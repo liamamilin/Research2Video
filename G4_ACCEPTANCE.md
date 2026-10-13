@@ -1,14 +1,14 @@
 # G4 验收报告
 
-**状态：PARTIAL（真实样片和技术验收通过；暂不打 V0.1 `ACCEPTED`）**
+**状态：PASS（G4 单机技术验收）**
 日期：2026-10-13
 范围：G4 品质闭环与发布验收。完成本报告后停止，不进入 M0 或 H 阶段。
 
 ## 结果
 
-三个固定 Golden Cases 均由真实 `deepseek-flash` 结构化输出、Kokoro 中文 TTS 和固定 Video IR v0.2 渲染器生成，无 mock；最终视频均通过独立 ffprobe、完整解码、逐场景抽帧、Beat 前后画面变化、字幕与案例语义验收。G4/G3/G2/G1 运行时回归共 **53 passed**。
+三个固定 Golden Cases 均由真实 `deepseek-flash` 结构化输出、Kokoro 中文 TTS 和固定 Video IR v0.2 渲染器生成，无 mock；最终视频均通过独立 ffprobe、完整解码、逐场景抽帧、Beat 前后画面变化、字幕与案例语义验收。按 README 从干净检出重新安装 Python/npm、下载并校验模型与 FFmpeg、重放 G0 音画流水线、安装并启动 G3 的验证也全部通过。G4/G3/G2/G1 运行时回归共 **53 passed**。
 
-阶段仍标记 PARTIAL，原因是本轮没有在干净环境重新下载大型 Kokoro 模型、FFmpeg/ffprobe 和浏览器，故 README 的全新机器安装链尚未完全冷启动验证；许可证审计也发现 eSpeak NG、GPL FFmpeg 构建及 H.264/AAC 专利事项需在产品分发前确认。已完成的隔离 Python/npm 安装和应用启动预检见下文。
+G4 按“单机、10–20 秒样片流水线”范围 PASS。许可证审计发现的 GPL 和编解码专利事项列入产品分发前的问题清单；本结论记录 G4 工程验收，不代替商业分发许可判断。用户的最终样片验收仍待完成，因此未开始 M0。
 
 ## 三条真实样片
 
@@ -53,7 +53,9 @@ python3 -m g4.qc case-b
 python3 -m g4.qc case-c
 ```
 
-G3 应用环境验证：在隔离的 `g3/.venv` 按 `g3/requirements.txt` 安装 Python 依赖；用空数据目录启动 FastAPI，并读取 `/api/config/status`。服务返回 `ready: true`、DeepSeek/Kokoro/Remotion 三项就绪、无 blockers，且 `api_key_value_exposed: false`。G0 Python 依赖在新建 `/tmp` 虚拟环境按 `g0/requirements.lock` 安装成功；Remotion 依赖在新建 `/tmp` 目录执行 `npm ci --ignore-scripts --no-audit --no-fund`，358 个包安装成功。上述启动/依赖检查使用了本机已存在的模型、Chrome 和媒体工具，未在新目录重新下载这些大型外部资产，故完整冷启动仍未通过实证。
+干净安装证据保存在 [`g4/clean_install/`](g4/clean_install/)。验证在从提交 `8fa65f1` 检出的 `/tmp` 副本中进行，G0/G3 均建立新虚拟环境。按 README 从上游重新下载模型、voices 和 FFmpeg 压缩包，模型/音色/FFmpeg/ffprobe 的文件哈希与本机已验证版本一致；Remotion 模板检出固定提交，`npm ci --ignore-scripts --no-audit --no-fund` 安装 358 个包。Chrome 155.0.8059.40 是 README 所列的宿主机前置依赖，已在宿主环境安装。
+
+该副本重新运行 `prepare → render → finish → verify`，G0 真实 Kokoro 语音 14 秒、H.264/AAC 1920×1080 30 fps 共 420 帧，完整解码和机械 QA 均 PASS。首次无提权 Chrome 启动被沙箱拒绝；保留失败日志后，在用户已授权的进程权限下重跑成功。随后从空数据目录安装、启动 G3 FastAPI，`/api/config/status` 返回 `ready: true`、三项依赖就绪、无 blockers、`api_key_value_exposed: false`。该启动只使用临时假 key 做就绪检查，没有发送模型请求。
 
 G3 测试包括重启时将残留 RUNNING 标记为可重试失败、独立尝试目录保留、取消状态、单 worker 锁和应用重启状态恢复；G4 测试验证调用预算预拒绝、失败请求消耗额度、费用封顶拒绝和 B/C 语义约束。上述恢复行为为测试覆盖，未进行真实进程强杀故障注入。
 
@@ -68,8 +70,7 @@ G3 测试包括重启时将残留 RUNNING 标记为可重试失败、独立尝�
 
 ## 未决事项
 
-1. 重新按 README 从空目录下载并验证 Kokoro 模型/音色、FFmpeg/ffprobe、固定 Remotion 上游模板，并在干净 Chrome 环境完整重放安装流程。
-2. 分发产品前处理许可证事项：当前 eSpeak loader wheel 同时携带 eSpeak NG GPLv3 动态库及语音数据；项目所用 FFmpeg 开启 GPL 和 x264/x265；确认模型/语音资产的通知要求，并评估 H.264/AAC 专利责任及目标司法辖区。
-3. 本阶段对画面做了关键帧人工目视检查和机器检查，但没有独立评审者的正式 0–5 质量评分；10–20 秒范围外、长片、并发、多用户及生产可靠性均未验证。
+1. 分发产品前处理许可证事项：当前 eSpeak loader wheel 同时携带 eSpeak NG GPLv3 动态库及语音数据；项目所用 FFmpeg 开启 GPL 和 x264/x265；确认模型/语音资产的通知要求，并评估 H.264/AAC 专利责任及目标司法辖区。
+2. 本阶段对画面做了关键帧目视检查和机器检查，但没有独立评审者的正式 0–5 质量评分；10–20 秒范围外、长片、并发、多用户及生产可靠性均未验证。
 
-完成 G4 后停止。下一步需先由用户验收本阶段；当前没有开始 M0 基线冻结，也没有执行 15–24 号规划内容。
+完成 G4 后停止。下一步需由用户验收本阶段；当前没有开始 M0 基线冻结，也没有执行 15–24 号规划内容。

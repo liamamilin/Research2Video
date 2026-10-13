@@ -9,8 +9,8 @@
     },
     {
       "path": "G4_ACCEPTANCE.md",
-      "size_bytes": 7031,
-      "sha256": "789b0183da76af006f438bff68e2e07e89386ee9759b73f1ebdd98869afc24ee"
+      "size_bytes": 7266,
+      "sha256": "b32c1bf9a989efc6745f2db4b741645c74edbc2b3cfa9608a21476fd817adb80"
     },
     {
       "path": "g1/tests/test_video_ir_v0_2_runtime.py",
@@ -86,6 +86,276 @@
       "path": "g4/__init__.py",
       "size_bytes": 61,
       "sha256": "05c8b336a4b1f522fdff38e35c29876e7a31ef2c2f64fb9693f26fa6d13e7ef7"
+    },
+    {
+      "path": "g4/clean_install/README.md",
+      "size_bytes": 1072,
+      "sha256": "e57f785bbaa5ef09f36928d6ba30c34112979389095c7eb419db7442ddda8851"
+    },
+    {
+      "path": "g4/clean_install/clean-install-evidence.json",
+      "size_bytes": 4470,
+      "sha256": "88910f1ade61967fb30b32f0a58cb69d4fb0c3333cc58aa69517c8c1ff0896c4"
+    },
+    {
+      "path": "g4/clean_install/g0-python-freeze.txt",
+      "size_bytes": 1164,
+      "sha256": "6d7acd4ee3b7f5ecb889a582696306743c4fb009a91336ce75f39c5d574d1fdb"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/G0_声音与波形.mp4",
+      "size_bytes": 2621136,
+      "sha256": "a6b45f06bb830d3224dbc67ced4f93125c09b4e3dc3538be24fbd29fce25affd"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/alignment.json",
+      "size_bytes": 2097,
+      "sha256": "c298b91e0c690cb38a981e631528da95d68a3fd7cc23cd74b90b2b1c7fe25484"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/background.png",
+      "size_bytes": 84265,
+      "sha256": "7c4c7a0d2616c5787804e0a2908fbab29a08a5aa22c5e8de96b312bd12872785"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/caption-1.png",
+      "size_bytes": 18712,
+      "sha256": "60175adc9d810843dd576844efc21c27bdba9334258744c46e1e4b07bc63d9eb"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/caption-2.png",
+      "size_bytes": 22929,
+      "sha256": "df6982c84ecef8faa382ff978a33f0e7fc88885b30deca55cd02598af41d70a4"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/caption-3.png",
+      "size_bytes": 21917,
+      "sha256": "1cfe71d3526aff5daf12dbf5dde0dcb451c24b1fb12970bece0836dcf0ae55dd"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/caption-4.png",
+      "size_bytes": 25826,
+      "sha256": "c1fc5efef8879298ac82d53207258f5aea958981213c5ba5aae48ebd81bb7214"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/captions.srt",
+      "size_bytes": 303,
+      "sha256": "52e9f14d9cbc76a4c0dcfb7011cd8c66acae8930b7c215cfb337971fa63a739a"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/contact-sheet.jpg",
+      "size_bytes": 294511,
+      "sha256": "2c0a124496ffbf639ae986dc2662bbb998459a893823f4e2a6d8a6a67fdcf575"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/decoded-audio.wav",
+      "size_bytes": 671858,
+      "sha256": "0797cf50a6930a92fcfe964356c986709cfa42068527468e77fed34ff3945f6d"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/ffprobe.json",
+      "size_bytes": 3604,
+      "sha256": "a2a6d6d2450338aa30f15168657c26cf586d05ec5f765a940876198fc1e45e03"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/keyframes/frame-0000.png",
+      "size_bytes": 140838,
+      "sha256": "ea697706a3a94eee2bc57d351f31cbd7c3194d2cb3a524e23e0afbd89801d687"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/keyframes/frame-0022.png",
+      "size_bytes": 267466,
+      "sha256": "811445d307eac48be4797cf8b7778a469ca1e2f52b5d574369c8e6184976fc4d"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/keyframes/frame-0056.png",
+      "size_bytes": 247116,
+      "sha256": "b1ad97e7164303b28e5b3630172d2ac43fc38c6c26c9bc2c1d4a4d16ceeade6f"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/keyframes/frame-0130.png",
+      "size_bytes": 307589,
+      "sha256": "471812daed42575379a76a22100cdef6ed197f58bed4e9caff737660834f9d93"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/keyframes/frame-0210.png",
+      "size_bytes": 285664,
+      "sha256": "d9f9f86566265d811c2722592ddeb1d9e32fb85e39a79706a2b430cb539163ac"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/keyframes/frame-0286.png",
+      "size_bytes": 165715,
+      "sha256": "44fbef0e1b3d556f3357b87d121ca8a2a6a92056d4ec0032faddcc2c811eee67"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/keyframes/frame-0340.png",
+      "size_bytes": 254635,
+      "sha256": "38afe3bab1168a2d26025dae8eef19b459682b954e3d133525c088d6263edbbe"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/keyframes/frame-0405.png",
+      "size_bytes": 139072,
+      "sha256": "272b3b4cec4a2eb10f9834d0b579df04b30f05a05f0de4df013c324e1e5e39ce"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/keyframes/frame-0419.png",
+      "size_bytes": 139072,
+      "sha256": "272b3b4cec4a2eb10f9834d0b579df04b30f05a05f0de4df013c324e1e5e39ce"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/manifest.json",
+      "size_bytes": 4454,
+      "sha256": "ddfeea138dc2c3021bb7ab24e4e5f7c495b474b589b2a2da33dc5e69f531a41c"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/n1.wav",
+      "size_bytes": 99820,
+      "sha256": "9d81e206653cb4d7e8a7cd71b7047c38298eda318b5c791b26685b70d928032f"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/n2.wav",
+      "size_bytes": 158188,
+      "sha256": "d971c5426af3901f285be240cd29f048590d625c1ad9e392c0b230593d6ed80d"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/n3.wav",
+      "size_bytes": 128300,
+      "sha256": "6e0b233ccb982ee2a6706f2f681d5e666809f70d278def9a42c06f8b8da3f468"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/n4.wav",
+      "size_bytes": 157706,
+      "sha256": "e06709a3a88f0f6f8dcff047644ffb684f73b2be5b67002b7423266ee0867d9c"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/narration.wav",
+      "size_bytes": 672044,
+      "sha256": "33c09f97faad9ac90047c2cdb2f99c777514b7d780d209228006eb5dcaa40374"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/pause.png",
+      "size_bytes": 18290,
+      "sha256": "5d02ff919192256046842995246fec00304d7c80f310bc73566ca58d488c45c0"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/qa.json",
+      "size_bytes": 1562,
+      "sha256": "7289a03e3f34419cdf980f9e96230c62a22628f07d73d1cb3a173dc8a4d31018"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/remotion-waveform.mp4",
+      "size_bytes": 3064153,
+      "sha256": "260c2d0ed8a758779fe30a56bce5ea36bbf16d0e27bf59345634ad21162c16a4"
+    },
+    {
+      "path": "g4/clean_install/g0/artifacts/tts-metrics.json",
+      "size_bytes": 458,
+      "sha256": "e86d17658cbc09d05ada8b5058ad69a3fea887827a20c4dbc96ff1434d3d87b5"
+    },
+    {
+      "path": "g4/clean_install/g3-python-freeze.txt",
+      "size_bytes": 282,
+      "sha256": "8d49c06cc39eb234210cc49b7d0e617d386b2443c38be3e374aa5fb360ce4dfd"
+    },
+    {
+      "path": "g4/clean_install/logs/audio-analysis-05.log",
+      "size_bytes": 1952,
+      "sha256": "5e9f119ac1c9e2dbda6142c80ee6d4c07eaa6ca6aaa34b67c727e1c19f270a10"
+    },
+    {
+      "path": "g4/clean_install/logs/commands.jsonl",
+      "size_bytes": 10802,
+      "sha256": "bdd71d4593a280cb81318ee7b682a0efdb4d83fe1ef030be69ee2763e0e096a9"
+    },
+    {
+      "path": "g4/clean_install/logs/decoded-audio-05.log",
+      "size_bytes": 1656,
+      "sha256": "69b25d96e15f221bb228186e070c47536c1211c9e1d0042d2051caab26b933c1"
+    },
+    {
+      "path": "g4/clean_install/logs/ffprobe-05.log",
+      "size_bytes": 4456,
+      "sha256": "d9b1d255df9c751e6f17c792e63c6566ec09e01f55e21b6c40797e16ecfd68aa"
+    },
+    {
+      "path": "g4/clean_install/logs/final-compose-06.log",
+      "size_bytes": 6650,
+      "sha256": "57c0fdb1be98147cbf83b774bc3499dd752e2fb436d4e3b99ade3e18ffce6895"
+    },
+    {
+      "path": "g4/clean_install/logs/frame-0000-05.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/frame-0022-05.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/frame-0056-05.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/frame-0130-05.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/frame-0210-05.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/frame-0286.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/frame-0340-04.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/frame-0405-05.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/frame-0419-05.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/full-decode-05.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "g4/clean_install/logs/loudness-05.log",
+      "size_bytes": 25332,
+      "sha256": "33e543caae5cb6870f715c3ab45c85a02c8cf6e775c54acf36bf6b79bfed2358"
+    },
+    {
+      "path": "g4/clean_install/logs/remotion-render-04.log",
+      "size_bytes": 592,
+      "sha256": "108e1c86ccfc625890c1afd861af75cebd382c915e310c0e051c13548ad25daf"
+    },
+    {
+      "path": "g4/clean_install/logs/remotion-render-05.log",
+      "size_bytes": 17490,
+      "sha256": "3c1d39877fcad0523e5e0cb78c9f6b22b3f31ba8699b32ac3116d3650c4e4723"
+    },
+    {
+      "path": "g4/clean_install/remotion-package-lock.json",
+      "size_bytes": 194340,
+      "sha256": "88a42f61974f52c47209148ad640111573f9fc46a147df1d9c34a003182e9703"
+    },
+    {
+      "path": "g4/clean_install/template-head.txt",
+      "size_bytes": 41,
+      "sha256": "2b83a5c0c90d8a3f7545f6a7705e678a0a183815d1c6e0542803bae93534dabf"
     },
     {
       "path": "g4/golden_cases/case-a/source.txt",
