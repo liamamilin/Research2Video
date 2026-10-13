@@ -403,28 +403,29 @@
         "comprehensibility": 3,
         "visual_maturity": 2,
         "audio_quality": 4,
-        "audio_visual_correspondence": null
+        "audio_visual_correspondence": 4
       },
       "clip-02": {
         "fidelity": 4,
         "comprehensibility": 4,
         "visual_maturity": 2,
         "audio_quality": 4,
-        "audio_visual_correspondence": null
+        "audio_visual_correspondence": 4
       },
       "clip-03": {
         "fidelity": 4,
         "comprehensibility": 3,
         "visual_maturity": 2,
         "audio_quality": 4,
-        "audio_visual_correspondence": null
+        "audio_visual_correspondence": 4
       }
     },
     "mean_scores_available_dimensions": {
       "fidelity": 3.6666666666666665,
       "comprehensibility": 3.3333333333333335,
       "visual_maturity": 2.0,
-      "audio_quality": 4.0
+      "audio_quality": 4.0,
+      "audio_visual_correspondence": 4.0
     },
     "qualitative_notes": "无特别问题"
   }
