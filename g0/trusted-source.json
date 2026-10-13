@@ -1,0 +1,23 @@
+{
+  "repository": "https://github.com/remotion-dev/template-audiogram",
+  "commit": "a7a1befca086f72eaf721a8b85d9e5038453da94",
+  "sha256": {
+    "src/Audiogram/AudioVizContainer.tsx": "738c43c2c306704b9b56436cee4831bfe5077ac4a033af1209493384c00c9c47",
+    "src/Audiogram/Captions.tsx": "8cc037c6a2846f4238cf13dd8946bbd6bab12e75db635f392087f38d8c0e8e20",
+    "src/Audiogram/Main.tsx": "20b03d62ecce51a4ce30528429a65ceb037315f48ab7ed56a5d57637674363f7",
+    "src/Audiogram/Oscilloscope.tsx": "0ca5114bb70fbfc1d8de08e059bfa96c08cdc3a92e8843914c0f145d79c94a2a",
+    "src/Audiogram/Spectrum.tsx": "8bb020ed0cfa694d659fa3701f1f9ac19f1d41585af30370c0124ae70502915d",
+    "src/Audiogram/WaitForFonts.tsx": "866f1f1d52ca05121d435d4a249668af10b6295e532a2f379f19d15d1d840d8d",
+    "src/Audiogram/Word.tsx": "f3931b5fbd8962de721030fb1901d18986a46e6110d5a17dcc26627bede42cad",
+    "src/Audiogram/constants.ts": "3431ab87f00b09f7290624dbb485278f63ccfbbed5baef259fb14f16534c6730",
+    "src/Audiogram/font.ts": "af984bed8f58173ed6112fa21a7c665fc064c38d2b086c735c66165c8766fd98",
+    "src/Audiogram/get-number-of-lines-for-text.ts": "b95969679f4120abc60b33bca22bee756dd628430deed2eb13735d21e66e7ea9",
+    "src/Audiogram/schema.ts": "afc291bf44a9069877159dadc91976808bbaea48b35b7514c8c8c28265c78fd1",
+    "src/Audiogram/sentence-to-display.ts": "20e06d93be0ae7157b7820b691bd5024796c9963be87cf71c05e76aeb0247d46",
+    "src/Root.tsx": "8ae3262a888360d91891fe26a9db2c7de64da402b9811463d6ece6df45541bee",
+    "src/helpers/fetch-captions.ts": "d95f2c1f834aa3fcabd9d13ae82ea505402fa6b8a5a7ea88e0c60904bd6a1560",
+    "src/helpers/ms-to-frame.ts": "5055ab4218d8040efe502fa11a164936ce8132e25c7bfb0114934df1eed166ac",
+    "src/index.ts": "957e481dd33a29b4a55ae0e95dbf763b7e48c37c427ca4bd1275faf34bc07a74",
+    "remotion.config.ts": "680114316c3f433b7ebee0f4badbedd162661ea7f86bfae17a8956dbf13f9629"
+  }
+}

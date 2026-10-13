@@ -1,0 +1,450 @@
+[
+  {
+    "name": "app.py",
+    "path": "examples/app.py",
+    "sha": "a201dd4f4bc2d18b606d7b7fd06bed7d10e4ee26",
+    "size": 2285,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/app.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/app.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/a201dd4f4bc2d18b606d7b7fd06bed7d10e4ee26",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/app.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/app.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/a201dd4f4bc2d18b606d7b7fd06bed7d10e4ee26",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/app.py"
+    }
+  },
+  {
+    "name": "chinese.py",
+    "path": "examples/chinese.py",
+    "sha": "7eaa757a885da10c7a36aea0cfbac224bce72e67",
+    "size": 1033,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/chinese.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/chinese.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/7eaa757a885da10c7a36aea0cfbac224bce72e67",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/chinese.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/chinese.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/7eaa757a885da10c7a36aea0cfbac224bce72e67",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/chinese.py"
+    }
+  },
+  {
+    "name": "english.py",
+    "path": "examples/english.py",
+    "sha": "1f40e47836cb136f25c5a9a79800603667c85e64",
+    "size": 1178,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/english.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/english.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/1f40e47836cb136f25c5a9a79800603667c85e64",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/english.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/english.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/1f40e47836cb136f25c5a9a79800603667c85e64",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/english.py"
+    }
+  },
+  {
+    "name": "french.py",
+    "path": "examples/french.py",
+    "sha": "285e5fd087f81ebfaa24f103bcf6429276d1ee09",
+    "size": 1183,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/french.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/french.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/285e5fd087f81ebfaa24f103bcf6429276d1ee09",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/french.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/french.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/285e5fd087f81ebfaa24f103bcf6429276d1ee09",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/french.py"
+    }
+  },
+  {
+    "name": "hebrew.py",
+    "path": "examples/hebrew.py",
+    "sha": "dfae9e741bb412422520bab2a672fcd84e97902e",
+    "size": 1561,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/hebrew.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/hebrew.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/dfae9e741bb412422520bab2a672fcd84e97902e",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/hebrew.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/hebrew.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/dfae9e741bb412422520bab2a672fcd84e97902e",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/hebrew.py"
+    }
+  },
+  {
+    "name": "hindi.py",
+    "path": "examples/hindi.py",
+    "sha": "1f1ac7398d821ae9390a49e53e70e6d463d18c35",
+    "size": 1290,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/hindi.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/hindi.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/1f1ac7398d821ae9390a49e53e70e6d463d18c35",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/hindi.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/hindi.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/1f1ac7398d821ae9390a49e53e70e6d463d18c35",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/hindi.py"
+    }
+  },
+  {
+    "name": "italian.py",
+    "path": "examples/italian.py",
+    "sha": "c075754e9466b30f793c9932e4e0c30c3027ce24",
+    "size": 1146,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/italian.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/italian.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/c075754e9466b30f793c9932e4e0c30c3027ce24",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/italian.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/italian.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/c075754e9466b30f793c9932e4e0c30c3027ce24",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/italian.py"
+    }
+  },
+  {
+    "name": "japanese.py",
+    "path": "examples/japanese.py",
+    "sha": "9543b49628e8b186c94d294c720f626c5fea0a1e",
+    "size": 1034,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/japanese.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/japanese.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/9543b49628e8b186c94d294c720f626c5fea0a1e",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/japanese.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/japanese.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/9543b49628e8b186c94d294c720f626c5fea0a1e",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/japanese.py"
+    }
+  },
+  {
+    "name": "play.py",
+    "path": "examples/play.py",
+    "sha": "df795a1eefe2c079e877749f130255a099a55603",
+    "size": 659,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/play.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/play.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/df795a1eefe2c079e877749f130255a099a55603",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/play.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/play.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/df795a1eefe2c079e877749f130255a099a55603",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/play.py"
+    }
+  },
+  {
+    "name": "podcast.py",
+    "path": "examples/podcast.py",
+    "sha": "7fde5483419fcc4aadcf15deffc9f1dbf657186c",
+    "size": 2215,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/podcast.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/podcast.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/7fde5483419fcc4aadcf15deffc9f1dbf657186c",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/podcast.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/podcast.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/7fde5483419fcc4aadcf15deffc9f1dbf657186c",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/podcast.py"
+    }
+  },
+  {
+    "name": "portuguese.py",
+    "path": "examples/portuguese.py",
+    "sha": "b5116df36943ba487da314362bd04bd31aa115c0",
+    "size": 1140,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/portuguese.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/portuguese.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/b5116df36943ba487da314362bd04bd31aa115c0",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/portuguese.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/portuguese.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/b5116df36943ba487da314362bd04bd31aa115c0",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/portuguese.py"
+    }
+  },
+  {
+    "name": "save.py",
+    "path": "examples/save.py",
+    "sha": "17413ead05b1a94568e467ee5f85b1fab569ca3a",
+    "size": 582,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/save.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/save.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/17413ead05b1a94568e467ee5f85b1fab569ca3a",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/save.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/save.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/17413ead05b1a94568e467ee5f85b1fab569ca3a",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/save.py"
+    }
+  },
+  {
+    "name": "spanish.py",
+    "path": "examples/spanish.py",
+    "sha": "8d03c7b34544c2dd36cb57fbf0528ccc2b6155f8",
+    "size": 1151,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/spanish.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/spanish.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/8d03c7b34544c2dd36cb57fbf0528ccc2b6155f8",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/spanish.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/spanish.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/8d03c7b34544c2dd36cb57fbf0528ccc2b6155f8",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/spanish.py"
+    }
+  },
+  {
+    "name": "with_blending.py",
+    "path": "examples/with_blending.py",
+    "sha": "abb09a9133eeabbf66b6f28374be7e84358a5964",
+    "size": 795,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_blending.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_blending.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/abb09a9133eeabbf66b6f28374be7e84358a5964",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_blending.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_blending.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/abb09a9133eeabbf66b6f28374be7e84358a5964",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_blending.py"
+    }
+  },
+  {
+    "name": "with_continuous.py",
+    "path": "examples/with_continuous.py",
+    "sha": "1e35ad567366deb497495b819975e9db2c7f8256",
+    "size": 1355,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_continuous.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_continuous.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/1e35ad567366deb497495b819975e9db2c7f8256",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_continuous.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_continuous.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/1e35ad567366deb497495b819975e9db2c7f8256",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_continuous.py"
+    }
+  },
+  {
+    "name": "with_cuda.py",
+    "path": "examples/with_cuda.py",
+    "sha": "31ba9838bc5ffac63d131b21243b53e39af410a3",
+    "size": 1484,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_cuda.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_cuda.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/31ba9838bc5ffac63d131b21243b53e39af410a3",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_cuda.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_cuda.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/31ba9838bc5ffac63d131b21243b53e39af410a3",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_cuda.py"
+    }
+  },
+  {
+    "name": "with_espeak_data.py",
+    "path": "examples/with_espeak_data.py",
+    "sha": "4a8dea39c9c52e442b6ed4d8bca72a32b07fff85",
+    "size": 681,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_espeak_data.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_espeak_data.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/4a8dea39c9c52e442b6ed4d8bca72a32b07fff85",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_espeak_data.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_espeak_data.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/4a8dea39c9c52e442b6ed4d8bca72a32b07fff85",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_espeak_data.py"
+    }
+  },
+  {
+    "name": "with_espeak_lib.py",
+    "path": "examples/with_espeak_lib.py",
+    "sha": "85aea5273c7bcb747cacf6e57235cc80a580e5c8",
+    "size": 876,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_espeak_lib.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_espeak_lib.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/85aea5273c7bcb747cacf6e57235cc80a580e5c8",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_espeak_lib.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_espeak_lib.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/85aea5273c7bcb747cacf6e57235cc80a580e5c8",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_espeak_lib.py"
+    }
+  },
+  {
+    "name": "with_log.py",
+    "path": "examples/with_log.py",
+    "sha": "4749d734c0167494b4e284ebf371b2fb69e1c474",
+    "size": 895,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_log.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_log.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/4749d734c0167494b4e284ebf371b2fb69e1c474",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_log.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_log.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/4749d734c0167494b4e284ebf371b2fb69e1c474",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_log.py"
+    }
+  },
+  {
+    "name": "with_phonemes.py",
+    "path": "examples/with_phonemes.py",
+    "sha": "5b3b99d573b81542514aa632a5918790e19f80fc",
+    "size": 661,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_phonemes.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_phonemes.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/5b3b99d573b81542514aa632a5918790e19f80fc",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_phonemes.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_phonemes.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/5b3b99d573b81542514aa632a5918790e19f80fc",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_phonemes.py"
+    }
+  },
+  {
+    "name": "with_provider.py",
+    "path": "examples/with_provider.py",
+    "sha": "e4b0e3b6c651a46ba9324002ccc9d8f20d2939e8",
+    "size": 1006,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_provider.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_provider.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/e4b0e3b6c651a46ba9324002ccc9d8f20d2939e8",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_provider.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_provider.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/e4b0e3b6c651a46ba9324002ccc9d8f20d2939e8",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_provider.py"
+    }
+  },
+  {
+    "name": "with_quant.py",
+    "path": "examples/with_quant.py",
+    "sha": "5e4a5021a484c537cdd0faf71b98d94cd4eac675",
+    "size": 1018,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_quant.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_quant.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/5e4a5021a484c537cdd0faf71b98d94cd4eac675",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_quant.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_quant.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/5e4a5021a484c537cdd0faf71b98d94cd4eac675",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_quant.py"
+    }
+  },
+  {
+    "name": "with_session.py",
+    "path": "examples/with_session.py",
+    "sha": "f9fee4eb0f3e56274fbb3b8a90cbf77834f2d694",
+    "size": 1413,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_session.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_session.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/f9fee4eb0f3e56274fbb3b8a90cbf77834f2d694",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_session.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_session.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/f9fee4eb0f3e56274fbb3b8a90cbf77834f2d694",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_session.py"
+    }
+  },
+  {
+    "name": "with_stream.py",
+    "path": "examples/with_stream.py",
+    "sha": "981b837d51537797ec0b31ae5e7119709d8845e5",
+    "size": 1812,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_stream.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_stream.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/981b837d51537797ec0b31ae5e7119709d8845e5",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_stream.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_stream.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/981b837d51537797ec0b31ae5e7119709d8845e5",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_stream.py"
+    }
+  },
+  {
+    "name": "with_stream_save.py",
+    "path": "examples/with_stream_save.py",
+    "sha": "0b0e19f8ceee9fa5ed5a4de1f45e110afdb6183f",
+    "size": 1831,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_stream_save.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_stream_save.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/0b0e19f8ceee9fa5ed5a4de1f45e110afdb6183f",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_stream_save.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_stream_save.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/0b0e19f8ceee9fa5ed5a4de1f45e110afdb6183f",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_stream_save.py"
+    }
+  },
+  {
+    "name": "with_timestamps.py",
+    "path": "examples/with_timestamps.py",
+    "sha": "99eee6b3509ca06cb10d98dbb345f7d683eec375",
+    "size": 1466,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_timestamps.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_timestamps.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/99eee6b3509ca06cb10d98dbb345f7d683eec375",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_timestamps.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_timestamps.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/99eee6b3509ca06cb10d98dbb345f7d683eec375",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_timestamps.py"
+    }
+  },
+  {
+    "name": "with_video_subtitles.py",
+    "path": "examples/with_video_subtitles.py",
+    "sha": "a5fabbd93e2a9005dd7f31892ca02dfce3102dcf",
+    "size": 4523,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_video_subtitles.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_video_subtitles.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/a5fabbd93e2a9005dd7f31892ca02dfce3102dcf",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_video_subtitles.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_video_subtitles.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/a5fabbd93e2a9005dd7f31892ca02dfce3102dcf",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_video_subtitles.py"
+    }
+  },
+  {
+    "name": "with_voice.py",
+    "path": "examples/with_voice.py",
+    "sha": "01166fda4a33cf7e36d96a718a6c7a62ad37367d",
+    "size": 797,
+    "url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_voice.py?ref=main",
+    "html_url": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_voice.py",
+    "git_url": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/01166fda4a33cf7e36d96a718a6c7a62ad37367d",
+    "download_url": "https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/examples/with_voice.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/contents/examples/with_voice.py?ref=main",
+      "git": "https://api.github.com/repos/thewh1teagle/kokoro-onnx/git/blobs/01166fda4a33cf7e36d96a718a6c7a62ad37367d",
+      "html": "https://github.com/thewh1teagle/kokoro-onnx/blob/main/examples/with_voice.py"
+    }
+  }
+]

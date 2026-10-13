@@ -1,0 +1,13 @@
+.DS_Store
+__pycache__/
+.pytest_cache/
+g0/.venv/
+g0/.npm-cache/
+g0/.cache/
+g0/.hf-cache/
+g0/vendor/
+g0/darwin_arm64/
+g0/tools/
+g0/*.zip
+g0/assets/*.onnx
+g0/assets/*.bin

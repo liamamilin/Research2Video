@@ -1,0 +1,99 @@
+RUN ffprobe-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffprobe', '-v', 'error', '-count_frames', '-show_streams', '-show_format', '-of', 'json', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4']
+DONE ffprobe-03: exit=0, seconds=0.449
+RUN full-decode-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-xerror', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-map', '0:v:0', '-map', '0:a:0', '-f', 'null', '-']
+DONE full-decode-03: exit=0, seconds=0.137
+RUN audio-analysis-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vn', '-af', 'volumedetect', '-f', 'null', '-']
+DONE audio-analysis-03: exit=0, seconds=0.021
+RUN loudness-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vn', '-af', 'ebur128=peak=true', '-f', 'null', '-']
+DONE loudness-03: exit=0, seconds=0.062
+RUN decoded-audio-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vn', '-ac', '1', '-ar', '24000', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/decoded-audio.wav']
+DONE decoded-audio-03: exit=0, seconds=0.02
+RUN frame-0000-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vf', 'select=eq(n\\,0)', '-frames:v', '1', '-update', '1', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/keyframes/frame-0000.png']
+DONE frame-0000-03: exit=0, seconds=0.041
+RUN frame-0022-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vf', 'select=eq(n\\,22)', '-frames:v', '1', '-update', '1', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/keyframes/frame-0022.png']
+DONE frame-0022-03: exit=0, seconds=0.05
+RUN frame-0056-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vf', 'select=eq(n\\,56)', '-frames:v', '1', '-update', '1', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/keyframes/frame-0056.png']
+DONE frame-0056-03: exit=0, seconds=0.059
+RUN frame-0130-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vf', 'select=eq(n\\,130)', '-frames:v', '1', '-update', '1', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/keyframes/frame-0130.png']
+DONE frame-0130-03: exit=0, seconds=0.079
+RUN frame-0210-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vf', 'select=eq(n\\,210)', '-frames:v', '1', '-update', '1', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/keyframes/frame-0210.png']
+DONE frame-0210-03: exit=0, seconds=0.1
+RUN frame-0287-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vf', 'select=eq(n\\,287)', '-frames:v', '1', '-update', '1', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/keyframes/frame-0287.png']
+DONE frame-0287-03: exit=0, seconds=0.112
+RUN frame-0340-02: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vf', 'select=eq(n\\,340)', '-frames:v', '1', '-update', '1', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/keyframes/frame-0340.png']
+DONE frame-0340-02: exit=0, seconds=0.126
+RUN frame-0405-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vf', 'select=eq(n\\,405)', '-frames:v', '1', '-update', '1', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/keyframes/frame-0405.png']
+DONE frame-0405-03: exit=0, seconds=0.134
+RUN frame-0419-03: ['/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg', '-nostdin', '-hide_banner', '-v', 'error', '-n', '-i', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/G0_声音与波形.mp4', '-vf', 'select=eq(n\\,419)', '-frames:v', '1', '-update', '1', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/keyframes/frame-0419.png']
+DONE frame-0419-03: exit=0, seconds=0.134
+{
+  "status": "PASS",
+  "scope": "G0 mechanical checks only",
+  "video": {
+    "codec": "h264",
+    "size": [
+      1920,
+      1080
+    ],
+    "fps": "30/1",
+    "frames": 420,
+    "duration": 14.0,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "correlation_with_real_tts": 0.997903916343222,
+    "full_decode": "PASS"
+  },
+  "animation": {
+    "source": "actual PCM waveform via unchanged Remotion Oscilloscope",
+    "silent_frame": 287,
+    "keyframe_wave_metrics": {
+      "0": {
+        "cyan_pixels": 12800,
+        "vertical_span_px": 8
+      },
+      "22": {
+        "cyan_pixels": 29177,
+        "vertical_span_px": 36
+      },
+      "56": {
+        "cyan_pixels": 18727,
+        "vertical_span_px": 24
+      },
+      "130": {
+        "cyan_pixels": 30038,
+        "vertical_span_px": 62
+      },
+      "210": {
+        "cyan_pixels": 30605,
+        "vertical_span_px": 54
+      },
+      "287": {
+        "cyan_pixels": 12832,
+        "vertical_span_px": 9
+      },
+      "340": {
+        "cyan_pixels": 30316,
+        "vertical_span_px": 76
+      },
+      "405": {
+        "cyan_pixels": 12816,
+        "vertical_span_px": 9
+      },
+      "419": {
+        "cyan_pixels": 12816,
+        "vertical_span_px": 9
+      }
+    }
+  },
+  "captions": {
+    "segments": 4,
+    "source": "measured generated-utterance sample boundaries",
+    "word_alignment": "NOT CLAIMED",
+    "same_srt_and_burned_timeline": true
+  },
+  "human_listening_review": "NOT PERFORMED",
+  "human_playback_acceptance": "PENDING USER"
+}

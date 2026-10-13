@@ -1,0 +1,16 @@
+{
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "machine": "arm64",
+  "python": "3.10.13",
+  "packages": {
+    "kokoro-onnx": "0.6.1",
+    "misaki": "0.9.4",
+    "onnxruntime": "1.23.2",
+    "soundfile": "0.14.0",
+    "numpy": "2.2.6",
+    "pillow": "12.3.0",
+    "static-ffmpeg": "3.0"
+  },
+  "node": "v22.21.1",
+  "npm": "10.9.4"
+}

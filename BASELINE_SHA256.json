@@ -1,0 +1,22 @@
+{
+  "baseline": "MVP_CORE_V0.3_FINAL",
+  "scope": "Immutable MVP core and Video IR materials; future-plan docs are not included",
+  "files": {
+    "00_PRODUCT_CHARTER.md": "58b542c80c17ebe8750ca7ecddb453e43366096a017e371739865630e6209c8d",
+    "01_MVP_REQUIREMENTS.md": "d5d8d94983f1234058d9a2c552a91fb057f372aa1e06dfe8083ebe16a3619c5a",
+    "02_SYSTEM_ARCHITECTURE.md": "41a1c0203848c87ac41025b29acf5f502d5760eef16a9518174c0451d1deaf44",
+    "03_VIDEO_IR_CONTRACT.md": "518e193f9b03ccb34dd7e9657d55d9eb1bc5fca0f46b845300e89d826fe6c34a",
+    "04_WORKFLOW_AND_RECOVERY.md": "ac068500d4bab4ced06ae316e5314e57e6ddbb03924c344060ebc94022f87021",
+    "05_VISUAL_AND_AUDIO_SYSTEM.md": "d855d6f44782c31c7f4e5d3433b270993ece9f0ac5e274b4b032b53fe789690b",
+    "06_PROVIDERS_AND_PROMPTS.md": "759bf3e99be35eee73c48ff1bcef32698d377eac1127dba1f8ffbcfb672bafaf",
+    "07_UI_AND_API.md": "48b2df9b4de20725de82c809d2408b44c39a4cd7f6bcba8d3094b88306725377",
+    "08_QA_AND_ACCEPTANCE.md": "e1f44d513a8dc086a2d39396b218063ebe7204e0be68056455e71fe8f9f2cdd7",
+    "12_EXPERIMENT_PROTOCOL.md": "83193303189fd56618dc1713ae95ea86f6d2dc57e1d45e1d446ed89874b407b7",
+    "13_G1_TEST_MATRIX.md": "1c2116c0750cfae9b575670873645aa6ba49b0e025e7b5ab9fa706b12f033eb3",
+    "14_DESIGN_AUDIT.md": "9823ab49b3aac86037304c0c6b05fee020495cf6003162d7d36d1494e5e7e2ea",
+    "schemas/video-ir-v0.2.schema.json": "f0400f632fb32342e5e6c9b3fc25dceabd966778a40847280e6b0572c880ad8a",
+    "schemas/video-ir-v0.1.schema.json": "dd493177348f092ff72b65d178d7923908d6c4ab0345d3df0dba86faa435f398",
+    "schemas/component-registry-v0.2.json": "906b51d786c5df811d273121bfbb181339813205b3085e7ca3e77ba443b63c39",
+    "examples/video-ir-beats-v0.2.json": "96794ffc3a4c23476a3e9aa6cb664fb1e8437b740a797a479b65f44934076ff0"
+  }
+}

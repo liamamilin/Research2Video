@@ -1,0 +1,15 @@
+{
+  "captions": null,
+  "titleColor": "transparent",
+  "captionsTextColor": "transparent",
+  "onlyDisplayCurrentSentence": true,
+  "visualizer": {
+    "type": "oscilloscope",
+    "color": "#4DB6E8",
+    "numberOfSamples": "256",
+    "windowInSeconds": 0.1,
+    "posterization": 1,
+    "amplitude": 1,
+    "padding": 50
+  }
+}
