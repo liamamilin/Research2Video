@@ -142,8 +142,8 @@ function Video({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: Record
     return frame >= start && frame < end;
   });
   return <AbsoluteFill style={{backgroundColor: colors.bg, color: colors.text, fontFamily: font}}>
-    {safeBackdrop && <Img src={safeBackdrop} style={{position: 'absolute', zIndex: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.82, transformOrigin: 'center', transform: `translateX(${panX}px) scale(${zoom})`}}/>}
-    {safeBackdrop && <AbsoluteFill style={{zIndex: 1, background: 'linear-gradient(90deg, rgba(5,10,19,.42), rgba(5,10,19,.24) 50%, rgba(5,10,19,.42)), linear-gradient(0deg, rgba(5,10,19,.66), rgba(5,10,19,.12) 48%, rgba(5,10,19,.38)'}}/>}
+    {safeBackdrop && <Img src={safeBackdrop} style={{position: 'absolute', zIndex: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.58, filter: 'blur(18px)', transformOrigin: 'center', transform: `translateX(${panX}px) scale(${zoom * 1.08})`}}/>}
+    {safeBackdrop && <AbsoluteFill style={{zIndex: 1, background: 'linear-gradient(90deg, rgba(5,10,19,.50), rgba(5,10,19,.36) 50%, rgba(5,10,19,.50)), linear-gradient(0deg, rgba(5,10,19,.72), rgba(5,10,19,.22) 48%, rgba(5,10,19,.46)'}}/>}
     <AbsoluteFill style={{zIndex: 2}}><div style={{position: 'absolute', left: 80, top: 54, color: colors.cyan, fontSize: 24, letterSpacing: 2}}>AUTOVIDEO　/　G1 · Video IR 0.2</div><div style={{position: 'absolute', right: 82, top: 56, color: colors.muted, fontSize: 22}}>知识动画　·　真实中文旁白</div><SceneVisual scene={scene} frame={frame}/></AbsoluteFill>
     <AbsoluteFill style={{zIndex: 3, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92, pointerEvents: 'none'}}>{caption && <div style={{minWidth: 320, maxWidth: 1680, minHeight: 72, padding: '13px 28px', borderRadius: 18, background: 'rgba(5,10,19,.88)', border: `1px solid ${colors.border}`, color: colors.text, textAlign: 'center', fontSize: 38, lineHeight: 1.4, boxSizing: 'border-box'}}>{caption.text}</div>}</AbsoluteFill>
     <Audio src={staticFile(ir.audio_public_file)} volume={Math.pow(10, 0/20)}/>
