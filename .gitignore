@@ -11,3 +11,6 @@ g0/tools/
 g0/*.zip
 g0/assets/*.onnx
 g0/assets/*.bin
+g1/renderer/node_modules
+g1/renderer/.cache/
+g1/logs/attempt-*/

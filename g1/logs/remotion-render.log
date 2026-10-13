@@ -1,0 +1,17 @@
+Bundling 6%
+/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:269
+            reject(new Error([
+                   ^
+
+Error: Failed to launch the browser process!
+Error: Closed with null signal: SIGABRT
+    at ChildProcess.<anonymous> (/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:260:32)
+    at ChildProcess.emit (node:events:519:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+Troubleshooting: https://remotion.dev/docs/troubleshooting/browser-launch
+    at onClose (/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:269:20)
+    at ChildProcess.<anonymous> (/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:260:24)
+    at ChildProcess.emit (node:events:519:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+
+Node.js v22.21.1
