@@ -27,12 +27,16 @@ class Settings:
 
 
 def probe_config(settings: Settings) -> dict:
-    try:
-        from g2.run_g2 import load_deepseek_api_key
-        load_deepseek_api_key(settings.key_file)
-        llm_ready = True
-    except Exception:
-        llm_ready = False
+    llm_ready = bool(os.environ.get("DEEPSEEK_API_KEY", "").strip())
+    if not llm_ready and settings.key_file.is_file():
+        try:
+            for line in settings.key_file.read_text(encoding="utf-8").splitlines():
+                name, separator, raw_value = line.partition("=")
+                if separator and name.strip() == "DEEPSEEK_API_KEY" and raw_value.strip().strip("\"'"):
+                    llm_ready = True
+                    break
+        except OSError:
+            llm_ready = False
     tts_ready = settings.tts_model.is_file() and settings.tts_voices.is_file()
     node_ready = bool(shutil.which("node"))
     renderer_ready = (node_ready and settings.ffmpeg.is_file() and settings.ffprobe.is_file()

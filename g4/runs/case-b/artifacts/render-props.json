@@ -1,0 +1,224 @@
+{
+  "ir": {
+    "schema_version": "0.2",
+    "video": {
+      "title": "批处理与流处理的区别",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "duration_ms": 17833
+    },
+    "style": {
+      "preset": "minimal_dark",
+      "seed": 20261013
+    },
+    "narration": {
+      "text": "批处理先收集一段时间的数据再集中处理。流处理在数据到达时持续处理。信息可以较早进入处理流程。主要区别是处理时点与组织方式。一种先积累后处理，另一种到达后连续处理",
+      "audio_asset_id": "communication_voice",
+      "segments": [
+        {
+          "id": "n1",
+          "text": "批处理先收集一段时间的数据再集中处理。",
+          "start_ms": 250,
+          "end_ms": 3867
+        },
+        {
+          "id": "n2",
+          "text": "流处理在数据到达时持续处理。",
+          "start_ms": 4438,
+          "end_ms": 7173
+        },
+        {
+          "id": "n3",
+          "text": "信息可以较早进入处理流程。",
+          "start_ms": 7734,
+          "end_ms": 10193
+        },
+        {
+          "id": "n4",
+          "text": "主要区别是处理时点与组织方式。",
+          "start_ms": 10759,
+          "end_ms": 13672
+        },
+        {
+          "id": "n5",
+          "text": "一种先积累后处理，另一种到达后连续处理",
+          "start_ms": 14230,
+          "end_ms": 17790
+        }
+      ],
+      "alignment": {
+        "method": "provider",
+        "granularity": "phrase"
+      }
+    },
+    "scenes": [
+      {
+        "id": "opening",
+        "component": "title_card",
+        "purpose": "点明主题并介绍批处理",
+        "visual_intent": {
+          "viewer_understands": "批处理先积累再集中处理",
+          "before": "未出现主题与批处理说明",
+          "after": "看到标题和批处理说明"
+        },
+        "props": {
+          "title": "批处理与流处理的区别",
+          "subtitle": "批处理先收集一段时间的数据再集中处理"
+        },
+        "narration_segment_ids": [
+          "n1"
+        ],
+        "start_frame": 0,
+        "end_frame": 125,
+        "beats": [
+          {
+            "id": "show_title",
+            "action": "reveal",
+            "target_id": "scene",
+            "frame": 8,
+            "absolute_ms": 250,
+            "order": 0
+          }
+        ]
+      },
+      {
+        "id": "comparison",
+        "component": "comparison",
+        "purpose": "对照两种处理方式的时点与组织",
+        "visual_intent": {
+          "viewer_understands": "流处理到达即处理，批处理先积累再处理",
+          "before": "尚未出现两种方式对照",
+          "after": "两侧特点可见并高亮"
+        },
+        "props": {
+          "left": {
+            "label": "批处理",
+            "items": [
+              "先收集一段时间的数据",
+              "再把数据集中处理",
+              "先积累后处理"
+            ]
+          },
+          "right": {
+            "label": "流处理",
+            "items": [
+              "在数据到达时持续处理",
+              "信息可较早进入流程",
+              "到达后连续处理"
+            ]
+          }
+        },
+        "narration_segment_ids": [
+          "n2",
+          "n3",
+          "n4"
+        ],
+        "start_frame": 125,
+        "end_frame": 419,
+        "beats": [
+          {
+            "id": "show_comparison",
+            "action": "reveal",
+            "target_id": "scene",
+            "frame": 133,
+            "absolute_ms": 4438,
+            "order": 0
+          },
+          {
+            "id": "highlight_stream",
+            "action": "highlight",
+            "target_id": "side:right",
+            "frame": 232,
+            "absolute_ms": 7734,
+            "order": 1
+          },
+          {
+            "id": "highlight_batch",
+            "action": "highlight",
+            "target_id": "side:left",
+            "frame": 323,
+            "absolute_ms": 10759,
+            "order": 2
+          }
+        ]
+      },
+      {
+        "id": "closing",
+        "component": "concept_reveal",
+        "purpose": "总结两种方式的核心区别",
+        "visual_intent": {
+          "viewer_understands": "一种先积累后处理，另一种到达后连续处理",
+          "before": "对照内容未总结",
+          "after": "看到两种方式的简短区别"
+        },
+        "props": {
+          "title": "两种方式的主要区别",
+          "lines": [
+            "批处理：先积累后处理",
+            "流处理：到达后连续处理"
+          ]
+        },
+        "narration_segment_ids": [
+          "n5"
+        ],
+        "start_frame": 419,
+        "end_frame": 535,
+        "beats": [
+          {
+            "id": "summarize",
+            "action": "reveal",
+            "target_id": "scene",
+            "frame": 427,
+            "absolute_ms": 14230,
+            "order": 0
+          }
+        ]
+      }
+    ],
+    "beats": [
+      {
+        "id": "show_title",
+        "action": "reveal",
+        "target_id": "scene",
+        "frame": 8,
+        "absolute_ms": 250,
+        "order": 0
+      },
+      {
+        "id": "show_comparison",
+        "action": "reveal",
+        "target_id": "scene",
+        "frame": 133,
+        "absolute_ms": 4438,
+        "order": 0
+      },
+      {
+        "id": "highlight_stream",
+        "action": "highlight",
+        "target_id": "side:right",
+        "frame": 232,
+        "absolute_ms": 7734,
+        "order": 1
+      },
+      {
+        "id": "highlight_batch",
+        "action": "highlight",
+        "target_id": "side:left",
+        "frame": 323,
+        "absolute_ms": 10759,
+        "order": 2
+      },
+      {
+        "id": "summarize",
+        "action": "reveal",
+        "target_id": "scene",
+        "frame": 427,
+        "absolute_ms": 14230,
+        "order": 0
+      }
+    ],
+    "total_frames": 535,
+    "audio_public_file": "assets/communications_noise.wav"
+  }
+}

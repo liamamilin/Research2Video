@@ -83,6 +83,15 @@ def test_prompt_keeps_source_as_untrusted_json_data():
     assert payload["source_text_as_untrusted_data"] == hostile
 
 
+def test_generic_narration_prompt_preserves_explicit_numbers_and_case_a_guard():
+    generic = build_narration_messages("虚构演示数据：甲类为 2，乙类为 4。")
+    assert "素材明确给出的比较条件、类别和数值应保持准确" in generic[0]["content"]
+    assert "虚构演示数据" not in generic[0]["content"]
+    source, _ = sample_narration()
+    case_a = build_narration_messages(source)
+    assert "不要增加概率、统计数字" in case_a[0]["content"]
+
+
 def test_storyboard_prompt_uses_compact_phrase_groups_and_bounded_offsets():
     _, narration = sample_narration()
     messages = build_storyboard_messages(narration)

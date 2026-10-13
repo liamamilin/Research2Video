@@ -199,7 +199,7 @@ class G2ProcessRunner:
             (qa_path, "qa.json", "application/json"),
             (artifacts_dir / "manifest.json", "manifest.json", "application/json"),
             (artifacts_dir / "storyboard-plan.json", "storyboard.json", "application/json"),
-            (run_dir / "fixtures/case-a.video-ir.json", "video-ir.json", "application/json"),
+            (run_dir / "fixtures/video-ir-v0.2.json", "video-ir.json", "application/json"),
             (artifacts_dir / "model-cost.json", "model-cost.json", "application/json"),
             (log_path, "execution-log.txt", "text/plain; charset=utf-8"),
         ]

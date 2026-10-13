@@ -1,0 +1,124 @@
+{
+  "scenes": [
+    {
+      "id": "opening",
+      "component": "title_card",
+      "props": {
+        "title": "条形图读分类数值",
+        "subtitle": "从零开始比较三类纸飞机"
+      },
+      "narration_segment_ids": [
+        "n1"
+      ],
+      "purpose": "点明主题：用零基条形图比较三类演示数值",
+      "visual_intent": {
+        "viewer_understands": "本图用零基条形图比较三类数值",
+        "before": "画面空白",
+        "after": "显示标题与副标题"
+      },
+      "beats": [
+        {
+          "id": "show_title",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n1",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "demo_chart",
+      "component": "bar_chart",
+      "props": {
+        "categories": [
+          "蓝色纸飞机",
+          "黄色纸飞机",
+          "红色纸飞机"
+        ],
+        "values": [
+          2,
+          4,
+          6
+        ],
+        "unit": "米",
+        "baseline_zero": true
+      },
+      "narration_segment_ids": [
+        "n2",
+        "n3",
+        "n4",
+        "n5"
+      ],
+      "purpose": "展示三类演示数值与零基柱高关系",
+      "visual_intent": {
+        "viewer_understands": "三类演示数值与柱高成比例",
+        "before": "尚未显示条形图",
+        "after": "显示蓝2米黄4米红6米"
+      },
+      "beats": [
+        {
+          "id": "show_chart",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n2",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "highlight_blue",
+          "action": "highlight",
+          "target_id": "bar:0",
+          "trigger": {
+            "segment_id": "n3",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "highlight_red",
+          "action": "highlight",
+          "target_id": "bar:2",
+          "trigger": {
+            "segment_id": "n4",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "closing",
+      "component": "title_card",
+      "props": {
+        "title": "虚构演示数据",
+        "subtitle": "仅用于演示如何比较三个类别"
+      },
+      "narration_segment_ids": [
+        "n6"
+      ],
+      "purpose": "提醒这些数值仅用于演示比较类别",
+      "visual_intent": {
+        "viewer_understands": "这些数字仅用于演示比较类别",
+        "before": "画面空白",
+        "after": "显示虚构演示提示"
+      },
+      "beats": [
+        {
+          "id": "show_disclaimer",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n6",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    }
+  ]
+}

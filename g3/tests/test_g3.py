@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 import hashlib
 import json
 from pathlib import Path
@@ -203,3 +204,21 @@ def test_api_rejects_out_of_scope_or_malformed_inputs(tmp_path):
             assert response.status_code == 503
             body = json.dumps(blocked.get("/api/config/status").json())
             assert "DEEPSEEK_API_KEY" not in body
+
+
+def test_clean_app_environment_checks_key_without_importing_g2(tmp_path, monkeypatch):
+    key_file = tmp_path / ".env"
+    key_file.write_text("DEEPSEEK_API_KEY='local-test-key'\n", encoding="utf-8")
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    settings = replace(make_settings(tmp_path), key_file=key_file)
+    status = probe_config(settings)
+    assert status["checks"]["deepseek"] is True
+    assert status["api_key_value_exposed"] is False
+
+
+def test_key_preflight_does_not_accept_an_empty_value(tmp_path, monkeypatch):
+    key_file = tmp_path / ".env"
+    key_file.write_text("# empty\nDEEPSEEK_API_KEY=\n", encoding="utf-8")
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    settings = replace(make_settings(tmp_path), key_file=key_file)
+    assert probe_config(settings)["checks"]["deepseek"] is False

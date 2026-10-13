@@ -1,0 +1,82 @@
+{
+  "provider": "local_kokoro_onnx",
+  "model": "Kokoro-82M-v1.0",
+  "voice": "zf_xiaoxiao",
+  "method": "separate real utterances with measured PCM activity bounds",
+  "granularity": "phrase",
+  "sample_rate": 24000,
+  "duration_seconds": 16.2,
+  "duration_ms": 16200,
+  "duration_frames": 486,
+  "activity_threshold": 0.003,
+  "edge_guard_ms": 50,
+  "inter_phrase_pause_ms": 360,
+  "segments": [
+    {
+      "id": "n1",
+      "text": "用条形图比较三个类别的数值。",
+      "utterance_start_sample": 6000,
+      "utterance_end_sample": 75584,
+      "speech_first_sample": 1182,
+      "speech_last_sample": 63379,
+      "sample_rate": 24000,
+      "voice": "zf_xiaoxiao",
+      "wav": "g4/runs/case-c/fixtures/assets/segments/n1.wav",
+      "start_ms": 250,
+      "end_ms": 2941
+    },
+    {
+      "id": "n2",
+      "text": "这些全是虚构演示数据。",
+      "utterance_start_sample": 84224,
+      "utterance_end_sample": 141280,
+      "speech_first_sample": 1395,
+      "speech_last_sample": 50735,
+      "sample_rate": 24000,
+      "voice": "zf_xiaoxiao",
+      "wav": "g4/runs/case-c/fixtures/assets/segments/n2.wav",
+      "start_ms": 3517,
+      "end_ms": 5673
+    },
+    {
+      "id": "n3",
+      "text": "蓝黄红纸飞机分别是2米、4米、6米。",
+      "utterance_start_sample": 149920,
+      "utterance_end_sample": 226944,
+      "speech_first_sample": 1070,
+      "speech_last_sample": 70839,
+      "sample_rate": 24000,
+      "voice": "zf_xiaoxiao",
+      "wav": "g4/runs/case-c/fixtures/assets/segments/n3.wav",
+      "start_ms": 6247,
+      "end_ms": 9248
+    },
+    {
+      "id": "n4",
+      "text": "它们不代表真实比赛或测量。",
+      "utterance_start_sample": 235584,
+      "utterance_end_sample": 298784,
+      "speech_first_sample": 1092,
+      "speech_last_sample": 57107,
+      "sample_rate": 24000,
+      "voice": "zf_xiaoxiao",
+      "wav": "g4/runs/case-c/fixtures/assets/segments/n4.wav",
+      "start_ms": 9816,
+      "end_ms": 12245
+    },
+    {
+      "id": "n5",
+      "text": "条形图从零开始，柱高与数值成比例。",
+      "utterance_start_sample": 307424,
+      "utterance_end_sample": 388064,
+      "speech_first_sample": 1392,
+      "speech_last_sample": 74668,
+      "sample_rate": 24000,
+      "voice": "zf_xiaoxiao",
+      "wav": "g4/runs/case-c/fixtures/assets/segments/n5.wav",
+      "start_ms": 12817,
+      "end_ms": 15971
+    }
+  ],
+  "limitation": "短语边界来自真实 WAV 的 PCM 活动；不声明词级对齐精度。"
+}

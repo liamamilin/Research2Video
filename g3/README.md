@@ -44,4 +44,4 @@ G3 提供本机 FastAPI + SQLite 服务和 React 界面，把已通过 G2 实测
 python3 -m pytest g3/tests g2/tests g1/tests/test_video_ir_v0_2_runtime.py -q
 ```
 
-测试不调用外部模型；真实生成验收需要通过 Web 界面提交任务，产物和执行日志保存在 `g3/data/jobs/<job-id>/attempts/<attempt>/g2-run/artifacts/`。
+测试不调用外部模型；真实生成验收需要通过 Web 界面提交任务，产物和执行日志保存在 `g3/data/jobs/<job-id>/attempts/<attempt>/g2-run/artifacts/`。固定 G4 Golden Case 输入和可重复的发布验收流程见 [`../g4/README.md`](../g4/README.md)。

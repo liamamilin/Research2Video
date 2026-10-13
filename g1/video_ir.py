@@ -110,6 +110,13 @@ def _validate_targets(component, props, action, target, path):
         _fail("INVALID_ACTION_TARGET", f"{path}/target_id", f"{target} is not allowed for {component}.{action}")
 
     exists = False
+
+    def numeric_target_index() -> int:
+        suffix = target.split(":", 1)[1]
+        if not suffix.isascii() or not suffix.isdecimal():
+            _fail("INVALID_ACTION_TARGET", f"{path}/target_id", f"{target} must use a non-negative integer index")
+        return int(suffix)
+
     if target == "scene":
         exists = True
     elif target in {"title", "subtitle"}:
@@ -125,14 +132,14 @@ def _validate_targets(component, props, action, target, path):
     elif target.startswith("path:"):
         exists = target.split(":", 1)[1] in {item["id"] for item in props.get("paths", [])}
     elif target.startswith("line:"):
-        index = int(target.split(":", 1)[1])
+        index = numeric_target_index()
         exists = index < len(props.get("lines", []))
     elif target.startswith("side:"):
         exists = target.split(":", 1)[1] in {"left", "right"} and target.split(":", 1)[1] in props
     elif target.startswith("event:"):
         exists = target.split(":", 1)[1] in {item["id"] for item in props.get("events", [])}
     elif target.startswith("bar:"):
-        index = int(target.split(":", 1)[1])
+        index = numeric_target_index()
         exists = index < min(len(props.get("categories", [])), len(props.get("values", [])))
     if not exists:
         _fail("INVALID_BEAT_TARGET", f"{path}/target_id", f"target {target} does not exist in component props")

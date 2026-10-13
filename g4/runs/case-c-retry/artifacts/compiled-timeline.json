@@ -1,0 +1,221 @@
+{
+  "schema_version": "0.2",
+  "video": {
+    "title": "条形图读分类数值",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration_ms": 19467
+  },
+  "style": {
+    "preset": "minimal_dark",
+    "seed": 20261013
+  },
+  "narration": {
+    "text": "这是一张从零开始的条形图。图上分蓝、黄、红三类纸飞机。演示数值依次是二米、四米和六米。柱子越高，对应的数值就越大。请记住，这些数字都是虚构演示数据。它们只用来演示如何比较三个类别。",
+    "audio_asset_id": "communication_voice",
+    "segments": [
+      {
+        "id": "n1",
+        "text": "这是一张从零开始的条形图。",
+        "start_ms": 257,
+        "end_ms": 2635
+      },
+      {
+        "id": "n2",
+        "text": "图上分蓝、黄、红三类纸飞机。",
+        "start_ms": 3191,
+        "end_ms": 5722
+      },
+      {
+        "id": "n3",
+        "text": "演示数值依次是二米、四米和六米。",
+        "start_ms": 6281,
+        "end_ms": 9065
+      },
+      {
+        "id": "n4",
+        "text": "柱子越高，对应的数值就越大。",
+        "start_ms": 9632,
+        "end_ms": 11974
+      },
+      {
+        "id": "n5",
+        "text": "请记住，这些数字都是虚构演示数据。",
+        "start_ms": 12533,
+        "end_ms": 15857
+      },
+      {
+        "id": "n6",
+        "text": "它们只用来演示如何比较三个类别。",
+        "start_ms": 16419,
+        "end_ms": 19257
+      }
+    ],
+    "alignment": {
+      "method": "provider",
+      "granularity": "phrase"
+    }
+  },
+  "scenes": [
+    {
+      "id": "opening",
+      "component": "title_card",
+      "purpose": "点明主题：用零基条形图比较三类演示数值",
+      "visual_intent": {
+        "viewer_understands": "本图用零基条形图比较三类数值",
+        "before": "画面空白",
+        "after": "显示标题与副标题"
+      },
+      "props": {
+        "title": "条形图读分类数值",
+        "subtitle": "从零开始比较三类纸飞机"
+      },
+      "narration_segment_ids": [
+        "n1"
+      ],
+      "start_frame": 0,
+      "end_frame": 87,
+      "beats": [
+        {
+          "id": "show_title",
+          "action": "reveal",
+          "target_id": "scene",
+          "frame": 8,
+          "absolute_ms": 257,
+          "order": 0
+        }
+      ]
+    },
+    {
+      "id": "demo_chart",
+      "component": "bar_chart",
+      "purpose": "展示三类演示数值与零基柱高关系",
+      "visual_intent": {
+        "viewer_understands": "三类演示数值与柱高成比例",
+        "before": "尚未显示条形图",
+        "after": "显示蓝2米黄4米红6米"
+      },
+      "props": {
+        "categories": [
+          "蓝色纸飞机",
+          "黄色纸飞机",
+          "红色纸飞机"
+        ],
+        "values": [
+          2,
+          4,
+          6
+        ],
+        "unit": "米",
+        "baseline_zero": true
+      },
+      "narration_segment_ids": [
+        "n2",
+        "n3",
+        "n4",
+        "n5"
+      ],
+      "start_frame": 87,
+      "end_frame": 484,
+      "beats": [
+        {
+          "id": "show_chart",
+          "action": "reveal",
+          "target_id": "scene",
+          "frame": 96,
+          "absolute_ms": 3191,
+          "order": 0
+        },
+        {
+          "id": "highlight_blue",
+          "action": "highlight",
+          "target_id": "bar:0",
+          "frame": 188,
+          "absolute_ms": 6281,
+          "order": 1
+        },
+        {
+          "id": "highlight_red",
+          "action": "highlight",
+          "target_id": "bar:2",
+          "frame": 289,
+          "absolute_ms": 9632,
+          "order": 2
+        }
+      ]
+    },
+    {
+      "id": "closing",
+      "component": "title_card",
+      "purpose": "提醒这些数值仅用于演示比较类别",
+      "visual_intent": {
+        "viewer_understands": "这些数字仅用于演示比较类别",
+        "before": "画面空白",
+        "after": "显示虚构演示提示"
+      },
+      "props": {
+        "title": "虚构演示数据",
+        "subtitle": "仅用于演示如何比较三个类别"
+      },
+      "narration_segment_ids": [
+        "n6"
+      ],
+      "start_frame": 484,
+      "end_frame": 584,
+      "beats": [
+        {
+          "id": "show_disclaimer",
+          "action": "reveal",
+          "target_id": "scene",
+          "frame": 493,
+          "absolute_ms": 16419,
+          "order": 0
+        }
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "id": "show_title",
+      "action": "reveal",
+      "target_id": "scene",
+      "frame": 8,
+      "absolute_ms": 257,
+      "order": 0
+    },
+    {
+      "id": "show_chart",
+      "action": "reveal",
+      "target_id": "scene",
+      "frame": 96,
+      "absolute_ms": 3191,
+      "order": 0
+    },
+    {
+      "id": "highlight_blue",
+      "action": "highlight",
+      "target_id": "bar:0",
+      "frame": 188,
+      "absolute_ms": 6281,
+      "order": 1
+    },
+    {
+      "id": "highlight_red",
+      "action": "highlight",
+      "target_id": "bar:2",
+      "frame": 289,
+      "absolute_ms": 9632,
+      "order": 2
+    },
+    {
+      "id": "show_disclaimer",
+      "action": "reveal",
+      "target_id": "scene",
+      "frame": 493,
+      "absolute_ms": 16419,
+      "order": 0
+    }
+  ],
+  "total_frames": 584
+}

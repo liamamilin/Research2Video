@@ -1,0 +1,30 @@
+{
+  "provider": "DeepSeek API",
+  "model": "deepseek-flash",
+  "endpoint": "https://api.deepseek.com/chat/completions",
+  "prompt_version": "g2-golden-general-v1.2",
+  "calls": [
+    {
+      "call_id": "narration-attempt-1",
+      "stage": "narration",
+      "provider": "deepseek_api",
+      "model": "deepseek-flash",
+      "prompt_version": "g2-golden-general-v1.2",
+      "status": "failed",
+      "error_type": "URLError",
+      "http_status": null,
+      "elapsed_seconds": 0.013,
+      "peak_uncached_cost_upper_bound_usd": 0.0128304,
+      "request_file": "g4/runs/case-a/artifacts/llm_calls/narration-attempt-1.request.json",
+      "response_file": "g4/runs/case-a/artifacts/llm_calls/narration-attempt-1.response.json",
+      "reasoning_content_saved": false,
+      "usage_unavailable": true
+    }
+  ],
+  "peak_uncached_cost_upper_bound_usd": 0.0128304,
+  "configured_worst_case_budget_usd": 0.089813,
+  "per_call_max_tokens": 8192,
+  "max_calls_per_run": 7,
+  "price_basis": "conservative upper bound at current peak rates assuming no prompt-cache hits",
+  "pricing_source": "https://api-docs.deepseek.com/quick_start/pricing/"
+}

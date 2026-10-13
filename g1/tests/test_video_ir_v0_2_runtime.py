@@ -11,6 +11,7 @@ import pytest
 from g1.video_ir import (
     ValidationFault,
     _validate_component,
+    _validate_targets,
     frame_at,
     schema_action_catalog,
     validate_video_ir,
@@ -180,3 +181,13 @@ def test_bar_chart_requires_matching_categories_and_values(tmp_path):
     ir = base_ir(root)
     ir["scenes"][0].update(component="bar_chart", props={"categories": ["甲", "乙"], "values": [1], "unit": "个", "baseline_zero": True})
     assert fault_code(ir, root) == "CHART_CARDINALITY_MISMATCH"
+
+
+@pytest.mark.parametrize("target", ["bar:*", "bar:-1", "bar:1.5", "bar:一", "line:*"])
+def test_rejects_non_numeric_or_wildcard_component_target_indices(target):
+    props = {"categories": ["甲"], "values": [1], "unit": "个", "baseline_zero": True}
+    component = "bar_chart" if target.startswith("bar:") else "concept_reveal"
+    with pytest.raises(ValidationFault) as exc:
+        _validate_targets(component, props, "reveal", target, "/scenes/s1/beats/0")
+    assert exc.value.code == "INVALID_ACTION_TARGET"
+    assert exc.value.field_path.endswith("/target_id")

@@ -180,7 +180,7 @@ function App() {
                 <div className="setting"><span className="setting-label">视觉主题</span><div className="theme-choice"><span className="theme-swatch"/><span>深色知识图解</span><span className="selected-check"><Icon name="check"/></span></div><small>简洁排版 · 受控组件动画</small></div>
                 <div className="setting"><span className="setting-label">中文旁白</span><div className="voice-choice"><span className="voice-wave">▂▅▃▇▅</span><span>小晓 · 普通话</span><span className="voice-play">▶</span></div><small>本机 Kokoro 语音合成</small></div>
               </div>
-              <div className="privacy-note"><Icon name="shield"/><span>提交后，文本会发送给 DeepSeek API 生成讲稿与分镜；配音和渲染在本机完成。任务文件保存在本机。</span></div>
+              <div className="privacy-note"><Icon name="shield"/><span>提交后，文本会发送给 DeepSeek API 生成 AI 讲稿与分镜，可能有遗漏或错误，请核对后使用；请勿提交无权外发的内容。配音和渲染在本机完成，任务文件保存在本机。</span></div>
               <div className="form-footer"><span><i className="secure-dot"/>不会执行模型生成的代码</span><button className="primary-button" type="submit" disabled={loading || !config?.ready || source.trim().length < 50}>{loading ? <><span className="spinner"/>正在创建…</> : <>开始生成 <span className="button-icon"><Icon name="arrow"/></span></>}</button></div>
             </form>
             <aside className="right-rail">
