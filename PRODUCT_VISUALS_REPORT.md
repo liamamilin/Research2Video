@@ -1,6 +1,6 @@
 # 产品视觉功能进展：Draw Things 本地场景图
 
-**状态：PARTIAL（真实 Draw Things 接入 PASS；最终视觉验收待复跑）** · **范围：本地视频产品的可选视觉能力** · **2026-10-13**
+**状态：PASS（Draw Things 本地生成与柔化背景验收）** · **范围：本地视频产品的可选视觉能力** · **2026-10-13**
 
 ## 结果
 
@@ -8,12 +8,12 @@ AutoVideo 新建页现在可检测 Draw Things 本机 HTTP API，并可为三个
 
 Draw Things 真实生成任务 `84e04a6b-85d7-4f9f-b658-26349cc3722b` 已在本机完成。三个场景图均由 `http://127.0.0.1:7860` 返回，实测尺寸 1280×704，PNG 解码有效且 SHA-256 与清单一致。18.709 秒成片为 1920×1080 H.264 + 48 kHz 双声道 AAC，561 帧；QA 和独立 FFmpeg 全流解码均 PASS，七个任务阶段全部成功。
 
-手工检查原联系表时发现原始背景有明显伪文字/伪图表。已用同一任务的真实背景、Video IR 和旁白在临时目录重渲染，柔化后的联系表不再显示可读伪文字，正式图解保持清晰；该临时成片全流解码通过。原始已完成任务及其哈希记录保持不变，新处理应用于后续任务。最终视觉验收仍需在 UI 通过修正后的 renderer 再生成一条，并播放检查。H1 的独立评议继续保持已取消，H1 原结论仍为 PARTIAL。
+修正 renderer 后，第二条真实任务 `520801e1-e2a1-42fc-83c6-099c4f36a6c0` 通过 Draw Things 生成了三张 1280×704 PNG，哈希全部匹配。16.213 秒成片为 1920×1080 H.264 + 48 kHz 双声道 AAC、486 帧；七个阶段、QA 和独立 FFmpeg 全流解码均 PASS。人工检查此任务的 9 帧联系表，背景伪字不再可读，正式图解清晰，柔化后的暗色氛围符合此主题，因此本产品功能验收为 PASS。H1 的独立评议仍由用户取消，H1 研究结论继续为 PARTIAL；本 PASS 不代表 H1 视觉质量对照实验通过。
 
 ## 变更文件
 
 - `g2/draw_things.py`：仅允许 loopback 的 Draw Things HTTP 客户端；三场景图像请求、PNG 校验、资产和哈希清单。
-- `g2/run_g2.py`、`g1/renderer/src/Root.tsx`：将可选场景背景作为 Video IR 之外的受控渲染 sidecar；为背景加入固定相机运镜。
+- `g2/run_g2.py`、`g1/renderer/src/Root.tsx`：将可选场景背景作为 Video IR 之外的受控渲染 sidecar；加入固定柔化/暗化和限幅相机运镜。
 - `g2/tests/test_draw_things.py`：接口请求、loopback 限制、离线状态与 PNG 校验测试。
 - `g3/app.py`、`g3/config.py`、`g3/worker.py`、`g3/store.py`、`g3/tests/test_g3.py`：可选任务输入、API 预检和可见的场景图阶段。
 - `g3/web/src/main.tsx`、`g3/web/src/visual.css`、`g3/web/static/app.js`、`g3/web/static/app.css`：本机连接状态、场景图开关和任务阶段界面。
@@ -26,14 +26,15 @@ Draw Things 真实生成任务 `84e04a6b-85d7-4f9f-b658-26349cc3722b` 已在本�
 - 使用临时背景图和已有音轨，经 Remotion 实际渲染 3 帧；`ffprobe` 确认 H.264 1920×1080 + AAC，`ffmpeg` 全流解码通过。临时制品：`/private/tmp/autovideo-draw-things-smoke/smoke.mp4`。
 - 真实任务原视频：`g3/data/jobs/84e04a6b-85d7-4f9f-b658-26349cc3722b/attempts/1/g2-run/artifacts/G2_自动生成.mp4`；原始联系表：`g3/data/jobs/84e04a6b-85d7-4f9f-b658-26349cc3722b/attempts/1/g2-run/artifacts/contact-sheet.jpg`。
 - 真实背景复用修正 renderer 后的临时成片：`/private/tmp/autovideo-draw-things-smoke/soft.mp4`；检查联系表：`/private/tmp/autovideo-draw-things-smoke/soft-contact.jpg`。临时输出仅用于对照，没有覆盖或登记到原任务。
+- 修正后的第二条真实 UI 任务：`g3/data/jobs/520801e1-e2a1-42fc-83c6-099c4f36a6c0/attempts/1/g2-run/artifacts/G2_自动生成.mp4`；QA 联系表：`g3/data/jobs/520801e1-e2a1-42fc-83c6-099c4f36a6c0/attempts/1/g2-run/artifacts/contact-sheet.jpg`；执行日志：`g3/data/jobs/520801e1-e2a1-42fc-83c6-099c4f36a6c0/attempts/1/worker.log`。
 - `git diff --check`：通过。
-- AutoVideo 本机 UI 已在 `http://127.0.0.1:8011/#new` 加载；UI 正确显示 Draw Things 尚未连接，生成按钮在本地 API 未开启时禁用。
+- AutoVideo 本机 UI 的第二条任务通过已连接的 Draw Things API 完成，详情可由任务 ID 持续查看。
 - 端口 `8000` 由独立项目 `video-opportunity-desk` 使用，未停止或修改该项目。
 
 ## 制品、限制与下一步
 
 新建页可在本机 AutoVideo 服务 `http://127.0.0.1:8011/#new` 使用。真实任务及所有正式产物保存在 `g3/data/jobs/84e04a6b-85d7-4f9f-b658-26349cc3722b/attempts/1/`。
 
-用户需用更新后的 renderer 再生成一条 10–20 秒视频并播放检查柔化背景的实际观感，方可把最终视觉验收从 PARTIAL 升为 PASS。
+下一项建议是让任务详情直接预览每个场景的本地背景图，便于用户快速检查素材与成片对应关系；该功能可沿用当前 API、工作区与固定组件，不需要新模型或服务。
 
-**风险：** 真实生成已验证服务端点为 `127.0.0.1:7860`。图像 API 请求了 1280×720，但模型返回 1280×704；renderer 使用 cover 填充画面。柔化背景降低了细节，最终美术观感仍应通过下一条 UI 成片确认。
+**风险：** 真实生成已验证服务端点为 `127.0.0.1:7860`。图像 API 请求 1280×720，但模型返回 1280×704；renderer 使用 cover 填充画面并柔化背景。较复杂的风格/场景仍需逐主题做抽样检查。
