@@ -22,7 +22,7 @@
     "retry_inclusive_cost_per_final_video_upper_bound_usd": 0.0174202,
     "all_attempt_elapsed_seconds": 315.4200000000001,
     "retry_inclusive_elapsed_seconds_per_final_video": 105.14000000000003,
-    "blind_human_review_status": "NOT_MEASURED"
+    "blind_human_review_status": "NOT_BLIND"
   },
   "attempts": [
     {
@@ -391,5 +391,41 @@
     "kokoro_voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
     "ffmpeg_sha256": "326895b16940f238d76e902fc71150f10c388c281985756f9850ff800a2f1499",
     "ffprobe_sha256": "307e09bc01bd72bde5f441a1a6df68769da3b2b6e431accfbfc9cf3893ad00c4"
+  },
+  "human_review": {
+    "reviewer_count": 1,
+    "reviewer_code": "liam",
+    "date": "2026-10-13",
+    "blind_integrity": "NOT_BLIND_REVIEWER_SAW_RUNTIME_INFO",
+    "scores_by_clip": {
+      "clip-01": {
+        "fidelity": 3,
+        "comprehensibility": 3,
+        "visual_maturity": 2,
+        "audio_quality": 4,
+        "audio_visual_correspondence": null
+      },
+      "clip-02": {
+        "fidelity": 4,
+        "comprehensibility": 4,
+        "visual_maturity": 2,
+        "audio_quality": 4,
+        "audio_visual_correspondence": null
+      },
+      "clip-03": {
+        "fidelity": 4,
+        "comprehensibility": 3,
+        "visual_maturity": 2,
+        "audio_quality": 4,
+        "audio_visual_correspondence": null
+      }
+    },
+    "mean_scores_available_dimensions": {
+      "fidelity": 3.6666666666666665,
+      "comprehensibility": 3.3333333333333335,
+      "visual_maturity": 2.0,
+      "audio_quality": 4.0
+    },
+    "qualitative_notes": "无特别问题"
   }
 }
