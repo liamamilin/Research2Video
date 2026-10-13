@@ -397,6 +397,8 @@
     "reviewer_code": "liam",
     "date": "2026-10-13",
     "blind_integrity": "NOT_BLIND_REVIEWER_SAW_RUNTIME_INFO",
+    "accepted_for_m0_baseline_by_user": true,
+    "acceptance_note": "User explicitly instructed that the supplied scores be used for the M0 baseline; this does not change their non-blind status.",
     "scores_by_clip": {
       "clip-01": {
         "fidelity": 3,
