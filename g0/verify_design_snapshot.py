@@ -1,4 +1,4 @@
-"""Verify the frozen document package separately from new G0 output files."""
+"""Verify the document package manifest separately from generated G0 output files."""
 import hashlib
 import json
 from pathlib import Path
@@ -14,7 +14,7 @@ for item in records:
     file = root / item["path"]
     assert file.stat().st_size == item["bytes"], item["path"]
     assert hashlib.sha256(file.read_bytes()).hexdigest() == item["sha256"], item["path"]
-print(f"Original frozen package: {len(records)} file hashes unchanged", flush=True)
+print(f"Document package manifest: {len(records)} file hashes match", flush=True)
 with tempfile.TemporaryDirectory(prefix="autovideo-g0-design-") as temp:
     snapshot = Path(temp)
     for rel in [r["path"] for r in records] + ["PACKAGE_MANIFEST.json"]:

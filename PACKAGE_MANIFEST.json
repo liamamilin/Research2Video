@@ -4,11 +4,19 @@
   "release_date": "2026-10-13",
   "mvp_product_target": "V0.1",
   "video_ir_contract": "v0.2",
-  "engineering_status": "DESIGN_ONLY_G0_NOT_ACCEPTED",
-  "active_stage": "G0",
+  "engineering_status": "MVP_ACCEPTED_LOCAL_SINGLE_MACHINE",
+  "active_stage": "LOCAL_PRODUCT_ITERATION",
+  "stage_status": {
+    "G0": "PARTIAL_HISTORICAL_REPORT",
+    "G1": "PASS",
+    "G2": "PASS",
+    "G3": "PASS",
+    "G4": "PASS_USER_ACCEPTED",
+    "M0": "PASS",
+    "H1": "PARTIAL"
+  },
   "future_stages": [
-    "M0",
-    "H1",
+    "H1_REMAINDER",
     "H2",
     "H3",
     "H4"
@@ -146,8 +154,8 @@
     },
     {
       "path": "AGENT_FIRST_TASK.md",
-      "bytes": 1777,
-      "sha256": "c9137c154959cd7e1bbba250d00aed0f53167cf32579b729cf92c8fec8cbdf18"
+      "bytes": 1813,
+      "sha256": "7c9e09854383444cb48c272a8b96c3730f7c5199e4a00c38c7de3538be560056"
     },
     {
       "path": "BASELINE_SHA256.json",
@@ -156,18 +164,18 @@
     },
     {
       "path": "README.md",
-      "bytes": 7499,
-      "sha256": "9370117192cabf9331b4c54b2d5c30aa5861572730036858b962dad2720abdeb"
+      "bytes": 7502,
+      "sha256": "b2c333d04c5e2626f81703625c03841613bff057f7185c29bb3118798a0e012d"
     },
     {
       "path": "RELEASE_STATUS.md",
-      "bytes": 1752,
-      "sha256": "dd928f851a6659b8dce3fc2f456af26e3ece9dca3945237ac5f23ade0a225f5a"
+      "bytes": 3159,
+      "sha256": "d7aa9e1a8d8c780ec7e13c234ca23f264c6e743a451dac11877d08f091d2b63e"
     },
     {
       "path": "START_HERE.md",
-      "bytes": 2473,
-      "sha256": "078b9d8e958f5cf0aa42c751f6f6183526d22298717a5614c17ebfbf2a514748"
+      "bytes": 2512,
+      "sha256": "145b18182b709afe1b61085c117ee29ee125f70285ea2bd5d06e0cea4afb3a4b"
     },
     {
       "path": "examples/video-ir-beats-v0.2.json",
@@ -231,8 +239,8 @@
     },
     {
       "path": "tests/test_final_release.py",
-      "bytes": 1663,
-      "sha256": "5cbfb88b5482fb7c93cd40a3c5772b7ddfaec088e3f9fd55144f7dc50f6a0698"
+      "bytes": 1910,
+      "sha256": "38963ad3052b00336161e75d82ed7e6fc35a5436155a1d1b41a21278574b3b88"
     },
     {
       "path": "tests/test_roadmap_contracts.py",

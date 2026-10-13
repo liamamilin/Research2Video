@@ -1,19 +1,19 @@
 # AutoVideo｜最终开发文档入口
 
-**发布状态：V0.3-DESIGN-FINAL（设计规范冻结）**  
-**产品目标：V0.1 MVP** · **现行 Video IR：v0.2** · **当前工程阶段：G0 尚未执行验收**
+**文档发布：V0.3-DESIGN-FINAL**
+
+**产品目标：V0.1 MVP** · **现行 Video IR：v0.2** · **当前状态：MVP 已验收；本地产品功能迭代中**
 
 ## 你拿到的是什么
 
-这是一套可交给编码 Agent 的完整规格，包含 25 篇编号文档、JSON Schema、组件注册表、示例、测试和 MVP 后的演进计划。**它不是已完成的应用，也不是视频样片集。**
+本仓库包含原始产品规格，以及 G0–G4 的真实验收产物、已实现应用和后续研究记录。MVP 已按本地单机 10–20 秒范围完成并由用户验收；当前状态和限制以 `RELEASE_STATUS.md` 及对应阶段报告为准。
 
 ## 如何阅读
 
-1. 首先读 `README.md`、`AGENTS.md`、`RELEASE_STATUS.md`。
-2. 当前研发只需遵守 `00–14`，其中 `01`（产品边界）、`03`（数据契约）、`08`（质量验收）、`09`（阶段计划）和 `10`（Agent 指令）最重要。
-3. `15–24` 是 MVP 之后的演进方案，用于理解长期方向，**不授权提前开发**。
-4. `schemas/video-ir-v0.2.schema.json` 与 `schemas/component-registry-v0.2.json` 是 G1 起的现行设计契约；旧 v0.1 文件仅作历史存档。
-5. 从 `AGENT_FIRST_TASK.md` 启动 G0，不因文档完整而跳过真实技术验证。
+1. 先读 `RELEASE_STATUS.md`、`README.md` 和 `AGENTS.md`，确认当前阶段、授权和已知限制。
+2. 按具体任务阅读 `00–14` 中对应规格；Video IR v0.2、组件 schema 和 Registry 是现行数据契约，v0.1 仅作历史存档。
+3. `15–24` 记录 MVP 后的方案与审查，不构成自动授权；按用户当前明确指示推进。
+4. `AGENT_FIRST_TASK.md` 是初始化时的 G0 首轮任务记录，G0 已执行，不要重复将其当作当前待办。
 
 ## 文档优先级与决策规则
 
@@ -21,8 +21,8 @@
 - 当前 Video IR：`03_VIDEO_IR_CONTRACT.md`、Schema 与 Registry。
 - 实施顺序：`09_IMPLEMENTATION_PLAN.md`；只有用户显式授权才能进入下一阶段。
 - 验收证据：`08_QA_AND_ACCEPTANCE.md` 及对应阶段测试矩阵。
-- 决策版本：`11_DECISION_LOG.md`（FROZEN-DESIGN 意味着仅设计冻结）。
-- 遇到冲突：停止冲突部分，列出差异并请求决定，不得自主扩大范围。
+- 决策版本：`11_DECISION_LOG.md` 记录原设计冻结；当前工程完成度以阶段报告和 `RELEASE_STATUS.md` 为准。
+- 遇到状态或范围冲突：以最新阶段验收报告及用户明确授权为准，并同步修正文档，避免把历史首轮指令误作当前状态。
 
 ## 本轮无需构建的功能
 

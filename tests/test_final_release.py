@@ -11,7 +11,11 @@ def test_release_metadata_unambiguous():
     assert m['document_release'] == 'V0.3-DESIGN-FINAL'
     assert m['mvp_product_target'] == 'V0.1'
     assert m['video_ir_contract'] == 'v0.2'
-    assert m['active_stage'] == 'G0'
+    assert m['engineering_status'] == 'MVP_ACCEPTED_LOCAL_SINGLE_MACHINE'
+    assert m['active_stage'] == 'LOCAL_PRODUCT_ITERATION'
+    assert m['stage_status']['G4'] == 'PASS_USER_ACCEPTED'
+    assert m['stage_status']['M0'] == 'PASS'
+    assert m['stage_status']['H1'] == 'PARTIAL'
 
 
 def test_manifest_hashes_and_file_coverage():
