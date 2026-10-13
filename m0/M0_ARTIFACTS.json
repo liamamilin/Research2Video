@@ -1,0 +1,395 @@
+{
+  "baseline_format_version": 1,
+  "captured_on": "2026-10-13",
+  "source_commit": "0d5275728d564f8170635d466202dec45f8d4092",
+  "g4_manifest": {
+    "path": "g4/G4_MANIFEST.json",
+    "sha256": "6f230382eb2788d22879c47fbf285a9a607883ab41907953b3fc1010f9e39e13",
+    "entries": 351,
+    "entries_verified": 351
+  },
+  "metrics": {
+    "attempt_count": 5,
+    "passed_attempts": 3,
+    "failed_attempts": 2,
+    "attempt_success_rate": 0.6,
+    "golden_case_count": 3,
+    "golden_case_final_completion_rate": 1.0,
+    "first_attempt_success_rate": 0.3333333333333333,
+    "successful_attempt_mean_cost_upper_bound_usd": 0.0098712,
+    "successful_attempt_mean_elapsed_seconds": 88.84400000000001,
+    "all_attempt_cost_upper_bound_usd": 0.052260600000000004,
+    "retry_inclusive_cost_per_final_video_upper_bound_usd": 0.0174202,
+    "all_attempt_elapsed_seconds": 315.4200000000001,
+    "retry_inclusive_elapsed_seconds_per_final_video": 105.14000000000003,
+    "blind_human_review_status": "NOT_MEASURED"
+  },
+  "attempts": [
+    {
+      "run_path": "g4/runs/case-a-retry",
+      "status": "PASS",
+      "failure_cause": null,
+      "api_calls": 2,
+      "cost_upper_bound_usd": 0.009084,
+      "elapsed_seconds": 85.877
+    },
+    {
+      "run_path": "g4/runs/case-b",
+      "status": "PASS",
+      "failure_cause": null,
+      "api_calls": 2,
+      "cost_upper_bound_usd": 0.0126021,
+      "elapsed_seconds": 99.43
+    },
+    {
+      "run_path": "g4/runs/case-c-retry",
+      "status": "PASS",
+      "failure_cause": null,
+      "api_calls": 2,
+      "cost_upper_bound_usd": 0.0079275,
+      "elapsed_seconds": 81.225
+    },
+    {
+      "run_path": "g4/runs/failed/case-a-network-blocked",
+      "status": "FAIL",
+      "failure_cause": "DNS/network failure before LLM response",
+      "api_calls": 1,
+      "cost_upper_bound_usd": 0.0128304,
+      "elapsed_seconds": 0.023
+    },
+    {
+      "run_path": "g4/runs/failed/case-c-invalid-target",
+      "status": "FAIL",
+      "failure_cause": "invalid bar:* action target rejected during storyboard validation",
+      "api_calls": 3,
+      "cost_upper_bound_usd": 0.0098166,
+      "elapsed_seconds": 48.865
+    }
+  ],
+  "golden_outputs": [
+    {
+      "case_id": "case-a",
+      "run_path": "g4/runs/case-a-retry",
+      "video": {
+        "path": "g4/runs/case-a-retry/artifacts/G2_自动生成.mp4",
+        "size_bytes": 1298381,
+        "sha256": "3c90eb169463c740a5c1f92442872e881556f34a4fa1de4a9e0a7955e6c241bd",
+        "duration_seconds": 19.968,
+        "frames": 599,
+        "video_codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "audio_codec": "aac",
+        "sample_rate_hz": 48000,
+        "channels": 2
+      },
+      "video_ir_path": "g4/runs/case-a-retry/fixtures/video-ir-v0.2.json",
+      "subtitle_path": "g4/runs/case-a-retry/artifacts/captions.srt",
+      "audio_paths": [
+        "g4/runs/case-a-retry/fixtures/assets/communications_noise.wav"
+      ],
+      "qc_path": "g4/runs/case-a-retry/g4-qc.json",
+      "contact_sheet_path": "g4/runs/case-a-retry/g4-qc/keyframes/contact-sheet.jpg",
+      "cost_upper_bound_usd": 0.009084,
+      "api_calls": 2
+    },
+    {
+      "case_id": "case-b",
+      "run_path": "g4/runs/case-b",
+      "video": {
+        "path": "g4/runs/case-b/artifacts/G2_自动生成.mp4",
+        "size_bytes": 1060976,
+        "sha256": "008bd21c63a2b9a23b4d004ef11a3851aec6c256909e793f1f045c834ba3af5a",
+        "duration_seconds": 17.835,
+        "frames": 535,
+        "video_codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "audio_codec": "aac",
+        "sample_rate_hz": 48000,
+        "channels": 2
+      },
+      "video_ir_path": "g4/runs/case-b/fixtures/video-ir-v0.2.json",
+      "subtitle_path": "g4/runs/case-b/artifacts/captions.srt",
+      "audio_paths": [
+        "g4/runs/case-b/fixtures/assets/communications_noise.wav"
+      ],
+      "qc_path": "g4/runs/case-b/g4-qc.json",
+      "contact_sheet_path": "g4/runs/case-b/g4-qc/keyframes/contact-sheet.jpg",
+      "cost_upper_bound_usd": 0.0126021,
+      "api_calls": 2
+    },
+    {
+      "case_id": "case-c",
+      "run_path": "g4/runs/case-c-retry",
+      "video": {
+        "path": "g4/runs/case-c-retry/artifacts/G2_自动生成.mp4",
+        "size_bytes": 1024278,
+        "sha256": "a984ab4bd0eb67a057b7a653f3dc9336648ecd6195cfdf0d1bc04e17517b859b",
+        "duration_seconds": 19.477,
+        "frames": 584,
+        "video_codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "audio_codec": "aac",
+        "sample_rate_hz": 48000,
+        "channels": 2
+      },
+      "video_ir_path": "g4/runs/case-c-retry/fixtures/video-ir-v0.2.json",
+      "subtitle_path": "g4/runs/case-c-retry/artifacts/captions.srt",
+      "audio_paths": [
+        "g4/runs/case-c-retry/fixtures/assets/communications_noise.wav"
+      ],
+      "qc_path": "g4/runs/case-c-retry/g4-qc.json",
+      "contact_sheet_path": "g4/runs/case-c-retry/g4-qc/keyframes/contact-sheet.jpg",
+      "cost_upper_bound_usd": 0.0079275,
+      "api_calls": 2
+    }
+  ],
+  "frozen_files": [
+    {
+      "path": "00_PRODUCT_CHARTER.md",
+      "size_bytes": 2616,
+      "sha256": "58b542c80c17ebe8750ca7ecddb453e43366096a017e371739865630e6209c8d"
+    },
+    {
+      "path": "01_MVP_REQUIREMENTS.md",
+      "size_bytes": 3503,
+      "sha256": "d5d8d94983f1234058d9a2c552a91fb057f372aa1e06dfe8083ebe16a3619c5a"
+    },
+    {
+      "path": "02_SYSTEM_ARCHITECTURE.md",
+      "size_bytes": 4103,
+      "sha256": "41a1c0203848c87ac41025b29acf5f502d5760eef16a9518174c0451d1deaf44"
+    },
+    {
+      "path": "03_VIDEO_IR_CONTRACT.md",
+      "size_bytes": 8269,
+      "sha256": "518e193f9b03ccb34dd7e9657d55d9eb1bc5fca0f46b845300e89d826fe6c34a"
+    },
+    {
+      "path": "04_WORKFLOW_AND_RECOVERY.md",
+      "size_bytes": 3331,
+      "sha256": "ac068500d4bab4ced06ae316e5314e57e6ddbb03924c344060ebc94022f87021"
+    },
+    {
+      "path": "05_VISUAL_AND_AUDIO_SYSTEM.md",
+      "size_bytes": 8373,
+      "sha256": "d855d6f44782c31c7f4e5d3433b270993ece9f0ac5e274b4b032b53fe789690b"
+    },
+    {
+      "path": "06_PROVIDERS_AND_PROMPTS.md",
+      "size_bytes": 3930,
+      "sha256": "759bf3e99be35eee73c48ff1bcef32698d377eac1127dba1f8ffbcfb672bafaf"
+    },
+    {
+      "path": "07_UI_AND_API.md",
+      "size_bytes": 2636,
+      "sha256": "48b2df9b4de20725de82c809d2408b44c39a4cd7f6bcba8d3094b88306725377"
+    },
+    {
+      "path": "08_QA_AND_ACCEPTANCE.md",
+      "size_bytes": 4464,
+      "sha256": "e1f44d513a8dc086a2d39396b218063ebe7204e0be68056455e71fe8f9f2cdd7"
+    },
+    {
+      "path": "09_IMPLEMENTATION_PLAN.md",
+      "size_bytes": 4248,
+      "sha256": "cc04a38a355aa5c3e59782bd3f1029bc2656da9c9ae25a35022b7a5f94462aac"
+    },
+    {
+      "path": "10_AGENT_EXECUTION_BRIEF.md",
+      "size_bytes": 3400,
+      "sha256": "137c51972f24610b0c040b69b425212bfaa8a155a7beadd3f7ec9f8b7b04f9b5"
+    },
+    {
+      "path": "11_DECISION_LOG.md",
+      "size_bytes": 4208,
+      "sha256": "b54fe46f3dcc25dd1fa437bb2b8173afbcf38b93df9737eb570d89f853539f33"
+    },
+    {
+      "path": "12_EXPERIMENT_PROTOCOL.md",
+      "size_bytes": 2011,
+      "sha256": "83193303189fd56618dc1713ae95ea86f6d2dc57e1d45e1d446ed89874b407b7"
+    },
+    {
+      "path": "13_G1_TEST_MATRIX.md",
+      "size_bytes": 2882,
+      "sha256": "1c2116c0750cfae9b575670873645aa6ba49b0e025e7b5ab9fa706b12f033eb3"
+    },
+    {
+      "path": "14_DESIGN_AUDIT.md",
+      "size_bytes": 2926,
+      "sha256": "9823ab49b3aac86037304c0c6b05fee020495cf6003162d7d36d1494e5e7e2ea"
+    },
+    {
+      "path": "AGENTS.md",
+      "size_bytes": 1791,
+      "sha256": "e8f3ae1abe5c936d79c1e08d2088106837042ac5e09540081a2e9baf3bd51496"
+    },
+    {
+      "path": "BASELINE_SHA256.json",
+      "size_bytes": 1775,
+      "sha256": "5787d95d44351801bc3cacac43c9af974cbb003454aafcd2db2758d6c8b07785"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 7499,
+      "sha256": "9370117192cabf9331b4c54b2d5c30aa5861572730036858b962dad2720abdeb"
+    },
+    {
+      "path": "examples/video-ir-beats-v0.2.json",
+      "size_bytes": 3335,
+      "sha256": "96794ffc3a4c23476a3e9aa6cb664fb1e8437b740a797a479b65f44934076ff0"
+    },
+    {
+      "path": "g0/environment.json",
+      "size_bytes": 336,
+      "sha256": "8ab15db7235570c5eb6508a5cfae75972d94949904d6fd0a6bd6dbe05d14fc09"
+    },
+    {
+      "path": "g0/remotion-package-lock.json",
+      "size_bytes": 194340,
+      "sha256": "88a42f61974f52c47209148ad640111573f9fc46a147df1d9c34a003182e9703"
+    },
+    {
+      "path": "g0/remotion-package.json",
+      "size_bytes": 1061,
+      "sha256": "53579473cb6f168adc14c9594abcf8d5ac3ed08968de2b0c9d2c5fe08c146398"
+    },
+    {
+      "path": "g0/requirements.lock",
+      "size_bytes": 1164,
+      "sha256": "6d7acd4ee3b7f5ecb889a582696306743c4fb009a91336ce75f39c5d574d1fdb"
+    },
+    {
+      "path": "g1/fixtures/communication-noise.video-ir.json",
+      "size_bytes": 5997,
+      "sha256": "abdbb72aef98b4f2521c73a90087e84be7849a89cba059673df03f23ba7472e1"
+    },
+    {
+      "path": "g1/tests/test_video_ir_v0_2_runtime.py",
+      "size_bytes": 8758,
+      "sha256": "214fd6a1c1e268e2c5fb557275f4738b27a84e3fef8dad6346b89a6d90fcb02e"
+    },
+    {
+      "path": "g2/tests/test_g2.py",
+      "size_bytes": 9442,
+      "sha256": "2f0d04e3f821cf0e2e404843170ceb28d59c3234df0fb3077ab9ecf85012af9b"
+    },
+    {
+      "path": "g3/requirements.txt",
+      "size_bytes": 50,
+      "sha256": "4f79277616938bb99aa8a658b6952497da6dc98689091fce1f6abc2cca578aa2"
+    },
+    {
+      "path": "g3/tests/test_g3.py",
+      "size_bytes": 9626,
+      "sha256": "129841d4d5d4b13de4fe4eef11a129347d11cba5b919d28274b80c2c68f6242a"
+    },
+    {
+      "path": "g4/G4_LICENSE_AUDIT.md",
+      "size_bytes": 4554,
+      "sha256": "4e21710b4447e7038e6cbe15c1218ade84de70acdfbd8ede404628e5e98a8a9f"
+    },
+    {
+      "path": "g4/G4_MANIFEST.json",
+      "size_bytes": 66337,
+      "sha256": "6f230382eb2788d22879c47fbf285a9a607883ab41907953b3fc1010f9e39e13"
+    },
+    {
+      "path": "g4/clean_install/clean-install-evidence.json",
+      "size_bytes": 4470,
+      "sha256": "88910f1ade61967fb30b32f0a58cb69d4fb0c3333cc58aa69517c8c1ff0896c4"
+    },
+    {
+      "path": "g4/golden_cases/case-a/source.txt",
+      "size_bytes": 624,
+      "sha256": "9c7b7b0b80ae0e9a15154e19ca1df91bc5a50535049af9bb4ec8d2ab54c1e6ca"
+    },
+    {
+      "path": "g4/golden_cases/case-b/source.txt",
+      "size_bytes": 567,
+      "sha256": "1920ef921a3a8f6454dcc27eddd4661a3bd50f36e1c19e260c52c981bf33b0e5"
+    },
+    {
+      "path": "g4/golden_cases/case-c/expected-chart.json",
+      "size_bytes": 180,
+      "sha256": "ec8676dadf8f1a3369664076839b6550ecc8386d4c45487146ed68749e9936b8"
+    },
+    {
+      "path": "g4/golden_cases/case-c/source.txt",
+      "size_bytes": 590,
+      "sha256": "217fd4d44918843f7364e19c39df929468a64f07e810715da14c2e13e3f821af"
+    },
+    {
+      "path": "g4/tests/test_g4.py",
+      "size_bytes": 3441,
+      "sha256": "d21ca5d5e57e2c3c242cb84d2357123aafee3e691b2e22fe98de517ac5bde9a4"
+    },
+    {
+      "path": "schemas/component-registry-v0.2.json",
+      "size_bytes": 2190,
+      "sha256": "906b51d786c5df811d273121bfbb181339813205b3085e7ca3e77ba443b63c39"
+    },
+    {
+      "path": "schemas/components/bar_chart.schema.json",
+      "size_bytes": 872,
+      "sha256": "d6e46829461697ed6a4e76cc02e4b0b18bac46e9415a4909d6b096e556b04443"
+    },
+    {
+      "path": "schemas/components/comparison.schema.json",
+      "size_bytes": 1518,
+      "sha256": "3827b97795a4d842cdc8a7e539f89541e4fa3a75a5263b0717ba6d8b31f2f9e8"
+    },
+    {
+      "path": "schemas/components/concept_reveal.schema.json",
+      "size_bytes": 593,
+      "sha256": "f1a7400f49e9fbd4b13334c319945a9bfe9550fe6443ea187bbd04d3affcda3e"
+    },
+    {
+      "path": "schemas/components/flow_diagram.schema.json",
+      "size_bytes": 2083,
+      "sha256": "06ef6ab0abde83f4026c849c08aa93a714f6b3e6961259323af621db40f0f3b0"
+    },
+    {
+      "path": "schemas/components/timeline.schema.json",
+      "size_bytes": 800,
+      "sha256": "8f63442be4274a73c58331c44062b0317052a7c2aa062da0bdc8411a19d1bdee"
+    },
+    {
+      "path": "schemas/components/title_card.schema.json",
+      "size_bytes": 480,
+      "sha256": "441489f1fedd5b75db11df9467096be7929ac36f0f922cd0462e4419ef77f1fc"
+    },
+    {
+      "path": "schemas/video-ir-v0.1.schema.json",
+      "size_bytes": 5093,
+      "sha256": "dd493177348f092ff72b65d178d7923908d6c4ab0345d3df0dba86faa435f398"
+    },
+    {
+      "path": "schemas/video-ir-v0.2.schema.json",
+      "size_bytes": 10152,
+      "sha256": "f0400f632fb32342e5e6c9b3fc25dceabd966778a40847280e6b0572c880ad8a"
+    },
+    {
+      "path": "tests/test_design_contracts.py",
+      "size_bytes": 3656,
+      "sha256": "be3e23921e2181e1daa9812865ef82f64a34cdc56e9110970b5a1c7e9f7094a8"
+    },
+    {
+      "path": "tests/test_roadmap_contracts.py",
+      "size_bytes": 1825,
+      "sha256": "706fcd5f6760aa795341556557b410c753c5f842fd7a82cc1a4a6fe23eeb9341"
+    }
+  ],
+  "clean_install_assets": {
+    "kokoro_model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+    "kokoro_voices_sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+    "ffmpeg_sha256": "326895b16940f238d76e902fc71150f10c388c281985756f9850ff800a2f1499",
+    "ffprobe_sha256": "307e09bc01bd72bde5f441a1a6df68769da3b2b6e431accfbfc9cf3893ad00c4"
+  }
+}
