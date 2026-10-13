@@ -35,4 +35,4 @@ g0/.venv/bin/python -m pytest tests/test_design_contracts.py tests/test_roadmap_
 
 ## 退出状态
 
-技术样片已完成，但 A 路线因沙箱条件不可验证而跳过，且两份独立盲评表尚未收回。H1 报告为 PARTIAL。不得将没有的人工评分或未知成本填写为估计值。
+技术样片已完成；A 路线未实施。用户于 2026-10-13 取消独立评议，并要求当前优先聚焦本地产品功能，不建设分发沙箱。研究性 H1 报告仍为 PARTIAL；不填写未收集的人工评分或工具未披露的成本。
