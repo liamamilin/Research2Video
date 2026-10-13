@@ -18,4 +18,7 @@ g1/renderer/node_modules
 g1/renderer/.cache/
 g2/renderer/node_modules
 g2/renderer/.cache/
+g3/data/
+g3/.venv/
+g3/web/node_modules/
 g1/logs/attempt-*/

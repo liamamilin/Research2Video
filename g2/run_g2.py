@@ -29,13 +29,21 @@ PROMPT_VERSION = "g2-case-a-v1.1"
 FPS = 30
 SAMPLE_RATE = 24000
 VOICE = "zf_xiaoxiao"
+_TARGET_ENV = os.environ.get("AUTOVIDEO_G2_TARGET_DURATION_SEC")
+TARGET_DURATION_SEC = int(_TARGET_ENV) if _TARGET_ENV else 15
+if not 10 <= TARGET_DURATION_SEC <= 20:
+    raise RuntimeError("AUTOVIDEO_G2_TARGET_DURATION_SEC must be between 10 and 20")
+TARGET_DURATION_RANGE = ((max(10, TARGET_DURATION_SEC - 2), min(20, TARGET_DURATION_SEC + 2))
+                         if _TARGET_ENV else (10, 20))
 MAX_LLM_ATTEMPTS = 3
 MAX_TOTAL_CALLS = 7
 MAX_TOKENS_PER_CALL = 8192
 MAX_INPUT_TOKENS_PER_CALL = 10000
 MAX_PROJECTED_API_COST_USD = MAX_TOTAL_CALLS * (MAX_INPUT_TOKENS_PER_CALL * 0.30 + MAX_TOKENS_PER_CALL * 1.20) / 1_000_000
 LLM_TIMEOUT_SECONDS = 240
-PROJECT_INPUT = ROOT / "fixtures/case-a/source.txt"
+PROJECT_INPUT = Path(os.environ.get("AUTOVIDEO_G2_SOURCE_FILE", ROOT / "fixtures/case-a/source.txt")).expanduser().resolve()
+if not PROJECT_INPUT.is_relative_to(PROJECT):
+    raise RuntimeError("G2 source file must remain inside the project workspace")
 NARRATION_SCHEMA_PATH = ROOT / "schemas/narration-plan.schema.json"
 STORYBOARD_SCHEMA_PATH = ROOT / "schemas/storyboard-plan.schema.json"
 REGISTRY_PATH = PROJECT / "schemas/component-registry-v0.2.json"
@@ -49,8 +57,12 @@ CHROME = Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
 KOKORO_MODEL = PROJECT / "g0/assets/kokoro-v1.0.onnx"
 KOKORO_VOICES = PROJECT / "g0/assets/voices-v1.0.bin"
 
-RUN_ID = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-RUN_ROOT = ROOT / "runs" / RUN_ID
+RUN_ID = os.environ.get("AUTOVIDEO_G2_RUN_ID") or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+if not re.fullmatch(r"[A-Za-z0-9_-]{1,96}", RUN_ID):
+    raise RuntimeError("AUTOVIDEO_G2_RUN_ID contains unsupported characters")
+RUN_ROOT = Path(os.environ.get("AUTOVIDEO_G2_RUN_DIR", ROOT / "runs" / RUN_ID)).expanduser().resolve()
+if not RUN_ROOT.is_relative_to(PROJECT):
+    raise RuntimeError("G2 run directory must remain inside the project workspace")
 FIXTURE_ROOT = RUN_ROOT / "fixtures"
 ASSETS = FIXTURE_ROOT / "assets"
 SEGMENTS_DIR = ASSETS / "segments"
@@ -58,7 +70,8 @@ ARTIFACTS = RUN_ROOT / "artifacts"
 CALLS_DIR = ARTIFACTS / "llm_calls"
 LOGS = RUN_ROOT / "logs"
 IR_PATH = FIXTURE_ROOT / "case-a.video-ir.json"
-VIDEO_PATH = ARTIFACTS / "G2_CaseA_通信噪声.mp4"
+VIDEO_FILENAME = "G2_自动生成.mp4" if os.environ.get("AUTOVIDEO_G2_SOURCE_FILE") else "G2_CaseA_通信噪声.mp4"
+VIDEO_PATH = ARTIFACTS / VIDEO_FILENAME
 COMMANDS_PATH = LOGS / "commands.jsonl"
 CALL_RECORDS: list[dict] = []
 
@@ -124,7 +137,7 @@ def build_narration_messages(source_text: str | dict, correction: str | None = N
         "不要加入标题朗读，句间不需要标注停顿。严格遵循随输入提供的 JSON Schema，只返回 JSON。"
         "JSON 输出结构示例：{\"title\":\"标题\",\"core_message\":\"中心信息\",\"necessary_points\":[{\"point\":\"知识点\",\"source_quotes\":[\"原文片段\"]},{\"point\":\"知识点\",\"source_quotes\":[\"原文片段\"]}],\"omissions\":[\"舍弃说明\"],\"ambiguities\":[\"歧义说明\"],\"segments\":[{\"id\":\"n1\",\"text\":\"旁白短句\",\"source_quotes\":[\"原文片段\"]}] }"
     )
-    payload = {"language": "zh-CN", "audience": "普通成年人", "target_duration_seconds": [10, 20],
+    payload = {"language": "zh-CN", "audience": "普通成年人", "target_duration_seconds": list(TARGET_DURATION_RANGE),
                "target_total_characters": [60, 80],
                "source_text_as_untrusted_data": source_text,
                "required_output_schema": _schema(NARRATION_SCHEMA_PATH)}
@@ -135,7 +148,7 @@ def build_narration_messages(source_text: str | dict, correction: str | None = N
             payload["previous_plan_to_revise"] = context["current_plan"]
             payload["measured_duration_seconds"] = context.get("measured_duration_seconds")
             payload["revision_target"] = context.get("revision_target")
-            payload["target_duration_seconds"] = [13, 17]
+            payload["target_duration_seconds"] = list(TARGET_DURATION_RANGE)
             payload["target_total_characters"] = [55, 75]
     if correction:
         payload["validation_feedback"] = correction
@@ -163,7 +176,17 @@ def validate_narration_plan(plan: dict, source_text: str) -> None:
         raise G2Fault("UNSAFE_NARRATION_CONTENT", "script/code/remote-link syntax is not allowed in narration")
 
 
-def build_storyboard_messages(plan: dict, correction: str | None = None) -> list[dict[str, str]]:
+def is_case_a_source(source_text: str) -> bool:
+    return all(term in source_text for term in ("噪声", "发送端", "通信信道", "接收端"))
+
+
+def build_storyboard_messages(context: dict, correction: str | None = None) -> list[dict[str, str]]:
+    if "narration_plan" in context:
+        plan = context["narration_plan"]
+        case_a = bool(context.get("case_a"))
+    else:
+        plan = context
+        case_a = True
     registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
     catalog = {name: {"actions": entry["actions"], "props_schema": json.loads((COMPONENT_SCHEMA_DIR / entry["props_schema"].split("/", 1)[1]).read_text(encoding="utf-8"))}
                for name, entry in registry["components"].items()}
@@ -174,13 +197,24 @@ def build_storyboard_messages(plan: dict, correction: str | None = None) -> list
         "只能选给定目录中的组件、动作与目标；props 必须符合对应 schema。不得写 JavaScript、HTML、CSS、URL、坐标或绝对毫秒时间。"
         "target_id 必须对应当前场景 props 中真实存在的元素；line:N 和 bar:N 使用从 0 开始的数组下标，例如第一行是 line:0。"
         "每个旁白段必须恰好出现在一个场景中，按原顺序完整覆盖，并严格按输入给出的三个 segment groups 分配。"
-        "首尾场景各恰好一个 reveal scene beat；中间 flow_diagram 场景恰好三个 beats：reveal scene、activate_path、mark_disrupted。"
-        "路径启动绑定中间组第一个短语 start、offset_ms 500；信道受扰绑定中间组最后一个短语 start、offset_ms 0。"
-        "所有 offset_ms 必须在 -1000 到 1000 之间。概念是噪声可能干扰信号，但不代表每次传输都出错。"
-        "画面说明发送端、信道、接收端；不要把概念示意说成真实数据。purpose、viewer_understands、before、after 各写一句短语，尽量不超过 30 个汉字。"
+        "首尾场景各用一个 reveal scene beat；中间场景用 1 到 3 个 beats 表现与讲解内容直接相关的可见变化。"
+        "所有 offset_ms 必须在 -1000 到 1000 之间。不要添加来源材料未支持的结论、数字或现实示例。"
+        "purpose、viewer_understands、before、after 各写一句短语，尽量不超过 30 个汉字。"
+    )
+    if case_a:
+        system += (
+            "本例主题是通信噪声：中间场景必须用 flow_diagram 清楚呈现发送端、信道和接收端，"
+            "恰好三条 beat：reveal scene、activate_path（中间组第一个短语 start +500ms）、"
+            "mark_disrupted（中间组最后一个短语 start +0ms）。不要把概念示意说成真实数据。"
+        )
+    else:
+        system += "根据中心信息选最合适的已注册组件解释概念；中间场景应呈现一个可理解的过程、对照或数量关系。"
+    system += (
         "只返回符合 schema 的 JSON。JSON 输出结构示例：{\"scenes\":[{\"id\":\"opening\",\"component\":\"title_card\",\"props\":{\"title\":\"标题\"},\"narration_segment_ids\":[\"n1\"],\"purpose\":\"解释目的\",\"visual_intent\":{\"viewer_understands\":\"观众理解\",\"before\":\"动作前状态\",\"after\":\"动作后状态\"},\"beats\":[{\"id\":\"show_title\",\"action\":\"reveal\",\"target_id\":\"scene\",\"trigger\":{\"segment_id\":\"n1\",\"boundary\":\"start\",\"offset_ms\":0}}]}]}"
     )
-    payload = {"narration_plan": plan, "case": "A: 通信噪声概念机制", "expected_scene_segment_groups": scene_groups,
+    payload = {"narration_plan": plan,
+               "case": "A: 通信噪声概念机制" if case_a else plan["core_message"],
+               "expected_scene_segment_groups": scene_groups,
                "component_catalog_and_props_schemas": catalog,
                "required_output_schema": _schema(STORYBOARD_SCHEMA_PATH)}
     if correction:
@@ -189,7 +223,13 @@ def build_storyboard_messages(plan: dict, correction: str | None = None) -> list
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
-def validate_storyboard_plan(board: dict, narration: dict) -> None:
+def validate_storyboard_plan(board: dict, context: dict) -> None:
+    if "narration_plan" in context:
+        narration = context["narration_plan"]
+        require_case_a = bool(context.get("case_a"))
+    else:
+        narration = context
+        require_case_a = True
     errors = _schema_errors(_schema(STORYBOARD_SCHEMA_PATH), board)
     if errors:
         raise G2Fault("INVALID_STORYBOARD_SCHEMA", "; ".join(errors[:4]))
@@ -216,14 +256,15 @@ def validate_storyboard_plan(board: dict, narration: dict) -> None:
                               f"existing target_id values for this component include: {', '.join(valid_targets)}") from exc
     if len(set(beat_ids)) != len(beat_ids):
         raise G2Fault("DUPLICATE_BEAT_ID", "beat IDs must be unique across scenes")
-    required_actions = {"activate_path", "mark_disrupted"}
-    flow_actions = {beat["action"] for scene in board["scenes"] if scene["component"] == "flow_diagram" for beat in scene["beats"]}
-    if not required_actions.issubset(flow_actions):
-        raise G2Fault("MISSING_CASE_A_STATE_CHANGE", "flow diagram must activate a path and visibly mark a disrupted edge")
-    flow_nodes = [node["label"] for scene in board["scenes"] if scene["component"] == "flow_diagram" for node in scene["props"].get("nodes", [])]
-    flow_text = " ".join(flow_nodes)
-    if not all(word in flow_text for word in ("发送", "信道", "接收")):
-        raise G2Fault("INCOMPLETE_COMMUNICATION_FLOW", "flow diagram must identify sender, channel, and receiver")
+    if require_case_a:
+        required_actions = {"activate_path", "mark_disrupted"}
+        flow_actions = {beat["action"] for scene in board["scenes"] if scene["component"] == "flow_diagram" for beat in scene["beats"]}
+        if not required_actions.issubset(flow_actions):
+            raise G2Fault("MISSING_CASE_A_STATE_CHANGE", "flow diagram must activate a path and visibly mark a disrupted edge")
+        flow_nodes = [node["label"] for scene in board["scenes"] if scene["component"] == "flow_diagram" for node in scene["props"].get("nodes", [])]
+        flow_text = " ".join(flow_nodes)
+        if not all(word in flow_text for word in ("发送", "信道", "接收")):
+            raise G2Fault("INCOMPLETE_COMMUNICATION_FLOW", "flow diagram must identify sender, channel, and receiver")
 
 
 def _existing_component_targets(component: str, props: dict) -> list[str]:
@@ -305,8 +346,8 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
               "peak_uncached_cost_upper_bound_usd": round(cost_upper_bound, 8),
               "pricing_snapshot": {"input_uncached_peak_usd_per_million": 0.30, "output_peak_usd_per_million": 1.20,
                                    "source": "https://api-docs.deepseek.com/quick_start/pricing/", "as_of": "2026-10-13"},
-              "request_file": str(request_path.relative_to(ROOT)),
-              "response_file": str(response_path.relative_to(ROOT)),
+              "request_file": str(request_path.relative_to(PROJECT)),
+              "response_file": str(response_path.relative_to(PROJECT)),
               "cloud_api_cost_estimate_usd": round(cost_upper_bound, 8),
               "local_compute_cost": "not applicable",
               "reasoning_content_saved": False}
@@ -350,7 +391,7 @@ def generate_validated_plan(stage: str, source_builder, schema_path: Path, valid
 
 def narration_stage() -> dict:
     source = PROJECT_INPUT.read_text(encoding="utf-8").strip()
-    write_json(ARTIFACTS / "input.json", {"case_id": "A", "language": "zh-CN", "source_text": source,
+    write_json(ARTIFACTS / "input.json", {"case_id": "A" if is_case_a_source(source) else "custom", "language": "zh-CN", "source_text": source,
                "source_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(), "human_authored_narration": False,
                "human_authored_storyboard": False, "human_authored_video_ir": False})
     plan = generate_validated_plan("narration", build_narration_messages, NARRATION_SCHEMA_PATH,
@@ -381,12 +422,12 @@ def fit_voiceover_to_duration(initial_plan: dict) -> tuple[dict, dict]:
             source = PROJECT_INPUT.read_text(encoding="utf-8").strip()
             context = {"source_text": source, "current_plan": plan,
                        "measured_duration_seconds": str(exc),
-                       "revision_target": "请据实测时长缩短或扩展旁白，使 Kokoro 实测配音在 13–17 秒，约 55–75 个汉字；保留全部关键事实并继续引用素材原句。"}
+                       "revision_target": f"请据实测时长缩短或扩展旁白，使 Kokoro 实测配音在 {TARGET_DURATION_RANGE[0]}–{TARGET_DURATION_RANGE[1]} 秒；保留全部关键事实并继续引用素材原句。"}
             revision_stage = f"narration-revision-{revision + 1:02d}"
             write_json(ARTIFACTS / f"{revision_stage}-input-plan.json", plan)
             plan = generate_validated_plan(revision_stage, build_narration_messages, NARRATION_SCHEMA_PATH,
                                            lambda value, ctx: validate_narration_plan(value, ctx["source_text"]), context)
-    raise G2Fault("TTS_DURATION_OUT_OF_RANGE", "measured duration remained outside 10–20s after two model revisions")
+    raise G2Fault("TTS_DURATION_OUT_OF_RANGE", f"measured duration remained outside {TARGET_DURATION_RANGE[0]}–{TARGET_DURATION_RANGE[1]}s after two model revisions")
 
 
 def synthesize_and_align(plan: dict) -> dict:
@@ -426,7 +467,7 @@ def synthesize_and_align(plan: dict) -> dict:
                      "end_sample": cursor + min(len(samples), int(active[-1]) + guard),
                      "utterance_start_sample": cursor, "utterance_end_sample": cursor + len(samples),
                      "speech_first_sample": int(active[0]), "speech_last_sample": int(active[-1]),
-                     "sample_rate": SAMPLE_RATE, "voice": VOICE, "wav": str(segment_path.relative_to(ROOT))})
+                     "sample_rate": SAMPLE_RATE, "voice": VOICE, "wav": str(segment_path.relative_to(PROJECT))})
         chunks.append(samples)
         cursor += len(samples)
         if index < len(plan["segments"]) - 1:
@@ -438,7 +479,7 @@ def synthesize_and_align(plan: dict) -> dict:
     audio = np.pad(audio, (0, total_frames * (SAMPLE_RATE // FPS) - len(audio)))
     duration_seconds = len(audio) / SAMPLE_RATE
     if not 10 <= duration_seconds <= 20:
-        raise G2Fault("TTS_DURATION_OUT_OF_RANGE", f"measured TTS timeline is {duration_seconds:.3f}s; expected 10–20s")
+        raise G2Fault("TTS_DURATION_OUT_OF_RANGE", f"measured TTS timeline is {duration_seconds:.3f}s; expected {TARGET_DURATION_RANGE[0]}–{TARGET_DURATION_RANGE[1]}s")
     duration_ms = (total_frames * 1000 + FPS // 2) // FPS
     audio_path = ASSETS / "communications_noise.wav"
     sf.write(audio_path, audio, SAMPLE_RATE, subtype="PCM_16")
@@ -531,7 +572,7 @@ def _run_fixed_command(label: str, argv: list[str | Path], cwd: Path, timeout: i
     output_path.write_text(output, encoding="utf-8")
     item = {"time_utc": datetime.now(timezone.utc).isoformat(), "label": label, "argv": args,
             "cwd": str(cwd), "exit_code": result.returncode, "elapsed_seconds": round(time.monotonic() - started, 3),
-            "output": str(output_path.relative_to(ROOT))}
+            "output": str(output_path.relative_to(PROJECT))}
     append_log(COMMANDS_PATH, item)
     if result.returncode:
         raise G2Fault("COMMAND_FAILED", f"{label} exited {result.returncode}; see {output_path}")
@@ -643,7 +684,7 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
             y = index * (height + 34) + 28
             sheet.paste(image, (col * width, y))
             draw.text((col * width + 12, index * (height + 34) + 4), f"{scene['id']} · frame {frame}", font=font, fill="#F3F6FC")
-            samples.append({"scene_id": scene["id"], "frame": frame, "file": str(image_path.relative_to(ROOT))})
+            samples.append({"scene_id": scene["id"], "frame": frame, "file": str(image_path.relative_to(PROJECT))})
     sheet.save(ARTIFACTS / "contact-sheet.jpg", quality=90)
     qa = {"status": "PASS", "gate": "G2", "real_llm": True, "real_tts": True, "mock_calls": 0,
           "model": MODEL, "llm_call_count": len(CALL_RECORDS), "video": {"codec": video["codec_name"], "width": video["width"],
@@ -676,7 +717,7 @@ def write_manifest() -> None:
             continue
         for path in sorted(base.rglob("*")):
             if path.is_file() and not path.is_symlink() and path.name != "manifest.json":
-                files.append({"path": str(path.relative_to(ROOT)), "bytes": path.stat().st_size, "sha256": digest(path)})
+                files.append({"path": str(path.relative_to(PROJECT)), "bytes": path.stat().st_size, "sha256": digest(path)})
     write_json(ARTIFACTS / "manifest.json", {"run_id": RUN_ID, "created_utc": datetime.now(timezone.utc).isoformat(), "files": files})
 
 
@@ -702,11 +743,14 @@ def run_step(label: str, fn, *args):
 def run_all() -> dict:
     RUN_ROOT.mkdir(parents=True, exist_ok=False)
     (ARTIFACTS / "llm_calls").mkdir(parents=True)
+    source = PROJECT_INPUT.read_text(encoding="utf-8").strip()
+    storyboard_context = {"narration_plan": None, "case_a": is_case_a_source(source)}
     print(f"G2 run {RUN_ID}; model={MODEL}; provider=DeepSeek API", flush=True)
     narration = run_step("narration-plan", narration_stage)
     narration, alignment = run_step("tts-and-align", fit_voiceover_to_duration, narration)
+    storyboard_context["narration_plan"] = narration
     board = run_step("storyboard-plan", generate_validated_plan, "storyboard", build_storyboard_messages,
-                     STORYBOARD_SCHEMA_PATH, validate_storyboard_plan, narration)
+                     STORYBOARD_SCHEMA_PATH, validate_storyboard_plan, storyboard_context)
     compiled = run_step("compile-ir", validate_compile_stage, narration, board, alignment)
     run_step("render", render, compiled)
     qa = run_step("verify-media", verify_media, compiled, alignment)

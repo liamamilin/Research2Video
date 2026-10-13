@@ -92,6 +92,23 @@ def test_storyboard_prompt_uses_compact_phrase_groups_and_bounded_offsets():
     assert "offset_ms 必须在 -1000 到 1000 之间" in messages[0]["content"]
 
 
+def test_storyboard_prompt_and_validator_support_non_case_a_topics():
+    _, narration = sample_narration()
+    context = {"narration_plan": narration, "case_a": False}
+    messages = build_storyboard_messages(context)
+    payload = json.loads(messages[1]["content"].split("\n", 1)[1])
+    assert payload["case"] == narration["core_message"]
+    assert "最合适的已注册组件" in messages[0]["content"]
+
+    board = sample_storyboard(narration)
+    middle = board["scenes"][1]
+    middle["component"] = "concept_reveal"
+    middle["props"] = {"title": "过程机制", "lines": ["演示状态变化"]}
+    middle["beats"] = [{"id": "reveal_process", "action": "reveal", "target_id": "scene",
+                        "trigger": {"segment_id": "n2", "boundary": "start", "offset_ms": 0}}]
+    validate_storyboard_plan(board, context)
+
+
 def test_api_key_loader_reads_local_env_without_printing_it(tmp_path, monkeypatch):
     env_file = tmp_path / ".env"
     env_file.write_text("# local only\nDEEPSEEK_API_KEY='test-key-value'\n", encoding="utf-8")
