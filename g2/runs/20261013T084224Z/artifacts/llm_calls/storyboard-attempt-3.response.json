@@ -1,0 +1,31 @@
+{
+  "id": "bd761820-e6db-4451-83e1-9045ba4d89ed",
+  "object": "chat.completion",
+  "created": 1791881020,
+  "model": "deepseek-flash",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"scenes\":[{\"id\":\"path_setup\",\"component\":\"flow_diagram\",\"props\":{\"nodes\":[{\"id\":\"sender\",\"label\":\"发送端\"},{\"id\":\"channel\",\"label\":\"通信信道\"},{\"id\":\"receiver\",\"label\":\"接收端\"}],\"edges\":[{\"id\":\"sender_channel\",\"from\":\"sender\",\"to\":\"channel\"},{\"id\":\"channel_receiver\",\"from\":\"channel\",\"to\":\"receiver\"}],\"paths\":[{\"id\":\"main_path\",\"edge_ids\":[\"sender_channel\",\"channel_receiver\"]}]},\"narration_segment_ids\":[\"n1\"],\"purpose\":\"用发送端、通信信道、接收端建立基本传输路径，并启动主路径。\",\"visual_intent\":{\"viewer_understands\":\"信息从发送端经过通信信道到达接收端。\",\"before\":\"画面只有空白场景，传输路径尚未出现。\",\"after\":\"发送端、通信信道、接收端依次出现，主路径被激活。\"},\"beats\":[{\"id\":\"show_scene\",\"action\":\"reveal\",\"target_id\":\"scene\",\"trigger\":{\"segment_id\":\"n1\",\"boundary\":\"start\",\"offset_ms\":0}},{\"id\":\"show_sender\",\"action\":\"reveal\",\"target_id\":\"node:sender\",\"trigger\":{\"segment_id\":\"n1\",\"boundary\":\"start\",\"offset_ms\":0}},{\"id\":\"show_channel\",\"action\":\"reveal\",\"target_id\":\"node:channel\",\"trigger\":{\"segment_id\":\"n1\",\"boundary\":\"start\",\"offset_ms\":0}},{\"id\":\"show_receiver\",\"action\":\"reveal\",\"target_id\":\"node:receiver\",\"trigger\":{\"segment_id\":\"n1\",\"boundary\":\"start\",\"offset_ms\":0}},{\"id\":\"show_sender_edge\",\"action\":\"reveal\",\"target_id\":\"edge:sender_channel\",\"trigger\":{\"segment_id\":\"n1\",\"boundary\":\"start\",\"offset_ms\":500}},{\"id\":\"show_receiver_edge\",\"action\":\"reveal\",\"target_id\":\"edge:channel_receiver\",\"trigger\":{\"segment_id\":\"n1\",\"boundary\":\"start\",\"offset_ms\":500}},{\"id\":\"activate_main_path\",\"action\":\"activate_path\",\"target_id\":\"path:main_path\",\"trigger\":{\"segment_id\":\"n1\",\"boundary\":\"start\",\"offset_ms\":800}}]},{\"id\":\"noise_interference\",\"component\":\"flow_diagram\",\"props\":{\"nodes\":[{\"id\":\"sender\",\"label\":\"发送端\"},{\"id\":\"channel\",\"label\":\"通信信道\"},{\"id\":\"receiver\",\"label\":\"接收端\"},{\"id\":\"noise\",\"label\":\"噪声\"}],\"edges\":[{\"id\":\"sender_channel\",\"from\":\"sender\",\"to\":\"channel\"},{\"id\":\"channel_receiver\",\"from\":\"channel\",\"to\":\"receiver\"},{\"id\":\"noise_channel\",\"from\":\"noise\",\"to\":\"channel\"}],\"paths\":[{\"id\":\"main_path\",\"edge_ids\":[\"sender_channel\",\"channel_receiver\"]}]},\"narration_segment_ids\":[\"n2\"],\"purpose\":\"引入噪声节点及其对通信信道的干扰，并让信道受扰状态可见。\",\"visual_intent\":{\"viewer_understands\":\"通信噪声是传输过程中对信号的干扰。\",\"before\":\"已有发送端、通信信道、接收端和主路径，信道未受扰。\",\"after\":\"噪声"
+      },
+      "logprobs": null,
+      "finish_reason": "length"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 3338,
+    "completion_tokens": 4096,
+    "total_tokens": 7434,
+    "prompt_tokens_details": {
+      "cached_tokens": 3200
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 3414
+    },
+    "prompt_cache_hit_tokens": 3200,
+    "prompt_cache_miss_tokens": 138
+  },
+  "system_fingerprint": "aeb56401ca74e127821c4f9126dcb669"
+}

@@ -1,0 +1,55 @@
+{
+  "source_sha256": "f5ec46305659c660c922a61fc20975cdf6f43f9bc2244ca7e362f2ca439bf432",
+  "necessary_points": [
+    {
+      "point": "发送端通过通信信道把信息传给接收端。",
+      "source_quotes": [
+        "发送端通过通信信道把信息传给接收端。"
+      ]
+    },
+    {
+      "point": "通信噪声是传输过程中对信号产生的干扰。",
+      "source_quotes": [
+        "通信噪声是传输过程中对信号产生的干扰。"
+      ]
+    },
+    {
+      "point": "噪声影响后，接收端收到的信息可能与发送端不同；噪声带来差错的可能性，但不表示每次传输都会出错。",
+      "source_quotes": [
+        "受到噪声影响后，接收端收到的信息可能与发送端发出的信息不同。",
+        "噪声带来差错的可能性，但不表示每次传输都会出错。"
+      ]
+    }
+  ],
+  "narration_segments": [
+    {
+      "segment_id": "n1",
+      "text": "发送端通过通信信道把信息传给接收端。",
+      "source_quotes": [
+        "发送端通过通信信道把信息传给接收端。"
+      ]
+    },
+    {
+      "segment_id": "n2",
+      "text": "通信噪声是传输过程中对信号产生的干扰。",
+      "source_quotes": [
+        "通信噪声是传输过程中对信号产生的干扰。"
+      ]
+    },
+    {
+      "segment_id": "n3",
+      "text": "接收端收到的信息可能与发送端不同。",
+      "source_quotes": [
+        "受到噪声影响后，接收端收到的信息可能与发送端发出的信息不同。"
+      ]
+    },
+    {
+      "segment_id": "n4",
+      "text": "噪声可能带来差错，但并非每次传输都出错。",
+      "source_quotes": [
+        "噪声带来差错的可能性，但不表示每次传输都会出错。"
+      ]
+    }
+  ],
+  "faithfulness_method": "exact source quote provenance plus local manual review; no independent semantic evaluator"
+}

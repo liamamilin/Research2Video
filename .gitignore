@@ -1,4 +1,7 @@
 .DS_Store
+.env
+.env.*
+!.env.example
 __pycache__/
 .pytest_cache/
 g0/.venv/
@@ -13,4 +16,6 @@ g0/assets/*.onnx
 g0/assets/*.bin
 g1/renderer/node_modules
 g1/renderer/.cache/
+g2/renderer/node_modules
+g2/renderer/.cache/
 g1/logs/attempt-*/
