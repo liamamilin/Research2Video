@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import shutil
 
+from g2.draw_things import probe_draw_things
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 G2_ROOT = PROJECT_ROOT / "g2"
@@ -42,8 +44,12 @@ def probe_config(settings: Settings) -> dict:
     renderer_ready = (node_ready and settings.ffmpeg.is_file() and settings.ffprobe.is_file()
                       and settings.chrome.is_file()
                       and (settings.project_root / "g0/vendor/remotion-audiogram/node_modules").is_dir())
-    checks = {"deepseek": llm_ready, "kokoro_zh": tts_ready, "remotion_renderer": renderer_ready}
+    draw_things = probe_draw_things()
+    checks = {"deepseek": llm_ready, "kokoro_zh": tts_ready, "remotion_renderer": renderer_ready,
+              "draw_things": draw_things["ready"]}
     blockers = [f"{name.upper()}_NOT_CONFIGURED" for name, ready in checks.items() if not ready]
+    blockers = [item for item in blockers if item != "DRAW_THINGS_NOT_CONFIGURED"]
     return {"ready": not blockers, "provider": "DeepSeek API", "model": "deepseek-flash",
             "target_duration_seconds": [10, 20], "checks": checks, "blockers": blockers,
+            "draw_things": draw_things,
             "api_key_value_exposed": False}

@@ -29,6 +29,7 @@ class CreateJobRequest(BaseModel):
     target_duration_sec: int = Field(default=18, ge=10, le=20)
     theme: Literal["minimal_dark"] = "minimal_dark"
     voice_id: Literal["zf_xiaoxiao"] = "zf_xiaoxiao"
+    use_draw_things: bool = False
 
     @field_validator("source_text")
     @classmethod
@@ -92,6 +93,9 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
         readiness = preflight(settings)
         if not readiness.get("ready"):
             raise _error(503, "CONFIG_NOT_READY", "服务配置未完成；请检查 DeepSeek key、Kokoro 与渲染依赖。")
+        if request.use_draw_things and not readiness.get("checks", {}).get("draw_things"):
+            raise _error(503, "DRAW_THINGS_NOT_READY",
+                         "Draw Things 本地 HTTP API 尚未连接；请在 Draw Things「设置 → 高级」开启 HTTP API 服务器后重试。")
         job_id = str(uuid4())
         title = request.title or "".join(request.source_text.split())[:28] or "未命名视频"
         payload = request.model_dump()

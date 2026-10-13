@@ -11,7 +11,7 @@ from typing import Iterator
 from uuid import UUID
 
 
-STAGES = ("PLAN", "VOICE_ALIGN", "STORYBOARD", "BUILD_IR", "RENDER", "QUALITY_CHECK")
+STAGES = ("PLAN", "VOICE_ALIGN", "STORYBOARD", "SCENE_IMAGES", "BUILD_IR", "RENDER", "QUALITY_CHECK")
 TERMINAL_STATES = {"COMPLETED", "FAILED", "CANCELLED"}
 
 
@@ -206,7 +206,7 @@ class JobStore:
             if old is None:
                 return
             started_at = old["started_at"] or (now if status == "RUNNING" else None)
-            completed_at = now if status in {"SUCCEEDED", "FAILED", "CANCELLED", "INTERRUPTED"} else None
+            completed_at = now if status in {"SUCCEEDED", "SKIPPED", "FAILED", "CANCELLED", "INTERRUPTED"} else None
             conn.execute("""UPDATE stages SET status=?,started_at=?,completed_at=?,duration_seconds=?,
                 error_code=?,error_message=? WHERE job_id=? AND attempt_no=? AND stage=?""",
                 (status, started_at, completed_at, duration_seconds, error_code, error_message,

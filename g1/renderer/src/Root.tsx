@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, Audio, Composition, interpolate, staticFile, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
 type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]};
@@ -128,20 +128,28 @@ function SceneVisual({scene, frame}: {scene: Scene; frame: number}) {
   }
 }
 
-function Video({ir}: {ir: Timeline}) {
+function Video({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: Record<string, string>}) {
   const frame = useCurrentFrame();
   const scene = ir.scenes.find((candidate) => frame >= candidate.start_frame && frame < candidate.end_frame) ?? ir.scenes[ir.scenes.length-1];
+  const backdropPath = sceneBackdrops[scene.id];
+  const safeBackdrop = typeof backdropPath === 'string' && /^assets\/scene-backgrounds\/scene-\d{2}\.png$/.test(backdropPath)
+    ? staticFile(backdropPath) : null;
+  const sceneProgress = (frame - scene.start_frame) / Math.max(1, scene.end_frame - scene.start_frame - 1);
+  const zoom = interpolate(sceneProgress, [0, 1], [1.035, 1.095], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const panX = interpolate(sceneProgress, [0, 1], [10, -10], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const caption = ir.narration.segments.find((s) => {
     const start = Math.floor((s.start_ms*ir.video.fps+500)/1000), end = Math.floor((s.end_ms*ir.video.fps+500)/1000);
     return frame >= start && frame < end;
   });
   return <AbsoluteFill style={{backgroundColor: colors.bg, color: colors.text, fontFamily: font}}>
-    <AbsoluteFill><div style={{position: 'absolute', left: 80, top: 54, color: colors.cyan, fontSize: 24, letterSpacing: 2}}>AUTOVIDEO　/　G1 · Video IR 0.2</div><div style={{position: 'absolute', right: 82, top: 56, color: colors.muted, fontSize: 22}}>知识动画　·　真实中文旁白</div><SceneVisual scene={scene} frame={frame}/></AbsoluteFill>
-    <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92, pointerEvents: 'none'}}>{caption && <div style={{minWidth: 320, maxWidth: 1680, minHeight: 72, padding: '13px 28px', borderRadius: 18, background: 'rgba(5,10,19,.88)', border: `1px solid ${colors.border}`, color: colors.text, textAlign: 'center', fontSize: 38, lineHeight: 1.4, boxSizing: 'border-box'}}>{caption.text}</div>}</AbsoluteFill>
+    {safeBackdrop && <Img src={safeBackdrop} style={{position: 'absolute', zIndex: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.82, transformOrigin: 'center', transform: `translateX(${panX}px) scale(${zoom})`}}/>}
+    {safeBackdrop && <AbsoluteFill style={{zIndex: 1, background: 'linear-gradient(90deg, rgba(5,10,19,.42), rgba(5,10,19,.24) 50%, rgba(5,10,19,.42)), linear-gradient(0deg, rgba(5,10,19,.66), rgba(5,10,19,.12) 48%, rgba(5,10,19,.38)'}}/>}
+    <AbsoluteFill style={{zIndex: 2}}><div style={{position: 'absolute', left: 80, top: 54, color: colors.cyan, fontSize: 24, letterSpacing: 2}}>AUTOVIDEO　/　G1 · Video IR 0.2</div><div style={{position: 'absolute', right: 82, top: 56, color: colors.muted, fontSize: 22}}>知识动画　·　真实中文旁白</div><SceneVisual scene={scene} frame={frame}/></AbsoluteFill>
+    <AbsoluteFill style={{zIndex: 3, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92, pointerEvents: 'none'}}>{caption && <div style={{minWidth: 320, maxWidth: 1680, minHeight: 72, padding: '13px 28px', borderRadius: 18, background: 'rgba(5,10,19,.88)', border: `1px solid ${colors.border}`, color: colors.text, textAlign: 'center', fontSize: 38, lineHeight: 1.4, boxSizing: 'border-box'}}>{caption.text}</div>}</AbsoluteFill>
     <Audio src={staticFile(ir.audio_public_file)} volume={Math.pow(10, 0/20)}/>
   </AbsoluteFill>;
 }
 
 const defaults: Timeline = {schema_version:'0.2', video:{title:'G1',width:1920,height:1080,fps:30,duration_ms:1000}, narration:{audio_asset_id:'audio',segments:[]}, scenes:[], total_frames:30, audio_public_file:'assets/communications_noise.wav'};
 
-export const Root: React.FC = () => <Composition id="G1CommunicationNoise" component={Video} defaultProps={{ir: defaults}} width={1920} height={1080} fps={30} durationInFrames={30} calculateMetadata={({props}) => ({durationInFrames: (props as any).ir.total_frames, fps:30, width:1920, height:1080})}/>;
+export const Root: React.FC = () => <Composition id="G1CommunicationNoise" component={Video} defaultProps={{ir: defaults, sceneBackdrops: {}}} width={1920} height={1080} fps={30} durationInFrames={30} calculateMetadata={({props}) => ({durationInFrames: (props as any).ir.total_frames, fps:30, width:1920, height:1080})}/>;

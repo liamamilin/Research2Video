@@ -187,6 +187,27 @@ def test_api_create_and_job_state_survive_app_restart(tmp_path):
         assert reopened.get("/api/jobs").json()["items"][0]["job_id"] == job_id
 
 
+def test_draw_things_backgrounds_are_optional_and_persist_with_the_job(tmp_path):
+    settings = make_settings(tmp_path)
+    base_ready = {"ready": True, "provider": "DeepSeek API", "model": "deepseek-flash",
+                  "blockers": [], "api_key_value_exposed": False}
+    api_off = lambda _settings: {**base_ready, "checks": {"draw_things": False}}
+    with TestClient(create_app(settings, start_worker=False, preflight=api_off)) as client:
+        refused = client.post("/api/jobs", json=request_payload(use_draw_things=True))
+        assert refused.status_code == 503
+        assert refused.json()["detail"]["code"] == "DRAW_THINGS_NOT_READY"
+        assert client.get("/api/jobs").json()["total"] == 0
+        vector_job = client.post("/api/jobs", json=request_payload())
+        assert vector_job.status_code == 202
+
+    api_on = lambda _settings: {**base_ready, "checks": {"draw_things": True}}
+    with TestClient(create_app(settings, start_worker=False, preflight=api_on)) as client:
+        generated_job = client.post("/api/jobs", json=request_payload(use_draw_things=True))
+        assert generated_job.status_code == 202
+        input_path = settings.data_dir / "jobs" / generated_job.json()["job_id"] / "input" / "input.json"
+        assert json.loads(input_path.read_text(encoding="utf-8"))["use_draw_things"] is True
+
+
 def test_api_rejects_out_of_scope_or_malformed_inputs(tmp_path):
     settings = make_settings(tmp_path)
     ready = lambda _settings: {"ready": True, "provider": "DeepSeek API", "model": "deepseek-flash",

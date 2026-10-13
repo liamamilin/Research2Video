@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import './styles.css';
+import './visual.css';
 
 type Status = 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
 type Stage = {stage: string; status: string; duration_seconds?: number; error_message?: string | null};
@@ -12,13 +13,13 @@ type Job = {
   updated_at: string; attempts?: Attempt[];
 };
 type Artifact = {name: string; content_type: string; bytes: number; download_url: string};
-type Config = {ready: boolean; provider: string; model: string; checks: Record<string, boolean>; blockers: string[]};
+type Config = {ready: boolean; provider: string; model: string; checks: Record<string, boolean>; blockers: string[]; draw_things?: {ready: boolean; endpoint: string; error?: string | null}};
 type Page = {kind: 'new'} | {kind: 'jobs'} | {kind: 'job'; id: string};
 
 const DEFAULT_SOURCE = `主题：通信噪声如何影响信息传输。\n事实材料：发送端通过通信信道把信息传给接收端。通信噪声是传输过程中对信号产生的干扰。受到噪声影响后，接收端收到的信息可能与发送端发出的信息不同。噪声带来差错的可能性，但不表示每次传输都会出错。\n表达边界：面向普通成年人，用通俗中文解释发送、信道受扰、接收三个环节。不要增加概率、统计数字、具体设备、未经材料支持的纠错方法或现实案例。可用抽象图形演示信号受到干扰，但要说明这是概念示意。`;
 const STAGES = [
   ['PLAN', '整理讲稿'], ['VOICE_ALIGN', '生成旁白与对齐'], ['STORYBOARD', '规划分镜'],
-  ['BUILD_IR', '校验时间线'], ['RENDER', '渲染动画'], ['QUALITY_CHECK', '检查音视频'],
+  ['SCENE_IMAGES', '生成场景图'], ['BUILD_IR', '校验时间线'], ['RENDER', '渲染动画'], ['QUALITY_CHECK', '检查音视频'],
 ] as const;
 const STATUS_TEXT: Record<Status, string> = {QUEUED: '等待中', RUNNING: '生成中', COMPLETED: '已完成', FAILED: '失败', CANCELLED: '已取消'};
 const STATUS_CLASS: Record<Status, string> = {QUEUED: 'queued', RUNNING: 'running', COMPLETED: 'completed', FAILED: 'failed', CANCELLED: 'cancelled'};
@@ -72,6 +73,8 @@ function App() {
   const [title, setTitle] = useState('通信噪声如何影响信息传输');
   const [source, setSource] = useState(DEFAULT_SOURCE);
   const [duration, setDuration] = useState(18);
+  const [useDrawThings, setUseDrawThings] = useState(true);
+  const [configLoading, setConfigLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [toast, setToast] = useState('');
@@ -79,6 +82,13 @@ function App() {
   const reloadJobs = useCallback(async () => {
     try { const result = await api<{items: Job[]}>('/api/jobs?limit=30'); setJobs(result.items); }
     catch (err) { setError(err instanceof Error ? err.message : '读取任务列表失败'); }
+  }, []);
+
+  const reloadConfig = useCallback(async () => {
+    setConfigLoading(true);
+    try { setConfig(await api<Config>('/api/config/status')); }
+    catch { setConfig(null); }
+    finally { setConfigLoading(false); }
   }, []);
 
   const reloadJob = useCallback(async (id: string) => {
@@ -95,10 +105,10 @@ function App() {
   useEffect(() => {
     const onRoute = () => { setPage(parseRoute()); setError(''); };
     window.addEventListener('hashchange', onRoute);
-    void api<Config>('/api/config/status').then(setConfig).catch(() => setConfig(null));
+    void reloadConfig();
     void reloadJobs();
     return () => window.removeEventListener('hashchange', onRoute);
-  }, [reloadJobs]);
+  }, [reloadConfig, reloadJobs]);
 
   useEffect(() => {
     if (page.kind !== 'job') { setJob(null); setArtifacts([]); return; }
@@ -120,7 +130,7 @@ function App() {
     try {
       const result = await api<{job_id: string}>('/api/jobs', {method: 'POST', body: JSON.stringify({
         title: title.trim() || undefined, source_text: source, target_duration_sec: duration,
-        theme: 'minimal_dark', voice_id: 'zf_xiaoxiao',
+        theme: 'minimal_dark', voice_id: 'zf_xiaoxiao', use_draw_things: useDrawThings,
       })});
       setToast('任务已加入队列'); window.location.hash = `#job/${result.job_id}`;
       await reloadJobs();
@@ -180,11 +190,16 @@ function App() {
                 <div className="setting"><span className="setting-label">视觉主题</span><div className="theme-choice"><span className="theme-swatch"/><span>深色知识图解</span><span className="selected-check"><Icon name="check"/></span></div><small>简洁排版 · 受控组件动画</small></div>
                 <div className="setting"><span className="setting-label">中文旁白</span><div className="voice-choice"><span className="voice-wave">▂▅▃▇▅</span><span>小晓 · 普通话</span><span className="voice-play">▶</span></div><small>本机 Kokoro 语音合成</small></div>
               </div>
-              <div className="privacy-note"><Icon name="shield"/><span>提交后，文本会发送给 DeepSeek API 生成 AI 讲稿与分镜，可能有遗漏或错误，请核对后使用；请勿提交无权外发的内容。配音和渲染在本机完成，任务文件保存在本机。</span></div>
-              <div className="form-footer"><span><i className="secure-dot"/>不会执行模型生成的代码</span><button className="primary-button" type="submit" disabled={loading || !config?.ready || source.trim().length < 50}>{loading ? <><span className="spinner"/>正在创建…</> : <>开始生成 <span className="button-icon"><Icon name="arrow"/></span></>}</button></div>
+              <section className="visual-option">
+                <label className="visual-option-main"><input type="checkbox" checked={useDrawThings} onChange={(event) => setUseDrawThings(event.target.checked)}/><span><strong>使用 Draw Things 本地场景图</strong><small>每个场景生成一张背景图，叠加受控图解与缓慢运镜</small></span><em>本机生成</em></label>
+                <div className={`visual-connection ${config?.draw_things?.ready ? 'connected' : 'disconnected'}`}><span><i/>{config?.draw_things?.ready ? 'Draw Things 已连接 · HTTP 127.0.0.1:7860' : '尚未连接 Draw Things HTTP API'}</span><button type="button" onClick={() => void reloadConfig()} disabled={configLoading}>{configLoading ? '检测中…' : '重新检测'}</button></div>
+                {useDrawThings && !config?.draw_things?.ready && <p className="visual-help">在 Draw Things「设置 → 高级」开启 HTTP API 服务器并选择 HTTP，然后重新检测。关闭此选项仍可生成原有图解动画。</p>}
+              </section>
+              <div className="privacy-note"><Icon name="shield"/><span>提交后，文本会发送给 DeepSeek API 生成 AI 讲稿与分镜，可能有遗漏或错误，请核对后使用；请勿提交无权外发的内容。启用场景图时，只把分镜意图发送给本机 Draw Things；配音、图像和视频渲染均在本机完成。</span></div>
+              <div className="form-footer"><span><i className="secure-dot"/>不会执行模型生成的代码</span><button className="primary-button" type="submit" disabled={loading || !config?.ready || (useDrawThings && !config?.draw_things?.ready) || source.trim().length < 50}>{loading ? <><span className="spinner"/>正在创建…</> : <>开始生成 <span className="button-icon"><Icon name="arrow"/></span></>}</button></div>
             </form>
             <aside className="right-rail">
-              <section className="rail-card preview-card"><div className="rail-title"><span>生成流程</span><span className="live-label"><i/>自动</span></div><div className="flow-preview"><div className="flow-node user-node"><span className="mini-icon">文</span><span>知识素材</span></div><div className="flow-connector"><i/></div><div className="flow-node ai-node"><span className="ai-mini"><Icon name="spark"/></span><span>AI 讲稿</span></div><div className="flow-connector"><i/></div><div className="flow-node voice-node"><span className="mini-wave">▂▅▃</span><span>中文配音</span></div><div className="flow-connector"><i/></div><div className="flow-node video-node"><span className="mini-play">▶</span><span>动画成片</span></div></div><div className="rail-note"><span>约 1–3 分钟</span><i/> 任务可在关闭浏览器后继续运行</div></section>
+              <section className="rail-card preview-card"><div className="rail-title"><span>生成流程</span><span className="live-label"><i/>自动</span></div><div className="flow-preview"><div className="flow-node user-node"><span className="mini-icon">文</span><span>知识素材</span></div><div className="flow-connector"><i/></div><div className="flow-node ai-node"><span className="ai-mini"><Icon name="spark"/></span><span>AI 讲稿</span></div><div className="flow-connector"><i/></div><div className="flow-node voice-node"><span className="mini-wave">▂▅▃</span><span>中文配音</span></div><div className="flow-connector"><i/></div><div className="flow-node video-node"><span className="mini-play">▶</span><span>动画成片</span></div></div><div className="rail-note"><span>{useDrawThings ? '约 3–8 分钟' : '约 1–3 分钟'}</span><i/> 任务可在关闭浏览器后继续运行</div></section>
               <section className="rail-card safety-card"><div className="safety-icon"><Icon name="shield"/></div><div><strong>受控生成</strong><p>文本与模型结果均经过校验。动画由已登记组件绘制，不运行自由生成脚本。</p></div></section>
               <section className="rail-card recent-card"><div className="rail-title"><span>最近任务</span><a href="#jobs">全部 <Icon name="arrow"/></a></div>{jobs.length ? jobs.slice(0, 3).map((item) => <JobRow key={item.job_id} job={item}/>) : <div className="empty-mini">创建第一个任务后，会显示在这里。</div>}</section>
             </aside>
@@ -221,15 +236,15 @@ function JobDetail({job, artifacts, onCancel, onRetry, onRefresh}: {
     <div className="detail-heading"><div><div className="eyebrow"><span className="eyebrow-line"/>生成任务 · {job.job_id.slice(0, 8)}</div><h1>{job.title}</h1><div className="detail-meta"><Badge status={job.status}/><span>创建于 {formatTime(job.created_at)}</span><span>•</span><span>第 {Math.max(1, job.attempt_count)} 次尝试</span>{job.cancel_requested && <span className="cancel-pending">正在停止任务…</span>}</div></div><div className="detail-actions">{job.status === 'RUNNING' && <button className="secondary-button danger-outline" onClick={onCancel}><Icon name="stop"/>取消任务</button>}{job.status === 'FAILED' && job.retryable && <button className="secondary-button" onClick={onRetry}><Icon name="refresh"/>重试</button>}<button className="icon-button" onClick={onRefresh} title="刷新"><Icon name="refresh"/></button></div></div>
     {job.status === 'FAILED' && <div className="alert error detail-error"><strong>{job.error_code || '生成失败'}</strong><span>{job.error_message || '请检查配置后重试。'}</span></div>}
     <div className="detail-grid"><div className="detail-main">
-      {job.status === 'COMPLETED' && video ? <section className="video-card"><div className="video-topline"><span><i className="completed-dot"/>成片已就绪</span><div><a className="download-link" href={video.download_url} download><Icon name="download"/>下载 MP4</a>{srt && <a className="download-link quiet" href={srt.download_url} download><Icon name="download"/>SRT</a>}</div></div><video className="video-player" controls playsInline src={video.download_url}/><div className="video-caption"><span>{job.title}</span><span>H.264 · 1080p · AAC</span></div></section> : <section className={`progress-card ${job.status.toLowerCase()}`}><div className="progress-top"><div><span className="progress-overline">{job.status === 'FAILED' ? '本次尝试未完成' : job.status === 'CANCELLED' ? '任务已取消' : '正在准备你的知识动画'}</span><h2>{job.status === 'QUEUED' ? '任务已加入队列' : job.status === 'RUNNING' ? stageLabel(job.active_stage) : job.status === 'FAILED' ? '暂时没有生成成片' : '你可以随时创建新的任务'}</h2><p>{job.status === 'RUNNING' ? '生成在本机后台持续进行；关闭此页面不会中断任务。' : job.status === 'QUEUED' ? '单 worker 会按顺序安全领取任务。' : job.status === 'FAILED' ? '阶段与错误已经保存；修复配置或素材后可以重试。' : '任务状态已保存到本机。'}</p></div><div className={`progress-orb ${job.status === 'RUNNING' ? 'spinning' : ''}`}><Icon name={job.status === 'COMPLETED' ? 'check' : job.status === 'FAILED' ? 'film' : 'spark'}/></div></div><div className="stage-list">{STAGES.map(([key, label], index) => {const stage = latest?.stages.find((item) => item.stage === key);const current = job.active_stage === key && job.status === 'RUNNING';const done = stage?.status === 'SUCCEEDED';const failed = stage?.status === 'FAILED' || (job.status === 'FAILED' && job.active_stage === key);return <div className={`stage-item ${done ? 'done' : ''} ${current ? 'current' : ''} ${failed ? 'stage-failed' : ''}`} key={key}><span className="stage-check">{done ? <Icon name="check"/> : failed ? '!' : current ? <i/> : String(index + 1).padStart(2, '0')}</span><span className="stage-label">{label}{current && <small>处理中…</small>}</span>{stage?.duration_seconds != null && <small className="stage-duration">{stage.duration_seconds.toFixed(1)}s</small>}</div>;})}</div></section>}
+      {job.status === 'COMPLETED' && video ? <section className="video-card"><div className="video-topline"><span><i className="completed-dot"/>成片已就绪</span><div><a className="download-link" href={video.download_url} download><Icon name="download"/>下载 MP4</a>{srt && <a className="download-link quiet" href={srt.download_url} download><Icon name="download"/>SRT</a>}</div></div><video className="video-player" controls playsInline src={video.download_url}/><div className="video-caption"><span>{job.title}</span><span>H.264 · 1080p · AAC</span></div></section> : <section className={`progress-card ${job.status.toLowerCase()}`}><div className="progress-top"><div><span className="progress-overline">{job.status === 'FAILED' ? '本次尝试未完成' : job.status === 'CANCELLED' ? '任务已取消' : '正在准备你的知识动画'}</span><h2>{job.status === 'QUEUED' ? '任务已加入队列' : job.status === 'RUNNING' ? stageLabel(job.active_stage) : job.status === 'FAILED' ? '暂时没有生成成片' : '你可以随时创建新的任务'}</h2><p>{job.status === 'RUNNING' ? '生成在本机后台持续进行；关闭此页面不会中断任务。' : job.status === 'QUEUED' ? '单 worker 会按顺序安全领取任务。' : job.status === 'FAILED' ? '阶段与错误已经保存；修复配置或素材后可以重试。' : '任务状态已保存到本机。'}</p></div><div className={`progress-orb ${job.status === 'RUNNING' ? 'spinning' : ''}`}><Icon name={job.status === 'COMPLETED' ? 'check' : job.status === 'FAILED' ? 'film' : 'spark'}/></div></div><div className="stage-list">{STAGES.map(([key, label], index) => {const stage = latest?.stages.find((item) => item.stage === key);const current = job.active_stage === key && job.status === 'RUNNING';const done = stage?.status === 'SUCCEEDED';const skipped = stage?.status === 'SKIPPED';const failed = stage?.status === 'FAILED' || (job.status === 'FAILED' && job.active_stage === key);return <div className={`stage-item ${done ? 'done' : ''} ${skipped ? 'stage-skipped' : ''} ${current ? 'current' : ''} ${failed ? 'stage-failed' : ''}`} key={key}><span className="stage-check">{done ? <Icon name="check"/> : skipped ? '—' : failed ? '!' : current ? <i/> : String(index + 1).padStart(2, '0')}</span><span className="stage-label">{label}{current && <small>处理中…</small>}</span>{stage?.duration_seconds != null && <small className="stage-duration">{stage.duration_seconds.toFixed(1)}s</small>}</div>;})}</div></section>}
       {job.status === 'COMPLETED' && <section className="success-summary"><span className="success-check"><Icon name="check"/></span><div><strong>生成与基础检查全部通过</strong><p>任务与制品已保存在本机。重新打开浏览器后仍可继续查看和下载。</p></div></section>}
       {job.status === 'COMPLETED' && <section className="artifact-card"><div className="card-title"><div><h2>交付文件</h2><p>本次生成的可下载产物</p></div><span>{artifacts.length} 个文件</span></div>{artifacts.map((item) => <a className="artifact-row" key={item.name} href={item.download_url} download><span className="artifact-type">{item.name.endsWith('.mp4') ? 'MP4' : item.name.endsWith('.srt') ? 'SRT' : 'JSON'}</span><span><b>{artifactLabel(item.name)}</b><small>{item.name}</small></span><span className="artifact-size">{formatBytes(item.bytes)}</span><Icon name="download"/></a>)}</section>}
       <section className="integrity-card"><div className="integrity-icon"><Icon name="shield"/></div><div><strong>任务状态已持久化</strong><p>SQLite 保存状态与阶段；每次重试使用独立工作区，不覆盖旧尝试。</p></div><span className="hash-short">SHA {job.source_sha256.slice(0, 12)}</span></section>
-    </div><aside className="detail-side"><section className="side-panel"><div className="panel-head"><h3>任务信息</h3><span className="panel-menu">···</span></div><div className="info-line"><span>目标时长</span><b>{job.target_duration_sec} 秒</b></div><div className="info-line"><span>视觉主题</span><b>深色知识图解</b></div><div className="info-line"><span>旁白音色</span><b>小晓 · 普通话</b></div><div className="info-line"><span>素材长度</span><b>{job.source_char_count} 字</b></div><div className="info-line"><span>任务状态</span><Badge status={job.status}/></div></section><section className="side-panel"><div className="panel-head"><h3>处理记录</h3><span>{latest ? `尝试 ${latest.attempt_no}` : '排队中'}</span></div>{latest?.stages.map((stage) => <div className="history-line" key={stage.stage}><span className={`history-dot ${stage.status.toLowerCase()}`}/><span>{stageLabel(stage.stage)}</span><small>{stage.status === 'SUCCEEDED' ? '完成' : stage.status === 'RUNNING' ? '进行中' : stage.status === 'FAILED' || stage.status === 'INTERRUPTED' ? '中断' : '待处理'}</small></div>) || <div className="empty-mini">任务开始后显示阶段状态。</div>}</section>{qa && <a className="report-link" href={qa.download_url}><span className="report-file">✓</span><span><b>基础验收报告</b><small>查看 QA JSON</small></span><Icon name="arrow"/></a>}</aside></div>
+    </div><aside className="detail-side"><section className="side-panel"><div className="panel-head"><h3>任务信息</h3><span className="panel-menu">···</span></div><div className="info-line"><span>目标时长</span><b>{job.target_duration_sec} 秒</b></div><div className="info-line"><span>视觉主题</span><b>深色知识图解</b></div><div className="info-line"><span>旁白音色</span><b>小晓 · 普通话</b></div><div className="info-line"><span>素材长度</span><b>{job.source_char_count} 字</b></div><div className="info-line"><span>任务状态</span><Badge status={job.status}/></div></section><section className="side-panel"><div className="panel-head"><h3>处理记录</h3><span>{latest ? `尝试 ${latest.attempt_no}` : '排队中'}</span></div>{latest?.stages.map((stage) => <div className="history-line" key={stage.stage}><span className={`history-dot ${stage.status.toLowerCase()}`}/><span>{stageLabel(stage.stage)}</span><small>{stage.status === 'SUCCEEDED' ? '完成' : stage.status === 'SKIPPED' ? '已跳过' : stage.status === 'RUNNING' ? '进行中' : stage.status === 'FAILED' || stage.status === 'INTERRUPTED' ? '中断' : '待处理'}</small></div>) || <div className="empty-mini">任务开始后显示阶段状态。</div>}</section>{qa && <a className="report-link" href={qa.download_url}><span className="report-file">✓</span><span><b>基础验收报告</b><small>查看 QA JSON</small></span><Icon name="arrow"/></a>}</aside></div>
   </section>;
 }
 
 function stageLabel(stage: string | null) { return STAGES.find(([key]) => key === stage)?.[1] || '准备生成'; }
-function artifactLabel(name: string) { return ({'video.mp4': '动画视频', 'captions.srt': '中文字幕', 'qa.json': '基础验收报告', 'manifest.json': '制品清单', 'storyboard.json': '分镜计划', 'video-ir.json': 'Video IR', 'model-cost.json': '模型用量', 'execution-log.txt': '执行日志'} as Record<string, string>)[name] || name; }
+function artifactLabel(name: string) { return ({'video.mp4': '动画视频', 'captions.srt': '中文字幕', 'qa.json': '基础验收报告', 'manifest.json': '制品清单', 'storyboard.json': '分镜计划', 'scene-backgrounds.json': '本地场景图记录', 'video-ir.json': 'Video IR', 'model-cost.json': '模型用量', 'execution-log.txt': '执行日志'} as Record<string, string>)[name] || name; }
 
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);

@@ -19,11 +19,12 @@ STEP_TO_STAGE = {
     "narration-plan": "PLAN",
     "tts-and-align": "VOICE_ALIGN",
     "storyboard-plan": "STORYBOARD",
+    "draw-things-backgrounds": "SCENE_IMAGES",
     "compile-ir": "BUILD_IR",
     "render": "RENDER",
     "verify-media": "QUALITY_CHECK",
 }
-STEP_LINE = re.compile(r"^STEP ([a-z0-9-]+): (PASS|FAIL)(?: in ([0-9.]+)s)?")
+STEP_LINE = re.compile(r"^STEP ([a-z0-9-]+): (PASS|FAIL|SKIPPED)(?: in ([0-9.]+)s)?")
 ERROR_LINE = re.compile(r"^G2 FAIL: ([A-Z0-9_]+)(?::\s*(.*))?$")
 
 
@@ -98,6 +99,12 @@ class G2ProcessRunner:
         env["AUTOVIDEO_G2_RUN_ID"] = run_id
         env["AUTOVIDEO_G2_RUN_DIR"] = str(run_dir)
         env["AUTOVIDEO_G2_TARGET_DURATION_SEC"] = str(job["target_duration_sec"])
+        input_path = Path(job["source_abs_path"]).parent / "input.json"
+        try:
+            input_payload = json.loads(input_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            input_payload = {}
+        env["AUTOVIDEO_G2_USE_DRAW_THINGS"] = "1" if input_payload.get("use_draw_things") is True else "0"
         log_path = attempt_root / "worker.log"
         active_stage = "PLAN"
         lines_read = 0
@@ -141,8 +148,9 @@ class G2ProcessRunner:
                             step, result, elapsed = match.groups()
                             stage = STEP_TO_STAGE.get(step)
                             if stage:
-                                if result == "PASS":
-                                    self.store.update_stage(job_id, attempt_no, stage, "SUCCEEDED",
+                                if result in {"PASS", "SKIPPED"}:
+                                    stage_status = "SUCCEEDED" if result == "PASS" else "SKIPPED"
+                                    self.store.update_stage(job_id, attempt_no, stage, stage_status,
                                                             float(elapsed) if elapsed else None)
                                     index = STAGES.index(stage)
                                     if index + 1 < len(STAGES):
@@ -199,6 +207,7 @@ class G2ProcessRunner:
             (qa_path, "qa.json", "application/json"),
             (artifacts_dir / "manifest.json", "manifest.json", "application/json"),
             (artifacts_dir / "storyboard-plan.json", "storyboard.json", "application/json"),
+            (artifacts_dir / "scene-backgrounds.json", "scene-backgrounds.json", "application/json"),
             (run_dir / "fixtures/video-ir-v0.2.json", "video-ir.json", "application/json"),
             (artifacts_dir / "model-cost.json", "model-cost.json", "application/json"),
             (log_path, "execution-log.txt", "text/plain; charset=utf-8"),

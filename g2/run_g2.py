@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parent
 PROJECT = ROOT.parent
 if str(PROJECT) not in sys.path:
     sys.path.insert(0, str(PROJECT))
+from g2.draw_things import generate_scene_backgrounds
 
 MODEL = "deepseek-flash"
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
@@ -616,7 +617,7 @@ def _run_fixed_command(label: str, argv: list[str | Path], cwd: Path, timeout: i
     return output
 
 
-def render(compiled: dict) -> None:
+def render(compiled: dict, scene_backdrops: dict[str, str] | None = None) -> None:
     renderer = ROOT / "renderer"
     src = renderer / "src"
     src.mkdir(parents=True, exist_ok=True)
@@ -632,7 +633,8 @@ def render(compiled: dict) -> None:
     if not dependency_link.exists():
         dependency_link.symlink_to(PROJECT / "g0/vendor/remotion-audiogram/node_modules", target_is_directory=True)
     props_path = ARTIFACTS / "render-props.json"
-    write_json(props_path, {"ir": {**compiled, "audio_public_file": "assets/communications_noise.wav"}})
+    write_json(props_path, {"ir": {**compiled, "audio_public_file": "assets/communications_noise.wav"},
+                            "sceneBackdrops": scene_backdrops or {}})
     argv = [NODE, CLI, "render", "src/index.ts", "G2CommunicationNoise", VIDEO_PATH,
             f"--props={props_path}", f"--public-dir={FIXTURE_ROOT}", "--width=1920", "--height=1080", "--fps=30",
             f"--duration={compiled['total_frames']}", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p",
@@ -777,6 +779,13 @@ def run_step(label: str, fn, *args):
     return result
 
 
+def skip_step(label: str, reason: str) -> None:
+    append_log(COMMANDS_PATH, {"time_utc": datetime.now(timezone.utc).isoformat(), "label": label,
+                "argv": [str(PYTHON), "-u", "g2/run_g2.py", label], "cwd": str(PROJECT),
+                "exit_code": 0, "status": "SKIPPED", "reason": reason})
+    print(f"STEP {label}: SKIPPED ({reason})", flush=True)
+
+
 def run_all() -> dict:
     RUN_ROOT.mkdir(parents=True, exist_ok=False)
     (ARTIFACTS / "llm_calls").mkdir(parents=True)
@@ -788,8 +797,14 @@ def run_all() -> dict:
     storyboard_context["narration_plan"] = narration
     board = run_step("storyboard-plan", generate_validated_plan, "storyboard", build_storyboard_messages,
                      STORYBOARD_SCHEMA_PATH, validate_storyboard_plan, storyboard_context)
+    scene_backdrops = None
+    if os.environ.get("AUTOVIDEO_G2_USE_DRAW_THINGS") == "1":
+        scene_backdrops = run_step("draw-things-backgrounds", generate_scene_backgrounds,
+                                   board, FIXTURE_ROOT, ARTIFACTS)
+    else:
+        skip_step("draw-things-backgrounds", "本任务未启用 Draw Things 场景背景")
     compiled = run_step("compile-ir", validate_compile_stage, narration, board, alignment)
-    run_step("render", render, compiled)
+    run_step("render", render, compiled, scene_backdrops)
     qa = run_step("verify-media", verify_media, compiled, alignment)
     write_call_summary()
     write_manifest()
