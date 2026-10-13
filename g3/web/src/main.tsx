@@ -13,6 +13,7 @@ type Job = {
   updated_at: string; attempts?: Attempt[];
 };
 type Artifact = {name: string; content_type: string; bytes: number; download_url: string};
+type SceneImage = {scene_id: string; bytes: number; width: number; height: number; sha256: string; image_url: string};
 type Config = {ready: boolean; provider: string; model: string; checks: Record<string, boolean>; blockers: string[]; draw_things?: {ready: boolean; endpoint: string; error?: string | null}};
 type Page = {kind: 'new'} | {kind: 'jobs'} | {kind: 'job'; id: string};
 
@@ -70,6 +71,7 @@ function App() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [job, setJob] = useState<Job | null>(null);
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+  const [sceneImages, setSceneImages] = useState<SceneImage[]>([]);
   const [title, setTitle] = useState('通信噪声如何影响信息传输');
   const [source, setSource] = useState(DEFAULT_SOURCE);
   const [duration, setDuration] = useState(18);
@@ -96,9 +98,13 @@ function App() {
       const value = await api<Job>(`/api/jobs/${id}`);
       setJob(value);
       if (value.status === 'COMPLETED') {
-        const collection = await api<{items: Artifact[]}>(`/api/jobs/${id}/artifacts`);
+        const [collection, imageCollection] = await Promise.all([
+          api<{items: Artifact[]}>(`/api/jobs/${id}/artifacts`),
+          api<{items: SceneImage[]}>(`/api/jobs/${id}/scene-images`),
+        ]);
         setArtifacts(collection.items);
-      } else setArtifacts([]);
+        setSceneImages(imageCollection.items);
+      } else { setArtifacts([]); setSceneImages([]); }
     } catch (err) { setError(err instanceof Error ? err.message : '读取任务失败'); }
   }, []);
 
@@ -208,7 +214,7 @@ function App() {
 
         {page.kind === 'jobs' && <section className="jobs-page"><div className="section-head"><div><div className="eyebrow"><span className="eyebrow-line"/>任务管理</div><h1>任务库</h1><p>所有生成记录与产物都保存在本机。</p></div><a className="primary-button small" href="#new">新建视频 <span className="button-icon"><Icon name="plus"/></span></a></div><div className="jobs-table"><div className="table-head"><span>视频任务</span><span>创建时间</span><span>时长</span><span>状态</span><span/></div>{jobs.length ? jobs.map((item) => <JobRow key={item.job_id} job={item} detailed/>) : <div className="empty-state"><span className="empty-icon"><Icon name="film"/></span><strong>还没有任务</strong><p>开始生成后，任务会保存在这里。</p><a href="#new" className="text-link">创建一个视频 <Icon name="arrow"/></a></div>}</div></section>}
 
-        {page.kind === 'job' && <JobDetail job={job} artifacts={artifacts} onCancel={cancel} onRetry={retry} onRefresh={() => job && reloadJob(job.job_id)}/>}
+        {page.kind === 'job' && <JobDetail job={job} artifacts={artifacts} sceneImages={sceneImages} onCancel={cancel} onRetry={retry} onRefresh={() => job && reloadJob(job.job_id)}/>}
       </div>
       <footer className="main-footer"><span>AutoVideo 本地版 <b>0.1</b></span><span>单 worker · SQLite 持久化 <i/> <a href="/api/health">服务状态</a></span></footer>
     </main>
@@ -223,8 +229,8 @@ function JobRow({job, detailed = false}: {job: Job; detailed?: boolean}) {
   </a>;
 }
 
-function JobDetail({job, artifacts, onCancel, onRetry, onRefresh}: {
-  job: Job | null; artifacts: Artifact[]; onCancel: () => void; onRetry: () => void; onRefresh: () => void;
+function JobDetail({job, artifacts, sceneImages, onCancel, onRetry, onRefresh}: {
+  job: Job | null; artifacts: Artifact[]; sceneImages: SceneImage[]; onCancel: () => void; onRetry: () => void; onRefresh: () => void;
 }) {
   if (!job) return <div className="loading-state"><span className="spinner dark"/>正在读取任务…</div>;
   const latest = job.attempts?.[0];
@@ -238,6 +244,7 @@ function JobDetail({job, artifacts, onCancel, onRetry, onRefresh}: {
     <div className="detail-grid"><div className="detail-main">
       {job.status === 'COMPLETED' && video ? <section className="video-card"><div className="video-topline"><span><i className="completed-dot"/>成片已就绪</span><div><a className="download-link" href={video.download_url} download><Icon name="download"/>下载 MP4</a>{srt && <a className="download-link quiet" href={srt.download_url} download><Icon name="download"/>SRT</a>}</div></div><video className="video-player" controls playsInline src={video.download_url}/><div className="video-caption"><span>{job.title}</span><span>H.264 · 1080p · AAC</span></div></section> : <section className={`progress-card ${job.status.toLowerCase()}`}><div className="progress-top"><div><span className="progress-overline">{job.status === 'FAILED' ? '本次尝试未完成' : job.status === 'CANCELLED' ? '任务已取消' : '正在准备你的知识动画'}</span><h2>{job.status === 'QUEUED' ? '任务已加入队列' : job.status === 'RUNNING' ? stageLabel(job.active_stage) : job.status === 'FAILED' ? '暂时没有生成成片' : '你可以随时创建新的任务'}</h2><p>{job.status === 'RUNNING' ? '生成在本机后台持续进行；关闭此页面不会中断任务。' : job.status === 'QUEUED' ? '单 worker 会按顺序安全领取任务。' : job.status === 'FAILED' ? '阶段与错误已经保存；修复配置或素材后可以重试。' : '任务状态已保存到本机。'}</p></div><div className={`progress-orb ${job.status === 'RUNNING' ? 'spinning' : ''}`}><Icon name={job.status === 'COMPLETED' ? 'check' : job.status === 'FAILED' ? 'film' : 'spark'}/></div></div><div className="stage-list">{STAGES.map(([key, label], index) => {const stage = latest?.stages.find((item) => item.stage === key);const current = job.active_stage === key && job.status === 'RUNNING';const done = stage?.status === 'SUCCEEDED';const skipped = stage?.status === 'SKIPPED';const failed = stage?.status === 'FAILED' || (job.status === 'FAILED' && job.active_stage === key);return <div className={`stage-item ${done ? 'done' : ''} ${skipped ? 'stage-skipped' : ''} ${current ? 'current' : ''} ${failed ? 'stage-failed' : ''}`} key={key}><span className="stage-check">{done ? <Icon name="check"/> : skipped ? '—' : failed ? '!' : current ? <i/> : String(index + 1).padStart(2, '0')}</span><span className="stage-label">{label}{current && <small>处理中…</small>}</span>{stage?.duration_seconds != null && <small className="stage-duration">{stage.duration_seconds.toFixed(1)}s</small>}</div>;})}</div></section>}
       {job.status === 'COMPLETED' && <section className="success-summary"><span className="success-check"><Icon name="check"/></span><div><strong>生成与基础检查全部通过</strong><p>任务与制品已保存在本机。重新打开浏览器后仍可继续查看和下载。</p></div></section>}
+      {job.status === 'COMPLETED' && sceneImages.length > 0 && <section className="scene-preview-card"><div className="card-title"><div><h2>场景背景预览</h2><p>模型背景在成片中经过柔化，并由受控图解覆盖</p></div><span>{sceneImages.length} 张</span></div><div className="scene-preview-grid">{sceneImages.map((image, index) => <a className="scene-preview-item" href={image.image_url} target="_blank" rel="noreferrer" key={image.scene_id}><img src={image.image_url} alt={`${sceneLabel(image.scene_id)}背景预览`}/><span><b>{sceneLabel(image.scene_id)}</b><small>{image.width} × {image.height} · {formatBytes(image.bytes)}</small></span></a>)}</div></section>}
       {job.status === 'COMPLETED' && <section className="artifact-card"><div className="card-title"><div><h2>交付文件</h2><p>本次生成的可下载产物</p></div><span>{artifacts.length} 个文件</span></div>{artifacts.map((item) => <a className="artifact-row" key={item.name} href={item.download_url} download><span className="artifact-type">{item.name.endsWith('.mp4') ? 'MP4' : item.name.endsWith('.srt') ? 'SRT' : 'JSON'}</span><span><b>{artifactLabel(item.name)}</b><small>{item.name}</small></span><span className="artifact-size">{formatBytes(item.bytes)}</span><Icon name="download"/></a>)}</section>}
       <section className="integrity-card"><div className="integrity-icon"><Icon name="shield"/></div><div><strong>任务状态已持久化</strong><p>SQLite 保存状态与阶段；每次重试使用独立工作区，不覆盖旧尝试。</p></div><span className="hash-short">SHA {job.source_sha256.slice(0, 12)}</span></section>
     </div><aside className="detail-side"><section className="side-panel"><div className="panel-head"><h3>任务信息</h3><span className="panel-menu">···</span></div><div className="info-line"><span>目标时长</span><b>{job.target_duration_sec} 秒</b></div><div className="info-line"><span>视觉主题</span><b>深色知识图解</b></div><div className="info-line"><span>旁白音色</span><b>小晓 · 普通话</b></div><div className="info-line"><span>素材长度</span><b>{job.source_char_count} 字</b></div><div className="info-line"><span>任务状态</span><Badge status={job.status}/></div></section><section className="side-panel"><div className="panel-head"><h3>处理记录</h3><span>{latest ? `尝试 ${latest.attempt_no}` : '排队中'}</span></div>{latest?.stages.map((stage) => <div className="history-line" key={stage.stage}><span className={`history-dot ${stage.status.toLowerCase()}`}/><span>{stageLabel(stage.stage)}</span><small>{stage.status === 'SUCCEEDED' ? '完成' : stage.status === 'SKIPPED' ? '已跳过' : stage.status === 'RUNNING' ? '进行中' : stage.status === 'FAILED' || stage.status === 'INTERRUPTED' ? '中断' : '待处理'}</small></div>) || <div className="empty-mini">任务开始后显示阶段状态。</div>}</section>{qa && <a className="report-link" href={qa.download_url}><span className="report-file">✓</span><span><b>基础验收报告</b><small>查看 QA JSON</small></span><Icon name="arrow"/></a>}</aside></div>
@@ -245,6 +252,7 @@ function JobDetail({job, artifacts, onCancel, onRetry, onRefresh}: {
 }
 
 function stageLabel(stage: string | null) { return STAGES.find(([key]) => key === stage)?.[1] || '准备生成'; }
+function sceneLabel(sceneId: string) { return ({opening: '开场', mechanism: '内容展开', middle: '内容展开', note: '结尾提示', closing: '结尾'} as Record<string, string>)[sceneId] || sceneId; }
 function artifactLabel(name: string) { return ({'video.mp4': '动画视频', 'captions.srt': '中文字幕', 'qa.json': '基础验收报告', 'manifest.json': '制品清单', 'storyboard.json': '分镜计划', 'scene-backgrounds.json': '本地场景图记录', 'video-ir.json': 'Video IR', 'model-cost.json': '模型用量', 'execution-log.txt': '执行日志'} as Record<string, string>)[name] || name; }
 
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);

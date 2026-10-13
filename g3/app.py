@@ -174,6 +174,29 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
             code = 404 if exc.code in {"JOB_NOT_FOUND", "ARTIFACT_NOT_FOUND"} else 409
             raise _error(code, exc.code, str(exc)) from exc
 
+    @application.get("/api/jobs/{job_id}/scene-images")
+    def list_scene_images(job_id: str):
+        try:
+            UUID(job_id)
+            return {"items": store.get_scene_images(job_id)}
+        except ValueError as exc:
+            raise _error(404, "JOB_NOT_FOUND", "任务不存在。") from exc
+        except StoreError as exc:
+            code = 404 if exc.code == "JOB_NOT_FOUND" else 409
+            raise _error(code, exc.code, str(exc)) from exc
+
+    @application.get("/api/jobs/{job_id}/scene-images/{scene_id}")
+    def get_scene_image(job_id: str, scene_id: str):
+        try:
+            UUID(job_id)
+            path = store.scene_image_path(job_id, scene_id)
+            return FileResponse(path, media_type="image/png", headers={"Cache-Control": "no-store"})
+        except ValueError as exc:
+            raise _error(404, "JOB_NOT_FOUND", "任务不存在。") from exc
+        except StoreError as exc:
+            code = 404 if exc.code in {"JOB_NOT_FOUND", "SCENE_IMAGE_NOT_FOUND"} else 409
+            raise _error(code, exc.code, str(exc)) from exc
+
     return application
 
 

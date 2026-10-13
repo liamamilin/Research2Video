@@ -6,13 +6,16 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import sqlite3
+import struct
 from typing import Iterator
 from uuid import UUID
 
 
 STAGES = ("PLAN", "VOICE_ALIGN", "STORYBOARD", "SCENE_IMAGES", "BUILD_IR", "RENDER", "QUALITY_CHECK")
 TERMINAL_STATES = {"COMPLETED", "FAILED", "CANCELLED"}
+SCENE_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_]{0,47}$")
 
 
 def utc_now() -> str:
@@ -444,3 +447,87 @@ class JobStore:
             return path, dict(item)
         finally:
             conn.close()
+
+    def _scene_image_records(self, job_id: str) -> list[dict]:
+        UUID(job_id)
+        conn = self._connect()
+        try:
+            job = conn.execute("SELECT status,attempt_count FROM jobs WHERE job_id=?", (job_id,)).fetchone()
+            if job is None:
+                raise StoreError("JOB_NOT_FOUND", "job not found")
+            if job["status"] != "COMPLETED":
+                return []
+            attempt_root = self.job_root / job_id / "attempts" / str(job["attempt_count"])
+        finally:
+            conn.close()
+
+        try:
+            resolved_root = attempt_root.resolve(strict=True)
+            if not resolved_root.is_relative_to(self.job_root / job_id):
+                raise StoreError("INVALID_SCENE_IMAGE_PATH", "scene images are outside the job workspace")
+            manifest_path = resolved_root / "g2-run" / "artifacts" / "scene-backgrounds.json"
+            try:
+                verified_manifest_path, manifest_artifact = self.artifact_path(job_id, "scene-backgrounds.json")
+            except StoreError as exc:
+                if exc.code == "ARTIFACT_NOT_FOUND":
+                    return []
+                raise
+            if (manifest_artifact["relative_path"] != "g2-run/artifacts/scene-backgrounds.json"
+                    or verified_manifest_path != manifest_path.resolve(strict=True)):
+                raise StoreError("INVALID_SCENE_IMAGE_PATH", "scene image manifest is outside the expected artifact path")
+            if manifest_path.is_symlink() or not manifest_path.is_file():
+                raise StoreError("SCENE_IMAGE_MANIFEST_INVALID", "verified scene image manifest is unavailable")
+            if not manifest_path.resolve(strict=True).is_relative_to(resolved_root):
+                raise StoreError("INVALID_SCENE_IMAGE_PATH", "scene image manifest is outside the job workspace")
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except StoreError:
+            raise
+        except (OSError, ValueError) as exc:
+            raise StoreError("SCENE_IMAGE_MANIFEST_INVALID", "scene image manifest is unavailable or invalid") from exc
+
+        images = manifest.get("images") if isinstance(manifest, dict) else None
+        if not isinstance(images, list) or len(images) != 3:
+            raise StoreError("SCENE_IMAGE_MANIFEST_INVALID", "scene image manifest must contain exactly three images")
+        records = []
+        scene_ids = set()
+        for index, item in enumerate(images, start=1):
+            if not isinstance(item, dict):
+                raise StoreError("SCENE_IMAGE_MANIFEST_INVALID", "scene image record is invalid")
+            scene_id = item.get("scene_id")
+            expected_relpath = f"assets/scene-backgrounds/scene-{index:02d}.png"
+            if (not isinstance(scene_id, str) or not SCENE_ID_PATTERN.fullmatch(scene_id)
+                    or scene_id in scene_ids or item.get("path") != expected_relpath):
+                raise StoreError("SCENE_IMAGE_MANIFEST_INVALID", "scene image mapping is invalid")
+            scene_ids.add(scene_id)
+            candidate = resolved_root / "g2-run" / "fixtures" / expected_relpath
+            try:
+                path = candidate.resolve(strict=True)
+                raw = path.read_bytes()
+            except OSError as exc:
+                raise StoreError("SCENE_IMAGE_NOT_FOUND", "scene image is missing") from exc
+            if (candidate.is_symlink() or not path.is_relative_to(resolved_root)
+                    or len(raw) < 24 or raw[:8] != b"\x89PNG\r\n\x1a\n" or raw[12:16] != b"IHDR"):
+                raise StoreError("INVALID_SCENE_IMAGE_PATH", "scene image is not a valid task-local PNG")
+            digest = hashlib.sha256(raw).hexdigest()
+            if digest != item.get("sha256"):
+                raise StoreError("SCENE_IMAGE_HASH_MISMATCH", "scene image integrity check failed")
+            width, height = struct.unpack(">II", raw[16:24])
+            if not (1 <= width <= 4096 and 1 <= height <= 4096):
+                raise StoreError("SCENE_IMAGE_INVALID", "scene image dimensions are invalid")
+            records.append({"scene_id": scene_id, "path": path, "bytes": len(raw),
+                            "width": width, "height": height, "sha256": digest})
+        return records
+
+    def get_scene_images(self, job_id: str) -> list[dict]:
+        return [{"scene_id": item["scene_id"], "bytes": item["bytes"],
+                 "width": item["width"], "height": item["height"], "sha256": item["sha256"],
+                 "image_url": f"/api/jobs/{job_id}/scene-images/{item['scene_id']}"}
+                for item in self._scene_image_records(job_id)]
+
+    def scene_image_path(self, job_id: str, scene_id: str) -> Path:
+        if not SCENE_ID_PATTERN.fullmatch(scene_id):
+            raise StoreError("SCENE_IMAGE_NOT_FOUND", "scene image not found")
+        for item in self._scene_image_records(job_id):
+            if item["scene_id"] == scene_id:
+                return item["path"]
+        raise StoreError("SCENE_IMAGE_NOT_FOUND", "scene image not found")

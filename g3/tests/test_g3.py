@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -153,6 +154,52 @@ def test_artifact_integrity_detects_modified_file(tmp_path):
     video.write_bytes(b"tampered")
     with pytest.raises(StoreError, match="integrity"):
         store.artifact_path(job_id, "video.mp4")
+
+
+def test_scene_images_are_previewable_only_from_verified_completed_job(tmp_path):
+    settings = make_settings(tmp_path)
+    png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+nm7cAAAAASUVORK5CYII=")
+    with TestClient(create_app(settings, start_worker=False)) as client:
+        store = client.app.state.store
+        job_id = new_job(store, use_draw_things=True)
+        claim = store.claim_next()
+        attempt_root = settings.data_dir / claim["workspace_rel_path"]
+        fixture_root = attempt_root / "g2-run/fixtures/assets/scene-backgrounds"
+        fixture_root.mkdir(parents=True)
+        artifact_root = attempt_root / "g2-run/artifacts"
+        artifact_root.mkdir(parents=True)
+        rows = []
+        for index, scene_id in enumerate(("opening", "middle", "closing"), start=1):
+            relative_path = f"assets/scene-backgrounds/scene-{index:02d}.png"
+            (fixture_root / f"scene-{index:02d}.png").write_bytes(png)
+            rows.append({"scene_id": scene_id, "path": relative_path,
+                         "sha256": hashlib.sha256(png).hexdigest()})
+        manifest_path = artifact_root / "scene-backgrounds.json"
+        manifest_path.write_text(json.dumps({"images": rows}), encoding="utf-8")
+        assert client.get(f"/api/jobs/{job_id}/scene-images").json()["items"] == []
+        video_path = artifact_root / "video.mp4"
+        video_path.write_bytes(b"verified output")
+        store.mark_completed(job_id, claim["attempt_no"], [{
+            "name": "video.mp4", "relative_path": "g2-run/artifacts/video.mp4", "content_type": "video/mp4",
+            "sha256": hashlib.sha256(video_path.read_bytes()).hexdigest(), "bytes": video_path.stat().st_size,
+        }, {
+            "name": "scene-backgrounds.json", "relative_path": "g2-run/artifacts/scene-backgrounds.json",
+            "content_type": "application/json", "sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+            "bytes": manifest_path.stat().st_size,
+        }])
+
+        listing = client.get(f"/api/jobs/{job_id}/scene-images")
+        assert listing.status_code == 200
+        assert [item["scene_id"] for item in listing.json()["items"]] == ["opening", "middle", "closing"]
+        preview = client.get(listing.json()["items"][0]["image_url"])
+        assert preview.status_code == 200
+        assert preview.headers["content-type"] == "image/png"
+        assert preview.content == png
+
+        (fixture_root / "scene-01.png").write_bytes(png[:-1] + bytes([png[-1] ^ 1]))
+        changed = client.get(f"/api/jobs/{job_id}/scene-images")
+        assert changed.status_code == 409
+        assert changed.json()["detail"]["code"] == "SCENE_IMAGE_HASH_MISMATCH"
 
 
 def test_single_worker_file_lock_prevents_a_second_worker(tmp_path):
