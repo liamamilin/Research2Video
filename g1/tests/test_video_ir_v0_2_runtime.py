@@ -176,6 +176,13 @@ def test_rejects_oversized_chinese_subtitle_before_render(tmp_path):
     assert fault_code(ir, root) == "SUBTITLE_TOO_WIDE"
 
 
+def test_accepts_long_chinese_caption_that_wraps_to_two_lines():
+    from g1.video_ir import make_burned_subtitle_segments
+
+    segment = {"text": "海岸形状、水深和海底地形会改变潮汐传播，不同海湾的潮汐时间与高度并不完全相同。" * 2}
+    assert make_burned_subtitle_segments([segment]) == [segment]
+
+
 def test_bar_chart_requires_matching_categories_and_values(tmp_path):
     root = make_root(tmp_path)
     ir = base_ir(root)

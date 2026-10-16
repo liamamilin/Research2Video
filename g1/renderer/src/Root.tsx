@@ -4,7 +4,7 @@ import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurre
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
 type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]};
 type Segment = {id: string; text: string; start_ms: number; end_ms: number};
-type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string};
+type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; presentation?: {preset: 'information_motion'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
 
 const colors = {bg: '#0B1020', panel: '#121B2E', border: '#293750', text: '#F3F6FC', muted: '#A9B7CD', cyan: '#4ED5E6', blue: '#6798FF', orange: '#FFAA55', red: '#FF6175', green: '#64D8A5'};
 const font = '"Hiragino Sans GB", "PingFang SC", sans-serif';
@@ -23,7 +23,63 @@ const targetVisible = (beats: Beat[], target: string, sceneId: string) => {
 const Text = ({children, x, y, size = 34, color = colors.text, anchor = 'middle', weight = 500}: any) => <text x={x} y={y} textAnchor={anchor} dominantBaseline="middle" fill={color} fontFamily={font} fontSize={size} fontWeight={weight}>{children}</text>;
 const Panel = ({x, y, w, h, fill = colors.panel, stroke = colors.border, r = 24, opacity = 1}: any) => <rect x={x} y={y} width={w} height={h} rx={r} fill={fill} stroke={stroke} strokeWidth="2" opacity={opacity}/>;
 
+function ProcessDiagram({scene, frame}: {scene: Scene; frame: number}) {
+  const {layout, nodes, edges, title, takeaway} = scene.props;
+  const beats = activeBeats(scene, frame);
+  const highlights = beats.filter((b) => b.action === 'highlight');
+  const focusFrame = highlights[highlights.length-1]?.frame;
+  const focused = new Set(highlights.filter((b) => b.frame === focusFrame).map((b) => b.target_id));
+  const revealed = (target: string) => beats.find((b) => b.action === 'reveal' && b.target_id === target);
+  const alpha = (target: string) => {
+    const beat = revealed(target);
+    return beat ? interpolate(frame-beat.frame, [0, 10], [.18, 1], {extrapolateLeft:'clamp', extrapolateRight:'clamp'}) : .18;
+  };
+  const complete = nodes.every((n: any) => revealed(`node:${n.id}`)) && edges.every((e: any) => revealed(`edge:${e.id}`));
+  const edgeMap = Object.fromEntries(edges.map((e: any) => [e.id, e]));
+  const blockedTargets = new Set(edges.filter((e: any) => e.relation === 'blocked' && focused.has(`edge:${e.id}`)).map((e: any) => e.to));
+  const markerId = `${scene.id}_layout_arrow`;
+  const positionAlong = (points: any[], t: number) => {
+    const lengths = points.slice(1).map((p: any, i: number) => Math.hypot(p.x-points[i].x, p.y-points[i].y));
+    let remaining = lengths.reduce((a: number, b: number) => a+b, 0)*t;
+    for (let i=0; i<lengths.length; i++) {
+      if (remaining <= lengths[i]) {
+        const p=points[i], q=points[i+1], f=remaining/Math.max(.001, lengths[i]);
+        return {x:p.x+(q.x-p.x)*f, y:p.y+(q.y-p.y)*f};
+      }
+      remaining-=lengths[i];
+    }
+    return points[points.length-1];
+  };
+  return <svg width="1920" height="1080" viewBox="0 0 1920 1080">
+    <Text x={960} y={220} size={48} weight={650}>{title}</Text>
+    <g transform="translate(180 300)">
+      <defs><marker id={markerId} viewBox="0 0 12 12" refX="11" refY="6" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill={colors.cyan}/></marker></defs>
+      {layout.edges.map((route: any) => {
+        const edge=edgeMap[route.id], target=`edge:${route.id}`;
+        const active=focused.has(target), blocked=edge.relation === 'blocked', color=blocked ? colors.red : active ? colors.cyan : colors.muted;
+        const point=positionAlong(route.points, ((frame-(focusFrame || 0))%55)/55);
+        return <g key={route.id} opacity={alpha(target)}>
+          <polyline points={route.points.map((p: any) => `${p.x},${p.y}`).join(' ')} fill="none" stroke={color} strokeWidth={active ? 5 : 3} strokeLinejoin="round" strokeDasharray={blocked ? '14 9' : undefined} markerEnd={blocked ? undefined : `url(#${markerId})`}/>
+          {active && !blocked && <circle cx={point.x} cy={point.y} r={8} fill="#FFFFFF"/>}
+          {blocked && <g transform={`translate(${route.points[route.points.length-1].x} ${route.points[route.points.length-1].y})`} stroke={colors.red} strokeWidth={4}><line x1={-8} y1={-8} x2={8} y2={8}/><line x1={-8} y1={8} x2={8} y2={-8}/></g>}
+          {edge.label && <><rect x={route.label_x-(edge.label.length*layout.edge_font_size+18)/2} y={route.label_y-layout.edge_font_size/2-4} width={edge.label.length*layout.edge_font_size+18} height={layout.edge_font_size+8} rx={6} fill={colors.bg}/><Text x={route.label_x} y={route.label_y} size={layout.edge_font_size} color={color}>{edge.label}</Text></>}
+        </g>;
+      })}
+      {layout.nodes.map((node: any) => {
+        const target=`node:${node.id}`, active=focused.has(target), blocked=blockedTargets.has(node.id);
+        return <g key={node.id} opacity={alpha(target)}>
+          <Panel x={node.x} y={node.y} w={node.width} h={node.height} fill={blocked ? '#372331' : active ? '#183C50' : colors.panel} stroke={blocked ? colors.red : active ? colors.cyan : colors.border} r={18}/>
+          {active && <rect x={node.x+8} y={node.y+8} width={node.width-16} height={node.height-16} rx={12} fill="none" stroke={blocked ? colors.red : colors.cyan} opacity={.12+.09*Math.sin(frame/7)}/>}
+          {node.label_lines.map((line: string, i: number) => <Text key={i} x={node.x+node.width/2} y={node.y+node.height/2+(i-(node.label_lines.length-1)/2)*layout.font_size*1.28} size={layout.font_size} weight={active ? 650 : 500}>{line}</Text>)}
+        </g>;
+      })}
+    </g>
+    {complete && <Text x={960} y={852} size={30} color={colors.muted}>{takeaway}</Text>}
+  </svg>;
+}
+
 function FlowDiagram({scene, frame}: {scene: Scene; frame: number}) {
+  if (scene.props.layout) return <ProcessDiagram scene={scene} frame={frame}/>;
   const {nodes, edges, paths} = scene.props;
   const beats = activeBeats(scene, frame);
   const positions: Record<string, [number, number]> = {};
@@ -128,9 +184,11 @@ function SceneVisual({scene, frame}: {scene: Scene; frame: number}) {
   }
 }
 
-function Video({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: Record<string, string>}) {
+function LegacyVideo({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: Record<string, string>}) {
   const frame = useCurrentFrame();
   const scene = ir.scenes.find((candidate) => frame >= candidate.start_frame && frame < candidate.end_frame) ?? ir.scenes[ir.scenes.length-1];
+  const chapters = ir.content_structure?.chapters || [];
+  const chapterIndex = chapters.findIndex((c) => c.narration_segment_ids.includes(scene.narration_segment_ids[0]));
   const backdropPath = sceneBackdrops[scene.id];
   const safeBackdrop = typeof backdropPath === 'string' && /^assets\/scene-backgrounds\/scene-\d{2}\.png$/.test(backdropPath)
     ? staticFile(backdropPath) : null;
@@ -144,10 +202,72 @@ function Video({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: Record
   return <AbsoluteFill style={{backgroundColor: colors.bg, color: colors.text, fontFamily: font}}>
     {safeBackdrop && <Img src={safeBackdrop} style={{position: 'absolute', zIndex: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.58, filter: 'blur(18px)', transformOrigin: 'center', transform: `translateX(${panX}px) scale(${zoom * 1.08})`}}/>}
     {safeBackdrop && <AbsoluteFill style={{zIndex: 1, background: 'linear-gradient(90deg, rgba(5,10,19,.50), rgba(5,10,19,.36) 50%, rgba(5,10,19,.50)), linear-gradient(0deg, rgba(5,10,19,.72), rgba(5,10,19,.22) 48%, rgba(5,10,19,.46)'}}/>}
-    <AbsoluteFill style={{zIndex: 2}}><div style={{position: 'absolute', left: 80, top: 54, color: colors.cyan, fontSize: 24, letterSpacing: 2}}>AUTOVIDEO　/　G1 · Video IR 0.2</div><div style={{position: 'absolute', right: 82, top: 56, color: colors.muted, fontSize: 22}}>知识动画　·　真实中文旁白</div><SceneVisual scene={scene} frame={frame}/></AbsoluteFill>
-    <AbsoluteFill style={{zIndex: 3, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92, pointerEvents: 'none'}}>{caption && <div style={{minWidth: 320, maxWidth: 1680, minHeight: 72, padding: '13px 28px', borderRadius: 18, background: 'rgba(5,10,19,.88)', border: `1px solid ${colors.border}`, color: colors.text, textAlign: 'center', fontSize: 38, lineHeight: 1.4, boxSizing: 'border-box'}}>{caption.text}</div>}</AbsoluteFill>
+    <AbsoluteFill style={{zIndex: 2}}><div style={{position: 'absolute', left: 80, top: 54, color: colors.cyan, fontSize: 24, letterSpacing: 2}}>AUTOVIDEO　/　G1 · Video IR 0.2</div><div style={{position: 'absolute', right: 82, top: 56, color: colors.muted, fontSize: 22}}>知识动画　·　真实中文旁白</div><SceneVisual scene={scene} frame={frame}/>{chapterIndex >= 0 && <div style={{position: 'absolute', left: 180, top: 124, color: colors.muted, fontSize: 26}}>第 {chapterIndex+1} / {chapters.length} 章 · {chapters[chapterIndex].title}</div>}</AbsoluteFill>
+    <AbsoluteFill style={{zIndex: 3, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92, pointerEvents: 'none'}}>{caption && <div style={{minWidth: 320, maxWidth: 1680, minHeight: 72, padding: '13px 28px', borderRadius: 18, background: 'rgba(5,10,19,.88)', border: `1px solid ${colors.border}`, color: colors.text, textAlign: 'center', fontSize: caption.text.length > 32 ? 30 : 38, lineHeight: 1.4, overflowWrap: 'anywhere', boxSizing: 'border-box'}}>{caption.text}</div>}</AbsoluteFill>
     <Audio src={staticFile(ir.audio_public_file)} volume={Math.pow(10, 0/20)}/>
   </AbsoluteFill>;
+}
+
+// A separate presentation for the same validated, registered content components.
+const paper = {bg:'#F7F8F5', ink:'#202D28', muted:'#69756E', green:'#17784B', line:'#E1E8E1'};
+const ease = (value: number) => 1-Math.pow(1-Math.max(0, Math.min(1, value)), 3);
+function InformationVideo({ir}: {ir: Timeline}) {
+  const frame = useCurrentFrame();
+  const sceneIndex = Math.max(0, ir.scenes.findIndex((s) => frame >= s.start_frame && frame < s.end_frame));
+  const scene = ir.scenes[sceneIndex], p = scene.props;
+  const caption = ir.narration.segments.find((s) => frame >= Math.floor((s.start_ms*30+500)/1000) && frame < Math.floor((s.end_ms*30+500)/1000));
+  const chapters = ir.content_structure?.chapters || [];
+  const chapterIndex = chapters.findIndex((c) => c.narration_segment_ids.includes(scene.narration_segment_ids[0]));
+  const reveals = scene.beats.filter((b) => b.action === 'reveal');
+  const shown = reveals.filter((b) => b.frame <= frame);
+  const latest = shown[shown.length-1]?.target_id;
+  const motion = (target: string): React.CSSProperties => {
+    const beat = reveals.find((b) => b.target_id === target);
+    const t = beat ? ease((frame-beat.frame)/16) : 0;
+    return {opacity:t, transform:`translateY(${(1-t)*22}px)`, willChange:'transform, opacity'};
+  };
+  const textStyle: React.CSSProperties = {overflowWrap:'anywhere', whiteSpace:'normal', wordBreak:'normal'};
+  const panelStyle: React.CSSProperties = {background:'#FFFFFF', border:`1px solid ${paper.line}`, borderRadius:22, boxShadow:'0 12px 32px rgba(26,50,35,.045)', boxSizing:'border-box'};
+  const heading = scene.component === 'comparison' ? scene.purpose : p.title;
+  return <AbsoluteFill style={{background:paper.bg, color:paper.ink, fontFamily:font, backgroundImage:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
+    <div style={{position:'absolute', left:140, top:70, display:'flex', alignItems:'center', gap:14, fontSize:22, letterSpacing:2, color:paper.green}}><span style={{width:9,height:9,borderRadius:3,background:paper.green}}/>AUTOVIDEO <span style={{color:paper.muted, letterSpacing:0, marginLeft:12}}>知识讲解</span></div>
+    <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? `${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　${chapters[chapterIndex].title}` : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
+    {scene.component === 'title_card' ? <div style={{position:'absolute',left:180,top:285,width:1520}}>
+      <div style={{...motion('title'), ...textStyle, fontSize:p.title.length > 30 ? 76 : 92, lineHeight:1.35,fontWeight:700,letterSpacing:-1,maxWidth:1450}}>{p.title}</div>
+      <div style={{...motion('title'),width:84,height:5,background:paper.green,marginTop:38,borderRadius:3}}/>
+      {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? 36 : 42,lineHeight:1.65,color:paper.muted}}>{p.subtitle}</div>}
+    </div> : <>
+      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...motion(scene.component === 'comparison' ? 'side:left' : 'title')}}>{heading}</div>
+      {scene.component === 'concept_reveal' && <div style={{position:'absolute',left:140,top:p.lines.length === 4 ? 330 : 360,width:1640,display:'grid',gridTemplateColumns:`repeat(${p.lines.length === 4 ? 2 : p.lines.length}, 1fr)`,gap:28}}>
+        {p.lines.map((line: string,i: number) => {
+          const match = line.match(/^([^：:]{1,16})[：:]\s*([\s\S]+)$/);
+          const label = match ? match[1] : line, body = match ? match[2] : '';
+          const active = latest === `line:${i}`, compact = p.lines.length === 4;
+          return <div key={i} style={{...panelStyle,...motion(`line:${i}`),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? paper.green : paper.line}`}}>
+            <div style={{fontSize:22,color:paper.green,fontWeight:600,letterSpacing:2,marginBottom:compact ? 10 : 29}}>{String(i+1).padStart(2,'0')}</div>
+            <div style={{...textStyle,fontWeight:650,fontSize:compact || label.length > 10 ? 36 : 42,lineHeight:1.4}}>{label}</div>
+            {body && <div style={{...textStyle,color:paper.muted,fontSize:compact ? 28 : p.lines.length === 3 ? 30 : 34,lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}>{body}</div>}
+          </div>;
+        })}
+      </div>}
+      {scene.component === 'comparison' && <div style={{position:'absolute',left:140,top:330,width:1640,display:'grid',gridTemplateColumns:'1fr 1fr',gap:44}}>
+        {(['left','right'] as const).map((side) => {
+          const data=p[side], total=data.items.join('').length, bodySize=total > 130 ? 30 : 34;
+          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${side === 'right' ? paper.green : paper.line}`}}>
+            <div style={{...textStyle,color:side === 'right' ? paper.green : paper.muted,fontSize:data.label.length > 20 ? 34 : 42,lineHeight:1.4,fontWeight:650,marginBottom:30}}>{data.label}</div>
+            <div style={{display:'flex',flexDirection:'column',gap:20}}>{data.items.map((item: string,i: number) => <div key={i} style={{display:'flex',gap:15,fontSize:bodySize,lineHeight:1.5}}><span style={{color:paper.green}}>·</span><span style={textStyle}>{item}</span></div>)}</div>
+          </div>;
+        })}
+      </div>}
+    </>}
+    <div style={{position:'absolute',bottom:60,left:120,right:120,display:'flex',justifyContent:'center',alignItems:'flex-end',minHeight:80}}>{caption && <div style={{maxWidth:1560,padding:'14px 28px',boxSizing:'border-box',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:caption.text.length > 32 ? 30 : 38,lineHeight:1.45,textAlign:'center',...textStyle}}>{caption.text}</div>}</div>
+    <div style={{position:'absolute',left:0,bottom:0,height:4,width:`${100*(frame+1)/ir.total_frames}%`,background:paper.green}}/>
+    <Audio src={staticFile(ir.audio_public_file)}/>
+  </AbsoluteFill>;
+}
+
+function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>}) {
+  return props.ir.presentation?.preset === 'information_motion' ? <InformationVideo ir={props.ir}/> : <LegacyVideo {...props}/>;
 }
 
 const defaults: Timeline = {schema_version:'0.2', video:{title:'G1',width:1920,height:1080,fps:30,duration_ms:1000}, narration:{audio_asset_id:'audio',segments:[]}, scenes:[], total_frames:30, audio_public_file:'assets/communications_noise.wav'};

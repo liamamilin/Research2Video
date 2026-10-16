@@ -5,6 +5,7 @@ fixed allowlisted Remotion component switch. It never evaluates IR strings.
 """
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import re
@@ -156,10 +157,57 @@ def _validate_asset_content(asset: dict, actual_path: Path, field_path: str):
 def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
     """Validate schema, media references, component semantics, and deterministic time."""
     schema = _schema(SCHEMA_PATH)
+    # Preserve the frozen MVP schema. Only a validated, laid-out flow diagram
+    # supports additional cues throughout a measured phrase, beyond 1 second.
+    if isinstance(ir, dict) and "presentation" not in ir and isinstance(ir.get("scenes"), list) and any(
+            isinstance(s, dict) and s.get("component") == "flow_diagram"
+            and isinstance(s.get("props"), dict) and "layout" in s["props"] for s in ir["scenes"]):
+        original_scene = schema["properties"]["scenes"]["items"]
+        diagram_scene = copy.deepcopy(original_scene)
+        diagram_scene["properties"]["component"] = {"const": "flow_diagram"}
+        diagram_scene["properties"]["props"]["required"] = ["layout"]
+        beats = diagram_scene["properties"]["beats"]
+        beats.pop("maxItems", None)
+        beats["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
+        schema["properties"]["scenes"]["items"] = {"anyOf": [original_scene, diagram_scene]}
+    information = isinstance(ir, dict) and ir.get("presentation") == {"preset": "information_motion"}
+    if isinstance(ir, dict) and "presentation" in ir:
+        schema["properties"]["presentation"] = {"type": "object", "additionalProperties": False,
+            "required": ["preset"], "properties": {"preset": {"const": "information_motion"}}}
+        if information:
+            schema["properties"]["style"]["properties"]["preset"] = {"const": "minimal_light"}
+            motion_scene = copy.deepcopy(schema["properties"]["scenes"]["items"])
+            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison"]}
+            motion_scene["properties"]["beats"].pop("maxItems", None)
+            motion_scene["properties"]["beats"]["items"]["properties"]["action"] = {"const": "reveal"}
+            motion_scene["properties"]["beats"]["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
+            schema["properties"]["scenes"]["items"] = motion_scene
+            schema["properties"]["scenes"].pop("maxItems", None)
+    if isinstance(ir, dict) and "content_structure" in ir:
+        # Explicit runtime extension; the frozen MVP contract remains unchanged.
+        schema["properties"]["content_structure"] = _schema(ROOT / "g2/schemas/content-structure.schema.json")
+        schema["properties"]["video"]["properties"]["duration_ms"].pop("maximum", None)
+        schema["properties"]["video"]["properties"]["duration_ms"]["minimum"] = 1
+        schema["properties"]["scenes"].pop("maxItems", None)
+        if not isinstance(ir.get("scenes"), list) or not ir["scenes"] or any(not isinstance(s, dict) or not (
+                (information and s.get("component") in {"title_card", "concept_reveal", "comparison"})
+                or (not information and s.get("component") == "flow_diagram" and isinstance(s.get("props"), dict) and "layout" in s["props"])) for s in ir["scenes"]):
+            _fail("CONTENT_COMPONENT_UNSUPPORTED", "/scenes", "chapter extension requires laid-out flow diagrams or explicit information motion")
+    if isinstance(ir, dict) and "playback" in ir:
+        schema["properties"]["playback"] = {"type":"object","additionalProperties":False,
+            "required":["speed","source_duration_ms","method"],"properties":{
+                "speed":{"enum":[.5,1,1.5,2]},"source_duration_ms":{"type":"integer","minimum":1},
+                "method":{"const":"pitch-preserving audio tempo; synchronized captions and animation"}}}
+        schema["properties"]["video"]["properties"]["duration_ms"].pop("maximum",None)
+        schema["properties"]["video"]["properties"]["duration_ms"]["minimum"] = 1
     errors = sorted(Draft202012Validator(schema).iter_errors(ir), key=lambda e: tuple(str(x) for x in e.path))
     if errors:
         error = errors[0]
         _fail("SCHEMA_VALIDATION", _pointer(error.path), error.message)
+    if "playback" in ir:
+        expected=ir["playback"]["source_duration_ms"]/ir["playback"]["speed"]
+        if abs(ir["video"]["duration_ms"]-expected)>max(200,expected*.02):
+            _fail("PLAYBACK_DURATION_MISMATCH","/playback","retimed duration does not match the selected speed")
     project_root = Path(project_root)
     if not project_root.is_dir():
         _fail("INVALID_PROJECT_ROOT", "/", "fixture root must be an existing directory")
@@ -181,6 +229,20 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         _fail("INVALID_AUDIO_ASSET", "/narration/audio_asset_id", "narration asset must be audio")
 
     segment_ids = _unique(narration["segments"], lambda x: x["id"], "/narration/segments", "segment id")
+    structure = ir.get("content_structure")
+    if structure:
+        chapters = structure["chapters"]
+        if [c["id"] for c in chapters] != [f"c{i+1}" for i in range(len(chapters))]:
+            _fail("CONTENT_CHAPTER_ORDER", "/content_structure", "chapter ids must be sequential")
+        coverage = [sid for c in chapters for sid in c["narration_segment_ids"]]
+        if coverage != [s["id"] for s in narration["segments"]]:
+            _fail("CONTENT_NARRATION_COVERAGE", "/content_structure", "chapters must cover narration once, in order")
+        scene_coverage = [sid for s in ir["scenes"] for sid in s["narration_segment_ids"]]
+        if scene_coverage != coverage:
+            _fail("CONTENT_SCENE_COVERAGE", "/scenes", "scenes must cover narration once, in order")
+        owner = {sid: c["id"] for c in chapters for sid in c["narration_segment_ids"]}
+        if any(len({owner[sid] for sid in s["narration_segment_ids"]}) != 1 for s in ir["scenes"]):
+            _fail("CONTENT_SCENE_CHAPTER", "/scenes", "a scene cannot cross a chapter boundary")
     previous_end = 0
     for index, segment in enumerate(narration["segments"]):
         path = f"/narration/segments/{index}"
@@ -228,6 +290,25 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
             for pi, path in enumerate(props["paths"]):
                 if len(set(path["edge_ids"])) != len(path["edge_ids"]) or any(e not in edge_ids for e in path["edge_ids"]):
                     _fail("INVALID_PATH_EDGE", f"{sp}/props/paths/{pi}/edge_ids", "path must reference unique declared edges")
+            if "layout" in props:
+                layout = props["layout"]
+                lp = f"{sp}/props/layout"
+                if not props.get("title") or not props.get("takeaway"):
+                    _fail("DIAGRAM_LAYOUT_CONTENT", lp, "laid out diagrams require title and takeaway")
+                laid_nodes = _unique(layout["nodes"], lambda n: n["id"], f"{lp}/nodes", "layout node")
+                laid_edges = _unique(layout["edges"], lambda e: e["id"], f"{lp}/edges", "layout edge")
+                if laid_nodes != node_ids or laid_edges != edge_ids:
+                    _fail("DIAGRAM_LAYOUT_COVERAGE", lp, "layout must cover all declared nodes and edges exactly")
+                labels = {n["id"]: n["label"] for n in props["nodes"]}
+                for ni, node in enumerate(layout["nodes"]):
+                    if "".join(node["label_lines"]) != labels[node["id"]]:
+                        _fail("DIAGRAM_LAYOUT_LABEL", f"{lp}/nodes/{ni}", "wrapped text must preserve the original label")
+                    if node["x"]+node["width"] > layout["width"]+1e-6 or node["y"]+node["height"] > layout["height"]+1e-6:
+                        _fail("DIAGRAM_LAYOUT_BOUNDS", f"{lp}/nodes/{ni}", "node exceeds the diagram stage")
+                    for other in layout["nodes"][:ni]:
+                        if (node["x"] < other["x"]+other["width"] and node["x"]+node["width"] > other["x"]
+                                and node["y"] < other["y"]+other["height"] and node["y"]+node["height"] > other["y"]):
+                            _fail("DIAGRAM_LAYOUT_OVERLAP", lp, "diagram nodes overlap")
 
         referenced = set(scene["narration_segment_ids"])
         if not referenced.issubset(segment_ids):
@@ -250,6 +331,10 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
                 _fail("TRIGGER_SEGMENT_NOT_IN_SCENE", f"{bp}/trigger/segment_id", sid)
             base = segments[sid]["start_ms"] if trigger["boundary"] == "start" else segments[sid]["end_ms"]
             absolute_ms = base + trigger["offset_ms"]
+            if ((information or (scene["component"] == "flow_diagram" and "layout" in props))
+                    and trigger["boundary"] == "start" and trigger["offset_ms"] >= 0
+                    and absolute_ms > segments[sid]["end_ms"]):
+                _fail("DIAGRAM_CUE_OUTSIDE_PHRASE", f"{bp}/trigger", "cue extends beyond its own measured phrase")
             if absolute_ms < 0 or absolute_ms > ir["video"]["duration_ms"]:
                 _fail("BEAT_TIME_OUT_OF_RANGE", f"{bp}/trigger/offset_ms", "trigger resolves outside the video")
             beat_frame = frame_at(absolute_ms, ir["video"]["fps"])
@@ -274,14 +359,37 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
     all_beats.sort(key=lambda b: (b["frame"], b["order"]))
     return {"schema_version": "0.2", "video": ir["video"], "style": ir["style"],
             "narration": narration, "scenes": scheduled_scenes, "beats": all_beats,
-            "total_frames": total_frames}
+            "total_frames": total_frames, **({"content_structure": structure} if structure else {}),
+            **({"presentation": ir["presentation"]} if information else {}),
+            **({"playback": ir["playback"]} if "playback" in ir else {})}
 
 
 def make_burned_subtitle_segments(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    font = ImageFont.truetype(SUBTITLE_FONT_PATH, SUBTITLE_FONT_SIZE)
+    # The renderer scales longer Chinese phrases to 30px and wraps at the same
+    # content width. Validate that every caption remains within two lines.
+    content_width = MAX_SUBTITLE_WIDTH - 56  # 28px horizontal padding on each side
     for index, segment in enumerate(segments):
-        bbox = font.getbbox(segment["text"])
-        if bbox[2] - bbox[0] > MAX_SUBTITLE_WIDTH or bbox[3] - bbox[1] > 74:
+        text = segment["text"]
+        font_size = SUBTITLE_FONT_SIZE if len(text) <= 32 else 30
+        font = ImageFont.truetype(SUBTITLE_FONT_PATH, font_size)
+        lines = 1
+        line_width = 0.0
+        for character in text:
+            if character in "\r\n":
+                lines += 1
+                line_width = 0.0
+                continue
+            character_width = font.getlength(character)
+            if character_width > content_width:
+                lines += 1
+                line_width = character_width
+            elif line_width + character_width > content_width:
+                lines += 1
+                line_width = character_width
+            else:
+                line_width += character_width
+        glyph_height = font.getbbox("潮")[3] - font.getbbox("潮")[1]
+        if lines > 2 or lines * glyph_height > 86:
             _fail("SUBTITLE_TOO_WIDE", f"/narration/segments/{index}/text", "subtitle exceeds the 1680px safe width")
     return segments
 
