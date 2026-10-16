@@ -11,6 +11,7 @@ import os
 import plistlib
 import re
 import subprocess
+import sys
 import time
 import tempfile
 from functools import wraps
@@ -562,6 +563,9 @@ def list_launchd_agents(directory: str | None = None) -> list[dict]:
     ``launchd_agents.agent_dir`` at an empty temp dir so the suite never reads
     (or edits) the machine's own agents.
     """
+    if sys.platform != "darwin":
+        return []
+
     agents: list[dict] = []
     for label in LAUNCHD_LABELS:
         # Read through launchd_agents so there is one definition of where an

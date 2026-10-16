@@ -5,6 +5,9 @@ Uses a synthetic crontab; the real user crontab is never touched.
 
 from __future__ import annotations
 
+import plistlib
+from types import SimpleNamespace
+
 import pytest
 
 from web.services import scheduler as sch
@@ -105,3 +108,37 @@ def test_discovery_keeps_launchd_when_cron_unavailable(monkeypatch):
     assert len(jobs) == 1
     assert jobs[0]["editable"] is False
     assert "unavailable" in jobs[0]["discovery_warning"]
+
+
+def test_linux_discovery_keeps_cron_without_reading_or_probing_launchd(fake_crontab, monkeypatch):
+    monkeypatch.setattr(sch, "sys", SimpleNamespace(platform="linux"))
+    monkeypatch.setattr(sch.launchd_agents, "agent_dir",
+                        lambda: pytest.fail("Linux read the macOS agent directory"))
+    monkeypatch.setattr(sch.subprocess, "run",
+                        lambda *_args, **_kwargs: pytest.fail("Linux probed launchctl"))
+
+    jobs = sch.all_jobs()
+
+    assert {job["id"] for job in jobs} == {"pipeline", "other_job"}
+    assert all(job["backend"] == "cron" for job in jobs)
+    assert all("discovery_warning" not in job for job in jobs)
+
+
+def test_macos_discovery_still_reports_a_real_launchctl_failure(tmp_path, monkeypatch):
+    label = sch.LAUNCHD_LABELS[0]
+    path = tmp_path / f"{label}.plist"
+    content = plistlib.dumps({"Label": label, "StartCalendarInterval": {"Hour": 6, "Minute": 0}})
+    path.write_bytes(content)
+    monkeypatch.setattr(sch, "sys", SimpleNamespace(platform="darwin"))
+
+    def unavailable(*_args, **_kwargs):
+        raise FileNotFoundError("fixture launchctl unavailable")
+
+    monkeypatch.setattr(sch.subprocess, "run", unavailable)
+
+    jobs = sch.list_launchd_agents(str(tmp_path))
+
+    job = next(job for job in jobs if job["id"] == label)
+    assert job["installed"] and not job["loaded"]
+    assert "fixture launchctl unavailable" in job["discovery_warning"]
+    assert path.read_bytes() == content

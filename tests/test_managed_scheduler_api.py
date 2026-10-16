@@ -1,5 +1,6 @@
 """Product API contracts for creating any job with a durable recurring plan."""
 import time
+from types import SimpleNamespace
 
 import pytest
 
@@ -50,6 +51,25 @@ def test_new_job_and_plan_create_atomically_without_touching_cron(admin, monkeyp
     assert client.put(f"/api/scheduler/{plan['id']}", headers=headers, json={'schedule': '0 9 * * *'}).json()['enabled'] is False
     assert client.delete('/api/jobs/research/新增_job', headers=headers).status_code == 200
     assert storage.list() == []
+
+
+def test_linux_managed_plan_stays_healthy_without_launchctl(admin, monkeypatch):
+    from web.services import scheduler
+
+    monkeypatch.setattr(scheduler, "sys", SimpleNamespace(platform="linux"))
+    monkeypatch.setattr(scheduler.subprocess, "run",
+                        lambda *_args, **_kwargs: pytest.fail("Linux probed launchctl"))
+    client, _, _, _ = admin
+
+    response = create(admin)
+    assert response.status_code == 201, response.text
+    listing = client.get('/api/scheduler').json()
+
+    assert listing['dispatcher']['online']
+    assert listing['health']['status'] == 'ok'
+    assert listing['warnings'] == []
+    assert any(job['backend'] == 'managed' for job in listing['jobs'])
+    assert all(job['backend'] != 'launchd' for job in listing['jobs'])
 
 
 def test_alias_cannot_create_duplicate_plan(admin):
