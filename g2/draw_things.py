@@ -168,3 +168,88 @@ def generate_scene_backgrounds(board: dict, fixture_root: Path, artifacts_dir: P
     (artifacts_dir / "scene-backgrounds.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return renderer_paths
+
+
+def regenerate_scene_background(board: dict, scene_id: str, fixture_root: Path, artifacts_dir: Path,
+                                *, prompt_extra: str = "", endpoint: str | None = None,
+                                timeout: float = API_TIMEOUT_SECONDS) -> dict[str, str]:
+    """Replace one background inside a fresh version workspace and preserve the other two."""
+    api_base = base_url(endpoint)
+    scenes = board.get("scenes")
+    if not isinstance(scenes, list) or len(scenes) != 3:
+        raise DrawThingsFault("DRAW_THINGS_SCENES_INVALID", "场景背景生成需要 3 个已校验分镜")
+    if not isinstance(prompt_extra, str) or len(prompt_extra) > 300:
+        raise DrawThingsFault("DRAW_THINGS_PROMPT_INVALID", "补充画面要求最多 300 个字符")
+    prompt_extra = re.sub(r"[\x00-\x1f\x7f]", " ", prompt_extra).strip()
+    manifest_path = artifacts_dir / "scene-backgrounds.json"
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise DrawThingsFault("SCENE_IMAGE_MANIFEST_INVALID", "原任务的场景图记录不可用") from exc
+    records = manifest.get("images") if isinstance(manifest, dict) else None
+    if not isinstance(records, list) or len(records) != 3:
+        raise DrawThingsFault("SCENE_IMAGE_MANIFEST_INVALID", "原任务的场景图记录必须包含三张图片")
+
+    renderer_paths: dict[str, str] = {}
+    selected = None
+    selected_index = None
+    for index, (scene, record) in enumerate(zip(scenes, records), start=1):
+        current_id = scene.get("id") if isinstance(scene, dict) else None
+        expected_path = f"assets/scene-backgrounds/scene-{index:02d}.png"
+        if (not isinstance(current_id, str) or not re.fullmatch(r"[a-z][a-z0-9_]{0,47}", current_id)
+                or not isinstance(record, dict) or record.get("scene_id") != current_id
+                or record.get("path") != expected_path):
+            raise DrawThingsFault("SCENE_IMAGE_MANIFEST_INVALID", "原任务的场景图映射无效")
+        renderer_paths[current_id] = expected_path
+        if current_id == scene_id:
+            selected, selected_index = scene, index
+    if selected is None or selected_index is None:
+        raise DrawThingsFault("SCENE_IMAGE_NOT_FOUND", "找不到要重做的场景")
+
+    prompt = _prompt_for_scene(selected)
+    if prompt_extra:
+        prompt += f" 用户补充要求：{prompt_extra}。"
+    body = json.dumps({
+        "prompt": prompt,
+        "negative_prompt": "text, letters, numbers, labels, typography, logo, watermark, UI, chart, diagram, arrow, clutter",
+        "width": IMAGE_WIDTH,
+        "height": IMAGE_HEIGHT,
+    }, ensure_ascii=False).encode("utf-8")
+    response = _read_json(api_base + "/sdapi/v1/txt2img", method="POST", body=body, timeout=timeout)
+    images = response.get("images")
+    if not isinstance(images, list) or not images or not isinstance(images[0], str):
+        raise DrawThingsFault("DRAW_THINGS_IMAGE_MISSING", f"场景 {scene_id} 没有收到图像")
+    try:
+        raw = base64.b64decode(images[0], validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise DrawThingsFault("DRAW_THINGS_IMAGE_INVALID", f"场景 {scene_id} 的图像数据无法解码") from exc
+    width, height = _validate_png(raw)
+    image_path = fixture_root / "assets" / "scene-backgrounds" / f"scene-{selected_index:02d}.png"
+    if image_path.is_symlink() or not image_path.is_file():
+        raise DrawThingsFault("SCENE_IMAGE_NOT_FOUND", f"原任务中的场景 {scene_id} 背景图不可用")
+    temporary = image_path.with_name(image_path.name + ".replacement")
+    if temporary.exists() or temporary.is_symlink():
+        raise DrawThingsFault("DRAW_THINGS_OUTPUT_EXISTS", "场景图替换临时文件已存在，拒绝覆盖")
+    try:
+        with temporary.open("xb") as stream:
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, image_path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+    digest = hashlib.sha256(raw).hexdigest()
+    records[selected_index - 1] = {
+        **records[selected_index - 1],
+        "prompt": prompt,
+        "sha256": digest,
+        "bytes": len(raw),
+        "width": width,
+        "height": height,
+        "revision": int(records[selected_index - 1].get("revision", 0)) + 1,
+    }
+    manifest["images"] = records
+    manifest["last_edited_scene_id"] = scene_id
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return renderer_paths

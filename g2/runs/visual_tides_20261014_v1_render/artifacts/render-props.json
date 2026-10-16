@@ -1,0 +1,727 @@
+{
+  "plan": {
+    "contract_version": "visual-experiment-1",
+    "scenes": [
+      {
+        "id": "tide_definition",
+        "title": "潮汐：有规律的升降",
+        "takeaway": "潮汐是海面有规律的升降，不是一次性的水位变化。",
+        "source_quotes": [
+          "潮汐是海面有规律的升降。"
+        ],
+        "narration_segment_ids": [
+          "n1"
+        ],
+        "objects": [
+          {
+            "id": "sea_bg",
+            "kind": "rect",
+            "x": 50,
+            "y": 80,
+            "width": 100,
+            "height": 28,
+            "color": "blue",
+            "opacity": 0.18
+          },
+          {
+            "id": "seafloor",
+            "kind": "rect",
+            "x": 50,
+            "y": 88,
+            "width": 100,
+            "height": 16,
+            "color": "slate",
+            "opacity": 0.55
+          },
+          {
+            "id": "sea_surface",
+            "kind": "wave",
+            "x": 50,
+            "y": 64,
+            "width": 70,
+            "height": 6,
+            "color": "cyan",
+            "label": "海面",
+            "label_position": "above",
+            "motion": {
+              "type": "wave",
+              "cycles": 2,
+              "amplitude": 0.2,
+              "start": 0,
+              "end": 1
+            }
+          },
+          {
+            "id": "high_tide",
+            "kind": "marker",
+            "x": 22,
+            "y": 54,
+            "width": 1.8,
+            "color": "white",
+            "label": "高潮位",
+            "label_position": "above"
+          },
+          {
+            "id": "low_tide",
+            "kind": "marker",
+            "x": 22,
+            "y": 74,
+            "width": 1.8,
+            "color": "white",
+            "label": "低潮位",
+            "label_position": "below"
+          },
+          {
+            "id": "rise_arrow",
+            "kind": "arrow",
+            "x": 38,
+            "y": 62,
+            "width": 8,
+            "height": 2,
+            "color": "gold",
+            "rotation": -90,
+            "label": "涨潮",
+            "label_position": "right"
+          },
+          {
+            "id": "fall_arrow",
+            "kind": "arrow",
+            "x": 62,
+            "y": 62,
+            "width": 8,
+            "height": 2,
+            "color": "blue",
+            "rotation": 90,
+            "label": "落潮",
+            "label_position": "right"
+          },
+          {
+            "id": "caption",
+            "kind": "text",
+            "x": 50,
+            "y": 16,
+            "width": 30,
+            "text": "海面有规律地升降",
+            "color": "white"
+          }
+        ],
+        "start_frame": 0,
+        "end_frame": 100
+      },
+      {
+        "id": "two_bulges",
+        "title": "月球作用与两侧隆起",
+        "takeaway": "月球引力与共同质心运动的惯性作用，使地球两侧海水都倾向隆起。",
+        "source_quotes": [
+          "地球上的海水受到月球引力作用，同时地球和月球围绕共同质心运动产生的惯性作用，使地球两侧的海水都倾向形成隆起。"
+        ],
+        "narration_segment_ids": [
+          "n2"
+        ],
+        "objects": [
+          {
+            "id": "water_left",
+            "kind": "ellipse",
+            "x": 22,
+            "y": 50,
+            "width": 26,
+            "height": 36,
+            "color": "cyan",
+            "opacity": 0.45
+          },
+          {
+            "id": "water_right",
+            "kind": "ellipse",
+            "x": 68,
+            "y": 50,
+            "width": 26,
+            "height": 36,
+            "color": "cyan",
+            "opacity": 0.45
+          },
+          {
+            "id": "earth",
+            "kind": "sphere",
+            "x": 45,
+            "y": 50,
+            "width": 20,
+            "surface": "earth",
+            "label": "地球",
+            "label_position": "below"
+          },
+          {
+            "id": "moon",
+            "kind": "sphere",
+            "x": 88,
+            "y": 24,
+            "width": 8,
+            "surface": "moon",
+            "label": "月球",
+            "label_position": "above"
+          },
+          {
+            "id": "moon_gravity",
+            "kind": "arrow",
+            "x": 65,
+            "y": 40,
+            "width": 14,
+            "height": 1.6,
+            "color": "gold",
+            "rotation": -31,
+            "label": "月球引力",
+            "label_position": "above"
+          },
+          {
+            "id": "inertia",
+            "kind": "arrow",
+            "x": 70,
+            "y": 62,
+            "width": 14,
+            "height": 1.6,
+            "color": "purple",
+            "rotation": 0,
+            "label": "惯性作用",
+            "label_position": "below"
+          },
+          {
+            "id": "caption",
+            "kind": "text",
+            "x": 46,
+            "y": 12,
+            "width": 30,
+            "text": "两侧海水都倾向隆起",
+            "color": "white"
+          },
+          {
+            "id": "note",
+            "kind": "text",
+            "x": 50,
+            "y": 90,
+            "width": 40,
+            "text": "共同质心运动的惯性作用",
+            "color": "white",
+            "opacity": 0.9
+          }
+        ],
+        "start_frame": 100,
+        "end_frame": 472
+      },
+      {
+        "id": "rotation_two_cycles",
+        "title": "自转带来两次涨落",
+        "takeaway": "地球自转使海岸依次经过不同海面高度，通常一天两次涨潮、两次落潮。",
+        "source_quotes": [
+          "地球自转使许多海岸地区依次经过不同的海面高度，因此通常一天会出现两次涨潮和两次落潮，但具体次数和时间会随地点而不同。"
+        ],
+        "narration_segment_ids": [
+          "n3"
+        ],
+        "objects": [
+          {
+            "id": "water_left",
+            "kind": "ellipse",
+            "x": 28,
+            "y": 50,
+            "width": 24,
+            "height": 34,
+            "color": "cyan",
+            "opacity": 0.42,
+            "label": "海水隆起",
+            "label_position": "above"
+          },
+          {
+            "id": "water_right",
+            "kind": "ellipse",
+            "x": 72,
+            "y": 50,
+            "width": 24,
+            "height": 34,
+            "color": "cyan",
+            "opacity": 0.42
+          },
+          {
+            "id": "earth_spin",
+            "kind": "group",
+            "x": 50,
+            "y": 50,
+            "motion": {
+              "type": "rotate",
+              "degrees": 360,
+              "start": 0,
+              "end": 1
+            }
+          },
+          {
+            "id": "earth",
+            "kind": "sphere",
+            "parent_id": "earth_spin",
+            "x": 0,
+            "y": 0,
+            "width": 22,
+            "surface": "earth"
+          },
+          {
+            "id": "coast",
+            "kind": "marker",
+            "parent_id": "earth_spin",
+            "x": 0,
+            "y": -11,
+            "width": 1.8,
+            "color": "red",
+            "label": "海岸",
+            "label_position": "above"
+          },
+          {
+            "id": "caption",
+            "kind": "text",
+            "x": 50,
+            "y": 10,
+            "width": 20,
+            "text": "地球自转",
+            "color": "white"
+          },
+          {
+            "id": "caption2",
+            "kind": "text",
+            "x": 50,
+            "y": 88,
+            "width": 38,
+            "text": "海岸依次经过不同海面高度",
+            "color": "white"
+          },
+          {
+            "id": "caption3",
+            "kind": "text",
+            "x": 50,
+            "y": 95,
+            "width": 38,
+            "text": "通常一天两次涨潮、两次落潮",
+            "color": "white"
+          }
+        ],
+        "start_frame": 472,
+        "end_frame": 824
+      },
+      {
+        "id": "spring_tide",
+        "title": "大潮：日月大致一线",
+        "takeaway": "地球、月球、太阳大致排成一线时，日月潮汐作用方向接近，潮差通常较大。",
+        "source_quotes": [
+          "太阳的引力也会影响潮汐。",
+          "当地球、月球、太阳大致排成一线时，太阳和月球的潮汐作用方向接近，潮差通常较大，称为大潮"
+        ],
+        "narration_segment_ids": [
+          "n4"
+        ],
+        "objects": [
+          {
+            "id": "sun",
+            "kind": "sphere",
+            "x": 10,
+            "y": 50,
+            "width": 14,
+            "surface": "sun",
+            "label": "太阳",
+            "label_position": "below"
+          },
+          {
+            "id": "moon",
+            "kind": "sphere",
+            "x": 30,
+            "y": 50,
+            "width": 8,
+            "surface": "moon",
+            "label": "月球",
+            "label_position": "below"
+          },
+          {
+            "id": "water_left",
+            "kind": "ellipse",
+            "x": 48,
+            "y": 50,
+            "width": 22,
+            "height": 30,
+            "color": "cyan",
+            "opacity": 0.45,
+            "label": "高潮区",
+            "label_position": "above"
+          },
+          {
+            "id": "water_right",
+            "kind": "ellipse",
+            "x": 76,
+            "y": 50,
+            "width": 22,
+            "height": 30,
+            "color": "cyan",
+            "opacity": 0.45
+          },
+          {
+            "id": "earth",
+            "kind": "sphere",
+            "x": 62,
+            "y": 50,
+            "width": 18,
+            "surface": "earth",
+            "label": "地球",
+            "label_position": "below"
+          },
+          {
+            "id": "caption",
+            "kind": "text",
+            "x": 50,
+            "y": 16,
+            "width": 40,
+            "text": "日月大致一线，作用方向接近",
+            "color": "white"
+          },
+          {
+            "id": "caption2",
+            "kind": "text",
+            "x": 50,
+            "y": 86,
+            "width": 36,
+            "text": "潮差通常较大，称为大潮",
+            "color": "white"
+          }
+        ],
+        "start_frame": 824,
+        "end_frame": 1152
+      },
+      {
+        "id": "neap_tide",
+        "title": "小潮：日月成直角",
+        "takeaway": "月球与太阳相对地球大致成直角时，两者作用部分抵消，潮差通常较小。",
+        "source_quotes": [
+          "当月球与太阳相对地球大致成直角时，两者作用部分抵消，潮差通常较小，称为小潮。"
+        ],
+        "narration_segment_ids": [
+          "n5"
+        ],
+        "objects": [
+          {
+            "id": "sun",
+            "kind": "sphere",
+            "x": 10,
+            "y": 50,
+            "width": 14,
+            "surface": "sun",
+            "label": "太阳",
+            "label_position": "below"
+          },
+          {
+            "id": "moon",
+            "kind": "sphere",
+            "x": 50,
+            "y": 12,
+            "width": 8,
+            "surface": "moon",
+            "label": "月球",
+            "label_position": "above"
+          },
+          {
+            "id": "water_small",
+            "kind": "ellipse",
+            "x": 50,
+            "y": 50,
+            "width": 26,
+            "height": 26,
+            "color": "cyan",
+            "opacity": 0.35
+          },
+          {
+            "id": "high_side_left",
+            "kind": "ellipse",
+            "x": 38,
+            "y": 50,
+            "width": 14,
+            "height": 20,
+            "color": "cyan",
+            "opacity": 0.45,
+            "label": "潮差较小",
+            "label_position": "left"
+          },
+          {
+            "id": "high_side_right",
+            "kind": "ellipse",
+            "x": 62,
+            "y": 50,
+            "width": 14,
+            "height": 20,
+            "color": "cyan",
+            "opacity": 0.45
+          },
+          {
+            "id": "earth",
+            "kind": "sphere",
+            "x": 50,
+            "y": 50,
+            "width": 18,
+            "surface": "earth",
+            "label": "地球",
+            "label_position": "below"
+          },
+          {
+            "id": "sun_dir",
+            "kind": "arrow",
+            "x": 34,
+            "y": 50,
+            "width": 10,
+            "height": 1.4,
+            "color": "gold",
+            "rotation": 180,
+            "label": "太阳方向",
+            "label_position": "above"
+          },
+          {
+            "id": "moon_dir",
+            "kind": "arrow",
+            "x": 50,
+            "y": 36,
+            "width": 8,
+            "height": 1.4,
+            "color": "purple",
+            "rotation": -90,
+            "label": "月球方向",
+            "label_position": "right"
+          },
+          {
+            "id": "caption",
+            "kind": "text",
+            "x": 50,
+            "y": 78,
+            "width": 30,
+            "text": "两者大致成直角",
+            "color": "white"
+          },
+          {
+            "id": "caption2",
+            "kind": "text",
+            "x": 50,
+            "y": 88,
+            "width": 36,
+            "text": "作用部分抵消，潮差较小",
+            "color": "white"
+          }
+        ],
+        "start_frame": 1152,
+        "end_frame": 1388
+      },
+      {
+        "id": "coast_varies",
+        "title": "海岸地形改变潮汐",
+        "takeaway": "海岸形状、水深和海底地形会改变潮汐传播，不同海湾的潮汐时间与高度并不相同。",
+        "source_quotes": [
+          "海岸的形状、水深和海底地形会进一步改变潮汐传播，因此不同海湾的潮汐时间与高度并不完全相同。",
+          "潮汐是海水整体运动，不等于每一处海面都以同样方式升降。"
+        ],
+        "narration_segment_ids": [
+          "n6"
+        ],
+        "objects": [
+          {
+            "id": "caption",
+            "kind": "text",
+            "x": 50,
+            "y": 10,
+            "width": 50,
+            "text": "海岸形状、水深、海底地形改变潮汐传播",
+            "color": "white"
+          },
+          {
+            "id": "caption2",
+            "kind": "text",
+            "x": 50,
+            "y": 18,
+            "width": 44,
+            "text": "不同海湾时间与高度不同（示意）",
+            "color": "white"
+          },
+          {
+            "id": "caption3",
+            "kind": "text",
+            "x": 50,
+            "y": 26,
+            "width": 44,
+            "text": "潮汐是海水整体运动，并非每处一样",
+            "color": "white"
+          },
+          {
+            "id": "different",
+            "kind": "arrow",
+            "x": 50,
+            "y": 36,
+            "width": 16,
+            "height": 2,
+            "color": "gold",
+            "rotation": 0,
+            "label": "地形不同",
+            "label_position": "above"
+          },
+          {
+            "id": "bay_A_land",
+            "kind": "rect",
+            "x": 24,
+            "y": 80,
+            "width": 40,
+            "height": 28,
+            "color": "slate",
+            "opacity": 0.65,
+            "label": "海湾A",
+            "label_position": "below"
+          },
+          {
+            "id": "bay_A_water",
+            "kind": "rect",
+            "x": 24,
+            "y": 66,
+            "width": 38,
+            "height": 16,
+            "color": "blue",
+            "opacity": 0.35
+          },
+          {
+            "id": "bay_A_surface",
+            "kind": "wave",
+            "x": 24,
+            "y": 56,
+            "width": 34,
+            "height": 6,
+            "color": "cyan",
+            "label": "潮位A",
+            "label_position": "above",
+            "motion": {
+              "type": "wave",
+              "cycles": 1.5,
+              "start": 0,
+              "end": 1
+            }
+          },
+          {
+            "id": "bay_B_land",
+            "kind": "rect",
+            "x": 74,
+            "y": 80,
+            "width": 40,
+            "height": 28,
+            "color": "slate",
+            "opacity": 0.65,
+            "label": "海湾B",
+            "label_position": "below"
+          },
+          {
+            "id": "bay_B_water",
+            "kind": "rect",
+            "x": 74,
+            "y": 60,
+            "width": 38,
+            "height": 26,
+            "color": "blue",
+            "opacity": 0.35
+          },
+          {
+            "id": "bay_B_surface",
+            "kind": "wave",
+            "x": 74,
+            "y": 46,
+            "width": 34,
+            "height": 6,
+            "color": "cyan",
+            "label": "潮位B",
+            "label_position": "above",
+            "motion": {
+              "type": "wave",
+              "cycles": 1.5,
+              "start": 0.3,
+              "end": 1
+            }
+          }
+        ],
+        "start_frame": 1388,
+        "end_frame": 1813
+      }
+    ],
+    "segments": [
+      {
+        "id": "n1",
+        "text": "潮汐是海面有规律的升降现象。",
+        "utterance_start_sample": 6000,
+        "utterance_end_sample": 77904,
+        "speech_first_sample": 1269,
+        "speech_last_sample": 65682,
+        "sample_rate": 24000,
+        "voice": "zf_xiaoxiao",
+        "wav": "g3/data/jobs/877e83a6-b9a7-41b2-a433-22a847a4e97c/attempts/1/g2-run/fixtures/assets/segments/n1.wav",
+        "start_ms": 253,
+        "end_ms": 3037
+      },
+      {
+        "id": "n2",
+        "text": "地球上的海水受到月球引力作用，同时地球和月球围绕共同质心运动产生的惯性作用，使地球两侧的海水都倾向形成隆起。月球引力会影响潮汐。",
+        "utterance_start_sample": 86544,
+        "utterance_end_sample": 375920,
+        "speech_first_sample": 1171,
+        "speech_last_sample": 283320,
+        "sample_rate": 24000,
+        "voice": "zf_xiaoxiao",
+        "wav": "g3/data/jobs/877e83a6-b9a7-41b2-a433-22a847a4e97c/attempts/1/g2-run/fixtures/assets/segments/n2.wav",
+        "start_ms": 3606,
+        "end_ms": 15461
+      },
+      {
+        "id": "n3",
+        "text": "地球自转使许多海岸地区依次经过不同的海面高度，因此通常一天会出现两次涨潮和两次落潮，但具体次数和时间会随地点而不同。",
+        "utterance_start_sample": 384560,
+        "utterance_end_sample": 657408,
+        "speech_first_sample": 1021,
+        "speech_last_sample": 266781,
+        "sample_rate": 24000,
+        "voice": "zf_xiaoxiao",
+        "wav": "g3/data/jobs/877e83a6-b9a7-41b2-a433-22a847a4e97c/attempts/1/g2-run/fixtures/assets/segments/n3.wav",
+        "start_ms": 16023,
+        "end_ms": 27189
+      },
+      {
+        "id": "n4",
+        "text": "太阳的引力也会影响潮汐。当地球、月球、太阳大致排成一线时，太阳和月球的潮汐作用方向接近，潮差通常较大，称为大潮。",
+        "utterance_start_sample": 666048,
+        "utterance_end_sample": 919552,
+        "speech_first_sample": 935,
+        "speech_last_sample": 247426,
+        "sample_rate": 24000,
+        "voice": "zf_xiaoxiao",
+        "wav": "g3/data/jobs/877e83a6-b9a7-41b2-a433-22a847a4e97c/attempts/1/g2-run/fixtures/assets/segments/n4.wav",
+        "start_ms": 27752,
+        "end_ms": 38111
+      },
+      {
+        "id": "n5",
+        "text": "当月球与太阳相对地球大致成直角时，两者作用部分抵消，潮差通常较小，称为小潮。",
+        "utterance_start_sample": 928192,
+        "utterance_end_sample": 1108303,
+        "speech_first_sample": 917,
+        "speech_last_sample": 174349,
+        "sample_rate": 24000,
+        "voice": "zf_xiaoxiao",
+        "wav": "g3/data/jobs/877e83a6-b9a7-41b2-a433-22a847a4e97c/attempts/1/g2-run/fixtures/assets/segments/n5.wav",
+        "start_ms": 38675,
+        "end_ms": 45989
+      },
+      {
+        "id": "n6",
+        "text": "海岸的形状、水深和海底地形会进一步改变潮汐传播，因此不同海湾的潮汐时间与高度并不完全相同。潮汐是海水整体运动，不等于每一处海面都以同样方式升降。",
+        "utterance_start_sample": 1116943,
+        "utterance_end_sample": 1449630,
+        "speech_first_sample": 1116,
+        "speech_last_sample": 326812,
+        "sample_rate": 24000,
+        "voice": "zf_xiaoxiao",
+        "wav": "g3/data/jobs/877e83a6-b9a7-41b2-a433-22a847a4e97c/attempts/1/g2-run/fixtures/assets/segments/n6.wav",
+        "start_ms": 46539,
+        "end_ms": 60206
+      }
+    ],
+    "total_frames": 1813,
+    "audio_public_file": "assets/communications_noise.wav"
+  }
+}

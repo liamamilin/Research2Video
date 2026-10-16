@@ -1,0 +1,9 @@
+{
+  "baseline": "g3/data/jobs/877e83a6-b9a7-41b2-a433-22a847a4e97c/attempts/1/g2-run",
+  "source_wav_sha256": "051061afb2694e955b8bb2e70a49863aa5531d83abb59b917468fcba07cb13ad",
+  "source_video_sha256": "8a1abe614cd6f99e370d3f13b44daa9e41708f0dba91630333e0e344e26bcce0",
+  "same_narration": true,
+  "same_audio": true,
+  "same_duration_frames": 1813,
+  "human_authored_visual_plan": false
+}

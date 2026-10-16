@@ -1,0 +1,244 @@
+{
+  "id": "merge",
+  "layoutOptions": {
+    "elk.algorithm": "layered",
+    "elk.direction": "RIGHT",
+    "elk.edgeRouting": "ORTHOGONAL",
+    "elk.spacing.nodeNode": "60",
+    "elk.layered.spacing.nodeNodeBetweenLayers": "70",
+    "elk.padding": "[top=30,left=30,bottom=30,right=30]"
+  },
+  "children": [
+    {
+      "id": "source",
+      "width": 220,
+      "height": 80,
+      "displayText": "输入素材",
+      "$H": 547,
+      "x": 30,
+      "y": 43.33333333333333
+    },
+    {
+      "id": "script",
+      "width": 220,
+      "height": 80,
+      "displayText": "旁白讲稿",
+      "$H": 549,
+      "x": 320,
+      "y": 43.33333333333333
+    },
+    {
+      "id": "plan",
+      "width": 220,
+      "height": 80,
+      "displayText": "视觉规划",
+      "$H": 551,
+      "x": 610,
+      "y": 30
+    },
+    {
+      "id": "voice",
+      "width": 220,
+      "height": 80,
+      "displayText": "生成旁白",
+      "$H": 553,
+      "x": 900,
+      "y": 170
+    },
+    {
+      "id": "visual",
+      "width": 220,
+      "height": 80,
+      "displayText": "生成画面",
+      "$H": 555,
+      "x": 900,
+      "y": 30
+    },
+    {
+      "id": "output",
+      "width": 220,
+      "height": 80,
+      "displayText": "合成视频",
+      "$H": 557,
+      "x": 1190,
+      "y": 43.33333333333333
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_0",
+      "sources": [
+        "source"
+      ],
+      "targets": [
+        "script"
+      ],
+      "sections": [
+        {
+          "id": "edge_0_s0",
+          "startPoint": {
+            "x": 250,
+            "y": 83.33333333333333
+          },
+          "endPoint": {
+            "x": 320,
+            "y": 83.33333333333333
+          },
+          "incomingShape": "source",
+          "outgoingShape": "script"
+        }
+      ],
+      "container": "merge"
+    },
+    {
+      "id": "edge_1",
+      "sources": [
+        "script"
+      ],
+      "targets": [
+        "voice"
+      ],
+      "sections": [
+        {
+          "id": "edge_1_s0",
+          "startPoint": {
+            "x": 540,
+            "y": 96.66666666666667
+          },
+          "endPoint": {
+            "x": 900,
+            "y": 210
+          },
+          "bendPoints": [
+            {
+              "x": 550,
+              "y": 96.66666666666667
+            },
+            {
+              "x": 550,
+              "y": 210
+            }
+          ],
+          "incomingShape": "script",
+          "outgoingShape": "voice"
+        }
+      ],
+      "container": "merge"
+    },
+    {
+      "id": "edge_2",
+      "sources": [
+        "script"
+      ],
+      "targets": [
+        "plan"
+      ],
+      "sections": [
+        {
+          "id": "edge_2_s0",
+          "startPoint": {
+            "x": 540,
+            "y": 70
+          },
+          "endPoint": {
+            "x": 610,
+            "y": 70
+          },
+          "incomingShape": "script",
+          "outgoingShape": "plan"
+        }
+      ],
+      "container": "merge"
+    },
+    {
+      "id": "edge_3",
+      "sources": [
+        "plan"
+      ],
+      "targets": [
+        "visual"
+      ],
+      "sections": [
+        {
+          "id": "edge_3_s0",
+          "startPoint": {
+            "x": 830,
+            "y": 70
+          },
+          "endPoint": {
+            "x": 900,
+            "y": 70
+          },
+          "incomingShape": "plan",
+          "outgoingShape": "visual"
+        }
+      ],
+      "container": "merge"
+    },
+    {
+      "id": "edge_4",
+      "sources": [
+        "voice"
+      ],
+      "targets": [
+        "output"
+      ],
+      "sections": [
+        {
+          "id": "edge_4_s0",
+          "startPoint": {
+            "x": 1120,
+            "y": 210
+          },
+          "endPoint": {
+            "x": 1190,
+            "y": 96.66666666666667
+          },
+          "bendPoints": [
+            {
+              "x": 1130,
+              "y": 210
+            },
+            {
+              "x": 1130,
+              "y": 96.66666666666667
+            }
+          ],
+          "incomingShape": "voice",
+          "outgoingShape": "output"
+        }
+      ],
+      "container": "merge"
+    },
+    {
+      "id": "edge_5",
+      "sources": [
+        "visual"
+      ],
+      "targets": [
+        "output"
+      ],
+      "sections": [
+        {
+          "id": "edge_5_s0",
+          "startPoint": {
+            "x": 1120,
+            "y": 70
+          },
+          "endPoint": {
+            "x": 1190,
+            "y": 70
+          },
+          "incomingShape": "visual",
+          "outgoingShape": "output"
+        }
+      ],
+      "container": "merge"
+    }
+  ],
+  "$H": 545,
+  "x": 0,
+  "y": 0,
+  "width": 1440,
+  "height": 280
+}

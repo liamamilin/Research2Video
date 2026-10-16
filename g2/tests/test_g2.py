@@ -1,11 +1,19 @@
 import json
+from pathlib import Path
 import pytest
 
 from g2.run_g2 import (
     G2Fault,
+    MAX_PROJECTED_API_COST_USD,
+    MAX_TOTAL_CALLS,
+    MAX_TOKENS_PER_CALL,
     build_narration_messages,
     build_storyboard_messages,
+    duration_is_acceptable,
+    duration_range_for,
+    ensure_renderer_dependency_link,
     load_deepseek_api_key,
+    narration_character_range,
     validate_narration_plan,
     validate_storyboard_plan,
 )
@@ -60,6 +68,43 @@ def test_narration_accepts_exact_source_provenance():
     validate_narration_plan(plan, source)
 
 
+def test_long_form_duration_and_narration_targets_scale_with_requested_length():
+    assert duration_range_for(18) == (16, 20)
+    assert duration_range_for(45) == (43, 47)
+    assert duration_range_for(90) == (88, 90)
+    assert narration_character_range(18) == (72, 94)
+    assert narration_character_range(45) == (180, 234)
+    assert narration_character_range(90) == (464, 468)
+    assert duration_is_acceptable(45.419, (43, 47))
+    assert not duration_is_acceptable(42.999, (43, 47))
+    with pytest.raises(ValueError):
+        duration_range_for(91)
+
+
+def test_deepseek_completion_budget_allows_long_reasoning_with_cost_bound_updated():
+    assert MAX_TOKENS_PER_CALL == 100_000
+    assert MAX_TOTAL_CALLS == 16
+    assert MAX_PROJECTED_API_COST_USD == pytest.approx(1.968)
+
+
+def test_long_form_prompt_requests_duration_scaled_narration():
+    messages = build_narration_messages("素材" * 100)
+    assert "全文约 60 到 80 个汉字" in messages[0]["content"]
+    payload = json.loads(messages[1]["content"].split("\n", 1)[1])
+    assert payload["target_duration_seconds"] == [10, 20]
+    assert payload["target_total_characters"] == [60, 80]
+
+
+def test_renderer_dependency_link_repairs_stale_broken_project_link(tmp_path):
+    renderer = tmp_path / "renderer"
+    renderer.mkdir()
+    dependency_link = renderer / "node_modules"
+    dependency_link.symlink_to(tmp_path / "moved-project" / "node_modules", target_is_directory=True)
+
+    assert ensure_renderer_dependency_link(renderer) == dependency_link
+    assert dependency_link.resolve(strict=True) == (Path(__file__).resolve().parents[2] / "g0/vendor/remotion-audiogram/node_modules").resolve()
+
+
 def test_narration_rejects_unsupported_citation():
     source, plan = sample_narration()
     plan["segments"][1]["source_quotes"] = ["每秒传输一百万比特"]
@@ -99,6 +144,8 @@ def test_storyboard_prompt_uses_compact_phrase_groups_and_bounded_offsets():
     assert payload["expected_scene_segment_groups"] == [["n1"], ["n2", "n3"], ["n4"]]
     assert "恰好 3 个" in messages[0]["content"]
     assert "offset_ms 必须在 -1000 到 1000 之间" in messages[0]["content"]
+    assert "路径 p_tidal_system 必须写 path:p_tidal_system" in messages[0]["content"]
+    assert "beat id 必须全局唯一" in messages[0]["content"]
 
 
 def test_storyboard_prompt_and_validator_support_non_case_a_topics():
