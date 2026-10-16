@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "core_message",
+    "chapters"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 46
+    },
+    "core_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "chapters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "question",
+          "source_unit_ids",
+          "points"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^c[1-9][0-9]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_unit_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^u[1-9][0-9]*$"
+            }
+          },
+          "points": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "point",
+                "source_quotes"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^p[1-9][0-9]*$"
+                },
+                "point": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_quotes": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

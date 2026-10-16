@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "recommended_form",
+    "reason",
+    "ordered_unit_ids",
+    "excluded_units",
+    "issues"
+  ],
+  "properties": {
+    "status": {
+      "enum": [
+        "ready",
+        "needs_input"
+      ]
+    },
+    "recommended_form": {
+      "enum": [
+        "process_diagram",
+        "information_motion"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ordered_unit_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^u[1-9][0-9]*$"
+      }
+    },
+    "excluded_units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "unit_id",
+          "reason",
+          "duplicate_of"
+        ],
+        "properties": {
+          "unit_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "enum": [
+              "duplicate",
+              "paste_noise",
+              "editorial_note"
+            ]
+          },
+          "duplicate_of": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "message",
+          "source_quotes",
+          "blocking"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "duplicate",
+              "noise",
+              "missing",
+              "conflict",
+              "unclear"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_quotes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "blocking": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}
