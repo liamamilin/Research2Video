@@ -104,8 +104,8 @@
     },
     {
       "path": "16_POST_MVP_ROADMAP.md",
-      "bytes": 4770,
-      "sha256": "d862e18d02fa386fa7e9d60bf37322f58fb5587dd759c2ef71be75b6069d55c1"
+      "bytes": 4894,
+      "sha256": "c395d0f08974f8809b9b1ca46eb4d5726efe8f4269748b4e7f4d213f1b18d509"
     },
     {
       "path": "17_CREATIVE_ARCHITECTURE_EVOLUTION.md",
@@ -149,8 +149,8 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 1791,
-      "sha256": "e8f3ae1abe5c936d79c1e08d2088106837042ac5e09540081a2e9baf3bd51496"
+      "bytes": 2923,
+      "sha256": "ca0ba69ca59b98b66b6145838bec323863116ff591353b6015658eb78a59cb73"
     },
     {
       "path": "AGENT_FIRST_TASK.md",
@@ -164,13 +164,13 @@
     },
     {
       "path": "README.md",
-      "bytes": 7502,
-      "sha256": "b2c333d04c5e2626f81703625c03841613bff057f7185c29bb3118798a0e012d"
+      "bytes": 7704,
+      "sha256": "74adb674c658c83e46be5a7f284f465be20c870ee43e75c363f7a3f664367a7c"
     },
     {
       "path": "RELEASE_STATUS.md",
-      "bytes": 3159,
-      "sha256": "d7aa9e1a8d8c780ec7e13c234ca23f264c6e743a451dac11877d08f091d2b63e"
+      "bytes": 6753,
+      "sha256": "7c1754e9766cb011ca4d06224df91970d5c8893497b86405999ecb62b551632e"
     },
     {
       "path": "START_HERE.md",
@@ -209,8 +209,8 @@
     },
     {
       "path": "schemas/components/flow_diagram.schema.json",
-      "bytes": 2083,
-      "sha256": "06ef6ab0abde83f4026c849c08aa93a714f6b3e6961259323af621db40f0f3b0"
+      "bytes": 6326,
+      "sha256": "a0f59b08aa45a09d66e5b83036a0cb72c3ecc6ad8c6d13bb717d68fe678adf0e"
     },
     {
       "path": "schemas/components/timeline.schema.json",
@@ -244,8 +244,8 @@
     },
     {
       "path": "tests/test_roadmap_contracts.py",
-      "bytes": 1825,
-      "sha256": "706fcd5f6760aa795341556557b410c753c5f842fd7a82cc1a4a6fe23eeb9341"
+      "bytes": 1737,
+      "sha256": "8055fc8bf61127051029167ee1c53876463e87560e0545a218fd8471af5748c9"
     }
   ]
 }

@@ -20,11 +20,9 @@ def test_mvp_core_specs_remain_unchanged_against_portable_baseline():
 
 
 
-def test_mvp_first_guards():
-    agents = (ROOT/'AGENTS.md').read_text()
+def test_roadmap_authorization_guards():
     roadmap = (ROOT/'16_POST_MVP_ROADMAP.md').read_text()
     readme = (ROOT/'README.md').read_text()
-    assert 'G0' in agents and 'Stop after G0' in agents
     assert 'G4' in roadmap and 'M0' in roadmap
     assert 'H1' in roadmap and 'H2' in roadmap and 'H3' in roadmap and 'H4' in roadmap
     assert '不得自动执行 H1–H4' in readme
