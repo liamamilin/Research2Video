@@ -78,6 +78,10 @@ class ScheduleStore:
                 CREATE TABLE IF NOT EXISTS scheduler_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
             ''')
         self._migrate_runs_timezone()
+        with self.connect(True) as db:
+            columns = {r['name'] for r in db.execute('PRAGMA table_info(schedule_runs)')}
+            if 'cancel_requested' not in columns:
+                db.execute('ALTER TABLE schedule_runs ADD COLUMN cancel_requested INTEGER NOT NULL DEFAULT 0')
 
     def _migrate_runs_timezone(self):
         """Stamp each run with the plan timezone it was scheduled in.
@@ -134,7 +138,7 @@ class ScheduleStore:
 
     def save(self, job_name: str, expression: str, *, schedule_id: str | None = None,
              timezone: str = 'local', missed_policy: str = 'latest', max_retries: int = 2,
-             editing: bool = False, now: float | None = None) -> dict:
+             editing: bool = False, now: float | None = None, expected_version: int | None = None) -> dict:
         """Create or edit a plan; edits preserve enabled state and cancel pending old slots."""
         now = time.time() if now is None else now
         schedule_id = schedule_id or uuid.uuid4().hex
@@ -154,6 +158,8 @@ class ScheduleStore:
                 if existing and not editing:
                     raise ScheduleConflict('调度 ID 已存在')
                 if existing:
+                    if expected_version is not None and existing['version'] != expected_version:
+                        raise ScheduleConflict('计划已被修改，请重新读取后保存')
                     if existing['job_name'] != job_name:
                         raise ValueError('编辑计划时不能替换研究任务，请另建计划')
                     db.execute('''UPDATE schedules SET schedule=?, timezone=?, missed_policy=?, max_retries=?,
@@ -220,6 +226,19 @@ class ScheduleStore:
             row = db.execute('SELECT * FROM schedule_runs WHERE id=?', (run_id,)).fetchone()
             return dict(row) if row else None
 
+    def cancel(self, run_id: str) -> dict:
+        """Cancel one slot durably; a live worker cooperatively observes the flag."""
+        with self.connect(True) as db:
+            row = db.execute('SELECT * FROM schedule_runs WHERE id=?', (run_id,)).fetchone()
+            if not row:
+                raise KeyError(run_id)
+            if row['status'] in ('queued', 'starting', 'retry'):
+                db.execute("UPDATE schedule_runs SET cancel_requested=1,status='cancelled',finished_at=?,lease_until=NULL,pid=NULL,error='用户取消' WHERE id=?",
+                           (time.time(), run_id))
+            elif row['status'] == 'running':
+                db.execute('UPDATE schedule_runs SET cancel_requested=1 WHERE id=?', (run_id,))
+        return self.run(run_id)
+
     def enqueue_due(self, now: float | None = None) -> int:
         """Coalesce overdue slots into one; never enqueue overlapping work for a job."""
         now = time.time() if now is None else now
@@ -285,6 +304,8 @@ class ScheduleStore:
             run = db.execute('SELECT * FROM schedule_runs WHERE id=?', (run_id,)).fetchone()
             if not run or run['status'] not in ('running', 'starting'):
                 return
+            if run['cancel_requested'] and status != 'success':
+                status, error = 'cancelled', '用户取消；不会自动重试'
             plan = db.execute('SELECT * FROM schedules WHERE id=?', (run['schedule_id'],)).fetchone()
             retry = (status in ('failed', 'interrupted') and run['attempt'] <= run['max_retries']
                      and plan and plan['enabled'] and not plan['deleted'] and plan['version'] == run['version'])

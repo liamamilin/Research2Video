@@ -25,6 +25,16 @@ afterEach(() => {
 });
 
 describe("api()", () => {
+  it("returns a live stream without buffering the body, preserving CSRF", async () => {
+    document.cookie = "ai_research_csrf=csrf-123";
+    const text = vi.fn();
+    const response = { ok: true, status: 200, body: {}, text };
+    fetchMock.mockResolvedValueOnce(response);
+    expect(await api<Response>("/api/assistant/stream", { method: "POST", responseType: "stream", body: {} })).toBe(response);
+    expect(text).not.toHaveBeenCalled();
+    expect(fetchMock.mock.calls[0][1].headers["Accept"]).toBe("text/event-stream");
+    expect(fetchMock.mock.calls[0][1].headers["X-CSRF-Token"]).toBe("csrf-123");
+  });
   it("sends GET with credentials and no CSRF header", async () => {
     fetchMock.mockResolvedValueOnce(fakeResponse(200, { ok: true }));
     const data = await api<{ ok: boolean }>("/api/things");

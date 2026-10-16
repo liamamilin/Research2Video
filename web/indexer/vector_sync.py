@@ -64,6 +64,9 @@ def sync_report(output_dir: str, rel_path: str, content: Optional[str] = None) -
         return result
 
     full = os.path.join(output_dir, rel_path)
+    from pathlib import Path
+    if not Path(full).resolve().is_relative_to(Path(output_dir).resolve()):
+        return {**result, 'reason': '路径超出报告目录'}
     try:
         if content is None:
             with open(full, "r", encoding="utf-8", errors="replace") as f:

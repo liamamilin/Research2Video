@@ -218,7 +218,8 @@ def _cosine(a: list[float], b: list[float]) -> float:
     return dot / (norm_a * norm_b)
 
 
-def semantic_search(query_vector: list[float], limit: int = 8) -> list[dict]:
+def semantic_search(query_vector: list[float], limit: int = 8,
+                    allowed_paths: set[str] | None = None) -> list[dict]:
     """Cosine-similarity search over stored chunks."""
     if not query_vector:
         return []
@@ -236,6 +237,7 @@ def semantic_search(query_vector: list[float], limit: int = 8) -> list[dict]:
             "source": "vector",
         }
         for row in rows
+        if allowed_paths is None or row['path'] in allowed_paths
     ]
     scored.sort(key=lambda item: -item["score"])
     return [item for item in scored[:limit] if item["score"] > 0]
@@ -408,7 +410,7 @@ def _scope_to_recent_rounds(ranked: list[dict], scope: int, need: int) -> list[d
 def hybrid_search(query: str, query_vector: Optional[list[float]], limit: int = 8,
                   recency_weight: float = 0.0, half_life_days: float = 30.0,
                   overfetch: int = 64, max_chunks_per_report: int = 2,
-                  round_scope: int = 1) -> list[dict]:
+                  round_scope: int = 1, allowed_paths: set[str] | None = None) -> list[dict]:
     """Merge FTS5 recall with chunk-level precision.
 
     ``recency_weight`` trades relevance against freshness: at 0 the ranking is
@@ -440,8 +442,14 @@ def hybrid_search(query: str, query_vector: Optional[list[float]], limit: int = 
     the middle of that plateau rather than at the edge.
     """
     pool = max(1, overfetch) * limit
-    fts_hits = index_db.search_reports(query, pool)
-    chunk_hits = semantic_search(query_vector or [], pool * 2)
+    if allowed_paths is None:
+        fts_hits = index_db.search_reports(query, pool)
+        chunk_hits = semantic_search(query_vector or [], pool * 2)
+    else:
+        # Filter before truncating: a small historical scope must not lose all
+        # its hits to a more recent, globally higher ranked report.
+        fts_hits = index_db.search_reports(query, pool, allowed_paths=allowed_paths)
+        chunk_hits = semantic_search(query_vector or [], pool * 2, allowed_paths=allowed_paths)
 
     # Best chunk per report, for the FTS hits to quote.
     best_chunk: dict[str, dict] = {}

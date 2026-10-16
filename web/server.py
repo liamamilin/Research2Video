@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import logging
 import os
+import json
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -31,6 +33,7 @@ from web.routes.pipeline import router as pipeline_router
 from web.routes.tracking import router as tracking_router
 from web.routes.share import router as share_router
 from web.routes.qa import router as qa_router
+from web.routes.assistant import router as assistant_router
 from web.routes.setup import router as setup_router
 from web.routes.gateway import router as gateway_router
 from web.runner.registry import TaskRegistry
@@ -74,6 +77,10 @@ def _schedule_check(state_dir: str) -> dict:
 async def lifespan(app: FastAPI):
     # Startup
     settings = get_settings()
+    from core import state as state_store, lock as job_locks, report_meta
+    state_store.use_state_dir(settings.paths.state_dir)
+    job_locks._LOCK_DIR = str(Path(settings.paths.state_dir) / 'locks')
+    report_meta.META_FILE = str(Path(settings.paths.state_dir) / 'report_meta.jsonl')
     from utils.logger import attach_file_logging
     from web.runner import pipeline as pipeline_runner
 
@@ -109,6 +116,7 @@ async def lifespan(app: FastAPI):
     start_watcher(settings.paths.output_dir, state_dir=settings.paths.state_dir)
 
     logger.info("Web UI started")
+    app.state.instance_id = uuid.uuid4().hex
     yield
     # Shutdown: cancel all running tasks
     registry = TaskRegistry()
@@ -131,6 +139,18 @@ def create_app() -> FastAPI:
         page load fires a burst of asset requests, which would look like a
         busy user long after they closed the tab.
         """
+        if not getattr(app.state, 'runtime_published', False) and getattr(app.state, 'instance_id', None):
+            try:
+                pending = Path(settings.paths.state_dir) / f'app_runtime-{os.getpid()}.json'
+                runtime = json.loads(pending.read_text())
+                if runtime.get('pid') == os.getpid():
+                    from web.services.yaml_io import atomic_write
+                    runtime['instance_id'] = app.state.instance_id
+                    atomic_write(str(Path(settings.paths.state_dir) / 'app_runtime.json'), json.dumps(runtime))
+                    atomic_write(runtime['pid_file'], str(os.getpid()))
+                    app.state.runtime_published = True
+            except (OSError, ValueError, KeyError):
+                pass
         response = await call_next(request)
         try:
             path = request.url.path
@@ -219,6 +239,7 @@ def create_app() -> FastAPI:
     app.include_router(tracking_router)
     app.include_router(share_router)
     app.include_router(qa_router)
+    app.include_router(assistant_router)
     app.include_router(setup_router)
     app.include_router(gateway_router)
 
@@ -234,6 +255,7 @@ def create_app() -> FastAPI:
             config_dir=settings.paths.config_dir,
             deep=False,
         )
+        result['instance_id'] = getattr(app.state, 'instance_id', None)
         return JSONResponse(
             status_code=503 if result["status"] == "error" else 200,
             content=result,

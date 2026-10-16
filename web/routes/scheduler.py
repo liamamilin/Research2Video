@@ -24,6 +24,8 @@ router = APIRouter(prefix="/api/scheduler", tags=["scheduler"])
 
 
 class ScheduleEdit(BaseModel):
+    preserve_command: StrictBool = False
+    expected_version: StrictInt | None = None
     schedule: StrictStr
     command: StrictStr = ''
     job_name: StrictStr = ''
@@ -176,6 +178,25 @@ def list_schedulable_jobs(user=Depends(require_admin)):
     return {"jobs": items, "project_dir": project_dir, "python": python}
 
 
+@router.get("/{schedule_id}")
+def get_scheduled(schedule_id: str, user=Depends(require_admin)):
+    """Read one recurring plan: its expression, state, next runs and last run.
+
+    The list view merged managed plans with the legacy cron entries, so there was no
+    way to read a single plan. Callers that already know a plan's id had to fetch
+    the whole list and pick from it.
+
+    Serves managed plans, which is every plan the recurring-plan paths create.
+    The two system launchd agents are listed by the list view and are edited through
+    the same paths, but they are not plans in this store and are reported as not
+    found here rather than described from a second source.
+    """
+    plan = managed.store().get(schedule_id)
+    if not plan:
+        raise _error(404, "not_found", f"未找到调度：{schedule_id}")
+    return managed.describe(plan)
+
+
 @router.post("")
 def add_scheduled(payload: ScheduleCreate, user=Depends(require_admin)):
     """Every new job plan goes to the durable dispatcher, never to cron."""
@@ -203,9 +224,10 @@ def edit_scheduled(job_id: str, payload: ScheduleEdit, user=Depends(require_admi
     if plan:
         updated = _mutate(lambda: managed.save(
             plan['job_name'], payload.schedule.strip(), schedule_id=job_id, editing=True,
-            timezone=payload.timezone, missed_policy=payload.missed_policy, max_retries=payload.max_retries))
+            timezone=payload.timezone, missed_policy=payload.missed_policy, max_retries=payload.max_retries,
+            expected_version=payload.expected_version if payload.expected_version is not None else plan['version']))
     else:
-        updated = _mutate(scheduler.update_job, job_id, payload.schedule.strip(), payload.command.strip())
+        updated = _mutate(scheduler.update_job, job_id, payload.schedule.strip(), None if payload.preserve_command else payload.command.strip())
     if updated is None:
         raise _error(404, "not_found", f"未找到调度：{job_id}")
     audit.log("schedule_edit", user=user["username"], target=job_id)
@@ -293,3 +315,11 @@ def execution_history(job_id: str, user=Depends(require_admin)):
     return {'runs': [{**run, 'due_at_iso': stamp(run, 'due_at'),
                       'started_at_iso': stamp(run, 'started_at')}
                      for run in storage.runs(job_id)]}
+
+
+@router.post('/runs/{run_id}/cancel')
+def cancel_execution(run_id: str, user=Depends(require_admin)):
+    """Cancel exactly one managed run, leaving future recurrence unchanged."""
+    result = _mutate(managed.store().cancel, run_id)
+    audit.log('schedule_run_cancel', user=user['username'], target=run_id)
+    return {'run': result, 'cancel_requested': bool(result.get('cancel_requested'))}

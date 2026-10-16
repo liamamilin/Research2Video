@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getRounds, getReportRaw, runRound, cancelRound, retryRound, type Round } from "@/api";
 import { RoundDetail } from "@/components/RoundDetail";
 import { useAuthStore } from "@/lib/auth-store";
@@ -27,6 +27,7 @@ function stageStyle(status: string): string {
 
 export function RoundsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const user = useAuthStore((s) => s.user);
   const canEdit = user?.role === "editor" || user?.role === "admin";
 
@@ -37,7 +38,10 @@ export function RoundsPage() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [compareDate, setCompareDate] = useState<string | null>(null);
-  const [detailDate, setDetailDate] = useState<string | null>(null);
+  const [detailDate, setDetailDate] = useState<string | null>(() => {
+    const value = searchParams.get('round');
+    return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
+  });
   const timerRef = useRef<number | null>(null);
 
   const load = useCallback(async () => {

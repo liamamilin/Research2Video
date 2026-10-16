@@ -11,6 +11,7 @@ import os
 import plistlib
 import re
 import subprocess
+import sys
 import time
 import tempfile
 from functools import wraps
@@ -231,13 +232,17 @@ def add_job(
 
 
 @_serialized
-def update_job(job_id: str, schedule: str, command: str) -> dict | None:
+def update_job(job_id: str, schedule: str, command: str | None) -> dict | None:
     """Edit in place, preserving paused state and unrelated crontab entries."""
-    entry = _validate_job(job_id, schedule, command)
+    entry = _validate_job(job_id, schedule, command) if command is not None else None
     lines = _get_crontab()
     indices = _find_job_lines(lines, job_id)
     if len(indices) < 2:
         return None
+    if command is None:
+        current = _parse_cron_entry(lines[indices[-1]])
+        command = current['command']
+        entry = _validate_job(job_id, schedule, command)
     enabled = not lines[indices[-1]].strip().startswith("#")
     lines[indices[-1]] = ("" if enabled else "# ") + " ".join(entry.values()) + " " + command
     _set_crontab(lines)
@@ -558,6 +563,9 @@ def list_launchd_agents(directory: str | None = None) -> list[dict]:
     ``launchd_agents.agent_dir`` at an empty temp dir so the suite never reads
     (or edits) the machine's own agents.
     """
+    if sys.platform != "darwin":
+        return []
+
     agents: list[dict] = []
     for label in LAUNCHD_LABELS:
         # Read through launchd_agents so there is one definition of where an

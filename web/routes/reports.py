@@ -292,10 +292,10 @@ def resolve_output_file(path: str,
                         allowed_exts: tuple[str, ...] = (".md", ".mdx", ".json")) -> str:
     """Resolve a report path inside output/, rejecting traversal and bad types."""
     settings = get_settings()
-    output_dir = os.path.abspath(settings.paths.output_dir)
+    output_dir = os.path.realpath(settings.paths.output_dir)
 
     safe = os.path.normpath(path).lstrip("/")
-    full_path = os.path.abspath(os.path.join(output_dir, safe))
+    full_path = os.path.realpath(os.path.join(output_dir, safe))
 
     if not full_path.startswith(output_dir + os.sep) and full_path != output_dir:
         raise HTTPException(

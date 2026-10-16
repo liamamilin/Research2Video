@@ -18,6 +18,27 @@ const SECRETS = {
   ],
 };
 
+const PROVIDERS = [
+  {
+    id: "open-design",
+    label: "Open Design（amr-link）",
+    base_url: "https://amr-link.open-design.ai/v1",
+    api_key_env: "LLM_API_KEY",
+    extra_headers: { "User-Agent": "BaseCodingCLi-ResearchAgent/2.0" },
+    models: ["deepseek-v4.1-flash"],
+    note: "OpenAI 兼容。",
+  },
+  {
+    id: "opencode-zen",
+    label: "opencode zen（按量计费）",
+    base_url: "https://opencode.ai/zen/v1",
+    api_key_env: "LLM_API_KEY",
+    extra_headers: {},
+    models: ["deepseek-v4-flash"],
+    note: "按量付费。",
+  },
+];
+
 function jsonResponse(status: number, body: unknown): Response {
   return {
     ok: status < 300,
@@ -36,6 +57,9 @@ function mockFetch() {
         return jsonResponse(200, { ok: true, secrets: SECRETS.secrets });
       }
       return jsonResponse(200, SECRETS);
+    }
+    if (String(url).includes("/api/config/providers")) {
+      return jsonResponse(200, { providers: PROVIDERS });
     }
     if (String(url).includes("/api/config/test-")) {
       return jsonResponse(200, { ok: true, latency_ms: 42, model: "old-model" });
@@ -142,5 +166,36 @@ describe("SystemConfig form", () => {
     const put = calls.find((c) => c.init?.method === "PUT" && !c.url.includes("secrets"));
     const body = JSON.parse(String(put?.init?.body));
     expect(body.patch.notifications.enabled).toBe(true);
+  });
+
+  it("fills base_url, env var and headers together when a provider is picked", async () => {
+    const calls = mockFetch();
+    render(<SystemConfig />);
+
+    // The saved URL (https://x/v1) matches no preset, so the dropdown starts custom.
+    await screen.findByDisplayValue("https://x/v1");
+    const select = screen.getByDisplayValue("自定义（当前地址未匹配预设）");
+    fireEvent.change(select, { target: { value: "open-design" } });
+
+    fireEvent.click(screen.getByText("保存配置"));
+    await waitFor(() => {
+      expect(calls.some((c) => c.init?.method === "PUT")).toBe(true);
+    });
+    const put = calls.find((c) => c.init?.method === "PUT" && !c.url.includes("secrets"));
+    const body = JSON.parse(String(put?.init?.body));
+    expect(body.patch.ai.base_url).toBe("https://amr-link.open-design.ai/v1");
+    expect(body.patch.ai.api_key_env).toBe("LLM_API_KEY");
+    expect(body.patch.ai.extra_headers["User-Agent"]).toBeTruthy();
+  });
+
+  it("warns when an API key is typed into the env-name field", async () => {
+    mockFetch();
+    render(<SystemConfig />);
+
+    await screen.findByDisplayValue("LLM_API_KEY");
+    const envInput = screen.getByDisplayValue("LLM_API_KEY");
+    fireEvent.change(envInput, { target: { value: "sk-amr-abc123" } });
+
+    expect(await screen.findByText(/请求不会带 Authorization 头/)).toBeTruthy();
   });
 });

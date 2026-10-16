@@ -206,30 +206,31 @@ class ResearchEngine:
                 cleaned = extract_report(raw_content, self.sys,
                                          cancel_token=self._cancel)
                 actual_path = self._save_output(cleaned, output_path)
+                report_path = self._output_reference(actual_path)
 
                 citation = self._check_citations(cleaned, agent)
-                self._register_events(job_name, actual_path, cleaned)
+                self._register_events(job_name, report_path, cleaned)
                 try:
                     from .report_meta import append_record
 
-                    append_record(actual_path, job_name, usage=usage,
+                    append_record(report_path, job_name, usage=usage,
                                   duration_seconds=round(time.time() - start_time, 1),
                                   extra={"citation_check": citation})
                 except Exception as exc:  # noqa: BLE001 - metadata is optional
                     logger.debug("report metadata skipped: %s", exc)
                 logger.info(
                     "Job '%s' completed → %s (%d bytes)",
-                    job_name, actual_path, len(cleaned),
+                    job_name, report_path, len(cleaned),
                 )
-                print(f"  [{job_name}] Done → {actual_path}")
+                print(f"  [{job_name}] Done → {report_path}")
                 output_path = actual_path  # use actual path for state
 
                 elapsed = time.time() - start_time
                 self._progress({"type": "status", "status": "success",
-                                "output_path": output_path,
+                                "output_path": report_path,
                                 "duration_seconds": round(elapsed, 1)})
                 StateManager.update(job_name, "success",
-                                    output_path=output_path,
+                                    output_path=report_path,
                                     usage=usage,
                                     user=self.user,
                                     duration_seconds=round(elapsed, 1))
@@ -238,12 +239,12 @@ class ResearchEngine:
                     "success", f"Job 完成: {job_name}",
                     f"{round(elapsed, 1)}s"
                     + (f" · {tokens:,} tokens" if tokens else "")
-                    + (f" · {output_path}" if output_path else ""),
+                    + (f" · {report_path}" if report_path else ""),
                     fields={"job": job_name, "status": "success",
-                            "output": output_path, "duration_seconds": round(elapsed, 1),
+                            "output": report_path, "duration_seconds": round(elapsed, 1),
                             "usage": usage},
                 )
-                return output_path
+                return report_path
         except LockAcquireError:
             print(f"  [{job_name}] SKIPPED: already running (lock held)")
             StateManager.update(job_name, "skipped",
@@ -257,7 +258,7 @@ class ResearchEngine:
             self._progress({"type": "status", "status": "cancelled",
                             "duration_seconds": round(elapsed, 1)})
             StateManager.update(job_name, "cancelled",
-                                output_path=output_path,
+                                output_path=self._output_reference(output_path),
                                 error="Cancelled by user",
                                 usage=usage,
                                 user=self.user,
@@ -273,7 +274,7 @@ class ResearchEngine:
                          job_name, elapsed, e)
             print(f"  [{job_name}] FAILED: {e}")
             StateManager.update(job_name, "failed",
-                                output_path=output_path,
+                                output_path=self._output_reference(output_path),
                                 error=str(e),
                                 usage=usage,
                                 duration_seconds=round(elapsed, 1))
@@ -288,7 +289,7 @@ class ResearchEngine:
             if verbose:
                 logger.exception("Details:")
             StateManager.update(job_name, "failed",
-                                output_path=output_path,
+                                output_path=self._output_reference(output_path),
                                 error=str(e),
                                 usage=usage,
                                 duration_seconds=round(elapsed, 1))
@@ -524,30 +525,30 @@ class ResearchEngine:
             or self.sys.get("defaults", {}).get("output_dir", "output")
         )
         allowed_root = (
-            os.path.abspath(configured)
+            os.path.realpath(configured)
             if os.path.isabs(configured)
-            else os.path.abspath(os.path.join(self.workspace_dir, configured))
+            else os.path.realpath(os.path.join(self.workspace_dir, configured))
         )
         if not raw:
             name = job.get("name", job.get("_file", "report"))
             ext = ".md"
-            raw = os.path.join(configured, f"{{date}}_{name}{ext}")
+            filename = f"{{date}}_{name}{ext}"
+            raw = filename if runtime.get('output_root') else os.path.join(configured, filename)
 
         path = self._render_path(raw, job)
 
         # If path is a directory, auto-derive filename from job name
-        if path.endswith(os.sep) or (os.path.exists(path) and os.path.isdir(path)):
+        custom_root = runtime.get("output_root")
+        base_dir = allowed_root if custom_root else self.workspace_dir
+        resolved = os.path.realpath(os.path.join(base_dir, path))
+        if path.endswith(os.sep) or os.path.isdir(resolved):
             name = job.get("name", job.get("_file", "report"))
             safe = re.sub(r'[<>:"/\\|?*]', "_", name)
-            path = os.path.join(path, f"{safe}_{self._now():%Y-%m-%d}.md")
+            resolved = os.path.join(resolved, f"{safe}_{self._now():%Y-%m-%d}.md")
 
         # Resolve relative targets against the workspace (not the process CWD)
         # so validation and the actual write always agree. When an explicit
         # output_root is configured, relative outputs live under that root.
-        custom_root = runtime.get("output_root")
-        base_dir = allowed_root if custom_root else self.workspace_dir
-        was_relative = not os.path.isabs(path)
-        resolved = os.path.abspath(os.path.join(base_dir, path))
         if resolved != allowed_root and not resolved.startswith(allowed_root + os.sep):
             raise ValueError(
                 f"Output path escapes the allowed root '{allowed_root}': {raw!r}. "
@@ -555,10 +556,16 @@ class ResearchEngine:
             )
 
         os.makedirs(os.path.dirname(resolved) or ".", exist_ok=True)
-        # Keep relative targets relative so stored paths stay comparable with
-        # the report index.
-        if was_relative:
-            return os.path.relpath(resolved, base_dir if custom_root else self.workspace_dir)
+        return resolved
+
+    def _output_reference(self, path: Optional[str]) -> Optional[str]:
+        """Keep display/state references portable without using them for I/O."""
+        if not path:
+            return None
+        workspace = os.path.realpath(self.workspace_dir)
+        resolved = os.path.realpath(path)
+        if resolved.startswith(workspace + os.sep):
+            return os.path.relpath(resolved, workspace)
         return resolved
 
     def _render_path(self, template: str, job: dict) -> str:

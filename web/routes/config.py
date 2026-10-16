@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import os
+import hashlib
+import logging
+import math
 import tempfile
 import time
 from io import StringIO
@@ -13,6 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from core.config import load_system_config
 from core.llm import LLMClient, LLMConfig
+from core.providers import list_providers, looks_like_secret
 from core.search import SearchClient, SearchConfig
 from web import audit
 from web.deps import require_admin
@@ -20,6 +24,18 @@ from web.models import ApiError
 from web.services.yaml_io import parse_yaml, atomic_write, save_backup
 
 router = APIRouter(prefix="/api/config", tags=["config"])
+logger = logging.getLogger(__name__)
+
+
+def system_config_lock():
+    """One lock for settings-page edits, assistant saves and direct rollback."""
+    from core.fileio import file_lock
+    from web.settings import get_settings
+    return file_lock(os.path.realpath(os.path.join(get_settings().paths.config_dir, 'system.yaml')))
+
+
+def content_version(content: str) -> str:
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
 _ENV_PATH_OVERRIDE: Optional[str] = None
 
@@ -133,6 +149,33 @@ def _write_env_value(env_name: str, value: Optional[str]) -> None:
         os.environ.pop(env_name, None)
 
 
+def _reject_secret_in_env_field(patch: dict) -> None:
+    """Refuse a patch that puts an API key into an ``*_api_key_env`` field.
+
+    Such a value is silently useless -- ``os.environ.get(key)`` returns "" and
+    the request goes out unauthenticated -- so it must not reach disk where it
+    is mistaken for a configured key.
+    """
+    def walk(node: dict, path: str) -> None:
+        for key, value in node.items():
+            if not isinstance(value, dict):
+                is_env_field = key == "api_key_env" or key.endswith("_api_key_env")
+                if is_env_field and isinstance(value, str) and looks_like_secret(value):
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail=ApiError.make(
+                            "secret_in_env_field",
+                            f"{path}{key} 看起来填的是 API Key，而不是环境变量名。"
+                            f"请在“API 密钥”卡片填写密钥，这里只填变量名"
+                            f"（如 LLM_API_KEY）。",
+                        ),
+                    )
+            else:
+                walk(value, f"{path}{key}.")
+
+    walk(patch, "")
+
+
 def _apply_patch(target: dict, patch: dict) -> None:
     """Deep-merge a patch into a ruamel document; None deletes a key."""
     from ruamel.yaml.comments import CommentedMap
@@ -190,6 +233,17 @@ def _mask_secrets(data: dict, parent_key: str = "") -> dict:
     return masked
 
 
+@router.get("/providers")
+def get_providers(user=Depends(require_admin)):
+    """LLM endpoint presets for the config form's provider dropdown.
+
+    Returns suggestions only; the form still accepts any OpenAI-compatible
+    ``base_url``. Lets the UI fill base_url / api_key_env / required headers
+    together so the three cannot be set from different vendors by accident.
+    """
+    return {"providers": list_providers()}
+
+
 @router.get("/system")
 def get_system_config(user=Depends(require_admin)):
     """Read system.yaml, with secrets masked in the structured view.
@@ -201,6 +255,12 @@ def get_system_config(user=Depends(require_admin)):
     secrets off the wire -- ``content`` is the admin's own editable copy of a
     file they can already read, and this endpoint is admin-only.
     """
+    with system_config_lock():
+        return _get_system_config_locked()
+
+
+def _get_system_config_locked():
+    """Read content and version from the same locked snapshot."""
     from web.settings import get_settings
     settings = get_settings()
     path = os.path.join(settings.paths.config_dir, "system.yaml")
@@ -219,6 +279,7 @@ def get_system_config(user=Depends(require_admin)):
     masked = _mask_secrets(parsed)
 
     return {
+        "version": content_version(raw),
         "content": raw,
         "parsed": parsed,
         "masked": masked,
@@ -233,11 +294,21 @@ def update_system_config(
     request: Request,
     user=Depends(require_admin),
 ):
-    """Write system.yaml. Only admin can do this."""
+    """Write system.yaml under the shared compare-and-publish lock."""
+    with system_config_lock():
+        return _update_system_config_locked(payload, request, user)
+
+
+def _update_system_config_locked(payload: dict, request: Request, user, *, trusted_restore: bool = False):
+    """Write with system_config_lock already held by the caller."""
     from web.settings import get_settings
     settings = get_settings()
     path = os.path.join(settings.paths.config_dir, "system.yaml")
 
+    old_content = Path(path).read_text(encoding='utf-8') if os.path.isfile(path) else ''
+    expected_version = payload.get('expected_version')
+    if expected_version is not None and expected_version != content_version(old_content):
+        raise HTTPException(409, detail=ApiError.make('conflict', 'system.yaml 已被修改，请重新读取后保存'))
     patch = payload.get("patch")
     if patch is not None:
         if not isinstance(patch, dict):
@@ -245,7 +316,10 @@ def update_system_config(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=ApiError.make("invalid_patch", "patch 必须为对象"),
             )
+        _reject_secret_in_env_field(patch)
         try:
+            from core.system_schema import validate_system_patch
+            validate_system_patch(patch, parse_yaml(old_content) if old_content.strip() else {})
             new_content = _merge_patch(path, patch)
         except Exception as e:  # noqa: BLE001 - reported to the admin
             raise HTTPException(
@@ -273,6 +347,8 @@ def update_system_config(
     if expected_mtime is not None and os.path.isfile(path):
         try:
             expected = float(expected_mtime)
+            if not math.isfinite(expected):
+                raise ValueError('non-finite version')
         except (TypeError, ValueError):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -282,7 +358,7 @@ def update_system_config(
                 ),
             ) from None
         current_mtime = os.path.getmtime(path)
-        if abs(current_mtime - expected) > 0.001:
+        if current_mtime != expected:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=ApiError.make(
@@ -294,7 +370,10 @@ def update_system_config(
 
     # Validate YAML
     try:
-        parse_yaml(new_content)
+        parsed = parse_yaml(new_content)
+        from core.system_schema import validate_system_change
+        if not trusted_restore:
+            validate_system_change(parse_yaml(old_content) if old_content.strip() else {}, parsed)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -312,14 +391,16 @@ def update_system_config(
             pass
 
     atomic_write(path, new_content)
-
-    audit.log(
-        "system_config_update",
-        user=user["username"],
-        result="success",
-        ip=request.client.host if request.client else None,
-    )
-    return {"ok": True, "mtime": os.path.getmtime(path)}
+    warnings = []
+    try:
+        from web.indexer import vector_sync
+        vector_sync.reset_client()
+        audit.log('system_config_update', user=user['username'], result='success',
+                  ip=request.client.host if request.client else None)
+    except Exception:
+        logger.exception('Configuration saved; post-save bookkeeping failed')
+        warnings.append('配置已保存，缓存或审计收尾未完成，请核验后续请求状态')
+    return {"ok": True, "mtime": os.path.getmtime(path), 'version': content_version(new_content), 'warnings': warnings}
 
 
 @router.get("/secrets")

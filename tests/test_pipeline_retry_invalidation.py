@@ -235,3 +235,38 @@ def test_start_retry_rejects_completed_round(retry_env, tmp_path):
             output_dir=str(tmp_path / "output"),
             date=retry_env["date"],
         )
+
+
+def test_force_completed_stage_also_invalidates_consumers(retry_env):
+    with pipeline._lock:
+        for stage in pipeline._rounds[retry_env['date']]['stages'].values():
+            stage['status'] = 'success'
+    tmp = retry_env['tmp']
+    result = pipeline.start_retry(str(tmp / 'config'), str(tmp / 'jobs'), str(tmp / 'output'),
+                                  date=retry_env['date'], force_stages=[P1])
+    assert _wait_for_capture(retry_env['captured']) == {P1, P7, P8, P9}
+    assert result['rerun_stages'] == [P1]
+    assert result['invalidated_stages'] == [P7, P8, P9]
+
+
+def test_failed_upstream_never_regenerates_consumers_from_old_files(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+    from core import artifacts
+    from core.pipeline_docs import STAGES
+    calls = []
+    state = {'date': '2026-09-24', 'status': 'running', 'cancel_requested': False,
+             'stages': {key: {'key': key, 'status': 'skipped'} for key, _, _ in STAGES}}
+    class Registry:
+        def start(self, name, *_):
+            calls.append(name)
+            return SimpleNamespace(job_name=name, status='running', future=None)
+    monkeypatch.setattr(pipeline, 'TaskRegistry', Registry)
+    monkeypatch.setattr(pipeline, 'ResearchEngine', lambda **_: object())
+    monkeypatch.setattr(pipeline, '_persist', lambda *_: None)
+    monkeypatch.setattr(pipeline, '_notify_round', lambda *_: None)
+    monkeypatch.setattr(pipeline, 'run_job_in_thread', lambda task, *_args, **_kwargs: setattr(task, 'status', 'failed'))
+    monkeypatch.setattr(artifacts, 'export_round_artifacts', lambda *_args, **_kwargs: pytest.fail('stale artifacts were re-exported'))
+    pipeline._run_round(state, str(tmp_path / 'config'), str(tmp_path / 'jobs'), 1, {P1, P7, P8, P9})
+    assert calls == ['practical_ai_intelligence/' + P1]
+    assert all(state['stages'][key]['status'] == 'stale' for key in (P7, P8, P9))
+    assert state['status'] == 'failed'

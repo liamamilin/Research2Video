@@ -282,6 +282,127 @@ export async function askQuestion(question: string, limit = 6): Promise<QaAnswer
   return api("/api/qa", { method: "POST", body: { question }, query: { limit } });
 }
 
+export interface AssistantAction {
+  tool: string;
+  ok: boolean;
+  message: string;
+  job_name?: string | null;
+  href?: string;
+  download_url?: string;
+  rollback_id?: string;
+  maintenance_id?: string;
+  background_id?: string;
+  operation_id?: string;
+  references?: { type: string; id: string; href: string; date?: string; title?: string }[];
+  detail?: { schedule?: string; timezone?: string; enabled?: boolean; next_runs?: string[]; executor_online?: boolean;
+    last_run?: { id: string; status: string; started_at?: number; finished_at?: number; href?: string; report?: { href: string } } | null };
+  input_card?: { id: string; title: string; description: string; fields: { name: string; label: string; type: string }[] };
+}
+
+export interface AssistantMessage {
+  role: "user" | "assistant";
+  content: string;
+  actions?: AssistantAction[];
+  error?: string | null;
+  continuation?: AssistantContinuation;
+}
+
+export interface AssistantContinuation {
+  reason: string; steps: number; reports_complete: number; remaining_report_count: number;
+  next_reports: string[]; report_reads: { path: string; next_offset: number; complete: boolean }[];
+}
+
+export interface AssistantReply {
+  answer: string;
+  actions: AssistantAction[];
+  error?: string | null;
+  conversation_id?: string;
+  request_id?: string;
+  status?: string;
+  continuation?: AssistantContinuation;
+}
+
+export interface AssistantConversation {
+  id: string;
+  requests: { id: string; message: string; status: string; result: AssistantReply }[];
+}
+
+export const getAssistantConversation = (id?: string) => api<AssistantConversation>(
+  id ? `/api/assistant/conversations/${id}` : "/api/assistant/conversation");
+export const newAssistantConversation = () => api<{ id: string }>("/api/assistant/conversations", { method: "POST" });
+export const stopAssistantResponse = (id: string) => api(`/api/assistant/requests/${id}/stop`, { method: "POST" });
+export const getAssistantInput = (id: string) => api<{ status: string; result?: { rollback_id?: string } }>(`/api/assistant/inputs/${id}`);
+export interface AssistantInputVerification { status: string; message: string; tokens?: { id: number; name: string; created_at: string; revoked: boolean }[];
+  configured?: boolean; header_names?: string[]; user?: { username: string; role: string; disabled: boolean } | null; rollback_id?: string | null; }
+export const verifyAssistantInput = (id: string) => api<AssistantInputVerification>(`/api/assistant/inputs/${id}/verify`);
+export const getAssistantConfigRecovery = () => api<{ rollback_id: string | null }>("/api/assistant/configuration/recovery");
+export const submitAssistantInput = (id: string, body: Record<string, string>) => api<{ token?: string; rollback_id?: string }>(`/api/assistant/inputs/${id}`, { method: "POST", body });
+export const rollbackAssistantConfiguration = (id: string) => api(`/api/assistant/rollback/${id}`, { method: "POST" });
+export const getAssistantBackground = (id: string) => api<{ status: string; progress?: { stage?: string; completed?: number; total?: number }; error?: string }>(`/api/assistant/background/${id}`);
+export const getAssistantMaintenance = (id: string) => api<{ status: string; error?: string }>(`/api/assistant/maintenance/${id}`);
+
+export type AssistantEvent =
+  | { type: "reset" }
+  | { type: "delta"; text: string }
+  | { type: "action"; action: AssistantAction }
+  | { type: "status"; message: string }
+  | { type: "done"; result: AssistantReply };
+
+export async function chatWithAssistant(
+  message: string, history: AssistantMessage[], onEvent: (event: AssistantEvent) => void,
+  options: { conversation_id?: string; request_id?: string; signal?: AbortSignal } = {},
+): Promise<AssistantReply> {
+  const response = await api<Response>("/api/assistant/stream", {
+    method: "POST",
+    responseType: "stream",
+    signal: options.signal,
+    body: {
+      message,
+      ...(options.conversation_id ? { conversation_id: options.conversation_id } : {}),
+      ...(options.request_id ? { request_id: options.request_id } : {}),
+      history: history.slice(-20).map((item) => ({
+        role: item.role,
+        content: (item.content + (item.actions?.length
+          ? "\n操作结果：\n" + item.actions.map((a) => `${a.ok ? "成功" : "失败"}：${a.message}`).join("\n")
+          : "")).slice(0, 24000),
+      })),
+    },
+  });
+  if (!response.body) throw new Error("无法读取助手输出流");
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let result: AssistantReply | undefined;
+
+  const dispatch = (block: string) => {
+    const data = block.split(/\r?\n/).filter((line) => line.startsWith("data:"))
+      .map((line) => line.slice(5).trimStart()).join("\n");
+    if (!data) return; // SSE comments are connection heartbeats.
+    const event = JSON.parse(data) as AssistantEvent;
+    onEvent(event);
+    if (event.type === "done") result = event.result;
+  };
+
+  try {
+    while (!result) {
+      const { value, done } = await reader.read();
+      buffer += done ? decoder.decode() : decoder.decode(value, { stream: true });
+      let separator = /\r?\n\r?\n/.exec(buffer);
+      while (separator) {
+        dispatch(buffer.slice(0, separator.index));
+        buffer = buffer.slice(separator.index + separator[0].length);
+        separator = /\r?\n\r?\n/.exec(buffer);
+      }
+      if (done) break;
+    }
+    if (!result) throw new Error("助手连接中断，已保留收到的回复和操作结果");
+    return result;
+  } finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
 export async function reindexVectors(limit = 200): Promise<{
   embedded: number;
   skipped: number;

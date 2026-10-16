@@ -19,9 +19,12 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from dotenv import load_dotenv
+# The .env file is the source of truth (the Web console writes keys there), so
+# it wins over a stale value inherited from a long-lived parent process. See
+# utils/env_file.py for the full reasoning.
+from utils.env_file import load_env
 
-load_dotenv(Path(__file__).resolve().parent / ".env")
+load_env(Path(__file__).resolve().parent / ".env")
 
 from core import ResearchEngine, load_system_config, list_jobs, load_job
 from core.state import StateManager

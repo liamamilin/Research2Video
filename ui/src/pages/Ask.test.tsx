@@ -1,144 +1,136 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-
 import { AskPage } from "./Ask";
 import { useAuthStore } from "@/lib/auth-store";
-
-interface Deferred {
-  resolve: (value: unknown) => void;
-  reject: (err: unknown) => void;
-  promise: Promise<unknown>;
+const cid = "a".repeat(32);
+const json = (value: unknown) => ({ ok: true, status: 200, text: async () => JSON.stringify(value) }) as Response;
+function stream(result: unknown) {
+  return { ok: true, status: 200, body: new ReadableStream({ start(c) {
+    c.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ type: "done", result })}\n\n`)); c.close();
+  } }) } as Response;
 }
-
-function deferred(): Deferred {
-  let resolve!: (value: unknown) => void;
-  let reject!: (err: unknown) => void;
-  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
-  return { resolve, reject, promise };
+function server(options: { requests?: unknown[]; send?: () => Response } = {}) {
+  const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+    if (url === "/api/assistant/conversation" || url === `/api/assistant/conversations/${cid}`) return json({ id: cid, requests: options.requests || [] });
+    if (url === "/api/assistant/conversations") return json({ id: "b".repeat(32) });
+    if (url.includes("/stop")) return json({ status: "stop_requested" });
+    if (url === "/api/assistant/stream") return options.send ? options.send() : stream({ answer: "已完成。", actions: [], conversation_id: cid });
+    throw new Error(`Unexpected request ${url} ${init?.method}`);
+  });
+  vi.stubGlobal("fetch", fetch); return fetch;
 }
-
-const ANSWER = (text: string, citations: unknown[] = []) => ({
-  answer: text,
-  citations,
-  mode: "keyword",
-  usage: { total_tokens: 0 },
-});
-
-let pendingCalls: Array<{ question: string; deferred: Deferred }> = [];
-
-function mockAsk(answers: Deferred[]) {
-  pendingCalls = [];
-  const fn = vi.fn(async (_url: string, init?: RequestInit) => {
-    const body = JSON.parse(String(init?.body || "{}"));
-    const slot = answers[pendingCalls.length] || answers[answers.length - 1];
-    const entry = { question: body.question, deferred: slot };
-    pendingCalls.push(entry);
-    const data = await slot.promise;
-    return {
-      ok: true,
-      status: 200,
-      statusText: "ok",
-      text: async () => JSON.stringify(data),
-    } as Response;
-  });
-  vi.stubGlobal("fetch", fn);
+async function renderAsk() {
+  const view = render(<MemoryRouter><AskPage /></MemoryRouter>);
+  await waitFor(() => expect((screen.getByLabelText("消息") as HTMLTextAreaElement).disabled).toBe(false)); return view;
 }
-
-function renderAsk() {
-  return render(
-    <MemoryRouter>
-      <AskPage />
-    </MemoryRouter>,
-  );
+function send(text: string) {
+  fireEvent.change(screen.getByLabelText("消息"), { target: { value: text } }); fireEvent.click(screen.getByText("发送"));
 }
-
-beforeEach(() => {
-  useAuthStore.setState({ user: { username: "a", role: "admin" } as never });
-});
-
-afterEach(() => {
-  cleanup();
-  vi.unstubAllGlobals();
-});
-
-describe("AskPage", () => {
-  it("shows a visible in-flight state with the pending question", async () => {
-    const slot = deferred();
-    mockAsk([slot]);
-
-    renderAsk();
-    fireEvent.change(screen.getByPlaceholderText(/跨全部报告提问/), { target: { value: "最近的模型价格变化" } });
-    fireEvent.click(screen.getByText("提问"));
-
-    expect(await screen.findByText(/正在检索报告并生成回答/)).toBeTruthy();
-    expect(screen.getByText("最近的模型价格变化")).toBeTruthy();
+beforeEach(() => { sessionStorage.clear(); useAuthStore.setState({ user: { username: "admin", role: "admin" } as never }); });
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+describe("Application assistant", () => {
+  it("restores actual server receipts without replay and carries the conversation ID", async () => {
+    const fetch = server({ requests: [{ id: "old", message: "创建任务", status: "completed", result: { answer: "已创建。", actions: [{ tool: "create_job", ok: true, job_name: "research/memory", message: "创建记忆任务" }] } }] });
+    await renderAsk(); expect(screen.getByText("已创建。")).toBeTruthy();
+    expect(screen.getByText("查看任务").getAttribute("href")).toBe("/jobs/research%2Fmemory");
+    expect(fetch.mock.calls.filter(([url]) => url.endsWith("/stream"))).toHaveLength(0);
+    send("运行它"); await screen.findByText("已完成。");
+    const call = fetch.mock.calls.find(([url]) => url.endsWith("/stream")); const body = JSON.parse(String(call?.[1]?.body));
+    expect(body.conversation_id).toBe(cid); expect(body.request_id).toMatch(/^[a-f0-9]{32}$/); expect(body.message).toBe("运行它");
   });
-
-  it("ignores a stale response that arrives after a newer question", async () => {
-    const first = deferred();
-    const second = deferred();
-    mockAsk([first, second]);
-
-    renderAsk();
-    const input = screen.getByPlaceholderText(/跨全部报告提问/);
-
-    fireEvent.change(input, { target: { value: "第一个问题" } });
-    fireEvent.click(screen.getByText("提问"));
-
-    // While the first request is in flight the submit button is disabled, but
-    // the example chips stay clickable — that is the real race.
-    fireEvent.click(screen.getByText("模型定价有什么变化，影响哪些工作流？"));
-
-    // The newer question answers first…
-    expect(pendingCalls.map((c) => c.question)).toEqual([
-      "第一个问题", "模型定价有什么变化，影响哪些工作流？",
-    ]);
-    second.resolve(ANSWER("第二个问题的答案", [{ index: 1, path: "b.md", title: "B", source: "b", snippet: "" }]));
-    await waitFor(() => expect(screen.getByText("第二个问题的答案")).toBeTruthy());
-
-    // …then the older one arrives late and must be discarded.
-    first.resolve(ANSWER("第一个问题的答案"));
-    await waitFor(() => expect(screen.queryByText("第一个问题的答案")).toBeNull());
-    expect(screen.getByText("第二个问题的答案")).toBeTruthy();
+  it("streams before completion and preserves a pending request through navigation", async () => {
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    const body = new ReadableStream<Uint8Array>({ start(c) { controller = c; } });
+    const fetch = server({ send: () => ({ ok: true, status: 200, body } as Response) });
+    const first = await renderAsk(); send("创建任务");
+    const emit = (event: unknown) => controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`));
+    const encoded = new TextEncoder().encode(`data: ${JSON.stringify({ type: "delta", text: "正在创建记忆任务" })}\n\n`);
+    controller.enqueue(encoded.slice(0, encoded.length-7)); controller.enqueue(encoded.slice(encoded.length-7));
+    expect(await screen.findByText("正在创建记忆任务")).toBeTruthy();
+    const action = { tool: "create_job", ok: true, message: "真实操作已完成", job_name: "research/memory" };
+    emit({ type: "action", action }); expect(await screen.findByText("真实操作已完成")).toBeTruthy();
+    first.unmount(); render(<MemoryRouter><AskPage /></MemoryRouter>);
+    expect(screen.getByText("正在创建记忆任务")).toBeTruthy();
+    emit({ type: "reset" }); emit({ type: "delta", text: "整理结果" });
+    expect(await screen.findByText("整理结果")).toBeTruthy(); expect(screen.queryByText("正在创建记忆任务")).toBeNull();
+    expect(screen.getByText("真实操作已完成")).toBeTruthy();
+    emit({ type: "done", result: { answer: "已完成。", actions: [action], conversation_id: cid } }); controller.close();
+    await screen.findByText("已完成。"); await waitFor(() => expect(screen.queryByRole("status")).toBeNull());
+    expect(fetch.mock.calls.filter(([url]) => url.endsWith("/stream"))).toHaveLength(1);
   });
-
-  it("warns when retrieval returned no citations", async () => {
-    const slot = deferred();
-    mockAsk([slot]);
-
-    renderAsk();
-    fireEvent.change(screen.getByPlaceholderText(/跨全部报告提问/), { target: { value: "库里没有的东西" } });
-    fireEvent.click(screen.getByText("提问"));
-    slot.resolve(ANSWER("一个没有依据的回答"));
-
-    expect(await screen.findByText(/没有命中任何报告/)).toBeTruthy();
+  it("keeps partial output after disconnect without automatic replay", async () => {
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    const fetch = server({ send: () => ({ ok: true, status: 200, body: new ReadableStream({ start(c) { controller = c; } }) } as Response) });
+    await renderAsk(); send("创建任务");
+    for (const event of [{ type: "delta", text: "任务已建立" }, { type: "action", action: { tool: "create_job", ok: true, message: "已创建 research/new" } }]) controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(event)}\r\n\r\n`));
+    expect(await screen.findByText("任务已建立")).toBeTruthy(); controller.close();
+    expect((await screen.findByRole("alert")).textContent).toContain("连接中断"); expect(screen.getByText("已创建 research/new")).toBeTruthy();
+    expect(fetch.mock.calls.filter(([url]) => url.endsWith("/stream"))).toHaveLength(1);
   });
-
-  it("does not show the empty-citation warning when sources exist", async () => {
-    const slot = deferred();
-    mockAsk([slot]);
-
-    renderAsk();
-    fireEvent.change(screen.getByPlaceholderText(/跨全部报告提问/), { target: { value: "价格变化" } });
-    fireEvent.click(screen.getByText("提问"));
-    slot.resolve(ANSWER("有依据的回答", [{ index: 1, path: "a.md", title: "A", source: "a", snippet: "" }]));
-
-    await screen.findByText("有依据的回答");
-    expect(screen.queryByText(/没有命中任何报告/)).toBeNull();
-    expect(screen.getByText(/引用（1）/)).toBeTruthy();
+  it("stops the assistant response without cancelling research jobs", async () => {
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    const fetch = server({ send: () => ({ ok: true, status: 200, body: new ReadableStream({ start(c) { controller = c; } }) } as Response) });
+    await renderAsk(); send("查看任务"); fireEvent.click(screen.getByText("停止响应"));
+    await waitFor(() => expect(fetch.mock.calls.some(([url]) => /\/requests\/[a-f0-9]{32}\/stop$/.test(url))).toBe(true));
+    controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ type: "done", result: { answer: "响应已停止。", actions: [] } })}\n\n`)); controller.close();
+    await screen.findByText("响应已停止。"); expect(fetch.mock.calls.some(([url]) => url.includes("/cancel"))).toBe(false);
   });
-
-  it("keeps the error visible and clears the spinner when the request fails", async () => {
-    const slot = deferred();
-    mockAsk([slot]);
-
-    renderAsk();
-    fireEvent.change(screen.getByPlaceholderText(/跨全部报告提问/), { target: { value: "会失败的问题" } });
-    fireEvent.click(screen.getByText("提问"));
-    slot.reject(new Error("HTTP 500"));
-
-    expect(await screen.findByText("HTTP 500")).toBeTruthy();
-    expect(screen.queryByText(/正在检索报告并生成回答/)).toBeNull();
+  it("renders timezone, next runs and report citations", async () => {
+    server({ send: () => stream({ answer: "计划已保存。", actions: [{ tool: "manage_schedule", ok: true, message: "计划保存完成", href: "/scheduler", detail: { schedule: "0 9 * * 1", timezone: "Asia/Shanghai", next_runs: ["2026-10-19T09:00:00+08:00"] }, references: [{ type: "report", id: "old.md", href: "/reports/view?path=old.md", title: "旧报告", date: "2026-09-01" }] }] }) });
+    await renderAsk(); send("设置周期"); expect(await screen.findByText(/Asia\/Shanghai/)).toBeTruthy(); expect(screen.getByText(/2026-10-19T09:00:00/)).toBeTruthy();
+    expect(screen.getByText("2026-09-01 · 旧报告").getAttribute("href")).toBe("/reports/view?path=old.md");
+  });
+  it("starts a new server conversation and clears cached messages", async () => {
+    const fetch = server({ requests: [{ id: "old", message: "旧问题", status: "completed", result: { answer: "旧回答", actions: [] } }] });
+    await renderAsk(); fireEvent.click(screen.getByText("新对话")); await waitFor(() => expect(screen.queryByText("旧回答")).toBeNull());
+    expect(sessionStorage.getItem("jobs-assistant:admin")).toBe("[]"); expect(fetch.mock.calls.some(([url, init]) => url === "/api/assistant/conversations" && init?.method === "POST")).toBe(true);
+  });
+  it("blocks submission until recovery succeeds and isolates accounts", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    sessionStorage.setItem("jobs-assistant:admin", JSON.stringify([{ role: "user", content: "admin private" }]));
+    useAuthStore.setState({ user: { username: "reader", role: "viewer" } as never });
+    render(<MemoryRouter><AskPage /></MemoryRouter>);
+    expect(await screen.findByText(/offline/)).toBeTruthy(); expect((screen.getByText("发送") as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/当前账号为只读权限/)).toBeTruthy(); expect(screen.queryByText("admin private")).toBeNull();
+  });
+  it('pins the tab to its own conversation when another conversation becomes latest', async () => {
+    const fetch = server({ requests: [{ id: 'a', message: '任务 A', status: 'completed', result: { answer: 'A 的结果', actions: [] } }] });
+    const first = await renderAsk();
+    expect(sessionStorage.getItem('jobs-assistant:admin:id')).toBe(cid);
+    first.unmount();
+    fetch.mockImplementation(async (url: string) => {
+      if (url === '/api/assistant/conversation') return json({ id: 'b'.repeat(32), requests: [] });
+      if (url === `/api/assistant/conversations/${cid}`) return json({ id: cid, requests: [{ id: 'a', message: '任务 A', status: 'completed', result: { answer: 'A 的结果', actions: [] } }] });
+      throw new Error(`Unexpected ${url}`);
+    });
+    await renderAsk();
+    expect(screen.getByText('A 的结果')).toBeTruthy();
+    expect(fetch.mock.calls[fetch.mock.calls.length - 1]?.[0]).toBe(`/api/assistant/conversations/${cid}`);
+  });
+  it('reads actual receipts after disconnect without a second model request', async () => {
+    const fetch = server({ send: () => ({ ok: true, status: 200, body: new ReadableStream({ start(c) { c.close(); } }) } as Response) });
+    await renderAsk(); send('创建任务');
+    await screen.findByRole('alert');
+    fetch.mockImplementation(async (url: string) => {
+      if (url === `/api/assistant/conversations/${cid}`) return json({ id: cid, requests: [{ id: 'saved', message: '创建任务', status: 'interrupted', result: { answer: '已记录的真实结果', actions: [{ tool: 'create_job', ok: true, message: '任务已创建' }] } }] });
+      throw new Error(`Unexpected ${url}`);
+    });
+    fireEvent.click(screen.getByText('核验结果'));
+    expect(await screen.findByText('已记录的真实结果')).toBeTruthy();
+    expect(screen.getByText('任务已创建')).toBeTruthy();
+    expect(fetch.mock.calls.filter(([url]) => url.endsWith('/stream'))).toHaveLength(1);
+  });
+  it('restores a partial task and continues only after an explicit click', async () => {
+    const fetch = server({ requests: [{ id: 'partial', message: '比较报告', status: 'completed', result: {
+      answer: '本次只完成一部分', actions: [], continuation: { reason: 'step_limit', steps: 16, reports_complete: 2, remaining_report_count: 3, next_reports: ['next.md'], report_reads: [] },
+    } }] });
+    await renderAsk();
+    expect(screen.getByText(/原请求尚未完成，进度已保存/)).toBeTruthy();
+    expect(fetch.mock.calls.some(([url]) => url.endsWith('/stream'))).toBe(false);
+    fireEvent.click(screen.getByText('继续处理'));
+    await screen.findByText('已完成。');
+    const request = fetch.mock.calls.find(([url]) => url.endsWith('/stream'));
+    expect(JSON.parse(String(request?.[1]?.body)).message).toContain('已成功的操作不要重复执行');
   });
 });

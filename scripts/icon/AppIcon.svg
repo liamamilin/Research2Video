@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    AI Research Console — app icon.
+
+    Drawn on Apple's macOS icon grid: a 824x824 rounded square inset 100px in a
+    1024 canvas, corner radius 186 (bigsur squircle). Rendered to PNG by
+    scripts/build_icons.sh; edit this file, not the PNGs.
+
+    Motif: a magnifier (research) whose lens holds a four-point AI sparkle.
+    Kept to one silhouette so it stays legible at 16px.
+  -->
+  <defs>
+    <linearGradient id="plate" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#4f8ef7"/>
+      <stop offset="0.45" stop-color="#1e56d6"/>
+      <stop offset="1" stop-color="#0f2a86"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="0.35" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="0.65" stop-color="#ffffff" stop-opacity="0.02"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.12"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0.18" y1="0.06" x2="0.9" y2="0.98">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.55" stop-color="#f5f9ff"/>
+      <stop offset="1" stop-color="#b9d1f5"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.5" stop-color="#eaf6ff"/>
+      <stop offset="1" stop-color="#5cbcff"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.32" cy="0.2" r="0.72">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="plateClip">
+      <rect x="100" y="100" width="824" height="824" rx="186" ry="186"/>
+    </clipPath>
+    <filter id="glassShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#071b52" flood-opacity="0.38"/>
+    </filter>
+    <!-- Lens opening + handle punched out of one ring shape. -->
+    <mask id="lensHole">
+      <rect x="0" y="0" width="1024" height="1024" fill="#000"/>
+      <circle cx="448" cy="448" r="218" fill="#fff"/>
+      <circle cx="448" cy="448" r="146" fill="#000"/>
+      <line x1="560" y1="560" x2="672" y2="672" stroke="#fff" stroke-width="96" stroke-linecap="round"/>
+      <circle cx="672" cy="672" r="48" fill="#fff"/>
+    </mask>
+  </defs>
+
+  <rect x="100" y="100" width="824" height="824" rx="186" ry="186" fill="url(#plate)"/>
+  <g clip-path="url(#plateClip)">
+    <rect x="100" y="100" width="824" height="824" fill="url(#halo)"/>
+    <rect x="100" y="100" width="824" height="824" fill="url(#gloss)"/>
+    <rect x="112" y="112" width="800" height="800" rx="176" ry="176"
+          fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="7"/>
+    <rect x="130" y="130" width="764" height="764" rx="160" ry="160"
+          fill="none" stroke="#0b2a6b" stroke-opacity="0.12" stroke-width="4"/>
+  </g>
+
+  <g filter="url(#glassShadow)">
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#glass)" mask="url(#lensHole)"/>
+  </g>
+
+  <path d="M448 338
+           C 458 402, 494 438, 558 448
+           C 494 458, 458 494, 448 558
+           C 438 494, 402 458, 338 448
+           C 402 438, 438 402, 448 338 Z"
+        fill="url(#spark)"/>
+</svg>

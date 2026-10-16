@@ -44,9 +44,11 @@ def _solo_registry():
     registry = TaskRegistry()
     with registry._lock:
         registry._tasks.clear()
+        registry._retiring.clear()
     yield
     with registry._lock:
         registry._tasks.clear()
+        registry._retiring.clear()
 
 
 # --- progress event mapping --------------------------------------------------

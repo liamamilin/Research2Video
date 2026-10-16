@@ -51,12 +51,37 @@ rm -rf "$TARGET"
 /usr/bin/osacompile -s -o "$TARGET" "$RENDERED"
 rm -f "$RENDERED"
 
-# Give it an icon so it is not the default AppleScript droplet.
+# Give it a real icon so it is not the default AppleScript droplet.
+#
+# Two files matter, and the second is the one that was missing: an applet ships
+# both Contents/Resources/applet.icns and Contents/Resources/Assets.car, and
+# Info.plist declares the icon through CFBundleIconFile *and* CFBundleIconName.
+# On current macOS the compiled asset catalog wins, so copying only the .icns
+# left the stock AppleScript ribbon visible on screen. Install both.
 ICON="$BASE_DIR/scripts/launcher.icns"
+ICON_DIR="$BASE_DIR/scripts/icon"
 if [[ -f "$ICON" ]]; then
   /usr/bin/codesign --force --sign - "$TARGET" 2>/dev/null || true
-  /usr/bin/cp "$ICON" "$TARGET/Contents/Resources/applet.icns" 2>/dev/null || true
+  # Plain `cp`, not `/usr/bin/cp`: on macOS cp lives in /bin, so the absolute
+  # path used here before did not exist and -- with `2>/dev/null || true` --
+  # failed silently, which is why this applet kept the stock AppleScript icon
+  # no matter how many times it was rebuilt.
+  cp "$ICON" "$TARGET/Contents/Resources/applet.icns"
+  # Replace the stock catalog built by osacompile; a stale one would win.
+  if [[ -f "$ICON_DIR/Assets.car" ]]; then
+    cp "$ICON_DIR/Assets.car" "$TARGET/Contents/Resources/Assets.car"
+  fi
+  # Declare the icon name the catalog was compiled with. osacompile already
+  # writes CFBundleIconName=applet, so this is a no-op on a fresh build -- but a
+  # bundle that predates it would otherwise ignore the catalog.
+  /usr/libexec/PlistBuddy -c "Set :CFBundleIconName applet" \
+    "$TARGET/Contents/Info.plist" 2>/dev/null \
+    || /usr/libexec/PlistBuddy -c "Add :CFBundleIconName string applet" \
+         "$TARGET/Contents/Info.plist" 2>/dev/null || true
   /usr/bin/codesign --force --sign - "$TARGET" 2>/dev/null || true
+  # LaunchServices caches icons by bundle path + mtime; without this the Dock
+  # keeps showing the old artwork for a while.
+  touch "$TARGET"
 fi
 
 echo "built $TARGET"

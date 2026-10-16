@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
+import { AssistantConfigRecovery } from "@/components/AssistantAction";
 import {
   CheckCircle2, FileCode, Plug, RotateCcw, Save, SlidersHorizontal, XCircle,
 } from "lucide-react";
@@ -15,6 +16,32 @@ interface SecretInfo {
   label: string;
   configured: boolean;
   masked: string;
+}
+
+interface ProviderPreset {
+  id: string;
+  label: string;
+  base_url: string;
+  api_key_env: string;
+  extra_headers: Record<string, string>;
+  models: string[];
+  note: string;
+}
+
+// Sentinel for "keep whatever is configured" -- not a provider, but the value
+// the dropdown shows when the saved base_url matches no preset.
+const CUSTOM_PROVIDER = "__custom__";
+
+// Mirrors core/providers.py: an env-var *name* is an identifier, so anything
+// else (or a known key prefix) is a key pasted into the wrong box.
+const ENV_NAME_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const SECRET_PREFIXES = ["sk-", "sk_", "gg-", "tvly-", "xai-", "gsk_", "aiza"];
+
+function looksLikeSecret(value: string): boolean {
+  const text = (value || "").trim();
+  if (!text) return false;
+  if (!ENV_NAME_RE.test(text)) return true;
+  return SECRET_PREFIXES.some((p) => text.toLowerCase().startsWith(p));
 }
 
 const NOTIFY_EVENTS = [
@@ -101,6 +128,7 @@ export function SystemConfig() {
   const [parsed, setParsed] = useState<any>(null);
   const [content, setContent] = useState("");
   const [mtime, setMtime] = useState<number | null>(null);
+  const [version, setVersion] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -112,6 +140,8 @@ export function SystemConfig() {
   const [cleared, setCleared] = useState<string[]>([]);
   const [savingSecrets, setSavingSecrets] = useState(false);
   const [secretMessage, setSecretMessage] = useState("");
+
+  const [providers, setProviders] = useState<ProviderPreset[]>([]);
 
   const [testing, setTesting] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<Record<string, any>>({});
@@ -125,6 +155,7 @@ export function SystemConfig() {
         setParsed(data.parsed || {});
         setContent(data.content || "");
         setMtime(typeof data.mtime === "number" ? data.mtime : null);
+        setVersion(data.version);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -135,6 +166,9 @@ export function SystemConfig() {
         setCleared([]);
       })
       .catch(() => setSecrets([]));
+    api<any>("/api/config/providers")
+      .then((data) => setProviders(data.providers || []))
+      .catch(() => setProviders([]));
   };
 
   useEffect(() => {
@@ -196,13 +230,14 @@ export function SystemConfig() {
     setConflict(false);
     try {
       const body = mode === "form"
-        ? { patch: buildPatch(), expected_mtime: mtime }
-        : { content, expected_mtime: mtime };
-      const resp = await api<{ ok: boolean; mtime: number }>("/api/config/system", {
+        ? { patch: buildPatch(), expected_mtime: mtime, expected_version: version }
+        : { content, expected_mtime: mtime, expected_version: version };
+      const resp = await api<{ ok: boolean; mtime: number; version?: string }>("/api/config/system", {
         method: "PUT",
         body,
       });
       if (typeof resp?.mtime === "number") setMtime(resp.mtime);
+      setVersion(resp.version);
       setMessage("保存成功");
       if (mode === "form") load();
     } catch (err: any) {
@@ -306,6 +341,34 @@ export function SystemConfig() {
   const searchEnvMap = get(["search", "api_key_envs"], {}) || {};
   const searchEnv = searchEnvMap[searchProvider] || get(["search", "api_key_env"], "");
 
+  // Which preset the saved base_url corresponds to, or CUSTOM_PROVIDER. Only
+  // read from `parsed` (saved values) for the initial match; the dropdown
+  // selection itself is derived so a manual URL edit flips it to 自定义.
+  const currentBaseUrl = String(get(["ai", "base_url"], "") || "").trim().replace(/\/+$/, "");
+  const matchedProvider = providers.find(
+    (p) => p.base_url.replace(/\/+$/, "").toLowerCase() === currentBaseUrl.toLowerCase());
+  const selectedProvider = currentBaseUrl === "" ? CUSTOM_PROVIDER
+    : (matchedProvider?.id ?? CUSTOM_PROVIDER);
+  const activeProvider = providers.find((p) => p.id === selectedProvider);
+
+  const applyProvider = (id: string) => {
+    const preset = providers.find((p) => p.id === id);
+    if (!preset) return;
+    // base_url, env var name and headers are set together: the whole point is
+    // that these three cannot end up pointing at different vendors.
+    set(["ai", "base_url"], preset.base_url);
+    set(["ai", "api_key_env"], preset.api_key_env);
+    set(["ai", "extra_headers"], Object.keys(preset.extra_headers).length
+      ? preset.extra_headers : undefined);
+  };
+
+  // A key pasted into the env-name field sends an unauthenticated request and
+  // comes back as a bare 401, so flag it in the form before the test even runs.
+  const envNameIsSecret = looksLikeSecret(String(llmEnv || ""));
+  const envNameIsEmpty = activeProvider
+    ? !activeProvider.api_key_env
+    : false;
+
   const TestButton = ({ id, label, path, configPatch, envName }: {
     id: string;
     label: string;
@@ -328,6 +391,7 @@ export function SystemConfig() {
 
   return (
     <div className="space-y-3">
+      <AssistantConfigRecovery onRestored={load} />
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex rounded-md border border-border overflow-hidden">
           <button
@@ -450,13 +514,32 @@ export function SystemConfig() {
             )}
           >
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="模型 ID">
+              <Field label="服务商" hint="选择后自动填入地址与密钥变量">
+                <div>
+                  <select
+                    className="input"
+                    value={selectedProvider}
+                    onChange={(e) => {
+                      if (e.target.value === CUSTOM_PROVIDER) return;
+                      applyProvider(e.target.value);
+                    }}
+                  >
+                    {selectedProvider === CUSTOM_PROVIDER && (
+                      <option value={CUSTOM_PROVIDER}>自定义（当前地址未匹配预设）</option>
+                    )}
+                    {providers.map((p) => (
+                      <option key={p.id} value={p.id}>{p.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </Field>
+              <Field label="模型 ID" hint={activeProvider?.models.length ? `如 ${activeProvider.models[0]}` : undefined}>
                 <div>{textInput(["ai", "model"], "deepseek-v4.1-flash", true)}</div>
               </Field>
               <Field label="接口地址" hint="OpenAI 兼容">
                 <div>{textInput(["ai", "base_url"], "https://.../v1", true)}</div>
               </Field>
-              <Field label="密钥环境变量" hint="对应上方密钥卡片">
+              <Field label="密钥环境变量" hint="只填变量名，不填密钥">
                 <div>{textInput(["ai", "api_key_env"], "LLM_API_KEY", true)}</div>
               </Field>
               <Field label="超时（秒）"><div>{numInput(["ai", "timeout"], { placeholder: "1800" })}</div></Field>
@@ -475,6 +558,21 @@ export function SystemConfig() {
                   onChange={(v) => set(["ai", "stream"], v)} />
               </div>
             </div>
+            {activeProvider?.note && (
+              <div className="text-[11px] text-text-muted">{activeProvider.note}</div>
+            )}
+            {envNameIsSecret && (
+              <div className="text-[11px] text-danger">
+                “密钥环境变量”里填的是 API Key，不是变量名（如 LLM_API_KEY）。
+                这样请求不会带 Authorization 头，会以 401 invalid_api_key 失败。
+                请把密钥填到上方“API 密钥”卡片。
+              </div>
+            )}
+            {envNameIsEmpty && !envNameIsSecret && (
+              <div className="text-[11px] text-text-muted">
+                该服务商无需密钥，保持“密钥环境变量”为空。
+              </div>
+            )}
           </Section>
 
           <Section

@@ -159,6 +159,29 @@ bash scripts/build_launcher.sh ~/Applications  # 构建并安装到「应用程�
 `build_launcher.sh` 用 `osacompile -s`（stay-open）编译：不带 `-s` 的
 applet 在 `run` 返回后立即退出，`on idle` 看门狗永远不会执行。
 
+#### 应用图标
+
+图标源文件是 `scripts/icon/AppIcon.svg`（矢量，可在 Figma / Sketch / 浏览器里改）。
+改完重新生成图标资产：
+
+```bash
+bash scripts/build_icons.sh   # SVG → PNG → launcher.icns + AppIcon.icns + Assets.car
+bash scripts/build_launcher.sh  # 重新构建 app 并写入图标
+```
+
+设计说明：蓝色 macOS Big Sur 圆角方块（824×824，圆角 186），主体是放大镜
+（“研究”）+ 镜片里的四角星芒（“AI”）。刻意做成单一剪影，保证在 16px 的
+Dock / 列表里依然可辨。
+
+> 图标为什么要两个文件：applet 包同时带 `Contents/Resources/applet.icns` 和
+> `Contents/Resources/Assets.car`，而 Info.plist 通过 `CFBundleIconFile` 和
+> `CFBundleIconName` 同时声明图标。**当前 macOS 优先用 Assets.car**，所以只替换
+> `.icns` 时屏幕上仍是 AppleScript 自带的灰色卷轴图标 —— 这正是之前一直不生效的
+> 原因。`build_launcher.sh` 现在两个都装。
+>
+> 依赖：Google Chrome（渲染 SVG）、Pillow、`iconutil`；`Assets.car` 需要 Xcode 的
+> `actool`（命令行工具自带）。全部离线运行。
+
 ### 常驻网关：URL 永不掉线 + 手机访问
 
 闲置退出只关掉启动器 applet，服务本身会继续跑，所以 URL 平时不会因空闲而失效。
@@ -224,10 +247,12 @@ python run_web.py reindex                  # Force re-scan output/ for search in
 | Report viewer | Markdown rendering (GFM tables, code blocks, TOC sidebar), 报告元数据（模型/tokens/耗时）|
 | Live generation | 流式生成进度（thinking/writing 字数、耗时），工具轮带心跳 |
 | Full-text search | FTS5-powered search across report titles and content |
-| 问答（RAG） | 跨全部报告提问：FTS5 + 向量混合检索（配置 `ai.embedding_model` 后启用），回答带引用可跳转；「重建索引」按钮增量嵌入 |
+| 助手 | 总览下方的流式应用入口：管理 Jobs/模板、周期与运行、报告与历史分析、情报轮次与行动、配置诊断、账号和服务维护。支持服务端恢复、操作回执、真实对象链接、受保护输入与配置回退；沿用现有权限和业务规则。 |
 | User management | Admin-panel: create/delete users with role-based access |
 | Audit log | Track all mutations (run, cancel, YAML edit, config change) |
 | System config | Edit system.yaml from the browser (admin only) |
+
+使用方式见 [助手 Harness 说明](spec/assistant-harness.md)，范围与验证见 [开发计划](spec/assistant-harness-plan.md) 和 [开发进度](spec/assistant-harness-progress.md)。
 
 ## Job Files
 

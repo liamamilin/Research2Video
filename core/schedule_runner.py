@@ -157,9 +157,15 @@ def work(runtime: Runtime, run_id: str, execute=execute_job) -> None:
                         store.finish(run_id, 'blocked', str(exc))
                         return
                     def heartbeat():
-                        while not done.wait(10):
+                        renewed = 0.0
+                        while not done.wait(0.5):
                             try:
-                                store.renew(run_id)
+                                current = store.run(run_id)
+                                if current and current.get('cancel_requested'):
+                                    cancel.set()
+                                if time.monotonic() - renewed >= 10:
+                                    store.renew(run_id)
+                                    renewed = time.monotonic()
                             except Exception:
                                 logger.exception('Worker heartbeat failed')
                     def deadline():

@@ -4,7 +4,7 @@ import { errorMessage } from '@/lib/toast';
 
 interface Attempt { attempt: number; status: string; error?: string }
 interface Run { id: string; due_at_iso: string; started_at_iso?: string; status: string; attempt: number; error?: string; output_path?: string; timezone?: string; attempts: Attempt[] }
-const LABELS: Record<string, string> = { success: '成功', failed: '失败', retry: '等待重试', running: '运行中', starting: '启动中', queued: '排队中', interrupted: '进程中断', skipped: '已跳过', blocked: '未执行' };
+const LABELS: Record<string, string> = { success: '成功', failed: '失败', retry: '等待重试', running: '运行中', starting: '启动中', queued: '排队中', interrupted: '进程中断', skipped: '已跳过', blocked: '未执行', cancelled: '用户已取消' };
 
 // The server sends the wall clock in the plan's own timezone. Cutting it to
 // "2026-09-25 03:00" hides which zone that is, and around a DST change the same

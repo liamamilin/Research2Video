@@ -270,6 +270,9 @@ def _notify_round(state: dict, results: dict[str, str],
 
 def _export_round_artifacts(state: dict, config_dir: str) -> None:
     """Best-effort JSON artifacts (actions, watchlist, sources) for a round."""
+    if any(stage.get('status') not in ('success', 'skipped') for stage in state.get('stages', {}).values()):
+        logger.warning('Round %s has unfinished/stale stages; retaining prior artifacts without resyncing them', state['date'])
+        return
     try:
         from core.artifacts import export_round_artifacts
         from core.config import load_system_config
@@ -365,7 +368,8 @@ def _stages_needing_rerun(file_stages: dict, previous: dict) -> list[str]:
 def start_retry(config_dir: str, jobs_dir: str, output_dir: str,
                 concurrency: int = 3, trigger: str = "web",
                 date: Optional[str] = None,
-                invalidate_downstream: bool = True) -> dict:
+                invalidate_downstream: bool = True,
+                force_stages: Optional[list[str]] = None) -> dict:
     """Re-run the unfinished stages of a round (missing/failed/interrupted).
 
     Stages that consumed the output of a re-run stage are invalidated and
@@ -374,6 +378,8 @@ def start_retry(config_dir: str, jobs_dir: str, output_dir: str,
     upstream documents.
     """
     date = date or datetime.now().strftime("%Y-%m-%d")
+    if force_stages and any(key not in STAGE_LABEL for key in force_stages):
+        raise RuntimeError('未知阶段，请使用轮次详情返回的完整阶段 key')
 
     file_stages = {s["key"]: s for s in build_round_files(date, output_dir)}
 
@@ -384,6 +390,15 @@ def start_retry(config_dir: str, jobs_dir: str, output_dir: str,
 
         previous = _rounds.get(date, {}).get("stages", {})
         plan = plan_retry(file_stages, previous, invalidate_downstream)
+        if force_stages:
+            needed = list(dict.fromkeys(force_stages))
+            downstream = downstream_closure(needed)
+            plan = {'needed': needed, 'invalidated': downstream,
+                    'run': needed + [key for key in downstream if key not in needed]}
+            unresolved = set(_stages_needing_rerun(file_stages, previous)) - set(plan['run'])
+            missing_inputs = sorted({dep for key in plan['run'] for dep in STAGE_DEPS.get(key, ()) if dep in unresolved})
+            if missing_inputs:
+                raise RuntimeError('所选阶段依赖未完成的上游：' + ', '.join(missing_inputs) + '；请先补跑，或明确将这些阶段一并加入重跑范围')
         needed = plan["needed"]
         run_set = set(plan["run"])
         invalidated = set(plan["invalidated"])
@@ -492,6 +507,12 @@ def _run_round(state: dict, config_dir: str, jobs_dir: str, concurrency: int,
             ) as pool:
                 futures = {}
                 for key in active:
+                    stale_dependencies = [dep for dep in STAGE_DEPS.get(key, [])
+                                          if (stage_filter is None or dep in stage_filter) and results.get(dep) != 'success']
+                    if stale_dependencies:
+                        _set_stage(state, key, 'stale', error='上游阶段未成功，保留旧报告供查阅，未生成本次新结论：' + ', '.join(stale_dependencies))
+                        results[key] = 'stale'
+                        continue
                     job_name = f"{PIPELINE_DIR}/{key}"
                     _set_stage(state, key, "queued")
 

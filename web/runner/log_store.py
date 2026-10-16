@@ -100,17 +100,23 @@ def read_events(logs_dir: str, job_name: str, run_id: Optional[str] = None,
         status = "unknown"
         started = records[0].get("ts", "") if records else ""
         finished = ""
+        output_path = None
+        duration_seconds = None
         for record in records:
             event = record.get("event") or {}
             if event.get("type") == "status":
                 status = str(event.get("status") or status)
                 finished = record.get("ts", "")
+                output_path = event.get("output_path") or output_path
+                duration_seconds = event.get("duration_seconds", duration_seconds)
         runs.append({
             "run_id": rid,
             "status": status,
             "started_at": started,
             "finished_at": finished,
             "events": len(records),
+            "output_path": output_path,
+            "duration_seconds": duration_seconds,
         })
     runs.reverse()
 

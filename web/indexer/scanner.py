@@ -55,6 +55,9 @@ def infer_job_name(rel_path: str) -> str:
 def index_file(output_dir: str, rel_path: str) -> bool:
     """Index a single file. Returns True if indexed, False on error/skip."""
     full_path = os.path.join(output_dir, rel_path)
+    if not Path(full_path).resolve().is_relative_to(Path(output_dir).resolve()):
+        index_db.remove_report(rel_path)
+        return False
 
     if not os.path.isfile(full_path):
         index_db.remove_report(rel_path)

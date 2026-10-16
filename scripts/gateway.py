@@ -97,6 +97,35 @@ _STARTING_PAGE = """<!doctype html>
 """
 
 
+_OPERATOR_OWNED = frozenset({"AI_RESEARCH_SECRET_KEY", "WEB_SECRET_KEY"})
+
+
+def _env_file_keys(project: Path) -> frozenset:
+    """Names defined in the project's .env, parsed without dotenv.
+
+    The gateway is the process that must survive everything else being broken,
+    so it stays stdlib-only and does not import the venv's dotenv. Only the key
+    names matter here, and ``KEY=value`` lines are trivial to read.
+    """
+    path = project / ".env"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return frozenset()
+    keys = set()
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key = line.split("=", 1)[0].strip()
+        # Tolerate `export KEY=value`, which some people write.
+        if key.startswith("export "):
+            key = key[len("export "):].strip()
+        if key:
+            keys.add(key)
+    return frozenset(keys)
+
+
 def lan_address() -> str:
     """This machine's LAN IP, or an empty string when there isn't one.
 
@@ -111,12 +140,15 @@ class Supervisor:
     """Keeps at most one app alive, and never spawns two at once."""
 
     def __init__(self, app_port: int, project: Path, cooldown: float = 10.0,
-                 health_timeout: float = 2.0, python: str | None = None):
+                 health_timeout: float = 2.0, python: str | None = None, state_dir: Path | None = None,
+                 logs_dir: Path | None = None):
         self.app_port = app_port
         self.project = project
         self.cooldown = max(0.0, cooldown)
         self.health_timeout = health_timeout
         self.python = python or sys.executable
+        self.state_dir = state_dir or project / 'state'
+        self.logs_dir = logs_dir or project / 'logs'
         self._lock = threading.Lock()
         self._last_attempt = 0.0
         self._started_at: float | None = None
@@ -150,7 +182,7 @@ class Supervisor:
         finally:
             probe.close()
 
-    def ensure(self) -> tuple[bool, str]:
+    def ensure(self, *, allow_shutdown_wake: bool = True) -> tuple[bool, str]:
         """Return (healthy, note). Starts the app at most once per cooldown."""
         if self.healthy():
             return True, "running"
@@ -163,6 +195,17 @@ class Supervisor:
                 # Something owns the port and is not answering yet, so it is
                 # still coming up rather than crashed.
                 return False, "starting"
+            try:
+                marker = json.loads((self.state_dir / 'assistant_maintenance.json').read_text())
+                if not allow_shutdown_wake and marker.get('action') == 'shutdown' and marker.get('status') in ('applying', 'completed'):
+                    runtime = json.loads((self.state_dir / 'app_runtime.json').read_text())
+                    if runtime.get('pid') == marker.get('pid'):
+                        return False, 'stopped'
+                if marker.get('action') == 'restart' and marker.get('status') in ('applying', 'starting') and \
+                        time.time() - marker.get('updated', marker.get('created', 0)) < 300:
+                    return False, 'maintenance'
+            except (OSError, ValueError):
+                pass
             now = time.monotonic()
             if self._last_attempt and (now - self._last_attempt) < self.cooldown:
                 return False, "starting"
@@ -178,20 +221,33 @@ class Supervisor:
         return False, "starting"
 
     def _spawn(self) -> None:
-        log = self.project / "logs" / "gateway_app.log"
+        log = self.logs_dir / "gateway_app.log"
         log.parent.mkdir(parents=True, exist_ok=True)
-        pid_file = self.project / "state" / "server.pid"
+        pid_file = self.state_dir / "server.pid"
         pid_file.parent.mkdir(parents=True, exist_ok=True)
         # A stale pid file from a crashed run would make the applet think a
         # server is still around, so clear it before handing over.
         pid_file.unlink(missing_ok=True)
-        env = {**os.environ, "AI_RESEARCH_APP_PORT": str(self.app_port)}
+        # Do NOT forward the .env values this process loaded at its own startup.
+        # The gateway lives for weeks, so its copy of a key is stale the moment
+        # the console saves a new one; passing that snapshot on made the app
+        # serve yesterday's key. The app re-reads .env itself, so drop the keys
+        # the file defines and let it fill them in fresh. This is why the
+        # gateway does not simply pass {**os.environ}.
+        #
+        # The JWT secret is kept: the README tells operators to set it in the
+        # environment, so an explicit value must reach the app -- and load_env
+        # would otherwise see the stripped copy and fall back to the file.
+        env = {k: v for k, v in os.environ.items()
+               if k not in _env_file_keys(self.project) or k in _OPERATOR_OWNED}
+        env["AI_RESEARCH_APP_PORT"] = str(self.app_port)
         with open(log, "ab") as handle:
-            subprocess.Popen(
+            child = subprocess.Popen(
                 [self.python, str(self.project / "run_web.py"), "serve"],
                 cwd=str(self.project), stdout=handle, stderr=handle,
                 stdin=subprocess.DEVNULL, start_new_session=True, env=env,
             )
+        threading.Thread(target=child.wait, daemon=True, name='reap-app').start()
 
     def status(self) -> dict:
         return {
@@ -335,7 +391,9 @@ class GatewayHandler(BaseHTTPRequestHandler):
         if self.path.split("?", 1)[0] == f"{GATEWAY_PREFIX}/status":
             self._gateway_status()
             return
-        healthy, _note = self.supervisor.ensure()
+        document = self.command in ('GET', 'HEAD') and (
+            self.path.split('?', 1)[0] in ('/', '/index.html') or 'text/html' in (self.headers.get('Accept') or ''))
+        healthy, _note = self.supervisor.ensure(allow_shutdown_wake=document)
         if not healthy:
             # A real request is the trigger, so a bookmark revives the app.
             # Only a document request gets the friendly page; an API caller
@@ -345,7 +403,8 @@ class GatewayHandler(BaseHTTPRequestHandler):
                 self._starting()
             else:
                 self._send(503, json.dumps({
-                    "error": {"code": "app_starting", "message": "服务正在启动，请稍候重试"}
+                    "error": {"code": "app_stopped" if _note == 'stopped' else "app_starting",
+                              "message": "服务已关停；重新打开应用页面后可恢复访问并核验维护回执" if _note == 'stopped' else "服务正在启动，请稍候重试"}
                 }).encode("utf-8"), "application/json; charset=utf-8",
                     {"Retry-After": "2"})
             return
@@ -354,7 +413,7 @@ class GatewayHandler(BaseHTTPRequestHandler):
     do_GET = do_HEAD = do_POST = do_PUT = do_PATCH = do_DELETE = _handle
 
     def do_OPTIONS(self) -> None:
-        healthy, _ = self.supervisor.ensure()
+        healthy, _ = self.supervisor.ensure(allow_shutdown_wake=False)
         if not healthy:
             self._starting()
             return
@@ -366,13 +425,20 @@ def _load_settings():
     return get_settings()
 
 
-def serve() -> int:
+def _serve_once(rebinding: str | None = None, fallback: dict | None = None) -> tuple[int, str | None]:
     settings = _load_settings()
+    if fallback:
+        # Restore the last actual listener without rewriting the desired
+        # config. The UI can then truthfully show "saved, still pending".
+        settings.server.host = fallback['bind_host']
+        settings.server.port = fallback['port']
+        settings.gateway.lan_access = fallback['lan_access']
+        settings.gateway.app_port = fallback['app_port']
     gateway = settings.gateway
     if not gateway.enabled:
         print("gateway.enabled is false; run the app directly (python run_web.py serve)",
               file=sys.stderr)
-        return 2
+        return 2, None
 
     public_port = settings.server.port
     host = lan_address() if gateway.lan_access else ""
@@ -384,6 +450,8 @@ def serve() -> int:
         "supervisor": Supervisor(
             app_port=gateway.app_port, project=ROOT,
             cooldown=gateway.respawn_cooldown, health_timeout=gateway.health_timeout,
+            state_dir=Path(settings.paths.state_dir),
+            logs_dir=Path(settings.paths.logs_dir),
         ),
         "public_port": public_port,
         "lan_access": gateway.lan_access,
@@ -410,7 +478,7 @@ def serve() -> int:
         if exc.errno == errno.EADDRINUSE:
             print(f"port {public_port} is already in use — is the gateway already running?",
                   file=sys.stderr)
-            return 1
+            return 1, None
         raise
 
     if gateway.lan_access and host:
@@ -421,11 +489,103 @@ def serve() -> int:
         print(f"gateway listening on {settings.bind_host()}:{public_port} (loopback only)")
     print(f"  app (internal): 127.0.0.1:{gateway.app_port}")
 
+    from core.fileio import atomic_write
+    state = Path(settings.paths.state_dir)
+    state.mkdir(parents=True, exist_ok=True)
+    stop = threading.Event()
+    reload_id = []
+    started = time.time()
+    actual = {'pid': os.getpid(), 'started_at': started, 'bind_host': settings.bind_host(), 'port': public_port,
+              'app_port': gateway.app_port, 'lan_access': gateway.lan_access, 'control_version': 1}
+
+    def write(path, data):
+        atomic_write(str(path), json.dumps(data, ensure_ascii=False))
+
+    def finish_reload(key, status, **extra):
+        path = state / 'maintenance' / (key + '.json')
+        try:
+            record = json.loads(path.read_text())
+            record.update(status=status, actual=actual, updated=time.time(), **extra)
+            write(path, record)
+            write(state / 'assistant_maintenance.json', record)
+        except (OSError, ValueError):
+            pass
+
+    write(state / 'gateway_runtime.json', {**actual, 'heartbeat': time.time()})
+    if rebinding:
+        finish_reload(rebinding, 'completed')
+
+    def monitor():
+        while not stop.wait(1):
+            write(state / 'gateway_runtime.json', {**actual, 'heartbeat': time.time()})
+            try:
+                command = json.loads((state / 'gateway_control.json').read_text())
+                key = command.get('id', '')
+                if command.get('action') != 'reload' or command.get('created', 0) < started or \
+                        len(key) != 32 or any(c not in '0123456789abcdef' for c in key):
+                    continue
+                record = json.loads((state / 'maintenance' / (key + '.json')).read_text())
+                if record.get('action') != 'rebind_gateway' or record.get('status') != 'applying':
+                    continue
+                reload_id.append(key)
+                httpd.shutdown()
+                return
+            except (OSError, ValueError):
+                pass
+    threading.Thread(target=monitor, daemon=True, name='gateway-control').start()
+
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("\ngateway stopped")
-    return 0
+    finally:
+        stop.set()
+        httpd.server_close()
+    return 0, reload_id[0] if reload_id else None
+
+
+def serve() -> int:
+    """Rebind under the same supervisor process, with a durable receipt."""
+    rebinding = None
+    fallback = None
+    previous = None
+    state = None
+    while True:
+        from web.settings import reset_settings
+        reset_settings()
+        try:
+            settings = _load_settings()
+            state = Path(settings.paths.state_dir)
+            if not rebinding:
+                previous = None
+                try:
+                    previous = json.loads((state / 'gateway_runtime.json').read_text())
+                except (OSError, ValueError):
+                    pass
+            code, next_reload = _serve_once(rebinding, fallback)
+        except OSError:
+            code, next_reload = 1, None
+        if code and rebinding and previous and state:
+            from core.fileio import atomic_write
+            path = state / 'maintenance' / (rebinding + '.json')
+            try:
+                record = json.loads(path.read_text())
+                record.update(status='failed', updated=time.time(),
+                              error='新监听未能绑定，正在恢复先前监听；保存的配置仍待生效')
+                atomic_write(str(path), json.dumps(record, ensure_ascii=False))
+                atomic_write(str(state / 'assistant_maintenance.json'), json.dumps(record, ensure_ascii=False))
+            except (OSError, ValueError):
+                pass
+            fallback, rebinding = previous, None
+            continue
+        if not next_reload:
+            return code
+        try:
+            previous = json.loads((state / 'gateway_runtime.json').read_text())
+        except (OSError, ValueError):
+            previous = None
+        rebinding = next_reload
+        fallback = None
 
 
 def status() -> int:

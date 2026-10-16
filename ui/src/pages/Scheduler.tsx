@@ -8,6 +8,7 @@ import { ScheduleRuns } from "@/components/ScheduleRuns";
 import { CronBuilder, scheduleSummary } from "@/components/CronBuilder";
 
 interface ScheduledJob {
+  version?: number;
   id: string;
   minute: string;
   hour: string;
@@ -42,14 +43,14 @@ interface SchedulableJob {
 }
 interface JobScheduleState {
   id: string;
-  status: "ok" | "paused" | "overdue" | "unverified" | "no_schedule" | "running" | "queued" | "retry";
+  status: "ok" | "paused" | "overdue" | "unverified" | "no_schedule" | "running" | "queued" | "retry" | "cancelled";
   detail: string;
   schedule: string;
   last_ran_at?: string;
 }
 interface Preview { schedule: string; timezone: string; next_runs: string[]; requestedTimezone?: string }
-const EMPTY = { id: "", job_name: "", schedule: "0 8 * * *", command: "", timezone: "local", missed_policy: "latest", max_retries: 2 };
-const STATUS = { ok: "有运行证据", paused: "已暂停", overdue: "需要检查", unverified: "待验证", no_schedule: "时间待检查", running: "运行中", queued: "等待执行", retry: "等待重试" };
+const EMPTY = { id: "", job_name: "", schedule: "0 8 * * *", command: "", timezone: "local", missed_policy: "latest", max_retries: 2, expected_version: null as number | null };
+const STATUS = { ok: "有运行证据", paused: "已暂停", overdue: "需要检查", unverified: "待验证", no_schedule: "时间待检查", running: "运行中", queued: "等待执行", retry: "等待重试", cancelled: "上次已取消" };
 // A launchd agent carries no dom/month/dow, so fall back to the cron expression
 // the backend projected from its plist; otherwise the editor would open on
 // "0 6 undefined undefined undefined".
@@ -65,6 +66,7 @@ const SYSTEM_HINT: Record<string, string> = {
 const displayTime = (iso?: string) => iso ? iso.slice(0, 16).replace("T", " ") : "—";
 
 export function SchedulerPage() {
+  const focusedPlan = new URLSearchParams(window.location.search).get('plan');
   const toast = useToast();
   const [dispatcher, setDispatcher] = useState<Dispatcher | null>(null);
   const [historyId, setHistoryId] = useState("");
@@ -89,6 +91,9 @@ export function SchedulerPage() {
   const [previewError, setPreviewError] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [removed, setRemoved] = useState<RemovedSystemJob[]>([]);
+  useEffect(() => {
+    if (!loading && focusedPlan) document.getElementById(`schedule-${focusedPlan}`)?.scrollIntoView?.({ block: 'center' });
+  }, [loading, focusedPlan]);
 
   const fetchJobs = useCallback(async (quiet = false) => {
     if (!quiet) setLoading(true);
@@ -143,7 +148,7 @@ export function SchedulerPage() {
     setShowForm(true);
   };
   const openEdit = (job: ScheduledJob) => {
-    setEditing(job.id); setForm({ ...EMPTY, id: job.id, job_name: job.job_name || "", schedule: expression(job), command: job.command, timezone: job.timezone || "local", missed_policy: job.missed_policy || "latest", max_retries: job.max_retries ?? 2 });
+    setEditing(job.id); setForm({ ...EMPTY, id: job.id, job_name: job.job_name || "", schedule: expression(job), command: job.command, timezone: job.timezone || "local", missed_policy: job.missed_policy || "latest", max_retries: job.max_retries ?? 2, expected_version: job.version ?? null });
     setMsg(""); setPreview(null); setShowForm(true);
   };
   const applyJob = (job: SchedulableJob) => {
@@ -314,7 +319,7 @@ export function SchedulerPage() {
       const state = states[job.id];
       const isSystem = job.backend === "launchd";
       const editable = job.editable !== false;
-      return <div key={job.id} className={cn("card p-4 space-y-3", state?.status === "overdue" && "border-danger/50")}>
+      return <div key={job.id} id={`schedule-${job.id}`} className={cn("card p-4 space-y-3", state?.status === "overdue" && "border-danger/50", focusedPlan === job.id && "ring-1 ring-accent")}>
         <div className="flex flex-wrap items-start gap-3"><div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2"><h2 className="text-sm font-medium break-all">{job.title || job.id}</h2><span className="text-[10px] border border-border rounded px-1.5 py-0.5 text-text-muted">{job.backend === "managed" ? "托管计划 · 自动补跑" : isSystem ? "情报矩阵 · 系统任务" : "旧 cron"}</span>
             <span className={cn("text-xs", !job.enabled ? "text-text-muted" : state?.status === "ok" ? "text-success" : "text-warning")}>{!job.enabled ? "已暂停" : state ? (job.backend === "managed" && state.status === "ok" ? "正常" : STATUS[state.status]) : "待验证"}</span></div>

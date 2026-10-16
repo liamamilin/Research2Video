@@ -255,7 +255,7 @@ def sanitize_fts_query(query: str) -> str:
     return " ".join('"' + t.replace('"', '""') + '"' for t in tokens)
 
 
-def search_reports(query: str, limit: int = 20) -> list[dict]:
+def search_reports(query: str, limit: int = 20, *, allowed_paths: set[str] | None = None) -> list[dict]:
     """Full-text search across report titles and content using FTS5.
 
     Trigrams need three characters per term, so short terms are searched with a
@@ -271,22 +271,32 @@ def search_reports(query: str, limit: int = 20) -> list[dict]:
     searchable = [t for t in terms if len(t) >= MIN_TRIGRAM_QUERY]
 
     if not searchable:
-        return _search_like(short or terms, limit)
+        return _search_like(short or terms, limit, allowed_paths)
 
-    rows = _search_fts(" ".join(searchable), limit)
+    rows = _search_fts(" ".join(searchable), limit, allowed_paths)
     if not short:
         return rows
-    return _merge_paths(rows, _search_like(short, limit), limit)
+    return _merge_paths(rows, _search_like(short, limit, allowed_paths), limit)
 
 
-def _search_fts(text: str, limit: int) -> list[dict]:
+def _path_scope(conn, paths: set[str] | None, column: str) -> str:
+    """Filter before LIMIT without an unbounded SQL placeholder list."""
+    if paths is None:
+        return ''
+    conn.execute('CREATE TEMP TABLE scoped_report_paths(path TEXT PRIMARY KEY)')
+    conn.executemany('INSERT INTO scoped_report_paths(path) VALUES (?)', ((path,) for path in paths))
+    return f' AND {column} IN (SELECT path FROM scoped_report_paths)'
+
+
+def _search_fts(text: str, limit: int, allowed_paths: set[str] | None = None) -> list[dict]:
     """Trigram FTS5 search, best match first."""
     safe_query = sanitize_fts_query(text)
     if not safe_query:
         return []
     with connect() as conn:
+        scope = _path_scope(conn, allowed_paths, 'r.path')
         rows = conn.execute(
-            """
+            f"""
             SELECT
                 r.path,
                 r.job_name,
@@ -301,7 +311,7 @@ def _search_fts(text: str, limit: int) -> list[dict]:
                 bm25(reports_fts) AS fts_score
             FROM reports_fts
             JOIN reports r ON r.rowid = reports_fts.rowid
-            WHERE reports_fts MATCH ?
+            WHERE reports_fts MATCH ? {scope}
             ORDER BY rank
             LIMIT ?
             """,
@@ -322,7 +332,7 @@ def _merge_paths(primary: list[dict], extra: list[dict], limit: int) -> list[dic
     return out[:limit]
 
 
-def _search_like(terms: list[str], limit: int) -> list[dict]:
+def _search_like(terms: list[str], limit: int, allowed_paths: set[str] | None = None) -> list[dict]:
     """Substring search for terms too short for trigram indexing.
 
     Trigrams cannot match one- or two-character terms, and the body text only
@@ -340,12 +350,13 @@ def _search_like(terms: list[str], limit: int) -> list[dict]:
         pattern = f"%{term.replace('%', '').replace('_', '')}%"
         params.extend([pattern, pattern])
     with connect() as conn:
+        scope = _path_scope(conn, allowed_paths, 'path')
         rows = conn.execute(
             f"""
             SELECT path, job_name, title, category, size_bytes, mtime,
                    favorite, tags, read_at
             FROM reports
-            WHERE {clause}
+            WHERE ({clause}) {scope}
             ORDER BY mtime DESC
             LIMIT ?
             """,
@@ -470,6 +481,8 @@ def _filter_clause(
     since: str | None = None,
     until: str | None = None,
     latest_round: bool = False,
+    path_prefix: str | None = None,
+    paths: list[str] | None = None,
 ) -> tuple[list[str], list]:
     """Shared WHERE fragments for the list and the tree, so they cannot drift."""
     where_parts: list[str] = []
@@ -502,6 +515,12 @@ def _filter_clause(
             # day; a round is one directory's output.
             where_parts.append("report_date = ? AND path LIKE ?")
             params.extend([latest_round_date(), round_prefix + "%"])
+    if path_prefix:
+        where_parts.append('path >= ? AND path < ?')
+        params.extend([path_prefix, path_prefix + '\U0010ffff'])
+    if paths is not None:
+        where_parts.append('path IN (' + ','.join('?' for _ in paths) + ')')
+        params.extend(paths)
     return where_parts, params
 
 
@@ -552,25 +571,14 @@ def list_reports(
     until: str | None = None,
     latest_round: bool = False,
     sort: str = "recent",
+    path_prefix: str | None = None,
+    paths: list[str] | None = None,
+    scope_metadata: bool = False,
+    scope_paths: bool = False,
 ) -> dict:
     """Paginated list of reports with optional filters."""
     where_parts, params = _filter_clause(
-        category, job_name, favorite, tag, unread, since, until, latest_round)
-
-    if category:
-        where_parts.append("category = ?")
-        params.append(category)
-    if job_name:
-        where_parts.append("job_name = ?")
-        params.append(job_name)
-    if favorite is not None:
-        where_parts.append("favorite = ?")
-        params.append(1 if favorite else 0)
-    if tag:
-        where_parts.append("tags LIKE ?")
-        params.append(f"%{json.dumps(tag, ensure_ascii=False)}%")
-    if unread is not None:
-        where_parts.append("read_at IS " + ("NULL" if unread else "NOT NULL"))
+        category, job_name, favorite, tag, unread, since, until, latest_round, path_prefix, paths)
 
     where = ""
     if where_parts:
@@ -588,6 +596,11 @@ def list_reports(
             f"SELECT * FROM reports{where} ORDER BY {order} LIMIT ? OFFSET ?",
             params + [per_page, offset],
         ).fetchall()
+        metadata = {}
+        if scope_metadata:
+            metadata['dates_available'] = [row[0] for row in conn.execute(f'SELECT DISTINCT report_date FROM reports{where} ORDER BY report_date', params)]
+        if scope_paths:
+            metadata['scope_paths'] = [row[0] for row in conn.execute(f'SELECT path FROM reports{where}', params)]
 
     return {
         "items": [_serialize_row(r) for r in rows],
@@ -595,6 +608,7 @@ def list_reports(
         "page": page,
         "per_page": per_page,
         "pages": (total + per_page - 1) // per_page if total > 0 else 1,
+        **metadata,
     }
 
 

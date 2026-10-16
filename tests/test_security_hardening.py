@@ -157,11 +157,11 @@ def test_output_root_can_be_overridden_explicitly(tmp_path):
     assert "custom" in path
 
 
-def test_default_output_stays_relative(tmp_path):
+def test_default_output_has_absolute_io_path_and_portable_reference(tmp_path):
     engine = _engine(tmp_path)
     path = engine._resolve_output_path({"name": "my job"})
-    assert not os.path.isabs(path)
-    assert path.startswith("output/")
+    assert os.path.isabs(path)
+    assert engine._output_reference(path).startswith("output/")
 
 
 # --- yaml output validation -------------------------------------------------
@@ -299,6 +299,19 @@ def _role_floor(dependant, ranks):
     return min(found, key=lambda r: ranks[r]) if found else None
 
 
+def _api_routes(app):
+    """Read router-owned routes on both flat and deferred FastAPI versions."""
+    seen = set()
+    def walk(router):
+        for route in router.routes:
+            if hasattr(route, 'original_router'):
+                yield from walk(route.original_router)
+            elif id(route) not in seen:
+                seen.add(id(route))
+                yield route
+    return list(walk(app))
+
+
 def test_every_api_write_route_declares_a_role(web_env):
     """A new route added without `Depends(require_*)` must fail here, not in prod.
 
@@ -314,7 +327,7 @@ def test_every_api_write_route_declares_a_role(web_env):
 
     app = create_app()
     ungated = []
-    for route in app.routes:
+    for route in _api_routes(app):
         methods = set(getattr(route, "methods", None) or ())
         path = getattr(route, "path", "")
         if not methods & _WRITE_METHODS or not path.startswith("/api"):
@@ -344,7 +357,7 @@ def test_the_role_gate_itself_is_not_vacuous(web_env):
     # keyed by path alone silently keeps only the last one.
     by_route = {
         (getattr(r, "path", ""), m): r
-        for r in app.routes
+        for r in _api_routes(app)
         for m in (getattr(r, "methods", None) or ())
     }
 
@@ -364,3 +377,20 @@ def test_the_role_gate_itself_is_not_vacuous(web_env):
     # ungated" would also be satisfied by a sweep that read nothing at all.
     jobs_read = by_route[("/api/jobs", "GET")]
     assert _role_floor(jobs_read.dependant, _ROLE_RANK) == "viewer"
+
+
+def test_output_directory_alias_matches_the_worker_workspace(tmp_path):
+    from core.engine import ResearchEngine
+    actual = tmp_path / 'actual'
+    actual.mkdir()
+    (actual / 'output').mkdir()
+    alias = tmp_path / 'alias'
+    alias.symlink_to(actual, target_is_directory=True)
+    engine = ResearchEngine.__new__(ResearchEngine)
+    engine.workspace_dir = str(actual)
+    engine.sys = {'defaults': {'output_dir': str(alias / 'output')}}
+    engine._date_override = None
+    assert engine._resolve_output_path({'name': 'test', 'output': 'output/test.md'}) == str((actual / 'output/test.md').resolve())
+    (actual / 'output' / 'escape').symlink_to(tmp_path, target_is_directory=True)
+    with pytest.raises(ValueError, match='escapes'):
+        engine._resolve_output_path({'name': 'test', 'output': 'output/escape/out.md'})

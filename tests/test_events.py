@@ -15,6 +15,11 @@ def events_db(tmp_path, monkeypatch):
     state = tmp_path / "state"
     state.mkdir(exist_ok=True)
     monkeypatch.setattr(events, "_DB_PATH_OVERRIDE", str(state / "events.db"))
+    import time as real_time
+    from types import SimpleNamespace
+    fixed_now = real_time.mktime((2026, 9, 29, 12, 0, 0, 0, 0, -1))
+    monkeypatch.setattr(events, 'time', SimpleNamespace(
+        time=lambda: fixed_now, strftime=real_time.strftime, localtime=real_time.localtime))
     events.init_db()
     yield
     events.set_db_path(None)
