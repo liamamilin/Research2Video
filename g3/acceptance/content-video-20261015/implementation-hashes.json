@@ -1,0 +1,69 @@
+{
+  "files": [
+    {
+      "path": "g2/content_video.py",
+      "sha256": "30037d85545d67f60c6da0fb4f242ee635425d705d1051c76caf2df77a393d7b"
+    },
+    {
+      "path": "g2/run_g2.py",
+      "sha256": "3a228c5b48dcd02991c15217d953ab630784e18b3aa544c6e2d42b01156124a3"
+    },
+    {
+      "path": "g2/process_diagram.py",
+      "sha256": "b468f3e7e76db038c1328d6e8b971686af7087f40f63c49b60dab8dea7487c9e"
+    },
+    {
+      "path": "g2/schemas/content-outline.schema.json",
+      "sha256": "19109000ecbe225ce2c8b29b998b53ea5397f4d2b615fc997db3ca1cf26fe9d9"
+    },
+    {
+      "path": "g2/schemas/chapter-narration.schema.json",
+      "sha256": "435c590b9e9f0711a1e6605d6e1186325f07fe79d44d1e7d0b8b551b678a204d"
+    },
+    {
+      "path": "g2/schemas/content-structure.schema.json",
+      "sha256": "a0afa55ae340a679091a93781960af1a7fc325ad3588c01cb250040e7a57c1e9"
+    },
+    {
+      "path": "g2/schemas/process-diagram-plan.schema.json",
+      "sha256": "a3966965e8fbe16b7b597d14acd496d3f071a8f9ee0f49d0d3c1224dd252cda6"
+    },
+    {
+      "path": "g1/video_ir.py",
+      "sha256": "cd32a3090c145ad669b8c52a9aba0efd0681f8f6f877d487eeb3b901cadd3f20"
+    },
+    {
+      "path": "g1/renderer/src/Root.tsx",
+      "sha256": "c85741f4caed51f9fcd1a2ec733f1e399c32ea4b7481e7186eb521e13e0f7e8b"
+    },
+    {
+      "path": "g3/app.py",
+      "sha256": "b292edda9ad86a260020e5359b8093501fe8636145dbd886d846407f6fd9c48d"
+    },
+    {
+      "path": "g3/store.py",
+      "sha256": "80b56808a3e963e9c54ff170b53e44d14b78b2a5470db392336955e878a2a60d"
+    },
+    {
+      "path": "g3/worker.py",
+      "sha256": "f72128369f54cb850dcd0799a17dd43ad6e810213c16d1d2d80b2ae4491d1c23"
+    },
+    {
+      "path": "g3/config.py",
+      "sha256": "c4866739769c6ccb70d7509d0dfb45d4f1dbcdbcdbcdcd0a520e3be6180af32c"
+    },
+    {
+      "path": "g3/web/src/main.tsx",
+      "sha256": "1a4cc092dfdc4fcba8b787e9572155a89c47d746df03c5fba904dbbb767c535a"
+    },
+    {
+      "path": "g3/web/static/app.js",
+      "sha256": "bb8c956046e569cfb89fc0f58321350a2b4601f422d96b80b5ff868f11db4088"
+    },
+    {
+      "path": "g3/web/static/app.css",
+      "sha256": "9a2800b4735cbd9764e646b4cdf3aff55965e65ac61e936beb8ff882461d8b2c"
+    }
+  ],
+  "note": "当前源码；标识符长度与48字符注册契约的对齐在整片渲染期间完成，当前成片使用重试后已通过的计划，原拒绝响应另经当前规则复核。"
+}

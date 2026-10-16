@@ -1,0 +1,60 @@
+{
+  "status": "PASS",
+  "sample_rate": 24000,
+  "original_samples": 12796800,
+  "decoded_samples": 12796928,
+  "audio_length_difference_seconds": 0.005333333333333333,
+  "chapter_audio": [
+    {
+      "id": "c1",
+      "title": "总览：系统、阶段与记录边界",
+      "start_ms": 0,
+      "end_ms": 49200,
+      "decoded_tts_correlation": 0.9999467128779435
+    },
+    {
+      "id": "c2",
+      "title": "提交报名与资料核验",
+      "start_ms": 49200,
+      "end_ms": 131633,
+      "decoded_tts_correlation": 0.9999450751862058
+    },
+    {
+      "id": "c3",
+      "title": "席位分配与候补队列",
+      "start_ms": 131633,
+      "end_ms": 217600,
+      "decoded_tts_correlation": 0.9999471446418607
+    },
+    {
+      "id": "c4",
+      "title": "取消、释放与递补确认",
+      "start_ms": 217600,
+      "end_ms": 306767,
+      "decoded_tts_correlation": 0.9999478342282461
+    },
+    {
+      "id": "c5",
+      "title": "通知与报名状态查询",
+      "start_ms": 306767,
+      "end_ms": 382933,
+      "decoded_tts_correlation": 0.99994461071361
+    },
+    {
+      "id": "c6",
+      "title": "现场入场与异常处理",
+      "start_ms": 382933,
+      "end_ms": 461400,
+      "decoded_tts_correlation": 0.9999476082457321
+    },
+    {
+      "id": "c7",
+      "title": "活动结束与记录核对",
+      "start_ms": 461400,
+      "end_ms": 533200,
+      "decoded_tts_correlation": 0.99994277418847
+    }
+  ],
+  "run_manifest_verified_files": 397,
+  "previous_order_video_unchanged": true
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "title": "缓存命中与未命中",
+    "job_id": "8dadf18e-fb6f-4b56-a69f-7c843212e9bc",
+    "run": "g3/data/jobs/8dadf18e-fb6f-4b56-a69f-7c843212e9bc/attempts/1/g2-run",
+    "duration_sec": 60.437,
+    "frames": 1813,
+    "scene_count": 5,
+    "minimum_node_font_px": 24.93783303730018,
+    "real_model_calls": 2,
+    "tts_correlation": 0.9999405479168315,
+    "video_sha256": "60e3148b3d1e149ce9c663cd27c2aabb3ff44bfda9597db284ff4ba7a94d1b4a",
+    "manifest_verified": true,
+    "media_qa": "PASS"
+  },
+  {
+    "title": "订单从下单到送达",
+    "job_id": "7a05ed7a-36a7-4aed-89db-9682406edc9c",
+    "run": "g3/data/jobs/7a05ed7a-36a7-4aed-89db-9682406edc9c/attempts/1/g2-run",
+    "duration_sec": 61.184,
+    "frames": 1835,
+    "scene_count": 5,
+    "minimum_node_font_px": 32.46242774566474,
+    "real_model_calls": 3,
+    "tts_correlation": 0.9999467322796037,
+    "video_sha256": "8ab07bc09287da5673326cc5534b1ecf7fb44e96cb835f73886500572c778665",
+    "manifest_verified": true,
+    "media_qa": "PASS"
+  },
+  {
+    "title": "订单履约·通用阻断关系修复后",
+    "job_id": "34f111f8-b8f7-435c-aef4-c73c2a93ea5f",
+    "run": "g3/data/jobs/34f111f8-b8f7-435c-aef4-c73c2a93ea5f/attempts/1/g2-run",
+    "duration_sec": 60.309,
+    "frames": 1809,
+    "scene_count": 4,
+    "minimum_node_font_px": 33.70948379351741,
+    "real_model_calls": 7,
+    "tts_correlation": 0.9999479738324103,
+    "video_sha256": "092910ecc072e47e62747ae9491b57888a4d5048c1e9d89365cdb50389d94ab4",
+    "manifest_verified": true,
+    "media_qa": "PASS"
+  }
+]

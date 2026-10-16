@@ -1,0 +1,53 @@
+{
+  "status": "needs_input",
+  "recommended_form": "information_motion",
+  "reason": "现有材料只是要告知报名者一个到场时间，属于单点通知信息，没有步骤、分支或因果流转，因此整片适合用信息动效呈现；但时间本身在材料中互相矛盾，需先澄清后再讲。",
+  "ordered_unit_ids": [
+    "u1",
+    "u2",
+    "u3",
+    "u4"
+  ],
+  "excluded_units": [],
+  "issues": [
+    {
+      "kind": "conflict",
+      "message": "同一场讲座出现了两个互相排斥的到场时间：一处写周五晚上七点，另一处写周六晚上七点；同时材料又强调本次讲座只有一个活动日期。无法据此确定唯一到场时间，需要明确到底是周五还是周六。",
+      "source_quotes": [
+        "本次讲座只有一个活动日期，需要通知报名者按这个时间到场。",
+        "本次讲座确定于周五晚上七点举行。",
+        "本次讲座确定于周六晚上七点举行。",
+        "请根据这些已确认材料说明本次讲座的唯一到场时间。"
+      ],
+      "blocking": true
+    }
+  ],
+  "requested_form": "auto",
+  "selected_form": "information_motion",
+  "selection_mode": "automatic",
+  "source_sha256": "9457f393e83f1507acd8468c5853ba1b5c19a76721142deed2f3f76c7cf6e127",
+  "source_units": [
+    {
+      "id": "u1",
+      "text": "本次讲座只有一个活动日期，需要通知报名者按这个时间到场。",
+      "separator": ""
+    },
+    {
+      "id": "u2",
+      "text": "本次讲座确定于周五晚上七点举行。",
+      "separator": ""
+    },
+    {
+      "id": "u3",
+      "text": "本次讲座确定于周六晚上七点举行。",
+      "separator": ""
+    },
+    {
+      "id": "u4",
+      "text": "请根据这些已确认材料说明本次讲座的唯一到场时间。",
+      "separator": ""
+    }
+  ],
+  "prepared_sha256": "83ff003e56de67b122a6fb0b81308b9d6f249a2dae92ef980e8bcc98764f6310",
+  "source_rewritten": false
+}

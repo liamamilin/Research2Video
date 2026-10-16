@@ -1,0 +1,51 @@
+[
+  {
+    "chapter_id": "c1",
+    "scene_id": "c1_s2",
+    "frame": 1475,
+    "video_seconds": 49.166666666666664,
+    "source_file": "g3/data/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/attempts/2/g2-run/artifacts/keyframes/frame-020.png"
+  },
+  {
+    "chapter_id": "c2",
+    "scene_id": "c2_s3",
+    "frame": 3195,
+    "video_seconds": 106.5,
+    "source_file": "g3/data/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/attempts/2/g2-run/artifacts/keyframes/frame-047.png"
+  },
+  {
+    "chapter_id": "c3",
+    "scene_id": "c3_s3",
+    "frame": 5682,
+    "video_seconds": 189.4,
+    "source_file": "g3/data/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/attempts/2/g2-run/artifacts/keyframes/frame-082.png"
+  },
+  {
+    "chapter_id": "c4",
+    "scene_id": "c4_s5",
+    "frame": 8259,
+    "video_seconds": 275.3,
+    "source_file": "g3/data/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/attempts/2/g2-run/artifacts/keyframes/frame-131.png"
+  },
+  {
+    "chapter_id": "c5",
+    "scene_id": "c5_s4",
+    "frame": 10762,
+    "video_seconds": 358.73333333333335,
+    "source_file": "g3/data/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/attempts/2/g2-run/artifacts/keyframes/frame-177.png"
+  },
+  {
+    "chapter_id": "c6",
+    "scene_id": "c6_s2",
+    "frame": 13051,
+    "video_seconds": 435.03333333333336,
+    "source_file": "g3/data/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/attempts/2/g2-run/artifacts/keyframes/frame-211.png"
+  },
+  {
+    "chapter_id": "c7",
+    "scene_id": "c7_s6",
+    "frame": 15995,
+    "video_seconds": 533.1666666666666,
+    "source_file": "g3/data/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/attempts/2/g2-run/artifacts/keyframes/frame-256.png"
+  }
+]

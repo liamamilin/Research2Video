@@ -1,0 +1,32 @@
+{
+  "case": "conflict",
+  "job_id": "6b2fc6b3-0ac1-436c-a8d6-2ed5f381df36",
+  "status": "FAILED",
+  "error_code": "INPUT_REQUIRES_CLARIFICATION",
+  "retryable": false,
+  "analysis": {
+    "requested_form": "auto",
+    "selected_form": "information_motion",
+    "recommended_form": "information_motion",
+    "selection_mode": "automatic",
+    "status": "needs_input",
+    "reason": "现有材料只是要告知报名者一个到场时间，属于单点通知信息，没有步骤、分支或因果流转，因此整片适合用信息动效呈现；但时间本身在材料中互相矛盾，需先澄清后再讲。",
+    "issues": [
+      {
+        "kind": "conflict",
+        "message": "同一场讲座出现了两个互相排斥的到场时间：一处写周五晚上七点，另一处写周六晚上七点；同时材料又强调本次讲座只有一个活动日期。无法据此确定唯一到场时间，需要明确到底是周五还是周六。",
+        "source_quotes": [
+          "本次讲座只有一个活动日期，需要通知报名者按这个时间到场。",
+          "本次讲座确定于周五晚上七点举行。",
+          "本次讲座确定于周六晚上七点举行。",
+          "请根据这些已确认材料说明本次讲座的唯一到场时间。"
+        ],
+        "blocking": true
+      }
+    ],
+    "retained_units": 4,
+    "excluded_units": 0
+  },
+  "llm_calls": 1,
+  "has_video": false
+}

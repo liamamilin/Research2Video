@@ -1,0 +1,13 @@
+{
+  "g1/video_ir.py": "c1c5e2fcb75ad3713729869a46e4ca99301b3d752ea73c5d3995928dd031f0fe",
+  "g1/renderer/src/Root.tsx": "8500a2bc66232abf1e27b3f53dacc0b1053aaecd7a6acdc7de8e2adde7c16b5f",
+  "g2/run_g2.py": "ecc43023d9ee183f2a9476e9e5b5a8f03a711f9088371ff21289b72117567ea1",
+  "g2/information_motion.py": "d7ed29c562ebef21c3592ae0ca029b394aa501f9e701defd6242df2bad4816fd",
+  "g2/schemas/information-motion-plan.schema.json": "b54e1790494d6dd51e9f71f655e804620c75f64b02fed69579c9d73f7971ae7f",
+  "g3/app.py": "346272fb7f6d70f7d5be46c2610d1ff6fe519418e438d5c25988b93ed73c0daf",
+  "g3/worker.py": "57e15570124365536488f26e56118ac4dc375fe8c9cf70ec442173936443b60a",
+  "g3/web/src/main.tsx": "f371d3c778803664e6e05d6eda575ad3868eb89350f90e68cf3dce68e146a9d5",
+  "g3/web/src/visual.css": "8f3c60ad5a469f1937085eb266375b089851d087b78c44657c245dd608f49b5d",
+  "g3/web/static/app.js": "2470037f87c67ff4a0bbeae649f338d83fa0ed9daa6a8cecf17b3cf522f0eb3a",
+  "g3/web/static/app.css": "9f7d7f427ad19fc27b2a3d927b8b04e551a9e6adcbf48271be809e7b65766564"
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "scene_id": "c1_s1",
+    "frame": 96,
+    "file": "c1_s1.png"
+  },
+  {
+    "scene_id": "c2_s2",
+    "frame": 1042,
+    "file": "c2_s2.png"
+  },
+  {
+    "scene_id": "c1_s2",
+    "frame": 253,
+    "file": "c1_s2.png"
+  },
+  {
+    "scene_id": "c2_s1",
+    "frame": 792,
+    "file": "c2_s1.png"
+  }
+]

@@ -1,0 +1,130 @@
+{
+  "job_id": "07207738-9e49-4ce9-a3d1-decf527e0b31",
+  "title": "auto-ordinary · 自动选择验收",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "67084b77aa19c4c3741845894e9b694441bd8c1685ed02a7e042e33f367c3dc0",
+  "source_char_count": 146,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zf_xiaoxiao",
+  "created_at": "2026-10-15T07:25:15.317+00:00",
+  "updated_at": "2026-10-15T07:28:34.169+00:00",
+  "version": 11,
+  "operation_type": "generate",
+  "parent_job_id": null,
+  "parent_attempt_no": null,
+  "scene_id": null,
+  "video_form": "auto",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "auto",
+    "selected_form": "information_motion",
+    "recommended_form": "information_motion",
+    "selection_mode": "automatic",
+    "status": "ready",
+    "reason": "原文主旨是任务交接时应说明的要点清单，包括目标、背景、完成标准等并列信息，适合用信息动效逐项呈现；没有步骤、分支或系统流转关系，不需要画流程图。",
+    "issues": [
+      {
+        "kind": "duplicate",
+        "message": "u2 与 u5 文本完全一致，保留 u2，将 u5 标为重复项。",
+        "source_quotes": [
+          "任务交接要讲清楚目标、背景、完成标准。",
+          "任务交接要讲清楚目标、背景、完成标准。"
+        ],
+        "blocking": false
+      },
+      {
+        "kind": "noise",
+        "message": "u8 是页码类粘贴噪声，不属于讲解内容。",
+        "source_quotes": [
+          "第 1 页 / 共 1 页"
+        ],
+        "blocking": false
+      }
+    ],
+    "retained_units": 6,
+    "excluded_units": 2
+  },
+  "resolved_video_form": "information_motion",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "COMPLETED",
+      "started_at": "2026-10-15T07:25:15.503+00:00",
+      "completed_at": "2026-10-15T07:28:34.169+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:25:15.503+00:00",
+          "completed_at": "2026-10-15T07:25:53.319+00:00",
+          "duration_seconds": 25.4,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:25:53.323+00:00",
+          "completed_at": "2026-10-15T07:25:59.404+00:00",
+          "duration_seconds": 6.06,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:25:59.409+00:00",
+          "completed_at": "2026-10-15T07:27:10.425+00:00",
+          "duration_seconds": 71.15,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T07:27:10.429+00:00",
+          "completed_at": "2026-10-15T07:27:10.432+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:27:10.433+00:00",
+          "completed_at": "2026-10-15T07:27:10.435+00:00",
+          "duration_seconds": 0.04,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:27:10.437+00:00",
+          "completed_at": "2026-10-15T07:28:31.973+00:00",
+          "duration_seconds": 81.44,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:28:31.985+00:00",
+          "completed_at": "2026-10-15T07:28:34.169+00:00",
+          "duration_seconds": 2.05,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}
