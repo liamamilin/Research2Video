@@ -1,0 +1,120 @@
+{
+  "job_id": "a6a6723d-ff90-4b2f-919a-2c63f5fe9f96",
+  "title": "设备借用 · 画面修订",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "130cc6f0a08f2249dd9153e27d17314ac49bde96aa34b748889842906a785666",
+  "source_char_count": 107,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zf_xiaoxiao",
+  "created_at": "2026-10-15T11:24:19.801+00:00",
+  "updated_at": "2026-10-15T11:28:04.110+00:00",
+  "version": 11,
+  "operation_type": "visual_revision",
+  "parent_job_id": "45e3bf98-8686-4478-8e82-a7e3e8f4af88",
+  "parent_attempt_no": 1,
+  "scene_id": "c2_s2",
+  "creative_intent": {
+    "audience": "",
+    "purpose": "",
+    "tone": "",
+    "focus": ""
+  },
+  "revision_mode": null,
+  "video_speed": 1.0,
+  "video_form": "process_diagram",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "auto",
+    "selected_form": "process_diagram",
+    "recommended_form": "process_diagram",
+    "selection_mode": "automatic",
+    "status": "ready",
+    "reason": "内容以设备借用的办理步骤为主线，并包含“有可用设备”和“没有可用设备”两种分支，以及归还后按等待顺序通知的后续流转，适合用流程图/步骤图呈现。",
+    "issues": [],
+    "retained_units": 7,
+    "excluded_units": 0
+  },
+  "resolved_video_form": "process_diagram",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "COMPLETED",
+      "started_at": "2026-10-15T11:25:37.171+00:00",
+      "completed_at": "2026-10-15T11:28:04.110+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T11:25:37.171+00:00",
+          "completed_at": "2026-10-15T11:25:37.575+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T11:25:37.579+00:00",
+          "completed_at": "2026-10-15T11:25:37.582+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:25:37.586+00:00",
+          "completed_at": "2026-10-15T11:25:57.891+00:00",
+          "duration_seconds": 20.35,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T11:25:57.900+00:00",
+          "completed_at": "2026-10-15T11:25:57.906+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:25:57.908+00:00",
+          "completed_at": "2026-10-15T11:25:57.910+00:00",
+          "duration_seconds": 0.06,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:25:57.912+00:00",
+          "completed_at": "2026-10-15T11:28:00.846+00:00",
+          "duration_seconds": 122.97,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:28:00.856+00:00",
+          "completed_at": "2026-10-15T11:28:04.110+00:00",
+          "duration_seconds": 3.16,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}

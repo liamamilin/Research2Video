@@ -1,0 +1,149 @@
+{
+  "mode": "source",
+  "job_id": "2d6a9bbf-1861-4530-a018-ac39a8122f08",
+  "parent_job_id": "6b2fc6b3-0ac1-436c-a8d6-2ed5f381df36",
+  "status": "COMPLETED",
+  "creative_intent": {
+    "audience": "第一次参加讲座的人",
+    "purpose": "活动通知（自定义）",
+    "tone": "简洁直接",
+    "focus": "讲清日期，地点未知需要保留待确认"
+  },
+  "qa": {
+    "status": "PASS",
+    "gate": "G2",
+    "real_llm": true,
+    "real_tts": true,
+    "mock_calls": 0,
+    "model": "deepseek-flash",
+    "llm_call_count": 4,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 607,
+      "duration_seconds": 20.245,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.9999485020783497,
+      "decoded_rms": 0.08320416510105133,
+      "full_decode": "PASS"
+    },
+    "timeline": {
+      "ir_frames": 607,
+      "scene_count": 2,
+      "beat_count": 6,
+      "alignment_granularity": "phrase"
+    },
+    "visual_beats": {
+      "c1_s1_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.047099729938271606
+      },
+      "c1_s1_b1": {
+        "action": "reveal",
+        "target_id": "line:0",
+        "beat_frame": 36,
+        "before_frame": 33,
+        "after_frame": 40,
+        "changed_pixel_ratio": 0.005165412808641976
+      },
+      "c1_s1_b2": {
+        "action": "reveal",
+        "target_id": "line:1",
+        "beat_frame": 110,
+        "before_frame": 107,
+        "after_frame": 114,
+        "changed_pixel_ratio": 0.006516685956790123
+      },
+      "c1_s1_b3": {
+        "action": "reveal",
+        "target_id": "line:2",
+        "beat_frame": 167,
+        "before_frame": 164,
+        "after_frame": 171,
+        "changed_pixel_ratio": 0.008226273148148147
+      },
+      "c1_s2_b0": {
+        "action": "reveal",
+        "target_id": "side:left",
+        "beat_frame": 258,
+        "before_frame": 255,
+        "after_frame": 262,
+        "changed_pixel_ratio": 0.048607253086419756
+      },
+      "c1_s2_b1": {
+        "action": "reveal",
+        "target_id": "side:right",
+        "beat_frame": 408,
+        "before_frame": 405,
+        "after_frame": 412,
+        "changed_pixel_ratio": 0.04697096836419753
+      }
+    },
+    "scene_samples": [
+      {
+        "scene_id": "c1_s1",
+        "frame": 0,
+        "file": "g3/data/jobs/2d6a9bbf-1861-4530-a018-ac39a8122f08/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 125,
+        "file": "g3/data/jobs/2d6a9bbf-1861-4530-a018-ac39a8122f08/attempts/1/g2-run/artifacts/keyframes/frame-008.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 249,
+        "file": "g3/data/jobs/2d6a9bbf-1861-4530-a018-ac39a8122f08/attempts/1/g2-run/artifacts/keyframes/frame-011.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 250,
+        "file": "g3/data/jobs/2d6a9bbf-1861-4530-a018-ac39a8122f08/attempts/1/g2-run/artifacts/keyframes/frame-012.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 428,
+        "file": "g3/data/jobs/2d6a9bbf-1861-4530-a018-ac39a8122f08/attempts/1/g2-run/artifacts/keyframes/frame-017.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 606,
+        "file": "g3/data/jobs/2d6a9bbf-1861-4530-a018-ac39a8122f08/attempts/1/g2-run/artifacts/keyframes/frame-018.png"
+      }
+    ],
+    "contact_sheet": "artifacts/contact-sheet.jpg",
+    "captions": {
+      "burned_in": true,
+      "srt": "artifacts/captions.srt",
+      "alignment": "phrase-level measured PCM activity"
+    },
+    "video_form": "information_motion",
+    "duration_mode": "content",
+    "information": {
+      "scene_count": 2,
+      "components": [
+        "comparison",
+        "concept_reveal"
+      ],
+      "timing": "measured phrases; estimated within-phrase cues",
+      "theme": "minimal_light"
+    }
+  },
+  "final_narration": "先看时间：本次讲座只有一个活动日期，确定在周六晚上七点，通知报名者按这个时间到场。请报名者按照这个时间到场，以周六晚上七点为准。地点方面，材料中没有说明具体地点，地点信息需要另行确认，不能写成已确定。",
+  "manifest_hashes_verified": 67,
+  "intent_in_all_actual_requests": true,
+  "llm_calls": 4,
+  "range_download": "PASS",
+  "parent_source_unchanged": true
+}

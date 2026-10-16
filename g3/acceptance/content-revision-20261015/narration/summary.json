@@ -1,0 +1,144 @@
+{
+  "mode": "narration",
+  "job_id": "64140056-fed2-465f-a5c1-4269f3c0332d",
+  "parent_job_id": "47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e",
+  "status": "COMPLETED",
+  "creative_intent": {
+    "audience": "刚加入项目的同事",
+    "purpose": "团队交接小课（自定义）",
+    "tone": "简洁直接",
+    "focus": "强调缺失信息标明待确认"
+  },
+  "qa": {
+    "status": "PASS",
+    "gate": "G2",
+    "real_llm": true,
+    "real_tts": true,
+    "mock_calls": 0,
+    "model": "deepseek-flash",
+    "llm_call_count": 1,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 695,
+      "duration_seconds": 23.168,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.9999473402088052,
+      "decoded_rms": 0.08119113743305206,
+      "full_decode": "PASS"
+    },
+    "timeline": {
+      "ir_frames": 695,
+      "scene_count": 2,
+      "beat_count": 5,
+      "alignment_granularity": "phrase"
+    },
+    "visual_beats": {
+      "c1_s1_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.04005449459876543
+      },
+      "c1_s1_b1": {
+        "action": "reveal",
+        "target_id": "line:0",
+        "beat_frame": 155,
+        "before_frame": 152,
+        "after_frame": 159,
+        "changed_pixel_ratio": 0.04453655478395062
+      },
+      "c1_s1_b2": {
+        "action": "reveal",
+        "target_id": "line:1",
+        "beat_frame": 318,
+        "before_frame": 315,
+        "after_frame": 322,
+        "changed_pixel_ratio": 0.03877170138888889
+      },
+      "c1_s1_b3": {
+        "action": "reveal",
+        "target_id": "line:2",
+        "beat_frame": 441,
+        "before_frame": 438,
+        "after_frame": 445,
+        "changed_pixel_ratio": 0.04387490354938271
+      },
+      "c1_s2_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 587,
+        "before_frame": 584,
+        "after_frame": 591,
+        "changed_pixel_ratio": 0.052119020061728395
+      }
+    },
+    "scene_samples": [
+      {
+        "scene_id": "c1_s1",
+        "frame": 0,
+        "file": "g3/data/jobs/64140056-fed2-465f-a5c1-4269f3c0332d/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 289,
+        "file": "g3/data/jobs/64140056-fed2-465f-a5c1-4269f3c0332d/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 577,
+        "file": "g3/data/jobs/64140056-fed2-465f-a5c1-4269f3c0332d/attempts/1/g2-run/artifacts/keyframes/frame-011.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 578,
+        "file": "g3/data/jobs/64140056-fed2-465f-a5c1-4269f3c0332d/attempts/1/g2-run/artifacts/keyframes/frame-012.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 636,
+        "file": "g3/data/jobs/64140056-fed2-465f-a5c1-4269f3c0332d/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 694,
+        "file": "g3/data/jobs/64140056-fed2-465f-a5c1-4269f3c0332d/attempts/1/g2-run/artifacts/keyframes/frame-016.png"
+      }
+    ],
+    "contact_sheet": "artifacts/contact-sheet.jpg",
+    "captions": {
+      "burned_in": true,
+      "srt": "artifacts/captions.srt",
+      "alignment": "phrase-level measured PCM activity"
+    },
+    "video_form": "information_motion",
+    "duration_mode": "content",
+    "information": {
+      "scene_count": 2,
+      "components": [
+        "concept_reveal",
+        "title_card"
+      ],
+      "timing": "measured phrases; estimated within-phrase cues",
+      "theme": "minimal_light"
+    }
+  },
+  "final_narration": "任务交接先讲清楚交付目标、必要背景和完成标准。交付目标要说明最终交付物，比如一页本周需求进展摘要。背景要交代读者、使用场景，以及现有记录。完成标准应列出完成项、当前阻塞和待讨论的决定。没有记录的信息标明待确认，不要猜测补齐。",
+  "exact_script_match": true,
+  "model_rewrote_narration": false,
+  "manifest_hashes_verified": 58,
+  "intent_in_all_actual_requests": true,
+  "llm_calls": 1,
+  "range_download": "PASS",
+  "parent_video_unchanged": true,
+  "parent_source_unchanged": true
+}

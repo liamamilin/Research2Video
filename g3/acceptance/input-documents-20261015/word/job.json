@@ -1,0 +1,119 @@
+{
+  "job_id": "d8bd6324-645e-492b-a2f0-340cfbe7bedd",
+  "title": "会议记录",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "71e24b283618b3a983caf674b55179190b87b05caebcd734bb88668c75b7d798",
+  "source_char_count": 142,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zf_xiaoxiao",
+  "created_at": "2026-10-15T08:57:48.541+00:00",
+  "updated_at": "2026-10-15T09:00:08.270+00:00",
+  "version": 11,
+  "operation_type": "generate",
+  "parent_job_id": null,
+  "parent_attempt_no": null,
+  "scene_id": null,
+  "creative_intent": {
+    "audience": "",
+    "purpose": "",
+    "tone": "",
+    "focus": ""
+  },
+  "revision_mode": null,
+  "video_form": "auto",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "auto",
+    "selected_form": "information_motion",
+    "recommended_form": "information_motion",
+    "selection_mode": "automatic",
+    "status": "ready",
+    "reason": "材料主旨是介绍会议记录应区分的三类重点信息，并补充用途与处理原则，属于方法、清单和并列分类，适合用信息动效逐条呈现，不需要绘制流程。",
+    "issues": [],
+    "retained_units": 7,
+    "excluded_units": 0
+  },
+  "resolved_video_form": "information_motion",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "COMPLETED",
+      "started_at": "2026-10-15T08:57:48.611+00:00",
+      "completed_at": "2026-10-15T09:00:08.270+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:57:48.611+00:00",
+          "completed_at": "2026-10-15T08:58:21.299+00:00",
+          "duration_seconds": 28.0,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:58:21.307+00:00",
+          "completed_at": "2026-10-15T08:58:27.056+00:00",
+          "duration_seconds": 5.53,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:58:27.061+00:00",
+          "completed_at": "2026-10-15T08:58:55.849+00:00",
+          "duration_seconds": 28.74,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T08:58:55.856+00:00",
+          "completed_at": "2026-10-15T08:58:55.860+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:58:55.862+00:00",
+          "completed_at": "2026-10-15T08:58:55.865+00:00",
+          "duration_seconds": 0.04,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:58:55.868+00:00",
+          "completed_at": "2026-10-15T09:00:06.446+00:00",
+          "duration_seconds": 70.83,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T09:00:06.455+00:00",
+          "completed_at": "2026-10-15T09:00:08.270+00:00",
+          "duration_seconds": 1.75,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}

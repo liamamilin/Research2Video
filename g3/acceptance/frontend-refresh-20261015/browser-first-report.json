@@ -1,0 +1,52 @@
+{
+  "layouts": [
+    {
+      "name": "new-1440",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1425,
+      "pageHeight": 1274,
+      "buttonTop": 627,
+      "sourceFont": "14px"
+    },
+    {
+      "name": "new-1280",
+      "width": 1280,
+      "height": 800,
+      "scrollWidth": 1265,
+      "pageHeight": 1274,
+      "buttonTop": 627,
+      "sourceFont": "14px"
+    },
+    {
+      "name": "new-1024",
+      "width": 1024,
+      "height": 768,
+      "scrollWidth": 1009,
+      "pageHeight": 1270,
+      "buttonTop": 625,
+      "sourceFont": "14px"
+    },
+    {
+      "name": "new-390",
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "pageHeight": 1953,
+      "buttonTop": 1303,
+      "sourceFont": "14px"
+    }
+  ],
+  "checks": [
+    "draft_reload_source_title",
+    "draft_voice_speed_reload",
+    "real_cached_accent_preview",
+    "real_docx_upload_draft_association_reload"
+  ],
+  "requests": [],
+  "errors": [],
+  "sample": {
+    "duration": 6.72,
+    "error": null
+  }
+}

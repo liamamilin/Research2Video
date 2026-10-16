@@ -1,0 +1,20 @@
+{
+  "g1/video_ir.py": "da398a0a6e9ba844068b21a8288358412420b223bbcead02713f655bf42315fa",
+  "g2/run_g2.py": "a93ed80f88ad0d4e9fc75922ff555622ae964dfe54aed86c4cd3ea7ecaace816",
+  "g2/media_settings.py": "88ca6cd2340865d1d3bc36449590ef2b064cfc35d407309d50e683065fef1a76",
+  "g2/scene_revision.py": "c5de33ba9c07bc821cf703dc1b6583ac46e1c4a41cd12e1beda526084692210c",
+  "g2/scene_fields.py": "37d103864c132ec4bbcb5d90495753bc8b23244de8ac41b75c27360e2cea2731",
+  "g2/qwen_voice.py": "1927ad8e510cf94b0dc5c20503f971abf0cce5f6853a74c4c029985b4fefe6b6",
+  "g2/voice_preview.py": "b9eb49fef15705fad13943d5957c1e0de68b685a3994ea558a700280b8a318ef",
+  "g2/voices.py": "ab6018e2900fabad43a3ce8d16b8d689dafd42dc9e9e9bc90516bb46f55cd3b7",
+  "g3/app.py": "6e9b7454c62cd6c1f493cb5125f51ed72d5e32fee006e8122789176cca54a2ec",
+  "g3/store.py": "30485172aa93cffb74aa34361967615852615a944bd6f29cff2c6bd353c478aa",
+  "g3/worker.py": "58e152682435aaf7e7f1143a858996c8658b440a2dc60f6c72492b400eac238e",
+  "g3/revision_support.py": "125782aadea9be245625f33629b576342bdde1230b3fe14b615b78b9750071fe",
+  "g3/web/src/main.tsx": "11eff92b6eb90ecd2a5ce3b92ee899e0390a7f2e0eb64dee4cab2bc0f7173648",
+  "g3/web/src/visual.css": "2f52ed6584a699702647787d36fa9ca57bed59dba586e76ff1480a0dbb743344",
+  "g3/web/static/app.js": "10678c8af810dae167889bd0e6d828d9b76d851896483873740b1816f7599660",
+  "g3/web/static/app.css": "8a165292ccdef11526032a44447e1a2a57fd02f0dd8fcd40fb8cd6f85cd13aed",
+  "g3/tests/test_scene_media.py": "ce3341a32534d01e4743b451efcd7e5fea461054fd62f89bd5f375458e4d4117",
+  "g3/voice-requirements.txt": "5859664ed0eeac22b752497725b0e865f2dfbd5f356153e93f61394bde93bdbb"
+}

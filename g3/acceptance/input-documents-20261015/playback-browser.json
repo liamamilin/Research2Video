@@ -1,0 +1,30 @@
+[
+  {
+    "mode": "word",
+    "job_id": "d8bd6324-645e-492b-a2f0-340cfbe7bedd",
+    "playback": {
+      "currentTime": 4.463816,
+      "duration": 31.573,
+      "width": 1920,
+      "height": 1080,
+      "error": null
+    },
+    "source_editor_restored": true,
+    "document_info_restored": true,
+    "document_source": "输入文档\n\n会议记录.docx · 提取 129 字 · 已按修改后的正文制作\n\n下载原文档\n\n已提取正文和表格；页眉页脚、批注、脚注、文本框和图片内容不自动转录。"
+  },
+  {
+    "mode": "pdf",
+    "job_id": "45e3bf98-8686-4478-8e82-a7e3e8f4af88",
+    "playback": {
+      "currentTime": 4.461873,
+      "duration": 56.533333,
+      "width": 1920,
+      "height": 1080,
+      "error": null
+    },
+    "source_editor_restored": true,
+    "document_info_restored": true,
+    "document_source": "输入文档\n\n设备借用.pdf · 提取 107 字\n\n下载原文档\n\n已提取 PDF 文字；图片、图表不自动转录，复杂分栏或表格的阅读顺序可在正文中调整。"
+  }
+]

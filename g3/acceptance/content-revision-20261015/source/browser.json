@@ -1,0 +1,19 @@
+{
+  "mode": "source",
+  "parent_job_id": "6b2fc6b3-0ac1-436c-a8d6-2ed5f381df36",
+  "job_id": "2d6a9bbf-1861-4530-a018-ac39a8122f08",
+  "text": "本次讲座只有一个活动日期，需要通知报名者按这个时间到场。本次讲座确定于周六晚上七点举行。请报名者按照这个时间到场。材料中没有说明具体地点，地点信息需要另行确认。",
+  "intent": {
+    "audience": "第一次参加讲座的人",
+    "purpose": "活动通知（自定义）",
+    "tone": "简洁直接",
+    "focus": "讲清日期，地点未知需要保留待确认"
+  },
+  "preferences_optional": true,
+  "custom_persisted_after_reload": {
+    "audience": "第一次参加讲座的人",
+    "purpose": "活动通知（自定义）"
+  },
+  "parent_unchanged": true,
+  "version_link": "PASS"
+}

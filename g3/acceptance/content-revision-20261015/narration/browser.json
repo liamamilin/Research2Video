@@ -1,0 +1,19 @@
+{
+  "mode": "narration",
+  "parent_job_id": "47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e",
+  "job_id": "64140056-fed2-465f-a5c1-4269f3c0332d",
+  "text": "任务交接先讲清楚交付目标、必要背景和完成标准。\n\n交付目标要说明最终交付物，比如一页本周需求进展摘要。\n\n背景要交代读者、使用场景，以及现有记录。\n\n完成标准应列出完成项、当前阻塞和待讨论的决定。\n\n没有记录的信息标明待确认，不要猜测补齐。",
+  "intent": {
+    "audience": "刚加入项目的同事",
+    "purpose": "团队交接小课（自定义）",
+    "tone": "简洁直接",
+    "focus": "强调缺失信息标明待确认"
+  },
+  "preferences_optional": true,
+  "custom_persisted_after_reload": {
+    "audience": "刚加入项目的同事",
+    "purpose": "团队交接小课（自定义）"
+  },
+  "parent_unchanged": true,
+  "version_link": "PASS"
+}

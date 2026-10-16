@@ -1,0 +1,120 @@
+{
+  "job_id": "f220d141-fecd-4de1-9082-4bb9e3e82d22",
+  "title": "任务交接三要素 · 讲稿修订 · 声音与速度",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "54159580ae05858cee01a71e1790eca04264989a277f10bdcec174a118899db2",
+  "source_char_count": 120,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zf_xiaoxiao",
+  "created_at": "2026-10-15T11:24:05.824+00:00",
+  "updated_at": "2026-10-15T11:25:37.167+00:00",
+  "version": 11,
+  "operation_type": "media_revision",
+  "parent_job_id": "64140056-fed2-465f-a5c1-4269f3c0332d",
+  "parent_attempt_no": 1,
+  "scene_id": null,
+  "creative_intent": {
+    "audience": "刚加入项目的同事",
+    "purpose": "团队交接小课（自定义）",
+    "tone": "简洁直接",
+    "focus": "强调缺失信息标明待确认"
+  },
+  "revision_mode": null,
+  "video_speed": 1.5,
+  "video_form": "information_motion",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "information_motion",
+    "selected_form": "information_motion",
+    "recommended_form": "information_motion",
+    "selection_mode": "manual",
+    "status": "ready",
+    "reason": "沿用原视频形式，按用户修订后的讲稿逐句配音。",
+    "issues": [],
+    "retained_units": 5,
+    "excluded_units": 0
+  },
+  "resolved_video_form": "information_motion",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "COMPLETED",
+      "started_at": "2026-10-15T11:24:58.784+00:00",
+      "completed_at": "2026-10-15T11:25:37.167+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T11:24:58.784+00:00",
+          "completed_at": "2026-10-15T11:24:59.169+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T11:24:59.170+00:00",
+          "completed_at": "2026-10-15T11:24:59.172+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T11:24:59.174+00:00",
+          "completed_at": "2026-10-15T11:24:59.176+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T11:24:59.178+00:00",
+          "completed_at": "2026-10-15T11:24:59.180+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:24:59.182+00:00",
+          "completed_at": "2026-10-15T11:24:59.184+00:00",
+          "duration_seconds": 0.02,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:24:59.185+00:00",
+          "completed_at": "2026-10-15T11:25:36.067+00:00",
+          "duration_seconds": 36.96,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:25:36.076+00:00",
+          "completed_at": "2026-10-15T11:25:37.167+00:00",
+          "duration_seconds": 0.87,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "zm_yunxi",
+    "seconds": 5.086625,
+    "sample_rate": 24000,
+    "sha256": "de2365729d309bab54e54d594cb6eb9aa3db24a9970875f0ece2d94fe8b8b17e",
+    "path": "/Users/milin/2026/软件开发/autovideo/g3/data/voice-samples/zm_yunxi/sample.wav"
+  },
+  {
+    "id": "zf_xiaoxiao",
+    "seconds": 5.589333333333333,
+    "sample_rate": 24000,
+    "sha256": "598dfbc558660b92103c36bccb45ad85668dd8c0581c6c25235beafb054ce5cb",
+    "path": "/Users/milin/2026/软件开发/autovideo/g3/data/voice-samples/zf_xiaoxiao/sample.wav"
+  },
+  {
+    "id": "qwen_eric",
+    "seconds": 6.72,
+    "sample_rate": 24000,
+    "sha256": "53d65dcd8f1a0ed9c3021ada35600f43d53f999e5ae14ca5fce54af38746c8d4",
+    "path": "/Users/milin/2026/软件开发/autovideo/g3/data/voice-samples/qwen_eric/sample.wav"
+  },
+  {
+    "id": "qwen_dylan",
+    "seconds": 6.16,
+    "sample_rate": 24000,
+    "sha256": "1e478232e848d17c743eb8f76ab3b0eef0929ee92c6c40528ceef393e875f2dd",
+    "path": "/Users/milin/2026/软件开发/autovideo/g3/data/voice-samples/qwen_dylan/sample.wav"
+  },
+  {
+    "id": "qwen_uncle_fu",
+    "seconds": 6.96,
+    "sample_rate": 24000,
+    "sha256": "02d1b55a4467f825dc1c717caa16dc0b960b77464475af255b143fb6f9d6b2a5",
+    "path": "/Users/milin/2026/软件开发/autovideo/g3/data/voice-samples/qwen_uncle_fu/sample.wav"
+  },
+  {
+    "id": "qwen_vivian",
+    "seconds": 7.12,
+    "sample_rate": 24000,
+    "sha256": "860cf9b68a779d202b61b8cd1dcb3424789c2aa3f726c233b8a6f932ecbedccc",
+    "path": "/Users/milin/2026/软件开发/autovideo/g3/data/voice-samples/qwen_vivian/sample.wav"
+  },
+  {
+    "id": "qwen_serena",
+    "seconds": 6.8,
+    "sample_rate": 24000,
+    "sha256": "b5df286ae8bb12d87b35592b2496451359fb0c4229cda011dd05f03efcf38c93",
+    "path": "/Users/milin/2026/软件开发/autovideo/g3/data/voice-samples/qwen_serena/sample.wav"
+  }
+]

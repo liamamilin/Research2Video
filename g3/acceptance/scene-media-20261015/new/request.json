@@ -1,0 +1,15 @@
+{
+  "mode": "new",
+  "job_id": "f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93",
+  "status": "QUEUED",
+  "created_at": "2026-10-15T11:27:24.979+00:00",
+  "status_url": "/api/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93",
+  "payload": {
+    "title": "普通话男声与双倍速 · 新建验证",
+    "source_text": "制作活动通知前应核对日期、时间和地点。已确认的信息可以直接说明。未确定的信息应标为待确认，不要用猜测补齐。通知发布前再核对一遍，避免出现互相矛盾的时间。",
+    "voice_id": "zm_yunxi",
+    "video_speed": 2,
+    "duration_mode": "content",
+    "video_form": "auto"
+  }
+}

@@ -1,0 +1,68 @@
+[
+  {
+    "job_id": "1332041b-b1e1-4c4d-a1ae-3ae12702572b",
+    "file": "g3/data/jobs/1332041b-b1e1-4c4d-a1ae-3ae12702572b/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "7308f2ba5d508f3491a8c26acb3f649ee6cd8a2665a127e8ba82cc335e822ff6",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "a6a6723d-ff90-4b2f-919a-2c63f5fe9f96",
+    "file": "g3/data/jobs/a6a6723d-ff90-4b2f-919a-2c63f5fe9f96/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "5f9f9820026236aabf438643d22e8b2d156711551a81963825901ab7dbefbf55",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "0fd09c09-86de-4740-8093-6b292731b61d",
+    "file": "g3/data/jobs/0fd09c09-86de-4740-8093-6b292731b61d/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "579d44b6af8978d2b7091a08743b587d66b595bb94dc2f3bae1299c634a82808",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "d47b903e-a899-4433-a2cb-6a0ba7a90fc8",
+    "file": "g3/data/jobs/d47b903e-a899-4433-a2cb-6a0ba7a90fc8/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "8bb6bbf7165775bffaf9f494bad031c7254de7de5b5785e7779e01642c9f6413",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "f220d141-fecd-4de1-9082-4bb9e3e82d22",
+    "file": "g3/data/jobs/f220d141-fecd-4de1-9082-4bb9e3e82d22/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "30176118074fe7f527e2ffb2c732bc6a6d587e3989b9c40e74b6a1130665e8b9",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "a87044d6-153e-44f0-ab2f-b32ada357917",
+    "file": "g3/data/jobs/a87044d6-153e-44f0-ab2f-b32ada357917/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "6b8c11c7a6924aefa4cc7d990c26934194f7326478811da47d9c39c47c01444b",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "a1611f69-83b9-4751-ad1e-d7640c0a8ced",
+    "file": "g3/data/jobs/a1611f69-83b9-4751-ad1e-d7640c0a8ced/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "c169d392fd5398cf50e7aa4f57659f889f9879a2ec8d8fa6342974ec92e5b550",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93",
+    "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "ce36d0a8574840cf9e8ae4d82f01d57ca3e8c74d04a6471c2565ea8e6cdb6749",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "53e45b7f-6944-4851-b959-0b2b9f2c3d20",
+    "file": "g3/data/jobs/53e45b7f-6944-4851-b959-0b2b9f2c3d20/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "68135264444e96465286b4487becf1c60a1a42b10c6ad724dc41725d79d0b516",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7",
+    "file": "g3/data/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/attempts/2/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "4ff3205e5f83e06971b345fe2a1ea7f52972f7706259b3767789cf8963f84666",
+    "matches_existing_manifest": true
+  },
+  {
+    "job_id": "2f232cbb-3271-4bab-a681-5d6a5aab9761",
+    "file": "g3/data/jobs/2f232cbb-3271-4bab-a681-5d6a5aab9761/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "sha256": "68da8c01d7089f431654f21d334d17459bea62482e9da6395eb1cb3a2377d08c",
+    "matches_existing_manifest": true
+  }
+]

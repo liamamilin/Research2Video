@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/Users/milin/2026/软件开发/autovideo/g2/qwen_voice.py", line 39, in <module>
+    if __name__=='__main__':generate(Path(sys.argv[1]),Path(sys.argv[2]),sys.argv[3])
+  File "/Users/milin/2026/软件开发/autovideo/g2/qwen_voice.py", line 14, in generate
+    import soundfile as sf
+ModuleNotFoundError: No module named 'soundfile'
+Traceback (most recent call last):
+  File "/Users/milin/2026/软件开发/autovideo/g2/voice_preview.py", line 26, in <module>
+    if __name__=='__main__':main(sys.argv[1])
+  File "/Users/milin/2026/软件开发/autovideo/g2/voice_preview.py", line 16, in main
+    subprocess.run([str(qwen_paths(ROOT)[0]),str(ROOT/'g2/qwen_voice.py'),str(request),str(root),voice],check=True,timeout=240)
+  File "/Users/milin/.pyenv/versions/3.10.13/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/milin/2026/软件开发/autovideo/g3/data/voice-runtime/bin/python', '/Users/milin/2026/软件开发/autovideo/g2/qwen_voice.py', '/Users/milin/2026/软件开发/autovideo/g3/data/voice-samples/qwen_eric/request.json', '/Users/milin/2026/软件开发/autovideo/g3/data/voice-samples/qwen_eric', 'qwen_eric']' returned non-zero exit status 1.

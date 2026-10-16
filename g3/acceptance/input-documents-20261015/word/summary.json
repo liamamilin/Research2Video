@@ -1,0 +1,194 @@
+{
+  "mode": "word",
+  "job_id": "d8bd6324-645e-492b-a2f0-340cfbe7bedd",
+  "status": "COMPLETED",
+  "resolved_video_form": "information_motion",
+  "input_document": {
+    "filename": "会议记录.docx",
+    "format": "docx",
+    "bytes": 37084,
+    "original_sha256": "c0de27ebbb0f6a632b245aa3cf065f1665804e93b2f8314afb36fbd80f9b462b",
+    "extracted_sha256": "63b0845acda342b15c1823532ce9204e07e3d7bfd2c69e0cf94869c851af972b",
+    "char_count": 129,
+    "warnings": [
+      "已提取正文和表格；页眉页脚、批注、脚注、文本框和图片内容不自动转录。"
+    ],
+    "source_edited": true,
+    "submitted_source_sha256": "71e24b283618b3a983caf674b55179190b87b05caebcd734bb88668c75b7d798"
+  },
+  "submitted_source_matches": true,
+  "original_download_matches": true,
+  "final_narration": "先明确目的：会议记录用于让没参加会议的同事了解结果。记录时要抓住三个重点：只保留必要背景，并分清决定、行动、待确认三类信息。决定类记录已经确定的事项，避免把讨论意见写成结论。行动类写清负责人和下一步动作，便于会后跟进。待确认类用于未达成共识的信息，要标为待确认，不猜测补齐。如果日期还没确定，就保留为待定。",
+  "qa": {
+    "status": "PASS",
+    "gate": "G2",
+    "real_llm": true,
+    "real_tts": true,
+    "mock_calls": 0,
+    "model": "deepseek-flash",
+    "llm_call_count": 4,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 947,
+      "duration_seconds": 31.573,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.9999490024696158,
+      "decoded_rms": 0.08270542323589325,
+      "full_decode": "PASS"
+    },
+    "timeline": {
+      "ir_frames": 947,
+      "scene_count": 3,
+      "beat_count": 9,
+      "alignment_granularity": "phrase"
+    },
+    "visual_beats": {
+      "c1_s1_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.050353973765432096
+      },
+      "c1_s1_b1": {
+        "action": "reveal",
+        "target_id": "subtitle",
+        "beat_frame": 41,
+        "before_frame": 38,
+        "after_frame": 45,
+        "changed_pixel_ratio": 0.005679012345679012
+      },
+      "c1_s2_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 170,
+        "before_frame": 167,
+        "after_frame": 174,
+        "changed_pixel_ratio": 0.0434741512345679
+      },
+      "c1_s2_b1": {
+        "action": "reveal",
+        "target_id": "line:0",
+        "beat_frame": 230,
+        "before_frame": 227,
+        "after_frame": 234,
+        "changed_pixel_ratio": 0.0061000192901234564
+      },
+      "c1_s2_b2": {
+        "action": "reveal",
+        "target_id": "line:1",
+        "beat_frame": 383,
+        "before_frame": 380,
+        "after_frame": 387,
+        "changed_pixel_ratio": 0.04516927083333333
+      },
+      "c1_s2_b3": {
+        "action": "reveal",
+        "target_id": "line:2",
+        "beat_frame": 537,
+        "before_frame": 534,
+        "after_frame": 541,
+        "changed_pixel_ratio": 0.041947820216049383
+      },
+      "c1_s2_b4": {
+        "action": "reveal",
+        "target_id": "line:3",
+        "beat_frame": 679,
+        "before_frame": 676,
+        "after_frame": 683,
+        "changed_pixel_ratio": 0.050906153549382716
+      },
+      "c1_s3_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 851,
+        "before_frame": 848,
+        "after_frame": 855,
+        "changed_pixel_ratio": 0.03595389660493827
+      },
+      "c1_s3_b1": {
+        "action": "reveal",
+        "target_id": "subtitle",
+        "beat_frame": 901,
+        "before_frame": 898,
+        "after_frame": 905,
+        "changed_pixel_ratio": 0.0051625192901234565
+      }
+    },
+    "scene_samples": [
+      {
+        "scene_id": "c1_s1",
+        "frame": 0,
+        "file": "g3/data/jobs/d8bd6324-645e-492b-a2f0-340cfbe7bedd/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 80,
+        "file": "g3/data/jobs/d8bd6324-645e-492b-a2f0-340cfbe7bedd/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 160,
+        "file": "g3/data/jobs/d8bd6324-645e-492b-a2f0-340cfbe7bedd/attempts/1/g2-run/artifacts/keyframes/frame-007.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 161,
+        "file": "g3/data/jobs/d8bd6324-645e-492b-a2f0-340cfbe7bedd/attempts/1/g2-run/artifacts/keyframes/frame-008.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 502,
+        "file": "g3/data/jobs/d8bd6324-645e-492b-a2f0-340cfbe7bedd/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 842,
+        "file": "g3/data/jobs/d8bd6324-645e-492b-a2f0-340cfbe7bedd/attempts/1/g2-run/artifacts/keyframes/frame-020.png"
+      },
+      {
+        "scene_id": "c1_s3",
+        "frame": 843,
+        "file": "g3/data/jobs/d8bd6324-645e-492b-a2f0-340cfbe7bedd/attempts/1/g2-run/artifacts/keyframes/frame-021.png"
+      },
+      {
+        "scene_id": "c1_s3",
+        "frame": 895,
+        "file": "g3/data/jobs/d8bd6324-645e-492b-a2f0-340cfbe7bedd/attempts/1/g2-run/artifacts/keyframes/frame-024.png"
+      },
+      {
+        "scene_id": "c1_s3",
+        "frame": 946,
+        "file": "g3/data/jobs/d8bd6324-645e-492b-a2f0-340cfbe7bedd/attempts/1/g2-run/artifacts/keyframes/frame-027.png"
+      }
+    ],
+    "contact_sheet": "artifacts/contact-sheet.jpg",
+    "captions": {
+      "burned_in": true,
+      "srt": "artifacts/captions.srt",
+      "alignment": "phrase-level measured PCM activity"
+    },
+    "video_form": "information_motion",
+    "duration_mode": "content",
+    "information": {
+      "scene_count": 3,
+      "components": [
+        "concept_reveal",
+        "title_card"
+      ],
+      "timing": "measured phrases; estimated within-phrase cues",
+      "theme": "minimal_light"
+    }
+  },
+  "manifest_hashes_verified": 79,
+  "range_download": "PASS"
+}

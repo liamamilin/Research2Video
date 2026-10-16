@@ -1,0 +1,22 @@
+{
+  "mode": "word",
+  "extracted": "会议记录的三个重点\n\n会议记录用于让没参加会议的同事了解结果。记录只保留必要背景，重点区分以下三类信息。\n\n决定\t记录已经确定的事项，避免把讨论意见写成结论。\n\n行动\t写清负责人和下一步动作，便于会后跟进。\n\n待确认\t未达成共识的信息标为待确认，不猜测补齐。",
+  "submitted": "会议记录的三个重点\n\n会议记录用于让没参加会议的同事了解结果。记录只保留必要背景，重点区分以下三类信息。\n\n决定\t记录已经确定的事项，避免把讨论意见写成结论。\n\n行动\t写清负责人和下一步动作，便于会后跟进。\n\n待确认\t未达成共识的信息标为待确认，不猜测补齐。\n未确定的日期保留为待定。",
+  "default_form": "auto",
+  "job_id": "d8bd6324-645e-492b-a2f0-340cfbe7bedd",
+  "document_source": "输入文档\n\n会议记录.docx · 提取 129 字 · 已按修改后的正文制作\n\n下载原文档\n\n已提取正文和表格；页眉页脚、批注、脚注、文本框和图片内容不自动转录。",
+  "input_document": {
+    "filename": "会议记录.docx",
+    "format": "docx",
+    "bytes": 37084,
+    "original_sha256": "c0de27ebbb0f6a632b245aa3cf065f1665804e93b2f8314afb36fbd80f9b462b",
+    "extracted_sha256": "63b0845acda342b15c1823532ce9204e07e3d7bfd2c69e0cf94869c851af972b",
+    "char_count": 129,
+    "warnings": [
+      "已提取正文和表格；页眉页脚、批注、脚注、文本框和图片内容不自动转录。"
+    ],
+    "source_edited": true,
+    "submitted_source_sha256": "71e24b283618b3a983caf674b55179190b87b05caebcd734bb88668c75b7d798"
+  },
+  "download_matches_original": true
+}

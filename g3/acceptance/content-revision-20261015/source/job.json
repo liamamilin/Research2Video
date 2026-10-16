@@ -1,0 +1,128 @@
+{
+  "job_id": "2d6a9bbf-1861-4530-a018-ac39a8122f08",
+  "title": "讲座时间已确认 · 原稿修订",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "df71908372c0191d054a735b8cd89c698ece73db09cc1eebdbc2e92f8d9957ac",
+  "source_char_count": 80,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zf_xiaoxiao",
+  "created_at": "2026-10-15T08:03:30.889+00:00",
+  "updated_at": "2026-10-15T08:05:49.568+00:00",
+  "version": 11,
+  "operation_type": "content_revision",
+  "parent_job_id": "6b2fc6b3-0ac1-436c-a8d6-2ed5f381df36",
+  "parent_attempt_no": 1,
+  "scene_id": null,
+  "creative_intent": {
+    "audience": "第一次参加讲座的人",
+    "purpose": "活动通知（自定义）",
+    "tone": "简洁直接",
+    "focus": "讲清日期，地点未知需要保留待确认"
+  },
+  "revision_mode": "source",
+  "video_form": "auto",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "auto",
+    "selected_form": "information_motion",
+    "recommended_form": "information_motion",
+    "selection_mode": "automatic",
+    "status": "ready",
+    "reason": "内容是活动通知，核心是日期、到场提醒和地点待确认，属于并列事实与事项提醒，没有步骤、分支或因果流程，因此整片用信息动效/图文说明更合适。按原文顺序保留全部单元。",
+    "issues": [
+      {
+        "kind": "missing",
+        "message": "材料明确没有给出具体地点，地点信息需要另行确认；通知中应如实说明地点待定，不能补造地点。",
+        "source_quotes": [
+          "材料中没有说明具体地点，地点信息需要另行确认。"
+        ],
+        "blocking": false
+      }
+    ],
+    "retained_units": 4,
+    "excluded_units": 0
+  },
+  "resolved_video_form": "information_motion",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "COMPLETED",
+      "started_at": "2026-10-15T08:03:59.332+00:00",
+      "completed_at": "2026-10-15T08:05:49.568+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:03:59.332+00:00",
+          "completed_at": "2026-10-15T08:04:32.479+00:00",
+          "duration_seconds": 16.39,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:04:32.484+00:00",
+          "completed_at": "2026-10-15T08:04:36.078+00:00",
+          "duration_seconds": 3.73,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:04:36.083+00:00",
+          "completed_at": "2026-10-15T08:04:59.497+00:00",
+          "duration_seconds": 23.44,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T08:04:59.502+00:00",
+          "completed_at": "2026-10-15T08:04:59.504+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:04:59.506+00:00",
+          "completed_at": "2026-10-15T08:04:59.508+00:00",
+          "duration_seconds": 0.03,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:04:59.510+00:00",
+          "completed_at": "2026-10-15T08:05:48.456+00:00",
+          "duration_seconds": 48.72,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T08:05:48.465+00:00",
+          "completed_at": "2026-10-15T08:05:49.568+00:00",
+          "duration_seconds": 1.13,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}
