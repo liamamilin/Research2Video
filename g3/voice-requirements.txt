@@ -1,0 +1,7 @@
+# Optional local Qwen3-TTS runtime; install into g3/data/voice-runtime.
+mlx-audio[tts]==0.5.9
+mlx==0.32.4
+mlx-metal==0.32.4
+transformers==5.19.0
+soundfile==0.14.0
+scipy==1.15.3
