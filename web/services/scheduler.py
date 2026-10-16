@@ -231,13 +231,17 @@ def add_job(
 
 
 @_serialized
-def update_job(job_id: str, schedule: str, command: str) -> dict | None:
+def update_job(job_id: str, schedule: str, command: str | None) -> dict | None:
     """Edit in place, preserving paused state and unrelated crontab entries."""
-    entry = _validate_job(job_id, schedule, command)
+    entry = _validate_job(job_id, schedule, command) if command is not None else None
     lines = _get_crontab()
     indices = _find_job_lines(lines, job_id)
     if len(indices) < 2:
         return None
+    if command is None:
+        current = _parse_cron_entry(lines[indices[-1]])
+        command = current['command']
+        entry = _validate_job(job_id, schedule, command)
     enabled = not lines[indices[-1]].strip().startswith("#")
     lines[indices[-1]] = ("" if enabled else "# ") + " ".join(entry.values()) + " " + command
     _set_crontab(lines)

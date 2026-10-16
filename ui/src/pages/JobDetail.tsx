@@ -307,6 +307,7 @@ export function JobDetailPage() {
         <span className="font-mono flex-1">{job.name}</span>
 
         <div className="flex items-center gap-2">
+          <Link className="btn text-xs" to={`/ask?job=${encodeURIComponent(job.name)}`}>在助手中处理</Link>
           {runError && (
             <span className="text-xs text-danger">{runError}</span>
           )}

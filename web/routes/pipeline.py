@@ -98,10 +98,15 @@ def _artifact_complaints(path: str, name: str, round_dir: str) -> tuple[list[str
 def _round_payload(date: str, with_warnings: bool = False) -> dict:
     settings = get_settings()
     stages = pipeline.build_round_files(date, settings.paths.output_dir)
+    live = pipeline.get_round_state(date) or _recorded_round(date, settings)
+    recorded = (live or {}).get('stages') or []
+    recorded = list(recorded.values()) if isinstance(recorded, dict) else recorded
+    statuses = {stage['key']: stage.get('status') for stage in recorded}
     tokens = report_meta.round_tokens(date)
     for stage in stages:
         stage["tokens"] = tokens.get(stage["key"], 0)
-    done = sum(1 for s in stages if s["exists"])
+        stage['status'] = statuses.get(stage['key']) or stage['status']
+    done = sum(1 for s in stages if s["exists"] and s['status'] in ('success', 'done', 'skipped'))
     payload = {
         "date": date,
         "done": done,
@@ -109,7 +114,7 @@ def _round_payload(date: str, with_warnings: bool = False) -> dict:
         "tokens_total": sum(tokens.values()),
         "stages": stages,
         "artifacts": _round_artifacts(date, settings.paths.output_dir),
-        "live": pipeline.get_round_state(date) or _recorded_round(date, settings),
+        "live": live,
     }
     if with_warnings:
         payload["warnings"] = _round_artifact_warnings(
@@ -175,11 +180,7 @@ def list_rounds(
 
 @router.get("/rounds/{date}")
 def get_round(date: str, user=Depends(require_viewer)):
-    if len(date) != 10:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=ApiError.make("invalid_date", "日期格式应为 YYYY-MM-DD"),
-        )
+    _require_date(date, 'date')
     return _round_payload(date, with_warnings=True)
 
 
@@ -251,6 +252,7 @@ def get_round_diff(date: str, against: str | None = Query(None),
 def run_round(request: Request, payload: dict | None = None,
               user=Depends(require_editor)):
     """Start today's round in the background."""
+    _accepting_runs()
     settings = get_settings()
     payload = payload or {}
     try:
@@ -259,12 +261,14 @@ def run_round(request: Request, payload: dict | None = None,
         concurrency = 3
 
     try:
-        state = pipeline.start_round(
-            config_dir=settings.paths.config_dir,
-            jobs_dir=settings.paths.jobs_dir,
-            concurrency=concurrency,
-            trigger=user["username"],
-        )
+        from web.services.assistant_maintenance import run_admission
+        with run_admission():
+            state = pipeline.start_round(
+                config_dir=settings.paths.config_dir,
+                jobs_dir=settings.paths.jobs_dir,
+                concurrency=concurrency,
+                trigger=user["username"],
+            )
     except RuntimeError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -288,6 +292,7 @@ def retry_round(request: Request, payload: dict | None = None,
     invalidated and re-run as well, so the round cannot report success while
     its synthesis still reflects stale upstream documents.
     """
+    _accepting_runs()
     settings = get_settings()
     payload = payload or {}
     try:
@@ -297,15 +302,17 @@ def retry_round(request: Request, payload: dict | None = None,
     date = _require_date(payload.get("date"), "date")
 
     try:
-        state = pipeline.start_retry(
-            config_dir=settings.paths.config_dir,
-            jobs_dir=settings.paths.jobs_dir,
-            output_dir=settings.paths.output_dir,
-            concurrency=concurrency,
-            trigger=user["username"],
-            date=date,
-            invalidate_downstream=invalidate_downstream,
-        )
+        from web.services.assistant_maintenance import run_admission
+        with run_admission():
+            state = pipeline.start_retry(
+                config_dir=settings.paths.config_dir,
+                jobs_dir=settings.paths.jobs_dir,
+                output_dir=settings.paths.output_dir,
+                concurrency=concurrency,
+                trigger=user["username"],
+                date=date,
+                invalidate_downstream=invalidate_downstream,
+            )
     except RuntimeError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -329,3 +336,32 @@ def cancel_round(request: Request, user=Depends(require_editor)):
     audit.log("pipeline_cancel", user=user["username"], result="cancelled",
               ip=request.client.host if request.client else None)
     return {"ok": True}
+
+
+@router.post('/rounds/{date}/rerun')
+def rerun_stages(date: str, payload: dict, request: Request, user=Depends(require_editor)):
+    """Re-run explicitly selected completed stages and every dependent stage."""
+    _accepting_runs()
+    _require_date(date, 'date')
+    stages = payload.get('stages')
+    if not isinstance(stages, list) or not stages or any(not isinstance(k, str) for k in stages):
+        raise HTTPException(422, 'stages 必须是非空阶段 key 数组')
+    settings = get_settings()
+    try:
+        from web.services.assistant_maintenance import run_admission
+        with run_admission():
+            result = pipeline.start_retry(settings.paths.config_dir, settings.paths.jobs_dir,
+                                          settings.paths.output_dir, trigger=user['username'], date=date,
+                                          force_stages=stages)
+    except RuntimeError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    audit.log('pipeline_rerun', user=user['username'], target=date, details={'stages': stages})
+    return result
+
+
+def _accepting_runs():
+    from web.services.assistant_maintenance import ensure_accepting_runs
+    try:
+        ensure_accepting_runs()
+    except RuntimeError as exc:
+        raise HTTPException(409, str(exc)) from exc

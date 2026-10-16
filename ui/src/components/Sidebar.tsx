@@ -7,9 +7,9 @@ import { AccountModal } from "./AccountModal";
 
 const navItems = [
   { to: "/", label: "总览", icon: LayoutDashboard },
+  { to: "/ask", label: "助手", icon: MessageSquareText },
   { to: "/jobs", label: "Jobs", icon: ListOrdered },
   { to: "/rounds", label: "情报轮次", icon: Radar },
-  { to: "/ask", label: "问答", icon: MessageSquareText },
   { to: "/reports", label: "报告", icon: FileText },
 ];
 

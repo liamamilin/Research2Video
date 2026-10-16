@@ -233,6 +233,7 @@ export function ReportViewPage() {
         </Link>
         <span className="text-text-muted">/</span>
         <span className="font-mono flex-1 truncate">{filename}</span>
+        <Link className="btn text-xs" to={`/ask?report=${encodeURIComponent(path)}`}>在助手中分析</Link>
         {headings.length > 2 && (
           <button onClick={() => setTocOpen(!tocOpen)} className="btn text-xs" title="目录">
             <List className="w-3 h-3" />

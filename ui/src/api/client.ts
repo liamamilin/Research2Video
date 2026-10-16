@@ -22,6 +22,7 @@ type RequestOpts = {
   method?: string;
   body?: unknown;
   signal?: AbortSignal;
+  responseType?: "stream";
   query?: Record<string, string | number | undefined>;
 };
 
@@ -70,7 +71,7 @@ export async function api<T = unknown>(
 ): Promise<T> {
   const method = opts.method || "GET";
   const headers: Record<string, string> = {
-    Accept: "application/json",
+    Accept: opts.responseType === "stream" ? "text/event-stream" : "application/json",
   };
 
   if (opts.body !== undefined) {
@@ -111,6 +112,10 @@ export async function api<T = unknown>(
 
   // 204 No Content
   if (resp.status === 204) return undefined as T;
+
+  // Return the live body before reading it. Authentication failures below still
+  // use the same refresh / CSRF handling and never replay an opened stream.
+  if (resp.ok && opts.responseType === "stream") return resp as T;
 
   let data: unknown = null;
   const text = await resp.text();

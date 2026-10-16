@@ -36,6 +36,13 @@ def test_paused_entry_parses_correctly(fake_crontab):
     assert jobs["other_job"]["enabled"] is True
 
 
+def test_schedule_only_edit_preserves_the_current_command_inside_the_write_lock(fake_crontab):
+    fake_crontab['lines'][2] = '# 0 6 * * * echo newly-edited-command'
+    result = sch.update_job('pipeline', '0 9 * * 1', None)
+    assert result['command'] == 'echo newly-edited-command'
+    assert fake_crontab['lines'][2] == '# 0 9 * * 1 echo newly-edited-command'
+
+
 def test_enable_strips_paused_marker_and_keeps_other_jobs(fake_crontab):
     assert sch.toggle_job("pipeline", True) is True
     assert fake_crontab["lines"][2] == "0 6 * * * export PATH=/x; cd /y && bash z.sh"

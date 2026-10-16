@@ -216,3 +216,37 @@ def test_budget_guard_prevents_model_call(runtime, monkeypatch):
     monkeypatch.setattr(budget, 'pipeline_allowed', lambda *_: (False, 'budget exhausted'))
     status, reason, output = execute_job(runtime, 'radar', threading.Event())
     assert (status, reason, output) == ('blocked', 'budget exhausted', None)
+
+
+def test_user_cancelled_claim_never_starts_or_retries(store):
+    p = plan(store)
+    store.enqueue_due(DUE)
+    run = store.claim(DUE)
+    assert store.cancel(run['id'])['status'] == 'cancelled'
+    assert not store.start(run['id'], 123, DUE + 1)
+    assert store.claim(DUE + 3600) is None
+    assert store.get(p['id'])['enabled']
+
+
+def test_running_worker_observes_durable_cancel_without_retry(runtime):
+    import threading
+    storage = ScheduleStore(runtime.state_dir)
+    p = storage.save('radar', '* * * * *', now=BASE)
+    storage.enqueue_due(DUE)
+    run = storage.claim(DUE)
+    started = threading.Event()
+    def execute(paths, name, cancel):
+        started.set()
+        assert cancel.wait(3), 'worker did not observe cancellation'
+        return 'failed', 'engine stopped', None
+    thread = threading.Thread(target=work, args=(runtime, run['id']), kwargs={'execute': execute})
+    thread.start()
+    assert started.wait(2)
+    storage.cancel(run['id'])
+    thread.join(4)
+    assert not thread.is_alive()
+    result = storage.run(run['id'])
+    assert result['status'] == 'cancelled'
+    assert storage.runs(p['id'])[0]['attempts'][0]['status'] == 'cancelled'
+    assert storage.claim(DUE + 3600) is None
+    assert storage.get(p['id'])['enabled']

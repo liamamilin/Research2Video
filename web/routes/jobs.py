@@ -451,6 +451,30 @@ def create_job(payload: dict, user=Depends(require_editor)):
         base_content = _default_job_yaml(name, description, language, keywords, prompt, output)
 
     parsed = yaml_io.parse_yaml(base_content)
+    references = payload.get('source_references')
+    if references:
+        if not isinstance(references, list) or len(references) > 30:
+            raise HTTPException(422, 'source_references 必须是来源引用数组')
+        for reference in references:
+            if not isinstance(reference, dict) or set(reference) != {'type', 'id'} or not isinstance(reference['id'], str):
+                raise HTTPException(422, '来源引用必须包含 type 与 id')
+            if reference['type'] == 'report':
+                from web.routes.reports import resolve_output_file
+                resolve_output_file(reference['id'])
+            elif reference['type'] == 'action':
+                from core import tracking
+                tracking.use_state_dir(settings.paths.state_dir)
+                if not tracking.get_item(reference['id']):
+                    raise HTTPException(422, '来源行动不存在')
+            elif reference['type'] == 'round':
+                from web.routes.pipeline import _require_date
+                _require_date(reference['id'], 'source_round')
+                if not os.path.isdir(os.path.join(settings.paths.output_dir, 'practical_ai_intelligence', reference['id'])):
+                    raise HTTPException(422, '来源轮次不存在')
+            else:
+                raise HTTPException(422, '来源类型必须是 report/action/round')
+        parsed['source_references'] = references
+        base_content = yaml_io.dump_yaml(parsed)
     output_errors = yaml_io.validate_output_path(parsed, output_root=settings.paths.output_dir)
     if output_errors:
         raise HTTPException(status_code=422, detail=ApiError.make('invalid_output', '；'.join(output_errors)))
@@ -550,6 +574,11 @@ def get_history(name: str, limit: int = 50, user=Depends(require_viewer)):
 
 @router.post("/{name:path}/run")
 def run_job(name: str, request: Request, user=Depends(require_editor)):
+    from web.services.assistant_maintenance import ensure_accepting_runs
+    try:
+        ensure_accepting_runs()
+    except RuntimeError as exc:
+        raise HTTPException(409, str(exc)) from exc
     """Trigger a job to run asynchronously in the background."""
     settings = get_settings()
     job = load_job(settings.paths.jobs_dir, name)
@@ -587,12 +616,15 @@ def run_job(name: str, request: Request, user=Depends(require_editor)):
     except Exception as exc:  # noqa: BLE001 - never block a run on config issues
         logger.warning("Budget check skipped: %s", exc)
 
-    task = start_job(
-        job_name=name,
-        started_by=user["username"],
-        config_dir=settings.paths.config_dir,
-        jobs_dir=settings.paths.jobs_dir,
-    )
+    from web.services.assistant_maintenance import run_admission
+    try:
+        with run_admission():
+            if _registry.is_running(name):
+                raise HTTPException(409, detail=ApiError.make('already_running', f"Job '{name}' 正在运行中"))
+            task = start_job(job_name=name, started_by=user['username'],
+                             config_dir=settings.paths.config_dir, jobs_dir=settings.paths.jobs_dir)
+    except RuntimeError as exc:
+        raise HTTPException(409, detail=ApiError.make('maintenance', str(exc))) from exc
 
     audit.log("job_run", user=user["username"], target=name,
               result="started", ip=request.client.host if request.client else None)
@@ -640,11 +672,16 @@ def get_job_logs(name: str, request: Request,
         return {"runs": [], "events": [], "run": None}
 
     current = _registry.get(name)
-    live = bool(current and current.is_running)
+    selected = next((run for run in runs if run['run_id'] == run_id), None) if run_id else (runs[0] if runs else None)
+    if run_id and selected is None:
+        raise HTTPException(404, detail=ApiError.make('run_not_found', '所选手动运行不存在或日志已过期'))
+    live = bool(current and current.is_running and selected and current.task_id == selected['run_id'])
+    if live:
+        selected = {**selected, 'status': current.status}
     return {
         "runs": runs,
         "events": events,
-        "run": runs[0] if runs else None,
+        "run": selected,
         "live": live,
     }
 

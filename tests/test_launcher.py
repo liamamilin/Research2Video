@@ -98,6 +98,80 @@ def test_watchdog_guards_are_wired():
     assert not re.search(r"^\ton notify\(", text, re.M)
 
 
+# --- app icon ----------------------------------------------------------------
+#
+# The applet showed the stock AppleScript ribbon for as long as it existed. Two
+# independent reasons: build_launcher.sh copied the icon with `/usr/bin/cp`
+# (which does not exist on macOS -- cp is /bin/cp) behind
+# `2>/dev/null || true`, so the copy failed silently; and it only wrote
+# applet.icns, while an applet also ships Contents/Resources/Assets.car and
+# Info.plist declares the icon via CFBundleIconName, which current macOS
+# prefers over the .icns. Either one alone leaves the stock icon on screen.
+
+ICON_DIR = REPO / "scripts" / "icon"
+
+
+def test_icon_source_and_artifacts_are_tracked():
+    assert (ICON_DIR / "AppIcon.svg").is_file(), "the icon's editable source is missing"
+    assert (REPO / "scripts" / "build_icons.sh").is_file()
+    assert (REPO / "scripts" / "launcher.icns").is_file(), \
+        "build_launcher.sh only applies an icon when this exists"
+
+
+def test_builder_installs_both_the_icns_and_the_asset_catalog():
+    """The catalog, not the .icns, is what current macOS renders."""
+    builder = BUILD.read_text(encoding="utf-8")
+    assert "applet.icns" in builder
+    assert "Assets.car" in builder, \
+        "an applet's Assets.car wins over applet.icns; it must be replaced too"
+
+
+def test_builder_never_uses_a_nonexistent_cp_path():
+    """`/usr/bin/cp` does not exist on macOS; `/bin/cp` does.
+
+    It was hidden behind `2>/dev/null || true`, so the icon copy failed without
+    a word -- the whole reason the icon never changed.
+    """
+    import shutil
+
+    for script in (BUILD, REPO / "scripts" / "build_icons.sh"):
+        # Ignore comments: the fix's own explanation names the bad path.
+        code = "\n".join(
+            line for line in script.read_text(encoding="utf-8").splitlines()
+            if not line.lstrip().startswith("#"))
+        assert "/usr/bin/cp" not in code, (
+            f"{script.name} copies with /usr/bin/cp, which does not exist; "
+            f"use `cp` ({shutil.which('cp')})")
+    assert shutil.which("cp") == "/bin/cp"
+
+
+def test_icon_assets_are_actually_large_enough_to_be_real_art():
+    """A stub or a placeholder must not pass as the shipped icon."""
+    icns = REPO / "scripts" / "launcher.icns"
+    assert icns.stat().st_size > 50_000, "launcher.icns looks like a placeholder"
+
+
+@darwin_only
+def test_built_app_carries_the_custom_catalog_and_icon_name():
+    """End-to-end: after a build the bundle declares and ships the new icon."""
+    import plistlib
+
+    app = REPO / "AREC.app"
+    if not app.is_dir():
+        pytest.skip("AREC.app not built in this checkout")
+
+    plist = plistlib.loads((app / "Contents" / "Info.plist").read_bytes())
+    # osacompile names the icon "applet"; the catalog is built under that name.
+    assert plist.get("CFBundleIconName") == "applet"
+
+    stock_catalog = 383_672  # size of the catalog osacompile writes
+    catalog = app / "Contents" / "Resources" / "Assets.car"
+    assert catalog.is_file()
+    assert catalog.stat().st_size != stock_catalog, (
+        "the bundle still carries osacompile's stock Assets.car, so the Dock "
+        "will keep showing the AppleScript ribbon")
+
+
 def test_starter_detaches_and_returns_immediately(tmp_path):
     """`do shell script` waits for the command; the starter must not block."""
     starter = STARTER.read_text(encoding="utf-8")

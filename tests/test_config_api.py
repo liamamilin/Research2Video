@@ -161,3 +161,48 @@ def test_a_stale_mtime_is_still_a_conflict(client, cfg):
     assert r.status_code == 409, r.text
     assert r.json()["error"]["code"] == "conflict"
     assert "keep this comment" in cfg.read_text(encoding="utf-8")
+
+
+# --- provider presets + key-in-the-wrong-field guard --------------------------
+
+def test_providers_endpoint_lists_presets(client, cfg):
+    assert client.get("/api/config/providers").status_code == 401
+    _login(client)
+    r = client.get("/api/config/providers")
+    assert r.status_code == 200
+    ids = {p["id"] for p in r.json()["providers"]}
+    assert "open-design" in ids and "opencode-go" in ids
+
+
+def test_a_key_in_the_env_name_field_is_rejected(client, cfg):
+    """Saving it would send an unauthenticated request and a confusing 401."""
+    _login(client)
+    r = client.put("/api/config/system",
+                   json={"patch": {"ai": {"api_key_env": "sk-amr-secret-here"}}},
+                   headers=_csrf(client))
+    assert r.status_code == 422, r.text
+    assert r.json()["error"]["code"] == "secret_in_env_field"
+    assert "sk-amr-secret-here" not in cfg.read_text(encoding="utf-8")
+
+
+def test_a_real_env_name_is_accepted(client, cfg):
+    _login(client)
+    r = client.put("/api/config/system",
+                   json={"patch": {"ai": {"api_key_env": "OPEN_DESIGN_KEY"}}},
+                   headers=_csrf(client))
+    assert r.status_code == 200, r.text
+    assert "OPEN_DESIGN_KEY" in cfg.read_text(encoding="utf-8")
+
+
+def test_switching_provider_saves_url_and_env_together(client, cfg):
+    _login(client)
+    r = client.put("/api/config/system",
+                   json={"patch": {"ai": {
+                       "base_url": "https://amr-link.open-design.ai/v1",
+                       "api_key_env": "LLM_API_KEY",
+                       "extra_headers": None}}},
+                   headers=_csrf(client))
+    assert r.status_code == 200, r.text
+    parsed = client.get("/api/config/system").json()["parsed"]
+    assert parsed["ai"]["base_url"] == "https://amr-link.open-design.ai/v1"
+    assert parsed["ai"]["api_key_env"] == "LLM_API_KEY"

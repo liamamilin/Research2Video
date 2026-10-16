@@ -39,11 +39,16 @@ def cmd_serve(args):
     # The app is loopback-only; which address the front door binds is the
     # gateway's decision, not this process's.
     host = "127.0.0.1" if settings.gateway.enabled else (args.host or settings.server.host)
-
-    # Write PID file
-    os.makedirs(os.path.dirname(PID_FILE), exist_ok=True)
-    with open(PID_FILE, "w") as f:
-        f.write(str(os.getpid()))
+    from pathlib import Path
+    from web.services.yaml_io import atomic_write
+    import json
+    runtime_path = Path(settings.paths.state_dir) / f'app_runtime-{os.getpid()}.json'
+    runtime_path.parent.mkdir(parents=True, exist_ok=True)
+    pid_file = str(Path(settings.paths.state_dir).resolve() / 'server.pid')
+    atomic_write(str(runtime_path), json.dumps({'pid': os.getpid(), 'host': host, 'port': port,
+                 'python': sys.executable, 'config_path': settings.source_path, 'started': time.time(), 'pid_file': pid_file}))
+    # Publish the shared runtime/PID only after this instance receives HTTP.
+    # A duplicate launch that fails to bind must not overwrite the live owner.
 
     print(f"Starting AI Research Console on http://{host}:{port}")
     print(f"(API docs: http://{host}:{port}/docs)")
@@ -68,19 +73,22 @@ def cmd_serve(args):
         )
     finally:
         try:
-            if os.path.isfile(PID_FILE):
-                os.remove(PID_FILE)
+            runtime_path.unlink(missing_ok=True)
+            if os.path.isfile(pid_file) and Path(pid_file).read_text().strip() == str(os.getpid()):
+                os.remove(pid_file)
         except OSError:
             pass
 
 
 def cmd_stop(args):
     """Stop the running server by reading PID file."""
-    if not os.path.isfile(PID_FILE):
+    from web.settings import get_settings
+    pid_file = os.path.join(os.path.abspath(get_settings().paths.state_dir), 'server.pid')
+    if not os.path.isfile(pid_file):
         print("Server is not running (no PID file found).", file=sys.stderr)
         sys.exit(1)
 
-    with open(PID_FILE) as f:
+    with open(pid_file) as f:
         pid = int(f.read().strip())
 
     try:
@@ -99,7 +107,7 @@ def cmd_stop(args):
     except ProcessLookupError:
         print(f"PID {pid} not found (server already stopped).")
         try:
-            os.remove(PID_FILE)
+            os.remove(pid_file)
         except OSError:
             pass
         sys.exit(1)

@@ -49,6 +49,7 @@ class TaskRegistry:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._tasks: dict[str, RunningTask] = {}
+            cls._instance._retiring: dict[str, RunningTask] = {}
             cls._instance._lock = threading.Lock()
         return cls._instance
 
@@ -79,6 +80,8 @@ class TaskRegistry:
             prev = self._tasks.get(job_name)
             if prev and prev.is_running:
                 prev.cancel_token.set()
+            if prev and prev.future is not None and not prev.future.done():
+                self._retiring[prev.task_id] = prev
             self._tasks[job_name] = task
         self._publish_activity()
         return task
@@ -110,3 +113,10 @@ class TaskRegistry:
         """Return all currently running tasks."""
         with self._lock:
             return {k: v for k, v in self._tasks.items() if v.is_running}
+
+    def all_tasks(self) -> dict[str, RunningTask]:
+        """Snapshot tasks, including engines finishing cooperative cancellation."""
+        with self._lock:
+            self._retiring = {key: task for key, task in self._retiring.items()
+                              if task.is_running or (task.future is not None and not task.future.done())}
+            return {**{f'{task.job_name}:{key}': task for key, task in self._retiring.items()}, **self._tasks}

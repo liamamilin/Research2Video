@@ -22,15 +22,26 @@ CSRF_COOKIE = "ai_research_csrf"
 
 
 def _set_auth_cookies(response: Response, access: str, refresh: str, csrf: str,
-                      remember: bool = False):
+                      refresh_expires_at: int | None = None):
+    """Attach the three auth cookies, tying each lifetime to what it carries.
+
+    ``refresh_expires_at`` is the refresh token's own ``exp`` claim. When given,
+    the refresh cookie (and the CSRF cookie, see below) live exactly as long as
+    that token, so "remember me" (30 days) survives every rotation instead of
+    being silently reset to the 7-day default on the first refresh.
+    """
     settings = get_settings()
     secure = settings.auth.cookie_secure
     samesite = settings.auth.cookie_samesite  # type: ignore[assignment]
     access_max = settings.auth.access_token_minutes * 60
-    # "Remember me" buys a longer session, not a stored password: the refresh
-    # cookie stays httpOnly and only the browser ever holds it.
-    days = settings.auth.remember_token_days if remember else settings.auth.refresh_token_days
-    refresh_max = max(1, days) * 86400
+
+    if refresh_expires_at is not None:
+        # Round to whole days: an "expires in 6d23h59m58s" cookie should be
+        # reported as 7 days and get the matching Max-Age, not 604798 seconds.
+        days = max(1, int(round((int(refresh_expires_at) - time.time()) / 86400)))
+    else:
+        days = max(1, settings.auth.refresh_token_days)
+    refresh_max = days * 86400
 
     response.set_cookie(
         ACCESS_COOKIE, access,
@@ -41,10 +52,17 @@ def _set_auth_cookies(response: Response, access: str, refresh: str, csrf: str,
         max_age=refresh_max, httponly=True, secure=secure, samesite=samesite,
         path="/api/auth",  # only sent to refresh endpoint
     )
-    # CSRF is NOT httpOnly: client JS reads it and echoes in X-CSRF-Token header
+    # CSRF is NOT httpOnly: client JS reads it and echoes in X-CSRF-Token header.
+    #
+    # It must outlive the ACCESS cookie, not match it: /api/auth/refresh is
+    # itself CSRF-protected and is called precisely when the access token has
+    # just expired. At the access lifetime the browser dropped this cookie and
+    # the refresh came back 403 csrf_failed, so a session that still held a
+    # valid refresh cookie was logged out every 15 idle minutes. It is a random
+    # double-submit token, not a credential, so the session lifetime is right.
     response.set_cookie(
         CSRF_COOKIE, csrf,
-        max_age=access_max, httponly=False, secure=secure, samesite=samesite, path="/",
+        max_age=refresh_max, httponly=False, secure=secure, samesite=samesite, path="/",
     )
     # Lets a client (and the tests) see which lifetime was actually granted
     # instead of having to parse Set-Cookie.
@@ -118,7 +136,8 @@ def login(payload: LoginRequest, request: Request, response: Response):
     # Reload user to get updated last_login_at
     user = user_db.get_user_by_id(user["id"]) or user
 
-    _set_auth_cookies(response, access, refresh, csrf, remember=payload.remember)
+    _set_auth_cookies(response, access, refresh, csrf,
+                      refresh_expires_at=refresh_exp)
     audit.log("login", user=payload.username, result="success", ip=ip,
               details={"remember": bool(payload.remember)})
 
@@ -202,7 +221,11 @@ def refresh(request: Request, response: Response):
     )
     csrf = jwt_helper.new_csrf_token()
     user_db.store_session(access_jti, user["id"], "access", access_exp)
-    _set_auth_cookies(response, access, token, csrf)
+    # Re-issue the cookies against the *existing* refresh token's expiry. Without
+    # this the rotation reset a 30-day "remember me" session to the 7-day default
+    # every time the access token was refreshed.
+    _set_auth_cookies(response, access, token, csrf,
+                      refresh_expires_at=payload.get("exp"))
 
     return TokenResponse(user=_user_out(user), csrf_token=csrf)
 

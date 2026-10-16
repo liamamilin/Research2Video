@@ -9,12 +9,16 @@ from pathlib import Path
 from typing import List, Optional
 
 import yaml
-from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 
-# Load .env file if present
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+# Load .env, and let the file win over an inherited environment. The Web console
+# writes API keys into .env and promises they take effect, but dotenv's default
+# would let a stale inherited value (e.g. the long-lived gateway's snapshot)
+# shadow them after a restart. See utils/env_file.py for the full story.
+from utils.env_file import load_env
+
+load_env(Path(__file__).resolve().parent.parent / ".env")
 
 ENVIRONMENTS = ("development", "staging", "production")
 

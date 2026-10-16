@@ -1,188 +1,191 @@
-import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Database, Loader2, Search, Sparkles } from "lucide-react";
-
-import { askQuestion, reindexVectors, type QaAnswer } from "@/api";
+import { Loader2, MessageSquareText, Plus, Send, Square } from "lucide-react";
+import {
+  chatWithAssistant, getAssistantConversation, newAssistantConversation, stopAssistantResponse,
+  type AssistantConversation, type AssistantMessage,
+} from "@/api";
+import { AssistantAction } from "@/components/AssistantAction";
 import { useAuthStore } from "@/lib/auth-store";
-import { cn } from "@/lib/utils";
 
-const EXAMPLES = [
-  "最近一轮有哪些值得立刻执行的行动？",
-  "模型定价有什么变化，影响哪些工作流？",
-  "有没有关于 agent 记忆的新进展？",
-];
-
+const EXAMPLES = ["查看现有 Jobs", "创建一个研究 AI Agent 记忆技术的 Job", "比较最近一个月的研究报告", "查看最近失败的 Jobs"];
+interface PendingConversation {
+  messages: AssistantMessage[];
+  status: string;
+  requestId: string;
+  conversationId?: string;
+  listeners: Set<(messages: AssistantMessage[], status: string) => void>;
+  promise: Promise<AssistantMessage[]>;
+}
+const pendingConversations = new Map<string, PendingConversation>();
+function saveConversation(key: string, messages: AssistantMessage[]) {
+  try { sessionStorage.setItem(key, JSON.stringify(messages.slice(-60))); } catch { /* Storage is optional. */ }
+}
+function readConversation(key: string): AssistantMessage[] {
+  try {
+    const saved: unknown = JSON.parse(sessionStorage.getItem(key) || "[]");
+    if (Array.isArray(saved)) return saved.filter((m): m is AssistantMessage => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string").slice(-60);
+  } catch { /* Storage is optional. */ }
+  return [];
+}
+function readConversationId(key: string): string | undefined {
+  try { const id = sessionStorage.getItem(`${key}:id`); return id && /^[a-f0-9]{32}$/.test(id) ? id : undefined; }
+  catch { return undefined; }
+}
+function saveConversationId(key: string, id?: string) {
+  if (id) { try { sessionStorage.setItem(`${key}:id`, id); } catch { /* Storage is optional. */ } }
+}
+function messagesFromServer(data: AssistantConversation): AssistantMessage[] {
+  return data.requests.flatMap((item) => [
+    { role: "user" as const, content: item.message },
+    { role: "assistant" as const, content: item.result.answer || "", actions: item.result.actions || [], error: item.result.error, continuation: item.result.continuation },
+  ]);
+}
+function submitConversation(key: string, text: string, history: AssistantMessage[], conversationId?: string) {
+  const prefix: AssistantMessage[] = [...history, { role: "user", content: text }];
+  const pending: PendingConversation = {
+    messages: [...prefix, { role: "assistant", content: "", actions: [] }], status: "正在连接…",
+    requestId: crypto.randomUUID().replace(/-/g, ""), listeners: new Set(), promise: Promise.resolve([]),
+    conversationId,
+  };
+  const publish = () => {
+    saveConversation(key, pending.messages);
+    pending.listeners.forEach((listener) => listener(pending.messages, pending.status));
+  };
+  pendingConversations.set(key, pending);
+  pending.promise = chatWithAssistant(text, history, (event) => {
+    const reply = pending.messages[pending.messages.length - 1];
+    if (event.type === "reset") pending.messages = [...prefix, { ...reply, content: "" }];
+    if (event.type === "delta") { pending.messages = [...prefix, { ...reply, content: reply.content + event.text }]; pending.status = "正在回复…"; }
+    if (event.type === "action") pending.messages = [...prefix, { ...reply, actions: [...(reply.actions || []), event.action] }];
+    if (event.type === "status") pending.status = event.message;
+    publish();
+  }, { conversation_id: conversationId, request_id: pending.requestId }).then((result) => {
+    pending.conversationId = result.conversation_id || conversationId;
+    saveConversationId(key, pending.conversationId);
+    pending.messages = [...prefix, { role: "assistant", content: result.answer, actions: result.actions, error: result.error, continuation: result.continuation }];
+  }).catch((error: unknown) => {
+    const reply = pending.messages[pending.messages.length - 1];
+    pending.messages = [...prefix, { ...reply, content: reply.content || "请求未完成。",
+      error: (error instanceof Error ? error.message : "请求失败") + "。请点顶部“核验结果”读取实际回执，再继续。" }];
+  }).then(() => { pending.status = ""; publish(); pendingConversations.delete(key); return pending.messages; });
+  publish();
+  return pending;
+}
 export function AskPage() {
   const user = useAuthStore((s) => s.user);
-  const canEdit = user?.role === "editor" || user?.role === "admin";
-
-  const [question, setQuestion] = useState("");
-  const [result, setResult] = useState<QaAnswer | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [reindexing, setReindexing] = useState(false);
-  const [notice, setNotice] = useState("");
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState("");
-  const requestId = useRef(0);
-
-  const handleAsk = async (value?: string) => {
-    const q = (value ?? question).trim();
-    if (q.length < 2) {
-      setError("请输入至少 2 个字符的问题");
-      return;
+  return <ApplicationAssistant key={user?.username} username={user?.username || ""} readOnly={user?.role === "viewer"} />;
+}
+function ApplicationAssistant({ username, readOnly }: { username: string; readOnly: boolean }) {
+  const storageKey = `jobs-assistant:${username}`;
+  const [params] = useSearchParams();
+  const [messages, setMessages] = useState<AssistantMessage[]>(() => pendingConversations.get(storageKey)?.messages || readConversation(storageKey));
+  const [input, setInput] = useState(() => params.get("job") ? `请查看任务 ${params.get("job")}` : params.get("report") ? `请分析报告 ${params.get("report")}` : "");
+  const [busy, setBusy] = useState(() => pendingConversations.has(storageKey));
+  const [restoring, setRestoring] = useState(() => !pendingConversations.has(storageKey));
+  const [restoreError, setRestoreError] = useState("");
+  const [status, setStatus] = useState(() => pendingConversations.get(storageKey)?.status || "");
+  const [recoverVersion, setRecoverVersion] = useState(0);
+  const conversationId = useRef<string | undefined>(pendingConversations.get(storageKey)?.conversationId || readConversationId(storageKey));
+  const runningId = useRef<string>();
+  const submitting = useRef(false);
+  const bottom = useRef<HTMLDivElement>(null);
+  useEffect(() => { bottom.current?.scrollIntoView?.({ behavior: busy ? "auto" : "smooth" }); }, [messages, busy]);
+  useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+    const pending = pendingConversations.get(storageKey);
+    if (pending) {
+      const update = (current: AssistantMessage[], progress: string) => { if (active) { setMessages(current); setStatus(progress); } };
+      pending.listeners.add(update);
+      void pending.promise.then((completed) => { if (active) { conversationId.current = pending.conversationId; setMessages(completed); setBusy(false); } });
+      return () => { active = false; pending.listeners.delete(update); };
     }
-    // Supersede any in-flight request: a slower earlier answer must not
-    // overwrite the answer to the question the user actually asked last.
-    const id = ++requestId.current;
-    setBusy(true);
-    setError("");
-    setNotice("");
-    setPending(q);
-    setResult(null);
-    try {
-      const answer = await askQuestion(q);
-      if (id !== requestId.current) return;
-      setResult(answer);
-    } catch (err: unknown) {
-      if (id !== requestId.current) return;
-      setError(err instanceof Error ? err.message : "提问失败");
-    } finally {
-      if (id === requestId.current) {
-        setBusy(false);
-        setPending("");
+    const recover = async () => {
+      try {
+        const data = await getAssistantConversation(conversationId.current);
+        if (!active) return;
+        conversationId.current = data.id;
+        saveConversationId(storageKey, data.id);
+        const restored = messagesFromServer(data);
+        setMessages(restored); saveConversation(storageKey, restored);
+        const running = data.requests.find((item) => item.status === "running");
+        runningId.current = running?.id;
+        setBusy(!!running); setRestoring(false); setRestoreError("");
+        setStatus(running ? "正在恢复本次请求的操作结果…" : "");
+        if (running) timer = setTimeout(() => void recover(), 1200);
+      } catch (error) {
+        if (active) { setRestoring(false); setRestoreError(error instanceof Error ? error.message : "对话恢复失败"); }
       }
-    }
+    };
+    void recover();
+    return () => { active = false; clearTimeout(timer); };
+  }, [storageKey, recoverVersion]);
+  const send = async (example?: string) => {
+    const text = (example ?? input).trim();
+    if (!text || restoring || restoreError || busy || submitting.current || pendingConversations.has(storageKey)) return;
+    submitting.current = true; setInput(""); setBusy(true);
+    const pending = submitConversation(storageKey, text, messages, conversationId.current);
+    runningId.current = pending.requestId;
+    const update = (current: AssistantMessage[], progress: string) => { setMessages(current); setStatus(progress); };
+    update(pending.messages, pending.status); pending.listeners.add(update);
+    try { setMessages(await pending.promise); }
+    finally { conversationId.current = pending.conversationId; pending.listeners.delete(update); submitting.current = false; setBusy(false); runningId.current = undefined; }
   };
-
-  const handleReindex = async () => {
-    setReindexing(true);
-    setError("");
-    try {
-      const stats = await reindexVectors();
-      setNotice(
-        `索引完成：新嵌入 ${stats.embedded} 篇 · 跳过 ${stats.skipped} 篇 · 失败 ${stats.failed} 篇` +
-        `（共 ${stats.stats.documents} 篇 / ${stats.stats.chunks} 块）`,
-      );
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "重建索引失败");
-    } finally {
-      setReindexing(false);
-    }
+  const fresh = async () => {
+    setRestoring(true); setRestoreError("");
+    try { const data = await newAssistantConversation(); conversationId.current = data.id; saveConversationId(storageKey, data.id); saveConversation(storageKey, []); setMessages([]); setInput(""); }
+    catch (error) { setRestoreError(error instanceof Error ? error.message : "新对话未创建"); }
+    finally { setRestoring(false); }
   };
-
-  return (
-    <div className="space-y-4 max-w-3xl">
-      <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold flex-1">问答</h1>
-        {result && (
-          <span className={cn("badge border text-xs",
-            result.mode === "hybrid"
-              ? "border-success/60 text-success"
-              : "border-border text-text-muted")}>
-            {result.mode === "hybrid" ? "语义+关键词" : "关键词"}
-          </span>
-        )}
-        {canEdit && (
-          <button onClick={handleReindex} disabled={reindexing} className="btn text-xs"
-                  title="为报告建立/更新向量索引（需配置 ai.embedding_model）">
-            <Database className="w-3 h-3" />
-            {reindexing ? "索引中..." : "重建索引"}
-          </button>
-        )}
-      </div>
-
-      <div className="card p-4 space-y-3">
-        <div className="flex gap-2">
-          <input
-            className="input flex-1"
-            placeholder="跨全部报告提问，例如：最近的模型价格变化？"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAsk()}
-          />
-          <button onClick={() => handleAsk()} disabled={busy} className="btn btn-primary">
-            <Search className="w-3.5 h-3.5" />
-            {busy ? "检索中..." : "提问"}
-          </button>
-        </div>
-        {!result && (
-          <div className="flex flex-wrap gap-1.5">
-            {EXAMPLES.map((example) => (
-              <button key={example}
-                      onClick={() => { setQuestion(example); handleAsk(example); }}
-                      className="text-xs text-text-muted border border-border rounded-full px-2.5 py-1 hover:bg-bg-hover hover:text-text transition">
-                {example}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {busy && (
-        <div className="card p-4 flex items-center gap-3 text-sm" role="status" aria-live="polite">
-          <Loader2 className="w-4 h-4 animate-spin text-accent shrink-0" />
-          <span className="text-text-muted">正在检索报告并生成回答…</span>
-          <span className="text-xs text-text-muted/70 truncate ml-auto max-w-[50%]">{pending}</span>
-        </div>
-      )}
-
-      {notice && (
-        <div className="text-xs text-text-muted bg-bg-card border border-border rounded-md px-3 py-2">
-          {notice}
-        </div>
-      )}
-      {error && (
-        <div className="text-sm text-danger bg-red-900/20 px-3 py-2 rounded-md">{error}</div>
-      )}
-
-      {result && (
-        <>
-          <div className="card p-4 md:p-6">
-            <div className="flex items-center gap-2 text-xs text-text-muted mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              回答
-              {result.usage?.total_tokens ? (
-                <span>· {result.usage.total_tokens} tokens</span>
-              ) : null}
-            </div>
-            <div className="md-body">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{result.answer}</ReactMarkdown>
-            </div>
-          </div>
-
-          {result.citations.length === 0 && (
-            <div role="alert"
-              className="rounded-md border border-warning/50 bg-amber-900/10 px-3 py-2 text-xs text-warning">
-              本次检索没有命中任何报告，下面这段回答没有报告作为依据，仅供参考。
-            </div>
-          )}
-
-          {result.citations.length > 0 && (
-            <div className="card p-4 space-y-2">
-              <div className="text-xs text-text-muted uppercase">引用（{result.citations.length}）</div>
-              {result.citations.map((c) => (
-                <div key={`${c.index}-${c.path}`} className="text-xs border-b border-border/50 last:border-0 pb-2 last:pb-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-text-muted">[{c.index}]</span>
-                    <Link
-                      to={`/reports/view?path=${encodeURIComponent(c.path)}`}
-                      className="text-accent hover:underline truncate"
-                    >
-                      {c.title || c.path}
-                    </Link>
-                    <span className="text-text-muted/70">{c.source}</span>
-                  </div>
-                  {c.snippet && (
-                    <div className="text-text-muted mt-0.5 line-clamp-2 pl-6">{c.snippet}</div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+  const stop = useCallback(async () => {
+    const id = pendingConversations.get(storageKey)?.requestId || runningId.current;
+    if (!id) return;
+    setStatus("正在停止助手响应…");
+    try { await stopAssistantResponse(id); }
+    catch (error) { setRestoreError(error instanceof Error ? error.message : "停止请求失败"); }
+  }, [storageKey]);
+  const disabled = busy || restoring || !!restoreError;
+  return <div className="h-full min-h-[420px] max-w-4xl mx-auto flex flex-col gap-4">
+    <div className="flex items-center gap-3">
+      <div className="flex-1"><h1 className="text-lg font-semibold">助手</h1><p className="text-xs text-text-muted mt-1">
+        {readOnly ? "查询任务、报告与情报轮次。当前账号为只读权限；账号操作仅限本人。" : "通过对话管理任务、周期、报告、情报轮次和应用设置。"}
+      </p></div>
+      <button className="btn text-xs" disabled={disabled || messages.length === 0} onClick={() => { setRestoring(true); setRecoverVersion((n) => n + 1); }}>核验结果</button>
+      <button className="btn text-xs" disabled={disabled || messages.length === 0} onClick={() => void fresh()}><Plus className="w-3.5 h-3.5" />新对话</button>
     </div>
-  );
+    {restoring && <p className="text-xs text-text-muted">正在恢复对话与操作回执…</p>}
+    {restoreError && <div className="card p-3 text-xs text-danger" role="alert">{restoreError}<button className="btn text-xs ml-3" onClick={() => { setRestoring(true); setRecoverVersion((n) => n+1); }}>重新读取对话</button></div>}
+    <div className="flex-1 min-h-0 overflow-y-auto space-y-5 pr-1" aria-label="对话记录" style={{ colorScheme: "dark" }}>
+      {messages.length === 0 && <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-4 text-center">
+        <MessageSquareText className="w-9 h-9 text-accent" /><div><p className="font-medium">想处理什么？</p><p className="text-sm text-text-muted mt-2">可以查报告、管理任务、调整周期，再接着处理执行结果。</p></div>
+        <div className="flex flex-wrap justify-center gap-2">{EXAMPLES.filter((_, i) => !readOnly || i !== 1).map((example) => <button key={example} className="btn text-xs" disabled={disabled} onClick={() => void send(example)}>{example}</button>)}</div>
+      </div>}
+      {messages.map((message, index) => <div key={index} className={message.role === "user" ? "ml-auto max-w-[90%] sm:max-w-[80%]" : "max-w-full"}>
+        <div className="text-xs text-text-muted mb-2">{message.role === "user" ? "你" : "助手"}</div>
+        <div className={message.role === "user" ? "rounded-lg bg-bg-hover border border-border px-4 py-3" : "card px-4 py-4 sm:px-5"}>
+          {message.role === "user" ? <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p> : <>
+            <div className="md-body"><ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown></div>
+            {message.continuation && <div className="mt-3 rounded border border-border p-3 text-xs space-y-2">
+              <p>{message.continuation.reason === 'service_maintenance' ? '维护已提交，后续步骤需恢复访问后继续。' : `原请求尚未完成，进度已保存。已完整读取 ${message.continuation.reports_complete} 份报告，${message.continuation.remaining_report_count} 份候选待展开。`}</p>
+              <button type="button" className="btn text-xs" disabled={disabled} onClick={() => void send('继续上一条尚未完成的请求。先核验已有回执，从保存的读取位置和剩余工作继续；已成功的操作不要重复执行。')}>继续处理</button>
+            </div>}
+            {!!message.actions?.length && <ul className="mt-4 pt-3 border-t border-border space-y-3" aria-label="操作结果">{message.actions.map((action, i) => <AssistantAction key={action.operation_id || i} action={action} />)}</ul>}
+            {message.error && message.error !== message.content && <p role="alert" className="text-xs text-danger mt-3">{message.error}</p>}
+          </>}
+        </div>
+      </div>)}
+      {busy && <div className="flex items-center gap-2 text-sm text-text-muted" role="status"><Loader2 className="w-4 h-4 animate-spin text-accent" />{status || "正在处理…"}</div>}
+      {messages.length > 0 && <div ref={bottom} />}
+    </div>
+    <form className="card p-3 flex items-end gap-3" onSubmit={(event) => { event.preventDefault(); void send(); }}>
+      <textarea className="input resize-none border-0 focus:ring-0 flex-1 min-w-0" rows={2} aria-label="消息" placeholder="例如：让这个 Job 每周一九点运行，使用上海时区"
+        value={input} maxLength={8000} disabled={disabled} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
+          if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); void send(); }
+        }} />
+      {busy ? <button type="button" className="btn mb-1" onClick={() => void stop()}><Square className="w-3.5 h-3.5" />停止响应</button> : <button type="submit" className="btn btn-primary mb-1" disabled={disabled || !input.trim()}><Send className="w-3.5 h-3.5" />发送</button>}
+    </form>
+  </div>;
 }

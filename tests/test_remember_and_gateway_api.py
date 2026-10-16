@@ -90,6 +90,66 @@ def test_remember_flag_does_not_change_authentication(client, web_env):
         'username': 'admin', 'password': 'wrong', 'remember': True}).status_code == 401
 
 
+# --- the session that kept asking for the password ---------------------------
+#
+# The report was "I have to type my password again and again". Two separate
+# defects, both about a cookie outliving or not outliving the thing it guards.
+
+def test_the_csrf_cookie_outlives_the_access_cookie(client, web_env):
+    """Refresh is CSRF-protected and runs *after* the access token expired.
+
+    The CSRF cookie was issued with the access lifetime (15 min), so the browser
+    dropped it exactly when the refresh was needed. The refresh then came back
+    403 csrf_failed, the client gave up, and a session whose refresh cookie still
+    had 30 days left was logged out on every idle timeout.
+    """
+    response = client.post('/api/auth/login', json={
+        'username': 'admin', 'password': 'admin-pass-123', 'remember': True})
+
+    csrf_max = int(_cookie(response, "ai_research_csrf").split("Max-Age=")[1].split(";")[0])
+    access_max = int(_cookie(response, "ai_research_access").split("Max-Age=")[1].split(";")[0])
+    assert csrf_max > access_max, "csrf cookie dies with the access token"
+    assert csrf_max == 30 * 86400
+
+
+def test_refresh_still_works_once_the_access_cookie_is_gone(client, web_env):
+    """Replays the idle timeout: access cookie gone, refresh must still succeed."""
+    client.post('/api/auth/login', json={
+        'username': 'admin', 'password': 'admin-pass-123', 'remember': True})
+    csrf = client.cookies.get("ai_research_csrf")
+
+    # 15 minutes later the browser has dropped the access cookie.
+    client.cookies.delete("ai_research_access")
+    assert client.get("/api/auth/me").status_code == 401
+
+    r = client.post("/api/auth/refresh", headers={"X-CSRF-Token": csrf or ""})
+    assert r.status_code == 200, r.text
+    assert client.get("/api/auth/me").status_code == 200
+
+
+def test_refresh_does_not_downgrade_a_remembered_session(client, web_env):
+    """Rotation re-issued the cookie from the 7-day default, not the token's life.
+
+    So the first refresh silently cut a "remember me" 30-day session to 7 days.
+    """
+    client.post('/api/auth/login', json={
+        'username': 'admin', 'password': 'admin-pass-123', 'remember': True})
+    r = client.post("/api/auth/refresh",
+                    headers={"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""})
+    assert r.headers["X-Session-Days"] == "30"
+    assert "Max-Age=2592000" in _cookie(r, "ai_research_refresh")
+
+
+def test_refresh_keeps_a_plain_session_at_seven_days(client, web_env):
+    """The fix must not stretch an ordinary login to 30 days."""
+    client.post('/api/auth/login',
+                json={'username': 'admin', 'password': 'admin-pass-123'})
+    r = client.post("/api/auth/refresh",
+                    headers={"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""})
+    assert r.headers["X-Session-Days"] == "7"
+    assert "Max-Age=604800" in _cookie(r, "ai_research_refresh")
+
+
 # --- gateway settings --------------------------------------------------------
 
 def _enable_gateway(tmp_path, monkeypatch, lan=False):

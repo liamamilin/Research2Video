@@ -27,7 +27,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from .errors import CancelledError, LLMConfigError, LLMError, LLMUnsupportedError
 
@@ -57,6 +57,9 @@ class LLMConfig:
     model: str = ""
     base_url: str = ""
     api_key: str = ""
+    # Name of the env var the key came from. Kept only so an unauthenticated
+    # 401 can say *why* no Authorization header was sent.
+    api_key_env: str = ""
     timeout: int = 1800
     request_timeout: int = 600
     max_tokens: int = 32768
@@ -76,19 +79,35 @@ class LLMConfig:
     @classmethod
     def from_system(cls, sys_config: dict, section: str = "ai") -> "LLMConfig":
         """Build a config from a system.yaml mapping (typically the ``ai`` key)."""
+        from .providers import is_valid_env_name
+
         cfg = sys_config.get(section, {}) or {}
         api_key_env = cfg.get("api_key_env")
         api_key = os.environ.get(api_key_env, "") if api_key_env else ""
         if api_key_env and not api_key:
-            logger.warning(
-                "Environment variable '%s' not set; requesting without auth "
-                "(fine for local endpoints, will fail for hosted ones)",
-                api_key_env,
-            )
+            # A value that is not a variable name is a key pasted into the name
+            # field: `os.environ.get` then returns "", no Authorization header is
+            # sent, and a hosted endpoint answers 401 invalid_api_key -- which
+            # reads as "the key is wrong" when in fact no key was sent at all.
+            if not is_valid_env_name(str(api_key_env)):
+                logger.error(
+                    "ai.api_key_env=%r is not an environment-variable name; it "
+                    "looks like an API key pasted into the wrong field. Put the "
+                    "key in the secrets card (.env) and the variable name "
+                    "(e.g. LLM_API_KEY) here. Requesting WITHOUT auth.",
+                    api_key_env,
+                )
+            else:
+                logger.warning(
+                    "Environment variable '%s' not set; requesting without auth "
+                    "(fine for local endpoints, will fail for hosted ones)",
+                    api_key_env,
+                )
         return cls(
             model=cfg.get("model", ""),
             base_url=(cfg.get("base_url") or "").rstrip("/"),
             api_key=api_key,
+            api_key_env=str(api_key_env or ""),
             timeout=int(cfg.get("timeout", 1800)),
             request_timeout=int(cfg.get("request_timeout", 600)),
             max_tokens=int(cfg.get("max_tokens", 32768)),
@@ -207,6 +226,8 @@ class LLMClient:
         tool_choice: Optional[str] = None,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
+        stream: Optional[bool] = None,
+        on_delta: Optional[Callable[[str], None]] = None,
     ) -> ChatResponse:
         """Run one chat completion, with retries and cancellation.
 
@@ -214,15 +235,27 @@ class LLMClient:
         ``LLMUnsupportedError`` when the endpoint rejects tool calling.
         """
         attempt = 0
+        emitted = False
+        use_stream = stream if stream is not None else (self.config.stream and not tools)
+
+        def emit(text: str) -> None:
+            nonlocal emitted
+            if on_delta:
+                emitted = True
+                on_delta(text)
+
         while True:
             if self._cancel.is_set():
                 raise CancelledError("Cancelled before LLM call")
 
             try:
-                if self.config.stream and not tools:
+                if use_stream:
                     return self._chat_cancellable(
                         messages,
                         _stream=True,
+                        tools=tools,
+                        tool_choice=tool_choice,
+                        on_delta=emit,
                         temperature=temperature,
                         max_tokens=max_tokens,
                     )
@@ -236,6 +269,9 @@ class LLMClient:
             except (CancelledError, LLMUnsupportedError):
                 raise
             except Exception as exc:
+                # Never replay a prefix the caller has already displayed.
+                if emitted:
+                    raise self._classify(exc) from exc
                 if not self._is_retryable(exc):
                     raise self._classify(exc) from exc
                 attempt += 1
@@ -336,8 +372,9 @@ class LLMClient:
         return box["resp"]
 
     def _chat_once_stream(self, messages, temperature=None,
-                          max_tokens=None) -> ChatResponse:
-        """Streaming variant for tool-free calls (e.g. report generation).
+                          max_tokens=None, tools=None, tool_choice=None,
+                          on_delta=None) -> ChatResponse:
+        """Stream text and assemble tool arguments before exposing tool calls.
 
         Emits throttled ``generating`` progress events and accumulates text
         and reasoning deltas. Falls back gracefully when the endpoint does
@@ -354,6 +391,11 @@ class LLMClient:
                 self.config.max_tokens if max_tokens is None else max_tokens
             ),
         }
+        if tools:
+            base["tools"] = tools
+            base["tool_choice"] = tool_choice or "auto"
+        if self.config.extra_body:
+            base["extra_body"] = self.config.extra_body
 
         stream = None
         try:
@@ -369,6 +411,7 @@ class LLMClient:
 
         content_parts: list[str] = []
         reasoning_parts: list[str] = []
+        tool_parts: dict[int, dict] = {}
         usage: dict = {}
         finish_reason = ""
         started = time.time()
@@ -404,6 +447,16 @@ class LLMClient:
                         text = getattr(delta, "content", None)
                         if text:
                             content_parts.append(text)
+                            if on_delta:
+                                on_delta(text)
+                        for tc in getattr(delta, "tool_calls", None) or []:
+                            part = tool_parts.setdefault(tc.index, {"id": "", "name": "", "arguments": ""})
+                            if getattr(tc, "id", None):
+                                part["id"] = tc.id
+                            fn = getattr(tc, "function", None)
+                            if fn is not None:
+                                part["name"] += getattr(fn, "name", None) or ""
+                                part["arguments"] += getattr(fn, "arguments", None) or ""
                         reasoning = getattr(delta, "reasoning_content", None)
                         if reasoning is None:
                             extra = getattr(delta, "model_extra", None) or {}
@@ -426,6 +479,18 @@ class LLMClient:
                 pass
 
         content = "".join(content_parts)
+        tool_calls: list[ToolCall] = []
+        if tools and (not finish_reason or (tool_parts and finish_reason == "length")):
+            raise LLMError("LLM tool stream ended before completion")
+        for index, part in sorted(tool_parts.items()):
+            try:
+                arguments = json.loads(part["arguments"] or "{}")
+            except json.JSONDecodeError as exc:
+                raise LLMError("LLM streamed incomplete tool arguments") from exc
+            if not part["name"] or not isinstance(arguments, dict):
+                raise LLMError("LLM streamed invalid tool arguments")
+            tool_calls.append(ToolCall(id=part["id"] or f"call_{index}",
+                                       name=part["name"], arguments=arguments))
         if usage:
             self.usage["requests"] += 1
             for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
@@ -441,7 +506,7 @@ class LLMClient:
 
         return ChatResponse(
             content=content,
-            tool_calls=[],
+            tool_calls=tool_calls,
             finish_reason=finish_reason,
             usage=usage,
             reasoning_content="".join(reasoning_parts),
@@ -569,7 +634,7 @@ class LLMClient:
                 f"Endpoint/model does not support tool calling: {text}"
             )
         if status in (401, 403):
-            return LLMError(f"LLM auth failed ({status}): {text}")
+            return LLMError(self._auth_message(status, text))
         if status == 402 or "insufficient balance" in lowered or "credit" in lowered:
             return LLMError(
                 f"LLM account has insufficient credits/balance: {text}"
@@ -581,6 +646,43 @@ class LLMClient:
                 f"'{self.config.base_url}'"
             )
         return LLMError(f"LLM call failed: {text}")
+
+    def _auth_message(self, status: int, text: str) -> str:
+        """Explain an auth failure, including *why* no key was sent.
+
+        A bare ``invalid_api_key`` 401 is the same message whether the key is
+        wrong or was never attached, and the two have completely different
+        fixes. When the config names an env var we could not read, say so.
+        """
+        from .providers import find_provider_by_base_url, is_valid_env_name
+
+        env_name = self.config.api_key_env
+        if self.config.api_key or not env_name:
+            # A key was sent and still rejected. The most common cause is a key
+            # that belongs to a different vendor than base_url points at, so
+            # name the endpoint when we recognize it.
+            preset = find_provider_by_base_url(self.config.base_url)
+            if preset is not None:
+                return (
+                    f"LLM auth failed ({status}): {text}。"
+                    f"已发送密钥但被拒绝：请确认该密钥属于当前服务商"
+                    f"（{preset.label}，{preset.base_url}），"
+                    f"不同服务商的密钥不能混用。"
+                )
+            return f"LLM auth failed ({status}): {text}"
+        if not is_valid_env_name(env_name):
+            return (
+                f"LLM auth failed ({status}): 未发送 Authorization 头。"
+                f"ai.api_key_env 的值 {env_name!r} 不是一个环境变量名，"
+                f"看起来是把 API Key 填进了“密钥环境变量”输入框。"
+                f"请在“API 密钥”卡片填写密钥，这里只填变量名（如 LLM_API_KEY）。"
+                f"原始错误: {text}"
+            )
+        return (
+            f"LLM auth failed ({status}): 未发送 Authorization 头，"
+            f"因为环境变量 '{env_name}' 未设置（.env 中没有该变量，"
+            f"或保存密钥后服务未重新读取）。原始错误: {text}"
+        )
 
     @staticmethod
     def _short(exc: Exception, limit: int = 300) -> str:

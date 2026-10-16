@@ -148,8 +148,8 @@ def test_unsupported_tool_calling_is_not_retried(monkeypatch):
     assert calls["n"] == 1
 
 
-def test_streaming_is_only_used_without_tools(monkeypatch):
-    """A stream and tool calls cannot be combined; tools must force one shot."""
+def test_default_streaming_preserves_existing_tool_call_behavior(monkeypatch):
+    """Tool calls retain the one-shot default unless streaming is requested."""
     client = make_client(stream=True)
     seen: list[dict] = []
 
@@ -251,3 +251,70 @@ def test_reasoning_echo_is_model_specific():
     # An explicit setting always wins.
     assert client("gpt-5.4", "always")._should_echo_reasoning() is True
     assert client("deepseek-v4.1-flash", "never")._should_echo_reasoning() is False
+
+
+def _auth_client(api_key="", api_key_env=""):
+    c = LLMClient.__new__(LLMClient)
+    c.config = LLMConfig(model="m", base_url="http://x/v1",
+                         api_key=api_key, api_key_env=api_key_env)
+    return c
+
+
+def test_a_401_with_a_rejected_key_names_the_provider():
+    """The original incident: an amr URL with a different vendor's key."""
+    c = _auth_client(api_key="sk-fixture-other-provider", api_key_env="LLM_API_KEY")
+    c.config.base_url = "https://amr-link.open-design.ai/v1"
+    msg = c._auth_message(401, "invalid_api_key")
+    assert "Open Design" in msg
+    assert "不能混用" in msg
+
+
+def test_a_401_with_a_rejected_key_at_an_unknown_endpoint_stays_plain():
+    c = _auth_client(api_key="k", api_key_env="LLM_API_KEY")
+    c.config.base_url = "https://nobody.example/v1"
+    msg = c._auth_message(401, "invalid_api_key")
+    assert "401" in msg and "invalid_api_key" in msg
+    assert "服务商" not in msg
+
+
+def test_a_401_with_a_key_sent_is_reported_plainly():
+    msg = _auth_client(api_key="k", api_key_env="LLM_API_KEY")._auth_message(401, "invalid_api_key")
+    assert "401" in msg and "invalid_api_key" in msg
+    assert "未发送" not in msg
+
+
+def test_a_401_names_the_secret_pasted_into_the_env_field():
+    """The incident: the key was in api_key_env, so nothing was sent.
+
+    A bare ``invalid_api_key`` hides that, so the message has to say the header
+    was absent and why.
+    """
+    c = _auth_client(api_key="", api_key_env="sk-amr-abc123")
+    msg = c._auth_message(401, "invalid_api_key")
+    assert "未发送 Authorization 头" in msg
+    assert "sk-amr-abc123" in msg
+    assert "密钥环境变量" in msg
+
+
+def test_a_401_names_the_missing_env_var():
+    msg = _auth_client(api_key="", api_key_env="LLM_API_KEY")._auth_message(401, "invalid_api_key")
+    assert "未发送 Authorization 头" in msg
+    assert "LLM_API_KEY" in msg
+    assert "未设置" in msg
+
+
+def test_from_system_records_the_env_name_for_diagnostics():
+    cfg = LLMConfig.from_system(
+        {"ai": {"model": "m", "base_url": "http://x/v1", "api_key_env": "SOME_KEY"}})
+    assert cfg.api_key_env == "SOME_KEY"
+
+
+def test_a_key_pasted_into_the_env_field_is_logged_as_such(caplog):
+    import logging
+
+    with caplog.at_level(logging.ERROR, logger="core.llm"):
+        cfg = LLMConfig.from_system({
+            "ai": {"model": "m", "base_url": "http://x/v1",
+                   "api_key_env": "sk-amr-pasted"}})
+    assert cfg.api_key == ""
+    assert any("not an environment-variable name" in r.message for r in caplog.records)

@@ -24,7 +24,7 @@ def ensure_online() -> dict:
 
 def save(job_name: str, expression: str, *, schedule_id: str | None = None,
          timezone: str = 'local', missed_policy: str = 'latest', max_retries: int = 2,
-         editing: bool = False) -> dict:
+         editing: bool = False, expected_version: int | None = None) -> dict:
     active = runtime()
     canonical, _ = canonical_job(active, job_name)
     # Validate before starting a system service or persisting any plan.
@@ -43,7 +43,7 @@ def save(job_name: str, expression: str, *, schedule_id: str | None = None,
             raise ScheduleConflict('这个 job 已有周期计划，请编辑现有计划')
     ensure_online()
     plan = store().save(canonical, expression, schedule_id=schedule_id, timezone=timezone,
-                        missed_policy=missed_policy, max_retries=max_retries, editing=editing)
+                        missed_policy=missed_policy, max_retries=max_retries, editing=editing, expected_version=expected_version)
     return describe(plan)
 
 
@@ -78,6 +78,8 @@ def classify(plan: dict, host: dict) -> dict:
             state, detail = 'running' if code == 'running' else 'queued', '任务正在运行' if code == 'running' else '已进入执行队列'
         elif code == 'skipped':
             state, detail = 'ok', last['error']
+        elif code == 'cancelled':
+            state, detail = 'cancelled', '上次运行已由用户取消，未自动重试；后续周期仍按计划执行'
         else:
             state, detail = 'ok', '最近一次执行成功，报告已生成'
     return {'id': plan['id'], 'status': state, 'detail': detail, 'schedule': plan['schedule'],
