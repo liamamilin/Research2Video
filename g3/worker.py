@@ -62,7 +62,8 @@ class G2ProcessRunner:
                                        text=True, timeout=2, check=False)
             command = inspected.stdout.strip()
             expected = str(self.settings.g2_script.resolve())
-            if inspected.returncode != 0 or expected not in command or " all" not in command:
+            if (inspected.returncode != 0 or expected not in command
+                    or not any(f" {mode}" in command for mode in ("all", "scene-edit"))):
                 return False
             os.killpg(pid, signal.SIGTERM)
             return True
@@ -99,16 +100,58 @@ class G2ProcessRunner:
         env["AUTOVIDEO_G2_RUN_ID"] = run_id
         env["AUTOVIDEO_G2_RUN_DIR"] = str(run_dir)
         env["AUTOVIDEO_G2_TARGET_DURATION_SEC"] = str(job["target_duration_sec"])
+        env["AUTOVIDEO_G2_DURATION_MODE"] = job.get("duration_mode", "fixed")
+        env.pop("AUTOVIDEO_G2_PREVIOUS_RUN_DIR", None)
+        if job.get("duration_mode") == "content" and attempt_no > 1:
+            previous = attempt_root.parent / str(attempt_no - 1) / "g2-run"
+            if previous.is_dir() and previous.resolve().is_relative_to((self.store.job_root / job_id).resolve()):
+                env["AUTOVIDEO_G2_PREVIOUS_RUN_DIR"] = str(previous)
+        operation_type = job.get("operation_type", "generate")
+        command_mode = "all"
+        if operation_type == "scene_edit":
+            try:
+                source = self.store.scene_edit_source(job["parent_job_id"], job["parent_attempt_no"], job["scene_id"])
+            except Exception as exc:
+                self.store.mark_failed(job_id, attempt_no, "SCENE_IMAGES", getattr(exc, "code", "SCENE_EDIT_SOURCE_UNAVAILABLE"),
+                                       str(exc)[:400], False)
+                return
+            command_mode = "scene-edit"
+            env["AUTOVIDEO_G2_SOURCE_ATTEMPT_DIR"] = str(source["attempt_root"])
+            env["AUTOVIDEO_G2_PARENT_JOB_ID"] = job["parent_job_id"]
+            env["AUTOVIDEO_G2_SCENE_ID"] = job["scene_id"]
+            env["AUTOVIDEO_G2_SCENE_GUIDANCE"] = job.get("prompt_extra") or ""
+        elif operation_type in {"visual_revision","media_revision"}:
+            try:
+                from g3.revision_support import source
+                _,_,parent_root=source(self.store,job["parent_job_id"])
+                env["AUTOVIDEO_G2_SOURCE_ATTEMPT_DIR"]=str(parent_root)
+                command_mode="revision"
+                env["AUTOVIDEO_G2_REUSE_NARRATION"]="1"
+            except Exception as exc:
+                self.store.mark_failed(job_id,attempt_no,"PLAN",getattr(exc,"code","REVISION_SOURCE_INVALID"),str(exc)[:400],False)
+                return
+        elif operation_type not in {"generate", "content_revision"}:
+            self.store.mark_failed(job_id, attempt_no, "PLAN", "UNKNOWN_JOB_OPERATION",
+                                   "任务操作类型不受支持", False)
+            return
         input_path = Path(job["source_abs_path"]).parent / "input.json"
         try:
             input_payload = json.loads(input_path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             input_payload = {}
+        env["AUTOVIDEO_G2_VOICE_ID"] = job["voice_id"]
+        env["AUTOVIDEO_G2_VIDEO_SPEED"] = str(job.get("video_speed",1))
+        env["AUTOVIDEO_G2_INTENT_FILE"] = str(input_path)
+        env["AUTOVIDEO_G2_LOCK_NARRATION"] = "1" if input_payload.get("revision_mode") == "narration" else "0"
         env["AUTOVIDEO_G2_USE_DRAW_THINGS"] = "1" if input_payload.get("use_draw_things") is True else "0"
+        env["AUTOVIDEO_G2_VIDEO_FORM"] = job.get("video_form", "knowledge_cards")
         log_path = attempt_root / "worker.log"
         active_stage = "PLAN"
         lines_read = 0
         started = time.monotonic()
+        timeout_seconds = self.settings.runner_timeout_seconds
+        workload_timeout_loaded = False
+        input_analysis_loaded = False
         error_code = None
         error_message = None
         retryable = True
@@ -116,13 +159,20 @@ class G2ProcessRunner:
         try:
             with log_path.open("xb") as log_stream:
                 process = subprocess.Popen(
-                    [str(self.settings.g2_python), "-u", str(self.settings.g2_script), "all"],
+                    [str(self.settings.g2_python), "-u", str(self.settings.g2_script), command_mode],
                     cwd=self.settings.project_root, env=env, stdout=log_stream,
                     stderr=subprocess.STDOUT, shell=False, start_new_session=True,
                 )
                 self.store.set_runner_pid(job_id, attempt_no, process.pid)
                 self.store.update_stage(job_id, attempt_no, active_stage, "RUNNING")
                 while True:
+                    if not input_analysis_loaded:
+                        try:
+                            brief = json.loads((run_dir / "artifacts/input-brief.json").read_text())
+                            self.store.record_input_analysis(job_id, attempt_no, brief)
+                            input_analysis_loaded = True
+                        except (OSError, ValueError, KeyError):
+                            pass
                     is_cancelled = self.store.cancel_requested(job_id)
                     is_stopping = stop_event.is_set()
                     if is_cancelled or is_stopping:
@@ -134,9 +184,17 @@ class G2ProcessRunner:
                             self.store.mark_failed(job_id, attempt_no, active_stage, "WORKER_INTERRUPTED",
                                                    "服务停止时任务进程被中断，可以重启后重试", True)
                         return
-                    if time.monotonic() - started > self.settings.runner_timeout_seconds:
+                    if job.get("duration_mode") == "content" and not workload_timeout_loaded:
+                        try:
+                            measured = json.loads((run_dir / "artifacts/alignment.json").read_text())
+                            # Preserve the startup/model allowance and add time for measured render work.
+                            timeout_seconds += max(0, float(measured["duration_seconds"])) * 6
+                            workload_timeout_loaded = True
+                        except (OSError, ValueError, KeyError, TypeError):
+                            pass
+                    if time.monotonic() - started > timeout_seconds:
                         self._stop_process(process)
-                        error_code, error_message = "GENERATION_TIMEOUT", "生成任务超过 30 分钟硬超时"
+                        error_code, error_message = "GENERATION_TIMEOUT", f"生成任务超过本次执行时限（{round(timeout_seconds / 60)} 分钟）"
                         break
                     try:
                         current_lines = log_path.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -181,7 +239,7 @@ class G2ProcessRunner:
             return
         if return_code != 0:
             error_code = error_code or "GENERATION_FAILED"
-            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "UNSUPPORTED_OUTPUT"}:
+            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION"}:
                 retryable = False
             self.store.mark_failed(job_id, attempt_no, active_stage, error_code,
                                    error_message or "视频生成失败，请查看任务阶段错误并重试", retryable)
@@ -208,8 +266,24 @@ class G2ProcessRunner:
             (artifacts_dir / "manifest.json", "manifest.json", "application/json"),
             (artifacts_dir / "storyboard-plan.json", "storyboard.json", "application/json"),
             (artifacts_dir / "scene-backgrounds.json", "scene-backgrounds.json", "application/json"),
+            (artifacts_dir / "scene-edit.json", "scene-edit.json", "application/json"),
             (run_dir / "fixtures/video-ir-v0.2.json", "video-ir.json", "application/json"),
             (artifacts_dir / "model-cost.json", "model-cost.json", "application/json"),
+            (artifacts_dir / "reused-plans.json", "reused-plans.json", "application/json"),
+            (artifacts_dir / "chapters.json", "chapters.json", "application/json"),
+            (artifacts_dir / "content-outline-plan.json", "content-outline.json", "application/json"),
+            (artifacts_dir / "final-narration-plan.json", "narration.json", "application/json"),
+            (artifacts_dir / "authored-narration.json", "authored-narration.json", "application/json"),
+            (artifacts_dir / "scene-revision.json", "scene-revision.json", "application/json"),
+            (artifacts_dir / "media-revision.json", "media-revision.json", "application/json"),
+            (artifacts_dir / "playback.json", "playback.json", "application/json"),
+            (artifacts_dir / "input-brief.json", "input-brief.json", "application/json"),
+            (artifacts_dir / "prepared-source.txt", "prepared-source.txt", "text/plain; charset=utf-8"),
+            (artifacts_dir / "information-plan.json", "information-plan.json", "application/json"),
+            (artifacts_dir / "information-timing.json", "information-timing.json", "application/json"),
+            (artifacts_dir / "diagram-plan.json", "diagram-plan.json", "application/json"),
+            (artifacts_dir / "diagram-layout.json", "diagram-layout.json", "application/json"),
+            (artifacts_dir / "diagram-timing.json", "diagram-timing.json", "application/json"),
             (log_path, "execution-log.txt", "text/plain; charset=utf-8"),
         ]
         artifacts = []

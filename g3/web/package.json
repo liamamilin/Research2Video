@@ -2,7 +2,7 @@
   "name": "autovideo-g3-web",
   "private": true,
   "version": "0.1.0",
-  "description": "Local React interface for the AutoVideo G3 verification app",
+  "description": "Local React video creation workspace for AutoVideo",
   "scripts": {
     "build": "esbuild src/main.tsx --bundle --minify --format=esm --jsx=automatic --outdir=static --entry-names=app"
   },

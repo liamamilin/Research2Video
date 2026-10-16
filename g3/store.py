@@ -85,7 +85,12 @@ class JobStore:
                     retryable INTEGER NOT NULL DEFAULT 0,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL,
-                    version INTEGER NOT NULL DEFAULT 1
+                    version INTEGER NOT NULL DEFAULT 1,
+                    operation_type TEXT NOT NULL DEFAULT 'generate',
+                    parent_job_id TEXT,
+                    parent_attempt_no INTEGER,
+                    scene_id TEXT,
+                    prompt_extra TEXT NOT NULL DEFAULT ''
                 );
                 CREATE INDEX IF NOT EXISTS jobs_queue_idx ON jobs(status, created_at, job_id);
                 CREATE TABLE IF NOT EXISTS attempts (
@@ -125,12 +130,38 @@ class JobStore:
                     PRIMARY KEY(job_id, attempt_no, name),
                     FOREIGN KEY(job_id, attempt_no) REFERENCES attempts(job_id, attempt_no)
                 );
-                PRAGMA user_version=1;
             """)
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(jobs)").fetchall()}
+            additions = {
+                "operation_type": "TEXT NOT NULL DEFAULT 'generate'",
+                "parent_job_id": "TEXT",
+                "parent_attempt_no": "INTEGER",
+                "scene_id": "TEXT",
+                "prompt_extra": "TEXT NOT NULL DEFAULT ''",
+                "video_form": "TEXT NOT NULL DEFAULT 'knowledge_cards'",
+                "duration_mode": "TEXT NOT NULL DEFAULT 'fixed'",
+                "input_analysis_json": "TEXT",
+                "creative_intent_json": "TEXT NOT NULL DEFAULT '{}'",
+                "revision_mode": "TEXT",
+                "video_speed": "REAL NOT NULL DEFAULT 1",
+            }
+            for name, definition in additions.items():
+                if name not in columns:
+                    conn.execute(f"ALTER TABLE jobs ADD COLUMN {name} {definition}")
+            conn.execute("CREATE INDEX IF NOT EXISTS jobs_parent_idx ON jobs(parent_job_id, created_at)")
+            conn.execute("PRAGMA user_version=7")
         finally:
             conn.close()
 
-    def create_job(self, job_id: str, request: dict) -> dict:
+    def record_input_analysis(self, job_id: str, attempt_no: int, brief: dict) -> None:
+        compact = {k: brief[k] for k in ("requested_form", "selected_form", "recommended_form", "selection_mode", "status", "reason", "issues")}
+        compact["retained_units"] = len(brief["ordered_unit_ids"])
+        compact["excluded_units"] = len(brief["excluded_units"])
+        with self._transaction() as conn:
+            conn.execute("UPDATE jobs SET input_analysis_json=?,updated_at=?,version=version+1 WHERE job_id=? AND attempt_count=? AND status='RUNNING'",
+                         (json.dumps(compact, ensure_ascii=False), utc_now(), job_id, attempt_no))
+
+    def create_job(self, job_id: str, request: dict, *, input_document: dict | None = None) -> dict:
         UUID(job_id)
         job_dir = (self.job_root / job_id).resolve()
         if not job_dir.is_relative_to(self.job_root.resolve()):
@@ -148,6 +179,16 @@ class JobStore:
             os.fsync(stream.fileno())
         os.replace(tmp_path, source_path)
         request_without_source = {k: v for k, v in request.items() if k != "source_text"}
+        if input_document is not None:
+            document_root = input_dir / "document"
+            document_root.mkdir()
+            metadata = {**input_document["metadata"],
+                        "source_edited": source_text != input_document["text"],
+                        "submitted_source_sha256": sha256_bytes(raw)}
+            (document_root / f"original.{metadata['format']}").write_bytes(input_document["raw"])
+            (document_root / "extracted.txt").write_text(input_document["text"], encoding="utf-8")
+            (document_root / "document.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+            request_without_source["input_document"] = metadata
         input_json = input_dir / "input.json"
         input_json.write_text(json.dumps({**request_without_source, "source_sha256": sha256_bytes(raw)},
                                          ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -157,15 +198,133 @@ class JobStore:
             with self._transaction() as conn:
                 conn.execute("""INSERT INTO jobs
                     (job_id,title,source_rel_path,source_sha256,source_char_count,target_duration_sec,theme,voice_id,
-                     status,active_stage,created_at,updated_at)
-                    VALUES(?,?,?,?,?,?,?,?, 'QUEUED','PLAN',?,?)""",
+                     status,active_stage,created_at,updated_at,operation_type,parent_job_id,parent_attempt_no,scene_id,prompt_extra,video_form,duration_mode)
+                    VALUES(?,?,?,?,?,?,?,?, 'QUEUED','PLAN',?,?,?,?,?,?,?,?,?)""",
                     (job_id, request["title"], source_rel, sha256_bytes(raw), len(source_text),
-                     request["target_duration_sec"], request["theme"], request["voice_id"], now, now))
+                     request["target_duration_sec"], request["theme"], request["voice_id"], now, now,
+                     request.get("operation_type", "generate"), request.get("parent_job_id"),
+                     request.get("parent_attempt_no"), request.get("scene_id"), request.get("prompt_extra", ""),
+                     request.get("video_form", "knowledge_cards"), request.get("duration_mode", "fixed")))
+                conn.execute("UPDATE jobs SET creative_intent_json=?,revision_mode=?,video_speed=? WHERE job_id=?",
+                             (json.dumps(request.get("creative_intent", {}), ensure_ascii=False), request.get("revision_mode"), request.get("video_speed",1), job_id))
         except Exception:
             import shutil
             shutil.rmtree(job_dir, ignore_errors=True)
             raise
         return self.get_job(job_id)
+
+    def editable_content(self, job_id: str) -> dict:
+        job = self.get_job(job_id)
+        source_path = self.source_path(job_id)
+        source = source_path.read_text(encoding="utf-8")
+        if sha256_bytes(source.encode("utf-8")) != job["source_sha256"]:
+            raise StoreError("JOB_INPUT_CHANGED", "原稿文件校验失败，暂不能基于它修订。")
+        input_path = source_path.parent / "input.json"
+        if input_path.is_symlink() or not input_path.resolve().is_relative_to((self.job_root / job_id).resolve()):
+            raise StoreError("INVALID_WORKSPACE", "任务输入路径无效。")
+        try:
+            saved = json.loads(input_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise StoreError("JOB_INPUT_INVALID", "原任务设置不可用。") from exc
+        narration = None
+        if job["status"] == "COMPLETED":
+            try:
+                path, _ = self.artifact_path(job_id, "narration.json")
+                plan = json.loads(path.read_text(encoding="utf-8"))
+                narration = "\n\n".join(s["text"] for s in plan["segments"])
+            except StoreError as exc:
+                if exc.code != "ARTIFACT_NOT_FOUND":
+                    raise
+        keys = ("target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "video_speed")
+        options = {key: saved.get(key, job.get(key)) for key in keys}
+        options["use_draw_things"] = saved.get("use_draw_things", False)
+        return {"job_id": job_id, "title": job["title"], "source_text": source, "narration_text": narration,
+                "creative_intent": job["creative_intent"], "options": options}
+
+    def content_revisions(self, job_id: str) -> list[dict]:
+        self.get_job(job_id)
+        conn = self._connect()
+        try:
+            rows = conn.execute("SELECT * FROM jobs WHERE parent_job_id=? AND operation_type IN ('content_revision','visual_revision','media_revision') ORDER BY created_at DESC", (job_id,)).fetchall()
+            return [self._job_view(row, False) for row in rows]
+        finally:
+            conn.close()
+
+    def create_scene_edit_job(self, job_id: str, parent_job_id: str, scene_id: str,
+                              prompt_extra: str = "") -> dict:
+        """Queue a versioned scene edit that reuses a verified completed job's inputs."""
+        UUID(parent_job_id)
+        if not SCENE_ID_PATTERN.fullmatch(scene_id):
+            raise StoreError("SCENE_IMAGE_NOT_FOUND", "scene image not found")
+        if not isinstance(prompt_extra, str) or len(prompt_extra) > 300 or any(
+                ord(character) < 32 or ord(character) == 127 for character in prompt_extra):
+            raise StoreError("SCENE_EDIT_PROMPT_INVALID", "补充画面要求无效，最多 300 个字符且不能包含控制字符")
+        parent = self.get_job(parent_job_id)
+        if parent["status"] != "COMPLETED":
+            raise StoreError("SCENE_EDIT_NOT_ALLOWED", "only completed jobs can be used for a scene edit")
+        input_candidate = self.job_root / parent_job_id / "input" / "input.json"
+        if input_candidate.is_symlink():
+            raise StoreError("INVALID_WORKSPACE", "job input is outside its workspace")
+        try:
+            input_path = input_candidate.resolve(strict=True)
+        except OSError as exc:
+            raise StoreError("JOB_INPUT_INVALID", "original job input is unavailable") from exc
+        if not input_path.is_relative_to((self.job_root / parent_job_id).resolve()):
+            raise StoreError("INVALID_WORKSPACE", "job input is outside its workspace")
+        try:
+            input_payload = json.loads(input_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise StoreError("JOB_INPUT_INVALID", "original job input is unavailable") from exc
+        if not isinstance(input_payload, dict):
+            raise StoreError("JOB_INPUT_INVALID", "original job input is invalid")
+        if input_payload.get("use_draw_things") is not True:
+            raise StoreError("SCENE_EDIT_NOT_ALLOWED", "scene edits require a job that used Draw Things")
+        self.scene_edit_source(parent_job_id, parent["attempt_count"], scene_id)
+        source_text = self.source_path(parent_job_id).read_text(encoding="utf-8")
+        try:
+            UUID(job_id)
+        except ValueError as exc:
+            raise StoreError("INVALID_JOB_ID", "job id must be a UUID") from exc
+        request = {
+            "title": f"{parent['title']} · {scene_id} 场景修订"[:80],
+            "source_text": source_text,
+            "target_duration_sec": parent["target_duration_sec"],
+            "theme": parent["theme"],
+            "voice_id": parent["voice_id"],
+            "use_draw_things": True,
+            "video_form": parent["video_form"],
+            "duration_mode": parent["duration_mode"],
+            "creative_intent": parent["creative_intent"],
+            "video_speed": parent.get("video_speed",1),
+            "operation_type": "scene_edit",
+            "parent_job_id": parent_job_id,
+            "parent_attempt_no": parent["attempt_count"],
+            "scene_id": scene_id,
+            "prompt_extra": prompt_extra,
+        }
+        return self.create_job(job_id, request)
+
+    def scene_edit_source(self, parent_job_id: str, attempt_no: int, scene_id: str) -> dict:
+        """Return the verified source attempt and artifacts needed by a scene edit."""
+        UUID(parent_job_id)
+        parent = self.get_job(parent_job_id)
+        if parent["status"] != "COMPLETED" or int(parent["attempt_count"]) != int(attempt_no):
+            raise StoreError("SCENE_EDIT_SOURCE_UNAVAILABLE", "source video is no longer the completed version")
+        image_records = self._scene_image_records(parent_job_id)
+        if not any(item["scene_id"] == scene_id for item in image_records):
+            raise StoreError("SCENE_IMAGE_NOT_FOUND", "scene image not found")
+        artifact_paths = {}
+        for name in ("video.mp4", "captions.srt", "storyboard.json", "scene-backgrounds.json", "video-ir.json"):
+            path, meta = self.artifact_path(parent_job_id, name)
+            artifact_paths[name] = {"path": path, "sha256": meta["sha256"]}
+        attempt_root = (self.job_root / parent_job_id / "attempts" / str(attempt_no)).resolve(strict=True)
+        if not attempt_root.is_relative_to((self.job_root / parent_job_id).resolve()):
+            raise StoreError("INVALID_WORKSPACE", "source attempt is outside its job workspace")
+        g2_root = attempt_root / "g2-run"
+        fixture_root = g2_root / "fixtures"
+        if g2_root.is_symlink() or fixture_root.is_symlink() or not fixture_root.is_dir():
+            raise StoreError("SCENE_EDIT_SOURCE_UNAVAILABLE", "source video timeline is unavailable")
+        return {"attempt_root": attempt_root, "fixture_root": fixture_root, "artifacts": artifact_paths}
 
     def claim_next(self) -> dict | None:
         with self._transaction() as conn:
@@ -177,7 +336,7 @@ class JobStore:
             now = utc_now()
             workspace_rel = f"jobs/{job_id}/attempts/{attempt_no}"
             changed = conn.execute("""UPDATE jobs SET status='RUNNING',attempt_count=?,active_stage='PLAN',
-                cancel_requested=0,error_code=NULL,error_message=NULL,retryable=0,updated_at=?,version=version+1
+                cancel_requested=0,error_code=NULL,error_message=NULL,retryable=0,input_analysis_json=NULL,updated_at=?,version=version+1
                 WHERE job_id=? AND status='QUEUED'""", (attempt_no, now, job_id)).rowcount
             if changed != 1:
                 return None
@@ -330,14 +489,31 @@ class JobStore:
                     WHERE job_id=? AND status='RUNNING'""", (now, row["job_id"]))
         return recovered
 
-    def list_jobs(self, limit: int = 20, offset: int = 0) -> dict:
+    def list_jobs(self, limit: int = 20, offset: int = 0, query: str = "", status: str = "") -> dict:
         conn = self._connect()
         try:
-            total = conn.execute("SELECT count(*) FROM jobs").fetchone()[0]
-            rows = conn.execute("SELECT * FROM jobs ORDER BY created_at DESC,job_id DESC LIMIT ? OFFSET ?",
-                                (limit, offset)).fetchall()
+            clauses, params = [], []
+            if query.strip():
+                clauses.append("(instr(lower(title), lower(?)) > 0 OR instr(lower(job_id), lower(?)) > 0)")
+                params.extend([query.strip(), query.strip()])
+            if status == "NEEDS_INPUT":
+                clauses.append("status='FAILED' AND error_code='INPUT_REQUIRES_CLARIFICATION'")
+            elif status:
+                clauses.append("status=?")
+                params.append(status)
+                if status == "FAILED":
+                    clauses.append("COALESCE(error_code,'') <> 'INPUT_REQUIRES_CLARIFICATION'")
+            where = " WHERE " + " AND ".join(clauses) if clauses else ""
+            total = conn.execute("SELECT count(*) FROM jobs" + where, params).fetchone()[0]
+            rows = conn.execute("SELECT * FROM jobs" + where + " ORDER BY created_at DESC,job_id DESC LIMIT ? OFFSET ?",
+                                [*params, limit, offset]).fetchall()
+            summary = conn.execute("""SELECT COUNT(*) AS total,
+                COALESCE(SUM(status='COMPLETED'),0) AS completed,
+                COALESCE(SUM(status IN ('RUNNING','QUEUED')),0) AS running,
+                COALESCE(SUM(status='FAILED' AND error_code='INPUT_REQUIRES_CLARIFICATION'),0) AS needs_input
+                FROM jobs""").fetchone()
             return {"items": [self._job_view(row, include_history=False) for row in rows], "total": total,
-                    "limit": limit, "offset": offset}
+                    "limit": limit, "offset": offset, "summary": dict(summary)}
         finally:
             conn.close()
 
@@ -358,7 +534,16 @@ class JobStore:
                   "error_message": row["error_message"], "retryable": bool(row["retryable"]),
                   "source_sha256": row["source_sha256"], "source_char_count": row["source_char_count"],
                   "target_duration_sec": row["target_duration_sec"], "theme": row["theme"], "voice_id": row["voice_id"],
-                  "created_at": row["created_at"], "updated_at": row["updated_at"], "version": row["version"]}
+                  "created_at": row["created_at"], "updated_at": row["updated_at"], "version": row["version"],
+                  "operation_type": row["operation_type"], "parent_job_id": row["parent_job_id"],
+                  "parent_attempt_no": row["parent_attempt_no"], "scene_id": row["scene_id"]}
+        result["creative_intent"] = json.loads(row["creative_intent_json"])
+        result["revision_mode"] = row["revision_mode"]
+        result["video_speed"] = row["video_speed"]
+        result["video_form"] = row["video_form"]
+        result["duration_mode"] = row["duration_mode"]
+        result["input_analysis"] = json.loads(row["input_analysis_json"]) if row["input_analysis_json"] else None
+        result["resolved_video_form"] = result["input_analysis"]["selected_form"] if result["input_analysis"] else (None if row["video_form"] == "auto" else row["video_form"])
         if not include_history:
             return result
         if conn is None:

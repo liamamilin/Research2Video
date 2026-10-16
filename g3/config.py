@@ -46,10 +46,11 @@ def probe_config(settings: Settings) -> dict:
                       and (settings.project_root / "g0/vendor/remotion-audiogram/node_modules").is_dir())
     draw_things = probe_draw_things()
     checks = {"deepseek": llm_ready, "kokoro_zh": tts_ready, "remotion_renderer": renderer_ready,
-              "draw_things": draw_things["ready"]}
+              "draw_things": draw_things["ready"],
+              "diagram_layout": node_ready and (settings.project_root / "g2/layout/node_modules/elkjs/lib/elk.bundled.js").is_file()}
     blockers = [f"{name.upper()}_NOT_CONFIGURED" for name, ready in checks.items() if not ready]
-    blockers = [item for item in blockers if item != "DRAW_THINGS_NOT_CONFIGURED"]
+    blockers = [item for item in blockers if item not in {"DRAW_THINGS_NOT_CONFIGURED", "DIAGRAM_LAYOUT_NOT_CONFIGURED"}]
     return {"ready": not blockers, "provider": "DeepSeek API", "model": "deepseek-flash",
-            "target_duration_seconds": [10, 20], "checks": checks, "blockers": blockers,
+            "target_duration_seconds": [10, 90], "duration_modes": ["fixed", "content"], "checks": checks, "blockers": blockers,
             "draw_things": draw_things,
             "api_key_value_exposed": False}
