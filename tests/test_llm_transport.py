@@ -82,6 +82,45 @@ def test_client_errors_are_not_retried(code, monkeypatch):
     assert calls["n"] == 1
 
 
+class FakeAPIError(Exception):
+    """Stands in for openai.APIError: a code from the body, no HTTP status."""
+
+    def __init__(self, code: str):
+        super().__init__(f"[code={code}] Error reading stream: connection reset by peer")
+        self.code = code
+
+
+def test_a_stream_reset_upstream_is_retried(monkeypatch):
+    """Seen live: a gateway reported a mid-stream reset as a plain APIError."""
+    client = make_client()
+    state = {"n": 0}
+
+    def flaky(_messages, **_kw):
+        state["n"] += 1
+        if state["n"] == 1:
+            raise FakeAPIError("upstream_stream_interrupted")
+        return reply("recovered")
+
+    monkeypatch.setattr(client, "_chat_cancellable", flaky)
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
+    assert client.chat([{"role": "user", "content": "x"}]).content == "recovered"
+    assert state["n"] == 2
+
+
+def test_other_provider_error_codes_are_not_retried(monkeypatch):
+    client = make_client()
+    calls = {"n": 0}
+
+    def boom(_messages, **_kw):
+        calls["n"] += 1
+        raise FakeAPIError("invalid_request")
+
+    monkeypatch.setattr(client, "_chat_cancellable", boom)
+    with pytest.raises(LLMError):
+        client.chat([{"role": "user", "content": "x"}])
+    assert calls["n"] == 1
+
+
 def test_a_retry_that_succeeds_returns_normally(monkeypatch):
     client = make_client()
     state = {"n": 0}

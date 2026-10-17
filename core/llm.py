@@ -48,6 +48,10 @@ _RETRYABLE_NAMES = {
     "InternalServerError",
     "RateLimitError",
 }
+#: Provider error codes that mean the connection broke, not that the request
+#: was wrong. Seen live: a gateway reported a reset mid-stream as a plain
+#: APIError with no HTTP status, so neither check above caught it.
+_RETRYABLE_CODES = {"upstream_stream_interrupted"}
 
 
 @dataclass
@@ -614,6 +618,9 @@ class LLMClient:
     def _is_retryable(self, exc: Exception) -> bool:
         status = getattr(exc, "status_code", None)
         if status in _RETRYABLE_STATUS:
+            return True
+        code = getattr(exc, "code", None)
+        if code in _RETRYABLE_CODES or any(f"[code={c}]" in str(exc) for c in _RETRYABLE_CODES):
             return True
         return type(exc).__name__ in _RETRYABLE_NAMES
 
