@@ -42,15 +42,19 @@ def prompt_versions() -> dict:
             "draft": draft.PROMPT_VERSION, "review": review.PROMPT_VERSION}
 
 
-def _audit(auditor, sections, plan, sheet, column, style, problems: list[str],
+def _audit(client, auditor, sections, plan, sheet, column, style, problems: list[str],
            previous: Optional[dict] = None, changed: Optional[set[str]] = None) -> dict:
-    """All three audits. Returns {"checks", "reading", "audit"}."""
+    """All three audits. Returns {"checks", "reading", "audit"}.
+
+    The newcomer reads with the writing model ``client``: a stronger model asks several times as many
+    questions of the same script, which no script can pass. The fact audit runs on ``auditor``.
+    """
     rule_issues = review.rules(sections, column=column, target_minutes=column.target_minutes,
                                plan=plan, sheet=sheet, style=style)
     hints = [i for i in rule_issues if i["rule"] == "D6"]
     reading = fact_check = None
     try:
-        reading = review.newcomer(auditor, sections, plan, style)
+        reading = review.newcomer(client, sections, plan, style)
         if previous and previous.get("audit") is not None and changed is not None:
             fact_check = review.fact_audit(auditor, sections, plan, sheet, reading, hints, only=changed)
             kept = [i for i in previous["audit"]["issues"] if pid(i["section"], i["paragraph"]) not in changed]
@@ -128,7 +132,7 @@ def adapt(
 
     Pass ``sheet`` to reuse the one made for this report; ``on_sheet`` gets a
     newly made sheet at once, so a later step failing does not waste it.
-    ``review_llm_config`` runs the audits on another model.
+    ``review_llm_config`` runs the fact audit on another model.
     """
     from core.llm import LLMClient
 
@@ -153,7 +157,7 @@ def adapt(
     writer._require_chinese(sections)
 
     stage("审校")
-    state = _audit(auditor, sections, plan, sheet, column, style, problems)
+    state = _audit(client, auditor, sections, plan, sheet, column, style, problems)
     initial = copy.deepcopy(state["checks"]["issues"])
     best = (sections, state)
     rounds = 0
@@ -171,7 +175,7 @@ def adapt(
         if not changed:
             break
         stage("审校")
-        state = _audit(auditor, sections, plan, sheet, column, style, problems, previous=state, changed=changed)
+        state = _audit(client, auditor, sections, plan, sheet, column, style, problems, previous=state, changed=changed)
         if state["checks"]["summary"]["rank"] <= best[1]["checks"]["summary"]["rank"]:
             best = (sections, state)
     sections, state = copy.deepcopy(best[0]), copy.deepcopy(best[1])

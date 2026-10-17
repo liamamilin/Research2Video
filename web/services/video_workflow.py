@@ -194,7 +194,7 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
 
 
 def _llm_configs(llm_config: Optional[LLMConfig]) -> tuple:
-    """(writing model, audit model or None). The audits use ``review_ai`` in system.yaml when it is set."""
+    """(writing model, fact-audit model or None). The fact audit uses ``review_ai`` in system.yaml when it is set."""
     if llm_config is not None:
         return llm_config, None
     system = load_system_config(get_settings().paths.config_dir)

@@ -606,12 +606,12 @@ def test_the_opening_and_the_core_message_are_never_cut(llm):
     assert "事实审计" in opening["note"]
 
 
-def test_audits_can_run_on_their_own_model(llm):
+def test_the_fact_audit_can_run_on_its_own_model(llm):
     adapted, _ = adapt(llm_config="writer", review_llm_config="reviewer")
     by_step = {step: config for step, _, config in llm.calls}
     assert by_step["draft"] == "writer" and by_step["plan"] == "writer"
-    assert by_step["newcomer"] == "reviewer" and by_step["audit"] == "reviewer"
-    assert adapted.meta["review_usage"]["requests"] == 2
+    assert by_step["newcomer"] == "writer" and by_step["audit"] == "reviewer"
+    assert adapted.meta["review_usage"]["requests"] == 1
 
 
 def test_pipeline_gives_up_after_two_rounds_and_says_what_is_left(llm):
