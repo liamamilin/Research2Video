@@ -15,6 +15,7 @@ from starlette.concurrency import run_in_threadpool
 
 from g3.input_documents import DocumentError, MAX_UPLOAD_BYTES, load_import, read_document, save_import
 
+from g2.authored_script import script_text
 from g2.voices import VOICE_IDS, SPEEDS, catalog
 from g3 import revision_support
 from g3.config import Settings, probe_config
@@ -41,12 +42,41 @@ class CreativeIntent(BaseModel):
         return value
 
 
+class NarrationChapter(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    title: str = Field(min_length=1, max_length=32, description="章节标题，原样用作视频章节标题")
+    paragraphs: list[str] = Field(min_length=1, description="本章讲稿段落，按顺序逐字配音")
+
+    @field_validator("title")
+    @classmethod
+    def check_title(cls, value: str) -> str:
+        if "\x00" in value or "\n" in value or "\r" in value:
+            raise ValueError("章节标题须为一行文字")
+        return value
+
+    @field_validator("paragraphs")
+    @classmethod
+    def check_paragraphs(cls, value: list[str]) -> list[str]:
+        value = [paragraph.strip() for paragraph in value]
+        if not all(value):
+            raise ValueError("讲稿段落不能为空")
+        if any("\x00" in paragraph for paragraph in value):
+            raise ValueError("讲稿不能包含空字符")
+        return value
+
+
 class CreateJobRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     title: str | None = Field(default=None, min_length=2, max_length=80)
     creative_intent: CreativeIntent = Field(default_factory=CreativeIntent)
-    source_text: str = Field(min_length=50)
+    input_mode: Literal["material", "narration"] = Field(
+        default="material",
+        description="material：source_text 是素材，AutoVideo 组织讲稿；narration：chapters 是定稿讲稿，逐字配音，只规划画面")
+    source_text: str | None = Field(default=None, min_length=50,
+                                    description="material 模式必填的素材正文；narration 模式不传，由 chapters 生成")
+    chapters: list[NarrationChapter] | None = Field(default=None, min_length=1,
+                                                    description="narration 模式必填：按顺序的章节标题与讲稿段落")
     input_document_id: str | None = None
     target_duration_sec: int = Field(default=60, ge=10, le=90)
     duration_mode: Literal["fixed", "content"] = "fixed"
@@ -64,7 +94,9 @@ class CreateJobRequest(BaseModel):
 
     @field_validator("source_text")
     @classmethod
-    def validate_source_text(cls, value: str) -> str:
+    def validate_source_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         value = value.strip()
         if len(value) < 50:
             raise ValueError("source_text must contain at least 50 non-whitespace characters")
@@ -74,6 +106,20 @@ class CreateJobRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_content_options(self):
+        if self.input_mode == "narration":
+            if self.chapters is None:
+                raise ValueError("按原稿配音需要 chapters（章节标题与讲稿段落）")
+            if self.source_text is not None:
+                raise ValueError("按原稿配音时不传 source_text；讲稿放在 chapters 中")
+            if self.input_document_id is not None:
+                raise ValueError("按原稿配音不使用 input_document_id")
+            if self.duration_mode != "content":
+                raise ValueError("按原稿配音需要 duration_mode: content，时长由讲稿决定")
+            self.source_text = script_text([chapter.model_dump() for chapter in self.chapters])
+        elif self.chapters is not None:
+            raise ValueError("chapters 仅用于 input_mode: narration")
+        elif self.source_text is None:
+            raise ValueError("source_text 为必填项")
         if self.duration_mode == "content":
             if self.video_form not in {"auto", "process_diagram", "information_motion"}:
                 raise ValueError("按内容组织请选择流程动态图解或简洁信息动效")
@@ -290,6 +336,8 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
         title = request.title or "".join(request.source_text.split())[:28] or "未命名视频"
         payload = request.model_dump()
         payload["title"] = title
+        if payload["chapters"] is None:
+            payload.pop("chapters")
         try:
             document = load_import(settings.data_dir, request.input_document_id) if request.input_document_id else None
             job = store.create_job(job_id, payload, input_document=document)

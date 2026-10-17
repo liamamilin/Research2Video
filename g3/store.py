@@ -144,6 +144,7 @@ class JobStore:
                 "creative_intent_json": "TEXT NOT NULL DEFAULT '{}'",
                 "revision_mode": "TEXT",
                 "video_speed": "REAL NOT NULL DEFAULT 1",
+                "input_mode": "TEXT NOT NULL DEFAULT 'material'",
             }
             for name, definition in additions.items():
                 if name not in columns:
@@ -205,8 +206,9 @@ class JobStore:
                      request.get("operation_type", "generate"), request.get("parent_job_id"),
                      request.get("parent_attempt_no"), request.get("scene_id"), request.get("prompt_extra", ""),
                      request.get("video_form", "knowledge_cards"), request.get("duration_mode", "fixed")))
-                conn.execute("UPDATE jobs SET creative_intent_json=?,revision_mode=?,video_speed=? WHERE job_id=?",
-                             (json.dumps(request.get("creative_intent", {}), ensure_ascii=False), request.get("revision_mode"), request.get("video_speed",1), job_id))
+                conn.execute("UPDATE jobs SET creative_intent_json=?,revision_mode=?,video_speed=?,input_mode=? WHERE job_id=?",
+                             (json.dumps(request.get("creative_intent", {}), ensure_ascii=False), request.get("revision_mode"),
+                              request.get("video_speed",1), request.get("input_mode", "material"), job_id))
         except Exception:
             import shutil
             shutil.rmtree(job_dir, ignore_errors=True)
@@ -539,6 +541,7 @@ class JobStore:
                   "parent_attempt_no": row["parent_attempt_no"], "scene_id": row["scene_id"]}
         result["creative_intent"] = json.loads(row["creative_intent_json"])
         result["revision_mode"] = row["revision_mode"]
+        result["input_mode"] = row["input_mode"]
         result["video_speed"] = row["video_speed"]
         result["video_form"] = row["video_form"]
         result["duration_mode"] = row["duration_mode"]

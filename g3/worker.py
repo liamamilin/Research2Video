@@ -142,7 +142,8 @@ class G2ProcessRunner:
         env["AUTOVIDEO_G2_VOICE_ID"] = job["voice_id"]
         env["AUTOVIDEO_G2_VIDEO_SPEED"] = str(job.get("video_speed",1))
         env["AUTOVIDEO_G2_INTENT_FILE"] = str(input_path)
-        env["AUTOVIDEO_G2_LOCK_NARRATION"] = "1" if input_payload.get("revision_mode") == "narration" else "0"
+        locked = input_payload.get("revision_mode") == "narration" or input_payload.get("input_mode") == "narration"
+        env["AUTOVIDEO_G2_LOCK_NARRATION"] = "1" if locked else "0"
         env["AUTOVIDEO_G2_USE_DRAW_THINGS"] = "1" if input_payload.get("use_draw_things") is True else "0"
         env["AUTOVIDEO_G2_VIDEO_FORM"] = job.get("video_form", "knowledge_cards")
         log_path = attempt_root / "worker.log"
@@ -239,7 +240,7 @@ class G2ProcessRunner:
             return
         if return_code != 0:
             error_code = error_code or "GENERATION_FAILED"
-            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION"}:
+            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION", "NARRATION_TEXT_MISMATCH"}:
                 retryable = False
             self.store.mark_failed(job_id, attempt_no, active_stage, error_code,
                                    error_message or "视频生成失败，请查看任务阶段错误并重试", retryable)
@@ -274,6 +275,7 @@ class G2ProcessRunner:
             (artifacts_dir / "content-outline-plan.json", "content-outline.json", "application/json"),
             (artifacts_dir / "final-narration-plan.json", "narration.json", "application/json"),
             (artifacts_dir / "authored-narration.json", "authored-narration.json", "application/json"),
+            (artifacts_dir / "narration-check.json", "narration-check.json", "application/json"),
             (artifacts_dir / "scene-revision.json", "scene-revision.json", "application/json"),
             (artifacts_dir / "media-revision.json", "media-revision.json", "application/json"),
             (artifacts_dir / "playback.json", "playback.json", "application/json"),

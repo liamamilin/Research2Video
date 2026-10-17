@@ -8,6 +8,8 @@ from jsonschema import Draft202012Validator
 from PIL import ImageFont
 import re
 
+from g2.technical_text import altered_technical_text, display_width, wrap_units
+
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "g2/schemas/information-motion-plan.schema.json"
 COMPONENTS = ("title_card", "concept_reveal", "comparison")
@@ -42,15 +44,24 @@ def targets(component: str, props: dict) -> list[str]:
 
 
 def text_lines(text: str, size: int, width: int) -> int:
+    """Count wrapped lines as the renderer lays them out: technical tokens move to the next line whole."""
     font = ImageFont.truetype("/System/Library/Fonts/Hiragino Sans GB.ttc", size)
     count, line = 1, ""
-    for character in text:
-        if character == "\n" or (line and font.getlength(line + character) > width):
-            count += 1
-            line = "" if character == "\n" else character
-        else:
-            line += character
+    for unit in wrap_units(text):
+        for piece in [unit] if display_width(font, unit) <= width else list(unit):
+            if piece == "\n" or (line and display_width(font, line + piece) > width):
+                count += 1
+                line = "" if piece == "\n" else piece
+            else:
+                line += piece
     return count
+
+
+def visible_text(scene: dict) -> list[str]:
+    props = scene["props"]
+    if scene["component"] == "comparison":
+        return [scene["headline"], *(text for side in ("left", "right") for text in [props[side]["label"], *props[side]["items"]])]
+    return [scene["headline"], props["title"], props.get("subtitle") or "", *props.get("lines", [])]
 
 
 def validate_text_fit(scene: dict) -> None:
@@ -120,6 +131,7 @@ def validate_plan(plan: dict, context: dict) -> None:
         raise InformationFault("INFORMATION_SCENE_IDS", "scene ids must be s1..sN")
     texts = {s["id"]: s["text"] for s in segments}
     segments_by_id = {s["id"]: s for s in segments}
+    reference = "\n".join([context["source_text"], *texts.values()])
     for scene in plan["scenes"]:
         component, props = scene["component"], scene["props"]
         schema = json.loads((ROOT / f"schemas/components/{component}.schema.json").read_text())
@@ -129,6 +141,12 @@ def validate_plan(plan: dict, context: dict) -> None:
         validate_text_fit(scene)
         if component != "comparison" and props["title"] != scene["headline"]:
             raise InformationFault("INFORMATION_HEADLINE", scene["id"])
+        for text in visible_text(scene):
+            altered = altered_technical_text(text, reference)
+            if altered:
+                raise InformationFault("INFORMATION_TECHNICAL_TEXT",
+                    f"{scene['id']} 的画面文字 {altered!r} 不是旁白或素材中的原样写法；命令、参数、代码、文件名和版本号须逐字照抄，"
+                    "例如 --models 不能写成 –models 或 -models")
         if component == "comparison" and props.get("highlights"):
             raise InformationFault("INFORMATION_PROPS", "comparison uses side cues; omit highlights")
         if any(q not in context["source_text"] for q in scene["source_quotes"]):

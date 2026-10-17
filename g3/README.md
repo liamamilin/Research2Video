@@ -108,6 +108,12 @@ API 的历史默认值 `knowledge_cards` 保持兼容；旧任务、场景图片
 
 API：`GET /api/jobs/{id}/editable-content`、`GET /api/jobs/{id}/revisions`、`POST /api/jobs/{id}/revisions`。POST 传 `mode: "source" | "narration"` 和 `text`，可另传标题及 `creative_intent`；省略偏好时继承父任务，显式传空对象时清空。新建任务也支持可省略的 `creative_intent`，包含 `audience`、`purpose`、`tone`、`focus` 四个字符串。结果与证据见 `CONTENT_REVISION_ACCEPTANCE.md`。
 
+## 按原稿配音（API）
+
+上游已审定的讲稿可直接新建任务：`POST /api/jobs` 传 `input_mode: "narration"`、`chapters: [{"title", "paragraphs"}]`、`duration_mode: "content"`，`video_form` 为 `auto`、`information_motion` 或 `process_diagram`，不传 `source_text`。配音与字幕逐字采用讲稿，只做分句和空白规整；章节标题取自请求；画面规划（`auto` 时含形式选择）仍自动完成。分句后及生成 Video IR 后各校验一次，讲稿、Video IR 旁白、字幕或章节标题不一致时任务以 `NARRATION_TEXT_MISMATCH` 失败且不可重试。省略 `input_mode` 时仍是原素材模式。字段与示例见根目录 `UPSTREAM_INTEGRATION.md` 第 3 节，真实验收见 `NARRATION_MODE_ACCEPTANCE.md`。
+
+命令、参数、代码和版本号在字幕和画面中按原样显示：连续连字符之间留出间隔（`--models` 不再看成 `–models`），这类片段能放下时不在中间换行；模型生成的卡片或流程图文字改动它们时会被拒绝重写。
+
 ## 本地文档输入
 
 新建页可上传 `.docx`、文字型 `.pdf`、`.txt` 或 `.md`。服务在本机提取正文并填入原素材编辑框；可直接点击“开始生成”，也可先修改正文，没有额外必经确认。原有粘贴输入和 API 保持兼容。上传本身不调用模型，提交生成后仅正文进入既有 DeepSeek 链路；原文件保存在本机。

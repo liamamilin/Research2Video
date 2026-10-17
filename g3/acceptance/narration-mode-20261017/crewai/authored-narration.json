@@ -1,0 +1,43 @@
+{
+  "mode": "user_authored",
+  "origin": "narration_create",
+  "text_sha256": "eef476e39a2274b60b2a47bc3ff2b1951198a13c9d3e798ba93ba6bfb0217a2d",
+  "model_rewrite": false,
+  "whitespace_normalized_only": true,
+  "segments": 63,
+  "chapters": [
+    {
+      "id": "c1",
+      "title": "开场：你要的那个数字，其实已经内置了",
+      "segments": 5
+    },
+    {
+      "id": "c2",
+      "title": "升级即可：1.15.27 到底加了什么",
+      "segments": 14
+    },
+    {
+      "id": "c3",
+      "title": "数字在哪看：对比输出，不是一个新命令",
+      "segments": 13
+    },
+    {
+      "id": "c4",
+      "title": "三个必须实测的口径：时间、计价、格式",
+      "segments": 18
+    },
+    {
+      "id": "c5",
+      "title": "要真延迟就走这三条路，以及本周就能做的清单",
+      "segments": 13
+    }
+  ],
+  "exact_text_check": {
+    "status": "PASS",
+    "chapters": 5,
+    "segments": 63,
+    "characters": 2370,
+    "rule": "segments reproduce the script in order; only splitting and whitespace may differ"
+  },
+  "provenance": "上游定稿讲稿逐字配音；AutoVideo 只做分句、空白规整与画面规划。"
+}

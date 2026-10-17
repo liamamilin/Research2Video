@@ -1,0 +1,23 @@
+{
+  "title": "升级 crewAI 并跑一次最小 sweep",
+  "input_mode": "narration",
+  "chapters": [
+    {
+      "title": "升级前先确认版本",
+      "paragraphs": [
+        "升级 crewAI 之前，先运行 pip show crewai 查看当前版本。",
+        "如果版本低于 1.15.27，就执行 pip install --upgrade crewai，然后再运行一次 pip show crewai 确认版本。"
+      ]
+    },
+    {
+      "title": "跑一次最小 sweep",
+      "paragraphs": [
+        "版本确认后，运行 crewai eval --models 跑一次最小 sweep。",
+        "命令结束后先看对比表：如果每一行都有 cost 和 time，就把输出原件存档；如果缺少这两列，就回到第一步检查版本。"
+      ]
+    }
+  ],
+  "video_form": "process_diagram",
+  "duration_mode": "content",
+  "voice_id": "zf_xiaoxiao"
+}

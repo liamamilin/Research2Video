@@ -1,0 +1,12 @@
+{
+  "g3/app.py": "5340d798a05f1cf11da240ade7c64d8e806a28215b0ad63ac0516c93de71036a",
+  "g3/store.py": "80bf6f98dad49e80b5d869ab21e00afef4d121da64d040350034aaa13fe2d800",
+  "g3/worker.py": "a9e33afd6d49bae8c9fe98c1c677f79725e9971f92ae318081ab41f512ac756d",
+  "g2/run_g2.py": "2ac1e5ee234aa9c6bd476833b6b5f1c44c1af6326ff0b737dccc37ed936e2023",
+  "g2/authored_script.py": "b4e0cda0d2ad80d980312928f68d49d563fc753f948127fcedd2f3efac587813",
+  "g2/technical_text.py": "4c8d86e046dd500c04ec27ba6b16c8db1128d09dff6a77879c4f12ee3dcac103",
+  "g2/information_motion.py": "3701a8e7479907339f93554e365cda5c8c7cf44753fd7fc83a47241c2df62c19",
+  "g2/process_diagram.py": "b86fcf9d24b2e409e608be6a5157dbbaa4a2b13ead9ee4f1747e5cf9adcc0ee1",
+  "g2/schemas/narration-form.schema.json": "fc0d6267be4ccedd59a4f53eaeafa7cb0dfc555d3f7a0fc937fd485a96132fab",
+  "g1/renderer/src/Root.tsx": "fe669ed4a47b4476f5d8adf6962cb4a89a6efc67a13892ab8ff8615872033654"
+}

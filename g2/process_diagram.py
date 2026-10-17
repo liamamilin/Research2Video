@@ -7,6 +7,8 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 from PIL import ImageFont
 
+from g2.technical_text import altered_technical_text, display_width, wrap_units
+
 SCHEMA = Path(__file__).parent / "schemas/process-diagram-plan.schema.json"
 LAYOUT_SCRIPT = Path(__file__).parent / "layout/compile.cjs"
 FONT = "/System/Library/Fonts/Hiragino Sans GB.ttc"
@@ -56,6 +58,7 @@ def validate_plan(plan: dict, context: dict) -> None:
     if actual != expected:
         raise DiagramPlanFault("DIAGRAM_COVERAGE", "cover every narration segment once, in order")
     text = {s["id"]: s["text"] for s in narration}
+    reference = "\n".join([context["source_text"], *text.values()])
     seen_scenes = set()
     for scene in plan["scenes"]:
         if scene["id"] in seen_scenes:
@@ -65,6 +68,12 @@ def validate_plan(plan: dict, context: dict) -> None:
         edges = {e["id"]: e for e in scene["edges"]}
         if len(nodes) != len(scene["nodes"]) or len(edges) != len(scene["edges"]):
             raise DiagramPlanFault("DUPLICATE_DIAGRAM_ID", scene["id"])
+        for label in [scene["title"], scene["takeaway"], *(n["label"] for n in nodes.values()), *(e["label"] for e in edges.values())]:
+            altered = altered_technical_text(label, reference)
+            if altered:
+                raise DiagramPlanFault("DIAGRAM_TECHNICAL_TEXT",
+                    f"{scene['id']} 的画面文字 {altered!r} 不是旁白或素材中的原样写法；命令、参数、代码、文件名和版本号须逐字照抄，"
+                    "例如 --models 不能写成 –models 或 -models")
         for item in [*nodes.values(), *edges.values()]:
             if item["source_quote"] not in context["source_text"]:
                 raise DiagramPlanFault("DIAGRAM_SOURCE_QUOTE", f"{item['id']}: 引用 {item['source_quote']!r} 不在原文中；不要复制改写后的旁白，请从 source_quote_candidates 逐字选择。")
@@ -111,13 +120,15 @@ def complete_cue_endpoints(plan: dict) -> None:
 
 
 def wrap_label(text: str, font: ImageFont.FreeTypeFont, width: int = 250) -> list[str]:
+    """Wrap by character, keeping a technical token such as --models on one line when it fits."""
     lines, current = [], ""
-    for character in text:
-        if current and font.getlength(current + character) > width:
-            lines.append(current)
-            current = character
-        else:
-            current += character
+    for unit in wrap_units(text):
+        for piece in [unit] if display_width(font, unit) <= width else list(unit):
+            if current and display_width(font, current + piece) > width:
+                lines.append(current)
+                current = piece
+            else:
+                current += piece
     return [*lines, current] if current else lines
 
 
@@ -128,10 +139,10 @@ def layout_request(plan: dict) -> dict:
         nodes = []
         for node in scene["nodes"]:
             lines = wrap_label(node["label"], font)
-            width = max(210, max(font.getlength(line) for line in lines) + 60)
+            width = max(210, max(display_width(font, line) for line in lines) + 60)
             nodes.append({"id": node["id"], "width": width, "height": max(100, len(lines)*46+40), "label_lines": lines})
         edges = [{"id": e["id"], "from": e["from"], "to": e["to"], "label": e["label"],
-                  "label_width": edge_font.getlength(e["label"])+24} for e in scene["edges"]]
+                  "label_width": display_width(edge_font, e["label"])+24} for e in scene["edges"]]
         scenes.append({"id": scene["id"], "nodes": nodes, "edges": edges})
     return {"scenes": scenes}
 

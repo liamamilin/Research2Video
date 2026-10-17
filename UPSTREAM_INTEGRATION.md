@@ -1,6 +1,6 @@
 # AutoVideo 上游工具对接指南
 
-核对日期：2026-10-15。适用版本：当前 AutoVideo 本地版 0.1。
+核对日期：2026-10-17。适用版本：当前 AutoVideo 本地版 0.1。
 
 面向“发现主题 → 生成内容”的上游工具开发者。本文描述**当前已经实现的 HTTP 接口**；待开发能力单独列出，不应据此提前调用。
 
@@ -8,8 +8,8 @@
 
 ```text
 上游：发现主题、生成内容、保留内容来源
-  ↓ 提交正文与可选制作偏好
-AutoVideo：整理素材、组织讲稿、选择表现形式、配音、字幕、动画、基础检查
+  ↓ 提交素材正文，或已审定的分章讲稿；附可选制作偏好
+AutoVideo：（素材模式）整理素材、组织讲稿；选择表现形式、配音、字幕、动画、基础检查
   ↓ 返回任务状态与文件地址
 上游：跟踪任务、获取 MP4 / 字幕 / 讲稿、继续后续处理
 ```
@@ -18,7 +18,7 @@ AutoVideo：整理素材、组织讲稿、选择表现形式、配音、字幕�
 
 - **当前推荐入口：HTTP API。** 不需要打开网页才能提交任务。
 - 内部存在 `g2/run_g2.py` 命令行执行脚本，但没有正式的 `autovideo create/wait/download` CLI；对接方使用 HTTP 接口。
-- 当前新建任务接收的是**内容材料**，AutoVideo 会组织和改写为讲稿。要求逐字采用最终讲稿时，先看第 9 节。
+- 新建任务有两种输入（第 3 节）：`input_mode: "material"`（默认）提交**内容材料**，AutoVideo 组织和改写为讲稿；`input_mode: "narration"` 提交**已审定的分章讲稿**，AutoVideo 逐字配音，只规划画面。
 - 上游负责主题选择、内容事实与出处。AutoVideo 的基础检查不构成外部事实核验。
 
 ## 2. 服务地址与启动条件
@@ -81,6 +81,44 @@ curl --fail --silent --show-error \
   "$AV_BASE_URL/api/jobs"
 ```
 
+### 按原稿配音（narration 模式）
+
+讲稿已在上游审定、要求逐字配音时，传 `input_mode: "narration"` 与 `chapters`，**不传** `source_text`：
+
+```json
+{
+  "title": "crewai eval --models 的每次运行成本与延迟",
+  "input_mode": "narration",
+  "chapters": [
+    {
+      "title": "开场：你要的那个数字，其实已经内置了",
+      "paragraphs": [
+        "你在给 crewAI 的 eval --models 做模型横评，为的是拿数字去申请预算。",
+        "好消息是：从 crewAI 1.15.27 起，crewai eval --models 自带每次运行的成本与耗时报告。"
+      ]
+    },
+    {
+      "title": "三个必须实测的口径：时间、计价、格式",
+      "paragraphs": [
+        "LiteLLM 在 completion 上返回 response_cost，再用 cost_per_token 和 completion_cost 对照模型成本表折算成美元。"
+      ]
+    }
+  ],
+  "video_form": "auto",
+  "duration_mode": "content",
+  "voice_id": "zf_xiaoxiao"
+}
+```
+
+此模式的约定：
+
+- **配音与字幕逐字采用讲稿。** AutoVideo 只把段落切成适合字幕的短句（按句末标点，过长句在逗号处、其次在空格处断开），并把连续空白规整为一个空格；不改写措辞、不加过渡句、不删字。
+- **强制校验。** 分句后、生成 Video IR 后各核对一次：配音分段、Video IR 旁白、`captions.srt` 和章节标题必须逐字还原讲稿。任何不一致都使任务以 `NARRATION_TEXT_MISMATCH` 失败（不可重试），`error_message` 指出章节、位置及讲稿与配音两侧文字；不会静默输出改动过的版本。
+- **章节标题取自 `chapters[].title`**，原样用于画面章节标签与 `chapters.json`；标题本身不朗读。
+- **画面仍自动规划。** `video_form: "auto"` 时只让模型为整片选择 `information_motion` 或 `process_diagram`（不读改、不剔除讲稿内容）；场景、卡片、流程图与动画节拍按每章讲稿自动生成。
+- 时长由讲稿和实际配音决定，因此必须传 `duration_mode: "content"`。
+- 任务保存的原稿 `source.txt` 由章节生成：章内段落以换行连接、章与章之间空一行；`source_sha256` 对应这份文本。
+
 ### 响应
 
 成功返回 **HTTP 202**，表示任务已接受，尚未完成。以下编号与时间为示例：
@@ -100,21 +138,27 @@ curl --fail --silent --show-error \
 
 | 字段 | 当前约定 |
 | --- | --- |
-| `source_text` | 必填字符串；去除首尾空白后至少 50 个字符，不允许 NUL。保持事实、条件、数字、例子及必要说明清楚完整 |
+| `input_mode` | 可选，默认 `material`。`material`：`source_text` 是素材，AutoVideo 组织讲稿；`narration`：`chapters` 是定稿讲稿，逐字配音 |
+| `source_text` | `material` 模式必填；去除首尾空白后至少 50 个字符，不允许 NUL。保持事实、条件、数字、例子及必要说明清楚完整。`narration` 模式不得传入 |
+| `chapters` | `narration` 模式必填，`material` 模式不得传入。非空数组，按顺序；每项只含 `title`（1–32 字符、单行）与 `paragraphs`（非空字符串数组，每段去除首尾空白后不能为空，不允许 NUL）。不接受 `visual_cues` 等其他字段 |
 | `title` | 可选；传入时长度 2–80。省略或为 `null` 时，服务端从正文截取任务标题；不要传空字符串 |
 | `video_form` | 推荐显式传 `auto`；可指定 `process_diagram` 或 `information_motion` |
-| `duration_mode` | 推荐显式传 `content`，按完整内容和实际配音组织章节与时长 |
+| `duration_mode` | 推荐显式传 `content`，按完整内容和实际配音组织章节与时长；`narration` 模式必须为 `content` |
 | `voice_id` | 可选，默认 `zf_xiaoxiao`；以 `/api/voices` 返回的可用 ID 为准 |
 | `video_speed` | 可选，默认 `1`；允许 `0.5`、`1`、`1.5`、`2`，会同步影响导出视频的音频、字幕和动画 |
 | `creative_intent` | 可省略或传 `{}`；支持 `audience`、`purpose`、`tone`、`focus` 四个可选字符串，允许自定义文字 |
 | `target_duration_sec` | 仅指定时长模式使用，整数 10–90，默认 60；`content` 模式可省略。即使在 `content` 模式传入，也仍需通过 10–90 的字段校验 |
-| `input_document_id` | 可选，来自文档上传接口；直接传正文时省略 |
+| `input_document_id` | 可选，来自文档上传接口；直接传正文时省略；`narration` 模式不得传入 |
 | `use_draw_things` | 当前两种主形式及自动选择使用默认 `false`；不需要传入 |
 | `theme` | 可省略；当前只接受兼容值 `minimal_dark`。主形式的实际视觉样式由所选形式决定 |
 
 **必须注意默认值兼容：** API 省略 `video_form` 时走历史 `knowledge_cards`；省略 `duration_mode` 时走 `fixed`。上游要获得当前网页的默认行为，应明确传入 `auto` 和 `content`。
 
-`content` 模式没有套用指定时长模式的 2,000 字符 / 90 秒上限，但仍受模型上下文、本机资源和执行时限约束，不承诺任意长度。`fixed` 模式的正文最多 2,000 字符。
+`content` 模式没有套用指定时长模式的 2,000 字符 / 90 秒上限，但仍受模型上下文、本机资源和执行时限约束，不承诺任意长度。`fixed` 模式的正文最多 2,000 字符。省略 `title` 时，两种模式都从正文开头截取任务标题；`narration` 模式建议显式传入视频标题。
+
+### 画面中的技术文字
+
+命令、参数、代码、文件名和版本号在字幕和画面中按原样显示：`--models` 的两个连字符之间留有可见间隔（不再被看成 `–models`），`v1.15.24`、`eval_crew.py`、`comparison['models']` 等英文与符号片段在能放下时不在中间换行。反引号原样显示在字幕中，但不朗读。模型生成的卡片、流程图标签若改动这类片段（如把 `--models` 写成 `–models` 或 `-models`，把 `1.15.27` 写成 `v1.15.27`），会被本地校验拒绝并要求重写，两种输入模式都适用。
 
 请求禁止未知字段。当前不能额外传 `content_id`、`input_type`、`callback_url`、`metadata` 等未实现字段；会返回 422。制作要求应放在 `creative_intent`，研究来源与上游业务元数据由上游保存。
 
@@ -134,7 +178,8 @@ curl --fail --silent --show-error \
 | `cancel_requested` | 已请求取消，尚可能在停止进程 |
 | `resolved_video_form` | 自动选择最终采用的形式；分析完成前可为 `null` |
 | `input_analysis` | 素材整理、选型理由和待确认问题；初期可为 `null` |
-| `source_sha256` | 服务端保存正文的哈希；服务端会去除首尾空白 |
+| `source_sha256` | 服务端保存正文的哈希；服务端会去除首尾空白。`narration` 模式为章节生成的原稿文本的哈希 |
+| `input_mode` | `material` 或 `narration`；历史任务为 `material` |
 | `parent_job_id` | 修订任务对应的父版本，没有时为 `null` |
 | `attempts` | 历次尝试及阶段记录，**按尝试编号倒序，最新项在第 0 项** |
 
@@ -182,7 +227,9 @@ curl --fail --silent --show-error \
 | --- | --- |
 | `video.mp4` | 最终 H.264 / AAC MP4 |
 | `captions.srt` | 中文字幕 |
-| `narration.json` | 最终讲稿 JSON，正文可从 `segments[].text` 读取 |
+| `narration.json` | 最终讲稿 JSON，正文可从 `segments[].text` 读取；`chapters[]` 含章节标题与所含段落 |
+| `narration-check.json` | `narration` 模式与讲稿修订：逐字校验结果（`status: "PASS"`、章节数、段数、已核对的 Video IR / 字幕 / 章节标题） |
+| `authored-narration.json` | `narration` 模式与讲稿修订：讲稿来源、`model_rewrite: false` 及分句后的首次逐字校验 |
 | `qa.json` | 本次基础媒体检查记录 |
 | `chapters.json` | 内容模式的章节和时间信息 |
 | `input-brief.json` | 输入整理、来源和形式选择记录 |
@@ -234,6 +281,7 @@ Pydantic 参数校验的 422 响应则可能是 `detail` 数组，包含 `loc`�
 ### 任务执行失败
 
 - `FAILED` 且 `error_code == "INPUT_REQUIRES_CLARIFICATION"`：素材关键事实需要确认。读取 `input_analysis.issues`，修正素材后创建修订版；**不要重复执行同一份冲突材料**。网页显示“待补充”，但原始任务 `status` 仍是 `FAILED`。
+- `FAILED` 且 `error_code == "NARRATION_TEXT_MISMATCH"`：`narration` 模式下配音或字幕未能逐字还原讲稿，`retryable` 为 `false`。保留 `error_message` 并反馈 AutoVideo 维护者；不要改用素材模式提交同一份定稿来绕过。
 - 其他 `FAILED`：读取 `error_code` / `error_message`。仅在 `retryable == true` 且上游重试策略允许时，调用 `POST /api/jobs/{job_id}/retry`，返回 HTTP 202。
 - 重试沿用**同一个 `job_id`**，创建新的 attempt，旧尝试保留。重新查询状态，不另建重复任务。
 - 配置和材料错误应先处理原因。`retryable` 是接口允许重试的信号，不是保证下一次成功，也不应触发无上限循环。
@@ -291,7 +339,7 @@ GET /api/jobs?q=标题关键词
 ```
 
 - `mode: "source"`：修改材料，重新组织讲稿与画面。
-- `mode: "narration"`：采用修订讲稿原文配音；要求父任务已有可读取讲稿且属于两种主形式。
+- `mode: "narration"`：采用修订讲稿原文配音，同样执行逐字校验；要求父任务已有可读取讲稿且属于两种主形式。修订讲稿是一段整体文字，生成单章，章节标题取任务标题；需要保留分章标题时，用 `narration` 模式新建任务。
 - 可选传 `title` 和 `creative_intent`。省略偏好时继承，传 `{}` 时清空。
 - 返回 HTTP 202 和**新的 `job_id`**、`parent_job_id`、`status_url`；父任务与旧成片保留。上游应跟踪新编号。
 
@@ -301,20 +349,19 @@ GET /api/jobs?q=标题关键词
 
 | 能力 | 当前状态与对接决定 |
 | --- | --- |
-| 新建任务直接采用最终讲稿 | **未提供对应入口。** 当前新建正文会被组织/改写；不要擅自发送 `input_type: "narration"`。已有讲稿修订机制可供后续实现复用，但不作为新建的保证 |
 | 正式产品 CLI | **未封装。** 上游使用 HTTP；未来 CLI 可作为同一 API 的客户端 |
 | 服务端幂等提交 / 上游业务编号 | **未实现。** 当前由上游记录映射，并对提交结果未知作显式处理 |
 | 完成回调 / Webhook | **未实现。** 当前轮询 |
 | 跨机器鉴权与远程分发 | **未实现。** 当前按同机接入 |
 
-若上游产出的是需要逐字使用的最终讲稿，先对齐这一需求，再由 AutoVideo 增加新建入口并更新契约。不要把“最终讲稿当材料提交”误认为“保证原文配音”。
+新建任务直接采用最终讲稿已实现（2026-10-17）：使用第 3 节的 `input_mode: "narration"` 与 `chapters`，复用讲稿修订的逐字配音机制，并增加分章标题、自动选型和强制逐字校验。把最终讲稿当作 `source_text` 以素材模式提交，仍会被组织和改写，不保证原文配音。
 
 ## 10. 上游实现与联调清单
 
 建议先完成一条闭环：
 
 1. 配置 API 基址，完成健康、依赖及声音检查。
-2. 生成一份真实内容材料，显式传 `auto` / `content` 创建任务。
+2. 生成一份真实内容材料，显式传 `auto` / `content` 创建任务；已审定讲稿用 `input_mode: "narration"` 与 `chapters` 提交。
 3. 收到 202 后保存 `job_id`；等待并区分成功、失败和取消。
 4. 下载 MP4、字幕及所需讲稿，核对文件哈希，记录输出。
 5. 使用任务链接在网页打开同一条视频，确认可继续修订。
@@ -325,7 +372,8 @@ GET /api/jobs?q=标题关键词
 - 材料关键冲突能进入待补充处理，不出现自动重试循环。
 - 参数错误能保留具体错误信息；取消与等待超时不被当作成功。
 - 同一内容已有映射时复用原任务；提交结果未知时进入对账处理。
+- `narration` 模式：下载 `narration.json` 后，将各段 `text` 与提交的段落比对（忽略空白差异），并检查 `narration-check.json` 的 `status` 为 `PASS`。
 
-本文只确定现有接口和建议的对接行为，没有新增 CLI、幂等、回调或最终稿入口。
+本文只确定现有接口和建议的对接行为，没有新增 CLI、幂等或回调。
 
-实现核对来源：仓库 `g3/app.py`（HTTP 与请求校验）、`g3/store.py`（任务/版本/文件）、`g3/worker.py`（执行和错误）、`g3/README.md`（本地使用）。字段细节可结合运行实例的 OpenAPI 查阅。
+实现核对来源：仓库 `g3/app.py`（HTTP 与请求校验）、`g3/store.py`（任务/版本/文件）、`g3/worker.py`（执行和错误）、`g2/authored_script.py`（按原稿配音与逐字校验）、`g3/README.md`（本地使用）。字段细节可结合运行实例的 OpenAPI 查阅。

@@ -1,0 +1,6 @@
+{
+  "status": "FAILED",
+  "error_code": "GENERATION_FAILED",
+  "message": "生成流程失败",
+  "stage": "BUILD_IR"
+}

@@ -20,7 +20,31 @@ const targetVisible = (beats: Beat[], target: string, sceneId: string) => {
   return visible || sceneId === '__default_visible__';
 };
 
-const Text = ({children, x, y, size = 34, color = colors.text, anchor = 'middle', weight = 500}: any) => <text x={x} y={y} textAnchor={anchor} dominantBaseline="middle" fill={color} fontFamily={font} fontSize={size} fontWeight={weight}>{children}</text>;
+// Commands, flags, code and versions must read exactly as written. These fonts draw "-" edge to edge,
+// so "--models" looked like "–models": keep a small gap between consecutive hyphens, and keep each
+// ASCII token whole on one line when it fits. Must match g2/technical_text.py.
+const HYPHEN_GAP_EM = 0.12;
+const TECH_RUN = /`[^`\n]{1,40}`|[!-~]{2,40}/g;
+const hyphenPieces = (text: string) => {
+  const pieces: string[] = [];
+  let start = 0;
+  for (let i = 0; i < text.length-1; i++) if (text[i] === '-' && text[i+1] === '-') { pieces.push(text.slice(start, i+1)); start = i+1; }
+  return [...pieces, text.slice(start)];
+};
+const Tech = ({text}: {text: string}) => {
+  const parts: React.ReactNode[] = [], pattern = new RegExp(TECH_RUN.source, 'g');
+  let last = 0, match: RegExpExecArray | null;
+  while ((match = pattern.exec(text))) {
+    if (match.index > last) parts.push(text.slice(last, match.index));
+    const pieces = hyphenPieces(match[0]);
+    parts.push(/^[A-Za-z0-9]+$/.test(match[0]) ? match[0] : <span key={match.index} style={{display:'inline-block', maxWidth:'100%'}}>{pieces.map((piece, i) => i < pieces.length-1 ? <span key={i} style={{marginRight:`${HYPHEN_GAP_EM}em`}}>{piece}</span> : piece)}</span>);
+    last = match.index + match[0].length;
+  }
+  parts.push(text.slice(last));
+  return <>{parts}</>;
+};
+const svgTech = (text: string, size: number) => hyphenPieces(text).map((piece, i) => <tspan key={i} dx={i ? size*HYPHEN_GAP_EM : undefined}>{piece}</tspan>);
+const Text = ({children, x, y, size = 34, color = colors.text, anchor = 'middle', weight = 500}: any) => <text x={x} y={y} textAnchor={anchor} dominantBaseline="middle" fill={color} fontFamily={font} fontSize={size} fontWeight={weight}>{typeof children === 'string' ? svgTech(children, size) : children}</text>;
 const Panel = ({x, y, w, h, fill = colors.panel, stroke = colors.border, r = 24, opacity = 1}: any) => <rect x={x} y={y} width={w} height={h} rx={r} fill={fill} stroke={stroke} strokeWidth="2" opacity={opacity}/>;
 
 function ProcessDiagram({scene, frame}: {scene: Scene; frame: number}) {
@@ -202,8 +226,8 @@ function LegacyVideo({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: 
   return <AbsoluteFill style={{backgroundColor: colors.bg, color: colors.text, fontFamily: font}}>
     {safeBackdrop && <Img src={safeBackdrop} style={{position: 'absolute', zIndex: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.58, filter: 'blur(18px)', transformOrigin: 'center', transform: `translateX(${panX}px) scale(${zoom * 1.08})`}}/>}
     {safeBackdrop && <AbsoluteFill style={{zIndex: 1, background: 'linear-gradient(90deg, rgba(5,10,19,.50), rgba(5,10,19,.36) 50%, rgba(5,10,19,.50)), linear-gradient(0deg, rgba(5,10,19,.72), rgba(5,10,19,.22) 48%, rgba(5,10,19,.46)'}}/>}
-    <AbsoluteFill style={{zIndex: 2}}><div style={{position: 'absolute', left: 80, top: 54, color: colors.cyan, fontSize: 24, letterSpacing: 2}}>AUTOVIDEO　/　G1 · Video IR 0.2</div><div style={{position: 'absolute', right: 82, top: 56, color: colors.muted, fontSize: 22}}>知识动画　·　真实中文旁白</div><SceneVisual scene={scene} frame={frame}/>{chapterIndex >= 0 && <div style={{position: 'absolute', left: 180, top: 124, color: colors.muted, fontSize: 26}}>第 {chapterIndex+1} / {chapters.length} 章 · {chapters[chapterIndex].title}</div>}</AbsoluteFill>
-    <AbsoluteFill style={{zIndex: 3, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92, pointerEvents: 'none'}}>{caption && <div style={{minWidth: 320, maxWidth: 1680, minHeight: 72, padding: '13px 28px', borderRadius: 18, background: 'rgba(5,10,19,.88)', border: `1px solid ${colors.border}`, color: colors.text, textAlign: 'center', fontSize: caption.text.length > 32 ? 30 : 38, lineHeight: 1.4, overflowWrap: 'anywhere', boxSizing: 'border-box'}}>{caption.text}</div>}</AbsoluteFill>
+    <AbsoluteFill style={{zIndex: 2}}><div style={{position: 'absolute', left: 80, top: 54, color: colors.cyan, fontSize: 24, letterSpacing: 2}}>AUTOVIDEO　/　G1 · Video IR 0.2</div><div style={{position: 'absolute', right: 82, top: 56, color: colors.muted, fontSize: 22}}>知识动画　·　真实中文旁白</div><SceneVisual scene={scene} frame={frame}/>{chapterIndex >= 0 && <div style={{position: 'absolute', left: 180, top: 124, color: colors.muted, fontSize: 26}}>第 {chapterIndex+1} / {chapters.length} 章 · <Tech text={chapters[chapterIndex].title}/></div>}</AbsoluteFill>
+    <AbsoluteFill style={{zIndex: 3, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92, pointerEvents: 'none'}}>{caption && <div style={{minWidth: 320, maxWidth: 1680, minHeight: 72, padding: '13px 28px', borderRadius: 18, background: 'rgba(5,10,19,.88)', border: `1px solid ${colors.border}`, color: colors.text, textAlign: 'center', fontSize: caption.text.length > 32 ? 30 : 38, lineHeight: 1.4, overflowWrap: 'anywhere', boxSizing: 'border-box'}}><Tech text={caption.text}/></div>}</AbsoluteFill>
     <Audio src={staticFile(ir.audio_public_file)} volume={Math.pow(10, 0/20)}/>
   </AbsoluteFill>;
 }
@@ -231,13 +255,13 @@ function InformationVideo({ir}: {ir: Timeline}) {
   const heading = scene.component === 'comparison' ? scene.purpose : p.title;
   return <AbsoluteFill style={{background:paper.bg, color:paper.ink, fontFamily:font, backgroundImage:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
     <div style={{position:'absolute', left:140, top:70, display:'flex', alignItems:'center', gap:14, fontSize:22, letterSpacing:2, color:paper.green}}><span style={{width:9,height:9,borderRadius:3,background:paper.green}}/>AUTOVIDEO <span style={{color:paper.muted, letterSpacing:0, marginLeft:12}}>知识讲解</span></div>
-    <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? `${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　${chapters[chapterIndex].title}` : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
+    <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
     {scene.component === 'title_card' ? <div style={{position:'absolute',left:180,top:285,width:1520}}>
-      <div style={{...motion('title'), ...textStyle, fontSize:p.title.length > 30 ? 76 : 92, lineHeight:1.35,fontWeight:700,letterSpacing:-1,maxWidth:1450}}>{p.title}</div>
+      <div style={{...motion('title'), ...textStyle, fontSize:p.title.length > 30 ? 76 : 92, lineHeight:1.35,fontWeight:700,letterSpacing:-1,maxWidth:1450}}><Tech text={p.title}/></div>
       <div style={{...motion('title'),width:84,height:5,background:paper.green,marginTop:38,borderRadius:3}}/>
-      {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? 36 : 42,lineHeight:1.65,color:paper.muted}}>{p.subtitle}</div>}
+      {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? 36 : 42,lineHeight:1.65,color:paper.muted}}><Tech text={p.subtitle}/></div>}
     </div> : <>
-      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...motion(scene.component === 'comparison' ? 'side:left' : 'title')}}>{heading}</div>
+      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...motion(scene.component === 'comparison' ? 'side:left' : 'title')}}><Tech text={heading}/></div>
       {scene.component === 'concept_reveal' && <div style={{position:'absolute',left:140,top:p.lines.length === 4 ? 330 : 360,width:1640,display:'grid',gridTemplateColumns:`repeat(${p.lines.length === 4 ? 2 : p.lines.length}, 1fr)`,gap:28}}>
         {p.lines.map((line: string,i: number) => {
           const match = line.match(/^([^：:]{1,16})[：:]\s*([\s\S]+)$/);
@@ -245,8 +269,8 @@ function InformationVideo({ir}: {ir: Timeline}) {
           const active = latest === `line:${i}`, compact = p.lines.length === 4;
           return <div key={i} style={{...panelStyle,...motion(`line:${i}`),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? paper.green : paper.line}`}}>
             <div style={{fontSize:22,color:paper.green,fontWeight:600,letterSpacing:2,marginBottom:compact ? 10 : 29}}>{String(i+1).padStart(2,'0')}</div>
-            <div style={{...textStyle,fontWeight:650,fontSize:compact || label.length > 10 ? 36 : 42,lineHeight:1.4}}>{label}</div>
-            {body && <div style={{...textStyle,color:paper.muted,fontSize:compact ? 28 : p.lines.length === 3 ? 30 : 34,lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}>{body}</div>}
+            <div style={{...textStyle,fontWeight:650,fontSize:compact || label.length > 10 ? 36 : 42,lineHeight:1.4}}><Tech text={label}/></div>
+            {body && <div style={{...textStyle,color:paper.muted,fontSize:compact ? 28 : p.lines.length === 3 ? 30 : 34,lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}><Tech text={body}/></div>}
           </div>;
         })}
       </div>}
@@ -254,13 +278,13 @@ function InformationVideo({ir}: {ir: Timeline}) {
         {(['left','right'] as const).map((side) => {
           const data=p[side], total=data.items.join('').length, bodySize=total > 130 ? 30 : 34;
           return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${side === 'right' ? paper.green : paper.line}`}}>
-            <div style={{...textStyle,color:side === 'right' ? paper.green : paper.muted,fontSize:data.label.length > 20 ? 34 : 42,lineHeight:1.4,fontWeight:650,marginBottom:30}}>{data.label}</div>
-            <div style={{display:'flex',flexDirection:'column',gap:20}}>{data.items.map((item: string,i: number) => <div key={i} style={{display:'flex',gap:15,fontSize:bodySize,lineHeight:1.5}}><span style={{color:paper.green}}>·</span><span style={textStyle}>{item}</span></div>)}</div>
+            <div style={{...textStyle,color:side === 'right' ? paper.green : paper.muted,fontSize:data.label.length > 20 ? 34 : 42,lineHeight:1.4,fontWeight:650,marginBottom:30}}><Tech text={data.label}/></div>
+            <div style={{display:'flex',flexDirection:'column',gap:20}}>{data.items.map((item: string,i: number) => <div key={i} style={{display:'flex',gap:15,fontSize:bodySize,lineHeight:1.5}}><span style={{color:paper.green}}>·</span><span style={textStyle}><Tech text={item}/></span></div>)}</div>
           </div>;
         })}
       </div>}
     </>}
-    <div style={{position:'absolute',bottom:60,left:120,right:120,display:'flex',justifyContent:'center',alignItems:'flex-end',minHeight:80}}>{caption && <div style={{maxWidth:1560,padding:'14px 28px',boxSizing:'border-box',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:caption.text.length > 32 ? 30 : 38,lineHeight:1.45,textAlign:'center',...textStyle}}>{caption.text}</div>}</div>
+    <div style={{position:'absolute',bottom:60,left:120,right:120,display:'flex',justifyContent:'center',alignItems:'flex-end',minHeight:80}}>{caption && <div style={{maxWidth:1560,padding:'14px 28px',boxSizing:'border-box',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:caption.text.length > 32 ? 30 : 38,lineHeight:1.45,textAlign:'center',...textStyle}}><Tech text={caption.text}/></div>}</div>
     <div style={{position:'absolute',left:0,bottom:0,height:4,width:`${100*(frame+1)/ir.total_frames}%`,background:paper.green}}/>
     <Audio src={staticFile(ir.audio_public_file)}/>
   </AbsoluteFill>;

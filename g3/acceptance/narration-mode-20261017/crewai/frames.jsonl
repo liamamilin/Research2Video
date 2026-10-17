@@ -1,0 +1,8 @@
+{"file": "scene-c1-s3.png", "time_seconds": 32.836, "tokens": ["1.15.27"]}
+{"file": "scene-c2-s2.png", "time_seconds": 80.935, "tokens": ["eval_crew.py"]}
+{"file": "scene-c3-s2.png", "time_seconds": 139.07, "tokens": ["--models", "v1.15.24", "1.15.27"]}
+{"file": "scene-c3-s3.png", "time_seconds": 148.425, "tokens": ["_print_comparison", "comparison['models']", "eval_crew.py"]}
+{"file": "caption-c1-n1.png", "time_seconds": 5.115, "tokens": ["--models"]}
+{"file": "caption-c1-n3.png", "time_seconds": 25.017, "tokens": ["--models", "1.15.27"]}
+{"file": "caption-c2-n7.png", "time_seconds": 73.072, "tokens": ["eval_crew.py"]}
+{"file": "caption-c3-n2.png", "time_seconds": 124.073, "tokens": ["--models", "v1.15.24"]}

@@ -572,6 +572,11 @@ def fit_voiceover_to_duration(initial_plan: dict) -> tuple[dict, dict]:
     raise G2Fault("TTS_DURATION_OUT_OF_RANGE", f"measured duration remained outside {TARGET_DURATION_RANGE[0]}–{TARGET_DURATION_RANGE[1]}s after two model revisions")
 
 
+def spoken_text(text: str) -> str:
+    """Backticks only mark code in the script; captions keep them, the voice does not read them."""
+    return text.replace("`", "")
+
+
 def synthesize_and_align(plan: dict) -> dict:
     import numpy as np
     import soundfile as sf
@@ -586,7 +591,7 @@ def synthesize_and_align(plan: dict) -> dict:
     start_time = time.monotonic()
     use_qwen = VOICE.startswith("qwen_")
     if use_qwen:
-        plan_path=ARTIFACTS/"voice-input.json";write_json(plan_path,plan)
+        plan_path=ARTIFACTS/"voice-input.json";write_json(plan_path,{**plan,"segments":[{**s,"text":spoken_text(s["text"])} for s in plan["segments"]]})
         _run_fixed_command("local-qwen-voice",[qwen_paths(PROJECT)[0],PROJECT/"g2/qwen_voice.py",plan_path,SEGMENTS_DIR,VOICE],PROJECT,timeout=1800)
     engine = None if use_qwen else Kokoro(str(KOKORO_MODEL), str(KOKORO_VOICES))
     g2p = None if use_qwen else zh.ZHG2P()
@@ -598,7 +603,7 @@ def synthesize_and_align(plan: dict) -> dict:
         if use_qwen:
             samples,sample_rate=sf.read(SEGMENTS_DIR/f"{segment['id']}.wav",dtype="float32")
         else:
-            phonemes, _ = g2p(segment["text"])
+            phonemes, _ = g2p(spoken_text(segment["text"]))
             if "❓" in phonemes:
                 raise G2Fault("TTS_G2P_FAILED", f"cannot resolve Chinese pronunciation for {segment['id']}")
             samples, sample_rate = engine.create(phonemes, voice=VOICE, speed=1.0, is_phonemes=True, trim=True)
@@ -714,7 +719,17 @@ def validate_compile_stage(narration: dict, board: dict, alignment: dict) -> dic
     write_json(IR_PATH, ir)
     write_json(ARTIFACTS / "compiled-timeline.json", compiled)
     write_json(ARTIFACTS / "action-catalog.json", json.loads(REGISTRY_PATH.read_text(encoding="utf-8")))
+    if LOCK_NARRATION:
+        from g2.authored_script import verify_outputs
+        source = PREPARED_SOURCE if PREPARED_SOURCE is not None else PROJECT_INPUT.read_text(encoding="utf-8").strip()
+        write_json(ARTIFACTS / "narration-check.json", verify_outputs(sys.modules[__name__], source))
     return compiled
+
+
+def add_narration_check(qa: dict) -> None:
+    path = ARTIFACTS / "narration-check.json"
+    if LOCK_NARRATION and path.is_file():
+        qa["narration_text"] = json.loads(path.read_text(encoding="utf-8"))
 
 
 def _run_fixed_command(label: str, argv: list[str | Path], cwd: Path, timeout: int = 900) -> str:
@@ -972,6 +987,7 @@ def run_all() -> dict:
                   information={"scene_count": len(plan["scenes"]),
                                "components": sorted({s["component"] for s in plan["scenes"]}),
                                "timing": "measured phrases; estimated within-phrase cues", "theme": "minimal_light"})
+        add_narration_check(qa)
         write_json(ARTIFACTS / "qa.json", qa)
         write_call_summary()
         write_manifest(renderer_root=renderer_root)
@@ -1012,6 +1028,7 @@ def run_all() -> dict:
         qa["diagram"] = {"layout_engine": "elkjs-0.12.0", "coordinates_authored_by_model": False,
                          "scene_count": len(plan["scenes"]), "cue_timing": "estimated within measured phrases",
                          "minimum_node_font_px": min(s["props"]["layout"]["font_size"] for s in compiled["scenes"])}
+        add_narration_check(qa)
         write_json(ARTIFACTS / "qa.json", qa)
         write_call_summary()
         write_manifest(renderer_root=renderer_root)
