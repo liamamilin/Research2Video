@@ -15,6 +15,8 @@ import { SchedulerPage } from "@/pages/Scheduler";
 import { RoundsPage } from "@/pages/Rounds";
 import { AskPage } from "@/pages/Ask";
 import { ShareViewPage } from "@/pages/ShareView";
+import { VideoScriptsPage } from "@/pages/VideoScripts";
+import { VideoScriptViewPage } from "@/pages/VideoScriptView";
 import { useAuthStore } from "@/lib/auth-store";
 import { ToastProvider } from "@/lib/toast";
 
@@ -59,6 +61,8 @@ function AppRoutes() {
         <Route path="/ask" element={<AskPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/reports/view" element={<ReportViewPage />} />
+        <Route path="/video" element={<VideoScriptsPage />} />
+        <Route path="/video/:id" element={<VideoScriptViewPage />} />
         <Route
           path="/settings"
           element={<AdminOnly><SettingsPage /></AdminOnly>}

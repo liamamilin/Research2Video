@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import json
+import threading
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -36,6 +37,7 @@ from web.routes.qa import router as qa_router
 from web.routes.assistant import router as assistant_router
 from web.routes.setup import router as setup_router
 from web.routes.gateway import router as gateway_router
+from web.routes.video import router as video_router
 from web.runner.registry import TaskRegistry
 from web.settings import get_settings
 from web.indexer import db as index_db
@@ -115,9 +117,42 @@ async def lifespan(app: FastAPI):
     # Start incremental file watcher
     start_watcher(settings.paths.output_dir, state_dir=settings.paths.state_dir)
 
+    # Video scripts: research or writing cut off by a restart cannot resume;
+    # renders can, from what their ledger rows record.
+    from core.video import store as video_store
+    from web.services import video_render
+
+    def recover_video_work() -> None:
+        interrupted = video_store.fail_interrupted()
+        if interrupted:
+            logger.info("Settled %d interrupted video script(s)", interrupted)
+        resumed = video_render.resume_active()
+        if resumed:
+            logger.info("Resumed %d in-flight video render(s)", resumed)
+
+    video_store.use_state_dir(settings.paths.state_dir)
+    video_store.init_db()
+    recover_video_work()
+
+    # Startup alone misses work cut off less than STALE_AFTER_SECONDS before
+    # this instance started (the gateway revives the app on the next request,
+    # often within seconds), so keep looking while serving. Only rows whose
+    # heartbeat has stopped are touched; live work beats every 20 s.
+    sweep_stop = threading.Event()
+
+    def sweep_video_work() -> None:
+        while not sweep_stop.wait(video_store.HEARTBEAT_SECONDS * 3):
+            try:
+                recover_video_work()
+            except Exception:  # noqa: BLE001 - the sweep must outlive one bad pass
+                logger.exception("video recovery sweep failed")
+
+    threading.Thread(target=sweep_video_work, name="video-recovery-sweep", daemon=True).start()
+
     logger.info("Web UI started")
     app.state.instance_id = uuid.uuid4().hex
     yield
+    sweep_stop.set()
     # Shutdown: cancel all running tasks
     registry = TaskRegistry()
     running = registry.all_running()
@@ -242,6 +277,7 @@ def create_app() -> FastAPI:
     app.include_router(assistant_router)
     app.include_router(setup_router)
     app.include_router(gateway_router)
+    app.include_router(video_router)
 
     @app.get("/api/health")
     def health():

@@ -1,0 +1,58 @@
+# 视频栏目：一个栏目 = 研究提示词 + 写稿规范 + 时长 + 视频形式 + 默认风格。
+# 见 spec/video-scripts.md 和 spec/video-adaptation.md。
+#
+# research_prompt 里的 {topic_*} 由 VOD/本系统按选题填入；{date} {date_7d_ago}
+# {keywords} {language} 由研究引擎在运行时替换。
+
+deep_dive:
+  name: 深度解读
+  description: 把一个值得讲清楚的问题讲透：先给结论，再按证据强弱展开，讲清反方和局限，最后给可执行的动作。
+  target_minutes: 6
+  video_form: auto          # AutoVideo：auto | information_motion | process_diagram
+  research_timeout_seconds: 3600
+  # 写稿方式（spec/video-adaptation.md）：legacy 一次写稿；adapt 五步改编。
+  # 验收通过前保持 legacy，改编通过「换个风格」给已有文稿生成新版本。
+  writer: legacy
+  default_style: {depth: intermediate, tone: explainer}   # 见 config/video_styles.yaml
+  allowed_tones: [concise, explainer, playful, story]
+  structure:                # 讲述方案和讲稿必须满足的结构，由代码检查
+    required_roles: [钩子, 反方, 行动]
+    sections: [4, 6]
+    paragraph_units: [60, 140]
+  research_prompt: |
+    你是一名技术研究员，为一位制作 AI / 软件类知识视频的创作者做选题调研。你的报告会被写成一篇约 {topic_minutes} 分钟的口播文稿，文稿里的每个事实都要能追溯到你引用的网页，所以每个关键判断都要给出原始网址。
+
+    ## 选题
+    - 标题：{topic_title}
+    - 核心角度：{topic_angle}
+    - 目标受众：{topic_audience}
+    - 为什么有人在乎：{topic_why}
+    - 建议大纲：{topic_outline}
+
+    ## 任务
+    围绕这个选题做深度调研：先直接回答它要回答的问题，再给出支撑证据、反方证据和仍未确定的部分。证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。
+    输出语言：{language}。
+
+    ## 证据规则
+    1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。
+    2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
+    3. 核心结论尽量由两个相互独立的来源支撑；只有厂商自己的说法时，标注「厂商自述，未独立验证」。
+    4. 给出反方证据或失败案例；确实找不到时写明「未找到反方证据」。
+    5. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
+    6. 数字（价格、版本号、日期、比例）照来源原样写，注明口径。
+
+    ## 输出结构
+    ### 1. 直接回答
+    ### 2. 关键事实（表格：事实 | 置信度 | 来源编号）
+    ### 3. 争议与反方证据
+    ### 4. 仍未确定的问题
+    ### 5. 适合视频的讲述角度（不超过 3 条）
+    ### 6. 来源清单
+    编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址
+  script_style: |
+    栏目「深度解读」：把一个问题讲透，而不是罗列新闻。
+    - 开场用一个具体场景或冲突把问题抛出来（1 段），紧接着给结论。
+    - 主体按证据强弱展开：先讲已证实的，再讲有迹象的，推测必须明说是推测。
+    - 必须有一节讲反方、局限或还不确定的地方。
+    - 结尾给观众 2–4 个本周就能做的具体动作。
+    - 4–6 节，每节 2–5 段，每段 60–140 字，口语化，适合朗读。
