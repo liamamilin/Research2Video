@@ -492,18 +492,37 @@ def reuse_validated_plan(stage: str, source_builder, validator, context) -> dict
     return plan
 
 
-def generate_validated_plan(stage: str, source_builder, schema_path: Path, validator, context) -> dict:
+def generate_validated_plan(stage: str, source_builder, schema_path: Path, validator, context,
+                            soft_validator=None, soft_reserve: int = 0) -> dict:
+    """Ask for a plan until ``validator`` accepts it.
+
+    ``soft_validator(plan, context)`` returns advisory problems. They earn one more attempt, and only while
+    ``soft_reserve`` further calls (the stages still to come) fit under the call cap; otherwise, or when
+    the retry fails, the first plan the hard validator accepted is kept and the problems are logged to
+    fidelity-warnings.jsonl. They never fail the job.
+    """
     schema = _schema(schema_path)
     cached = reuse_validated_plan(stage, source_builder, validator, context)
     if cached is not None:
         return cached
     feedback = None
     last_error: Exception | None = None
+    fallback = None  # (plan, problems): accepted by the hard validator, with advisory problems left
     for attempt in range(1, MAX_LLM_ATTEMPTS + 1):
         messages = creative_messages(source_builder(context, feedback))
         try:
             result = deepseek_json_call(stage, messages, schema, attempt)
             validator(result, context)
+            problems = soft_validator(result, context) if soft_validator else []
+            if problems and fallback is None and attempt < MAX_LLM_ATTEMPTS \
+                    and len(CALL_RECORDS) + 1 + soft_reserve <= MAX_TOTAL_CALLS:
+                fallback = (result, problems)
+                append_log(LOGS / "validation_retries.jsonl", {"stage": stage, "attempt": attempt,
+                            "error_code": "FIDELITY_SOFT", "error": "；".join(problems), "retry_limit": MAX_LLM_ATTEMPTS})
+                feedback = "上一次输出能通过本地校验，但画面文字与旁白不够贴：" + "；".join(problems) + "。请只修正这些问题，只输出完整 JSON。"
+                continue
+            if problems:
+                append_log(LOGS / "fidelity-warnings.jsonl", {"stage": stage, "attempt": attempt, "problems": problems})
             write_json(ARTIFACTS / f"{stage}-plan.json", result)
             return result
         except G2Fault as exc:
@@ -513,7 +532,13 @@ def generate_validated_plan(stage: str, source_builder, schema_path: Path, valid
             feedback = f"上一次输出被本地验证器拒绝：{exc}。请修正后只输出完整 JSON。"
             if attempt == MAX_LLM_ATTEMPTS or exc.code in {
                     "DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "DEEPSEEK_RATE_LIMIT",
-                    "DEEPSEEK_HTTP_ERROR", "DEEPSEEK_UNAVAILABLE", "DEEPSEEK_TIMEOUT"}:
+                    "DEEPSEEK_HTTP_ERROR", "DEEPSEEK_UNAVAILABLE", "DEEPSEEK_TIMEOUT", "MODEL_CALL_BUDGET_EXHAUSTED",
+                    "MODEL_COST_BUDGET_EXCEEDED"}:
+                if fallback is not None:
+                    append_log(LOGS / "fidelity-warnings.jsonl", {"stage": stage, "attempt": 1, "problems": fallback[1],
+                                "retry_failed_with": exc.code})
+                    write_json(ARTIFACTS / f"{stage}-plan.json", fallback[0])
+                    return fallback[0]
                 raise
     assert last_error is not None
     raise last_error
