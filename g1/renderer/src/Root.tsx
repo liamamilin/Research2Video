@@ -250,7 +250,9 @@ function InformationVideo({ir}: {ir: Timeline}) {
     const t = beat ? ease((frame-beat.frame)/16) : 0;
     return {opacity:t, transform:`translateY(${(1-t)*22}px)`, willChange:'transform, opacity'};
   };
-  const textStyle: React.CSSProperties = {overflowWrap:'anywhere', whiteSpace:'normal', wordBreak:'normal'};
+  // 'pretty' keeps a line from ending on a single orphaned character ("美" / "分"). 'balance' was tried for headings and
+  // split phrases worse ("账" / "从 10 美元…"), because Chinese text has no word gaps to balance on.
+  const textStyle = {overflowWrap:'anywhere', whiteSpace:'normal', wordBreak:'normal', textWrap:'pretty'} as React.CSSProperties;
   const panelStyle: React.CSSProperties = {background:'#FFFFFF', border:`1px solid ${paper.line}`, borderRadius:22, boxShadow:'0 12px 32px rgba(26,50,35,.045)', boxSizing:'border-box'};
   const heading = scene.component === 'comparison' ? scene.purpose : p.title;
   return <AbsoluteFill style={{background:paper.bg, color:paper.ink, fontFamily:font, backgroundImage:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
