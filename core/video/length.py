@@ -8,9 +8,16 @@ afterwards.
 
 Spoken units rather than ``len()``: a Latin word inside a Chinese script
 ("Claude", "API") takes about the time of one character, not one per
-letter. Three real AutoVideo renders of Chinese scripts measured 4.30, 4.30
-and 4.36 units per second, pauses included; by ``len()`` the same narration
-ran at about 6.6 characters per second.
+letter. By ``len()`` real narration ran at about 6.6 characters per second.
+
+Duration is speech plus pauses. AutoVideo cuts the script into sentences
+(``g2/authored_script.split_script``) and leaves 0.36 s between sentences and
+0.85 s between chapters, so a script of short sentences runs longer than one of
+long sentences with the same number of units. Two real renders (C4 v10: 1683
+units, 92 sentences, 6 chapters, 406.9 s; the crewAI eval script: 1518 units, 63
+sentences, 5 chapters, 353.9 s) both gave 4.53-4.61 units per second of speech
+once the pauses were taken out, but 4.14 and 4.29 overall. The estimate adds the
+pauses; the unit budget uses the overall rate at about 20 units per sentence.
 """
 
 from __future__ import annotations
@@ -18,7 +25,14 @@ from __future__ import annotations
 import re
 from collections.abc import Sequence
 
-UNITS_PER_SECOND = 4.3
+#: Overall rate, pauses included, at about 20 units per sentence: what turns a target into a unit budget.
+UNITS_PER_SECOND = 4.2
+#: Speech alone, from the two renders above.
+SPEECH_UNITS_PER_SECOND = 4.57
+SENTENCE_PAUSE_SECONDS = 0.36
+CHAPTER_PAUSE_SECONDS = 0.85
+#: AutoVideo splits a longer sentence at a comma.
+SEGMENT_MAX_CHARS = 80
 #: A script more than this far from its budget is flagged, never truncated:
 #: cutting narration mid-argument would drop the qualifiers that matter.
 #: Was 0.25, under which a six-minute target showed 4.5–7.5 minutes as on
@@ -36,6 +50,31 @@ def spoken_units(text: str) -> int:
     if not text:
         return 0
     return len(_CJK.findall(text)) + len(_LATIN_WORD.findall(text)) + len(_DIGIT.findall(text))
+
+
+def segment_count(text: str) -> int:
+    """How many pieces AutoVideo voices ``text`` in: one per sentence, and a sentence over 80 characters is cut."""
+    count = 0
+    for paragraph in re.split(r"[\r\n]+", text):
+        for sentence in re.split(r"(?<=[。！？!?；;])", paragraph):
+            remaining = sentence.strip()
+            while remaining:
+                end = min(SEGMENT_MAX_CHARS, len(remaining))
+                if len(remaining) > SEGMENT_MAX_CHARS:
+                    natural = max(remaining.rfind(mark, 0, SEGMENT_MAX_CHARS) + 1 for mark in "，,、")
+                    if natural < SEGMENT_MAX_CHARS // 2:
+                        natural = remaining.rfind(" ", 0, SEGMENT_MAX_CHARS) + 1
+                    if natural >= SEGMENT_MAX_CHARS // 2:
+                        end = natural
+                remaining = remaining[end:].strip()
+                count += 1
+    return count
+
+
+def estimated_seconds(units: int, segments: int, chapters: int) -> float:
+    """Speech time plus the pauses between sentences and between chapters."""
+    pauses = SENTENCE_PAUSE_SECONDS * max(segments - chapters, 0) + CHAPTER_PAUSE_SECONDS * max(chapters - 1, 0)
+    return units / SPEECH_UNITS_PER_SECOND + pauses
 
 
 def chinese_share(text: str) -> float:
@@ -72,7 +111,10 @@ def allocate(total: int, weights: Sequence[float]) -> list[int]:
 def status(length: int, budget: int | None) -> str | None:
     if not budget:
         return None
-    ratio = length / budget
+    return _status_of(length / budget)
+
+
+def _status_of(ratio: float) -> str:
     if ratio > 1 + TOLERANCE:
         return "OVER"
     if ratio < 1 - TOLERANCE:
@@ -89,24 +131,31 @@ def measure(sections: list[dict], target_minutes: int | None,
     """
     per_section = []
     total = 0
+    segments = 0
     for section in sections:
-        length = sum(spoken_units(str(p.get("text") or "")) for p in section.get("paragraphs") or [])
+        texts = [str(p.get("text") or "") for p in section.get("paragraphs") or []]
+        length = sum(spoken_units(text) for text in texts)
         total += length
+        segments += segment_count("\n".join(texts))
         per_section.append({"title": section.get("title", ""), "spoken_length": length})
+    seconds = estimated_seconds(total, segments, len(sections))
     budget = budget_for(target_minutes) if target_minutes else None
     if budget:
         weights = list(section_budgets) if section_budgets and len(section_budgets) == len(per_section) \
             else [1] * len(per_section)
         for part, share in zip(per_section, allocate(budget, weights), strict=True):
             part["budget"] = share
+    # The verdict is on the estimated time: units alone miss the pauses of a script of short sentences.
+    ratio = seconds / (target_minutes * 60) if target_minutes else None
     return {
         "spoken_length": total,
-        "estimated_seconds": round(total / UNITS_PER_SECOND),
+        "estimated_seconds": round(seconds),
+        "segments": segments,
         "units_per_second": UNITS_PER_SECOND,
         "target_minutes": target_minutes,
         "budget": budget,
-        "ratio": round(total / budget, 3) if budget else None,
-        "status": status(total, budget),
+        "ratio": round(ratio, 3) if ratio else None,
+        "status": _status_of(ratio) if ratio else None,
         "tolerance": TOLERANCE,
         "sections": per_section,
     }

@@ -172,6 +172,30 @@ def test_spoken_units_count_words_not_letters():
     assert sum(length.allocate(100, [1, 2, 0])) == 100
 
 
+def test_segments_are_counted_the_way_autovideo_cuts_a_script():
+    assert length.segment_count("先说一句。再说一句！还有吗？") == 3
+    assert length.segment_count("第一段。\n第二段没有句号") == 2
+    long_sentence = "，".join(["这是一个比较长的分句内容" * 2] * 4) + "。"  # over 80 characters: cut at a comma
+    assert len(long_sentence) > 80 and length.segment_count(long_sentence) == 2
+    assert length.segment_count("") == 0
+
+
+def test_the_estimate_adds_the_pauses_and_matches_the_real_renders():
+    # (units, sentences, chapters, real seconds): C4 v10 and the crewAI eval script, voiced by AutoVideo
+    for units, segments, chapters, real in ((1683, 92, 6, 406.9), (1518, 63, 5, 353.9)):
+        assert abs(length.estimated_seconds(units, segments, chapters) / real - 1) < 0.02
+    assert length.estimated_seconds(0, 0, 0) == 0
+
+
+def test_a_script_of_short_sentences_is_judged_by_its_time_not_its_units():
+    short = [{"title": "章", "paragraphs": [{"text": "好。" * 800}]}]  # 800 units, 800 sentences
+    check = length.measure(short, 6)
+    assert check["spoken_length"] == 800 and check["segments"] == 800
+    assert check["estimated_seconds"] > 360 * 1.15 and check["status"] == "OVER"
+    assert length.status(800, check["budget"]) == "UNDER"  # by units alone it would have looked short
+    assert abs(check["ratio"] - check["estimated_seconds"] / 360) < 0.003  # the ratio is the time against the target
+
+
 def test_topics_come_from_the_newest_round_with_a_content_report(tmp_path):
     base = tmp_path / video_topics.PIPELINE_DIR
     (base / "2026-10-01").mkdir(parents=True)
