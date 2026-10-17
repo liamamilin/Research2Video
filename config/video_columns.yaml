@@ -11,8 +11,9 @@ deep_dive:
   video_form: auto          # AutoVideo：auto | information_motion | process_diagram
   research_timeout_seconds: 3600
   # 写稿方式（spec/video-adaptation.md）：legacy 一次写稿；adapt 五步改编。
-  # 验收通过前保持 legacy，改编通过「换个风格」给已有文稿生成新版本。
-  writer: legacy
+  # 已改为 adapt（2026-10-17）：新稿走改编和三项审计，仍由人工审稿后定稿。
+  # 已有文稿可以随时「换个风格」；需要退回时把这里改回 legacy。
+  writer: adapt
   default_style: {depth: intermediate, tone: explainer}   # 见 config/video_styles.yaml
   allowed_tones: [concise, explainer, playful, story]
   structure:                # 讲述方案和讲稿必须满足的结构，由代码检查

@@ -111,7 +111,11 @@ def llm(monkeypatch):
 def video_env(web_env, monkeypatch):
     tmp, users = web_env
     (tmp / "config").mkdir(exist_ok=True)
-    shutil.copy(ROOT / "config" / "video_columns.yaml", tmp / "config" / "video_columns.yaml")
+    # These tests drive the one-call writer; the default column is `adapt`, which test_video_adapt.py covers.
+    columns_yaml = (ROOT / "config" / "video_columns.yaml").read_text(encoding="utf-8")
+    assert "  writer: adapt\n" in columns_yaml
+    (tmp / "config" / "video_columns.yaml").write_text(columns_yaml.replace("  writer: adapt\n", "  writer: legacy\n"),
+                                                       encoding="utf-8")
     store.use_state_dir(str(tmp / "state"))
     store.init_db()
     from core import report_meta

@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 
 from .. import length
 from ..columns import ROLES
-from .common import WEAK, call_json, fact_ids, fact_line, facts_by_id
+from .common import WEAK, call_json, concept_names, covered, fact_ids, fact_line, facts_by_id
 
 PROMPT_VERSION = 2
 
@@ -185,15 +185,6 @@ def _known_ids(values, known: dict, unknown: set[str]) -> list[str]:
     return [f for f in ids if f in known]
 
 
-def _covered(term: str, plan: dict) -> bool:
-    """A concept the viewer will have: explained in the glossary, or already known."""
-    needle = term.strip().lower()
-    if not needle:
-        return True
-    known = [g["term"] for g in plan["glossary"]] + plan["audience"]["knows"]
-    return any(needle in k.lower() or k.lower() in needle for k in known if k.strip())
-
-
 def check(plan: dict, sheet: dict, column, target_minutes: int) -> list[str]:
     """Structural problems worth one retry. Unknown fact ids are removed in place."""
     known = facts_by_id(sheet)
@@ -245,9 +236,20 @@ def check(plan: dict, sheet: dict, column, target_minutes: int) -> list[str]:
     for action in plan["actions"]:
         if not action["condition"].strip() or not action["verify"].strip():
             problems.append(f"行动「{action['step'][:20]}」缺少适用条件或验证方法")
-        missing_terms = [t for t in action["needs"] if not _covered(t, plan)]
+        missing_terms = [t for t in action["needs"] if not covered(t, plan)]
         if missing_terms:
             problems.append(f"行动「{action['step'][:20]}」依赖的概念没有解释：{'、'.join(missing_terms)}")
+    # The plan's own list of needed concepts can leave one out (C4 v8 advised placing content "before the
+    # cache breakpoint" and never explained breakpoints), so also check every concept the fact sheet names.
+    said = " ".join(f"{a['step']} {a['condition']}" for a in plan["actions"]) + " " + \
+        " ".join(c["step"] for c in plan["chain"])
+    unexplained = []
+    for concept in sheet.get("concepts") or []:
+        names = concept_names(concept.get("term", ""))
+        if any(n.lower() in said.lower() for n in names) and not any(covered(n, plan) for n in names):
+            unexplained.append(names[0])
+    if unexplained:
+        problems.append(f"行动或因果链用到了没有解释的概念：{'、'.join(unexplained)}（加进术语表，或者换个不需要它的说法）")
     bad_cover = [c["item"][:20] for c in plan["must_cover"] if not 1 <= c["beat"] <= len(plan["beats"])]
     if bad_cover:
         problems.append(f"这些必讲内容没有安排到有效的节：{'；'.join(bad_cover)}")

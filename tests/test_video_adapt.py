@@ -279,6 +279,34 @@ def test_an_action_resting_on_an_unexplained_concept_is_sent_back(llm):
     assert problems == []
 
 
+def test_concepts_the_fact_sheet_names_must_be_explained_before_actions_use_them(llm):
+    # Found on C4 v8: an action said "before the cache breakpoint", breakpoints were never explained,
+    # and the plan's own needs list had left them out. Not caching here: agent audit trails.
+    sheet = {"facts": [{"id": "F1", "claim": "本地框架把轨迹写在 agent 可写的目录里", "confidence": "已证实",
+                        "sources": [PRICING]}],
+             "concepts": [{"term": "写权限边界（write boundary）", "meaning": "被调查者能不能改这条记录", "needs": []}]}
+    plan = plan_json()
+    for beat in plan["beats"]:
+        beat["facts"] = ["F1"]
+    plan["hook"]["facts"] = []
+    plan["left_out"] = []
+    plan["goals"] = [{"question": f"问题{i}", "answer": "", "facts": ["F1"]} for i in range(3)]
+    plan["chain"] = [{"step": "轨迹在可写目录里", "facts": ["F1"]}, {"step": "所以它能被改", "facts": ["F1"]}]
+    plan["actions"] = [{"condition": "你做事故复盘时", "step": "把记录放到写权限边界之外", "verify": "删本地记录后外部还在",
+                        "needs": []}]
+    problems = planning.check(json.loads(json.dumps(plan)), sheet, column(), 6)
+    assert any("没有解释的概念：写权限边界" in p for p in problems)
+    plan["glossary"].append({"term": "写权限边界", "plain": "被调查者改不了的地方"})
+    assert not any("没有解释的概念" in p for p in planning.check(json.loads(json.dumps(plan)), sheet, column(), 6))
+
+    sections = [{"title": "一", "paragraphs": [{"text": "先看记录放在哪。", "facts": []},
+                                              {"text": "记录要在 write boundary 之外。", "facts": []}]}]
+    plan["glossary"].pop()
+    c1 = [i for i in review.rules(sections, column=column(), target_minutes=6, plan=plan, sheet=sheet, style=style())
+          if i["rule"] == "C1"]
+    assert [(i["severity"], i["section"], i["paragraph"]) for i in c1] == [(review.WARN, 0, 1)]
+
+
 def test_the_comprehension_path_must_hold_together(llm):
     bad = plan_json()
     bad["goals"] = bad["goals"][:2] + [{"question": "没有依据的目标", "answer": "", "facts": []}]
@@ -452,7 +480,7 @@ def test_pipeline_passes_a_clean_script_in_five_calls(llm):
     first = adapted.sections[0]["paragraphs"][0]
     assert first["citations"] == [PRICING] and first["evidence"] == "CITED"
     assert adapted.meta["style"]["presets"] == ["intermediate@1", "explainer@2"]
-    assert adapted.meta["prompts"] == {"facts": 2, "plan": 2, "draft": 2, "review": 2}
+    assert adapted.meta["prompts"] == {"facts": 2, "plan": 2, "draft": 2, "review": 3}
     assert adapted.meta["fact_sheet_id"] == facts.sheet_id(REPORT)
     assert adapted.meta["description"]["sources"][0] == {"url": PRICING, "facts": ["F3", "F1", "F2"]}
     assert "批处理命中率在 30% 到 98% 之间" in adapted.meta["description"]["not_covered"]
@@ -528,6 +556,38 @@ def test_a_serious_error_that_survives_the_rounds_loses_its_sentence(llm):
     assert not any(i["severity"] == review.SERIOUS for i in checks["issues"])
     assert any(i["rule"] == "D1" and i["resolved"] == "deleted" for i in checks["initial"])
     assert adapted.length_check["spoken_length"] < length.measure(script["sections"], 6)["spoken_length"]
+
+
+def test_an_action_that_fails_when_followed_is_a_serious_issue_even_if_the_audit_lists_no_error(llm):
+    script = draft_json()
+    script["sections"][2]["paragraphs"][1]["text"] = "把会变的东西挪到末尾。" + sentences_of(120, "讲")
+    llm.queues["draft"] = [script]
+    llm.queues["audit"] = [{**CLEAN, "actions": [
+        {"id": "S3P2", "relies_on": "缓存只认断点之前的内容", "simulate": "挪到末尾后仍在断点之前，前缀照样变化",
+         "works": False, "severity": "严重", "quote": "把会变的东西挪到末尾", "problem": "只挪位置不挪断点，缓存照样失效",
+         "suggestion": "放到断点之后"},
+        {"id": "S3P1", "relies_on": "底稿没有", "simulate": "", "works": True}]}]
+    adapted, _ = adapt()
+    assert "【严重】D7：只挪位置不挪断点，缓存照样失效（原句：把会变的东西挪到末尾）" in llm.request("revise")
+    checks = adapted.meta["checks"]
+    assert [(d["section"], d["paragraph"], d["rule"]) for d in checks["deletions"]] == [(2, 1, "D7")]
+    assert any(i["rule"] == "D7" and i["resolved"] == "deleted" for i in checks["initial"])
+    assert not any(i["rule"] == "D7" for i in checks["issues"])
+
+
+def test_an_action_that_only_leaves_out_a_condition_is_a_reminder_not_a_deletion(llm):
+    script = draft_json()
+    script["sections"][2]["paragraphs"][1]["text"] = "读到零，多半是前缀没稳住。" + sentences_of(120, "讲")
+    llm.queues["draft"] = [script]
+    llm.queues["audit"] = [{**CLEAN, "actions": [
+        {"id": "S3P2", "relies_on": "前缀太短不缓存", "simulate": "读零也可能是前缀太短", "works": False,
+         "severity": "一般", "quote": "读到零，多半是前缀没稳住", "problem": "漏了前缀过短这个原因"}]}]
+    adapted, _ = adapt()
+    checks = adapted.meta["checks"]
+    assert checks["deletions"] == [] and "读到零，多半是前缀没稳住" in adapted.sections[2]["paragraphs"][1]["text"]
+    d7 = [i for i in checks["issues"] if i["rule"] == "D7"]
+    assert [(i["severity"], i["section"], i["paragraph"]) for i in d7] == [("warn", 2, 1)]
+    assert checks["summary"]["passed"]  # a reminder never blocks the approval
 
 
 def test_the_opening_and_the_core_message_are_never_cut(llm):
@@ -661,7 +721,7 @@ def test_editing_an_adapted_version_keeps_its_facts(client, video_env, llm):
     first = version["sections"][0]["paragraphs"][0]
     assert first["facts"] == ["F3", "F1"] and first["citations"] == [PRICING] and first["note"] == "审稿人的备注"
     assert version["meta"]["style"]["tone"] == "explainer" and version["meta"]["plan"]["core_message"]
-    assert version["meta"]["prompts"]["review"] == 2
+    assert version["meta"]["prompts"]["review"] == 3
     assert version["checks"]["model_checks_stale"] is True and version["checks"]["version"] == 2
 
     # Editing the old legacy version keeps it legacy, even though an adapted version is current.

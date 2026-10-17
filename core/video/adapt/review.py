@@ -33,10 +33,10 @@ from pydantic import BaseModel, Field
 
 from .. import length
 from ..writer import FORBIDDEN_PHRASES
-from .common import (VERSIONED, WEAK, call_json, fact_line, facts_by_id, numbered_script, paragraphs, pid,
-                     quantities, untraced)
+from .common import (VERSIONED, WEAK, call_json, concept_names, covered, fact_line, facts_by_id, numbered_script,
+                     paragraphs, pid, quantities, untraced)
 
-PROMPT_VERSION = 2
+PROMPT_VERSION = 3
 
 SERIOUS, MUST, WARN = "serious", "must", "warn"
 FACT, COMPREHENSION, COMMUNICATION = "fact", "comprehension", "communication"
@@ -155,6 +155,14 @@ def rules(sections: list[dict], *, column, target_minutes: int, plan: dict | Non
                 issues.append(issue("C1", MUST, f"「{term}」没有解释过", si, pi))
             elif introduced > said:
                 issues.append(issue("C1", MUST, f"「{term}」在解释之前就用了", si, pi))
+        # A concept the fact sheet says needs explaining, said aloud with no glossary entry.
+        for concept in sheet.get("concepts") or []:
+            names = concept_names(concept.get("term", ""))
+            if not names or any(covered(n, plan) for n in names):
+                continue
+            first = next(((si, pi) for si, pi, p in order if any(n.lower() in p["text"].lower() for n in names)), None)
+            if first:
+                issues.append(issue("C1", WARN, f"「{names[0]}」用到了，但方案没有安排解释它", *first))
         limit = style.depth.max_new_terms_per_section if style else 0
         if limit:
             for si, section in enumerate(sections):
@@ -269,6 +277,14 @@ FACT_AUDIT_PROMPT = """你是事实审计员。逐段检查口播稿，只找问
 
 代码已经找出一些在标注事实里找不到的数字，列在「代码发现」里：逐个核实，确实有问题的才报告。
 
+行动核验：凡是让观众「去做某件事」的段落，都要在 actions 里写一条，不要只凭印象判断「听起来对」。每条写：
+- relies_on：这条建议靠的是事实底稿里的哪个机制（原样引用或概括，没有对应机制就写「底稿没有」）；
+- simulate：把建议当成操作步骤，观众照着做一遍，一步一步写出会发生什么，包括建议没说清楚的地方（放在哪里、先后顺序、作用范围、适用条件）；
+- works：照做以后能不能达到建议想要的效果，能写 true，不能或底稿里的机制说不通写 false；
+- severity：works 为 false 时写。照做得到相反的结果、或者完全无效，写「严重」；建议大体可行，只是漏了适用条件、归因不全、说得偏绝对，写「一般」（句子里已经用了「多半」「可能」这类留有余地的说法时，一般只算「一般」）；
+- quote、problem、suggestion：works 为 false 时写，quote 是出问题的那句话，原样复制。
+works 为 false 的建议不需要再在 issues 里重复。
+
 严重程度：
 - 严重：编造、事实写反、数字或推导错到改变结论、照做会出错的建议、把推导或推测说成已经证实。
 - 一般：数字偏差在 10% 以内且不改变结论、措辞偏绝对但不误导、可以更准确的表达。
@@ -280,8 +296,8 @@ FACT_AUDIT_PROMPT = """你是事实审计员。逐段检查口播稿，只找问
 - 按答案要点给观众对测验题的回答判分：correct 为 true 或 false，note 写一句理由。意思对就算对，不要求用词一致；「没听出来」算错。
 
 只输出一个 JSON 对象，不要任何其他文字：
-{"issues": [{"id": "S2P1", "quote": "", "rule": "D2", "severity": "严重", "problem": "", "why": "", "suggestion": ""}], "core_message_match": true, "core_message_note": "", "grades": [{"id": "G1", "correct": true, "note": ""}]}
-没有问题时 issues 为空列表。"""
+{"issues": [{"id": "S2P1", "quote": "", "rule": "D2", "severity": "严重", "problem": "", "why": "", "suggestion": ""}], "actions": [{"id": "S6P1", "relies_on": "", "simulate": "", "works": true, "severity": "", "quote": "", "problem": "", "suggestion": ""}], "core_message_match": true, "core_message_note": "", "grades": [{"id": "G1", "correct": true, "note": ""}]}
+没有问题时 issues 为空列表；没有行动建议的段落不写 actions。"""
 
 
 class _Reading(BaseModel):
@@ -319,8 +335,20 @@ class _Grade(BaseModel):
     note: str = ""
 
 
+class _ActionCheck(BaseModel):
+    id: str
+    relies_on: str = ""
+    simulate: str = ""
+    works: bool = True
+    severity: str = "一般"
+    quote: str = ""
+    problem: str = ""
+    suggestion: str = ""
+
+
 class _FactAudit(BaseModel):
     issues: list[_Finding] = Field(default_factory=list)
+    actions: list[_ActionCheck] = Field(default_factory=list)
     core_message_match: bool | None = None
     core_message_note: str = ""
     grades: list[_Grade] = Field(default_factory=list)
@@ -404,6 +432,16 @@ def fact_audit(client, sections: list[dict], plan: dict, sheet: dict, reading: d
         severity = SERIOUS if "严重" in finding.severity else WARN
         found.append(issue(rule, severity, finding.problem, *spot, quote=finding.quote, why=finding.why,
                            suggestion=finding.suggestion, source="model"))
+    for action in result.actions:
+        spot = _locate(action.id)
+        if action.works or not _valid(spot, sections):
+            continue
+        if any(i["rule"] == "D7" and (i["section"], i["paragraph"]) == spot for i in found):
+            continue  # the audit already reported this advice
+        severity = SERIOUS if "严重" in action.severity else WARN
+        found.append(issue("D7", severity, action.problem or "照这条建议做，达不到想要的效果", *spot,
+                           quote=action.quote, why=action.simulate or RULE_INFO["D7"][1],
+                           suggestion=action.suggestion, source="model"))
     return {
         "issues": found,
         "core_message_match": result.core_message_match,

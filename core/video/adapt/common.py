@@ -206,6 +206,22 @@ def numbered_script(sections: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def concept_names(term: str) -> list[str]:
+    """The ways a sheet concept is said: "缓存断点（cache_control breakpoint）" → both halves."""
+    match = re.match(r"^(.*?)\s*[（(](.*?)[）)]\s*$", term or "")
+    names = [match.group(1), match.group(2)] if match else [term or ""]
+    return [n.strip() for n in names if len(n.strip()) >= 2]
+
+
+def covered(name: str, plan: dict) -> bool:
+    """A concept the viewer will have: explained in the plan's glossary, or already known."""
+    needle = name.strip().lower()
+    if not needle:
+        return True
+    known = [g.get("term", "") for g in plan.get("glossary") or []] + list((plan.get("audience") or {}).get("knows") or [])
+    return any(needle in k.lower() or k.lower() in needle for k in known if k.strip())
+
+
 def fact_line(fact: dict) -> str:
     """One fact for a prompt: id, confidence, claim, caveat, formula. Sources stay out."""
     line = f"{fact['id']} [{fact['confidence']}] {fact['claim']}"
