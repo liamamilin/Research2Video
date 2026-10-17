@@ -1,0 +1,16 @@
+{
+  "registry_version": "0.2-ext1",
+  "notes": "Extension components for the information_motion presentation only. The frozen v0.2 registry (component-registry-v0.2.json) is unchanged; g1/video_ir.load_registry() merges these entries. big_number reveals title, then line:0 (value), line:1 (label) and line:2 (note, if present): the frozen beat target pattern has no other names.",
+  "components": {
+    "big_number": {
+      "props_schema": "components/big_number.schema.json",
+      "actions": {
+        "reveal": [
+          "scene",
+          "title",
+          "line:*"
+        ]
+      }
+    }
+  }
+}

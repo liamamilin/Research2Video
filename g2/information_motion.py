@@ -12,7 +12,7 @@ from g2.technical_text import altered_technical_text, display_width, wrap_units
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "g2/schemas/information-motion-plan.schema.json"
-COMPONENTS = ("title_card", "concept_reveal", "comparison")
+COMPONENTS = ("title_card", "concept_reveal", "comparison", "big_number", "bar_chart")
 
 
 class InformationFault(ValueError):
@@ -40,6 +40,10 @@ def targets(component: str, props: dict) -> list[str]:
         return ["title", *(["subtitle"] if props.get("subtitle") else [])]
     if component == "concept_reveal":
         return ["title", *[f"line:{i}" for i in range(len(props["lines"]))]]
+    if component == "big_number":
+        return ["title", "line:0", "line:1", *(["line:2"] if props.get("note") else [])]  # value, label, note
+    if component == "bar_chart":
+        return [f"bar:{i}" for i in range(len(props["categories"]))]
     return ["side:left", "side:right"]
 
 
@@ -57,8 +61,17 @@ def text_lines(text: str, size: int, width: int) -> int:
     return count
 
 
+def bar_value_text(props: dict, index: int) -> str:
+    """A bar's value as the renderer prints it: the number, then the unit."""
+    return f"{props['values'][index]:,.3f}".rstrip("0").rstrip(".") + f" {props['unit']}"
+
+
 def visible_text(scene: dict) -> list[str]:
     props = scene["props"]
+    if scene["component"] == "big_number":
+        return [scene["headline"], props["title"], props["value"], props["label"], props.get("note") or ""]
+    if scene["component"] == "bar_chart":
+        return [scene["headline"], *props["categories"], *[bar_value_text(props, i) for i in range(len(props["categories"]))]]
     if scene["component"] == "comparison":
         return [scene["headline"], *(text for side in ("left", "right") for text in [props[side]["label"], *props[side]["items"]])]
     return [scene["headline"], props["title"], props.get("subtitle") or "", *props.get("lines", [])]
@@ -83,6 +96,31 @@ def validate_text_fit(scene: dict) -> None:
                 height += (10 if compact else 22) + text_lines(body, body_size, text_width) * body_size * (1.5 if compact else 1.6)
             if height > (250 if compact else 440):
                 raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: card text exceeds its panel; shorten on-screen wording or split into another scene")
+    elif component == "big_number":
+        size = 220 if len(props["value"]) <= 6 else 180 if len(props["value"]) <= 9 else 140
+        if text_lines(props["value"], size, 1496) > 1:
+            raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: big_number value must fit on one line; write only the number and its unit")
+        label_lines = text_lines(props["label"], 46, 1496)
+        note_lines = text_lines(props["note"], 32, 1496) if props.get("note") else 0
+        height = size * 1.1 + 24 + label_lines * 46 * 1.35 + (20 + note_lines * 32 * 1.5 if note_lines else 0)
+        if label_lines > 2 or note_lines > 2 or height > 440:
+            raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: big_number label or note is too long for its panel; shorten it")
+    elif component == "bar_chart":
+        count = len(props["categories"])
+        if not 2 <= count <= 6:
+            raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: a bar_chart takes 2 to 6 bars; split a longer comparison into scenes")
+        size = 30 if count > 4 else 34
+        font = ImageFont.truetype("/System/Library/Fonts/Hiragino Sans GB.ttc", 32 if count > 4 else 38)
+        rows = []
+        for index, category in enumerate(props["categories"]):
+            lines = text_lines(category, size, 360)
+            if lines > 2:
+                raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: bar label {category!r} wraps onto more than two lines; shorten it")
+            if display_width(font, bar_value_text(props, index)) > 290:
+                raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: the value label {bar_value_text(props, index)!r} is too wide; use a shorter unit")
+            rows.append(max(44 if count > 4 else 58, lines * size * 1.3))
+        if sum(rows) + (22 if count > 4 else 34) * (count - 1) > 420:
+            raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: the bars do not fit their panel; use fewer or shorter bars")
     elif component == "comparison":
         for side in ("left", "right"):
             data = props[side]
@@ -123,19 +161,26 @@ def _plain(value: float) -> str:
     return str(int(value)) if float(value).is_integer() else repr(round(float(value), 6))
 
 
-def numbers_in(text: str, scaled: bool = True) -> list[str]:
-    """Numbers as written in text, in order: 1.25, 2 万 (also 20000 when scaled), 百分之五 (5), 九成 (90)."""
+def _derived_numbers(text: str, scaled: bool = True) -> list[tuple[int, str]]:
+    """Numbers the text gives in another form: 2 万 (20000), 百分之五 (5), 半美元 (0.5), 九成 (90)."""
     found: list[tuple[int, str]] = []
-    for match in re.finditer(r"(?<![\w.])(\d[\d,]*(?:\.\d+)?)\s*([万亿])?", text):
-        value = float(match[1].replace(",", ""))
-        found.append((match.start(), _plain(value)))
-        if match[2] and scaled:
-            found.append((match.start(), _plain(value * (10_000 if match[2] == "万" else 100_000_000))))
+    if scaled:
+        for match in re.finditer(r"(?<![\w.])(\d[\d,]*(?:\.\d+)?)\s*([万亿])", text):
+            found.append((match.start(), _plain(float(match[1].replace(",", "")) * (10_000 if match[2] == "万" else 100_000_000))))
     for match in re.finditer(r"百分之([零一二两三四五六七八九十百]+)", text):
         if (value := _cn_int(match[1])) is not None:
             found.append((match.start(), _plain(value)))
+    for match in re.finditer(r"半(?=[美元块小时分钟个倍年天])", text):
+        found.append((match.start(), "0.5"))
     for match in re.finditer(r"([一二两三四五六七八九])成", text):
         found.append((match.start(), _plain(_CN_DIGITS[match[1]] * 10)))
+    return found
+
+
+def numbers_in(text: str, scaled: bool = True) -> list[str]:
+    """Numbers as written in text, in order: 1.25, 2 万 (also 20000 when scaled), 百分之五 (5), 半美元 (0.5), 九成 (90)."""
+    found = [(m.start(), _plain(float(m[1].replace(",", "")))) for m in re.finditer(r"(?<![\w.])(\d[\d,]*(?:\.\d+)?)", text)]
+    found += _derived_numbers(text, scaled)
     out: list[str] = []
     for _, number in sorted(found):
         if number not in out:
@@ -197,7 +242,7 @@ def fidelity_issues(plan: dict, context: dict) -> list[str]:
         key = numbers_in(own, scaled=False)
         if scene["component"] == "comparison":
             need = key[:4]
-        elif scene["component"] == "concept_reveal" and len(key) >= 3:
+        elif scene["component"] in ("concept_reveal", "big_number", "bar_chart") and len(key) >= 3:
             need = key[:(len(key) + 1) // 2]
         else:
             need = []  # a title card is short; it only must not invent numbers
@@ -217,14 +262,17 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
 目标：像精心排版的讲解短片，用大标题、留白、并列卡片、前后对比和简洁结论表达内容。不要强行改成流程图。
 按意思决定场景数量，不固定三幕；一个场景讲一个重点，相邻句子共享画面。开场建立问题，后续展开依据/方法/示例，结尾提炼结论；只在符合当前章节内容时使用这些形式，不要每章重复开场和结尾。
 每个场景连续覆盖旁白段，全章每段按原顺序恰好出现一次。scene id 为 s1,s2,...。
-仅使用给定目录中的三个组件及其 props schema：
+仅使用给定目录中的组件及其 props schema：
 title_card 用于开场或结论。title 是短标题，subtitle 补充一条信息，不把整段旁白贴上去。
 concept_reveal 用于1–4个并列要点。每条 lines 用“短标题：一句解释”的格式，标题尽量2–10字，解释简短具体；根据内容分屏，避免拥挤。
 comparison 用于来源支持的两个状态/说法/方法的对比。left/right 各有 label 和 items，items 简洁；不要杜撰优劣或对立关系。不输出 highlights。
+big_number 用于旁白明确强调的一个关键数字：title 是本屏标题，与 headline 完全一致；value 是数字加单位，如「25 倍」「10 美元」，必须出自旁白，只写数字和单位；label 说明它是什么的数字；note 可选，写它的前提或口径。次要的数字不要做成大数字；一章里最多用两三次，只用于旁白点明为关键结论的数字（如「相差 25 倍」「便宜了九成」），普通的价格和次数写进卡片或条形图。value、label、note 的出现位置按旁白里说到它们的先后，不必按这个顺序排。
+bar_chart 用于旁白里 2–6 个同单位的数字并列比较：categories 是各项名称，values 是旁白里的数字，原样写，不换算、不估算；unit 是单位，baseline_zero 必须是 true。单位或口径不同的数字不要放进同一张图。图的标题写在 headline，不放 props.title。
+旁白里有成组的并列数字时优先用 bar_chart，强调单个关键数字时用 big_number，不要把它们写成文字卡片。
 headline 是本屏清晰的观众可见标题；title_card/concept_reveal 的 props.title 必须与 headline 完全一致。
 source_quotes 必须逐字摘自原始素材；cue.quote 则必须逐字摘自 narration_plan 中对应段的 text 字段。
 旁白 text 常被改写，与素材原句有细微差别；两个字段绝不能混用。抄错只会导致本地校验拒绝。
-cues 为每个可见元素指定首次出现的旁白位置；按旁白顺序排列，每个元素恰好一次。title_card 目标是 title、可选subtitle；concept_reveal 为 title、line:0等；comparison为side:left、side:right。不得用scene笼统展示全部内容。
+cues 为每个可见元素指定首次出现的旁白位置；按旁白顺序排列，每个元素恰好一次。title_card 目标是 title、可选subtitle；concept_reveal 为 title、line:0等；comparison为side:left、side:right；big_number 为 title、line:0（value）、line:1（label）、可选 line:2（note）；bar_chart 为 bar:0、bar:1 等（图的标题随 bar:0 出现）。不得用scene笼统展示全部内容。
 要点卡片、对比两侧随讲解依次出现。标题在本场首句开头出现：第一个元素的 cue.quote 必须是本场首段 text 的开头连续片段，取自段首，不得从段中间开始。不要一开场就把所有要点亮完，也不要把关键信息拖到无关的后一句。
 无法用本屏承载的内容可以新增场景，保持覆盖完整；画面文字应概括旁白，避免大段复读。"""
     if context.get("verbatim"):
@@ -251,15 +299,26 @@ def validate_plan(plan: dict, context: dict) -> None:
     texts = {s["id"]: s["text"] for s in segments}
     segments_by_id = {s["id"]: s for s in segments}
     reference = "\n".join([context["source_text"], *texts.values()])
+    # A chart that prints 0.5 for the narration's 半美元 is not altering a technical token.
+    reference += "\n" + " ".join(number for _, number in _derived_numbers(reference))
     for scene in plan["scenes"]:
         component, props = scene["component"], scene["props"]
         schema = json.loads((ROOT / f"schemas/components/{component}.schema.json").read_text())
         errors = list(Draft202012Validator(schema).iter_errors(props))
         if errors:
             raise InformationFault("INFORMATION_PROPS", errors[0].message)
+        if component == "bar_chart" and len(props["categories"]) != len(props["values"]):
+            raise InformationFault("INFORMATION_PROPS", f"{scene['id']}: bar_chart needs one value per category")
         validate_text_fit(scene)
-        if component != "comparison" and props["title"] != scene["headline"]:
+        if component not in ("comparison", "bar_chart") and props["title"] != scene["headline"]:
             raise InformationFault("INFORMATION_HEADLINE", scene["id"])
+        if component in ("big_number", "bar_chart"):
+            known = set(numbers_in(reference))
+            shown = props["values"] if component == "bar_chart" else numbers_in(props["value"])
+            unknown = [_plain(float(n)) for n in shown if _plain(float(n)) not in known]
+            if unknown:
+                raise InformationFault("INFORMATION_NUMBERS",
+                    f"{scene['id']} 的数字 {unknown} 不在旁白或素材里；{component} 里的数字必须原样取自旁白，不换算、不估算")
         for text in visible_text(scene):
             altered = altered_technical_text(text, reference)
             if altered:
@@ -275,6 +334,7 @@ def validate_plan(plan: dict, context: dict) -> None:
         if sorted(actual) != sorted(required):
             raise InformationFault("INFORMATION_CUE_TARGETS", f"{scene['id']} needs each of {required} exactly once")
         previous = (-1, -1)
+        opening = None
         for cue in scene["cues"]:
             sid = cue["segment_id"]
             if sid not in scene["narration_segment_ids"]:
@@ -286,6 +346,13 @@ def validate_plan(plan: dict, context: dict) -> None:
                     f"{scene['id']} 的 target {cue['target_id']} 引文 {cue['quote']!r} 不是段 {sid} 旁白的连续原文{hint}；"
                     f"该段旁白原文为 {texts[sid]!r}，请从中逐字复制一段连续文字")
             position = (expected.index(sid), texts[sid].index(cue["quote"]))
+            if component == "big_number":
+                # The number is often said after its label ("……是……的 25 倍"), so after the title the three
+                # elements may come in any order; none may come before the title.
+                opening = opening or position
+                if position < opening:
+                    raise InformationFault("INFORMATION_CUE_ORDER", f"{scene['id']} 的 cue {cue['target_id']} 出现在标题之前，请从本场首句开头开始")
+                continue
             if position < previous:
                 raise InformationFault("INFORMATION_CUE_ORDER", f"{scene['id']} 的 cue {cue['target_id']} 相对前一个元素回退了，请按旁白出现顺序排列")
             previous = position
@@ -330,7 +397,11 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
     scenes, timing = [], []
     for scene in plan["scenes"]:
         beats = []
-        for cue in scene["cues"]:
+        order = list(rows)
+        cues = scene["cues"]
+        if scene["component"] == "big_number":  # validated in any order after the title; reveal in spoken order
+            cues = sorted(cues, key=lambda c: (order.index(c["segment_id"]), rows[c["segment_id"]]["text"].index(c["quote"])))
+        for cue in cues:
             row = rows[cue["segment_id"]]
             offset = int(row["text"].index(cue["quote"]) / len(row["text"]) * (row["end_ms"] - row["start_ms"]))
             beat = {"id": f"{scene['id']}_b{len(beats)}", "action": "reveal", "target_id": cue["target_id"],

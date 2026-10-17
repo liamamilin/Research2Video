@@ -254,7 +254,8 @@ function InformationVideo({ir}: {ir: Timeline}) {
   // split phrases worse ("账" / "从 10 美元…"), because Chinese text has no word gaps to balance on.
   const textStyle = {overflowWrap:'anywhere', whiteSpace:'normal', wordBreak:'normal', textWrap:'pretty'} as React.CSSProperties;
   const panelStyle: React.CSSProperties = {background:'#FFFFFF', border:`1px solid ${paper.line}`, borderRadius:22, boxShadow:'0 12px 32px rgba(26,50,35,.045)', boxSizing:'border-box'};
-  const heading = scene.component === 'comparison' ? scene.purpose : p.title;
+  const chartLike = scene.component === 'comparison' || scene.component === 'bar_chart';
+  const heading = chartLike ? scene.purpose : p.title;
   return <AbsoluteFill style={{background:paper.bg, color:paper.ink, fontFamily:font, backgroundImage:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
     <div style={{position:'absolute', left:140, top:70, display:'flex', alignItems:'center', gap:14, fontSize:22, letterSpacing:2, color:paper.green}}><span style={{width:9,height:9,borderRadius:3,background:paper.green}}/>AUTOVIDEO <span style={{color:paper.muted, letterSpacing:0, marginLeft:12}}>知识讲解</span></div>
     <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
@@ -263,7 +264,7 @@ function InformationVideo({ir}: {ir: Timeline}) {
       <div style={{...motion('title'),width:84,height:5,background:paper.green,marginTop:38,borderRadius:3}}/>
       {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? 36 : 42,lineHeight:1.65,color:paper.muted}}><Tech text={p.subtitle}/></div>}
     </div> : <>
-      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...motion(scene.component === 'comparison' ? 'side:left' : 'title')}}><Tech text={heading}/></div>
+      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : 'title')}}><Tech text={heading}/></div>
       {scene.component === 'concept_reveal' && <div style={{position:'absolute',left:140,top:p.lines.length === 4 ? 330 : 360,width:1640,display:'grid',gridTemplateColumns:`repeat(${p.lines.length === 4 ? 2 : p.lines.length}, 1fr)`,gap:28}}>
         {p.lines.map((line: string,i: number) => {
           const match = line.match(/^([^：:]{1,16})[：:]\s*([\s\S]+)$/);
@@ -285,6 +286,28 @@ function InformationVideo({ir}: {ir: Timeline}) {
           </div>;
         })}
       </div>}
+      {scene.component === 'big_number' && <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 72px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center'}}>
+        <div style={{...motion('line:0'),...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
+        <div style={{...motion('line:1'),...textStyle,fontSize:46,fontWeight:650,lineHeight:1.35,marginTop:24}}><Tech text={p.label}/></div>
+        {p.note && <div style={{...motion('line:2'),...textStyle,fontSize:32,lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
+      </div>}
+      {scene.component === 'bar_chart' && (() => {
+        const top = Math.max(...p.values, 0) || 1, count = p.categories.length;
+        const shownValue = (value: number) => `${value.toLocaleString('en-US', {maximumFractionDigits: 3})} ${p.unit}`;
+        return <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 56px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center',gap:count > 4 ? 22 : 34}}>
+          {p.categories.map((category: string, i: number) => {
+            const beat = reveals.find((b) => b.target_id === `bar:${i}`);
+            const t = beat ? ease((frame-beat.frame)/20) : 0;
+            return <div key={i} style={{display:'flex',alignItems:'center',gap:32,opacity:Math.min(1, t*2.2)}}>
+              <div style={{...textStyle,width:360,flex:'none',fontSize:count > 4 ? 30 : 34,fontWeight:600,lineHeight:1.3}}><Tech text={category}/></div>
+              <div style={{flex:1,display:'flex',alignItems:'center',gap:20,minWidth:0}}>
+                <div style={{height:count > 4 ? 44 : 58,borderRadius:10,background:paper.green,width:`${Math.max(1.2, p.values[i]/top*72*t)}%`,flex:'none'}}/>
+                <div style={{...textStyle,fontSize:count > 4 ? 32 : 38,fontWeight:650,whiteSpace:'nowrap',color:paper.ink}}><Tech text={shownValue(p.values[i])}/></div>
+              </div>
+            </div>;
+          })}
+        </div>;
+      })()}
     </>}
     <div style={{position:'absolute',bottom:60,left:120,right:120,display:'flex',justifyContent:'center',alignItems:'flex-end',minHeight:80}}>{caption && <div style={{maxWidth:1560,padding:'14px 28px',boxSizing:'border-box',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:caption.text.length > 32 ? 30 : 38,lineHeight:1.45,textAlign:'center',...textStyle}}><Tech text={caption.text}/></div>}</div>
     <div style={{position:'absolute',left:0,bottom:0,height:4,width:`${100*(frame+1)/ir.total_frames}%`,background:paper.green}}/>

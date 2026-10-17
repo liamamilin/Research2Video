@@ -329,3 +329,195 @@ def test_storyboard_planning_checks_fidelity_only_for_authored_narration(tmp_pat
     motion.plan_storyboard(Pipeline(True), "source", narration)
     assert calls[0] == ({}, None)
     assert set(calls[1][0]) == {"soft_validator", "soft_reserve"} and calls[1][0]["soft_reserve"] == 0 and calls[1][1] is True
+
+
+# --- Big number and bar chart ----------------------------------------------------------------------
+
+
+PRICE_TEXTS = ["不开缓存，同样一份请求要 8 美元。", "次次重写，就要 10 美元。", "两边相差 25 倍。"]
+
+
+def price_context():
+    texts = PRICE_TEXTS
+    return {"source_text": "".join(texts), "narration_plan": {"segments": [{"id": f"n{i + 1}", "text": t} for i, t in enumerate(texts)]}}
+
+
+def bar_scene(**props):
+    base = {"categories": ["不开缓存", "次次重写"], "values": [8, 10], "unit": "美元", "baseline_zero": True}
+    return {"id": "s1", "component": "bar_chart", "headline": "两种做法的账单", "props": {**base, **props},
+            "narration_segment_ids": ["n1", "n2"], "source_quotes": PRICE_TEXTS[:2],
+            "cues": [{"target_id": "bar:0", "segment_id": "n1", "quote": "不开缓存"},
+                     {"target_id": "bar:1", "segment_id": "n2", "quote": "次次重写"}]}
+
+
+def number_scene(**props):
+    base = {"title": "两边差多少", "value": "25 倍", "label": "两种账单之比"}
+    return {"id": "s1", "component": "big_number", "headline": "两边差多少", "props": {**base, **props},
+            "narration_segment_ids": ["n3"], "source_quotes": [PRICE_TEXTS[2]],
+            "cues": [{"target_id": "title", "segment_id": "n3", "quote": "两边相差"},
+                     {"target_id": "line:0", "segment_id": "n3", "quote": "25 倍"},
+                     {"target_id": "line:1", "segment_id": "n3", "quote": "25 倍"}]}
+
+
+def test_a_bar_chart_and_a_big_number_pass_when_their_numbers_are_in_the_narration():
+    context = price_context()
+    motion.validate_plan({"scenes": [bar_scene()]}, {**context, "narration_plan": {"segments": context["narration_plan"]["segments"][:2]}})
+    only_third = {"source_text": PRICE_TEXTS[2], "narration_plan": {"segments": [{"id": "n3", "text": PRICE_TEXTS[2]}]}}
+    motion.validate_plan({"scenes": [number_scene()]}, only_third)
+    assert motion.targets("big_number", {"note": "x"}) == ["title", "line:0", "line:1", "line:2"]
+    assert motion.targets("big_number", {}) == ["title", "line:0", "line:1"]
+    assert motion.targets("bar_chart", bar_scene()["props"]) == ["bar:0", "bar:1"]
+
+
+def test_numbers_in_a_chart_must_come_from_the_narration():
+    context = {"source_text": "".join(PRICE_TEXTS[:2]), "narration_plan": {"segments": [{"id": "n1", "text": PRICE_TEXTS[0]}, {"id": "n2", "text": PRICE_TEXTS[1]}]}}
+    with pytest.raises(motion.InformationFault) as exc:
+        motion.validate_plan({"scenes": [bar_scene(values=[8, 12.5])]}, context)
+    assert exc.value.code == "INFORMATION_NUMBERS" and "12.5" in exc.value.message
+    only_third = {"source_text": PRICE_TEXTS[2], "narration_plan": {"segments": [{"id": "n3", "text": PRICE_TEXTS[2]}]}}
+    with pytest.raises(motion.InformationFault) as exc:
+        motion.validate_plan({"scenes": [number_scene(value="30 倍")]}, only_third)
+    assert exc.value.code == "INFORMATION_NUMBERS" and "30" in exc.value.message
+
+
+def test_half_a_dollar_is_a_number_the_narration_gave():
+    assert motion.numbers_in("账单约半美元，每次都重写要 10 美元。") == ["10", "0.5"] or set(motion.numbers_in("账单约半美元，每次都重写要 10 美元。")) == {"0.5", "10"}
+
+
+def test_the_bar_chart_has_no_title_prop_and_must_have_matching_lengths():
+    with pytest.raises(motion.InformationFault) as exc:
+        motion.validate_plan({"scenes": [bar_scene(values=[8])]}, {**price_context(), "narration_plan": {"segments": [
+            {"id": "n1", "text": PRICE_TEXTS[0]}, {"id": "n2", "text": PRICE_TEXTS[1]}]}})
+    assert exc.value.code in {"INFORMATION_PROPS"}
+
+
+def test_text_fit_covers_the_two_new_layouts():
+    motion.validate_text_fit(bar_scene())
+    motion.validate_text_fit(number_scene(note="Opus 5.5 与 Sonnet 5.5"))
+    for bad, text in ((bar_scene(categories=["长" * 25, "短"], values=[1, 2]), "bar label"),
+                      (bar_scene(categories=list("一二三四五六七"), values=[1] * 7), "2 to 6 bars"),
+                      (bar_scene(unit="很长的单位名称很长的单位"), "too wide"),
+                      (number_scene(value="壹" * 12), "one line"),
+                      (number_scene(label="说" * 34, note="补充"), "too long")):
+        with pytest.raises(motion.InformationFault, match="INFORMATION_TEXT_FIT") as exc:
+            motion.validate_text_fit(bad)
+        assert text in exc.value.message
+
+
+def test_the_new_layouts_count_toward_the_fidelity_checks():
+    narration = verbatim_context("读取按 0.05 倍，写入按 1.25 倍。", "两边差 25 倍，十分悬殊。", "一次 10 美分。")
+    card = {"scenes": [{"id": "s1", "component": "bar_chart", "headline": "价格", "narration_segment_ids": ["n1", "n2", "n3"],
+                        "props": {"categories": ["读取"], "values": [0.05], "unit": "倍", "baseline_zero": True}}]}
+    issues = motion.fidelity_issues(card, narration)
+    assert len(issues) == 1 and "'1.25'" in issues[0]  # four numbers in the narration, only 0.05 shown
+
+
+def test_a_big_number_is_listed_for_the_planner_and_revision():
+    _, context = example()
+    system = motion.messages(context)[0]["content"]
+    assert "big_number" in system and "bar_chart" in system and "baseline_zero" in system
+    catalog = json.loads(motion.messages(context)[1]["content"])["component_props_schemas"]
+    assert set(catalog) == set(motion.COMPONENTS) and "value" in catalog["big_number"]["properties"]
+    from g2.scene_fields import editable_fields, apply_changes
+    scene = {"component": "big_number", "props": {"title": "t", "value": "25 倍", "label": "之比", "note": "n"}}
+    assert [f["path"] for f in editable_fields(scene)] == ["title", "value", "label", "note"]
+    assert apply_changes(scene, {"value": "20 倍"})["props"]["value"] == "20 倍"
+    chart = {"component": "bar_chart", "props": bar_scene()["props"]}
+    assert [f["path"] for f in editable_fields(chart)] == ["categories.0", "categories.1", "unit"]
+    assert apply_changes(chart, {"categories.1": "重写"})["props"]["categories"] == ["不开缓存", "重写"]
+
+
+def information_ir_with(tmp_path, component, props, targets):
+    root, ir = information_ir(tmp_path)
+    scene = ir["scenes"][0]
+    scene.update(component=component, props=props)
+    beat = scene["beats"][0]
+    scene["beats"] = [{**beat, "id": f"b{i}", "target_id": target} for i, target in enumerate(targets)]
+    return root, ir
+
+
+def test_the_ir_accepts_the_new_components_only_for_information_motion(tmp_path):
+    root, ir = information_ir_with(tmp_path, "big_number", {"title": "差多少", "value": "25 倍", "label": "两种账单之比"},
+                                   ["title"])
+    validate_video_ir(ir, root)
+    ir["scenes"][0]["beats"][0]["target_id"] = "line:2"
+    with pytest.raises(ValidationFault, match="INVALID_BEAT_TARGET"):
+        validate_video_ir(ir, root)  # this big_number has no note
+    ir["scenes"][0]["beats"][0]["target_id"] = "line:1"
+    validate_video_ir(ir, root)  # the label
+    ir["scenes"][0]["props"]["value"] = "很多倍"
+    with pytest.raises(ValidationFault, match="INVALID_COMPONENT_PROPS"):
+        validate_video_ir(ir, root)  # the value carries a digit
+    legacy = copy.deepcopy(ir)
+    legacy.pop("presentation")
+    legacy["scenes"][0]["props"]["value"] = "25 倍"
+    with pytest.raises(ValidationFault):
+        validate_video_ir(legacy, root)  # the frozen v0.2 schema still refuses it
+
+    root, chart = information_ir_with(tmp_path / "chart", "bar_chart", bar_scene()["props"], ["bar:0"])
+    validate_video_ir(chart, root)
+    chart["scenes"][0]["beats"][0]["target_id"] = "bar:2"
+    with pytest.raises(ValidationFault, match="INVALID_BEAT_TARGET"):
+        validate_video_ir(chart, root)
+
+
+def test_the_frozen_registry_is_untouched_and_the_extension_is_merged():
+    from g1.video_ir import load_registry, schema_action_catalog
+    assert "big_number" not in schema_action_catalog()
+    registry = load_registry()["components"]
+    assert registry["big_number"]["actions"]["reveal"] == ["scene", "title", "line:*"]
+    assert {"title_card", "bar_chart"} <= set(registry)
+
+
+def test_a_chart_may_print_the_number_behind_the_narrations_half_a_dollar():
+    texts = ["同样 100 次调用，前缀稳，账单约半美元；", "每次都重写，10 美元。"]
+    context = {"source_text": "".join(texts), "narration_plan": {"segments": [{"id": f"n{i + 1}", "text": t} for i, t in enumerate(texts)]}}
+    scene = bar_scene(categories=["前缀稳", "每次都重写"], values=[0.5, 10])
+    scene["narration_segment_ids"], scene["source_quotes"] = ["n1", "n2"], texts
+    scene["cues"] = [{"target_id": "bar:0", "segment_id": "n1", "quote": "同样 100 次调用"},
+                     {"target_id": "bar:1", "segment_id": "n2", "quote": "每次都重写"}]
+    motion.validate_plan({"scenes": [scene]}, context)  # 0.5 is not in the text, but it is what 半美元 says
+    assert "0.5" in motion.visible_text(scene)[-2]
+    scene["props"]["values"] = [0.7, 10]
+    with pytest.raises(motion.InformationFault) as exc:
+        motion.validate_plan({"scenes": [scene]}, context)
+    assert exc.value.code in {"INFORMATION_NUMBERS", "INFORMATION_TECHNICAL_TEXT"}
+
+
+def test_a_big_number_may_say_its_label_before_its_number():
+    text = "两边一除，是写入价和读取价之比的 25 倍。"
+    context = {"source_text": text, "narration_plan": {"segments": [{"id": "n1", "text": text}]}}
+    scene = number_scene(title="两边一除")
+    scene.update(narration_segment_ids=["n1"], source_quotes=[text], headline="两边一除")
+    scene["cues"] = [{"target_id": "title", "segment_id": "n1", "quote": "两边一除"},
+                     {"target_id": "line:1", "segment_id": "n1", "quote": "写入价和读取价之比"},  # said first
+                     {"target_id": "line:0", "segment_id": "n1", "quote": "25 倍"}]
+    motion.validate_plan({"scenes": [scene]}, context)
+
+    class Pipeline:
+        ARTIFACTS = None
+
+        @staticmethod
+        def write_json(path, value):
+            pass
+    Pipeline.ARTIFACTS = type("P", (), {"__truediv__": lambda self, other: other})()
+    rows = [{"id": "n1", "text": text, "start_ms": 0, "end_ms": 4000}]
+    beats = motion.compile_storyboard({"scenes": [scene]}, {"rows": rows}, Pipeline)["scenes"][0]["beats"]
+    assert [b["target_id"] for b in beats] == ["title", "line:1", "line:0"]  # revealed as they are spoken
+    offsets = [b["trigger"]["offset_ms"] for b in beats]
+    assert offsets == sorted(offsets)
+    scene["cues"] = [{"target_id": "line:0", "segment_id": "n1", "quote": "25 倍"}] + scene["cues"][:1] + scene["cues"][1:2]
+    with pytest.raises(motion.InformationFault) as exc:
+        motion.validate_plan({"scenes": [scene]}, context)
+    assert exc.value.code in {"INFORMATION_OPENING_CUE", "INFORMATION_CUE_ORDER"}  # the title still opens the scene
+
+
+def test_a_schema_echo_at_the_root_is_dropped_but_a_real_field_is_not():
+    from g2.run_g2 import strip_schema_echo
+    schema = json.loads(motion.SCHEMA.read_text())
+    assert strip_schema_echo({"type": "object", "scenes": []}, schema) == {"scenes": []}
+    assert strip_schema_echo({"type": "json_object", "recommended_form": "x"}, schema) == {"recommended_form": "x"}  # the real narration-form echo
+    assert strip_schema_echo({"scenes": []}, schema) == {"scenes": []}
+    assert strip_schema_echo({"type": "banana", "scenes": []}, schema) == {"type": "banana", "scenes": []}
+    typed = {"properties": {"type": {"type": "string"}}}
+    assert strip_schema_echo({"type": "object"}, typed) == {"type": "object"}  # a schema that has a type field keeps it

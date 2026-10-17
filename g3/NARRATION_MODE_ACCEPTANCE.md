@@ -33,3 +33,18 @@
 仍有的问题：第 5 章开场卡的副标题「这是账本的前提，先补两个前提」仍然别扭；画面仍然只有三种版式。
 
 换行：对比卡里「每次 0.4 美分」曾在行尾把「美分」拆成两行。渲染器的文字样式加了 `text-wrap: pretty`（`g1/renderer/src/Root.tsx`），用同一个任务的参数单独渲染第 1 章对比卡验证：「美分」不再被拆开（`screen-text-fidelity/wrap-pretty-after.png`，对照 `comparison-key-numbers.png`）。标题试过 `balance`，在「账 / 从 10 美元…」处断开，更差，没有采用。这一处只用静态帧验证，没有整片重渲染。
+
+## 大数字卡和条形对比（2026-10-18）
+
+信息动效原来只有标题卡、概念卡、对比卡，口播里的关键数字大多只在配音里。新增两种版式，只用于 `information_motion`：
+
+- **`big_number`**（新组件，`schemas/components/big_number.schema.json`）：一个被旁白强调的数字。props 为 `title`、`value`（数字加单位，至少含一个数字）、`label`、可选 `note`。冻结的 v0.2 注册表和 IR schema 的哈希有契约测试，所以没有改它们：组件登记在 `schemas/component-registry-extensions.json`，`g1/video_ir.load_registry()` 在加载时合并；cue 目标沿用冻结模式里已有的名字，`title`、`line:0`（value）、`line:1`（label）、`line:2`（note）。
+- **`bar_chart`**（已登记的组件，信息动效里原来没启用）：2 到 6 个同单位数字的条形，条长按 0 基线的比例，数字和单位印在条尾，条随旁白逐条长出。
+
+校验：`big_number` 的 value 和 `bar_chart` 的 values 必须原样出自旁白或素材（`INFORMATION_NUMBERS`，不换算；「半美元」可以写 0.5，「百分之五」可以写 5）；两种版式各有屏上文字容量检查；`big_number` 的 value、label、note 可以按旁白说到的先后出现，只有标题必须开场；修订界面（`scene_fields`）可以改它们的文字。提示词要求「成组的并列数字用条形，单个关键数字用大数字」，并限制大数字一章只用两三次。
+
+验证（同一份 C4 v10，真实成片，证据在 `g3/acceptance/narration-mode-20261017/new-layouts/`）：配音、字幕和讲稿逐字一致（1980 字，92 句，PASS）；406.9 秒；45 个场景里 4 个大数字卡、3 个条形图（原来是 0 个）：两张「25 倍」（写入价与读取价之比、命中读与未命中写的价差）、两张「20 倍」（10 美元除以半美元、工具声称的最高压缩比），以及「半美元对 10 美元」「8 美元对 10 美元」「1.25 倍对 2 倍输入价」三张条形图；数字、条长比例和文字都按预期显示。分镜有 2 次软校验重试（都修好了，没有留下 `fidelity-warnings.jsonl`）和 2 次硬校验重试（开场 cue、条形图值标签过宽）。
+
+过程中暴露并修掉的问题：
+- 第一次真实成片在第 3 章用光 3 次机会失败：模型把「半美元」画成 0.5，被「技术文字必须逐字」检查拒绝；`big_number` 的 value 先于 label 的固定顺序和口播的先后相冲（INFORMATION_CUE_ORDER）；规划器过度使用大数字（一章 3 个）。分别改为：推导出来的数字（半、百分之、成、万）也算原样；大数字的三个元素可以按说到的先后出现；提示词限制用量。
+- 规划器偶尔在 JSON 根上多回一个 `"type"`（抄自 schema 的 `"object"` 或请求的 `"json_object"`），每次浪费一次模型调用。`strip_schema_echo` 把它去掉。这一条是在验证成片之后加的，没有再整片重渲染验证；单元测试覆盖了。

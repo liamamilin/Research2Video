@@ -20,6 +20,8 @@ from PIL import ImageFont
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / "schemas/video-ir-v0.2.schema.json"
 REGISTRY_PATH = ROOT / "schemas/component-registry-v0.2.json"
+#: Components added after the v0.2 freeze (information_motion only); the frozen registry stays byte-identical.
+EXTENSION_REGISTRY_PATH = ROOT / "schemas/component-registry-extensions.json"
 COMPONENT_SCHEMA_DIR = ROOT / "schemas/components"
 FPS = 30
 MAX_SUBTITLE_WIDTH = 1680
@@ -98,8 +100,16 @@ def _asset_path(project_root: Path, raw_path: str, field_path: str) -> Path:
     return resolved
 
 
-def _validate_targets(component, props, action, target, path):
+def load_registry() -> dict[str, Any]:
+    """The frozen v0.2 registry plus the extension components."""
     registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
+    if EXTENSION_REGISTRY_PATH.is_file():
+        registry["components"].update(json.loads(EXTENSION_REGISTRY_PATH.read_text(encoding="utf-8"))["components"])
+    return registry
+
+
+def _validate_targets(component, props, action, target, path):
+    registry = load_registry()
     entries = registry["components"].get(component)
     if not entries:
         _fail("UNKNOWN_COMPONENT", f"{path}/component", component)
@@ -134,7 +144,8 @@ def _validate_targets(component, props, action, target, path):
         exists = target.split(":", 1)[1] in {item["id"] for item in props.get("paths", [])}
     elif target.startswith("line:"):
         index = numeric_target_index()
-        exists = index < len(props.get("lines", []))
+        # big_number: line:0 is the value, line:1 the label, line:2 the optional note.
+        exists = index < ((3 if "note" in props else 2) if component == "big_number" else len(props.get("lines", [])))
     elif target.startswith("side:"):
         exists = target.split(":", 1)[1] in {"left", "right"} and target.split(":", 1)[1] in props
     elif target.startswith("event:"):
@@ -177,7 +188,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         if information:
             schema["properties"]["style"]["properties"]["preset"] = {"const": "minimal_light"}
             motion_scene = copy.deepcopy(schema["properties"]["scenes"]["items"])
-            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison"]}
+            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison", "big_number", "bar_chart"]}
             motion_scene["properties"]["beats"].pop("maxItems", None)
             motion_scene["properties"]["beats"]["items"]["properties"]["action"] = {"const": "reveal"}
             motion_scene["properties"]["beats"]["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
@@ -190,7 +201,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         schema["properties"]["video"]["properties"]["duration_ms"]["minimum"] = 1
         schema["properties"]["scenes"].pop("maxItems", None)
         if not isinstance(ir.get("scenes"), list) or not ir["scenes"] or any(not isinstance(s, dict) or not (
-                (information and s.get("component") in {"title_card", "concept_reveal", "comparison"})
+                (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart"})
                 or (not information and s.get("component") == "flow_diagram" and isinstance(s.get("props"), dict) and "layout" in s["props"])) for s in ir["scenes"]):
             _fail("CONTENT_COMPONENT_UNSUPPORTED", "/scenes", "chapter extension requires laid-out flow diagrams or explicit information motion")
     if isinstance(ir, dict) and "playback" in ir:

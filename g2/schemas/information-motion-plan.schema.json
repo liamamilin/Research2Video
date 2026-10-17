@@ -31,7 +31,9 @@
             "enum": [
               "title_card",
               "concept_reveal",
-              "comparison"
+              "comparison",
+              "big_number",
+              "bar_chart"
             ]
           },
           "props": {

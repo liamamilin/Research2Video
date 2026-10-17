@@ -37,13 +37,15 @@ G4 三个真实案例的运行、独立 ffprobe/解码、抽帧、布局风险�
 
 ## 简洁信息动效
 
-设置 `AUTOVIDEO_G2_VIDEO_FORM=information_motion`，可与 `AUTOVIDEO_G2_DURATION_MODE=content` 一起使用。`information_motion.py` 按内容生成场景，复用注册的 `title_card`、`concept_reveal` 与 `comparison`；标题、要点卡片和对比两侧按旁白引用依次淡入、轻移。无需新增模型服务或布局依赖。
+设置 `AUTOVIDEO_G2_VIDEO_FORM=information_motion`，可与 `AUTOVIDEO_G2_DURATION_MODE=content` 一起使用。`information_motion.py` 按内容生成场景，复用注册的 `title_card`、`concept_reveal`、`comparison` 与 `bar_chart`，另有只用于此形式的 `big_number`；标题、要点卡片、对比两侧、条形和大数字按旁白引用依次淡入、轻移。无需新增模型服务或布局依赖。
+
+`big_number`：一个被旁白强调的关键数字，props 为 `title`（与 headline 一致）、`value`（数字加单位，至少含一个数字，如「25 倍」）、`label`、可选 `note`；cue 目标依次是 `title`、`line:0`（value）、`line:1`（label）、`line:2`（note）。`bar_chart`：2 到 6 个同单位数字的并列条形，沿用已注册的 `categories` / `values` / `unit` / `baseline_zero`，cue 目标是 `bar:0`…；图的标题是场景 headline，随 `bar:0` 出现。两者的数字都必须原样取自旁白或素材（本地校验 `INFORMATION_NUMBERS`，不换算、不估算；「半」读作 0.5），屏上文字容量按各自的面板检查。
 
 此形式采用浅色排版，不能组合 Draw Things 背景；旧 `knowledge_cards` 与历史背景修订仍保留兼容。分镜必须有原文引文、完整有序旁白覆盖与每个可见元素的有效 cue。固定画面文字容量检查失败时，模型需缩短屏上措辞或拆成更多场景，旁白不因此截断。
 
 分镜规划只把每段旁白的 `text` 发给模型，不再附带该段的 `source_quotes`。旁白是改写后的文本，与所引素材原句常有细微差别（例如素材「并在 Gemini 应用中上线…」对旁白「Gemini 应用同时上线…」）；同时给出两者会让模型把素材原句抄进 `cue.quote`，而 cue 必须落在该段旁白内，于是被本地校验拒绝。`cue.quote` 的校验失败信息会指出场景、目标、错误引文、疑似来源与该段旁白全文，重试反馈才有可修正的依据。
 
-原始 MVP schema 不变；运行时通过 `presentation: {"preset": "information_motion"}` 明确启用 `minimal_light` 主题及三个注册组件，只支持 reveal 动作，仍校验资产、目标和所属短语范围。场景数量随内容决定。`information-plan.json` 与 `information-timing.json` 保存来源及出现时机；短语内时机是字符位置估算，不声明词级对齐。
+原始 MVP schema 不变；运行时通过 `presentation: {"preset": "information_motion"}` 明确启用 `minimal_light` 主题及五个组件（`big_number` 登记在扩展注册表 `schemas/component-registry-extensions.json`，由 `g1/video_ir.load_registry()` 与冻结的 v0.2 注册表合并；冻结文件的哈希不变，所以 big_number 的 cue 目标沿用已有的 `title` 与 `line:N` 名称），只支持 reveal 动作，仍校验资产、目标和所属短语范围。场景数量随内容决定。`information-plan.json` 与 `information-timing.json` 保存来源及出现时机；短语内时机是字符位置估算，不声明词级对齐。
 
 ## 输入准备与自动选型
 

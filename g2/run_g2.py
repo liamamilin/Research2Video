@@ -345,6 +345,8 @@ def _existing_component_targets(component: str, props: dict) -> list[str]:
         targets.extend(f"node:{item['id']}" for item in props.get("nodes", []))
         targets.extend(f"edge:{item['id']}" for item in props.get("edges", []))
         targets.extend(f"path:{item['id']}" for item in props.get("paths", []))
+    elif component == "big_number":
+        targets.extend(["title", "line:0", "line:1", *(["line:2"] if "note" in props else [])])
     elif component == "comparison":
         targets.extend(f"side:{side}" for side in ("left", "right") if side in props)
         if props.get("highlights"):
@@ -452,9 +454,23 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
     except (KeyError, TypeError, json.JSONDecodeError) as exc:
         finish = (response_obj.get("choices") or [{}])[0].get("finish_reason")
         raise G2Fault("MODEL_INVALID_JSON", f"{stage} response was not valid JSON (finish_reason={finish}): {exc}") from exc
+    result = strip_schema_echo(result, schema)
     schema_errors = _schema_errors(schema, result)
     if schema_errors:
         raise G2Fault("MODEL_SCHEMA_REJECTED", "; ".join(schema_errors[:4]))
+    return result
+
+
+def strip_schema_echo(result, schema: dict):
+    """Drop a root-level ``"type"`` the model echoed from what it was shown: the schema's ``"object"`` or the
+    request's ``response_format`` value ``"json_object"``.
+
+    It happens about once per job (narration-form and chapter plans), is never a real field, and each
+    occurrence wasted a whole model call on a retry.
+    """
+    if isinstance(result, dict) and result.get("type") in ("object", "json_object") \
+            and "type" not in (schema.get("properties") or {}):
+        return {key: value for key, value in result.items() if key != "type"}
     return result
 
 
@@ -743,7 +759,8 @@ def validate_compile_stage(narration: dict, board: dict, alignment: dict) -> dic
         raise G2Fault("AUDIO_TIMELINE_FRAME_MISMATCH", "compiled Video IR frames do not equal the real WAV frame count")
     write_json(IR_PATH, ir)
     write_json(ARTIFACTS / "compiled-timeline.json", compiled)
-    write_json(ARTIFACTS / "action-catalog.json", json.loads(REGISTRY_PATH.read_text(encoding="utf-8")))
+    from g1.video_ir import load_registry
+    write_json(ARTIFACTS / "action-catalog.json", load_registry())
     if LOCK_NARRATION:
         from g2.authored_script import verify_outputs
         source = PREPARED_SOURCE if PREPARED_SOURCE is not None else PROJECT_INPUT.read_text(encoding="utf-8").strip()
