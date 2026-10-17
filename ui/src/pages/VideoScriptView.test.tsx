@@ -98,16 +98,39 @@ const ADAPTED = {
       },
     },
     checks: {
-      rules: [{ rule: "C4", severity: "must", section: 0, paragraph: 0, detail: "一句话里有 4 个数字" }],
-      newcomer: {
-        paragraphs: { S1P1: { questions: ["缓存是什么？"], lost: [] } },
-        retell: "前缀要稳",
-        scores: { hook: 5, clarity: 3 },
-        comments: "",
+      version: 2,
+      issues: [
+        { audit: "communication", rule: "C4", severity: "must", section: 0, paragraph: 0, quote: "一句话里的原句",
+          problem: "一句话里有 4 个数字", why: "听觉记不住", suggestion: "拆开", source: "rule" },
+        { audit: "comprehension", rule: "N1", severity: "must", section: 0, paragraph: 0, quote: "",
+          problem: "缓存是什么？", why: "", suggestion: "", source: "model" },
+        { audit: "fact", rule: "D1", severity: "serious", section: 0, paragraph: 0, quote: "凌晨三点的翻车现场",
+          problem: "把假设场景说成真事", why: "观众会当真", suggestion: "删掉", source: "model",
+          unhandled: "开场段不自动删除，请人工处理" },
+      ],
+      quiz: {
+        items: [
+          { id: "G1", question: "为什么前缀要稳定？", expected: "写入加价", answer: "因为会重写", correct: true, note: "" },
+          { id: "G2", question: "断点放在哪？", expected: "稳定和易变的交界", answer: "没听出来", correct: false, note: "没答出" },
+        ],
+        score: 0.5,
       },
-      fidelity: { issues: [], core_message_match: true, core_message_note: "" },
-      summary: { must: 1, warn: 0, questions: 1, lost: 0, fidelity: 0, low_scores: ["clarity"], core_message_mismatch: false, passed: false },
+      newcomer: { retell: "前缀要稳", scores: { hook: 5, clarity: 3 }, comments: "" },
+      core_message_match: true,
+      core_message_note: "",
+      model_ran: true,
+      summary: {
+        serious: 1, must: 2, warn: 0, rule_must: 1, questions: 1, lost: 0, quiz_score: 0.5, low_scores: ["clarity"],
+        by_audit: {
+          fact: { serious: 1, must: 0, warn: 0 },
+          comprehension: { serious: 0, must: 1, warn: 0 },
+          communication: { serious: 0, must: 1, warn: 0 },
+        },
+        passed: false,
+      },
       rounds: 2,
+      deletions: [{ section: 1, paragraph: 0, quote: "批处理跑了两万次调用", before: "", rule: "D1", reason: "编造的次数" }],
+      initial: [],
     },
   },
 };
@@ -166,7 +189,7 @@ describe("Video script review", () => {
     expect(screen.getByText("无引用")).toBeTruthy();
     expect(screen.getByText("需核实")).toBeTruthy();
     expect(screen.getByText("docs.example.com")).toBeTruthy();
-    expect(screen.getByText("时长达标")).toBeTruthy();
+    expect(screen.getByText("时长达标（比目标短 3%）")).toBeTruthy();
     expect(screen.getByText("去掉了 1 个不可信引用")).toBeTruthy();
   });
 
@@ -195,8 +218,12 @@ describe("Video script review", () => {
     expect(await screen.findByText("进阶 · 讲解通俗")).toBeTruthy();
     expect(screen.getByText("未通过")).toBeTruthy();
     expect(screen.getByText("一句话里有 4 个数字")).toBeTruthy();
-    expect(screen.getByText("新观众会问：缓存是什么？")).toBeTruthy();
+    expect(screen.getByText("缓存是什么？")).toBeTruthy();
     expect(screen.getByText("自动修改 2 轮")).toBeTruthy();
+    expect(screen.getByText("需要你处理的严重问题")).toBeTruthy();
+    expect(screen.getAllByText("开场段不自动删除，请人工处理").length).toBeGreaterThan(0);
+    expect(screen.getByText("批处理跑了两万次调用")).toBeTruthy();
+    expect(screen.getByText("测验 1/2")).toBeTruthy();
     expect(screen.getByText("前缀稳不稳决定缓存省不省钱")).toBeTruthy();
     await waitFor(() => expect(screen.getByText("F3").getAttribute("title")).toContain("比不开缓存贵 25%"));
 

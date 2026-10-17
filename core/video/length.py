@@ -21,7 +21,9 @@ from collections.abc import Sequence
 UNITS_PER_SECOND = 4.3
 #: A script more than this far from its budget is flagged, never truncated:
 #: cutting narration mid-argument would drop the qualifiers that matter.
-TOLERANCE = 0.25
+#: Was 0.25, under which a six-minute target showed 4.5–7.5 minutes as on
+#: target (C4 v6: 437 s, +21%, shown as 达标).
+TOLERANCE = 0.15
 MIN_MINUTES, MAX_MINUTES = 2, 15
 
 _CJK = re.compile("[" + chr(0x3400) + "-" + chr(0x9FFF) + chr(0xF900) + "-" + chr(0xFAFF) + "]")

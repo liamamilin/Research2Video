@@ -155,12 +155,13 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     # 2. Write.
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
-    config = llm_config or LLMConfig.from_system(load_system_config(settings.paths.config_dir), "ai")
+    config, review_config = _llm_configs(llm_config)
     if column.writer == "adapt":
         try:
             style = video_styles.resolve(settings.paths.config_dir, column)
             _adapt_version(script_id, report=report, report_path=report_path, citation_check=citation_check,
-                           column=column, topic=topic, style=style, started_by=started_by, llm_config=config)
+                           column=column, topic=topic, style=style, started_by=started_by, llm_config=config,
+                           review_llm_config=review_config)
         except (AdaptError, writer.ScriptError, video_styles.StyleError) as exc:
             store.update_script(script_id, status="FAILED", stage=None, error=f"改编失败：{exc}")
             return "FAILED"
@@ -192,8 +193,17 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     return "DRAFT"
 
 
+def _llm_configs(llm_config: Optional[LLMConfig]) -> tuple:
+    """(writing model, audit model or None). The audits use ``review_ai`` in system.yaml when it is set."""
+    if llm_config is not None:
+        return llm_config, None
+    system = load_system_config(get_settings().paths.config_dir)
+    review = LLMConfig.from_system(system, "review_ai") if system.get("review_ai") else None
+    return LLMConfig.from_system(system, "ai"), review
+
+
 def _adapt_version(script_id: str, *, report: str, report_path: str, citation_check: Optional[dict], column,
-                   topic: dict, style, started_by: str, llm_config) -> int:
+                   topic: dict, style, started_by: str, llm_config, review_llm_config=None) -> int:
     """Adapt the report in ``style`` and store the result as a new GENERATED version."""
     sheet_id = adapt_facts.sheet_id(report)
     cached = store.get_fact_sheet(sheet_id)
@@ -204,6 +214,7 @@ def _adapt_version(script_id: str, *, report: str, report_path: str, citation_ch
         column=column,
         style=style,
         llm_config=llm_config,
+        review_llm_config=review_llm_config,
         sheet=cached["sheet"] if cached else None,
         on_sheet=lambda sheet: store.save_fact_sheet(sheet_id, report_path=report_path, sheet=sheet),
         on_stage=lambda name: store.update_script(script_id, stage=name),
@@ -258,10 +269,10 @@ def run_restyle(script_id: str, depth: str, tone: str, *, started_by: str = "",
             style = video_styles.resolve(settings.paths.config_dir, column, depth, tone)
             report = _read_report(script["report_path"])
             citation_check = (report_meta.get(script["report_path"]) or {}).get("citation_check")
-            config = llm_config or LLMConfig.from_system(load_system_config(settings.paths.config_dir), "ai")
+            config, review_config = _llm_configs(llm_config)
             _adapt_version(script_id, report=report, report_path=script["report_path"],
                            citation_check=citation_check, column=column, topic=script["topic"], style=style,
-                           started_by=started_by, llm_config=config)
+                           started_by=started_by, llm_config=config, review_llm_config=review_config)
         store.update_script(script_id, status="DRAFT", stage=None, error=None)
         return "DRAFT"
     except Exception as exc:  # noqa: BLE001 - the earlier versions must stay usable
@@ -292,14 +303,18 @@ def _style_of(meta: dict, column):
         return None
 
 
+def _rules_only(issues: list[dict], plan: Optional[dict], sections: list[dict], **extra) -> dict:
+    return {**adapt_review.assemble(issues, None, None, plan, sections),
+            "rounds": 0, "deletions": [], "initial": [], **extra}
+
+
 def rule_checks(version: dict, column) -> dict:
-    """Checks for a version: the stored ones, or the rule checks alone for versions without any."""
+    """Checks for a version: the stored ones (older shapes converted), or the rule checks alone."""
     meta = version.get("meta") or {}
     if meta.get("checks"):
-        return meta["checks"]
+        return adapt_review.normalize(meta["checks"], len(version["sections"]))
     issues = adapt_review.rules(version["sections"], column=column, target_minutes=column.target_minutes)
-    return {"rules": issues, "newcomer": None, "fidelity": None, "rounds": 0,
-            "summary": adapt_review.summarize(issues, None, None)}
+    return _rules_only(issues, None, version["sections"])
 
 
 def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: str,
@@ -352,12 +367,12 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
                                 plan=plan, sheet=sheet, style=style)
     meta: dict = {
         "problems": writer.lint(clean),
-        "checks": {"rules": issues, "newcomer": None, "fidelity": None, "rounds": 0, "model_checks_stale": True,
-                   "summary": adapt_review.summarize(issues, None, None)},
+        "checks": _rules_only(issues, plan, clean, model_checks_stale=True),
     }
     budgets = None
     if sheet:
-        meta.update({k: base_meta.get(k) for k in ("writer", "style", "fact_sheet_id", "plan", "description")})
+        meta.update({k: base_meta.get(k) for k in ("writer", "style", "prompts", "fact_sheet_id", "plan",
+                                                   "description")})
         if plan and len(plan.get("beats") or []) == len(clean):
             budgets = [b["budget"] for b in plan["beats"]]
     version = store.add_version(

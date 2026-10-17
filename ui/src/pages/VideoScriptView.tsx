@@ -49,6 +49,13 @@ const RENDER_LABEL: Record<RenderStatus, string> = {
 };
 const RENDER_ACTIVE: RenderStatus[] = ["SUBMITTING", "QUEUED", "RUNNING", "DOWNLOADING"];
 
+/** "比目标长 21%" — the status alone hides how far within the tolerance a script is. */
+export function deviation(ratio: number): string {
+  const pct = Math.round((ratio - 1) * 100);
+  if (pct === 0) return "和目标基本一致";
+  return pct > 0 ? `比目标长 ${pct}%` : `比目标短 ${-pct}%`;
+}
+
 function host(url: string): string {
   try {
     return new URL(url).hostname.replace(/^www\./, "");
@@ -305,7 +312,12 @@ export function VideoScriptViewPage() {
               目标 {check.target_minutes} 分钟（{check.budget} 字）
             </span>
           ) : null}
-          {check.status ? <span className={LENGTH[check.status].cls}>{LENGTH[check.status].label}</span> : null}
+          {check.status ? (
+            <span className={LENGTH[check.status].cls}>
+              {LENGTH[check.status].label}
+              {check.ratio ? `（${deviation(check.ratio)}）` : ""}
+            </span>
+          ) : null}
           {check.dropped_citations ? (
             <span className="text-warning">去掉了 {check.dropped_citations} 个不可信引用</span>
           ) : null}

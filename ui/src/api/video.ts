@@ -37,46 +37,70 @@ export interface ScriptStyle {
 }
 
 export interface ScriptPlan {
+  question?: string;
   audience: { knows: string[]; lacks: string[]; cares: string; takeaway: string };
+  goals?: { question: string; answer: string; facts: string[] }[];
+  chain?: { step: string; facts: string[] }[];
+  misconceptions?: { wrong: string; fix: string }[];
+  actions?: { condition: string; step: string; verify: string; needs: string[] }[];
+  must_cover?: { item: string; beat: number }[];
+  scope_out?: string[];
+  fit?: { ok: boolean; note: string };
   core_message: string;
   hook: { kind: string; idea: string; facts: string[] };
-  glossary: { term: string; plain: string; analogy: string; mapping: Record<string, string>; breaks: string }[];
+  glossary: { term: string; plain: string; needs?: string[]; analogy: string; mapping: Record<string, string>; breaks: string }[];
   beats: { title: string; role: string; point: string; facts: string[]; terms: string[]; budget: number }[];
   left_out: { fact: string; reason: string; to_description: boolean }[];
 }
 
+export type AuditName = "fact" | "comprehension" | "communication";
+export type Severity = "serious" | "must" | "warn";
+
 export interface CheckIssue {
+  audit: AuditName;
   rule: string;
-  severity: "must" | "warn";
+  severity: Severity;
   section: number | null;
   paragraph: number | null;
-  detail: string;
+  quote: string;
+  problem: string;
+  why: string;
+  suggestion: string;
+  source: "rule" | "model";
+  unhandled?: string;
+  resolved?: boolean | "deleted";
 }
 
 export interface ScriptChecks {
-  rules: CheckIssue[];
+  version: 2;
+  issues: CheckIssue[];
+  quiz: {
+    items: { id: string; question: string; expected: string; answer: string | null; correct: boolean | null; note: string }[];
+    score: number | null;
+  };
   newcomer: {
-    paragraphs: Record<string, { questions: string[]; lost: string[] }>;
     retell: string;
     scores: Partial<Record<"hook" | "clarity" | "pacing" | "style", number>>;
     comments: string;
   } | null;
-  fidelity: {
-    issues: { id: string; rule: string; detail: string }[];
-    core_message_match: boolean | null;
-    core_message_note: string;
-  } | null;
+  core_message_match: boolean | null;
+  core_message_note: string;
+  model_ran: boolean;
   summary: {
+    serious: number;
     must: number;
     warn: number;
+    rule_must: number;
     questions: number;
     lost: number;
-    fidelity: number;
+    quiz_score: number | null;
     low_scores: string[];
-    core_message_mismatch: boolean;
+    by_audit: Record<AuditName, Record<Severity, number>>;
     passed: boolean;
   };
   rounds: number;
+  deletions: { section: number; paragraph: number; quote: string; before: string; rule: string; reason: string }[];
+  initial: CheckIssue[];
   model_checks_stale?: boolean;
 }
 
@@ -156,6 +180,7 @@ export interface ScriptVersion {
     report_path?: string;
     writer?: "adapt";
     style?: ScriptStyle;
+    prompts?: Record<string, number>;
     plan?: ScriptPlan;
     description?: ScriptDescription;
     fact_sheet_id?: string;
