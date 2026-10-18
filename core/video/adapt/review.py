@@ -232,7 +232,7 @@ def rules(sections: list[dict], *, column, target_minutes: int, plan: dict | Non
 
     # E4: total length; blame the sections furthest from their budget.
     budgets = [b["budget"] for b in plan["beats"]] if adapted and len(plan["beats"]) == len(sections) else None
-    check = length.measure(sections, target_minutes, section_budgets=budgets)
+    check = length.measure(sections, target_minutes, section_budgets=budgets, voice=column.voice_id)
     if check["status"] in ("OVER", "UNDER"):
         word = "超出" if check["status"] == "OVER" else "不足"
         flagged = False

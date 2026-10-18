@@ -210,5 +210,6 @@ def adapt(
     if auditor is not client:
         meta["review_usage"] = dict(auditor.usage)
     return Adapted(title=title, sections=sections,
-                   length_check=length.measure(sections, column.target_minutes, section_budgets=budgets),
+                   length_check=length.measure(sections, column.target_minutes, section_budgets=budgets,
+                                               voice=column.voice_id),
                    meta=meta), sheet

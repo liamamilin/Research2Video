@@ -379,7 +379,7 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
         script_id,
         title=title.strip(),
         sections=clean,
-        length_check=length.measure(clean, column.target_minutes, section_budgets=budgets),
+        length_check=length.measure(clean, column.target_minutes, section_budgets=budgets, voice=column.voice_id),
         edit_type="EDITED",
         meta=meta,
         created_by=edited_by,

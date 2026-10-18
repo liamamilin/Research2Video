@@ -27,8 +27,18 @@ from collections.abc import Sequence
 
 #: Overall rate, pauses included, at about 20 units per sentence: what turns a target into a unit budget.
 UNITS_PER_SECOND = 4.2
-#: Speech alone, from the two renders above.
+#: Speech alone, from the two renders above (the Kokoro voice, which is also the default).
 SPEECH_UNITS_PER_SECOND = 4.57
+#: Local voices measured on real renders; a voice that is not listed is counted like the default one.
+#: ``speech_rate`` is units per second of speech alone (edge silence trimmed). ``content_pauses`` voices rest between
+#: pieces by what the pieces say (``content_pause``, mirrored from AutoVideo's g2/pauses.py) and keep
+#: ``EDGE_MARGIN_SECONDS`` of silence around each piece; the other voices rest a flat SENTENCE_PAUSE_SECONDS.
+#: voxcpm_anchor: C4 v10 rendered 2026-10-18 (1683 units, 92 pieces, 342.8 s of speech, 39.6 s of rests, 390.0 s in all);
+#: overhead_per_piece is EDGE_MARGIN_SECONDS plus the average rest per piece (39.6 / 92).
+VOICE_PROFILES = {"voxcpm_anchor": {"speech_rate": 4.91, "content_pauses": True, "overhead_per_piece": 0.52}}
+EDGE_MARGIN_SECONDS = 0.09
+#: What UNITS_PER_SECOND assumes: about this many units per sentence.
+UNITS_PER_SENTENCE = 20
 SENTENCE_PAUSE_SECONDS = 0.36
 CHAPTER_PAUSE_SECONDS = 0.85
 #: AutoVideo splits a longer sentence at a comma.
@@ -52,9 +62,9 @@ def spoken_units(text: str) -> int:
     return len(_CJK.findall(text)) + len(_LATIN_WORD.findall(text)) + len(_DIGIT.findall(text))
 
 
-def segment_count(text: str) -> int:
-    """How many pieces AutoVideo voices ``text`` in: one per sentence, and a sentence over 80 characters is cut."""
-    count = 0
+def pieces(text: str) -> list[str]:
+    """The pieces AutoVideo voices ``text`` in: one per sentence, and a sentence over 80 characters is cut."""
+    out = []
     for paragraph in re.split(r"[\r\n]+", text):
         for sentence in re.split(r"(?<=[。！？!?；;])", paragraph):
             remaining = sentence.strip()
@@ -66,15 +76,97 @@ def segment_count(text: str) -> int:
                         natural = remaining.rfind(" ", 0, SEGMENT_MAX_CHARS) + 1
                     if natural >= SEGMENT_MAX_CHARS // 2:
                         end = natural
-                remaining = remaining[end:].strip()
-                count += 1
-    return count
+                piece, remaining = remaining[:end].strip(), remaining[end:].strip()
+                if piece:
+                    out.append(piece)
+    return out
 
 
-def estimated_seconds(units: int, segments: int, chapters: int) -> float:
+def segment_count(text: str) -> int:
+    """How many pieces AutoVideo voices ``text`` in."""
+    return len(pieces(text))
+
+
+# Rests between pieces for the voices with ``content_pauses``; the same rule and numbers as AutoVideo's
+# g2/pauses.py (both test the same GOLDEN table), in seconds.
+_PAUSE = {"base": 0.36, "question": 0.16, "semicolon": -0.12, "cut": 0.12, "lead_in": 0.10, "long": 0.08,
+          "connective": -0.08, "paragraph": 0.66, "chapter": 0.85, "min": 0.12, "max": 0.70}
+_LEAD_IN_UNITS, _LONG_UNITS = 6, 32
+_CONNECTIVE = re.compile(r"^(但是|但|不过|可是|所以|因此|因为|而且|并且|而|另外|同时|然后|接着|再|还有|也就是说|比如|例如|就像|如果|要是|否则|只是)")
+
+#: (current, following, boundary, milliseconds): asserted by AutoVideo's tests too
+GOLDEN = [
+    ("请求本身就是这个顺序：工具定义在前，系统提示在中，消息在后。", "缓存就按这个顺序从开头往后比。", "sentence", 360),
+    ("缓存有两个价。", "第一次把前缀存进去，叫缓存写入。", "sentence", 460),
+    ("开头不改呢？", "只有第一次 10 美分。", "sentence", 520),
+    ("先说钱。", "缓存有两个价。", "sentence", 460),
+    ("命中按 0.05 倍读，没命中按 1.25 倍写。", "隔了 25 倍。", "sentence", 360),
+    ("不是缓存坏了，是缓存从你改动的那个字节起就对不上，后面的全认不出来，所以每次都要重新写一遍。", "好。", "sentence", 440),
+    ("前缀对得上，这次走读取，按 0.05 倍算；", "对不上，这段就得重新写进缓存，按 1.25 倍算。", "sentence", 240),
+    ("这笔账我们一步步算。", "但是前缀一变，就全废了。", "sentence", 280),
+    ("先说钱。", "再说账。", "sentence", 380),
+    ("工具定义在前，系统提示在中，消息在后，缓存按这个顺序从开头往后比，比到哪一段断了，", "从那往后全作废。", "sentence", 120),
+    ("这笔账我们一步步算。", "打个比方，就像咖啡店。", "paragraph", 660),
+    ("记住这个顺序。", "先做最便宜的：清前缀。", "chapter", 850),
+]
+
+
+def content_pause(current: str, following: str, boundary: str = "sentence") -> float:
+    """Seconds of silence after ``current`` before ``following``; ``boundary`` is "sentence", "paragraph" or "chapter"."""
+    if boundary == "chapter":
+        return _PAUSE["chapter"]
+    if boundary == "paragraph":
+        return _PAUSE["paragraph"]
+    text = current.rstrip()
+    end = text[-1:] if text else ""
+    if end in "，,、":
+        return _PAUSE["cut"]
+    gap = _PAUSE["base"]
+    if end in "？?":
+        gap += _PAUSE["question"]
+    elif end in "；;":
+        gap += _PAUSE["semicolon"]
+    elif spoken_units(text) <= _LEAD_IN_UNITS:
+        gap += _PAUSE["lead_in"]
+    if spoken_units(text) >= _LONG_UNITS:
+        gap += _PAUSE["long"]
+    if _CONNECTIVE.match(following.lstrip()):
+        gap += _PAUSE["connective"]
+    return max(_PAUSE["min"], min(_PAUSE["max"], gap))
+
+
+def content_pause_seconds(sections: list[dict]) -> tuple[int, float]:
+    """(pieces, seconds of rest between them) for a script voiced with content-aware pauses."""
+    flat = []
+    for si, section in enumerate(sections):
+        for pi, paragraph in enumerate(section.get("paragraphs") or []):
+            flat.extend((piece, si, pi) for piece in pieces(str(paragraph.get("text") or "")))
+    total = 0.0
+    for (current, si, pi), (following, sj, pj) in zip(flat, flat[1:]):
+        boundary = "chapter" if si != sj else "paragraph" if pi != pj else "sentence"
+        total += content_pause(current, following, boundary)
+    return len(flat), total
+
+
+def speech_rate(voice: str | None = None) -> float:
+    """Units per second of speech for ``voice`` (the default voice when it is not named or not measured)."""
+    return VOICE_PROFILES.get(voice or "", {}).get("speech_rate", SPEECH_UNITS_PER_SECOND)
+
+
+def units_per_second(voice: str | None = None) -> float:
+    """Overall rate, pauses included, at about 20 units per sentence: what turns a target into a unit budget."""
+    profile = VOICE_PROFILES.get(voice or "")
+    if not profile:
+        return UNITS_PER_SECOND
+    # the average rest and edge margin per piece, measured on the render the speech rate comes from
+    overhead = profile.get("overhead_per_piece", SENTENCE_PAUSE_SECONDS)
+    return round(UNITS_PER_SENTENCE / (UNITS_PER_SENTENCE / profile["speech_rate"] + overhead), 2)
+
+
+def estimated_seconds(units: int, segments: int, chapters: int, voice: str | None = None) -> float:
     """Speech time plus the pauses between sentences and between chapters."""
     pauses = SENTENCE_PAUSE_SECONDS * max(segments - chapters, 0) + CHAPTER_PAUSE_SECONDS * max(chapters - 1, 0)
-    return units / SPEECH_UNITS_PER_SECOND + pauses
+    return units / speech_rate(voice) + pauses
 
 
 def chinese_share(text: str) -> float:
@@ -84,8 +176,8 @@ def chinese_share(text: str) -> float:
     return cjk / (cjk + latin) if cjk + latin else 0.0
 
 
-def budget_for(target_minutes: int) -> int:
-    return round(target_minutes * 60 * UNITS_PER_SECOND)
+def budget_for(target_minutes: int, voice: str | None = None) -> int:
+    return round(target_minutes * 60 * units_per_second(voice))
 
 
 def allocate(total: int, weights: Sequence[float]) -> list[int]:
@@ -123,11 +215,12 @@ def _status_of(ratio: float) -> str:
 
 
 def measure(sections: list[dict], target_minutes: int | None,
-            section_budgets: Sequence[int] | None = None) -> dict:
+            section_budgets: Sequence[int] | None = None, voice: str | None = None) -> dict:
     """The ``length_check`` recorded on a script version.
 
     Sections share the budget evenly unless ``section_budgets`` (one per
-    section, e.g. from a narrative plan) says otherwise.
+    section, e.g. from a narrative plan) says otherwise. ``voice`` is the voice
+    that will read it: voices speak at different rates.
     """
     per_section = []
     total = 0
@@ -138,8 +231,12 @@ def measure(sections: list[dict], target_minutes: int | None,
         total += length
         segments += segment_count("\n".join(texts))
         per_section.append({"title": section.get("title", ""), "spoken_length": length})
-    seconds = estimated_seconds(total, segments, len(sections))
-    budget = budget_for(target_minutes) if target_minutes else None
+    if VOICE_PROFILES.get(voice or "", {}).get("content_pauses"):
+        segments, rests = content_pause_seconds(sections)
+        seconds = total / speech_rate(voice) + EDGE_MARGIN_SECONDS * segments + rests
+    else:
+        seconds = estimated_seconds(total, segments, len(sections), voice)
+    budget = budget_for(target_minutes, voice) if target_minutes else None
     if budget:
         weights = list(section_budgets) if section_budgets and len(section_budgets) == len(per_section) \
             else [1] * len(per_section)
@@ -151,7 +248,8 @@ def measure(sections: list[dict], target_minutes: int | None,
         "spoken_length": total,
         "estimated_seconds": round(seconds),
         "segments": segments,
-        "units_per_second": UNITS_PER_SECOND,
+        "units_per_second": units_per_second(voice),
+        "voice": voice or None,
         "target_minutes": target_minutes,
         "budget": budget,
         "ratio": round(ratio, 3) if ratio else None,

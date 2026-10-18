@@ -264,7 +264,7 @@ def test_plan_gets_one_retry_for_structure_and_budgets_from_code(llm):
     assert llm.steps() == ["plan", "plan"]
     assert "缺少这些角色的节" in llm.request("plan", 1)  # the retry names the problem
     assert problems == [] and len(plan["beats"]) == 4
-    assert sum(b["budget"] for b in plan["beats"]) == length.budget_for(6)
+    assert sum(b["budget"] for b in plan["beats"]) == length.budget_for(6, column().voice_id)
 
 
 def test_an_action_resting_on_an_unexplained_concept_is_sent_back(llm):

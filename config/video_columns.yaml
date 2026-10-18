@@ -14,6 +14,9 @@ deep_dive:
   # 已改为 adapt（2026-10-17）：新稿走改编和三项审计，仍由人工审稿后定稿。
   # 已有文稿可以随时「换个风格」；需要退回时把这里改回 legacy。
   writer: adapt
+  # 配音声音（AutoVideo 的 voice_id）。长度估算按这个声音的语速算，出片默认也用它；
+  # 换声音要同步 core/video/length.py 的 VOICE_SPEECH_RATES。
+  voice_id: voxcpm_anchor
   default_style: {depth: intermediate, tone: explainer}   # 见 config/video_styles.yaml
   allowed_tones: [concise, explainer, playful, story]
   structure:                # 讲述方案和讲稿必须满足的结构，由代码检查

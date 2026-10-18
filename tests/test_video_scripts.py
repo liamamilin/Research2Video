@@ -187,6 +187,50 @@ def test_the_estimate_adds_the_pauses_and_matches_the_real_renders():
     assert length.estimated_seconds(0, 0, 0) == 0
 
 
+def test_the_estimate_matches_the_voxcpm2_render_of_c4_v10():
+    # the rendered script: 6 chapters, 19 paragraphs, 92 pieces, 1683 units; AutoVideo measured 390.03 s
+    shape = json.loads((ROOT / "tests/fixtures_c4_v10_shape.json").read_text(encoding="utf-8"))
+    sections = [{"title": str(i), "paragraphs": [{"text": text} for text in paragraphs]} for i, paragraphs in enumerate(shape)]
+    check = length.measure(sections, 6, voice="voxcpm_anchor")
+    assert check["segments"] == 92 and check["spoken_length"] == 1683
+    assert abs(check["estimated_seconds"] / 390.03 - 1) < 0.02
+
+
+def test_the_estimate_follows_the_voice_that_reads_it():
+    assert length.speech_rate("voxcpm_anchor") > length.speech_rate(None) == length.SPEECH_UNITS_PER_SECOND
+    # a voice nobody measured is counted at the default rate, and the default budget does not move
+    assert length.estimated_seconds(1683, 92, 6, "zf_xiaoxiao") == length.estimated_seconds(1683, 92, 6)
+    assert length.budget_for(6) == 1512 == length.budget_for(6, "")
+    faster = length.budget_for(6, "voxcpm_anchor")
+    assert faster > 1512 and abs(faster / 360 - length.units_per_second("voxcpm_anchor")) < 0.01
+    sections = [{"title": "章", "paragraphs": [{"text": "这是一句话。" * 400}]}]
+    check = length.measure(sections, 6, voice="voxcpm_anchor")
+    assert check["voice"] == "voxcpm_anchor" and check["units_per_second"] == length.units_per_second("voxcpm_anchor")
+    assert check["budget"] == faster and length.measure(sections, 6)["voice"] is None
+
+
+@pytest.mark.parametrize("current, following, boundary, ms", length.GOLDEN)
+def test_content_pauses_follow_the_rule_autovideo_uses(current, following, boundary, ms):
+    assert round(length.content_pause(current, following, boundary) * 1000) == ms
+
+
+def test_content_aware_voices_count_the_rests_by_what_the_pieces_say():
+    sections = [
+        {"title": "一", "paragraphs": [{"text": "开头不改呢？只有第一次十美分。"}, {"text": "再说账。好。"}]},
+        {"title": "二", "paragraphs": [{"text": "先说钱。缓存有两个价。"}]},
+    ]
+    pieces, rests = length.content_pause_seconds(sections)
+    assert pieces == 6
+    # 问句 .52 + 段落 .66 + 短句 .46 (再说账。->好。) + 章 .85 + 短句 .46 (先说钱。->缓存有两个价。)
+    assert abs(rests - (0.52 + 0.66 + 0.46 + 0.85 + 0.46)) < 1e-9
+    flat = length.measure(sections, None)
+    timed = length.measure(sections, None, voice="voxcpm_anchor")
+    assert flat["segments"] == timed["segments"] == 6
+    units = timed["spoken_length"]
+    assert abs(timed["estimated_seconds"] - round(units / length.speech_rate("voxcpm_anchor")
+                                                  + length.EDGE_MARGIN_SECONDS * 6 + rests)) <= 1
+
+
 def test_a_script_of_short_sentences_is_judged_by_its_time_not_its_units():
     short = [{"title": "章", "paragraphs": [{"text": "好。" * 800}]}]  # 800 units, 800 sentences
     check = length.measure(short, 6)
@@ -395,6 +439,19 @@ def test_render_submits_the_approved_words_for_verbatim_narration(video_env, aut
     done = store.get_render(render["id"])
     assert {a["name"] for a in done["artifacts"]} == {"video.mp4", "captions.srt"}
     assert (video_render.files_dir(render["id"]) / "video.mp4").read_bytes() == autovideo.files["video.mp4"]
+
+
+def test_the_render_uses_the_columns_voice_unless_one_is_chosen(video_env, autovideo):
+    from web.services import video_render
+
+    column_voice = video_columns.get(str(ROOT / "config"), "deep_dive").voice_id
+    assert column_voice  # the column names the voice its length estimate assumes
+    default = video_render.create(_approved_script("默认声音"))
+    chosen = video_render.create(_approved_script("指定声音"), voice_id="zf_xiaoxiao")
+    for render in (default, chosen):
+        autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]  # the fake serves each status once
+        assert video_render.process(render["id"]) == "COMPLETED"
+    assert [post["voice_id"] for post in autovideo.posts] == [column_voice, "zf_xiaoxiao"]
 
 
 def test_a_lost_create_response_is_reconciled_not_resubmitted(video_env, autovideo):

@@ -32,6 +32,9 @@ class Column:
     script_style: str
     research_timeout_seconds: int = 3600
     writer: str = "legacy"
+    #: AutoVideo voice the column is rendered with, and the speech rate the length estimate assumes; empty means
+    #: AutoVideo's own default.
+    voice_id: str = ""
     default_depth: str = "intermediate"
     default_tone: str = "explainer"
     #: Tones a script of this column may be restyled to; empty means any.
@@ -48,6 +51,7 @@ class Column:
             "target_minutes": self.target_minutes,
             "video_form": self.video_form,
             "writer": self.writer,
+            "voice_id": self.voice_id,
             "default_style": {"depth": self.default_depth, "tone": self.default_tone},
             "allowed_tones": list(self.allowed_tones),
         }
@@ -109,6 +113,7 @@ def load(config_dir: str) -> dict[str, Column]:
             script_style=str(raw.get("script_style") or "").strip(),
             research_timeout_seconds=int(raw.get("research_timeout_seconds", 3600)),
             writer=writer,
+            voice_id=str(raw.get("voice_id") or ""),
             default_depth=str(style.get("depth") or "intermediate"),
             default_tone=str(style.get("tone") or "explainer"),
             allowed_tones=tuple(str(t) for t in raw.get("allowed_tones") or ()),

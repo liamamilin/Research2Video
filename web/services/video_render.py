@@ -118,6 +118,8 @@ def create(script: dict, *, voice_id: Optional[str] = None) -> dict:
     }
     if len(title) >= 2:
         request["title"] = title
+    # The column's voice is the one its length estimate assumes, so it is also what the render asks for.
+    voice_id = voice_id or column.voice_id
     if voice_id:
         request["voice_id"] = voice_id
     try:
