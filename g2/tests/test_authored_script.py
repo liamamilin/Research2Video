@@ -42,3 +42,11 @@ def test_natural_script_duration_extension_does_not_relax_legacy_timeline(tmp_pa
     ir.pop("content_structure")
     with pytest.raises(ValidationFault,match="SCHEMA_VALIDATION"):
         validate_video_ir(ir,root)
+
+
+def test_split_marked_flags_the_piece_that_opens_each_paragraph():
+    from g2.authored_script import split_marked
+    marked = split_marked("先说钱。缓存有两个价。\n再说账？没有。\n\n第三段只有一句。")
+    assert [text for text, _ in marked] == ["先说钱。", "缓存有两个价。", "再说账？", "没有。", "第三段只有一句。"]
+    assert [opens for _, opens in marked] == [True, False, True, False, True]
+    assert split_script("先说钱。缓存有两个价。\n再说账？没有。") == [text for text, _ in split_marked("先说钱。缓存有两个价。\n再说账？没有。")]

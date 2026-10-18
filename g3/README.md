@@ -157,6 +157,38 @@ touch g3/data/voice-models/qwen3-0.6b-4bit/.ready
 
 语音模型和样音位于忽略的 `g3/data/`；模型推理使用本地文件并关闭模型网络下载。源文仍按原有流程交给 DeepSeek 规划，配音不发送给新的云服务。
 
+### VoxCPM2（`voxcpm_anchor`，原稿模式的推荐声音）
+
+VoxCPM2（2B，8 位量化，Apache-2.0，约 3 GB）没有内置说话人。`g2/voxcpm_voice.py` 让每一句都以同一段 5 秒参考音
+（`g2/voice_assets/voxcpm2_anchor.wav`，内容是 `g2/voices.py` 的 `VOXCPM_ANCHOR_TEXT`）为准，并接着上一句往下读，每章开头
+回到参考音。去掉参考音，句与句之间音色会变；只接上一句，会逐渐变成另一个人。要换音色，换这段参考音和它的文字即可。
+
+- 读的文字和字幕分开处理：`g2/tts_text.py` 把小数写成中文读法（“Opus 5.5”读“五点五”，不读成 five point five），
+  “2 万 / 2 倍 / 2 次”这类孤立的 2 读“两”（不是“二”），字幕和原话校验仍是原文。
+- **接续方式 `chain`**（`AUTOVIDEO_G2_VOXCPM_CHAIN`，默认 `guarded`）：接着上一句读会把语速一路放大（C4 v10 实测每章从约 4.6
+  加快到约 6.9 字/秒，下一章开头又掉回去）。`guarded` 在上一句的语速偏离参考音超过 12% 时改用参考音；`anchor` 每句只用参考音
+  （最稳，语速离散度最低）；`chain` 是原来会漂的做法。
+- 每句生成后按语速检查（每秒 2.8–9.5 个字单位，少于 6 个字的短句不查），超出范围换随机种子重新生成，最多三次；结果写入
+  `voice-report.json`（每句的秒数、语速、尝试次数、用的是参考音还是上一句）。
+- **句间停顿按内容变化**（`g2/pauses.py`）：模型自己带的头尾静音每句 0–0.4 秒不等，先统一裁成固定边距，再按规则加停顿——问句后多停、
+  长句后换口气、很短的引子句后留一拍、分号后和长句中间切开处几乎不停、换段落停得更久、换章最久。每个间隔写在 alignment.json 的
+  `gap_after_ms`。AREC 的 `core/video/length.py` 用同一套规则算时长（两边共用一张 GOLDEN 对照表，改要一起改）。
+- 默认扩散 10 步（实时倍率约 1）；`AUTOVIDEO_G2_VOXCPM_STEPS=25` 更稳，约慢 2.7 倍。
+
+安装（与 Qwen 共用 `g3/data/voice-runtime`）：
+
+```sh
+g3/data/voice-runtime/bin/python - <<'PYTHON'
+from huggingface_hub import snapshot_download
+snapshot_download('mlx-community/VoxCPM2-8bit', revision='d52725898a0675703f7f9ddc5a4d1a3cdbb99032',
+    local_dir='g3/data/voice-models/voxcpm2-8bit')
+PYTHON
+g0/.venv/bin/python g2/voice_preview.py voxcpm_anchor
+touch g3/data/voice-models/voxcpm2-8bit/.ready
+```
+
+`model.safetensors` 的 SHA-256 为 `c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f`。
+
 API：`GET /api/voices`、`GET /api/voices/{voice_id}/sample`；新建任务可传 `voice_id` 与 `video_speed`（默认小晓、1 倍）。`GET /api/jobs/{id}/scenes` 返回可改字段与预览；`POST /api/jobs/{id}/visual-revisions` 传 `scene_id`，以及 `changes` 或 `instruction` 两者之一；`POST /api/jobs/{id}/media-revisions` 传 `voice_id`、`video_speed` 的至少一项。所有修订生成独立子任务，原任务版本列表统一列出。
 
 验收与实际视频、样音、调用记录见 `SCENE_MEDIA_ACCEPTANCE.md`。

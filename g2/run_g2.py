@@ -29,7 +29,8 @@ DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 PROMPT_VERSION = "g2-golden-general-v1.3"
 FPS = 30
 SAMPLE_RATE = 24000
-from g2.voices import VOICE_IDS, SPEEDS, qwen_paths
+from g2.voices import VOICE_IDS, SPEEDS, mlx_engine, qwen_paths
+from g2 import pauses, pronunciation
 VOICE = os.environ.get("AUTOVIDEO_G2_VOICE_ID", "zf_xiaoxiao")
 OUTPUT_SPEED = float(os.environ.get("AUTOVIDEO_G2_VIDEO_SPEED", "1"))
 if VOICE not in VOICE_IDS or OUTPUT_SPEED not in SPEEDS:
@@ -630,21 +631,35 @@ def synthesize_and_align(plan: dict) -> dict:
     ASSETS.mkdir(parents=True, exist_ok=True)
     SEGMENTS_DIR.mkdir(parents=True, exist_ok=True)
     start_time = time.monotonic()
-    use_qwen = VOICE.startswith("qwen_")
+    mlx = mlx_engine(VOICE, PROJECT)  # None for Kokoro, which runs in this process
+    use_qwen = mlx is not None  # the voice comes as one wav per segment from a fixed local MLX entry point
     if use_qwen:
-        plan_path=ARTIFACTS/"voice-input.json";write_json(plan_path,{**plan,"segments":[{**s,"text":spoken_text(s["text"])} for s in plan["segments"]]})
-        _run_fixed_command("local-qwen-voice",[qwen_paths(PROJECT)[0],PROJECT/"g2/qwen_voice.py",plan_path,SEGMENTS_DIR,VOICE],PROJECT,timeout=1800)
+        voice_settings = {"steps": int(os.environ.get("AUTOVIDEO_G2_VOXCPM_STEPS", "10")),
+                          "chain": os.environ.get("AUTOVIDEO_G2_VOXCPM_CHAIN", "guarded")} if VOICE.startswith("voxcpm_") else {}
+        plan_path=ARTIFACTS/"voice-input.json";write_json(plan_path,{**plan,"voice_settings":voice_settings,"segments":[{**s,"text":spoken_text(s["text"])} for s in plan["segments"]]})
+        _run_fixed_command("local-mlx-voice",[mlx["python"],mlx["entry"],plan_path,SEGMENTS_DIR,VOICE],PROJECT,timeout=3600)
+        if (SEGMENTS_DIR/"voice-report.json").is_file():
+            shutil.move(str(SEGMENTS_DIR/"voice-report.json"),str(ARTIFACTS/"voice-report.json"))
     engine = None if use_qwen else Kokoro(str(KOKORO_MODEL), str(KOKORO_VOICES))
     g2p = None if use_qwen else zh.ZHG2P()
+    english = None if use_qwen else pronunciation.english_phonemes()
+    if not use_qwen:  # the readings the dictionary picks that nobody pinned, for a person to check
+        write_json(ARTIFACTS / "pronunciation-review.json", {
+            "pinned_words": sorted(pronunciation.PHRASES),
+            "unreviewed_readings": pronunciation.unreviewed_readings("\n".join(spoken_text(s["text"]) for s in plan["segments"]))})
     chunks = [np.zeros(round(SAMPLE_RATE * 0.25), dtype=np.float32)]
     cursor = len(chunks[0])
     rows = []
     pause_ms = 360
+    paragraph_file = ARTIFACTS / "paragraph-starts.json"
+    paragraph_starts = set(json.loads(paragraph_file.read_text(encoding="utf-8"))["segment_ids"]) if paragraph_file.is_file() else set()
     for index, segment in enumerate(plan["segments"]):
         if use_qwen:
             samples,sample_rate=sf.read(SEGMENTS_DIR/f"{segment['id']}.wav",dtype="float32")
+            samples=pauses.trim(samples,sample_rate)  # the voice's own edge silence varies per sentence; the gaps below are the rest
         else:
-            phonemes, _ = g2p(spoken_text(segment["text"]))
+            phonemes = pronunciation.phonemes(spoken_text(segment["text"]), g2p, english,
+                                              flat_questions=os.environ.get("AUTOVIDEO_G2_FLAT_QUESTIONS") == "1")
             if "❓" in phonemes:
                 raise G2Fault("TTS_G2P_FAILED", f"cannot resolve Chinese pronunciation for {segment['id']}")
             samples, sample_rate = engine.create(phonemes, voice=VOICE, speed=1.0, is_phonemes=True, trim=True)
@@ -668,7 +683,12 @@ def synthesize_and_align(plan: dict) -> dict:
         if index < len(plan["segments"]) - 1:
             next_segment = plan["segments"][index + 1]
             chapter_boundary = segment.get("chapter_id") != next_segment.get("chapter_id")
-            gap_ms = 850 if chapter_boundary else pause_ms
+            if use_qwen:  # content-aware rests for the local MLX voices
+                boundary = "chapter" if chapter_boundary else "paragraph" if next_segment["id"] in paragraph_starts else "sentence"
+                gap_ms = pauses.gap_ms(spoken_text(segment["text"]), spoken_text(next_segment["text"]), boundary)
+                rows[-1]["gap_after_ms"] = gap_ms
+            else:
+                gap_ms = 850 if chapter_boundary else pause_ms
             silence = np.zeros(round(SAMPLE_RATE * gap_ms / 1000), dtype=np.float32)
             chunks.append(silence)
             cursor += len(silence)
@@ -684,18 +704,19 @@ def synthesize_and_align(plan: dict) -> dict:
     for row in rows:
         row["start_ms"] = (row.pop("start_sample") * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE
         row["end_ms"] = (row.pop("end_sample") * 1000 + SAMPLE_RATE // 2) // SAMPLE_RATE
-    alignment = {"provider": "local_qwen_mlx" if use_qwen else "local_kokoro_onnx", "model": "Qwen3-TTS-0.6B-4bit" if use_qwen else "Kokoro-82M-v1.0", "voice": VOICE,
+    alignment = {"provider": mlx["provider"] if use_qwen else "local_kokoro_onnx", "model": mlx["model"] if use_qwen else "Kokoro-82M-v1.0", "voice": VOICE,
                  "method": "separate real utterances with measured PCM activity bounds", "granularity": "phrase",
                  "sample_rate": SAMPLE_RATE, "duration_seconds": duration_seconds, "duration_ms": duration_ms,
                  "duration_frames": total_frames, "activity_threshold": 0.003, "edge_guard_ms": 50,
-                 "inter_phrase_pause_ms": pause_ms, "inter_chapter_pause_ms": 850 if CONTENT_MODE else None, "segments": rows,
+                 "inter_phrase_pause_ms": pause_ms, "inter_chapter_pause_ms": 850 if CONTENT_MODE else None,
+                 "pause_model": "content-aware (g2/pauses.py): gap_after_ms per row, edges trimmed" if use_qwen else "fixed", "segments": rows,
                  "limitation": "短语边界来自真实 WAV 的 PCM 活动；不声明词级对齐精度。"}
     write_json(ARTIFACTS / "alignment.json", alignment)
-    write_json(ARTIFACTS / "tts-metrics.json", {"provider": "local_qwen_mlx" if use_qwen else "local_kokoro_onnx", "model": "Qwen3-TTS-0.6B-4bit" if use_qwen else "Kokoro-82M-v1.0",
+    write_json(ARTIFACTS / "tts-metrics.json", {"provider": mlx["provider"] if use_qwen else "local_kokoro_onnx", "model": mlx["model"] if use_qwen else "Kokoro-82M-v1.0",
                "voice": VOICE, "sample_rate": SAMPLE_RATE, "duration_seconds": duration_seconds,
                "generation_seconds": round(time.monotonic() - start_time, 3), "cloud_requests": 0,
                "cloud_api_cost": 0, "local_compute_cost": "not measured",
-               "model_sha256": digest(qwen_paths(PROJECT)[1]/"model.safetensors") if use_qwen else digest(KOKORO_MODEL), "voice_file_sha256": None if use_qwen else digest(KOKORO_VOICES),
+               "model_sha256": digest(mlx["weights"]) if use_qwen else digest(KOKORO_MODEL), "voice_file_sha256": None if use_qwen else digest(KOKORO_VOICES),
                "audio_sha256": digest(audio_path)})
     def stamp(ms: int) -> str:
         return f"{ms//3600000:02}:{ms//60000%60:02}:{ms//1000%60:02},{ms%1000:03}"
@@ -733,7 +754,7 @@ def compile_ir(narration: dict, board: dict, alignment: dict) -> dict:
           "source": {"language": "zh-CN", "original_text": source, "text_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest()},
           "style": {"preset": "minimal_dark", "seed": 20261013},
           "assets": [{"id": "communication_voice", "type": "audio", "path": "assets/communications_noise.wav",
-                       "origin": ("local Qwen3-TTS Chinese speech from " if VOICE.startswith("qwen_") else "local Kokoro-82M v1.0 Chinese TTS from ") + ("saved narration" if os.environ.get("AUTOVIDEO_G2_REUSE_NARRATION")=="1" else "user-edited narration" if LOCK_NARRATION else "model-generated NarrationPlan"),
+                       "origin": ("local Qwen3-TTS Chinese speech from " if VOICE.startswith("qwen_") else "local VoxCPM2 Chinese speech from " if VOICE.startswith("voxcpm_") else "local Kokoro-82M v1.0 Chinese TTS from ") + ("saved narration" if os.environ.get("AUTOVIDEO_G2_REUSE_NARRATION")=="1" else "user-edited narration" if LOCK_NARRATION else "model-generated NarrationPlan"),
                        "sha256": digest(audio_path)}],
           "narration": {"text": "".join(segment["text"] for segment in narration["segments"]),
                         "audio_asset_id": "communication_voice",
@@ -776,7 +797,7 @@ def add_narration_check(qa: dict) -> None:
 
 def _run_fixed_command(label: str, argv: list[str | Path], cwd: Path, timeout: int = 900) -> str:
     executable = Path(argv[0]).resolve()
-    allowlist = {NODE.resolve(), PYTHON.resolve(), FFMPEG.resolve(), FFPROBE.resolve(), qwen_paths(PROJECT)[0].resolve()}
+    allowlist = {NODE.resolve(), PYTHON.resolve(), FFMPEG.resolve(), FFPROBE.resolve(), qwen_paths(PROJECT)[0].resolve()}  # the voice runtime also runs VoxCPM2
     if executable not in allowlist:
         raise G2Fault("EXECUTABLE_NOT_ALLOWLISTED", f"refusing to execute {executable}")
     args = list(map(str, argv))

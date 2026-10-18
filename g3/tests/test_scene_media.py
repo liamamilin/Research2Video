@@ -113,7 +113,7 @@ def test_settings_validation_defaults_and_choices(tmp_path):
         job=c.get('/api/jobs/'+r.json()['job_id']).json();assert job['voice_id']=='zf_xiaoxiao' and job['video_speed']==1
         assert c.post('/api/jobs',json={'source_text':SOURCE,'video_speed':3}).status_code==422
         assert c.post('/api/jobs',json={'source_text':SOURCE,'voice_id':'fake'}).status_code==422
-        assert len(c.get('/api/voices').json()['items'])==13
+        assert len(c.get('/api/voices').json()['items'])==14
 
 
 def test_flow_text_revision_retains_graph_identity_and_connections():

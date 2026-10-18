@@ -17,9 +17,11 @@ class NarrationMismatch(ValueError):
     code = MISMATCH
 
 
-def split_script(text: str) -> list[str]:
+def split_marked(text: str) -> list[tuple[str, bool]]:
+    """The pieces the script is voiced in, each with whether it opens a paragraph."""
     chunks = []
     for paragraph in re.split(r"[\r\n]+", text):
+        first = True
         for sentence in re.split(r"(?<=[。！？!?；;])", paragraph):
             remaining = sentence.strip()
             while remaining:
@@ -33,12 +35,17 @@ def split_script(text: str) -> list[str]:
                         end = natural
                 part, remaining = remaining[:end].strip(), remaining[end:].strip()
                 if part:
-                    chunks.append(part)
+                    chunks.append((part, first))
+                    first = False
     if not chunks:
         raise ValueError("讲稿不能为空")
-    if re.sub(r"\s", "", "".join(chunks)) != re.sub(r"\s", "", text):
+    if re.sub(r"\s", "", "".join(chunk for chunk, _ in chunks)) != re.sub(r"\s", "", text):
         raise ValueError("讲稿分句不得丢失或改写文字")
     return chunks
+
+
+def split_script(text: str) -> list[str]:
+    return [chunk for chunk, _ in split_marked(text)]
 
 
 def script_text(chapters: list[dict]) -> str:
@@ -112,10 +119,12 @@ def _chapter_units(source: str, chapters: list[dict]) -> list[list[str]]:
 def plan(pipeline, source: str):
     title, chapters, origin = load_script(pipeline, source)
     unit_ids = _chapter_units(source, chapters)
-    segments, points, planned = [], [], []
+    segments, points, planned, paragraph_starts = [], [], [], []
     for index, chapter in enumerate(chapters, 1):
         cid = f"c{index}"
-        values = split_script("\n".join(chapter["paragraphs"]))
+        marked = split_marked("\n".join(chapter["paragraphs"]))
+        values = [t for t, _ in marked]
+        paragraph_starts.extend(f"{cid}_n{i + 1}" for i, (_, opens) in enumerate(marked) if opens)
         local_points = [{"id": f"{cid}_p{i + 1}", "point": t, "source_quotes": [t]} for i, t in enumerate(values)]
         local_segments = [{"id": f"{cid}_n{i + 1}", "text": t, "chapter_id": cid, "point_ids": [f"{cid}_p{i + 1}"],
                            "source_quotes": [t]} for i, t in enumerate(values)]
@@ -135,6 +144,8 @@ def plan(pipeline, source: str):
     result = {"title": title, "core_message": title, "necessary_points": points,
               "omissions": [], "ambiguities": [], "segments": segments, "chapters": planned}
     pipeline.write_json(pipeline.ARTIFACTS / "narration-plan.json", result)
+    # Where the author began a new paragraph: the voice rests longer there (g2/pauses.py).
+    pipeline.write_json(pipeline.ARTIFACTS / "paragraph-starts.json", {"segment_ids": paragraph_starts})
     pipeline.write_json(pipeline.ARTIFACTS / "authored-narration.json", {
         "mode": "user_authored", "origin": origin, "text_sha256": hashlib.sha256(source.encode()).hexdigest(),
         "model_rewrite": False, "whitespace_normalized_only": True, "segments": len(segments),

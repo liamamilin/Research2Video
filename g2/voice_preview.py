@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys,json,subprocess
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from g2.voices import VOICE_IDS,qwen_paths
+from g2.voices import VOICE_IDS,mlx_engine
 
 
 def main(voice):
@@ -11,9 +11,10 @@ def main(voice):
     target=root/'sample.wav'
     if target.exists():return
     text='你好，欢迎使用自动视频。先讲清楚目标，再安排画面和声音。'
-    if voice.startswith('qwen_'):
+    engine=mlx_engine(voice,ROOT)
+    if engine:
         request=root/'request.json';request.write_text(json.dumps({'segments':[{'id':'s1','text':text}]},ensure_ascii=False))
-        subprocess.run([str(qwen_paths(ROOT)[0]),str(ROOT/'g2/qwen_voice.py'),str(request),str(root),voice],check=True,timeout=240)
+        subprocess.run([str(engine['python']),str(engine['entry']),str(request),str(root),voice],check=True,timeout=600)
         (root/'s1.wav').replace(target)
     else:
         from kokoro_onnx import Kokoro
