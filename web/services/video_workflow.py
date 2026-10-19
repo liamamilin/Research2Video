@@ -267,12 +267,17 @@ def _audit_short(script_id: str, written, report: str, column, config, review_co
     # The review model is often a slow free one: cap each
     # attempt and the whole call so a slow audit costs minutes, not the 10-minute attempts the writer is allowed.
     if is_dataclass(base):
+        # a long script (a roundup is about 1000 units) gives the slow review model twice the time
+        total = AUDIT_TIMEOUT_SECONDS * (2 if column.target_minutes >= 3 else 1)
         base = replace(base, request_timeout=min(base.request_timeout, AUDIT_REQUEST_SECONDS),
-                       timeout=min(base.timeout, AUDIT_TIMEOUT_SECONDS))
+                       timeout=min(base.timeout, total))
     client = LLMClient(base)
     try:
         checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues,
-                                          column_style=column.script_style)
+                                          column_style=column.script_style,
+                                          # a roundup covers several items in turn, so "too many details" is part of its form
+                                          style_severity=(adapt_review.WARN if column.topic_kind == "roundup"
+                                                          else adapt_review.MUST))
     except Exception as exc:  # noqa: BLE001 - an audit that crashes must not lose the draft
         logger.exception("fact audit of script %s failed", script_id)
         checks, note = _rules_only(rule_issues, None, written.sections), f"事实审计没有完成：{type(exc).__name__}: {exc}"

@@ -279,3 +279,13 @@ def test_a_roundup_marks_each_of_its_items_as_written(video_env):
     failed = store.create_script("flash", {"id": "2026-10-19/F4", "title": "失败的", "fields": {}})
     store.update_script(failed["id"], status="FAILED")
     assert store.topic_ids_in_use() == {"2026-10-19/F2", "2026-10-19/F3"}
+
+
+def test_the_style_audit_can_report_as_a_warning_for_a_roundup(llm):
+    from core.video import audit as video_audit
+
+    reply = '{"issues": [{"id": "S1P1", "quote": "一句话", "rule": "S1", "severity": "一般", "problem": "细节多", "why": "", "suggestion": ""}]}'
+    llm.style_replies = [reply, reply]
+    client = llm(None)
+    assert video_audit.style_issues(client, SECTIONS, "规范")[0]["severity"] == adapt_review.MUST
+    assert video_audit.style_issues(client, SECTIONS, "规范", adapt_review.WARN)[0]["severity"] == adapt_review.WARN
