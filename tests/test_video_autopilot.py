@@ -272,3 +272,10 @@ def test_the_dispatcher_wakes_the_console_only_while_the_pipeline_has_work(video
     assert runner.poke_autopilot(runtime, plan["next_fire"] + 2) is False  # throttled
     pilot.start_run({"picks": [{"column": "flash", "count": 1, "source": "flash"}], "refresh": False})
     assert runner.autopilot_due(state_dir, 0.0) is True  # a running batch keeps the console awake
+
+
+def test_a_roundup_marks_each_of_its_items_as_written(video_env):
+    store.create_script("ai-developer-roundup-long", {"id": None, "title": "盘点", "items": ["2026-10-19/F2", "2026-10-19/F3"]})
+    failed = store.create_script("flash", {"id": "2026-10-19/F4", "title": "失败的", "fields": {}})
+    store.update_script(failed["id"], status="FAILED")
+    assert store.topic_ids_in_use() == {"2026-10-19/F2", "2026-10-19/F3"}

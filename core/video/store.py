@@ -233,10 +233,15 @@ def update_script(script_id: str, **fields: Any) -> None:
 
 
 def topic_ids_in_use() -> set[str]:
-    """Topic ids that already have a script that did not fail."""
+    """Topic ids that already have a script that did not fail (a roundup covers each of its items)."""
     with connect() as conn:
         rows = conn.execute("SELECT topic FROM scripts WHERE status != 'FAILED'").fetchall()
-    return {json.loads(r["topic"]).get("id") for r in rows} - {None}
+    ids: set = set()
+    for row in rows:
+        topic = json.loads(row["topic"])
+        ids.add(topic.get("id"))
+        ids.update(topic.get("items") or [])
+    return ids - {None}
 
 
 @contextmanager
@@ -337,7 +342,12 @@ def published_topic_ids() -> set[str]:
     """Topic ids whose script has been published."""
     with connect() as conn:
         rows = conn.execute("SELECT topic FROM scripts WHERE id IN (SELECT script_id FROM publications)").fetchall()
-    return {json.loads(r["topic"]).get("id") for r in rows} - {None}
+    ids: set = set()
+    for row in rows:
+        topic = json.loads(row["topic"])
+        ids.add(topic.get("id"))
+        ids.update(topic.get("items") or [])
+    return ids - {None}
 
 
 class ActiveRecheckError(RuntimeError):
