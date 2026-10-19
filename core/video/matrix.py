@@ -143,15 +143,23 @@ def compose(cell_id: str, domain: dict, audience: dict, type_: dict, format_: di
     return raw
 
 
-def load(config_dir: str) -> dict[str, Cell]:
-    """Every cell of ``video_matrix.yaml`` by its id; a malformed definition raises, naming it."""
+def _read(config_dir: str) -> tuple[dict, dict]:
+    """(the file's data, its definitions by dimension); empty when there is no matrix file."""
     path = os.path.join(config_dir, MATRIX_FILE)
     if not os.path.isfile(path):
-        return {}
+        return {}, {}
     with open(path, encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
     defs = {name: _mapping(data, plural) for name, plural in
             (("domain", "domains"), ("audience", "audiences"), ("type", "types"), ("format", "formats"))}
+    return data, defs
+
+
+def load(config_dir: str) -> dict[str, Cell]:
+    """Every cell of ``video_matrix.yaml`` by its id; a malformed definition raises, naming it."""
+    data, defs = _read(config_dir)
+    if not data:
+        return {}
     cells = data.get("cells") or []
     if not isinstance(cells, list):
         raise columns.ColumnError("矩阵的 cells 必须是列表")
@@ -194,3 +202,30 @@ def provenance(config_dir: str, key: str) -> Optional[dict]:
         if cell.id == key or (cell.column is not None and cell.column.key == key):
             return {"cell": cell.id, "status": cell.status, "parts": cell.parts}
     return None
+
+
+def catalog(config_dir: str) -> list[dict]:
+    """Every cell for a picker: what it is made of, whether it can be used and why not, and its column's settings.
+
+    Enabled cells come first, then experimental ones, then blocked ones; a column of ``video_columns.yaml`` is listed
+    as an enabled cell with no parts."""
+    _, defs = _read(config_dir)
+    rows = []
+    for column in columns._flat(config_dir).values():
+        rows.append({"id": column.key, "key": column.key, "status": "enabled", "reason": "", "usable": True,
+                     "label": column.name, "parts": None, "column": column.as_dict()})
+    for cell in load(config_dir).values():
+        names = {dim: defs[dim][cell.parts[dim]["key"]].get("label") or defs[dim][cell.parts[dim]["key"]].get("name")
+                 or cell.parts[dim]["key"] for dim in DIMENSIONS}
+        rows.append({
+            "id": cell.id,
+            "key": cell.column.key if cell.column else None,
+            "status": cell.status,
+            "reason": cell.reason,
+            "usable": cell.status != "blocked",
+            "label": " · ".join(names[dim] for dim in ("type", "audience", "format")),
+            "parts": {dim: {**cell.parts[dim], "name": names[dim]} for dim in DIMENSIONS},
+            "column": cell.column.as_dict() if cell.column else None,
+        })
+    order = {status: i for i, status in enumerate(STATUSES)}
+    return sorted(rows, key=lambda r: order[r["status"]])

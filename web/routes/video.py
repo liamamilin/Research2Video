@@ -81,6 +81,17 @@ def list_columns(user=Depends(require_viewer)) -> list[dict]:
             for c in _columns().values()]
 
 
+@router.get("/cells")
+def list_cells(user=Depends(require_viewer)) -> list[dict]:
+    """Every cell of the content matrix with its status, for choosing what to write (spec/video-matrix.md)."""
+    from core.video import matrix
+
+    try:
+        return matrix.catalog(get_settings().paths.config_dir)
+    except video_columns.ColumnError as exc:
+        raise HTTPException(500, detail=ApiError.make("bad_matrix", str(exc))) from exc
+
+
 @router.get("/styles")
 def list_styles(user=Depends(require_viewer)) -> dict:
     """Depths and tones a script can be written in."""

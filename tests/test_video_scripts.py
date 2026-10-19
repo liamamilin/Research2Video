@@ -957,3 +957,11 @@ def test_api_a_comparison_researches_its_two_subjects_and_a_single_topic_column_
     wrong = client.post("/api/video/scripts", headers=_csrf(client), json={
         "column": "deep_dive", "topic": {"title": "一个普通选题", "subjects": ["A", "B"]}})
     assert wrong.status_code == 422 and "topic_not_for_column" in wrong.text
+
+
+def test_api_cells_list_the_matrix_for_a_picker(client, video_env):
+    _login(client)
+    rows = client.get("/api/video/cells").json()
+    assert rows and all({"id", "key", "status", "usable", "label", "column"} <= set(r) for r in rows)
+    assert {r["id"] for r in rows} >= {"deep_dive", "flash", "point_short"}  # this environment's columns are flat ones
+    assert client.get("/api/video/cells").status_code == 200

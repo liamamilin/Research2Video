@@ -22,6 +22,24 @@ export interface VideoColumn {
   writer?: "legacy" | "adapt";
   default_style?: { depth: string; tone: string };
   allowed_tones?: string[];
+  audience?: string;
+  allowed_forms?: string[];
+  topic_kind?: "single" | "roundup" | "comparison";
+  status?: CellStatus;
+}
+
+export type CellStatus = "enabled" | "experimental" | "blocked";
+
+// 内容矩阵的一个格子（领域 × 受众 × 类型 × 形态），见 spec/video-matrix.md。
+export interface VideoCell {
+  id: string;
+  key: string | null; // 创建文稿时用的栏目名；blocked 的格子没有
+  status: CellStatus;
+  reason: string;
+  usable: boolean;
+  label: string;
+  parts: Record<"domain" | "audience" | "type" | "format", { key: string; name: string; version: number }> | null;
+  column: VideoColumn | null;
 }
 
 export interface StyleCatalog {
@@ -248,9 +266,12 @@ export interface AutoVideoStatus {
 
 export const listVideoColumns = () => api<VideoColumn[]>("/api/video/columns");
 
+export const listVideoCells = () => api<VideoCell[]>("/api/video/cells");
+
 export const listVideoStyles = () => api<StyleCatalog>("/api/video/styles");
 
-export const listVideoTopics = () => api<{ round: string | null; topics: VideoTopic[] }>("/api/video/topics");
+export const listVideoTopics = (source: "opportunities" | "flash" = "opportunities") =>
+  api<{ round: string | null; topics: VideoTopic[] }>("/api/video/topics", { query: { source } });
 
 export const listVideoScripts = () => api<VideoScriptSummary[]>("/api/video/scripts");
 
@@ -260,7 +281,9 @@ export const getVideoScript = (id: string, version?: number) =>
 export const createVideoScript = (body: {
   column?: string;
   topic_id?: string;
-  topic?: { title: string; angle?: string; audience?: string };
+  topic?: { title?: string; angle?: string; audience?: string; subjects?: string[]; dimensions?: string };
+  topic_ids?: string[];
+  video_form?: string;
 }) => api<VideoScriptSummary>("/api/video/scripts", { method: "POST", body });
 
 export const saveVideoScript = (id: string, body: { title: string; sections: ScriptSection[]; base_version?: number }) =>

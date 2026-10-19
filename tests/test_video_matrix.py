@@ -197,3 +197,28 @@ def test_a_column_needs_a_research_prompt_unless_it_is_a_roundup():
     assert video_columns.build("b", {**base, "topic_kind": "roundup"}).topic_kind == "roundup"
     with pytest.raises(video_columns.ColumnError, match="topic_kind"):
         video_columns.build("c", {**base, "topic_kind": "listicle", "research_prompt": "x"})
+
+
+def test_the_catalog_lists_every_cell_with_its_status_and_why_a_blocked_one_cannot_be_used(tmp_path):
+    rows = matrix.catalog(str(ROOT / "config"))
+    assert [r["status"] for r in rows] == sorted((r["status"] for r in rows), key=["enabled", "experimental", "blocked"].index)
+    flash = next(r for r in rows if r["id"] == "ai-developer-quick_take-short")
+    assert flash["key"] == "flash" and flash["usable"] and flash["label"] == "快讯 · 开发者 · B 站横屏短"
+    assert flash["parts"]["audience"] == {"key": "developer", "version": 1, "name": "开发者"}
+    assert flash["column"]["topic_kind"] == "single" and flash["column"]["allowed_forms"] == ["information_motion"]
+
+    data = _shipped()
+    data["cells"].append({"domain": "ai", "audience": "developer", "type": "quick_take", "format": "long",
+                          "status": "blocked", "reason": "竖屏需要新的画面版本"})
+    data["types"]["quick_take"]["formats"]["long"] = {"target_minutes": 2}
+    blocked = matrix.catalog(_write(tmp_path, data))[-1]
+    assert blocked["status"] == "blocked" and not blocked["usable"] and blocked["key"] is None
+    assert blocked["reason"] == "竖屏需要新的画面版本" and blocked["column"] is None
+
+
+def test_a_flat_column_is_listed_as_an_enabled_cell_without_parts(tmp_path):
+    (tmp_path / "video_columns.yaml").write_text(
+        "mine:\n  name: 我的栏目\n  research_prompt: x\n  target_minutes: 3\n", encoding="utf-8")
+    assert matrix.catalog(str(tmp_path)) == [{
+        "id": "mine", "key": "mine", "status": "enabled", "reason": "", "usable": True, "label": "我的栏目",
+        "parts": None, "column": video_columns.load(str(tmp_path))["mine"].as_dict()}]

@@ -2,11 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   createVideoScript,
-  listVideoColumns,
+  listVideoCells,
   listVideoScripts,
   listVideoTopics,
   type ScriptStatus,
-  type VideoColumn,
+  type VideoCell,
   type VideoScriptSummary,
   type VideoTopic,
 } from "@/api/video";
@@ -31,6 +31,17 @@ export const STATUS_CLASS: Record<ScriptStatus, string> = {
   FAILED: "bg-danger/15 text-danger border-danger/30",
 };
 
+export const FORM_LABEL: Record<string, string> = {
+  auto: "自动选择",
+  information_motion: "信息动效",
+  process_diagram: "流程图解",
+};
+
+export const STATUS_NOTE: Partial<Record<VideoCell["status"], string>> = {
+  experimental: "未验证",
+  blocked: "不可用",
+};
+
 const IN_FLIGHT: ScriptStatus[] = ["RESEARCHING", "WRITING"];
 
 export function minutes(seconds: number | null | undefined): string {
@@ -45,7 +56,12 @@ export function VideoScriptsPage() {
   const navigate = useNavigate();
 
   const [scripts, setScripts] = useState<VideoScriptSummary[] | null>(null);
-  const [columns, setColumns] = useState<VideoColumn[]>([]);
+  const [cells, setCells] = useState<VideoCell[]>([]);
+  const [cellId, setCellId] = useState<string>("");
+  const [form, setForm] = useState<string>("");
+  const [picked, setPicked] = useState<string[]>([]);
+  const [roundupTitle, setRoundupTitle] = useState("");
+  const [compare, setCompare] = useState({ first: "", second: "", dimensions: "", audience: "" });
   const [round, setRound] = useState<string | null>(null);
   const [topics, setTopics] = useState<VideoTopic[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -55,11 +71,10 @@ export function VideoScriptsPage() {
 
   const load = useCallback(async () => {
     try {
-      const [s, c, t] = await Promise.all([listVideoScripts(), listVideoColumns(), listVideoTopics()]);
+      const [s, c] = await Promise.all([listVideoScripts(), listVideoCells()]);
       setScripts(s);
-      setColumns(c);
-      setRound(t.round);
-      setTopics(t.topics);
+      setCells(c);
+      setCellId((current) => current || (c.find((x) => x.usable)?.id ?? ""));
       setError(null);
     } catch (e) {
       setError(errorMessage(e, "加载视频文稿失败"));
@@ -80,12 +95,39 @@ export function VideoScriptsPage() {
     return () => clearInterval(timer);
   }, [inFlight]);
 
-  const column = columns[0];
+  const cell = cells.find((c) => c.id === cellId);
+  const column = cell?.column ?? null;
+  const kind = column?.topic_kind ?? "single";
+  // 快讯类和盘点的选题来自发现报告（F<n>），其余来自内容机会（C<n>）
+  const source = kind === "roundup" || cell?.parts?.type.key === "quick_take" ? "flash" : "opportunities";
+  const forms = column?.allowed_forms ?? [];
+
+  // 换了格子：回到它默认的视频形式，清掉已选条目，按它的选题来源重新取选题
+  useEffect(() => {
+    setForm("");
+    setPicked([]);
+    if (kind === "comparison") return;
+    let alive = true;
+    listVideoTopics(source)
+      .then((t) => {
+        if (!alive) return;
+        setRound(t.round);
+        setTopics(t.topics);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [cellId, kind, source]);
 
   async function create(body: Parameters<typeof createVideoScript>[0], key: string) {
     setBusy(key);
     try {
-      const made = await createVideoScript({ column: column?.key, ...body });
+      const made = await createVideoScript({
+        column: cell?.key ?? undefined,
+        ...(form ? { video_form: form } : {}),
+        ...body,
+      });
       toast.success("已开始研究", "研究通常需要 3–10 分钟，完成后自动写稿");
       navigate(`/video/${made.id}`);
     } catch (e) {
@@ -99,18 +141,46 @@ export function VideoScriptsPage() {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <h1 className="text-lg font-semibold flex-1">视频文稿</h1>
-        {column ? (
-          <span className="text-xs text-text-muted">
-            栏目：{column.name} · 约 {column.target_minutes} 分钟
-          </span>
-        ) : null}
       </div>
 
-      {canEdit && column ? (
+      {canEdit && cell && column ? (
         <section className="card space-y-3">
-          <div className="flex items-center gap-2">
-            <h2 className="font-medium flex-1">新建「{column.name}」</h2>
-            {(["topics", "manual"] as const).map((key) => (
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="font-medium">新建</h2>
+            <select
+              aria-label="格子"
+              className="input w-auto"
+              value={cellId}
+              onChange={(e) => setCellId(e.target.value)}
+            >
+              {cells.map((c) => (
+                <option key={c.id} value={c.id} disabled={!c.usable}>
+                  {c.label}
+                  {STATUS_NOTE[c.status] ? `（${STATUS_NOTE[c.status]}）` : ""}
+                </option>
+              ))}
+            </select>
+            {forms.length > 1 ? (
+              <select
+                aria-label="视频形式"
+                className="input w-auto"
+                value={form}
+                onChange={(e) => setForm(e.target.value)}
+              >
+                <option value="">视频形式：默认（{FORM_LABEL[column.video_form] ?? column.video_form}）</option>
+                {forms
+                  .filter((f) => f !== column.video_form)
+                  .map((f) => (
+                    <option key={f} value={f}>
+                      {FORM_LABEL[f] ?? f}
+                    </option>
+                  ))}
+              </select>
+            ) : null}
+            <span className="flex-1 text-xs text-text-muted text-right">约 {column.target_minutes} 分钟</span>
+            {kind === "single" ? (
+              <>
+                {(["topics", "manual"] as const).map((key) => (
               <button
                 key={key}
                 onClick={() => setTab(key)}
@@ -119,16 +189,119 @@ export function VideoScriptsPage() {
                   tab === key ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover",
                 )}
               >
-                {key === "topics" ? "从内容机会选" : "手写选题"}
-              </button>
-            ))}
+                    {key === "topics" ? (source === "flash" ? "从快讯条目选" : "从内容机会选") : "手写选题"}
+                  </button>
+                ))}
+              </>
+            ) : null}
           </div>
+          {cell.status === "experimental" ? (
+            <p className="text-xs text-warning">这个格子还没出过片，写出的文稿和视频效果没有验证过。</p>
+          ) : null}
           <p className="text-xs text-text-muted">{column.description}</p>
 
-          {tab === "topics" ? (
+          {kind === "roundup" ? (
+            <div className="space-y-2">
+              <p className="text-xs text-text-muted">
+                选 2–10 条{round ? `（发现报告 ${round}）` : ""}，每条讲一节，按选的顺序排。已选 {picked.length} 条。
+              </p>
+              {topics.map((t) => (
+                <label key={t.id} className="flex items-start gap-3 rounded border border-border p-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={picked.includes(t.id)}
+                    onChange={(e) =>
+                      setPicked(e.target.checked ? [...picked, t.id] : picked.filter((id) => id !== t.id))
+                    }
+                  />
+                  <span className="font-mono text-xs text-text-muted pt-0.5">{t.code}</span>
+                  <span className="text-sm flex-1">{t.title}</span>
+                  {picked.includes(t.id) ? (
+                    <span className="badge border border-border text-xs">第 {picked.indexOf(t.id) + 1} 条</span>
+                  ) : null}
+                </label>
+              ))}
+              {topics.length === 0 ? <ErrorState compact empty="还没有快讯发现报告。" /> : null}
+              <input
+                className="input"
+                placeholder="盘点标题（可选）"
+                value={roundupTitle}
+                onChange={(e) => setRoundupTitle(e.target.value)}
+              />
+              <button
+                className="btn btn-primary text-xs"
+                disabled={busy !== null || picked.length < 2 || picked.length > 10}
+                onClick={() =>
+                  create({ topic_ids: picked, ...(roundupTitle.trim() ? { topic: { title: roundupTitle.trim() } } : {}) }, "roundup")
+                }
+              >
+                {busy === "roundup" ? "开始中..." : "写这一期盘点"}
+              </button>
+            </div>
+          ) : kind === "comparison" ? (
+            <form
+              className="grid gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                create(
+                  {
+                    topic: {
+                      subjects: [compare.first.trim(), compare.second.trim()],
+                      dimensions: compare.dimensions.trim(),
+                      audience: compare.audience.trim(),
+                    },
+                  },
+                  "compare",
+                );
+              }}
+            >
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  className="input"
+                  placeholder="对象一（必填）"
+                  value={compare.first}
+                  onChange={(e) => setCompare({ ...compare, first: e.target.value })}
+                />
+                <input
+                  className="input"
+                  placeholder="对象二（必填）"
+                  value={compare.second}
+                  onChange={(e) => setCompare({ ...compare, second: e.target.value })}
+                />
+              </div>
+              <input
+                className="input"
+                placeholder="对比维度，例如：价格、上下文长度"
+                value={compare.dimensions}
+                onChange={(e) => setCompare({ ...compare, dimensions: e.target.value })}
+              />
+              <input
+                className="input"
+                placeholder="目标受众（可选）"
+                value={compare.audience}
+                onChange={(e) => setCompare({ ...compare, audience: e.target.value })}
+              />
+              <div>
+                <button
+                  type="submit"
+                  className="btn btn-primary text-xs"
+                  disabled={
+                    busy !== null ||
+                    !compare.first.trim() ||
+                    !compare.second.trim() ||
+                    compare.first.trim() === compare.second.trim()
+                  }
+                >
+                  {busy === "compare" ? "开始中..." : "开始研究"}
+                </button>
+              </div>
+            </form>
+          ) : tab === "topics" ? (
             topics.length ? (
               <div className="space-y-2">
-                <p className="text-xs text-text-muted">情报轮次 {round} 的内容机会（P7）</p>
+                <p className="text-xs text-text-muted">
+                  {source === "flash" ? `快讯发现报告 ${round} 的条目` : `情报轮次 ${round} 的内容机会（P7）`}
+                </p>
                 {topics.map((t) => (
                   <div key={t.id} className="flex items-start gap-3 rounded border border-border p-3">
                     <span className="font-mono text-xs text-text-muted pt-0.5">{t.code}</span>
@@ -154,7 +327,10 @@ export function VideoScriptsPage() {
                 ))}
               </div>
             ) : (
-              <ErrorState compact empty="还没有内容机会报告。跑一轮情报流水线后，这里会列出它推荐的视频选题。" />
+              <ErrorState
+                compact
+                empty={source === "flash" ? "还没有快讯发现报告。" : "还没有内容机会报告。跑一轮情报流水线后，这里会列出它推荐的视频选题。"}
+              />
             )
           ) : (
             <form
