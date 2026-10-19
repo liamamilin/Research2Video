@@ -120,13 +120,28 @@ def poke_autopilot(runtime: Runtime, now: float, interval: float = 30.0, port: i
         return False
     _last_poke = now
     import http.client
+    import json
+    import socket
+    # Loopback first, then this host's LAN address: another program may own 127.0.0.1:<port> while the gateway
+    # listens on every other address (it does on this host), and only the gateway answers with JSON.
+    hosts = ['127.0.0.1']
     try:
-        conn = http.client.HTTPConnection('127.0.0.1', port, timeout=5)
-        conn.request('GET', '/api/health')
-        conn.getresponse().read()
-        conn.close()
+        probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        probe.connect(('192.0.2.1', 9))
+        hosts.append(probe.getsockname()[0])
+        probe.close()
     except OSError:
-        pass  # the gateway answers "starting" or is down; the next tick asks again
+        pass
+    for host in hosts:
+        try:
+            conn = http.client.HTTPConnection(host, port, timeout=5)
+            conn.request('GET', '/api/health')
+            body = conn.getresponse().read()
+            conn.close()
+            json.loads(body)
+            return True
+        except (OSError, ValueError):
+            continue  # not the gateway, or it is down; try the next address, then the next tick asks again
     return True
 
 

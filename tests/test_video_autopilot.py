@@ -258,7 +258,7 @@ def test_the_dispatcher_wakes_the_console_only_while_the_pipeline_has_work(video
     class Conn:
         def __init__(self, host, port, timeout=None): knocks.append(f"{host}:{port}")
         def request(self, method, path): knocks.append(path)
-        def getresponse(self): return type("R", (), {"read": lambda self: b""})()
+        def getresponse(self): return type("R", (), {"read": lambda self: b"{}"})()
         def close(self): pass
 
     monkeypatch.setattr("http.client.HTTPConnection", Conn)
@@ -268,7 +268,7 @@ def test_the_dispatcher_wakes_the_console_only_while_the_pipeline_has_work(video
                                                    "refresh": False})
     assert runner.poke_autopilot(runtime, plan["next_fire"] - 10, interval=0) is False  # not due yet
     assert runner.poke_autopilot(runtime, plan["next_fire"] + 1, interval=0) is True
-    assert knocks == ["127.0.0.1:8765", "/api/health"]
+    assert knocks == ["127.0.0.1:8765", "/api/health"]  # the first address answered with JSON
     assert runner.poke_autopilot(runtime, plan["next_fire"] + 2) is False  # throttled
     pilot.start_run({"picks": [{"column": "flash", "count": 1, "source": "flash"}], "refresh": False})
     assert runner.autopilot_due(state_dir, 0.0) is True  # a running batch keeps the console awake
@@ -376,3 +376,33 @@ def test_a_failed_render_is_submitted_once_more_then_held(pilot_env, monkeypatch
     pilot.tick()
     assert len(store.list_renders(script_id)) == 2
     assert item_of(run["id"], 0)["state"] == "HELD" and "出片失败" in item_of(run["id"], 0)["note"]
+
+
+def test_the_wake_up_skips_a_stranger_on_loopback_and_reaches_the_gateway(video_env, monkeypatch):
+    from core import schedule_runner as runner
+    from web.settings import get_settings
+
+    state_dir = get_settings().paths.state_dir
+    runtime = runner.Runtime(str(video_env), state_dir, str(video_env / "jobs"), str(video_env / "config"), str(video_env / "logs"))
+    pilot.start_run({"picks": [{"column": "flash", "count": 1, "source": "flash"}], "refresh": False})
+    asked: list[str] = []
+
+    class Conn:
+        def __init__(self, host, port, timeout=None): self.host = host
+        def request(self, method, path): asked.append(self.host)
+        def getresponse(self):
+            body = b"404 page not found" if self.host == "127.0.0.1" else b'{"error": {"code": "app_starting"}}'
+            return type("R", (), {"read": lambda s: body})()
+        def close(self): pass
+
+    class Sock:
+        def __init__(self, *a): pass
+        def connect(self, addr): pass
+        def getsockname(self): return ("192.168.2.226", 1234)
+        def close(self): pass
+
+    monkeypatch.setattr("http.client.HTTPConnection", Conn)
+    monkeypatch.setattr("socket.socket", Sock)
+    monkeypatch.setattr(runner, "_last_poke", 0.0)
+    assert runner.poke_autopilot(runtime, 1.0, interval=0) is True
+    assert asked == ["127.0.0.1", "192.168.2.226"]
