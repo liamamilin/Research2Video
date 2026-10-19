@@ -125,6 +125,9 @@ def rules(sections: list[dict], *, column, target_minutes: float, plan: dict | N
     adapted = plan is not None and sheet is not None
     low, high = column.paragraph_units
     order = list(paragraphs(sections))
+    # Scripts written in one call (flash, one-point, roundup) are spoken, short and number-heavy by nature: digit
+    # density and dash ranges stay visible as warnings but do not block approving them.
+    soft = WARN if not adapted else MUST
 
     if adapted:
         audience = plan.get("audience") or {}
@@ -203,7 +206,7 @@ def rules(sections: list[dict], *, column, target_minutes: float, plan: dict | N
         for sentence in sentences(text):
             numbers = count_numbers(sentence)
             if numbers > MAX_NUMBERS_PER_SENTENCE:
-                issues.append(issue("C4", MUST, f"一句话里有 {numbers} 个数字", si, pi, quote=_quote(sentence, 60)))
+                issues.append(issue("C4", soft, f"一句话里有 {numbers} 个数字", si, pi, quote=_quote(sentence, 60)))
             size = length.spoken_units(sentence)
             if size > SENTENCE_MUST:
                 issues.append(issue("C6", MUST, f"句子有 {size} 个字", si, pi, quote=_quote(sentence, 60)))
@@ -215,7 +218,7 @@ def rules(sections: list[dict], *, column, target_minutes: float, plan: dict | N
         symbols = sorted(set(_SYMBOLS.findall(_LETTER_PAIR.sub("", text))))
         if symbols or _DASH_RANGE.search(text):
             shown = "".join(symbols) + ("，短横线区间" if _DASH_RANGE.search(text) else "")
-            issues.append(issue("E1", MUST, f"有读不出来的符号：{shown}", si, pi))
+            issues.append(issue("E1", soft, f"有读不出来的符号：{shown}", si, pi))
         code = _CODE.findall(text)
         if len(code) > 1:
             issues.append(issue("E2", WARN, f"一段里读了 {len(code)} 个命令或参数名：{', '.join(code[:4])}", si, pi))

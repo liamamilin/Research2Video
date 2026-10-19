@@ -777,3 +777,11 @@ def test_an_interrupted_restyle_goes_back_to_draft(video_env):
     assert store.fail_interrupted() == 1
     back = store.get_script(script["id"])
     assert back["status"] == "DRAFT" and back["stage"] is None and "换风格" in back["error"]
+
+
+def test_short_scripts_get_number_and_dash_findings_as_warnings():
+    sections = [{"title": "开场", "paragraphs": [
+        {"text": "缓存写入 5 分钟是 1.25 倍，1 小时是 2 倍。降幅 41%–80%。", "facts": [], "introduces": [], "recap": False}]}]
+    issues = review.rules(sections, column=column(), target_minutes=1)
+    assert {"C4", "E1"} <= _rule_ids(issues, review.WARN)
+    assert not {"C4", "E1"} & _rule_ids(issues, review.MUST)
