@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "rows"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 46
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "before",
+          "after"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "before": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10,
+            "pattern": "\\d"
+          },
+          "after": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10,
+            "pattern": "\\d"
+          },
+          "change": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8,
+            "pattern": "\\d"
+          },
+          "direction": {
+            "enum": [
+              "down",
+              "up"
+            ]
+          }
+        },
+        "dependentRequired": {
+          "change": [
+            "direction"
+          ],
+          "direction": [
+            "change"
+          ]
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/autovideo/components/price_change.schema.json",
+  "title": "AutoVideo price_change props v0.2"
+}

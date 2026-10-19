@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "chapters": 3,
+  "segments": 5,
+  "characters": 220,
+  "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+  "checked": [
+    "narration-plan",
+    "video-ir",
+    "captions.srt",
+    "chapter-titles"
+  ]
+}

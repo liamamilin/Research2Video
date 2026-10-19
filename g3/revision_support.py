@@ -68,7 +68,10 @@ def create_revision(store,jid,request,kind):
 
 def preview(store,settings,jid,sid):
     # Only registered video and IR are needed for read-only preview.
-    video,_=store.artifact_path(jid,'video.mp4');ir_path,_=store.artifact_path(jid,'video-ir.json')
+    # The scene times in the IR are content times, so frames come from the content-only video when packaged.
+    try:video,_=store.artifact_path(jid,'content.mp4')
+    except StoreError:video,_=store.artifact_path(jid,'video.mp4')
+    ir_path,_=store.artifact_path(jid,'video-ir.json')
     ir=json.loads(ir_path.read_text());scene=next((s for s in ir['scenes'] if s['id']==sid),None)
     if scene is None:raise StoreError('SCENE_NOT_FOUND','场景不存在。')
     UUID(jid)

@@ -348,6 +348,10 @@ def _existing_component_targets(component: str, props: dict) -> list[str]:
         targets.extend(f"path:{item['id']}" for item in props.get("paths", []))
     elif component == "big_number":
         targets.extend(["title", "line:0", "line:1", *(["line:2"] if "note" in props else [])])
+    elif component == "price_change":
+        targets.extend(["title", *[f"line:{i}" for i in range(len(props["rows"]))]])
+    elif component == "source_card":
+        targets.extend(["title", *[f"line:{i}" for i in range(len(props["sources"]))]])
     elif component == "comparison":
         targets.extend(f"side:{side}" for side in ("left", "right") if side in props)
         if props.get("highlights"):
@@ -762,7 +766,8 @@ def compile_ir(narration: dict, board: dict, alignment: dict) -> dict:
                         "alignment": {"method": "provider", "granularity": "phrase"}},
           "scenes": scenes, "audio_mix": {"narration_gain_db": 0}}
     if os.environ.get("AUTOVIDEO_G2_VIDEO_FORM") == "information_motion":
-        ir["presentation"] = {"preset": "information_motion"}
+        from g2.information_motion import short_form
+        ir["presentation"] = {"preset": "information_motion", **({"density": "large"} if short_form(narration) else {})}
         ir["style"]["preset"] = "minimal_light"
     if CONTENT_MODE:
         from g2.content_video import content_structure
@@ -854,8 +859,12 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     (src / "index.ts").write_text("import {registerRoot} from 'remotion';\nimport {Root} from './Root';\n\nregisterRoot(Root);\n", encoding="utf-8")
     ensure_renderer_dependency_link(renderer)
     props_path = ARTIFACTS / "render-props.json"
-    write_json(props_path, {"ir": {**compiled, "audio_public_file": "assets/communications_noise.wav"},
-                            "sceneBackdrops": scene_backdrops or {}})
+    props = {"ir": {**compiled, "audio_public_file": "assets/communications_noise.wav"},
+             "sceneBackdrops": scene_backdrops or {}}
+    package = package_request_from_intent()
+    if package:  # a packaged video carries the column's badge instead of the product label
+        props["badge"] = {"text": package.get("badge", ""), "color": package["accent"]}
+    write_json(props_path, props)
     argv = [NODE, CLI, "render", "src/index.ts", "G2CommunicationNoise", VIDEO_PATH,
             f"--props={props_path}", f"--public-dir={FIXTURE_ROOT}", "--width=1920", "--height=1080", "--fps=30",
             f"--duration={compiled['total_frames']}", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p",
@@ -1009,6 +1018,32 @@ def skip_step(label: str, reason: str) -> None:
                 "argv": [str(PYTHON), "-u", "g2/run_g2.py", label], "cwd": str(PROJECT),
                 "exit_code": 0, "status": "SKIPPED", "reason": reason})
     print(f"STEP {label}: SKIPPED ({reason})", flush=True)
+
+
+def package_request_from_intent() -> dict | None:
+    """The optional validated ``package`` block saved with the job request."""
+    path = os.environ.get("AUTOVIDEO_G2_INTENT_FILE")
+    if not path or not Path(path).is_file():
+        return None
+    try:
+        saved = json.loads(Path(path).read_text(encoding="utf-8"))
+    except ValueError:
+        return None
+    return saved.get("package") if isinstance(saved, dict) else None
+
+
+def run_package_stage(config: dict) -> dict:
+    """Attach the stinger and end card to the verified content video; content QA is not modified."""
+    from g2 import package_stage
+
+    def runner(label: str, argv: list, timeout: int = 900) -> str:
+        try:
+            return _run_fixed_command(label, argv, PROJECT, timeout=timeout)
+        except G2Fault as exc:
+            raise package_stage.PackageFault("PACKAGE_COMMAND_FAILED", exc.message) from exc
+
+    return package_stage.build_package(runner, FFMPEG, FFPROBE, config=config, content_video=VIDEO_PATH,
+                                       voice_wav=ASSETS / "communications_noise.wav", artifacts=ARTIFACTS)
 
 
 def run_all() -> dict:
@@ -1192,6 +1227,11 @@ if __name__ == "__main__":
             qa_result=run_revision(sys.modules[__name__])
         else:
             qa_result = run_all() if sys.argv[1] == "all" else run_scene_edit()
+        package_request = package_request_from_intent()
+        if package_request is None:
+            skip_step("package", "请求没有 package")
+        else:
+            run_step("package", run_package_stage, package_request)
         append_log(COMMANDS_PATH, {"time_utc": datetime.now(timezone.utc).isoformat(), "label": "all",
                     "exit_code": 0, "elapsed_seconds": round(time.monotonic() - started, 3), "status": qa_result["status"]})
         private_renderer = RUN_ROOT / "renderer"

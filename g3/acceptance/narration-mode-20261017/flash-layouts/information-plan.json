@@ -1,0 +1,204 @@
+{
+  "scenes": [
+    {
+      "id": "c1_s1",
+      "component": "price_change",
+      "props": {
+        "title": "Opus 5.5 输入价和输出价各降两成",
+        "unit": "每百万 token",
+        "rows": [
+          {
+            "label": "输入价",
+            "before": "5 美元",
+            "after": "4 美元",
+            "change": "20%",
+            "direction": "down"
+          },
+          {
+            "label": "输出价",
+            "before": "25 美元",
+            "after": "20 美元",
+            "change": "20%",
+            "direction": "down"
+          }
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n1"
+      ],
+      "headline": "Opus 5.5 输入价和输出价各降两成",
+      "source_quotes": [
+        "Opus 5.5 输入价从每百万 token 5 美元降到 4 美元，输出价从 25 美元降到 20 美元，各降两成。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n1",
+          "quote": "Opus 5.5 输入价从每百万 token 5 美元降到 4 美元"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c1_n1",
+          "quote": "输入价从每百万 token 5 美元降到 4 美元"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c1_n1",
+          "quote": "输出价从 25 美元降到 20 美元"
+        }
+      ]
+    },
+    {
+      "id": "c1_s2",
+      "component": "bar_chart",
+      "props": {
+        "categories": [
+          "输入价",
+          "输出价"
+        ],
+        "values": [
+          2,
+          10
+        ],
+        "unit": "美元",
+        "baseline_zero": true
+      },
+      "narration_segment_ids": [
+        "c1_n2"
+      ],
+      "headline": "GPT-6 Sol 同日降价",
+      "source_quotes": [
+        "同一天，OpenAI 的 GPT-6 Sol 把输入价砍到 2 美元，输出价砍到 10 美元。"
+      ],
+      "cues": [
+        {
+          "target_id": "bar:0",
+          "segment_id": "c1_n2",
+          "quote": "同一天，OpenAI 的 GPT-6 Sol 把输入价砍到 2 美元"
+        },
+        {
+          "target_id": "bar:1",
+          "segment_id": "c1_n2",
+          "quote": "输出价砍到 10 美元"
+        }
+      ]
+    },
+    {
+      "id": "c2_s1",
+      "component": "big_number",
+      "props": {
+        "title": "长任务主力是 Opus，账单少两成",
+        "value": "20%",
+        "label": "账单降幅",
+        "note": "同样的 token 量"
+      },
+      "narration_segment_ids": [
+        "c2_n1"
+      ],
+      "headline": "长任务主力是 Opus，账单少两成",
+      "source_quotes": [
+        "如果你的长任务主力是 Opus，同样的 token 量，账单直接少两成。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n1",
+          "quote": "如果你的长任务主力是 Opus"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c2_n1",
+          "quote": "同样的 token 量"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c2_n1",
+          "quote": "账单"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c2_n1",
+          "quote": "少两成"
+        }
+      ]
+    },
+    {
+      "id": "c2_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "Sol 价格只有 Opus 5.5 的一半",
+        "lines": [
+          "输入价：只有 Opus 5.5 的一半",
+          "输出价：只有 Opus 5.5 的一半"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n2"
+      ],
+      "headline": "Sol 价格只有 Opus 5.5 的一半",
+      "source_quotes": [
+        "但别急着高兴：Sol 的输入价和输出价，都只有 Opus 5.5 的一半。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n2",
+          "quote": "但别急着高兴"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c2_n2",
+          "quote": "Sol 的输入价"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c2_n2",
+          "quote": "输出价"
+        }
+      ]
+    },
+    {
+      "id": "c3_src",
+      "component": "source_card",
+      "props": {
+        "title": "来源",
+        "sources": [
+          {
+            "title": "Opus 5.5 定价更新（样例）",
+            "domain": "example.com",
+            "date": "2026-10-16"
+          },
+          {
+            "title": "GPT-6 Sol 价格页（样例）",
+            "domain": "pricing.example.org",
+            "date": "2026-10-16"
+          }
+        ]
+      },
+      "narration_segment_ids": [
+        "c3_n1"
+      ],
+      "headline": "来源",
+      "source_quotes": [
+        "今天就拿你最贵的那条流水线，按新价格重算一遍月度预算，再决定要不要换主力模型。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n1",
+          "quote": "今"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c3_n1",
+          "quote": "条"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c3_n1",
+          "quote": "算"
+        }
+      ]
+    }
+  ]
+}

@@ -26,7 +26,7 @@ type Page = {kind: 'new'} | {kind: 'jobs'} | {kind: 'job'; id: string};
 const DEFAULT_SOURCE = `主题：通信噪声如何影响信息传输。\n事实材料：发送端通过通信信道把信息传给接收端。通信噪声是传输过程中对信号产生的干扰。受到噪声影响后，接收端收到的信息可能与发送端发出的信息不同。噪声带来差错的可能性，但不表示每次传输都会出错。\n表达边界：面向普通成年人，用通俗中文解释发送、信道受扰、接收三个环节。不要增加概率、统计数字、具体设备、未经材料支持的纠错方法或现实案例。可用抽象图形演示信号受到干扰，但要说明这是概念示意。`;
 const STAGES = [
   ['PLAN', '整理讲稿'], ['VOICE_ALIGN', '生成旁白与对齐'], ['STORYBOARD', '规划分镜'],
-  ['SCENE_IMAGES', '生成场景图'], ['BUILD_IR', '校验时间线'], ['RENDER', '渲染动画'], ['QUALITY_CHECK', '检查音视频'],
+  ['SCENE_IMAGES', '生成场景图'], ['BUILD_IR', '校验时间线'], ['RENDER', '渲染动画'], ['QUALITY_CHECK', '检查音视频'], ['PACKAGE', '加片头片尾'],
 ] as const;
 const STATUS_TEXT: Record<Status, string> = {QUEUED: '等待中', RUNNING: '生成中', COMPLETED: '已完成', FAILED: '失败', CANCELLED: '已取消'};
 const STATUS_CLASS: Record<Status, string> = {QUEUED: 'queued', RUNNING: 'running', COMPLETED: 'completed', FAILED: 'failed', CANCELLED: 'cancelled'};
@@ -298,14 +298,18 @@ function JobDetail({job, artifacts, sceneImages, drawThingsReady, onCancel, onRe
   const player = useRef<HTMLVideoElement>(null);
   const [tab, setTab] = useState('visual'), [actualDuration, setActualDuration] = useState(0);
   const [poster, setPoster] = useState('');
+  const [packageOffset, setPackageOffset] = useState(0);
+  const packageInfo = artifacts.find(a => a.name === 'package.json');
+  useEffect(() => {let active = true; setPackageOffset(0); if (packageInfo) void api<{offset_ms: number}>(packageInfo.download_url).then(v => {if (active) setPackageOffset((v.offset_ms || 0) / 1000);}).catch(() => {}); return () => {active = false;};}, [packageInfo?.download_url]);
   if (!job) return <div className="loading-state" role="status"><span className="spinner dark"/>正在打开视频工作区…</div>;
   const video = artifacts.find(a => a.name === 'video.mp4'), srt = artifacts.find(a => a.name === 'captions.srt');
-  const chapter = artifacts.find(a => a.name === 'chapters.json');
+  // With a package the player shows the packaged file, so seeks add the intro length to content times.
+  const chapter = artifacts.find(a => a.name === 'content-chapters.json') || artifacts.find(a => a.name === 'chapters.json');
   const completed = job.status === 'COMPLETED' && !!video;
   const needsInput = job.error_code === 'INPUT_REQUIRES_CLARIFICATION';
   const terminal = ['COMPLETED', 'FAILED', 'CANCELLED'].includes(job.status);
   const editableVisual = ['process_diagram', 'information_motion'].includes(job.resolved_video_form || job.video_form || '');
-  const seek = (seconds: number) => { if (player.current) player.current.currentTime = seconds; };
+  const seek = (seconds: number) => { if (player.current) player.current.currentTime = seconds + packageOffset; };
   const tabs = [{id: 'visual', label: '画面', icon: 'film'}, {id: 'script', label: '讲稿', icon: 'file'}, {id: 'audio', label: '声音', icon: 'sound'}, {id: 'versions', label: '版本', icon: 'layers'}] as const;
   return <section className="detail-page">
     <a className="back-link" href="#jobs">← 返回作品库</a>
@@ -342,7 +346,7 @@ function JobDetail({job, artifacts, sceneImages, drawThingsReady, onCancel, onRe
     <details className="technical-details"><summary><span><Icon name="settings"/>制作详情与文件</span><span>{job.job_id.slice(0, 8)} <span aria-hidden="true">⌄</span></span></summary><div className="technical-grid"><section><h3>制作信息</h3><dl className="job-properties"><div><dt>表现形式</dt><dd>{formLabel(job.resolved_video_form || job.video_form)}</dd></div><div><dt>时长模式</dt><dd>{job.duration_mode === 'content' ? '按内容自动组织' : `约 ${job.target_duration_sec} 秒`}</dd></div><div><dt>声音</dt><dd>{voiceLabel(job.voice_id)}</dd></div><div><dt>导出倍速</dt><dd>{job.video_speed || 1} 倍</dd></div><div><dt>素材长度</dt><dd>{job.source_char_count.toLocaleString()} 字</dd></div><div><dt>制作尝试</dt><dd>{job.attempt_count} 次</dd></div></dl>
       {job.input_analysis && <details className="input-analysis"><summary>素材整理与形式选择</summary><p>{job.input_analysis.reason}</p><p>保留 {job.input_analysis.retained_units} 个内容单元，排除 {job.input_analysis.excluded_units} 个重复或粘贴噪声单元。</p>{job.input_analysis.issues.map((i, n) => <p key={n}>{i.message}</p>)}</details>}
       <h3>处理记录</h3><JobTimeline job={job}/>
-    </section><section><h3>文件与运行记录</h3><p className="quiet-note">视频和字幕可直接下载，其余文件用于追溯制作过程。</p>{artifacts.filter(a => a.name !== 'video.mp4').map(a => <a className="artifact-row" key={a.name} href={a.download_url} download><span className="artifact-type">{a.name.endsWith('.srt') ? 'SRT' : a.name.endsWith('.txt') ? 'TXT' : 'JSON'}</span><span><b>{artifactLabel(a.name)}</b><small>{a.name}</small></span><span className="artifact-size">{formatBytes(a.bytes)}</span><Icon name="download"/></a>)}{!artifacts.length && <p className="quiet-note">制作完成后可在这里下载文件。</p>}</section></div></details>
+    </section><section><h3>文件与运行记录</h3><p className="quiet-note">视频和字幕可直接下载，其余文件用于追溯制作过程。</p>{artifacts.filter(a => a.name !== 'video.mp4').map(a => <a className="artifact-row" key={a.name} href={a.download_url} download><span className="artifact-type">{a.name.endsWith('.srt') ? 'SRT' : a.name.endsWith('.txt') ? 'TXT' : a.name.endsWith('.mp4') ? 'MP4' : a.name.endsWith('.jpg') ? 'JPG' : 'JSON'}</span><span><b>{artifactLabel(a.name)}</b><small>{a.name}</small></span><span className="artifact-size">{formatBytes(a.bytes)}</span><Icon name="download"/></a>)}{!artifacts.length && <p className="quiet-note">制作完成后可在这里下载文件。</p>}</section></div></details>
   </section>;
 }
 function JobTimeline({job}: {job: Job}) {
@@ -353,7 +357,7 @@ function JobTimeline({job}: {job: Job}) {
     let text = state === 'SUCCEEDED' ? '已完成' : state === 'SKIPPED' ? '已复用 / 无需执行' : state === 'RUNNING' ? '进行中' : state === 'FAILED' || state === 'INTERRUPTED' ? '未完成' : '待处理';
     if (job.error_code === 'INPUT_REQUIRES_CLARIFICATION') { state = key === 'PLAN' ? 'NEEDS_INPUT' : 'SKIPPED'; text = key === 'PLAN' ? '待补充' : '未执行'; }
     else if (job.status === 'COMPLETED' && !['SUCCEEDED', 'SKIPPED'].includes(state)) {
-      state = 'SKIPPED'; text = ['visual_revision', 'media_revision', 'scene_edit'].includes(job.operation_type) && ['PLAN', 'VOICE_ALIGN', 'STORYBOARD'].includes(key) ? '已复用 / 本次未重做' : key === 'SCENE_IMAGES' ? '无需执行' : '已结束';
+      state = 'SKIPPED'; text = ['visual_revision', 'media_revision', 'scene_edit'].includes(job.operation_type) && ['PLAN', 'VOICE_ALIGN', 'STORYBOARD'].includes(key) ? '已复用 / 本次未重做' : ['SCENE_IMAGES', 'PACKAGE'].includes(key) ? '无需执行' : '已结束';
     } else if (['FAILED', 'CANCELLED'].includes(job.status) && state === 'RUNNING') { state = 'INTERRUPTED'; text = '已停止'; }
     return <li className={`stage-item ${state.toLowerCase()}`} key={key}><span className="stage-dot"/><span>{label}</span><small>{text}</small></li>;
   })}</ol>;
@@ -453,6 +457,6 @@ function ChapterList({url, onSeek}: {url: string; onSeek: (seconds: number) => v
 function formLabel(form?: string | null) { return ({auto:'自动选择中', process_diagram:'流程动态图解', information_motion:'简洁信息动效', knowledge_cards:'知识卡片与背景图'} as Record<string,string>)[form || ''] || '选择中'; }
 function stageLabel(stage: string | null) { return STAGES.find(([key]) => key === stage)?.[1] || '准备生成'; }
 function sceneLabel(sceneId: string) { return ({opening: '开场', mechanism: '内容展开', middle: '内容展开', note: '结尾提示', closing: '结尾'} as Record<string, string>)[sceneId] || sceneId; }
-function artifactLabel(name: string) { return ({'video.mp4': '动画视频', 'captions.srt': '中文字幕', 'qa.json': '基础验收报告', 'manifest.json': '制品清单', 'storyboard.json': '分镜计划', 'scene-backgrounds.json': '本地场景图记录', 'scene-edit.json': '场景修订记录', 'video-ir.json': 'Video IR', 'model-cost.json': '模型用量', 'execution-log.txt': '执行日志', 'chapters.json': '章节与内容覆盖', 'content-outline.json': '完整内容纲要', 'narration.json': '最终讲稿', 'authored-narration.json': '用户修订讲稿记录', 'input-brief.json': '输入整理与形式选择', 'prepared-source.txt': '整理后的原文材料', 'information-plan.json': '信息分镜与来源', 'information-timing.json': '信息动效与旁白对应', 'diagram-plan.json': '流程内容与来源', 'diagram-layout.json': '自动布局记录', 'diagram-timing.json': '图解与旁白对应记录'} as Record<string, string>)[name] || name; }
+function artifactLabel(name: string) { return ({'video.mp4': '动画视频', 'content.mp4': '内容视频（无片头片尾）', 'content-captions.srt': '内容字幕（内容时间线）', 'content-chapters.json': '章节（内容时间线）', 'package.json': '打包记录', 'package-qa.json': '打包检查报告', 'package-contact-sheet.jpg': '打包接触表', 'captions.srt': '中文字幕', 'qa.json': '基础验收报告', 'manifest.json': '制品清单', 'storyboard.json': '分镜计划', 'scene-backgrounds.json': '本地场景图记录', 'scene-edit.json': '场景修订记录', 'video-ir.json': 'Video IR', 'model-cost.json': '模型用量', 'execution-log.txt': '执行日志', 'chapters.json': '章节与内容覆盖', 'content-outline.json': '完整内容纲要', 'narration.json': '最终讲稿', 'authored-narration.json': '用户修订讲稿记录', 'input-brief.json': '输入整理与形式选择', 'prepared-source.txt': '整理后的原文材料', 'information-plan.json': '信息分镜与来源', 'information-timing.json': '信息动效与旁白对应', 'diagram-plan.json': '流程内容与来源', 'diagram-layout.json': '自动布局记录', 'diagram-timing.json': '图解与旁白对应记录'} as Record<string, string>)[name] || name; }
 
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);

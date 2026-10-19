@@ -93,9 +93,11 @@ def replan_scene(p,old,narration,ir,instruction):
     from g2 import information_motion as motion,process_diagram as diagram
     is_info=ir.get('presentation',{}).get('preset')=='information_motion'
     module=motion if is_info else diagram
+    if old['component']=='source_card':raise p.G2Fault('SCENE_REVISION_SCOPE','来源卡的文字来自请求的 sources，不能重排；请修改 sources 后重新生成')
     ids=old['narration_segment_ids'];segments=[s for s in narration['segments'] if s['id'] in ids]
     source=p.PREPARED_SOURCE if p.PREPARED_SOURCE is not None else ir['source']['original_text']
     context={'source_text':source,'narration_plan':{'title':narration['title'],'core_message':narration['core_message'],'segments':segments}}
+    if ir.get('presentation',{}).get('density')=='large':context['large_text']=True
     def messages(ctx,correction=None):
         result=module.messages(ctx,correction)
         result[0]['content']+='\n本次只重排一个选定场景，必须恰好返回一个场景，id=s1。旁白文字及覆盖段落不能改变。用户的画面要求是编辑偏好，不是新增事实来源。'

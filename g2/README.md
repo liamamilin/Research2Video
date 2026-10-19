@@ -45,6 +45,10 @@ G4 三个真实案例的运行、独立 ffprobe/解码、抽帧、布局风险�
 
 分镜规划只把每段旁白的 `text` 发给模型，不再附带该段的 `source_quotes`。旁白是改写后的文本，与所引素材原句常有细微差别（例如素材「并在 Gemini 应用中上线…」对旁白「Gemini 应用同时上线…」）；同时给出两者会让模型把素材原句抄进 `cue.quote`，而 cue 必须落在该段旁白内，于是被本地校验拒绝。`cue.quote` 的校验失败信息会指出场景、目标、错误引文、疑似来源与该段旁白全文，重试反馈才有可修正的依据。
 
+`price_change`（只用于信息动效，登记在扩展注册表）：旧到新的价格/数值变化，画面主角是「5 美元 → 4 美元」。props 为 `title`（与 headline 一致）、可选 `unit`（计量口径，如「每百万 token」）、`rows`（1–2 行，每行 `label`、`before`、`after`、可选 `change` 与 `direction`）；`change` 只写数字和百分号（如「20%」），正负号和箭头由渲染器按 `direction` 画，模型不写。cue 目标是 `title`、`line:0`、`line:1`（每行一个）。`before`/`after`/`change` 里的数字同样要通过 `INFORMATION_NUMBERS`（出自旁白；「两成」读作 20），并检查 `direction` 与新旧值一致。`source_card`：片尾来源卡，模型不能规划，只由请求的 `sources` 在本地生成并在编译时校验逐字一致（见 `UPSTREAM_INTEGRATION.md`「来源卡」）；它是屏上文字核对唯一的豁免，且豁免是单向的。
+
+短视频字号：讲稿全文 ≤ 560 字时 IR 带 `presentation.density: "large"`，渲染器把信息动效的文字放大到 1.3 倍（`Root.tsx` 的 `S()` 与 `information_motion.scaled()` 取整一致），`validate_text_fit` 按同一尺寸检查，每屏容量因此变小。
+
 原始 MVP schema 不变；运行时通过 `presentation: {"preset": "information_motion"}` 明确启用 `minimal_light` 主题及五个组件（`big_number` 登记在扩展注册表 `schemas/component-registry-extensions.json`，由 `g1/video_ir.load_registry()` 与冻结的 v0.2 注册表合并；冻结文件的哈希不变，所以 big_number 的 cue 目标沿用已有的 `title` 与 `line:N` 名称），只支持 reveal 动作，仍校验资产、目标和所属短语范围。场景数量随内容决定。`information-plan.json` 与 `information-timing.json` 保存来源及出现时机；短语内时机是字符位置估算，不声明词级对齐。
 
 ## 输入准备与自动选型

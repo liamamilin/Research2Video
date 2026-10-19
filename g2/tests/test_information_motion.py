@@ -521,3 +521,266 @@ def test_a_schema_echo_at_the_root_is_dropped_but_a_real_field_is_not():
     assert strip_schema_echo({"type": "banana", "scenes": []}, schema) == {"type": "banana", "scenes": []}
     typed = {"properties": {"type": {"type": "string"}}}
     assert strip_schema_echo({"type": "object"}, typed) == {"type": "object"}  # a schema that has a type field keeps it
+
+
+# --- Price change, source card and the short-form text scale ------------------------------------------
+
+from g2 import information_motion as motion  # noqa: E402  (already imported above; kept for the reader)
+
+OPUS_TEXTS = ["Opus 5.5 输入价从每百万 token 5 美元降到 4 美元，输出价从 25 美元降到 20 美元，各降两成。", "同一天，GPT-6 Sol 把输入价砍到 2 美元。"]
+
+
+def opus_context():
+    return {"source_text": "".join(OPUS_TEXTS), "large_text": True,
+            "narration_plan": {"segments": [{"id": f"n{i + 1}", "text": t} for i, t in enumerate(OPUS_TEXTS)]}}
+
+
+def price_scene(rows=None, **props):
+    base = {"title": "Opus 5.5 降价", "unit": "每百万 token", "rows": rows or [
+        {"label": "输入价", "before": "5 美元", "after": "4 美元", "change": "20%", "direction": "down"},
+        {"label": "输出价", "before": "25 美元", "after": "20 美元", "change": "20%", "direction": "down"}]}
+    return {"id": "s1", "component": "price_change", "headline": "Opus 5.5 降价", "props": {**base, **props},
+            "narration_segment_ids": ["n1"], "source_quotes": [OPUS_TEXTS[0]],
+            "cues": [{"target_id": "title", "segment_id": "n1", "quote": "Opus 5.5"},
+                     {"target_id": "line:0", "segment_id": "n1", "quote": "输入价从"},
+                     {"target_id": "line:1", "segment_id": "n1", "quote": "输出价从"}]}
+
+
+def test_a_price_change_with_numbers_from_the_narration_passes():
+    motion.validate_plan({"scenes": [price_scene()]}, {**opus_context(), "narration_plan": {"segments": [{"id": "n1", "text": OPUS_TEXTS[0]}]}})
+
+
+@pytest.mark.parametrize("mutate,code", [
+    (lambda s: s["props"]["rows"][0].update(after="3 美元"), "INFORMATION_NUMBERS"),  # 3 is not in the narration
+    (lambda s: s["props"]["rows"][0].update(change="50%"), "INFORMATION_NUMBERS"),  # 一半 is not a derived form; 50 is nowhere
+    (lambda s: s["props"]["rows"][0].update(before="4 美元", after="5 美元"), "INFORMATION_PROPS"),  # up, but direction=down
+    (lambda s: s["props"]["rows"][0].update(before="5 美元", after="5 美元"), "INFORMATION_PROPS"),  # no change at all
+    (lambda s: s["props"]["rows"][0].pop("direction"), "INFORMATION_PROPS"),  # change needs a direction
+    (lambda s: s["props"]["rows"][0].update(change="−20%"), "INFORMATION_TECHNICAL_TEXT"),  # the minus sign is drawn, never written
+    (lambda s: s["props"]["rows"].append(s["props"]["rows"][0]) or s["props"]["rows"].append(s["props"]["rows"][0]), "INFORMATION_PROPS"),  # 3 rows
+])
+def test_a_price_change_that_departs_from_the_narration_is_rejected(mutate, code):
+    scene = price_scene()
+    mutate(scene)
+    if len(scene["props"]["rows"]) > 2:
+        scene["cues"].append({"target_id": "line:2", "segment_id": "n1", "quote": "输出价从"})
+    with pytest.raises(motion.InformationFault, match=code):
+        motion.validate_plan({"scenes": [scene]}, {**opus_context(), "narration_plan": {"segments": [{"id": "n1", "text": OPUS_TEXTS[0]}]}})
+
+
+def test_price_change_cues_name_the_title_and_one_line_per_row():
+    one = price_scene(rows=[{"label": "输入价", "before": "5 美元", "after": "4 美元"}])
+    assert motion.targets("price_change", one["props"]) == ["title", "line:0"]
+    assert motion.targets("price_change", price_scene()["props"]) == ["title", "line:0", "line:1"]
+    context = {**opus_context(), "narration_plan": {"segments": [{"id": "n1", "text": OPUS_TEXTS[0]}]}}
+    with pytest.raises(motion.InformationFault, match="INFORMATION_CUE_TARGETS"):
+        motion.validate_plan({"scenes": [one | {"cues": price_scene()["cues"]}]}, context)
+
+
+def test_price_change_text_fit_at_both_sizes():
+    for large in (False, True):
+        motion.validate_text_fit(price_scene(), large)
+        motion.validate_text_fit(price_scene(rows=[{"label": "输入价", "before": "5 美元", "after": "4 美元"}]), large)
+    wide = price_scene(rows=[{"label": "输入价", "before": "1234567.89 美元", "after": "1234567.89 美元"[:10]}])
+    two_line_labels = [{"label": "缓存读取的价格", "before": "5 美元", "after": "4 美元"}, {"label": "缓存写入的价格", "before": "25 美元", "after": "20 美元"}]
+    motion.validate_text_fit(price_scene(rows=two_line_labels), False)  # fits at the normal size
+    for bad, text in ((wide, "too wide"), (price_scene(rows=two_line_labels), "do not fit")):
+        with pytest.raises(motion.InformationFault, match="INFORMATION_TEXT_FIT") as exc:
+            motion.validate_text_fit(bad, True)
+        assert text in exc.value.message
+
+
+def test_large_text_is_the_same_rounding_as_the_renderer_and_is_rolled_out_by_narration_length():
+    assert [motion.scaled(n, True) for n in (28, 34, 46, 55)] == [36, 44, 60, 72]
+    assert motion.scaled(34, False) == 34
+    assert motion.short_form({"segments": [{"text": "字" * 560}]}) and not motion.short_form({"segments": [{"text": "字" * 561}]})
+
+
+def test_large_text_makes_a_tight_card_overflow_that_fits_at_the_normal_size():
+    scene = {"id": "s1", "component": "concept_reveal", "props": {"title": "三项", "lines": ["要点一：" + "清" * 44, "要点二：" + "清" * 44, "要点三：" + "清" * 44]}}
+    motion.validate_text_fit(scene, False)
+    with pytest.raises(motion.InformationFault, match="INFORMATION_TEXT_FIT"):
+        motion.validate_text_fit(scene, True)
+    long_title = {"id": "s1", "component": "title_card", "props": {"title": "题" * 46, "subtitle": "副" * 90}}
+    motion.validate_text_fit(long_title, False)  # no fit check without the large scale
+    with pytest.raises(motion.InformationFault, match="INFORMATION_TEXT_FIT"):
+        motion.validate_text_fit(long_title, True)
+
+
+def test_the_large_flag_reaches_validate_plan_and_the_prompt():
+    context = opus_context()
+    assert "手机" in motion.messages(context)[0]["content"]
+    assert "手机" not in motion.messages({k: v for k, v in context.items() if k != "large_text"})[0]["content"]
+    assert "price_change" in motion.messages(context)[0]["content"]
+
+
+SOURCES = [{"title": "Opus 5.5 定价更新", "url": "https://www.example.com/news/opus", "date": "2026-10-16"},
+           {"title": "GPT-6 Sol 价格页", "url": "https://pricing.example.org/sol", "date": "2026-10-16"}]
+
+
+def test_the_source_card_is_built_from_the_requests_sources_only():
+    props = motion.build_source_card(SOURCES)
+    assert props == {"title": "来源", "sources": [
+        {"title": "Opus 5.5 定价更新", "domain": "example.com", "date": "2026-10-16"},
+        {"title": "GPT-6 Sol 价格页", "domain": "pricing.example.org", "date": "2026-10-16"}]}
+    motion.check_source_card(props, SOURCES)
+
+
+@pytest.mark.parametrize("edit", [
+    lambda p: p["sources"][0].update(title="另一个标题"),
+    lambda p: p["sources"][0].update(domain="evil.example"),
+    lambda p: p["sources"][0].update(date="2026-10-17"),
+    lambda p: p["sources"].pop(),
+    lambda p: p.update(title="权威来源"),
+])
+def test_a_source_card_that_differs_from_the_request_is_rejected(edit):
+    props = motion.build_source_card(SOURCES)
+    edit(props)
+    with pytest.raises(motion.InformationFault, match="INFORMATION_SOURCE_TEXT"):
+        motion.check_source_card(props, SOURCES)
+
+
+def test_source_text_is_not_a_reference_for_the_other_scenes():
+    """The exemption is one-way: a number or token that only a source title carries is still invented on any other scene."""
+    sources = [{"title": "GPT-6 Sol 在 2026 年发布 --models", "url": "https://example.com/a", "date": "2026-10-16"}]
+    motion.build_source_card(sources)
+    context = {"source_text": "价格降了。", "narration_plan": {"segments": [{"id": "n1", "text": "价格降了。"}]}}
+    scene = {"id": "s1", "component": "concept_reveal", "headline": "价格降了", "props": {"title": "价格降了", "lines": ["时间：2026 年发布"]},
+             "narration_segment_ids": ["n1"], "source_quotes": ["价格降了。"],
+             "cues": [{"target_id": "title", "segment_id": "n1", "quote": "价格降了"}, {"target_id": "line:0", "segment_id": "n1", "quote": "价格降了"}]}
+    assert any("2026" in issue for issue in motion.fidelity_issues({"scenes": [scene]}, context))
+    scene["props"]["lines"] = ["选项：--models"]
+    with pytest.raises(motion.InformationFault, match="INFORMATION_TECHNICAL_TEXT"):
+        motion.validate_plan({"scenes": [scene]}, context)
+    # ...and the card itself may carry such text, because it is request data (GPT-6, 2026, --models in a title).
+    assert motion.build_source_card(sources)["sources"][0]["title"].startswith("GPT-6")
+
+
+def test_source_card_limits_and_unusable_urls():
+    with pytest.raises(motion.InformationFault, match="INFORMATION_SOURCE_CARD"):
+        motion.build_source_card([{"title": "题" * 40, "url": "https://example.com", "date": "2026-10-16"}] * 3)  # does not fit
+    with pytest.raises(motion.InformationFault, match="INFORMATION_SOURCE_CARD"):
+        motion.build_source_card([{"title": "无域名", "url": "https://", "date": "2026-10-16"}])
+    with pytest.raises(motion.InformationFault, match="INFORMATION_SOURCE_CARD"):
+        motion.build_source_card([{"title": "坏日期", "url": "https://example.com", "date": "10/16/2026"}])
+
+
+def card_scenes():
+    def scene(sid, component, ids, cue_ids):
+        return {"id": sid, "component": component, "props": {}, "narration_segment_ids": ids, "headline": sid, "source_quotes": ["x"],
+                "cues": [{"target_id": "title", "segment_id": i, "quote": "字"} for i in cue_ids]}
+    return scene
+
+
+TEXTS = {"c2_n1": "第一句话在这里。", "c2_n2": "第二句话在这里。", "c2_n3": "最后一句话在这里。"}
+
+
+def test_the_card_takes_the_last_segment_of_the_final_scene_when_it_can_spare_one():
+    scene = card_scenes()
+    scenes = [scene("c1_s1", "title_card", ["c1_n1"], ["c1_n1"]), scene("c2_s1", "concept_reveal", ["c2_n1", "c2_n2", "c2_n3"], ["c2_n1"])]
+    placed, report = motion.place_source_card(scenes, ["c2_n1", "c2_n2", "c2_n3"], TEXTS, motion.build_source_card(SOURCES))
+    assert report["placed"] and [s["id"] for s in placed] == ["c1_s1", "c2_s1", "c2_src"]
+    assert placed[1]["narration_segment_ids"] == ["c2_n1", "c2_n2"] and placed[2]["narration_segment_ids"] == ["c2_n3"]
+    assert [c["target_id"] for c in placed[2]["cues"]] == ["title", "line:0", "line:1"]
+    assert all(c["quote"] and c["quote"] in TEXTS["c2_n3"] for c in placed[2]["cues"])
+
+
+def test_the_card_replaces_a_single_segment_text_scene_but_never_a_data_scene():
+    scene = card_scenes()
+    props = motion.build_source_card(SOURCES)
+    placed, report = motion.place_source_card([scene("c2_s1", "concept_reveal", ["c2_n1"], ["c2_n1"])], ["c2_n1"], TEXTS, props)
+    assert report["placed"] and [s["component"] for s in placed] == ["source_card"]
+    data = [scene("c2_s1", "title_card", ["c2_n1", "c2_n2"], ["c2_n1", "c2_n2"]), scene("c2_s2", "price_change", ["c2_n3"], ["c2_n3"])]
+    placed, report = motion.place_source_card(data, ["c2_n1", "c2_n2", "c2_n3"], TEXTS, props)
+    assert not report["placed"] and "data scene" in report["reason"] and placed == data  # c2_n2 is cued, so no scene can spare it
+    spare = [scene("c2_s1", "title_card", ["c2_n1", "c2_n2"], ["c2_n1"]), scene("c2_s2", "big_number", ["c2_n3"], ["c2_n3"])]
+    placed, report = motion.place_source_card(spare, ["c2_n1", "c2_n2", "c2_n3"], TEXTS, props)
+    assert report["placed"] and [s["id"] for s in placed] == ["c2_s1", "c2_src", "c2_s2"]  # the card sits between, in narration order
+
+
+def test_a_cue_on_the_last_segment_stops_the_scene_from_giving_it_up():
+    scene = card_scenes()
+    scenes = [scene("c2_s1", "concept_reveal", ["c2_n1", "c2_n2"], ["c2_n1", "c2_n2"])]
+    placed, report = motion.place_source_card(scenes, ["c2_n1", "c2_n2"], TEXTS, motion.build_source_card(SOURCES))
+    assert not report["placed"] and placed == scenes
+
+
+class CardPipeline:
+    def __init__(self, tmp_path, sources):
+        (tmp_path / "input").mkdir()
+        (tmp_path / "input" / "input.json").write_text(json.dumps({"sources": sources} if sources else {}), encoding="utf-8")
+        self.PROJECT_INPUT = tmp_path / "input" / "source.txt"
+        self.ARTIFACTS = tmp_path
+        self.written = {}
+
+    class G2Fault(RuntimeError):
+        def __init__(self, code, message):
+            self.code = code
+            super().__init__(f"{code}: {message}")
+
+    def write_json(self, path, value):
+        self.written[path.name] = value
+
+
+def test_a_source_card_scene_compiles_to_title_and_line_beats_and_never_without_sources(tmp_path):
+    props = motion.build_source_card(SOURCES)
+    scene = {"id": "c1_src", "component": "source_card", "props": props, "narration_segment_ids": ["n1"], "headline": "来源", "source_quotes": ["x"],
+             "cues": [{"target_id": "title", "segment_id": "n1", "quote": "同"}, {"target_id": "line:0", "segment_id": "n1", "quote": "天"}, {"target_id": "line:1", "segment_id": "n1", "quote": "GPT"}]}
+    rows = [{"id": "n1", "text": OPUS_TEXTS[1], "start_ms": 0, "end_ms": 4000}]
+    board = motion.compile_storyboard({"scenes": [scene]}, {"rows": rows}, CardPipeline(tmp_path / "a", SOURCES) if (tmp_path / "a").mkdir() is None else None)
+    assert [b["target_id"] for b in board["scenes"][0]["beats"]] == ["title", "line:0", "line:1"]
+    (tmp_path / "b").mkdir()
+    with pytest.raises(CardPipeline.G2Fault, match="INFORMATION_SOURCE_CARD"):
+        motion.compile_storyboard({"scenes": [scene]}, {"rows": rows}, CardPipeline(tmp_path / "b", None))  # a card with no sources in the request
+    (tmp_path / "c").mkdir()
+    tampered = {**scene, "props": {**props, "sources": [{**props["sources"][0], "title": "伪造的来源"}, props["sources"][1]]}}
+    with pytest.raises(CardPipeline.G2Fault, match="INFORMATION_SOURCE_TEXT"):
+        motion.compile_storyboard({"scenes": [tampered]}, {"rows": rows}, CardPipeline(tmp_path / "c", SOURCES))
+
+
+def test_the_model_cannot_plan_a_source_card_and_a_card_cannot_be_replanned():
+    context = {**opus_context()}
+    scene = price_scene() | {"component": "source_card", "props": motion.build_source_card(SOURCES)}
+    with pytest.raises(motion.InformationFault, match="INVALID_INFORMATION_PLAN"):
+        motion.validate_plan({"scenes": [scene]}, context)
+    from g2 import scene_revision
+    class P:
+        class G2Fault(RuntimeError):
+            def __init__(self, code, message):
+                self.code = code
+                super().__init__(message)
+    with pytest.raises(P.G2Fault) as exc:
+        scene_revision.replan_scene(P, {"component": "source_card"}, {}, {"presentation": {"preset": "information_motion"}}, "改一下")
+    assert exc.value.code == "SCENE_REVISION_SCOPE"
+
+
+def test_the_ir_takes_the_new_components_and_the_large_density(tmp_path):
+    root, ir = information_ir_with(tmp_path, "price_change", price_scene()["props"], ["title", "line:0", "line:1"])
+    validate_video_ir(ir, root)
+    ir["scenes"][0]["beats"][0]["target_id"] = "line:2"
+    with pytest.raises(ValidationFault, match="INVALID_BEAT_TARGET"):
+        validate_video_ir(ir, root)  # two rows only
+    ir["scenes"][0]["beats"][0]["target_id"] = "title"
+    ir["presentation"] = {"preset": "information_motion", "density": "large"}
+    validate_video_ir(ir, root)
+    ir["presentation"]["density"] = "huge"
+    with pytest.raises(ValidationFault):
+        validate_video_ir(ir, root)
+    ir["presentation"] = {"preset": "information_motion", "size": 3}
+    with pytest.raises(ValidationFault):
+        validate_video_ir(ir, root)
+    root, card = information_ir_with(tmp_path / "card", "source_card", motion.build_source_card(SOURCES), ["title", "line:0", "line:1"])
+    validate_video_ir(card, root)
+    card["scenes"][0]["beats"][0]["target_id"] = "line:2"
+    with pytest.raises(ValidationFault, match="INVALID_BEAT_TARGET"):
+        validate_video_ir(card, root)
+    card["scenes"][0]["beats"][0]["target_id"] = "title"
+    card["scenes"][0]["props"]["sources"][0]["date"] = "昨天"
+    with pytest.raises(ValidationFault, match="INVALID_COMPONENT_PROPS"):
+        validate_video_ir(card, root)
+
+
+def test_the_frozen_registry_still_lacks_the_extension_components():
+    from g1.video_ir import load_registry, schema_action_catalog
+    assert not {"price_change", "source_card"} & set(schema_action_catalog())
+    assert {"price_change", "source_card"} <= set(load_registry()["components"])

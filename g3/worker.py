@@ -23,7 +23,9 @@ STEP_TO_STAGE = {
     "compile-ir": "BUILD_IR",
     "render": "RENDER",
     "verify-media": "QUALITY_CHECK",
+    "package": "PACKAGE",
 }
+PACKAGE_FINAL_ERRORS = {"PACKAGE_CONFIG_INVALID", "PACKAGE_CONTENT_MISSING", "PACKAGE_UNVERIFIED", "PACKAGE_FORMAT_MISMATCH"}
 STEP_LINE = re.compile(r"^STEP ([a-z0-9-]+): (PASS|FAIL|SKIPPED)(?: in ([0-9.]+)s)?")
 ERROR_LINE = re.compile(r"^G2 FAIL: ([A-Z0-9_]+)(?::\s*(.*))?$")
 
@@ -150,7 +152,7 @@ class G2ProcessRunner:
         active_stage = "PLAN"
         lines_read = 0
         started = time.monotonic()
-        timeout_seconds = self.settings.runner_timeout_seconds
+        timeout_seconds = self.settings.runner_timeout_seconds + (300 if input_payload.get("package") else 0)
         workload_timeout_loaded = False
         input_analysis_loaded = False
         error_code = None
@@ -240,7 +242,7 @@ class G2ProcessRunner:
             return
         if return_code != 0:
             error_code = error_code or "GENERATION_FAILED"
-            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION", "NARRATION_TEXT_MISMATCH"}:
+            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION", "NARRATION_TEXT_MISMATCH"} | PACKAGE_FINAL_ERRORS:
                 retryable = False
             self.store.mark_failed(job_id, attempt_no, active_stage, error_code,
                                    error_message or "视频生成失败，请查看任务阶段错误并重试", retryable)
@@ -259,6 +261,18 @@ class G2ProcessRunner:
             return
 
         artifacts_dir = run_dir / "artifacts"
+        package_dir = artifacts_dir / "package"
+        packaged = bool(input_payload.get("package"))
+        if packaged:
+            try:
+                package_qa = json.loads((package_dir / "package-qa.json").read_text(encoding="utf-8"))
+                if package_qa.get("status") != "PASS" or not (package_dir / "video.mp4").is_file():
+                    raise ValueError("package QA was not PASS")
+            except Exception as exc:
+                self.store.mark_failed(job_id, attempt_no, "PACKAGE", "PACKAGE_UNVERIFIED",
+                                       f"打包后的成片缺少通过的检查报告：{type(exc).__name__}", False)
+                self._write_failure_report(attempt_root, "PACKAGE_UNVERIFIED", "打包成片未通过检查", "PACKAGE")
+                return
         video_name = "G2_自动生成.mp4" if (artifacts_dir / "G2_自动生成.mp4").is_file() else "G2_CaseA_通信噪声.mp4"
         artifact_specs = [
             (artifacts_dir / video_name, "video.mp4", "video/mp4"),
@@ -288,6 +302,20 @@ class G2ProcessRunner:
             (artifacts_dir / "diagram-timing.json", "diagram-timing.json", "application/json"),
             (log_path, "execution-log.txt", "text/plain; charset=utf-8"),
         ]
+        if packaged:
+            # video.mp4 / captions.srt / chapters.json describe the packaged file; the content-only
+            # versions keep their own names. Everything that reads the content timeline uses content.mp4.
+            replaced = {"video.mp4": "content.mp4", "captions.srt": "content-captions.srt",
+                        "chapters.json": "content-chapters.json"}
+            artifact_specs = [(path, replaced.get(name, name), ctype) for path, name, ctype in artifact_specs]
+            artifact_specs += [
+                (package_dir / "video.mp4", "video.mp4", "video/mp4"),
+                (package_dir / "captions.srt", "captions.srt", "application/x-subrip"),
+                (package_dir / "chapters.json", "chapters.json", "application/json"),
+                (package_dir / "package.json", "package.json", "application/json"),
+                (package_dir / "package-qa.json", "package-qa.json", "application/json"),
+                (package_dir / "contact-sheet.jpg", "package-contact-sheet.jpg", "image/jpeg"),
+            ]
         artifacts = []
         for path, name, content_type in artifact_specs:
             item = safe_artifact(path, attempt_root, name, content_type)

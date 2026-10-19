@@ -33,7 +33,8 @@
               "concept_reveal",
               "comparison",
               "big_number",
-              "bar_chart"
+              "bar_chart",
+              "price_change"
             ]
           },
           "props": {

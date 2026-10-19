@@ -13,7 +13,7 @@ from typing import Iterator
 from uuid import UUID
 
 
-STAGES = ("PLAN", "VOICE_ALIGN", "STORYBOARD", "SCENE_IMAGES", "BUILD_IR", "RENDER", "QUALITY_CHECK")
+STAGES = ("PLAN", "VOICE_ALIGN", "STORYBOARD", "SCENE_IMAGES", "BUILD_IR", "RENDER", "QUALITY_CHECK", "PACKAGE")
 TERMINAL_STATES = {"COMPLETED", "FAILED", "CANCELLED"}
 SCENE_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_]{0,47}$")
 
@@ -240,6 +240,8 @@ class JobStore:
         keys = ("target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "video_speed")
         options = {key: saved.get(key, job.get(key)) for key in keys}
         options["use_draw_things"] = saved.get("use_draw_things", False)
+        if saved.get("package"):
+            options["package"] = saved["package"]  # revisions are repackaged with the parent's kit
         return {"job_id": job_id, "title": job["title"], "source_text": source, "narration_text": narration,
                 "creative_intent": job["creative_intent"], "options": options}
 
@@ -304,6 +306,8 @@ class JobStore:
             "scene_id": scene_id,
             "prompt_extra": prompt_extra,
         }
+        if input_payload.get("package"):
+            request["package"] = input_payload["package"]
         return self.create_job(job_id, request)
 
     def scene_edit_source(self, parent_job_id: str, attempt_no: int, scene_id: str) -> dict:
@@ -455,6 +459,8 @@ class JobStore:
                              (now, job_id))
                 return False
             conn.execute("UPDATE stages SET status='SUCCEEDED',completed_at=? WHERE job_id=? AND attempt_no=? AND stage='QUALITY_CHECK'",
+                         (now, job_id, attempt_no))
+            conn.execute("UPDATE stages SET status='SKIPPED',completed_at=? WHERE job_id=? AND attempt_no=? AND stage='PACKAGE' AND status IN ('PENDING','RUNNING')",
                          (now, job_id, attempt_no))
             conn.execute("UPDATE attempts SET status='COMPLETED',completed_at=?,runner_pid=NULL WHERE job_id=? AND attempt_no=?",
                          (now, job_id, attempt_no))

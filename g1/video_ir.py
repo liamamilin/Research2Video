@@ -145,7 +145,15 @@ def _validate_targets(component, props, action, target, path):
     elif target.startswith("line:"):
         index = numeric_target_index()
         # big_number: line:0 is the value, line:1 the label, line:2 the optional note.
-        exists = index < ((3 if "note" in props else 2) if component == "big_number" else len(props.get("lines", [])))
+        if component == "big_number":
+            limit = 3 if "note" in props else 2
+        elif component == "price_change":  # one line per row
+            limit = len(props.get("rows", []))
+        elif component == "source_card":  # one line per source
+            limit = len(props.get("sources", []))
+        else:
+            limit = len(props.get("lines", []))
+        exists = index < limit
     elif target.startswith("side:"):
         exists = target.split(":", 1)[1] in {"left", "right"} and target.split(":", 1)[1] in props
     elif target.startswith("event:"):
@@ -181,14 +189,17 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         beats.pop("maxItems", None)
         beats["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
         schema["properties"]["scenes"]["items"] = {"anyOf": [original_scene, diagram_scene]}
-    information = isinstance(ir, dict) and ir.get("presentation") == {"preset": "information_motion"}
+    presentation = ir.get("presentation") if isinstance(ir, dict) else None
+    # density "large" is the short-form text scale (see g2/information_motion.py); the key is optional.
+    information = isinstance(presentation, dict) and presentation.get("preset") == "information_motion" \
+        and set(presentation) <= {"preset", "density"}
     if isinstance(ir, dict) and "presentation" in ir:
         schema["properties"]["presentation"] = {"type": "object", "additionalProperties": False,
-            "required": ["preset"], "properties": {"preset": {"const": "information_motion"}}}
+            "required": ["preset"], "properties": {"preset": {"const": "information_motion"}, "density": {"const": "large"}}}
         if information:
             schema["properties"]["style"]["properties"]["preset"] = {"const": "minimal_light"}
             motion_scene = copy.deepcopy(schema["properties"]["scenes"]["items"])
-            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison", "big_number", "bar_chart"]}
+            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"]}
             motion_scene["properties"]["beats"].pop("maxItems", None)
             motion_scene["properties"]["beats"]["items"]["properties"]["action"] = {"const": "reveal"}
             motion_scene["properties"]["beats"]["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
@@ -201,7 +212,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         schema["properties"]["video"]["properties"]["duration_ms"]["minimum"] = 1
         schema["properties"]["scenes"].pop("maxItems", None)
         if not isinstance(ir.get("scenes"), list) or not ir["scenes"] or any(not isinstance(s, dict) or not (
-                (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart"})
+                (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"})
                 or (not information and s.get("component") == "flow_diagram" and isinstance(s.get("props"), dict) and "layout" in s["props"])) for s in ir["scenes"]):
             _fail("CONTENT_COMPONENT_UNSUPPORTED", "/scenes", "chapter extension requires laid-out flow diagrams or explicit information motion")
     if isinstance(ir, dict) and "playback" in ir:

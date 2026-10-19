@@ -114,3 +114,50 @@ def test_worker_locks_narration_and_a_mismatch_is_not_retryable(tmp_path, monkey
     assert env["AUTOVIDEO_G2_LOCK_NARRATION"] == "1" and env["AUTOVIDEO_G2_DURATION_MODE"] == "content"
     assert job["status"] == "FAILED" and job["error_code"] == "NARRATION_TEXT_MISMATCH"
     assert job["retryable"] is False and "第 1 章" in job["error_message"]
+
+
+# --- Sources for the closing source card ------------------------------------------------------------
+
+SOURCES = [{"title": "Opus 5.5 定价更新", "url": "https://www.example.com/news/opus-pricing", "date": "2026-10-16"},
+           {"title": "GPT-6 Sol 价格页", "url": "http://pricing.example.org/sol", "date": "2026-10-16"}]
+
+
+def test_sources_are_stored_in_input_json_for_the_pipeline(tmp_path):
+    with TestClient(create_app(Settings(data_dir=tmp_path / "data"), start_worker=False, preflight=READY)) as c:
+        response = c.post("/api/jobs", json=narration(video_form="information_motion", sources=SOURCES))
+        assert response.status_code == 202
+        store = c.app.state.store
+        saved = json.loads((store.source_path(response.json()["job_id"]).parent / "input.json").read_text(encoding="utf-8"))
+        assert saved["sources"] == SOURCES
+        assert "来源" not in store.source_path(response.json()["job_id"]).read_text(encoding="utf-8")  # never part of the script
+        plain = c.post("/api/jobs", json=narration(video_form="information_motion")).json()["job_id"]
+        assert "sources" not in json.loads((store.source_path(plain).parent / "input.json").read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("payload,message", [
+    ({"sources": []}, "at least 1"),
+    ({"sources": SOURCES + SOURCES[:2]}, "at most 3"),
+    ({"sources": [{**SOURCES[0], "title": "题" * 41}]}, "at most 40"),
+    ({"sources": [{**SOURCES[0], "title": "两行\n标题"}]}, "一行"),
+    ({"sources": [{**SOURCES[0], "url": "ftp://example.com/a"}]}, "http(s)"),
+    ({"sources": [{**SOURCES[0], "url": "https://example.com/a b"}]}, "http(s)"),
+    ({"sources": [{**SOURCES[0], "url": "javascript:alert(1)"}]}, "http(s)"),
+    ({"sources": [{**SOURCES[0], "date": "2026-13-01"}]}, "YYYY-MM-DD"),
+    ({"sources": [{**SOURCES[0], "date": "2026-1-5"}]}, "YYYY-MM-DD"),
+    ({"sources": [{**SOURCES[0], "author": "x"}]}, "Extra inputs"),
+    ({"sources": [{"title": "缺日期", "url": "https://example.com/a"}]}, "Field required"),
+    ({"sources": SOURCES, "video_form": "process_diagram"}, "来源卡只用于"),
+])
+def test_sources_are_validated(tmp_path, payload, message):
+    with TestClient(create_app(Settings(data_dir=tmp_path / "data"), start_worker=False, preflight=READY)) as c:
+        response = c.post("/api/jobs", json=narration(**payload))
+        assert response.status_code == 422
+        assert message in json.dumps(response.json(), ensure_ascii=False)
+        assert c.get("/api/jobs").json()["total"] == 0
+
+
+def test_sources_belong_to_narration_mode_only(tmp_path):
+    with TestClient(create_app(Settings(data_dir=tmp_path / "data"), start_worker=False, preflight=READY)) as c:
+        source = "会议记录的目的是让未参会的同事也能理解结果。先交代必要背景，再区分已经确定的决定、需要执行的行动和仍待确认的问题。"
+        response = c.post("/api/jobs", json={"source_text": source, "video_form": "information_motion", "duration_mode": "content", "sources": SOURCES})
+        assert response.status_code == 422 and "仅用于 input_mode: narration" in json.dumps(response.json(), ensure_ascii=False)

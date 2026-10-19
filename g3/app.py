@@ -3,7 +3,9 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from pathlib import Path
 import re
+from datetime import date as calendar_date
 from typing import Literal
+from urllib.parse import urlsplit
 from uuid import UUID, uuid4
 
 from fastapi import FastAPI, HTTPException, Query, UploadFile
@@ -16,6 +18,7 @@ from starlette.concurrency import run_in_threadpool
 from g3.input_documents import DocumentError, MAX_UPLOAD_BYTES, load_import, read_document, save_import
 
 from g2.authored_script import script_text
+from g2.package_kit import PackageConfigError, validate_package
 from g2.voices import VOICE_IDS, SPEEDS, catalog
 from g3 import revision_support
 from g3.config import Settings, probe_config
@@ -65,6 +68,43 @@ class NarrationChapter(BaseModel):
         return value
 
 
+MAX_SOURCES = 3
+
+
+class NarrationSource(BaseModel):
+    """One reference shown on the closing source card. The card's text comes from here, not from the narration."""
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    title: str = Field(min_length=1, max_length=40, description="来源标题，原样显示在来源卡上")
+    url: str = Field(min_length=8, max_length=300, description="http(s) 网址；来源卡显示其域名")
+    date: str = Field(description="发布日期，YYYY-MM-DD")
+
+    @field_validator("title")
+    @classmethod
+    def check_title(cls, value: str) -> str:
+        if any(ord(character) < 32 or ord(character) == 127 for character in value):
+            raise ValueError("来源标题须为一行文字，不能含控制字符")
+        return value
+
+    @field_validator("url")
+    @classmethod
+    def check_url(cls, value: str) -> str:
+        parts = urlsplit(value)
+        if parts.scheme not in {"http", "https"} or not parts.hostname or any(c.isspace() or ord(c) < 32 for c in value):
+            raise ValueError("来源网址须为带域名的 http(s) 网址，且不含空白")
+        return value
+
+    @field_validator("date")
+    @classmethod
+    def check_date(cls, value: str) -> str:
+        try:
+            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+                raise ValueError
+            calendar_date.fromisoformat(value)
+        except ValueError:
+            raise ValueError("来源日期须为存在的 YYYY-MM-DD 日期") from None
+        return value
+
+
 class CreateJobRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
@@ -77,6 +117,10 @@ class CreateJobRequest(BaseModel):
                                     description="material 模式必填的素材正文；narration 模式不传，由 chapters 生成")
     chapters: list[NarrationChapter] | None = Field(default=None, min_length=1,
                                                     description="narration 模式必填：按顺序的章节标题与讲稿段落")
+    sources: list[NarrationSource] | None = Field(default=None, min_length=1, max_length=MAX_SOURCES,
+                                                  description="narration 模式可选：片尾来源卡显示的来源（标题、网址、日期），最多 3 条；不传则没有来源卡")
+    package: dict | None = Field(default=None, description="可选：出片之后接上的片头（stinger）和片尾（end_card）；不传则成片就是内容本身。"
+                                                           "形如 {accent, intro?, outro?}，契约见 UPSTREAM_INTEGRATION.md")
     input_document_id: str | None = None
     target_duration_sec: int = Field(default=60, ge=10, le=90)
     duration_mode: Literal["fixed", "content"] = "fixed"
@@ -104,6 +148,16 @@ class CreateJobRequest(BaseModel):
             raise ValueError("source_text cannot contain NUL characters")
         return value
 
+    @field_validator("package")
+    @classmethod
+    def check_package(cls, value):
+        if value is None:
+            return None
+        try:
+            return validate_package(value)
+        except PackageConfigError as exc:
+            raise ValueError(str(exc)) from None
+
     @model_validator(mode="after")
     def validate_content_options(self):
         if self.input_mode == "narration":
@@ -118,8 +172,12 @@ class CreateJobRequest(BaseModel):
             self.source_text = script_text([chapter.model_dump() for chapter in self.chapters])
         elif self.chapters is not None:
             raise ValueError("chapters 仅用于 input_mode: narration")
+        elif self.sources is not None:
+            raise ValueError("sources 仅用于 input_mode: narration")
         elif self.source_text is None:
             raise ValueError("source_text 为必填项")
+        if self.sources is not None and self.video_form not in {"auto", "information_motion"}:
+            raise ValueError("来源卡只用于简洁信息动效（video_form: information_motion 或 auto）")
         if self.duration_mode == "content":
             if self.video_form not in {"auto", "process_diagram", "information_motion"}:
                 raise ValueError("按内容组织请选择流程动态图解或简洁信息动效")
@@ -336,8 +394,9 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
         title = request.title or "".join(request.source_text.split())[:28] or "未命名视频"
         payload = request.model_dump()
         payload["title"] = title
-        if payload["chapters"] is None:
-            payload.pop("chapters")
+        for optional in ("chapters", "sources", "package"):
+            if payload[optional] is None:
+                payload.pop(optional)
         try:
             document = load_import(settings.data_dir, request.input_document_id) if request.input_document_id else None
             job = store.create_job(job_id, payload, input_document=document)
@@ -410,7 +469,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
                        "creative_intent": request.creative_intent.model_dump() if request.creative_intent is not None else draft["creative_intent"]}
             if request.mode == "source":
                 try:
-                    checked = CreateJobRequest(**{k: payload[k] for k in ("title", "source_text", "target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "creative_intent", "video_speed")})
+                    checked = CreateJobRequest(**{k: payload[k] for k in ("title", "source_text", "target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "creative_intent", "video_speed", "package") if k in payload})
                 except ValidationError as exc:
                     raise _error(422, "REVISION_INPUT_INVALID", str(exc.errors()[0]["msg"])) from exc
                 payload.update(checked.model_dump())

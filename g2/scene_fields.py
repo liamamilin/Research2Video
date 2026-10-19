@@ -13,6 +13,12 @@ def editable_fields(scene: dict) -> list[dict]:
     if c=='big_number':
         add('value','大数字',p['value']);add('label','数字说明',p['label'])
         if 'note' in p:add('note','前提或口径',p['note'])
+    if c=='price_change':
+        add('title','场景标题',p['title'])
+        if 'unit' in p:add('unit','计量口径',p['unit'])
+        for i,row in enumerate(p['rows']):
+            add(f'rows.{i}.label',f'第 {i+1} 行名称',row['label']);add(f'rows.{i}.before',f'第 {i+1} 行旧值',row['before']);add(f'rows.{i}.after',f'第 {i+1} 行新值',row['after'])
+            if 'change' in row:add(f'rows.{i}.change',f'第 {i+1} 行幅度',row['change'])
     if c=='bar_chart':
         for i,text in enumerate(p['categories']):add(f'categories.{i}',f'第 {i+1} 条名称',text)
         add('unit','单位',p['unit'])

@@ -117,7 +117,36 @@ curl --fail --silent --show-error \
 - **章节标题取自 `chapters[].title`**，原样用于画面章节标签与 `chapters.json`；标题本身不朗读。
 - **画面仍自动规划。** `video_form: "auto"` 时只让模型为整片选择 `information_motion` 或 `process_diagram`（不读改、不剔除讲稿内容）；场景、卡片、流程图与动画节拍按每章讲稿自动生成。
 - 时长由讲稿和实际配音决定，因此必须传 `duration_mode: "content"`。
+- **来源卡（可选 `sources`）。** `narration` 模式可附 `sources: [{title, url, date}]`，片尾出现一张「来源」卡，每条显示标题、域名和发布日期；不传则没有来源卡。约定：
+  - 1–3 条；`title` 1–40 字符、单行；`url` 必须是带域名的 `http`/`https` 网址（不含空白，≤300 字符），画面只显示去掉 `www.` 的域名；`date` 为存在的 `YYYY-MM-DD`；不接受其他字段。只用于 `narration` 模式，且 `video_form` 必须是 `information_motion` 或 `auto`（`auto` 选成流程图时不出现来源卡）。
+  - **来源文字不是旁白，也不进入旁白。** 它既不朗读，也不参与「画面文字贴口播」的核对：来源卡的文字由请求里的 `sources` 在本地生成（模型不写），生成后必须与请求数据逐字一致，否则以 `INFORMATION_SOURCE_TEXT` 失败。这条豁免只覆盖来源卡本身：来源标题里的数字和术语**不会**被加入旁白的核对依据，其他场景的数字与命令、版本号等仍必须出自旁白。
+  - 来源卡占用片尾一句旁白的画面（因为场景必须逐段覆盖旁白）：最后一个场景有两句以上且最后一句没有被它的节拍引用时，取走最后一句；最后一个场景只有一句且是文字类场景（标题、要点、对比）时，由来源卡替换；数据类场景（数字、价格、图表）不会被替换，改为从章内较前、能让出一句的场景取。都不行时不出来源卡，原因写入 `artifacts/source-card.json`（任务仍成功）。
+  - 来源标题或域名过长、条数过多导致排不下时，任务以 `INFORMATION_SOURCE_CARD` 失败，`error_message` 说明原因；缩短标题后重新提交。
+  - 修订任务（讲稿修订、场景修订）不继承 `sources`；来源卡场景不能被重排，其文字不能编辑。
+- **短视频大字号。** 讲稿全文 ≤ 560 字（约 60–120 秒）时，信息动效整片的文字放大到 1.3 倍（IR 里 `presentation.density: "large"`），每屏容量相应变小，规划器会写得更短。更长的视频沿用原字号。
 - 任务保存的原稿 `source.txt` 由章节生成：章内段落以换行连接、章与章之间空一行；`source_sha256` 对应这份文本。
+
+### 包装套件（可选 `package`：片头与片尾）
+
+一条视频 = 内容部分 + 非内容部分。非内容部分（片头 stinger、片尾 end_card）**不进 Video IR**：IR v0.2 要求每个场景至少有一个旁白段，音频 QA 要求成片音轨与配音的相关系数不低于 0.98。内容视频照常渲染并通过原有的媒体 QA、原话校验（这些一律不动），然后由独立的 `PACKAGE` 阶段把片头、片尾接在它前后，成片就是打包后的视频。请求里没有 `package` 时行为与以前完全一样（`PACKAGE` 阶段显示「已跳过」，不产生新文件）。
+
+```json
+"package": {
+  "accent": "#1f7a4d",
+  "badge": "快讯",
+  "intro": {"template": "stinger", "title": "快讯", "subtitle": "2026-10-19", "seconds": 1.5, "sound": "synth_sting"},
+  "outro": {"template": "end_card", "title": "快讯", "lines": ["来源见简介"], "seconds": 3, "sound": "synth_sting"}
+}
+```
+
+- **角标 `badge`（可选）**：短文字，≤ 12 字单行，写栏目名（如「快讯」）。带 `package` 的任务，内容画面左上角的角标改由套件提供：有 `badge` 时显示「色点 + badge 文字」，色点和文字用 `accent`；没传 `badge` 时只显示 `accent` 色点，不写产品名和「知识讲解」。**没有 `package` 的任务保持原样**（显示「AUTOVIDEO 知识讲解」）。目前只改了简洁信息动效（`information_motion`）版式的角标；旧版式和流程图解版式（左上角「AUTOVIDEO / G1 · Video IR 0.2」等）不变。角标作为渲染参数传给渲染器，不进 Video IR。\n- **字段**：`accent` 必填，`#rrggbb`；`intro`、`outro` 各自可选，**至少给一个**（例如知识点栏目只要片尾）。模板名只认 `stinger`（片头）和 `end_card`（片尾）；`seconds` 在 0.5–5 之间，按 30 fps 取整到帧；`title` ≤ 12 字；`subtitle`（仅片头）≤ 24 字；`lines`（仅片尾）最多 3 行、每行 ≤ 30 字；`sound` 可选，是套件里提示音的名字（小写字母、数字、下划线，必须在套件里存在，目前只有 `synth_sting`）。多余字段、错位字段（如片尾的 `subtitle`）一律以 422 拒绝，任务不会创建。不带 `sound` 时片头片尾是静音的。
+- **文字只来自请求**：模板用固定版式（片头：主色底、白字标题加副标题；片尾：浅底、主色竖条、标题与说明行）逐帧绘制，不经过模型，文字过长时只缩字号、不截断。日期等动态内容由上游写进 `subtitle`，AutoVideo 不替换 `{date}`。
+- **提示音**：套件目录 `g2/package_kit/` 里的声音是带来源和授权的资产（`kit.json` 记录 `source`、`license`、`author`、`sha256`）。第一版 `synth_sting` 由确定性脚本 `synth_sounds.py` 合成（原创，无授权问题，音质有限）。换成自己的音乐文件只需要换 `sounds/` 里的文件并更新 `kit.json` 的元数据和 sha256，流程不变；打包时校验 sha256，文件与元数据不符会拒绝。
+- **响度**：提示音按内容视频**实际播放**的人声有效电平（50 ms 窗口，高于 −45 dBFS 才计入）自动降低 6 dB 混入，并在片头/片尾片段内裁短、淡出，不会渗进内容。成片检查要求提示音至少比人声低 3 dB 且不削波，否则以 `PACKAGE_SEAM_LOUDNESS` 失败。
+- **产物**：`video.mp4` 是**打包后的成片**；`content.mp4` 是内容视频本身（未打包，也是原话校验、内容 QA 针对的那个文件）。时间线：`captions.srt`、`chapters.json` 已加上片头长度，与 `video.mp4` 对齐；内容时间线的版本另存为 `content-captions.srt`、`content-chapters.json`。`package.json` 记录片头/内容/片尾的帧数与偏移（`offset_ms` 是片头时长）、提示音元数据与每项检查结果；`package-qa.json` 是检查报告；`package-contact-sheet.jpg` 是接触表。上游发布时间戳时用 `chapters.json`（已含偏移）。网页播放器播放打包后的成片，章节和场景跳转自动加上片头偏移。
+- **打包后的检查（全部通过才算完成）**：完整解码；帧数等于片头 + 内容 + 片尾，时长误差不超过一帧；尺寸、帧率、采样率、声道与内容视频一致且全片没有中途变化；内容部分的音轨相关系数按片头长度错开后重算，仍须 ≥ 0.98；接缝处提示音响度。失败码：`PACKAGE_DECODE_FAILED`、`PACKAGE_DURATION_MISMATCH`、`PACKAGE_FORMAT_MISMATCH`、`PACKAGE_AUDIO_MISMATCH`、`PACKAGE_SEAM_LOUDNESS`；另有 `PACKAGE_CONFIG_INVALID`、`PACKAGE_CONTENT_MISSING`、`PACKAGE_RENDER_FAILED`、`PACKAGE_COMMAND_FAILED`、`PACKAGE_UNVERIFIED`（请求了打包但没有通过的检查报告，绝不发布未验证的成片）。`PACKAGE_CONFIG_INVALID`、`PACKAGE_CONTENT_MISSING`、`PACKAGE_FORMAT_MISMATCH`、`PACKAGE_UNVERIFIED` 的 `retryable` 为 `false`，其余可重试。阶段名 `PACKAGE`（页面显示「加片头片尾」），排在 `QUALITY_CHECK` 之后；历史任务没有这一阶段。
+- **重试与修订**：重试沿用保存的请求，会重新打包。讲稿修订、原稿修订、画面修订、声音与速度修订、场景背景重生成都**继承父任务的 `package`**，并在新内容视频上重新打包（章节、字幕按新内容重算偏移）；这一点与 `sources` 不同。场景预览取自 `content.mp4`，不受片头影响。
+- 提示音只加在片头、片尾；**不做背景音乐垫底**，也不做竖屏。
 
 ### 响应
 
@@ -141,6 +170,8 @@ curl --fail --silent --show-error \
 | `input_mode` | 可选，默认 `material`。`material`：`source_text` 是素材，AutoVideo 组织讲稿；`narration`：`chapters` 是定稿讲稿，逐字配音 |
 | `source_text` | `material` 模式必填；去除首尾空白后至少 50 个字符，不允许 NUL。保持事实、条件、数字、例子及必要说明清楚完整。`narration` 模式不得传入 |
 | `chapters` | `narration` 模式必填，`material` 模式不得传入。非空数组，按顺序；每项只含 `title`（1–32 字符、单行）与 `paragraphs`（非空字符串数组，每段去除首尾空白后不能为空，不允许 NUL）。不接受 `visual_cues` 等其他字段 |
+| `sources` | 可选，仅 `narration` 模式：片尾来源卡，1–3 项，每项 `title`（1–40 字符、单行）、`url`（带域名的 http/https）、`date`（`YYYY-MM-DD`）。详见上文「来源卡」 |
+| `package` | 可选：片头（`stinger`）和片尾（`end_card`）加主色与提示音，出片后单独打包；任何模式都可用。详见上文「包装套件」 |
 | `title` | 可选；传入时长度 2–80。省略或为 `null` 时，服务端从正文截取任务标题；不要传空字符串 |
 | `video_form` | 推荐显式传 `auto`；可指定 `process_diagram` 或 `information_motion` |
 | `duration_mode` | 推荐显式传 `content`，按完整内容和实际配音组织章节与时长；`narration` 模式必须为 `content` |
@@ -225,13 +256,15 @@ curl --fail --silent --show-error \
 
 | `name` | 用途 |
 | --- | --- |
-| `video.mp4` | 最终 H.264 / AAC MP4 |
-| `captions.srt` | 中文字幕 |
+| `video.mp4` | 最终 H.264 / AAC MP4；带 `package` 时是打包后的成片 |
+| `content.mp4` | 仅带 `package`：内容视频本身（无片头片尾） |
+| `captions.srt` | 中文字幕；带 `package` 时已加片头偏移，与 `video.mp4` 对齐（内容时间线版本为 `content-captions.srt`） |
+| `package.json` / `package-qa.json` / `package-contact-sheet.jpg` | 仅带 `package`：打包记录（含 `offset_ms`）、检查报告、接触表 |
 | `narration.json` | 最终讲稿 JSON，正文可从 `segments[].text` 读取；`chapters[]` 含章节标题与所含段落 |
 | `narration-check.json` | `narration` 模式与讲稿修订：逐字校验结果（`status: "PASS"`、章节数、段数、已核对的 Video IR / 字幕 / 章节标题） |
 | `authored-narration.json` | `narration` 模式与讲稿修订：讲稿来源、`model_rewrite: false` 及分句后的首次逐字校验 |
 | `qa.json` | 本次基础媒体检查记录 |
-| `chapters.json` | 内容模式的章节和时间信息 |
+| `chapters.json` | 内容模式的章节和时间信息；带 `package` 时已加片头偏移（内容时间线版本为 `content-chapters.json`） |
 | `input-brief.json` | 输入整理、来源和形式选择记录 |
 
 以 `items` 实际返回为准，部分辅助文件不适用于所有任务。未完成时文件列表为空；空列表不能被解释为成功。

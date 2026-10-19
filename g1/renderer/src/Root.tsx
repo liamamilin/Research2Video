@@ -4,7 +4,7 @@ import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurre
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
 type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]};
 type Segment = {id: string; text: string; start_ms: number; end_ms: number};
-type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; presentation?: {preset: 'information_motion'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
+type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; presentation?: {preset: 'information_motion'; density?: 'large'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
 
 const colors = {bg: '#0B1020', panel: '#121B2E', border: '#293750', text: '#F3F6FC', muted: '#A9B7CD', cyan: '#4ED5E6', blue: '#6798FF', orange: '#FFAA55', red: '#FF6175', green: '#64D8A5'};
 const font = '"Hiragino Sans GB", "PingFang SC", sans-serif';
@@ -235,10 +235,14 @@ function LegacyVideo({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: 
 // A separate presentation for the same validated, registered content components.
 const paper = {bg:'#F7F8F5', ink:'#202D28', muted:'#69756E', green:'#17784B', line:'#E1E8E1'};
 const ease = (value: number) => 1-Math.pow(1-Math.max(0, Math.min(1, value)), 3);
-function InformationVideo({ir}: {ir: Timeline}) {
+type Badge = {text?: string; color: string};
+function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
   const frame = useCurrentFrame();
   const sceneIndex = Math.max(0, ir.scenes.findIndex((s) => frame >= s.start_frame && frame < s.end_frame));
   const scene = ir.scenes[sceneIndex], p = scene.props;
+  // Short videos (presentation.density 'large') scale every text size by 1.3; g2/information_motion.py::scaled() mirrors this for text fit.
+  const large = ir.presentation?.density === 'large';
+  const S = (size: number) => large ? Math.round(size * 1.3) : size;
   const caption = ir.narration.segments.find((s) => frame >= Math.floor((s.start_ms*30+500)/1000) && frame < Math.floor((s.end_ms*30+500)/1000));
   const chapters = ir.content_structure?.chapters || [];
   const chapterIndex = chapters.findIndex((c) => c.narration_segment_ids.includes(scene.narration_segment_ids[0]));
@@ -257,14 +261,14 @@ function InformationVideo({ir}: {ir: Timeline}) {
   const chartLike = scene.component === 'comparison' || scene.component === 'bar_chart';
   const heading = chartLike ? scene.purpose : p.title;
   return <AbsoluteFill style={{background:paper.bg, color:paper.ink, fontFamily:font, backgroundImage:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
-    <div style={{position:'absolute', left:140, top:70, display:'flex', alignItems:'center', gap:14, fontSize:22, letterSpacing:2, color:paper.green}}><span style={{width:9,height:9,borderRadius:3,background:paper.green}}/>AUTOVIDEO <span style={{color:paper.muted, letterSpacing:0, marginLeft:12}}>知识讲解</span></div>
+    <div style={{position:'absolute', left:140, top:70, display:'flex', alignItems:'center', gap:14, fontSize:22, letterSpacing:2, color:badge ? badge.color : paper.green}}><span style={{width:9,height:9,borderRadius:3,background:badge ? badge.color : paper.green}}/>{badge ? badge.text : <>AUTOVIDEO <span style={{color:paper.muted, letterSpacing:0, marginLeft:12}}>知识讲解</span></>}</div>
     <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
     {scene.component === 'title_card' ? <div style={{position:'absolute',left:180,top:285,width:1520}}>
-      <div style={{...motion('title'), ...textStyle, fontSize:p.title.length > 30 ? 76 : 92, lineHeight:1.35,fontWeight:700,letterSpacing:-1,maxWidth:1450}}><Tech text={p.title}/></div>
+      <div style={{...motion('title'), ...textStyle, fontSize:large ? (p.title.length > 20 ? S(66) : S(83)) : p.title.length > 30 ? 76 : 92, lineHeight:1.35,fontWeight:700,letterSpacing:-1,maxWidth:1450}}><Tech text={p.title}/></div>
       <div style={{...motion('title'),width:84,height:5,background:paper.green,marginTop:38,borderRadius:3}}/>
-      {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? 36 : 42,lineHeight:1.65,color:paper.muted}}><Tech text={p.subtitle}/></div>}
+      {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? S(36) : S(42),lineHeight:1.65,color:paper.muted}}><Tech text={p.subtitle}/></div>}
     </div> : <>
-      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : 'title')}}><Tech text={heading}/></div>
+      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : 'title')}}><Tech text={heading}/></div>
       {scene.component === 'concept_reveal' && <div style={{position:'absolute',left:140,top:p.lines.length === 4 ? 330 : 360,width:1640,display:'grid',gridTemplateColumns:`repeat(${p.lines.length === 4 ? 2 : p.lines.length}, 1fr)`,gap:28}}>
         {p.lines.map((line: string,i: number) => {
           const match = line.match(/^([^：:]{1,16})[：:]\s*([\s\S]+)$/);
@@ -272,24 +276,59 @@ function InformationVideo({ir}: {ir: Timeline}) {
           const active = latest === `line:${i}`, compact = p.lines.length === 4;
           return <div key={i} style={{...panelStyle,...motion(`line:${i}`),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? paper.green : paper.line}`}}>
             <div style={{fontSize:22,color:paper.green,fontWeight:600,letterSpacing:2,marginBottom:compact ? 10 : 29}}>{String(i+1).padStart(2,'0')}</div>
-            <div style={{...textStyle,fontWeight:650,fontSize:compact || label.length > 10 ? 36 : 42,lineHeight:1.4}}><Tech text={label}/></div>
-            {body && <div style={{...textStyle,color:paper.muted,fontSize:compact ? 28 : p.lines.length === 3 ? 30 : 34,lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}><Tech text={body}/></div>}
+            <div style={{...textStyle,fontWeight:650,fontSize:S(compact || label.length > 10 ? 36 : 42),lineHeight:1.4}}><Tech text={label}/></div>
+            {body && <div style={{...textStyle,color:paper.muted,fontSize:S(compact ? 28 : p.lines.length === 3 ? 30 : 34),lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}><Tech text={body}/></div>}
           </div>;
         })}
       </div>}
       {scene.component === 'comparison' && <div style={{position:'absolute',left:140,top:330,width:1640,display:'grid',gridTemplateColumns:'1fr 1fr',gap:44}}>
         {(['left','right'] as const).map((side) => {
-          const data=p[side], total=data.items.join('').length, bodySize=total > 130 ? 30 : 34;
+          const data=p[side], total=data.items.join('').length, bodySize=S(total > 130 ? 30 : 34);
           return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${side === 'right' ? paper.green : paper.line}`}}>
-            <div style={{...textStyle,color:side === 'right' ? paper.green : paper.muted,fontSize:data.label.length > 20 ? 34 : 42,lineHeight:1.4,fontWeight:650,marginBottom:30}}><Tech text={data.label}/></div>
+            <div style={{...textStyle,color:side === 'right' ? paper.green : paper.muted,fontSize:S(data.label.length > 20 ? 34 : 42),lineHeight:1.4,fontWeight:650,marginBottom:30}}><Tech text={data.label}/></div>
             <div style={{display:'flex',flexDirection:'column',gap:20}}>{data.items.map((item: string,i: number) => <div key={i} style={{display:'flex',gap:15,fontSize:bodySize,lineHeight:1.5}}><span style={{color:paper.green}}>·</span><span style={textStyle}><Tech text={item}/></span></div>)}</div>
           </div>;
         })}
       </div>}
       {scene.component === 'big_number' && <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 72px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center'}}>
         <div style={{...motion('line:0'),...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
-        <div style={{...motion('line:1'),...textStyle,fontSize:46,fontWeight:650,lineHeight:1.35,marginTop:24}}><Tech text={p.label}/></div>
-        {p.note && <div style={{...motion('line:2'),...textStyle,fontSize:32,lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
+        <div style={{...motion('line:1'),...textStyle,fontSize:S(46),fontWeight:650,lineHeight:1.35,marginTop:24}}><Tech text={p.label}/></div>
+        {p.note && <div style={{...motion('line:2'),...textStyle,fontSize:S(32),lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
+      </div>}
+      {scene.component === 'price_change' && (() => {
+        const rows = p.rows, size = rows.length === 1 ? 180 : 128, side = Math.round(size * .42), badge = S(52);
+        // Same geometry as g2/information_motion.py (PRICE_*): 400px label column, 36px gaps, arrow 0.62 x size wide.
+        const Value = ({text, color, opacity = 1}: {text: string; color: string; opacity?: number}) => {
+          const m = text.match(/^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$/), parts = m ? [m[1], m[2], m[3]] : ['', text, ''];
+          return <span style={{color, opacity, whiteSpace:'nowrap', fontWeight:750, letterSpacing:-2, lineHeight:1.1}}><span style={{fontSize:side}}>{parts[0]}</span><span style={{fontSize:size}}>{parts[1]}</span><span style={{fontSize:side,fontWeight:650}}>{parts[2]}</span></span>;
+        };
+        return <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 56px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center',boxSizing:'border-box'}}>
+          {p.unit && <div style={{...motion('title'),...textStyle,fontSize:S(36),lineHeight:1.4,color:paper.muted,marginBottom:20}}><Tech text={p.unit}/></div>}
+          <div style={{display:'flex',flexDirection:'column',gap:34}}>
+            {rows.map((row: any, i: number) => {
+              const beat = reveals.find((b) => b.target_id === `line:${i}`);
+              const later = (delay: number) => beat ? ease((frame-beat.frame-delay)/14) : 0;
+              return <div key={i} style={{...motion(`line:${i}`),display:'flex',alignItems:'center',gap:36,lineHeight:1.1}}>
+                <div style={{...textStyle,width:400,flex:'none',fontSize:S(46),fontWeight:650,lineHeight:1.35}}><Tech text={row.label}/></div>
+                <div style={{flex:1,display:'flex',alignItems:'center',minWidth:0}}>
+                  <Value text={row.before} color={paper.muted}/>
+                  <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:later(8)}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <Value text={row.after} color={paper.green} opacity={later(8)}/>
+                </div>
+                {row.change && <div style={{flex:'none',padding:'6px 26px',borderRadius:18,background:row.direction === 'down' ? '#E3F3E9' : '#FBE8E4',color:row.direction === 'down' ? paper.green : '#B3402E',fontSize:badge,fontWeight:750,lineHeight:1.3,opacity:later(20),whiteSpace:'nowrap'}}>{row.direction === 'down' ? '−' : '+'}{row.change}</div>}
+              </div>;
+            })}
+          </div>
+        </div>;
+      })()}
+      {scene.component === 'source_card' && <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 56px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center',gap:26,boxSizing:'border-box'}}>
+        {p.sources.map((source: any, i: number) => <div key={i} style={motion(`line:${i}`)}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:40}}>
+            <div style={{...textStyle,fontSize:S(34),fontWeight:650,lineHeight:1.3}}><Tech text={source.title}/></div>
+            <div style={{flex:'none',fontSize:S(30),color:paper.muted,whiteSpace:'nowrap'}}>{source.date}</div>
+          </div>
+          <div style={{fontSize:S(28),lineHeight:1.5,color:paper.green}}><Tech text={source.domain}/></div>
+        </div>)}
       </div>}
       {scene.component === 'bar_chart' && (() => {
         const top = Math.max(...p.values, 0) || 1, count = p.categories.length;
@@ -299,24 +338,24 @@ function InformationVideo({ir}: {ir: Timeline}) {
             const beat = reveals.find((b) => b.target_id === `bar:${i}`);
             const t = beat ? ease((frame-beat.frame)/20) : 0;
             return <div key={i} style={{display:'flex',alignItems:'center',gap:32,opacity:Math.min(1, t*2.2)}}>
-              <div style={{...textStyle,width:360,flex:'none',fontSize:count > 4 ? 30 : 34,fontWeight:600,lineHeight:1.3}}><Tech text={category}/></div>
+              <div style={{...textStyle,width:large ? 440 : 360,flex:'none',fontSize:S(count > 4 ? 30 : 34),fontWeight:600,lineHeight:1.3}}><Tech text={category}/></div>
               <div style={{flex:1,display:'flex',alignItems:'center',gap:20,minWidth:0}}>
                 <div style={{height:count > 4 ? 44 : 58,borderRadius:10,background:paper.green,width:`${Math.max(1.2, p.values[i]/top*72*t)}%`,flex:'none'}}/>
-                <div style={{...textStyle,fontSize:count > 4 ? 32 : 38,fontWeight:650,whiteSpace:'nowrap',color:paper.ink}}><Tech text={shownValue(p.values[i])}/></div>
+                <div style={{...textStyle,fontSize:S(count > 4 ? 32 : 38),fontWeight:650,whiteSpace:'nowrap',color:paper.ink}}><Tech text={shownValue(p.values[i])}/></div>
               </div>
             </div>;
           })}
         </div>;
       })()}
     </>}
-    <div style={{position:'absolute',bottom:60,left:120,right:120,display:'flex',justifyContent:'center',alignItems:'flex-end',minHeight:80}}>{caption && <div style={{maxWidth:1560,padding:'14px 28px',boxSizing:'border-box',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:caption.text.length > 32 ? 30 : 38,lineHeight:1.45,textAlign:'center',...textStyle}}><Tech text={caption.text}/></div>}</div>
+    <div style={{position:'absolute',bottom:60,left:120,right:120,display:'flex',justifyContent:'center',alignItems:'flex-end',minHeight:80}}>{caption && <div style={{maxWidth:1560,padding:'14px 28px',boxSizing:'border-box',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:large ? (caption.text.length > 32 ? 36 : 44) : caption.text.length > 32 ? 30 : 38,lineHeight:1.45,textAlign:'center',...textStyle}}><Tech text={caption.text}/></div>}</div>
     <div style={{position:'absolute',left:0,bottom:0,height:4,width:`${100*(frame+1)/ir.total_frames}%`,background:paper.green}}/>
     <Audio src={staticFile(ir.audio_public_file)}/>
   </AbsoluteFill>;
 }
 
-function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>}) {
-  return props.ir.presentation?.preset === 'information_motion' ? <InformationVideo ir={props.ir}/> : <LegacyVideo {...props}/>;
+function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge}) {
+  return props.ir.presentation?.preset === 'information_motion' ? <InformationVideo ir={props.ir} badge={props.badge}/> : <LegacyVideo {...props}/>;
 }
 
 const defaults: Timeline = {schema_version:'0.2', video:{title:'G1',width:1920,height:1080,fps:30,duration_ms:1000}, narration:{audio_asset_id:'audio',segments:[]}, scenes:[], total_frames:30, audio_public_file:'assets/communications_noise.wav'};

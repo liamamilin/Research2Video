@@ -1,0 +1,264 @@
+{
+  "status": "PASS",
+  "gate": "G2",
+  "real_llm": true,
+  "real_tts": true,
+  "mock_calls": 0,
+  "model": "deepseek-flash",
+  "llm_call_count": 3,
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 1075,
+    "duration_seconds": 35.84,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.9999549626372826,
+    "decoded_rms": 0.06453083455562592,
+    "full_decode": "PASS"
+  },
+  "timeline": {
+    "ir_frames": 1075,
+    "scene_count": 5,
+    "beat_count": 15,
+    "alignment_granularity": "phrase"
+  },
+  "visual_beats": {
+    "c1_s1_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 8,
+      "before_frame": 5,
+      "after_frame": 12,
+      "changed_pixel_ratio": 0.1122313850308642
+    },
+    "c1_s1_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 44,
+      "before_frame": 41,
+      "after_frame": 48,
+      "changed_pixel_ratio": 0.008453896604938272
+    },
+    "c1_s1_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 151,
+      "before_frame": 148,
+      "after_frame": 155,
+      "changed_pixel_ratio": 0.012430555555555556
+    },
+    "c1_s2_b0": {
+      "action": "reveal",
+      "target_id": "bar:0",
+      "beat_frame": 270,
+      "before_frame": 267,
+      "after_frame": 274,
+      "changed_pixel_ratio": 0.060516010802469135
+    },
+    "c1_s2_b1": {
+      "action": "reveal",
+      "target_id": "bar:1",
+      "beat_frame": 391,
+      "before_frame": 388,
+      "after_frame": 395,
+      "changed_pixel_ratio": 0.015015914351851851
+    },
+    "c2_s1_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 459,
+      "before_frame": 456,
+      "after_frame": 463,
+      "changed_pixel_ratio": 0.054801311728395065
+    },
+    "c2_s1_b1": {
+      "action": "reveal",
+      "target_id": "line:2",
+      "beat_frame": 536,
+      "before_frame": 533,
+      "after_frame": 540,
+      "changed_pixel_ratio": 0.004880401234567901
+    },
+    "c2_s1_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 594,
+      "before_frame": 591,
+      "after_frame": 598,
+      "changed_pixel_ratio": 0.007294560185185185
+    },
+    "c2_s1_b3": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 613,
+      "before_frame": 610,
+      "after_frame": 617,
+      "changed_pixel_ratio": 0.02341676311728395
+    },
+    "c2_s2_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 653,
+      "before_frame": 650,
+      "after_frame": 657,
+      "changed_pixel_ratio": 0.05224295910493827
+    },
+    "c2_s2_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 683,
+      "before_frame": 680,
+      "after_frame": 687,
+      "changed_pixel_ratio": 0.007882426697530864
+    },
+    "c2_s2_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 722,
+      "before_frame": 719,
+      "after_frame": 726,
+      "changed_pixel_ratio": 0.010474537037037037
+    },
+    "c3_src_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 839,
+      "before_frame": 836,
+      "after_frame": 843,
+      "changed_pixel_ratio": 0.052561246141975305
+    },
+    "c3_src_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 893,
+      "before_frame": 890,
+      "after_frame": 897,
+      "changed_pixel_ratio": 0.007755111882716049
+    },
+    "c3_src_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 954,
+      "before_frame": 951,
+      "after_frame": 958,
+      "changed_pixel_ratio": 0.009710165895061728
+    }
+  },
+  "scene_samples": [
+    {
+      "scene_id": "c1_s1",
+      "frame": 0,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+    },
+    {
+      "scene_id": "c1_s1",
+      "frame": 130,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+    },
+    {
+      "scene_id": "c1_s1",
+      "frame": 259,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-009.png"
+    },
+    {
+      "scene_id": "c1_s2",
+      "frame": 260,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-010.png"
+    },
+    {
+      "scene_id": "c1_s2",
+      "frame": 353,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-013.png"
+    },
+    {
+      "scene_id": "c1_s2",
+      "frame": 445,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-016.png"
+    },
+    {
+      "scene_id": "c2_s1",
+      "frame": 446,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-017.png"
+    },
+    {
+      "scene_id": "c2_s1",
+      "frame": 544,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-022.png"
+    },
+    {
+      "scene_id": "c2_s1",
+      "frame": 641,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-027.png"
+    },
+    {
+      "scene_id": "c2_s2",
+      "frame": 642,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-028.png"
+    },
+    {
+      "scene_id": "c2_s2",
+      "frame": 734,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-035.png"
+    },
+    {
+      "scene_id": "c2_s2",
+      "frame": 825,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-036.png"
+    },
+    {
+      "scene_id": "c3_src",
+      "frame": 826,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-037.png"
+    },
+    {
+      "scene_id": "c3_src",
+      "frame": 950,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-042.png"
+    },
+    {
+      "scene_id": "c3_src",
+      "frame": 1074,
+      "file": "g3/data/jobs/51dee4f2-04e7-498c-972c-e04972a7840f/attempts/1/g2-run/artifacts/keyframes/frame-045.png"
+    }
+  ],
+  "contact_sheet": "artifacts/contact-sheet.jpg",
+  "captions": {
+    "burned_in": true,
+    "srt": "artifacts/captions.srt",
+    "alignment": "phrase-level measured PCM activity"
+  },
+  "video_form": "information_motion",
+  "duration_mode": "content",
+  "information": {
+    "scene_count": 5,
+    "components": [
+      "bar_chart",
+      "big_number",
+      "concept_reveal",
+      "price_change",
+      "source_card"
+    ],
+    "timing": "measured phrases; estimated within-phrase cues",
+    "theme": "minimal_light"
+  },
+  "narration_text": {
+    "status": "PASS",
+    "chapters": 3,
+    "segments": 5,
+    "characters": 220,
+    "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+    "checked": [
+      "narration-plan",
+      "video-ir",
+      "captions.srt",
+      "chapter-titles"
+    ]
+  }
+}

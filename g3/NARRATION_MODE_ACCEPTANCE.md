@@ -69,3 +69,54 @@
   - **句间停顿**：模型自带的句首句尾静音每句在 0 到 0.4 秒之间随机，所以 `g2/pauses.py` 先把每段的两端裁到固定余量（前 30 毫秒、后 60 毫秒），再按内容排停顿：基础 360 毫秒；问句 +160；"；"后 −120；长句中间按逗号切开的地方 120；6 字以内的短引句 +100；32 字以上的长句 +80；下一句以"但是/所以/比如"之类连接词开头 −80；段间 660；章间 850；单次限制在 120–700 毫秒（段间、章间除外）。`g2/tests/test_pauses.py` 的 `GOLDEN` 表与 AREC `core/video/length.py` 的同名表逐项相同，两边一起改。
   - **第二次整片（C4 v10，同一稿，AutoVideo 任务 `bf5ba382-62db-4a3a-b621-209a89e723f3`）的配音实测**：390.03 秒、92 句；每章语速斜率接近 0（−0.077 到 +0.052 字/秒每句，原先 +0.04 到 +0.18），章间落差 −0.73 到 +0.71（原先 −0.95 到 −2.32）；句间停顿最小 240、中位 360、最大 850 毫秒，8 种取值；92 句里 27 句因语速偏离而改用参考音，重试种子 0 次，没有句子超出语速范围。纯说话 1683 字用 342.8 秒，4.909 字/秒；AREC 的估算按此校准为 4.91 字/秒加每句 0.52 秒（头尾余量 + 平均停顿），估算 391 秒对实测 390.03 秒。
   - **未验证**：没有语音识别，"两万"是否真读成 liǎng、多音字和 "Opus 5.5" 是否读对，只能靠人听；"和真人讲解还有差距"仍留待后续打磨。
+
+## 快讯版式：价格变化、来源卡、短视频大字号（2026-10-19）
+
+背景：B 站横屏 60–120 秒快讯，原来只有白底文字卡片，数字藏在小字里，没有来源，字在手机上太小。竖屏、背景音乐不在本次范围。
+
+做了什么：
+- **`price_change`（旧到新大数字）**：画面主角是「5 美元 → 4 美元」，每行有标签（输入价/输出价）、可选幅度标记（−20%）；顶部可有计量口径（每百万 token）；1–2 行，按旁白的 cue 依次出现（箭头、新值、幅度略晚于旧值）。模型只写数字和 `direction`，负号和箭头由渲染器画（模型写「−20%」会被技术文字检查拒绝）。数字必须出自旁白（`INFORMATION_NUMBERS`，「两成」读作 20），`direction` 与新旧值不一致会被拒绝（`INFORMATION_PROPS`）。
+- **来源卡（`source_card`）**：请求新增可选 `sources: [{title, url, date}]`（≤3 条，标题 ≤40 字、http(s) 网址、`YYYY-MM-DD`），契约见 `UPSTREAM_INTEGRATION.md`。卡片文字由请求在本地生成（模型不能规划），编译时必须与请求逐字一致（`INFORMATION_SOURCE_TEXT`）；这是屏上文字核对唯一的豁免，且是单向的：来源里的数字、术语不会进入其他场景的核对依据。场景必须逐段覆盖旁白，所以来源卡取片尾一句旁白的画面（规则见 `place_source_card`，放不下时不出卡并记入 `source-card.json`）。
+- **短视频字号**：讲稿全文 ≤ 560 字时 IR 带 `presentation.density: "large"`，所有信息动效文字放大到 1.3 倍（渲染器 `S()` 与 `information_motion.scaled()` 取整一致，`validate_text_fit` 按同尺寸检查，标题卡也新增了大字号下的容量检查）；字幕 38→44（长句 30→36）。
+- 冻结的 v0.2 注册表与 IR schema 文件未改；新组件登记在 `schemas/component-registry-extensions.json`，`presentation` 的 `density` 键在 `g1/video_ir.py` 里按代码扩展。
+
+离线测试：`python3 -m pytest g3/tests` 83 通过；`g0/.venv/bin/python -m pytest g4/tests g2/tests g1/tests` 259 通过（含新增：价格变化的数字、方向、cue、容量、大字号失败路径，来源卡逐字一致与四类篡改、单向豁免、放置规则，IR 对新组件与 `density` 的接受和拒绝，`sources` 的 12 种非法输入）；`tests/` 仅 `test_final_release.py::test_manifest_hashes_and_file_coverage` 失败（已知旧失败）；`g0/verify_design_snapshot.py` 通过。
+
+真实出片：样片为手写的 36 秒快讯（`flash_sample.json` 加两条示例来源，域名为 example.com/example.org），任务 `51dee4f2-04e7-498c-972c-e04972a7840f`（旧版式对照任务 `1487f345-…`）。结果：原话校验 PASS（3 章、5 句、220 字，配音/字幕/章节标题逐字还原）；媒体 QA PASS（1920×1080、30fps、1075 帧、35.84 秒，音视频完整解码，TTS 相关 0.99995）；5 个场景：价格变化（输入价 5→4、输出价 25→20，各 −20%）、条形图（GPT-6 Sol 的 2 与 10 美元）、大数字（20%）、要点卡（输入价/输出价「只有 Opus 5.5 的一半」）、来源卡（两条来源，标题、域名、日期）；3 次模型调用，无重试。接触表确认：价格变化是画面主角，数字和幅度很大；来源卡出现在片尾并替换了最后一个文字场景（那一句旁白保留字幕）；字号可读。证据在 `g3/acceptance/narration-mode-20261017/flash-layouts/`（接触表、`source-card.json`、`qa.json`、`narration-check.json`、`information-plan.json`、三张静帧）。
+
+已知限制与未验证：
+- 修订任务不继承 `sources`，来源卡场景不能重排或编辑。
+- 来源卡占用片尾一句旁白的画面；最后一个场景是数据类单句场景时，改从前面能让出一句的场景取，都不行则不出卡。
+- 只出了一条真实样片；两行标签（≥7 字）在大字号下会排不下而被规划器重试，没有统计过它的频率。大字号对更长（>560 字）视频不生效。手机上的实际观感没有人看过，只按像素尺寸判断（正文最小约 36–44 px，数字 128–220 px）。
+- AREC 一侧发送 `sources` 的改动不在这里。未提交。
+
+## 包装套件：片头、片尾（PACKAGE 阶段，2026-10-19）
+
+背景：B 站横屏短视频要有栏目片头（stinger）和片尾（end_card）。非内容部分不进 Video IR（冻结 v0.2 要求每个场景至少一个旁白段；音频 QA 要求配音相关系数 ≥ 0.98），而是内容视频渲染并通过原有媒体 QA 之后的独立 `PACKAGE` 阶段。契约见 `UPSTREAM_INTEGRATION.md`「包装套件」。
+
+做了什么：
+- **请求字段 `package`**（可选）：`{accent, intro?, outro?}`，模板只认 `stinger`/`end_card`，`seconds` 0.5–5，`title` ≤ 12 字，`subtitle` ≤ 24，`lines` ≤ 3 行每行 ≤ 30，`sound` 必须是套件里存在的名字，多余字段 422。校验在 `g2/package_kit/__init__.py`（仅标准库），API 和出片进程用同一份。没有 `package` 时请求、产物、行为都与以前一样，`PACKAGE` 阶段为「已跳过」。
+- **`g2/package_stage.py`**：`run_g2.py` 在各模式（新建、场景重生成、各类修订）尾部统一调用，位置在原有 QA 之后、最终清单之前，因此清单覆盖打包文件、后续修订的完整性校验不受影响。片头片尾用 Pillow 逐帧绘制固定版式（文字只来自请求，过长只缩字号），ffmpeg 编码，再用 concat 滤镜（重编码，避免 AAC 起止填充造成偏差）接成一个 MP4。内容视频保留为 `content.mp4`，原话校验、内容 QA 不动。
+- **提示音套件 `g2/package_kit/`**：`kit.json`（name、source、license、author、sample_rate、sha256）、`sounds/synth_sting.wav`、确定性合成脚本 `synth_sounds.py`（标准库，重复运行哈希一致）。换成用户自己的音乐文件只需换文件并更新 `kit.json`；打包时校验 sha256。**WAV 是随仓库提交的小资产（96 KB）**，AGENTS.md 说二进制不入库，这里属有意例外，且可由脚本重新生成并有测试核对哈希。
+- **响度**：提示音按内容视频实际播放的人声有效电平（不是配音 WAV：实测内容混音比 WAV 低约 3 dB）降低 6 dB 混入，裁短、淡出；检查要求至少低 3 dB 且峰值 ≤ 0.99。
+- **时间线**：`video.mp4`、`captions.srt`、`chapters.json` 对应打包成片（已加片头偏移）；内容时间线版本是 `content.mp4`、`content-captions.srt`、`content-chapters.json`。`package.json` 里的 `offset_ms` 是片头时长。场景预览改取 `content.mp4`。网页播放器的章节和场景跳转加上偏移，阶段列表新增「加片头片尾」。
+- **重试与修订**：重试读同一份 `input.json`；讲稿/原稿/画面/声音与速度修订和场景重生成都继承父任务的 `package`（和 `sources` 相反）。
+
+打包后的检查与错误码：完整解码（`PACKAGE_DECODE_FAILED`）；帧数 = 片头 + 内容 + 片尾，时长误差 ≤ 1 帧（`PACKAGE_DURATION_MISMATCH`）；尺寸/帧率/采样率/声道与内容视频一致且逐帧无中途变化（`PACKAGE_FORMAT_MISMATCH`）；内容部分按片头长度错开后相关系数 ≥ 0.98（`PACKAGE_AUDIO_MISMATCH`）；接缝处提示音响度（`PACKAGE_SEAM_LOUDNESS`）。另有 `PACKAGE_CONFIG_INVALID`、`PACKAGE_CONTENT_MISSING`、`PACKAGE_RENDER_FAILED`、`PACKAGE_COMMAND_FAILED`；请求了打包但没有通过的检查报告时，worker 以 `PACKAGE_UNVERIFIED` 失败，不发布。
+
+离线测试：`python3 -m pytest g3/tests` 106 通过（新增 23 项：校验拒绝、不带 package 时输入/阶段/产物不变、worker 成功/失败码/缺报告、重试、三种修订、场景重生成继承）；`g0/.venv/bin/python -m pytest g4/tests g2/tests g1/tests` 295 通过（新增 `g2/tests/test_package_stage.py` 36 项：用 lavfi 合成的真实 MP4 覆盖打包成功、时间线偏移、仅片头无声、错位 10 帧的相关系数失败、时长不符、采样率/声道不符、损坏文件解码失败、提示音比人声响的响度失败、提示音哈希被改/缺失、全部请求校验与确定性合成）；`tests/` 22 通过，唯一失败是已知的 `test_manifest_hashes_and_file_coverage`。
+
+真实出片（AREC 样片 `flash_sample.json`，36 秒快讯，加 `package`：片头「快讯 · 2026-10-16」1.5 秒、片尾「快讯 / 来源见简介」3 秒、主色 #1f7a4d、`synth_sting`；本地独立实例，数据目录 `g3/data/package-acceptance`，一次 DeepSeek 规划调用加本地 VoxCPM2 配音）：
+- 任务 `b2d26702-e86a-4fba-9597-0618eca7a64c`：内容视频 35.84 秒（1075 帧）原话校验 PASS（3 章、5 句、220 字）、内容 QA PASS（配音相关系数 0.99995）；打包成片 **40.333 秒 / 1210 帧 = 45 + 1075 + 90**，完整解码 PASS，1920×1080 / 30 fps / 48 kHz 立体声逐帧一致，错开 45 帧（36000 采样）后内容音轨相关系数 **0.99984**，人声 −22.75 dBFS，提示音片头 −27.67 / 片尾 −27.66 dBFS（比人声低 4.9 dB，峰值 0.155）。阶段 PACKAGE 8.98 秒。字幕第一句从 00:00:01,750 开始（内容时间线 00:00:00,250）。
+- 修订任务 `448e4b25-79d2-4d28-aba4-e7b6a6bd7541`（对上面任务做 1.5 倍速的声音与速度修订，同一 `package` 自动继承）：内容 717 帧，打包 45 + 717 + 90 = 852 帧，相关系数 0.99989，提示音比人声低 4.9 dB；`chapters.json` 起点 1500 / 11400 / 19867 ms，对应内容时间线 0 / 9900 / 18367 ms（差正好是片头 1500 ms），字幕 00:00:00,167 → 00:00:01,667。同时验证了原任务的场景列表和场景预览（取自 `content.mp4`）在加入打包文件后仍通过完整性校验。
+- 证据在 `g3/acceptance/package-stage-20261019/`（`run1/`、`run2-speed1.5/`）：`video_packaged.mp4`、`content.mp4`、`package.json`、`package-qa.json`、接触表 `contact-sheet.jpg`（片头起/中/末、内容首末帧、片尾起/中/末）、内容接触表、`captions.srt`、`chapters.json`、`content-qa.json`、`narration-check.json`、`execution-log.txt`。
+
+已知限制与未验证：
+- 提示音是合成的三音上行铃音，听感没有人听过；响度只按 RMS 度量，没有 LUFS/真峰值标准；片头文字字体固定为 Hiragino Sans GB，字体缺字不会报错（按框绘制，不是模型文字）。
+- 内容视频在打包时会被 libx264（crf 16）再编码一次，画面有一次额外的有损压缩；相关系数检查没发现音频受影响。
+- 片头片尾版式只有一套（片头主色底白字、片尾浅底），没做封面、没有按栏目换版式；片头的日期由上游写进 `subtitle`，AutoVideo 不替换 `{date}`。
+- 网页上的偏移跳转和阶段显示只重新构建了前端，没有在浏览器里点过；背景音乐、竖屏、AREC 一侧打开 `package` 都不在本次范围。未提交、未推送。
+
+### 包装套件补充：角标 `badge`（2026-10-19）
+
+带 `package` 的任务，信息动效版式左上角的「AUTOVIDEO 知识讲解」改由套件提供：`package.badge`（可选，≤ 12 字）显示为「色点 + 文字」，颜色取 `package.accent`；没传 `badge` 只显示色点。没有 `package` 的任务不变。角标经渲染参数（`render-props.json` 的 `badge`）传入渲染器，不进 Video IR；旧版式和流程图解版式的左上角文字未改。验证：用已有真实任务的渲染参数各出一帧静帧（`badge: 快讯` 显示「快讯」，空 badge 只有色点），离线测试 g3 108、g4/g2/g1 300 通过。**没有重新出整条真实视频**（只验证了静帧），已有验收证据未改。

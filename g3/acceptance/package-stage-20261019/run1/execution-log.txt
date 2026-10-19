@@ -1,0 +1,14 @@
+G2 run job_b2d26702e86a4fba95970618eca7a64c_a1; model=deepseek-flash; provider=DeepSeek API
+NARRATION READY: information_motion -> information_motion; 3 chapters kept verbatim
+STEP prepare-input: PASS in 0.00s
+STEP narration-plan: PASS in 0.00s
+REAL TTS: 35.833s, 1075 frames, 5 measured phrase spans
+STEP tts-and-align: PASS in 42.59s
+STEP storyboard-plan: PASS in 43.08s
+STEP draw-things-backgrounds: SKIPPED (简洁信息动效采用浅色排版与卡片)
+STEP compile-ir: PASS in 0.04s
+STEP render: PASS in 79.90s
+MEDIA PASS: 35.840s, 1075 frames, AAC/TTS correlation=0.99995
+STEP verify-media: PASS in 2.18s
+STEP package: PASS in 8.98s
+G2 PASS

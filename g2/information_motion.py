@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from jsonschema import Draft202012Validator
 from PIL import ImageFont
@@ -12,7 +14,28 @@ from g2.technical_text import altered_technical_text, display_width, wrap_units
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "g2/schemas/information-motion-plan.schema.json"
-COMPONENTS = ("title_card", "concept_reveal", "comparison", "big_number", "bar_chart")
+COMPONENTS = ("title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change")
+# source_card is not in the planner's catalog: the model never writes it. place_source_card() adds it from the request's sources.
+HIRAGINO = "/System/Library/Fonts/Hiragino Sans GB.ttc"
+
+#: A narration this short (about 60-120 s) is a quick news item watched on a phone: every text size is scaled up.
+#: The renderer reads the same decision from presentation.density, so text fit and drawing agree.
+LARGE_TEXT_MAX_CHARS = 560
+LARGE_TEXT_SCALE = 1.3
+
+
+def short_form(narration: dict) -> bool:
+    return sum(len(segment["text"]) for segment in narration["segments"]) <= LARGE_TEXT_MAX_CHARS
+
+
+def scaled(size: int, large: bool) -> int:
+    """Same rounding as the renderer's Math.round(size * 1.3)."""
+    return int(size * LARGE_TEXT_SCALE + 0.5) if large else size
+
+
+@lru_cache(maxsize=None)
+def _font(size: int):
+    return ImageFont.truetype(HIRAGINO, size)
 
 
 class InformationFault(ValueError):
@@ -44,12 +67,14 @@ def targets(component: str, props: dict) -> list[str]:
         return ["title", "line:0", "line:1", *(["line:2"] if props.get("note") else [])]  # value, label, note
     if component == "bar_chart":
         return [f"bar:{i}" for i in range(len(props["categories"]))]
+    if component == "price_change":
+        return ["title", *[f"line:{i}" for i in range(len(props["rows"]))]]
     return ["side:left", "side:right"]
 
 
 def text_lines(text: str, size: int, width: int) -> int:
     """Count wrapped lines as the renderer lays them out: technical tokens move to the next line whole."""
-    font = ImageFont.truetype("/System/Library/Fonts/Hiragino Sans GB.ttc", size)
+    font = _font(size)
     count, line = 1, ""
     for unit in wrap_units(text):
         for piece in [unit] if display_width(font, unit) <= width else list(unit):
@@ -70,6 +95,9 @@ def visible_text(scene: dict) -> list[str]:
     props = scene["props"]
     if scene["component"] == "big_number":
         return [scene["headline"], props["title"], props["value"], props["label"], props.get("note") or ""]
+    if scene["component"] == "price_change":
+        return [scene["headline"], props["title"], props.get("unit") or "",
+                *[text for row in props["rows"] for text in (row["label"], row["before"], row["after"], row.get("change") or "")]]
     if scene["component"] == "bar_chart":
         return [scene["headline"], *props["categories"], *[bar_value_text(props, i) for i in range(len(props["categories"]))]]
     if scene["component"] == "comparison":
@@ -77,18 +105,64 @@ def visible_text(scene: dict) -> list[str]:
     return [scene["headline"], props["title"], props.get("subtitle") or "", *props.get("lines", [])]
 
 
-def validate_text_fit(scene: dict) -> None:
-    """Check the actual fixed panel capacity; overflow should become another scene."""
+#: Geometry shared with g1/renderer/src/Root.tsx (price_change): label column, gap, number sizes.
+PRICE_LABEL_W, PRICE_GAP, PRICE_INNER_W = 400, 36, 1528
+PRICE_SIDE = .42  # prefix and unit ("美元", "$") are drawn at this fraction of the number's size
+
+
+def price_size(rows: int) -> int:
+    return 180 if rows == 1 else 128
+
+
+def split_value(text: str) -> tuple[str, str, str]:
+    """('$', '5', ' 美元'): the digits are drawn large, what surrounds them small."""
+    match = re.match(r"^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$", text)
+    return (match[1], match[2], match[3]) if match else ("", text, "")
+
+
+def value_width(text: str, size: int) -> float:
+    prefix, number, suffix = split_value(text)
+    side = int(size * PRICE_SIDE)
+    return sum(display_width(_font(use), part) for part, use in ((prefix, side), (number, size), (suffix, side)) if part)
+
+
+def change_text(row: dict) -> str:
+    """The badge as drawn: the sign comes from direction, so the model never writes a minus sign."""
+    return ("−" if row["direction"] == "down" else "+") + row["change"]
+
+
+def price_badge_size(large: bool) -> int:
+    return scaled(52, large)
+
+
+def _fit_fault(scene: dict, message: str) -> InformationFault:
+    return InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: {message}")
+
+
+def validate_text_fit(scene: dict, large: bool = False) -> None:
+    """Check the actual fixed panel capacity; overflow should become another scene.
+
+    large is the short-form scale: every text size below goes through S(), as in the renderer.
+    """
+    S = lambda size: scaled(size, large)
     component, props = scene["component"], scene["props"]
-    if component == "concept_reveal":
+    if component == "title_card" and large:
+        title_size = S(66) if len(props["title"]) > 20 else S(83)
+        sub_size = S(36) if len(props.get("subtitle", "")) > 65 else S(42)
+        height = text_lines(props["title"], title_size, 1450) * title_size * 1.35 + 43
+        if props.get("subtitle"):
+            height += 40 + text_lines(props["subtitle"], sub_size, 1380) * sub_size * 1.65
+        if height > 600:
+            raise _fit_fault(scene, "title_card text exceeds its area at the large size; shorten the title or subtitle")
+    elif component == "concept_reveal":
         count = len(props["lines"])
         compact = count == 4
         width = (1640 - 28 * ((2 if compact else count) - 1)) / (2 if compact else count)
         for line in props["lines"]:
             match = re.match(r"^([^：:]{1,16})[：:]\s*([\s\S]+)$", line)
             label, body = (match[1], match[2]) if match else (line, "")
-            label_size = 36 if compact or len(label) > 10 else 42
-            body_size = 28 if compact else 30 if count == 3 else 34
+            label_size = S(36 if compact or len(label) > 10 else 42)
+            body_size = S(28 if compact else 30 if count == 3 else 34)
             text_width = int(width - (68 if compact else 72))
             height = (50 if compact else 68) + 31 + (10 if compact else 29)
             height += text_lines(label, label_size, text_width) * label_size * 1.4
@@ -100,23 +174,52 @@ def validate_text_fit(scene: dict) -> None:
         size = 220 if len(props["value"]) <= 6 else 180 if len(props["value"]) <= 9 else 140
         if text_lines(props["value"], size, 1496) > 1:
             raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: big_number value must fit on one line; write only the number and its unit")
-        label_lines = text_lines(props["label"], 46, 1496)
-        note_lines = text_lines(props["note"], 32, 1496) if props.get("note") else 0
-        height = size * 1.1 + 24 + label_lines * 46 * 1.35 + (20 + note_lines * 32 * 1.5 if note_lines else 0)
+        label_lines = text_lines(props["label"], S(46), 1496)
+        note_lines = text_lines(props["note"], S(32), 1496) if props.get("note") else 0
+        height = size * 1.1 + 24 + label_lines * S(46) * 1.35 + (20 + note_lines * S(32) * 1.5 if note_lines else 0)
         if label_lines > 2 or note_lines > 2 or height > 440:
             raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: big_number label or note is too long for its panel; shorten it")
+    elif component == "price_change":
+        rows = props["rows"]
+        size, label_size, badge = price_size(len(rows)), S(46), price_badge_size(large)
+        unit_size = S(36)
+        height = (unit_size * 1.4 + 20 if props.get("unit") else 0) + 34 * (len(rows) - 1)
+        for row in rows:
+            lines = text_lines(row["label"], label_size, PRICE_LABEL_W)
+            if lines > 2:
+                raise _fit_fault(scene, f"price_change label {row['label']!r} wraps onto more than two lines; shorten it")
+            room = PRICE_INNER_W - PRICE_LABEL_W - PRICE_GAP
+            if row.get("change"):
+                room -= display_width(_font(badge), change_text(row)) + 52 + PRICE_GAP
+            used = value_width(row["before"], size) + value_width(row["after"], size) + size * .62 + size * .36
+            if used > room:
+                raise _fit_fault(scene, f"price_change numbers {row['before']!r} -> {row['after']!r} are too wide for the row; write only the number and its unit")
+            height += max(size * 1.1, lines * label_size * 1.35)
+        if height > 440:
+            raise _fit_fault(scene, "price_change rows do not fit their panel; use fewer rows or shorter labels")
+    elif component == "source_card":
+        height = 26 * (len(props["sources"]) - 1)
+        for source in props["sources"]:
+            date_w = display_width(_font(S(30)), source["date"])
+            lines = text_lines(source["title"], S(34), int(PRICE_INNER_W - date_w - 40))
+            if lines > 2 or display_width(_font(S(28)), source["domain"]) > PRICE_INNER_W:
+                raise InformationFault("INFORMATION_SOURCE_CARD", f"来源标题或域名过长，无法在来源卡上排下：{source['title']!r}；请缩短 sources 里的标题")
+            height += lines * S(34) * 1.3 + S(28) * 1.5
+        if height > 440:
+            raise InformationFault("INFORMATION_SOURCE_CARD", "来源太多或标题太长，来源卡排不下；请减少 sources 或缩短标题")
     elif component == "bar_chart":
         count = len(props["categories"])
         if not 2 <= count <= 6:
             raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: a bar_chart takes 2 to 6 bars; split a longer comparison into scenes")
-        size = 30 if count > 4 else 34
-        font = ImageFont.truetype("/System/Library/Fonts/Hiragino Sans GB.ttc", 32 if count > 4 else 38)
+        size = S(30 if count > 4 else 34)
+        font = _font(S(32 if count > 4 else 38))
+        label_w, value_w = (440, 360) if large else (360, 290)
         rows = []
         for index, category in enumerate(props["categories"]):
-            lines = text_lines(category, size, 360)
+            lines = text_lines(category, size, label_w)
             if lines > 2:
                 raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: bar label {category!r} wraps onto more than two lines; shorten it")
-            if display_width(font, bar_value_text(props, index)) > 290:
+            if display_width(font, bar_value_text(props, index)) > value_w:
                 raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: the value label {bar_value_text(props, index)!r} is too wide; use a shorter unit")
             rows.append(max(44 if count > 4 else 58, lines * size * 1.3))
         if sum(rows) + (22 if count > 4 else 34) * (count - 1) > 420:
@@ -124,8 +227,8 @@ def validate_text_fit(scene: dict) -> None:
     elif component == "comparison":
         for side in ("left", "right"):
             data = props[side]
-            size = 30 if len("".join(data["items"])) > 130 else 34
-            label_size = 34 if len(data["label"]) > 20 else 42
+            size = S(30 if len("".join(data["items"])) > 130 else 34)
+            label_size = S(34 if len(data["label"]) > 20 else 42)
             height = 68 + text_lines(data["label"], label_size, 718) * label_size * 1.4 + 30
             height += sum(text_lines(item, size, 685) * size * 1.5 for item in data["items"]) + 20 * (len(data["items"])-1)
             if height > 500:
@@ -139,6 +242,9 @@ VERBATIM_RULES = """
 3. 旁白里的关键数字（价格、倍数、百分比、时长、次数）要上屏，并带着它的对象和单位，例如「基础版：每月 10 美元」，不要只写「基础版」。对比卡的两侧要各自写出旁白里对应的数字。
 4. 对比卡左右必须是旁白里明确对照的两件事，不要把一边的问题写进另一边的卡片。
 5. 画面上的数字只能来自旁白，不要自己算出新数字。"""
+
+LARGE_TEXT_RULES = """
+这是手机上看的短视频，画面字号很大，每屏容量因此变小：标题、卡片文字、标签都要更短，一屏一个重点，宁可多分场景。"""
 
 _CJK = re.compile(r"[\u4e00-\u9fff]")
 _PUNCT = re.compile(r"[\s，。！？；：、,.!?;:“”\"'（）()「」『』《》\[\]\-—…·]")
@@ -242,7 +348,7 @@ def fidelity_issues(plan: dict, context: dict) -> list[str]:
         key = numbers_in(own, scaled=False)
         if scene["component"] == "comparison":
             need = key[:4]
-        elif scene["component"] in ("concept_reveal", "big_number", "bar_chart") and len(key) >= 3:
+        elif scene["component"] in ("concept_reveal", "big_number", "bar_chart", "price_change") and len(key) >= 3:
             need = key[:(len(key) + 1) // 2]
         else:
             need = []  # a title card is short; it only must not invent numbers
@@ -267,6 +373,7 @@ title_card 用于开场或结论。title 是短标题，subtitle 补充一条信
 concept_reveal 用于1–4个并列要点。每条 lines 用“短标题：一句解释”的格式，标题尽量2–10字，解释简短具体；根据内容分屏，避免拥挤。
 comparison 用于来源支持的两个状态/说法/方法的对比。left/right 各有 label 和 items，items 简洁；不要杜撰优劣或对立关系。不输出 highlights。
 big_number 用于旁白明确强调的一个关键数字：title 是本屏标题，与 headline 完全一致；value 是数字加单位，如「25 倍」「10 美元」，必须出自旁白，只写数字和单位；label 说明它是什么的数字；note 可选，写它的前提或口径。次要的数字不要做成大数字；一章里最多用两三次，只用于旁白点明为关键结论的数字（如「相差 25 倍」「便宜了九成」），普通的价格和次数写进卡片或条形图。value、label、note 的出现位置按旁白里说到它们的先后，不必按这个顺序排。
+price_change 用于旁白说「某个价格/数值从旧值变成新值」：title 与 headline 完全一致；unit 写计量口径（如「每百万 token」，旁白有才写）；rows 为 1–2 行，每行 label（如「输入价」，≤10 字）、before（旧值，数字加单位，写法同旁白，如「5 美元」）、after（新值）；旁白说了幅度（如「降两成」「涨一倍」）才写 change（只写数字和百分号，如「20%」，不要写正负号或箭头）并给 direction（down 或 up）。before/after/change 的数字必须出自旁白。cues 为 title、line:0、可选 line:1（每行随旁白说到它时出现）。有旧→新价格变化时优先用 price_change，不要用大数字或文字卡片。
 bar_chart 用于旁白里 2–6 个同单位的数字并列比较：categories 是各项名称，values 是旁白里的数字，原样写，不换算、不估算；unit 是单位，baseline_zero 必须是 true。单位或口径不同的数字不要放进同一张图。图的标题写在 headline，不放 props.title。
 旁白里有成组的并列数字时优先用 bar_chart，强调单个关键数字时用 big_number，不要把它们写成文字卡片。
 headline 是本屏清晰的观众可见标题；title_card/concept_reveal 的 props.title 必须与 headline 完全一致。
@@ -277,6 +384,8 @@ cues 为每个可见元素指定首次出现的旁白位置；按旁白顺序排
 无法用本屏承载的内容可以新增场景，保持覆盖完整；画面文字应概括旁白，避免大段复读。"""
     if context.get("verbatim"):
         system += VERBATIM_RULES
+    if context.get("large_text"):
+        system += LARGE_TEXT_RULES
     catalog = {name: json.loads((ROOT / f"schemas/components/{name}.schema.json").read_text()) for name in COMPONENTS}
     payload = {"source_text_as_untrusted_data": context["source_text"],
                "narration_plan": narration_brief(context["narration_plan"]), "component_props_schemas": catalog,
@@ -309,12 +418,26 @@ def validate_plan(plan: dict, context: dict) -> None:
             raise InformationFault("INFORMATION_PROPS", errors[0].message)
         if component == "bar_chart" and len(props["categories"]) != len(props["values"]):
             raise InformationFault("INFORMATION_PROPS", f"{scene['id']}: bar_chart needs one value per category")
-        validate_text_fit(scene)
+        validate_text_fit(scene, bool(context.get("large_text")))
         if component not in ("comparison", "bar_chart") and props["title"] != scene["headline"]:
             raise InformationFault("INFORMATION_HEADLINE", scene["id"])
-        if component in ("big_number", "bar_chart"):
+        if component == "price_change":
+            for row in props["rows"]:
+                # The model writes the number and its direction; the renderer draws the arrow and the sign.
+                if row.get("change") and not (row.get("direction") and numbers_in(row["change"])):
+                    raise InformationFault("INFORMATION_PROPS", f"{scene['id']}: a price_change row's change needs a number and a direction")
+                first = [re.search(r"\d[\d,]*(?:\.\d+)?", row[key]) for key in ("before", "after")]
+                if row.get("direction") and all(first) and not any(re.search(r"[万亿]", row[key]) for key in ("before", "after")):
+                    old, new = (float(m[0].replace(",", "")) for m in first)
+                    if old == new or (new < old) != (row["direction"] == "down"):
+                        raise InformationFault("INFORMATION_PROPS",
+                            f"{scene['id']}: {row['label']} 从 {row['before']} 到 {row['after']} 与 direction={row.get('direction')} 不符；before 是旧值，after 是新值")
+        if component in ("big_number", "bar_chart", "price_change"):
             known = set(numbers_in(reference))
-            shown = props["values"] if component == "bar_chart" else numbers_in(props["value"])
+            if component == "price_change":
+                shown = [n for row in props["rows"] for key in ("before", "after", "change") for n in numbers_in(row.get(key) or "")]
+            else:
+                shown = props["values"] if component == "bar_chart" else numbers_in(props["value"])
             unknown = [_plain(float(n)) for n in shown if _plain(float(n)) not in known]
             if unknown:
                 raise InformationFault("INFORMATION_NUMBERS",
@@ -365,6 +488,87 @@ def validate_plan(plan: dict, context: dict) -> None:
                 f"该段旁白开头为 {texts[scene['narration_segment_ids'][0]][:32]!r}，请从段首逐字复制")
 
 
+def source_domain(url: str) -> str:
+    host = (urlsplit(url).hostname or "").lower()
+    return host[4:] if host.startswith("www.") else host
+
+
+def build_source_card(sources: list[dict]) -> dict:
+    """Source card props, derived only from the request's sources (title, domain of the url, date)."""
+    props = {"title": "来源", "sources": [{"title": s["title"], "domain": source_domain(s["url"]), "date": s["date"]} for s in sources]}
+    schema = json.loads((ROOT / "schemas/components/source_card.schema.json").read_text())
+    errors = list(Draft202012Validator(schema).iter_errors(props))
+    if errors or any(not item["domain"] for item in props["sources"]):
+        raise InformationFault("INFORMATION_SOURCE_CARD", f"sources 无法生成来源卡：{errors[0].message if errors else 'url 没有域名'}")
+    validate_text_fit({"id": "source_card", "component": "source_card", "props": props}, True)
+    return props
+
+
+def check_source_card(props: dict, sources: list[dict]) -> None:
+    """The one place where on-screen text is not tied to the narration.
+
+    A source card shows data the request supplied (title, domain, date), which the narration never says, so the
+    narration-grounding checks (numbers, technical tokens, cues) do not apply to it. The exemption is narrow:
+    the card must equal what build_source_card() derives from the request, character for character. Nothing the
+    card shows is added to the reference text, so a source title never makes a number or token on another
+    scene acceptable.
+    """
+    if props != build_source_card(sources):
+        raise InformationFault("INFORMATION_SOURCE_TEXT", "来源卡的文字必须逐字来自请求里的 sources（标题、域名、日期），不能自行增改")
+
+
+def load_sources(pipeline) -> list[dict]:
+    path = getattr(pipeline, "PROJECT_INPUT", None)
+    path = path.parent / "input.json" if path else None
+    return (json.loads(path.read_text(encoding="utf-8")).get("sources") or []) if path and path.is_file() else []
+
+
+TEXT_SCENES = ("title_card", "concept_reveal", "comparison")
+
+
+def place_source_card(scenes: list[dict], last_chapter_ids: list[str], texts: dict[str, str], props: dict) -> tuple[list[dict], dict]:
+    """Add the source card at the end of the final chapter, on a narration segment of its own.
+
+    Scenes must cover the narration once, in order, so the card cannot be an extra scene: it takes the final
+    segment of the last scene when that scene has another segment and no cue on it; otherwise it replaces a
+    final text scene that has only that segment; otherwise it takes the last segment of an earlier scene of
+    the chapter that can spare one. Data scenes (numbers, charts) are never replaced. Returns the scenes and a
+    report that says where the card went, or why it did not.
+    """
+    ids = set(last_chapter_ids)
+    cued = lambda scene, sid: any(cue["segment_id"] == sid for cue in scene["cues"])
+    last = len(scenes) - 1
+    if last < 0 or not set(scenes[last]["narration_segment_ids"]) <= ids:
+        return scenes, {"placed": False, "reason": "no scene in the final chapter"}
+    def card(donor: dict, sid: str) -> dict:
+        text, n = texts[sid], len(props["sources"])
+        cues = [{"target_id": "title", "segment_id": sid, "quote": text[:1]}]
+        for i in range(n):
+            cues.append({"target_id": f"line:{i}", "segment_id": sid, "quote": text[int(len(text) * (i + 1) / (n + 2)):][:1]})
+        return {"id": f"{donor['id'].rsplit('_', 1)[0]}_src" if "_" in donor["id"] else "src", "component": "source_card", "props": props,
+                "narration_segment_ids": [sid], "headline": props["title"], "source_quotes": [text], "cues": cues}
+    def donate(index: int) -> tuple[list[dict], dict] | None:
+        donor = scenes[index]
+        sid = donor["narration_segment_ids"][-1]
+        if len(donor["narration_segment_ids"]) < 2 or cued(donor, sid) or not set(donor["narration_segment_ids"]) <= ids:
+            return None
+        trimmed = {**donor, "narration_segment_ids": donor["narration_segment_ids"][:-1]}
+        return ([*scenes[:index], trimmed, card(donor, sid), *scenes[index + 1:]],
+                {"placed": True, "how": "took the last segment of a scene", "scene": donor["id"], "segment": sid})
+    if (result := donate(last)):
+        return result
+    only = scenes[last]
+    if len(only["narration_segment_ids"]) == 1 and only["component"] in TEXT_SCENES:
+        sid = only["narration_segment_ids"][0]
+        return ([*scenes[:last], card(only, sid)], {"placed": True, "how": "replaced the final text scene", "scene": only["id"], "segment": sid})
+    for index in range(last - 1, -1, -1):
+        if not set(scenes[index]["narration_segment_ids"]) <= ids:
+            break
+        if (result := donate(index)):
+            return result
+    return scenes, {"placed": False, "reason": "no final scene can spare a narration segment without losing a cue or a data scene"}
+
+
 def plan_storyboard(pipeline, source: str, narration: dict) -> dict:
     from g2.content_video import source_units, chapter_source
     units = source_units(source)
@@ -376,7 +580,7 @@ def plan_storyboard(pipeline, source: str, narration: dict) -> dict:
         local = {"title": chapter["title"], "core_message": narration["core_message"],
                  "segments": [s for s in narration["segments"] if s["id"] in ids]}
         context = {"source_text": chapter_source(chapter, units) if chapter["id"] else source, "narration_plan": local,
-                   **({"verbatim": True} if verbatim else {})}
+                   **({"verbatim": True} if verbatim else {}), **({"large_text": True} if short_form(narration) else {})}
         def check(value, ctx):
             try:
                 validate_plan(value, ctx)
@@ -387,6 +591,17 @@ def plan_storyboard(pipeline, source: str, narration: dict) -> dict:
         local_plan = pipeline.generate_validated_plan(stage, messages, SCHEMA, check, context, **soft)
         for scene in local_plan["scenes"]:
             scenes.append({**scene, "id": f"{chapter['id']}_{scene['id']}" if chapter["id"] else scene["id"]})
+    sources = load_sources(pipeline)
+    if sources:
+        try:
+            props = build_source_card(sources)
+        except InformationFault as exc:
+            raise pipeline.G2Fault(exc.code, exc.message) from exc
+        last_ids = chapters[-1]["narration_segment_ids"]
+        texts = {s["id"]: s["text"] for s in narration["segments"]}
+        scenes, report = place_source_card(scenes, last_ids, texts, props)
+        pipeline.write_json(pipeline.ARTIFACTS / "source-card.json", {**report, "sources": sources})
+        print(f"SOURCE CARD: {'placed on ' + report['segment'] if report['placed'] else 'skipped, ' + report['reason']}", flush=True)
     combined = {"scenes": scenes}
     pipeline.write_json(pipeline.ARTIFACTS / "information-plan.json", combined)
     return combined
@@ -398,6 +613,11 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
     for scene in plan["scenes"]:
         beats = []
         order = list(rows)
+        if scene["component"] == "source_card":
+            try:
+                check_source_card(scene["props"], load_sources(pipeline))
+            except InformationFault as exc:
+                raise pipeline.G2Fault(exc.code, exc.message) from exc
         cues = scene["cues"]
         if scene["component"] == "big_number":  # validated in any order after the title; reveal in spoken order
             cues = sorted(cues, key=lambda c: (order.index(c["segment_id"]), rows[c["segment_id"]]["text"].index(c["quote"])))
