@@ -523,3 +523,96 @@ def get_render_file(render_id: str, name: str, user=Depends(require_viewer)) -> 
         raise _not_found("文件")
     content_type = next((a.get("content_type") for a in render["artifacts"] if a.get("name") == name), None)
     return FileResponse(path, media_type=content_type, filename=name)
+
+
+# --- Unattended pipeline -------------------------------------------------------
+
+
+class AutopilotPick(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    column: str
+    count: int = Field(default=1, ge=1, le=10)
+    source: str = Field(default="flash", pattern="^(flash|opportunities)$")
+
+
+class AutopilotSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    picks: list[AutopilotPick] = Field(min_length=1, max_length=6)
+    refresh: bool = Field(default=True, description="Run today's flash discovery first when it is not there yet")
+
+
+class AutopilotRunIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    spec: Optional[AutopilotSpec] = None
+
+
+class AutopilotPlanIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=80)
+    expression: str = Field(description="Five-field cron in the host's timezone, e.g. '0 6 * * 1' for Mondays 06:00")
+    spec: Optional[AutopilotSpec] = None
+
+
+@router.get("/autopilot")
+def autopilot_overview(user=Depends(require_viewer)) -> dict:
+    """Weekly plans and recent batches, each item with where it stands."""
+    from core.video import autopilot_store
+
+    return {"plans": autopilot_store.list_plans(), "runs": autopilot_store.list_runs(limit=10)}
+
+
+@router.post("/autopilot/runs", status_code=202)
+def autopilot_start(body: Optional[AutopilotRunIn] = None, user=Depends(require_editor)) -> dict:
+    """Start one batch now (the default one: 3 flash + 2 one-point). Stops at a finished render; never publishes."""
+    from web.services import video_autopilot
+
+    spec = body.spec.model_dump() if body and body.spec else None
+    try:
+        run = video_autopilot.start_run(spec, started_by=user["username"])
+    except Exception as exc:  # noqa: BLE001 - an unknown cell
+        raise HTTPException(422, detail=ApiError.make("bad_spec", str(exc))) from exc
+    audit.log("video_autopilot_run", user=user["username"], target=run["id"], result="started")
+    return run
+
+
+@router.post("/autopilot/runs/{run_id}/cancel")
+def autopilot_cancel(run_id: str, user=Depends(require_editor)) -> dict:
+    """Stop advancing a batch. Work already running (a render) finishes on its own."""
+    from core.video import autopilot_store
+
+    run = autopilot_store.get_run(run_id)
+    if run is None:
+        raise _not_found("这个批次")
+    for item in run["items"]:
+        if item["state"] in ("PENDING", "WORKING"):
+            autopilot_store.update_item(item["id"], state="CANCELLED", note="已取消")
+    autopilot_store.update_run(run_id, status="CANCELLED")
+    audit.log("video_autopilot_cancel", user=user["username"], target=run_id, result="cancelled")
+    return autopilot_store.get_run(run_id)
+
+
+@router.post("/autopilot/plans", status_code=201)
+def autopilot_save_plan(body: AutopilotPlanIn, user=Depends(require_editor)) -> dict:
+    from web.services import video_autopilot
+
+    try:
+        plan = video_autopilot.save_plan(body.name, body.expression, body.spec.model_dump() if body.spec else None,
+                                         created_by=user["username"])
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("bad_schedule", str(exc))) from exc
+    audit.log("video_autopilot_plan", user=user["username"], target=plan["id"], result=body.expression)
+    return plan
+
+
+@router.delete("/autopilot/plans/{plan_id}")
+def autopilot_delete_plan(plan_id: str, user=Depends(require_editor)) -> dict:
+    from core.video import autopilot_store
+
+    if not autopilot_store.delete_plan(plan_id):
+        raise _not_found("这个计划")
+    audit.log("video_autopilot_plan_delete", user=user["username"], target=plan_id, result="deleted")
+    return {"deleted": plan_id}

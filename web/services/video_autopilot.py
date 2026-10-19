@@ -1,0 +1,323 @@
+"""The unattended pipeline: topics → script → audit → approve (gated) → render, resuming where it stopped.
+
+``tick()`` is idempotent. Each call reads the real state of every item's script and render and does
+the next thing that is missing, so a restart or a crash never repeats finished work:
+
+* no script yet → create it (its id is recorded before the work starts);
+* script FAILED or its audits cut off → resume it (research is reused, a saved draft is not rewritten);
+* draft with audits done → the gate: approve automatically, or hold the item for the user;
+* approved → one render (a render row with an AutoVideo job id is only polled, never resubmitted);
+* render completed → done. Nothing here publishes.
+
+The gate approves only when the fact audit found nothing serious, the length is within budget, the model audit
+really ran, and no rule marked "must" is left. What it let through (warnings, style findings) is recorded.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import threading
+import time
+import uuid
+from typing import Optional
+
+from core.fileio import file_lock
+from core.video import autopilot_store as ap
+from core.video import columns as video_columns
+from core.video import flash as video_flash
+from core.video import store
+from core.video import topics as video_topics
+from web.services import video_render, video_workflow
+from web.settings import get_settings
+
+logger = logging.getLogger("ai_research.web.video_autopilot")
+
+#: A stage that fails is retried this many times, then the item is held for the user.
+MAX_RETRIES = 2
+#: Scripts researching at once (each research uses search quota); renders go one at a time.
+MAX_SCRIPTS = 2
+MAX_RENDERS = 1
+#: Wait this long for a fresh discovery report before using the newest one there is.
+TOPICS_WAIT_SECONDS = 70 * 60
+
+DEFAULT_SPEC = {"picks": [{"column": "flash", "count": 3, "source": "flash"},
+                          {"column": "point_short", "count": 2, "source": "flash"}],
+                "refresh": True}
+
+
+# --- picking ---------------------------------------------------------------
+
+def pick_topics(spec: dict) -> list[dict]:
+    """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet."""
+    out_dir = get_settings().paths.output_dir
+    taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids()
+    items: list[dict] = []
+    for pick in spec.get("picks", []):
+        loader = video_flash.load if pick.get("source", "flash") == "flash" else video_topics.load
+        _, topics = loader(out_dir)
+        for topic in sorted(topics, key=lambda t: -(t.score or 0)):
+            if len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
+                break
+            if topic.id in taken:
+                continue
+            taken.add(topic.id)
+            items.append({"column_key": pick["column"], "topic": topic.as_dict(), "pick": pick})
+    for item in items:
+        del item["pick"]
+    return items
+
+
+def fresh_topics(spec: dict, run: dict) -> bool:
+    """True when the batch can start picking. A stale discovery report starts today's job once and waits for it."""
+    if not spec.get("refresh"):
+        return True
+    today = time.strftime("%Y-%m-%d")
+    out_dir = get_settings().paths.output_dir
+    if video_flash.latest_report(out_dir) == today:
+        return True
+    if time.time() - run["started_at"] > TOPICS_WAIT_SECONDS:
+        ap.update_run(run["id"], note="今天的快讯发现没有在限时内完成，用最新的一期")
+        return True
+    _start_discovery()
+    return False
+
+
+_discovery_lock = threading.Lock()
+
+
+def _start_discovery() -> None:
+    """Start the flash discovery job; the engine's own per-job lock keeps this from running twice."""
+    from web.runner.executor import start_job
+
+    settings = get_settings()
+    with _discovery_lock:
+        try:
+            start_job("ai_flash_discovery", "autopilot", config_dir=settings.paths.config_dir,
+                      jobs_dir=settings.paths.jobs_dir)
+        except Exception as exc:  # noqa: BLE001 - already running, or the job cannot start; the wait covers both
+            logger.info("flash discovery not started: %s", exc)
+
+
+# --- the gate --------------------------------------------------------------
+
+def gate(script: dict, column) -> dict:
+    """Whether the current version may be approved without the user, and what it let through."""
+    version = store.get_version(script["id"], script["current_version"])
+    checks = video_workflow.rule_checks(version, column)
+    summary = checks.get("summary") or {}
+    reasons = []
+    if not checks.get("model_ran"):
+        reasons.append("事实/风格审计没有真正跑完")
+    if summary.get("serious"):
+        reasons.append(f"事实审计有 {summary['serious']} 条严重问题")
+    if summary.get("rule_must"):
+        reasons.append(f"规则检查还有 {summary['rule_must']} 条必须改")
+    if (version.get("length_check") or {}).get("status") != "OK":
+        reasons.append("长度不在预算内")
+    ignored = {"must": max(0, int(summary.get("must", 0)) - int(summary.get("rule_must", 0))),
+               "warn": int(summary.get("warn", 0))}
+    return {"pass": not reasons, "reasons": reasons, "ignored": ignored, "version": version["version"]}
+
+
+# --- advancing one item ----------------------------------------------------
+
+def _retries(item: dict, key: str) -> int:
+    return int((item.get("retries") or {}).get(key, 0))
+
+
+def _bump(item: dict, key: str) -> dict:
+    retries = {**(item.get("retries") or {}), key: _retries(item, key) + 1}
+    ap.update_item(item["id"], retries=retries)
+    return {**item, "retries": retries}
+
+
+def _hold(item: dict, note: str) -> None:
+    ap.update_item(item["id"], state="HELD", note=note)
+
+
+def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> dict:
+    """Do the next missing thing for one item. Returns which kinds of work it newly started."""
+    took = {"script": False, "render": False}
+    if item["state"] in ("DONE", "FAILED", "HELD", "CANCELLED"):
+        return took
+    if not item["script_id"]:
+        if not can_start_script:
+            return took
+        script = store.create_script(item["column_key"], _prepare(item), created_by="autopilot")
+        ap.update_item(item["id"], script_id=script["id"], state="WORKING", note="已开始写稿")
+        video_workflow.spawn(script["id"], "autopilot")
+        took["script"] = True
+        return took
+    script = store.get_script(item["script_id"])
+    if script is None:
+        _fail(item, "文稿记录丢失")
+        return took
+    status = script["status"]
+    column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
+    if status in ("RESEARCHING", "WRITING"):
+        return took
+    if status == "FAILED":
+        if _retries(item, "script") >= MAX_RETRIES:
+            _hold(item, f"写稿失败 {MAX_RETRIES + 1} 次：{script.get('error')}")
+            return took
+        if not can_start_script:
+            return took
+        _bump(item, "script")
+        store.update_script(script["id"], status="RESEARCHING", error=None)
+        video_workflow.spawn(script["id"], "autopilot")
+        ap.update_item(item["id"], note="写稿失败，从断点继续")
+        took["script"] = True
+        return took
+    if status == "DRAFT":
+        if script.get("stage"):  # audits running
+            return took
+        verdict = gate(script, column)
+        if not verdict["pass"]:
+            if "事实/风格审计没有真正跑完" in verdict["reasons"] and _retries(item, "audit") < MAX_RETRIES and can_start_script:
+                _bump(item, "audit")
+                video_workflow.spawn(script["id"], "autopilot")  # current_version set → only the audits rerun
+                ap.update_item(item["id"], note="审计没有跑完，重跑审计")
+                took["script"] = True
+                return took
+            ap.update_item(item["id"], gate=verdict)
+            _hold(item, "闸门没通过：" + "；".join(verdict["reasons"]))
+            return took
+        store.update_script(script["id"], status="APPROVED", approved_version=verdict["version"])
+        ap.update_item(item["id"], gate={**verdict, "approved": "auto"}, note="已自动定稿，准备出片")
+        return took
+    if status == "APPROVED":
+        return _render_step(item, script, can_start_render, took)
+    return took
+
+
+def _prepare(item: dict) -> dict:
+    topic = dict(item["topic"])
+    column = video_columns.get(get_settings().paths.config_dir, item["column_key"])
+    fields = topic.setdefault("fields", {})
+    if column.audience and not (fields.get("目标受众") or "").strip():
+        fields["目标受众"] = column.audience
+    return topic
+
+
+def _fail(item: dict, note: str) -> dict:
+    ap.update_item(item["id"], state="FAILED", note=note)
+    return item
+
+
+def _render_step(item: dict, script: dict, can_start_render: bool, took: dict) -> dict:
+    renders = store.list_renders(script["id"])
+    current = [r for r in renders if r["version"] == script["approved_version"]]
+    active = [r for r in current if r["status"] in store.ACTIVE_RENDER_STATUSES]
+    done = [r for r in current if r["status"] == "COMPLETED"]
+    if done:
+        ap.update_item(item["id"], state="DONE", render_id=done[0]["id"], note="成片完成，等你看片和发布")
+        return took
+    if active:
+        ap.update_item(item["id"], render_id=active[0]["id"], note=f"出片中（{active[0]['status']}）")
+        video_render.start(active[0]["id"])  # no-op when this process already follows it
+        return took
+    failed = [r for r in current if r["status"] in ("FAILED", "CANCELLED")]
+    if len(failed) > MAX_RETRIES:
+        _hold(item, f"出片失败 {len(failed)} 次：{failed[0].get('error_message')}")
+        return took
+    if not can_start_render:
+        return took
+    try:
+        render = video_render.create(script)
+    except video_render.RenderError as exc:
+        _hold(item, f"不能出片：{exc}")
+        return took
+    video_render.start(render["id"])
+    ap.update_item(item["id"], render_id=render["id"], note="已提交出片")
+    took["render"] = True
+    return took
+
+
+# --- the tick --------------------------------------------------------------
+
+def tick() -> int:
+    """Fire due plans, then advance every running batch one step. Safe to call from any process, any time."""
+    try:
+        with file_lock(os.path.join(get_settings().paths.state_dir, "autopilot-tick"), timeout=0):
+            fire_due_plans()
+            return sum(_tick_run(run) for run in ap.list_runs(status="RUNNING"))
+    except TimeoutError:
+        return 0
+
+
+def _tick_run(run: dict) -> int:
+    spec = run["spec"]
+    if run["stage"] == "TOPICS":
+        if not fresh_topics(spec, run):
+            return 0
+        items = pick_topics(spec)
+        if not items:
+            ap.update_run(run["id"], status="DONE", note="没有可写的新选题")
+            return 0
+        _add_items(run["id"], items)
+        ap.update_run(run["id"], stage="ITEMS")
+        run = ap.get_run(run["id"])
+    scripts = renders = 0
+    for item in run["items"]:  # work already in flight, to respect the limits
+        if item["script_id"]:
+            s = store.get_script(item["script_id"])
+            scripts += bool(s and (s["status"] in ("RESEARCHING", "WRITING") or (s["status"] == "DRAFT" and s.get("stage"))))
+            renders += any(r["status"] in store.ACTIVE_RENDER_STATUSES for r in store.list_renders(item["script_id"]))
+    for item in run["items"]:
+        took = advance(item, can_start_script=scripts < MAX_SCRIPTS, can_start_render=renders < MAX_RENDERS)
+        scripts += took["script"]
+        renders += took["render"]
+    run = ap.get_run(run["id"])
+    if run["items"] and all(i["state"] in ("DONE", "FAILED", "HELD", "CANCELLED") for i in run["items"]):
+        ap.update_run(run["id"], status="DONE", note=_summary(run))
+    return 1
+
+
+def _add_items(run_id: str, items: list[dict]) -> None:
+    now = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    with store.connect(write=True) as conn:
+        for i, item in enumerate(items):
+            conn.execute("INSERT INTO autopilot_items (id, run_id, slot, column_key, topic, updated_at)"
+                         " VALUES (?, ?, ?, ?, ?, ?)",
+                         (uuid.uuid4().hex, run_id, i, item["column_key"], json.dumps(item["topic"], ensure_ascii=False), now))
+
+
+def _summary(run: dict) -> str:
+    counts: dict[str, int] = {}
+    for i in run["items"]:
+        counts[i["state"]] = counts.get(i["state"], 0) + 1
+    return "，".join(f"{k} {v}" for k, v in sorted(counts.items()))
+
+
+# --- plans -----------------------------------------------------------------
+
+def start_run(spec: Optional[dict] = None, *, plan_id: Optional[str] = None, started_by: str = "") -> dict:
+    """A batch from ``spec`` (the default one when none is given). Items are picked on the first tick."""
+    spec = spec or DEFAULT_SPEC
+    for pick in spec.get("picks", []):
+        video_columns.get(get_settings().paths.config_dir, pick["column"])  # unknown cell raises
+    return ap.create_run(spec, [], plan_id=plan_id, started_by=started_by)
+
+
+def save_plan(name: str, expression: str, spec: Optional[dict] = None, *, created_by: str = "") -> dict:
+    from core.schedule_store import slot
+    next_fire = slot(expression, time.time(), "local")
+    return ap.save_plan(name, expression, spec or DEFAULT_SPEC, next_fire=next_fire, created_by=created_by)
+
+
+def fire_due_plans(now: Optional[float] = None) -> int:
+    from core.schedule_store import slot
+    now = time.time() if now is None else now
+    fired = 0
+    for plan in ap.list_plans():
+        if not plan["enabled"] or plan["next_fire"] is None or plan["next_fire"] > now:
+            continue
+        # a missed slot (the host was off) fires once, late — but not if it is more than a day old
+        nxt = slot(plan["expression"], now, "local")
+        if ap.claim_plan(plan["id"], plan["next_fire"], nxt):
+            if now - plan["next_fire"] < 24 * 3600:
+                start_run(plan["spec"], plan_id=plan["id"], started_by="autopilot")
+                fired += 1
+    return fired

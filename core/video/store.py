@@ -176,6 +176,8 @@ def init_db() -> None:
         columns = {r[1] for r in conn.execute("PRAGMA table_info(scripts)")}
         if "stage" not in columns:
             conn.execute("ALTER TABLE scripts ADD COLUMN stage TEXT")
+        from core.video import autopilot_store
+        autopilot_store.init(conn)
 
 
 def _decode(row: sqlite3.Row | None, json_fields: tuple[str, ...]) -> dict | None:

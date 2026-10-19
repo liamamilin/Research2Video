@@ -149,6 +149,18 @@ async def lifespan(app: FastAPI):
 
     threading.Thread(target=sweep_video_work, name="video-recovery-sweep", daemon=True).start()
 
+    # The unattended pipeline: due weekly plans start a batch, running batches advance one step per tick.
+    from web.services import video_autopilot
+
+    def autopilot_loop() -> None:
+        while not sweep_stop.wait(30):
+            try:
+                video_autopilot.tick()
+            except Exception:  # noqa: BLE001 - one bad tick must not stop the loop
+                logger.exception("video autopilot tick failed")
+
+    threading.Thread(target=autopilot_loop, name="video-autopilot", daemon=True).start()
+
     logger.info("Web UI started")
     app.state.instance_id = uuid.uuid4().hex
     yield

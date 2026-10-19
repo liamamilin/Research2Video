@@ -106,12 +106,16 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     if column.audience and not (fields.get("目标受众") or "").strip():
         fields["目标受众"] = column.audience  # a topic that names no audience is for the cell's
     script = store.create_script(column.key, topic, created_by=started_by)
-    thread = threading.Thread(
-        target=run, args=(script["id"],), kwargs={"started_by": started_by},
-        name=f"video-script-{script['id'][:8]}", daemon=True,
-    )
-    thread.start()
+    spawn(script["id"], started_by)
     return script
+
+
+def spawn(script_id: str, started_by: str = "") -> None:
+    """Run (or resume) a script in a background thread."""
+    threading.Thread(
+        target=run, args=(script_id,), kwargs={"started_by": started_by},
+        name=f"video-script-{script_id[:8]}", daemon=True,
+    ).start()
 
 
 def run(script_id: str, *, started_by: str = "", llm_config: Optional[LLMConfig] = None) -> str:
@@ -145,7 +149,13 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
 
     # 1. Research: an ordinary job, unless the topic comes with a report already (a short video cut from a longer
     # one is written from that one's research, its sources and citation check).
-    report_path = topic.get("from_report") or ""
+    report_path = topic.get("from_report") or script["report_path"] or ""
+    if not report_path:
+        job_name = research_job_name(column.key, script_id)
+        # a restart cut this run off after its research finished: the job's own state remembers the report
+        done = (StateManager.get(job_name) or {}).get("last_output") or ""
+        if done and os.path.isfile(done if os.path.isabs(done) else os.path.join(workspace_dir(), done)):
+            report_path = done
     if not report_path:
         job_name = research_job_name(column.key, script_id)
         job_path = os.path.join(settings.paths.jobs_dir, f"{job_name}.yaml")
@@ -170,6 +180,13 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
         store.update_script(script_id, status="FAILED", error=f"读不到研究报告 {report_path}：{exc}")
         return "FAILED"
     citation_check = (report_meta.get(report_path) or {}).get("citation_check")
+
+    if script["current_version"] and column.writer != "adapt":
+        # 2b. Resume: the draft was saved and the audits after it were cut off — only the audits are left.
+        return _resume_audit(script_id, script, report, report_path, column)
+    if script["current_version"]:
+        store.update_script(script_id, status="DRAFT", stage=None, error=None)
+        return "DRAFT"
 
     # 2. Write.
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
@@ -218,6 +235,23 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     store.update_script(script_id, status="DRAFT", error=None, stage="事实审计")
     audit_meta = _audit_short(script_id, written, report, column, config, review_config, rule_issues)
     store.update_version_audit(script_id, version, sections=written.sections, meta={**meta, **audit_meta})
+    store.update_script(script_id, stage=None)
+    return "DRAFT"
+
+
+def _resume_audit(script_id: str, script: dict, report: str, report_path: str, column) -> str:
+    """Redo the fact and style audit of the current version, which a restart or a timeout left rule-only."""
+    from types import SimpleNamespace
+
+    config, review_config = _llm_configs(None)
+    version = store.get_version(script_id, script["current_version"])
+    rule_issues = adapt_review.rules(version["sections"], column=column, target_minutes=column.target_minutes)
+    store.update_script(script_id, status="DRAFT", error=None, stage="事实审计")
+    written = SimpleNamespace(sections=version["sections"], meta=version["meta"])
+    audit_meta = _audit_short(script_id, written, report, column, config, review_config, rule_issues)
+    meta = {k: v for k, v in version["meta"].items() if k not in ("checks", "problems", "audit_usage")}
+    store.update_version_audit(script_id, version["version"], sections=written.sections,
+                               meta={**meta, "report_path": report_path, **audit_meta})
     store.update_script(script_id, stage=None)
     return "DRAFT"
 
