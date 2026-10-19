@@ -75,7 +75,7 @@ def test_the_placeholders_the_research_prompt_fills_come_from_the_item():
     assert fields["核心角度"] == "Opus 5.5 输入价降到每百万 token 4 美元"
     assert fields["为什么有人在乎"] == "长任务的账单降两成。"
     assert fields["建议大纲"] == "重算一遍月度预算。"
-    assert fields["目标受众"] == "开发者"
+    assert "目标受众" not in fields  # the audience comes from the cell the script is made for
     assert fields["变化"].startswith("输入 $5 → $4")
 
 

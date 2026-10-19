@@ -25,8 +25,12 @@ STATUSES = ("enabled", "experimental", "blocked")
 DIMENSIONS = ("domain", "audience", "type", "format")
 _SLUG = re.compile(r"[a-z0-9][a-z0-9_-]*")
 #: what a type may say about one format, on top of the format's own settings
-_OVERRIDES = {"target_minutes", "video_form", "voice_id", "source_card", "package", "writer", "sections",
-              "paragraph_units"}
+_OVERRIDES = {"target_minutes", "voice_id", "source_card", "package", "writer", "sections", "paragraph_units"}
+#: what an audience fills into a type's text: ``{audience}`` inline, the others on a line of their own (an empty
+#: value removes the line, so an audience that has nothing to add leaves the text as it was)
+SLOTS = ("audience", "audience_impact", "audience_guidance", "audience_research")
+_SLOT_TEXT = {"audience": "label", "audience_impact": "impact", "audience_guidance": "guidance",
+              "audience_research": "research"}
 
 
 @dataclass(frozen=True)
@@ -51,6 +55,27 @@ def _mapping(data: dict, name: str) -> dict:
     return value
 
 
+def fill_slots(text, audience: dict, where: str):
+    """``text`` with the audience's words in the ``{audience...}`` slots; strings inside lists and mappings too."""
+    if isinstance(text, list):
+        return [fill_slots(item, audience, where) for item in text]
+    if isinstance(text, dict):
+        return {key: fill_slots(item, audience, where) for key, item in text.items()}
+    if not isinstance(text, str):
+        return text
+    for slot in SLOTS:
+        value = str(audience.get(_SLOT_TEXT[slot]) or "").strip("\n")
+        if slot != "audience":
+            text = re.sub(rf"^[ \t]*\{{{slot}\}}[ \t]*\n", (value + "\n") if value else "", text, flags=re.M)
+            text = re.sub(rf"\n[ \t]*\{{{slot}\}}[ \t]*$", ("\n" + value) if value else "", text)
+            if text.strip() == f"{{{slot}}}":
+                text = value
+        text = text.replace(f"{{{slot}}}", value)
+    if re.search(r"\{audience[a-z_]*\}", text):
+        raise columns.ColumnError(f"{where}：有不认识的受众插槽 {re.search(r'{audience[a-z_]*}', text).group(0)}")
+    return text
+
+
 def compose(cell_id: str, domain: dict, audience: dict, type_: dict, format_: dict, format_key: str) -> dict:
     """The flat column settings of one cell."""
     if format_key not in (type_.get("formats") or {}):
@@ -59,6 +84,15 @@ def compose(cell_id: str, domain: dict, audience: dict, type_: dict, format_: di
     unknown = set(override) - _OVERRIDES
     if unknown:
         raise columns.ColumnError(f"格子 {cell_id}：类型对形态的设置不认 {', '.join(sorted(unknown))}")
+
+    allowed_forms = list(type_.get("allowed_forms") or [])
+    if not allowed_forms:
+        raise columns.ColumnError(f"格子 {cell_id}：类型 {type_.get('name')} 没写 allowed_forms")
+    if format_.get("forms"):
+        allowed_forms = [f for f in allowed_forms if f in format_["forms"]]
+    default_form = type_.get("default_form")
+    if default_form not in allowed_forms:
+        raise columns.ColumnError(f"格子 {cell_id}：默认形式 {default_form} 不在类型和形态都允许的 {allowed_forms} 里")
 
     def pick(name: str, default=None):
         for source in (override, format_, type_, audience, domain):
@@ -80,21 +114,30 @@ def compose(cell_id: str, domain: dict, audience: dict, type_: dict, format_: di
             structure[name] = pick(name)
     raw = {
         "name": type_.get("name"),
-        "description": type_.get("description", ""),
+        "description": fill_slots(type_.get("description", ""), audience, cell_id),
         "target_minutes": pick("target_minutes", 6),
-        "video_form": pick("video_form", "auto"),
+        "video_form": default_form,
+        "allowed_forms": allowed_forms,
+        "audience": audience.get("label") or audience.get("name") or "",
         "research_timeout_seconds": type_.get("research_timeout_seconds", 3600),
         "writer": pick("writer", "legacy"),
         "voice_id": pick("voice_id", ""),
         "default_style": {"depth": audience.get("depth", "intermediate"), "tone": type_.get("default_tone", "explainer")},
         "allowed_tones": tones,
         "structure": structure,
-        "research_prompt": type_.get("research_prompt", ""),
-        "script_style": type_.get("script_style", ""),
+        "research_prompt": fill_slots(type_.get("research_prompt", ""), audience, cell_id),
+        "script_style": fill_slots(type_.get("script_style", ""), audience, cell_id),
     }
+    intent = {}
+    if type_.get("purpose"):
+        intent["purpose"] = type_["purpose"]
+    if audience.get("video_hint"):
+        intent["audience"] = audience["video_hint"]
+    if intent:
+        raw["creative_intent"] = intent
     for name in ("package", "source_card"):
         if pick(name) is not None:
-            raw[name] = pick(name)
+            raw[name] = fill_slots(pick(name), audience, cell_id) if name == "package" else pick(name)
     return raw
 
 

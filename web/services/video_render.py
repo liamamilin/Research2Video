@@ -157,19 +157,23 @@ def create(script: dict, *, voice_id: Optional[str] = None) -> dict:
     title = version["title"][:80]
     # Narration mode: the approved words are voiced verbatim; AutoVideo only
     # plans the visuals and fails the job rather than change a word.
+    form = script["topic"].get("video_form") or column.video_form
+    if form not in (column.allowed_forms or (column.video_form,)):
+        raise RenderError(f"这个栏目不能用视频形式 {form}")
     request: dict[str, Any] = {
         "input_mode": "narration",
         "chapters": chapter_list,
-        "video_form": column.video_form,
+        "video_form": form,
         "duration_mode": "content",
-        "creative_intent": {"purpose": "知识讲解", "focus": (script["topic"].get("fields") or {}).get("核心角度", "")[:300]},
+        "creative_intent": {**(column.creative_intent or {"purpose": "知识讲解"}),
+                            "focus": (script["topic"].get("fields") or {}).get("核心角度", "")[:300]},
     }
     if len(title) >= 2:
         request["title"] = title
     package = package_request(column, script["topic"])
     if package:
         request["package"] = package
-    if column.source_card:
+    if column.source_card and form in ("auto", "information_motion"):  # AutoVideo takes a source card only there
         cards = source_card_request(script, version)
         if cards:
             request["sources"] = cards

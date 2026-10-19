@@ -6,6 +6,8 @@
 # 格子的 key 是旧的栏目名（flash、point_short、deep_dive），保持旧文稿能用；不写 key 就用四个维度拼成的 id。
 # status：enabled 已有真实成片验证；experimental 只定义了、没出过片；blocked 不能用，要写 reason。
 # 类型下 formats 里没有的形态，这个类型不支持它。
+# 视频形式（画面怎么组织）挂在类型下：allowed_forms 是能用的，default_form 是默认的；形态的 forms 只做限制，取交集。
+# 受众的话填进类型文字里的插槽：{audience}（短称）写在行内，{audience_impact} 也在行内，{audience_guidance}、{audience_research} 单独占一行（受众没有就删掉这一行）。
 # 格子的组合结果必须和 tests/golden/video_cells.json 一致（有意的变更才重新生成）。
 # config/video_columns.yaml 仍可写单个栏目（老格式）。
 
@@ -16,21 +18,47 @@ domains:
 audiences:
   developer:
     name: 开发者
+    label: 开发者
     version: 1
     depth: intermediate
     tones: [news, concise, explainer, playful, story]
+    impact: 谁受影响、多花或少花多少、要改什么
+  non_tech:
+    name: 会用 AI 的非技术人员
+    label: 普通用户
+    version: 1
+    depth: intro
+    tones: [news, concise, explainer, playful, story]
+    impact: 谁受影响、每月多花或少花多少、要不要换工具或改设置
+    video_hint: 会用 ChatGPT、Claude 这类 AI 工具、但不写代码的人；画面少用术语，不出现命令和参数
+    guidance: |
+      读者会用 ChatGPT、Claude 这类 AI 工具，但不写代码，也不看技术文档。
+      - token、API、模型、上下文这类词第一次出现就用一句白话解释，或换成日常说法；不出现命令、参数、代码。
+      - 数字换算成他们能感觉到的量：每月多花多少钱、能多聊多久，不用「每百万 token」这类口径。
+      - 举例用写邮件、做表格、查资料、整理笔记这类日常场景。
+      - 动作只说去哪个设置里点什么、要不要换套餐，不写代码。
+    research: |
+      读者是不写代码的普通用户：优先官方帮助页、套餐和价格页、产品更新说明里用户能直接感受到的变化；少用基准测试、代码仓库和 API 文档作主要证据；技术细节只在影响用户时才写。
+video_forms:
+  information_motion:
+    name: 信息动效
+    fits: 一个变化、一组数字、几个并列要点；快讯、知识点、对比、盘点
+  process_diagram:
+    name: 流程图解
+    fits: 有先后步骤或因果链的内容；教程、机制讲解
+  auto:
+    name: 自动
+    fits: 让 AutoVideo 在信息动效和流程图解里选
 formats:
   short:
     name: B 站横屏短
     version: 1
-    video_form: information_motion
     voice_id: voxcpm_anchor
     target_minutes: 1.5
     source_card: true
   long:
     name: B 站横屏长
     version: 1
-    video_form: auto
     voice_id: voxcpm_anchor
     target_minutes: 6
 types:
@@ -39,6 +67,9 @@ types:
     version: 1
     description: 把一个值得讲清楚的问题讲透：先给结论，再按证据强弱展开，讲清反方和局限，最后给可执行的动作。
     research_timeout_seconds: 3600
+    purpose: 知识讲解
+    allowed_forms: [auto, information_motion, process_diagram]
+    default_form: auto
     default_tone: explainer
     allowed_tones: [concise, explainer, playful, story]
     required_roles: [钩子, 反方, 行动]
@@ -63,6 +94,7 @@ types:
       4. 给出反方证据或失败案例；确实找不到时写明「未找到反方证据」。
       5. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
       6. 数字（价格、版本号、日期、比例）照来源原样写，注明口径。
+      {audience_research}
 
       ## 输出结构
       ### 1. 直接回答
@@ -79,6 +111,7 @@ types:
       - 必须有一节讲反方、局限或还不确定的地方。
       - 结尾给观众 2–4 个本周就能做的具体动作。
       - 4–6 节，每节 2–5 段，每段 60–140 字，口语化，适合朗读。
+      {audience_guidance}
     formats:
       long:
         writer: adapt
@@ -87,8 +120,11 @@ types:
   quick_take:
     name: 快讯
     version: 1
-    description: 一个变化讲清楚：改了什么（旧到新）、对开发者意味着什么、现在该做什么。
+    description: 一个变化讲清楚：改了什么（旧到新）、对{audience}意味着什么、现在该做什么。
     research_timeout_seconds: 1500
+    purpose: 知识讲解
+    allowed_forms: [information_motion]
+    default_form: information_motion
     default_tone: news
     allowed_tones: [news, concise]
     required_roles: [钩子, 行动]
@@ -100,12 +136,12 @@ types:
       - 一句话：{topic_angle}
       - 发布日期：{topic_date}
       - 变化（旧 → 新）：{topic_change}
-      - 对开发者的影响：{topic_why}
+      - 对{audience}的影响：{topic_why}
       - 候选来源：
       {topic_sources}
 
       ## 任务
-      核实这条变化是否属实、数字是否准确，并找出它对开发者的实际影响。检索保持克制：以核实为主，不做背景综述。
+      核实这条变化是否属实、数字是否准确，并找出它对{audience}的实际影响。检索保持克制：以核实为主，不做背景综述。
       1. 打开候选来源，确认日期、旧到新的数字、适用范围（哪些套餐、哪些模型、什么时候生效）。
       2. 找一个独立来源交叉核对核心数字；只有厂商自己的说法时，标注「厂商自述，未独立验证」。
       3. 找出例外、生效条件或隐藏的计费坑；确实找不到时写明「未找到限制条件」。
@@ -117,6 +153,7 @@ types:
       1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。
       2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
       3. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
+      {audience_research}
 
       ## 输出结构
       ### 1. 直接回答
@@ -128,12 +165,13 @@ types:
       编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址
     script_style: |
       栏目「快讯」：60–90 秒讲清一个变化，不铺垫背景，不罗列。
-      - 第一句是钩子：直接说变化和它的数字，或一个让开发者停下来的问题；不说「大家好」，不说「今天」。
+      - 第一句是钩子：直接说变化和它的数字，或一个让{audience}停下来的问题；不说「大家好」，不说「今天」。
       - 然后讲变化：旧的是什么、新的是什么；数字、单位、口径照来源原样，价格要说清是输入还是输出、每百万 token 还是每次。
-      - 再讲对开发者意味着什么：谁受影响、多花或少花多少、要改什么。数字只留最关键的 2–3 个；上下文长度、输出上限、各档位价格这类参数，除非它们就是这条快讯的变化，否则不讲。
+      - 再讲对{audience}意味着什么：{audience_impact}。数字只留最关键的 2–3 个；上下文长度、输出上限、各档位价格这类参数，除非它们就是这条快讯的变化，否则不讲。
       - 最后一句给一个现在就能做的动作。
       - 只有厂商自己的说法时，口播里说「官方说法」，不要说成已经验证的事实。
       - 2–4 个小节，每节 1–2 段，每段 20–90 字，口语化，适合朗读。
+      {audience_guidance}
     formats:
       short:
         target_minutes: 1.25
@@ -152,7 +190,7 @@ types:
           outro:
             template: end_card
             title: 快讯
-            lines: [面向开发者的 AI 快讯]
+            lines: ["面向{audience}的 AI 快讯"]
             seconds: 3
             sound: synth_sting
   one_point:
@@ -160,6 +198,9 @@ types:
     version: 1
     description: 60–120 秒只讲清楚一件事：一个结论、一个关键数字或例子、一个能马上做的动作。
     research_timeout_seconds: 1800
+    purpose: 知识讲解
+    allowed_forms: [information_motion]
+    default_form: information_motion
     default_tone: explainer
     allowed_tones: [concise, explainer, playful]
     required_roles: [钩子, 行动]
@@ -182,6 +223,7 @@ types:
       2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
       3. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
       4. 数字照来源原样写，注明口径。
+      {audience_research}
 
       ## 输出结构
       ### 1. 直接回答
@@ -199,6 +241,7 @@ types:
       - 最后一句给一个本周就能做的动作。
       - 不依赖前文：观众没有看过这个系列的其他视频。
       - 2–4 个小节，每节 1–2 段，每段 30–100 字，口语化，适合朗读。
+      {audience_guidance}
     formats:
       short:
         target_minutes: 1.5
@@ -211,7 +254,7 @@ types:
           outro:
             template: end_card
             title: 一个知识点
-            lines: [面向开发者的 AI 知识点]
+            lines: ["面向{audience}的 AI 知识点"]
             seconds: 2.5
             sound: synth_sting
 cells:
@@ -233,3 +276,18 @@ cells:
   format: short
   key: point_short
   status: enabled
+- domain: ai
+  audience: non_tech
+  type: deep_dive
+  format: long
+  status: experimental
+- domain: ai
+  audience: non_tech
+  type: quick_take
+  format: short
+  status: experimental
+- domain: ai
+  audience: non_tech
+  type: one_point
+  format: short
+  status: experimental

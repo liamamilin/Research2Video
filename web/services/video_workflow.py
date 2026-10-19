@@ -96,6 +96,9 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     """Create a script for ``topic`` and start researching it in the background."""
     settings = get_settings()
     column = video_columns.get(settings.paths.config_dir, column_key)
+    fields = topic.setdefault("fields", {})
+    if column.audience and not (fields.get("目标受众") or "").strip():
+        fields["目标受众"] = column.audience  # a topic that names no audience is for the cell's
     script = store.create_script(column.key, topic, created_by=started_by)
     thread = threading.Thread(
         target=run, args=(script["id"],), kwargs={"started_by": started_by},

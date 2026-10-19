@@ -26,7 +26,12 @@ def _write(tmp_path, data: dict) -> str:
 
 def test_the_shipped_cells_keep_their_old_column_keys_and_are_enabled():
     cells = matrix.load(str(ROOT / "config"))
-    assert {c.column.key: c.status for c in cells.values()} == {"deep_dive": "enabled", "flash": "enabled", "point_short": "enabled"}
+    assert {c.column.key: c.status for c in cells.values() if c.parts["audience"]["key"] == "developer"} == {
+        "deep_dive": "enabled", "flash": "enabled", "point_short": "enabled"}
+    # the second audience is defined but has never been rendered
+    assert {c.id: c.status for c in cells.values() if c.parts["audience"]["key"] == "non_tech"} == {
+        "ai-non_tech-deep_dive-long": "experimental", "ai-non_tech-one_point-short": "experimental",
+        "ai-non_tech-quick_take-short": "experimental"}
     assert "ai-developer-quick_take-short" in cells
     assert cells["ai-developer-quick_take-short"].parts["audience"] == {"key": "developer", "version": 1}
 
@@ -34,7 +39,7 @@ def test_the_shipped_cells_keep_their_old_column_keys_and_are_enabled():
 def test_a_cell_is_found_by_its_id_and_by_its_column_key():
     config = str(ROOT / "config")
     assert video_columns.get(config, "ai-developer-quick_take-short") == video_columns.get(config, "flash")
-    assert sorted(video_columns.load(config)) == ["deep_dive", "flash", "point_short"]  # one entry per cell
+    assert sorted(video_columns.load(config)) == sorted(["deep_dive", "flash", "point_short", "ai-non_tech-deep_dive-long", "ai-non_tech-one_point-short", "ai-non_tech-quick_take-short"])  # one per cell
     assert matrix.provenance(config, "flash")["cell"] == "ai-developer-quick_take-short"
     assert matrix.provenance(config, "no-such-column") is None
 
@@ -74,7 +79,7 @@ def test_experimental_cells_load_and_blocked_cells_say_why(tmp_path):
     data["cells"][2].update(status="blocked", reason="竖屏需要新的画面版本")
     config = _write(tmp_path, data)
     loaded = video_columns.load(config)
-    assert sorted(loaded) == ["deep_dive", "flash"]
+    assert "point_short" not in loaded and {"deep_dive", "flash"} <= set(loaded)
     assert matrix.provenance(config, "flash")["status"] == "experimental"
     with pytest.raises(video_columns.ColumnError, match="暂不能用：竖屏需要新的画面版本"):
         video_columns.get(config, "ai-developer-one_point-short")
@@ -106,7 +111,7 @@ def test_a_flat_column_may_not_reuse_a_cells_key(tmp_path):
     with pytest.raises(video_columns.ColumnError, match="同时出现"):
         video_columns.load(config)
     (tmp_path / "video_columns.yaml").write_text("custom:\n  research_prompt: x\n", encoding="utf-8")
-    assert sorted(video_columns.load(config)) == ["custom", "deep_dive", "flash", "point_short"]
+    assert {"custom", "deep_dive", "flash", "point_short"} <= set(video_columns.load(config))
 
 
 def test_composition_equals_the_flat_settings_the_columns_used_to_have():
@@ -119,3 +124,52 @@ def test_composition_equals_the_flat_settings_the_columns_used_to_have():
         flat = video_columns.load(tmp)
     shipped = video_columns.load(str(ROOT / "config"))
     assert {k: dataclasses.asdict(c) for k, c in flat.items()} == {k: dataclasses.asdict(c) for k, c in shipped.items()}
+
+
+# --- phase 2: the audience as a dimension, and the video form under the type ---------------------------------------
+
+
+def test_the_second_audience_fills_its_own_words_into_a_types_text():
+    config = str(ROOT / "config")
+    developer = video_columns.get(config, "flash")
+    plain = video_columns.get(config, "ai-non_tech-quick_take-short")
+    assert plain.audience == "普通用户" and developer.audience == "开发者"
+    for text in (plain.research_prompt, plain.script_style, plain.description, str(plain.package)):
+        assert "开发者" not in text and "{audience" not in text
+    assert "对普通用户的影响" in plain.research_prompt and "每月多花或少花多少" in plain.script_style
+    assert "不写代码" in plain.script_style and "不写代码" in plain.research_prompt  # its guidance and research lines
+    assert plain.package["outro"]["lines"] == ["面向普通用户的 AI 快讯"]
+    assert "{audience" not in developer.script_style and "不写代码" not in developer.script_style  # the developer cell adds nothing
+    assert plain.default_depth == "intro" and developer.default_depth == "intermediate"
+
+
+def test_a_slot_on_its_own_line_vanishes_when_the_audience_has_nothing_to_add():
+    audience = {"label": "开发者", "impact": "要改什么"}
+    text = "先说{audience}。\n{audience_guidance}\n最后。\n{audience_research}"
+    assert matrix.fill_slots(text, audience, "x") == "先说开发者。\n最后。"
+    assert matrix.fill_slots("a\n{audience_guidance}\nb", {"guidance": "一\n二"}, "x") == "a\n一\n二\nb"
+    with pytest.raises(video_columns.ColumnError, match="不认识的受众插槽"):
+        matrix.fill_slots("{audience_unknown}", audience, "x")
+
+
+def test_the_video_form_is_the_types_and_the_format_only_restricts_it(tmp_path):
+    data = _shipped()
+    assert video_columns.get(str(ROOT / "config"), "deep_dive").allowed_forms == ("auto", "information_motion", "process_diagram")
+    assert video_columns.get(str(ROOT / "config"), "flash").allowed_forms == ("information_motion",)
+    data["formats"]["long"]["forms"] = ["information_motion", "auto"]  # the format drops process_diagram
+    loaded = video_columns.load(_write(tmp_path, data))
+    assert loaded["deep_dive"].allowed_forms == ("auto", "information_motion")  # in the type's order
+    with pytest.raises(video_columns.ColumnError, match="默认形式 auto"):
+        data["formats"]["long"]["forms"] = ["process_diagram"]
+        video_columns.load(_write(tmp_path, data))
+    data["formats"]["long"].pop("forms")
+    data["types"]["deep_dive"].pop("allowed_forms")
+    with pytest.raises(video_columns.ColumnError, match="没写 allowed_forms"):
+        video_columns.load(_write(tmp_path, data))
+
+
+def test_what_autovideo_is_told_about_the_video_comes_from_the_cell():
+    config = str(ROOT / "config")
+    assert video_columns.get(config, "flash").creative_intent == {"purpose": "知识讲解"}  # as it always was
+    hint = video_columns.get(config, "ai-non_tech-quick_take-short").creative_intent
+    assert hint["purpose"] == "知识讲解" and "不写代码" in hint["audience"]

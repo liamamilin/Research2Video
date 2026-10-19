@@ -219,7 +219,9 @@ def make_plan(llm) -> tuple[dict, list[str]]:
 
 def test_shipped_styles_cover_every_columns_defaults_and_tones():
     config = str(ROOT / "config")
-    labels = {"deep_dive": "进阶 · 讲解通俗", "flash": "进阶 · 新闻播报", "point_short": "进阶 · 讲解通俗"}
+    labels = {"deep_dive": "进阶 · 讲解通俗", "flash": "进阶 · 新闻播报", "point_short": "进阶 · 讲解通俗",
+              "ai-non_tech-deep_dive-long": "入门 · 讲解通俗", "ai-non_tech-quick_take-short": "入门 · 新闻播报",
+              "ai-non_tech-one_point-short": "入门 · 讲解通俗"}
     columns = video_columns.load(config)
     assert set(columns) == set(labels)
     for key, col in columns.items():

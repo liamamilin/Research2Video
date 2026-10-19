@@ -2,12 +2,21 @@
  "deep_dive": {
   "budget": 1566,
   "column": {
+   "allowed_forms": [
+    "auto",
+    "information_motion",
+    "process_diagram"
+   ],
    "allowed_tones": [
     "concise",
     "explainer",
     "playful",
     "story"
    ],
+   "audience": "开发者",
+   "creative_intent": {
+    "purpose": "知识讲解"
+   },
    "default_depth": "intermediate",
    "default_tone": "explainer",
    "description": "把一个值得讲清楚的问题讲透：先给结论，再按证据强弱展开，讲清反方和局限，最后给可执行的动作。",
@@ -62,10 +71,17 @@
  "flash": {
   "budget": 326,
   "column": {
+   "allowed_forms": [
+    "information_motion"
+   ],
    "allowed_tones": [
     "news",
     "concise"
    ],
+   "audience": "开发者",
+   "creative_intent": {
+    "purpose": "知识讲解"
+   },
    "default_depth": "intermediate",
    "default_tone": "news",
    "description": "一个变化讲清楚：改了什么（旧到新）、对开发者意味着什么、现在该做什么。",
@@ -157,11 +173,18 @@
  "point_short": {
   "budget": 391,
   "column": {
+   "allowed_forms": [
+    "information_motion"
+   ],
    "allowed_tones": [
     "concise",
     "explainer",
     "playful"
    ],
+   "audience": "开发者",
+   "creative_intent": {
+    "purpose": "知识讲解"
+   },
    "default_depth": "intermediate",
    "default_tone": "explainer",
    "description": "60–120 秒只讲清楚一件事：一个结论、一个关键数字或例子、一个能马上做的动作。",

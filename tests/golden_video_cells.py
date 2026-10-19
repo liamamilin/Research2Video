@@ -19,6 +19,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 GOLDEN = ROOT / "tests" / "golden" / "video_cells.json"
 
+#: the cells that have been rendered and checked; cells added later are experimental and not frozen here
+VALIDATED = ("deep_dive", "flash", "point_short")
 TOPIC = {
     "id": "2026-10-19/F1", "round": "2026-10-19", "title": "示例选题：某模型的限时价格",
     "fields": {"核心角度": "输入价从 2 美元涨到 4 美元", "目标受众": "开发者", "为什么有人在乎": "影响 API 成本",
@@ -51,6 +53,8 @@ def snapshot() -> dict:
 
     out: dict = {}
     for key, column in sorted(video_columns.load(str(ROOT / "config")).items()):
+        if key not in VALIDATED:
+            continue
         fields = dataclasses.asdict(column)
         budget = length.budget_for(column.target_minutes, column.voice_id or None)
         out[key] = {

@@ -73,7 +73,11 @@ def _script_summary(script: dict) -> dict:
 
 @router.get("/columns")
 def list_columns(user=Depends(require_viewer)) -> list[dict]:
-    return [c.as_dict() for c in _columns().values()]
+    from core.video import matrix
+
+    config_dir = get_settings().paths.config_dir
+    return [{**c.as_dict(), "status": (matrix.provenance(config_dir, c.key) or {}).get("status", "enabled")}
+            for c in _columns().values()]
 
 
 @router.get("/styles")
@@ -117,6 +121,8 @@ class ScriptCreateIn(BaseModel):
     column: str = "deep_dive"
     topic_id: Optional[str] = Field(default=None, description="A content-opportunity topic id, e.g. 2026-09-29/C3")
     topic: Optional[TopicIn] = None
+    video_form: Optional[str] = Field(
+        default=None, description="One of the column's allowed forms; the column's default when left out")
     from_script: Optional[str] = Field(
         default=None, description="Write from this script's research report instead of researching again")
 
@@ -127,6 +133,10 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
         raise HTTPException(422, detail=ApiError.make("topic_required", "请选择一个内容机会，或填写一个选题"))
     if body.column not in _columns():
         raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{body.column}"))
+    chosen = _columns()[body.column]
+    if body.video_form is not None and body.video_form not in (chosen.allowed_forms or (chosen.video_form,)):
+        raise HTTPException(422, detail=ApiError.make(
+            "form_not_allowed", f"这个栏目只能用这些视频形式：{', '.join(chosen.allowed_forms or (chosen.video_form,))}"))
     if body.topic_id is not None:
         found = video_topics.find(get_settings().paths.output_dir, body.topic_id)
         if found is None:
@@ -135,6 +145,8 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
     else:
         topic = {"id": None, "title": body.topic.title.strip(),
                  "fields": {"核心角度": body.topic.angle.strip(), "目标受众": body.topic.audience.strip()}}
+    if body.video_form is not None:
+        topic = {**topic, "video_form": body.video_form}
     if body.from_script is not None:
         parent = store.get_script(body.from_script)
         if parent is None or not parent.get("report_path"):

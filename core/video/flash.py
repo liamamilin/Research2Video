@@ -34,7 +34,6 @@ ALIASES = {
     "建议大纲": ("可做的动作", "推荐行动"),
     "变化": ("旧/新情况",),
 }
-AUDIENCE = "开发者"
 
 
 def _plain(text: str) -> str:
@@ -94,7 +93,6 @@ def _complete(topic: Topic, sources: dict[str, dict]) -> None:
             found = next((fields[a] for a in aliases if fields.get(a)), "")
             if found:
                 fields[name] = found
-    fields.setdefault("目标受众", AUDIENCE)
     cited = fields.get("证据来源", "")
     chosen = [sources[n] for n in dict.fromkeys(_REF.findall(cited)) if n in sources]
     urls = [s["url"] for s in chosen] or list(dict.fromkeys(u.rstrip(".") for u in _URL.findall(cited)))

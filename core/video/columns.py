@@ -48,6 +48,13 @@ class Column:
     package: dict = field(default_factory=dict)
     #: End the video on a source card listing what the script cites (AutoVideo ``sources``).
     source_card: bool = False
+    #: Who the column is for, as a short label for on-screen and prompt text; empty for a column with no audience.
+    audience: str = ""
+    #: The video forms a script of this column may use (``video_form`` is the default); see spec/video-matrix.md.
+    allowed_forms: tuple[str, ...] = ()
+    #: What AutoVideo is told about the video (``creative_intent``: purpose, audience, tone, focus); a script's
+    #: own focus is added when it is rendered.
+    creative_intent: dict = field(default_factory=dict)
 
     def as_dict(self) -> dict:
         return {
@@ -62,6 +69,8 @@ class Column:
             "allowed_tones": list(self.allowed_tones),
             "package": self.package,
             "source_card": self.source_card,
+            "audience": self.audience,
+            "allowed_forms": list(self.allowed_forms) or [self.video_form],
         }
 
 
@@ -135,6 +144,17 @@ def _flag(key: str, name: str, raw) -> bool:
     return raw
 
 
+_INTENT_KEYS = ("purpose", "audience", "tone", "focus")
+
+
+def _intent(key: str, raw) -> dict:
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict) or set(raw) - set(_INTENT_KEYS) or not all(isinstance(v, str) and v.strip() for v in raw.values()):
+        raise ColumnError(f"栏目 {key} 的 creative_intent 只能有 {', '.join(_INTENT_KEYS)}，值是文字")
+    return {k: v.strip() for k, v in raw.items()}
+
+
 def _pair(key: str, field: str, raw, default: tuple[int, int]) -> tuple[int, int]:
     if raw is None:
         return default
@@ -175,6 +195,9 @@ def build(key: str, raw: dict) -> Column:
     unknown = [r for r in roles if r not in ROLES]
     if unknown:
         raise ColumnError(f"栏目 {key} 的 structure.required_roles 有未知角色：{', '.join(unknown)}")
+    forms = tuple(str(f) for f in raw.get("allowed_forms") or (form,))
+    if form not in forms or set(forms) - set(VIDEO_FORMS):
+        raise ColumnError(f"栏目 {key} 的 allowed_forms 应是 {', '.join(VIDEO_FORMS)} 里的，并包含默认的 {form}")
     return Column(
         key=key,
         name=str(raw.get("name") or key),
@@ -194,6 +217,9 @@ def build(key: str, raw: dict) -> Column:
         paragraph_units=_pair(key, "paragraph_units", structure.get("paragraph_units"), (60, 140)),
         package=_package(key, raw.get("package")),
         source_card=_flag(key, "source_card", raw.get("source_card")),
+        audience=str(raw.get("audience") or ""),
+        allowed_forms=forms,
+        creative_intent=_intent(key, raw.get("creative_intent")),
     )
 
 

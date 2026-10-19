@@ -116,6 +116,16 @@ formats:
 
 之后进入方向 2「打磨链路」：发布包（标题、简介、封面）、事实审计、初稿质量度量、选题到发布的衔接。
 
+## 第 2 期做完了什么（2026-10-19）
+
+- 写了第二个受众 `non_tech`（会用 AI 的非技术人员，短称「普通用户」，默认入门深度）和它的三个格子，全部 `experimental`。
+- 受众的话通过插槽填进类型文字：`{audience}`、`{audience_impact}` 在行内，`{audience_guidance}`、`{audience_research}` 单独一行，受众没有就整行删掉。开发者三格的文字因此逐字不变（黄金快照守住）。去掉了 `flash.AUDIENCE`；没写受众的选题，目标受众取格子的。
+- 视频形式从形态移到类型：`allowed_forms`、`default_form`，形态的 `forms` 只做限制；创建文稿时 `video_form` 可选，记在文稿的 topic 上，出片用它；AutoVideo 只在信息动效和自动形式下收来源卡，选流程图解时不带。
+- `Column` 新增 `audience`、`allowed_forms`、`creative_intent`；出片请求的 `creative_intent` 由格子给。三个已验证的格子仍是 `{purpose: 知识讲解}`，没有加受众提示，避免未经验证地改变画面规划；新受众的格子带受众提示。黄金快照只多了这三个字段，其余一个字没变。
+- `GET /api/video/columns` 带每格的 `status` 和 `allowed_forms`。
+
+**还没解决（持续成本）**：快讯类型的选题来自开发者口径的发现任务（`jobs/monitoring/ai_flash_discovery.yaml`），非技术人员的快讯格子暂时用同一份报告当候选，没有按受众重新评分或重新搜集；每个受众要有自己的发现任务才算完整。
+
 ## 不做
 
 竖屏、教程和观点两个类型、新增 AutoVideo 组件、定时发现任务、真实出片验证（等用户说开始测试）。

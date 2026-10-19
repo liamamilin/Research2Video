@@ -830,3 +830,47 @@ def test_the_render_carries_a_source_card_only_for_a_column_that_asks_and_a_repo
     autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]
     assert video_render.process(third["id"]) == "COMPLETED"
     assert "sources" not in autovideo.posts[2]
+
+
+def test_a_script_can_choose_one_of_the_columns_video_forms_and_the_render_uses_it(client, video_env, research, llm, autovideo):
+    from web.services import video_render
+
+    _login(client)
+    wrong = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "flash", "topic": {"title": "某个选题的标题", "angle": "x"}, "video_form": "process_diagram"})
+    assert wrong.status_code == 422 and "information_motion" in wrong.text  # flash only has the one form
+    columns = {c["key"]: c for c in client.get("/api/video/columns").json()}
+    assert columns["deep_dive"]["allowed_forms"] == ["auto", "information_motion", "process_diagram"]
+    assert all("status" in c for c in columns.values())  # a flat column is enabled; matrix cells carry their own status
+
+    # the choice is recorded on the script and is what the render asks AutoVideo for; a source card, which
+    # AutoVideo takes only on the information-motion forms, is left out of a flow diagram
+    (video_env / "output").mkdir(exist_ok=True)
+    (video_env / "output" / "report.md").write_text(REPORT, encoding="utf-8")
+    path = video_env / "config" / "video_columns.yaml"
+    path.write_text(path.read_text(encoding="utf-8").replace("  voice_id: voxcpm_anchor\n", "  voice_id: voxcpm_anchor\n  source_card: true\n", 1), encoding="utf-8")
+    for form, expected in ((None, "auto"), ("process_diagram", "process_diagram")):
+        script = _approved_script(f"形式 {form}")
+        topic = {**script["topic"], **({"video_form": form} if form else {})}
+        store.update_script(script["id"], report_path="output/report.md", topic=topic)
+        render = video_render.create(store.get_script(script["id"]))
+        autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]
+        assert video_render.process(render["id"]) == "COMPLETED"
+        sent = autovideo.posts[-1]
+        assert sent["video_form"] == expected
+        assert ("sources" in sent) == (form is None)
+    bad = _approved_script("不允许的形式")
+    store.update_script(bad["id"], topic={**bad["topic"], "video_form": "knowledge_cards"})
+    with pytest.raises(video_render.RenderError, match="不能用视频形式"):
+        video_render.create(store.get_script(bad["id"]))
+
+
+def test_a_topic_without_an_audience_is_for_the_cells_audience(client, video_env, research, llm):
+    llm.replies = [script_json(300)]
+    _login(client)
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "ai-non_tech-one_point-short", "topic": {"title": "一个没有写受众的选题", "angle": "x"}})
+    assert made.status_code == 202, made.text
+    script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    assert script["topic"]["fields"]["目标受众"] == "普通用户"
+    assert script["column"]["key"] == "ai-non_tech-one_point-short"
