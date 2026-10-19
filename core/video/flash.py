@@ -15,6 +15,7 @@ from __future__ import annotations
 import os
 import re
 
+from .sources import parse_list
 from .topics import Topic
 
 FLASH_DIR = "flash"
@@ -23,7 +24,6 @@ _ITEM = re.compile(r"^#{2,4}\s*(\d+\.\d+)\s*[.．、:：]?\s*(.+?)\s*$")
 _HEADING = re.compile(r"^#{1,4}\s")
 _FIELD = re.compile(r"^\s*[-*]\s*\*\*(.+?)\*\*\s*[:：]\s*(.*)$")
 _NESTED = re.compile(r"^\s{2,}[-*]\s+(.*)$")
-_SOURCE = re.compile(r"^\s*(\d+)\s*[.．、)]\s*(.+)$")
 _URL = re.compile(r"https?://[^\s)\]；;，,>]+")
 _REF = re.compile(r"\[(\d+)\]")
 
@@ -41,21 +41,6 @@ def _plain(text: str) -> str:
     return text.replace("**", "").replace("__", "").strip()
 
 
-def _sources(lines: list[str]) -> dict[str, dict]:
-    sources: dict[str, dict] = {}
-    for line in lines:
-        match = _SOURCE.match(line)
-        if not match:
-            continue
-        url = _URL.search(match.group(2))
-        if url is None:
-            continue
-        parts = [p.strip() for p in match.group(2).split("|")]
-        sources[match.group(1)] = {"title": parts[0], "kind": parts[1] if len(parts) > 3 else "",
-                                   "date": parts[2] if len(parts) > 3 else "", "url": url.group(0).rstrip(".")}
-    return sources
-
-
 def parse(report: str, report_date: str) -> list[Topic]:
     """The items of a discovery report, as topics, in the order the report lists them."""
     lines = report.splitlines()
@@ -66,7 +51,7 @@ def parse(report: str, report_date: str) -> list[Topic]:
             in_sources = "来源清单" in line
         elif in_sources:
             listed.append(line)
-    sources = _sources(listed)
+    sources = parse_list(listed)
 
     topics: list[Topic] = []
     current: Topic | None = None

@@ -67,17 +67,25 @@ deep_dive:
 flash:
   name: 快讯
   description: 一个变化讲清楚：改了什么（旧到新）、对开发者意味着什么、现在该做什么。
-  target_minutes: 1.5
+  target_minutes: 1.25
   video_form: information_motion
   research_timeout_seconds: 1500
   writer: legacy
   voice_id: voxcpm_anchor
+  # 片尾来源卡：列出文稿引用最多的一手来源（最多 3 条），AutoVideo 的 sources 字段。
+  source_card: true
   default_style: {depth: intermediate, tone: news}
   allowed_tones: [news, concise]
   structure:
     required_roles: [钩子, 行动]
     sections: [2, 4]
     paragraph_units: [20, 90]
+  # 片头片尾和角标（spec/video-short-forms.md「包装套件」）。片尾来源已有来源卡，片尾卡只放栏目名。
+  package:
+    accent: "#1f7a4d"
+    badge: 快讯          # 内容画面左上角的栏目标，取代写死的「AUTOVIDEO 知识讲解」
+    intro: {template: stinger, title: 快讯, subtitle: "{date}", seconds: 1.5, sound: synth_sting}
+    outro: {template: end_card, title: 快讯, lines: ["面向开发者的 AI 快讯"], seconds: 3, sound: synth_sting}
   research_prompt: |
     你是一名技术研究员，为一位制作 B 站 60–90 秒 AI / 软件开发快讯视频的创作者核实一条变化。你的报告会被写成约 {topic_minutes} 分钟的口播文稿，文稿里的每个事实都要能追溯到你引用的网页，所以每个关键判断都要给出原始网址。
 
@@ -116,7 +124,7 @@ flash:
     栏目「快讯」：60–90 秒讲清一个变化，不铺垫背景，不罗列。
     - 第一句是钩子：直接说变化和它的数字，或一个让开发者停下来的问题；不说「大家好」，不说「今天」。
     - 然后讲变化：旧的是什么、新的是什么；数字、单位、口径照来源原样，价格要说清是输入还是输出、每百万 token 还是每次。
-    - 再讲对开发者意味着什么：谁受影响、多花或少花多少、要改什么。数字只留最关键的 2–3 个。
+    - 再讲对开发者意味着什么：谁受影响、多花或少花多少、要改什么。数字只留最关键的 2–3 个；上下文长度、输出上限、各档位价格这类参数，除非它们就是这条快讯的变化，否则不讲。
     - 最后一句给一个现在就能做的动作。
     - 只有厂商自己的说法时，口播里说「官方说法」，不要说成已经验证的事实。
     - 2–4 个小节，每节 1–2 段，每段 20–90 字，口语化，适合朗读。
@@ -129,6 +137,7 @@ point_short:
   research_timeout_seconds: 1800
   writer: legacy
   voice_id: voxcpm_anchor
+  source_card: true
   default_style: {depth: intermediate, tone: explainer}
   allowed_tones: [concise, explainer, playful]
   structure:

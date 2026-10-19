@@ -146,8 +146,16 @@ def _finalize(script: _Script, allowed: set[str], target_minutes: float, voice: 
 _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
 
 
+def _canonical(raw: str) -> str:
+    """A number as digits only: 1,500 -> 1500, 0.20 -> 0.2, so $0.20 in a report matches 0.2 in the script."""
+    text = raw.replace(",", "").rstrip(".")
+    if "." in text:
+        text = text.rstrip("0").rstrip(".") or "0"
+    return text
+
+
 def _numbers(text: str) -> set[str]:
-    return {m.group(0).replace(",", "").rstrip(".") for m in _NUMBER.finditer(text)}
+    return {_canonical(m.group(0)) for m in _NUMBER.finditer(text)}
 
 
 def ungrounded_numbers(sections: list[dict], report: str) -> list[str]:
@@ -157,7 +165,7 @@ def ungrounded_numbers(sections: list[dict], report: str) -> list[str]:
     for section in sections:
         for para in section["paragraphs"]:
             for match in _NUMBER.finditer(para["text"]):
-                number = match.group(0).replace(",", "").rstrip(".")
+                number = _canonical(match.group(0))
                 if number not in known and number not in found:
                     found.append(number)
     return found

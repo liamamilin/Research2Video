@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -27,8 +28,10 @@ from typing import Any, Optional
 
 from core.config import load_system_config
 from core.video import columns as video_columns
+from core.video import sources as video_sources
 from core.video import store
 from core.video.autovideo import ARTIFACT_NAME, AutoVideoClient, AutoVideoError, AutoVideoUnreachable
+from web.services import video_workflow
 from web.settings import get_settings
 
 logger = logging.getLogger("ai_research.web.video")
@@ -97,6 +100,51 @@ def narration_source(chapter_list: list[dict]) -> tuple[str, str]:
     return text, hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+_DATE = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
+
+
+def topic_date(topic: dict) -> str:
+    """The date a topic is about, as 「10月19日」: its item's release date, else its report's date; empty when unknown."""
+    fields = topic.get("fields") or {}
+    for raw in (fields.get("发布日期"), topic.get("round")):
+        match = _DATE.search(str(raw or ""))
+        if match:
+            return f"{int(match.group(2))}月{int(match.group(3))}日"
+    return ""
+
+
+def package_request(column: video_columns.Column, topic: dict) -> dict:
+    """The column's package block for the render request, with ``{date}`` filled from the topic.
+
+    A part whose text needs a date the topic does not have loses that text rather than say a wrong day: the render
+    date would be wrong for a topic from last week."""
+    date = topic_date(topic)
+    package: dict = {}
+    for name, value in column.package.items():
+        if not isinstance(value, dict):
+            package[name] = value
+            continue
+        part = dict(value)
+        subtitle = part.get("subtitle")
+        if subtitle and "{date}" in subtitle:
+            if date:
+                part["subtitle"] = subtitle.replace("{date}", date)
+            else:
+                del part["subtitle"]
+        package[name] = part
+    return package
+
+
+def source_card_request(script: dict, version: dict) -> list[dict]:
+    """The script's ``sources`` for the closing source card; empty when the report cannot be read or cites none."""
+    try:
+        report = video_workflow._read_report(script["report_path"])
+    except (OSError, KeyError, TypeError):
+        logger.warning("script %s: no readable report, so no source card", script.get("id"))
+        return []
+    return video_sources.source_cards(version, report)
+
+
 def create(script: dict, *, voice_id: Optional[str] = None) -> dict:
     """Record a render of the script's approved version. Does not contact AutoVideo."""
     version_no = script.get("approved_version")
@@ -118,6 +166,13 @@ def create(script: dict, *, voice_id: Optional[str] = None) -> dict:
     }
     if len(title) >= 2:
         request["title"] = title
+    package = package_request(column, script["topic"])
+    if package:
+        request["package"] = package
+    if column.source_card:
+        cards = source_card_request(script, version)
+        if cards:
+            request["sources"] = cards
     # The column's voice is the one its length estimate assumes, so it is also what the render asks for.
     voice_id = voice_id or column.voice_id
     if voice_id:

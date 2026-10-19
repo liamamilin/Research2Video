@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, field
 
 import yaml
 
@@ -42,6 +43,11 @@ class Column:
     required_roles: tuple[str, ...] = ()
     sections: tuple[int, int] = (4, 6)
     paragraph_units: tuple[int, int] = (60, 140)
+    #: The non-content parts of a video (intro, outro, accent colour), see ``package`` in spec/video-short-forms.md.
+    #: Empty means the video is the content alone.
+    package: dict = field(default_factory=dict)
+    #: End the video on a source card listing what the script cites (AutoVideo ``sources``).
+    source_card: bool = False
 
     def as_dict(self) -> dict:
         return {
@@ -54,7 +60,79 @@ class Column:
             "voice_id": self.voice_id,
             "default_style": {"depth": self.default_depth, "tone": self.default_tone},
             "allowed_tones": list(self.allowed_tones),
+            "package": self.package,
+            "source_card": self.source_card,
         }
+
+
+#: part -> template names AutoVideo knows for it
+PACKAGE_TEMPLATES = {"intro": ("stinger",), "outro": ("end_card",)}
+PACKAGE_SECONDS = (0.5, 5.0)
+_PART_KEYS = {"template", "title", "subtitle", "lines", "seconds", "sound"}
+_SOUND_ID = re.compile(r"[a-z][a-z0-9_]{0,31}")
+_ACCENT = re.compile(r"#[0-9a-fA-F]{6}")
+
+
+def _text(key: str, part: str, name: str, value, limit: int) -> str:
+    if not isinstance(value, str) or not value.strip() or len(value.strip()) > limit:
+        raise ColumnError(f"栏目 {key} 的 package.{part}.{name} 应为 1–{limit} 个字的文字")
+    return value.strip()
+
+
+def _package(key: str, raw) -> dict:
+    """The validated ``package`` block: {"intro": {...}, "outro": {...}, "accent": "#rrggbb", "badge": "快讯"}, each optional.
+
+    The badge is the column's mark in the corner of the content picture.
+
+    A subtitle may contain ``{date}``, filled with the date of the topic when the render is made."""
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict) or set(raw) - {"intro", "outro", "accent", "badge"}:
+        raise ColumnError(f"栏目 {key} 的 package 只能有 intro、outro、accent、badge")
+    out: dict = {}
+    if "accent" in raw:
+        if not isinstance(raw["accent"], str) or not _ACCENT.fullmatch(raw["accent"]):
+            raise ColumnError(f"栏目 {key} 的 package.accent 应为 #rrggbb")
+        out["accent"] = raw["accent"]
+    if "badge" in raw:
+        out["badge"] = _text(key, "badge", "badge", raw["badge"], 12)
+    for part, templates in PACKAGE_TEMPLATES.items():
+        if part not in raw:
+            continue
+        spec = raw[part]
+        if not isinstance(spec, dict) or set(spec) - _PART_KEYS:
+            raise ColumnError(f"栏目 {key} 的 package.{part} 只能有 {', '.join(sorted(_PART_KEYS))}")
+        if spec.get("template") not in templates:
+            raise ColumnError(f"栏目 {key} 的 package.{part}.template 应为 {', '.join(templates)} 之一")
+        item: dict = {"template": spec["template"], "title": _text(key, part, "title", spec.get("title"), 12)}
+        if "subtitle" in spec:
+            item["subtitle"] = _text(key, part, "subtitle", spec["subtitle"], 24)
+        if "lines" in spec:
+            lines = spec["lines"]
+            if not isinstance(lines, list) or not 1 <= len(lines) <= 3:
+                raise ColumnError(f"栏目 {key} 的 package.{part}.lines 应为 1–3 行文字")
+            item["lines"] = [_text(key, part, "lines", line, 30) for line in lines]
+        try:
+            seconds = float(spec.get("seconds", 2))
+        except (TypeError, ValueError) as exc:
+            raise ColumnError(f"栏目 {key} 的 package.{part}.seconds 不是数字") from exc
+        if not PACKAGE_SECONDS[0] <= seconds <= PACKAGE_SECONDS[1]:
+            raise ColumnError(f"栏目 {key} 的 package.{part}.seconds 应在 {PACKAGE_SECONDS[0]}–{PACKAGE_SECONDS[1]} 之间")
+        item["seconds"] = int(seconds) if seconds == int(seconds) else seconds
+        if "sound" in spec:
+            if not isinstance(spec["sound"], str) or not _SOUND_ID.fullmatch(spec["sound"]):
+                raise ColumnError(f"栏目 {key} 的 package.{part}.sound 应为小写字母、数字、下划线组成的名字")
+            item["sound"] = spec["sound"]
+        out[part] = item
+    return out
+
+
+def _flag(key: str, name: str, raw) -> bool:
+    if raw is None:
+        return False
+    if not isinstance(raw, bool):
+        raise ColumnError(f"栏目 {key} 的 {name} 应为 true 或 false")
+    return raw
 
 
 def _pair(key: str, field: str, raw, default: tuple[int, int]) -> tuple[int, int]:
@@ -121,6 +199,8 @@ def load(config_dir: str) -> dict[str, Column]:
             required_roles=roles,
             sections=_pair(key, "sections", structure.get("sections"), (4, 6)),
             paragraph_units=_pair(key, "paragraph_units", structure.get("paragraph_units"), (60, 140)),
+            package=_package(key, raw.get("package")),
+            source_card=_flag(key, "source_card", raw.get("source_card")),
         )
     return columns
 

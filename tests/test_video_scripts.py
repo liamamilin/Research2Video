@@ -471,6 +471,85 @@ def test_the_render_uses_the_columns_voice_unless_one_is_chosen(video_env, autov
     assert [post["voice_id"] for post in autovideo.posts] == [column_voice, "zf_xiaoxiao"]
 
 
+PACKAGE_YAML = """\
+  package:
+    accent: "#1f7a4d"
+    badge: 快讯
+    intro: {template: stinger, title: 快讯, subtitle: "{date}", seconds: 1.5, sound: synth_sting}
+    outro: {template: end_card, title: 快讯, lines: ["来源见简介"], seconds: 3}
+"""
+
+
+def _column_with_package(tmp_path, block: str):
+    (tmp_path / "video_columns.yaml").write_text(
+        "short:\n  target_minutes: 1.5\n  research_prompt: x\n" + block, encoding="utf-8")
+    return video_columns.load(str(tmp_path))["short"]
+
+
+def test_a_column_may_declare_its_intro_and_outro(tmp_path):
+    column = _column_with_package(tmp_path, PACKAGE_YAML)
+    assert column.package == {
+        "accent": "#1f7a4d", "badge": "快讯",
+        "intro": {"template": "stinger", "title": "快讯", "subtitle": "{date}", "seconds": 1.5, "sound": "synth_sting"},
+        "outro": {"template": "end_card", "title": "快讯", "lines": ["来源见简介"], "seconds": 3}}
+    assert column.as_dict()["package"] == column.package
+    assert _column_with_package(tmp_path, "").package == {}
+
+
+@pytest.mark.parametrize("block", [
+    "  package: {intro: {template: end_card, title: 快讯}}\n",           # an outro template as an intro
+    "  package: {intro: {template: stinger}}\n",                          # no title
+    "  package: {intro: {template: stinger, title: 这个标题实在是太长了没法放下}}\n",
+    "  package: {intro: {template: stinger, title: 快讯, seconds: 12}}\n",
+    "  package: {intro: {template: stinger, title: 快讯, sound: ../x}}\n",
+    "  package: {intro: {template: stinger, title: 快讯, color: red}}\n",   # unknown key
+    "  package: {outro: {template: end_card, title: 快讯, lines: []}}\n",
+    "  package: {accent: red}\n",
+    "  package: {badge: 这个角标实在是太长了没法放下}\n",
+    "  package: {badge: \"\"}\n",
+    "  package: {middle: {}}\n",
+    "  package: nope\n",
+])
+def test_a_bad_package_block_names_the_column(tmp_path, block):
+    with pytest.raises(video_columns.ColumnError, match="short"):
+        _column_with_package(tmp_path, block)
+
+
+def test_the_package_date_is_the_topics_not_the_render_day(tmp_path):
+    from web.services import video_render
+
+    column = _column_with_package(tmp_path, PACKAGE_YAML)
+    dated = {"round": "2026-10-19", "fields": {"发布日期": "2026-10-14"}}
+    assert video_render.topic_date(dated) == "10月14日"
+    assert video_render.topic_date({"round": "2026-10-19", "fields": {}}) == "10月19日"
+    assert video_render.topic_date({"fields": {}}) == ""
+    assert video_render.package_request(column, dated)["intro"]["subtitle"] == "10月14日"
+    undated = video_render.package_request(column, {"id": None, "title": "手写选题", "fields": {}})
+    assert "subtitle" not in undated["intro"] and undated["intro"]["title"] == "快讯"  # no date, no wrong date
+    assert undated["outro"]["lines"] == ["来源见简介"] and undated["accent"] == "#1f7a4d"
+
+
+def test_the_render_carries_the_columns_package_only_when_it_has_one(video_env, autovideo):
+    from web.services import video_render
+
+    first = video_render.create(_approved_script("没有包装"))
+    autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]
+    assert video_render.process(first["id"]) == "COMPLETED"
+    assert "package" not in autovideo.posts[0]
+
+    path = video_env / "config" / "video_columns.yaml"
+    text = path.read_text(encoding="utf-8")
+    assert "  voice_id: voxcpm_anchor\n" in text
+    path.write_text(text.replace("  voice_id: voxcpm_anchor\n", "  voice_id: voxcpm_anchor\n" + PACKAGE_YAML, 1), encoding="utf-8")
+    script = _approved_script("有包装")
+    store.update_script(script["id"], topic={"id": None, "title": "有包装", "fields": {"发布日期": "2026-10-14"}})
+    second = video_render.create(store.get_script(script["id"]))
+    autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]
+    assert video_render.process(second["id"]) == "COMPLETED"
+    sent = autovideo.posts[1]["package"]
+    assert sent["intro"]["subtitle"] == "10月14日" and sent["outro"]["template"] == "end_card"
+
+
 def test_a_lost_create_response_is_reconciled_not_resubmitted(video_env, autovideo):
     from web.services import video_render
 
@@ -673,11 +752,20 @@ def test_the_writer_names_numbers_the_report_does_not_contain():
     assert writer.lint(sections) == []  # no report to check against
 
 
+def test_numbers_match_by_value_not_by_spelling():
+    sections = [{"title": "章", "paragraphs": [{"text": "缓存涨到 0.2 美元，Priority 输入 3.6 美元，共 1500 次。"}]}]
+    assert writer.ungrounded_numbers(sections, "缓存 $0.20；Priority $3.60 输入；1,500 次") == []
+    assert writer.ungrounded_numbers(sections, "缓存 $0.25；Priority $3.65") == ["0.2", "3.6", "1500"]
+
+
 def test_api_flash_items_are_topics_and_a_point_is_cut_from_an_earlier_research(client, video_env, research, llm, autovideo):
     base = video_env / "output" / "flash"
     base.mkdir(parents=True)
     (base / "2026-10-19_ai_flash_discovery.md").write_text(FLASH_REPORT, encoding="utf-8")
-    llm.replies = [script_json(390, citations={(0, 0): [GOOD]})] * 2
+    # each column's script is sized to its own budget; an over-long reply would be sent back for a rewrite
+    budgets = [length.budget_for(video_columns.get(str(ROOT / "config"), key).target_minutes, "voxcpm_anchor")
+               for key in ("flash", "point_short")]
+    llm.replies = [script_json(budget - 5, citations={(0, 0): [GOOD]}) for budget in budgets]
     _login(client)
 
     listed = client.get("/api/video/topics", params={"source": "flash"}).json()
@@ -693,7 +781,7 @@ def test_api_flash_items_are_topics_and_a_point_is_cut_from_an_earlier_research(
     assert len(research.jobs) == 1
     spec = (video_env / "jobs" / f"{research.jobs[0]}.yaml").read_text(encoding="utf-8")
     assert "无成本字段 → 每次运行报告成本与耗时" in spec and GOOD_2 in spec and "{topic_" not in spec
-    assert first["version_shown"]["length_check"]["target_minutes"] == 1.5
+    assert first["version_shown"]["length_check"]["target_minutes"] == video_columns.get(str(ROOT / "config"), "flash").target_minutes
 
     # A point cut from that script's research: no second research job, the same report and sources.
     cut = client.post("/api/video/scripts", headers=_csrf(client), json={
@@ -708,3 +796,34 @@ def test_api_flash_items_are_topics_and_a_point_is_cut_from_an_earlier_research(
     missing = client.post("/api/video/scripts", headers=_csrf(client), json={
         "column": "point_short", "from_script": "no-such-script", "topic": {"title": "某个知识点", "angle": "x"}})
     assert missing.status_code == 422
+
+
+def test_the_render_carries_a_source_card_only_for_a_column_that_asks_and_a_report_that_lists_dated_sources(
+        video_env, autovideo):
+    from web.services import video_render
+
+    (video_env / "output").mkdir(exist_ok=True)
+    (video_env / "output" / "report.md").write_text(REPORT, encoding="utf-8")
+    plain = _approved_script("没有来源卡")
+    store.update_script(plain["id"], report_path="output/report.md")
+    first = video_render.create(store.get_script(plain["id"]))
+    autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]
+    assert video_render.process(first["id"]) == "COMPLETED"
+    assert "sources" not in autovideo.posts[0]  # the column did not ask for one
+
+    path = video_env / "config" / "video_columns.yaml"
+    text = path.read_text(encoding="utf-8")
+    assert "  voice_id: voxcpm_anchor\n" in text
+    path.write_text(text.replace("  voice_id: voxcpm_anchor\n", "  voice_id: voxcpm_anchor\n  source_card: true\n", 1), encoding="utf-8")
+    carded = _approved_script("有来源卡")
+    store.update_script(carded["id"], report_path="output/report.md")
+    second = video_render.create(store.get_script(carded["id"]))
+    autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]
+    assert video_render.process(second["id"]) == "COMPLETED"
+    assert autovideo.posts[1]["sources"] == [{"title": "CLI 文档", "url": GOOD, "date": "2026-10-01"}]
+
+    unreadable = _approved_script("报告不见了")  # no report on file: the video still renders, without the card
+    third = video_render.create(store.get_script(unreadable["id"]))
+    autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]
+    assert video_render.process(third["id"]) == "COMPLETED"
+    assert "sources" not in autovideo.posts[2]
