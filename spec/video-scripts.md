@@ -86,6 +86,8 @@ C4 v10 用 VoxCPM2 出片实际 390.03 秒，估算 391 秒。换声音要同步
 |---|---|---|
 | GET | `/api/video/columns` | 栏目列表 |
 | GET | `/api/video/styles` | 深浅档位和语气 |
+| GET | `/api/video/board` | 首页看板：各阶段数量和“需要你处理”清单（`web/services/video_board.py`） |
+| GET | `/api/video/shipments` | 已定稿文稿的成片、发布记录和复核提醒（成片与发布页） |
 | GET | `/api/video/topics` | 最新一轮 P7 内容机会，标出已写过的 |
 | POST | `/api/video/scripts` | 按选题新建文稿并开始研究（202） |
 | GET | `/api/video/scripts` | 文稿列表 |
