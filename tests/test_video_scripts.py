@@ -1029,3 +1029,19 @@ def test_api_publish_pack_uses_the_renders_chapters(client, video_env, autovideo
     second = client.get(f"/api/video/scripts/{script['id']}/publish").json()
     assert [c["time"] for c in second["chapters"]] == ["00:00", "00:30", "00:50"]
     assert "00:30 展开" in second["description"]
+
+
+def test_api_quality_compares_each_approved_script_with_its_draft(client, video_env):
+    script = store.create_script("flash", {"id": None, "title": "质量的选题", "fields": {}})
+    draft = [{"title": "节", "paragraphs": [{"text": "第一段内容不动。", "citations": [], "evidence": "UNCITED"},
+                                          {"text": "第二段说得太绝对了。", "citations": [], "evidence": "UNCITED"}]}]
+    final = [{"title": "节", "paragraphs": [{"text": "第一段内容不动。", "citations": [], "evidence": "UNCITED"},
+                                          {"text": "第二段说得没那么绝对了。", "citations": [], "evidence": "UNCITED"}]}]
+    store.add_version(script["id"], title="草稿", sections=draft, length_check=length.measure(draft, 1.25), edit_type="GENERATED")
+    store.add_version(script["id"], title="定稿", sections=final, length_check=length.measure(final, 1.25), edit_type="EDITED")
+    store.update_script(script["id"], status="APPROVED", approved_version=2)
+    _login(client)
+    body = client.get("/api/video/quality").json()
+    assert body["columns"]["flash"]["scripts"] == 1
+    row = body["scripts"][0]
+    assert (row["unchanged"], row["edited"]) == (1, 1) and row["draft_version"] == 1 and row["approved_version"] == 2

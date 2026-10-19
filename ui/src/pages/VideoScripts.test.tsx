@@ -66,6 +66,7 @@ beforeEach(() => {
       if (String(url).includes("/api/video/topics")) {
         return jsonResponse({ round: "2026-10-19", topics: String(url).includes("source=flash") ? FLASH : [] });
       }
+      if (String(url).includes("/api/video/quality")) return jsonResponse({ columns: {}, scripts: [] });
       if (method === "POST") return jsonResponse({ id: "new1" }, 202);
       return jsonResponse([]);
     }),

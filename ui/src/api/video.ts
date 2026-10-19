@@ -282,6 +282,31 @@ export interface PublishPack {
 export const getPublishPack = (id: string, version?: number) =>
   api<PublishPack>(`/api/video/scripts/${encodeURIComponent(id)}/publish`, { query: { version } });
 
+// 初稿质量：定稿的文稿保留了多少生成的初稿，见 core/video/quality.py。
+export interface DraftQuality {
+  columns: Record<
+    string,
+    { scripts: number; edited_by_hand: number; median_kept_share: number | null; paragraphs_untouched: number | null }
+  >;
+  scripts: {
+    script_id: string;
+    column_key: string;
+    title: string;
+    draft_version: number;
+    approved_version: number;
+    unchanged: number;
+    edited: number;
+    dropped: number;
+    added: number;
+    kept_share: number | null;
+    new_share: number | null;
+    signals: { length_status: string | null; serious: number | null; must: number | null; problems: number; audited: boolean };
+    examples: { before: string; after: string; similarity: number }[];
+  }[];
+}
+
+export const getDraftQuality = () => api<DraftQuality>("/api/video/quality");
+
 export const listVideoCells = () => api<VideoCell[]>("/api/video/cells");
 
 export const listVideoStyles = () => api<StyleCatalog>("/api/video/styles");

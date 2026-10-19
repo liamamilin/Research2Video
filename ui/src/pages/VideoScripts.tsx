@@ -14,6 +14,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
 import { cn, timeAgo } from "@/lib/utils";
+import { DraftQualityPanel } from "./VideoQuality";
 
 export const STATUS_LABEL: Record<ScriptStatus, string> = {
   RESEARCHING: "研究中",
@@ -411,6 +412,8 @@ export function VideoScriptsPage() {
           </table>
         )}
       </section>
+
+      <DraftQualityPanel />
     </div>
   );
 }

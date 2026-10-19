@@ -92,6 +92,20 @@ def list_cells(user=Depends(require_viewer)) -> list[dict]:
         raise HTTPException(500, detail=ApiError.make("bad_matrix", str(exc))) from exc
 
 
+@router.get("/quality")
+def draft_quality(limit: int = 200, user=Depends(require_viewer)) -> dict:
+    """How much of each approved script's generated draft survived editing (core/video/quality.py)."""
+    from core.video import quality
+
+    reports = []
+    for script in store.list_scripts(limit=min(max(limit, 1), 500)):
+        row = quality.script_report(script, [store.get_version(script["id"], v["version"])
+                                             for v in store.list_versions(script["id"])])
+        if row is not None:
+            reports.append(row)
+    return {"columns": quality.summarize(reports), "scripts": reports}
+
+
 @router.get("/styles")
 def list_styles(user=Depends(require_viewer)) -> dict:
     """Depths and tones a script can be written in."""
