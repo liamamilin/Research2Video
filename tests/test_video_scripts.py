@@ -1250,3 +1250,15 @@ def test_the_audits_of_a_short_script_run_with_capped_timeouts(client, video_env
     assert _wait(client, made.json()["id"], {"DRAFT", "FAILED"})["status"] == "DRAFT"
     writer_attempt, audit_attempt = seen[0], seen[-1]
     assert audit_attempt == (120, 240) and writer_attempt[0] > 120
+
+
+def test_api_the_home_board_counts_stages_and_lists_what_needs_the_user(client, video_env):
+    script = _approved(client)
+    _login(client)
+    board = client.get("/api/video/board").json()
+    counts = {s["key"]: s["count"] for s in board["stages"]}
+    assert counts["approved"] == 1 and counts["published"] == 0 and board["failed"] == 0
+    assert [(a["kind"], a["script_id"]) for a in board["attention"] if a["kind"] != "recheck"] == [("render", script["id"])]
+    client.post(f"/api/video/scripts/{script['id']}/publications", headers=_csrf(client), json={"url": "https://b23.tv/x"})
+    board = client.get("/api/video/board").json()
+    assert {s["key"]: s["count"] for s in board["stages"]}["published"] == 1 and board["attention"] == []

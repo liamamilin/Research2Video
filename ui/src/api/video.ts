@@ -401,3 +401,25 @@ export const restyleVideoScript = (id: string, style: { depth?: string; tone?: s
 
 export const getVideoFacts = (id: string, version?: number) =>
   api<FactSheet>(`/api/video/scripts/${encodeURIComponent(id)}/facts`, { query: { version } });
+
+export interface BoardStage {
+  key: string;
+  label: string;
+  count: number;
+}
+
+export interface BoardAttention {
+  kind: "review" | "failed" | "render" | "render_done" | "recheck";
+  script_id: string;
+  title: string;
+  column_key: string;
+  text: string;
+}
+
+export interface VideoBoard {
+  stages: BoardStage[];
+  failed: number;
+  attention: BoardAttention[];
+}
+
+export const getVideoBoard = () => api<VideoBoard>("/api/video/board");

@@ -6,6 +6,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Layout } from "@/components/Layout";
 import { LoginPage } from "@/pages/Login";
 import { DashboardPage } from "@/pages/Dashboard";
+import { HomeBoardPage } from "@/pages/HomeBoard";
 import { JobsListPage } from "@/pages/JobsList";
 import { JobDetailPage } from "@/pages/JobDetail";
 import { ReportsPage } from "@/pages/Reports";
@@ -54,7 +55,8 @@ function AppRoutes() {
     <Routes>
       <Route path="/share/:token" element={<ShareViewPage />} />
       <Route element={<Layout />}>
-        <Route index element={<DashboardPage />} />
+        <Route index element={<HomeBoardPage />} />
+        <Route path="/engine" element={<DashboardPage />} />
         <Route path="/jobs" element={<JobsListPage />} />
         <Route path="/jobs/:name" element={<JobDetailPage />} />
         <Route path="/rounds" element={<RoundsPage />} />

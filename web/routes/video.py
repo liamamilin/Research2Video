@@ -93,6 +93,14 @@ def list_cells(user=Depends(require_viewer)) -> list[dict]:
         raise HTTPException(500, detail=ApiError.make("bad_matrix", str(exc))) from exc
 
 
+@router.get("/board")
+def home_board(user=Depends(require_viewer)) -> dict:
+    """Counts per pipeline stage and what needs the user, for the home page."""
+    from web.services import video_board
+
+    return video_board.board(_columns())
+
+
 @router.get("/quality")
 def draft_quality(limit: int = 200, user=Depends(require_viewer)) -> dict:
     """How much of each approved script's generated draft survived editing (core/video/quality.py)."""
