@@ -97,8 +97,12 @@ def load(output_dir: str, round_date: str | None = None) -> tuple[str | None, li
 
 
 def find(output_dir: str, topic_id: str) -> Topic | None:
-    round_date, _, _code = topic_id.partition("/")
+    round_date, _, code = topic_id.partition("/")
     if not _DATE.match(round_date):
         return None
-    _, topics = load(output_dir, round_date)
+    if re.fullmatch(r"F\d+", code):  # a flash-news item, see flash.py
+        from . import flash
+        _, topics = flash.load(output_dir, round_date)
+    else:
+        _, topics = load(output_dir, round_date)
     return next((t for t in topics if t.id == topic_id), None)

@@ -70,6 +70,9 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
         "{topic_audience}": fields.get("目标受众", "") or "（未提供）",
         "{topic_why}": fields.get("为什么有人在乎", "") or "（未提供）",
         "{topic_outline}": fields.get("建议大纲", "") or "（未提供）",
+        "{topic_change}": fields.get("变化", "") or "（未提供）",
+        "{topic_date}": fields.get("发布日期", "") or "（未提供）",
+        "{topic_sources}": fields.get("来源网址", "") or "（未提供）",
     }
     prompt = column.research_prompt
     for key, value in fill.items():
@@ -127,24 +130,27 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     column = video_columns.get(settings.paths.config_dir, script["column_key"])
     topic = script["topic"]
 
-    # 1. Research: an ordinary job.
-    job_name = research_job_name(column.key, script_id)
-    job_path = os.path.join(settings.paths.jobs_dir, f"{job_name}.yaml")
-    os.makedirs(os.path.dirname(job_path), exist_ok=True)
-    if not os.path.isfile(job_path):
-        yaml_io.atomic_create(job_path, yaml_io.dump_yaml(job_spec(column, topic, script_id)))
-    store.update_script(script_id, status="RESEARCHING", research_job=job_name, error=None)
+    # 1. Research: an ordinary job, unless the topic comes with a report already (a short video cut from a longer
+    # one is written from that one's research, its sources and citation check).
+    report_path = topic.get("from_report") or ""
+    if not report_path:
+        job_name = research_job_name(column.key, script_id)
+        job_path = os.path.join(settings.paths.jobs_dir, f"{job_name}.yaml")
+        os.makedirs(os.path.dirname(job_path), exist_ok=True)
+        if not os.path.isfile(job_path):
+            yaml_io.atomic_create(job_path, yaml_io.dump_yaml(job_spec(column, topic, script_id)))
+        store.update_script(script_id, status="RESEARCHING", research_job=job_name, error=None)
 
-    task = start_job(job_name, started_by or "video",
-                     config_dir=settings.paths.config_dir, jobs_dir=settings.paths.jobs_dir)
-    task.future.result(timeout=column.research_timeout_seconds + WAIT_SLACK_SECONDS)
-    if task.status != "success":
-        state = StateManager.get(job_name) or {}
-        store.update_script(script_id, status="FAILED",
-                            error=f"研究没有完成（{task.status}）：{state.get('last_error') or '见 Jobs 页日志'}")
-        return "FAILED"
+        task = start_job(job_name, started_by or "video",
+                         config_dir=settings.paths.config_dir, jobs_dir=settings.paths.jobs_dir)
+        task.future.result(timeout=column.research_timeout_seconds + WAIT_SLACK_SECONDS)
+        if task.status != "success":
+            state = StateManager.get(job_name) or {}
+            store.update_script(script_id, status="FAILED",
+                                error=f"研究没有完成（{task.status}）：{state.get('last_error') or '见 Jobs 页日志'}")
+            return "FAILED"
 
-    report_path = (StateManager.get(job_name) or {}).get("last_output") or ""
+        report_path = (StateManager.get(job_name) or {}).get("last_output") or ""
     try:
         report = _read_report(report_path)
     except OSError as exc:
@@ -175,6 +181,7 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
             column_style=column.script_style,
             target_minutes=column.target_minutes,
             llm_config=config,
+            voice=column.voice_id or None,
         )
     except writer.ScriptError as exc:
         store.update_script(script_id, status="FAILED", error=f"写稿失败：{exc}")

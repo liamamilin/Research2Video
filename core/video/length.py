@@ -48,7 +48,8 @@ SEGMENT_MAX_CHARS = 80
 #: Was 0.25, under which a six-minute target showed 4.5–7.5 minutes as on
 #: target (C4 v6: 437 s, +21%, shown as 达标).
 TOLERANCE = 0.15
-MIN_MINUTES, MAX_MINUTES = 2, 15
+#: a column may target a short video: 1, 1.5, 2 ... 15 minutes
+MIN_MINUTES, MAX_MINUTES = 1, 15
 
 _CJK = re.compile("[" + chr(0x3400) + "-" + chr(0x9FFF) + chr(0xF900) + "-" + chr(0xFAFF) + "]")
 _LATIN_WORD = re.compile(r"[A-Za-z][A-Za-z0-9'’-]*")
@@ -176,7 +177,7 @@ def chinese_share(text: str) -> float:
     return cjk / (cjk + latin) if cjk + latin else 0.0
 
 
-def budget_for(target_minutes: int, voice: str | None = None) -> int:
+def budget_for(target_minutes: float, voice: str | None = None) -> int:
     return round(target_minutes * 60 * units_per_second(voice))
 
 
@@ -214,7 +215,7 @@ def _status_of(ratio: float) -> str:
     return "OK"
 
 
-def measure(sections: list[dict], target_minutes: int | None,
+def measure(sections: list[dict], target_minutes: float | None,
             section_budgets: Sequence[int] | None = None, voice: str | None = None) -> dict:
     """The ``length_check`` recorded on a script version.
 

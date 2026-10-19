@@ -84,7 +84,7 @@ def trusted_urls(report: str, citation_check: Optional[dict]) -> set[str]:
     return cited - unmatched
 
 
-def _request(report: str, topic: dict, column_style: str, target_minutes: int, budget: int) -> str:
+def _request(report: str, topic: dict, column_style: str, target_minutes: float, budget: int) -> str:
     topic_lines = "\n".join(
         f"- {k}：{v}" for k, v in (
             ("选题", topic.get("title", "")),
@@ -117,7 +117,7 @@ def _parse(content: str) -> _Script:
         raise ScriptError(f"文稿 JSON 不符合格式：{exc}") from exc
 
 
-def _finalize(script: _Script, allowed: set[str], target_minutes: int) -> tuple[list[dict], dict]:
+def _finalize(script: _Script, allowed: set[str], target_minutes: float, voice: Optional[str] = None) -> tuple[list[dict], dict]:
     sections: list[dict] = []
     dropped = 0
     for section in script.sections:
@@ -138,15 +138,40 @@ def _finalize(script: _Script, allowed: set[str], target_minutes: int) -> tuple[
                 note = f"去掉了 {dropped_here} 个不在报告可信来源里的引用"
             paragraphs.append({"text": text, "citations": kept, "evidence": evidence, "note": note})
         sections.append({"title": section.title.strip(), "paragraphs": paragraphs})
-    check = length.measure(sections, target_minutes)
+    check = length.measure(sections, target_minutes, voice=voice)
     check["dropped_citations"] = dropped
     return sections, check
 
 
-def lint(sections: list[dict]) -> list[str]:
-    """Problems a reviewer should see: forbidden phrases, non-Chinese script."""
+_NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
+
+
+def _numbers(text: str) -> set[str]:
+    return {m.group(0).replace(",", "").rstrip(".") for m in _NUMBER.finditer(text)}
+
+
+def ungrounded_numbers(sections: list[dict], report: str) -> list[str]:
+    """Numbers the script says that the research report does not contain, in the order they are said."""
+    known = _numbers(report)
+    found: list[str] = []
+    for section in sections:
+        for para in section["paragraphs"]:
+            for match in _NUMBER.finditer(para["text"]):
+                number = match.group(0).replace(",", "").rstrip(".")
+                if number not in known and number not in found:
+                    found.append(number)
+    return found
+
+
+def lint(sections: list[dict], report: Optional[str] = None) -> list[str]:
+    """Problems a reviewer should see: forbidden phrases, non-Chinese script, numbers the report does not have."""
     problems = []
     spoken = "".join(p["text"] for s in sections for p in s["paragraphs"])
+    if report is not None:
+        missing = ungrounded_numbers(sections, report)
+        if missing:
+            shown = "、".join(missing[:6]) + ("等" if len(missing) > 6 else "")
+            problems.append(f"文稿里的数字 {shown} 在研究报告里找不到，请对照来源核实")
     for phrase in FORBIDDEN_PHRASES:
         if phrase in spoken:
             problems.append(f"文稿里出现了「{phrase}」")
@@ -167,15 +192,16 @@ def write(
     citation_check: Optional[dict],
     topic: dict,
     column_style: str,
-    target_minutes: int,
+    target_minutes: float,
     llm_config,
     cancel_token: Optional[threading.Event] = None,
+    voice: Optional[str] = None,
 ) -> WrittenScript:
     """Write, check, and if needed revise once to length."""
     from core.llm import LLMClient
 
     client = LLMClient(llm_config, cancel_token=cancel_token)
-    budget = length.budget_for(target_minutes)
+    budget = length.budget_for(target_minutes, voice)
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": _request(report, topic, column_style, target_minutes, budget)},
@@ -183,7 +209,7 @@ def write(
     response = client.chat(messages, temperature=0.4)
     script = _parse(response.content)
     allowed = trusted_urls(report, citation_check)
-    sections, check = _finalize(script, allowed, target_minutes)
+    sections, check = _finalize(script, allowed, target_minutes, voice)
     attempts = 1
     # Language first: a revision to length cannot fix a script AutoVideo
     # cannot voice, so do not pay for one.
@@ -201,13 +227,13 @@ def write(
         revised = client.chat(messages, temperature=0.3)
         try:
             script = _parse(revised.content)
-            sections, check = _finalize(script, allowed, target_minutes)
+            sections, check = _finalize(script, allowed, target_minutes, voice)
             attempts = 2
         except ScriptError:
             pass  # keep the first draft; its length flag tells the reviewer
 
     _require_chinese(sections)
-    problems = lint(sections)
+    problems = lint(sections, report)
     return WrittenScript(
         title=script.title.strip(),
         sections=sections,

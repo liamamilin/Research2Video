@@ -219,8 +219,11 @@ def make_plan(llm) -> tuple[dict, list[str]]:
 
 def test_shipped_styles_cover_every_columns_defaults_and_tones():
     config = str(ROOT / "config")
-    for col in video_columns.load(config).values():
-        assert styles.resolve(config, col).label == "进阶 · 讲解通俗"
+    labels = {"deep_dive": "进阶 · 讲解通俗", "flash": "进阶 · 新闻播报", "point_short": "进阶 · 讲解通俗"}
+    columns = video_columns.load(config)
+    assert set(columns) == set(labels)
+    for key, col in columns.items():
+        assert styles.resolve(config, col).label == labels[key]
         for tone in col.allowed_tones:
             styles.resolve(config, col, tone=tone)
     with pytest.raises(styles.StyleError, match="不用"):

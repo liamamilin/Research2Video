@@ -266,6 +266,23 @@ def test_a_bad_column_config_names_the_column(tmp_path):
         video_columns.load(str(tmp_path))
 
 
+def test_a_column_may_target_a_short_video(tmp_path):
+    body = "short:\n  target_minutes: {}\n  research_prompt: x\n"
+    (tmp_path / "video_columns.yaml").write_text(body.format("1.5"), encoding="utf-8")
+    assert video_columns.load(str(tmp_path))["short"].target_minutes == 1.5
+    (tmp_path / "video_columns.yaml").write_text(body.format("1"), encoding="utf-8")
+    assert video_columns.load(str(tmp_path))["short"].target_minutes == 1
+    for bad in ("0.5", "16", "soon"):
+        (tmp_path / "video_columns.yaml").write_text(body.format(bad), encoding="utf-8")
+        with pytest.raises(video_columns.ColumnError, match="short"):
+            video_columns.load(str(tmp_path))
+
+
+def test_the_budget_of_a_short_video_follows_its_seconds():
+    assert length.budget_for(1.5, "voxcpm_anchor") == round(90 * length.units_per_second("voxcpm_anchor"))
+    assert length.budget_for(1.5) < length.budget_for(2) < length.budget_for(6)
+
+
 # --- Writer ------------------------------------------------------------------
 
 
@@ -627,3 +644,67 @@ def test_heartbeat_beats_while_the_work_runs(video_env):
     with store.beating(store.touch_script, script["id"], every=0.01):
         time.sleep(0.05)
     assert store.get_script(script["id"])["heartbeat_at"] > 0
+
+
+# --- Short columns: flash items, a point cut from an earlier research -------------
+
+FLASH_REPORT = f"""### 1. 条目
+
+### 1.1 crewAI eval 开始报告每次运行成本
+- **一句话**：crewai eval --models 会报告每次运行的成本与耗时
+- **发布日期**：2026-10-17
+- **变化**：无成本字段 → 每次运行报告成本与耗时
+- **对开发者的影响**：不用自己算每次评测花了多少。
+- **评分**：8/10
+- **证据来源**：[1]
+
+### 3. 来源清单
+1. 版本发布说明 | 一手 | 2026-10-17 | {GOOD_2}
+"""
+
+
+def test_the_writer_names_numbers_the_report_does_not_contain():
+    sections = [{"title": "章", "paragraphs": [
+        {"text": "1.15.27 起每次运行多花 77 倍，约 1,500 美分。"}, {"text": "再来 77 倍和 3 次。"}]}]
+    report = "版本 1.15.27 之后；每次 1500 美分；3 次。"
+    assert writer.ungrounded_numbers(sections, report) == ["77"]
+    problems = writer.lint(sections, report)
+    assert any("77" in p and "研究报告" in p for p in problems)
+    assert writer.lint(sections) == []  # no report to check against
+
+
+def test_api_flash_items_are_topics_and_a_point_is_cut_from_an_earlier_research(client, video_env, research, llm, autovideo):
+    base = video_env / "output" / "flash"
+    base.mkdir(parents=True)
+    (base / "2026-10-19_ai_flash_discovery.md").write_text(FLASH_REPORT, encoding="utf-8")
+    llm.replies = [script_json(390, citations={(0, 0): [GOOD]})] * 2
+    _login(client)
+
+    listed = client.get("/api/video/topics", params={"source": "flash"}).json()
+    assert listed["round"] == "2026-10-19" and listed["topics"][0]["id"] == "2026-10-19/F1"
+    assert listed["topics"][0]["score"] == 8 and listed["topics"][0]["scripted"] is False
+    assert client.get("/api/video/topics", params={"source": "nope"}).status_code == 422
+
+    created = client.post("/api/video/scripts", json={"column": "flash", "topic_id": "2026-10-19/F1"},
+                          headers=_csrf(client))
+    assert created.status_code == 202, created.text
+    first = _wait(client, created.json()["id"], {"DRAFT", "FAILED"})
+    assert first["status"] == "DRAFT", first.get("error")
+    assert len(research.jobs) == 1
+    spec = (video_env / "jobs" / f"{research.jobs[0]}.yaml").read_text(encoding="utf-8")
+    assert "无成本字段 → 每次运行报告成本与耗时" in spec and GOOD_2 in spec and "{topic_" not in spec
+    assert first["version_shown"]["length_check"]["target_minutes"] == 1.5
+
+    # A point cut from that script's research: no second research job, the same report and sources.
+    cut = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "point_short", "from_script": first["id"],
+        "topic": {"title": "每次运行成本怎么看", "angle": "只讲成本字段", "audience": "开发者"}})
+    assert cut.status_code == 202, cut.text
+    second = _wait(client, cut.json()["id"], {"DRAFT", "FAILED"})
+    assert second["status"] == "DRAFT", second.get("error")
+    assert len(research.jobs) == 1
+    assert second["report_path"] == first["report_path"] and second["topic"]["parent_script"] == first["id"]
+
+    missing = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "point_short", "from_script": "no-such-script", "topic": {"title": "某个知识点", "angle": "x"}})
+    assert missing.status_code == 422

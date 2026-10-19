@@ -1,8 +1,8 @@
 # 视频栏目：一个栏目 = 研究提示词 + 写稿规范 + 时长 + 视频形式 + 默认风格。
 # 见 spec/video-scripts.md 和 spec/video-adaptation.md。
 #
-# research_prompt 里的 {topic_*} 由 VOD/本系统按选题填入；{date} {date_7d_ago}
-# {keywords} {language} 由研究引擎在运行时替换。
+# research_prompt 里的 {topic_*} 由 VOD/本系统按选题填入（快讯条目另有 {topic_date} {topic_change}
+# {topic_sources}）；{date} {date_7d_ago} {keywords} {language} 由研究引擎在运行时替换。
 
 deep_dive:
   name: 深度解读
@@ -15,7 +15,7 @@ deep_dive:
   # 已有文稿可以随时「换个风格」；需要退回时把这里改回 legacy。
   writer: adapt
   # 配音声音（AutoVideo 的 voice_id）。长度估算按这个声音的语速算，出片默认也用它；
-  # 换声音要同步 core/video/length.py 的 VOICE_SPEECH_RATES。
+  # 换声音要同步 core/video/length.py 的 VOICE_PROFILES。
   voice_id: voxcpm_anchor
   default_style: {depth: intermediate, tone: explainer}   # 见 config/video_styles.yaml
   allowed_tones: [concise, explainer, playful, story]
@@ -60,3 +60,115 @@ deep_dive:
     - 必须有一节讲反方、局限或还不确定的地方。
     - 结尾给观众 2–4 个本周就能做的具体动作。
     - 4–6 节，每节 2–5 段，每段 60–140 字，口语化，适合朗读。
+
+# 短视频栏目（spec/video-short-forms.md）：B 站横屏，60–120 秒，一次只讲一件事。
+# 一次一条，写稿用 legacy（一次调用）：五步改编是为六分钟、要让新手听懂的长稿设计的。
+# 文稿里的数字必须能在研究报告里找到，找不到的会在审稿页提示（writer.ungrounded_numbers）。
+flash:
+  name: 快讯
+  description: 一个变化讲清楚：改了什么（旧到新）、对开发者意味着什么、现在该做什么。
+  target_minutes: 1.5
+  video_form: information_motion
+  research_timeout_seconds: 1500
+  writer: legacy
+  voice_id: voxcpm_anchor
+  default_style: {depth: intermediate, tone: news}
+  allowed_tones: [news, concise]
+  structure:
+    required_roles: [钩子, 行动]
+    sections: [2, 4]
+    paragraph_units: [20, 90]
+  research_prompt: |
+    你是一名技术研究员，为一位制作 B 站 60–90 秒 AI / 软件开发快讯视频的创作者核实一条变化。你的报告会被写成约 {topic_minutes} 分钟的口播文稿，文稿里的每个事实都要能追溯到你引用的网页，所以每个关键判断都要给出原始网址。
+
+    ## 条目
+    - 标题：{topic_title}
+    - 一句话：{topic_angle}
+    - 发布日期：{topic_date}
+    - 变化（旧 → 新）：{topic_change}
+    - 对开发者的影响：{topic_why}
+    - 候选来源：
+    {topic_sources}
+
+    ## 任务
+    核实这条变化是否属实、数字是否准确，并找出它对开发者的实际影响。检索保持克制：以核实为主，不做背景综述。
+    1. 打开候选来源，确认日期、旧到新的数字、适用范围（哪些套餐、哪些模型、什么时候生效）。
+    2. 找一个独立来源交叉核对核心数字；只有厂商自己的说法时，标注「厂商自述，未独立验证」。
+    3. 找出例外、生效条件或隐藏的计费坑；确实找不到时写明「未找到限制条件」。
+    4. 数字（价格、版本号、日期、比例）照来源原样写，注明口径（输入还是输出、每百万 token 还是每次）。
+    证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。
+    输出语言：{language}。
+
+    ## 证据规则
+    1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。
+    2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
+    3. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
+
+    ## 输出结构
+    ### 1. 直接回答
+    ### 2. 关键事实（表格：事实 | 置信度 | 来源编号）
+    ### 3. 限制与反方证据
+    ### 4. 仍未确定的问题
+    ### 5. 适合快讯的讲法（不超过 2 条）
+    ### 6. 来源清单
+    编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址
+  script_style: |
+    栏目「快讯」：60–90 秒讲清一个变化，不铺垫背景，不罗列。
+    - 第一句是钩子：直接说变化和它的数字，或一个让开发者停下来的问题；不说「大家好」，不说「今天」。
+    - 然后讲变化：旧的是什么、新的是什么；数字、单位、口径照来源原样，价格要说清是输入还是输出、每百万 token 还是每次。
+    - 再讲对开发者意味着什么：谁受影响、多花或少花多少、要改什么。数字只留最关键的 2–3 个。
+    - 最后一句给一个现在就能做的动作。
+    - 只有厂商自己的说法时，口播里说「官方说法」，不要说成已经验证的事实。
+    - 2–4 个小节，每节 1–2 段，每段 20–90 字，口语化，适合朗读。
+
+point_short:
+  name: 一个知识点
+  description: 60–120 秒只讲清楚一件事：一个结论、一个关键数字或例子、一个能马上做的动作。
+  target_minutes: 1.5
+  video_form: information_motion
+  research_timeout_seconds: 1800
+  writer: legacy
+  voice_id: voxcpm_anchor
+  default_style: {depth: intermediate, tone: explainer}
+  allowed_tones: [concise, explainer, playful]
+  structure:
+    required_roles: [钩子, 行动]
+    sections: [2, 4]
+    paragraph_units: [30, 100]
+  # 从一篇深度解读的研究里切出一个点时，创建文稿用 from_script，不再重新研究（POST /api/video/scripts）。
+  research_prompt: |
+    你是一名技术研究员，为一位制作 B 站 60–120 秒 AI / 软件知识短视频的创作者核实一个知识点。你的报告会被写成约 {topic_minutes} 分钟的口播文稿，文稿里的每个事实都要能追溯到你引用的网页，所以每个关键判断都要给出原始网址。
+
+    ## 知识点
+    - 标题：{topic_title}
+    - 核心角度：{topic_angle}
+    - 目标受众：{topic_audience}
+    - 为什么有人在乎：{topic_why}
+
+    ## 任务
+    只围绕这一个点：先直接回答它要回答的问题，再给出最关键的一个数字或例子，以及它成立的前提和例外。不展开相邻话题。
+    证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。
+    输出语言：{language}。
+
+    ## 证据规则
+    1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源。
+    2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
+    3. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
+    4. 数字照来源原样写，注明口径。
+
+    ## 输出结构
+    ### 1. 直接回答
+    ### 2. 关键事实（表格：事实 | 置信度 | 来源编号）
+    ### 3. 前提、例外与反方证据
+    ### 4. 仍未确定的问题
+    ### 5. 适合短视频的讲法（不超过 2 条）
+    ### 6. 来源清单
+    编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址
+  script_style: |
+    栏目「一个知识点」：60–120 秒只讲清楚一件事，让观众看完能自己复述。
+    - 第一句是钩子：一个具体场景、反常识的结果或观众关心的问题；不说「大家好」。
+    - 然后只讲这一个点：先给结论，再给一个最关键的数字或例子，必要时用一句话说明前提或反方。
+    - 术语第一次出现就用一句白话解释；不引入第二个新概念。
+    - 最后一句给一个本周就能做的动作。
+    - 不依赖前文：观众没有看过这个系列的其他视频。
+    - 2–4 个小节，每节 1–2 段，每段 30–100 字，口语化，适合朗读。

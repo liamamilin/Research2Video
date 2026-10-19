@@ -117,7 +117,7 @@ def _fact_text(fact_ids: list[str], known: dict) -> str:
                      for f in fact_ids if f in known)
 
 
-def rules(sections: list[dict], *, column, target_minutes: int, plan: dict | None = None,
+def rules(sections: list[dict], *, column, target_minutes: float, plan: dict | None = None,
           sheet: dict | None = None, style=None) -> list[dict]:
     """The rule checks. Without ``plan`` and ``sheet``, only those that need neither."""
     issues: list[dict] = []

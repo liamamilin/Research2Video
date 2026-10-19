@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from core.video import columns as video_columns
+from core.video import flash as video_flash
 from core.video import store
 from core.video import topics as video_topics
 from core.video.adapt import styles as video_styles
@@ -85,9 +86,13 @@ def list_styles(user=Depends(require_viewer)) -> dict:
 
 
 @router.get("/topics")
-def list_topics(round: Optional[str] = None, user=Depends(require_viewer)) -> dict:
-    """Content-opportunity topics of a round (the latest by default)."""
-    round_date, topics = video_topics.load(get_settings().paths.output_dir, round)
+def list_topics(round: Optional[str] = None, source: str = "opportunities",
+                user=Depends(require_viewer)) -> dict:
+    """Topics of a round (the latest by default): content opportunities, or ``source=flash`` for flash-news items."""
+    if source not in ("opportunities", "flash"):
+        raise HTTPException(422, detail=ApiError.make("unknown_source", "source 应为 opportunities 或 flash"))
+    loader = video_flash.load if source == "flash" else video_topics.load
+    round_date, topics = loader(get_settings().paths.output_dir, round)
     used = store.topic_ids_in_use()
     return {
         "round": round_date,
@@ -112,6 +117,8 @@ class ScriptCreateIn(BaseModel):
     column: str = "deep_dive"
     topic_id: Optional[str] = Field(default=None, description="A content-opportunity topic id, e.g. 2026-09-29/C3")
     topic: Optional[TopicIn] = None
+    from_script: Optional[str] = Field(
+        default=None, description="Write from this script's research report instead of researching again")
 
 
 @router.post("/scripts", status_code=202)
@@ -128,6 +135,11 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
     else:
         topic = {"id": None, "title": body.topic.title.strip(),
                  "fields": {"核心角度": body.topic.angle.strip(), "目标受众": body.topic.audience.strip()}}
+    if body.from_script is not None:
+        parent = store.get_script(body.from_script)
+        if parent is None or not parent.get("report_path"):
+            raise HTTPException(422, detail=ApiError.make("unknown_parent", "找不到这篇文稿，或它还没有研究报告"))
+        topic = {**topic, "from_report": parent["report_path"], "parent_script": parent["id"]}
     script = video_workflow.start(body.column, topic, started_by=user["username"])
     audit.log("video_script_create", user=user["username"], target=script["id"], result="started",
               ip=request.client.host if request.client else None)

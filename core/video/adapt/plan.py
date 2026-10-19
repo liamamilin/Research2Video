@@ -36,7 +36,7 @@ MIN_FACTS = 8
 GOALS = (3, 5)
 
 
-def fact_budget(target_minutes: int, voice: str | None = None) -> int:
+def fact_budget(target_minutes: float, voice: str | None = None) -> int:
     return max(MIN_FACTS, length.budget_for(target_minutes, voice) // UNITS_PER_FACT)
 
 
@@ -155,7 +155,7 @@ class _Plan(BaseModel):
     fit: _Fit = Field(default_factory=_Fit)
 
 
-def _request(sheet: dict, column, topic: dict, style, target_minutes: int) -> str:
+def _request(sheet: dict, column, topic: dict, style, target_minutes: float) -> str:
     fields = topic.get("fields") or {}
     topic_lines = "\n".join(f"- {k}：{v}" for k, v in (
         ("选题", topic.get("title", "")), ("核心角度", fields.get("核心角度", "")),
@@ -185,7 +185,7 @@ def _known_ids(values, known: dict, unknown: set[str]) -> list[str]:
     return [f for f in ids if f in known]
 
 
-def check(plan: dict, sheet: dict, column, target_minutes: int) -> list[str]:
+def check(plan: dict, sheet: dict, column, target_minutes: float) -> list[str]:
     """Structural problems worth one retry. Unknown fact ids are removed in place."""
     known = facts_by_id(sheet)
     problems: list[str] = []
@@ -256,7 +256,7 @@ def check(plan: dict, sheet: dict, column, target_minutes: int) -> list[str]:
     return problems
 
 
-def make(client, sheet: dict, column, topic: dict, style, target_minutes: int) -> tuple[dict, list[str]]:
+def make(client, sheet: dict, column, topic: dict, style, target_minutes: float) -> tuple[dict, list[str]]:
     """(plan, problems left after one retry, plus a scope warning the plan itself raised)."""
     request = _request(sheet, column, topic, style, target_minutes)
     plan = call_json(client, SYSTEM_PROMPT, request, _Plan, temperature=0.4).model_dump()

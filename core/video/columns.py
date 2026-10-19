@@ -26,7 +26,7 @@ class Column:
     key: str
     name: str
     description: str
-    target_minutes: int
+    target_minutes: float
     video_form: str
     research_prompt: str
     script_style: str
@@ -81,9 +81,10 @@ def load(config_dir: str) -> dict[str, Column]:
         if not isinstance(raw, dict):
             raise ColumnError(f"栏目 {key} 的配置必须是映射")
         try:
-            minutes = int(raw.get("target_minutes", 6))
+            minutes = float(raw.get("target_minutes", 6))
         except (TypeError, ValueError) as exc:
-            raise ColumnError(f"栏目 {key} 的 target_minutes 不是整数") from exc
+            raise ColumnError(f"栏目 {key} 的 target_minutes 不是数字") from exc
+        minutes = int(minutes) if minutes == int(minutes) else minutes
         if not MIN_MINUTES <= minutes <= MAX_MINUTES:
             raise ColumnError(f"栏目 {key} 的 target_minutes 应在 {MIN_MINUTES}–{MAX_MINUTES} 之间")
         form = str(raw.get("video_form", "auto"))
