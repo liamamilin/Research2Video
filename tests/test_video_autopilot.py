@@ -355,3 +355,24 @@ def test_a_held_draft_the_user_approves_goes_on_to_its_render(pilot_env, monkeyp
     assert item_of(run["id"], 0)["state"] == "WORKING" and ap.get_run(run["id"])["status"] == "RUNNING"
     pilot.tick()
     assert len(store.list_renders(script_id)) == 1
+
+
+def test_a_failed_render_is_submitted_once_more_then_held(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id)
+    pilot.tick()  # approved
+    pilot.tick()  # first render
+    for expected in (2, 2):
+        render = store.list_renders(script_id)[0]
+        store.update_render(render["id"], status="FAILED", error_message="AutoVideo 规划失败")
+        pilot.tick()
+        assert len(store.list_renders(script_id)) == expected
+        if expected == 2:
+            break
+    second = [r for r in store.list_renders(script_id) if r["status"] != "FAILED"][0]
+    store.update_render(second["id"], status="FAILED", error_message="又失败了")
+    pilot.tick()
+    assert len(store.list_renders(script_id)) == 2
+    assert item_of(run["id"], 0)["state"] == "HELD" and "出片失败" in item_of(run["id"], 0)["note"]

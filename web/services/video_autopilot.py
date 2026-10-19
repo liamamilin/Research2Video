@@ -36,6 +36,8 @@ logger = logging.getLogger("ai_research.web.video_autopilot")
 
 #: A stage that fails is retried this many times, then the item is held for the user.
 MAX_RETRIES = 2
+#: A render AutoVideo failed is submitted again this many times (a render is 15-30 minutes of its time).
+RENDER_RETRIES = 1
 #: Scripts researching at once (each research uses search quota); renders go one at a time.
 MAX_SCRIPTS = 2
 MAX_RENDERS = 1
@@ -219,7 +221,7 @@ def _render_step(item: dict, script: dict, can_start_render: bool, took: dict) -
         video_render.start(active[0]["id"])  # no-op when this process already follows it
         return took
     failed = [r for r in current if r["status"] in ("FAILED", "CANCELLED")]
-    if len(failed) > MAX_RETRIES:
+    if len(failed) > RENDER_RETRIES:
         _hold(item, f"出片失败 {len(failed)} 次：{failed[0].get('error_message')}")
         return took
     if not can_start_render:
