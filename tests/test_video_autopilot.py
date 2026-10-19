@@ -244,3 +244,31 @@ def test_api_start_a_batch_plan_it_weekly_and_cancel(client, video_env):
     run_id = overview["runs"][0]["id"]
     assert client.post(f"/api/video/autopilot/runs/{run_id}/cancel", headers=_csrf(client)).json()["status"] == "CANCELLED"
     assert client.delete(f"/api/video/autopilot/plans/{plan.json()['id']}", headers=_csrf(client)).status_code == 200
+
+
+def test_the_dispatcher_wakes_the_console_only_while_the_pipeline_has_work(video_env, monkeypatch):
+    """The scheduler process runs without the web app; it reads video.db and knocks on the gateway."""
+    from core import schedule_runner as runner
+    from web.settings import get_settings
+
+    state_dir = get_settings().paths.state_dir
+    runtime = runner.Runtime(str(video_env), state_dir, str(video_env / "jobs"), str(video_env / "config"), str(video_env / "logs"))
+    knocks: list[str] = []
+
+    class Conn:
+        def __init__(self, host, port, timeout=None): knocks.append(f"{host}:{port}")
+        def request(self, method, path): knocks.append(path)
+        def getresponse(self): return type("R", (), {"read": lambda self: b""})()
+        def close(self): pass
+
+    monkeypatch.setattr("http.client.HTTPConnection", Conn)
+    monkeypatch.setattr(runner, "_last_poke", 0.0)
+    assert runner.poke_autopilot(runtime, 1000.0) is False and knocks == []  # nothing to do
+    plan = pilot.save_plan("每周一批", "0 6 * * 1", {"picks": [{"column": "flash", "count": 1, "source": "flash"}],
+                                                   "refresh": False})
+    assert runner.poke_autopilot(runtime, plan["next_fire"] - 10, interval=0) is False  # not due yet
+    assert runner.poke_autopilot(runtime, plan["next_fire"] + 1, interval=0) is True
+    assert knocks == ["127.0.0.1:8765", "/api/health"]
+    assert runner.poke_autopilot(runtime, plan["next_fire"] + 2) is False  # throttled
+    pilot.start_run({"picks": [{"column": "flash", "count": 1, "source": "flash"}], "refresh": False})
+    assert runner.autopilot_due(state_dir, 0.0) is True  # a running batch keeps the console awake

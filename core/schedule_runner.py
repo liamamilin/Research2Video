@@ -90,6 +90,46 @@ def spawn_worker(runtime: Runtime, run: dict) -> None:
     threading.Thread(target=process.wait, daemon=True).start()
 
 
+_last_poke = 0.0
+
+
+def autopilot_due(state_dir: str, now: float) -> bool:
+    """Whether the video pipeline has something to do: a weekly plan that is due, or a batch still running.
+
+    Reads video.db directly (stdlib only) so this works while the web app is down."""
+    import sqlite3
+    path = Path(state_dir) / 'video.db'
+    if not path.is_file():
+        return False
+    try:
+        with sqlite3.connect(f'file:{path}?mode=ro', uri=True, timeout=2) as db:
+            if db.execute("SELECT 1 FROM autopilot_runs WHERE status = 'RUNNING' LIMIT 1").fetchone():
+                return True
+            return bool(db.execute("SELECT 1 FROM autopilot_plans WHERE enabled = 1 AND next_fire IS NOT NULL"
+                                   " AND next_fire <= ? LIMIT 1", (now,)).fetchone())
+    except sqlite3.Error:
+        return False
+
+
+def poke_autopilot(runtime: Runtime, now: float, interval: float = 30.0, port: int = 8765) -> bool:
+    """Wake the console (through its gateway, which starts it on demand) while the video pipeline has work.
+
+    The pipeline itself runs inside the app; this only makes sure the app is up to run it."""
+    global _last_poke
+    if now - _last_poke < interval or not autopilot_due(runtime.state_dir, now):
+        return False
+    _last_poke = now
+    import http.client
+    try:
+        conn = http.client.HTTPConnection('127.0.0.1', port, timeout=5)
+        conn.request('GET', '/api/health')
+        conn.getresponse().read()
+        conn.close()
+    except OSError:
+        pass  # the gateway answers "starting" or is down; the next tick asks again
+    return True
+
+
 def dispatch_once(runtime: Runtime, store: ScheduleStore, now: float | None = None, spawn=spawn_worker) -> int:
     """Recover dead claims, enqueue due slots, and dispatch at most two workers."""
     now = time.time() if now is None else now
@@ -105,6 +145,10 @@ def dispatch_once(runtime: Runtime, store: ScheduleStore, now: float | None = No
             launched += 1
         except Exception as exc:
             store.finish(run['id'], 'failed', f'启动执行进程失败：{exc}', now=now)
+    try:
+        poke_autopilot(runtime, now)
+    except Exception:
+        logger.exception('Video pipeline wake-up failed')
     store.heartbeat({'checked_at': now, 'status': 'ok', 'pid': os.getpid(), 'runtime': runtime.identity()})
     return launched
 

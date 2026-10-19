@@ -242,7 +242,13 @@ def tick() -> int:
     try:
         with file_lock(os.path.join(get_settings().paths.state_dir, "autopilot-tick"), timeout=0):
             fire_due_plans()
-            return sum(_tick_run(run) for run in ap.list_runs(status="RUNNING"))
+            runs = ap.list_runs(status="RUNNING")
+            if runs:  # a batch in flight counts as use of the console: the launcher's idle watchdog must not close it
+                from core import activity
+
+                activity.use_state_dir(get_settings().paths.state_dir)
+                activity.mark_activity()
+            return sum(_tick_run(run) for run in runs)
     except TimeoutError:
         return 0
 
