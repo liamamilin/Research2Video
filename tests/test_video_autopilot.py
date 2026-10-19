@@ -306,3 +306,38 @@ def test_api_archiving_hides_a_script_without_deleting_it(client, video_env):
     assert "2026-10-19/F9" in store.topic_ids_in_use()  # still counts as written
     client.post(f"/api/video/scripts/{script['id']}/archive", headers=_csrf(client), json={"archived": False})
     assert len(client.get("/api/video/scripts").json()) == 2
+
+
+def test_reference_videos_keep_only_single_video_pages():
+    from core.search import SearchResult
+    from core.video import reference
+
+    assert reference.platform_of("https://www.bilibili.com/video/BV1xx411c7mD/") == "B 站"
+    assert reference.platform_of("https://www.youtube.com/watch?v=abc123def45") == "YouTube"
+    assert reference.platform_of("https://youtu.be/abc123def45") == "YouTube"
+    assert reference.platform_of("https://space.bilibili.com/123") is None
+    assert reference.platform_of("https://www.youtube.com/@channel") is None
+    assert reference.platform_of("https://notbilibili.com/video/BV1xx") is None
+
+    class Client:
+        calls = 1
+
+        def search(self, queries, objective=""):
+            return [SearchResult("别人讲缓存", "https://www.bilibili.com/video/BV1xx411c7mD", "2026-10-01", ["讲提示缓存。"]),
+                    SearchResult("某频道", "https://space.bilibili.com/1"),
+                    SearchResult("别人讲缓存", "https://www.bilibili.com/video/BV1xx411c7mD")]
+
+    found = reference.find(Client(), "提示缓存", limit=5)
+    assert [v["platform"] for v in found] == ["B 站"] and found[0]["snippet"] == "讲提示缓存。"
+
+
+def test_api_reference_search_returns_links_only(client, video_env, monkeypatch):
+    from tests.test_video_scripts import _login
+    from core.search import SearchResult, SearchClient
+
+    monkeypatch.setattr(SearchClient, "search", lambda self, queries, objective="", after_date=None: [
+        SearchResult("别人讲缓存", "https://www.bilibili.com/video/BV1xx411c7mD", None, ["x"])])
+    _login(client, "viewer", "viewer-pass-123")
+    body = client.get("/api/video/references", params={"q": "提示缓存"}).json()
+    assert body["videos"][0]["url"].startswith("https://www.bilibili.com/video/")
+    assert client.get("/api/video/references", params={"q": "短"}).status_code == 422

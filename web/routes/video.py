@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import Query, APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -635,3 +635,19 @@ def autopilot_delete_plan(plan_id: str, user=Depends(require_editor)) -> dict:
         raise _not_found("这个计划")
     audit.log("video_autopilot_plan_delete", user=user["username"], target=plan_id, result="deleted")
     return {"deleted": plan_id}
+
+
+# --- Reference videos ------------------------------------------------------------
+
+
+@router.get("/references")
+def reference_videos(q: str = Query(min_length=4, max_length=120), limit: int = Query(default=8, ge=1, le=20),
+                     user=Depends(require_viewer)) -> dict:
+    """Other people's videos on a topic (B 站, YouTube) found by a web search: titles and links only, nothing
+    downloaded. Costs one search run."""
+    from core.config import load_system_config
+    from core.search import SearchClient, SearchConfig
+    from core.video import reference
+
+    client = SearchClient(SearchConfig.from_system(load_system_config(get_settings().paths.config_dir)))
+    return {"query": q, "videos": reference.find(client, q, limit=limit), "searches": client.calls}

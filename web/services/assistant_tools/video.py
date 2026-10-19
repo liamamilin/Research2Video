@@ -16,7 +16,7 @@ COSTS = {
 
 
 class VideoQuery(Arguments):
-    action: Literal['board', 'list', 'find', 'get', 'topics', 'cells', 'quality'] = 'board'
+    action: Literal['board', 'list', 'find', 'get', 'topics', 'cells', 'quality', 'references'] = 'board'
     script_id: str = ''
     text: str = ''
     status: Literal['RESEARCHING', 'WRITING', 'DRAFT', 'APPROVED', 'FAILED'] | None = None
@@ -58,6 +58,8 @@ def query(a, request, user):
         return video.list_cells(user=user)
     if a.action == 'quality':
         return video.draft_quality(user=user)
+    if a.action == 'references':
+        return video.reference_videos(q=a.text, limit=min(a.limit, 20), user=user)
     if a.action == 'topics':
         return video.list_topics(source=a.source, user=user)
     if a.action == 'get':
@@ -131,7 +133,7 @@ def change(a, request, user):
 
 
 TOOLS = {
-    'query_video': Tool(VideoQuery, '查视频流水线：board各阶段数量和待处理清单；list/find按状态或标题查文稿；get一篇文稿的状态、审校摘要、成片、发布记录、复核；topics快讯或内容机会候选（含是否已写稿/已发布）；cells可选的栏目格子及状态；quality初稿被改动的程度。只查内部数据，不上网找视频。', query, label='查询视频'),
+    'query_video': Tool(VideoQuery, '查视频流水线：board各阶段数量和待处理清单；list/find按状态或标题查文稿；get一篇文稿的状态、审校摘要、成片、发布记录、复核；topics快讯或内容机会候选（含是否已写稿/已发布）；cells可选的栏目格子及状态；quality初稿被改动的程度。references在B站和YouTube找别人做的参考视频（text是主题；只返回标题和链接，不下载；花一次搜索额度，开始前说一句）；其余都只查内部数据。', query, label='查询视频'),
     'create_video': Tool(VideoCreate, '用栏目+选题开始一篇文稿（盘点用topic_ids，对比用subjects+dimensions，快讯/深度用topic_id或title）。会消耗搜索额度和数分钟，开始前先说明；只写到草稿，不会定稿或出片。返回已启动回执，需再查实际状态。', create, 'editor', True, '创建视频文稿'),
     'manage_video': Tool(VideoChange, '对已有文稿：approve定稿（只在用户明确说定稿时）、restyle换风格重写、recheck发布前复核（快讯）、render生成成片、add_publication记录用户提供的B站链接和日期、delete_publication删除记录。不会向任何平台发布。render/recheck/restyle开始前说明耗时，返回只代表已启动。', change, 'editor', True, '管理视频文稿'),
 }
