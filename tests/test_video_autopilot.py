@@ -341,3 +341,17 @@ def test_api_reference_search_returns_links_only(client, video_env, monkeypatch)
     body = client.get("/api/video/references", params={"q": "提示缓存"}).json()
     assert body["videos"][0]["url"].startswith("https://www.bilibili.com/video/")
     assert client.get("/api/video/references", params={"q": "短"}).status_code == 422
+
+
+def test_a_held_draft_the_user_approves_goes_on_to_its_render(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id, serious=1)
+    pilot.tick()
+    assert item_of(run["id"], 0)["state"] == "HELD" and ap.get_run(run["id"])["status"] == "DONE"
+    store.update_script(script_id, status="APPROVED", approved_version=1)  # the user read it and approved
+    pilot.tick()
+    assert item_of(run["id"], 0)["state"] == "WORKING" and ap.get_run(run["id"])["status"] == "RUNNING"
+    pilot.tick()
+    assert len(store.list_renders(script_id)) == 1

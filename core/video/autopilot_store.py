@@ -175,3 +175,11 @@ def used_topic_ids() -> set[str]:
     with connect() as conn:
         rows = conn.execute("SELECT topic FROM autopilot_items WHERE state NOT IN ('FAILED', 'CANCELLED')").fetchall()
     return {json.loads(r["topic"]).get("id") for r in rows} - {None}
+
+
+def held_items(limit: int = 50) -> list[dict]:
+    """Items waiting for the user, newest first (the user may have approved their script since)."""
+    with connect() as conn:
+        rows = conn.execute("SELECT * FROM autopilot_items WHERE state = 'HELD' ORDER BY updated_at DESC LIMIT ?",
+                            (limit,)).fetchall()
+    return [_dec(r, _ITEM_JSON) for r in rows]

@@ -242,6 +242,7 @@ def tick() -> int:
     try:
         with file_lock(os.path.join(get_settings().paths.state_dir, "autopilot-tick"), timeout=0):
             fire_due_plans()
+            reopen_approved()
             runs = ap.list_runs(status="RUNNING")
             if runs:  # a batch in flight counts as use of the console: the launcher's idle watchdog must not close it
                 from core import activity
@@ -251,6 +252,19 @@ def tick() -> int:
             return sum(_tick_run(run) for run in runs)
     except TimeoutError:
         return 0
+
+
+def reopen_approved() -> int:
+    """A held item whose script the user has since approved goes on to its render, in its batch."""
+    reopened = 0
+    for item in ap.held_items():
+        script = store.get_script(item["script_id"]) if item["script_id"] else None
+        if script and script["status"] == "APPROVED" and not any(
+                r["status"] in ("COMPLETED", *store.ACTIVE_RENDER_STATUSES) for r in store.list_renders(script["id"])):
+            ap.update_item(item["id"], state="WORKING", note="你已定稿，继续出片")
+            ap.update_run(item["run_id"], status="RUNNING")
+            reopened += 1
+    return reopened
 
 
 def _tick_run(run: dict) -> int:
