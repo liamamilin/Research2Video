@@ -59,6 +59,8 @@ class Column:
     #: own focus is added when it is rendered.
     creative_intent: dict = field(default_factory=dict)
     topic_kind: str = "single"
+    #: A flash-news script is checked again just before it is published (a search for changes since it was written).
+    recheck: bool = False
 
     def as_dict(self) -> dict:
         return {
@@ -76,6 +78,7 @@ class Column:
             "audience": self.audience,
             "allowed_forms": list(self.allowed_forms) or [self.video_form],
             "topic_kind": self.topic_kind,
+            "recheck": self.recheck,
         }
 
 
@@ -229,6 +232,7 @@ def build(key: str, raw: dict) -> Column:
         allowed_forms=forms,
         creative_intent=_intent(key, raw.get("creative_intent")),
         topic_kind=topic_kind,
+        recheck=_flag(key, "recheck", raw.get("recheck")),
     )
 
 

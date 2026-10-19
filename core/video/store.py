@@ -132,6 +132,38 @@ def init_db() -> None:
                 meta TEXT NOT NULL DEFAULT '{}',
                 created_at TEXT NOT NULL
             );
+            -- Where a script's video went up (a script may be published more than once).
+            CREATE TABLE IF NOT EXISTS publications (
+                id TEXT PRIMARY KEY,
+                script_id TEXT NOT NULL,
+                version INTEGER,
+                render_id TEXT,
+                platform TEXT NOT NULL DEFAULT 'bilibili',
+                url TEXT NOT NULL,
+                published_on TEXT NOT NULL,
+                title TEXT NOT NULL DEFAULT '',
+                note TEXT NOT NULL DEFAULT '',
+                recorded_by TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_publications_script ON publications(script_id);
+            -- A before-publishing check that what a flash script says still holds (a web search over its claims).
+            CREATE TABLE IF NOT EXISTS rechecks (
+                id TEXT PRIMARY KEY,
+                script_id TEXT NOT NULL,
+                version INTEGER NOT NULL,
+                status TEXT NOT NULL,
+                verdict TEXT,
+                summary TEXT NOT NULL DEFAULT '',
+                job TEXT NOT NULL DEFAULT '',
+                report_path TEXT NOT NULL DEFAULT '',
+                error TEXT,
+                started_by TEXT NOT NULL DEFAULT '',
+                heartbeat_at REAL,
+                created_at TEXT NOT NULL,
+                finished_at TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_rechecks_script ON rechecks(script_id);
             -- One render in flight per script.
             CREATE UNIQUE INDEX IF NOT EXISTS idx_renders_one_active ON renders(script_id)
                 WHERE status IN ('SUBMITTING', 'QUEUED', 'RUNNING', 'DOWNLOADING');
@@ -251,7 +283,106 @@ def fail_interrupted(stale_after: float = STALE_AFTER_SECONDS) -> int:
             "UPDATE scripts SET status = 'FAILED', stage = NULL, error = ?, updated_at = ?" + where,
             ("服务重启，研究或写稿被中断；可以重新生成。", _now(), stale),
         ).rowcount
-        return restyled + failed
+    return restyled + failed + fail_interrupted_rechecks()
+
+
+# --- Publications and rechecks ------------------------------------------------------
+
+
+def add_publication(script_id: str, *, url: str, published_on: str, version: Optional[int] = None,
+                    render_id: Optional[str] = None, platform: str = "bilibili", title: str = "", note: str = "",
+                    recorded_by: str = "") -> dict:
+    pub_id = uuid.uuid4().hex
+    with connect(write=True) as conn:
+        conn.execute(
+            "INSERT INTO publications (id, script_id, version, render_id, platform, url, published_on, title, note,"
+            " recorded_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (pub_id, script_id, version, render_id, platform, url, published_on, title, note, recorded_by, _now()),
+        )
+    return get_publication(pub_id)
+
+
+def get_publication(pub_id: str) -> dict | None:
+    with connect() as conn:
+        row = conn.execute("SELECT * FROM publications WHERE id = ?", (pub_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def list_publications(script_id: str) -> list[dict]:
+    with connect() as conn:
+        rows = conn.execute("SELECT * FROM publications WHERE script_id = ? ORDER BY published_on DESC, created_at DESC",
+                            (script_id,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def delete_publication(pub_id: str) -> bool:
+    with connect(write=True) as conn:
+        return conn.execute("DELETE FROM publications WHERE id = ?", (pub_id,)).rowcount > 0
+
+
+def published_script_ids() -> set[str]:
+    with connect() as conn:
+        return {r["script_id"] for r in conn.execute("SELECT DISTINCT script_id FROM publications")}
+
+
+def published_topic_ids() -> set[str]:
+    """Topic ids whose script has been published."""
+    with connect() as conn:
+        rows = conn.execute("SELECT topic FROM scripts WHERE id IN (SELECT script_id FROM publications)").fetchall()
+    return {json.loads(r["topic"]).get("id") for r in rows} - {None}
+
+
+class ActiveRecheckError(RuntimeError):
+    pass
+
+
+def create_recheck(script_id: str, version: int, started_by: str = "") -> dict:
+    """Record a recheck as RUNNING; one per script at a time."""
+    with connect(write=True) as conn:
+        if conn.execute("SELECT 1 FROM rechecks WHERE script_id = ? AND status = 'RUNNING'", (script_id,)).fetchone():
+            raise ActiveRecheckError("这篇文稿正在复核")
+        recheck_id = uuid.uuid4().hex
+        conn.execute(
+            "INSERT INTO rechecks (id, script_id, version, status, started_by, heartbeat_at, created_at)"
+            " VALUES (?, ?, ?, 'RUNNING', ?, ?, ?)",
+            (recheck_id, script_id, version, started_by, time.time(), _now()),
+        )
+    return get_recheck(recheck_id)
+
+
+def get_recheck(recheck_id: str) -> dict | None:
+    with connect() as conn:
+        row = conn.execute("SELECT * FROM rechecks WHERE id = ?", (recheck_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def list_rechecks(script_id: str) -> list[dict]:
+    with connect() as conn:
+        rows = conn.execute("SELECT * FROM rechecks WHERE script_id = ? ORDER BY created_at DESC, id DESC",
+                            (script_id,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def update_recheck(recheck_id: str, **fields: Any) -> None:
+    if not fields:
+        return
+    assignments = ", ".join(f"{k} = ?" for k in fields)
+    with connect(write=True) as conn:
+        conn.execute(f"UPDATE rechecks SET {assignments} WHERE id = ?", (*fields.values(), recheck_id))
+
+
+def touch_recheck(recheck_id: str) -> None:
+    with connect(write=True) as conn:
+        conn.execute("UPDATE rechecks SET heartbeat_at = ? WHERE id = ?", (time.time(), recheck_id))
+
+
+def fail_interrupted_rechecks(stale_after: float = STALE_AFTER_SECONDS) -> int:
+    with connect(write=True) as conn:
+        return conn.execute(
+            "UPDATE rechecks SET status = 'FAILED', error = ?, finished_at = ? WHERE status = 'RUNNING'"
+            " AND (heartbeat_at IS NULL OR heartbeat_at < ?)",
+            ("服务重启，复核被中断；可以重新复核。", _now(), time.time() - stale_after),
+        ).rowcount
 
 
 # --- Fact sheets ----------------------------------------------------------------

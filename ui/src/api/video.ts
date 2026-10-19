@@ -25,6 +25,7 @@ export interface VideoColumn {
   audience?: string;
   allowed_forms?: string[];
   topic_kind?: "single" | "roundup" | "comparison";
+  recheck?: boolean;
   status?: CellStatus;
 }
 
@@ -157,6 +158,7 @@ export interface VideoTopic {
   fields: Record<string, string>;
   score: number | null;
   scripted: boolean;
+  published?: boolean;
 }
 
 export interface ScriptParagraph {
@@ -244,6 +246,32 @@ export interface VideoScriptSummary {
   updated_at: string;
   title: string;
   length_check: LengthCheck | null;
+  published?: boolean;
+}
+
+// 发布记录和发布前复核（快讯），见 spec/video-publish.md。
+export interface Publication {
+  id: string;
+  script_id: string;
+  version: number | null;
+  render_id: string | null;
+  platform: string;
+  url: string;
+  published_on: string;
+  title: string;
+  note: string;
+  recorded_by: string;
+}
+
+export interface Recheck {
+  id: string;
+  version: number;
+  status: "RUNNING" | "DONE" | "FAILED";
+  verdict: "无变化" | "有变化" | "无法确认" | null;
+  summary: string;
+  error: string | null;
+  created_at: string;
+  finished_at: string | null;
 }
 
 export interface VideoScriptDetail extends VideoScriptSummary {
@@ -253,6 +281,8 @@ export interface VideoScriptDetail extends VideoScriptSummary {
     style?: string | null;
   })[];
   renders: VideoRender[];
+  publications?: Publication[];
+  rechecks?: Recheck[];
 }
 
 export interface AutoVideoStatus {
@@ -277,6 +307,14 @@ export interface PublishPack {
   references: { title: string; url: string; date: string }[];
   warnings: string[];
   version: number;
+  freshness?: {
+    required: boolean;
+    age_hours?: number;
+    stale?: boolean;
+    running?: boolean;
+    last?: { verdict: string; summary: string; finished_at: string; version: number } | null;
+    warnings: string[];
+  };
 }
 
 export const getPublishPack = (id: string, version?: number) =>
@@ -306,6 +344,17 @@ export interface DraftQuality {
 }
 
 export const getDraftQuality = () => api<DraftQuality>("/api/video/quality");
+
+export const addPublication = (id: string, body: { url: string; published_on?: string; note?: string }) =>
+  api<Publication>(`/api/video/scripts/${encodeURIComponent(id)}/publications`, { method: "POST", body });
+
+export const deletePublication = (id: string, publicationId: string) =>
+  api<{ deleted: string }>(`/api/video/scripts/${encodeURIComponent(id)}/publications/${encodeURIComponent(publicationId)}`, {
+    method: "DELETE",
+  });
+
+export const recheckVideoScript = (id: string) =>
+  api<Recheck>(`/api/video/scripts/${encodeURIComponent(id)}/recheck`, { method: "POST" });
 
 export const listVideoCells = () => api<VideoCell[]>("/api/video/cells");
 

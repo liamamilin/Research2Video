@@ -1083,3 +1083,144 @@ def test_api_a_failed_style_audit_keeps_the_fact_audit(client, video_env, resear
     assert script["status"] == "DRAFT"
     assert script["version_shown"]["checks"]["model_ran"] is True  # the fact audit ran
     assert any("风格审计没有完成" in p for p in script["version_shown"]["meta"]["problems"])
+
+
+# --- Publications and the pre-publish recheck -----------------------------------------
+
+
+def _approved(client, column="flash", title="Gemini 4 Argon 上线"):
+    script = store.create_script(column, {"id": "2026-10-19/F1", "title": title, "fields": {}})
+    sections = [{"title": "开场", "paragraphs": [{"text": "Google 开放了 Gemini 4 Argon，输入价 2 美元。",
+                                                 "citations": [GOOD], "evidence": "CITED"}]}]
+    store.add_version(script["id"], title=title, sections=sections, length_check=length.measure(sections, 1.25),
+                      edit_type="GENERATED")
+    store.update_script(script["id"], status="APPROVED", approved_version=1)
+    return store.get_script(script["id"])
+
+
+def test_api_a_publication_records_a_link_and_a_date_and_marks_the_script_and_topic(client, video_env):
+    script = _approved(client)
+    _login(client)
+    url = f"/api/video/scripts/{script['id']}/publications"
+    made = client.post(url, headers=_csrf(client), json={"url": "https://www.bilibili.com/video/BV1xx", "published_on": "2026-10-19"})
+    assert made.status_code == 201, made.text
+    assert made.json()["version"] == 1 and made.json()["title"] == "Gemini 4 Argon 上线" and made.json()["published_on"] == "2026-10-19"
+    detail = client.get(f"/api/video/scripts/{script['id']}").json()
+    assert [p["url"] for p in detail["publications"]] == ["https://www.bilibili.com/video/BV1xx"]
+    assert [s["published"] for s in client.get("/api/video/scripts").json()] == [True]
+    # a second upload (b23.tv short links count) is another record, newest day first
+    client.post(url, headers=_csrf(client), json={"url": "https://b23.tv/abc", "published_on": "2026-10-20"})
+    assert [p["published_on"] for p in client.get(f"/api/video/scripts/{script['id']}").json()["publications"]] == ["2026-10-20", "2026-10-19"]
+    gone = client.delete(f"{url}/{made.json()['id']}", headers=_csrf(client))
+    assert gone.status_code == 200 and len(client.get(f"/api/video/scripts/{script['id']}").json()["publications"]) == 1
+    assert client.delete(f"{url}/{made.json()['id']}", headers=_csrf(client)).status_code == 404
+
+
+@pytest.mark.parametrize("body", [
+    {"url": "ftp://www.bilibili.com/video/x"},
+    {"url": "https://evil.example.com/video/BV1"},
+    {"url": "https://notbilibili.com/video/BV1"},
+    {"url": "https://www.bilibili.com/video/BV1", "published_on": "10/19/2026"},
+    {"url": "https://www.bilibili.com/video/BV1", "published_on": "2999-01-01"},
+    {"url": "https://www.bilibili.com/video/BV1", "version": 9},
+    {"url": "https://www.bilibili.com/video/BV1", "render_id": "nope"},
+])
+def test_api_a_publication_needs_a_bilibili_link_a_real_date_and_known_version_and_render(client, video_env, body):
+    script = _approved(client)
+    _login(client)
+    assert client.post(f"/api/video/scripts/{script['id']}/publications", headers=_csrf(client), json=body).status_code in (404, 422)
+    assert client.get(f"/api/video/scripts/{script['id']}").json()["publications"] == []
+
+
+def test_api_a_published_topic_is_flagged_in_the_topic_list(client, video_env):
+    base = video_env / "output" / "flash"
+    base.mkdir(parents=True)
+    (base / "2026-10-19_ai_flash_discovery.md").write_text(FLASH_REPORT, encoding="utf-8")
+    script = _approved(client)
+    _login(client)
+    before = client.get("/api/video/topics", params={"source": "flash"}).json()["topics"][0]
+    assert before["published"] is False
+    client.post(f"/api/video/scripts/{script['id']}/publications", headers=_csrf(client), json={"url": "https://b23.tv/x"})
+    assert client.get("/api/video/topics", params={"source": "flash"}).json()["topics"][0]["published"] is True
+
+
+class RecheckResearch(FakeResearch):
+    """The recheck's search job: writes a report with the verdict it is told to."""
+
+    def __init__(self, tmp, report: str):
+        super().__init__(tmp)
+        self.report = report
+
+    def __call__(self, job_name, started_by, config_dir="config", jobs_dir="jobs", verbose=False):
+        global REPORT
+        saved, REPORT = REPORT, self.report
+        try:
+            return super().__call__(job_name, started_by, config_dir=config_dir, jobs_dir=jobs_dir, verbose=verbose)
+        finally:
+            REPORT = saved
+
+
+def test_api_a_flash_script_can_be_rechecked_and_the_verdict_reaches_the_publish_pack(client, video_env, monkeypatch):
+    script = _approved(client)
+    (video_env / "output" / "video").mkdir(parents=True, exist_ok=True)
+    (video_env / "output" / "video" / "r.md").write_text(REPORT, encoding="utf-8")
+    store.update_script(script["id"], report_path="output/video/r.md")
+    fake = RecheckResearch(video_env, "### 结论\n结论：有变化\n### 变化清单\n| 输入价 | 12 月涨到 4 美元 | https://x | 2026-10-20 |\n### 建议\n改第一句")
+    monkeypatch.setattr("web.runner.executor.start_job", fake)
+    _login(client)
+    made = client.post(f"/api/video/scripts/{script['id']}/recheck", headers=_csrf(client))
+    assert made.status_code == 202, made.text
+    for _ in range(100):
+        rows = client.get(f"/api/video/scripts/{script['id']}").json()["rechecks"]
+        if rows and rows[0]["status"] != "RUNNING":
+            break
+        time.sleep(0.1)
+    assert rows[0]["status"] == "DONE" and rows[0]["verdict"] == "有变化" and "12 月涨到 4 美元" in rows[0]["summary"]
+    spec = (video_env / "jobs" / f"{fake.jobs[0]}.yaml").read_text(encoding="utf-8")
+    assert "Google 开放了 Gemini 4 Argon" in spec and GOOD in spec and "{script}" not in spec
+    pack = client.get(f"/api/video/scripts/{script['id']}/publish").json()
+    assert pack["freshness"]["required"] and pack["freshness"]["last"]["verdict"] == "有变化"
+    assert any("复核发现稿子里的事实有变化" in w for w in pack["warnings"])
+
+
+def test_api_recheck_is_only_for_approved_flash_scripts(client, video_env):
+    flash = _approved(client)
+    deep = _approved(client, "deep_dive", "深度解读的选题")
+    draft = store.create_script("flash", {"id": None, "title": "没定稿的", "fields": {}})
+    _login(client)
+    assert client.post(f"/api/video/scripts/{deep['id']}/recheck", headers=_csrf(client)).status_code == 409
+    assert client.post(f"/api/video/scripts/{draft['id']}/recheck", headers=_csrf(client)).status_code == 409
+    assert client.post("/api/video/scripts/nope/recheck", headers=_csrf(client)).status_code == 404
+    assert flash["id"]
+
+
+def test_recheck_parses_a_verdict_and_says_so_when_there_is_none():
+    from web.services import video_recheck
+
+    assert video_recheck.parse("### 结论\n结论：无变化\n### 变化清单\n无")[0] == "无变化"
+    assert video_recheck.parse("结论: 无法确认\n来源打不开")[0] == "无法确认"
+    verdict, summary = video_recheck.parse("我查了一下，好像没什么事")
+    assert verdict == "无法确认" and "没有给出可识别的结论" in summary
+
+
+def test_freshness_asks_for_a_recheck_after_a_day_and_trusts_a_recent_one():
+    from datetime import datetime, timezone
+    from web.services import video_recheck
+
+    def stamp(hours_ago, now):
+        return datetime.fromtimestamp(now - hours_ago * 3600, timezone.utc).strftime("%Y-%m-%dT%H:%M:%S%z")
+
+    now = 1_800_000_000.0
+    column = video_columns.get(str(ROOT / "config"), "flash")
+    script = {"created_at": stamp(30, now)}
+    version = {"version": 1}
+    old = video_recheck.freshness(script, version, column, [], now)
+    assert old["stale"] and any("建议点「发布前复核」" in w for w in old["warnings"])
+    young = video_recheck.freshness({"created_at": stamp(5, now)}, version, column, [], now)
+    assert young["warnings"] == [] and not young["stale"]
+    done = {"version": 1, "status": "DONE", "verdict": "无变化", "summary": "", "id": "r", "finished_at": stamp(2, now)}
+    assert video_recheck.freshness(script, version, column, [done], now)["warnings"] == []
+    stale = {**done, "finished_at": stamp(26, now)}
+    assert any("上次复核是 26 小时前" in w for w in video_recheck.freshness(script, version, column, [stale], now)["warnings"])
+    deep = video_columns.get(str(ROOT / "config"), "deep_dive")
+    assert video_recheck.freshness(script, version, deep, [], now) == {"required": False, "warnings": []}

@@ -27,6 +27,7 @@
     60,
     140
    ],
+   "recheck": false,
    "required_roles": [
     "钩子",
     "反方",
@@ -112,6 +113,7 @@
     20,
     90
    ],
+   "recheck": true,
    "required_roles": [
     "钩子",
     "行动"
@@ -209,6 +211,7 @@
     30,
     100
    ],
+   "recheck": false,
    "required_roles": [
     "钩子",
     "行动"

@@ -322,7 +322,7 @@ export function VideoScriptsPage() {
                       onClick={() => create({ topic_id: t.id }, t.id)}
                       title={t.scripted ? "这个选题已经写过" : undefined}
                     >
-                      {t.scripted ? "已写过" : busy === t.id ? "开始中..." : "写这一篇"}
+                      {t.published ? "已发布" : t.scripted ? "已写过" : busy === t.id ? "开始中..." : "写这一篇"}
                     </button>
                   </div>
                 ))}
@@ -397,6 +397,7 @@ export function VideoScriptsPage() {
                     <Link to={`/video/${s.id}`} className="text-accent hover:underline">
                       {s.title}
                     </Link>
+                    {s.published ? <span className="badge border border-success/30 bg-success/15 text-success ml-2">已发布</span> : null}
                   </td>
                   <td className="px-4 py-2">
                     <span className={cn("badge border", STATUS_CLASS[s.status])}>

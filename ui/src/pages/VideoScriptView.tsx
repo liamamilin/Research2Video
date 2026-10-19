@@ -424,7 +424,16 @@ export function VideoScriptViewPage() {
       ))}
 
       {detail.status === "APPROVED" ? (
-        <PublishPanel scriptId={detail.id} version={detail.approved_version ?? undefined} refreshKey={latestRender?.status} />
+        <PublishPanel
+          scriptId={detail.id}
+          version={detail.approved_version ?? undefined}
+          refreshKey={latestRender?.status}
+          canEdit={canEdit}
+          recheckEnabled={Boolean(detail.column?.recheck)}
+          publications={detail.publications}
+          rechecks={detail.rechecks}
+          onChanged={load}
+        />
       ) : null}
 
       {detail.status === "APPROVED" || detail.renders.length ? (

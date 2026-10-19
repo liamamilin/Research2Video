@@ -114,7 +114,8 @@ def reference_lines(version: dict, report: str) -> list[dict]:
     return out
 
 
-def build(script: dict, version: dict, column, report: str, timeline: Optional[dict]) -> dict:
+def build(script: dict, version: dict, column, report: str, timeline: Optional[dict],
+          freshness: Optional[dict] = None) -> dict:
     """The pack for ``version``. ``report`` may be empty (then no references); ``timeline`` is a render's chapters.json."""
     title = str(version.get("title") or "").strip()
     chapters = chapter_lines(timeline)
@@ -159,6 +160,7 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
     if dateless:
         warnings.append(f"{len(dateless)} 个来源没有发布日期，简介里只写了网址。")
 
+    warnings += (freshness or {}).get("warnings") or []
     return {
         "title": title,
         "description": description,
@@ -169,4 +171,5 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
         "references": refs,
         "warnings": warnings,
         "version": version.get("version"),
+        "freshness": freshness or {"required": False, "warnings": []},
     }

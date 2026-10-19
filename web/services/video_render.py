@@ -167,7 +167,10 @@ def publish_pack(script: dict, version: dict, column) -> dict:
                 timeline = None
             break
     checks = video_workflow.rule_checks(version, column)
-    return publish.build(script, {**version, "checks": checks}, column, report, timeline)
+    from web.services import video_recheck
+
+    fresh = video_recheck.freshness(script, version, column, store.list_rechecks(script["id"]))
+    return publish.build(script, {**version, "checks": checks}, column, report, timeline, fresh)
 
 
 def create(script: dict, *, voice_id: Optional[str] = None) -> dict:

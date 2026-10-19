@@ -60,12 +60,13 @@ def _render_out(render: dict) -> dict:
     }
 
 
-def _script_summary(script: dict) -> dict:
+def _script_summary(script: dict, published: Optional[set] = None) -> dict:
     current = store.get_version(script["id"], script["current_version"]) if script["current_version"] else None
     return {
         **script,
         "title": current["title"] if current else script["topic"].get("title", ""),
         "length_check": current["length_check"] if current else None,
+        "published": script["id"] in (published if published is not None else store.published_script_ids()),
     }
 
 
@@ -124,9 +125,10 @@ def list_topics(round: Optional[str] = None, source: str = "opportunities",
     loader = video_flash.load if source == "flash" else video_topics.load
     round_date, topics = loader(get_settings().paths.output_dir, round)
     used = store.topic_ids_in_use()
+    published = store.published_topic_ids()
     return {
         "round": round_date,
-        "topics": [{**t.as_dict(), "scripted": t.id in used} for t in topics],
+        "topics": [{**t.as_dict(), "scripted": t.id in used, "published": t.id in published} for t in topics],
     }
 
 
@@ -227,7 +229,8 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
 
 @router.get("/scripts")
 def list_scripts(limit: int = 100, user=Depends(require_viewer)) -> list[dict]:
-    return [_script_summary(s) for s in store.list_scripts(limit=min(max(limit, 1), 500))]
+    published = store.published_script_ids()
+    return [_script_summary(s, published) for s in store.list_scripts(limit=min(max(limit, 1), 500))]
 
 
 @router.get("/scripts/{script_id}")
@@ -246,6 +249,8 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         "version_shown": current,
         "versions": store.list_versions(script_id),
         "renders": [_render_out(r) for r in store.list_renders(script_id)],
+        "publications": store.list_publications(script_id),
+        "rechecks": store.list_rechecks(script_id)[:5],
     }
 
 
@@ -337,6 +342,92 @@ def get_publish_pack(script_id: str, version: Optional[int] = None, user=Depends
     if column is None:
         raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{script['column_key']}"))
     return video_render.publish_pack(script, shown, column)
+
+
+class PublicationIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    url: str = Field(min_length=8, max_length=500)
+    published_on: Optional[str] = Field(default=None, description="YYYY-MM-DD; today by default")
+    version: Optional[int] = None
+    render_id: Optional[str] = None
+    platform: str = Field(default="bilibili", pattern=r"^[a-z0-9_-]{1,20}$")
+    note: str = Field(default="", max_length=500)
+
+
+_BILIBILI_HOSTS = ("bilibili.com", "b23.tv")
+
+
+def _publication_fields(body: PublicationIn, script: dict) -> dict:
+    from datetime import date, datetime, timedelta
+    from urllib.parse import urlsplit
+
+    parts = urlsplit(body.url.strip())
+    host = (parts.hostname or "").lower()
+    if parts.scheme not in ("http", "https") or not host:
+        raise HTTPException(422, detail=ApiError.make("bad_url", "链接应以 http:// 或 https:// 开头"))
+    if body.platform == "bilibili" and not any(host == h or host.endswith("." + h) for h in _BILIBILI_HOSTS):
+        raise HTTPException(422, detail=ApiError.make("bad_url", "B 站的链接应在 bilibili.com 或 b23.tv 下"))
+    if body.published_on is None:
+        published_on = date.today().isoformat()
+    else:
+        try:
+            day = datetime.strptime(body.published_on, "%Y-%m-%d").date()
+        except ValueError as exc:
+            raise HTTPException(422, detail=ApiError.make("bad_date", "发布日期应为 YYYY-MM-DD")) from exc
+        if day > date.today() + timedelta(days=1):
+            raise HTTPException(422, detail=ApiError.make("bad_date", "发布日期不能在未来"))
+        published_on = body.published_on
+    version = body.version or script["approved_version"]
+    if version is not None and store.get_version(script["id"], version) is None:
+        raise _not_found("这个版本")
+    if body.render_id is not None:
+        render = store.get_render(body.render_id)
+        if render is None or render["script_id"] != script["id"]:
+            raise _not_found("这次出片")
+    return {"url": body.url.strip(), "published_on": published_on, "version": version, "render_id": body.render_id,
+            "platform": body.platform, "note": body.note.strip()}
+
+
+@router.post("/scripts/{script_id}/publications", status_code=201)
+def add_publication(script_id: str, body: PublicationIn, user=Depends(require_editor)) -> dict:
+    """Record where a script's video was published (a link and a date); nothing is posted anywhere."""
+    script = _script_or_404(script_id)
+    fields = _publication_fields(body, script)
+    shown = store.get_version(script_id, fields["version"]) if fields["version"] else None
+    made = store.add_publication(script_id, title=(shown or {}).get("title", ""), recorded_by=user["username"], **fields)
+    audit.log("video_publication_add", user=user["username"], target=script_id, result=fields["url"][:120])
+    return made
+
+
+@router.delete("/scripts/{script_id}/publications/{publication_id}")
+def delete_publication(script_id: str, publication_id: str, user=Depends(require_editor)) -> dict:
+    _script_or_404(script_id)
+    found = store.get_publication(publication_id)
+    if found is None or found["script_id"] != script_id or not store.delete_publication(publication_id):
+        raise _not_found("这条发布记录")
+    audit.log("video_publication_delete", user=user["username"], target=script_id, result=publication_id)
+    return {"deleted": publication_id}
+
+
+@router.post("/scripts/{script_id}/recheck", status_code=202)
+def recheck_script(script_id: str, user=Depends(require_editor)) -> dict:
+    """Search again for changes since a flash script was written (its approved version); reports, never blocks."""
+    from web.services import video_recheck
+
+    script = _script_or_404(script_id)
+    column = _columns().get(script["column_key"])
+    if column is None or not column.recheck:
+        raise HTTPException(409, detail=ApiError.make("no_recheck", "这个栏目不需要发布前复核"))
+    if script["status"] != "APPROVED" or not script["approved_version"]:
+        raise HTTPException(409, detail=ApiError.make("not_approved", "请先定稿再复核"))
+    version = store.get_version(script_id, script["approved_version"])
+    try:
+        made = video_recheck.start(script, version, started_by=user["username"])
+    except store.ActiveRecheckError as exc:
+        raise HTTPException(409, detail=ApiError.make("recheck_running", str(exc))) from exc
+    audit.log("video_recheck", user=user["username"], target=script_id, result=f"v{version['version']}")
+    return made
 
 
 class ApproveIn(BaseModel):
