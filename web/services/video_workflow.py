@@ -124,6 +124,10 @@ def run(script_id: str, *, started_by: str = "", llm_config: Optional[LLMConfig]
             return _run(script_id, started_by, llm_config)
     except Exception as exc:  # noqa: BLE001 - a crash must not leave it in flight
         logger.exception("video script %s crashed", script_id)
+        if (store.get_script(script_id) or {}).get("current_version"):
+            # the draft was already saved and only the audits after it broke: keep the draft
+            store.update_script(script_id, status="DRAFT", stage=None, error=f"审计没有完成：{type(exc).__name__}: {exc}")
+            return "DRAFT"
         store.update_script(script_id, status="FAILED", error=f"{type(exc).__name__}: {exc}")
         return "FAILED"
     finally:

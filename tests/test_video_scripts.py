@@ -1311,3 +1311,23 @@ def test_api_shipments_list_approved_scripts_with_their_publications(client, vid
     client.post(f"/api/video/scripts/{script['id']}/publications", headers=_csrf(client), json={"url": "https://b23.tv/x"})
     rows = client.get("/api/video/shipments").json()
     assert [p["url"] for p in rows[0]["publications"]] == ["https://b23.tv/x"] and rows[0]["warnings"] == []
+
+
+def test_a_draft_whose_audits_died_with_the_process_keeps_its_draft_and_loses_the_stage(video_env):
+    script = _approved_script("审计到一半")
+    store.update_script(script["id"], status="DRAFT", stage="事实审计", heartbeat_at=1.0)
+    assert store.fail_interrupted() == 1
+    after = store.get_script(script["id"])
+    assert after["status"] == "DRAFT" and after["stage"] is None and "审计被中断" in after["error"]
+    assert after["current_version"] == 1
+
+
+def test_a_crash_after_the_draft_was_saved_keeps_the_draft(video_env, research, llm, monkeypatch):
+    from web.services import video_workflow
+
+    llm.replies = [script_json(citations={(0, 0): [GOOD]})]
+    monkeypatch.setattr(video_workflow, "_audit_short", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
+    script = store.create_script("deep_dive", {"id": None, "title": "审计崩了", "fields": {}})
+    assert video_workflow.run(script["id"], started_by="editor", llm_config=object()) == "DRAFT"
+    after = store.get_script(script["id"])
+    assert after["current_version"] == 1 and after["status"] == "DRAFT" and "boom" in after["error"]

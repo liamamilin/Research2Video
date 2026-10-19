@@ -283,7 +283,13 @@ def fail_interrupted(stale_after: float = STALE_AFTER_SECONDS) -> int:
             "UPDATE scripts SET status = 'FAILED', stage = NULL, error = ?, updated_at = ?" + where,
             ("服务重启，研究或写稿被中断；可以重新生成。", _now(), stale),
         ).rowcount
-    return restyled + failed + fail_interrupted_rechecks()
+        # a draft shown while its audits ran: the audits died with the process, the draft stays
+        audits = conn.execute(
+            "UPDATE scripts SET stage = NULL, error = ?, updated_at = ? WHERE status = 'DRAFT' AND stage IS NOT NULL"
+            " AND (heartbeat_at IS NULL OR heartbeat_at < ?)",
+            ("服务重启，事实和风格审计被中断；审校结果只有规则检查。", _now(), stale),
+        ).rowcount
+    return restyled + failed + audits + fail_interrupted_rechecks()
 
 
 # --- Publications and rechecks ------------------------------------------------------
