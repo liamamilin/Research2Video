@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getVideoBoard, type BoardAttention, type VideoBoard } from "@/api/video";
+import { AutopilotCard } from "@/components/AutopilotCard";
 import { cn } from "@/lib/utils";
 
 const KIND: Record<BoardAttention["kind"], { label: string; cls: string }> = {
@@ -62,6 +63,8 @@ export function HomeBoardPage() {
           {board.failed ? (
             <p className="text-sm text-danger">另有 {board.failed} 篇失败，列在下面。</p>
           ) : null}
+
+          <AutopilotCard />
 
           <section className="card space-y-2">
             <h2 className="font-medium text-sm">需要你处理</h2>

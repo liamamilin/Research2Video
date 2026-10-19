@@ -443,3 +443,37 @@ export interface Shipment {
 }
 
 export const listShipments = () => api<Shipment[]>("/api/video/shipments");
+
+export interface AutopilotItem {
+  id: string;
+  slot: number;
+  column_key: string;
+  topic: { id: string | null; title: string };
+  script_id: string | null;
+  render_id: string | null;
+  state: "PENDING" | "WORKING" | "HELD" | "DONE" | "FAILED" | "CANCELLED";
+  note: string;
+  gate: { pass?: boolean; approved?: string; reasons?: string[]; ignored?: { must: number; warn: number } };
+}
+
+export interface AutopilotRun {
+  id: string;
+  status: "RUNNING" | "DONE" | "CANCELLED";
+  stage: string;
+  note: string;
+  created_at: string;
+  items: AutopilotItem[];
+}
+
+export interface AutopilotPlan {
+  id: string;
+  name: string;
+  expression: string;
+  next_fire: number | null;
+  enabled: number;
+}
+
+export const getAutopilot = () => api<{ plans: AutopilotPlan[]; runs: AutopilotRun[] }>("/api/video/autopilot");
+export const startAutopilotRun = () => api<AutopilotRun>("/api/video/autopilot/runs", { method: "POST" });
+export const cancelAutopilotRun = (id: string) =>
+  api<AutopilotRun>(`/api/video/autopilot/runs/${encodeURIComponent(id)}/cancel`, { method: "POST" });
