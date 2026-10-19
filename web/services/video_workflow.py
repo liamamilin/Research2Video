@@ -218,7 +218,8 @@ def _audit_short(script_id: str, written, report: str, column, config, review_co
     rule_issues = adapt_review.rules(written.sections, column=column, target_minutes=column.target_minutes)
     client = LLMClient(review_config or config)
     try:
-        checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues)
+        checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues,
+                                          column_style=column.script_style)
     except Exception as exc:  # noqa: BLE001 - an audit that crashes must not lose the draft
         logger.exception("fact audit of script %s failed", script_id)
         checks, note = _rules_only(rule_issues, None, written.sections), f"事实审计没有完成：{type(exc).__name__}: {exc}"

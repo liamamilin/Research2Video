@@ -93,12 +93,18 @@ class FakeLLM:
     #: the fact audit of a script written in one call is a separate call; it finds nothing unless a test queues findings
     audit_replies: list[str] = []
     audit_calls: list[list[dict]] = []
+    #: the style audit is a second call after the fact audit
+    style_replies: list[str] = []
+    style_calls: list[list[dict]] = []
 
     def __init__(self, config, cancel_token=None, progress_cb=None):
         self.usage = {"requests": 0, "total_tokens": 0}
 
     def chat(self, messages, **kwargs):
         self.usage["requests"] += 1
+        if messages[0]["content"].startswith("你是栏目风格审计员"):
+            FakeLLM.style_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.style_replies.pop(0) if FakeLLM.style_replies else '{"issues": []}')
         if messages[0]["content"].startswith("你是事实审计员"):
             FakeLLM.audit_calls.append(list(messages))
             return ChatResponse(content=FakeLLM.audit_replies.pop(0) if FakeLLM.audit_replies else '{"issues": []}')
@@ -112,6 +118,8 @@ def llm(monkeypatch):
     FakeLLM.calls = []
     FakeLLM.audit_replies = []
     FakeLLM.audit_calls = []
+    FakeLLM.style_replies = []
+    FakeLLM.style_calls = []
     monkeypatch.setattr("core.llm.LLMClient", FakeLLM)
     return FakeLLM
 
@@ -1045,3 +1053,33 @@ def test_api_quality_compares_each_approved_script_with_its_draft(client, video_
     assert body["columns"]["flash"]["scripts"] == 1
     row = body["scripts"][0]
     assert (row["unchanged"], row["edited"]) == (1, 1) and row["draft_version"] == 1 and row["approved_version"] == 2
+
+
+def test_api_a_short_script_is_also_checked_against_its_columns_style(client, video_env, research, llm):
+    key = "point_short"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    llm.style_replies = ['{"issues": [{"id": "S2P1", "quote": "讲讲讲", "rule": "S1", "severity": "一般", '
+                         '"problem": "栏目规范说不讲上限参数，这段讲了输出上限", "why": "占掉篇幅", "suggestion": "删掉这句"},'
+                         '{"id": "S9P9", "quote": "x", "rule": "S1", "problem": "越界"}]}']
+    _login(client)
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": key, "topic": {"title": "一个要查风格的选题", "angle": "x"}})
+    script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    assert script["status"] == "DRAFT", script.get("error")
+    assert len(llm.style_calls) == 1 and "栏目「一个知识点」" in llm.style_calls[0][-1]["content"]
+    style = [i for i in script["version_shown"]["checks"]["issues"] if i["rule"] == "S1"]
+    assert [(i["severity"], i["section"], i["paragraph"], i["source"]) for i in style] == [("must", 1, 0, "model")]
+    assert script["version_shown"]["checks"]["summary"]["by_audit"]["communication"]["must"] >= 1
+
+
+def test_api_a_failed_style_audit_keeps_the_fact_audit(client, video_env, research, llm):
+    key = "point_short"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    llm.style_replies = ["不是 JSON", "还是不是 JSON"]
+    _login(client)
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": key, "topic": {"title": "一个风格审计会失败的选题", "angle": "x"}})
+    script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    assert script["status"] == "DRAFT"
+    assert script["version_shown"]["checks"]["model_ran"] is True  # the fact audit ran
+    assert any("风格审计没有完成" in p for p in script["version_shown"]["meta"]["problems"])

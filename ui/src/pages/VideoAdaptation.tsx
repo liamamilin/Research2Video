@@ -38,6 +38,7 @@ export const RULE_NAME: Record<string, string> = {
   E4: "时长",
   E5: "机械路标",
   E6: "重复数字",
+  S1: "栏目风格",
   N1: "新观众疑问",
   N2: "新观众跟不上",
   N3: "测验答错",
