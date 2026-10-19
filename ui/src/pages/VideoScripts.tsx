@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
 import {
   createVideoScript,
@@ -58,7 +59,8 @@ export function VideoScriptsPage() {
 
   const [scripts, setScripts] = useState<VideoScriptSummary[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
-  const [cellId, setCellId] = useState<string>("");
+  const [params] = useSearchParams();
+  const [cellId, setCellId] = useState<string>(params.get("cell") ?? "");
   const [form, setForm] = useState<string>("");
   const [picked, setPicked] = useState<string[]>([]);
   const [roundupTitle, setRoundupTitle] = useState("");

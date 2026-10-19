@@ -23,6 +23,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
 import { cn, timeAgo } from "@/lib/utils";
+import { nextStep, TAB_LABEL, type ScriptTab } from "./videoNext";
 import { ChecksPanel, DescriptionPanel, FactChips, IssueList, PlanPanel, StylePanel } from "./VideoAdaptation";
 import { PublishPanel } from "./VideoPublish";
 import { STATUS_CLASS, STATUS_LABEL, minutes } from "./VideoScripts";
@@ -150,6 +151,23 @@ export function VideoScriptViewPage() {
   const isCurrent = shown?.version === detail.current_version;
   const check = shown?.length_check;
   const problems = shown?.meta?.problems ?? [];
+  const step = nextStep(detail);
+  const staged = ["DRAFT", "APPROVED"].includes(detail.status);
+  const tabs: ScriptTab[] = !staged
+    ? []
+    : detail.status === "APPROVED"
+      ? ["draft", "review", "video", "publish"]
+      : detail.renders.length
+        ? ["draft", "review", "video"]
+        : ["draft", "review"];
+  const asked = search.get("tab") as ScriptTab | null;
+  const tab: ScriptTab = editing || !staged ? "draft" : asked && tabs.includes(asked) ? asked : step.tab;
+  const goTab = (t: ScriptTab) =>
+    setSearch((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", t);
+      return next;
+    });
 
   function startEdit() {
     if (!shown) return;
@@ -277,6 +295,43 @@ export function VideoScriptViewPage() {
         ) : null}
       </div>
 
+      <section
+        aria-label="下一步"
+        className={cn(
+          "card text-sm flex flex-wrap items-center gap-x-3 gap-y-2",
+          step.tone === "bad" && "border-danger/40",
+          step.tone === "todo" && "border-accent",
+        )}
+      >
+        <span className="text-text-muted">下一步</span>
+        <span className="flex-1 min-w-0">{step.text}</span>
+        {staged && step.tab !== tab ? (
+          <button className="btn text-xs" onClick={() => goTab(step.tab)}>
+            去「{TAB_LABEL[step.tab]}」
+          </button>
+        ) : null}
+      </section>
+
+      {tabs.length ? (
+        <div role="tablist" className="flex gap-1 border-b border-border">
+          {tabs.map((t) => (
+            <button
+              key={t}
+              role="tab"
+              aria-selected={t === tab}
+              disabled={editing}
+              onClick={() => goTab(t)}
+              className={cn(
+                "px-3 py-1.5 text-sm -mb-px border-b-2",
+                t === tab ? "border-accent text-text font-medium" : "border-transparent text-text-muted hover:text-text",
+              )}
+            >
+              {TAB_LABEL[t]}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       {["RESEARCHING", "WRITING"].includes(detail.status) ? (
         <section className="card text-sm space-y-1">
           <p>
@@ -308,7 +363,7 @@ export function VideoScriptViewPage() {
         </section>
       ) : null}
 
-      {check ? (
+      {check && tab === "draft" ? (
         <section className="card text-sm flex flex-wrap items-center gap-x-6 gap-y-2">
           <span>
             约 <b>{minutes(check.estimated_seconds)}</b>（{check.spoken_length} 字）
@@ -340,7 +395,7 @@ export function VideoScriptViewPage() {
         </section>
       ) : null}
 
-      {shown ? (
+      {shown && tab === "draft" ? (
         <StylePanel
           key={`${shown.version}-${catalog ? "ready" : "loading"}`}
           detail={detail}
@@ -350,7 +405,7 @@ export function VideoScriptViewPage() {
           onRestyle={restyle}
         />
       ) : null}
-      {shown?.checks && !editing ? (
+      {shown?.checks && !editing && tab === "review" ? (
         detail.status === "APPROVED" ? (
           <details className="text-sm">
             <summary className="cursor-pointer text-text-muted">
@@ -364,10 +419,10 @@ export function VideoScriptViewPage() {
           <ChecksPanel checks={shown.checks} />
         )
       ) : null}
-      {shown?.meta?.plan && !editing ? <PlanPanel plan={shown.meta.plan} /> : null}
-      {shown?.meta?.description && !editing ? <DescriptionPanel description={shown.meta.description} /> : null}
+      {shown?.meta?.plan && !editing && tab === "review" ? <PlanPanel plan={shown.meta.plan} /> : null}
+      {shown?.meta?.description && !editing && tab === "review" ? <DescriptionPanel description={shown.meta.description} /> : null}
 
-      {detail.versions.length > 1 ? (
+      {detail.versions.length > 1 && tab === "draft" ? (
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
           <span className="text-text-muted">版本</span>
           {detail.versions.map((v) => (
@@ -389,7 +444,7 @@ export function VideoScriptViewPage() {
         </div>
       ) : null}
 
-      {sections.map((section, si) => (
+      {(tab === "draft" ? sections : []).map((section, si) => (
         <section key={si} className="card space-y-3">
           <div className="flex items-baseline gap-3">
             <span className="font-mono text-xs text-accent">{String(si + 1).padStart(2, "0")}</span>
@@ -441,7 +496,7 @@ export function VideoScriptViewPage() {
         </section>
       ))}
 
-      {detail.status === "APPROVED" ? (
+      {detail.status === "APPROVED" && tab === "publish" ? (
         <PublishPanel
           scriptId={detail.id}
           version={detail.approved_version ?? undefined}
@@ -454,7 +509,7 @@ export function VideoScriptViewPage() {
         />
       ) : null}
 
-      {detail.status === "APPROVED" || detail.renders.length ? (
+      {(detail.status === "APPROVED" || detail.renders.length) && tab === "video" ? (
         <RenderPanel
           detail={detail}
           autovideo={autovideo}

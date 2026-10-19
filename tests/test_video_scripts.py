@@ -1300,3 +1300,14 @@ def test_assistant_video_writes_need_an_editor(client, video_env):
     with pytest.raises(HTTPException):
         _assistant("manage_video", {"action": "approve", "script_id": script["id"]}, role="viewer")
     assert _assistant("query_video", {"action": "board"}, role="viewer")["failed"] == 0
+
+
+def test_api_shipments_list_approved_scripts_with_their_publications(client, video_env):
+    script = _approved(client)
+    store.create_script("deep_dive", {"id": None, "title": "还是草稿", "fields": {}})
+    _login(client)
+    rows = client.get("/api/video/shipments").json()
+    assert [r["script_id"] for r in rows] == [script["id"]] and rows[0]["render"] is None and rows[0]["publications"] == []
+    client.post(f"/api/video/scripts/{script['id']}/publications", headers=_csrf(client), json={"url": "https://b23.tv/x"})
+    rows = client.get("/api/video/shipments").json()
+    assert [p["url"] for p in rows[0]["publications"]] == ["https://b23.tv/x"] and rows[0]["warnings"] == []

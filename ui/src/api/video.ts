@@ -423,3 +423,17 @@ export interface VideoBoard {
 }
 
 export const getVideoBoard = () => api<VideoBoard>("/api/video/board");
+
+export interface Shipment {
+  script_id: string;
+  title: string;
+  column_key: string;
+  approved_version: number | null;
+  created_at: string;
+  render: { id: string; status: string; version: number; error: string | null } | null;
+  video_url: string | null;
+  publications: Publication[];
+  warnings: string[];
+}
+
+export const listShipments = () => api<Shipment[]>("/api/video/shipments");

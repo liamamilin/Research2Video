@@ -7,6 +7,8 @@ import { Layout } from "@/components/Layout";
 import { LoginPage } from "@/pages/Login";
 import { DashboardPage } from "@/pages/Dashboard";
 import { HomeBoardPage } from "@/pages/HomeBoard";
+import { TopicsPage } from "@/pages/Topics";
+import { PublishQueuePage } from "@/pages/PublishQueue";
 import { JobsListPage } from "@/pages/JobsList";
 import { JobDetailPage } from "@/pages/JobDetail";
 import { ReportsPage } from "@/pages/Reports";
@@ -63,6 +65,8 @@ function AppRoutes() {
         <Route path="/ask" element={<AskPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/reports/view" element={<ReportViewPage />} />
+        <Route path="/topics" element={<TopicsPage />} />
+        <Route path="/publish" element={<PublishQueuePage />} />
         <Route path="/video" element={<VideoScriptsPage />} />
         <Route path="/video/:id" element={<VideoScriptViewPage />} />
         <Route

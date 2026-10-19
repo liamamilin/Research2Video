@@ -101,6 +101,14 @@ def home_board(user=Depends(require_viewer)) -> dict:
     return video_board.board(_columns())
 
 
+@router.get("/shipments")
+def shipments(user=Depends(require_viewer)) -> list[dict]:
+    """Approved scripts with their render and publication state, for the 成片与发布 page."""
+    from web.services import video_board
+
+    return video_board.shipments(_columns())
+
+
 @router.get("/quality")
 def draft_quality(limit: int = 200, user=Depends(require_viewer)) -> dict:
     """How much of each approved script's generated draft survived editing (core/video/quality.py)."""

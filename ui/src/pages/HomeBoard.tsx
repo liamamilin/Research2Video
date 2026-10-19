@@ -33,7 +33,8 @@ export function HomeBoardPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-lg font-semibold flex-1">视频看板</h1>
-        <Link to="/video" className="btn text-sm">新建 / 全部文稿</Link>
+        <Link to="/topics" className="btn text-sm">选题</Link>
+        <Link to="/video" className="btn text-sm">全部文稿</Link>
       </div>
 
       {error ? <p className="text-danger text-sm">{error}</p> : null}
@@ -56,7 +57,7 @@ export function HomeBoardPage() {
           <section className="card space-y-2">
             <h2 className="font-medium text-sm">需要你处理</h2>
             {board.attention.length === 0 ? (
-              <p className="text-sm text-text-muted">现在没有要处理的事。可以去「文稿」挑一个栏目新建一篇。</p>
+              <p className="text-sm text-text-muted">现在没有要处理的事。可以去「选题」挑一条新的来写。</p>
             ) : (
               <ul className="divide-y divide-border">
                 {board.attention.map((item, i) => (
