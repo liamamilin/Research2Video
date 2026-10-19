@@ -41,6 +41,7 @@
    ],
    "source_card": false,
    "target_minutes": 6,
+   "topic_kind": "single",
    "video_form": "auto",
    "voice_id": "voxcpm_anchor",
    "writer": "adapt"
@@ -124,6 +125,7 @@
    ],
    "source_card": true,
    "target_minutes": 1.25,
+   "topic_kind": "single",
    "video_form": "information_motion",
    "voice_id": "voxcpm_anchor",
    "writer": "legacy"
@@ -220,6 +222,7 @@
    ],
    "source_card": true,
    "target_minutes": 1.5,
+   "topic_kind": "single",
    "video_form": "information_motion",
    "voice_id": "voxcpm_anchor",
    "writer": "legacy"

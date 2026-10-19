@@ -126,6 +126,17 @@ formats:
 
 **还没解决（持续成本）**：快讯类型的选题来自开发者口径的发现任务（`jobs/monitoring/ai_flash_discovery.yaml`），非技术人员的快讯格子暂时用同一份报告当候选，没有按受众重新评分或重新搜集；每个受众要有自己的发现任务才算完整。
 
+## 第 3 期做完了什么（2026-10-19）
+
+- 两个新类型 `roundup`（盘点）、`comparison`（对比），各一个开发者长视频格子，都是 `experimental`：`ai-developer-roundup-long`（4 分钟，每条一节，3–11 节）、`ai-developer-comparison-long`（4.5 分钟，3–6 节）。写稿器都是 legacy，画面形式只允许信息动效（现有 `comparison`、`bar_chart` 组件，AutoVideo 没改）。
+- 类型新增 `topic_kind`（`single` 默认、`roundup`、`comparison`），Column 带出，`GET /api/video/columns` 也返回。盘点没有自己的研究，所以只有它可以不写 `research_prompt`。
+- 选题字段：盘点 `条目数`、`条目`（带序号的标题加一句话）；对比 `对比对象`（两个，用「；」连接）、`对比维度`。写稿器的请求带上这些字段；对比的研究提示词有 `{topic_subjects}`、`{topic_dimensions}`。
+- 选题来源：盘点 `POST /api/video/scripts` 传 `topic_ids`（同一份发现报告的 2–10 条快讯 `F<n>`，不重复），直接以发现报告当证据、跳过研究；对比传 `topic.subjects`（两个不同对象）和 `topic.dimensions`，走正常研究，也可以用 `from_script` 从深度解读的研究里切。其他栏目传这些字段会被拒绝（`topic_not_for_column`）。
+- 角色：不加新角色。盘点必有「钩子」「行动」，对比再加「证据」，每条、每个维度都是普通小节。
+- 黄金快照只多了 `topic_kind`。
+
+**没做、没验证**：没有真实出过片；盘点的条目取自快讯发现报告，开发者口径；盘点每条的来源卡、小节配图和条目数过多时的时长没有真实检查。
+
 ## 不做
 
 竖屏、教程和观点两个类型、新增 AutoVideo 组件、定时发现任务、真实出片验证（等用户说开始测试）。

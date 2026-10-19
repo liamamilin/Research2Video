@@ -73,6 +73,8 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
         "{topic_change}": fields.get("变化", "") or "（未提供）",
         "{topic_date}": fields.get("发布日期", "") or "（未提供）",
         "{topic_sources}": fields.get("来源网址", "") or "（未提供）",
+        "{topic_subjects}": fields.get("对比对象", "") or "（未提供）",
+        "{topic_dimensions}": fields.get("对比维度", "") or "（未提供）",
     }
     prompt = column.research_prompt
     for key, value in fill.items():

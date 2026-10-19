@@ -106,3 +106,50 @@ def find(output_dir: str, topic_id: str) -> Topic | None:
     else:
         _, topics = load(output_dir, round_date)
     return next((t for t in topics if t.id == topic_id), None)
+
+
+#: a roundup lists this many items at most / at least
+ROUNDUP_ITEMS = (2, 10)
+
+
+def roundup_topic(items: list[Topic], report_path: str, theme: str = "") -> dict:
+    """A topic for a roundup video: the chosen discovery-report items, written from that report (no research).
+
+    The items keep the order given. Their summaries go in ``条目`` so the writer covers exactly these, one section
+    each; the report itself is the evidence."""
+    if not ROUNDUP_ITEMS[0] <= len(items) <= ROUNDUP_ITEMS[1]:
+        raise ValueError(f"盘点应选 {ROUNDUP_ITEMS[0]}–{ROUNDUP_ITEMS[1]} 条，现在是 {len(items)} 条")
+    lines = []
+    for number, item in enumerate(items, 1):
+        summary = item.fields.get("核心角度", "")
+        lines.append(f"{number}. {item.title}" + (f"：{summary}" if summary else ""))
+    title = theme.strip() or f"{items[0].round} AI 动态盘点"
+    return {
+        "id": None,
+        "title": title,
+        "fields": {
+            "核心角度": f"{len(items)} 条值得知道的变化",
+            "条目数": str(len(items)),
+            "条目": "\n".join(lines),
+        },
+        "from_report": report_path,
+        "items": [item.id for item in items],
+    }
+
+
+def comparison_topic(subjects: list[str], dimensions: str, angle: str = "", audience: str = "") -> dict:
+    """A topic for a comparison video: two subjects and what they are compared on."""
+    first, second = (s.strip() for s in subjects)
+    if not first or not second or first == second:
+        raise ValueError("对比需要两个不同的对象")
+    dims = dimensions.strip()
+    return {
+        "id": None,
+        "title": f"{first} 和 {second}：{dims}" if dims else f"{first} 和 {second}",
+        "fields": {
+            "核心角度": angle.strip() or (f"{first} 和 {second} 在{dims}上的差别" if dims else f"{first} 和 {second} 的差别"),
+            "目标受众": audience.strip(),
+            "对比对象": f"{first}；{second}",
+            "对比维度": dims,
+        },
+    }

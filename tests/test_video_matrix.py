@@ -27,7 +27,8 @@ def _write(tmp_path, data: dict) -> str:
 def test_the_shipped_cells_keep_their_old_column_keys_and_are_enabled():
     cells = matrix.load(str(ROOT / "config"))
     assert {c.column.key: c.status for c in cells.values() if c.parts["audience"]["key"] == "developer"} == {
-        "deep_dive": "enabled", "flash": "enabled", "point_short": "enabled"}
+        "deep_dive": "enabled", "flash": "enabled", "point_short": "enabled",
+        "ai-developer-roundup-long": "experimental", "ai-developer-comparison-long": "experimental"}
     # the second audience is defined but has never been rendered
     assert {c.id: c.status for c in cells.values() if c.parts["audience"]["key"] == "non_tech"} == {
         "ai-non_tech-deep_dive-long": "experimental", "ai-non_tech-one_point-short": "experimental",
@@ -39,7 +40,7 @@ def test_the_shipped_cells_keep_their_old_column_keys_and_are_enabled():
 def test_a_cell_is_found_by_its_id_and_by_its_column_key():
     config = str(ROOT / "config")
     assert video_columns.get(config, "ai-developer-quick_take-short") == video_columns.get(config, "flash")
-    assert sorted(video_columns.load(config)) == sorted(["deep_dive", "flash", "point_short", "ai-non_tech-deep_dive-long", "ai-non_tech-one_point-short", "ai-non_tech-quick_take-short"])  # one per cell
+    assert sorted(video_columns.load(config)) == sorted(["deep_dive", "flash", "point_short", "ai-non_tech-deep_dive-long", "ai-non_tech-one_point-short", "ai-non_tech-quick_take-short", "ai-developer-roundup-long", "ai-developer-comparison-long"])  # one per cell
     assert matrix.provenance(config, "flash")["cell"] == "ai-developer-quick_take-short"
     assert matrix.provenance(config, "no-such-column") is None
 
@@ -173,3 +174,26 @@ def test_what_autovideo_is_told_about_the_video_comes_from_the_cell():
     assert video_columns.get(config, "flash").creative_intent == {"purpose": "知识讲解"}  # as it always was
     hint = video_columns.get(config, "ai-non_tech-quick_take-short").creative_intent
     assert hint["purpose"] == "知识讲解" and "不写代码" in hint["audience"]
+
+
+def test_the_shipped_roundup_and_comparison_cells_are_experimental_and_carry_their_topic_kind():
+    cells = matrix.load(str(ROOT / "config"))
+    roundup, comparison = cells["ai-developer-roundup-long"], cells["ai-developer-comparison-long"]
+    assert roundup.status == comparison.status == "experimental"
+    assert (roundup.column.topic_kind, comparison.column.topic_kind) == ("roundup", "comparison")
+    # a roundup is written from a discovery report, so it has no research prompt; a comparison researches
+    assert roundup.column.research_prompt == "" and "{topic_subjects}" in comparison.column.research_prompt
+    assert all(cell.column.topic_kind == "single" for cid, cell in cells.items() if cid.split("-")[2] in
+               ("deep_dive", "quick_take", "one_point"))
+    # no audience slot is left unfilled
+    for cell in (roundup, comparison):
+        assert "{audience" not in cell.column.script_style and "{audience" not in cell.column.description
+
+
+def test_a_column_needs_a_research_prompt_unless_it_is_a_roundup():
+    base = {"name": "x", "target_minutes": 3}
+    with pytest.raises(video_columns.ColumnError, match="research_prompt"):
+        video_columns.build("a", {**base, "topic_kind": "comparison"})
+    assert video_columns.build("b", {**base, "topic_kind": "roundup"}).topic_kind == "roundup"
+    with pytest.raises(video_columns.ColumnError, match="topic_kind"):
+        video_columns.build("c", {**base, "topic_kind": "listicle", "research_prompt": "x"})

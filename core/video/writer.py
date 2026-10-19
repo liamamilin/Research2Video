@@ -90,6 +90,10 @@ def _request(report: str, topic: dict, column_style: str, target_minutes: float,
             ("选题", topic.get("title", "")),
             ("核心角度", (topic.get("fields") or {}).get("核心角度", "")),
             ("目标受众", (topic.get("fields") or {}).get("目标受众", "")),
+            ("条目数", (topic.get("fields") or {}).get("条目数", "")),
+            ("条目", (topic.get("fields") or {}).get("条目", "")),
+            ("对比对象", (topic.get("fields") or {}).get("对比对象", "")),
+            ("对比维度", (topic.get("fields") or {}).get("对比维度", "")),
         ) if v
     )
     return (

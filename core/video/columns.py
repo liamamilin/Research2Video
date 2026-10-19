@@ -12,6 +12,9 @@ from .length import MAX_MINUTES, MIN_MINUTES
 
 COLUMNS_FILE = "video_columns.yaml"
 VIDEO_FORMS = ("auto", "information_motion", "process_diagram")
+#: What a script of the column is made from: one topic (single), several items of a discovery report cut into a
+#: list video (roundup), or two subjects set against each other (comparison); see spec/video-matrix.md.
+TOPIC_KINDS = ("single", "roundup", "comparison")
 #: legacy: one model call writes the script (core/video/writer.py).
 #: adapt: the five-step adaptation (core/video/adapt/, spec/video-adaptation.md).
 WRITERS = ("legacy", "adapt")
@@ -55,6 +58,7 @@ class Column:
     #: What AutoVideo is told about the video (``creative_intent``: purpose, audience, tone, focus); a script's
     #: own focus is added when it is rendered.
     creative_intent: dict = field(default_factory=dict)
+    topic_kind: str = "single"
 
     def as_dict(self) -> dict:
         return {
@@ -71,6 +75,7 @@ class Column:
             "source_card": self.source_card,
             "audience": self.audience,
             "allowed_forms": list(self.allowed_forms) or [self.video_form],
+            "topic_kind": self.topic_kind,
         }
 
 
@@ -181,8 +186,11 @@ def build(key: str, raw: dict) -> Column:
     form = str(raw.get("video_form", "auto"))
     if form not in VIDEO_FORMS:
         raise ColumnError(f"栏目 {key} 的 video_form 应为 {', '.join(VIDEO_FORMS)} 之一")
+    topic_kind = str(raw.get("topic_kind") or "single")
+    if topic_kind not in TOPIC_KINDS:
+        raise ColumnError(f"栏目 {key} 的 topic_kind 应为 {', '.join(TOPIC_KINDS)} 之一")
     prompt = str(raw.get("research_prompt") or "").strip()
-    if not prompt:
+    if not prompt and topic_kind != "roundup":  # a roundup is written from a discovery report, no research of its own
         raise ColumnError(f"栏目 {key} 缺少 research_prompt")
     writer = str(raw.get("writer", "legacy"))
     if writer not in WRITERS:
@@ -220,6 +228,7 @@ def build(key: str, raw: dict) -> Column:
         audience=str(raw.get("audience") or ""),
         allowed_forms=forms,
         creative_intent=_intent(key, raw.get("creative_intent")),
+        topic_kind=topic_kind,
     )
 
 

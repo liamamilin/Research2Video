@@ -135,6 +135,8 @@ def compose(cell_id: str, domain: dict, audience: dict, type_: dict, format_: di
         intent["audience"] = audience["video_hint"]
     if intent:
         raw["creative_intent"] = intent
+    if type_.get("topic_kind"):
+        raw["topic_kind"] = type_["topic_kind"]
     for name in ("package", "source_card"):
         if pick(name) is not None:
             raw[name] = fill_slots(pick(name), audience, cell_id) if name == "package" else pick(name)

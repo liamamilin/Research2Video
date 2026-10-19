@@ -5,6 +5,7 @@ See spec/video-scripts.md and, for styles and restyling, spec/video-adaptation.m
 
 from __future__ import annotations
 
+import os
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -110,9 +111,11 @@ def list_topics(round: Optional[str] = None, source: str = "opportunities",
 class TopicIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    title: str = Field(min_length=4, max_length=200)
+    title: str = Field(default="", max_length=200, description="Required, except for a comparison (made from its subjects)")
     angle: str = ""
     audience: str = ""
+    subjects: list[str] = Field(default_factory=list, max_length=2, description="The two things a comparison sets against each other")
+    dimensions: str = Field(default="", max_length=200, description="What a comparison compares them on")
 
 
 class ScriptCreateIn(BaseModel):
@@ -121,30 +124,69 @@ class ScriptCreateIn(BaseModel):
     column: str = "deep_dive"
     topic_id: Optional[str] = Field(default=None, description="A content-opportunity topic id, e.g. 2026-09-29/C3")
     topic: Optional[TopicIn] = None
+    topic_ids: list[str] = Field(
+        default_factory=list, description="A roundup's items: flash-news topic ids (F<n>) of one discovery report")
     video_form: Optional[str] = Field(
         default=None, description="One of the column's allowed forms; the column's default when left out")
     from_script: Optional[str] = Field(
         default=None, description="Write from this script's research report instead of researching again")
 
 
+def _roundup_topic(body: ScriptCreateIn) -> dict:
+    if body.topic_id is not None or not body.topic_ids:
+        raise HTTPException(422, detail=ApiError.make("topic_required", "盘点要选 2–10 条快讯条目（topic_ids）"))
+    output_dir = get_settings().paths.output_dir
+    found = [video_topics.find(output_dir, tid) for tid in body.topic_ids]
+    missing = [tid for tid, item in zip(body.topic_ids, found) if item is None]
+    if missing or any(not item.code.startswith("F") for item in found):
+        raise HTTPException(422, detail=ApiError.make("unknown_topic", f"找不到快讯条目：{', '.join(missing) or '只能选快讯条目'}"))
+    if len({item.round for item in found}) != 1 or len(set(body.topic_ids)) != len(body.topic_ids):
+        raise HTTPException(422, detail=ApiError.make("roundup_items", "盘点的条目要来自同一份发现报告，且不重复"))
+    report = os.path.relpath(video_flash.report_path(output_dir, found[0].round), os.path.dirname(output_dir))
+    try:
+        return video_topics.roundup_topic(found, report, body.topic.title if body.topic else "")
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("roundup_items", str(exc))) from exc
+
+
+def _comparison_topic(body: ScriptCreateIn) -> dict:
+    if body.topic_id is not None or body.topic_ids or body.topic is None:
+        raise HTTPException(422, detail=ApiError.make("topic_required", "对比要填两个对象和对比维度（topic.subjects、topic.dimensions）"))
+    try:
+        return video_topics.comparison_topic(body.topic.subjects, body.topic.dimensions, body.topic.angle,
+                                             body.topic.audience)
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("comparison_subjects", str(exc))) from exc
+
+
 @router.post("/scripts", status_code=202)
 def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_editor)) -> dict:
-    if (body.topic_id is None) == (body.topic is None):
-        raise HTTPException(422, detail=ApiError.make("topic_required", "请选择一个内容机会，或填写一个选题"))
     if body.column not in _columns():
         raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{body.column}"))
     chosen = _columns()[body.column]
     if body.video_form is not None and body.video_form not in (chosen.allowed_forms or (chosen.video_form,)):
         raise HTTPException(422, detail=ApiError.make(
             "form_not_allowed", f"这个栏目只能用这些视频形式：{', '.join(chosen.allowed_forms or (chosen.video_form,))}"))
-    if body.topic_id is not None:
-        found = video_topics.find(get_settings().paths.output_dir, body.topic_id)
-        if found is None:
-            raise HTTPException(422, detail=ApiError.make("unknown_topic", f"找不到选题 {body.topic_id}"))
-        topic = found.as_dict()
+    kind = chosen.topic_kind
+    if kind == "roundup":
+        topic = _roundup_topic(body)
+    elif kind == "comparison":
+        topic = _comparison_topic(body)
     else:
-        topic = {"id": None, "title": body.topic.title.strip(),
-                 "fields": {"核心角度": body.topic.angle.strip(), "目标受众": body.topic.audience.strip()}}
+        if body.topic_ids or (body.topic is not None and (body.topic.subjects or body.topic.dimensions)):
+            raise HTTPException(422, detail=ApiError.make("topic_not_for_column", "这个栏目的选题不用条目列表或对比对象"))
+        if (body.topic_id is None) == (body.topic is None):
+            raise HTTPException(422, detail=ApiError.make("topic_required", "请选择一个内容机会，或填写一个选题"))
+        if body.topic is not None and len(body.topic.title.strip()) < 4:
+            raise HTTPException(422, detail=ApiError.make("topic_required", "选题标题至少 4 个字"))
+        if body.topic_id is not None:
+            found = video_topics.find(get_settings().paths.output_dir, body.topic_id)
+            if found is None:
+                raise HTTPException(422, detail=ApiError.make("unknown_topic", f"找不到选题 {body.topic_id}"))
+            topic = found.as_dict()
+        else:
+            topic = {"id": None, "title": body.topic.title.strip(),
+                     "fields": {"核心角度": body.topic.angle.strip(), "目标受众": body.topic.audience.strip()}}
     if body.video_form is not None:
         topic = {**topic, "video_form": body.video_form}
     if body.from_script is not None:

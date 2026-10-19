@@ -874,3 +874,86 @@ def test_a_topic_without_an_audience_is_for_the_cells_audience(client, video_env
     script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
     assert script["topic"]["fields"]["目标受众"] == "普通用户"
     assert script["column"]["key"] == "ai-non_tech-one_point-short"
+
+
+ROUNDUP_REPORT = FLASH_REPORT.replace("### 3. 来源清单", """### 1.2 某框架 2.0 弃用旧接口
+- **一句话**：旧接口在 2.0 里不再可用
+- **发布日期**：2026-10-18
+- **变化**：旧接口可用 → 2.0 起移除
+- **对开发者的影响**：升级前要改调用方式。
+- **评分**：7/10
+- **证据来源**：[1]
+
+### 3. 来源清单""")
+
+
+def _roundup_budget(key: str) -> int:
+    return length.budget_for(video_columns.get(str(ROOT / "config"), key).target_minutes, "voxcpm_anchor")
+
+
+def test_api_a_roundup_is_written_from_chosen_flash_items_without_research(client, video_env, research, llm):
+    base = video_env / "output" / "flash"
+    base.mkdir(parents=True)
+    (base / "2026-10-19_ai_flash_discovery.md").write_text(ROUNDUP_REPORT, encoding="utf-8")
+    key = "ai-developer-roundup-long"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    _login(client)
+
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": key, "topic_ids": ["2026-10-19/F2", "2026-10-19/F1"], "video_form": "information_motion"})
+    assert made.status_code == 202, made.text
+    script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    assert script["status"] == "DRAFT", script.get("error")
+    assert research.jobs == []  # no research of its own: the discovery report is the evidence
+    assert script["report_path"] == "output/flash/2026-10-19_ai_flash_discovery.md"
+    fields = script["topic"]["fields"]
+    assert fields["条目数"] == "2" and script["topic"]["items"] == ["2026-10-19/F2", "2026-10-19/F1"]
+    assert fields["条目"].splitlines()[0].startswith("1. ")
+    asked = llm.calls[0][-1]["content"]
+    assert "条目数：2" in asked and fields["条目"].splitlines()[1] in asked
+    assert script["version_shown"]["length_check"]["target_minutes"] == 4
+    assert script["column"]["topic_kind"] == "roundup"
+
+
+@pytest.mark.parametrize("body, code", [
+    ({"topic_ids": []}, "topic_required"),
+    ({"topic_ids": ["2026-10-19/F1"]}, "roundup_items"),
+    ({"topic_ids": ["2026-10-19/F1", "2026-10-19/F1"]}, "roundup_items"),
+    ({"topic_ids": ["2026-10-19/F1", "2026-10-19/F99"]}, "unknown_topic"),
+    ({"topic_ids": ["2026-10-19/F1", "2026-10-19/C1"]}, "unknown_topic"),
+    ({"topic_id": "2026-10-19/F1", "topic_ids": ["2026-10-19/F1", "2026-10-19/F2"]}, "topic_required"),
+])
+def test_api_a_roundup_needs_two_or_more_distinct_flash_items(client, video_env, research, llm, body, code):
+    base = video_env / "output" / "flash"
+    base.mkdir(parents=True)
+    (base / "2026-10-19_ai_flash_discovery.md").write_text(ROUNDUP_REPORT, encoding="utf-8")
+    _login(client)
+    refused = client.post("/api/video/scripts", headers=_csrf(client), json={"column": "ai-developer-roundup-long", **body})
+    assert refused.status_code == 422
+    assert code in refused.text
+    assert research.jobs == []
+
+
+def test_api_a_comparison_researches_its_two_subjects_and_a_single_topic_column_refuses_them(client, video_env, research, llm):
+    key = "ai-developer-comparison-long"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    _login(client)
+
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": key, "topic": {"subjects": ["Claude Code", "Codex CLI"], "dimensions": "价格、上下文长度"}})
+    assert made.status_code == 202, made.text
+    script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    assert script["status"] == "DRAFT", script.get("error")
+    spec = (video_env / "jobs" / f"{research.jobs[0]}.yaml").read_text(encoding="utf-8")
+    assert "Claude Code；Codex CLI" in spec and "价格、上下文长度" in spec and "{topic_" not in spec
+    assert script["topic"]["title"] == "Claude Code 和 Codex CLI：价格、上下文长度"
+    asked = llm.calls[0][-1]["content"]
+    assert "对比对象：Claude Code；Codex CLI" in asked and "对比维度：价格、上下文长度" in asked
+
+    for subjects in (["只有一个"], ["同一个", "同一个"], []):
+        bad = client.post("/api/video/scripts", headers=_csrf(client), json={
+            "column": key, "topic": {"subjects": subjects, "dimensions": "价格"}})
+        assert bad.status_code == 422 and "comparison_subjects" in bad.text
+    wrong = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "deep_dive", "topic": {"title": "一个普通选题", "subjects": ["A", "B"]}})
+    assert wrong.status_code == 422 and "topic_not_for_column" in wrong.text
