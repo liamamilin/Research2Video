@@ -220,7 +220,7 @@ def validate_text_fit(scene: dict, large: bool = False) -> None:
             if lines > 2:
                 raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: bar label {category!r} wraps onto more than two lines; shorten it")
             if display_width(font, bar_value_text(props, index)) > value_w:
-                raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: the value label {bar_value_text(props, index)!r} is too wide; use a shorter unit")
+                raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: the value label {bar_value_text(props, index)!r} is too wide; keep the unit to one short word such as 美元 and put the basis (for example 每百万 token) in the headline")
             rows.append(max(44 if count > 4 else 58, lines * size * 1.3))
         if sum(rows) + (22 if count > 4 else 34) * (count - 1) > 420:
             raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: the bars do not fit their panel; use fewer or shorter bars")
@@ -374,7 +374,7 @@ concept_reveal 用于1–4个并列要点。每条 lines 用“短标题：一�
 comparison 用于来源支持的两个状态/说法/方法的对比。left/right 各有 label 和 items，items 简洁；不要杜撰优劣或对立关系。不输出 highlights。
 big_number 用于旁白明确强调的一个关键数字：title 是本屏标题，与 headline 完全一致；value 是数字加单位，如「25 倍」「10 美元」，必须出自旁白，只写数字和单位；label 说明它是什么的数字；note 可选，写它的前提或口径。次要的数字不要做成大数字；一章里最多用两三次，只用于旁白点明为关键结论的数字（如「相差 25 倍」「便宜了九成」），普通的价格和次数写进卡片或条形图。value、label、note 的出现位置按旁白里说到它们的先后，不必按这个顺序排。
 price_change 用于旁白说「某个价格/数值从旧值变成新值」：title 与 headline 完全一致；unit 写计量口径（如「每百万 token」，旁白有才写）；rows 为 1–2 行，每行 label（如「输入价」，≤10 字）、before（旧值，数字加单位，写法同旁白，如「5 美元」）、after（新值）；旁白说了幅度（如「降两成」「涨一倍」）才写 change（只写数字和百分号，如「20%」，不要写正负号或箭头）并给 direction（down 或 up）。before/after/change 的数字必须出自旁白。cues 为 title、line:0、可选 line:1（每行随旁白说到它时出现）。有旧→新价格变化时优先用 price_change，不要用大数字或文字卡片。
-bar_chart 用于旁白里 2–6 个同单位的数字并列比较：categories 是各项名称，values 是旁白里的数字，原样写，不换算、不估算；unit 是单位，baseline_zero 必须是 true。单位或口径不同的数字不要放进同一张图。图的标题写在 headline，不放 props.title。
+bar_chart 用于旁白里 2–6 个同单位的数字并列比较：categories 是各项名称，values 是旁白里的数字，原样写，不换算、不估算；unit 只写一个短单位词（如「美元」「倍」「%」「秒」，不超过 4 个字），计量口径（如「每百万 token」「每次」）写进 headline，不写进 unit，否则每根柱子的数值标签放不下。baseline_zero 必须是 true。单位或口径不同的数字不要放进同一张图。图的标题写在 headline，不放 props.title。
 旁白里有成组的并列数字时优先用 bar_chart，强调单个关键数字时用 big_number，不要把它们写成文字卡片。
 headline 是本屏清晰的观众可见标题；title_card/concept_reveal 的 props.title 必须与 headline 完全一致。
 source_quotes 必须逐字摘自原始素材；cue.quote 则必须逐字摘自 narration_plan 中对应段的 text 字段。

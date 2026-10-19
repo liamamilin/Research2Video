@@ -784,3 +784,14 @@ def test_the_frozen_registry_still_lacks_the_extension_components():
     from g1.video_ir import load_registry, schema_action_catalog
     assert not {"price_change", "source_card"} & set(schema_action_catalog())
     assert {"price_change", "source_card"} <= set(load_registry()["components"])
+
+
+def test_a_per_million_token_unit_overflows_a_large_bar_label_and_the_plan_is_told_where_the_basis_goes():
+    """The one-point video on prompt caching failed twice on 「4 美元/百万 token」: the prompt now keeps the basis out of the unit."""
+    chart = bar_scene(categories=["输入", "缓存读取"], values=[4, 0.2], unit="美元/百万 token")
+    for large in (False, True):
+        with pytest.raises(motion.InformationFault, match="INFORMATION_TEXT_FIT") as exc:
+            motion.validate_text_fit(chart, large)
+        assert "headline" in str(exc.value) and "美元" in str(exc.value)
+        motion.validate_text_fit(bar_scene(categories=["输入", "缓存读取"], values=[4, 0.2], unit="美元"), large)
+    assert "计量口径" in motion.messages(opus_context())[0]["content"]
