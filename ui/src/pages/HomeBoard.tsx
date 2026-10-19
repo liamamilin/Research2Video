@@ -11,6 +11,15 @@ const KIND: Record<BoardAttention["kind"], { label: string; cls: string }> = {
   recheck: { label: "待复核", cls: "border-warning text-warning" },
 };
 
+const STAGE_LINK: Record<string, string> = {
+  researching: "/video?status=RESEARCHING",
+  draft: "/video?status=DRAFT",
+  approved: "/publish",
+  rendering: "/publish",
+  rendered: "/publish",
+  published: "/video?status=published",
+};
+
 export function HomeBoardPage() {
   const [board, setBoard] = useState<VideoBoard | null>(null);
   const [error, setError] = useState("");
@@ -44,7 +53,7 @@ export function HomeBoardPage() {
         <>
           <section aria-label="流水线阶段" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             {board.stages.map((stage) => (
-              <Link key={stage.key} to="/video" className="card text-center py-3 hover:bg-bg-hover">
+              <Link key={stage.key} to={STAGE_LINK[stage.key] ?? "/video"} className="card text-center py-3 hover:bg-bg-hover">
                 <div className="text-2xl font-semibold">{stage.count}</div>
                 <div className="text-xs text-text-muted">{stage.label}</div>
               </Link>

@@ -59,7 +59,17 @@ export function VideoScriptsPage() {
 
   const [scripts, setScripts] = useState<VideoScriptSummary[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
+  const statusFilter = params.get("status") ?? "";
+  const columnFilter = params.get("column") ?? "";
+  const highlight = params.get("topic");
+  const setFilter = (key: string, value: string) =>
+    setParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value) next.set(key, value);
+      else next.delete(key);
+      return next;
+    });
   const [cellId, setCellId] = useState<string>(params.get("cell") ?? "");
   const [form, setForm] = useState<string>("");
   const [picked, setPicked] = useState<string[]>([]);
@@ -98,6 +108,12 @@ export function VideoScriptsPage() {
     return () => clearInterval(timer);
   }, [inFlight]);
 
+  const shownScripts = (scripts ?? []).filter(
+    (x) =>
+      (!columnFilter || x.column_key === columnFilter) &&
+      (!statusFilter ||
+        (statusFilter === "published" ? x.published : statusFilter === "RESEARCHING" ? IN_FLIGHT.includes(x.status) : x.status === statusFilter)),
+  );
   const cell = cells.find((c) => c.id === cellId);
   const column = cell?.column ?? null;
   const kind = column?.topic_kind ?? "single";
@@ -122,6 +138,12 @@ export function VideoScriptsPage() {
       alive = false;
     };
   }, [cellId, kind, source]);
+
+  useEffect(() => {
+    if (highlight && topics.some((t) => t.id === highlight)) {
+      document.getElementById(`topic-${highlight}`)?.scrollIntoView?.({ block: "center" });
+    }
+  }, [highlight, topics]);
 
   async function create(body: Parameters<typeof createVideoScript>[0], key: string) {
     setBusy(key);
@@ -153,7 +175,7 @@ export function VideoScriptsPage() {
             <h2 className="font-medium">新建</h2>
             <select
               aria-label="格子"
-              className="input w-auto"
+              className="input w-auto max-w-full"
               value={cellId}
               onChange={(e) => setCellId(e.target.value)}
             >
@@ -308,7 +330,11 @@ export function VideoScriptsPage() {
                   {source === "flash" ? `快讯发现报告 ${round} 的条目` : `情报轮次 ${round} 的内容机会（P7）`}
                 </p>
                 {topics.map((t) => (
-                  <div key={t.id} className="flex items-start gap-3 rounded border border-border p-3">
+                  <div
+                    key={t.id}
+                    id={`topic-${t.id}`}
+                    className={cn("flex items-start gap-3 rounded border p-3", highlight === t.id ? "border-accent ring-1 ring-accent" : "border-border")}
+                  >
                     <span className="font-mono text-xs text-text-muted pt-0.5">{t.code}</span>
                     <div className="min-w-0 flex-1 space-y-1">
                       <p className="text-sm">{t.title}</p>
@@ -377,6 +403,27 @@ export function VideoScriptsPage() {
         </section>
       ) : null}
 
+      <div className="flex flex-wrap items-center gap-2 text-xs" aria-label="筛选">
+        {[
+          ["", "全部"], ["RESEARCHING", "研究/写稿中"], ["DRAFT", "草稿"], ["APPROVED", "已定稿"],
+          ["published", "已发布"], ["FAILED", "失败"],
+        ].map(([value, label]) => (
+          <button
+            key={value}
+            className={cn("badge border cursor-pointer", statusFilter === value ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover")}
+            onClick={() => setFilter("status", value)}
+          >
+            {label}
+          </button>
+        ))}
+        <select aria-label="栏目筛选" className="input text-xs py-1 w-auto max-w-full" value={columnFilter} onChange={(e) => setFilter("column", e.target.value)}>
+          <option value="">全部栏目</option>
+          {Array.from(new Set((scripts ?? []).map((x) => x.column_key))).map((key) => (
+            <option key={key} value={key}>{cells.find((c) => c.key === key)?.label ?? key}</option>
+          ))}
+        </select>
+      </div>
+
       <section className="card p-0 overflow-hidden">
         {error ? (
           <ErrorState error={error} onRetry={load} />
@@ -395,7 +442,7 @@ export function VideoScriptsPage() {
               </tr>
             </thead>
             <tbody>
-              {scripts.map((s) => (
+              {shownScripts.map((s) => (
                 <tr key={s.id} className="border-b border-border last:border-0 hover:bg-bg-hover">
                   <td className="px-4 py-2">
                     <Link to={`/video/${s.id}`} className="text-accent hover:underline">

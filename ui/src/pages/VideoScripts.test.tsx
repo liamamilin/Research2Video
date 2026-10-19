@@ -146,4 +146,24 @@ describe("Video script cell picker", () => {
       topic: { subjects: ["Claude Code", "Codex CLI"], dimensions: "价格" },
     });
   });
+
+  it("filters the script list by status and keeps the topic from the topics page highlighted", async () => {
+    const scripts = [
+      { id: "a", title: "草稿一篇", status: "DRAFT", column_key: "deep_dive", published: false, updated_at: "2026-10-19T10:00:00+0800", length_check: null },
+      { id: "b", title: "已发一篇", status: "APPROVED", column_key: "deep_dive", published: true, updated_at: "2026-10-19T10:00:00+0800", length_check: null },
+    ];
+    const base = (fetch as unknown as ReturnType<typeof vi.fn>).getMockImplementation()!;
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) =>
+      String(url).endsWith("/api/video/scripts") ? jsonResponse(scripts) : base(url, init)));
+    render(
+      <MemoryRouter initialEntries={["/video?cell=ai-developer-roundup-long&topic=2026-10-19/F2"]}>
+        <VideoScriptsPage />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("草稿一篇")).toBeTruthy();
+    expect(screen.getByText("已发一篇")).toBeTruthy();
+    fireEvent.click(screen.getByText("已发布", { selector: "button" }));
+    await waitFor(() => expect(screen.queryByText("草稿一篇")).toBeNull());
+    expect(screen.getByText("已发一篇")).toBeTruthy();
+  });
 });

@@ -32,7 +32,7 @@ describe("Topics page", () => {
     render(<MemoryRouter><TopicsPage /></MemoryRouter>);
     expect(await screen.findByText("已发布")).toBeTruthy();
     const link = (await screen.findByText("用这个写稿")).closest("a");
-    expect(link?.getAttribute("href")).toBe("/video?cell=ai-developer-quick-take-long");
+    expect(link?.getAttribute("href")).toBe("/video?cell=ai-developer-quick-take-long&topic=2026-10-19%2FF2");
     expect(screen.getByText(/还有 1 条没写/)).toBeTruthy();
   });
 });

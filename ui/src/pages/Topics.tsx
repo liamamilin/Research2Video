@@ -73,7 +73,7 @@ export function TopicsPage() {
             ) : t.scripted ? (
               <span className="badge border border-border text-text-muted">已写过</span>
             ) : cell ? (
-              <Link className="btn btn-primary text-xs shrink-0" to={`/video?cell=${encodeURIComponent(cell.id)}`}>
+              <Link className="btn btn-primary text-xs shrink-0" to={`/video?cell=${encodeURIComponent(cell.id)}&topic=${encodeURIComponent(t.id)}`}>
                 用这个写稿
               </Link>
             ) : null}
