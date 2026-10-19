@@ -10,7 +10,7 @@ import {
 import { AssistantAction } from "@/components/AssistantAction";
 import { useAuthStore } from "@/lib/auth-store";
 
-const EXAMPLES = ["查看现有 Jobs", "创建一个研究 AI Agent 记忆技术的 Job", "比较最近一个月的研究报告", "查看最近失败的 Jobs"];
+const EXAMPLES = ["看看有哪些文稿等我审", "今天的快讯里有哪些选题还没写", "用今天的快讯写一期盘点", "查看现有 Jobs"];
 interface PendingConversation {
   messages: AssistantMessage[];
   status: string;
@@ -82,7 +82,7 @@ function ApplicationAssistant({ username, readOnly }: { username: string; readOn
   const storageKey = `jobs-assistant:${username}`;
   const [params] = useSearchParams();
   const [messages, setMessages] = useState<AssistantMessage[]>(() => pendingConversations.get(storageKey)?.messages || readConversation(storageKey));
-  const [input, setInput] = useState(() => params.get("job") ? `请查看任务 ${params.get("job")}` : params.get("report") ? `请分析报告 ${params.get("report")}` : "");
+  const [input, setInput] = useState(() => params.get("video") ? `请查看视频文稿 ${params.get("video")}，告诉我现在到哪一步、下一步做什么` : params.get("job") ? `请查看任务 ${params.get("job")}` : params.get("report") ? `请分析报告 ${params.get("report")}` : "");
   const [busy, setBusy] = useState(() => pendingConversations.has(storageKey));
   const [restoring, setRestoring] = useState(() => !pendingConversations.has(storageKey));
   const [restoreError, setRestoreError] = useState("");
@@ -151,7 +151,7 @@ function ApplicationAssistant({ username, readOnly }: { username: string; readOn
   return <div className="h-full min-h-[420px] max-w-4xl mx-auto flex flex-col gap-4">
     <div className="flex items-center gap-3">
       <div className="flex-1"><h1 className="text-lg font-semibold">助手</h1><p className="text-xs text-text-muted mt-1">
-        {readOnly ? "查询任务、报告与情报轮次。当前账号为只读权限；账号操作仅限本人。" : "通过对话管理任务、周期、报告、情报轮次和应用设置。"}
+        {readOnly ? "查询任务、报告与情报轮次。当前账号为只读权限；账号操作仅限本人。" : "通过对话处理视频文稿、选题、成片和发布记录，也能管理研究任务、报告和应用设置。"}
       </p></div>
       <button className="btn text-xs" disabled={disabled || messages.length === 0} onClick={() => { setRestoring(true); setRecoverVersion((n) => n + 1); }}>核验结果</button>
       <button className="btn text-xs" disabled={disabled || messages.length === 0} onClick={() => void fresh()}><Plus className="w-3.5 h-3.5" />新对话</button>
@@ -161,7 +161,7 @@ function ApplicationAssistant({ username, readOnly }: { username: string; readOn
     <div className="flex-1 min-h-0 overflow-y-auto space-y-5 pr-1" aria-label="对话记录" style={{ colorScheme: "dark" }}>
       {messages.length === 0 && <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-4 text-center">
         <MessageSquareText className="w-9 h-9 text-accent" /><div><p className="font-medium">想处理什么？</p><p className="text-sm text-text-muted mt-2">可以查报告、管理任务、调整周期，再接着处理执行结果。</p></div>
-        <div className="flex flex-wrap justify-center gap-2">{EXAMPLES.filter((_, i) => !readOnly || i !== 1).map((example) => <button key={example} className="btn text-xs" disabled={disabled} onClick={() => void send(example)}>{example}</button>)}</div>
+        <div className="flex flex-wrap justify-center gap-2">{EXAMPLES.filter((_, i) => !readOnly || i !== 2).map((example) => <button key={example} className="btn text-xs" disabled={disabled} onClick={() => void send(example)}>{example}</button>)}</div>
       </div>}
       {messages.map((message, index) => <div key={index} className={message.role === "user" ? "ml-auto max-w-[90%] sm:max-w-[80%]" : "max-w-full"}>
         <div className="text-xs text-text-muted mb-2">{message.role === "user" ? "你" : "助手"}</div>

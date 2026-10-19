@@ -1262,3 +1262,41 @@ def test_api_the_home_board_counts_stages_and_lists_what_needs_the_user(client, 
     client.post(f"/api/video/scripts/{script['id']}/publications", headers=_csrf(client), json={"url": "https://b23.tv/x"})
     board = client.get("/api/video/board").json()
     assert {s["key"]: s["count"] for s in board["stages"]}["published"] == 1 and board["attention"] == []
+
+
+def _assistant(name, arguments, role="editor"):
+    from types import SimpleNamespace
+
+    from web.services import assistant_tools
+
+    request = SimpleNamespace(method="GET", client=SimpleNamespace(host="127.0.0.1"), headers={}, cookies={})
+    return assistant_tools.execute(name, arguments, request, {"username": "tester", "role": role})
+
+
+def test_assistant_video_tools_query_start_and_record_without_posting_anywhere(client, video_env, llm, research):
+    script = _approved(client)
+    found = _assistant("query_video", {"action": "find", "text": "Argon"})
+    assert [s["script_id"] for s in found["scripts"]] == [script["id"]]
+    assert _assistant("query_video", {"action": "get", "script_id": script["id"]})["approved_version"] == 1
+    assert {s["key"]: s["count"] for s in _assistant("query_video", {"action": "board"})["stages"]}["approved"] == 1
+
+    # recording a link only stores it; the receipt is the record, nothing is sent anywhere
+    done = _assistant("manage_video", {"action": "add_publication", "script_id": script["id"],
+                                       "url": "https://b23.tv/abc", "published_on": "2026-10-19"})
+    assert done["status"] == "recorded" and done["href"] == f"/video/{script['id']}"
+    assert [s["published"] for s in _assistant("query_video", {"action": "list"})["scripts"]] == [True]
+    with pytest.raises(Exception):
+        _assistant("manage_video", {"action": "add_publication", "script_id": script["id"], "url": "https://evil.example.com/x"})
+
+    # starting a script says what it costs and stops at a draft (it is not approved or rendered)
+    started = _assistant("create_video", {"column": "deep_dive", "title": "助手发起的选题"})
+    assert started["status"] == "started" and "草稿" in started["cost"]
+
+
+def test_assistant_video_writes_need_an_editor(client, video_env):
+    from fastapi import HTTPException
+
+    script = _approved(client)
+    with pytest.raises(HTTPException):
+        _assistant("manage_video", {"action": "approve", "script_id": script["id"]}, role="viewer")
+    assert _assistant("query_video", {"action": "board"}, role="viewer")["failed"] == 0

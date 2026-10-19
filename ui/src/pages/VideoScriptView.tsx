@@ -243,7 +243,12 @@ export function VideoScriptViewPage() {
           ) : (
             <h1 className="text-lg font-semibold">{shown?.title ?? detail.title}</h1>
           )}
-          <p className="text-xs text-text-muted mt-1">选题：{detail.topic.title}</p>
+          <p className="text-xs text-text-muted mt-1">
+            选题：{detail.topic.title}
+            <Link className="ml-3 text-accent hover:underline" to={`/ask?video=${encodeURIComponent(detail.id)}`}>
+              在助手中处理
+            </Link>
+          </p>
         </div>
         {canEdit && shown && ["DRAFT", "APPROVED"].includes(detail.status) ? (
           <div className="flex gap-2">
