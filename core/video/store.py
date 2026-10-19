@@ -176,6 +176,8 @@ def init_db() -> None:
         columns = {r[1] for r in conn.execute("PRAGMA table_info(scripts)")}
         if "stage" not in columns:
             conn.execute("ALTER TABLE scripts ADD COLUMN stage TEXT")
+        if "archived" not in columns:
+            conn.execute("ALTER TABLE scripts ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
         from core.video import autopilot_store
         autopilot_store.init(conn)
 
@@ -215,10 +217,12 @@ def get_script(script_id: str) -> dict | None:
     return _decode(row, _SCRIPT_JSON)
 
 
-def list_scripts(limit: int = 100) -> list[dict]:
+def list_scripts(limit: int = 100, archived: bool = False) -> list[dict]:
+    """Newest first. Archived scripts (kept, but out of the way) are listed only when asked for."""
     with connect() as conn:
         rows = conn.execute(
-            "SELECT * FROM scripts ORDER BY created_at DESC, id DESC LIMIT ?", (limit,)
+            "SELECT * FROM scripts WHERE archived = ? ORDER BY created_at DESC, id DESC LIMIT ?",
+            (1 if archived else 0, limit),
         ).fetchall()
     return [_decode(r, _SCRIPT_JSON) for r in rows]
 

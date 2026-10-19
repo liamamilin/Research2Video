@@ -289,3 +289,20 @@ def test_the_style_audit_can_report_as_a_warning_for_a_roundup(llm):
     client = llm(None)
     assert video_audit.style_issues(client, SECTIONS, "规范")[0]["severity"] == adapt_review.MUST
     assert video_audit.style_issues(client, SECTIONS, "规范", adapt_review.WARN)[0]["severity"] == adapt_review.WARN
+
+
+def test_api_archiving_hides_a_script_without_deleting_it(client, video_env):
+    from tests.test_video_scripts import _csrf, _login
+
+    _login(client)
+    script = store.create_script("flash", {"id": "2026-10-19/F9", "title": "旧的测试文稿", "fields": {}})
+    store.update_script(script["id"], status="DRAFT")
+    busy = store.create_script("flash", {"id": "2026-10-19/F8", "title": "还在写的文稿", "fields": {}})
+    assert client.post(f"/api/video/scripts/{busy['id']}/archive", headers=_csrf(client)).status_code == 409
+    done = client.post(f"/api/video/scripts/{script['id']}/archive", headers=_csrf(client))
+    assert done.status_code == 200 and done.json()["archived"] == 1
+    assert [s["id"] for s in client.get("/api/video/scripts").json()] == [busy["id"]]
+    assert [s["id"] for s in client.get("/api/video/scripts?archived=true").json()] == [script["id"]]
+    assert "2026-10-19/F9" in store.topic_ids_in_use()  # still counts as written
+    client.post(f"/api/video/scripts/{script['id']}/archive", headers=_csrf(client), json={"archived": False})
+    assert len(client.get("/api/video/scripts").json()) == 2

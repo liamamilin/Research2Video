@@ -82,9 +82,10 @@ export function VideoScriptsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [manual, setManual] = useState({ title: "", angle: "", audience: "" });
 
+  const showArchived = statusFilter === "archived";
   const load = useCallback(async () => {
     try {
-      const [s, c] = await Promise.all([listVideoScripts(), listVideoCells()]);
+      const [s, c] = await Promise.all([listVideoScripts(showArchived), listVideoCells()]);
       setScripts(s);
       setCells(c);
       setCellId((current) => current || (c.find((x) => x.usable)?.id ?? ""));
@@ -92,7 +93,7 @@ export function VideoScriptsPage() {
     } catch (e) {
       setError(errorMessage(e, "加载视频文稿失败"));
     }
-  }, []);
+  }, [showArchived]);
 
   useEffect(() => {
     load();
@@ -103,15 +104,15 @@ export function VideoScriptsPage() {
   useEffect(() => {
     if (!inFlight) return;
     const timer = setInterval(() => {
-      listVideoScripts().then(setScripts).catch(() => undefined);
+      listVideoScripts(showArchived).then(setScripts).catch(() => undefined);
     }, 5000);
     return () => clearInterval(timer);
-  }, [inFlight]);
+  }, [inFlight, showArchived]);
 
   const shownScripts = (scripts ?? []).filter(
     (x) =>
       (!columnFilter || x.column_key === columnFilter) &&
-      (!statusFilter ||
+      (!statusFilter || showArchived ||
         (statusFilter === "published" ? x.published : statusFilter === "RESEARCHING" ? IN_FLIGHT.includes(x.status) : x.status === statusFilter)),
   );
   const cell = cells.find((c) => c.id === cellId);
@@ -406,7 +407,7 @@ export function VideoScriptsPage() {
       <div className="flex flex-wrap items-center gap-2 text-xs" aria-label="筛选">
         {[
           ["", "全部"], ["RESEARCHING", "研究/写稿中"], ["DRAFT", "草稿"], ["APPROVED", "已定稿"],
-          ["published", "已发布"], ["FAILED", "失败"],
+          ["published", "已发布"], ["FAILED", "失败"], ["archived", "已归档"],
         ].map(([value, label]) => (
           <button
             key={value}

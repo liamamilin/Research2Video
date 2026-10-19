@@ -244,9 +244,28 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
 
 
 @router.get("/scripts")
-def list_scripts(limit: int = 100, user=Depends(require_viewer)) -> list[dict]:
+def list_scripts(limit: int = 100, archived: bool = False, user=Depends(require_viewer)) -> list[dict]:
     published = store.published_script_ids()
-    return [_script_summary(s, published) for s in store.list_scripts(limit=min(max(limit, 1), 500))]
+    return [_script_summary(s, published)
+            for s in store.list_scripts(limit=min(max(limit, 1), 500), archived=archived)]
+
+
+class ArchiveIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    archived: bool = True
+
+
+@router.post("/scripts/{script_id}/archive")
+def archive_script(script_id: str, body: Optional[ArchiveIn] = None, user=Depends(require_editor)) -> dict:
+    """Hide a script from the board and the lists (or bring it back). Nothing is deleted."""
+    script = _script_or_404(script_id)
+    flag = body.archived if body else True
+    if flag and script["status"] in ("RESEARCHING", "WRITING"):
+        raise HTTPException(409, detail=ApiError.make("busy", "文稿还在研究或写稿，完成后才能归档"))
+    store.update_script(script_id, archived=1 if flag else 0)
+    audit.log("video_script_archive", user=user["username"], target=script_id, result="archived" if flag else "restored")
+    return get_script(script_id, user=user)
 
 
 @router.get("/scripts/{script_id}")

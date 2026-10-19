@@ -247,6 +247,7 @@ export interface VideoScriptSummary {
   title: string;
   length_check: LengthCheck | null;
   published?: boolean;
+  archived?: number;
 }
 
 // 发布记录和发布前复核（快讯），见 spec/video-publish.md。
@@ -364,7 +365,12 @@ export const listVideoStyles = () => api<StyleCatalog>("/api/video/styles");
 export const listVideoTopics = (source: "opportunities" | "flash" = "opportunities") =>
   api<{ round: string | null; topics: VideoTopic[] }>("/api/video/topics", { query: { source } });
 
-export const listVideoScripts = () => api<VideoScriptSummary[]>("/api/video/scripts");
+export const listVideoScripts = (archived = false) =>
+  api<VideoScriptSummary[]>("/api/video/scripts", { query: archived ? { archived: "true" } : undefined });
+
+/** 归档：从看板和列表里收起来（不删除）；archived=false 取消归档。 */
+export const archiveVideoScript = (id: string, archived = true) =>
+  api<VideoScriptDetail>(`/api/video/scripts/${encodeURIComponent(id)}/archive`, { method: "POST", body: { archived } });
 
 export const getVideoScript = (id: string, version?: number) =>
   api<VideoScriptDetail>(`/api/video/scripts/${encodeURIComponent(id)}`, { query: { version } });

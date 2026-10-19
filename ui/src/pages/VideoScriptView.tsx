@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   approveVideoScript,
+  archiveVideoScript,
   getAutoVideoStatus,
   getVideoFacts,
   getVideoRender,
@@ -191,6 +192,18 @@ export function VideoScriptViewPage() {
     }
   }
 
+  async function archive() {
+    setBusy("archive");
+    try {
+      setDetail(await archiveVideoScript(id, !detail?.archived));
+      toast.success(detail?.archived ? "已取消归档" : "已归档，列表和看板里不再显示");
+    } catch (e) {
+      toast.error("归档失败", errorMessage(e));
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function approve() {
     setBusy("approve");
     try {
@@ -266,6 +279,11 @@ export function VideoScriptViewPage() {
             <Link className="ml-3 text-accent hover:underline" to={`/ask?video=${encodeURIComponent(detail.id)}`}>
               在助手中处理
             </Link>
+            {canEdit && !["RESEARCHING", "WRITING"].includes(detail.status) ? (
+              <button className="ml-3 text-accent hover:underline" disabled={busy !== null} onClick={archive}>
+                {detail.archived ? "取消归档" : "归档"}
+              </button>
+            ) : null}
           </p>
         </div>
         {canEdit && shown && ["DRAFT", "APPROVED"].includes(detail.status) ? (
