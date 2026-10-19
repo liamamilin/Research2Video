@@ -192,18 +192,39 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
         store.update_script(script_id, status="FAILED", error=f"写稿失败：{exc}")
         return "FAILED"
 
+    audit_meta = _audit_short(script_id, written, report, column, config, review_config)
     store.add_version(
         script_id,
         title=written.title,
         sections=written.sections,
         length_check=written.length_check,
         edit_type="GENERATED",
-        meta={**written.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        meta={**written.meta, **audit_meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
               "cell": video_columns.provenance(settings.paths.config_dir, column.key)},
         created_by=started_by,
     )
     store.update_script(script_id, status="DRAFT", error=None)
     return "DRAFT"
+
+
+def _audit_short(script_id: str, written, report: str, column, config, review_config) -> dict:
+    """Rule checks and the fact audit of a script written in one call, as the version's ``checks``.
+
+    The audit never fails the script: when it cannot run, the checks say so and the reason goes in ``problems``."""
+    from core.llm import LLMClient
+    from core.video import audit as video_audit
+
+    store.update_script(script_id, stage="事实审计")
+    rule_issues = adapt_review.rules(written.sections, column=column, target_minutes=column.target_minutes)
+    client = LLMClient(review_config or config)
+    try:
+        checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues)
+    except Exception as exc:  # noqa: BLE001 - an audit that crashes must not lose the draft
+        logger.exception("fact audit of script %s failed", script_id)
+        checks, note = _rules_only(rule_issues, None, written.sections), f"事实审计没有完成：{type(exc).__name__}: {exc}"
+    problems = list(written.meta.get("problems") or []) + ([note] if note else [])
+    store.update_script(script_id, stage=None)
+    return {"checks": checks, "problems": problems, "audit_usage": dict(client.usage)}
 
 
 def _llm_configs(llm_config: Optional[LLMConfig]) -> tuple:

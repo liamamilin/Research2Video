@@ -90,13 +90,19 @@ class FakeLLM:
 
     replies: list[str] = []
     calls: list[list[dict]] = []
+    #: the fact audit of a script written in one call is a separate call; it finds nothing unless a test queues findings
+    audit_replies: list[str] = []
+    audit_calls: list[list[dict]] = []
 
     def __init__(self, config, cancel_token=None, progress_cb=None):
         self.usage = {"requests": 0, "total_tokens": 0}
 
     def chat(self, messages, **kwargs):
-        FakeLLM.calls.append(list(messages))
         self.usage["requests"] += 1
+        if messages[0]["content"].startswith("你是事实审计员"):
+            FakeLLM.audit_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.audit_replies.pop(0) if FakeLLM.audit_replies else '{"issues": []}')
+        FakeLLM.calls.append(list(messages))
         return ChatResponse(content=FakeLLM.replies.pop(0))
 
 
@@ -104,6 +110,8 @@ class FakeLLM:
 def llm(monkeypatch):
     FakeLLM.replies = []
     FakeLLM.calls = []
+    FakeLLM.audit_replies = []
+    FakeLLM.audit_calls = []
     monkeypatch.setattr("core.llm.LLMClient", FakeLLM)
     return FakeLLM
 
@@ -965,3 +973,36 @@ def test_api_cells_list_the_matrix_for_a_picker(client, video_env):
     assert rows and all({"id", "key", "status", "usable", "label", "column"} <= set(r) for r in rows)
     assert {r["id"] for r in rows} >= {"deep_dive", "flash", "point_short"}  # this environment's columns are flat ones
     assert client.get("/api/video/cells").status_code == 200
+
+
+def test_api_a_short_script_gets_a_fact_audit_against_its_report(client, video_env, research, llm):
+    key = "point_short"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    llm.audit_replies = ['{"issues": [{"id": "S1P1", "quote": "讲讲讲", "rule": "D2", "severity": "严重", '
+                         '"problem": "把厂商自述说成已证实", "why": "报告没有独立来源", "suggestion": "改成官方说"},'
+                         '{"id": "S9P9", "quote": "x", "rule": "D1", "severity": "严重", "problem": "越界的编号"}]}']
+    _login(client)
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": key, "topic": {"title": "一个要审计的选题", "angle": "x"}})
+    script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    assert script["status"] == "DRAFT", script.get("error")
+    assert len(llm.audit_calls) == 1 and "研究报告" in llm.audit_calls[0][-1]["content"]
+    checks = script["version_shown"]["checks"]
+    facts = [i for i in checks["issues"] if i["audit"] == "fact" and i["source"] == "model"]
+    assert [(i["rule"], i["severity"], i["section"], i["paragraph"]) for i in facts] == [("D2", "serious", 0, 0)]
+    assert checks["model_ran"] is True and checks["summary"]["serious"] == 1 and checks["summary"]["passed"] is False
+    first = script["version_shown"]["sections"][0]["paragraphs"][0]
+    assert first["evidence"] == "NEEDS_REVIEW" and "把厂商自述说成已证实" in first["note"]
+
+
+def test_api_a_failed_audit_keeps_the_draft_and_says_why(client, video_env, research, llm):
+    key = "point_short"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    llm.audit_replies = ["不是 JSON", "还是不是 JSON"]
+    _login(client)
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": key, "topic": {"title": "一个审计会失败的选题", "angle": "x"}})
+    script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    assert script["status"] == "DRAFT", script.get("error")
+    assert script["version_shown"]["checks"]["model_ran"] is False
+    assert any("事实审计没有完成" in p for p in script["version_shown"]["meta"]["problems"])
