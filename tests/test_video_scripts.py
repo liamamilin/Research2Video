@@ -23,6 +23,7 @@ from core.video import columns as video_columns
 from core.video import length, store
 from core.video import topics as video_topics
 from core.video import writer
+from tests import golden_video_cells as golden
 from core.video.autovideo import AutoVideoClient, AutoVideoError
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -112,7 +113,7 @@ def video_env(web_env, monkeypatch):
     tmp, users = web_env
     (tmp / "config").mkdir(exist_ok=True)
     # These tests drive the one-call writer; the default column is `adapt`, which test_video_adapt.py covers.
-    columns_yaml = (ROOT / "config" / "video_columns.yaml").read_text(encoding="utf-8")
+    columns_yaml = golden.shipped_flat_yaml()
     assert "  writer: adapt\n" in columns_yaml
     (tmp / "config" / "video_columns.yaml").write_text(columns_yaml.replace("  writer: adapt\n", "  writer: legacy\n"),
                                                        encoding="utf-8")
@@ -782,6 +783,8 @@ def test_api_flash_items_are_topics_and_a_point_is_cut_from_an_earlier_research(
     spec = (video_env / "jobs" / f"{research.jobs[0]}.yaml").read_text(encoding="utf-8")
     assert "无成本字段 → 每次运行报告成本与耗时" in spec and GOOD_2 in spec and "{topic_" not in spec
     assert first["version_shown"]["length_check"]["target_minutes"] == video_columns.get(str(ROOT / "config"), "flash").target_minutes
+    # the version records which matrix cell wrote it; this environment's columns are flat ones, which have none
+    assert "cell" in first["version_shown"]["meta"] and first["version_shown"]["meta"]["cell"] is None
 
     # A point cut from that script's research: no second research job, the same report and sources.
     cut = client.post("/api/video/scripts", headers=_csrf(client), json={

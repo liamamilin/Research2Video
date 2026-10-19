@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from core.video import columns as video_columns
 from core.video import sources
+from tests import golden_video_cells as golden
 
 LONG = "A very long title about a pricing page that goes on well past the limit of forty characters"
 REPORT = f"""# 报告
@@ -66,14 +67,12 @@ def test_titles_fit_the_card():
 
 
 def test_a_column_turns_the_card_on_with_a_flag_and_rejects_anything_else(tmp_path):
-    text = (video_columns.__file__ and open(
-        __import__("pathlib").Path(__file__).resolve().parents[1] / "config" / "video_columns.yaml", encoding="utf-8").read())
+    text = golden.shipped_flat_yaml()
     (tmp_path / "video_columns.yaml").write_text(text, encoding="utf-8")
     columns = video_columns.load(str(tmp_path))
     assert columns["flash"].source_card and not columns["deep_dive"].source_card
     (tmp_path / "video_columns.yaml").write_text(
-        text.replace("  source_card: true\n  default_style: {depth: intermediate, tone: news}",
-                     "  source_card: yes please\n  default_style: {depth: intermediate, tone: news}", 1), encoding="utf-8")
+        text.replace("  source_card: true\n", "  source_card: yes please\n", 1), encoding="utf-8")  # flash is the first to have one
     try:
         video_columns.load(str(tmp_path))
     except video_columns.ColumnError as exc:

@@ -193,7 +193,8 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
         sections=written.sections,
         length_check=written.length_check,
         edit_type="GENERATED",
-        meta={**written.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")},
+        meta={**written.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+              "cell": video_columns.provenance(settings.paths.config_dir, column.key)},
         created_by=started_by,
     )
     store.update_script(script_id, status="DRAFT", error=None)
@@ -232,7 +233,8 @@ def _adapt_version(script_id: str, *, report: str, report_path: str, citation_ch
         sections=adapted.sections,
         length_check=adapted.length_check,
         edit_type="GENERATED",
-        meta={**adapted.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")},
+        meta={**adapted.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+              "cell": video_columns.provenance(get_settings().paths.config_dir, column.key)},
         created_by=started_by,
     )
 

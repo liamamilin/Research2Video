@@ -174,7 +174,7 @@ def llm(monkeypatch):
 @pytest.fixture
 def video_env(web_env, monkeypatch):
     tmp, _ = web_env
-    for name in ("video_columns.yaml", "video_styles.yaml"):
+    for name in ("video_columns.yaml", "video_matrix.yaml", "video_styles.yaml"):
         shutil.copy(ROOT / "config" / name, tmp / "config" / name)
     store.use_state_dir(str(tmp / "state"))
     store.init_db()

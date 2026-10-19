@@ -28,6 +28,22 @@ TOPIC = {
 REPORT = "### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n"
 
 
+def shipped_flat_yaml(config_dir: Path | str = ROOT / "config") -> str:
+    """The shipped cells as a flat ``video_columns.yaml``, for tests that write their own config and edit its text."""
+    import yaml
+
+    from core.video import matrix
+
+    class Dumper(yaml.SafeDumper):
+        pass
+
+    Dumper.add_representer(str, lambda d, v: d.represent_scalar("tag:yaml.org,2002:str", v, style="|" if "\n" in v else None))
+    Dumper.add_representer(list, lambda d, v: d.represent_sequence(
+        "tag:yaml.org,2002:seq", v, flow_style=all(not isinstance(i, (dict, list)) for i in v)))
+    flat = {cell.column.key: cell.raw for cell in matrix.load(str(config_dir)).values() if cell.column is not None}
+    return yaml.dump(flat, Dumper=Dumper, allow_unicode=True, sort_keys=False, width=10000)
+
+
 def snapshot() -> dict:
     from core.video import columns as video_columns
     from core.video import length, writer

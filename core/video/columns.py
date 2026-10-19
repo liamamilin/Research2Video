@@ -147,66 +147,98 @@ def _pair(key: str, field: str, raw, default: tuple[int, int]) -> tuple[int, int
     return low, high
 
 
-def load(config_dir: str) -> dict[str, Column]:
-    """All configured columns. A malformed entry raises, naming the column."""
+def build(key: str, raw: dict) -> Column:
+    """One column from its flat settings, as written in ``video_columns.yaml`` or composed from a matrix cell."""
+    if not isinstance(raw, dict):
+        raise ColumnError(f"栏目 {key} 的配置必须是映射")
+    try:
+        minutes = float(raw.get("target_minutes", 6))
+    except (TypeError, ValueError) as exc:
+        raise ColumnError(f"栏目 {key} 的 target_minutes 不是数字") from exc
+    minutes = int(minutes) if minutes == int(minutes) else minutes
+    if not MIN_MINUTES <= minutes <= MAX_MINUTES:
+        raise ColumnError(f"栏目 {key} 的 target_minutes 应在 {MIN_MINUTES}–{MAX_MINUTES} 之间")
+    form = str(raw.get("video_form", "auto"))
+    if form not in VIDEO_FORMS:
+        raise ColumnError(f"栏目 {key} 的 video_form 应为 {', '.join(VIDEO_FORMS)} 之一")
+    prompt = str(raw.get("research_prompt") or "").strip()
+    if not prompt:
+        raise ColumnError(f"栏目 {key} 缺少 research_prompt")
+    writer = str(raw.get("writer", "legacy"))
+    if writer not in WRITERS:
+        raise ColumnError(f"栏目 {key} 的 writer 应为 {', '.join(WRITERS)} 之一")
+    style = raw.get("default_style") or {}
+    structure = raw.get("structure") or {}
+    if not isinstance(style, dict) or not isinstance(structure, dict):
+        raise ColumnError(f"栏目 {key} 的 default_style 和 structure 必须是映射")
+    roles = tuple(str(r) for r in structure.get("required_roles") or ())
+    unknown = [r for r in roles if r not in ROLES]
+    if unknown:
+        raise ColumnError(f"栏目 {key} 的 structure.required_roles 有未知角色：{', '.join(unknown)}")
+    return Column(
+        key=key,
+        name=str(raw.get("name") or key),
+        description=str(raw.get("description") or ""),
+        target_minutes=minutes,
+        video_form=form,
+        research_prompt=prompt,
+        script_style=str(raw.get("script_style") or "").strip(),
+        research_timeout_seconds=int(raw.get("research_timeout_seconds", 3600)),
+        writer=writer,
+        voice_id=str(raw.get("voice_id") or ""),
+        default_depth=str(style.get("depth") or "intermediate"),
+        default_tone=str(style.get("tone") or "explainer"),
+        allowed_tones=tuple(str(t) for t in raw.get("allowed_tones") or ()),
+        required_roles=roles,
+        sections=_pair(key, "sections", structure.get("sections"), (4, 6)),
+        paragraph_units=_pair(key, "paragraph_units", structure.get("paragraph_units"), (60, 140)),
+        package=_package(key, raw.get("package")),
+        source_card=_flag(key, "source_card", raw.get("source_card")),
+    )
+
+
+def _flat(config_dir: str) -> dict[str, Column]:
     path = os.path.join(config_dir, COLUMNS_FILE)
     if not os.path.isfile(path):
         return {}
     with open(path, encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
-    columns: dict[str, Column] = {}
-    for key, raw in data.items():
-        if not isinstance(raw, dict):
-            raise ColumnError(f"栏目 {key} 的配置必须是映射")
-        try:
-            minutes = float(raw.get("target_minutes", 6))
-        except (TypeError, ValueError) as exc:
-            raise ColumnError(f"栏目 {key} 的 target_minutes 不是数字") from exc
-        minutes = int(minutes) if minutes == int(minutes) else minutes
-        if not MIN_MINUTES <= minutes <= MAX_MINUTES:
-            raise ColumnError(f"栏目 {key} 的 target_minutes 应在 {MIN_MINUTES}–{MAX_MINUTES} 之间")
-        form = str(raw.get("video_form", "auto"))
-        if form not in VIDEO_FORMS:
-            raise ColumnError(f"栏目 {key} 的 video_form 应为 {', '.join(VIDEO_FORMS)} 之一")
-        prompt = str(raw.get("research_prompt") or "").strip()
-        if not prompt:
-            raise ColumnError(f"栏目 {key} 缺少 research_prompt")
-        writer = str(raw.get("writer", "legacy"))
-        if writer not in WRITERS:
-            raise ColumnError(f"栏目 {key} 的 writer 应为 {', '.join(WRITERS)} 之一")
-        style = raw.get("default_style") or {}
-        structure = raw.get("structure") or {}
-        if not isinstance(style, dict) or not isinstance(structure, dict):
-            raise ColumnError(f"栏目 {key} 的 default_style 和 structure 必须是映射")
-        roles = tuple(str(r) for r in structure.get("required_roles") or ())
-        unknown = [r for r in roles if r not in ROLES]
-        if unknown:
-            raise ColumnError(f"栏目 {key} 的 structure.required_roles 有未知角色：{', '.join(unknown)}")
-        columns[key] = Column(
-            key=key,
-            name=str(raw.get("name") or key),
-            description=str(raw.get("description") or ""),
-            target_minutes=minutes,
-            video_form=form,
-            research_prompt=prompt,
-            script_style=str(raw.get("script_style") or "").strip(),
-            research_timeout_seconds=int(raw.get("research_timeout_seconds", 3600)),
-            writer=writer,
-            voice_id=str(raw.get("voice_id") or ""),
-            default_depth=str(style.get("depth") or "intermediate"),
-            default_tone=str(style.get("tone") or "explainer"),
-            allowed_tones=tuple(str(t) for t in raw.get("allowed_tones") or ()),
-            required_roles=roles,
-            sections=_pair(key, "sections", structure.get("sections"), (4, 6)),
-            paragraph_units=_pair(key, "paragraph_units", structure.get("paragraph_units"), (60, 140)),
-            package=_package(key, raw.get("package")),
-            source_card=_flag(key, "source_card", raw.get("source_card")),
-        )
+    return {key: build(key, raw) for key, raw in data.items()}
+
+
+def load(config_dir: str) -> dict[str, Column]:
+    """All configured columns: the flat ones in ``video_columns.yaml`` and the cells of ``video_matrix.yaml``.
+
+    A malformed entry raises, naming the column. A cell is listed under its column key (the old name when it has
+    one); ``get`` also takes the cell's own id."""
+    from . import matrix
+
+    columns = _flat(config_dir)
+    for cell in matrix.load(config_dir).values():
+        if cell.status == "blocked":
+            continue
+        if cell.column.key in columns:
+            raise ColumnError(f"栏目 {cell.column.key} 同时出现在 {COLUMNS_FILE} 和矩阵里")
+        columns[cell.column.key] = cell.column
     return columns
 
 
 def get(config_dir: str, key: str) -> Column:
+    from . import matrix
+
     columns = load(config_dir)
     if key not in columns:
-        raise ColumnError(f"没有这个栏目：{key}")
+        cell = matrix.load(config_dir).get(key)
+        if cell is not None and cell.status == "blocked":
+            raise ColumnError(f"格子 {key} 暂不能用：{cell.reason}")
+        if cell is None or cell.column.key not in columns:
+            raise ColumnError(f"没有这个栏目：{key}")
+        return columns[cell.column.key]
     return columns[key]
+
+
+def provenance(config_dir: str, key: str):
+    """The matrix cell and definition versions a column key resolved to (recorded in a script version's meta)."""
+    from . import matrix
+
+    return matrix.provenance(config_dir, key)
