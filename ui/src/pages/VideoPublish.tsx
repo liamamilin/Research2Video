@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import {
   addPublication,
@@ -157,7 +159,17 @@ export function PublishPanel({
                 复核结论：<strong>{latestRecheck.verdict}</strong>
                 <span className="text-xs text-text-muted"> · {latestRecheck.finished_at?.slice(0, 16).replace("T", " ")}</span>
               </p>
-              <pre className="whitespace-pre-wrap break-words text-xs font-sans text-text-muted">{latestRecheck.summary}</pre>
+              <div className="md-body text-xs overflow-x-auto">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{latestRecheck.summary}</ReactMarkdown>
+              </div>
+              {latestRecheck.report_path ? (
+                <a
+                  className="text-xs text-accent hover:underline"
+                  href={`/reports/view?path=${encodeURIComponent(latestRecheck.report_path.replace(/^output\//, ""))}`}
+                >
+                  查看完整复核报告 →
+                </a>
+              ) : null}
             </div>
           ) : latestRecheck?.status === "FAILED" ? (
             <p className="text-xs text-danger">上次复核没有完成：{latestRecheck.error}</p>

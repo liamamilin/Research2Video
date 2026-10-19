@@ -345,7 +345,20 @@ export function VideoScriptViewPage() {
           onRestyle={restyle}
         />
       ) : null}
-      {shown?.checks && !editing ? <ChecksPanel checks={shown.checks} /> : null}
+      {shown?.checks && !editing ? (
+        detail.status === "APPROVED" ? (
+          <details className="text-sm">
+            <summary className="cursor-pointer text-text-muted">
+              审校记录（已定稿，{shown.checks.summary.passed ? "当时通过" : `当时有 ${shown.checks.summary.serious} 处必须改，已由你决定`}）
+            </summary>
+            <div className="mt-2">
+              <ChecksPanel checks={shown.checks} />
+            </div>
+          </details>
+        ) : (
+          <ChecksPanel checks={shown.checks} />
+        )
+      ) : null}
       {shown?.meta?.plan && !editing ? <PlanPanel plan={shown.meta.plan} /> : null}
       {shown?.meta?.description && !editing ? <DescriptionPanel description={shown.meta.description} /> : null}
 
@@ -490,13 +503,26 @@ function RenderPanel({
       {video && latest ? (
         <div className="space-y-2">
           <video key={latest.id} controls preload="metadata" src={video.url} className="w-full rounded bg-black aspect-video" />
-          <div className="flex flex-wrap gap-3 text-xs">
-            {latest.files.map((f) => (
-              <a key={f.name} href={f.url} download={f.name} className="text-accent hover:underline">
-                {f.name}
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            <a href={video.url} download={video.name} className="text-accent hover:underline">
+              下载成片
+            </a>
+            {latest.files.some((f) => f.name === "captions.srt") ? (
+              <a href={latest.files.find((f) => f.name === "captions.srt")!.url} download="captions.srt" className="text-accent hover:underline">
+                字幕
               </a>
-            ))}
+            ) : null}
           </div>
+          <details className="text-xs">
+            <summary className="cursor-pointer text-text-muted">全部文件（{latest.files.length}）：规划、QA、日志等</summary>
+            <div className="flex flex-wrap gap-3 mt-2">
+              {latest.files.map((f) => (
+                <a key={f.name} href={f.url} download={f.name} className="text-accent hover:underline">
+                  {f.name}
+                </a>
+              ))}
+            </div>
+          </details>
         </div>
       ) : null}
 

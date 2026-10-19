@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import logging
 import os
+from dataclasses import is_dataclass, replace
 import re
 import threading
 import time
@@ -38,6 +39,9 @@ from web.settings import get_settings
 logger = logging.getLogger("ai_research.web.video")
 
 JOB_CATEGORY = "video"
+#: Per attempt and per call limits for the audits of a script written in one call (see ``_audit_short``).
+AUDIT_REQUEST_SECONDS = 120
+AUDIT_TIMEOUT_SECONDS = 240
 #: How long to wait for the research job beyond its own timeout.
 WAIT_SLACK_SECONDS = 300
 _active: set[str] = set()
@@ -187,36 +191,47 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
             target_minutes=column.target_minutes,
             llm_config=config,
             voice=column.voice_id or None,
+            paragraph_units=tuple(column.paragraph_units),
         )
     except writer.ScriptError as exc:
         store.update_script(script_id, status="FAILED", error=f"写稿失败：{exc}")
         return "FAILED"
 
-    audit_meta = _audit_short(script_id, written, report, column, config, review_config)
-    store.add_version(
+    # The draft is shown at once with the rule checks; the audits then replace its checks when they are done.
+    meta = {**written.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "cell": video_columns.provenance(settings.paths.config_dir, column.key)}
+    rule_issues = adapt_review.rules(written.sections, column=column, target_minutes=column.target_minutes)
+    version = store.add_version(
         script_id,
         title=written.title,
         sections=written.sections,
         length_check=written.length_check,
         edit_type="GENERATED",
-        meta={**written.meta, **audit_meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-              "cell": video_columns.provenance(settings.paths.config_dir, column.key)},
+        meta={**meta, "checks": _rules_only(rule_issues, None, written.sections),
+              "problems": list(written.meta.get("problems") or []) + ["事实审计和风格审计还在进行，完成后这里会更新。"]},
         created_by=started_by,
     )
-    store.update_script(script_id, status="DRAFT", error=None)
+    store.update_script(script_id, status="DRAFT", error=None, stage="事实审计")
+    audit_meta = _audit_short(script_id, written, report, column, config, review_config, rule_issues)
+    store.update_version_audit(script_id, version, sections=written.sections, meta={**meta, **audit_meta})
+    store.update_script(script_id, stage=None)
     return "DRAFT"
 
 
-def _audit_short(script_id: str, written, report: str, column, config, review_config) -> dict:
+def _audit_short(script_id: str, written, report: str, column, config, review_config, rule_issues: list) -> dict:
     """Rule checks and the fact audit of a script written in one call, as the version's ``checks``.
 
     The audit never fails the script: when it cannot run, the checks say so and the reason goes in ``problems``."""
     from core.llm import LLMClient
     from core.video import audit as video_audit
 
-    store.update_script(script_id, stage="事实审计")
-    rule_issues = adapt_review.rules(written.sections, column=column, target_minutes=column.target_minutes)
-    client = LLMClient(review_config or config)
+    base = review_config or config
+    # The review model is often a slow free one: cap each
+    # attempt and the whole call so a slow audit costs minutes, not the 10-minute attempts the writer is allowed.
+    if is_dataclass(base):
+        base = replace(base, request_timeout=min(base.request_timeout, AUDIT_REQUEST_SECONDS),
+                       timeout=min(base.timeout, AUDIT_TIMEOUT_SECONDS))
+    client = LLMClient(base)
     try:
         checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues,
                                           column_style=column.script_style)
@@ -224,7 +239,6 @@ def _audit_short(script_id: str, written, report: str, column, config, review_co
         logger.exception("fact audit of script %s failed", script_id)
         checks, note = _rules_only(rule_issues, None, written.sections), f"事实审计没有完成：{type(exc).__name__}: {exc}"
     problems = list(written.meta.get("problems") or []) + ([note] if note else [])
-    store.update_script(script_id, stage=None)
     return {"checks": checks, "problems": problems, "audit_usage": dict(client.usage)}
 
 

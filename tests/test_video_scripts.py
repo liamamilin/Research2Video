@@ -355,6 +355,14 @@ def test_writer_reads_a_fenced_reply(llm):
 # --- Workflow ------------------------------------------------------------------
 
 
+def test_workflow_retries_a_script_reply_cut_off_mid_json(video_env, research, llm):
+    from web.services import video_workflow
+
+    llm.replies = ['{"title": "AI 动态盘点", "sections": [{"title": "一", "paragraphs": [{"text": "半截', script_json(citations={(0, 0): [GOOD]})]
+    script = store.create_script("deep_dive", {"id": None, "title": "被截断的回复", "fields": {}})
+    assert video_workflow.run(script["id"], started_by="editor", llm_config=object()) == "DRAFT"
+
+
 def test_workflow_researches_then_writes_a_draft(video_env, research, llm):
     from web.services import video_workflow
 
@@ -1224,3 +1232,21 @@ def test_freshness_asks_for_a_recheck_after_a_day_and_trusts_a_recent_one():
     assert any("上次复核是 26 小时前" in w for w in video_recheck.freshness(script, version, column, [stale], now)["warnings"])
     deep = video_columns.get(str(ROOT / "config"), "deep_dive")
     assert video_recheck.freshness(script, version, deep, [], now) == {"required": False, "warnings": []}
+
+
+def test_the_audits_of_a_short_script_run_with_capped_timeouts(client, video_env, research, llm, monkeypatch):
+    seen = []
+    real = FakeLLM.__init__
+
+    def spy(self, config, cancel_token=None, progress_cb=None):
+        seen.append((config.request_timeout, config.timeout))
+        real(self, config, cancel_token, progress_cb)
+
+    monkeypatch.setattr(FakeLLM, "__init__", spy)
+    llm.replies = [script_json(_roundup_budget("point_short") - 5, citations={(0, 0): [GOOD]})]
+    _login(client)
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "point_short", "topic": {"title": "一个审计要限时的选题", "angle": "x"}})
+    assert _wait(client, made.json()["id"], {"DRAFT", "FAILED"})["status"] == "DRAFT"
+    writer_attempt, audit_attempt = seen[0], seen[-1]
+    assert audit_attempt == (120, 240) and writer_attempt[0] > 120

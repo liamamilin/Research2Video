@@ -437,6 +437,14 @@ def add_version(
     return version
 
 
+def update_version_audit(script_id: str, version: int, *, sections: list[dict], meta: dict) -> None:
+    """Replace a GENERATED version's ``meta`` and sections once its audits finish (the audit marks paragraphs)."""
+    with connect(write=True) as conn:
+        conn.execute("UPDATE script_versions SET sections = ?, meta = ? WHERE script_id = ? AND version = ?",
+                     (json.dumps(sections, ensure_ascii=False), json.dumps(meta, ensure_ascii=False),
+                      script_id, version))
+
+
 def get_version(script_id: str, version: int) -> dict | None:
     with connect() as conn:
         row = conn.execute(

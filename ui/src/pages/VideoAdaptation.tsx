@@ -116,9 +116,9 @@ export function StylePanel({
   return (
     <section className="card text-sm flex flex-wrap items-center gap-x-4 gap-y-2">
       <span>
-        风格：<b>{current?.label ?? "旧版写稿（没有分风格）"}</b>
+        风格：<b>{current?.label ?? "短稿一次成稿（这个栏目不分风格）"}</b>
       </span>
-      {canRestyle && catalog ? (
+      {canRestyle && catalog && (current || detail.column?.writer === "adapt") ? (
         <span className="flex flex-wrap items-center gap-2">
           <select className="input text-xs py-1 w-auto" value={depth} onChange={(e) => setDepth(e.target.value)} aria-label="深浅">
             {catalog.depths.map((d) => (

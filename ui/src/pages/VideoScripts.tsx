@@ -129,7 +129,8 @@ export function VideoScriptsPage() {
         ...(form ? { video_form: form } : {}),
         ...body,
       });
-      toast.success("已开始研究", "研究通常需要 3–10 分钟，完成后自动写稿");
+      if (kind === "roundup") toast.success("已开始写稿", "盘点直接用发现报告写稿，通常几分钟");
+      else toast.success("已开始研究", "研究通常需要 3–10 分钟，完成后自动写稿");
       navigate(`/video/${made.id}`);
     } catch (e) {
       toast.error("没能开始", errorMessage(e));
@@ -210,6 +211,7 @@ export function VideoScriptsPage() {
                 <label key={t.id} className="flex items-start gap-3 rounded border border-border p-3 cursor-pointer">
                   <input
                     type="checkbox"
+                    aria-label={`${t.code} ${t.title}`}
                     checked={picked.includes(t.id)}
                     onChange={(e) =>
                       setPicked(e.target.checked ? [...picked, t.id] : picked.filter((id) => id !== t.id))

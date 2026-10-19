@@ -269,6 +269,7 @@ export interface Recheck {
   status: "RUNNING" | "DONE" | "FAILED";
   verdict: "无变化" | "有变化" | "无法确认" | null;
   summary: string;
+  report_path?: string;
   error: string | null;
   created_at: string;
   finished_at: string | null;
