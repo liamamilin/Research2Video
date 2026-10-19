@@ -143,6 +143,10 @@ function mockApi(detail: unknown = DETAIL) {
     const method = init?.method ?? "GET";
     calls.push({ url: String(url), method, body: init?.body ? JSON.parse(String(init.body)) : undefined });
     if (String(url).includes("/api/video/styles")) return jsonResponse(CATALOG);
+    if (String(url).includes("/publish")) {
+      return jsonResponse({ title: "缓存前缀纪律", description: "", chapters: [], chapter_note: "", tags: [],
+        cover: { headline: "缓存前缀纪律", badge: "深度解读" }, references: [], warnings: [], version: 1 });
+    }
     if (String(url).includes("/facts")) {
       return jsonResponse({ id: "sheet1", report_path: "", question: "", answer: "", concepts: [], facts: [
         { id: "F3", claim: "前缀每次被打断时比不开缓存贵 25%", confidence: "推导", sources: [], caveat: "", derived_from: [], formula: "1.25 − 1" },

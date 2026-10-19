@@ -24,6 +24,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
 import { cn, timeAgo } from "@/lib/utils";
 import { ChecksPanel, DescriptionPanel, FactChips, IssueList, PlanPanel, StylePanel } from "./VideoAdaptation";
+import { PublishPanel } from "./VideoPublish";
 import { STATUS_CLASS, STATUS_LABEL, minutes } from "./VideoScripts";
 
 const EVIDENCE: Record<Evidence, { label: string; cls: string }> = {
@@ -421,6 +422,10 @@ export function VideoScriptViewPage() {
           ))}
         </section>
       ))}
+
+      {detail.status === "APPROVED" ? (
+        <PublishPanel scriptId={detail.id} version={detail.approved_version ?? undefined} refreshKey={latestRender?.status} />
+      ) : null}
 
       {detail.status === "APPROVED" || detail.renders.length ? (
         <RenderPanel

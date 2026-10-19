@@ -1006,3 +1006,26 @@ def test_api_a_failed_audit_keeps_the_draft_and_says_why(client, video_env, rese
     assert script["status"] == "DRAFT", script.get("error")
     assert script["version_shown"]["checks"]["model_ran"] is False
     assert any("事实审计没有完成" in p for p in script["version_shown"]["meta"]["problems"])
+
+
+def test_api_publish_pack_uses_the_renders_chapters(client, video_env, autovideo):
+    from web.services import video_render
+
+    script = _approved_script("发布包的选题")
+    _login(client)
+    first = client.get(f"/api/video/scripts/{script['id']}/publish")
+    assert first.status_code == 200, first.text
+    assert first.json()["title"] == "一篇定稿" and first.json()["chapters"] == []
+    assert "还没有出片，所以没有章节时间。" in first.json()["warnings"]
+    assert client.get("/api/video/scripts/no-such/publish").status_code == 404
+
+    render = store.create_render(script["id"], 1, title="一篇定稿", source_text="x", source_sha256="0" * 64, request={})
+    folder = video_render.files_dir(render["id"])
+    folder.mkdir(parents=True)
+    (folder / "chapters.json").write_text(json.dumps({"timeline": "packaged", "chapters": [
+        {"title": "开场", "start_ms": 1500}, {"title": "展开", "start_ms": 30000}, {"title": "结论", "start_ms": 50000}]}),
+        encoding="utf-8")
+    store.update_render(render["id"], status="COMPLETED", artifacts=[{"name": "chapters.json"}])
+    second = client.get(f"/api/video/scripts/{script['id']}/publish").json()
+    assert [c["time"] for c in second["chapters"]] == ["00:00", "00:30", "00:50"]
+    assert "00:30 展开" in second["description"]

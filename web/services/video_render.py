@@ -18,6 +18,7 @@ A render resumes from whatever its row records, so a restart loses nothing:
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import re
 import threading
@@ -143,6 +144,30 @@ def source_card_request(script: dict, version: dict) -> list[dict]:
         logger.warning("script %s: no readable report, so no source card", script.get("id"))
         return []
     return video_sources.source_cards(version, report)
+
+
+def publish_pack(script: dict, version: dict, column) -> dict:
+    """The publish pack of ``version``; chapter times come from its newest completed render, if there is one."""
+    from core.video import publish
+
+    report = ""
+    try:
+        report = video_workflow._read_report(script["report_path"])
+    except (OSError, KeyError, TypeError):
+        pass
+    timeline = None
+    for render in store.list_renders(script["id"]):
+        if render["version"] != version["version"] or render["status"] != "COMPLETED":
+            continue
+        path = safe_file(render, "chapters.json")
+        if path is not None:
+            try:
+                timeline = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                timeline = None
+            break
+    checks = video_workflow.rule_checks(version, column)
+    return publish.build(script, {**version, "checks": checks}, column, report, timeline)
 
 
 def create(script: dict, *, voice_id: Optional[str] = None) -> dict:

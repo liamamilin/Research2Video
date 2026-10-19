@@ -311,6 +311,20 @@ def get_facts(script_id: str, version: Optional[int] = None, user=Depends(requir
     return {"id": row["id"], "report_path": row["report_path"], "created_at": row["created_at"], **row["sheet"]}
 
 
+@router.get("/scripts/{script_id}/publish")
+def get_publish_pack(script_id: str, version: Optional[int] = None, user=Depends(require_viewer)) -> dict:
+    """Title, description, chapters, tags and cover text for uploading a version (the approved one by default)."""
+    script = _script_or_404(script_id)
+    number = version or script["approved_version"] or script["current_version"]
+    shown = store.get_version(script_id, number) if number else None
+    if shown is None:
+        raise _not_found("这个版本")
+    column = _columns().get(script["column_key"])
+    if column is None:
+        raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{script['column_key']}"))
+    return video_render.publish_pack(script, shown, column)
+
+
 class ApproveIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

@@ -266,6 +266,22 @@ export interface AutoVideoStatus {
 
 export const listVideoColumns = () => api<VideoColumn[]>("/api/video/columns");
 
+// 上传用的发布包：标题、简介、章节、标签、封面文字。见 core/video/publish.py。
+export interface PublishPack {
+  title: string;
+  description: string;
+  chapters: { seconds: number; time: string; title: string }[];
+  chapter_note: string;
+  tags: string[];
+  cover: { headline: string; badge: string };
+  references: { title: string; url: string; date: string }[];
+  warnings: string[];
+  version: number;
+}
+
+export const getPublishPack = (id: string, version?: number) =>
+  api<PublishPack>(`/api/video/scripts/${encodeURIComponent(id)}/publish`, { query: { version } });
+
 export const listVideoCells = () => api<VideoCell[]>("/api/video/cells");
 
 export const listVideoStyles = () => api<StyleCatalog>("/api/video/styles");
