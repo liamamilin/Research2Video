@@ -19,6 +19,7 @@ _SOURCE = re.compile(r"^\s*(\d+)\s*[.．、)]\s*(.+)$")
 _URL = re.compile(r"https?://[^\s)\]；;，,>]+")
 _HEADING = re.compile(r"^#{1,4}\s")
 _ISO = re.compile(r"^(\d{4})-(\d{2})-(\d{2})")
+_CHECKED = re.compile(r"检索于\s*(\d{4})-(\d{2})-(\d{2})")
 _TRAILING_NOTE = re.compile(r"\s*[（(][^（()）]*[)）]\s*$")
 
 
@@ -33,9 +34,18 @@ def parse_list(lines: list[str]) -> dict[str, dict]:
         if url is None:
             continue
         parts = [p.strip() for p in match.group(2).split("|")]
-        sources[match.group(1)] = {"title": parts[0], "kind": parts[1] if len(parts) > 3 else "",
-                                   "date": parts[2] if len(parts) > 3 else "", "url": url.group(0).rstrip(".")}
+        kind, date_note = _kind_and_date(parts)
+        sources[match.group(1)] = {"title": parts[0], "kind": kind, "date": date_note, "url": url.group(0).rstrip(".")}
     return sources
+
+
+def _kind_and_date(parts: list[str]) -> tuple[str, str]:
+    """``title | 一手/二手 | date | url`` or ``title | site | 一手/二手 | date | url``: the kind and the date note after it."""
+    for index, part in enumerate(parts[1:], start=1):
+        if part.startswith(("一手", "二手")):
+            after = parts[index + 1] if index + 1 < len(parts) else ""
+            return part, "" if _URL.search(after) else after
+    return (parts[1], parts[2]) if len(parts) > 3 else ("", "")
 
 
 def report_sources(report: str) -> list[dict]:
@@ -50,18 +60,28 @@ def report_sources(report: str) -> list[dict]:
     return list(parse_list(listed).values())
 
 
-def _iso_date(raw: str) -> str:
-    """The publish date a source line starts with, as YYYY-MM-DD; empty when it is not a real date.
-
-    「未标注（检索于 …）」 is a retrieval date, not a publish date, so only a date at the start counts."""
-    match = _ISO.match(raw.strip())
-    if not match:
-        return ""
+def _valid(match) -> str:
     try:
         date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
     except ValueError:
         return ""
-    return match.group(0)
+    return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
+
+
+def _iso_date(raw: str) -> str:
+    """The date to show for a source, as YYYY-MM-DD; empty when there is none.
+
+    A date at the start of the note is the publish date. A page the report says is kept up to date
+    (「持续更新，检索于 2026-10-17」) has no publish date, so the day it was checked stands in: the card then reads
+    as of that day. A date elsewhere in the note (「随 Opus 5.5 于 2026-09-22 开放」) is about something else and is not used."""
+    match = _ISO.match(raw.strip())
+    if match:
+        return _valid(match)
+    if "持续更新" in raw:
+        checked = _CHECKED.search(raw)
+        if checked:
+            return _valid(checked)
+    return ""
 
 
 def _title(raw: str) -> str:

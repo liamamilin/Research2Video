@@ -138,6 +138,11 @@ point_short:
   writer: legacy
   voice_id: voxcpm_anchor
   source_card: true
+  # 知识点没有片头（观众点进来就是为了这个点），只在角落放栏目标，片尾短。
+  package:
+    accent: "#1f7a4d"
+    badge: 一个知识点
+    outro: {template: end_card, title: 一个知识点, lines: ["面向开发者的 AI 知识点"], seconds: 2.5, sound: synth_sting}
   default_style: {depth: intermediate, tone: explainer}
   allowed_tones: [concise, explainer, playful]
   structure:

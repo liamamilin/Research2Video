@@ -80,3 +80,30 @@ def test_a_column_turns_the_card_on_with_a_flag_and_rejects_anything_else(tmp_pa
         assert "flash" in str(exc) and "source_card" in str(exc)
     else:
         raise AssertionError("a non-boolean source_card was accepted")
+
+
+DEEP_REPORT = """### 6. 来源清单
+
+1. Prompt caching | Claude Platform Docs | 一手 | 持续更新，检索于 2026-10-17 | https://docs.example.com/caching
+2. Mid-conversation messages | Claude Platform Docs | 一手 | 随 Opus 5.5 于 2026-09-22 开放（beta 头 `x`） | https://docs.example.com/mid
+3. Introducing Opus 5.5 | Anthropic | 一手 | 2026-09-22 | https://www.example.com/opus
+4. 一篇博客 | dev.to | 二手 | 2026-07-29 | https://blog.example.com/p
+5. 某个页面 | Docs | 一手 | 检索于 2026-10-17 | https://docs.example.com/other
+"""
+
+
+def test_a_source_list_with_a_site_column_is_read_too():
+    listed = {s["url"]: s for s in sources.report_sources(DEEP_REPORT)}
+    assert listed["https://docs.example.com/caching"]["kind"] == "一手"
+    assert listed["https://blog.example.com/p"]["kind"] == "二手" and listed["https://blog.example.com/p"]["date"] == "2026-07-29"
+
+
+def test_a_living_page_is_shown_as_of_the_day_it_was_checked_and_other_dates_are_not_borrowed():
+    version = _version(["https://docs.example.com/caching", "https://blog.example.com/p"],
+                       ["https://docs.example.com/mid", "https://docs.example.com/other", "https://www.example.com/opus"])
+    cards = sources.source_cards(version, DEEP_REPORT)
+    # the first-hand pages come before the blog; the page whose only date is a feature's release date is left out,
+    # and so is the one that says it was checked but does not say it is kept up to date
+    assert [(c["url"], c["date"]) for c in cards] == [("https://docs.example.com/caching", "2026-10-17"),
+                                                      ("https://www.example.com/opus", "2026-09-22"),
+                                                      ("https://blog.example.com/p", "2026-07-29")]
