@@ -1,0 +1,54 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（选题 → 调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 盘点
+description: 把一批值得知道的变化按顺序讲一遍：每条一个小节，说清变了什么、对开发者意味着什么，最后给出先做哪件事。
+status: experimental
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  audience:
+    key: developer
+    name: 开发者
+  type:
+    key: roundup
+    name: 盘点
+  format:
+    key: long
+    name: B 站横屏长
+audience: 开发者
+target_minutes: 4
+topic:
+  kind: roundup
+  sources: [flash]
+  fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style:
+    depth: intermediate
+    tone: concise
+  allowed_tones: [news, concise, explainer]
+  sections: [3, 11]
+  paragraph_units: [30, 100]
+  required_roles: [钩子, 行动]
+  audit:
+    model: review
+    style_severity: warn
+    timeout_seconds: 480
+  style: |
+    栏目「盘点」：把选题里列出的条目逐条讲完，条目数和顺序照选题的「条目」，不增不减，也不加报告里没列入的条目。
+    - 开场两三句话交代这期盘点什么、一共几条，并点出最值得先看的一条；不讲背景。
+    - 每条一个小节：先说变了什么（数字、单位、口径照来源原样），再说对开发者意味着什么：谁受影响、多花或少花多少、要改什么。每条 30–60 秒的口播量，不展开背景。
+    - 条目之间用一句话过渡，不重复上一条的结论。
+    - 结尾只挑最该先做的一件事，说一个现在就能做的动作，不并列多个动作，不重复前面的内容。
+    - 事实只用研究报告里有来源的；只有厂商自己的说法时，口播里说「官方说法」。
+output:
+  target: autovideo
+  voice_id: voxcpm_anchor
+  video_form: information_motion
+  allowed_forms: [information_motion]
+  creative_intent:
+    purpose: 知识讲解

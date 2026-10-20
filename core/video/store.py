@@ -232,6 +232,12 @@ def list_scripts(limit: int = 100, archived: bool = False) -> list[dict]:
     return [_decode(r, _SCRIPT_JSON) for r in rows]
 
 
+def count_scripts_by_column() -> dict[str, int]:
+    """Column (recipe) key -> how many scripts were made with it, archived ones included."""
+    with connect() as conn:
+        return {row[0]: row[1] for row in conn.execute("SELECT column_key, COUNT(*) FROM scripts GROUP BY column_key")}
+
+
 def update_script(script_id: str, **fields: Any) -> None:
     if not fields:
         return

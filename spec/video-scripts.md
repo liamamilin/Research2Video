@@ -29,7 +29,7 @@ AI_research 负责一条视频从选题到**定稿**的全部内容工作；定�
 
 ## 栏目
 
-`config/video_columns.yaml`。一个栏目 = 研究提示词 + 写稿规范 + 时长 + 视频形式。
+现在每个栏目是一份配方文件 `config/video_recipes/<key>.yaml`（选题来源、调研、写稿、审计、出片都在里面），见 `spec/video-recipes.md`。
 第一版只有 `deep_dive`（深度解读）：6 分钟、按证据分级讲清一个问题。
 
 ## 引用规则

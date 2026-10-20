@@ -426,7 +426,7 @@ export function VideoScriptViewPage() {
           key={`${shown.version}-${catalog ? "ready" : "loading"}`}
           detail={detail}
           catalog={catalog}
-          canRestyle={canEdit && !editing && ["DRAFT", "APPROVED"].includes(detail.status) && Boolean(detail.report_path)}
+          canRestyle={canEdit && !editing && ["DRAFT", "APPROVED"].includes(detail.status) && Boolean(detail.report_path) && detail.column?.writer === "adapt"}
           busy={busy === "restyle"}
           onRestyle={restyle}
         />

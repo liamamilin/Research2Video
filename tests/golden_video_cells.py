@@ -1,6 +1,6 @@
 """Golden snapshot of what the three shipped video columns turn into (spec/video-matrix.md, phase 0).
 
-The matrix refactor must not change what a shipped column resolves to: its fields, the research prompt a topic
+They are recipe files now (config/video_recipes/, spec/video-recipes.md). A refactor must not change what a shipped column resolves to: its fields, the research prompt a topic
 fills, and the request the one-call writer sends the model. ``snapshot()`` computes them from the shipped
 ``config/``; ``tests/golden/video_cells.json`` is the committed result. Regenerate it only for a deliberate change:
 
@@ -30,20 +30,56 @@ TOPIC = {
 REPORT = "### 1. 直接回答\n示例报告：输入价 2 美元，12 月 1 日起 4 美元。\n\n### 6. 来源清单\n1. 定价页 | 一手 | 2026-10-13 | https://example.com/pricing\n"
 
 
-def shipped_flat_yaml(config_dir: Path | str = ROOT / "config") -> str:
-    """The shipped cells as a flat ``video_columns.yaml``, for tests that write their own config and edit its text."""
+def install_recipes(config_dir: Path | str, replace: tuple[tuple[str, str], ...] = ()) -> Path:
+    """Copy the shipped recipe files into ``config_dir``; each (old, new) in ``replace`` is applied to every file."""
+    import shutil
+
+    target = Path(config_dir) / "video_recipes"
+    shutil.rmtree(target, ignore_errors=True)
+    target.mkdir(parents=True)
+    for source in sorted((ROOT / "config" / "video_recipes").glob("*.yaml")):
+        text = source.read_text(encoding="utf-8")
+        for old, new in replace:
+            text = text.replace(old, new)
+        (target / source.name).write_text(text, encoding="utf-8")
+    return target
+
+
+#: flat column field -> (recipe section or None for the top level, field there)
+_FLAT = {
+    "name": (None, "name"), "description": (None, "description"), "audience": (None, "audience"),
+    "target_minutes": (None, "target_minutes"), "status": (None, "status"),
+    "topic_kind": ("topic", "kind"), "topic_sources": ("topic", "sources"), "topic_fields": ("topic", "fields"),
+    "research_mode": ("research", "mode"), "research_timeout_seconds": ("research", "timeout_seconds"),
+    "research_language": ("research", "language"), "research_prompt": ("research", "prompt"),
+    "script_style": ("writing", "style"), "default_style": ("writing", "default_style"),
+    "allowed_tones": ("writing", "allowed_tones"), "revise_rounds": ("writing", "revise_rounds"),
+    "audit": ("writing", "audit"),
+    "voice_id": ("output", "voice_id"), "video_form": ("output", "video_form"),
+    "allowed_forms": ("output", "allowed_forms"), "creative_intent": ("output", "creative_intent"),
+    "source_card": ("output", "source_card"), "package": ("output", "package"), "recheck": ("output", "recheck"),
+}
+
+
+def write_flat(config_dir: Path | str, text: str) -> None:
+    """Test shorthand: a mapping of key -> flat column settings, written as one recipe file per key."""
     import yaml
 
-    from core.video import matrix
+    from core.video import recipes
 
-    class Dumper(yaml.SafeDumper):
-        pass
-
-    Dumper.add_representer(str, lambda d, v: d.represent_scalar("tag:yaml.org,2002:str", v, style="|" if "\n" in v else None))
-    Dumper.add_representer(list, lambda d, v: d.represent_sequence(
-        "tag:yaml.org,2002:seq", v, flow_style=all(not isinstance(i, (dict, list)) for i in v)))
-    flat = {cell.column.key: cell.raw for cell in matrix.load(str(config_dir)).values() if cell.column is not None}
-    return yaml.dump(flat, Dumper=Dumper, allow_unicode=True, sort_keys=False, width=10000)
+    folder = Path(config_dir) / "video_recipes"
+    folder.mkdir(parents=True, exist_ok=True)
+    for key, flat in (yaml.safe_load(text) or {}).items():
+        recipe: dict = {"status": "enabled"}
+        for name, value in (flat or {}).items():
+            if name == "writer":
+                recipe.setdefault("writing", {})["pipeline"] = "single" if value == "legacy" else value
+            elif name == "structure":
+                recipe.setdefault("writing", {}).update(value or {})
+            else:
+                section, field = _FLAT[name]
+                (recipe if section is None else recipe.setdefault(section, {}))[field] = value
+        (folder / f"{key}.yaml").write_text(recipes.dump(recipe), encoding="utf-8")
 
 
 def snapshot() -> dict:
@@ -62,6 +98,8 @@ def snapshot() -> dict:
             "research_job": video_workflow.job_spec(column, TOPIC, "00000000aaaa"),
             "writer_system": writer.SYSTEM_PROMPT,
             "writer_request": writer._request(REPORT, TOPIC, column.script_style, column.target_minutes, budget),
+            "writer_request_used": writer._request(REPORT, TOPIC, column.script_style, column.target_minutes, budget,
+                                                   tuple(column.paragraph_units), column.writer_topic_fields()),
             "budget": budget,
             "package_request": video_render.package_request(column, TOPIC),
         }

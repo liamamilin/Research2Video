@@ -129,10 +129,7 @@ def video_env(web_env, monkeypatch):
     tmp, users = web_env
     (tmp / "config").mkdir(exist_ok=True)
     # These tests drive the one-call writer; the default column is `adapt`, which test_video_adapt.py covers.
-    columns_yaml = golden.shipped_flat_yaml()
-    assert "  writer: adapt\n" in columns_yaml
-    (tmp / "config" / "video_columns.yaml").write_text(columns_yaml.replace("  writer: adapt\n", "  writer: legacy\n"),
-                                                       encoding="utf-8")
+    golden.install_recipes(tmp / "config", replace=(("  pipeline: adapt\n", "  pipeline: single\n"),))
     store.use_state_dir(str(tmp / "state"))
     store.init_db()
     from core import report_meta
@@ -276,23 +273,23 @@ def test_the_shipped_column_config_is_valid():
     assert "{topic_title}" in deep.research_prompt and "{date}" in deep.research_prompt
 
 
-def test_a_bad_column_config_names_the_column(tmp_path):
-    (tmp_path / "video_columns.yaml").write_text("broken:\n  target_minutes: 40\n  research_prompt: x\n",
-                                                 encoding="utf-8")
+def test_a_bad_column_config_names_the_column_and_leaves_the_others_usable(tmp_path):
+    golden.write_flat(tmp_path, "broken:\n  target_minutes: 40\n  research_prompt: x\nfine:\n  research_prompt: x\n")
+    assert list(video_columns.load(str(tmp_path))) == ["fine"]  # one bad file does not stop the others
     with pytest.raises(video_columns.ColumnError, match="broken"):
-        video_columns.load(str(tmp_path))
+        video_columns.get(str(tmp_path), "broken")
 
 
 def test_a_column_may_target_a_short_video(tmp_path):
     body = "short:\n  target_minutes: {}\n  research_prompt: x\n"
-    (tmp_path / "video_columns.yaml").write_text(body.format("1.5"), encoding="utf-8")
-    assert video_columns.load(str(tmp_path))["short"].target_minutes == 1.5
-    (tmp_path / "video_columns.yaml").write_text(body.format("1"), encoding="utf-8")
-    assert video_columns.load(str(tmp_path))["short"].target_minutes == 1
+    golden.write_flat(tmp_path, body.format("1.5"))
+    assert video_columns.get(str(tmp_path), "short").target_minutes == 1.5
+    golden.write_flat(tmp_path, body.format("1"))
+    assert video_columns.get(str(tmp_path), "short").target_minutes == 1
     for bad in ("0.5", "16", "soon"):
-        (tmp_path / "video_columns.yaml").write_text(body.format(bad), encoding="utf-8")
+        golden.write_flat(tmp_path, body.format(bad))
         with pytest.raises(video_columns.ColumnError, match="short"):
-            video_columns.load(str(tmp_path))
+            video_columns.get(str(tmp_path), "short")
 
 
 def test_the_budget_of_a_short_video_follows_its_seconds():
@@ -506,9 +503,8 @@ PACKAGE_YAML = """\
 
 
 def _column_with_package(tmp_path, block: str):
-    (tmp_path / "video_columns.yaml").write_text(
-        "short:\n  target_minutes: 1.5\n  research_prompt: x\n" + block, encoding="utf-8")
-    return video_columns.load(str(tmp_path))["short"]
+    golden.write_flat(tmp_path, "short:\n  target_minutes: 1.5\n  research_prompt: x\n" + block)
+    return video_columns.get(str(tmp_path), "short")
 
 
 def test_a_column_may_declare_its_intro_and_outro(tmp_path):
@@ -562,7 +558,7 @@ def test_the_render_carries_the_columns_package_only_when_it_has_one(video_env, 
     assert video_render.process(first["id"]) == "COMPLETED"
     assert "package" not in autovideo.posts[0]
 
-    path = video_env / "config" / "video_columns.yaml"
+    path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
     text = path.read_text(encoding="utf-8")
     assert "  voice_id: voxcpm_anchor\n" in text
     path.write_text(text.replace("  voice_id: voxcpm_anchor\n", "  voice_id: voxcpm_anchor\n" + PACKAGE_YAML, 1), encoding="utf-8")
@@ -807,8 +803,10 @@ def test_api_flash_items_are_topics_and_a_point_is_cut_from_an_earlier_research(
     spec = (video_env / "jobs" / f"{research.jobs[0]}.yaml").read_text(encoding="utf-8")
     assert "无成本字段 → 每次运行报告成本与耗时" in spec and GOOD_2 in spec and "{topic_" not in spec
     assert first["version_shown"]["length_check"]["target_minutes"] == video_columns.get(str(ROOT / "config"), "flash").target_minutes
-    # the version records which matrix cell wrote it; this environment's columns are flat ones, which have none
-    assert "cell" in first["version_shown"]["meta"] and first["version_shown"]["meta"]["cell"] is None
+    # the version records which recipe wrote it: its file and the hash of what the file said
+    made_with = first["version_shown"]["meta"]["cell"]
+    assert made_with["recipe"] == "flash" and made_with["cell"] == "ai-developer-quick_take-short"
+    assert len(made_with["sha256"]) == 64
 
     # A point cut from that script's research: no second research job, the same report and sources.
     cut = client.post("/api/video/scripts", headers=_csrf(client), json={
@@ -838,7 +836,7 @@ def test_the_render_carries_a_source_card_only_for_a_column_that_asks_and_a_repo
     assert video_render.process(first["id"]) == "COMPLETED"
     assert "sources" not in autovideo.posts[0]  # the column did not ask for one
 
-    path = video_env / "config" / "video_columns.yaml"
+    path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
     text = path.read_text(encoding="utf-8")
     assert "  voice_id: voxcpm_anchor\n" in text
     path.write_text(text.replace("  voice_id: voxcpm_anchor\n", "  voice_id: voxcpm_anchor\n  source_card: true\n", 1), encoding="utf-8")
@@ -865,13 +863,13 @@ def test_a_script_can_choose_one_of_the_columns_video_forms_and_the_render_uses_
     assert wrong.status_code == 422 and "information_motion" in wrong.text  # flash only has the one form
     columns = {c["key"]: c for c in client.get("/api/video/columns").json()}
     assert columns["deep_dive"]["allowed_forms"] == ["auto", "information_motion", "process_diagram"]
-    assert all("status" in c for c in columns.values())  # a flat column is enabled; matrix cells carry their own status
+    assert all("status" in c for c in columns.values())  # every recipe carries its own status
 
     # the choice is recorded on the script and is what the render asks AutoVideo for; a source card, which
     # AutoVideo takes only on the information-motion forms, is left out of a flow diagram
     (video_env / "output").mkdir(exist_ok=True)
     (video_env / "output" / "report.md").write_text(REPORT, encoding="utf-8")
-    path = video_env / "config" / "video_columns.yaml"
+    path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
     path.write_text(path.read_text(encoding="utf-8").replace("  voice_id: voxcpm_anchor\n", "  voice_id: voxcpm_anchor\n  source_card: true\n", 1), encoding="utf-8")
     for form, expected in ((None, "auto"), ("process_diagram", "process_diagram")):
         script = _approved_script(f"形式 {form}")
@@ -987,7 +985,8 @@ def test_api_cells_list_the_matrix_for_a_picker(client, video_env):
     _login(client)
     rows = client.get("/api/video/cells").json()
     assert rows and all({"id", "key", "status", "usable", "label", "column"} <= set(r) for r in rows)
-    assert {r["id"] for r in rows} >= {"deep_dive", "flash", "point_short"}  # this environment's columns are flat ones
+    assert {r["key"] for r in rows} >= {"deep_dive", "flash", "point_short"}
+    assert {r["id"] for r in rows} >= {"ai-developer-quick_take-short"}  # a recipe tagged with all four is placed
     assert client.get("/api/video/cells").status_code == 200
 
 

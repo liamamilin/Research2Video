@@ -65,24 +65,33 @@ def research_job_name(column_key: str, script_id: str) -> str:
     return f"{JOB_CATEGORY}/{column_key}_{script_id[:8]}"
 
 
-def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
+#: The research prompt's older placeholder names and the topic field each one stands for.
+TOPIC_ALIASES = {
+    "topic_angle": "核心角度", "topic_audience": "目标受众", "topic_why": "为什么有人在乎",
+    "topic_outline": "建议大纲", "topic_change": "变化", "topic_date": "发布日期", "topic_sources": "来源网址",
+    "topic_subjects": "对比对象", "topic_dimensions": "对比维度",
+}
+MISSING = "（未提供）"
+
+
+def fill_topic(text: str, column: video_columns.Column, topic: dict) -> str:
+    """``text`` with the topic in its placeholders: ``{topic.标题}`` / ``{topic.<field>}`` for any topic field,
+    ``{topic_minutes}``, and the older names in ``TOPIC_ALIASES``. A field the topic lacks reads （未提供）."""
     fields = topic.get("fields") or {}
-    fill = {
-        "{topic_minutes}": str(column.target_minutes),
-        "{topic_title}": topic.get("title", ""),
-        "{topic_angle}": fields.get("核心角度", "") or "（未提供）",
-        "{topic_audience}": fields.get("目标受众", "") or "（未提供）",
-        "{topic_why}": fields.get("为什么有人在乎", "") or "（未提供）",
-        "{topic_outline}": fields.get("建议大纲", "") or "（未提供）",
-        "{topic_change}": fields.get("变化", "") or "（未提供）",
-        "{topic_date}": fields.get("发布日期", "") or "（未提供）",
-        "{topic_sources}": fields.get("来源网址", "") or "（未提供）",
-        "{topic_subjects}": fields.get("对比对象", "") or "（未提供）",
-        "{topic_dimensions}": fields.get("对比维度", "") or "（未提供）",
-    }
-    prompt = column.research_prompt
-    for key, value in fill.items():
-        prompt = prompt.replace(key, value)
+
+    def value(name: str) -> str:
+        if name in ("title", "标题"):
+            return topic.get("title", "")
+        return str(fields.get(name, "") or "") or MISSING
+
+    text = text.replace("{topic_minutes}", str(column.target_minutes)).replace("{topic_title}", topic.get("title", ""))
+    for alias, name in TOPIC_ALIASES.items():
+        text = text.replace("{" + alias + "}", value(name))
+    return re.sub(r"\{topic\.([^{}\s]+)\}", lambda m: value(m.group(1)), text)
+
+
+def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
+    prompt = fill_topic(column.research_prompt, column, topic)
     name = research_job_name(column.key, script_id).split("/", 1)[1]
     keywords = [k for k in re.split(r"[：:，,、]", topic.get("title", "")) if k.strip()][:5]
     return {
@@ -90,7 +99,7 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
         "description": f"{column.name}：{topic.get('title', '')}"[:200],
         "enabled": True,
         "keywords": keywords or [topic.get("title", "")],
-        "language": "zh",
+        "language": column.research_language,
         "schedule": {"type": "manual"},
         "runtime": {"timeout_seconds": column.research_timeout_seconds, "skip_if_running": True},
         "prompt": prompt,
@@ -101,7 +110,7 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
 def start(column_key: str, topic: dict, started_by: str) -> dict:
     """Create a script for ``topic`` and start researching it in the background."""
     settings = get_settings()
-    column = video_columns.get(settings.paths.config_dir, column_key)
+    column = video_columns.for_new_script(settings.paths.config_dir, column_key)
     fields = topic.setdefault("fields", {})
     if column.audience and not (fields.get("目标受众") or "").strip():
         fields["目标受众"] = column.audience  # a topic that names no audience is for the cell's
@@ -150,6 +159,10 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     # 1. Research: an ordinary job, unless the topic comes with a report already (a short video cut from a longer
     # one is written from that one's research, its sources and citation check).
     report_path = topic.get("from_report") or script["report_path"] or ""
+    if not report_path and column.research_mode == "none":
+        store.update_script(script_id, status="FAILED",
+                            error=f"配方 {column.key} 不做调研（research.mode: none），选题要带上研究报告")
+        return "FAILED"
     if not report_path:
         job_name = research_job_name(column.key, script_id)
         # a restart cut this run off after its research finished: the job's own state remembers the report
@@ -191,7 +204,7 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     # 2. Write.
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
-    config, review_config = _llm_configs(llm_config)
+    config, review_config = _llm_configs(llm_config, column)
     if column.writer == "adapt":
         try:
             style = video_styles.resolve(settings.paths.config_dir, column)
@@ -213,6 +226,7 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
             llm_config=config,
             voice=column.voice_id or None,
             paragraph_units=tuple(column.paragraph_units),
+            topic_fields=column.writer_topic_fields(),
         )
     except writer.ScriptError as exc:
         store.update_script(script_id, status="FAILED", error=f"写稿失败：{exc}")
@@ -243,7 +257,7 @@ def _resume_audit(script_id: str, script: dict, report: str, report_path: str, c
     """Redo the fact and style audit of the current version, which a restart or a timeout left rule-only."""
     from types import SimpleNamespace
 
-    config, review_config = _llm_configs(None)
+    config, review_config = _llm_configs(None, column)
     version = store.get_version(script_id, script["current_version"])
     rule_issues = adapt_review.rules(version["sections"], column=column, target_minutes=column.target_minutes)
     store.update_script(script_id, status="DRAFT", error=None, stage="事实审计")
@@ -268,15 +282,14 @@ def _audit_short(script_id: str, written, report: str, column, config, review_co
     # attempt and the whole call so a slow audit costs minutes, not the 10-minute attempts the writer is allowed.
     if is_dataclass(base):
         # a long script (a roundup is about 1000 units) gives the slow review model twice the time
-        total = AUDIT_TIMEOUT_SECONDS * (2 if column.target_minutes >= 3 else 1)
+        total = column.audit_timeout_seconds or AUDIT_TIMEOUT_SECONDS * (2 if column.target_minutes >= 3 else 1)
         base = replace(base, request_timeout=min(base.request_timeout, AUDIT_REQUEST_SECONDS),
                        timeout=min(base.timeout, total))
     client = LLMClient(base)
     try:
         checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues,
                                           column_style=column.script_style,
-                                          # a roundup covers several items in turn, so "too many details" is part of its form
-                                          style_severity=(adapt_review.WARN if column.topic_kind == "roundup"
+                                          style_severity=(adapt_review.WARN if column.audit_style_severity == "warn"
                                                           else adapt_review.MUST))
     except Exception as exc:  # noqa: BLE001 - an audit that crashes must not lose the draft
         logger.exception("fact audit of script %s failed", script_id)
@@ -285,10 +298,13 @@ def _audit_short(script_id: str, written, report: str, column, config, review_co
     return {"checks": checks, "problems": problems, "audit_usage": dict(client.usage)}
 
 
-def _llm_configs(llm_config: Optional[LLMConfig]) -> tuple:
-    """(writing model, fact-audit model or None). The fact audit uses ``review_ai`` in system.yaml when it is set."""
+def _llm_configs(llm_config: Optional[LLMConfig], column=None) -> tuple:
+    """(writing model, fact-audit model or None). The fact audit uses ``review_ai`` in system.yaml when it is set,
+    unless the recipe says ``audit.model: writer``."""
     if llm_config is not None:
         return llm_config, None
+    if column is not None and column.audit_model == "writer":
+        return LLMConfig.from_system(load_system_config(get_settings().paths.config_dir), "ai"), None
     system = load_system_config(get_settings().paths.config_dir)
     review = LLMConfig.from_system(system, "review_ai") if system.get("review_ai") else None
     return LLMConfig.from_system(system, "ai"), review
@@ -337,6 +353,9 @@ def restyle(script_id: str, *, depth: Optional[str] = None, tone: Optional[str] 
     except OSError as exc:
         raise RestyleError(f"读不到研究报告 {script['report_path']}") from exc
     column = video_columns.get(settings.paths.config_dir, script["column_key"])
+    if column.writer != "adapt":
+        raise RestyleError(f"配方 {column.key} 一次写成（writing.pipeline: single），没有换风格这一步；"
+                           "要换写法就改配方的 writing.style 后重新生成")
     style = video_styles.resolve(settings.paths.config_dir, column, depth, tone)  # StyleError → 422
     store.update_script(script_id, status="WRITING", stage="排队", error=None, heartbeat_at=time.time())
     thread = threading.Thread(
@@ -362,7 +381,7 @@ def run_restyle(script_id: str, depth: str, tone: str, *, started_by: str = "",
             style = video_styles.resolve(settings.paths.config_dir, column, depth, tone)
             report = _read_report(script["report_path"])
             citation_check = (report_meta.get(script["report_path"]) or {}).get("citation_check")
-            config, review_config = _llm_configs(llm_config)
+            config, review_config = _llm_configs(llm_config, column)
             _adapt_version(script_id, report=report, report_path=script["report_path"],
                            citation_check=citation_check, column=column, topic=script["topic"], style=style,
                            started_by=started_by, llm_config=config, review_llm_config=review_config)

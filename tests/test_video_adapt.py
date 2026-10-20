@@ -18,6 +18,7 @@ import pytest
 
 from core.llm import ChatResponse
 from core.video import columns as video_columns
+from tests import golden_video_cells as golden
 from core.video import length, store
 from core.video.adapt import common, draft, facts, pipeline, review, styles
 from core.video.adapt import plan as planning
@@ -174,8 +175,8 @@ def llm(monkeypatch):
 @pytest.fixture
 def video_env(web_env, monkeypatch):
     tmp, _ = web_env
-    for name in ("video_columns.yaml", "video_matrix.yaml", "video_styles.yaml"):
-        shutil.copy(ROOT / "config" / name, tmp / "config" / name)
+    shutil.copy(ROOT / "config" / "video_styles.yaml", tmp / "config" / "video_styles.yaml")
+    golden.install_recipes(tmp / "config")
     store.use_state_dir(str(tmp / "state"))
     store.init_db()
     from core import report_meta

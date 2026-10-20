@@ -476,13 +476,11 @@ def test_topics_know_which_scripts_cover_them(video_env):
 
 
 def test_cells_declare_topic_sources_and_picks_can_name_a_cell(video_env):
-    from core.video import matrix
+    from core.video import recipes as matrix
     import shutil
     from web.settings import get_settings as real_settings
 
     config_dir = real_settings().paths.config_dir
-    shutil.copy("config/video_matrix.yaml", os.path.join(config_dir, "video_matrix.yaml"))
-    os.remove(os.path.join(config_dir, "video_columns.yaml"))  # the matrix defines the columns here
     assert matrix.topic_sources(config_dir, "point_short") == ["flash"]
     assert pilot.resolve_pick({"cell": "point_short", "count": 2}) == {"column": "point_short", "count": 2, "source": "flash"}
     assert pilot.resolve_pick({"column": "flash", "count": 1, "source": "flash"})["column"] == "flash"
@@ -500,8 +498,6 @@ def test_coverage_counts_written_per_cell_not_per_topic(video_env, monkeypatch):
     from web.settings import get_settings as real_settings
 
     config_dir = real_settings().paths.config_dir
-    shutil.copy("config/video_matrix.yaml", os.path.join(config_dir, "video_matrix.yaml"))
-    os.remove(os.path.join(config_dir, "video_columns.yaml"))
     out = video_env / "output"
     (out / "flash").mkdir(parents=True)
     store.create_script("flash", {"id": "2026-10-19/F1", "title": "单条", "fields": {}})
@@ -517,8 +513,6 @@ def _matrix_only(video_env):
     from web.settings import get_settings as real_settings
 
     config_dir = real_settings().paths.config_dir
-    shutil.copy("config/video_matrix.yaml", os.path.join(config_dir, "video_matrix.yaml"))
-    os.remove(os.path.join(config_dir, "video_columns.yaml"))
 
 
 def test_a_dismissed_topic_leaves_the_counts_and_the_picks_and_comes_back(video_env, monkeypatch):

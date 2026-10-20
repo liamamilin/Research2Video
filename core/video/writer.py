@@ -84,17 +84,16 @@ def trusted_urls(report: str, citation_check: Optional[dict]) -> set[str]:
     return cited - unmatched
 
 
+#: The topic fields shown to the model when the recipe names none.
+TOPIC_FIELDS = ("核心角度", "目标受众", "条目数", "条目", "对比对象", "对比维度")
+
+
 def _request(report: str, topic: dict, column_style: str, target_minutes: float, budget: int,
-             paragraph_units: Optional[tuple] = None) -> str:
+             paragraph_units: Optional[tuple] = None, topic_fields: Optional[tuple] = None) -> str:
+    fields = topic.get("fields") or {}
     topic_lines = "\n".join(
         f"- {k}：{v}" for k, v in (
-            ("选题", topic.get("title", "")),
-            ("核心角度", (topic.get("fields") or {}).get("核心角度", "")),
-            ("目标受众", (topic.get("fields") or {}).get("目标受众", "")),
-            ("条目数", (topic.get("fields") or {}).get("条目数", "")),
-            ("条目", (topic.get("fields") or {}).get("条目", "")),
-            ("对比对象", (topic.get("fields") or {}).get("对比对象", "")),
-            ("对比维度", (topic.get("fields") or {}).get("对比维度", "")),
+            ("选题", topic.get("title", "")), *((name, fields.get(name, "")) for name in topic_fields or TOPIC_FIELDS),
         ) if v
     )
     structure = ""
@@ -218,6 +217,7 @@ def write(
     cancel_token: Optional[threading.Event] = None,
     voice: Optional[str] = None,
     paragraph_units: Optional[tuple] = None,
+    topic_fields: Optional[tuple] = None,
 ) -> WrittenScript:
     """Write, check, and if needed revise once to length."""
     from core.llm import LLMClient
@@ -226,7 +226,8 @@ def write(
     budget = length.budget_for(target_minutes, voice)
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": _request(report, topic, column_style, target_minutes, budget, paragraph_units)},
+        {"role": "user", "content": _request(report, topic, column_style, target_minutes, budget, paragraph_units,
+                                                     topic_fields)},
     ]
     response = client.chat(messages, temperature=0.4)
     try:

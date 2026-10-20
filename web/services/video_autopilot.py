@@ -61,20 +61,20 @@ def resolve_pick(pick: dict) -> dict:
     """A pick by ``cell`` (what the matrix says it can be written from) becomes ``column`` + ``source``."""
     if not pick.get("cell"):
         return pick
-    from core.video import matrix
+    from core.video import recipes as matrix
 
     config_dir = get_settings().paths.config_dir
     sources = matrix.topic_sources(config_dir, pick["cell"])
     if not sources:
         raise ValueError(f"格子 {pick['cell']} 没有选题来源，不能自动挑选题")
-    if video_columns.get(config_dir, pick["cell"]).topic_kind != "single":
+    if video_columns.for_new_script(config_dir, pick["cell"]).topic_kind != "single":
         raise ValueError(f"格子 {pick['cell']} 一期用几条选题合成，不能按条数自动挑")
     return {"column": pick["cell"], "count": pick.get("count", 1), "source": sources[0]}
 
 
 def coverage() -> list[dict]:
     """Per cell: its topic sources, how many topics wait to be written and how many are taken, newest report date."""
-    from core.video import matrix
+    from core.video import recipes as matrix
 
     settings = get_settings()
     covered = store.scripts_by_topic()
@@ -415,7 +415,7 @@ def start_run(spec: Optional[dict] = None, *, plan_id: Optional[str] = None, sta
     spec = spec or DEFAULT_SPEC
     for pick in spec.get("picks", []):
         pick = resolve_pick(pick)
-        video_columns.get(get_settings().paths.config_dir, pick["column"])  # unknown cell raises
+        video_columns.for_new_script(get_settings().paths.config_dir, pick["column"])  # unknown or blocked raises
     return ap.create_run(spec, [], plan_id=plan_id, started_by=started_by)
 
 

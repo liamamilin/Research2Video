@@ -161,7 +161,7 @@ def adapt(
     initial = copy.deepcopy(state["checks"]["issues"])
     best = (sections, state)
     rounds = 0
-    while not state["checks"]["summary"]["passed"] and rounds < MAX_ROUNDS and state["reading"] is not None:
+    while not state["checks"]["summary"]["passed"] and rounds < getattr(column, "revise_rounds", MAX_ROUNDS) and state["reading"] is not None:
         todo = review.targets(sections, state["checks"])
         if not todo:
             break

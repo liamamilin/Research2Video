@@ -72,7 +72,7 @@ const CATALOG = {
 
 const ADAPTED = {
   ...DETAIL,
-  column: { ...DETAIL.column, default_style: { depth: "intermediate", tone: "explainer" }, allowed_tones: ["explainer", "playful"] },
+  column: { ...DETAIL.column, writer: "adapt", default_style: { depth: "intermediate", tone: "explainer" }, allowed_tones: ["explainer", "playful"] },
   version_shown: {
     ...DETAIL.version_shown,
     sections: [

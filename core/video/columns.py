@@ -1,16 +1,19 @@
-"""Video columns (栏目), configured in ``config/video_columns.yaml``."""
+"""Video columns (栏目): the settings one script is made with.
+
+Each column is a recipe file, ``config/video_recipes/<key>.yaml`` (core/video/recipes.py, spec/video-recipes.md);
+``build`` turns a recipe's flat settings into a ``Column``, which everything downstream consumes."""
 
 from __future__ import annotations
 
-import os
 import re
 from dataclasses import dataclass, field
 
-import yaml
 
 from .length import MAX_MINUTES, MIN_MINUTES
 
-COLUMNS_FILE = "video_columns.yaml"
+#: The five-step adaptation needs room for 3–5 comprehension goals and a causal chain (spec/video-adaptation.md).
+ADAPT_MIN_MINUTES = 3
+
 VIDEO_FORMS = ("auto", "information_motion", "process_diagram")
 #: What a script of the column is made from: one topic (single), several items of a discovery report cut into a
 #: list video (roundup), or two subjects set against each other (comparison); see spec/video-matrix.md.
@@ -18,6 +21,18 @@ TOPIC_KINDS = ("single", "roundup", "comparison")
 #: legacy: one model call writes the script (core/video/writer.py).
 #: adapt: the five-step adaptation (core/video/adapt/, spec/video-adaptation.md).
 WRITERS = ("legacy", "adapt")
+#: job: each script runs its own research job; none: the topic brings the report it is written from (a roundup's
+#: discovery report, or the research of the script it is cut from).
+RESEARCH_MODES = ("job", "none")
+#: Which model runs the fact audit: ``review`` uses ``review_ai`` in system.yaml when it is set, ``writer`` the
+#: writing model.
+AUDIT_MODELS = ("review", "writer")
+SEVERITIES = ("must", "warn")
+#: The topic fields each writer shows the model when the recipe names none (what they always showed).
+DEFAULT_TOPIC_FIELDS = {
+    "legacy": ("核心角度", "目标受众", "条目数", "条目", "对比对象", "对比维度"),
+    "adapt": ("核心角度", "目标受众", "为什么有人在乎"),
+}
 ROLES = ("钩子", "背景", "概念", "机制", "证据", "反方", "行动", "收束")
 
 
@@ -61,6 +76,22 @@ class Column:
     topic_kind: str = "single"
     #: A flash-news script is checked again just before it is published (a search for changes since it was written).
     recheck: bool = False
+    research_mode: str = "job"
+    research_language: str = "zh"
+    #: Where topics for this column come from (``flash``, ``opportunities``); empty: picked by hand only.
+    topic_sources: tuple[str, ...] = ()
+    #: The topic fields the writer is shown, in order; empty: the writer's default (``DEFAULT_TOPIC_FIELDS``).
+    topic_fields: tuple[str, ...] = ()
+    audit_model: str = "review"
+    #: How a style finding of the one-call writer's audit counts: ``must`` (fix before approving) or ``warn``.
+    audit_style_severity: str = "must"
+    #: Time limit of the one-call writer's audit call; 0 means the default (240 s, twice that from 3 minutes on).
+    audit_timeout_seconds: int = 0
+    #: Fix rounds of the five-step adaptation.
+    revise_rounds: int = 2
+
+    def writer_topic_fields(self) -> tuple[str, ...]:
+        return self.topic_fields or DEFAULT_TOPIC_FIELDS[self.writer]
 
     def as_dict(self) -> dict:
         return {
@@ -79,6 +110,8 @@ class Column:
             "allowed_forms": list(self.allowed_forms) or [self.video_form],
             "topic_kind": self.topic_kind,
             "recheck": self.recheck,
+            "research_mode": self.research_mode,
+            "topic_sources": list(self.topic_sources),
         }
 
 
@@ -175,8 +208,24 @@ def _pair(key: str, field: str, raw, default: tuple[int, int]) -> tuple[int, int
     return low, high
 
 
+#: where topics can come from: flash = the flash-news discovery reports, opportunities = the intelligence rounds
+TOPIC_SOURCES = ("flash", "opportunities")
+
+
+def _names(key: str, name: str, raw, allowed: tuple[str, ...] = ()) -> tuple[str, ...]:
+    """A list of names; a bare string is refused (``flash`` would otherwise become f, l, a, s, h)."""
+    if raw is None:
+        return ()
+    if not isinstance(raw, (list, tuple)) or not all(isinstance(x, str) and x.strip() for x in raw):
+        raise ColumnError(f"栏目 {key} 的 {name} 应写成列表，如 [a, b]")
+    unknown = [x for x in raw if allowed and x not in allowed]
+    if unknown:
+        raise ColumnError(f"栏目 {key} 的 {name} 只能取 {', '.join(allowed)}，不认识：{', '.join(unknown)}")
+    return tuple(x.strip() for x in raw)
+
+
 def build(key: str, raw: dict) -> Column:
-    """One column from its flat settings, as written in ``video_columns.yaml`` or composed from a matrix cell."""
+    """One column from its flat settings (``recipes.to_flat`` of a recipe file)."""
     if not isinstance(raw, dict):
         raise ColumnError(f"栏目 {key} 的配置必须是映射")
     try:
@@ -193,8 +242,11 @@ def build(key: str, raw: dict) -> Column:
     if topic_kind not in TOPIC_KINDS:
         raise ColumnError(f"栏目 {key} 的 topic_kind 应为 {', '.join(TOPIC_KINDS)} 之一")
     prompt = str(raw.get("research_prompt") or "").strip()
-    if not prompt and topic_kind != "roundup":  # a roundup is written from a discovery report, no research of its own
-        raise ColumnError(f"栏目 {key} 缺少 research_prompt")
+    research_mode = str(raw.get("research_mode") or ("none" if topic_kind == "roundup" else "job"))
+    if research_mode not in RESEARCH_MODES:
+        raise ColumnError(f"栏目 {key} 的 research.mode 应为 {', '.join(RESEARCH_MODES)} 之一")
+    if not prompt and research_mode == "job":
+        raise ColumnError(f"栏目 {key} 缺少 research_prompt（research.mode 是 job 时要写调研提示词）")
     writer = str(raw.get("writer", "legacy"))
     if writer not in WRITERS:
         raise ColumnError(f"栏目 {key} 的 writer 应为 {', '.join(WRITERS)} 之一")
@@ -202,11 +254,33 @@ def build(key: str, raw: dict) -> Column:
     structure = raw.get("structure") or {}
     if not isinstance(style, dict) or not isinstance(structure, dict):
         raise ColumnError(f"栏目 {key} 的 default_style 和 structure 必须是映射")
-    roles = tuple(str(r) for r in structure.get("required_roles") or ())
+    roles = _names(key, "required_roles", structure.get("required_roles"))
     unknown = [r for r in roles if r not in ROLES]
     if unknown:
         raise ColumnError(f"栏目 {key} 的 structure.required_roles 有未知角色：{', '.join(unknown)}")
-    forms = tuple(str(f) for f in raw.get("allowed_forms") or (form,))
+    audit = raw.get("audit") or {}
+    if not isinstance(audit, dict) or set(audit) - {"model", "style_severity", "timeout_seconds"}:
+        raise ColumnError(f"栏目 {key} 的 audit 只能有 model、style_severity、timeout_seconds")
+    audit_model = str(audit.get("model") or "review")
+    if audit_model not in AUDIT_MODELS:
+        raise ColumnError(f"栏目 {key} 的 audit.model 应为 {', '.join(AUDIT_MODELS)} 之一")
+    severity = str(audit.get("style_severity") or "must")
+    if severity not in SEVERITIES:
+        raise ColumnError(f"栏目 {key} 的 audit.style_severity 应为 {', '.join(SEVERITIES)} 之一")
+    try:
+        audit_timeout = int(audit.get("timeout_seconds") or 0)
+        rounds = int(raw.get("revise_rounds", 2))
+    except (TypeError, ValueError) as exc:
+        raise ColumnError(f"栏目 {key} 的 audit.timeout_seconds 和 revise_rounds 应为整数") from exc
+    if audit_timeout < 0 or not 0 <= rounds <= 5:
+        raise ColumnError(f"栏目 {key}：audit.timeout_seconds 不能为负，revise_rounds 应在 0–5 之间")
+    if writer == "adapt" and minutes < ADAPT_MIN_MINUTES:
+        raise ColumnError(f"栏目 {key}：五步改编（adapt）是给 {ADAPT_MIN_MINUTES} 分钟以上的稿子设计的，"
+                          f"{minutes} 分钟的稿子用 single")
+    topic_fields = raw.get("topic_fields") or ()
+    if not isinstance(topic_fields, (list, tuple)) or not all(isinstance(f, str) and f.strip() for f in topic_fields):
+        raise ColumnError(f"栏目 {key} 的 topic_fields 应为字段名列表")
+    forms = _names(key, "allowed_forms", raw.get("allowed_forms")) or (form,)
     if form not in forms or set(forms) - set(VIDEO_FORMS):
         raise ColumnError(f"栏目 {key} 的 allowed_forms 应是 {', '.join(VIDEO_FORMS)} 里的，并包含默认的 {form}")
     return Column(
@@ -222,7 +296,7 @@ def build(key: str, raw: dict) -> Column:
         voice_id=str(raw.get("voice_id") or ""),
         default_depth=str(style.get("depth") or "intermediate"),
         default_tone=str(style.get("tone") or "explainer"),
-        allowed_tones=tuple(str(t) for t in raw.get("allowed_tones") or ()),
+        allowed_tones=_names(key, "allowed_tones", raw.get("allowed_tones")),
         required_roles=roles,
         sections=_pair(key, "sections", structure.get("sections"), (4, 6)),
         paragraph_units=_pair(key, "paragraph_units", structure.get("paragraph_units"), (60, 140)),
@@ -233,51 +307,54 @@ def build(key: str, raw: dict) -> Column:
         creative_intent=_intent(key, raw.get("creative_intent")),
         topic_kind=topic_kind,
         recheck=_flag(key, "recheck", raw.get("recheck")),
+        research_mode=research_mode,
+        research_language=str(raw.get("research_language") or "zh"),
+        topic_sources=_names(key, "topic.sources", raw.get("topic_sources"), TOPIC_SOURCES),
+        topic_fields=tuple(f.strip() for f in topic_fields),
+        audit_model=audit_model,
+        audit_style_severity=severity,
+        audit_timeout_seconds=audit_timeout,
+        revise_rounds=rounds,
     )
 
 
-def _flat(config_dir: str) -> dict[str, Column]:
-    path = os.path.join(config_dir, COLUMNS_FILE)
-    if not os.path.isfile(path):
-        return {}
-    with open(path, encoding="utf-8") as fh:
-        data = yaml.safe_load(fh) or {}
-    return {key: build(key, raw) for key, raw in data.items()}
-
-
 def load(config_dir: str) -> dict[str, Column]:
-    """All configured columns: the flat ones in ``video_columns.yaml`` and the cells of ``video_matrix.yaml``.
+    """Every column new scripts can be made with, by key: one per recipe file that builds and is not blocked.
 
-    A malformed entry raises, naming the column. A cell is listed under its column key (the old name when it has
-    one); ``get`` also takes the cell's own id."""
-    from . import matrix
+    A recipe that does not build is left out (``recipes.load`` reports it), so one bad file cannot stop the rest."""
+    from . import recipes
 
-    columns = _flat(config_dir)
-    for cell in matrix.load(config_dir).values():
-        if cell.status == "blocked":
-            continue
-        if cell.column.key in columns:
-            raise ColumnError(f"栏目 {cell.column.key} 同时出现在 {COLUMNS_FILE} 和矩阵里")
-        columns[cell.column.key] = cell.column
-    return columns
+    return {key: r.column for key, r in recipes.load(config_dir).items() if r.usable}
 
 
 def get(config_dir: str, key: str) -> Column:
-    from . import matrix
+    """A column by its key, or by the cell id its tags spell (``ai-developer-quick_take-short`` is ``flash``).
 
-    columns = load(config_dir)
-    if key not in columns:
-        cell = matrix.load(config_dir).get(key)
-        if cell is not None and cell.status == "blocked":
-            raise ColumnError(f"格子 {key} 暂不能用：{cell.reason}")
-        if cell is None or cell.column.key not in columns:
-            raise ColumnError(f"没有这个栏目：{key}")
-        return columns[cell.column.key]
-    return columns[key]
+    A blocked recipe still resolves, so the scripts already made with it can be read, approved and rendered;
+    ``for_new_script`` is the check for starting one."""
+    from . import recipes
+
+    recipe = recipes.find(config_dir, key)
+    if recipe is None:
+        raise ColumnError(f"没有这个栏目：{key}")
+    if recipe.column is None:
+        raise ColumnError(f"配方 {recipe.key} 有错误：{recipe.error}")
+    return recipe.column
+
+
+def for_new_script(config_dir: str, key: str) -> Column:
+    """The column a new script is made with; a blocked recipe makes none."""
+    from . import recipes
+
+    column = get(config_dir, key)
+    recipe = recipes.find(config_dir, key)
+    if recipe is not None and recipe.status == "blocked":
+        raise ColumnError(f"配方 {recipe.key} 已停用：{recipe.reason}")
+    return column
 
 
 def provenance(config_dir: str, key: str):
-    """The matrix cell and definition versions a column key resolved to (recorded in a script version's meta)."""
-    from . import matrix
+    """Which recipe (and which content of it) a column key resolved to, recorded in a script version's meta."""
+    from . import recipes
 
-    return matrix.provenance(config_dir, key)
+    return recipes.provenance(config_dir, key)

@@ -59,7 +59,7 @@ describe("Layout sidebar", () => {
     expect(aside?.className).toContain("translate-x-0");
     expect(aside?.className).not.toContain("-translate-x-full");
     const links = Array.from(container.querySelectorAll("nav a"));
-    expect(links.slice(0, 5).map((link) => link.textContent)).toEqual(["视频看板", "选题", "文稿", "成片与发布", "助手"]);
+    expect(links.slice(0, 6).map((link) => link.textContent)).toEqual(["视频看板", "选题", "文稿", "文稿配方", "成片与发布", "助手"]);
   });
 
   it("keeps the sidebar visible after navigating on desktop", () => {

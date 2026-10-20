@@ -20,6 +20,7 @@ import { AskPage } from "@/pages/Ask";
 import { ShareViewPage } from "@/pages/ShareView";
 import { VideoScriptsPage } from "@/pages/VideoScripts";
 import { VideoScriptViewPage } from "@/pages/VideoScriptView";
+import { VideoRecipesPage } from "@/pages/VideoRecipes";
 import { useAuthStore } from "@/lib/auth-store";
 import { ToastProvider } from "@/lib/toast";
 
@@ -68,6 +69,8 @@ function AppRoutes() {
         <Route path="/topics" element={<TopicsPage />} />
         <Route path="/publish" element={<PublishQueuePage />} />
         <Route path="/video" element={<VideoScriptsPage />} />
+        <Route path="/video-recipes" element={<VideoRecipesPage />} />
+        <Route path="/video-recipes/:key" element={<VideoRecipesPage />} />
         <Route path="/video/:id" element={<VideoScriptViewPage />} />
         <Route
           path="/settings"

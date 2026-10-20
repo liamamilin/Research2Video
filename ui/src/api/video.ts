@@ -39,8 +39,11 @@ export interface VideoCell {
   reason: string;
   usable: boolean;
   label: string;
-  parts: Record<"domain" | "audience" | "type" | "format", { key: string; name: string; version: number }> | null;
+  parts: Record<"domain" | "audience" | "type" | "format", { key: string; name: string }> | null;
   column: VideoColumn | null;
+  recipe?: string; // 配方文件名（config/video_recipes/<recipe>.yaml）
+  error?: string; // 配方文件有错时的原因
+  topic_sources?: string[];
 }
 
 export interface StyleCatalog {
@@ -541,3 +544,45 @@ export const setPlanSpec = (id: string, spec: AutopilotSpec) =>
   api<AutopilotPlan>(`/api/video/autopilot/plans/${encodeURIComponent(id)}/spec`, { method: "PUT", body: { spec } });
 export const cancelAutopilotRun = (id: string) =>
   api<AutopilotRun>(`/api/video/autopilot/runs/${encodeURIComponent(id)}/cancel`, { method: "POST" });
+
+// 文稿配方：config/video_recipes/<key>.yaml，一份文件就是一种文稿的完整做法（spec/video-recipes.md）
+export interface VideoRecipe {
+  key: string;
+  label: string;
+  status: CellStatus;
+  reason: string;
+  error: string;
+  usable: boolean;
+  cell: string;
+  name: string;
+  pipeline: "single" | "adapt" | null;
+  research_mode: "job" | "none" | null;
+  target_minutes: number | null;
+  topic_kind: string | null;
+  topic_sources: string[];
+  scripts: number;
+  mtime: number | null;
+  sha256: string;
+}
+
+export interface VideoRecipeDetail extends VideoRecipe {
+  content: string;
+  column: VideoColumn | null;
+}
+
+export const listVideoRecipes = () => api<VideoRecipe[]>("/api/video/recipes");
+export const getVideoRecipe = (key: string) => api<VideoRecipeDetail>(`/api/video/recipes/${encodeURIComponent(key)}`);
+export const validateVideoRecipe = (key: string, content: string) =>
+  api<{ ok: boolean; error: string; column: VideoColumn | null }>(`/api/video/recipes/${encodeURIComponent(key)}/validate`, {
+    method: "POST",
+    body: { content },
+  });
+export const saveVideoRecipe = (key: string, content: string, expectedMtime?: number | null) =>
+  api<VideoRecipeDetail>(`/api/video/recipes/${encodeURIComponent(key)}`, {
+    method: "PUT",
+    body: { content, expected_mtime: expectedMtime ?? undefined },
+  });
+export const copyVideoRecipe = (key: string, copyFrom: string) =>
+  api<VideoRecipeDetail>("/api/video/recipes", { method: "POST", body: { key, copy_from: copyFrom } });
+export const deleteVideoRecipe = (key: string) =>
+  api<{ ok: boolean }>(`/api/video/recipes/${encodeURIComponent(key)}`, { method: "DELETE" });

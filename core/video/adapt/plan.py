@@ -157,9 +157,9 @@ class _Plan(BaseModel):
 
 def _request(sheet: dict, column, topic: dict, style, target_minutes: float) -> str:
     fields = topic.get("fields") or {}
+    names = column.writer_topic_fields() if hasattr(column, "writer_topic_fields") else ("核心角度", "目标受众", "为什么有人在乎")
     topic_lines = "\n".join(f"- {k}：{v}" for k, v in (
-        ("选题", topic.get("title", "")), ("核心角度", fields.get("核心角度", "")),
-        ("目标受众", fields.get("目标受众", "")), ("为什么有人在乎", fields.get("为什么有人在乎", "")),
+        ("选题", topic.get("title", "")), *((name, fields.get(name, "")) for name in names),
     ) if v)
     low, high = column.sections
     roles = "、".join(column.required_roles) or "无"

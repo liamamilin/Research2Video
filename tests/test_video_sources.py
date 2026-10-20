@@ -67,14 +67,14 @@ def test_titles_fit_the_card():
 
 
 def test_a_column_turns_the_card_on_with_a_flag_and_rejects_anything_else(tmp_path):
-    text = golden.shipped_flat_yaml()
-    (tmp_path / "video_columns.yaml").write_text(text, encoding="utf-8")
+    folder = golden.install_recipes(tmp_path)
     columns = video_columns.load(str(tmp_path))
     assert columns["flash"].source_card and not columns["deep_dive"].source_card
-    (tmp_path / "video_columns.yaml").write_text(
-        text.replace("  source_card: true\n", "  source_card: yes please\n", 1), encoding="utf-8")  # flash is the first to have one
+    flash = folder / "flash.yaml"
+    flash.write_text(flash.read_text(encoding="utf-8").replace("  source_card: true\n", "  source_card: yes please\n"),
+                     encoding="utf-8")
     try:
-        video_columns.load(str(tmp_path))
+        video_columns.get(str(tmp_path), "flash")
     except video_columns.ColumnError as exc:
         assert "flash" in str(exc) and "source_card" in str(exc)
     else:

@@ -1,4 +1,0 @@
-# 单个视频栏目（老格式）：一个栏目 = 研究提示词 + 写稿规范 + 时长 + 视频形式 + 默认风格。见 spec/video-scripts.md。
-#
-# 三个正式栏目（deep_dive、flash、point_short）现在由 config/video_matrix.yaml 的格子组合出来，见 spec/video-matrix.md。
-# 这里还可以写单独的栏目，键不能和矩阵里的格子 key 重复；字段同 core/video/columns.py 的 build。

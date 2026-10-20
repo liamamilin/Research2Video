@@ -32,10 +32,18 @@ def _not_found(what: str) -> HTTPException:
 
 
 def _columns() -> dict:
+    """The columns new scripts can be made with (blocked and broken recipes left out)."""
     try:
         return video_columns.load(get_settings().paths.config_dir)
     except video_columns.ColumnError as exc:
         raise HTTPException(500, detail=ApiError.make("bad_column_config", str(exc))) from exc
+
+
+def _known_columns() -> dict:
+    """Every column that builds, blocked ones included: existing scripts stay readable, approvable and renderable."""
+    from core.video import recipes
+
+    return {key: r.column for key, r in recipes.load(get_settings().paths.config_dir).items() if r.column is not None}
 
 
 def _script_or_404(script_id: str) -> dict:
@@ -78,7 +86,7 @@ def _script_summary(script: dict, published: Optional[set] = None) -> dict:
 
 @router.get("/columns")
 def list_columns(user=Depends(require_viewer)) -> list[dict]:
-    from core.video import matrix
+    from core.video import recipes as matrix
 
     config_dir = get_settings().paths.config_dir
     return [{**c.as_dict(), "status": (matrix.provenance(config_dir, c.key) or {}).get("status", "enabled")}
@@ -87,13 +95,13 @@ def list_columns(user=Depends(require_viewer)) -> list[dict]:
 
 @router.get("/cells")
 def list_cells(user=Depends(require_viewer)) -> list[dict]:
-    """Every cell of the content matrix with its status, for choosing what to write (spec/video-matrix.md)."""
-    from core.video import matrix
+    """Every recipe with its status, for choosing what to write (spec/video-recipes.md)."""
+    from core.video import recipes as matrix
 
     try:
         return matrix.catalog(get_settings().paths.config_dir)
     except video_columns.ColumnError as exc:
-        raise HTTPException(500, detail=ApiError.make("bad_matrix", str(exc))) from exc
+        raise HTTPException(500, detail=ApiError.make("bad_recipe", str(exc))) from exc
 
 
 @router.get("/coverage")
@@ -109,7 +117,7 @@ def home_board(user=Depends(require_viewer)) -> dict:
     """Counts per pipeline stage and what needs the user, for the home page."""
     from web.services import video_board
 
-    return video_board.board(_columns())
+    return video_board.board(_known_columns())
 
 
 @router.get("/shipments")
@@ -117,7 +125,7 @@ def shipments(user=Depends(require_viewer)) -> list[dict]:
     """Approved scripts with their render and publication state, for the 成片与发布 page."""
     from web.services import video_board
 
-    return video_board.shipments(_columns())
+    return video_board.shipments(_known_columns())
 
 
 @router.get("/quality")
@@ -288,6 +296,9 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
         if parent is None or not parent.get("report_path"):
             raise HTTPException(422, detail=ApiError.make("unknown_parent", "找不到这篇文稿，或它还没有研究报告"))
         topic = {**topic, "from_report": parent["report_path"], "parent_script": parent["id"]}
+    if chosen.research_mode == "none" and not topic.get("from_report"):
+        raise HTTPException(422, detail=ApiError.make(
+            "report_required", "这个配方不做调研（research.mode: none）：要从已有文稿切（from_script）或选发现报告里的条目"))
     script = video_workflow.start(body.column, topic, started_by=user["username"])
     audit.log("video_script_create", user=user["username"], target=script["id"], result="started",
               ip=request.client.host if request.client else None)
@@ -326,7 +337,7 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
     current = store.get_version(script_id, shown) if shown else None
     if version and current is None:
         raise _not_found("这个版本")
-    column = _columns().get(script["column_key"])
+    column = _known_columns().get(script["column_key"])
     if current is not None and column is not None:
         current = {**current, "checks": video_workflow.rule_checks(current, column)}
     return {
@@ -426,7 +437,7 @@ def get_publish_pack(script_id: str, version: Optional[int] = None, user=Depends
     shown = store.get_version(script_id, number) if number else None
     if shown is None:
         raise _not_found("这个版本")
-    column = _columns().get(script["column_key"])
+    column = _known_columns().get(script["column_key"])
     if column is None:
         raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{script['column_key']}"))
     return video_render.publish_pack(script, shown, column)
@@ -504,7 +515,7 @@ def recheck_script(script_id: str, user=Depends(require_editor)) -> dict:
     from web.services import video_recheck
 
     script = _script_or_404(script_id)
-    column = _columns().get(script["column_key"])
+    column = _known_columns().get(script["column_key"])
     if column is None or not column.recheck:
         raise HTTPException(409, detail=ApiError.make("no_recheck", "这个栏目不需要发布前复核"))
     if script["status"] != "APPROVED" or not script["approved_version"]:
