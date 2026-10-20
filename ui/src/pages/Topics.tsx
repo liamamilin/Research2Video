@@ -221,7 +221,7 @@ export function TopicsPage() {
                 {fits.map((c) => {
                   const done = (t.scripts ?? []).some((x) => x.column_key === c.cell);
                   return (
-                    <button key={c.cell} className={`badge border ${done ? "border-success text-success" : "border-border text-text-muted"} ${c.cell === current?.cell ? "font-semibold" : ""}`} title={done ? "这个格子已写过" : "还没写"} onClick={() => setSelected(c.cell)}>
+                    <button key={c.cell} className={`badge border mr-1 ${done ? "border-success text-success" : "border-border text-text-muted"} ${c.cell === current?.cell ? "font-semibold" : ""}`} title={done ? "这个格子已写过" : "还没写"} onClick={() => setSelected(c.cell)}>
                       {typeName(c.cell)}{done ? " ✓" : ""}
                     </button>
                   );
