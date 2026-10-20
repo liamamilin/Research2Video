@@ -110,6 +110,24 @@ def test_a_bad_declaration_is_listed_with_why_and_not_imported(video_env, block,
     assert topic_store.report_files(bad, str(video_env)) == []
 
 
+def test_an_edited_job_is_read_again_and_an_unchanged_one_is_not_reparsed(video_env, monkeypatch):
+    import yaml
+
+    jobs = str(video_env / "jobs")
+    path = write(video_env, "jobs/research/deep_topics.yaml", DEEP_JOB)
+    assert topic_store.resolve(jobs, "deep_topics").prefix == "D"
+    parsed = []
+    real = yaml.safe_load
+    monkeypatch.setattr(yaml, "safe_load", lambda *a, **k: parsed.append(1) or real(*a, **k))
+    topic_store.sources(jobs)
+    assert parsed == []  # nothing changed on disk: nothing parsed (the topics page asks once per recipe)
+    write(video_env, "jobs/research/deep_topics.yaml", DEEP_JOB.replace("prefix: D", "prefix: DT"))
+    assert topic_store.resolve(jobs, "deep_topics").prefix == "DT" and len(parsed) == 1
+    import os
+    os.remove(path)
+    assert topic_store.resolve(jobs, "deep_topics") is None
+
+
 def test_a_job_without_a_dated_output_cannot_be_a_source(video_env):
     write(video_env, "jobs/research/nodate.yaml", 'name: x\nprompt: y\noutput: "output/x.md"\ntopics:\n  format: items\n  prefix: X\n')
     assert "{date}" in topic_store.resolve(str(video_env / "jobs"), "research/nodate").error

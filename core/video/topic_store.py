@@ -118,10 +118,34 @@ def _declare(job_name: str, job: dict) -> Optional[Source]:
                   refresh=bool(block.get("refresh")), output=output, error="；".join(errors))
 
 
-def sources(jobs_dir: str) -> dict[str, Source]:
-    """Every job that declares ``topics:``, by name. Two sources with the same name or prefix are both errors."""
+#: path → ((mtime_ns, size), job name, its Source or None). Parsing every job file took ~80 ms per call, and the
+#: topics page asked for the sources once per recipe; an edited file has a new mtime or size and is parsed again.
+_declared: dict[str, tuple[tuple[int, int], str, Optional[Source]]] = {}
+
+
+def _declared_in(path: str, job_name: str) -> Optional[Source]:
     import yaml
 
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return None
+    key = (stat.st_mtime_ns, stat.st_size)
+    cached = _declared.get(path)
+    if cached is not None and cached[0] == key and cached[1] == job_name:
+        return cached[2]
+    try:
+        with open(path, encoding="utf-8") as fh:
+            job = yaml.safe_load(fh) or {}
+    except (OSError, yaml.YAMLError):
+        return None  # not cached: a file caught half-written is read again next time
+    source = _declare(job_name, job) if isinstance(job, dict) else None
+    _declared[path] = (key, job_name, source)
+    return source
+
+
+def sources(jobs_dir: str) -> dict[str, Source]:
+    """Every job that declares ``topics:``, by name. Two sources with the same name or prefix are both errors."""
     from core.config import list_jobs
 
     found: list[Source] = []
@@ -132,12 +156,7 @@ def sources(jobs_dir: str) -> dict[str, Source]:
                      if os.path.isfile(p)), None)
         if path is None:
             continue
-        try:
-            with open(path, encoding="utf-8") as fh:
-                job = yaml.safe_load(fh) or {}
-        except (OSError, yaml.YAMLError):
-            continue
-        if isinstance(job, dict) and (source := _declare(job_name, job)) is not None:
+        if (source := _declared_in(path, job_name)) is not None:
             found.append(source)
     out: dict[str, Source] = {}
     for source in found:
