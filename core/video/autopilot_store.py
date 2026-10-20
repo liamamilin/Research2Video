@@ -65,6 +65,11 @@ _RUN_JSON = ("spec",)
 
 def init(conn) -> None:
     conn.executescript(SCHEMA)
+    columns = {r[1] for r in conn.execute("PRAGMA table_info(autopilot_runs)")}
+    if "discovery_at" not in columns:
+        conn.execute("ALTER TABLE autopilot_runs ADD COLUMN discovery_at REAL")
+    if "discovery_tries" not in columns:
+        conn.execute("ALTER TABLE autopilot_runs ADD COLUMN discovery_tries INTEGER NOT NULL DEFAULT 0")
 
 
 def _dec(row, fields) -> dict | None:

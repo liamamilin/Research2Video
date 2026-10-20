@@ -71,34 +71,52 @@ def pick_topics(spec: dict) -> list[dict]:
     return items
 
 
+DISCOVERY_JOB = "ai_flash_discovery"
+#: A discovery run cut off (the app restarted) is started once more, no more: each one costs about 20 searches.
+DISCOVERY_STARTS = 2
+
+
 def fresh_topics(spec: dict, run: dict) -> bool:
-    """True when the batch can start picking. A stale discovery report starts today's job once and waits for it."""
+    """True when the batch can start picking.
+
+    A stale discovery report starts today's job — once. Starting a job cancels the one already running under the
+    same name, so a start on every tick would restart it forever."""
+    from web.runner.registry import TaskRegistry
+
     if not spec.get("refresh"):
         return True
-    today = time.strftime("%Y-%m-%d")
-    out_dir = get_settings().paths.output_dir
-    if video_flash.latest_report(out_dir) == today:
+    if video_flash.latest_report(get_settings().paths.output_dir) == time.strftime("%Y-%m-%d"):
         return True
-    if time.time() - run["started_at"] > TOPICS_WAIT_SECONDS:
+    running = TaskRegistry().is_running(DISCOVERY_JOB)
+    started_at = run.get("discovery_at")
+    if running:
+        if started_at is None:  # someone else started it (by hand): wait for that one
+            ap.update_run(run["id"], discovery_at=time.time())
+            return False
+        if time.time() - started_at <= TOPICS_WAIT_SECONDS:
+            return False
         ap.update_run(run["id"], note="今天的快讯发现没有在限时内完成，用最新的一期")
         return True
-    _start_discovery()
-    return False
+    if int(run.get("discovery_tries") or 0) < DISCOVERY_STARTS:
+        ap.update_run(run["id"], discovery_at=time.time(), discovery_tries=int(run.get("discovery_tries") or 0) + 1)
+        _start_discovery()
+        return False
+    ap.update_run(run["id"], note="今天的快讯发现没有跑出报告，用最新的一期")
+    return True
 
 
 _discovery_lock = threading.Lock()
 
 
 def _start_discovery() -> None:
-    """Start the flash discovery job; the engine's own per-job lock keeps this from running twice."""
     from web.runner.executor import start_job
 
     settings = get_settings()
     with _discovery_lock:
         try:
-            start_job("ai_flash_discovery", "autopilot", config_dir=settings.paths.config_dir,
+            start_job(DISCOVERY_JOB, "autopilot", config_dir=settings.paths.config_dir,
                       jobs_dir=settings.paths.jobs_dir)
-        except Exception as exc:  # noqa: BLE001 - already running, or the job cannot start; the wait covers both
+        except Exception as exc:  # noqa: BLE001 - the job cannot start; the next tick sees it is not running
             logger.info("flash discovery not started: %s", exc)
 
 

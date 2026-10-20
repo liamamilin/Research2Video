@@ -415,3 +415,30 @@ def test_the_wake_up_follows_the_gateway_port_in_web_yaml(video_env):
     assert runner.gateway_port(runtime) == 8765  # no web.yaml: the default
     (video_env / "config" / "web.yaml").write_text("server:\n  port: 8775\n", encoding="utf-8")
     assert runner.gateway_port(runtime) == 8775
+
+
+def test_todays_discovery_is_started_once_and_waited_for_not_restarted_every_tick(video_env, monkeypatch):
+    """Starting a job cancels the one already running under that name, so a start per tick would restart it forever."""
+    from web.runner.registry import TaskRegistry
+
+    out = video_env / "output"
+    (out / "flash").mkdir(parents=True)
+    spec = {"picks": [{"column": "flash", "count": 1, "source": "flash"}], "refresh": True}
+    run, other = pilot.start_run(spec), pilot.start_run(spec)
+    monkeypatch.setattr(pilot, "get_settings", lambda: type("S", (), {"paths": type("P", (), {"output_dir": str(out)})})())
+    starts: list[int] = []
+    running = {"now": False}
+    monkeypatch.setattr(pilot, "_start_discovery", lambda: (starts.append(1), running.update(now=True)))
+    monkeypatch.setattr(TaskRegistry, "is_running", lambda self, job: running["now"])
+    for _ in range(5):  # five ticks while the discovery runs
+        assert pilot.fresh_topics(run["spec"], ap.get_run(run["id"])) is False
+    assert len(starts) == 1
+    # the app restarted: the job is gone and no report appeared — one more start is allowed, then the batch goes on
+    running["now"] = False
+    assert pilot.fresh_topics(run["spec"], ap.get_run(run["id"])) is False and len(starts) == 2
+    running["now"] = False
+    assert pilot.fresh_topics(run["spec"], ap.get_run(run["id"])) is True and len(starts) == 2
+    assert "没有跑出报告" in ap.get_run(run["id"])["note"]
+    # a report for today ends the wait at once
+    (out / "flash" / f"{time.strftime('%Y-%m-%d')}_ai_flash_discovery.md").write_text("x", encoding="utf-8")
+    assert pilot.fresh_topics(other["spec"], other) is True and len(starts) == 2
