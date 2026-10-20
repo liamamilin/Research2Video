@@ -111,11 +111,22 @@ def autopilot_due(state_dir: str, now: float) -> bool:
         return False
 
 
-def poke_autopilot(runtime: Runtime, now: float, interval: float = 30.0, port: int = 8765) -> bool:
+def gateway_port(runtime: Runtime, default: int = 8765) -> int:
+    """The gateway's public port, from config/web.yaml (``server.port``)."""
+    try:
+        import yaml
+        with open(Path(runtime.config_dir) / 'web.yaml', encoding='utf-8') as fh:
+            return int(((yaml.safe_load(fh) or {}).get('server') or {}).get('port') or default)
+    except (OSError, ValueError, TypeError, ImportError):
+        return default
+
+
+def poke_autopilot(runtime: Runtime, now: float, interval: float = 30.0, port: int | None = None) -> bool:
     """Wake the console (through its gateway, which starts it on demand) while the video pipeline has work.
 
     The pipeline itself runs inside the app; this only makes sure the app is up to run it."""
     global _last_poke
+    port = port or gateway_port(runtime)
     if now - _last_poke < interval or not autopilot_due(runtime.state_dir, now):
         return False
     _last_poke = now

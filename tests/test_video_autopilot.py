@@ -406,3 +406,12 @@ def test_the_wake_up_skips_a_stranger_on_loopback_and_reaches_the_gateway(video_
     monkeypatch.setattr(runner, "_last_poke", 0.0)
     assert runner.poke_autopilot(runtime, 1.0, interval=0) is True
     assert asked == ["127.0.0.1", "192.168.2.226"]
+
+
+def test_the_wake_up_follows_the_gateway_port_in_web_yaml(video_env):
+    from core import schedule_runner as runner
+
+    runtime = runner.Runtime(str(video_env), str(video_env / "state"), str(video_env / "jobs"), str(video_env / "config"), str(video_env / "logs"))
+    assert runner.gateway_port(runtime) == 8765  # no web.yaml: the default
+    (video_env / "config" / "web.yaml").write_text("server:\n  port: 8775\n", encoding="utf-8")
+    assert runner.gateway_port(runtime) == 8775

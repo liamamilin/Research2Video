@@ -21,7 +21,7 @@
 --     bind and the launcher would spin until it timed out.
 --   * Server output goes to @LOG_FILE@
 
-property baseUrl : "http://127.0.0.1:8765"
+property baseUrl : "http://127.0.0.1:8775"
 property projectDir : "@PROJECT_DIR@"
 property pythonBin : "@PYTHON_BIN@"
 property logFile : "@LOG_FILE@"

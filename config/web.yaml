@@ -1,8 +1,8 @@
 # Web UI configuration (dev defaults)
 server:
   host: "127.0.0.1"
-  port: 8765
-  base_url: "http://127.0.0.1:8765"
+  port: 8775           # 8765 被本机别的程序占用过，网关改用 8775
+  base_url: "http://127.0.0.1:8775"
 
 auth:
   secret_key: "dev-only-change-me-in-production-aaaaaaaaaaaaaaaaaa"
