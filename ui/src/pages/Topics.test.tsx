@@ -12,13 +12,18 @@ const TOPICS = {
   ],
 };
 const CELLS = [
-  { id: "ai-developer-quick-take-long", key: "k", label: "快讯", usable: true, status: "enabled", parts: { type: { key: "quick_take" } }, column: { topic_kind: "single" } },
+  { id: "ai-developer-quick-take-long", key: "flash", label: "快讯", usable: true, status: "enabled", parts: { type: { key: "quick_take" } }, column: { topic_kind: "single" } },
+];
+
+const COVERAGE = [
+  { cell: "flash", label: "快讯", status: "enabled", sources: ["flash"], open: 1, written: 1, report_date: "2026-10-19" },
+  { cell: "cmp", label: "对比", status: "experimental", sources: [], open: 0, written: 0, report_date: null },
 ];
 
 beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
     ok: true, status: 200, statusText: "ok",
-    text: async () => JSON.stringify(String(url).includes("/cells") ? CELLS : TOPICS),
+    text: async () => JSON.stringify(String(url).includes("/coverage") ? COVERAGE : String(url).includes("/cells") ? CELLS : TOPICS),
   }) as Response));
 });
 
@@ -43,5 +48,12 @@ describe("Topics page", () => {
     fireEvent.change(screen.getByLabelText("写稿"), { target: { value: "no" } });
     await waitFor(() => expect(screen.queryByText("Gemini 4 Argon 上线")).toBeNull());
     expect(screen.getByText("GPT-5.5 从 ChatGPT 退役")).toBeTruthy();
+  });
+
+  it("has a tab per cell; a cell without a source says it is chosen by hand", async () => {
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("tab", { name: /对比（实验）/ }));
+    expect(await screen.findByText(/还没有选题来源/)).toBeTruthy();
+    expect(screen.queryByText("GPT-5.5 从 ChatGPT 退役")).toBeNull();
   });
 });

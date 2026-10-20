@@ -8,15 +8,8 @@ type Source = "flash" | "opportunities";
 
 const SOURCE_LABEL: Record<Source, string> = { flash: "快讯条目", opportunities: "内容机会" };
 
-/** The cell a topic of this source is written in: quick takes for flash items, the first usable single-topic cell otherwise. */
-function cellFor(cells: VideoCell[], source: Source): VideoCell | undefined {
-  const usable = cells.filter((c) => c.usable);
-  if (source === "flash") return usable.find((c) => c.parts?.type.key === "quick_take");
-  return usable.find((c) => (c.column?.topic_kind ?? "single") === "single" && c.parts?.type.key !== "quick_take");
-}
-
 export function TopicsPage() {
-  const [source, setSource] = useState<Source>("flash");
+  const [selected, setSelected] = useState<string | null>(null);
   const [round, setRound] = useState<string | null>(null);
   const [topics, setTopics] = useState<VideoTopic[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
@@ -28,20 +21,28 @@ export function TopicsPage() {
     listCellCoverage().then(setCoverage).catch(() => undefined);
   }, []);
 
+  const current = coverage.find((c) => c.cell === selected) ?? coverage.find((c) => c.sources.length) ?? coverage[0];
+  const source = (current?.sources[0] ?? "flash") as Source;
+
   useEffect(() => {
     let alive = true;
     setTopics(null);
+    if (current && !current.sources.length) {
+      setRound(null);
+      setTopics([]);
+      return;
+    }
     listVideoTopics(source)
       .then((t) => alive && (setRound(t.round), setTopics(t.topics), setError("")))
       .catch((e) => alive && setError(e instanceof Error ? e.message : "读取失败"));
     return () => {
       alive = false;
     };
-  }, [source]);
+  }, [source, current?.cell, current?.sources.length]);
 
   const filters = useFilters(["written", "score"]);
   const { values: f } = filters;
-  const cell = cellFor(cells, source);
+  const cell = cells.find((c) => c.usable && c.key === current?.cell);
   const todo = (topics ?? []).filter((t) => !t.scripted && !t.published).length;
   const shown = (topics ?? []).filter(
     (t) =>
@@ -58,49 +59,30 @@ export function TopicsPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-lg font-semibold flex-1">选题</h1>
-        <div role="tablist" className="flex gap-1">
-          {(Object.keys(SOURCE_LABEL) as Source[]).map((key) => (
-            <button key={key} role="tab" aria-selected={key === source} className={key === source ? "btn btn-primary text-xs" : "btn text-xs"} onClick={() => setSource(key)}>
-              {SOURCE_LABEL[key]}
-            </button>
-          ))}
-        </div>
       </div>
+      <div role="tablist" aria-label="格子" className="flex flex-wrap gap-1">
+        {coverage.map((c) => (
+          <button key={c.cell} role="tab" aria-selected={c.cell === current?.cell} className={c.cell === current?.cell ? "btn btn-primary text-xs" : "btn text-xs"} onClick={() => setSelected(c.cell)}>
+            {c.label}
+            {c.status !== "enabled" ? "（实验）" : ""}
+            {c.sources.length ? ` ${c.open}` : ""}
+          </button>
+        ))}
+      </div>
+      {current && !current.sources.length ? (
+        <p className="text-sm text-text-muted">
+          这个格子还没有选题来源，只能手选：去 <Link className="text-accent hover:underline" to={`/video?cell=${encodeURIComponent(cell?.id ?? current.cell)}`}>文稿页</Link> 选条目或填标题。
+        </p>
+      ) : null}
       <p className="text-xs text-text-muted">
         {source === "flash" ? "来自快讯发现报告" : "来自情报轮次推荐的视频选题（P7）"}
         {round ? ` ${round}` : ""}，还有 {todo} 条没写。想把几条快讯合成一期盘点，去文稿页选「盘点」。
       </p>
-      {coverage.length ? (
-        <div className="overflow-x-auto" aria-label="内容矩阵">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="text-left text-text-muted">
-                <th className="py-1 pr-3 font-normal">格子</th>
-                <th className="py-1 pr-3 font-normal">选题来源</th>
-                <th className="py-1 pr-3 font-normal">还没写</th>
-                <th className="py-1 pr-3 font-normal">已写</th>
-                <th className="py-1 font-normal">最近一期</th>
-              </tr>
-            </thead>
-            <tbody>
-              {coverage.map((c) => (
-                <tr key={c.cell} className="border-t border-border">
-                  <td className="py-1 pr-3">{c.label}</td>
-                  <td className="py-1 pr-3">{c.sources.length ? c.sources.map((s) => SOURCE_LABEL[s as Source] ?? s).join("、") : "手选（没有来源）"}</td>
-                  <td className="py-1 pr-3">{c.sources.length ? c.open : "—"}</td>
-                  <td className="py-1 pr-3">{c.sources.length ? c.written : "—"}</td>
-                  <td className="py-1">{c.report_date ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
       {error ? <p className="text-danger text-sm">{error}</p> : null}
       {topics && topics.length ? <FilterBar facets={facets} filters={filters} shown={shown.length} total={topics.length} placeholder="搜索选题" /> : null}
       {topics && topics.length === 0 ? (
         <p className="text-sm text-text-muted">
-          {source === "flash" ? "还没有快讯发现报告。" : "还没有内容机会报告。跑一轮情报流水线后，这里会列出推荐的选题。"}
+          {!current?.sources.length ? "" : source === "flash" ? "还没有快讯发现报告。" : "还没有内容机会报告。跑一轮情报流水线后，这里会列出推荐的选题。"}
         </p>
       ) : null}
       <ul className="space-y-2">
@@ -108,7 +90,9 @@ export function TopicsPage() {
           <li key={t.id} className="card flex items-start gap-3">
             <span className="font-mono text-xs text-text-muted pt-0.5">{t.code}</span>
             <div className="min-w-0 flex-1 space-y-1">
-              <p className="text-sm">{t.title}</p>
+              <p className="text-sm">
+                {t.title} {current ? <span className="badge border border-border text-text-muted">{current.label}</span> : null}
+              </p>
               {t.fields["核心角度"] ? <p className="text-xs text-text-muted">角度：{t.fields["核心角度"]}</p> : null}
               <p className="text-xs text-text-muted flex flex-wrap gap-x-3">
                 {t.fields["发布日期"] ? <span>事件日期 {t.fields["发布日期"]}</span> : null}
