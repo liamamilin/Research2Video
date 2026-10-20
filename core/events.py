@@ -440,11 +440,14 @@ def register_report(job: str, date: str, content: str,
 
 
 def recent_events(days: int = 7, limit: int = 50,
-                  before: Optional[str] = None) -> list[dict]:
+                  before: Optional[str] = None,
+                  exclude_jobs: Optional[set] = None) -> list[dict]:
     """Events seen within the last ``days`` days, most recent first.
 
     One entry per story: sources folded into an earlier event are listed as
-    corroborating hosts instead of appearing as separate events.
+    corroborating hosts instead of appearing as separate events. With
+    ``exclude_jobs``, an event that only those Jobs reported is left out (one
+    any other Job also reported stays).
     """
     init_db()
     cutoff = time.strftime("%Y-%m-%d", time.localtime(time.time() - days * 86400))
@@ -453,10 +456,16 @@ def recent_events(days: int = 7, limit: int = 50,
     if before:
         query += " AND first_seen < ?"
         params.append(before)
-    query += " ORDER BY last_seen DESC, times_seen DESC LIMIT ?"
-    params.append(int(limit))
+    query += " ORDER BY last_seen DESC, times_seen DESC"
+    if not exclude_jobs:
+        query += " LIMIT ?"
+        params.append(int(limit))
     with connect() as conn:
         events = [dict(r) for r in conn.execute(query, params).fetchall()]
+        if exclude_jobs:
+            events = [e for e in events
+                      if not {j for j in (e.get("jobs") or "").split(",") if j} <= set(exclude_jobs)
+                      or not e.get("jobs")][:int(limit)]
         keys = [e["url_key"] for e in events]
         if keys:
             placeholders = ",".join("?" * len(keys))
@@ -509,10 +518,11 @@ def round_counts(round_date: str) -> dict:
             "clustered": clustered}
 
 
-def reported_block(days: int = 7, limit: int = 15) -> str:
+def reported_block(days: int = 7, limit: int = 15,
+                   exclude_jobs: Optional[set] = None) -> str:
     """Prompt-ready "already reported" list (empty string when nothing to add)."""
     try:
-        events = recent_events(days=days, limit=limit)
+        events = recent_events(days=days, limit=limit, exclude_jobs=exclude_jobs)
     except sqlite3.Error:
         return ""
     if not events:

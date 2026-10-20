@@ -102,6 +102,12 @@ class ResearchEngine:
             print(f"  [{job_name}] SKIPPED: job is disabled (enabled: false)")
             return None
 
+        # A member of a matrix runs with the matrix's keywords and domain (spec/matrices.md). Applied here and not
+        # in load_job, which the web layer also uses: the Job editor must not save them into the Job file.
+        from . import matrices
+        job = matrices.for_run(job, self.config_dir)
+        self._events_exclude = matrices.jobs_of_other_matrices(job.get("_file", job_name), self.config_dir)
+
         logger.info("Running job: %s", job_name)
         desc = job.get("description", "")
         print(f"  [{job_name}] {desc}")
@@ -209,7 +215,8 @@ class ResearchEngine:
                 report_path = self._output_reference(actual_path)
 
                 citation = self._check_citations(cleaned, agent)
-                self._register_events(job_name, report_path, cleaned)
+                # by file path, the name the matrix filter compares (a run may be started by a shorter name)
+                self._register_events(job.get("_file", job_name), report_path, cleaned)
                 try:
                     from .report_meta import append_record
 
@@ -361,6 +368,8 @@ class ResearchEngine:
         now = self._now()
         variables = {
             "name": job.get("name", job.get("_file", "")),
+            # the matrix's domain; a Job in no matrix has none, so {domain} reads as its name
+            "domain": job.get("_domain") or job.get("name", job.get("_file", "")),
             "keywords": keyword_str,
             "language": job.get("language", "zh"),
             "date": now.strftime("%Y-%m-%d"),
@@ -417,6 +426,8 @@ class ResearchEngine:
             return events.reported_block(
                 days=int(cfg.get("days", 7)),
                 limit=int(cfg.get("limit", 15)),
+                # other matrices' sources: a medical round must not make AI skip its news, nor the other way round
+                exclude_jobs=getattr(self, "_events_exclude", None),
             )
         except Exception as exc:  # noqa: BLE001 - never break a run over memory
             # Degrading to no memory is the right behaviour, but it is silent:

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen } from "lucide-react";
+import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import { AccountModal } from "./AccountModal";
@@ -16,6 +16,7 @@ const mainItems = [
 
 const engineItems = [
   { to: "/engine", label: "研究总览", icon: Gauge },
+  { to: "/matrices", label: "矩阵", icon: Boxes },
   { to: "/jobs", label: "Jobs", icon: ListOrdered },
   { to: "/rounds", label: "情报轮次", icon: Radar },
   { to: "/reports", label: "报告", icon: FileText },

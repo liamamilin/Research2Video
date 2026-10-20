@@ -31,7 +31,7 @@ _registry = TaskRegistry()
 
 PROMPT_VARIABLES = {
     "name", "keywords", "language", "date", "date_1d_ago", "date_7d_ago",
-    "time", "datetime", "recent_outcomes", "reported_events",
+    "time", "datetime", "recent_outcomes", "reported_events", "domain",
 }
 OUTPUT_VARIABLES = {"name", "date", "time", "datetime"}
 TEMPLATE_CATEGORIES = {"monitoring", "research", "analysis", "practice", "actionable"}

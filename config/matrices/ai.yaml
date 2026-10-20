@@ -1,0 +1,37 @@
+# 矩阵：一组 Job，共用一个领域和一套关键词（spec/matrices.md）。成员 Job 运行时，{keywords} 先放这里的关键词，
+# 再放 Job 自己的；{domain} 是这里的 domain。
+#
+# AI 矩阵是 2026-10-20 从现有 Job 归过来的。关键词还写在各个 Job 里，这里先空着：放进来就会改动它们的提示词。
+# 这些 Job 的提示词写死了 AI，所以换关键词复制时只有写了 copy_as 的能复制（用那个不分领域的模板）。
+name: AI 矩阵
+domain: AI 与软件开发
+keywords: []
+jobs:
+- job: monitoring/ai_flash_discovery
+  copy_as: _flash_discovery
+- practical_ai_intelligence/00_collection_planner
+- practical_ai_intelligence/01_model_and_pricing_radar
+- practical_ai_intelligence/02_ai_coding_tools_radar
+- practical_ai_intelligence/03_agent_workflow_radar
+- practical_ai_intelligence/04_project_understanding_radar
+- practical_ai_intelligence/05_context_rag_memory_radar
+- practical_ai_intelligence/06_infra_and_eval_radar
+- practical_ai_intelligence/07_product_content_opportunities
+- practical_ai_intelligence/08_risk_and_alternatives
+- practical_ai_intelligence/09_executive_synthesis_and_actions
+- actionable/ai_agents_actionable
+- analysis/ai_gap_analysis
+- analysis/ai_trends
+- analysis/research_gap_analysis
+- monitoring/ai
+- monitoring/ai_monitoring
+- monitoring/daily_ai_agents
+- monitoring/人工智能
+- practice/ai_agents_practice
+- practice/ai_agents_practice_search
+- research/ai
+- research/ai_agent_coding_tool_research
+- research/ai_agents_latest_research
+- research/ai_agents_survey_direct
+- research/ai_automation_systems_research
+- research/ai_survey
