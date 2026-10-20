@@ -21,7 +21,8 @@ def test_each_tier():
     assert credibility.label(version(["CITED", "UNCITED", "UNCITED", "UNCITED"]))["tier"] == "partial"
     assert credibility.label(version(["CITED"] * 4, model_ran=False))["tier"] == "unaudited"
     assert credibility.label(version(["CITED"] * 4, serious=1))["tier"] == "serious"
-    assert credibility.label(version(["CITED", "NEEDS_REVIEW"]))["tier"] == "serious"
+    label = credibility.label(version(["CITED", "NEEDS_REVIEW"]))
+    assert label["tier"] == "verify" and "第 1 节第 2 段" in " ".join(label["reasons"])
     assert credibility.label(version(["CITED"] * 4, rules=("D5",)))["tier"] == "spoken"
     assert credibility.label(None)["tier"] == "unaudited"
 

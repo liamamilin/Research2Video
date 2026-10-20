@@ -3,7 +3,8 @@
 The label informs; it never blocks. The pipeline goes on to a finished render whatever the label says and records it,
 and every list that leads to a publishing decision shows it. Tiers, worst first:
 
-* serious    有严重问题   the fact audit found something serious, or a paragraph is marked as needing review
+* serious    有严重问题   the fact audit found something serious
+* verify     有待核实     a paragraph is marked as needing review (it names which)
 * spoken     口播有问题   the narration would come out wrong (review jargon spoken aloud, forbidden phrases, a rule left)
 * unaudited  未审计       the model audit never ran, so the facts were not checked by anything
 * partial    部分无出处   audited and nothing serious, but many paragraphs cite no source
@@ -23,6 +24,7 @@ CITED_SHARE = 0.6
 
 TIERS = {
     "serious": "有严重问题",
+    "verify": "有待核实",
     "spoken": "口播有问题",
     "unaudited": "未审计",
     "partial": "部分无出处",
@@ -44,6 +46,8 @@ def label(version: dict | None, *, auditing: bool = False) -> dict:
     summary = (checks or {}).get("summary") or {}
     issues = (checks or {}).get("issues") or []
     marks = [p.get("evidence") for s in sections for p in s.get("paragraphs", [])]
+    to_check = [f"第 {si + 1} 节第 {pi + 1} 段" for si, s in enumerate(sections)
+                for pi, p in enumerate(s.get("paragraphs", [])) if p.get("evidence") == "NEEDS_REVIEW"]
     cited = sum(1 for m in marks if m == "CITED")
     share = cited / len(marks) if marks else None
     reviewed = sum(1 for m in marks if m == "NEEDS_REVIEW")
@@ -55,7 +59,7 @@ def label(version: dict | None, *, auditing: bool = False) -> dict:
     if serious:
         reasons.append(f"事实审计有 {serious} 条严重问题")
     if reviewed:
-        reasons.append(f"{reviewed} 段被标为需要核实")
+        reasons.append(f"{reviewed} 段被标为需要核实：" + "、".join(to_check))
     if spoken:
         reasons.append("口播里会读出：" + "、".join(sorted({i["rule"] + (" 审稿用语" if i["rule"] == "D5" else " 不能说的话") for i in spoken})))
     if not ran:
@@ -65,8 +69,10 @@ def label(version: dict | None, *, auditing: bool = False) -> dict:
     if (version.get("length_check") or {}).get("status") not in (None, "OK"):
         reasons.append("长度不在预算内")
 
-    if serious or reviewed:
+    if serious:
         tier = "serious"
+    elif reviewed:
+        tier = "verify"
     elif spoken:
         tier = "spoken"
     elif not ran:

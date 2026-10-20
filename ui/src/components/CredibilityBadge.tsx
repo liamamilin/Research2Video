@@ -7,6 +7,7 @@ export const TIER_CLASS: Record<CredibilityTier, string> = {
   unaudited: "border-warning text-warning",
   spoken: "border-danger text-danger",
   serious: "border-danger text-danger",
+  verify: "border-warning text-warning",
 };
 
 export const TIER_LABEL: Record<CredibilityTier, string> = {
@@ -15,6 +16,7 @@ export const TIER_LABEL: Record<CredibilityTier, string> = {
   unaudited: "未审计",
   spoken: "口播有问题",
   serious: "有严重问题",
+  verify: "有待核实",
 };
 
 /** How far a script's words can be trusted. Informs, never blocks; hover for the reasons. */

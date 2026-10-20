@@ -150,7 +150,7 @@ export interface FactSheet {
   concepts: { term: string; meaning: string; needs: string[] }[];
 }
 
-export type CredibilityTier = "serious" | "spoken" | "unaudited" | "partial" | "trusted";
+export type CredibilityTier = "serious" | "verify" | "spoken" | "unaudited" | "partial" | "trusted";
 
 /** 文稿可信度：从审计结果和出处标注算出，只提示不拦截（core/video/credibility.py）。 */
 export interface Credibility {
