@@ -71,6 +71,7 @@ function AppRoutes() {
         <Route path="/video" element={<VideoScriptsPage />} />
         <Route path="/video-recipes" element={<VideoRecipesPage />} />
         <Route path="/video-recipes/:key" element={<VideoRecipesPage />} />
+        <Route path="/video-recipes/parts/:kind/:name" element={<VideoRecipesPage />} />
         <Route path="/video/:id" element={<VideoScriptViewPage />} />
         <Route
           path="/settings"

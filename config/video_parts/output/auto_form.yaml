@@ -1,0 +1,8 @@
+# 出片部件（spec/video-recipes.md）：AutoVideo 横屏，由 AutoVideo 在信息动效、流程图之间自选（auto）。配方写 output: {use: auto_form} 引用，配方里写的同名字段优先。
+
+target: autovideo
+voice_id: voxcpm_anchor
+video_form: auto
+allowed_forms: [auto, information_motion, process_diagram]
+creative_intent:
+  purpose: 知识讲解

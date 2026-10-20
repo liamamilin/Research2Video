@@ -1,4 +1,5 @@
-# 文稿配方：一份文件就是一种文稿的完整做法（选题 → 调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
 name: 盘点
@@ -46,9 +47,4 @@ writing:
     - 结尾只挑最该先做的一件事，说一个现在就能做的动作，不并列多个动作，不重复前面的内容。
     - 事实只用研究报告里有来源的；只有厂商自己的说法时，口播里说「官方说法」。
 output:
-  target: autovideo
-  voice_id: voxcpm_anchor
-  video_form: information_motion
-  allowed_forms: [information_motion]
-  creative_intent:
-    purpose: 知识讲解
+  use: motion

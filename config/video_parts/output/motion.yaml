@@ -1,0 +1,8 @@
+# 出片部件（spec/video-recipes.md）：AutoVideo 横屏，只用信息动效（information_motion）。配方写 output: {use: motion} 引用，配方里写的同名字段优先。
+
+target: autovideo
+voice_id: voxcpm_anchor
+video_form: information_motion
+allowed_forms: [information_motion]
+creative_intent:
+  purpose: 知识讲解

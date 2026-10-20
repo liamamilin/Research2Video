@@ -70,6 +70,8 @@ def _summary(recipe: recipes.Recipe, used: dict[str, int]) -> dict:
         "topic_kind": column.topic_kind if column else None,
         "topic_sources": list(column.topic_sources) if column else [],
         "warnings": _warnings(recipe),
+        "uses": {section: {"kind": "research" if section == "research" else section, "name": u["name"]}
+                 for section, u in recipe.uses.items()},
         "scripts": used.get(recipe.key, 0),
         "mtime": os.path.getmtime(recipe.path) if recipe.path and os.path.isfile(recipe.path) else None,
         "sha256": recipe.sha256,
@@ -78,9 +80,95 @@ def _summary(recipe: recipes.Recipe, used: dict[str, int]) -> dict:
 
 def _check(key: str, content: str) -> recipes.Recipe:
     try:
-        return recipes.validate(key, content)
+        return recipes.validate(key, content, _config_dir())
     except video_columns.ColumnError as exc:
         raise HTTPException(422, detail=ApiError.make("recipe_invalid", str(exc))) from exc
+
+
+# --- shared parts: research templates and output / writing parts ---------------------------------------------
+# (declared before /{key}, which would otherwise take "parts" for a recipe key)
+
+
+def _part_path(kind: str, name: str) -> str:
+    try:
+        return recipes.part_file(_config_dir(), kind, name)
+    except video_columns.ColumnError as exc:
+        raise HTTPException(422, detail=ApiError.make("bad_part", str(exc))) from exc
+
+
+def _part(kind: str, name: str) -> dict:
+    path = _part_path(kind, name)
+    if not os.path.isfile(path):
+        raise HTTPException(404, detail=ApiError.make("part_not_found", f"没有这个部件：{kind}/{name}"))
+    row = next((p for p in recipes.parts(_config_dir()) if p["kind"] == kind and p["name"] == name), {})
+    with open(path, encoding="utf-8") as fh:
+        content = fh.read()
+    return {**row, "kind": kind, "name": name, "content": content, "mtime": os.path.getmtime(path)}
+
+
+class PartSaveIn(BaseModel):
+    content: str = Field(max_length=200_000)
+    expected_mtime: Optional[float] = None
+
+
+def _check_part(kind: str, name: str, content: str, used_by: list[str]) -> None:
+    """The edit must be a mapping, and every recipe that uses the part must still build with it."""
+    try:
+        data = yaml_io.parse_yaml(content)
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("part_invalid", str(exc))) from exc
+    if not isinstance(data, dict) or not data:
+        raise HTTPException(422, detail=ApiError.make("part_invalid", "部件应是非空的 YAML 映射"))
+    path = _part_path(kind, name)
+    with recipes.trying(path, content):
+        every = recipes.load(_config_dir())
+    broken = [f"{key}：{every[key].error}" for key in used_by if key in every and every[key].error]
+    if broken:
+        raise HTTPException(422, detail=ApiError.make("part_breaks_recipes", "改了以后这些配方就用不了：" + "；".join(broken)))
+
+
+@router.get("/parts")
+def list_parts(user=Depends(require_viewer)) -> list[dict]:
+    return recipes.parts(_config_dir())
+
+
+@router.get("/parts/{kind}/{name}")
+def get_part(kind: str, name: str, user=Depends(require_viewer)) -> dict:
+    return _part(kind, name)
+
+
+@router.put("/parts/{kind}/{name}")
+def save_part(kind: str, name: str, body: PartSaveIn, user=Depends(require_editor)) -> dict:
+    current = _part(kind, name)
+    _check_part(kind, name, body.content, current.get("used_by") or [])
+    path = _part_path(kind, name)
+    if body.expected_mtime is not None and yaml_io.check_conflict(path, body.expected_mtime) is not None:
+        raise HTTPException(409, detail=ApiError.make("conflict", "部件文件已被别处修改。请先复制你的修改再刷新。"))
+    backup = (yaml_io.save_backup(f"video_part_{kind}_{name}.yaml", current["content"])
+              if current["content"] != body.content else None)
+    yaml_io.atomic_write(path, body.content)
+    audit.log("video_part_update", user=user["username"], target=f"{kind}/{name}", result="success",
+              details={"backup": backup, "used_by": current.get("used_by")})
+    return _part(kind, name)
+
+
+class PartCreateIn(BaseModel):
+    name: str
+    copy_from: str = Field(description="An existing part of the same kind to start from")
+
+
+@router.post("/parts/{kind}", status_code=201)
+def create_part(kind: str, body: PartCreateIn, user=Depends(require_editor)) -> dict:
+    content = _part(kind, body.copy_from)["content"]
+    path = _part_path(kind, body.name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    try:
+        yaml_io.atomic_create(path, content)
+    except FileExistsError as exc:
+        raise HTTPException(409, detail=ApiError.make("part_exists", f"部件 {kind}/{body.name} 已存在")) from exc
+    audit.log("video_part_create", user=user["username"], target=f"{kind}/{body.name}", result="success",
+              details={"copy_from": body.copy_from})
+    return _part(kind, body.name)
 
 
 @router.get("")
@@ -94,7 +182,7 @@ def get_recipe(key: str, user=Depends(require_viewer)) -> dict:
     path = _existing(key)
     with open(path, encoding="utf-8") as fh:
         content = fh.read()
-    recipe = recipes.parse(key, content, path)
+    recipe = recipes.parse(key, content, path, _config_dir())
     return {**_summary(recipe, store.count_scripts_by_column()), "content": content,
             "column": recipe.column.as_dict() if recipe.column else None}
 
@@ -106,7 +194,7 @@ class RecipeCheckIn(BaseModel):
 @router.post("/{key}/validate")
 def validate_recipe(key: str, body: RecipeCheckIn, user=Depends(require_viewer)) -> dict:
     """Whether ``content`` would build, and what it builds to; never writes."""
-    recipe = recipes.parse(key, body.content)
+    recipe = recipes.parse(key, body.content, config_dir=_config_dir())
     return {"ok": not recipe.error, "error": recipe.error, "warnings": _warnings(recipe),
             "column": recipe.column.as_dict() if recipe.column else None}
 

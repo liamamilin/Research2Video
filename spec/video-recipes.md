@@ -13,7 +13,10 @@
 ## 文件
 
 `config/video_recipes/<key>.yaml`，文件名就是配方名（也是文稿记录里的 `column_key`），小写字母、数字、下划线、
-连字符。以 `_` 开头的文件不读。没有继承：新配方从已有配方复制（复制后 status 变成 experimental）。
+连字符。以 `_` 开头的文件不读。新配方从已有配方复制（复制后 status 变成 experimental）。
+
+调研和出片这两段可以不写在配方里，而是引用共用部件（见下面「共用部件」）：`research: {template: …}`、
+`output: {use: …}`。配方里同一段再写的字段优先于部件，所以“大体照部件、个别字段不同”直接在配方里写那个字段。
 
 ```yaml
 name: 快讯                      # 显示名
@@ -34,6 +37,7 @@ topic:
   fields: [核心角度, 目标受众]   # 写稿时给模型看的选题字段，按顺序；不写用写法的默认
 
 research:
+  template: quick_take_developer  # 引用调研模板（下面几项由模板给，配方里写了就以配方为准）；不引用就整段自己写：
   mode: job                     # job 每篇文稿跑一个研究 job / none 不调研，选题必须自带报告（盘点、从长稿切）
   timeout_seconds: 1500
   language: zh
@@ -56,6 +60,7 @@ writing:
     …
 
 output:
+  use: motion                   # 引用出片部件（config/video_parts/output/motion.yaml），下面写的字段优先
   target: autovideo             # 现在只有 autovideo
   voice_id: voxcpm_anchor
   video_form: information_motion
@@ -74,6 +79,33 @@ output:
 - 旧名字照旧可用：`{topic_title}` `{topic_angle}`（核心角度）`{topic_audience}` `{topic_why}` `{topic_outline}`
   `{topic_change}` `{topic_date}` `{topic_sources}`（来源网址）`{topic_subjects}` `{topic_dimensions}` `{topic_minutes}`。
 - `{date}` `{date_7d_ago}` `{language}` 由 Job 运行时填（和普通 Job 一样）。
+
+## 共用部件
+
+几个配方共用的一段放在单独的文件里，改一处，引用它的配方一起变。
+
+| 种类 | 配方里怎么写 | 文件 |
+|---|---|---|
+| 调研模板 | `research: {template: <名字>}` | `jobs/_templates/video_research/<名字>.yaml` |
+| 出片部件 | `output: {use: <名字>}` | `config/video_parts/output/<名字>.yaml` |
+| 写稿部件 | `writing: {use: <名字>}` | `config/video_parts/writing/<名字>.yaml`（现在还没有） |
+
+- **调研模板就是 Job 模板的写法**：`name`、`description`、`language`、`runtime.timeout_seconds`、`prompt`。每篇文稿的调研
+  Job 由它生成（`mode` 固定为 job）。它放在 `_templates` 的子目录里，不出现在「新建 Job」的模板列表：prompt 里有
+  `{topic.…}`、`{topic_title}` 这类只有建文稿时才有的占位符，单独建 Job 填不上。
+- **出片 / 写稿部件**是配方那一段的字段，合并是浅合并：配方里写了的键整个替换部件里的同名键（比如 `package` 整个替换）。
+  部件里写了那一段不认识的字段会报错。
+- 现在的部件：7 个调研模板（快讯、单点、深度解读各分开发者 / 非技术，对比只有开发者）；2 个出片部件 `motion`
+  （信息动效）、`auto_form`（自动选形态）。盘点不调研，没有调研模板。
+- 文稿版本的 `meta.cell` 除了配方文件的 `sha256`，还记 `resolved_sha256`（拼好部件之后的内容）和 `uses`（引用了哪些部件
+  及其哈希）。只改了部件时，从这两项能看出来。
+- 引用的部件不存在或坏了，只有引用它的配方标“有错”，其他配方照常。
+
+**为什么听众不是部件。** 调研提示词和写稿规范里，“给谁看”不是一段能单独拿出来的文字，而是散在每句话里（举例、用词、
+要不要讲代码）。硬拆成部件就得改写这些提示词，拼出来的文字就不再和原来一致。所以现在听众差异体现在调研模板分开发者 /
+非技术两份，写稿规范仍写在各自配方里。以后要加新的听众，复制一份调研模板改写即可。
+
+拆分前后对比：8 个配方解析出的 Column、调研 Job 的提示词、写稿和出片请求逐字一致（同一个脚本拆分前后各导出一次比对）。
 
 ## 加载与校验
 
@@ -96,8 +128,14 @@ output:
 | PUT | `/api/video/recipes/{key}` | 保存：先校验（422），再比 mtime（409），备份旧文件到 `state/backups/video_recipe_<key>_<时间>.yaml`，原子写 |
 | POST | `/api/video/recipes` | 新建：`{key, copy_from}` 复制已有配方，或 `{key, content}` |
 | DELETE | `/api/video/recipes/{key}` | 删除（先备份）；有文稿用它时拒绝（409），改成 blocked 即可 |
+| GET | `/api/video/recipes/parts` | 所有部件：种类、名字、路径、哪些配方在用（`used_by`） |
+| GET | `/api/video/recipes/parts/{kind}/{name}` | 部件原文；`kind` 是 research / output / writing |
+| PUT | `/api/video/recipes/parts/{kind}/{name}` | 保存：用新内容重建每个在用的配方，有一个建不起来就 422 并列出原因；比 mtime（409）；备份到 `state/backups/video_part_<kind>_<name>_<时间>.yaml` |
+| POST | `/api/video/recipes/parts/{kind}` | 新建：`{name, copy_from}` 复制同种类的已有部件 |
 
 界面：侧边栏「文稿配方」（`/video-recipes`），左边列表，右边 YAML 编辑器，校验 / 保存 / 复制为新配方 / 删除。
+配方上方列出它引用的部件（可点开）；列表下半是「共用部件」，点开（`/video-recipes/parts/<kind>/<name>`）可以编辑、
+复制，并列出在用的配方。
 `/api/video/cells`、`/api/video/columns`、`/api/video/coverage` 的形状不变，数据来自配方。
 
 保存只影响之后新写的文稿；正在写的文稿开始时已经读过配方。

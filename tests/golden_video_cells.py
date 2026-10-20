@@ -42,7 +42,21 @@ def install_recipes(config_dir: Path | str, replace: tuple[tuple[str, str], ...]
         for old, new in replace:
             text = text.replace(old, new)
         (target / source.name).write_text(text, encoding="utf-8")
+    install_parts(config_dir)
     return target
+
+
+def install_parts(config_dir: Path | str) -> None:
+    """Copy the shared parts the recipes use: output parts into ``config_dir``, research templates into the jobs
+    folder next to it (where ``recipes.jobs_dir_for`` looks)."""
+    import shutil
+
+    from core.video import recipes
+
+    config_dir = Path(config_dir)
+    shutil.copytree(ROOT / "config" / recipes.PARTS_DIR, config_dir / recipes.PARTS_DIR, dirs_exist_ok=True)
+    jobs = Path(recipes.jobs_dir_for(str(config_dir)))
+    shutil.copytree(ROOT / "jobs" / recipes.RESEARCH_TEMPLATES, jobs / recipes.RESEARCH_TEMPLATES, dirs_exist_ok=True)
 
 
 #: flat column field -> (recipe section or None for the top level, field there)

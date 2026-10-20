@@ -31,6 +31,8 @@ state/
 
 # Output
 output/
+# …but the video recipes' shared output parts are config, not run output
+!config/video_parts/output/
 
 # Temp
 *.tmp

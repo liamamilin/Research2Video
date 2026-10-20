@@ -1,4 +1,5 @@
-# 文稿配方：一份文件就是一种文稿的完整做法（选题 → 调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
 name: 一个知识点
@@ -24,37 +25,7 @@ topic:
   sources: [flash]
   fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
 research:
-  mode: job
-  timeout_seconds: 1800
-  language: zh
-  prompt: |
-    你是一名技术研究员，为一位制作 B 站 60–120 秒 AI / 软件知识短视频的创作者核实一个知识点。你的报告会被写成约 {topic_minutes} 分钟的口播文稿，文稿里的每个事实都要能追溯到你引用的网页，所以每个关键判断都要给出原始网址。
-
-    ## 知识点
-    - 标题：{topic_title}
-    - 核心角度：{topic_angle}
-    - 目标受众：{topic_audience}
-    - 为什么有人在乎：{topic_why}
-
-    ## 任务
-    只围绕这一个点：先直接回答它要回答的问题，再给出最关键的一个数字或例子，以及它成立的前提和例外。不展开相邻话题。
-    证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。
-    输出语言：{language}。
-
-    ## 证据规则
-    1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源。
-    2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
-    3. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
-    4. 数字照来源原样写，注明口径。
-
-    ## 输出结构
-    ### 1. 直接回答
-    ### 2. 关键事实（表格：事实 | 置信度 | 来源编号）
-    ### 3. 前提、例外与反方证据
-    ### 4. 仍未确定的问题
-    ### 5. 适合短视频的讲法（不超过 2 条）
-    ### 6. 来源清单
-    编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址
+  template: one_point_developer
 writing:
   pipeline: single
   default_style:
@@ -77,12 +48,7 @@ writing:
     - 不依赖前文：观众没有看过这个系列的其他视频。
     - 2–4 个小节，每节 1–2 段，每段 30–100 字，口语化，适合朗读。
 output:
-  target: autovideo
-  voice_id: voxcpm_anchor
-  video_form: information_motion
-  allowed_forms: [information_motion]
-  creative_intent:
-    purpose: 知识讲解
+  use: motion
   source_card: true
   package:
     accent: '#1f7a4d'

@@ -572,8 +572,8 @@ def test_the_render_carries_the_columns_package_only_when_it_has_one(video_env, 
 
     path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
     text = path.read_text(encoding="utf-8")
-    assert "  voice_id: voxcpm_anchor\n" in text
-    path.write_text(text.replace("  voice_id: voxcpm_anchor\n", "  voice_id: voxcpm_anchor\n" + PACKAGE_YAML, 1), encoding="utf-8")
+    assert "  use: auto_form\n" in text
+    path.write_text(text.replace("  use: auto_form\n", "  use: auto_form\n" + PACKAGE_YAML, 1), encoding="utf-8")
     script = _approved_script("有包装")
     store.update_script(script["id"], topic={"id": None, "title": "有包装", "fields": {"发布日期": "2026-10-14"}})
     second = video_render.create(store.get_script(script["id"]))
@@ -850,8 +850,8 @@ def test_the_render_carries_a_source_card_only_for_a_column_that_asks_and_a_repo
 
     path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
     text = path.read_text(encoding="utf-8")
-    assert "  voice_id: voxcpm_anchor\n" in text
-    path.write_text(text.replace("  voice_id: voxcpm_anchor\n", "  voice_id: voxcpm_anchor\n  source_card: true\n", 1), encoding="utf-8")
+    assert "  use: auto_form\n" in text
+    path.write_text(text.replace("  use: auto_form\n", "  use: auto_form\n  source_card: true\n", 1), encoding="utf-8")
     carded = _approved_script("有来源卡")
     store.update_script(carded["id"], report_path="output/report.md")
     second = video_render.create(store.get_script(carded["id"]))
@@ -882,7 +882,7 @@ def test_a_script_can_choose_one_of_the_columns_video_forms_and_the_render_uses_
     (video_env / "output").mkdir(exist_ok=True)
     (video_env / "output" / "report.md").write_text(REPORT, encoding="utf-8")
     path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
-    path.write_text(path.read_text(encoding="utf-8").replace("  voice_id: voxcpm_anchor\n", "  voice_id: voxcpm_anchor\n  source_card: true\n", 1), encoding="utf-8")
+    path.write_text(path.read_text(encoding="utf-8").replace("  use: auto_form\n", "  use: auto_form\n  source_card: true\n", 1), encoding="utf-8")
     for form, expected in ((None, "auto"), ("process_diagram", "process_diagram")):
         script = _approved_script(f"形式 {form}")
         topic = {**script["topic"], **({"video_form": form} if form else {})}

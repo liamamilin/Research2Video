@@ -602,6 +602,8 @@ export interface VideoRecipe {
   target_minutes: number | null;
   topic_kind: string | null;
   topic_sources: string[];
+  // 引用的共用部件：research → 调研模板（jobs/_templates/video_research），output / writing → config/video_parts
+  uses: Partial<Record<VideoPartKind, { kind: VideoPartKind; name: string }>>;
   scripts: number;
   mtime: number | null;
   sha256: string;
@@ -628,3 +630,32 @@ export const copyVideoRecipe = (key: string, copyFrom: string) =>
   api<VideoRecipeDetail>("/api/video/recipes", { method: "POST", body: { key, copy_from: copyFrom } });
 export const deleteVideoRecipe = (key: string) =>
   api<{ ok: boolean }>(`/api/video/recipes/${encodeURIComponent(key)}`, { method: "DELETE" });
+
+// 共用部件：多个配方引用同一份调研模板或出片设置，改一处、引用它的配方一起变（配方自己写的字段优先）
+export type VideoPartKind = "research" | "output" | "writing";
+
+export interface VideoPart {
+  kind: VideoPartKind;
+  kind_label: string;
+  name: string;
+  label: string;
+  path: string;
+  used_by: string[];
+}
+
+export interface VideoPartDetail extends VideoPart {
+  content: string;
+  mtime: number;
+}
+
+const partUrl = (kind: string, name: string) =>
+  `/api/video/recipes/parts/${encodeURIComponent(kind)}/${encodeURIComponent(name)}`;
+export const listVideoParts = () => api<VideoPart[]>("/api/video/recipes/parts");
+export const getVideoPart = (kind: string, name: string) => api<VideoPartDetail>(partUrl(kind, name));
+export const saveVideoPart = (kind: string, name: string, content: string, expectedMtime?: number | null) =>
+  api<VideoPartDetail>(partUrl(kind, name), { method: "PUT", body: { content, expected_mtime: expectedMtime ?? undefined } });
+export const copyVideoPart = (kind: string, name: string, copyFrom: string) =>
+  api<VideoPartDetail>(`/api/video/recipes/parts/${encodeURIComponent(kind)}`, {
+    method: "POST",
+    body: { name, copy_from: copyFrom },
+  });

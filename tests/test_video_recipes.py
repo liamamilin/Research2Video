@@ -212,3 +212,84 @@ def test_the_shipped_recipes_match_the_golden_snapshot_install():
         folder = golden.install_recipes(tmp)
         for path in (ROOT / "config" / "video_recipes").glob("*.yaml"):
             assert (folder / path.name).read_text(encoding="utf-8") == path.read_text(encoding="utf-8")
+
+
+# --- shared parts: research templates and output parts -------------------------------------------------------
+
+def _shipped(tmp_path) -> Path:
+    config = tmp_path / "config"
+    golden.install_recipes(config)
+    return config
+
+
+def test_every_shipped_recipe_takes_its_research_and_output_from_shared_files(tmp_path):
+    config = _shipped(tmp_path)
+    every = recipes.load(str(config))
+    assert not [r.key for r in every.values() if r.error]
+    flash = every["flash"]
+    assert flash.uses["research"]["name"] == "quick_take_developer" and flash.uses["output"]["name"] == "motion"
+    assert flash.column.research_timeout_seconds == 1500 and "{topic_title}" in flash.column.research_prompt
+    assert flash.column.voice_id == "voxcpm_anchor" and flash.column.source_card is True  # part + the recipe's own
+    assert "research" not in every["ai-developer-roundup-long"].uses  # no research of its own
+    record = recipes.provenance(str(config), "flash")
+    assert record["uses"]["research"]["name"] == "quick_take_developer" and len(record["resolved_sha256"]) == 64
+    rows = {(p["kind"], p["name"]): p for p in recipes.parts(str(config))}
+    assert rows[("output", "motion")]["used_by"] and rows[("research", "deep_dive_developer")]["used_by"] == ["deep_dive"]
+
+
+def test_the_recipe_wins_over_the_shared_file_and_an_edit_to_a_template_reaches_every_recipe_using_it(tmp_path):
+    config = _shipped(tmp_path)
+    flash = config / "video_recipes" / "flash.yaml"
+    flash.write_text(flash.read_text(encoding="utf-8").replace(
+        "  template: quick_take_developer\n", "  template: quick_take_developer\n  timeout_seconds: 900\n"), encoding="utf-8")
+    template = Path(recipes.research_template_path(str(config), "quick_take_developer"))
+    template.write_text(template.read_text(encoding="utf-8").replace("核实这条变化", "先核实这条变化"), encoding="utf-8")
+    column = recipes.load(str(config))["flash"].column
+    assert column.research_timeout_seconds == 900 and "先核实这条变化" in column.research_prompt
+
+
+@pytest.mark.parametrize("change, message", [
+    (("  template: quick_take_developer\n", "  template: nothing_here\n"), "nothing_here"),
+    (("  use: motion\n", "  use: nothing_here\n"), "nothing_here"),
+])
+def test_a_missing_shared_file_breaks_only_that_recipe(tmp_path, change, message):
+    config = _shipped(tmp_path)
+    flash = config / "video_recipes" / "flash.yaml"
+    flash.write_text(flash.read_text(encoding="utf-8").replace(*change), encoding="utf-8")
+    every = recipes.load(str(config))
+    assert message in every["flash"].error and every["point_short"].usable
+
+
+def test_without_a_config_folder_a_recipe_that_uses_parts_does_not_build():
+    with pytest.raises(video_columns.ColumnError, match="config"):
+        recipes.validate("x", MINIMAL.replace("  mode: job\n", "  template: anything\n"))
+
+
+def test_api_parts_read_save_refuse_a_breaking_edit_and_copy(client, video_env):
+    _login(client, "viewer", "viewer-pass-123")
+    rows = client.get("/api/video/recipes/parts").json()
+    assert {("research", "quick_take_developer"), ("output", "motion")} <= {(r["kind"], r["name"]) for r in rows}
+    part = client.get("/api/video/recipes/parts/research/quick_take_developer").json()
+    assert part["used_by"] == ["flash"] and "prompt:" in part["content"]
+    assert client.get("/api/video/recipes/flash").json()["uses"]["research"] == {"kind": "research", "name": "quick_take_developer"}
+    assert client.put("/api/video/recipes/parts/research/quick_take_developer", headers=_csrf(client),
+                      json={"content": part["content"]}).status_code == 403
+
+    _login(client)
+    broken = part["content"].replace("prompt: |", "notes: |")  # a template with no prompt breaks flash
+    refused = client.put("/api/video/recipes/parts/research/quick_take_developer", headers=_csrf(client),
+                         json={"content": broken})
+    assert refused.status_code == 422 and "flash" in refused.text
+    edited = part["content"].replace("核实这条变化", "先核实这条变化")
+    saved = client.put("/api/video/recipes/parts/research/quick_take_developer", headers=_csrf(client),
+                       json={"content": edited, "expected_mtime": part["mtime"]})
+    assert saved.status_code == 200, saved.text
+    assert "先核实这条变化" in video_columns.get(str(video_env / "config"), "flash").research_prompt
+    assert list((video_env / "state" / "backups").glob("video_part_research_quick_take_developer_*.yaml"))
+
+    copied = client.post("/api/video/recipes/parts/research", headers=_csrf(client),
+                         json={"name": "quick_take_pm", "copy_from": "quick_take_developer"})
+    assert copied.status_code == 201 and copied.json()["used_by"] == []
+    assert client.post("/api/video/recipes/parts/research", headers=_csrf(client),
+                       json={"name": "quick_take_pm", "copy_from": "quick_take_developer"}).status_code == 409
+    assert client.get("/api/video/recipes/parts/nope/x").status_code == 422
