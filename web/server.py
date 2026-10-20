@@ -229,9 +229,9 @@ def create_app() -> FastAPI:
         response.headers.setdefault(
             "Content-Security-Policy",
             # The SPA is a Vite build with hashed assets; no inline script and
-            # no remote origins. Monaco is fetched from jsDelivr at runtime
-            # unless self-hosted, so it is the one thing still allowed out.
-            "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; "
+            # no remote origins. Monaco (incl. its worker) is bundled and
+            # self-hosted too, see ui/src/lib/monaco.ts.
+            "default-src 'self'; script-src 'self'; "
             "style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; "
             "connect-src 'self'; font-src 'self' data:; "
             "object-src 'none'; base-uri 'self'; form-action 'self'; "

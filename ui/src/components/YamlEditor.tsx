@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import Editor from "@monaco-editor/react";
 import type { OnMount } from "@monaco-editor/react";
 import { cn } from "@/lib/utils";
+import "@/lib/monaco";
 
 interface YamlEditorProps {
   value: string;
@@ -38,6 +39,7 @@ export function YamlEditor({
       <Editor
         height={height}
         language="yaml"
+        theme="vs-dark"
         value={value}
         onChange={(v) => onChange?.(v ?? "")}
         onMount={handleMount}
@@ -51,7 +53,6 @@ export function YamlEditor({
           fontSize: 13,
           fontFamily:
             "'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace",
-          theme: "vs-dark",
           automaticLayout: true,
           folding: true,
           suggestOnTriggerCharacters: true,
