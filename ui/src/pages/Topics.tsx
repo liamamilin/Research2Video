@@ -59,14 +59,33 @@ function AddTopicForm({ onAdded }: { onAdded: () => void }) {
   );
 }
 
-/** The content matrix as a grid: a row per type, a column per audience; a click picks the cell. */
-function MatrixGrid({ cells, coverage, current, onPick }: { cells: VideoCell[]; coverage: CellCoverage[]; current?: string; onPick: (key: string) => void }) {
+type GridProps = { cells: VideoCell[]; coverage: CellCoverage[]; current?: string; onPick: (key: string) => void };
+
+/** The content matrix as a grid: a table per domain (one domain: just the table), a row per type, a column per audience;
+ *  a click picks the cell. */
+function MatrixGrid({ cells, ...rest }: GridProps) {
   const usable = cells.filter((c) => c.usable && c.parts);
+  // fixtures and old catalogs may leave out the domain: they all go into one table
+  const domains = [...new Map(usable.map((c) => [c.parts!.domain?.key ?? "", c.parts!.domain?.name ?? ""])).entries()];
+  if (!usable.length) return null;
+  if (domains.length < 2) return <DomainGrid cells={usable} {...rest} />;
+  return (
+    <div className="space-y-2">
+      {domains.map(([key, name]) => (
+        <section key={key} aria-label={`${name}领域`}>
+          <h3 className="text-xs text-text-muted mb-1">{name}</h3>
+          <DomainGrid cells={usable.filter((c) => (c.parts!.domain?.key ?? "") === key)} domain={name} {...rest} />
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function DomainGrid({ cells: usable, coverage, current, onPick, domain }: GridProps & { domain?: string }) {
   const types = [...new Map(usable.map((c) => [c.parts!.type.key, c.parts!.type.name])).entries()];
   const audiences = [...new Map(usable.map((c) => [c.parts!.audience.key, c.parts!.audience.name])).entries()];
-  if (!types.length) return null;
   return (
-    <div className="overflow-x-auto" aria-label="内容矩阵">
+    <div className="overflow-x-auto" aria-label={domain ? `${domain}内容矩阵` : "内容矩阵"}>
       <table className="text-xs border-separate border-spacing-1">
         <thead>
           <tr>
@@ -88,7 +107,7 @@ function MatrixGrid({ cells, coverage, current, onPick }: { cells: VideoCell[]; 
                 return (
                   <td key={akey}>
                     <button
-                      aria-label={`${tname} ${cell.parts!.audience.name}`}
+                      aria-label={`${domain ? `${domain} ` : ""}${tname} ${cell.parts!.audience.name}`}
                       aria-pressed={on}
                       className={`${on ? "btn btn-primary" : "btn"} text-xs w-full`}
                       onClick={() => onPick(row.cell)}

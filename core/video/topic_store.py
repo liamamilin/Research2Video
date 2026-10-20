@@ -5,7 +5,9 @@ A job becomes a topic source by saying how to read its reports::
     topics:
       alias: flash          # optional short name recipes and batches use (the job path otherwise)
       format: flash         # flash (### 1.1 items -> F1, F2 ...) | opportunities (### C1 ...) | items (any ### heading)
-      prefix: D             # items only: the code letter(s) its topics get (D1, D2 ...), unique among sources
+      prefix: D             # the code letter(s) its topics get (D1, D2 ...), unique among sources; required for
+                            # items, optional for flash (F) and opportunities (C) — a second source of the same format
+                            # needs one, or both would number their topics F1, F2 … and overwrite each other's
       refresh: true         # the unattended pipeline may start this job when its newest report is not today's
 
 Its reports are the files its ``output`` path names (``{date}`` in the path is the report date). They are read into
@@ -14,6 +16,10 @@ again, the others are left alone — so a report written by the scheduler, the c
 is picked up the same way, and the first scan imports every report there already is. A topic's id is
 ``<report date>/<code>``, as it always was, so the scripts, batches and "not writing" marks made before keep pointing
 at the same topics. Topics added by hand have the source ``manual`` and the id ``manual/<n>``.
+
+Ids are unique only while prefixes are: when two sources would give the same codes, the one that has already imported
+reports keeps its prefix and the newcomer is listed with an error until it declares its own (a second flash source,
+e.g. one per matrix). See spec/video-topics.md.
 """
 
 from __future__ import annotations
@@ -32,8 +38,9 @@ from .topics import Topic
 
 FORMATS = ("flash", "opportunities", "items")
 MANUAL = "manual"
-#: codes the two built-in formats give; an ``items`` source must pick another prefix
-_RESERVED_PREFIXES = {"F", "C"}
+#: the codes the two built-in formats give when no prefix is declared; an ``items`` source must pick another prefix
+DEFAULT_PREFIXES = {"flash": "F", "opportunities": "C"}
+_RESERVED_PREFIXES = set(DEFAULT_PREFIXES.values())
 _PREFIX = re.compile(r"[A-Z]{1,3}")
 _ALIAS = re.compile(r"[a-z][a-z0-9_-]{1,31}")
 #: per-script research jobs are never topic sources
@@ -78,7 +85,7 @@ class Source:
     job: str             # the job path (jobs/<job>.yaml)
     label: str
     format: str = "items"
-    prefix: str = ""
+    prefix: str = ""     # the code letters its topics get: declared, else the format's own (F, C)
     refresh: bool = False
     output: str = ""     # the job's output path, with {date}
     error: str = ""      # why it cannot be read; it is listed but not imported
@@ -109,12 +116,14 @@ def _declare(job_name: str, job: dict) -> Optional[Source]:
         errors.append(f"format 应为 {', '.join(FORMATS)} 之一")
     if fmt == "items" and (not _PREFIX.fullmatch(prefix) or prefix in _RESERVED_PREFIXES):
         errors.append("format: items 要写 prefix（1–3 个大写字母，不能是 F 或 C），选题编号就是 prefix + 序号")
+    elif fmt != "items" and prefix and not _PREFIX.fullmatch(prefix):
+        errors.append("prefix 要写 1–3 个大写字母，选题编号就是 prefix + 序号")
     if "{date}" not in output:
         errors.append("这个 Job 的 output 路径里要有 {date}，才能知道每份报告是哪天的")
     unknown = set(block) - {"alias", "format", "prefix", "refresh"}
     if unknown:
         errors.append(f"topics 不认识这些字段：{', '.join(sorted(unknown))}")
-    return Source(name=name, job=job_name, label=label, format=fmt, prefix=prefix if fmt == "items" else "",
+    return Source(name=name, job=job_name, label=label, format=fmt, prefix=prefix or DEFAULT_PREFIXES.get(fmt, ""),
                   refresh=bool(block.get("refresh")), output=output, error="；".join(errors))
 
 
@@ -158,15 +167,29 @@ def sources(jobs_dir: str) -> dict[str, Source]:
             continue
         if (source := _declared_in(path, job_name)) is not None:
             found.append(source)
+    imported = _imported_sources()
     out: dict[str, Source] = {}
     for source in found:
         clash = [s for s in found if s is not source and (s.name == source.name or (
             source.prefix and s.prefix == source.prefix))]
-        if clash:
-            source = Source(**{**source.__dict__, "error": "；".join(filter(None, [
-                source.error, f"和 {clash[0].job} 重名或编号前缀相同"]))})
+        # the source already feeding topics keeps them; only a newcomer is stopped (its ids would overwrite)
+        if clash and not (source.name in imported and not any(s.name in imported for s in clash)):
+            other = clash[0]
+            why = (f"和 {other.job} 重名" if other.name == source.name else
+                   f"编号前缀 {source.prefix} 已经被 {other.job} 用了：在这个 Job 的 topics 里加一个 prefix"
+                   f"（1–3 个大写字母，比如 M{source.prefix}），选题编号就是 prefix + 序号")
+            source = Source(**{**source.__dict__, "error": "；".join(filter(None, [source.error, why]))})
         out.setdefault(source.name, source)
     return out
+
+
+def _imported_sources() -> set[str]:
+    """Names of the sources that have imported a report: they keep their codes when a newcomer clashes."""
+    try:
+        with connect() as conn:
+            return {r["source"] for r in conn.execute("SELECT DISTINCT source FROM topic_imports")}
+    except Exception:  # noqa: BLE001 - no database yet: nobody has imported anything
+        return set()
 
 
 def resolve(jobs_dir: str, name: str) -> Optional[Source]:
@@ -236,11 +259,19 @@ def parse_items(text: str, report_date: str, prefix: str) -> list[Topic]:
 
 
 def parse(source: Source, text: str, report_date: str) -> list[Topic]:
-    if source.format == "opportunities":
-        return opportunity_format.parse(text, report_date)
     if source.format == "items":
         return parse_items(text, report_date, source.prefix)
-    return flash_format.parse(text, report_date)
+    if source.format == "opportunities":
+        found = opportunity_format.parse(text, report_date)
+    else:
+        found = flash_format.parse(text, report_date)
+    default = DEFAULT_PREFIXES[source.format]
+    if source.prefix == default:
+        return found
+    for topic in found:  # a declared prefix replaces the format's own letter: F3 -> MF3
+        topic.code = source.prefix + topic.code[len(default):]
+        topic.id = f"{report_date}/{topic.code}"
+    return found
 
 
 def sync(jobs_dir: str, output_dir: str) -> list[dict]:

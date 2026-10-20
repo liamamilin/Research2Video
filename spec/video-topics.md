@@ -27,7 +27,8 @@ output: "output/topic_discovery/{date}_{name}.md"   # 必须带 {date}；{name} 
 topics:
   alias: deep_topics   # 可选：配方和批次用的短名；不写就用 Job 路径（如 monitoring/深度选题）
   format: items        # flash | opportunities | items
-  prefix: D            # 只给 items：选题编号 D1、D2…；1–3 个大写字母，不能是 F、C，各来源不同
+  prefix: D            # 选题编号 D1、D2…；1–3 个大写字母，各来源不同。items 必须写且不能是 F、C；
+                       # flash、opportunities 不写就是 F、C，第二个同格式的来源要写自己的（如 MF）
   refresh: true        # 可选：允许自动流水线在当天没有报告时启动这个 Job（会花搜索额度）
 ```
 
@@ -35,15 +36,16 @@ topics:
 
 | format | 报告长什么样 | 编号 |
 |---|---|---|
-| `flash` | `### 1.1 标题` 加 `- **字段**：值`，末尾有来源清单 | F1、F2… |
-| `opportunities` | `### C1. 标题` 加 `- **字段**：值` | C1、C2…（照报告里写的） |
+| `flash` | `### 1.1 标题` 加 `- **字段**：值`，末尾有来源清单 | F1、F2…（写了 prefix 就是 MF1、MF2…） |
+| `opportunities` | `### C1. 标题` 加 `- **字段**：值` | C1、C2…（照报告里写的；写了 prefix 就把 C 换成它） |
 | `items` | 任意 `###` 标题后面跟 `- **字段**：值`；没有字段的标题（概述、小节标题）不算选题 | prefix + 序号 |
 
 声明有错时，这个来源照样列出来、标明原因，但不导入。常见错误：
 
 - format 不认识；
 - `items` 没写 prefix，或用了 F / C；
-- 两个来源重名，或编号前缀相同；
+- prefix 不是 1–3 个大写字母；
+- 两个来源重名，或编号前缀相同。选题编号是「日期/编号」，前缀相同的两个来源同一天会互相覆盖。已经导入过报告的那个照常工作，只拦新来的，错误里会让它加 prefix；两个都没导入过（或都导入过）就两个都拦；
 - output 里没有 `{date}`；
 - 写了不认识的字段。
 

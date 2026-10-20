@@ -114,4 +114,24 @@ describe("Topics page", () => {
     expect(await screen.findByText("为什么我不再用向量库")).toBeTruthy(); // the 手动添加 tab is shown
     expect(screen.getByRole("button", { name: "手动添加" }).getAttribute("aria-pressed")).toBe("true");
   });
+
+  it("gives each domain its own grid, so a second domain's recipe for the same type and audience is not hidden", async () => {
+    const ai = { domain: { key: "ai", name: "AI" } };
+    const cells = [
+      ...CELLS.map((c) => ({ ...c, parts: { ...c.parts, ...ai } })),
+      { id: "med-developer-quick-take-long", key: "med_flash", label: "医疗快讯", usable: true, status: "enabled", parts: { domain: { key: "medical", name: "医疗" }, type: { key: "quick_take", name: "快讯" }, audience: { key: "developer", name: "开发者" } }, column: { topic_kind: "single" } },
+    ];
+    const coverage = [...COVERAGE, { cell: "med_flash", label: "医疗快讯", status: "enabled", sources: ["medical_flash"], open: 4, written: 0, dismissed: 0, multi: false, autopilot: false, report_date: "2026-10-19" }];
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      const u = String(url);
+      const body = u.includes("/topics/sources") ? SOURCES : u.includes("/discovery") ? DISCOVERY : u.includes("/coverage") ? coverage : u.includes("/cells") ? cells : TOPICS;
+      return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(body) } as Response;
+    }));
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    expect(await screen.findByRole("button", { name: "医疗 快讯 开发者" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "AI 快讯 开发者" }).textContent).toContain("1 条待写");
+    expect(screen.getByRole("button", { name: "医疗 快讯 开发者" }).textContent).toContain("4 条待写");
+    expect(screen.getByLabelText("医疗内容矩阵")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "快讯 开发者" })).toBeNull(); // with one domain the label stays as it was
+  });
 });

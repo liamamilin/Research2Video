@@ -101,6 +101,7 @@ def test_any_job_can_be_a_source_and_a_recipe_can_read_it(video_env):
     ("topics:\n  format: rss\n", "format"),
     ("topics:\n  alias: flash\n  format: flash\n", "重名"),               # the shipped flash job has that alias
     ("topics:\n  format: flash\n  schedule: daily\n", "schedule"),
+    ("topics:\n  format: flash\n  prefix: mf\n", "prefix"),             # 1–3 capital letters
 ])
 def test_a_bad_declaration_is_listed_with_why_and_not_imported(video_env, block, message):
     write(video_env, "jobs/research/bad.yaml", 'name: 坏\nprompt: x\noutput: "output/bad/{date}.md"\n' + block)
@@ -108,6 +109,42 @@ def test_a_bad_declaration_is_listed_with_why_and_not_imported(video_env, block,
     bad = topic_store.resolve(str(video_env / "jobs"), "research/bad")
     assert bad is not None and message in bad.error
     assert topic_store.report_files(bad, str(video_env)) == []
+
+
+MEDICAL_FLASH = """name: 医疗快讯发现
+prompt: 找医疗健康的快讯
+output: "output/medical_flash/{date}_medical_flash.md"
+topics:
+  alias: medical_flash
+  format: flash
+"""
+
+
+def test_a_second_flash_source_needs_its_own_prefix_and_the_first_keeps_its_topics(video_env):
+    reports(video_env)
+    pilot.sync_topics()
+    write(video_env, "jobs/monitoring/medical_flash.yaml", MEDICAL_FLASH)
+    write(video_env, "output/medical_flash/2026-10-19_medical_flash.md", DISCOVERY)  # same day, same F1, F2 …
+    pilot.sync_topics()
+    every = topic_store.sources(str(video_env / "jobs"))
+    assert not every["flash"].error  # it already feeds the pool: the newcomer is the one stopped
+    assert "编号前缀 F" in every["medical_flash"].error and "prefix" in every["medical_flash"].error
+    assert topic_store.load("medical_flash")[1] == []
+    assert {t.report_path for t in topic_store.load("flash")[1]} == {"output/flash/2026-10-19_ai_flash_discovery.md"}
+
+    write(video_env, "jobs/monitoring/medical_flash.yaml", MEDICAL_FLASH + "  prefix: MF\n")
+    pilot.sync_topics()
+    assert [t.id for t in topic_store.load("medical_flash")[1]] == ["2026-10-19/MF1", "2026-10-19/MF2"]
+    assert topic_store.get("2026-10-19/MF1").code == "MF1"
+    assert [t.id for t in topic_store.load("flash")[1]] == ["2026-10-19/F1", "2026-10-19/F2"]  # untouched
+
+
+def test_an_opportunities_source_with_a_prefix_renumbers_its_c_codes():
+    source = topic_store.Source(name="x", job="x", label="x", format="opportunities", prefix="MC")
+    codes = [t.code for t in topic_store.parse(source, CONTENT_REPORT, "2026-10-01")]
+    assert codes[:2] == ["MC1", "MC2"]
+    shipped = topic_store.Source(name="o", job="o", label="o", format="opportunities", prefix="C")
+    assert [t.code for t in topic_store.parse(shipped, CONTENT_REPORT, "2026-10-01")][:2] == ["C1", "C2"]
 
 
 def test_an_edited_job_is_read_again_and_an_unchanged_one_is_not_reparsed(video_env, monkeypatch):
