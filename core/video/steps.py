@@ -102,7 +102,8 @@ def derive(script: dict, version: Optional[dict], renders: list[dict], *, resear
     if approved:
         approve = _step("approve", "DONE", f"v{approved}")
     elif has_version and status == "DRAFT" and not stage:
-        approve = _step("approve", "WAITING", "自动流水线会自动定稿" if script.get("created_by") == "autopilot" else "等你定稿")
+        approve = _step("approve", "WAITING", "批次在跑时会自动定稿；批次结束了就等你定稿"
+                        if script.get("created_by") == "autopilot" else "等你定稿")
     else:
         approve = _step("approve", "PENDING")
 

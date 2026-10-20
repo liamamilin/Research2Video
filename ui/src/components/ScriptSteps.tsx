@@ -21,9 +21,11 @@ function rerunnable(step: ScriptStep, detail: VideoScriptDetail): { label: strin
     return { label: "从断点继续", confirm: "继续调研？Job 已跑完的报告会直接用；没跑完就重新调研，会花搜索额度。" };
   }
   if (step.step === "write" && detail.report_path && ["DONE", "FAILED"].includes(step.state)) {
-    return { label: "重写", confirm: "用同一份研究报告重写一版？不再调研；会调用写稿模型，存成新版本，旧版本都保留。" };
+    const approved = detail.status === "APPROVED" ? "重写成功后文稿回到草稿，要重新定稿（旧定稿和成片都还在）；失败则保持定稿。" : "";
+    return { label: "重写", confirm: `用同一份研究报告重写一版？不再调研；会调用写稿模型，存成新版本，旧版本都保留。${approved}` };
   }
-  if (step.step === "audit" && ["DONE", "INCOMPLETE"].includes(step.state) && detail.column?.writer !== "adapt") {
+  // only a draft: the audit resumes as a draft, which would take an approved script's approval away
+  if (step.step === "audit" && detail.status === "DRAFT" && ["DONE", "INCOMPLETE"].includes(step.state) && detail.column?.writer !== "adapt") {
     return { label: "重跑审计", confirm: "重跑事实和风格审计？不改稿子，会调用审校模型。" };
   }
   return null;

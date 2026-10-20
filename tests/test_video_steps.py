@@ -98,22 +98,31 @@ def test_a_failed_rewrite_keeps_the_draft_and_its_versions(video_env, llm, monke
     after = store.get_script(script["id"])
     assert after["status"] == "DRAFT" and after["current_version"] == 1 and "写稿失败" in (after["error"] or "")
 
+    # an approved script whose rewrite fails stays approved, on the same version (it may be rendered, published)
+    store.update_script(script["id"], status="APPROVED", approved_version=1, error=None)
+    llm.replies = ["这不是 JSON"] * 5
+    video_workflow.run_rewrite(script["id"], started_by="editor", previous_status="APPROVED")
+    after = store.get_script(script["id"])
+    assert after["status"] == "APPROVED" and after["approved_version"] == 1 and after["current_version"] == 1
+
 
 @pytest.mark.parametrize("status, report, step, ok", [
     ("FAILED", "", "research", True),          # resume: the job's finished report is reused if there is one
     ("DRAFT", "output/r.md", "research", False),
     ("DRAFT", "output/r.md", "audit", True),   # a one-call script: only the audits run again
     ("RESEARCHING", "", "write", False),       # busy
+    ("APPROVED", "output/r.md", "audit", False),  # it would come back a draft and lose its approval
 ])
 def test_which_reruns_are_allowed(video_env, monkeypatch, status, report, step, ok):
     spawned: list[str] = []
     monkeypatch.setattr(video_workflow, "spawn", lambda script_id, started_by="": spawned.append(script_id))
     script = store.create_script("flash", {"id": None, "title": "一条"})
-    if report:
+    if report or status == "APPROVED":
         sections = [{"title": "开场", "paragraphs": [{"text": "一句话。", "citations": [], "evidence": "UNCITED"}]}]
         store.add_version(script["id"], title="t", sections=sections, length_check=length.measure(sections, 1.25),
                           edit_type="GENERATED")
-    store.update_script(script["id"], status=status, report_path=report)
+    store.update_script(script["id"], status=status, report_path=report,
+                        approved_version=1 if status == "APPROVED" else None)
     if ok:
         video_executor.rerun(script["id"], step, "editor")
         assert spawned == [script["id"]] and steps.events(script["id"])[-1]["step"] == step

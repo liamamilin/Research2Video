@@ -104,7 +104,10 @@ def _rewrite(script: dict, by: str) -> dict:
 
 
 def _rerun_audit(script: dict, by: str) -> dict:
-    if not script.get("current_version") or script["status"] not in ("DRAFT", "APPROVED"):
+    if script["status"] == "APPROVED":
+        # the audit resumes as a draft: an approved (maybe rendered, maybe published) script would lose its approval
+        raise StepError("已经定稿了：重跑审计会把它退回草稿。要重审就先重写，或改稿后再定稿")
+    if not script.get("current_version") or script["status"] != "DRAFT":
         raise StepError("还没有草稿，不能审计")
     if column_of(script).writer == "adapt":
         raise StepError("五步改编的审校是写稿的一部分，要重来就重写")

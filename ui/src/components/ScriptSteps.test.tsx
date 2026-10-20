@@ -55,5 +55,8 @@ describe("ScriptSteps", () => {
     rerender(<ScriptSteps detail={{ ...DETAIL, column: { writer: "adapt" } } as unknown as VideoScriptDetail} canEdit onChanged={() => undefined} />);
     expect(screen.getByRole("button", { name: "重写" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "重跑审计" })).toBeNull();
+    rerender(<ScriptSteps detail={{ ...DETAIL, status: "APPROVED" } as VideoScriptDetail} canEdit onChanged={() => undefined} />);
+    expect(screen.queryByRole("button", { name: "重跑审计" })).toBeNull(); // it would lose its approval
+    expect(screen.getByRole("button", { name: "重写" })).toBeTruthy();
   });
 });

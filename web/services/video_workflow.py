@@ -405,18 +405,21 @@ def rewrite(script_id: str, *, started_by: str = "") -> dict:
         raise RestyleError(f"读不到研究报告 {script['report_path']}") from exc
     store.update_script(script_id, status="WRITING", stage="排队", error=None, heartbeat_at=time.time())
     threading.Thread(target=run_rewrite, args=(script_id,),
-                     kwargs={"started_by": started_by, "had_draft": bool(script["current_version"])},
+                     kwargs={"started_by": started_by, "previous_status": script["status"]},
                      name=f"video-rewrite-{script_id[:8]}", daemon=True).start()
     return store.get_script(script_id)
 
 
-def run_rewrite(script_id: str, *, started_by: str = "", had_draft: bool = True,
+def run_rewrite(script_id: str, *, started_by: str = "", previous_status: str = "DRAFT",
                 llm_config: Optional[LLMConfig] = None) -> str:
-    """Rewrite from the same report in the recipe's (or the current version's) style. Returns the final status."""
+    """Rewrite from the same report in the recipe's (or the current version's) style. Returns the final status.
+
+    A new version is a draft (as after a restyle); a rewrite that fails leaves the script as it was — an approved
+    script stays approved, with the same approved version."""
     if script_id in _active:
         return "RUNNING"
     _active.add(script_id)
-    failed = "DRAFT" if had_draft else "FAILED"
+    failed = previous_status
     try:
         with store.beating(store.touch_script, script_id):
             settings = get_settings()
