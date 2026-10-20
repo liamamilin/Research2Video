@@ -589,3 +589,20 @@ def test_api_dismiss_is_for_editors_and_reversible(client, video_env):
     assert store.dismissed_topic_ids() == set()
     _login(client, "viewer", "viewer-pass-123")
     assert client.post("/api/video/topics/dismiss", headers=_csrf(client), json=body).status_code == 403
+
+
+def test_api_a_batch_and_the_weekly_plan_can_be_set_per_cell(client, video_env):
+    from tests.test_video_scripts import _csrf, _login
+
+    _matrix_only(video_env)
+    _login(client)
+    spec = {"picks": [{"cell": "flash", "count": 2}, {"cell": "point_short", "count": 1}], "refresh": False}
+    run = client.post("/api/video/autopilot/runs", headers=_csrf(client), json={"spec": spec})
+    assert run.status_code == 202 and run.json()["spec"]["picks"][0] == {"cell": "flash", "count": 2, "source": "flash"} or run.json()["spec"]["picks"][0]["cell"] == "flash"
+    plan = client.post("/api/video/autopilot/plans", headers=_csrf(client), json={"name": "p", "expression": "0 5 * * 2"}).json()
+    edited = client.put(f"/api/video/autopilot/plans/{plan['id']}/spec", headers=_csrf(client), json={"spec": spec})
+    assert edited.status_code == 200 and edited.json()["spec"]["picks"][1] == {"cell": "point_short", "count": 1, "source": "flash"} or edited.json()["spec"]["picks"][1]["cell"] == "point_short"
+    assert edited.json()["expression"] == "0 5 * * 2"
+    roundup = {"picks": [{"cell": "ai-developer-roundup-long", "count": 2}]}
+    assert client.put(f"/api/video/autopilot/plans/{plan['id']}/spec", headers=_csrf(client), json={"spec": roundup}).status_code == 422
+    assert client.put("/api/video/autopilot/plans/nope/spec", headers=_csrf(client), json={"spec": spec}).status_code == 404

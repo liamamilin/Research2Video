@@ -5,6 +5,7 @@ See spec/video-scripts.md and, for styles and restyling, spec/video-adaptation.m
 
 from __future__ import annotations
 
+import json
 import os
 from typing import Optional
 
@@ -648,7 +649,7 @@ def autopilot_start(body: Optional[AutopilotRunIn] = None, user=Depends(require_
     """Start one batch now (the default one: 3 flash + 2 one-point). Stops at a finished render; never publishes."""
     from web.services import video_autopilot
 
-    spec = body.spec.model_dump() if body and body.spec else None
+    spec = body.spec.model_dump(exclude_none=True) if body and body.spec else None
     try:
         run = video_autopilot.start_run(spec, started_by=user["username"])
     except Exception as exc:  # noqa: BLE001 - an unknown cell
@@ -678,12 +679,37 @@ def autopilot_save_plan(body: AutopilotPlanIn, user=Depends(require_editor)) -> 
     from web.services import video_autopilot
 
     try:
-        plan = video_autopilot.save_plan(body.name, body.expression, body.spec.model_dump() if body.spec else None,
+        plan = video_autopilot.save_plan(body.name, body.expression, body.spec.model_dump(exclude_none=True) if body.spec else None,
                                          created_by=user["username"])
     except ValueError as exc:
         raise HTTPException(422, detail=ApiError.make("bad_schedule", str(exc))) from exc
     audit.log("video_autopilot_plan", user=user["username"], target=plan["id"], result=body.expression)
     return plan
+
+
+class AutopilotPlanSpecIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    spec: AutopilotSpec
+
+
+@router.put("/autopilot/plans/{plan_id}/spec")
+def autopilot_edit_plan_spec(plan_id: str, body: AutopilotPlanSpecIn, user=Depends(require_editor)) -> dict:
+    """Change what the weekly plan writes (cells and counts); the schedule stays."""
+    from core.video import autopilot_store
+    from web.services import video_autopilot
+
+    if autopilot_store.get_plan(plan_id) is None:
+        raise _not_found("这个计划")
+    spec = body.spec.model_dump(exclude_none=True)
+    try:
+        for pick in spec["picks"]:
+            video_autopilot.resolve_pick(pick)
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("bad_spec", str(exc))) from exc
+    autopilot_store.update_plan(plan_id, spec=spec)
+    audit.log("video_autopilot_plan_spec", user=user["username"], target=plan_id, result=json.dumps(spec, ensure_ascii=False))
+    return autopilot_store.get_plan(plan_id)
 
 
 @router.delete("/autopilot/plans/{plan_id}")
