@@ -89,7 +89,8 @@ export function TopicsPage() {
     return () => window.clearInterval(timer);
   }, [tick]);
 
-  const current = coverage.find((c) => c.cell === selected) ?? coverage.find((c) => c.sources.length) ?? coverage[0];
+  const current =
+    coverage.find((c) => c.cell === selected) ?? coverage.find((c) => c.cell === "flash") ?? coverage.find((c) => c.sources.length) ?? coverage[0];
   const source = (current?.sources[0] ?? "flash") as Source;
   const noSource = Boolean(current && !current.sources.length);
 
