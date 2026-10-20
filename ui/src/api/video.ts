@@ -176,6 +176,8 @@ export interface VideoTopic {
   stale?: boolean;
   event_date?: string | null;
   scripts?: { id: string; column_key: string; status: ScriptStatus; created_at: string; archived?: number }[];
+  /** 来自哪个选题来源：Job 的 topics.alias（或 Job 路径），手动添加的是 manual */
+  source?: string;
 }
 
 export interface ScriptParagraph {
@@ -390,17 +392,42 @@ export interface CellCoverage {
   multi: boolean;
   autopilot: boolean;
   report_date: string | null;
+  /** 配方里写了、但没有 Job 声明的选题来源 */
+  unknown_sources?: string[];
 }
 
 export interface DiscoveryStatus {
+  source: string;
+  job: string;
+  label: string;
   running: boolean;
   report_date: string | null;
   report_at: number | null;
-  searches: number;
+  /** 上次跑这个 Job 用了几次搜索；没跑过是 null */
+  searches: number | null;
 }
 
-export const getDiscovery = () => api<DiscoveryStatus>("/api/video/topics/discovery");
-export const startDiscovery = () => api<DiscoveryStatus>("/api/video/topics/discovery", { method: "POST" });
+/** 选题来源：声明了 topics: 的 Job，加上「手动添加」（name 为 manual）。 */
+export interface TopicSource {
+  name: string;
+  job: string | null;
+  label: string;
+  format: string | null;
+  prefix: string;
+  refresh: boolean;
+  error: string;
+  reports: number;
+  latest: string | null;
+  report_error: string;
+  count?: number;
+}
+
+export const listTopicSources = () => api<TopicSource[]>("/api/video/topics/sources");
+export const getDiscovery = (source = "flash") => api<DiscoveryStatus>("/api/video/topics/discovery", { query: { source } });
+export const startDiscovery = (source = "flash") =>
+  api<DiscoveryStatus>("/api/video/topics/discovery", { method: "POST", query: { source } });
+export const addVideoTopic = (body: { title: string; angle?: string; audience?: string; fields?: Record<string, string> }) =>
+  api<VideoTopic>("/api/video/topics", { method: "POST", body });
 export const dismissTopic = (topic_id: string, dismissed: boolean) =>
   api<{ topic_id: string; dismissed: boolean }>("/api/video/topics/dismiss", { method: "POST", body: { topic_id, dismissed } });
 
@@ -408,7 +435,7 @@ export const listCellCoverage = () => api<CellCoverage[]>("/api/video/coverage")
 
 export const listVideoStyles = () => api<StyleCatalog>("/api/video/styles");
 
-export const listVideoTopics = (source: "opportunities" | "flash" = "opportunities", round?: string) =>
+export const listVideoTopics = (source = "opportunities", round?: string) =>
   api<{ round: string | null; rounds?: string[]; topics: VideoTopic[] }>("/api/video/topics", { query: { source, ...(round ? { round } : {}) } });
 
 export const listVideoScripts = (archived = false) =>

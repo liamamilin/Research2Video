@@ -42,6 +42,16 @@ def _existing(key: str) -> str:
     return path
 
 
+def _warnings(recipe: recipes.Recipe) -> list[str]:
+    """What builds but will not work: a topic source no job declares."""
+    from web.services import video_autopilot
+
+    if recipe.column is None:
+        return []
+    return [f"topic.sources 里的 {name} 没有哪个 Job 声明（在 Job 的 YAML 里写 topics: alias: {name}）"
+            for name in recipe.column.topic_sources if not video_autopilot.known_source(name)]
+
+
 def _summary(recipe: recipes.Recipe, used: dict[str, int]) -> dict:
     column = recipe.column
     return {
@@ -59,6 +69,7 @@ def _summary(recipe: recipes.Recipe, used: dict[str, int]) -> dict:
         "target_minutes": column.target_minutes if column else None,
         "topic_kind": column.topic_kind if column else None,
         "topic_sources": list(column.topic_sources) if column else [],
+        "warnings": _warnings(recipe),
         "scripts": used.get(recipe.key, 0),
         "mtime": os.path.getmtime(recipe.path) if recipe.path and os.path.isfile(recipe.path) else None,
         "sha256": recipe.sha256,
@@ -96,7 +107,8 @@ class RecipeCheckIn(BaseModel):
 def validate_recipe(key: str, body: RecipeCheckIn, user=Depends(require_viewer)) -> dict:
     """Whether ``content`` would build, and what it builds to; never writes."""
     recipe = recipes.parse(key, body.content)
-    return {"ok": not recipe.error, "error": recipe.error, "column": recipe.column.as_dict() if recipe.column else None}
+    return {"ok": not recipe.error, "error": recipe.error, "warnings": _warnings(recipe),
+            "column": recipe.column.as_dict() if recipe.column else None}
 
 
 class RecipeSaveIn(BaseModel):

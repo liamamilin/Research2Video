@@ -28,9 +28,8 @@ from core.fileio import file_lock
 from core.video import autopilot_store as ap
 from core.video import columns as video_columns
 from core.video import credibility
-from core.video import flash as video_flash
 from core.video import store
-from core.video import topics as video_topics
+from core.video import topic_store
 from web.services import video_render, video_workflow
 from web.settings import get_settings
 
@@ -53,12 +52,14 @@ DEFAULT_SPEC = {"picks": [{"column": "flash", "count": 3, "source": "flash"},
 
 # --- picking ---------------------------------------------------------------
 
-def _loader(source: str):
-    return video_flash.load if source == "flash" else video_topics.load
+def sync_topics() -> list[dict]:
+    """Read new or changed reports of every topic source into the topics table (core/video/topic_store.py)."""
+    settings = get_settings()
+    return topic_store.sync(settings.paths.jobs_dir, settings.paths.output_dir)
 
 
 def resolve_pick(pick: dict) -> dict:
-    """A pick by ``cell`` (what the matrix says it can be written from) becomes ``column`` + ``source``."""
+    """A pick by ``cell`` (the recipe's key) becomes ``column`` + ``source`` (the recipe's first topic source)."""
     if not pick.get("cell"):
         return pick
     from core.video import recipes as matrix
@@ -72,11 +73,16 @@ def resolve_pick(pick: dict) -> dict:
     return {"column": pick["cell"], "count": pick.get("count", 1), "source": sources[0]}
 
 
+def known_source(name: str) -> bool:
+    return name == topic_store.MANUAL or topic_store.resolve(get_settings().paths.jobs_dir, name) is not None
+
+
 def coverage() -> list[dict]:
     """Per cell: its topic sources, how many topics wait to be written and how many are taken, newest report date."""
     from core.video import recipes as matrix
 
     settings = get_settings()
+    sync_topics()
     covered = store.scripts_by_topic()
     dismissed = store.dismissed_topic_ids()
     cache: dict[str, tuple] = {}
@@ -87,11 +93,12 @@ def coverage() -> list[dict]:
             continue
         row = {"cell": cell["key"], "label": cell["label"], "status": cell["status"], "sources": sources,
                "open": 0, "written": 0, "dismissed": 0, "report_date": None,
+               "unknown_sources": [s for s in sources if not known_source(s)],
                "multi": bool(cell["column"] and cell["column"].get("topic_kind") == "roundup"),
                "autopilot": bool(cell["column"] and cell["column"].get("topic_kind", "single") == "single")}
         for source in sources:
             if source not in cache:
-                cache[source] = _loader(source)(settings.paths.output_dir)
+                cache[source] = topic_store.load(source)
             date, topics = cache[source]
             row["report_date"] = max(filter(None, [row["report_date"], date]), default=None)
             # written is per cell: a topic written as a quick take is still open for a knowledge point
@@ -106,12 +113,11 @@ def coverage() -> list[dict]:
 
 def pick_topics(spec: dict) -> list[dict]:
     """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet."""
-    out_dir = get_settings().paths.output_dir
+    sync_topics()
     taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
     items: list[dict] = []
     for pick in (resolve_pick(p) for p in spec.get("picks", [])):
-        loader = _loader(pick.get("source", "flash"))
-        _, topics = loader(out_dir)
+        _, topics = topic_store.load(pick.get("source", "flash"))
         # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
         for topic in sorted(topics, key=lambda t: (bool(getattr(t, "stale", lambda: False)()), -(t.score or 0))):
             if len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
@@ -125,87 +131,108 @@ def pick_topics(spec: dict) -> list[dict]:
     return items
 
 
-DISCOVERY_JOB = "ai_flash_discovery"
-#: A discovery run cut off (the app restarted) is started once more, no more: each one costs about 20 searches.
+#: A source job cut off (the app restarted) is started once more, no more: each start spends its searches again.
 DISCOVERY_STARTS = 2
+
+
+def refresh_sources(spec: dict) -> list[topic_store.Source]:
+    """The sources a batch's picks read that let the pipeline start their job (``topics.refresh: true``)."""
+    jobs_dir = get_settings().paths.jobs_dir
+    out: dict[str, topic_store.Source] = {}
+    for pick in spec.get("picks", []):
+        source = topic_store.resolve(jobs_dir, resolve_pick(pick).get("source", ""))
+        if source is not None and source.refresh and not source.error:
+            out[source.name] = source
+    return list(out.values())
+
+
+def _has_today(source: topic_store.Source) -> bool:
+    files = topic_store.report_files(source, os.path.dirname(os.path.abspath(get_settings().paths.output_dir)))
+    return bool(files) and files[0][0] == time.strftime("%Y-%m-%d")
 
 
 def fresh_topics(spec: dict, run: dict) -> bool:
     """True when the batch can start picking.
 
-    A stale discovery report starts today's job — once. Starting a job cancels the one already running under the
-    same name, so a start on every tick would restart it forever."""
+    A source whose newest report is not today's has its job started — once per batch. Starting a job cancels the one
+    already running under the same name, so a start on every tick would restart it forever."""
     if not spec.get("refresh"):
         return True
-    if video_flash.latest_report(get_settings().paths.output_dir) == time.strftime("%Y-%m-%d"):
+    stale = [s for s in refresh_sources(spec) if not _has_today(s)]
+    if not stale:
         return True
-    running = _discovery_running()
+    labels = "、".join(f"「{s.label}」" for s in stale)
     started_at = run.get("discovery_at")
-    if running:
+    if any(_discovery_running(s.job) for s in stale):
         if started_at is None:  # someone else started it (by hand): wait for that one
             ap.update_run(run["id"], discovery_at=time.time())
             return False
         if time.time() - started_at <= TOPICS_WAIT_SECONDS:
             return False
-        ap.update_run(run["id"], note="今天的快讯发现没有在限时内完成，用最新的一期")
+        ap.update_run(run["id"], note=f"今天的{labels}没有在限时内完成，用最新的一期")
         return True
     if int(run.get("discovery_tries") or 0) < DISCOVERY_STARTS:
         ap.update_run(run["id"], discovery_at=time.time(), discovery_tries=int(run.get("discovery_tries") or 0) + 1)
-        _start_discovery()
+        for source in stale:
+            _start_discovery(source.job)
         return False
-    ap.update_run(run["id"], note="今天的快讯发现没有跑出报告，用最新的一期")
+    ap.update_run(run["id"], note=f"今天的{labels}没有跑出报告，用最新的一期")
     return True
 
 
 _discovery_lock = threading.RLock()
 
 
-def discovery_status() -> dict:
-    """Is the flash discovery job running, and when its newest report came out."""
-    out = get_settings().paths.output_dir
-    date = video_flash.latest_report(out)
-    path = video_flash.report_path(out, date) if date else None
-    return {"running": _discovery_running(), "report_date": date,
-            "report_at": os.path.getmtime(path) if path and os.path.isfile(path) else None,
-            "searches": 20}
+def discovery_status(name: str = "flash") -> dict:
+    """A refreshable source's job: running now, when its newest report came out, how many searches it last took."""
+    from core.state import StateManager
+
+    settings = get_settings()
+    source = topic_store.resolve(settings.paths.jobs_dir, name)
+    if source is None or not source.refresh:
+        raise ValueError(f"选题来源 {name} 不能从这里生成（它的 Job 没写 topics.refresh: true）")
+    files = topic_store.report_files(source, os.path.dirname(os.path.abspath(settings.paths.output_dir)))
+    last = StateManager.get(source.job) or {}
+    return {"source": source.name, "job": source.job, "label": source.label,
+            "running": _discovery_running(source.job),
+            "report_date": files[0][0] if files else None,
+            "report_at": os.path.getmtime(files[0][1]) if files else None,
+            "searches": (last.get("last_usage") or {}).get("searches")}
 
 
-def start_discovery_if_idle() -> bool:
-    """Start today's flash discovery unless it is running — starting a job cancels the one running under its name."""
+def start_discovery_if_idle(name: str = "flash") -> bool:
+    """Start a refreshable source's job unless it is running — starting a job cancels the one running under its name."""
+    status = discovery_status(name)
     with _discovery_lock:  # the check and the start are one step, so a double click starts it once
-        if _discovery_running():
+        if _discovery_running(status["job"]):
             return False
-        _start_discovery()
+        _start_discovery(status["job"])
         return True
 
 
-def _discovery_names() -> set[str]:
-    """Every name the discovery job runs under: the batch starts it by its short name, the Jobs page by its path."""
-    from core.config import load_job
-
-    job = load_job(get_settings().paths.jobs_dir, DISCOVERY_JOB) or {}
-    return {DISCOVERY_JOB, job.get("_file") or DISCOVERY_JOB}
+def _job_names(job: str) -> set[str]:
+    """Every name a job may be running under: its path (the Jobs page), its file name (older batches)."""
+    return {job, job.rsplit("/", 1)[-1]}
 
 
-def _discovery_running() -> bool:
+def _discovery_running(job: str) -> bool:
     """Running here under either name, or in another process (the scheduler, the command line) holding its lock."""
     from core.lock import LockManager
     from web.runner.registry import TaskRegistry
 
     registry = TaskRegistry()
-    return any(registry.is_running(name) or LockManager.is_locked(name) for name in _discovery_names())
+    return any(registry.is_running(name) or LockManager.is_locked(name) for name in _job_names(job))
 
 
-def _start_discovery() -> None:
+def _start_discovery(job: str) -> None:
     from web.runner.executor import start_job
 
     settings = get_settings()
     with _discovery_lock:
         try:
-            start_job(DISCOVERY_JOB, "autopilot", config_dir=settings.paths.config_dir,
-                      jobs_dir=settings.paths.jobs_dir)
+            start_job(job, "autopilot", config_dir=settings.paths.config_dir, jobs_dir=settings.paths.jobs_dir)
         except Exception as exc:  # noqa: BLE001 - the job cannot start; the next tick sees it is not running
-            logger.info("flash discovery not started: %s", exc)
+            logger.info("topic source %s not started: %s", job, exc)
 
 
 # --- the label (there is no gate) ---------------------------------------------

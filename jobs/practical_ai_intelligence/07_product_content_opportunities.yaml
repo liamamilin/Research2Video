@@ -75,3 +75,7 @@ prompt: |
 
   请用中文输出完整报告。
 output: "output/practical_ai_intelligence/{date}/07_product_content_opportunities.md"
+# 选题来源（spec/video-topics.md）：报告里的 ### C1 选题导入选题表；它是情报轮次的一步，自动流水线不会单独启动它
+topics:
+  alias: opportunities
+  format: opportunities

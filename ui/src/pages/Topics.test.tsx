@@ -27,11 +27,16 @@ const COVERAGE = [
   { cell: "cmp", label: "对比", status: "experimental", sources: [], open: 0, written: 0, dismissed: 0, multi: false, autopilot: false, report_date: null },
 ];
 
+const SOURCES = [
+  { name: "flash", job: "monitoring/ai_flash_discovery", label: "AI Flash Discovery", format: "flash", prefix: "", refresh: true, error: "", reports: 2, latest: "2026-10-19", report_error: "" },
+  { name: "manual", job: null, label: "手动添加", format: null, prefix: "M", refresh: false, error: "", reports: 0, latest: null, report_error: "", count: 0 },
+];
+
 beforeEach(() => {
   useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
   vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
     ok: true, status: 200, statusText: "ok",
-    text: async () => JSON.stringify(String(url).includes("/discovery") ? DISCOVERY : String(url).includes("/coverage") ? COVERAGE : String(url).includes("/cells") ? CELLS : TOPICS),
+    text: async () => JSON.stringify(String(url).includes("/topics/sources") ? SOURCES : String(url).includes("/discovery") ? DISCOVERY : String(url).includes("/coverage") ? COVERAGE : String(url).includes("/cells") ? CELLS : TOPICS),
   }) as Response));
 });
 
@@ -84,5 +89,29 @@ describe("Topics page", () => {
     fireEvent.click(box);
     expect(screen.queryByText(/合成一期盘点（/)).toBeNull(); // one is not enough
     expect(screen.queryByText("用这个写稿")).toBeNull();
+  });
+
+  it("adds a topic by hand, which lands under the 手动添加 tab, and flags a source no job declares", async () => {
+    const posts: { url: string; body: string }[] = [];
+    const manual = { id: "manual/1", round: "", code: "M1", title: "为什么我不再用向量库", fields: {}, score: null, scripted: false, source: "manual" };
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      const u = String(url);
+      if (init?.method === "POST") posts.push({ url: u, body: String(init.body) });
+      const coverage = COVERAGE.map((c) => (c.cell === "flash" ? { ...c, unknown_sources: ["rss"] } : c));
+      const body = u.includes("/topics/sources") ? SOURCES : u.includes("/discovery") ? DISCOVERY : u.includes("/coverage") ? coverage
+        : u.includes("/cells") ? CELLS : u.includes("source=manual") ? { round: null, rounds: [], topics: posts.length ? [manual] : [] }
+        : init?.method === "POST" ? manual : TOPICS;
+      return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(body) } as Response;
+    }));
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    expect(await screen.findByText(/没有 Job 声明的选题来源：rss/)).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "AI Flash Discovery" })).toBeTruthy();
+    fireEvent.click(screen.getByText("手动添加选题"));
+    fireEvent.change(screen.getByPlaceholderText("标题（至少 4 个字）"), { target: { value: "为什么我不再用向量库" } });
+    fireEvent.click(screen.getByText("添加"));
+    await waitFor(() => expect(posts.some((p) => p.url.endsWith("/api/video/topics"))).toBe(true));
+    expect(JSON.parse(posts[0].body).title).toBe("为什么我不再用向量库");
+    expect(await screen.findByText("为什么我不再用向量库")).toBeTruthy(); // the 手动添加 tab is shown
+    expect(screen.getByRole("button", { name: "手动添加" }).getAttribute("aria-pressed")).toBe("true");
   });
 });

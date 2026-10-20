@@ -14,7 +14,6 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from core.video import columns as video_columns
-from core.video import flash as video_flash
 from core.video import credibility, store
 from core.video import topics as video_topics
 from core.video.adapt import styles as video_styles
@@ -175,25 +174,75 @@ def list_styles(user=Depends(require_viewer)) -> dict:
         raise HTTPException(500, detail=ApiError.make("bad_style_config", str(exc))) from exc
 
 
+def _topics():
+    from core.video import topic_store
+    from web.services import video_autopilot
+
+    video_autopilot.sync_topics()
+    return topic_store
+
+
+@router.get("/topics/sources")
+def list_topic_sources(user=Depends(require_viewer)) -> list[dict]:
+    """Every job that declares ``topics:`` (and ``manual``): its newest report, and why a report gave no topics."""
+    from core.video import topic_store
+    from web.services import video_autopilot
+
+    rows = video_autopilot.sync_topics()
+    errors = topic_store.import_errors()
+    for row in rows:
+        failed = errors.get(row["name"], [])
+        # only the newest report matters: older ones in an earlier format stay as they were
+        row["report_error"] = failed[0]["error"] if failed and failed[0]["date"] == row["latest"] else ""
+    manual = topic_store.load(topic_store.MANUAL)[1]
+    return rows + [{"name": topic_store.MANUAL, "job": None, "label": "手动添加", "format": None, "prefix": "M",
+                    "refresh": False, "error": "", "reports": 0, "latest": None, "report_error": "",
+                    "count": len(manual)}]
+
+
 @router.get("/topics")
 def list_topics(round: Optional[str] = None, source: str = "opportunities",
                 user=Depends(require_viewer)) -> dict:
-    """Topics of a round (the latest by default): content opportunities, or ``source=flash`` for flash-news items."""
-    if source not in ("opportunities", "flash"):
-        raise HTTPException(422, detail=ApiError.make("unknown_source", "source 应为 opportunities 或 flash"))
-    loader = video_flash.load if source == "flash" else video_topics.load
-    out = get_settings().paths.output_dir
-    round_date, topics = loader(out, round)
+    """Topics of one report of a source (the newest by default); ``source=manual`` lists the ones added by hand."""
+    from web.services import video_autopilot
+
+    topic_store = _topics()
+    if not video_autopilot.known_source(source):
+        raise HTTPException(422, detail=ApiError.make(
+            "unknown_source", f"没有叫 {source} 的选题来源：在 Job 的 YAML 里写 topics: 才能当来源"))
+    round_date, topics = topic_store.load(source, round)
     used = store.topic_ids_in_use()
     published = store.published_topic_ids()
     covered = store.scripts_by_topic()
     dismissed = store.dismissed_topic_ids()
     return {
         "round": round_date,
-        "rounds": (video_flash.report_dates(out) if source == "flash" else video_topics.round_dates(out)),
-        "topics": [{**t.as_dict(), "scripted": t.id in used, "published": t.id in published,
+        "rounds": topic_store.report_dates(source),
+        "topics": [{**t.as_dict(), "source": t.source, "scripted": t.id in used, "published": t.id in published,
                     "dismissed": t.id in dismissed, "scripts": covered.get(t.id, [])} for t in topics],
     }
+
+
+class ManualTopicIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(min_length=4, max_length=200)
+    angle: str = Field(default="", max_length=2000)
+    audience: str = Field(default="", max_length=200)
+    fields: dict[str, str] = Field(default_factory=dict, description="Any other topic fields, e.g. 变化, 发布日期")
+
+
+@router.post("/topics", status_code=201)
+def add_topic(body: ManualTopicIn, user=Depends(require_editor)) -> dict:
+    """A topic written by hand. It sits in the pool like any other (source ``manual``)."""
+    topic_store = _topics()
+    fields = {**body.fields, "核心角度": body.angle, "目标受众": body.audience}
+    try:
+        topic = topic_store.add_manual(body.title, fields, user["username"])
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("topic_required", str(exc))) from exc
+    audit.log("video_topic_add", user=user["username"], target=topic.id, result="added")
+    return {**topic.as_dict(), "source": topic.source}
 
 
 class DismissIn(BaseModel):
@@ -213,22 +262,30 @@ def dismiss_topic(body: DismissIn, user=Depends(require_editor)) -> dict:
 
 
 @router.get("/topics/discovery")
-def discovery_status(user=Depends(require_viewer)) -> dict:
-    """The flash discovery job: running now, and when its newest report came out."""
+def discovery_status(source: str = "flash", user=Depends(require_viewer)) -> dict:
+    """A source the console may run (``topics.refresh: true``): running now, and when its newest report came out."""
     from web.services import video_autopilot
 
-    return video_autopilot.discovery_status()
+    try:
+        return video_autopilot.discovery_status(source)
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("not_refreshable", str(exc))) from exc
 
 
 @router.post("/topics/discovery", status_code=202)
-def start_discovery(user=Depends(require_editor)) -> dict:
-    """Start today's flash discovery (about 20 searches). Refused while it is already running."""
+def start_discovery(source: str = "flash", user=Depends(require_editor)) -> dict:
+    """Run that source's job now (it spends its searches). Refused while it is already running."""
     from web.services import video_autopilot
 
-    if not video_autopilot.start_discovery_if_idle():
-        raise HTTPException(409, detail=ApiError.make("discovery_running", "快讯发现正在跑，等它跑完"))
-    audit.log("video_discovery_start", user=user["username"], target="ai_flash_discovery", result="started")
-    return video_autopilot.discovery_status()
+    try:
+        started = video_autopilot.start_discovery_if_idle(source)
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("not_refreshable", str(exc))) from exc
+    if not started:
+        raise HTTPException(409, detail=ApiError.make("discovery_running", "这个选题来源的 Job 正在跑，等它跑完"))
+    status = video_autopilot.discovery_status(source)
+    audit.log("video_discovery_start", user=user["username"], target=status["job"], result="started")
+    return status
 
 
 # --- Scripts -----------------------------------------------------------------
@@ -261,14 +318,15 @@ class ScriptCreateIn(BaseModel):
 def _roundup_topic(body: ScriptCreateIn) -> dict:
     if body.topic_id is not None or not body.topic_ids:
         raise HTTPException(422, detail=ApiError.make("topic_required", "盘点要选 2–10 条快讯条目（topic_ids）"))
-    output_dir = get_settings().paths.output_dir
-    found = [video_topics.find(output_dir, tid) for tid in body.topic_ids]
+    topic_store = _topics()
+    found = [topic_store.get(tid) for tid in body.topic_ids]
     missing = [tid for tid, item in zip(body.topic_ids, found) if item is None]
-    if missing or any(not item.code.startswith("F") for item in found):
-        raise HTTPException(422, detail=ApiError.make("unknown_topic", f"找不到快讯条目：{', '.join(missing) or '只能选快讯条目'}"))
-    if len({item.round for item in found}) != 1 or len(set(body.topic_ids)) != len(body.topic_ids):
-        raise HTTPException(422, detail=ApiError.make("roundup_items", "盘点的条目要来自同一份发现报告，且不重复"))
-    report = os.path.relpath(video_flash.report_path(output_dir, found[0].round), os.path.dirname(output_dir))
+    if missing or any(not item.report_path for item in found):
+        raise HTTPException(422, detail=ApiError.make(
+            "unknown_topic", f"找不到这些条目：{', '.join(missing)}" if missing else "盘点只能选报告里的条目"))
+    if len({item.report_path for item in found}) != 1 or len(set(body.topic_ids)) != len(body.topic_ids):
+        raise HTTPException(422, detail=ApiError.make("roundup_items", "盘点的条目要来自同一份报告，且不重复"))
+    report = found[0].report_path
     try:
         return video_topics.roundup_topic(found, report, body.topic.title if body.topic else "")
     except ValueError as exc:
@@ -305,14 +363,15 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
             raise HTTPException(422, detail=ApiError.make("topic_required", "请选择一个内容机会，或填写一个选题"))
         if body.topic is not None and len(body.topic.title.strip()) < 4:
             raise HTTPException(422, detail=ApiError.make("topic_required", "选题标题至少 4 个字"))
-        if body.topic_id is not None:
-            found = video_topics.find(get_settings().paths.output_dir, body.topic_id)
-            if found is None:
-                raise HTTPException(422, detail=ApiError.make("unknown_topic", f"找不到选题 {body.topic_id}"))
-            topic = found.as_dict()
-        else:
-            topic = {"id": None, "title": body.topic.title.strip(),
-                     "fields": {"核心角度": body.topic.angle.strip(), "目标受众": body.topic.audience.strip()}}
+        topic_store = _topics()
+        if body.topic is not None:  # a title typed here becomes a topic in the pool first, like one added by hand
+            made = topic_store.add_manual(body.topic.title, {"核心角度": body.topic.angle,
+                                                             "目标受众": body.topic.audience}, user["username"])
+            body = body.model_copy(update={"topic_id": made.id, "topic": None})
+        found = topic_store.get(body.topic_id)
+        if found is None:
+            raise HTTPException(422, detail=ApiError.make("unknown_topic", f"找不到选题 {body.topic_id}"))
+        topic = found.as_dict()
     if body.video_form is not None:
         topic = {**topic, "video_form": body.video_form}
     if body.from_script is not None:

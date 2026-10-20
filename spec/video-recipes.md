@@ -30,7 +30,7 @@ target_minutes: 1.25            # 调研提示词、字数预算、长度检查�
 
 topic:
   kind: single                  # single 一条选题 / roundup 几条快讯合成一期 / comparison 两个对象对比
-  sources: [flash]              # 自动流水线从哪挑题：flash 快讯发现、opportunities 情报轮次；空 = 自动流水线不挑这个配方。手动建稿不受影响，可填任何题目
+  sources: [flash]              # 自动流水线从哪挑题：声明了 topics: 的 Job 的 alias 或路径（flash、opportunities…），或 manual；空 = 自动流水线不挑这个配方。手动建稿不受影响。见 spec/video-topics.md
   fields: [核心角度, 目标受众]   # 写稿时给模型看的选题字段，按顺序；不写用写法的默认
 
 research:

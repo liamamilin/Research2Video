@@ -72,3 +72,8 @@ prompt: |
   - 条目里的数字必须能在对应来源里找到；找不到就不写这个数字。
   - 不把推测写成事实。
 output: "output/flash/{date}_ai_flash_discovery.md"
+# 选题来源（spec/video-topics.md）：报告里的 ### 1.1 条目导入选题表，编号 F1、F2…；自动流水线可在当天没有报告时启动它
+topics:
+  alias: flash
+  format: flash
+  refresh: true

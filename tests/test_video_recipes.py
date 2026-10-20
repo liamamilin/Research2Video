@@ -114,7 +114,8 @@ def test_a_value_of_the_wrong_type_is_an_error_on_that_file_only(tmp_path):
 
 @pytest.mark.parametrize("line, message", [
     ("topic:\n  sources: flash\n", "topic.sources"),            # would split into f, l, a, s, h
-    ("topic:\n  sources: [rss]\n", "rss"),
+    ("topic:\n  sources: ['two words']\n", "two words"),   # a source is a job alias or path; whether one exists is a warning
+
     ("writing_extra: 1\n", "writing_extra"),
 ])
 def test_list_fields_must_be_lists_of_known_names(line, message):

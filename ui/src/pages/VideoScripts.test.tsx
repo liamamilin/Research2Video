@@ -46,6 +46,9 @@ const CELLS = [
   }),
   cell("ai-developer-quick_take-vertical", null, "blocked", "快讯 · 竖屏", "quick_take"),
 ];
+// as the shipped recipes say: deep dives are picked from the rounds, roundups from the flash reports
+Object.assign(CELLS[0], { topic_sources: ["opportunities"] });
+Object.assign(CELLS[1], { topic_sources: ["flash"] });
 
 const FLASH = [
   { id: "2026-10-19/F1", round: "2026-10-19", code: "F1", title: "价格下调", fields: {}, score: 8, scripted: false },

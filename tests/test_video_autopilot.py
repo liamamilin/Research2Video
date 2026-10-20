@@ -63,10 +63,9 @@ def test_picking_takes_the_best_unwritten_topics_and_skips_taken_ones(video_env,
     from core.video import flash as video_flash
     from tests.test_video_flash import DISCOVERY
 
-    out = tmp_path / "output"
+    out = video_env / "output"
     (out / "flash").mkdir(parents=True)
     (out / "flash" / "2026-10-19_ai_flash_discovery.md").write_text(DISCOVERY, encoding="utf-8")
-    monkeypatch.setattr(pilot, "get_settings", lambda: type("S", (), {"paths": type("P", (), {"output_dir": str(out)})})())
     import datetime
     from core.video import topics as video_topics
     monkeypatch.setattr(video_topics, "_today", lambda: datetime.date(2026, 10, 19))  # the report's own day: none is stale
@@ -450,14 +449,13 @@ def _discovery_once(video_env, monkeypatch):
     (out / "flash").mkdir(parents=True)
     spec = {"picks": [{"column": "flash", "count": 1, "source": "flash"}], "refresh": True}
     run, other = pilot.start_run(spec), pilot.start_run(spec)
-    monkeypatch.setattr(pilot, "get_settings", lambda: type("S", (), {"paths": type("P", (), {"output_dir": str(out)})})())
     starts: list[int] = []
     running = {"now": False}
-    monkeypatch.setattr(pilot, "_start_discovery", lambda: (starts.append(1), running.update(now=True)))
-    monkeypatch.setattr(pilot, "_discovery_running", lambda: running["now"])
+    monkeypatch.setattr(pilot, "_start_discovery", lambda job: (starts.append(job), running.update(now=True)))
+    monkeypatch.setattr(pilot, "_discovery_running", lambda job: running["now"])
     for _ in range(5):  # five ticks while the discovery runs
         assert pilot.fresh_topics(run["spec"], ap.get_run(run["id"])) is False
-    assert len(starts) == 1
+    assert starts == ["monitoring/ai_flash_discovery"]  # by its path, the name the Jobs page uses too
     # the app restarted: the job is gone and no report appeared — one more start is allowed, then the batch goes on
     running["now"] = False
     assert pilot.fresh_topics(run["spec"], ap.get_run(run["id"])) is False and len(starts) == 2
@@ -503,8 +501,7 @@ def test_coverage_counts_written_per_cell_not_per_topic(video_env, monkeypatch):
     out = video_env / "output"
     (out / "flash").mkdir(parents=True)
     store.create_script("flash", {"id": "2026-10-19/F1", "title": "单条", "fields": {}})
-    from core.video import flash as video_flash
-    monkeypatch.setattr(video_flash, "load", lambda d, date=None: ("2026-10-19", [type("T", (), {"id": "2026-10-19/F1"})(), type("T", (), {"id": "2026-10-19/F2"})()]))
+    monkeypatch.setattr(pilot.topic_store, "load", lambda source, date=None: ("2026-10-19", [type("T", (), {"id": "2026-10-19/F1"})(), type("T", (), {"id": "2026-10-19/F2"})()]))
     rows = {r["cell"]: r for r in pilot.coverage()}
     assert (rows["flash"]["written"], rows["flash"]["open"]) == (1, 1)
     assert (rows["point_short"]["written"], rows["point_short"]["open"]) == (0, 2)  # same news, another cell
@@ -521,7 +518,7 @@ def test_a_dismissed_topic_leaves_the_counts_and_the_picks_and_comes_back(video_
     _matrix_only(video_env)
     topics = [type("T", (), {"id": f"2026-10-19/F{i}", "score": 9 - i, "stale": lambda self: False,
                              "as_dict": lambda self: {"id": self.id}})() for i in (1, 2, 3)]
-    monkeypatch.setattr(pilot.video_flash, "load", lambda d, date=None: ("2026-10-19", topics))
+    monkeypatch.setattr(pilot.topic_store, "load", lambda source, date=None: ("2026-10-19", topics))
     store.set_dismissed("2026-10-19/F1", True)
     row = {r["cell"]: r for r in pilot.coverage()}["flash"]
     assert (row["open"], row["dismissed"]) == (2, 1)
@@ -536,7 +533,7 @@ def test_stale_news_ranks_after_fresher_news_but_is_still_picked(video_env, monk
     mk = lambda i, score, stale: type("T", (), {"id": f"2026-10-19/F{i}", "score": score, "stale": lambda self: stale,
                                                 "as_dict": lambda self: {"id": self.id}})()
     topics = [mk(1, 9, True), mk(2, 7, False), mk(3, 8, False)]
-    monkeypatch.setattr(pilot.video_flash, "load", lambda d, date=None: ("2026-10-19", topics))
+    monkeypatch.setattr(pilot.topic_store, "load", lambda source, date=None: ("2026-10-19", topics))
     ids = [i["topic"]["id"] for i in pilot.pick_topics({"picks": [{"cell": "flash", "count": 3}]})]
     assert ids == ["2026-10-19/F3", "2026-10-19/F2", "2026-10-19/F1"]
 
@@ -562,8 +559,8 @@ def test_api_discovery_starts_once_and_refuses_while_running(client, video_env, 
 
     running = {"now": False}
     starts: list[int] = []
-    monkeypatch.setattr(pilot, "_discovery_running", lambda: running["now"])
-    monkeypatch.setattr(pilot, "_start_discovery", lambda: (starts.append(1), running.update(now=True)))
+    monkeypatch.setattr(pilot, "_discovery_running", lambda job: running["now"])
+    monkeypatch.setattr(pilot, "_start_discovery", lambda job: (starts.append(job), running.update(now=True)))
     _login(client)
     first = client.post("/api/video/topics/discovery", headers=_csrf(client))
     second = client.post("/api/video/topics/discovery", headers=_csrf(client))  # a double click

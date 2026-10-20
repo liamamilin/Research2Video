@@ -208,8 +208,9 @@ def _pair(key: str, field: str, raw, default: tuple[int, int]) -> tuple[int, int
     return low, high
 
 
-#: where topics can come from: flash = the flash-news discovery reports, opportunities = the intelligence rounds
-TOPIC_SOURCES = ("flash", "opportunities")
+#: a topic source is any job that declares ``topics:`` (by its alias or path), or ``manual``; whether one exists is
+#: checked against the jobs folder where it is used (core/video/topic_store.py), not here
+_SOURCE_NAME = re.compile(r"[^\s{}\[\],]+")
 
 
 def _names(key: str, name: str, raw, allowed: tuple[str, ...] = ()) -> tuple[str, ...]:
@@ -222,6 +223,14 @@ def _names(key: str, name: str, raw, allowed: tuple[str, ...] = ()) -> tuple[str
     if unknown:
         raise ColumnError(f"栏目 {key} 的 {name} 只能取 {', '.join(allowed)}，不认识：{', '.join(unknown)}")
     return tuple(x.strip() for x in raw)
+
+
+def _source_names(key: str, raw) -> tuple[str, ...]:
+    names = _names(key, "topic.sources", raw)
+    bad = [n for n in names if not _SOURCE_NAME.fullmatch(n)]
+    if bad:
+        raise ColumnError(f"栏目 {key} 的 topic.sources 写的应是 Job 的 topics.alias 或 Job 路径，不认识：{', '.join(bad)}")
+    return names
 
 
 def build(key: str, raw: dict) -> Column:
@@ -309,7 +318,7 @@ def build(key: str, raw: dict) -> Column:
         recheck=_flag(key, "recheck", raw.get("recheck")),
         research_mode=research_mode,
         research_language=str(raw.get("research_language") or "zh"),
-        topic_sources=_names(key, "topic.sources", raw.get("topic_sources"), TOPIC_SOURCES),
+        topic_sources=_source_names(key, raw.get("topic_sources")),
         topic_fields=tuple(f.strip() for f in topic_fields),
         audit_model=audit_model,
         audit_style_severity=severity,

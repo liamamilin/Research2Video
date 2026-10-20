@@ -183,8 +183,9 @@ def init_db() -> None:
             conn.execute("ALTER TABLE scripts ADD COLUMN stage TEXT")
         if "archived" not in columns:
             conn.execute("ALTER TABLE scripts ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
-        from core.video import autopilot_store
+        from core.video import autopilot_store, topic_store
         autopilot_store.init(conn)
+        topic_store.init(conn)
 
 
 def _decode(row: sqlite3.Row | None, json_fields: tuple[str, ...]) -> dict | None:

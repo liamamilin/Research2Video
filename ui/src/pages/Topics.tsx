@@ -3,14 +3,61 @@ import { Link } from "react-router-dom";
 import { FilterBar, matchesText, useFilters, type Facet } from "@/components/FilterBar";
 import { TimeStamp } from "@/components/TimeStamp";
 import {
-  dismissTopic, getDiscovery, listCellCoverage, listVideoCells, listVideoTopics, startDiscovery,
-  type CellCoverage, type DiscoveryStatus, type VideoCell, type VideoTopic,
+  addVideoTopic, dismissTopic, getDiscovery, listCellCoverage, listTopicSources, listVideoCells, listVideoTopics, startDiscovery,
+  type CellCoverage, type DiscoveryStatus, type TopicSource, type VideoCell, type VideoTopic,
 } from "@/api/video";
 import { useAuthStore } from "@/lib/auth-store";
 
-type Source = "flash" | "opportunities";
+const MANUAL = "manual";
 
-const SOURCE_LABEL: Record<Source, string> = { flash: "快讯条目", opportunities: "内容机会" };
+/** 手动添加一个选题：进选题池，和 Job 产出的选题一样可以写稿、被自动流水线挑（配方的 topic.sources 写了 manual 时）。 */
+function AddTopicForm({ onAdded }: { onAdded: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [angle, setAngle] = useState("");
+  const [audience, setAudience] = useState("");
+  const [error, setError] = useState("");
+  if (!open) {
+    return (
+      <button className="btn text-xs" onClick={() => setOpen(true)}>
+        手动添加选题
+      </button>
+    );
+  }
+  return (
+    <form
+      className="card space-y-2 w-full"
+      aria-label="手动添加选题"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        try {
+          await addVideoTopic({ title, angle, audience });
+          setTitle("");
+          setAngle("");
+          setAudience("");
+          setOpen(false);
+          setError("");
+          onAdded();
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "没加上");
+        }
+      }}
+    >
+      <input className="input w-full text-sm" placeholder="标题（至少 4 个字）" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <input className="input w-full text-sm" placeholder="核心角度（可空）" value={angle} onChange={(e) => setAngle(e.target.value)} />
+      <input className="input w-full text-sm" placeholder="目标受众（可空）" value={audience} onChange={(e) => setAudience(e.target.value)} />
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
+      <div className="flex gap-2">
+        <button className="btn btn-primary text-xs" type="submit" disabled={title.trim().length < 4}>
+          添加
+        </button>
+        <button className="btn text-xs" type="button" onClick={() => setOpen(false)}>
+          取消
+        </button>
+      </div>
+    </form>
+  );
+}
 
 /** The content matrix as a grid: a row per type, a column per audience; a click picks the cell. */
 function MatrixGrid({ cells, coverage, current, onPick }: { cells: VideoCell[]; coverage: CellCoverage[]; current?: string; onPick: (key: string) => void }) {
@@ -71,6 +118,8 @@ export function TopicsPage() {
   const [rounds, setRounds] = useState<string[]>([]);
   const [chosenRound, setChosenRound] = useState("");
   const [discovery, setDiscovery] = useState<DiscoveryStatus | null>(null);
+  const [sources, setSources] = useState<TopicSource[]>([]);
+  const [chosenSource, setChosenSource] = useState<string | null>(null);
   const [checked, setChecked] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [tick, setTick] = useState(0);
@@ -82,22 +131,31 @@ export function TopicsPage() {
   }, []);
   useEffect(() => {
     listCellCoverage().then(setCoverage).catch(() => undefined);
-  }, [tick]);
-  useEffect(() => {
-    getDiscovery().then(setDiscovery).catch(() => undefined);
-    const timer = window.setInterval(() => getDiscovery().then(setDiscovery).catch(() => undefined), 15000);
-    return () => window.clearInterval(timer);
+    listTopicSources().then(setSources).catch(() => undefined);
   }, [tick]);
 
   const current =
     coverage.find((c) => c.cell === selected) ?? coverage.find((c) => c.cell === "flash") ?? coverage.find((c) => c.sources.length) ?? coverage[0];
-  const source = (current?.sources[0] ?? "flash") as Source;
-  const noSource = Boolean(current && !current.sources.length);
+  // the cell's own sources, then the topics added by hand (any single-topic cell can be written from those)
+  // (a roundup is put together from a report's items, a comparison from two subjects typed on the scripts page)
+  const tabs = [...(current?.sources ?? []), ...(current?.sources.includes(MANUAL) || !current?.autopilot ? [] : [MANUAL])];
+  const source = chosenSource && tabs.includes(chosenSource) ? chosenSource : tabs[0] ?? "";
+  const sourceInfo = sources.find((s) => s.name === source);
+  const sourceLabel = (name: string) => sources.find((s) => s.name === name)?.label ?? name;
+
+  useEffect(() => {
+    setDiscovery(null);
+    if (!sourceInfo?.refresh) return;
+    const load = () => getDiscovery(source).then(setDiscovery).catch(() => undefined);
+    load();
+    const timer = window.setInterval(load, 15000);
+    return () => window.clearInterval(timer);
+  }, [source, sourceInfo?.refresh, tick]);
 
   useEffect(() => {
     let alive = true;
     setTopics(null);
-    if (noSource) {
+    if (!source) {
       setRound(null);
       setTopics([]);
       return;
@@ -108,7 +166,7 @@ export function TopicsPage() {
     return () => {
       alive = false;
     };
-  }, [source, noSource, chosenRound, tick]);
+  }, [source, chosenRound, tick]);
   useEffect(() => {
     setChosenRound("");
     setChecked([]);
@@ -122,7 +180,9 @@ export function TopicsPage() {
   const audienceOf = (key?: string) => cells.find((c) => c.key === key)?.parts?.audience.key;
   const typeName = (key: string) => cells.find((c) => c.key === key)?.parts?.type.name ?? key;
   // the cells this topic fits: the same audience as the picked cell, and a topic source of the same kind
-  const fits = coverage.filter((c) => c.sources.includes(source) && audienceOf(c.cell) === audienceOf(current?.cell));
+  const fits = coverage.filter(
+    (c) => (source === MANUAL ? c.autopilot : c.sources.includes(source)) && audienceOf(c.cell) === audienceOf(current?.cell),
+  );
   const todo = (topics ?? []).filter((t) => !doneHere(t) && !t.dismissed).length;
   const multi = Boolean(current?.multi);
   const shown = (topics ?? []).filter(
@@ -146,16 +206,32 @@ export function TopicsPage() {
         <h1 className="text-lg font-semibold flex-1">选题</h1>
       </div>
       <MatrixGrid cells={cells} coverage={coverage} current={current?.cell} onPick={setSelected} />
-      {current && !current.sources.length ? (
-        <p className="text-sm text-text-muted">
-          这个格子还没有选题来源，只能手选：去 <Link className="text-accent hover:underline" to={`/video?cell=${encodeURIComponent(cell?.id ?? current.cell)}`}>文稿页</Link> 选条目或填标题。
+      {current?.unknown_sources?.length ? (
+        <p className="text-sm text-danger">
+          这个格子的配方写了没有 Job 声明的选题来源：{current.unknown_sources.join("、")}。到 <Link className="text-accent hover:underline" to="/video-recipes">文稿配方</Link> 改，或在 Job 的 YAML 里写 topics:。
         </p>
       ) : null}
+      {current && !tabs.length ? (
+        <p className="text-sm text-text-muted">
+          这个格子还没有选题来源，要手填：去 <Link className="text-accent hover:underline" to={`/video?cell=${encodeURIComponent(cell?.id ?? current.cell)}`}>文稿页</Link> 填两个对象和对比维度。
+        </p>
+      ) : null}
+      <div className="flex flex-wrap items-center gap-2" aria-label="选题来源">
+        {tabs.map((name) => (
+          <button key={name} aria-pressed={name === source} className={`${name === source ? "btn btn-primary" : "btn"} text-xs`} onClick={() => setChosenSource(name)}>
+            {name === MANUAL ? "手动添加" : sourceLabel(name)}
+          </button>
+        ))}
+        {canEdit ? <AddTopicForm onAdded={() => (setChosenSource(MANUAL), setTick((n) => n + 1))} /> : null}
+      </div>
+      {sourceInfo?.error || sourceInfo?.report_error ? (
+        <p className="text-sm text-danger">选题来源「{sourceInfo.label}」：{sourceInfo.error || `最新一期 ${sourceInfo.latest ?? ""} ${sourceInfo.report_error}`}</p>
+      ) : null}
       <div className="flex flex-wrap items-center gap-3 text-xs text-text-muted">
-        <span>
-          {source === "flash" ? "来自快讯发现报告" : "来自情报轮次推荐的视频选题（P7）"}
+        <span hidden={!source}>
+          {source === MANUAL ? "手动添加的选题" : `来自「${sourceLabel(source)}」`}
           {round ? ` ${round}` : ""}，这个格子还有 {todo} 条没写。
-          {source === "flash" && !multi ? "想把几条快讯合成一期，点上面的「盘点」格子。" : ""}
+          {multi ? "" : current?.sources.includes(source) && sources.some((s) => s.name === source && s.format === "flash") ? "想把几条合成一期，点上面的「盘点」格子。" : ""}
         </span>
         {rounds.length > 1 ? (
           <select aria-label="报告日期" className="input w-auto text-xs" value={chosenRound || rounds[0]} onChange={(e) => setChosenRound(e.target.value === rounds[0] ? "" : e.target.value)}>
@@ -164,7 +240,7 @@ export function TopicsPage() {
             ))}
           </select>
         ) : null}
-        {source === "flash" && discovery ? (
+        {discovery ? (
           <span className="flex items-center gap-2">
             上次发现 {discovery.report_date ?? "—"}
             {discovery.report_at ? <TimeStamp value={new Date(discovery.report_at * 1000).toISOString()} /> : null}
@@ -172,11 +248,12 @@ export function TopicsPage() {
               <button
                 className="btn text-xs"
                 disabled={discovery.running}
-                title={discovery.running ? "正在跑，跑完再点" : `约 ${discovery.searches} 次搜索`}
+                title={discovery.running ? "正在跑，跑完再点" : discovery.searches != null ? `上次用了 ${discovery.searches} 次搜索` : "要花搜索额度"}
                 onClick={async () => {
-                  if (!window.confirm(`生成今天的快讯选题，约 ${discovery.searches} 次搜索，通常 20 分钟左右。继续？`)) return;
+                  const cost = discovery.searches != null ? `上次用了 ${discovery.searches} 次搜索` : "要花搜索额度";
+                  if (!window.confirm(`现在跑「${discovery.label}」生成选题，${cost}。继续？`)) return;
                   try {
-                    setDiscovery(await startDiscovery());
+                    setDiscovery(await startDiscovery(source));
                     setNote("已开始，跑完后刷新这一页");
                   } catch (e) {
                     setNote(e instanceof Error ? e.message : "没有开始");
@@ -188,9 +265,9 @@ export function TopicsPage() {
             ) : null}
           </span>
         ) : null}
-        {source === "opportunities" ? (
+        {sourceInfo?.job && !sourceInfo.refresh ? (
           <span>
-            新选题来自情报轮次第 07 步：到 <Link className="text-accent hover:underline" to="/rounds">情报轮次</Link> 跑一轮就会更新。
+            新选题来自 Job <Link className="text-accent hover:underline" to={`/jobs/${encodeURIComponent(sourceInfo.job)}`}>{sourceInfo.job}</Link>：它跑出新报告，这里就会更新。
           </span>
         ) : null}
         {note ? <span className="text-warning">{note}</span> : null}
@@ -199,7 +276,7 @@ export function TopicsPage() {
       {topics && topics.length ? <FilterBar facets={facets} filters={filters} shown={shown.length} total={topics.length} placeholder="搜索选题" /> : null}
       {topics && topics.length === 0 ? (
         <p className="text-sm text-text-muted">
-          {!current?.sources.length ? "" : source === "flash" ? "还没有快讯发现报告。" : "还没有内容机会报告。跑一轮情报流水线后，这里会列出推荐的选题。"}
+          {!source ? "" : source === MANUAL ? "还没有手动添加的选题。" : `「${sourceLabel(source)}」还没有能读出选题的报告。`}
         </p>
       ) : null}
       {multi && cell ? (
@@ -235,7 +312,7 @@ export function TopicsPage() {
               <p className="text-xs text-text-muted flex flex-wrap gap-x-3">
                 {t.fields["发布日期"] ? <span>事件日期 {t.fields["发布日期"]}</span> : null}
                 {t.stale ? <span className="badge border border-warning text-warning" title="事件已超过 5 天；自动流水线排在新一点的后面">偏旧</span> : null}
-                <span>{source === "flash" ? "发现报告" : "情报轮次"} {t.round}</span>
+                {t.round ? <span>{sourceLabel(source)} {t.round}</span> : null}
                 {t.score != null ? <span>评分 {t.score}</span> : null}
                 {(t.scripts ?? []).map((s) => (
                   <span key={s.id}>

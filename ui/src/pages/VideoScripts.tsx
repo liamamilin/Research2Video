@@ -128,8 +128,8 @@ export function VideoScriptsPage() {
   const cell = cells.find((c) => c.id === cellId);
   const column = cell?.column ?? null;
   const kind = column?.topic_kind ?? "single";
-  // 选题来源由配方的 topic.sources 决定；盘点总是从发现报告（F<n>）里选条目
-  const source: "flash" | "opportunities" = kind === "roundup" || cell?.topic_sources?.[0] === "flash" ? "flash" : "opportunities";
+  // 选题来源由配方的 topic.sources 决定（第一个）；从选题页带来的手动选题、或配方没写来源时，列手动添加的选题
+  const source = highlight?.startsWith("manual/") || !cell?.topic_sources?.length ? "manual" : cell.topic_sources[0];
   const forms = column?.allowed_forms ?? [];
 
   // 换了格子：回到它默认的视频形式，清掉已选条目，按它的选题来源重新取选题

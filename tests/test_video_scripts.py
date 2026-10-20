@@ -124,12 +124,24 @@ def llm(monkeypatch):
     return FakeLLM
 
 
+#: the jobs that declare ``topics:`` (core/video/topic_store.py), copied as shipped
+TOPIC_SOURCE_JOBS = ("monitoring/ai_flash_discovery.yaml", "practical_ai_intelligence/07_product_content_opportunities.yaml")
+
+
+def install_topic_sources(jobs_dir: Path) -> None:
+    shipped = Path(__file__).resolve().parents[1] / "jobs"
+    for rel in TOPIC_SOURCE_JOBS:
+        (jobs_dir / rel).parent.mkdir(parents=True, exist_ok=True)
+        (jobs_dir / rel).write_text((shipped / rel).read_text(encoding="utf-8"), encoding="utf-8")
+
+
 @pytest.fixture
 def video_env(web_env, monkeypatch):
     tmp, users = web_env
     (tmp / "config").mkdir(exist_ok=True)
     # These tests drive the one-call writer; the default column is `adapt`, which test_video_adapt.py covers.
     golden.install_recipes(tmp / "config", replace=(("  pipeline: adapt\n", "  pipeline: single\n"),))
+    install_topic_sources(tmp / "jobs")
     store.use_state_dir(str(tmp / "state"))
     store.init_db()
     from core import report_meta

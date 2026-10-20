@@ -119,8 +119,8 @@ def test_the_batch_sees_a_discovery_started_from_the_jobs_page(jobs, monkeypatch
     registry = TaskRegistry()
     monkeypatch.setattr(registry, "is_running", lambda name: name == "monitoring/ai_flash_discovery")
     monkeypatch.setattr(TaskRegistry, "__new__", lambda cls, *a, **k: registry)
-    assert pilot._discovery_names() == {"ai_flash_discovery", "monitoring/ai_flash_discovery"}
-    assert pilot._discovery_running()
+    assert pilot._job_names("monitoring/ai_flash_discovery") == {"ai_flash_discovery", "monitoring/ai_flash_discovery"}
+    assert pilot._discovery_running("monitoring/ai_flash_discovery")
 
 
 def test_api_list_and_acknowledge(client, jobs):
