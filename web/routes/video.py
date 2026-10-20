@@ -15,12 +15,13 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from core.video import columns as video_columns
 from core.video import credibility, store
+from core.video import steps as video_steps
 from core.video import topics as video_topics
 from core.video.adapt import styles as video_styles
 from web import audit
 from web.deps import require_editor, require_viewer
 from web.models import ApiError
-from web.services import video_render, video_workflow
+from web.services import video_executor, video_render, video_workflow
 from web.settings import get_settings
 
 router = APIRouter(prefix="/api/video", tags=["video"])
@@ -423,7 +424,7 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
     if chosen.research_mode == "none" and not topic.get("from_report"):
         raise HTTPException(422, detail=ApiError.make(
             "report_required", "这个配方不做调研（research.mode: none）：要从已有文稿切（from_script）或选发现报告里的条目"))
-    script = video_workflow.start(body.column, topic, started_by=user["username"])
+    script = video_executor.create(body.column, topic, user["username"])
     audit.log("video_script_create", user=user["username"], target=script["id"], result="started",
               ip=request.client.host if request.client else None)
     return _script_summary(script)
@@ -474,7 +475,23 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         "renders": [_render_out(r) for r in store.list_renders(script_id)],
         "publications": store.list_publications(script_id),
         "rechecks": store.list_rechecks(script_id)[:5],
+        # research → write → audit → approve → render, read off the records above; and who started what
+        "steps": video_executor.steps_of(script),
+        "events": video_steps.events(script_id),
     }
+
+
+@router.post("/scripts/{script_id}/steps/{step}/rerun", status_code=202)
+def rerun_step(script_id: str, step: str, user=Depends(require_editor)) -> dict:
+    """Run one step again (spec/video-steps.md): resume a failed research, rewrite from the same report, rerun the
+    audit, or render the approved version. A finished research is never redone here (it costs searches)."""
+    _script_or_404(script_id)
+    try:
+        video_executor.rerun(script_id, step, user["username"])
+    except video_executor.StepError as exc:
+        raise HTTPException(409, detail=ApiError.make("step_not_runnable", str(exc))) from exc
+    audit.log("video_step_rerun", user=user["username"], target=script_id, result=step)
+    return get_script(script_id, user=user)
 
 
 class ParagraphIn(BaseModel):
@@ -668,7 +685,7 @@ def approve_script(script_id: str, body: Optional[ApproveIn] = None, user=Depend
     version = (body.version if body else None) or script["current_version"]
     if store.get_version(script_id, version) is None:
         raise _not_found("这个版本")
-    store.update_script(script_id, status="APPROVED", approved_version=version)
+    video_executor.approve(script_id, version, user["username"])
     audit.log("video_script_approve", user=user["username"], target=script_id, result=f"v{version}")
     return get_script(script_id, user=user)
 
@@ -686,10 +703,9 @@ def render_script(script_id: str, body: Optional[RenderIn] = None, user=Depends(
     if script["status"] != "APPROVED":
         raise HTTPException(409, detail=ApiError.make("not_approved", "请先定稿再出片"))
     try:
-        render = video_render.create(script, voice_id=body.voice_id if body else None)
-    except video_render.RenderError as exc:
+        render = video_executor.render(script_id, user["username"], voice_id=body.voice_id if body else None)
+    except video_executor.StepError as exc:
         raise HTTPException(409, detail=ApiError.make("render_not_allowed", str(exc))) from exc
-    video_render.start(render["id"])
     audit.log("video_render", user=user["username"], target=script_id, result=render["id"])
     return _render_out(render)
 

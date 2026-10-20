@@ -203,18 +203,27 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
         return "DRAFT"
 
     # 2. Write.
+    return _write(script_id, report=report, report_path=report_path, citation_check=citation_check, column=column,
+                  topic=topic, started_by=started_by, llm_config=llm_config)
+
+
+def _write(script_id: str, *, report: str, report_path: str, citation_check, column, topic: dict, started_by: str,
+           llm_config: Optional[LLMConfig], failed_status: str = "FAILED", style=None) -> str:
+    """Write a new version from ``report`` (then audit it, for a one-call script). Returns DRAFT, or
+    ``failed_status`` when writing failed (a rewrite keeps the script a DRAFT: its earlier versions still stand)."""
+    settings = get_settings()
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
     config, review_config = _llm_configs(llm_config, column)
     if column.writer == "adapt":
         try:
-            style = video_styles.resolve(settings.paths.config_dir, column)
+            style = style or video_styles.resolve(settings.paths.config_dir, column)
             _adapt_version(script_id, report=report, report_path=report_path, citation_check=citation_check,
                            column=column, topic=topic, style=style, started_by=started_by, llm_config=config,
                            review_llm_config=review_config)
         except (AdaptError, writer.ScriptError, video_styles.StyleError) as exc:
-            store.update_script(script_id, status="FAILED", stage=None, error=f"改编失败：{exc}")
-            return "FAILED"
+            store.update_script(script_id, status=failed_status, stage=None, error=f"改编失败：{exc}")
+            return failed_status
         store.update_script(script_id, status="DRAFT", stage=None, error=None)
         return "DRAFT"
     try:
@@ -230,8 +239,8 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
             topic_fields=column.writer_topic_fields(),
         )
     except writer.ScriptError as exc:
-        store.update_script(script_id, status="FAILED", error=f"写稿失败：{exc}")
-        return "FAILED"
+        store.update_script(script_id, status=failed_status, stage=None, error=f"写稿失败：{exc}")
+        return failed_status
 
     # The draft is shown at once with the rule checks; the audits then replace its checks when they are done.
     meta = {**written.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -381,6 +390,54 @@ def restyle(script_id: str, *, depth: Optional[str] = None, tone: Optional[str] 
     )
     thread.start()
     return store.get_script(script_id)
+
+
+def rewrite(script_id: str, *, started_by: str = "") -> dict:
+    """Write a new version from the script's own report, in the background — no new research (spec/video-steps.md)."""
+    script = store.get_script(script_id)
+    if script["status"] not in ("DRAFT", "APPROVED", "FAILED") or script_id in _active:
+        raise RestyleError(f"文稿当前是 {script['status']}，不能重写")
+    if not script["report_path"]:
+        raise RestyleError("这篇文稿没有研究报告，不能重写")
+    try:
+        _read_report(script["report_path"])
+    except OSError as exc:
+        raise RestyleError(f"读不到研究报告 {script['report_path']}") from exc
+    store.update_script(script_id, status="WRITING", stage="排队", error=None, heartbeat_at=time.time())
+    threading.Thread(target=run_rewrite, args=(script_id,),
+                     kwargs={"started_by": started_by, "had_draft": bool(script["current_version"])},
+                     name=f"video-rewrite-{script_id[:8]}", daemon=True).start()
+    return store.get_script(script_id)
+
+
+def run_rewrite(script_id: str, *, started_by: str = "", had_draft: bool = True,
+                llm_config: Optional[LLMConfig] = None) -> str:
+    """Rewrite from the same report in the recipe's (or the current version's) style. Returns the final status."""
+    if script_id in _active:
+        return "RUNNING"
+    _active.add(script_id)
+    failed = "DRAFT" if had_draft else "FAILED"
+    try:
+        with store.beating(store.touch_script, script_id):
+            settings = get_settings()
+            script = store.get_script(script_id)
+            column = video_columns.get(settings.paths.config_dir, script["column_key"])
+            report = _read_report(script["report_path"])
+            citation_check = (report_meta.get(script["report_path"]) or {}).get("citation_check")
+            style = None
+            if column.writer == "adapt" and script["current_version"]:
+                meta = (store.get_version(script_id, script["current_version"]) or {}).get("meta") or {}
+                style = _style_of(meta, column)  # keep the style the current version was written in
+            store.update_script(script_id, stage=None)
+            return _write(script_id, report=report, report_path=script["report_path"], citation_check=citation_check,
+                          column=column, topic=script["topic"], started_by=started_by, llm_config=llm_config,
+                          failed_status=failed, style=style)
+    except Exception as exc:  # noqa: BLE001 - the earlier versions must stay usable
+        logger.exception("rewriting video script %s failed", script_id)
+        store.update_script(script_id, status=failed, stage=None, error=f"重写失败：{type(exc).__name__}: {exc}")
+        return failed
+    finally:
+        _active.discard(script_id)
 
 
 def run_restyle(script_id: str, depth: str, tone: str, *, started_by: str = "",

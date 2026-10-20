@@ -22,6 +22,7 @@ import {
 } from "@/api/video";
 import { CredibilityBadge } from "@/components/CredibilityBadge";
 import { ReportReuse } from "@/components/ReportReuse";
+import { ScriptSteps } from "@/components/ScriptSteps";
 import { TimeStamp } from "@/components/TimeStamp";
 import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
@@ -107,6 +108,7 @@ export function VideoScriptViewPage() {
   const busyServer =
     detail != null &&
     (["RESEARCHING", "WRITING"].includes(detail.status) ||
+      Boolean(detail.stage) || // a rerun audit: DRAFT while the audits run
       (latestRender != null && RENDER_ACTIVE.includes(latestRender.status)));
   useEffect(() => {
     if (!busyServer || editing) return;
@@ -338,6 +340,8 @@ export function VideoScriptViewPage() {
           </button>
         ) : null}
       </section>
+
+      <ScriptSteps detail={detail} canEdit={canEdit} onChanged={setDetail} />
 
       {tabs.length ? (
         <div role="tablist" className="flex gap-1 border-b border-border">

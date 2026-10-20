@@ -307,7 +307,21 @@ export interface VideoScriptDetail extends VideoScriptSummary {
   renders: VideoRender[];
   publications?: Publication[];
   rechecks?: Recheck[];
+  steps?: ScriptStep[]; // 调研 → 写稿 → 审计 → 定稿 → 出片，按现有记录读出来（spec/video-steps.md）
+  events?: ScriptEvent[]; // 谁在什么时候启动 / 重跑了哪一步
 }
+
+export type StepName = "research" | "write" | "audit" | "approve" | "render";
+export interface ScriptStep {
+  step: StepName;
+  label: string;
+  state: "PENDING" | "RUNNING" | "DONE" | "FAILED" | "SKIPPED" | "WAITING" | "INCOMPLETE";
+  note: string;
+}
+export interface ScriptEvent { step: StepName; event: string; note: string; by: string; at: string }
+
+export const rerunVideoStep = (id: string, step: StepName) =>
+  api<VideoScriptDetail>(`/api/video/scripts/${encodeURIComponent(id)}/steps/${step}/rerun`, { method: "POST" });
 
 export interface AutoVideoStatus {
   base_url: string;

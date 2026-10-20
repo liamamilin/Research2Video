@@ -27,18 +27,16 @@ from typing import Optional
 from core.fileio import file_lock
 from core.video import autopilot_store as ap
 from core.video import columns as video_columns
-from core.video import credibility
 from core.video import store
 from core.video import topic_store
-from web.services import video_render, video_workflow
+from web.services import video_executor, video_render, video_workflow  # noqa: F401 - tests patch the last two here
 from web.settings import get_settings
 
 logger = logging.getLogger("ai_research.web.video_autopilot")
 
-#: A stage that fails is retried this many times, then the item is held for the user.
-MAX_RETRIES = 2
-#: A render AutoVideo failed is submitted again this many times (a render is 15-30 minutes of its time).
-RENDER_RETRIES = 1
+#: Retries of a failed stage and of a failed render: the executor's (web/services/video_executor.py).
+MAX_RETRIES = video_executor.MAX_RETRIES
+RENDER_RETRIES = video_executor.RENDER_RETRIES
 #: Scripts researching at once (each research uses search quota); renders go one at a time.
 MAX_SCRIPTS = 2
 MAX_RENDERS = 1
@@ -252,22 +250,12 @@ def _start_discovery(job: str) -> None:
             logger.info("topic source %s not started: %s", job, exc)
 
 
-# --- the label (there is no gate) ---------------------------------------------
-
-def judge(script: dict, column) -> dict:
-    """The credibility label of the current version, and what it let through. It never stops the pipeline."""
-    version = store.get_version(script["id"], script["current_version"])
-    label = credibility.label(version)
-    checks = video_workflow.rule_checks(version, column)
-    summary = checks.get("summary") or {}
-    return {"label": label["tier"], "text": label["text"], "reasons": label["reasons"],
-            "cited_share": label["cited_share"], "audited": bool(checks.get("model_ran")),
-            "ignored": {"must": max(0, int(summary.get("must", 0)) - int(summary.get("rule_must", 0))),
-                        "warn": int(summary.get("warn", 0))},
-            "version": version["version"]}
-
-
 # --- advancing one item ----------------------------------------------------
+# What a script does next is decided by the executor (web/services/video_executor.py), the same place the user's
+# buttons go through; here is only the batch's bookkeeping: its items, their retries and notes.
+
+judge = video_executor.judge
+
 
 def _retries(item: dict, key: str) -> int:
     return int((item.get("retries") or {}).get(key, 0))
@@ -291,50 +279,23 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
     if not item["script_id"]:
         if not can_start_script:
             return took
-        script = store.create_script(item["column_key"], _prepare(item), created_by="autopilot")
+        script = video_executor.create(item["column_key"], _prepare(item), "autopilot")
         ap.update_item(item["id"], script_id=script["id"], state="WORKING", note="已开始写稿")
-        video_workflow.spawn(script["id"], "autopilot")
         took["script"] = True
         return took
     script = store.get_script(item["script_id"])
     if script is None:
         _fail(item, "文稿记录丢失")
         return took
-    status = script["status"]
-    column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
-    if status in ("RESEARCHING", "WRITING"):
-        return took
-    if status == "FAILED":
-        if _retries(item, "script") >= MAX_RETRIES:
-            _hold(item, f"写稿失败 {MAX_RETRIES + 1} 次：{script.get('error')}")
-            return took
-        if not can_start_script:
-            return took
-        _bump(item, "script")
-        store.update_script(script["id"], status="RESEARCHING", error=None)
-        video_workflow.spawn(script["id"], "autopilot")
-        ap.update_item(item["id"], note="写稿失败，从断点继续")
-        took["script"] = True
-        return took
-    if status == "DRAFT":
-        if script.get("stage"):  # audits running
-            return took
-        verdict = judge(script, column)
-        if not verdict["audited"] and _retries(item, "audit") < MAX_RETRIES and can_start_script:
-            _bump(item, "audit")
-            video_workflow.spawn(script["id"], "autopilot")  # current_version set → only the audits rerun
-            ap.update_item(item["id"], note="审计没有跑完，重跑审计")
-            took["script"] = True
-            return took
-        if not verdict["audited"] and _retries(item, "audit") < MAX_RETRIES:
-            return took  # wait for a free slot to rerun the audit
-        # whatever the label, the video is made: it is shown next to the video, and the user decides what to publish
-        store.update_script(script["id"], status="APPROVED", approved_version=verdict["version"])
-        ap.update_item(item["id"], gate={**verdict, "approved": "auto"}, note=f"已自动定稿（{verdict['text']}），准备出片")
-        return took
-    if status == "APPROVED":
-        return _render_step(item, script, can_start_render, took)
-    return took
+    out = video_executor.advance_auto(script, item.get("retries") or {}, can_start_script=can_start_script,
+                                      can_start_render=can_start_render)
+    if out["bump"]:
+        _bump(item, out["bump"])
+    if out["hold"]:
+        _hold(item, out["hold"])
+    elif out["item"]:
+        ap.update_item(item["id"], **out["item"])
+    return out["took"]
 
 
 def _prepare(item: dict) -> dict:
@@ -349,35 +310,6 @@ def _prepare(item: dict) -> dict:
 def _fail(item: dict, note: str) -> dict:
     ap.update_item(item["id"], state="FAILED", note=note)
     return item
-
-
-def _render_step(item: dict, script: dict, can_start_render: bool, took: dict) -> dict:
-    renders = store.list_renders(script["id"])
-    current = [r for r in renders if r["version"] == script["approved_version"]]
-    active = [r for r in current if r["status"] in store.ACTIVE_RENDER_STATUSES]
-    done = [r for r in current if r["status"] == "COMPLETED"]
-    if done:
-        ap.update_item(item["id"], state="DONE", render_id=done[0]["id"], note="成片完成，等你看片和发布")
-        return took
-    if active:
-        ap.update_item(item["id"], render_id=active[0]["id"], note=f"出片中（{active[0]['status']}）")
-        video_render.start(active[0]["id"])  # no-op when this process already follows it
-        return took
-    failed = [r for r in current if r["status"] in ("FAILED", "CANCELLED")]
-    if len(failed) > RENDER_RETRIES:
-        _hold(item, f"出片失败 {len(failed)} 次：{failed[0].get('error_message')}")
-        return took
-    if not can_start_render:
-        return took
-    try:
-        render = video_render.create(script)
-    except video_render.RenderError as exc:
-        _hold(item, f"不能出片：{exc}")
-        return took
-    video_render.start(render["id"])
-    ap.update_item(item["id"], render_id=render["id"], note="已提交出片")
-    took["render"] = True
-    return took
 
 
 # --- the tick --------------------------------------------------------------
