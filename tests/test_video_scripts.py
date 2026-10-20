@@ -1331,3 +1331,11 @@ def test_a_crash_after_the_draft_was_saved_keeps_the_draft(video_env, research, 
     assert video_workflow.run(script["id"], started_by="editor", llm_config=object()) == "DRAFT"
     after = store.get_script(script["id"])
     assert after["current_version"] == 1 and after["status"] == "DRAFT" and "boom" in after["error"]
+
+
+def test_a_cover_headline_is_not_cut_inside_a_model_name():
+    from core.video import publish
+
+    column = type("C", (), {"package": {}, "name": "快讯"})()
+    assert publish.cover_text("OpenAI 弃用 GPT-4o 与 GPT-4.1 系列，2027年1月14日 API 下线", column)["headline"] == "OpenAI 弃用"
+    assert publish.cover_text("短标题", column)["headline"] == "短标题"

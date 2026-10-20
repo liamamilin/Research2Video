@@ -95,10 +95,17 @@ def tags(title: str, column, topic_title: str = "") -> list[str]:
     return out[:TAGS_MAX]
 
 
+_WORD_CHAR = re.compile(r"[A-Za-z0-9.\-_/]")
+
+
 def cover_text(title: str, column) -> dict:
     """A short headline for the cover picture and the badge the column puts on its videos."""
     headline = re.split(r"[：:，,]", title)[0].strip() if len(title) > 14 else title
-    headline = headline[:14]
+    if len(headline) > 14:
+        cut = 14
+        while cut > 0 and _WORD_CHAR.match(headline[cut - 1]) and _WORD_CHAR.match(headline[cut]):
+            cut -= 1  # never cut a model name or a number in half (GPT-4o)
+        headline = headline[:cut].strip() or headline[:14]
     return {"headline": headline, "badge": (column.package or {}).get("badge") or column.name}
 
 
