@@ -313,6 +313,29 @@ def get_research_report(report_id: str, user=Depends(require_viewer)) -> dict:
     return {**report, "on_disk": reports.exists_on_disk(report, video_workflow.workspace_dir())}
 
 
+class ReportRecordIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str = Field(min_length=1, max_length=500, description="A Markdown report under output/, as the Reports page lists it")
+
+
+@router.post("/reports")
+def record_research_report(body: ReportRecordIn, user=Depends(require_editor)) -> dict:
+    """Record any engine report (once) so a video can be written straight from it, with its title as the topic."""
+    from core import report_meta
+    from core.video import reports
+    from web.routes.reports import resolve_output_file
+
+    full = resolve_output_file(body.path, allowed_exts=(".md",))
+    workspace = video_workflow.workspace_dir()
+    relative = os.path.relpath(full, os.path.realpath(workspace)).replace(os.sep, "/")
+    if relative.startswith("../"):
+        raise HTTPException(422, detail=ApiError.make("invalid_path", "这份报告不在工作区里，不能写成视频"))
+    meta = report_meta.get(relative) or {}
+    report = reports.record_file(relative, job=str(meta.get("job") or ""), created_by=user["username"])
+    return {**report, "on_disk": True, "title": reports.title_of(full)}
+
+
 # --- Scripts -----------------------------------------------------------------
 
 
@@ -380,6 +403,7 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
         raise HTTPException(422, detail=ApiError.make(
             "form_not_allowed", f"这个栏目只能用这些视频形式：{', '.join(chosen.allowed_forms or (chosen.video_form,))}"))
     report = None
+    report_topic = None
     if body.report_id is not None:
         from core.video import reports
 
@@ -388,15 +412,23 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
         report = reports.get(body.report_id)
         if report is None or not reports.exists_on_disk(report, video_workflow.workspace_dir()):
             raise HTTPException(422, detail=ApiError.make("unknown_report", "找不到这份研究报告，或报告文件已不在"))
-        if body.topic_id is None and body.topic is None and not body.topic_ids and chosen.topic_kind == "single":
-            if not report["topic_id"]:
-                raise HTTPException(422, detail=ApiError.make("topic_required", "这份报告不是为某个选题调研的，请选一个选题"))
-            body = body.model_copy(update={"topic_id": report["topic_id"]})
+        if body.topic_id is None and not body.topic_ids and chosen.topic_kind == "single":
+            if body.topic is None and report["topic_id"]:
+                body = body.model_copy(update={"topic_id": report["topic_id"]})
+            elif body.topic is None or not (body.topic.subjects or body.topic.dimensions):
+                # not researched for a topic, or a title typed for it: the report itself is the subject, no pool row
+                typed = body.topic or TopicIn()
+                report_topic = reports.topic_for(report, video_workflow.workspace_dir(),
+                                                 typed.title, typed.angle, typed.audience)
+                if len(report_topic["title"]) < 4:
+                    raise HTTPException(422, detail=ApiError.make("topic_required", "选题标题至少 4 个字"))
     kind = chosen.topic_kind
     if kind == "roundup":
         topic = _roundup_topic(body)
     elif kind == "comparison":
         topic = _comparison_topic(body)
+    elif report_topic is not None:
+        topic = report_topic
     else:
         if body.topic_ids or (body.topic is not None and (body.topic.subjects or body.topic.dimensions)):
             raise HTTPException(422, detail=ApiError.make("topic_not_for_column", "这个栏目的选题不用条目列表或对比对象"))

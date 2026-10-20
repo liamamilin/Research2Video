@@ -22,7 +22,8 @@ export function ReportReuse({ scriptId, reportId, canEdit }: { scriptId: string;
   const others = report.scripts.filter((s) => s.id !== scriptId);
   // 只有一条选题的配方能直接沿用报告的选题；盘点、对比要另选条目
   const choices = cells.filter((c) => c.usable && c.key && c.column?.topic_kind === "single");
-  const canWrite = canEdit && report.on_disk && Boolean(report.topic_id);
+  // 不是为某个选题调研的报告，用报告标题当题目；选题来源报告（快讯发现）要去选题页挑条目
+  const canWrite = canEdit && report.on_disk && (Boolean(report.topic_id) || report.kind !== "topic_source");
 
   const write = async () => {
     setBusy(true);
@@ -72,7 +73,9 @@ export function ReportReuse({ scriptId, reportId, canEdit }: { scriptId: string;
           <button className="btn" disabled={busy || !column} onClick={write}>
             用这份研究再写一篇
           </button>
-          <span className="text-text-muted">不再调研，选题沿用「{report.topic_title}」</span>
+          <span className="text-text-muted">
+            {report.topic_id ? `不再调研，选题沿用「${report.topic_title}」` : "不再调研，题目用报告标题"}
+          </span>
         </div>
       ) : null}
     </section>

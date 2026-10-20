@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { ArrowLeft, Download, Copy, List, Star, Tag, Share2, Mail, FileCode } from "lucide-react";
 import { cn, formatTokens } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth-store";
+import { ReportToVideo } from "@/components/ReportToVideo";
 import { errorMessage, useToast } from "@/lib/toast";
 
 interface Heading {
@@ -294,6 +295,12 @@ export function ReportViewPage() {
           下载
         </button>
       </div>
+
+      {canEdit && path.endsWith(".md") && (
+        <div className="flex">
+          <ReportToVideo path={path} />
+        </div>
+      )}
 
       {notice && (
         <div className="text-xs text-text-muted bg-bg-card border border-border rounded-md px-3 py-1.5">

@@ -92,6 +92,42 @@ def attach(script_id: str, report_path: str, *, job: str = "", topic: Optional[d
     return report_id
 
 
+def record_file(report_path: str, *, job: str = "", created_by: str = "") -> dict:
+    """Record any report file (``output/…``, relative to the workspace) so a script can be written from it.
+
+    Recording a file that is already recorded returns its row unchanged."""
+    with store.connect(write=True) as conn:
+        report_id = _record(conn, report_path, job=job, created_by=created_by)
+    return get(report_id)
+
+
+def title_of(full_path: str) -> str:
+    """The report's first level-1 heading, else its file name: the title a video written from it starts with."""
+    try:
+        with open(full_path, encoding="utf-8") as f:
+            for _ in range(60):
+                line = f.readline()
+                if not line:
+                    break
+                if line.startswith("# "):
+                    title = line[2:].strip().strip("#").strip()
+                    if title:
+                        return title
+    except OSError:
+        pass
+    return os.path.splitext(os.path.basename(full_path))[0]
+
+
+def topic_for(report: dict, workspace: str, title: str = "", angle: str = "", audience: str = "") -> dict:
+    """The topic of a video written from a report that was not researched for one: the report is the whole subject.
+
+    Nothing goes into the topic pool (spec/product-redesign.md: a topic is no longer a required step)."""
+    path = report["report_path"]
+    fields = {key: value for key, value in (("核心角度", angle.strip()), ("目标受众", audience.strip())) if value}
+    return {"id": None, "title": title.strip() or title_of(path if os.path.isabs(path) else os.path.join(workspace, path)),
+            "fields": fields}
+
+
 def _scripts(conn, report_id: str) -> list[dict]:
     import json
 

@@ -88,3 +88,68 @@ def test_scripts_from_before_are_recorded_once_per_report_file(video_env):
     with store.connect() as conn:
         assert conn.execute("SELECT count(*) FROM scripts WHERE report_path = '' AND report_id IS NOT NULL").fetchone()[0] == 0
     json.dumps(reports.list_reports())  # serialisable as the API returns it
+
+
+WEEKLY_REPORT = """# 医疗健康一周快讯（2026-10-14 至 2026-10-20）
+
+## 1. 条目
+
+### 1.1 某新药获批上市
+- **一句话**：示例
+"""
+
+
+def _topic_rows() -> int:
+    with store.connect() as conn:
+        return conn.execute("SELECT count(*) FROM topics").fetchone()[0]
+
+
+def test_api_any_engine_report_is_written_into_a_video_without_a_topic(client, video_env, research, llm, autovideo):
+    """Product redesign phase 1: a report from any Job becomes a video directly; nothing goes into the topic pool."""
+    base = video_env / "output" / "monitoring"
+    base.mkdir(parents=True, exist_ok=True)
+    (base / "2026-10-20_medical.md").write_text(WEEKLY_REPORT, encoding="utf-8")
+    budget = length.budget_for(video_columns.get(str(ROOT / "config"), "point_short").target_minutes, "voxcpm_anchor")
+    llm.replies = [script_json(budget - 5, citations={(0, 0): [GOOD]}) for _ in range(2)]
+    _login(client)
+
+    recorded = client.post("/api/video/reports", json={"path": "monitoring/2026-10-20_medical.md"}, headers=_csrf(client))
+    assert recorded.status_code == 200, recorded.text
+    report = recorded.json()
+    assert report["report_path"] == "output/monitoring/2026-10-20_medical.md" and report["kind"] == "other"
+    assert report["title"] == "医疗健康一周快讯（2026-10-14 至 2026-10-20）" and report["topic_id"] == ""
+    again = client.post("/api/video/reports", json={"path": "monitoring/2026-10-20_medical.md"}, headers=_csrf(client))
+    assert again.json()["id"] == report["id"]  # recorded once
+
+    pool = _topic_rows()
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={"column": "point_short", "report_id": report["id"]})
+    assert made.status_code == 202, made.text
+    script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    assert script["status"] == "DRAFT", script.get("error")
+    assert script["topic"]["id"] is None and script["topic"]["title"] == report["title"]
+    assert script["report_id"] == report["id"] and script["report_path"] == report["report_path"]
+
+    typed = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "point_short", "report_id": report["id"], "topic": {"title": "新药审批这周变了什么", "audience": "普通读者"}})
+    assert typed.status_code == 202, typed.text
+    second = _wait(client, typed.json()["id"], {"DRAFT", "FAILED"})
+    assert second["topic"]["title"] == "新药审批这周变了什么" and second["topic"]["fields"] == {"目标受众": "普通读者"}
+    assert research.jobs == []  # written from the report: no research, no searches
+    assert _topic_rows() == pool  # and no topic was made for either
+    assert [s["id"] for s in client.get(f"/api/video/reports/{report['id']}").json()["scripts"]] == [script["id"], second["id"]]
+
+    short = client.post("/api/video/scripts", headers=_csrf(client),
+                        json={"column": "point_short", "report_id": report["id"], "topic": {"title": "短"}})
+    assert short.status_code == 422
+
+
+def test_api_recording_a_report_only_takes_markdown_inside_output(client, video_env):
+    (video_env / "output").mkdir(exist_ok=True)
+    (video_env / "output" / "notes.json").write_text("{}", encoding="utf-8")
+    _login(client)
+    post = lambda path: client.post("/api/video/reports", json={"path": path}, headers=_csrf(client)).status_code  # noqa: E731
+    assert post("../config/system.yaml") == 400
+    assert post("notes.json") == 400
+    assert post("missing.md") == 404
+    client.post("/api/auth/logout", headers=_csrf(client))
+    assert post("missing.md") in (401, 403)

@@ -516,6 +516,9 @@ export interface ResearchReport {
 
 export const listResearchReports = () => api<ResearchReport[]>("/api/video/reports");
 export const getResearchReport = (id: string) => api<ResearchReport>(`/api/video/reports/${encodeURIComponent(id)}`);
+// 任何一份报告（报告页的路径，相对 output/）记成研究报告，就能直接写成视频；title 是报告的第一个标题
+export const recordResearchReport = (path: string) =>
+  api<ResearchReport & { title: string }>("/api/video/reports", { method: "POST", body: { path } });
 
 export const saveVideoScript = (id: string, body: { title: string; sections: ScriptSection[]; base_version?: number }) =>
   api<VideoScriptDetail>(`/api/video/scripts/${encodeURIComponent(id)}`, { method: "PUT", body });
