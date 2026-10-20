@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -7,7 +7,7 @@ import { TopicsPage } from "./Topics";
 const TOPICS = {
   round: "2026-10-19",
   topics: [
-    { id: "2026-10-19/F1", round: "2026-10-19", code: "F1", title: "Gemini 4 Argon 上线", fields: {}, score: null, scripted: true, published: true },
+    { id: "2026-10-19/F1", round: "2026-10-19", code: "F1", title: "Gemini 4 Argon 上线", fields: { 发布日期: "2026-10-14" }, score: 9, scripted: true, published: true, scripts: [{ id: "s9", column_key: "flash", status: "APPROVED", created_at: "2026-10-19T14:45:00+0800" }] },
     { id: "2026-10-19/F2", round: "2026-10-19", code: "F2", title: "GPT-5.5 从 ChatGPT 退役", fields: {}, score: null, scripted: false, published: false },
   ],
 };
@@ -34,5 +34,14 @@ describe("Topics page", () => {
     const link = (await screen.findByText("用这个写稿")).closest("a");
     expect(link?.getAttribute("href")).toBe("/video?cell=ai-developer-quick-take-long&topic=2026-10-19%2FF2");
     expect(screen.getByText(/还有 1 条没写/)).toBeTruthy();
+  });
+
+  it("shows the event date next to the report date and which script already covers a topic, and filters", async () => {
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    expect(await screen.findByText("事件日期 2026-10-14")).toBeTruthy();
+    expect(screen.getByText("已有文稿").getAttribute("href")).toBe("/video/s9");
+    fireEvent.change(screen.getByLabelText("写稿"), { target: { value: "no" } });
+    await waitFor(() => expect(screen.queryByText("Gemini 4 Argon 上线")).toBeNull());
+    expect(screen.getByText("GPT-5.5 从 ChatGPT 退役")).toBeTruthy();
   });
 });

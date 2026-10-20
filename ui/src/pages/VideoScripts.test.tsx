@@ -149,7 +149,7 @@ describe("Video script cell picker", () => {
 
   it("filters the script list by status and keeps the topic from the topics page highlighted", async () => {
     const scripts = [
-      { id: "a", title: "草稿一篇", status: "DRAFT", column_key: "deep_dive", published: false, updated_at: "2026-10-19T10:00:00+0800", length_check: null },
+      { id: "a", title: "草稿一篇", status: "DRAFT", column_key: "deep_dive", published: false, updated_at: "2026-10-19T10:00:00+0800", created_at: "2026-10-19T10:00:00+0800", length_check: null, credibility: { tier: "trusted", text: "有出处可信", reasons: [], cited_share: 1 } },
       { id: "b", title: "已发一篇", status: "APPROVED", column_key: "deep_dive", published: true, updated_at: "2026-10-19T10:00:00+0800", length_check: null },
     ];
     const base = (fetch as unknown as ReturnType<typeof vi.fn>).getMockImplementation()!;
@@ -162,8 +162,33 @@ describe("Video script cell picker", () => {
     );
     expect(await screen.findByText("草稿一篇")).toBeTruthy();
     expect(screen.getByText("已发一篇")).toBeTruthy();
-    fireEvent.click(screen.getByText("已发布", { selector: "button" }));
+    fireEvent.change(screen.getByLabelText("状态"), { target: { value: "published" } });
     await waitFor(() => expect(screen.queryByText("草稿一篇")).toBeNull());
     expect(screen.getByText("已发一篇")).toBeTruthy();
+  });
+});
+
+describe("Script list filters", () => {
+  it("filters by credibility label and by text, shows when each script was made, and clears", async () => {
+    const scripts = [
+      { id: "a", title: "缓存那一篇", status: "DRAFT", column_key: "flash", published: false, auto: true, created_at: "2020-01-02T09:30:00+0800", updated_at: "2026-10-20T10:00:00+0800", length_check: null, topic: { id: null, title: "缓存" }, credibility: { tier: "serious", text: "有严重问题", reasons: ["事实审计有 1 条严重问题"], cited_share: 0.5 } },
+      { id: "b", title: "价格那一篇", status: "DRAFT", column_key: "flash", published: false, created_at: "2026-10-20T09:30:00+0800", updated_at: "2026-10-20T10:00:00+0800", length_check: null, topic: { id: null, title: "价格" }, credibility: { tier: "trusted", text: "有出处可信", reasons: [], cited_share: 1 } },
+    ];
+    const base = (fetch as unknown as ReturnType<typeof vi.fn>).getMockImplementation()!;
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) =>
+      String(url).endsWith("/api/video/scripts") ? jsonResponse(scripts) : base(url, init)));
+    render(<MemoryRouter initialEntries={["/video"]}><VideoScriptsPage /></MemoryRouter>);
+    expect(await screen.findByText("缓存那一篇")).toBeTruthy();
+    expect(screen.getByText(/01-02 09:30|2020-01-02 09:30/)).toBeTruthy(); // the made-at time is written out, not only "x 天前"
+    expect(screen.getByText("显示 2 / 2")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("可信度"), { target: { value: "serious" } });
+    await waitFor(() => expect(screen.queryByText("价格那一篇")).toBeNull());
+    expect(screen.getByText("显示 1 / 2")).toBeTruthy();
+    fireEvent.click(screen.getByText("清除筛选"));
+    expect(await screen.findByText("价格那一篇")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("搜索"), { target: { value: "价格" } });
+    await waitFor(() => expect(screen.queryByText("缓存那一篇")).toBeNull());
+    fireEvent.change(screen.getByLabelText("来源"), { target: { value: "auto" } });
+    await waitFor(() => expect(screen.queryByText("价格那一篇")).toBeNull());
   });
 });

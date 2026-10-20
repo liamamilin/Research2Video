@@ -4,7 +4,7 @@ import { DeleteJobDialog } from "@/components/DeleteJobDialog";
 import { listJobs, createJob, listTemplates, listJobCategories, type JobCategory, type JobTemplate } from "@/api";
 import type { JobSummary } from "@/api/types";
 import { useAuthStore } from "@/lib/auth-store";
-import { cn, timeAgo } from "@/lib/utils";
+import { cn, shortTime, timeAgo } from "@/lib/utils";
 import { TemplateGrid } from "@/components/TemplateGrid";
 import { ErrorState } from "@/components/ErrorState";
 import { errorMessage } from "@/lib/toast";
@@ -485,7 +485,7 @@ export function JobsListPage() {
                     <StatusBadge status={j.state?.last_status || null} />
                     {j.state?.last_run_at && (
                       <span className="text-text-muted text-xs shrink-0" title={j.state.last_run_at}>
-                        {timeAgo(j.state.last_run_at)}
+                        {shortTime(j.state.last_run_at)} · {timeAgo(j.state.last_run_at)}
                       </span>
                     )}
                     {canEdit && (

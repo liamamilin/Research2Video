@@ -11,10 +11,13 @@ import {
   type VideoScriptSummary,
   type VideoTopic,
 } from "@/api/video";
+import { CredibilityBadge, TIER_LABEL } from "@/components/CredibilityBadge";
 import { ErrorState } from "@/components/ErrorState";
+import { FilterBar, inRange, matchesText, RANGE_FACET, useFilters, type Facet } from "@/components/FilterBar";
+import { TimeStamp } from "@/components/TimeStamp";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
-import { cn, timeAgo } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { DraftQualityPanel } from "./VideoQuality";
 
 export const STATUS_LABEL: Record<ScriptStatus, string> = {
@@ -60,16 +63,9 @@ export function VideoScriptsPage() {
   const [scripts, setScripts] = useState<VideoScriptSummary[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
   const [params, setParams] = useSearchParams();
-  const statusFilter = params.get("status") ?? "";
-  const columnFilter = params.get("column") ?? "";
+  const filters = useFilters(["status", "column", "tier", "source", "range"]);
+  const statusFilter = filters.values.status;
   const highlight = params.get("topic");
-  const setFilter = (key: string, value: string) =>
-    setParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (value) next.set(key, value);
-      else next.delete(key);
-      return next;
-    });
   const [cellId, setCellId] = useState<string>(params.get("cell") ?? "");
   const [form, setForm] = useState<string>("");
   const [picked, setPicked] = useState<string[]>([]);
@@ -109,12 +105,24 @@ export function VideoScriptsPage() {
     return () => clearInterval(timer);
   }, [inFlight, showArchived]);
 
+  const { values: f } = filters;
   const shownScripts = (scripts ?? []).filter(
     (x) =>
-      (!columnFilter || x.column_key === columnFilter) &&
-      (!statusFilter || showArchived ||
-        (statusFilter === "published" ? x.published : statusFilter === "RESEARCHING" ? IN_FLIGHT.includes(x.status) : x.status === statusFilter)),
+      (!f.column || x.column_key === f.column) &&
+      (!f.tier || x.credibility?.tier === f.tier) &&
+      (!f.source || (f.source === "auto") === Boolean(x.auto)) &&
+      inRange(x.created_at, f.range) &&
+      matchesText(f.q, x.title, x.topic?.title) &&
+      (!f.status || showArchived ||
+        (f.status === "published" ? x.published : f.status === "RESEARCHING" ? IN_FLIGHT.includes(x.status) : x.status === f.status)),
   );
+  const facets: Facet[] = [
+    { key: "status", label: "状态", options: [["RESEARCHING", "研究/写稿中"], ["DRAFT", "草稿"], ["APPROVED", "已定稿"], ["published", "已发布"], ["FAILED", "失败"], ["archived", "已归档"]].map(([value, label]) => ({ value, label })) },
+    { key: "column", label: "栏目格子", options: Array.from(new Set((scripts ?? []).map((x) => x.column_key))).map((key) => ({ value: key, label: cells.find((c) => c.key === key)?.label ?? key })) },
+    { key: "tier", label: "可信度", options: (Object.keys(TIER_LABEL) as (keyof typeof TIER_LABEL)[]).map((k) => ({ value: k, label: TIER_LABEL[k] })) },
+    { key: "source", label: "来源", options: [{ value: "auto", label: "自动流水线" }, { value: "manual", label: "手动创建" }] },
+    RANGE_FACET,
+  ];
   const cell = cells.find((c) => c.id === cellId);
   const column = cell?.column ?? null;
   const kind = column?.topic_kind ?? "single";
@@ -404,26 +412,7 @@ export function VideoScriptsPage() {
         </section>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2 text-xs" aria-label="筛选">
-        {[
-          ["", "全部"], ["RESEARCHING", "研究/写稿中"], ["DRAFT", "草稿"], ["APPROVED", "已定稿"],
-          ["published", "已发布"], ["FAILED", "失败"], ["archived", "已归档"],
-        ].map(([value, label]) => (
-          <button
-            key={value}
-            className={cn("badge border cursor-pointer", statusFilter === value ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover")}
-            onClick={() => setFilter("status", value)}
-          >
-            {label}
-          </button>
-        ))}
-        <select aria-label="栏目筛选" className="input text-xs py-1 w-auto max-w-full" value={columnFilter} onChange={(e) => setFilter("column", e.target.value)}>
-          <option value="">全部栏目</option>
-          {Array.from(new Set((scripts ?? []).map((x) => x.column_key))).map((key) => (
-            <option key={key} value={key}>{cells.find((c) => c.key === key)?.label ?? key}</option>
-          ))}
-        </select>
-      </div>
+      <FilterBar facets={facets} filters={filters} shown={shownScripts.length} total={(scripts ?? []).length} />
 
       <section className="card p-0 overflow-hidden">
         {error ? (
@@ -438,8 +427,9 @@ export function VideoScriptsPage() {
               <tr>
                 <th className="text-left font-normal px-4 py-2">文稿</th>
                 <th className="text-left font-normal px-4 py-2">状态</th>
+                <th className="text-left font-normal px-4 py-2">可信度</th>
                 <th className="text-left font-normal px-4 py-2">时长</th>
-                <th className="text-left font-normal px-4 py-2">更新</th>
+                <th className="text-left font-normal px-4 py-2">创建</th>
               </tr>
             </thead>
             <tbody>
@@ -450,6 +440,7 @@ export function VideoScriptsPage() {
                       {s.title}
                     </Link>
                     {s.published ? <span className="badge border border-success/30 bg-success/15 text-success ml-2">已发布</span> : null}
+                    {s.auto ? <span className="badge border border-border text-text-muted ml-2">自动</span> : null}
                   </td>
                   <td className="px-4 py-2">
                     <span className={cn("badge border", STATUS_CLASS[s.status])}>
@@ -457,8 +448,9 @@ export function VideoScriptsPage() {
                       {s.status === "WRITING" && s.stage ? ` · ${s.stage}` : ""}
                     </span>
                   </td>
+                  <td className="px-4 py-2"><CredibilityBadge value={s.credibility} /></td>
                   <td className="px-4 py-2 text-text-muted">{minutes(s.length_check?.estimated_seconds)}</td>
-                  <td className="px-4 py-2 text-text-muted">{timeAgo(s.updated_at)}</td>
+                  <td className="px-4 py-2"><TimeStamp value={s.created_at} /></td>
                 </tr>
               ))}
             </tbody>

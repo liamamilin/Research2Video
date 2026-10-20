@@ -41,3 +41,12 @@ export function formatTokens(n: number | null | undefined): string {
 export function normalizePriority(value: string | null | undefined): string {
   return (value || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
 }
+
+/** "10-20 10:32" — the date and time as written, for lists where "3 小时前" alone hides how old something is. */
+export function shortTime(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (!m) return iso.slice(0, 16);
+  const sameYear = Number(m[1]) === new Date().getFullYear();
+  return `${sameYear ? "" : m[1] + "-"}${m[2]}-${m[3]} ${m[4]}:${m[5]}`;
+}

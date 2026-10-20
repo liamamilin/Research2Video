@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getVideoBoard, type BoardAttention, type VideoBoard } from "@/api/video";
 import { AutopilotCard } from "@/components/AutopilotCard";
+import { CredibilityBadge } from "@/components/CredibilityBadge";
+import { TimeStamp } from "@/components/TimeStamp";
 import { cn } from "@/lib/utils";
 
 const KIND: Record<BoardAttention["kind"], { label: string; cls: string }> = {
@@ -69,7 +71,7 @@ export function HomeBoardPage() {
           <section className="card space-y-2">
             <h2 className="font-medium text-sm">需要你处理</h2>
             {board.attention.length === 0 ? (
-              <p className="text-sm text-text-muted">现在没有要处理的事。可以去「选题」挑一条新的来写。</p>
+              <p className="text-sm text-text-muted">现在没有要处理的事。草稿不需要你审：流水线会自动定稿、出片，每条的可信度标在旁边，你只需要看片和发布。</p>
             ) : (
               <ul className="divide-y divide-border">
                 {board.attention.map((item, i) => (
@@ -77,7 +79,9 @@ export function HomeBoardPage() {
                     <Link to={`/video/${item.script_id}`} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2 hover:bg-bg-hover rounded">
                       <span className={cn("badge border", KIND[item.kind].cls)}>{KIND[item.kind].label}</span>
                       <span className="text-sm font-medium">{item.title || item.script_id.slice(0, 8)}</span>
+                      <CredibilityBadge value={item.credibility} />
                       <span className="text-xs text-text-muted">{item.text}</span>
+                      <TimeStamp value={item.created_at} label="创建" />
                     </Link>
                   </li>
                 ))}

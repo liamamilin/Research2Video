@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { cancelAutopilotRun, getAutopilot, startAutopilotRun, type AutopilotItem, type AutopilotPlan, type AutopilotRun } from "@/api/video";
+import { TIER_CLASS } from "@/components/CredibilityBadge";
+import { TimeStamp } from "@/components/TimeStamp";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 
 const STATE: Record<AutopilotItem["state"], { label: string; cls: string }> = {
   PENDING: { label: "排队", cls: "border-border text-text-muted" },
   WORKING: { label: "进行中", cls: "border-accent text-accent" },
-  HELD: { label: "等你处理", cls: "border-warning text-warning" },
+  HELD: { label: "出了故障", cls: "border-warning text-warning" },
   DONE: { label: "成片完成", cls: "border-success text-success" },
   FAILED: { label: "失败", cls: "border-danger text-danger" },
   CANCELLED: { label: "已取消", cls: "border-border text-text-muted" },
@@ -76,7 +78,7 @@ export function AutopilotCard() {
       {run ? (
         <>
           <p className="text-xs text-text-muted">
-            最近一批：{run.created_at.replace("T", " ").slice(0, 16)}，{run.status === "RUNNING" ? "进行中" : "已结束"}
+            最近一批：<TimeStamp value={run.created_at} />，{run.status === "RUNNING" ? "进行中" : "已结束"}
             {run.note ? `（${run.note}）` : ""}
           </p>
           {run.items.length === 0 ? <p className="text-xs text-text-muted">正在挑选选题…</p> : null}
@@ -90,8 +92,8 @@ export function AutopilotCard() {
                   <span className="text-sm font-medium">{item.topic.title}</span>
                 )}
                 <span className="text-xs text-text-muted">{item.note}</span>
-                {item.gate?.approved === "auto" && item.gate.ignored ? (
-                  <span className="text-xs text-text-muted">自动定稿（放过：{item.gate.ignored.must} 条风格必须改、{item.gate.ignored.warn} 条提醒）</span>
+                {item.gate?.label && item.gate.text ? (
+                  <span className={cn("badge border", TIER_CLASS[item.gate.label])} title={(item.gate.reasons ?? []).join("；")}>{item.gate.text}</span>
                 ) : null}
               </li>
             ))}

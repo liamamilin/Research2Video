@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FilterBar, matchesText, useFilters, type Facet } from "@/components/FilterBar";
+import { TimeStamp } from "@/components/TimeStamp";
 import { listVideoCells, listVideoTopics, type VideoCell, type VideoTopic } from "@/api/video";
 
 type Source = "flash" | "opportunities";
@@ -35,8 +37,20 @@ export function TopicsPage() {
     };
   }, [source]);
 
+  const filters = useFilters(["written", "score"]);
+  const { values: f } = filters;
   const cell = cellFor(cells, source);
   const todo = (topics ?? []).filter((t) => !t.scripted && !t.published).length;
+  const shown = (topics ?? []).filter(
+    (t) =>
+      (!f.written || (f.written === "no" ? !t.scripted && !t.published : t.scripted || t.published)) &&
+      (!f.score || (t.score ?? 0) >= Number(f.score)) &&
+      matchesText(f.q, t.title, t.fields["核心角度"], t.fields["一句话"]),
+  );
+  const facets: Facet[] = [
+    { key: "written", label: "写稿", options: [{ value: "no", label: "还没写" }, { value: "yes", label: "已写过" }] },
+    { key: "score", label: "评分", options: [{ value: "8", label: "8 分以上" }, { value: "7", label: "7 分以上" }] },
+  ];
 
   return (
     <div className="space-y-4">
@@ -55,18 +69,29 @@ export function TopicsPage() {
         {round ? ` ${round}` : ""}，还有 {todo} 条没写。想把几条快讯合成一期盘点，去文稿页选「盘点」。
       </p>
       {error ? <p className="text-danger text-sm">{error}</p> : null}
+      {topics && topics.length ? <FilterBar facets={facets} filters={filters} shown={shown.length} total={topics.length} placeholder="搜索选题" /> : null}
       {topics && topics.length === 0 ? (
         <p className="text-sm text-text-muted">
           {source === "flash" ? "还没有快讯发现报告。" : "还没有内容机会报告。跑一轮情报流水线后，这里会列出推荐的选题。"}
         </p>
       ) : null}
       <ul className="space-y-2">
-        {(topics ?? []).map((t) => (
+        {shown.map((t) => (
           <li key={t.id} className="card flex items-start gap-3">
             <span className="font-mono text-xs text-text-muted pt-0.5">{t.code}</span>
             <div className="min-w-0 flex-1 space-y-1">
               <p className="text-sm">{t.title}</p>
               {t.fields["核心角度"] ? <p className="text-xs text-text-muted">角度：{t.fields["核心角度"]}</p> : null}
+              <p className="text-xs text-text-muted flex flex-wrap gap-x-3">
+                {t.fields["发布日期"] ? <span>事件日期 {t.fields["发布日期"]}</span> : null}
+                <span>{source === "flash" ? "发现报告" : "情报轮次"} {t.round}</span>
+                {t.score != null ? <span>评分 {t.score}</span> : null}
+                {(t.scripts ?? []).map((s) => (
+                  <span key={s.id}>
+                    <Link className="text-accent hover:underline" to={`/video/${s.id}`}>已有文稿</Link> <TimeStamp value={s.created_at} />
+                  </span>
+                ))}
+              </p>
             </div>
             {t.published ? (
               <span className="badge border border-success text-success">已发布</span>

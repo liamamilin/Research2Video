@@ -150,6 +150,16 @@ export interface FactSheet {
   concepts: { term: string; meaning: string; needs: string[] }[];
 }
 
+export type CredibilityTier = "serious" | "spoken" | "unaudited" | "partial" | "trusted";
+
+/** 文稿可信度：从审计结果和出处标注算出，只提示不拦截（core/video/credibility.py）。 */
+export interface Credibility {
+  tier: CredibilityTier;
+  text: string;
+  reasons: string[];
+  cited_share: number | null;
+}
+
 export interface VideoTopic {
   id: string;
   round: string;
@@ -159,6 +169,7 @@ export interface VideoTopic {
   score: number | null;
   scripted: boolean;
   published?: boolean;
+  scripts?: { id: string; column_key: string; status: ScriptStatus; created_at: string; archived?: number }[];
 }
 
 export interface ScriptParagraph {
@@ -248,6 +259,8 @@ export interface VideoScriptSummary {
   length_check: LengthCheck | null;
   published?: boolean;
   archived?: number;
+  credibility?: Credibility | null;
+  auto?: boolean;
 }
 
 // 发布记录和发布前复核（快讯），见 spec/video-publish.md。
@@ -420,6 +433,8 @@ export interface BoardAttention {
   title: string;
   column_key: string;
   text: string;
+  created_at?: string;
+  credibility?: Credibility | null;
 }
 
 export interface VideoBoard {
@@ -436,7 +451,9 @@ export interface Shipment {
   column_key: string;
   approved_version: number | null;
   created_at: string;
-  render: { id: string; status: string; version: number; error: string | null } | null;
+  credibility?: Credibility | null;
+  auto?: boolean;
+  render: { id: string; status: string; version: number; error: string | null; completed_at?: string | null } | null;
   video_url: string | null;
   publications: Publication[];
   warnings: string[];
@@ -453,7 +470,7 @@ export interface AutopilotItem {
   render_id: string | null;
   state: "PENDING" | "WORKING" | "HELD" | "DONE" | "FAILED" | "CANCELLED";
   note: string;
-  gate: { pass?: boolean; approved?: string; reasons?: string[]; ignored?: { must: number; warn: number } };
+  gate: { label?: CredibilityTier; text?: string; approved?: string; reasons?: string[]; ignored?: { must: number; warn: number } };
 }
 
 export interface AutopilotRun {

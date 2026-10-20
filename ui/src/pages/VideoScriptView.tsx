@@ -20,6 +20,8 @@ import {
   type VideoRender,
   type VideoScriptDetail,
 } from "@/api/video";
+import { CredibilityBadge } from "@/components/CredibilityBadge";
+import { TimeStamp } from "@/components/TimeStamp";
 import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
@@ -264,6 +266,8 @@ export function VideoScriptViewPage() {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className={cn("badge border", STATUS_CLASS[detail.status])}>{STATUS_LABEL[detail.status]}</span>
+            <CredibilityBadge value={detail.credibility} />
+            {detail.auto ? <span className="badge border border-border text-text-muted">自动流水线</span> : null}
             {detail.column ? <span className="text-xs text-text-muted">{detail.column.name}</span> : null}
             {detail.approved_version ? (
               <span className="text-xs text-success">定稿 v{detail.approved_version}</span>
@@ -274,7 +278,11 @@ export function VideoScriptViewPage() {
           ) : (
             <h1 className="text-lg font-semibold">{shown?.title ?? detail.title}</h1>
           )}
+          {detail.credibility && detail.credibility.tier !== "trusted" ? (
+            <p className="text-xs text-text-muted mt-1">可信度提示：{detail.credibility.reasons.join("；")}</p>
+          ) : null}
           <p className="text-xs text-text-muted mt-1">
+            <TimeStamp value={detail.created_at} label="创建" className="mr-3" />
             选题：{detail.topic.title}
             <Link className="ml-3 text-accent hover:underline" to={`/ask?video=${encodeURIComponent(detail.id)}`}>
               在助手中处理
@@ -569,6 +577,7 @@ function RenderPanel({
       <div className="flex items-center gap-2">
         <h2 className="font-medium flex-1">成片</h2>
         {latest ? <span className="badge border border-border">{RENDER_LABEL[latest.status]}</span> : null}
+        {latest ? <TimeStamp value={latest.completed_at ?? latest.created_at} label={latest.completed_at ? "完成" : "提交"} /> : null}
       </div>
       {notReady ? (
         <p className="text-warning text-xs">
