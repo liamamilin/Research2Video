@@ -71,11 +71,12 @@ export function TopicsPage() {
 
   const current = coverage.find((c) => c.cell === selected) ?? coverage.find((c) => c.sources.length) ?? coverage[0];
   const source = (current?.sources[0] ?? "flash") as Source;
+  const noSource = Boolean(current && !current.sources.length);
 
   useEffect(() => {
     let alive = true;
     setTopics(null);
-    if (current && !current.sources.length) {
+    if (noSource) {
       setRound(null);
       setTopics([]);
       return;
@@ -86,7 +87,7 @@ export function TopicsPage() {
     return () => {
       alive = false;
     };
-  }, [source, current?.cell, current?.sources.length]);
+  }, [source, noSource]);
 
   const filters = useFilters(["written", "score"]);
   const { values: f } = filters;
