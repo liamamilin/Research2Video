@@ -8,6 +8,54 @@ type Source = "flash" | "opportunities";
 
 const SOURCE_LABEL: Record<Source, string> = { flash: "快讯条目", opportunities: "内容机会" };
 
+/** The content matrix as a grid: a row per type, a column per audience; a click picks the cell. */
+function MatrixGrid({ cells, coverage, current, onPick }: { cells: VideoCell[]; coverage: CellCoverage[]; current?: string; onPick: (key: string) => void }) {
+  const usable = cells.filter((c) => c.usable && c.parts);
+  const types = [...new Map(usable.map((c) => [c.parts!.type.key, c.parts!.type.name])).entries()];
+  const audiences = [...new Map(usable.map((c) => [c.parts!.audience.key, c.parts!.audience.name])).entries()];
+  if (!types.length) return null;
+  return (
+    <div className="overflow-x-auto" aria-label="内容矩阵">
+      <table className="text-xs border-separate border-spacing-1">
+        <thead>
+          <tr>
+            <th />
+            {audiences.map(([key, name]) => (
+              <th key={key} className="font-normal text-text-muted px-2">{name}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {types.map(([tkey, tname]) => (
+            <tr key={tkey}>
+              <th className="font-normal text-text-muted text-left pr-2">{tname}</th>
+              {audiences.map(([akey]) => {
+                const cell = usable.find((c) => c.parts!.type.key === tkey && c.parts!.audience.key === akey);
+                const row = coverage.find((c) => c.cell === cell?.key);
+                if (!cell || !row) return <td key={akey} className="px-2 py-1 text-text-muted text-center">—</td>;
+                const on = row.cell === current;
+                return (
+                  <td key={akey}>
+                    <button
+                      aria-label={`${tname} ${cell.parts!.audience.name}`}
+                      aria-pressed={on}
+                      className={`${on ? "btn btn-primary" : "btn"} text-xs w-full`}
+                      onClick={() => onPick(row.cell)}
+                    >
+                      {row.sources.length ? `${row.open} 条待写` : "手选"}
+                      {row.status !== "enabled" ? "（实验）" : ""}
+                    </button>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function TopicsPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [round, setRound] = useState<string | null>(null);
@@ -60,15 +108,7 @@ export function TopicsPage() {
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-lg font-semibold flex-1">选题</h1>
       </div>
-      <div role="tablist" aria-label="格子" className="flex flex-wrap gap-1">
-        {coverage.map((c) => (
-          <button key={c.cell} role="tab" aria-selected={c.cell === current?.cell} className={c.cell === current?.cell ? "btn btn-primary text-xs" : "btn text-xs"} onClick={() => setSelected(c.cell)}>
-            {c.label}
-            {c.status !== "enabled" ? "（实验）" : ""}
-            {c.sources.length ? ` ${c.open}` : ""}
-          </button>
-        ))}
-      </div>
+      <MatrixGrid cells={cells} coverage={coverage} current={current?.cell} onPick={setSelected} />
       {current && !current.sources.length ? (
         <p className="text-sm text-text-muted">
           这个格子还没有选题来源，只能手选：去 <Link className="text-accent hover:underline" to={`/video?cell=${encodeURIComponent(cell?.id ?? current.cell)}`}>文稿页</Link> 选条目或填标题。

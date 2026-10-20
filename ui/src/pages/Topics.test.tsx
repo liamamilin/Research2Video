@@ -12,7 +12,8 @@ const TOPICS = {
   ],
 };
 const CELLS = [
-  { id: "ai-developer-quick-take-long", key: "flash", label: "快讯", usable: true, status: "enabled", parts: { type: { key: "quick_take" } }, column: { topic_kind: "single" } },
+  { id: "cmp-cell", key: "cmp", label: "对比", usable: true, status: "experimental", parts: { type: { key: "comparison", name: "对比" }, audience: { key: "developer", name: "开发者" } }, column: { topic_kind: "comparison" } },
+  { id: "ai-developer-quick-take-long", key: "flash", label: "快讯", usable: true, status: "enabled", parts: { type: { key: "quick_take", name: "快讯" }, audience: { key: "developer", name: "开发者" } }, column: { topic_kind: "single" } },
 ];
 
 const COVERAGE = [
@@ -52,7 +53,7 @@ describe("Topics page", () => {
 
   it("has a tab per cell; a cell without a source says it is chosen by hand", async () => {
     render(<MemoryRouter><TopicsPage /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole("tab", { name: /对比（实验）/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "对比 开发者" }));
     expect(await screen.findByText(/还没有选题来源/)).toBeTruthy();
     expect(screen.queryByText("GPT-5.5 从 ChatGPT 退役")).toBeNull();
   });
