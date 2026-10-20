@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS script_events (
     script_id TEXT NOT NULL,
     step TEXT NOT NULL,
     event TEXT NOT NULL,             -- start | rerun | resume | approve | render | hold | fail
+                                     -- | confirm | redo_plan | discard_plan (a plan waiting for the user)
     note TEXT NOT NULL DEFAULT '',
     by TEXT NOT NULL DEFAULT '',     -- a user name, or autopilot
     at REAL NOT NULL
@@ -77,7 +78,9 @@ def derive(script: dict, version: Optional[dict], renders: list[dict], *, resear
     else:
         research = _step("research", "PENDING")
 
-    if status == "WRITING":
+    if status == "PLAN_READY":  # before has_version: a rewrite of a written script can wait at its plan too
+        write = _step("write", "WAITING", error or "方案定好了，等你确认")
+    elif status == "WRITING":
         write = _step("write", "RUNNING", stage or "")
     elif has_version:
         write = _step("write", "DONE", f"v{script['current_version']}")
@@ -89,7 +92,7 @@ def derive(script: dict, version: Optional[dict], renders: list[dict], *, resear
     checks = ((version or {}).get("meta") or {}).get("checks") or {}
     if status == "DRAFT" and stage:
         audit = _step("audit", "RUNNING", stage)
-    elif not has_version or status == "WRITING":
+    elif not has_version or status in ("WRITING", "PLAN_READY"):
         audit = _step("audit", "PENDING")
     elif checks.get("model_ran"):
         audit = _step("audit", "DONE")

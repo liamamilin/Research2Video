@@ -24,6 +24,8 @@ export function nextStep(detail: VideoScriptDetail): NextStep {
     case "RESEARCHING":
     case "WRITING":
       return { tab: "draft", text: "正在研究和写稿，完成后会出现草稿。可以离开此页。", tone: "wait" };
+    case "PLAN_READY":
+      return { tab: "draft", text: "讲述方案定好了：读一下，可以改字、带意见重做或放弃；确认后才开始写稿。", tone: "todo" };
     case "FAILED":
       return { tab: "draft", text: "这篇没有完成，原因见下面。", tone: "bad" };
     case "DRAFT": {

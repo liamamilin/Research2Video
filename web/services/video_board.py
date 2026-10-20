@@ -27,7 +27,7 @@ def _stage(script: dict, renders: list[dict], published: bool) -> str:
         if any(r["status"] == "COMPLETED" for r in renders):
             return "rendered"
         return "approved"
-    return "draft" if status == "DRAFT" else "failed"
+    return "draft" if status in ("DRAFT", "PLAN_READY") else "failed"
 
 
 def _label(script: dict) -> Optional[dict]:
@@ -55,7 +55,9 @@ def board(columns: dict, *, limit: int = 200) -> dict:
         item = {"script_id": script["id"], "title": _title(script), "column_key": script["column_key"],
                 "created_at": script["created_at"], "credibility": label}
         # drafts are not a to-do any more: the pipeline carries them on and the label says how far to trust them
-        if stage == "failed":
+        if script["status"] == "PLAN_READY":
+            attention.append({**item, "kind": "plan", "text": script.get("error") or "方案定好了，等你确认再写稿"})
+        elif stage == "failed":
             attention.append({**item, "kind": "failed", "text": script.get("error") or "失败了"})
         elif stage == "rendered":
             attention.append({**item, "kind": "render_done", "text": "成片完成，看片后发布并记录链接"})

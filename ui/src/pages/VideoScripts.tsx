@@ -23,6 +23,7 @@ import { DraftQualityPanel } from "./VideoQuality";
 export const STATUS_LABEL: Record<ScriptStatus, string> = {
   RESEARCHING: "研究中",
   WRITING: "写稿中",
+  PLAN_READY: "方案待确认",
   DRAFT: "待审稿",
   APPROVED: "已定稿",
   FAILED: "失败",
@@ -31,6 +32,7 @@ export const STATUS_LABEL: Record<ScriptStatus, string> = {
 export const STATUS_CLASS: Record<ScriptStatus, string> = {
   RESEARCHING: "bg-accent/15 text-accent border-accent/30",
   WRITING: "bg-accent/15 text-accent border-accent/30",
+  PLAN_READY: "bg-warning/15 text-warning border-warning/30",
   DRAFT: "bg-warning/15 text-warning border-warning/30",
   APPROVED: "bg-success/15 text-success border-success/30",
   FAILED: "bg-danger/15 text-danger border-danger/30",
@@ -119,7 +121,7 @@ export function VideoScriptsPage() {
         (f.status === "published" ? x.published : f.status === "RESEARCHING" ? IN_FLIGHT.includes(x.status) : x.status === f.status)),
   );
   const facets: Facet[] = [
-    { key: "status", label: "状态", options: [["RESEARCHING", "研究/写稿中"], ["DRAFT", "草稿"], ["APPROVED", "已定稿"], ["published", "已发布"], ["FAILED", "失败"], ["archived", "已归档"]].map(([value, label]) => ({ value, label })) },
+    { key: "status", label: "状态", options: [["RESEARCHING", "研究/写稿中"], ["PLAN_READY", "方案待确认"], ["DRAFT", "草稿"], ["APPROVED", "已定稿"], ["published", "已发布"], ["FAILED", "失败"], ["archived", "已归档"]].map(([value, label]) => ({ value, label })) },
     { key: "column", label: "栏目格子", options: Array.from(new Set((scripts ?? []).map((x) => x.column_key))).map((key) => ({ value: key, label: cells.find((c) => c.key === key)?.label ?? key })) },
     { key: "tier", label: "可信度", options: (Object.keys(TIER_LABEL) as (keyof typeof TIER_LABEL)[]).map((k) => ({ value: k, label: TIER_LABEL[k] })) },
     { key: "source", label: "来源", options: [{ value: "auto", label: "自动流水线" }, { value: "manual", label: "手动创建" }] },

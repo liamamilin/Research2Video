@@ -2,7 +2,7 @@
 // 风格、改编和审校见 spec/video-adaptation.md。
 import { api } from "./client";
 
-export type ScriptStatus = "RESEARCHING" | "WRITING" | "DRAFT" | "APPROVED" | "FAILED";
+export type ScriptStatus = "RESEARCHING" | "WRITING" | "PLAN_READY" | "DRAFT" | "APPROVED" | "FAILED";
 export type Evidence = "CITED" | "UNCITED" | "NEEDS_REVIEW";
 export type RenderStatus =
   | "SUBMITTING"
@@ -309,6 +309,25 @@ export interface VideoScriptDetail extends VideoScriptSummary {
   rechecks?: Recheck[];
   steps?: ScriptStep[]; // 调研 → 写稿 → 审计 → 定稿 → 出片，按现有记录读出来（spec/video-steps.md）
   events?: ScriptEvent[]; // 谁在什么时候启动 / 重跑了哪一步
+  pending_plan?: PendingPlan | null; // 配方 writing.pause_after_plan：方案定好后等你确认
+}
+
+export interface PendingPlan {
+  id: string;
+  plan: ScriptPlan;
+  problems: string[];
+  style: { depth?: string; tone?: string };
+  note: string;
+  created_by: string;
+  created_at: string;
+}
+
+/** 只放改了的字；beats 每节一项，没改的节给空对象。 */
+export interface PlanEdits {
+  question?: string;
+  core_message?: string;
+  hook_idea?: string;
+  beats?: { title?: string; point?: string }[];
 }
 
 export type StepName = "research" | "write" | "audit" | "approve" | "render";
@@ -322,6 +341,13 @@ export interface ScriptEvent { step: StepName; event: string; note: string; by: 
 
 export const rerunVideoStep = (id: string, step: StepName) =>
   api<VideoScriptDetail>(`/api/video/scripts/${encodeURIComponent(id)}/steps/${step}/rerun`, { method: "POST" });
+
+export const confirmVideoPlan = (id: string, edits: PlanEdits) =>
+  api<VideoScriptDetail>(`/api/video/scripts/${encodeURIComponent(id)}/plan/confirm`, { method: "POST", body: edits });
+export const redoVideoPlan = (id: string, note: string) =>
+  api<VideoScriptDetail>(`/api/video/scripts/${encodeURIComponent(id)}/plan/redo`, { method: "POST", body: { note } });
+export const discardVideoPlan = (id: string) =>
+  api<VideoScriptDetail>(`/api/video/scripts/${encodeURIComponent(id)}/plan/discard`, { method: "POST" });
 
 export interface AutoVideoStatus {
   base_url: string;
@@ -523,7 +549,7 @@ export interface BoardStage {
 }
 
 export interface BoardAttention {
-  kind: "review" | "failed" | "render" | "render_done" | "recheck";
+  kind: "review" | "plan" | "failed" | "render" | "render_done" | "recheck";
   script_id: string;
   title: string;
   column_key: string;

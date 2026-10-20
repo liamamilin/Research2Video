@@ -50,7 +50,7 @@ _SECTIONS = {
     "topic": {"kind", "sources", "fields"},
     "research": {"mode", "timeout_seconds", "language", "prompt"},
     "writing": {"pipeline", "style", "sections", "paragraph_units", "required_roles", "default_style",
-                "allowed_tones", "revise_rounds", "audit"},
+                "allowed_tones", "revise_rounds", "pause_after_plan", "audit"},
     "output": {"target", "voice_id", "video_form", "allowed_forms", "creative_intent", "source_card", "package",
                "recheck"},
 }
@@ -246,6 +246,7 @@ def to_flat(key: str, data: dict) -> dict:
         "default_style": writing.get("default_style"),
         "allowed_tones": writing.get("allowed_tones"),
         "revise_rounds": writing.get("revise_rounds"),
+        "pause_after_plan": writing.get("pause_after_plan"),
         "audit": writing.get("audit"),
         "voice_id": output.get("voice_id"),
         "video_form": output.get("video_form"),

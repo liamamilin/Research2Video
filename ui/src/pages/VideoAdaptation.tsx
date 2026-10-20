@@ -305,9 +305,9 @@ export function FactChips({ ids, facts }: { ids: string[] | undefined; facts: Re
   );
 }
 
-export function PlanPanel({ plan }: { plan: ScriptPlan }) {
+export function PlanPanel({ plan, open = false }: { plan: ScriptPlan; open?: boolean }) {
   return (
-    <details className="card text-sm">
+    <details className="card text-sm" open={open}>
       <summary className="cursor-pointer font-medium">讲述方案</summary>
       <div className="mt-3 space-y-3">
         {plan.question ? (

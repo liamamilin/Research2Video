@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from core.video import columns as video_columns
 from core.video import credibility, store
+from core.video import plans as video_plans
 from core.video import steps as video_steps
 from core.video import topics as video_topics
 from core.video.adapt import styles as video_styles
@@ -478,7 +479,15 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         # research → write → audit → approve → render, read off the records above; and who started what
         "steps": video_executor.steps_of(script),
         "events": video_steps.events(script_id),
+        # the plan waiting for the user, when the recipe pauses after the plan (writing.pause_after_plan)
+        "pending_plan": _plan_out(video_plans.pending(script_id)) if script["status"] == "PLAN_READY" else None,
     }
+
+
+def _plan_out(row: Optional[dict]) -> Optional[dict]:
+    if row is None:
+        return None
+    return {k: row[k] for k in ("id", "plan", "problems", "style", "note", "created_by", "created_at")}
 
 
 @router.post("/scripts/{script_id}/steps/{step}/rerun", status_code=202)
@@ -492,6 +501,62 @@ def rerun_step(script_id: str, step: str, user=Depends(require_editor)) -> dict:
         raise HTTPException(409, detail=ApiError.make("step_not_runnable", str(exc))) from exc
     audit.log("video_step_rerun", user=user["username"], target=script_id, result=step)
     return get_script(script_id, user=user)
+
+
+class PlanBeatEdit(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: Optional[str] = Field(default=None, max_length=80)
+    point: Optional[str] = Field(default=None, max_length=400)
+
+
+class PlanConfirmIn(BaseModel):
+    """The words the user changed; anything left out stays as the plan has it. ``beats``: one entry per beat."""
+    model_config = ConfigDict(extra="forbid")
+
+    question: Optional[str] = Field(default=None, max_length=200)
+    core_message: Optional[str] = Field(default=None, max_length=100)
+    hook_idea: Optional[str] = Field(default=None, max_length=400)
+    beats: Optional[list[PlanBeatEdit]] = None
+
+
+class PlanRedoIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    note: str = Field(min_length=1, max_length=2000)
+
+
+def _plan_action(script_id: str, user: dict, action: str, run) -> dict:
+    _script_or_404(script_id)
+    try:
+        run()
+    except video_executor.StepError as exc:
+        raise HTTPException(409, detail=ApiError.make("plan_not_waiting", str(exc))) from exc
+    audit.log(f"video_plan_{action}", user=user["username"], target=script_id, result="ok")
+    return get_script(script_id, user=user)
+
+
+@router.post("/scripts/{script_id}/plan/confirm", status_code=202)
+def confirm_plan(script_id: str, body: Optional[PlanConfirmIn] = None, user=Depends(require_editor)) -> dict:
+    """Confirm the waiting plan (spec/video-steps.md), maybe reworded, and write the draft from it. Costs the writing
+    model."""
+    edits = body.model_dump(exclude_none=True) if body else {}
+    if "beats" in edits:
+        edits["beats"] = [b.model_dump() for b in body.beats]
+    return _plan_action(script_id, user, "confirm",
+                        lambda: video_executor.confirm_plan(script_id, user["username"], edits))
+
+
+@router.post("/scripts/{script_id}/plan/redo", status_code=202)
+def redo_plan(script_id: str, body: PlanRedoIn, user=Depends(require_editor)) -> dict:
+    """Make the plan again with the user's note. Costs the writing model."""
+    return _plan_action(script_id, user, "redo", lambda: video_executor.redo_plan(script_id, user["username"], body.note))
+
+
+@router.post("/scripts/{script_id}/plan/discard")
+def discard_plan(script_id: str, user=Depends(require_editor)) -> dict:
+    """Drop the waiting plan; the script goes back to what it was."""
+    return _plan_action(script_id, user, "discard", lambda: video_executor.discard_plan(script_id, user["username"]))
 
 
 class ParagraphIn(BaseModel):

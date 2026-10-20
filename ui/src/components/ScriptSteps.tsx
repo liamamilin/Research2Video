@@ -13,7 +13,10 @@ const STATE: Record<ScriptStep["state"], { label: string; cls: string }> = {
   WAITING: { label: "等待", cls: "text-warning" },
   INCOMPLETE: { label: "没跑完", cls: "text-warning" },
 };
-const EVENT: Record<string, string> = { start: "开始", rerun: "重跑", resume: "从断点继续", approve: "定稿", render: "出片" };
+const EVENT: Record<string, string> = {
+  start: "开始", rerun: "重跑", resume: "从断点继续", approve: "定稿", render: "出片",
+  confirm: "确认方案", redo_plan: "重做方案", discard_plan: "放弃方案",
+};
 
 // 能重跑哪一步、按钮叫什么、确认时说清楚花什么。出片在「成片」页，定稿在上方按钮。
 function rerunnable(step: ScriptStep, detail: VideoScriptDetail): { label: string; confirm: string } | null {

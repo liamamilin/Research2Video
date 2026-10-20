@@ -28,6 +28,7 @@ from core.llm import LLMConfig
 from core.state import StateManager
 from core.video import columns as video_columns
 from core.video import length, store, writer
+from core.video import plans as video_plans
 from core.video.adapt import draft as adapt_draft
 from core.video.adapt import facts as adapt_facts
 from core.video.adapt import pipeline as adapt_pipeline
@@ -218,9 +219,25 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     if column.writer == "adapt":
         try:
             style = style or video_styles.resolve(settings.paths.config_dir, column)
-            _adapt_version(script_id, report=report, report_path=report_path, citation_check=citation_check,
-                           column=column, topic=topic, style=style, started_by=started_by, llm_config=config,
-                           review_llm_config=review_config)
+            waiting = video_plans.open_plan(script_id)
+            if waiting and waiting["state"] == "PENDING" and waiting["style"] != _style_keys(style):
+                video_plans.mark(waiting["id"], "SUPERSEDED", only_from=("PENDING",))  # made for another style
+                waiting = None
+            if waiting and waiting["state"] == "CONFIRMED":
+                # the user confirmed this plan and its draft was cut off (a restart): write from it, no new plan
+                _version_from_plan(script_id, waiting, report=report, report_path=report_path, column=column,
+                                   started_by=started_by, llm_config=config, review_llm_config=review_config)
+            elif pauses(store.get_script(script_id), column, started_by):
+                if waiting is None:  # a plan already waiting (a restart cut off a redo) is shown again, at no cost
+                    _make_plan(script_id, report=report, report_path=report_path, citation_check=citation_check,
+                               column=column, topic=topic, style=style, started_by=started_by, llm_config=config,
+                               previous_status=failed_status)
+                store.update_script(script_id, status="PLAN_READY", stage=None, error=None)
+                return "PLAN_READY"
+            else:
+                _adapt_version(script_id, report=report, report_path=report_path, citation_check=citation_check,
+                               column=column, topic=topic, style=style, started_by=started_by, llm_config=config,
+                               review_llm_config=review_config)
         except (AdaptError, writer.ScriptError, video_styles.StyleError) as exc:
             store.update_script(script_id, status=failed_status, stage=None, error=f"改编失败：{exc}")
             return failed_status
@@ -362,6 +379,186 @@ def _adapt_version(script_id: str, *, report: str, report_path: str, citation_ch
               "cell": video_columns.provenance(get_settings().paths.config_dir, column.key)},
         created_by=started_by,
     )
+
+
+# --- pausing after the plan (writing.pause_after_plan, spec/video-steps.md) ----------------------------------
+
+def pauses(script: dict, column, started_by: str) -> bool:
+    """Whether this write stops at the plan for the user. A batch's script never does, whoever starts the write:
+    a batch does not wait for the user (and its next tick would find nothing to do)."""
+    return (column.writer == "adapt" and column.pause_after_plan and started_by != "autopilot"
+            and script.get("created_by") != "autopilot")
+
+
+def _style_keys(style) -> dict:
+    return {"depth": style.depth.key, "tone": style.tone.key}
+
+
+def _make_plan(script_id: str, *, report: str, report_path: str, citation_check: Optional[dict], column,
+               topic: dict, style, started_by: str, llm_config, previous_status: str, note: str = "",
+               previous: Optional[dict] = None) -> dict:
+    """Steps ① and ② of the adaptation; the plan is stored to wait for the user."""
+    sheet_id = adapt_facts.sheet_id(report)
+    cached = store.get_fact_sheet(sheet_id)
+    planned, _ = adapt_pipeline.make_plan(
+        report=report,
+        citation_check=citation_check,
+        topic=topic,
+        column=column,
+        style=style,
+        llm_config=llm_config,
+        sheet=cached["sheet"] if cached else None,
+        on_sheet=lambda sheet: store.save_fact_sheet(sheet_id, report_path=report_path, sheet=sheet),
+        on_stage=lambda name: store.update_script(script_id, stage=name),
+        note=note,
+        previous=previous,
+    )
+    return video_plans.save(script_id, plan=planned.plan, problems=planned.problems, usage=planned.usage,
+                            sheet_id=sheet_id, style=_style_keys(style), note=note,
+                            previous_status=previous_status, created_by=started_by)
+
+
+def _version_from_plan(script_id: str, row: dict, *, report: str, report_path: str, column, started_by: str,
+                       llm_config, review_llm_config=None) -> int:
+    """Steps ③–⑤ from a confirmed plan, stored as a new GENERATED version."""
+    style = video_styles.resolve(get_settings().paths.config_dir, column, row["style"].get("depth"),
+                                 row["style"].get("tone"))
+    cached = store.get_fact_sheet(row["sheet_id"])
+    if cached is None:
+        raise AdaptError("这份方案用的事实底稿不见了，请放弃方案后重新写稿")
+    adapted = adapt_pipeline.write_from_plan(
+        report=report,
+        planned=adapt_pipeline.Planned(plan=row["plan"], problems=row["problems"], usage=row["usage"]),
+        sheet=cached["sheet"],
+        column=column,
+        style=style,
+        llm_config=llm_config,
+        review_llm_config=review_llm_config,
+        on_stage=lambda name: store.update_script(script_id, stage=name),
+    )
+    version = store.add_version(
+        script_id,
+        title=adapted.title,
+        sections=adapted.sections,
+        length_check=adapted.length_check,
+        edit_type="GENERATED",
+        meta={**adapted.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+              "cell": video_columns.provenance(get_settings().paths.config_dir, column.key),
+              "plan_confirmed": {"plan_id": row["id"], "by": row["confirmed_by"], "at": row["confirmed_at"],
+                                 "edits": row["edits"], "note": row["note"]}},
+        created_by=started_by,
+    )
+    video_plans.mark(row["id"], "USED", version=version)
+    return version
+
+
+def _waiting_plan(script_id: str) -> dict:
+    script = store.get_script(script_id)
+    if script is None or script["status"] != "PLAN_READY" or script_id in _active:
+        raise RestyleError(f"文稿当前是 {(script or {}).get('status')}，没有等确认的方案")
+    row = video_plans.pending(script_id)
+    if row is None:
+        raise RestyleError("没有等确认的方案")
+    return row
+
+
+def confirm_plan(script_id: str, *, edits: Optional[dict] = None, started_by: str = "") -> dict:
+    """The user confirms the waiting plan (maybe rewording it); the draft is then written in the background."""
+    row = _waiting_plan(script_id)
+    plan = row["plan"]
+    try:
+        changed = video_plans.apply_edits(plan, edits or {})
+    except ValueError as exc:
+        raise RestyleError(str(exc)) from exc
+    if not video_plans.confirm(row["id"], plan=plan, edits=changed, by=started_by):
+        raise RestyleError("这份方案已经确认、重做或放弃了")
+    store.update_script(script_id, status="WRITING", stage="排队", error=None, heartbeat_at=time.time())
+    threading.Thread(target=run_from_plan, args=(script_id,), kwargs={"started_by": started_by},
+                     name=f"video-plan-write-{script_id[:8]}", daemon=True).start()
+    return {**store.get_script(script_id), "edits": changed}
+
+
+def run_from_plan(script_id: str, *, started_by: str = "", llm_config: Optional[LLMConfig] = None) -> str:
+    """Write the draft from the confirmed plan. A failure puts the plan back to wait, with the reason."""
+    if script_id in _active:
+        return "RUNNING"
+    _active.add(script_id)
+    row = None
+    try:
+        with store.beating(store.touch_script, script_id):
+            script = store.get_script(script_id)
+            row = video_plans.open_plan(script_id)
+            if row is None or row["state"] != "CONFIRMED":
+                raise AdaptError("没有已确认的方案")
+            column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
+            report = _read_report(script["report_path"])
+            config, review_config = _llm_configs(llm_config, column)
+            store.update_script(script_id, stage=None)
+            _version_from_plan(script_id, row, report=report, report_path=script["report_path"], column=column,
+                               started_by=started_by, llm_config=config, review_llm_config=review_config)
+        store.update_script(script_id, status="DRAFT", stage=None, error=None)
+        return "DRAFT"
+    except Exception as exc:  # noqa: BLE001 - the plan stays; the user can confirm it again, redo or discard it
+        logger.exception("writing video script %s from its plan failed", script_id)
+        if row is not None:
+            video_plans.mark(row["id"], "PENDING", only_from=("CONFIRMED",))
+        store.update_script(script_id, status="PLAN_READY", stage=None,
+                            error=f"按方案写稿失败：{type(exc).__name__}: {exc}")
+        return "PLAN_READY"
+    finally:
+        _active.discard(script_id)
+
+
+def redo_plan(script_id: str, *, note: str, started_by: str = "") -> dict:
+    """Make the plan again with the user's note, in the background. The old plan waits until the new one is in."""
+    row = _waiting_plan(script_id)
+    if not note.strip():
+        raise RestyleError("写一句对方案的意见再重做")
+    store.update_script(script_id, status="WRITING", stage="定方案", error=None, heartbeat_at=time.time())
+    threading.Thread(target=run_redo_plan, args=(script_id, row["id"], note.strip()),
+                     kwargs={"started_by": started_by}, name=f"video-plan-redo-{script_id[:8]}", daemon=True).start()
+    return store.get_script(script_id)
+
+
+def run_redo_plan(script_id: str, plan_id: str, note: str, *, started_by: str = "",
+                  llm_config: Optional[LLMConfig] = None) -> str:
+    if script_id in _active:
+        return "RUNNING"
+    _active.add(script_id)
+    try:
+        with store.beating(store.touch_script, script_id):
+            script = store.get_script(script_id)
+            row = video_plans.get(plan_id)
+            column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
+            style = video_styles.resolve(get_settings().paths.config_dir, column, row["style"].get("depth"),
+                                         row["style"].get("tone"))
+            report = _read_report(script["report_path"])
+            citation_check = (report_meta.get(script["report_path"]) or {}).get("citation_check")
+            config, _ = _llm_configs(llm_config, column)
+            _make_plan(script_id, report=report, report_path=script["report_path"], citation_check=citation_check,
+                       column=column, topic=script["topic"], style=style, started_by=started_by, llm_config=config,
+                       previous_status=row["previous_status"], note=note, previous=row["plan"])
+        store.update_script(script_id, status="PLAN_READY", stage=None, error=None)
+        return "PLAN_READY"
+    except Exception as exc:  # noqa: BLE001 - the old plan still waits
+        logger.exception("redoing the plan of video script %s failed", script_id)
+        store.update_script(script_id, status="PLAN_READY", stage=None,
+                            error=f"重做方案失败，原方案还在：{type(exc).__name__}: {exc}")
+        return "PLAN_READY"
+    finally:
+        _active.discard(script_id)
+
+
+def discard_plan(script_id: str, *, started_by: str = "") -> dict:
+    """Drop the waiting plan: the script goes back to what it was (a first write: FAILED, so it can be rewritten)."""
+    row = _waiting_plan(script_id)
+    if not video_plans.mark(row["id"], "DISCARDED", only_from=("PENDING",)):
+        raise RestyleError("这份方案已经确认、重做或放弃了")
+    script = store.get_script(script_id)
+    back = row["previous_status"] if script.get("current_version") else "FAILED"
+    store.update_script(script_id, status=back, stage=None,
+                        error="方案已放弃；要写稿就重跑「写稿」" if back == "FAILED" else None)
+    return store.get_script(script_id)
 
 
 def restyle(script_id: str, *, depth: Optional[str] = None, tone: Optional[str] = None,

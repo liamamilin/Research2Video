@@ -22,6 +22,7 @@ import {
 } from "@/api/video";
 import { CredibilityBadge } from "@/components/CredibilityBadge";
 import { ReportReuse } from "@/components/ReportReuse";
+import { PlanReview } from "@/components/PlanReview";
 import { ScriptSteps } from "@/components/ScriptSteps";
 import { TimeStamp } from "@/components/TimeStamp";
 import { ErrorState } from "@/components/ErrorState";
@@ -342,6 +343,10 @@ export function VideoScriptViewPage() {
       </section>
 
       <ScriptSteps detail={detail} canEdit={canEdit} onChanged={setDetail} />
+
+      {detail.pending_plan ? (
+        <PlanReview key={detail.pending_plan.id} detail={detail} canEdit={canEdit} onChanged={setDetail} />
+      ) : null}
 
       {tabs.length ? (
         <div role="tablist" className="flex gap-1 border-b border-border">

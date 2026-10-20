@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 const KIND: Record<BoardAttention["kind"], { label: string; cls: string }> = {
   review: { label: "待审校", cls: "border-warning text-warning" },
+  plan: { label: "待确认方案", cls: "border-warning text-warning" },
   failed: { label: "失败", cls: "border-danger text-danger" },
   render: { label: "待成片", cls: "border-border text-text-muted" },
   render_done: { label: "待发布", cls: "border-success text-success" },

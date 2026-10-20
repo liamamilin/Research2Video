@@ -52,6 +52,7 @@ writing:
   paragraph_units: [20, 90]
   required_roles: [钩子, 行动]
   revise_rounds: 2              # 只对 adapt：审校后的修改轮数，0–5
+  pause_after_plan: false       # 只对 adapt：方案定好后停下等你确认再写稿；默认 false，批次的文稿从不停（spec/video-steps.md）
   audit:
     model: review               # review 用 system.yaml 的 review_ai / writer 用写稿模型
     style_severity: must        # 一次写稿的风格审计：must 必须改 / warn 只提醒

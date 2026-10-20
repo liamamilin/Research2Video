@@ -114,33 +114,18 @@ def _resolved(initial: list[dict], final: list[dict]) -> list[dict]:
             for i in initial]
 
 
-def adapt(
-    *,
-    report: str,
-    citation_check: Optional[dict],
-    topic: dict,
-    column,
-    style,
-    llm_config,
-    review_llm_config=None,
-    sheet: Optional[dict] = None,
-    on_sheet: Optional[Callable[[dict], None]] = None,
-    on_stage: Optional[Callable[[str], None]] = None,
-    cancel_token: Optional[threading.Event] = None,
-) -> tuple[Adapted, dict]:
-    """(script, fact sheet).
+def _sum_usage(*usages: dict) -> dict:
+    out: dict = {}
+    for usage in usages:
+        for key, value in (usage or {}).items():
+            out[key] = out.get(key, 0) + value
+    return out
 
-    Pass ``sheet`` to reuse the one made for this report; ``on_sheet`` gets a
-    newly made sheet at once, so a later step failing does not waste it.
-    ``review_llm_config`` runs the fact audit on another model.
-    """
-    from core.llm import LLMClient
 
-    client = LLMClient(llm_config, cancel_token=cancel_token)
-    auditor = LLMClient(review_llm_config, cancel_token=cancel_token) if review_llm_config else client
-    stage = on_stage or (lambda _name: None)
+def _plan(client, *, report, citation_check, topic, column, style, sheet, on_sheet, stage,
+          note: str = "", previous: Optional[dict] = None) -> tuple[dict, list[str], dict]:
+    """Steps ① and ②: (plan, problems so far, fact sheet)."""
     problems: list[str] = []
-
     if sheet is None:
         stage("拆事实")
         sheet, sheet_problems = facts.extract(client, report, citation_check)
@@ -149,9 +134,16 @@ def adapt(
             on_sheet(sheet)
 
     stage("定方案")
-    plan, plan_problems = planning.make(client, sheet, column, topic, style, column.target_minutes)
+    plan, plan_problems = planning.make(client, sheet, column, topic, style, column.target_minutes,
+                                        note=note, previous=previous)
     problems += plan_problems
+    return plan, problems, sheet
 
+
+def _write(client, auditor, *, report, plan, sheet, column, style, problems: list[str], stage,
+           usage_before: Optional[dict] = None) -> Adapted:
+    """Steps ③–⑤ from a plan: draft, audits and fix rounds. ``problems`` are the plan step's, kept first."""
+    problems = list(problems)
     stage("写稿")
     title, sections, raw_description = draft.write(client, plan, sheet, style, column)
     writer._require_chinese(sections)
@@ -204,7 +196,7 @@ def adapt(
         "plan": plan,
         "checks": checks,
         "description": draft.description(raw_description, sections, plan, sheet),
-        "usage": dict(client.usage),
+        "usage": _sum_usage(usage_before, client.usage) if usage_before else dict(client.usage),
         "problems": problems + writer.lint(sections),
     }
     if auditor is not client:
@@ -212,4 +204,91 @@ def adapt(
     return Adapted(title=title, sections=sections,
                    length_check=length.measure(sections, column.target_minutes, section_budgets=budgets,
                                                voice=column.voice_id),
-                   meta=meta), sheet
+                   meta=meta)
+
+
+def _clients(llm_config, review_llm_config, cancel_token):
+    from core.llm import LLMClient
+
+    client = LLMClient(llm_config, cancel_token=cancel_token)
+    auditor = LLMClient(review_llm_config, cancel_token=cancel_token) if review_llm_config else client
+    return client, auditor
+
+
+def adapt(
+    *,
+    report: str,
+    citation_check: Optional[dict],
+    topic: dict,
+    column,
+    style,
+    llm_config,
+    review_llm_config=None,
+    sheet: Optional[dict] = None,
+    on_sheet: Optional[Callable[[dict], None]] = None,
+    on_stage: Optional[Callable[[str], None]] = None,
+    cancel_token: Optional[threading.Event] = None,
+) -> tuple[Adapted, dict]:
+    """(script, fact sheet): all five steps in one go.
+
+    Pass ``sheet`` to reuse the one made for this report; ``on_sheet`` gets a
+    newly made sheet at once, so a later step failing does not waste it.
+    ``review_llm_config`` runs the fact audit on another model.
+    """
+    client, auditor = _clients(llm_config, review_llm_config, cancel_token)
+    stage = on_stage or (lambda _name: None)
+    plan, problems, sheet = _plan(client, report=report, citation_check=citation_check, topic=topic, column=column,
+                                  style=style, sheet=sheet, on_sheet=on_sheet, stage=stage)
+    return _write(client, auditor, report=report, plan=plan, sheet=sheet, column=column, style=style,
+                  problems=problems, stage=stage), sheet
+
+
+@dataclass
+class Planned:
+    """Steps ① and ② done: the plan waits for the user before the draft is written."""
+    plan: dict
+    problems: list[str]
+    usage: dict
+
+
+def make_plan(
+    *,
+    report: str,
+    citation_check: Optional[dict],
+    topic: dict,
+    column,
+    style,
+    llm_config,
+    sheet: Optional[dict] = None,
+    on_sheet: Optional[Callable[[dict], None]] = None,
+    on_stage: Optional[Callable[[str], None]] = None,
+    cancel_token: Optional[threading.Event] = None,
+    note: str = "",
+    previous: Optional[dict] = None,
+) -> tuple[Planned, dict]:
+    """(plan, fact sheet), the first half of ``adapt``. ``note`` is the user's word on ``previous`` plan, for a redo."""
+    client, _ = _clients(llm_config, None, cancel_token)
+    plan, problems, sheet = _plan(client, report=report, citation_check=citation_check, topic=topic, column=column,
+                                  style=style, sheet=sheet, on_sheet=on_sheet, stage=on_stage or (lambda _name: None),
+                                  note=note, previous=previous)
+    return Planned(plan=plan, problems=problems, usage=dict(client.usage)), sheet
+
+
+def write_from_plan(
+    *,
+    report: str,
+    planned: Planned,
+    sheet: dict,
+    column,
+    style,
+    llm_config,
+    review_llm_config=None,
+    on_stage: Optional[Callable[[str], None]] = None,
+    cancel_token: Optional[threading.Event] = None,
+) -> Adapted:
+    """The second half of ``adapt``: the same draft, audits and fixes, from a plan made (and maybe edited) earlier.
+
+    The version's usage adds up both halves."""
+    client, auditor = _clients(llm_config, review_llm_config, cancel_token)
+    return _write(client, auditor, report=report, plan=planned.plan, sheet=sheet, column=column, style=style,
+                  problems=planned.problems, stage=on_stage or (lambda _name: None), usage_before=planned.usage)

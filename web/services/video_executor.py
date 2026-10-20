@@ -73,6 +73,8 @@ def rerun(script_id: str, step: str, by: str) -> dict:
         raise StepError(f"这一步不能重跑：{step}（定稿在文稿页点「定稿」）")
     if script["status"] in ("RESEARCHING", "WRITING") or (script["status"] == "DRAFT" and script.get("stage")):
         raise StepError("文稿正在调研或写稿，等它完成")
+    if script["status"] == "PLAN_READY":
+        raise StepError("方案在等你确认：先确认、带意见重做或放弃方案")
     if step == "research":
         return _resume_research(script, by)
     if step == "write":
@@ -129,6 +131,38 @@ def _render(script: dict, by: str, voice_id: Optional[str] = None) -> dict:
     return render
 
 
+# --- a plan waiting for the user (writing.pause_after_plan) -------------------
+
+def confirm_plan(script_id: str, by: str, edits: Optional[dict] = None) -> dict:
+    """The user confirms the waiting plan, maybe reworded; the draft is written from it."""
+    try:
+        script = video_workflow.confirm_plan(script_id, edits=edits, started_by=by)
+    except video_workflow.RestyleError as exc:
+        raise StepError(str(exc)) from exc
+    changed = script.pop("edits")
+    steps.log(script_id, "write", "confirm", "确认方案" + (f"，改了 {'、'.join(changed)}" if changed else "，没有改动")
+              + "；按方案写稿", by=by)
+    return script
+
+
+def redo_plan(script_id: str, by: str, note: str) -> dict:
+    try:
+        script = video_workflow.redo_plan(script_id, note=note, started_by=by)
+    except video_workflow.RestyleError as exc:
+        raise StepError(str(exc)) from exc
+    steps.log(script_id, "write", "redo_plan", f"带意见重做方案：{note.strip()[:200]}", by=by)
+    return script
+
+
+def discard_plan(script_id: str, by: str) -> dict:
+    try:
+        script = video_workflow.discard_plan(script_id, started_by=by)
+    except video_workflow.RestyleError as exc:
+        raise StepError(str(exc)) from exc
+    steps.log(script_id, "write", "discard_plan", "放弃方案", by=by)
+    return script
+
+
 def render(script_id: str, by: str, voice_id: Optional[str] = None) -> dict:
     """The user's 出片 button: the approved version to AutoVideo. Returns the render."""
     script = store.get_script(script_id)
@@ -167,6 +201,9 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
     column = column_of(script)
     tries = lambda key: int((retries or {}).get(key, 0))  # noqa: E731
     if status in ("RESEARCHING", "WRITING"):
+        return out
+    if status == "PLAN_READY":  # a batch's write never pauses; this one was paused by hand
+        out["hold"] = "方案在等你确认"
         return out
     if status == "FAILED":
         if tries("script") >= MAX_RETRIES:

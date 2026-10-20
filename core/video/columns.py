@@ -89,6 +89,9 @@ class Column:
     audit_timeout_seconds: int = 0
     #: Fix rounds of the five-step adaptation.
     revise_rounds: int = 2
+    #: Stop the five-step adaptation once the plan is made, until the user confirms it (spec/video-steps.md).
+    #: Never for a batch's scripts: a batch does not wait for the user.
+    pause_after_plan: bool = False
 
     def writer_topic_fields(self) -> tuple[str, ...]:
         return self.topic_fields or DEFAULT_TOPIC_FIELDS[self.writer]
@@ -283,6 +286,9 @@ def build(key: str, raw: dict) -> Column:
         raise ColumnError(f"栏目 {key} 的 audit.timeout_seconds 和 revise_rounds 应为整数") from exc
     if audit_timeout < 0 or not 0 <= rounds <= 5:
         raise ColumnError(f"栏目 {key}：audit.timeout_seconds 不能为负，revise_rounds 应在 0–5 之间")
+    pause = _flag(key, "pause_after_plan", raw.get("pause_after_plan"))
+    if pause and writer != "adapt":
+        raise ColumnError(f"栏目 {key}：pause_after_plan 只用于五步改编（writing.pipeline: adapt），一次写成没有方案这一步")
     if writer == "adapt" and minutes < ADAPT_MIN_MINUTES:
         raise ColumnError(f"栏目 {key}：五步改编（adapt）是给 {ADAPT_MIN_MINUTES} 分钟以上的稿子设计的，"
                           f"{minutes} 分钟的稿子用 single")
@@ -324,6 +330,7 @@ def build(key: str, raw: dict) -> Column:
         audit_style_severity=severity,
         audit_timeout_seconds=audit_timeout,
         revise_rounds=rounds,
+        pause_after_plan=pause,
     )
 
 

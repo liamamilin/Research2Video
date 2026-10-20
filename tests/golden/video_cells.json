@@ -30,6 +30,7 @@
     60,
     140
    ],
+   "pause_after_plan": false,
    "recheck": false,
    "required_roles": [
     "钩子",
@@ -131,6 +132,7 @@
     20,
     90
    ],
+   "pause_after_plan": false,
    "recheck": true,
    "required_roles": [
     "钩子",
@@ -247,6 +249,7 @@
     30,
     100
    ],
+   "pause_after_plan": false,
    "recheck": false,
    "required_roles": [
     "钩子",

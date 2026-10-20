@@ -256,9 +256,16 @@ def check(plan: dict, sheet: dict, column, target_minutes: float) -> list[str]:
     return problems
 
 
-def make(client, sheet: dict, column, topic: dict, style, target_minutes: float) -> tuple[dict, list[str]]:
-    """(plan, problems left after one retry, plus a scope warning the plan itself raised)."""
+def make(client, sheet: dict, column, topic: dict, style, target_minutes: float, *,
+         note: str = "", previous: dict | None = None) -> tuple[dict, list[str]]:
+    """(plan, problems left after one retry, plus a scope warning the plan itself raised).
+
+    ``note`` is the editor's word on the ``previous`` plan, when the user asked for it to be redone; without one the
+    request is exactly the first plan's."""
     request = _request(sheet, column, topic, style, target_minutes)
+    if note.strip():
+        request += ("\n\n## 编辑看过的方案\n" + json.dumps(previous or {}, ensure_ascii=False)
+                    + "\n\n## 编辑对这版方案的意见（按意见改，输出完整的新方案）\n" + note.strip())
     plan = call_json(client, SYSTEM_PROMPT, request, _Plan, temperature=0.4).model_dump()
     problems = check(plan, sheet, column, target_minutes)
     if problems:

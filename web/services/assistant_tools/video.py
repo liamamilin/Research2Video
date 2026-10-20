@@ -19,7 +19,7 @@ class VideoQuery(Arguments):
     action: Literal['board', 'list', 'find', 'get', 'topics', 'cells', 'quality', 'references'] = 'board'
     script_id: str = ''
     text: str = ''
-    status: Literal['RESEARCHING', 'WRITING', 'DRAFT', 'APPROVED', 'FAILED'] | None = None
+    status: Literal['RESEARCHING', 'WRITING', 'PLAN_READY', 'DRAFT', 'APPROVED', 'FAILED'] | None = None
     source: Literal['flash', 'opportunities'] = 'flash'
     limit: int = Field(default=30, ge=1, le=100)
 
