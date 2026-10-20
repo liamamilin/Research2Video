@@ -193,6 +193,7 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
         store.update_script(script_id, status="FAILED", error=f"读不到研究报告 {report_path}：{exc}")
         return "FAILED"
     citation_check = (report_meta.get(report_path) or {}).get("citation_check")
+    _attach_report(script, report_path, column, started_by)
 
     if script["current_version"] and column.writer != "adapt":
         # 2b. Resume: the draft was saved and the audits after it were cut off — only the audits are left.
@@ -251,6 +252,21 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     store.update_version_audit(script_id, version, sections=written.sections, meta={**meta, **audit_meta})
     store.update_script(script_id, stage=None)
     return "DRAFT"
+
+
+def _attach_report(script: dict, report_path: str, column, started_by: str) -> None:
+    """Record the report this script is written from (spec/video-reports.md), once per report file."""
+    from core.video import reports
+
+    if script.get("report_id") and script.get("report_path") == report_path:
+        return
+    reused = bool(script["topic"].get("from_report"))
+    uses = (video_columns.provenance(get_settings().paths.config_dir, column.key) or {}).get("uses") or {}
+    reports.attach(script["id"], report_path,
+                   job="" if reused else research_job_name(column.key, script["id"]),
+                   topic=None if reused else script["topic"],
+                   research="" if reused else ((uses.get("research") or {}).get("name") or ""),
+                   created_by=started_by or script.get("created_by") or "")
 
 
 def _resume_audit(script_id: str, script: dict, report: str, report_path: str, column) -> str:

@@ -21,6 +21,7 @@ import {
   type VideoScriptDetail,
 } from "@/api/video";
 import { CredibilityBadge } from "@/components/CredibilityBadge";
+import { ReportReuse } from "@/components/ReportReuse";
 import { TimeStamp } from "@/components/TimeStamp";
 import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
@@ -419,6 +420,10 @@ export function VideoScriptViewPage() {
             </span>
           ))}
         </section>
+      ) : null}
+
+      {detail.report_id && tab === "draft" ? (
+        <ReportReuse scriptId={detail.id} reportId={detail.report_id} canEdit={canEdit} />
       ) : null}
 
       {shown && tab === "draft" ? (

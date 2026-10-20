@@ -288,6 +288,29 @@ def start_discovery(source: str = "flash", user=Depends(require_editor)) -> dict
     return status
 
 
+# --- Research reports ----------------------------------------------------------
+# Every report a script is written from, recorded once; a new script can start from any of them (spec/video-reports.md)
+
+
+@router.get("/reports")
+def list_research_reports(limit: int = 100, user=Depends(require_viewer)) -> list[dict]:
+    from core.video import reports
+
+    workspace = video_workflow.workspace_dir()
+    return [{**r, "on_disk": reports.exists_on_disk(r, workspace)}
+            for r in reports.list_reports(limit=min(max(limit, 1), 500))]
+
+
+@router.get("/reports/{report_id}")
+def get_research_report(report_id: str, user=Depends(require_viewer)) -> dict:
+    from core.video import reports
+
+    report = reports.get(report_id)
+    if report is None:
+        raise HTTPException(404, detail=ApiError.make("not_found", "没有这份研究报告"))
+    return {**report, "on_disk": reports.exists_on_disk(report, video_workflow.workspace_dir())}
+
+
 # --- Scripts -----------------------------------------------------------------
 
 
@@ -313,6 +336,9 @@ class ScriptCreateIn(BaseModel):
         default=None, description="One of the column's allowed forms; the column's default when left out")
     from_script: Optional[str] = Field(
         default=None, description="Write from this script's research report instead of researching again")
+    report_id: Optional[str] = Field(
+        default=None, description="Write from this recorded research report (GET /reports) instead of researching;"
+                                  " the topic defaults to the one the report was researched for")
 
 
 def _roundup_topic(body: ScriptCreateIn) -> dict:
@@ -351,6 +377,19 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
     if body.video_form is not None and body.video_form not in (chosen.allowed_forms or (chosen.video_form,)):
         raise HTTPException(422, detail=ApiError.make(
             "form_not_allowed", f"这个栏目只能用这些视频形式：{', '.join(chosen.allowed_forms or (chosen.video_form,))}"))
+    report = None
+    if body.report_id is not None:
+        from core.video import reports
+
+        if body.from_script is not None:
+            raise HTTPException(422, detail=ApiError.make("one_report", "report_id 和 from_script 只能给一个"))
+        report = reports.get(body.report_id)
+        if report is None or not reports.exists_on_disk(report, video_workflow.workspace_dir()):
+            raise HTTPException(422, detail=ApiError.make("unknown_report", "找不到这份研究报告，或报告文件已不在"))
+        if body.topic_id is None and body.topic is None and not body.topic_ids and chosen.topic_kind == "single":
+            if not report["topic_id"]:
+                raise HTTPException(422, detail=ApiError.make("topic_required", "这份报告不是为某个选题调研的，请选一个选题"))
+            body = body.model_copy(update={"topic_id": report["topic_id"]})
     kind = chosen.topic_kind
     if kind == "roundup":
         topic = _roundup_topic(body)
@@ -379,6 +418,8 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
         if parent is None or not parent.get("report_path"):
             raise HTTPException(422, detail=ApiError.make("unknown_parent", "找不到这篇文稿，或它还没有研究报告"))
         topic = {**topic, "from_report": parent["report_path"], "parent_script": parent["id"]}
+    if report is not None:
+        topic = {**topic, "from_report": report["report_path"], "report_id": report["id"]}
     if chosen.research_mode == "none" and not topic.get("from_report"):
         raise HTTPException(422, detail=ApiError.make(
             "report_required", "这个配方不做调研（research.mode: none）：要从已有文稿切（from_script）或选发现报告里的条目"))

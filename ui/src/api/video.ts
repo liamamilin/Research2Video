@@ -257,6 +257,7 @@ export interface VideoScriptSummary {
   stage?: string | null;
   research_job: string;
   report_path: string;
+  report_id?: string | null; // 研究报告记录（/api/video/reports），同一份报告可以写多篇
   current_version: number;
   approved_version: number | null;
   error: string | null;
@@ -454,7 +455,27 @@ export const createVideoScript = (body: {
   topic?: { title?: string; angle?: string; audience?: string; subjects?: string[]; dimensions?: string };
   topic_ids?: string[];
   video_form?: string;
+  report_id?: string; // 用已有的研究报告写，不再调研；不给选题时用报告当初调研的那个选题
 }) => api<VideoScriptSummary>("/api/video/scripts", { method: "POST", body });
+
+// 研究报告记录：每个报告文件一行，记着从它写出的所有文稿（spec/video-reports.md）
+export interface ResearchReport {
+  id: string;
+  report_path: string;
+  kind: "video_research" | "topic_source" | "other";
+  kind_label: string;
+  job: string;
+  topic_id: string;
+  topic_title: string;
+  research: string;
+  created_by: string;
+  created_at: string;
+  on_disk: boolean;
+  scripts: { id: string; column_key: string; status: ScriptStatus; title: string; archived: boolean; created_at: string }[];
+}
+
+export const listResearchReports = () => api<ResearchReport[]>("/api/video/reports");
+export const getResearchReport = (id: string) => api<ResearchReport>(`/api/video/reports/${encodeURIComponent(id)}`);
 
 export const saveVideoScript = (id: string, body: { title: string; sections: ScriptSection[]; base_version?: number }) =>
   api<VideoScriptDetail>(`/api/video/scripts/${encodeURIComponent(id)}`, { method: "PUT", body });
