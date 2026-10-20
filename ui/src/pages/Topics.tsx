@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FilterBar, matchesText, useFilters, type Facet } from "@/components/FilterBar";
 import { TimeStamp } from "@/components/TimeStamp";
-import { listVideoCells, listVideoTopics, type VideoCell, type VideoTopic } from "@/api/video";
+import { listCellCoverage, listVideoCells, listVideoTopics, type CellCoverage, type VideoCell, type VideoTopic } from "@/api/video";
 
 type Source = "flash" | "opportunities";
 
@@ -20,10 +20,12 @@ export function TopicsPage() {
   const [round, setRound] = useState<string | null>(null);
   const [topics, setTopics] = useState<VideoTopic[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
+  const [coverage, setCoverage] = useState<CellCoverage[]>([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     listVideoCells().then(setCells).catch(() => undefined);
+    listCellCoverage().then(setCoverage).catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -68,6 +70,32 @@ export function TopicsPage() {
         {source === "flash" ? "来自快讯发现报告" : "来自情报轮次推荐的视频选题（P7）"}
         {round ? ` ${round}` : ""}，还有 {todo} 条没写。想把几条快讯合成一期盘点，去文稿页选「盘点」。
       </p>
+      {coverage.length ? (
+        <div className="overflow-x-auto" aria-label="内容矩阵">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-left text-text-muted">
+                <th className="py-1 pr-3 font-normal">格子</th>
+                <th className="py-1 pr-3 font-normal">选题来源</th>
+                <th className="py-1 pr-3 font-normal">还没写</th>
+                <th className="py-1 pr-3 font-normal">已写</th>
+                <th className="py-1 font-normal">最近一期</th>
+              </tr>
+            </thead>
+            <tbody>
+              {coverage.map((c) => (
+                <tr key={c.cell} className="border-t border-border">
+                  <td className="py-1 pr-3">{c.label}</td>
+                  <td className="py-1 pr-3">{c.sources.length ? c.sources.map((s) => SOURCE_LABEL[s as Source] ?? s).join("、") : "手选（没有来源）"}</td>
+                  <td className="py-1 pr-3">{c.sources.length ? c.open : "—"}</td>
+                  <td className="py-1 pr-3">{c.sources.length ? c.written : "—"}</td>
+                  <td className="py-1">{c.report_date ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
       {error ? <p className="text-danger text-sm">{error}</p> : null}
       {topics && topics.length ? <FilterBar facets={facets} filters={filters} shown={shown.length} total={topics.length} placeholder="搜索选题" /> : null}
       {topics && topics.length === 0 ? (

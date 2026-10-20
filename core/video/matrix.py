@@ -157,6 +157,16 @@ def _read(config_dir: str) -> tuple[dict, dict]:
     return data, defs
 
 
+def topic_sources(config_dir: str, key: str) -> list[str]:
+    """The topic sources a cell's type declares (``topic_sources`` on the type); empty when it has none."""
+    data, defs = _read(config_dir)
+    for entry in (data.get("cells") or []):
+        cell_id = "-".join(str(entry.get(dim)) for dim in DIMENSIONS)
+        if key in (cell_id, entry.get("key")):
+            return [str(x) for x in (defs["type"].get(entry.get("type")) or {}).get("topic_sources") or []]
+    return []
+
+
 def load(config_dir: str) -> dict[str, Cell]:
     """Every cell of ``video_matrix.yaml`` by its id; a malformed definition raises, naming it."""
     data, defs = _read(config_dir)
@@ -228,6 +238,7 @@ def catalog(config_dir: str) -> list[dict]:
             "label": " · ".join(names[dim] for dim in ("type", "audience", "format")),
             "parts": {dim: {**cell.parts[dim], "name": names[dim]} for dim in DIMENSIONS},
             "column": cell.column.as_dict() if cell.column else None,
+            "topic_sources": topic_sources(config_dir, cell.id),
         })
     order = {status: i for i, status in enumerate(STATUSES)}
     return sorted(rows, key=lambda r: order[r["status"]])

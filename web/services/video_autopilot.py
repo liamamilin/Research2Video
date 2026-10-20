@@ -53,13 +53,55 @@ DEFAULT_SPEC = {"picks": [{"column": "flash", "count": 3, "source": "flash"},
 
 # --- picking ---------------------------------------------------------------
 
+def _loader(source: str):
+    return video_flash.load if source == "flash" else video_topics.load
+
+
+def resolve_pick(pick: dict) -> dict:
+    """A pick by ``cell`` (what the matrix says it can be written from) becomes ``column`` + ``source``."""
+    if not pick.get("cell"):
+        return pick
+    from core.video import matrix
+
+    config_dir = get_settings().paths.config_dir
+    sources = matrix.topic_sources(config_dir, pick["cell"])
+    if not sources:
+        raise ValueError(f"格子 {pick['cell']} 没有选题来源，不能自动挑选题")
+    return {"column": pick["cell"], "count": pick.get("count", 1), "source": sources[0]}
+
+
+def coverage() -> list[dict]:
+    """Per cell: its topic sources, how many topics wait to be written and how many are taken, newest report date."""
+    from core.video import matrix
+
+    settings = get_settings()
+    taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids()
+    cache: dict[str, tuple] = {}
+    rows = []
+    for cell in matrix.catalog(settings.paths.config_dir):
+        sources = cell.get("topic_sources") or []
+        if not cell["usable"] or cell["key"] is None:
+            continue
+        row = {"cell": cell["key"], "label": cell["label"], "status": cell["status"], "sources": sources,
+               "open": 0, "written": 0, "report_date": None}
+        for source in sources:
+            if source not in cache:
+                cache[source] = _loader(source)(settings.paths.output_dir)
+            date, topics = cache[source]
+            row["report_date"] = max(filter(None, [row["report_date"], date]), default=None)
+            row["open"] += len([t for t in topics if t.id not in taken])
+            row["written"] += len([t for t in topics if t.id in taken])
+        rows.append(row)
+    return rows
+
+
 def pick_topics(spec: dict) -> list[dict]:
     """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet."""
     out_dir = get_settings().paths.output_dir
     taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids()
     items: list[dict] = []
-    for pick in spec.get("picks", []):
-        loader = video_flash.load if pick.get("source", "flash") == "flash" else video_topics.load
+    for pick in (resolve_pick(p) for p in spec.get("picks", [])):
+        loader = _loader(pick.get("source", "flash"))
         _, topics = loader(out_dir)
         for topic in sorted(topics, key=lambda t: -(t.score or 0)):
             if len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
@@ -343,6 +385,7 @@ def start_run(spec: Optional[dict] = None, *, plan_id: Optional[str] = None, sta
     """A batch from ``spec`` (the default one when none is given). Items are picked on the first tick."""
     spec = spec or DEFAULT_SPEC
     for pick in spec.get("picks", []):
+        pick = resolve_pick(pick)
         video_columns.get(get_settings().paths.config_dir, pick["column"])  # unknown cell raises
     return ap.create_run(spec, [], plan_id=plan_id, started_by=started_by)
 

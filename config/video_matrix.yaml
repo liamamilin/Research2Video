@@ -10,6 +10,7 @@
 # 视频形式（画面怎么组织）挂在类型下：allowed_forms 是能用的，default_form 是默认的；形态的 forms 只做限制，取交集。
 # 受众的话填进类型文字里的插槽：{audience}（短称）写在行内，{audience_impact} 也在行内，{audience_guidance}、{audience_research} 单独占一行（受众没有就删掉这一行）。
 # 格子的组合结果必须和 tests/golden/video_cells.json 一致（有意的变更才重新生成）。
+# 类型的 topic_sources：这个类型的选题从哪些来源取（flash 快讯发现、opportunities 情报轮次）；没写就是没有来源，只能手选。
 # config/video_columns.yaml 仍可写单个栏目（老格式）。
 
 domains:
@@ -64,6 +65,7 @@ formats:
     target_minutes: 6
 types:
   deep_dive:
+    topic_sources: [opportunities]
     name: 深度解读
     version: 1
     description: 把一个值得讲清楚的问题讲透：先给结论，再按证据强弱展开，讲清反方和局限，最后给可执行的动作。
@@ -119,6 +121,7 @@ types:
         sections: [4, 6]
         paragraph_units: [60, 140]
   quick_take:
+    topic_sources: [flash]
     name: 快讯
     version: 1
     description: 一个变化讲清楚：改了什么（旧到新）、对{audience}意味着什么、现在该做什么。
@@ -196,6 +199,7 @@ types:
             seconds: 3
             sound: synth_sting
   one_point:
+    topic_sources: [flash]
     name: 一个知识点
     version: 1
     description: 60–120 秒只讲清楚一件事：一个结论、一个关键数字或例子、一个能马上做的动作。

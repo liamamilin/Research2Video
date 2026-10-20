@@ -470,3 +470,23 @@ def test_topics_know_which_scripts_cover_them(video_env):
     covered = store.scripts_by_topic()
     assert {s["id"] for s in covered["2026-10-19/F1"]} == {roundup["id"], single["id"]}
     assert [s["id"] for s in covered["2026-10-19/F2"]] == [roundup["id"]]
+
+
+def test_cells_declare_topic_sources_and_picks_can_name_a_cell(video_env):
+    from core.video import matrix
+    import shutil
+    from web.settings import get_settings as real_settings
+
+    config_dir = real_settings().paths.config_dir
+    shutil.copy("config/video_matrix.yaml", os.path.join(config_dir, "video_matrix.yaml"))
+    os.remove(os.path.join(config_dir, "video_columns.yaml"))  # the matrix defines the columns here
+    assert matrix.topic_sources(config_dir, "point_short") == ["flash"]
+    assert pilot.resolve_pick({"cell": "point_short", "count": 2}) == {"column": "point_short", "count": 2, "source": "flash"}
+    assert pilot.resolve_pick({"column": "flash", "count": 1, "source": "flash"})["column"] == "flash"
+    with pytest.raises(ValueError):  # a comparison has no topic source: it is chosen by hand
+        pilot.resolve_pick({"cell": "ai-developer-comparison-long", "count": 1})
+    run = pilot.start_run({"picks": [{"cell": "flash", "count": 1}], "refresh": False})
+    assert run["spec"]["picks"][0]["cell"] == "flash"
+    rows = {r["cell"]: r for r in pilot.coverage()}
+    assert rows["flash"]["sources"] == ["flash"] and "open" in rows["flash"]
+    assert rows.get("ai-developer-comparison-long", {"sources": []})["sources"] == []

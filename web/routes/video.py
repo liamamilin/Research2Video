@@ -10,7 +10,7 @@ from typing import Optional
 
 from fastapi import Query, APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from core.video import columns as video_columns
 from core.video import flash as video_flash
@@ -93,6 +93,14 @@ def list_cells(user=Depends(require_viewer)) -> list[dict]:
         return matrix.catalog(get_settings().paths.config_dir)
     except video_columns.ColumnError as exc:
         raise HTTPException(500, detail=ApiError.make("bad_matrix", str(exc))) from exc
+
+
+@router.get("/coverage")
+def cell_coverage(user=Depends(require_viewer)) -> list[dict]:
+    """Per cell: topic sources, topics waiting and already taken (the content matrix view of /topics)."""
+    from web.services import video_autopilot
+
+    return video_autopilot.coverage()
 
 
 @router.get("/board")
@@ -556,9 +564,16 @@ def get_render_file(render_id: str, name: str, user=Depends(require_viewer)) -> 
 class AutopilotPick(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    column: str
+    column: Optional[str] = None
+    cell: Optional[str] = None  # a matrix cell: its column and topic source come from the matrix
     count: int = Field(default=1, ge=1, le=10)
     source: str = Field(default="flash", pattern="^(flash|opportunities)$")
+
+    @model_validator(mode="after")
+    def _one_of(self):
+        if bool(self.column) == bool(self.cell):
+            raise ValueError("column 和 cell 二选一")
+        return self
 
 
 class AutopilotSpec(BaseModel):

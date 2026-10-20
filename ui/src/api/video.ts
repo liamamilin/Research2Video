@@ -373,6 +373,18 @@ export const recheckVideoScript = (id: string) =>
 
 export const listVideoCells = () => api<VideoCell[]>("/api/video/cells");
 
+export interface CellCoverage {
+  cell: string;
+  label: string;
+  status: string;
+  sources: string[];
+  open: number;
+  written: number;
+  report_date: string | null;
+}
+
+export const listCellCoverage = () => api<CellCoverage[]>("/api/video/coverage");
+
 export const listVideoStyles = () => api<StyleCatalog>("/api/video/styles");
 
 export const listVideoTopics = (source: "opportunities" | "flash" = "opportunities") =>
