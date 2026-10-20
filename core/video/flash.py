@@ -110,6 +110,14 @@ def latest_report(output_dir: str) -> str | None:
     return dates[0] if dates else None
 
 
+def report_dates(output_dir: str) -> list[str]:
+    """Dates of every discovery report, newest first."""
+    base = os.path.join(output_dir, FLASH_DIR)
+    if not os.path.isdir(base):
+        return []
+    return sorted((m.group(1) for name in os.listdir(base) if (m := _REPORT.match(name))), reverse=True)
+
+
 def report_path(output_dir: str, report_date: str) -> str:
     return os.path.join(output_dir, FLASH_DIR, f"{report_date}_ai_flash_discovery.md")
 

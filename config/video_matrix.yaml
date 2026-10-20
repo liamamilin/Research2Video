@@ -264,6 +264,7 @@ types:
             seconds: 2.5
             sound: synth_sting
   roundup:
+    topic_sources: [flash]
     name: 盘点
     version: 1
     description: 把一批值得知道的变化按顺序讲一遍：每条一个小节，说清变了什么、对{audience}意味着什么，最后给出先做哪件事。

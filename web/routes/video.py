@@ -149,15 +149,53 @@ def list_topics(round: Optional[str] = None, source: str = "opportunities",
     if source not in ("opportunities", "flash"):
         raise HTTPException(422, detail=ApiError.make("unknown_source", "source 应为 opportunities 或 flash"))
     loader = video_flash.load if source == "flash" else video_topics.load
-    round_date, topics = loader(get_settings().paths.output_dir, round)
+    out = get_settings().paths.output_dir
+    round_date, topics = loader(out, round)
     used = store.topic_ids_in_use()
     published = store.published_topic_ids()
     covered = store.scripts_by_topic()
+    dismissed = store.dismissed_topic_ids()
     return {
         "round": round_date,
+        "rounds": (video_flash.report_dates(out) if source == "flash" else video_topics.round_dates(out)),
         "topics": [{**t.as_dict(), "scripted": t.id in used, "published": t.id in published,
-                    "scripts": covered.get(t.id, [])} for t in topics],
+                    "dismissed": t.id in dismissed, "scripts": covered.get(t.id, [])} for t in topics],
     }
+
+
+class DismissIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    topic_id: str = Field(min_length=3, max_length=120)
+    dismissed: bool = True
+
+
+@router.post("/topics/dismiss")
+def dismiss_topic(body: DismissIn, user=Depends(require_editor)) -> dict:
+    """Mark a topic "not writing" (or bring it back). Reversible; it only hides it from the counts and the pipeline."""
+    store.set_dismissed(body.topic_id, body.dismissed)
+    audit.log("video_topic_dismiss", user=user["username"], target=body.topic_id,
+              result="dismissed" if body.dismissed else "restored")
+    return {"topic_id": body.topic_id, "dismissed": body.dismissed}
+
+
+@router.get("/topics/discovery")
+def discovery_status(user=Depends(require_viewer)) -> dict:
+    """The flash discovery job: running now, and when its newest report came out."""
+    from web.services import video_autopilot
+
+    return video_autopilot.discovery_status()
+
+
+@router.post("/topics/discovery", status_code=202)
+def start_discovery(user=Depends(require_editor)) -> dict:
+    """Start today's flash discovery (about 20 searches). Refused while it is already running."""
+    from web.services import video_autopilot
+
+    if not video_autopilot.start_discovery_if_idle():
+        raise HTTPException(409, detail=ApiError.make("discovery_running", "快讯发现正在跑，等它跑完"))
+    audit.log("video_discovery_start", user=user["username"], target="ai_flash_discovery", result="started")
+    return video_autopilot.discovery_status()
 
 
 # --- Scripts -----------------------------------------------------------------

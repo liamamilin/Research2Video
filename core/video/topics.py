@@ -9,6 +9,7 @@ round, so a script can say which topic it came from.
 
 from __future__ import annotations
 
+import datetime
 import os
 import re
 from dataclasses import asdict, dataclass, field
@@ -21,6 +22,13 @@ _FIELD = re.compile(r"^\s*[-*]\s*\*\*(.+?)\*\*\s*[:：]\s*(.*)$")
 _SCORE = re.compile(r"(\d+(?:\.\d+)?)\s*/\s*10")
 _HEADING = re.compile(r"^#{1,4}\s")
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+#: A news item whose event is older than this many days is marked 偏旧 (a default the user has not confirmed).
+STALE_DAYS = 5
+
+
+def _today() -> datetime.date:
+    return datetime.date.today()
 
 
 @dataclass
@@ -36,8 +44,24 @@ class Topic:
         match = _SCORE.search(self.fields.get("评分", ""))
         return float(match.group(1)) if match else None
 
+    @property
+    def event_date(self) -> str | None:
+        """The day the news happened (the first date in the item's 发布日期), None when it has none."""
+        match = _ISO_DATE.search(self.fields.get("发布日期", ""))
+        return match.group(0) if match else None
+
+    def age_days(self, today: datetime.date | None = None) -> int | None:
+        if not self.event_date:
+            return None
+        today = today or _today()
+        return (today - datetime.date.fromisoformat(self.event_date)).days
+
+    def stale(self, today: datetime.date | None = None) -> bool:
+        age = self.age_days(today)
+        return age is not None and age > STALE_DAYS
+
     def as_dict(self) -> dict:
-        return {**asdict(self), "score": self.score}
+        return {**asdict(self), "score": self.score, "event_date": self.event_date, "stale": self.stale()}
 
 
 def parse(report: str, round_date: str) -> list[Topic]:
@@ -81,6 +105,15 @@ def latest_round(output_dir: str) -> str | None:
         if os.path.isfile(os.path.join(base, date, CONTENT_FILE)):
             return date
     return None
+
+
+def round_dates(output_dir: str) -> list[str]:
+    """Dates of every round that has a content-opportunity report, newest first."""
+    base = os.path.join(output_dir, PIPELINE_DIR)
+    if not os.path.isdir(base):
+        return []
+    return sorted((d for d in os.listdir(base) if _DATE.match(d)
+                   and os.path.isfile(os.path.join(base, d, CONTENT_FILE))), reverse=True)
 
 
 def load(output_dir: str, round_date: str | None = None) -> tuple[str | None, list[Topic]]:

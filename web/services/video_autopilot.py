@@ -67,6 +67,8 @@ def resolve_pick(pick: dict) -> dict:
     sources = matrix.topic_sources(config_dir, pick["cell"])
     if not sources:
         raise ValueError(f"格子 {pick['cell']} 没有选题来源，不能自动挑选题")
+    if video_columns.get(config_dir, pick["cell"]).topic_kind != "single":
+        raise ValueError(f"格子 {pick['cell']} 一期用几条选题合成，不能按条数自动挑")
     return {"column": pick["cell"], "count": pick.get("count", 1), "source": sources[0]}
 
 
@@ -76,6 +78,7 @@ def coverage() -> list[dict]:
 
     settings = get_settings()
     covered = store.scripts_by_topic()
+    dismissed = store.dismissed_topic_ids()
     cache: dict[str, tuple] = {}
     rows = []
     for cell in matrix.catalog(settings.paths.config_dir):
@@ -83,7 +86,9 @@ def coverage() -> list[dict]:
         if not cell["usable"] or cell["key"] is None:
             continue
         row = {"cell": cell["key"], "label": cell["label"], "status": cell["status"], "sources": sources,
-               "open": 0, "written": 0, "report_date": None}
+               "open": 0, "written": 0, "dismissed": 0, "report_date": None,
+               "multi": bool(cell["column"] and cell["column"].get("topic_kind") == "roundup"),
+               "autopilot": bool(cell["column"] and cell["column"].get("topic_kind", "single") == "single")}
         for source in sources:
             if source not in cache:
                 cache[source] = _loader(source)(settings.paths.output_dir)
@@ -91,8 +96,10 @@ def coverage() -> list[dict]:
             row["report_date"] = max(filter(None, [row["report_date"], date]), default=None)
             # written is per cell: a topic written as a quick take is still open for a knowledge point
             done = {t.id for t in topics if any(x["column_key"] == cell["key"] for x in covered.get(t.id, []))}
-            row["open"] += len(topics) - len(done)
+            skipped = {t.id for t in topics if t.id in dismissed} - done
+            row["open"] += len(topics) - len(done) - len(skipped)
             row["written"] += len(done)
+            row["dismissed"] += len(skipped)
         rows.append(row)
     return rows
 
@@ -100,12 +107,13 @@ def coverage() -> list[dict]:
 def pick_topics(spec: dict) -> list[dict]:
     """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet."""
     out_dir = get_settings().paths.output_dir
-    taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids()
+    taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
     items: list[dict] = []
     for pick in (resolve_pick(p) for p in spec.get("picks", [])):
         loader = _loader(pick.get("source", "flash"))
         _, topics = loader(out_dir)
-        for topic in sorted(topics, key=lambda t: -(t.score or 0)):
+        # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
+        for topic in sorted(topics, key=lambda t: (bool(getattr(t, "stale", lambda: False)()), -(t.score or 0))):
             if len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
                 break
             if topic.id in taken:
@@ -149,7 +157,26 @@ def fresh_topics(spec: dict, run: dict) -> bool:
     return True
 
 
-_discovery_lock = threading.Lock()
+_discovery_lock = threading.RLock()
+
+
+def discovery_status() -> dict:
+    """Is the flash discovery job running, and when its newest report came out."""
+    out = get_settings().paths.output_dir
+    date = video_flash.latest_report(out)
+    path = video_flash.report_path(out, date) if date else None
+    return {"running": _discovery_running(), "report_date": date,
+            "report_at": os.path.getmtime(path) if path and os.path.isfile(path) else None,
+            "searches": 20}
+
+
+def start_discovery_if_idle() -> bool:
+    """Start today's flash discovery unless it is running — starting a job cancels the one running under its name."""
+    with _discovery_lock:  # the check and the start are one step, so a double click starts it once
+        if _discovery_running():
+            return False
+        _start_discovery()
+        return True
 
 
 def _discovery_running() -> bool:

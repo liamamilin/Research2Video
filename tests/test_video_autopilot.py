@@ -67,6 +67,9 @@ def test_picking_takes_the_best_unwritten_topics_and_skips_taken_ones(video_env,
     (out / "flash").mkdir(parents=True)
     (out / "flash" / "2026-10-19_ai_flash_discovery.md").write_text(DISCOVERY, encoding="utf-8")
     monkeypatch.setattr(pilot, "get_settings", lambda: type("S", (), {"paths": type("P", (), {"output_dir": str(out)})})())
+    import datetime
+    from core.video import topics as video_topics
+    monkeypatch.setattr(video_topics, "_today", lambda: datetime.date(2026, 10, 19))  # the report's own day: none is stale
     first = pilot.pick_topics({"picks": [{"column": "flash", "count": 1, "source": "flash"}]})
     assert [i["topic"]["id"] for i in first] == ["2026-10-19/F1"]  # the higher score
     store.create_script("flash", first[0]["topic"])
@@ -507,3 +510,82 @@ def test_coverage_counts_written_per_cell_not_per_topic(video_env, monkeypatch):
     rows = {r["cell"]: r for r in pilot.coverage()}
     assert (rows["flash"]["written"], rows["flash"]["open"]) == (1, 1)
     assert (rows["point_short"]["written"], rows["point_short"]["open"]) == (0, 2)  # same news, another cell
+
+
+def _matrix_only(video_env):
+    import shutil
+    from web.settings import get_settings as real_settings
+
+    config_dir = real_settings().paths.config_dir
+    shutil.copy("config/video_matrix.yaml", os.path.join(config_dir, "video_matrix.yaml"))
+    os.remove(os.path.join(config_dir, "video_columns.yaml"))
+
+
+def test_a_dismissed_topic_leaves_the_counts_and_the_picks_and_comes_back(video_env, monkeypatch):
+    _matrix_only(video_env)
+    topics = [type("T", (), {"id": f"2026-10-19/F{i}", "score": 9 - i, "stale": lambda self: False,
+                             "as_dict": lambda self: {"id": self.id}})() for i in (1, 2, 3)]
+    monkeypatch.setattr(pilot.video_flash, "load", lambda d, date=None: ("2026-10-19", topics))
+    store.set_dismissed("2026-10-19/F1", True)
+    row = {r["cell"]: r for r in pilot.coverage()}["flash"]
+    assert (row["open"], row["dismissed"]) == (2, 1)
+    picked = pilot.pick_topics({"picks": [{"cell": "flash", "count": 3}]})
+    assert [i["topic"]["id"] for i in picked] == ["2026-10-19/F2", "2026-10-19/F3"]
+    store.set_dismissed("2026-10-19/F1", False)
+    assert {r["cell"]: r for r in pilot.coverage()}["flash"]["open"] == 3
+
+
+def test_stale_news_ranks_after_fresher_news_but_is_still_picked(video_env, monkeypatch):
+    _matrix_only(video_env)
+    mk = lambda i, score, stale: type("T", (), {"id": f"2026-10-19/F{i}", "score": score, "stale": lambda self: stale,
+                                                "as_dict": lambda self: {"id": self.id}})()
+    topics = [mk(1, 9, True), mk(2, 7, False), mk(3, 8, False)]
+    monkeypatch.setattr(pilot.video_flash, "load", lambda d, date=None: ("2026-10-19", topics))
+    ids = [i["topic"]["id"] for i in pilot.pick_topics({"picks": [{"cell": "flash", "count": 3}]})]
+    assert ids == ["2026-10-19/F3", "2026-10-19/F2", "2026-10-19/F1"]
+
+
+def test_topic_age_marks_old_news_and_a_roundup_cell_cannot_be_picked_by_count(video_env):
+    import datetime
+    from core.video.topics import STALE_DAYS, Topic
+
+    today = datetime.date(2026, 10, 20)
+    old = Topic("x/F1", "x", "F1", "t", {"发布日期": "2026-10-13（模型上线）；涨价生效 2026-11-30"})
+    assert old.event_date == "2026-10-13" and old.stale(today) and STALE_DAYS == 5
+    assert not Topic("x/F2", "x", "F2", "t", {"发布日期": "2026-10-16"}).stale(today)
+    assert not Topic("x/F3", "x", "F3", "t", {}).stale(today)
+    _matrix_only(video_env)
+    with pytest.raises(ValueError):
+        pilot.resolve_pick({"cell": "ai-developer-roundup-long", "count": 2})
+    row = {r["cell"]: r for r in pilot.coverage()}["ai-developer-roundup-long"]
+    assert row["multi"] is True and row["sources"] == ["flash"]
+
+
+def test_api_discovery_starts_once_and_refuses_while_running(client, video_env, monkeypatch):
+    from tests.test_video_scripts import _csrf, _login
+
+    running = {"now": False}
+    starts: list[int] = []
+    monkeypatch.setattr(pilot, "_discovery_running", lambda: running["now"])
+    monkeypatch.setattr(pilot, "_start_discovery", lambda: (starts.append(1), running.update(now=True)))
+    _login(client)
+    first = client.post("/api/video/topics/discovery", headers=_csrf(client))
+    second = client.post("/api/video/topics/discovery", headers=_csrf(client))  # a double click
+    assert first.status_code == 202 and second.status_code == 409 and len(starts) == 1
+    assert client.get("/api/video/topics/discovery").json()["running"] is True
+    _login(client, "viewer", "viewer-pass-123")
+    assert client.post("/api/video/topics/discovery", headers=_csrf(client)).status_code == 403
+    assert client.get("/api/video/topics?source=flash").json()["rounds"] == []
+
+
+def test_api_dismiss_is_for_editors_and_reversible(client, video_env):
+    from tests.test_video_scripts import _csrf, _login
+
+    _login(client)
+    body = {"topic_id": "2026-10-19/F1"}
+    assert client.post("/api/video/topics/dismiss", headers=_csrf(client), json=body).json()["dismissed"] is True
+    assert "2026-10-19/F1" in store.dismissed_topic_ids()
+    client.post("/api/video/topics/dismiss", headers=_csrf(client), json={**body, "dismissed": False})
+    assert store.dismissed_topic_ids() == set()
+    _login(client, "viewer", "viewer-pass-123")
+    assert client.post("/api/video/topics/dismiss", headers=_csrf(client), json=body).status_code == 403

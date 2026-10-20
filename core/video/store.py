@@ -164,6 +164,11 @@ def init_db() -> None:
                 finished_at TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_rechecks_script ON rechecks(script_id);
+            -- Topics the user marked "not writing": reversible, hidden from the to-write counts and the pipeline.
+            CREATE TABLE IF NOT EXISTS dismissed_topics (
+                topic_id TEXT PRIMARY KEY,
+                dismissed_at TEXT NOT NULL
+            );
             -- One render in flight per script.
             CREATE UNIQUE INDEX IF NOT EXISTS idx_renders_one_active ON renders(script_id)
                 WHERE status IN ('SUBMITTING', 'QUEUED', 'RUNNING', 'DOWNLOADING');
@@ -355,6 +360,20 @@ def delete_publication(pub_id: str) -> bool:
 def published_script_ids() -> set[str]:
     with connect() as conn:
         return {r["script_id"] for r in conn.execute("SELECT DISTINCT script_id FROM publications")}
+
+
+def dismissed_topic_ids() -> set[str]:
+    with connect() as conn:
+        return {r["topic_id"] for r in conn.execute("SELECT topic_id FROM dismissed_topics")}
+
+
+def set_dismissed(topic_id: str, dismissed: bool) -> None:
+    with connect() as conn:
+        if dismissed:
+            conn.execute("INSERT OR REPLACE INTO dismissed_topics (topic_id, dismissed_at) VALUES (?, ?)",
+                         (topic_id, time.strftime("%Y-%m-%dT%H:%M:%S%z")))
+        else:
+            conn.execute("DELETE FROM dismissed_topics WHERE topic_id = ?", (topic_id,))
 
 
 def published_topic_ids() -> set[str]:
