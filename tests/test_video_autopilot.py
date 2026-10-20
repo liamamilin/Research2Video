@@ -194,9 +194,11 @@ def test_a_weekly_plan_fires_once_per_slot(pilot_env, monkeypatch):
     assert pilot.fire_due_plans(now=due) == 0  # the slot moved on
     assert ap.get_plan(plan["id"])["next_fire"] > due
     assert len(ap.list_runs()) == 1
-    # a slot the host slept through by more than a day does not start a stale batch
+    # a slot the host slept through by more than a day does not start a stale batch, but it is recorded as missed
     stale = ap.get_plan(plan["id"])["next_fire"] + 3 * 86400
-    assert pilot.fire_due_plans(now=stale) == 0 and len(ap.list_runs()) == 1
+    assert pilot.fire_due_plans(now=stale) == 0
+    runs = ap.list_runs()
+    assert len(runs) == 2 and runs[0]["status"] == "DONE" and not runs[0]["items"] and "错过了" in runs[0]["note"]
 
 
 def test_resuming_a_script_reuses_the_research_and_the_saved_draft(video_env, research, llm, monkeypatch):

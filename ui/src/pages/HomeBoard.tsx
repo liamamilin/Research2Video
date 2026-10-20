@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getVideoBoard, type BoardAttention, type VideoBoard } from "@/api/video";
+import { AlertsCard } from "@/components/AlertsCard";
 import { AutopilotCard } from "@/components/AutopilotCard";
 import { CredibilityBadge } from "@/components/CredibilityBadge";
 import { TimeStamp } from "@/components/TimeStamp";
@@ -48,6 +49,8 @@ export function HomeBoardPage() {
         <Link to="/topics" className="btn text-sm">选题</Link>
         <Link to="/video" className="btn text-sm">全部文稿</Link>
       </div>
+
+      <AlertsCard />
 
       {error ? <p className="text-danger text-sm">{error}</p> : null}
       {!board && !error ? <p className="text-text-muted text-sm">读取中…</p> : null}

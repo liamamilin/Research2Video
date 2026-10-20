@@ -120,6 +120,30 @@ def home_board(user=Depends(require_viewer)) -> dict:
     return video_board.board(_known_columns())
 
 
+@router.get("/alerts")
+def automation_alerts(user=Depends(require_viewer)) -> list[dict]:
+    """What ran on its own this week and went wrong (empty batches, failed or restarted jobs, missed plans)."""
+    from web.services import automation_health
+
+    return automation_health.alerts()
+
+
+class AlertAckIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    key: str = Field(min_length=3, max_length=300)
+
+
+@router.post("/alerts/ack")
+def ack_alert(body: AlertAckIn, user=Depends(require_editor)) -> dict:
+    """The user has seen an alert: it leaves the board."""
+    from core.video import autopilot_store
+
+    autopilot_store.ack_alert(body.key, user["username"])
+    audit.log("automation_alert_ack", user=user["username"], target=body.key, result="acked")
+    return {"key": body.key, "acked": True}
+
+
 @router.get("/shipments")
 def shipments(user=Depends(require_viewer)) -> list[dict]:
     """Approved scripts with their render and publication state, for the 成片与发布 page."""

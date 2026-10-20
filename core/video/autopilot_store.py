@@ -56,6 +56,11 @@ CREATE TABLE IF NOT EXISTS autopilot_items (
     updated_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_autopilot_items_run ON autopilot_items(run_id);
+CREATE TABLE IF NOT EXISTS alert_acks (
+    key TEXT PRIMARY KEY,
+    acked_by TEXT NOT NULL DEFAULT '',
+    acked_at TEXT NOT NULL
+);
 """
 
 _ITEM_JSON = ("topic", "gate", "retries")
@@ -173,6 +178,24 @@ def update_run(run_id: str, **fields: Any) -> None:
 
 def update_item(item_id: str, **fields: Any) -> None:
     _update("autopilot_items", item_id, _ITEM_JSON, **fields)
+
+
+def finished_run(spec: dict, note: str, *, plan_id: Optional[str] = None, started_by: str = "") -> dict:
+    """A batch that did nothing, recorded so it shows (a plan slot that was skipped, say)."""
+    run = create_run(spec, [], plan_id=plan_id, started_by=started_by)
+    update_run(run["id"], status="DONE", note=note)
+    return get_run(run["id"])
+
+
+def ack_alert(key: str, by: str = "") -> None:
+    """The user has seen this automation alert: it leaves the board."""
+    with connect(write=True) as conn:
+        conn.execute("INSERT OR REPLACE INTO alert_acks (key, acked_by, acked_at) VALUES (?, ?, ?)", (key, by, _now()))
+
+
+def acked_alerts() -> set[str]:
+    with connect() as conn:
+        return {r["key"] for r in conn.execute("SELECT key FROM alert_acks")}
 
 
 def used_topic_ids() -> set[str]:

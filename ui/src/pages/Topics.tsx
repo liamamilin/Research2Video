@@ -188,7 +188,11 @@ export function TopicsPage() {
             ) : null}
           </span>
         ) : null}
-        {source === "opportunities" ? <span>情报轮次已停，这里不会有新的；要新选题先手动写，或等新来源。</span> : null}
+        {source === "opportunities" ? (
+          <span>
+            新选题来自情报轮次第 07 步：到 <Link className="text-accent hover:underline" to="/rounds">情报轮次</Link> 跑一轮就会更新。
+          </span>
+        ) : null}
         {note ? <span className="text-warning">{note}</span> : null}
       </div>
       {error ? <p className="text-danger text-sm">{error}</p> : null}

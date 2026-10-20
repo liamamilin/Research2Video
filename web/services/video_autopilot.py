@@ -179,9 +179,21 @@ def start_discovery_if_idle() -> bool:
         return True
 
 
+def _discovery_names() -> set[str]:
+    """Every name the discovery job runs under: the batch starts it by its short name, the Jobs page by its path."""
+    from core.config import load_job
+
+    job = load_job(get_settings().paths.jobs_dir, DISCOVERY_JOB) or {}
+    return {DISCOVERY_JOB, job.get("_file") or DISCOVERY_JOB}
+
+
 def _discovery_running() -> bool:
+    """Running here under either name, or in another process (the scheduler, the command line) holding its lock."""
+    from core.lock import LockManager
     from web.runner.registry import TaskRegistry
-    return TaskRegistry().is_running(DISCOVERY_JOB)
+
+    registry = TaskRegistry()
+    return any(registry.is_running(name) or LockManager.is_locked(name) for name in _discovery_names())
 
 
 def _start_discovery() -> None:
@@ -371,7 +383,9 @@ def _tick_run(run: dict) -> int:
             return 0
         items = pick_topics(spec)
         if not items:
-            ap.update_run(run["id"], status="DONE", note="没有可写的新选题")
+            # keep why the topics were not fresh: that, not the empty pick, is usually what went wrong
+            cause = (ap.get_run(run["id"]) or {}).get("note") or ""
+            ap.update_run(run["id"], status="DONE", note="；".join(filter(None, [cause, "没有可写的新选题"])))
             return 0
         _add_items(run["id"], items)
         ap.update_run(run["id"], stage="ITEMS")
@@ -435,7 +449,12 @@ def fire_due_plans(now: Optional[float] = None) -> int:
         # a missed slot (the host was off) fires once, late — but not if it is more than a day old
         nxt = slot(plan["expression"], now, "local")
         if ap.claim_plan(plan["id"], plan["next_fire"], nxt):
-            if now - plan["next_fire"] < 24 * 3600:
+            late = now - plan["next_fire"]
+            if late < 24 * 3600:
                 start_run(plan["spec"], plan_id=plan["id"], started_by="autopilot")
                 fired += 1
+            else:  # recorded, so a skipped week shows on the board instead of passing unseen
+                ap.finished_run(plan["spec"], f"错过了 {time.strftime('%m-%d %H:%M', time.localtime(plan['next_fire']))}"
+                                f" 这一批（晚了 {late / 3600:.0f} 小时，超过一天不补跑）",
+                                plan_id=plan["id"], started_by="autopilot")
     return fired
