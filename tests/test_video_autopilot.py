@@ -606,3 +606,19 @@ def test_api_a_batch_and_the_weekly_plan_can_be_set_per_cell(client, video_env):
     roundup = {"picks": [{"cell": "ai-developer-roundup-long", "count": 2}]}
     assert client.put(f"/api/video/autopilot/plans/{plan['id']}/spec", headers=_csrf(client), json={"spec": roundup}).status_code == 422
     assert client.put("/api/video/autopilot/plans/nope/spec", headers=_csrf(client), json={"spec": spec}).status_code == 404
+
+
+def test_api_the_batch_shows_the_label_as_it_is_now_not_as_it_was_at_approval(client, pilot_env, monkeypatch):
+    from tests.test_video_scripts import _login
+
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id, serious=1)
+    pilot.tick()
+    _login(client)
+    item = client.get("/api/video/autopilot").json()["runs"][0]["items"][0]
+    assert item["credibility"]["tier"] == "serious" and item["gate"]["label"] == "serious"
+    draft(script_id)  # a newer version, audited with nothing serious
+    item = client.get("/api/video/autopilot").json()["runs"][0]["items"][0]
+    assert item["credibility"]["tier"] != "serious" and item["gate"]["label"] == "serious"

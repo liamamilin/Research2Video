@@ -641,7 +641,14 @@ def autopilot_overview(user=Depends(require_viewer)) -> dict:
     """Weekly plans and recent batches, each item with where it stands."""
     from core.video import autopilot_store
 
-    return {"plans": autopilot_store.list_plans(), "runs": autopilot_store.list_runs(limit=10)}
+    runs = autopilot_store.list_runs(limit=10)
+    for run in runs:  # the label as it is now (an edit or a finished audit changes it), not the one at approval time
+        for item in run.get("items", []):
+            script = store.get_script(item["script_id"]) if item.get("script_id") else None
+            current = store.get_version(script["id"], script["current_version"]) if script and script["current_version"] else None
+            if current:
+                item["credibility"] = credibility.label(current, auditing=bool(script.get("stage")))
+    return {"plans": autopilot_store.list_plans(), "runs": runs}
 
 
 @router.post("/autopilot/runs", status_code=202)

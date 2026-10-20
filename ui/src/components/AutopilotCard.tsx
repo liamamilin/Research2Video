@@ -4,7 +4,7 @@ import {
   cancelAutopilotRun, getAutopilot, listCellCoverage, setPlanSpec, startAutopilotRun,
   type AutopilotItem, type AutopilotPlan, type AutopilotRun, type AutopilotSpec, type CellCoverage,
 } from "@/api/video";
-import { TIER_CLASS } from "@/components/CredibilityBadge";
+import { CredibilityBadge } from "@/components/CredibilityBadge";
 import { TimeStamp } from "@/components/TimeStamp";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,13 @@ export function AutopilotCard() {
   const [editing, setEditing] = useState(false);
   const [cells, setCells] = useState<CellCoverage[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [labels, setLabels] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    listCellCoverage()
+      .then((rows) => setLabels(Object.fromEntries(rows.map((r) => [r.cell, r.label.split(" · ")[0]]))))
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     if (!editing || cells.length) return;
@@ -136,7 +143,7 @@ export function AutopilotCard() {
       {plans.map((p) => (
         <p key={p.id} className="text-xs text-text-muted">
           计划「{p.name}」{p.expression}（{p.enabled ? "启用" : "停用"}），下次 {when(p.next_fire)}
-          {p.spec?.picks.length ? `；写 ${p.spec.picks.map((k) => `${k.cell ?? k.column} ${k.count} 条`).join("、")}` : ""}
+          {p.spec?.picks.length ? `；写 ${p.spec.picks.map((k) => `${labels[k.cell ?? k.column ?? ""] ?? k.cell ?? k.column} ${k.count} 条`).join("、")}` : ""}
         </p>
       ))}
       {run ? (
@@ -156,9 +163,7 @@ export function AutopilotCard() {
                   <span className="text-sm font-medium">{item.topic.title}</span>
                 )}
                 <span className="text-xs text-text-muted">{item.note}</span>
-                {item.gate?.label && item.gate.text ? (
-                  <span className={cn("badge border", TIER_CLASS[item.gate.label])} title={(item.gate.reasons ?? []).join("；")}>{item.gate.text}</span>
-                ) : null}
+                <CredibilityBadge value={item.credibility ?? (item.gate?.label && item.gate.text ? { tier: item.gate.label, text: item.gate.text, reasons: item.gate.reasons ?? [], cited_share: null } : null)} />
               </li>
             ))}
           </ul>

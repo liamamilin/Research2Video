@@ -500,6 +500,7 @@ export interface AutopilotItem {
   render_id: string | null;
   state: "PENDING" | "WORKING" | "HELD" | "DONE" | "FAILED" | "CANCELLED";
   note: string;
+  credibility?: Credibility;
   gate: { label?: CredibilityTier; text?: string; approved?: string; reasons?: string[]; ignored?: { must: number; warn: number } };
 }
 
