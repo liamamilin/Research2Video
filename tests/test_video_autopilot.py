@@ -490,3 +490,20 @@ def test_cells_declare_topic_sources_and_picks_can_name_a_cell(video_env):
     rows = {r["cell"]: r for r in pilot.coverage()}
     assert rows["flash"]["sources"] == ["flash"] and "open" in rows["flash"]
     assert rows.get("ai-developer-comparison-long", {"sources": []})["sources"] == []
+
+
+def test_coverage_counts_written_per_cell_not_per_topic(video_env, monkeypatch):
+    import shutil
+    from web.settings import get_settings as real_settings
+
+    config_dir = real_settings().paths.config_dir
+    shutil.copy("config/video_matrix.yaml", os.path.join(config_dir, "video_matrix.yaml"))
+    os.remove(os.path.join(config_dir, "video_columns.yaml"))
+    out = video_env / "output"
+    (out / "flash").mkdir(parents=True)
+    store.create_script("flash", {"id": "2026-10-19/F1", "title": "单条", "fields": {}})
+    from core.video import flash as video_flash
+    monkeypatch.setattr(video_flash, "load", lambda d, date=None: ("2026-10-19", [type("T", (), {"id": "2026-10-19/F1"})(), type("T", (), {"id": "2026-10-19/F2"})()]))
+    rows = {r["cell"]: r for r in pilot.coverage()}
+    assert (rows["flash"]["written"], rows["flash"]["open"]) == (1, 1)
+    assert (rows["point_short"]["written"], rows["point_short"]["open"]) == (0, 2)  # same news, another cell

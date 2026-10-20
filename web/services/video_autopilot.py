@@ -75,7 +75,7 @@ def coverage() -> list[dict]:
     from core.video import matrix
 
     settings = get_settings()
-    taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids()
+    covered = store.scripts_by_topic()
     cache: dict[str, tuple] = {}
     rows = []
     for cell in matrix.catalog(settings.paths.config_dir):
@@ -89,8 +89,10 @@ def coverage() -> list[dict]:
                 cache[source] = _loader(source)(settings.paths.output_dir)
             date, topics = cache[source]
             row["report_date"] = max(filter(None, [row["report_date"], date]), default=None)
-            row["open"] += len([t for t in topics if t.id not in taken])
-            row["written"] += len([t for t in topics if t.id in taken])
+            # written is per cell: a topic written as a quick take is still open for a knowledge point
+            done = {t.id for t in topics if any(x["column_key"] == cell["key"] for x in covered.get(t.id, []))}
+            row["open"] += len(topics) - len(done)
+            row["written"] += len(done)
         rows.append(row)
     return rows
 

@@ -91,15 +91,21 @@ export function TopicsPage() {
   const filters = useFilters(["written", "score"]);
   const { values: f } = filters;
   const cell = cells.find((c) => c.usable && c.key === current?.cell);
-  const todo = (topics ?? []).filter((t) => !t.scripted && !t.published).length;
+  const inCell = (t: VideoTopic) => (t.scripts ?? []).some((x) => x.column_key === current?.cell);
+  const doneHere = (t: VideoTopic) => inCell(t) || (t.published && !(t.scripts ?? []).length);
+  const audienceOf = (key?: string) => cells.find((c) => c.key === key)?.parts?.audience.key;
+  const typeName = (key: string) => cells.find((c) => c.key === key)?.parts?.type.name ?? key;
+  // the cells this topic fits: the same audience as the picked cell, and a topic source of the same kind
+  const fits = coverage.filter((c) => c.sources.includes(source) && audienceOf(c.cell) === audienceOf(current?.cell));
+  const todo = (topics ?? []).filter((t) => !doneHere(t)).length;
   const shown = (topics ?? []).filter(
     (t) =>
-      (!f.written || (f.written === "no" ? !t.scripted && !t.published : t.scripted || t.published)) &&
+      (!f.written || (f.written === "no" ? !doneHere(t) : doneHere(t))) &&
       (!f.score || (t.score ?? 0) >= Number(f.score)) &&
       matchesText(f.q, t.title, t.fields["核心角度"], t.fields["一句话"]),
   );
   const facets: Facet[] = [
-    { key: "written", label: "写稿", options: [{ value: "no", label: "还没写" }, { value: "yes", label: "已写过" }] },
+    { key: "written", label: "写稿", options: [{ value: "no", label: "这个格子还没写" }, { value: "yes", label: "这个格子写过" }] },
     { key: "score", label: "评分", options: [{ value: "8", label: "8 分以上" }, { value: "7", label: "7 分以上" }] },
   ];
 
@@ -131,7 +137,15 @@ export function TopicsPage() {
             <span className="font-mono text-xs text-text-muted pt-0.5">{t.code}</span>
             <div className="min-w-0 flex-1 space-y-1">
               <p className="text-sm">
-                {t.title} {current ? <span className="badge border border-border text-text-muted">{current.label}</span> : null}
+                {t.title}{" "}
+                {fits.map((c) => {
+                  const done = (t.scripts ?? []).some((x) => x.column_key === c.cell);
+                  return (
+                    <button key={c.cell} className={`badge border ${done ? "border-success text-success" : "border-border text-text-muted"} ${c.cell === current?.cell ? "font-semibold" : ""}`} title={done ? "这个格子已写过" : "还没写"} onClick={() => setSelected(c.cell)}>
+                      {typeName(c.cell)}{done ? " ✓" : ""}
+                    </button>
+                  );
+                })}
               </p>
               {t.fields["核心角度"] ? <p className="text-xs text-text-muted">角度：{t.fields["核心角度"]}</p> : null}
               <p className="text-xs text-text-muted flex flex-wrap gap-x-3">
@@ -145,10 +159,12 @@ export function TopicsPage() {
                 ))}
               </p>
             </div>
-            {t.published ? (
-              <span className="badge border border-success text-success">已发布</span>
-            ) : t.scripted ? (
-              <span className="badge border border-border text-text-muted">已写过</span>
+            {doneHere(t) ? (
+              t.published ? (
+                <span className="badge border border-success text-success">已发布</span>
+              ) : (
+                <span className="badge border border-border text-text-muted">这个格子已写过</span>
+              )
             ) : cell ? (
               <Link className="btn btn-primary text-xs shrink-0" to={`/video?cell=${encodeURIComponent(cell.id)}&topic=${encodeURIComponent(t.id)}`}>
                 用这个写稿
