@@ -169,6 +169,9 @@ export interface VideoTopic {
   score: number | null;
   scripted: boolean;
   published?: boolean;
+  dismissed?: boolean;
+  stale?: boolean;
+  event_date?: string | null;
   scripts?: { id: string; column_key: string; status: ScriptStatus; created_at: string; archived?: number }[];
 }
 
@@ -380,15 +383,30 @@ export interface CellCoverage {
   sources: string[];
   open: number;
   written: number;
+  dismissed: number;
+  multi: boolean;
+  autopilot: boolean;
   report_date: string | null;
 }
+
+export interface DiscoveryStatus {
+  running: boolean;
+  report_date: string | null;
+  report_at: number | null;
+  searches: number;
+}
+
+export const getDiscovery = () => api<DiscoveryStatus>("/api/video/topics/discovery");
+export const startDiscovery = () => api<DiscoveryStatus>("/api/video/topics/discovery", { method: "POST" });
+export const dismissTopic = (topic_id: string, dismissed: boolean) =>
+  api<{ topic_id: string; dismissed: boolean }>("/api/video/topics/dismiss", { method: "POST", body: { topic_id, dismissed } });
 
 export const listCellCoverage = () => api<CellCoverage[]>("/api/video/coverage");
 
 export const listVideoStyles = () => api<StyleCatalog>("/api/video/styles");
 
-export const listVideoTopics = (source: "opportunities" | "flash" = "opportunities") =>
-  api<{ round: string | null; topics: VideoTopic[] }>("/api/video/topics", { query: { source } });
+export const listVideoTopics = (source: "opportunities" | "flash" = "opportunities", round?: string) =>
+  api<{ round: string | null; rounds?: string[]; topics: VideoTopic[] }>("/api/video/topics", { query: { source, ...(round ? { round } : {}) } });
 
 export const listVideoScripts = (archived = false) =>
   api<VideoScriptSummary[]>("/api/video/scripts", { query: archived ? { archived: "true" } : undefined });
@@ -500,9 +518,25 @@ export interface AutopilotPlan {
   expression: string;
   next_fire: number | null;
   enabled: number;
+  spec?: AutopilotSpec;
+}
+
+export interface AutopilotPick {
+  cell?: string;
+  column?: string;
+  source?: string;
+  count: number;
+}
+
+export interface AutopilotSpec {
+  picks: AutopilotPick[];
+  refresh?: boolean;
 }
 
 export const getAutopilot = () => api<{ plans: AutopilotPlan[]; runs: AutopilotRun[] }>("/api/video/autopilot");
-export const startAutopilotRun = () => api<AutopilotRun>("/api/video/autopilot/runs", { method: "POST" });
+export const startAutopilotRun = (spec?: AutopilotSpec) =>
+  api<AutopilotRun>("/api/video/autopilot/runs", { method: "POST", ...(spec ? { body: { spec } } : {}) });
+export const setPlanSpec = (id: string, spec: AutopilotSpec) =>
+  api<AutopilotPlan>(`/api/video/autopilot/plans/${encodeURIComponent(id)}/spec`, { method: "PUT", body: { spec } });
 export const cancelAutopilotRun = (id: string) =>
   api<AutopilotRun>(`/api/video/autopilot/runs/${encodeURIComponent(id)}/cancel`, { method: "POST" });

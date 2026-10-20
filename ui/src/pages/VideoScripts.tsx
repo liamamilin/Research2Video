@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -69,6 +69,8 @@ export function VideoScriptsPage() {
   const [cellId, setCellId] = useState<string>(params.get("cell") ?? "");
   const [form, setForm] = useState<string>("");
   const [picked, setPicked] = useState<string[]>([]);
+  // 从选题页勾选带过来的条目（?topics=a,b），只用一次
+  const arrived = useRef<string[] | null>(params.get("topics") ? params.get("topics")!.split(",").filter(Boolean) : null);
   const [roundupTitle, setRoundupTitle] = useState("");
   const [compare, setCompare] = useState({ first: "", second: "", dimensions: "", audience: "" });
   const [round, setRound] = useState<string | null>(null);
@@ -133,7 +135,8 @@ export function VideoScriptsPage() {
   // 换了格子：回到它默认的视频形式，清掉已选条目，按它的选题来源重新取选题
   useEffect(() => {
     setForm("");
-    setPicked([]);
+    setPicked(kind === "roundup" ? arrived.current ?? [] : []);
+    if (kind === "roundup") arrived.current = null;
     if (kind === "comparison") return;
     let alive = true;
     listVideoTopics(source)

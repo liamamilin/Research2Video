@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -42,5 +42,28 @@ describe("Autopilot card", () => {
     const { container } = render(<MemoryRouter><AutopilotCard /></MemoryRouter>);
     await new Promise((r) => setTimeout(r, 20));
     expect(container.textContent).toBe("");
+  });
+
+  it("sets how many topics each cell writes and starts that batch", async () => {
+    useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
+    const calls: { url: string; body?: string; method?: string }[] = [];
+    const coverage = [
+      { cell: "flash", label: "快讯", status: "enabled", sources: ["flash"], open: 5, written: 0, dismissed: 0, multi: false, autopilot: true, report_date: "2026-10-20" },
+      { cell: "ai-developer-roundup-long", label: "盘点", status: "experimental", sources: ["flash"], open: 5, written: 0, dismissed: 0, multi: true, autopilot: false, report_date: null },
+    ];
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      calls.push({ url: String(url), body: init?.body as string | undefined, method: init?.method });
+      const done = { ...BODY, runs: [{ ...BODY.runs[0], status: "DONE" }] };
+      return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(String(url).includes("/coverage") ? coverage : done) } as Response;
+    }));
+    render(<MemoryRouter><AutopilotCard /></MemoryRouter>);
+    fireEvent.click(await screen.findByText("设置这一批"));
+    const box = await screen.findByLabelText("快讯");
+    expect(screen.queryByLabelText("盘点")).toBeNull(); // a roundup is not picked by count
+    fireEvent.change(box, { target: { value: "2" } });
+    fireEvent.click(screen.getByText(/按这个现在开始一批/));
+    await waitFor(() => expect(calls.some((c) => c.method === "POST" && c.url.includes("/autopilot/runs"))).toBe(true));
+    const post = calls.find((c) => c.method === "POST" && c.url.includes("/autopilot/runs"))!;
+    expect(JSON.parse(post.body!).spec.picks).toEqual([{ cell: "flash", count: 2 }]);
   });
 });

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { cancelAutopilotRun, getAutopilot, startAutopilotRun, type AutopilotItem, type AutopilotPlan, type AutopilotRun } from "@/api/video";
+import {
+  cancelAutopilotRun, getAutopilot, listCellCoverage, setPlanSpec, startAutopilotRun,
+  type AutopilotItem, type AutopilotPlan, type AutopilotRun, type AutopilotSpec, type CellCoverage,
+} from "@/api/video";
 import { TIER_CLASS } from "@/components/CredibilityBadge";
 import { TimeStamp } from "@/components/TimeStamp";
 import { useAuthStore } from "@/lib/auth-store";
@@ -27,6 +30,30 @@ export function AutopilotCard() {
   const [run, setRun] = useState<AutopilotRun | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [cells, setCells] = useState<CellCoverage[]>([]);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (!editing || cells.length) return;
+    listCellCoverage()
+      .then((rows) => {
+        const usable = rows.filter((r) => r.autopilot && r.sources.length);
+        setCells(usable);
+        // start from what the weekly plan writes now, else the default batch
+        const picks = plans[0]?.spec?.picks ?? [{ cell: "flash", count: 3 }, { cell: "point_short", count: 2 }];
+        const init: Record<string, number> = {};
+        for (const pick of picks) init[pick.cell ?? pick.column ?? ""] = pick.count;
+        setCounts(init);
+      })
+      .catch(() => undefined);
+  }, [editing]);
+
+  const specNow = (): AutopilotSpec => ({
+    picks: Object.entries(counts).filter(([cell, n]) => n > 0 && cells.some((c) => c.cell === cell)).map(([cell, count]) => ({ cell, count })),
+    refresh: true,
+  });
+  const total = specNow().picks.reduce((a, p) => a + p.count, 0);
 
   const load = () =>
     getAutopilot()
@@ -64,15 +91,52 @@ export function AutopilotCard() {
           <button className="btn text-xs" disabled={busy} onClick={() => act(() => cancelAutopilotRun(run.id))}>取消这一批</button>
         ) : null}
         {canEdit && run?.status !== "RUNNING" ? (
-          <button className="btn text-xs" disabled={busy} onClick={() => act(startAutopilotRun)}>
+          <button className="btn text-xs" disabled={busy} onClick={() => (editing ? setEditing(false) : setEditing(true))}>
+            {editing ? "收起" : "设置这一批"}
+          </button>
+        ) : null}
+        {canEdit && run?.status !== "RUNNING" && !editing ? (
+          <button className="btn text-xs" disabled={busy} onClick={() => act(() => startAutopilotRun())}>
             现在开始一批（3 条快讯 + 2 个知识点）
           </button>
         ) : null}
       </div>
+      {editing ? (
+        <div className="space-y-2 rounded border border-border p-3" aria-label="批次设置">
+          <p className="text-xs text-text-muted">每个格子写几条（只列有选题来源、能按条数挑的格子）。每条要研究约几次到二十次搜索。</p>
+          <div className="flex flex-wrap gap-3">
+            {cells.map((c) => (
+              <label key={c.cell} className="flex items-center gap-2 text-xs">
+                {c.label}
+                <input
+                  type="number"
+                  min={0}
+                  max={5}
+                  className="input w-16"
+                  aria-label={c.label}
+                  value={counts[c.cell] ?? 0}
+                  onChange={(e) => setCounts({ ...counts, [c.cell]: Math.max(0, Math.min(5, Number(e.target.value) || 0)) })}
+                />
+              </label>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn btn-primary text-xs" disabled={busy || total === 0} onClick={() => act(async () => { await startAutopilotRun(specNow()); setEditing(false); })}>
+              按这个现在开始一批（共 {total} 条）
+            </button>
+            {plans[0] ? (
+              <button className="btn text-xs" disabled={busy || total === 0} onClick={() => act(() => setPlanSpec(plans[0].id, specNow()))}>
+                存为「{plans[0].name}」的内容
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       {error ? <p className="text-danger text-xs">{error}</p> : null}
       {plans.map((p) => (
         <p key={p.id} className="text-xs text-text-muted">
           计划「{p.name}」{p.expression}（{p.enabled ? "启用" : "停用"}），下次 {when(p.next_fire)}
+          {p.spec?.picks.length ? `；写 ${p.spec.picks.map((k) => `${k.cell ?? k.column} ${k.count} 条`).join("、")}` : ""}
         </p>
       ))}
       {run ? (
