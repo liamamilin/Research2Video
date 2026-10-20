@@ -6,6 +6,7 @@ that they were asked, and the tests set the script and render rows the way those
 
 from __future__ import annotations
 
+import os
 import time
 
 import pytest
@@ -93,7 +94,7 @@ def test_a_clean_draft_is_approved_automatically_and_rendered_once(pilot_env, mo
     script = store.get_script(script_id)
     assert script["status"] == "APPROVED" and script["approved_version"] == 1
     gate = item_of(run["id"], 0)["gate"]
-    assert gate["pass"] and gate["approved"] == "auto"
+    assert gate["approved"] == "auto" and gate["label"] == "partial"  # audited, but the paragraph cites nothing
     pilot.tick()
     pilot.tick()  # a render in flight is followed, never submitted again
     assert len(store.list_renders(script_id)) == 1 and len(set(started)) == 1
@@ -104,19 +105,21 @@ def test_a_clean_draft_is_approved_automatically_and_rendered_once(pilot_env, mo
     assert ap.get_run(run["id"])["status"] == "DONE"
 
 
-@pytest.mark.parametrize("kwargs, reason", [({"serious": 1}, "严重"), ({"status_ok": False}, "长度")])
-def test_the_gate_holds_a_draft_with_a_serious_finding_or_the_wrong_length(pilot_env, monkeypatch, kwargs, reason):
+@pytest.mark.parametrize("kwargs, tier", [({"serious": 1}, "serious"), ({"status_ok": False}, "partial")])
+def test_a_draft_is_approved_whatever_the_label_and_the_label_is_recorded(pilot_env, monkeypatch, kwargs, tier):
     run = batch(monkeypatch, 1)
     pilot.tick()
     script_id = item_of(run["id"], 0)["script_id"]
     draft(script_id, **kwargs)
     pilot.tick()
     item = item_of(run["id"], 0)
-    assert item["state"] == "HELD" and reason in item["note"]
-    assert store.get_script(script_id)["status"] == "DRAFT" and not store.list_renders(script_id)
+    assert item["state"] == "WORKING" and item["gate"]["approved"] == "auto" and item["gate"]["label"] == tier
+    assert store.get_script(script_id)["status"] == "APPROVED"
+    pilot.tick()
+    assert len(store.list_renders(script_id)) == 1  # nothing waited for the user
 
 
-def test_a_draft_whose_model_audit_never_ran_gets_its_audit_rerun_then_is_held(pilot_env, monkeypatch):
+def test_a_draft_whose_model_audit_never_ran_gets_its_audit_rerun_then_goes_on_labelled_unaudited(pilot_env, monkeypatch):
     spawned, _ = pilot_env
     run = batch(monkeypatch, 1)
     pilot.tick()
@@ -127,8 +130,8 @@ def test_a_draft_whose_model_audit_never_ran_gets_its_audit_rerun_then_is_held(p
     assert spawned.count(script_id) == 1 + pilot.MAX_RETRIES  # the first start, then one rerun per retry
     pilot.tick()
     item = item_of(run["id"], 0)
-    assert item["state"] == "HELD" and "没有真正跑完" in item["note"]
-    assert store.get_script(script_id)["status"] == "DRAFT"
+    assert item["gate"]["label"] == "unaudited" and item["gate"]["audited"] is False
+    assert store.get_script(script_id)["status"] == "APPROVED"
 
 
 def test_a_failed_script_is_resumed_twice_then_held(pilot_env, monkeypatch):
@@ -343,18 +346,28 @@ def test_api_reference_search_returns_links_only(client, video_env, monkeypatch)
     assert client.get("/api/video/references", params={"q": "短"}).status_code == 422
 
 
-def test_a_held_draft_the_user_approves_goes_on_to_its_render(pilot_env, monkeypatch):
-    run = batch(monkeypatch, 1)
+def test_a_held_script_the_user_approves_goes_on_to_its_render_and_an_old_gate_hold_is_let_through(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 2)
     pilot.tick()
-    script_id = item_of(run["id"], 0)["script_id"]
-    draft(script_id, serious=1)
+    first, second = (item_of(run["id"], i) for i in (0, 1))
+    store.update_script(first["script_id"], status="FAILED", error="x")
+    for _ in range(pilot.MAX_RETRIES + 1):
+        store.update_script(first["script_id"], status="FAILED", error="还是失败")
+        pilot.tick()
+    assert item_of(run["id"], 0)["state"] == "HELD"
+    store.update_script(first["script_id"], status="APPROVED", approved_version=1)  # the user fixed it and approved
+    draft(first["script_id"])
+    store.update_script(first["script_id"], status="APPROVED", approved_version=1)
     pilot.tick()
-    assert item_of(run["id"], 0)["state"] == "HELD" and ap.get_run(run["id"])["status"] == "DONE"
-    store.update_script(script_id, status="APPROVED", approved_version=1)  # the user read it and approved
+    assert item_of(run["id"], 0)["state"] == "WORKING"
+    # a draft the quality gate of an earlier version held is let through now
+    draft(second["script_id"], serious=1)
+    ap.update_item(second["id"], state="HELD", note="闸门没通过：事实审计有 1 条严重问题")
+    ap.update_run(run["id"], status="DONE")
     pilot.tick()
-    assert item_of(run["id"], 0)["state"] == "WORKING" and ap.get_run(run["id"])["status"] == "RUNNING"
     pilot.tick()
-    assert len(store.list_renders(script_id)) == 1
+    assert store.get_script(second["script_id"])["status"] == "APPROVED"
+    assert item_of(run["id"], 1)["gate"]["label"] == "serious"
 
 
 def test_a_failed_render_is_submitted_once_more_then_held(pilot_env, monkeypatch):
@@ -418,9 +431,16 @@ def test_the_wake_up_follows_the_gateway_port_in_web_yaml(video_env):
 
 
 def test_todays_discovery_is_started_once_and_waited_for_not_restarted_every_tick(video_env, monkeypatch):
-    """Starting a job cancels the one already running under that name, so a start per tick would restart it forever."""
-    from web.runner.registry import TaskRegistry
+    # a tick thread left running by an earlier test's app would otherwise advance these runs behind the test's back
+    from core.fileio import file_lock
+    from web.settings import get_settings as real_settings
 
+    with file_lock(os.path.join(real_settings().paths.state_dir, "autopilot-tick"), timeout=0):
+        _discovery_once(video_env, monkeypatch)
+
+
+def _discovery_once(video_env, monkeypatch):
+    """Starting a job cancels the one already running under that name, so a start per tick would restart it forever."""
     out = video_env / "output"
     (out / "flash").mkdir(parents=True)
     spec = {"picks": [{"column": "flash", "count": 1, "source": "flash"}], "refresh": True}
@@ -429,7 +449,7 @@ def test_todays_discovery_is_started_once_and_waited_for_not_restarted_every_tic
     starts: list[int] = []
     running = {"now": False}
     monkeypatch.setattr(pilot, "_start_discovery", lambda: (starts.append(1), running.update(now=True)))
-    monkeypatch.setattr(TaskRegistry, "is_running", lambda self, job: running["now"])
+    monkeypatch.setattr(pilot, "_discovery_running", lambda: running["now"])
     for _ in range(5):  # five ticks while the discovery runs
         assert pilot.fresh_topics(run["spec"], ap.get_run(run["id"])) is False
     assert len(starts) == 1
@@ -442,3 +462,11 @@ def test_todays_discovery_is_started_once_and_waited_for_not_restarted_every_tic
     # a report for today ends the wait at once
     (out / "flash" / f"{time.strftime('%Y-%m-%d')}_ai_flash_discovery.md").write_text("x", encoding="utf-8")
     assert pilot.fresh_topics(other["spec"], other) is True and len(starts) == 2
+
+
+def test_topics_know_which_scripts_cover_them(video_env):
+    single = store.create_script("flash", {"id": "2026-10-19/F1", "title": "单条", "fields": {}})
+    roundup = store.create_script("ai-developer-roundup-long", {"id": None, "title": "盘点", "items": ["2026-10-19/F1", "2026-10-19/F2"]})
+    covered = store.scripts_by_topic()
+    assert {s["id"] for s in covered["2026-10-19/F1"]} == {roundup["id"], single["id"]}
+    assert [s["id"] for s in covered["2026-10-19/F2"]] == [roundup["id"]]

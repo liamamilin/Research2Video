@@ -248,6 +248,21 @@ def topic_ids_in_use() -> set[str]:
     return ids - {None}
 
 
+def scripts_by_topic() -> dict[str, list[dict]]:
+    """Topic id → the scripts that cover it (not failed, newest first), a roundup covering each of its items."""
+    with connect() as conn:
+        rows = conn.execute("SELECT id, column_key, topic, status, created_at, archived FROM scripts"
+                            " WHERE status != 'FAILED' ORDER BY created_at DESC").fetchall()
+    covered: dict[str, list[dict]] = {}
+    for row in rows:
+        topic = json.loads(row["topic"])
+        for topic_id in {topic.get("id"), *(topic.get("items") or [])} - {None}:
+            covered.setdefault(topic_id, []).append({"id": row["id"], "column_key": row["column_key"],
+                                                      "status": row["status"], "created_at": row["created_at"],
+                                                      "archived": row["archived"]})
+    return covered
+
+
 @contextmanager
 def beating(touch, key: str, every: float = HEARTBEAT_SECONDS) -> Iterator[None]:
     """Call ``touch(key)`` now and every ``every`` seconds until the block exits."""

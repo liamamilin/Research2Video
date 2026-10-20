@@ -1,16 +1,17 @@
-"""The unattended pipeline: topics → script → audit → approve (gated) → render, resuming where it stopped.
+"""The unattended pipeline: topics → script → audit → approve → render, resuming where it stopped.
 
 ``tick()`` is idempotent. Each call reads the real state of every item's script and render and does
 the next thing that is missing, so a restart or a crash never repeats finished work:
 
 * no script yet → create it (its id is recorded before the work starts);
 * script FAILED or its audits cut off → resume it (research is reused, a saved draft is not rewritten);
-* draft with audits done → the gate: approve automatically, or hold the item for the user;
+* draft with audits done → approve automatically, with a credibility label (core/video/credibility.py);
 * approved → one render (a render row with an AutoVideo job id is only polled, never resubmitted);
 * render completed → done. Nothing here publishes.
 
-The gate approves only when the fact audit found nothing serious, the length is within budget, the model audit
-really ran, and no rule marked "must" is left. What it let through (warnings, style findings) is recorded.
+Nothing here waits for the user. The label (有出处可信 … 有严重问题) says how far the words can be trusted and is
+shown wherever a video is listed; an item is held only for a technical failure (the script failed after its retries,
+the render failed after its retry).
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ from typing import Optional
 from core.fileio import file_lock
 from core.video import autopilot_store as ap
 from core.video import columns as video_columns
+from core.video import credibility
 from core.video import flash as video_flash
 from core.video import store
 from core.video import topics as video_topics
@@ -81,13 +83,11 @@ def fresh_topics(spec: dict, run: dict) -> bool:
 
     A stale discovery report starts today's job — once. Starting a job cancels the one already running under the
     same name, so a start on every tick would restart it forever."""
-    from web.runner.registry import TaskRegistry
-
     if not spec.get("refresh"):
         return True
     if video_flash.latest_report(get_settings().paths.output_dir) == time.strftime("%Y-%m-%d"):
         return True
-    running = TaskRegistry().is_running(DISCOVERY_JOB)
+    running = _discovery_running()
     started_at = run.get("discovery_at")
     if running:
         if started_at is None:  # someone else started it (by hand): wait for that one
@@ -108,6 +108,11 @@ def fresh_topics(spec: dict, run: dict) -> bool:
 _discovery_lock = threading.Lock()
 
 
+def _discovery_running() -> bool:
+    from web.runner.registry import TaskRegistry
+    return TaskRegistry().is_running(DISCOVERY_JOB)
+
+
 def _start_discovery() -> None:
     from web.runner.executor import start_job
 
@@ -120,25 +125,19 @@ def _start_discovery() -> None:
             logger.info("flash discovery not started: %s", exc)
 
 
-# --- the gate --------------------------------------------------------------
+# --- the label (there is no gate) ---------------------------------------------
 
-def gate(script: dict, column) -> dict:
-    """Whether the current version may be approved without the user, and what it let through."""
+def judge(script: dict, column) -> dict:
+    """The credibility label of the current version, and what it let through. It never stops the pipeline."""
     version = store.get_version(script["id"], script["current_version"])
+    label = credibility.label(version)
     checks = video_workflow.rule_checks(version, column)
     summary = checks.get("summary") or {}
-    reasons = []
-    if not checks.get("model_ran"):
-        reasons.append("事实/风格审计没有真正跑完")
-    if summary.get("serious"):
-        reasons.append(f"事实审计有 {summary['serious']} 条严重问题")
-    if summary.get("rule_must"):
-        reasons.append(f"规则检查还有 {summary['rule_must']} 条必须改")
-    if (version.get("length_check") or {}).get("status") != "OK":
-        reasons.append("长度不在预算内")
-    ignored = {"must": max(0, int(summary.get("must", 0)) - int(summary.get("rule_must", 0))),
-               "warn": int(summary.get("warn", 0))}
-    return {"pass": not reasons, "reasons": reasons, "ignored": ignored, "version": version["version"]}
+    return {"label": label["tier"], "text": label["text"], "reasons": label["reasons"],
+            "cited_share": label["cited_share"], "audited": bool(checks.get("model_ran")),
+            "ignored": {"must": max(0, int(summary.get("must", 0)) - int(summary.get("rule_must", 0))),
+                        "warn": int(summary.get("warn", 0))},
+            "version": version["version"]}
 
 
 # --- advancing one item ----------------------------------------------------
@@ -193,19 +192,18 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
     if status == "DRAFT":
         if script.get("stage"):  # audits running
             return took
-        verdict = gate(script, column)
-        if not verdict["pass"]:
-            if "事实/风格审计没有真正跑完" in verdict["reasons"] and _retries(item, "audit") < MAX_RETRIES and can_start_script:
-                _bump(item, "audit")
-                video_workflow.spawn(script["id"], "autopilot")  # current_version set → only the audits rerun
-                ap.update_item(item["id"], note="审计没有跑完，重跑审计")
-                took["script"] = True
-                return took
-            ap.update_item(item["id"], gate=verdict)
-            _hold(item, "闸门没通过：" + "；".join(verdict["reasons"]))
+        verdict = judge(script, column)
+        if not verdict["audited"] and _retries(item, "audit") < MAX_RETRIES and can_start_script:
+            _bump(item, "audit")
+            video_workflow.spawn(script["id"], "autopilot")  # current_version set → only the audits rerun
+            ap.update_item(item["id"], note="审计没有跑完，重跑审计")
+            took["script"] = True
             return took
+        if not verdict["audited"] and _retries(item, "audit") < MAX_RETRIES:
+            return took  # wait for a free slot to rerun the audit
+        # whatever the label, the video is made: it is shown next to the video, and the user decides what to publish
         store.update_script(script["id"], status="APPROVED", approved_version=verdict["version"])
-        ap.update_item(item["id"], gate={**verdict, "approved": "auto"}, note="已自动定稿，准备出片")
+        ap.update_item(item["id"], gate={**verdict, "approved": "auto"}, note=f"已自动定稿（{verdict['text']}），准备出片")
         return took
     if status == "APPROVED":
         return _render_step(item, script, can_start_render, took)
@@ -275,10 +273,18 @@ def tick() -> int:
 
 
 def reopen_approved() -> int:
-    """A held item whose script the user has since approved goes on to its render, in its batch."""
+    """A held item whose script the user has since approved goes on to its render, in its batch.
+
+    Items an earlier version of the pipeline held at its quality gate (there is none now) are let through too."""
     reopened = 0
     for item in ap.held_items():
         script = store.get_script(item["script_id"]) if item["script_id"] else None
+        old_gate = script and script["status"] == "DRAFT" and not script.get("stage") and item["note"].startswith("闸门没通过")
+        if old_gate:
+            ap.update_item(item["id"], state="WORKING", note="不再设闸门，继续")
+            ap.update_run(item["run_id"], status="RUNNING")
+            reopened += 1
+            continue
         if script and script["status"] == "APPROVED" and not any(
                 r["status"] in ("COMPLETED", *store.ACTIVE_RENDER_STATUSES) for r in store.list_renders(script["id"])):
             ap.update_item(item["id"], state="WORKING", note="你已定稿，继续出片")

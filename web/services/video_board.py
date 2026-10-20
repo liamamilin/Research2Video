@@ -1,7 +1,7 @@
 """The home board: how many scripts are at each stage, and what needs the user (spec/console-redesign.md)."""
 from typing import Optional
 
-from core.video import store
+from core.video import credibility, store
 
 #: Stages in pipeline order. A script is counted once, at the furthest stage it has reached.
 STAGES = (
@@ -30,6 +30,11 @@ def _stage(script: dict, renders: list[dict], published: bool) -> str:
     return "draft" if status == "DRAFT" else "failed"
 
 
+def _label(script: dict) -> Optional[dict]:
+    version = store.get_version(script["id"], script["current_version"]) if script["current_version"] else None
+    return credibility.label(version, auditing=bool(script.get("stage"))) if version else None
+
+
 def _title(script: dict) -> str:
     version = store.get_version(script["id"], script["current_version"]) if script["current_version"] else None
     return version["title"] if version else script["topic"].get("title", "")
@@ -46,10 +51,11 @@ def board(columns: dict, *, limit: int = 200) -> dict:
         renders = store.list_renders(script["id"])
         stage = _stage(script, renders, script["id"] in published)
         counts[stage] += 1
-        item = {"script_id": script["id"], "title": _title(script), "column_key": script["column_key"]}
-        if stage == "draft":
-            attention.append({**item, "kind": "review", "text": "草稿等你审校定稿"})
-        elif stage == "failed":
+        label = _label(script)
+        item = {"script_id": script["id"], "title": _title(script), "column_key": script["column_key"],
+                "created_at": script["created_at"], "credibility": label}
+        # drafts are not a to-do any more: the pipeline carries them on and the label says how far to trust them
+        if stage == "failed":
             attention.append({**item, "kind": "failed", "text": script.get("error") or "失败了"})
         elif stage == "rendered":
             attention.append({**item, "kind": "render_done", "text": "成片完成，看片后发布并记录链接"})
@@ -89,8 +95,10 @@ def shipments(columns: dict, *, limit: int = 200) -> list[dict]:
         rows.append({
             "script_id": script["id"], "title": _title(script), "column_key": script["column_key"],
             "approved_version": script["approved_version"], "created_at": script["created_at"],
+            "credibility": _label(script), "auto": script.get("created_by") == "autopilot",
             "render": None if latest is None else {"id": latest["id"], "status": latest["status"],
-                                                   "version": latest["version"], "error": latest.get("error_message")},
+                                                   "version": latest["version"], "error": latest.get("error_message"),
+                                                   "completed_at": latest.get("completed_at")},
             "video_url": f"/api/video/renders/{latest['id']}/files/video.mp4" if video and latest["status"] == "COMPLETED" else None,
             "publications": store.list_publications(script["id"]),
             "warnings": warnings,

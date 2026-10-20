@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import os
+
+os.environ.setdefault("AREC_NO_AUTOPILOT_LOOP", "1")
+
+import os
 import sys
 import threading
 from pathlib import Path

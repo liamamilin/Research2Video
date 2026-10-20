@@ -159,7 +159,8 @@ async def lifespan(app: FastAPI):
             except Exception:  # noqa: BLE001 - one bad tick must not stop the loop
                 logger.exception("video autopilot tick failed")
 
-    threading.Thread(target=autopilot_loop, name="video-autopilot", daemon=True).start()
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):  # tests set this so no stray thread ticks against their data
+        threading.Thread(target=autopilot_loop, name="video-autopilot", daemon=True).start()
 
     logger.info("Web UI started")
     app.state.instance_id = uuid.uuid4().hex

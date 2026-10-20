@@ -14,7 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from core.video import columns as video_columns
 from core.video import flash as video_flash
-from core.video import store
+from core.video import credibility, store
 from core.video import topics as video_topics
 from core.video.adapt import styles as video_styles
 from web import audit
@@ -64,6 +64,8 @@ def _script_summary(script: dict, published: Optional[set] = None) -> dict:
     current = store.get_version(script["id"], script["current_version"]) if script["current_version"] else None
     return {
         **script,
+        "credibility": credibility.label(current, auditing=bool(script.get("stage"))) if current else None,
+        "auto": script.get("created_by") == "autopilot",
         "title": current["title"] if current else script["topic"].get("title", ""),
         "length_check": current["length_check"] if current else None,
         "published": script["id"] in (published if published is not None else store.published_script_ids()),
@@ -142,9 +144,11 @@ def list_topics(round: Optional[str] = None, source: str = "opportunities",
     round_date, topics = loader(get_settings().paths.output_dir, round)
     used = store.topic_ids_in_use()
     published = store.published_topic_ids()
+    covered = store.scripts_by_topic()
     return {
         "round": round_date,
-        "topics": [{**t.as_dict(), "scripted": t.id in used, "published": t.id in published} for t in topics],
+        "topics": [{**t.as_dict(), "scripted": t.id in used, "published": t.id in published,
+                    "scripts": covered.get(t.id, [])} for t in topics],
     }
 
 
@@ -280,6 +284,8 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         current = {**current, "checks": video_workflow.rule_checks(current, column)}
     return {
         **script,
+        "credibility": credibility.label(current, auditing=bool(script.get("stage"))) if current else None,
+        "auto": script.get("created_by") == "autopilot",
         "column": column.as_dict() if column else None,
         "version_shown": current,
         "versions": store.list_versions(script_id),
