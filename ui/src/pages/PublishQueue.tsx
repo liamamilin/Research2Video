@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listShipments, type Shipment } from "@/api/video";
+import { listShipments, listVideoCells, type Shipment, type VideoCell } from "@/api/video";
 import { CredibilityBadge, TIER_LABEL } from "@/components/CredibilityBadge";
 import { FilterBar, inRange, matchesText, RANGE_FACET, useFilters, type Facet } from "@/components/FilterBar";
 import { TimeStamp } from "@/components/TimeStamp";
@@ -23,6 +23,11 @@ export function PublishQueuePage() {
   const filters = useFilters(["stage", "tier", "column", "source", "range"]);
   const [rows, setRows] = useState<Shipment[] | null>(null);
   const [error, setError] = useState("");
+  const [cells, setCells] = useState<VideoCell[]>([]);
+  useEffect(() => {
+    listVideoCells().then(setCells).catch(() => undefined);
+  }, []);
+  const cellName = (key: string) => cells.find((c) => c.key === key)?.label?.split(" · ").slice(0, 2).join(" · ") ?? key;
 
   useEffect(() => {
     let alive = true;
@@ -49,9 +54,9 @@ export function PublishQueuePage() {
       matchesText(f.q, s.title),
   );
   const facets: Facet[] = [
-    { key: "stage", label: "阶段", options: ["待发布", "已发布", "待出片", "生成中", "出片失败"].map((v) => ({ value: v, label: v })) },
+    { key: "stage", label: "阶段", options: ["待发布", "已发布", "待出片", "生成中", "出片失败"].map((v) => ({ value: v, label: cellName(v) })) },
     { key: "tier", label: "可信度", options: (Object.keys(TIER_LABEL) as (keyof typeof TIER_LABEL)[]).map((k) => ({ value: k, label: TIER_LABEL[k] })) },
-    { key: "column", label: "栏目格子", options: Array.from(new Set((rows ?? []).map((r) => r.column_key))).map((v) => ({ value: v, label: v })) },
+    { key: "column", label: "栏目格子", options: Array.from(new Set((rows ?? []).map((r) => r.column_key))).map((v) => ({ value: v, label: cellName(v) })) },
     { key: "source", label: "来源", options: [{ value: "auto", label: "自动流水线" }, { value: "manual", label: "手动创建" }] },
     RANGE_FACET,
   ];
@@ -73,7 +78,7 @@ export function PublishQueuePage() {
                 <Link to={`/video/${s.script_id}`} className="text-sm font-medium hover:underline">{s.title || s.script_id.slice(0, 8)}</Link>
                 <CredibilityBadge value={s.credibility} />
                 {s.auto ? <span className="badge border border-border text-text-muted">自动</span> : null}
-                <span className="text-xs text-text-muted">定稿 v{s.approved_version}</span>
+                <span className="text-xs text-text-muted">{cellName(s.column_key)} · 定稿 v{s.approved_version}</span>
                 <TimeStamp value={s.created_at} label="创建" />
                 {s.render?.status === "COMPLETED" ? <TimeStamp value={s.render.completed_at} label="成片完成" /> : null}
                 {s.video_url ? <a className="text-xs text-accent hover:underline" href={s.video_url} target="_blank" rel="noreferrer">看成片</a> : null}

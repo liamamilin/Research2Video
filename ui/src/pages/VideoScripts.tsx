@@ -429,6 +429,7 @@ export function VideoScriptsPage() {
             <thead className="text-xs text-text-muted border-b border-border">
               <tr>
                 <th className="text-left font-normal px-4 py-2">文稿</th>
+                <th className="text-left font-normal px-4 py-2">格子</th>
                 <th className="text-left font-normal px-4 py-2">状态</th>
                 <th className="text-left font-normal px-4 py-2">可信度</th>
                 <th className="text-left font-normal px-4 py-2">时长</th>
@@ -445,6 +446,7 @@ export function VideoScriptsPage() {
                     {s.published ? <span className="badge border border-success/30 bg-success/15 text-success ml-2">已发布</span> : null}
                     {s.auto ? <span className="badge border border-border text-text-muted ml-2">自动</span> : null}
                   </td>
+                  <td className="px-4 py-2 text-xs text-text-muted">{cells.find((c) => c.key === s.column_key)?.label?.split(" · ").slice(0, 2).join(" · ") ?? s.column_key}</td>
                   <td className="px-4 py-2">
                     <span className={cn("badge border", STATUS_CLASS[s.status])}>
                       {STATUS_LABEL[s.status]}
