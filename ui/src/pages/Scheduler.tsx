@@ -31,6 +31,19 @@ interface ScheduledJob {
   installed?: boolean;
   loaded?: boolean;
 }
+// Timed work this page lists but does not edit: the video pipeline's weekly batches and the daily maintenance agent.
+interface OtherSchedule {
+  id: string;
+  kind: "video_batch" | "maintenance";
+  title: string;
+  schedule: string;
+  enabled: boolean;
+  next_run: string | null;
+  last_run: { status: string; note: string; started_at: string | null; empty?: boolean; done?: number; items?: number } | null;
+  where: string;
+  link: string | null;
+  cost: string;
+}
 interface RemovedSystemJob { label: string; kind: string; deleted_at: string; schedule: string; installed?: boolean }
 interface Dispatcher { online: boolean; detail: string; age_seconds?: number }
 interface SchedulableJob {
@@ -91,6 +104,7 @@ export function SchedulerPage() {
   const [previewError, setPreviewError] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [removed, setRemoved] = useState<RemovedSystemJob[]>([]);
+  const [others, setOthers] = useState<OtherSchedule[]>([]);
   useEffect(() => {
     if (!loading && focusedPlan) document.getElementById(`schedule-${focusedPlan}`)?.scrollIntoView?.({ block: 'center' });
   }, [loading, focusedPlan]);
@@ -99,13 +113,14 @@ export function SchedulerPage() {
     if (!quiet) setLoading(true);
     setError("");
     try {
-      const data = await api<{ jobs: ScheduledJob[]; health?: { jobs: JobScheduleState[] }; timezone?: string; warnings?: string[]; dispatcher?: Dispatcher; removed_system_jobs?: RemovedSystemJob[] }>("/api/scheduler");
+      const data = await api<{ jobs: ScheduledJob[]; health?: { jobs: JobScheduleState[] }; timezone?: string; warnings?: string[]; dispatcher?: Dispatcher; removed_system_jobs?: RemovedSystemJob[]; others?: OtherSchedule[] }>("/api/scheduler");
       setJobs(data.jobs);
       setDispatcher(data.dispatcher || null);
       setStates(Object.fromEntries((data.health?.jobs || []).map(entry => [entry.id, entry])));
       setTimezone(data.timezone || "服务器本地时区");
       setWarnings(data.warnings || []);
       setRemoved(data.removed_system_jobs || []);
+      setOthers(data.others || []);
     } catch (err) { setError(errorMessage(err, "加载失败")); }
     finally { setLoading(false); }
   }, []);
@@ -347,6 +362,23 @@ export function SchedulerPage() {
         </div></details>}
       </div>;
     })}</div>}
+    {others.length > 0 && <section className="space-y-3" aria-label="其他定时任务">
+      <div><h2 className="text-sm font-medium">其他定时任务</h2><p className="text-xs text-text-muted mt-1">也会按时自己运行，但不在本页修改；每项写了去哪里改。</p></div>
+      {others.map(other => {
+        const last = other.last_run;
+        const bad = !!last && (last.status === "failed" || last.empty);
+        return <div key={other.id} className={cn("card p-4 space-y-2", bad && "border-warning/50")}>
+          <div className="flex flex-wrap items-center gap-2"><h3 className="text-sm font-medium">{other.title}</h3>
+            <span className="text-[10px] border border-border rounded px-1.5 py-0.5 text-text-muted">{other.kind === "video_batch" ? "视频流水线 · 周计划" : "维护 · 系统任务"}</span>
+            <span className={cn("text-xs", !other.enabled ? "text-text-muted" : bad ? "text-warning" : "text-success")}>{!other.enabled ? "已暂停" : !last ? "还没运行过" : bad ? (last.empty ? "上次空跑" : "上次失败") : "上次正常"}</span></div>
+          <p className="text-sm text-text-muted">{other.schedule ? scheduleSummary(other.schedule) : "频率未知"}</p>
+          <div className="grid sm:grid-cols-2 gap-2 text-xs"><p><span className="text-text-muted mr-2">下次</span>{!other.enabled ? "暂停期间不执行" : other.next_run ? displayTime(other.next_run) : "由系统安排"}</p>
+            <p><span className="text-text-muted mr-2">上次</span>{last?.started_at ? displayTime(last.started_at) : "—"}{last?.items !== undefined && last.items > 0 ? ` · 完成 ${last.done}/${last.items} 篇` : ""}</p></div>
+          {last?.note && <p className={cn("text-xs p-2.5 rounded bg-bg-hover", bad ? "text-warning" : "text-text-muted")}>{last.note}</p>}
+          <p className="text-xs text-text-muted">在哪里改：{other.link ? <a className="text-accent" href={other.link}>{other.where}</a> : other.where}{other.cost ? ` · 花费：${other.cost}` : ""}</p>
+        </div>;
+      })}
+    </section>}
     {/* Outside the jobs list on purpose: this is the only way back from
         deleting the last system task, so it cannot live inside the branch that
         an empty list takes. */}

@@ -42,8 +42,10 @@ RENDER_RETRIES = 1
 #: Scripts researching at once (each research uses search quota); renders go one at a time.
 MAX_SCRIPTS = 2
 MAX_RENDERS = 1
-#: Wait this long for a fresh discovery report before using the newest one there is.
-TOPICS_WAIT_SECONDS = 70 * 60
+#: How long past a discovery job's own time limit (``runtime.timeout_seconds``) to keep waiting for it to end.
+#: The job's engine cancels it at that limit, so the batch waits for the job, not for a clock of its own.
+DISCOVERY_SLACK_SECONDS = 5 * 60
+DISCOVERY_DEFAULT_TIMEOUT = 3600
 
 DEFAULT_SPEC = {"picks": [{"column": "flash", "count": 3, "source": "flash"},
                           {"column": "point_short", "count": 2, "source": "flash"}],
@@ -167,9 +169,9 @@ def fresh_topics(spec: dict, run: dict) -> bool:
         if started_at is None:  # someone else started it (by hand): wait for that one
             ap.update_run(run["id"], discovery_at=time.time())
             return False
-        if time.time() - started_at <= TOPICS_WAIT_SECONDS:
-            return False
-        ap.update_run(run["id"], note=f"今天的{labels}没有在限时内完成，用最新的一期")
+        if time.time() - started_at <= discovery_wait_seconds(stale):
+            return False  # the job is still going and within its own time limit: wait for it to end
+        ap.update_run(run["id"], note=f"今天的{labels}超过了它自己的时限还没结束，用最新的一期")
         return True
     if int(run.get("discovery_tries") or 0) < DISCOVERY_STARTS:
         ap.update_run(run["id"], discovery_at=time.time(), discovery_tries=int(run.get("discovery_tries") or 0) + 1)
@@ -178,6 +180,21 @@ def fresh_topics(spec: dict, run: dict) -> bool:
         return False
     ap.update_run(run["id"], note=f"今天的{labels}没有跑出报告，用最新的一期")
     return True
+
+
+def discovery_wait_seconds(sources: list[topic_store.Source]) -> int:
+    """How long a batch waits for these sources' jobs: the longest job time limit, plus a little."""
+    from core.config import load_job
+
+    jobs_dir = get_settings().paths.jobs_dir
+    limits = []
+    for source in sources:
+        runtime = (load_job(jobs_dir, source.job) or {}).get("runtime") or {}
+        try:
+            limits.append(int(runtime.get("timeout_seconds") or DISCOVERY_DEFAULT_TIMEOUT))
+        except (TypeError, ValueError):
+            limits.append(DISCOVERY_DEFAULT_TIMEOUT)
+    return max(limits or [DISCOVERY_DEFAULT_TIMEOUT]) + DISCOVERY_SLACK_SECONDS
 
 
 _discovery_lock = threading.RLock()

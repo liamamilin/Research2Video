@@ -134,3 +134,31 @@ def test_api_list_and_acknowledge(client, jobs):
     _login(client)
     assert client.post("/api/video/alerts/ack", json={"key": key}, headers=_csrf(client)).status_code == 200
     assert key not in {r["key"] for r in client.get("/api/video/alerts").json()}
+
+
+def test_api_the_schedule_page_also_lists_the_video_batches_and_maintenance_read_only(client, jobs, monkeypatch):
+    import plistlib
+
+    from web.services import launchd_agents
+
+    plan = ap.save_plan("每周二早上一批", "0 5 * * 2", {"picks": [], "refresh": True}, next_fire=FIVE + 7 * 86400)
+    run = morning_of_the_20th(jobs)
+    ap.update_run(run["id"], plan_id=plan["id"], status="DONE", note="没有可写的新选题")
+    with open(launchd_agents.agent_dir() / "com.arec.maintenance.plist", "wb") as fh:
+        plistlib.dump({"Label": "com.arec.maintenance", "StartCalendarInterval": {"Hour": 4, "Minute": 30}}, fh)
+    (jobs / "logs").mkdir(exist_ok=True)
+    (jobs / "logs" / "maintenance.log").write_text("sessions: 已清理过期记录\n", encoding="utf-8")
+    from web.settings import get_settings
+    monkeypatch.setattr(get_settings().paths, "logs_dir", str(jobs / "logs"))
+
+    _login(client, "admin", "admin-pass-123")  # the schedule page is for admins
+    listed = client.get("/api/scheduler")
+    assert listed.status_code == 200, listed.text
+    others = {o["kind"]: o for o in listed.json()["others"]}
+    batch = others["video_batch"]
+    assert batch["title"] == "每周二早上一批" and batch["schedule"] == "0 5 * * 2" and batch["link"] == "/"
+    assert batch["last_run"]["empty"] is True and "没有可写" in batch["last_run"]["note"]
+    assert others["maintenance"]["schedule"] == "30 4 * * *" and others["maintenance"]["last_run"]["status"] == "ok"
+    # read-only here: the page's edit routes do not know these ids
+    assert client.put("/api/scheduler/com.arec.maintenance/toggle", json={"enabled": False},
+                      headers=_csrf(client)).status_code == 404

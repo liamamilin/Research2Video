@@ -213,6 +213,24 @@ describe("Schedule editing and previews", () => {
     expect(screen.queryByRole("button", { name: /删除 com.arec/ })).toBeNull();
   });
 
+  it("lists the video batches and maintenance read-only, with where to change them and an empty last batch", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ jobs: [], total: 0, others: [
+      { id: "video:p1", kind: "video_batch", title: "每周二早上一批", schedule: "0 5 * * 2", enabled: true,
+        next_run: "2026-10-27T05:00:00+0800", where: "看板首页的「无人值守流水线」卡片", link: "/", cost: "搜索额度",
+        last_run: { status: "DONE", note: "没有可写的新选题", started_at: "2026-10-20T05:00:29+0800", empty: true, done: 0, items: 0 } },
+      { id: "com.arec.maintenance", kind: "maintenance", title: "每日维护", schedule: "30 4 * * *", enabled: true,
+        next_run: null, where: "launchd；本页只读", link: null, cost: "",
+        last_run: { status: "ok", note: "", started_at: "2026-10-20T04:30:00+0800" } },
+    ] })));
+    render(<SchedulerPage />);
+    expect(await screen.findByText("每周二早上一批")).toBeTruthy();
+    expect(screen.getByText("上次空跑")).toBeTruthy();
+    expect(screen.getByText("没有可写的新选题")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /无人值守流水线/ }).getAttribute("href")).toBe("/");
+    expect(screen.getByText("每日维护")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /暂停 video:p1|删除 com.arec.maintenance/ })).toBeNull();
+  });
+
   it("previews a changed schedule and saves an edit with PUT", async () => {
     const calls: { url: string; method?: string; body?: string }[] = [];
     vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {

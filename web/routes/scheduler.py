@@ -97,9 +97,13 @@ def list_scheduled(user=Depends(require_admin)):
     health['status'] = 'error' if health['overdue'] else 'warn' if warnings else 'ok'
     removed = launchd_agents.list_deleted(get_settings().paths.state_dir)
     warnings.extend(_matrix_trigger_warnings(displayed, removed))
+    from web.services import schedule_overview
+    others = schedule_overview.rows()
     return {"jobs": displayed, "total": len(displayed), "health": health,
             "timezone": cron.timezone_label(), "warnings": warnings,
-            'dispatcher': host, "removed_system_jobs": removed}
+            'dispatcher': host, "removed_system_jobs": removed,
+            # timed work managed elsewhere (video batches, maintenance), read-only here
+            "others": others}
 
 
 def _matrix_trigger_warnings(displayed: list[dict], removed: list[dict]) -> list[str]:

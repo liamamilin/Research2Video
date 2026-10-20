@@ -7,6 +7,7 @@ that they were asked, and the tests set the script and render rows the way those
 from __future__ import annotations
 
 import os
+import re
 import time
 
 import pytest
@@ -615,3 +616,25 @@ def test_api_the_batch_shows_the_label_as_it_is_now_not_as_it_was_at_approval(cl
     draft(script_id)  # a newer version, audited with nothing serious
     item = client.get("/api/video/autopilot").json()["runs"][0]["items"][0]
     assert item["credibility"]["tier"] != "serious" and item["gate"]["label"] == "serious"
+
+
+def test_the_batch_waits_for_the_discovery_job_as_long_as_the_job_itself_may_run(video_env, monkeypatch):
+    """No clock of its own (it used to be a fixed 70 minutes): the job's runtime.timeout_seconds, plus a little."""
+    (video_env / "output" / "flash").mkdir(parents=True)
+    job = video_env / "jobs" / "monitoring" / "ai_flash_discovery.yaml"
+    job.write_text(job.read_text(encoding="utf-8").replace("topics:", "runtime:\n  timeout_seconds: 600\ntopics:", 1)
+                   if "runtime:" not in job.read_text(encoding="utf-8") else
+                   re.sub(r"timeout_seconds: \d+", "timeout_seconds: 600", job.read_text(encoding="utf-8")), encoding="utf-8")
+    source = pilot.topic_store.resolve(str(video_env / "jobs"), "flash")
+    assert pilot.discovery_wait_seconds([source]) == 600 + pilot.DISCOVERY_SLACK_SECONDS
+
+    spec = {"picks": [{"column": "flash", "count": 1, "source": "flash"}], "refresh": True}
+    run = pilot.start_run(spec)
+    starts: list[str] = []
+    monkeypatch.setattr(pilot, "_start_discovery", starts.append)
+    monkeypatch.setattr(pilot, "_discovery_running", lambda job: True)
+    ap.update_run(run["id"], discovery_at=time.time() - 600, discovery_tries=1)  # past the job's limit, within slack
+    assert pilot.fresh_topics(spec, ap.get_run(run["id"])) is False
+    ap.update_run(run["id"], discovery_at=time.time() - 600 - pilot.DISCOVERY_SLACK_SECONDS - 1)
+    assert pilot.fresh_topics(spec, ap.get_run(run["id"])) is True
+    assert "超过了它自己的时限" in ap.get_run(run["id"])["note"] and starts == []  # never restarted to "help"
