@@ -41,7 +41,9 @@ export interface VideoCell {
   label: string;
   parts: Record<"domain" | "audience" | "type" | "format", { key: string; name: string }> | null;
   column: VideoColumn | null;
-  recipe?: string; // 配方文件名（config/video_recipes/<recipe>.yaml）
+  recipe?: string; // 栏目名：配方文件名，或配方加上它的另一个受众
+  base?: string; // 配方文件名（config/video_recipes/<base>.yaml）
+  audience?: string; // 给谁看的档案名；配方没写 audiences 就是空的
   error?: string; // 配方文件有错时的原因
   topic_sources?: string[];
 }

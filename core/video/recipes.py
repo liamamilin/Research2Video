@@ -556,6 +556,8 @@ def catalog(config_dir: str) -> list[dict]:
             "id": recipe.cell_id,
             "key": recipe.key if recipe.usable else None,
             "recipe": recipe.key,
+            "base": recipe.base or recipe.key,  # the recipe file it comes from
+            "audience": recipe.audience,  # the audience profile it is for ("" when the recipe names none)
             "status": recipe.status,
             "reason": recipe.reason,
             "error": recipe.error,

@@ -5,11 +5,13 @@ One file per config, ``config/production/<key>.yaml``::
     name: 快讯 · 开发者        # optional; the recipe's label when left out
     job: monitoring/ai_flash_discovery
     recipe: flash              # how it is written and rendered: a recipe under config/video_recipes/
+    audience: non_tech         # optional: which of the audiences the recipe offers (its first when left out)
 
-A config adds no settings of its own yet. Who it is for, how long it runs, whether a picked item is researched again
-and how the report is split all come from the recipe, because the recipes' prompts say them in their own words
-(a developer recipe's style says 开发者 and 60–90 秒; overriding the number would make it contradict itself). So a
-config resolves to exactly its recipe's Column, and what the AI configs write is what the recipes wrote before.
+Who it is for is the config's choice among the audiences the recipe offers (``recipes.py``: each audience is a column
+of its own, so the config resolves to that column and nothing downstream changes). How long it runs, whether a picked
+item is researched again and how the report is split still come from the recipe, because the recipes' prompts say them
+in their own words (a style that says 60–90 秒 would contradict an overridden number). So a config resolves to exactly
+one Column, and what the AI configs write is what the recipes wrote before.
 What a config is for: tying a recipe to the Job whose reports it writes from, so a matrix shows what each Job's
 reports turn into, and every script records which config made it.
 """
@@ -41,6 +43,9 @@ class Config:
     job: str
     recipe: str
     errors: tuple = ()
+    #: the recipe file and audience profile the column is made of ("" for a recipe that names no audiences)
+    base_recipe: str = ""
+    audience_key: str = ""
     #: filled when the recipe builds: what it derives from the recipe
     source: str = ""         # the topic source the Job feeds (its alias), where items are picked from
     split: str = ""
@@ -56,6 +61,7 @@ class Config:
 
     def as_dict(self) -> dict:
         return {"key": self.key, "name": self.name, "job": self.job, "recipe": self.recipe, "errors": list(self.errors),
+                "base_recipe": self.base_recipe, "audience_key": self.audience_key,
                 "source": self.source, "split": self.split, "split_name": self.split_name, "reverify": self.reverify,
                 "audience": self.audience, "target_minutes": self.target_minutes, "label": self.label}
 
@@ -64,15 +70,33 @@ def directory(config_dir: str) -> str:
     return os.path.join(config_dir, DIR)
 
 
+def column_key(every_recipe: dict, recipe: str, audience: str = "") -> tuple[str, str]:
+    """The column a recipe file and audience make (the recipe's own key when no audience is asked for), or why not."""
+    if not audience:
+        return recipe, ""
+    base = every_recipe.get(recipe)
+    if base is None or base.base != base.key:
+        return recipe, f"没有这个配方：{recipe or '（没写 recipe）'}"
+    if audience not in base.audiences:
+        offered = "、".join(base.audiences)
+        return recipe, f"配方 {recipe} 没有 {audience} 这个受众" + (f"（有：{offered}）" if offered else "（它没写 audiences）")
+    return (recipe if audience == base.audiences[0] else recipes.variant_key(base, audience)), ""
+
+
 def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: dict) -> Config:
     job, recipe_key = str(data.get("job") or "").strip(), str(data.get("recipe") or "").strip()
+    audience = str(data.get("audience") or "").strip()
     errors: list[str] = []
-    unknown = set(data) - {"name", "job", "recipe"}
+    unknown = set(data) - {"name", "job", "recipe", "audience"}
     if unknown:
         errors.append(f"不认识的字段：{', '.join(sorted(unknown))}")
+    recipe_key, why = column_key(every_recipe, recipe_key, audience)
+    if why:
+        errors.append(why)
     recipe = every_recipe.get(recipe_key)
     if recipe is None:
-        errors.append(f"没有这个配方：{recipe_key or '（没写 recipe）'}")
+        if not why:
+            errors.append(f"没有这个配方：{recipe_key or '（没写 recipe）'}")
     elif not recipe.usable:
         errors.append(f"配方 {recipe_key} {'已停用' if recipe.column else '有错'}，不能用来写稿")
     source = None
@@ -99,7 +123,9 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
     split, split_name = SPLITS.get(column.topic_kind, ("", "")) if column is not None else ("", "")
     label = recipe.label if recipe is not None else ""
     return Config(key=key, name=str(data.get("name") or "").strip() or label or key, job=job, recipe=recipe_key,
-                  errors=tuple(errors), source=source.name if source else "", split=split, split_name=split_name,
+                  errors=tuple(errors), base_recipe=recipe.base if recipe is not None else "",
+                  audience_key=recipe.audience if recipe is not None else "",
+                  source=source.name if source else "", split=split, split_name=split_name,
                   reverify=bool(column is not None and column.research_mode == "job"),
                   audience=column.audience if column is not None else "",
                   target_minutes=column.target_minutes if column is not None else 0.0, label=label)
@@ -135,9 +161,10 @@ def get(config_dir: str, jobs_dir: str, key: str) -> Optional[Config]:
     return load_all(config_dir, jobs_dir).get(key)
 
 
-def save(config_dir: str, key: str, *, job: str, recipe: str, name: str = "") -> None:
-    data = {"name": name, "job": job, "recipe": recipe} if name else {"job": job, "recipe": recipe}
-    text = ("# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。给谁看、多长、拆不拆、要不要再核实都由配方定。\n"
+def save(config_dir: str, key: str, *, job: str, recipe: str, name: str = "", audience: str = "") -> None:
+    data = {"name": name, "job": job, "recipe": recipe, "audience": audience}
+    data = {k: v for k, v in data.items() if v}
+    text = ("# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。多长、拆不拆、要不要再核实由配方定，给谁看在 audience 里选。\n"
             + yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False))
     os.makedirs(directory(config_dir), exist_ok=True)
     atomic_write(os.path.join(directory(config_dir), f"{key}.yaml"), text)

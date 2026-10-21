@@ -25,6 +25,17 @@ const PENDING = { report_date: "2026-10-19", report_path: "output/flash/x.md", i
   { id: "2026-10-19/F3", code: "F3", title: "第三条", fields: {}, written: false, dismissed: false, scripts: [] },
 ] };
 
+const cell = (base: string, key: string, audience: string, name: string, type: string, kind: string) => ({
+  id: key, key, status: "enabled", reason: "", usable: true, label: `${type} · ${name} · B 站横屏短`, recipe: key, base, audience,
+  parts: { domain: { key: "ai", name: "AI" }, audience: { key: audience, name }, type: { key: type, name: type }, format: { key: "short", name: "B 站横屏短" } },
+  column: { topic_kind: kind }, topic_sources: ["flash"],
+});
+const CELLS = [
+  cell("flash", "flash", "developer", "开发者", "快讯", "single"),
+  cell("flash", "ai-non_tech-quick_take-short", "non_tech", "普通用户", "快讯", "single"),
+  cell("rnd", "rnd", "developer", "开发者", "盘点", "roundup"),
+];
+
 let posts: { url: string; body: unknown }[] = [];
 
 beforeEach(() => {
@@ -33,7 +44,7 @@ beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
     const u = String(url);
     if (init?.method === "POST") posts.push({ url: u, body: JSON.parse(String(init.body)) });
-    const body = u.includes("/write") ? [{ id: "new" }] : u.includes("/pending") ? PENDING : u.includes("/api/video/cells") ? [] : CONFIGS;
+    const body = u.includes("/write") ? [{ id: "new" }] : u.includes("/pending") ? PENDING : u.includes("/api/video/cells") ? CELLS : CONFIGS;
     return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(body) } as Response;
   }));
 });
@@ -77,6 +88,25 @@ describe("ProductionConfigs", () => {
     expect(button.disabled).toBe(true);
     fireEvent.click(screen.getByLabelText("选 F3"));
     expect((screen.getByText(/合成一期（已选 2 条/) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("adds a config by picking the Job, the recipe, then who it is for", async () => {
+    show();
+    await screen.findByLabelText("配置 快讯 · 开发者");
+    const recipe = screen.getByLabelText("加配置用的配方") as HTMLSelectElement;
+    const audience = screen.getByLabelText("加配置给谁看") as HTMLSelectElement;
+    expect(recipe.disabled).toBe(true);
+    expect(audience.disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("加配置的 Job"), { target: { value: "monitoring/ai_flash_discovery" } });
+    expect([...recipe.options].map((o) => o.text)).toEqual(["用哪个配方…", "快讯 · B 站横屏短", "盘点 · B 站横屏短"]);  // one per file
+    fireEvent.change(recipe, { target: { value: "flash" } });
+    expect(audience.disabled).toBe(false);
+    expect([...audience.options].map((o) => o.text)).toEqual(["给开发者看（已挂了一套）", "给普通用户看"]);  // the developer one is on this Job already
+    expect(audience.value).toBe("developer");  // the recipe's own audience is the default
+    fireEvent.change(audience, { target: { value: "non_tech" } });
+    fireEvent.click(screen.getByText("加一套配置"));
+    await waitFor(() => expect(posts.length).toBe(1));
+    expect(posts[0]).toEqual({ url: "/api/production", body: { job: "monitoring/ai_flash_discovery", recipe: "flash", audience: "non_tech" } });
   });
 
   it("is read-only for a viewer", async () => {

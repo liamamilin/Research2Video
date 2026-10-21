@@ -9,7 +9,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from core.video import outputs, production, store
+from core.video import outputs, production, recipes, store
 from web import audit
 from web.deps import require_editor, require_viewer
 from web.models import ApiError
@@ -65,6 +65,7 @@ class ConfigIn(BaseModel):
 
     job: str
     recipe: str
+    audience: str = ""
     name: str = ""
 
 
@@ -72,16 +73,18 @@ class ConfigIn(BaseModel):
 def add_config(body: ConfigIn, user=Depends(require_editor)) -> dict:
     paths = get_settings().paths
     every = _all()
-    stem = body.recipe if production.KEY.fullmatch(body.recipe) else "config"
+    recipe, audience = body.recipe.strip(), body.audience.strip()
+    column, _ = production.column_key(recipes.expanded(paths.config_dir), recipe, audience)
+    stem = column if production.KEY.fullmatch(column) else "config"  # named after the column it writes with
     key, n = stem, 2
     while key in every:
         key, n = f"{stem}-{n}", n + 1
-    production.save(paths.config_dir, key, job=body.job.strip(), recipe=body.recipe.strip(), name=body.name.strip())
+    production.save(paths.config_dir, key, job=body.job.strip(), recipe=recipe, name=body.name.strip(), audience=audience)
     made = production.get(paths.config_dir, paths.jobs_dir, key)
     if made is None or not made.usable:
         production.remove(paths.config_dir, key)  # never leave a config that cannot write
         raise _error(422, "invalid_config", "；".join(made.errors) if made else "建不起来")
-    audit.log("production_add", user=user["username"], target=key, details={"job": body.job, "recipe": body.recipe})
+    audit.log("production_add", user=user["username"], target=key, details={"job": body.job, "recipe": body.recipe, "audience": audience})
     return {**made.as_dict(), "scripts": 0}
 
 

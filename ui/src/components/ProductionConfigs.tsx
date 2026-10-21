@@ -134,13 +134,14 @@ function ConfigCard({ config, canEdit, onChange }: { config: ProductionConfig; c
   );
 }
 
-/** 矩阵详情里的「视频配置」：每个 Job 的报告写成哪几种视频。给谁看、多长、拆不拆都由配置用的配方定。 */
+/** 矩阵详情里的「视频配置」：每个 Job 的报告写成哪几种视频。给谁看在配置里选，多长、拆不拆由配置用的配方定。 */
 export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[]; canEdit: boolean }) {
   const toast = useToast();
   const [configs, setConfigs] = useState<ProductionConfig[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
   const [job, setJob] = useState("");
-  const [recipe, setRecipe] = useState("");
+  const [recipe, setRecipe] = useState(""); // 配方文件名
+  const [audience, setAudience] = useState("");
 
   const load = () => listProduction().then(setConfigs).catch((e) => toast.error(errorMessage(e)));
   useEffect(() => {
@@ -156,14 +157,20 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
   const sources = members.filter((m) => m.topics);
   // 能挂在这个 Job 上的配方：一条一期的、挑几条合一期的，而且是给这个 Job 的条目写的（topic.sources 里有它）
   const source = sources.find((m) => m.job === job)?.topics ?? "";
-  const recipes = cells.filter((c) => c.usable && c.key && ["single", "roundup"].includes(c.column?.topic_kind ?? "")
+  const usable = cells.filter((c) => c.usable && c.key && ["single", "roundup"].includes(c.column?.topic_kind ?? "")
     && (c.topic_sources ?? []).includes(source));
+  // 一份配方文件一项，同一份文件的几个受众收在一起：先选配方（快讯、盘点…），再选给谁看
+  const files = new Map<string, VideoCell[]>();
+  for (const c of usable) files.set(c.base ?? c.recipe ?? c.id, [...(files.get(c.base ?? c.recipe ?? c.id) ?? []), c]);
+  const fileName = (cs: VideoCell[]) => (cs[0].parts ? `${cs[0].parts.type.name} · ${cs[0].parts.format.name}` : cs[0].label);
+  const audiences = files.get(recipe) ?? [];
+  const attached = (c: VideoCell) => mine.some((m) => m.job === job && m.recipe === c.key);
 
   return (
     <section className="card p-3 space-y-3" aria-label="视频配置">
       <div>
         <h2 className="font-medium text-sm">视频配置</h2>
-        <p className="text-xs text-text-muted">每个 Job 的报告写成哪几种视频。给谁看、多长、拆不拆，由每套配置用的配方决定。</p>
+        <p className="text-xs text-text-muted">每个 Job 的报告写成哪几种视频。给谁看在配置里选；多长、拆不拆、要不要重新调研，由配置用的配方决定。</p>
       </div>
       {sources.map((m) => {
         const own = mine.filter((c) => c.job === m.job);
@@ -189,17 +196,35 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
       ))}
       {canEdit && sources.length ? (
         <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border pt-2">
-          <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); }}>
+          <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); setAudience(""); }}>
             <option value="">给哪个 Job…</option>
             {sources.map((m) => (
               <option key={m.job} value={m.job}>{m.name}</option>
             ))}
           </select>
-          <select aria-label="加配置用的配方" className="input w-auto" disabled={!job} value={recipe} onChange={(e) => setRecipe(e.target.value)}>
+          <select
+            aria-label="加配置用的配方"
+            className="input w-auto"
+            disabled={!job}
+            value={recipe}
+            onChange={(e) => { setRecipe(e.target.value); setAudience(files.get(e.target.value)?.[0].audience ?? ""); }}
+          >
             <option value="">{job ? "用哪个配方…" : "先选 Job"}</option>
-            {recipes.map((c) => (
-              <option key={c.id} value={c.key!}>
-                {c.label}{mine.some((m) => m.job === job && m.recipe === c.key) ? "（已挂了一套）" : ""}
+            {[...files.entries()].map(([name, cs]) => (
+              <option key={name} value={name}>{fileName(cs)}</option>
+            ))}
+          </select>
+          <select
+            aria-label="加配置给谁看"
+            className="input w-auto"
+            disabled={!recipe || !audiences[0]?.audience}
+            value={audience}
+            onChange={(e) => setAudience(e.target.value)}
+          >
+            {!recipe ? <option value="">先选配方</option> : !audiences[0]?.audience ? <option value="">这份配方不分受众</option> : null}
+            {audiences.filter((c) => c.audience).map((c) => (
+              <option key={c.audience} value={c.audience}>
+                给{c.parts?.audience.name ?? c.audience}看{attached(c) ? "（已挂了一套）" : ""}
               </option>
             ))}
           </select>
@@ -208,9 +233,10 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
             disabled={!job || !recipe}
             onClick={async () => {
               try {
-                await addProduction({ job, recipe });
+                await addProduction({ job, recipe, audience: audience || undefined });
                 setJob("");
                 setRecipe("");
+                setAudience("");
                 load();
               } catch (e) {
                 toast.error(errorMessage(e));

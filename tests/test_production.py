@@ -62,7 +62,9 @@ def prod_env(video_env):
     ({"job": "monitoring/ai_flash_discovery", "recipe": "ai-developer-comparison-long"}, "对比"),
     ({"job": "monitoring/ai_flash_discovery", "recipe": "nope"}, "没有这个配方"),
     ({"job": "research/nope", "recipe": "flash"}, "没有这个 Job"),
-    ({"job": "monitoring/ai_flash_discovery", "recipe": "flash", "audience": "儿童"}, "不认识的字段"),
+    ({"job": "monitoring/ai_flash_discovery", "recipe": "flash", "minutes": 3}, "不认识的字段"),
+    ({"job": "monitoring/ai_flash_discovery", "recipe": "flash", "audience": "儿童"}, "flash 没有 儿童 这个受众（有：developer、non_tech）"),
+    ({"job": "monitoring/ai_flash_discovery", "recipe": "ai-non_tech-quick_take-short", "audience": "non_tech"}, "没有这个配方"),  # a column, not a file
     ({"job": "medical/flash_discovery", "recipe": "flash"}, "先在配方的 topic.sources 里加上 medical_flash"),  # an AI recipe
 ])
 def test_a_config_that_cannot_write_is_listed_with_why(prod_env, data, message):
@@ -124,6 +126,39 @@ def test_api_adding_and_removing_a_config(client, prod_env):
     assert wrong.status_code == 422 and wrong.json()["error"]["code"] == "not_from_this_job"
     assert client.delete("/api/production/flash-2", headers=_csrf(client)).status_code == 200
     assert not os.path.exists(prod_env / "config" / "production" / "flash-2.yaml")
+
+
+def test_a_config_picks_the_audience_and_is_the_column_that_audience_makes(prod_env):
+    config, jobs = str(prod_env / "config"), str(prod_env / "jobs")
+    (prod_env / "config" / "production" / "kids.yaml").write_text(
+        "job: monitoring/ai_flash_discovery\nrecipe: flash\naudience: non_tech\n", encoding="utf-8")
+    (prod_env / "config" / "production" / "devs.yaml").write_text(
+        "job: monitoring/ai_flash_discovery\nrecipe: flash\naudience: developer\n", encoding="utf-8")
+    every = production.load_all(config, jobs)
+    assert (every["kids"].recipe, every["kids"].base_recipe, every["kids"].audience_key, every["kids"].audience) == (
+        "ai-non_tech-quick_take-short", "flash", "non_tech", "普通用户")
+    assert (every["devs"].recipe, every["devs"].audience) == ("flash", "开发者")  # the recipe's first audience is its own key
+    assert every["kids"].usable and every["devs"].usable
+    # the old way of naming the column directly still works, and says the same
+    old = every["ai-non_tech-quick_take-short"]
+    assert (old.recipe, old.base_recipe, old.audience_key) == (every["kids"].recipe, "flash", "non_tech")
+
+
+def test_api_adding_a_config_for_an_audience(client, prod_env):
+    _login(client)
+    body = {"job": "monitoring/ai_flash_discovery", "recipe": "flash", "audience": "non_tech"}
+    added = client.post("/api/production", json=body, headers=_csrf(client))
+    assert added.status_code == 201, added.text
+    made = added.json()
+    assert made["key"] == "ai-non_tech-quick_take-short-2"  # named after the column it writes with; the shipped one has it
+    assert (made["recipe"], made["base_recipe"], made["audience_key"], made["audience"]) == (
+        "ai-non_tech-quick_take-short", "flash", "non_tech", "普通用户")
+    assert yaml.safe_load((prod_env / "config" / "production" / "ai-non_tech-quick_take-short-2.yaml").read_text(
+        encoding="utf-8")) == body
+    bad = client.post("/api/production", json={**body, "audience": "ghosts"}, headers=_csrf(client))
+    assert bad.status_code == 422 and "没有 ghosts 这个受众" in bad.json()["error"]["message"]
+    assert not list((prod_env / "config" / "production").glob("*ghosts*")) and not (
+        prod_env / "config" / "production" / "flash-2.yaml").exists()
 
 
 def test_api_only_editors_change_or_write(client, prod_env):
