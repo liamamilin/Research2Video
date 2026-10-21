@@ -69,6 +69,7 @@ class ConfigIn(BaseModel):
     recipe: str
     audience: str = ""
     minutes: Optional[float] = None
+    reverify: Optional[bool] = None
     name: str = ""
 
 
@@ -77,18 +78,19 @@ def add_config(body: ConfigIn, user=Depends(require_editor)) -> dict:
     paths = get_settings().paths
     every = _all()
     recipe, audience = body.recipe.strip(), body.audience.strip()
-    column, _ = production.column_key(recipes.expanded(paths.config_dir), recipe, audience, body.minutes)
+    column, _ = production.column_key(recipes.expanded(paths.config_dir), recipe, audience, body.minutes, body.reverify)
     stem = column if production.KEY.fullmatch(column) else "config"  # named after the column it writes with
     key, n = stem, 2
     while key in every:
         key, n = f"{stem}-{n}", n + 1
     production.save(paths.config_dir, key, job=body.job.strip(), recipe=recipe, name=body.name.strip(), audience=audience,
-                    minutes=body.minutes)
+                    minutes=body.minutes, reverify=body.reverify)
     made = production.get(paths.config_dir, paths.jobs_dir, key)
     if made is None or not made.usable:
         production.remove(paths.config_dir, key)  # never leave a config that cannot write
         raise _error(422, "invalid_config", "；".join(made.errors) if made else "建不起来")
-    audit.log("production_add", user=user["username"], target=key, details={"job": body.job, "recipe": body.recipe, "audience": audience, "minutes": body.minutes})
+    audit.log("production_add", user=user["username"], target=key, details={"job": body.job, "recipe": body.recipe, "audience": audience, "minutes": body.minutes,
+                                                   "reverify": body.reverify})
     return {**made.as_dict(), "scripts": 0}
 
 

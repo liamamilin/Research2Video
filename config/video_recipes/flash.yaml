@@ -23,6 +23,7 @@ topic:
   fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
 research:
   template: quick_take
+  optional: true
 writing:
   pipeline: single
   default_style:

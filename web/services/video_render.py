@@ -139,7 +139,7 @@ def package_request(column: video_columns.Column, topic: dict) -> dict:
 def source_card_request(script: dict, version: dict) -> list[dict]:
     """The script's ``sources`` for the closing source card; empty when the report cannot be read or cites none."""
     try:
-        report = video_workflow._read_report(script["report_path"])
+        report = video_workflow.report_of(script)
     except (OSError, KeyError, TypeError):
         logger.warning("script %s: no readable report, so no source card", script.get("id"))
         return []
@@ -152,7 +152,7 @@ def publish_pack(script: dict, version: dict, column) -> dict:
 
     report = ""
     try:
-        report = video_workflow._read_report(script["report_path"])
+        report = video_workflow.report_of(script)
     except (OSError, KeyError, TypeError):
         pass
     timeline = None

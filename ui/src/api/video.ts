@@ -45,6 +45,7 @@ export interface VideoCell {
   base?: string; // 配方文件名（config/video_recipes/<base>.yaml）
   audience?: string; // 给谁看的档案名；配方没写 audiences 就是空的
   minutes_range?: number[]; // 配置可以把时长改成哪个范围 [最短, 最长]；空：时长不能改
+  research_optional?: boolean; // 配置可以关掉重新调研（research.optional）
   error?: string; // 配方文件有错时的原因
   topic_sources?: string[];
 }

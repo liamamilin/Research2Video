@@ -25,14 +25,14 @@ const PENDING = { report_date: "2026-10-19", report_path: "output/flash/x.md", i
   { id: "2026-10-19/F3", code: "F3", title: "第三条", fields: {}, written: false, dismissed: false, scripts: [] },
 ] };
 
-const cell = (base: string, key: string, audience: string, name: string, type: string, kind: string, range: number[] = []) => ({
+const cell = (base: string, key: string, audience: string, name: string, type: string, kind: string, range: number[] = [], optional = false) => ({
   id: key, key, status: "enabled", reason: "", usable: true, label: `${type} · ${name} · B 站横屏短`, recipe: key, base, audience,
   parts: { domain: { key: "ai", name: "AI" }, audience: { key: audience, name }, type: { key: type, name: type }, format: { key: "short", name: "B 站横屏短" } },
-  column: { topic_kind: kind, target_minutes: 4 }, topic_sources: ["flash"], minutes_range: range,
+  column: { topic_kind: kind, target_minutes: 4 }, topic_sources: ["flash"], minutes_range: range, research_optional: optional,
 });
 const CELLS = [
-  cell("flash", "flash", "developer", "开发者", "快讯", "single"),
-  cell("flash", "ai-non_tech-quick_take-short", "non_tech", "普通用户", "快讯", "single"),
+  cell("flash", "flash", "developer", "开发者", "快讯", "single", [], true),
+  cell("flash", "ai-non_tech-quick_take-short", "non_tech", "普通用户", "快讯", "single", [], true),
   cell("rnd", "rnd", "developer", "开发者", "盘点", "roundup", [3, 6]),
 ];
 
@@ -123,6 +123,31 @@ describe("ProductionConfigs", () => {
     fireEvent.click(screen.getByText("加一套配置"));
     await waitFor(() => expect(posts.length).toBe(1));
     expect(posts[0].body).toEqual({ job: "monitoring/ai_flash_discovery", recipe: "rnd", audience: "developer", minutes: 5 });
+  });
+
+  it("offers to skip the research only where the recipe says it is optional, and sends reverify false when it is turned off", async () => {
+    show();
+    await screen.findByLabelText("配置 快讯 · 开发者");
+    fireEvent.change(screen.getByLabelText("加配置的 Job"), { target: { value: "monitoring/ai_flash_discovery" } });
+    fireEvent.change(screen.getByLabelText("加配置用的配方"), { target: { value: "rnd" } });
+    expect(screen.queryByLabelText("重新调研一遍")).toBeNull();  // a roundup does not research anyway
+    fireEvent.change(screen.getByLabelText("加配置用的配方"), { target: { value: "flash" } });
+    const box = screen.getByLabelText("重新调研一遍") as HTMLInputElement;
+    expect(box.checked).toBe(true);
+    fireEvent.click(box);
+    fireEvent.click(screen.getByText("加一套配置"));
+    await waitFor(() => expect(posts.length).toBe(1));
+    expect(posts[0].body).toEqual({ job: "monitoring/ai_flash_discovery", recipe: "flash", audience: "developer", reverify: false });
+  });
+
+  it("leaves reverify out when the research is kept", async () => {
+    show();
+    await screen.findByLabelText("配置 快讯 · 开发者");
+    fireEvent.change(screen.getByLabelText("加配置的 Job"), { target: { value: "monitoring/ai_flash_discovery" } });
+    fireEvent.change(screen.getByLabelText("加配置用的配方"), { target: { value: "flash" } });
+    fireEvent.click(screen.getByText("加一套配置"));
+    await waitFor(() => expect(posts.length).toBe(1));
+    expect(posts[0].body).toEqual({ job: "monitoring/ai_flash_discovery", recipe: "flash", audience: "developer" });
   });
 
   it("is read-only for a viewer", async () => {

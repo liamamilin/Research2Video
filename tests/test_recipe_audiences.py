@@ -207,3 +207,21 @@ def test_a_bad_minutes_range_does_not_save(tmp_path, edit, message):
     config = _config(tmp_path, text)
     with pytest.raises(video_columns.ColumnError, match=message):
         recipes.validate("quick", text, config)
+
+
+def test_a_recipe_can_say_its_research_is_optional_and_only_then_is_there_a_version_without_it(tmp_path):
+    optional = RECIPE.replace("  mode: job\n", "  mode: job\n  optional: true\n")
+    config = _config(tmp_path, optional)
+    bare = recipes.find(config, "quick-nr")
+    assert (bare.column.research_mode, bare.column.research_prompt, bare.audience, bare.no_research) == ("none", "", "kids", True)
+    assert recipes.find(config, "ai-adults-quick_take-short-nr").column.research_mode == "none"
+    assert recipes.find(config, "quick").research_optional and not bare.research_optional
+    own, other = dataclasses.asdict(recipes.find(config, "quick").column), dataclasses.asdict(bare.column)
+    assert {k for k in own if own[k] != other[k]} == {"key", "research_mode", "research_prompt"}
+    assert recipes.split_variant_key("flash-m2-nr") == ("flash", 2.0, True)
+    assert recipes.find(config, "quick-nr-m4") is None  # the length comes before -nr; there is no length of a column without research
+    assert recipes.variant_column_key("deep_dive", 7.5, True) == "deep_dive-m7p5-nr"
+    fixed = _config(tmp_path / "fixed")
+    assert "调研不能关" in recipes.find(fixed, "quick-nr").error
+    with pytest.raises(video_columns.ColumnError, match="research.optional"):
+        recipes.validate("quick", optional.replace("optional: true", "optional: yes please"), config)

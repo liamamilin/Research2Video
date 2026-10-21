@@ -41,8 +41,8 @@ def _columns() -> dict:
 
 
 class _Columns(dict):
-    """The columns that build. One built for another length than its recipe's (``deep_dive-m8``) is not listed, there
-    being no list of every length: it is made when a script asks for it."""
+    """The columns that build. One built for another length than its recipe's, or without its research (``deep_dive-m8``,
+    ``flash-nr``) is not listed, there being no list of every length: it is made when a script asks for it."""
 
     def __init__(self, config_dir: str, columns: dict):
         super().__init__(columns)
@@ -53,7 +53,7 @@ class _Columns(dict):
             return self[key]
         from core.video import recipes
 
-        if recipes.split_minutes_key(key):
+        if recipes.split_variant_key(key):
             recipe = recipes.find(self._config_dir, key)
             if recipe is not None and recipe.column is not None:
                 return recipe.column
@@ -69,13 +69,14 @@ def _known_columns() -> dict:
 
 
 def _creatable(key: str):
-    """The column a new script may be made with: a listed one, or a listed one at another length its recipe allows."""
+    """The column a new script may be made with: a listed one, or one at another length or without research that
+    its recipe allows."""
     from core.video import recipes
 
     columns = _columns()
     if key in columns:
         return columns[key]
-    if recipes.split_minutes_key(key):
+    if recipes.split_variant_key(key):
         try:
             return video_columns.for_new_script(get_settings().paths.config_dir, key)
         except video_columns.ColumnError:
@@ -479,6 +480,9 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
         if found is None:
             raise HTTPException(422, detail=ApiError.make("unknown_topic", f"找不到选题 {body.topic_id}"))
         topic = found.as_dict()
+        if chosen.research_mode == "none" and chosen.topic_kind == "single" and found.report_path:
+            # not researched: written from the item's part of its report (excerpt.py), not the whole report
+            topic = {**topic, "from_report": found.report_path, "from_item": found.id}
     if body.video_form is not None:
         topic = {**topic, "video_form": body.video_form}
     if body.from_script is not None:

@@ -134,7 +134,7 @@ function ConfigCard({ config, canEdit, onChange }: { config: ProductionConfig; c
   );
 }
 
-/** 矩阵详情里的「视频配置」：每个 Job 的报告写成哪几种视频。给谁看在配置里选，多长、拆不拆由配置用的配方定。 */
+/** 矩阵详情里的「视频配置」：每个 Job 的报告写成哪几种视频。给谁看在配置里选，多长和要不要重新调研在配方允许时也能选，拆不拆由配方定。 */
 export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[]; canEdit: boolean }) {
   const toast = useToast();
   const [configs, setConfigs] = useState<ProductionConfig[] | null>(null);
@@ -143,6 +143,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
   const [recipe, setRecipe] = useState(""); // 配方文件名
   const [audience, setAudience] = useState("");
   const [minutes, setMinutes] = useState("");
+  const [researchAgain, setResearchAgain] = useState(true);
 
   const load = () => listProduction().then(setConfigs).catch((e) => toast.error(errorMessage(e)));
   useEffect(() => {
@@ -169,12 +170,13 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
   // 配方写了 minutes_range 才能改时长；不填就是配方自己的
   const chosen = audiences.find((c) => c.audience === audience) ?? audiences[0];
   const span = chosen?.minutes_range?.length === 2 ? chosen.minutes_range : null;
+  const canSkip = !!chosen?.research_optional; // 配方说它的调研可以不做
 
   return (
     <section className="card p-3 space-y-3" aria-label="视频配置">
       <div>
         <h2 className="font-medium text-sm">视频配置</h2>
-        <p className="text-xs text-text-muted">每个 Job 的报告写成哪几种视频。给谁看在配置里选；多长、拆不拆、要不要重新调研，由配置用的配方决定。</p>
+        <p className="text-xs text-text-muted">每个 Job 的报告写成哪几种视频。给谁看在配置里选；多长、要不要重新调研，配方允许的才能在配置里改；拆不拆由配方定。</p>
       </div>
       {sources.map((m) => {
         const own = mine.filter((c) => c.job === m.job);
@@ -200,7 +202,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
       ))}
       {canEdit && sources.length ? (
         <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border pt-2">
-          <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); setAudience(""); setMinutes(""); }}>
+          <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); setAudience(""); setMinutes(""); setResearchAgain(true); }}>
             <option value="">给哪个 Job…</option>
             {sources.map((m) => (
               <option key={m.job} value={m.job}>{m.name}</option>
@@ -211,7 +213,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
             className="input w-auto"
             disabled={!job}
             value={recipe}
-            onChange={(e) => { setRecipe(e.target.value); setAudience(files.get(e.target.value)?.[0].audience ?? ""); setMinutes(""); }}
+            onChange={(e) => { setRecipe(e.target.value); setAudience(files.get(e.target.value)?.[0].audience ?? ""); setMinutes(""); setResearchAgain(true); }}
           >
             <option value="">{job ? "用哪个配方…" : "先选 Job"}</option>
             {[...files.entries()].map(([name, cs]) => (
@@ -248,16 +250,23 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
               分钟（{span[0]}–{span[1]}，不填用配方的）
             </label>
           ) : null}
+          {canSkip ? (
+            <label className="flex items-center gap-1 text-text-muted" title="不勾：直接用报告里这一条的那一节和它引用的来源写，不再搜索，省搜索额度；证据只有报告里已有的">
+              <input type="checkbox" aria-label="重新调研一遍" checked={researchAgain} onChange={(e) => setResearchAgain(e.target.checked)} />
+              挑中的条目重新调研一遍
+            </label>
+          ) : null}
           <button
             className="btn text-xs"
             disabled={!job || !recipe}
             onClick={async () => {
               try {
-                await addProduction({ job, recipe, audience: audience || undefined, minutes: span && minutes ? Number(minutes) : undefined });
+                await addProduction({ job, recipe, audience: audience || undefined, minutes: span && minutes ? Number(minutes) : undefined, reverify: canSkip && !researchAgain ? false : undefined });
                 setJob("");
                 setRecipe("");
                 setAudience("");
                 setMinutes("");
+                setResearchAgain(true);
                 load();
               } catch (e) {
                 toast.error(errorMessage(e));

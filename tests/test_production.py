@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import os
 import shutil
 
@@ -226,3 +227,56 @@ def test_api_only_editors_change_or_write(client, prod_env):
     assert client.get("/api/production").status_code == 200
     assert client.post("/api/production/flash/write", json={"topic_ids": ["2026-10-19/F1"]},
                        headers=_csrf(client)).status_code == 403
+
+
+def test_a_config_can_turn_the_research_off_only_where_its_recipe_says_so(prod_env):
+    config, jobs = str(prod_env / "config"), str(prod_env / "jobs")
+    job = "monitoring/ai_flash_discovery"
+    for name, body in {"bare": f"job: {job}\nrecipe: flash\nreverify: false\n",
+                       "bare-kids": f"job: {job}\nrecipe: flash\naudience: non_tech\nreverify: false\n",
+                       "keeps": f"job: {job}\nrecipe: flash\nreverify: true\n",
+                       "no-point": f"job: {job}\nrecipe: point_short\nreverify: false\n",
+                       "roundup": f"job: {job}\nrecipe: ai-developer-roundup-long\nreverify: false\n",
+                       "silly": f"job: {job}\nrecipe: flash\nreverify: 0\n"}.items():
+        (prod_env / "config" / "production" / f"{name}.yaml").write_text(body, encoding="utf-8")
+    every = production.load_all(config, jobs)
+    bare = every["bare"]
+    assert bare.usable and (bare.recipe, bare.base_recipe, bare.reverify, bare.split) == ("flash-nr", "flash", False, "each")
+    assert (every["bare-kids"].recipe, every["bare-kids"].audience_key) == ("ai-non_tech-quick_take-short-nr", "non_tech")
+    assert every["keeps"].recipe == "flash" and every["keeps"].reverify  # asking for the research is no change
+    assert "调研不能关" in "".join(every["no-point"].errors)  # explaining a knowledge point takes research
+    assert every["roundup"].recipe == "ai-developer-roundup-long" and not every["roundup"].reverify  # none to turn off
+    assert "reverify 应为" in "".join(every["silly"].errors)
+    # only what it is written from changes
+    own, bare_col = (dataclasses.asdict(video_columns.get(config, k)) for k in ("flash", "flash-nr"))
+    assert {k for k in own if own[k] != bare_col[k]} == {"key", "research_mode", "research_prompt", "research_timeout_seconds",
+                                                          "research_language"} - {k for k in own if own[k] == bare_col[k]}
+    assert bare_col["research_mode"] == "none" and bare_col["script_style"] == own["script_style"]
+
+
+def test_api_writing_without_research_gives_the_writer_only_that_items_part_of_the_report(client, prod_env, research, llm, autovideo):
+    budget = length.budget_for(video_columns.get(str(ROOT / "config"), "flash").target_minutes, "voxcpm_anchor")
+    llm.replies = [script_json(budget - 5, citations={(0, 0): ["https://example.com/pricing"]})]
+    report = prod_env / "output" / "flash" / "2026-10-19_ai_flash_discovery.md"
+    report.write_text(report.read_text(encoding="utf-8") + "3. 无关来源 | 二手 | 2026-10-01 | https://example.com/unrelated\n",
+                      encoding="utf-8")
+    _login(client)
+    added = client.post("/api/production", json={"job": "monitoring/ai_flash_discovery", "recipe": "flash", "reverify": False},
+                        headers=_csrf(client))
+    assert added.status_code == 201, added.text
+    assert (added.json()["key"], added.json()["recipe"], added.json()["reverify"]) == ("flash-nr", "flash-nr", False)
+    made = client.post("/api/production/flash-nr/write", json={"topic_ids": ["2026-10-19/F1"]}, headers=_csrf(client))
+    assert made.status_code == 202, made.text
+    script = _wait(client, made.json()[0]["id"], {"DRAFT", "FAILED"})
+    assert script["status"] == "DRAFT", script.get("error")
+    assert research.jobs == []  # nothing was researched
+    stored = store.get_script(script["id"])
+    assert stored["column_key"] == "flash-nr" and stored["production"] == "flash-nr"
+    assert stored["topic"]["from_item"] == "2026-10-19/F1" and stored["topic"]["from_report"].endswith("_ai_flash_discovery.md")
+    sent = "\n".join(m["content"] for m in FakeLLM.calls[0])
+    assert "Opus 5.5 输入价降到 4 美元" in sent and "https://example.com/pricing" in sent  # the item and its source
+    assert "https://example.com/releases/2.0" in sent  # F1 cites source 2 as well as 1
+    assert "某框架 2.0" not in sent and "https://example.com/unrelated" not in sent  # not the other item, nor a source F1 never cites
+    assert "未收录但值得留意" not in sent
+    again = client.get("/api/production/flash-nr/pending").json()
+    assert [i["written"] for i in again["items"]][:2] == [True, False]

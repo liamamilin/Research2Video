@@ -31,6 +31,11 @@ A recipe whose text does not name a length may declare ``minutes_range: [min, ma
 ask for another length in half-minute steps within it. That too is a column of its own, named by the column it
 changes and the length (``deep_dive-m8``, ``deep_dive-m7p5``); ``find`` builds it on demand, since there is no
 list of every length (``minutes_key``).
+
+A recipe whose item is already verified by the report it comes from may say ``research: {optional: true}``: a config
+can then turn the research off, and the script is written from that item's part of the report alone
+(``excerpt.py``). That is another column too, with ``-nr`` after its name (``flash-nr``, ``flash-m2-nr``); every
+such column is the original but for what it is written from, and its length if one was asked for.
 """
 
 from __future__ import annotations
@@ -60,7 +65,7 @@ _TOP = {"name", "description", "status", "reason", "label", "tags", "audience", 
         "topic", "research", "writing", "output"}
 _SECTIONS = {
     "topic": {"kind", "sources", "fields"},
-    "research": {"mode", "timeout_seconds", "language", "prompt"},
+    "research": {"mode", "timeout_seconds", "language", "prompt", "optional"},
     "writing": {"pipeline", "style", "sections", "paragraph_units", "required_roles", "default_style",
                 "allowed_tones", "revise_rounds", "pause_after_plan", "audit"},
     "output": {"target", "voice_id", "video_form", "allowed_forms", "creative_intent", "source_card", "package",
@@ -101,6 +106,9 @@ class Recipe:
     minutes_range: tuple = ()
     #: set on a column made for another length than its recipe's
     minutes: float = 0.0
+    #: a config may turn the research off (``research.optional``); set on the column made that way: ``no_research``
+    research_optional: bool = False
+    no_research: bool = False
 
     @property
     def cell_id(self) -> str:
@@ -401,12 +409,13 @@ def _range(key: str, data: dict) -> tuple:
 
 
 def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None, audience: Optional[str] = None,
-          base: str = "", minutes: Optional[float] = None) -> Recipe:
+          base: str = "", minutes: Optional[float] = None, no_research: bool = False) -> Recipe:
     """One recipe from its file's text. Never raises for bad content: the problem goes in ``error``.
 
     ``config_dir`` is where its shared parts are looked up; without it a recipe that uses one does not build.
     ``audience`` picks which of the audiences the file offers it is built for (the first when left out); ``minutes``
-    builds it for another length, which the recipe has to allow (``minutes_range``)."""
+    builds it for another length, which the recipe has to allow (``minutes_range``), and ``no_research`` without the
+    research, which it has to allow too (``research.optional``)."""
     sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
     uses: dict = {}
     offered: tuple[str, ...] = ()
@@ -441,6 +450,13 @@ def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None,
             if not span[0] <= minutes <= span[1] or minutes * 2 != int(minutes * 2):
                 raise columns.ColumnError(f"配方 {key} 的时长只能在 {span[0]:g}–{span[1]:g} 分钟之间，半分钟一档")
             data = {**data, "target_minutes": minutes}
+        optional = (data.get("research") or {}).get("optional", False) if isinstance(data.get("research"), dict) else False
+        if not isinstance(optional, bool):
+            raise columns.ColumnError(f"配方 {key} 的 research.optional 应为 true 或 false")
+        if no_research:
+            if not optional:
+                raise columns.ColumnError(f"配方 {key} 的调研不能关（没写 research.optional: true）：它靠调研才讲得对，或者本来就不调研")
+            data = {**data, "research": {"mode": "none"}}
         tags = _tags(key, data.get("tags"))
         if len(offered) > 1 and not all(dim in tags for dim in DIMENSIONS):
             raise columns.ColumnError(f"配方 {key} 有多个受众，要写全 tags 的 domain、type、format（栏目名由它们拼出）")
@@ -457,7 +473,8 @@ def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None,
     resolved = hashlib.sha256(json.dumps(flat, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
     return Recipe(key=key, path=path, sha256=sha, status=status, reason=reason, label=label, tags=tags,
                   column=column, data=data, uses=uses, resolved_sha256=resolved, audience=chosen, audiences=offered,
-                  base=base or key, minutes_range=span, minutes=minutes or 0.0)
+                  base=base or key, minutes_range=span, minutes=minutes or 0.0,
+                  research_optional=optional and not no_research, no_research=no_research)
 
 
 def validate(key: str, text: str, config_dir: Optional[str] = None) -> Recipe:
@@ -469,6 +486,10 @@ def validate(key: str, text: str, config_dir: Optional[str] = None) -> Recipe:
         ends = parse(key, text, config_dir=config_dir, minutes=end)
         if ends.error:
             raise columns.ColumnError(f"时长 {end:g} 分钟这一版有问题：{ends.error}")
+    if recipe.research_optional:  # and without the research, if it offers that
+        bare = parse(key, text, config_dir=config_dir, no_research=True)
+        if bare.error:
+            raise columns.ColumnError(f"不调研的这一版有问题：{bare.error}")
     for other in recipe.audiences[1:]:  # each audience is a column of its own: all of them must build
         variant = parse(key, text, config_dir=config_dir, audience=other)
         if variant.error:
@@ -516,7 +537,7 @@ def expanded(config_dir: str) -> dict[str, Recipe]:
     return dict(sorted(out.items(), key=lambda kv: order[kv[1].status]))
 
 
-_MINUTES_KEY = re.compile(r"(.+)-m(\d{1,2})(p5)?")
+_VARIANT_KEY = re.compile(r"(.+?)(?:-m(\d{1,2})(p5)?)?(-nr)?")
 
 
 def minutes_key(column_key: str, minutes: float) -> str:
@@ -524,10 +545,19 @@ def minutes_key(column_key: str, minutes: float) -> str:
     return f"{column_key}-m{int(minutes)}" + ("p5" if minutes != int(minutes) else "")
 
 
-def split_minutes_key(key: str) -> Optional[tuple[str, float]]:
-    """``(column key, minutes)`` when ``key`` names a column at another length, else None."""
-    found = _MINUTES_KEY.fullmatch(key or "")
-    return (found.group(1), int(found.group(2)) + (0.5 if found.group(3) else 0.0)) if found else None
+def variant_column_key(column_key: str, minutes: Optional[float] = None, no_research: bool = False) -> str:
+    """The key of a column at another length and/or without research: ``deep_dive-m8``, ``flash-nr``, ``flash-m2-nr``."""
+    key = minutes_key(column_key, minutes) if minutes is not None else column_key
+    return key + ("-nr" if no_research else "")
+
+
+def split_variant_key(key: str) -> Optional[tuple[str, Optional[float], bool]]:
+    """``(column key, minutes or None, no research)`` when ``key`` names a column changed that way, else None."""
+    found = _VARIANT_KEY.fullmatch(key or "")
+    if not found or (found.group(2) is None and not found.group(4)):
+        return None
+    minutes = None if found.group(2) is None else int(found.group(2)) + (0.5 if found.group(3) else 0.0)
+    return found.group(1), minutes, bool(found.group(4))
 
 
 def find(config_dir: str, key: str) -> Optional[Recipe]:
@@ -538,13 +568,13 @@ def find(config_dir: str, key: str) -> Optional[Recipe]:
     cell = next((r for r in every.values() if r.cell_id == key), None)
     if cell is not None:
         return cell
-    split = split_minutes_key(key)
+    split = split_variant_key(key)
     parent = every.get(split[0]) if split else None
-    if parent is None or parent.error or parent.minutes:
+    if parent is None or parent.error:
         return None
     with open(parent.path, encoding="utf-8") as fh:
         return parse(key, fh.read(), parent.path, config_dir, audience=parent.audience or None, base=parent.base,
-                     minutes=split[1])
+                     minutes=split[1], no_research=split[2])
 
 
 def provenance(config_dir: str, key: str) -> Optional[dict]:
@@ -615,6 +645,7 @@ def catalog(config_dir: str) -> list[dict]:
             "recipe": recipe.key,
             "base": recipe.base or recipe.key,  # the recipe file it comes from
             "minutes_range": list(recipe.minutes_range),  # the lengths a config may ask for; empty: none
+            "research_optional": recipe.research_optional,  # a config may turn the research off
             "audience": recipe.audience,  # the audience profile it is for ("" when the recipe names none)
             "status": recipe.status,
             "reason": recipe.reason,

@@ -62,6 +62,21 @@ def _read_report(report_path: str) -> str:
         return fh.read()
 
 
+def report_of(script: dict, report_path: str = "") -> str:
+    """The text a script is written and checked against: its report, or for an item written without research that
+    item's part of it (core/video/excerpt.py). Raises OSError when the report or the item is not there."""
+    from core.video import excerpt
+
+    text = _read_report(report_path or script["report_path"])
+    topic = script.get("topic") or {}
+    if not topic.get("from_item"):
+        return text
+    part = excerpt.item_excerpt(text, topic.get("title") or "")
+    if part is None:
+        raise OSError(f"报告里找不到条目「{topic.get('title')}」，没法只用它那一节写稿")
+    return part
+
+
 def research_job_name(column_key: str, script_id: str) -> str:
     return f"{JOB_CATEGORY}/{column_key}_{script_id[:8]}"
 
@@ -189,7 +204,7 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
 
         report_path = (StateManager.get(job_name) or {}).get("last_output") or ""
     try:
-        report = _read_report(report_path)
+        report = report_of(script, report_path)
     except OSError as exc:
         store.update_script(script_id, status="FAILED", error=f"读不到研究报告 {report_path}：{exc}")
         return "FAILED"
@@ -491,7 +506,7 @@ def run_from_plan(script_id: str, *, started_by: str = "", llm_config: Optional[
             if row is None or row["state"] != "CONFIRMED":
                 raise AdaptError("没有已确认的方案")
             column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
-            report = _read_report(script["report_path"])
+            report = report_of(script)
             config, review_config = _llm_configs(llm_config, column)
             store.update_script(script_id, stage=None)
             _version_from_plan(script_id, row, report=report, report_path=script["report_path"], column=column,
@@ -532,7 +547,7 @@ def run_redo_plan(script_id: str, plan_id: str, note: str, *, started_by: str = 
             column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
             style = video_styles.resolve(get_settings().paths.config_dir, column, row["style"].get("depth"),
                                          row["style"].get("tone"))
-            report = _read_report(script["report_path"])
+            report = report_of(script)
             citation_check = (report_meta.get(script["report_path"]) or {}).get("citation_check")
             config, _ = _llm_configs(llm_config, column)
             _make_plan(script_id, report=report, report_path=script["report_path"], citation_check=citation_check,
@@ -571,7 +586,7 @@ def restyle(script_id: str, *, depth: Optional[str] = None, tone: Optional[str] 
     if not script["report_path"]:
         raise RestyleError("这篇文稿没有研究报告，不能换风格")
     try:
-        _read_report(script["report_path"])
+        report_of(script)
     except OSError as exc:
         raise RestyleError(f"读不到研究报告 {script['report_path']}") from exc
     column = video_columns.get(settings.paths.config_dir, script["column_key"])
@@ -597,7 +612,7 @@ def rewrite(script_id: str, *, started_by: str = "") -> dict:
     if not script["report_path"]:
         raise RestyleError("这篇文稿没有研究报告，不能重写")
     try:
-        _read_report(script["report_path"])
+        report_of(script)
     except OSError as exc:
         raise RestyleError(f"读不到研究报告 {script['report_path']}") from exc
     store.update_script(script_id, status="WRITING", stage="排队", error=None, heartbeat_at=time.time())
@@ -622,7 +637,7 @@ def run_rewrite(script_id: str, *, started_by: str = "", previous_status: str = 
             settings = get_settings()
             script = store.get_script(script_id)
             column = video_columns.get(settings.paths.config_dir, script["column_key"])
-            report = _read_report(script["report_path"])
+            report = report_of(script)
             citation_check = (report_meta.get(script["report_path"]) or {}).get("citation_check")
             style = None
             if column.writer == "adapt" and script["current_version"]:
@@ -652,7 +667,7 @@ def run_restyle(script_id: str, depth: str, tone: str, *, started_by: str = "",
             script = store.get_script(script_id)
             column = video_columns.get(settings.paths.config_dir, script["column_key"])
             style = video_styles.resolve(settings.paths.config_dir, column, depth, tone)
-            report = _read_report(script["report_path"])
+            report = report_of(script)
             citation_check = (report_meta.get(script["report_path"]) or {}).get("citation_check")
             config, review_config = _llm_configs(llm_config, column)
             _adapt_version(script_id, report=report, report_path=script["report_path"],

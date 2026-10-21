@@ -35,7 +35,7 @@ export const listProduction = (job?: string) =>
   api<ProductionConfig[]>("/api/production", { query: job ? { job } : undefined });
 export const getPending = (key: string) =>
   api<{ report_date: string | null; report_path: string; items: PendingItem[] }>(`/api/production/${encodeURIComponent(key)}/pending`);
-export const addProduction = (body: { job: string; recipe: string; audience?: string; minutes?: number; name?: string }) =>
+export const addProduction = (body: { job: string; recipe: string; audience?: string; minutes?: number; reverify?: boolean; name?: string }) =>
   api<ProductionConfig>("/api/production", { method: "POST", body });
 export const removeProduction = (key: string) => api<{ ok: boolean }>(`/api/production/${encodeURIComponent(key)}`, { method: "DELETE" });
 export const writeFromProduction = (key: string, topicIds: string[]) =>

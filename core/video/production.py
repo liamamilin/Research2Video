@@ -7,13 +7,15 @@ One file per config, ``config/production/<key>.yaml``::
     recipe: flash              # how it is written and rendered: a recipe under config/video_recipes/
     audience: non_tech         # optional: which of the audiences the recipe offers (its first when left out)
     minutes: 8                 # optional: another length than the recipe's, within the range it declares
+    reverify: false            # optional: do not research a picked item again; write from its part of the report
 
 Who it is for is the config's choice among the audiences the recipe offers (``recipes.py``: each audience is a column
 of its own, so the config resolves to that column and nothing downstream changes). How long it runs, whether a picked
 item is researched again and how the report is split still come from the recipe, because the recipes' prompts say them
 in their own words (a style that says 60–90 秒 would contradict an overridden number). So a config resolves to exactly
 one Column, and what the AI configs write is what the recipes wrote before. Length is the config's choice only for a
-recipe that declares a ``minutes_range``.
+recipe that declares a ``minutes_range``, and whether a picked item is researched again only for a recipe that says
+its research is ``optional``.
 What a config is for: tying a recipe to the Job whose reports it writes from, so a matrix shows what each Job's
 reports turn into, and every script records which config made it.
 """
@@ -76,9 +78,9 @@ def directory(config_dir: str) -> str:
     return os.path.join(config_dir, DIR)
 
 
-def column_key(every_recipe: dict, recipe: str, audience: str = "", minutes=None) -> tuple[str, str]:
-    """The column a recipe file, audience and length make (the recipe's own key when none is asked for), or why not.
-    Whether the length is one the recipe allows is for ``recipes.find`` to say."""
+def column_key(every_recipe: dict, recipe: str, audience: str = "", minutes=None, reverify=None) -> tuple[str, str]:
+    """The column a recipe file, audience, length and research choice make (the recipe's own key when none is asked
+    for), or why not. Whether the recipe allows the length or the missing research is for ``recipes.find`` to say."""
     key = recipe
     if audience:
         base = every_recipe.get(recipe)
@@ -94,6 +96,14 @@ def column_key(every_recipe: dict, recipe: str, audience: str = "", minutes=None
         own = every_recipe.get(key)
         if own is None or own.column is None or own.column.target_minutes != minutes:  # asking for its own length is no change
             key = recipes.minutes_key(key, minutes)
+        else:
+            minutes = None
+    if reverify is not None and not isinstance(reverify, bool):
+        return key, "reverify 应为 true 或 false"
+    if reverify is False:
+        own = every_recipe.get(recipes.split_variant_key(key)[0] if recipes.split_variant_key(key) else key)
+        if own is None or own.column is None or own.column.research_mode != "none":  # it has no research to turn off
+            key += "-nr"
     return key, ""
 
 
@@ -101,20 +111,21 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
     job, recipe_key = str(data.get("job") or "").strip(), str(data.get("recipe") or "").strip()
     audience = str(data.get("audience") or "").strip()
     errors: list[str] = []
-    unknown = set(data) - {"name", "job", "recipe", "audience", "minutes"}
+    unknown = set(data) - {"name", "job", "recipe", "audience", "minutes", "reverify"}
     if unknown:
         errors.append(f"不认识的字段：{', '.join(sorted(unknown))}")
     minutes = data.get("minutes")
-    recipe_key, why = column_key(every_recipe, recipe_key, audience, minutes)
+    reverify = data.get("reverify")
+    recipe_key, why = column_key(every_recipe, recipe_key, audience, minutes, reverify)
     if why:
         errors.append(why)
     recipe = every_recipe.get(recipe_key)
-    if recipe is None and not why and minutes is not None:
+    if recipe is None and not why and recipes.split_variant_key(recipe_key):
         recipe = recipes.find(config_dir, recipe_key)  # a length is no recipe of its own: built when asked for
     if recipe is None:
         if not why:
             errors.append(f"没有这个配方：{recipe_key or '（没写 recipe）'}")
-    elif recipe.error and minutes is not None:
+    elif recipe.error and recipes.split_variant_key(recipe_key):
         errors.append(recipe.error)
     elif not recipe.usable:
         errors.append(f"配方 {recipe_key} {'已停用' if recipe.column else '有错'}，不能用来写稿")
@@ -183,10 +194,10 @@ def get(config_dir: str, jobs_dir: str, key: str) -> Optional[Config]:
 
 
 def save(config_dir: str, key: str, *, job: str, recipe: str, name: str = "", audience: str = "",
-         minutes=None) -> None:
-    data = {"name": name, "job": job, "recipe": recipe, "audience": audience, "minutes": minutes}
+         minutes=None, reverify=None) -> None:
+    data = {"name": name, "job": job, "recipe": recipe, "audience": audience, "minutes": minutes, "reverify": reverify}
     data = {k: v for k, v in data.items() if v not in ("", None)}
-    text = ("# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。拆不拆、要不要再核实由配方定，给谁看在 audience 里选，多长在配方允许的范围里用 minutes 改。\n"
+    text = ("# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。拆不拆、要不要再核实由配方定，给谁看在 audience 里选，多长在配方允许的范围里用 minutes 改，要不要重新调研用 reverify 改。\n"
             + yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False))
     os.makedirs(directory(config_dir), exist_ok=True)
     atomic_write(os.path.join(directory(config_dir), f"{key}.yaml"), text)

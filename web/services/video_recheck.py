@@ -113,7 +113,7 @@ def _run(recheck_id: str, started_by: str) -> str:
     script = store.get_script(recheck["script_id"])
     version = store.get_version(script["id"], recheck["version"])
     try:
-        report = video_workflow._read_report(script["report_path"])
+        report = video_workflow.report_of(script)
     except OSError:
         report = ""
     refs = publish.reference_lines(version, report)
