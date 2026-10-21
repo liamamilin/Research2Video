@@ -15,7 +15,7 @@ const MEMBERS = [
 ];
 const config = (key: string, name: string, split: string, reverify: boolean) => ({
   key, name, job: "monitoring/ai_flash_discovery", recipe: key, errors: [], source: "flash", split,
-  split_name: split === "some" ? "挑几条合一期" : "每条一期", reverify, audience: "开发者", target_minutes: 1.25, label: name, scripts: 0,
+  split_name: split === "some" ? "挑几条合一期" : "每条一期", reverify, auto: 0, audience: "开发者", target_minutes: 1.25, label: name, scripts: 0,
 });
 const CONFIGS = [config("flash", "快讯 · 开发者", "each", true), config("rnd", "盘点 · 开发者", "some", false),
   { ...config("other", "别的矩阵的", "each", true), job: "medical/flash_discovery" }];
@@ -43,7 +43,7 @@ beforeEach(() => {
   vi.stubGlobal("confirm", vi.fn(() => true));
   vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
     const u = String(url);
-    if (init?.method === "POST") posts.push({ url: u, body: JSON.parse(String(init.body)) });
+    if (init?.method === "POST" || init?.method === "PATCH") posts.push({ url: u, body: JSON.parse(String(init.body)) });
     const body = u.includes("/write") ? [{ id: "new" }] : u.includes("/pending") ? PENDING : u.includes("/api/video/cells") ? CELLS : CONFIGS;
     return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(body) } as Response;
   }));
@@ -150,6 +150,28 @@ describe("ProductionConfigs", () => {
     expect(posts[0].body).toEqual({ job: "monitoring/ai_flash_discovery", recipe: "flash", audience: "developer" });
   });
 
+  it("turns auto on for a recipe that writes one video per item, after saying what it spends, and off again", async () => {
+    show();
+    await screen.findByLabelText("配置 快讯 · 开发者");
+    const boxes = screen.getAllByLabelText("自动写") as HTMLInputElement[];
+    expect(boxes.length).toBe(1);  // 盘点 is one video from several items: not written unattended
+    fireEvent.change(screen.getByLabelText("自动每次写几条"), { target: { value: "2" } });
+    fireEvent.click(boxes[0]);
+    await waitFor(() => expect(posts.length).toBe(1));
+    expect(posts[0]).toEqual({ url: "/api/production/flash", body: { auto: 2 } });
+    const said = String((window.confirm as unknown as { mock: { calls: string[][] } }).mock.calls[0][0]);
+    expect(said).toContain("每篇约 4–20 次搜索");
+    expect(said).toContain("只写打开之后出的报告");
+  });
+
+  it("says when a Job with auto has no schedule, so nothing will start it", async () => {
+    CONFIGS[0] = { ...CONFIGS[0], auto: 3 };
+    show();
+    expect(await screen.findByText(/这个 Job 没设周期/)).toBeTruthy();
+    expect(screen.getByText(/自动：报告一出来写最多 3 条/)).toBeTruthy();
+    CONFIGS[0] = { ...CONFIGS[0], auto: 0 };
+  });
+
   it("is read-only for a viewer", async () => {
     show(false);
     fireEvent.click((await screen.findAllByText("挑条目写"))[0]);
@@ -157,5 +179,6 @@ describe("ProductionConfigs", () => {
     expect(screen.queryByLabelText("选 F2")).toBeNull();
     expect(screen.queryByText("删除这套")).toBeNull();
     expect(screen.queryByText("加一套配置")).toBeNull();
+    expect(screen.queryByLabelText("自动写")).toBeNull();
   });
 });

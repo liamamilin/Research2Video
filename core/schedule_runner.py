@@ -93,10 +93,11 @@ def spawn_worker(runtime: Runtime, run: dict) -> None:
 _last_poke = 0.0
 
 
-def autopilot_due(state_dir: str, now: float) -> bool:
+def autopilot_due(state_dir: str, now: float, runtime: Runtime | None = None) -> bool:
     """Whether the video pipeline has something to do: a weekly plan that is due, or a batch still running.
 
-    Reads video.db directly (stdlib only) so this works while the web app is down."""
+    Reads video.db directly (stdlib only) so this works while the web app is down. With ``runtime`` it also asks whether a
+    Job with auto configs has a new report to write from."""
     import sqlite3
     path = Path(state_dir) / 'video.db'
     if not path.is_file():
@@ -105,9 +106,23 @@ def autopilot_due(state_dir: str, now: float) -> bool:
         with sqlite3.connect(f'file:{path}?mode=ro', uri=True, timeout=2) as db:
             if db.execute("SELECT 1 FROM autopilot_runs WHERE status = 'RUNNING' LIMIT 1").fetchone():
                 return True
-            return bool(db.execute("SELECT 1 FROM autopilot_plans WHERE enabled = 1 AND next_fire IS NOT NULL"
-                                   " AND next_fire <= ? LIMIT 1", (now,)).fetchone())
+            if db.execute("SELECT 1 FROM autopilot_plans WHERE enabled = 1 AND next_fire IS NOT NULL"
+                          " AND next_fire <= ? LIMIT 1", (now,)).fetchone():
+                return True
     except sqlite3.Error:
+        return False
+    return runtime is not None and auto_due(runtime, now)
+
+
+def auto_due(runtime: Runtime, now: float) -> bool:
+    """Whether a Job with auto configs has a new report to write from (core/video/auto.py): nothing else wakes the
+    console after a scheduled run, and an idle console is closed by its launcher."""
+    from core.video import auto
+
+    try:
+        return bool(auto.pending(runtime.config_dir, runtime.jobs_dir, runtime.state_dir, runtime.workspace, now))
+    except Exception:
+        logger.exception('Auto-write check failed')
         return False
 
 
@@ -127,7 +142,7 @@ def poke_autopilot(runtime: Runtime, now: float, interval: float = 30.0, port: i
     The pipeline itself runs inside the app; this only makes sure the app is up to run it."""
     global _last_poke
     port = port or gateway_port(runtime)
-    if now - _last_poke < interval or not autopilot_due(runtime.state_dir, now):
+    if now - _last_poke < interval or not autopilot_due(runtime.state_dir, now, runtime):
         return False
     _last_poke = now
     import http.client

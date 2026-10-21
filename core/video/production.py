@@ -8,6 +8,7 @@ One file per config, ``config/production/<key>.yaml``::
     audience: non_tech         # optional: which of the audiences the recipe offers (its first when left out)
     minutes: 8                 # optional: another length than the recipe's, within the range it declares
     reverify: false            # optional: do not research a picked item again; write from its part of the report
+    auto: 3                    # optional: when the Job's report comes out, write up to this many of its items, unattended
 
 Who it is for is the config's choice among the audiences the recipe offers (``recipes.py``: each audience is a column
 of its own, so the config resolves to that column and nothing downstream changes). How long it runs, whether a picked
@@ -16,6 +17,10 @@ in their own words (a style that says 60–90 秒 would contradict an overridden
 one Column, and what the AI configs write is what the recipes wrote before. Length is the config's choice only for a
 recipe that declares a ``minutes_range``, and whether a picked item is researched again only for a recipe that says
 its research is ``optional``.
+``auto`` is the one setting that is no part of the column: it says the unattended pipeline (``video_autopilot``) writes
+this config's recipe from each new report of the Job, up to that many items, and takes each to a finished video. It is
+off unless asked for, only for a recipe that writes one video per item, and only reports that come out after it was
+turned on are written (``core/video/auto.py``).
 What a config is for: tying a recipe to the Job whose reports it writes from, so a matrix shows what each Job's
 reports turn into, and every script records which config made it.
 """
@@ -38,6 +43,8 @@ DIR = "production"
 KEY = recipes.KEY
 #: how a recipe's topic kind splits a report (the prototype's 拆不拆)
 SPLITS = {"single": ("each", "每条一期"), "roundup": ("some", "挑几条合一期")}
+#: most items one report is written into without being asked (one batch of the unattended pipeline)
+MAX_AUTO = 10
 
 
 @dataclass(frozen=True)
@@ -58,6 +65,7 @@ class Config:
     split: str = ""
     split_name: str = ""
     reverify: bool = False   # a picked item is researched again before writing (the recipe's research.mode: job)
+    auto: int = 0            # items written per new report without being asked (0: only when the user writes)
     audience: str = ""
     target_minutes: float = 0.0
     label: str = ""          # the recipe's label
@@ -71,6 +79,7 @@ class Config:
                 "base_recipe": self.base_recipe, "audience_key": self.audience_key, "minutes": self.minutes,
                 "minutes_range": list(self.minutes_range),
                 "source": self.source, "split": self.split, "split_name": self.split_name, "reverify": self.reverify,
+                "auto": self.auto,
                 "audience": self.audience, "target_minutes": self.target_minutes, "label": self.label}
 
 
@@ -111,7 +120,7 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
     job, recipe_key = str(data.get("job") or "").strip(), str(data.get("recipe") or "").strip()
     audience = str(data.get("audience") or "").strip()
     errors: list[str] = []
-    unknown = set(data) - {"name", "job", "recipe", "audience", "minutes", "reverify"}
+    unknown = set(data) - {"name", "job", "recipe", "audience", "minutes", "reverify", "auto"}
     if unknown:
         errors.append(f"不认识的字段：{', '.join(sorted(unknown))}")
     minutes = data.get("minutes")
@@ -151,6 +160,13 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
         errors.append(f"配方 {recipe_key} 是给 {'、'.join(column.topic_sources) or '手选'} 的条目写的，不读 {source.name}："
                       f"要用它，先在配方的 topic.sources 里加上 {source.name}")
     split, split_name = SPLITS.get(column.topic_kind, ("", "")) if column is not None else ("", "")
+    auto = data.get("auto")
+    if auto is not None and (isinstance(auto, bool) or not isinstance(auto, int) or not 0 <= auto <= MAX_AUTO):
+        errors.append(f"auto 应是每次写几条，1 到 {MAX_AUTO} 的整数（0 是不自动写）")
+        auto = None
+    elif auto is not None and split == "some":
+        errors.append("盘点一期要挑几条合成，不能自动写：自动只用于每条一期的配方")
+        auto = None
     label = recipe.label if recipe is not None else ""
     return Config(key=key, name=str(data.get("name") or "").strip() or label or key, job=job, recipe=recipe_key,
                   errors=tuple(errors), base_recipe=recipe.base if recipe is not None else "",
@@ -158,7 +174,7 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
                   minutes=recipe.minutes if recipe is not None else 0.0,
                   minutes_range=recipe.minutes_range if recipe is not None else (),
                   source=source.name if source else "", split=split, split_name=split_name,
-                  reverify=bool(column is not None and column.research_mode == "job"),
+                  reverify=bool(column is not None and column.research_mode == "job"), auto=auto or 0,
                   audience=column.audience if column is not None else "",
                   target_minutes=column.target_minutes if column is not None else 0.0, label=label)
 
@@ -193,14 +209,37 @@ def get(config_dir: str, jobs_dir: str, key: str) -> Optional[Config]:
     return load_all(config_dir, jobs_dir).get(key)
 
 
-def save(config_dir: str, key: str, *, job: str, recipe: str, name: str = "", audience: str = "",
-         minutes=None, reverify=None) -> None:
-    data = {"name": name, "job": job, "recipe": recipe, "audience": audience, "minutes": minutes, "reverify": reverify}
+HEADER = ("# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。拆不拆、要不要再核实由配方定，给谁看在 audience 里选，"
+          "多长在配方允许的范围里用 minutes 改，要不要重新调研用 reverify 改，报告出来后自动写几条用 auto 改。\n")
+
+
+def _write(config_dir: str, key: str, data: dict) -> None:
     data = {k: v for k, v in data.items() if v not in ("", None)}
-    text = ("# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。拆不拆、要不要再核实由配方定，给谁看在 audience 里选，多长在配方允许的范围里用 minutes 改，要不要重新调研用 reverify 改。\n"
-            + yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False))
     os.makedirs(directory(config_dir), exist_ok=True)
-    atomic_write(os.path.join(directory(config_dir), f"{key}.yaml"), text)
+    atomic_write(os.path.join(directory(config_dir), f"{key}.yaml"),
+                 HEADER + yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False))
+
+
+def save(config_dir: str, key: str, *, job: str, recipe: str, name: str = "", audience: str = "",
+         minutes=None, reverify=None, auto=None) -> None:
+    _write(config_dir, key, {"name": name, "job": job, "recipe": recipe, "audience": audience, "minutes": minutes,
+                             "reverify": reverify, "auto": auto})
+
+
+def set_auto(config_dir: str, key: str, count: Optional[int]) -> bool:
+    """Turn the unattended writing of a config on (``count`` items per report) or off (None), keeping the rest of its
+    file. False when there is no such config file."""
+    path = os.path.join(directory(config_dir), f"{key}.yaml")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = yaml.safe_load(fh) or {}
+    except (OSError, yaml.YAMLError):
+        return False
+    if not isinstance(data, dict):
+        return False
+    data["auto"] = count
+    _write(config_dir, key, data)  # the file's time is when auto was turned on: older reports are not written
+    return True
 
 
 def remove(config_dir: str, key: str) -> bool:

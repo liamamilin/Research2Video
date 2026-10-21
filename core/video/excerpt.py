@@ -44,3 +44,13 @@ def item_excerpt(report: str, title: str) -> Optional[str]:
     if listed:
         out += "\n\n### 来源清单\n" + "\n".join(listed)
     return out + "\n"
+
+
+def topic_for(column, found) -> dict:
+    """The topic a script of ``column`` is made from for a report item. A column that does not research its item
+    (``research_mode: none``) writes from the item's part of its report, so the topic carries the report and the item;
+    the manual route and the unattended pipeline both build it here."""
+    topic = found.as_dict()
+    if column.research_mode == "none" and column.topic_kind == "single" and found.report_path:
+        topic = {**topic, "from_report": found.report_path, "from_item": found.id}
+    return topic

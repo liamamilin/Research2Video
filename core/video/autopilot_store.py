@@ -4,7 +4,8 @@ An item records only what is needed to find its place again after a restart — 
 render id, how many times each stage was retried. Where the work actually is comes from the script
 and render rows, so a restart resumes from the last finished stage instead of starting over.
 
-Item states: PENDING (no script yet), WORKING, HELD (needs the user: the gate said no or a retry
+An item also records the production config it was written for ("" for the weekly plan's), so its script says which
+config made it. Item states: PENDING (no script yet), WORKING, HELD (needs the user: the gate said no or a retry
 ran out), DONE (render completed), FAILED, CANCELLED.
 Run states: RUNNING, DONE, CANCELLED.
 """
@@ -75,6 +76,8 @@ def init(conn) -> None:
         conn.execute("ALTER TABLE autopilot_runs ADD COLUMN discovery_at REAL")
     if "discovery_tries" not in columns:
         conn.execute("ALTER TABLE autopilot_runs ADD COLUMN discovery_tries INTEGER NOT NULL DEFAULT 0")
+    if "production" not in {r[1] for r in conn.execute("PRAGMA table_info(autopilot_items)")}:
+        conn.execute("ALTER TABLE autopilot_items ADD COLUMN production TEXT NOT NULL DEFAULT ''")
 
 
 def _dec(row, fields) -> dict | None:
@@ -148,9 +151,10 @@ def create_run(spec: dict, items: list[dict], *, plan_id: Optional[str] = None, 
             (run_id, plan_id, json.dumps(spec, ensure_ascii=False), started_by, time.time(), now, now))
         for i, item in enumerate(items):
             conn.execute(
-                "INSERT INTO autopilot_items (id, run_id, slot, column_key, topic, updated_at)"
-                " VALUES (?, ?, ?, ?, ?, ?)",
-                (uuid.uuid4().hex, run_id, i, item["column_key"], json.dumps(item["topic"], ensure_ascii=False), now))
+                "INSERT INTO autopilot_items (id, run_id, slot, column_key, topic, production, updated_at)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (uuid.uuid4().hex, run_id, i, item["column_key"], json.dumps(item["topic"], ensure_ascii=False),
+                 item.get("production", ""), now))
     return get_run(run_id)
 
 

@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from core.video import columns as video_columns
-from core.video import credibility, store
+from core.video import credibility, excerpt, store
 from core.video import plans as video_plans
 from core.video import steps as video_steps
 from core.video import topics as video_topics
@@ -479,10 +479,7 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
         found = topic_store.get(body.topic_id)
         if found is None:
             raise HTTPException(422, detail=ApiError.make("unknown_topic", f"找不到选题 {body.topic_id}"))
-        topic = found.as_dict()
-        if chosen.research_mode == "none" and chosen.topic_kind == "single" and found.report_path:
-            # not researched: written from the item's part of its report (excerpt.py), not the whole report
-            topic = {**topic, "from_report": found.report_path, "from_item": found.id}
+        topic = excerpt.topic_for(chosen, found)  # not researched: written from the item's part of its report
     if body.video_form is not None:
         topic = {**topic, "video_form": body.video_form}
     if body.from_script is not None:

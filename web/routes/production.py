@@ -70,6 +70,7 @@ class ConfigIn(BaseModel):
     audience: str = ""
     minutes: Optional[float] = None
     reverify: Optional[bool] = None
+    auto: Optional[int] = None
     name: str = ""
 
 
@@ -84,14 +85,39 @@ def add_config(body: ConfigIn, user=Depends(require_editor)) -> dict:
     while key in every:
         key, n = f"{stem}-{n}", n + 1
     production.save(paths.config_dir, key, job=body.job.strip(), recipe=recipe, name=body.name.strip(), audience=audience,
-                    minutes=body.minutes, reverify=body.reverify)
+                    minutes=body.minutes, reverify=body.reverify, auto=body.auto)
     made = production.get(paths.config_dir, paths.jobs_dir, key)
     if made is None or not made.usable:
         production.remove(paths.config_dir, key)  # never leave a config that cannot write
         raise _error(422, "invalid_config", "；".join(made.errors) if made else "建不起来")
     audit.log("production_add", user=user["username"], target=key, details={"job": body.job, "recipe": body.recipe, "audience": audience, "minutes": body.minutes,
-                                                   "reverify": body.reverify})
+                                                   "reverify": body.reverify, "auto": body.auto})
     return {**made.as_dict(), "scripts": 0}
+
+
+class AutoIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    auto: Optional[int] = None  # items written per new report; none or 0 turns it off
+
+
+@router.patch("/{key}")
+def set_auto(key: str, body: AutoIn, user=Depends(require_editor)) -> dict:
+    """Turn the unattended writing of a config on or off. Only reports that come out afterwards are written."""
+    config = _get(key)
+    count = body.auto or None
+    if count is not None:
+        if not config.usable:
+            raise _error(422, "config_broken", "；".join(config.errors))
+        if config.split != "each":
+            raise _error(422, "auto_needs_each", "盘点一期要挑几条合成，不能自动写：自动只用于每条一期的配方")
+        if not 1 <= count <= production.MAX_AUTO:
+            raise _error(422, "auto_count", f"每次写 1 到 {production.MAX_AUTO} 条")
+    paths = get_settings().paths
+    production.set_auto(paths.config_dir, key, count)
+    audit.log("production_auto", user=user["username"], target=key, details={"auto": count})
+    made = production.get(paths.config_dir, paths.jobs_dir, key)
+    return {**made.as_dict(), "scripts": outputs.count_by_config(paths.config_dir, paths.jobs_dir).get(key, 0)}
 
 
 @router.delete("/{key}")

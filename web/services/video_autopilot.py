@@ -25,8 +25,10 @@ import uuid
 from typing import Optional
 
 from core.fileio import file_lock
+from core.video import auto as video_auto
 from core.video import autopilot_store as ap
 from core.video import columns as video_columns
+from core.video import excerpt
 from core.video import store
 from core.video import topic_store
 from web.services import video_executor, video_render, video_workflow  # noqa: F401 - tests patch the last two here
@@ -116,7 +118,9 @@ def pick_topics(spec: dict) -> list[dict]:
     sync_topics()
     taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
     items: list[dict] = []
+    config_dir = get_settings().paths.config_dir
     for pick in (resolve_pick(p) for p in spec.get("picks", [])):
+        column = video_columns.get(config_dir, pick["column"])
         _, topics = topic_store.load(pick.get("source", "flash"))
         # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
         for topic in sorted(topics, key=lambda t: (bool(getattr(t, "stale", lambda: False)()), -(t.score or 0))):
@@ -125,7 +129,8 @@ def pick_topics(spec: dict) -> list[dict]:
             if topic.id in taken:
                 continue
             taken.add(topic.id)
-            items.append({"column_key": pick["column"], "topic": topic.as_dict(), "pick": pick})
+            items.append({"column_key": pick["column"], "topic": excerpt.topic_for(column, topic),
+                          "production": pick.get("production", ""), "pick": pick})
     for item in items:
         del item["pick"]
     return items
@@ -280,6 +285,8 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
         if not can_start_script:
             return took
         script = video_executor.create(item["column_key"], _prepare(item), "autopilot")
+        if item.get("production"):
+            store.update_script(script["id"], production=item["production"])
         ap.update_item(item["id"], script_id=script["id"], state="WORKING", note="已开始写稿")
         took["script"] = True
         return took
@@ -319,6 +326,7 @@ def tick() -> int:
     try:
         with file_lock(os.path.join(get_settings().paths.state_dir, "autopilot-tick"), timeout=0):
             fire_due_plans()
+            fire_auto()
             reopen_approved()
             runs = ap.list_runs(status="RUNNING")
             if runs:  # a batch in flight counts as use of the console: the launcher's idle watchdog must not close it
@@ -386,9 +394,10 @@ def _add_items(run_id: str, items: list[dict]) -> None:
     now = time.strftime("%Y-%m-%dT%H:%M:%S%z")
     with store.connect(write=True) as conn:
         for i, item in enumerate(items):
-            conn.execute("INSERT INTO autopilot_items (id, run_id, slot, column_key, topic, updated_at)"
-                         " VALUES (?, ?, ?, ?, ?, ?)",
-                         (uuid.uuid4().hex, run_id, i, item["column_key"], json.dumps(item["topic"], ensure_ascii=False), now))
+            conn.execute("INSERT INTO autopilot_items (id, run_id, slot, column_key, topic, production, updated_at)"
+                         " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                         (uuid.uuid4().hex, run_id, i, item["column_key"], json.dumps(item["topic"], ensure_ascii=False),
+                          item.get("production", ""), now))
 
 
 def _summary(run: dict) -> str:
@@ -433,4 +442,25 @@ def fire_due_plans(now: Optional[float] = None) -> int:
                 ap.finished_run(plan["spec"], f"错过了 {time.strftime('%m-%d %H:%M', time.localtime(plan['next_fire']))}"
                                 f" 这一批（晚了 {late / 3600:.0f} 小时，超过一天不补跑）",
                                 plan_id=plan["id"], started_by="autopilot")
+    return fired
+
+
+def fire_auto(now: Optional[float] = None) -> int:
+    """A batch for each Job that has a new report its auto configs have not written from (core/video/auto.py).
+
+    The Job's own schedule produced the report, so the batch does not start the Job (``refresh`` off); its picks are the
+    Job's auto configs, one batch so the limits and the topics already taken hold across them."""
+    paths = get_settings().paths
+    root = os.path.dirname(os.path.abspath(paths.output_dir))
+    fired = 0
+    for found in video_auto.pending(paths.config_dir, paths.jobs_dir, paths.state_dir, root,
+                                    time.time() if now is None else now):
+        try:
+            start_run({"picks": found["picks"], "refresh": False, "job": found["job"], "report": found["report"]},
+                      started_by="autopilot")
+            fired += 1
+        except Exception:  # noqa: BLE001 - a config that cannot start must not stop the others or the tick
+            logger.exception("auto batch for %s not started", found["job"])
+            ap.finished_run({"picks": found["picks"], "refresh": False, "job": found["job"], "report": found["report"]},
+                            "自动写稿没能开始，看日志", started_by="autopilot")  # also marks the report handled: no retry loop
     return fired

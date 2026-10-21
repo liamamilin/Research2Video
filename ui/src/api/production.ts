@@ -15,6 +15,7 @@ export interface ProductionConfig {
   split: "each" | "some" | "";
   split_name: string;
   reverify: boolean;
+  auto: number; // Job 每出一份新报告，自动写几条（0 是不自动写）
   audience: string;
   target_minutes: number;
   label: string;
@@ -35,8 +36,10 @@ export const listProduction = (job?: string) =>
   api<ProductionConfig[]>("/api/production", { query: job ? { job } : undefined });
 export const getPending = (key: string) =>
   api<{ report_date: string | null; report_path: string; items: PendingItem[] }>(`/api/production/${encodeURIComponent(key)}/pending`);
-export const addProduction = (body: { job: string; recipe: string; audience?: string; minutes?: number; reverify?: boolean; name?: string }) =>
+export const addProduction = (body: { job: string; recipe: string; audience?: string; minutes?: number; reverify?: boolean; auto?: number; name?: string }) =>
   api<ProductionConfig>("/api/production", { method: "POST", body });
 export const removeProduction = (key: string) => api<{ ok: boolean }>(`/api/production/${encodeURIComponent(key)}`, { method: "DELETE" });
 export const writeFromProduction = (key: string, topicIds: string[]) =>
   api<({ id: string } | { failed: unknown })[]>(`/api/production/${encodeURIComponent(key)}/write`, { method: "POST", body: { topic_ids: topicIds } });
+export const setAuto = (key: string, auto: number | null) =>
+  api<ProductionConfig>(`/api/production/${encodeURIComponent(key)}`, { method: "PATCH", body: { auto } });

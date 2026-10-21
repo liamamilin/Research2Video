@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import type { MatrixMember } from "@/api/matrices";
 import {
-  addProduction, getPending, listProduction, removeProduction, writeFromProduction,
+  addProduction, getPending, listProduction, removeProduction, setAuto, writeFromProduction,
   type PendingItem, type ProductionConfig,
 } from "@/api/production";
 import { listVideoCells, type VideoCell } from "@/api/video";
@@ -88,7 +88,45 @@ function Pending({ config, canEdit, onWritten }: { config: ProductionConfig; can
   );
 }
 
-function ConfigCard({ config, canEdit, onChange }: { config: ProductionConfig; canEdit: boolean; onChange: () => void }) {
+/** 自动写：这个 Job 每出一份新报告，就写最多 N 条并出片，不等人点。只写打开之后出的报告，所以打开时不会去写眼前这份旧的。 */
+function AutoWrite({ config, scheduled, onChange }: { config: ProductionConfig; scheduled: boolean; onChange: () => void }) {
+  const toast = useToast();
+  const [count, setCount] = useState(String(config.auto || 3));
+  const n = Number(count);
+  const valid = Number.isInteger(n) && n >= 1 && n <= 10;
+  const change = async (next: number | null) => {
+    if (next !== null) {
+      const cost = config.reverify ? "每条先调研一遍，每篇约 4–20 次搜索，" : "";
+      if (!window.confirm(`打开后，这个 Job 每出一份新报告，就自动用「${config.name}」写最多 ${next} 条并出片，不等你确认；${cost}只写打开之后出的报告。确定？`)) return;
+    }
+    try {
+      await setAuto(config.key, next);
+      onChange();
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  };
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-xs">
+      <label className="flex items-center gap-1">
+        <input type="checkbox" aria-label="自动写" checked={config.auto > 0} disabled={config.auto === 0 && !valid}
+          onChange={(e) => change(e.target.checked ? n : null)} />
+        报告一出来就自动写
+      </label>
+      <label className="flex items-center gap-1 text-text-muted">
+        最多
+        <input aria-label="自动每次写几条" className="input w-14" type="number" min={1} max={10} value={count} onChange={(e) => setCount(e.target.value)} />
+        条
+      </label>
+      {config.auto > 0 && valid && n !== config.auto ? <button className="btn text-xs" onClick={() => change(n)}>改成 {n} 条</button> : null}
+      {config.auto > 0 && !scheduled ? (
+        <span className="text-warning">这个 Job 没设周期：要有人跑出报告才会触发</span>
+      ) : null}
+    </div>
+  );
+}
+
+function ConfigCard({ config, canEdit, scheduled, onChange }: { config: ProductionConfig; canEdit: boolean; scheduled: boolean; onChange: () => void }) {
   const toast = useToast();
   const [open, setOpen] = useState(false);
   return (
@@ -104,8 +142,10 @@ function ConfigCard({ config, canEdit, onChange }: { config: ProductionConfig; c
         <p className="text-xs text-text-muted">
           给{config.audience || "—"}看 · 约 {config.target_minutes} 分钟 · {config.split_name}
           {config.split === "each" ? (config.reverify ? " · 挑中的条目会重新调研一遍" : " · 不再调研") : " · 用报告里的条目，不调研"}
+          {config.auto ? ` · 自动：报告一出来写最多 ${config.auto} 条` : ""}
         </p>
       )}
+      {canEdit && config.split === "each" && !config.errors.length ? <AutoWrite config={config} scheduled={scheduled} onChange={onChange} /> : null}
       <div className="flex gap-2">
         {!config.errors.length ? (
           <button className="btn text-xs" onClick={() => setOpen(!open)}>
@@ -184,7 +224,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
           <div key={m.job} className="space-y-2">
             <h3 className="text-xs text-text-muted">{m.name}</h3>
             {own.length ? (
-              own.map((c) => <ConfigCard key={c.key} config={c} canEdit={canEdit} onChange={load} />)
+              own.map((c) => <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!m.schedule} onChange={load} />)
             ) : (
               <p className="text-xs text-text-muted">这个 Job 还没配视频，报告只存着，不会写稿。</p>
             )}
@@ -198,7 +238,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
         </p>
       ) : null}
       {mine.filter((c) => !sources.some((m) => m.job === c.job)).map((c) => (
-        <ConfigCard key={c.key} config={c} canEdit={canEdit} onChange={load} />
+        <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!members.find((m) => m.job === c.job)?.schedule} onChange={load} />
       ))}
       {canEdit && sources.length ? (
         <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border pt-2">
