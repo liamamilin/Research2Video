@@ -1,0 +1,60 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 这一份是「整份报告」配方：不挑条目、不再调研，直接从 Job 的整份报告写（topic.whole_report: true）。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 本期头条
+description: 90 秒只讲一份报告里最重要的一个发现：变了什么、数字是多少、对{{audience}}意味着什么、现在该做什么。
+status: experimental
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: headline
+    name: 本期头条
+  format:
+    key: short
+    name: B 站横屏短
+audiences: [developer, non_tech]
+target_minutes: 1.5
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: concise
+  allowed_tones: [concise, explainer, news]
+  sections: [2, 4]
+  paragraph_units: [20, 90]
+  required_roles: [钩子, 行动]
+  audit:
+    model: review
+    style_severity: must
+    timeout_seconds: 240
+  style: |
+    栏目「本期头条」：整份报告只讲一件事，就是它里面对{{audience}}最重要的那一个发现。
+    - 挑法：报告评分最高、且对{{audience}}影响最直接的一条；两条差不多时选能马上行动的那条。不讲第二件事，也不说「还有」「另外」。
+    - 第一句是钩子：直接说变化和它的数字，或一个让{{audience}}停下来的问题；不说「大家好」，不说「今天」。
+    - 然后讲变化：旧的是什么、新的是什么；数字、单位、口径照报告原样，价格要说清是输入还是输出、每百万 token 还是每次。
+    - 再讲对{{audience}}意味着什么：{{audience.impact}}。数字只留最关键的 2–3 个。
+    - 最后一句给一个现在就能做的动作。
+    - 事实只用报告里写明来源的；只有厂商自己的说法时，口播里说「官方说法」。
+    - 2–4 个小节，每段 20–90 字，口语化，适合朗读。
+    {{audience.writing_rules}}
+output:
+  use: motion
+  source_card: true
+  package:
+    accent: '#1f7a4d'
+    badge: 本期头条
+    outro:
+      template: end_card
+      title: 本期头条
+      lines: ['面向{{audience}}的 AI 本期头条']
+      seconds: 2.5
+      sound: synth_sting

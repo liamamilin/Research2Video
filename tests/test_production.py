@@ -21,6 +21,9 @@ def test_each_recipe_but_comparison_is_one_config_on_the_job_it_picks_from():
     every = production.load_all(config, jobs)
     shipped = {k: r for k, r in recipes.expanded(config).items() if r.column and r.column.topic_kind != "comparison"}
     shipped.pop("ai-non_tech-roundup-long")  # an audience added after the migration: no config on it yet
+    for whole in ("report_digest", "top_finding", "action_list"):  # whole-report recipes: a config on a Job with no items
+        shipped.pop(whole), shipped.pop({"report_digest": "ai-non_tech-digest-long", "top_finding": "ai-non_tech-headline-short",
+                                         "action_list": "ai-non_tech-action_list-short"}[whole])
     assert sorted(c.recipe for c in every.values()) == sorted(shipped)  # one each, so old scripts map 1:1 by recipe
     for c in every.values():
         column = shipped[c.recipe].column

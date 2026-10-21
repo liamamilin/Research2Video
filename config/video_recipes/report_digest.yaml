@@ -1,0 +1,62 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 这一份是「整份报告」配方：不挑条目、不再调研，直接从 Job 的整份报告写（topic.whole_report: true）。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 报告速览
+description: 把一份报告里最重要的 3–5 件事按重要程度讲一遍：每件一个小节，说清变了什么、对{{audience}}意味着什么，最后给出先做哪件事。
+status: experimental
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: digest
+    name: 报告速览
+  format:
+    key: long
+    name: B 站横屏长
+audiences: [developer, non_tech]
+target_minutes: 3
+minutes_range: [3, 6]
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众]
+research:
+  mode: none
+writing:
+  pipeline: adapt
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: concise
+  allowed_tones: [concise, explainer, news]
+  sections: [4, 7]
+  paragraph_units: [30, 100]
+  required_roles: [钩子, 行动]
+  revise_rounds: 1
+  audit:
+    model: review
+    style_severity: warn
+    timeout_seconds: 480
+  style: |
+    栏目「报告速览」：从一份完整报告里挑出最该知道的 3–5 件事，讲给没时间读报告的人。
+    - 开场两三句话交代这是什么报告、这期最大的变化是什么；不说「大家好」，不讲背景。
+    - 只挑 3–5 件：按报告自己的评分和「推荐行动」排，选对{{audience}}影响最大的；报告里再多的条目也不全讲，也不加报告里没有的内容。
+    - 每件一个小节：先说变了什么（数字、单位、口径照报告原样，价格要说清是输入还是输出、每百万 token 还是每次），再说对{{audience}}意味着什么：{{audience.impact}}。
+    - 小节之间用一句话过渡，不重复上一件的结论。
+    - 结尾只挑最该先做的一件事，说一个现在就能做的动作，不并列多个动作。
+    - 事实只用报告里写明来源的；只有厂商自己的说法时，口播里说「官方说法」；报告标了「窗口外」或「未验证」的不当成事实讲。
+    - 4–7 个小节，每段 30–100 字，口语化，适合朗读。
+    {{audience.writing_rules}}
+output:
+  use: motion
+  source_card: true
+  package:
+    accent: '#1f7a4d'
+    badge: 报告速览
+    outro:
+      template: end_card
+      title: 报告速览
+      lines: ['面向{{audience}}的 AI 报告速览']
+      seconds: 3
+      sound: synth_sting

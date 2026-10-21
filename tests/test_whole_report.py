@@ -38,7 +38,9 @@ def _load(env):
 
 def test_a_recipe_says_it_can_be_written_from_a_whole_report():
     every = recipes.expanded(str(ROOT / "config"))
-    assert {k for k, r in every.items() if r.whole_report} == {"deep_dive", "ai-non_tech-deep_dive-long"}
+    assert {k for k, r in every.items() if r.whole_report} == {
+        "deep_dive", "ai-non_tech-deep_dive-long", "report_digest", "ai-non_tech-digest-long", "top_finding",
+        "ai-non_tech-headline-short", "action_list", "ai-non_tech-action_list-short"}
     assert not every["flash"].whole_report and not every["ai-developer-roundup-long"].whole_report
 
 
@@ -188,3 +190,16 @@ def pilot_env_whole(video_env, monkeypatch):
     monkeypatch.setattr(video_render, "start", lambda render_id, client=None: None)
     monkeypatch.setattr(pilot, "fresh_topics", lambda spec, run: True)
     return spawned
+
+
+@pytest.mark.parametrize("recipe, audience, minutes", [
+    ("report_digest", "", 4), ("report_digest", "non_tech", 5), ("top_finding", "", None),
+    ("top_finding", "non_tech", None), ("action_list", "", 3), ("action_list", "non_tech", None)])
+def test_each_shipped_whole_report_recipe_is_a_usable_config_on_a_job_without_items(whole_env, recipe, audience, minutes):
+    lines = [f"job: {JOB}", f"recipe: {recipe}"] + ([f"audience: {audience}"] if audience else []) \
+        + ([f"minutes: {minutes}"] if minutes else [])
+    _config_file(whole_env, "new").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    made = _load(whole_env)["new"]
+    assert made.usable, made.errors
+    assert made.split == "whole" and not made.reverify
+    assert (made.audience_key or "developer") == (audience or "developer")

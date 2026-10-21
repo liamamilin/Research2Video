@@ -102,6 +102,9 @@ output:
 - 现在的部件：4 个调研模板（快讯 `quick_take`、一个知识点 `one_point`、深度解读 `deep_dive`，都不分受众；对比 `comparison_developer`
   还只有开发者）；2 个出片部件 `motion`（信息动效）、`auto_form`（自动选形态）；2 份观众档案 `developer`、`non_tech`。
   盘点不调研，没有调研模板。
+- **整份报告的配方**（`topic.whole_report: true`，不写 `topic.sources`）：`deep_dive`、`report_digest` 报告速览、`top_finding` 本期头条、
+  `action_list` 行动清单。后三个 `research.mode: none`、`status: experimental`：报告本身就是调研，只是讲法不同（挑 3–5 件 / 只讲一个 / 收成三件要做的事）。
+  `adapt` 写稿要 3 分钟以上，所以 90 秒的头条用 `single`。
 - 文稿版本的 `meta.cell` 除了配方文件的 `sha256`，还记 `resolved_sha256`（拼好部件之后的内容）和 `uses`（引用了哪些部件
   及其哈希）。只改了部件时，从这两项能看出来。
 - 引用的部件不存在或坏了，只有引用它的配方标“有错”，其他配方照常。

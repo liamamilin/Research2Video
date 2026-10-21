@@ -223,7 +223,10 @@ def test_shipped_styles_cover_every_columns_defaults_and_tones():
     labels = {"deep_dive": "进阶 · 讲解通俗", "flash": "进阶 · 新闻播报", "point_short": "进阶 · 讲解通俗",
               "ai-non_tech-deep_dive-long": "入门 · 讲解通俗", "ai-non_tech-quick_take-short": "入门 · 新闻播报",
               "ai-non_tech-one_point-short": "入门 · 讲解通俗", "ai-non_tech-roundup-long": "入门 · 简洁干货",
-              "ai-developer-roundup-long": "进阶 · 简洁干货", "ai-developer-comparison-long": "进阶 · 讲解通俗"}
+              "ai-developer-roundup-long": "进阶 · 简洁干货", "ai-developer-comparison-long": "进阶 · 讲解通俗",
+              "report_digest": "进阶 · 简洁干货", "ai-non_tech-digest-long": "入门 · 简洁干货",
+              "top_finding": "进阶 · 简洁干货", "ai-non_tech-headline-short": "入门 · 简洁干货",
+              "action_list": "进阶 · 讲解通俗", "ai-non_tech-action_list-short": "入门 · 讲解通俗"}
     columns = video_columns.load(config)
     assert set(columns) == set(labels)
     for key, col in columns.items():
