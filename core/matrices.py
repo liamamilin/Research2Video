@@ -45,6 +45,7 @@ class Matrix:
     keywords: tuple = ()
     members: tuple = ()  # Member, in the file's order
     errors: tuple = ()
+    paused: tuple = ()   # Jobs whose timed runs were stopped by pausing the whole matrix (resuming turns them back on)
 
     @property
     def jobs(self) -> list[str]:
@@ -52,7 +53,8 @@ class Matrix:
 
     def as_dict(self) -> dict:
         return {"key": self.key, "name": self.name, "domain": self.domain, "keywords": list(self.keywords),
-                "jobs": [{"job": m.job, "copy_as": m.copy_as} for m in self.members], "errors": list(self.errors)}
+                "jobs": [{"job": m.job, "copy_as": m.copy_as} for m in self.members], "errors": list(self.errors),
+                "paused": list(self.paused)}
 
 
 def directory(config_dir: str) -> str:
@@ -90,11 +92,12 @@ def _read(path: str, key: str) -> Matrix:
             continue
         if member.job not in [m.job for m in members]:
             members.append(member)
-    unknown = set(data) - {"name", "domain", "keywords", "jobs"}
+    unknown = set(data) - {"name", "domain", "keywords", "jobs", "paused"}
     if unknown:
         errors.append(f"不认识的字段：{', '.join(sorted(unknown))}")
     return Matrix(key=key, name=str(data.get("name") or key).strip(), domain=str(data.get("domain") or "").strip(),
-                  keywords=tuple(_strings(data.get("keywords"))), members=tuple(members), errors=tuple(errors))
+                  keywords=tuple(_strings(data.get("keywords"))), members=tuple(members), errors=tuple(errors),
+                  paused=tuple(_strings(data.get("paused"))))
 
 
 def load_all(config_dir: str = "config") -> dict[str, Matrix]:
@@ -164,9 +167,16 @@ def jobs_of_other_matrices(job_name: str, config_dir: str = "config") -> set[str
     return {j for m in every if job_name not in m.jobs for j in m.jobs}
 
 
-def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members) -> None:
+def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members, paused=None) -> None:
+    """Write a matrix file. ``paused`` is kept as the file has it unless given (a rename never un-pauses)."""
+    if paused is None:
+        before = load_all(config_dir).get(key)
+        paused = before.paused if before else ()
     data = {"name": name, "domain": domain, "keywords": _strings(keywords),
             "jobs": [m.job if not m.copy_as else {"job": m.job, "copy_as": m.copy_as} for m in members]}
+    kept = [j for j in _strings(paused) if j in [m.job for m in members]]
+    if kept:
+        data["paused"] = kept
     text = ("# 矩阵：一组 Job，共用一个领域和一套关键词（spec/matrices.md）。成员 Job 运行时，{keywords} 先放这里的关键词，\n"
             "# 再放 Job 自己的；{domain} 是这里的 domain。\n"
             + yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False))

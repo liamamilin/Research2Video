@@ -18,6 +18,20 @@ const AI = {
 };
 const LIST = { matrices: [AI], ungrouped: [{ job: "research/games", name: "独立游戏" }] };
 
+const RUNS = {
+  total: 3, more: true,
+  runs: [
+    { ts: "2026-10-20T10:00:00+08:00", job: "monitoring/ai_flash_discovery", name: "AI Flash Discovery", trigger: "manual", user: "admin", status: "success", duration_seconds: 188, searches: 18, report_path: "output/flash/c.md", error: "", scripts: 0 },
+    { ts: "2026-10-19T14:12:00+08:00", job: "monitoring/ai_flash_discovery", name: "AI Flash Discovery", trigger: "", user: "", status: "failed", duration_seconds: null, searches: 0, report_path: "", error: "超时了", scripts: 0 },
+    { ts: "2026-09-29T16:00:00+08:00", job: "research/deep", name: "AI 深度", trigger: "scheduled", user: "scheduler", status: "success", duration_seconds: 600, searches: 30, report_path: "output/d/x.md", error: "", scripts: 2 },
+  ],
+};
+const CALENDAR = {
+  now: "2026-10-21T12:00+08:00", concurrent_runs: 2, searches_by_day: { "2026-10-27": 20 },
+  jobs: { "monitoring/ai_flash_discovery": { name: "AI Flash Discovery", enabled: true, schedule: "0 5 * * 2", period: { kind: "weekly", time: "05:00", days: [2], day: 1 }, searches_per_run: 20, runs: ["2026-10-27T05:00+08:00"] } },
+  runs: [{ ts: "2026-10-27T05:00+08:00", job: "monitoring/ai_flash_discovery", name: "AI Flash Discovery", searches: 20 }],
+  clashes: [{ ts: "2026-10-27T05:00+08:00", jobs: ["A", "B", "C"] }],
+};
 let PRODUCTION: unknown[] = [];
 let calls: { url: string; method: string; body: unknown }[] = [];
 
@@ -29,7 +43,8 @@ beforeEach(() => {
     const u = String(url);
     const method = init?.method || "GET";
     calls.push({ url: u, method, body: init?.body ? JSON.parse(String(init.body)) : null });
-    const body = u.includes("/period") && method === "GET"
+    const body = u.includes("/runs") ? RUNS : u.includes("/calendar") ? CALENDAR
+      : u.includes("/period") && method === "GET"
       ? { schedule: "0 5 * * 2", next_runs: ["2026-10-27T05:00:00+08:00"], runs_per_month: 4, searches_per_run: 20, searches_per_month: 80 }
       : method === "POST" && u.includes("/api/jobs/") ? { ok: true, task_id: "t1", started_at: "x" }
       : method === "POST" && u.endsWith("/copy") ? { ...AI, key: "medical", name: "医疗矩阵", members: [] }
@@ -178,6 +193,71 @@ describe("Matrices", () => {
     await waitFor(() => expect(calls.some((c) => c.method === "PUT" && c.url.includes("/jobs/monitoring/ai_flash_discovery/period"))).toBe(true));
     const put = calls.find((c) => c.method === "PUT" && c.url.includes("/period"))!;
     expect(put.body).toMatchObject({ kind: "weekly", time: "05:00", days: [1], confirm: true });
+    confirm.mockRestore();
+  });
+
+  it("lists the runs of every Job with what came of them, filters, and offers the next step for a report with no video", async () => {
+    at("/matrices/ai?tab=runs");
+    expect(await screen.findByText("运行记录（3）")).toBeTruthy();
+    expect(screen.getByText("18 次搜索")).toBeTruthy();
+    expect(screen.getByText("超时了")).toBeTruthy();
+    expect(screen.getByText("写了 2 篇文稿")).toBeTruthy();
+    expect(screen.getByText("2026 年 10 月")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "还没写视频 →" }).getAttribute("href")).toBe("/matrices/ai/video/monitoring%2Fai_flash_discovery");
+    fireEvent.change(screen.getByLabelText("按状态筛"), { target: { value: "failed" } });
+    await waitFor(() => expect(calls.some((c) => c.url.includes("/runs") && c.url.includes("status=failed"))).toBe(true));
+    fireEvent.click(screen.getByRole("button", { name: "最新在前" }));
+    await waitFor(() => expect(calls.some((c) => c.url.includes("order=asc"))).toBe(true));
+    fireEvent.click(await screen.findByRole("button", { name: "再加载 20 条" }));
+    await waitFor(() => expect(calls.some((c) => c.url.includes("offset=3"))).toBe(true));
+  });
+
+  it("shows the next week of timed runs, with a warning when too many are due together", async () => {
+    at("/matrices/ai?tab=week");
+    expect(await screen.findByText("接下来 7 天")).toBeTruthy();
+    expect(screen.getByText(/同时到点 3 个：A、B、C/)).toBeTruthy();
+    expect(screen.getAllByText("05:00").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("20 次").length).toBeGreaterThan(0);
+    expect(screen.getByText(/按时间排/)).toBeTruthy();
+  });
+
+  it("switches between the Job table and the tabs", async () => {
+    at("/matrices/ai");
+    fireEvent.click(await screen.findByRole("tab", { name: "运行记录" }));
+    expect(await screen.findByLabelText("按 Job 筛")).toBeTruthy();
+    expect(screen.queryByLabelText("矩阵里的 Job")).toBeNull();
+    fireEvent.click(screen.getByRole("tab", { name: "Job" }));
+    expect(await screen.findByLabelText("矩阵里的 Job")).toBeTruthy();
+  });
+
+  it("pauses and resumes a whole matrix: the resume says what it costs and only a yes confirms it", async () => {
+    useAuthStore.setState({ user: { username: "a", role: "admin" } as never });
+    const paused = { ...AI, paused: ["research/deep"] };
+    const live = { ...AI, members: [{ ...AI.members[0], schedule: { schedule: "0 5 * * 2", timezone: "x", enabled: true, next_runs: [] } }, AI.members[1]] };
+    const sent: { url: string; body: unknown }[] = [];
+    let state: unknown = live;
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      const u = String(url);
+      const body = init?.body ? JSON.parse(String(init.body)) : null;
+      if (init?.method === "POST") sent.push({ url: u, body });
+      if (u.endsWith("/pause")) { state = paused; return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(paused) } as Response; }
+      if (u.endsWith("/resume")) {
+        if (!(body as { confirm: boolean }).confirm) {
+          return { ok: false, status: 409, statusText: "Conflict", text: async () => JSON.stringify({ error: { code: "confirm_needed", message: "恢复后 1 个 Job 会自己运行：每月约 4 次运行" } }) } as Response;
+        }
+        state = AI;
+        return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(AI) } as Response;
+      }
+      return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(u.includes("/api/production") || u.includes("/cells") ? [] : u.endsWith("/api/matrices") ? LIST : state) } as Response;
+    }));
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    at("/matrices/ai");
+    fireEvent.click(await screen.findByRole("button", { name: "整个暂停" }));
+    expect(await screen.findByText(/矩阵已暂停：1 个 Job 的定时没在跑/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "恢复定时" }));
+    await waitFor(() => expect(sent.filter((c) => c.url.endsWith("/resume")).map((c) => (c.body as { confirm: boolean }).confirm)).toEqual([false, true]));
+    expect(String(confirm.mock.calls.at(-1)?.[0])).toContain("每月约 4 次运行");
+    await waitFor(() => expect(screen.queryByText(/矩阵已暂停/)).toBeNull());
     confirm.mockRestore();
   });
 });

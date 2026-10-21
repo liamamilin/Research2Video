@@ -351,3 +351,160 @@ def set_period(key: str, job: str, body: PeriodIn, user=Depends(require_admin)):
         _mutate(lambda: managed.save(job, expression))
     audit.log("matrix_period", user=user["username"], target=job, details={"kind": body.kind, "schedule": expression})
     return get_matrix(key, user)
+
+
+# --- Runs of a matrix ------------------------------------------------------------
+
+#: history ``user`` values of runs nobody started by hand
+_BY_ITSELF = ("scheduler", "autopilot")
+_STATUSES = ("success", "failed", "cancelled", "skipped")
+
+
+@router.get("/{key}/runs")
+def matrix_runs(key: str, job: str = "", status: str = "", days: int = 0, order: str = "desc", limit: int = 30,
+                offset: int = 0, user=Depends(require_viewer)):
+    """Every run of every member, newest first (``order=asc`` for oldest first): when, which Job, scheduled or by hand,
+    how it ended, what it cost in searches, the report it wrote and how many videos came from that report."""
+    from collections import Counter
+    from datetime import timedelta
+
+    from core.state import StateManager
+    from core.video import outputs
+
+    matrix = _get(key)
+    if status and status not in _STATUSES:
+        raise _error(422, "bad_status", f"状态只能是 {'、'.join(_STATUSES)} 之一")
+    if order not in ("asc", "desc") or not 0 <= days <= 3650 or not 1 <= limit <= 200 or offset < 0:
+        raise _error(422, "bad_query", "order 是 asc 或 desc，days 在 0–3650，limit 在 1–200，offset 不小于 0")
+    if job and job not in matrix.jobs:
+        raise _error(404, "not_a_member", f"{job} 不在矩阵 {key} 里")
+    config_dir, jobs_dir = _dirs()
+    since = (datetime.now().astimezone() - timedelta(days=days)).isoformat(timespec="seconds") if days else ""
+    rows = []
+    for name in ([job] if job else matrix.jobs):
+        loaded = load_job(jobs_dir, name)
+        for entry in StateManager.get_history(name, limit=2000):
+            if (status and entry.get("status") != status) or (since and entry.get("ts", "") < since):
+                continue
+            who = entry.get("user") or ""
+            usage = entry.get("usage") or {}
+            rows.append({
+                "ts": entry.get("ts", ""), "job": name, "name": (loaded or {}).get("name") or name,
+                "trigger": "scheduled" if who in _BY_ITSELF else "manual" if who else "", "user": who,
+                "status": entry.get("status") or "", "duration_seconds": entry.get("duration_seconds"),
+                "searches": int(usage.get("searches") or 0), "report_path": entry.get("output_path") or "",
+                "error": entry.get("error") or "",
+            })
+    rows.sort(key=lambda r: r["ts"], reverse=order == "desc")
+    page = rows[offset:offset + limit]
+    made = Counter()
+    if any(r["report_path"] for r in page):
+        for s in outputs.collect(config_dir, jobs_dir)["scripts"]:
+            if s["status"] != "FAILED":
+                made[(s["job"], s["report_path"])] += 1
+    for r in page:
+        r["scripts"] = made[(r["job"], r["report_path"])] if r["report_path"] else 0
+    return {"runs": page, "total": len(rows), "more": offset + limit < len(rows)}
+
+
+# --- The matrix's week --------------------------------------------------------------
+
+#: the scheduler runs this many Jobs at once; more due in the same minute wait in a queue
+CONCURRENT_RUNS = 2
+
+
+@router.get("/{key}/calendar")
+def matrix_calendar(key: str, user=Depends(require_viewer)):
+    """The next 7 days of the matrix's timed runs: each member's runs, a list of all of them in time order, how many
+    searches each day is expected to take, and the minutes when more Jobs are due than can run at once."""
+    from collections import Counter, defaultdict
+    from datetime import timedelta
+
+    from web.routes.jobs import _state_for
+
+    matrix = _get(key)
+    _, jobs_dir = _dirs()
+    plans = _plans()
+    now = datetime.now().astimezone()
+    end = now + timedelta(days=7)
+    runs, per_job = [], {}
+    for member in matrix.members:
+        plan = plans.get(member.job)
+        job = load_job(jobs_dir, member.job)
+        if plan is None or job is None:
+            continue
+        name = job.get("name") or member.job
+        state = _state_for(member.job)
+        searches = int(((state.last_usage if state else None) or {}).get("searches") or 0)
+        due = []
+        if plan["enabled"]:
+            entry = cron.parse_schedule(plan["schedule"])
+            due = [t for t in cron.fire_times(entry, now, count=200, days=7) if t <= end]
+        per_job[member.job] = {"name": name, "enabled": plan["enabled"], "schedule": plan["schedule"], "period": plan["period"],
+                               "searches_per_run": searches,
+                               "runs": [t.isoformat(timespec="minutes") for t in due]}
+        runs += [{"ts": t.isoformat(timespec="minutes"), "job": member.job, "name": name, "searches": searches} for t in due]
+    runs.sort(key=lambda r: r["ts"])
+    days: dict[str, int] = defaultdict(int)
+    for r in runs:
+        days[r["ts"][:10]] += r["searches"]
+    crowd = Counter(r["ts"] for r in runs)
+    clashes = [{"ts": ts, "jobs": [r["name"] for r in runs if r["ts"] == ts]} for ts, n in sorted(crowd.items()) if n > CONCURRENT_RUNS]
+    return {"now": now.isoformat(timespec="minutes"), "jobs": per_job, "runs": runs,
+            "searches_by_day": dict(sorted(days.items())), "clashes": clashes, "concurrent_runs": CONCURRENT_RUNS}
+
+
+# --- Pausing the whole matrix ---------------------------------------------------------
+
+
+class ResumeIn(BaseModel):
+    confirm: bool = False  # turning timed runs back on spends money again, so the page asks first
+
+
+def _save_paused(matrix: matrices.Matrix, paused: list[str]) -> None:
+    matrices.save(_dirs()[0], matrix.key, name=matrix.name, domain=matrix.domain, keywords=matrix.keywords,
+                  members=matrix.members, paused=paused)
+
+
+@router.post("/{key}/pause")
+def pause_matrix(key: str, user=Depends(require_admin)):
+    """Stop every member's timed runs. Each Job keeps its own period (resuming turns the same ones back on) and can
+    still be run by hand. Runs missed while paused are not made up."""
+    from web.routes.scheduler import _mutate
+    from web.services import managed_scheduler as managed
+
+    matrix = _get(key)
+    stopped = list(matrix.paused)
+    for member in matrix.members:
+        plan = _plan_of(member.job)
+        if plan and plan["enabled"]:
+            _mutate(managed.store().toggle, plan["id"], False)
+            if member.job not in stopped:
+                stopped.append(member.job)
+    _save_paused(matrix, stopped)
+    audit.log("matrix_pause", user=user["username"], target=key, details={"jobs": stopped})
+    return get_matrix(key, user)
+
+
+@router.post("/{key}/resume")
+def resume_matrix(key: str, body: ResumeIn, user=Depends(require_admin)):
+    """Turn back on the timed runs that pausing stopped (the ones switched off by hand meanwhile stay as they are)."""
+    from web.routes.scheduler import _mutate
+    from web.services import managed_scheduler as managed
+
+    matrix = _get(key)
+    due = [(j, p) for j in matrix.paused for p in [_plan_of(j)] if p and not p["enabled"]]
+    if due and not body.confirm:
+        now = datetime.now().astimezone()
+        runs = sum(periods.runs_per_month(p["schedule"], now) for _, p in due)
+        searches = sum(periods.runs_per_month(p["schedule"], now) * _cost(p["schedule"], j)["searches_per_run"] for j, p in due)
+        raise _error(409, "confirm_needed", (
+            f"恢复后 {len(due)} 个 Job 会按各自的周期自己运行：每月约 {runs} 次运行"
+            + (f"，按上次每次的搜索数约 {searches} 次搜索" if searches else "") + "。暂停期间错过的不补跑。确认后再恢复"))
+    if due:
+        _mutate(managed.ensure_online)
+    for _, plan in due:
+        _mutate(managed.store().toggle, plan["id"], True)
+    _save_paused(matrix, [])
+    audit.log("matrix_resume", user=user["username"], target=key, details={"jobs": [j for j, _ in due]})
+    return get_matrix(key, user)

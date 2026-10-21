@@ -46,6 +46,7 @@ export interface Matrix {
   jobs: { job: string; copy_as: string }[];
   errors: string[];
   members: MatrixMember[];
+  paused?: string[]; // 整个暂停时停掉定时的 Job，恢复时打开的就是它们
 }
 
 export interface MatrixFields {
@@ -69,6 +70,37 @@ export const previewPeriod = (matrix: string, job: string, p: PeriodBody) =>
   api<PeriodPreview>(periodPath(matrix, job), { query: { kind: p.kind, time: p.time, days: p.days.join(","), day: p.day } });
 export const setPeriod = (matrix: string, job: string, body: PeriodBody & { confirm?: boolean }) =>
   api<Matrix>(periodPath(matrix, job), { method: "PUT", body });
+
+export const pauseMatrix = (key: string) => api<Matrix>(`/api/matrices/${encodeURIComponent(key)}/pause`, { method: "POST" });
+export const resumeMatrix = (key: string, confirm: boolean) =>
+  api<Matrix>(`/api/matrices/${encodeURIComponent(key)}/resume`, { method: "POST", body: { confirm } });
+
+export interface MatrixRun {
+  ts: string;
+  job: string;
+  name: string;
+  trigger: "scheduled" | "manual" | ""; // 定时或自动 / 有人点的 / 老记录没写
+  user: string;
+  status: string;
+  duration_seconds: number | null;
+  searches: number;
+  report_path: string;
+  error: string;
+  scripts: number; // 从这份报告写出了几篇文稿
+}
+export interface RunsQuery { job?: string; status?: string; days?: number; order?: "asc" | "desc"; limit?: number; offset?: number }
+export const listMatrixRuns = (key: string, q: RunsQuery = {}) =>
+  api<{ runs: MatrixRun[]; total: number; more: boolean }>(`/api/matrices/${encodeURIComponent(key)}/runs`, { query: { ...q } });
+
+export interface MatrixCalendar {
+  now: string;
+  jobs: Record<string, { name: string; enabled: boolean; schedule: string; period: Period; searches_per_run: number; runs: string[] }>;
+  runs: { ts: string; job: string; name: string; searches: number }[];
+  searches_by_day: Record<string, number>;
+  clashes: { ts: string; jobs: string[] }[];
+  concurrent_runs: number;
+}
+export const getMatrixCalendar = (key: string) => api<MatrixCalendar>(`/api/matrices/${encodeURIComponent(key)}/calendar`);
 
 /** 关键词输入框：逗号、顿号或换行分开 */
 export const splitKeywords = (text: string) => [...new Set(text.split(/[,，、\n]/).map((k) => k.trim()).filter(Boolean))];
