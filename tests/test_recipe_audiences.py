@@ -172,3 +172,38 @@ def test_api_shows_audiences_and_rebuilds_every_version_when_a_profile_is_edited
     config = str(video_env / "config")
     assert "每年多花" in video_columns.get(config, "ai-non_tech-quick_take-short").script_style
     assert "每年多花" not in video_columns.get(config, "flash").script_style
+
+
+def test_a_recipe_offers_other_lengths_only_when_it_says_so(tmp_path):
+    config = _config(tmp_path, RECIPE.replace("target_minutes: 1.5", "target_minutes: 4\nminutes_range: [3, 6]"))
+    every = recipes.expanded(config)
+    assert every["quick"].minutes_range == (3.0, 6.0) and "quick-m5" not in every  # no list of every length
+    five = recipes.find(config, "quick-m5")
+    assert (five.key, five.column.key, five.column.target_minutes, five.audience, five.base) == ("quick-m5", "quick-m5", 5, "kids", "quick")
+    seven = recipes.find(config, "ai-adults-quick_take-short-m5p5")  # another audience, at half a minute
+    assert (seven.column.target_minutes, seven.audience) == (5.5, "adults") and not seven.error
+    assert video_columns.get(config, "quick-m3").target_minutes == 3
+    assert recipes.find(config, "quick-m7").error and "3–6 分钟" in recipes.find(config, "quick-m7").error
+    assert recipes.find(config, "quick-m4p3") is None  # not a key at all
+    assert recipes.find(config, "quick-m5-m5") is None  # a length of a length is not a thing
+    fixed = _config(tmp_path / "fixed")
+    assert "不能改" in recipes.find(fixed, "quick-m5").error
+    # the other length changes the minutes and nothing else
+    own, other = dataclasses.asdict(every["quick"].column), dataclasses.asdict(five.column)
+    assert {k for k in own if own[k] != other[k]} == {"key", "target_minutes"}
+
+
+@pytest.mark.parametrize("edit, message", [
+    ("minutes_range: [3, 6]", "半分钟一档"),
+    ("minutes_range: [6, 3]", "半分钟一档"),
+    ("minutes_range: [5, 6]", "自己的 target_minutes 要在"),
+    ("minutes_range: [3, 2]", "半分钟一档"),
+    ("minutes_range: [0.5, 4]", "时长 0.5 分钟这一版有问题"),  # shorter than any column can be
+])
+def test_a_bad_minutes_range_does_not_save(tmp_path, edit, message):
+    text = RECIPE.replace("target_minutes: 1.5", "target_minutes: 4\n" + edit)
+    if "[3, 6]" in edit:
+        text = text.replace("minutes_range: [3, 6]", "minutes_range: [3.3, 6]")
+    config = _config(tmp_path, text)
+    with pytest.raises(video_columns.ColumnError, match=message):
+        recipes.validate("quick", text, config)

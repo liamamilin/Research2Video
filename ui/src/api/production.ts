@@ -8,6 +8,8 @@ export interface ProductionConfig {
   recipe: string; // 它写稿用的栏目名（配方，加上选的受众）
   base_recipe: string; // 配方文件
   audience_key: string; // 选的受众档案；配方没写 audiences 就是空的
+  minutes: number; // 配置要的时长；0 是用配方自己的
+  minutes_range: number[]; // 配方允许改成的时长 [最短, 最长]；空是不能改
   errors: string[];
   source: string;
   split: "each" | "some" | "";
@@ -33,7 +35,7 @@ export const listProduction = (job?: string) =>
   api<ProductionConfig[]>("/api/production", { query: job ? { job } : undefined });
 export const getPending = (key: string) =>
   api<{ report_date: string | null; report_path: string; items: PendingItem[] }>(`/api/production/${encodeURIComponent(key)}/pending`);
-export const addProduction = (body: { job: string; recipe: string; audience?: string; name?: string }) =>
+export const addProduction = (body: { job: string; recipe: string; audience?: string; minutes?: number; name?: string }) =>
   api<ProductionConfig>("/api/production", { method: "POST", body });
 export const removeProduction = (key: string) => api<{ ok: boolean }>(`/api/production/${encodeURIComponent(key)}`, { method: "DELETE" });
 export const writeFromProduction = (key: string, topicIds: string[]) =>

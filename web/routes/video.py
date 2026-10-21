@@ -40,11 +40,47 @@ def _columns() -> dict:
         raise HTTPException(500, detail=ApiError.make("bad_column_config", str(exc))) from exc
 
 
+class _Columns(dict):
+    """The columns that build. One built for another length than its recipe's (``deep_dive-m8``) is not listed, there
+    being no list of every length: it is made when a script asks for it."""
+
+    def __init__(self, config_dir: str, columns: dict):
+        super().__init__(columns)
+        self._config_dir = config_dir
+
+    def get(self, key, default=None):
+        if key in self:
+            return self[key]
+        from core.video import recipes
+
+        if recipes.split_minutes_key(key):
+            recipe = recipes.find(self._config_dir, key)
+            if recipe is not None and recipe.column is not None:
+                return recipe.column
+        return default
+
+
 def _known_columns() -> dict:
     """Every column that builds, blocked ones included: existing scripts stay readable, approvable and renderable."""
     from core.video import recipes
 
-    return {key: r.column for key, r in recipes.expanded(get_settings().paths.config_dir).items() if r.column is not None}
+    config_dir = get_settings().paths.config_dir
+    return _Columns(config_dir, {key: r.column for key, r in recipes.expanded(config_dir).items() if r.column is not None})
+
+
+def _creatable(key: str):
+    """The column a new script may be made with: a listed one, or a listed one at another length its recipe allows."""
+    from core.video import recipes
+
+    columns = _columns()
+    if key in columns:
+        return columns[key]
+    if recipes.split_minutes_key(key):
+        try:
+            return video_columns.for_new_script(get_settings().paths.config_dir, key)
+        except video_columns.ColumnError:
+            pass
+    raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{key}"))
 
 
 def _script_or_404(script_id: str) -> dict:
@@ -396,9 +432,7 @@ def _comparison_topic(body: ScriptCreateIn) -> dict:
 
 @router.post("/scripts", status_code=202)
 def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_editor)) -> dict:
-    if body.column not in _columns():
-        raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{body.column}"))
-    chosen = _columns()[body.column]
+    chosen = _creatable(body.column)
     if body.video_form is not None and body.video_form not in (chosen.allowed_forms or (chosen.video_form,)):
         raise HTTPException(422, detail=ApiError.make(
             "form_not_allowed", f"这个栏目只能用这些视频形式：{', '.join(chosen.allowed_forms or (chosen.video_form,))}"))

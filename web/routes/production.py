@@ -6,6 +6,8 @@ recipe (the same path as the topics page), with the config recorded on the scrip
 
 from __future__ import annotations
 
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -66,6 +68,7 @@ class ConfigIn(BaseModel):
     job: str
     recipe: str
     audience: str = ""
+    minutes: Optional[float] = None
     name: str = ""
 
 
@@ -74,17 +77,18 @@ def add_config(body: ConfigIn, user=Depends(require_editor)) -> dict:
     paths = get_settings().paths
     every = _all()
     recipe, audience = body.recipe.strip(), body.audience.strip()
-    column, _ = production.column_key(recipes.expanded(paths.config_dir), recipe, audience)
+    column, _ = production.column_key(recipes.expanded(paths.config_dir), recipe, audience, body.minutes)
     stem = column if production.KEY.fullmatch(column) else "config"  # named after the column it writes with
     key, n = stem, 2
     while key in every:
         key, n = f"{stem}-{n}", n + 1
-    production.save(paths.config_dir, key, job=body.job.strip(), recipe=recipe, name=body.name.strip(), audience=audience)
+    production.save(paths.config_dir, key, job=body.job.strip(), recipe=recipe, name=body.name.strip(), audience=audience,
+                    minutes=body.minutes)
     made = production.get(paths.config_dir, paths.jobs_dir, key)
     if made is None or not made.usable:
         production.remove(paths.config_dir, key)  # never leave a config that cannot write
         raise _error(422, "invalid_config", "；".join(made.errors) if made else "建不起来")
-    audit.log("production_add", user=user["username"], target=key, details={"job": body.job, "recipe": body.recipe, "audience": audience})
+    audit.log("production_add", user=user["username"], target=key, details={"job": body.job, "recipe": body.recipe, "audience": audience, "minutes": body.minutes})
     return {**made.as_dict(), "scripts": 0}
 
 

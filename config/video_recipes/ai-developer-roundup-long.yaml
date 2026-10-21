@@ -17,6 +17,7 @@ tags:
     name: B 站横屏长
 audiences: [developer, non_tech]
 target_minutes: 4
+minutes_range: [3, 6]
 topic:
   kind: roundup
   sources: [flash]

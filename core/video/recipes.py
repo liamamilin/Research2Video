@@ -26,6 +26,11 @@ is a profile, ``config/video_parts/audience/<key>.yaml``, and the recipe's text 
 its ``text:``). Every audience is its own column: the first is the recipe's own key, the others are named by the
 cell their tags spell with that audience (``ai-non_tech-quick_take-short``), so everything that looks a column up
 by key keeps working (``expanded``).
+
+A recipe whose text does not name a length may declare ``minutes_range: [min, max]``: a production config can then
+ask for another length in half-minute steps within it. That too is a column of its own, named by the column it
+changes and the length (``deep_dive-m8``, ``deep_dive-m7p5``); ``find`` builds it on demand, since there is no
+list of every length (``minutes_key``).
 """
 
 from __future__ import annotations
@@ -51,7 +56,7 @@ PIPELINES = {"single": "legacy", "adapt": "adapt"}
 OUTPUT_TARGETS = ("autovideo",)
 KEY = re.compile(r"[a-z0-9][a-z0-9_-]{0,63}")
 
-_TOP = {"name", "description", "status", "reason", "label", "tags", "audience", "audiences", "target_minutes",
+_TOP = {"name", "description", "status", "reason", "label", "tags", "audience", "audiences", "target_minutes", "minutes_range",
         "topic", "research", "writing", "output"}
 _SECTIONS = {
     "topic": {"kind", "sources", "fields"},
@@ -92,6 +97,10 @@ class Recipe:
     audience: str = ""
     audiences: tuple = ()
     base: str = ""
+    #: the lengths (minutes) a config may ask for instead of the recipe's own; empty: the length is not for sale
+    minutes_range: tuple = ()
+    #: set on a column made for another length than its recipe's
+    minutes: float = 0.0
 
     @property
     def cell_id(self) -> str:
@@ -380,12 +389,24 @@ def _offered(data) -> tuple[str, ...]:
     return tuple(raw)
 
 
+def _range(key: str, data: dict) -> tuple:
+    raw = data.get("minutes_range")
+    if raw is None:
+        return ()
+    ok = (isinstance(raw, list) and len(raw) == 2 and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in raw)
+          and all(v * 2 == int(v * 2) for v in raw) and raw[0] <= raw[1])
+    if not ok:
+        raise columns.ColumnError(f"配方 {key} 的 minutes_range 应是 [最短, 最长]，分钟数，半分钟一档，例如 [4, 8]")
+    return (float(raw[0]), float(raw[1]))
+
+
 def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None, audience: Optional[str] = None,
-          base: str = "") -> Recipe:
+          base: str = "", minutes: Optional[float] = None) -> Recipe:
     """One recipe from its file's text. Never raises for bad content: the problem goes in ``error``.
 
     ``config_dir`` is where its shared parts are looked up; without it a recipe that uses one does not build.
-    ``audience`` picks which of the audiences the file offers it is built for (the first when left out)."""
+    ``audience`` picks which of the audiences the file offers it is built for (the first when left out); ``minutes``
+    builds it for another length, which the recipe has to allow (``minutes_range``)."""
     sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
     uses: dict = {}
     offered: tuple[str, ...] = ()
@@ -411,6 +432,15 @@ def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None,
         reason = str(data.get("reason") or "")
         if status == "blocked" and not reason:
             raise columns.ColumnError(f"配方 {key} 是 blocked，要写 reason")
+        span = _range(key, data)
+        if span and not span[0] <= float(data.get("target_minutes", 0) or 0) <= span[1]:
+            raise columns.ColumnError(f"配方 {key} 自己的 target_minutes 要在 minutes_range {list(span)} 里")
+        if minutes is not None:
+            if not span:
+                raise columns.ColumnError(f"配方 {key} 的时长不能改（没写 minutes_range）：文字里写着它多长，或者它不是为改时长写的")
+            if not span[0] <= minutes <= span[1] or minutes * 2 != int(minutes * 2):
+                raise columns.ColumnError(f"配方 {key} 的时长只能在 {span[0]:g}–{span[1]:g} 分钟之间，半分钟一档")
+            data = {**data, "target_minutes": minutes}
         tags = _tags(key, data.get("tags"))
         if len(offered) > 1 and not all(dim in tags for dim in DIMENSIONS):
             raise columns.ColumnError(f"配方 {key} 有多个受众，要写全 tags 的 domain、type、format（栏目名由它们拼出）")
@@ -427,7 +457,7 @@ def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None,
     resolved = hashlib.sha256(json.dumps(flat, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
     return Recipe(key=key, path=path, sha256=sha, status=status, reason=reason, label=label, tags=tags,
                   column=column, data=data, uses=uses, resolved_sha256=resolved, audience=chosen, audiences=offered,
-                  base=base or key)
+                  base=base or key, minutes_range=span, minutes=minutes or 0.0)
 
 
 def validate(key: str, text: str, config_dir: Optional[str] = None) -> Recipe:
@@ -435,6 +465,10 @@ def validate(key: str, text: str, config_dir: Optional[str] = None) -> Recipe:
     recipe = parse(key, text, config_dir=config_dir)
     if recipe.error:
         raise columns.ColumnError(recipe.error)
+    for end in recipe.minutes_range:  # a recipe offering other lengths must build at both ends of them
+        ends = parse(key, text, config_dir=config_dir, minutes=end)
+        if ends.error:
+            raise columns.ColumnError(f"时长 {end:g} 分钟这一版有问题：{ends.error}")
     for other in recipe.audiences[1:]:  # each audience is a column of its own: all of them must build
         variant = parse(key, text, config_dir=config_dir, audience=other)
         if variant.error:
@@ -482,12 +516,35 @@ def expanded(config_dir: str) -> dict[str, Recipe]:
     return dict(sorted(out.items(), key=lambda kv: order[kv[1].status]))
 
 
+_MINUTES_KEY = re.compile(r"(.+)-m(\d{1,2})(p5)?")
+
+
+def minutes_key(column_key: str, minutes: float) -> str:
+    """The column key for a column at another length: ``deep_dive`` at 7.5 minutes is ``deep_dive-m7p5``."""
+    return f"{column_key}-m{int(minutes)}" + ("p5" if minutes != int(minutes) else "")
+
+
+def split_minutes_key(key: str) -> Optional[tuple[str, float]]:
+    """``(column key, minutes)`` when ``key`` names a column at another length, else None."""
+    found = _MINUTES_KEY.fullmatch(key or "")
+    return (found.group(1), int(found.group(2)) + (0.5 if found.group(3) else 0.0)) if found else None
+
+
 def find(config_dir: str, key: str) -> Optional[Recipe]:
-    """A recipe by its key, or by the cell id its tags spell."""
+    """A recipe by its key, or by the cell id its tags spell, or built for another length than a recipe's own."""
     every = expanded(config_dir)
     if key in every:
         return every[key]
-    return next((r for r in every.values() if r.cell_id == key), None)
+    cell = next((r for r in every.values() if r.cell_id == key), None)
+    if cell is not None:
+        return cell
+    split = split_minutes_key(key)
+    parent = every.get(split[0]) if split else None
+    if parent is None or parent.error or parent.minutes:
+        return None
+    with open(parent.path, encoding="utf-8") as fh:
+        return parse(key, fh.read(), parent.path, config_dir, audience=parent.audience or None, base=parent.base,
+                     minutes=split[1])
 
 
 def provenance(config_dir: str, key: str) -> Optional[dict]:
@@ -557,6 +614,7 @@ def catalog(config_dir: str) -> list[dict]:
             "key": recipe.key if recipe.usable else None,
             "recipe": recipe.key,
             "base": recipe.base or recipe.key,  # the recipe file it comes from
+            "minutes_range": list(recipe.minutes_range),  # the lengths a config may ask for; empty: none
             "audience": recipe.audience,  # the audience profile it is for ("" when the recipe names none)
             "status": recipe.status,
             "reason": recipe.reason,

@@ -25,15 +25,15 @@ const PENDING = { report_date: "2026-10-19", report_path: "output/flash/x.md", i
   { id: "2026-10-19/F3", code: "F3", title: "第三条", fields: {}, written: false, dismissed: false, scripts: [] },
 ] };
 
-const cell = (base: string, key: string, audience: string, name: string, type: string, kind: string) => ({
+const cell = (base: string, key: string, audience: string, name: string, type: string, kind: string, range: number[] = []) => ({
   id: key, key, status: "enabled", reason: "", usable: true, label: `${type} · ${name} · B 站横屏短`, recipe: key, base, audience,
   parts: { domain: { key: "ai", name: "AI" }, audience: { key: audience, name }, type: { key: type, name: type }, format: { key: "short", name: "B 站横屏短" } },
-  column: { topic_kind: kind }, topic_sources: ["flash"],
+  column: { topic_kind: kind, target_minutes: 4 }, topic_sources: ["flash"], minutes_range: range,
 });
 const CELLS = [
   cell("flash", "flash", "developer", "开发者", "快讯", "single"),
   cell("flash", "ai-non_tech-quick_take-short", "non_tech", "普通用户", "快讯", "single"),
-  cell("rnd", "rnd", "developer", "开发者", "盘点", "roundup"),
+  cell("rnd", "rnd", "developer", "开发者", "盘点", "roundup", [3, 6]),
 ];
 
 let posts: { url: string; body: unknown }[] = [];
@@ -107,6 +107,22 @@ describe("ProductionConfigs", () => {
     fireEvent.click(screen.getByText("加一套配置"));
     await waitFor(() => expect(posts.length).toBe(1));
     expect(posts[0]).toEqual({ url: "/api/production", body: { job: "monitoring/ai_flash_discovery", recipe: "flash", audience: "non_tech" } });
+  });
+
+  it("asks for a length only where the recipe allows one, and sends it when filled in", async () => {
+    show();
+    await screen.findByLabelText("配置 快讯 · 开发者");
+    fireEvent.change(screen.getByLabelText("加配置的 Job"), { target: { value: "monitoring/ai_flash_discovery" } });
+    fireEvent.change(screen.getByLabelText("加配置用的配方"), { target: { value: "flash" } });
+    expect(screen.queryByLabelText("加配置的分钟数")).toBeNull();  // 快讯 is 60–90 秒 by its own words
+    fireEvent.change(screen.getByLabelText("加配置用的配方"), { target: { value: "rnd" } });
+    const input = screen.getByLabelText("加配置的分钟数") as HTMLInputElement;
+    expect(input.placeholder).toBe("4");
+    expect(screen.getByText(/3–6，不填用配方的/)).toBeTruthy();
+    fireEvent.change(input, { target: { value: "5" } });
+    fireEvent.click(screen.getByText("加一套配置"));
+    await waitFor(() => expect(posts.length).toBe(1));
+    expect(posts[0].body).toEqual({ job: "monitoring/ai_flash_discovery", recipe: "rnd", audience: "developer", minutes: 5 });
   });
 
   it("is read-only for a viewer", async () => {

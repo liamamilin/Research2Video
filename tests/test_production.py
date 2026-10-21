@@ -62,7 +62,14 @@ def prod_env(video_env):
     ({"job": "monitoring/ai_flash_discovery", "recipe": "ai-developer-comparison-long"}, "对比"),
     ({"job": "monitoring/ai_flash_discovery", "recipe": "nope"}, "没有这个配方"),
     ({"job": "research/nope", "recipe": "flash"}, "没有这个 Job"),
-    ({"job": "monitoring/ai_flash_discovery", "recipe": "flash", "minutes": 3}, "不认识的字段"),
+    ({"job": "monitoring/ai_flash_discovery", "recipe": "flash", "speed": 3}, "不认识的字段"),
+    ({"job": "monitoring/ai_flash_discovery", "recipe": "flash", "minutes": 3}, "时长不能改"),  # its text says 60–90 秒
+    ({"job": "practical_ai_intelligence/07_product_content_opportunities", "recipe": "deep_dive", "minutes": 9},
+     "只能在 4–8 分钟之间"),
+    ({"job": "practical_ai_intelligence/07_product_content_opportunities", "recipe": "deep_dive", "minutes": 6.3},
+     "半分钟一档"),
+    ({"job": "practical_ai_intelligence/07_product_content_opportunities", "recipe": "deep_dive", "minutes": "八"},
+     "分钟数"),
     ({"job": "monitoring/ai_flash_discovery", "recipe": "flash", "audience": "儿童"}, "flash 没有 儿童 这个受众（有：developer、non_tech）"),
     ({"job": "monitoring/ai_flash_discovery", "recipe": "ai-non_tech-quick_take-short", "audience": "non_tech"}, "没有这个配方"),  # a column, not a file
     ({"job": "medical/flash_discovery", "recipe": "flash"}, "先在配方的 topic.sources 里加上 medical_flash"),  # an AI recipe
@@ -142,6 +149,59 @@ def test_a_config_picks_the_audience_and_is_the_column_that_audience_makes(prod_
     # the old way of naming the column directly still works, and says the same
     old = every["ai-non_tech-quick_take-short"]
     assert (old.recipe, old.base_recipe, old.audience_key) == (every["kids"].recipe, "flash", "non_tech")
+
+
+def test_a_config_asks_for_another_length_within_what_its_recipe_allows(prod_env):
+    config, jobs = str(prod_env / "config"), str(prod_env / "jobs")
+    job = "practical_ai_intelligence/07_product_content_opportunities"
+    (prod_env / "config" / "production" / "long.yaml").write_text(
+        f"job: {job}\nrecipe: deep_dive\nminutes: 7.5\n", encoding="utf-8")
+    (prod_env / "config" / "production" / "long-kids.yaml").write_text(
+        f"job: {job}\nrecipe: deep_dive\naudience: non_tech\nminutes: 4\n", encoding="utf-8")
+    every = production.load_all(config, jobs)
+    long, kids = every["long"], every["long-kids"]
+    assert long.usable and (long.recipe, long.base_recipe, long.target_minutes, long.minutes, long.minutes_range) == (
+        "deep_dive-m7p5", "deep_dive", 7.5, 7.5, (4.0, 8.0))
+    assert kids.usable and (kids.recipe, kids.audience_key, kids.target_minutes) == (
+        "ai-non_tech-deep_dive-long-m4", "non_tech", 4.0)
+    assert every["deep_dive"].minutes == 0 and every["deep_dive"].target_minutes == 6  # the recipe's own length
+    assert video_columns.get(config, "deep_dive-m7p5").target_minutes == 7.5
+    assert video_columns.get(config, "deep_dive").target_minutes == 6
+    # only the length changes: the same prompts and settings as the recipe's own
+    import dataclasses
+    own, longer = dataclasses.asdict(video_columns.get(config, "deep_dive")), dataclasses.asdict(video_columns.get(config, "deep_dive-m7p5"))
+    assert {k for k in own if own[k] != longer[k]} == {"key", "target_minutes"}
+
+
+def test_api_adding_a_config_with_a_length_and_writing_from_it(client, prod_env, monkeypatch):
+    monkeypatch.setattr("web.services.video_workflow.spawn", lambda *a, **k: None)  # make the script, do not run it
+    _login(client)
+    job = "practical_ai_intelligence/07_product_content_opportunities"
+    refused = client.post("/api/production", json={"job": "monitoring/ai_flash_discovery", "recipe": "flash", "minutes": 3},
+                          headers=_csrf(client))
+    assert refused.status_code == 422 and "时长不能改" in refused.json()["error"]["message"]
+    added = client.post("/api/production", json={"job": job, "recipe": "deep_dive", "minutes": 8}, headers=_csrf(client))
+    assert added.status_code == 201, added.text
+    made = added.json()
+    assert (made["key"], made["recipe"], made["minutes"], made["target_minutes"]) == ("deep_dive-m8", "deep_dive-m8", 8, 8)
+    assert yaml.safe_load((prod_env / "config" / "production" / "deep_dive-m8.yaml").read_text(encoding="utf-8")) == {
+        "job": job, "recipe": "deep_dive", "minutes": 8}
+    listed = {c["key"]: c for c in client.get("/api/production").json()}
+    assert listed["deep_dive-m8"]["minutes_range"] == [4, 8] and listed["flash"]["minutes_range"] == []
+    # a script made at that length is a column the app can read back: it appears on the board and is not "unknown"
+    made_script = client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "deep_dive-m8", "topic": {"title": "八分钟的选题", "angle": "x"}})
+    assert made_script.status_code == 202, made_script.text
+    detail = client.get(f"/api/video/scripts/{made_script.json()['id']}").json()
+    assert detail["column_key"] == "deep_dive-m8" and detail["column"]["key"] == "deep_dive-m8"
+    assert detail["column"]["target_minutes"] == 8
+    from web.routes import video  # the lookups that read a script's column back (approve, render, board) find it too
+    known = video._known_columns()
+    assert known.get("deep_dive-m8").target_minutes == 8 and known.get("deep_dive-m9") is None and "deep_dive-m8" not in known
+    assert client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "deep_dive-m9", "topic": {"title": "太长", "angle": "x"}}).status_code == 422
+    assert client.post("/api/video/scripts", headers=_csrf(client), json={
+        "column": "flash-m2", "topic": {"title": "不让改", "angle": "x"}}).status_code == 422
 
 
 def test_api_adding_a_config_for_an_audience(client, prod_env):

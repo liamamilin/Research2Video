@@ -142,6 +142,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
   const [job, setJob] = useState("");
   const [recipe, setRecipe] = useState(""); // 配方文件名
   const [audience, setAudience] = useState("");
+  const [minutes, setMinutes] = useState("");
 
   const load = () => listProduction().then(setConfigs).catch((e) => toast.error(errorMessage(e)));
   useEffect(() => {
@@ -165,6 +166,9 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
   const fileName = (cs: VideoCell[]) => (cs[0].parts ? `${cs[0].parts.type.name} · ${cs[0].parts.format.name}` : cs[0].label);
   const audiences = files.get(recipe) ?? [];
   const attached = (c: VideoCell) => mine.some((m) => m.job === job && m.recipe === c.key);
+  // 配方写了 minutes_range 才能改时长；不填就是配方自己的
+  const chosen = audiences.find((c) => c.audience === audience) ?? audiences[0];
+  const span = chosen?.minutes_range?.length === 2 ? chosen.minutes_range : null;
 
   return (
     <section className="card p-3 space-y-3" aria-label="视频配置">
@@ -196,7 +200,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
       ))}
       {canEdit && sources.length ? (
         <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border pt-2">
-          <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); setAudience(""); }}>
+          <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); setAudience(""); setMinutes(""); }}>
             <option value="">给哪个 Job…</option>
             {sources.map((m) => (
               <option key={m.job} value={m.job}>{m.name}</option>
@@ -207,7 +211,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
             className="input w-auto"
             disabled={!job}
             value={recipe}
-            onChange={(e) => { setRecipe(e.target.value); setAudience(files.get(e.target.value)?.[0].audience ?? ""); }}
+            onChange={(e) => { setRecipe(e.target.value); setAudience(files.get(e.target.value)?.[0].audience ?? ""); setMinutes(""); }}
           >
             <option value="">{job ? "用哪个配方…" : "先选 Job"}</option>
             {[...files.entries()].map(([name, cs]) => (
@@ -228,15 +232,32 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
               </option>
             ))}
           </select>
+          {span ? (
+            <label className="flex items-center gap-1 text-text-muted">
+              <input
+                aria-label="加配置的分钟数"
+                className="input w-20"
+                type="number"
+                min={span[0]}
+                max={span[1]}
+                step={0.5}
+                placeholder={`${chosen.column?.target_minutes ?? ""}`}
+                value={minutes}
+                onChange={(e) => setMinutes(e.target.value)}
+              />
+              分钟（{span[0]}–{span[1]}，不填用配方的）
+            </label>
+          ) : null}
           <button
             className="btn text-xs"
             disabled={!job || !recipe}
             onClick={async () => {
               try {
-                await addProduction({ job, recipe, audience: audience || undefined });
+                await addProduction({ job, recipe, audience: audience || undefined, minutes: span && minutes ? Number(minutes) : undefined });
                 setJob("");
                 setRecipe("");
                 setAudience("");
+                setMinutes("");
                 load();
               } catch (e) {
                 toast.error(errorMessage(e));

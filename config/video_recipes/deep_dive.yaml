@@ -17,6 +17,7 @@ tags:
     name: B 站横屏长
 audiences: [developer, non_tech]
 target_minutes: 6
+minutes_range: [4, 8]
 topic:
   kind: single
   sources: [opportunities]
