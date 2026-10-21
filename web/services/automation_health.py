@@ -158,7 +158,7 @@ def cap_alerts(now: float) -> list[dict]:
     for matrix in matrices.load_all(settings.paths.config_dir).values():
         if not matrix.monthly_searches:
             continue
-        spent = matrices.month_searches(matrix, when)
+        spent = matrices.month_searches(matrix, when, settings.paths.jobs_dir)
         used = f"本月已用 {spent}/{matrix.monthly_searches} 次搜索"
         link = f"/matrices/{quote(matrix.key)}"
         if spent >= matrix.monthly_searches:

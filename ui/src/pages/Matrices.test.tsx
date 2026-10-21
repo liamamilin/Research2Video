@@ -314,4 +314,24 @@ describe("Matrices", () => {
     expect(await screen.findByText(/100 次，本月已用 100 次，这个矩阵的 Job 本月不会再启动/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "改上限" })).toBeNull(); // an editor
   });
+
+  it("opens the runs already filtered to the Job it was linked for", async () => {
+    at("/matrices/ai?tab=runs&job=monitoring%2Fai_flash_discovery");
+    await screen.findByText("运行记录（3）");
+    expect(calls.some((c) => c.url.includes("/runs") && c.url.includes("job=monitoring%2Fai_flash_discovery"))).toBe(true);
+    expect((screen.getByLabelText("按 Job 筛") as HTMLSelectElement).value).toBe("monitoring/ai_flash_discovery");
+  });
+
+  it("lists a config whose Job is in no matrix on the list page, and removes it after asking", async () => {
+    PRODUCTION = [{ key: "orphan", name: "孤儿配置", job: "research/gone", errors: ["Job 不在了"] }, { key: "fine", name: "好的", job: "research/deep", errors: [] }];
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    at("/matrices");
+    expect(await screen.findByText("1 套视频配置挂的 Job 不在任何矩阵里")).toBeTruthy();
+    expect(screen.getByText("research/gone")).toBeTruthy();
+    expect(screen.queryByText("好的")).toBeNull(); // its Job is in a matrix
+    fireEvent.click(screen.getByRole("button", { name: "删除" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "DELETE" && c.url.endsWith("/api/production/orphan"))).toBe(true));
+    await waitFor(() => expect(screen.queryByText("research/gone")).toBeNull());
+    confirm.mockRestore();
+  });
 });

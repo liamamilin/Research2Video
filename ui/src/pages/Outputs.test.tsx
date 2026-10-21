@@ -44,6 +44,7 @@ describe("Outputs", () => {
     const job = await screen.findByLabelText("Job AI Flash Discovery");
     expect(within(job).getByText("2026-10-20 那次运行的报告").getAttribute("href")).toBe("/reports/view?path=flash%2F2026-10-20.md"); // the report page reads inside output/
     expect(job.textContent).toContain("另外 3 次运行的报告还没做成视频");
+    expect(within(job).getByRole("link", { name: "看这个 Job 的运行" }).getAttribute("href")).toMatch(/^\/matrices\/[^/?]+\?tab=runs&job=/); // the matrix's runs, that Job only
     expect(screen.getByRole("link", { name: "新的一篇" }).getAttribute("href")).toBe("/video/a");
     expect(screen.getByText("手填选题写的")).toBeTruthy();
     expect(titles()).toEqual(["文稿 新的一篇", "文稿 旧的一篇", "文稿 手填的一篇"]); // newest report first

@@ -20,8 +20,8 @@ const PAGE = 20;
 const monthOf = (ts: string) => ts.slice(0, 7);
 
 /** 矩阵详情的「运行记录」：所有 Job 的每次运行，最新在前，可以改成最早在前，按 Job、状态、时间筛选，按月分组 */
-export function MatrixRuns({ matrix }: { matrix: Matrix }) {
-  const [job, setJob] = useState("");
+export function MatrixRuns({ matrix, initialJob = "" }: { matrix: Matrix; initialJob?: string }) {
+  const [job, setJob] = useState(matrix.members.some((m) => m.job === initialJob) ? initialJob : "");
   const [status, setStatus] = useState("");
   const [days, setDays] = useState(0);
   const [order, setOrder] = useState<"asc" | "desc">("desc");

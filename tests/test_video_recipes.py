@@ -191,6 +191,11 @@ def test_api_read_check_save_copy_and_delete(client, video_env):
 
     store.create_script("flash", {"id": None, "title": "用着呢", "fields": {}})
     assert client.delete("/api/video/recipes/flash", headers=_csrf(client)).status_code == 409
+    (video_env / "config" / "production").mkdir(exist_ok=True)  # a config on the copy: deleting the recipe would break it
+    (video_env / "config" / "production" / "non_dev.yaml").write_text("job: monitoring/ai_flash_discovery\nrecipe: flash_non_dev\n", encoding="utf-8")
+    in_use = client.delete("/api/video/recipes/flash_non_dev", headers=_csrf(client))
+    assert in_use.status_code == 409 and "1 套生产配置" in in_use.text and "non_dev" in in_use.text
+    (video_env / "config" / "production" / "non_dev.yaml").unlink()
     assert client.delete("/api/video/recipes/flash_non_dev", headers=_csrf(client)).status_code == 200
     assert client.get("/api/video/recipes/flash_non_dev").status_code == 404
 

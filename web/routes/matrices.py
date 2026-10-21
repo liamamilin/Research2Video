@@ -120,11 +120,10 @@ def _items_by_report() -> dict[str, int]:
 
 def _latest_reports(matrix: matrices.Matrix) -> dict[str, dict]:
     """Each member's newest finished report and how many videos were written from it (Jobs that never succeeded: none)."""
-    from core.state import StateManager
-
+    jobs_dir = _dirs()[1]
     latest = {}
     for job in matrix.jobs:
-        last = next((h for h in StateManager.get_history(job, limit=200) if h.get("status") == "success" and h.get("output_path")), None)
+        last = next((h for h in matrices.history_of(job, jobs_dir, 200) if h.get("status") == "success" and h.get("output_path")), None)
         if last:
             latest[job] = {"path": last["output_path"], "ts": last.get("ts", "")}
     if not latest:
@@ -136,7 +135,7 @@ def _latest_reports(matrix: matrices.Matrix) -> dict[str, dict]:
 def _shown(matrix: matrices.Matrix, jobs_dir: str, plans: dict, reports: bool = False) -> dict:
     latest = _latest_reports(matrix) if reports else {}
     members = [{**_member(jobs_dir, m, plans), **({"latest_report": latest[m.job]} if m.job in latest else {})} for m in matrix.members]
-    spent = {"searches_this_month": matrices.month_searches(matrix)} if reports and matrix.monthly_searches else {}
+    spent = {"searches_this_month": matrices.month_searches(matrix, jobs_dir=jobs_dir)} if reports and matrix.monthly_searches else {}
     return {**matrix.as_dict(), "members": members, **spent}
 
 
@@ -409,8 +408,6 @@ def matrix_runs(key: str, job: str = "", status: str = "", days: int = 0, order:
     how it ended, what it cost in searches, the report it wrote, how many items that report has (when it is an item list) and how many videos came from it."""
     from datetime import timedelta
 
-    from core.state import StateManager
-
     matrix = _get(key)
     if status and status not in _STATUSES:
         raise _error(422, "bad_status", f"状态只能是 {'、'.join(_STATUSES)} 之一")
@@ -423,7 +420,7 @@ def matrix_runs(key: str, job: str = "", status: str = "", days: int = 0, order:
     rows = []
     for name in ([job] if job else matrix.jobs):
         loaded = load_job(jobs_dir, name)
-        for entry in StateManager.get_history(name, limit=2000):
+        for entry in matrices.history_of(name, jobs_dir, 2000):
             if (status and entry.get("status") != status) or (since and entry.get("ts", "") < since):
                 continue
             who = entry.get("user") or ""

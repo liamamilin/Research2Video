@@ -10,7 +10,7 @@ import {
   type Matrix, type MatrixMember,
 } from "@/api/matrices";
 import { ProductionConfigs } from "@/components/ProductionConfigs";
-import { listProduction, type ProductionConfig } from "@/api/production";
+import { listProduction, removeProduction, type ProductionConfig } from "@/api/production";
 import { TimeStamp } from "@/components/TimeStamp";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
@@ -85,6 +85,8 @@ export function MatricesPage() {
   const [rows, setRows] = useState<Matrix[] | null>(null);
   const [ungrouped, setUngrouped] = useState<{ job: string; name: string }[]>([]);
   const [error, setError] = useState("");
+  const [configs, setConfigs] = useState<ProductionConfig[]>([]);
+  const toast = useToast();
 
   useEffect(() => {
     listMatrices()
@@ -93,7 +95,20 @@ export function MatricesPage() {
         setUngrouped(body.ungrouped);
       })
       .catch((e) => setError(errorMessage(e)));
+    listProduction().then((list) => setConfigs(Array.isArray(list) ? list : [])).catch(() => setConfigs([]));
   }, []);
+  // a config on a Job that left its matrix (or whose file is gone) shows on no Job page: list it here to remove it
+  const grouped = new Set((rows || []).flatMap((m) => m.members.map((x) => x.job)));
+  const stray = rows ? configs.filter((c) => !grouped.has(c.job)) : [];
+  const drop = async (c: ProductionConfig) => {
+    if (!window.confirm(`删掉「${c.name || c.key}」这套配置？已经写好的文稿和成片都还在。`)) return;
+    try {
+      await removeProduction(c.key);
+      setConfigs(configs.filter((x) => x.key !== c.key));
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -119,6 +134,22 @@ export function MatricesPage() {
           </Link>
         ))}
       </div>
+      {stray.length ? (
+        <section className="card p-3 space-y-1 text-xs" aria-label="没有矩阵的视频配置">
+          <h2 className="font-medium text-sm">{stray.length} 套视频配置挂的 Job 不在任何矩阵里</h2>
+          <p className="text-text-muted">Job 被移出了矩阵，或者 Job 文件不在了：这些配置在 Job 页上看不到。把 Job 放回矩阵就能继续用，不要了就删掉。</p>
+          <ul>
+            {stray.map((c) => (
+              <li key={c.key} className="flex flex-wrap items-center gap-2">
+                <span>{c.name || c.key}</span>
+                <span className="font-mono text-text-muted">{c.job}</span>
+                {c.errors.length ? <span className="text-warning">{c.errors.join("；")}</span> : null}
+                {canEdit ? <button className="text-accent hover:underline" onClick={() => drop(c)}>删除</button> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       {ungrouped.length ? (
         <p className="text-xs text-text-muted">
           还有 {ungrouped.length} 个 Job 不在任何矩阵里：{ungrouped.map((j) => j.name).join("、")}
@@ -508,7 +539,7 @@ export function MatrixDetailPage() {
           </button>
         ))}
       </div>
-      {tab === "runs" ? <MatrixRuns matrix={matrix} /> : null}
+      {tab === "runs" ? <MatrixRuns matrix={matrix} initialJob={params.get("job") ?? ""} /> : null}
       {tab === "week" ? <MatrixWeek matrix={matrix} onChanged={setMatrix} /> : null}
 
       {tab === "jobs" ? (

@@ -213,20 +213,32 @@ def remove(config_dir: str, key: str) -> bool:
 WARN_RATIO = 0.8
 
 
-def month_searches(matrix: Matrix, now=None) -> int:
+def history_of(job: str, jobs_dir: str = "jobs", limit: int = 5000) -> list[dict]:
+    """A Job's run history, newest first. Older runs (the autopilot's, the command line's by file name) were filed under
+    the Job's short file name; those count too, unless another Job has the same short name (then they cannot be told apart)."""
+    from .config import list_jobs
+    from .state import StateManager
+
+    entries = StateManager.get_history(job, limit=limit)
+    short = job.rsplit("/", 1)[-1]
+    if short != job and sum(1 for other in list_jobs(jobs_dir) if other.rsplit("/", 1)[-1] == short) == 1:
+        seen = {(e.get("ts"), e.get("status")) for e in entries}
+        entries += [e for e in StateManager.get_history(short, limit=limit) if (e.get("ts"), e.get("status")) not in seen]
+        entries.sort(key=lambda e: str(e.get("ts", "")), reverse=True)
+    return entries
+
+
+def month_searches(matrix: Matrix, now=None, jobs_dir: str = "jobs") -> int:
     """Searches the matrix's Jobs have used in the calendar month of ``now`` (what their run history recorded)."""
     from datetime import datetime
 
-    from .state import StateManager
-
     month = (now or datetime.now().astimezone()).strftime("%Y-%m")
-    total = 0
-    for job in matrix.jobs:
-        for name in {job, job.rsplit("/", 1)[-1]}:  # a Job's history sits under its path or its file name, by who ran it
-            for entry in StateManager.get_history(name, limit=5000):
-                if str(entry.get("ts", "")).startswith(month):
-                    total += int((entry.get("usage") or {}).get("searches") or 0)
-    return total
+    return sum(int((entry.get("usage") or {}).get("searches") or 0) for job in matrix.jobs
+               for entry in history_of(job, jobs_dir) if str(entry.get("ts", "")).startswith(month))
+
+
+def _jobs_dir(config_dir: str) -> str:
+    return os.path.join(os.path.dirname(os.path.abspath(config_dir)), "jobs")
 
 
 def cap_status(job_name: str, config_dir: str = "config", now=None) -> Optional[dict]:
@@ -234,7 +246,7 @@ def cap_status(job_name: str, config_dir: str = "config", now=None) -> Optional[
     matrix = of_job(job_name, config_dir)
     if matrix is None or not matrix.monthly_searches:
         return None
-    spent = month_searches(matrix, now)
+    spent = month_searches(matrix, now, _jobs_dir(config_dir))
     return {"matrix": matrix.key, "name": matrix.name, "cap": matrix.monthly_searches, "spent": spent,
             "exceeded": spent >= matrix.monthly_searches}
 

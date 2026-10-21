@@ -313,3 +313,15 @@ def test_every_way_of_starting_a_job_goes_through_the_limit(matrix_env):
     _cap(matrix_env, 40)
     with pytest.raises(MatrixLimitReached, match="搜索额度用完了"):  # the autopilot's topic discovery and the assistant use this
         start_job(FLASH, "autopilot", config_dir=str(matrix_env / "config"), jobs_dir=str(matrix_env / "jobs"))
+
+
+def test_runs_filed_under_a_jobs_short_name_count_unless_two_jobs_share_it(matrix_env):
+    from core import matrices
+
+    _history(matrix_env, "deep", [("2026-10-20T10:00:00+0800", "autopilot", "success", "x.md", 7)])  # filed by file name
+    _history(matrix_env, "research/deep", [("2026-10-21T10:00:00+0800", "admin", "success", "y.md", 3)])
+    jobs = str(matrix_env / "jobs")
+    assert [e["output_path"] for e in matrices.history_of("research/deep", jobs)] == ["y.md", "x.md"]
+    (matrix_env / "jobs/monitoring").mkdir(exist_ok=True)
+    (matrix_env / "jobs/monitoring/deep.yaml").write_text("name: 另一个 deep\nprompt: x\noutput: output/z/{date}.md\n", encoding="utf-8")
+    assert [e["output_path"] for e in matrices.history_of("research/deep", jobs)] == ["y.md"]  # "deep" is now ambiguous

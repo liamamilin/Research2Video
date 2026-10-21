@@ -268,6 +268,14 @@ def delete_recipe(key: str, user=Depends(require_editor)) -> dict:
     if used:
         raise HTTPException(409, detail=ApiError.make(
             "recipe_in_use", f"有 {used} 篇文稿用这个配方，删掉后它们打不开；不想再用就把 status 改成 blocked"))
+    from core.video import production
+
+    paths = get_settings().paths
+    configs = sorted(c.key for c in production.load_all(paths.config_dir, paths.jobs_dir).values() if c.base_recipe == key)
+    if configs:
+        raise HTTPException(409, detail=ApiError.make(
+            "recipe_in_use", f"有 {len(configs)} 套生产配置用这个配方（{'、'.join(configs[:5])}{'…' if len(configs) > 5 else ''}）："
+                             f"先到那些 Job 的视频配置页删掉它们"))
     with open(path, encoding="utf-8") as fh:
         backup = yaml_io.save_backup(f"video_recipe_{key}.yaml", fh.read())
     os.remove(path)

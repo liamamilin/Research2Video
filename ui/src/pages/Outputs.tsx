@@ -96,7 +96,10 @@ function ByOwner({ data, rows, newest }: { data: Outputs; rows: OutputScript[]; 
                 {summary?.unwritten ? (
                   <p className="text-xs text-text-muted pl-3">
                     另外 {summary.unwritten} 次运行的报告还没做成视频
-                    {" · "}<Link className="text-accent hover:underline" to={`/jobs/${encodeURIComponent(job)}`}>看这个 Job 的运行</Link>
+                    {" · "}
+                    <Link className="text-accent hover:underline" to={m.startsWith("_") ? `/jobs/${encodeURIComponent(job)}` : `/matrices/${m}?tab=runs&job=${encodeURIComponent(job)}`}>
+                      看这个 Job 的运行
+                    </Link>
                   </p>
                 ) : null}
               </div>
