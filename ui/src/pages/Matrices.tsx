@@ -6,6 +6,7 @@ import {
   type Matrix, type MatrixMember,
 } from "@/api/matrices";
 import { ProductionConfigs } from "@/components/ProductionConfigs";
+import { listProduction, type ProductionConfig } from "@/api/production";
 import { TimeStamp } from "@/components/TimeStamp";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
@@ -125,7 +126,7 @@ function scheduleText(member: MatrixMember) {
   return `${plan.enabled ? "定时" : "定时（已暂停）"} ${plan.schedule}`;
 }
 
-function MemberRow({ member, canEdit, onRemove }: { member: MatrixMember; canEdit: boolean; onRemove: () => void }) {
+function MemberRow({ member, matrixKey, configs, canEdit, onRemove }: { member: MatrixMember; matrixKey: string; configs: number | null; canEdit: boolean; onRemove: () => void }) {
   const state = member.state;
   return (
     <tr className="border-t border-border align-top">
@@ -158,6 +159,14 @@ function MemberRow({ member, canEdit, onRemove }: { member: MatrixMember; canEdi
         )}
       </td>
       <td className="py-2 pr-3 text-xs">{member.topics ? `选题来源 ${member.topics}` : ""}</td>
+      <td className="py-2 pr-3 text-xs whitespace-nowrap">
+        {member.exists ? (
+          <Link className="text-accent hover:underline" to={`/matrices/${encodeURIComponent(matrixKey)}/video/${encodeURIComponent(member.job)}`}>
+            视频配置
+          </Link>
+        ) : null}
+        <div className="text-text-muted">{configs === null ? "" : configs ? `${configs} 套` : member.topics ? "还没配" : "整份报告"}</div>
+      </td>
       <td className="py-2 text-xs text-right">
         {canEdit ? (
           <button className="btn text-xs" aria-label={`把 ${member.name} 移出矩阵`} onClick={onRemove}>
@@ -251,9 +260,11 @@ export function MatrixDetailPage() {
   const [domain, setDomain] = useState("");
   const [adding, setAdding] = useState("");
   const [copying, setCopying] = useState(false);
+  const [configs, setConfigs] = useState<ProductionConfig[] | null>(null);
 
   const load = () => {
     getMatrix(key).then(setMatrix).catch((e) => setError(errorMessage(e)));
+    listProduction().then(setConfigs).catch(() => setConfigs(null));
     listMatrices().then((body) => setUngrouped(body.ungrouped)).catch(() => setUngrouped([]));
   };
   useEffect(load, [key]);
@@ -349,12 +360,14 @@ export function MatrixDetailPage() {
                 <th className="font-normal pb-1">周期</th>
                 <th className="font-normal pb-1">上次运行</th>
                 <th className="font-normal pb-1">选题</th>
+                <th className="font-normal pb-1">视频</th>
                 <th />
               </tr>
             </thead>
             <tbody>
               {matrix.members.map((m) => (
-                <MemberRow key={m.job} member={m} canEdit={canEdit} onRemove={() => save({ jobs: jobs.filter((j) => j !== m.job) })} />
+                <MemberRow key={m.job} member={m} matrixKey={matrix.key} configs={configs ? configs.filter((c) => c.job === m.job).length : null}
+                  canEdit={canEdit} onRemove={() => save({ jobs: jobs.filter((j) => j !== m.job) })} />
               ))}
             </tbody>
           </table>
@@ -381,8 +394,6 @@ export function MatrixDetailPage() {
         ) : null}
       </section>
 
-      <ProductionConfigs members={matrix.members} canEdit={canEdit} />
-
       {canEdit ? (
         <button
           className="btn text-xs text-danger"
@@ -399,6 +410,41 @@ export function MatrixDetailPage() {
           删除这个矩阵
         </button>
       ) : null}
+    </div>
+  );
+}
+
+
+/** 一个 Job 的视频配置：它的报告写成哪几种视频，给谁看、多长、要不要自动写都在这里设。 */
+export function MatrixJobVideoPage() {
+  const { key = "", job = "" } = useParams();
+  const canEdit = useCanEdit();
+  const [matrix, setMatrix] = useState<Matrix | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    getMatrix(key).then(setMatrix).catch((e) => setError(errorMessage(e)));
+  }, [key]);
+
+  if (error) return <p className="text-sm text-danger">{error}</p>;
+  if (!matrix) return <p className="text-sm text-text-muted">读取中…</p>;
+  const member = matrix.members.find((m) => m.job === job);
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-baseline gap-2">
+        <Link className="text-xs text-accent hover:underline" to="/matrices">矩阵</Link>
+        <span className="text-xs text-text-muted">/</span>
+        <Link className="text-xs text-accent hover:underline" to={`/matrices/${encodeURIComponent(matrix.key)}`}>{matrix.name}</Link>
+        <span className="text-xs text-text-muted">/</span>
+        <h1 className="text-lg font-semibold">{member?.name ?? job} · 视频配置</h1>
+      </div>
+      {member ? (
+        <>
+          <p className="text-xs text-text-muted font-mono">{member.job}</p>
+          <ProductionConfigs members={[member]} canEdit={canEdit} />
+        </>
+      ) : (
+        <p className="text-sm text-text-muted">这个矩阵里没有这个 Job：{job}</p>
+      )}
     </div>
   );
 }

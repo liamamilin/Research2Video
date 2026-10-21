@@ -174,12 +174,14 @@ function ConfigCard({ config, canEdit, scheduled, onChange }: { config: Producti
   );
 }
 
-/** 矩阵详情里的「视频配置」：每个 Job 的报告写成哪几种视频。给谁看在配置里选，多长和要不要重新调研在配方允许时也能选，拆不拆由配方定。 */
+/** 一个 Job（或一组 Job）的「视频配置」：报告写成哪几种视频。给谁看在配置里选，多长和要不要重新调研在配方允许时也能选，拆不拆由配方定。
+ *  只给一个 Job 时就是那个 Job 自己的页面：不再问「给哪个 Job」，也不再重复写 Job 名。 */
 export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[]; canEdit: boolean }) {
   const toast = useToast();
   const [configs, setConfigs] = useState<ProductionConfig[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
-  const [job, setJob] = useState("");
+  const only = members.length === 1 && members[0].topics ? members[0].job : ""; // 页面就是这一个 Job 的
+  const [job, setJob] = useState(only);
   const [recipe, setRecipe] = useState(""); // 配方文件名
   const [audience, setAudience] = useState("");
   const [minutes, setMinutes] = useState("");
@@ -197,6 +199,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
   const mine = configs.filter((c) => jobs.has(c.job)).sort((a, b) => a.name.localeCompare(b.name, "zh"));
   const whole = members.length - members.filter((m) => m.topics).length;
   const sources = members.filter((m) => m.topics);
+  const single = members.length === 1;
   // 能挂在这个 Job 上的配方：一条一期的、挑几条合一期的，而且是给这个 Job 的条目写的（topic.sources 里有它）
   const source = sources.find((m) => m.job === job)?.topics ?? "";
   const usable = cells.filter((c) => c.usable && c.key && ["single", "roundup"].includes(c.column?.topic_kind ?? "")
@@ -222,7 +225,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
         const own = mine.filter((c) => c.job === m.job);
         return (
           <div key={m.job} className="space-y-2">
-            <h3 className="text-xs text-text-muted">{m.name}</h3>
+            {single ? null : <h3 className="text-xs text-text-muted">{m.name}</h3>}
             {own.length ? (
               own.map((c) => <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!m.schedule} onChange={load} />)
             ) : (
@@ -231,8 +234,14 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
           </div>
         );
       })}
-      {!sources.length ? <p className="text-xs text-text-muted">这个矩阵里还没有出条目列表的 Job（Job 要声明 topics:）。</p> : null}
-      {whole && sources.length ? (
+      {!sources.length ? (
+        <p className="text-xs text-text-muted">
+          {single
+            ? "这个 Job 的报告是整份的，不拆成条目，现在还挂不了配置。要写成视频，打开那份报告点「写成视频」。"
+            : "这个矩阵里还没有出条目列表的 Job（Job 要声明 topics:）。"}
+        </p>
+      ) : null}
+      {whole && sources.length && !single ? (
         <p className="text-xs text-text-muted">
           另外 {whole} 个 Job 的报告是整份的，不拆成条目，所以不在这里挂配置。要写成视频，打开那份报告点「写成视频」。
         </p>
@@ -242,12 +251,14 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
       ))}
       {canEdit && sources.length ? (
         <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border pt-2">
-          <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); setAudience(""); setMinutes(""); setResearchAgain(true); }}>
-            <option value="">给哪个 Job…</option>
-            {sources.map((m) => (
-              <option key={m.job} value={m.job}>{m.name}</option>
-            ))}
-          </select>
+          {only ? null : (
+            <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); setAudience(""); setMinutes(""); setResearchAgain(true); }}>
+              <option value="">给哪个 Job…</option>
+              {sources.map((m) => (
+                <option key={m.job} value={m.job}>{m.name}</option>
+              ))}
+            </select>
+          )}
           <select
             aria-label="加配置用的配方"
             className="input w-auto"
@@ -302,7 +313,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
             onClick={async () => {
               try {
                 await addProduction({ job, recipe, audience: audience || undefined, minutes: span && minutes ? Number(minutes) : undefined, reverify: canSkip && !researchAgain ? false : undefined });
-                setJob("");
+                setJob(only);
                 setRecipe("");
                 setAudience("");
                 setMinutes("");

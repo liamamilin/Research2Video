@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useAuthStore } from "@/lib/auth-store";
 import { ToastProvider } from "@/lib/toast";
-import { MatricesPage, MatrixDetailPage } from "./Matrices";
+import { MatricesPage, MatrixDetailPage, MatrixJobVideoPage } from "./Matrices";
 
 const AI = {
   key: "ai", name: "AI 矩阵", domain: "AI 与软件开发", keywords: [], errors: [],
@@ -47,6 +47,7 @@ const at = (path: string) =>
         <Routes>
           <Route path="/matrices" element={<MatricesPage />} />
           <Route path="/matrices/:key" element={<MatrixDetailPage />} />
+          <Route path="/matrices/:key/video/:job" element={<MatrixJobVideoPage />} />
         </Routes>
       </MemoryRouter>
     </ToastProvider>,
@@ -73,6 +74,26 @@ describe("Matrices", () => {
     expect((calls.find((c) => c.method === "PUT")!.body as { jobs: string[] }).jobs).toEqual([
       "monitoring/ai_flash_discovery", "research/deep", "research/games",
     ]);
+  });
+
+  it("gives every Job a way into its own video configs, and keeps them off the matrix page", async () => {
+    at("/matrices/ai");
+    const links = (await screen.findAllByRole("link", { name: "视频配置" })) as HTMLAnchorElement[];
+    expect(links.map((a) => a.getAttribute("href"))).toEqual([
+      "/matrices/ai/video/monitoring%2Fai_flash_discovery", "/matrices/ai/video/research%2Fdeep",
+    ]);  // the Job whose report is not a list of items has one too
+    expect(screen.getByText("整份报告")).toBeTruthy();
+    expect(screen.queryByLabelText("视频配置")).toBeNull();  // no section at the bottom any more
+  });
+
+  it("the Job's own page is that Job's configs: no Job to pick, and a whole-report Job says why it has none yet", async () => {
+    at("/matrices/ai/video/monitoring%2Fai_flash_discovery");
+    expect(await screen.findByText("AI Flash Discovery · 视频配置")).toBeTruthy();
+    expect(await screen.findByLabelText("视频配置")).toBeTruthy();
+    expect(screen.queryByLabelText("加配置的 Job")).toBeNull();
+    cleanup();
+    at("/matrices/ai/video/research%2Fdeep");
+    expect(await screen.findByText(/这个 Job 的报告是整份的，不拆成条目/)).toBeTruthy();
   });
 
   it("copies with new keywords only the Jobs that have a neutral template", async () => {

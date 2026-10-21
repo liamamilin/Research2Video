@@ -172,6 +172,19 @@ describe("ProductionConfigs", () => {
     CONFIGS[0] = { ...CONFIGS[0], auto: 0 };
   });
 
+  it("on one Job's own page the Job is already chosen", async () => {
+    render(<ToastProvider><MemoryRouter><ProductionConfigs members={[MEMBERS[0]]} canEdit={true} /></MemoryRouter></ToastProvider>);
+    await screen.findByLabelText("配置 快讯 · 开发者");
+    expect(screen.queryByLabelText("加配置的 Job")).toBeNull();
+    const recipe = screen.getByLabelText("加配置用的配方") as HTMLSelectElement;
+    expect(recipe.disabled).toBe(false);  // nothing to pick first
+    fireEvent.change(recipe, { target: { value: "flash" } });
+    fireEvent.click(screen.getByText("加一套配置"));
+    await waitFor(() => expect(posts.length).toBe(1));
+    expect(posts[0].body).toMatchObject({ job: "monitoring/ai_flash_discovery", recipe: "flash" });
+    expect((screen.getByLabelText("加配置用的配方") as HTMLSelectElement).disabled).toBe(false);  // still this Job after adding
+  });
+
   it("is read-only for a viewer", async () => {
     show(false);
     fireEvent.click((await screen.findAllByText("挑条目写"))[0]);
