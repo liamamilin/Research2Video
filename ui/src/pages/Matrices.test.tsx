@@ -11,24 +11,29 @@ const AI = {
   jobs: [{ job: "monitoring/ai_flash_discovery", copy_as: "_flash_discovery" }, { job: "research/deep", copy_as: "" }],
   members: [
     { job: "monitoring/ai_flash_discovery", exists: true, name: "AI Flash Discovery", enabled: true, keywords: ["新模型发布"], copy_as: "_flash_discovery", copyable: true, topics: "flash",
-      state: { job_name: "monitoring/ai_flash_discovery", last_run_at: "2026-10-20T08:00:00+08:00", last_status: "success", last_output: null, last_error: null, last_duration_seconds: 500 }, is_running: false, schedule: null },
+      state: { job_name: "monitoring/ai_flash_discovery", last_run_at: "2026-10-20T08:00:00+08:00", last_status: "success", last_output: null, last_error: null, last_duration_seconds: 500 }, is_running: false, searches_per_run: 20, schedule: null },
     { job: "research/deep", exists: true, name: "AI 深度", enabled: true, keywords: [], copy_as: "", copyable: false, topics: "", state: null, is_running: false,
       schedule: { schedule: "0 8 * * 1", timezone: "Asia/Shanghai", enabled: false, next_runs: [] } },
   ],
 };
 const LIST = { matrices: [AI], ungrouped: [{ job: "research/games", name: "独立游戏" }] };
 
+let PRODUCTION: unknown[] = [];
 let calls: { url: string; method: string; body: unknown }[] = [];
 
 beforeEach(() => {
   calls = [];
+  PRODUCTION = [];
   useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
   vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
     const u = String(url);
     const method = init?.method || "GET";
     calls.push({ url: u, method, body: init?.body ? JSON.parse(String(init.body)) : null });
-    const body = method === "POST" && u.endsWith("/copy") ? { ...AI, key: "medical", name: "医疗矩阵", members: [] }
-      : method === "PUT" ? AI : u.includes("/api/production") || u.includes("/api/video/cells") ? []
+    const body = u.includes("/period") && method === "GET"
+      ? { schedule: "0 5 * * 2", next_runs: ["2026-10-27T05:00:00+08:00"], runs_per_month: 4, searches_per_run: 20, searches_per_month: 80 }
+      : method === "POST" && u.includes("/api/jobs/") ? { ok: true, task_id: "t1", started_at: "x" }
+      : method === "POST" && u.endsWith("/copy") ? { ...AI, key: "medical", name: "医疗矩阵", members: [] }
+      : method === "PUT" ? AI : u.includes("/api/production") ? PRODUCTION : u.includes("/api/video/cells") ? []
       : u.endsWith("/api/matrices") ? LIST : AI;
     return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(body) } as Response;
   }));
@@ -136,5 +141,43 @@ describe("Matrices", () => {
     expect(screen.queryByText("换关键词复制")).toBeNull();
     expect(screen.queryByText("移出")).toBeNull();
     expect(screen.queryByText("删除这个矩阵")).toBeNull();
+  });
+
+  it("runs a Job once after asking, and says when its report is ready to be written", async () => {
+    PRODUCTION = [{ job: "monitoring/ai_flash_discovery", auto: 3 }, { job: "monitoring/ai_flash_discovery", auto: 0 }];
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    at("/matrices/ai");
+    expect(await screen.findByRole("link", { name: "报告已出，去写视频 →" })).toBeTruthy();
+    expect(screen.getByText("2 套，1 套自动写")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "运行 AI Flash Discovery 一次" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "POST" && c.url.endsWith("/api/jobs/monitoring%2Fai_flash_discovery/run"))).toBe(true));
+    expect(confirm.mock.calls[0][0]).toContain("20 次搜索");
+    confirm.mockRestore();
+  });
+
+  it("does not run when the question is declined", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    at("/matrices/ai");
+    fireEvent.click(await screen.findByRole("button", { name: "运行 AI Flash Discovery 一次" }));
+    expect(calls.some((c) => c.url.includes("/run"))).toBe(false);
+    confirm.mockRestore();
+  });
+
+  it("lets an admin change a Job's period with a preview, and an editor cannot", async () => {
+    at("/matrices/ai");
+    await screen.findByRole("link", { name: "AI Flash Discovery" });
+    expect(screen.queryByRole("button", { name: "改 AI Flash Discovery 的周期" })).toBeNull(); // an editor
+    cleanup();
+    useAuthStore.setState({ user: { username: "a", role: "admin" } as never });
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    at("/matrices/ai");
+    fireEvent.click(await screen.findByRole("button", { name: "改 AI Flash Discovery 的周期" }));
+    fireEvent.change(screen.getByLabelText("周期"), { target: { value: "weekly" } });
+    expect(await screen.findByText(/每月约 4 次运行，上次每次用了 20 次搜索，约 80 次/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "PUT" && c.url.includes("/jobs/monitoring/ai_flash_discovery/period"))).toBe(true));
+    const put = calls.find((c) => c.method === "PUT" && c.url.includes("/period"))!;
+    expect(put.body).toMatchObject({ kind: "weekly", time: "05:00", days: [1], confirm: true });
+    confirm.mockRestore();
   });
 });

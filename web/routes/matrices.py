@@ -1,7 +1,8 @@
 """Matrices: a set of research Jobs sharing a domain and keywords, listed, edited and copied (spec/matrices.md).
 
-A matrix only groups Jobs. Running, pausing and scheduling a member stay on the Jobs and schedule pages; this page
-shows them. Copying a matrix with new keywords makes new Job files from each member's ``copy_as`` template: they
+A matrix only groups Jobs. Running a member and changing its period (manual, daily, weekdays, some weekdays,
+monthly) can be done from the matrix page; pausing, cancelling and the schedule's finer settings stay on the Jobs and
+schedule pages. Copying a matrix with new keywords makes new Job files from each member's ``copy_as`` template: they
 start manual, so a copy never runs or spends anything until someone starts it.
 """
 
@@ -14,10 +15,12 @@ import string
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from core import matrices
+from datetime import datetime
+
+from core import cron, matrices, periods
 from core.config import list_jobs, load_job
 from web import audit
-from web.deps import require_editor, require_viewer
+from web.deps import require_admin, require_editor, require_viewer
 from web.models import ApiError
 from web.services import yaml_io
 from web.settings import get_settings
@@ -63,8 +66,10 @@ def _plans() -> dict[str, dict]:
         out = {}
         for plan in managed.store().list():
             shown = managed.describe(plan)
-            out[plan["job_name"]] = {"schedule": plan["schedule"], "timezone": plan["timezone"],
-                                     "enabled": shown["enabled"], "next_runs": shown["next_runs"][:1]}
+            out[plan["job_name"]] = {"id": plan["id"], "schedule": plan["schedule"], "timezone": plan["timezone"],
+                                     "enabled": shown["enabled"], "next_runs": shown["next_runs"][:1],
+                                     "period": periods.from_cron(plan["schedule"]),
+                                     "runs_per_month": periods.runs_per_month(plan["schedule"], datetime.now().astimezone())}
         return out
     except Exception:  # noqa: BLE001 - no scheduler state: every member reads as manual
         return {}
@@ -85,6 +90,7 @@ def _member(jobs_dir: str, member: matrices.Member, plans: dict) -> dict:
         "keywords": list(job.get("keywords") or []), "copy_as": member.copy_as, "copyable": bool(member.copy_as),
         "topics": topics.get("alias") or (member.job if topics else ""),
         "state": state.model_dump() if state else None, "is_running": _registry.is_running(member.job),
+        "searches_per_run": int(((state.last_usage if state else None) or {}).get("searches") or 0),
         "schedule": plans.get(member.job),
     }
 
@@ -257,3 +263,91 @@ def copy_matrix(key: str, payload: CopyIn, user=Depends(require_editor)):
         raise
     audit.log("matrix_copy", user=user["username"], target=new_key, details={"from": key, "jobs": len(members)})
     return get_matrix(new_key, user)
+
+
+# --- A member's period -----------------------------------------------------------
+
+
+class PeriodIn(BaseModel):
+    kind: str
+    time: str = "05:00"
+    days: list[int] = Field(default_factory=list)
+    day: int = 1
+    confirm: bool = False  # turning a timed run on spends money on every run: the page asks first
+
+
+def _member_of(key: str, job: str) -> None:
+    if job not in _get(key).jobs:
+        raise _error(404, "not_a_member", f"{job} 不在矩阵 {key} 里")
+
+
+def _plan_of(job: str) -> dict | None:
+    from web.services import managed_scheduler as managed
+
+    return next((p for p in managed.store().list() if p["job_name"] == job), None)
+
+
+def _cron_of(body: PeriodIn) -> str:
+    try:
+        return periods.to_cron(body.kind, body.time, body.days, body.day)
+    except ValueError as exc:
+        raise _error(422, "invalid_period", str(exc)) from exc
+
+
+def _cost(expression: str, job: str) -> dict:
+    from web.routes.jobs import _state_for
+
+    state = _state_for(job)
+    searches = int(((state.last_usage if state else None) or {}).get("searches") or 0)
+    runs = periods.runs_per_month(expression, datetime.now().astimezone()) if expression else 0
+    return {"runs_per_month": runs, "searches_per_run": searches, "searches_per_month": runs * searches}
+
+
+@router.get("/{key}/jobs/{job:path}/period")
+def preview_period(key: str, job: str, kind: str, time: str = "05:00", days: str = "", day: int = 1,
+                   user=Depends(require_viewer)):
+    """What a period would be: its cron, the next three runs and the monthly cost, without saving anything."""
+    _member_of(key, job)
+    try:
+        listed = [int(d) for d in days.split(",") if d.strip()]
+    except ValueError as exc:
+        raise _error(422, "invalid_period", "每周几天要用数字，用逗号分开") from exc
+    expression = _cron_of(PeriodIn(kind=kind, time=time, days=listed, day=day))
+    if not expression:
+        return {"schedule": "", "next_runs": [], **_cost("", job)}
+    entry = cron.parse_schedule(expression)
+    upcoming = cron.fire_times(entry, datetime.now().astimezone(), count=3)
+    return {"schedule": expression, "next_runs": [t.isoformat(timespec="seconds") for t in upcoming], **_cost(expression, job)}
+
+
+@router.put("/{key}/jobs/{job:path}/period")
+def set_period(key: str, job: str, body: PeriodIn, user=Depends(require_admin)):
+    """Change a member's period. ``manual`` removes its plan; a timed one saves it (and turns a paused one back on)."""
+    from web.routes.scheduler import _mutate
+    from web.services import managed_scheduler as managed
+
+    _member_of(key, job)
+    expression = _cron_of(body)
+    plan = _plan_of(job)
+    if not expression:
+        if plan:
+            _mutate(managed.store().delete, plan["id"])
+        audit.log("matrix_period", user=user["username"], target=job, details={"kind": "manual"})
+        return get_matrix(key, user)
+    if not (plan and plan["enabled"]) and not body.confirm:
+        cost = _cost(expression, job)
+        raise _error(409, "confirm_needed", (
+            f"打开定时后每次都会自己运行并花搜索额度：每月约 {cost['runs_per_month']} 次"
+            + (f"，上次每次用了 {cost['searches_per_run']} 次搜索，约 {cost['searches_per_month']} 次" if cost["searches_per_run"] else "")
+            + "。确认后再保存"))
+    if plan:
+        _mutate(lambda: managed.save(job, expression, schedule_id=plan["id"], editing=True, timezone=plan["timezone"],
+                                     missed_policy=plan["missed_policy"], max_retries=plan["max_retries"],
+                                     expected_version=plan["version"]))
+        if not plan["enabled"]:
+            _mutate(managed.ensure_online)
+            _mutate(managed.store().toggle, plan["id"], True)
+    else:
+        _mutate(lambda: managed.save(job, expression))
+    audit.log("matrix_period", user=user["username"], target=job, details={"kind": body.kind, "schedule": expression})
+    return get_matrix(key, user)

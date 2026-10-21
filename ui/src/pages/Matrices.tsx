@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+import { runJob } from "@/api";
 import {
-  copyMatrix, createMatrix, deleteMatrix, getMatrix, listMatrices, splitKeywords, updateMatrix,
-  type Matrix, type MatrixMember,
+  copyMatrix, createMatrix, deleteMatrix, getMatrix, listMatrices, previewPeriod, setPeriod, splitKeywords, updateMatrix,
+  type Matrix, type MatrixMember, type PeriodBody, type PeriodKind, type PeriodPreview,
 } from "@/api/matrices";
 import { ProductionConfigs } from "@/components/ProductionConfigs";
 import { listProduction, type ProductionConfig } from "@/api/production";
@@ -14,6 +15,10 @@ import { errorMessage, useToast } from "@/lib/toast";
 function useCanEdit() {
   const role = useAuthStore((s) => s.user?.role);
   return role === "editor" || role === "admin";
+}
+
+function useIsAdmin() {
+  return useAuthStore((s) => s.user?.role) === "admin";
 }
 
 function Keywords({ words, empty }: { words: string[]; empty: string }) {
@@ -120,10 +125,102 @@ export function MatricesPage() {
   );
 }
 
-function scheduleText(member: MatrixMember) {
+const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
+const KIND_NAMES: Record<PeriodKind, string> = { manual: "手动", daily: "每天", weekdays: "工作日", weekly: "每周几天", monthly: "每月一次" };
+
+function periodWords(member: MatrixMember) {
   const plan = member.schedule;
   if (!plan) return "手动";
-  return `${plan.enabled ? "定时" : "定时（已暂停）"} ${plan.schedule}`;
+  const period = plan.period;
+  const when = period?.time ?? "";
+  const words =
+    period?.kind === "daily" ? `每天 ${when}`
+    : period?.kind === "weekdays" ? `工作日 ${when}`
+    : period?.kind === "weekly" ? `每周${(period.days ?? []).map((d) => WEEKDAYS[d]).join("、")} ${when}`
+    : period?.kind === "monthly" ? `每月 ${period.day} 号 ${when}`
+    : null;
+  if (words === null) return `${plan.enabled ? "定时" : "定时（已暂停）"} ${plan.schedule}`;  // a cron the period words cannot say
+  return plan.enabled ? words : `${words}（已暂停）`;
+}
+
+/** 改周期：挑一种、选时间，当场看下次几点跑和每月大约花多少；开定时前要确认 */
+function PeriodEditor({ matrixKey, member, onDone, onCancel }: { matrixKey: string; member: MatrixMember; onDone: (m: Matrix) => void; onCancel: () => void }) {
+  const toast = useToast();
+  const now = member.schedule?.period;
+  const [form, setForm] = useState<PeriodBody>({
+    kind: !now ? "manual" : now.kind === "custom" ? "daily" : now.kind,
+    time: now?.time ?? "05:00",
+    days: now?.days?.length ? now.days : [1],
+    day: now?.day ?? 1,
+  });
+  const [preview, setPreview] = useState<PeriodPreview | null>(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const on = !!member.schedule?.enabled;
+
+  useEffect(() => {
+    if (form.kind === "manual") { setPreview(null); setError(""); return; }
+    let live = true;
+    previewPeriod(matrixKey, member.job, form).then((p) => { if (live) { setPreview(p); setError(""); } })
+      .catch((e) => { if (live) { setPreview(null); setError(errorMessage(e)); } });
+    return () => { live = false; };
+  }, [matrixKey, member.job, form]);
+
+  const cost = preview
+    ? `每月约 ${preview.runs_per_month} 次运行${preview.searches_per_run ? `，上次每次用了 ${preview.searches_per_run} 次搜索，约 ${preview.searches_per_month} 次` : ""}`
+    : "";
+  const save = async () => {
+    if (form.kind !== "manual" && !on && !window.confirm(`打开定时后「${member.name}」会自己运行并花搜索额度：${cost}。确定？`)) return;
+    setBusy(true);
+    try {
+      onDone(await setPeriod(matrixKey, member.job, { ...form, confirm: form.kind !== "manual" }));
+      toast.success(form.kind === "manual" ? "改成手动了，不会自己跑" : "周期保存了");
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const set = (patch: Partial<PeriodBody>) => setForm({ ...form, ...patch });
+  return (
+    <div className="mt-2 space-y-2 border border-border rounded p-2 text-xs" aria-label={`改 ${member.name} 的周期`}>
+      <div className="flex flex-wrap items-center gap-2">
+        <select aria-label="周期" className="input w-auto" value={form.kind} onChange={(e) => set({ kind: e.target.value as PeriodKind })}>
+          {(Object.keys(KIND_NAMES) as PeriodKind[]).map((k) => <option key={k} value={k}>{KIND_NAMES[k]}</option>)}
+        </select>
+        {form.kind !== "manual" ? (
+          <input aria-label="几点跑" type="time" className="input w-auto" value={form.time} onChange={(e) => set({ time: e.target.value })} />
+        ) : null}
+        {form.kind === "monthly" ? (
+          <select aria-label="每月几号" className="input w-auto" value={form.day} onChange={(e) => set({ day: Number(e.target.value) })}>
+            {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => <option key={d} value={d}>{d} 号</option>)}
+          </select>
+        ) : null}
+      </div>
+      {form.kind === "weekly" ? (
+        <div className="flex flex-wrap gap-2">
+          {WEEKDAYS.map((name, d) => (
+            <label key={d} className="flex items-center gap-1">
+              <input type="checkbox" aria-label={`周${name}`} checked={form.days.includes(d)}
+                onChange={(e) => set({ days: e.target.checked ? [...form.days, d] : form.days.filter((x) => x !== d) })} />
+              周{name}
+            </label>
+          ))}
+        </div>
+      ) : null}
+      {form.kind === "manual" ? <p className="text-text-muted">手动：不会自己跑，也不花搜索额度，点「运行一次」才跑。</p> : null}
+      {error ? <p role="alert" className="text-danger">{error}</p> : null}
+      {preview ? (
+        <p className="text-text-muted">
+          接下来：{preview.next_runs.map((t) => t.replace("T", " ").slice(5, 16)).join("、")}。{cost}。
+        </p>
+      ) : null}
+      <div className="flex gap-2">
+        <button className="btn btn-primary text-xs" disabled={busy || (form.kind !== "manual" && !preview)} onClick={save}>保存</button>
+        <button className="btn text-xs" onClick={onCancel}>取消</button>
+      </div>
+    </div>
+  );
 }
 
 /** Job 自己的关键词：有的 Job 有两百多个，只列前几个，其余点开看 */
@@ -144,8 +241,31 @@ function MemberKeywords({ words }: { words: string[] }) {
   );
 }
 
-function MemberRow({ member, matrixKey, configs, canEdit, onRemove }: { member: MatrixMember; matrixKey: string; configs: number | null; canEdit: boolean; onRemove: () => void }) {
+type RowConfigs = { count: number; auto: number } | null;
+
+function MemberRow({ member, matrixKey, configs, canEdit, isAdmin, onRemove, onChanged }: {
+  member: MatrixMember; matrixKey: string; configs: RowConfigs; canEdit: boolean; isAdmin: boolean; onRemove: () => void; onChanged: (m?: Matrix) => void;
+}) {
   const state = member.state;
+  const toast = useToast();
+  const [editingPeriod, setEditingPeriod] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const runnable = canEdit && member.exists && member.enabled !== false && !member.is_running;
+  const run = async () => {
+    const spend = member.searches_per_run ? `上次用了 ${member.searches_per_run} 次搜索。` : "";
+    if (!window.confirm(`运行「${member.name}」一次？会花搜索额度，${spend}跑完后到视频配置里写成视频。`)) return;
+    setStarting(true);
+    try {
+      await runJob(member.job);
+      toast.success("开始运行了");
+      onChanged();
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setStarting(false);
+    }
+  };
+  const fresh = !member.is_running && state?.last_status === "success" && !!configs?.count;
   return (
     <tr className="border-t border-border align-top">
       <td className="py-2 pr-3">
@@ -158,8 +278,15 @@ function MemberRow({ member, matrixKey, configs, canEdit, onRemove }: { member: 
         {member.keywords?.length ? <MemberKeywords words={member.keywords} /> : null}
       </td>
       <td className="py-2 pr-3 text-xs whitespace-nowrap">
-        {member.exists && !member.enabled ? <span className="text-text-muted">已停用</span> : scheduleText(member)}
+        {member.exists && !member.enabled ? <span className="text-text-muted">已停用</span> : periodWords(member)}
         {member.schedule?.next_runs[0] ? <div><TimeStamp value={member.schedule.next_runs[0]} label="下次" /></div> : null}
+        {isAdmin && member.exists && !editingPeriod ? (
+          <div><button className="text-accent hover:underline" aria-label={`改 ${member.name} 的周期`} onClick={() => setEditingPeriod(true)}>改周期</button></div>
+        ) : null}
+        {editingPeriod ? (
+          <PeriodEditor matrixKey={matrixKey} member={member} onCancel={() => setEditingPeriod(false)}
+            onDone={(m) => { setEditingPeriod(false); onChanged(m); }} />
+        ) : null}
       </td>
       <td className="py-2 pr-3 text-xs">
         {member.is_running ? "运行中" : state?.last_run_at ? (
@@ -170,6 +297,9 @@ function MemberRow({ member, matrixKey, configs, canEdit, onRemove }: { member: 
         ) : (
           <span className="text-text-muted">还没跑过</span>
         )}
+        {runnable ? (
+          <div><button className="btn text-xs mt-1" disabled={starting} aria-label={`运行 ${member.name} 一次`} onClick={run}>运行一次</button></div>
+        ) : null}
       </td>
       <td className="py-2 pr-3 text-xs">{member.topics ? `选题来源 ${member.topics}` : ""}</td>
       <td className="py-2 pr-3 text-xs whitespace-nowrap">
@@ -178,7 +308,12 @@ function MemberRow({ member, matrixKey, configs, canEdit, onRemove }: { member: 
             视频配置
           </Link>
         ) : null}
-        <div className="text-text-muted">{configs === null ? "" : configs ? `${configs} 套` : "还没配"}</div>
+        <div className="text-text-muted">
+          {configs === null ? "" : configs.count ? `${configs.count} 套${configs.auto ? `，${configs.auto} 套自动写` : ""}` : "还没配"}
+        </div>
+        {fresh ? (
+          <div><Link className="text-success hover:underline" to={`/matrices/${encodeURIComponent(matrixKey)}/video/${encodeURIComponent(member.job)}`}>报告已出，去写视频 →</Link></div>
+        ) : null}
       </td>
       <td className="py-2 text-xs text-right">
         {canEdit ? (
@@ -265,6 +400,7 @@ export function MatrixDetailPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const canEdit = useCanEdit();
+  const isAdmin = useIsAdmin();
   const [matrix, setMatrix] = useState<Matrix | null>(null);
   const [ungrouped, setUngrouped] = useState<{ job: string; name: string }[]>([]);
   const [error, setError] = useState("");
@@ -281,6 +417,13 @@ export function MatrixDetailPage() {
     listMatrices().then((body) => setUngrouped(body.ungrouped)).catch(() => setUngrouped([]));
   };
   useEffect(load, [key]);
+  // a Job started from here is watched until it ends, so the row turns into "报告已出" without a refresh
+  const anyRunning = !!matrix?.members.some((m) => m.is_running);
+  useEffect(() => {
+    if (!anyRunning) return;
+    const timer = window.setInterval(() => getMatrix(key).then(setMatrix).catch(() => undefined), 5000);
+    return () => window.clearInterval(timer);
+  }, [anyRunning, key]);
 
   if (error) return <p className="text-sm text-danger">{error}</p>;
   if (!matrix) return <p className="text-sm text-text-muted">读取中…</p>;
@@ -362,7 +505,7 @@ export function MatrixDetailPage() {
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="font-medium text-sm flex-1">Job（{matrix.members.length}）</h2>
           <span className="text-xs text-text-muted">
-            运行、停用、改提示词在各 Job 页；定时在<Link className="text-accent hover:underline" to="/scheduler">周期调度</Link>页。
+            停用、改提示词在各 Job 页；周期更细的设置在<Link className="text-accent hover:underline" to="/scheduler">周期调度</Link>页。
           </span>
         </div>
         <div className="overflow-x-auto">
@@ -379,8 +522,10 @@ export function MatrixDetailPage() {
             </thead>
             <tbody>
               {matrix.members.map((m) => (
-                <MemberRow key={m.job} member={m} matrixKey={matrix.key} configs={configs ? configs.filter((c) => c.job === m.job).length : null}
-                  canEdit={canEdit} onRemove={() => save({ jobs: jobs.filter((j) => j !== m.job) })} />
+                <MemberRow key={m.job} member={m} matrixKey={matrix.key} canEdit={canEdit} isAdmin={isAdmin}
+                  configs={configs ? { count: configs.filter((c) => c.job === m.job).length, auto: configs.filter((c) => c.job === m.job && c.auto > 0).length } : null}
+                  onRemove={() => save({ jobs: jobs.filter((j) => j !== m.job) })}
+                  onChanged={(next) => (next ? setMatrix(next) : load())} />
               ))}
             </tbody>
           </table>
