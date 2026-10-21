@@ -1,0 +1,38 @@
+import { api } from "./client";
+
+// 生产配置：一个配方挂在矩阵的一个 Job 上，从这个 Job 的报告写视频（spec/production.md）
+export interface ProductionConfig {
+  key: string;
+  name: string;
+  job: string;
+  recipe: string;
+  errors: string[];
+  source: string;
+  split: "each" | "some" | "";
+  split_name: string;
+  reverify: boolean;
+  audience: string;
+  target_minutes: number;
+  label: string;
+  scripts: number;
+}
+
+export interface PendingItem {
+  id: string;
+  code: string;
+  title: string;
+  fields: Record<string, string>;
+  written: boolean;
+  dismissed: boolean;
+  scripts: { id: string; status: string }[];
+}
+
+export const listProduction = (job?: string) =>
+  api<ProductionConfig[]>("/api/production", { query: job ? { job } : undefined });
+export const getPending = (key: string) =>
+  api<{ report_date: string | null; report_path: string; items: PendingItem[] }>(`/api/production/${encodeURIComponent(key)}/pending`);
+export const addProduction = (body: { job: string; recipe: string; name?: string }) =>
+  api<ProductionConfig>("/api/production", { method: "POST", body });
+export const removeProduction = (key: string) => api<{ ok: boolean }>(`/api/production/${encodeURIComponent(key)}`, { method: "DELETE" });
+export const writeFromProduction = (key: string, topicIds: string[]) =>
+  api<({ id: string } | { failed: unknown })[]>(`/api/production/${encodeURIComponent(key)}/write`, { method: "POST", body: { topic_ids: topicIds } });

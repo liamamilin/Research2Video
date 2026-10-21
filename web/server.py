@@ -40,6 +40,7 @@ from web.routes.gateway import router as gateway_router
 from web.routes.video import router as video_router
 from web.routes.video_recipes import router as video_recipes_router
 from web.routes.matrices import router as matrices_router
+from web.routes.production import router as production_router
 from web.runner.registry import TaskRegistry
 from web.settings import get_settings
 from web.indexer import db as index_db
@@ -295,6 +296,7 @@ def create_app() -> FastAPI:
     app.include_router(video_recipes_router)
     app.include_router(video_router)
     app.include_router(matrices_router)
+    app.include_router(production_router)
 
     @app.get("/api/health")
     def health():

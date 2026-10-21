@@ -28,7 +28,8 @@ beforeEach(() => {
     const method = init?.method || "GET";
     calls.push({ url: u, method, body: init?.body ? JSON.parse(String(init.body)) : null });
     const body = method === "POST" && u.endsWith("/copy") ? { ...AI, key: "medical", name: "医疗矩阵", members: [] }
-      : method === "PUT" ? AI : u.endsWith("/api/matrices") ? LIST : AI;
+      : method === "PUT" ? AI : u.includes("/api/production") || u.includes("/api/video/cells") ? []
+      : u.endsWith("/api/matrices") ? LIST : AI;
     return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(body) } as Response;
   }));
 });

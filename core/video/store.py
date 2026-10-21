@@ -183,6 +183,8 @@ def init_db() -> None:
             conn.execute("ALTER TABLE scripts ADD COLUMN stage TEXT")
         if "archived" not in columns:
             conn.execute("ALTER TABLE scripts ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
+        if "production" not in columns:  # the production config that made it (spec/production.md); '' before them
+            conn.execute("ALTER TABLE scripts ADD COLUMN production TEXT NOT NULL DEFAULT ''")
         from core.video import autopilot_store, plans, reports, steps, topic_store
         autopilot_store.init(conn)
         plans.init(conn)
@@ -234,6 +236,13 @@ def list_scripts(limit: int = 100, archived: bool = False) -> list[dict]:
             (1 if archived else 0, limit),
         ).fetchall()
     return [_decode(r, _SCRIPT_JSON) for r in rows]
+
+
+def count_scripts_by_production() -> dict[str, int]:
+    """Production config key -> how many scripts it made, archived ones included."""
+    with connect() as conn:
+        return {row[0]: row[1] for row in conn.execute(
+            "SELECT production, COUNT(*) FROM scripts WHERE production != '' GROUP BY production")}
 
 
 def count_scripts_by_column() -> dict[str, int]:

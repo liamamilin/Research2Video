@@ -5,6 +5,7 @@ import {
   copyMatrix, createMatrix, deleteMatrix, getMatrix, listMatrices, splitKeywords, updateMatrix,
   type Matrix, type MatrixMember,
 } from "@/api/matrices";
+import { ProductionConfigs } from "@/components/ProductionConfigs";
 import { TimeStamp } from "@/components/TimeStamp";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
@@ -379,6 +380,8 @@ export function MatrixDetailPage() {
           </div>
         ) : null}
       </section>
+
+      <ProductionConfigs members={matrix.members} canEdit={canEdit} />
 
       {canEdit ? (
         <button
