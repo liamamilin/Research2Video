@@ -238,13 +238,6 @@ def list_scripts(limit: int = 100, archived: bool = False) -> list[dict]:
     return [_decode(r, _SCRIPT_JSON) for r in rows]
 
 
-def count_scripts_by_production() -> dict[str, int]:
-    """Production config key -> how many scripts it made, archived ones included."""
-    with connect() as conn:
-        return {row[0]: row[1] for row in conn.execute(
-            "SELECT production, COUNT(*) FROM scripts WHERE production != '' GROUP BY production")}
-
-
 def count_scripts_by_column() -> dict[str, int]:
     """Column (recipe) key -> how many scripts were made with it, archived ones included."""
     with connect() as conn:
@@ -374,6 +367,13 @@ def list_publications(script_id: str) -> list[dict]:
 def delete_publication(pub_id: str) -> bool:
     with connect(write=True) as conn:
         return conn.execute("DELETE FROM publications WHERE id = ?", (pub_id,)).rowcount > 0
+
+
+def latest_render_by_script() -> dict[str, dict]:
+    """Script id -> its newest render's status and when it was made (what the outputs page shows as 成片)."""
+    with connect() as conn:
+        rows = conn.execute("SELECT script_id, status, created_at FROM renders ORDER BY created_at").fetchall()
+    return {r["script_id"]: {"status": r["status"], "created_at": r["created_at"]} for r in rows}
 
 
 def published_script_ids() -> set[str]:

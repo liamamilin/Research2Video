@@ -9,7 +9,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from core.video import production, store
+from core.video import outputs, production, store
 from web import audit
 from web.deps import require_editor, require_viewer
 from web.models import ApiError
@@ -36,7 +36,8 @@ def _get(key: str) -> production.Config:
 
 @router.get("")
 def list_configs(job: str = "", user=Depends(require_viewer)) -> list[dict]:
-    made = store.count_scripts_by_production()
+    paths = get_settings().paths
+    made = outputs.count_by_config(paths.config_dir, paths.jobs_dir)  # scripts made before configs count too
     return [{**c.as_dict(), "scripts": made.get(c.key, 0)} for c in _all().values() if not job or c.job == job]
 
 

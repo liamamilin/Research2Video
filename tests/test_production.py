@@ -96,8 +96,8 @@ def test_api_writing_from_a_config_is_writing_with_its_recipe_and_records_the_co
     pending = client.get("/api/production/flash/pending").json()
     assert pending["report_date"] == "2026-10-19"
     assert [i["written"] for i in pending["items"]][:2] == [True, False]  # F1 written with this recipe, F2 not yet
-    assert client.get("/api/production").json()[0]["scripts"] >= 0
-    assert {c["key"]: c["scripts"] for c in client.get("/api/production").json()}["flash"] == 1
+    # both count: the direct one is flash on this config's Job, written before it was recorded (spec/outputs.md)
+    assert {c["key"]: c["scripts"] for c in client.get("/api/production").json()}["flash"] == 2
 
 
 def test_api_a_roundup_config_writes_the_picked_items_as_one_script_without_research(client, prod_env, research, llm, autovideo):

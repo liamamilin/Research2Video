@@ -44,7 +44,7 @@ recipe: flash              # 怎么写、怎么出片：config/video_recipes/ �
 | `flash`、`point_short`、`ai-developer-roundup-long`、`ai-non_tech-quick_take-short`、`ai-non_tech-one_point-short` | `monitoring/ai_flash_discovery` |
 | `deep_dive`、`ai-non_tech-deep_dive-long` | `practical_ai_intelligence/07_product_content_opportunities` |
 
-配置和配方一一对应，配置的英文名就是配方名，所以第 5 期给旧文稿补「哪套配置写的」时，看 `column_key` 就行，不用猜。
+配置和配方一一对应，配置的英文名就是配方名，所以旧文稿是哪套配置写的，看配方名和来源 Job 就能认出来（第 5 期，`spec/outputs.md`）。
 
 ## 写稿
 
@@ -58,7 +58,7 @@ recipe: flash              # 怎么写、怎么出片：config/video_recipes/ �
 
 | 方法 | 路径 | 谁能用 | 做什么 |
 |---|---|---|---|
-| GET | `/api/production` | 所有人 | 全部配置，加上每套写了几篇（`scripts`）。`?job=` 只看一个 Job 的 |
+| GET | `/api/production` | 所有人 | 全部配置，加上每套写了几篇（`scripts`，没记配置的旧文稿按 `spec/outputs.md` 认出来的也算）。`?job=` 只看一个 Job 的 |
 | GET | `/api/production/{key}/pending` | 所有人 | 这个 Job 最新一份报告的条目，每条标出这套配置写过没有、有没有标「不写」 |
 | POST | `/api/production` | 编辑 | 加一套（`job`、`recipe`、可选 `name`）。英文名用配方名，重名就加 `-2`、`-3`。建不起来就 422，不留文件 |
 | DELETE | `/api/production/{key}` | 编辑 | 删掉这套。已经写好的文稿和成片都还在 |
@@ -72,7 +72,7 @@ recipe: flash              # 怎么写、怎么出片：config/video_recipes/ �
 - 「挑条目写」：列出最新一期的条目，写过的、标了不写的不能选。写之前会先确认，要调研的会写明每篇约 4–20 次搜索。
 - 还没配视频的 Job 写一句「报告只存着，不会写稿」。可以给 Job 加一套配置，或者删掉一套。
 
-选题页、配方页、自动流水线都没动，照旧能用。
+选题页、配方页、自动流水线都没动，照旧能用（第 5 期起放在侧栏「高级」里）。
 
 ## 还没做
 

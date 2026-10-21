@@ -1,25 +1,31 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes } from "lucide-react";
+import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes, Layers } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import { AccountModal } from "./AccountModal";
 
+// 矩阵是入口：Job 跑出报告，报告按视频配置写成文稿；产出按 矩阵 › Job › 报告 看（spec/product-redesign.md）
 const mainItems = [
+  { to: "/matrices", label: "矩阵", icon: Boxes },
+  { to: "/outputs", label: "产出", icon: Layers },
   { to: "/", label: "视频看板", icon: LayoutDashboard },
-  { to: "/topics", label: "选题", icon: Lightbulb },
   { to: "/video", label: "文稿", icon: Clapperboard },
-  { to: "/video-recipes", label: "文稿配方", icon: BookOpen },
   { to: "/publish", label: "成片与发布", icon: Send },
   { to: "/ask", label: "助手", icon: MessageSquareText },
 ];
 
 const engineItems = [
   { to: "/engine", label: "研究总览", icon: Gauge },
-  { to: "/matrices", label: "矩阵", icon: Boxes },
   { to: "/jobs", label: "Jobs", icon: ListOrdered },
   { to: "/rounds", label: "情报轮次", icon: Radar },
   { to: "/reports", label: "报告", icon: FileText },
+];
+
+// 不经过视频配置、直接挑选题和改配方：仍然能用，只是不再是必经的一步
+const advancedItems = [
+  { to: "/topics", label: "选题", icon: Lightbulb },
+  { to: "/video-recipes", label: "文稿配方", icon: BookOpen },
 ];
 
 const adminEngineItems = [{ to: "/scheduler", label: "周期调度", icon: Clock }];
@@ -34,6 +40,7 @@ export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate?: () =
   const groups = [
     { title: "", items: mainItems },
     { title: "研究引擎", items: admin ? [...engineItems, ...adminEngineItems] : engineItems },
+    { title: "高级", items: advancedItems },
     { title: "", items: admin ? adminItems : [] },
   ].filter((g) => g.items.length);
 
