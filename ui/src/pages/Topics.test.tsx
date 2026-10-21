@@ -17,6 +17,7 @@ const TOPICS = {
 const CELLS = [
   { id: "rnd-cell", key: "rnd", label: "盘点", usable: true, status: "experimental", parts: { type: { key: "roundup", name: "盘点" }, audience: { key: "developer", name: "开发者" } }, column: { topic_kind: "roundup" } },
   { id: "cmp-cell", key: "cmp", label: "对比", usable: true, status: "experimental", parts: { type: { key: "comparison", name: "对比" }, audience: { key: "developer", name: "开发者" } }, column: { topic_kind: "comparison" } },
+  { id: "whole-cell", key: "digest", label: "报告速览", usable: true, status: "experimental", parts: { type: { key: "digest", name: "报告速览" }, audience: { key: "developer", name: "开发者" } }, column: { topic_kind: "single" } },
   { id: "ai-developer-quick-take-long", key: "flash", label: "快讯", usable: true, status: "enabled", parts: { type: { key: "quick_take", name: "快讯" }, audience: { key: "developer", name: "开发者" } }, column: { topic_kind: "single" } },
 ];
 
@@ -69,6 +70,12 @@ describe("Topics page", () => {
     fireEvent.click(await screen.findByRole("button", { name: "对比 开发者" }));
     expect(await screen.findByText(/还没有选题来源/)).toBeTruthy();
     expect(screen.queryByText("GPT-5.5 从 ChatGPT 退役")).toBeNull();
+  });
+
+  it("leaves out a recipe written from a whole report: it has no items to pick here", async () => {
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    await screen.findByRole("button", { name: "快讯 开发者" });
+    expect(screen.queryByRole("button", { name: "报告速览 开发者" })).toBeNull();
   });
 
   it("marks old news, hides what was marked not-writing, and disables discovery while it runs", async () => {

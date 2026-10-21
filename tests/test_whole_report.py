@@ -203,3 +203,10 @@ def test_each_shipped_whole_report_recipe_is_a_usable_config_on_a_job_without_it
     assert made.usable, made.errors
     assert made.split == "whole" and not made.reverify
     assert (made.audience_key or "developer") == (audience or "developer")
+
+
+def test_the_topics_grid_leaves_out_a_recipe_that_only_writes_from_a_whole_report(whole_env):
+    # no items to pick: deep_dive stays (it also reads the opportunities source), the sourceless ones go
+    rows = {r["cell"] for r in pilot.coverage()}
+    assert {"deep_dive", "flash", "point_short"} <= rows
+    assert not rows & {"report_digest", "top_finding", "action_list", "ai-non_tech-digest-long"}

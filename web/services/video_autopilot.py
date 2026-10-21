@@ -93,6 +93,8 @@ def coverage() -> list[dict]:
         sources = cell.get("topic_sources") or []
         if not cell["usable"] or cell["key"] is None:
             continue
+        if cell.get("whole_report") and not sources:  # written from a whole report (Job page), no items to pick here
+            continue
         row = {"cell": cell["key"], "label": cell["label"], "status": cell["status"], "sources": sources,
                "open": 0, "written": 0, "dismissed": 0, "report_date": None,
                "unknown_sources": [s for s in sources if not known_source(s)],

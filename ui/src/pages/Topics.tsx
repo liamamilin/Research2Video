@@ -64,7 +64,8 @@ type GridProps = { cells: VideoCell[]; coverage: CellCoverage[]; current?: strin
 /** The content matrix as a grid: a table per domain (one domain: just the table), a row per type, a column per audience;
  *  a click picks the cell. */
 function MatrixGrid({ cells, ...rest }: GridProps) {
-  const usable = cells.filter((c) => c.usable && c.parts);
+  // a recipe with no coverage row is written from a whole report (the Job's page), not from items picked here
+  const usable = cells.filter((c) => c.usable && c.parts && rest.coverage.some((r) => r.cell === c.key));
   // fixtures and old catalogs may leave out the domain: they all go into one table
   const domains = [...new Map(usable.map((c) => [c.parts!.domain?.key ?? "", c.parts!.domain?.name ?? ""])).entries()];
   if (!usable.length) return null;
