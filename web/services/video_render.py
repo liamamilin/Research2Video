@@ -421,6 +421,28 @@ def _parse(value: Any) -> Optional[datetime]:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
+def reveal(render: dict, name: str = "video.mp4") -> dict:
+    """Show a finished render's file in the host's file manager (Finder on a Mac): ``{path, opened}``.
+
+    The path is built from the render's own folder and a recorded artifact name, never from the request. Only a Mac
+    can be asked to open it; elsewhere (or when ``open`` fails) the path alone comes back, for the page to show.
+    """
+    import subprocess
+    import sys
+
+    path = safe_file(render, name)
+    if path is None:
+        raise FileNotFoundError(name)
+    opened = False
+    if sys.platform == "darwin":
+        try:
+            opened = subprocess.run(["open", "-R", str(path)], timeout=10, check=False,
+                                    capture_output=True).returncode == 0
+        except (OSError, subprocess.SubprocessError):
+            opened = False
+    return {"path": str(path), "folder": str(path.parent), "opened": opened}
+
+
 def safe_file(render: dict, name: str) -> Optional[Path]:
     """Path of a recorded, downloaded artifact, or None."""
     if not ARTIFACT_NAME.match(name):

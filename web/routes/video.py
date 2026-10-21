@@ -868,6 +868,20 @@ def get_render(render_id: str, user=Depends(require_viewer)) -> dict:
     return _render_out(render)
 
 
+@router.post("/renders/{render_id}/reveal")
+def reveal_render_file(render_id: str, name: str = "video.mp4", user=Depends(require_editor)) -> dict:
+    """Open the folder holding a finished video on the machine running this app, so it can be uploaded by hand."""
+    render = store.get_render(render_id)
+    if render is None:
+        raise _not_found("出片记录")
+    try:
+        shown = video_render.reveal(render, name)
+    except FileNotFoundError:
+        raise _not_found("文件") from None
+    audit.log("video_render_reveal", user=user["username"], target=render_id, details={"name": name, "opened": shown["opened"]})
+    return shown
+
+
 @router.get("/renders/{render_id}/files/{name}")
 def get_render_file(render_id: str, name: str, user=Depends(require_viewer)) -> FileResponse:
     render = store.get_render(render_id)

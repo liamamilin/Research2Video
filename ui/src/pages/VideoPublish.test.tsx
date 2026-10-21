@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { PublishPanel } from "./VideoPublish";
+import { PublishPanel, RenderFolder } from "./VideoPublish";
 
 const PACK = {
   title: "Gemini 4 Argon：限时价 12 月翻倍",
@@ -68,5 +68,33 @@ describe("Publish pack", () => {
     fireEvent.change(screen.getByPlaceholderText(/B 站视频链接/), { target: { value: "https://b23.tv/abcdef" } });
     fireEvent.click(screen.getByText("记录发布"));
     await waitFor(() => expect(calls.find((c) => c.method === "POST")?.body).toEqual({ url: "https://b23.tv/abcdef" }));
+  });
+});
+
+describe("Render folder", () => {
+  const RENDER = {
+    id: "r1", script_id: "s1", version: 2, status: "COMPLETED", title: "x", autovideo_job_id: null, autovideo_url: null,
+    active_stage: null, attempt_count: 1, resolved_video_form: null, error_code: null, error_message: null, source_chars: 0,
+    files: [{ name: "video.mp4", content_type: "video/mp4", bytes: 5242880, url: "/api/video/renders/r1/files/video.mp4" }],
+    submitted_at: null, completed_at: null, created_at: "2026-10-20T10:00:00+08:00",
+  } as never;
+
+  it("lists the files and asks the app to show the folder in Finder", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      calls.push({ url: String(url), method: init?.method ?? "GET" });
+      return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify({ path: "/s/r1/video.mp4", folder: "/s/r1", opened: true }) } as Response;
+    }));
+    render(<RenderFolder render={RENDER} canEdit />);
+    expect(screen.getByText("5.0 MB")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "在访达中显示" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "POST" && c.url.includes("/api/video/renders/r1/reveal"))).toBe(true));
+    expect(await screen.findByText("/s/r1/video.mp4")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "复制路径" }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith("/s/r1/video.mp4"));
+  });
+
+  it("has no buttons for a viewer", () => {
+    render(<RenderFolder render={RENDER} />);
+    expect(screen.queryByRole("button", { name: "在访达中显示" })).toBeNull();
   });
 });

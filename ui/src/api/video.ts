@@ -540,6 +540,8 @@ export const renderVideoScript = (id: string, voiceId?: string) =>
     body: voiceId ? { voice_id: voiceId } : {},
   });
 
+export const revealVideoRender = (id: string, name = "video.mp4") =>
+  api<{ path: string; folder: string; opened: boolean }>(`/api/video/renders/${encodeURIComponent(id)}/reveal`, { method: "POST", query: { name } });
 export const getVideoRender = (id: string) => api<VideoRender>(`/api/video/renders/${encodeURIComponent(id)}`);
 
 export const getAutoVideoStatus = () => api<AutoVideoStatus>("/api/video/autovideo");

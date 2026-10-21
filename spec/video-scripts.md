@@ -98,6 +98,7 @@ C4 v10 用 VoxCPM2 出片实际 390.03 秒，估算 391 秒。换声音要同步
 | POST | `/api/video/scripts/{id}/approve` | 定稿 |
 | POST | `/api/video/scripts/{id}/render` | 把定稿交给 AutoVideo（202） |
 | GET | `/api/video/renders/{id}/files/{name}` | 下载成片文件 |
+| POST | `/api/video/renders/{id}/reveal` | 编辑：在运行这个应用的电脑上用访达打开成片所在的文件夹（`open -R`），好直接拖去 B 站上传。只认已记录并已下载的文件（`name` 默认 `video.mp4`）；不是 Mac 或打不开时 `opened: false`，只返回路径给页面显示。文稿页「发布」页签最上面有「成片文件」卡（在访达中显示、复制路径），「成片与发布」列表每个已出片的行也有这个按钮 |
 
 ## 交给 AutoVideo
 

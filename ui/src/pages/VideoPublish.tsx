@@ -7,11 +7,89 @@ import {
   deletePublication,
   getPublishPack,
   recheckVideoScript,
+  revealVideoRender,
   type PublishPack,
   type Publication,
   type Recheck,
+  type VideoRender,
 } from "@/api/video";
 import { errorMessage, useToast } from "@/lib/toast";
+
+const sizeText = (bytes: number | null) => (bytes == null ? "" : bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
+
+/** 在这台电脑的访达里显示成片：发布页的成片文件卡和成片与发布列表每一行都用它 */
+export function RevealButton({ renderId, className = "btn text-xs" }: { renderId: string; className?: string }) {
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  async function open() {
+    setBusy(true);
+    try {
+      const shown = await revealVideoRender(renderId);
+      if (shown.opened) toast.success("已在访达中显示成片");
+      else toast.error("没能在这台电脑上打开文件夹", `成片在 ${shown.path}`);
+    } catch (e) {
+      toast.error("没能打开文件夹", errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return <button className={className} disabled={busy} onClick={open}>在访达中显示</button>;
+}
+
+// 成片文件：在这台电脑的访达里打开存着成片的文件夹，直接拖去 B 站上传；不在这台电脑上看页面时，复制路径
+export function RenderFolder({ render, canEdit = false }: { render: VideoRender; canEdit?: boolean }) {
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  const [path, setPath] = useState("");
+
+  async function open() {
+    setBusy(true);
+    try {
+      const shown = await revealVideoRender(render.id);
+      setPath(shown.path);
+      if (shown.opened) toast.success("已在访达中显示成片");
+      else toast.error("没能在这台电脑上打开文件夹", `成片在 ${shown.path}，可以复制路径自己找`);
+    } catch (e) {
+      toast.error("没能打开文件夹", errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function copyPath() {
+    try {
+      const shown = path ? { path } : await revealVideoRender(render.id).then((r) => ({ path: r.path }));
+      setPath(shown.path);
+      await navigator.clipboard.writeText(shown.path);
+      toast.success("已复制成片路径");
+    } catch (e) {
+      toast.error("没能复制路径", errorMessage(e));
+    }
+  }
+
+  return (
+    <section className="card space-y-2" aria-label="成片文件">
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="font-medium flex-1">成片文件</h2>
+        {canEdit ? (
+          <>
+            <button className="btn btn-primary text-xs" disabled={busy} onClick={open}>在访达中显示</button>
+            <button className="btn text-xs" onClick={copyPath}>复制路径</button>
+          </>
+        ) : null}
+      </div>
+      <ul className="text-xs space-y-1">
+        {render.files.map((f) => (
+          <li key={f.name} className="flex gap-2">
+            <a className="text-accent hover:underline" href={f.url} download={f.name}>{f.name}</a>
+            <span className="text-text-muted">{sizeText(f.bytes)}</span>
+          </li>
+        ))}
+      </ul>
+      {path ? <p className="text-xs text-text-muted break-all">{path}</p> : null}
+    </section>
+  );
+}
 
 // 发布包：标题、简介（含章节和参考来源）、标签、封面文字，每项一个复制按钮。只生成建议，不发布。
 export function PublishPanel({

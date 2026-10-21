@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { useAuthStore } from "@/lib/auth-store";
 import { PublishQueuePage } from "./PublishQueue";
 
 const ROWS = [
@@ -15,6 +16,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  useAuthStore.setState({ user: null });
   vi.unstubAllGlobals();
 });
 
@@ -37,5 +39,15 @@ describe("Publish queue", () => {
     await waitFor(() => expect(screen.queryByText("Gemini 4 Argon 上线")).toBeNull());
     expect(screen.getByText("已发的一期")).toBeTruthy();
     expect(screen.getByText("显示 1 / 2")).toBeTruthy();
+  });
+
+  it("lets an editor open the folder of a finished video, and nobody else", async () => {
+    render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
+    await screen.findByText("Gemini 4 Argon 上线");
+    expect(screen.queryByRole("button", { name: "在访达中显示" })).toBeNull(); // not signed in as an editor
+    cleanup();
+    useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
+    render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
+    expect(await screen.findAllByRole("button", { name: "在访达中显示" })).toHaveLength(1); // only the finished one
   });
 });

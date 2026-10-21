@@ -4,7 +4,9 @@ import { listShipments, listVideoCells, type Shipment, type VideoCell } from "@/
 import { CredibilityBadge, TIER_LABEL } from "@/components/CredibilityBadge";
 import { FilterBar, inRange, matchesText, RANGE_FACET, useFilters, type Facet } from "@/components/FilterBar";
 import { TimeStamp } from "@/components/TimeStamp";
+import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
+import { RevealButton } from "./VideoPublish";
 
 const RENDER_NOTE: Record<string, string> = {
   SUBMITTING: "提交中", QUEUED: "排队中", RUNNING: "生成中", DOWNLOADING: "取回中",
@@ -20,6 +22,8 @@ function state(s: Shipment): { label: string; cls: string } {
 }
 
 export function PublishQueuePage() {
+  const role = useAuthStore((s) => s.user?.role);
+  const canEdit = role === "editor" || role === "admin";
   const filters = useFilters(["stage", "tier", "column", "source", "range"]);
   const [rows, setRows] = useState<Shipment[] | null>(null);
   const [error, setError] = useState("");
@@ -82,6 +86,7 @@ export function PublishQueuePage() {
                 <TimeStamp value={s.created_at} label="创建" />
                 {s.render?.status === "COMPLETED" ? <TimeStamp value={s.render.completed_at} label="成片完成" /> : null}
                 {s.video_url ? <a className="text-xs text-accent hover:underline" href={s.video_url} target="_blank" rel="noreferrer">看成片</a> : null}
+                {s.render?.status === "COMPLETED" && canEdit ? <RevealButton renderId={s.render.id} className="text-xs text-accent hover:underline" /> : null}
                 <Link className="text-xs text-accent hover:underline" to={`/video/${s.script_id}?tab=${s.render?.status === "COMPLETED" ? "publish" : "video"}`}>
                   {s.render?.status === "COMPLETED" ? "发布包与记录 →" : "去出片 →"}
                 </Link>
