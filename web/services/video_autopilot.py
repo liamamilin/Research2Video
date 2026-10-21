@@ -351,13 +351,16 @@ def tick() -> int:
             fire_due_plans()
             fire_auto()
             reopen_approved()
-            runs = ap.list_runs(status="RUNNING")
+            runs = sorted(ap.list_runs(status="RUNNING"), key=lambda r: r["started_at"])  # oldest first: see below
             if runs:  # a batch in flight counts as use of the console: the launcher's idle watchdog must not close it
                 from core import activity
 
                 activity.use_state_dir(get_settings().paths.state_dir)
                 activity.mark_activity()
-            counts = _in_flight(runs)  # the limits hold across batches: each Job's report is a batch of its own
+            # The limits hold across batches (each Job's report is a batch of its own), so who asks first gets the free
+            # slot. Oldest first: a script that failed or waits for its audit is retried before any newer batch starts,
+            # instead of starving behind them for as long as new batches keep coming.
+            counts = _in_flight(runs)
             return sum(_tick_run(run, counts) for run in runs)
     except TimeoutError:
         return 0

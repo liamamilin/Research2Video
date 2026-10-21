@@ -26,6 +26,30 @@ class AdaptError(RuntimeError):
     """A step's model output could not be used."""
 
 
+_AFTER_VALUE = re.compile(r'[\]}"\d]|true|false|null')
+_VALUE_START = re.compile(r'["{\[\d\-tfn]')
+
+
+def _loads(text: str) -> dict | list | str | int | float | bool | None:
+    """``json.loads`` that also fixes the two slips long replies make: a missing comma between two values,
+    and a comma left before a closing bracket. Only a reply that does not parse is touched at all."""
+    try:
+        return json.loads(text, strict=False)
+    except json.JSONDecodeError:
+        pass
+    text = re.sub(r",\s*([}\]])", r"\1", text)
+    for _ in range(40):
+        try:
+            return json.loads(text, strict=False)
+        except json.JSONDecodeError as exc:
+            before, here = text[:exc.pos].rstrip(), text[exc.pos:exc.pos + 1]
+            if "delimiter" in exc.msg and before and _AFTER_VALUE.search(before[-5:]) and _VALUE_START.match(here):
+                text = before + "," + text[len(before):]  # `}` `{` or `"` `"` with nothing between them
+                continue
+            raise
+    return json.loads(text, strict=False)
+
+
 def parse_json(content: str) -> dict:
     """The JSON object in a model reply, fenced or bare."""
     text = (content or "").strip()
@@ -38,7 +62,7 @@ def parse_json(content: str) -> dict:
             raise AdaptError("模型没有返回 JSON")
         text = text[start:end + 1]
     try:
-        data = json.loads(text)
+        data = _loads(text)
     except json.JSONDecodeError as exc:
         raise AdaptError(f"模型返回的 JSON 无法解析：{exc}") from exc
     if not isinstance(data, dict):
@@ -46,21 +70,30 @@ def parse_json(content: str) -> dict:
     return data
 
 
+#: A reply that cannot be read is asked for again this many times; the long ones (a fact sheet, a draft) fail by
+#: one slip in hundreds of lines, so a third try with a calmer temperature usually gets through.
+JSON_TRIES = 3
+
+
 def call_json(client, system: str, user: str, model: type[BaseModel], *, temperature: float) -> BaseModel:
-    """One call whose reply must validate as ``model``; one retry that names the problem."""
+    """One call whose reply must validate as ``model``; retries that name the problem, each a little calmer."""
     messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
     problem = ""
-    for _ in range(2):
-        response = client.chat(messages, temperature=temperature)
+    for attempt in range(JSON_TRIES):
+        response = client.chat(messages, temperature=min(temperature, 0.2) if attempt else temperature)
         try:
             return model.model_validate(parse_json(response.content))
         except (AdaptError, ValidationError) as exc:
             problem = str(exc)[:600]
-            messages = messages + [
-                {"role": "assistant", "content": response.content},
-                {"role": "user", "content": f"上面的回复不符合要求：{problem}\n只输出一个符合格式的 JSON 对象。"},
-            ]
-    raise AdaptError(f"模型两次都没有给出可用的 JSON：{problem}")
+            cut = getattr(response, "finish_reason", "") == "length"
+            ask = ("上面的回复被截断了。请重新输出完整的 JSON，内容更精简一些。" if cut
+                   else f"上面的回复不符合要求：{problem}\n只输出一个符合格式的 JSON 对象，注意每两个元素之间都有逗号。")
+            if not (response.content or "").strip():
+                messages = messages + [{"role": "user", "content": ask}]  # nothing to quote back
+            else:
+                messages = messages + [{"role": "assistant", "content": response.content},
+                                       {"role": "user", "content": ask}]
+    raise AdaptError(f"模型{JSON_TRIES}次都没有给出可用的 JSON：{problem}")
 
 
 # --- Quantities and sentences ------------------------------------------------------

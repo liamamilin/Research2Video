@@ -1025,7 +1025,7 @@ def test_api_a_short_script_gets_a_fact_audit_against_its_report(client, video_e
 def test_api_a_failed_audit_keeps_the_draft_and_says_why(client, video_env, research, llm):
     key = "point_short"
     llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
-    llm.audit_replies = ["不是 JSON", "还是不是 JSON"]
+    llm.audit_replies = ["不是 JSON", "还是不是 JSON", "依然不是 JSON"]  # every try the reader gets
     _login(client)
     made = client.post("/api/video/scripts", headers=_csrf(client), json={
         "column": key, "topic": {"title": "一个审计会失败的选题", "angle": "x"}})
@@ -1094,7 +1094,7 @@ def test_api_a_short_script_is_also_checked_against_its_columns_style(client, vi
 def test_api_a_failed_style_audit_keeps_the_fact_audit(client, video_env, research, llm):
     key = "point_short"
     llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
-    llm.style_replies = ["不是 JSON", "还是不是 JSON"]
+    llm.style_replies = ["不是 JSON", "还是不是 JSON", "依然不是 JSON"]
     _login(client)
     made = client.post("/api/video/scripts", headers=_csrf(client), json={
         "column": key, "topic": {"title": "一个风格审计会失败的选题", "angle": "x"}})

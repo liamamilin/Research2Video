@@ -789,3 +789,35 @@ def test_short_scripts_get_number_and_dash_findings_as_warnings():
     issues = review.rules(sections, column=column(), target_minutes=1)
     assert {"C4", "E1"} <= _rule_ids(issues, review.WARN)
     assert not {"C4", "E1"} & _rule_ids(issues, review.MUST)
+
+
+def test_a_reply_missing_one_comma_or_with_one_extra_is_still_read():
+    from core.video.adapt.common import parse_json
+
+    assert parse_json('{"a": [{"x": 1} {"y": 2}], "b": "q" "c": 3,}') == {"a": [{"x": 1}, {"y": 2}], "b": "q", "c": 3}
+    assert parse_json('```json\n{"n": [1, 2,],}\n```') == {"n": [1, 2]}
+    assert parse_json('{"text": "a, }"}') == {"text": "a, }"}  # a reply that already parses is left alone
+
+
+def test_a_json_reply_gets_three_tries_and_the_later_ones_are_calmer():
+    from pydantic import BaseModel
+
+    from core.llm import ChatResponse
+    from core.video.adapt.common import AdaptError, call_json
+
+    class Out(BaseModel):
+        ok: bool
+
+    class Client:
+        def __init__(self, replies):
+            self.replies, self.temps = list(replies), []
+
+        def chat(self, messages, **kwargs):
+            self.temps.append(kwargs["temperature"])
+            return ChatResponse(content=self.replies.pop(0))
+
+    client = Client(["这不是 JSON", "", '{"ok": true}'])
+    assert call_json(client, "s", "u", Out, temperature=0.6).ok and client.temps == [0.6, 0.2, 0.2]
+    bad = Client(["不是", "不是", "不是"])
+    with pytest.raises(AdaptError, match="3次"):
+        call_json(bad, "s", "u", Out, temperature=0.6)

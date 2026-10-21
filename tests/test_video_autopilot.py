@@ -87,6 +87,20 @@ def test_scripts_start_up_to_the_limit_then_the_rest_wait(pilot_env, monkeypatch
     assert len(spawned) == pilot.MAX_SCRIPTS  # nothing new while both are still researching
 
 
+def test_an_older_batch_gets_the_free_slot_before_a_newer_one(pilot_env, monkeypatch):
+    spawned, _ = pilot_env
+    old = batch(monkeypatch, 1)
+    pilot.tick()
+    stuck = item_of(old["id"], 0)["script_id"]
+    store.update_script(stuck, status="FAILED", error="改编失败")  # its write failed: it needs a slot to be retried
+    time.sleep(0.01)  # runs are ordered by their start time
+    newer = batch(monkeypatch, 3)
+    pilot.tick()
+    assert spawned == [stuck, stuck, spawned[2]]  # the retry came first; the newer batch got the one slot left
+    assert store.get_script(stuck)["status"] == "RESEARCHING"
+    assert [i["state"] for i in ap.get_run(newer["id"])["items"]] == ["WORKING", "PENDING", "PENDING"]
+
+
 def test_a_clean_draft_is_approved_automatically_and_rendered_once(pilot_env, monkeypatch, autovideo):
     spawned, started = pilot_env
     run = batch(monkeypatch, 1)
