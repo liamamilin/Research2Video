@@ -3,33 +3,30 @@
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
 name: 快讯
-description: 一个变化讲清楚：改了什么（旧到新）、对开发者意味着什么、现在该做什么。
+description: 一个变化讲清楚：改了什么（旧到新）、对{{audience}}意味着什么、现在该做什么。
 status: enabled
 tags:
   domain:
     key: ai
     name: AI 与软件
-  audience:
-    key: developer
-    name: 开发者
   type:
     key: quick_take
     name: 快讯
   format:
     key: short
     name: B 站横屏短
-audience: 开发者
+audiences: [developer, non_tech]
 target_minutes: 1.25
 topic:
   kind: single
   sources: [flash]
   fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
 research:
-  template: quick_take_developer
+  template: quick_take
 writing:
   pipeline: single
   default_style:
-    depth: intermediate
+    depth: '{{audience.depth}}'
     tone: news
   allowed_tones: [news, concise]
   sections: [2, 4]
@@ -41,12 +38,13 @@ writing:
     timeout_seconds: 240
   style: |
     栏目「快讯」：60–90 秒讲清一个变化，不铺垫背景，不罗列。
-    - 第一句是钩子：直接说变化和它的数字，或一个让开发者停下来的问题；不说「大家好」，不说「今天」。
+    - 第一句是钩子：直接说变化和它的数字，或一个让{{audience}}停下来的问题；不说「大家好」，不说「今天」。
     - 然后讲变化：旧的是什么、新的是什么；数字、单位、口径照来源原样，价格要说清是输入还是输出、每百万 token 还是每次。
-    - 再讲对开发者意味着什么：谁受影响、多花或少花多少、要改什么。数字只留最关键的 2–3 个；上下文长度、输出上限、各档位价格这类参数，除非它们就是这条快讯的变化，否则不讲。
+    - 再讲对{{audience}}意味着什么：{{audience.impact}}。数字只留最关键的 2–3 个；上下文长度、输出上限、各档位价格这类参数，除非它们就是这条快讯的变化，否则不讲。
     - 最后一句给一个现在就能做的动作。
     - 只有厂商自己的说法时，口播里说「官方说法」，不要说成已经验证的事实。
     - 2–4 个小节，每节 1–2 段，每段 20–90 字，口语化，适合朗读。
+    {{audience.writing_rules}}
 output:
   use: motion
   source_card: true
@@ -62,7 +60,7 @@ output:
     outro:
       template: end_card
       title: 快讯
-      lines: [面向开发者的 AI 快讯]
+      lines: ['面向{{audience}}的 AI 快讯']
       seconds: 3
       sound: synth_sting
   recheck: true

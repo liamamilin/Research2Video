@@ -666,7 +666,9 @@ export interface VideoRecipe {
   target_minutes: number | null;
   topic_kind: string | null;
   topic_sources: string[];
-  // 引用的共用部件：research → 调研模板（jobs/_templates/video_research），output / writing → config/video_parts
+  // 这份文件给哪些受众各做一个栏目（第一个用文件自己的名字，其余按 tags 拼出）；没写 audiences 的配方是空的
+  audiences: { key: string; recipe: string }[];
+  // 引用的共用部件：research → 调研模板（jobs/_templates/video_research），output / writing / audience → config/video_parts
   uses: Partial<Record<VideoPartKind, { kind: VideoPartKind; name: string }>>;
   scripts: number;
   mtime: number | null;
@@ -696,7 +698,7 @@ export const deleteVideoRecipe = (key: string) =>
   api<{ ok: boolean }>(`/api/video/recipes/${encodeURIComponent(key)}`, { method: "DELETE" });
 
 // 共用部件：多个配方引用同一份调研模板或出片设置，改一处、引用它的配方一起变（配方自己写的字段优先）
-export type VideoPartKind = "research" | "output" | "writing";
+export type VideoPartKind = "research" | "output" | "writing" | "audience";
 
 export interface VideoPart {
   kind: VideoPartKind;

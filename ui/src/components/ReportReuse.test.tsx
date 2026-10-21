@@ -6,7 +6,7 @@ import { ReportReuse } from "./ReportReuse";
 
 const REPORT = {
   id: "r1", report_path: "output/video/x.md", kind: "video_research", kind_label: "文稿调研", job: "video/deep_dive_abc",
-  topic_id: "2026-09-29/C2", topic_title: "长上下文计费陷阱", research: "deep_dive_developer", created_by: "admin",
+  topic_id: "2026-09-29/C2", topic_title: "长上下文计费陷阱", research: "deep_dive", created_by: "admin",
   created_at: "2026-10-20T12:25:40+0800", on_disk: true,
   scripts: [
     { id: "s1", column_key: "deep_dive", status: "APPROVED", title: "长上下文计费陷阱", archived: false, created_at: "" },

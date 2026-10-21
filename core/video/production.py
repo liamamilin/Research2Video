@@ -112,7 +112,7 @@ def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
         names = sorted(f for f in os.listdir(folder) if f.endswith(".yaml") and not f.startswith((".", "_")))
     except OSError:
         return {}
-    every_recipe = recipes.load(config_dir)
+    every_recipe = recipes.expanded(config_dir)
     out: dict[str, Config] = {}
     for filename in names:
         key = filename[:-len(".yaml")]

@@ -9,27 +9,24 @@ tags:
   domain:
     key: ai
     name: AI 与软件
-  audience:
-    key: developer
-    name: 开发者
   type:
     key: one_point
     name: 一个知识点
   format:
     key: short
     name: B 站横屏短
-audience: 开发者
+audiences: [developer, non_tech]
 target_minutes: 1.5
 topic:
   kind: single
   sources: [flash]
   fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
 research:
-  template: one_point_developer
+  template: one_point
 writing:
   pipeline: single
   default_style:
-    depth: intermediate
+    depth: '{{audience.depth}}'
     tone: explainer
   allowed_tones: [concise, explainer, playful]
   sections: [2, 4]
@@ -47,6 +44,7 @@ writing:
     - 最后一句给一个本周就能做的动作。
     - 不依赖前文：观众没有看过这个系列的其他视频。
     - 2–4 个小节，每节 1–2 段，每段 30–100 字，口语化，适合朗读。
+    {{audience.writing_rules}}
 output:
   use: motion
   source_card: true
@@ -56,6 +54,6 @@ output:
     outro:
       template: end_card
       title: 一个知识点
-      lines: [面向开发者的 AI 知识点]
+      lines: ['面向{{audience}}的 AI 知识点']
       seconds: 2.5
       sound: synth_sting

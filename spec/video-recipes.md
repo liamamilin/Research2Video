@@ -92,21 +92,48 @@ output:
 | 调研模板 | `research: {template: <名字>}` | `jobs/_templates/video_research/<名字>.yaml` |
 | 出片部件 | `output: {use: <名字>}` | `config/video_parts/output/<名字>.yaml` |
 | 写稿部件 | `writing: {use: <名字>}` | `config/video_parts/writing/<名字>.yaml`（现在还没有） |
+| 给谁看 | `audiences: [developer, non_tech]` | `config/video_parts/audience/<名字>.yaml`，见下面「给谁看」 |
 
 - **调研模板就是 Job 模板的写法**：`name`、`description`、`language`、`runtime.timeout_seconds`、`prompt`。每篇文稿的调研
   Job 由它生成（`mode` 固定为 job）。它放在 `_templates` 的子目录里，不出现在「新建 Job」的模板列表：prompt 里有
   `{topic.…}`、`{topic_title}` 这类只有建文稿时才有的占位符，单独建 Job 填不上。
 - **出片 / 写稿部件**是配方那一段的字段，合并是浅合并：配方里写了的键整个替换部件里的同名键（比如 `package` 整个替换）。
   部件里写了那一段不认识的字段会报错。
-- 现在的部件：7 个调研模板（快讯、单点、深度解读各分开发者 / 非技术，对比只有开发者）；2 个出片部件 `motion`
-  （信息动效）、`auto_form`（自动选形态）。盘点不调研，没有调研模板。
+- 现在的部件：4 个调研模板（快讯 `quick_take`、一个知识点 `one_point`、深度解读 `deep_dive`，都不分受众；对比 `comparison_developer`
+  还只有开发者）；2 个出片部件 `motion`（信息动效）、`auto_form`（自动选形态）；2 份观众档案 `developer`、`non_tech`。
+  盘点不调研，没有调研模板。
 - 文稿版本的 `meta.cell` 除了配方文件的 `sha256`，还记 `resolved_sha256`（拼好部件之后的内容）和 `uses`（引用了哪些部件
   及其哈希）。只改了部件时，从这两项能看出来。
 - 引用的部件不存在或坏了，只有引用它的配方标“有错”，其他配方照常。
 
-**为什么听众不是部件。** 调研提示词和写稿规范里，“给谁看”不是一段能单独拿出来的文字，而是散在每句话里（举例、用词、
-要不要讲代码）。硬拆成部件就得改写这些提示词，拼出来的文字就不再和原来一致。所以现在听众差异体现在调研模板分开发者 /
-非技术两份，写稿规范仍写在各自配方里。以后要加新的听众，复制一份调研模板改写即可。
+### 给谁看
+
+「给谁看」散在每句话里，不能整段拿出来换。所以配方写成不分受众的，受众的话写在一份**观众档案**里，配方在要放的地方写占位符：
+
+```yaml
+# config/video_parts/audience/non_tech.yaml
+name: 普通用户
+status: experimental          # 可选：这个受众还没验证过，用它的栏目也是 experimental
+depth: intro                  # {{audience.depth}}
+creative_intent: {purpose: 知识讲解, audience: …}   # 可选：替换出片部件里的 creative_intent，配方自己写的更优先
+text:                         # 配方按名字插进去的文字，名字用小写字母、数字、下划线
+  impact: 谁受影响、每月多花或少花多少、要不要换工具或改设置
+  writing_rules: |
+    读者会用 ChatGPT、Claude 这类 AI 工具，但不写代码……
+```
+
+配方里写 `audiences: [developer, non_tech]`（第一个是默认），文字里用：
+
+- `{{audience}}`：档案的 `name`。`{{audience.depth}}`、`{{audience.<text 里的名字>}}`：对应的字。
+- 单独占一行的 `{{audience.<名字>}}` 会换成那段文字的各行；这段是空的，就整行去掉，不留空行。开发者档案的 `writing_rules`、`research_rules` 都是空的，所以开发者的提示词和从前逐字一样。
+- 花括号是两层，和 `{topic_title}`、`{date}` 这类运行时才填的占位符分得开。写错名字、写了档案里没有的字，配方建不起来。
+- 写了 `audiences` 就不要再写 `audience`，`tags` 里也不写 `audience`（由档案填），但要写全 `domain`、`type`、`format`。
+
+**每个受众是一个栏目。** 第一个受众用文件自己的名字（`flash`）；其余的用 tags 拼出来的格子名，受众换成它自己（`ai-non_tech-quick_take-short`）。所以凡是按栏目名查栏目的地方（改稿、审计、出片、发布标签、自动流水线、生产配置）都不用改，已有文稿的 `column_key` 也照旧能解析。`recipes.expanded()` 给出全部栏目，`recipes.load()` 仍是一个文件一条。栏目的 status 取配方和档案里更不稳的那个。同名的栏目已经有文件时，文件优先，受众那一版不生成。
+
+保存配方时每个受众那一版都要能建起来；保存档案时，用它的每个配方的每一版都要重建，有一个建不起来就不存。
+
+调研的那一句「读者是不写代码的普通用户，优先官方帮助页……」现在是 `non_tech` 档案的 `research_rules`，为的是让普通用户那 3 个栏目的调研提示词和从前逐字一样。`spec/product-redesign.md` 第 5 条的意思是调研不分受众，这一句留着是过渡，删掉它是下一步单独的一件事。
 
 拆分前后对比：8 个配方解析出的 Column、调研 Job 的提示词、写稿和出片请求逐字一致（同一个脚本拆分前后各导出一次比对）。
 

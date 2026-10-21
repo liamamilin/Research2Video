@@ -22,7 +22,7 @@ import { errorMessage, useToast } from "@/lib/toast";
 
 const STATUS_LABEL: Record<string, string> = { enabled: "已用", experimental: "试验", blocked: "停用" };
 const PIPELINE_LABEL: Record<string, string> = { single: "一次写稿", adapt: "五步改编" };
-const PART_LABEL: Record<string, string> = { research: "调研模板", output: "出片部件", writing: "写稿部件" };
+const PART_LABEL: Record<string, string> = { research: "调研模板", output: "出片部件", writing: "写稿部件", audience: "给谁看" };
 const partLink = (kind: string, name: string) => `/video-recipes/parts/${kind}/${name}`;
 
 // 文稿配方：一份 YAML 就是一种文稿的完整做法（调研 → 写稿 → 出片，外加自动流水线从哪挑题），像 Job 一样直接改、复制复用。
@@ -204,6 +204,21 @@ export function VideoRecipesPage() {
                   </span>
                 ))}
                 。配方里自己写的字段优先于部件。
+              </div>
+            ) : null}
+            {detail.audiences?.length ? (
+              <div className="text-xs text-text-muted">
+                给谁看：
+                {detail.audiences.map((a, i) => (
+                  <span key={a.key}>
+                    {i ? " · " : ""}
+                    <Link className="underline" to={partLink("audience", a.key)}>
+                      {a.key}
+                    </Link>
+                    {i ? `（栏目 ${a.recipe}）` : ""}
+                  </span>
+                ))}
+                。每个受众是一个栏目，文字里的 {"{{audience}}"} 由各自的档案填。
               </div>
             ) : null}
             {detail.error ? <div className="text-sm text-danger">这份配方现在不能用：{detail.error}</div> : null}

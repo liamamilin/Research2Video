@@ -1,0 +1,18 @@
+# 观众档案（给谁看）：配方里的 {{audience}}、{{audience.depth}}、{{audience.<名>}} 由它填，字段说明见 spec/video-recipes.md。
+# text 下每一段都是配方可以按名字插进去的文字；一段没有内容，配方里单独占一行的那个位置就整行去掉。
+
+name: 普通用户
+status: experimental
+depth: intro
+creative_intent:
+  purpose: 知识讲解
+  audience: 会用 ChatGPT、Claude 这类 AI 工具、但不写代码的人；画面少用术语，不出现命令和参数
+text:
+  impact: 谁受影响、每月多花或少花多少、要不要换工具或改设置
+  writing_rules: |
+    读者会用 ChatGPT、Claude 这类 AI 工具，但不写代码，也不看技术文档。
+    - token、API、模型、上下文这类词第一次出现就用一句白话解释，或换成日常说法；不出现命令、参数、代码。
+    - 数字换算成他们能感觉到的量：每月多花多少钱、能多聊多久，不用「每百万 token」这类口径。
+    - 举例用写邮件、做表格、查资料、整理笔记这类日常场景。
+    - 动作只说去哪个设置里点什么、要不要换套餐，不写代码。
+  research_rules: 读者是不写代码的普通用户：优先官方帮助页、套餐和价格页、产品更新说明里用户能直接感受到的变化；少用基准测试、代码仓库和 API 文档作主要证据；技术细节只在影响用户时才写。

@@ -9,27 +9,24 @@ tags:
   domain:
     key: ai
     name: AI 与软件
-  audience:
-    key: developer
-    name: 开发者
   type:
     key: deep_dive
     name: 深度解读
   format:
     key: long
     name: B 站横屏长
-audience: 开发者
+audiences: [developer, non_tech]
 target_minutes: 6
 topic:
   kind: single
   sources: [opportunities]
   fields: [核心角度, 目标受众, 为什么有人在乎]
 research:
-  template: deep_dive_developer
+  template: deep_dive
 writing:
   pipeline: adapt
   default_style:
-    depth: intermediate
+    depth: '{{audience.depth}}'
     tone: explainer
   allowed_tones: [concise, explainer, playful, story]
   sections: [4, 6]
@@ -47,5 +44,6 @@ writing:
     - 必须有一节讲反方、局限或还不确定的地方。
     - 结尾给观众 2–4 个本周就能做的具体动作。
     - 4–6 节，每节 2–5 段，每段 60–140 字，口语化，适合朗读。
+    {{audience.writing_rules}}
 output:
   use: auto_form

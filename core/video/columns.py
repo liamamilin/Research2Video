@@ -335,12 +335,13 @@ def build(key: str, raw: dict) -> Column:
 
 
 def load(config_dir: str) -> dict[str, Column]:
-    """Every column new scripts can be made with, by key: one per recipe file that builds and is not blocked.
+    """Every column new scripts can be made with, by key: one per recipe file and audience that builds and is not
+    blocked.
 
     A recipe that does not build is left out (``recipes.load`` reports it), so one bad file cannot stop the rest."""
     from . import recipes
 
-    return {key: r.column for key, r in recipes.load(config_dir).items() if r.usable}
+    return {key: r.column for key, r in recipes.expanded(config_dir).items() if r.usable}
 
 
 def get(config_dir: str, key: str) -> Column:

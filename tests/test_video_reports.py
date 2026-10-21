@@ -29,7 +29,7 @@ def test_api_one_research_three_scripts_and_the_report_lists_them(client, video_
     assert first["report_id"]
     report = client.get(f"/api/video/reports/{first['report_id']}").json()
     assert report["kind"] == "video_research" and report["job"] == research.jobs[0]
-    assert report["topic_id"] == "2026-10-19/F1" and report["research"] == "quick_take_developer"
+    assert report["topic_id"] == "2026-10-19/F1" and report["research"] == "quick_take"
 
     # another recipe from the same research, the old way (from_script) and the new way (report_id, topic defaulted)
     cut = client.post("/api/video/scripts", headers=_csrf(client), json={

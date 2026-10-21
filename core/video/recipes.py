@@ -19,6 +19,13 @@ A recipe may take two of its sections from shared files instead of writing them 
 
 What the recipe itself writes in that section wins over the shared file (one level deep). A script version records
 which files were used and the hash of the settings they came to (``provenance``).
+
+A recipe may also leave out who it is for and offer several audiences (``audiences: [developer, non_tech]``): each
+is a profile, ``config/video_parts/audience/<key>.yaml``, and the recipe's text says where the profile's words go
+(``{{audience}}`` is the profile's name, ``{{audience.depth}}`` its depth, ``{{audience.<snippet>}}`` a snippet from
+its ``text:``). Every audience is its own column: the first is the recipe's own key, the others are named by the
+cell their tags spell with that audience (``ai-non_tech-quick_take-short``), so everything that looks a column up
+by key keeps working (``expanded``).
 """
 
 from __future__ import annotations
@@ -44,7 +51,7 @@ PIPELINES = {"single": "legacy", "adapt": "adapt"}
 OUTPUT_TARGETS = ("autovideo",)
 KEY = re.compile(r"[a-z0-9][a-z0-9_-]{0,63}")
 
-_TOP = {"name", "description", "status", "reason", "label", "tags", "audience", "target_minutes",
+_TOP = {"name", "description", "status", "reason", "label", "tags", "audience", "audiences", "target_minutes",
         "topic", "research", "writing", "output"}
 _SECTIONS = {
     "topic": {"kind", "sources", "fields"},
@@ -57,6 +64,10 @@ _SECTIONS = {
 #: sections that may name a shared part (``use``), and where research templates live under the jobs folder
 PART_SECTIONS = ("writing", "output")
 PARTS_DIR = "video_parts"
+AUDIENCE_DIR = "audience"
+_AUDIENCE_FIELDS = {"name", "status", "depth", "creative_intent", "text"}
+_STRAY = re.compile(r"\{\{\s*audien")  # anything that looks like a token and was not filled
+_TOKEN = re.compile(r"\{\{\s*audience(?:\.([a-z][a-z0-9_]*))?\s*\}\}")
 RESEARCH_TEMPLATES = os.path.join("_templates", "video_research")
 
 
@@ -76,6 +87,11 @@ class Recipe:
     uses: dict = field(default_factory=dict, compare=False)
     #: hash of the settings after the shared files were put in (what actually runs)
     resolved_sha256: str = ""
+    #: the audience profile it was made for ("" when the recipe names none), every audience its file offers (the
+    #: first is the recipe's own), and the key of the file it comes from
+    audience: str = ""
+    audiences: tuple = ()
+    base: str = ""
 
     @property
     def cell_id(self) -> str:
@@ -140,6 +156,12 @@ def part_path(config_dir: str, section: str, name: str) -> str:
     return os.path.join(config_dir, PARTS_DIR, section, f"{name}.yaml")
 
 
+def audience_path(config_dir: str, name: str) -> str:
+    if not KEY.fullmatch(name or ""):
+        raise columns.ColumnError(f"受众名 {name!r} 只能用小写字母、数字、下划线、连字符")
+    return os.path.join(config_dir, PARTS_DIR, AUDIENCE_DIR, f"{name}.yaml")
+
+
 #: file text to use instead of what is on disk, while checking an edit to a shared part (``trying``)
 _TRYING: contextvars.ContextVar[dict] = contextvars.ContextVar("recipe_parts_trying", default={})
 
@@ -181,12 +203,84 @@ def research_from_template(config_dir: str, name: str) -> tuple[dict, dict]:
             {"kind": "research_template", "name": name, "path": path, "sha256": sha})
 
 
-def resolve(key: str, data: dict, config_dir: Optional[str]) -> tuple[dict, dict]:
-    """The recipe with its shared sections put in: research templates and parts, the recipe's own fields winning."""
+def audience_profile(config_dir: str, name: str) -> tuple[dict, dict]:
+    """An audience profile (``config/video_parts/audience/<name>.yaml``) and where it came from."""
+    path = audience_path(config_dir, name)
+    data, sha = _read_mapping(path, f"受众 {name}")
+    extra = set(data) - _AUDIENCE_FIELDS
+    if extra:
+        raise columns.ColumnError(f"受众 {name} 不认识这些字段：{', '.join(sorted(extra))}")
+    if not str(data.get("name") or "").strip():
+        raise columns.ColumnError(f"受众 {name} 要写 name（显示名）")
+    if data.get("status", "enabled") not in ("enabled", "experimental"):
+        raise columns.ColumnError(f"受众 {name} 的 status 应为 enabled、experimental 之一")
+    if data.get("creative_intent") is not None and not isinstance(data["creative_intent"], dict):
+        raise columns.ColumnError(f"受众 {name} 的 creative_intent 必须是映射")
+    text = data.get("text")
+    if text is not None and (not isinstance(text, dict) or not all(
+            isinstance(k, str) and re.fullmatch(r"[a-z][a-z0-9_]*", k) and isinstance(v, str) for k, v in text.items())):
+        raise columns.ColumnError(f"受众 {name} 的 text 应是 {{小写名: 文字}}")
+    return data, {"kind": "audience", "name": name, "path": path, "sha256": sha}
+
+
+def _fill(text: str, values: dict, where: str) -> str:
+    """Put the audience's words in. A line that holds only a token takes the value's lines, and goes away when the
+    value is empty (an audience with nothing to add leaves no blank line); a token inside a line is replaced."""
+    def word(match) -> str:
+        field = match.group(1)
+        if field is None:
+            return values["name"]
+        if field not in values:
+            raise columns.ColumnError(f"{where} 用了 {{{{audience.{field}}}}}，这个受众没写 {field}")
+        return str(values[field])
+
+    out = []
+    for line in text.splitlines(keepends=True):
+        whole = _TOKEN.fullmatch(line.strip())
+        if whole and whole.group(1) is not None:
+            value = word(whole)
+            if value.strip():
+                out.append(value.rstrip("\n") + ("\n" if line.endswith("\n") else ""))
+            continue
+        out.append(_TOKEN.sub(word, line))
+    return "".join(out)
+
+
+def _fill_tree(node, values: dict, where: str):
+    if isinstance(node, str):
+        return _fill(node, values, where)
+    if isinstance(node, dict):
+        return {k: _fill_tree(v, values, where) for k, v in node.items()}
+    if isinstance(node, list):
+        return [_fill_tree(v, values, where) for v in node]
+    return node
+
+
+def _strings(node):
+    if isinstance(node, str):
+        yield node
+    elif isinstance(node, dict):
+        for v in node.values():
+            yield from _strings(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _strings(v)
+
+
+def resolve(key: str, data: dict, config_dir: Optional[str], audience: Optional[str] = None) -> tuple[dict, dict]:
+    """The recipe with its shared sections put in: research templates and parts, the recipe's own fields winning;
+    with ``audience``, that profile's words put into the text."""
     if not isinstance(data, dict):
         raise columns.ColumnError(f"配方 {key} 的根必须是映射")
     out = dict(data)
     uses: dict = {}
+    profile: dict = {}
+    if audience:
+        if config_dir is None:
+            raise columns.ColumnError(f"配方 {key} 有受众，要知道 config 目录才能读")
+        profile, uses["audience"] = audience_profile(config_dir, audience)
+        if profile.get("creative_intent"):  # the audience's intent stands in for the part's; the recipe's own wins
+            out["output"] = {"creative_intent": profile["creative_intent"], **(out.get("output") or {})}
     research = data.get("research")
     if isinstance(research, dict) and "template" in research:
         if config_dir is None:
@@ -194,7 +288,7 @@ def resolve(key: str, data: dict, config_dir: Optional[str]) -> tuple[dict, dict
         base, uses["research"] = research_from_template(config_dir, str(research["template"]))
         out["research"] = {**base, **{k: v for k, v in research.items() if k != "template"}}
     for section in PART_SECTIONS:
-        own = data.get(section)
+        own = out.get(section)
         if isinstance(own, dict) and "use" in own:
             if config_dir is None:
                 raise columns.ColumnError(f"配方 {key} 引用了部件，要知道 config 目录才能读")
@@ -205,6 +299,18 @@ def resolve(key: str, data: dict, config_dir: Optional[str]) -> tuple[dict, dict
                 raise columns.ColumnError(f"部件 {section}/{own['use']} 不认识这些字段：{', '.join(sorted(extra))}")
             uses[section] = {"kind": "part", "name": str(own["use"]), "path": path, "sha256": sha}
             out[section] = {**base, **{k: v for k, v in own.items() if k != "use"}}
+    if audience:
+        values = {**(profile.get("text") or {}), "name": profile["name"], "key": audience}
+        if profile.get("depth") is not None:
+            values["depth"] = str(profile["depth"])
+        out = _fill_tree(out, values, f"配方 {key}")
+        out["audience"] = profile["name"]
+        out["tags"] = {**(out.get("tags") or {}), "audience": {"key": audience, "name": profile["name"]}}
+        if profile.get("status") == "experimental" and out.get("status", "experimental") == "enabled":
+            out["status"] = "experimental"  # a recipe is no more settled than the audience it is written for
+    if any(_STRAY.search(text) for text in _strings(out)):
+        raise columns.ColumnError(
+            f"配方 {key} 里有没填的 {{{{audience}}}}：" + ("写了 audiences 才会填。" if not audience else "写错了名字？"))
     return out, uses
 
 
@@ -263,18 +369,42 @@ def to_flat(key: str, data: dict) -> dict:
     return flat
 
 
-def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None) -> Recipe:
+def _offered(data) -> tuple[str, ...]:
+    """The audiences a recipe's file offers (the first is the recipe's own); empty when it names none."""
+    raw = data.get("audiences") if isinstance(data, dict) else None
+    if raw is None:
+        return ()
+    if not isinstance(raw, list) or not raw or not all(isinstance(a, str) and KEY.fullmatch(a) for a in raw) \
+            or len(set(raw)) != len(raw):
+        raise columns.ColumnError("audiences 应是受众名的列表，不能重复，例如 [developer, non_tech]")
+    return tuple(raw)
+
+
+def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None, audience: Optional[str] = None,
+          base: str = "") -> Recipe:
     """One recipe from its file's text. Never raises for bad content: the problem goes in ``error``.
 
-    ``config_dir`` is where its shared parts are looked up; without it a recipe that uses one does not build."""
+    ``config_dir`` is where its shared parts are looked up; without it a recipe that uses one does not build.
+    ``audience`` picks which of the audiences the file offers it is built for (the first when left out)."""
     sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
     uses: dict = {}
+    offered: tuple[str, ...] = ()
     try:
         data = yaml.safe_load(text) or {}
         if not isinstance(data, dict):
             raise columns.ColumnError(f"配方 {key} 的根必须是映射")
         written = data
-        data, uses = resolve(key, written, config_dir)
+        offered = _offered(written)
+        if offered and "audience" in written:
+            raise columns.ColumnError(f"配方 {key} 写了 audiences，就不要再写 audience：给谁看由受众定")
+        chosen = ""
+        if offered:
+            chosen = audience or offered[0]
+            if chosen not in offered:
+                raise columns.ColumnError(f"配方 {key} 没有 {chosen} 这个受众")
+        elif audience:
+            raise columns.ColumnError(f"配方 {key} 没有写 audiences")
+        data, uses = resolve(key, written, config_dir, chosen or None)
         status = str(data.get("status") or "experimental")
         if status not in STATUSES:
             raise columns.ColumnError(f"配方 {key} 的 status 应为 {', '.join(STATUSES)} 之一")
@@ -282,19 +412,22 @@ def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None)
         if status == "blocked" and not reason:
             raise columns.ColumnError(f"配方 {key} 是 blocked，要写 reason")
         tags = _tags(key, data.get("tags"))
+        if len(offered) > 1 and not all(dim in tags for dim in DIMENSIONS):
+            raise columns.ColumnError(f"配方 {key} 有多个受众，要写全 tags 的 domain、type、format（栏目名由它们拼出）")
         flat = to_flat(key, data)
         column = columns.build(key, flat)
     except Exception as exc:  # noqa: BLE001 - one hand-edited file must never break loading the others
         if not isinstance(exc, (yaml.YAMLError, columns.ColumnError)):
             exc = columns.ColumnError(f"配方 {key} 有个值的类型不对：{type(exc).__name__}: {exc}")
         return Recipe(key=key, path=path, sha256=sha, status="blocked", reason=str(exc), error=str(exc),
-                      label=key, data={}, uses=uses)
+                      label=key, data={}, uses=uses, audience=audience or "", audiences=offered, base=base or key)
     label = str(data.get("label") or "") or " · ".join(
         tags[dim]["name"] for dim in ("type", "audience", "format") if dim in tags) or column.name
     # a blocked recipe keeps its column: the scripts already made with it stay readable and renderable
     resolved = hashlib.sha256(json.dumps(flat, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
     return Recipe(key=key, path=path, sha256=sha, status=status, reason=reason, label=label, tags=tags,
-                  column=column, data=data, uses=uses, resolved_sha256=resolved)
+                  column=column, data=data, uses=uses, resolved_sha256=resolved, audience=chosen, audiences=offered,
+                  base=base or key)
 
 
 def validate(key: str, text: str, config_dir: Optional[str] = None) -> Recipe:
@@ -302,6 +435,10 @@ def validate(key: str, text: str, config_dir: Optional[str] = None) -> Recipe:
     recipe = parse(key, text, config_dir=config_dir)
     if recipe.error:
         raise columns.ColumnError(recipe.error)
+    for other in recipe.audiences[1:]:  # each audience is a column of its own: all of them must build
+        variant = parse(key, text, config_dir=config_dir, audience=other)
+        if variant.error:
+            raise columns.ColumnError(f"给 {other} 看的这一版有问题：{variant.error}")
     return recipe
 
 
@@ -322,9 +459,32 @@ def load(config_dir: str) -> dict[str, Recipe]:
     return dict(sorted(out.items(), key=lambda kv: order[kv[1].status]))  # enabled first, then by file name
 
 
+def variant_key(base: Recipe, audience: str) -> str:
+    """The column key of a recipe's version for another audience: the cell its tags spell with that audience."""
+    return "-".join(audience if dim == "audience" else base.tags[dim]["key"] for dim in DIMENSIONS)
+
+
+def expanded(config_dir: str) -> dict[str, Recipe]:
+    """Every column there is: each recipe file's own (its first audience) and one more for each other audience it
+    offers. A key a file already has is not taken by an audience's version."""
+    every = load(config_dir)
+    out = dict(every)
+    for key, base in every.items():
+        if len(base.audiences) < 2 or base.error:
+            continue
+        with open(base.path, encoding="utf-8") as fh:
+            text = fh.read()
+        for audience in base.audiences[1:]:
+            name = variant_key(base, audience)
+            if name not in out:
+                out[name] = parse(name, text, base.path, config_dir, audience=audience, base=key)
+    order = {status: i for i, status in enumerate(STATUSES)}
+    return dict(sorted(out.items(), key=lambda kv: order[kv[1].status]))
+
+
 def find(config_dir: str, key: str) -> Optional[Recipe]:
     """A recipe by its key, or by the cell id its tags spell."""
-    every = load(config_dir)
+    every = expanded(config_dir)
     if key in every:
         return every[key]
     return next((r for r in every.values() if r.cell_id == key), None)
@@ -342,21 +502,23 @@ def provenance(config_dir: str, key: str) -> Optional[dict]:
                      for section, u in recipe.uses.items()} or None}
 
 
-PART_KINDS = {"research": "调研模板", "output": "出片部件", "writing": "写稿部件"}
+PART_KINDS = {"research": "调研模板", "output": "出片部件", "writing": "写稿部件", "audience": "给谁看"}
 
 
 def part_file(config_dir: str, kind: str, name: str) -> str:
     """Where a shared part lives: ``research`` templates under the jobs folder, the others under config."""
     if kind not in PART_KINDS:
         raise columns.ColumnError(f"部件类型应为 {', '.join(PART_KINDS)} 之一")
+    if kind == "audience":
+        return audience_path(config_dir, name)
     return research_template_path(config_dir, name) if kind == "research" else part_path(config_dir, kind, name)
 
 
 def parts(config_dir: str) -> list[dict]:
-    """Every shared part there is, with the recipes that use it."""
-    every = load(config_dir)
+    """Every shared part there is, with the recipe files that use it."""
+    every = expanded(config_dir)
     folders = {"research": os.path.join(jobs_dir_for(config_dir), RESEARCH_TEMPLATES)}
-    folders.update({kind: os.path.join(config_dir, PARTS_DIR, kind) for kind in PART_SECTIONS})
+    folders.update({kind: os.path.join(config_dir, PARTS_DIR, kind) for kind in (*PART_SECTIONS, AUDIENCE_DIR)})
     out = []
     for kind, folder in folders.items():
         if not os.path.isdir(folder):
@@ -367,7 +529,7 @@ def parts(config_dir: str) -> list[dict]:
                 continue
             path = os.path.join(folder, name)
             section = "research" if kind == "research" else kind
-            used_by = [r.key for r in every.values() if (r.uses.get(section) or {}).get("path") == path]
+            used_by = sorted({r.base or r.key for r in every.values() if (r.uses.get(section) or {}).get("path") == path})
             try:
                 data = yaml.safe_load(open(path, encoding="utf-8").read()) or {}
             except (OSError, yaml.YAMLError):
@@ -389,7 +551,7 @@ def catalog(config_dir: str) -> list[dict]:
 
     Enabled first, then experimental, then blocked or broken ones."""
     rows = []
-    for recipe in load(config_dir).values():
+    for recipe in expanded(config_dir).values():
         rows.append({
             "id": recipe.cell_id,
             "key": recipe.key if recipe.usable else None,

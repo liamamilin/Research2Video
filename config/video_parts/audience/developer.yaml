@@ -1,0 +1,9 @@
+# 观众档案（给谁看）：配方里的 {{audience}}、{{audience.depth}}、{{audience.<名>}} 由它填，字段说明见 spec/video-recipes.md。
+# text 下每一段都是配方可以按名字插进去的文字；一段没有内容，配方里单独占一行的那个位置就整行去掉。
+
+name: 开发者
+depth: intermediate
+text:
+  impact: 谁受影响、多花或少花多少、要改什么
+  writing_rules: ''
+  research_rules: ''

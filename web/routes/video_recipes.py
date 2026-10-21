@@ -52,6 +52,13 @@ def _warnings(recipe: recipes.Recipe) -> list[str]:
             for name in recipe.column.topic_sources if not video_autopilot.known_source(name)]
 
 
+def _audiences(recipe: recipes.Recipe) -> list[dict]:
+    if not recipe.audiences or recipe.error or not all(d in recipe.tags for d in recipes.DIMENSIONS):
+        return []
+    return [{"key": a, "recipe": recipe.key if i == 0 else recipes.variant_key(recipe, a)}
+            for i, a in enumerate(recipe.audiences)]
+
+
 def _summary(recipe: recipes.Recipe, used: dict[str, int]) -> dict:
     column = recipe.column
     return {
@@ -63,6 +70,7 @@ def _summary(recipe: recipes.Recipe, used: dict[str, int]) -> dict:
         "usable": recipe.usable,
         "cell": recipe.cell_id,
         "tags": recipe.tags,
+        "audiences": _audiences(recipe),
         "name": column.name if column else recipe.key,
         "pipeline": ("adapt" if column.writer == "adapt" else "single") if column else None,
         "research_mode": column.research_mode if column else None,
@@ -72,7 +80,7 @@ def _summary(recipe: recipes.Recipe, used: dict[str, int]) -> dict:
         "warnings": _warnings(recipe),
         "uses": {section: {"kind": "research" if section == "research" else section, "name": u["name"]}
                  for section, u in recipe.uses.items()},
-        "scripts": used.get(recipe.key, 0),
+        "scripts": sum(used.get(k, 0) for k in {recipe.key, *(a["recipe"] for a in _audiences(recipe))}),
         "mtime": os.path.getmtime(recipe.path) if recipe.path and os.path.isfile(recipe.path) else None,
         "sha256": recipe.sha256,
     }
@@ -121,8 +129,8 @@ def _check_part(kind: str, name: str, content: str, used_by: list[str]) -> None:
         raise HTTPException(422, detail=ApiError.make("part_invalid", "部件应是非空的 YAML 映射"))
     path = _part_path(kind, name)
     with recipes.trying(path, content):
-        every = recipes.load(_config_dir())
-    broken = [f"{key}：{every[key].error}" for key in used_by if key in every and every[key].error]
+        every = recipes.expanded(_config_dir())
+    broken = [f"{key}：{r.error}" for key, r in every.items() if r.base in used_by and r.error]
     if broken:
         raise HTTPException(422, detail=ApiError.make("part_breaks_recipes", "改了以后这些配方就用不了：" + "；".join(broken)))
 
@@ -254,7 +262,9 @@ def create_recipe(body: RecipeCreateIn, user=Depends(require_editor)) -> dict:
 @router.delete("/{key}")
 def delete_recipe(key: str, user=Depends(require_editor)) -> dict:
     path = _existing(key)
-    used = store.count_scripts_by_column().get(key, 0)
+    counts = store.count_scripts_by_column()
+    recipe = recipes.load(_config_dir()).get(key)
+    used = sum(counts.get(k, 0) for k in {key, *(a["recipe"] for a in (_audiences(recipe) if recipe else []))})
     if used:
         raise HTTPException(409, detail=ApiError.make(
             "recipe_in_use", f"有 {used} 篇文稿用这个配方，删掉后它们打不开；不想再用就把 status 改成 blocked"))

@@ -44,7 +44,7 @@ def _known_columns() -> dict:
     """Every column that builds, blocked ones included: existing scripts stay readable, approvable and renderable."""
     from core.video import recipes
 
-    return {key: r.column for key, r in recipes.load(get_settings().paths.config_dir).items() if r.column is not None}
+    return {key: r.column for key, r in recipes.expanded(get_settings().paths.config_dir).items() if r.column is not None}
 
 
 def _script_or_404(script_id: str) -> dict:
