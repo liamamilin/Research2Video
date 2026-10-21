@@ -69,12 +69,13 @@ def _attribute(config_dir: str, jobs_dir: str, configs: dict, sources: dict, own
 
 
 def count_by_config(config_dir: str, jobs_dir: str) -> dict[str, int]:
-    """Production config key -> how many scripts it made, archived ones and those made before configs included."""
+    """Production config key -> how many scripts it made, archived ones and those made before configs included.
+    Failed ones are left out, as 写过了 leaves them out."""
     configs = production.load_all(config_dir, jobs_dir)
     owner = {j: m for m in matrices.load_all(config_dir).values() for j in m.jobs}
     counts: dict[str, int] = {}
     for a in _attribute(config_dir, jobs_dir, configs, topic_store.sources(jobs_dir), owner):
-        if a["production"]:
+        if a["production"] and a["script"]["status"] != "FAILED":
             counts[a["production"]] = counts.get(a["production"], 0) + 1
     return counts
 

@@ -50,10 +50,11 @@ describe("ProductionConfigs", () => {
   it("lists each source Job's configs, says which Job has none, and leaves out other matrices'", async () => {
     show();
     expect(await screen.findByLabelText("配置 快讯 · 开发者")).toBeTruthy();
-    expect(screen.getByText(/每条一期 · 挑中的条目先再调研一遍/)).toBeTruthy();
+    expect(screen.getByText(/每条一期 · 挑中的条目会重新调研一遍/)).toBeTruthy();
     expect(screen.getByText(/挑几条合一期 · 用报告里的条目，不调研/)).toBeTruthy();
     expect(screen.getByText("这个 Job 还没配视频，报告只存着，不会写稿。")).toBeTruthy();  // the opportunities Job
     expect(screen.queryByText("AI 深度")).toBeNull();  // its reports are not item lists
+    expect(screen.getByText(/另外 1 个 Job 的报告是整份的/)).toBeTruthy();
     expect(screen.queryByText("别的矩阵的")).toBeNull();
   });
 

@@ -103,7 +103,7 @@ function ConfigCard({ config, canEdit, onChange }: { config: ProductionConfig; c
       ) : (
         <p className="text-xs text-text-muted">
           给{config.audience || "—"}看 · 约 {config.target_minutes} 分钟 · {config.split_name}
-          {config.split === "each" ? (config.reverify ? " · 挑中的条目先再调研一遍" : " · 不再调研") : " · 用报告里的条目，不调研"}
+          {config.split === "each" ? (config.reverify ? " · 挑中的条目会重新调研一遍" : " · 不再调研") : " · 用报告里的条目，不调研"}
         </p>
       )}
       <div className="flex gap-2">
@@ -114,7 +114,7 @@ function ConfigCard({ config, canEdit, onChange }: { config: ProductionConfig; c
         ) : null}
         {canEdit ? (
           <button
-            className="btn text-xs"
+            className="btn text-xs text-danger ml-auto"
             onClick={async () => {
               if (!window.confirm(`删掉「${config.name}」这套配置？已经写好的文稿和成片都还在。`)) return;
               try {
@@ -150,7 +150,9 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
 
   if (!configs) return null;
   const jobs = new Set(members.map((m) => m.job));
-  const mine = configs.filter((c) => jobs.has(c.job));
+  // 同一个 Job 下按名字排，快讯、盘点、一个知识点各自挨在一起
+  const mine = configs.filter((c) => jobs.has(c.job)).sort((a, b) => a.name.localeCompare(b.name, "zh"));
+  const whole = members.length - members.filter((m) => m.topics).length;
   const sources = members.filter((m) => m.topics);
   // 能挂在这个 Job 上的配方：一条一期的、挑几条合一期的，而且是给这个 Job 的条目写的（topic.sources 里有它）
   const source = sources.find((m) => m.job === job)?.topics ?? "";
@@ -161,7 +163,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
     <section className="card p-3 space-y-3" aria-label="视频配置">
       <div>
         <h2 className="font-medium text-sm">视频配置</h2>
-        <p className="text-xs text-text-muted">每个 Job 的报告写成哪几种视频。给谁看、多长、拆不拆，现在都由配置用的配方定。</p>
+        <p className="text-xs text-text-muted">每个 Job 的报告写成哪几种视频。给谁看、多长、拆不拆，由每套配置用的配方决定。</p>
       </div>
       {sources.map((m) => {
         const own = mine.filter((c) => c.job === m.job);
@@ -177,21 +179,28 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
         );
       })}
       {!sources.length ? <p className="text-xs text-text-muted">这个矩阵里还没有出条目列表的 Job（Job 要声明 topics:）。</p> : null}
+      {whole && sources.length ? (
+        <p className="text-xs text-text-muted">
+          另外 {whole} 个 Job 的报告是整份的，不拆成条目，所以不在这里挂配置。要写成视频，打开那份报告点「写成视频」。
+        </p>
+      ) : null}
       {mine.filter((c) => !sources.some((m) => m.job === c.job)).map((c) => (
         <ConfigCard key={c.key} config={c} canEdit={canEdit} onChange={load} />
       ))}
       {canEdit && sources.length ? (
         <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border pt-2">
-          <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => setJob(e.target.value)}>
+          <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); }}>
             <option value="">给哪个 Job…</option>
             {sources.map((m) => (
               <option key={m.job} value={m.job}>{m.name}</option>
             ))}
           </select>
-          <select aria-label="加配置用的配方" className="input w-auto" value={recipe} onChange={(e) => setRecipe(e.target.value)}>
-            <option value="">用哪个配方…</option>
+          <select aria-label="加配置用的配方" className="input w-auto" disabled={!job} value={recipe} onChange={(e) => setRecipe(e.target.value)}>
+            <option value="">{job ? "用哪个配方…" : "先选 Job"}</option>
             {recipes.map((c) => (
-              <option key={c.id} value={c.key!}>{c.label}</option>
+              <option key={c.id} value={c.key!}>
+                {c.label}{mine.some((m) => m.job === job && m.recipe === c.key) ? "（已挂了一套）" : ""}
+              </option>
             ))}
           </select>
           <button

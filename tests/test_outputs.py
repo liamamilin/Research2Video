@@ -61,3 +61,11 @@ def test_api_lists_outputs_for_viewers(client, prod_env):
     _login(client, "viewer", "viewer-pass-123")
     body = client.get("/api/outputs").json()
     assert body["scripts"] == [] and {"key": "ai", "name": "AI 矩阵"} in body["matrices"]
+
+
+def test_config_counts_leave_out_failed_scripts_and_count_older_ones(prod_env):
+    topic_store.sync(str(prod_env / "jobs"), str(prod_env / "output"))
+    for status in ("DRAFT", "FAILED"):
+        script = store.create_script("flash", {"id": "2026-10-19/F1", "title": "x"})
+        store.update_script(script["id"], status=status)
+    assert outputs.count_by_config(str(prod_env / "config"), str(prod_env / "jobs")) == {"flash": 1}
