@@ -95,10 +95,21 @@ def run_job_in_thread(task: RunningTask, config_dir: str, jobs_dir: str,
             pass
 
 
+class MatrixLimitReached(RuntimeError):
+    """The Job's matrix has no searches left this month."""
+
+
 def start_job(job_name: str, started_by: str,
               config_dir: str = "config", jobs_dir: str = "jobs",
               verbose: bool = False) -> RunningTask:
-    """Start a job asynchronously. Returns the RunningTask immediately."""
+    """Start a job asynchronously. Returns the RunningTask immediately.
+
+    Raises ``MatrixLimitReached`` when the Job's matrix has used up the month's searches (spec/matrices.md)."""
+    from core import matrices
+
+    reason = matrices.cap_block(job_name, config_dir)
+    if reason:
+        raise MatrixLimitReached(reason)
     registry = TaskRegistry()
 
     engine_stub = ResearchEngine(config_dir=config_dir, jobs_dir=jobs_dir)

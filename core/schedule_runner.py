@@ -210,6 +210,10 @@ def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event) -> tup
     allowed, reason = pipeline_allowed(load_system_config(runtime.config_dir))
     if not allowed:
         return 'blocked', reason, None
+    from core.matrices import cap_block
+    reason = cap_block(canonical, runtime.config_dir)
+    if reason:
+        return 'blocked', reason, None
     # The engine shares its own per-job lock with CLI/Web manual runs.
     engine = ResearchEngine(config_dir=runtime.config_dir, jobs_dir=runtime.jobs_dir,
                             workspace_dir=runtime.workspace, cancel_token=cancel, user='scheduler')

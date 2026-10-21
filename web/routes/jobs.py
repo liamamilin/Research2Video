@@ -599,6 +599,12 @@ def run_job(name: str, request: Request, user=Depends(require_editor)):
             detail=ApiError.make("already_running", f"Job '{name}' 正在运行中"),
         )
 
+    from core import matrices as _matrices
+
+    blocked = _matrices.cap_block(name, settings.paths.config_dir)
+    if blocked:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail=ApiError.make("matrix_limit", blocked))
+
     # Budget guard applies to ad-hoc runs too, not just matrix rounds
     try:
         from core.budget import month_spend, run_allowed

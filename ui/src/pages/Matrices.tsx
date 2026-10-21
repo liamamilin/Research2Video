@@ -170,7 +170,13 @@ function MemberRow({ member, matrixKey, configs, canEdit, isAdmin, onRemove, onC
       setStarting(false);
     }
   };
-  const fresh = !member.is_running && state?.last_status === "success" && !!configs?.count;
+  const latest = member.latest_report;
+  const hasConfig = !!configs?.count;
+  // the newest report: still to write, written by an auto config, or already written
+  const reportNote = member.is_running || !latest || !hasConfig ? null
+    : latest.scripts ? `最新报告已写 ${latest.scripts} 篇`
+    : configs!.auto ? "最新报告还没写，会自动写"
+    : "最新报告还没写视频 →";
   return (
     <tr className="border-t border-border align-top">
       <td className="py-2 pr-3">
@@ -216,8 +222,14 @@ function MemberRow({ member, matrixKey, configs, canEdit, isAdmin, onRemove, onC
         <div className="text-text-muted">
           {configs === null ? "" : configs.count ? `${configs.count} 套${configs.auto ? `，${configs.auto} 套自动写` : ""}` : "还没配"}
         </div>
-        {fresh ? (
-          <div><Link className="text-success hover:underline" to={`/matrices/${encodeURIComponent(matrixKey)}/video/${encodeURIComponent(member.job)}`}>报告已出，去写视频 →</Link></div>
+        {reportNote ? (
+          <div>
+            {!latest!.scripts && !configs!.auto ? (
+              <Link className="text-success hover:underline" to={`/matrices/${encodeURIComponent(matrixKey)}/video/${encodeURIComponent(member.job)}`}>{reportNote}</Link>
+            ) : (
+              <span className="text-text-muted">{reportNote}</span>
+            )}
+          </div>
         ) : null}
       </td>
       <td className="py-2 text-xs text-right">
@@ -228,6 +240,50 @@ function MemberRow({ member, matrixKey, configs, canEdit, isAdmin, onRemove, onC
         ) : null}
       </td>
     </tr>
+  );
+}
+
+/** 每月搜索上限：用完这个矩阵的 Job 都不再启动（定时和手动都停），到下个月自动恢复 */
+function MonthlyLimit({ matrix, isAdmin, onSaved }: { matrix: Matrix; isAdmin: boolean; onSaved: (m: Matrix) => void }) {
+  const toast = useToast();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState("");
+  const cap = matrix.monthly_searches ?? 0;
+  const used = matrix.searches_this_month ?? 0;
+  const save = async () => {
+    const n = Number(value);
+    if (!Number.isInteger(n) || n < 0) { toast.error("填每月最多几次搜索，0 是不限"); return; }
+    try {
+      onSaved(await updateMatrix(matrix.key, { name: matrix.name, domain: matrix.domain, keywords: matrix.keywords, monthly_searches: n }));
+      setEditing(false);
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  };
+  return (
+    <div className="text-sm">
+      <span className="text-text-muted text-xs">每月搜索上限：</span>
+      {cap ? (
+        <span className={used >= cap ? "text-danger" : used >= cap * 0.8 ? "text-warning" : ""}>
+          {cap} 次，本月已用 {used} 次{used >= cap ? "，这个矩阵的 Job 本月不会再启动" : ""}
+        </span>
+      ) : (
+        <span className="text-text-muted">没设（Job 想跑多少跑多少）</span>
+      )}
+      {isAdmin && !editing ? (
+        <button className="ml-2 text-xs text-accent hover:underline" onClick={() => { setValue(String(cap || "")); setEditing(true); }}>
+          {cap ? "改上限" : "设上限"}
+        </button>
+      ) : null}
+      {editing ? (
+        <span className="ml-2 inline-flex items-center gap-2">
+          <input aria-label="每月搜索上限" className="input w-28" type="number" min={0} value={value} onChange={(e) => setValue(e.target.value)} />
+          <button className="btn btn-primary text-xs" onClick={save}>保存</button>
+          <button className="btn text-xs" onClick={() => setEditing(false)}>取消</button>
+          <span className="text-xs text-text-muted">0 是不限；到了上限定时和手动都不再启动，下个月自动恢复</span>
+        </span>
+      ) : null}
+    </div>
   );
 }
 
@@ -424,6 +480,7 @@ export function MatrixDetailPage() {
               <span className="text-text-muted text-xs">关键词：</span>
               <Keywords words={matrix.keywords} empty="还写在各个 Job 里（AI 矩阵是从现有 Job 归过来的，放到这里会改动它们的提示词）" />
             </div>
+            <MonthlyLimit matrix={matrix} isAdmin={isAdmin} onSaved={setMatrix} />
             {canEdit ? (
               <button
                 className="btn text-xs"

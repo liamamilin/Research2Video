@@ -15,6 +15,7 @@ export interface MatrixMember {
   state?: JobState | null;
   is_running?: boolean;
   searches_per_run?: number; // 上次运行用了几次搜索（0 是不知道）
+  latest_report?: { path: string; ts: string; scripts: number }; // 最近一次成功写出的报告，和从它写出了几篇文稿（只在矩阵详情里有）
   schedule: {
     id?: string; schedule: string; timezone: string; enabled: boolean; next_runs: string[];
     period?: Period; runs_per_month?: number;
@@ -47,6 +48,8 @@ export interface Matrix {
   errors: string[];
   members: MatrixMember[];
   paused?: string[]; // 整个暂停时停掉定时的 Job，恢复时打开的就是它们
+  monthly_searches?: number; // 每月最多几次搜索，0 是不限
+  searches_this_month?: number; // 本月已用（只在设了上限的矩阵详情里有）
 }
 
 export interface MatrixFields {
@@ -54,6 +57,7 @@ export interface MatrixFields {
   domain: string;
   keywords: string[];
   jobs?: string[];
+  monthly_searches?: number; // 不写是不动，0 是不限
 }
 
 export const listMatrices = () => api<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] }>("/api/matrices");
@@ -87,6 +91,7 @@ export interface MatrixRun {
   report_path: string;
   error: string;
   scripts: number; // 从这份报告写出了几篇文稿
+  items: number; // 这份报告有几条（条目列表才有，0 是整份的）
 }
 export interface RunsQuery { job?: string; status?: string; days?: number; order?: "asc" | "desc"; limit?: number; offset?: number }
 export const listMatrixRuns = (key: string, q: RunsQuery = {}) =>

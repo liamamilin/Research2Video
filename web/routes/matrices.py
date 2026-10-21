@@ -34,6 +34,7 @@ class MatrixIn(BaseModel):
     domain: str = ""
     keywords: list[str] = Field(default_factory=list)
     jobs: list[str] | None = None  # editing: the members, in order; creating: none yet
+    monthly_searches: int | None = Field(default=None, ge=0, le=1_000_000)  # editing: none keeps it, 0 lifts it
 
 
 class CopyIn(BaseModel):
@@ -95,8 +96,48 @@ def _member(jobs_dir: str, member: matrices.Member, plans: dict) -> dict:
     }
 
 
-def _shown(matrix: matrices.Matrix, jobs_dir: str, plans: dict) -> dict:
-    return {**matrix.as_dict(), "members": [_member(jobs_dir, m, plans) for m in matrix.members]}
+def _scripts_by_report():
+    """``(job, report path)`` -> how many scripts were written from that report (failed ones left out)."""
+    from collections import Counter
+
+    from core.video import outputs
+
+    config_dir, jobs_dir = _dirs()
+    made = Counter()
+    for s in outputs.collect(config_dir, jobs_dir)["scripts"]:
+        if s["status"] != "FAILED":
+            made[(s["job"], s["report_path"])] += 1
+    return made
+
+
+def _items_by_report() -> dict[str, int]:
+    """Report path -> how many items its Job's topic list took from it."""
+    from core.video import store
+
+    with store.connect() as conn:
+        return {r[0]: r[1] for r in conn.execute("SELECT report_path, COUNT(*) FROM topics WHERE report_path != '' GROUP BY report_path")}
+
+
+def _latest_reports(matrix: matrices.Matrix) -> dict[str, dict]:
+    """Each member's newest finished report and how many videos were written from it (Jobs that never succeeded: none)."""
+    from core.state import StateManager
+
+    latest = {}
+    for job in matrix.jobs:
+        last = next((h for h in StateManager.get_history(job, limit=200) if h.get("status") == "success" and h.get("output_path")), None)
+        if last:
+            latest[job] = {"path": last["output_path"], "ts": last.get("ts", "")}
+    if not latest:
+        return {}
+    made = _scripts_by_report()
+    return {job: {**info, "scripts": made[(job, info["path"])]} for job, info in latest.items()}
+
+
+def _shown(matrix: matrices.Matrix, jobs_dir: str, plans: dict, reports: bool = False) -> dict:
+    latest = _latest_reports(matrix) if reports else {}
+    members = [{**_member(jobs_dir, m, plans), **({"latest_report": latest[m.job]} if m.job in latest else {})} for m in matrix.members]
+    spent = {"searches_this_month": matrices.month_searches(matrix)} if reports and matrix.monthly_searches else {}
+    return {**matrix.as_dict(), "members": members, **spent}
 
 
 @router.get("")
@@ -123,7 +164,7 @@ def _get(key: str) -> matrices.Matrix:
 
 @router.get("/{key}")
 def get_matrix(key: str, user=Depends(require_viewer)):
-    return _shown(_get(key), _dirs()[1], _plans())
+    return _shown(_get(key), _dirs()[1], _plans(), reports=True)
 
 
 def _new_key(key: str) -> str:
@@ -172,8 +213,9 @@ def update_matrix(key: str, payload: MatrixIn, user=Depends(require_editor)):
         raise _error(422, "missing_name", "矩阵要有名字")
     members = _members(payload.jobs, matrix) if payload.jobs is not None else list(matrix.members)
     matrices.save(_dirs()[0], key, name=payload.name.strip(), domain=payload.domain.strip(),
-                  keywords=_keywords(payload.keywords), members=members)
-    audit.log("matrix_update", user=user["username"], target=key)
+                  keywords=_keywords(payload.keywords), members=members, monthly_searches=payload.monthly_searches)
+    audit.log("matrix_update", user=user["username"], target=key,
+              details={"monthly_searches": payload.monthly_searches} if payload.monthly_searches is not None else None)
     return get_matrix(key, user)
 
 
@@ -364,12 +406,10 @@ _STATUSES = ("success", "failed", "cancelled", "skipped")
 def matrix_runs(key: str, job: str = "", status: str = "", days: int = 0, order: str = "desc", limit: int = 30,
                 offset: int = 0, user=Depends(require_viewer)):
     """Every run of every member, newest first (``order=asc`` for oldest first): when, which Job, scheduled or by hand,
-    how it ended, what it cost in searches, the report it wrote and how many videos came from that report."""
-    from collections import Counter
+    how it ended, what it cost in searches, the report it wrote, how many items that report has (when it is an item list) and how many videos came from it."""
     from datetime import timedelta
 
     from core.state import StateManager
-    from core.video import outputs
 
     matrix = _get(key)
     if status and status not in _STATUSES:
@@ -397,13 +437,11 @@ def matrix_runs(key: str, job: str = "", status: str = "", days: int = 0, order:
             })
     rows.sort(key=lambda r: r["ts"], reverse=order == "desc")
     page = rows[offset:offset + limit]
-    made = Counter()
-    if any(r["report_path"] for r in page):
-        for s in outputs.collect(config_dir, jobs_dir)["scripts"]:
-            if s["status"] != "FAILED":
-                made[(s["job"], s["report_path"])] += 1
+    made = _scripts_by_report() if any(r["report_path"] for r in page) else {}
+    items = _items_by_report() if any(r["report_path"] for r in page) else {}
     for r in page:
-        r["scripts"] = made[(r["job"], r["report_path"])] if r["report_path"] else 0
+        r["scripts"] = made.get((r["job"], r["report_path"]), 0) if r["report_path"] else 0
+        r["items"] = items.get(r["report_path"], 0)  # 0: the report is no item list (or was never read into the topic pool)
     return {"runs": page, "total": len(rows), "more": offset + limit < len(rows)}
 
 

@@ -148,11 +148,33 @@ def round_alerts(since: float) -> list[dict]:
     return alerts
 
 
+def cap_alerts(now: float) -> list[dict]:
+    """A matrix that used up its month of searches (its Jobs will not start) or is close to it."""
+    from core import matrices
+
+    settings = get_settings()
+    when = datetime.fromtimestamp(now).astimezone()
+    out = []
+    for matrix in matrices.load_all(settings.paths.config_dir).values():
+        if not matrix.monthly_searches:
+            continue
+        spent = matrices.month_searches(matrix, when)
+        used = f"本月已用 {spent}/{matrix.monthly_searches} 次搜索"
+        link = f"/matrices/{quote(matrix.key)}"
+        if spent >= matrix.monthly_searches:
+            out.append(_alert(f"matrix_cap:{matrix.key}:{when:%Y-%m}", "matrix_cap", now, f"「{matrix.name}」本月搜索额度用完了",
+                              f"{used}，它的 Job 都不会再启动（定时的和手动的）。到矩阵页调高上限，或等下个月", link))
+        elif spent >= matrices.WARN_RATIO * matrix.monthly_searches:
+            out.append(_alert(f"matrix_cap_near:{matrix.key}:{when:%Y-%m}", "matrix_cap", now, f"「{matrix.name}」本月搜索额度快用完了",
+                              f"{used}，到上限它的 Job 会停", link))
+    return out
+
+
 def alerts(now: Optional[float] = None, *, include_acked: bool = False) -> list[dict]:
     """Everything that went wrong on its own in the last week, newest first, minus what the user acknowledged."""
     now = time.time() if now is None else now
     since = now - WINDOW_DAYS * 86400
-    out = job_alerts(since) + batch_alerts(since, now) + plan_alerts(now) + round_alerts(since)
+    out = job_alerts(since) + batch_alerts(since, now) + plan_alerts(now) + round_alerts(since) + cap_alerts(now)
     if not include_acked:
         acked = ap.acked_alerts()
         out = [a for a in out if a["key"] not in acked]

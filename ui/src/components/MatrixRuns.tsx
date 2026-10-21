@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { runJob } from "@/api";
 import { listMatrixRuns, type Matrix, type MatrixRun } from "@/api/matrices";
 import { TimeStamp } from "@/components/TimeStamp";
-import { errorMessage } from "@/lib/toast";
+import { useAuthStore } from "@/lib/auth-store";
+import { errorMessage, useToast } from "@/lib/toast";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   success: { label: "完成", cls: "text-success" },
@@ -27,6 +29,22 @@ export function MatrixRuns({ matrix }: { matrix: Matrix }) {
   const [total, setTotal] = useState(0);
   const [more, setMore] = useState(false);
   const [error, setError] = useState("");
+  const toast = useToast();
+  const role = useAuthStore((s) => s.user?.role);
+  const canEdit = role === "editor" || role === "admin";
+  const member = (j: string) => matrix.members.find((m) => m.job === j);
+
+  // the engine has no resume point: a run that did not finish is started again from the beginning
+  const again = async (r: MatrixRun) => {
+    const spend = member(r.job)?.searches_per_run ? `上次完整跑一次用了 ${member(r.job)!.searches_per_run} 次搜索。` : "";
+    if (!window.confirm(`重新运行「${r.name}」？会从头再跑一遍，花搜索额度，${spend}`)) return;
+    try {
+      await runJob(r.job);
+      toast.success("开始运行了，刷新后能在最上面看到");
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  };
 
   useEffect(() => {
     let live = true;
@@ -83,8 +101,12 @@ export function MatrixRuns({ matrix }: { matrix: Matrix }) {
                 <span className={st.cls}>{st.label}</span>
                 {r.searches ? <span className="text-text-muted">{r.searches} 次搜索</span> : null}
                 {r.duration_seconds ? <span className="text-text-muted">{Math.max(1, Math.round(r.duration_seconds / 60))} 分钟</span> : null}
-                {r.report_path ? (
+                {r.report_path && r.status === "success" ? (
                   <Link className="text-accent hover:underline" to={`/reports/view?path=${encodeURIComponent(r.report_path)}`}>看报告</Link>
+                ) : null}
+                {r.items ? <span className="text-text-muted">{r.items} 条</span> : null}
+                {canEdit && (r.status === "failed" || r.status === "cancelled") && member(r.job)?.enabled !== false && !member(r.job)?.is_running ? (
+                  <button className="text-accent hover:underline" onClick={() => again(r)}>重新运行</button>
                 ) : null}
                 {r.status === "success" && r.report_path ? (
                   r.scripts ? (

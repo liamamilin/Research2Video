@@ -21,9 +21,9 @@ const LIST = { matrices: [AI], ungrouped: [{ job: "research/games", name: "独�
 const RUNS = {
   total: 3, more: true,
   runs: [
-    { ts: "2026-10-20T10:00:00+08:00", job: "monitoring/ai_flash_discovery", name: "AI Flash Discovery", trigger: "manual", user: "admin", status: "success", duration_seconds: 188, searches: 18, report_path: "output/flash/c.md", error: "", scripts: 0 },
-    { ts: "2026-10-19T14:12:00+08:00", job: "monitoring/ai_flash_discovery", name: "AI Flash Discovery", trigger: "", user: "", status: "failed", duration_seconds: null, searches: 0, report_path: "", error: "超时了", scripts: 0 },
-    { ts: "2026-09-29T16:00:00+08:00", job: "research/deep", name: "AI 深度", trigger: "scheduled", user: "scheduler", status: "success", duration_seconds: 600, searches: 30, report_path: "output/d/x.md", error: "", scripts: 2 },
+    { ts: "2026-10-20T10:00:00+08:00", job: "monitoring/ai_flash_discovery", name: "AI Flash Discovery", trigger: "manual", user: "admin", status: "success", duration_seconds: 188, searches: 18, report_path: "output/flash/c.md", error: "", scripts: 0, items: 10 },
+    { ts: "2026-10-19T14:12:00+08:00", job: "monitoring/ai_flash_discovery", name: "AI Flash Discovery", trigger: "", user: "", status: "failed", duration_seconds: null, searches: 0, report_path: "", error: "超时了", scripts: 0, items: 0 },
+    { ts: "2026-09-29T16:00:00+08:00", job: "research/deep", name: "AI 深度", trigger: "scheduled", user: "scheduler", status: "success", duration_seconds: 600, searches: 30, report_path: "output/d/x.md", error: "", scripts: 2, items: 0 },
   ],
 };
 const CALENDAR = {
@@ -160,14 +160,16 @@ describe("Matrices", () => {
 
   it("runs a Job once after asking, and says when its report is ready to be written", async () => {
     PRODUCTION = [{ job: "monitoring/ai_flash_discovery", auto: 3 }, { job: "monitoring/ai_flash_discovery", auto: 0 }];
+    (AI.members[0] as { latest_report?: unknown }).latest_report = { path: "output/flash/c.md", ts: "x", scripts: 0 };
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     at("/matrices/ai");
-    expect(await screen.findByRole("link", { name: "报告已出，去写视频 →" })).toBeTruthy();
+    expect(await screen.findByText("最新报告还没写，会自动写")).toBeTruthy(); // one config writes by itself
     expect(screen.getByText("2 套，1 套自动写")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "运行 AI Flash Discovery 一次" }));
     await waitFor(() => expect(calls.some((c) => c.method === "POST" && c.url.endsWith("/api/jobs/monitoring%2Fai_flash_discovery/run"))).toBe(true));
     expect(confirm.mock.calls[0][0]).toContain("20 次搜索");
     confirm.mockRestore();
+    delete (AI.members[0] as { latest_report?: unknown }).latest_report;
   });
 
   it("does not run when the question is declined", async () => {
@@ -202,6 +204,8 @@ describe("Matrices", () => {
     expect(screen.getByText("18 次搜索")).toBeTruthy();
     expect(screen.getByText("超时了")).toBeTruthy();
     expect(screen.getByText("写了 2 篇文稿")).toBeTruthy();
+    expect(screen.getByText("10 条")).toBeTruthy();
+    expect(screen.getAllByText("看报告")).toHaveLength(2); // the failed run has no report to look at
     expect(screen.getByText("2026 年 10 月")).toBeTruthy();
     expect(screen.getByRole("link", { name: "还没写视频 →" }).getAttribute("href")).toBe("/matrices/ai/video/monitoring%2Fai_flash_discovery");
     fireEvent.change(screen.getByLabelText("按状态筛"), { target: { value: "failed" } });
@@ -259,5 +263,55 @@ describe("Matrices", () => {
     expect(String(confirm.mock.calls.at(-1)?.[0])).toContain("每月约 4 次运行");
     await waitFor(() => expect(screen.queryByText(/矩阵已暂停/)).toBeNull());
     confirm.mockRestore();
+  });
+
+  it("says whether the newest report still needs a video: a link when nothing writes it, a count once written", async () => {
+    const flash = AI.members[0] as { latest_report?: unknown };
+    try {
+      flash.latest_report = { path: "output/flash/c.md", ts: "2026-10-20T10:00:00+08:00", scripts: 0 };
+      PRODUCTION = [{ job: "monitoring/ai_flash_discovery", auto: 0 }];
+      at("/matrices/ai");
+      expect((await screen.findByRole("link", { name: "最新报告还没写视频 →" })).getAttribute("href")).toBe("/matrices/ai/video/monitoring%2Fai_flash_discovery");
+      cleanup();
+      flash.latest_report = { path: "output/flash/c.md", ts: "x", scripts: 3 };
+      at("/matrices/ai");
+      expect(await screen.findByText("最新报告已写 3 篇")).toBeTruthy();
+      expect(screen.queryByRole("link", { name: /还没写视频/ })).toBeNull();
+      cleanup();
+      PRODUCTION = []; // no config on the Job: nothing to say about writing
+      at("/matrices/ai");
+      await screen.findByRole("link", { name: "AI Flash Discovery" });
+      expect(screen.queryByText(/最新报告/)).toBeNull();
+    } finally {
+      delete flash.latest_report;
+    }
+  });
+
+  it("starts a run that did not finish again from the beginning, after asking", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    at("/matrices/ai?tab=runs");
+    fireEvent.click(await screen.findByRole("button", { name: "重新运行" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "POST" && c.url.endsWith("/api/jobs/monitoring%2Fai_flash_discovery/run"))).toBe(true));
+    expect(String(confirm.mock.calls[0][0])).toContain("从头再跑");
+    confirm.mockRestore();
+  });
+
+  it("shows the month's search limit against what is used, and lets an admin set it", async () => {
+    useAuthStore.setState({ user: { username: "a", role: "admin" } as never });
+    at("/matrices/ai");
+    expect(await screen.findByText(/没设（Job 想跑多少跑多少）/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "设上限" }));
+    fireEvent.change(screen.getByLabelText("每月搜索上限"), { target: { value: "500" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    await waitFor(() => expect(calls.some((c) => c.method === "PUT" && (c.body as { monthly_searches?: number })?.monthly_searches === 500)).toBe(true));
+  });
+
+  it("warns when the month's searches are used up, and an editor cannot change the limit", async () => {
+    const limited = { ...AI, monthly_searches: 100, searches_this_month: 100 };
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ ok: true, status: 200, statusText: "ok",
+      text: async () => JSON.stringify(String(url).includes("/api/production") || String(url).includes("/cells") ? [] : String(url).endsWith("/api/matrices") ? LIST : limited) }) as Response));
+    at("/matrices/ai");
+    expect(await screen.findByText(/100 次，本月已用 100 次，这个矩阵的 Job 本月不会再启动/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "改上限" })).toBeNull(); // an editor
   });
 });

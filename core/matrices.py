@@ -46,6 +46,7 @@ class Matrix:
     members: tuple = ()  # Member, in the file's order
     errors: tuple = ()
     paused: tuple = ()   # Jobs whose timed runs were stopped by pausing the whole matrix (resuming turns them back on)
+    monthly_searches: int = 0  # most searches its Jobs may use in a calendar month; 0 is no limit
 
     @property
     def jobs(self) -> list[str]:
@@ -54,7 +55,7 @@ class Matrix:
     def as_dict(self) -> dict:
         return {"key": self.key, "name": self.name, "domain": self.domain, "keywords": list(self.keywords),
                 "jobs": [{"job": m.job, "copy_as": m.copy_as} for m in self.members], "errors": list(self.errors),
-                "paused": list(self.paused)}
+                "paused": list(self.paused), "monthly_searches": self.monthly_searches}
 
 
 def directory(config_dir: str) -> str:
@@ -68,6 +69,15 @@ def _strings(value) -> list[str]:
         if text and text not in out:
             out.append(text)
     return out
+
+
+def _cap(value, errors: list[str]) -> int:
+    if value in (None, ""):
+        return 0
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        errors.append("monthly_searches 应是每月最多几次搜索的整数（0 是不限）")
+        return 0
+    return value
 
 
 def _read(path: str, key: str) -> Matrix:
@@ -92,12 +102,12 @@ def _read(path: str, key: str) -> Matrix:
             continue
         if member.job not in [m.job for m in members]:
             members.append(member)
-    unknown = set(data) - {"name", "domain", "keywords", "jobs", "paused"}
+    unknown = set(data) - {"name", "domain", "keywords", "jobs", "paused", "monthly_searches"}
     if unknown:
         errors.append(f"不认识的字段：{', '.join(sorted(unknown))}")
     return Matrix(key=key, name=str(data.get("name") or key).strip(), domain=str(data.get("domain") or "").strip(),
                   keywords=tuple(_strings(data.get("keywords"))), members=tuple(members), errors=tuple(errors),
-                  paused=tuple(_strings(data.get("paused"))))
+                  paused=tuple(_strings(data.get("paused"))), monthly_searches=_cap(data.get("monthly_searches"), errors))
 
 
 def load_all(config_dir: str = "config") -> dict[str, Matrix]:
@@ -167,16 +177,22 @@ def jobs_of_other_matrices(job_name: str, config_dir: str = "config") -> set[str
     return {j for m in every if job_name not in m.jobs for j in m.jobs}
 
 
-def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members, paused=None) -> None:
-    """Write a matrix file. ``paused`` is kept as the file has it unless given (a rename never un-pauses)."""
+def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members, paused=None,
+         monthly_searches=None) -> None:
+    """Write a matrix file. ``paused`` and ``monthly_searches`` are kept as the file has them unless given (a rename
+    never un-pauses or lifts the limit)."""
+    before = load_all(config_dir).get(key) if paused is None or monthly_searches is None else None
     if paused is None:
-        before = load_all(config_dir).get(key)
         paused = before.paused if before else ()
+    if monthly_searches is None:
+        monthly_searches = before.monthly_searches if before else 0
     data = {"name": name, "domain": domain, "keywords": _strings(keywords),
             "jobs": [m.job if not m.copy_as else {"job": m.job, "copy_as": m.copy_as} for m in members]}
     kept = [j for j in _strings(paused) if j in [m.job for m in members]]
     if kept:
         data["paused"] = kept
+    if monthly_searches:
+        data["monthly_searches"] = int(monthly_searches)
     text = ("# 矩阵：一组 Job，共用一个领域和一套关键词（spec/matrices.md）。成员 Job 运行时，{keywords} 先放这里的关键词，\n"
             "# 再放 Job 自己的；{domain} 是这里的 domain。\n"
             + yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False))
@@ -190,3 +206,43 @@ def remove(config_dir: str, key: str) -> bool:
         return True
     except FileNotFoundError:
         return False
+
+
+# --- The monthly search limit -------------------------------------------------------------------------------------
+
+WARN_RATIO = 0.8
+
+
+def month_searches(matrix: Matrix, now=None) -> int:
+    """Searches the matrix's Jobs have used in the calendar month of ``now`` (what their run history recorded)."""
+    from datetime import datetime
+
+    from .state import StateManager
+
+    month = (now or datetime.now().astimezone()).strftime("%Y-%m")
+    total = 0
+    for job in matrix.jobs:
+        for name in {job, job.rsplit("/", 1)[-1]}:  # a Job's history sits under its path or its file name, by who ran it
+            for entry in StateManager.get_history(name, limit=5000):
+                if str(entry.get("ts", "")).startswith(month):
+                    total += int((entry.get("usage") or {}).get("searches") or 0)
+    return total
+
+
+def cap_status(job_name: str, config_dir: str = "config", now=None) -> Optional[dict]:
+    """The limit of the matrix this Job is in: ``{matrix, name, cap, spent, exceeded}``; none when it has no limit."""
+    matrix = of_job(job_name, config_dir)
+    if matrix is None or not matrix.monthly_searches:
+        return None
+    spent = month_searches(matrix, now)
+    return {"matrix": matrix.key, "name": matrix.name, "cap": matrix.monthly_searches, "spent": spent,
+            "exceeded": spent >= matrix.monthly_searches}
+
+
+def cap_block(job_name: str, config_dir: str = "config") -> str:
+    """Why this Job may not start (its matrix used up the month's searches), or an empty string."""
+    status = cap_status(job_name, config_dir)
+    if status and status["exceeded"]:
+        return (f"「{status['name']}」本月的搜索额度用完了（{status['spent']}/{status['cap']} 次），已阻止运行。"
+                f"到矩阵页调高每月上限，或等下个月")
+    return ""

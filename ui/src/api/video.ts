@@ -579,7 +579,7 @@ export const getVideoBoard = () => api<VideoBoard>("/api/video/board");
 /** 自动化异常：自己跑的东西出了问题（批次空跑、Job 失败或被反复重启、周计划没触发、情报轮次失败）。 */
 export interface AutomationAlert {
   key: string;
-  kind: "job_failed" | "job_restarted" | "batch_empty" | "batch_stuck" | "batch_items" | "plan_late" | "round_failed";
+  kind: "job_failed" | "job_restarted" | "batch_empty" | "batch_stuck" | "batch_items" | "plan_late" | "round_failed" | "matrix_cap";
   at: number;
   title: string;
   detail: string;
