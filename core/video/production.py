@@ -21,6 +21,8 @@ its research is ``optional``.
 this config's recipe from each new report of the Job, up to that many items, and takes each to a finished video. It is
 off unless asked for, only for a recipe that writes one video per item, and only reports that come out after it was
 turned on are written (``core/video/auto.py``).
+A Job whose reports are no item lists (no ``topics:``) takes a config too: its recipe has to say ``topic.whole_report``,
+and each new report is one video written from the report as it is (split ``whole``, never researched again).
 What a config is for: tying a recipe to the Job whose reports it writes from, so a matrix shows what each Job's
 reports turn into, and every script records which config made it.
 """
@@ -43,6 +45,8 @@ DIR = "production"
 KEY = recipes.KEY
 #: how a recipe's topic kind splits a report (the prototype's 拆不拆)
 SPLITS = {"single": ("each", "每条一期"), "roundup": ("some", "挑几条合一期")}
+#: a Job whose reports are no item lists: each new report is one video, written from the report as it is
+WHOLE = ("whole", "整份报告一期")
 #: most items one report is written into without being asked (one batch of the unattended pipeline)
 MAX_AUTO = 10
 
@@ -139,6 +143,7 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
     elif not recipe.usable:
         errors.append(f"配方 {recipe_key} {'已停用' if recipe.column else '有错'}，不能用来写稿")
     source = None
+    whole = None  # the Job's reports as whole files, when they are no item lists
     if not job:
         errors.append("没写 job")
     elif load_job(jobs_dir, job) is None:
@@ -148,10 +153,18 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
             errors.append(f"{job} 不在任何矩阵里：先把它放进一个矩阵")
         source = topic_store.resolve(jobs_dir, job)
         if source is None:
-            errors.append(f"{job} 的报告不是条目列表（没有 topics:），整份写成视频请在报告页点「写成视频」")
+            whole = topic_store.whole_source(jobs_dir, job)
+            if whole is not None and whole.error:
+                errors.append(f"{job}：{whole.error}")
         elif source.error:
             errors.append(f"{job} 的选题来源有错：{source.error}")
     column = recipe.column if recipe is not None and recipe.usable else None
+    if column is not None and whole is not None:
+        if column.topic_kind != "single" or not recipe.whole_report:
+            errors.append(f"{job} 的报告不是条目列表，而是整份的：配方 {recipe_key} 要从条目里挑，不能用；"
+                          f"整份报告要用写了 topic.whole_report 的配方（比如深度解读）")
+        elif reverify is not None:
+            errors.append("整份报告写成视频本来就不再调研，不用写 reverify")
     if column is not None and column.topic_kind not in SPLITS:
         errors.append(f"配方 {recipe_key} 要手填两个对象（对比），不从 Job 的报告里挑条目")
     elif column is not None and source is not None and not source.error and source.name not in column.topic_sources:
@@ -160,12 +173,17 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
         errors.append(f"配方 {recipe_key} 是给 {'、'.join(column.topic_sources) or '手选'} 的条目写的，不读 {source.name}："
                       f"要用它，先在配方的 topic.sources 里加上 {source.name}")
     split, split_name = SPLITS.get(column.topic_kind, ("", "")) if column is not None else ("", "")
+    if whole is not None and column is not None and column.topic_kind == "single" and recipe.whole_report:
+        split, split_name = WHOLE
     auto = data.get("auto")
     if auto is not None and (isinstance(auto, bool) or not isinstance(auto, int) or not 0 <= auto <= MAX_AUTO):
         errors.append(f"auto 应是每次写几条，1 到 {MAX_AUTO} 的整数（0 是不自动写）")
         auto = None
     elif auto is not None and split == "some":
         errors.append("盘点一期要挑几条合成，不能自动写：自动只用于每条一期的配方")
+        auto = None
+    elif auto is not None and split == "whole" and auto > 1:
+        errors.append("整份报告每份写一期，auto 只能是 1（开）或 0（关）")
         auto = None
     label = recipe.label if recipe is not None else ""
     return Config(key=key, name=str(data.get("name") or "").strip() or label or key, job=job, recipe=recipe_key,
@@ -174,7 +192,7 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
                   minutes=recipe.minutes if recipe is not None else 0.0,
                   minutes_range=recipe.minutes_range if recipe is not None else (),
                   source=source.name if source else "", split=split, split_name=split_name,
-                  reverify=bool(column is not None and column.research_mode == "job"), auto=auto or 0,
+                  reverify=bool(column is not None and column.research_mode == "job" and split != "whole"), auto=auto or 0,
                   audience=column.audience if column is not None else "",
                   target_minutes=column.target_minutes if column is not None else 0.0, label=label)
 

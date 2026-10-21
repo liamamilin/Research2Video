@@ -47,8 +47,10 @@ def _kind(conn, report_path: str, job: str) -> str:
 
 def _record(conn, report_path: str, *, job: str = "", topic: Optional[dict] = None, research: str = "",
             created_by: str = "") -> str:
-    row = conn.execute("SELECT id FROM research_reports WHERE report_path = ?", (report_path,)).fetchone()
+    row = conn.execute("SELECT id, job FROM research_reports WHERE report_path = ?", (report_path,)).fetchone()
     if row:
+        if job and not row[1]:  # first recorded without its Job (from the report page): its matrix is found by it
+            conn.execute("UPDATE research_reports SET job = ? WHERE id = ?", (job, row[0]))
         return row[0]
     topic = topic or {}
     kind = _kind(conn, report_path, job)
@@ -101,6 +103,20 @@ def record_file(report_path: str, *, job: str = "", created_by: str = "") -> dic
     return get(report_id)
 
 
+def relative(path: str, workspace: str) -> str:
+    """A report file as scripts and ``research_reports`` store it: relative to the workspace, ``/``-separated."""
+    return os.path.relpath(os.path.realpath(path), os.path.realpath(workspace)).replace(os.sep, "/")
+
+
+def scripts_of(report_path: str, column_key: str) -> list[dict]:
+    """The scripts written from this report file with this column, failed ones left out (the report's 写过了)."""
+    with store.connect() as conn:
+        row = conn.execute("SELECT id FROM research_reports WHERE report_path = ?", (report_path,)).fetchone()
+        if row is None:
+            return []
+        return [s for s in _scripts(conn, row[0], started=True) if s["column_key"] == column_key and s["status"] != "FAILED"]
+
+
 def title_of(full_path: str) -> str:
     """The report's first level-1 heading, else its file name: the title a video written from it starts with."""
     try:
@@ -128,12 +144,17 @@ def topic_for(report: dict, workspace: str, title: str = "", angle: str = "", au
             "fields": fields}
 
 
-def _scripts(conn, report_id: str) -> list[dict]:
+def _scripts(conn, report_id: str, *, started: bool = False) -> list[dict]:
+    """The scripts written from a report. ``started`` also takes one not yet attached (``scripts.report_id`` is set when
+    its writer begins): it carries the report in its topic from the moment it is made."""
     import json
 
     out = []
+    where, args = "report_id = ?", (report_id,)
+    if started:
+        where, args = "(report_id = ? OR topic LIKE ?)", (report_id, f'%"report_id": "{report_id}"%')
     for row in conn.execute("SELECT id, column_key, status, topic, archived, created_at FROM scripts"
-                            " WHERE report_id = ? ORDER BY created_at", (report_id,)):
+                            f" WHERE {where} ORDER BY created_at", args):
         try:
             title = json.loads(row[3] or "{}").get("title", "")
         except ValueError:

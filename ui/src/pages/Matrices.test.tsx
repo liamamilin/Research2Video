@@ -82,18 +82,18 @@ describe("Matrices", () => {
     expect(links.map((a) => a.getAttribute("href"))).toEqual([
       "/matrices/ai/video/monitoring%2Fai_flash_discovery", "/matrices/ai/video/research%2Fdeep",
     ]);  // the Job whose report is not a list of items has one too
-    expect(screen.getByText("整份报告")).toBeTruthy();
+    expect(screen.getAllByText("还没配").length).toBe(2);  // the whole-report Job too: it can take a config now
     expect(screen.queryByLabelText("视频配置")).toBeNull();  // no section at the bottom any more
   });
 
-  it("the Job's own page is that Job's configs: no Job to pick, and a whole-report Job says why it has none yet", async () => {
+  it("the Job's own page is that Job's configs: no Job to pick, and a whole-report Job can be given one", async () => {
     at("/matrices/ai/video/monitoring%2Fai_flash_discovery");
     expect(await screen.findByText("AI Flash Discovery · 视频配置")).toBeTruthy();
     expect(await screen.findByLabelText("视频配置")).toBeTruthy();
     expect(screen.queryByLabelText("加配置的 Job")).toBeNull();
     cleanup();
     at("/matrices/ai/video/research%2Fdeep");
-    expect(await screen.findByText(/这个 Job 的报告是整份的，不拆成条目/)).toBeTruthy();
+    expect(await screen.findByText(/这个 Job 的报告是整份的，还没配视频/)).toBeTruthy();
   });
 
   it("copies with new keywords only the Jobs that have a neutral template", async () => {

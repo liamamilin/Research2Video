@@ -8,11 +8,13 @@ const CELLS = [
   { id: "a", key: "point_short", label: "一个知识点 · 开发者", usable: true, status: "enabled", column: { topic_kind: "single" } },
   { id: "b", key: "ai-developer-roundup-long", label: "盘点", usable: true, status: "experimental", column: { topic_kind: "roundup" } },
 ];
+let PRODUCTION: Record<string, unknown>[] = [];
 let report: Record<string, unknown> = {};
 let posts: { url: string; body: unknown }[] = [];
 
 beforeEach(() => {
   posts = [];
+  PRODUCTION = [];
   report = {
     id: "r9", report_path: "output/monitoring/2026-10-15_人工智能.md", kind: "other", kind_label: "其他报告", job: "人工智能",
     topic_id: "", topic_title: "", research: "", created_by: "admin", created_at: "", on_disk: true, scripts: [],
@@ -21,7 +23,8 @@ beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
     const u = String(url);
     if (init?.method === "POST") posts.push({ url: u, body: JSON.parse(String(init.body)) });
-    const body = u.endsWith("/api/video/reports") ? report : u.includes("/cells") ? CELLS : { id: "s7" };
+    const body = u.endsWith("/api/video/reports") ? report : u.includes("/cells") ? CELLS
+      : u.endsWith("/api/production") ? PRODUCTION : u.includes("/api/production/") ? [{ id: "s7" }] : { id: "s7" };
     return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(body) } as Response;
   }));
 });
@@ -54,6 +57,22 @@ describe("ReportToVideo", () => {
     fireEvent.click(screen.getByRole("button", { name: "写这一篇" }));
     expect(await screen.findByText("new script page")).toBeTruthy();
     expect(posts[1].body).toEqual({ column: "point_short", report_id: "r9" });
+  });
+
+  it("offers the Job's own whole-report configs first and writes through one, so the script records it", async () => {
+    PRODUCTION = [
+      { key: "deep", name: "深度解读 · 开发者", job: "monitoring/人工智能", split: "whole", errors: [] },
+      { key: "flash", name: "快讯", job: "monitoring/人工智能", split: "each", errors: [] },  // items: not for a whole report
+      { key: "other", name: "别的 Job 的", job: "research/x", split: "whole", errors: [] },
+    ];
+    mount();
+    fireEvent.click(screen.getByRole("button", { name: "写成视频" }));
+    await screen.findByLabelText("写成哪种视频");
+    expect(screen.queryByRole("button", { name: "快讯" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "别的 Job 的" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "深度解读 · 开发者" }));
+    expect(await screen.findByText("new script page")).toBeTruthy();
+    expect(posts[1]).toEqual({ url: "/api/production/deep/write", body: { report_path: "output/monitoring/2026-10-15_人工智能.md" } });
   });
 
   it("sends a typed title", async () => {

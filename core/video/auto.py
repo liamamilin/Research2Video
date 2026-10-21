@@ -44,7 +44,8 @@ def _handled(state_dir: str) -> set[tuple[str, str]]:
 
 def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: float) -> list[dict]:
     """One batch per Job whose newest report is new to its auto configs: ``{job, report, picks}`` with a pick per
-    config, in key order (what a batch writes first is the config sorted first)."""
+    config, in key order (what a batch writes first is the config sorted first). A pick of a whole-report config says
+    ``whole`` and has no source: it is the report itself."""
     try:
         handled = _handled(state_dir)
         configs = production.load_all(config_dir, jobs_dir)
@@ -52,11 +53,12 @@ def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: floa
         return []
     by_job: dict[str, list] = {}
     for config in configs.values():
-        if config.auto and config.usable and config.split == "each":
+        if config.auto and config.usable and config.split in ("each", "whole"):
             by_job.setdefault(config.job, []).append(config)
     out = []
     for job, mine in by_job.items():
-        source = topic_store.resolve(jobs_dir, job)
+        # a Job's reports are item lists (its topic source) or whole files; its configs are all of one kind
+        source = topic_store.resolve(jobs_dir, job) or topic_store.whole_source(jobs_dir, job)
         files = topic_store.report_files(source, root) if source is not None else []
         if not files:
             continue
@@ -75,7 +77,10 @@ def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: floa
                 turned_on = os.path.getmtime(os.path.join(production.directory(config_dir), f"{config.key}.yaml"))
             except OSError:
                 continue
-            if reported > turned_on:
+            if reported > turned_on and config.split == "whole":
+                # one video from the report as it is: marked, so the batch never reads a topic source for it
+                picks.append({"column": config.recipe, "count": 1, "whole": True, "production": config.key})
+            elif reported > turned_on:
                 picks.append({"column": config.recipe, "count": config.auto, "source": config.source,
                               "production": config.key})
         if picks:

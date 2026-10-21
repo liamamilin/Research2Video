@@ -64,7 +64,7 @@ KEY = re.compile(r"[a-z0-9][a-z0-9_-]{0,63}")
 _TOP = {"name", "description", "status", "reason", "label", "tags", "audience", "audiences", "target_minutes", "minutes_range",
         "topic", "research", "writing", "output"}
 _SECTIONS = {
-    "topic": {"kind", "sources", "fields"},
+    "topic": {"kind", "sources", "fields", "whole_report"},
     "research": {"mode", "timeout_seconds", "language", "prompt", "optional"},
     "writing": {"pipeline", "style", "sections", "paragraph_units", "required_roles", "default_style",
                 "allowed_tones", "revise_rounds", "pause_after_plan", "audit"},
@@ -109,6 +109,8 @@ class Recipe:
     #: a config may turn the research off (``research.optional``); set on the column made that way: ``no_research``
     research_optional: bool = False
     no_research: bool = False
+    #: ``topic.whole_report``: it may be written from a whole report as it is (a Job whose reports are no item lists)
+    whole_report: bool = False
 
     @property
     def cell_id(self) -> str:
@@ -453,6 +455,9 @@ def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None,
         optional = (data.get("research") or {}).get("optional", False) if isinstance(data.get("research"), dict) else False
         if not isinstance(optional, bool):
             raise columns.ColumnError(f"配方 {key} 的 research.optional 应为 true 或 false")
+        whole = (data.get("topic") or {}).get("whole_report", False) if isinstance(data.get("topic"), dict) else False
+        if not isinstance(whole, bool):
+            raise columns.ColumnError(f"配方 {key} 的 topic.whole_report 应为 true 或 false")
         if no_research:
             if not optional:
                 raise columns.ColumnError(f"配方 {key} 的调研不能关（没写 research.optional: true）：它靠调研才讲得对，或者本来就不调研")
@@ -474,7 +479,7 @@ def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None,
     return Recipe(key=key, path=path, sha256=sha, status=status, reason=reason, label=label, tags=tags,
                   column=column, data=data, uses=uses, resolved_sha256=resolved, audience=chosen, audiences=offered,
                   base=base or key, minutes_range=span, minutes=minutes or 0.0,
-                  research_optional=optional and not no_research, no_research=no_research)
+                  research_optional=optional and not no_research, no_research=no_research, whole_report=whole)
 
 
 def validate(key: str, text: str, config_dir: Optional[str] = None) -> Recipe:
@@ -646,6 +651,7 @@ def catalog(config_dir: str) -> list[dict]:
             "base": recipe.base or recipe.key,  # the recipe file it comes from
             "minutes_range": list(recipe.minutes_range),  # the lengths a config may ask for; empty: none
             "research_optional": recipe.research_optional,  # a config may turn the research off
+            "whole_report": recipe.whole_report,  # a config may write it from a whole report (no items to pick)
             "audience": recipe.audience,  # the audience profile it is for ("" when the recipe names none)
             "status": recipe.status,
             "reason": recipe.reason,

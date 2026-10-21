@@ -3,11 +3,64 @@ import { Link } from "react-router-dom";
 
 import type { MatrixMember } from "@/api/matrices";
 import {
-  addProduction, getPending, listProduction, removeProduction, setAuto, writeFromProduction,
-  type PendingItem, type ProductionConfig,
+  addProduction, getPending, listProduction, removeProduction, setAuto, writeFromProduction, writeReportFromProduction,
+  type PendingItem, type ProductionConfig, type WholeReport,
 } from "@/api/production";
 import { listVideoCells, type VideoCell } from "@/api/video";
 import { errorMessage, useToast } from "@/lib/toast";
+
+/** 整份报告的配置：这个 Job 最近的几份报告，每份写成一期视频；写过的标出来。报告就是调研，不再搜索。 */
+function PendingReports({ config, canEdit, onWritten }: { config: ProductionConfig; canEdit: boolean; onWritten: () => void }) {
+  const toast = useToast();
+  const [reports, setReports] = useState<WholeReport[] | null>(null);
+  const [busy, setBusy] = useState("");
+  const load = () => getPending(config.key).then((d) => setReports(d.reports ?? [])).catch((e) => toast.error(errorMessage(e)));
+  useEffect(() => {
+    load();
+  }, [config.key]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!reports) return <p className="text-xs text-text-muted">读取中…</p>;
+  if (!reports.length) return <p className="text-xs text-text-muted">这个 Job 还没有报告，跑一次才有报告可写。</p>;
+  const write = async (r: WholeReport) => {
+    if (!window.confirm(`用「${config.name}」把 ${r.date} 这份报告写成一期视频：直接用报告，不再搜索。确定？`)) return;
+    setBusy(r.path);
+    try {
+      await writeReportFromProduction(config.key, r.path);
+      toast.success("已开始写稿，在文稿页能看到进度");
+      await load();
+      onWritten();
+    } catch (e) {
+      toast.error(errorMessage(e));
+      await load();
+    } finally {
+      setBusy("");
+    }
+  };
+  return (
+    <div className="space-y-1 text-xs" aria-label={`${config.name} 的报告`}>
+      <p className="text-text-muted">最近的报告，每份写成一期：</p>
+      <ul className="space-y-1">
+        {reports.map((r) => (
+          <li key={r.path} className="flex items-center gap-2">
+            <span className={r.written ? "text-text-muted" : ""}>{r.date}</span>
+            <span className="font-mono text-text-muted truncate">{r.path}</span>
+            <span className="ml-auto whitespace-nowrap">
+              {r.written ? (
+                r.scripts.slice(0, 1).map((s) => (
+                  <Link key={s.id} className="text-accent hover:underline" to={`/video/${s.id}`}>写过了</Link>
+                ))
+              ) : canEdit ? (
+                <button className="btn text-xs" disabled={busy === r.path} aria-label={`写 ${r.date} 的报告`} onClick={() => write(r)}>
+                  写成视频
+                </button>
+              ) : null}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 /** 一套配置的待写条目：这个 Job 最新一份报告里的条目，标出这套配置写过的、标了不写的。 */
 function Pending({ config, canEdit, onWritten }: { config: ProductionConfig; canEdit: boolean; onWritten: () => void }) {
@@ -92,12 +145,14 @@ function Pending({ config, canEdit, onWritten }: { config: ProductionConfig; can
 function AutoWrite({ config, scheduled, onChange }: { config: ProductionConfig; scheduled: boolean; onChange: () => void }) {
   const toast = useToast();
   const [count, setCount] = useState(String(config.auto || 3));
-  const n = Number(count);
+  const whole = config.split === "whole"; // 整份报告每份写一期：只有开和关，没有条数
+  const n = whole ? 1 : Number(count);
   const valid = Number.isInteger(n) && n >= 1 && n <= 10;
   const change = async (next: number | null) => {
     if (next !== null) {
       const cost = config.reverify ? "每条先调研一遍，每篇约 4–20 次搜索，" : "";
-      if (!window.confirm(`打开后，这个 Job 每出一份新报告，就自动用「${config.name}」写最多 ${next} 条并出片，不等你确认；${cost}只写打开之后出的报告。确定？`)) return;
+      const what = whole ? "写一期并出片" : `写最多 ${next} 条并出片`;
+      if (!window.confirm(`打开后，这个 Job 每出一份新报告，就自动用「${config.name}」${what}，不等你确认；${cost}只写打开之后出的报告。确定？`)) return;
     }
     try {
       await setAuto(config.key, next);
@@ -113,12 +168,14 @@ function AutoWrite({ config, scheduled, onChange }: { config: ProductionConfig; 
           onChange={(e) => change(e.target.checked ? n : null)} />
         报告一出来就自动写
       </label>
-      <label className="flex items-center gap-1 text-text-muted">
-        最多
-        <input aria-label="自动每次写几条" className="input w-14" type="number" min={1} max={10} value={count} onChange={(e) => setCount(e.target.value)} />
-        条
-      </label>
-      {config.auto > 0 && valid && n !== config.auto ? <button className="btn text-xs" onClick={() => change(n)}>改成 {n} 条</button> : null}
+      {whole ? null : (
+        <label className="flex items-center gap-1 text-text-muted">
+          最多
+          <input aria-label="自动每次写几条" className="input w-14" type="number" min={1} max={10} value={count} onChange={(e) => setCount(e.target.value)} />
+          条
+        </label>
+      )}
+      {!whole && config.auto > 0 && valid && n !== config.auto ? <button className="btn text-xs" onClick={() => change(n)}>改成 {n} 条</button> : null}
       {config.auto > 0 && !scheduled ? (
         <span className="text-warning">这个 Job 没设周期：要有人跑出报告才会触发</span>
       ) : null}
@@ -141,15 +198,16 @@ function ConfigCard({ config, canEdit, scheduled, onChange }: { config: Producti
       ) : (
         <p className="text-xs text-text-muted">
           给{config.audience || "—"}看 · 约 {config.target_minutes} 分钟 · {config.split_name}
-          {config.split === "each" ? (config.reverify ? " · 挑中的条目会重新调研一遍" : " · 不再调研") : " · 用报告里的条目，不调研"}
-          {config.auto ? ` · 自动：报告一出来写最多 ${config.auto} 条` : ""}
+          {config.split === "whole" ? " · 每份报告写一期，直接用报告，不调研"
+            : config.split === "each" ? (config.reverify ? " · 挑中的条目会重新调研一遍" : " · 不再调研") : " · 用报告里的条目，不调研"}
+          {config.auto ? (config.split === "whole" ? " · 自动：报告一出来就写" : ` · 自动：报告一出来写最多 ${config.auto} 条`) : ""}
         </p>
       )}
-      {canEdit && config.split === "each" && !config.errors.length ? <AutoWrite config={config} scheduled={scheduled} onChange={onChange} /> : null}
+      {canEdit && (config.split === "each" || config.split === "whole") && !config.errors.length ? <AutoWrite config={config} scheduled={scheduled} onChange={onChange} /> : null}
       <div className="flex gap-2">
         {!config.errors.length ? (
           <button className="btn text-xs" onClick={() => setOpen(!open)}>
-            {open ? "收起" : "挑条目写"}
+            {open ? "收起" : config.split === "whole" ? "选报告写" : "挑条目写"}
           </button>
         ) : null}
         {canEdit ? (
@@ -169,7 +227,9 @@ function ConfigCard({ config, canEdit, scheduled, onChange }: { config: Producti
           </button>
         ) : null}
       </div>
-      {open ? <Pending config={config} canEdit={canEdit} onWritten={onChange} /> : null}
+      {open ? (config.split === "whole"
+        ? <PendingReports config={config} canEdit={canEdit} onWritten={onChange} />
+        : <Pending config={config} canEdit={canEdit} onWritten={onChange} />) : null}
     </div>
   );
 }
@@ -180,7 +240,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
   const toast = useToast();
   const [configs, setConfigs] = useState<ProductionConfig[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
-  const only = members.length === 1 && members[0].topics ? members[0].job : ""; // 页面就是这一个 Job 的
+  const only = members.length === 1 && members[0].exists ? members[0].job : ""; // 页面就是这一个 Job 的
   const [job, setJob] = useState(only);
   const [recipe, setRecipe] = useState(""); // 配方文件名
   const [audience, setAudience] = useState("");
@@ -200,10 +260,15 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
   const whole = members.length - members.filter((m) => m.topics).length;
   const sources = members.filter((m) => m.topics);
   const single = members.length === 1;
+  // 报告不是条目清单的 Job（只有它自己的页面才挂）：每份新报告写成一期
+  const wholes = single ? members.filter((m) => !m.topics && m.exists) : [];
+  const pickable = [...sources, ...wholes];
+  const isWhole = wholes.some((m) => m.job === job);
   // 能挂在这个 Job 上的配方：一条一期的、挑几条合一期的，而且是给这个 Job 的条目写的（topic.sources 里有它）
-  const source = sources.find((m) => m.job === job)?.topics ?? "";
-  const usable = cells.filter((c) => c.usable && c.key && ["single", "roundup"].includes(c.column?.topic_kind ?? "")
-    && (c.topic_sources ?? []).includes(source));
+  const source = pickable.find((m) => m.job === job)?.topics ?? "";
+  const usable = cells.filter((c) => c.usable && c.key && (isWhole
+    ? c.column?.topic_kind === "single" && c.whole_report
+    : ["single", "roundup"].includes(c.column?.topic_kind ?? "") && (c.topic_sources ?? []).includes(source)));
   // 一份配方文件一项，同一份文件的几个受众收在一起：先选配方（快讯、盘点…），再选给谁看
   const files = new Map<string, VideoCell[]>();
   for (const c of usable) files.set(c.base ?? c.recipe ?? c.id, [...(files.get(c.base ?? c.recipe ?? c.id) ?? []), c]);
@@ -221,7 +286,7 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
         <h2 className="font-medium text-sm">视频配置</h2>
         <p className="text-xs text-text-muted">每个 Job 的报告写成哪几种视频。给谁看在配置里选；多长、要不要重新调研，配方允许的才能在配置里改；拆不拆由配方定。</p>
       </div>
-      {sources.map((m) => {
+      {pickable.map((m) => {
         const own = mine.filter((c) => c.job === m.job);
         return (
           <div key={m.job} className="space-y-2">
@@ -229,32 +294,28 @@ export function ProductionConfigs({ members, canEdit }: { members: MatrixMember[
             {own.length ? (
               own.map((c) => <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!m.schedule} onChange={load} />)
             ) : (
-              <p className="text-xs text-text-muted">这个 Job 还没配视频，报告只存着，不会写稿。</p>
+              <p className="text-xs text-text-muted">
+                {m.topics ? "这个 Job 还没配视频，报告只存着，不会写稿。" : "这个 Job 的报告是整份的，还没配视频：配一套，每份新报告就能写成一期。"}
+              </p>
             )}
           </div>
         );
       })}
-      {!sources.length ? (
-        <p className="text-xs text-text-muted">
-          {single
-            ? "这个 Job 的报告是整份的，不拆成条目，现在还挂不了配置。要写成视频，打开那份报告点「写成视频」。"
-            : "这个矩阵里还没有出条目列表的 Job（Job 要声明 topics:）。"}
-        </p>
-      ) : null}
+      {!pickable.length ? <p className="text-xs text-text-muted">这个矩阵里还没有出条目列表的 Job（Job 要声明 topics:）。</p> : null}
       {whole && sources.length && !single ? (
         <p className="text-xs text-text-muted">
           另外 {whole} 个 Job 的报告是整份的，不拆成条目，所以不在这里挂配置。要写成视频，打开那份报告点「写成视频」。
         </p>
       ) : null}
-      {mine.filter((c) => !sources.some((m) => m.job === c.job)).map((c) => (
+      {mine.filter((c) => !pickable.some((m) => m.job === c.job)).map((c) => (
         <ConfigCard key={c.key} config={c} canEdit={canEdit} scheduled={!!members.find((m) => m.job === c.job)?.schedule} onChange={load} />
       ))}
-      {canEdit && sources.length ? (
+      {canEdit && pickable.length ? (
         <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border pt-2">
           {only ? null : (
             <select aria-label="加配置的 Job" className="input w-auto" value={job} onChange={(e) => { setJob(e.target.value); setRecipe(""); setAudience(""); setMinutes(""); setResearchAgain(true); }}>
               <option value="">给哪个 Job…</option>
-              {sources.map((m) => (
+              {pickable.map((m) => (
                 <option key={m.job} value={m.job}>{m.name}</option>
               ))}
             </select>

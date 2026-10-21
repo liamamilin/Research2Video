@@ -121,6 +121,11 @@ def pick_topics(spec: dict) -> list[dict]:
     config_dir = get_settings().paths.config_dir
     for pick in (resolve_pick(p) for p in spec.get("picks", [])):
         column = video_columns.get(config_dir, pick["column"])
+        if pick.get("whole"):  # the Job's report as it is, one video: never a topic source
+            item = _whole_item(spec, pick)
+            if item is not None:
+                items.append({**item, "pick": pick})
+            continue
         _, topics = topic_store.load(pick.get("source", "flash"))
         # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
         for topic in sorted(topics, key=lambda t: (bool(getattr(t, "stale", lambda: False)()), -(t.score or 0))):
@@ -134,6 +139,22 @@ def pick_topics(spec: dict) -> list[dict]:
     for item in items:
         del item["pick"]
     return items
+
+
+def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
+    """The item for a whole-report pick: the report the batch was started for, unless it was written already."""
+    from core.video import reports
+
+    report = spec.get("report")
+    if not report:
+        return None
+    workspace = video_workflow.workspace_dir()
+    relative = reports.relative(report, workspace)
+    if reports.scripts_of(relative, pick["column"]):
+        return None  # written already (by hand, or by an earlier batch)
+    record = reports.record_file(relative, job=spec.get("job", ""), created_by="autopilot")
+    topic = {**reports.topic_for(record, workspace), "from_report": relative, "report_id": record["id"]}
+    return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
 
 
 #: A source job cut off (the app restarted) is started once more, no more: each start spends its searches again.
@@ -334,7 +355,8 @@ def tick() -> int:
 
                 activity.use_state_dir(get_settings().paths.state_dir)
                 activity.mark_activity()
-            return sum(_tick_run(run) for run in runs)
+            counts = _in_flight(runs)  # the limits hold across batches: each Job's report is a batch of its own
+            return sum(_tick_run(run, counts) for run in runs)
     except TimeoutError:
         return 0
 
@@ -360,7 +382,20 @@ def reopen_approved() -> int:
     return reopened
 
 
-def _tick_run(run: dict) -> int:
+def _in_flight(runs: list[dict]) -> dict:
+    """Scripts being written and renders being made right now, over every one of these batches' items."""
+    counts = {"scripts": 0, "renders": 0}
+    for run in runs:
+        for item in run.get("items") or []:
+            if item["script_id"]:
+                s = store.get_script(item["script_id"])
+                counts["scripts"] += bool(s and (s["status"] in ("RESEARCHING", "WRITING")
+                                                 or (s["status"] == "DRAFT" and s.get("stage"))))
+                counts["renders"] += any(r["status"] in store.ACTIVE_RENDER_STATUSES for r in store.list_renders(item["script_id"]))
+    return counts
+
+
+def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
     spec = run["spec"]
     if run["stage"] == "TOPICS":
         if not fresh_topics(spec, run):
@@ -374,16 +409,12 @@ def _tick_run(run: dict) -> int:
         _add_items(run["id"], items)
         ap.update_run(run["id"], stage="ITEMS")
         run = ap.get_run(run["id"])
-    scripts = renders = 0
-    for item in run["items"]:  # work already in flight, to respect the limits
-        if item["script_id"]:
-            s = store.get_script(item["script_id"])
-            scripts += bool(s and (s["status"] in ("RESEARCHING", "WRITING") or (s["status"] == "DRAFT" and s.get("stage"))))
-            renders += any(r["status"] in store.ACTIVE_RENDER_STATUSES for r in store.list_renders(item["script_id"]))
+    if counts is None:  # a batch ticked on its own: the work in flight is its own and every other running batch's
+        counts = _in_flight(ap.list_runs(status="RUNNING"))
     for item in run["items"]:
-        took = advance(item, can_start_script=scripts < MAX_SCRIPTS, can_start_render=renders < MAX_RENDERS)
-        scripts += took["script"]
-        renders += took["render"]
+        took = advance(item, can_start_script=counts["scripts"] < MAX_SCRIPTS, can_start_render=counts["renders"] < MAX_RENDERS)
+        counts["scripts"] += took["script"]
+        counts["renders"] += took["render"]
     run = ap.get_run(run["id"])
     if run["items"] and all(i["state"] in ("DONE", "FAILED", "HELD", "CANCELLED") for i in run["items"]):
         ap.update_run(run["id"], status="DONE", note=_summary(run))

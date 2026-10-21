@@ -165,7 +165,7 @@ function MemberRow({ member, matrixKey, configs, canEdit, onRemove }: { member: 
             视频配置
           </Link>
         ) : null}
-        <div className="text-text-muted">{configs === null ? "" : configs ? `${configs} 套` : member.topics ? "还没配" : "整份报告"}</div>
+        <div className="text-text-muted">{configs === null ? "" : configs ? `${configs} 套` : "还没配"}</div>
       </td>
       <td className="py-2 text-xs text-right">
         {canEdit ? (

@@ -38,6 +38,13 @@ def _pending(env, now):
     return video_auto.pending(str(env / "config"), str(env / "jobs"), str(env / "state"), str(env), now)
 
 
+@pytest.fixture(autouse=True)
+def _auto_off(prod_env):  # noqa: F811
+    """The shipped configs may have auto on (it is turned on for real Jobs); these tests start from none."""
+    for path in (prod_env / "config" / "production").glob("*.yaml"):
+        production.set_auto(str(prod_env / "config"), path.stem, None)
+
+
 @pytest.fixture
 def pilot_env(prod_env, monkeypatch):  # noqa: F811
     spawned: list[str] = []

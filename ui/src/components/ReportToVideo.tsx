@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { listProduction, writeReportFromProduction, type ProductionConfig } from "@/api/production";
 import { createVideoScript, listVideoCells, recordResearchReport, type ResearchReport, type VideoCell } from "@/api/video";
 import { errorMessage, useToast } from "@/lib/toast";
 
@@ -11,6 +12,7 @@ export function ReportToVideo({ path }: { path: string }) {
   const [open, setOpen] = useState(false);
   const [report, setReport] = useState<(ResearchReport & { title: string }) | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
+  const [configs, setConfigs] = useState<ProductionConfig[]>([]); // 这份报告所属 Job 的「整份报告一期」配置
   const [column, setColumn] = useState("");
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
@@ -22,6 +24,11 @@ export function ReportToVideo({ path }: { path: string }) {
       const [made, all] = await Promise.all([recordResearchReport(path), listVideoCells()]);
       setReport(made);
       setCells(all);
+      if (made.job) {
+        const same = (job: string) => job === made.job || job.endsWith(`/${made.job}`);
+        const every = await listProduction().catch(() => []);
+        setConfigs((Array.isArray(every) ? every : []).filter((c) => c.split === "whole" && !c.errors.length && same(c.job)));
+      }
     } catch (e) {
       toast.error(errorMessage(e));
       setOpen(false);
@@ -36,6 +43,20 @@ export function ReportToVideo({ path }: { path: string }) {
       const made = await createVideoScript({ column, report_id: report.id, ...(typed ? { topic: { title: typed } } : {}) });
       toast.success("已开始写稿：用这份报告，不再调研");
       navigate(`/video/${made.id}`);
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const writeWith = async (config: ProductionConfig) => {
+    if (!report) return;
+    setBusy(true);
+    try {
+      const made = await writeReportFromProduction(config.key, report.report_path);
+      toast.success("已开始写稿：用这份报告，不再调研");
+      navigate(`/video/${made[0].id}`);
     } catch (e) {
       toast.error(errorMessage(e));
     } finally {
@@ -63,6 +84,18 @@ export function ReportToVideo({ path }: { path: string }) {
           。去那里挑一条写快讯，或者挑几条写一期盘点。
         </p>
       ) : (
+        <>
+        {configs.length ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-text-muted">用这个 Job 的视频配置写：</span>
+            {configs.map((c) => (
+              <button key={c.key} className="btn btn-primary" disabled={busy} onClick={() => writeWith(c)}>
+                {c.name}
+              </button>
+            ))}
+            <span className="text-text-muted">（给谁看、多长都按配置；或者在下面自己选一个配方）</span>
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <select aria-label="写成哪种视频" className="input w-auto" value={column} onChange={(e) => setColumn(e.target.value)}>
             <option value="">选一个配方…</option>
@@ -84,6 +117,7 @@ export function ReportToVideo({ path }: { path: string }) {
           </button>
           <span className="text-text-muted">不再调研，不花搜索额度。题目不填就用报告标题。</span>
         </div>
+        </>
       )}
       {report.scripts.length ? (
         <p className="text-text-muted">

@@ -25,15 +25,17 @@ const PENDING = { report_date: "2026-10-19", report_path: "output/flash/x.md", i
   { id: "2026-10-19/F3", code: "F3", title: "第三条", fields: {}, written: false, dismissed: false, scripts: [] },
 ] };
 
-const cell = (base: string, key: string, audience: string, name: string, type: string, kind: string, range: number[] = [], optional = false) => ({
+const cell = (base: string, key: string, audience: string, name: string, type: string, kind: string, range: number[] = [], optional = false, whole = false) => ({
   id: key, key, status: "enabled", reason: "", usable: true, label: `${type} · ${name} · B 站横屏短`, recipe: key, base, audience,
   parts: { domain: { key: "ai", name: "AI" }, audience: { key: audience, name }, type: { key: type, name: type }, format: { key: "short", name: "B 站横屏短" } },
-  column: { topic_kind: kind, target_minutes: 4 }, topic_sources: ["flash"], minutes_range: range, research_optional: optional,
+  column: { topic_kind: kind, target_minutes: 4 }, topic_sources: ["flash"], minutes_range: range, research_optional: optional, whole_report: whole,
 });
 const CELLS = [
   cell("flash", "flash", "developer", "开发者", "快讯", "single", [], true),
   cell("flash", "ai-non_tech-quick_take-short", "non_tech", "普通用户", "快讯", "single", [], true),
   cell("rnd", "rnd", "developer", "开发者", "盘点", "roundup", [3, 6]),
+  { ...cell("dd", "dd", "developer", "开发者", "深度解读", "single", [4, 8], false, true), topic_sources: ["opportunities"] },
+  { ...cell("dd", "ai-non_tech-dd", "non_tech", "普通用户", "深度解读", "single", [4, 8], false, true), topic_sources: ["opportunities"] },
 ];
 
 let posts: { url: string; body: unknown }[] = [];
@@ -183,6 +185,47 @@ describe("ProductionConfigs", () => {
     await waitFor(() => expect(posts.length).toBe(1));
     expect(posts[0].body).toMatchObject({ job: "monitoring/ai_flash_discovery", recipe: "flash" });
     expect((screen.getByLabelText("加配置用的配方") as HTMLSelectElement).disabled).toBe(false);  // still this Job after adding
+  });
+
+  it("a Job whose report is not a list of items takes a config that writes each report as one video", async () => {
+    const deep = { ...config("dd", "深度解读 · 开发者", "whole", false), job: "research/deep", source: "", split_name: "整份报告一期", auto: 0 };
+    CONFIGS.push(deep);
+    const WHOLE_REPORTS = { report_date: null, report_path: "", items: [], reports: [
+      { date: "2026-10-20", path: "output/x/2026-10-20.md", written: false, scripts: [] },
+      { date: "2026-10-18", path: "output/x/2026-10-18.md", written: true, scripts: [{ id: "s9", status: "DRAFT" }] },
+    ] };
+    const base = global.fetch as unknown as (u: string, i?: RequestInit) => Promise<Response>;
+    vi.stubGlobal("fetch", vi.fn(async (u: string, i?: RequestInit) => {
+      if (String(u).includes("/api/production/dd/pending")) return { ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(WHOLE_REPORTS) } as Response;
+      return base(u, i);
+    }));
+    render(<ToastProvider><MemoryRouter><ProductionConfigs members={[MEMBERS[2]]} canEdit={true} /></MemoryRouter></ToastProvider>);
+    expect(await screen.findByLabelText("配置 深度解读 · 开发者")).toBeTruthy();
+    expect(screen.getByText(/整份报告一期 · 每份报告写一期，直接用报告，不调研/)).toBeTruthy();
+    expect(screen.queryByLabelText("自动每次写几条")).toBeNull();  // on or off, no count
+    fireEvent.click(screen.getByLabelText("自动写"));
+    await waitFor(() => expect(posts.length).toBe(1));
+    expect(posts[0]).toEqual({ url: "/api/production/dd", body: { auto: 1 } });
+    fireEvent.click(screen.getByText("选报告写"));
+    expect(await screen.findByLabelText("写 2026-10-20 的报告")).toBeTruthy();
+    expect(screen.queryByLabelText("写 2026-10-18 的报告")).toBeNull();  // written already
+    fireEvent.click(screen.getByLabelText("写 2026-10-20 的报告"));
+    await waitFor(() => expect(posts.length).toBe(2));
+    expect(posts[1]).toEqual({ url: "/api/production/dd/write", body: { report_path: "output/x/2026-10-20.md" } });
+    expect(String((window.confirm as unknown as { mock: { calls: string[][] } }).mock.calls[1][0])).toContain("不再搜索");
+    CONFIGS.pop();
+  });
+
+  it("offers only the recipes that can be written from a whole report when adding to such a Job", async () => {
+    render(<ToastProvider><MemoryRouter><ProductionConfigs members={[MEMBERS[2]]} canEdit={true} /></MemoryRouter></ToastProvider>);
+    await screen.findByText(/这个 Job 的报告是整份的，还没配视频/);
+    expect(screen.queryByLabelText("加配置的 Job")).toBeNull();
+    const recipe = screen.getByLabelText("加配置用的配方") as HTMLSelectElement;
+    expect([...recipe.options].map((o) => o.text)).toEqual(["用哪个配方…", "深度解读 · B 站横屏短"]);  // not 快讯 or 盘点
+    fireEvent.change(recipe, { target: { value: "dd" } });
+    fireEvent.click(screen.getByText("加一套配置"));
+    await waitFor(() => expect(posts.length).toBe(1));
+    expect(posts[0].body).toMatchObject({ job: "research/deep", recipe: "dd" });
   });
 
   it("is read-only for a viewer", async () => {

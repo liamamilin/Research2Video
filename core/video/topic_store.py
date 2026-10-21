@@ -192,6 +192,19 @@ def _imported_sources() -> set[str]:
         return set()
 
 
+def whole_source(jobs_dir: str, job_name: str) -> Optional[Source]:
+    """A Job whose reports are not item lists (no ``topics:``), read as a source of whole reports: where its reports are
+    and which day each is from. None when the Job does not exist or does declare ``topics:`` (``resolve`` is for those)."""
+    from core.config import load_job
+
+    job = load_job(jobs_dir, job_name)
+    if not isinstance(job, dict) or job.get("topics") is not None:
+        return None
+    output = str(job.get("output") or "")
+    return Source(name=job_name, job=job_name, label=str(job.get("name") or job_name), output=output,
+                  error="" if "{date}" in output else "这个 Job 的 output 路径里要有 {date}，才能知道每份报告是哪天的")
+
+
 def resolve(jobs_dir: str, name: str) -> Optional[Source]:
     """A source by its name, alias or job path."""
     every = sources(jobs_dir)

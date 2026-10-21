@@ -21,6 +21,7 @@ minutes_range: [4, 8]
 topic:
   kind: single
   sources: [opportunities]
+  whole_report: true
   fields: [核心角度, 目标受众, 为什么有人在乎]
 research:
   template: deep_dive
