@@ -96,6 +96,19 @@ describe("Matrices", () => {
     expect(await screen.findByText(/这个 Job 的报告是整份的，还没配视频/)).toBeTruthy();
   });
 
+  it("lists only the first of a Job's many keywords, the rest on request", async () => {
+    const many = Array.from({ length: 40 }, (_, i) => `词${i + 1}`);
+    (AI.members as { keywords: string[] }[])[1].keywords = many;
+    at("/matrices/ai");
+    expect(await screen.findByText(/词1、词2/)).toBeTruthy();
+    expect(screen.queryByText(/词7/)).toBeNull();
+    fireEvent.click(screen.getByText("…共 40 个，展开"));
+    expect(screen.getByText(/词40/)).toBeTruthy();
+    fireEvent.click(screen.getByText("收起"));
+    expect(screen.queryByText(/词7/)).toBeNull();
+    (AI.members as { keywords: string[] }[])[1].keywords = [];
+  });
+
   it("copies with new keywords only the Jobs that have a neutral template", async () => {
     at("/matrices/ai");
     fireEvent.click(await screen.findByText("换关键词复制", { selector: "button" }));

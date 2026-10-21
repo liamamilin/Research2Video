@@ -126,6 +126,24 @@ function scheduleText(member: MatrixMember) {
   return `${plan.enabled ? "定时" : "定时（已暂停）"} ${plan.schedule}`;
 }
 
+/** Job 自己的关键词：有的 Job 有两百多个，只列前几个，其余点开看 */
+const KEYWORDS_SHOWN = 6;
+function MemberKeywords({ words }: { words: string[] }) {
+  const [all, setAll] = useState(false);
+  const more = words.length - KEYWORDS_SHOWN;
+  return (
+    <div className="text-xs mt-1">
+      <span className="text-text-muted">自己的关键词：</span>
+      {(all || more <= 0 ? words : words.slice(0, KEYWORDS_SHOWN)).join("、")}
+      {more > 0 ? (
+        <button className="ml-1 text-accent hover:underline" onClick={() => setAll(!all)}>
+          {all ? "收起" : `…共 ${words.length} 个，展开`}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 function MemberRow({ member, matrixKey, configs, canEdit, onRemove }: { member: MatrixMember; matrixKey: string; configs: number | null; canEdit: boolean; onRemove: () => void }) {
   const state = member.state;
   return (
@@ -137,12 +155,7 @@ function MemberRow({ member, matrixKey, configs, canEdit, onRemove }: { member: 
           <span className="text-warning">{member.job}（Job 文件不在了）</span>
         )}
         <div className="text-xs text-text-muted font-mono">{member.job}</div>
-        {member.keywords?.length ? (
-          <div className="text-xs mt-1">
-            <span className="text-text-muted">自己的关键词：</span>
-            {member.keywords.join("、")}
-          </div>
-        ) : null}
+        {member.keywords?.length ? <MemberKeywords words={member.keywords} /> : null}
       </td>
       <td className="py-2 pr-3 text-xs whitespace-nowrap">
         {member.exists && !member.enabled ? <span className="text-text-muted">已停用</span> : scheduleText(member)}
