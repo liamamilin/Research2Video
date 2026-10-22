@@ -625,7 +625,10 @@ class JobStore:
                                 (job_id, job["attempt_count"], name)).fetchone()
             if item is None:
                 raise StoreError("ARTIFACT_NOT_FOUND", "artifact not found")
-            workspace = (self.job_root / job_id / "attempts" / str(job["attempt_count"])).resolve(strict=True)
+            try:
+                workspace = (self.job_root / job_id / "attempts" / str(job["attempt_count"])).resolve(strict=True)
+            except FileNotFoundError as exc:
+                raise StoreError("ARTIFACT_ARCHIVED", "the job folder was moved off this disk; restore it to download") from exc
             relative = Path(item["relative_path"])
             if relative.is_absolute() or ".." in relative.parts or not relative.parts:
                 raise StoreError("INVALID_ARTIFACT_PATH", "artifact path is outside the job attempt workspace")

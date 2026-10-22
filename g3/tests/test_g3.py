@@ -308,3 +308,18 @@ def test_create_job_works_when_the_jobs_folder_is_a_symlink_to_another_disk(tmp_
     assert (other / job_id / "input" / "source.txt").is_file()
     with sqlite3.connect(store.db_path) as conn:
         assert conn.execute("SELECT source_rel_path FROM jobs WHERE job_id=?", (job_id,)).fetchone()[0] == f"jobs/{job_id}/input/source.txt"
+
+
+def test_downloading_from_a_job_whose_folder_was_archived_says_so_instead_of_failing(tmp_path):
+    import shutil
+
+    store = make_store(tmp_path)
+    job_id = new_job(store)
+    with sqlite3.connect(store.db_path) as conn:
+        conn.execute("UPDATE jobs SET status='COMPLETED', attempt_count=1 WHERE job_id=?", (job_id,))
+        conn.execute("INSERT INTO artifacts (job_id,attempt_no,name,relative_path,content_type,bytes,sha256,created_at) VALUES (?,?,?,?,?,?,?,?)",
+                     (job_id, 1, "video.mp4", "g2-run/artifacts/video.mp4", "video/mp4", 1, "0" * 64, "2026-10-22T00:00:00Z"))
+    shutil.rmtree(store.job_root / job_id)
+    with pytest.raises(StoreError) as caught:
+        store.artifact_path(job_id, "video.mp4")
+    assert caught.value.code == "ARTIFACT_ARCHIVED"
