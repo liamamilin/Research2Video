@@ -6,7 +6,7 @@ import { MatrixRuns } from "@/components/MatrixRuns";
 import { MatrixWeek } from "@/components/MatrixWeek";
 import { periodWords, PeriodEditor } from "@/components/PeriodEditor";
 import {
-  copyMatrix, createMatrix, deleteMatrix, getMatrix, listMatrices, pauseMatrix, resumeMatrix, splitKeywords, updateMatrix,
+  archiveMatrix, copyMatrix, createMatrix, deleteMatrix, getMatrix, listMatrices, pauseMatrix, resumeMatrix, splitKeywords, updateMatrix,
   type Matrix, type MatrixMember,
 } from "@/api/matrices";
 import { ProductionConfigs } from "@/components/ProductionConfigs";
@@ -86,6 +86,7 @@ export function MatricesPage() {
   const [ungrouped, setUngrouped] = useState<{ job: string; name: string }[]>([]);
   const [error, setError] = useState("");
   const [configs, setConfigs] = useState<ProductionConfig[]>([]);
+  const [showArchived, setShowArchived] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -100,6 +101,8 @@ export function MatricesPage() {
   // a config on a Job that left its matrix (or whose file is gone) shows on no Job page: list it here to remove it
   const grouped = new Set((rows || []).flatMap((m) => m.members.map((x) => x.job)));
   const stray = rows ? configs.filter((c) => !grouped.has(c.job)) : [];
+  const archivedCount = (rows || []).filter((m) => m.archived).length;
+  const shown = (rows || []).filter((m) => showArchived || !m.archived);
   const drop = async (c: ProductionConfig) => {
     if (!window.confirm(`删掉「${c.name || c.key}」这套配置？已经写好的文稿和成片都还在。`)) return;
     try {
@@ -119,12 +122,19 @@ export function MatricesPage() {
       <p className="text-xs text-text-muted">一个矩阵是一组 Job，共用一个领域和一套关键词。Job 跑出报告，报告再写成视频。</p>
       {error ? <p className="text-sm text-danger">{error}</p> : null}
       {rows === null && !error ? <p className="text-sm text-text-muted">读取中…</p> : null}
+      {archivedCount ? (
+        <label className="flex items-center gap-2 text-xs text-text-muted">
+          <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
+          显示已归档（{archivedCount}）
+        </label>
+      ) : null}
       <div className="grid gap-3 md:grid-cols-2">
-        {(rows || []).map((m) => (
+        {shown.map((m) => (
           <Link key={m.key} to={`/matrices/${m.key}`} className="card p-3 space-y-1 hover:border-accent" aria-label={m.name}>
             <div className="flex items-baseline gap-2">
               <span className="font-medium">{m.name}</span>
               <span className="text-xs text-text-muted">{m.domain}</span>
+              {m.archived ? <span className="text-xs text-text-muted">已归档</span> : null}
               <span className="text-xs text-text-muted ml-auto">{m.members.length} 个 Job</span>
             </div>
             <div className="text-xs">
@@ -444,6 +454,16 @@ export function MatrixDetailPage() {
       toast.error(errorMessage(e));
     }
   };
+  const archive = async () => {
+    const putAway = !matrix.archived;
+    if (putAway && !window.confirm("归档后矩阵列表里不再显示，里面的 Job 和已有的文稿、成片都不动。确定？")) return;
+    try {
+      setMatrix(await archiveMatrix(matrix.key, putAway));
+      toast.success(putAway ? "已归档" : "已取消归档");
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  };
   const resume = async () => {
     try {
       let next: Matrix;
@@ -469,6 +489,9 @@ export function MatrixDetailPage() {
         <h1 className="text-lg font-semibold flex-1">{matrix.name}</h1>
         {isAdmin && matrix.members.some((m) => m.schedule?.enabled) ? (
           <button className="btn text-xs" onClick={pause}>整个暂停</button>
+        ) : null}
+        {canEdit ? (
+          <button className="btn text-xs" onClick={archive}>{matrix.archived ? "取消归档" : "归档"}</button>
         ) : null}
         {canEdit ? (
           <button className="btn text-xs" onClick={() => setCopying(!copying)}>

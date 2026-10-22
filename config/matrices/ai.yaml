@@ -1,8 +1,5 @@
 # 矩阵：一组 Job，共用一个领域和一套关键词（spec/matrices.md）。成员 Job 运行时，{keywords} 先放这里的关键词，
 # 再放 Job 自己的；{domain} 是这里的 domain。
-#
-# AI 矩阵是 2026-10-20 从现有 Job 归过来的。关键词还写在各个 Job 里，这里先空着：放进来就会改动它们的提示词。
-# 这些 Job 的提示词写死了 AI，所以换关键词复制时只有写了 copy_as 的能复制（用那个不分领域的模板）。
 name: AI 矩阵
 domain: AI 与软件开发
 keywords: []
@@ -33,3 +30,4 @@ jobs:
 - research/ai_agents_survey_direct
 - research/ai_automation_systems_research
 - research/ai_survey
+archived: true

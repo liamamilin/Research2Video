@@ -49,6 +49,7 @@ export interface Matrix {
   members: MatrixMember[];
   paused?: string[]; // 整个暂停时停掉定时的 Job，恢复时打开的就是它们
   monthly_searches?: number; // 每月最多几次搜索，0 是不限
+  archived?: boolean; // 收起来了：矩阵列表默认不显示，Job 和已有文稿都不动
   searches_this_month?: number; // 本月已用（只在设了上限的矩阵详情里有）
 }
 
@@ -75,6 +76,8 @@ export const previewPeriod = (matrix: string, job: string, p: PeriodBody) =>
 export const setPeriod = (matrix: string, job: string, body: PeriodBody & { confirm?: boolean }) =>
   api<Matrix>(periodPath(matrix, job), { method: "PUT", body });
 
+export const archiveMatrix = (key: string, archived: boolean) =>
+  api<Matrix>(`/api/matrices/${encodeURIComponent(key)}/archive`, { method: "POST", body: { archived } });
 export const pauseMatrix = (key: string) => api<Matrix>(`/api/matrices/${encodeURIComponent(key)}/pause`, { method: "POST" });
 export const resumeMatrix = (key: string, confirm: boolean) =>
   api<Matrix>(`/api/matrices/${encodeURIComponent(key)}/resume`, { method: "POST", body: { confirm } });

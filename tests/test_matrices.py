@@ -215,6 +215,18 @@ def test_api_editing_members_keeps_a_job_in_one_matrix_and_deleting_keeps_the_jo
     assert (matrix_env / "jobs/research/games.yaml").exists()
 
 
+def test_api_archiving_a_matrix_hides_nothing_but_the_flag_and_survives_a_rename(client, matrix_env):
+    _login(client)
+    done = client.post("/api/matrices/ai/archive", json={"archived": True}, headers=_csrf(client)).json()
+    assert done["archived"] is True and [m["job"] for m in done["members"]] == ["monitoring/ai_flash_discovery", "research/deep"]
+    renamed = client.put("/api/matrices/ai", json={"name": "AI 矩阵 2", "domain": "AI 与软件开发", "keywords": []},
+                         headers=_csrf(client)).json()
+    assert renamed["archived"] is True  # a rename does not bring it back
+    assert [m for m in client.get("/api/matrices").json()["matrices"] if m["key"] == "ai"][0]["archived"] is True
+    back = client.post("/api/matrices/ai/archive", json={"archived": False}, headers=_csrf(client)).json()
+    assert back["archived"] is False
+
+
 def test_api_only_editors_change_matrices(client, matrix_env):
     _login(client, "viewer", "viewer-pass-123")
     assert client.get("/api/matrices").status_code == 200

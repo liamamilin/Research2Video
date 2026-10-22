@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from datetime import datetime
+from typing import Optional
 
 from core import cron, matrices, periods
 from core.config import list_jobs, load_job
@@ -499,6 +500,22 @@ class ResumeIn(BaseModel):
 def _save_paused(matrix: matrices.Matrix, paused: list[str]) -> None:
     matrices.save(_dirs()[0], matrix.key, name=matrix.name, domain=matrix.domain, keywords=matrix.keywords,
                   members=matrix.members, paused=paused)
+
+
+class ArchiveIn(BaseModel):
+    archived: bool = True
+
+
+@router.post("/{key}/archive")
+def archive_matrix(key: str, body: Optional[ArchiveIn] = None, user=Depends(require_editor)):
+    """Put a matrix away (or bring it back). Nothing is deleted or stopped: its Jobs keep belonging to it, and the
+    matrix list just stops showing it."""
+    matrix = _get(key)
+    flag = body.archived if body else True
+    matrices.save(_dirs()[0], key, name=matrix.name, domain=matrix.domain, keywords=matrix.keywords,
+                  members=matrix.members, archived=flag)
+    audit.log("matrix_archive", user=user["username"], target=key, result="archived" if flag else "restored")
+    return get_matrix(key, user)
 
 
 @router.post("/{key}/pause")
