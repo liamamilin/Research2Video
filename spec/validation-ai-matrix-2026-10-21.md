@@ -28,3 +28,12 @@
 - `web/services/video_autopilot.py` `tick()`：批次按开始时间从老到新处理，先到先得。
 - 测试：`test_a_reply_missing_one_comma_or_with_one_extra_is_still_read`、`test_a_json_reply_gets_three_tries_and_the_later_ones_are_calmer`、`test_an_older_batch_gets_the_free_slot_before_a_newer_one`；`test_video_scripts.py` 里两个「审计失败」测试给了三次回复。
 - 没有用真实模型重跑过：上面 5 个失败的写稿还没重试，是否真的修好要看重跑。
+
+## AutoVideo 的模型服务可配置（2026-10-22）
+
+出片那一步 402 来自 AutoVideo 自己的 DeepSeek 账户，和 AREC 的模型服务是两回事。AutoVideo 现在可以在它的 `.env` 里选服务（`AUTOVIDEO_LLM_PROVIDER`：`deepseek` 默认、`opencode`、`opendesign`、`custom`，见 autovideo 仓库 `g2/llm_provider.py`，提交 703e41d）。
+
+- 用 Open Design 的 `deepseek-v4-flash` 真实出了一个视频（5 章，191 秒，1920×1080，QA 通过），6 次模型调用，成本上限约 0.066 美元。
+- opencode 的免费模型 `minimax-m3.1-flash-free` 没能验证：同一把 key 的请求今天上午起一直返回 401「Upstream request failed: Invalid credential」，之前几次是 200 与 401 交替。AutoVideo 加 opencode 时要带 `x-opencode-session` 头，否则是 400。
+- AutoVideo 服务（8011）现在是用环境变量临时指向 Open Design 启动的，没有写进 `.env`，下次重启会回到 DeepSeek。
+- 21 个因 402 挂起的条目还没重新出片：AREC 里它们的出片失败次数已满，不会自己重试。
