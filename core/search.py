@@ -1,15 +1,16 @@
 """
 Web search API clients.
 
-Providers: Parallel (default), Tavily, Brave Search, Serper (Google), plus a
+Providers: Parallel (default), Exa, Tavily, Brave Search, Serper (Google), plus a
 keyless DuckDuckGo fallback. All return ranked URLs with LLM-ready excerpts.
 
 Configured via ``system.yaml``::
 
     search:
-      provider: "parallel"          # parallel | tavily | brave | serper | duckduckgo
+      provider: "parallel"          # parallel | exa | tavily | brave | serper | duckduckgo
       api_key_env: "PARALLEL_API_KEY"
       api_key_envs:                 # per-provider keys (used when switching)
+        exa: "EXA_API_KEY"
         tavily: "TAVILY_API_KEY"
         brave: "BRAVE_API_KEY"
         serper: "SERPER_API_KEY"
@@ -135,6 +136,8 @@ class SearchClient:
         self._progress = progress_cb or (lambda _: None)
         self._session_id: str = ""
         self.calls = 0
+        #: provider -> why it gave nothing, from the last ``search`` (a provider that failed is otherwise only in the log)
+        self.errors: dict[str, str] = {}
 
     # ------------------------------------------------------------------
     # Public API
@@ -155,6 +158,7 @@ class SearchClient:
         if self._cancel.is_set():
             raise CancelledError("Cancelled before search")
 
+        self.errors = {}
         providers = [self.config.provider]
         for fallback in ([self.config.fallback_provider]
                          + list(self.config.fallback_providers)):
@@ -167,6 +171,8 @@ class SearchClient:
                     results = self._search_parallel(
                         queries, objective, after_date=after_date
                     )
+                elif provider == "exa":
+                    results = self._search_exa(queries, after_date=after_date)
                 elif provider == "tavily":
                     results = self._search_tavily(queries, objective)
                 elif provider == "brave":
@@ -181,12 +187,14 @@ class SearchClient:
                 if results:
                     self.calls += 1
                     return self._dedupe(results)
+                self.errors[provider] = "没有返回结果"
                 logger.warning(
                     "Search provider '%s' returned no results", provider
                 )
             except CancelledError:
                 raise
             except Exception as exc:  # noqa: BLE001 - provider fallback
+                self.errors[provider] = str(exc)[:300]
                 logger.warning(
                     "Search provider '%s' failed: %s", provider, str(exc)[:300]
                 )
@@ -305,6 +313,36 @@ class SearchClient:
                 f"(configure search.api_key_envs.{provider})"
             )
         return key
+
+    def _search_exa(self, queries: list[str], after_date: Optional[str] = None) -> list[SearchResult]:
+        """Exa (https://docs.exa.ai): one request per query, page text as the excerpt, key in ``x-api-key``."""
+        key = self._provider_key("exa")
+        self._progress({"type": "search", "provider": "exa", "queries": queries})
+        logger.info("Searching (exa): %s", "; ".join(queries))
+
+        bound = after_date or self.config.after_date
+        results: list[SearchResult] = []
+        for query in queries[:3]:
+            if self._cancel.is_set():
+                raise CancelledError("Cancelled during search")
+            payload: dict = {
+                "query": query[:_MAX_QUERY_CHARS],
+                "type": "auto",
+                "numResults": self.config.max_results,
+                "contents": {"text": {"maxCharacters": self.config.max_chars_per_result}},
+            }
+            if bound:
+                payload["startPublishedDate"] = f"{bound}T00:00:00.000Z"
+            body = self._post_json("https://api.exa.ai/search", payload, api_key=key)
+            for item in body.get("results", []):
+                results.append(SearchResult(
+                    title=item.get("title") or "",
+                    url=item.get("url") or "",
+                    publish_date=(item.get("publishedDate") or "")[:10] or None,
+                    excerpts=[item.get("text") or "", *(item.get("highlights") or [])],
+                    provider="exa",
+                ))
+        return results
 
     def _search_tavily(self, queries: list[str], objective: str) -> list[SearchResult]:
         key = self._provider_key("tavily")

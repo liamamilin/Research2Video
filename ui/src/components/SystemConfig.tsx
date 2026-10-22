@@ -735,7 +735,7 @@ export function SystemConfig() {
           >
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="服务商">
-                <div>{selectInput(["search", "provider"], ["parallel", "tavily", "brave", "serper", "duckduckgo"])}</div>
+                <div>{selectInput(["search", "provider"], ["parallel", "exa", "tavily", "brave", "serper", "duckduckgo"])}</div>
               </Field>
               <Field label="模式">
                 <div>{selectInput(["search", "mode"], ["advanced", "basic", "fast", "turbo"])}</div>

@@ -36,9 +36,10 @@ ai:                                   # LLM API (OpenAI-compatible)
   temperature: 0.3
 
 search:                               # Web search API
-  provider: "parallel"                # parallel | tavily | brave | serper | duckduckgo
+  provider: "parallel"                # parallel | exa | tavily | brave | serper | duckduckgo
   api_key_env: "PARALLEL_API_KEY"
   api_key_envs:                       # per-provider keys, switch freely
+    exa: "EXA_API_KEY"
     tavily: "TAVILY_API_KEY"
     brave: "BRAVE_API_KEY"
     serper: "SERPER_API_KEY"

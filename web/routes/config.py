@@ -600,6 +600,10 @@ def test_search(payload: dict, user=Depends(require_admin)):
     search_cfg.max_results = 1
     search_cfg.max_chars_per_result = 200
     search_cfg.timeout = min(search_cfg.timeout, 30)
+    # the chosen provider alone: with a fallback a provider out of quota is answered by DuckDuckGo and the test reads
+    # "ok" while every real search pays for the failed first try
+    search_cfg.fallback_provider = ""
+    search_cfg.fallback_providers = []
 
     started = time.time()
     try:
@@ -614,7 +618,7 @@ def test_search(payload: dict, user=Depends(require_admin)):
         if hits:
             result["sample_url"] = hits[0].url
         if not hits:
-            result["error"] = "无结果返回（检查服务商与密钥）"
+            result["error"] = getattr(client, "errors", {}).get(search_cfg.provider) or "无结果返回（检查服务商与密钥）"
         return result
     except Exception as exc:  # noqa: BLE001 - reported to the admin
         return {
