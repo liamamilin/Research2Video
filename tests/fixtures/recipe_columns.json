@@ -22,7 +22,19 @@
    "description": "把两个对象放在同几个维度上比：每个维度谁强谁弱、差多少，最后说明什么情况下选哪个。",
    "key": "ai-developer-comparison-long",
    "name": "对比",
-   "package": {},
+   "package": {
+    "accent": "#1f7a4d",
+    "badge": "对比",
+    "outro": {
+     "lines": [
+      "AI 对比"
+     ],
+     "seconds": 2.5,
+     "sound": "synth_sting",
+     "template": "end_card",
+     "title": "对比"
+    }
+   },
    "paragraph_units": [
     30,
     100
@@ -61,7 +73,7 @@
    "writer": "legacy"
   },
   "label": "对比 · 开发者 · B 站横屏长",
-  "resolved_sha256": "b0c54ce75c9da4aa0995b37a6c0dabedbfdce41df56ab183b22e6bab827ac753",
+  "resolved_sha256": "e07b29737930d4832fdbf63ea6beabc161dd04a0d1716a8e48a7ac81385258c6",
   "status": "experimental",
   "tags": {
    "audience": {
@@ -105,7 +117,19 @@
    "description": "把一批值得知道的变化按顺序讲一遍：每条一个小节，说清变了什么、对开发者意味着什么，最后给出先做哪件事。",
    "key": "ai-developer-roundup-long",
    "name": "盘点",
-   "package": {},
+   "package": {
+    "accent": "#1f7a4d",
+    "badge": "盘点",
+    "outro": {
+     "lines": [
+      "AI 盘点"
+     ],
+     "seconds": 2.5,
+     "sound": "synth_sting",
+     "template": "end_card",
+     "title": "盘点"
+    }
+   },
    "paragraph_units": [
     30,
     100
@@ -145,7 +169,7 @@
    "writer": "legacy"
   },
   "label": "盘点 · 开发者 · B 站横屏长",
-  "resolved_sha256": "ab9f756d36bdcc6de80fa35698244e3bace939410a8afb7f1f097ef853dd45a4",
+  "resolved_sha256": "005e98324ee0f5bf599686d4b6e46746027fae73ee5f2c0e248cc3bae3f7328a",
   "status": "experimental",
   "tags": {
    "audience": {
@@ -193,7 +217,19 @@
    "description": "把一个值得讲清楚的问题讲透：先给结论，再按证据强弱展开，讲清反方和局限，最后给可执行的动作。",
    "key": "ai-non_tech-deep_dive-long",
    "name": "深度解读",
-   "package": {},
+   "package": {
+    "accent": "#1f7a4d",
+    "badge": "深度解读",
+    "outro": {
+     "lines": [
+      "面向普通用户的 AI 深度解读"
+     ],
+     "seconds": 2.5,
+     "sound": "synth_sting",
+     "template": "end_card",
+     "title": "深度解读"
+    }
+   },
    "paragraph_units": [
     60,
     140
@@ -231,7 +267,7 @@
    "writer": "adapt"
   },
   "label": "深度解读 · 普通用户 · B 站横屏长",
-  "resolved_sha256": "bce7a23ef180e558bd344419de81e1ead3bb6bbaeac91787692630e35d69ef26",
+  "resolved_sha256": "a32a45ec2391b07739386bbeff427e74beb5b347c986bbe233c40975aa997a68",
   "status": "experimental",
   "tags": {
    "audience": {
@@ -478,7 +514,19 @@
    "description": "把一个值得讲清楚的问题讲透：先给结论，再按证据强弱展开，讲清反方和局限，最后给可执行的动作。",
    "key": "deep_dive",
    "name": "深度解读",
-   "package": {},
+   "package": {
+    "accent": "#1f7a4d",
+    "badge": "深度解读",
+    "outro": {
+     "lines": [
+      "面向开发者的 AI 深度解读"
+     ],
+     "seconds": 2.5,
+     "sound": "synth_sting",
+     "template": "end_card",
+     "title": "深度解读"
+    }
+   },
    "paragraph_units": [
     60,
     140
@@ -516,7 +564,7 @@
    "writer": "adapt"
   },
   "label": "深度解读 · 开发者 · B 站横屏长",
-  "resolved_sha256": "eafca1b38a314bf64b8ade2f8522d462a3b82370c7271d9157c09131e8f3762e",
+  "resolved_sha256": "847ca102e234ba1520d2b033798978fce1c925882ba0ee6c7e9d26dc69fab81c",
   "status": "enabled",
   "tags": {
    "audience": {

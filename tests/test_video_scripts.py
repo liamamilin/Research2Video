@@ -565,12 +565,14 @@ def test_the_package_date_is_the_topics_not_the_render_day(tmp_path):
 def test_the_render_carries_the_columns_package_only_when_it_has_one(video_env, autovideo):
     from web.services import video_render
 
+    path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
+    shipped = path.read_text(encoding="utf-8")
+    path.write_text(shipped[:shipped.index("  package:")], encoding="utf-8")  # a recipe with no package block
     first = video_render.create(_approved_script("没有包装"))
     autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]
     assert video_render.process(first["id"]) == "COMPLETED"
     assert "package" not in autovideo.posts[0]
 
-    path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
     text = path.read_text(encoding="utf-8")
     assert "  use: auto_form\n" in text
     path.write_text(text.replace("  use: auto_form\n", "  use: auto_form\n" + PACKAGE_YAML, 1), encoding="utf-8")
@@ -590,6 +592,20 @@ def test_a_lost_create_response_is_reconciled_not_resubmitted(video_env, autovid
     render = video_render.create(_approved_script())
     assert video_render.process(render["id"]) == "COMPLETED"
     assert len(autovideo.posts) == 1
+
+
+def test_a_render_is_not_started_while_a_required_disk_is_missing(video_env, autovideo, monkeypatch, tmp_path):
+    from web.services import video_render
+
+    gone = str(tmp_path / "unplugged")  # nothing is mounted there
+    monkeypatch.setattr(video_render, "_video_config", lambda: {"require_mounts": [gone]})
+    render = video_render.create(_approved_script())
+    assert video_render.process(render["id"]) == "FAILED"
+    failed = store.get_render(render["id"])
+    assert failed["error_code"] == "DISK_OFFLINE" and gone in failed["error_message"]
+    assert autovideo.posts == []  # AutoVideo was never asked, so it could not write under the missing path
+    monkeypatch.setattr(video_render, "_video_config", lambda: {})
+    assert video_render.offline_mounts() == []
 
 
 def test_a_mismatched_download_is_not_kept(video_env, autovideo):

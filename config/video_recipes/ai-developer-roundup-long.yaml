@@ -47,3 +47,12 @@ writing:
     {{audience.writing_rules}}
 output:
   use: motion
+  package:
+    accent: '#1f7a4d'
+    badge: 盘点
+    outro:
+      template: end_card
+      title: 盘点
+      lines: ['AI 盘点']
+      seconds: 2.5
+      sound: synth_sting
