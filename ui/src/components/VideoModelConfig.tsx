@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
-import { ProviderModels } from "@/components/ProviderModels";
+import { recallModel, rememberModel } from "@/lib/modelMemory";
+import { isOffered, ProviderModels } from "@/components/ProviderModels";
 import { CheckCircle2, Plug, RotateCcw, Save, XCircle } from "lucide-react";
 
 export interface ProviderPreset {
@@ -86,10 +87,10 @@ export function VideoModelConfig({ providers, secrets }: { providers: ProviderPr
   const pick = (id: string) => {
     const preset = providers.find((p) => p.id === id);
     if (!preset) return;
-    // another vendor's model id is a 404: keep ours only when this provider offers it
-    const model = preset.models.includes(form.model) ? form.model
-      : (preset.free_models[0] ?? preset.models[0] ?? form.model);
-    setForm({ base_url: preset.base_url, key_env: preset.api_key_env, model });
+    // another vendor's model id is a 404: put back what this card had with that provider, or leave the model empty
+    if (active && isOffered(active.id, form.model)) rememberModel("video", active.id, { model: form.model, fallbacks: [] });
+    const back = recallModel("video", id);
+    setForm({ base_url: preset.base_url, key_env: preset.api_key_env, model: back?.model ?? "" });
     setNotice(null);
   };
 

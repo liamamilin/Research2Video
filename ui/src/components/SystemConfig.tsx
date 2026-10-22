@@ -2,7 +2,8 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
 import { AssistantConfigRecovery } from "@/components/AssistantAction";
-import { ProviderModels } from "@/components/ProviderModels";
+import { recallModel, rememberModel } from "@/lib/modelMemory";
+import { isOffered, ProviderModels } from "@/components/ProviderModels";
 import { VideoModelConfig } from "@/components/VideoModelConfig";
 import {
   CheckCircle2, FileCode, Plug, RotateCcw, Save, SlidersHorizontal, XCircle,
@@ -240,6 +241,14 @@ export function SystemConfig() {
   });
 
   const handleSave = async () => {
+    // switching provider leaves the model empty when this card never used that provider; saving it would keep the old
+    // provider's model id (an absent key is not a deletion) next to the new address
+    const noModel = mode === "form" && [["ai", "AI 模型"], ["review_ai", "审校模型"], ["extraction", "报告清理"]].find(([section]) =>
+      String(get([section, "base_url"], "") || "").trim() && !String(get([section, "model"], "") || "").trim());
+    if (noModel) {
+      setError(`${noModel[1]}：还没选模型。切换服务商后没有记住的模型，请在模型 ID 里填一个或点下面列表里的。`);
+      return;
+    }
     setSaving(true);
     setMessage("");
     setError("");
@@ -381,13 +390,19 @@ export function SystemConfig() {
       set([section, "api_key_env"], preset.api_key_env);
       set([section, "extra_headers"], Object.keys(preset.extra_headers).length
         ? preset.extra_headers : undefined);
-      // the model goes with the provider too: another vendor's model id is a 404 (or worse, a different model), so
-      // keep it only when this provider offers it, else take its free one first; fallbacks likewise
-      const model = String(get([section, "model"], "") || "");
-      const next = preset.models.includes(model) ? model : (preset.free_models[0] ?? preset.models[0] ?? model);
-      if (next !== model) set([section, "model"], next);
-      const fallbacks: string[] = get([section, "fallback_models"], []) || [];
-      set([section, "fallback_models"], fallbacks.filter((m) => preset.models.includes(m) && m !== next));
+      // the model goes with the provider too: another vendor's model id is a 404, so what this card had with the
+      // provider we leave is remembered, and what it had with the one we switch to comes back -- or nothing
+      const leaving = activeProvider;
+      const had = String(get([section, "model"], "") || "");
+      if (leaving && isOffered(leaving.id, had)) {  // a model that provider does not have is not worth putting back
+        rememberModel(section, leaving.id, {
+          model: had,
+          fallbacks: (get([section, "fallback_models"], []) || []).filter((m: string) => isOffered(leaving.id, m)),
+        });
+      }
+      const back = recallModel(section, id);
+      set([section, "model"], back?.model || undefined);
+      set([section, "fallback_models"], back?.fallbacks.length ? back.fallbacks : undefined);
     };
     const fallbackModels: string[] = get([section, "fallback_models"], []) || [];
     return {
@@ -707,7 +722,7 @@ export function SystemConfig() {
             testLabel: "测试审校模型",
             modelPlaceholder: "deepseek-v4-pro", envPlaceholder: "LLM_API_KEY",
             note: "不配置（或下面按钮删除）时，视频文稿审校用上面的 AI 模型。",
-            onRemove: get(["review_ai", "model"]) ? () => set(["review_ai"], undefined) : undefined,
+            onRemove: Object.keys(parsed?.review_ai || {}).length ? () => set(["review_ai"], undefined) : undefined,
           })}
 
           <VideoModelConfig providers={providers} secrets={secrets} />

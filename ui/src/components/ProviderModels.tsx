@@ -4,6 +4,14 @@ import { api } from "@/api/client";
 // The models a provider offers right now, beside the model id field: the id is checked against the provider's own
 // /models list (GET /api/config/providers/{id}/models), so "Open Design with a model only opencode has" shows here
 // instead of as a 404 on the first request. The preset list is only a hint; this one is what the provider answered.
+// What each provider last answered, for callers that must not remember a model the provider does not have.
+const answered = new Map<string, string[]>();
+
+export function isOffered(providerId: string, model: string): boolean {
+  const list = answered.get(providerId);
+  return !list || list.length === 0 || list.includes(model);
+}
+
 export function ProviderModels({ providerId, label, model, fallbacks = [], onPick }: {
   providerId: string;
   label: string;
@@ -17,7 +25,10 @@ export function ProviderModels({ providerId, label, model, fallbacks = [], onPic
     let live = true;
     setState(null);
     api<any>(`/api/config/providers/${encodeURIComponent(providerId)}/models`)
-      .then((d) => live && setState({ id: providerId, models: d.models || [], error: d.error || null }))
+      .then((d) => {
+        answered.set(providerId, d.models || []);
+        if (live) setState({ id: providerId, models: d.models || [], error: d.error || null });
+      })
       .catch((err) => live && setState({ id: providerId, models: [], error: err.message }));
     return () => { live = false; };
   }, [providerId]);

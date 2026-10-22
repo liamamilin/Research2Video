@@ -24,7 +24,7 @@ function mockFetch(opts: { reachable?: boolean } = {}) {
   vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
     calls.push({ url: String(url), init });
     const u = String(url);
-    if (u.includes("/models")) return reply(200, { models: ["deepseek-v4-flash", "glm-5.3-flash"], error: null });
+    if (u.includes("/models")) return reply(200, { models: ["deepseek-v4-flash", "glm-5.3-flash", "deepseek-flash"], error: null });
     if (u.endsWith("/api/video/model/test")) return reply(200, { ok: true, status: 200, message: "可用" });
     if (u.endsWith("/api/video/model") && init?.method === "PUT") {
       return reply(200, { ...CONFIG, ...JSON.parse(String(init.body)), source: "设置页" });
@@ -40,7 +40,7 @@ function mockFetch(opts: { reachable?: boolean } = {}) {
   return calls;
 }
 
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+afterEach(() => { localStorage.clear(); cleanup(); vi.unstubAllGlobals(); });
 
 describe("VideoModelConfig", () => {
   it("shows what AutoVideo uses now and recognises the provider from its address", async () => {
@@ -57,7 +57,8 @@ describe("VideoModelConfig", () => {
     fireEvent.change(screen.getByLabelText("视频模型服务商"), { target: { value: "open-design" } });
     expect((screen.getByLabelText("视频模型接口地址") as HTMLInputElement).value).toBe("https://amr-link.open-design.ai/v1");
     expect((screen.getByLabelText("视频模型密钥变量") as HTMLInputElement).value).toBe("OPENDESIGN_API_KEY");
-    expect((screen.getByLabelText("视频模型 ID") as HTMLInputElement).value).toBe("glm-5.3-flash");
+    expect((screen.getByLabelText("视频模型 ID") as HTMLInputElement).value).toBe("");  // never used with it: empty
+    fireEvent.change(screen.getByLabelText("视频模型 ID"), { target: { value: "glm-5.3-flash" } });
     expect(screen.getByText(/OPENDESIGN_API_KEY 还没填/)).toBeTruthy();
     fireEvent.click(screen.getByText("保存并应用"));
     await screen.findByText(/已保存/);
@@ -77,6 +78,16 @@ describe("VideoModelConfig", () => {
     fireEvent.click(await screen.findByText("deepseek-v4-flash"));
     expect((screen.getByLabelText("视频模型 ID") as HTMLInputElement).value).toBe("deepseek-v4-flash");
     expect(screen.queryByText(/没有这个模型/)).toBeNull();
+  });
+
+  it("puts back the model last used with a provider when switching back", async () => {
+    mockFetch();
+    render(<VideoModelConfig providers={PROVIDERS} secrets={SECRETS} />);
+    await screen.findByText(/现在用/);
+    const select = screen.getByLabelText("视频模型服务商");
+    fireEvent.change(select, { target: { value: "open-design" } });
+    fireEvent.change(select, { target: { value: "deepseek" } });
+    expect((screen.getByLabelText("视频模型 ID") as HTMLInputElement).value).toBe("deepseek-flash");
   });
 
   it("tests the candidate without saving it", async () => {

@@ -60,7 +60,7 @@ function mockFetch(parsed: unknown = PARSED) {
   const fn = vi.fn(async (url: string, init?: RequestInit) => {
     calls.push({ url: String(url), init });
     if (String(url).includes("/models")) {
-      return jsonResponse(200, { models: ["deepseek-v4-flash", "glm-5.3-flash"], error: null });
+      return jsonResponse(200, { models: ["deepseek-v4-flash", "glm-5.3-flash", "deepseek-v4.1-flash", "deepseek-v4-pro", "beam-free"], error: null });
     }
     if (String(url).includes("/api/config/secrets")) {
       if (init?.method === "PUT") {
@@ -88,6 +88,7 @@ function mockFetch(parsed: unknown = PARSED) {
 }
 
 afterEach(() => {
+  localStorage.clear();
   cleanup();
   vi.unstubAllGlobals();
 });
@@ -197,6 +198,7 @@ describe("SystemConfig form", () => {
     await screen.findByDisplayValue("https://x/v1");
     const [select] = screen.getAllByDisplayValue("自定义（当前地址未匹配预设）");
     fireEvent.change(select, { target: { value: "open-design" } });
+    fireEvent.change(screen.getAllByPlaceholderText("deepseek-v4.1-flash")[0], { target: { value: "deepseek-v4.1-flash" } });
 
     fireEvent.click(screen.getByText("保存配置"));
     await waitFor(() => {
@@ -209,18 +211,36 @@ describe("SystemConfig form", () => {
     expect(body.patch.ai.extra_headers["User-Agent"]).toBeTruthy();
   });
 
-  it("moves the model with the provider: another vendor's model is replaced, one it offers is kept", async () => {
-    const calls = mockFetch();
+  it("puts back the model last used with a provider, or leaves the field empty, and will not save an empty one", async () => {
+    const calls = mockFetch({ ...PARSED, ai: { ...PARSED.ai, base_url: "https://amr-link.open-design.ai/v1",
+                                              model: "deepseek-v4.1-flash", fallback_models: ["deepseek-v4-pro"] } });
     render(<SystemConfig />);
 
-    await screen.findByDisplayValue("https://x/v1");
-    const [select] = screen.getAllByDisplayValue("自定义（当前地址未匹配预设）");
-    fireEvent.change(select, { target: { value: "open-design" } });  // offers deepseek-v4.1-flash; "old-model" is not its
-
+    const modelInput = () => screen.getAllByPlaceholderText("deepseek-v4.1-flash")[0] as HTMLInputElement;
+    await screen.findByDisplayValue("deepseek-v4.1-flash");
+    const select = screen.getAllByDisplayValue("Open Design（amr-link）")[0];
+    fireEvent.change(select, { target: { value: "opencode-zen" } });  // never used here: nothing to put back
+    expect(modelInput().value).toBe("");
     fireEvent.click(screen.getByText("保存配置"));
-    await waitFor(() => expect(calls.some((c) => c.init?.method === "PUT" && !c.url.includes("secrets"))).toBe(true));
-    const put = calls.find((c) => c.init?.method === "PUT" && !c.url.includes("secrets"));
-    expect(JSON.parse(String(put?.init?.body)).patch.ai.model).toBe("deepseek-v4.1-flash");
+    await screen.findByText(/AI 模型：还没选模型/);
+    expect(calls.some((c) => c.init?.method === "PUT" && !c.url.includes("secrets"))).toBe(false);
+
+    fireEvent.change(modelInput(), { target: { value: "beam-free" } });
+    fireEvent.change(screen.getAllByDisplayValue("opencode zen（按量计费）")[0], { target: { value: "open-design" } });
+    expect(modelInput().value).toBe("deepseek-v4.1-flash");  // what the card had with Open Design before
+    expect(screen.getByDisplayValue("deepseek-v4-pro")).toBeTruthy();  // and its fallback
+    fireEvent.change(screen.getAllByDisplayValue("Open Design（amr-link）")[0], { target: { value: "opencode-zen" } });
+    expect(modelInput().value).toBe("beam-free");
+  });
+
+  it("does not remember a model the provider does not have", async () => {
+    mockFetch({ ...PARSED, ai: { ...PARSED.ai, base_url: "https://amr-link.open-design.ai/v1", model: "minimax-m3.1-flash-free" } });
+    render(<SystemConfig />);
+
+    await screen.findByText(/没有这个模型：minimax-m3.1-flash-free/);  // the live list has arrived
+    fireEvent.change(screen.getAllByDisplayValue("Open Design（amr-link）")[0], { target: { value: "opencode-zen" } });
+    fireEvent.change(screen.getAllByDisplayValue("opencode zen（按量计费）")[0], { target: { value: "open-design" } });
+    expect((screen.getAllByPlaceholderText("deepseek-v4.1-flash")[0] as HTMLInputElement).value).toBe("");
   });
 
   it("warns when an API key is typed into the env-name field", async () => {
@@ -259,6 +279,7 @@ describe("SystemConfig form", () => {
     await screen.findByText("报告清理（可选）");
     const selects = screen.getAllByDisplayValue("自定义（当前地址未匹配预设）");
     fireEvent.change(selects[selects.length - 1], { target: { value: "open-design" } });  // the last card is the cleanup one
+    fireEvent.change(screen.getAllByPlaceholderText("deepseek-v4-flash").pop()!, { target: { value: "deepseek-v4.1-flash" } });
     fireEvent.click(screen.getByLabelText("启用生成后清理（extraction）"));
     fireEvent.click(screen.getByText("保存配置"));
     await waitFor(() => expect(calls.some((c) => c.init?.method === "PUT" && !c.url.includes("secrets"))).toBe(true));
