@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import threading
 import time
 import urllib.error
@@ -40,6 +41,7 @@ from .errors import CancelledError, SearchUnavailableError
 logger = logging.getLogger(__name__)
 
 _PARALLEL_ENDPOINT = "https://api.parallel.ai/v1/search"
+_EXA_MCP_ENDPOINT = "https://mcp.exa.ai/mcp"  # Exa's public hosted MCP server: keyless, rate limits undocumented
 _DOUBAO_ENDPOINT = "https://open.feedcoopapi.com/search_api/global_search"
 _DOUBAO_QUERY_CHARS = 100  # the API truncates longer queries and takes one phrase per request
 _MAX_QUERIES = 5
@@ -184,6 +186,8 @@ class SearchClient:
                     )
                 elif provider == "exa":
                     results = self._search_exa(queries, after_date=after_date)
+                elif provider == "exa_mcp":
+                    results = self._search_exa_mcp(queries, objective)
                 elif provider == "doubao":
                     results = self._search_doubao(queries)
                 elif provider == "tavily":
@@ -373,6 +377,69 @@ class SearchClient:
         "700429": "请求太频繁（超过 10 QPS）",
         "700901": "API Key 无效",
     }
+
+    #: one result in the MCP tool's text: ``Title/URL/Published/Author/Highlights`` then the page text
+    _EXA_MCP_RESULT = re.compile(
+        r"^Title: (?P<title>.*)\nURL: (?P<url>.*)\nPublished: (?P<published>.*)\nAuthor: .*\nHighlights:\n",
+        re.MULTILINE,
+    )
+
+    def _search_exa_mcp(self, queries: list[str], objective: str = "") -> list[SearchResult]:
+        """Exa through its public MCP endpoint (what OpenCode's ``websearch`` tool uses): no key, free, and with
+        undocumented rate limits, so it is a fallback, not a main provider. Plain JSON-RPC over HTTP; the reply is a
+        server-sent event whose ``data:`` line carries the JSON-RPC response."""
+        self._progress({"type": "search", "provider": "exa_mcp", "queries": queries})
+        logger.info("Searching (exa_mcp): %s", "; ".join(queries))
+
+        results: list[SearchResult] = []
+        for query in queries[:3]:
+            if self._cancel.is_set():
+                raise CancelledError("Cancelled during search")
+            payload = {
+                "jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                "params": {"name": "web_search_exa", "arguments": {
+                    "query": query[:_MAX_QUERY_CHARS],
+                    "numResults": self.config.max_results,
+                    "objective": (objective or query)[:4096],
+                }},
+            }
+            request = urllib.request.Request(
+                _EXA_MCP_ENDPOINT, data=json.dumps(payload).encode("utf-8"), method="POST",
+                headers={"Content-Type": "application/json", "Accept": "application/json, text/event-stream",
+                         "User-Agent": "BaseCodingCLi/2.0"},
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=self.config.timeout) as resp:
+                    raw = resp.read().decode("utf-8", errors="replace")
+            except urllib.error.HTTPError as exc:
+                raise RuntimeError(f"HTTP {exc.code}{'：被限流' if exc.code == 429 else ''}") from exc
+            except urllib.error.URLError as exc:
+                raise RuntimeError(f"connection failed: {exc.reason}") from exc
+
+            data = [line[5:].strip() for line in raw.splitlines() if line.startswith("data:")]
+            try:
+                reply = json.loads(data[-1] if data else raw)
+            except ValueError as exc:
+                raise RuntimeError(f"unreadable reply: {raw[:120]}") from exc
+            if reply.get("error"):
+                raise RuntimeError(f"{(reply['error'] or {}).get('message') or reply['error']}"[:300])
+            outcome = reply.get("result") or {}
+            text = "\n".join(c.get("text") or "" for c in outcome.get("content") or [] if c.get("type") == "text")
+            if outcome.get("isError"):
+                raise RuntimeError(text[:300] or "the search tool reported an error")
+            found = list(self._EXA_MCP_RESULT.finditer(text))
+            for i, match in enumerate(found):
+                end = found[i + 1].start() if i + 1 < len(found) else len(text)
+                body = text[match.end():end].strip()
+                published = match.group("published").strip()
+                results.append(SearchResult(
+                    title=match.group("title").strip() if match.group("title") != "N/A" else "",
+                    url=match.group("url").strip(),
+                    publish_date=None if published in ("", "N/A") else published[:10],
+                    excerpts=[body[: self.config.max_chars_per_result]],
+                    provider="exa_mcp",
+                ))
+        return results
 
     def _search_doubao(self, queries: list[str]) -> list[SearchResult]:
         """Doubao search, Global edition (Volcengine, pay-as-you-go; 500 free calls a month per account).

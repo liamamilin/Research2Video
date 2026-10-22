@@ -123,3 +123,53 @@ def test_doubao_without_a_key_names_the_variable():
     with pytest.raises(SearchUnavailableError):
         client.search(["q"])
     assert "DOUBAO_SEARCH_API_KEY" in client.errors["doubao"]
+
+
+# --- Exa public MCP endpoint (keyless) ------------------------------------------------------------------------
+
+_MCP_TEXT = (
+    "Title: Models & Pricing\nURL: https://api-docs.deepseek.com/quick_start/pricing/\nPublished: 2026-10-17T00:00:00.000Z\n"
+    "Author: N/A\nHighlights:\n# Models & Pricing\n\nSource: x\n\n---\n\nmore text\n\n"
+    "Title: N/A\nURL: https://b.test/n\nPublished: N/A\nAuthor: N/A\nHighlights:\nsecond page"
+)
+
+
+def _sse(payload):
+    class Reply:
+        def read(self):
+            return ("event: message\ndata: " + json.dumps(payload) + "\n\n").encode()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+    return Reply()
+
+
+def test_exa_mcp_needs_no_key_and_parses_the_tool_text(monkeypatch):
+    sent = []
+
+    def fake_open(request, timeout=None):
+        sent.append(json.loads(request.data))
+        return _sse({"result": {"content": [{"type": "text", "text": _MCP_TEXT}]}})
+
+    monkeypatch.setattr("core.search.urllib.request.urlopen", fake_open)
+    hits = SearchClient(_config(provider="exa_mcp", api_keys={})).search(["deepseek pricing"], objective="find the price page")
+    args = sent[0]["params"]["arguments"]
+    assert sent[0]["params"]["name"] == "web_search_exa" and args["objective"] == "find the price page"
+    assert [h.url for h in hits] == ["https://api-docs.deepseek.com/quick_start/pricing/", "https://b.test/n"]
+    assert hits[0].publish_date == "2026-10-17" and hits[1].publish_date is None and hits[1].title == ""
+    assert "more text" in hits[0].excerpts[0] and hits[1].excerpts == ["second page"] and hits[0].provider == "exa_mcp"
+
+
+@pytest.mark.parametrize("reply, shown", [
+    ({"error": {"message": "rate limit exceeded"}}, "rate limit"),
+    ({"result": {"isError": True, "content": [{"type": "text", "text": "quota"}]}}, "quota"),
+])
+def test_exa_mcp_errors_are_failures_not_empty_results(monkeypatch, reply, shown):
+    monkeypatch.setattr("core.search.urllib.request.urlopen", lambda request, timeout=None: _sse(reply))
+    client = SearchClient(_config(provider="exa_mcp", api_keys={}))
+    with pytest.raises(SearchUnavailableError):
+        client.search(["q"])
+    assert shown in client.errors["exa_mcp"]

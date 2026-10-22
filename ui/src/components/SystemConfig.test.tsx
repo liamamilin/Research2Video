@@ -133,6 +133,8 @@ describe("SystemConfig form", () => {
     expect(screen.getByDisplayValue("EXA_API_KEY")).toBeTruthy();  // not left on Parallel's variable
     fireEvent.change(screen.getByLabelText("搜索服务商"), { target: { value: "doubao" } });
     expect(screen.getByDisplayValue("DOUBAO_SEARCH_API_KEY")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("搜索服务商"), { target: { value: "exa_mcp" } });
+    expect(screen.getByText(/Exa 公开端点无需密钥/)).toBeTruthy();
     fireEvent.change(screen.getByLabelText("搜索服务商"), { target: { value: "duckduckgo" } });
     expect(screen.getByText("DuckDuckGo 无需密钥。")).toBeTruthy();
     fireEvent.change(screen.getByLabelText("搜索服务商"), { target: { value: "exa" } });

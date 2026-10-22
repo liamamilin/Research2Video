@@ -51,7 +51,7 @@ function looksLikeSecret(value: string): boolean {
 
 // Each search provider's own key variable. ``search.api_key_env`` is Parallel's; the others live in
 // ``search.api_key_envs`` (core/search.py), so switching provider switches which variable is read.
-const SEARCH_PROVIDERS = ["parallel", "exa", "doubao", "tavily", "brave", "serper", "duckduckgo"];
+const SEARCH_PROVIDERS = ["parallel", "exa", "exa_mcp", "doubao", "tavily", "brave", "serper", "duckduckgo"];
 const SEARCH_KEY_ENVS: Record<string, string> = {
   parallel: "PARALLEL_API_KEY", exa: "EXA_API_KEY", doubao: "DOUBAO_SEARCH_API_KEY", tavily: "TAVILY_API_KEY", brave: "BRAVE_API_KEY",
   serper: "SERPER_API_KEY",
@@ -375,7 +375,7 @@ export function SystemConfig() {
   const searchProvider = get(["search", "provider"], "parallel");
   const searchEnvMap = get(["search", "api_key_envs"], {}) || {};
   const searchKeyPath = searchProvider === "parallel" ? ["search", "api_key_env"] : ["search", "api_key_envs", searchProvider];
-  const searchEnv = searchProvider === "duckduckgo" ? ""
+  const searchEnv = (searchProvider === "duckduckgo" || searchProvider === "exa_mcp") ? ""
     : (searchProvider === "parallel" ? get(["search", "api_key_env"], SEARCH_KEY_ENVS.parallel)
       : searchEnvMap[searchProvider] || "");
   const pickSearchProvider = (next: string) => {
@@ -763,12 +763,14 @@ export function SystemConfig() {
               <Field label="模式">
                 <div>{selectInput(["search", "mode"], ["advanced", "basic", "fast", "turbo"])}</div>
               </Field>
-              {searchProvider !== "duckduckgo" ? (
+              {searchProvider !== "duckduckgo" && searchProvider !== "exa_mcp" ? (
                 <Field label="密钥环境变量" hint="当前服务商">
                   <div>{textInput(searchKeyPath, SEARCH_KEY_ENVS[searchProvider] || "", true)}</div>
                 </Field>
               ) : (
-                <div className="text-[11px] text-text-muted self-end pb-2">DuckDuckGo 无需密钥。</div>
+                <div className="text-[11px] text-text-muted self-end pb-2">
+                  {searchProvider === "exa_mcp" ? "Exa 公开端点无需密钥（免费，限流不明，适合兜底）。" : "DuckDuckGo 无需密钥。"}
+                </div>
               )}
               <Field label="每次结果数">
                 <div>{numInput(["search", "max_results"], { placeholder: "10" })}</div>
