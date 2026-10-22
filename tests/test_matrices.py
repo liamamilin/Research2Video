@@ -49,8 +49,10 @@ def test_every_existing_job_renders_the_prompt_it_rendered_before_matrices():
             f"{name} renders a different prompt than before matrices. If its prompt was edited on purpose, take the "
             f"snapshot again: python scripts/snapshot_job_prompts.py")
         # its event memory is unchanged too, except that since 2026-10-22 the two AI matrices (the 26 older Jobs and
-        # the 5 media Jobs) leave each other's events out; no other matrix exists
-        assert matrices.jobs_of_other_matrices(name, config) <= AI_MEDIA | set(matrices.load_all(config)["ai"].jobs), name
+        # the 5 media Jobs) leave each other's events out, and so do the ten feed matrices (tech ... geography)
+        loaded = matrices.load_all(config)
+        feeds = {j for key, m in loaded.items() if key not in ("ai", "ai_media") for j in m.jobs}
+        assert matrices.jobs_of_other_matrices(name, config) <= AI_MEDIA | set(loaded["ai"].jobs) | feeds, name
         checked += 1
     assert checked >= 24
 

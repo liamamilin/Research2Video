@@ -1,0 +1,7 @@
+# 矩阵：科学与知识百科（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
+name: 科学与知识百科
+domain: 科学与知识
+keywords: []
+jobs:
+- science/science_daily
+- science/science_weekly

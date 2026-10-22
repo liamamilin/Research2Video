@@ -14,6 +14,9 @@ with web-search results. Specs are strings:
 * ``aa:models``            Artificial Analysis model leaderboard (intelligence, price, speed)
 * ``wb:CODE[@ISO;ISO]``   World Bank indicator: the two latest yearly values for the world and nine large economies
 
+A Job's ``sources`` may also name entries of the registry (``config/sources.yaml``): ``source:<id>`` is one source,
+``tag:<tag>`` every source carrying that tag, in registry order. ``resolve`` turns them into the specs above.
+
 A page that answers 200 but yields no items is a failure, not "no news": ``fetch_all_strict`` reports it, and raises
 ``SourcesUnavailableError`` when nothing at all came back.
 """
@@ -368,6 +371,66 @@ _ADAPTERS = {
     "aa": fetch_aa_models,
     "wb": fetch_worldbank,
 }
+
+
+REGISTRY_FILE = "sources.yaml"
+
+
+class RegistryError(ValueError):
+    """The registry is unreadable, or a Job names a source or tag that is not in it."""
+
+
+def load_registry(config_dir: str = "config") -> dict[str, dict]:
+    """``{id: {name, spec, tags, note}}`` from ``<config_dir>/sources.yaml``; empty when the file does not exist."""
+    import yaml
+
+    path = os.path.join(config_dir, REGISTRY_FILE)
+    if not os.path.isfile(path):
+        return {}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            raw = yaml.safe_load(fh) or {}
+    except (OSError, yaml.YAMLError) as exc:
+        raise RegistryError(f"{REGISTRY_FILE} 读不了：{exc}") from exc
+    if not isinstance(raw, dict):
+        raise RegistryError(f"{REGISTRY_FILE} 顶层应该是「id: 配置」")
+    out: dict[str, dict] = {}
+    for key, entry in raw.items():
+        entry = entry if isinstance(entry, dict) else {}
+        spec = str(entry.get("spec") or "").strip()
+        kind = spec.partition(":")[0].strip().lower()
+        if kind not in _ADAPTERS or not spec.partition(":")[2].strip():
+            raise RegistryError(f"信息源 {key} 的 spec 不对：{spec or '（空）'}")
+        tags = entry.get("tags") or []
+        out[str(key)] = {"name": str(entry.get("name") or key), "spec": spec,
+                         "tags": [str(t) for t in tags] if isinstance(tags, list) else [], "note": str(entry.get("note") or "")}
+    return out
+
+
+def resolve(specs: list[str], config_dir: str = "config") -> list[str]:
+    """Replace ``source:<id>`` and ``tag:<tag>`` by the registry's specs; other specs pass through. Order kept, no repeats.
+
+    Raises ``RegistryError`` for an id or tag the registry does not have: a Job must not run on fewer sources than it
+    asked for without anyone being told."""
+    if not any(str(s).startswith(("source:", "tag:")) for s in specs or []):
+        return list(specs or [])
+    registry = load_registry(config_dir)
+    out: list[str] = []
+    for spec in specs:
+        spec = str(spec).strip()
+        kind, _, target = spec.partition(":")
+        if kind == "source":
+            if target.strip() not in registry:
+                raise RegistryError(f"信息源注册表里没有 {target.strip()}")
+            found = [registry[target.strip()]["spec"]]
+        elif kind == "tag":
+            found = [e["spec"] for e in registry.values() if target.strip() in e["tags"]]
+            if not found:
+                raise RegistryError(f"信息源注册表里没有标签 {target.strip()} 的源")
+        else:
+            found = [spec]
+        out += [f for f in found if f not in out]
+    return out
 
 
 def fetch_source(spec: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:

@@ -40,7 +40,7 @@ def test_a_recipe_says_it_can_be_written_from_a_whole_report():
     every = recipes.expanded(str(ROOT / "config"))
     assert {k for k, r in every.items() if r.whole_report} == {
         "deep_dive", "ai-non_tech-deep_dive-long", "report_digest", "ai-non_tech-digest-long", "top_finding",
-        "ai-non_tech-headline-short", "action_list", "ai-non_tech-action_list-short"}
+        "ai-non_tech-headline-short", "action_list", "ai-non_tech-action_list-short", "topic_digest"}
     assert not every["flash"].whole_report and not every["ai-developer-roundup-long"].whole_report
 
 

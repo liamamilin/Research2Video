@@ -178,3 +178,70 @@ def test_fetch_worldbank_gives_the_latest_value_with_the_year_before_per_country
     assert china.url == "https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG?locations=CHN" and china.provider == "worldbank"
     world = by_title["World · GDP growth (annual %)"]  # a missing year is skipped, not shown as 0
     assert world.publish_date == "2024" and "2025" not in world.excerpts[0]
+
+
+REGISTRY = """
+a:
+  name: Feed A
+  spec: rss:https://a.example/feed
+  tags: [tech, robotics]
+b:
+  name: Feed B
+  spec: rss:https://b.example/feed
+  tags: [tech]
+c:
+  name: Data C
+  spec: wb:NY.GDP.MKTP.KD.ZG
+  tags: [economy]
+  note: 官方统计
+"""
+
+
+def _registry(tmp_path, text=REGISTRY):
+    (tmp_path / "sources.yaml").write_text(text, encoding="utf-8")
+    return str(tmp_path)
+
+
+def test_resolve_expands_ids_and_tags_in_order_without_repeats(tmp_path):
+    config = _registry(tmp_path)
+    assert sources.resolve(["source:b", "tag:tech", "gh_new:llm", "source:a"], config) == [
+        "rss:https://b.example/feed", "rss:https://a.example/feed", "gh_new:llm"]
+    assert sources.resolve(["rss:https://x/feed", "tldr:ai"], config) == ["rss:https://x/feed", "tldr:ai"]  # nothing to look up
+    assert sources.resolve(["rss:https://x/feed"], str(tmp_path / "missing")) == ["rss:https://x/feed"]  # no registry needed
+
+
+def test_resolve_refuses_a_source_or_tag_the_registry_does_not_have(tmp_path):
+    config = _registry(tmp_path)
+    for spec in ("source:nope", "tag:nothing"):
+        try:
+            sources.resolve([spec], config)
+        except sources.RegistryError as exc:
+            assert spec.split(":")[1] in str(exc)
+        else:
+            raise AssertionError(f"{spec} should have been refused")
+
+
+def test_load_registry_rejects_a_spec_no_adapter_reads(tmp_path):
+    bad = _registry(tmp_path, "x:\n  name: X\n  spec: ftp://example.com/a\n")
+    try:
+        sources.load_registry(bad)
+    except sources.RegistryError as exc:
+        assert "x" in str(exc)
+    else:
+        raise AssertionError("a spec without a known adapter must not load")
+    assert sources.load_registry(_registry(tmp_path))["c"]["note"] == "官方统计"
+
+
+def test_the_shipped_registry_loads_and_every_tag_a_job_uses_exists():
+    import yaml
+
+    registry = sources.load_registry("config")
+    assert len(registry) > 50
+    tags = {t for e in registry.values() for t in e["tags"]}
+    for path in __import__("glob").glob("jobs/**/*.yaml", recursive=True):
+        job = yaml.safe_load(open(path, encoding="utf-8")) or {}
+        for spec in job.get("sources") or []:
+            if str(spec).startswith("tag:"):
+                assert spec[4:] in tags, f"{path}: {spec}"
+            if str(spec).startswith("source:"):
+                assert spec[7:] in registry, f"{path}: {spec}"

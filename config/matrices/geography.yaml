@@ -1,0 +1,7 @@
+# 矩阵：地理与世界探索（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
+name: 地理与世界探索
+domain: 地理与世界
+keywords: []
+jobs:
+- geography/geography_daily
+- geography/geography_weekly

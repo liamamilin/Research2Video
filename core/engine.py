@@ -354,9 +354,9 @@ class ResearchEngine:
         is never asked to write from memory; sources that failed while others answered are named in the block, so the
         report states what it did not cover."""
         from .search import SearchClient
-        from .sources import fetch_all_strict
+        from .sources import fetch_all_strict, resolve
 
-        items, stats = fetch_all_strict(list(job.get("sources") or []),
+        items, stats = fetch_all_strict(resolve(list(job.get("sources") or []), self.config_dir),
                                         limit_per_source=int(job.get("sources_limit", 8)))
         failed = [f"- {spec}: {state}" for spec, state in stats.items() if not isinstance(state, int)]
         header = ("## Fetched sources\n\n" + "\n".join(
@@ -372,10 +372,10 @@ class ResearchEngine:
             return ""
         try:
             from .search import SearchClient
-            from .sources import fetch_all
+            from .sources import fetch_all, resolve
 
             limit = int(job.get("sources_limit", 8))
-            results = fetch_all(list(specs), limit_per_source=limit)
+            results = fetch_all(resolve(list(specs), self.config_dir), limit_per_source=limit)
             if not results:
                 return ""
             logger.info("Sources pre-fetched: %d items from %d spec(s)",
@@ -383,6 +383,10 @@ class ResearchEngine:
             return ("## Pre-fetched subscription sources\n\n"
                     + SearchClient.format_results(results))
         except Exception as exc:  # noqa: BLE001 - sources are optional context
+            from .sources import RegistryError
+
+            if isinstance(exc, RegistryError):
+                raise  # a name the registry does not have is a mistake in the Job, not a source that was down
             logger.warning("Sources pre-fetch skipped: %s", exc)
             return ""
 

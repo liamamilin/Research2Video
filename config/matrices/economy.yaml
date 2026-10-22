@@ -1,0 +1,7 @@
+# 矩阵：财经与经济（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
+name: 财经与经济
+domain: 财经与经济
+keywords: []
+jobs:
+- economy/economy_daily
+- economy/economy_weekly

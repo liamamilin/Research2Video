@@ -1,0 +1,333 @@
+# 信息源注册表：每个源只在这里写一次；Job 的 sources 里用 `source:<id>` 引用单个源，用 `tag:<标签>` 引用一类
+# （也可以继续直接写 `rss:网址` 这样的完整写法）。标签没有固定含义，Job 要什么就按什么标签取。
+# spec 的写法见 core/sources.py 开头；note 写这个源的限制：只有标题、付费、版权、抓取偶尔失败等。
+# 2026-10-22 逐个用项目自己的抓取器试过，下面的都抓到了条目。
+
+# --- AI（AI 视频栏目现有 Job 用的；Job 里还是完整写法，后面改引用也不影响抓取） ---
+tldr_ai:
+  name: TLDR AI
+  spec: tldr:ai
+  tags: [ai]
+  note: 周末没有新一期，抓最近几天的
+therundown:
+  name: The Rundown AI
+  spec: rss:https://www.therundown.ai/feed
+  tags: [ai]
+import_ai:
+  name: Import AI
+  spec: rss:https://importai.substack.com/feed
+  tags: [ai]
+hf_papers:
+  name: Hugging Face 每日论文
+  spec: hf_papers:daily
+  tags: [ai, science]
+hf_models:
+  name: Hugging Face 热门模型
+  spec: hf_models:trending
+  tags: [ai]
+aa_models:
+  name: Artificial Analysis 模型榜
+  spec: aa:models
+  tags: [ai]
+gh_new_llm:
+  name: GitHub 新项目 · llm
+  spec: gh_new:llm
+  tags: [ai, software]
+gh_new_agent:
+  name: GitHub 新项目 · agent
+  spec: gh_new:agent
+  tags: [ai, software]
+
+# --- 科技 ---
+ieee_spectrum:
+  name: IEEE Spectrum
+  spec: rss:https://spectrum.ieee.org/feeds/feed.rss
+  tags: [tech, industry]
+ieee_robotics:
+  name: IEEE Spectrum · 机器人
+  spec: rss:https://spectrum.ieee.org/feeds/topic/robotics.rss
+  tags: [tech, robotics]
+ieee_semiconductors:
+  name: IEEE Spectrum · 半导体
+  spec: rss:https://spectrum.ieee.org/feeds/topic/semiconductors.rss
+  tags: [tech, industry, semiconductors]
+ieee_energy:
+  name: IEEE Spectrum · 能源
+  spec: rss:https://spectrum.ieee.org/feeds/topic/energy.rss
+  tags: [tech, industry, energy]
+mit_tech_review:
+  name: MIT Technology Review
+  spec: rss:https://www.technologyreview.com/feed/
+  tags: [tech]
+  note: 部分文章在付费墙后，订阅源里只有摘要
+mit_news:
+  name: MIT News
+  spec: rss:https://news.mit.edu/rss/feed
+  tags: [tech, science]
+nasa:
+  name: NASA
+  spec: rss:https://www.nasa.gov/feed/
+  tags: [tech, space]
+  note: 含每日天文图（APOD）这类图片条目
+ars_technica:
+  name: Ars Technica
+  spec: rss:https://feeds.arstechnica.com/arstechnica/index
+  tags: [tech, software]
+ars_gadgets:
+  name: Ars Technica · 数码
+  spec: rss:https://feeds.arstechnica.com/arstechnica/gadgets
+  tags: [consumer]
+nature:
+  name: Nature
+  spec: rss:https://www.nature.com/nature.rss
+  tags: [science, tech]
+  note: 订阅源只有标题和日期，没有摘要
+
+# --- 商业 ---
+mckinsey:
+  name: McKinsey Insights
+  spec: rss:https://www.mckinsey.com/insights/rss
+  tags: [business, economy]
+  note: 咨询公司的二手研究，数字要追溯原始披露
+yc_blog:
+  name: Y Combinator Blog
+  spec: rss:https://www.ycombinator.com/blog/rss
+  tags: [business]
+crunchbase_news:
+  name: Crunchbase News
+  spec: rss:https://news.crunchbase.com/feed/
+  tags: [business]
+fast_company:
+  name: Fast Company
+  spec: rss:https://www.fastcompany.com/latest/rss
+  tags: [business]
+sec_press:
+  name: SEC 新闻稿
+  spec: rss:https://www.sec.gov/news/pressreleases.rss
+  tags: [business, economy]
+  note: 只是监管动作；上市公司财报原文（EDGAR）需要带联系方式的请求头，还没接
+
+# --- 财经 ---
+owid:
+  name: Our World in Data
+  spec: rss:https://ourworldindata.org/atom.xml
+  tags: [economy, science, geography]
+bis:
+  name: BIS 出版物
+  spec: rss:https://www.bis.org/doclist/bis_fsi_publs.rss
+  tags: [economy]
+fed_press:
+  name: 美联储新闻稿
+  spec: rss:https://www.federalreserve.gov/feeds/press_all.xml
+  tags: [economy]
+ecb_press:
+  name: 欧洲央行新闻稿
+  spec: rss:https://www.ecb.europa.eu/rss/press.html
+  tags: [economy]
+ft_home:
+  name: Financial Times
+  spec: rss:https://www.ft.com/rss/home
+  tags: [economy, business]
+  note: 付费墙，订阅源只有标题和一句摘要，只能当线索，不能当事实依据
+wb_gdp_growth:
+  name: 世界银行 · GDP 增速
+  spec: wb:NY.GDP.MKTP.KD.ZG
+  tags: [economy, data]
+  note: 官方统计，最近一年可能是估计值，之后会修订
+wb_inflation:
+  name: 世界银行 · 通胀率
+  spec: wb:FP.CPI.TOTL.ZG
+  tags: [economy, data]
+  note: 消费者价格年增长率，各国口径略有不同
+wb_unemployment:
+  name: 世界银行 · 失业率
+  spec: wb:SL.UEM.TOTL.ZS
+  tags: [economy, data]
+  note: 按国际劳工组织口径的模型估计值
+
+# --- 科学 ---
+quanta:
+  name: Quanta Magazine
+  spec: rss:https://api.quantamagazine.org/feed/
+  tags: [science]
+science_news:
+  name: Science 新闻
+  spec: rss:https://www.science.org/rss/news_current.xml
+  tags: [science]
+phys_org:
+  name: Phys.org
+  spec: rss:https://phys.org/rss-feed/
+  tags: [science]
+  note: 多是大学和机构新闻稿的改写
+sciencedaily:
+  name: ScienceDaily
+  spec: rss:https://www.sciencedaily.com/rss/all.xml
+  tags: [science]
+  note: 多是大学和机构新闻稿的改写
+
+# --- 历史 ---
+world_history:
+  name: World History Encyclopedia
+  spec: rss:https://www.worldhistory.org/rss/
+  tags: [history]
+smithsonian_history:
+  name: Smithsonian · 历史
+  spec: rss:https://www.smithsonianmag.com/rss/history/
+  tags: [history]
+jstor_daily:
+  name: JSTOR Daily
+  spec: rss:https://daily.jstor.org/feed/
+  tags: [history, culture]
+loc_blog:
+  name: 美国国会图书馆博客
+  spec: rss:https://blogs.loc.gov/loc/feed/
+  tags: [history]
+medievalists:
+  name: Medievalists.net
+  spec: rss:https://www.medievalists.net/feed/
+  tags: [history]
+
+# --- 软件 ---
+product_hunt:
+  name: Product Hunt
+  spec: rss:https://www.producthunt.com/feed
+  tags: [software]
+  note: 条目多是一句话简介，没有细节
+hn_show:
+  name: Show HN
+  spec: rss:https://hnrss.org/show
+  tags: [software]
+github_blog:
+  name: GitHub Blog
+  spec: rss:https://github.blog/feed/
+  tags: [software]
+changelog:
+  name: Changelog
+  spec: rss:https://changelog.com/feed
+  tags: [software]
+lwn:
+  name: LWN.net
+  spec: rss:https://lwn.net/headlines/rss
+  tags: [software]
+  note: 订阅者专享的文章只有标题（标题带 [$]）
+gh_new_selfhosted:
+  name: GitHub 新项目 · 自托管
+  spec: gh_new:self-hosted
+  tags: [software]
+  note: 近 7 天新建的仓库，按 star 排序，很多还是空壳
+
+# --- 消费科技 ---
+notebookcheck_reviews:
+  name: Notebookcheck 评测
+  spec: rss:https://www.notebookcheck.net/RSS-Feed-Notebook-Reviews.8156.0.html
+  tags: [consumer]
+gsmarena:
+  name: GSMArena
+  spec: rss:https://www.gsmarena.com/rss-news-reviews.php3
+  tags: [consumer]
+toms_hardware:
+  name: Tom's Hardware
+  spec: rss:https://www.tomshardware.com/feeds/all
+  tags: [consumer]
+  note: 什么都有，包含非硬件新闻
+ifixit_news:
+  name: iFixit 新闻
+  spec: rss:https://www.ifixit.com/News/feed
+  tags: [consumer]
+iihs:
+  name: IIHS 新闻
+  spec: rss:https://www.iihs.org/rss/news
+  tags: [consumer, auto]
+engadget:
+  name: Engadget
+  spec: rss:https://www.engadget.com/rss.xml
+  tags: [consumer]
+
+# --- 产业与制造 ---
+nist_news:
+  name: NIST 新闻
+  spec: rss:https://www.nist.gov/news-events/news/rss.xml
+  tags: [industry, science]
+semi:
+  name: SEMI
+  spec: rss:https://www.semi.org/en/rss.xml
+  tags: [industry, semiconductors]
+  note: 多是展会和活动公告
+supply_chain_dive:
+  name: Supply Chain Dive
+  spec: rss:https://www.supplychaindive.com/feeds/news/
+  tags: [industry]
+manufacturing_dive:
+  name: Manufacturing Dive
+  spec: rss:https://www.manufacturingdive.com/feeds/news/
+  tags: [industry]
+eetimes:
+  name: EE Times
+  spec: rss:https://www.eetimes.com/feed/
+  tags: [industry, semiconductors]
+semiconductor_digest:
+  name: Semiconductor Digest
+  spec: rss:https://sst.semiconductor-digest.com/feed/
+  tags: [industry, semiconductors]
+
+# --- 文化与艺术 ---
+hyperallergic:
+  name: Hyperallergic
+  spec: rss:https://hyperallergic.com/feed/
+  tags: [culture]
+colossal:
+  name: Colossal
+  spec: rss:https://www.thisiscolossal.com/feed/
+  tags: [culture]
+open_culture:
+  name: Open Culture
+  spec: rss:https://www.openculture.com/feed
+  tags: [culture]
+artnet:
+  name: Artnet News
+  spec: rss:https://news.artnet.com/feed
+  tags: [culture]
+smithsonian_arts:
+  name: Smithsonian · 艺术与文化
+  spec: rss:https://www.smithsonianmag.com/rss/arts-culture/
+  tags: [culture]
+  note: 条目很少（常常只有几条）
+pitchfork:
+  name: Pitchfork 新闻
+  spec: rss:https://pitchfork.com/feed/feed-news/rss
+  tags: [culture, music]
+dezeen:
+  name: Dezeen
+  spec: rss:https://www.dezeen.com/feed/
+  tags: [culture, design]
+jazztimes:
+  name: JazzTimes
+  spec: rss:https://jazztimes.com/feed/
+  tags: [culture, music]
+
+# --- 地理 ---
+unesco_wh:
+  name: UNESCO 世界遗产新闻
+  spec: rss:https://whc.unesco.org/en/news/rss/
+  tags: [geography, culture]
+atlas_obscura:
+  name: Atlas Obscura
+  spec: rss:https://www.atlasobscura.com/feeds/latest
+  tags: [geography]
+smithsonian_travel:
+  name: Smithsonian · 旅行
+  spec: rss:https://www.smithsonianmag.com/rss/travel/
+  tags: [geography]
+mongabay:
+  name: Mongabay
+  spec: rss:https://news.mongabay.com/feed/
+  tags: [geography, science]
+geographical:
+  name: Geographical
+  spec: rss:https://geographical.co.uk/feed
+  tags: [geography]
+usgs_quakes:
+  name: USGS · 本周重大地震
+  spec: rss:https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.atom
+  tags: [geography, data]
+  note: 一周里常常只有几条

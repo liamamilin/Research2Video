@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes, Layers } from "lucide-react";
+import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes, Layers, Rss } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import { AccountModal } from "./AccountModal";
@@ -25,6 +25,7 @@ const engineItems = [
 // 不经过视频配置、直接挑选题和改配方：仍然能用，只是不再是必经的一步
 const advancedItems = [
   { to: "/topics", label: "选题", icon: Lightbulb },
+  { to: "/sources", label: "信息源", icon: Rss },
   { to: "/video-recipes", label: "文稿配方", icon: BookOpen },
 ];
 

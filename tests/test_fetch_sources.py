@@ -99,6 +99,7 @@ def test_the_engine_names_failed_sources_in_the_prompt_block(monkeypatch):
     hit = SearchResult(title="t", url="https://a.test", excerpts=["x"], provider="tldr")
     _stub(monkeypatch, {"a": [hit], "b": RuntimeError("HTTP 500")})
     engine = ResearchEngine.__new__(ResearchEngine)
+    engine.config_dir = "config"
     block, (items, stats) = engine._fetch_sources_strict({"sources": ["a", "b"]})
     assert "a: 1 items" in block and "b: 失败：HTTP 500" in block and "不得写成覆盖了它们" in block and items
 
