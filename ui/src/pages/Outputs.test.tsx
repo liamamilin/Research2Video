@@ -63,10 +63,29 @@ describe("Outputs", () => {
     expect(titles()).toEqual(["文稿 新的一篇"]);
   });
 
+  it("shows how far a finished script got with its video, not just that it was approved", async () => {
+    open();
+    const done = await screen.findByLabelText("文稿 新的一篇"); // approved with a finished render
+    expect(within(done).getByText("成片完成")).toBeTruthy();
+    expect(within(done).queryByText("已定稿")).toBeNull();
+    expect(within(screen.getByLabelText("文稿 旧的一篇")).getByText("待审稿")).toBeTruthy(); // no video yet: the script's own status
+  });
+
+  it("puts the matrix with the newest script first and marks a put-away matrix", async () => {
+    const wide = { ...DATA, matrices: [{ key: "old", name: "旧矩阵", archived: true }, { key: "ai", name: "AI 矩阵" }],
+      scripts: [...DATA.scripts, { ...base, id: "z", title: "旧矩阵的", status: "APPROVED", created_at: old, matrix: "old", job: "x/y", report_path: "output/x.md", report_date: "2026-08-01" }] };
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(wide) }) as Response));
+    open();
+    await screen.findByLabelText("矩阵 ai");
+    const order = screen.getAllByLabelText(/^矩阵 /).map((e) => e.getAttribute("aria-label"));
+    expect(order.indexOf("矩阵 ai")).toBeLessThan(order.indexOf("矩阵 old"));
+    expect(within(screen.getByLabelText("矩阵 old")).getByText("已归档")).toBeTruthy();
+  });
+
   it("asks for archived scripts when told to", async () => {
     open();
     await screen.findByLabelText("Job AI Flash Discovery");
-    fireEvent.click(screen.getByLabelText("看已归档的"));
+    fireEvent.click(screen.getByLabelText(/看已归档的/));
     await screen.findByLabelText("Job AI Flash Discovery");
     expect(urls.at(-1)).toContain("/api/outputs?archived=true");
   });

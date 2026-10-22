@@ -33,7 +33,7 @@ export interface OutputJob {
 export interface Outputs {
   scripts: OutputScript[];
   jobs: OutputJob[];
-  matrices: { key: string; name: string }[];
+  matrices: { key: string; name: string; archived?: boolean }[]; // 归档的矩阵：它的文稿只在「看已归档的」里
 }
 
 export const listOutputs = (archived = false) => api<Outputs>(`/api/outputs${archived ? "?archived=true" : ""}`);

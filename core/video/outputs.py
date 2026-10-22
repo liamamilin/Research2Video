@@ -81,7 +81,7 @@ def count_by_config(config_dir: str, jobs_dir: str) -> dict[str, int]:
 
 
 def collect(config_dir: str, jobs_dir: str, archived: bool = False) -> dict:
-    """Every script (archived ones with ``archived``) with where it came from, and each Job's reports no script was
+    """Every script (the put-away ones, and those of a put-away matrix, with ``archived``) with where it came from, and each Job's reports no script was
     written from. A report counts as written from when any script came from it, archived or not."""
     sources = topic_store.sources(jobs_dir)
     every_matrix = matrices.load_all(config_dir)
@@ -92,10 +92,12 @@ def collect(config_dir: str, jobs_dir: str, archived: bool = False) -> dict:
     attributed = _attribute(config_dir, jobs_dir, configs, sources, owner)
     used = {a["origin"].get("report_path") for a in attributed}
 
+    owner_archived = lambda key: every_matrix[key].archived if key in every_matrix else False  # noqa: E731
     rows = []
     for a in attributed:
         script, origin, config = a["script"], a["origin"], a["production"]
-        if bool(script.get("archived")) != archived:
+        away = bool(script.get("archived")) or bool(a["matrix"] and owner_archived(a["matrix"]))  # put away itself, or in a put-away matrix
+        if away != archived:
             continue
         version = store.get_version(script["id"], script["current_version"]) if script["current_version"] else None
         rows.append({
@@ -126,5 +128,5 @@ def collect(config_dir: str, jobs_dir: str, archived: bool = False) -> dict:
     return {
         "scripts": rows,
         "jobs": list(jobs.values()),
-        "matrices": [{"key": m.key, "name": m.name} for m in every_matrix.values()],
+        "matrices": [{"key": m.key, "name": m.name, "archived": m.archived} for m in every_matrix.values()],
     }

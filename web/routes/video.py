@@ -513,7 +513,8 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
 @router.get("/scripts")
 def list_scripts(limit: int = 100, archived: bool = False, user=Depends(require_viewer)) -> list[dict]:
     published = store.published_script_ids()
-    return [_script_summary(s, published)
+    renders = store.latest_render_by_script()
+    return [{**_script_summary(s, published), "render": renders.get(s["id"])}
             for s in store.list_scripts(limit=min(max(limit, 1), 500), archived=archived)]
 
 

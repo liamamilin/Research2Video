@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -38,6 +38,38 @@ export const STATUS_CLASS: Record<ScriptStatus, string> = {
   FAILED: "bg-danger/15 text-danger border-danger/30",
 };
 
+/** 文稿在流水线上走到哪：写稿的几步看文稿状态，定稿之后看它出片到哪一步 */
+export type Stage = ScriptStatus | "rendering" | "rendered" | "render_failed" | "published";
+const RENDERING = ["SUBMITTING", "QUEUED", "RUNNING", "DOWNLOADING"];
+
+export function stageOf(s: { status: ScriptStatus; published?: boolean; render?: { status: string } | null }): Stage {
+  if (s.published) return "published";
+  if (s.status !== "APPROVED" || !s.render) return s.status;
+  if (s.render.status === "COMPLETED") return "rendered";
+  return RENDERING.includes(s.render.status) ? "rendering" : s.render.status === "FAILED" ? "render_failed" : s.status;
+}
+
+export const STAGE_LABEL: Record<Stage, string> = {
+  ...STATUS_LABEL, APPROVED: "已定稿", rendering: "出片中", rendered: "成片完成", render_failed: "出片失败", published: "已发布",
+};
+export const STAGE_CLASS: Record<Stage, string> = {
+  ...STATUS_CLASS,
+  rendering: "bg-accent/15 text-accent border-accent/30",
+  rendered: "bg-success/15 text-success border-success/30",
+  render_failed: "bg-danger/15 text-danger border-danger/30",
+  published: "bg-success/15 text-success border-success/30",
+};
+
+/** 列表按天分组的标题 */
+export function dayLabel(iso: string | null | undefined): string {
+  if (!iso) return "更早";
+  const t = new Date(iso.replace(/([+-]\d{2})(\d{2})$/, "$1:$2"));
+  if (Number.isNaN(t.getTime())) return iso.slice(0, 10);
+  const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const gap = Math.round((day(new Date()) - day(t)) / 86400000);
+  return gap === 0 ? "今天" : gap === 1 ? "昨天" : `${t.getMonth() + 1} 月 ${t.getDate()} 日`;
+}
+
 export const FORM_LABEL: Record<string, string> = {
   auto: "自动选择",
   information_motion: "信息动效",
@@ -50,6 +82,8 @@ export const STATUS_NOTE: Partial<Record<VideoCell["status"], string>> = {
 };
 
 const IN_FLIGHT: ScriptStatus[] = ["RESEARCHING", "WRITING"];
+// 状态按钮的顺序：先写稿，再出片，最后发布；失败的放最后
+const CHIPS = ["RESEARCHING", "PLAN_READY", "DRAFT", "APPROVED", "rendering", "rendered", "render_failed", "published", "FAILED"];
 
 export function minutes(seconds: number | null | undefined): string {
   if (!seconds) return "—";
@@ -81,6 +115,8 @@ export function VideoScriptsPage() {
   const [tab, setTab] = useState<"topics" | "manual">("topics");
   const [busy, setBusy] = useState<string | null>(null);
   const [manual, setManual] = useState({ title: "", angle: "", audience: "" });
+  // 新建的表单很长，平时收起来，让列表在最上面；从选题页带着选题过来时直接展开
+  const [creating, setCreating] = useState(Boolean(params.get("topic") || params.get("topics") || params.get("cell")));
 
   const showArchived = statusFilter === "archived";
   const load = useCallback(async () => {
@@ -110,6 +146,12 @@ export function VideoScriptsPage() {
   }, [inFlight, showArchived]);
 
   const { values: f } = filters;
+  // 研究和写稿合成一格：对用户来说都是「还在写」
+  const chipOf = (x: VideoScriptSummary): string => {
+    const stage = stageOf(x);
+    return stage === "WRITING" ? "RESEARCHING" : stage;
+  };
+  const chipCount = (key: string) => (scripts ?? []).filter((x) => chipOf(x) === key).length;
   const shownScripts = (scripts ?? []).filter(
     (x) =>
       (!f.column || x.column_key === f.column) &&
@@ -117,11 +159,9 @@ export function VideoScriptsPage() {
       (!f.source || (f.source === "auto") === Boolean(x.auto)) &&
       inRange(x.created_at, f.range) &&
       matchesText(f.q, x.title, x.topic?.title) &&
-      (!f.status || showArchived ||
-        (f.status === "published" ? x.published : f.status === "RESEARCHING" ? IN_FLIGHT.includes(x.status) : x.status === f.status)),
-  );
+      (!f.status || showArchived || chipOf(x) === f.status),
+  ).sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""));
   const facets: Facet[] = [
-    { key: "status", label: "状态", options: [["RESEARCHING", "研究/写稿中"], ["PLAN_READY", "方案待确认"], ["DRAFT", "草稿"], ["APPROVED", "已定稿"], ["published", "已发布"], ["FAILED", "失败"], ["archived", "已归档"]].map(([value, label]) => ({ value, label })) },
     { key: "column", label: "栏目格子", options: Array.from(new Set((scripts ?? []).map((x) => x.column_key))).map((key) => ({ value: key, label: cells.find((c) => c.key === key)?.label ?? key })) },
     { key: "tier", label: "可信度", options: (Object.keys(TIER_LABEL) as (keyof typeof TIER_LABEL)[]).map((k) => ({ value: k, label: TIER_LABEL[k] })) },
     { key: "source", label: "来源", options: [{ value: "auto", label: "自动流水线" }, { value: "manual", label: "手动创建" }] },
@@ -180,10 +220,18 @@ export function VideoScriptsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold flex-1">视频文稿</h1>
+        <div className="flex-1">
+          <h1 className="text-lg font-semibold">视频文稿</h1>
+          <p className="text-xs text-text-muted">自动流水线写的和手动写的都在这里；定稿之后的一列看它出片到哪一步。</p>
+        </div>
+        {canEdit && cell && column ? (
+          <button className={cn("btn text-sm", creating ? "" : "btn-primary")} aria-expanded={creating} onClick={() => setCreating(!creating)}>
+            {creating ? "收起新建" : "＋ 新建文稿"}
+          </button>
+        ) : null}
       </div>
 
-      {canEdit && cell && column ? (
+      {canEdit && cell && column && creating ? (
         <section className="card space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-medium">新建</h2>
@@ -417,6 +465,24 @@ export function VideoScriptsPage() {
         </section>
       ) : null}
 
+      <div className="flex flex-wrap items-center gap-2" aria-label="状态">
+        {([["", "全部"], ...CHIPS.map((c) => [c, c === "RESEARCHING" ? "研究/写稿中" : c === "DRAFT" ? "待审稿" : STAGE_LABEL[c as Stage]]), ["archived", "已归档"]] as [string, string][])
+          .filter(([key]) => key === "" || key === "archived" || f.status === key || chipCount(key) > 0)
+          .map(([key, label]) => (
+            <button
+              key={key}
+              aria-pressed={f.status === key}
+              onClick={() => filters.set("status", key)}
+              className={cn(
+                "badge border cursor-pointer",
+                f.status === key ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover",
+              )}
+            >
+              {label}
+              {key !== "archived" ? ` ${key === "" ? (showArchived ? "" : (scripts ?? []).length) : chipCount(key)}` : ""}
+            </button>
+          ))}
+      </div>
       <FilterBar facets={facets} filters={filters} shown={shownScripts.length} total={(scripts ?? []).length} />
 
       <section className="card p-0 overflow-hidden">
@@ -439,19 +505,22 @@ export function VideoScriptsPage() {
               </tr>
             </thead>
             <tbody>
-              {shownScripts.map((s) => (
-                <tr key={s.id} className="border-b border-border last:border-0 hover:bg-bg-hover">
+              {shownScripts.map((s, i) => (
+                <Fragment key={s.id}>
+                {i === 0 || dayLabel(s.created_at) !== dayLabel(shownScripts[i - 1].created_at) ? (
+                  <tr className="bg-bg-hover/50"><td colSpan={6} className="px-4 py-1 text-xs text-text-muted">{dayLabel(s.created_at)}</td></tr>
+                ) : null}
+                <tr className="border-b border-border last:border-0 hover:bg-bg-hover">
                   <td className="px-4 py-2">
                     <Link to={`/video/${s.id}`} className="text-accent hover:underline">
                       {s.title}
                     </Link>
-                    {s.published ? <span className="badge border border-success/30 bg-success/15 text-success ml-2">已发布</span> : null}
                     {s.auto ? <span className="badge border border-border text-text-muted ml-2">自动</span> : null}
                   </td>
                   <td className="px-4 py-2 text-xs text-text-muted">{cells.find((c) => c.key === s.column_key)?.label?.split(" · ").slice(0, 2).join(" · ") ?? s.column_key}</td>
                   <td className="px-4 py-2">
-                    <span className={cn("badge border", STATUS_CLASS[s.status])}>
-                      {STATUS_LABEL[s.status]}
+                    <span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>
+                      {STAGE_LABEL[stageOf(s)]}
                       {s.status === "WRITING" && s.stage ? ` · ${s.stage}` : ""}
                     </span>
                   </td>
@@ -459,6 +528,7 @@ export function VideoScriptsPage() {
                   <td className="px-4 py-2 text-text-muted">{minutes(s.length_check?.estimated_seconds)}</td>
                   <td className="px-4 py-2"><TimeStamp value={s.created_at} /></td>
                 </tr>
+                </Fragment>
               ))}
             </tbody>
           </table>

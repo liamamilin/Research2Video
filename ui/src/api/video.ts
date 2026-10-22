@@ -275,6 +275,7 @@ export interface VideoScriptSummary {
   archived?: number;
   credibility?: Credibility | null;
   auto?: boolean;
+  render?: { status: string; created_at: string } | null; // 最近一次出片（列表里才有）
 }
 
 // 发布记录和发布前复核（快讯），见 spec/video-publish.md。

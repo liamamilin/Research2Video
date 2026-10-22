@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from core import matrices
 from core.video import outputs, reports, store, topic_store
 from tests.test_production import prod_env  # noqa: F401
 from tests.test_video_scripts import _login, video_env  # noqa: F401
@@ -57,10 +58,21 @@ def test_a_report_no_script_came_from_is_counted_per_job_archived_scripts_includ
     assert flash(_collect(prod_env))["unwritten"] == 1  # the 10-19 run was made into a video, even if archived since
 
 
+def test_scripts_of_a_put_away_matrix_are_listed_only_with_the_archived(prod_env):
+    topic_store.sync(str(prod_env / "jobs"), str(prod_env / "output"))
+    script = store.create_script("flash", {"id": "2026-10-19/F1", "title": "x"})
+    assert [r["id"] for r in _collect(prod_env)["scripts"]] == [script["id"]]
+    matrices.save(str(prod_env / "config"), "ai", name="AI 矩阵", domain="", keywords=[],
+                  members=matrices.load_all(str(prod_env / "config"))["ai"].members, archived=True)
+    assert _collect(prod_env)["scripts"] == []
+    assert [r["id"] for r in _collect(prod_env, True)["scripts"]] == [script["id"]]
+    assert next(m for m in _collect(prod_env)["matrices"] if m["key"] == "ai")["archived"] is True
+
+
 def test_api_lists_outputs_for_viewers(client, prod_env):
     _login(client, "viewer", "viewer-pass-123")
     body = client.get("/api/outputs").json()
-    assert body["scripts"] == [] and {"key": "ai", "name": "AI 矩阵"} in body["matrices"]
+    assert body["scripts"] == [] and {"key": "ai", "name": "AI 矩阵", "archived": False} in body["matrices"]
 
 
 def test_config_counts_leave_out_failed_scripts_and_count_older_ones(prod_env):

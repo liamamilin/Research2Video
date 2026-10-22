@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { listOutputs, type OutputScript, type Outputs } from "@/api/outputs";
 import { errorMessage } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import { STATUS_CLASS, STATUS_LABEL } from "./VideoScripts";
+import { STAGE_CLASS, STAGE_LABEL, stageOf } from "./VideoScripts";
 
 const RANGES = [["", "全部时间"], ["7", "近 7 天"], ["30", "近 30 天"], ["90", "近 90 天"]];
 const RENDERS = [["", "全部成片状态"], ["none", "还没出片"], ["working", "出片中"], ["done", "成片完成"], ["failed", "出片失败"], ["published", "已发布"]];
@@ -19,15 +19,12 @@ function renderState(s: OutputScript): string {
   return WORKING.includes(s.render.status) ? "working" : "failed";
 }
 
-const RENDER_LABEL: Record<string, string> = { none: "", working: "出片中", done: "成片完成", failed: "出片失败", published: "已发布" };
-
 function ScriptLine({ s, showOrigin }: { s: OutputScript; showOrigin: boolean }) {
-  const render = RENDER_LABEL[renderState(s)];
+  const stage = stageOf(s);
   return (
     <li className="flex flex-wrap items-baseline gap-2 text-sm py-1" aria-label={`文稿 ${s.title}`}>
-      <span className={cn("text-xs px-1.5 py-0.5 rounded border whitespace-nowrap", STATUS_CLASS[s.status])}>{STATUS_LABEL[s.status] ?? s.status}</span>
+      <span className={cn("text-xs px-1.5 py-0.5 rounded border whitespace-nowrap", STAGE_CLASS[stage])}>{STAGE_LABEL[stage]}</span>
       <Link className="hover:underline hover:text-accent min-w-0 flex-1" to={`/video/${s.id}`}>{s.title || "（没有标题）"}</Link>
-      {render ? <span className="text-xs text-text-muted whitespace-nowrap">{render}</span> : null}
       <span className="text-xs text-text-muted whitespace-nowrap" title={s.production_guessed ? "配置出现之前写的，按配方和 Job 认出是这套" : undefined}>
         {s.production_name || s.column_key}
         {s.auto ? " · 自动" : ""}
@@ -55,7 +52,13 @@ function ByOwner({ data, rows, newest }: { data: Outputs; rows: OutputScript[]; 
     byJob.set(s.job, byReport);
     groups.set(m, byJob);
   }
-  const matrixOrder = [...data.matrices.map((m) => m.key), "_none", "_manual"].filter((k) => groups.has(k));
+  // the matrix with the newest (or oldest) script first; the ones with none of their own come last
+  const edge = (k: string) => {
+    const times = [...groups.get(k)!.values()].flatMap((byReport) => [...byReport.values()].flat().map((s) => s.created_at));
+    return times.length ? times.reduce((x, y) => (order(x, y) <= 0 ? x : y)) : "";
+  };
+  const matrixOrder = [...data.matrices.map((m) => m.key), "_none", "_manual"].filter((k) => groups.has(k))
+    .sort((a, b) => order(edge(a), edge(b)));
   if (!matrixOrder.length) return <p className="text-sm text-text-muted">没有符合条件的文稿。</p>;
   return (
     <div className="space-y-3">
@@ -63,7 +66,10 @@ function ByOwner({ data, rows, newest }: { data: Outputs; rows: OutputScript[]; 
         <section key={m} className="card p-3 space-y-3" aria-label={`矩阵 ${m}`}>
           <h2 className="font-medium">
             {m === "_none" ? "不在矩阵里的 Job" : m === "_manual" ? "手填选题写的" : (
-              <Link className="hover:underline" to={`/matrices/${m}`}>{matrixName(m)}</Link>
+              <>
+                <Link className="hover:underline" to={`/matrices/${m}`}>{matrixName(m)}</Link>
+                {data.matrices.find((x) => x.key === m)?.archived ? <span className="text-xs text-text-muted ml-2">已归档</span> : null}
+              </>
             )}
           </h2>
           {[...groups.get(m)!.entries()].map(([job, byReport]) => {
@@ -158,12 +164,12 @@ export function OutputsPage() {
         {data && data.matrices.length > 1 ? (
           <select aria-label="矩阵" className="input w-auto" value={matrix} onChange={(e) => setMatrix(e.target.value)}>
             <option value="">全部矩阵</option>
-            {data.matrices.map((m) => <option key={m.key} value={m.key}>{m.name}</option>)}
+            {data.matrices.filter((m) => archived || !m.archived).map((m) => <option key={m.key} value={m.key}>{m.name}</option>)}
           </select>
         ) : null}
         <label className="flex items-center gap-1">
           <input type="checkbox" checked={archived} onChange={(e) => setArchived(e.target.checked)} />
-          看已归档的
+          看已归档的（含已归档矩阵）
         </label>
       </div>
       {error ? <p className="text-sm text-danger">{error}</p> : null}

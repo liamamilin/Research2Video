@@ -81,6 +81,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+async function openCreate() {
+  fireEvent.click(await screen.findByText("＋ 新建文稿"));
+}
+
 function renderPage() {
   render(
     <MemoryRouter>
@@ -92,6 +96,7 @@ function renderPage() {
 describe("Video script cell picker", () => {
   it("marks unverified cells, disables blocked ones and offers the cell's other video forms", async () => {
     renderPage();
+    await openCreate();
     const picker = (await screen.findByLabelText("格子")) as HTMLSelectElement;
     const options = Array.from(picker.options);
     expect(options.map((o) => o.text)).toEqual([
@@ -107,6 +112,7 @@ describe("Video script cell picker", () => {
 
   it("sends the chosen cell's key and video form", async () => {
     renderPage();
+    await openCreate();
     fireEvent.click(await screen.findByText("手写选题"));
     fireEvent.change(screen.getByLabelText("视频形式"), { target: { value: "process_diagram" } });
     fireEvent.change(screen.getByPlaceholderText(/选题（必填）/), { target: { value: "一个手写的选题标题" } });
@@ -118,6 +124,7 @@ describe("Video script cell picker", () => {
 
   it("builds a roundup from flash items in the order they were ticked", async () => {
     renderPage();
+    await openCreate();
     fireEvent.change(await screen.findByLabelText("格子"), { target: { value: "ai-developer-roundup-long" } });
     expect(await screen.findByText("这个格子还没出过片，写出的文稿和视频效果没有验证过。")).toBeTruthy();
     fireEvent.click(await screen.findByLabelText(/F2/));
@@ -134,6 +141,7 @@ describe("Video script cell picker", () => {
 
   it("asks a comparison for two different subjects and what to compare them on", async () => {
     renderPage();
+    await openCreate();
     fireEvent.change(await screen.findByLabelText("格子"), { target: { value: "ai-developer-comparison-long" } });
     const go = (await screen.findByText("开始研究")) as HTMLButtonElement;
     expect(go.disabled).toBe(true);
@@ -165,9 +173,33 @@ describe("Video script cell picker", () => {
     );
     expect(await screen.findByText("草稿一篇")).toBeTruthy();
     expect(screen.getByText("已发一篇")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("状态"), { target: { value: "published" } });
+    fireEvent.click(screen.getByRole("button", { name: /^已发布/ }));
     await waitFor(() => expect(screen.queryByText("草稿一篇")).toBeNull());
     expect(screen.getByText("已发一篇")).toBeTruthy();
+  });
+});
+
+describe("Script list stages", () => {
+  it("shows how far an approved script got with its video, counts them per stage and groups by day", async () => {
+    const at = (day: string) => `${day}T10:00:00+0800`;
+    const scripts = [
+      { id: "a", title: "出完片的", status: "APPROVED", column_key: "flash", published: false, created_at: at("2026-10-22"), render: { status: "COMPLETED", created_at: at("2026-10-22") } },
+      { id: "b", title: "排队出片的", status: "APPROVED", column_key: "flash", published: false, created_at: at("2026-10-21"), render: { status: "RUNNING", created_at: at("2026-10-21") } },
+      { id: "c", title: "还没出片的", status: "APPROVED", column_key: "flash", published: false, created_at: at("2026-10-21"), render: null },
+    ];
+    const base = (fetch as unknown as ReturnType<typeof vi.fn>).getMockImplementation()!;
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) =>
+      String(url).endsWith("/api/video/scripts") ? jsonResponse(scripts) : base(url, init)));
+    renderPage();
+    const row = (await screen.findByText("出完片的")).closest("tr")!;
+    expect(row.textContent).toContain("成片完成");
+    expect(row.textContent).not.toContain("已定稿");
+    expect(screen.getByText("排队出片的").closest("tr")!.textContent).toContain("出片中");
+    expect(screen.getByText("还没出片的").closest("tr")!.textContent).toContain("已定稿");
+    expect(screen.getByRole("button", { name: "成片完成 1" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "成片完成 1" }));
+    await waitFor(() => expect(screen.queryByText("还没出片的")).toBeNull());
+    expect(screen.getByText("出完片的")).toBeTruthy();
   });
 });
 
