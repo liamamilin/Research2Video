@@ -318,6 +318,9 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
     if script is None:
         _fail(item, "文稿记录丢失")
         return took
+    if script.get("archived"):  # put away by the user: the pipeline does not approve or render it behind their back
+        ap.update_item(item["id"], state="CANCELLED", note="文稿已归档，不再继续")
+        return took
     out = video_executor.advance_auto(script, item.get("retries") or {}, can_start_script=can_start_script,
                                       can_start_render=can_start_render)
     if out["bump"]:
@@ -390,11 +393,13 @@ def reopen_approved() -> int:
 
 def retry_held_renders() -> int:
     """Items held for failed renders go on, their earlier failures no longer counted: for when what broke them is fixed
-    (an account's balance, a key, the model the renders use). Only items whose script is approved. Returns how many."""
+    (an account's balance, a key, the model the renders use). Only items whose script is approved and not archived (an
+    archived one was put away on purpose: it would be rendered again behind the user's back). Returns how many."""
     reopened = 0
     for item in ap.held_items(limit=500):
         script = store.get_script(item["script_id"]) if item["script_id"] else None
-        if not (script and script["status"] == "APPROVED" and item["note"].startswith("出片失败")):
+        if not (script and script["status"] == "APPROVED" and not script.get("archived")
+                and item["note"].startswith("出片失败")):
             continue
         cutoff = max((r["created_at"] for r in store.list_renders(script["id"]) if r["status"] in ("FAILED", "CANCELLED")),
                      default="")  # the failures there are now; a render made after this one counts again

@@ -440,6 +440,19 @@ def test_a_failed_render_is_submitted_once_more_then_held(pilot_env, monkeypatch
     assert item_of(run["id"], 0)["state"] == "HELD" and "出片失败" in item_of(run["id"], 0)["note"]
 
 
+def test_a_script_the_user_archives_is_not_approved_or_rendered_by_the_pipeline(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id)
+    store.update_script(script_id, archived=1)
+    pilot.tick()
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    assert item["state"] == "CANCELLED" and "已归档" in item["note"]
+    assert store.get_script(script_id)["status"] != "APPROVED" and store.list_renders(script_id) == []
+
+
 def test_held_renders_go_again_once_their_cause_is_fixed_and_only_the_old_failures_are_forgiven(pilot_env, monkeypatch):
     run = batch(monkeypatch, 1)
     pilot.tick()
@@ -455,6 +468,9 @@ def test_held_renders_go_again_once_their_cause_is_fixed_and_only_the_old_failur
     for r in store.list_renders(script_id):  # a second ago
         store.update_render(r["id"], created_at="2026-10-21T10:00:00+0800")
 
+    store.update_script(script_id, archived=1)  # put away on purpose: not made again
+    assert pilot.retry_held_renders() == 0
+    store.update_script(script_id, archived=0)
     assert pilot.retry_held_renders() == 1
     assert pilot.retry_held_renders() == 0  # nothing is held any more
     pilot.tick()
