@@ -211,3 +211,17 @@ def test_storyboard_rejects_target_missing_from_component_props_with_valid_targe
     board["scenes"][2]["beats"][0]["target_id"] = "line:2"
     with pytest.raises(G2Fault, match=r"INVALID_BEAT_TARGET.*line:0, line:1"):
         validate_storyboard_plan(board, narration)
+
+
+def test_every_remotion_render_switches_the_webpack_cache_off():
+    """The cache is keyed per run and never reused; leaving it on wrote ~180 MB into every attempt's folder."""
+    import re
+
+    from g2 import run_g2
+
+    assert run_g2.RENDER_NO_CACHE == "--bundle-cache=false"
+    here = Path(run_g2.__file__).parent
+    for name in ("run_g2.py", "visual_narrative.py"):
+        source = (here / name).read_text(encoding="utf-8")
+        for call in re.findall(r'"render", "src/index\.ts".*?(?:timeout=\d+\)|\n\s*render_timeout)', source, flags=re.S):
+            assert "RENDER_NO_CACHE" in call, name

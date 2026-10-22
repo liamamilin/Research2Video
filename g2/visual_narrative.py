@@ -158,7 +158,7 @@ def render(compiled: dict) -> None:
     pipeline._run_fixed_command("visual-render", [pipeline.NODE, pipeline.CLI, "render", "src/index.ts",
         "VisualNarrative", pipeline.VIDEO_PATH, f"--props={props}", f"--public-dir={pipeline.FIXTURE_ROOT}",
         "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p", "--concurrency=2", "--crf=18",
-        f"--browser-executable={pipeline.CHROME}", "--overwrite=false"], renderer, timeout=1200)
+        f"--browser-executable={pipeline.CHROME}", "--overwrite=false", pipeline.RENDER_NO_CACHE], renderer, timeout=1200)
 
 
 def verify(compiled: dict, baseline: Path) -> dict:

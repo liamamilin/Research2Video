@@ -102,6 +102,9 @@ COMPONENT_SCHEMA_DIR = PROJECT / "schemas/components"
 NODE = Path(shutil.which("node") or "")
 PYTHON = PROJECT / "g0/.venv/bin/python"
 CLI = PROJECT / "g0/vendor/remotion-audiogram/node_modules/@remotion/cli/remotion-cli.js"
+#: Remotion's webpack cache is keyed per run (every attempt made a different ~180 MB folder under renderer/.cache and
+#: nothing ever reused one: 12 GB across the first 130 attempts), so it is switched off.
+RENDER_NO_CACHE = "--bundle-cache=false"
 FFMPEG = PROJECT / "g0/darwin_arm64/ffmpeg"
 FFPROBE = PROJECT / "g0/darwin_arm64/ffprobe"
 CHROME = Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
@@ -891,7 +894,8 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     argv = [NODE, CLI, "render", "src/index.ts", "G2CommunicationNoise", VIDEO_PATH,
             f"--props={props_path}", f"--public-dir={FIXTURE_ROOT}", "--width=1920", "--height=1080", "--fps=30",
             f"--duration={compiled['total_frames']}", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p",
-            "--concurrency=2", "--crf=18", f"--browser-executable={CHROME}", "--overwrite=false"]
+            "--concurrency=2", "--crf=18", f"--browser-executable={CHROME}", "--overwrite=false",
+            RENDER_NO_CACHE]
     render_timeout = max(1200, math.ceil(compiled["total_frames"] / FPS * 6)) if CONTENT_MODE else 1200
     _run_fixed_command("remotion-render", argv, renderer, timeout=render_timeout)
 
