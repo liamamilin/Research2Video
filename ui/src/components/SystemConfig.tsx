@@ -49,6 +49,14 @@ function looksLikeSecret(value: string): boolean {
   return SECRET_PREFIXES.some((p) => text.toLowerCase().startsWith(p));
 }
 
+// Each search provider's own key variable. ``search.api_key_env`` is Parallel's; the others live in
+// ``search.api_key_envs`` (core/search.py), so switching provider switches which variable is read.
+const SEARCH_PROVIDERS = ["parallel", "exa", "tavily", "brave", "serper", "duckduckgo"];
+const SEARCH_KEY_ENVS: Record<string, string> = {
+  parallel: "PARALLEL_API_KEY", exa: "EXA_API_KEY", tavily: "TAVILY_API_KEY", brave: "BRAVE_API_KEY",
+  serper: "SERPER_API_KEY",
+};
+
 const NOTIFY_EVENTS = [
   ["failed", "任务失败"],
   ["cancelled", "任务取消"],
@@ -366,7 +374,17 @@ export function SystemConfig() {
   const embedEnv = get(["ai", "embedding_api_key_env"], "");
   const searchProvider = get(["search", "provider"], "parallel");
   const searchEnvMap = get(["search", "api_key_envs"], {}) || {};
-  const searchEnv = searchEnvMap[searchProvider] || get(["search", "api_key_env"], "");
+  const searchKeyPath = searchProvider === "parallel" ? ["search", "api_key_env"] : ["search", "api_key_envs", searchProvider];
+  const searchEnv = searchProvider === "duckduckgo" ? ""
+    : (searchProvider === "parallel" ? get(["search", "api_key_env"], SEARCH_KEY_ENVS.parallel)
+      : searchEnvMap[searchProvider] || "");
+  const pickSearchProvider = (next: string) => {
+    set(["search", "provider"], next);
+    // the key variable goes with the provider, or the new one is asked with the old one's key (a 401)
+    if (next !== "parallel" && SEARCH_KEY_ENVS[next] && !searchEnvMap[next]) {
+      set(["search", "api_key_envs", next], SEARCH_KEY_ENVS[next]);
+    }
+  };
 
   // One LLM section's derived state: ai and review_ai (spec/video-adaptation-audit.md)
   // are both "one LLMConfig", so ai/review_ai pick the same provider presets
@@ -735,14 +753,23 @@ export function SystemConfig() {
           >
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="服务商">
-                <div>{selectInput(["search", "provider"], ["parallel", "exa", "tavily", "brave", "serper", "duckduckgo"])}</div>
+                <div>
+                  <select className="input" value={searchProvider} aria-label="搜索服务商"
+                    onChange={(e) => pickSearchProvider(e.target.value)}>
+                    {SEARCH_PROVIDERS.map((name) => <option key={name} value={name}>{name}</option>)}
+                  </select>
+                </div>
               </Field>
               <Field label="模式">
                 <div>{selectInput(["search", "mode"], ["advanced", "basic", "fast", "turbo"])}</div>
               </Field>
-              <Field label="密钥环境变量" hint="当前服务商">
-                <div>{textInput(["search", "api_key_env"], "PARALLEL_API_KEY", true)}</div>
-              </Field>
+              {searchProvider !== "duckduckgo" ? (
+                <Field label="密钥环境变量" hint="当前服务商">
+                  <div>{textInput(searchKeyPath, SEARCH_KEY_ENVS[searchProvider] || "", true)}</div>
+                </Field>
+              ) : (
+                <div className="text-[11px] text-text-muted self-end pb-2">DuckDuckGo 无需密钥。</div>
+              )}
               <Field label="每次结果数">
                 <div>{numInput(["search", "max_results"], { placeholder: "10" })}</div>
               </Field>
@@ -753,6 +780,21 @@ export function SystemConfig() {
                 <div>{textInput(["search", "fallback_provider"], "duckduckgo")}</div>
               </Field>
             </div>
+            {searchEnv && secrets.some((item) => item.env === searchEnv) && (
+              <Field label={`${searchProvider} 的 API 密钥`} hint={searchEnv}>
+                <input
+                  className="input flex-1 font-mono text-xs"
+                  type="password"
+                  aria-label={`${searchEnv} 密钥`}
+                  placeholder={(() => {
+                    const slot = secrets.find((item) => item.env === searchEnv);
+                    return slot?.configured ? `已配置 · ${slot.masked}（要换就重填）` : "未配置：粘贴这家的密钥";
+                  })()}
+                  value={secretInputs[searchEnv] || ""}
+                  onChange={(e) => setSecretInputs((prev) => ({ ...prev, [searchEnv]: e.target.value }))}
+                />
+              </Field>
+            )}
             {testResults.search?.sample_url && (
               <div className="text-[11px] text-text-muted truncate">
                 示例结果：{testResults.search.sample_url}

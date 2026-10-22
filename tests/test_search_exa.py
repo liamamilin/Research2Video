@@ -74,3 +74,10 @@ def test_the_search_test_asks_the_chosen_provider_alone(monkeypatch):
     out = routes.test_search({"config": {"search": {"provider": "exa", "fallback_provider": "duckduckgo"}}}, user=None)
     assert seen["fallbacks"] == ("", [])  # DuckDuckGo answering for a dead provider would read as "ok"
     assert out["ok"] is False and out["error"] == "HTTP 402: out of credits"
+
+
+def test_a_provider_with_its_own_key_variable_never_falls_back_to_the_generic_key():
+    # provider exa, EXA_API_KEY unset, but PARALLEL_API_KEY (the generic search.api_key) is: that key is not Exa's
+    client = SearchClient(_config(api_keys={}, api_key="parallel-key", key_envs={"exa": "EXA_API_KEY"}))
+    assert client.search(["q"]) == []
+    assert "EXA_API_KEY" in client.errors["exa"]

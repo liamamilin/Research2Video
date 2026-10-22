@@ -124,6 +124,26 @@ describe("SystemConfig form", () => {
     expect(input.value).toBe("minimax-m3, deepseek-v4-pro");
   });
 
+  it("switching the search provider switches the key variable with it", async () => {
+    const calls = mockFetch();
+    render(<SystemConfig />);
+
+    await screen.findByDisplayValue("PARALLEL_API_KEY");
+    fireEvent.change(screen.getByLabelText("搜索服务商"), { target: { value: "exa" } });
+    expect(screen.getByDisplayValue("EXA_API_KEY")).toBeTruthy();  // not left on Parallel's variable
+    fireEvent.change(screen.getByLabelText("搜索服务商"), { target: { value: "duckduckgo" } });
+    expect(screen.getByText("DuckDuckGo 无需密钥。")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("搜索服务商"), { target: { value: "exa" } });
+
+    fireEvent.click(screen.getByText("保存配置"));
+    await waitFor(() => expect(calls.some((c) => c.init?.method === "PUT" && !c.url.includes("secrets"))).toBe(true));
+    const put = calls.find((c) => c.init?.method === "PUT" && !c.url.includes("secrets"));
+    const search = JSON.parse(String(put?.init?.body)).patch.search;
+    expect(search.provider).toBe("exa");
+    expect(search.api_key_envs.exa).toBe("EXA_API_KEY");
+    expect(search.api_key_env).toBe("PARALLEL_API_KEY");  // Parallel's own stays as it was
+  });
+
   it("shows configured API keys masked", async () => {
     mockFetch();
     render(<SystemConfig />);
@@ -276,7 +296,7 @@ describe("SystemConfig form", () => {
     const calls = mockFetch({ ...PARSED, ai: { ...PARSED.ai, api_key_env: "PARALLEL_API_KEY" } });
     render(<SystemConfig />);
 
-    fireEvent.change(await screen.findByLabelText("PARALLEL_API_KEY 密钥"), { target: { value: "sk-typed" } });
+    fireEvent.change((await screen.findAllByLabelText("PARALLEL_API_KEY 密钥"))[0], { target: { value: "sk-typed" } });  // the search card shares it
     fireEvent.click(screen.getByText("保存配置"));
     await waitFor(() => expect(calls.some((c) => c.url.includes("secrets") && c.init?.method === "PUT")).toBe(true));
     const put = calls.find((c) => c.url.includes("secrets") && c.init?.method === "PUT");

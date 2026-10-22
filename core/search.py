@@ -82,6 +82,7 @@ class SearchConfig:
     timeout: int = 60
     fallback_provider: str = "duckduckgo"
     api_keys: dict = field(default_factory=dict)
+    key_envs: dict = field(default_factory=dict)  # provider -> its key's env var (search.api_key_envs)
     fallback_providers: list = field(default_factory=list)
 
     @classmethod
@@ -118,6 +119,7 @@ class SearchConfig:
             timeout=int(cfg.get("timeout", 60)),
             fallback_provider=cfg.get("fallback_provider", "duckduckgo"),
             api_keys=api_keys,
+            key_envs={str(k): str(v) for k, v in (cfg.get("api_key_envs") or {}).items()},
             fallback_providers=list(cfg.get("fallback_providers") or []),
         )
 
@@ -305,12 +307,15 @@ class SearchClient:
 
     def _provider_key(self, provider: str) -> str:
         key = self.config.api_keys.get(provider, "")
-        if not key and provider == self.config.provider:
+        env = self.config.key_envs.get(provider)
+        # a provider with its own key variable is asked with that key only: the generic one (Parallel's) belongs to
+        # another vendor and would come back as a 401
+        if not key and provider == self.config.provider and not env:
             key = self.config.api_key
         if not key:
             raise RuntimeError(
                 f"missing API key for provider '{provider}' "
-                f"(configure search.api_key_envs.{provider})"
+                f"({'env ' + env if env else 'configure search.api_key_envs.' + provider})"
             )
         return key
 
