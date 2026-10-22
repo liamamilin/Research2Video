@@ -6,11 +6,11 @@
 
 | 栏目 | Job | 周期 | 读什么 | 搜索 | 视频 |
 |---|---|---|---|---|---|
-| AI 快讯 | `monitoring/ai_flash_discovery` | 每天 05:30 | TLDR AI（最近 3 期）、The Rundown RSS、Hugging Face 热门模型 | 不搜 | `flash` ×3（`reverify: false`），一份报告拆 5–10 条 |
-| AI 开源雷达 | `ai_media/daily_opensource_radar` | 每天 05:45 | GitHub 近 7 天新项目（`llm`、`agent`）、HF 热门模型、HF 每日论文、TLDR | 不搜 | `report_digest` ×1 |
-| AI 模型竞技场 | `ai_media/weekly_model_arena` | 每周一 06:00 | Artificial Analysis 排行榜、HF 热门模型、Rundown | 不搜 | `report_digest` ×1 |
-| AI 商业观察 | `ai_media/weekly_business_watch` | 每周一 06:20 | Rundown、Import AI、TLDR | 不搜 | `report_digest` ×1 |
-| AI 深度研究 | `ai_media/weekly_deep_research` | 每周一 06:40 | Import AI、HF 每日论文，再搜 | **最多 6 次**（`max_searches: 6`） | `deep_dive` ×1 |
+| AI 快讯 | `monitoring/ai_flash_discovery` | 每天 02:30 | TLDR AI（最近 3 期）、The Rundown RSS、Hugging Face 热门模型 | 不搜 | `flash` ×3（`reverify: false`），一份报告拆 5–10 条 |
+| AI 开源雷达 | `ai_media/daily_opensource_radar` | 每天 02:45 | GitHub 近 7 天新项目（`llm`、`agent`）、HF 热门模型、HF 每日论文、TLDR | 不搜 | `report_digest` ×1 |
+| AI 模型竞技场 | `ai_media/weekly_model_arena` | 每周一 03:00 | Artificial Analysis 排行榜、HF 热门模型、Rundown | 不搜 | `report_digest` ×1 |
+| AI 商业观察 | `ai_media/weekly_business_watch` | 每周一 03:20 | Rundown、Import AI、TLDR | 不搜 | `report_digest` ×1 |
+| AI 深度研究 | `ai_media/weekly_deep_research` | 每周一 03:40 | Import AI、HF 每日论文，再搜 | **最多 6 次**（`max_searches: 6`） | `deep_dive` ×1 |
 
 生产配置在 `config/production/`：`flash_daily`（`flash` 配方，auto 3，`reverify: false`）、`ai_media_*`（auto 1）。原来的 `flash` 和 `point_short` 配置自动关了：`flash` 每条要重新调研，`point_short` 的配方不允许跳过调研，都是每条搜 4–20 次。
 
