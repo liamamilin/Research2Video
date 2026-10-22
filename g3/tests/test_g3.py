@@ -6,6 +6,7 @@ import base64
 import hashlib
 import json
 from pathlib import Path
+import sqlite3
 from uuid import uuid4
 
 import pytest
@@ -292,3 +293,18 @@ def test_key_preflight_does_not_accept_an_empty_value(tmp_path, monkeypatch):
     monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     settings = replace(make_settings(tmp_path), key_file=key_file)
     assert probe_config(settings)["checks"]["deepseek"] is False
+
+
+def test_create_job_works_when_the_jobs_folder_is_a_symlink_to_another_disk(tmp_path):
+    other = tmp_path / "other-disk" / "jobs"
+    other.mkdir(parents=True)
+    data = tmp_path / "data"
+    data.mkdir()
+    (data / "jobs").symlink_to(other, target_is_directory=True)
+    store = JobStore(data)
+    store.initialize()
+    job_id = str(uuid4())
+    store.create_job(job_id, request_payload())
+    assert (other / job_id / "input" / "source.txt").is_file()
+    with sqlite3.connect(store.db_path) as conn:
+        assert conn.execute("SELECT source_rel_path FROM jobs WHERE job_id=?", (job_id,)).fetchone()[0] == f"jobs/{job_id}/input/source.txt"

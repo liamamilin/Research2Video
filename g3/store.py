@@ -194,7 +194,9 @@ class JobStore:
         input_json.write_text(json.dumps({**request_without_source, "source_sha256": sha256_bytes(raw)},
                                          ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         now = utc_now()
-        source_rel = source_path.relative_to(self.data_dir).as_posix()
+        # job_dir is resolved (the jobs folder may be a symlink to another disk), so build the stored path from the
+        # unresolved root instead of taking it relative to data_dir
+        source_rel = (self.job_root.relative_to(self.data_dir) / job_id / "input" / "source.txt").as_posix()
         try:
             with self._transaction() as conn:
                 conn.execute("""INSERT INTO jobs
@@ -657,7 +659,7 @@ class JobStore:
 
         try:
             resolved_root = attempt_root.resolve(strict=True)
-            if not resolved_root.is_relative_to(self.job_root / job_id):
+            if not resolved_root.is_relative_to((self.job_root / job_id).resolve()):
                 raise StoreError("INVALID_SCENE_IMAGE_PATH", "scene images are outside the job workspace")
             manifest_path = resolved_root / "g2-run" / "artifacts" / "scene-backgrounds.json"
             try:
