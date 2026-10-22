@@ -163,6 +163,21 @@ async def lifespan(app: FastAPI):
             except Exception:  # noqa: BLE001 - one bad tick must not stop the loop
                 logger.exception("video autopilot tick failed")
 
+    from core.video import archive as video_archive
+
+    def archive_loop() -> None:
+        """Finished video data goes to the archive disk and leaves this one a week later (core/video/archive.py)."""
+        paths = get_settings().paths
+        while not sweep_stop.wait(600):
+            try:
+                if video_archive.due(paths.state_dir):
+                    result = video_archive.run(paths.config_dir, paths.state_dir, video_store.list_all_renders())
+                    logger.info("video archive pass: %s", result)
+            except Exception:  # noqa: BLE001 - one bad pass must not stop the loop
+                logger.exception("video archive pass failed")
+
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
+        threading.Thread(target=archive_loop, name="video-archive", daemon=True).start()
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):  # tests set this so no stray thread ticks against their data
         threading.Thread(target=autopilot_loop, name="video-autopilot", daemon=True).start()
 

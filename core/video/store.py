@@ -587,6 +587,13 @@ def list_renders(script_id: str) -> list[dict]:
     return [_decode(r, _RENDER_JSON) for r in rows]
 
 
+def list_all_renders() -> list[dict]:
+    """Every render's id, status and times (no source text or artifacts): for the archive pass."""
+    with connect() as conn:
+        rows = conn.execute("SELECT id, script_id, status, created_at, completed_at FROM renders").fetchall()
+    return [dict(r) for r in rows]
+
+
 def touch_render(render_id: str) -> None:
     with connect(write=True) as conn:
         conn.execute("UPDATE renders SET heartbeat_at = ? WHERE id = ?", (time.time(), render_id))

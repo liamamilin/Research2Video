@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from core.config import load_system_config
+from core.video import archive as video_archive
 from core.video import columns as video_columns
 from core.video import sources as video_sources
 from core.video import store
@@ -465,4 +466,9 @@ def safe_file(render: dict, name: str) -> Optional[Path]:
     if not any(a.get("name") == name for a in render.get("artifacts") or []):
         return None
     path = files_dir(render["id"]) / name
-    return path if path.is_file() else None
+    if path.is_file():
+        return path
+    # a week after it finished the folder moves to the archive disk (core/video/archive.py)
+    archived = video_archive.archived_dir(get_settings().paths.config_dir, render["id"])
+    path = archived / name if archived else None
+    return path if path is not None and path.is_file() else None
