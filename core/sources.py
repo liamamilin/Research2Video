@@ -12,6 +12,7 @@ with web-search results. Specs are strings:
 * ``hf_models:trending``   Hugging Face trending models
 * ``gh_new:keywords``      GitHub repositories created in the last 7 days matching the keywords, by stars
 * ``aa:models``            Artificial Analysis model leaderboard (intelligence, price, speed)
+* ``wb:CODE[@ISO;ISO]``   World Bank indicator: the two latest yearly values for the world and nine large economies
 
 A page that answers 200 but yields no items is a failure, not "no news": ``fetch_all_strict`` reports it, and raises
 ``SourcesUnavailableError`` when nothing at all came back.
@@ -85,6 +86,20 @@ def _parse_feed(xml_text: str, limit: int) -> list[SearchResult]:
             excerpts=[_clean(summary)] if summary else [],
             publish_date=(entry.findtext("a:updated", default="", namespaces=_ATOM_NS)
                           or entry.findtext("a:published", default="", namespaces=_ATOM_NS)).strip(),
+            provider="rss",
+        ))
+    if results:
+        return results
+
+    # RSS 1.0 (RDF): items sit in the RSS namespace and dates in Dublin Core (Nature, Science, BIS)
+    rss, dc = "{http://purl.org/rss/1.0/}", "{http://purl.org/dc/elements/1.1/}"
+    for item in root.findall(f"{rss}item")[:limit]:
+        description = item.findtext(f"{rss}description")
+        results.append(SearchResult(
+            title=_clean(item.findtext(f"{rss}title"), 200),
+            url=(item.findtext(f"{rss}link") or item.get("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about") or "").strip(),
+            excerpts=[_clean(description)] if description else [],
+            publish_date=(item.findtext(f"{dc}date") or "").strip(),
             provider="rss",
         ))
     return results
@@ -302,6 +317,44 @@ def fetch_aa_models(target: str, limit: int = 8, timeout: int = 30) -> list[Sear
     return parse_aa_models(_get_page("https://artificialanalysis.ai/leaderboards/models", timeout), limit)
 
 
+_WB_COUNTRIES = "WLD;USA;CHN;JPN;DEU;IND;GBR;BRA;FRA;KOR"
+
+
+def fetch_worldbank(target: str, limit: int = 8, timeout: int = 30) -> list[SearchResult]:
+    """World Bank indicator, the two latest yearly values for the world and nine large economies.
+
+    ``target`` is the indicator code (``NY.GDP.MKTP.KD.ZG``) optionally followed by ``@`` and ``;``-separated
+    country codes. One item per country: the value, the year, and the year before it, with the indicator's name."""
+    code, _, countries = target.partition("@")
+    code = code.strip()
+    url = (f"https://api.worldbank.org/v2/country/{urllib.parse.quote(countries.strip() or _WB_COUNTRIES, safe=';')}"
+           f"/indicator/{urllib.parse.quote(code)}?format=json&mrv=2&per_page=100")
+    payload = _get_json(url, timeout)
+    rows = payload[1] if isinstance(payload, list) and len(payload) > 1 and payload[1] else []
+    by_country: dict[str, list[dict]] = {}
+    for row in rows:
+        if row.get("value") is not None:
+            by_country.setdefault(row["country"]["value"], []).append(row)
+    results: list[SearchResult] = []
+    for country, values in by_country.items():
+        values.sort(key=lambda r: r["date"], reverse=True)
+        latest = values[0]
+        name = latest["indicator"]["value"]
+        text = f"{country}，{name}：{latest['date']} 年 {latest['value']:.4g}"
+        if len(values) > 1:
+            text += f"（{values[1]['date']} 年 {values[1]['value']:.4g}）"
+        results.append(SearchResult(
+            title=_clean(f"{country} · {name}", 200),
+            url=f"https://data.worldbank.org/indicator/{code}?locations={latest['countryiso3code']}",
+            excerpts=[text],
+            publish_date=str(latest["date"]),
+            provider="worldbank",
+        ))
+        if len(results) >= limit:
+            break
+    return results
+
+
 _ADAPTERS = {
     "rss": fetch_rss,
     "feed": fetch_rss,
@@ -313,6 +366,7 @@ _ADAPTERS = {
     "hf_models": fetch_hf_models,
     "gh_new": fetch_gh_new,
     "aa": fetch_aa_models,
+    "wb": fetch_worldbank,
 }
 
 

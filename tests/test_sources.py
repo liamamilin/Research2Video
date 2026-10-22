@@ -135,3 +135,46 @@ def test_fetch_all_dedupes_and_survives_failures(monkeypatch):
     monkeypatch.setattr(sources, "fetch_source", fake_fetch)
     results = sources.fetch_all(["rss:https://bad.test/f", "hn:q"])
     assert [r.title for r in results] == ["A", "B"]
+
+
+RDF_XML = """<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns="http://purl.org/rss/1.0/">
+  <channel rdf:about="https://example.org/feed"><title>Journal</title></channel>
+  <item rdf:about="https://example.org/a">
+    <title><![CDATA[<i>De novo</i> design of enzymes]]></title>
+    <link>https://example.org/a</link>
+    <description>Short abstract</description>
+    <dc:date>2026-10-21</dc:date>
+  </item>
+  <item rdf:about="https://example.org/b"><title>No link element</title><dc:date>2026-10-20</dc:date></item>
+</rdf:RDF>
+"""
+
+
+def test_fetch_rss_reads_rss_1_0_rdf_feeds(monkeypatch):
+    monkeypatch.setattr(sources, "_get_text", lambda url, timeout, accept="*/*": RDF_XML)
+    results = sources.fetch_rss("https://example.org/feed", limit=5)
+    assert [r.title for r in results] == ["De novo design of enzymes", "No link element"]
+    assert results[0].url == "https://example.org/a" and results[0].excerpts == ["Short abstract"]
+    assert results[0].publish_date == "2026-10-21"
+    assert results[1].url == "https://example.org/b" and results[1].excerpts == []  # the item's rdf:about stands in for a link
+
+
+def test_fetch_worldbank_gives_the_latest_value_with_the_year_before_per_country(monkeypatch):
+    def row(country, iso, date, value):
+        return {"indicator": {"id": "NY.GDP.MKTP.KD.ZG", "value": "GDP growth (annual %)"}, "country": {"value": country},
+                "countryiso3code": iso, "date": date, "value": value}
+
+    payload = json.dumps([{"page": 1}, [row("China", "CHN", "2025", 4.96), row("China", "CHN", "2024", 4.958),
+                                        row("World", "WLD", "2025", None), row("World", "WLD", "2024", 2.9)]])
+    seen = []
+    monkeypatch.setattr(sources, "_get_text", lambda url, timeout, accept="*/*": (seen.append(url), payload)[1])
+    results = sources.fetch_source("wb:NY.GDP.MKTP.KD.ZG@CHN;WLD", limit=8)
+    assert "/country/CHN;WLD/indicator/NY.GDP.MKTP.KD.ZG" in seen[0] and "mrv=2" in seen[0]
+    by_title = {r.title: r for r in results}
+    china = by_title["China · GDP growth (annual %)"]
+    assert china.excerpts == ["China，GDP growth (annual %)：2025 年 4.96（2024 年 4.958）"]
+    assert china.url == "https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG?locations=CHN" and china.provider == "worldbank"
+    world = by_title["World · GDP growth (annual %)"]  # a missing year is skipped, not shown as 0
+    assert world.publish_date == "2024" and "2025" not in world.excerpts[0]
