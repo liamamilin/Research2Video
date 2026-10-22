@@ -136,7 +136,8 @@ def plan_narration(pipeline, source: str) -> dict:
     # Allow one outline plus per-chapter narration/diagram retries; still bounded.
     pipeline.MAX_TOTAL_CALLS = max(pipeline.MAX_TOTAL_CALLS, 3 + (3 if getattr(pipeline, "PREPARED_SOURCE", None) is not None else 0) + 6 * len(outline["chapters"]))
     pipeline.MAX_PROJECTED_API_COST_USD = pipeline.MAX_TOTAL_CALLS * (
-        pipeline.MAX_INPUT_TOKENS_PER_CALL * .30 + pipeline.MAX_TOKENS_PER_CALL * 1.20) / 1_000_000
+        pipeline.MAX_INPUT_TOKENS_PER_CALL * getattr(pipeline, "LLM_INPUT_PER_M", .30)
+        + pipeline.MAX_TOKENS_PER_CALL * getattr(pipeline, "LLM_OUTPUT_PER_M", 1.20)) / 1_000_000
     plan = {"title": outline["title"], "core_message": outline["core_message"],
             "necessary_points": [], "omissions": [], "ambiguities": [], "segments": [], "chapters": []}
     previous_closing = ""

@@ -44,4 +44,4 @@ Use concise imperative subjects, following history: `Add completed-job scene pre
 
 ## Security & Configuration
 
-Keep `DEEPSEEK_API_KEY` in ignored `.env` with mode `0600`. Exclude keys, model weights, binaries, and runtime data from Git. Bind services locally. Validate model JSON against Video IR v0.2 and the action registry; execute only trusted renderer components.
+Keep `DEEPSEEK_API_KEY` (or the key of the provider chosen with `AUTOVIDEO_LLM_PROVIDER`, see `g2/llm_provider.py`) in ignored `.env` with mode `0600`. Exclude keys, model weights, binaries, and runtime data from Git. Bind services locally. Validate model JSON against Video IR v0.2 and the action registry; execute only trusted renderer components.

@@ -242,7 +242,7 @@ class G2ProcessRunner:
             return
         if return_code != 0:
             error_code = error_code or "GENERATION_FAILED"
-            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION", "NARRATION_TEXT_MISMATCH"} | PACKAGE_FINAL_ERRORS:
+            if error_code in {"DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "LLM_API_KEY_MISSING", "LLM_AUTH_FAILED", "LLM_PROVIDER_INVALID", "UNSUPPORTED_OUTPUT", "DIAGRAM_CONTENT_UNSUPPORTED", "CONTENT_FORM_UNSUPPORTED", "INPUT_REQUIRES_CLARIFICATION", "NARRATION_TEXT_MISMATCH"} | PACKAGE_FINAL_ERRORS:
                 retryable = False
             self.store.mark_failed(job_id, attempt_no, active_stage, error_code,
                                    error_message or "视频生成失败，请查看任务阶段错误并重试", retryable)

@@ -22,10 +22,14 @@ ROOT = Path(__file__).resolve().parent
 PROJECT = ROOT.parent
 if str(PROJECT) not in sys.path:
     sys.path.insert(0, str(PROJECT))
+from g2 import llm_provider
 from g2.draw_things import generate_scene_backgrounds, regenerate_scene_background
 
-MODEL = "deepseek-flash"
-DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+#: The model service for every planning call: DeepSeek unless ``.env`` says otherwise (g2/llm_provider.py).
+PROVIDER = llm_provider.load(PROJECT / ".env")
+MODEL = PROVIDER.model
+DEEPSEEK_URL = PROVIDER.url  # the name predates other providers
+LLM_INPUT_PER_M, LLM_OUTPUT_PER_M = PROVIDER.input_per_m, PROVIDER.output_per_m
 PROMPT_VERSION = "g2-golden-general-v1.3"
 FPS = 30
 SAMPLE_RATE = 24000
@@ -67,9 +71,10 @@ TARGET_DURATION_RANGE = duration_range_for(TARGET_DURATION_SEC) if _TARGET_ENV e
 TARGET_CHARACTER_RANGE = narration_character_range(TARGET_DURATION_SEC) if _TARGET_ENV else (60, 80)
 MAX_LLM_ATTEMPTS = 3
 MAX_TOTAL_CALLS = 16
-MAX_TOKENS_PER_CALL = 100_000
+MAX_TOKENS_PER_CALL = PROVIDER.max_tokens
 MAX_INPUT_TOKENS_PER_CALL = 10000
-MAX_PROJECTED_API_COST_USD = MAX_TOTAL_CALLS * (MAX_INPUT_TOKENS_PER_CALL * 0.30 + MAX_TOKENS_PER_CALL * 1.20) / 1_000_000
+MAX_PROJECTED_API_COST_USD = MAX_TOTAL_CALLS * (
+    MAX_INPUT_TOKENS_PER_CALL * LLM_INPUT_PER_M + MAX_TOKENS_PER_CALL * LLM_OUTPUT_PER_M) / 1_000_000
 LLM_TIMEOUT_SECONDS = 240
 PROJECT_INPUT = Path(os.environ.get("AUTOVIDEO_G2_SOURCE_FILE", ROOT / "fixtures/case-a/source.txt")).expanduser().resolve()
 if not PROJECT_INPUT.is_relative_to(PROJECT):
@@ -163,17 +168,11 @@ def _schema_errors(schema: dict, value: dict) -> list[str]:
 
 
 def load_deepseek_api_key(env_path: Path | None = None, environ: dict[str, str] | None = None) -> str:
-    """Read a local key without printing it or adding it to request artifacts."""
-    values = os.environ if environ is None else environ
-    value = values.get("DEEPSEEK_API_KEY", "").strip()
-    if not value and env_path is not None and env_path.is_file():
-        for line in env_path.read_text(encoding="utf-8").splitlines():
-            name, sep, raw = line.partition("=")
-            if sep and name.strip() == "DEEPSEEK_API_KEY":
-                value = raw.strip().strip("\"'")
-                break
+    """Read the chosen provider's local key without printing it or adding it to request artifacts."""
+    provider = llm_provider.load(env_path, environ) if environ is not None else PROVIDER
+    value = llm_provider.api_key(provider, env_path, environ)
     if not value:
-        raise G2Fault("DEEPSEEK_API_KEY_MISSING", "在项目根目录 .env 的 DEEPSEEK_API_KEY 中填写 key 后再运行")
+        raise G2Fault(provider.code("API_KEY_MISSING"), f"在项目根目录 .env 的 {provider.key_env} 中填写 key 后再运行")
     return value
 
 
@@ -365,28 +364,33 @@ def _existing_component_targets(component: str, props: dict) -> list[str]:
 
 
 def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict, attempt: int) -> dict:
+    """One planning call to the chosen provider (the name predates other providers)."""
+    if PROVIDER.error:
+        raise G2Fault("LLM_PROVIDER_INVALID", PROVIDER.error)
     if len(CALL_RECORDS) >= MAX_TOTAL_CALLS:
         raise G2Fault("MODEL_CALL_BUDGET_EXHAUSTED", f"G2 is capped at {MAX_TOTAL_CALLS} DeepSeek calls per run")
     CALLS_DIR.mkdir(parents=True, exist_ok=True)
     call_id = f"{stage}-attempt-{attempt}"
-    body = {"model": MODEL, "messages": messages, "stream": False,
-            "response_format": {"type": "json_object"},
-            "thinking": {"type": "enabled"}, "reasoning_effort": "high",
-            "max_tokens": MAX_TOKENS_PER_CALL}
+    body = {"model": MODEL, "messages": messages, "stream": False, "max_tokens": MAX_TOKENS_PER_CALL}
+    if PROVIDER.json_mode:
+        body["response_format"] = {"type": "json_object"}
+    if PROVIDER.thinking:
+        body.update({"thinking": {"type": "enabled"}, "reasoning_effort": "high"})
     request_path = CALLS_DIR / f"{call_id}.request.json"
     response_path = CALLS_DIR / f"{call_id}.response.json"
     write_json(request_path, body)
     api_key = load_deepseek_api_key(PROJECT / ".env")
-    request = urllib.request.Request(DEEPSEEK_URL, data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
-                                     headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
+    request = urllib.request.Request(PROVIDER.url, data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+                                     headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}",
+                                              **PROVIDER.request_headers(RUN_ID)},
                                      method="POST")
     started = time.monotonic()
 
     def record_failed_request(error_type: str, *, http_status: int | None = None) -> None:
         # Count every request attempt, including transport and provider failures, against the hard cap.
         # When token usage is unavailable, reserve the full configured per-call upper bound.
-        maximum_call_cost = (MAX_INPUT_TOKENS_PER_CALL * 0.30 + MAX_TOKENS_PER_CALL * 1.20) / 1_000_000
-        record = {"call_id": call_id, "stage": stage, "provider": "deepseek_api", "model": MODEL,
+        maximum_call_cost = (MAX_INPUT_TOKENS_PER_CALL * LLM_INPUT_PER_M + MAX_TOKENS_PER_CALL * LLM_OUTPUT_PER_M) / 1_000_000
+        record = {"call_id": call_id, "stage": stage, "provider": f"{PROVIDER.name}_api", "model": MODEL,
                   "prompt_version": PROMPT_VERSION, "status": "failed", "error_type": error_type,
                   "http_status": http_status, "elapsed_seconds": round(time.monotonic() - started, 3),
                   "peak_uncached_cost_upper_bound_usd": round(maximum_call_cost, 8),
@@ -402,26 +406,26 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
         response_obj = json.loads(raw)
     except urllib.error.HTTPError as exc:
         elapsed = time.monotonic() - started
-        error = {"call_id": call_id, "provider": "deepseek", "http_status": exc.code,
+        error = {"call_id": call_id, "provider": PROVIDER.name, "http_status": exc.code,
                  "elapsed_seconds": round(elapsed, 3)}
         write_json(response_path, error)
         record_failed_request("HTTPError", http_status=exc.code)
-        code = "DEEPSEEK_AUTH_FAILED" if exc.code in {401, 403} else ("DEEPSEEK_RATE_LIMIT" if exc.code == 429 else "DEEPSEEK_HTTP_ERROR")
-        raise G2Fault(code, f"DeepSeek API returned HTTP {exc.code}; response body and Authorization header were omitted") from exc
+        code = PROVIDER.code("AUTH_FAILED" if exc.code in {401, 403} else ("RATE_LIMIT" if exc.code == 429 else "HTTP_ERROR"))
+        raise G2Fault(code, f"{PROVIDER.label} returned HTTP {exc.code}; response body and Authorization header were omitted") from exc
     except urllib.error.URLError as exc:
         elapsed = time.monotonic() - started
-        error = {"call_id": call_id, "provider": "deepseek", "error_type": type(exc).__name__,
+        error = {"call_id": call_id, "provider": PROVIDER.name, "error_type": type(exc).__name__,
                  "elapsed_seconds": round(elapsed, 3)}
         write_json(response_path, error)
         record_failed_request(type(exc).__name__)
-        code = "DEEPSEEK_TIMEOUT" if isinstance(getattr(exc, "reason", None), TimeoutError) else "DEEPSEEK_UNAVAILABLE"
-        raise G2Fault(code, f"DeepSeek API request failed ({type(exc).__name__}); no key or response body was logged") from exc
+        code = PROVIDER.code("TIMEOUT" if isinstance(getattr(exc, "reason", None), TimeoutError) else "UNAVAILABLE")
+        raise G2Fault(code, f"{PROVIDER.label} request failed ({type(exc).__name__}); no key or response body was logged") from exc
     except json.JSONDecodeError as exc:
-        error = {"call_id": call_id, "provider": "deepseek", "error_type": "InvalidJSONResponse",
+        error = {"call_id": call_id, "provider": PROVIDER.name, "error_type": "InvalidJSONResponse",
                  "elapsed_seconds": round(time.monotonic() - started, 3)}
         write_json(response_path, error)
         record_failed_request("InvalidJSONResponse")
-        raise G2Fault("DEEPSEEK_INVALID_RESPONSE", "DeepSeek API returned a non-JSON response; body omitted") from exc
+        raise G2Fault(PROVIDER.code("INVALID_RESPONSE"), f"{PROVIDER.label} returned a non-JSON response; body omitted") from exc
     elapsed = time.monotonic() - started
     # Preserve the usable output and telemetry, but omit any provider thinking channel.
     try:
@@ -434,15 +438,16 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
     prompt_tokens = int(usage.get("prompt_tokens", 0))
     completion_tokens = int(usage.get("completion_tokens", 0))
     # A conservative estimate uses peak-hour prices and treats all prompt tokens as cache misses.
-    cost_upper_bound = prompt_tokens * 0.30 / 1_000_000 + completion_tokens * 1.20 / 1_000_000
-    record = {"call_id": call_id, "stage": stage, "provider": "deepseek_api", "model": response_obj.get("model", MODEL),
+    cost_upper_bound = prompt_tokens * LLM_INPUT_PER_M / 1_000_000 + completion_tokens * LLM_OUTPUT_PER_M / 1_000_000
+    record = {"call_id": call_id, "stage": stage, "provider": f"{PROVIDER.name}_api", "model": response_obj.get("model", MODEL),
               "prompt_version": PROMPT_VERSION, "elapsed_seconds": round(elapsed, 3),
               "prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens,
               "reasoning_tokens": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens"),
               "request_id": response_obj.get("id"), "finish_reason": (response_obj.get("choices") or [{}])[0].get("finish_reason"),
               "peak_uncached_cost_upper_bound_usd": round(cost_upper_bound, 8),
-              "pricing_snapshot": {"input_uncached_peak_usd_per_million": 0.30, "output_peak_usd_per_million": 1.20,
-                                   "source": "https://api-docs.deepseek.com/quick_start/pricing/", "as_of": "2026-10-13"},
+              "pricing_snapshot": {"input_uncached_peak_usd_per_million": LLM_INPUT_PER_M,
+                                   "output_peak_usd_per_million": LLM_OUTPUT_PER_M,
+                                   "source": PROVIDER.pricing_source or "configured in .env", "as_of": "2026-10-13"},
               "request_file": str(request_path.relative_to(PROJECT)),
               "response_file": str(response_path.relative_to(PROJECT)),
               "cloud_api_cost_estimate_usd": round(cost_upper_bound, 8),
@@ -552,9 +557,8 @@ def generate_validated_plan(stage: str, source_builder, schema_path: Path, valid
                         "error_code": exc.code, "error": str(exc), "retry_limit": MAX_LLM_ATTEMPTS})
             feedback = f"上一次输出被本地验证器拒绝：{exc}。请修正后只输出完整 JSON。"
             if attempt == MAX_LLM_ATTEMPTS or exc.code in {
-                    "DEEPSEEK_API_KEY_MISSING", "DEEPSEEK_AUTH_FAILED", "DEEPSEEK_RATE_LIMIT",
-                    "DEEPSEEK_HTTP_ERROR", "DEEPSEEK_UNAVAILABLE", "DEEPSEEK_TIMEOUT", "MODEL_CALL_BUDGET_EXHAUSTED",
-                    "MODEL_COST_BUDGET_EXCEEDED"}:
+                    *llm_provider.ALL_FAULT_CODES, "LLM_PROVIDER_INVALID", "MODEL_CALL_BUDGET_EXHAUSTED",
+                    "MODEL_COST_BUDGET_EXCEEDED"} - {PROVIDER.code("INVALID_RESPONSE")}:
                 if fallback is not None:
                     append_log(LOGS / "fidelity-warnings.jsonl", {"stage": stage, "attempt": 1, "problems": fallback[1],
                                 "retry_failed_with": exc.code})
@@ -974,13 +978,13 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
 
 
 def write_call_summary() -> None:
-    write_json(ARTIFACTS / "model-cost.json", {"provider": "DeepSeek API", "model": MODEL,
-               "endpoint": DEEPSEEK_URL, "prompt_version": PROMPT_VERSION, "calls": CALL_RECORDS,
+    write_json(ARTIFACTS / "model-cost.json", {"provider": PROVIDER.label, "model": MODEL,
+               "endpoint": PROVIDER.url, "prompt_version": PROMPT_VERSION, "calls": CALL_RECORDS,
                "peak_uncached_cost_upper_bound_usd": round(sum(c.get("peak_uncached_cost_upper_bound_usd", 0) for c in CALL_RECORDS), 8),
                "configured_worst_case_budget_usd": round(MAX_PROJECTED_API_COST_USD, 6),
                "per_call_max_tokens": MAX_TOKENS_PER_CALL, "max_calls_per_run": MAX_TOTAL_CALLS,
                "price_basis": "conservative upper bound at current peak rates assuming no prompt-cache hits",
-               "pricing_source": "https://api-docs.deepseek.com/quick_start/pricing/"})
+               "pricing_source": PROVIDER.pricing_source or "configured in .env"})
 
 
 def write_manifest(*, renderer_root: Path | None = None) -> None:
@@ -1052,7 +1056,7 @@ def run_all() -> dict:
     (ARTIFACTS / "llm_calls").mkdir(parents=True)
     source = PROJECT_INPUT.read_text(encoding="utf-8").strip()
     storyboard_context = {"narration_plan": None, "case_a": is_case_a_source(source)}
-    print(f"G2 run {RUN_ID}; model={MODEL}; provider=DeepSeek API", flush=True)
+    print(f"G2 run {RUN_ID}; model={MODEL}; provider={PROVIDER.label}", flush=True)
     form = os.environ.get("AUTOVIDEO_G2_VIDEO_FORM", "knowledge_cards")
     if form in {"auto", "process_diagram", "information_motion"}:
         if LOCK_NARRATION:

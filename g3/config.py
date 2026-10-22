@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import shutil
 
+from g2 import llm_provider
 from g2.draw_things import probe_draw_things
 
 
@@ -29,28 +30,20 @@ class Settings:
 
 
 def probe_config(settings: Settings) -> dict:
-    llm_ready = bool(os.environ.get("DEEPSEEK_API_KEY", "").strip())
-    if not llm_ready and settings.key_file.is_file():
-        try:
-            for line in settings.key_file.read_text(encoding="utf-8").splitlines():
-                name, separator, raw_value = line.partition("=")
-                if separator and name.strip() == "DEEPSEEK_API_KEY" and raw_value.strip().strip("\"'"):
-                    llm_ready = True
-                    break
-        except OSError:
-            llm_ready = False
+    provider = llm_provider.load(settings.key_file)
+    llm_ready = not provider.error and bool(llm_provider.api_key(provider, settings.key_file))
     tts_ready = settings.tts_model.is_file() and settings.tts_voices.is_file()
     node_ready = bool(shutil.which("node"))
     renderer_ready = (node_ready and settings.ffmpeg.is_file() and settings.ffprobe.is_file()
                       and settings.chrome.is_file()
                       and (settings.project_root / "g0/vendor/remotion-audiogram/node_modules").is_dir())
     draw_things = probe_draw_things()
-    checks = {"deepseek": llm_ready, "kokoro_zh": tts_ready, "remotion_renderer": renderer_ready,
+    checks = {provider.code_prefix.lower(): llm_ready, "kokoro_zh": tts_ready, "remotion_renderer": renderer_ready,
               "draw_things": draw_things["ready"],
               "diagram_layout": node_ready and (settings.project_root / "g2/layout/node_modules/elkjs/lib/elk.bundled.js").is_file()}
     blockers = [f"{name.upper()}_NOT_CONFIGURED" for name, ready in checks.items() if not ready]
     blockers = [item for item in blockers if item not in {"DRAW_THINGS_NOT_CONFIGURED", "DIAGRAM_LAYOUT_NOT_CONFIGURED"}]
-    return {"ready": not blockers, "provider": "DeepSeek API", "model": "deepseek-flash",
+    return {"ready": not blockers, "provider": provider.label, "model": provider.model,
             "target_duration_seconds": [10, 90], "duration_modes": ["fixed", "content"], "checks": checks, "blockers": blockers,
             "draw_things": draw_things,
             "api_key_value_exposed": False}

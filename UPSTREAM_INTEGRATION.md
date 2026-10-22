@@ -34,7 +34,7 @@ OpenAPI：http://127.0.0.1:8011/openapi.json
 
 先按**同一台机器上的进程**对接。上游运行在远程机器或容器时，其 `127.0.0.1` 不一定指向 AutoVideo；这需要另行约定连接方式。当前服务没有远程鉴权方案，且限制访问 Host；不要直接把本地地址替换成公网地址便视为远程接入完成。
 
-AutoVideo 的维护者负责启动本地服务、配置 DeepSeek 密钥和本地依赖。上游不需要持有或传入 DeepSeek 密钥。正文会由 AutoVideo 发送给 DeepSeek；文档原件、语音合成及视频渲染在本机处理。
+AutoVideo 的维护者负责启动本地服务、配置 DeepSeek 密钥和本地依赖。规划用的模型服务默认是 DeepSeek，也可以在 AutoVideo 的 `.env` 里用 `AUTOVIDEO_LLM_PROVIDER`（`deepseek`、`opencode`、`opendesign`、`custom`）换成别的 OpenAI 协议服务，见 `g2/llm_provider.py`；`GET /api/config/status` 会返回当前用的服务和模型。上游不需要持有或传入 DeepSeek 密钥。正文会由 AutoVideo 发送给 DeepSeek；文档原件、语音合成及视频渲染在本机处理。
 
 启动前检查：
 

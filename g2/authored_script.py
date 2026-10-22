@@ -140,7 +140,8 @@ def plan(pipeline, source: str):
     # Visual planning is the only model work left: one storyboard stage per chapter, plus form selection.
     pipeline.MAX_TOTAL_CALLS = max(pipeline.MAX_TOTAL_CALLS, 3 + 3 * len(chapters))
     pipeline.MAX_PROJECTED_API_COST_USD = pipeline.MAX_TOTAL_CALLS * (
-        pipeline.MAX_INPUT_TOKENS_PER_CALL * .30 + pipeline.MAX_TOKENS_PER_CALL * 1.20) / 1_000_000
+        pipeline.MAX_INPUT_TOKENS_PER_CALL * getattr(pipeline, "LLM_INPUT_PER_M", .30)
+        + pipeline.MAX_TOKENS_PER_CALL * getattr(pipeline, "LLM_OUTPUT_PER_M", 1.20)) / 1_000_000
     result = {"title": title, "core_message": title, "necessary_points": points,
               "omissions": [], "ambiguities": [], "segments": segments, "chapters": planned}
     pipeline.write_json(pipeline.ARTIFACTS / "narration-plan.json", result)
