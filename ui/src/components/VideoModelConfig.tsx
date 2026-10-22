@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
 import { recallModel, rememberModel } from "@/lib/modelMemory";
+import { ModelListInput } from "@/components/ModelListInput";
 import { isOffered, ProviderModels } from "@/components/ProviderModels";
 import { CheckCircle2, Plug, RotateCcw, Save, XCircle } from "lucide-react";
 
@@ -25,6 +26,7 @@ interface VideoModel {
   base_url: string;
   model: string;
   key_env: string;
+  fallback_models: string[];
   source: string;
   needs_key: boolean;
   key_ready: boolean;
@@ -35,7 +37,9 @@ interface Form {
   base_url: string;
   model: string;
   key_env: string;
+  fallbacks: string[];
 }
+
 
 const CUSTOM = "__custom__";
 
@@ -54,13 +58,14 @@ export function VideoModelConfig({ providers, secrets }: { providers: ProviderPr
   const [current, setCurrent] = useState<VideoModel | null>(null);
   const [reachable, setReachable] = useState(true);
   const [unreachableWhy, setUnreachableWhy] = useState("");
-  const [form, setForm] = useState<Form>({ base_url: "", model: "", key_env: "" });
+  const [form, setForm] = useState<Form>({ base_url: "", model: "", key_env: "", fallbacks: [] });
   const [busy, setBusy] = useState<"" | "save" | "test" | "reset">("");
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
 
   const apply = (config: VideoModel) => {
     setCurrent(config);
-    setForm({ base_url: config.base_url, model: config.model, key_env: config.key_env });
+    setForm({ base_url: config.base_url, model: config.model, key_env: config.key_env,
+      fallbacks: config.fallback_models || [] });
   };
 
   const load = useCallback(() => {
@@ -82,27 +87,33 @@ export function VideoModelConfig({ providers, secrets }: { providers: ProviderPr
   const keySlot = secrets.find((s) => s.env === form.key_env);
   const keyMissing = Boolean(form.key_env) && keySlot !== undefined && !keySlot.configured;
   const dirty = !current || current.base_url !== form.base_url || current.model !== form.model
-    || current.key_env !== form.key_env;
+    || current.key_env !== form.key_env
+    || (current.fallback_models || []).join(",") !== form.fallbacks.join(",");
 
   const pick = (id: string) => {
     const preset = providers.find((p) => p.id === id);
     if (!preset) return;
     // another vendor's model id is a 404: put back what this card had with that provider, or leave the model empty
-    if (active && isOffered(active.id, form.model)) rememberModel("video", active.id, { model: form.model, fallbacks: [] });
+    if (active && isOffered(active.id, form.model)) rememberModel("video", active.id, {
+      model: form.model, fallbacks: form.fallbacks.filter((m) => isOffered(active.id, m)) });
     const back = recallModel("video", id);
-    setForm({ base_url: preset.base_url, key_env: preset.api_key_env, model: back?.model ?? "" });
+    setForm({ base_url: preset.base_url, key_env: preset.api_key_env, model: back?.model ?? "",
+      fallbacks: back?.fallbacks ?? [] });
     setNotice(null);
   };
+
+  const payload = () => ({ base_url: form.base_url, model: form.model, key_env: form.key_env,
+    fallback_models: form.fallbacks });
 
   const run = async (what: "save" | "test" | "reset") => {
     setBusy(what);
     setNotice(null);
     try {
       if (what === "test") {
-        const r = await api<any>("/api/video/model/test", { method: "POST", body: form });
+        const r = await api<any>("/api/video/model/test", { method: "POST", body: payload() });
         setNotice({ ok: Boolean(r.ok), text: r.ok ? "可用" : `${r.status ?? ""} ${r.message || "失败"}`.trim() });
       } else if (what === "save") {
-        const config = await api<VideoModel>("/api/video/model", { method: "PUT", body: form });
+        const config = await api<VideoModel>("/api/video/model", { method: "PUT", body: payload() });
         apply(config);
         setNotice({ ok: true, text: "已保存，之后出的片用这个模型（正在出的片不受影响）" });
       } else {
@@ -170,10 +181,15 @@ export function VideoModelConfig({ providers, secrets }: { providers: ProviderPr
         )}
         {active && (
           <div className="sm:col-span-2 -mt-1">
-            <ProviderModels providerId={active.id} label={active.label} model={form.model}
+            <ProviderModels providerId={active.id} label={active.label} model={form.model} fallbacks={form.fallbacks}
               onPick={(id) => setForm({ ...form, model: id })} />
           </div>
         )}
+        <label className="block space-y-1 sm:col-span-2">
+          <div className="text-xs text-text-muted">兜底模型<span className="ml-1 opacity-70">主模型余额或额度用完（HTTP 402）时按顺序换用，逗号分隔；一次出片里换过就不再换回</span></div>
+          <ModelListInput value={form.fallbacks} disabled={!reachable} ariaLabel="视频模型兜底模型" placeholder="deepseek-v4-pro"
+            onChange={(list) => setForm({ ...form, fallbacks: list })} />
+        </label>
         <label className="block space-y-1">
           <div className="text-xs text-text-muted">接口地址<span className="ml-1 opacity-70">OpenAI 兼容</span></div>
           <input className="input font-mono text-xs" value={form.base_url} disabled={!reachable} aria-label="视频模型接口地址"

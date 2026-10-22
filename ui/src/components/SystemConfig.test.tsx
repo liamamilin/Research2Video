@@ -113,6 +113,17 @@ describe("SystemConfig form", () => {
     expect(await screen.findByText(/没有这个模型：minimax-m3.1-flash-free、minimax-m3/)).toBeTruthy();
   });
 
+  it("keeps a half-typed fallback list: the comma typed is not swallowed", async () => {
+    mockFetch();
+    render(<SystemConfig />);
+
+    const input = (await screen.findByLabelText("ai 兜底模型")) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "minimax-m3, " } });
+    expect(input.value).toBe("minimax-m3, ");
+    fireEvent.change(input, { target: { value: "minimax-m3, deepseek-v4-pro" } });
+    expect(input.value).toBe("minimax-m3, deepseek-v4-pro");
+  });
+
   it("shows configured API keys masked", async () => {
     mockFetch();
     render(<SystemConfig />);

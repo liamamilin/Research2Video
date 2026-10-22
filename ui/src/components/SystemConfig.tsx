@@ -3,6 +3,7 @@ import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
 import { AssistantConfigRecovery } from "@/components/AssistantAction";
 import { recallModel, rememberModel } from "@/lib/modelMemory";
+import { ModelListInput } from "@/components/ModelListInput";
 import { isOffered, ProviderModels } from "@/components/ProviderModels";
 import { VideoModelConfig } from "@/components/VideoModelConfig";
 import {
@@ -519,15 +520,8 @@ export function SystemConfig() {
           )}
           {!opts.simple && (<Field label="付费兜底模型" hint="免费模型额度用尽（计费错误）时按顺序尝试，逗号分隔">
             <div>
-              <input
-                className="input font-mono text-xs"
-                placeholder="minimax-m3, deepseek-v4.1-flash"
-                value={fallbackModels.join(", ")}
-                onChange={(e) => {
-                  const items = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
-                  set([section, "fallback_models"], items.length ? items : undefined);
-                }}
-              />
+              <ModelListInput value={fallbackModels} placeholder="minimax-m3, deepseek-v4.1-flash" ariaLabel={`${section} 兜底模型`}
+                onChange={(items) => set([section, "fallback_models"], items.length ? items : undefined)} />
             </div>
           </Field>)}
           <Field label="接口地址" hint="OpenAI 兼容">

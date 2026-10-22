@@ -863,6 +863,7 @@ class VideoModelIn(BaseModel):
     base_url: str = Field(min_length=1, max_length=300)
     model: str = Field(min_length=1, max_length=120)
     key_env: str = Field(default="", max_length=80)
+    fallback_models: list[str] = Field(default_factory=list, max_length=8)
 
     def settings(self) -> dict:
         return {**self.model_dump(), "env_file": config_routes._env_path() if self.key_env else ""}

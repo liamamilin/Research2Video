@@ -67,11 +67,13 @@ def test_an_unreachable_autovideo_is_shown_not_raised(video_env, client, fake):
 def test_saving_sends_the_key_name_and_this_apps_env_file_never_a_key(video_env, client, fake):
     _login(client, "admin", "admin-pass-123")
     reply = client.put("/api/video/model", headers=_csrf(client), json={
-        "base_url": "https://amr-link.open-design.ai/v1", "model": "deepseek-v4-flash", "key_env": "OPENDESIGN_API_KEY"})
+        "base_url": "https://amr-link.open-design.ai/v1", "model": "deepseek-v4-flash", "key_env": "OPENDESIGN_API_KEY",
+        "fallback_models": ["deepseek-v4-pro"]})
     assert reply.status_code == 200 and reply.json()["source"] == "设置页"
     method, path, sent = fake.calls[-1]
     assert (method, path) == ("PUT", "/api/config/llm")
     assert sent["key_env"] == "OPENDESIGN_API_KEY" and sent["env_file"].endswith(".env")
+    assert sent["fallback_models"] == ["deepseek-v4-pro"]
 
 
 def test_a_keyless_local_service_sends_no_env_file(video_env, client, fake):

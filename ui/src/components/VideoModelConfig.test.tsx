@@ -5,7 +5,7 @@ import { VideoModelConfig } from "./VideoModelConfig";
 
 const CONFIG = {
   label: "DeepSeek（官方）", base_url: "https://api.deepseek.com", model: "deepseek-flash", key_env: "DEEPSEEK_API_KEY",
-  source: "默认", needs_key: true, key_ready: true, error: "",
+  fallback_models: [], source: "默认", needs_key: true, key_ready: true, error: "",
 };
 const PROVIDERS = [
   { id: "deepseek", label: "DeepSeek", base_url: "https://api.deepseek.com/v1", api_key_env: "DEEPSEEK_API_KEY",
@@ -60,11 +60,15 @@ describe("VideoModelConfig", () => {
     expect((screen.getByLabelText("视频模型 ID") as HTMLInputElement).value).toBe("");  // never used with it: empty
     fireEvent.change(screen.getByLabelText("视频模型 ID"), { target: { value: "glm-5.3-flash" } });
     expect(screen.getByText(/OPENDESIGN_API_KEY 还没填/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("视频模型兜底模型"), { target: { value: "deepseek-v4-pro, " } });
+    expect((screen.getByLabelText("视频模型兜底模型") as HTMLInputElement).value).toBe("deepseek-v4-pro, ");  // half typed
+    fireEvent.change(screen.getByLabelText("视频模型兜底模型"), { target: { value: "deepseek-v4-pro, glm-5.3-flash" } });
     fireEvent.click(screen.getByText("保存并应用"));
     await screen.findByText(/已保存/);
     const put = calls.find((c) => c.init?.method === "PUT")!;
     expect(JSON.parse(String(put.init!.body))).toEqual({
-      base_url: "https://amr-link.open-design.ai/v1", model: "glm-5.3-flash", key_env: "OPENDESIGN_API_KEY" });
+      base_url: "https://amr-link.open-design.ai/v1", model: "glm-5.3-flash", key_env: "OPENDESIGN_API_KEY",
+      fallback_models: ["deepseek-v4-pro", "glm-5.3-flash"] });
     await screen.findByText(/来源：设置页/);
   });
 
