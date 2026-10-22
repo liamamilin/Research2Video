@@ -36,6 +36,16 @@ describe("Autopilot card", () => {
     expect(screen.queryByText(/现在开始一批/)).toBeNull(); // a batch is running
   });
 
+  it("does not promise a next run for a plan that is switched off", async () => {
+    useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
+    const off = { ...BODY, plans: [{ ...BODY.plans[0], enabled: 0 }] };
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(off) }) as Response));
+    render(<MemoryRouter><AutopilotCard /></MemoryRouter>);
+    const line = await screen.findByText(/计划「每周一批」/);
+    expect(line.textContent).toContain("已停用，不会自动运行");
+    expect(line.textContent).not.toContain("下次");
+  });
+
   it("is hidden from a viewer when nothing has ever run", async () => {
     useAuthStore.setState({ user: { username: "v", role: "viewer" } as never });
     vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify({ plans: [], runs: [] }) }) as Response));

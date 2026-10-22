@@ -107,3 +107,14 @@ def test_tags_skip_prices_and_a_long_title_is_cut_at_its_first_clause_for_the_co
     assert not any(t.startswith("$") or t[0].isdigit() for t in publish.tags(title, column()))
     assert publish.cover_text("系统提示里一行时间戳，让缓存白开了", column())["headline"] == "系统提示里一行时间戳"
     assert publish.cover_text("短标题", column())["headline"] == "短标题"
+
+
+def test_a_summary_cut_for_length_ends_at_a_comma_not_in_the_middle_of_a_word():
+    long = "这周讲几个大模型怎么挑" + "，Claude Opus 5.5 智能指数最高" * 6 + "，最快开始返回第一段，最便宜的是另一个。后面还有。"
+    out = publish.summary({"sections": [{"paragraphs": [{"text": long}]}]})
+    assert len(out) <= publish.SUMMARY_MAX + 1 and out.endswith("。") and "，。" not in out
+    assert out == long[:out.index("。")] + "。" and long.startswith(out[:-1])
+    no_comma = publish.summary({"sections": [{"paragraphs": [{"text": "超" * 150 + "。"}]}]})
+    assert no_comma == "超" * publish.SUMMARY_MAX + "…"
+    short = publish.summary({"sections": [{"paragraphs": [{"text": "很短的一句。第二句。"}]}]})
+    assert short == "很短的一句。"

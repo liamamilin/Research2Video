@@ -60,11 +60,17 @@ def chapter_lines(timeline: Optional[dict]) -> list[dict]:
     return [{"seconds": c["seconds"], "time": clock(c["seconds"]), "title": c["title"]} for c in out]
 
 
-def _first_clause(text: str, limit: int) -> str:
+def _first_sentence(text: str, limit: int) -> str:
+    """The text up to its first full stop, ended with 。; when that is longer than ``limit``, cut at the last comma
+    that fits (or at ``limit`` with … when there is none): never a sentence chopped mid-word and then closed."""
     text = text.strip()
     match = _CLAUSE_END.search(text)
-    clause = text[:match.start()] if match else text
-    return clause if len(clause) <= limit else clause[:limit]
+    sentence = text[:match.start()] if match else text
+    if len(sentence) <= limit:
+        return sentence + "。"
+    head = sentence[:limit]
+    comma = max(head.rfind("，"), head.rfind("、"), head.rfind(","))
+    return head[:comma] + "。" if comma > limit // 2 else head + "…"
 
 
 def summary(version: dict) -> str:
@@ -76,7 +82,7 @@ def summary(version: dict) -> str:
         for paragraph in section.get("paragraphs") or []:
             text = str(paragraph.get("text") or "").strip()
             if text:
-                return _first_clause(text, SUMMARY_MAX) + "。"
+                return _first_sentence(text, SUMMARY_MAX)
     return ""
 
 

@@ -13,13 +13,15 @@ export function timeAgo(iso: string | null | undefined): string {
   const then = new Date(normalized).getTime();
   if (Number.isNaN(then)) return iso;
   const diffMs = Date.now() - then;
-  const mins = Math.round(diffMs / 60000);
+  const ahead = diffMs < 0; // 下一次运行这类还没到的时间：说「几小时后」，不是「刚刚」
+  const mins = Math.round(Math.abs(diffMs) / 60000);
+  const tail = ahead ? "后" : "前";
   if (mins < 1) return "刚刚";
-  if (mins < 60) return `${mins} 分钟前`;
+  if (mins < 60) return `${mins} 分钟${tail}`;
   const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours} 小时前`;
+  if (hours < 24) return `${hours} 小时${tail}`;
   const days = Math.round(hours / 24);
-  if (days < 30) return `${days} 天前`;
+  if (days < 30) return `${days} 天${tail}`;
   return iso.slice(0, 10);
 }
 

@@ -53,6 +53,12 @@ describe("timeAgo", () => {
     expect(timeAgo(ago(5_000))).toBe("刚刚");
   });
 
+  it("says 后 for a time that has not come yet (the next run of a Job), not 刚刚", () => {
+    expect(timeAgo(ago(-8 * 3_600_000))).toBe("8 小时后");
+    expect(timeAgo(ago(-45 * 60_000))).toBe("45 分钟后");
+    expect(timeAgo(ago(-3 * 86_400_000))).toBe("3 天后");
+  });
+
   it("falls back to the raw string on invalid dates", () => {
     expect(timeAgo("not-a-date")).toBe("not-a-date");
   });

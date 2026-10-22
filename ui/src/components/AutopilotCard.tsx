@@ -142,7 +142,7 @@ export function AutopilotCard() {
       {error ? <p className="text-danger text-xs">{error}</p> : null}
       {plans.map((p) => (
         <p key={p.id} className="text-xs text-text-muted">
-          计划「{p.name}」{p.expression}（{p.enabled ? "启用" : "停用"}），下次 {when(p.next_fire)}
+          计划「{p.name}」{p.expression}{p.enabled ? `（启用），下次 ${when(p.next_fire)}` : "（已停用，不会自动运行）"}
           {p.spec?.picks.length ? `；写 ${p.spec.picks.map((k) => `${labels[k.cell ?? k.column ?? ""] ?? k.cell ?? k.column} ${k.count} 条`).join("、")}` : ""}
         </p>
       ))}

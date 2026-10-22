@@ -43,7 +43,7 @@ export function DashboardPage() {
   const lastFailed = jobs.filter((j) => j.state?.last_status === "failed").length;
 
   const stats = [
-    { label: "Total", value: total, color: "" },
+    { label: "全部 Job", value: total, color: "" },
     { label: "已启用", value: enabled, color: "text-accent" },
     { label: "运行中", value: running, color: running > 0 ? "text-accent" : "" },
     { label: "上次失败", value: lastFailed, color: lastFailed > 0 ? "text-danger" : "" },
@@ -57,7 +57,7 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <h1 className="text-lg font-semibold flex-1">总览</h1>
+        <h1 className="text-lg font-semibold flex-1">研究总览</h1>
         {health && (
           <button
             onClick={() => setHealthOpen((v) => !v)}

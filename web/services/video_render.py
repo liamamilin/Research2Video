@@ -171,13 +171,14 @@ def publish_pack(script: dict, version: dict, column) -> dict:
     for render in store.list_renders(script["id"]):
         if render["version"] != version["version"] or render["status"] != "COMPLETED":
             continue
+        timeline = {}  # there is a video: with no chapters file it has no chapters, which is not "not rendered yet"
         path = safe_file(render, "chapters.json")
         if path is not None:
             try:
                 timeline = json.loads(path.read_text(encoding="utf-8"))
             except (OSError, ValueError):
-                timeline = None
-            break
+                timeline = {}
+        break
     checks = video_workflow.rule_checks(version, column)
     from web.services import video_recheck
 
