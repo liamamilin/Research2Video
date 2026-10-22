@@ -173,3 +173,45 @@ def test_exa_mcp_errors_are_failures_not_empty_results(monkeypatch, reply, shown
     with pytest.raises(SearchUnavailableError):
         client.search(["q"])
     assert shown in client.errors["exa_mcp"]
+
+
+# --- You.com free MCP profile (keyless) -----------------------------------------------------------------------
+
+def test_youcom_reads_the_answer_after_log_notifications_and_bounds_freshness(monkeypatch):
+    sent = []
+    answer = {"results": {"web": [{"url": "https://y.test/a", "title": "A", "description": "short", "page_age": "2026-10-18T00:00:00",
+                                    "contents": {"highlights": ["h1", "h2"]}}],
+                          "news": [{"url": "https://y.test/n", "title": "N", "description": "only a description"}]}}
+
+    class Stream:
+        def read(self):
+            note = {"jsonrpc": "2.0", "method": "notifications/message", "params": {"data": "Search successful"}}
+            result = {"result": {"content": [{"type": "text", "text": json.dumps(answer)}]}}
+            return (f"event: message\ndata: {json.dumps(note)}\n\nevent: message\ndata: {json.dumps(result)}\n\n").encode()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_open(request, timeout=None):
+        sent.append((request.full_url, json.loads(request.data)))
+        return Stream()
+
+    monkeypatch.setattr("core.search.urllib.request.urlopen", fake_open)
+    hits = SearchClient(_config(provider="youcom", api_keys={})).search(["q"], after_date="2026-10-01")
+    url, body = sent[0]
+    assert url == "https://api.you.com/mcp?profile=free" and body["params"]["name"] == "you-search"
+    assert body["params"]["arguments"]["freshness"].startswith("2026-10-01to")
+    assert [h.url for h in hits] == ["https://y.test/a", "https://y.test/n"]
+    assert hits[0].excerpts == ["h1", "h2"] and hits[0].publish_date == "2026-10-18" and hits[1].excerpts == ["only a description"]
+
+
+def test_youcom_daily_limit_is_a_failure_not_an_empty_result(monkeypatch):
+    monkeypatch.setattr("core.search.urllib.request.urlopen", lambda request, timeout=None: _sse(
+        {"result": {"isError": True, "content": [{"type": "text", "text": "daily limit reached"}]}}))
+    client = SearchClient(_config(provider="youcom", api_keys={}))
+    with pytest.raises(SearchUnavailableError):
+        client.search(["q"])
+    assert "daily limit" in client.errors["youcom"]

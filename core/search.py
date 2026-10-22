@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 
 _PARALLEL_ENDPOINT = "https://api.parallel.ai/v1/search"
 _EXA_MCP_ENDPOINT = "https://mcp.exa.ai/mcp"  # Exa's public hosted MCP server: keyless, rate limits undocumented
+_YOUCOM_ENDPOINT = "https://api.you.com/mcp?profile=free"  # keyless, you-search only, 100 queries a day
 _DOUBAO_ENDPOINT = "https://open.feedcoopapi.com/search_api/global_search"
 _DOUBAO_QUERY_CHARS = 100  # the API truncates longer queries and takes one phrase per request
 _MAX_QUERIES = 5
@@ -188,6 +189,8 @@ class SearchClient:
                     results = self._search_exa(queries, after_date=after_date)
                 elif provider == "exa_mcp":
                     results = self._search_exa_mcp(queries, objective)
+                elif provider == "youcom":
+                    results = self._search_youcom(queries, after_date=after_date)
                 elif provider == "doubao":
                     results = self._search_doubao(queries)
                 elif provider == "tavily":
@@ -378,6 +381,46 @@ class SearchClient:
         "700901": "API Key 无效",
     }
 
+    def _mcp_call(self, endpoint: str, tool: str, arguments: dict) -> str:
+        """Call one tool of a remote MCP server (JSON-RPC over HTTP; the reply is a server-sent-event stream whose last
+        ``data:`` line with a result carries the answer) and return its text. Any error, in HTTP, in JSON-RPC or in the
+        tool's own ``isError``, raises: an empty string must mean "found nothing", never "was refused"."""
+        payload = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": tool, "arguments": arguments}}
+        request = urllib.request.Request(
+            endpoint, data=json.dumps(payload).encode("utf-8"), method="POST",
+            headers={"Content-Type": "application/json", "Accept": "application/json, text/event-stream",
+                     "User-Agent": "BaseCodingCLi/2.0"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self.config.timeout) as resp:
+                raw = resp.read().decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError(f"HTTP {exc.code}{'：被限流' if exc.code == 429 else ''}") from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"connection failed: {exc.reason}") from exc
+
+        replies = []
+        for line in raw.splitlines():
+            if line.startswith("data:"):
+                try:
+                    replies.append(json.loads(line[5:].strip()))
+                except ValueError:
+                    continue
+        if not replies:  # a plain JSON body instead of a stream
+            try:
+                replies = [json.loads(raw)]
+            except ValueError as exc:
+                raise RuntimeError(f"unreadable reply: {raw[:120]}") from exc
+        # a stream may carry log notifications before the answer
+        reply = next((r for r in reversed(replies) if "result" in r or "error" in r), {})
+        if reply.get("error"):
+            raise RuntimeError(f"{(reply['error'] or {}).get('message') or reply['error']}"[:300])
+        outcome = reply.get("result") or {}
+        text = "\n".join(c.get("text") or "" for c in outcome.get("content") or [] if c.get("type") == "text")
+        if outcome.get("isError"):
+            raise RuntimeError(text[:300] or "the search tool reported an error")
+        return text
+
     #: one result in the MCP tool's text: ``Title/URL/Published/Author/Highlights`` then the page text
     _EXA_MCP_RESULT = re.compile(
         r"^Title: (?P<title>.*)\nURL: (?P<url>.*)\nPublished: (?P<published>.*)\nAuthor: .*\nHighlights:\n",
@@ -395,38 +438,11 @@ class SearchClient:
         for query in queries[:3]:
             if self._cancel.is_set():
                 raise CancelledError("Cancelled during search")
-            payload = {
-                "jsonrpc": "2.0", "id": 1, "method": "tools/call",
-                "params": {"name": "web_search_exa", "arguments": {
-                    "query": query[:_MAX_QUERY_CHARS],
-                    "numResults": self.config.max_results,
-                    "objective": (objective or query)[:4096],
-                }},
-            }
-            request = urllib.request.Request(
-                _EXA_MCP_ENDPOINT, data=json.dumps(payload).encode("utf-8"), method="POST",
-                headers={"Content-Type": "application/json", "Accept": "application/json, text/event-stream",
-                         "User-Agent": "BaseCodingCLi/2.0"},
-            )
-            try:
-                with urllib.request.urlopen(request, timeout=self.config.timeout) as resp:
-                    raw = resp.read().decode("utf-8", errors="replace")
-            except urllib.error.HTTPError as exc:
-                raise RuntimeError(f"HTTP {exc.code}{'：被限流' if exc.code == 429 else ''}") from exc
-            except urllib.error.URLError as exc:
-                raise RuntimeError(f"connection failed: {exc.reason}") from exc
-
-            data = [line[5:].strip() for line in raw.splitlines() if line.startswith("data:")]
-            try:
-                reply = json.loads(data[-1] if data else raw)
-            except ValueError as exc:
-                raise RuntimeError(f"unreadable reply: {raw[:120]}") from exc
-            if reply.get("error"):
-                raise RuntimeError(f"{(reply['error'] or {}).get('message') or reply['error']}"[:300])
-            outcome = reply.get("result") or {}
-            text = "\n".join(c.get("text") or "" for c in outcome.get("content") or [] if c.get("type") == "text")
-            if outcome.get("isError"):
-                raise RuntimeError(text[:300] or "the search tool reported an error")
+            text = self._mcp_call(_EXA_MCP_ENDPOINT, "web_search_exa", {
+                "query": query[:_MAX_QUERY_CHARS],
+                "numResults": self.config.max_results,
+                "objective": (objective or query)[:4096],
+            })
             found = list(self._EXA_MCP_RESULT.finditer(text))
             for i, match in enumerate(found):
                 end = found[i + 1].start() if i + 1 < len(found) else len(text)
@@ -438,6 +454,37 @@ class SearchClient:
                     publish_date=None if published in ("", "N/A") else published[:10],
                     excerpts=[body[: self.config.max_chars_per_result]],
                     provider="exa_mcp",
+                ))
+        return results
+
+    def _search_youcom(self, queries: list[str], after_date: Optional[str] = None) -> list[SearchResult]:
+        """You.com's free MCP profile: no key, ``you-search`` only, 100 queries a day. One request per query; a date
+        bound becomes a ``freshness`` range."""
+        self._progress({"type": "search", "provider": "youcom", "queries": queries})
+        logger.info("Searching (youcom): %s", "; ".join(queries))
+
+        bound = after_date or self.config.after_date
+        results: list[SearchResult] = []
+        for query in queries[:3]:
+            if self._cancel.is_set():
+                raise CancelledError("Cancelled during search")
+            arguments: dict = {"query": query[:_MAX_QUERY_CHARS], "count": max(1, min(self.config.max_results, 100))}
+            if bound:
+                arguments["freshness"] = f"{bound}to{datetime.now().strftime('%Y-%m-%d')}"
+            text = self._mcp_call(_YOUCOM_ENDPOINT, "you-search", arguments)
+            try:
+                groups = (json.loads(text).get("results") or {}) if text.strip() else {}
+            except ValueError as exc:
+                raise RuntimeError(f"unreadable result: {text[:120]}") from exc
+            for item in [*(groups.get("web") or []), *(groups.get("news") or [])]:
+                contents = item.get("contents") or {}
+                excerpts = [e for e in (contents.get("highlights") or []) if e] or [item.get("description") or ""]
+                results.append(SearchResult(
+                    title=item.get("title") or "",
+                    url=item.get("url") or "",
+                    publish_date=(item.get("page_age") or "")[:10] or None,
+                    excerpts=[e[: self.config.max_chars_per_result] for e in excerpts],
+                    provider="youcom",
                 ))
         return results
 

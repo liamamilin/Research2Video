@@ -51,7 +51,13 @@ function looksLikeSecret(value: string): boolean {
 
 // Each search provider's own key variable. ``search.api_key_env`` is Parallel's; the others live in
 // ``search.api_key_envs`` (core/search.py), so switching provider switches which variable is read.
-const SEARCH_PROVIDERS = ["parallel", "exa", "exa_mcp", "doubao", "tavily", "brave", "serper", "duckduckgo"];
+const SEARCH_PROVIDERS = ["parallel", "exa", "exa_mcp", "youcom", "doubao", "tavily", "brave", "serper", "duckduckgo"];
+const KEYLESS_SEARCH = ["duckduckgo", "exa_mcp", "youcom"];
+const KEYLESS_NOTE: Record<string, string> = {
+  duckduckgo: "DuckDuckGo 无需密钥。",
+  exa_mcp: "Exa 公开端点无需密钥（免费，限流不明，适合兜底）。",
+  youcom: "You.com 免费端点无需密钥（每天 100 次查询，适合兜底）。",
+};
 const SEARCH_KEY_ENVS: Record<string, string> = {
   parallel: "PARALLEL_API_KEY", exa: "EXA_API_KEY", doubao: "DOUBAO_SEARCH_API_KEY", tavily: "TAVILY_API_KEY", brave: "BRAVE_API_KEY",
   serper: "SERPER_API_KEY",
@@ -375,7 +381,7 @@ export function SystemConfig() {
   const searchProvider = get(["search", "provider"], "parallel");
   const searchEnvMap = get(["search", "api_key_envs"], {}) || {};
   const searchKeyPath = searchProvider === "parallel" ? ["search", "api_key_env"] : ["search", "api_key_envs", searchProvider];
-  const searchEnv = (searchProvider === "duckduckgo" || searchProvider === "exa_mcp") ? ""
+  const searchEnv = KEYLESS_SEARCH.includes(searchProvider) ? ""
     : (searchProvider === "parallel" ? get(["search", "api_key_env"], SEARCH_KEY_ENVS.parallel)
       : searchEnvMap[searchProvider] || "");
   const pickSearchProvider = (next: string) => {
@@ -763,13 +769,13 @@ export function SystemConfig() {
               <Field label="模式">
                 <div>{selectInput(["search", "mode"], ["advanced", "basic", "fast", "turbo"])}</div>
               </Field>
-              {searchProvider !== "duckduckgo" && searchProvider !== "exa_mcp" ? (
+              {!KEYLESS_SEARCH.includes(searchProvider) ? (
                 <Field label="密钥环境变量" hint="当前服务商">
                   <div>{textInput(searchKeyPath, SEARCH_KEY_ENVS[searchProvider] || "", true)}</div>
                 </Field>
               ) : (
                 <div className="text-[11px] text-text-muted self-end pb-2">
-                  {searchProvider === "exa_mcp" ? "Exa 公开端点无需密钥（免费，限流不明，适合兜底）。" : "DuckDuckGo 无需密钥。"}
+                  {KEYLESS_NOTE[searchProvider]}
                 </div>
               )}
               <Field label="每次结果数">
