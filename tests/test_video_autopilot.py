@@ -410,6 +410,37 @@ def test_a_failed_render_is_submitted_once_more_then_held(pilot_env, monkeypatch
     assert item_of(run["id"], 0)["state"] == "HELD" and "出片失败" in item_of(run["id"], 0)["note"]
 
 
+def test_held_renders_go_again_once_their_cause_is_fixed_and_only_the_old_failures_are_forgiven(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id)
+    pilot.tick()  # approved
+    pilot.tick()  # first render
+    for _ in range(2):
+        render = [r for r in store.list_renders(script_id) if r["status"] != "FAILED"][0]
+        store.update_render(render["id"], status="FAILED", error_message="DeepSeek API returned HTTP 402")
+        pilot.tick()
+    assert item_of(run["id"], 0)["state"] == "HELD" and len(store.list_renders(script_id)) == 2
+    for r in store.list_renders(script_id):  # a second ago
+        store.update_render(r["id"], created_at="2026-10-21T10:00:00+0800")
+
+    assert pilot.retry_held_renders() == 1
+    assert pilot.retry_held_renders() == 0  # nothing is held any more
+    pilot.tick()
+    renders = store.list_renders(script_id)
+    assert len(renders) == 3 and item_of(run["id"], 0)["state"] == "WORKING"
+    store.update_render(renders[0]["id"], status="FAILED", error_message="again")  # the new render's own failure counts
+    pilot.tick()
+    pilot.tick()
+    assert len(store.list_renders(script_id)) == 4
+    for r in store.list_renders(script_id):
+        if r["status"] != "FAILED":
+            store.update_render(r["id"], status="FAILED", error_message="and again")
+    pilot.tick()
+    assert item_of(run["id"], 0)["state"] == "HELD"
+
+
 def test_the_wake_up_skips_a_stranger_on_loopback_and_reaches_the_gateway(video_env, monkeypatch):
     from core import schedule_runner as runner
     from web.settings import get_settings

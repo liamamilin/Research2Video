@@ -387,6 +387,23 @@ def reopen_approved() -> int:
     return reopened
 
 
+def retry_held_renders() -> int:
+    """Items held for failed renders go on, their earlier failures no longer counted: for when what broke them is fixed
+    (an account's balance, a key, the model the renders use). Only items whose script is approved. Returns how many."""
+    reopened = 0
+    for item in ap.held_items(limit=500):
+        script = store.get_script(item["script_id"]) if item["script_id"] else None
+        if not (script and script["status"] == "APPROVED" and item["note"].startswith("出片失败")):
+            continue
+        cutoff = max((r["created_at"] for r in store.list_renders(script["id"]) if r["status"] in ("FAILED", "CANCELLED")),
+                     default="")  # the failures there are now; a render made after this one counts again
+        ap.update_item(item["id"], state="WORKING", note="重新出片",
+                       retries={**(item.get("retries") or {}), "renders_forgiven_before": cutoff})
+        ap.update_run(item["run_id"], status="RUNNING")
+        reopened += 1
+    return reopened
+
+
 def _in_flight(runs: list[dict]) -> dict:
     """Scripts being written and renders being made right now, over every one of these batches' items."""
     counts = {"scripts": 0, "renders": 0}

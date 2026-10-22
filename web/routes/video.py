@@ -302,6 +302,16 @@ def dismiss_topic(body: DismissIn, user=Depends(require_editor)) -> dict:
     return {"topic_id": body.topic_id, "dismissed": body.dismissed}
 
 
+@router.post("/autopilot/retry-held")
+def retry_held_renders(user=Depends(require_editor)) -> dict:
+    """Run again the items held for failed renders (their earlier failures stop counting), once what broke them is fixed."""
+    from web.services import video_autopilot
+
+    reopened = video_autopilot.retry_held_renders()
+    audit.log("video_retry_held", user=user["username"], result=str(reopened))
+    return {"reopened": reopened}
+
+
 @router.get("/topics/discovery")
 def discovery_status(source: str = "flash", user=Depends(require_viewer)) -> dict:
     """A source the console may run (``topics.refresh: true``): running now, and when its newest report came out."""

@@ -236,11 +236,11 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
         out["item"] = {"gate": {**verdict, "approved": "auto"}, "note": f"已自动定稿（{verdict['text']}），准备出片"}
         return out
     if status == "APPROVED":
-        return _render_auto(script, can_start_render, out)
+        return _render_auto(script, can_start_render, out, retries)
     return out
 
 
-def _render_auto(script: dict, can_start_render: bool, out: dict) -> dict:
+def _render_auto(script: dict, can_start_render: bool, out: dict, retries: Optional[dict] = None) -> dict:
     renders = store.list_renders(script["id"])
     current = [r for r in renders if r["version"] == script["approved_version"]]
     active = [r for r in current if r["status"] in store.ACTIVE_RENDER_STATUSES]
@@ -252,7 +252,10 @@ def _render_auto(script: dict, can_start_render: bool, out: dict) -> dict:
         out["item"] = {"render_id": active[0]["id"], "note": f"出片中（{active[0]['status']}）"}
         video_render.start(active[0]["id"])  # no-op when this process already follows it
         return out
-    failed = [r for r in current if r["status"] in ("FAILED", "CANCELLED")]
+    # failures before ``renders_forgiven_before`` (set by video_autopilot.retry_held_renders, once what broke them is
+    # fixed: an account out of balance, a key) do not count against the script
+    forgiven = str((retries or {}).get("renders_forgiven_before") or "")
+    failed = [r for r in current if r["status"] in ("FAILED", "CANCELLED") and r["created_at"] > forgiven]
     if len(failed) > RENDER_RETRIES:
         out["hold"] = f"出片失败 {len(failed)} 次：{failed[0].get('error_message')}"
         return out
