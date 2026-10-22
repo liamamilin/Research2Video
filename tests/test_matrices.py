@@ -27,6 +27,10 @@ def _engine(config_dir: str) -> ResearchEngine:
     return engine
 
 
+AI_MEDIA = {"monitoring/ai_flash_discovery", "ai_media/daily_opensource_radar", "ai_media/weekly_model_arena",
+            "ai_media/weekly_business_watch", "ai_media/weekly_deep_research"}
+
+
 def test_every_existing_job_renders_the_prompt_it_rendered_before_matrices():
     """The hashes were taken from the engine before matrices existed (tests/fixtures/job_prompt_hashes.json,
     scripts/snapshot_job_prompts.py)."""
@@ -44,16 +48,20 @@ def test_every_existing_job_renders_the_prompt_it_rendered_before_matrices():
         assert hashlib.sha256(text.encode()).hexdigest() == digest, (
             f"{name} renders a different prompt than before matrices. If its prompt was edited on purpose, take the "
             f"snapshot again: python scripts/snapshot_job_prompts.py")
-        assert matrices.jobs_of_other_matrices(name, config) == set(), name  # its event memory is unchanged too
+        # its event memory is unchanged too, except that since 2026-10-22 the two AI matrices (the 26 older Jobs and
+        # the 5 media Jobs) leave each other's events out; no other matrix exists
+        assert matrices.jobs_of_other_matrices(name, config) <= AI_MEDIA | set(matrices.load_all(config)["ai"].jobs), name
         checked += 1
     assert checked >= 24
 
 
-def test_the_ai_matrix_holds_the_ai_jobs_and_only_the_flash_job_can_be_copied():
-    ai = matrices.load_all(os.path.join(ROOT, "config"))["ai"]
-    assert not ai.errors and ai.keywords == () and ai.domain == "AI 与软件开发"
-    assert "monitoring/ai_flash_discovery" in ai.jobs and "research/独立游戏" not in ai.jobs
-    assert [m.job for m in ai.members if m.copy_as] == ["monitoring/ai_flash_discovery"]
+def test_the_ai_matrices_hold_the_old_jobs_and_the_media_jobs_and_only_the_flash_job_can_be_copied():
+    loaded = matrices.load_all(os.path.join(ROOT, "config"))
+    ai, media = loaded["ai"], loaded["ai_media"]
+    assert not ai.errors and not media.errors and ai.keywords == () and ai.domain == media.domain == "AI 与软件开发"
+    assert set(media.jobs) == AI_MEDIA and not AI_MEDIA & set(ai.jobs) and "research/独立游戏" not in ai.jobs
+    assert [m.job for m in media.members if m.copy_as] == ["monitoring/ai_flash_discovery"]
+    assert not [m for m in ai.members if m.copy_as]
     assert os.path.isfile(os.path.join(ROOT, "jobs/_templates/_flash_discovery.yaml"))
 
 

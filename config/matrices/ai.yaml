@@ -7,8 +7,6 @@ name: AI 矩阵
 domain: AI 与软件开发
 keywords: []
 jobs:
-- job: monitoring/ai_flash_discovery
-  copy_as: _flash_discovery
 - practical_ai_intelligence/00_collection_planner
 - practical_ai_intelligence/01_model_and_pricing_radar
 - practical_ai_intelligence/02_ai_coding_tools_radar
@@ -35,7 +33,3 @@ jobs:
 - research/ai_agents_survey_direct
 - research/ai_automation_systems_research
 - research/ai_survey
-- ai_media/daily_opensource_radar
-- ai_media/weekly_model_arena
-- ai_media/weekly_business_watch
-- ai_media/weekly_deep_research
