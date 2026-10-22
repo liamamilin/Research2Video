@@ -122,18 +122,48 @@ def test_a_clean_draft_is_approved_automatically_and_rendered_once(pilot_env, mo
     assert ap.get_run(run["id"])["status"] == "DONE"
 
 
-@pytest.mark.parametrize("kwargs, tier", [({"serious": 1}, "serious"), ({"status_ok": False}, "partial")])
-def test_a_draft_is_approved_whatever_the_label_and_the_label_is_recorded(pilot_env, monkeypatch, kwargs, tier):
+def test_a_draft_with_a_weaker_label_is_approved_and_the_label_is_recorded(pilot_env, monkeypatch):
     run = batch(monkeypatch, 1)
     pilot.tick()
     script_id = item_of(run["id"], 0)["script_id"]
-    draft(script_id, **kwargs)
+    draft(script_id, status_ok=False)
     pilot.tick()
     item = item_of(run["id"], 0)
-    assert item["state"] == "WORKING" and item["gate"]["approved"] == "auto" and item["gate"]["label"] == tier
+    assert item["state"] == "WORKING" and item["gate"]["approved"] == "auto" and item["gate"]["label"] == "partial"
     assert store.get_script(script_id)["status"] == "APPROVED"
     pilot.tick()
     assert len(store.list_renders(script_id)) == 1  # nothing waited for the user
+
+
+def test_a_draft_with_a_serious_finding_is_held_not_rendered_until_the_user_approves(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id, serious=1)
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    assert item["state"] == "HELD" and "文稿没过审（有严重问题）" in item["note"] and "数字对不上" not in item["note"]
+    assert store.get_script(script_id)["status"] == "DRAFT" and store.list_renders(script_id) == []
+    pilot.tick()
+    assert store.list_renders(script_id) == []  # a held item stays held
+    store.update_script(script_id, status="APPROVED", approved_version=1)  # the user read it and approved
+    pilot.tick()
+    pilot.tick()
+    assert item_of(run["id"], 0)["state"] == "WORKING" and len(store.list_renders(script_id)) == 1
+
+
+def test_a_draft_that_would_be_spoken_wrongly_is_held_too(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id)
+    version = store.get_version(script_id, 1)
+    bad = adapt_review.issue("D5", adapt_review.MUST, "审稿用语进了口播：「二手」", 0, 0)
+    checks = adapt_review.assemble([bad], {"issues": []}, {"issues": []}, None, SECTIONS)
+    store.update_version_audit(script_id, 1, sections=SECTIONS, meta={"checks": checks})
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    assert item["state"] == "HELD" and "口播有问题" in item["note"] and store.list_renders(script_id) == []
 
 
 def test_a_draft_whose_model_audit_never_ran_gets_its_audit_rerun_then_goes_on_labelled_unaudited(pilot_env, monkeypatch):
@@ -380,13 +410,13 @@ def test_a_held_script_the_user_approves_goes_on_to_its_render_and_an_old_gate_h
     pilot.tick()
     assert item_of(run["id"], 0)["state"] == "WORKING"
     # a draft the quality gate of an earlier version held is let through now
-    draft(second["script_id"], serious=1)
+    draft(second["script_id"])
     ap.update_item(second["id"], state="HELD", note="闸门没通过：事实审计有 1 条严重问题")
     ap.update_run(run["id"], status="DONE")
     pilot.tick()
     pilot.tick()
     assert store.get_script(second["script_id"])["status"] == "APPROVED"
-    assert item_of(run["id"], 1)["gate"]["label"] == "serious"
+    assert item_of(run["id"], 1)["gate"]["approved"] == "auto"
 
 
 def test_a_failed_render_is_submitted_once_more_then_held(pilot_env, monkeypatch):
@@ -650,6 +680,7 @@ def test_api_a_batch_and_the_weekly_plan_can_be_set_per_cell(client, video_env):
 def test_api_the_batch_shows_the_label_as_it_is_now_not_as_it_was_at_approval(client, pilot_env, monkeypatch):
     from tests.test_video_scripts import _login
 
+    monkeypatch.setattr("web.services.video_executor.HOLD_TIERS", ())  # let a serious draft through to be labelled
     run = batch(monkeypatch, 1)
     pilot.tick()
     script_id = item_of(run["id"], 0)["script_id"]

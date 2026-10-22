@@ -1,7 +1,8 @@
 """One credibility label per script version: how far its words can be trusted, and why.
 
-The label informs; it never blocks. The pipeline goes on to a finished render whatever the label says and records it,
-and every list that leads to a publishing decision shows it. Tiers, worst first:
+The label informs, and the unattended pipeline stops on two tiers: ``serious`` and ``spoken`` (after the audits and
+the one rewrite, see web/services/video_executor.py HOLD_TIERS) are held for the user instead of being rendered. Every
+other tier goes on to a finished render and is recorded; every list that leads to a publishing decision shows it. Tiers, worst first:
 
 * serious    有严重问题   the fact audit found something serious
 * verify     有待核实     a paragraph is marked as needing review (it names which)

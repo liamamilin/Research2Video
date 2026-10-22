@@ -178,8 +178,13 @@ def approve(script_id: str, version: int, by: str) -> None:
 
 # --- a batch's script --------------------------------------------------------
 
+#: Credibility tiers (core/video/credibility.py) that keep a batch's script from being rendered unseen.
+HOLD_TIERS = ("serious", "spoken")
+
+
 def judge(script: dict, column) -> dict:
-    """The credibility label of the current version, and what it let through. It never stops the pipeline."""
+    """The credibility label of the current version, and what it let through (``advance_auto`` holds the tiers in
+    HOLD_TIERS)."""
     version = store.get_version(script["id"], script["current_version"])
     label = credibility.label(version)
     checks = video_workflow.rule_checks(version, column)
@@ -192,7 +197,7 @@ def judge(script: dict, column) -> dict:
 
 
 def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_start_render: bool) -> dict:
-    """Do the next missing thing for a batch's script. Nothing here waits for the user.
+    """Do the next missing thing for a batch's script. Nothing here waits for the user, but a draft in HOLD_TIERS.
 
     Returns ``{"took": {"script", "render"}, "bump": retry key or None, "hold": note or None, "item": fields}``:
     what newly started (for the batch's limits), and what the batch should note on its item."""
@@ -230,7 +235,12 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
             return out
         if not verdict["audited"] and tries("audit") < MAX_RETRIES:
             return out  # wait for a free slot to rerun the audit
-        # whatever the label, the video is made: it is shown next to the video, and the user decides what to publish
+        if verdict["label"] in HOLD_TIERS:
+            # after the audits and the one rewrite, a serious finding or a phrase that would be spoken wrongly is
+            # still there: no render is queued for it. Approving the script by hand sends it on (reopen_approved).
+            out["hold"] = f"文稿没过审（{verdict['text']}），没有出片：" + "；".join(verdict["reasons"][:3]) + "。看过文稿、确认后再出片"
+            return out
+        # any other label: the video is made, the label is shown next to it, and the user decides what to publish
         store.update_script(script["id"], status="APPROVED", approved_version=verdict["version"])
         steps.log(script["id"], "approve", "approve", f"自动定稿 v{verdict['version']}（{verdict['text']}）", by="autopilot")
         out["item"] = {"gate": {**verdict, "approved": "auto"}, "note": f"已自动定稿（{verdict['text']}），准备出片"}

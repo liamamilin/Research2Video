@@ -9,9 +9,10 @@ the next thing that is missing, so a restart or a crash never repeats finished w
 * approved → one render (a render row with an AutoVideo job id is only polled, never resubmitted);
 * render completed → done. Nothing here publishes.
 
-Nothing here waits for the user. The label (有出处可信 … 有严重问题) says how far the words can be trusted and is
-shown wherever a video is listed; an item is held only for a technical failure (the script failed after its retries,
-the render failed after its retry).
+Nothing here waits for the user, except a draft the audits still call seriously wrong (有严重问题) or that would be
+spoken wrongly (口播有问题): it is held, with the reason, until the user approves it. The label (有出处可信 … 有严重问题)
+says how far the words can be trusted and is shown wherever a video is listed; otherwise an item is held only for a
+technical failure (the script failed after its retries, the render failed after its retry).
 """
 
 from __future__ import annotations
