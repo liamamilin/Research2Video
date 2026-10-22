@@ -20,6 +20,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import re
 import threading
 import time
@@ -57,6 +58,16 @@ def _video_config() -> dict:
         return load_system_config(get_settings().paths.config_dir).get("video") or {}
     except Exception:  # noqa: BLE001 - defaults are fine
         return {}
+
+
+def offline_mounts() -> list[str]:
+    """The mount points ``video.require_mounts`` names that are not mounted now.
+
+    The big video folders live on an external disk (a link at the old place). Unplugged, nothing is mounted at the
+    disk's path, and a program that creates folders along the way would quietly write the videos to the laptop
+    under /Volumes. So a render is not started while a disk it needs is missing.
+    """
+    return [str(m) for m in _video_config().get("require_mounts") or [] if not os.path.ismount(str(m))]
 
 
 def get_client() -> AutoVideoClient:
@@ -281,6 +292,10 @@ def _advance(render_id: str, client: AutoVideoClient) -> str:
 
 
 def _submit(render: dict, client: AutoVideoClient) -> Optional[str]:
+    offline = offline_mounts()
+    if offline:
+        _fail(render["id"], "DISK_OFFLINE", f"外接盘没有挂载：{'、'.join(offline)}。接上后再重试，这次没有出片")
+        return None
     started = datetime.now(timezone.utc)
     store.update_render(render["id"], submit_started_at=started.isoformat())
     payload = dict(render["request"])
