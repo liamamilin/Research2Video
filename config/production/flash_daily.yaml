@@ -1,0 +1,6 @@
+# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。
+name: 快讯 · 每天（不再调研）
+job: monitoring/ai_flash_discovery
+recipe: flash
+auto: 3
+reverify: false

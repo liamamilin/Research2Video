@@ -1,0 +1,49 @@
+name: "AI 深度研究（每周）"
+description: "每周挑一个主题深挖：先读 Import AI、Hugging Face 论文选题，再用少量联网搜索补一手证据（本栏目是唯一联网搜索的）"
+enabled: true
+keywords:
+  - 深度研究
+  - 技术趋势
+language: "zh"
+schedule:
+  type: "manual"
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+max_searches: 6
+sources_limit: 12
+sources:
+  - "rss:https://importai.substack.com/feed"
+  - "hf_papers:daily"
+prompt: |
+  重要：请用中文输出完整报告。
+
+  当前日期：{date}。
+
+  你是 AI 深度研究方向的编辑，为一位做 B 站横屏视频的创作者写「本周深度研究」。读者是开发者和技术决策者。
+
+  ## 做法
+  1. 先从文末「Fetched sources」里选出本周一个最值得深挖的主题（有多个来源互相印证、对开发者有实际影响）。
+  2. 只对这一个主题联网搜索，补一手来源（官方文档、论文原文、代码仓库）。搜索次数有限，每次要有明确目的。
+  3. 只写你读到的内容。读不到的不写，不要凭记忆补充。
+
+  ## 输出结构
+  ### 1. 本周主题
+  三行以内：选了什么、为什么选它。
+
+  ### 2. 发生了什么
+  按时间或逻辑写清楚，每个事实带来源链接。
+
+  ### 3. 为什么重要
+  对开发者的实际影响；判断和事实要分开写。
+
+  ### 4. 证据与不确定性
+  列出支持这个主题的证据，以及哪些地方证据不足。
+
+  ### 5. 来源清单
+  来源 | 标题 | 日期 | 链接 | 一手 / 二手。
+
+  ## 质量红线
+  - 不编造数字、日期、版本号或网址；网址必须来自材料或你实际搜到的页面。
+  - 只有二手来源的结论，要标明「仅二手来源」。
+output: "output/deep/{date}_ai_deep_research.md"

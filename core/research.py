@@ -223,6 +223,28 @@ and citing source URLs for every finding.
 """
 
 
+class _NoSearch:
+    """Stands in for the search client of a fetch-only run: any attempt to search is a bug, not a quiet no-op."""
+
+    calls = 0
+    errors: dict = {}
+
+    def search(self, *args, **kwargs):
+        raise RuntimeError("this Job reads only its declared sources; web search is switched off for it")
+
+
+_FETCH_SYSTEM_PROMPT = """\
+You are a senior editor. Write the complete final report in Markdown from the task instructions and ONLY the \
+fetched source material appended to the task. You have no web search and no other knowledge to lean on.
+
+Rules:
+1. Every fact, number, date and URL must come from the fetched material. If it is not there, leave it out.
+2. Cite the source URL of each item exactly as it appears in the material; never invent or complete a URL.
+3. A figure that comes from a newsletter's summary rather than the linked original is second-hand: say so.
+4. Respect the output language and structure the task requires. No meta commentary, no notes about your process.
+"""
+
+
 class ResearchAgent:
     """Runs the research workflow for a single job."""
 
@@ -243,6 +265,8 @@ class ResearchAgent:
             search_config, cancel_token=cancel_token, progress_cb=progress_cb
         )
         self.config = research_config or ResearchConfig()
+        #: source spec -> item count (or "失败：…") of a fetch-only run, for the usage record
+        self.fetched: dict = {}
         self.workspace = os.path.realpath(workspace_dir)
         self._cancel = cancel_token or threading.Event()
         self._progress = progress_cb or (lambda _: None)
@@ -304,6 +328,25 @@ class ResearchAgent:
             fallback_queries=fallback_queries or [],
         )
 
+    def run_fetch_only(self, task_prompt: str, fetched_urls=(), stats: Optional[dict] = None) -> str:
+        """Write the report from the fetched sources already in ``task_prompt``: one model call, no tools, no web
+        search and no query planning. ``fetched_urls`` count as retrieved for the citation check."""
+        self.search = _NoSearch()
+        self.fetched = dict(stats or {})
+        for url in fetched_urls:
+            if url:
+                self.retrieved_urls.add(url)
+        self._remember_urls_in(task_prompt)
+        self._progress({"type": "phase", "phase": "writing_report"})
+        self._check_cancel()
+        messages = [
+            {"role": "system", "content": _FETCH_SYSTEM_PROMPT},
+            {"role": "user", "content": task_prompt},
+        ]
+        response = self.llm.chat(messages, tools=None)
+        self._log_usage()
+        return response.content.strip()
+
     def close(self) -> None:
         """Release HTTP resources."""
         self.llm.close()
@@ -313,6 +356,8 @@ class ResearchAgent:
         usage = dict(self.llm.usage)
         usage["model"] = self.llm.config.model
         usage["searches"] = self.search.calls
+        if self.fetched:
+            usage["fetched"] = dict(self.fetched)
         return usage
 
     # ------------------------------------------------------------------

@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>The Rundown AI</title>
+    <link>https://www.therundown.ai</link>
+    <atom:link href="https://www.therundown.ai/feed" rel="self" type="application/rss+xml"/>
+    <description>Get the latest AI news, understand why it matters, and learn how to apply it in your work.</description>
+    <language>en</language>
+    <item>
+      <title>Sam Altman’s three endings for the AI safety race</title>
+      <link>https://www.therundown.ai/articles/sam-altman-three-endings-for-the-ai-safety-race</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/sam-altman-three-endings-for-the-ai-safety-race</guid>
+      <pubDate>Wed, 21 Oct 2026 10:00:00 GMT</pubDate>
+      <description>PLUS: Make Claude Code check its work after each edit</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>What AI sees in your selfie</title>
+      <link>https://www.therundown.ai/articles/what-ai-sees-in-your-selfie</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/what-ai-sees-in-your-selfie</guid>
+      <pubDate>Tue, 20 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Japan heads to Martian moon</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>Anthropic co-founder says the singularity is underway</title>
+      <link>https://www.therundown.ai/articles/anthropic-co-founder-says-the-singularity-is-underway</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/anthropic-co-founder-says-the-singularity-is-underway</guid>
+      <pubDate>Tue, 20 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Try ChatGPT’s new voices with GPT-Live-1.1</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>SoftBank’s $18B bet on robot guards</title>
+      <link>https://www.therundown.ai/articles/softbank-18b-bet-on-robot-guards</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/softbank-18b-bet-on-robot-guards</guid>
+      <pubDate>Mon, 19 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Teleport to grandma's with this robot</description>
+      <category>robotics</category>
+    </item>
+    <item>
+      <title>Anthropic designs a pay package for the public</title>
+      <link>https://www.therundown.ai/articles/anthropic-designs-a-pay-package-for-the-public</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/anthropic-designs-a-pay-package-for-the-public</guid>
+      <pubDate>Mon, 19 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Turn a content spreadsheet into a working app</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Elon Musk's 'flying car' is here</title>
+      <link>https://www.therundown.ai/articles/elon-musk-flying-car-is-here</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/elon-musk-flying-car-is-here</guid>
+      <pubDate>Fri, 16 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Google’s Universal Cart goes live in Gemini</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>Meta turns Mac into an AI supercomputer</title>
+      <link>https://www.therundown.ai/articles/meta-turns-mac-into-an-ai-supercomputer</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/meta-turns-mac-into-an-ai-supercomputer</guid>
+      <pubDate>Fri, 16 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Turn a ChatGPT answer into a tool you can use</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Inside Amazon’s million-robot experiment</title>
+      <link>https://www.therundown.ai/articles/inside-amazon-million-robot-experiment</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/inside-amazon-million-robot-experiment</guid>
+      <pubDate>Thu, 15 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Microbots deliver drugs directly to the heart</description>
+      <category>robotics</category>
+    </item>
+    <item>
+      <title>Rogue AI agents sit for their first interview</title>
+      <link>https://www.therundown.ai/articles/rogue-ai-agents-sit-for-their-first-interview</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/rogue-ai-agents-sit-for-their-first-interview</guid>
+      <pubDate>Thu, 15 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Build a live sales dashboard in Claude</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>OpenAI finds a bug in its boardroom</title>
+      <link>https://www.therundown.ai/articles/openai-finds-a-bug-in-its-boardroom</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/openai-finds-a-bug-in-its-boardroom</guid>
+      <pubDate>Wed, 14 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: How to give Grok Bot its own email inbox</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Apple goes all-in on the home</title>
+      <link>https://www.therundown.ai/articles/apple-goes-all-in-on-the-home</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/apple-goes-all-in-on-the-home</guid>
+      <pubDate>Tue, 13 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: French grocers hit with massive cyberattack</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>Meta's Watermelon ripens into a frontier model</title>
+      <link>https://www.therundown.ai/articles/meta-watermelon-ripens-into-a-frontier-model</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/meta-watermelon-ripens-into-a-frontier-model</guid>
+      <pubDate>Tue, 13 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Put Meta’s new model to work</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>UCLA builds a humanoid from smartphone</title>
+      <link>https://www.therundown.ai/articles/ucla-builds-a-humanoid-from-smartphone</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/ucla-builds-a-humanoid-from-smartphone</guid>
+      <pubDate>Mon, 12 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Tesla is developing a robot skin</description>
+      <category>robotics</category>
+    </item>
+    <item>
+      <title>This AI factory builds tiny machines from code</title>
+      <link>https://www.therundown.ai/articles/this-ai-factory-builds-tiny-machines-from-code</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/this-ai-factory-builds-tiny-machines-from-code</guid>
+      <pubDate>Mon, 12 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Turn a product photo into three matching ads</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Microsoft's Jacob Andreou on AI's product gap</title>
+      <link>https://www.therundown.ai/articles/microsoft-s-jacob-andreou-on-ai-s-product-gap</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/microsoft-s-jacob-andreou-on-ai-s-product-gap</guid>
+      <pubDate>Sun, 11 Oct 2026 10:00:00 GMT</pubDate>
+      <description>How Microsoft rebuilt the new Copilot with capabilities to address a growing gap in AI</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Apple brings touch to the Mac </title>
+      <link>https://www.therundown.ai/articles/apple-brings-touch-to-the-mac</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/apple-brings-touch-to-the-mac</guid>
+      <pubDate>Fri, 09 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Amazon retires Fire, lets Google in</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>Fired OpenAI safety researchers hit back</title>
+      <link>https://www.therundown.ai/articles/fired-openai-safety-researchers-hit-back</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/fired-openai-safety-researchers-hit-back</guid>
+      <pubDate>Fri, 09 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Clean up a messy Excel report with Claude</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Meet Roger, the bomb-squad humanoid </title>
+      <link>https://www.therundown.ai/articles/meet-roger-the-bomb-squad-humanoid</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/meet-roger-the-bomb-squad-humanoid</guid>
+      <pubDate>Thu, 08 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Agilink's robot hands are getting crafty</description>
+      <category>robotics</category>
+    </item>
+    <item>
+      <title>AI's next frontier is the human cell</title>
+      <link>https://www.therundown.ai/articles/ai-s-next-frontier-is-the-human-cell</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/ai-s-next-frontier-is-the-human-cell</guid>
+      <pubDate>Thu, 08 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Give Claude’s routine work to Haiku 5.5</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>OpenAI's math avalanche continues</title>
+      <link>https://www.therundown.ai/articles/openai-math-avalanche-continues</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/openai-math-avalanche-continues</guid>
+      <pubDate>Wed, 07 Oct 2026 10:00:00 GMT</pubDate>
+      <description>PLUS: Let OpenAI’s GPT-6 Astra compare websites for you</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>A breakout moment for AI medicine</title>
+      <link>https://www.therundown.ai/articles/a-breakout-moment-for-ai-medicine</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/a-breakout-moment-for-ai-medicine</guid>
+      <pubDate>Tue, 06 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: This new headset measures burnout</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>The 'DeepSeek of the West' finally has a model</title>
+      <link>https://www.therundown.ai/articles/the-deepseek-of-the-west-finally-has-a-model</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/the-deepseek-of-the-west-finally-has-a-model</guid>
+      <pubDate>Tue, 06 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Protect your files with this Claude Code mod</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>California crashes robot fight club</title>
+      <link>https://www.therundown.ai/articles/california-crashes-robot-fight-club</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/california-crashes-robot-fight-club</guid>
+      <pubDate>Mon, 05 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Atlas gets a four-fingered upgrade</description>
+      <category>robotics</category>
+    </item>
+    <item>
+      <title>An OpenAI safety insider calls the culture 'broken'</title>
+      <link>https://www.therundown.ai/articles/an-openai-safety-insider-calls-the-culture-broken</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/an-openai-safety-insider-calls-the-culture-broken</guid>
+      <pubDate>Mon, 05 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: How to decide between different models</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Apple's 'no-video' security camera</title>
+      <link>https://www.therundown.ai/articles/apple-no-video-security-camera</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/apple-no-video-security-camera</guid>
+      <pubDate>Fri, 02 Oct 2026 14:34:09 GMT</pubDate>
+      <description>PLUS: Telecom giants team up to kill dead zones</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>Tavus' AI looks, listens, and talks back live</title>
+      <link>https://www.therundown.ai/articles/tavus-ai-looks-listens-and-talks-back-live</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/tavus-ai-looks-listens-and-talks-back-live</guid>
+      <pubDate>Fri, 02 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Is ChatGPT “Dots” worth upgrading to Pro for?</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>DoorDash puts its own drone on the menu</title>
+      <link>https://www.therundown.ai/articles/doordash-puts-its-own-drone-on-the-menu</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/doordash-puts-its-own-drone-on-the-menu</guid>
+      <pubDate>Thu, 01 Oct 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Figure jumps into fiery inferno</description>
+      <category>robotics</category>
+    </item>
+    <item>
+      <title>Argon aims to return Google to the frontier</title>
+      <link>https://www.therundown.ai/articles/argon-aims-to-return-google-to-the-frontier</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/argon-aims-to-return-google-to-the-frontier</guid>
+      <pubDate>Thu, 01 Oct 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: How (and why) to set up Meta’s Muse Desktop</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>OpenAI connects the dots on always-on agents</title>
+      <link>https://www.therundown.ai/articles/openai-connects-the-dots-on-always-on-agents</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/openai-connects-the-dots-on-always-on-agents</guid>
+      <pubDate>Wed, 30 Sep 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Get started with ChatGPT dot, OpenAI's new agent</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>SpaceX's $15B megarocket finally delivers</title>
+      <link>https://www.therundown.ai/articles/spacex-s-15b-megarocket-finally-delivers</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/spacex-s-15b-megarocket-finally-delivers</guid>
+      <pubDate>Tue, 29 Sep 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Apple's $5.7B bad buzz</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>Anthropic's mid-tier Claude climbs the rankings</title>
+      <link>https://www.therundown.ai/articles/anthropic-mid-tier-claude-climbs-the-rankings</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/anthropic-mid-tier-claude-climbs-the-rankings</guid>
+      <pubDate>Tue, 29 Sep 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Pick the right Claude model with one quick test</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>OpenAI's agents went rogue on Washington</title>
+      <link>https://www.therundown.ai/articles/openai-s-agents-went-rogue-on-washington</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/openai-s-agents-went-rogue-on-washington</guid>
+      <pubDate>Mon, 28 Sep 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: How to get started with Jev, TypeSafe's new AI</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Meta's Connect turns into a Muse takeover</title>
+      <link>https://www.therundown.ai/articles/meta-connect-turns-into-a-muse-takeover</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/meta-connect-turns-into-a-muse-takeover</guid>
+      <pubDate>Fri, 25 Sep 2026 10:00:00 GMT</pubDate>
+      <description>PLUS: Use Gemini Canvas to visualize Google Sheets</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Anthropic's AI biology lab makes its first find</title>
+      <link>https://www.therundown.ai/articles/anthropic-ai-biology-lab-makes-its-first-find</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/anthropic-ai-biology-lab-makes-its-first-find</guid>
+      <pubDate>Thu, 24 Sep 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Your go-to guy lives in the browser</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>The pacing era's first launch day</title>
+      <link>https://www.therundown.ai/articles/the-pacing-era-s-first-launch-day</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/the-pacing-era-s-first-launch-day</guid>
+      <pubDate>Wed, 23 Sep 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Build, test, and publish an app without leaving Codex</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Amazon shuts out Meta's Muse</title>
+      <link>https://www.therundown.ai/articles/amazon-shuts-out-meta-s-muse</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/amazon-shuts-out-meta-s-muse</guid>
+      <pubDate>Tue, 22 Sep 2026 10:00:00 GMT</pubDate>
+      <description>PLUS: How to set up ChatGPT to write in your voice</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>OpenAI goes from hacker to hacked</title>
+      <link>https://www.therundown.ai/articles/openai-goes-from-hacker-to-hacked</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/openai-goes-from-hacker-to-hacked</guid>
+      <pubDate>Mon, 21 Sep 2026 10:00:00 GMT</pubDate>
+      <description>PLUS: Build and test your own AI image skill pack</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Meta's less-creepy smart glasses</title>
+      <link>https://www.therundown.ai/articles/meta-less-creepy-smart-glasses</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/meta-less-creepy-smart-glasses</guid>
+      <pubDate>Fri, 18 Sep 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: OpenAI rescues biotech’s lost research</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>Inside OpenAI's log of misbehaving models</title>
+      <link>https://www.therundown.ai/articles/inside-openai-log-of-misbehaving-models</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/inside-openai-log-of-misbehaving-models</guid>
+      <pubDate>Fri, 18 Sep 2026 10:00:00 GMT</pubDate>
+      <description>PLUS: Test AI video object swaps with Higgsfield</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Agility's new 'safer' humanoid </title>
+      <link>https://www.therundown.ai/articles/agility-new-safer-humanoid</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/agility-new-safer-humanoid</guid>
+      <pubDate>Thu, 17 Sep 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Waymo's next stop is Tokyo</description>
+      <category>robotics</category>
+    </item>
+    <item>
+      <title>Zuck sits out the AI slowdown</title>
+      <link>https://www.therundown.ai/articles/zuck-sits-out-the-ai-slowdown</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/zuck-sits-out-the-ai-slowdown</guid>
+      <pubDate>Thu, 17 Sep 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: A beginner’s guide to ChatGPT Work</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>ChatGPT co-creator launches a new kind of AI</title>
+      <link>https://www.therundown.ai/articles/chatgpt-co-creator-launches-a-new-kind-of-ai</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/chatgpt-co-creator-launches-a-new-kind-of-ai</guid>
+      <pubDate>Wed, 16 Sep 2026 10:00:00 GMT</pubDate>
+      <description>PLUS: How to add models to Codex, Claude Code</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>U.S. confirms weapons are in orbit</title>
+      <link>https://www.therundown.ai/articles/us-confirms-weapons-are-in-orbit</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/us-confirms-weapons-are-in-orbit</guid>
+      <pubDate>Tue, 15 Sep 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: A brain implant that decodes your body language</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>Trump, China both shoot down the AI slowdown</title>
+      <link>https://www.therundown.ai/articles/trump-china-both-shoot-down-the-ai-slowdown</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/trump-china-both-shoot-down-the-ai-slowdown</guid>
+      <pubDate>Tue, 15 Sep 2026 10:00:00 GMT</pubDate>
+      <description>PLUS: Make any complex topic click with an ELI5 skill</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Japan’s latest answer to home robots</title>
+      <link>https://www.therundown.ai/articles/japan-latest-answer-to-home-robots</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/japan-latest-answer-to-home-robots</guid>
+      <pubDate>Mon, 14 Sep 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Foundation develops its war machine</description>
+      <category>robotics</category>
+    </item>
+    <item>
+      <title>Top AI labs want to pump the brakes </title>
+      <link>https://www.therundown.ai/articles/top-ai-labs-want-to-pump-the-brakes</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/top-ai-labs-want-to-pump-the-brakes</guid>
+      <pubDate>Mon, 14 Sep 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: Send a one-page proposal after sales calls</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Apple turns Watch into AI notetaker </title>
+      <link>https://www.therundown.ai/articles/apple-turns-watch-into-ai-notetaker</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/apple-turns-watch-into-ai-notetaker</guid>
+      <pubDate>Fri, 11 Sep 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: Air taxis take flight in Texas</description>
+      <category>tech</category>
+    </item>
+    <item>
+      <title>Anthropic opens the files on global Claude misuse</title>
+      <link>https://www.therundown.ai/articles/anthropic-opens-the-files-on-global-claude-misuse</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/anthropic-opens-the-files-on-global-claude-misuse</guid>
+      <pubDate>Fri, 11 Sep 2026 09:00:00 GMT</pubDate>
+      <description>PLUS: How Rowan used Astra to redo his wardrobe</description>
+      <category>ai</category>
+    </item>
+    <item>
+      <title>Tesla’s Cybercab is already getting weird</title>
+      <link>https://www.therundown.ai/articles/tesla-cybercab-is-already-getting-weird</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/tesla-cybercab-is-already-getting-weird</guid>
+      <pubDate>Thu, 10 Sep 2026 14:30:00 GMT</pubDate>
+      <description>PLUS: A Boston Dynamics spinout emerges from stealth</description>
+      <category>robotics</category>
+    </item>
+    <item>
+      <title>An Anthropic exit becomes an extinction debate</title>
+      <link>https://www.therundown.ai/articles/an-anthropic-exit-becomes-an-extinction-debate</link>
+      <guid isPermaLink="true">https://www.therundown.ai/articles/an-anthropic-exit-becomes-an-extinction-debate</guid>
+      <pubDate>Thu, 10 Sep 2026 10:00:00 GMT</pubDate>
+      <description>PLUS: Make your website easier for AI to find and cite pt. 2</description>
+      <category>ai</category>
+    </item>
+  </channel>
+</rss>

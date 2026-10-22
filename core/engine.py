@@ -137,7 +137,12 @@ class ResearchEngine:
                 print(f"  [{job_name}] Building prompt...")
                 output_path = self._resolve_output_path(job)
                 prompt = self._build_prompt(job)
-                source_block = self._fetch_sources_block(job)
+                fetch_only = job.get("search") is False  # search: false -> the Job reads only its declared sources
+                fetched = None
+                if fetch_only:
+                    source_block, fetched = self._fetch_sources_strict(job)
+                else:
+                    source_block = self._fetch_sources_block(job)
                 if source_block:
                     prompt = f"{prompt}\n\n{source_block}"
                 logger.debug("Prompt built: %d chars", len(prompt))
@@ -170,10 +175,13 @@ class ResearchEngine:
                     logger.warning("Could not stash stale output: %s", exc)
                     prev_path = None
 
+                research_cfg = ResearchConfig.from_system(self.sys)
+                if job.get("max_searches") is not None:  # a Job may cap its own searches below the system default
+                    research_cfg.max_searches = int(job["max_searches"])
                 agent = ResearchAgent(
                     llm_config=LLMConfig.from_system(self.sys, "ai"),
                     search_config=SearchConfig.from_system(self.sys),
-                    research_config=ResearchConfig.from_system(self.sys),
+                    research_config=research_cfg,
                     workspace_dir=self.workspace_dir,
                     cancel_token=self._cancel,
                     progress_cb=self._progress,
@@ -182,11 +190,15 @@ class ResearchEngine:
                 objective = " - ".join(
                     part for part in (job.get("name", ""), desc) if part
                 )
-                raw_content = agent.run(
-                    prompt,
-                    objective=objective,
-                    fallback_queries=job.get("keywords", []),
-                )
+                if fetch_only:
+                    raw_content = agent.run_fetch_only(
+                        prompt, fetched_urls=[r.url for r in fetched[0]], stats=fetched[1])
+                else:
+                    raw_content = agent.run(
+                        prompt,
+                        objective=objective,
+                        fallback_queries=job.get("keywords", []),
+                    )
                 usage = agent.get_usage()
 
                 if self._cancel.is_set():
@@ -334,6 +346,24 @@ class ResearchEngine:
     # ------------------------------------------------------------------
     # Prompt building
     # ------------------------------------------------------------------
+
+    def _fetch_sources_strict(self, job: dict):
+        """The source block of a Job that has no web search: every source fetched, or the run fails.
+
+        Returns ``(block, (items, stats))``. Raises ``SourcesUnavailableError`` when nothing came back, so the model
+        is never asked to write from memory; sources that failed while others answered are named in the block, so the
+        report states what it did not cover."""
+        from .search import SearchClient
+        from .sources import fetch_all_strict
+
+        items, stats = fetch_all_strict(list(job.get("sources") or []),
+                                        limit_per_source=int(job.get("sources_limit", 8)))
+        failed = [f"- {spec}: {state}" for spec, state in stats.items() if not isinstance(state, int)]
+        header = ("## Fetched sources\n\n" + "\n".join(
+            f"- {spec}: {state if not isinstance(state, int) else f'{state} items'}" for spec, state in stats.items()))
+        note = ("\n\n以下来源本次没有抓到，报告不得写成覆盖了它们，并在末尾「来源清单」前注明：\n" + "\n".join(failed)) if failed else ""
+        logger.info("Sources fetched: %s", stats)
+        return f"{header}{note}\n\n{SearchClient.format_results(items)}", (items, stats)
 
     def _fetch_sources_block(self, job: dict) -> str:
         """Pre-fetch job ``sources`` (RSS/GitHub/arXiv/HN) into prompt context."""

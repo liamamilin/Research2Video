@@ -35,3 +35,7 @@ jobs:
 - research/ai_agents_survey_direct
 - research/ai_automation_systems_research
 - research/ai_survey
+- ai_media/daily_opensource_radar
+- ai_media/weekly_model_arena
+- ai_media/weekly_business_watch
+- ai_media/weekly_deep_research
