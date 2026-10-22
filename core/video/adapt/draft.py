@@ -11,6 +11,9 @@ Prompt versions (recorded as ``prompts.draft``):
      add nothing new and stay near the paragraph's length. Found on C4: v7
      invented "凌晨三点, 两万次调用", v6/v7 opened sections with "这一节",
      and revisions answering a newcomer's questions added unsupported claims.
+  3  the hook's protagonist is explained in the opening paragraph; a source reminder is said once, not on every
+     weak fact; no reviewer words (一手/二手/未核实) and no teasers. Found on WildAWM (deep_dive, 2026-10-22): the
+     opening named an unexplained project and threw out three more terms, and the script said 二手 AI 审稿 aloud.
 """
 
 from __future__ import annotations
@@ -22,11 +25,11 @@ from pydantic import BaseModel, Field
 from .common import (WEAK, WORDING, call_json, fact_ids, fact_line, facts_by_id, numbered_script, paragraphs, pid,
                      remove_sentence)
 
-PROMPT_VERSION = 2
+PROMPT_VERSION = 3
 
 RULES = f"""写法：
 1. 按方案的 beats 顺序写，每个 beat 一节；小节标题只上画面、不朗读，不超过 20 个字。
-2. 开场 15 秒内（约 65 个字）抛出方案里的钩子，不先讲背景，不自我介绍。结尾回到钩子，再说一次主旨。
+2. 开场 15 秒内（约 65 个字）抛出方案里的钩子，不先讲背景，不自我介绍；但钩子里的主角（产品、论文、项目、缩写）观众没听过，要在开场同一段用半句白话说清它是什么，再抛问题或结论。结尾回到钩子，再说一次主旨。
 3. 用场景时只能是假设场景，用「比如你」「假设」这类说法起头，让观众听得出这是假设；场景里的时间、次数、金额等细节只能来自事实，不能编，不能把假设说成真实发生过的事。
 4. 讲稿要让观众看完能回答方案里的理解目标（goals）：按因果链（chain）一步步讲清「为什么」，不要只给结论；方案列出的误解（misconceptions）要主动澄清。
 5. 一个概念要在用到它之前讲清楚，它依赖的概念（needs）更要先讲。术语第一次出现的那一段，用一句白话解释它；有类比的按方案的类比讲，类比的每个部分都要对得上；方案没给类比的就用白话。这一段的 introduces 填它第一次解释的术语。
@@ -34,9 +37,9 @@ RULES = f"""写法：
 7. 并列的做法按内容称呼，不按「第一遍」「第二遍」称呼，免得听成先后两次。
 8. 节与节之间用自然的过渡，让观众知道为什么接着讲这个；不要用「这一节讲」「这一节我们」这类说法。视频超过 5 分钟时，大约每 2 分钟用一两句话回顾讲到哪了，这一段的 recap 设为 true。
 9. 只用方案里列出的事实。每段的 facts 只填它用到的事实编号（如 "F3"），过渡段可以为空。不写网址。推导出来的数照事实底稿写，不要自己重算，参数和单位都要一致。
-10. 按事实的置信度用对应的说法：{WORDING}。范围不能放大：事实说「Opus 5.5 和 Sonnet 5.5」，就不能说成「5.5 这一代」。有前提的结论要连同前提一起说；推导出来的结论不能说成被实验证明过。
+10. 按事实的置信度用对应的说法：{WORDING}。范围不能放大：事实说「Opus 5.5 和 Sonnet 5.5」，就不能说成「5.5 这一代」。有前提的结论要连同前提一起说；推导出来的结论不能说成被实验证明过。同一类来源提醒（官方说、自述、没有独立验证）第一次讲到时说一次，后面同一个来源不再重复。
 11. 行动建议按方案的 actions 写：说清在什么情况下适用、具体怎么做、怎么确认有效；不给方案以外的建议，不把有条件的建议说成绝对的。
-12. 对观众说「你」。语气自然，像一个真正懂行的人在耐心讲解：不用戏剧化的说法代替事实，网络用语少用。不说「根据报告」「报告显示」「上回」「上一期」，不说「得核实」「没拿到一手出处」这类审稿用语。
+12. 对观众说「你」。语气自然，像一个真正懂行的人在耐心讲解：不用戏剧化的说法代替事实，网络用语少用。不说「根据报告」「报告显示」「上回」「上一期」，不说「得核实」「没拿到一手出处」「二手」「未核实」「没有确认」这类审稿用语：来源不确定就直接说「官方说」「按作者自述」「还没有第三方验证」。不预告后面的内容（「接下来看……」）。
 13. 不用读不出来的符号：× → ≥ ≤ ~ / 括号、短横线表示的区间、Markdown 标记。区间写成「41% 到 80%」。命令和参数名只在观众需要照着输入时才读，每段最多一个。
 14. 按每节的长度预算写。预算按朗读单位计：每个汉字、每个英文单词、每个数字各算 1 个单位，标点不算。"""
 

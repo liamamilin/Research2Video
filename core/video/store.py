@@ -512,12 +512,20 @@ def add_version(
     return version
 
 
-def update_version_audit(script_id: str, version: int, *, sections: list[dict], meta: dict) -> None:
-    """Replace a GENERATED version's ``meta`` and sections once its audits finish (the audit marks paragraphs)."""
+def update_version_audit(script_id: str, version: int, *, sections: list[dict], meta: dict,
+                         length_check: dict | None = None) -> None:
+    """Replace a GENERATED version's ``meta`` and sections once its audits finish (the audit marks paragraphs, and
+    a rewrite from its findings changes the text, so the length check comes with it)."""
     with connect(write=True) as conn:
-        conn.execute("UPDATE script_versions SET sections = ?, meta = ? WHERE script_id = ? AND version = ?",
-                     (json.dumps(sections, ensure_ascii=False), json.dumps(meta, ensure_ascii=False),
-                      script_id, version))
+        if length_check is None:
+            conn.execute("UPDATE script_versions SET sections = ?, meta = ? WHERE script_id = ? AND version = ?",
+                         (json.dumps(sections, ensure_ascii=False), json.dumps(meta, ensure_ascii=False),
+                          script_id, version))
+        else:
+            conn.execute("UPDATE script_versions SET sections = ?, meta = ?, length_check = ?"
+                         " WHERE script_id = ? AND version = ?",
+                         (json.dumps(sections, ensure_ascii=False), json.dumps(meta, ensure_ascii=False),
+                          json.dumps(length_check, ensure_ascii=False), script_id, version))
 
 
 def get_version(script_id: str, version: int) -> dict | None:

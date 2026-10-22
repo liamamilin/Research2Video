@@ -29,6 +29,8 @@ from core.provenance import extract_urls, normalize_url
 from . import length
 
 MIN_CHINESE_SHARE = 0.5
+#: A script under this share of its budget is asked to grow; between it and the tolerance it is left short.
+MIN_FILL = 0.6
 MAX_REPORT_CHARS = 60000
 #: Phrases a script must never say aloud: they leak the production process.
 FORBIDDEN_PHRASES = ("根据报告", "报告显示", "报告中提到", "接着上回", "上回说到", "上一期")
@@ -63,7 +65,10 @@ SYSTEM_PROMPT = """你是中文知识视频的文稿编辑。你把一份带引�
 4. 口语化、适合朗读：短句、少括号、不用表格和列表符号；数字、版本号、命令、参数（如 --models、v1.15.27）原样保留。
 5. 你对某段事实把握不足、需要人工核实时，把 needs_review 设为 true。
 6. 小节标题是画面上的章节标签，不朗读，写短：不超过 20 个字。
-7. 严格按给定的长度预算写：预算按「朗读单位」计，每个汉字、每个英文单词、每个数字各算 1 个单位，标点不算。
+7. 严格按给定的长度预算写：预算按「朗读单位」计，每个汉字、每个英文单词、每个数字各算 1 个单位，标点不算。预算是上限不是目标：事实只有这么多就写短，宁可短一些，也不要把同一个意思换个说法再讲一遍。
+8. 观众没看过报告，也没看过这个系列：产品、项目、公司、框架、缩写第一次出现，用半句白话说清它是什么、能干什么；不要用「这个」「它」指代前面没出现过的东西。开头一两句先交代这期讲什么，再进入细节。
+9. 每段都要有新信息，不重复前面讲过的点。关于来源的提醒（「官方说法」「刚发布」「许可证没说明」「还没独立验证」之类）全篇只在最需要的地方说一次，不要每条每段都说。
+10. 不预告后面（「接下来看……」），不自问自答，不说「一手」「二手」「未核实」「没有确认」这类审稿用语：来源不确定就直接说「官方说」「按厂商自述」。
 
 只输出一个 JSON 对象，不要任何其他文字：
 {"title": "视频标题", "sections": [{"title": "小节标题", "paragraphs": [{"text": "口播段落", "citations": ["https://..."], "needs_review": false}]}]}"""
@@ -243,7 +248,9 @@ def write(
     # cannot voice, so do not pay for one.
     _require_chinese(sections)
 
-    if check["status"] in ("OVER", "UNDER"):
+    # Too long is cut. A script that is short because the report holds little stays short: asking the model to fill
+    # the budget makes it say the same thing again, which is what the style audit then flags.
+    if check["status"] == "OVER" or (check["status"] == "UNDER" and check["spoken_length"] < budget * MIN_FILL):
         direction = "删减" if check["status"] == "OVER" else "扩充"
         messages += [
             {"role": "assistant", "content": response.content},

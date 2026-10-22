@@ -455,6 +455,31 @@ def test_review_phrases_are_reviewer_talk_not_everyday_words():
     assert [i["problem"] for i in d5] == ["审稿用语进了口播：「没拿到一手」"]
 
 
+def test_a_source_reminder_said_in_many_paragraphs_is_flagged_after_the_first_two():
+    said = "Vercel 官方说法：这个功能已经上线。"
+    sections = [{"title": "一", "paragraphs": [{"text": said}, {"text": said + "按官方说法，团队不用重试。"}]},
+                {"title": "二", "paragraphs": [{"text": said + "官方还称不会重复。"}, {"text": "接入前先在测试环境验证。"},
+                                              {"text": "厂商自述的数字，还没有独立验证。"}]}]
+    e7 = [i for i in review.rules(sections, column=column(), target_minutes=6) if i["rule"] == "E7"]
+    assert [(i["section"], i["paragraph"], i["severity"]) for i in e7] == [(1, 0, "must"), (1, 2, "must")]
+    quiet = [{"title": "一", "paragraphs": [{"text": said}, {"text": "团队不用再手动重试。"}]}]
+    assert not [i for i in review.rules(quiet, column=column(), target_minutes=6) if i["rule"] == "E7"]
+
+
+def test_a_teaser_for_what_comes_next_is_a_must_but_an_ordinary_next_step_is_not():
+    sections = [{"title": "开场", "paragraphs": [{"text": "榜单只筛候选。接下来看它怎么改片。"},
+                                              {"text": "下一步先在测试环境跑一遍。"}]}]
+    e8 = [i for i in review.rules(sections, column=column(), target_minutes=6) if i["rule"] == "E8"]
+    assert [(i["section"], i["paragraph"], i["severity"]) for i in e8] == [(0, 0, "must")]
+
+
+def test_source_provenance_words_are_reviewer_talk():
+    sections = [{"title": "开场", "paragraphs": [{"text": "二手 AI 审稿称，评测可能复用了外壳。"},
+                                              {"text": "逐门名称还没有确认。"}, {"text": "先确认你的账单再选型。"}]}]
+    d5 = [(i["paragraph"], i["problem"]) for i in review.rules(sections, column=column(), target_minutes=6) if i["rule"] == "D5"]
+    assert d5 == [(0, "审稿用语进了口播：「二手」"), (0, "审稿用语进了口播：「AI 审稿」"), (1, "审稿用语进了口播：「没有确认」")]
+
+
 def test_legacy_versions_get_only_the_checks_that_need_no_plan():
     sections = [{"title": "开场", "paragraphs": [{"text": "缓存写入 5 分钟是 1.25 倍，1 小时是 2 倍。没有 A/B 测试。"}]}]
     issues = review.rules(sections, column=column(), target_minutes=6)
@@ -490,7 +515,7 @@ def test_pipeline_passes_a_clean_script_in_five_calls(llm):
     first = adapted.sections[0]["paragraphs"][0]
     assert first["citations"] == [PRICING] and first["evidence"] == "CITED"
     assert adapted.meta["style"]["presets"] == ["intermediate@1", "explainer@2"]
-    assert adapted.meta["prompts"] == {"facts": 2, "plan": 2, "draft": 2, "review": 3}
+    assert adapted.meta["prompts"] == {"facts": 2, "plan": 3, "draft": 3, "review": 3}
     assert adapted.meta["fact_sheet_id"] == facts.sheet_id(REPORT)
     assert adapted.meta["description"]["sources"][0] == {"url": PRICING, "facts": ["F3", "F1", "F2"]}
     assert "批处理命中率在 30% 到 98% 之间" in adapted.meta["description"]["not_covered"]
@@ -539,6 +564,29 @@ def test_pipeline_rewrites_only_flagged_paragraphs_serious_first(llm):
     assert checks["rounds"] == 1 and checks["summary"]["passed"]
     assert {(i["rule"], i["resolved"]) for i in checks["initial"] if i["severity"] != review.WARN} == {
         ("N1", True), ("D2", True)}
+
+
+def test_a_big_rewrite_that_comes_back_unreadable_is_retried_with_the_worst_half(monkeypatch):
+    from core.video.adapt import draft, pipeline
+    from core.video.adapt.common import AdaptError
+
+    seen = []
+
+    def revise(client, sections, todo, plan, sheet, style):
+        seen.append(list(todo))
+        if len(seen) == 1:
+            raise AdaptError("模型没有返回 JSON")
+        return sections, set(todo)
+
+    monkeypatch.setattr(draft, "revise", revise)
+    todo = {f"S1P{i}": ["x"] for i in range(1, 9)}
+    _, changed = pipeline._revise(None, [], todo, {}, {}, None)
+    assert seen[1] == ["S1P1", "S1P2", "S1P3", "S1P4"] and changed == set(seen[1])
+    seen.clear()
+    few = {"S1P1": ["x"], "S1P2": ["x"]}
+    with pytest.raises(AdaptError):  # a small rewrite is not split: there is nothing to halve
+        pipeline._revise(None, [], few, {}, {}, None)
+    assert len(seen) == 1
 
 
 def test_minor_findings_are_shown_but_not_revised(llm):

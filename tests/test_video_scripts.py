@@ -96,6 +96,11 @@ class FakeLLM:
     #: the style audit is a second call after the fact audit
     style_replies: list[str] = []
     style_calls: list[list[dict]] = []
+    #: the new-viewer read and the rewrite from the audits' findings; both find nothing unless a test queues replies
+    reader_replies: list[str] = []
+    reader_calls: list[list[dict]] = []
+    revise_replies: list[str] = []
+    revise_calls: list[list[dict]] = []
 
     def __init__(self, config, cancel_token=None, progress_cb=None):
         self.usage = {"requests": 0, "total_tokens": 0}
@@ -105,6 +110,12 @@ class FakeLLM:
         if messages[0]["content"].startswith("你是栏目风格审计员"):
             FakeLLM.style_calls.append(list(messages))
             return ChatResponse(content=FakeLLM.style_replies.pop(0) if FakeLLM.style_replies else '{"issues": []}')
+        if messages[0]["content"].startswith("你扮演一位观众"):
+            FakeLLM.reader_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.reader_replies.pop(0) if FakeLLM.reader_replies else '{"paragraphs": []}')
+        if messages[0]["content"].startswith("你是中文知识视频的文稿编辑，正在修改"):
+            FakeLLM.revise_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.revise_replies.pop(0) if FakeLLM.revise_replies else '{"paragraphs": []}')
         if messages[0]["content"].startswith("你是事实审计员"):
             FakeLLM.audit_calls.append(list(messages))
             return ChatResponse(content=FakeLLM.audit_replies.pop(0) if FakeLLM.audit_replies else '{"issues": []}')
@@ -120,6 +131,10 @@ def llm(monkeypatch):
     FakeLLM.audit_calls = []
     FakeLLM.style_replies = []
     FakeLLM.style_calls = []
+    FakeLLM.reader_replies = []
+    FakeLLM.reader_calls = []
+    FakeLLM.revise_replies = []
+    FakeLLM.revise_calls = []
     monkeypatch.setattr("core.llm.LLMClient", FakeLLM)
     return FakeLLM
 
@@ -1105,6 +1120,87 @@ def test_api_a_short_script_is_also_checked_against_its_columns_style(client, vi
     style = [i for i in script["version_shown"]["checks"]["issues"] if i["rule"] == "S1"]
     assert [(i["severity"], i["section"], i["paragraph"], i["source"]) for i in style] == [("must", 1, 0, "model")]
     assert script["version_shown"]["checks"]["summary"]["by_audit"]["communication"]["must"] >= 1
+
+
+def _make(client, key, title):
+    made = client.post("/api/video/scripts", headers=_csrf(client), json={"column": key, "topic": {"title": title, "angle": "x"}})
+    return _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+
+
+def test_api_a_short_script_is_rewritten_once_where_the_audits_found_problems(client, video_env, research, llm):
+    key = "point_short"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    llm.style_replies = ['{"issues": [{"id": "S2P1", "quote": "讲讲讲", "rule": "S1", "severity": "一般", '
+                         '"problem": "这一段把上一段的意思又讲了一遍", "why": "重复", "suggestion": "删掉这一段"}]}']
+    llm.reader_replies = ['{"paragraphs": [{"id": "S1P1", "questions": ["Huashu 是什么？"], "lost": []}]}']
+    llm.revise_replies = ['{"paragraphs": [{"id": "S1P1", "text": "Huashu 是一个做动效的开源工具，这周更新了。"}, '
+                          '{"id": "S2P1", "text": ""}]}']
+    _login(client)
+    script = _make(client, key, "一个要被改写的选题")
+    assert script["status"] == "DRAFT", script.get("error")
+    assert len(llm.reader_calls) == 1 and len(llm.revise_calls) == 1
+    asked = llm.revise_calls[0][-1]["content"]
+    assert "Huashu 是什么？" in asked and "这一段把上一段的意思又讲了一遍" in asked and "栏目「一个知识点」" in asked
+    shown = script["version_shown"]
+    assert shown["sections"][0]["paragraphs"][0]["text"] == "Huashu 是一个做动效的开源工具，这周更新了。"
+    assert shown["sections"][0]["paragraphs"][0]["note"] == "已按审计意见改写"
+    assert shown["sections"][0]["paragraphs"][0]["citations"] == [GOOD]  # a rewrite keeps what the paragraph cited
+    assert len(shown["sections"][1]["paragraphs"]) == 2  # the dropped paragraph is gone (3 before)
+    assert shown["checks"]["rounds"] == 1 and shown["checks"]["model_ran"] is True
+    assert not [i for i in shown["checks"]["issues"] if i["rule"] in ("N1", "S1")]  # the findings were acted on
+    assert len(llm.audit_calls) == 2 and "S1P1" in llm.audit_calls[1][-1]["content"]  # the rewrite is fact-checked
+    assert "S3P1" not in llm.audit_calls[1][-1]["content"]  # ...and only the rewritten paragraphs
+
+
+def test_api_a_short_script_nothing_flagged_is_not_rewritten(client, video_env, research, llm):
+    key = "point_short"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    _login(client)
+    script = _make(client, key, "一个不用改写的选题")
+    assert script["status"] == "DRAFT" and llm.revise_calls == []
+    assert script["version_shown"]["checks"]["rounds"] == 0
+
+
+def test_api_a_failed_rewrite_keeps_the_script_and_says_so(client, video_env, research, llm):
+    key = "point_short"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    llm.reader_replies = ['{"paragraphs": [{"id": "S1P1", "questions": ["X 是什么？"], "lost": []}]}']
+    llm.revise_replies = ["不是 JSON", "还是不是 JSON", "依然不是 JSON"]
+    _login(client)
+    script = _make(client, key, "一个改写会失败的选题")
+    assert script["status"] == "DRAFT", script.get("error")
+    assert any("按审计意见改写没有成功" in p for p in script["version_shown"]["meta"]["problems"])
+    assert [i for i in script["version_shown"]["checks"]["issues"] if i["rule"] == "N1"]  # still reported
+
+
+def test_api_a_short_script_that_is_a_little_short_is_not_padded(client, video_env, research, llm):
+    key = "point_short"
+    budget = _roundup_budget(key)
+    llm.replies = [script_json(int(budget * 0.8), citations={(0, 0): [GOOD]})]  # short, but not by much
+    _login(client)
+    script = _make(client, key, "一个素材不多的选题")
+    assert script["status"] == "DRAFT", script.get("error")
+    assert len(llm.calls) == 1  # no "expand to the budget" call: that makes the model say the same thing twice
+    assert script["version_shown"]["length_check"]["status"] == "UNDER"
+
+
+def test_api_a_timed_out_style_audit_does_not_throw_away_the_fact_audit(client, video_env, research, llm, monkeypatch):
+    from core.errors import LLMError
+
+    key = "point_short"
+    llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
+    real = FakeLLM.chat
+
+    def chat(self, messages, **kwargs):
+        if messages[0]["content"].startswith("你是栏目风格审计员"):
+            raise LLMError("LLM call exceeded timeout of 240s")
+        return real(self, messages, **kwargs)
+
+    monkeypatch.setattr(FakeLLM, "chat", chat)
+    _login(client)
+    script = _make(client, key, "一个风格审计会超时的选题")
+    assert script["version_shown"]["checks"]["model_ran"] is True
+    assert any("风格审计没有完成" in p for p in script["version_shown"]["meta"]["problems"])
 
 
 def test_api_a_failed_style_audit_keeps_the_fact_audit(client, video_env, research, llm):

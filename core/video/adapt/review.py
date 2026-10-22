@@ -51,7 +51,11 @@ PASS_QUIZ = 0.8
 #: Paragraphs in different sections sharing this many quantities retell the same numbers.
 REPEATED_QUANTITIES = 3
 #: Reviewer-to-reviewer talk that must not be voiced (D5).
-REVIEW_PHRASES = ("得核实", "需核实", "需要核实", "待核实", "一手出处", "二手来源", "二手转述", "没拿到一手", "未取得")
+REVIEW_PHRASES = ("得核实", "需核实", "需要核实", "待核实", "一手出处", "二手来源", "二手转述", "没拿到一手", "未取得",
+                  "一手", "二手", "未核实", "没有确认", "还没确认", "未确认", "AI 审稿")
+#: The same source reminder ("官方说", "厂商自述", "没有独立验证") said again and again is noise: a viewer needs it once.
+_CAVEAT = re.compile(r"官方(?:说法|称|还称|表示|说)|按官方|厂商自述|按厂商|自述|独立验证|第三方验证")
+CAVEAT_FREE = 2
 
 _SENTENCE_END = re.compile(r"(?<=[。！？；!?;])|\n")
 _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?%?")
@@ -61,6 +65,8 @@ _DASH_RANGE = re.compile(r"\d\s*%?\s*[-–—]\s*\d")
 _LETTER_PAIR = re.compile(r"\b[A-Za-z]/[A-Za-z]\b")
 _CODE = re.compile(r"--[A-Za-z][\w-]*|\b[A-Za-z]+_[A-Za-z_]+\b|\b\w+\(\)")
 _SIGNPOST = re.compile(r"这一节(?:讲|我们|来|说|算|看|聊|给|先)")
+#: A teaser for what comes next ("接下来看它怎么改片") promises a payoff the script may never deliver.
+_TEASER = re.compile(r"(?:接下来|下面|后面)(?:我们)?(?:一起)?(?:看|讲|聊|说|来看|来讲)")
 
 #: rule → (audit, why it matters, what to do). Shown with every issue.
 RULE_INFO: dict[str, tuple[str, str, str]] = {
@@ -82,6 +88,8 @@ RULE_INFO: dict[str, tuple[str, str, str]] = {
     "E4": (COMMUNICATION, "时长偏离目标太多", "按每节预算删减或扩充，先删重复和旁支"),
     "E5": (COMMUNICATION, "「这一节讲……」是机械的路标，听起来像念提纲", "用自然的过渡说明为什么接着讲这个"),
     "E6": (COMMUNICATION, "同一组数字讲了两遍，占时长又让人以为是新信息", "第二次只说结论"),
+    "E7": (COMMUNICATION, "来源提醒说了一遍又一遍，观众只会觉得啰嗦，也记不住真正的重点", "只在最需要的地方说一次，其余删掉"),
+    "E8": (COMMUNICATION, "预告了后面的内容，观众会等一个可能不兑现的下文", "直接讲，不预告"),
     "D1": (FACT, "观众会把编造或没有依据的说法当成事实", "照事实改，或者删掉"),
     "D3": (FACT, "数字或推导错了，结论就跟着错", "照事实底稿的数字和公式改"),
     "D7": (FACT, "照做可能达不到效果，或者在不适用的情况下照做", "改成符合机制的做法，并说清适用条件"),
@@ -212,8 +220,9 @@ def rules(sections: list[dict], *, column, target_minutes: float, plan: dict | N
                 issues.append(issue("C6", MUST, f"句子有 {size} 个字", si, pi, quote=_quote(sentence, 60)))
             elif size > SENTENCE_WARN:
                 issues.append(issue("C6", WARN, f"句子有 {size} 个字", si, pi, quote=_quote(sentence, 60)))
-        for phrase in REVIEW_PHRASES:
-            if phrase in text:
+        said = [phrase for phrase in REVIEW_PHRASES if phrase in text]
+        for phrase in said:
+            if not any(phrase != other and phrase in other for other in said):  # 「没拿到一手」, not also 「一手」
                 issues.append(issue("D5", MUST, f"审稿用语进了口播：「{phrase}」", si, pi))
         symbols = sorted(set(_SYMBOLS.findall(_LETTER_PAIR.sub("", text))))
         if symbols or _DASH_RANGE.search(text):
@@ -227,12 +236,20 @@ def rules(sections: list[dict], *, column, target_minutes: float, plan: dict | N
                 issues.append(issue("E3", MUST, f"出现了「{phrase}」", si, pi))
         for match in _SIGNPOST.finditer(text):
             issues.append(issue("E5", WARN, f"机械的路标：「{match.group(0)}……」", si, pi))
+        for match in _TEASER.finditer(text):
+            issues.append(issue("E8", MUST, f"预告后面的内容：「{match.group(0)}……」", si, pi, quote=_quote(text[max(0, match.start() - 6):], 30)))
         values = {v for v, _, _ in quantities(text) if v not in (0, 1)}
         for other_section, other in seen_quantities:
             if other_section != si and len(values & other) >= REPEATED_QUANTITIES:
                 issues.append(issue("E6", WARN, "这组数字前面已经完整讲过一遍", si, pi))
                 break
         seen_quantities.append((si, values))
+
+    # E7: a source reminder in more than a few paragraphs; the first ones stand, the rest are named.
+    reminded = [(si, pi) for si, pi, para in order if _CAVEAT.search(para.get("text") or "")]
+    if len(reminded) > max(CAVEAT_FREE, len(order) // 3):
+        for si, pi in reminded[CAVEAT_FREE:]:
+            issues.append(issue("E7", MUST, f"同一类来源提醒（官方说法、自述、没有独立验证）全篇已有 {len(reminded)} 段在说", si, pi))
 
     # E4: total length; blame the sections furthest from their budget.
     budgets = [b["budget"] for b in plan["beats"]] if adapted and len(plan["beats"]) == len(sections) else None

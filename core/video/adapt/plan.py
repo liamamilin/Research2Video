@@ -26,7 +26,7 @@ from .. import length
 from ..columns import ROLES
 from .common import WEAK, call_json, concept_names, covered, fact_ids, fact_line, facts_by_id
 
-PROMPT_VERSION = 2
+PROMPT_VERSION = 3
 
 #: One fact per this many spoken units at most (about 15 in six minutes).
 #: Found live: with every fact on offer the plan used 40 of 43, and the
@@ -56,7 +56,7 @@ SYSTEM_PROMPT = """你是知识视频的策划编辑。研究报告已经拆成�
 
 第二部分：取舍和顺序
 9. core_message：全片一句话主旨，不超过 30 个字。结论有前提的，主旨要带上前提，不要说成绝对的。
-10. hook：开场 15 秒内抛出的钩子：一个场景、反常识的结果，或观众关心的问题。kind 取 场景、反常识、问题、数字 之一。用场景时只能是假设场景，用「比如你」「假设」开头；场景里的时间、次数、金额只能来自事实，不能编。钩子不能用置信度为「未核实」或「有冲突」的事实。
+10. hook：开场 15 秒内抛出的钩子：一个场景、反常识的结果，或观众关心的问题。kind 取 场景、反常识、问题、数字 之一。用场景时只能是假设场景，用「比如你」「假设」开头；场景里的时间、次数、金额只能来自事实，不能编。钩子不能用置信度为「未核实」或「有冲突」的事实。 钩子里出现的主角（产品、论文、项目、缩写）如果观众没听过，要在 idea 里写明用哪半句白话交代它是什么。
 11. beats：每节一个 beat，按理解路径排序：先讲后面要用到的概念，再讲机制，再讲证据和反方，最后讲行动。role 取：钩子、背景、概念、机制、证据、反方、行动、收束。point 写这一节观众要记住的一句话。facts 只写事实编号（如 "F3"）。terms 写这一节第一次解释的术语，每个术语只在一节里出现，而且要在用到它的节之前或同一节。budget 写这一节的长度权重（相对值）。
 12. 取舍按优先级：因果链和理解目标需要的事实 > 必讲内容 > 支撑证据 > 旁支。全片用到的事实不能超过给定上限，超出时先删旁支。同一组数字只安排在一节里讲。正确、但这期不讲的内容写进 scope_out。
 13. left_out：没用到的事实逐条列出并说明原因；to_description 为 true 的放进视频简介。每条事实要么在某个 beat 的 facts 里，要么在 left_out 里。

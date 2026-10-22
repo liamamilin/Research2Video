@@ -107,6 +107,21 @@ def _mark_evidence(sections: list[dict], issues: list[dict]) -> None:
         para["note"] = f"{para['note']}；{note}" if para.get("note") and note not in para["note"] else note
 
 
+#: A rewrite of this many paragraphs or more that comes back unreadable is tried again with the worst half: a long
+#: JSON reply is where the free models cut off or slip (seen on a paper explainer with 20 flagged spots).
+REVISE_RETRY_FROM = 4
+
+
+def _revise(client, sections, todo, plan, sheet, style):
+    try:
+        return draft.revise(client, sections, todo, plan, sheet, style)
+    except AdaptError:
+        if len(todo) < REVISE_RETRY_FROM:
+            raise
+        half = dict(list(todo.items())[:max(2, len(todo) // 2)])
+        return draft.revise(client, sections, half, plan, sheet, style)
+
+
 def _resolved(initial: list[dict], final: list[dict]) -> list[dict]:
     """The first audit's issues, each marked fixed or not by the end."""
     still = {(i["rule"], i["section"], i["paragraph"]) for i in final}
@@ -160,7 +175,7 @@ def _write(client, auditor, *, report, plan, sheet, column, style, problems: lis
         rounds += 1
         stage("修改")
         try:
-            sections, changed = draft.revise(client, sections, todo, plan, sheet, style)
+            sections, changed = _revise(client, sections, todo, plan, sheet, style)
         except AdaptError as exc:
             problems.append(f"第 {rounds} 轮修改没有成功：{exc}")
             break

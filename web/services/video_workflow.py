@@ -290,7 +290,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     )
     store.update_script(script_id, status="DRAFT", error=None, stage="事实审计")
     audit_meta = _audit_short(script_id, written, report, column, config, review_config, rule_issues)
-    store.update_version_audit(script_id, version, sections=written.sections, meta={**meta, **audit_meta})
+    store.update_version_audit(script_id, version, sections=written.sections, meta={**meta, **audit_meta},
+                               length_check=written.length_check)
     store.update_script(script_id, stage=None)
     return "DRAFT"
 
@@ -318,11 +319,12 @@ def _resume_audit(script_id: str, script: dict, report: str, report_path: str, c
     version = store.get_version(script_id, script["current_version"])
     rule_issues = adapt_review.rules(version["sections"], column=column, target_minutes=column.target_minutes)
     store.update_script(script_id, status="DRAFT", error=None, stage="事实审计")
-    written = SimpleNamespace(sections=version["sections"], meta=version["meta"])
+    written = SimpleNamespace(sections=version["sections"], meta=version["meta"], length_check=version["length_check"])
     audit_meta = _audit_short(script_id, written, report, column, config, review_config, rule_issues)
     meta = {k: v for k, v in version["meta"].items() if k not in ("checks", "problems", "audit_usage")}
     store.update_version_audit(script_id, version["version"], sections=written.sections,
-                               meta={**meta, "report_path": report_path, **audit_meta})
+                               meta={**meta, "report_path": report_path, **audit_meta},
+                               length_check=written.length_check)
     store.update_script(script_id, stage=None)
     return "DRAFT"
 
@@ -345,14 +347,101 @@ def _audit_short(script_id: str, written, report: str, column, config, review_co
     client = LLMClient(base)
     try:
         checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues,
-                                          column_style=column.script_style,
+                                          column_style=column.script_style, audience=column.audience,
                                           style_severity=(adapt_review.WARN if column.audit_style_severity == "warn"
                                                           else adapt_review.MUST))
     except Exception as exc:  # noqa: BLE001 - an audit that crashes must not lose the draft
         logger.exception("fact audit of script %s failed", script_id)
         checks, note = _rules_only(rule_issues, None, written.sections), f"事实审计没有完成：{type(exc).__name__}: {exc}"
-    problems = list(written.meta.get("problems") or []) + ([note] if note else [])
-    return {"checks": checks, "problems": problems, "audit_usage": dict(client.usage)}
+    problems = [p for p in (written.meta.get("problems") or []) if not p.startswith(STALE_AUDIT_NOTES)]
+    problems += [note] if note else []
+    meta = {"checks": checks, "problems": problems, "audit_usage": dict(client.usage)}
+    return _revise_short(script_id, written, report, column, config, meta)
+
+
+#: Notes a finished audit replaces: the one saying the audits were still running, and the ones saying one failed.
+STALE_AUDIT_NOTES = ("事实审计", "风格审计", "新观众审计")
+#: A script written in one call is rewritten at most this many times from its audits' findings.
+SHORT_REVISE_ROUNDS = 1
+#: Rules whose finding a rewrite of a paragraph cannot fix (the length is the whole script's).
+UNREVISABLE_RULES = ("E4", "N3", "B1")
+
+
+def _revise_short(script_id: str, written, report: str, column, config, audit_meta: dict) -> dict:
+    """Rewrite the paragraphs the audits flagged (serious or must), once, then check the rewrite: the rule checks run
+    again and the fact audit reads the rewritten paragraphs. ``written.sections`` is replaced by the result.
+
+    Without this the audits only describe the problems: a script they call repetitive or unintelligible would go
+    on to a render as it is. A rewrite that fails keeps the script and says so in ``problems``."""
+    from core.llm import LLMClient
+    from core.video import audit as video_audit
+    from core.video.adapt.common import paragraphs as walk, pid
+    from core.video.adapt.pipeline import _mark_evidence, _resolved
+
+    rounds = min(getattr(column, "revise_rounds", SHORT_REVISE_ROUNDS), SHORT_REVISE_ROUNDS)
+    checks = audit_meta["checks"]
+    sections = written.sections
+    open_issues = [i for i in checks["issues"] if i["rule"] not in UNREVISABLE_RULES]
+    todo = adapt_review.targets(sections, {**checks, "issues": open_issues, "newcomer": None})
+    if rounds < 1 or not todo:
+        return audit_meta
+    store.update_script(script_id, stage="按审计意见改写")
+    problems = list(audit_meta["problems"])
+    client = LLMClient(config)
+    try:
+        revised, changed = video_audit.revise(client, sections, report, todo, column.script_style)
+    except Exception as exc:  # noqa: BLE001 - a failed rewrite keeps the script as audited
+        logger.exception("revising script %s failed", script_id)
+        return {**audit_meta, "problems": problems + [f"按审计意见改写没有成功：{type(exc).__name__}: {exc}"]}
+    if revised == sections:
+        return audit_meta
+    new_at = {id(p): (si, pi) for si, pi, p in walk(revised)}
+    old_at = {id(p): (si, pi) for si, pi, p in walk(sections)}
+    section_at = {id(s): si for si, s in enumerate(revised)}
+    rewritten = {new_at[id(p)] for p in changed}
+    rewritten_ids = {pid(si, pi) for si, pi in rewritten}
+
+    # The findings about paragraphs that stayed as they were are kept (at their new place); the rewritten ones are
+    # read again. Findings about the whole script or a whole section are redone by the rule checks below.
+    kept = []
+    for item in checks["issues"]:
+        if item["source"] != "model" or item["section"] is None or item["paragraph"] is None:
+            continue
+        para = sections[item["section"]]["paragraphs"][item["paragraph"]]
+        spot = new_at.get(id(para))
+        if spot is not None and spot not in rewritten:
+            kept.append({**item, "section": spot[0], "paragraph": spot[1]})
+    rule_issues = adapt_review.rules(revised, column=column, target_minutes=column.target_minutes)
+    fresh: list[dict] = []
+    if rewritten_ids and checks.get("model_ran"):
+        base = _llm_configs(None, column)[1] or config
+        auditor = LLMClient(replace(base, request_timeout=min(base.request_timeout, AUDIT_REQUEST_SECONDS),
+                                    timeout=min(base.timeout, AUDIT_TIMEOUT_SECONDS)) if is_dataclass(base) else base)
+        try:
+            fresh = video_audit.fact_issues(auditor, revised, report, only=rewritten_ids)
+        except Exception as exc:  # noqa: BLE001
+            problems.append(f"改写后的事实审计没有完成：{type(exc).__name__}: {exc}；改写过的段落请对照来源核实")
+            for si, pi in rewritten:
+                revised[si]["paragraphs"][pi]["evidence"] = "NEEDS_REVIEW"
+    initial = [i for i in checks["issues"] if i["severity"] in (adapt_review.SERIOUS, adapt_review.MUST)]
+    merged = adapt_review.assemble(rule_issues, None, None, None, revised)
+    merged["issues"] = merged["issues"] + kept + fresh
+    merged["model_ran"] = checks.get("model_ran", False)
+    _mark_evidence(revised, fresh)
+    merged["summary"] = adapt_review.summarize(merged, len(revised))
+    merged.update({"rounds": 1, "deletions": [], "initial": _resolved(initial, merged["issues"])})
+    written.sections = revised
+    written.length_check = length.measure(revised, column.target_minutes, voice=column.voice_id or None)
+    return {**audit_meta, "checks": merged, "problems": problems,
+            "audit_usage": _sum_usage(audit_meta.get("audit_usage"), client.usage)}
+
+
+def _sum_usage(*usages: Optional[dict]) -> dict:
+    out: dict = {}
+    for usage in usages:
+        for key, value in (usage or {}).items():
+            out[key] = out.get(key, 0) + value
+    return out
 
 
 def _llm_configs(llm_config: Optional[LLMConfig], column=None) -> tuple:
