@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
+import { listProduction } from "@/api/production";
 import {
   createVideoScript,
   listVideoCells,
@@ -98,6 +99,8 @@ export function VideoScriptsPage() {
 
   const [scripts, setScripts] = useState<VideoScriptSummary[] | null>(null);
   const [cells, setCells] = useState<VideoCell[]>([]);
+  // 生产配置派生出来的栏目（如 flash-nr）不在格子目录里：用配置的名字，不显示内部的键
+  const [configNames, setConfigNames] = useState<Record<string, string>>({});
   const [params, setParams] = useSearchParams();
   const filters = useFilters(["status", "column", "tier", "source", "range"]);
   const statusFilter = filters.values.status;
@@ -135,6 +138,12 @@ export function VideoScriptsPage() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    listProduction()
+      .then((rows) => setConfigNames(Object.fromEntries(rows.flatMap((c) => [[c.key, c.name], [c.recipe, c.name]]))))
+      .catch(() => undefined);
+  }, []);
+
   // Follow scripts that are still being researched or written.
   const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status)) ?? false;
   useEffect(() => {
@@ -162,7 +171,7 @@ export function VideoScriptsPage() {
       (!f.status || showArchived || chipOf(x) === f.status),
   ).sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""));
   const facets: Facet[] = [
-    { key: "column", label: "栏目格子", options: Array.from(new Set((scripts ?? []).map((x) => x.column_key))).map((key) => ({ value: key, label: cells.find((c) => c.key === key)?.label ?? key })) },
+    { key: "column", label: "栏目格子", options: Array.from(new Set((scripts ?? []).map((x) => x.column_key))).map((key) => ({ value: key, label: cells.find((c) => c.key === key)?.label ?? configNames[key] ?? key })) },
     { key: "tier", label: "可信度", options: (Object.keys(TIER_LABEL) as (keyof typeof TIER_LABEL)[]).map((k) => ({ value: k, label: TIER_LABEL[k] })) },
     { key: "source", label: "来源", options: [{ value: "auto", label: "自动流水线" }, { value: "manual", label: "手动创建" }] },
     RANGE_FACET,
@@ -517,7 +526,7 @@ export function VideoScriptsPage() {
                     </Link>
                     {s.auto ? <span className="badge border border-border text-text-muted ml-2">自动</span> : null}
                   </td>
-                  <td className="px-4 py-2 text-xs text-text-muted">{cells.find((c) => c.key === s.column_key)?.label?.split(" · ").slice(0, 2).join(" · ") ?? s.column_key}</td>
+                  <td className="px-4 py-2 text-xs text-text-muted">{cells.find((c) => c.key === s.column_key)?.label?.split(" · ").slice(0, 2).join(" · ") ?? configNames[s.column_key] ?? s.column_key}</td>
                   <td className="px-4 py-2">
                     <span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>
                       {STAGE_LABEL[stageOf(s)]}

@@ -179,6 +179,24 @@ describe("Video script cell picker", () => {
   });
 });
 
+describe("Script list columns", () => {
+  it("names a column made by a production config with the config's name, not its internal key", async () => {
+    const scripts = [
+      { id: "a", title: "每天的快讯", status: "APPROVED", column_key: "flash-nr", published: false, created_at: "2026-10-22T10:00:00+0800", length_check: null },
+    ];
+    const base = (fetch as unknown as ReturnType<typeof vi.fn>).getMockImplementation()!;
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith("/api/video/scripts")) return jsonResponse(scripts);
+      if (String(url).endsWith("/api/production")) return jsonResponse([{ key: "flash_daily", name: "快讯 · 每天（不再调研）", recipe: "flash-nr" }]);
+      return base(url, init);
+    }));
+    renderPage();
+    const row = (await screen.findByText("每天的快讯")).closest("tr")!;
+    await waitFor(() => expect(row.textContent).toContain("快讯 · 每天（不再调研）"));
+    expect(row.textContent).not.toContain("flash-nr");
+  });
+});
+
 describe("Script list stages", () => {
   it("shows how far an approved script got with its video, counts them per stage and groups by day", async () => {
     const at = (day: string) => `${day}T10:00:00+0800`;

@@ -44,6 +44,8 @@ def cmd_serve(args):
     import json
     runtime_path = Path(settings.paths.state_dir) / f'app_runtime-{os.getpid()}.json'
     runtime_path.parent.mkdir(parents=True, exist_ok=True)
+    from web.services.runtime_files import prune_dead
+    prune_dead(runtime_path.parent)
     pid_file = str(Path(settings.paths.state_dir).resolve() / 'server.pid')
     atomic_write(str(runtime_path), json.dumps({'pid': os.getpid(), 'host': host, 'port': port,
                  'python': sys.executable, 'config_path': settings.source_path, 'started': time.time(), 'pid_file': pid_file}))

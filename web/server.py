@@ -216,6 +216,7 @@ def create_app() -> FastAPI:
                     atomic_write(str(Path(settings.paths.state_dir) / 'app_runtime.json'), json.dumps(runtime))
                     atomic_write(runtime['pid_file'], str(os.getpid()))
                     app.state.runtime_published = True
+                    pending.unlink(missing_ok=True)  # its contents live in app_runtime.json now
             except (OSError, ValueError, KeyError):
                 pass
         response = await call_next(request)
