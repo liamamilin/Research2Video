@@ -152,8 +152,8 @@ def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
         return None
     workspace = video_workflow.workspace_dir()
     relative = reports.relative(report, workspace)
-    if reports.scripts_of(relative, pick["column"]):
-        return None  # written already (by hand, or by an earlier batch)
+    if [s for s in reports.scripts_of(relative, pick["column"]) if not s.get("archived")]:
+        return None  # written already (by hand, or by an earlier batch); one put away does not count: that is how a redo is asked for
     record = reports.record_file(relative, job=spec.get("job", ""), created_by="autopilot")
     topic = {**reports.topic_for(record, workspace), "from_report": relative, "report_id": record["id"]}
     return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}

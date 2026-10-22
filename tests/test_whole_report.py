@@ -153,6 +153,10 @@ def test_auto_picks_the_report_itself_and_never_reads_a_topic_source(whole_env, 
     assert len(reports.scripts_of("output/x/2026-10-20.md", "deep_dive")) == 1  # but it counts as written from the start
     # written already (by hand, say): a second batch for the same report picks nothing
     assert pilot.pick_topics(run["spec"]) == []
+    # put away, it no longer counts: archiving a script is how the user asks for the report to be written again
+    store.update_script(script["id"], archived=1)
+    [again] = pilot.pick_topics(run["spec"])
+    assert again["topic"]["from_report"] == "output/x/2026-10-20.md"
 
 
 def test_auto_leaves_a_whole_report_alone_when_it_was_written_by_hand(whole_env, monkeypatch):
