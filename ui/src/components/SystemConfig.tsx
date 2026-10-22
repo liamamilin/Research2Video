@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
 import { AssistantConfigRecovery } from "@/components/AssistantAction";
+import { ProviderModels } from "@/components/ProviderModels";
 import { VideoModelConfig } from "@/components/VideoModelConfig";
 import {
   CheckCircle2, FileCode, Plug, RotateCcw, Save, SlidersHorizontal, XCircle,
@@ -494,6 +495,13 @@ export function SystemConfig() {
               ))}
             </div>
           )}
+          {activeProvider && (
+            <div className="sm:col-span-2 -mt-1">
+              <ProviderModels providerId={activeProvider.id} label={activeProvider.label}
+                model={String(get([section, "model"], "") || "")} fallbacks={opts.simple ? [] : fallbackModels}
+                onPick={(id) => set([section, "model"], id)} />
+            </div>
+          )}
           {!opts.simple && (<Field label="付费兜底模型" hint="免费模型额度用尽（计费错误）时按顺序尝试，逗号分隔">
             <div>
               <input
@@ -702,7 +710,7 @@ export function SystemConfig() {
             onRemove: get(["review_ai", "model"]) ? () => set(["review_ai"], undefined) : undefined,
           })}
 
-          <VideoModelConfig />
+          <VideoModelConfig providers={providers} secrets={secrets} />
 
           <Section
             title="搜索服务"

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
+import { ProviderModels } from "@/components/ProviderModels";
 import { CheckCircle2, Plug, RotateCcw, Save, XCircle } from "lucide-react";
 
-interface ProviderPreset {
+export interface ProviderPreset {
   id: string;
   label: string;
   base_url: string;
@@ -13,7 +14,7 @@ interface ProviderPreset {
   note: string;
 }
 
-interface SecretInfo {
+export interface SecretInfo {
   env: string;
   configured: boolean;
 }
@@ -48,9 +49,7 @@ function hostOf(url: string): string {
 // The video model: which service writes a video's storyboard inside AutoVideo. Same provider list as the AI model above,
 // but the choice is saved in AutoVideo (through /api/video/model) and applies to videos rendered from now on.
 // See spec/llm-providers.md.
-export function VideoModelConfig() {
-  const [providers, setProviders] = useState<ProviderPreset[]>([]);
-  const [secrets, setSecrets] = useState<SecretInfo[]>([]);
+export function VideoModelConfig({ providers, secrets }: { providers: ProviderPreset[]; secrets: SecretInfo[] }) {
   const [current, setCurrent] = useState<VideoModel | null>(null);
   const [reachable, setReachable] = useState(true);
   const [unreachableWhy, setUnreachableWhy] = useState("");
@@ -71,12 +70,10 @@ export function VideoModelConfig() {
         if (data.config) apply(data.config);
       })
       .catch((err) => { setReachable(false); setUnreachableWhy(err.message); });
-    api<any>("/api/config/secrets").then((d) => setSecrets(d.secrets || [])).catch(() => setSecrets([]));
   }, []);
 
   useEffect(() => {
     load();
-    api<any>("/api/config/providers").then((d) => setProviders(d.providers || [])).catch(() => setProviders([]));
   }, [load]);
 
   const active = providers.find((p) => hostOf(p.base_url) === hostOf(form.base_url));
@@ -168,6 +165,12 @@ export function VideoModelConfig() {
                 {id}
               </button>
             ))}
+          </div>
+        )}
+        {active && (
+          <div className="sm:col-span-2 -mt-1">
+            <ProviderModels providerId={active.id} label={active.label} model={form.model}
+              onPick={(id) => setForm({ ...form, model: id })} />
           </div>
         )}
         <label className="block space-y-1">

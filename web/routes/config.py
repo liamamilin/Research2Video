@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from core.config import load_system_config
 from core.llm import LLMClient, LLMConfig
-from core.providers import list_providers, looks_like_secret
+from core.providers import get_provider, list_providers, looks_like_secret
 from core.search import SearchClient, SearchConfig
 from web import audit
 from web.deps import require_admin
@@ -273,6 +273,35 @@ def get_providers(user=Depends(require_admin)):
     together so the three cannot be set from different vendors by accident.
     """
     return {"providers": list_providers()}
+
+
+@router.get("/providers/{provider_id}/models")
+def get_provider_models(provider_id: str, user=Depends(require_admin)):
+    """The model ids a provider preset serves right now (its ``/models`` list), so the form can warn about an id the
+    provider does not have instead of the first request failing with 404.
+
+    Only a preset's own address is asked, with that preset's own key: an arbitrary URL would let this route send a saved
+    key anywhere. Never an HTTP error for a provider that is down or has no key: ``error`` says why and ``models`` is empty.
+    """
+    import httpx
+
+    preset = get_provider(provider_id)
+    if preset is None:
+        raise HTTPException(status_code=404, detail=ApiError.make("not_found", "没有这个服务商"))
+    headers = {k: v.replace("{session_id}", "models") for k, v in preset.extra_headers.items()}
+    key = os.environ.get(preset.api_key_env, "") if preset.api_key_env else ""
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    elif preset.api_key_env:
+        return {"models": [], "error": f"还没填密钥 {preset.api_key_env}"}
+    try:
+        reply = httpx.get(preset.base_url.rstrip("/") + "/models", headers=headers, timeout=10.0)
+        if reply.status_code >= 400:
+            return {"models": [], "error": f"服务商返回 {reply.status_code}"}
+        items = reply.json().get("data") or []
+        return {"models": sorted({str(i["id"]) for i in items if isinstance(i, dict) and i.get("id")}), "error": None}
+    except (httpx.HTTPError, ValueError, AttributeError) as exc:
+        return {"models": [], "error": f"取不到模型列表：{type(exc).__name__}"}
 
 
 @router.get("/system")

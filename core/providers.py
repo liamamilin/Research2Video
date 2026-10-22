@@ -95,7 +95,7 @@ PROVIDERS: tuple[ProviderPreset, ...] = (
         label="Open Design（amr-link）",
         base_url="https://amr-link.open-design.ai/v1",
         api_key_env="OPENDESIGN_API_KEY",
-        models=["deepseek-v4.1-flash", "deepseek-v4-pro"],
+        models=["deepseek-v4.1-flash", "deepseek-v4-flash", "deepseek-v4-pro", "glm-5.3-flash", "claude-haiku-5.5"],
         note="OpenAI 兼容。密钥以 sk-amr- 开头，填在下方密钥卡片，不要填进“密钥环境变量”。",
     ),
     ProviderPreset(
@@ -107,9 +107,9 @@ PROVIDERS: tuple[ProviderPreset, ...] = (
             "x-opencode-session": "ses_{session_id}",
             "User-Agent": "BaseCodingCLi-ResearchAgent/2.0",
         },
-        models=["longcat-2.5-preview-free", "beam-free", "minimax-m3", "deepseek-v4.1-flash",
+        models=["minimax-m3.1-flash-free", "beam-free", "minimax-m3", "deepseek-v4.1-flash",
                 "deepseek-v4-pro", "glm-5.3-flash", "claude-haiku-5-5"],
-        free_models=["longcat-2.5-preview-free", "beam-free"],
+        free_models=["minimax-m3.1-flash-free", "beam-free"],
         note="需要有效的 OpenCode Go 订阅；否则返回 403。免费模型名带 -free 后缀，会不定期变化。",
     ),
     ProviderPreset(
@@ -118,7 +118,9 @@ PROVIDERS: tuple[ProviderPreset, ...] = (
         base_url="https://opencode.ai/zen/v1",
         api_key_env="OPENCODE_API_KEY",
         extra_headers={"User-Agent": "BaseCodingCLi-ResearchAgent/2.0"},
-        models=["deepseek-v4.1-flash", "minimax-m3", "gpt-5.4"],
+        models=["deepseek-v4.1-flash-free", "minimax-m3.1-flash-free", "glm-5.3-flash-free", "mimo-v2.6-flash-free",
+                "deepseek-v4.1-flash", "minimax-m3", "gpt-5.5"],
+        free_models=["deepseek-v4.1-flash-free", "minimax-m3.1-flash-free", "glm-5.3-flash-free", "mimo-v2.6-flash-free"],
         note="按量付费，需要账户余额。",
     ),
     ProviderPreset(

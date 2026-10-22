@@ -59,6 +59,9 @@ function mockFetch(parsed: unknown = PARSED) {
   const calls: { url: string; init?: RequestInit }[] = [];
   const fn = vi.fn(async (url: string, init?: RequestInit) => {
     calls.push({ url: String(url), init });
+    if (String(url).includes("/models")) {
+      return jsonResponse(200, { models: ["deepseek-v4-flash", "glm-5.3-flash"], error: null });
+    }
     if (String(url).includes("/api/config/secrets")) {
       if (init?.method === "PUT") {
         return jsonResponse(200, { ok: true, secrets: SECRETS.secrets });
@@ -97,6 +100,16 @@ describe("SystemConfig form", () => {
     expect(screen.getByDisplayValue("https://x/v1")).toBeTruthy();
     expect(screen.getByText("API 密钥")).toBeTruthy();
     expect(screen.getByText("预算护栏")).toBeTruthy();
+  });
+
+  it("warns when the model is not one the provider has, fallbacks included", async () => {
+    mockFetch({
+      ...PARSED,
+      ai: { model: "minimax-m3.1-flash-free", fallback_models: ["glm-5.3-flash", "minimax-m3"],
+            base_url: "https://amr-link.open-design.ai/v1", api_key_env: "LLM_API_KEY" },
+    });
+    render(<SystemConfig />);
+    expect(await screen.findByText(/没有这个模型：minimax-m3.1-flash-free、minimax-m3/)).toBeTruthy();
   });
 
   it("shows configured API keys masked", async () => {

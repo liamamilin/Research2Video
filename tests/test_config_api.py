@@ -174,6 +174,42 @@ def test_providers_endpoint_lists_presets(client, cfg):
     assert "open-design" in ids and "opencode-go" in ids
 
 
+def test_provider_models_come_from_the_presets_own_address_with_its_own_key(client, cfg, monkeypatch):
+    import httpx
+
+    seen = {}
+
+    def fake_get(url, headers=None, timeout=None):
+        seen.update(url=url, auth=(headers or {}).get("Authorization"))
+        return httpx.Response(200, json={"data": [{"id": "glm-5.3-flash"}, {"id": "deepseek-v4-flash"}]},
+                              request=httpx.Request("GET", url))
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+    monkeypatch.setenv("OPENDESIGN_API_KEY", "k-123")
+    assert client.get("/api/config/providers/open-design/models").status_code == 401
+    _login(client)
+    body = client.get("/api/config/providers/open-design/models").json()
+    assert body == {"models": ["deepseek-v4-flash", "glm-5.3-flash"], "error": None}
+    assert seen == {"url": "https://amr-link.open-design.ai/v1/models", "auth": "Bearer k-123"}
+    assert client.get("/api/config/providers/nope/models").status_code == 404
+
+
+def test_provider_models_say_why_when_there_is_no_list(client, cfg, monkeypatch):
+    import httpx
+
+    _login(client)
+    monkeypatch.delenv("OPENDESIGN_API_KEY", raising=False)
+    assert "密钥" in client.get("/api/config/providers/open-design/models").json()["error"]
+    monkeypatch.setenv("OPENDESIGN_API_KEY", "k")
+
+    def boom(*a, **k):
+        raise httpx.ConnectError("down")
+
+    monkeypatch.setattr(httpx, "get", boom)
+    body = client.get("/api/config/providers/open-design/models").json()
+    assert body["models"] == [] and "ConnectError" in body["error"]
+
+
 def test_a_key_in_the_env_name_field_is_rejected(client, cfg):
     """Saving it would send an unauthenticated request and a confusing 401."""
     _login(client)

@@ -25,7 +25,7 @@ opencode Go。这件事暴露了两个一直存在的问题：换一个服务商
 
 ```yaml
 ai:
-  model: "longcat-2.5-preview-free"
+  model: "minimax-m3.1-flash-free"
   fallback_models:
     - "minimax-m3"
     - "deepseek-v4.1-flash"
@@ -58,7 +58,7 @@ Design、换回 `deepseek-v4-pro` 之前低一些。
 
 ## 已知的限制
 
-- **没有实时价格接口**：`free_models` 是人工维护的提示，不是厂商 API 查出来的，
+- **模型清单是活的，价格不是**：设置页会向服务商的 `/models` 取真实模型清单（`GET /api/config/providers/{id}/models`，只访问预设自己的地址、用预设自己的密钥），模型 ID 不在清单里时标红提醒，点清单里的名字就能填入。免费与否清单里没有，不过 opencode 的免费模型名带 `-free`。**没有实时价格接口**：`free_models` 是人工维护的提示，不是厂商 API 查出来的，
   服务商新增/下线免费模型时需要手动改 `core/providers.py`。
 - **成本统计会在切换到付费兜底时失真**：`ai.pricing` 只按配置里写的那一个模型
   算钱，实际回答的模型换了之后，预算页的估算还是按免费模型的单价算（通常是 0），
