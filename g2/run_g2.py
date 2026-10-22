@@ -28,6 +28,22 @@ from g2.draw_things import generate_scene_backgrounds, regenerate_scene_backgrou
 #: The model service for every planning call: DeepSeek unless ``.env`` says otherwise (g2/llm_provider.py).
 PROVIDER = llm_provider.load(PROJECT / ".env")
 MODEL = PROVIDER.model
+#: ``[model, *fallbacks]``; a 402 (out of balance or quota) moves to the next one for the rest of the run.
+MODELS = [PROVIDER.model, *PROVIDER.fallback_models]
+_ACTIVE_MODEL = 0
+
+
+def active_model() -> str:
+    return MODELS[min(_ACTIVE_MODEL, len(MODELS) - 1)]
+
+
+def _next_model() -> bool:
+    global _ACTIVE_MODEL
+    if _ACTIVE_MODEL + 1 >= len(MODELS):
+        return False
+    _ACTIVE_MODEL += 1
+    return True
+
 DEEPSEEK_URL = PROVIDER.url  # the name predates other providers
 LLM_INPUT_PER_M, LLM_OUTPUT_PER_M = PROVIDER.input_per_m, PROVIDER.output_per_m
 PROMPT_VERSION = "g2-golden-general-v1.3"
@@ -371,7 +387,7 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
         raise G2Fault("MODEL_CALL_BUDGET_EXHAUSTED", f"G2 is capped at {MAX_TOTAL_CALLS} DeepSeek calls per run")
     CALLS_DIR.mkdir(parents=True, exist_ok=True)
     call_id = f"{stage}-attempt-{attempt}"
-    body = {"model": MODEL, "messages": messages, "stream": False, "max_tokens": MAX_TOKENS_PER_CALL}
+    body = {"model": active_model(), "messages": messages, "stream": False, "max_tokens": MAX_TOKENS_PER_CALL}
     if PROVIDER.json_mode:
         body["response_format"] = {"type": "json_object"}
     if PROVIDER.thinking:
@@ -390,7 +406,7 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
         # Count every request attempt, including transport and provider failures, against the hard cap.
         # When token usage is unavailable, reserve the full configured per-call upper bound.
         maximum_call_cost = (MAX_INPUT_TOKENS_PER_CALL * LLM_INPUT_PER_M + MAX_TOKENS_PER_CALL * LLM_OUTPUT_PER_M) / 1_000_000
-        record = {"call_id": call_id, "stage": stage, "provider": f"{PROVIDER.name}_api", "model": MODEL,
+        record = {"call_id": call_id, "stage": stage, "provider": f"{PROVIDER.name}_api", "model": active_model(),
                   "prompt_version": PROMPT_VERSION, "status": "failed", "error_type": error_type,
                   "http_status": http_status, "elapsed_seconds": round(time.monotonic() - started, 3),
                   "peak_uncached_cost_upper_bound_usd": round(maximum_call_cost, 8),
@@ -410,6 +426,9 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
                  "elapsed_seconds": round(elapsed, 3)}
         write_json(response_path, error)
         record_failed_request("HTTPError", http_status=exc.code)
+        if exc.code == 402 and _next_model():
+            print(f"{PROVIDER.label}: {MODELS[_ACTIVE_MODEL - 1]} is out of balance/quota (HTTP 402); continuing with {active_model()}", flush=True)
+            return deepseek_json_call(stage, messages, schema, attempt)
         code = PROVIDER.code("AUTH_FAILED" if exc.code in {401, 403} else ("RATE_LIMIT" if exc.code == 429 else "HTTP_ERROR"))
         raise G2Fault(code, f"{PROVIDER.label} returned HTTP {exc.code}; response body and Authorization header were omitted") from exc
     except urllib.error.URLError as exc:
@@ -439,7 +458,7 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
     completion_tokens = int(usage.get("completion_tokens", 0))
     # A conservative estimate uses peak-hour prices and treats all prompt tokens as cache misses.
     cost_upper_bound = prompt_tokens * LLM_INPUT_PER_M / 1_000_000 + completion_tokens * LLM_OUTPUT_PER_M / 1_000_000
-    record = {"call_id": call_id, "stage": stage, "provider": f"{PROVIDER.name}_api", "model": response_obj.get("model", MODEL),
+    record = {"call_id": call_id, "stage": stage, "provider": f"{PROVIDER.name}_api", "model": response_obj.get("model", active_model()),
               "prompt_version": PROMPT_VERSION, "elapsed_seconds": round(elapsed, 3),
               "prompt_tokens": prompt_tokens, "completion_tokens": completion_tokens,
               "reasoning_tokens": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens"),
@@ -964,7 +983,7 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
             samples.append({"scene_id": scene["id"], "frame": frame, "file": str(image_path.relative_to(PROJECT))})
     sheet.save(ARTIFACTS / "contact-sheet.jpg", quality=90)
     qa = {"status": "PASS", "gate": "G2", "real_llm": True, "real_tts": True, "mock_calls": 0,
-          "model": MODEL, "llm_call_count": len(CALL_RECORDS), "video": {"codec": video["codec_name"], "width": video["width"],
+          "model": active_model(), "llm_call_count": len(CALL_RECORDS), "video": {"codec": video["codec_name"], "width": video["width"],
           "height": video["height"], "fps": video["avg_frame_rate"], "frames": frames, "duration_seconds": seconds,
           "full_decode": "PASS"}, "audio": {"codec": audio["codec_name"], "sample_rate": audio["sample_rate"],
           "channels": audio["channels"], "decoded_tts_correlation": correlation, "decoded_rms": rms, "full_decode": "PASS"},
@@ -978,7 +997,7 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
 
 
 def write_call_summary() -> None:
-    write_json(ARTIFACTS / "model-cost.json", {"provider": PROVIDER.label, "model": MODEL,
+    write_json(ARTIFACTS / "model-cost.json", {"provider": PROVIDER.label, "model": active_model(),
                "endpoint": PROVIDER.url, "prompt_version": PROMPT_VERSION, "calls": CALL_RECORDS,
                "peak_uncached_cost_upper_bound_usd": round(sum(c.get("peak_uncached_cost_upper_bound_usd", 0) for c in CALL_RECORDS), 8),
                "configured_worst_case_budget_usd": round(MAX_PROJECTED_API_COST_USD, 6),

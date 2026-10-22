@@ -50,6 +50,7 @@ class Provider:
     pricing_source: str = ""
     error: str = ""  # set when the settings cannot be used; the first call fails with it instead of the import
     env_file: str = ""  # a second file to read the key from (never copied)
+    fallback_models: tuple = ()  # tried in order, same service and key, when the model answers 402 (out of balance/quota)
     source: str = "默认"  # where the choice came from: 默认 | .env | 设置页
 
     @property
@@ -110,6 +111,12 @@ def _host(url: str) -> str:
     return urlparse(url if "//" in url else "//" + url).hostname or ""
 
 
+def _models(value) -> tuple:
+    """A list (or comma-separated text) of model ids, without blanks or repeats."""
+    items = value.split(",") if isinstance(value, str) else (value or [])
+    return tuple(dict.fromkeys(str(m).strip() for m in items if str(m).strip()))
+
+
 def preset_for(base_url: str) -> Provider:
     """The preset that serves ``base_url``, or a plain OpenAI-compatible service (conservative price cap, no thinking)."""
     host = _host(base_url)
@@ -158,18 +165,20 @@ def load(env_path: Optional[Path] = None, environ: Optional[Mapping[str, str]] =
         for var, attr, cast in (("BASE_URL", "base_url", str), ("MODEL", "model", str), ("API_KEY_ENV", "key_env", str),
                                 ("MAX_TOKENS", "max_tokens", int), ("INPUT_PER_M", "input_per_m", float),
                                 ("OUTPUT_PER_M", "output_per_m", float), ("THINKING", "thinking", _flag),
+                                ("FALLBACK_MODELS", "fallback_models", _models),
                                 ("JSON_MODE", "json_mode", _flag)):
             raw = (settings.get(f"AUTOVIDEO_LLM_{var}") or "").strip()
             if raw:
                 changes[attr] = cast(raw)
-        for attr, cast in (("model", str), ("key_env", str), ("max_tokens", int), ("input_per_m", float),
+        for attr, cast in (("model", str), ("key_env", str), ("fallback_models", _models), ("max_tokens", int), ("input_per_m", float),
                            ("output_per_m", float), ("thinking", bool), ("json_mode", bool)):
-            if attr in saved and (attr == "key_env" or saved[attr] not in (None, "")):
+            if attr in saved and (attr in ("key_env", "fallback_models") or saved[attr] not in (None, "")):
                 changes[attr] = cast(saved[attr])
     except (ValueError, TypeError) as exc:
         return replace(provider, error=f"LLM 设置里的数值写错了：{exc}")
     env_file = str(saved.get("env_file") or settings.get("AUTOVIDEO_LLM_ENV_FILE") or "").strip()
     provider = replace(provider, source=source, env_file=env_file, **changes)
+    provider = replace(provider, fallback_models=tuple(m for m in provider.fallback_models if m != provider.model))
     missing = [label for label, value in (("AUTOVIDEO_LLM_BASE_URL", provider.base_url), ("AUTOVIDEO_LLM_MODEL", provider.model))
                if not value]
     if provider.name == "custom" and not saved.get("base_url") and not provider.key_env:
@@ -237,7 +246,8 @@ def validate_settings(raw: dict) -> dict:
     env_file = str(raw.get("env_file") or "").strip()
     if env_file and not Path(env_file).expanduser().is_file():
         raise ValueError("找不到存放密钥的文件")
-    out = {"base_url": base_url, "model": model, "key_env": key_env, "env_file": env_file}
+    fallbacks = [m for m in _models(raw.get("fallback_models")) if m != model]
+    out = {"base_url": base_url, "model": model, "key_env": key_env, "env_file": env_file, "fallback_models": fallbacks}
     for attr, cast in (("max_tokens", int), ("input_per_m", float), ("output_per_m", float)):
         if raw.get(attr) not in (None, ""):
             try:

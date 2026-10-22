@@ -297,7 +297,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
         key = llm_provider.api_key(provider, settings.key_file, environ)
         return provider, key, {
             "label": provider.label, "base_url": provider.base_url, "model": provider.model, "key_env": provider.key_env,
-            "env_file": provider.env_file, "source": provider.source, "needs_key": provider.needs_key,
+            "env_file": provider.env_file, "fallback_models": list(provider.fallback_models), "source": provider.source, "needs_key": provider.needs_key,
             "key_ready": bool(key) or not provider.needs_key, "error": provider.error,
         }
 

@@ -70,6 +70,8 @@ def _call(monkeypatch, tmp_path, provider, urlopen):
     monkeypatch.setattr(g2, "CALL_RECORDS", [])
     monkeypatch.setattr(g2, "PROVIDER", provider)
     monkeypatch.setattr(g2, "MODEL", provider.model)
+    monkeypatch.setattr(g2, "MODELS", [provider.model, *provider.fallback_models])
+    monkeypatch.setattr(g2, "_ACTIVE_MODEL", 0)
     monkeypatch.setattr(g2, "MAX_TOKENS_PER_CALL", provider.max_tokens)  # both are read from PROVIDER at import
     monkeypatch.setattr(g2, "LLM_INPUT_PER_M", provider.input_per_m)
     monkeypatch.setattr(g2, "LLM_OUTPUT_PER_M", provider.output_per_m)
@@ -142,8 +144,51 @@ def test_probe_config_reports_the_chosen_provider(tmp_path, monkeypatch):
     env.write_text("AUTOVIDEO_LLM_PROVIDER=opencode\nOPENCODE_API_KEY=k\n")
     for name in ("AUTOVIDEO_LLM_PROVIDER", "OPENCODE_API_KEY", "DEEPSEEK_API_KEY"):
         monkeypatch.delenv(name, raising=False)
-    probe = config.probe_config(replace(config.Settings(), key_file=env))
+    probe = config.probe_config(replace(config.Settings(), key_file=env, data_dir=tmp_path / "data"))
     assert probe["provider"] == "opencode Go" and probe["model"] == "minimax-m3.1-flash-free"
     assert probe["checks"]["llm"] is True and "deepseek" not in probe["checks"] and probe["api_key_value_exposed"] is False
     env.write_text("AUTOVIDEO_LLM_PROVIDER=opencode\n")
-    assert config.probe_config(replace(config.Settings(), key_file=env))["checks"]["llm"] is False
+    assert config.probe_config(replace(config.Settings(), key_file=env, data_dir=tmp_path / "data"))["checks"]["llm"] is False
+
+
+def test_a_402_moves_to_the_next_model_for_the_rest_of_the_run_and_nothing_else_does(monkeypatch, tmp_path):
+    import urllib.error
+
+    seen = []
+
+    def urlopen(request, timeout=None):
+        model = json.loads(request.data)["model"]
+        seen.append(model)
+        if model == "dead-free":
+            raise urllib.error.HTTPError(request.full_url, 402, "Payment Required", {}, None)
+        return Reply(json.dumps({"id": "r1", "model": model, "choices": [
+            {"message": {"content": '{"ok": true}'}, "finish_reason": "stop"}], "usage": {}}).encode())
+
+    provider = lp.replace(lp.PRESETS["opencode"], model="dead-free", fallback_models=("paid-a", "paid-b"))
+    assert _call(monkeypatch, tmp_path, provider, urlopen) == {"ok": True}
+    assert seen == ["dead-free", "paid-a"] and g2.active_model() == "paid-a"
+    assert g2.deepseek_json_call("plan", [{"role": "user", "content": "x"}], {}, 1) == {"ok": True}
+    assert seen[2:] == ["paid-a"]  # no second try of the dead one
+    assert [r["model"] for r in g2.CALL_RECORDS][-1] == "paid-a"
+
+
+def test_other_errors_and_a_402_with_no_fallback_left_still_fail(monkeypatch, tmp_path):
+    import urllib.error
+
+    def urlopen(request, timeout=None):
+        raise urllib.error.HTTPError(request.full_url, 402, "Payment Required", {}, None)
+
+    provider = lp.replace(lp.PRESETS["opencode"], model="a", fallback_models=("b",))
+    with pytest.raises(g2.G2Fault) as caught:
+        _call(monkeypatch, tmp_path, provider, urlopen)
+    assert "402" in str(caught.value)
+    assert g2.active_model() == "b"
+
+
+def test_fallback_models_come_from_the_saved_settings_without_the_main_model_or_repeats(tmp_path):
+    saved = tmp_path / "s.json"
+    saved.write_text(json.dumps({"base_url": "https://opencode.ai/zen/go/v1", "model": "m", "key_env": "K",
+                                 "fallback_models": ["m", "x", "x", " y "]}))
+    provider = lp.load(None, {"AUTOVIDEO_LLM_SETTINGS_FILE": str(saved)})
+    assert provider.fallback_models == ("x", "y")
+    assert lp.validate_settings({"base_url": "https://a/v1", "model": "m", "fallback_models": "m, z"})["fallback_models"] == ["z"]
