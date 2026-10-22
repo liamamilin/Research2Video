@@ -104,6 +104,8 @@ def batch_alerts(since: float, now: float) -> list[dict]:
         when = time.strftime("%m-%d %H:%M", time.localtime(run["started_at"]))
         who = "周计划" if run.get("plan_id") else "手动"
         if run["status"] == "DONE" and not run["items"]:
+            if not run.get("plan_id"):
+                continue  # started by hand: the person who pressed the button was told "no topics" on the spot
             alerts.append(_alert(f"batch-empty:{run['id']}", "batch_empty", run["started_at"],
                                  f"{when} 的{who}批次一篇也没写", run["note"], "/"))
         elif run["status"] == "RUNNING" and run["stage"] == "TOPICS" and now - run["started_at"] > TOPICS_STUCK_SECONDS:

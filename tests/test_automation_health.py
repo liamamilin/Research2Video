@@ -162,3 +162,9 @@ def test_api_the_schedule_page_also_lists_the_video_batches_and_maintenance_read
     # read-only here: the page's edit routes do not know these ids
     assert client.put("/api/scheduler/com.arec.maintenance/toggle", json={"enabled": False},
                       headers=_csrf(client)).status_code == 404
+
+
+def test_an_empty_batch_started_by_hand_is_not_an_alert(jobs):
+    run = ap.create_run({"picks": [], "refresh": False}, [], started_by="admin")
+    ap.update_run(run["id"], started_at=FIVE, status="DONE", note="没有可写的新选题")
+    assert health.alerts(now=FIVE + 3600) == []

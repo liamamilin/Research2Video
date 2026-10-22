@@ -125,14 +125,16 @@ def load_job(jobs_dir: str, job_name: str) -> Optional[dict]:
 def list_jobs(jobs_dir: str, enabled_only: bool = False) -> list:
     """List all job names (relative paths without extension) in the jobs directory.
 
-    Skips directories starting with '_' (e.g., _templates) and special dirs.
+    Skips directories starting with '_' (e.g., _templates) and special dirs, and the top-level ``archive/`` folder
+    (jobs put away: still loadable by their path, but not part of the list, the matrices or the schedule).
     """
     if not os.path.isdir(jobs_dir):
         return []
 
     jobs = []
     for root, dirs, files in os.walk(jobs_dir):
-        dirs[:] = [d for d in dirs if d not in _SKIP_DIRS and not d.startswith("_")]
+        dirs[:] = [d for d in dirs if d not in _SKIP_DIRS and not d.startswith("_")
+                   and not (root == jobs_dir and d == "archive")]
         for fn in sorted(files):
             if not fn.endswith((".yaml", ".yml")):
                 continue

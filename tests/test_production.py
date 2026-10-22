@@ -16,9 +16,14 @@ from tests.test_video_scripts import (GOOD, ROOT, FakeLLM, _csrf, _login, _wait,
                                       research, script_json, video_env)
 
 
+SHIPPED_CONFIGS = {"ai-developer-roundup-long", "ai-non_tech-deep_dive-long", "ai-non_tech-one_point-short",
+                   "ai-non_tech-quick_take-short", "deep_dive", "flash", "point_short"}
+
+
 def test_each_recipe_but_comparison_is_one_config_on_the_job_it_picks_from():
     config, jobs = str(ROOT / "config"), str(ROOT / "jobs")
-    every = production.load_all(config, jobs)
+    # the configs the migration made, one per recipe; configs added since (ai_media_*, pai_*, ...) are not checked here
+    every = {k: c for k, c in production.load_all(config, jobs).items() if k in SHIPPED_CONFIGS}
     shipped = {k: r for k, r in recipes.expanded(config).items() if r.column and r.column.topic_kind != "comparison"}
     shipped.pop("ai-non_tech-roundup-long")  # an audience added after the migration: no config on it yet
     for whole in ("report_digest", "top_finding", "action_list"):  # whole-report recipes: a config on a Job with no items

@@ -54,4 +54,19 @@ describe("Automation alerts card", () => {
     expect(await screen.findByText(/一篇也没写/)).toBeTruthy();
     expect(screen.queryByText("知道了")).toBeNull();
   });
+
+  it("folds a long list, and 全部知道了 acknowledges every one", async () => {
+    useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
+    const rows = Array.from({ length: 5 }, (_, i) => ({ key: `k${i}`, kind: "job_failed", at: 1792443629 - i, title: `第${i}条`, detail: "", link: "" }));
+    const calls: { url: string; method?: string; body?: string }[] = [];
+    stub(rows, calls);
+    render(<MemoryRouter><AlertsCard /></MemoryRouter>);
+    expect(await screen.findByText("第0条")).toBeTruthy();
+    expect(screen.queryByText("第3条")).toBeNull();
+    fireEvent.click(screen.getByText("还有 2 条，展开"));
+    expect(screen.getByText("第4条")).toBeTruthy();
+    fireEvent.click(screen.getByText("全部知道了"));
+    await waitFor(() => expect(calls.filter((c) => c.url.endsWith("/ack")).length).toBe(5));
+    await waitFor(() => expect(screen.queryByText("第0条")).toBeNull());
+  });
 });
