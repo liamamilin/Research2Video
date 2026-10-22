@@ -58,12 +58,20 @@ class ProviderPreset:
     label: str
     base_url: str
     # Env var this provider's key should live in. Empty for keyless endpoints.
+    # Distinct per vendor (not a shared "LLM_API_KEY") so switching providers
+    # never overwrites a key you may want to switch back to later: both keys
+    # sit in .env at once, and only the active one is read.
     api_key_env: str = "LLM_API_KEY"
     # Headers the gateway requires. ``{session_id}`` is filled per conversation.
     extra_headers: dict = field(default_factory=dict)
     # Model ids we know the endpoint serves. A *hint* for the model field, not a
     # validation list: any OpenAI-compatible id the provider accepts will work.
     models: list = field(default_factory=list)
+    # Which of those ids cost nothing (a curated hint, not fetched live --
+    # the endpoints have no pricing API). Put the free ones in ai.model /
+    # review_ai.model and the rest in fallback_models so a quota-exhausted
+    # free model fails over to a paid one instead of failing the job.
+    free_models: list = field(default_factory=list)
     note: str = ""
 
     def as_dict(self) -> dict:
@@ -74,6 +82,7 @@ class ProviderPreset:
             "api_key_env": self.api_key_env,
             "extra_headers": dict(self.extra_headers),
             "models": list(self.models),
+            "free_models": list(self.free_models),
             "note": self.note,
         }
 
@@ -85,36 +94,38 @@ PROVIDERS: tuple[ProviderPreset, ...] = (
         id="open-design",
         label="Open Design（amr-link）",
         base_url="https://amr-link.open-design.ai/v1",
-        api_key_env="LLM_API_KEY",
-        models=["deepseek-v4.1-flash", "deepseek-v4-flash"],
+        api_key_env="OPENDESIGN_API_KEY",
+        models=["deepseek-v4.1-flash", "deepseek-v4-pro"],
         note="OpenAI 兼容。密钥以 sk-amr- 开头，填在下方密钥卡片，不要填进“密钥环境变量”。",
     ),
     ProviderPreset(
         id="opencode-go",
         label="opencode Go（订阅）",
         base_url="https://opencode.ai/zen/go/v1",
-        api_key_env="LLM_API_KEY",
+        api_key_env="OPENCODE_API_KEY",
         extra_headers={
             "x-opencode-session": "ses_{session_id}",
             "User-Agent": "BaseCodingCLi-ResearchAgent/2.0",
         },
-        models=["deepseek-v4.1-flash", "deepseek-v4-flash"],
-        note="需要有效的 OpenCode Go 订阅；否则返回 403。",
+        models=["longcat-2.5-preview-free", "beam-free", "minimax-m3", "deepseek-v4.1-flash",
+                "deepseek-v4-pro", "glm-5.3-flash", "claude-haiku-5-5"],
+        free_models=["longcat-2.5-preview-free", "beam-free"],
+        note="需要有效的 OpenCode Go 订阅；否则返回 403。免费模型名带 -free 后缀，会不定期变化。",
     ),
     ProviderPreset(
         id="opencode-zen",
         label="opencode zen（按量计费）",
         base_url="https://opencode.ai/zen/v1",
-        api_key_env="LLM_API_KEY",
+        api_key_env="OPENCODE_API_KEY",
         extra_headers={"User-Agent": "BaseCodingCLi-ResearchAgent/2.0"},
-        models=["deepseek-v4-flash", "gpt-5.4"],
+        models=["deepseek-v4.1-flash", "minimax-m3", "gpt-5.4"],
         note="按量付费，需要账户余额。",
     ),
     ProviderPreset(
         id="deepseek",
         label="DeepSeek 官方",
         base_url="https://api.deepseek.com/v1",
-        api_key_env="LLM_API_KEY",
+        api_key_env="DEEPSEEK_API_KEY",
         models=["deepseek-chat", "deepseek-reasoner"],
         note="DeepSeek 官方 OpenAI 兼容接口。",
     ),
@@ -122,7 +133,7 @@ PROVIDERS: tuple[ProviderPreset, ...] = (
         id="openai",
         label="OpenAI",
         base_url="https://api.openai.com/v1",
-        api_key_env="LLM_API_KEY",
+        api_key_env="OPENAI_API_KEY",
         models=["gpt-5.4"],
         note="官方 OpenAI 接口。",
     ),
@@ -132,6 +143,7 @@ PROVIDERS: tuple[ProviderPreset, ...] = (
         base_url="http://localhost:11434/v1",
         api_key_env="",
         models=["qwen3.8:27b-mlx", "bge-m3:latest"],
+        free_models=["qwen3.8:27b-mlx", "bge-m3:latest"],
         note="本地端点，密钥环境变量留空。",
     ),
 )

@@ -121,6 +121,127 @@ def test_other_provider_error_codes_are_not_retried(monkeypatch):
     assert calls["n"] == 1
 
 
+class FakeQuotaError(Exception):
+    """Stands in for the 402 an OpenAI-compatible gateway sends when the
+    account is out of money, e.g. ``{"code": "insufficient_balance", ...}``."""
+
+    def __init__(self, code: str = "insufficient_balance"):
+        super().__init__(f"[code={code}] Coding Plan quota is exhausted and wallet "
+                         "balance is insufficient.")
+        self.code = code
+
+
+def test_a_quota_exhausted_model_falls_back_to_the_next_one(monkeypatch):
+    client = make_client(model="free", fallback_models=["paid1", "paid2"])
+    calls: list[str] = []
+
+    def answer(_messages, **_kw):
+        model = client._active_model()
+        calls.append(model)
+        if model == "free":
+            raise FakeQuotaError()
+        return reply(f"answered by {model}")
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
+    result = client.chat([{"role": "user", "content": "x"}])
+    # ``reply()`` builds a canned ChatResponse, so it doesn't set .model the
+    # way the real _chat_once(_stream) does; that one-line pass-through is
+    # exercised by the fake-transport tests in test_llm_stream.py instead.
+    assert result.content == "answered by paid1"
+    assert calls == ["free", "paid1"]  # one call per model, no backoff retry of "free"
+    assert client._active_model() == "paid1"  # sticky: later calls skip the exhausted model
+
+
+def test_quota_exhausted_with_no_fallback_configured_raises_at_once(monkeypatch):
+    client = make_client(model="free")  # no fallback_models
+    calls = {"n": 0}
+
+    def boom(_messages, **_kw):
+        calls["n"] += 1
+        raise FakeQuotaError()
+
+    monkeypatch.setattr(client, "_chat_cancellable", boom)
+    with pytest.raises(LLMError, match="insufficient"):
+        client.chat([{"role": "user", "content": "x"}])
+    assert calls["n"] == 1  # no backoff retries of a model that cannot recover
+
+
+def test_all_fallbacks_exhausted_names_every_model_tried(monkeypatch):
+    client = make_client(model="free", fallback_models=["paid1", "paid2"])
+    calls = {"n": 0}
+
+    def boom(_messages, **_kw):
+        calls["n"] += 1
+        raise FakeQuotaError()
+
+    monkeypatch.setattr(client, "_chat_cancellable", boom)
+    with pytest.raises(LLMError) as caught:
+        client.chat([{"role": "user", "content": "x"}])
+    assert calls["n"] == 3  # free, paid1, paid2 -- each tried exactly once
+    for model in ("free", "paid1", "paid2"):
+        assert model in str(caught.value)
+
+
+def test_a_fallback_model_gets_its_own_transient_retry_budget(monkeypatch):
+    """A quota error on model 1 must not burn model 2's retry allowance."""
+    client = make_client(model="free", fallback_models=["paid1"], max_retries=2)
+    state = {"n": 0}
+
+    def answer(_messages, **_kw):
+        state["n"] += 1
+        if state["n"] == 1:
+            raise FakeQuotaError()  # switches to paid1
+        if state["n"] in (2, 3):
+            raise FakeAPIStatusError(503)  # paid1: transient, within its own budget
+        return reply("ok")
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
+    assert client.chat([{"role": "user", "content": "x"}]).content == "ok"
+    assert state["n"] == 4
+
+
+def test_duplicate_fallback_models_are_tried_only_once(monkeypatch):
+    client = make_client(model="free", fallback_models=["free", "paid1", "paid1"])
+    calls: list[str] = []
+
+    def answer(_messages, **_kw):
+        model = client._active_model()
+        calls.append(model)
+        if model == "free":
+            raise FakeQuotaError()
+        return reply("ok")
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
+    client.chat([{"role": "user", "content": "x"}])
+    assert calls == ["free", "paid1"]
+
+
+def test_a_partially_displayed_reply_blocks_fallback_too(monkeypatch):
+    """The no-replay-after-display rule applies to a quota fallback as well."""
+    client = make_client(model="free", fallback_models=["paid1"], stream=True)
+    deltas = []
+
+    def answer(_messages, **kwargs):
+        kwargs["on_delta"]("partial")
+        raise FakeQuotaError()
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    with pytest.raises(LLMError):
+        client.chat([{"role": "user", "content": "x"}], on_delta=deltas.append)
+    assert deltas == ["partial"]
+    assert client._active_model() == "free"  # never switched
+
+
+def test_reasoning_echo_follows_a_fallback_switch(monkeypatch):
+    client = make_client(model="longcat", fallback_models=["deepseek-v4.1-flash"])
+    assert client._should_echo_reasoning() is False
+    client._model_idx = 1
+    assert client._should_echo_reasoning() is True
+
+
 def test_a_retry_that_succeeds_returns_normally(monkeypatch):
     client = make_client()
     state = {"n": 0}

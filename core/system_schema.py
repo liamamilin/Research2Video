@@ -17,17 +17,26 @@ STRINGS = [str]
 ENV_MAP = {'*': str}
 HEADERS = {'*': str}
 CHANNEL = {'enabled': bool, 'webhook_url': str, 'webhook_url_env': str}
+# ai and review_ai are both "one LLMConfig" sections (core/llm.py); review_ai
+# is optional and, when absent, review steps fall back to ai. embedding_* only
+# makes sense on ai (there is one embedding model, not one per audit model).
+_LLM_SECTION = {
+    'model': str, 'base_url': str, 'api_key': str, 'api_key_env': str,
+    'timeout': POSITIVE_INT, 'request_timeout': POSITIVE_INT,
+    'max_tokens': POSITIVE_INT, 'temperature': NONNEGATIVE_NUMBER,
+    'max_retries': NONNEGATIVE_INT, 'stream': bool,
+    'reasoning_content': ('enum', 'auto', 'always', 'never'),
+    'extra_body': dict, 'extra_headers': HEADERS,
+    # Tried in order on a quota/billing error (core.llm._is_quota_exhausted),
+    # same provider and key as ``model`` -- e.g. a free model first, paid ones
+    # after. See spec/llm-providers.md.
+    'fallback_models': STRINGS,
+    'pricing': {'input_per_1m': NONNEGATIVE_NUMBER, 'output_per_1m': NONNEGATIVE_NUMBER},
+}
 SCHEMA = {
-    'ai': {
-        'model': str, 'base_url': str, 'api_key': str, 'api_key_env': str,
-        'embedding_model': str, 'embedding_base_url': str, 'embedding_api_key_env': str,
-        'timeout': POSITIVE_INT, 'request_timeout': POSITIVE_INT,
-        'max_tokens': POSITIVE_INT, 'temperature': NONNEGATIVE_NUMBER,
-        'max_retries': NONNEGATIVE_INT, 'stream': bool,
-        'reasoning_content': ('enum', 'auto', 'always', 'never'),
-        'extra_body': dict, 'extra_headers': HEADERS,
-        'pricing': {'input_per_1m': NONNEGATIVE_NUMBER, 'output_per_1m': NONNEGATIVE_NUMBER},
-    },
+    'ai': {**_LLM_SECTION, 'embedding_model': str, 'embedding_base_url': str,
+           'embedding_api_key_env': str},
+    'review_ai': _LLM_SECTION,
     'search': {
         'provider': str, 'api_key_env': str, 'api_key_envs': ENV_MAP,
         'mode': str, 'max_results': POSITIVE_INT, 'max_chars_per_result': POSITIVE_INT,

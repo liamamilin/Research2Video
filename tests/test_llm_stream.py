@@ -66,6 +66,11 @@ def test_text_is_delivered_before_the_upstream_stream_finishes():
     assert stream.closed
 
 
+def test_the_response_names_the_model_that_answered():
+    client, _stream, _requests = client_for([chunk(text="hi", finish="stop")], stream=False)
+    assert client.chat([{"role": "user", "content": "x"}], stream=True).model == "deepseek-test"
+
+
 def test_interleaved_tool_arguments_are_assembled_before_execution():
     client, stream, _requests = client_for([
         chunk(calls=[call(0, name="get_", arguments='{"job_', id="a"),

@@ -64,7 +64,35 @@ def test_open_design_preset_is_available():
     preset = get_provider("open-design")
     assert preset is not None
     assert preset.base_url == "https://amr-link.open-design.ai/v1"
-    assert preset.api_key_env == "LLM_API_KEY"
+    assert preset.api_key_env == "OPENDESIGN_API_KEY"
+
+
+def test_each_vendor_has_its_own_key_env_so_switching_never_clobbers_another():
+    """Found live: every preset defaulted to the same LLM_API_KEY, so picking a
+    new provider in Settings overwrote the previous one's key in .env with no
+    way back short of re-obtaining it. Each vendor now gets its own slot, so
+    both keys can sit in .env at once and switching back needs no new key."""
+    keyed = [p for p in PROVIDERS if p.api_key_env]
+    by_env: dict[str, set[str]] = {}
+    for preset in keyed:
+        by_env.setdefault(preset.api_key_env, set()).add(preset.id)
+    # opencode Go and opencode zen are the same vendor/account, so sharing one
+    # var is intentional; every other var must belong to exactly one vendor.
+    for env_name, ids in by_env.items():
+        if ids == {"opencode-go", "opencode-zen"}:
+            continue
+        assert len(ids) == 1, f"{env_name} is shared by {ids}"
+
+
+def test_free_models_are_a_subset_of_models():
+    for preset in PROVIDERS:
+        assert set(preset.free_models) <= set(preset.models), preset.id
+
+
+def test_opencode_go_prefers_a_free_model_with_paid_fallbacks_available():
+    preset = get_provider("opencode-go")
+    assert preset.free_models, "opencode-go should have at least one free model"
+    assert set(preset.models) - set(preset.free_models), "and at least one paid one"
 
 
 def test_base_url_matches_a_preset_ignoring_trailing_slash_and_case():
@@ -78,7 +106,7 @@ def test_list_providers_returns_plain_dicts():
     items = list_providers()
     assert isinstance(items[0], dict)
     assert set(items[0]) >= {"id", "label", "base_url", "api_key_env",
-                             "extra_headers", "models", "note"}
+                             "extra_headers", "models", "free_models", "note"}
 
 
 def test_opencode_go_ships_its_required_headers():

@@ -194,6 +194,58 @@ def test_a_real_env_name_is_accepted(client, cfg):
     assert "OPEN_DESIGN_KEY" in cfg.read_text(encoding="utf-8")
 
 
+def test_fallback_models_are_accepted_as_a_string_list(client, cfg):
+    _login(client)
+    r = client.put("/api/config/system",
+                   json={"patch": {"ai": {"fallback_models": ["minimax-m3", "deepseek-v4.1-flash"]}}},
+                   headers=_csrf(client))
+    assert r.status_code == 200, r.text
+    parsed = client.get("/api/config/system").json()["parsed"]
+    assert parsed["ai"]["fallback_models"] == ["minimax-m3", "deepseek-v4.1-flash"]
+
+
+def test_fallback_models_rejects_non_strings(client, cfg):
+    _login(client)
+    r = client.put("/api/config/system",
+                   json={"patch": {"ai": {"fallback_models": [1, 2]}}},
+                   headers=_csrf(client))
+    assert r.status_code == 422, r.text
+
+
+def test_review_ai_section_is_a_known_field(client, cfg):
+    """review_ai (spec/video-adaptation-audit.md) is a real, validated section,
+    not just whatever happens to be in the file -- a patch can create and edit
+    it the same way as ai."""
+    _login(client)
+    r = client.put("/api/config/system",
+                   json={"patch": {"review_ai": {
+                       "model": "deepseek-v4-pro", "base_url": "https://llm.test/v1",
+                       "api_key_env": "REVIEW_API_KEY", "fallback_models": ["minimax-m3"],
+                   }}},
+                   headers=_csrf(client))
+    assert r.status_code == 200, r.text
+    parsed = client.get("/api/config/system").json()["parsed"]
+    assert parsed["review_ai"]["model"] == "deepseek-v4-pro"
+    assert parsed["review_ai"]["fallback_models"] == ["minimax-m3"]
+
+
+def test_review_ai_rejects_an_embedding_field_it_has_no_use_for(client, cfg):
+    """embedding_* belongs only to ai: one embedding model, not one per audit model."""
+    _login(client)
+    r = client.put("/api/config/system",
+                   json={"patch": {"review_ai": {"embedding_model": "x"}}},
+                   headers=_csrf(client))
+    assert r.status_code == 422, r.text
+
+
+def test_an_unknown_top_level_section_is_rejected(client, cfg):
+    _login(client)
+    r = client.put("/api/config/system",
+                   json={"patch": {"not_a_real_section": {"x": 1}}},
+                   headers=_csrf(client))
+    assert r.status_code == 422, r.text
+
+
 def test_switching_provider_saves_url_and_env_together(client, cfg):
     _login(client)
     r = client.put("/api/config/system",

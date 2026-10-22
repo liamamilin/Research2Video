@@ -52,6 +52,11 @@ _RETRYABLE_NAMES = {
 #: was wrong. Seen live: a gateway reported a reset mid-stream as a plain
 #: APIError with no HTTP status, so neither check above caught it.
 _RETRYABLE_CODES = {"upstream_stream_interrupted"}
+#: Provider error codes for "the account is out of money/quota", distinct from
+#: a transient failure: retrying the same model never helps, only a different
+#: (or cheaper) model or a top-up does. Seen live from an OpenAI-compatible
+#: gateway: ``{"code": "insufficient_balance", "details": {"coding_plan_exhausted": true}}``.
+_QUOTA_EXHAUSTED_CODES = {"insufficient_balance", "quota_exhausted"}
 
 
 @dataclass
@@ -73,6 +78,13 @@ class LLMConfig:
     stream: bool = True               # stream text-only calls (live progress)
     extra_body: dict = field(default_factory=dict)
     extra_headers: dict = field(default_factory=dict)
+    # Tried in order, same provider and key, when ``model`` answers with a
+    # quota/billing error (see ``_is_quota_exhausted``) -- never for an
+    # ordinary transient failure, which retries the same model instead. Put a
+    # free model in ``model`` and paid ones here so a quota-exhausted free
+    # model fails over instead of failing the job; once switched, a client
+    # keeps using the fallback for the rest of its calls (see ``_active_model``).
+    fallback_models: list = field(default_factory=list)
 
     def validate(self) -> None:
         if not self.model:
@@ -121,6 +133,7 @@ class LLMConfig:
             stream=bool(cfg.get("stream", True)),
             extra_body=cfg.get("extra_body") or {},
             extra_headers=cfg.get("extra_headers") or {},
+            fallback_models=[str(m) for m in (cfg.get("fallback_models") or [])],
         )
 
 
@@ -143,6 +156,9 @@ class ChatResponse:
     usage: dict = field(default_factory=dict)
     reasoning_content: str = ""
     echo_reasoning: bool = False
+    # The model that actually answered -- ``config.model`` unless a quota
+    # error fell back to one of ``config.fallback_models``.
+    model: str = ""
 
     @property
     def assistant_message(self) -> dict:
@@ -211,6 +227,11 @@ class LLMClient:
         self._cancel = cancel_token or threading.Event()
         self._progress = progress_cb or (lambda _: None)
         self._session_id = "ses_" + uuid.uuid4().hex
+        # Index into ``_model_list()``: 0 is ``config.model``, >0 is a
+        # fallback a quota error switched to. Never resets, so once this
+        # client switches away from an exhausted model it stays switched for
+        # the rest of the job rather than re-trying the known-bad one.
+        self._model_idx = 0
         self._client = self._make_client()
         self.usage = {
             "requests": 0,
@@ -277,6 +298,18 @@ class LLMClient:
                 if emitted:
                     raise self._classify(exc) from exc
                 if not self._is_retryable(exc):
+                    if self._is_quota_exhausted(exc):
+                        previous_model = self._active_model()
+                        if self._advance_model():
+                            logger.warning(
+                                "LLM model %r is out of quota/balance, switching to "
+                                "fallback %r: %s",
+                                previous_model,
+                                self._active_model(),
+                                self._short(exc),
+                            )
+                            attempt = 0  # the new model gets its own transient-retry budget
+                            continue
                     raise self._classify(exc) from exc
                 attempt += 1
                 if attempt > self.config.max_retries:
@@ -292,6 +325,46 @@ class LLMClient:
                     delay,
                 )
                 self._sleep_cancellable(delay)
+
+    def _model_list(self) -> list[str]:
+        """``[config.model, *config.fallback_models]``, de-duplicated in order."""
+        out: list[str] = []
+        for model in [self.config.model, *(self.config.fallback_models or [])]:
+            if model and model not in out:
+                out.append(model)
+        return out
+
+    def _active_model(self) -> str:
+        """The model the next request uses: ``config.model`` or a fallback switched to.
+
+        ``_model_idx`` defaults to 0 via ``getattr`` so a client built by
+        tests with ``LLMClient.__new__`` (skipping ``__init__``) still works.
+        """
+        models = self._model_list()
+        idx = getattr(self, "_model_idx", 0)
+        if not models:
+            return self.config.model
+        return models[min(idx, len(models) - 1)]
+
+    def _advance_model(self) -> bool:
+        """Switch to the next fallback model. False when there is none left."""
+        idx = getattr(self, "_model_idx", 0)
+        if idx + 1 >= len(self._model_list()):
+            return False
+        self._model_idx = idx + 1
+        return True
+
+    def _is_quota_exhausted(self, exc: Exception) -> bool:
+        """A billing/quota rejection, not a transient failure: retrying the
+        same model will not help, but a fallback model might."""
+        status = getattr(exc, "status_code", None)
+        if status == 402:
+            return True
+        code = getattr(exc, "code", None)
+        if code in _QUOTA_EXHAUSTED_CODES:
+            return True
+        lowered = self._short(exc, 500).lower()
+        return "insufficient balance" in lowered or "insufficient_balance" in lowered or "credit" in lowered
 
     def close(self) -> None:
         """Close the underlying HTTP client."""
@@ -386,7 +459,7 @@ class LLMClient:
         """
         client = self._ensure_client()
         base = {
-            "model": self.config.model,
+            "model": self._active_model(),
             "messages": messages,
             "temperature": (
                 self.config.temperature if temperature is None else temperature
@@ -515,13 +588,14 @@ class LLMClient:
             usage=usage,
             reasoning_content="".join(reasoning_parts),
             echo_reasoning=self._should_echo_reasoning(),
+            model=self._active_model(),
         )
 
     def _chat_once(self, messages, tools=None, tool_choice=None,
                    temperature=None, max_tokens=None) -> ChatResponse:
         client = self._ensure_client()
         kwargs: dict[str, Any] = {
-            "model": self.config.model,
+            "model": self._active_model(),
             "messages": messages,
             "temperature": (
                 self.config.temperature if temperature is None else temperature
@@ -592,6 +666,7 @@ class LLMClient:
             usage=usage_dict,
             reasoning_content=_normalize_content(reasoning),
             echo_reasoning=self._should_echo_reasoning(),
+            model=self._active_model(),
         )
 
     def _should_echo_reasoning(self) -> bool:
@@ -605,7 +680,7 @@ class LLMClient:
             return True
         if mode == "never":
             return False
-        return "deepseek" in (self.config.model or "").lower()
+        return "deepseek" in (self._active_model() or "").lower()
 
     def _abort(self) -> None:
         """Force-close the HTTP client to abort an in-flight request."""
@@ -642,14 +717,16 @@ class LLMClient:
             )
         if status in (401, 403):
             return LLMError(self._auth_message(status, text))
-        if status == 402 or "insufficient balance" in lowered or "credit" in lowered:
+        if self._is_quota_exhausted(exc):
+            models_tried = self._model_list()[: getattr(self, "_model_idx", 0) + 1]
+            tried = f" (tried: {', '.join(models_tried)})" if len(self._model_list()) > 1 else ""
             return LLMError(
-                f"LLM account has insufficient credits/balance: {text}"
+                f"LLM account has insufficient credits/balance{tried}: {text}"
             )
         if status == 404:
             return LLMError(
                 f"LLM model or endpoint not found (404): {text}. "
-                f"Check ai.model='{self.config.model}' and ai.base_url="
+                f"Check ai.model='{self._active_model()}' and ai.base_url="
                 f"'{self.config.base_url}'"
             )
         return LLMError(f"LLM call failed: {text}")

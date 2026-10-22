@@ -65,15 +65,34 @@ def _merged_system(overrides: Optional[dict] = None) -> dict:
 
 
 def _secret_env_map() -> dict[str, str]:
-    """Env var name → human label, derived from the current config."""
+    """Env var name → human label.
+
+    Always includes a slot for every known LLM provider preset's key
+    (core.providers.PROVIDERS), not only the ones ai/review_ai currently
+    reference. Found live: switching ai from provider A to provider B made
+    A's key slot disappear from the settings page the moment B became
+    active, which read as "the key got lost" even though .env still held it
+    untouched -- A's slot is just as real when it is not the active one, so
+    it stays listed, and a key for a provider you have not switched to yet
+    can be saved here in advance. An active ai/review_ai section's label
+    wins when its var is also a preset's.
+    """
     sys_config = _load_system()
     ai = sys_config.get("ai") or {}
     search = sys_config.get("search") or {}
     extraction = sys_config.get("extraction") or {}
 
+    review_ai = sys_config.get("review_ai") or {}
+
     mapping: dict[str, str] = {}
+    roles: dict[str, list[str]] = {}  # who uses a var right now (several features may share one provider's key)
+    for section, role in ((ai, "AI 模型（LLM）"), (review_ai, "审校模型（review_ai）"), (extraction, "报告清理")):
+        if section.get("api_key_env"):
+            roles.setdefault(str(section["api_key_env"]), []).append(role)
     if ai.get("api_key_env"):
         mapping[str(ai["api_key_env"])] = "AI 模型（LLM）"
+    if review_ai.get("api_key_env"):
+        mapping.setdefault(str(review_ai["api_key_env"]), "审校模型（review_ai）")
     if ai.get("embedding_api_key_env"):
         mapping[str(ai["embedding_api_key_env"])] = "Embedding 模型"
     if search.get("api_key_env"):
@@ -82,7 +101,19 @@ def _secret_env_map() -> dict[str, str]:
         if env_name:
             mapping[str(env_name)] = f"搜索 · {provider}"
     if extraction.get("api_key_env"):
-        mapping[str(extraction["api_key_env"])] = "报告清理（可选）"
+        mapping.setdefault(str(extraction["api_key_env"]), "报告清理（可选）")
+
+    by_env: dict[str, list[str]] = {}
+    for preset in list_providers():
+        if preset["api_key_env"]:
+            by_env.setdefault(preset["api_key_env"], []).append(preset["label"])
+    for env_name, labels in by_env.items():
+        provider = "服务商 · " + "、".join(dict.fromkeys(labels))
+        role = "、".join(r for r in dict.fromkeys(roles.get(env_name, [])))
+        # The slot is named after whose key it is, never after the role using it right now: labelled "AI 模型（LLM）"
+        # it read as the AI's key whichever provider was active, and a key for another provider got pasted into it
+        # (then switching provider found the new one's slot empty and the old one's slot holding the wrong key).
+        mapping[env_name] = f"{provider} · 当前用于 {role}" if role else provider
     return mapping
 
 
@@ -476,11 +507,19 @@ def update_secrets(payload: dict, request: Request, user=Depends(require_admin))
 
 @router.post("/test-llm")
 def test_llm(payload: dict, user=Depends(require_admin)):
-    """Send a tiny chat completion with the (possibly unsaved) LLM config."""
+    """Send a tiny chat completion with the (possibly unsaved) LLM config.
+
+    ``section`` picks ``ai`` (default) or ``review_ai``, so the audit model
+    can be tested the same way as the main one.
+    """
+    section = (payload or {}).get("section") or "ai"
+    if section not in ("ai", "review_ai"):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail=ApiError.make("invalid_section", f"未知配置分区：{section}"))
     overrides = (payload or {}).get("config") or {}
     api_key = (payload or {}).get("api_key")
     sys_config = _merged_system(overrides)
-    llm_cfg = LLMConfig.from_system(sys_config, "ai")
+    llm_cfg = LLMConfig.from_system(sys_config, section)
     if api_key:
         llm_cfg.api_key = api_key
     llm_cfg.max_tokens = 16
