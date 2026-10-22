@@ -621,10 +621,11 @@ def test_search(payload: dict, user=Depends(require_admin)):
             result["error"] = getattr(client, "errors", {}).get(search_cfg.provider) or "无结果返回（检查服务商与密钥）"
         return result
     except Exception as exc:  # noqa: BLE001 - reported to the admin
+        reasons = getattr(exc, "reasons", None)
         return {
             "ok": False,
             "provider": search_cfg.provider,
-            "error": str(exc)[:300],
+            "error": (reasons or {}).get(search_cfg.provider) or str(exc)[:300],
             "latency_ms": int((time.time() - started) * 1000),
         }
 

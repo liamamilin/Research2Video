@@ -18,3 +18,19 @@ class LLMUnsupportedError(LLMError):
 
     Signals the research agent to fall back to pipeline mode.
     """
+
+
+class SearchUnavailableError(Exception):
+    """Raised when no search provider could answer (quota, key, rate limit, network).
+
+    A run must stop on this: carrying on would write the report from the model's
+    own memory and mark it a success. ``reasons`` maps provider -> why it failed.
+    """
+
+    def __init__(self, reasons: dict[str, str]):
+        self.reasons = dict(reasons)
+        detail = "；".join(f"{name}: {why}" for name, why in self.reasons.items())
+        super().__init__(
+            f"联网搜索不可用，已中止，没有生成报告。{detail}。"
+            "请到「设置 → 搜索」检查服务商额度和 Key，或换一个搜索服务商后重新运行。"
+        )

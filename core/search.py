@@ -35,7 +35,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Optional
 
-from .errors import CancelledError
+from .errors import CancelledError, SearchUnavailableError
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +151,13 @@ class SearchClient:
         objective: str = "",
         after_date: Optional[str] = None,
     ) -> list[SearchResult]:
-        """Run a web search. Returns [] when all providers fail."""
+        """Run a web search.
+
+        Returns [] when a provider answered but found nothing. Raises
+        ``SearchUnavailableError`` when no provider could answer at all: an
+        empty list there would look like "nothing to find" and the caller would
+        write from memory.
+        """
         queries = self._clean_queries(queries)
         if not queries:
             logger.warning("search called without usable queries")
@@ -167,6 +173,7 @@ class SearchClient:
             if fallback and fallback not in providers:
                 providers.append(fallback)
 
+        answered = False
         for provider in providers:
             try:
                 if provider == "parallel":
@@ -185,7 +192,9 @@ class SearchClient:
                     results = self._search_duckduckgo(queries)
                 else:
                     logger.error("Unknown search provider: %s", provider)
+                    self.errors[provider] = "未知的搜索服务商"
                     continue
+                answered = True
                 if results:
                     self.calls += 1
                     return self._dedupe(results)
@@ -201,6 +210,8 @@ class SearchClient:
                     "Search provider '%s' failed: %s", provider, str(exc)[:300]
                 )
 
+        if not answered:
+            raise SearchUnavailableError(self.errors)
         return []
 
     @staticmethod
@@ -458,10 +469,7 @@ class SearchClient:
             try:
                 from ddgs import DDGS  # type: ignore[no-redef]
             except ImportError:
-                logger.warning(
-                    "duckduckgo fallback unavailable: install duckduckgo-search"
-                )
-                return []
+                raise RuntimeError("未安装 duckduckgo-search")
 
         self._progress(
             {"type": "search", "provider": "duckduckgo", "queries": queries}

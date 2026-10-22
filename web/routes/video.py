@@ -1111,4 +1111,10 @@ def reference_videos(q: str = Query(min_length=4, max_length=120), limit: int = 
     from core.video import reference
 
     client = SearchClient(SearchConfig.from_system(load_system_config(get_settings().paths.config_dir)))
-    return {"query": q, "videos": reference.find(client, q, limit=limit), "searches": client.calls}
+    from core.errors import SearchUnavailableError
+
+    try:
+        videos = reference.find(client, q, limit=limit)
+    except SearchUnavailableError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    return {"query": q, "videos": videos, "searches": client.calls}

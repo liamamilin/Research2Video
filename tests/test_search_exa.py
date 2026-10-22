@@ -6,6 +6,7 @@ import json
 
 import pytest
 
+from core.errors import SearchUnavailableError
 from core.search import SearchClient, SearchConfig
 
 
@@ -53,8 +54,9 @@ def test_exa_is_asked_per_query_with_its_key_and_the_page_text_comes_back_as_the
 
 def test_a_missing_key_is_reported_by_name_not_swallowed():
     client = SearchClient(_config(api_keys={}))
-    assert client.search(["q"]) == []
-    assert "exa" in client.errors["exa"]
+    with pytest.raises(SearchUnavailableError) as raised:
+        client.search(["q"])
+    assert "exa" in client.errors["exa"] and "exa" in raised.value.reasons
 
 
 def test_the_search_test_asks_the_chosen_provider_alone(monkeypatch):
@@ -79,5 +81,6 @@ def test_the_search_test_asks_the_chosen_provider_alone(monkeypatch):
 def test_a_provider_with_its_own_key_variable_never_falls_back_to_the_generic_key():
     # provider exa, EXA_API_KEY unset, but PARALLEL_API_KEY (the generic search.api_key) is: that key is not Exa's
     client = SearchClient(_config(api_keys={}, api_key="parallel-key", key_envs={"exa": "EXA_API_KEY"}))
-    assert client.search(["q"]) == []
+    with pytest.raises(SearchUnavailableError):
+        client.search(["q"])
     assert "EXA_API_KEY" in client.errors["exa"]

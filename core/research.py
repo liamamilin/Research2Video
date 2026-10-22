@@ -126,7 +126,7 @@ def is_sensitive_path(path: str, workspace: str) -> bool:
 _is_sensitive_path = is_sensitive_path
 
 from . import provenance
-from .errors import CancelledError, LLMError, LLMUnsupportedError
+from .errors import CancelledError, LLMError, LLMUnsupportedError, SearchUnavailableError
 from .llm import LLMClient, LLMConfig
 from .search import SearchClient, SearchConfig, SearchResult
 
@@ -141,6 +141,9 @@ from .search import SearchClient, SearchConfig, SearchResult
 _URL_RE = provenance.URL_RE
 
 logger = logging.getLogger(__name__)
+
+
+_SEARCH_RETRY_DELAY = 3.0  # seconds before the one retry when every provider failed
 
 
 @dataclass
@@ -410,11 +413,26 @@ class ResearchAgent:
             if name == "list_files":
                 return self._tool_list_files(arguments)
             return f"Error: unknown tool '{name}'"
-        except CancelledError:
+        except (CancelledError, SearchUnavailableError):
             raise
         except Exception as exc:  # noqa: BLE001 - fed back to the model
             logger.warning("Tool '%s' failed: %s", name, exc)
             return f"Error: {exc}"
+
+    def _search_or_abort(self, queries: list[str], objective: str) -> list[SearchResult]:
+        """Search; if no provider can answer, retry once, then end the run.
+
+        Writing on without sources is the worse outcome: the report reads as
+        researched and the run is recorded as a success.
+        """
+        try:
+            return self.search.search(queries, objective=objective)
+        except SearchUnavailableError as exc:
+            logger.warning("Web search unavailable, retrying once: %s", exc)
+        self._check_cancel()
+        time.sleep(_SEARCH_RETRY_DELAY)
+        # a second SearchUnavailableError propagates and fails the run
+        return self.search.search(queries, objective=objective)
 
     def _tool_search_web(self, arguments: dict) -> str:
         if self._search_calls >= self.config.max_searches:
@@ -428,7 +446,7 @@ class ResearchAgent:
         objective = arguments.get("objective") or ""
         self._search_calls += 1
 
-        results = self.search.search(queries, objective=objective)
+        results = self._search_or_abort(queries, objective)
         self._remember(results)
         if not results:
             return (
@@ -507,7 +525,7 @@ class ResearchAgent:
         results: list[SearchResult] = []
         if queries:
             self._search_calls += 1
-            results = self.search.search(queries, objective=objective)
+            results = self._search_or_abort(queries, objective)
             self._remember(results)
 
         if results:
