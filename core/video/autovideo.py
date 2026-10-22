@@ -65,6 +65,18 @@ class AutoVideoClient:
     def config_status(self) -> dict:
         return self._request("GET", "/api/config/status")
 
+    def llm_config(self) -> dict:
+        return self._request("GET", "/api/config/llm")
+
+    def set_llm_config(self, payload: dict) -> dict:
+        return self._request("PUT", "/api/config/llm", json=payload)
+
+    def reset_llm_config(self) -> dict:
+        return self._request("DELETE", "/api/config/llm")
+
+    def test_llm_config(self, payload: dict) -> dict:
+        return self._request("POST", "/api/config/llm/test", json=payload)
+
     def voices(self) -> list[dict]:
         return self._request("GET", "/api/voices").get("items", [])
 

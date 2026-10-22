@@ -14,14 +14,16 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from core.video import columns as video_columns
+from core.video.autovideo import AutoVideoError, AutoVideoUnreachable
 from core.video import credibility, excerpt, store
 from core.video import plans as video_plans
 from core.video import steps as video_steps
 from core.video import topics as video_topics
 from core.video.adapt import styles as video_styles
 from web import audit
-from web.deps import require_editor, require_viewer
+from web.deps import require_admin, require_editor, require_viewer
 from web.models import ApiError
+from web.routes import config as config_routes
 from web.services import video_executor, video_render, video_workflow
 from web.settings import get_settings
 
@@ -840,6 +842,65 @@ def render_script(script_id: str, body: Optional[RenderIn] = None, user=Depends(
         raise HTTPException(409, detail=ApiError.make("render_not_allowed", str(exc))) from exc
     audit.log("video_render", user=user["username"], target=script_id, result=render["id"])
     return _render_out(render)
+
+
+class VideoModelIn(BaseModel):
+    """The model that writes a video's storyboard in AutoVideo. The key is only ever named, never sent: AutoVideo reads it
+    from this app's ``.env`` by its variable name."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    base_url: str = Field(min_length=1, max_length=300)
+    model: str = Field(min_length=1, max_length=120)
+    key_env: str = Field(default="", max_length=80)
+
+    def settings(self) -> dict:
+        return {**self.model_dump(), "env_file": config_routes._env_path() if self.key_env else ""}
+
+
+def _autovideo_call(call):
+    try:
+        return call(video_render.get_client())
+    except AutoVideoUnreachable as exc:
+        raise HTTPException(503, detail=ApiError.make("autovideo_unreachable", str(exc))) from exc
+    except AutoVideoError as exc:
+        raise HTTPException(exc.status_code if exc.status_code in (404, 422) else 502,
+                            detail=ApiError.make(exc.code.lower(), exc.message or exc.code)) from exc
+
+
+@router.get("/model")
+def get_video_model(user=Depends(require_admin)) -> dict:
+    """The provider and model AutoVideo uses now (and whether its key is found), for the settings page."""
+    client = video_render.get_client()
+    out = {"base_url": client.base_url, "reachable": False, "config": None, "error": None}
+    try:
+        out["config"] = client.llm_config()
+        out["reachable"] = True
+    except Exception as exc:  # noqa: BLE001 - the settings page shows why it is empty
+        out["error"] = str(exc)
+    return out
+
+
+@router.put("/model")
+def put_video_model(body: VideoModelIn, user=Depends(require_admin)) -> dict:
+    """Choose the provider/model for videos rendered from now on (a render already running keeps what it started with)."""
+    config = _autovideo_call(lambda c: c.set_llm_config(body.settings()))
+    audit.log("video_model_update", user=user["username"], target=body.base_url, result=body.model)
+    return config
+
+
+@router.delete("/model")
+def reset_video_model(user=Depends(require_admin)) -> dict:
+    """Back to AutoVideo's own default (what its ``.env`` says)."""
+    config = _autovideo_call(lambda c: c.reset_llm_config())
+    audit.log("video_model_reset", user=user["username"])
+    return config
+
+
+@router.post("/model/test")
+def test_video_model(body: VideoModelIn, user=Depends(require_admin)) -> dict:
+    """One tiny request to the chosen provider, without saving it."""
+    return _autovideo_call(lambda c: c.test_llm_config(body.settings()))
 
 
 @router.get("/autovideo")

@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
 import { AssistantConfigRecovery } from "@/components/AssistantAction";
+import { VideoModelConfig } from "@/components/VideoModelConfig";
 import {
   CheckCircle2, FileCode, Plug, RotateCcw, Save, SlidersHorizontal, XCircle,
 } from "lucide-react";
@@ -574,6 +575,8 @@ export function SystemConfig() {
               </div>
             )}
           </Section>
+
+          <VideoModelConfig />
 
           <Section
             title="搜索服务"
