@@ -98,6 +98,7 @@ class G2ProcessRunner:
         run_dir = attempt_root / "g2-run"
         run_id = f"job_{job_id.replace('-', '')}_a{attempt_no}"
         env = os.environ.copy()
+        env["AUTOVIDEO_LLM_SETTINGS_FILE"] = str(self.settings.llm_settings_file)
         env["AUTOVIDEO_G2_SOURCE_FILE"] = job["source_abs_path"]
         env["AUTOVIDEO_G2_RUN_ID"] = run_id
         env["AUTOVIDEO_G2_RUN_DIR"] = str(run_dir)

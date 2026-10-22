@@ -28,10 +28,18 @@ class Settings:
     worker_poll_seconds: float = 0.35
     runner_timeout_seconds: int = 1800
 
+    @property
+    def llm_settings_file(self) -> Path:
+        """Where ``PUT /api/config/llm`` saves the provider choice; the generation subprocess reads the same file."""
+        return self.data_dir / "llm-settings.json"
+
+    def llm_environ(self) -> dict:
+        return {**os.environ, "AUTOVIDEO_LLM_SETTINGS_FILE": str(self.llm_settings_file)}
+
 
 def probe_config(settings: Settings) -> dict:
-    provider = llm_provider.load(settings.key_file)
-    llm_ready = not provider.error and bool(llm_provider.api_key(provider, settings.key_file))
+    provider = llm_provider.load(settings.key_file, settings.llm_environ())
+    llm_ready = not provider.error and (not provider.needs_key or bool(llm_provider.api_key(provider, settings.key_file, settings.llm_environ())))
     tts_ready = settings.tts_model.is_file() and settings.tts_voices.is_file()
     node_ready = bool(shutil.which("node"))
     renderer_ready = (node_ready and settings.ffmpeg.is_file() and settings.ffprobe.is_file()

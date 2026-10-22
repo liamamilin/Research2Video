@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from pathlib import Path
+import json
+import os
 import re
 from datetime import date as calendar_date
 from typing import Literal
@@ -17,6 +19,7 @@ from starlette.concurrency import run_in_threadpool
 
 from g3.input_documents import DocumentError, MAX_UPLOAD_BYTES, load_import, read_document, save_import
 
+from g2 import llm_provider
 from g2.authored_script import script_text
 from g2.package_kit import PackageConfigError, validate_package
 from g2.voices import VOICE_IDS, SPEEDS, catalog
@@ -287,6 +290,60 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
     def config_status():
         status = preflight(settings)
         return status
+
+    def llm_state():
+        environ = settings.llm_environ()
+        provider = llm_provider.load(settings.key_file, environ)
+        key = llm_provider.api_key(provider, settings.key_file, environ)
+        return provider, key, {
+            "label": provider.label, "base_url": provider.base_url, "model": provider.model, "key_env": provider.key_env,
+            "env_file": provider.env_file, "source": provider.source, "needs_key": provider.needs_key,
+            "key_ready": bool(key) or not provider.needs_key, "error": provider.error,
+        }
+
+    @application.get("/api/config/llm")
+    def get_llm_config():
+        return llm_state()[2]
+
+    def checked_llm_settings(payload: dict):
+        try:
+            return llm_provider.validate_settings(payload)
+        except ValueError as exc:
+            raise _error(422, "LLM_SETTINGS_INVALID", str(exc))
+
+    @application.put("/api/config/llm")
+    def put_llm_config(payload: dict):
+        saved = checked_llm_settings(payload)
+        path = settings.llm_settings_file
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temp = path.with_suffix(".tmp")
+        temp.write_text(json.dumps(saved, ensure_ascii=False, indent=2), encoding="utf-8")
+        os.replace(temp, path)
+        return llm_state()[2]
+
+    @application.delete("/api/config/llm")
+    def reset_llm_config():
+        settings.llm_settings_file.unlink(missing_ok=True)
+        return llm_state()[2]
+
+    @application.post("/api/config/llm/test")
+    def test_llm_config(payload: dict | None = None):
+        """One tiny request to the saved provider (or, with a body, to that candidate without saving it)."""
+        if payload:
+            saved = checked_llm_settings(payload)
+            environ = {**settings.llm_environ(), "AUTOVIDEO_LLM_SETTINGS_FILE": ""}
+            candidate = settings.data_dir / "llm-settings.candidate.json"
+            candidate.parent.mkdir(parents=True, exist_ok=True)
+            candidate.write_text(json.dumps(saved, ensure_ascii=False), encoding="utf-8")
+            try:
+                environ["AUTOVIDEO_LLM_SETTINGS_FILE"] = str(candidate)
+                provider = llm_provider.load(settings.key_file, environ)
+                key = llm_provider.api_key(provider, settings.key_file, environ)
+            finally:
+                candidate.unlink(missing_ok=True)
+        else:
+            provider, key, _ = llm_state()
+        return llm_provider.ping(provider, key)
 
     def check_voice(voice_id):
         if not next((v["available"] for v in catalog(settings.project_root) if v["id"]==voice_id),False):
