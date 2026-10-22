@@ -37,6 +37,9 @@ def test_github_search_and_artificial_analysis_parse():
     assert repos[0].url.startswith("https://github.com/") and "stars" in repos[0].excerpts[0]
     rows = sources.parse_aa_models((FIX / "aa_models.html").read_text(), 10)
     assert len(rows) == 10 and "Intelligence Index" in rows[0].excerpts[0] and "cost per task" in rows[0].excerpts[0]
+    # the rows share one page: de-duplicating by URL (as fetching every source does) must keep all of them
+    from core.search import SearchClient
+    assert len(SearchClient._dedupe(rows)) == 10
 
 
 def test_a_page_that_answers_200_with_no_items_is_a_failure(monkeypatch):
@@ -124,3 +127,10 @@ def test_a_fetch_only_run_never_searches_and_credits_the_fetched_urls(monkeypatc
     assert agent.get_usage()["fetched"] == {"tldr:ai": 12} and agent.get_usage()["searches"] == 0
     with pytest.raises(RuntimeError, match="switched off"):
         agent.search.search(["q"])
+
+
+def test_the_counts_are_the_items_the_model_is_given_not_the_ones_dropped_as_repeats(monkeypatch):
+    same = lambda n: [sources.SearchResult(title=f"t{i}", url="https://x.test/page", excerpts=["e"]) for i in range(n)]  # noqa: E731
+    monkeypatch.setattr(sources, "fetch_source", lambda spec, limit=8, timeout=20: same(5))
+    items, stats = sources.fetch_all_strict(["rss:a"], 8)
+    assert len(items) == 1 and stats == {"rss:a": 1}

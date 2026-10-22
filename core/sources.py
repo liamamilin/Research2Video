@@ -284,8 +284,10 @@ def parse_aa_models(page: str, limit: int) -> list[SearchResult]:
         if len(cells) < 6 or not cells[0]:
             continue
         model, context, creator, index, cost, speed = cells[:6]
+        # one page, many rows: each row needs its own address or the de-duplication by URL keeps only the first
+        anchor = re.sub(r"[^a-z0-9]+", "-", f"{model} {creator}".lower()).strip("-")
         results.append(SearchResult(
-            title=f"{model} ({creator})", url="https://artificialanalysis.ai/leaderboards/models",
+            title=f"{model} ({creator})", url=f"https://artificialanalysis.ai/leaderboards/models#{anchor}",
             excerpts=[f"context window {context}; Artificial Analysis Intelligence Index {index}; "
                       f"cost per task {cost}; median {speed} tokens/s"
                       + (f"; latency to first chunk {cells[6]} s" if len(cells) > 6 else "")
@@ -348,6 +350,7 @@ def fetch_all_strict(sources: list[str], limit_per_source: int = 8,
     collected: list[SearchResult] = []
     stats: dict[str, object] = {}
     failures: dict[str, str] = {}
+    owners: dict[int, str] = {}
     for spec in sources or []:
         try:
             items = fetch_source(spec, limit=limit_per_source, timeout=timeout)
@@ -360,6 +363,12 @@ def fetch_all_strict(sources: list[str], limit_per_source: int = 8,
             continue
         stats[spec] = len(items)
         collected.extend(items)
+        owners.update({id(item): spec for item in items})
     if not collected:
         raise SourcesUnavailableError(failures or {"(无)": "Job 没有声明任何订阅源"})
-    return SearchClient._dedupe(collected), stats
+    kept = SearchClient._dedupe(collected)
+    # the counts are what the model is given: an item another source already supplied (same URL) is not counted twice
+    for spec in stats:
+        if isinstance(stats[spec], int):
+            stats[spec] = sum(1 for item in kept if owners.get(id(item)) == spec)
+    return kept, stats
