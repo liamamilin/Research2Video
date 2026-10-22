@@ -26,6 +26,7 @@ interface ProviderPreset {
   api_key_env: string;
   extra_headers: Record<string, string>;
   models: string[];
+  free_models: string[];
   note: string;
 }
 
@@ -52,8 +53,8 @@ const NOTIFY_EVENTS = [
   ["round_finished", "轮次完成"],
 ] as const;
 
-const LLM_KEYS = ["model", "base_url", "api_key_env", "timeout", "request_timeout",
-  "max_tokens", "temperature", "stream", "extra_headers"];
+const LLM_KEYS = ["model", "fallback_models", "base_url", "api_key_env", "timeout",
+  "request_timeout", "max_tokens", "temperature", "stream", "extra_headers"];
 const EMBED_KEYS = ["embedding_model", "embedding_base_url", "embedding_api_key_env"];
 const SEARCH_KEYS = ["provider", "mode", "api_key_env", "api_key_envs", "max_results",
   "timeout", "fallback_provider", "fallback_providers"];
@@ -212,8 +213,21 @@ export function SystemConfig() {
     return out;
   };
 
+  // `pick()` omits a key the admin cleared entirely (undefined locally), so
+  // the server never learns to delete it and the old value survives a save.
+  // fallback_models is cleared that way (an empty list is sent as none), so
+  // it goes through explicit null instead, same reasoning as review_ai below.
+  const llmPatch = (section: "ai" | "review_ai", keys: string[]) => ({
+    ...pick(parsed?.[section], keys),
+    fallback_models: get([section, "fallback_models"], null) ?? null,
+  });
+
   const buildPatch = () => ({
-    ai: pick(parsed?.ai, [...LLM_KEYS, ...EMBED_KEYS]),
+    ai: llmPatch("ai", [...LLM_KEYS, ...EMBED_KEYS]),
+    // Explicit null (not undefined, which JSON.stringify would drop): an
+    // absent review_ai must actually delete any saved section, not leave a
+    // stale one in place after the "delete this config" button clears it here.
+    review_ai: Object.keys(parsed?.review_ai || {}).length ? llmPatch("review_ai", LLM_KEYS) : null,
     search: pick(parsed?.search, SEARCH_KEYS),
     research: pick(parsed?.research, ["mode", "max_rounds", "max_searches"]),
     budget: pick(parsed?.budget, ["monthly_usd_limit", "warn_ratio", "block_pipeline"]),
@@ -240,6 +254,8 @@ export function SystemConfig() {
       if (typeof resp?.mtime === "number") setMtime(resp.mtime);
       setVersion(resp.version);
       setMessage("保存成功");
+      // a key typed next to its provider (the model card) is saved together with the config that points at it
+      if (Object.values(secretInputs).some(Boolean)) await handleSaveSecrets();
       if (mode === "form") load();
     } catch (err: any) {
       if (err?.code === "conflict") {
@@ -282,7 +298,7 @@ export function SystemConfig() {
     }
   };
 
-  const runTest = async (key: string, path: string, configPatch: any, envName?: string) => {
+  const runTest = async (key: string, path: string, configPatch: any, envName?: string, extra?: Record<string, unknown>) => {
     setTesting(key);
     setError("");
     setTestResults((prev) => ({ ...prev, [key]: null }));
@@ -290,7 +306,7 @@ export function SystemConfig() {
       const typedKey = envName ? secretInputs[envName] || undefined : undefined;
       const result = await api<any>(path, {
         method: "POST",
-        body: { config: configPatch, api_key: typedKey },
+        body: { config: configPatch, api_key: typedKey, ...extra },
       });
       setTestResults((prev) => ({ ...prev, [key]: result }));
     } catch (err: any) {
@@ -336,50 +352,70 @@ export function SystemConfig() {
   if (loading) return <div className="text-sm text-text-muted">加载中...</div>;
 
   const notifyOn: string[] = get(["notifications", "notify_on"], []) || [];
-  const llmEnv = get(["ai", "api_key_env"], "LLM_API_KEY");
   const embedEnv = get(["ai", "embedding_api_key_env"], "");
   const searchProvider = get(["search", "provider"], "parallel");
   const searchEnvMap = get(["search", "api_key_envs"], {}) || {};
   const searchEnv = searchEnvMap[searchProvider] || get(["search", "api_key_env"], "");
 
-  // Which preset the saved base_url corresponds to, or CUSTOM_PROVIDER. Only
-  // read from `parsed` (saved values) for the initial match; the dropdown
-  // selection itself is derived so a manual URL edit flips it to 自定义.
-  const currentBaseUrl = String(get(["ai", "base_url"], "") || "").trim().replace(/\/+$/, "");
-  const matchedProvider = providers.find(
-    (p) => p.base_url.replace(/\/+$/, "").toLowerCase() === currentBaseUrl.toLowerCase());
-  const selectedProvider = currentBaseUrl === "" ? CUSTOM_PROVIDER
-    : (matchedProvider?.id ?? CUSTOM_PROVIDER);
-  const activeProvider = providers.find((p) => p.id === selectedProvider);
-
-  const applyProvider = (id: string) => {
-    const preset = providers.find((p) => p.id === id);
-    if (!preset) return;
-    // base_url, env var name and headers are set together: the whole point is
-    // that these three cannot end up pointing at different vendors.
-    set(["ai", "base_url"], preset.base_url);
-    set(["ai", "api_key_env"], preset.api_key_env);
-    set(["ai", "extra_headers"], Object.keys(preset.extra_headers).length
-      ? preset.extra_headers : undefined);
+  // One LLM section's derived state: ai and review_ai (spec/video-adaptation-audit.md)
+  // are both "one LLMConfig", so ai/review_ai pick the same provider presets
+  // and the same provider/model/fallback UI, just at a different YAML path.
+  const llmSectionState = (section: "ai" | "review_ai" | "extraction") => {
+    const envVar = get([section, "api_key_env"], section === "ai" ? "LLM_API_KEY" : "");
+    // Which preset the saved base_url corresponds to, or CUSTOM_PROVIDER. Only
+    // read from `parsed` (saved values) for the initial match; the dropdown
+    // selection itself is derived so a manual URL edit flips it to 自定义.
+    const currentBaseUrl = String(get([section, "base_url"], "") || "").trim().replace(/\/+$/, "");
+    const matchedProvider = providers.find(
+      (p) => p.base_url.replace(/\/+$/, "").toLowerCase() === currentBaseUrl.toLowerCase());
+    const selectedProvider = currentBaseUrl === "" ? CUSTOM_PROVIDER
+      : (matchedProvider?.id ?? CUSTOM_PROVIDER);
+    const activeProvider = providers.find((p) => p.id === selectedProvider);
+    const applyProvider = (id: string) => {
+      const preset = providers.find((p) => p.id === id);
+      if (!preset) return;
+      // base_url, env var name and headers are set together: the whole point
+      // is that these three cannot end up pointing at different vendors.
+      set([section, "base_url"], preset.base_url);
+      set([section, "api_key_env"], preset.api_key_env);
+      set([section, "extra_headers"], Object.keys(preset.extra_headers).length
+        ? preset.extra_headers : undefined);
+      // the model goes with the provider too: another vendor's model id is a 404 (or worse, a different model), so
+      // keep it only when this provider offers it, else take its free one first; fallbacks likewise
+      const model = String(get([section, "model"], "") || "");
+      const next = preset.models.includes(model) ? model : (preset.free_models[0] ?? preset.models[0] ?? model);
+      if (next !== model) set([section, "model"], next);
+      const fallbacks: string[] = get([section, "fallback_models"], []) || [];
+      set([section, "fallback_models"], fallbacks.filter((m) => preset.models.includes(m) && m !== next));
+    };
+    const fallbackModels: string[] = get([section, "fallback_models"], []) || [];
+    return {
+      envVar, selectedProvider, activeProvider, applyProvider, fallbackModels,
+      envNameIsSecret: looksLikeSecret(String(envVar || "")),
+      envNameIsEmpty: activeProvider ? !activeProvider.api_key_env : false,
+      // this provider's own key slot is empty: the request would go out without a key (a key pasted for another
+      // provider does not count, every provider has its own slot in the 密钥 card)
+      keyMissing: secrets.some((item) => item.env === envVar && !item.configured),
+    };
   };
+  const ai = llmSectionState("ai");
+  const reviewAi = llmSectionState("review_ai");
+  const extractionState = llmSectionState("extraction");
 
   // A key pasted into the env-name field sends an unauthenticated request and
-  // comes back as a bare 401, so flag it in the form before the test even runs.
-  const envNameIsSecret = looksLikeSecret(String(llmEnv || ""));
-  const envNameIsEmpty = activeProvider
-    ? !activeProvider.api_key_env
-    : false;
-
-  const TestButton = ({ id, label, path, configPatch, envName }: {
+  // comes back as a bare 401, so flag it before the test even runs (ai.envNameIsSecret
+  // / reviewAi.envNameIsSecret below).
+  const TestButton = ({ id, label, path, configPatch, envName, extra }: {
     id: string;
     label: string;
     path: string;
     configPatch: any;
     envName?: string;
+    extra?: Record<string, unknown>;
   }) => (
     <div className="flex items-center gap-2">
       <button
-        onClick={() => runTest(id, path, configPatch, envName)}
+        onClick={() => runTest(id, path, configPatch, envName, extra)}
         disabled={testing != null}
         className="btn text-xs"
       >
@@ -389,6 +425,157 @@ export function SystemConfig() {
       <TestBadge state={testResults[id]} testing={testing === id} />
     </div>
   );
+
+  // One LLM provider/model card, used for both ai and review_ai -- see
+  // llmSectionState above and spec/llm-providers.md.
+  const renderLlmSection = (
+    section: "ai" | "review_ai" | "extraction",
+    state: ReturnType<typeof llmSectionState>,
+    opts: {
+      title: string; testId?: string; testLabel?: string; modelPlaceholder: string;
+      envPlaceholder: string; note?: string; onRemove?: () => void;
+      // the cleanup pass only has provider, model, address and key: no fallbacks, timeouts or sampling
+      simple?: boolean; lead?: React.ReactNode;
+    },
+  ) => {
+    const { envVar, selectedProvider, activeProvider, applyProvider, fallbackModels,
+      envNameIsSecret, envNameIsEmpty, keyMissing } = state;
+    const freeModels = activeProvider?.free_models ?? [];
+    return (
+      <Section
+        title={opts.title}
+        action={opts.testId && section !== "extraction" ? (
+          <TestButton
+            id={opts.testId}
+            label={opts.testLabel ?? "测试"}
+            path="/api/config/test-llm"
+            configPatch={{ [section]: llmPatch(section, LLM_KEYS) }}
+            envName={state.envVar}
+            extra={{ section }}
+          />
+        ) : undefined}
+      >
+        {opts.lead}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="服务商" hint="选择后自动填入地址与密钥变量">
+            <div>
+              <select
+                className="input"
+                value={selectedProvider}
+                onChange={(e) => {
+                  if (e.target.value === CUSTOM_PROVIDER) return;
+                  applyProvider(e.target.value);
+                }}
+              >
+                {selectedProvider === CUSTOM_PROVIDER && (
+                  <option value={CUSTOM_PROVIDER}>自定义（当前地址未匹配预设）</option>
+                )}
+                {providers.map((p) => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+          </Field>
+          <Field label="模型 ID" hint={activeProvider?.models.length ? `如 ${activeProvider.models[0]}` : undefined}>
+            <div>{textInput([section, "model"], opts.modelPlaceholder, true)}</div>
+          </Field>
+          {freeModels.length > 0 && (
+            <div className="sm:col-span-2 flex flex-wrap items-center gap-1.5 -mt-1">
+              <span className="text-[11px] text-text-muted">免费模型：</span>
+              {freeModels.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => set([section, "model"], id)}
+                  className="badge border border-border bg-bg-card font-mono text-[11px] hover:bg-bg-hover"
+                >
+                  {id}
+                </button>
+              ))}
+            </div>
+          )}
+          {!opts.simple && (<Field label="付费兜底模型" hint="免费模型额度用尽（计费错误）时按顺序尝试，逗号分隔">
+            <div>
+              <input
+                className="input font-mono text-xs"
+                placeholder="minimax-m3, deepseek-v4.1-flash"
+                value={fallbackModels.join(", ")}
+                onChange={(e) => {
+                  const items = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                  set([section, "fallback_models"], items.length ? items : undefined);
+                }}
+              />
+            </div>
+          </Field>)}
+          <Field label="接口地址" hint="OpenAI 兼容">
+            <div>{textInput([section, "base_url"], "https://.../v1", true)}</div>
+          </Field>
+          <Field label="密钥环境变量" hint="只填变量名，不填密钥">
+            <div>{textInput([section, "api_key_env"], opts.envPlaceholder, true)}</div>
+          </Field>
+          {!opts.simple && (<>
+          <Field label="超时（秒）"><div>{numInput([section, "timeout"], { placeholder: "1800" })}</div></Field>
+          <Field label="单次请求超时（秒）">
+            <div>{numInput([section, "request_timeout"], { placeholder: "600" })}</div>
+          </Field>
+          <Field label="最大输出 tokens">
+            <div>{numInput([section, "max_tokens"], { placeholder: "32768" })}</div>
+          </Field>
+          <Field label="温度" hint="0-2">
+            <div>{numInput([section, "temperature"], { step: "0.1", placeholder: "0.3" })}</div>
+          </Field>
+          <div className="flex items-end">
+            <Toggle label="流式输出（实时进度）"
+              checked={Boolean(get([section, "stream"], true))}
+              onChange={(v) => set([section, "stream"], v)} />
+          </div>
+          </>)}
+        </div>
+        {activeProvider?.note && (
+          <div className="text-[11px] text-text-muted">{activeProvider.note}</div>
+        )}
+        {envNameIsSecret && (
+          <div className="text-[11px] text-danger">
+            “密钥环境变量”里填的是 API Key，不是变量名（如 {opts.envPlaceholder}）。
+            这样请求不会带 Authorization 头，会以 401 invalid_api_key 失败。
+            请把密钥填到上方“API 密钥”卡片。
+          </div>
+        )}
+        {envVar && !envNameIsSecret && secrets.some((item) => item.env === envVar) && (
+          <Field label={`${activeProvider?.label ?? "服务商"}的 API 密钥`} hint={envVar}>
+            <input
+              className="input flex-1 font-mono text-xs"
+              type="password"
+              aria-label={`${envVar} 密钥`}
+              placeholder={(() => {
+                const slot = secrets.find((item) => item.env === envVar);
+                return slot?.configured ? `已配置 · ${slot.masked}（要换就重填）` : "未配置：粘贴这家的密钥";
+              })()}
+              value={secretInputs[envVar] || ""}
+              onChange={(e) => setSecretInputs((prev) => ({ ...prev, [envVar]: e.target.value }))}
+            />
+          </Field>
+        )}
+        {keyMissing && !envNameIsSecret && (
+          <div role="alert" className="text-[11px] text-danger">
+            这个服务商的密钥（{envVar}）还没填：请到“API 密钥”卡片里标着“服务商 · {activeProvider?.label ?? "…"}”的那一行填写并保存。
+            每个服务商各有一行，别填到别家那一行里。
+          </div>
+        )}
+        {envNameIsEmpty && !envNameIsSecret && (
+          <div className="text-[11px] text-text-muted">
+            该服务商无需密钥，保持“密钥环境变量”为空。
+          </div>
+        )}
+        {opts.note && <div className="text-[11px] text-text-muted">{opts.note}</div>}
+        {opts.onRemove && (
+          <button type="button" onClick={opts.onRemove} className="text-[11px] text-text-muted hover:text-danger">
+            删除此配置
+          </button>
+        )}
+      </Section>
+    );
+  };
 
   return (
     <div className="space-y-3">
@@ -502,79 +689,18 @@ export function SystemConfig() {
             </div>
           </Section>
 
-          <Section
-            title="AI 模型（LLM）"
-            action={(
-              <TestButton
-                id="llm"
-                label="测试 LLM"
-                path="/api/config/test-llm"
-                configPatch={{ ai: pick(parsed?.ai, LLM_KEYS) }}
-                envName={llmEnv}
-              />
-            )}
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="服务商" hint="选择后自动填入地址与密钥变量">
-                <div>
-                  <select
-                    className="input"
-                    value={selectedProvider}
-                    onChange={(e) => {
-                      if (e.target.value === CUSTOM_PROVIDER) return;
-                      applyProvider(e.target.value);
-                    }}
-                  >
-                    {selectedProvider === CUSTOM_PROVIDER && (
-                      <option value={CUSTOM_PROVIDER}>自定义（当前地址未匹配预设）</option>
-                    )}
-                    {providers.map((p) => (
-                      <option key={p.id} value={p.id}>{p.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </Field>
-              <Field label="模型 ID" hint={activeProvider?.models.length ? `如 ${activeProvider.models[0]}` : undefined}>
-                <div>{textInput(["ai", "model"], "deepseek-v4.1-flash", true)}</div>
-              </Field>
-              <Field label="接口地址" hint="OpenAI 兼容">
-                <div>{textInput(["ai", "base_url"], "https://.../v1", true)}</div>
-              </Field>
-              <Field label="密钥环境变量" hint="只填变量名，不填密钥">
-                <div>{textInput(["ai", "api_key_env"], "LLM_API_KEY", true)}</div>
-              </Field>
-              <Field label="超时（秒）"><div>{numInput(["ai", "timeout"], { placeholder: "1800" })}</div></Field>
-              <Field label="单次请求超时（秒）">
-                <div>{numInput(["ai", "request_timeout"], { placeholder: "600" })}</div>
-              </Field>
-              <Field label="最大输出 tokens">
-                <div>{numInput(["ai", "max_tokens"], { placeholder: "32768" })}</div>
-              </Field>
-              <Field label="温度" hint="0-2">
-                <div>{numInput(["ai", "temperature"], { step: "0.1", placeholder: "0.3" })}</div>
-              </Field>
-              <div className="flex items-end">
-                <Toggle label="流式输出（实时进度）"
-                  checked={Boolean(get(["ai", "stream"], true))}
-                  onChange={(v) => set(["ai", "stream"], v)} />
-              </div>
-            </div>
-            {activeProvider?.note && (
-              <div className="text-[11px] text-text-muted">{activeProvider.note}</div>
-            )}
-            {envNameIsSecret && (
-              <div className="text-[11px] text-danger">
-                “密钥环境变量”里填的是 API Key，不是变量名（如 LLM_API_KEY）。
-                这样请求不会带 Authorization 头，会以 401 invalid_api_key 失败。
-                请把密钥填到上方“API 密钥”卡片。
-              </div>
-            )}
-            {envNameIsEmpty && !envNameIsSecret && (
-              <div className="text-[11px] text-text-muted">
-                该服务商无需密钥，保持“密钥环境变量”为空。
-              </div>
-            )}
-          </Section>
+          {renderLlmSection("ai", ai, {
+            title: "AI 模型（LLM）", testId: "llm", testLabel: "测试 LLM",
+            modelPlaceholder: "deepseek-v4.1-flash", envPlaceholder: "LLM_API_KEY",
+          })}
+
+          {renderLlmSection("review_ai", reviewAi, {
+            title: "审校模型（review_ai，可选，用于视频文稿审校）", testId: "review-llm",
+            testLabel: "测试审校模型",
+            modelPlaceholder: "deepseek-v4-pro", envPlaceholder: "LLM_API_KEY",
+            note: "不配置（或下面按钮删除）时，视频文稿审校用上面的 AI 模型。",
+            onRemove: get(["review_ai", "model"]) ? () => set(["review_ai"], undefined) : undefined,
+          })}
 
           <VideoModelConfig />
 
@@ -710,14 +836,16 @@ export function SystemConfig() {
             </div>
           </Section>
 
-          <Section title="报告清理（可选）">
-            <Toggle label="启用生成后清理（extraction）"
-              checked={Boolean(get(["extraction", "enabled"], false))}
-              onChange={(v) => set(["extraction", "enabled"], v)} />
-            <div className="text-[11px] text-text-muted">
-              使用较便宜的模型对报告做一次格式清理；一般不需要开启。
-            </div>
-          </Section>
+          {renderLlmSection("extraction", extractionState, {
+            title: "报告清理（可选）", modelPlaceholder: "deepseek-v4-flash", envPlaceholder: "OPENCODE_API_KEY",
+            simple: true,
+            note: "使用较便宜的模型对报告做一次格式清理；一般不需要开启。",
+            lead: (
+              <Toggle label="启用生成后清理（extraction）"
+                checked={Boolean(get(["extraction", "enabled"], false))}
+                onChange={(v) => set(["extraction", "enabled"], v)} />
+            ),
+          })}
         </div>
       )}
     </div>
