@@ -258,6 +258,22 @@ def test_test_llm_can_target_the_review_section(client, secrets_env, monkeypatch
     assert r.json()["model"] == "audit-model"
 
 
+def test_test_llm_tries_the_configured_model_alone_never_its_fallbacks(client, secrets_env, monkeypatch):
+    seen = []
+
+    class Recording(_FakeLLMClient):
+        def __init__(self, cfg):
+            super().__init__(cfg)
+            seen.append(cfg.fallback_models)
+
+    monkeypatch.setattr("web.routes.config.LLMClient", Recording)
+    _login(client)
+    r = client.post("/api/config/test-llm", headers=_csrf(client), json={
+        "section": "review_ai", "config": {"review_ai": {"model": "dead-free", "fallback_models": ["minimax-m3"]}}})
+    assert r.status_code == 200, r.text
+    assert seen == [[]]  # a dead primary answered by its fallback would read as "available"
+
+
 def test_test_llm_rejects_an_unknown_section(client, secrets_env):
     _login(client)
     r = client.post("/api/config/test-llm", json={"section": "search"}, headers=_csrf(client))

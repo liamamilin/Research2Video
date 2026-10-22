@@ -121,7 +121,7 @@ function TestBadge({ state, testing }: { state: any; testing: boolean }) {
       state.ok ? "text-success" : "text-danger")}>
       {state.ok ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
       {state.ok
-        ? `可用 · ${state.latency_ms}ms${state.dims ? ` · ${state.dims} 维` : ""}`
+        ? `可用 · ${state.model ? `${state.model} · ` : ""}${state.latency_ms}ms${state.dims ? ` · ${state.dims} 维` : ""}`
         : state.error || "失败"}
     </span>
   );
