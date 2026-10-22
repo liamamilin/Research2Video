@@ -453,6 +453,20 @@ def test_a_script_the_user_archives_is_not_approved_or_rendered_by_the_pipeline(
     assert store.get_script(script_id)["status"] != "APPROVED" and store.list_renders(script_id) == []
 
 
+def test_archiving_a_script_cancels_its_waiting_item(client, pilot_env, monkeypatch):
+    from tests.test_video_scripts import _csrf, _login
+
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id)
+    ap.update_item(item_of(run["id"], 0)["id"], state="HELD", note="出片失败两次")
+    _login(client)
+    assert client.post(f"/api/video/scripts/{script_id}/archive", headers=_csrf(client)).status_code == 200
+    item = item_of(run["id"], 0)
+    assert item["state"] == "CANCELLED" and "已归档" in item["note"] and ap.held_items() == []
+
+
 def test_held_renders_go_again_once_their_cause_is_fixed_and_only_the_old_failures_are_forgiven(pilot_env, monkeypatch):
     run = batch(monkeypatch, 1)
     pilot.tick()

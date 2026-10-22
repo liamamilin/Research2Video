@@ -532,6 +532,10 @@ def archive_script(script_id: str, body: Optional[ArchiveIn] = None, user=Depend
     if flag and script["status"] in ("RESEARCHING", "WRITING"):
         raise HTTPException(409, detail=ApiError.make("busy", "文稿还在研究或写稿，完成后才能归档"))
     store.update_script(script_id, archived=1 if flag else 0)
+    if flag:
+        from core.video import autopilot_store
+
+        autopilot_store.cancel_open_items(script_id, "文稿已归档，不再继续")  # no "waiting for you" left behind
     audit.log("video_script_archive", user=user["username"], target=script_id, result="archived" if flag else "restored")
     return get_script(script_id, user=user)
 

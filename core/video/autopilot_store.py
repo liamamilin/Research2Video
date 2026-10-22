@@ -202,6 +202,16 @@ def acked_alerts() -> set[str]:
         return {r["key"] for r in conn.execute("SELECT key FROM alert_acks")}
 
 
+def cancel_open_items(script_id: str, note: str) -> int:
+    """Stop the pipeline from carrying on with a script (the user put it away): its unfinished items are cancelled."""
+    with connect() as conn:
+        rows = conn.execute("SELECT id FROM autopilot_items WHERE script_id = ? AND state NOT IN ('DONE', 'FAILED', 'CANCELLED')",
+                            (script_id,)).fetchall()
+    for row in rows:
+        update_item(row["id"], state="CANCELLED", note=note)
+    return len(rows)
+
+
 def used_topic_ids() -> set[str]:
     """Topics already given to a pending or running item, so two batches never pick the same one."""
     with connect() as conn:

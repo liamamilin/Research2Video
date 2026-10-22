@@ -515,7 +515,7 @@ def test_pipeline_passes_a_clean_script_in_five_calls(llm):
     first = adapted.sections[0]["paragraphs"][0]
     assert first["citations"] == [PRICING] and first["evidence"] == "CITED"
     assert adapted.meta["style"]["presets"] == ["intermediate@1", "explainer@2"]
-    assert adapted.meta["prompts"] == {"facts": 2, "plan": 3, "draft": 3, "review": 3}
+    assert adapted.meta["prompts"] == {"facts": 2, "plan": 3, "draft": 4, "review": 3}
     assert adapted.meta["fact_sheet_id"] == facts.sheet_id(REPORT)
     assert adapted.meta["description"]["sources"][0] == {"url": PRICING, "facts": ["F3", "F1", "F2"]}
     assert "批处理命中率在 30% 到 98% 之间" in adapted.meta["description"]["not_covered"]
