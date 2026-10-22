@@ -51,9 +51,9 @@ function looksLikeSecret(value: string): boolean {
 
 // Each search provider's own key variable. ``search.api_key_env`` is Parallel's; the others live in
 // ``search.api_key_envs`` (core/search.py), so switching provider switches which variable is read.
-const SEARCH_PROVIDERS = ["parallel", "exa", "tavily", "brave", "serper", "duckduckgo"];
+const SEARCH_PROVIDERS = ["parallel", "exa", "doubao", "tavily", "brave", "serper", "duckduckgo"];
 const SEARCH_KEY_ENVS: Record<string, string> = {
-  parallel: "PARALLEL_API_KEY", exa: "EXA_API_KEY", tavily: "TAVILY_API_KEY", brave: "BRAVE_API_KEY",
+  parallel: "PARALLEL_API_KEY", exa: "EXA_API_KEY", doubao: "DOUBAO_SEARCH_API_KEY", tavily: "TAVILY_API_KEY", brave: "BRAVE_API_KEY",
   serper: "SERPER_API_KEY",
 };
 

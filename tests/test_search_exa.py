@@ -84,3 +84,42 @@ def test_a_provider_with_its_own_key_variable_never_falls_back_to_the_generic_ke
     with pytest.raises(SearchUnavailableError):
         client.search(["q"])
     assert "EXA_API_KEY" in client.errors["exa"]
+
+
+# --- Doubao search (Volcengine, Global edition) ---------------------------------------------------------------
+
+def test_doubao_posts_one_phrase_per_request_with_a_bearer_key(monkeypatch):
+    sent = []
+
+    def fake_open(request, timeout=None):
+        sent.append((request.full_url, dict(request.header_items()), json.loads(request.data)))
+        return _Reply({"ResponseMetadata": {"RequestId": "r"}, "Result": {"ErrorCode": 0, "Documents": [
+            {"Rank": 0, "Url": "https://d.test/a", "Title": "T",
+             "Snippet": [{"Type": "text", "Text": "正文"}, {"Type": "image", "Image": {}}],
+             "DocumentInfo": {"PublishTime": "2026-10-20 08:00:00"}}]}})
+
+    monkeypatch.setattr("core.search.urllib.request.urlopen", fake_open)
+    hits = SearchClient(_config(provider="doubao", api_keys={"doubao": "db-key"}, max_results=50)).search(["x" * 150, "second"])
+    url, headers, body = sent[0]
+    assert url == "https://open.feedcoopapi.com/search_api/global_search" and headers["Authorization"] == "Bearer db-key"
+    assert len(body["Query"]) == 100 and body["SearchType"] == "web" and body["DocCount"] == 20  # the API's caps
+    assert len(sent) == 2 and hits[0].excerpts == ["正文"] and hits[0].publish_date == "2026-10-20" and hits[0].provider == "doubao"
+
+
+@pytest.mark.parametrize("body, shown", [
+    ({"ResponseMetadata": {"Error": {"Code": "700901", "Message": "invalid"}}, "Result": None}, "API Key 无效"),
+    ({"ResponseMetadata": {}, "Result": {"ErrorCode": 10412, "ErrorMsg": "no quota", "Documents": []}}, "搜索额度不足"),
+])
+def test_doubao_errors_arrive_as_http_200_and_are_not_an_empty_result(monkeypatch, body, shown):
+    monkeypatch.setattr("core.search.urllib.request.urlopen", lambda request, timeout=None: _Reply(body))
+    client = SearchClient(_config(provider="doubao", api_keys={"doubao": "k"}))
+    with pytest.raises(SearchUnavailableError):
+        client.search(["q"])
+    assert shown in client.errors["doubao"]
+
+
+def test_doubao_without_a_key_names_the_variable():
+    client = SearchClient(_config(provider="doubao", api_keys={}, key_envs={"doubao": "DOUBAO_SEARCH_API_KEY"}))
+    with pytest.raises(SearchUnavailableError):
+        client.search(["q"])
+    assert "DOUBAO_SEARCH_API_KEY" in client.errors["doubao"]

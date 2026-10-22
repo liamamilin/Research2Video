@@ -40,6 +40,8 @@ from .errors import CancelledError, SearchUnavailableError
 logger = logging.getLogger(__name__)
 
 _PARALLEL_ENDPOINT = "https://api.parallel.ai/v1/search"
+_DOUBAO_ENDPOINT = "https://open.feedcoopapi.com/search_api/global_search"
+_DOUBAO_QUERY_CHARS = 100  # the API truncates longer queries and takes one phrase per request
 _MAX_QUERIES = 5
 _MAX_QUERY_CHARS = 200
 _MAX_OBJECTIVE_CHARS = 5000
@@ -182,6 +184,8 @@ class SearchClient:
                     )
                 elif provider == "exa":
                     results = self._search_exa(queries, after_date=after_date)
+                elif provider == "doubao":
+                    results = self._search_doubao(queries)
                 elif provider == "tavily":
                     results = self._search_tavily(queries, objective)
                 elif provider == "brave":
@@ -288,14 +292,14 @@ class SearchClient:
         return results
 
     def _post_json(self, url: str, payload: dict, api_key: Optional[str] = None,
-                   header_name: str = "x-api-key") -> dict:
+                   header_name: str = "x-api-key", auth_prefix: str = "") -> dict:
         data = json.dumps(payload).encode("utf-8")
         headers = {
             "Content-Type": "application/json",
             "User-Agent": "BaseCodingCLi/2.0",
         }
         if api_key:
-            headers[header_name] = api_key
+            headers[header_name] = f"{auth_prefix}{api_key}"
         req = urllib.request.Request(url, data=data, headers=headers, method="POST")
         try:
             with urllib.request.urlopen(
@@ -357,6 +361,59 @@ class SearchClient:
                     publish_date=(item.get("publishedDate") or "")[:10] or None,
                     excerpts=[item.get("text") or "", *(item.get("highlights") or [])],
                     provider="exa",
+                ))
+        return results
+
+    #: Doubao search error codes worth saying in words (the rest are shown as the API's own message)
+    _DOUBAO_ERRORS = {
+        "10403": "账号或权限错误，检查 Key 和服务开通状态",
+        "10408": "服务未付费开通",
+        "10410": "没有可用的搜索套餐",
+        "10412": "搜索额度不足",
+        "700429": "请求太频繁（超过 10 QPS）",
+        "700901": "API Key 无效",
+    }
+
+    def _search_doubao(self, queries: list[str]) -> list[SearchResult]:
+        """Doubao search, Global edition (Volcengine, pay-as-you-go; 500 free calls a month per account).
+
+        One phrase per request, ``Authorization: Bearer``. Errors come back as HTTP 200 with the code in the body, so
+        both places are checked: an empty list from a rejected key would read as "nothing found".
+        """
+        key = self._provider_key("doubao")
+        self._progress({"type": "search", "provider": "doubao", "queries": queries})
+        logger.info("Searching (doubao): %s", "; ".join(queries))
+
+        results: list[SearchResult] = []
+        for query in queries[:3]:
+            if self._cancel.is_set():
+                raise CancelledError("Cancelled during search")
+            body = self._post_json(
+                _DOUBAO_ENDPOINT,
+                {
+                    "Query": query[:_DOUBAO_QUERY_CHARS],
+                    "SearchType": "web",
+                    "DocCount": max(1, min(self.config.max_results, 20)),
+                    "MaxSnippetLength": max(100, min(self.config.max_chars_per_result, 1000)),
+                    "MaxImageCountPerDoc": 0,
+                },
+                api_key=key, header_name="Authorization", auth_prefix="Bearer ",
+            )
+            error = (body.get("ResponseMetadata") or {}).get("Error") or {}
+            result = body.get("Result") or {}
+            code = str(error.get("Code") or (result.get("ErrorCode") or "") or "")
+            if code and code != "0":
+                message = error.get("Message") or result.get("ErrorMsg") or ""
+                raise RuntimeError(f"{code} {self._DOUBAO_ERRORS.get(code, '')} {message}".replace("  ", " ").strip())
+            for item in result.get("Documents") or []:
+                texts = [(s.get("Text") or "").strip() for s in item.get("Snippet") or [] if s.get("Type") == "text"]
+                info = item.get("DocumentInfo") or {}
+                results.append(SearchResult(
+                    title=item.get("Title") or "",
+                    url=item.get("Url") or "",
+                    publish_date=(info.get("PublishTime") or "")[:10] or None,
+                    excerpts=[t for t in texts if t],
+                    provider="doubao",
                 ))
         return results
 
