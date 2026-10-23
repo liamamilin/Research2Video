@@ -478,3 +478,140 @@ def test_a_key_pasted_into_the_env_field_is_logged_as_such(caplog):
                    "api_key_env": "sk-amr-pasted"}})
     assert cfg.api_key == ""
     assert any("not an environment-variable name" in r.message for r in caplog.records)
+
+
+# --- falling back for more than an empty account -----------------------------
+
+class FakeBodyError(Exception):
+    """An error with a status and the provider's own words, like the 410 ``ModelDeprecated`` that ended
+    minimax-m3.1-flash-free on 2026-10-23."""
+
+    def __init__(self, status: int, text: str):
+        super().__init__(text)
+        self.status_code = status
+        self.response = types.SimpleNamespace(status_code=status, headers={})
+
+
+@pytest.mark.parametrize("status,text", [
+    (410, "ModelDeprecated: Model x has been deprecated."),
+    (401, "invalid_api_key for this model"),
+    (403, "your plan cannot use this model"),
+    (404, "model not found"),
+    (400, "The model `x` does not exist"),
+    (422, "Unknown model: x"),
+])
+def test_a_model_the_endpoint_will_not_serve_falls_back(status, text, monkeypatch):
+    client = make_client(model="old", fallback_models=["new"])
+    calls: list[str] = []
+
+    def answer(_messages, **_kw):
+        calls.append(client._active_model())
+        if client._active_model() == "old":
+            raise FakeBodyError(status, text)
+        return reply("from new")
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
+    assert client.chat([{"role": "user", "content": "x"}]).content == "from new"
+    assert calls == ["old", "new"]  # one call each, no backoff on a model that cannot recover
+    assert client.model_switches[0]["from"] == "old" and client.model_switches[0]["to"] == "new"
+
+
+def test_a_bad_request_or_a_tool_complaint_is_not_a_reason_to_switch(monkeypatch):
+    for status, text in ((400, "messages: field required"), (422, "temperature must be <= 2")):
+        client = make_client(model="old", fallback_models=["new"])
+        calls: list[str] = []
+
+        def answer(_messages, **_kw):
+            calls.append(client._active_model())
+            raise FakeBodyError(status, text)
+
+        monkeypatch.setattr(client, "_chat_cancellable", answer)
+        with pytest.raises(LLMError):
+            client.chat([{"role": "user", "content": "x"}])
+        assert calls == ["old"]  # every model would reject it the same way
+    client = make_client(model="old", fallback_models=["new"])
+    monkeypatch.setattr(client, "_chat_cancellable",
+                        lambda _m, **_k: (_ for _ in ()).throw(FakeBodyError(400, "this model does not support tool_choice")))
+    with pytest.raises(LLMUnsupportedError):
+        client.chat([{"role": "user", "content": "x"}])
+    assert client._active_model() == "old"
+
+
+def test_every_model_refusing_the_key_names_them_all(monkeypatch):
+    client = make_client(model="a", fallback_models=["b", "c"])
+    calls = {"n": 0}
+
+    def answer(_messages, **_kw):
+        calls["n"] += 1
+        raise FakeBodyError(401, "invalid_api_key")
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    with pytest.raises(LLMError) as caught:
+        client.chat([{"role": "user", "content": "x"}])
+    assert calls["n"] == 3
+    for model in ("a", "b", "c"):
+        assert model in str(caught.value)
+
+
+def test_a_model_that_keeps_failing_transiently_hands_over_to_the_next(monkeypatch):
+    client = make_client(model="flaky", fallback_models=["steady"], max_retries=2)
+    calls: list[str] = []
+
+    def answer(_messages, **_kw):
+        calls.append(client._active_model())
+        if client._active_model() == "flaky":
+            raise FakeAPIStatusError(503)
+        return reply("ok")
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
+    assert client.chat([{"role": "user", "content": "x"}]).content == "ok"
+    assert calls == ["flaky"] * 3 + ["steady"]  # its own retry budget first, then the fallback
+    assert client.model_switches[0]["reason"] == "重试用尽仍失败"
+
+
+def test_transient_failures_without_a_fallback_still_end_after_the_retry_budget(monkeypatch):
+    client = make_client(model="only", max_retries=2)
+    calls = {"n": 0}
+
+    def boom(_messages, **_kw):
+        calls["n"] += 1
+        raise FakeAPIStatusError(503)
+
+    monkeypatch.setattr(client, "_chat_cancellable", boom)
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
+    with pytest.raises(LLMError):
+        client.chat([{"role": "user", "content": "x"}])
+    assert calls["n"] == 3
+
+
+def test_an_empty_reply_is_retried_and_then_handed_to_the_next_model(monkeypatch):
+    client = make_client(model="silent", fallback_models=["talker"], max_retries=1)
+    calls: list[str] = []
+
+    def answer(_messages, **_kw):
+        calls.append(client._active_model())
+        return reply("") if client._active_model() == "silent" else reply("words")
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
+    assert client.chat([{"role": "user", "content": "x"}]).content == "words"
+    assert calls == ["silent", "silent", "talker"]
+
+
+def test_an_empty_reply_that_is_a_tool_call_or_a_truncation_is_not_an_empty_reply(monkeypatch):
+    client = make_client(model="m", fallback_models=["n"])
+    call = ToolCall(id="1", name="search", arguments={})
+    for response in (reply("", tool_calls=[call]), reply("", finish_reason="length")):
+        monkeypatch.setattr(client, "_chat_cancellable", lambda _m, _r=response, **_k: _r)
+        assert client.chat([{"role": "user", "content": "x"}]) is response
+    assert client._active_model() == "m"
+
+
+def test_an_empty_reply_from_every_model_fails_and_says_so(monkeypatch):
+    client = make_client(model="a", fallback_models=["b"], max_retries=0)
+    monkeypatch.setattr(client, "_chat_cancellable", lambda _m, **_k: reply(""))
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
+    with pytest.raises(LLMError, match="a, b"):
+        client.chat([{"role": "user", "content": "x"}])

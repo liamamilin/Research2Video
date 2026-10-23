@@ -354,7 +354,10 @@ class ResearchAgent:
     def get_usage(self) -> dict:
         """Return LLM/search consumption accumulated by this run."""
         usage = dict(self.llm.usage)
-        usage["model"] = self.llm.config.model
+        usage["model"] = self.llm._active_model()  # the one that answered: a fallback when the configured one failed
+        switches = getattr(self.llm, "model_switches", None)
+        if switches:
+            usage["model_switches"] = list(switches)
         usage["searches"] = self.search.calls
         if self.fetched:
             usage["fetched"] = dict(self.fetched)

@@ -47,7 +47,13 @@ _RETRYABLE_NAMES = {
     "APITimeoutError",
     "InternalServerError",
     "RateLimitError",
+    "EmptyReplyError",
 }
+
+
+class EmptyReplyError(Exception):
+    """The model answered with nothing at all (no text, no tool call): retried like a transient failure, and when it
+    keeps happening the next fallback model takes over."""
 #: Provider error codes that mean the connection broke, not that the request
 #: was wrong. Seen live: a gateway reported a reset mid-stream as a plain
 #: APIError with no HTTP status, so neither check above caught it.
@@ -57,6 +63,13 @@ _RETRYABLE_CODES = {"upstream_stream_interrupted"}
 #: (or cheaper) model or a top-up does. Seen live from an OpenAI-compatible
 #: gateway: ``{"code": "insufficient_balance", "details": {"coding_plan_exhausted": true}}``.
 _QUOTA_EXHAUSTED_CODES = {"insufficient_balance", "quota_exhausted"}
+#: Statuses that say "this model cannot serve you", not "the request was wrong": the key is refused for it (401/403),
+#: or it is gone (404 not found, 410 deprecated). Another model on the same endpoint may still answer.
+_MODEL_REFUSED_STATUS = {401: "鉴权被拒绝", 403: "没有权限使用它", 404: "不存在", 410: "已下线"}
+#: A 400/422 whose text blames the model itself (never a tool-calling complaint: that is LLMUnsupportedError).
+_MODEL_UNUSABLE_WORDS = ("deprecated", "model_not_found", "modeldeprecated", "model not found", "unknown model",
+                         "invalid model", "model is not available", "model not available", "does not exist",
+                         "not supported model", "model is not supported", "no longer available", "decommissioned")
 
 
 @dataclass
@@ -275,7 +288,7 @@ class LLMClient:
 
             try:
                 if use_stream:
-                    return self._chat_cancellable(
+                    response = self._chat_cancellable(
                         messages,
                         _stream=True,
                         tools=tools,
@@ -284,13 +297,17 @@ class LLMClient:
                         temperature=temperature,
                         max_tokens=max_tokens,
                     )
-                return self._chat_cancellable(
-                    messages,
-                    tools=tools,
-                    tool_choice=tool_choice,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                )
+                else:
+                    response = self._chat_cancellable(
+                        messages,
+                        tools=tools,
+                        tool_choice=tool_choice,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                if self._is_empty_reply(response):
+                    raise EmptyReplyError("模型返回了空内容")
+                return response
             except (CancelledError, LLMUnsupportedError):
                 raise
             except Exception as exc:
@@ -298,23 +315,19 @@ class LLMClient:
                 if emitted:
                     raise self._classify(exc) from exc
                 if not self._is_retryable(exc):
-                    if self._is_quota_exhausted(exc):
-                        previous_model = self._active_model()
-                        if self._advance_model():
-                            logger.warning(
-                                "LLM model %r is out of quota/balance, switching to "
-                                "fallback %r: %s",
-                                previous_model,
-                                self._active_model(),
-                                self._short(exc),
-                            )
-                            attempt = 0  # the new model gets its own transient-retry budget
-                            continue
+                    reason = self._model_unusable_reason(exc)
+                    if reason and self._switch_model(reason, exc):
+                        attempt = 0  # the new model gets its own transient-retry budget
+                        continue
                     raise self._classify(exc) from exc
                 attempt += 1
                 if attempt > self.config.max_retries:
+                    # this model kept failing on its own budget: try the next one before giving up
+                    if self._switch_model("重试用尽仍失败", exc):
+                        attempt = 0
+                        continue
                     raise LLMError(
-                        f"LLM call failed after {attempt} attempts: {exc}"
+                        f"LLM call failed after {attempt} attempts{self._tried()}: {exc}"
                     ) from exc
                 delay = min(2 ** attempt + random.random(), 30.0)
                 logger.warning(
@@ -365,6 +378,51 @@ class LLMClient:
             return True
         lowered = self._short(exc, 500).lower()
         return "insufficient balance" in lowered or "insufficient_balance" in lowered or "credit" in lowered
+
+    def _model_unusable_reason(self, exc: Exception) -> str:
+        """Why this model cannot serve the request, or ``""`` when a different model would not help.
+
+        Switching models is for failures that belong to the model or to the account's access to it: out of quota
+        (402 or a balance message), key refused (401/403), model missing or deprecated (404/410, or a 400/422 that
+        blames the model). A bad request, a tool-calling complaint or a content problem fails the same way on every
+        model, so those are not in here."""
+        if self._is_quota_exhausted(exc):
+            return "额度或余额用完"
+        status = getattr(exc, "status_code", None)
+        text = self._short(exc, 500).lower()
+        if status in _MODEL_REFUSED_STATUS:
+            return _MODEL_REFUSED_STATUS[status]
+        if status in (400, 422) and not ("tool" in text or "function" in text) and any(w in text for w in _MODEL_UNUSABLE_WORDS):
+            return "不可用"
+        if status is None and any(w in text for w in ("deprecated", "model_not_found")):
+            return "已下线或不存在"
+        return ""
+
+    def _switch_model(self, reason: str, exc: Exception) -> bool:
+        """Move to the next fallback model for ``reason``; False (and nothing changes) when none is left."""
+        previous = self._active_model()
+        if not self._advance_model():
+            return False
+        logger.warning("LLM model %r %s, switching to fallback %r: %s", previous, reason, self._active_model(),
+                       self._short(exc))
+        if not hasattr(self, "model_switches"):
+            self.model_switches = []
+        self.model_switches.append({"from": previous, "to": self._active_model(), "reason": reason})
+        return True
+
+    def _tried(self) -> str:
+        """`` (tried: a, b)`` once a fallback was used, so a final error names every model it went through."""
+        models = self._model_list()
+        if len(models) < 2:
+            return ""
+        return f" (tried: {', '.join(models[: getattr(self, '_model_idx', 0) + 1])})"
+
+    @staticmethod
+    def _is_empty_reply(response: "ChatResponse") -> bool:
+        """No text and no tool call although the model stopped on its own: it produced nothing to use. A reply cut off
+        by the token limit is a different failure and is reported as one downstream."""
+        return (not (response.content or "").strip() and not response.tool_calls
+                and (response.finish_reason or "stop") == "stop")
 
     def close(self) -> None:
         """Close the underlying HTTP client."""
@@ -716,7 +774,7 @@ class LLMClient:
                 f"Endpoint/model does not support tool calling: {text}"
             )
         if status in (401, 403):
-            return LLMError(self._auth_message(status, text))
+            return LLMError(self._auth_message(status, text) + self._tried())
         if self._is_quota_exhausted(exc):
             models_tried = self._model_list()[: getattr(self, "_model_idx", 0) + 1]
             tried = f" (tried: {', '.join(models_tried)})" if len(self._model_list()) > 1 else ""
@@ -729,7 +787,7 @@ class LLMClient:
                 f"Check ai.model='{self._active_model()}' and ai.base_url="
                 f"'{self.config.base_url}'"
             )
-        return LLMError(f"LLM call failed: {text}")
+        return LLMError(f"LLM call failed{self._tried()}: {text}")
 
     def _auth_message(self, status: int, text: str) -> str:
         """Explain an auth failure, including *why* no key was sent.
