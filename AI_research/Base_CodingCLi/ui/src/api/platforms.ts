@@ -1,4 +1,5 @@
 import { api } from "./client";
+import type { PublishAdaptationResult } from "@/lib/publish-text";
 
 export const PLATFORM_API = "/api/platforms/bilibili";
 export type BilibiliCategory = { tid: number; name: string; path: string; description: string };
@@ -8,7 +9,7 @@ export type FirstComment = { enabled: boolean; text: string; pin: boolean };
 export const EMPTY_FIRST_COMMENT: FirstComment = { enabled: false, text: "", pin: false };
 export type PlatformSettings = { auto_upload: boolean; sync_comments: boolean; tid: number; auto_since?: number; first_comment?: FirstComment };
 export type UploadPayload = { render_id: string; title: string; description: string; tags: string[]; tid: number; first_comment?: FirstComment };
-export type UploadPreview = UploadPayload & { warnings: string[]; credibility: { text: string }; freshness_warnings: string[]; existing_upload?: UploadTask | null };
+export type UploadPreview = UploadPayload & { adaptation?: PublishAdaptationResult; account_uid?: string; draft?: { payload: Partial<UploadPayload>; render_id: string } | null; warnings: string[]; credibility: { text: string }; freshness_warnings: string[]; existing_upload?: UploadTask | null };
 export type UploadTask = { id: string; render_id: string; script_id: string; version: number; status: string; bvid: string; error: string; created_at: number; payload: UploadPayload;
   first_comment_status?: string; first_comment_rpid?: string; first_comment_error?: string; first_comment_pin_status?: string; first_comment_pin_error?: string };
 export type PlatformComment = { bvid: string; rpid: string; root: string; author: string; message: string; ctime: number; likes: number; status: string; draft: string; reply: string; reply_rpid: string; error: string };

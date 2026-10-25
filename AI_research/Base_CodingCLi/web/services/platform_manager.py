@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 from core.platform_store import PlatformStore
-from core.video import credibility, store as video_store
+from core.video import content_guard, credibility, store as video_store
 from web.services import bilibili, video_render
 from web.settings import get_settings
 
@@ -52,6 +52,16 @@ def account_lock():
         yield
 
 
+@contextmanager
+def identity_lock():
+    """Serialize short credential mutations and enqueues without blocking behind a video upload."""
+    folder = directory()
+    folder.mkdir(parents=True, exist_ok=True)
+    with (folder / "identity.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        yield
+
+
 def account() -> dict:
     data = credentials()
     path = directory() / "account.json"
@@ -67,7 +77,7 @@ def connect(data: dict) -> dict:
     mid = str(normalized["token_info"]["mid"])
     if profile["uid"] != mid:
         raise Error("凭证的账号 ID 与验证结果不一致。")
-    with account_lock():
+    with account_lock(), identity_lock():
         # Pause before replacing either part of the account, under the worker's own lock.
         patch = {"auto_upload": False, "sync_comments": False}
         if account().get("uid") != profile["uid"]:
@@ -89,7 +99,7 @@ def verify() -> dict:
 
 
 def disconnect() -> None:
-    with account_lock():
+    with account_lock(), identity_lock():
         store().save_settings({"auto_upload": False, "sync_comments": False,
                                "first_comment": {"enabled": False, "text": "", "pin": False}})
         for name in ("credentials.json", "account.json", "login.json"):
@@ -140,6 +150,8 @@ def eligible(render_id: str, *, automatic: bool = False) -> tuple[dict, dict, di
     script = video_store.get_script(render["script_id"]) if render else None
     if not render or render["status"] != "COMPLETED" or not script:
         raise Error("请选择已完成的成片。")
+    if reason := content_guard.publishing_block(script):
+        raise Error(reason)
     if automatic and (script.get("archived") or script["status"] != "APPROVED" or
                       script.get("approved_version") != render["version"] or script.get("current_version") != render["version"]):
         raise Error("自动投稿只处理未归档文稿的当前定稿成片。")
@@ -152,16 +164,20 @@ def eligible(render_id: str, *, automatic: bool = False) -> tuple[dict, dict, di
 
 
 def preview(render_id: str) -> dict:
+    from web.services.distributions import preview_draft
     render, script, version = eligible(render_id)
     pack = video_render.publish_pack(script, version, column_for(script), render_id=render_id)
+    from core.video.platform_publish import adapt
+    from core.social.publish_text import default_comment
+    adaptation = adapt(pack, "bilibili")
     warnings = list(pack["warnings"])
     if script.get("archived"):
         warnings.append("这篇文稿已归档，仍可手动投稿已有成片。")
     if script.get("current_version") != render["version"]:
         warnings.append(f"本次投稿使用 v{render['version']} 成片；文稿当前为 v{script['current_version']}，请确认选中了需要的版本。")
-    return {"render_id": render["id"], "title": pack["title"], "description": pack["description"],
-            "tags": pack["tags"], "tid": store().settings()["tid"], "warnings": warnings,
-            "first_comment": store().settings()["first_comment"],
+    return {**preview_draft(render, "bilibili"), "render_id": render["id"], **adaptation["payload"],
+            "adaptation": adaptation, "tid": store().settings()["tid"], "warnings": warnings,
+            "first_comment": default_comment(store().settings()["first_comment"]),
             "freshness_warnings": pack.get("freshness", {}).get("warnings", []),
             "credibility": credibility.label(version),
             "existing_upload": next((u for u in script_uploads(script["id"]) if u["version"] == render["version"]), None)}
@@ -183,11 +199,13 @@ def upload_task(task_id: str) -> dict:
 
 def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
     owner = uid()
+    if payload.get("account_uid") and payload["account_uid"] != owner:
+        raise Error("登录账号已改变，请刷新页面后重试。")
     render, script, version = eligible(render_id, automatic=automatic)
     existing = next((u for u in script_uploads(script["id"]) if u["version"] == render["version"]), None)
     if existing:
         return existing
-    if any(p["platform"] == "bilibili" and p["version"] == render["version"] for p in video_store.list_publications(script["id"])):
+    if video_store.has_publication(script["id"], render["version"], "bilibili", owner):
         raise Error("这个版本已经记录发布，请先查看文稿中的发布记录。")
     if not bilibili.biliup_binary():
         raise Error("未找到 biliup；安装后才能加入投稿队列。")
@@ -196,13 +214,24 @@ def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
     if not 1 <= len(title) <= 80 or not 1 <= len(tags) <= 10 or any(len(t) > 20 or "," in t for t in tags):
         raise Error("标题需为 1–80 字；标签需为 1–10 个，每个不超过 20 字且不能含逗号。")
     description = str(payload.get("description", ""))
+    from core.video.platform_publish import inspect
+    preflight = inspect("bilibili", {"title": title, "description": description, "tags": tags})
+    if not preflight["valid"]:
+        raise Error("；".join(preflight["issues"]))
+    if automatic and not payload.get("adaptation", {}).get("check", {}).get("valid", True):
+        raise Error("平台发布文案仍需人工整理，请查看发布包。")
     if len(description) > 2000 or not 1 <= int(payload.get("tid") or 0) <= 65535:
         raise Error("简介最多 2000 字，并且需要选择投稿分区。")
     cover = next((p for name in ("cover.png", "cover.jpg") if (p := video_render.safe_file(render, name))), None)
     clean = {"title": title, "tags": tags, "description": description, "tid": int(payload["tid"]),
              "cover": str(cover.resolve()) if cover else "", "automatic": automatic,
              "first_comment": clean_first_comment(payload.get("first_comment", {}))}
-    return store().enqueue(owner, render, clean)
+    if automatic:  # tick already owns the same worker lock
+        return store().enqueue(owner, render, clean)
+    with identity_lock():
+        if uid() != owner:
+            raise Error("登录账号已改变，请刷新页面后重试。")
+        return store().enqueue(owner, render, clean)
 
 
 def clean_first_comment(value: dict) -> dict:
@@ -229,10 +258,12 @@ def candidate_catalog() -> tuple[list[dict], dict]:
     with video_store.connect() as conn:
         rows = conn.execute("SELECT r.id AS render_id,r.script_id,r.version,r.title,r.completed_at,r.artifacts,"
             "s.current_version,s.approved_version,s.status AS script_status,s.archived,"
+            f"({content_guard.PUBLISHABLE_SQL}) AS publishable,"
             "EXISTS(SELECT 1 FROM publications p WHERE p.script_id=r.script_id AND p.version=r.version "
-            "AND p.platform='bilibili') AS published FROM renders r JOIN scripts s ON s.id=r.script_id "
+            "AND p.platform='bilibili' AND (p.account_uid=? OR p.account_uid='')) AS published FROM renders r JOIN scripts s ON s.id=r.script_id "
             "JOIN script_versions v ON v.script_id=r.script_id AND v.version=r.version "
-            "WHERE r.status='COMPLETED' ORDER BY r.completed_at DESC,r.created_at DESC,r.id DESC").fetchall()
+            "WHERE r.status='COMPLETED' "
+            "ORDER BY r.completed_at DESC,r.created_at DESC,r.id DESC", (current,)).fetchall()
     stats = {"completed_renders": len(rows), "available_versions": 0, "published_versions": 0,
              "queued_versions": 0, "unavailable_versions": 0, "ready_versions": 0}
     all_versions = {(row["script_id"], row["version"]) for row in rows}
@@ -250,7 +281,7 @@ def candidate_catalog() -> tuple[list[dict], dict]:
             stats["published_versions"] += 1
         elif key in queued:
             stats["queued_versions"] += 1
-        else:
+        elif row["publishable"]:
             result.append({k: row[k] for k in ("render_id", "script_id", "version", "title", "completed_at",
                                              "current_version", "approved_version", "script_status", "archived")})
     stats["unavailable_versions"] = len(all_versions - available)
@@ -335,7 +366,8 @@ def reconcile(task_id: str, bvid: str) -> dict:
         published_at = datetime.now().astimezone()
     video_store.add_publication(row["script_id"], version=row["version"], render_id=row["render_id"],
         url=url, published_on=published_at.date().isoformat(), title=info.get("title") or row["payload"]["title"],
-        note="平台管理确认视频已公开，自动回写发布记录。", recorded_by="platform-manager")
+        note="平台管理确认视频已公开，自动回写发布记录。", recorded_by="platform-manager",
+        account_uid=row["uid"], account_name=account().get("name", ""))
     db.update_upload(task_id, status="PUBLISHED", bvid=bvid)
     return db.get_upload(task_id)
 
@@ -424,7 +456,7 @@ def tick() -> None:
             task = queued[0]
             try:
                 render, _, _ = eligible(task["render_id"], automatic=bool(task["payload"].get("automatic")))
-                if any(p["platform"] == "bilibili" and p["version"] == task["version"] for p in video_store.list_publications(task["script_id"])):
+                if video_store.has_publication(task["script_id"], task["version"], "bilibili", owner):
                     raise Error("这个版本已经补录发布，已停止重复投稿。")
                 verify()
                 if not bilibili.biliup_binary():

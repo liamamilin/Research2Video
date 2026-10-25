@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -191,6 +191,21 @@ afterEach(() => {
 });
 
 describe("Video script review", () => {
+  it("keeps polling a social UNKNOWN task and receives its automatic publication record", async () => {
+    const distribution={platform:"kuaishou",script_id:"s1",version:1,account_uid:"owner",account_name:"测试作者",connected:true,current_account:true,status:"UNKNOWN",can_prepare:false,blocked_reason:"",draft:null,publications:[],task:{id:"task",status:"UNKNOWN",error:"",work_id:"",render_id:"r",updated_at:1}};
+    mockApi({...DETAIL,distributions:[distribution]});
+    const timers=vi.spyOn(window,"setInterval");
+    try {
+      renderPage();
+      await screen.findByText("一个时间戳让缓存折扣失效");
+      const refresh=timers.mock.calls.find(([,milliseconds]) => milliseconds===5000)?.[0];
+      expect(typeof refresh).toBe("function");
+      mockApi({...DETAIL,version_shown:{...DETAIL.version_shown,title:"已收到自动发布回执"},distributions:[{...distribution,status:"PUBLISHED",task:{...distribution.task,status:"PUBLISHED",work_id:"3xexactwork"},publications:[{id:"pub",version:1,platform:"kuaishou",account_uid:"owner",url:"https://www.kuaishou.com/short-video/3xexactwork",confirmed_at:"2026-10-25T17:00:00+0800"}]}]});
+      await act(async () => {if(typeof refresh==="function") refresh();});
+      await screen.findByText("已收到自动发布回执");
+      expect(calls.every(call => call.method==="GET")).toBe(true);
+    } finally {timers.mockRestore();}
+  });
   it("starts rewriting from the prominent entry only after its scope is accepted", async () => {
     vi.stubGlobal("confirm", vi.fn(() => false));
     renderPage();
@@ -276,8 +291,8 @@ describe("Script version context", () => {
       { id: "p1", version: 1, url: "https://www.bilibili.com/video/BV1xx411c7mD", published_on: "2026-10-24", recorded_by: "platform-manager" },
     ] });
     renderPage("/video/s1?tab=publish");
-    expect(await screen.findByText("已发布")).toBeTruthy();
-    expect(await screen.findByText("平台自动回写")).toBeTruthy();
+    expect(await screen.findByText("已发布至 1 个平台")).toBeTruthy();
+    expect(await screen.findByText("平台自动确认")).toBeTruthy();
     expect(screen.queryByRole("link", { name: "投稿到哔哩哔哩" })).toBeNull();
   });
 
@@ -286,7 +301,7 @@ describe("Script version context", () => {
       renders: [{ ...oldRender, id: "new", version: 2 }, oldRender] });
     renderPage("/video/s1?tab=publish&publish_version=1");
     expect(await screen.findByLabelText("选择发布版本")).toHaveProperty("value", "1");
-    expect(screen.getByRole("link", { name: "投稿到哔哩哔哩" }).getAttribute("href")).toContain("render=old");
+    expect(screen.getByRole("link", { name: "前往平台管理" }).getAttribute("href")).toContain("render=old");
   });
 
   it.each(["DRAFT", "WRITING", "FAILED"])("keeps publication available for an older video while current status is %s", async (status) => {
@@ -299,10 +314,10 @@ describe("Script version context", () => {
     expect(screen.getByRole("button", { name: "记录发布" })).toBeTruthy();
     expect(calls.some(c => c.url.includes("/publish?version=1"))).toBe(true);
     expect(calls.some(c => c.url.includes("/publish?version=2"))).toBe(false);
-    fireEvent.change(screen.getByPlaceholderText(/B 站视频链接/), { target: { value: "https://b23.tv/abcdef" } });
+    fireEvent.change(screen.getByLabelText("补录视频链接"), { target: { value: "https://b23.tv/abcdef" } });
     fireEvent.click(screen.getByRole("button", { name: "记录发布" }));
     await waitFor(() => expect(calls.find(c => c.url.endsWith("/publications") && c.method === "POST")?.body)
-      .toEqual({ url: "https://b23.tv/abcdef", version: 1, render_id: "old" }));
+      .toEqual({ url: "https://b23.tv/abcdef", version: 1, render_id: "old", platform: "bilibili", account_uid: "" }));
   });
 
   it("opens the publication pack from the selected completed video and switches versions explicitly", async () => {

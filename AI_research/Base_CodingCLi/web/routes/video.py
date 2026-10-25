@@ -559,7 +559,10 @@ def list_scripts(limit: int = 100000, archived: bool = False, user=Depends(requi
                      key=lambda s: (s["created_at"], s["id"]), reverse=True)[:min(max(limit, 1), 100000)]
     versions = store.current_versions([s["id"] for s in scripts])
     columns = _known_columns()
+    from web.services import distributions
+    distribution_rows = distributions.overview(scripts)
     return [{**_script_summary(s, published, versions=versions),
+             "distributions": [d for d in distribution_rows[s["id"]] if d["version"] == s["current_version"]],
              **{k: v for k, v in owners[s["id"]].items() if k != "matrix_archived"},
              "column_label": owners[s["id"]]["production_name"] or (columns.get(s["column_key"]).name if columns.get(s["column_key"]) else s["column_key"]),
              **progress.render_state(s, renders.get(s["id"], []))} for s in scripts]
@@ -590,7 +593,7 @@ def archive_script(script_id: str, body: Optional[ArchiveIn] = None, user=Depend
 @router.get("/scripts/{script_id}")
 def get_script(script_id: str, version: Optional[int] = None, user=Depends(require_viewer)) -> dict:
     from web.services.video_configuration import context
-    from web.services import platform_manager
+    from web.services import platform_manager, distributions
     script = _script_or_404(script_id)
     shown = version or script["current_version"]
     current = store.get_version(script_id, shown) if shown else None
@@ -610,6 +613,7 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         "renders": [_render_out(r) for r in store.list_renders(script_id)],
         "publications": store.list_publications(script_id),
         "platform_uploads": platform_manager.script_uploads(script_id),
+        "distributions": distributions.overview([script])[script_id],
         "rechecks": store.list_rechecks(script_id)[:5],
         # research → write → audit → approve → render, read off the records above; and who started what
         "steps": video_executor.steps_of(script),
@@ -793,6 +797,7 @@ class PublicationIn(BaseModel):
     render_id: Optional[str] = None
     platform: str = Field(default="bilibili", pattern=r"^[a-z0-9_-]{1,20}$")
     note: str = Field(default="", max_length=500)
+    account_uid: str = Field(default="", max_length=300)
 
 
 _BILIBILI_HOSTS = ("bilibili.com", "b23.tv")
@@ -800,14 +805,17 @@ _BILIBILI_HOSTS = ("bilibili.com", "b23.tv")
 
 def _publication_fields(body: PublicationIn, script: dict) -> dict:
     from datetime import date, datetime, timedelta
-    from urllib.parse import urlsplit
 
-    parts = urlsplit(body.url.strip())
-    host = (parts.hostname or "").lower()
-    if parts.scheme not in ("http", "https") or not host:
-        raise HTTPException(422, detail=ApiError.make("bad_url", "链接应以 http:// 或 https:// 开头"))
-    if body.platform == "bilibili" and not any(host == h or host.endswith("." + h) for h in _BILIBILI_HOSTS):
-        raise HTTPException(422, detail=ApiError.make("bad_url", "B 站的链接应在 bilibili.com 或 b23.tv 下"))
+    from core.video.publication_identity import identify
+    from web.services import distributions
+
+    try:
+        _, canonical = identify(body.platform, body.url, strict=True)
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("bad_url", str(exc))) from exc
+    profile = distributions.accounts().get(body.platform, {})
+    if body.account_uid and body.account_uid != profile.get("uid"):
+        raise HTTPException(422, detail=ApiError.make("account_changed", "平台账号已改变，请刷新后核对。"))
     if body.published_on is None:
         published_on = date.today().isoformat()
     else:
@@ -828,8 +836,9 @@ def _publication_fields(body: PublicationIn, script: dict) -> dict:
         raise _not_found("这个版本")
     if render and render["version"] != version:
         raise HTTPException(422, detail=ApiError.make("version_mismatch", "发布记录的文稿版本与所选成片不一致。"))
-    return {"url": body.url.strip(), "published_on": published_on, "version": version, "render_id": body.render_id,
-            "platform": body.platform, "note": body.note.strip()}
+    return {"url": canonical, "published_on": published_on, "version": version, "render_id": body.render_id,
+            "platform": body.platform, "note": body.note.strip(), "account_uid": body.account_uid,
+            "account_name": profile.get("name", "") if body.account_uid else ""}
 
 
 @router.post("/scripts/{script_id}/publications", status_code=201)
@@ -838,7 +847,10 @@ def add_publication(script_id: str, body: PublicationIn, user=Depends(require_ed
     script = _script_or_404(script_id)
     fields = _publication_fields(body, script)
     shown = store.get_version(script_id, fields["version"]) if fields["version"] else None
-    made = store.add_publication(script_id, title=(shown or {}).get("title", ""), recorded_by=user["username"], **fields)
+    try:
+        made = store.add_publication(script_id, title=(shown or {}).get("title", ""), recorded_by=user["username"], **fields)
+    except ValueError as exc:
+        raise HTTPException(422, detail=ApiError.make("publication_conflict", str(exc))) from exc
     audit.log("video_publication_add", user=user["username"], target=script_id, result=fields["url"][:120])
     return made
 
@@ -1185,3 +1197,55 @@ def reference_videos(q: str = Query(min_length=4, max_length=120), limit: int = 
     except SearchUnavailableError as exc:
         raise HTTPException(503, str(exc)) from exc
     return {"query": q, "videos": videos, "searches": client.calls}
+
+
+class DistributionDraftIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    render_id: str = Field(min_length=1, max_length=64)
+    account_uid: str = Field(min_length=1, max_length=300)
+    payload: dict
+    previous_payload: dict | None = None
+
+
+@router.put("/distributions/{platform}/draft")
+def save_distribution_draft(platform: str, body: DistributionDraftIn, user=Depends(require_editor)) -> dict:
+    from web.services import distributions, platform_manager
+    from core.social.adapter import AdapterError
+    try:
+        if platform not in distributions.PLATFORMS:
+            raise ValueError("这个平台尚未接入。")
+        result = distributions.save_draft(body.render_id, platform, body.account_uid, body.payload, body.previous_payload)
+    except (ValueError, platform_manager.Error, AdapterError) as exc:
+        raise HTTPException(409, detail=ApiError.make("draft_unavailable", str(exc))) from exc
+    audit.log("platform_draft_save", user=user["username"], target=platform, result=body.render_id)
+    return result
+
+
+class DistributionAdaptIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    render_id: str = Field(min_length=1, max_length=64)
+    payload: dict
+
+
+@router.post("/distributions/{platform}/adapt")
+def adapt_distribution(platform: str, body: DistributionAdaptIn, user=Depends(require_editor)) -> dict:
+    from web.services import distributions, platform_manager
+    from core.social.adapter import AdapterError
+    try:
+        if platform not in distributions.PLATFORMS:
+            raise ValueError("这个平台尚未接入。")
+        return distributions.adapt_preview(body.render_id, platform, body.payload)
+    except (ValueError, platform_manager.Error, AdapterError) as exc:
+        raise HTTPException(409, detail=ApiError.make("adaptation_unavailable", str(exc))) from exc
+
+
+@router.get("/distributions/{platform}/history/{render_id}")
+def distribution_history(platform: str, render_id: str, user=Depends(require_editor)) -> dict:
+    from web.services import distributions, platform_manager
+    from core.social.adapter import AdapterError
+    try:
+        if platform not in distributions.PLATFORMS:
+            raise ValueError("这个平台尚未接入。")
+        return distributions.history(render_id, platform)
+    except (ValueError, platform_manager.Error, AdapterError) as exc:
+        raise HTTPException(409, detail=ApiError.make("draft_unavailable", str(exc))) from exc

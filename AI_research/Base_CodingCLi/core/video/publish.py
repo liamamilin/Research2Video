@@ -153,9 +153,17 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
     chapters = chapter_lines(timeline)
     meta_description = (version.get("meta") or {}).get("description") or {}
     refs = reference_lines(version, report)
+    article = (version.get("meta") or {}).get("article")
+    article_credit = ""
+    if article:
+        article_credit = "原文朗读" if article["mode"] == "read" else "根据文章改编"
+        if article["source"].get("author"):
+            article_credit += " · 原文作者：" + article["source"]["author"]
 
     def assemble(with_extra: bool) -> str:
         parts = [summary(version)]
+        if article_credit:
+            parts.append(article_credit)
         if chapters:
             parts.append("\n".join(f"{c['time']} {c['title']}" for c in chapters))
         if with_extra:
@@ -208,4 +216,14 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
         "warnings": warnings,
         "version": version.get("version"),
         "freshness": freshness or {"required": False, "warnings": []},
+        "content": {
+            # Keep an entire paragraph when no separately authored summary is
+            # available. The first sentence may omit a following qualification.
+            "required": [str(meta_description.get("summary") or next((p["text"] for s in version.get("sections") or []
+                         for p in s.get("paragraphs") or [] if p.get("text")), "")).strip(),
+                         *([article_credit] if article_credit else []),
+                         *(["数字和口径：\n" + "\n".join(f"· {d}" for d in meta_description["details"])] if meta_description.get("details") else []),
+                         *(["还没确定：\n" + "\n".join(f"· {q}" for q in meta_description["open_questions"])] if meta_description.get("open_questions") else [])],
+            "chapters": "\n".join(f"{c['time']} {c['title']}" for c in chapters),
+        },
     }

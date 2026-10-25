@@ -187,6 +187,20 @@ def init_db() -> None:
             conn.execute("ALTER TABLE scripts ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
         if "production" not in columns:  # the production config that made it (spec/production.md); '' before them
             conn.execute("ALTER TABLE scripts ADD COLUMN production TEXT NOT NULL DEFAULT ''")
+        pub_columns = {r[1] for r in conn.execute("PRAGMA table_info(publications)")}
+        for name in ("account_uid", "account_name", "work_id", "confirmed_at", "removed_at"):
+            if name not in pub_columns:
+                conn.execute(f"ALTER TABLE publications ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
+        if "sources" not in pub_columns:
+            conn.execute("ALTER TABLE publications ADD COLUMN sources TEXT NOT NULL DEFAULT '[]'")
+        conn.execute("""CREATE TABLE IF NOT EXISTS distribution_drafts (
+            script_id TEXT NOT NULL, version INTEGER NOT NULL, platform TEXT NOT NULL, account_uid TEXT NOT NULL,
+            render_id TEXT NOT NULL, payload TEXT NOT NULL, updated_at TEXT NOT NULL,
+            PRIMARY KEY(script_id,version,platform,account_uid))""")
+        conn.execute("""CREATE TABLE IF NOT EXISTS distribution_draft_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, script_id TEXT NOT NULL, version INTEGER NOT NULL,
+            platform TEXT NOT NULL, account_uid TEXT NOT NULL, render_id TEXT NOT NULL,
+            payload TEXT NOT NULL, saved_at TEXT NOT NULL)""")
         from core.video import autopilot_store, plans, reports, steps, topic_store
         autopilot_store.init(conn)
         plans.init(conn)
@@ -342,31 +356,36 @@ def fail_interrupted(stale_after: float = STALE_AFTER_SECONDS) -> int:
 
 def add_publication(script_id: str, *, url: str, published_on: str, version: Optional[int] = None,
                     render_id: Optional[str] = None, platform: str = "bilibili", title: str = "", note: str = "",
-                    recorded_by: str = "") -> dict:
-    pub_id = uuid.uuid4().hex
+                    recorded_by: str = "", account_uid: str = "", account_name: str = "") -> dict:
+    from core.video.publication_identity import identify
+
+    work_id, url = identify(platform, url)
+    source = "automatic" if recorded_by == "platform-manager" else "manual"
+    now = _now()
     with connect(write=True) as conn:
-        # The platform worker and a manual record can arrive together. One
-        # version/video identifies one publication even across different renders.
-        from urllib.parse import urlsplit
-
-        def identity(value):
-            parts = urlsplit(value)
-            if platform == "bilibili" and parts.hostname in ("www.bilibili.com", "m.bilibili.com", "bilibili.com"):
-                return ("bilibili.com", parts.path.rstrip("/"))
-            return value.strip()
-
         existing = conn.execute("SELECT * FROM publications WHERE script_id=? AND version IS ? AND platform=?",
                                 (script_id, version, platform)).fetchall()
         for row in existing:
-            if identity(row["url"]) == identity(url):
-                if render_id and not row["render_id"]:
-                    conn.execute("UPDATE publications SET render_id=? WHERE id=?", (render_id, row["id"]))
-                return {**dict(row), "render_id": row["render_id"] or render_id}
-        conn.execute(
-            "INSERT INTO publications (id, script_id, version, render_id, platform, url, published_on, title, note,"
-            " recorded_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (pub_id, script_id, version, render_id, platform, url, published_on, title, note, recorded_by, _now()),
-        )
+            old_id, old_url = identify(platform, row["url"])
+            if (work_id and (row["work_id"] or old_id) == work_id) or old_url == url:
+                if row["account_uid"] and account_uid and row["account_uid"] != account_uid:
+                    raise ValueError("这条作品已关联另一个平台账号，请核对归属。")
+                sources = set(json.loads(row["sources"]) or ["automatic" if row["recorded_by"] == "platform-manager" else "manual"])
+                sources.add(source)
+                conn.execute("UPDATE publications SET render_id=COALESCE(render_id,?),work_id=?,url=?,"
+                             "account_uid=?,account_name=?,sources=?,confirmed_at=?,removed_at=? WHERE id=?",
+                             (render_id, work_id or row["work_id"], url, row["account_uid"] or account_uid,
+                              row["account_name"] or account_name, json.dumps(sorted(sources)),
+                              now if source == "automatic" else row["confirmed_at"], "" if source == "manual" else row["removed_at"], row["id"]))
+                pub_id = row["id"]
+                break
+        else:
+            pub_id = uuid.uuid4().hex
+            conn.execute("INSERT INTO publications (id,script_id,version,render_id,platform,url,published_on,title,note,"
+                         "recorded_by,created_at,account_uid,account_name,work_id,sources,confirmed_at) "
+                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                         (pub_id, script_id, version, render_id, platform, url, published_on, title, note, recorded_by,
+                          now, account_uid, account_name, work_id, json.dumps([source]), now if source == "automatic" else ""))
     return get_publication(pub_id)
 
 
@@ -376,16 +395,60 @@ def get_publication(pub_id: str) -> dict | None:
     return dict(row) if row else None
 
 
-def list_publications(script_id: str) -> list[dict]:
+def list_publications(script_id: str, *, include_removed: bool = False) -> list[dict]:
     with connect() as conn:
-        rows = conn.execute("SELECT * FROM publications WHERE script_id = ? ORDER BY published_on DESC, created_at DESC",
-                            (script_id,)).fetchall()
+        rows = conn.execute("SELECT * FROM publications WHERE script_id = ?" +
+                            ("" if include_removed else " AND removed_at=''") +
+                            " ORDER BY published_on DESC, created_at DESC", (script_id,)).fetchall()
     return [dict(r) for r in rows]
+
+
+def has_publication(script_id: str, version: int, platform: str, account_uid: str) -> bool:
+    """Keep the duplicate guard even after a local record is removed. Unknown old accounts block conservatively."""
+    with connect() as conn:
+        return bool(conn.execute("SELECT 1 FROM publications WHERE script_id=? AND version=? AND platform=? "
+                                 "AND (account_uid=? OR account_uid='') LIMIT 1",
+                                 (script_id, version, platform, account_uid)).fetchone())
 
 
 def delete_publication(pub_id: str) -> bool:
     with connect(write=True) as conn:
-        return conn.execute("DELETE FROM publications WHERE id = ?", (pub_id,)).rowcount > 0
+        return conn.execute("UPDATE publications SET removed_at=? WHERE id=? AND removed_at=''", (_now(), pub_id)).rowcount > 0
+
+
+def save_distribution_draft(render: dict, platform: str, account_uid: str, payload: dict,
+                            previous_payload: dict | None = None) -> dict:
+    now = _now()
+    with connect(write=True) as conn:
+        key = (render["script_id"], render["version"], platform, account_uid)
+        previous = conn.execute("SELECT payload,render_id FROM distribution_drafts WHERE script_id=? AND version=? AND platform=? AND account_uid=?", key).fetchone()
+        snapshots = ([(previous["payload"], previous["render_id"])] if previous else [])
+        if previous_payload is not None:
+            snapshots.append((json.dumps(previous_payload, ensure_ascii=False), render["id"]))
+        snapshots.append((json.dumps(payload, ensure_ascii=False), render["id"]))
+        for raw, render_id in snapshots:
+            last = conn.execute("SELECT payload,render_id FROM distribution_draft_history WHERE script_id=? AND version=? AND platform=? AND account_uid=? ORDER BY id DESC LIMIT 1", key).fetchone()
+            if not last or (last["payload"], last["render_id"]) != (raw, render_id):
+                conn.execute("INSERT INTO distribution_draft_history(script_id,version,platform,account_uid,render_id,payload,saved_at) VALUES (?,?,?,?,?,?,?)", (*key, render_id, raw, now))
+        conn.execute("INSERT INTO distribution_drafts VALUES (?,?,?,?,?,?,?) ON CONFLICT(script_id,version,platform,account_uid) "
+                     "DO UPDATE SET render_id=excluded.render_id,payload=excluded.payload,updated_at=excluded.updated_at",
+                     (render["script_id"], render["version"], platform, account_uid, render["id"], json.dumps(payload, ensure_ascii=False), now))
+    return {"payload": payload, "render_id": render["id"], "updated_at": now}
+
+
+def distribution_draft_history(render: dict, platform: str, account_uid: str) -> list[dict]:
+    """Latest saved copies for one account/version; older rows remain in the ledger."""
+    with connect() as conn:
+        rows = conn.execute("SELECT id,render_id,payload,saved_at FROM distribution_draft_history WHERE script_id=? AND version=? AND platform=? AND account_uid=? ORDER BY id DESC LIMIT 30",
+                            (render["script_id"], render["version"], platform, account_uid)).fetchall()
+    return [_decode(row, ("payload",)) for row in rows]
+
+
+def distribution_draft(render: dict, platform: str, account_uid: str) -> dict | None:
+    with connect() as conn:
+        row = conn.execute("SELECT * FROM distribution_drafts WHERE script_id=? AND version=? AND platform=? AND account_uid=?",
+                           (render["script_id"], render["version"], platform, account_uid)).fetchone()
+    return _decode(row, ("payload",))
 
 
 def latest_render_by_script() -> dict[str, dict]:

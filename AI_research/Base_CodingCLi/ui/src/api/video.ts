@@ -179,6 +179,7 @@ export interface VideoTopic {
   score: number | null;
   scripted: boolean;
   published?: boolean;
+  distributions?: Distribution[];
   dismissed?: boolean;
   stale?: boolean;
   event_date?: string | null;
@@ -275,6 +276,7 @@ export interface VideoScriptSummary {
   title: string;
   length_check: LengthCheck | null;
   published?: boolean;
+  distributions?: Distribution[];
   archived?: number;
   credibility?: Credibility | null;
   auto?: boolean;
@@ -286,6 +288,22 @@ export interface VideoScriptSummary {
   has_video?: boolean;
   has_previous_video?: boolean;
   render?: { id?: string; version?: number; status: string; created_at: string } | null; // 当前版本的出片进度
+}
+
+export interface Distribution {
+  script_id: string;
+  version: number | null;
+  platform: string;
+  account_uid: string;
+  account_name: string;
+  connected: boolean;
+  current_account: boolean;
+  status: string;
+  can_prepare: boolean;
+  blocked_reason: string;
+  task: { id: string; status: string; error: string; render_id: string; work_id: string; updated_at: number } | null;
+  draft: { render_id: string; updated_at: string } | null;
+  publications: Publication[];
 }
 
 // 发布记录和发布前复核（快讯），见 spec/video-publish.md。
@@ -300,6 +318,12 @@ export interface Publication {
   title: string;
   note: string;
   recorded_by: string;
+  account_uid?: string;
+  account_name?: string;
+  work_id?: string;
+  sources?: string;
+  confirmed_at?: string;
+  removed_at?: string;
 }
 
 export interface Recheck {
@@ -431,7 +455,7 @@ export interface DraftQuality {
 
 export const getDraftQuality = () => api<DraftQuality>("/api/video/quality");
 
-export const addPublication = (id: string, body: { url: string; published_on?: string; note?: string; version?: number; render_id?: string }) =>
+export const addPublication = (id: string, body: { url: string; published_on?: string; note?: string; version?: number; render_id?: string; platform?: string; account_uid?: string }) =>
   api<Publication>(`/api/video/scripts/${encodeURIComponent(id)}/publications`, { method: "POST", body });
 
 export const deletePublication = (id: string, publicationId: string) =>
@@ -665,6 +689,7 @@ export interface Shipment {
   render: { id: string; status: string; version: number; error: string | null; completed_at?: string | null } | null;
   video_url: string | null;
   publications: Publication[];
+  distributions?: Distribution[];
   warnings: string[];
 }
 

@@ -45,6 +45,8 @@ from web.routes.sources import router as sources_router
 from web.routes.outputs import router as outputs_router
 from web.routes.production import router as production_router
 from web.routes.platforms import router as platforms_router
+from web.routes.douyin import router as douyin_router
+from web.routes.social_publishing import router as social_publishing_router
 from web.runner.registry import TaskRegistry
 from web.settings import get_settings
 from web.indexer import db as index_db
@@ -139,6 +141,8 @@ async def lifespan(app: FastAPI):
 
     video_store.use_state_dir(settings.paths.state_dir)
     video_store.init_db()
+    from web.services import distributions
+    distributions.migrate_confirmed_accounts()
     recover_video_work()
 
     # Startup alone misses work cut off less than STALE_AFTER_SECONDS before
@@ -195,6 +199,31 @@ async def lifespan(app: FastAPI):
 
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
         threading.Thread(target=platform_loop, name="platform-worker", daemon=True).start()
+
+    def douyin_loop() -> None:
+        from web.services import douyin
+
+        while not sweep_stop.wait(5):
+            try:
+                douyin.tick()
+            except Exception:
+                logger.warning("douyin worker pass failed; will check again next pass")
+
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
+        threading.Thread(target=douyin_loop, name="douyin-worker", daemon=True).start()
+
+    def social_loop(platform: str) -> None:
+        from web.services import social_publishing
+        while not sweep_stop.wait(5):
+            try:
+                social_publishing.tick(platform)
+            except Exception:
+                logger.warning("social publisher pass failed for %s; will retry next pass", platform)
+
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
+        from core.social.registry import active_platforms
+        for platform in active_platforms():
+            threading.Thread(target=social_loop,args=(platform,),name=f"publisher-{platform}",daemon=True).start()
 
     def analytics_manual_loop() -> None:
         from web.services import platform_analytics
@@ -358,6 +387,8 @@ def create_app() -> FastAPI:
     app.include_router(production_router)
     app.include_router(outputs_router)
     app.include_router(platforms_router)
+    app.include_router(douyin_router)
+    app.include_router(social_publishing_router)
 
     @app.get("/api/live")
     async def live():

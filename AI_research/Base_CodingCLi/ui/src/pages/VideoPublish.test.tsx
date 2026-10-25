@@ -83,9 +83,9 @@ describe("Publish pack", () => {
     await screen.findByText(PACK.title);
     expect(screen.queryByText("发布前复核")).toBeNull();
     expect(screen.getByText("https://www.bilibili.com/video/BV1old")).toBeTruthy();
-    fireEvent.change(screen.getByPlaceholderText(/B 站视频链接/), { target: { value: "https://b23.tv/abcdef" } });
+    fireEvent.change(screen.getByLabelText("补录视频链接"), { target: { value: "https://b23.tv/abcdef" } });
     fireEvent.click(screen.getByText("记录发布"));
-    await waitFor(() => expect(calls.find((c) => c.method === "POST")?.body).toEqual({ url: "https://b23.tv/abcdef", version: 2 }));
+    await waitFor(() => expect(calls.find((c) => c.method === "POST")?.body).toEqual({ url: "https://b23.tv/abcdef", version: 2, platform: "bilibili", account_uid: "" }));
   });
 });
 
@@ -115,4 +115,16 @@ describe("Render folder", () => {
     render(<RenderFolder render={RENDER} />);
     expect(screen.queryByRole("button", { name: "在访达中显示" })).toBeNull();
   });
+});
+
+it("recognizes Douyin links and records the chosen account and platform without replacing Bilibili", async () => {
+  const dyTarget = { platform: "douyin", account_uid: "456", account_name: "抖音创作者", current_account: true } as never;
+  render(<PublishPanel scriptId="s1" version={2} canEdit distributions={[dyTarget]} publications={[{ id: "b", version: 2, platform: "bilibili", url: "https://b23.tv/old", published_on: "2026-10-20" } as never]} />);
+  await screen.findByText(PACK.title);
+  fireEvent.change(screen.getByLabelText("补录视频链接"), { target: { value: "https://www.douyin.com/video/7700436961890209034" } });
+  expect(screen.getByLabelText("补录平台")).toHaveProperty("value", "douyin");
+  await waitFor(() => expect(screen.getByLabelText("补录账号")).toHaveProperty("value", "456"));
+  fireEvent.click(screen.getByRole("button", { name: "记录发布" }));
+  await waitFor(() => expect(calls.find(c => c.method === "POST")?.body).toEqual({ url: "https://www.douyin.com/video/7700436961890209034", version: 2, platform: "douyin", account_uid: "456" }));
+  expect(screen.getByRole("link", { name: "https://b23.tv/old" })).toBeTruthy();
 });

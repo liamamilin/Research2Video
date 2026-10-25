@@ -1,0 +1,1226 @@
+{
+  "render_id": "18d2f1e12f4e41c887bab2f44357eb7b",
+  "script_id": "a844f43b55de4e6fb094f76092c2fc30",
+  "version": 1,
+  "original_description_chars": 1844,
+  "original_reference_count": 20,
+  "original_pack": {
+    "title": "编程 Agent 正在基础设施化：本地 125 tok/s、断线续跑、密码不给它看",
+    "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+    "chapters": [
+      {
+        "seconds": 0.0,
+        "time": "00:00",
+        "title": "先问一个问题 Agent 还只是聊天框吗"
+      },
+      {
+        "seconds": 32.2,
+        "time": "00:32",
+        "title": "本地跑 40B 只激活 2 5B 125"
+      },
+      {
+        "seconds": 73.9,
+        "time": "01:13",
+        "title": "断线续跑 Agent 从进程变成 dur"
+      },
+      {
+        "seconds": 104.767,
+        "time": "01:44",
+        "title": "登录网站 但永远看不到密码"
+      },
+      {
+        "seconds": 132.3,
+        "time": "02:12",
+        "title": "用 TypeScript 实时改 Cla"
+      },
+      {
+        "seconds": 155.967,
+        "time": "02:35",
+        "title": "API 版本化和推理账本 长期跑的两本账"
+      },
+      {
+        "seconds": 204.567,
+        "time": "03:24",
+        "title": "收束 开发者该看哪六个指标"
+      }
+    ],
+    "chapter_note": "章节格式（MM:SS 标题、首条 00:00、至少 3 条、间隔不少于 5 秒、标题不带特殊符号）来自第三方资料，没有找到 B 站官方说明；第一次发布时粘贴后确认是否变成可点击的章节。",
+    "tags": [
+      "一个知识点",
+      "开发者",
+      "AI",
+      "Agent",
+      "tok",
+      "report",
+      "编程"
+    ],
+    "cover": {
+      "headline": "编程 Agent 正在基础设",
+      "badge": "一个知识点"
+    },
+    "references": [
+      {
+        "title": "Recursive Flint 发布文",
+        "url": "https://recursive.com/updates/introducing-recursive-flint",
+        "date": "",
+        "kind": "",
+        "cited": true
+      },
+      {
+        "title": "RecursiveSI/flint Hugging Face 模型页",
+        "url": "https://huggingface.co/RecursiveSI/flint",
+        "date": "",
+        "kind": "",
+        "cited": true
+      },
+      {
+        "title": "Claude API 2026-10-21 Thread 摘要",
+        "url": "https://threadreaderapp.com/thread/2113013247209021918.html",
+        "date": "",
+        "kind": "",
+        "cited": true
+      },
+      {
+        "title": "Vercel durable-harness",
+        "url": "https://vercel.com/blog/making-every-harness-durable",
+        "date": "",
+        "kind": "",
+        "cited": true
+      },
+      {
+        "title": "1Password for Agents",
+        "url": "https://1password.com/blog/1password-for-ai-agents",
+        "date": "",
+        "kind": "",
+        "cited": true
+      },
+      {
+        "title": "DeepSeek V4.1 Flash 大规模推理部署",
+        "url": "https://zhuanlan.zhihu.com/p/2095560295930508953",
+        "date": "",
+        "kind": "",
+        "cited": true
+      },
+      {
+        "title": "DeepSeek-V4.1-Flash-1017 Hugging Face 模型页",
+        "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+        "date": "",
+        "kind": "",
+        "cited": true
+      },
+      {
+        "title": "Claude Mods",
+        "url": "https://www.latent.space/p/claude-mods",
+        "date": "",
+        "kind": "",
+        "cited": true
+      },
+      {
+        "title": "OpenAI 模型进入 Google Cloud",
+        "url": "https://openai.com/index/openai-models-google-cloud/",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "Mistral Voxtral 3",
+        "url": "https://mistral.ai/news/voxtral-3/",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "TorchTPU",
+        "url": "https://pytorch.org/blog/introducing-torchtpu/",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "llm-d",
+        "url": "https://llm-d.ai/",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "Claude Duet",
+        "url": "https://claude.com/resources/articles/claude-duet",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "Cerebras 部署万亿参数模型",
+        "url": "https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "vLLM Humming 量化推理 kernel",
+        "url": "https://vllm.ai/blog/2026-10-21-humming",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "WorldTUI：360M 模型假装成终端",
+        "url": "https://simedw.com/2026/10/21/world-model-terminal/",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "Claude 文本水印",
+        "url": "https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "METR 红队测试 OpenAI agent 监控",
+        "url": "https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "OpenAI PHP 漏洞协调披露",
+        "url": "https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/",
+        "date": "",
+        "kind": "",
+        "cited": false
+      },
+      {
+        "title": "OpenAI 融资背景",
+        "url": "https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+        "date": "",
+        "kind": "",
+        "cited": false
+      }
+    ],
+    "warnings": [
+      "20 个来源没有发布日期，简介里只写了网址。"
+    ],
+    "version": 1,
+    "freshness": {
+      "required": false,
+      "warnings": []
+    },
+    "content": {
+      "required": [
+        "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了；你想让它登录后台，又不敢把密码交给它；你想改它的行为，只能反复改 prompt。最近这一周，好几个发布其实都在拆这三个痛点。"
+      ],
+      "chapters": "00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标"
+    }
+  },
+  "platforms": {
+    "bilibili": {
+      "payload": {
+        "title": "编程 Agent 正在基础设施化：本地 125 tok/s、断线续跑、密码不给它看",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了；你想让它登录后台，又不敢把密码交给它；你想改它的行为，只能反复改 prompt。最近这一周，好几个发布其实都在拆这三个痛点。\n\n主要来源：\nhttps://recursive.com/updates/introducing-recursive-flint\nhttps://huggingface.co/RecursiveSI/flint\nhttps://threadreaderapp.com/thread/2113013247209021918.html\nhttps://vercel.com/blog/making-every-harness-durable\nhttps://1password.com/blog/1password-for-ai-agents\nhttps://zhuanlan.zhihu.com/p/2095560295930508953\nhttps://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\nhttps://www.latent.space/p/claude-mods\nhttps://openai.com/index/openai-models-google-cloud/\nhttps://mistral.ai/news/voxtral-3/\nhttps://pytorch.org/blog/introducing-torchtpu/\nhttps://llm-d.ai/\nhttps://claude.com/resources/articles/claude-duet\nhttps://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\nhttps://vllm.ai/blog/2026-10-21-humming\nhttps://simedw.com/2026/10/21/world-model-terminal/\nhttps://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\nhttps://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\nhttps://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\nhttps://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI",
+          "Agent",
+          "tok",
+          "report",
+          "编程"
+        ]
+      },
+      "before": {
+        "title": "编程 Agent 正在基础设施化：本地 125 tok/s、断线续跑、密码不给它看",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI",
+          "Agent",
+          "tok",
+          "report",
+          "编程"
+        ]
+      },
+      "check": {
+        "limits": {
+          "platform": "bilibili",
+          "name": "B站",
+          "title_min": 1,
+          "title_limit": 80,
+          "description_limit": 2000,
+          "tag_limit": 10,
+          "tag_min": 1,
+          "tag_length_limit": 20,
+          "combined_limit": null,
+          "combined_label": "简介",
+          "counter": "codepoint",
+          "comment_limit": 1000,
+          "comment_counter": "codepoint"
+        },
+        "counts": {
+          "title": 41,
+          "description": 1435,
+          "tags": 7,
+          "combined": 1435,
+          "description_budget": 2000
+        },
+        "issues": [],
+        "valid": true
+      },
+      "notes": [],
+      "references": [
+        {
+          "title": "Recursive Flint 发布文",
+          "url": "https://recursive.com/updates/introducing-recursive-flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "RecursiveSI/flint Hugging Face 模型页",
+          "url": "https://huggingface.co/RecursiveSI/flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude API 2026-10-21 Thread 摘要",
+          "url": "https://threadreaderapp.com/thread/2113013247209021918.html",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Vercel durable-harness",
+          "url": "https://vercel.com/blog/making-every-harness-durable",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "1Password for Agents",
+          "url": "https://1password.com/blog/1password-for-ai-agents",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek V4.1 Flash 大规模推理部署",
+          "url": "https://zhuanlan.zhihu.com/p/2095560295930508953",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek-V4.1-Flash-1017 Hugging Face 模型页",
+          "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude Mods",
+          "url": "https://www.latent.space/p/claude-mods",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "OpenAI 模型进入 Google Cloud",
+          "url": "https://openai.com/index/openai-models-google-cloud/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Mistral Voxtral 3",
+          "url": "https://mistral.ai/news/voxtral-3/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "TorchTPU",
+          "url": "https://pytorch.org/blog/introducing-torchtpu/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "llm-d",
+          "url": "https://llm-d.ai/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude Duet",
+          "url": "https://claude.com/resources/articles/claude-duet",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Cerebras 部署万亿参数模型",
+          "url": "https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "vLLM Humming 量化推理 kernel",
+          "url": "https://vllm.ai/blog/2026-10-21-humming",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "WorldTUI：360M 模型假装成终端",
+          "url": "https://simedw.com/2026/10/21/world-model-terminal/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude 文本水印",
+          "url": "https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "METR 红队测试 OpenAI agent 监控",
+          "url": "https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI PHP 漏洞协调披露",
+          "url": "https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI 融资背景",
+          "url": "https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+          "date": "",
+          "kind": "",
+          "cited": false
+        }
+      ],
+      "source_description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+      "references_in_description": 20
+    },
+    "douyin": {
+      "payload": {
+        "title": "编程 Agent 正在基础设施化",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了；你想让它登录后台，又不敢把密码交给它；你想改它的行为，只能反复改 prompt。最近这一周，好几个发布其实都在拆这三个痛点。\n\n主要来源：\nhttps://recursive.com/updates/introducing-recursive-flint\nhttps://huggingface.co/RecursiveSI/flint\nhttps://threadreaderapp.com/thread/2113013247209021918.html\nhttps://vercel.com/blog/making-every-harness-durable\nhttps://1password.com/blog/1password-for-ai-agents\nhttps://zhuanlan.zhihu.com/p/2095560295930508953\nhttps://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\nhttps://www.latent.space/p/claude-mods\nhttps://openai.com/index/openai-models-google-cloud/\nhttps://mistral.ai/news/voxtral-3/\nhttps://pytorch.org/blog/introducing-torchtpu/\nhttps://llm-d.ai/\nhttps://claude.com/resources/articles/claude-duet\nhttps://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\nhttps://vllm.ai/blog/2026-10-21-humming\nhttps://simedw.com/2026/10/21/world-model-terminal/",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI",
+          "Agent",
+          "tok"
+        ]
+      },
+      "before": {
+        "title": "编程 Agent 正在基础设施化：本地 125 tok/s、断线续跑、密码不给它看",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI",
+          "Agent",
+          "tok",
+          "report",
+          "编程"
+        ]
+      },
+      "check": {
+        "limits": {
+          "platform": "douyin",
+          "name": "抖音",
+          "title_min": 1,
+          "title_limit": 30,
+          "description_limit": 1000,
+          "tag_limit": 5,
+          "tag_min": 0,
+          "tag_length_limit": 20,
+          "combined_limit": 1000,
+          "combined_label": "简介和话题合计",
+          "counter": "codepoint",
+          "comment_limit": 500,
+          "comment_counter": "codepoint"
+        },
+        "counts": {
+          "title": 16,
+          "description": 920,
+          "tags": 5,
+          "combined": 948,
+          "description_budget": 972
+        },
+        "issues": [],
+        "valid": true
+      },
+      "notes": [
+        "简介保留 16/20 条主要来源；完整出处保留在原发布包中。",
+        "章节时间保留在原发布包中。",
+        "标题使用原题中完整的开头分句，未截断型号或数字。",
+        "按本平台规则整理话题，保留 5 个。"
+      ],
+      "references": [
+        {
+          "title": "Recursive Flint 发布文",
+          "url": "https://recursive.com/updates/introducing-recursive-flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "RecursiveSI/flint Hugging Face 模型页",
+          "url": "https://huggingface.co/RecursiveSI/flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude API 2026-10-21 Thread 摘要",
+          "url": "https://threadreaderapp.com/thread/2113013247209021918.html",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Vercel durable-harness",
+          "url": "https://vercel.com/blog/making-every-harness-durable",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "1Password for Agents",
+          "url": "https://1password.com/blog/1password-for-ai-agents",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek V4.1 Flash 大规模推理部署",
+          "url": "https://zhuanlan.zhihu.com/p/2095560295930508953",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek-V4.1-Flash-1017 Hugging Face 模型页",
+          "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude Mods",
+          "url": "https://www.latent.space/p/claude-mods",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "OpenAI 模型进入 Google Cloud",
+          "url": "https://openai.com/index/openai-models-google-cloud/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Mistral Voxtral 3",
+          "url": "https://mistral.ai/news/voxtral-3/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "TorchTPU",
+          "url": "https://pytorch.org/blog/introducing-torchtpu/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "llm-d",
+          "url": "https://llm-d.ai/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude Duet",
+          "url": "https://claude.com/resources/articles/claude-duet",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Cerebras 部署万亿参数模型",
+          "url": "https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "vLLM Humming 量化推理 kernel",
+          "url": "https://vllm.ai/blog/2026-10-21-humming",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "WorldTUI：360M 模型假装成终端",
+          "url": "https://simedw.com/2026/10/21/world-model-terminal/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude 文本水印",
+          "url": "https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "METR 红队测试 OpenAI agent 监控",
+          "url": "https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI PHP 漏洞协调披露",
+          "url": "https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI 融资背景",
+          "url": "https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+          "date": "",
+          "kind": "",
+          "cited": false
+        }
+      ],
+      "source_description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+      "references_in_description": 16
+    },
+    "kuaishou": {
+      "payload": {
+        "title": "编程 Agent 正在基础设施化：本地 125 tok/s、断线续跑、密码不给它看",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了；你想让它登录后台，又不敢把密码交给它；你想改它的行为，只能反复改 prompt。最近这一周，好几个发布其实都在拆这三个痛点。\n\n主要来源：\nhttps://recursive.com/updates/introducing-recursive-flint\nhttps://huggingface.co/RecursiveSI/flint\nhttps://threadreaderapp.com/thread/2113013247209021918.html\nhttps://vercel.com/blog/making-every-harness-durable\nhttps://1password.com/blog/1password-for-ai-agents\nhttps://www.latent.space/p/claude-mods",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI"
+        ]
+      },
+      "before": {
+        "title": "编程 Agent 正在基础设施化：本地 125 tok/s、断线续跑、密码不给它看",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI",
+          "Agent",
+          "tok",
+          "report",
+          "编程"
+        ]
+      },
+      "check": {
+        "limits": {
+          "title_min": 1,
+          "title_limit": 80,
+          "description_limit": 500,
+          "tag_limit": 3,
+          "combined_limit": 500,
+          "name": "快手",
+          "platform": "kuaishou",
+          "tag_min": 0,
+          "tag_length_limit": 30,
+          "combined_label": "标题、简介和话题合计",
+          "counter": "codepoint",
+          "comment_limit": 250,
+          "comment_counter": "utf16"
+        },
+        "counts": {
+          "title": 41,
+          "description": 426,
+          "tags": 3,
+          "combined": 488,
+          "description_budget": 438
+        },
+        "issues": [],
+        "valid": true
+      },
+      "notes": [
+        "简介保留 6/20 条主要来源；完整出处保留在原发布包中。",
+        "章节时间保留在原发布包中。",
+        "按本平台规则整理话题，保留 3 个。"
+      ],
+      "references": [
+        {
+          "title": "Recursive Flint 发布文",
+          "url": "https://recursive.com/updates/introducing-recursive-flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "RecursiveSI/flint Hugging Face 模型页",
+          "url": "https://huggingface.co/RecursiveSI/flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude API 2026-10-21 Thread 摘要",
+          "url": "https://threadreaderapp.com/thread/2113013247209021918.html",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Vercel durable-harness",
+          "url": "https://vercel.com/blog/making-every-harness-durable",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "1Password for Agents",
+          "url": "https://1password.com/blog/1password-for-ai-agents",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek V4.1 Flash 大规模推理部署",
+          "url": "https://zhuanlan.zhihu.com/p/2095560295930508953",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek-V4.1-Flash-1017 Hugging Face 模型页",
+          "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude Mods",
+          "url": "https://www.latent.space/p/claude-mods",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "OpenAI 模型进入 Google Cloud",
+          "url": "https://openai.com/index/openai-models-google-cloud/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Mistral Voxtral 3",
+          "url": "https://mistral.ai/news/voxtral-3/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "TorchTPU",
+          "url": "https://pytorch.org/blog/introducing-torchtpu/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "llm-d",
+          "url": "https://llm-d.ai/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude Duet",
+          "url": "https://claude.com/resources/articles/claude-duet",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Cerebras 部署万亿参数模型",
+          "url": "https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "vLLM Humming 量化推理 kernel",
+          "url": "https://vllm.ai/blog/2026-10-21-humming",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "WorldTUI：360M 模型假装成终端",
+          "url": "https://simedw.com/2026/10/21/world-model-terminal/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude 文本水印",
+          "url": "https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "METR 红队测试 OpenAI agent 监控",
+          "url": "https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI PHP 漏洞协调披露",
+          "url": "https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI 融资背景",
+          "url": "https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+          "date": "",
+          "kind": "",
+          "cited": false
+        }
+      ],
+      "source_description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+      "references_in_description": 6
+    },
+    "xiaohongshu": {
+      "payload": {
+        "title": "编程 Agent 正在基础设施化",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了；你想让它登录后台，又不敢把密码交给它；你想改它的行为，只能反复改 prompt。最近这一周，好几个发布其实都在拆这三个痛点。\n\n主要来源：\nhttps://recursive.com/updates/introducing-recursive-flint\nhttps://huggingface.co/RecursiveSI/flint\nhttps://threadreaderapp.com/thread/2113013247209021918.html\nhttps://vercel.com/blog/making-every-harness-durable\nhttps://1password.com/blog/1password-for-ai-agents\nhttps://zhuanlan.zhihu.com/p/2095560295930508953\nhttps://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\nhttps://www.latent.space/p/claude-mods\nhttps://openai.com/index/openai-models-google-cloud/\nhttps://mistral.ai/news/voxtral-3/\nhttps://pytorch.org/blog/introducing-torchtpu/\nhttps://llm-d.ai/\nhttps://claude.com/resources/articles/claude-duet\nhttps://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\nhttps://vllm.ai/blog/2026-10-21-humming\nhttps://simedw.com/2026/10/21/world-model-terminal/\nhttps://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI",
+          "Agent",
+          "tok",
+          "report",
+          "编程"
+        ]
+      },
+      "before": {
+        "title": "编程 Agent 正在基础设施化：本地 125 tok/s、断线续跑、密码不给它看",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI",
+          "Agent",
+          "tok",
+          "report",
+          "编程"
+        ]
+      },
+      "check": {
+        "limits": {
+          "title_min": 1,
+          "title_limit": 20,
+          "description_limit": 1000,
+          "tag_limit": 10,
+          "combined_limit": null,
+          "name": "小红书",
+          "platform": "xiaohongshu",
+          "tag_min": 0,
+          "tag_length_limit": 100,
+          "combined_label": "标题、简介和话题合计",
+          "counter": "codepoint",
+          "comment_limit": 250,
+          "comment_counter": "utf16"
+        },
+        "counts": {
+          "title": 16,
+          "description": 990,
+          "tags": 7,
+          "combined": 990,
+          "description_budget": 1000
+        },
+        "issues": [],
+        "valid": true
+      },
+      "notes": [
+        "简介保留 17/20 条主要来源；完整出处保留在原发布包中。",
+        "章节时间保留在原发布包中。",
+        "标题使用原题中完整的开头分句，未截断型号或数字。"
+      ],
+      "references": [
+        {
+          "title": "Recursive Flint 发布文",
+          "url": "https://recursive.com/updates/introducing-recursive-flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "RecursiveSI/flint Hugging Face 模型页",
+          "url": "https://huggingface.co/RecursiveSI/flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude API 2026-10-21 Thread 摘要",
+          "url": "https://threadreaderapp.com/thread/2113013247209021918.html",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Vercel durable-harness",
+          "url": "https://vercel.com/blog/making-every-harness-durable",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "1Password for Agents",
+          "url": "https://1password.com/blog/1password-for-ai-agents",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek V4.1 Flash 大规模推理部署",
+          "url": "https://zhuanlan.zhihu.com/p/2095560295930508953",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek-V4.1-Flash-1017 Hugging Face 模型页",
+          "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude Mods",
+          "url": "https://www.latent.space/p/claude-mods",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "OpenAI 模型进入 Google Cloud",
+          "url": "https://openai.com/index/openai-models-google-cloud/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Mistral Voxtral 3",
+          "url": "https://mistral.ai/news/voxtral-3/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "TorchTPU",
+          "url": "https://pytorch.org/blog/introducing-torchtpu/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "llm-d",
+          "url": "https://llm-d.ai/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude Duet",
+          "url": "https://claude.com/resources/articles/claude-duet",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Cerebras 部署万亿参数模型",
+          "url": "https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "vLLM Humming 量化推理 kernel",
+          "url": "https://vllm.ai/blog/2026-10-21-humming",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "WorldTUI：360M 模型假装成终端",
+          "url": "https://simedw.com/2026/10/21/world-model-terminal/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude 文本水印",
+          "url": "https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "METR 红队测试 OpenAI agent 监控",
+          "url": "https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI PHP 漏洞协调披露",
+          "url": "https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI 融资背景",
+          "url": "https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+          "date": "",
+          "kind": "",
+          "cited": false
+        }
+      ],
+      "source_description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+      "references_in_description": 17
+    },
+    "weixin_channels": {
+      "payload": {
+        "title": "编程 Agent 正在基础设施化",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了；你想让它登录后台，又不敢把密码交给它；你想改它的行为，只能反复改 prompt。最近这一周，好几个发布其实都在拆这三个痛点。\n\n主要来源：\nhttps://recursive.com/updates/introducing-recursive-flint\nhttps://huggingface.co/RecursiveSI/flint\nhttps://threadreaderapp.com/thread/2113013247209021918.html\nhttps://vercel.com/blog/making-every-harness-durable\nhttps://1password.com/blog/1password-for-ai-agents\nhttps://zhuanlan.zhihu.com/p/2095560295930508953\nhttps://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\nhttps://www.latent.space/p/claude-mods\nhttps://openai.com/index/openai-models-google-cloud/\nhttps://mistral.ai/news/voxtral-3/\nhttps://pytorch.org/blog/introducing-torchtpu/\nhttps://llm-d.ai/\nhttps://claude.com/resources/articles/claude-duet\nhttps://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\nhttps://vllm.ai/blog/2026-10-21-humming\nhttps://simedw.com/2026/10/21/world-model-terminal/",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI",
+          "Agent",
+          "tok",
+          "report",
+          "编程"
+        ]
+      },
+      "before": {
+        "title": "编程 Agent 正在基础设施化：本地 125 tok/s、断线续跑、密码不给它看",
+        "description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+        "tags": [
+          "一个知识点",
+          "开发者",
+          "AI",
+          "Agent",
+          "tok",
+          "report",
+          "编程"
+        ]
+      },
+      "check": {
+        "limits": {
+          "title_min": 6,
+          "title_limit": 16,
+          "description_limit": 1000,
+          "tag_limit": 10,
+          "combined_limit": 1000,
+          "name": "微信视频号",
+          "platform": "weixin_channels",
+          "tag_min": 0,
+          "tag_length_limit": 100,
+          "combined_label": "标题、简介和话题合计",
+          "counter": "codepoint",
+          "comment_limit": 250,
+          "comment_counter": "utf16"
+        },
+        "counts": {
+          "title": 16,
+          "description": 920,
+          "tags": 7,
+          "combined": 978,
+          "description_budget": 942
+        },
+        "issues": [],
+        "valid": true
+      },
+      "notes": [
+        "简介保留 16/20 条主要来源；完整出处保留在原发布包中。",
+        "章节时间保留在原发布包中。",
+        "标题使用原题中完整的开头分句，未截断型号或数字。"
+      ],
+      "references": [
+        {
+          "title": "Recursive Flint 发布文",
+          "url": "https://recursive.com/updates/introducing-recursive-flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "RecursiveSI/flint Hugging Face 模型页",
+          "url": "https://huggingface.co/RecursiveSI/flint",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude API 2026-10-21 Thread 摘要",
+          "url": "https://threadreaderapp.com/thread/2113013247209021918.html",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Vercel durable-harness",
+          "url": "https://vercel.com/blog/making-every-harness-durable",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "1Password for Agents",
+          "url": "https://1password.com/blog/1password-for-ai-agents",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek V4.1 Flash 大规模推理部署",
+          "url": "https://zhuanlan.zhihu.com/p/2095560295930508953",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "DeepSeek-V4.1-Flash-1017 Hugging Face 模型页",
+          "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "Claude Mods",
+          "url": "https://www.latent.space/p/claude-mods",
+          "date": "",
+          "kind": "",
+          "cited": true
+        },
+        {
+          "title": "OpenAI 模型进入 Google Cloud",
+          "url": "https://openai.com/index/openai-models-google-cloud/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Mistral Voxtral 3",
+          "url": "https://mistral.ai/news/voxtral-3/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "TorchTPU",
+          "url": "https://pytorch.org/blog/introducing-torchtpu/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "llm-d",
+          "url": "https://llm-d.ai/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude Duet",
+          "url": "https://claude.com/resources/articles/claude-duet",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Cerebras 部署万亿参数模型",
+          "url": "https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "vLLM Humming 量化推理 kernel",
+          "url": "https://vllm.ai/blog/2026-10-21-humming",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "WorldTUI：360M 模型假装成终端",
+          "url": "https://simedw.com/2026/10/21/world-model-terminal/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "Claude 文本水印",
+          "url": "https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "METR 红队测试 OpenAI agent 监控",
+          "url": "https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI PHP 漏洞协调披露",
+          "url": "https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/",
+          "date": "",
+          "kind": "",
+          "cited": false
+        },
+        {
+          "title": "OpenAI 融资背景",
+          "url": "https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+          "date": "",
+          "kind": "",
+          "cited": false
+        }
+      ],
+      "source_description": "你可以想象一个很常见的场景：你让 Codex 或 Claude Code 跑一个长任务，浏览器一关，任务没了。\n\n00:00 先问一个问题 Agent 还只是聊天框吗\n00:32 本地跑 40B 只激活 2 5B 125\n01:13 断线续跑 Agent 从进程变成 dur\n01:44 登录网站 但永远看不到密码\n02:12 用 TypeScript 实时改 Cla\n02:35 API 版本化和推理账本 长期跑的两本账\n03:24 收束 开发者该看哪六个指标\n\n参考来源（文稿引用）：\n· Recursive Flint 发布文 https://recursive.com/updates/introducing-recursive-flint\n· RecursiveSI/flint Hugging Face 模型页 https://huggingface.co/RecursiveSI/flint\n· Claude API 2026-10-21 Thread 摘要 https://threadreaderapp.com/thread/2113013247209021918.html\n· Vercel durable-harness https://vercel.com/blog/making-every-harness-durable\n· 1Password for Agents https://1password.com/blog/1password-for-ai-agents\n· DeepSeek V4.1 Flash 大规模推理部署 https://zhuanlan.zhihu.com/p/2095560295930508953\n· DeepSeek-V4.1-Flash-1017 Hugging Face 模型页 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· Claude Mods https://www.latent.space/p/claude-mods\n\n报告补充资料：\n· OpenAI 模型进入 Google Cloud https://openai.com/index/openai-models-google-cloud/\n· Mistral Voxtral 3 https://mistral.ai/news/voxtral-3/\n· TorchTPU https://pytorch.org/blog/introducing-torchtpu/\n· llm-d https://llm-d.ai/\n· Claude Duet https://claude.com/resources/articles/claude-duet\n· Cerebras 部署万亿参数模型 https://www.cerebras.ai/blog/how-we-deploy-trillion-parameter-frontier-models-on-cerebras\n· vLLM Humming 量化推理 kernel https://vllm.ai/blog/2026-10-21-humming\n· WorldTUI：360M 模型假装成终端 https://simedw.com/2026/10/21/world-model-terminal/\n· Claude 文本水印 https://www.oreilly.com/radar/the-latest-anthropic-claude-models-contain-ai-text-watermarks-what-does-this-mean-for-you\n· METR 红队测试 OpenAI agent 监控 https://metr.org/blog/2026-10-22-red-teaming-openai-agent-monitoring/\n· OpenAI PHP 漏洞协调披露 https://openai.com/index/coordinated-disclosure-of-critical-vulnerabilities/\n· OpenAI 融资背景 https://www.cnbc.com/2026/10/22/openai-funding-round-uae-investors.html",
+      "references_in_description": 16
+    }
+  }
+}

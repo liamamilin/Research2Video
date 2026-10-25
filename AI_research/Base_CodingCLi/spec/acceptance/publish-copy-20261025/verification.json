@@ -1,0 +1,51 @@
+{
+  "checked_at": "2026-10-25T19:23:10.776852",
+  "render_id": "18d2f1e12f4e41c887bab2f44357eb7b",
+  "script_id": "a844f43b55de4e6fb094f76092c2fc30",
+  "version": 1,
+  "history": [
+    {
+      "id": 4,
+      "description_chars": 426,
+      "saved_at": "2026-10-25T19:20:40+0800"
+    },
+    {
+      "id": 3,
+      "description_chars": 1844,
+      "saved_at": "2026-10-25T19:18:02+0800"
+    },
+    {
+      "id": 2,
+      "description_chars": 426,
+      "saved_at": "2026-10-25T19:17:06+0800"
+    },
+    {
+      "id": 1,
+      "description_chars": 1844,
+      "saved_at": "2026-10-25T19:17:06+0800"
+    }
+  ],
+  "final_description_chars": 426,
+  "sample_upload_tasks": 0,
+  "manual_restore_and_reload_checked": true,
+  "preview_does_not_overwrite_checked": true,
+  "backend_tests": 857,
+  "frontend_tests": 545,
+  "eslint": "PASS",
+  "frontend_build": "PASS",
+  "python_compile": "PASS",
+  "diff_check": "PASS",
+  "publish_copy_tests": 16,
+  "all_twenty_sources_visible_in_ui": true,
+  "final_ui_followup_tests": 54,
+  "commit_scope_validation": {
+    "base_commit": "0afe3ff1501706ba66d11c39268bca310a553311",
+    "isolated_from_other_worktree_changes": true,
+    "backend_passed": 834,
+    "backend_skipped": 1,
+    "frontend_files": 63,
+    "frontend_passed": 515,
+    "lint_passed": true,
+    "build_passed": true
+  }
+}

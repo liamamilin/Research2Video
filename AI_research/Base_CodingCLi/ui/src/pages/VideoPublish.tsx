@@ -9,9 +9,11 @@ import {
   recheckVideoScript,
   revealVideoRender,
   type Publication,
+  type Distribution,
   type Recheck,
   type VideoRender,
 } from "@/api/video";
+import { PLATFORM_NAMES, VISIBLE_PLATFORM_NAMES, PLATFORM_LINK_PLACEHOLDERS, isVisiblePlatform, platformFromLink } from "@/lib/distributions";
 import { ErrorState } from "@/components/ErrorState";
 import { usePageResource } from "@/lib/use-page-resource";
 import { errorMessage, useToast } from "@/lib/toast";
@@ -106,6 +108,7 @@ export function PublishPanel({
   canEdit = false,
   recheckEnabled = false,
   publications = [],
+  distributions = [],
   rechecks = [],
   onChanged,
 }: {
@@ -116,12 +119,19 @@ export function PublishPanel({
   canEdit?: boolean;
   recheckEnabled?: boolean;
   publications?: Publication[];
+  distributions?: Distribution[];
   rechecks?: Recheck[];
   onChanged?: () => void;
 }) {
   const toast = useToast();
   const loadPack = useCallback((signal: AbortSignal) => getPublishPack(scriptId, version, signal), [scriptId, version]);
   const { data: pack, error, reload } = usePageResource(loadPack);
+  const [platform, setPlatform] = useState("bilibili");
+  const [owner, setOwner] = useState("");
+  const [allHistory, setAllHistory] = useState(false);
+  const currentAccount = distributions.find(d => d.platform === platform && d.current_account);
+  const currentUid = currentAccount?.account_uid ?? "";
+  useEffect(() => { setOwner(currentUid); }, [currentUid, platform]);
   const [link, setLink] = useState("");
   const [day, setDay] = useState("");
   const [busy, setBusy] = useState(false);
@@ -162,7 +172,7 @@ export function PublishPanel({
   async function record() {
     setBusy(true);
     try {
-      await addPublication(scriptId, { url: link.trim(), version: pack?.version ?? version,
+      await addPublication(scriptId, { url: link.trim(), platform, account_uid: owner, version: pack?.version ?? version,
         ...(renderId ? { render_id: renderId } : {}), ...(day ? { published_on: day } : {}) });
       setLink("");
       setDay("");
@@ -276,34 +286,34 @@ export function PublishPanel({
         </div>
       ) : null}
 
-      <div className="space-y-2 border-t border-border pt-3">
+      <div id="publication-records" className="space-y-2 border-t border-border pt-3">
         <h3 className="text-sm font-medium">发布记录</h3>
-        <p className="text-xs text-text-muted">平台投稿确认公开后自动回填链接和发布日期。已在 B 站手动发布的视频，可在这里补录。</p>
-        {publications.map((p) => (
-          <div key={p.id} className="flex items-center gap-2 text-sm">
-            <span className="text-xs text-text-muted">{p.published_on}</span>
-            <a href={p.url} target="_blank" rel="noreferrer" className="text-accent hover:underline break-all flex-1">
-              {p.url}
-            </a>
-            {p.version ? <span className="text-xs text-text-muted">v{p.version}</span> : null}
-            {p.recorded_by === "platform-manager" ? <span className="badge border border-border text-xs">平台自动回写</span> : null}
-            {canEdit ? (
-              <button className="text-xs text-text-muted hover:text-danger" onClick={() => forget(p.id)}>
-                删除
-              </button>
-            ) : null}
-          </div>
-        ))}
+        <p className="text-xs text-text-muted">确认公开后自动回填。手动补录表示你确认已发布，会标注「未自动核验」。移除本地记录不会删除平台作品，也不会解除投稿防重。</p>
+        {publications.some(p => p.version == null) ? <p className="text-xs text-warning">有版本待核对的旧记录，可展开所有历史版本查看；未将它们归入当前版本。</p> : null}
+        <label className="text-xs flex items-center gap-2"><input type="checkbox" checked={allHistory} onChange={e => setAllHistory(e.target.checked)} />显示所有历史版本</label>
+        {Object.entries(PLATFORM_NAMES).map(([key, name]) => {
+          const records = publications.filter(p => (p.platform || "bilibili") === key && (allHistory || p.version === (pack.version ?? version)));
+          if (!records.length) return null;
+          return <div key={key} className="space-y-2 rounded border border-border p-3"><h4 className="text-sm font-medium">{name} · {records.length} 条作品</h4>{records.map(p => <div key={p.id} className="text-xs space-y-1">
+            <div className="flex flex-wrap items-center gap-2"><span>{p.published_on}</span><span>{p.version ? `v${p.version}` : "版本待核对"}</span><span>{p.account_name || (p.account_uid ? `UID ${p.account_uid}` : "账号待核对")}</span><span className="text-text-muted">{p.confirmed_at || p.recorded_by === "platform-manager" ? "平台自动确认" : "手动记录 · 未自动核验"}{p.confirmed_at && p.sources?.includes("manual") ? " · 曾手动补录" : ""}</span>{canEdit ? <button className="ml-auto text-text-muted hover:text-danger" onClick={() => forget(p.id)}>移除本地记录</button> : null}</div>
+            <a href={p.url} target="_blank" rel="noreferrer" className="text-accent hover:underline break-all">{p.url}</a>
+          </div>)}</div>;
+        })}
         {canEdit ? (
           <div className="space-y-2"><p className="text-xs text-text-muted">手动补录发布记录</p><div className="flex flex-wrap gap-2">
+            <label className="text-xs space-y-1"><span className="block">平台</span><select aria-label="补录平台" className="input w-auto" value={platform} onChange={e => setPlatform(e.target.value)}>{Object.entries(VISIBLE_PLATFORM_NAMES).map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></label>
+            <label className="text-xs space-y-1"><span className="block">账号</span><select aria-label="补录账号" className="input w-auto" value={owner} onChange={e => setOwner(e.target.value)}><option value="">账号待核对</option>{currentAccount ? <option value={currentAccount.account_uid}>{currentAccount.account_name || currentAccount.account_uid}</option> : null}</select></label>
+            <label className="text-xs space-y-1 flex-1 min-w-[16rem]"><span className="block">视频链接</span>
             <input
               className="input flex-1 min-w-[16rem]"
-              placeholder="B 站视频链接，例如 https://www.bilibili.com/video/BV..."
+              aria-label="补录视频链接"
+              placeholder={PLATFORM_LINK_PLACEHOLDERS[platform]}
               value={link}
-              onChange={(e) => setLink(e.target.value)}
+              onChange={e => { setLink(e.target.value); const detected=platformFromLink(e.target.value); if (detected && isVisiblePlatform(detected)) setPlatform(detected); }}
             />
-            <input className="input w-auto" type="date" aria-label="发布日期" value={day} onChange={(e) => setDay(e.target.value)} />
-            <button className="btn text-xs" disabled={busy || link.trim().length < 8} onClick={record}>
+            </label>
+            <label className="text-xs space-y-1"><span className="block">发布日期</span><input className="input w-auto" type="date" aria-label="发布日期" value={day} onChange={(e) => setDay(e.target.value)} /></label>
+            <button className="btn text-xs self-end" disabled={busy || link.trim().length < 8} onClick={record}>
               记录发布
             </button>
           </div></div>

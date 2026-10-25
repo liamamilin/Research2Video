@@ -27,6 +27,8 @@ import { ScriptSteps } from "@/components/ScriptSteps";
 import { ScriptIteration } from "@/components/ScriptIteration";
 import { TimeStamp } from "@/components/TimeStamp";
 import { ErrorState } from "@/components/ErrorState";
+import { DistributionSummary } from "@/components/DistributionSummary";
+import { publishedPlatformCount } from "@/lib/distributions";
 import { PublicationFlow } from "@/components/PublicationFlow";
 import { UPLOAD_LABEL } from "@/lib/platform-links";
 import { useAuthStore } from "@/lib/auth-store";
@@ -113,7 +115,7 @@ export function VideoScriptViewPage() {
     return () => { flight.current?.abort(); flight.current = null; };
   }, [load]);
 
-  const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || Boolean(detail.stage) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.platform_uploads?.some(task => ["QUEUED", "UPLOADING", "SUBMITTED"].includes(task.status)));
+  const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || Boolean(detail.stage) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.distributions?.some(row => ["QUEUED", "UPLOADING", "RUNNING", "SUBMITTED"].includes(row.task?.status ?? "") || (["kuaishou","xiaohongshu"].includes(row.platform) && row.task?.status === "UNKNOWN")));
   useEffect(() => {
     if (editing) return;
     const refresh = () => { if (!document.hidden) void load(); };
@@ -167,8 +169,7 @@ export function VideoScriptViewPage() {
     ?? publishVersions.find((v) => v === shown?.version) ?? publishVersions[0] ?? shown?.version;
   const publishingRender = completed.find((r) => r.version === publishingVersion && r.files?.some(file => file.name === "video.mp4")) ?? completed.find((r) => r.version === publishingVersion);
   const publishingUpload = detail.platform_uploads?.find(task => task.version === publishingVersion);
-  const currentPublished = currentPublications(detail).length > 0;
-  const currentUpload = detail.platform_uploads?.find(task => task.version === detail.current_version);
+
   const tabs: ScriptTab[] = !staged && !detail.renders.length && !detail.publications?.length
     ? []
     : detail.status === "APPROVED" || completed.length || detail.publications?.length
@@ -291,8 +292,8 @@ export function VideoScriptViewPage() {
       <div className="flex flex-wrap items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className={cn("badge border", currentPublished ? "bg-success/15 text-success border-success/30" : STATUS_CLASS[detail.status])}>{currentPublished ? "已发布" : STATUS_LABEL[detail.status]}</span>
-            {!currentPublished && currentUpload ? <span className="badge border border-border">{UPLOAD_LABEL[currentUpload.status] || currentUpload.status}</span> : null}
+            <span className={cn("badge border", STATUS_CLASS[detail.status])}>{STATUS_LABEL[detail.status]}</span>
+            <DistributionSummary rows={detail.distributions?.filter(d => d.version === detail.current_version)} publications={currentPublications(detail)} />
             <CredibilityBadge value={detail.credibility} />
             {detail.auto ? <span className="badge border border-border text-text-muted">自动流水线</span> : null}
             {detail.column ? <span className="text-xs text-text-muted">{detail.column.name}</span> : null}
@@ -555,7 +556,7 @@ export function VideoScriptViewPage() {
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="font-medium">发布版本</h2>
             {publishVersions.length ? <select className="input w-auto text-sm" aria-label="选择发布版本" value={publishingVersion} onChange={(e) => setPublishVersion(Number(e.target.value))}>
-              {publishVersions.map((v) => <option key={v} value={v}>文稿 v{v} · {(detail.publications ?? []).some(row => row.version === v) ? "已发布" : UPLOAD_LABEL[detail.platform_uploads?.find(task => task.version === v)?.status ?? ""] || "成片完成"}</option>)}
+              {publishVersions.map((v) => <option key={v} value={v}>文稿 v{v} · {publishedPlatformCount(detail.distributions?.filter(d => d.version === v), (detail.publications ?? []).filter(row => row.version === v)) ? `已发布至 ${publishedPlatformCount(detail.distributions?.filter(d => d.version === v), (detail.publications ?? []).filter(row => row.version === v))} 个平台` : UPLOAD_LABEL[detail.platform_uploads?.find(task => task.version === v)?.status ?? ""] || "成片完成"}</option>)}
             </select> : <span className="text-sm">文稿 v{publishingVersion} · 尚未出片</span>}
           </div>
           <p className="text-sm">{publishingRender?.title ?? shown?.title}</p>
@@ -564,7 +565,7 @@ export function VideoScriptViewPage() {
         </section>
       ) : null}
 
-      {tab === "publish" && publishingVersion ? <PublicationFlow scriptId={detail.id} version={publishingVersion} render={publishingRender} publications={publishingVersion === detail.current_version ? currentPublications(detail).map(row => ({ ...row, version: publishingVersion })) : detail.publications ?? []} upload={publishingUpload} canEdit={canEdit} /> : null}
+      {tab === "publish" && publishingVersion ? <PublicationFlow scriptId={detail.id} version={publishingVersion} render={publishingRender} publications={publishingVersion === detail.current_version ? currentPublications(detail).map(row => ({ ...row, version: publishingVersion })) : detail.publications ?? []} upload={publishingUpload} distributions={detail.distributions} onChanged={load} canEdit={canEdit} /> : null}
 
       {tab === "publish" && publishingRender ? (
         <RenderFolder render={publishingRender} canEdit={canEdit} />
@@ -580,6 +581,7 @@ export function VideoScriptViewPage() {
           canEdit={canEdit}
           recheckEnabled={Boolean(detail.column?.recheck) && detail.status === "APPROVED" && !detail.stage && publishingVersion === detail.approved_version}
           publications={detail.publications}
+          distributions={detail.distributions}
           rechecks={detail.rechecks}
           onChanged={load}
         />

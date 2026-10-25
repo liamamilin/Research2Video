@@ -36,6 +36,7 @@ class SettingsIn(Input):
 
 
 class UploadIn(Input):
+    account_uid: str = Field(default="", max_length=64)
     render_id: str = Field(min_length=1, max_length=64)
     title: str = Field(min_length=1, max_length=80)
     description: str = Field(max_length=2000)
