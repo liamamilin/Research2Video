@@ -1,0 +1,4 @@
+FROM qwen3-vl:8b-instruct-q4_K_M
+PARAMETER num_ctx 8192
+PARAMETER num_predict 800
+PARAMETER temperature 0

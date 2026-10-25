@@ -1,0 +1,54 @@
+{
+  "models": [
+    {
+      "name": "yanying-vision:8b",
+      "digest": "6253cfd7cc5e9e0d170b5084871146518f18c9d2f79d5d27c719d3d37df5f173",
+      "size": 6190971828,
+      "details": {
+        "parent_model": "qwen3-vl:8b-instruct-q4_K_M",
+        "format": "gguf",
+        "family": "qwen3vl",
+        "families": [
+          "qwen3vl",
+          "clip"
+        ],
+        "parameter_size": "8.2B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 262144,
+        "embedding_length": 4096
+      }
+    },
+    {
+      "name": "qwen3-vl:8b-instruct-q4_K_M",
+      "digest": "70e58e37beb15464e19aa903dedb2cba828b89c0fb186f75ff2738c7347b96eb",
+      "size": 6190971795,
+      "details": {
+        "parent_model": "dhiltgen/qwen3-vl:8b-instruct-q4_K_M-llamacpp",
+        "format": "gguf",
+        "family": "qwen3vl",
+        "families": [
+          "qwen3vl",
+          "clip"
+        ],
+        "parameter_size": "8.2B",
+        "quantization_level": "Q4_K_M",
+        "context_length": 262144,
+        "embedding_length": 4096
+      }
+    }
+  ],
+  "parameters": "temperature                    0\ntop_k                          20\ntop_p                          0.95\nnum_ctx                        8192\nnum_predict                    800",
+  "capabilities": [
+    "completion",
+    "vision",
+    "tools"
+  ],
+  "runtime": [
+    {
+      "name": "yanying-vision:8b",
+      "size": 6899787365,
+      "size_vram": 6899787365,
+      "context_length": 8192
+    }
+  ]
+}

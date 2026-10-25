@@ -18,6 +18,8 @@ python-dotenv>=1.0
 markdown>=3.5              # HTML export for reports
 nh3>=0.2.15                # sanitize that export (report bodies are untrusted)
 qrcode[pil]>=7.4,<9        # Bilibili account login QR image
+playwright>=1.48,<2        # Static public-page screenshots (install chromium separately)
+Pillow>=10,<13            # Validate preserved screenshot dimensions and format
 
 # Optional: keyless DuckDuckGo fallback for web search
 # duckduckgo-search>=6.0

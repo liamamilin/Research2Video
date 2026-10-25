@@ -1,0 +1,34 @@
+{
+  "capture": "PASS",
+  "register": "PASS",
+  "save": "PASS",
+  "reload": "PASS",
+  "page_errors": [],
+  "selection": {
+    "version": 1,
+    "chapter_hash": "ebf659d983361e2f99c36ffcb44c68e581e9dd8a6d5a258587b5587e829435b0",
+    "form": "dynamic_collage",
+    "engine_url": "http://127.0.0.1:8011",
+    "materials": [
+      {
+        "screenshot_id": "97aea9ba-e3a2-4941-826f-f9765819b901",
+        "caption": "官方截图功能说明，2026年10月25日获取",
+        "role": "reference",
+        "placements": [
+          {
+            "chapter_index": 0,
+            "paragraph_index": 1
+          }
+        ],
+        "image_id": "8e9f996d-5bcf-472c-8054-b3a2c3190e4f",
+        "source": {
+          "url": "https://playwright.dev/python/docs/screenshots",
+          "final_url": "https://playwright.dev/python/docs/screenshots",
+          "title": "Screenshots | Playwright Python",
+          "captured_at": "2026-10-25T12:31:58+00:00",
+          "sha256": "1b3c40ad9babe931a8e1a53df6cda5a8e6b0b8ed9295cf4283a11ecfa7ac6d7d"
+        }
+      }
+    ]
+  }
+}

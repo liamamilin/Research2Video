@@ -87,3 +87,43 @@ def test_music_recommendations_reuse_only_available_instrumental_candidates():
     result=recommend('原理科普','science_explainer',[],assets)
     assert [item['id'] for item in result['music']]==['generated','ambient_pad']
     assert result['automatic_changes'] is False
+
+
+def test_explicit_paragraph_mapping_is_validated_frozen_and_not_silently_reused_after_edit(tmp_path):
+    with TestClient(create_app(Settings(data_dir=tmp_path), start_worker=False, preflight=READY)) as c:
+        image = upload(c)['image_id']
+        material = {'image_id': image, 'caption': '官方功能页', 'role': 'detail',
+                    'placements': [{'chapter_index': 0, 'paragraph_index': 1}]}
+        request = {'input_mode': 'narration', 'chapters': [{'title': '功能说明', 'paragraphs': ['先介绍背景。', '这一段展示真实功能页。']}],
+                   'video_form': 'object_showcase', 'duration_mode': 'content', 'image_materials': [material]}
+        r = c.post('/api/jobs', json=request)
+        assert r.status_code == 202, r.text
+        jid = r.json()['job_id']
+        assert saved_input(c, jid)['image_materials'] == [material]
+        for placements in [[{'chapter_index': 1, 'paragraph_index': 0}], [{'chapter_index': 0, 'paragraph_index': 2}],
+                           [{'chapter_index': 0, 'paragraph_index': 0}] * 2, []]:
+            bad = {**request, 'image_materials': [{**material, 'placements': placements}]}
+            assert c.post('/api/jobs', json=bad).status_code == 422
+        bad = {k: v for k, v in request.items() if k not in {'chapters', 'input_mode'}}
+        assert c.post('/api/jobs', json={**bad, 'source_text': '不可对自动改写素材的讲稿假设段落位置。' * 4}).status_code == 422
+        store = c.app.state.store
+        store.claim_next(); store.mark_failed(jid, 1, 'PLAN', 'TEST', 'test', True)
+        edited = c.post(f'/api/jobs/{jid}/revisions', json={'mode': 'source', 'text': '修改之后原来的段落位置不能继续冒充正确。' * 4})
+        assert edited.status_code == 409 and edited.json()['detail']['code'] == 'IMAGE_MAPPING_REQUIRES_REVIEW'
+
+
+def test_focus_requires_valid_coordinates_and_registered_image_dimensions(tmp_path):
+    with TestClient(create_app(Settings(data_dir=tmp_path), start_worker=False, preflight=READY)) as client:
+        image = upload(client)
+        focus = {'width': 640, 'height': 480, 'regions': [{'x1': 100, 'y1': 200, 'x2': 800, 'y2': 600, 'label': '实际内容', 'style': 'box'}]}
+        request = {'source_text': '检查图片坐标与尺寸，保留原有图片登记和生成过程。' * 3, 'video_form': 'object_showcase',
+                   'duration_mode': 'content', 'image_materials': [{'image_id': image['image_id'], 'focus': focus}]}
+        for changed in [{**focus, 'width': 800}, {**focus, 'regions': [{**focus['regions'][0], 'x2': 50}]},
+                        {**focus, 'regions': [{**focus['regions'][0], 'x1': -10}]},
+                        {**focus, 'regions': [{**focus['regions'][0], 'style': 'execute'}]}]:
+            bad = copy.deepcopy(request); bad['image_materials'][0]['focus'] = changed
+            assert client.post('/api/jobs', json=bad).status_code == 422
+        assert client.get('/api/jobs').json()['total'] == 0
+        result = client.post('/api/jobs', json=request)
+        assert result.status_code == 202, result.text
+        assert saved_input(client, result.json()['job_id'])['image_materials'][0]['focus'] == focus

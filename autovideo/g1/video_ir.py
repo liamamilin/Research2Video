@@ -212,7 +212,10 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
             "required": ["preset"], "properties": {"preset": {"enum": list(creative_components)}}}
         schema["properties"]["style"]["properties"]["preset"] = {"const": "minimal_light"}
         scene_schema = copy.deepcopy(schema["properties"]["scenes"]["items"])
-        scene_schema["properties"]["component"] = {"const": creative_components[presentation["preset"]]}
+        allowed_creative = [creative_components[presentation["preset"]]]
+        if presentation["preset"] in {"object_showcase", "dynamic_collage"}:
+            allowed_creative.append("kinetic_text")
+        scene_schema["properties"]["component"] = {"enum": allowed_creative}
         scene_schema["properties"]["beats"]["items"]["properties"]["action"] = {"const": "reveal"}
         schema["properties"]["scenes"]["items"] = scene_schema
         schema["properties"]["scenes"].pop("maxItems", None)
@@ -224,7 +227,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         schema["properties"]["video"]["properties"]["duration_ms"]["minimum"] = 1
         schema["properties"]["scenes"].pop("maxItems", None)
         if not isinstance(ir.get("scenes"), list) or not ir["scenes"] or any(not isinstance(s, dict) or not (
-                (creative and s.get("component") == creative_components[presentation["preset"]])
+                (creative and s.get("component") in allowed_creative)
                 or (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"})
                 or (not information and s.get("component") == "flow_diagram" and isinstance(s.get("props"), dict) and "layout" in s["props"])) for s in ir["scenes"]):
             _fail("CONTENT_COMPONENT_UNSUPPORTED", "/scenes", "chapter extension requires laid-out flow diagrams or explicit information motion")
@@ -362,6 +365,10 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
             if scene["component"] in {"object_showcase", "material_collage"}:
                 if any(index >= len(props["images"]) for index in props["focus_indices"]):
                     _fail("MATERIAL_IMAGE_INDEX", f"{sp}/props/focus_indices", "focus must reference an image in this scene")
+                for item in props["images"]:
+                    for region in (item.get("focus") or {}).get("regions", []):
+                        if region["x2"] <= region["x1"] or region["y2"] <= region["y1"]:
+                            _fail("MATERIAL_FOCUS_BOUNDS", f"{sp}/props/images", "focus rectangle must have positive width and height")
         referenced = set(scene["narration_segment_ids"])
         if not referenced.issubset(segment_ids):
             _fail("MISSING_NARRATION_SEGMENT", f"{sp}/narration_segment_ids", "scene references a missing segment")

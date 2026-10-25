@@ -1,0 +1,21 @@
+{
+  "jobs_before": 280,
+  "stopped_pids": [
+    53473,
+    42801
+  ],
+  "engine_restart": {
+    "status": "ready",
+    "action": "started",
+    "pid": 8691,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "research_document_status": 503,
+  "research_screenshot_routes": true,
+  "engine_placement_contract": true,
+  "jobs_after": 280,
+  "research_after": 8693,
+  "final_research_document_status": 200,
+  "final_health": "PASS"
+}

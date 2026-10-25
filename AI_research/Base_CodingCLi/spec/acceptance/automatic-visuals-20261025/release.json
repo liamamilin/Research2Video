@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-25 22:21:25",
+  "research_url": "http://127.0.0.1:8775",
+  "research_pid": 60662,
+  "research_code_current": true,
+  "config_reloaded_on_each_render": true,
+  "policy": {
+    "enabled": true,
+    "version": 3,
+    "max_pages": 3,
+    "max_images": 3,
+    "max_seconds": 180,
+    "attempts_per_paragraph": 2,
+    "cache_hours": 6,
+    "semantic_review": false,
+    "max_model_calls": 3,
+    "ocr_review": true,
+    "vision_section": "visual_ai",
+    "vision_required": true,
+    "vision_timeout": 60
+  },
+  "engine_jobs": 282,
+  "engine_focus_contract_live": true,
+  "prior_research_rows_preserved": {
+    "scripts": 138,
+    "script_versions": 208,
+    "renders": 218
+  },
+  "model_available": true
+}

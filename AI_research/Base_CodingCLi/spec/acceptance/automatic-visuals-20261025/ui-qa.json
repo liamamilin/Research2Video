@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "render_id": "08dab03653714636a6720ec4e0c09d15",
+  "origin": "automatic",
+  "image_writes": [],
+  "page_errors": [],
+  "placements": [
+    {
+      "chapter_index": 0,
+      "paragraph_index": 1
+    }
+  ],
+  "no_capture_or_confirm_click": true
+}

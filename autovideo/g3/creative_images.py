@@ -106,6 +106,12 @@ def freeze_images(data_dir: Path, input_dir: Path, request: dict) -> dict:
     else:
         loaded = [load_image(data_dir, image_id) for image_id in ids]
     records = [record for record, _ in loaded]
+    by_id = {r['image_id']: r for r in records}
+    for material in request.get('image_materials', []):
+        focus = material.get('focus')
+        record = by_id.get(material['image_id'])
+        if focus and record and (focus['width'], focus['height']) != (record['width'], record['height']):
+            raise ImageImportError('重点坐标所用尺寸与已登记图片不一致，请重新获取图片位置')
     if request.get("slideshow_images_resolved") not in (None, records):
         raise ImageImportError("原版本的轮播图片已改变，请重新上传")
     folder = input_dir / "images"

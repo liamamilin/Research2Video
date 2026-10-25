@@ -1,0 +1,33 @@
+# 将这些字段合并到本机 config/system.yaml；保留原有 video.archive 等设置。
+# 安装 Playwright/Chrome，并先执行：
+# ollama pull qwen3-vl:8b-instruct-q4_K_M
+# ollama create yanying-vision:8b -f config/visual_models/Qwen3VL8B.Modelfile
+visual_ai:
+  model: yanying-vision:8b
+  base_url: http://127.0.0.1:11434/v1
+  api_key_env: ""
+  timeout: 60
+  request_timeout: 60
+  max_tokens: 1000
+  temperature: 0
+  max_retries: 0
+  stream: false
+  extra_body:
+    response_format:
+      type: json_object
+
+video:
+  visual_materials:
+    enabled: true
+    version: 3
+    max_pages: 3
+    max_images: 3
+    max_seconds: 180
+    attempts_per_paragraph: 2
+    cache_hours: 6
+    semantic_review: false
+    max_model_calls: 3
+    ocr_review: true
+    vision_section: visual_ai
+    vision_required: true
+    vision_timeout: 60

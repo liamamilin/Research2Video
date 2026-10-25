@@ -136,7 +136,10 @@ def attach_materials(board: dict, assets: list[dict], saved: dict) -> dict:
     for asset, record in zip(assets, records):
         row = annotations.get(record['image_id'], {})
         images.append({'image_path': asset['path'], 'image_asset_id': asset['id'],
-                       'caption': row.get('caption', ''), 'role': row.get('role', 'reference')})
+                       'caption': row.get('caption', ''), 'role': row.get('role', 'reference'),
+                       **({'focus': row['focus']} if row.get('focus') else {})})
+    if any(row.get('placements') for row in annotations.values()):
+        return _attach_mapped_materials(board, assets, images, saved)
     attach_images(board, assets)
     positions = {asset['id']: i for i, asset in enumerate(assets)}
     for scene in board['scenes']:
@@ -144,3 +147,44 @@ def attach_materials(board: dict, assets: list[dict], saved: dict) -> dict:
         scene['props'].update(images=images, focus_indices=[positions[item['image_asset_id']] for item in assigned])
     return {**board, 'image_assets': assets,
             'material_assignment': 'submitted order or complete explicit picture tour; captions/roles supplied by caller; no pixel interpretation'}
+
+
+def _attach_mapped_materials(board: dict, assets: list[dict], images: list[dict], saved: dict) -> dict:
+    """Resolve authored paragraph positions through the exact same trusted splitter as narration."""
+    from g2.authored_script import split_script
+
+    chapters = saved.get('chapters') or []
+    if saved.get('input_mode') != 'narration' or not chapters:
+        raise ValueError('段落配图需要分章讲稿')
+    segment_owner = {}
+    for ci, chapter in enumerate(chapters):
+        count = 0
+        for pi, paragraph in enumerate(chapter['paragraphs']):
+            for text in split_script(paragraph):
+                count += 1
+                segment_owner[f'c{ci + 1}_n{count}'] = ((ci, pi), text)
+    flattened = [sid for scene in board['scenes'] for sid in scene['narration_segment_ids']]
+    if flattened != list(segment_owner):
+        raise ValueError('配图段落与最终讲稿分句不一致，请重新确认')
+    by_paragraph = {}
+    for image, record in zip(images, saved['slideshow_images_resolved']):
+        material = next(row for row in saved['image_materials'] if row['image_id'] == record['image_id'])
+        if not material.get('placements'):
+            raise ValueError('每张图片都须指定段落')
+        for placement in material['placements']:
+            key = (placement['chapter_index'], placement['paragraph_index'])
+            if min(key) < 0 or key[0] >= len(chapters) or key[1] >= len(chapters[key[0]]['paragraphs']):
+                raise ValueError('配图段落不存在')
+            by_paragraph.setdefault(key, []).append(image)
+    for scene in board['scenes']:
+        owners = {segment_owner[sid][0] for sid in scene['narration_segment_ids']}
+        if len(owners) != 1 or scene['props']['text'] != ''.join(segment_owner[sid][1] for sid in scene['narration_segment_ids']):
+            raise ValueError('配图场景必须准确对应一个讲稿段落')
+        chosen = by_paragraph.get(next(iter(owners)), [])
+        if chosen:
+            scene['props'].update(images=chosen, focus_indices=list(range(len(chosen))))
+        else:
+            scene['component'] = 'kinetic_text'
+            scene['props'] = {k: scene['props'][k] for k in ('title', 'text')}
+    return {**board, 'image_assets': assets,
+            'material_assignment': 'explicit authored chapter/paragraph positions; unassigned paragraphs use text; no semantic inference'}

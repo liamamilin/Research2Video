@@ -43,7 +43,7 @@ _lock = threading.Lock()
 
 _SCRIPT_JSON = ("topic",)
 _VERSION_JSON = ("sections", "length_check", "meta")
-_RENDER_JSON = ("request", "artifacts", "timings")
+_RENDER_JSON = ("request", "artifacts", "timings", "visuals", "submission_request")
 
 
 def db_path() -> str:
@@ -180,6 +180,10 @@ def init_db() -> None:
                 conn.execute(f"ALTER TABLE {table} ADD COLUMN heartbeat_at REAL")
         if "timings" not in {r[1] for r in conn.execute("PRAGMA table_info(renders)")}:
             conn.execute("ALTER TABLE renders ADD COLUMN timings TEXT NOT NULL DEFAULT '{}'")
+        render_columns = {r[1] for r in conn.execute("PRAGMA table_info(renders)")}
+        for name in ("visuals", "submission_request"):
+            if name not in render_columns:
+                conn.execute(f"ALTER TABLE renders ADD COLUMN {name} TEXT NOT NULL DEFAULT '{{}}'")
         columns = {r[1] for r in conn.execute("PRAGMA table_info(scripts)")}
         if "stage" not in columns:
             conn.execute("ALTER TABLE scripts ADD COLUMN stage TEXT")
@@ -709,17 +713,18 @@ class ActiveRenderError(RuntimeError):
 
 
 def create_render(script_id: str, version: int, *, title: str, source_text: str,
-                  source_sha256: str, request: dict) -> dict:
+                  source_sha256: str, request: dict, visuals: dict | None = None) -> dict:
     now = _now()
     render_id = uuid.uuid4().hex
     try:
         with connect(write=True) as conn:
             conn.execute(
                 "INSERT INTO renders (id, script_id, version, status, title, source_text,"
-                " source_sha256, request, created_at, updated_at)"
-                " VALUES (?, ?, ?, 'SUBMITTING', ?, ?, ?, ?, ?, ?)",
+                " source_sha256, request, visuals, created_at, updated_at)"
+                " VALUES (?, ?, ?, 'SUBMITTING', ?, ?, ?, ?, ?, ?, ?)",
                 (render_id, script_id, version, title, source_text, source_sha256,
-                 json.dumps({**request, "idempotency_key": f"research:{render_id}"}, ensure_ascii=False), now, now),
+                 json.dumps({**request, "idempotency_key": f"research:{render_id}"}, ensure_ascii=False),
+                 json.dumps(visuals or {}, ensure_ascii=False), now, now),
             )
     except sqlite3.IntegrityError as exc:
         raise ActiveRenderError("这篇文稿已有进行中的出片任务") from exc
@@ -793,3 +798,19 @@ def update_render(render_id: str, **fields: Any) -> None:
     assignments = ", ".join(f"{k} = ?" for k in fields)
     with connect(write=True) as conn:
         conn.execute(f"UPDATE renders SET {assignments} WHERE id = ?", (*fields.values(), render_id))
+
+
+def freeze_render_submission(render_id: str, request: dict, visuals: dict) -> dict:
+    """Freeze the effective payload once, before any potentially unanswered submit."""
+    with connect(write=True) as conn:
+        conn.execute("UPDATE renders SET submission_request=?, visuals=?, updated_at=? "
+                     "WHERE id=? AND submission_request='{}' AND submit_started_at IS NULL",
+                     (json.dumps(request, ensure_ascii=False), json.dumps(visuals, ensure_ascii=False), _now(), render_id))
+    return get_render(render_id)
+
+
+def latest_render_visuals(script_id: str, version: int) -> dict | None:
+    with connect() as conn:
+        row = conn.execute("SELECT id,visuals FROM renders WHERE script_id=? AND version=? AND visuals!='{}' "
+                           "ORDER BY created_at DESC, rowid DESC LIMIT 1", (script_id, version)).fetchone()
+    return {"render_id": row["id"], **json.loads(row["visuals"])} if row else None

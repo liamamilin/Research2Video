@@ -1,0 +1,24 @@
+{
+  "engine_data": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-automatic-visuals/1e91b641a38b446193dedc0918ece256",
+  "fixtures_labelled": true,
+  "cases": [
+    {
+      "case": "continuous-focus",
+      "job_id": "26ddb542-0f1e-45d7-91e0-6c94ffb8fc05",
+      "status": "PASS",
+      "seconds": 13.12,
+      "full_decode": "PASS",
+      "real_tts": true,
+      "scene_count": 1
+    },
+    {
+      "case": "side-by-side",
+      "job_id": "bd92cd00-d764-4f6c-84e8-f05ff5610aae",
+      "status": "PASS",
+      "seconds": 11.008,
+      "full_decode": "PASS",
+      "real_tts": true,
+      "scene_count": 1
+    }
+  ]
+}

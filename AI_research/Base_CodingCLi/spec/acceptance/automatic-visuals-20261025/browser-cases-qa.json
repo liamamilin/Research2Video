@@ -1,0 +1,71 @@
+{
+  "kind": "controlled HTML, real Chrome and native OCR",
+  "cases": [
+    {
+      "case": "monthly_price",
+      "accepted": true,
+      "passed": true,
+      "reason": "文字与真实像素复核通过"
+    },
+    {
+      "case": "amount_mismatch",
+      "accepted": false,
+      "passed": true,
+      "reason": "没有匹配的截图区域：价格金额或币种与讲稿不一致"
+    },
+    {
+      "case": "currency_mismatch",
+      "accepted": false,
+      "passed": true,
+      "reason": "没有匹配的截图区域：价格金额或币种与讲稿不一致"
+    },
+    {
+      "case": "annual_condition",
+      "accepted": false,
+      "passed": true,
+      "reason": "没有匹配的截图区域：区域存在讲稿没有确认的年付条件"
+    },
+    {
+      "case": "tier_mismatch",
+      "accepted": false,
+      "passed": true,
+      "reason": "没有匹配的截图区域：价格套餐与讲稿不一致"
+    },
+    {
+      "case": "product_mismatch",
+      "accepted": false,
+      "passed": true,
+      "reason": "没有匹配的截图区域：页面或区域缺少讲稿所讲的产品实体"
+    },
+    {
+      "case": "version_mismatch",
+      "accepted": false,
+      "passed": true,
+      "reason": "没有匹配的截图区域：产品名称或版本与讲稿不一致"
+    },
+    {
+      "case": "login",
+      "accepted": false,
+      "passed": true,
+      "reason": "页面需要登录"
+    },
+    {
+      "case": "challenge",
+      "accepted": false,
+      "passed": true,
+      "reason": "页面要求验证或拒绝访问"
+    },
+    {
+      "case": "occluded",
+      "accepted": false,
+      "passed": true,
+      "reason": "相关区域被弹窗或其他页面元素遮挡"
+    },
+    {
+      "case": "pixel_price_changed",
+      "accepted": false,
+      "passed": true,
+      "reason": "图片价格复核失败：价格金额或币种与讲稿不一致"
+    }
+  ]
+}

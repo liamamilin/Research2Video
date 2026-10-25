@@ -38,6 +38,7 @@ import { currentPublications, nextStep, renderForVersion, TAB_LABEL, type Script
 import { ChecksPanel, DescriptionPanel, FactChips, IssueList, PlanPanel, StylePanel } from "./VideoAdaptation";
 import { PublishPanel, RenderFolder } from "./VideoPublish";
 import { STATUS_CLASS, STATUS_LABEL, minutes } from "./VideoScripts";
+import { ScriptScreenshots } from "@/components/ScriptScreenshots";
 
 const EVIDENCE: Record<Evidence, { label: string; cls: string }> = {
   CITED: { label: "有出处", cls: "bg-success/15 text-success border-success/30" },
@@ -465,6 +466,7 @@ export function VideoScriptViewPage() {
         </section>
       ) : null}
 
+      {shown && !editing && (tab === "draft" || tab === "video") ? <ScriptScreenshots key={`${detail.id}-${shown.version}-${renderForVersion(detail, shown.version)?.id ?? ""}`} id={detail.id} version={shown.version} canEdit={writable && ["DRAFT", "APPROVED"].includes(detail.status)} /> : null}
       {detail.report_id && tab === "draft" ? (
         <details className="card" onToggle={(e) => setReuseOpen(e.currentTarget.open)}>
           <summary className="p-3 cursor-pointer text-xs text-text-muted">沿用这份研究，查看其他文稿或另写一篇</summary>
@@ -688,6 +690,7 @@ function RenderPanel({
           正在后台制作，完成后会自动回传，可以离开此页。
         </p>
       ) : null}
+      {latest?.visuals ? <p className="text-xs text-text-muted">配图：{latest.visuals.reason}</p> : null}
       {latest && (latest.status === "FAILED" || latest.status === "CANCELLED") ? (
         <p className="text-danger">
           {latest.error_code ? <span className="font-mono text-xs mr-2">{latest.error_code}</span> : null}

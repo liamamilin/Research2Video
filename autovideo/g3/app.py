@@ -122,11 +122,54 @@ class ContentNotice(BaseModel):
     message: str = Field(min_length=1, max_length=120)
 
 
+class ImagePlacement(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    chapter_index: int = Field(ge=0)
+    paragraph_index: int = Field(ge=0)
+
+
+class ScreenshotSource(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    url: str = Field(min_length=1, max_length=2048)
+    final_url: str = Field(min_length=1, max_length=2048)
+    title: str = Field(max_length=300)
+    captured_at: str = Field(max_length=40)
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class ImageFocusRegion(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    x1: int = Field(ge=0, le=1000)
+    y1: int = Field(ge=0, le=1000)
+    x2: int = Field(ge=0, le=1000)
+    y2: int = Field(ge=0, le=1000)
+    label: str = Field(default="", max_length=32)
+    style: Literal["box", "circle", "underline", "highlight"] = "box"
+
+    @model_validator(mode="after")
+    def valid_rectangle(self):
+        if self.x2 <= self.x1 or self.y2 <= self.y1:
+            raise ValueError("重点区域须为图片内的有效矩形")
+        if any(ord(c) < 32 or ord(c) == 127 for c in self.label):
+            raise ValueError("重点说明须为单行文字")
+        return self
+
+
+class ImageFocus(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    width: int = Field(ge=128, le=8192)
+    height: int = Field(ge=128, le=8192)
+    regions: list[ImageFocusRegion] = Field(min_length=1, max_length=3)
+
+
 class ImageMaterial(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     image_id: str
     caption: str = Field(default="", max_length=80)
     role: Literal["reference", "overall", "detail", "comparison"] = "reference"
+    placements: list[ImagePlacement] | None = Field(default=None, min_length=1, max_length=100)
+    source: ScreenshotSource | None = None
+    focus: ImageFocus | None = None
 
     @field_validator("caption")
     @classmethod
@@ -262,6 +305,16 @@ class CreateJobRequest(BaseModel):
             if len(set(ids)) != len(ids) or (self.slideshow_images and self.slideshow_images != ids):
                 raise ValueError("图片素材编号重复或与图片清单不一致")
             self.slideshow_images = ids
+            mapped = [item.placements is not None for item in self.image_materials]
+            if any(mapped):
+                if not all(mapped) or self.input_mode != "narration" or not self.chapters:
+                    raise ValueError("段落配图须全部明确指定 placements，并使用分章讲稿模式")
+                for item in self.image_materials:
+                    positions = [(p.chapter_index, p.paragraph_index) for p in item.placements]
+                    if len(set(positions)) != len(positions) or any(
+                        c >= len(self.chapters) or p >= len(self.chapters[c].paragraphs) for c, p in positions
+                    ):
+                        raise ValueError("图片须对应讲稿中存在且不重复的章节和段落")
         if any(n.chapter_index is not None and (self.chapters is None or n.chapter_index >= len(self.chapters)) for n in self.content_notices):
             raise ValueError("核实提示须引用讲稿中存在的章节")
         if self.package is not None and self.packaging is not None:
@@ -725,7 +778,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
     def get_creative_recommendations(request: RecommendationRequest):
         from g2.creative_recommendations import recommend
         try:
-            images = [item.model_dump() for item in request.image_materials]
+            images = [item.model_dump(exclude_none=True) for item in request.image_materials]
             if len({row['image_id'] for row in images}) != len(images):
                 raise ImageImportError('图片素材不能重复')
             for row in images:
@@ -749,6 +802,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
     @application.post("/api/jobs", status_code=202)
     def create_job(request: CreateJobRequest):
         payload = request.model_dump()
+        payload["image_materials"] = [item.model_dump(exclude_none=True) for item in request.image_materials]
         payload["_production_submitted"] = {k: v for k, v in request._submitted.items()
                                             if k in {"production_recipe", "production_context", "package", "production_mode", "visual_style", "video_form", "duration_mode", "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music"}}
         payload["title"] = request.title or "".join(request.source_text.split())[:28] or "未命名视频"
@@ -841,6 +895,8 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
             if parent["status"] not in {"COMPLETED", "FAILED", "CANCELLED"}:
                 raise _error(409, "REVISION_NOT_ALLOWED", "请在当前任务结束后创建修订版。")
             draft = store.editable_content(job_id)
+            if any(item.get("placements") for item in draft["options"].get("image_materials", [])):
+                raise _error(409, "IMAGE_MAPPING_REQUIRES_REVIEW", "此任务有明确的段落配图。修改讲稿后请在研究侧重新确认配图并新建任务；声音、倍速和配乐仍可单独修订。")
             if request.mode == "narration" and not draft["narration_text"]:
                 raise _error(409, "NARRATION_UNAVAILABLE", "本任务暂无可修订讲稿，请先修改原稿。")
             readiness = preflight(settings)
@@ -867,6 +923,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
                 except ValidationError as exc:
                     raise _error(422, "REVISION_INPUT_INVALID", str(exc.errors()[0]["msg"])) from exc
                 payload.update({k: v for k, v in checked.model_dump().items() if k not in {"package", "packaging", "sources", "production_recipe", "background_music"}})
+                payload["image_materials"] = [item.model_dump(exclude_none=True) for item in checked.image_materials]
             if payload["use_draw_things"] and not readiness.get("checks", {}).get("draw_things"):
                 raise _error(503, "DRAW_THINGS_NOT_READY", "Draw Things 尚未连接。")
             if payload["video_form"] == "process_diagram" and not readiness.get("checks", {}).get("diagram_layout"):

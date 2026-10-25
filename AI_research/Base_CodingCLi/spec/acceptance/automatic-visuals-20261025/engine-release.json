@@ -1,0 +1,13 @@
+{
+  "engine_restart": {
+    "status": "ready",
+    "action": "started",
+    "pid": 62283,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "old_pid": 8691,
+  "existing_jobs": 282,
+  "existing_ids_preserved": true,
+  "focus_contract_live": true
+}

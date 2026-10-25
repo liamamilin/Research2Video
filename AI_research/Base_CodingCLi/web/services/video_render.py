@@ -36,6 +36,7 @@ from core.video import sources as video_sources
 from core.video import store
 from core.video.audience_copy import submission_problem
 from core.video.autovideo import ARTIFACT_NAME, AutoVideoClient, AutoVideoError, AutoVideoUnreachable
+from core.video.screenshots import CHAPTER_TITLE_MAX, chapters as authored_chapters
 from web.services import video_workflow
 from web.settings import get_settings
 
@@ -85,23 +86,13 @@ def files_dir(render_id: str) -> Path:
     return Path(get_settings().paths.state_dir) / "video_renders" / render_id
 
 
-#: AutoVideo's limit on a chapter title (shown on screen, never voiced).
-CHAPTER_TITLE_MAX = 32
-
-
 def chapters(version: dict) -> list[dict]:
     """The approved script as AutoVideo narration chapters.
 
     Only spoken text goes over: citations and review notes are production
     metadata. Titles are shown as chapter labels, not read aloud.
     """
-    out = []
-    for section in version["sections"]:
-        paragraphs = [p["text"].strip() for p in section["paragraphs"] if p["text"].strip()]
-        if paragraphs:
-            title = " ".join(section["title"].split())[:CHAPTER_TITLE_MAX] or "未命名"
-            out.append({"title": title, "paragraphs": paragraphs})
-    return out
+    return authored_chapters(version)
 
 
 def narration_source(chapter_list: list[dict]) -> tuple[str, str]:
@@ -327,7 +318,15 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
             request["production_mode"] = production_mode
             if production_mode == "fast":
                 request.update(video_form="information_cards", visual_style="editorial_light")
+    from core.video import screenshots
     try:
+        materials = screenshots.render_materials(script["id"], version, get_client().base_url)
+        if materials:
+            # Explicit editorial choices override recipe defaults only for this
+            # render. Fast cards cannot accept images; reject that explicit choice.
+            if production_mode == "fast":
+                raise RenderError("当前版本已选择段落配图，请用标准制作；快速卡片不接收图片")
+            request.update(materials)
         if recover_download:
             previous = store.list_renders(script["id"])
             latest = previous[0] if previous else None
@@ -340,9 +339,17 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         problem = submission_problem(version)
         if problem:
             raise RenderError(problem)
+        from core.video import visual_materials
+        try:
+            listed = video_sources.report_sources(video_workflow.report_of(script), fallback=True) if script.get("report_path") else []
+        except (OSError, ValueError, KeyError, TypeError):
+            listed = []
+        visuals = visual_materials.intent(script, version, request, _video_config().get("visual_materials"), listed)
         return store.create_render(script["id"], version_no, title=title, source_text=text,
-                                   source_sha256=sha, request=request)
+                                   source_sha256=sha, request=request, visuals=visuals)
     except store.ActiveRenderError as exc:
+        raise RenderError(str(exc)) from exc
+    except screenshots.ScreenshotError as exc:
         raise RenderError(str(exc)) from exc
 
 
@@ -426,6 +433,9 @@ def _advance(render_id: str, client: AutoVideoClient) -> str:
         return render["status"]
     job_id = render["autovideo_job_id"]
     if job_id is None:
+        if not render["submit_started_at"]:
+            from web.services import video_visuals
+            render = video_visuals.freeze(render, client)
         job_id = _reconcile(render, client) if render["submit_started_at"] else _submit(render, client)
         if job_id is None:
             return "FAILED"
@@ -444,7 +454,8 @@ def _submit(render: dict, client: AutoVideoClient) -> Optional[str]:
         return None
     started = datetime.now(timezone.utc)
     store.update_render(render["id"], submit_started_at=started.isoformat())
-    payload = dict(render["request"])
+    from web.services.video_visuals import submission
+    payload = submission(render)
     if payload.get("input_mode") != "narration":
         payload["source_text"] = render["source_text"]
     try:

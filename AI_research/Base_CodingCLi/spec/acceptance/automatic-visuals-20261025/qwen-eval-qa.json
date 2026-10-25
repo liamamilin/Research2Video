@@ -1,0 +1,110 @@
+{
+  "model": "yanying-vision:8b",
+  "real_local_vision": true,
+  "cases": [
+    {
+      "case": "public_feature_match",
+      "image": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/spec/acceptance/automatic-visuals-20261025/source-region.png",
+      "expected_accepted": true,
+      "accepted": true,
+      "seconds": 21.767,
+      "reason": "图片展示Playwright截取单个元素截图功能，与段落c1p2内容完全匹配。",
+      "review": {
+        "state": "passed",
+        "model": "yanying-vision:8b",
+        "reason": "图片展示Playwright截取单个元素截图功能，与段落c1p2内容完全匹配。",
+        "usage": {
+          "prompt_tokens": 1485,
+          "completion_tokens": 219,
+          "total_tokens": 1704
+        },
+        "summary": "展示Playwright如何截取单个元素的截图，代码示例为page.locator(\".header\").screenshot(path=\"screenshot.png\")。",
+        "visible_text": "Element screenshot\nSometimes it is useful to take a screenshot of a single element.\nSync  Async\npage.locator(\".header\").screenshot(path=\"screenshot.png\")",
+        "paragraph_ids": [
+          "c1p2"
+        ],
+        "focus": {
+          "x1": 37,
+          "y1": 200,
+          "x2": 637,
+          "y2": 800
+        },
+        "focus_reason": "聚焦展示元素截图功能及代码示例，与段落c1p2中'Playwright 支持截取页面中的指定元素'语义完全一致。",
+        "claim_sha256": "153c5a46b1034cfecc786eff3875a253692cfc0ddc13c171d6f9e9de54dedf65"
+      },
+      "model_calls": 1,
+      "semantic_completed": true,
+      "passed": true
+    },
+    {
+      "case": "feature_is_not_a_price_table",
+      "image": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/spec/acceptance/automatic-visuals-20261025/source-region.png",
+      "expected_accepted": false,
+      "accepted": false,
+      "seconds": 18.643,
+      "reason": "图片内容没有匹配当前讲解段落，保留文字画面",
+      "review": {},
+      "model_calls": 1,
+      "semantic_completed": true,
+      "passed": true
+    },
+    {
+      "case": "price_match",
+      "image": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/automatic_visual_acceptance/20261025/browser-cases-final/monthly_price/capture.png",
+      "expected_accepted": true,
+      "accepted": true,
+      "seconds": 15.641,
+      "reason": "图片明确展示Atlas Pro月付价格为$20，与段落c1p3的描述一致。",
+      "review": {
+        "state": "passed",
+        "model": "yanying-vision:8b",
+        "reason": "图片明确展示Atlas Pro月付价格为$20，与段落c1p3的描述一致。",
+        "usage": {
+          "prompt_tokens": 1503,
+          "completion_tokens": 183,
+          "total_tokens": 1686
+        },
+        "summary": "Atlas Pro 月付价格为20美元，面向个人创作者提供清晰的产品计划。",
+        "visible_text": "Atlas Pro pricing\n$20 per month\nThis service offers a clear product plan for individual creators. Review the billing details and available features before choosing a subscription.",
+        "paragraph_ids": [
+          "c1p3"
+        ],
+        "focus": {
+          "x1": 10,
+          "y1": 300,
+          "x2": 990,
+          "y2": 800
+        },
+        "focus_reason": "聚焦显示价格和产品描述，与段落c1p3内容完全匹配。",
+        "claim_sha256": "ec6177bba8f05c7de5c3e41b3680e9802dc1bcf10d2c65fb3827bbc98c9a6a90"
+      },
+      "model_calls": 1,
+      "semantic_completed": true,
+      "passed": true
+    },
+    {
+      "case": "price_is_not_a_feature",
+      "image": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/automatic_visual_acceptance/20261025/browser-cases-final/monthly_price/capture.png",
+      "expected_accepted": false,
+      "accepted": false,
+      "seconds": 15.467,
+      "reason": "图片内容没有匹配当前讲解段落，保留文字画面",
+      "review": {},
+      "model_calls": 1,
+      "semantic_completed": true,
+      "passed": true
+    },
+    {
+      "case": "wrong_visible_amount",
+      "image": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/automatic_visual_acceptance/20261025/browser-cases-final/pixel_price_changed/capture.png",
+      "expected_accepted": false,
+      "accepted": false,
+      "seconds": 13.464,
+      "reason": "视觉模型检查未通过：图片中显示的月付价格为$25，与讲稿中c1p3的'每月20美元'矛盾，因此不可用。",
+      "review": {},
+      "model_calls": 1,
+      "semantic_completed": true,
+      "passed": true
+    }
+  ]
+}

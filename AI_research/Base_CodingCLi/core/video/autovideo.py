@@ -104,6 +104,18 @@ class AutoVideoClient:
     def create_job(self, payload: dict) -> dict:
         return self._request("POST", "/api/jobs", json=payload)
 
+    def upload_creative_image(self, raw: bytes, filename: str, *, timeout: float | None = None) -> dict:
+        """Register already acquired PNG bytes; the engine never fetches a remote image URL."""
+        from uuid import UUID
+        result = self._request("POST", "/api/creative-images", files={"file": (filename, raw, "image/png")},
+                               **({"timeout": timeout} if timeout is not None else {}))
+        try:
+            if str(UUID(result["image_id"])) != result["image_id"]:
+                raise ValueError()
+        except (KeyError, ValueError, TypeError, AttributeError) as exc:
+            raise AutoVideoError(502, "BAD_IMAGE_RESPONSE", "AutoVideo 未返回有效的图片编号") from exc
+        return result
+
     def get_job(self, job_id: str) -> dict:
         return self._request("GET", f"/api/jobs/{job_id}")
 

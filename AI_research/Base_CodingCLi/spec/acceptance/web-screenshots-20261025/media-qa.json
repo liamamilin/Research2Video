@@ -1,0 +1,46 @@
+{
+  "source": {
+    "url": "https://playwright.dev/python/docs/screenshots",
+    "final_url": "https://playwright.dev/python/docs/screenshots",
+    "title": "Screenshots | Playwright Python",
+    "mode": "crop",
+    "selector": "",
+    "clip": {
+      "x": 320,
+      "y": 120,
+      "width": 1040,
+      "height": 640
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "captured_at": "2026-10-25T12:28:07+00:00"
+  },
+  "results": [
+    {
+      "form": "object_showcase",
+      "job_id": "e41c6fe9-65d8-4ddb-bfa8-0ffdd5814d0a",
+      "video": "/private/tmp/yanying-screenshot-smoke-20261025-run2/object_showcase/video.mp4",
+      "sha256": "c56925c27d9b6055d0f32c34c3f2b96bcb3894ffe92a984ce25f26f011400240",
+      "duration_seconds": 6.4,
+      "frames": 192,
+      "decode": "PASS",
+      "assignment": "PASS",
+      "audio": "silent timing fixture",
+      "real_llm": false
+    },
+    {
+      "form": "dynamic_collage",
+      "job_id": "6c51ee60-6a85-44a6-a875-37966b4771af",
+      "video": "/private/tmp/yanying-screenshot-smoke-20261025-run2/dynamic_collage/video.mp4",
+      "sha256": "b5e631f52ebe939cb695e083140fec519ac9228527b0ee24c22eca7c7c3f6fa1",
+      "duration_seconds": 6.4,
+      "frames": 192,
+      "decode": "PASS",
+      "assignment": "PASS",
+      "audio": "silent timing fixture",
+      "real_llm": false
+    }
+  ]
+}

@@ -1,0 +1,222 @@
+{
+  "status": "PASS",
+  "render_id": "08dab03653714636a6720ec4e0c09d15",
+  "engine_job_id": "d544161f-743e-42b6-b609-2ae3ef240e7b",
+  "mapped_scenes": 1,
+  "text_scenes": 2,
+  "verified_artifacts": 27,
+  "real_tts": true,
+  "voice": "zf_xiaoxiao",
+  "real_worker": true,
+  "source": "https://playwright.dev/python/docs/screenshots",
+  "state_files": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/automatic_visual_acceptance/20261025/real-chain/state/video_renders/08dab03653714636a6720ec4e0c09d15",
+  "semantic": {
+    "state": "passed",
+    "model": "deepseek-v4.1-flash",
+    "reason": "该区域明确说明可对单个元素截图，并提供元素截图示例，能支持讲解中的结论；仅体现局部功能。",
+    "quote": "Sometimes it is useful to take a screenshot of a single element.",
+    "usage": {
+      "prompt_tokens": 242,
+      "completion_tokens": 252,
+      "total_tokens": 494
+    }
+  },
+  "image_review": {
+    "state": "passed",
+    "pixel_contrast": 24.26,
+    "ocr_lines": 5,
+    "visible_text": "Element screenshot\nSometimes it is useful to take a screenshot of a single element.\nSync\nAsync\npage. locator（\".header\"）.screenshot （path=\"screenshot.png\"）",
+    "matched_anchors": [
+      "async",
+      "header",
+      "path",
+      "screenshot.png",
+      "single",
+      "sometimes",
+      "sync",
+      "take",
+      "useful"
+    ],
+    "projected_text_height": 22.53,
+    "vision": {
+      "state": "skipped",
+      "reason": "本机图像文字复核已完成；未配置额外视觉模型"
+    }
+  },
+  "preparation_seconds": 25.175,
+  "media_qa": {
+    "status": "PASS",
+    "gate": "G2",
+    "real_llm": false,
+    "real_tts": true,
+    "mock_calls": 0,
+    "model": "deepseek-flash",
+    "llm_call_count": 0,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 330,
+      "duration_seconds": 11.008,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.9999477027480995,
+      "decoded_rms": 0.08107877522706985,
+      "full_decode": "PASS"
+    },
+    "timeline": {
+      "ir_frames": 330,
+      "scene_count": 3,
+      "beat_count": 3,
+      "alignment_granularity": "phrase"
+    },
+    "visual_beats": {
+      "cf_1_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.02789158950617284
+      },
+      "cf_2_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 117,
+        "before_frame": 114,
+        "after_frame": 121,
+        "changed_pixel_ratio": 0.022198109567901234
+      },
+      "cf_3_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 219,
+        "before_frame": 216,
+        "after_frame": 223,
+        "changed_pixel_ratio": 0.028559992283950616
+      }
+    },
+    "scene_samples": [
+      {
+        "scene_id": "cf_1",
+        "frame": 0,
+        "file": "g3/data/acceptance-automatic-visuals/d0db8317f9404b2690e75f0ad14af4a4/jobs/d544161f-743e-42b6-b609-2ae3ef240e7b/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+      },
+      {
+        "scene_id": "cf_1",
+        "frame": 54,
+        "file": "g3/data/acceptance-automatic-visuals/d0db8317f9404b2690e75f0ad14af4a4/jobs/d544161f-743e-42b6-b609-2ae3ef240e7b/attempts/1/g2-run/artifacts/keyframes/frame-004.png"
+      },
+      {
+        "scene_id": "cf_1",
+        "frame": 107,
+        "file": "g3/data/acceptance-automatic-visuals/d0db8317f9404b2690e75f0ad14af4a4/jobs/d544161f-743e-42b6-b609-2ae3ef240e7b/attempts/1/g2-run/artifacts/keyframes/frame-005.png"
+      },
+      {
+        "scene_id": "cf_2",
+        "frame": 108,
+        "file": "g3/data/acceptance-automatic-visuals/d0db8317f9404b2690e75f0ad14af4a4/jobs/d544161f-743e-42b6-b609-2ae3ef240e7b/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+      },
+      {
+        "scene_id": "cf_2",
+        "frame": 159,
+        "file": "g3/data/acceptance-automatic-visuals/d0db8317f9404b2690e75f0ad14af4a4/jobs/d544161f-743e-42b6-b609-2ae3ef240e7b/attempts/1/g2-run/artifacts/keyframes/frame-009.png"
+      },
+      {
+        "scene_id": "cf_2",
+        "frame": 210,
+        "file": "g3/data/acceptance-automatic-visuals/d0db8317f9404b2690e75f0ad14af4a4/jobs/d544161f-743e-42b6-b609-2ae3ef240e7b/attempts/1/g2-run/artifacts/keyframes/frame-010.png"
+      },
+      {
+        "scene_id": "cf_3",
+        "frame": 211,
+        "file": "g3/data/acceptance-automatic-visuals/d0db8317f9404b2690e75f0ad14af4a4/jobs/d544161f-743e-42b6-b609-2ae3ef240e7b/attempts/1/g2-run/artifacts/keyframes/frame-011.png"
+      },
+      {
+        "scene_id": "cf_3",
+        "frame": 270,
+        "file": "g3/data/acceptance-automatic-visuals/d0db8317f9404b2690e75f0ad14af4a4/jobs/d544161f-743e-42b6-b609-2ae3ef240e7b/attempts/1/g2-run/artifacts/keyframes/frame-014.png"
+      },
+      {
+        "scene_id": "cf_3",
+        "frame": 329,
+        "file": "g3/data/acceptance-automatic-visuals/d0db8317f9404b2690e75f0ad14af4a4/jobs/d544161f-743e-42b6-b609-2ae3ef240e7b/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+      }
+    ],
+    "contact_sheet": "artifacts/contact-sheet.jpg",
+    "captions": {
+      "burned_in": true,
+      "srt": "artifacts/captions.srt",
+      "alignment": "phrase-level measured PCM activity"
+    },
+    "video_form": "object_showcase",
+    "duration_mode": "content",
+    "creative_form": {
+      "scene_count": 3,
+      "registered_component": "object_showcase",
+      "timing": "one page per measured narration phrase",
+      "voice": "single narrator"
+    },
+    "narration_text": {
+      "status": "PASS",
+      "chapters": 1,
+      "segments": 3,
+      "characters": 60,
+      "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+      "checked": [
+        "narration-plan",
+        "video-ir",
+        "captions.srt",
+        "chapter-titles"
+      ]
+    }
+  },
+  "package_qa": {
+    "status": "PASS",
+    "checks": {
+      "full_decode": "PASS",
+      "format": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "sample_rate": "48000",
+        "channels": 2,
+        "uniform_across_frames": true
+      },
+      "duration": {
+        "frames": 450,
+        "seconds": 15.0,
+        "expected_frames": 450,
+        "expected_seconds": 15.0,
+        "tolerance_seconds": 0.035333333333333335
+      },
+      "content_audio": {
+        "shifted_by_frames": 45,
+        "offset_samples": 36000,
+        "correlation": 0.999942202486742,
+        "rms": 0.08106822520494461
+      },
+      "seam_loudness": {
+        "speech_active_db": -20.88,
+        "min_margin_db": 3.0,
+        "regions": {
+          "intro": {
+            "active_db": -26.07,
+            "margin_db": 5.2,
+            "peak": 0.1924
+          },
+          "outro": {
+            "active_db": -26.09,
+            "margin_db": 5.21,
+            "peak": 0.1919
+          }
+        }
+      }
+    }
+  }
+}

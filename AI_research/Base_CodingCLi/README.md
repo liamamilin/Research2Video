@@ -1,5 +1,8 @@
 # AI Research System
 
+网页截图与段落配图：标准出片前自动截取来源页面、理解图片并绑定讲稿段落，按元素位置聚焦展示；也可人工调整。
+安装与素材合同见 [video-screenshots.md](spec/video-screenshots.md)。
+
 Automated AI research report generator + Web UI console.
 Define research jobs in YAML, run them via CLI or web dashboard, browse and search generated reports.
 

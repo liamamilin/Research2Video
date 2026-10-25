@@ -1,0 +1,33 @@
+{
+  "case": "wrong_visible_amount",
+  "image": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/automatic_visual_acceptance/20261025/browser-cases-final/pixel_price_changed/capture.png",
+  "expected_accepted": false,
+  "accepted": true,
+  "seconds": 21.457,
+  "reason": "图片明确显示Atlas Pro月付价格为$25，与段落c1p3中提到的20美元不符，但图片是唯一可信来源，因此选择该段落并修正价格。",
+  "review": {
+    "state": "passed",
+    "model": "yanying-vision:8b",
+    "reason": "图片明确显示Atlas Pro月付价格为$25，与段落c1p3中提到的20美元不符，但图片是唯一可信来源，因此选择该段落并修正价格。",
+    "usage": {
+      "prompt_tokens": 1473,
+      "completion_tokens": 201,
+      "total_tokens": 1674
+    },
+    "summary": "Atlas Pro 月付价格为25美元，面向个人创作者提供清晰的产品计划。",
+    "visible_text": "Atlas Pro pricing\n$25 per month\nThis service offers a clear product plan for individual creators. Review the billing details and available features before choosing a subscription.",
+    "paragraph_ids": [
+      "c1p3"
+    ],
+    "focus": {
+      "x1": 16,
+      "y1": 340,
+      "x2": 166,
+      "y2": 440
+    },
+    "focus_reason": "聚焦价格信息，与段落中提到的月付价格直接相关。",
+    "claim_sha256": "ec6177bba8f05c7de5c3e41b3680e9802dc1bcf10d2c65fb3827bbc98c9a6a90"
+  },
+  "model_calls": 1,
+  "passed": false
+}

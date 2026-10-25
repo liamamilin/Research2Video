@@ -151,3 +151,49 @@ def test_material_assignment_preserves_all_twelve_images_and_supplied_captions()
     assert [index for scene in result['scenes'] for index in scene['props']['focus_indices']]==list(range(12))
     assert result['scenes'][0]['props']['images'][0]['caption']=='用户提供说明'
     assert result['scenes'][0]['props']['images'][1]['caption']==''
+
+
+@pytest.mark.parametrize('form', ['object_showcase', 'dynamic_collage'])
+def test_mapped_screenshot_appears_only_in_chosen_paragraph_after_sentence_splitting(form):
+    from g2.authored_script import split_script
+    paragraphs = ['先介绍背景。这一段没有配图。', '功能页面在这里展示。它支持逐句讲解。', '最后总结。']
+    segments = [{'id': f'c1_n{i+1}', 'text': text} for i, text in enumerate(
+        text for paragraph in paragraphs for text in split_script(paragraph))]
+    board = forms.plan_storyboard(None, {'title': '功能说明', 'segments': segments}, form)
+    assets = [{'id': 'slide_image_1', 'path': 'assets/slideshow/image-01.png'}]
+    saved = {'input_mode': 'narration', 'chapters': [{'title': '功能说明', 'paragraphs': paragraphs}],
+             'slideshow_images_resolved': [{'image_id': 'fixture'}], 'image_materials': [
+                 {'image_id': 'fixture', 'caption': '官方功能页面', 'role': 'detail',
+                  'placements': [{'chapter_index': 0, 'paragraph_index': 1}]}]}
+    result = forms.attach_materials(board, assets, saved)
+    assert [s['component'] for s in result['scenes']] == ['kinetic_text', 'kinetic_text', forms.FORMS[form], forms.FORMS[form], 'kinetic_text']
+    assert result['scenes'][2]['props']['images'][0]['caption'] == '官方功能页面'
+    assert 'images' not in result['scenes'][0]['props']
+    assert [s['props']['text'] for s in result['scenes']] == [s['text'] for s in segments]
+    bad = copy.deepcopy(saved); bad['chapters'][0]['paragraphs'][0] = '修改后分句数量不同。'
+    with pytest.raises(ValueError, match='分句不一致'):
+        forms.attach_materials(copy.deepcopy(board), assets, bad)
+
+
+@pytest.mark.parametrize('form', ['object_showcase', 'dynamic_collage'])
+def test_material_preset_allows_trusted_text_for_unassigned_paragraphs(tmp_path, form):
+    ir, root = creative_ir(tmp_path, form)
+    ir['scenes'][0].update(component='kinetic_text', props={'title': '未配图', 'text': '传输示例。'})
+    validate_video_ir(ir, root)
+    ir['presentation']['preset'] = 'image_slideshow'
+    with pytest.raises(ValidationFault):
+        validate_video_ir(ir, root)
+
+
+@pytest.mark.parametrize('form', ['object_showcase', 'dynamic_collage'])
+def test_focus_coordinates_pass_through_and_ir_rejects_invalid_rectangles(tmp_path, form):
+    ir, root = creative_ir(tmp_path, form)
+    focus = {'width': 640, 'height': 480, 'regions': [{'x1': 100, 'y1': 100, 'x2': 900, 'y2': 700, 'label': '重点', 'style': 'circle'}]}
+    ir['scenes'][0]['props']['images'][0]['focus'] = focus
+    validate_video_ir(ir, root)
+    bad = copy.deepcopy(ir); bad['scenes'][0]['props']['images'][0]['focus']['regions'][0]['x2'] = 50
+    with pytest.raises(ValidationFault, match='MATERIAL_FOCUS_BOUNDS'):
+        validate_video_ir(bad, root)
+    bad = copy.deepcopy(ir); bad['scenes'][0]['props']['images'][0]['focus']['regions'][0]['x1'] = -1
+    with pytest.raises(ValidationFault, match='INVALID_COMPONENT_PROPS'):
+        validate_video_ir(bad, root)

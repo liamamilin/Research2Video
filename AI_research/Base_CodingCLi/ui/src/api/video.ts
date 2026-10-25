@@ -256,6 +256,7 @@ export interface VideoRender {
   completed_at: string | null;
   created_at: string;
   timings?: { elapsed_seconds?: number; download_seconds?: number; process_seconds?: number };
+  visuals?: import("./screenshots").AutomaticVisuals | null;
 }
 
 export interface VideoScriptSummary {

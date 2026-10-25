@@ -73,7 +73,7 @@ export function CreativeVideo({ir, badge}: {ir: any; badge?: Badge}) {
   const end = phrase.end_ms * .03;
   const enter = interpolate(frame - scene.start_frame, [0, 12], [0, 1], clamp);
   const progress = interpolate(frame, [start, end], [0, 1], clamp);
-  const mode = ir.presentation.preset as CreativePreset;
+  const mode: CreativePreset = scene.component === 'kinetic_text' ? 'kinetic_typography' : ir.presentation.preset;
   // Break by measured length, preserving every codepoint; technical tokens can wrap inside the fixed stage.
   const characters = Array.from(p.text as string);
   const chunks = Array.from({length: Math.ceil(characters.length / 16)}, (_, i) => characters.slice(i * 16, (i + 1) * 16).join(''));
@@ -100,7 +100,7 @@ export function CreativeVideo({ir, badge}: {ir: any; badge?: Badge}) {
       <div style={{alignSelf:'flex-start',maxWidth:1330}}><div style={{fontSize:24,color:muted,marginBottom:12}}>观众 · 本章问题</div><div style={{padding:'24px 36px',background:'#FFFFFF',border:'1px solid #DFE5DC',borderRadius:'8px 30px 30px 30px',fontSize:p.question.length > 90 ? 29 : 36,lineHeight:1.5,overflowWrap:'anywhere'}}>{p.question}</div></div>
       {p.side !== 'left' && <div style={{alignSelf:p.side === 'left' ? 'flex-start' : 'flex-end',maxWidth:1350,opacity:enter,transform:`translateY(${(1-enter)*20}px)`}}><div style={{fontSize:24,color:muted,marginBottom:12,textAlign:p.side === 'left' ? 'left' : 'right'}}>{p.speaker}</div><div style={{padding:'34px 44px',background:green,color:'#FFFFFF',borderRadius:p.side === 'left' ? '8px 30px 30px 30px' : '30px 8px 30px 30px',fontSize:p.text.length > 60 ? 44 : 52,lineHeight:1.65,overflowWrap:'anywhere',boxShadow:'0 12px 30px #23796816'}}>{spokenText}</div></div>}
     </div>}
-    {['object_showcase','dynamic_collage'].includes(mode) && <ImageMaterials props={p} mode={mode} frame={frame} start={scene.start_frame} progress={progress}/>}
+    {['object_showcase','dynamic_collage'].includes(mode) && <ImageMaterials props={p} mode={mode} frame={frame} start={scene.start_frame} progress={progress} durationFrames={scene.end_frame-scene.start_frame}/>}
     {footer}<div style={{position:'absolute',bottom:0,left:0,height:5,width:`${100*(frame+1)/ir.total_frames}%`,background:green}}/>
     <Audio src={staticFile(ir.audio_public_file)}/>
   </AbsoluteFill>;

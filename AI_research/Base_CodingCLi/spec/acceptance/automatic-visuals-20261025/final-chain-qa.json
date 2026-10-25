@@ -1,0 +1,392 @@
+{
+  "status": "PASS",
+  "render_id": "654a1bc42612475e94636090aa5a6035",
+  "engine_job_id": "b395ec71-88cc-40c2-a6fe-a3e1226470b3",
+  "engine_data": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f",
+  "visuals": {
+    "version": 3,
+    "state": "completed",
+    "reason": "自动配图 1 张，其余段落保留文字画面",
+    "policy": {
+      "enabled": true,
+      "version": 3,
+      "max_pages": 3,
+      "max_images": 5,
+      "max_seconds": 120,
+      "attempts_per_paragraph": 2,
+      "cache_hours": 6,
+      "semantic_review": false,
+      "max_model_calls": 2,
+      "ocr_review": true,
+      "vision_section": "visual_ai",
+      "vision_required": true,
+      "vision_timeout": 60
+    },
+    "chapter_hash": "c309f24ac2a74f61e8cce804009fc6fbbeafe663866a3517d22952d8060d2349",
+    "needs": [
+      {
+        "id": "c1p2",
+        "chapter_index": 0,
+        "paragraph_index": 1,
+        "title": "画面与来源",
+        "text": "Playwright 支持截取页面中的指定元素。",
+        "kind": "feature",
+        "urls": [
+          "https://playwright.dev/python/docs/screenshots"
+        ],
+        "facts": [],
+        "claims": "Playwright 支持截取页面中的指定元素。"
+      }
+    ],
+    "decisions": [
+      {
+        "need_id": "c1p2",
+        "status": "accepted",
+        "reason": "已取得该段引用来源的页面截图",
+        "screenshot_id": "07e87730-33cf-4177-be98-189f61108db2",
+        "source_url": "https://playwright.dev/python/docs/screenshots",
+        "cached": false,
+        "quality": {
+          "version": 3,
+          "candidate_id": "yy-bf218e94db05-3",
+          "score": 0.939,
+          "region_text": "Element screenshot​ Sometimes it is useful to take a screenshot of a single element. Sync Async page.locator(\".header\").screenshot(path=\"screenshot.png\")",
+          "text_match": "来源、实体及展示条件通过文本检查",
+          "semantic": {
+            "state": "skipped",
+            "reason": "使用可核对的规则匹配"
+          },
+          "dom_targets": [
+            {
+              "text": "Element screenshot​",
+              "tag": "h2",
+              "x": 316,
+              "y": 204.765625,
+              "width": 823,
+              "height": 40,
+              "x1": 219,
+              "y1": 228,
+              "x2": 791,
+              "y2": 272
+            },
+            {
+              "text": "Sometimes it is useful to take a screenshot of a single element.",
+              "tag": "p",
+              "x": 316,
+              "y": 264.765625,
+              "width": 823,
+              "height": 26.390625,
+              "x1": 219,
+              "y1": 294,
+              "x2": 791,
+              "y2": 324
+            },
+            {
+              "text": "Sync Async page.locator(\".header\").screenshot(path=\"screenshot.png\")",
+              "tag": "div",
+              "x": 316,
+              "y": 311.15625,
+              "width": 823,
+              "height": 131.421875,
+              "x1": 219,
+              "y1": 346,
+              "x2": 791,
+              "y2": 492
+            },
+            {
+              "text": "page.locator(\".header\").screenshot(path=\"screenshot.png\")",
+              "tag": "code",
+              "x": 316,
+              "y": 388.546875,
+              "width": 823,
+              "height": 54.03125,
+              "x1": 219,
+              "y1": 432,
+              "x2": 791,
+              "y2": 492
+            }
+          ],
+          "capture_size": {
+            "width": 1440,
+            "height": 900
+          },
+          "image": {
+            "state": "passed",
+            "pixel_contrast": 97.17,
+            "ocr_lines": 43,
+            "visible_text": "Docs\nAPI\nGetting started - Library\nRelease notes\nGuides\nActions\nAuto-waiting\nAPl testing\nAssertions.\nAuthentication\nBrowsers\nChrome extensions\nClock\nDebugging Tests\nDialogs\nDownloads\nEmulation\nLearn\nscreenshot_bytes = page.screenshot（）\nprint（base64.b64encode （screenshot_bytes）. decode（））\nElement screenshot\nSometimes it is useful to take a screenshot of a single element.\nSync\nAsync\npage. locator（\".header\"）.screenshot （path=\"screenshot.png\"）\nPrevious\n《 Page object models\ncommunity\nGetting started\nPlaywright Training C\nLearn Videos\nStack Overflow E\nFeature Videos\nIntroduction\nFull page screenshots\nCapture into buffer\nElement screenshot\nNext\nSnapshot testing»\nMore\nAmbassadors\nMicrosoft Privacy Statement C\nCopyright © 2026 Microsoft",
+            "matched_anchors": [
+              "async",
+              "header",
+              "path",
+              "screenshot.png",
+              "single",
+              "sometimes",
+              "sync",
+              "take",
+              "useful"
+            ],
+            "projected_text_height": 17.26,
+            "readability_basis": "measured DOM target after bounded camera zoom",
+            "vision": {
+              "state": "passed",
+              "model": "yanying-vision:8b",
+              "reason": "图片展示的是Playwright中截取单个元素截图的功能，与段落中提到的“支持截取页面中的指定元素”完全一致。",
+              "usage": {
+                "prompt_tokens": 1624,
+                "completion_tokens": 197,
+                "total_tokens": 1821
+              },
+              "summary": "Playwright文档页面展示如何截取单个元素的截图，包含同步代码示例。",
+              "visible_text": "Element screenshot\nSometimes it is useful to take a screenshot of a single element.\nSync\npage.locator(\".header\").screenshot(path=\"screenshot.png\")",
+              "paragraph_ids": [
+                "c1p2"
+              ],
+              "focus": {
+                "x1": 218,
+                "y1": 427,
+                "x2": 785,
+                "y2": 492
+              },
+              "focus_reason": "聚焦展示截取元素截图的同步代码示例，与段落内容直接相关。",
+              "claim_sha256": "153c5a46b1034cfecc786eff3875a253692cfc0ddc13c171d6f9e9de54dedf65"
+            }
+          }
+        }
+      }
+    ],
+    "selection": {
+      "form": "object_showcase",
+      "materials": [
+        {
+          "screenshot_id": "07e87730-33cf-4177-be98-189f61108db2",
+          "image_id": "ccde0d27-83aa-4320-be9b-22571e1cd26e",
+          "caption": "来源页面 · 2026-10-25 截图",
+          "role": "detail",
+          "placements": [
+            {
+              "chapter_index": 0,
+              "paragraph_index": 1
+            }
+          ],
+          "source": {
+            "url": "https://playwright.dev/python/docs/screenshots",
+            "final_url": "https://playwright.dev/python/docs/screenshots",
+            "title": "Screenshots | Playwright Python",
+            "captured_at": "2026-10-25T14:07:44+00:00",
+            "sha256": "1f6ba496445965b570322bafb1069fa6e3b815a499d6605e10b5dd0be48123e1"
+          },
+          "focus": {
+            "width": 1440,
+            "height": 900,
+            "regions": [
+              {
+                "x1": 219,
+                "y1": 294,
+                "x2": 791,
+                "y2": 324,
+                "label": "对应功能说明",
+                "style": "box"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "started_at": "2026-10-25T14:07:37.330130+00:00",
+    "pages": [
+      {
+        "url": "https://playwright.dev/python/docs/screenshots",
+        "need_id": "c1p2",
+        "cached": false,
+        "evidence": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/automatic_visual_acceptance/20261025/real-chain-final/state/video_renders/654a1bc42612475e94636090aa5a6035/visuals/capture-01.png",
+        "screenshot_id": "07e87730-33cf-4177-be98-189f61108db2"
+      }
+    ],
+    "model_calls": 1,
+    "seconds": 27.989,
+    "finished_at": "2026-10-25T14:08:05.318307+00:00",
+    "submission_sha256": "f56b49a9ab07cef5cec2fda5dbc7563c511d5cd95636bb78737b154898f98d62"
+  },
+  "mapped_scenes": 1,
+  "text_scenes": 2,
+  "voice": "real local Kokoro Chinese TTS",
+  "real_renderer": true,
+  "verified_downloads": 27,
+  "files": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/automatic_visual_acceptance/20261025/real-chain-final/state/video_renders/654a1bc42612475e94636090aa5a6035",
+  "media_qa": {
+    "status": "PASS",
+    "gate": "G2",
+    "real_llm": false,
+    "real_tts": true,
+    "mock_calls": 0,
+    "model": "deepseek-flash",
+    "llm_call_count": 0,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 330,
+      "duration_seconds": 11.008,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.9999484727703407,
+      "decoded_rms": 0.08111491054296494,
+      "full_decode": "PASS"
+    },
+    "timeline": {
+      "ir_frames": 330,
+      "scene_count": 3,
+      "beat_count": 3,
+      "alignment_granularity": "phrase"
+    },
+    "visual_beats": {
+      "cf_1_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.027890625
+      },
+      "cf_2_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 117,
+        "before_frame": 114,
+        "after_frame": 121,
+        "changed_pixel_ratio": 0.08989052854938272
+      },
+      "cf_3_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 219,
+        "before_frame": 216,
+        "after_frame": 223,
+        "changed_pixel_ratio": 0.02851610725308642
+      }
+    },
+    "scene_samples": [
+      {
+        "scene_id": "cf_1",
+        "frame": 0,
+        "file": "g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f/jobs/b395ec71-88cc-40c2-a6fe-a3e1226470b3/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+      },
+      {
+        "scene_id": "cf_1",
+        "frame": 54,
+        "file": "g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f/jobs/b395ec71-88cc-40c2-a6fe-a3e1226470b3/attempts/1/g2-run/artifacts/keyframes/frame-004.png"
+      },
+      {
+        "scene_id": "cf_1",
+        "frame": 107,
+        "file": "g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f/jobs/b395ec71-88cc-40c2-a6fe-a3e1226470b3/attempts/1/g2-run/artifacts/keyframes/frame-005.png"
+      },
+      {
+        "scene_id": "cf_2",
+        "frame": 108,
+        "file": "g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f/jobs/b395ec71-88cc-40c2-a6fe-a3e1226470b3/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+      },
+      {
+        "scene_id": "cf_2",
+        "frame": 159,
+        "file": "g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f/jobs/b395ec71-88cc-40c2-a6fe-a3e1226470b3/attempts/1/g2-run/artifacts/keyframes/frame-009.png"
+      },
+      {
+        "scene_id": "cf_2",
+        "frame": 210,
+        "file": "g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f/jobs/b395ec71-88cc-40c2-a6fe-a3e1226470b3/attempts/1/g2-run/artifacts/keyframes/frame-010.png"
+      },
+      {
+        "scene_id": "cf_3",
+        "frame": 211,
+        "file": "g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f/jobs/b395ec71-88cc-40c2-a6fe-a3e1226470b3/attempts/1/g2-run/artifacts/keyframes/frame-011.png"
+      },
+      {
+        "scene_id": "cf_3",
+        "frame": 270,
+        "file": "g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f/jobs/b395ec71-88cc-40c2-a6fe-a3e1226470b3/attempts/1/g2-run/artifacts/keyframes/frame-014.png"
+      },
+      {
+        "scene_id": "cf_3",
+        "frame": 329,
+        "file": "g3/data/acceptance-automatic-visuals/4dcdaff1d1da4950a982d708f3e7464f/jobs/b395ec71-88cc-40c2-a6fe-a3e1226470b3/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+      }
+    ],
+    "contact_sheet": "artifacts/contact-sheet.jpg",
+    "captions": {
+      "burned_in": true,
+      "srt": "artifacts/captions.srt",
+      "alignment": "phrase-level measured PCM activity"
+    },
+    "video_form": "object_showcase",
+    "duration_mode": "content",
+    "creative_form": {
+      "scene_count": 3,
+      "registered_component": "object_showcase",
+      "timing": "one page per measured narration phrase",
+      "voice": "single narrator"
+    },
+    "narration_text": {
+      "status": "PASS",
+      "chapters": 1,
+      "segments": 3,
+      "characters": 60,
+      "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+      "checked": [
+        "narration-plan",
+        "video-ir",
+        "captions.srt",
+        "chapter-titles"
+      ]
+    }
+  },
+  "package_qa": {
+    "status": "PASS",
+    "checks": {
+      "full_decode": "PASS",
+      "format": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "sample_rate": "48000",
+        "channels": 2,
+        "uniform_across_frames": true
+      },
+      "duration": {
+        "frames": 450,
+        "seconds": 15.0,
+        "expected_frames": 450,
+        "expected_seconds": 15.0,
+        "tolerance_seconds": 0.035333333333333335
+      },
+      "content_audio": {
+        "shifted_by_frames": 45,
+        "offset_samples": 36000,
+        "correlation": 0.9999431037855553,
+        "rms": 0.08110780268907547
+      },
+      "seam_loudness": {
+        "speech_active_db": -20.87,
+        "min_margin_db": 3.0,
+        "regions": {
+          "intro": {
+            "active_db": -26.07,
+            "margin_db": 5.2,
+            "peak": 0.1924
+          },
+          "outro": {
+            "active_db": -26.09,
+            "margin_db": 5.21,
+            "peak": 0.1919
+          }
+        }
+      }
+    }
+  }
+}

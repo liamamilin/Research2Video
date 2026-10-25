@@ -28,6 +28,8 @@ from web.services import video_executor, video_render, video_workflow
 from web.settings import get_settings
 
 router = APIRouter(prefix="/api/video", tags=["video"])
+from web.routes.video_screenshots import router as screenshots_router
+router.include_router(screenshots_router)
 
 
 def _not_found(what: str) -> HTTPException:
@@ -101,6 +103,7 @@ def _script_or_404(script_id: str) -> dict:
 
 
 def _render_out(render: dict) -> dict:
+    from core.video.visual_materials import summary
     client = video_render.get_client()
     return {
         **{k: render[k] for k in (
@@ -109,6 +112,7 @@ def _render_out(render: dict) -> dict:
             "submitted_at", "completed_at", "created_at", "updated_at")},
         "source_chars": len(render["source_text"]),
         "timings": video_render.render_timings(render),
+        "visuals": summary(render.get("visuals")),
         "autovideo_url": client.job_page_url(render["autovideo_job_id"]) if render["autovideo_job_id"] else None,
         "files": [
             {**a, "url": f"/api/video/renders/{render['id']}/files/{a['name']}"}
