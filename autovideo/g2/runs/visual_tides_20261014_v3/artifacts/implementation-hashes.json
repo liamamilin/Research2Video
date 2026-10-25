@@ -1,7 +1,0 @@
-{
-  "g2/visual_narrative.py": "fdab8712bb39ecffdb8a118aba34b31f1b1e0176ec6237a8e3d07fe23ee3c5b0",
-  "g2/schemas/visual-scene-plan.schema.json": "0d871f29ae80c012bd71078422d1d87623905eec8b42b2c3673d87275f402132",
-  "g2/visual_renderer/src/Root.tsx": "7f27aa49c4efea208daaa6666a9817ba7af3e250b3c35922af3ec3fb71bfa0d5",
-  "g2/visual_renderer/src/index.ts": "a58f804bf74bab68b4549aa5c715eb4a89ec5835206d198fc79b462b4fc71ef9",
-  "g2/tests/test_visual_narrative.py": "991502cef0fb172510a924288e629d49785dcaffc15f0d050e827bddbcc0d1b8"
-}

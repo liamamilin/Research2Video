@@ -1,9 +1,0 @@
-{
-  "case_id": "custom",
-  "language": "zh-CN",
-  "source_text": "主题：用条形图阅读分类数值。\n事实材料：本例全部数值都是虚构演示数据。蓝色纸飞机飞行距离为 2 米，黄色纸飞机为 4 米，红色纸飞机为 6 米。数值只用于演示如何比较三个类别，不代表真实比赛、测量或现实统计。条形图从零开始，柱子高度应与对应数值成比例。\n表达边界：明确说这是虚构演示数据；类别、数值和单位必须一致，不添加真实统计或其他测量结果。画面使用从零开始的条形图，显示蓝色、黄色、红色三类及 2、4、6 米。",
-  "source_sha256": "181ad3b746a48ccffcc457d0cc9df2776f741283057a185a78dceb226e1dad73",
-  "human_authored_narration": false,
-  "human_authored_storyboard": false,
-  "human_authored_video_ir": false
-}

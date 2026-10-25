@@ -1,5 +1,0 @@
-{"stage": "narration-form", "attempt": 1, "error_code": "MODEL_SCHEMA_REJECTED", "error": "MODEL_SCHEMA_REJECTED: /: Additional properties are not allowed ('type' was unexpected)", "retry_limit": 3}
-{"stage": "chapter-c1-information", "attempt": 1, "error_code": "FIDELITY_SOFT", "error": "s1 的画面复述了「系统提示第一行是当前时间」，却丢了旁白里的条件「假设你有个每晚跑的脚本」；请把条件一起写上屏", "retry_limit": 3}
-{"stage": "chapter-c5-information", "attempt": 1, "error_code": "INFORMATION_OPENING_CUE", "error": "INFORMATION_OPENING_CUE: s6 的第一个元素必须是 target side:left，且其 quote 为覆盖首段 c5_n10 旁白的开头连续片段；当前为 target side:right、segment c5_n10、quote '前缀断链不一样，那是单价直接乘 25。'；该段旁白开头为 '前缀断链不一样，那是单价直接乘 25。'，请从段首逐字复制", "retry_limit": 3}
-{"stage": "chapter-c5-information", "attempt": 2, "error_code": "FIDELITY_SOFT", "error": "s2 的画面复述了「换模型的杠杆更大，按输入价算，Haiku 5.5 和 Opus 5.5 差 40 倍」，却丢了旁白里的条件「要是允许降级」；请把条件一起写上屏", "retry_limit": 3}
-{"stage": "chapter-c6-information", "attempt": 1, "error_code": "INFORMATION_TEXT_FIT", "error": "INFORMATION_TEXT_FIT: s5: the value label '1.25 倍（相对输入价）' is too wide; use a shorter unit", "retry_limit": 3}

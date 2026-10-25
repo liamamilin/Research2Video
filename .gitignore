@@ -15,14 +15,95 @@
 !**/.env.example
 **/__pycache__/
 **/.pytest_cache/
+**/.venv/
+**/node_modules/
 /autovideo/.cache/
 /autovideo/state/
-/AI_research/Base_CodingCLi/config/*.lock
+/AI_research/Base_CodingCLi/config/**/*.lock
+/AI_research/Base_CodingCLi/jobs/**/*.lock
 /AI_research/Base_CodingCLi/jobs/video/
 
-# Keep raw acceptance run logs and temporary media locally.
-/autovideo/g3/acceptance/**/*.log
+# Credentials and browser login state, including copies outside runtime folders.
+**/secrets/
+**/credentials.json
+**/credential.json
+**/cookies.json
+**/cookie.json
+**/token.json
+**/tokens.json
+**/account.json
+**/login.json
+**/storage-state.json
+**/storage_state.json
+**/auth-state.json
+**/auth_state.json
+*.pem
+*.key
+*.p12
+*.pfx
+**/id_rsa
+**/id_ed25519
+
+# Runtime databases, sidecars, process records, and raw logs.
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.pid
+*.pid.lock
+*.log
+*.jsonl
+
+# Local models and downloaded installers. Configuration and lockfiles stay in Git.
+*.onnx
+*.safetensors
+*.ckpt
+*.pth
+*.pt
+**/pytorch_model*.bin
+**/model*.bin
+*.dmg
+*.pkg
+
+# Finished videos and generated audio stay local at every output location.
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.avi
+*.m4v
+*.mp3
+*.wav
+*.m4a
+*.aac
+*.flac
+*.ogg
+*.ass
+
+# Reviewed, small reusable assets: G1 replay fixture, package cue, and voice anchor.
+!/autovideo/g1/fixtures/assets/communications_noise.wav
+!/autovideo/g1/fixtures/assets/segments/n1.wav
+!/autovideo/g1/fixtures/assets/segments/n2.wav
+!/autovideo/g1/fixtures/assets/segments/n3.wav
+!/autovideo/g1/fixtures/assets/segments/n4.wav
+!/autovideo/g1/fixtures/assets/segments/n5.wav
+!/autovideo/g2/package_kit/sounds/synth_sting.wav
+!/autovideo/g2/voice_assets/voxcpm2_anchor.wav
+
+# Generated run trees contain copied renderers and request/response snapshots too.
+/autovideo/g0/artifacts/
+/autovideo/g0/logs/
+/autovideo/g1/artifacts/
+/autovideo/g1/logs/
+/autovideo/g2/runs/
+/autovideo/g4/runs/
+/autovideo/g4/clean_install/*
+!/autovideo/g4/clean_install/README.md
+/autovideo/h1/runs/
+
+# Keep compact acceptance reports and reviewed images; raw run records stay local.
 /autovideo/g3/acceptance/**/*.txt
-/autovideo/g3/acceptance/**/*.jsonl
-/autovideo/g3/acceptance/**/*.ass
-/autovideo/g3/acceptance/**/*.mp4
+**/acceptance/**/activation*.json
+**/acceptance/**/backend-activation*.json

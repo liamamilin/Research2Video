@@ -1,8 +1,0 @@
-{
-  "run_id": "20261013T082539Z",
-  "status": "ABORTED_FOR_CONFIGURATION_FIX",
-  "reason": "Qwen thinking channel consumed output-token limit and returned empty content; user-facing output was not generated.",
-  "fix": "Ollama chat request now sets think=false; model thinking content is excluded from saved responses.",
-  "completed_calls": 1,
-  "incomplete_request": "artifacts/llm_calls/narration-attempt-2.request.json"
-}

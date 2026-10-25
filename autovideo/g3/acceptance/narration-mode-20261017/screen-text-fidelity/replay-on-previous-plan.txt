@@ -1,7 +1,0 @@
-Offline replay of fidelity_issues() on the previous render's storyboard (job 5fdd0271, 37 scenes):
-c1 s2 的画面没有带上旁白里的关键数字 ['5.5', '4']，请把它们连同对象和单位写上屏
-c1 s3 的画面没有带上旁白里的关键数字 ['5']，请把它们连同对象和单位写上屏；对比卡两侧要各自写出对应的数字
-c5 s3 的画面复述了「换模型的杠杆更大，按输入价算，Haiku 5.5 和 Opus 5.5 差 40 倍」，却丢了旁白里的条件「要是允许降级」；请把条件一起写上屏
-c6 s7 的画面复述了「先稳前缀，再压提示，最后才谈换模型」，却丢了旁白里的条件「模型被任务锁死时」；请把条件一起写上屏
-
-New storyboard (job b1b1eeaa, 45 scenes): fidelity_issues() found 0; validation_retries.jsonl has only the narration-form schema retry; no FIDELITY_SOFT retry was needed.

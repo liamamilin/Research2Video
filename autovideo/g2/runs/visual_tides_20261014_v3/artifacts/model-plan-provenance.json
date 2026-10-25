@@ -1,7 +1,0 @@
-{
-  "response_file": "g2/runs/visual_tides_20261014_v2/artifacts/llm_calls/visual-attempt-1.response.json",
-  "response_sha256": "2f5497be4f4372a36431a54d9b811e7607bd6173bd7ca3bf7a694fe4b38fa0d9",
-  "request_sha256": "8a1cd483aee2af0b59fb86e0fe618fc9f2ba0437c9b7d41f296c1dc08324aa79",
-  "new_api_requests_for_replay": 0,
-  "model_response_edited": false
-}

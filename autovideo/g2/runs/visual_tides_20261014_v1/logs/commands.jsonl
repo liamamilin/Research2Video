@@ -1,1 +1,0 @@
-{"time_utc": "2026-10-14T04:01:06.374106+00:00", "label": "visual-plan", "argv": ["/Users/milin/2026/软件开发/autovideo/g0/.venv/bin/python", "-u", "g2/run_g2.py", "visual-plan"], "cwd": "/Users/milin/2026/软件开发/autovideo", "exit_code": 1, "elapsed_seconds": 94.333, "error": "DEEPSEEK_UNAVAILABLE: DeepSeek API request failed (URLError); no key or response body was logged"}
