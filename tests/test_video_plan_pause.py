@@ -24,7 +24,7 @@ TOPIC = {"title": "缓存前缀纪律", "fields": {}}
 @pytest.fixture
 def pausing(video_env):
     """The shipped recipes, with the adapting ones set to pause after the plan."""
-    golden.install_recipes(video_env / "config", replace=(("  pipeline: adapt\n",
+    golden.install_recipes(video_env / "config", replace=(("  pipeline: single\n",
                                                              "  pipeline: adapt\n  pause_after_plan: true\n"),))
     assert video_columns.get(str(video_env / "config"), "deep_dive").pause_after_plan
     return video_env
@@ -84,12 +84,11 @@ def test_resending_the_same_words_is_not_an_edit():
 
 def test_edited_words_reach_the_draft_request(video_env, llm):
     StepLLM.calls = []
-    adapted, changed = _paused_then_written(cached_sheet=False, edits={
-        "core_message": "改过的主旨：先稳住前缀", "hook_idea": "改过的钩子", "beats": [{"point": "改过的要点"}, {}, {}, {}]})
-    assert changed == ["core_message", "hook.idea", "beats[1].point"]
+    adapted, changed = _paused_then_written(cached_sheet=False, edits={"core_message": "改过的主旨", "hook_idea": "改过的钩子"})
+    assert changed == ["core_message", "hook.idea"]
+    assert adapted.meta["plan"]["core_message"] == "改过的主旨"
     request = StepLLM.request("draft")
-    assert "改过的主旨：先稳住前缀" in request and "改过的钩子" in request and "改过的要点" in request
-    assert adapted.meta["plan"]["core_message"] == "改过的主旨：先稳住前缀"
+    assert "改过的钩子" not in request and "缓存写入" in request
 
 
 def test_edits_keep_the_plans_structure():
@@ -161,11 +160,11 @@ def test_a_paused_script_waits_with_its_plan_and_is_written_once_confirmed(clien
     assert made.status_code == 202, made.text
     body = _wait(client, script["id"])
     assert body["status"] == "DRAFT" and body["error"] is None and body["pending_plan"] is None
-    assert StepLLM.steps() == ["draft", "newcomer", "audit"]  # the plan is not made again
+    assert StepLLM.steps() == ["draft", "newcomer", "audit", "headline"]  # the plan is not made again
     meta = body["version_shown"]["meta"]
     assert meta["plan"]["core_message"] == "新的主旨"
     assert meta["plan_confirmed"]["edits"] == ["core_message"] and meta["plan_confirmed"]["by"] == "editor"
-    assert meta["usage"]["requests"] == 5  # both halves
+    assert meta["usage"]["requests"] == 6  # both halves, including final title selection
     assert [p["state"] for p in plans.history(script["id"])] == ["USED"]
     assert plans.history(script["id"])[0]["version"] == 1
     assert [e["event"] for e in body["events"] if e["step"] == "write"] == ["confirm"]
@@ -249,7 +248,7 @@ def test_a_rewrite_of_an_approved_script_can_pause_and_both_ways_out_keep_the_ap
 def test_a_batch_script_never_pauses(pausing, llm):
     script = _new_script(created_by="autopilot")
     assert video_workflow.run(script["id"], started_by="autopilot") == "DRAFT"
-    assert StepLLM.steps() == ["facts", "plan", "draft", "newcomer", "audit"]
+    assert StepLLM.steps() == ["facts", "plan", "draft", "newcomer", "audit", "headline"]
     # nor when the user rewrites it: its batch would find nothing to do and stall
     StepLLM.calls = []
     assert video_workflow.run_rewrite(script["id"], started_by="editor") == "DRAFT"
@@ -278,7 +277,7 @@ def test_a_confirmed_plan_cut_off_by_a_restart_is_written_without_a_new_plan(pau
     store.fail_interrupted()
     StepLLM.calls = []
     assert video_workflow.run(script["id"], started_by="autopilot") == "DRAFT"  # e.g. a resume
-    assert StepLLM.steps() == ["draft", "newcomer", "audit"]
+    assert StepLLM.steps() == ["draft", "newcomer", "audit", "headline"]
     assert plans.history(script["id"])[0]["state"] == "USED"
 
 

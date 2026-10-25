@@ -12,8 +12,9 @@ from __future__ import annotations
 import hashlib
 import os
 import re
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 
 import httpx
 
@@ -42,9 +43,29 @@ class AutoVideoClient:
         self.base_url = base_url.rstrip("/")
         self._timeout = timeout
         self._transport = transport
+        self._session_client: Optional[httpx.Client] = None
 
-    def _client(self) -> httpx.Client:
-        return httpx.Client(base_url=self.base_url, timeout=self._timeout, transport=self._transport)
+    @contextmanager
+    def _client(self) -> Iterator[httpx.Client]:
+        if self._session_client is not None:
+            yield self._session_client
+        else:
+            with httpx.Client(base_url=self.base_url, timeout=self._timeout, transport=self._transport,
+                              limits=httpx.Limits(max_connections=4, max_keepalive_connections=4)) as client:
+                yield client
+
+    @contextmanager
+    def session(self):
+        """Reuse one bounded, thread-safe connection pool for a render lifecycle."""
+        if self._session_client is not None:
+            yield self
+            return
+        with self._client() as client:
+            self._session_client = client
+            try:
+                yield self
+            finally:
+                self._session_client = None
 
     def _request(self, method: str, path: str, **kwargs: Any) -> Any:
         try:
@@ -86,8 +107,11 @@ class AutoVideoClient:
     def get_job(self, job_id: str) -> dict:
         return self._request("GET", f"/api/jobs/{job_id}")
 
-    def find_jobs(self, query: str) -> list[dict]:
-        data = self._request("GET", "/api/jobs", params={"q": query[:200], "limit": 50})
+    def find_jobs(self, query: str, *, idempotency_key: Optional[str] = None) -> list[dict]:
+        params: dict[str, Any] = {"q": query[:200], "limit": 50}
+        if idempotency_key:
+            params = {"idempotency_key": idempotency_key, "limit": 1}
+        data = self._request("GET", "/api/jobs", params=params)
         return list(data.get("items", []))
 
     def list_artifacts(self, job_id: str) -> list[dict]:
@@ -96,17 +120,28 @@ class AutoVideoClient:
     def job_page_url(self, job_id: str) -> str:
         return f"{self.base_url}/#job/{job_id}"
 
-    def download(self, artifact: dict, dest: Path) -> None:
+    def download(self, artifact: dict, dest: Path) -> dict:
         """Download one artifact to ``dest``, verifying size and SHA-256.
 
-        Writes a ``.part`` file first, so a failed or mismatched download never
-        leaves a file that looks complete.
+        Reuse an existing file only after both size and SHA-256 match. Writes
+        replacements atomically, preserving prior complete files on failure.
         """
         url = str(artifact.get("download_url", ""))
         # Relative to the AutoVideo base. An absolute URL would make httpx
         # ignore the base and fetch from wherever it points.
         if not url.startswith("/api/"):
             raise AutoVideoError(502, "BAD_ARTIFACT_URL", f"不接受的下载地址：{url!r}")
+        expected_sha, expected_bytes = artifact.get("sha256"), artifact.get("bytes")
+        if (not isinstance(expected_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_sha)
+                or type(expected_bytes) is not int or expected_bytes < 0):
+            raise AutoVideoError(502, "BAD_ARTIFACT_METADATA", f"{dest.name} 缺少有效的大小或 SHA-256，不能确认文件完整")
+        if dest.is_file() and not dest.is_symlink() and dest.stat().st_size == expected_bytes:
+            existing = hashlib.sha256()
+            with dest.open("rb") as fh:
+                for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+                    existing.update(chunk)
+            if existing.hexdigest() == expected_sha:
+                return {"reused": True, "bytes": expected_bytes}
         dest.parent.mkdir(parents=True, exist_ok=True)
         tmp = dest.with_name(dest.name + ".part")
         digest = hashlib.sha256()
@@ -127,13 +162,11 @@ class AutoVideoClient:
         except BaseException:
             tmp.unlink(missing_ok=True)
             raise
-        expected_sha, expected_bytes = artifact.get("sha256"), artifact.get("bytes")
-        if (expected_sha and digest.hexdigest() != expected_sha) or (
-            expected_bytes is not None and size != expected_bytes
-        ):
+        if digest.hexdigest() != expected_sha or size != expected_bytes:
             tmp.unlink(missing_ok=True)
             raise AutoVideoError(502, "ARTIFACT_MISMATCH", f"{dest.name} 的大小或哈希与 AutoVideo 记录不一致")
         os.replace(tmp, dest)
+        return {"reused": False, "bytes": size}
 
 
 def _error_from(response: httpx.Response) -> AutoVideoError:

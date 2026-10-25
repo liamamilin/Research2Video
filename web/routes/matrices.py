@@ -13,7 +13,8 @@ import re
 import string
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from pydantic_core import PydanticCustomError
 
 from datetime import datetime
 from typing import Optional
@@ -36,6 +37,18 @@ class MatrixIn(BaseModel):
     keywords: list[str] = Field(default_factory=list)
     jobs: list[str] | None = None  # editing: the members, in order; creating: none yet
     monthly_searches: int | None = Field(default=None, ge=0, le=1_000_000)  # editing: none keeps it, 0 lifts it
+    render: dict | None = None
+
+    @field_validator("render")
+    @classmethod
+    def validate_render(cls, value):
+        if value is None:
+            return None
+        from core.video.production_settings import validate
+        try:
+            return validate(value)
+        except ValueError as exc:
+            raise PydanticCustomError("render_settings", "{message}", {"message": str(exc)}) from exc
 
 
 class CopyIn(BaseModel):
@@ -99,16 +112,10 @@ def _member(jobs_dir: str, member: matrices.Member, plans: dict) -> dict:
 
 def _scripts_by_report():
     """``(job, report path)`` -> how many scripts were written from that report (failed ones left out)."""
-    from collections import Counter
-
     from core.video import outputs
 
     config_dir, jobs_dir = _dirs()
-    made = Counter()
-    for s in outputs.collect(config_dir, jobs_dir)["scripts"]:
-        if s["status"] != "FAILED":
-            made[(s["job"], s["report_path"])] += 1
-    return made
+    return outputs.count_by_report(config_dir, jobs_dir)
 
 
 def _items_by_report() -> dict[str, int]:
@@ -119,12 +126,12 @@ def _items_by_report() -> dict[str, int]:
         return {r[0]: r[1] for r in conn.execute("SELECT report_path, COUNT(*) FROM topics WHERE report_path != '' GROUP BY report_path")}
 
 
-def _latest_reports(matrix: matrices.Matrix) -> dict[str, dict]:
+def _latest_reports(matrix: matrices.Matrix, known_jobs: list[str]) -> dict[str, dict]:
     """Each member's newest finished report and how many videos were written from it (Jobs that never succeeded: none)."""
     jobs_dir = _dirs()[1]
     latest = {}
     for job in matrix.jobs:
-        last = next((h for h in matrices.history_of(job, jobs_dir, 200) if h.get("status") == "success" and h.get("output_path")), None)
+        last = next((h for h in matrices.history_of(job, jobs_dir, 200, known_jobs=known_jobs) if h.get("status") == "success" and h.get("output_path")), None)
         if last:
             latest[job] = {"path": last["output_path"], "ts": last.get("ts", "")}
     if not latest:
@@ -134,9 +141,10 @@ def _latest_reports(matrix: matrices.Matrix) -> dict[str, dict]:
 
 
 def _shown(matrix: matrices.Matrix, jobs_dir: str, plans: dict, reports: bool = False) -> dict:
-    latest = _latest_reports(matrix) if reports else {}
+    names = list_jobs(jobs_dir) if reports else []
+    latest = _latest_reports(matrix, names) if reports else {}
     members = [{**_member(jobs_dir, m, plans), **({"latest_report": latest[m.job]} if m.job in latest else {})} for m in matrix.members]
-    spent = {"searches_this_month": matrices.month_searches(matrix, jobs_dir=jobs_dir)} if reports and matrix.monthly_searches else {}
+    spent = {"searches_this_month": matrices.month_searches(matrix, jobs_dir=jobs_dir, known_jobs=names)} if reports and matrix.monthly_searches else {}
     return {**matrix.as_dict(), "members": members, **spent}
 
 
@@ -201,7 +209,7 @@ def create_matrix(payload: MatrixIn, user=Depends(require_editor)):
         raise _error(422, "missing_name", "矩阵要有名字")
     members = _members(payload.jobs or [], None)
     matrices.save(_dirs()[0], key, name=payload.name.strip(), domain=payload.domain.strip(),
-                  keywords=_keywords(payload.keywords), members=members)
+                  keywords=_keywords(payload.keywords), members=members, render=payload.render)
     audit.log("matrix_create", user=user["username"], target=key)
     return get_matrix(key, user)
 
@@ -213,7 +221,8 @@ def update_matrix(key: str, payload: MatrixIn, user=Depends(require_editor)):
         raise _error(422, "missing_name", "矩阵要有名字")
     members = _members(payload.jobs, matrix) if payload.jobs is not None else list(matrix.members)
     matrices.save(_dirs()[0], key, name=payload.name.strip(), domain=payload.domain.strip(),
-                  keywords=_keywords(payload.keywords), members=members, monthly_searches=payload.monthly_searches)
+                  keywords=_keywords(payload.keywords), members=members, monthly_searches=payload.monthly_searches,
+                  render=payload.render)
     audit.log("matrix_update", user=user["username"], target=key,
               details={"monthly_searches": payload.monthly_searches} if payload.monthly_searches is not None else None)
     return get_matrix(key, user)
@@ -295,7 +304,8 @@ def copy_matrix(key: str, payload: CopyIn, user=Depends(require_editor)):
         for path, content in files:
             yaml_io.atomic_create(path, content)
             written.append(path)
-        matrices.save(config_dir, new_key, name=name, domain=domain, keywords=keywords, members=members)
+        matrices.save(config_dir, new_key, name=name, domain=domain, keywords=keywords, members=members,
+                      render=source.render)
     except Exception:
         for path in written:  # all or nothing: a half-made matrix would leave Jobs nobody groups
             try:
@@ -419,9 +429,10 @@ def matrix_runs(key: str, job: str = "", status: str = "", days: int = 0, order:
     config_dir, jobs_dir = _dirs()
     since = (datetime.now().astimezone() - timedelta(days=days)).isoformat(timespec="seconds") if days else ""
     rows = []
+    names = list_jobs(jobs_dir)
     for name in ([job] if job else matrix.jobs):
         loaded = load_job(jobs_dir, name)
-        for entry in matrices.history_of(name, jobs_dir, 2000):
+        for entry in matrices.history_of(name, jobs_dir, 2000, known_jobs=names):
             if (status and entry.get("status") != status) or (since and entry.get("ts", "") < since):
                 continue
             who = entry.get("user") or ""

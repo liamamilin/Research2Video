@@ -172,7 +172,11 @@ describe("Video script cell picker", () => {
       </MemoryRouter>,
     );
     expect(await screen.findByText("草稿一篇")).toBeTruthy();
+    expect(screen.queryByText("已发一篇")).toBeNull();
+    expect(screen.getByRole("button", { name: "未发布 1" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "全部 2" }));
     expect(screen.getByText("已发一篇")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "全部 2" }).getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: /^已发布/ }));
     await waitFor(() => expect(screen.queryByText("草稿一篇")).toBeNull());
     expect(screen.getByText("已发一篇")).toBeTruthy();
@@ -234,6 +238,7 @@ describe("Script list filters", () => {
     expect(await screen.findByText("缓存那一篇")).toBeTruthy();
     expect(screen.getByText(/01-02 09:30|2020-01-02 09:30/)).toBeTruthy(); // the made-at time is written out, not only "x 天前"
     expect(screen.getByText("显示 2 / 2")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /筛选/ }));
     fireEvent.change(screen.getByLabelText("可信度"), { target: { value: "serious" } });
     await waitFor(() => expect(screen.queryByText("价格那一篇")).toBeNull());
     expect(screen.getByText("显示 1 / 2")).toBeTruthy();
@@ -243,5 +248,63 @@ describe("Script list filters", () => {
     await waitFor(() => expect(screen.queryByText("缓存那一篇")).toBeNull());
     fireEvent.change(screen.getByLabelText("来源"), { target: { value: "auto" } });
     await waitFor(() => expect(screen.queryByText("价格那一篇")).toBeNull());
+  });
+});
+
+
+describe("Script list scope and independent loading", () => {
+  const rows = [
+    { id: "a", title: "矩阵甲的文稿", status: "DRAFT", matrix: "a", matrix_name: "矩阵甲", column_key: "flash", column_label: "快讯", current_version: 4, has_previous_video: true, created_at: "2026-10-23T10:00:00+0800" },
+    { id: "b", title: "矩阵乙的文稿", status: "APPROVED", matrix: "b", matrix_name: "矩阵乙", column_key: "flash", column_label: "快讯", current_version: 1, created_at: "2026-10-23T09:00:00+0800" },
+  ];
+  it("keeps an explicit all-status link instead of applying the unpublished default", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse([
+      ...rows, { ...rows[0], id: "published", title: "已经发布的文稿", published: true },
+    ])));
+    render(<MemoryRouter initialEntries={["/video?status=all"]}><VideoScriptsPage /></MemoryRouter>);
+    expect(await screen.findByText("已经发布的文稿")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "全部 3" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "未发布 2" }));
+    expect(screen.queryByText("已经发布的文稿")).toBeNull();
+  });
+  it("filters unpublished current versions across stages and keeps matrix counts", async () => {
+    const scripts = [...rows,
+      { ...rows[0], id: "c", title: "矩阵甲已发布", published: true },
+      { ...rows[0], id: "d", title: "矩阵甲成片未发布", status: "APPROVED", published: false, render: { status: "COMPLETED" } },
+    ];
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse(scripts)));
+    render(<MemoryRouter initialEntries={["/video?status=unpublished"]}><VideoScriptsPage /></MemoryRouter>);
+    const unpublished = await screen.findByRole("button", { name: "未发布 3" });
+    expect(unpublished.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("矩阵甲的文稿")).toBeTruthy();
+    expect(screen.getByText("矩阵甲成片未发布")).toBeTruthy();
+    expect(screen.queryByText("矩阵甲已发布")).toBeNull();
+    fireEvent.change(screen.getByLabelText("文稿矩阵"), { target: { value: "a" } });
+    expect(screen.getByRole("button", { name: "未发布 2" })).toBeTruthy();
+    expect(screen.queryByText("矩阵乙的文稿")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "已发布 1" }));
+    expect(screen.getByText("矩阵甲已发布")).toBeTruthy();
+    expect(screen.queryByText("矩阵甲成片未发布")).toBeNull();
+  });
+  it("loads existing scripts without loading authoring catalogs, and scopes counts by matrix", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      calls.push({ url: String(url), method: "GET" });
+      return String(url).endsWith("/api/video/scripts") ? jsonResponse(rows) : jsonResponse({ error: { message: "配方读取失败", code: "catalog_failed" } }, 400);
+    }));
+    renderPage();
+    expect(await screen.findByText("矩阵甲的文稿")).toBeTruthy();
+    expect(calls.map((c) => c.url)).toEqual(["/api/video/scripts"]);
+    fireEvent.change(screen.getByLabelText("文稿矩阵"), { target: { value: "a" } });
+    expect(screen.queryByText("矩阵乙的文稿")).toBeNull();
+    expect(screen.getByRole("button", { name: "待审稿 1" })).toBeTruthy();
+    fireEvent.click(screen.getByText("＋ 新建文稿"));
+    expect(await screen.findByText(/配方读取失败/)).toBeTruthy();
+    expect(screen.getByText("矩阵甲的文稿")).toBeTruthy();
+  });
+
+  it("uses the selected topic source and report date from the topics page", async () => {
+    render(<MemoryRouter initialEntries={["/video?cell=ai-developer-roundup-long&topic=2026-10-01/F1&topic_source=history&topic_round=2026-10-01"]}><VideoScriptsPage /></MemoryRouter>);
+    await screen.findByLabelText("格子");
+    await waitFor(() => expect(calls.some((c) => c.url.includes("source=history") && c.url.includes("round=2026-10-01"))).toBe(true));
   });
 });

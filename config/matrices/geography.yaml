@@ -5,3 +5,5 @@ keywords: []
 jobs:
 - geography/geography_daily
 - geography/geography_weekly
+render:
+  video_speed: 1.25

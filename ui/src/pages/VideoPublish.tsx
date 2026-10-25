@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -8,11 +8,12 @@ import {
   getPublishPack,
   recheckVideoScript,
   revealVideoRender,
-  type PublishPack,
   type Publication,
   type Recheck,
   type VideoRender,
 } from "@/api/video";
+import { ErrorState } from "@/components/ErrorState";
+import { usePageResource } from "@/lib/use-page-resource";
 import { errorMessage, useToast } from "@/lib/toast";
 
 const sizeText = (bytes: number | null) => (bytes == null ? "" : bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
@@ -68,9 +69,10 @@ export function RenderFolder({ render, canEdit = false }: { render: VideoRender;
   }
 
   return (
-    <section className="card space-y-2" aria-label="成片文件">
+    <section className="card p-4 space-y-2" aria-label="成片文件">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="font-medium flex-1">成片文件</h2>
+        <span className="text-xs text-text-muted">使用文稿 v{render.version}</span>
         {canEdit ? (
           <>
             <button className="btn btn-primary text-xs" disabled={busy} onClick={open}>在访达中显示</button>
@@ -79,22 +81,27 @@ export function RenderFolder({ render, canEdit = false }: { render: VideoRender;
         ) : null}
       </div>
       <ul className="text-xs space-y-1">
-        {render.files.map((f) => (
+        {render.files.filter(f => ["video.mp4", "captions.srt"].includes(f.name)).map((f) => (
           <li key={f.name} className="flex gap-2">
             <a className="text-accent hover:underline" href={f.url} download={f.name}>{f.name}</a>
             <span className="text-text-muted">{sizeText(f.bytes)}</span>
           </li>
         ))}
       </ul>
+      {render.files.some(f => !["video.mp4", "captions.srt"].includes(f.name)) ? <details className="text-xs">
+        <summary className="cursor-pointer text-text-muted">技术文件与生成记录（{render.files.filter(f => !["video.mp4", "captions.srt"].includes(f.name)).length}）</summary>
+        <ul className="mt-2 space-y-1">{render.files.filter(f => !["video.mp4", "captions.srt"].includes(f.name)).map(f => <li key={f.name}><a className="text-accent hover:underline" href={f.url} download={f.name}>{f.name}</a><span className="text-text-muted ml-2">{sizeText(f.bytes)}</span></li>)}</ul>
+      </details> : null}
       {path ? <p className="text-xs text-text-muted break-all">{path}</p> : null}
     </section>
   );
 }
 
-// 发布包：标题、简介（含章节和参考来源）、标签、封面文字，每项一个复制按钮。只生成建议，不发布。
+// 发布素材与统一发布记录；平台投稿在平台管理确认，也保留手动补录。
 export function PublishPanel({
   scriptId,
   version,
+  renderId,
   refreshKey,
   canEdit = false,
   recheckEnabled = false,
@@ -104,6 +111,7 @@ export function PublishPanel({
 }: {
   scriptId: string;
   version?: number;
+  renderId?: string;
   refreshKey?: string;
   canEdit?: boolean;
   recheckEnabled?: boolean;
@@ -112,8 +120,8 @@ export function PublishPanel({
   onChanged?: () => void;
 }) {
   const toast = useToast();
-  const [pack, setPack] = useState<PublishPack | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const loadPack = useCallback((signal: AbortSignal) => getPublishPack(scriptId, version, signal), [scriptId, version]);
+  const { data: pack, error, reload } = usePageResource(loadPack);
   const [link, setLink] = useState("");
   const [day, setDay] = useState("");
   const [busy, setBusy] = useState(false);
@@ -123,19 +131,11 @@ export function PublishPanel({
   // 复核在后台跑，几分钟；跑着的时候每隔几秒让上层刷新一次
   useEffect(() => {
     if (!running || !onChanged) return;
-    const timer = setInterval(onChanged, 5000);
+    const timer = setInterval(() => { if (!document.hidden) onChanged(); }, 5000);
     return () => clearInterval(timer);
   }, [running, onChanged]);
 
-  useEffect(() => {
-    let alive = true;
-    getPublishPack(scriptId, version)
-      .then((p) => alive && (setPack(p), setError(null)))
-      .catch((e) => alive && setError(errorMessage(e, "生成发布包失败")));
-    return () => {
-      alive = false;
-    };
-  }, [scriptId, version, refreshKey, rechecks.length, running, publications.length]);
+  useEffect(() => { void reload(); }, [reload, refreshKey, rechecks.length, running, publications.length]);
 
   async function copy(text: string, what: string) {
     try {
@@ -162,7 +162,8 @@ export function PublishPanel({
   async function record() {
     setBusy(true);
     try {
-      await addPublication(scriptId, { url: link.trim(), ...(day ? { published_on: day } : {}) });
+      await addPublication(scriptId, { url: link.trim(), version: pack?.version ?? version,
+        ...(renderId ? { render_id: renderId } : {}), ...(day ? { published_on: day } : {}) });
       setLink("");
       setDay("");
       toast.success("已记录发布");
@@ -183,7 +184,7 @@ export function PublishPanel({
     }
   }
 
-  if (error) return <p className="text-xs text-danger">{error}</p>;
+  if (error && !pack) return <ErrorState error={error} onRetry={reload} compact />;
   if (!pack) return null;
 
   const row = (label: string, text: string, what: string, multiline = false) => (
@@ -203,10 +204,11 @@ export function PublishPanel({
   );
 
   return (
-    <section className="card space-y-3" aria-label="发布包">
+    <section className="card p-4 space-y-3" aria-label="发布包">
+      {error ? <ErrorState error={error} onRetry={reload} compact /> : null}
       <div className="flex items-center gap-2">
         <h2 className="font-medium flex-1">发布包</h2>
-        <span className="text-xs text-text-muted">v{pack.version} · 只是建议，不会发布到任何平台</span>
+        <span className="text-xs text-text-muted">v{pack.version} · 用于平台投稿，也可复制后手动发布</span>
       </div>
       {pack.warnings.map((w) => (
         <p key={w} className="text-xs text-warning">
@@ -215,6 +217,25 @@ export function PublishPanel({
       ))}
       {row(`标题（${pack.title.length} 字）`, pack.title, "标题")}
       {row(`简介（${pack.description.length} 字）`, pack.description, "简介", true)}
+      {pack.references.length ? (
+        <details className="rounded border border-border p-2 text-sm">
+          <summary className="cursor-pointer">资料来源（{pack.references.length}）</summary>
+          <ul className="mt-2 space-y-2">
+            {pack.references.map((ref) => (
+              <li key={ref.url} className="space-y-0.5">
+                <a href={ref.url} target="_blank" rel="noreferrer" className="text-accent hover:underline break-words">
+                  {ref.title}
+                </a>
+                <span className="ml-2 text-xs text-text-muted">{ref.cited ? "文稿引用" : "报告补充资料"}{ref.date ? ` · ${ref.date}` : ""}</span>
+                <p className="break-all text-xs text-text-muted">{ref.url}</p>
+              </li>
+            ))}
+          </ul>
+          <button className="btn mt-2 text-xs" onClick={() => copy(pack.references.map((ref) => `${ref.title}\n${ref.url}`).join("\n\n"), "资料链接")}>
+            复制资料链接
+          </button>
+        </details>
+      ) : null}
       {pack.chapter_note ? <p className="text-xs text-text-muted">{pack.chapter_note}</p> : null}
       {pack.tags.length ? row("标签", pack.tags.join(" "), "标签") : null}
       {row("封面文字", `${pack.cover.headline}（角标：${pack.cover.badge}）`, "封面文字")}
@@ -256,7 +277,8 @@ export function PublishPanel({
       ) : null}
 
       <div className="space-y-2 border-t border-border pt-3">
-        <span className="text-xs text-text-muted">发布记录（发布后把链接记在这里；不会自动发布或抓取数据）</span>
+        <h3 className="text-sm font-medium">发布记录</h3>
+        <p className="text-xs text-text-muted">平台投稿确认公开后自动回填链接和发布日期。已在 B 站手动发布的视频，可在这里补录。</p>
         {publications.map((p) => (
           <div key={p.id} className="flex items-center gap-2 text-sm">
             <span className="text-xs text-text-muted">{p.published_on}</span>
@@ -264,6 +286,7 @@ export function PublishPanel({
               {p.url}
             </a>
             {p.version ? <span className="text-xs text-text-muted">v{p.version}</span> : null}
+            {p.recorded_by === "platform-manager" ? <span className="badge border border-border text-xs">平台自动回写</span> : null}
             {canEdit ? (
               <button className="text-xs text-text-muted hover:text-danger" onClick={() => forget(p.id)}>
                 删除
@@ -272,7 +295,7 @@ export function PublishPanel({
           </div>
         ))}
         {canEdit ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="space-y-2"><p className="text-xs text-text-muted">手动补录发布记录</p><div className="flex flex-wrap gap-2">
             <input
               className="input flex-1 min-w-[16rem]"
               placeholder="B 站视频链接，例如 https://www.bilibili.com/video/BV..."
@@ -280,10 +303,10 @@ export function PublishPanel({
               onChange={(e) => setLink(e.target.value)}
             />
             <input className="input w-auto" type="date" aria-label="发布日期" value={day} onChange={(e) => setDay(e.target.value)} />
-            <button className="btn btn-primary text-xs" disabled={busy || link.trim().length < 8} onClick={record}>
+            <button className="btn text-xs" disabled={busy || link.trim().length < 8} onClick={record}>
               记录发布
             </button>
-          </div>
+          </div></div>
         ) : null}
       </div>
     </section>

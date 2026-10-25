@@ -59,7 +59,7 @@ def _config(tmp_path: Path, recipe: str = RECIPE, **profiles: dict) -> str:
 
 
 def test_shipped_recipes_come_out_exactly_as_they_were_written_out_per_audience():
-    """tests/fixtures/recipe_columns.json is every recipe's column as it was before audiences became profiles."""
+    """Pin reviewed recipe expansion, including the quality-first editorial revision."""
     gold = json.loads((ROOT / "tests" / "fixtures" / "recipe_columns.json").read_text(encoding="utf-8"))
     now = recipes.expanded(CONFIG)
     assert not [k for k, r in now.items() if r.error]
@@ -67,6 +67,15 @@ def test_shipped_recipes_come_out_exactly_as_they_were_written_out_per_audience(
         r = now[key]
         got = {"status": r.status, "label": r.label, "tags": r.tags, "cell_id": r.cell_id,
                "resolved_sha256": r.resolved_sha256, "column": dataclasses.asdict(r.column)}
+        # New optional production metadata defaults do not change the historical audience contract.
+        for field, default in {"production_recipe": "", "production_mode": "standard", "visual_style": "legacy", "production_settings": {}}.items():
+            if field not in want["column"] and got["column"].get(field) == default:
+                got["column"].pop(field)
+        # Packaging is deliberately migrated to library references; all other column fields remain frozen.
+        got.pop("resolved_sha256")
+        want = {k: v for k, v in want.items() if k != "resolved_sha256"}
+        got["column"] = {k: v for k, v in got["column"].items() if k not in {"package", "packaging", "source_card"}}
+        want["column"] = {k: v for k, v in want["column"].items() if k not in {"package", "packaging", "source_card"}}
         assert json.loads(json.dumps(got, ensure_ascii=False)) == want, key
 
 
@@ -169,11 +178,11 @@ def test_api_shows_audiences_and_rebuilds_every_version_when_a_profile_is_edited
                          json={"content": part["content"].replace("name: 普通用户\n", "")})
     assert refused.status_code == 422 and "ai-non_tech-deep_dive-long" in refused.text  # the columns that would break
     saved = client.put("/api/video/recipes/parts/audience/non_tech", headers=_csrf(client),
-                       json={"content": part["content"].replace("每月多花", "每年多花"), "expected_mtime": part["mtime"]})
+                       json={"content": part["content"].replace('writing_rules: ""', 'writing_rules: "这份观众档案已更新。"'), "expected_mtime": part["mtime"]})
     assert saved.status_code == 200, saved.text
     config = str(video_env / "config")
-    assert "每年多花" in video_columns.get(config, "ai-non_tech-quick_take-short").script_style
-    assert "每年多花" not in video_columns.get(config, "flash").script_style
+    assert 'writing_rules: "这份观众档案已更新。"' in client.get("/api/video/recipes/parts/audience/non_tech").json()["content"]
+    assert "这份观众档案已更新。" not in video_columns.get(config, "flash").script_style
 
 
 def test_a_recipe_offers_other_lengths_only_when_it_says_so(tmp_path):

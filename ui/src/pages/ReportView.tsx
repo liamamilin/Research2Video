@@ -1,11 +1,12 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { getReportRaw, updateReportMeta, createShareLink, emailReport } from "@/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Download, Copy, List, Star, Tag, Share2, Mail, FileCode } from "lucide-react";
+import { ArrowLeft, Download, Copy, List, Star, Tag, Share2, Mail, FileCode, RefreshCw } from "lucide-react";
 import { cn, formatTokens } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth-store";
+import { ErrorState } from "@/components/ErrorState";
 import { ReportToVideo } from "@/components/ReportToVideo";
 import { errorMessage, useToast } from "@/lib/toast";
 
@@ -41,19 +42,22 @@ function childrenToText(children: unknown): string {
 function extractHeadings(markdown: string): Heading[] {
   const headings: Heading[] = [];
   let inFence = false;
+  const ids: Record<string, number> = {};
   for (const line of markdown.split("\n")) {
     const trimmed = line.trim();
-    if (trimmed.startsWith("```")) {
+    if (trimmed.startsWith("```") || trimmed.startsWith("~~~")) {
       inFence = !inFence;
       continue;
     }
     if (inFence) continue;
     const match = /^(#{1,3})\s+(.+?)\s*$/.exec(line);
     if (match) {
+      const text = match[2].replace(/!?\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/[*`_~]/g, "").replace(/\s+#+$/, "");
+      const base = slugify(text); const count = ids[base] || 0; ids[base] = count + 1;
       headings.push({
         level: match[1].length,
-        text: match[2].replace(/[*`_~]/g, ""),
-        id: slugify(match[2]),
+        text,
+        id: count ? `${base}-${count}` : base,
       });
     }
   }
@@ -63,6 +67,10 @@ function extractHeadings(markdown: string): Heading[] {
 export function ReportViewPage() {
   const [searchParams] = useSearchParams();
   const path = searchParams.get("path") || "";
+  return <ReportWorkspace key={path} path={path} />;
+}
+
+function ReportWorkspace({ path }: { path: string }) {
 
   const [content, setContent] = useState("");
   const [meta, setMeta] = useState<any>(null);
@@ -83,30 +91,34 @@ export function ReportViewPage() {
   const toast = useToast();
   const [busyAction, setBusyAction] = useState("");
 
+  const flight = useRef<AbortController | null>(null);
   const fetchContent = useCallback(async () => {
+    if (flight.current) return;
+    const controller = new AbortController(); flight.current = controller;
     if (!path) {
       setError("缺少 path 参数");
-      setLoading(false);
+      setLoading(false); flight.current = null;
       return;
     }
     setLoading(true);
     setError("");
     try {
-      const data = await getReportRaw(path);
+      const data = await getReportRaw(path, controller.signal);
+      if (controller.signal.aborted) return;
       setContent(data.content);
       setMeta((data as any).meta || null);
       setIndexMeta((data as any).index || null);
       if (canEdit) {
         updateReportMeta(path, { read: true })
-          .then((row) => setIndexMeta(row))
+          .then((row) => { if (!controller.signal.aborted) setIndexMeta(row); })
           .catch((err: unknown) => {
             toast.warning("未能标记为已读", errorMessage(err));
           });
       }
     } catch (err: any) {
-      setError(err.message || "加载失败");
+      if (!controller.signal.aborted) setError(err.message || "加载失败");
     } finally {
-      setLoading(false);
+      if (flight.current === controller) { flight.current = null; setLoading(false); }
     }
   }, [path, canEdit, toast]);
 
@@ -182,7 +194,8 @@ export function ReportViewPage() {
   });
 
   useEffect(() => {
-    fetchContent();
+    void fetchContent();
+    return () => { flight.current?.abort(); flight.current = null; };
   }, [fetchContent]);
 
   const handleCopy = async () => {
@@ -191,7 +204,7 @@ export function ReportViewPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // ignore
+      toast.error("未能复制报告", "请手动选择正文复制");
     }
   };
 
@@ -205,24 +218,32 @@ export function ReportViewPage() {
     URL.revokeObjectURL(url);
   };
 
-  if (loading) {
+  if (loading && !content) {
     return <div className="text-text-muted">加载中...</div>;
   }
 
-  if (error) {
+  if (error && !content) {
     return (
       <div className="space-y-4">
         <Link to="/reports" className="btn">
           <ArrowLeft className="w-4 h-4" />
           返回
         </Link>
-        <div className="card p-4 text-danger">{error}</div>
+        <ErrorState error={error} onRetry={fetchContent} />
       </div>
     );
   }
 
   const filename = path.split("/").pop() || "";
-  const headings = content ? extractHeadings(content) : [];
+  const preamble = /^\s*<think>([\s\S]*?)<\/think>\s*/i.exec(content);
+  const auxiliary = preamble ? [preamble[1]] : [];
+  const visibleContent = preamble ? content.slice(preamble[0].length) : content;
+  const headings = visibleContent ? extractHeadings(visibleContent) : [];
+  const headingCounts: Record<string, number> = {};
+  const headingId = (children: unknown) => {
+    const base = slugify(childrenToText(children)); const count = headingCounts[base] || 0; headingCounts[base] = count + 1;
+    return count ? `${base}-${count}` : base;
+  };
 
   return (
     <div className="space-y-4">
@@ -308,6 +329,9 @@ export function ReportViewPage() {
         </div>
       )}
 
+      {error ? <ErrorState error={error} onRetry={fetchContent} compact /> : null}
+      <button className="btn text-xs" disabled={loading} onClick={fetchContent}><RefreshCw className="h-3.5 w-3.5" />刷新报告</button>
+      {auxiliary.length ? <details className="card p-3 text-xs text-text-muted"><summary className="cursor-pointer">原报告附带的模型辅助文本（{auxiliary.length} 段，原始下载保留）</summary><pre className="whitespace-pre-wrap break-words mt-3 max-h-80 overflow-auto">{auxiliary.map((text) => text.replace(/^<think>|<\/think>$/gi, "")).join("\n\n")}</pre></details> : null}
       {/* Breadcrumb path + metadata */}
       <div className="text-xs text-text-muted flex flex-wrap items-center gap-2">
         <span>{path}</span>
@@ -394,17 +418,17 @@ export function ReportViewPage() {
             remarkPlugins={[remarkGfm]}
             components={{
               h1: ({ children, ...props }) => (
-                <h1 id={slugify(childrenToText(children))} className="text-xl font-bold mt-6 mb-3 pb-1 border-b border-border scroll-mt-4" {...props}>
+                <h1 id={headingId(children)} className="text-xl font-bold mt-6 mb-3 pb-1 border-b border-border scroll-mt-4" {...props}>
                   {children}
                 </h1>
               ),
               h2: ({ children, ...props }) => (
-                <h2 id={slugify(childrenToText(children))} className="text-lg font-semibold mt-5 mb-2 scroll-mt-4" {...props}>
+                <h2 id={headingId(children)} className="text-lg font-semibold mt-5 mb-2 scroll-mt-4" {...props}>
                   {children}
                 </h2>
               ),
               h3: ({ children, ...props }) => (
-                <h3 id={slugify(childrenToText(children))} className="text-base font-medium mt-4 mb-1 scroll-mt-4" {...props}>
+                <h3 id={headingId(children)} className="text-base font-medium mt-4 mb-1 scroll-mt-4" {...props}>
                   {children}
                 </h3>
               ),
@@ -490,7 +514,7 @@ export function ReportViewPage() {
               ),
             }}
           >
-            {content}
+            {visibleContent}
           </ReactMarkdown>
           </div>
         </div>

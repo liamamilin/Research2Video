@@ -30,7 +30,7 @@ reports turn into, and every script records which config made it.
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 import yaml
@@ -38,6 +38,7 @@ import yaml
 from core import matrices
 from core.config import load_job
 from core.fileio import atomic_write
+from core.yaml_cache import load_yaml
 
 from . import recipes, topic_store
 
@@ -73,6 +74,7 @@ class Config:
     audience: str = ""
     target_minutes: float = 0.0
     label: str = ""          # the recipe's label
+    render: dict = field(default_factory=dict)
 
     @property
     def usable(self) -> bool:
@@ -84,6 +86,7 @@ class Config:
                 "minutes_range": list(self.minutes_range),
                 "source": self.source, "split": self.split, "split_name": self.split_name, "reverify": self.reverify,
                 "auto": self.auto,
+                **({"render": self.render} if self.render else {}),
                 "audience": self.audience, "target_minutes": self.target_minutes, "label": self.label}
 
 
@@ -99,6 +102,8 @@ def column_key(every_recipe: dict, recipe: str, audience: str = "", minutes=None
         base = every_recipe.get(recipe)
         if base is None or base.base != base.key:
             return recipe, f"没有这个配方：{recipe or '（没写 recipe）'}"
+        if base.error:
+            return recipe, f"配方 {recipe} 有错：{base.error}"
         if audience not in base.audiences:
             offered = "、".join(base.audiences)
             return recipe, f"配方 {recipe} 没有 {audience} 这个受众" + (f"（有：{offered}）" if offered else "（它没写 audiences）")
@@ -120,13 +125,20 @@ def column_key(every_recipe: dict, recipe: str, audience: str = "", minutes=None
     return key, ""
 
 
-def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: dict) -> Config:
+def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: dict,
+           sources: dict, matrix_jobs: set[str]) -> Config:
     job, recipe_key = str(data.get("job") or "").strip(), str(data.get("recipe") or "").strip()
     audience = str(data.get("audience") or "").strip()
     errors: list[str] = []
-    unknown = set(data) - {"name", "job", "recipe", "audience", "minutes", "reverify", "auto"}
+    unknown = set(data) - {"name", "job", "recipe", "audience", "minutes", "reverify", "auto", "render"}
     if unknown:
         errors.append(f"不认识的字段：{', '.join(sorted(unknown))}")
+    from .production_settings import validate as validate_render
+    try:
+        render_settings = validate_render(data.get("render"))
+    except ValueError as exc:
+        errors.append(str(exc))
+        render_settings = {}
     minutes = data.get("minutes")
     reverify = data.get("reverify")
     recipe_key, why = column_key(every_recipe, recipe_key, audience, minutes, reverify)
@@ -134,7 +146,7 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
         errors.append(why)
     recipe = every_recipe.get(recipe_key)
     if recipe is None and not why and recipes.split_variant_key(recipe_key):
-        recipe = recipes.find(config_dir, recipe_key)  # a length is no recipe of its own: built when asked for
+        recipe = recipes.find(config_dir, recipe_key, every=every_recipe)
     if recipe is None:
         if not why:
             errors.append(f"没有这个配方：{recipe_key or '（没写 recipe）'}")
@@ -149,9 +161,9 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
     elif load_job(jobs_dir, job) is None:
         errors.append(f"没有这个 Job：{job}")
     else:
-        if matrices.of_job(job, config_dir) is None:
+        if job not in matrix_jobs:
             errors.append(f"{job} 不在任何矩阵里：先把它放进一个矩阵")
-        source = topic_store.resolve(jobs_dir, job)
+        source = sources.get(job)
         if source is None:
             whole = topic_store.whole_source(jobs_dir, job)
             if whole is not None and whole.error:
@@ -194,7 +206,7 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
                   source=source.name if source else "", split=split, split_name=split_name,
                   reverify=bool(column is not None and column.research_mode == "job" and split != "whole"), auto=auto or 0,
                   audience=column.audience if column is not None else "",
-                  target_minutes=column.target_minutes if column is not None else 0.0, label=label)
+                  target_minutes=column.target_minutes if column is not None else 0.0, label=label, render=render_settings)
 
 
 def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
@@ -205,6 +217,11 @@ def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
     except OSError:
         return {}
     every_recipe = recipes.expanded(config_dir)
+    # These are one request's snapshots, not a persistent cache. Loading them
+    # inside _check rescanned every Job and reopened the topics DB per config.
+    sources = topic_store.sources(jobs_dir)
+    sources = {**{s.job: s for s in sources.values()}, **sources}
+    matrix_jobs = {job for matrix in matrices.load_all(config_dir).values() for job in matrix.jobs}
     out: dict[str, Config] = {}
     for filename in names:
         key = filename[:-len(".yaml")]
@@ -212,14 +229,21 @@ def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
             continue
         try:
             with open(os.path.join(folder, filename), encoding="utf-8") as fh:
-                data = yaml.safe_load(fh) or {}
+                data = load_yaml(fh) or {}
         except (OSError, yaml.YAMLError) as exc:
             out[key] = Config(key=key, name=key, job="", recipe="", errors=(f"读不了：{str(exc)[:120]}",))
             continue
         if not isinstance(data, dict):
             out[key] = Config(key=key, name=key, job="", recipe="", errors=("应为映射（name、job、recipe）",))
             continue
-        out[key] = _check(key, data, config_dir, jobs_dir, every_recipe)
+        try:
+            out[key] = _check(key, data, config_dir, jobs_dir, every_recipe, sources, matrix_jobs)
+        except (OSError, ValueError, TypeError, AttributeError, KeyError, yaml.YAMLError) as exc:
+            # A referenced job/part may be malformed or replaced during an edit.
+            # Keep the broken config visible without breaking every list page.
+            out[key] = Config(key=key, name=str(data.get("name") or key), job=str(data.get("job") or ""),
+                              recipe=str(data.get("recipe") or ""),
+                              errors=(f"配置加载失败：{type(exc).__name__}: {str(exc)[:160]}",))
     return out
 
 
@@ -239,9 +263,16 @@ def _write(config_dir: str, key: str, data: dict) -> None:
 
 
 def save(config_dir: str, key: str, *, job: str, recipe: str, name: str = "", audience: str = "",
-         minutes=None, reverify=None, auto=None) -> None:
+         minutes=None, reverify=None, auto=None, render=None) -> None:
+    if render is None:
+        path = os.path.join(directory(config_dir), f"{key}.yaml")
+        if os.path.isfile(path):
+            with open(path, encoding="utf-8") as stream:
+                render = (yaml.safe_load(stream) or {}).get("render")
+    from .production_settings import validate as validate_render
+    render = validate_render(render)
     _write(config_dir, key, {"name": name, "job": job, "recipe": recipe, "audience": audience, "minutes": minutes,
-                             "reverify": reverify, "auto": auto})
+                             "reverify": reverify, "auto": auto, **({"render": render} if render else {})})
 
 
 def set_auto(config_dir: str, key: str, count: Optional[int]) -> bool:

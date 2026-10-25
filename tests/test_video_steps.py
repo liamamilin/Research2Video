@@ -55,6 +55,42 @@ def test_a_render_step_follows_the_approved_versions_renders(video_env, autovide
     assert states(script["id"])["render"] == "DONE"
 
 
+def test_rerun_resumes_a_failed_copy_of_the_same_approved_video(video_env, autovideo, monkeypatch):
+    from web.services import video_render
+
+    script = _approved_script()
+    render = video_render.create(script)
+    autovideo.served["video.mp4"] = b"truncated"
+    assert video_render.process(render["id"]) == "FAILED"
+    monkeypatch.setattr(video_render, "start", lambda *a: None)
+    resumed = video_executor.rerun(script["id"], "render", "editor")
+    assert resumed["id"] == render["id"] and resumed["status"] == "DOWNLOADING"
+    autovideo.served.clear()
+    assert video_render.process(resumed["id"]) == "COMPLETED"
+    assert len(autovideo.posts) == len(store.list_renders(script["id"])) == 1
+
+
+def test_a_changed_voice_creates_a_new_video_after_copy_failure(video_env, autovideo, monkeypatch):
+    from web.services import video_render
+
+    script = _approved_script()
+    render = video_render.create(script)
+    store.update_render(render["id"], status="FAILED", error_code="DOWNLOAD_FAILED", autovideo_job_id="old-video")
+    monkeypatch.setattr(video_render, "start", lambda *a: None)
+    changed = video_executor._render(script, "editor", voice_id="zf_xiaoxiao")
+    assert changed["id"] != render["id"] and changed["status"] == "SUBMITTING"
+
+
+def test_core_fact_audit_completes_even_when_optional_expression_checks_are_unfinished(video_env):
+    script = store.create_script("flash", {"title": "等待完整复审"})
+    sections = [{"title": "开场", "paragraphs": [{"text": "一句话。", "citations": [], "evidence": "UNCITED"}]}]
+    store.add_version(script["id"], title="t", sections=sections, length_check=length.measure(sections, 1.25),
+                      edit_type="GENERATED", meta={"checks": {"model_ran": True, "audits_complete": False}})
+    store.update_script(script["id"], status="DRAFT", stage=None)
+    step = video_executor.steps_of(store.get_script(script["id"]))[2]
+    assert step["state"] == "DONE" and "表达检查有未完成项" in step["note"]
+
+
 def test_api_rewrite_from_the_same_report_makes_a_new_version_without_researching(client, video_env, research, llm,
                                                                                   autovideo):
     _flash(video_env)
@@ -158,3 +194,14 @@ def test_a_batch_scripts_steps_are_logged_as_autopilot(video_env, monkeypatch):
     pilot.tick()
     assert [(e["step"], e["event"], e["by"]) for e in steps.events(script_id)] == [
         ("research", "start", "autopilot"), ("research", "resume", "autopilot")]
+
+
+def test_new_draft_does_not_inherit_approval_or_render_completion_from_old_version(video_env):
+    script = _approved_script()
+    render = store.create_render(script["id"], 1, title="旧片", source_text="x", source_sha256="0" * 64, request={})
+    store.update_render(render["id"], status="COMPLETED")
+    original = store.get_version(script["id"], 1)
+    store.add_version(script["id"], title="新版", sections=original["sections"], length_check=original["length_check"], edit_type="EDITED")
+    store.update_script(script["id"], status="DRAFT")
+    assert states(script["id"])["approve"] == "WAITING"
+    assert states(script["id"])["render"] == "PENDING"

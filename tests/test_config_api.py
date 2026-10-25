@@ -189,7 +189,10 @@ def test_provider_models_come_from_the_presets_own_address_with_its_own_key(clie
     assert client.get("/api/config/providers/open-design/models").status_code == 401
     _login(client)
     body = client.get("/api/config/providers/open-design/models").json()
-    assert body == {"models": ["deepseek-v4-flash", "glm-5.3-flash"], "error": None}
+    assert body["models"] == ["deepseek-v4-flash", "glm-5.3-flash"]
+    assert body["error"] is None
+    assert body["free_models"] == []
+    assert body["updated_at"] > 0
     assert seen == {"url": "https://amr-link.open-design.ai/v1/models", "auth": "Bearer k-123"}
     assert client.get("/api/config/providers/nope/models").status_code == 404
 
@@ -208,6 +211,31 @@ def test_provider_models_say_why_when_there_is_no_list(client, cfg, monkeypatch)
     monkeypatch.setattr(httpx, "get", boom)
     body = client.get("/api/config/providers/open-design/models").json()
     assert body["models"] == [] and "ConnectError" in body["error"]
+
+
+def test_provider_refresh_requires_admin_and_bypasses_cached_list(client, cfg, monkeypatch):
+    import httpx
+
+    url = "/api/config/providers/open-design/models"
+    assert client.get(url + "?refresh=true").status_code == 401
+    _login(client, "viewer", "viewer-pass-123")
+    assert client.get(url + "?refresh=true").status_code == 403
+    _login(client)
+    monkeypatch.setenv("OPENDESIGN_API_KEY", "fixture")
+    offered = ["first-model"]
+    calls = []
+
+    def fake_get(address, **kwargs):
+        calls.append(address)
+        return httpx.Response(200, json={"data": [{"id": name} for name in offered]},
+                              request=httpx.Request("GET", address))
+
+    monkeypatch.setattr(httpx, "get", fake_get)
+    assert client.get(url).json()["models"] == ["first-model"]
+    offered[:] = ["replacement-model"]
+    assert client.get(url).json()["models"] == ["first-model"]
+    assert client.get(url + "?refresh=true").json()["models"] == ["replacement-model"]
+    assert len(calls) == 2
 
 
 def test_a_key_in_the_env_name_field_is_rejected(client, cfg):

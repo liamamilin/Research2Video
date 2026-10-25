@@ -305,6 +305,8 @@ class LLMClient:
                         temperature=temperature,
                         max_tokens=max_tokens,
                     )
+                if response.finish_reason == "content_filter":
+                    raise LLMError("模型服务过滤了本次请求（finish_reason=content_filter），没有可用的完整结果")
                 if self._is_empty_reply(response):
                     raise EmptyReplyError("模型返回了空内容")
                 return response

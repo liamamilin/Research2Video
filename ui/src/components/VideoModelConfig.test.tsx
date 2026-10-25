@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { VideoModelConfig } from "./VideoModelConfig";
@@ -24,7 +24,8 @@ function mockFetch(opts: { reachable?: boolean } = {}) {
   vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
     calls.push({ url: String(url), init });
     const u = String(url);
-    if (u.includes("/models")) return reply(200, { models: ["deepseek-v4-flash", "glm-5.3-flash", "deepseek-flash"], error: null });
+    if (u.includes("/models")) return reply(200, { models: ["deepseek-v4-flash", "glm-5.3-flash", "deepseek-flash"],
+      free_models: [], prices: {}, updated_at: 1792700000, error: null });
     if (u.endsWith("/api/video/model/test")) return reply(200, { ok: true, status: 200, message: "可用" });
     if (u.endsWith("/api/video/model") && init?.method === "PUT") {
       return reply(200, { ...CONFIG, ...JSON.parse(String(init.body)), source: "设置页" });

@@ -127,7 +127,6 @@ export function VideoModelConfig({ providers, secrets }: { providers: ProviderPr
     }
   };
 
-  const freeModels = active?.free_models ?? [];
   return (
     <div className="card p-4 space-y-3" data-testid="video-model-config">
       <div className="flex items-center gap-2 flex-wrap">
@@ -168,17 +167,6 @@ export function VideoModelConfig({ providers, secrets }: { providers: ProviderPr
             placeholder="deepseek-v4-flash"
             onChange={(e) => setForm({ ...form, model: e.target.value })} />
         </label>
-        {freeModels.length > 0 && (
-          <div className="sm:col-span-2 flex flex-wrap items-center gap-1.5 -mt-1">
-            <span className="text-[11px] text-text-muted">免费模型：</span>
-            {freeModels.map((id) => (
-              <button key={id} type="button" className="badge border border-border bg-bg-card font-mono text-[11px] hover:bg-bg-hover"
-                onClick={() => setForm({ ...form, model: id })}>
-                {id}
-              </button>
-            ))}
-          </div>
-        )}
         {active && (
           <div className="sm:col-span-2 -mt-1">
             <ProviderModels providerId={active.id} label={active.label} model={form.model} fallbacks={form.fallbacks}

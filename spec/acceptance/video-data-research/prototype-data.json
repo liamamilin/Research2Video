@@ -1,0 +1,230 @@
+{
+  "periods": {
+    "7": {
+      "play": 683,
+      "like": 0,
+      "fav": 0,
+      "fan": -6,
+      "points": [
+        {
+          "date": "2026-10-17",
+          "value": 7
+        },
+        {
+          "date": "2026-10-18",
+          "value": 25
+        },
+        {
+          "date": "2026-10-19",
+          "value": 84
+        },
+        {
+          "date": "2026-10-20",
+          "value": 13
+        },
+        {
+          "date": "2026-10-21",
+          "value": 97
+        },
+        {
+          "date": "2026-10-22",
+          "value": 383
+        },
+        {
+          "date": "2026-10-23",
+          "value": 74
+        }
+      ]
+    },
+    "30": {
+      "play": 987,
+      "like": 0,
+      "fav": 0,
+      "fan": -6,
+      "points": [
+        {
+          "date": "2026-09-24",
+          "value": 17
+        },
+        {
+          "date": "2026-09-25",
+          "value": 16
+        },
+        {
+          "date": "2026-09-26",
+          "value": 13
+        },
+        {
+          "date": "2026-09-27",
+          "value": 17
+        },
+        {
+          "date": "2026-09-28",
+          "value": 9
+        },
+        {
+          "date": "2026-09-29",
+          "value": 10
+        },
+        {
+          "date": "2026-09-30",
+          "value": 6
+        },
+        {
+          "date": "2026-10-01",
+          "value": 10
+        },
+        {
+          "date": "2026-10-02",
+          "value": 13
+        },
+        {
+          "date": "2026-10-03",
+          "value": 10
+        },
+        {
+          "date": "2026-10-04",
+          "value": 7
+        },
+        {
+          "date": "2026-10-05",
+          "value": 6
+        },
+        {
+          "date": "2026-10-06",
+          "value": 9
+        },
+        {
+          "date": "2026-10-07",
+          "value": 6
+        },
+        {
+          "date": "2026-10-08",
+          "value": 19
+        },
+        {
+          "date": "2026-10-09",
+          "value": 17
+        },
+        {
+          "date": "2026-10-10",
+          "value": 58
+        },
+        {
+          "date": "2026-10-11",
+          "value": 14
+        },
+        {
+          "date": "2026-10-12",
+          "value": 7
+        },
+        {
+          "date": "2026-10-13",
+          "value": 9
+        },
+        {
+          "date": "2026-10-14",
+          "value": 13
+        },
+        {
+          "date": "2026-10-15",
+          "value": 12
+        },
+        {
+          "date": "2026-10-16",
+          "value": 6
+        },
+        {
+          "date": "2026-10-17",
+          "value": 7
+        },
+        {
+          "date": "2026-10-18",
+          "value": 25
+        },
+        {
+          "date": "2026-10-19",
+          "value": 84
+        },
+        {
+          "date": "2026-10-20",
+          "value": 13
+        },
+        {
+          "date": "2026-10-21",
+          "value": 97
+        },
+        {
+          "date": "2026-10-22",
+          "value": 383
+        },
+        {
+          "date": "2026-10-23",
+          "value": 74
+        }
+      ]
+    }
+  },
+  "videos": [
+    {
+      "title": "名字叫电厂，却没有发电机：Google 想靠少用电补电网缺口",
+      "bvid": "BV1zfHK6kE1U",
+      "stat": {
+        "view": 0,
+        "like": 0,
+        "coin": 0,
+        "favorite": 0,
+        "reply": 1,
+        "danmaku": 0,
+        "share": 0
+      },
+      "date": 1792771200,
+      "source": "workflow"
+    },
+    {
+      "title": "摩托罗拉 Edge 70 Max续航近28小时",
+      "bvid": "BV1rRHK6LE2z",
+      "stat": {
+        "view": 0,
+        "like": 0,
+        "coin": 0,
+        "favorite": 0,
+        "reply": 1,
+        "danmaku": 0,
+        "share": 0
+      },
+      "date": 1792771200,
+      "source": "workflow"
+    },
+    {
+      "title": "Artificial Analysis 10月22日的模型榜",
+      "bvid": "BV1rRHK6LEsR",
+      "stat": {
+        "view": 0,
+        "like": 0,
+        "coin": 0,
+        "favorite": 0,
+        "reply": 1,
+        "danmaku": 0,
+        "share": 0
+      },
+      "date": 1792771200,
+      "source": "workflow"
+    },
+    {
+      "title": "编码 Agent 开始接宣传片：Huashu Motion 想让你指着画面改",
+      "bvid": "BV1SqHK6oEm8",
+      "stat": {
+        "view": 4,
+        "like": 0,
+        "coin": 0,
+        "favorite": 0,
+        "reply": 1,
+        "danmaku": 0,
+        "share": 0
+      },
+      "date": 1792836804,
+      "source": "workflow"
+    }
+  ]
+}

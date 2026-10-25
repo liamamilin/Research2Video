@@ -35,12 +35,15 @@ from typing import Optional
 
 from .errors import SourcesUnavailableError
 from .search import SearchClient, SearchResult
+from .yaml_cache import load_yaml
 import datetime
 
 logger = logging.getLogger(__name__)
 
 _UA = "BaseCodingCLi-ResearchAgent/2.0"
 _ATOM_NS = {"a": "http://www.w3.org/2005/Atom"}
+_CONTENT = "{http://purl.org/rss/1.0/modules/content/}encoded"
+FEED_EXCERPT_CHARS = 3000
 _TAG_RE = re.compile(r"<[^>]+>")
 
 
@@ -66,10 +69,11 @@ def _parse_feed(xml_text: str, limit: int) -> list[SearchResult]:
     results: list[SearchResult] = []
 
     for item in root.findall(".//item")[:limit]:
+        body = item.findtext(_CONTENT) or item.findtext("description") or ""
         results.append(SearchResult(
             title=_clean(item.findtext("title"), 200),
             url=(item.findtext("link") or "").strip(),
-            excerpts=[_clean(item.findtext("description"))] if item.findtext("description") else [],
+            excerpts=[_clean(body, FEED_EXCERPT_CHARS)] if body else [],
             publish_date=(item.findtext("pubDate") or "").strip(),
             provider="rss",
         ))
@@ -82,11 +86,13 @@ def _parse_feed(xml_text: str, limit: int) -> list[SearchResult]:
             if node.get("rel", "alternate") == "alternate" and node.get("href"):
                 link = node.get("href")
                 break
-        summary = entry.findtext("a:summary", default="", namespaces=_ATOM_NS)
+        content = entry.find("a:content", _ATOM_NS)
+        summary = (" ".join(content.itertext()) if content is not None else "")
+        summary = summary or entry.findtext("a:summary", default="", namespaces=_ATOM_NS)
         results.append(SearchResult(
             title=_clean(entry.findtext("a:title", default="", namespaces=_ATOM_NS), 200),
             url=link.strip(),
-            excerpts=[_clean(summary)] if summary else [],
+            excerpts=[_clean(summary, FEED_EXCERPT_CHARS)] if summary else [],
             publish_date=(entry.findtext("a:updated", default="", namespaces=_ATOM_NS)
                           or entry.findtext("a:published", default="", namespaces=_ATOM_NS)).strip(),
             provider="rss",
@@ -97,11 +103,11 @@ def _parse_feed(xml_text: str, limit: int) -> list[SearchResult]:
     # RSS 1.0 (RDF): items sit in the RSS namespace and dates in Dublin Core (Nature, Science, BIS)
     rss, dc = "{http://purl.org/rss/1.0/}", "{http://purl.org/dc/elements/1.1/}"
     for item in root.findall(f"{rss}item")[:limit]:
-        description = item.findtext(f"{rss}description")
+        description = item.findtext(_CONTENT) or item.findtext(f"{rss}description")
         results.append(SearchResult(
             title=_clean(item.findtext(f"{rss}title"), 200),
             url=(item.findtext(f"{rss}link") or item.get("{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about") or "").strip(),
-            excerpts=[_clean(description)] if description else [],
+            excerpts=[_clean(description, FEED_EXCERPT_CHARS)] if description else [],
             publish_date=(item.findtext(f"{dc}date") or "").strip(),
             provider="rss",
         ))
@@ -128,7 +134,7 @@ def fetch_github_releases(repo: str, limit: int = 8, timeout: int = 20) -> list[
         results.append(SearchResult(
             title=_clean(f"{repo} {name}".strip(), 200),
             url=rel.get("html_url") or f"https://github.com/{repo}/releases",
-            excerpts=[_clean(rel.get("body"))] if rel.get("body") else [],
+            excerpts=[_clean(rel.get("body"), FEED_EXCERPT_CHARS)] if rel.get("body") else [],
             publish_date=(rel.get("published_at") or "")[:10],
             provider="github",
         ))
@@ -192,7 +198,7 @@ def parse_tldr(page: str, issue_date: str) -> list[SearchResult]:
         if any(mark in title.lower() or mark in url.lower() for mark in _TLDR_SPONSOR):
             continue
         results.append(SearchResult(
-            title=title, url=url.split("?utm_source", 1)[0], excerpts=[_clean(match.group("body"), 700)],
+            title=title, url=url.split("?utm_source", 1)[0], excerpts=[_clean(match.group("body"), FEED_EXCERPT_CHARS)],
             publish_date=issue_date, provider="tldr"))
     return results
 
@@ -235,7 +241,7 @@ def parse_hf_papers(data: list, limit: int) -> list[SearchResult]:
         summary = paper.get("ai_summary") or item.get("summary") or paper.get("summary") or ""
         results.append(SearchResult(
             title=_clean(item.get("title") or paper.get("title"), 200), url=f"https://huggingface.co/papers/{paper_id}",
-            excerpts=[_clean(" ".join(m for m in meta if m) + ". " + summary, 700)],
+            excerpts=[_clean(" ".join(m for m in meta if m) + ". " + summary, FEED_EXCERPT_CHARS)],
             publish_date=(item.get("publishedAt") or paper.get("publishedAt") or "")[:10], provider="hf_papers"))
     return results
 
@@ -389,7 +395,7 @@ def load_registry(config_dir: str = "config") -> dict[str, dict]:
         return {}
     try:
         with open(path, encoding="utf-8") as fh:
-            raw = yaml.safe_load(fh) or {}
+            raw = load_yaml(fh) or {}
     except (OSError, yaml.YAMLError) as exc:
         raise RegistryError(f"{REGISTRY_FILE} 读不了：{exc}") from exc
     if not isinstance(raw, dict):
@@ -407,14 +413,16 @@ def load_registry(config_dir: str = "config") -> dict[str, dict]:
     return out
 
 
-def resolve(specs: list[str], config_dir: str = "config") -> list[str]:
+def resolve(specs: list[str], config_dir: str = "config", *, registry: Optional[dict[str, dict]] = None) -> list[str]:
     """Replace ``source:<id>`` and ``tag:<tag>`` by the registry's specs; other specs pass through. Order kept, no repeats.
 
     Raises ``RegistryError`` for an id or tag the registry does not have: a Job must not run on fewer sources than it
-    asked for without anyone being told."""
+    asked for without anyone being told. A caller resolving many Jobs may supply one already loaded registry
+    so the entire operation sees the same configuration snapshot."""
     if not any(str(s).startswith(("source:", "tag:")) for s in specs or []):
         return list(specs or [])
-    registry = load_registry(config_dir)
+    if registry is None:
+        registry = load_registry(config_dir)
     out: list[str] = []
     for spec in specs:
         spec = str(spec).strip()

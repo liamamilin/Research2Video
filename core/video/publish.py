@@ -14,6 +14,7 @@ from __future__ import annotations
 import re
 from typing import Optional
 
+from core.provenance import extract_urls
 from . import sources
 
 TITLE_MAX = 80
@@ -112,19 +113,37 @@ def cover_text(title: str, column) -> dict:
         while cut > 0 and _WORD_CHAR.match(headline[cut - 1]) and _WORD_CHAR.match(headline[cut]):
             cut -= 1  # never cut a model name or a number in half (GPT-4o)
         headline = headline[:cut].strip() or headline[:14]
-    return {"headline": headline, "badge": (column.package or {}).get("badge") or column.name}
+    packaging = getattr(column, "packaging", None) or {}
+    badge = packaging.get("badge", {}).get("text") or packaging.get("label") or (column.package or {}).get("badge") or column.name
+    return {"headline": headline, "badge": badge}
 
 
 def reference_lines(version: dict, report: str) -> list[dict]:
-    """The sources the script cites, as ``{title, url, date}`` in the report's order; a source with no date has ''."""
+    """Attach the report's source material, recording which links the script explicitly cites."""
+    from core import report_material
+
+    meta = version.get("meta") or {}
+    original = report_material.read(meta.get("material") or {}, meta.get("report_path") or "")
     cited = {sources._key(u) for s in version.get("sections") or [] for p in s.get("paragraphs") or []
              for u in p.get("citations") or []}
-    out = []
-    for entry in sources.report_sources(report):
-        if sources._key(entry["url"]) in cited:
-            out.append({"title": sources._title(entry["title"]) or entry["url"], "url": entry["url"],
-                        "date": sources._iso_date(entry["date"])})
-    return out
+    entries = sources.report_sources(report, fallback=True)
+    listed = {sources._key(entry["url"]) for entry in entries}
+    for entry in sources.report_sources(original, fallback=True):
+        key = sources._key(entry["url"])
+        if key in cited and key not in listed:
+            entries.append(entry)
+            listed.add(key)
+    # A paragraph may cite a real report URL that the bibliography did not repeat. Keep that source too;
+    # citations absent from the report are never promoted into report material here.
+    for url in extract_urls(report):
+        key = sources._key(url)
+        if key in cited and key not in listed:
+            entries.append({"title": url, "url": url, "date": "", "kind": ""})
+            listed.add(key)
+    out = [{"title": sources._label(entry["title"]) or entry["url"], "url": entry["url"],
+            "date": sources._iso_date(entry["date"]), "kind": entry.get("kind") or "",
+            "cited": sources._key(entry["url"]) in cited} for entry in entries]
+    return sorted(out, key=lambda entry: not entry["cited"])
 
 
 def build(script: dict, version: dict, column, report: str, timeline: Optional[dict],
@@ -144,9 +163,11 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
                 parts.append("数字和口径：\n" + "\n".join(f"· {d}" for d in meta_description["details"]))
             if meta_description.get("open_questions"):
                 parts.append("还没确定：\n" + "\n".join(f"· {q}" for q in meta_description["open_questions"]))
-        if refs:
-            parts.append("参考来源：\n" + "\n".join(
-                f"· {r['title']}{('（' + r['date'] + '）') if r['date'] else ''} {r['url']}" for r in refs))
+        for used, heading in ((True, "参考来源（文稿引用）："), (False, "报告补充资料：")):
+            group = [r for r in refs if r["cited"] == used]
+            if group:
+                parts.append(heading + "\n" + "\n".join(
+                    f"· {r['title']}{('（' + r['date'] + '）') if r['date'] else ''} {r['url']}" for r in group))
         return "\n\n".join(p for p in parts if p)
 
     description = assemble(True)
@@ -154,12 +175,14 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
         description = assemble(False)
 
     warnings: list[str] = []
-    if script.get("status") != "APPROVED" or script.get("approved_version") != version.get("version"):
+    if script.get("approved_version") != version.get("version"):
         warnings.append("这一版还没有定稿，发布包按它现在的样子生成。")
+    elif script.get("current_version") and script["current_version"] != version.get("version"):
+        warnings.append(f"发布包对应已定稿旧版 v{version['version']}，当前文稿为 v{script['current_version']}。")
     if len(title) > TITLE_MAX:
         warnings.append(f"标题有 {len(title)} 个字，超过 {TITLE_MAX}。")
     if len(description) > DESCRIPTION_MAX:
-        warnings.append(f"简介有 {len(description)} 个字，超过 {DESCRIPTION_MAX}，请删减。")
+        warnings.append(f"简介有 {len(description)} 个字，超过 {DESCRIPTION_MAX} 的参考长度；资料链接已完整保留，可按平台要求编辑。")
     serious = ((version.get("checks") or (version.get("meta") or {}).get("checks") or {}).get("summary") or {}).get("serious")
     if serious:
         warnings.append(f"审稿还有 {serious} 个严重的事实问题没有处理。")
@@ -167,8 +190,8 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
         warnings.append("还没有出片，所以没有章节时间。")
     elif not chapters:
         warnings.append(f"视频不足 {CHAPTERS_MIN} 个章节，简介里不放章节。")
-    if report and not refs:
-        warnings.append("稿子没有引用报告里列出的来源，简介没有参考来源。")
+    if not refs:
+        warnings.append("报告中没有找到可提取的资料链接。" if report else "研究报告暂时无法读取，未能附上资料来源。")
     dateless = [r for r in refs if not r["date"]]
     if dateless:
         warnings.append(f"{len(dateless)} 个来源没有发布日期，简介里只写了网址。")

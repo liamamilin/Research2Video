@@ -48,13 +48,14 @@ def tail(limit: int = 100) -> list[dict]:
     path = _audit_path()
     if not os.path.isfile(path):
         return []
+    from core.fileio import tail_lines
+
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
+        lines = tail_lines(path, limit)
     except OSError:
         return []
     result: list[dict] = []
-    for line in reversed(lines[-limit:]):
+    for line in reversed(lines):
         try:
             result.append(json.loads(line))
         except json.JSONDecodeError:

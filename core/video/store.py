@@ -43,7 +43,7 @@ _lock = threading.Lock()
 
 _SCRIPT_JSON = ("topic",)
 _VERSION_JSON = ("sections", "length_check", "meta")
-_RENDER_JSON = ("request", "artifacts")
+_RENDER_JSON = ("request", "artifacts", "timings")
 
 
 def db_path() -> str:
@@ -178,6 +178,8 @@ def init_db() -> None:
             columns = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
             if "heartbeat_at" not in columns:
                 conn.execute(f"ALTER TABLE {table} ADD COLUMN heartbeat_at REAL")
+        if "timings" not in {r[1] for r in conn.execute("PRAGMA table_info(renders)")}:
+            conn.execute("ALTER TABLE renders ADD COLUMN timings TEXT NOT NULL DEFAULT '{}'")
         columns = {r[1] for r in conn.execute("PRAGMA table_info(scripts)")}
         if "stage" not in columns:
             conn.execute("ALTER TABLE scripts ADD COLUMN stage TEXT")
@@ -343,6 +345,23 @@ def add_publication(script_id: str, *, url: str, published_on: str, version: Opt
                     recorded_by: str = "") -> dict:
     pub_id = uuid.uuid4().hex
     with connect(write=True) as conn:
+        # The platform worker and a manual record can arrive together. One
+        # version/video identifies one publication even across different renders.
+        from urllib.parse import urlsplit
+
+        def identity(value):
+            parts = urlsplit(value)
+            if platform == "bilibili" and parts.hostname in ("www.bilibili.com", "m.bilibili.com", "bilibili.com"):
+                return ("bilibili.com", parts.path.rstrip("/"))
+            return value.strip()
+
+        existing = conn.execute("SELECT * FROM publications WHERE script_id=? AND version IS ? AND platform=?",
+                                (script_id, version, platform)).fetchall()
+        for row in existing:
+            if identity(row["url"]) == identity(url):
+                if render_id and not row["render_id"]:
+                    conn.execute("UPDATE publications SET render_id=? WHERE id=?", (render_id, row["id"]))
+                return {**dict(row), "render_id": row["render_id"] or render_id}
         conn.execute(
             "INSERT INTO publications (id, script_id, version, render_id, platform, url, published_on, title, note,"
             " recorded_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -513,7 +532,7 @@ def add_version(
 
 
 def update_version_audit(script_id: str, version: int, *, sections: list[dict], meta: dict,
-                         length_check: dict | None = None) -> None:
+                         length_check: dict | None = None, title: str | None = None) -> None:
     """Replace a GENERATED version's ``meta`` and sections once its audits finish (the audit marks paragraphs, and
     a rewrite from its findings changes the text, so the length check comes with it)."""
     with connect(write=True) as conn:
@@ -526,6 +545,9 @@ def update_version_audit(script_id: str, version: int, *, sections: list[dict], 
                          " WHERE script_id = ? AND version = ?",
                          (json.dumps(sections, ensure_ascii=False), json.dumps(meta, ensure_ascii=False),
                           json.dumps(length_check, ensure_ascii=False), script_id, version))
+        if title is not None:
+            conn.execute("UPDATE script_versions SET title = ? WHERE script_id = ? AND version = ?",
+                         (title, script_id, version))
 
 
 def get_version(script_id: str, version: int) -> dict | None:
@@ -534,6 +556,74 @@ def get_version(script_id: str, version: int) -> dict | None:
             "SELECT * FROM script_versions WHERE script_id = ? AND version = ?", (script_id, version)
         ).fetchone()
     return _decode(row, _VERSION_JSON)
+
+
+def current_versions(script_ids: list[str]) -> dict[str, dict]:
+    """Current versions for a page, in batches instead of one database connection per row."""
+    ids = list(dict.fromkeys(script_ids))
+    out: dict[str, dict] = {}
+    if not ids:
+        return out
+    with connect() as conn:
+        for start in range(0, len(ids), 500):
+            batch = ids[start:start + 500]
+            rows = conn.execute(
+                "SELECT v.* FROM script_versions v JOIN scripts s"
+                " ON v.script_id = s.id AND v.version = s.current_version"
+                f" WHERE s.id IN ({','.join('?' for _ in batch)})", batch,
+            )
+            out.update((r["script_id"], _decode(r, _VERSION_JSON)) for r in rows)
+    return out
+
+
+def current_titles() -> dict[str, str]:
+    """Titles for list pages, without reading narration or audit JSON."""
+    with connect() as conn:
+        return {r[0]: r[1] for r in conn.execute(
+            "SELECT v.script_id, v.title FROM script_versions v JOIN scripts s"
+            " ON v.script_id = s.id AND v.version = s.current_version")}
+
+
+def render_statuses_by_script() -> dict[str, list[dict]]:
+    """Stage counts need statuses, not every render's source text and request."""
+    out: dict[str, list[dict]] = {}
+    with connect() as conn:
+        for row in conn.execute("SELECT id, script_id, version, status, created_at FROM renders ORDER BY created_at DESC, id DESC"):
+            out.setdefault(row["script_id"], []).append(dict(row))
+    return out
+
+
+def shipment_rows(script_ids: list[str], render_ids: list[str]) -> dict[str, dict]:
+    """Batch the publication page's details; render request bodies and source text stay unread."""
+    out = {"renders": {}, "publications": {}, "rechecks": {}}
+    if not script_ids:
+        return out
+    queries = (
+        ("renders", "id", render_ids, "id, script_id, version, status, error_message, completed_at, artifacts", "id"),
+        ("publications", "script_id", script_ids, "*", "published_on DESC, created_at DESC"),
+        ("rechecks", "script_id", script_ids, "*", "created_at DESC, id DESC"),
+    )
+    with connect() as conn:
+        for table, column, ids, fields, order in queries:
+            unique = list(dict.fromkeys(ids))
+            for offset in range(0, len(unique), 500):
+                group = unique[offset:offset + 500]
+                marks = ",".join("?" for _ in group)
+                for row in conn.execute(f"SELECT {fields} FROM {table} WHERE {column} IN ({marks}) ORDER BY {order}", group):
+                    if table == "renders":
+                        out[table][row["id"]] = _decode(row, ("artifacts",))
+                    else:
+                        out[table].setdefault(row["script_id"], []).append(dict(row))
+    return out
+
+
+def published_versions_by_script() -> dict[str, set[int | None]]:
+    """Version-aware publication status so a new draft is not mistaken for an already published video."""
+    out: dict[str, set[int | None]] = {}
+    with connect() as conn:
+        for row in conn.execute("SELECT script_id, version FROM publications"):
+            out.setdefault(row["script_id"], set()).add(row["version"])
+    return out
 
 
 def list_versions(script_id: str) -> list[dict]:
@@ -566,7 +656,7 @@ def create_render(script_id: str, version: int, *, title: str, source_text: str,
                 " source_sha256, request, created_at, updated_at)"
                 " VALUES (?, ?, ?, 'SUBMITTING', ?, ?, ?, ?, ?, ?)",
                 (render_id, script_id, version, title, source_text, source_sha256,
-                 json.dumps(request, ensure_ascii=False), now, now),
+                 json.dumps({**request, "idempotency_key": f"research:{render_id}"}, ensure_ascii=False), now, now),
             )
     except sqlite3.IntegrityError as exc:
         raise ActiveRenderError("这篇文稿已有进行中的出片任务") from exc
@@ -577,6 +667,21 @@ def get_render(render_id: str) -> dict | None:
     with connect() as conn:
         row = conn.execute("SELECT * FROM renders WHERE id = ?", (render_id,)).fetchone()
     return _decode(row, _RENDER_JSON)
+
+
+def resume_render_download(render_id: str) -> dict | None:
+    """Recover a completed remote video's failed copy without submitting another video."""
+    try:
+        with connect(write=True) as conn:
+            changed = conn.execute(
+                "UPDATE renders SET status='DOWNLOADING',error_code=NULL,error_message=NULL,"
+                " completed_at=NULL,updated_at=? WHERE id=? AND status='FAILED'"
+                " AND error_code='DOWNLOAD_FAILED' AND autovideo_job_id IS NOT NULL",
+                (_now(), render_id),
+            ).rowcount
+    except sqlite3.IntegrityError as exc:
+        raise ActiveRenderError("这篇文稿已有进行中的出片任务") from exc
+    return get_render(render_id) if changed else None
 
 
 def list_renders(script_id: str) -> list[dict]:

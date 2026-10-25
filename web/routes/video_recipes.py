@@ -42,14 +42,15 @@ def _existing(key: str) -> str:
     return path
 
 
-def _warnings(recipe: recipes.Recipe) -> list[str]:
+def _warnings(recipe: recipes.Recipe, known_sources: Optional[set[str]] = None) -> list[str]:
     """What builds but will not work: a topic source no job declares."""
     from web.services import video_autopilot
 
     if recipe.column is None:
         return []
     return [f"topic.sources 里的 {name} 没有哪个 Job 声明（在 Job 的 YAML 里写 topics: alias: {name}）"
-            for name in recipe.column.topic_sources if not video_autopilot.known_source(name)]
+            for name in recipe.column.topic_sources
+            if (name not in known_sources if known_sources is not None else not video_autopilot.known_source(name))]
 
 
 def _audiences(recipe: recipes.Recipe) -> list[dict]:
@@ -59,7 +60,7 @@ def _audiences(recipe: recipes.Recipe) -> list[dict]:
             for i, a in enumerate(recipe.audiences)]
 
 
-def _summary(recipe: recipes.Recipe, used: dict[str, int]) -> dict:
+def _summary(recipe: recipes.Recipe, used: dict[str, int], *, known_sources: Optional[set[str]] = None) -> dict:
     column = recipe.column
     return {
         "key": recipe.key,
@@ -77,7 +78,7 @@ def _summary(recipe: recipes.Recipe, used: dict[str, int]) -> dict:
         "target_minutes": column.target_minutes if column else None,
         "topic_kind": column.topic_kind if column else None,
         "topic_sources": list(column.topic_sources) if column else [],
-        "warnings": _warnings(recipe),
+        "warnings": _warnings(recipe, known_sources),
         "uses": {section: {"kind": "research" if section == "research" else section, "name": u["name"]}
                  for section, u in recipe.uses.items()},
         "scripts": sum(used.get(k, 0) for k in {recipe.key, *(a["recipe"] for a in _audiences(recipe))}),
@@ -181,8 +182,12 @@ def create_part(kind: str, body: PartCreateIn, user=Depends(require_editor)) -> 
 
 @router.get("")
 def list_recipes(user=Depends(require_viewer)) -> list[dict]:
+    from core.video import topic_store
+
     used = store.count_scripts_by_column()
-    return [_summary(r, used) for r in recipes.load(_config_dir()).values()]
+    sources = topic_store.sources(get_settings().paths.jobs_dir)
+    known = {topic_store.MANUAL} | {value for source in sources.values() for value in (source.name, source.job)}
+    return [_summary(r, used, known_sources=known) for r in recipes.load(_config_dir()).values()]
 
 
 @router.get("/{key}")

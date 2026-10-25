@@ -3,7 +3,7 @@
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
 name: 盘点
-description: 把一批值得知道的变化按顺序讲一遍：每条一个小节，说清变了什么、对{{audience}}意味着什么，最后给出先做哪件事。
+description: 从这批变化里为{{audience}}选出值得听的内容，找到它们之间有意思的联系，让整期像一次发现之旅。
 status: experimental
 tags:
   domain:
@@ -29,30 +29,14 @@ writing:
   default_style:
     depth: '{{audience.depth}}'
     tone: concise
-  allowed_tones: [news, concise, explainer]
-  sections: [3, 11]
-  paragraph_units: [30, 100]
-  required_roles: [钩子, 行动]
-  audit:
-    model: review
-    style_severity: warn
-    timeout_seconds: 480
   style: |
-    栏目「盘点」：把选题里列出的条目逐条讲完，条目数和顺序照选题的「条目」，不增不减，也不加报告里没列入的条目。
-    - 开场两三句话交代这期盘点什么、一共几条，并点出最值得先看的一条；不讲背景。
-    - 每条一个小节：先说变了什么（数字、单位、口径照来源原样），再说对{{audience}}意味着什么：{{audience.impact}}。每条 30–60 秒的口播量，不展开背景。
-    - 条目之间用一句话过渡，不重复上一条的结论。
-    - 结尾只挑最该先做的一件事，说一个现在就能做的动作，不并列多个动作，不重复前面的内容。
-    - 事实只用研究报告里有来源的；只有厂商自己的说法时，在讲到它的那条里说「官方说法」，不要每条都重复这个提醒。
-    {{audience.writing_rules}}
+    从这批变化里为{{audience}}选出值得听的内容，找到它们之间有意思的联系，让整期像一次发现之旅。
 output:
   use: motion
-  package:
-    accent: '#1f7a4d'
-    badge: 盘点
+  packaging:
+    use: common
+    label: 盘点
     outro:
-      template: end_card
-      title: 盘点
-      lines: ['AI 盘点']
+      lines:
+      - AI 盘点
       seconds: 2.5
-      sound: synth_sting

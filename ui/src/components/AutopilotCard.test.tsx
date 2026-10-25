@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useAuthStore } from "@/lib/auth-store";
 import { AutopilotCard } from "./AutopilotCard";
+import type { BoardItem } from "@/api/video";
 
 const BODY = {
   plans: [{ id: "p1", name: "每周一批", expression: "0 5 * * 2", next_fire: 1792444800, enabled: 1 }],
@@ -25,6 +26,18 @@ afterEach(() => {
 });
 
 describe("Autopilot card", () => {
+  it("uses the current draft title and audit label instead of an obsolete batch snapshot", async () => {
+    const finished = { ...BODY, runs: [{ ...BODY.runs[0], status: "DONE" }] };
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(finished) }) as Response));
+    const current: Pick<BoardItem, "script_id" | "title" | "version" | "note" | "credibility"> = { script_id: "s2", title: "重新核实后的新稿", version: 4, note: "当前草稿待定稿", credibility: { tier: "trusted", text: "有出处可信", reasons: [], cited_share: 1 } };
+    render(<MemoryRouter><AutopilotCard currentItems={[current]} /></MemoryRouter>);
+    expect(await screen.findByText("重新核实后的新稿")).toBeTruthy();
+    expect(screen.queryByText("Gemini 4 上线")).toBeNull();
+    expect(screen.queryByText("有严重问题")).toBeNull();
+    expect(screen.getByText("当前 v4：当前草稿待定稿")).toBeTruthy();
+    expect(screen.getByText("批次结果：成片完成")).toBeTruthy();
+  });
+
   it("shows the weekly plan, where each video of the latest batch is, and what an automatic approval let through", async () => {
     useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
     vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(BODY) }) as Response));

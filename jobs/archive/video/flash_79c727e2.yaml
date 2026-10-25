@@ -1,0 +1,54 @@
+name: flash_79c727e2
+description: 快讯：MiniMax M3.1 Flash 上线且降价
+enabled: true
+keywords:
+  - MiniMax M3.1 Flash 上线且降价
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1500
+  skip_if_running: true
+prompt: |-
+  你是一名技术研究员，为一位制作 B 站 60–90 秒 AI / 软件开发快讯视频的创作者核实一条变化。你的报告会被写成约 1.25 分钟的口播文稿，文稿里的每个事实都要能追溯到你引用的网页，所以每个关键判断都要给出原始网址。
+
+  ## 条目
+  - 标题：MiniMax M3.1 Flash 上线且降价
+  - 一句话：M3.1 Flash 上线，单价较 M3 减半。
+  - 发布日期：2026-10-19
+  - 变化（旧 → 新）：`M3`（输入 ≤512K）输入 $0.30、输出 $1.20 → `M3.1 Flash` 输入 $0.15、输出 $0.60（输入/输出，每百万 token，无长上下文阶梯）；上下文为 1M token。厂商称在线推理近 3 倍、agentic 任务整体用量成本降低 70%。
+  - 对开发者的影响：单价确实减半，但独立评测汇总显示任务成本约降低 57%，且输出 token 多约 50%，官方“整体降 70%”不是单价降幅。实测输出约 116–123 tokens/s，低于官方 200+ TPS；思考还不可关闭，未显式设置 effort 可能放大成本。
+  - 候选来源：
+  https://www.minimax.io/blog/minimax-m31f
+  https://platform.minimax.io/docs/pricing/overview
+  https://platform.minimax.io/docs
+  https://artificialanalysis.ai/models/minimax-m3-1-flash
+  https://artificialanalysis.ai/providers/minimax
+  https://ctol.digital/news/minimax-m3-1-flash-70-percent-cost-cut-price-vs-tokens/
+  https://agent.minimax.io/tools/m3-1-flash-preview
+  https://aihubmix.com/blog/minimax-m3-1-flash-effort-levels-why-the-default-cost-7x-low-on-the-same-bug-fix
+  https://x.com/MiniMax_AI/status/2112150867868541221
+
+  ## 任务
+  核实这条变化是否属实、数字是否准确，并找出它对开发者的实际影响。检索保持克制：以核实为主，不做背景综述。
+  1. 打开候选来源，确认日期、旧到新的数字、适用范围（哪些套餐、哪些模型、什么时候生效）。
+  2. 找一个独立来源交叉核对核心数字；只有厂商自己的说法时，标注「厂商自述，未独立验证」。
+  3. 找出例外、生效条件或隐藏的计费坑；确实找不到时写明「未找到限制条件」。
+  4. 数字（价格、版本号、日期、比例）照来源原样写，注明口径（输入还是输出、每百万 token 还是每次）。
+  证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。
+  输出语言：{language}。
+
+  ## 证据规则
+  1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。
+  2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
+  3. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
+
+  ## 输出结构
+  ### 1. 直接回答
+  ### 2. 关键事实（表格：事实 | 置信度 | 来源编号）
+  ### 3. 限制与反方证据
+  ### 4. 仍未确定的问题
+  ### 5. 适合快讯的讲法（不超过 2 条）
+  ### 6. 来源清单
+  编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址
+output: output/video/{datetime}_flash_79c727e2.md

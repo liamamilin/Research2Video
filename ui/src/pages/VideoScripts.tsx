@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link, useNavigate } from "react-router-dom";
+import { RefreshCw, SlidersHorizontal } from "lucide-react";
 import { listProduction } from "@/api/production";
 import {
   createVideoScript,
@@ -84,7 +85,7 @@ export const STATUS_NOTE: Partial<Record<VideoCell["status"], string>> = {
 
 const IN_FLIGHT: ScriptStatus[] = ["RESEARCHING", "WRITING"];
 // 状态按钮的顺序：先写稿，再出片，最后发布；失败的放最后
-const CHIPS = ["RESEARCHING", "PLAN_READY", "DRAFT", "APPROVED", "rendering", "rendered", "render_failed", "published", "FAILED"];
+const CHIPS = ["RESEARCHING", "PLAN_READY", "DRAFT", "APPROVED", "rendering", "rendered", "render_failed", "unpublished", "published", "FAILED"];
 
 export function minutes(seconds: number | null | undefined): string {
   if (!seconds) return "—";
@@ -97,13 +98,26 @@ export function VideoScriptsPage() {
   const toast = useToast();
   const navigate = useNavigate();
 
-  const [scripts, setScripts] = useState<VideoScriptSummary[] | null>(null);
+  const [result, setResult] = useState<{ archived: boolean; scripts: VideoScriptSummary[] } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const flight = useRef<AbortController | null>(null);
+  const [advanced, setAdvanced] = useState(false);
+  const [quality, setQuality] = useState(false);
+  const [limit, setLimit] = useState(24);
+  const [cellError, setCellError] = useState("");
+  const [cellLoading, setCellLoading] = useState(false);
+  const [cellRetry, setCellRetry] = useState(0);
+  const cellReady = useRef(false);
+  const [topicError, setTopicError] = useState("");
+  const [topicLoading, setTopicLoading] = useState(false);
+  const [topicRetry, setTopicRetry] = useState(0);
   const [cells, setCells] = useState<VideoCell[]>([]);
   // 生产配置派生出来的栏目（如 flash-nr）不在格子目录里：用配置的名字，不显示内部的键
   const [configNames, setConfigNames] = useState<Record<string, string>>({});
   const [params, setParams] = useSearchParams();
-  const filters = useFilters(["status", "column", "tier", "source", "range"]);
-  const statusFilter = filters.values.status;
+  const filters = useFilters(["status", "column", "tier", "source", "range", "matrix", "archived"]);
+  const requestedStatus = params.get("status") ?? "unpublished";
+  const statusFilter = ["archived", "all"].includes(requestedStatus) ? "" : requestedStatus;
   const highlight = params.get("topic");
   const [cellId, setCellId] = useState<string>(params.get("cell") ?? "");
   const [form, setForm] = useState<string>("");
@@ -121,38 +135,46 @@ export function VideoScriptsPage() {
   // 新建的表单很长，平时收起来，让列表在最上面；从选题页带着选题过来时直接展开
   const [creating, setCreating] = useState(Boolean(params.get("topic") || params.get("topics") || params.get("cell")));
 
-  const showArchived = statusFilter === "archived";
+  const showArchived = filters.values.archived === "1" || filters.values.status === "archived";
+  const scripts = result?.archived === showArchived ? result.scripts : null;
   const load = useCallback(async () => {
+    if (flight.current) return;
+    const controller = new AbortController(); flight.current = controller; setLoading(true);
     try {
-      const [s, c] = await Promise.all([listVideoScripts(showArchived), listVideoCells()]);
-      setScripts(s);
-      setCells(c);
-      setCellId((current) => current || (c.find((x) => x.usable)?.id ?? ""));
-      setError(null);
-    } catch (e) {
-      setError(errorMessage(e, "加载视频文稿失败"));
-    }
+      const rows = await listVideoScripts(showArchived, controller.signal);
+      if (!Array.isArray(rows)) throw new Error("文稿数据格式异常，请重试");
+      if (!controller.signal.aborted) { setResult({ archived: showArchived, scripts: rows }); setError(null); }
+    } catch (e) { if (!controller.signal.aborted) setError(errorMessage(e, "加载视频文稿失败")); }
+    finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
   }, [showArchived]);
-
+  useEffect(() => { setError(null); void load(); return () => { flight.current?.abort(); flight.current = null; }; }, [load]);
+  const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status) || s.stage || (s.render && RENDERING.includes(s.render.status))) ?? false;
   useEffect(() => {
-    load();
-  }, [load]);
-
+    const refresh = () => { if (!document.hidden) void load(); };
+    const timer = window.setInterval(refresh, inFlight ? 5000 : 30000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+  }, [inFlight, load]);
+  const namesLoaded = useRef(false);
   useEffect(() => {
-    listProduction()
-      .then((rows) => setConfigNames(Object.fromEntries(rows.flatMap((c) => [[c.key, c.name], [c.recipe, c.name]]))))
-      .catch(() => undefined);
-  }, []);
-
-  // Follow scripts that are still being researched or written.
-  const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status)) ?? false;
+    if (namesLoaded.current || !scripts?.some((s) => !s.column_label)) return;
+    namesLoaded.current = true;
+    const controller = new AbortController();
+    listProduction(undefined, controller.signal).then((rows) => {
+      if (!controller.signal.aborted && Array.isArray(rows)) setConfigNames(Object.fromEntries(rows.flatMap((c) => [[c.key, c.name], [c.recipe, c.name]])));
+    }).catch(() => { namesLoaded.current = false; });
+    return () => { controller.abort(); };
+  }, [scripts]);
   useEffect(() => {
-    if (!inFlight) return;
-    const timer = setInterval(() => {
-      listVideoScripts(showArchived).then(setScripts).catch(() => undefined);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [inFlight, showArchived]);
+    if (!creating || (cellReady.current && cellRetry === 0)) return;
+    const controller = new AbortController(); setCellLoading(true);
+    listVideoCells(controller.signal).then((rows) => {
+      if (!Array.isArray(rows)) throw new Error("配方数据格式异常，请重试");
+      if (!controller.signal.aborted) { cellReady.current = true; setCells(rows); setCellId((current) => current || rows.find((c) => c.usable)?.id || ""); setCellError(""); }
+    }).catch((e) => { if (!controller.signal.aborted) setCellError(errorMessage(e)); })
+      .finally(() => { if (!controller.signal.aborted) setCellLoading(false); });
+    return () => { controller.abort(); };
+  }, [creating, cellRetry]);
 
   const { values: f } = filters;
   // 研究和写稿合成一格：对用户来说都是「还在写」
@@ -160,18 +182,22 @@ export function VideoScriptsPage() {
     const stage = stageOf(x);
     return stage === "WRITING" ? "RESEARCHING" : stage;
   };
-  const chipCount = (key: string) => (scripts ?? []).filter((x) => chipOf(x) === key).length;
-  const shownScripts = (scripts ?? []).filter(
+  const scope = (scripts ?? []).filter((s) => !f.matrix || (s.matrix || "_independent") === f.matrix);
+  const matrixOptions = [...new Map((scripts ?? []).map((s) => [s.matrix || "_independent", s.matrix_name || "独立视频"]))];
+  const columnName = (key: string) => (scripts ?? []).find((s) => s.column_key === key)?.column_label || cells.find((c) => c.key === key)?.label?.split(" · ").slice(0, 2).join(" · ") || configNames[key] || key;
+  const matchesStatus = (x: VideoScriptSummary, key: string) => key === "unpublished" ? !x.published : chipOf(x) === key;
+  const chipCount = (key: string) => scope.filter((x) => matchesStatus(x, key)).length;
+  const shownScripts = scope.filter(
     (x) =>
       (!f.column || x.column_key === f.column) &&
       (!f.tier || x.credibility?.tier === f.tier) &&
       (!f.source || (f.source === "auto") === Boolean(x.auto)) &&
       inRange(x.created_at, f.range) &&
-      matchesText(f.q, x.title, x.topic?.title) &&
-      (!f.status || showArchived || chipOf(x) === f.status),
+      matchesText(f.q, x.title, x.topic?.title, x.job_name, x.job, x.matrix_name) &&
+      (!statusFilter || matchesStatus(x, statusFilter)),
   ).sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""));
   const facets: Facet[] = [
-    { key: "column", label: "栏目格子", options: Array.from(new Set((scripts ?? []).map((x) => x.column_key))).map((key) => ({ value: key, label: cells.find((c) => c.key === key)?.label ?? configNames[key] ?? key })) },
+    { key: "column", label: "视频类型", options: Array.from(new Set(scope.map((x) => x.column_key))).map((key) => ({ value: key, label: columnName(key) })) },
     { key: "tier", label: "可信度", options: (Object.keys(TIER_LABEL) as (keyof typeof TIER_LABEL)[]).map((k) => ({ value: k, label: TIER_LABEL[k] })) },
     { key: "source", label: "来源", options: [{ value: "auto", label: "自动流水线" }, { value: "manual", label: "手动创建" }] },
     RANGE_FACET,
@@ -180,27 +206,26 @@ export function VideoScriptsPage() {
   const column = cell?.column ?? null;
   const kind = column?.topic_kind ?? "single";
   // 选题来源由配方的 topic.sources 决定（第一个）；从选题页带来的手动选题、或配方没写来源时，列手动添加的选题
-  const source = highlight?.startsWith("manual/") || !cell?.topic_sources?.length ? "manual" : cell.topic_sources[0];
+  const incomingSource = params.get("cell") === cellId ? params.get("topic_source") : null;
+  const source = incomingSource || (highlight?.startsWith("manual/") || !cell?.topic_sources?.length ? "manual" : cell.topic_sources[0]);
+  const sourceRound = incomingSource ? params.get("topic_round") || undefined : undefined;
   const forms = column?.allowed_forms ?? [];
 
-  // 换了格子：回到它默认的视频形式，清掉已选条目，按它的选题来源重新取选题
   useEffect(() => {
     setForm("");
     setPicked(kind === "roundup" ? arrived.current ?? [] : []);
     if (kind === "roundup") arrived.current = null;
-    if (kind === "comparison") return;
-    let alive = true;
-    listVideoTopics(source)
-      .then((t) => {
-        if (!alive) return;
-        setRound(t.round);
-        setTopics(t.topics);
-      })
-      .catch(() => undefined);
-    return () => {
-      alive = false;
-    };
-  }, [cellId, kind, source]);
+  }, [cellId, kind]);
+  useEffect(() => {
+    if (!creating || !column || kind === "comparison") return;
+    const controller = new AbortController(); setTopicLoading(true); setTopics([]); setRound(null); setTopicError("");
+    listVideoTopics(source, sourceRound, controller.signal).then((body) => {
+      if (!controller.signal.aborted) { setRound(body.round); setTopics(body.topics); }
+    }).catch((e) => { if (!controller.signal.aborted) setTopicError(errorMessage(e)); })
+      .finally(() => { if (!controller.signal.aborted) setTopicLoading(false); });
+    return () => { controller.abort(); };
+  }, [creating, cellId, column, kind, source, sourceRound, topicRetry]);
+  useEffect(() => { setLimit(24); }, [f.q, f.matrix, f.column, f.tier, f.source, f.range, statusFilter, showArchived]);
 
   useEffect(() => {
     if (highlight && topics.some((t) => t.id === highlight)) {
@@ -209,6 +234,7 @@ export function VideoScriptsPage() {
   }, [highlight, topics]);
 
   async function create(body: Parameters<typeof createVideoScript>[0], key: string) {
+    if (busy !== null) return;
     setBusy(key);
     try {
       const made = await createVideoScript({
@@ -228,24 +254,19 @@ export function VideoScriptsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="flex-1">
-          <h1 className="text-lg font-semibold">视频文稿</h1>
-          <p className="text-xs text-text-muted">自动流水线写的和手动写的都在这里；定稿之后的一列看它出片到哪一步。</p>
-        </div>
-        {canEdit && cell && column ? (
-          <button className={cn("btn text-sm", creating ? "" : "btn-primary")} aria-expanded={creating} onClick={() => setCreating(!creating)}>
-            {creating ? "收起新建" : "＋ 新建文稿"}
-          </button>
-        ) : null}
-      </div>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div><h1 className="text-xl font-semibold tracking-tight">视频文稿</h1><p className="text-xs text-text-muted mt-1">按矩阵查找文稿，查看当前版本、事实审计与制作进度。</p></div>
+        <div className="flex flex-wrap gap-2"><button className="btn text-xs" aria-label="刷新文稿" disabled={loading} onClick={load}><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />刷新</button>{canEdit ? <button className={cn("btn text-xs", !creating && "btn-primary")} aria-expanded={creating} onClick={() => setCreating(!creating)}>{creating ? "收起新建" : "＋ 新建文稿"}</button> : null}</div>
+      </header>
+      {creating && canEdit && (!column || cellLoading) ? <section className="card p-4 text-sm space-y-3">{cellError ? <ErrorState error={cellError} onRetry={() => setCellRetry((n) => n + 1)} compact /> : cellLoading ? <p role="status" className="text-text-muted">正在读取文稿配方…</p> : <><p>所选配方暂不可用，请选择其他配方。</p><select aria-label="选择可用配方" className="input text-xs" value={cellId} onChange={(e) => setCellId(e.target.value)}><option value="">选择配方</option>{cells.filter((c) => c.usable).map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}</select><Link className="text-xs text-accent" to="/video-recipes">查看文稿配方</Link></>}</section> : null}
 
       {canEdit && cell && column && creating ? (
-        <section className="card space-y-3">
+        <section className="card p-4 space-y-3" aria-label="新建文稿">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-medium">新建</h2>
+            <h2 className="font-medium text-sm">从选题新建</h2>
             <select
               aria-label="格子"
+              disabled={busy !== null}
               className="input w-auto max-w-full"
               value={cellId}
               onChange={(e) => setCellId(e.target.value)}
@@ -286,7 +307,7 @@ export function VideoScriptsPage() {
                   tab === key ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover",
                 )}
               >
-                    {key === "topics" ? (source === "flash" ? "从快讯条目选" : "从内容机会选") : "手写选题"}
+                    {key === "topics" ? "从选题库选择" : "手写选题"}
                   </button>
                 ))}
               </>
@@ -296,6 +317,9 @@ export function VideoScriptsPage() {
             <p className="text-xs text-warning">这个格子还没出过片，写出的文稿和视频效果没有验证过。</p>
           ) : null}
           <p className="text-xs text-text-muted">{column.description}</p>
+          {f.matrix && f.matrix !== "_independent" ? <p className="text-xs text-text-muted">使用矩阵的研究报告写稿，可从 <Link className="text-accent hover:underline" to={`/matrices/${encodeURIComponent(f.matrix)}`}>研究任务的视频配置</Link> 进入。</p> : null}
+          {topicError && tab === "topics" ? <ErrorState error={topicError} onRetry={() => setTopicRetry((n) => n + 1)} compact /> : null}
+          {topicLoading && (kind === "roundup" || tab === "topics") ? <p role="status" className="text-xs text-text-muted">正在读取选题…</p> : null}
 
           {kind === "roundup" ? (
             <div className="space-y-2">
@@ -319,7 +343,7 @@ export function VideoScriptsPage() {
                   ) : null}
                 </label>
               ))}
-              {topics.length === 0 ? <ErrorState compact empty="还没有快讯发现报告。" /> : null}
+              {topics.length === 0 && !topicLoading && !topicError ? <ErrorState compact empty="这个来源还没有可用的选题报告。" /> : null}
               <input
                 className="input"
                 placeholder="盘点标题（可选）"
@@ -395,10 +419,10 @@ export function VideoScriptsPage() {
               </div>
             </form>
           ) : tab === "topics" ? (
-            topics.length ? (
+            topicLoading || topicError ? null : topics.length ? (
               <div className="space-y-2">
                 <p className="text-xs text-text-muted">
-                  {source === "flash" ? `快讯发现报告 ${round} 的条目` : `情报轮次 ${round} 的内容机会（P7）`}
+                  {`选题报告 ${round || ""} 的条目`}
                 </p>
                 {topics.map((t) => (
                   <div
@@ -431,7 +455,7 @@ export function VideoScriptsPage() {
             ) : (
               <ErrorState
                 compact
-                empty={source === "flash" ? "还没有快讯发现报告。" : "还没有内容机会报告。跑一轮情报流水线后，这里会列出它推荐的视频选题。"}
+                empty="这个来源还没有可用选题。可前往选题页选择，或手写选题。"
               />
             )
           ) : (
@@ -474,77 +498,25 @@ export function VideoScriptsPage() {
         </section>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2" aria-label="状态">
-        {([["", "全部"], ...CHIPS.map((c) => [c, c === "RESEARCHING" ? "研究/写稿中" : c === "DRAFT" ? "待审稿" : STAGE_LABEL[c as Stage]]), ["archived", "已归档"]] as [string, string][])
-          .filter(([key]) => key === "" || key === "archived" || f.status === key || chipCount(key) > 0)
-          .map(([key, label]) => (
-            <button
-              key={key}
-              aria-pressed={f.status === key}
-              onClick={() => filters.set("status", key)}
-              className={cn(
-                "badge border cursor-pointer",
-                f.status === key ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover",
-              )}
-            >
-              {label}
-              {key !== "archived" ? ` ${key === "" ? (showArchived ? "" : (scripts ?? []).length) : chipCount(key)}` : ""}
-            </button>
-          ))}
+      <div className="flex flex-wrap gap-2 items-center">
+        <select aria-label="文稿矩阵" className="input w-auto max-w-full text-xs" value={f.matrix} onChange={(e) => setParams((old) => { const next = new URLSearchParams(old); ["q", "status", "column", "tier", "source", "range"].forEach((k) => next.delete(k)); if (showArchived) next.set("archived", "1"); if (e.target.value) next.set("matrix", e.target.value); else next.delete("matrix"); return next; }, { replace: true })}><option value="">全部矩阵</option>{matrixOptions.map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select>
+        <select aria-label="文稿归档范围" className="input w-auto text-xs" value={showArchived ? "1" : ""} onChange={(e) => setParams((old) => { const next = new URLSearchParams(old); ["status", "matrix"].forEach((k) => next.delete(k)); if (e.target.value) next.set("archived", "1"); else next.delete("archived"); return next; }, { replace: true })}><option value="">使用中</option><option value="1">已归档</option></select>
+        <button className="btn text-xs" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}><SlidersHorizontal className="h-3.5 w-3.5" />筛选{f.column || f.tier || f.source || f.range ? " · 已启用" : ""}</button>
       </div>
-      <FilterBar facets={facets} filters={filters} shown={shownScripts.length} total={(scripts ?? []).length} />
-
-      <section className="card p-0 overflow-hidden">
-        {error ? (
-          <ErrorState error={error} onRetry={load} />
-        ) : scripts === null ? (
-          <ErrorState empty="加载中..." />
-        ) : scripts.length === 0 ? (
-          <ErrorState empty="还没有视频文稿。" />
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="text-xs text-text-muted border-b border-border">
-              <tr>
-                <th className="text-left font-normal px-4 py-2">文稿</th>
-                <th className="text-left font-normal px-4 py-2">格子</th>
-                <th className="text-left font-normal px-4 py-2">状态</th>
-                <th className="text-left font-normal px-4 py-2">可信度</th>
-                <th className="text-left font-normal px-4 py-2">时长</th>
-                <th className="text-left font-normal px-4 py-2">创建</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shownScripts.map((s, i) => (
-                <Fragment key={s.id}>
-                {i === 0 || dayLabel(s.created_at) !== dayLabel(shownScripts[i - 1].created_at) ? (
-                  <tr className="bg-bg-hover/50"><td colSpan={6} className="px-4 py-1 text-xs text-text-muted">{dayLabel(s.created_at)}</td></tr>
-                ) : null}
-                <tr className="border-b border-border last:border-0 hover:bg-bg-hover">
-                  <td className="px-4 py-2">
-                    <Link to={`/video/${s.id}`} className="text-accent hover:underline">
-                      {s.title}
-                    </Link>
-                    {s.auto ? <span className="badge border border-border text-text-muted ml-2">自动</span> : null}
-                  </td>
-                  <td className="px-4 py-2 text-xs text-text-muted">{cells.find((c) => c.key === s.column_key)?.label?.split(" · ").slice(0, 2).join(" · ") ?? configNames[s.column_key] ?? s.column_key}</td>
-                  <td className="px-4 py-2">
-                    <span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>
-                      {STAGE_LABEL[stageOf(s)]}
-                      {s.status === "WRITING" && s.stage ? ` · ${s.stage}` : ""}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2"><CredibilityBadge value={s.credibility} /></td>
-                  <td className="px-4 py-2 text-text-muted">{minutes(s.length_check?.estimated_seconds)}</td>
-                  <td className="px-4 py-2"><TimeStamp value={s.created_at} /></td>
-                </tr>
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-
-      <DraftQualityPanel />
+      {scripts ? <div className="flex flex-wrap items-center gap-2" aria-label="状态">{([["", "全部"], ...CHIPS.map((c) => [c, c === "RESEARCHING" ? "研究/写稿中" : c === "unpublished" ? "未发布" : STAGE_LABEL[c as Stage]])] as [string, string][]).filter(([key]) => key === "" || key === "unpublished" || statusFilter === key || chipCount(key) > 0).map(([key, label]) => <button key={key} aria-pressed={statusFilter === key} onClick={() => filters.set("status", key || "all")} className={cn("badge border cursor-pointer", statusFilter === key ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover")}>{label} {key ? chipCount(key) : scope.length}</button>)}</div> : null}
+      <FilterBar facets={advanced ? facets : []} filters={filters} shown={shownScripts.length} total={scope.length} placeholder="搜索文稿或来源任务" />
+      {error ? <div><ErrorState error={error} onRetry={load} compact />{scripts ? <p className="text-xs text-warning mt-2">暂时显示上次读取的文稿。</p> : null}</div> : null}
+      {scripts === null && !error ? <div className="card p-8 text-sm text-text-muted" role="status">正在读取文稿…</div> : null}
+      {scripts ? !shownScripts.length ? <section className="card p-8 text-center space-y-3"><p className="text-sm">{scripts.length ? statusFilter === "unpublished" ? "暂无未发布文稿" : "没有符合筛选的文稿" : "还没有视频文稿"}</p>{filters.active ? <button className="btn text-xs" onClick={filters.clear}>清除筛选</button> : scripts.length ? <button className="btn text-xs" onClick={() => filters.set("status", "all")}>查看全部文稿</button> : <Link className="btn text-xs" to="/matrices">从研究矩阵开始</Link>}</section> : <section className="card overflow-hidden"><div className="overflow-x-auto"><table className="w-full min-w-[42rem] text-sm">
+        <thead className="text-xs text-text-muted border-b border-border"><tr><th className="text-left font-normal px-4 py-3">文稿与来源</th><th className="text-left font-normal px-4 py-3">制作进度</th><th className="text-left font-normal px-4 py-3">事实审计</th><th className="text-left font-normal px-4 py-3">创建时间</th></tr></thead>
+        <tbody>{shownScripts.slice(0, limit).map((s, i) => <Fragment key={s.id}>{i === 0 || dayLabel(s.created_at) !== dayLabel(shownScripts[i - 1].created_at) ? <tr className="bg-bg-hover/50"><td colSpan={4} className="px-4 py-2 text-xs text-text-muted">{dayLabel(s.created_at)}</td></tr> : null}<tr className="border-b border-border last:border-0 hover:bg-bg-hover">
+          <td className="px-4 py-3 min-w-60"><Link to={`/video/${s.id}`} className="font-medium text-sm leading-6 hover:text-accent hover:underline">{s.title}</Link><div className="text-xs text-text-muted flex flex-wrap gap-x-2 gap-y-1 mt-1"><span>{s.matrix_name || "独立视频"}</span>{s.current_version ? <span>v{s.current_version}</span> : null}{s.has_previous_video ? <span>有旧版成片</span> : null}{s.auto ? <span>自动生成</span> : null}</div><p className="text-xs text-text-muted mt-1">{columnName(s.column_key)}{s.length_check?.estimated_seconds ? ` · 预计口播 ${minutes(s.length_check.estimated_seconds)}` : ""}</p>{s.job_name ? <p className="text-xs text-text-muted mt-1">{s.job_name}</p> : null}</td>
+          <td className="px-4 py-3 align-top pt-4"><span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>{STAGE_LABEL[stageOf(s)]}{s.stage ? ` · ${s.stage}` : ""}</span></td>
+          <td className="px-4 py-3 align-top pt-4"><Link to={`/video/${s.id}?tab=review`} className="inline-flex hover:opacity-80" aria-label={`查看审校：${s.title}`}><CredibilityBadge value={s.credibility} /></Link></td>
+          <td className="px-4 py-3 align-top pt-4"><TimeStamp value={s.created_at} staleDays={Infinity} /></td>
+        </tr></Fragment>)}</tbody>
+      </table></div>{shownScripts.length > limit ? <button className="w-full p-3 text-xs text-accent border-t border-border hover:bg-bg-hover" onClick={() => setLimit((n) => n + 24)}>继续显示更早的文稿（还有 {shownScripts.length - limit} 篇）</button> : null}</section> : null}
+      <details className="card" open={quality} onToggle={(e) => setQuality(e.currentTarget.open)}><summary className="p-4 text-sm cursor-pointer">改稿统计<span className="text-xs text-text-muted ml-2">查看人工修改与版本保留情况</span></summary>{quality ? <div className="px-4 pb-4"><DraftQualityPanel /></div> : null}</details>
     </div>
   );
 }

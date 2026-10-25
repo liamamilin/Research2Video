@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getRounds, getReportRaw, runRound, cancelRound, retryRound, type Round } from "@/api";
+import { ErrorState } from "@/components/ErrorState";
 import { RoundDetail } from "@/components/RoundDetail";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn, formatTokens } from "@/lib/utils";
@@ -42,34 +43,31 @@ export function RoundsPage() {
     const value = searchParams.get('round');
     return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
   });
-  const timerRef = useRef<number | null>(null);
+  const flight = useRef<AbortController | null>(null);
+  const [visible, setVisible] = useState(7);
 
   const load = useCallback(async () => {
+    if (flight.current) return;
+    const controller = new AbortController(); flight.current = controller;
     try {
-      const data = await getRounds(30);
+      const data = await getRounds(30, controller.signal);
+      if (controller.signal.aborted) return;
       setRounds(data.rounds);
       setRunning(data.running);
       setError("");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "加载失败");
+      if (!controller.signal.aborted) setError(err instanceof Error ? err.message : "加载失败");
     } finally {
-      setLoading(false);
+      if (flight.current === controller) { flight.current = null; setLoading(false); }
     }
   }, []);
 
+  useEffect(() => { void load(); return () => { flight.current?.abort(); flight.current = null; }; }, [load]);
   useEffect(() => {
-    load();
-  }, [load]);
-
-  // Poll while a round is running
-  useEffect(() => {
-    if (timerRef.current) window.clearInterval(timerRef.current);
-    if (running) {
-      timerRef.current = window.setInterval(load, 5000);
-    }
-    return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current);
-    };
+    const refresh = () => { if (!document.hidden) void load(); };
+    const timer = window.setInterval(refresh, running ? 5000 : 30000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [running, load]);
 
   const handleRun = async () => {
@@ -145,8 +143,8 @@ export function RoundsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold flex-1">情报轮次</h1>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex-1"><h1 className="text-xl font-semibold tracking-tight">情报轮次</h1><p className="text-xs text-text-muted mt-1">跟踪多阶段研究的执行与产物，按轮次检查失败和待补跑的阶段。</p></div>
         {running && (
           <span className="inline-flex items-center gap-1.5 text-xs text-accent">
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
@@ -179,7 +177,7 @@ export function RoundsPage() {
       </div>
 
       {error && (
-        <div className="text-sm text-danger bg-red-900/20 px-3 py-2 rounded-md">{error}</div>
+        <ErrorState error={error} onRetry={load} compact />
       )}
 
       {notice && (
@@ -188,20 +186,20 @@ export function RoundsPage() {
 
       {loading ? (
         <div className="text-sm text-text-muted">加载中...</div>
-      ) : rounds.length === 0 ? (
+      ) : error && rounds.length === 0 ? null : rounds.length === 0 ? (
         <div className="card p-6 text-center text-text-muted text-sm">
           暂无轮次记录。点击「运行今日轮次」开始。
         </div>
       ) : (
         <div className="space-y-3">
-          {rounds.map((round, roundIndex) => {
+          {rounds.slice(0, visible).map((round, roundIndex) => {
             const prevRound = rounds[roundIndex + 1];
             const liveStages: Record<string, string> = {};
             for (const s of round.live?.stages || []) liveStages[s.key] = s.status;
             const isLiveRound = round.live?.status === "running";
             return (
               <div key={round.date} className={cn("card", isLiveRound && "border-accent/50")}>
-                <div className="px-4 py-2.5 border-b border-border flex items-center gap-3 text-sm">
+                <div className="px-4 py-2.5 border-b border-border flex flex-wrap items-center gap-3 text-sm">
                   <span className="font-mono">{round.date}</span>
                   <span className="text-text-muted text-xs">
                     {round.done}/{round.total} 完成
@@ -209,7 +207,7 @@ export function RoundsPage() {
                   <div className="h-1.5 flex-1 max-w-[200px] bg-bg-hover rounded-full overflow-hidden">
                     <div
                       className="h-full bg-success rounded-full transition-all"
-                      style={{ width: `${(round.done / round.total) * 100}%` }}
+                      style={{ width: `${round.total ? (round.done / round.total) * 100 : 0}%` }}
                     />
                   </div>
                   {round.live && (
@@ -220,7 +218,7 @@ export function RoundsPage() {
                       round.live.status === "partial" ? "border-warning/60 text-warning" :
                       "border-danger/60 text-danger"
                     )}>
-                      {round.live.status}
+                      {({ running: "运行中", success: "已完成", partial: "部分完成", failed: "失败", cancelled: "已取消" } as Record<string,string>)[round.live.status] || round.live.status}
                     </span>
                   )}
                   {round.live?.trigger && (
@@ -266,7 +264,7 @@ export function RoundsPage() {
                       onClick={() => setCompareDate(compareDate === round.date ? null : round.date)}
                       className="text-xs text-text-muted hover:text-text underline-offset-2 hover:underline min-h-[24px] py-1"
                     >
-                      {compareDate === round.date ? "收起对比" : "对比上一轮"}
+                                      {compareDate === round.date ? "收起对比" : "对比上一轮"}
                     </button>
                   )}
                 </div>
@@ -355,6 +353,8 @@ export function RoundsPage() {
           })}
         </div>
       )}
+
+      {rounds.length > visible ? <button className="btn text-xs" onClick={() => setVisible((n) => n + 7)}>再显示 7 轮（共 {rounds.length} 轮）</button> : null}
 
       {detailDate && (
         <RoundDetail date={detailDate} onClose={() => setDetailDate(null)} />

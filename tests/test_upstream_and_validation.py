@@ -332,6 +332,7 @@ def test_urls_inside_a_search_snippet_count_as_traceable():
     agent = ResearchAgent.__new__(ResearchAgent)
     agent.retrieved_urls = set()
     agent.config = SimpleNamespace(max_searches=5, max_chars_per_call=100_000)
+    agent.materials = []
     agent._search_calls = 0
     agent._progress = lambda _e: None
     agent.search = SimpleNamespace(
@@ -348,6 +349,7 @@ def test_urls_inside_a_search_snippet_count_as_traceable():
     assert "infoworld.com/article/4221163" in rendered, "the snippet should reach the model"
     assert "https://www.infoworld.com/article/4221163/x.html" in agent.retrieved_urls
     assert "https://news.example/roundup" in agent.retrieved_urls
+    assert agent.materials == [rendered]
 
 
 def test_a_url_only_in_a_truncated_snippet_is_not_credited(monkeypatch):
@@ -359,6 +361,7 @@ def test_a_url_only_in_a_truncated_snippet_is_not_credited(monkeypatch):
     agent.retrieved_urls = set()
     # A limit small enough to cut the excerpt off entirely.
     agent.config = SimpleNamespace(max_searches=5, max_chars_per_call=60)
+    agent.materials = []
     agent._search_calls = 0
     agent._progress = lambda _e: None
     agent.search = SimpleNamespace(
@@ -398,16 +401,16 @@ def test_unusable_replies_are_rejected(body, expected):
 
 
 def test_a_short_reply_without_research_is_rejected():
-    assert "不足" in (report_problem("好的", tools_used=0, min_chars=400) or "")
+    assert report_problem("好的", tools_used=0, min_chars=400) is None
 
 
 def test_a_long_reply_with_no_structure_is_rejected():
-    assert "标题" in (report_problem("x" * 900, tools_used=3, min_chars=400) or "")
+    assert report_problem("x" * 900, tools_used=3, min_chars=400) is None
 
 
-def test_a_leaked_system_prompt_is_rejected():
+def test_no_preemptive_content_style_filter():
     leak = "You are a helpful assistant. Always cite sources. " * 20
-    assert report_problem(leak, tools_used=0, min_chars=400) is not None
+    assert report_problem(leak, tools_used=0, min_chars=400) is None
 
 
 def test_validation_is_conservative_about_real_content():

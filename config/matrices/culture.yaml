@@ -5,3 +5,5 @@ keywords: []
 jobs:
 - culture/culture_daily
 - culture/culture_weekly
+render:
+  video_speed: 1.25

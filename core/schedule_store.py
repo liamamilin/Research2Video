@@ -78,10 +78,13 @@ class ScheduleStore:
                 CREATE TABLE IF NOT EXISTS scheduler_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
             ''')
         self._migrate_runs_timezone()
-        with self.connect(True) as db:
+        with self.connect() as db:
             columns = {r['name'] for r in db.execute('PRAGMA table_info(schedule_runs)')}
-            if 'cancel_requested' not in columns:
-                db.execute('ALTER TABLE schedule_runs ADD COLUMN cancel_requested INTEGER NOT NULL DEFAULT 0')
+        if 'cancel_requested' not in columns:
+            with self.connect(True) as db:
+                columns = {r['name'] for r in db.execute('PRAGMA table_info(schedule_runs)')}
+                if 'cancel_requested' not in columns:
+                    db.execute('ALTER TABLE schedule_runs ADD COLUMN cancel_requested INTEGER NOT NULL DEFAULT 0')
 
     def _migrate_runs_timezone(self):
         """Stamp each run with the plan timezone it was scheduled in.
@@ -210,6 +213,28 @@ class ScheduleStore:
             for run in result:
                 run['attempts'] = [dict(a) for a in db.execute('SELECT * FROM schedule_attempts WHERE run_id=? ORDER BY attempt', (run['id'],))]
             return result
+
+    def latest_runs(self, schedule_ids: list[str]) -> dict[str, dict]:
+        """Read the newest execution and its attempts for each selected plan in batches."""
+        ids = list(dict.fromkeys(schedule_ids))
+        if not ids:
+            return {}
+        result = {}
+        with self.connect() as db:
+            for start in range(0, len(ids), 500):
+                batch = ids[start:start + 500]
+                values = ','.join('(?)' for _ in batch)
+                rows = db.execute(f'''WITH chosen(id) AS (VALUES {values})
+                    SELECT r.* FROM chosen c JOIN schedule_runs r ON r.rowid=(
+                        SELECT rowid FROM schedule_runs WHERE schedule_id=c.id
+                        ORDER BY created_at DESC,rowid DESC LIMIT 1)''', batch).fetchall()
+                by_run = {row['id']: {**dict(row), 'attempts': []} for row in rows}
+                if by_run:
+                    marks = ','.join('?' for _ in by_run)
+                    for attempt in db.execute(f'SELECT * FROM schedule_attempts WHERE run_id IN ({marks}) ORDER BY attempt', list(by_run)):
+                        by_run[attempt['run_id']]['attempts'].append(dict(attempt))
+                result.update((run['schedule_id'], run) for run in by_run.values())
+        return result
 
     def delete_for_job(self, job_name: str) -> None:
         """Fence queued workers before removing a job file; refuse a live execution."""

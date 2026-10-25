@@ -3,7 +3,7 @@
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
 name: 深度解读
-description: 把一个值得讲清楚的问题讲透：先给结论，再按证据强弱展开，讲清反方和局限，最后给可执行的动作。
+description: 陪{{audience}}深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。
 status: enabled
 tags:
   domain:
@@ -26,35 +26,18 @@ topic:
 research:
   template: deep_dive
 writing:
-  pipeline: adapt
+  pipeline: single
   default_style:
     depth: '{{audience.depth}}'
     tone: explainer
-  allowed_tones: [concise, explainer, playful, story]
-  sections: [4, 6]
-  paragraph_units: [60, 140]
-  required_roles: [钩子, 反方, 行动]
-  revise_rounds: 2
-  audit:
-    model: review
-    style_severity: must
-    timeout_seconds: 480
   style: |
-    栏目「深度解读」：把一个问题讲透，而不是罗列新闻。
-    - 开场用一个具体场景或冲突把问题抛出来（1 段），紧接着给结论。
-    - 主体按证据强弱展开：先讲已证实的，再讲有迹象的，推测必须明说是推测。
-    - 必须有一节讲反方、局限或还不确定的地方。
-    - 结尾给观众 2–4 个本周就能做的具体动作。
-    - 4–6 节，每节 2–5 段，每段 60–140 字，口语化，适合朗读。
-    {{audience.writing_rules}}
+    陪{{audience}}深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。
 output:
   use: auto_form
-  package:
-    accent: '#1f7a4d'
-    badge: 深度解读
+  packaging:
+    use: common
+    label: 深度解读
     outro:
-      template: end_card
-      title: 深度解读
-      lines: ['面向{{audience}}的 AI 深度解读']
+      lines:
+      - 面向{{audience}}的 深度解读
       seconds: 2.5
-      sound: synth_sting

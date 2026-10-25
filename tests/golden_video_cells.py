@@ -1,7 +1,9 @@
 """Golden snapshot of what the three shipped video columns turn into (spec/video-matrix.md, phase 0).
 
 They are recipe files now (config/video_recipes/, spec/video-recipes.md). A refactor must not change what a shipped column resolves to: its fields, the research prompt a topic
-fills, and the request the one-call writer sends the model. ``snapshot()`` computes them from the shipped
+fills, and the source request now used by the automatic material-selection step.
+The draft's selected packet is dynamic and covered by workflow integration tests.
+``snapshot()`` computes them from the shipped
 ``config/``; ``tests/golden/video_cells.json`` is the committed result. Regenerate it only for a deliberate change:
 
     python -m tests.golden_video_cells --write
@@ -71,7 +73,7 @@ _FLAT = {
     "audit": ("writing", "audit"),
     "voice_id": ("output", "voice_id"), "video_form": ("output", "video_form"),
     "allowed_forms": ("output", "allowed_forms"), "creative_intent": ("output", "creative_intent"),
-    "source_card": ("output", "source_card"), "package": ("output", "package"), "recheck": ("output", "recheck"),
+    "source_card": ("output", "source_card"), "package": ("output", "package"), "packaging": ("output", "packaging"), "recheck": ("output", "recheck"),
 }
 
 
@@ -116,6 +118,7 @@ def snapshot() -> dict:
                                                    tuple(column.paragraph_units), column.writer_topic_fields()),
             "budget": budget,
             "package_request": video_render.package_request(column, TOPIC),
+            "packaging_request": video_render.packaging_request(column, TOPIC),
         }
     return json.loads(json.dumps(out, ensure_ascii=False))
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from core.video import outputs, production, recipes, reports, store, topic_store as video_topic_store
 from web import audit
@@ -39,8 +39,9 @@ def _get(key: str) -> production.Config:
 @router.get("")
 def list_configs(job: str = "", user=Depends(require_viewer)) -> list[dict]:
     paths = get_settings().paths
-    made = outputs.count_by_config(paths.config_dir, paths.jobs_dir)  # scripts made before configs count too
-    return [{**c.as_dict(), "scripts": made.get(c.key, 0)} for c in _all().values() if not job or c.job == job]
+    configs = _all()
+    made = outputs.count_by_config(paths.config_dir, paths.jobs_dir, configs=configs)
+    return [{**c.as_dict(), "scripts": made.get(c.key, 0)} for c in configs.values() if not job or c.job == job]
 
 
 @router.get("/{key}/pending")
@@ -95,6 +96,13 @@ class ConfigIn(BaseModel):
     reverify: Optional[bool] = None
     auto: Optional[int] = None
     name: str = ""
+    render: Optional[dict] = None
+
+    @field_validator("render")
+    @classmethod
+    def validate_render(cls, value):
+        from core.video.production_settings import validate
+        return validate(value) if value is not None else None
 
 
 @router.post("", status_code=201)
@@ -108,7 +116,7 @@ def add_config(body: ConfigIn, user=Depends(require_editor)) -> dict:
     while key in every:
         key, n = f"{stem}-{n}", n + 1
     production.save(paths.config_dir, key, job=body.job.strip(), recipe=recipe, name=body.name.strip(), audience=audience,
-                    minutes=body.minutes, reverify=body.reverify, auto=body.auto)
+                    minutes=body.minutes, reverify=body.reverify, auto=body.auto, render=body.render)
     made = production.get(paths.config_dir, paths.jobs_dir, key)
     if made is None or not made.usable:
         production.remove(paths.config_dir, key)  # never leave a config that cannot write

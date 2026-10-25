@@ -3,7 +3,7 @@
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
 name: 对比
-description: 把两个对象放在同几个维度上比：每个维度谁强谁弱、差多少，最后说明什么情况下选哪个。
+description: 陪开发者弄明白这些对象各自适合什么，沿着真正影响选择的差别展开，听完能作出自己的判断。
 status: experimental
 tags:
   domain:
@@ -31,30 +31,14 @@ writing:
   default_style:
     depth: intermediate
     tone: explainer
-  allowed_tones: [concise, explainer, playful]
-  sections: [3, 6]
-  paragraph_units: [30, 100]
-  required_roles: [钩子, 证据, 行动]
-  audit:
-    model: review
-    style_severity: must
-    timeout_seconds: 480
   style: |
-    栏目「对比」：两个对象放在同几个维度上比，不做各自的产品介绍。
-    - 开场一句话说清比的是谁和谁、比哪几项，并先给整体结论。
-    - 主体每个维度一个小节：先说谁强，再给两边的数字（单位、口径一致），一句话说差在哪。维度照选题的「对比维度」，不加别的。
-    - 一边没有公开数据就说「未公开」，不估算、不拿别的口径凑。
-    - 必须有一节讲「什么情况下选哪个」，结论取决于场景时要明说。
-    - 结尾给开发者一个现在就能做的动作：谁受影响、多花或少花多少、要改什么。
-    - 3–6 个小节，每节 1–3 段，每段 30–100 字，口语化，适合朗读。
+    陪开发者弄明白这些对象各自适合什么，沿着真正影响选择的差别展开，听完能作出自己的判断。
 output:
   use: motion
-  package:
-    accent: '#1f7a4d'
-    badge: 对比
+  packaging:
+    use: common
+    label: 对比
     outro:
-      template: end_card
-      title: 对比
-      lines: ['AI 对比']
+      lines:
+      - 对比
       seconds: 2.5
-      sound: synth_sting

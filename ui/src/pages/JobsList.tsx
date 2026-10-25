@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { RefreshCw } from "lucide-react";
+import { listMatrices } from "@/api/matrices";
+import { usePageResource } from "@/lib/use-page-resource";
 import { DeleteJobDialog } from "@/components/DeleteJobDialog";
 import { listJobs, createJob, listTemplates, listJobCategories, type JobCategory, type JobTemplate } from "@/api";
 import type { JobSummary } from "@/api/types";
@@ -7,7 +10,6 @@ import { useAuthStore } from "@/lib/auth-store";
 import { cn, shortTime, timeAgo } from "@/lib/utils";
 import { TemplateGrid } from "@/components/TemplateGrid";
 import { ErrorState } from "@/components/ErrorState";
-import { errorMessage } from "@/lib/toast";
 import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { CronBuilder } from "@/components/CronBuilder";
 
@@ -24,20 +26,24 @@ function StatusBadge({ status }: { status: string | null }) {
   };
   return (
     <span className={cn("badge border", colors[status] || "bg-gray-800 text-gray-400")}>
-      {status}
+      {({ success: "已完成", failed: "失败", skipped: "已跳过", cancelled: "已取消" } as Record<string,string>)[status] || status}
     </span>
   );
 }
 
 export function JobsListPage() {
-  const [jobs, setJobs] = useState<JobSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: jobData, error, loading, reload: fetchJobs } = usePageResource(listJobs, 15000);
+  const jobs = jobData ?? [];
+  const { data: matrices } = usePageResource(listMatrices);
+  const [params] = useSearchParams();
+  const [matrix, setMatrix] = useState(params.get("matrix") || "");
+  const owner = (job: string) => matrices?.matrices?.find((m) => m.jobs.some((j) => j.job === job));
+  const jobLabel = (job: string) => owner(job)?.members.find((j) => j.job === job)?.name || job;
   const [filter, setFilter] = useState("");
-  const [error, setError] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   // The same questions the reports page answers: what is new, what is running,
   // what did I just create.
-  const [statusFilter, setStatusFilter] = useState<"all" | "enabled" | "disabled" | "running">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "enabled" | "disabled" | "running" | "failed">(() => ["enabled", "disabled", "running", "failed"].includes(params.get("status") || "") ? params.get("status") as "running" : "all");
   const [range, setRange] = useState<"all" | "today" | "7d" | "30d">("all");
   const [sort, setSort] = useState<"modified" | "name" | "ran" | "never">("modified");
   const [highlight, setHighlight] = useState<string | null>(null);
@@ -67,18 +73,6 @@ export function JobsListPage() {
     }
   };
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      setJobs(await listJobs());
-    } catch (err: unknown) {
-      setError(errorMessage(err, "无法加载 Job 列表"));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchCategories = async () => {
     try {
       const data = await listJobCategories();
@@ -88,7 +82,7 @@ export function JobsListPage() {
     }
   };
 
-  useEffect(() => { fetchJobs(); fetchCategories(); }, []);
+  useEffect(() => { fetchCategories(); }, []);
 
   const openCreate = async () => {
     setShowCreate(true);
@@ -163,13 +157,15 @@ export function JobsListPage() {
   };
 
   const visible = jobs.filter((j) => {
+    if (matrix && (owner(j.name)?.key || "_independent") !== matrix) return false;
+    if (statusFilter === "failed" && j.state?.last_status !== "failed") return false;
     if (statusFilter === "enabled" && !j.enabled) return false;
     if (statusFilter === "disabled" && j.enabled) return false;
     if (statusFilter === "running" && !j.is_running) return false;
     if (!matchesTime(j)) return false;
     if (filter) {
       const q = filter.toLowerCase();
-      const hay = [j.name, j.description, ...(j.keywords || [])].join(" ").toLowerCase();
+      const hay = [j.name, jobLabel(j.name), owner(j.name)?.name, j.description, ...(j.keywords || [])].join(" ").toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -211,11 +207,12 @@ export function JobsListPage() {
         onDeleted={() => { setDeleting(null); fetchJobs(); }}
         onClose={() => setDeleting(null)}
       />
-      <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold flex-1">Jobs</h1>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex-1"><h1 className="text-xl font-semibold tracking-tight">Jobs</h1><p className="text-xs text-text-muted mt-1">按矩阵或分类查找研究任务，查看运行结果与任务配置。</p></div><button className="btn text-xs" disabled={loading} onClick={fetchJobs}><RefreshCw className="h-3.5 w-3.5" />刷新</button>
         <input
           className="input max-w-xs"
-          placeholder="搜索..."
+          aria-label="搜索研究任务"
+          placeholder="搜索任务名称或关键词"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         />
@@ -233,9 +230,10 @@ export function JobsListPage() {
 
       {/* Status / time / sort: find the job you just made */}
       <div className="flex flex-wrap items-center gap-1.5">
-        {([["all", "全部"], ["enabled", "启用"], ["disabled", "停用"], ["running", "运行中"]] as const).map(([key, label]) => (
+        {([["all", "全部"], ["enabled", "启用"], ["disabled", "停用"], ["running", "运行中"], ["failed", "上次失败"]] as const).map(([key, label]) => (
           <button
             key={key}
+            aria-pressed={statusFilter === key}
             onClick={() => setStatusFilter(key)}
             className={cn("badge border cursor-pointer hover:bg-bg-hover",
               statusFilter === key ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border")}
@@ -266,9 +264,9 @@ export function JobsListPage() {
           <option value="never">从未运行优先</option>
           <option value="name">名称 A→Z</option>
         </select>
-        {(statusFilter !== "all" || range !== "all" || filter) && (
+        {(statusFilter !== "all" || range !== "all" || filter || matrix || categoryFilter) && (
           <button
-            onClick={() => { setStatusFilter("all"); setRange("all"); setFilter(""); }}
+            onClick={() => { setStatusFilter("all"); setRange("all"); setFilter(""); setMatrix(""); setCategoryFilter(""); }}
             className="chip border border-border text-text-muted"
           >
             清除筛选
@@ -279,31 +277,8 @@ export function JobsListPage() {
         </span>
       </div>
 
-      {/* Category filter */}
-      {categories.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          <button
-            onClick={() => setCategoryFilter("")}
-            className={cn("badge border cursor-pointer hover:bg-bg-hover",
-              !categoryFilter ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border")}
-          >
-            全部分类
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.name}
-              onClick={() => setCategoryFilter(categoryFilter === cat.name ? "" : cat.name)}
-              className={cn("badge border cursor-pointer hover:bg-bg-hover",
-                categoryFilter === cat.name
-                  ? "bg-accent-solid text-white border-accent"
-                  : "bg-bg-card border-border")}
-              title={`${cat.name}：${cat.count} 个 job`}
-            >
-              {cat.name} <span className="opacity-60">{cat.count}</span>
-            </button>
-          ))}
-        </div>
-      )}
+      {matrices?.matrices?.length ? <div className="flex flex-wrap items-center gap-3"><select aria-label="任务矩阵" className="input w-auto max-w-full text-xs" value={matrix} onChange={(e) => setMatrix(e.target.value)}><option value="">全部矩阵</option>{matrices.matrices.map((m) => <option key={m.key} value={m.key}>{m.name}{m.archived ? "（已归档）" : ""}</option>)}<option value="_independent">独立任务</option></select>{matrix && matrix !== "_independent" ? <Link className="text-xs text-accent hover:underline" to={`/matrices/${encodeURIComponent(matrix)}`}>进入矩阵工作区 ↗</Link> : null}</div> : null}
+      {categories.length ? <select aria-label="任务分类" className="input w-auto max-w-full text-xs" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}><option value="">全部分类</option>{categories.map((cat) => <option key={cat.name} value={cat.name}>{cat.name}（{cat.count}）</option>)}</select> : null}
 
       {/* Create form */}
       {showCreate && (
@@ -441,16 +416,17 @@ export function JobsListPage() {
       )}
 
       {/* Job list */}
-      {loading ? (
+      {error && jobData ? <ErrorState error={error} onRetry={fetchJobs} compact /> : null}
+      {loading && !jobData ? (
         <div className="text-sm text-text-muted">加载中...</div>
-      ) : error ? (
+      ) : error && !jobData ? (
         <ErrorState error={error} onRetry={fetchJobs} />
       ) : jobs.length === 0 ? (
         <div className="card p-8 text-center text-sm text-text-muted space-y-2">
           <div>还没有任何 Job</div>
           {canEdit && <div className="text-xs">点右上角「+ 新建」，可以从模板库创建第一个 Job。</div>}
         </div>
-      ) : (
+      ) : visibleCount === 0 ? <section className="card p-8 text-center text-sm text-text-muted">没有符合筛选的任务</section> : (
         <div className="space-y-4">
           {[...filtered.entries()].map(([cat, items]) => (
             <div key={cat} className="card">
@@ -464,7 +440,7 @@ export function JobsListPage() {
                     to={`/jobs/${encodeURIComponent(j.name)}`}
                     data-job={j.name}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-2.5 hover:bg-bg-hover transition text-sm",
+                      "flex flex-wrap sm:flex-nowrap items-center gap-3 px-4 py-3 hover:bg-bg-hover transition text-sm",
                       highlight === j.name && "bg-accent/15 ring-1 ring-inset ring-accent/50",
                     )}
                   >
@@ -475,7 +451,7 @@ export function JobsListPage() {
                       )}
                       title={j.enabled ? "enabled" : "disabled"}
                     />
-                    <span className="font-mono flex-1 truncate">{j.name}</span>
+                    <div className="flex-1 min-w-0"><div className="truncate">{jobLabel(j.name)}</div><p className="text-xs text-text-muted truncate mt-1">{owner(j.name)?.name ? `${owner(j.name)!.name} · ` : ""}{jobLabel(j.name) !== j.name ? j.name : j.description || "独立研究任务"}</p></div>
                     {j.is_running && (
                       <span className="inline-flex items-center gap-1 text-xs text-accent shrink-0">
                         <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />

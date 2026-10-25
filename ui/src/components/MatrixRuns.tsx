@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { runJob } from "@/api";
 import { listMatrixRuns, type Matrix, type MatrixRun } from "@/api/matrices";
 import { TimeStamp } from "@/components/TimeStamp";
+import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
 
@@ -29,6 +30,12 @@ export function MatrixRuns({ matrix, initialJob = "" }: { matrix: Matrix; initia
   const [total, setTotal] = useState(0);
   const [more, setMore] = useState(false);
   const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const generation = useRef(0);
+  const appendFlight = useRef<AbortController | null>(null);
+  const offset = useRef(0);
+  const failedMore = useRef(false);
   const toast = useToast();
   const role = useAuthStore((s) => s.user?.role);
   const canEdit = role === "editor" || role === "admin";
@@ -47,27 +54,38 @@ export function MatrixRuns({ matrix, initialJob = "" }: { matrix: Matrix; initia
   };
 
   useEffect(() => {
-    let live = true;
-    setRows(null);
-    listMatrixRuns(matrix.key, { job: job || undefined, status: status || undefined, days: days || undefined, order, limit: PAGE })
-      .then((b) => { if (live) { setRows(b.runs); setTotal(b.total); setMore(b.more); setError(""); } })
-      .catch((e) => { if (live) setError(errorMessage(e)); });
-    return () => { live = false; };
-  }, [matrix.key, job, status, days, order]);
+    const controller = new AbortController();
+    generation.current += 1;
+    appendFlight.current?.abort(); appendFlight.current = null;
+    setRows(null); setMore(false); setLoadingMore(false); setError(""); failedMore.current = false; offset.current = 0;
+    listMatrixRuns(matrix.key, { job: job || undefined, status: status || undefined, days: days || undefined, order, limit: PAGE }, controller.signal)
+      .then((b) => { if (!controller.signal.aborted) { setRows(b.runs); setTotal(b.total); setMore(b.more); offset.current = b.runs.length; } })
+      .catch((e) => { if (!controller.signal.aborted) setError(errorMessage(e)); });
+    return () => { controller.abort(); appendFlight.current?.abort(); generation.current += 1; };
+  }, [matrix.key, job, status, days, order, retry]);
 
   const loadMore = async () => {
+    if (appendFlight.current || rows === null) return;
+    const controller = new AbortController(); appendFlight.current = controller;
+    const current = generation.current;
+    setLoadingMore(true);
     try {
-      const b = await listMatrixRuns(matrix.key, { job: job || undefined, status: status || undefined, days: days || undefined, order, limit: PAGE, offset: rows?.length ?? 0 });
-      setRows([...(rows ?? []), ...b.runs]);
-      setMore(b.more);
+      const b = await listMatrixRuns(matrix.key, { job: job || undefined, status: status || undefined, days: days || undefined, order, limit: PAGE, offset: offset.current }, controller.signal);
+      if (controller.signal.aborted || current !== generation.current) return;
+      const known = new Set(rows.map((r) => `${r.job}-${r.ts}`));
+      const added = b.runs.filter((r) => !known.has(`${r.job}-${r.ts}`));
+      setRows([...rows, ...added]); offset.current += b.runs.length;
+      setMore(b.more && added.length > 0); setError("");
     } catch (e) {
-      setError(errorMessage(e));
+      if (!controller.signal.aborted && current === generation.current) { setError(errorMessage(e)); failedMore.current = true; }
+    } finally {
+      if (appendFlight.current === controller) { appendFlight.current = null; setLoadingMore(false); }
     }
   };
 
   let month = "";
   return (
-    <section className="card p-3 space-y-2" aria-label="运行记录">
+    <section className="card p-4 space-y-3" aria-label="运行记录">
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <h2 className="font-medium text-sm flex-1">运行记录{rows ? `（${total}）` : ""}</h2>
         <select aria-label="按 Job 筛" className="input w-auto" value={job} onChange={(e) => setJob(e.target.value)}>
@@ -85,7 +103,8 @@ export function MatrixRuns({ matrix, initialJob = "" }: { matrix: Matrix; initia
           {order === "desc" ? "最新在前" : "最早在前"}
         </button>
       </div>
-      {error ? <p role="alert" className="text-xs text-danger">{error}</p> : null}
+      {error ? <ErrorState error={error} onRetry={() => failedMore.current ? loadMore() : setRetry((n) => n + 1)} compact /> : null}
+      {rows === null && !error ? <p role="status" className="py-6 text-xs text-text-muted">正在读取运行记录…</p> : null}
       {rows && !rows.length ? <p className="text-xs text-text-muted">没有符合的运行。</p> : null}
       <ul className="space-y-1">
         {rows?.map((r) => {
@@ -102,7 +121,7 @@ export function MatrixRuns({ matrix, initialJob = "" }: { matrix: Matrix; initia
                 {r.searches ? <span className="text-text-muted">{r.searches} 次搜索</span> : null}
                 {r.duration_seconds ? <span className="text-text-muted">{Math.max(1, Math.round(r.duration_seconds / 60))} 分钟</span> : null}
                 {r.report_path && r.status === "success" ? (
-                  <Link className="text-accent hover:underline" to={`/reports/view?path=${encodeURIComponent(r.report_path)}`}>看报告</Link>
+                  <Link className="text-accent hover:underline" to={`/reports/view?path=${encodeURIComponent(r.report_path.replace(/^output\//, ""))}`}>看报告</Link>
                 ) : null}
                 {r.items ? <span className="text-text-muted">{r.items} 条</span> : null}
                 {canEdit && (r.status === "failed" || r.status === "cancelled") && member(r.job)?.enabled !== false && !member(r.job)?.is_running ? (
@@ -115,13 +134,13 @@ export function MatrixRuns({ matrix, initialJob = "" }: { matrix: Matrix; initia
                     <Link className="text-success hover:underline" to={`/matrices/${encodeURIComponent(matrix.key)}/video/${encodeURIComponent(r.job)}`}>还没写视频 →</Link>
                   )
                 ) : null}
-                {r.error ? <span className="text-danger break-all">{r.error}</span> : null}
+                {r.error ? <details className="basis-full text-text-muted"><summary className="cursor-pointer text-warning">失败详情</summary><p className="mt-2 text-xs leading-5 break-words">{r.error}</p></details> : null}
               </div>
             </li>
           );
         })}
       </ul>
-      {more ? <button className="btn text-xs" onClick={loadMore}>再加载 {PAGE} 条</button> : null}
+      {more ? <button className="btn text-xs" disabled={loadingMore} onClick={loadMore}>{loadingMore ? "加载中…" : `再加载 ${PAGE} 条`}</button> : null}
     </section>
   );
 }

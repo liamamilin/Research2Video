@@ -134,3 +134,11 @@ describe("Application assistant", () => {
     expect(JSON.parse(String(request?.[1]?.body)).message).toContain('已成功的操作不要重复执行');
   });
 });
+
+
+it("fills an example without submitting a model request", async () => {
+  const fetch = server(); await renderAsk();
+  fireEvent.click(screen.getByRole("button", { name: "看看有哪些文稿等我审" }));
+  expect((screen.getByLabelText("消息") as HTMLTextAreaElement).value).toBe("看看有哪些文稿等我审");
+  expect(fetch.mock.calls.filter(([url]) => url.endsWith("/stream"))).toHaveLength(0);
+});

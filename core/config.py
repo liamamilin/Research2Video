@@ -8,6 +8,8 @@ import logging
 import yaml
 from typing import Optional
 
+from core.yaml_cache import load_yaml
+
 logger = logging.getLogger(__name__)
 
 # Directories to skip during job discovery
@@ -21,7 +23,7 @@ def load_system_config(config_dir: str = "config") -> dict:
         logger.warning("system.yaml not found at %s, using defaults", path)
         return {}
     with open(path, "r", encoding="utf-8") as f:
-        cfg = yaml.safe_load(f) or {}
+        cfg = load_yaml(f) or {}
     logger.debug("Loaded system config from %s", path)
     return cfg
 
@@ -88,7 +90,7 @@ def _find_job_path(jobs_dir: str, job_name: str) -> Optional[str]:
             # 3) Match by internal 'name' field (case-insensitive, first word heuristic)
             try:
                 with open(file_path, "r", encoding="utf-8") as fh:
-                    data = yaml.safe_load(fh) or {}
+                    data = load_yaml(fh) or {}
                 file_job_name = data.get("name", "")
                 if file_job_name.lower() == job_name.lower():
                     return rel_no_ext
@@ -113,7 +115,7 @@ def load_job(jobs_dir: str, job_name: str) -> Optional[dict]:
             path = path_yml
 
     with open(path, "r", encoding="utf-8") as f:
-        job = yaml.safe_load(f) or {}
+        job = load_yaml(f) or {}
     job["_file"] = resolved
     try:
         job["_mtime"] = os.path.getmtime(path)
@@ -147,7 +149,7 @@ def list_jobs(jobs_dir: str, enabled_only: bool = False) -> list:
             if enabled_only:
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
-                        job = yaml.safe_load(f) or {}
+                        job = load_yaml(f) or {}
                     if not job.get("enabled", True):
                         continue
                 except Exception:

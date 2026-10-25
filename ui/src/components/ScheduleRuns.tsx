@@ -22,12 +22,13 @@ export function ScheduleRuns({ id }: { id: string }) {
   const [revision, setRevision] = useState(0);
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     setLoading(true); setError('');
-    api<{runs: Run[]}>(`/api/scheduler/${encodeURIComponent(id)}/runs`)
+    api<{runs: Run[]}>(`/api/scheduler/${encodeURIComponent(id)}/runs`, { signal: controller.signal })
       .then(data => { if (active) setRuns(data.runs); })
       .catch(err => { if (active) setError(errorMessage(err)); })
       .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    return () => { active = false; controller.abort(); };
   }, [id, revision]);
   return <div className="space-y-2 text-xs">
     <div className="flex items-center justify-between"><span className="text-text-muted">最近 20 次计划执行（含重试记录）</span><button className="btn text-xs" disabled={loading} onClick={() => setRevision(v => v + 1)}>刷新记录</button></div>

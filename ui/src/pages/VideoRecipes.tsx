@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import {
   copyVideoPart,
@@ -17,22 +17,30 @@ import {
   type VideoRecipe,
   type VideoRecipeDetail,
 } from "@/api/video";
+import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
 
 const STATUS_LABEL: Record<string, string> = { enabled: "已用", experimental: "试验", blocked: "停用" };
 const PIPELINE_LABEL: Record<string, string> = { single: "一次写稿", adapt: "五步改编" };
-const PART_LABEL: Record<string, string> = { research: "调研模板", output: "出片部件", writing: "写稿部件", audience: "给谁看" };
+const PART_LABEL: Record<string, string> = { research: "调研模板", output: "出片部件", writing: "写稿部件", audience: "给谁看", packaging: "包装方案" };
+const withOrigin = (path: string, from: string | null) => from && /^[A-Za-z0-9_-]{1,100}$/.test(from) ? `${path}?from=${encodeURIComponent(from)}` : path;
 const partLink = (kind: string, name: string) => `/video-recipes/parts/${kind}/${name}`;
 
 // 文稿配方：一份 YAML 就是一种文稿的完整做法（调研 → 写稿 → 出片，外加自动流水线从哪挑题），像 Job 一样直接改、复制复用。
 export function VideoRecipesPage() {
   const { key, kind, name } = useParams();
+  const [search] = useSearchParams();
+  const from = search.get("from");
   const navigate = useNavigate();
   const toast = useToast();
   const user = useAuthStore((s) => s.user);
   const canEdit = user?.role === "editor" || user?.role === "admin";
 
+  const [pendingPath, setPendingPath] = useState("");
+  const [partDirty, setPartDirty] = useState(false);
+  const [query, setQuery] = useState("");
+  const [retry, setRetry] = useState(0);
   const [list, setList] = useState<VideoRecipe[]>([]);
   const [parts, setParts] = useState<VideoPart[]>([]);
   const [detail, setDetail] = useState<VideoRecipeDetail | null>(null);
@@ -57,21 +65,31 @@ export function VideoRecipesPage() {
       setDetail(null);
       return;
     }
+    let active = true; setDetail(null); setError(null);
     setCheck(null);
     getVideoRecipe(key)
       .then((d) => {
+        if (!active) return;
         setDetail(d);
         setText(d.content);
         setError(null);
       })
-      .catch((e) => setError(errorMessage(e, "读取配方失败")));
-  }, [key]);
+      .catch((e) => { if (active) setError(errorMessage(e, "读取配方失败")); });
+    return () => { active = false; };
+  }, [key, retry]);
 
   useEffect(() => {
-    if (!key && !kind && list.length) navigate(`/video-recipes/${list[0].key}`, { replace: true });
-  }, [key, kind, list, navigate]);
+    if (!key && !kind && list.length) navigate(withOrigin(`/video-recipes/${list[0].key}`, from), { replace: true });
+  }, [key, kind, list, navigate, from]);
 
   const dirty = detail !== null && text !== detail.content;
+  const jump = (path: string) => { if (dirty || partDirty) setPendingPath(withOrigin(path, from)); else navigate(withOrigin(path, from)); };
+  useEffect(() => {
+    if (!dirty && !partDirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty, partDirty]);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
@@ -106,7 +124,7 @@ export function VideoRecipesPage() {
     run(async () => {
       const made = await copyVideoRecipe(name.trim(), detail!.key);
       refresh();
-      navigate(`/video-recipes/${made.key}`);
+      navigate(withOrigin(`/video-recipes/${made.key}`, from));
     });
   };
 
@@ -115,26 +133,36 @@ export function VideoRecipesPage() {
     run(async () => {
       await deleteVideoRecipe(detail!.key);
       refresh();
-      navigate("/video-recipes");
+      navigate(withOrigin("/video-recipes", from));
     });
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" onClickCapture={(event) => {
+      const target = (event.target as HTMLElement).closest("a"); const href = target?.getAttribute("href");
+      if ((dirty || partDirty) && (href?.startsWith("/video-recipes") || href?.startsWith("/video/"))) { event.preventDefault(); event.stopPropagation(); setPendingPath(href); }
+    }}>
+      {from && /^[A-Za-z0-9_-]{1,100}$/.test(from) ? <div className="card p-3 flex flex-wrap items-center gap-2 text-xs">
+        <Link className="text-accent font-medium hover:underline" to={`/video/${encodeURIComponent(from)}?tab=draft`}>← 返回文稿，继续迭代</Link>
+        <span className="text-text-muted">保存配置后回到文稿重新生成，已有结果会保留。</span>
+      </div> : null}
       <div>
         <h1 className="text-xl font-semibold">文稿配方</h1>
         <p className="text-sm text-text-muted">
-          每个配方是 config/video_recipes 下的一份 YAML：怎么调研、怎么写稿和审计、出成什么样，以及自动流水线从哪挑题（手动建稿可以用任何题目）。改完先校验再保存；新配方从已有配方复制。
+          根据素材，产出目标观众愿意看、听得懂、想继续看的视频。这里调整每类视频的创作方向和生成方式，保存后用于新稿。
         </p>
       </div>
-      {error ? <div className="text-sm text-danger">{error}</div> : null}
+      {pendingPath ? <div role="alert" className="card p-3 border-warning/40 text-xs space-y-2"><p>有未保存的修改。切换前请保存，或选择放弃修改。</p><div className="flex gap-2"><button className="btn" onClick={() => setPendingPath("")}>继续编辑</button><button className="btn" onClick={() => { setPartDirty(false); setDetail(null); navigate(pendingPath); setPendingPath(""); }}>放弃修改并切换</button></div></div> : null}
+      {error ? <ErrorState error={error} onRetry={() => { refresh(); setRetry((n) => n + 1); }} compact /> : null}
       <div className="grid gap-4 md:grid-cols-[18rem_1fr]">
-        <nav className="card p-2 space-y-1" aria-label="配方列表">
-          {list.map((r) => (
+        <nav className="card p-2 space-y-1 md:max-h-[calc(100vh-12rem)] overflow-y-auto" aria-label="配方列表">
+          <input className="input text-xs mb-2" aria-label="搜索配方或部件" placeholder="搜索配方或部件" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <p className="px-2 text-xs text-text-muted py-2">文稿配方（{list.length}）</p>
+          {list.filter((r) => `${r.key} ${r.label}`.toLowerCase().includes(query.trim().toLowerCase())).map((r) => (
             <button
               key={r.key}
-              onClick={() => navigate(`/video-recipes/${r.key}`)}
-              className={`w-full text-left rounded px-2 py-1.5 text-sm ${r.key === key ? "bg-surface-2" : "hover:bg-surface-2"}`}
+              onClick={() => jump(`/video-recipes/${r.key}`)}
+              className={`w-full text-left rounded px-2 py-1.5 text-sm ${r.key === key ? "bg-accent/15 text-accent" : "hover:bg-bg-hover"}`}
             >
               <div className="flex items-center gap-2">
                 <span className="flex-1 truncate">{r.label}</span>
@@ -149,12 +177,12 @@ export function VideoRecipesPage() {
             </button>
           ))}
           <div className="px-2 pt-3 pb-1 text-xs text-text-muted">共用部件（被多个配方引用，改一处一起变）</div>
-          {parts.map((p) => (
+          {parts.filter((p) => `${p.kind_label} ${p.name} ${p.label}`.toLowerCase().includes(query.trim().toLowerCase())).map((p) => (
             <button
               key={`${p.kind}/${p.name}`}
-              onClick={() => navigate(partLink(p.kind, p.name))}
+              onClick={() => jump(partLink(p.kind, p.name))}
               className={`w-full text-left rounded px-2 py-1.5 text-sm ${
-                p.kind === kind && p.name === name ? "bg-surface-2" : "hover:bg-surface-2"
+                p.kind === kind && p.name === name ? "bg-accent/15 text-accent" : "hover:bg-bg-hover"
               }`}
             >
               <div className="truncate">{p.label}</div>
@@ -165,9 +193,9 @@ export function VideoRecipesPage() {
           ))}
         </nav>
         {kind && name ? (
-          <PartEditor kind={kind} name={name} canEdit={canEdit} onSaved={refresh} />
+          <PartEditor key={`${kind}/${name}`} kind={kind} name={name} canEdit={canEdit} onSaved={refresh} onDirty={setPartDirty} />
         ) : detail ? (
-          <section className="card space-y-3" aria-label="配方内容">
+          <section className="card p-4 space-y-3 min-w-0" aria-label="配方内容">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="font-medium flex-1">
                 {detail.label} <span className="text-xs text-text-muted">{detail.key}.yaml</span>
@@ -194,11 +222,11 @@ export function VideoRecipesPage() {
             {Object.keys(detail.uses ?? {}).length ? (
               <div className="text-xs text-text-muted">
                 引用：
-                {Object.values(detail.uses).map((u, i) => (
-                  <span key={u!.kind}>
+                {Object.entries(detail.uses).map(([section, u], i) => (
+                  <span key={section}>
                     {i ? " · " : ""}
-                    {PART_LABEL[u!.kind]}{" "}
-                    <Link className="underline" to={partLink(u!.kind, u!.name)}>
+                    {PART_LABEL[section]}{" "}
+                    <Link className="underline" to={withOrigin(partLink(section, u!.name), from)}>
                       {u!.name}
                     </Link>
                   </span>
@@ -212,7 +240,7 @@ export function VideoRecipesPage() {
                 {detail.audiences.map((a, i) => (
                   <span key={a.key}>
                     {i ? " · " : ""}
-                    <Link className="underline" to={partLink("audience", a.key)}>
+                    <Link className="underline" to={withOrigin(partLink("audience", a.key), from)}>
                       {a.key}
                     </Link>
                     {i ? `（栏目 ${a.recipe}）` : ""}
@@ -249,24 +277,30 @@ export function VideoRecipesPage() {
 }
 
 // 一个共用部件：调研模板或出片 / 写稿部件。保存前后端会用新内容重建每个引用它的配方，有一个建不起来就不保存。
-function PartEditor({ kind, name, canEdit, onSaved }: { kind: string; name: string; canEdit: boolean; onSaved: () => void }) {
+function PartEditor({ kind, name, canEdit, onSaved, onDirty }: { kind: string; name: string; canEdit: boolean; onSaved: () => void; onDirty: (dirty: boolean) => void }) {
+  const [search] = useSearchParams();
+  const from = search.get("from");
   const navigate = useNavigate();
   const toast = useToast();
   const [part, setPart] = useState<VideoPartDetail | null>(null);
+  const [retry, setRetry] = useState(0);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setPart(null);
+    let active = true; setPart(null);
     getVideoPart(kind, name)
       .then((p) => {
+        if (!active) return;
         setPart(p);
         setText(p.content);
         setError(null);
       })
-      .catch((e) => setError(errorMessage(e, "读取部件失败")));
-  }, [kind, name]);
+      .catch((e) => { if (active) setError(errorMessage(e, "读取部件失败")); });
+    return () => { active = false; };
+  }, [kind, name, retry]);
+  useEffect(() => { onDirty(part !== null && text !== part.content); return () => onDirty(false); }, [part, text, onDirty]);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
@@ -294,15 +328,15 @@ function PartEditor({ kind, name, canEdit, onSaved }: { kind: string; name: stri
     run(async () => {
       const made = await copyVideoPart(kind, next.trim(), name);
       onSaved();
-      navigate(partLink(made.kind, made.name));
+      navigate(withOrigin(partLink(made.kind, made.name), from));
     });
   };
 
-  if (error) return <div className="text-sm text-danger">{error}</div>;
+  if (error) return <ErrorState error={error} onRetry={() => setRetry((n) => n + 1)} compact />;
   if (!part) return null;
   const dirty = text !== part.content;
   return (
-    <section className="card space-y-3" aria-label="部件内容">
+    <section className="card p-4 space-y-3 min-w-0" aria-label="部件内容">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="font-medium flex-1">
           {part.label} <span className="text-xs text-text-muted">{part.path}</span>
@@ -326,7 +360,7 @@ function PartEditor({ kind, name, canEdit, onSaved }: { kind: string; name: stri
             {part.used_by.map((k, i) => (
               <span key={k}>
                 {i ? "、" : ""}
-                <Link className="underline" to={`/video-recipes/${k}`}>
+                <Link className="underline" to={withOrigin(`/video-recipes/${k}`, from)}>
                   {k}
                 </Link>
               </span>

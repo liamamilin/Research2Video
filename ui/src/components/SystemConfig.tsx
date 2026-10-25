@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { ErrorState } from "@/components/ErrorState";
 import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
 import { AssistantConfigRecovery } from "@/components/AssistantAction";
@@ -116,7 +117,7 @@ function Section({ title, children, action }: {
   action?: React.ReactNode;
 }) {
   return (
-    <div className="card p-4 space-y-3">
+    <div id={`setting-${title.split("（")[0].trim()}`} className="card p-4 space-y-3 scroll-mt-24">
       <div className="flex items-center gap-2">
         <div className="text-sm font-medium flex-1">{title}</div>
         {action}
@@ -144,6 +145,10 @@ function TestBadge({ state, testing }: { state: any; testing: boolean }) {
 
 export function SystemConfig() {
   const [mode, setMode] = useState<Mode>("form");
+  const [pendingMode, setPendingMode] = useState<Mode | null>(null);
+  const [baseline, setBaseline] = useState({ parsed: "", content: "" });
+  const [auxError, setAuxError] = useState(false);
+  const flight = useRef<AbortController | null>(null);
   const [parsed, setParsed] = useState<any>(null);
   const [content, setContent] = useState("");
   const [mtime, setMtime] = useState<number | null>(null);
@@ -165,33 +170,52 @@ export function SystemConfig() {
   const [testing, setTesting] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<Record<string, any>>({});
 
+  const dirty = parsed != null && (mode === "form" ? JSON.stringify(parsed) !== baseline.parsed : content !== baseline.content);
+  const secretsDirty = cleared.length > 0 || Object.values(secretInputs).some(Boolean);
+  const requestMode = (next: Mode) => {
+    if (next === mode) return;
+    if (dirty || secretsDirty) { setPendingMode(next); return; }
+    setMode(next); load();
+  };
+  useEffect(() => {
+    if (!dirty && !secretsDirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty, secretsDirty]);
+
   const load = () => {
-    setLoading(true);
+    flight.current?.abort(); const controller = new AbortController(); flight.current = controller;
+    setAuxError(false); setLoading(true);
     setError("");
     setConflict(false);
-    api<any>("/api/config/system")
+    api<any>("/api/config/system", { signal: controller.signal })
       .then((data) => {
+        if (controller.signal.aborted) return;
+        setBaseline({ parsed: JSON.stringify(data.parsed || {}), content: data.content || "" });
         setParsed(data.parsed || {});
         setContent(data.content || "");
         setMtime(typeof data.mtime === "number" ? data.mtime : null);
         setVersion(data.version);
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-    api<any>("/api/config/secrets")
+      .catch((err) => { if (!controller.signal.aborted) setError(err.message); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    api<any>("/api/config/secrets", { signal: controller.signal })
       .then((data) => {
+        if (controller.signal.aborted) return;
         setSecrets(data.secrets || []);
         setSecretInputs({});
         setCleared([]);
       })
-      .catch(() => setSecrets([]));
-    api<any>("/api/config/providers")
-      .then((data) => setProviders(data.providers || []))
-      .catch(() => setProviders([]));
+      .catch(() => { if (!controller.signal.aborted) setAuxError(true); });
+    api<any>("/api/config/providers", { signal: controller.signal })
+      .then((data) => { if (!controller.signal.aborted) setProviders(data.providers || []); })
+      .catch(() => { if (!controller.signal.aborted) setAuxError(true); });
   };
 
   useEffect(() => {
     load();
+    return () => flight.current?.abort();
   }, []);
 
   const get = (path: string[], fallback?: unknown) => {
@@ -204,6 +228,7 @@ export function SystemConfig() {
   };
 
   const set = (path: string[], value: unknown) => {
+    setMessage("");
     setParsed((prev: any) => {
       const next = JSON.parse(JSON.stringify(prev ?? {}));
       let node = next;
@@ -280,8 +305,13 @@ export function SystemConfig() {
       setVersion(resp.version);
       setMessage("保存成功");
       // a key typed next to its provider (the model card) is saved together with the config that points at it
-      if (Object.values(secretInputs).some(Boolean)) await handleSaveSecrets();
+      if (secretsDirty && !(await handleSaveSecrets())) {
+        setBaseline({ parsed: JSON.stringify(parsed), content });
+        setMessage("配置已保存，密钥未保存，请重试");
+        return;
+      }
       if (mode === "form") load();
+      else setBaseline({ parsed: JSON.stringify(parsed), content });
     } catch (err: any) {
       if (err?.code === "conflict") {
         setConflict(true);
@@ -302,7 +332,7 @@ export function SystemConfig() {
     }
     if (Object.keys(values).length === 0) {
       setSecretMessage("没有需要保存的密钥变更");
-      return;
+      return true;
     }
     setSavingSecrets(true);
     setSecretMessage("");
@@ -316,8 +346,10 @@ export function SystemConfig() {
       setSecretInputs({});
       setCleared([]);
       setSecretMessage("密钥已保存并立即生效（写入 .env，不进版本库）");
+      return true;
     } catch (err: any) {
       setError(err.message || "保存密钥失败");
+      return false;
     } finally {
       setSavingSecrets(false);
     }
@@ -375,6 +407,7 @@ export function SystemConfig() {
   );
 
   if (loading) return <div className="text-sm text-text-muted">加载中...</div>;
+  if (!parsed && error) return <ErrorState error={error} onRetry={load} />;
 
   const notifyOn: string[] = get(["notifications", "notify_on"], []) || [];
   const embedEnv = get(["ai", "embedding_api_key_env"], "");
@@ -481,7 +514,6 @@ export function SystemConfig() {
   ) => {
     const { envVar, selectedProvider, activeProvider, applyProvider, fallbackModels,
       envNameIsSecret, envNameIsEmpty, keyMissing } = state;
-    const freeModels = activeProvider?.free_models ?? [];
     return (
       <Section
         title={opts.title}
@@ -517,24 +549,9 @@ export function SystemConfig() {
               </select>
             </div>
           </Field>
-          <Field label="模型 ID" hint={activeProvider?.models.length ? `如 ${activeProvider.models[0]}` : undefined}>
+          <Field label="模型 ID" hint="可填写，或从检测结果选择">
             <div>{textInput([section, "model"], opts.modelPlaceholder, true)}</div>
           </Field>
-          {freeModels.length > 0 && (
-            <div className="sm:col-span-2 flex flex-wrap items-center gap-1.5 -mt-1">
-              <span className="text-[11px] text-text-muted">免费模型：</span>
-              {freeModels.map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => set([section, "model"], id)}
-                  className="badge border border-border bg-bg-card font-mono text-[11px] hover:bg-bg-hover"
-                >
-                  {id}
-                </button>
-              ))}
-            </div>
-          )}
           {activeProvider && (
             <div className="sm:col-span-2 -mt-1">
               <ProviderModels providerId={activeProvider.id} label={activeProvider.label}
@@ -621,10 +638,12 @@ export function SystemConfig() {
   return (
     <div className="space-y-3">
       <AssistantConfigRecovery onRestored={load} />
-      <div className="flex items-center gap-2 flex-wrap">
+      {pendingMode ? <div role="alert" className="card border-warning/40 p-3 text-xs space-y-2"><p>有未保存的配置或密钥修改。切换编辑方式会重新读取已保存的配置。</p><div className="flex gap-2"><button className="btn text-xs" onClick={() => setPendingMode(null)}>继续编辑</button><button className="btn text-xs" onClick={() => { setMode(pendingMode); setPendingMode(null); load(); }}>放弃修改并切换</button></div></div> : null}
+      {auxError ? <p role="alert" className="text-xs text-warning">服务商或密钥状态读取失败，请重新加载后确认配置。</p> : null}
+      <div className="flex items-center gap-2 flex-wrap sticky top-0 z-10 bg-bg py-2">
         <div className="flex rounded-md border border-border overflow-hidden">
           <button
-            onClick={() => { setMode("form"); load(); }}
+            onClick={() => requestMode("form")}
             className={cn("px-3 py-1.5 text-xs flex items-center gap-1.5",
               mode === "form" ? "bg-accent-solid text-white" : "text-text-muted hover:bg-bg-hover")}
           >
@@ -632,7 +651,7 @@ export function SystemConfig() {
             表单
           </button>
           <button
-            onClick={() => { setMode("yaml"); load(); }}
+            onClick={() => requestMode("yaml")}
             className={cn("px-3 py-1.5 text-xs flex items-center gap-1.5",
               mode === "yaml" ? "bg-accent-solid text-white" : "text-text-muted hover:bg-bg-hover")}
           >
@@ -658,13 +677,15 @@ export function SystemConfig() {
             重新加载
           </button>
         )}
+        {(dirty || secretsDirty) ? <span className="text-xs text-warning">有未保存修改</span> : null}
         {message && <span className="text-xs text-success">{message}</span>}
         {error && <span className="text-xs text-danger">{error}</span>}
       </div>
 
+      {mode === "form" ? <nav className="flex flex-wrap gap-2 text-xs text-text-muted" aria-label="配置分组">{[["模型", "AI 模型"], ["密钥", "API 密钥"], ["搜索", "搜索服务"], ["语义检索", "语义检索"], ["研究", "研究 Agent"], ["预算", "预算护栏"], ["通知", "通知"]].map(([label, target]) => <button className="btn text-xs" key={target} onClick={() => document.getElementById(`setting-${target}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}>{label}</button>)}</nav> : null}
       {mode === "yaml" ? (
         <Suspense fallback={<div className="text-sm text-text-muted py-6 text-center">加载编辑器...</div>}>
-          <YamlEditor value={content} onChange={setContent} height="calc(100vh - 340px)" />
+          <YamlEditor value={content} onChange={(value) => { setContent(value); setMessage(""); }} height="calc(100vh - 340px)" />
         </Suspense>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">

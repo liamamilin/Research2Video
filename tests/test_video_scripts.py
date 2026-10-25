@@ -101,22 +101,66 @@ class FakeLLM:
     reader_calls: list[list[dict]] = []
     revise_replies: list[str] = []
     revise_calls: list[list[dict]] = []
+    editorial_replies: list[str] = []
+    editorial_calls: list[list[dict]] = []
+    brief_replies: list[str] = []
+    brief_calls: list[list[dict]] = []
+    compare_replies: list[str] = []
+    compare_calls: list[list[dict]] = []
+    fact_replies: list[str] = []
+    fact_calls: list[list[dict]] = []
+    headline_replies: list[str] = []
+    headline_calls: list[list[dict]] = []
 
     def __init__(self, config, cancel_token=None, progress_cb=None):
         self.usage = {"requests": 0, "total_tokens": 0}
 
     def chat(self, messages, **kwargs):
+        from core.video import audit as video_audit
+        from core.video import editorial
+        from core.video import headline
+        from core.video.adapt import facts
+        from core.provenance import extract_urls
         self.usage["requests"] += 1
-        if messages[0]["content"].startswith("你是栏目风格审计员"):
+        if messages[0]["content"] == headline.PROMPT:
+            FakeLLM.headline_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.headline_replies.pop(0) if FakeLLM.headline_replies else
+                                '{"candidates":[],"choice":-1,"reason":"原题已能兑现看点"}')
+        if messages[0]["content"] == facts.SYSTEM_PROMPT:
+            FakeLLM.fact_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.fact_replies.pop(0) if FakeLLM.fact_replies else json.dumps({
+                "question": "内部报告的问题", "answer": "内部纠错和推荐讲法不应交给作者",
+                "facts": [{"id": "F1", "claim": "运行会输出成本与耗时", "confidence": "厂商自述",
+                           "sources": extract_urls(messages[1]["content"])}], "concepts": [],
+            }))
+        if messages[0]["content"] == editorial.BRIEF_PROMPT:
+            FakeLLM.brief_calls.append(list(messages))
+            request = messages[1]["content"]
+            marker = "## 原始材料" if "## 原始材料" in request else "## 研究报告"
+            return ChatResponse(content=FakeLLM.brief_replies.pop(0) if FakeLLM.brief_replies else json.dumps({
+                "angle": "每次运行的成本与耗时", "viewer_value": "知道运行花费", "throughline": "变化及用途",
+                "keep": ["每次运行成本"], "leave_out": ["无关背景"],
+                "facts": ["F1"], "opening": "跑一遍评测，先看花了多少。",
+                "beats": [{"point": "可比较每次运行的开销", "facts": ["F1"], "connection": "指标如何帮助选择"}],
+                "material": request.split(marker, 1)[-1].partition("\n")[2],
+            }))
+        if messages[0]["content"] in (editorial.REWRITE_PROMPT, editorial.COPYEDIT_PROMPT):
+            FakeLLM.editorial_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.editorial_replies.pop(0))
+        if messages[0]["content"] == editorial.COMPARE_PROMPT:
+            FakeLLM.compare_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.compare_replies.pop(0) if FakeLLM.compare_replies else
+                                '{"choice":"B","reason":"删去旁支，具体用途更清楚","remaining":[]}')
+        if messages[0]["content"] == video_audit.STYLE_PROMPT:
             FakeLLM.style_calls.append(list(messages))
             return ChatResponse(content=FakeLLM.style_replies.pop(0) if FakeLLM.style_replies else '{"issues": []}')
-        if messages[0]["content"].startswith("你扮演一位观众"):
+        if messages[0]["content"] == video_audit.READER_PROMPT:
             FakeLLM.reader_calls.append(list(messages))
             return ChatResponse(content=FakeLLM.reader_replies.pop(0) if FakeLLM.reader_replies else '{"paragraphs": []}')
-        if messages[0]["content"].startswith("你是中文知识视频的文稿编辑，正在修改"):
+        if messages[0]["content"] == video_audit.REVISE_PROMPT:
             FakeLLM.revise_calls.append(list(messages))
             return ChatResponse(content=FakeLLM.revise_replies.pop(0) if FakeLLM.revise_replies else '{"paragraphs": []}')
-        if messages[0]["content"].startswith("你是事实审计员"):
+        if messages[0]["content"] == video_audit.PROMPT:
             FakeLLM.audit_calls.append(list(messages))
             return ChatResponse(content=FakeLLM.audit_replies.pop(0) if FakeLLM.audit_replies else '{"issues": []}')
         FakeLLM.calls.append(list(messages))
@@ -135,6 +179,16 @@ def llm(monkeypatch):
     FakeLLM.reader_calls = []
     FakeLLM.revise_replies = []
     FakeLLM.revise_calls = []
+    FakeLLM.editorial_replies = []
+    FakeLLM.editorial_calls = []
+    FakeLLM.brief_replies = []
+    FakeLLM.brief_calls = []
+    FakeLLM.compare_replies = []
+    FakeLLM.compare_calls = []
+    FakeLLM.fact_replies = []
+    FakeLLM.fact_calls = []
+    FakeLLM.headline_replies = []
+    FakeLLM.headline_calls = []
     monkeypatch.setattr("core.llm.LLMClient", FakeLLM)
     return FakeLLM
 
@@ -346,12 +400,31 @@ def test_writer_keeps_only_citations_the_report_traced(llm):
     assert written.length_check["status"] == "OK"
 
 
-def test_writer_revises_once_to_length(llm):
+def test_research_thinking_is_not_narration_material_or_a_citable_final_finding(llm):
+    internal = "先纠正内部选题，接下来写核查报告。" + OUTSIDE
+    original = "<think>" + internal + "</think>\n\n" + REPORT
+    llm.replies = [script_json(citations={(0, 0): [GOOD], (0, 1): [OUTSIDE]})]
+    written = _write(report=original)
+    request = llm.calls[0][-1]["content"]
+    assert internal not in request and REPORT in request
+    assert not llm.brief_calls and not llm.fact_calls
+    assert written.sections[0]["paragraphs"][0]["citations"] == [GOOD]
+    assert written.sections[0]["paragraphs"][1]["citations"] == []
+    assert writer.report_body(original) == REPORT
+    assert original.startswith("<think>")  # cleaning never mutates the saved source
+
+
+@pytest.mark.parametrize("text", ["<think>没有闭合的文本", "<think>只有过程</think>",
+                                  "# 正文\n这里引用了 <think>标签</think> 的写法"])
+def test_report_cleanup_does_not_drop_incomplete_or_in_body_material(text):
+    assert writer.report_body(text) == text
+
+
+def test_writer_does_not_rewrite_facts_just_to_fit_a_length_budget(llm):
     llm.replies = [script_json(3000), script_json(1548)]
     written = _write()
-    assert len(llm.calls) == 2
-    assert "预算是" in llm.calls[1][-1]["content"]
-    assert written.meta["attempts"] == 2 and written.length_check["status"] == "OK"
+    assert len(llm.calls) == 1
+    assert written.meta["attempts"] == 1 and written.length_check["status"] == "OVER"
 
 
 def test_writer_keeps_a_flagged_draft_when_the_revision_is_unusable(llm):
@@ -362,13 +435,14 @@ def test_writer_keeps_a_flagged_draft_when_the_revision_is_unusable(llm):
 
 def test_writer_refuses_a_script_autovideo_cannot_voice(llm):
     llm.replies = [script_json(1548, text_seed="word ")]
-    with pytest.raises(writer.ScriptError, match="中文"):
-        _write()
+    written = _write()
+    assert written.sections[0]["paragraphs"][0]["text"].startswith("word")
+    assert len(llm.calls) == 1
 
 
-def test_writer_flags_phrases_that_leak_the_process(llm):
+def test_writer_does_not_ban_phrases_without_their_context(llm):
     llm.replies = [script_json(1548, extra="接着上回说，")]
-    assert any("接着上回" in p for p in _write().meta["problems"])
+    assert not any("接着上回" in p for p in _write().meta["problems"])
 
 
 def test_writer_reads_a_fenced_reply(llm):
@@ -402,7 +476,7 @@ def test_workflow_researches_then_writes_a_draft(video_env, research, llm):
     version = store.get_version(script["id"], 1)
     assert version["edit_type"] == "GENERATED"
     assert version["sections"][0]["paragraphs"][0]["citations"] == [GOOD]
-    assert REPORT[:20] in FakeLLM.calls[0][1]["content"]  # the report reached the writer
+    assert REPORT[:20] in FakeLLM.calls[0][1]["content"]  # the full report reaches fact extraction
 
 
 def test_failed_research_fails_the_script_with_the_reason(video_env, monkeypatch, llm):
@@ -444,6 +518,7 @@ class FakeAutoVideo:
             self.jobs[job_id] = {
                 "job_id": job_id, "title": payload.get("title"), "status": "QUEUED",
                 "source_sha256": hashlib.sha256(source.strip().encode()).hexdigest(),
+                "idempotency_key": payload.get("idempotency_key"),
                 "created_at": datetime.now(timezone.utc).isoformat(), "attempt_count": 1,
             }
             if self.drop_create_response:
@@ -582,11 +657,12 @@ def test_the_render_carries_the_columns_package_only_when_it_has_one(video_env, 
 
     path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
     shipped = path.read_text(encoding="utf-8")
-    path.write_text(shipped[:shipped.index("  package:")], encoding="utf-8")  # a recipe with no package block
+    path.write_text(shipped[:shipped.index("  packaging:")], encoding="utf-8")  # a recipe with no package block
     first = video_render.create(_approved_script("没有包装"))
     autovideo.statuses[:] = ["QUEUED", "RUNNING", "COMPLETED"]
     assert video_render.process(first["id"]) == "COMPLETED"
     assert "package" not in autovideo.posts[0]
+    assert autovideo.posts[0]["packaging"]["preset"] == "common"
 
     text = path.read_text(encoding="utf-8")
     assert "  use: auto_form\n" in text
@@ -607,6 +683,94 @@ def test_a_lost_create_response_is_reconciled_not_resubmitted(video_env, autovid
     render = video_render.create(_approved_script())
     assert video_render.process(render["id"]) == "COMPLETED"
     assert len(autovideo.posts) == 1
+
+
+def test_reconciliation_cannot_adopt_a_same_manuscript_with_another_identity(video_env, autovideo):
+    from web.services import video_render
+
+    render = video_render.create(_approved_script())
+    wrong = autovideo.client().create_job({**render["request"], "idempotency_key": "another-render"})
+    store.update_render(render["id"], submit_started_at=datetime.now(timezone.utc).isoformat())
+    assert video_render.process(render["id"]) == "FAILED"
+    failed = store.get_render(render["id"])
+    assert failed["error_code"] == "SUBMIT_UNCONFIRMED"
+    assert failed["autovideo_job_id"] is None
+    assert wrong["job_id"] in autovideo.jobs and len(autovideo.posts) == 1
+
+
+def test_legacy_reconciliation_refuses_ambiguous_matches(video_env, autovideo):
+    from web.services import video_render
+
+    render = video_render.create(_approved_script())
+    legacy = {k: v for k, v in render["request"].items() if k != "idempotency_key"}
+    autovideo.client().create_job(legacy)
+    autovideo.client().create_job(legacy)
+    store.update_render(render["id"], request=legacy, submit_started_at=datetime.now(timezone.utc).isoformat())
+    assert video_render.process(render["id"]) == "FAILED"
+    assert store.get_render(render["id"])["autovideo_job_id"] is None
+
+
+def test_download_retry_reuses_the_video_after_a_later_artifact_fails(video_env, autovideo, monkeypatch):
+    from web.services import video_render
+
+    client = autovideo.client()
+    original = client._transport.handler
+    gets = []
+    def handle(request):
+        if "/artifacts/" in request.url.path:
+            gets.append(request.url.path.rsplit("/", 1)[-1])
+            if gets.count("captions.srt") == 1 and gets[-1] == "captions.srt":
+                raise httpx.ReadTimeout("download interrupted", request=request)
+        return original(request)
+    client._transport = httpx.MockTransport(handle)
+    render = video_render.create(_approved_script())
+    assert video_render.process(render["id"], client=client) == "COMPLETED"
+    assert gets.count("video.mp4") == 1 and gets.count("captions.srt") == 2
+
+
+def test_reconciliation_waits_for_a_submission_still_being_committed(video_env, autovideo, monkeypatch):
+    from web.services import video_render
+
+    render = video_render.create(_approved_script())
+    created = autovideo.client().create_job(render["request"])
+    store.update_render(render["id"], submit_started_at=datetime.now(timezone.utc).isoformat())
+    client = autovideo.client()
+    find = client.find_jobs
+    lookups = []
+    def delayed(*args, **kwargs):
+        lookups.append(1)
+        return [] if len(lookups) == 1 else find(*args, **kwargs)
+    monkeypatch.setattr(client, "find_jobs", delayed)
+    assert video_render.process(render["id"], client=client) == "COMPLETED"
+    assert len(lookups) == 2 and len(autovideo.posts) == 1
+    assert store.get_render(render["id"])["autovideo_job_id"] == created["job_id"]
+
+
+def test_concurrent_recovery_cannot_run_a_second_follower(video_env, autovideo, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+    from web.services import video_render
+
+    render = video_render.create(_approved_script())
+    entered, release = threading.Event(), threading.Event()
+    advance = video_render._advance
+    calls = []
+    def held(*args):
+        calls.append(args[0])
+        entered.set()
+        assert release.wait(timeout=5)
+        return advance(*args)
+    monkeypatch.setattr(video_render, "_advance", held)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first = pool.submit(video_render.process, render["id"])
+        try:
+            assert entered.wait(timeout=5)
+            second = pool.submit(video_render.process, render["id"])
+            assert second.result(timeout=2) in store.ACTIVE_RENDER_STATUSES
+        finally:
+            release.set()
+        assert first.result(timeout=5) == "COMPLETED"
+    assert len(calls) == len(autovideo.posts) == 1
 
 
 def test_a_render_is_not_started_while_a_required_disk_is_missing(video_env, autovideo, monkeypatch, tmp_path):
@@ -631,6 +795,31 @@ def test_a_mismatched_download_is_not_kept(video_env, autovideo):
     assert video_render.process(render["id"]) == "FAILED"
     assert store.get_render(render["id"])["error_code"] == "DOWNLOAD_FAILED"
     assert not (video_render.files_dir(render["id"]) / "video.mp4").exists()
+
+
+def test_a_disk_unplugged_after_submission_does_not_get_recreated(video_env, autovideo, monkeypatch):
+    from web.services import video_render
+
+    render = video_render.create(_approved_script())
+    job = autovideo.client().create_job(render["request"])
+    store.update_render(render["id"], status="DOWNLOADING", autovideo_job_id=job["job_id"])
+    monkeypatch.setattr(video_render, "offline_mounts", lambda: ["/Volumes/unplugged"])
+    assert video_render.process(render["id"]) == "FAILED"
+    assert store.get_render(render["id"])["error_code"] == "DOWNLOAD_FAILED"
+    assert not video_render.files_dir(render["id"]).exists()
+
+
+def test_a_disk_write_failure_is_reported_as_a_recoverable_copy_failure(video_env, autovideo, monkeypatch):
+    from web.services import video_render
+
+    render = video_render.create(_approved_script())
+    client = autovideo.client()
+    def full(*args):
+        raise OSError("disk full")
+    monkeypatch.setattr(client, "download", full)
+    assert video_render.process(render["id"], client=client) == "FAILED"
+    failed = store.get_render(render["id"])
+    assert failed["error_code"] == "DOWNLOAD_FAILED" and "disk full" in failed["error_message"]
 
 
 def test_an_absolute_download_url_is_refused(tmp_path, autovideo):
@@ -672,7 +861,10 @@ def _wait(client, script_id: str, until: set[str], timeout: float = 10.0) -> dic
     deadline = time.monotonic() + timeout
     while True:
         body = client.get(f"/api/video/scripts/{script_id}").json()
-        if body["status"] in until or time.monotonic() > deadline:
+        # A draft is saved before the audits finish; wait for the completed
+        # handoff rather than racing the background thread on a busy renderer.
+        done = body["status"] in until and not (body["status"] == "DRAFT" and body.get("stage"))
+        if done or time.monotonic() > deadline:
             return body
         time.sleep(0.05)
 
@@ -872,6 +1064,9 @@ def test_the_render_carries_a_source_card_only_for_a_column_that_asks_and_a_repo
 
     (video_env / "output").mkdir(exist_ok=True)
     (video_env / "output" / "report.md").write_text(REPORT, encoding="utf-8")
+    path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
+    text = path.read_text(encoding="utf-8")
+    path.write_text(text.replace("    use: common\n", "    use: common\n    source_card: {enabled: false}\n"), encoding="utf-8")
     plain = _approved_script("没有来源卡")
     store.update_script(plain["id"], report_path="output/report.md")
     first = video_render.create(store.get_script(plain["id"]))
@@ -882,7 +1077,7 @@ def test_the_render_carries_a_source_card_only_for_a_column_that_asks_and_a_repo
     path = video_env / "config" / "video_recipes" / "deep_dive.yaml"
     text = path.read_text(encoding="utf-8")
     assert "  use: auto_form\n" in text
-    path.write_text(text.replace("  use: auto_form\n", "  use: auto_form\n  source_card: true\n", 1), encoding="utf-8")
+    path.write_text(text.replace("    source_card: {enabled: false}\n", ""), encoding="utf-8")
     carded = _approved_script("有来源卡")
     store.update_script(carded["id"], report_path="output/report.md")
     second = video_render.create(store.get_script(carded["id"]))
@@ -923,7 +1118,7 @@ def test_a_script_can_choose_one_of_the_columns_video_forms_and_the_render_uses_
         assert video_render.process(render["id"]) == "COMPLETED"
         sent = autovideo.posts[-1]
         assert sent["video_form"] == expected
-        assert ("sources" in sent) == (form is None)
+        assert "sources" in sent  # the library appends sources for both forms
     bad = _approved_script("不允许的形式")
     store.update_script(bad["id"], topic={**bad["topic"], "video_form": "knowledge_cards"})
     with pytest.raises(video_render.RenderError, match="不能用视频形式"):
@@ -975,7 +1170,7 @@ def test_api_a_roundup_is_written_from_chosen_flash_items_without_research(clien
     assert fields["条目数"] == "2" and script["topic"]["items"] == ["2026-10-19/F2", "2026-10-19/F1"]
     assert fields["条目"].splitlines()[0].startswith("1. ")
     asked = llm.calls[0][-1]["content"]
-    assert "条目数：2" in asked and fields["条目"].splitlines()[1] in asked
+    assert "条目数：2" not in asked and fields["条目"].splitlines()[1] in asked
     assert script["version_shown"]["length_check"]["target_minutes"] == 4
     assert script["column"]["topic_kind"] == "roundup"
 
@@ -1043,6 +1238,7 @@ def test_api_a_short_script_gets_a_fact_audit_against_its_report(client, video_e
     made = client.post("/api/video/scripts", headers=_csrf(client), json={
         "column": key, "topic": {"title": "一个要审计的选题", "angle": "x"}})
     script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    script = _request_audit(client, script["id"])
     assert script["status"] == "DRAFT", script.get("error")
     assert len(llm.audit_calls) == 1 and "研究报告" in llm.audit_calls[0][-1]["content"]
     checks = script["version_shown"]["checks"]
@@ -1061,6 +1257,7 @@ def test_api_a_failed_audit_keeps_the_draft_and_says_why(client, video_env, rese
     made = client.post("/api/video/scripts", headers=_csrf(client), json={
         "column": key, "topic": {"title": "一个审计会失败的选题", "angle": "x"}})
     script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    script = _request_audit(client, script["id"])
     assert script["status"] == "DRAFT", script.get("error")
     assert script["version_shown"]["checks"]["model_ran"] is False
     assert any("事实审计没有完成" in p for p in script["version_shown"]["meta"]["problems"])
@@ -1089,6 +1286,23 @@ def test_api_publish_pack_uses_the_renders_chapters(client, video_env, autovideo
     assert "00:30 展开" in second["description"]
 
 
+def test_api_publish_pack_attaches_table_report_sources_without_rewriting_a_finished_video(client, video_env):
+    from tests.test_video_sources import TABLE_REPORT
+
+    script = _approved_script("历史报告的资料链接")
+    (video_env / "output" / "report.md").write_text(TABLE_REPORT, encoding="utf-8")
+    store.update_script(script["id"], report_path="output/report.md")
+    _login(client)
+    response = client.get(f"/api/video/scripts/{script['id']}/publish")
+    assert response.status_code == 200
+    pack = response.json()
+    assert len(pack["references"]) == 2
+    assert "https://museum.example/eclipse/" in pack["description"]
+    assert "https://library.example/letter/" in pack["description"]
+    assert store.get_script(script["id"])["current_version"] == 1
+    assert store.list_renders(script["id"]) == []
+
+
 def test_api_quality_compares_each_approved_script_with_its_draft(client, video_env):
     script = store.create_script("flash", {"id": None, "title": "质量的选题", "fields": {}})
     draft = [{"title": "节", "paragraphs": [{"text": "第一段内容不动。", "citations": [], "evidence": "UNCITED"},
@@ -1115,11 +1329,12 @@ def test_api_a_short_script_is_also_checked_against_its_columns_style(client, vi
     made = client.post("/api/video/scripts", headers=_csrf(client), json={
         "column": key, "topic": {"title": "一个要查风格的选题", "angle": "x"}})
     script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    script = _request_audit(client, script["id"])
     assert script["status"] == "DRAFT", script.get("error")
-    assert len(llm.style_calls) == 1 and "栏目「一个知识点」" in llm.style_calls[0][-1]["content"]
+    assert len(llm.style_calls) == 1 and "##" in llm.style_calls[0][-1]["content"]
     style = [i for i in script["version_shown"]["checks"]["issues"] if i["rule"] == "S1"]
-    assert [(i["severity"], i["section"], i["paragraph"], i["source"]) for i in style] == [("must", 1, 0, "model")]
-    assert script["version_shown"]["checks"]["summary"]["by_audit"]["communication"]["must"] >= 1
+    assert [(i["severity"], i["section"], i["paragraph"], i["source"]) for i in style] == [("warn", 1, 0, "model")]
+    assert llm.revise_calls == []  # formatting constraints alone do not trigger automatic rewriting
 
 
 def _make(client, key, title):
@@ -1127,29 +1342,41 @@ def _make(client, key, title):
     return _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
 
 
-def test_api_a_short_script_is_rewritten_once_where_the_audits_found_problems(client, video_env, research, llm):
+def _request_audit(client, script_id):
+    response = client.post(f"/api/video/scripts/{script_id}/steps/audit/rerun", headers=_csrf(client))
+    assert response.status_code == 202, response.text
+    return _wait(client, script_id, {"DRAFT", "FAILED"})
+
+
+def _make_audited(client, key, title):
+    made = _make(client, key, title)
+    return _request_audit(client, made["id"])
+
+
+def test_api_a_short_script_edits_the_whole_story_when_audits_find_mixed_problems(client, video_env, research, llm):
     key = "point_short"
     llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
-    llm.style_replies = ['{"issues": [{"id": "S2P1", "quote": "讲讲讲", "rule": "S1", "severity": "一般", '
-                         '"problem": "这一段把上一段的意思又讲了一遍", "why": "重复", "suggestion": "删掉这一段"}]}']
+    llm.style_replies = [json.dumps({"issues": [{"id": "S2P1", "rule": "S1", "severity": "一般",
+                         "problem": "这一段把上一段的意思又讲了一遍", "editorial": True}]})]
     llm.reader_replies = ['{"paragraphs": [{"id": "S1P1", "questions": ["Huashu 是什么？"], "lost": []}]}']
-    llm.revise_replies = ['{"paragraphs": [{"id": "S1P1", "text": "Huashu 是一个做动效的开源工具，这周更新了。"}, '
-                          '{"id": "S2P1", "text": ""}]}']
+    llm.editorial_replies = [json.dumps({"title": "先看工具能做什么", "sections": [{"title": "用途", "paragraphs": [
+        {"text": "Huashu 是一个做动效的开源工具，这周更新了。", "citations": [GOOD]}]}]})]
+    llm.audit_replies = [json.dumps({"issues": [{"id": "S1P1", "rule": "D1", "severity": "严重",
+                                              "problem": "用途与来源不符，需要改成做动效工具"}]}), json.dumps({"issues": [], "verifications": [
+        {"id": "S1P1", "status": "verified", "reason": "项目用途与引用一致", "sources": [GOOD]},
+    ]})]
     _login(client)
-    script = _make(client, key, "一个要被改写的选题")
+    script = _make_audited(client, key, "同时改好讲法与事实")
     assert script["status"] == "DRAFT", script.get("error")
-    assert len(llm.reader_calls) == 1 and len(llm.revise_calls) == 1
-    asked = llm.revise_calls[0][-1]["content"]
-    assert "Huashu 是什么？" in asked and "这一段把上一段的意思又讲了一遍" in asked and "栏目「一个知识点」" in asked
+    assert len(llm.reader_calls) == 2 and len(llm.style_calls) == 2 and not llm.revise_calls
+    assert len(llm.editorial_calls) == 1 and len(llm.compare_calls) == 1
+    asked = llm.brief_calls[0][-1]["content"]
+    assert "用途与来源不符" in asked and "这一段把上一段的意思又讲了一遍" in asked
     shown = script["version_shown"]
     assert shown["sections"][0]["paragraphs"][0]["text"] == "Huashu 是一个做动效的开源工具，这周更新了。"
-    assert shown["sections"][0]["paragraphs"][0]["note"] == "已按审计意见改写"
-    assert shown["sections"][0]["paragraphs"][0]["citations"] == [GOOD]  # a rewrite keeps what the paragraph cited
-    assert len(shown["sections"][1]["paragraphs"]) == 2  # the dropped paragraph is gone (3 before)
-    assert shown["checks"]["rounds"] == 1 and shown["checks"]["model_ran"] is True
-    assert not [i for i in shown["checks"]["issues"] if i["rule"] in ("N1", "S1")]  # the findings were acted on
-    assert len(llm.audit_calls) == 2 and "S1P1" in llm.audit_calls[1][-1]["content"]  # the rewrite is fact-checked
-    assert "S3P1" not in llm.audit_calls[1][-1]["content"]  # ...and only the rewritten paragraphs
+    assert shown["sections"][0]["paragraphs"][0]["citations"] == [GOOD]
+    assert len(shown["sections"]) == 1
+    assert shown["checks"]["rounds"] == 1 and shown["checks"]["summary"]["passed"]
 
 
 def test_api_a_short_script_nothing_flagged_is_not_rewritten(client, video_env, research, llm):
@@ -1165,9 +1392,10 @@ def test_api_a_failed_rewrite_keeps_the_script_and_says_so(client, video_env, re
     key = "point_short"
     llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
     llm.reader_replies = ['{"paragraphs": [{"id": "S1P1", "questions": ["X 是什么？"], "lost": []}]}']
+    llm.audit_replies = ['{"issues": [{"id": "S1P1", "rule": "D1", "severity": "严重", "problem": "用途与来源不符"}]}']
     llm.revise_replies = ["不是 JSON", "还是不是 JSON", "依然不是 JSON"]
     _login(client)
-    script = _make(client, key, "一个改写会失败的选题")
+    script = _make_audited(client, key, "一个改写会失败的选题")
     assert script["status"] == "DRAFT", script.get("error")
     assert any("按审计意见改写没有成功" in p for p in script["version_shown"]["meta"]["problems"])
     assert [i for i in script["version_shown"]["checks"]["issues"] if i["rule"] == "N1"]  # still reported
@@ -1186,19 +1414,20 @@ def test_api_a_short_script_that_is_a_little_short_is_not_padded(client, video_e
 
 def test_api_a_timed_out_style_audit_does_not_throw_away_the_fact_audit(client, video_env, research, llm, monkeypatch):
     from core.errors import LLMError
+    from core.video import audit as video_audit
 
     key = "point_short"
     llm.replies = [script_json(_roundup_budget(key) - 5, citations={(0, 0): [GOOD]})]
     real = FakeLLM.chat
 
     def chat(self, messages, **kwargs):
-        if messages[0]["content"].startswith("你是栏目风格审计员"):
+        if messages[0]["content"] == video_audit.STYLE_PROMPT:
             raise LLMError("LLM call exceeded timeout of 240s")
         return real(self, messages, **kwargs)
 
     monkeypatch.setattr(FakeLLM, "chat", chat)
     _login(client)
-    script = _make(client, key, "一个风格审计会超时的选题")
+    script = _make_audited(client, key, "一个风格审计会超时的选题")
     assert script["version_shown"]["checks"]["model_ran"] is True
     assert any("风格审计没有完成" in p for p in script["version_shown"]["meta"]["problems"])
 
@@ -1211,6 +1440,7 @@ def test_api_a_failed_style_audit_keeps_the_fact_audit(client, video_env, resear
     made = client.post("/api/video/scripts", headers=_csrf(client), json={
         "column": key, "topic": {"title": "一个风格审计会失败的选题", "angle": "x"}})
     script = _wait(client, made.json()["id"], {"DRAFT", "FAILED"})
+    script = _request_audit(client, script["id"])
     assert script["status"] == "DRAFT"
     assert script["version_shown"]["checks"]["model_ran"] is True  # the fact audit ran
     assert any("风格审计没有完成" in p for p in script["version_shown"]["meta"]["problems"])
@@ -1371,6 +1601,7 @@ def test_the_audits_of_a_short_script_run_with_capped_timeouts(client, video_env
     made = client.post("/api/video/scripts", headers=_csrf(client), json={
         "column": "point_short", "topic": {"title": "一个审计要限时的选题", "angle": "x"}})
     assert _wait(client, made.json()["id"], {"DRAFT", "FAILED"})["status"] == "DRAFT"
+    _request_audit(client, made.json()["id"])
     writer_attempt, audit_attempt = seen[0], seen[-1]
     assert audit_attempt == (120, 240) and writer_attempt[0] > 120
 
@@ -1381,7 +1612,9 @@ def test_api_the_home_board_counts_stages_and_lists_what_needs_the_user(client, 
     board = client.get("/api/video/board").json()
     counts = {s["key"]: s["count"] for s in board["stages"]}
     assert counts["approved"] == 1 and counts["published"] == 0 and board["failed"] == 0
-    assert [(a["kind"], a["script_id"]) for a in board["attention"] if a["kind"] != "recheck"] == [("render", script["id"])]
+    # This fixture has no fact audit: an approved flag does not mean the facts were checked.
+    assert [(a["kind"], a["script_id"]) for a in board["attention"]] == [("review", script["id"])]
+    assert board["items"][0]["action"] == "review"
     client.post(f"/api/video/scripts/{script['id']}/publications", headers=_csrf(client), json={"url": "https://b23.tv/x"})
     board = client.get("/api/video/board").json()
     assert {s["key"]: s["count"] for s in board["stages"]}["published"] == 1 and board["attention"] == []
@@ -1447,13 +1680,13 @@ def test_a_draft_whose_audits_died_with_the_process_keeps_its_draft_and_loses_th
 
 def test_a_crash_after_the_draft_was_saved_keeps_the_draft(video_env, research, llm, monkeypatch):
     from web.services import video_workflow
-
     llm.replies = [script_json(citations={(0, 0): [GOOD]})]
     monkeypatch.setattr(video_workflow, "_audit_short", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
-    script = store.create_script("deep_dive", {"id": None, "title": "审计崩了", "fields": {}})
+    script = store.create_script("deep_dive", {"title": "直接成稿", "fields": {}})
     assert video_workflow.run(script["id"], started_by="editor", llm_config=object()) == "DRAFT"
     after = store.get_script(script["id"])
-    assert after["current_version"] == 1 and after["status"] == "DRAFT" and "boom" in after["error"]
+    assert after["current_version"] == 1 and not after["error"] and not after["stage"]
+    assert not llm.audit_calls
 
 
 def test_a_cover_headline_is_not_cut_inside_a_model_name():

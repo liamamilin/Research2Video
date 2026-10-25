@@ -24,6 +24,7 @@ import { VideoRecipesPage } from "@/pages/VideoRecipes";
 import { MatricesPage, MatrixDetailPage, MatrixJobVideoPage } from "@/pages/Matrices";
 import { SourcesPage } from "@/pages/Sources";
 import { OutputsPage } from "@/pages/Outputs";
+import { PlatformsPage } from "@/pages/Platforms";
 import { useAuthStore } from "@/lib/auth-store";
 import { ToastProvider } from "@/lib/toast";
 
@@ -76,6 +77,7 @@ function AppRoutes() {
         <Route path="/reports/view" element={<ReportViewPage />} />
         <Route path="/topics" element={<TopicsPage />} />
         <Route path="/publish" element={<PublishQueuePage />} />
+        <Route path="/platforms" element={<PlatformsPage />} />
         <Route path="/video" element={<VideoScriptsPage />} />
         <Route path="/video-recipes" element={<VideoRecipesPage />} />
         <Route path="/video-recipes/:key" element={<VideoRecipesPage />} />

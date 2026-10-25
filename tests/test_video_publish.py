@@ -73,7 +73,9 @@ def test_the_pack_has_title_description_references_tags_and_cover_text():
     assert "00:00 第1章" in lines and "00:29 第2章" in lines
     assert "· Gemini 4 定价页（2026-10-13） https://ai.google.dev/pricing" in lines
     assert "· 没有日期的博客 https://blog.example.com/a" in lines
-    assert "unused" not in pack["description"]  # only what the script cites
+    assert "https://example.com/unused" in pack["description"]
+    assert "参考来源（文稿引用）：" in pack["description"] and "报告补充资料：" in pack["description"]
+    assert [r["cited"] for r in pack["references"]] == [True, True, True, False]
     assert pack["tags"][:3] == ["快讯", "开发者", "AI"] and "Gemini" in pack["tags"] and len(pack["tags"]) <= 10
     assert pack["cover"] == {"headline": "Gemini 4 Argon", "badge": "快讯"}
     assert pack["chapter_note"] and any("没有发布日期" in w for w in pack["warnings"])
@@ -89,10 +91,20 @@ def test_an_adapted_versions_summary_and_details_lead_the_description():
 
 def test_warnings_say_what_a_person_must_check_before_uploading():
     long = {**version(), "title": "长" * 81, "checks": {"summary": {"serious": 2}}}
-    pack = publish.build({**SCRIPT, "status": "DRAFT"}, long, column(), REPORT, timeline([0, 30]))
+    pack = publish.build({**SCRIPT, "status": "DRAFT", "approved_version": None}, long, column(), REPORT, timeline([0, 30]))
     warnings = " ".join(pack["warnings"])
     for expected in ("还没有定稿", "超过 80", "2 个严重的事实问题", "不足 3 个章节"):
         assert expected in warnings
+
+
+@pytest.mark.parametrize("status", ["DRAFT", "WRITING", "FAILED"])
+def test_a_new_draft_does_not_revoke_the_previous_versions_approval(status):
+    script = {**SCRIPT, "status": status, "current_version": 3}
+    pack = publish.build(script, version(), column(), REPORT, timeline([0, 30, 60]))
+    assert not any("还没有定稿" in w for w in pack["warnings"])
+    assert "发布包对应已定稿旧版 v2，当前文稿为 v3。" in pack["warnings"]
+    new = publish.build(script, {**version(), "version": 3}, column(), REPORT, None)
+    assert any("还没有定稿" in w for w in new["warnings"])
 
 
 def test_a_description_over_the_limit_drops_the_extras_before_the_references():
@@ -118,3 +130,44 @@ def test_a_summary_cut_for_length_ends_at_a_comma_not_in_the_middle_of_a_word():
     assert no_comma == "超" * publish.SUMMARY_MAX + "…"
     short = publish.summary({"sections": [{"paragraphs": [{"text": "很短的一句。第二句。"}]}]})
     assert short == "很短的一句。"
+
+
+def test_a_publish_pack_keeps_report_material_when_the_script_has_no_paragraph_citations():
+    draft = version()
+    for section in draft["sections"]:
+        for paragraph in section["paragraphs"]:
+            paragraph["citations"] = []
+    pack = publish.build(SCRIPT, draft, column(), REPORT, None)
+    assert len(pack["references"]) == 4 and all(not r["cited"] for r in pack["references"])
+    assert "报告补充资料：" in pack["description"]
+    assert all(r["url"] in pack["description"] for r in pack["references"])
+    assert not any("没有参考来源" in w for w in pack["warnings"])
+
+
+def test_table_sources_make_the_history_videos_description_even_with_tracking_in_citations():
+    from tests.test_video_sources import TABLE_REPORT
+
+    draft = version()
+    draft["sections"][0]["paragraphs"][0]["citations"] = ["https://museum.example/eclipse?utm_source=video"]
+    pack = publish.build(SCRIPT, draft, column(), TABLE_REPORT, timeline([0, 30, 60]))
+    assert len(pack["references"]) == 2 and pack["references"][0]["cited"]
+    assert "日食传说（2026-10-21） https://museum.example/eclipse/" in pack["description"]
+    assert "https://example.com/not-a-reference" not in pack["description"]
+
+
+def test_inline_citations_are_attached_but_urls_not_in_the_report_are_not_promoted():
+    draft = version()
+    draft["sections"][0]["paragraphs"][0]["citations"] = ["https://example.com/inline", "https://invented.example/source"]
+    report = REPORT + "\n正文中引用 https://example.com/inline。"
+    pack = publish.build(SCRIPT, draft, column(), report, None)
+    assert "https://example.com/inline" in pack["description"]
+    assert "https://invented.example/source" not in pack["description"]
+
+
+def test_reference_links_are_never_cut_to_fit_the_description_budget():
+    report = "## 参考来源\n" + "\n".join(f"- [资料{i}](https://example.com/{i}/{'long' * 30})" for i in range(25))
+    pack = publish.build(SCRIPT, version(), column(), report, None)
+    assert len(pack["description"]) > publish.DESCRIPTION_MAX
+    assert len(pack["references"]) == 25
+    assert all(r["url"] in pack["description"] for r in pack["references"])
+    assert any("简介有" in w for w in pack["warnings"])

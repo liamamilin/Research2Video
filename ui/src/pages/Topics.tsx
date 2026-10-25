@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FilterBar, matchesText, useFilters, type Facet } from "@/components/FilterBar";
+import { ErrorState } from "@/components/ErrorState";
+import { RefreshCw } from "lucide-react";
 import { TimeStamp } from "@/components/TimeStamp";
 import {
-  addVideoTopic, dismissTopic, getDiscovery, listCellCoverage, listTopicSources, listVideoCells, listVideoTopics, startDiscovery,
-  type CellCoverage, type DiscoveryStatus, type TopicSource, type VideoCell, type VideoTopic,
+  addVideoTopic, dismissTopic, getDiscovery, getTopicBrowser, listVideoTopics, startDiscovery,
+  type CellCoverage, type DiscoveryStatus, type TopicBrowser, type TopicListing, type VideoCell, type VideoTopic,
 } from "@/api/video";
 import { useAuthStore } from "@/lib/auth-store";
 
@@ -17,6 +19,7 @@ function AddTopicForm({ onAdded }: { onAdded: () => void }) {
   const [angle, setAngle] = useState("");
   const [audience, setAudience] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   if (!open) {
     return (
       <button className="btn text-xs" onClick={() => setOpen(true)}>
@@ -26,10 +29,11 @@ function AddTopicForm({ onAdded }: { onAdded: () => void }) {
   }
   return (
     <form
-      className="card space-y-2 w-full"
+      className="card p-4 space-y-2 w-full"
       aria-label="手动添加选题"
       onSubmit={async (e) => {
         e.preventDefault();
+        if (busy) return; setBusy(true);
         try {
           await addVideoTopic({ title, angle, audience });
           setTitle("");
@@ -40,7 +44,7 @@ function AddTopicForm({ onAdded }: { onAdded: () => void }) {
           onAdded();
         } catch (err) {
           setError(err instanceof Error ? err.message : "没加上");
-        }
+        } finally { setBusy(false); }
       }}
     >
       <input className="input w-full text-sm" placeholder="标题（至少 4 个字）" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -48,7 +52,7 @@ function AddTopicForm({ onAdded }: { onAdded: () => void }) {
       <input className="input w-full text-sm" placeholder="目标受众（可空）" value={audience} onChange={(e) => setAudience(e.target.value)} />
       {error ? <p className="text-xs text-danger">{error}</p> : null}
       <div className="flex gap-2">
-        <button className="btn btn-primary text-xs" type="submit" disabled={title.trim().length < 4}>
+        <button className="btn btn-primary text-xs" type="submit" disabled={busy || title.trim().length < 4}>
           添加
         </button>
         <button className="btn text-xs" type="button" onClick={() => setOpen(false)}>
@@ -129,29 +133,41 @@ function DomainGrid({ cells: usable, coverage, current, onPick, domain }: GridPr
 }
 
 export function TopicsPage() {
+  const [catalogError, setCatalogError] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
-  const [round, setRound] = useState<string | null>(null);
-  const [topics, setTopics] = useState<VideoTopic[] | null>(null);
-  const [cells, setCells] = useState<VideoCell[]>([]);
-  const [coverage, setCoverage] = useState<CellCoverage[]>([]);
+  const [catalog, setCatalog] = useState<TopicBrowser | null>(null);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogReadyTick, setCatalogReadyTick] = useState(-1);
+  const [listing, setListing] = useState<{ source: string; requestedRound: string; data: TopicListing } | null>(null);
+  const usedBootstrap = useRef<TopicBrowser | null>(null);
   const [error, setError] = useState("");
-  const [rounds, setRounds] = useState<string[]>([]);
   const [chosenRound, setChosenRound] = useState("");
   const [discovery, setDiscovery] = useState<DiscoveryStatus | null>(null);
-  const [sources, setSources] = useState<TopicSource[]>([]);
   const [chosenSource, setChosenSource] = useState<string | null>(null);
   const [checked, setChecked] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [tick, setTick] = useState(0);
   const user = useAuthStore((s) => s.user);
   const canEdit = user?.role === "editor" || user?.role === "admin";
+  const cells = catalog?.cells ?? [];
+  const coverage = catalog?.coverage ?? [];
+  const sources = catalog?.sources ?? [];
 
   useEffect(() => {
-    listVideoCells().then(setCells).catch(() => undefined);
-  }, []);
-  useEffect(() => {
-    listCellCoverage().then(setCoverage).catch(() => undefined);
-    listTopicSources().then(setSources).catch(() => undefined);
+    const controller = new AbortController();
+    setCatalogLoading(true);
+    getTopicBrowser(controller.signal).then((data) => {
+      if (controller.signal.aborted) return;
+      setCatalog(data);
+      setCatalogError("");
+      setCatalogReadyTick(tick);
+    }).catch(() => {
+      if (!controller.signal.aborted) {
+        setCatalogError("选题无法读取，请重试");
+        setCatalogReadyTick(tick);
+      }
+    }).finally(() => { if (!controller.signal.aborted) setCatalogLoading(false); });
+    return () => controller.abort();
   }, [tick]);
 
   const current =
@@ -162,35 +178,51 @@ export function TopicsPage() {
   const source = chosenSource && tabs.includes(chosenSource) ? chosenSource : tabs[0] ?? "";
   const sourceInfo = sources.find((s) => s.name === source);
   const sourceLabel = (name: string) => sources.find((s) => s.name === name)?.label ?? name;
+  const topicData = listing?.source === source && listing.requestedRound === chosenRound ? listing.data : null;
+  const topics = topicData?.topics ?? null;
+  const round = topicData?.round ?? null;
+  const rounds = topicData?.rounds ?? [];
 
   useEffect(() => {
     setDiscovery(null);
     if (!sourceInfo?.refresh) return;
-    const load = () => getDiscovery(source).then(setDiscovery).catch(() => undefined);
-    load();
+    let active = true; let pending = false;
+    const load = async () => {
+      if (!active || pending || document.hidden) return;
+      pending = true;
+      try { const data = await getDiscovery(source); if (active) setDiscovery(data); } catch { /* Source errors remain in the source catalog. */ }
+      finally { pending = false; }
+    };
+    void load();
     const timer = window.setInterval(load, 15000);
-    return () => window.clearInterval(timer);
+    return () => { active = false; window.clearInterval(timer); };
   }, [source, sourceInfo?.refresh, tick]);
 
   useEffect(() => {
-    let alive = true;
-    setTopics(null);
-    if (!source) {
-      setRound(null);
-      setTopics([]);
+    let alive = true; const controller = new AbortController();
+    if (!catalog || catalogReadyTick !== tick) return;
+    setError("");
+    const firstRead = usedBootstrap.current !== catalog;
+    usedBootstrap.current = catalog;
+    if (firstRead && source === catalog.initial.source && !chosenRound) {
+      setListing({ source, requestedRound: chosenRound, data: catalog.initial });
       return;
     }
-    listVideoTopics(source, chosenRound || undefined)
-      .then((t) => alive && (setRound(t.round), setRounds(t.rounds ?? []), setTopics(t.topics), setError("")))
+    if (!source) {
+      setListing({ source, requestedRound: chosenRound, data: { round: null, rounds: [], topics: [] } });
+      return;
+    }
+    listVideoTopics(source, chosenRound || undefined, controller.signal)
+      .then((data) => alive && (setListing({ source, requestedRound: chosenRound, data }), setError("")))
       .catch((e) => alive && setError(e instanceof Error ? e.message : "读取失败"));
     return () => {
-      alive = false;
+      alive = false; controller.abort();
     };
-  }, [source, chosenRound, tick]);
+  }, [source, chosenRound, tick, catalog, catalogReadyTick]);
   useEffect(() => {
     setChosenRound("");
-    setChecked([]);
   }, [source]);
+  useEffect(() => { setChecked([]); }, [source, chosenRound]);
 
   const filters = useFilters(["written", "score", "age", "hidden"]);
   const { values: f } = filters;
@@ -223,9 +255,12 @@ export function TopicsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-lg font-semibold flex-1">选题</h1>
+        <div className="flex-1"><h1 className="text-xl font-semibold tracking-tight">选题</h1><p className="text-xs text-text-muted mt-1">选择视频类型，再从对应来源挑选条目。整份报告改编可从矩阵研究任务进入。</p></div><button className="btn text-xs" disabled={catalogLoading} onClick={() => setTick((n) => n + 1)}><RefreshCw className="h-3.5 w-3.5" />刷新选题</button>
       </div>
-      <MatrixGrid cells={cells} coverage={coverage} current={current?.cell} onPick={setSelected} />
+      {catalogError ? <ErrorState error={catalogError} onRetry={() => setTick((n) => n + 1)} compact /> : null}
+      {!catalog && catalogLoading ? <p role="status" className="text-xs text-text-muted">正在加载选题…</p> : null}
+      {coverage.length ? <div className="flex items-center gap-3"><label className="text-xs text-text-muted" htmlFor="topic-cell">视频类型</label><select id="topic-cell" className="input w-auto max-w-full text-xs" value={current?.cell || ""} onChange={(e) => setSelected(e.target.value)}>{coverage.map((c) => <option key={c.cell} value={c.cell}>{cells.find((item) => item.key === c.cell)?.label || c.label} · {c.open} 条待写</option>)}</select></div> : null}
+      <details className="card"><summary className="p-3 text-xs text-text-muted cursor-pointer">按领域与受众选择类型</summary><div className="px-3 pb-3"><MatrixGrid cells={cells} coverage={coverage} current={current?.cell} onPick={setSelected} /></div></details>
       {current?.unknown_sources?.length ? (
         <p className="text-sm text-danger">
           这个格子的配方写了没有 Job 声明的选题来源：{current.unknown_sources.join("、")}。到 <Link className="text-accent hover:underline" to="/video-recipes">文稿配方</Link> 改，或在 Job 的 YAML 里写 topics:。
@@ -292,7 +327,7 @@ export function TopicsPage() {
         ) : null}
         {note ? <span className="text-warning">{note}</span> : null}
       </div>
-      {error ? <p className="text-danger text-sm">{error}</p> : null}
+      {error ? <ErrorState error={error} onRetry={() => setTick((n) => n + 1)} compact /> : !topics && source ? <p role="status" className="text-xs text-text-muted">正在读取选题…</p> : null}
       {topics && topics.length ? <FilterBar facets={facets} filters={filters} shown={shown.length} total={topics.length} placeholder="搜索选题" /> : null}
       {topics && topics.length === 0 ? (
         <p className="text-sm text-text-muted">
@@ -303,15 +338,16 @@ export function TopicsPage() {
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <span className="text-text-muted">选 2–10 条，合成一期盘点；已选 {checked.length} 条。</span>
           {checked.length >= 2 && checked.length <= 10 ? (
-            <Link className="btn btn-primary text-xs" to={`/video?cell=${encodeURIComponent(cell.id)}&topics=${encodeURIComponent(checked.join(","))}`}>
+            <Link className="btn btn-primary text-xs" to={`/video?cell=${encodeURIComponent(cell.id)}&topics=${encodeURIComponent(checked.join(","))}&topic_source=${encodeURIComponent(source)}${round ? `&topic_round=${encodeURIComponent(round)}` : ""}`}>
               合成一期盘点（{checked.length} 条）
             </Link>
           ) : null}
         </div>
       ) : null}
+      {topics && topics.length > 0 && !shown.length ? <p className="text-sm text-text-muted">没有符合筛选的选题</p> : null}
       <ul className="space-y-2">
         {shown.map((t) => (
-          <li key={t.id} className="card flex items-start gap-3">
+          <li key={t.id} className="card p-4 flex flex-wrap sm:flex-nowrap items-start gap-3">
             {multi && !doneHere(t) ? (
               <input type="checkbox" aria-label={`选 ${t.code}`} checked={checked.includes(t.id)} onChange={(e) => setChecked(e.target.checked ? [...checked, t.id] : checked.filter((id) => id !== t.id))} />
             ) : null}
@@ -351,7 +387,7 @@ export function TopicsPage() {
               ) : t.dismissed ? (
                 <span className="badge border border-border text-text-muted">已标不写</span>
               ) : cell && !multi ? (
-                <Link className="btn btn-primary text-xs" to={`/video?cell=${encodeURIComponent(cell.id)}&topic=${encodeURIComponent(t.id)}`}>
+                <Link className="btn btn-primary text-xs" to={`/video?cell=${encodeURIComponent(cell.id)}&topic=${encodeURIComponent(t.id)}&topic_source=${encodeURIComponent(source)}${round ? `&topic_round=${encodeURIComponent(round)}` : ""}`}>
                   用这个写稿
                 </Link>
               ) : null}

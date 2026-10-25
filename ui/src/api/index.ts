@@ -24,12 +24,12 @@ export async function getMe(): Promise<User> {
 
 // --- Jobs ---
 
-export async function listJobs(): Promise<JobSummary[]> {
-  return api("/api/jobs");
+export async function listJobs(signal?: AbortSignal): Promise<JobSummary[]> {
+  return api("/api/jobs", { signal });
 }
 
-export async function getJob(name: string): Promise<JobDetail> {
-  return api(`/api/jobs/${encodeURIComponent(name)}`);
+export async function getJob(name: string, signal?: AbortSignal): Promise<JobDetail> {
+  return api(`/api/jobs/${encodeURIComponent(name)}`, { signal });
 }
 
 export async function getJobState(name: string): Promise<JobDetail["state"]> {
@@ -146,8 +146,8 @@ export interface HealthReport {
   stale_locks?: string[];
 }
 
-export async function getHealth(detailed = false): Promise<HealthReport> {
-  return api(detailed ? "/api/health/detailed" : "/api/health");
+export async function getHealth(detailed = false, signal?: AbortSignal): Promise<HealthReport> {
+  return api(detailed ? "/api/health/detailed" : "/api/health", { signal });
 }
 
 export interface JobCategory {
@@ -464,16 +464,16 @@ export async function getReportTree(params?: TreeQuery): Promise<any[]> {
   return api("/api/reports/tree", { query: params as any });
 }
 
-export async function getReportRaw(path: string): Promise<{ path: string; content: string; size: number }> {
-  return api("/api/reports/raw", { query: { path } });
+export async function getReportRaw(path: string, signal?: AbortSignal): Promise<{ path: string; content: string; size: number }> {
+  return api("/api/reports/raw", { query: { path }, signal });
 }
 
 export async function searchReports(q: string, limit = 20): Promise<{ results: any[]; total: number }> {
   return api("/api/reports/search", { query: { q, limit } });
 }
 
-export async function getReportStats(): Promise<{ total: number; total_size_bytes: number; categories: number }> {
-  return api("/api/reports/stats");
+export async function getReportStats(signal?: AbortSignal): Promise<{ total: number; total_size_bytes: number; categories: number }> {
+  return api("/api/reports/stats", { signal });
 }
 
 export async function getReportCategories(): Promise<string[]> {
@@ -512,8 +512,8 @@ export interface UsageSummary {
   };
 }
 
-export async function getUsage(days = 30, month = false): Promise<UsageSummary> {
-  return api("/api/usage", { query: month ? { month: "true" } : { days } });
+export async function getUsage(days = 30, month = false, signal?: AbortSignal): Promise<UsageSummary> {
+  return api("/api/usage", { query: month ? { month: "true" } : { days }, signal });
 }
 
 export interface RatingSummary {
@@ -522,8 +522,8 @@ export interface RatingSummary {
   per_job: { job_name: string; count: number; average: number }[];
 }
 
-export async function getRatings(): Promise<RatingSummary> {
-  return api("/api/usage/ratings");
+export async function getRatings(signal?: AbortSignal): Promise<RatingSummary> {
+  return api("/api/usage/ratings", { signal });
 }
 
 // --- Pipeline rounds ---
@@ -573,8 +573,8 @@ export interface RoundsResponse {
   groups: { name: string; stages: string[] }[];
 }
 
-export async function getRounds(limit = 14): Promise<RoundsResponse> {
-  return api("/api/pipeline/rounds", { query: { limit } });
+export async function getRounds(limit = 14, signal?: AbortSignal): Promise<RoundsResponse> {
+  return api("/api/pipeline/rounds", { query: { limit }, signal });
 }
 
 export async function runRound(concurrency = 3): Promise<Round["live"]> {

@@ -60,7 +60,8 @@ function mockFetch(parsed: unknown = PARSED) {
   const fn = vi.fn(async (url: string, init?: RequestInit) => {
     calls.push({ url: String(url), init });
     if (String(url).includes("/models")) {
-      return jsonResponse(200, { models: ["deepseek-v4-flash", "glm-5.3-flash", "deepseek-v4.1-flash", "deepseek-v4-pro", "beam-free"], error: null });
+      return jsonResponse(200, { models: ["deepseek-v4-flash", "glm-5.3-flash", "deepseek-v4.1-flash", "deepseek-v4-pro", "beam-free"],
+        free_models: String(url).includes("opencode-zen") ? ["beam-free"] : [], prices: {}, updated_at: 1792700000, error: null });
     }
     if (String(url).includes("/api/config/secrets")) {
       if (init?.method === "PUT") {
@@ -344,7 +345,7 @@ describe("SystemConfig form", () => {
     const [select] = await screen.findAllByDisplayValue("自定义（当前地址未匹配预设）");
     fireEvent.change(select, { target: { value: "opencode-zen" } });
 
-    fireEvent.click(await screen.findByText("beam-free"));
+    fireEvent.click((await screen.findAllByText("beam-free"))[0]);
     expect(await screen.findByDisplayValue("beam-free")).toBeTruthy();
   });
 
@@ -388,4 +389,15 @@ describe("SystemConfig form", () => {
     const body = JSON.parse(String(put?.init?.body));
     expect(body.patch.review_ai).toBeNull();
   });
+});
+
+
+it("preserves unsaved form changes when switching editing modes is cancelled", async () => {
+  mockFetch(); render(<SystemConfig />);
+  const input = await screen.findByDisplayValue("old-model");
+  fireEvent.change(input, { target: { value: "local-draft-model" } });
+  fireEvent.click(screen.getByRole("button", { name: "YAML（高级）" }));
+  expect(screen.getByText(/有未保存的配置或密钥修改/)).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+  expect(screen.getByDisplayValue("local-draft-model")).toBeTruthy();
 });

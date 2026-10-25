@@ -1,0 +1,304 @@
+{
+  "checked_at": 1792840905.721588,
+  "uid": "382769913",
+  "counts": {
+    "videos": 359,
+    "public_videos": 352,
+    "baselines": 352,
+    "snapshots": 352
+  },
+  "collector": {
+    "uid": "382769913",
+    "enabled": 1,
+    "requested_at": 0.0,
+    "last_requested_at": 1792840371.48793,
+    "run_id": "",
+    "page": 1,
+    "remote_total": 359,
+    "status": "IDLE",
+    "last_success_at": 1792840805.307322,
+    "last_attempt_at": 1792840805.307322,
+    "next_catalog_at": 1792844007.452637,
+    "next_account_at": 1792861983.894238,
+    "blocked_until": 0.0,
+    "failures": 0,
+    "error": "",
+    "worker_at": 1792840805.307322
+  },
+  "overview_7": {
+    "uid": "382769913",
+    "period": 7,
+    "summary": {
+      "view": 683,
+      "like": 0,
+      "favorite": 0,
+      "fan": -6
+    },
+    "points": [
+      {
+        "date": "2026-10-17",
+        "value": 7
+      },
+      {
+        "date": "2026-10-18",
+        "value": 25
+      },
+      {
+        "date": "2026-10-19",
+        "value": 84
+      },
+      {
+        "date": "2026-10-20",
+        "value": 13
+      },
+      {
+        "date": "2026-10-21",
+        "value": 97
+      },
+      {
+        "date": "2026-10-22",
+        "value": 383
+      },
+      {
+        "date": "2026-10-23",
+        "value": 74
+      }
+    ],
+    "platform_date": "2026-10-23",
+    "synced_at": 1792840383.894238
+  },
+  "overview_30": {
+    "uid": "382769913",
+    "period": 30,
+    "summary": {
+      "view": 987,
+      "like": 0,
+      "favorite": 0,
+      "fan": -6
+    },
+    "points": [
+      {
+        "date": "2026-09-24",
+        "value": 17
+      },
+      {
+        "date": "2026-09-25",
+        "value": 16
+      },
+      {
+        "date": "2026-09-26",
+        "value": 13
+      },
+      {
+        "date": "2026-09-27",
+        "value": 17
+      },
+      {
+        "date": "2026-09-28",
+        "value": 9
+      },
+      {
+        "date": "2026-09-29",
+        "value": 10
+      },
+      {
+        "date": "2026-09-30",
+        "value": 6
+      },
+      {
+        "date": "2026-10-01",
+        "value": 10
+      },
+      {
+        "date": "2026-10-02",
+        "value": 13
+      },
+      {
+        "date": "2026-10-03",
+        "value": 10
+      },
+      {
+        "date": "2026-10-04",
+        "value": 7
+      },
+      {
+        "date": "2026-10-05",
+        "value": 6
+      },
+      {
+        "date": "2026-10-06",
+        "value": 9
+      },
+      {
+        "date": "2026-10-07",
+        "value": 6
+      },
+      {
+        "date": "2026-10-08",
+        "value": 19
+      },
+      {
+        "date": "2026-10-09",
+        "value": 17
+      },
+      {
+        "date": "2026-10-10",
+        "value": 58
+      },
+      {
+        "date": "2026-10-11",
+        "value": 14
+      },
+      {
+        "date": "2026-10-12",
+        "value": 7
+      },
+      {
+        "date": "2026-10-13",
+        "value": 9
+      },
+      {
+        "date": "2026-10-14",
+        "value": 13
+      },
+      {
+        "date": "2026-10-15",
+        "value": 12
+      },
+      {
+        "date": "2026-10-16",
+        "value": 6
+      },
+      {
+        "date": "2026-10-17",
+        "value": 7
+      },
+      {
+        "date": "2026-10-18",
+        "value": 25
+      },
+      {
+        "date": "2026-10-19",
+        "value": 84
+      },
+      {
+        "date": "2026-10-20",
+        "value": 13
+      },
+      {
+        "date": "2026-10-21",
+        "value": 97
+      },
+      {
+        "date": "2026-10-22",
+        "value": 383
+      },
+      {
+        "date": "2026-10-23",
+        "value": 74
+      }
+    ],
+    "platform_date": "2026-10-23",
+    "synced_at": 1792840383.894238
+  },
+  "schedule": {
+    "id": "bilibili-video-data",
+    "job_name": "__bilibili_video_data",
+    "schedule": "*/5 * * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "missed_policy": "latest",
+    "max_retries": 0,
+    "version": 1,
+    "next_run_at": 1792840800.0,
+    "created_at": 1792840371.47805,
+    "updated_at": 1792840371.47805,
+    "deleted": 0
+  },
+  "runs": [
+    {
+      "id": "836f8d3c78e84d78a220a273058fae5e",
+      "schedule_id": "bilibili-video-data",
+      "job_name": "__bilibili_video_data",
+      "version": 1,
+      "due_at": 1792840800.0,
+      "status": "success",
+      "attempt": 1,
+      "max_retries": 0,
+      "ready_at": 1792840805.360236,
+      "lease_until": null,
+      "pid": null,
+      "started_at": 1792840805.240115,
+      "finished_at": 1792840805.360236,
+      "error": "",
+      "output_path": null,
+      "created_at": 1792840803.003349,
+      "timezone": "Asia/Shanghai",
+      "cancel_requested": 0,
+      "attempts": [
+        {
+          "run_id": "836f8d3c78e84d78a220a273058fae5e",
+          "attempt": 1,
+          "started_at": 1792840805.240115,
+          "finished_at": 1792840805.360236,
+          "status": "success",
+          "error": "",
+          "output_path": null
+        }
+      ]
+    },
+    {
+      "id": "5f906aa554af4fb19e73dbf356185682",
+      "schedule_id": "bilibili-video-data",
+      "job_name": "__bilibili_video_data",
+      "version": 1,
+      "due_at": 1792840500.0,
+      "status": "success",
+      "attempt": 1,
+      "max_retries": 0,
+      "ready_at": 1792840512.056857,
+      "lease_until": null,
+      "pid": null,
+      "started_at": 1792840511.92432,
+      "finished_at": 1792840512.056857,
+      "error": "",
+      "output_path": null,
+      "created_at": 1792840509.6677709,
+      "timezone": "Asia/Shanghai",
+      "cancel_requested": 0,
+      "attempts": [
+        {
+          "run_id": "5f906aa554af4fb19e73dbf356185682",
+          "attempt": 1,
+          "started_at": 1792840511.92432,
+          "finished_at": 1792840512.056857,
+          "status": "success",
+          "error": "",
+          "output_path": null
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "full_backend": "2113 passed, 3 skipped",
+    "focused_backend": "119 passed",
+    "frontend": "442 passed",
+    "build": "passed",
+    "lint": "passed"
+  },
+  "ui_checks": [
+    "正式视频数据tab加载",
+    "标题搜索",
+    "BV精确关联文稿v3",
+    "七项累计指标",
+    "首个快照不显示增量",
+    "单视频详情完整可见"
+  ],
+  "console_restart": {
+    "health_status": 200,
+    "new_instance_id": "7e589970b61c4b16a0a344da7123af44",
+    "resumed_render_status": "COMPLETED",
+    "remote_job_id_preserved": true,
+    "process_runs": 2
+  }
+}

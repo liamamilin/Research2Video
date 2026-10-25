@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { ScriptStatus } from "./video";
+import type { Credibility, ScriptStatus } from "./video";
 
 // 产出：每篇文稿属于哪个矩阵、哪个 Job、哪次运行的报告、哪套生产配置（spec/outputs.md）
 export interface OutputScript {
@@ -8,6 +8,11 @@ export interface OutputScript {
   status: ScriptStatus;
   column_key: string;
   created_at: string;
+  updated_at?: string;
+  version?: number;
+  credibility?: Credibility | null;
+  has_video?: boolean;
+  has_previous_video?: boolean;
   archived: boolean;
   auto: boolean;
   matrix: string;
@@ -18,7 +23,7 @@ export interface OutputScript {
   production: string;
   production_name: string;
   production_guessed: boolean; // 配置出现之前写的：按配方和 Job 认出来的
-  render: { status: string; created_at: string } | null;
+  render: { id?: string; version?: number; status: string; created_at: string } | null;
   published: boolean;
 }
 
@@ -36,4 +41,5 @@ export interface Outputs {
   matrices: { key: string; name: string; archived?: boolean }[]; // 归档的矩阵：它的文稿只在「看已归档的」里
 }
 
-export const listOutputs = (archived = false) => api<Outputs>(`/api/outputs${archived ? "?archived=true" : ""}`);
+export const listOutputs = (archived = false, signal?: AbortSignal) =>
+  api<Outputs>(`/api/outputs${archived ? "?archived=true" : ""}`, { signal });

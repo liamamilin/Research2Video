@@ -80,17 +80,19 @@ def known_source(name: str) -> bool:
     return name == topic_store.MANUAL or topic_store.resolve(get_settings().paths.jobs_dir, name) is not None
 
 
-def coverage() -> list[dict]:
+def coverage(*, cells: Optional[list[dict]] = None, source_rows: Optional[list[dict]] = None) -> list[dict]:
     """Per cell: its topic sources, how many topics wait to be written and how many are taken, newest report date."""
     from core.video import recipes as matrix
 
     settings = get_settings()
-    sync_topics()
+    if source_rows is None:
+        source_rows = sync_topics()
+    known = {topic_store.MANUAL} | {value for row in source_rows for value in (row["name"], row["job"])}
     covered = store.scripts_by_topic()
     dismissed = store.dismissed_topic_ids()
     cache: dict[str, tuple] = {}
     rows = []
-    for cell in matrix.catalog(settings.paths.config_dir):
+    for cell in cells if cells is not None else matrix.catalog(settings.paths.config_dir):
         sources = cell.get("topic_sources") or []
         if not cell["usable"] or cell["key"] is None:
             continue
@@ -98,7 +100,7 @@ def coverage() -> list[dict]:
             continue
         row = {"cell": cell["key"], "label": cell["label"], "status": cell["status"], "sources": sources,
                "open": 0, "written": 0, "dismissed": 0, "report_date": None,
-               "unknown_sources": [s for s in sources if not known_source(s)],
+               "unknown_sources": [s for s in sources if s not in known],
                "multi": bool(cell["column"] and cell["column"].get("topic_kind") == "roundup"),
                "autopilot": bool(cell["column"] and cell["column"].get("topic_kind", "single") == "single")}
         for source in sources:
@@ -326,6 +328,8 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
     if out["bump"]:
         _bump(item, out["bump"])
     if out["hold"]:
+        if out["item"]:
+            ap.update_item(item["id"], **out["item"])
         _hold(item, out["hold"])
     elif out["item"]:
         ap.update_item(item["id"], **out["item"])

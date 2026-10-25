@@ -9,8 +9,8 @@ from collections.abc import Iterator
 from pydantic import BaseModel, ValidationError
 
 CONFIDENCE = ("已证实", "厂商自述", "有迹象", "推导", "推测", "有冲突", "未核实")
-#: A fact this weak cannot carry the hook, and a paragraph using it needs review.
-WEAK = ("未核实", "有冲突")
+#: Untraced facts need review; sourced disputes may be reported with clear attribution.
+WEAK = ("未核实",)
 UNVERIFIED = "未核实"
 DERIVED = "推导"
 
@@ -86,7 +86,8 @@ def call_json(client, system: str, user: str, model: type[BaseModel], *, tempera
         except (AdaptError, ValidationError) as exc:
             problem = str(exc)[:600]
             cut = getattr(response, "finish_reason", "") == "length"
-            ask = ("上面的回复被截断了。请重新输出完整的 JSON，内容更精简一些。" if cut
+            ask = ("上面的回复被截断了。请重新输出完整的 JSON，可精简重复说明和无关旁支，"
+                   "但保留事实、来源、单位和成立条件，不用缺省事实来换取短回复。" if cut
                    else f"上面的回复不符合要求：{problem}\n只输出一个符合格式的 JSON 对象，注意每两个元素之间都有逗号。")
             if not (response.content or "").strip():
                 messages = messages + [{"role": "user", "content": ask}]  # nothing to quote back
@@ -229,11 +230,12 @@ def paragraphs(sections: list[dict]) -> Iterator[tuple[int, int, dict]]:
             yield si, pi, para
 
 
-def numbered_script(sections: list[dict]) -> str:
-    """The script as a model reads it: section titles and numbered paragraphs."""
+def numbered_script(sections: list[dict], *, include_titles: bool = True) -> str:
+    """Number paragraphs for review; listeners receive only the voiced text."""
     lines = []
     for si, section in enumerate(sections):
-        lines.append(f"## {section.get('title', '')}")
+        if include_titles:
+            lines.append(f"## {section.get('title', '')}")
         for pi, para in enumerate(section.get("paragraphs") or []):
             lines.append(f"[{pid(si, pi)}] {para.get('text', '')}")
     return "\n".join(lines)
@@ -262,6 +264,21 @@ def fact_line(fact: dict) -> str:
         line += f"（口径：{fact['caveat']}）"
     if fact.get("formula"):
         line += f"（推导：{fact['formula']}）"
+    return line
+
+
+def material_fact(fact: dict) -> dict:
+    """Give authors the substance; keep audit classifications in the source sheet."""
+    out = {key: fact[key] for key in ("id", "claim", "sources") if key in fact}
+    if fact.get("caveat"):
+        out["context"] = fact["caveat"]  # Older sheets carry actual conditions separately.
+    return out
+
+
+def material_line(fact: dict) -> str:
+    line = f"{fact['id']} {fact['claim']}"
+    if fact.get("caveat"):
+        line += f"（背景：{fact['caveat']}）"
     return line
 
 

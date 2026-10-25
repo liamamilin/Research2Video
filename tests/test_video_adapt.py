@@ -19,7 +19,7 @@ import pytest
 from core.llm import ChatResponse
 from core.video import columns as video_columns
 from tests import golden_video_cells as golden
-from core.video import length, store
+from core.video import editorial, length, store
 from core.video.adapt import common, draft, facts, pipeline, review, styles
 from core.video.adapt import plan as planning
 
@@ -140,6 +140,9 @@ class StepLLM:
     STEPS = {
         "facts": facts.SYSTEM_PROMPT, "plan": planning.SYSTEM_PROMPT, "draft": draft.SYSTEM_PROMPT,
         "revise": draft.REVISE_PROMPT, "newcomer": review.NEWCOMER_PROMPT, "audit": review.FACT_AUDIT_PROMPT,
+        "editorial": editorial.REWRITE_PROMPT, "compare": editorial.COMPARE_PROMPT,
+        "copyedit": editorial.COPYEDIT_PROMPT,
+        "rebrief": editorial.BRIEF_PROMPT,
     }
 
     def __init__(self, config, cancel_token=None, progress_cb=None):
@@ -147,10 +150,17 @@ class StepLLM:
         self.usage = {"requests": 0, "total_tokens": 0}
 
     def chat(self, messages, **kwargs):
+        from core.video import headline
+        if messages[0]["content"] == headline.PROMPT:
+            self.usage["requests"] += 1
+            StepLLM.calls.append(("headline", list(messages), self.config))
+            queue = StepLLM.queues.get("headline") or [{"candidates": [], "choice": -1, "reason": "原题看点清楚"}]
+            reply = queue.pop(0) if len(queue) > 1 else queue[0]
+            return ChatResponse(content=json.dumps(reply, ensure_ascii=False))
         step = next(k for k, prompt in self.STEPS.items() if messages[0]["content"] == prompt)
         StepLLM.calls.append((step, list(messages), self.config))
         self.usage["requests"] += 1
-        queue = StepLLM.queues[step]
+        queue = StepLLM.queues["editorial" if step == "copyedit" else step]
         reply = queue.pop(0) if len(queue) > 1 else queue[0]  # the last reply repeats
         return ChatResponse(content=reply if isinstance(reply, str) else json.dumps(reply, ensure_ascii=False))
 
@@ -166,7 +176,10 @@ class StepLLM:
 @pytest.fixture
 def llm(monkeypatch):
     StepLLM.queues = {"facts": [SHEET], "plan": [plan_json()], "draft": [draft_json()], "revise": [{"paragraphs": []}],
-                      "newcomer": [GOOD_READ], "audit": [CLEAN]}
+                      "newcomer": [GOOD_READ], "audit": [CLEAN], "editorial": [draft_json()],
+                      "compare": [{"choice": "B", "reason": "用途更清楚", "remaining": []}],
+                      "rebrief": [{"angle": CORE, "viewer_value": "弄清缓存账单", "throughline": "成本与使用条件",
+                                   "facts": ["F1", "F3"], "material": json.dumps(SHEET, ensure_ascii=False)}]}
     StepLLM.calls = []
     monkeypatch.setattr("core.llm.LLMClient", StepLLM)
     return StepLLM
@@ -176,7 +189,7 @@ def llm(monkeypatch):
 def video_env(web_env, monkeypatch):
     tmp, _ = web_env
     shutil.copy(ROOT / "config" / "video_styles.yaml", tmp / "config" / "video_styles.yaml")
-    golden.install_recipes(tmp / "config")
+    golden.install_recipes(tmp / "config", replace=(("  pipeline: single\n", "  pipeline: adapt\n"),))
     store.use_state_dir(str(tmp / "state"))
     store.init_db()
     from core import report_meta
@@ -234,9 +247,8 @@ def test_shipped_styles_cover_every_columns_defaults_and_tones():
         assert styles.resolve(config, col).label == labels[key]
         for tone in col.allowed_tones:
             styles.resolve(config, col, tone=tone)
-    with pytest.raises(styles.StyleError, match="不用"):
-        styles.resolve(config, column(), tone="news")  # deep_dive does not allow news
-    assert style("playful").as_dict()["presets"] == ["intermediate@1", "playful@2"]
+    assert styles.resolve(config, column(), tone="news").tone.key == "news"
+    assert style("playful").as_dict()["presets"] == ["intermediate@4", "playful@5"]
 
 
 def test_length_tolerance_flags_a_fifth_over_target():
@@ -266,33 +278,79 @@ def test_fact_sheet_is_keyed_by_report_content_and_prompt_version(monkeypatch):
     assert facts.sheet_id(REPORT) != first  # a new prompt never rewrites a sheet old versions point at
 
 
+def test_fact_extraction_and_cache_use_the_final_report_not_the_providers_thinking(llm):
+    process = "先纠正原选题并核对资料。"
+    raw = "<think>" + process + "</think>\n" + REPORT
+    sheet, _ = facts.extract(llm(None), raw, CITATION_CHECK)
+    assert process not in llm.request("facts") and REPORT in llm.request("facts")
+    assert sheet["facts"] and facts.sheet_id(raw) == facts.sheet_id(REPORT)
+
+
+@pytest.mark.parametrize("confidence", ["厂商自述", "有冲突"])
+def test_sourced_claims_do_not_require_independent_replication_or_resolution(confidence):
+    raw = {"facts": [{"id": "F1", "claim": "厂商称该配置吞吐更高，另一个来源给出不同结果",
+                      "confidence": confidence, "sources": [PRICING]}]}
+    sheet, problems = facts.normalize(raw, {PRICING})
+    assert not problems and sheet["facts"][0]["confidence"] == confidence
+    para = draft.finalize_paragraph({"text": "按厂商的说法，这个配置吞吐更高；另一个来源的结果不同。",
+                                     "facts": ["F1"]}, common.facts_by_id(sheet))
+    assert para["evidence"] == "CITED"
+    assert not review.rules([{"paragraphs": [para]}], column=column(), target_minutes=1,
+                            plan={"core_message": "不同测试的结果有差异"}, sheet=sheet)
+    untraced, _ = facts.normalize(raw, set())
+    assert untraced["facts"][0]["confidence"] == "未核实"
+    assert draft.finalize_paragraph({"text": "据说吞吐更高", "facts": ["F1"]},
+                                    common.facts_by_id(untraced))["evidence"] == "NEEDS_REVIEW"
+
+
 # --- ② Plan and its comprehension path ------------------------------------------------------
+
+
+def test_a_short_narrative_needs_no_course_goals_glossary_opposition_or_action(llm):
+    short = {"core_message": CORE, "hook": {"facts": ["F1"]},
+             "beats": [{"title": "缓存并非自动省钱", "role": "机制", "facts": ["F1", "F2", "F3"]}]}
+    llm.queues["plan"] = [short]
+    made, problems = make_plan(llm)
+    assert llm.steps() == ["plan"]  # recipe section counts never trigger a retry
+    assert len(made["beats"]) == 1
+    assert all(made[key] == [] for key in ("goals", "chain", "glossary", "misconceptions", "actions", "must_cover"))
+    assert problems == []
+
+
+def test_scoped_adapt_audit_uses_full_context_and_ignores_unrelated_findings_and_actions(llm):
+    sections = [{"paragraphs": [{"text": "以下是厂商给出的这组测试。", "facts": ["F1"]},
+                                {"text": "吞吐有所提升。", "facts": ["F1"]}]}]
+    llm.queues["audit"] = [{"issues": [finding("S1P1", "以下是厂商给出的这组测试。")],
+                            "actions": [{"id": "S1P1", "works": False, "severity": "严重"}]}]
+    checked = review.fact_audit(llm(None), sections, {}, sheet_of(), {}, [], only={"S1P2"})
+    assert checked["issues"] == []
+    request = llm.request("audit")
+    assert "以下是厂商给出的这组测试。" in request.split("## 全文上下文", 1)[1].split("## 要检查的段落", 1)[0]
+    targets = request.split("## 要检查的段落", 1)[1]
+    assert "[S1P2]" in targets and "[S1P1]" not in targets
 
 
 def test_plan_gets_one_retry_for_structure_and_budgets_from_code(llm):
     llm.queues["plan"] = [plan_json(beats=2), plan_json(beats=4)]
     plan, problems = make_plan(llm)
     assert llm.steps() == ["plan", "plan"]
-    assert "缺少这些角色的节" in llm.request("plan", 1)  # the retry names the problem
+    assert "必讲内容没有安排到有效的节" in llm.request("plan", 1)  # dangling references still need correction
     assert problems == [] and len(plan["beats"]) == 4
     assert sum(b["budget"] for b in plan["beats"]) == length.budget_for(6, column().voice_id)
 
 
-def test_an_action_resting_on_an_unexplained_concept_is_sent_back(llm):
-    # Found on C4: v7 advised "move it to the end" without ever explaining cache breakpoints.
-    bad = plan_json()
-    bad["actions"][0]["needs"] = ["缓存断点"]
-    bad["actions"][0]["verify"] = ""
-    llm.queues["plan"] = [bad, plan_json()]
-    _, problems = make_plan(llm)
-    retry = llm.request("plan", 1)
-    assert "依赖的概念没有解释：缓存断点" in retry and "缺少适用条件或验证方法" in retry
+def test_optional_planning_fields_do_not_force_extra_generation(llm):
+    plan = plan_json()
+    plan["actions"][0]["needs"] = ["缓存断点"]
+    plan["actions"][0]["verify"] = ""
+    llm.queues["plan"] = [plan]
+    made, problems = make_plan(llm)
+    assert llm.steps() == ["plan"]
+    assert made["actions"][0]["verify"] == ""
     assert problems == []
 
 
-def test_concepts_the_fact_sheet_names_must_be_explained_before_actions_use_them(llm):
-    # Found on C4 v8: an action said "before the cache breakpoint", breakpoints were never explained,
-    # and the plan's own needs list had left them out. Not caching here: agent audit trails.
+def test_named_concepts_do_not_force_definitions_in_an_expert_narrative(llm):
     sheet = {"facts": [{"id": "F1", "claim": "本地框架把轨迹写在 agent 可写的目录里", "confidence": "已证实",
                         "sources": [PRICING]}],
              "concepts": [{"term": "写权限边界（write boundary）", "meaning": "被调查者能不能改这条记录", "needs": []}]}
@@ -306,16 +364,13 @@ def test_concepts_the_fact_sheet_names_must_be_explained_before_actions_use_them
     plan["actions"] = [{"condition": "你做事故复盘时", "step": "把记录放到写权限边界之外", "verify": "删本地记录后外部还在",
                         "needs": []}]
     problems = planning.check(json.loads(json.dumps(plan)), sheet, column(), 6)
-    assert any("没有解释的概念：写权限边界" in p for p in problems)
-    plan["glossary"].append({"term": "写权限边界", "plain": "被调查者改不了的地方"})
-    assert not any("没有解释的概念" in p for p in planning.check(json.loads(json.dumps(plan)), sheet, column(), 6))
+    assert not any("没有解释的概念" in p for p in problems)
 
     sections = [{"title": "一", "paragraphs": [{"text": "先看记录放在哪。", "facts": []},
                                               {"text": "记录要在 write boundary 之外。", "facts": []}]}]
-    plan["glossary"].pop()
     c1 = [i for i in review.rules(sections, column=column(), target_minutes=6, plan=plan, sheet=sheet, style=style())
           if i["rule"] == "C1"]
-    assert [(i["severity"], i["section"], i["paragraph"]) for i in c1] == [(review.WARN, 0, 1)]
+    assert c1 == []  # understanding is judged in context by the reader, not by matching a term
 
 
 def test_the_comprehension_path_must_hold_together(llm):
@@ -327,20 +382,23 @@ def test_the_comprehension_path_must_hold_together(llm):
     llm.queues["plan"] = [bad]
     _, problems = make_plan(llm)
     text = "\n".join(problems)
-    for expected in ("没有依据的事实", "因果链至少要有两步", "没有安排进任何一节：F4", "必讲内容没有安排到有效的节",
+    for expected in ("没有依据的事实", "没有安排进任何一节：F4", "必讲内容没有安排到有效的节",
                      "讲不清。建议只讲缓存"):
         assert expected in text, expected
 
 
-def test_a_plan_that_uses_too_many_facts_is_sent_back(llm, monkeypatch):
-    # Found live: offered 43 facts, the plan used 40 and the newcomer drowned in numbers.
-    monkeypatch.setattr(planning, "MIN_FACTS", 2)
-    monkeypatch.setattr(planning, "UNITS_PER_FACT", length.budget_for(6) // 2)  # a budget of 2 facts
-    llm.queues["plan"] = [plan_json(), plan_json()]
-    _, problems = make_plan(llm)
-    assert "最多用 2 条事实" in llm.request("plan", 0)
-    assert "上限是 2 条" in llm.request("plan", 1)
-    assert any("上限是 2 条" in p for p in problems)  # still too many after the retry: reported
+def test_necessary_facts_and_goals_are_not_limited_by_duration(llm):
+    sheet = sheet_of()
+    sheet["facts"] += [{"id": f"F{i}", "claim": f"条件{i}", "sources": [PRICING], "confidence": "已证实"}
+                       for i in range(7, 30)]
+    plan = plan_json()
+    plan["goals"] = plan["goals"][:1]
+    plan["chain"] = plan["chain"][:1]
+    plan["beats"][0]["facts"] += [f"F{i}" for i in range(7, 30)]
+    llm.queues["plan"] = [plan]
+    made, problems = planning.make(llm(None), sheet, column(target_minutes=1), {}, style(), 1)
+    assert llm.steps() == ["plan"] and problems == []
+    assert len(made["beats"][0]["facts"]) > 20 and len(made["goals"]) == 1
 
 
 def test_fact_ids_written_with_their_claims_still_count(llm):
@@ -428,16 +486,13 @@ def test_rules_catch_what_a_listener_trips_over():
         ]},
     ]
     issues = review.rules(sections, column=column(), target_minutes=6, plan=plan, sheet=sheet_of(), style=style())
-    assert {"C1", "C4", "D2", "D4", "D5", "E1", "E3", "E4"} <= _rule_ids(issues, review.MUST)
+    assert {"D2", "D4"} <= _rule_ids(issues, review.MUST)
+    assert {"D6", "E1"} <= _rule_ids(issues, review.WARN)
+    assert not {"C4", "C5", "C6", "E4"} & _rule_ids(issues)
     assert "D6" in _rule_ids(issues, review.WARN)  # 5 分钟, 1 小时, 2 倍 are in none of the paragraph's facts
-    c1 = next(i for i in issues if i["rule"] == "C1")
-    assert (c1["section"], c1["paragraph"]) == (0, 0) and "解释之前" in c1["problem"]
-    assert c1["audit"] == review.COMPREHENSION and c1["why"] and c1["suggestion"]
-    c4 = next(i for i in issues if i["rule"] == "C4")
-    assert c4["audit"] == review.COMMUNICATION and "1.25" in c4["quote"]
 
 
-def test_mechanical_signposts_and_repeated_numbers_are_flagged():
+def test_transitions_and_repeated_numbers_are_not_judged_by_keyword_or_count():
     sections = [
         {"title": "一", "paragraphs": [{"text": "这一节讲索引。加索引后查询从 1200 毫秒降到 40 毫秒，表有 300 万行。"}]},
         {"title": "二", "paragraphs": [{"text": "接下来看看为什么会变快。"},
@@ -445,46 +500,46 @@ def test_mechanical_signposts_and_repeated_numbers_are_flagged():
     ]
     issues = review.rules(sections, column=column(), target_minutes=6)
     e5 = [i for i in issues if i["rule"] == "E5"]
-    assert [(i["section"], i["paragraph"]) for i in e5] == [(0, 0)]  # a natural transition is not flagged
+    assert e5 == []
     e6 = [i for i in issues if i["rule"] == "E6"]
-    assert [(i["section"], i["paragraph"]) for i in e6] == [(1, 1)]
+    assert e6 == []
 
 
 def test_review_phrases_are_reviewer_talk_not_everyday_words():
     sections = [{"title": "开场", "paragraphs": [{"text": "读取的折扣一次没拿到。这个数我们没拿到一手来源。"}]}]
     d5 = [i for i in review.rules(sections, column=column(), target_minutes=6) if i["rule"] == "D5"]
-    assert [i["problem"] for i in d5] == ["审稿用语进了口播：「没拿到一手」"]
+    assert d5 == []  # a disclosed source limitation is not automatically reviewer leakage
 
 
-def test_a_source_reminder_said_in_many_paragraphs_is_flagged_after_the_first_two():
+def test_source_attribution_has_no_fixed_repetition_quota():
     said = "Vercel 官方说法：这个功能已经上线。"
     sections = [{"title": "一", "paragraphs": [{"text": said}, {"text": said + "按官方说法，团队不用重试。"}]},
                 {"title": "二", "paragraphs": [{"text": said + "官方还称不会重复。"}, {"text": "接入前先在测试环境验证。"},
                                               {"text": "厂商自述的数字，还没有独立验证。"}]}]
     e7 = [i for i in review.rules(sections, column=column(), target_minutes=6) if i["rule"] == "E7"]
-    assert [(i["section"], i["paragraph"], i["severity"]) for i in e7] == [(1, 0, "must"), (1, 2, "must")]
+    assert e7 == []
     quiet = [{"title": "一", "paragraphs": [{"text": said}, {"text": "团队不用再手动重试。"}]}]
     assert not [i for i in review.rules(quiet, column=column(), target_minutes=6) if i["rule"] == "E7"]
 
 
-def test_a_teaser_for_what_comes_next_is_a_must_but_an_ordinary_next_step_is_not():
+def test_a_teaser_for_what_comes_next_is_advice_but_an_ordinary_next_step_is_not():
     sections = [{"title": "开场", "paragraphs": [{"text": "榜单只筛候选。接下来看它怎么改片。"},
                                               {"text": "下一步先在测试环境跑一遍。"}]}]
     e8 = [i for i in review.rules(sections, column=column(), target_minutes=6) if i["rule"] == "E8"]
-    assert [(i["section"], i["paragraph"], i["severity"]) for i in e8] == [(0, 0, "must")]
+    assert e8 == []
 
 
 def test_source_provenance_words_are_reviewer_talk():
     sections = [{"title": "开场", "paragraphs": [{"text": "二手 AI 审稿称，评测可能复用了外壳。"},
                                               {"text": "逐门名称还没有确认。"}, {"text": "先确认你的账单再选型。"}]}]
     d5 = [(i["paragraph"], i["problem"]) for i in review.rules(sections, column=column(), target_minutes=6) if i["rule"] == "D5"]
-    assert d5 == [(0, "审稿用语进了口播：「二手」"), (0, "审稿用语进了口播：「AI 审稿」"), (1, "审稿用语进了口播：「没有确认」")]
+    assert d5 == []  # ordinary provenance words need context, not a global blacklist
 
 
 def test_legacy_versions_get_only_the_checks_that_need_no_plan():
     sections = [{"title": "开场", "paragraphs": [{"text": "缓存写入 5 分钟是 1.25 倍，1 小时是 2 倍。没有 A/B 测试。"}]}]
     issues = review.rules(sections, column=column(), target_minutes=6)
-    assert "C4" in _rule_ids(issues)
+    assert "C4" not in _rule_ids(issues)
     assert not _rule_ids(issues) & {"A1", "B1", "B3", "C1", "C7", "D2", "D4", "D6", "E1"}
     checks = review.assemble(issues, None, None, None, sections)
     assert not checks["model_ran"] and not checks["summary"]["passed"] and checks["summary"]["low_scores"] == []
@@ -507,20 +562,84 @@ def test_checks_stored_by_the_first_prompt_version_still_read():
 # --- The whole pipeline -----------------------------------------------------------------------
 
 
-def test_pipeline_passes_a_clean_script_in_five_calls(llm):
+def test_pipeline_finishes_a_clean_script_with_independent_title_selection(llm):
     adapted, _ = adapt()
-    assert llm.steps() == ["facts", "plan", "draft", "newcomer", "audit"]
+    assert llm.steps() == ["facts", "plan", "draft", "newcomer", "audit", "headline"]
     checks = adapted.meta["checks"]
     assert checks["summary"]["passed"], checks["issues"]
     assert checks["rounds"] == 0 and checks["deletions"] == [] and checks["quiz"]["score"] == 1.0
     first = adapted.sections[0]["paragraphs"][0]
     assert first["citations"] == [PRICING] and first["evidence"] == "CITED"
-    assert adapted.meta["style"]["presets"] == ["intermediate@1", "explainer@2"]
-    assert adapted.meta["prompts"] == {"facts": 2, "plan": 3, "draft": 4, "review": 3}
+    assert adapted.meta["style"]["presets"] == ["intermediate@4", "explainer@5"]
+    assert adapted.meta["prompts"] == {"facts": facts.PROMPT_VERSION, "plan": planning.PROMPT_VERSION,
+                                       "draft": draft.PROMPT_VERSION, "review": review.PROMPT_VERSION}
     assert adapted.meta["fact_sheet_id"] == facts.sheet_id(REPORT)
     assert adapted.meta["description"]["sources"][0] == {"url": PRICING, "facts": ["F3", "F1", "F2"]}
     assert "批处理命中率在 30% 到 98% 之间" in adapted.meta["description"]["not_covered"]
     assert adapted.length_check["status"] == "OK"
+
+
+def test_adaptation_edits_a_real_listening_problem_once_without_a_score_gate(llm):
+    before = draft_json()["sections"][0]["paragraphs"][0]["text"]
+    llm.queues["newcomer"] = [{**GOOD_READ, "paragraphs": [{"id": "S1P1", "lost": ["开场像内部纠错，看不出为什么要听"]}]}, GOOD_READ]
+    llm.queues["editorial"] = [{"title": "缓存账单为什么没降", "sections": [{"title": "先看写入", "paragraphs": [
+        {"text": "缓存开着，账单却未必会降。先看写入发生了什么。", "facts": ["F1", "F3"]}]}]}]
+    adapted, _ = adapt()
+    assert llm.steps() == ["facts", "plan", "draft", "newcomer", "audit", "rebrief", "editorial", "newcomer", "audit", "compare", "headline"]
+    assert adapted.meta["checks"]["summary"]["passed"]
+    assert adapted.meta["checks"]["editorial_attempted"]
+    assert adapted.sections[0]["paragraphs"][0]["text"] != before
+    assert adapted.title == "缓存账单为什么没降" and len(adapted.sections) == 1
+
+
+def test_adaptation_may_drop_a_whole_branch_and_rechecks_shifted_paragraph_ids(llm):
+    sections = [{"title": "主线", "paragraphs": [{"text": "缓存写入也有成本。", "facts": ["F1"]}]},
+                {"title": "旁支", "paragraphs": [{"text": "先介绍完整历史。", "facts": []}]},
+                {"title": "收获", "paragraphs": [{"text": "要看前缀是否稳定。", "facts": ["F3"]}]}]
+    llm.queues["revise"] = [{"paragraphs": [{"id": "S2P1", "text": "", "facts": []}]}]
+    revised, changed = draft.revise(llm(None), sections, {"S2P1": ["旁支无助理解，可以删除整节"]},
+                                    plan_json(), sheet_of(), style())
+    assert [s["title"] for s in revised] == ["主线", "收获"]
+    assert changed == {"S1P1", "S2P1", "S3P1"}  # old findings are discarded and all new IDs are checked
+    assert len(sections) == 3
+
+
+def test_a_failed_fact_check_of_an_editorial_edit_keeps_the_checked_adaptation(llm):
+    original = draft_json()["sections"][0]["paragraphs"][0]["text"]
+    llm.queues["newcomer"] = [{**GOOD_READ, "paragraphs": [{"id": "S1P1", "lost": ["开场没有推进"]}]}, GOOD_READ]
+    llm.queues["editorial"] = [{"title": "缓存也有成本", "sections": [{"title": "费用", "paragraphs": [
+        {"text": "缓存可以省钱，先看它怎么收费。", "facts": ["F1"]}]}]}]
+    llm.queues["audit"] = [CLEAN, "不能解析的复审回复"]
+    adapted, _ = adapt()
+    assert adapted.sections[0]["paragraphs"][0]["text"] == original
+    assert adapted.meta["checks"]["summary"]["passed"]
+    assert not adapted.meta["editorial_attempt"]["applied"]
+    assert adapted.meta["editorial_attempt"]["problems"]
+    assert not any("事实审计没有完成" in p for p in adapted.meta["problems"])
+
+
+def test_an_editorial_preference_for_the_original_preserves_its_title_and_description(llm):
+    llm.queues["newcomer"] = [{**GOOD_READ, "paragraphs": [{"id": "S1P1", "lost": ["开场铺垫有点长"]}]}, GOOD_READ]
+    llm.queues["editorial"] = [{"title": "看看缓存的变化", "sections": [{"title": "变化", "paragraphs": [
+        {"text": "缓存发生了一些变化，值得关注。", "facts": ["F1"]}]}], "description": {"summary": "新介绍"}}]
+    llm.queues["compare"] = [{"choice": "A", "reason": "B 丢了具体机制，结尾空泛", "remaining": []}]
+    adapted, _ = adapt()
+    assert adapted.title == draft_json()["title"]
+    assert adapted.meta["description"]["summary"] == draft_json()["description"]["summary"]
+    assert not adapted.meta["editorial_attempt"]["applied"]
+    assert adapted.meta["editorial_attempt"]["decision"]["choice"] == "A"
+
+
+def test_editorial_uncertainty_is_not_erased_by_adaptation_finalization(llm):
+    llm.queues["newcomer"] = [{**GOOD_READ, "paragraphs": [{"id": "S1P1", "lost": ["主线有点散"]}]}, GOOD_READ]
+    llm.queues["editorial"] = [{"title": "缓存更省钱了吗", "sections": [{"title": "成本", "paragraphs": [
+        {"text": "缓存也有写入成本。", "facts": ["F1"], "needs_review": True,
+         "review_reason": "当前结论还有一个适用条件待核对"}]}]}]
+    adapted, _ = adapt()
+    assert adapted.title == draft_json()["title"]
+    assert not adapted.meta["editorial_attempt"]["applied"]
+    assert not adapted.meta["editorial_attempt"]["checks"]["summary"]["passed"]
+    assert "compare" not in llm.steps()
 
 
 def test_the_newcomer_gets_the_quiz_but_not_the_answers_or_facts(llm):
@@ -533,13 +652,14 @@ def test_the_newcomer_gets_the_quiz_but_not_the_answers_or_facts(llm):
     assert all(REPORT[:20] not in msgs[1]["content"] for step, msgs, _ in llm.calls if step != "facts")
 
 
-def test_a_wrong_quiz_answer_keeps_the_script_from_passing(llm):
+def test_a_wrong_quiz_answer_is_advice_without_rewriting_verified_facts(llm):
     llm.queues["audit"] = [{**CLEAN, "grades": [{"id": "G1", "correct": True}, {"id": "G2", "correct": False,
                                                                                 "note": "没听出来"},
                                                  {"id": "G3", "correct": True}]}]
     adapted, _ = adapt()
     checks = adapted.meta["checks"]
-    assert checks["quiz"]["score"] == 0.67 and not checks["summary"]["passed"]
+    assert checks["quiz"]["score"] == 0.67 and checks["summary"]["passed"]
+    assert "revise" not in llm.steps()
     assert any(i["rule"] == "N3" and "G2" in i["problem"] for i in checks["issues"])
 
 
@@ -553,18 +673,21 @@ def test_pipeline_rewrites_only_flagged_paragraphs_serious_first(llm):
                                             {"id": "S4P3", "text": "不该改的段落。"}]}]
     before = draft_json()
     adapted, _ = adapt()
-    assert llm.steps() == ["facts", "plan", "draft", "newcomer", "audit", "revise", "newcomer", "audit"]
+    assert llm.steps() == ["facts", "plan", "draft", "newcomer", "audit", "revise", "newcomer", "audit", "headline"]
     revise_request = llm.request("revise")
-    assert revise_request.index("【严重】D2：说成了整个系列") < revise_request.index("读取是跟什么比")
+    assert "【严重】D2：说成了整个系列" in revise_request
+    assert "读取是跟什么比" not in revise_request  # reader advice alone cannot rewrite correct paragraphs
     # Only the changed paragraphs were audited again.
-    assert "[S2P1]" in llm.request("audit", 1) and "[S1P1]" not in llm.request("audit", 1)
+    assert "[S2P1]" in llm.request("audit", 1)  # context retains attribution and transitions
+    scoped = llm.request("audit", 1).split("## 要检查的段落", 1)[1]
+    assert "[S3P2]" in scoped and "[S2P1]" not in scoped
     texts = [[p["text"] for p in s["paragraphs"]] for s in adapted.sections]
-    assert texts[1][0] == fixed and texts[2][1] == fixed
+    assert texts[1][0] == before["sections"][1]["paragraphs"][0]["text"] and texts[2][1] == fixed
     assert texts[3][2] == before["sections"][3]["paragraphs"][2]["text"]  # not a target: untouched
     checks = adapted.meta["checks"]
     assert checks["rounds"] == 1 and checks["summary"]["passed"]
     assert {(i["rule"], i["resolved"]) for i in checks["initial"] if i["severity"] != review.WARN} == {
-        ("N1", True), ("D2", True)}
+        ("D2", True)}
 
 
 def test_a_big_rewrite_that_comes_back_unreadable_is_retried_with_the_worst_half(monkeypatch):
@@ -590,13 +713,14 @@ def test_a_big_rewrite_that_comes_back_unreadable_is_retried_with_the_worst_half
     assert len(seen) == 1
 
 
-def test_minor_findings_are_shown_but_not_revised(llm):
+def test_unresolved_minor_fact_findings_still_require_review(llm):
     llm.queues["audit"] = [{**CLEAN, "issues": [finding("S2P2", "讲讲讲", severity="一般", rule="D3",
                                                           problem="1.28 次应为 1.26 次")]}]
     adapted, _ = adapt()
-    assert "revise" not in llm.steps()
+    assert "revise" in llm.steps()
     minor = [i for i in adapted.meta["checks"]["issues"] if i["rule"] == "D3"]
-    assert minor and minor[0]["severity"] == review.WARN and adapted.meta["checks"]["summary"]["passed"]
+    assert minor and minor[0]["severity"] == review.WARN and not adapted.meta["checks"]["summary"]["passed"]
+    assert adapted.sections[1]["paragraphs"][1]["evidence"] == "NEEDS_REVIEW"
 
 
 def test_a_serious_error_that_survives_the_rounds_loses_its_sentence(llm):
@@ -634,7 +758,7 @@ def test_an_action_that_fails_when_followed_is_a_serious_issue_even_if_the_audit
     assert not any(i["rule"] == "D7" for i in checks["issues"])
 
 
-def test_an_action_that_only_leaves_out_a_condition_is_a_reminder_not_a_deletion(llm):
+def test_an_action_missing_a_condition_is_preserved_for_repair_and_review(llm):
     script = draft_json()
     script["sections"][2]["paragraphs"][1]["text"] = "读到零，多半是前缀没稳住。" + sentences_of(120, "讲")
     llm.queues["draft"] = [script]
@@ -646,7 +770,8 @@ def test_an_action_that_only_leaves_out_a_condition_is_a_reminder_not_a_deletion
     assert checks["deletions"] == [] and "读到零，多半是前缀没稳住" in adapted.sections[2]["paragraphs"][1]["text"]
     d7 = [i for i in checks["issues"] if i["rule"] == "D7"]
     assert [(i["severity"], i["section"], i["paragraph"]) for i in d7] == [("warn", 2, 1)]
-    assert checks["summary"]["passed"]  # a reminder never blocks the approval
+    assert not checks["summary"]["passed"]
+    assert adapted.sections[2]["paragraphs"][1]["evidence"] == "NEEDS_REVIEW"
 
 
 def test_the_opening_and_the_core_message_are_never_cut(llm):
@@ -673,14 +798,14 @@ def test_the_fact_audit_can_run_on_its_own_model(llm):
     assert adapted.meta["review_usage"]["requests"] == 1
 
 
-def test_pipeline_gives_up_after_two_rounds_and_says_what_is_left(llm):
+def test_reader_questions_do_not_trigger_rewrite_rounds(llm):
     stuck = {**GOOD_READ, "paragraphs": [{"id": "S1P2", "questions": [f"疑问{i}" for i in range(6)], "lost": []}]}
     llm.queues["newcomer"] = [stuck]
     llm.queues["revise"] = [{"paragraphs": [{"id": "S1P2", "text": sentences_of(120, "又")}]}]
     adapted, _ = adapt()
-    assert llm.steps().count("revise") == pipeline.MAX_ROUNDS
+    assert llm.steps().count("revise") == 0
     summary = adapted.meta["checks"]["summary"]
-    assert not summary["passed"] and summary["questions"] == 6
+    assert summary["passed"] and summary["questions"] == 6
 
 
 def test_a_reused_fact_sheet_skips_step_one(llm):
@@ -720,7 +845,7 @@ def test_restyle_adds_a_version_and_reuses_the_fact_sheet(client, video_env, llm
     csrf = _login(client)
 
     legacy = client.get(f"/api/video/scripts/{script['id']}").json()["version_shown"]
-    assert "C4" in {i["rule"] for i in legacy["checks"]["issues"]}  # legacy versions get rule checks too
+    assert legacy["checks"]["model_ran"] is False  # rule checks alone still cannot invent a fact-audit pass
 
     made = client.post(f"/api/video/scripts/{script['id']}/restyle", json={"tone": "playful"}, headers=csrf)
     assert made.status_code == 202, made.text
@@ -745,7 +870,8 @@ def test_restyle_refusals(client, video_env, llm):
     script = _script_with_a_legacy_version(video_env)
     csrf = _login(client)
     url = f"/api/video/scripts/{script['id']}/restyle"
-    assert client.post(url, json={"tone": "news"}, headers=csrf).status_code == 422  # not allowed in this column
+    assert client.post(url, json={"tone": "news"}, headers=csrf).status_code == 202
+    _wait(client, script["id"])
     assert client.post(url, json={"tone": "nope"}, headers=csrf).status_code == 422
     store.update_script(script["id"], status="RESEARCHING")
     assert client.post(url, json={}, headers=csrf).status_code == 409
@@ -780,7 +906,7 @@ def test_editing_an_adapted_version_keeps_its_facts(client, video_env, llm):
     first = version["sections"][0]["paragraphs"][0]
     assert first["facts"] == ["F3", "F1"] and first["citations"] == [PRICING] and first["note"] == "审稿人的备注"
     assert version["meta"]["style"]["tone"] == "explainer" and version["meta"]["plan"]["core_message"]
-    assert version["meta"]["prompts"]["review"] == 3
+    assert version["meta"]["prompts"]["review"] == review.PROMPT_VERSION
     assert version["checks"]["model_checks_stale"] is True and version["checks"]["version"] == 2
 
     # Editing the old legacy version keeps it legacy, even though an adapted version is current.
@@ -836,7 +962,8 @@ def test_short_scripts_get_number_and_dash_findings_as_warnings():
     sections = [{"title": "开场", "paragraphs": [
         {"text": "缓存写入 5 分钟是 1.25 倍，1 小时是 2 倍。降幅 41%–80%。", "facts": [], "introduces": [], "recap": False}]}]
     issues = review.rules(sections, column=column(), target_minutes=1)
-    assert {"C4", "E1"} <= _rule_ids(issues, review.WARN)
+    assert "E1" in _rule_ids(issues, review.WARN)
+    assert "C4" not in _rule_ids(issues)
     assert not {"C4", "E1"} & _rule_ids(issues, review.MUST)
 
 

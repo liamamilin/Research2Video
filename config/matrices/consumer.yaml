@@ -5,3 +5,5 @@ keywords: []
 jobs:
 - consumer/consumer_daily
 - consumer/consumer_weekly
+render:
+  video_speed: 1.25

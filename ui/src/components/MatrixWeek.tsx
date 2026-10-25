@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { getMatrixCalendar, type Matrix, type MatrixCalendar } from "@/api/matrices";
 import { PeriodEditor, periodWords, WEEKDAYS } from "@/components/PeriodEditor";
+import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage } from "@/lib/toast";
 
@@ -11,7 +12,7 @@ const dayLabel = (day: string) => `周${WEEKDAYS[new Date(`${day}T00:00:00`).get
 
 function nextSevenDays(now: string) {
   const start = new Date(`${dayKey(now)}T00:00:00`);
-  return Array.from({ length: 8 }, (_, i) => {
+  return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(start.getTime() + i * 86400000);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   });
@@ -23,28 +24,30 @@ export function MatrixWeek({ matrix, onChanged }: { matrix: Matrix; onChanged: (
   const [cal, setCal] = useState<MatrixCalendar | null>(null);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState("");
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    let live = true;
-    getMatrixCalendar(matrix.key).then((c) => { if (live) { setCal(c); setError(""); } }).catch((e) => { if (live) setError(errorMessage(e)); });
-    return () => { live = false; };
-  }, [matrix]);
+    const controller = new AbortController();
+    getMatrixCalendar(matrix.key, controller.signal).then((c) => { if (!controller.signal.aborted) { setCal(c); setError(""); } }).catch((e) => { if (!controller.signal.aborted) setError(errorMessage(e)); });
+    return () => { controller.abort(); };
+  }, [matrix, retry]);
 
-  if (error) return <p role="alert" className="text-sm text-danger">{error}</p>;
-  if (!cal) return <p className="text-sm text-text-muted">读取中…</p>;
+  if (!cal) return error ? <ErrorState error={error} onRetry={() => setRetry((n) => n + 1)} /> : <p role="status" className="text-sm text-text-muted">正在读取周期安排…</p>;
   const days = nextSevenDays(cal.now);
+  const runs = cal.runs.filter((r) => days.includes(dayKey(r.ts)));
   const timed = matrix.members.filter((m) => cal.jobs[m.job]);
   return (
     <section className="space-y-3" aria-label="周期">
-      {cal.clashes.map((c) => (
+      {error ? <ErrorState error={error} onRetry={() => setRetry((n) => n + 1)} compact /> : null}
+      {cal.clashes.filter((c) => days.includes(dayKey(c.ts))).map((c) => (
         <p key={c.ts} role="alert" className="card border-warning/50 p-2 text-xs text-warning">
-          {dayKey(c.ts)} {clock(c.ts)} 同时到点 {c.jobs.length} 个：{c.jobs.join("、")}。一次最多跑 {cal.concurrent_runs} 个，多的要排队，可以错开几分钟。
+          {dayKey(c.ts)} {clock(c.ts)} 同时到点 {c.jobs.length} 个：{c.jobs.map((j) => cal.jobs[j]?.name || j).join("、")}。一次最多跑 {cal.concurrent_runs} 个，多的要排队，可以错开几分钟。
         </p>
       ))}
-      <div className="card p-3 space-y-2 overflow-x-auto">
+      <div className="card p-4 space-y-3 overflow-x-auto">
         <h2 className="font-medium text-sm">接下来 7 天</h2>
         {timed.length ? (
-          <table className="text-xs border-separate border-spacing-1 w-full">
+          <table className="text-xs border-separate border-spacing-1 w-full min-w-[40rem]">
             <thead>
               <tr className="text-left text-text-muted">
                 <th className="font-normal">Job</th>
@@ -89,11 +92,11 @@ export function MatrixWeek({ matrix, onChanged }: { matrix: Matrix; onChanged: (
           <PeriodEditor key={m.job} matrixKey={matrix.key} member={m} onCancel={() => setEditing("")} onDone={(next) => { setEditing(""); onChanged(next); }} />
         ))}
       </div>
-      <div className="card p-3 space-y-1">
+      <div className="card p-4 space-y-2">
         <h2 className="font-medium text-sm">按时间排</h2>
-        {cal.runs.length ? (
+        {runs.length ? (
           <ul className="text-xs space-y-0.5">
-            {cal.runs.map((r) => (
+            {runs.map((r) => (
               <li key={`${r.job}-${r.ts}`} className="flex gap-3">
                 <span className="font-mono text-text-muted">{dayLabel(dayKey(r.ts))} {clock(r.ts)}</span>
                 <span>{r.name}</span>

@@ -3,7 +3,7 @@
 # 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
 
 name: 行动清单
-description: 把一份报告里的建议收成 3 件现在就能做的事：每件说清做什么、为什么、做完能得到什么。
+description: 帮助{{audience}}把材料中的启发变成自己能用的做法，听着有收获，也知道接下来可以怎样尝试。
 status: experimental
 tags:
   domain:
@@ -29,32 +29,14 @@ writing:
   default_style:
     depth: '{{audience.depth}}'
     tone: explainer
-  allowed_tones: [concise, explainer, playful]
-  sections: [3, 5]
-  paragraph_units: [30, 100]
-  required_roles: [钩子, 行动]
-  audit:
-    model: review
-    style_severity: warn
-    timeout_seconds: 300
   style: |
-    栏目「行动清单」：不讲新闻，只讲看完这份报告之后{{audience}}该做的三件事。
-    - 开场一两句话说明这份报告的结论，直接进入第一件事；不说「大家好」。
-    - 恰好三件事，从报告的「推荐行动」「建议测试」一类内容里挑；按「花几分钟就能做完」到「要花一点功夫」排；报告里没有依据的建议不加。
-    - 每件事一个小节：做什么（具体到点哪里、改什么）、为什么（一个关键数字或一个理由）、做完能得到什么：{{audience.impact}}。
-    - 数字、单位、口径照报告原样；价格要说清是输入还是输出、每百万 token 还是每次。
-    - 结尾一句话，提醒哪一件最该今天就做。
-    - 3–5 个小节，每段 30–100 字，口语化，适合朗读。
-    {{audience.writing_rules}}
+    帮助{{audience}}把材料中的启发变成自己能用的做法，听着有收获，也知道接下来可以怎样尝试。
 output:
   use: motion
-  source_card: true
-  package:
-    accent: '#1f7a4d'
-    badge: 行动清单
+  packaging:
+    use: common
+    label: 行动清单
     outro:
-      template: end_card
-      title: 行动清单
-      lines: ['面向{{audience}}的 AI 行动清单']
+      lines:
+      - 面向{{audience}}的 行动清单
       seconds: 3
-      sound: synth_sting

@@ -2,6 +2,7 @@ import type { Credibility, CredibilityTier } from "@/api/video";
 import { cn } from "@/lib/utils";
 
 export const TIER_CLASS: Record<CredibilityTier, string> = {
+  generated: "border-border text-text-muted",
   trusted: "border-success text-success",
   partial: "border-border text-text-muted",
   unaudited: "border-warning text-warning",
@@ -11,6 +12,7 @@ export const TIER_CLASS: Record<CredibilityTier, string> = {
 };
 
 export const TIER_LABEL: Record<CredibilityTier, string> = {
+  generated: "按素材生成",
   trusted: "有出处可信",
   partial: "部分无出处",
   unaudited: "未审计",
@@ -19,7 +21,7 @@ export const TIER_LABEL: Record<CredibilityTier, string> = {
   verify: "有待核实",
 };
 
-/** How far a script's words can be trusted. Informs, never blocks; hover for the reasons. */
+/** The version's credibility and the reasons used by the automatic approval gate. */
 export function CredibilityBadge({ value, className }: { value: Credibility | null | undefined; className?: string }) {
   if (!value) return null;
   return (

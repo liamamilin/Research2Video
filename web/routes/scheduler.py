@@ -6,6 +6,7 @@ import os
 import shlex
 import sys
 from pathlib import Path
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, StrictBool, StrictStr, StrictInt
@@ -72,13 +73,13 @@ def _require_installed(job_id: str) -> None:
 
 
 @router.get("")
-def list_scheduled(user=Depends(require_admin)):
+def list_scheduled(user=Depends(require_admin), scope: Literal['all', 'managed', 'system'] = 'all'):
     """Use the same discovery and health source as the system health page."""
     warnings = []
     try:
-        jobs = scheduler.all_jobs()
+        jobs = scheduler.all_jobs() if scope != 'managed' else []
         health = scheduler.schedule_health(
-            state_dir=get_settings().paths.state_dir, repo_dir=os.getcwd(), jobs=jobs)
+            state_dir=get_settings().paths.state_dir, repo_dir=os.getcwd(), jobs=jobs) if scope != 'managed' else {'jobs': []}
         displayed = [scheduler.describe_job(job) for job in jobs]
     except (RuntimeError, OSError) as exc:
         jobs, displayed = [], []
@@ -87,18 +88,19 @@ def list_scheduled(user=Depends(require_admin)):
     warnings.extend(dict.fromkeys(j["discovery_warning"] for j in jobs if j.get("discovery_warning")))
     if health.get("orphan_headers"):
         warnings.append(health["detail"])
-    host = schedule_host.status(managed.runtime())
-    plans = [managed.describe(plan) for plan in managed.store().list()]
+    host = schedule_host.status(managed.runtime()) if scope != 'system' else None
+    plans = managed.describe_all(managed.store()) if scope != 'system' else []
     states = [managed.classify(plan, host) for plan in plans]
     displayed = plans + displayed
     health['jobs'] = states + health['jobs']
     health['overdue'] = sum(s['status'] == 'overdue' for s in health['jobs'])
     health['paused'] = sum(s['status'] == 'paused' for s in health['jobs'])
     health['status'] = 'error' if health['overdue'] else 'warn' if warnings else 'ok'
-    removed = launchd_agents.list_deleted(get_settings().paths.state_dir)
-    warnings.extend(_matrix_trigger_warnings(displayed, removed))
+    removed = launchd_agents.list_deleted(get_settings().paths.state_dir) if scope != 'managed' else []
+    if scope != 'managed':
+        warnings.extend(_matrix_trigger_warnings(displayed, removed))
     from web.services import schedule_overview
-    others = schedule_overview.rows()
+    others = schedule_overview.rows() if scope != 'managed' else []
     return {"jobs": displayed, "total": len(displayed), "health": health,
             "timezone": cron.timezone_label(), "warnings": warnings,
             'dispatcher': host, "removed_system_jobs": removed,

@@ -75,6 +75,29 @@ afterEach(() => {
 });
 
 describe("Dashboard system health", () => {
+  it("does not overlap slow statistic refreshes and cancels them when leaving", async () => {
+    let healthSignal: AbortSignal | undefined;
+    const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
+      const path = String(url);
+      if (path.includes("/api/health")) {
+        healthSignal = init?.signal as AbortSignal;
+        return new Promise<Response>((_resolve, reject) => healthSignal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")), { once: true }));
+      }
+      if (path.includes("/api/jobs")) return jsonResponse([]);
+      if (path.includes("/api/usage")) return jsonResponse(USAGE);
+      return jsonResponse({ total: 0, total_size_bytes: 0, categories: 0 });
+    });
+    vi.stubGlobal("fetch", fetcher);
+    const page = render(<MemoryRouter><DashboardPage /></MemoryRouter>);
+    const refresh = screen.getByRole("button", { name: "刷新" }) as HTMLButtonElement;
+    await waitFor(() => expect(refresh.disabled).toBe(false));
+    fireEvent.click(refresh);
+    await waitFor(() => expect(refresh.disabled).toBe(false));
+    expect(fetcher.mock.calls.filter(([url]) => String(url).includes("/api/health"))).toHaveLength(1);
+    page.unmount();
+    expect(healthSignal?.aborted).toBe(true);
+  });
+
   it("shows a normal badge and hides details until clicked", async () => {
     mockApi(HEALTH_OK);
     render(<MemoryRouter><DashboardPage /></MemoryRouter>);

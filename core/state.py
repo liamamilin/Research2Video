@@ -15,7 +15,7 @@ import time
 import logging
 from typing import Optional
 
-from core.fileio import append_line, atomic_write, file_lock
+from core.fileio import append_line, atomic_write, file_lock, tail_lines
 
 logger = logging.getLogger(__name__)
 
@@ -147,8 +147,11 @@ class StateManager:
         if not os.path.isfile(path):
             return []
         try:
-            with open(path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
+            if limit > 0:
+                lines = tail_lines(path, limit)
+            else:  # preserve the legacy zero/negative slice semantics
+                with open(path, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
         except OSError:
             return []
         result = []

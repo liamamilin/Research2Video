@@ -69,9 +69,12 @@ def test_titles_fit_the_card():
 def test_a_column_turns_the_card_on_with_a_flag_and_rejects_anything_else(tmp_path):
     folder = golden.install_recipes(tmp_path)
     columns = video_columns.load(str(tmp_path))
-    assert columns["flash"].source_card and not columns["deep_dive"].source_card
+    assert columns["flash"].source_card and columns["deep_dive"].source_card
     flash = folder / "flash.yaml"
-    flash.write_text(flash.read_text(encoding="utf-8").replace("  source_card: true\n", "  source_card: yes please\n"),
+    text = flash.read_text(encoding="utf-8")
+    flash.write_text(text.replace("    use: common\n", "    use: common\n    source_card: {enabled: false}\n"), encoding="utf-8")
+    assert not video_columns.get(str(tmp_path), "flash").source_card
+    flash.write_text(text.replace("    use: common\n", "    use: common\n    source_card: {enabled: yes please}\n"),
                      encoding="utf-8")
     try:
         video_columns.get(str(tmp_path), "flash")
@@ -106,3 +109,49 @@ def test_a_living_page_is_shown_as_of_the_day_it_was_checked_and_other_dates_are
     assert [(c["url"], c["date"]) for c in cards] == [("https://docs.example.com/caching", "2026-10-17"),
                                                       ("https://www.example.com/opus", "2026-09-22"),
                                                       ("https://blog.example.com/p", "2026-07-29")]
+
+
+TABLE_REPORT = """# 历史与考古动态
+### 1. 本期要点
+正文里另一个地址 https://example.com/not-a-reference
+### 3. 来源清单
+| 来源 | 标题 | 日期 | 链接（链接原样照抄） |
+|---|---|---|---|
+| museum.example | 日食传说 | Wed, 21 Oct 2026 11:45:00 +0000 | https://museum.example/eclipse/ |
+| library.example | 林肯书信 | Wed, 21 Oct 2026 17:00:01 +0000 | [阅读原文](https://library.example/letter/) |
+"""
+
+
+def test_history_report_tables_preserve_titles_urls_and_rfc_dates():
+    entries = sources.report_sources(TABLE_REPORT)
+    assert [entry["title"] for entry in entries] == ["日食传说", "林肯书信"]
+    assert [entry["url"] for entry in entries] == ["https://museum.example/eclipse/", "https://library.example/letter/"]
+    assert [sources._iso_date(entry["date"]) for entry in entries] == ["2026-10-21", "2026-10-21"]
+    assert all(not entry["kind"] for entry in entries)  # a site name does not establish first-hand provenance
+
+
+def test_markdown_bibliographies_keep_link_labels_and_ignore_following_sections():
+    report = """## 参考资料
+- [官方说明](https://example.com/docs/)
+### 补充文献
+- [案例](https://example.com/case)
+## 下一部分
+[不是来源](https://example.com/elsewhere)
+"""
+    entries = sources.report_sources(report)
+    assert [(e["title"], e["url"]) for e in entries] == [("官方说明", "https://example.com/docs/"),
+                                                          ("案例", "https://example.com/case")]
+
+
+def test_source_deduplication_matches_tracking_variants_but_preserves_the_original_link():
+    report = "## Sources\n- [原文](https://www.example.com/p/?utm_source=r)\n- https://example.com/p\n"
+    entries = sources.report_sources(report)
+    assert len(entries) == 1 and entries[0]["url"] == "https://www.example.com/p/?utm_source=r"
+
+
+def test_inline_source_fallback_is_explicit_and_dates_are_not_guessed():
+    report = "2026-10-23 的分析，参见 [资料](https://example.com/data)。"
+    assert sources.report_sources(report) == []
+    entry = sources.report_sources(report, fallback=True)[0]
+    assert entry["title"] == "资料" and not entry["date"]
+    assert sources._iso_date("not a date") == ""

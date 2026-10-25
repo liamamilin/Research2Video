@@ -64,7 +64,7 @@ def _put(client, body, job=FLASH):
 def test_a_timed_period_asks_for_confirmation_then_shows_on_the_member(client, online):
     _admin(client)
     refused = _put(client, {"kind": "weekly", "time": "05:00", "days": [2]})
-    assert refused.status_code == 409 and "每月约 4" in refused.text
+    assert refused.status_code == 409 and any(f"每月约 {count}" in refused.text for count in (4, 5))
     assert managed.store().list() == []  # nothing saved without the yes
     made = _put(client, {"kind": "weekly", "time": "05:00", "days": [2], "confirm": True})
     assert made.status_code == 200, made.text

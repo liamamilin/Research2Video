@@ -40,7 +40,7 @@ describe("ScriptSteps", () => {
     expect(screen.getByText("等你定稿")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "从断点继续" })).toBeNull(); // the research did not fail
     fireEvent.click(screen.getByRole("button", { name: "重跑审计" }));
-    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining("不改稿子"));
+    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining("可能自动修改文稿"));
     await waitFor(() => expect(changed).toHaveBeenCalled());
     expect(posted).toEqual(["/api/video/scripts/s1/steps/audit/rerun"]);
     fireEvent.click(screen.getByRole("button", { name: "记录（1）" }));

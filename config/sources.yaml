@@ -247,7 +247,11 @@ engadget:
 nist_news:
   name: NIST 新闻
   spec: rss:https://www.nist.gov/news-events/news/rss.xml
-  tags: [industry, science]
+  tags: [science]
+nist_manufacturing:
+  name: NIST 制造业
+  spec: rss:https://www.nist.gov/news-events/manufacturing/rss.xml
+  tags: [industry]
 semi:
   name: SEMI
   spec: rss:https://www.semi.org/en/rss.xml
@@ -267,7 +271,7 @@ eetimes:
   tags: [industry, semiconductors]
 semiconductor_digest:
   name: Semiconductor Digest
-  spec: rss:https://sst.semiconductor-digest.com/feed/
+  spec: rss:https://www.semiconductor-digest.com/feed/
   tags: [industry, semiconductors]
 
 # --- 文化与艺术 ---

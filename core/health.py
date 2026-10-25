@@ -15,6 +15,7 @@ import re
 import shutil
 import sqlite3
 import time
+import tempfile
 from datetime import datetime
 from typing import Optional
 from typing import Optional
@@ -56,10 +57,10 @@ def _paths_check(state_dir: str, output_dir: str) -> list[dict]:
     for label, path in (("state_dir", state_dir), ("output_dir", output_dir)):
         try:
             os.makedirs(path, exist_ok=True)
-            probe = os.path.join(path, ".health-probe")
-            with open(probe, "w", encoding="utf-8") as f:
+            # Health requests run concurrently (the gateway probes on every request).
+            # A shared filename lets one request remove another request's probe.
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path, prefix=".health-probe-") as f:
                 f.write("ok")
-            os.remove(probe)
             results.append(_check(label, OK, f"writable: {os.path.abspath(path)}"))
         except OSError as exc:
             results.append(_check(label, ERROR, f"not writable: {exc}"))

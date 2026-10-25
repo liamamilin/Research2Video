@@ -16,4 +16,4 @@ export interface SourceCatalog {
   problems: { job: string; problem: string }[]; // Job 里写了注册表没有的源或标签
 }
 
-export const listSources = () => api<SourceCatalog>("/api/sources");
+export const listSources = (signal?: AbortSignal) => api<SourceCatalog>("/api/sources", { signal });

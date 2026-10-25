@@ -45,6 +45,10 @@ class Runtime:
 
 def canonical_job(runtime: Runtime, name: str) -> tuple[str, dict]:
     """Resolve aliases once and ensure the selected YAML stays inside jobs_dir."""
+    from core.platform_analytics_store import INTERNAL_JOB
+    if name == INTERNAL_JOB:
+        return name, {'name': 'B站视频数据采集', '_file': name, 'enabled': True,
+                      'runtime': {'timeout_seconds': 300}}
     from core.config import load_job
     job = load_job(runtime.jobs_dir, name)
     if not job:
@@ -196,6 +200,10 @@ def dispatch_once(runtime: Runtime, store: ScheduleStore, now: float | None = No
 
 def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event) -> tuple[str, str, str | None]:
     """Use the research engine's actual result, not run.py's historical exit code."""
+    from core.platform_analytics_store import INTERNAL_JOB
+    if job_name == INTERNAL_JOB:
+        from web.services.platform_analytics import run_scheduled
+        return run_scheduled(runtime.state_dir, cancel)
     from core import state, lock, report_meta
     from core.budget import pipeline_allowed
     from core.config import load_system_config

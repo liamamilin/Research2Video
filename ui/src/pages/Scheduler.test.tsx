@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SchedulerPage } from "./Scheduler";
@@ -149,7 +149,7 @@ describe("Scheduler missed-run banners", () => {
       paused: 0,
     });
     render(<SchedulerPage />);
-    expect(await screen.findByText(/漏跑：practical_ai_intelligence/)).toBeTruthy();
+    expect(await screen.findByText("存在漏跑记录")).toBeTruthy();
     expect(screen.getByText(/上次应运行 09-24 06:00/)).toBeTruthy();
   });
 
@@ -165,7 +165,7 @@ describe("Scheduler missed-run banners", () => {
       paused: 1,
     });
     render(<SchedulerPage />);
-    expect(await screen.findByText(/已暂停：practical_ai_intelligence/)).toBeTruthy();
+    expect(await screen.findByText("已暂停", { selector: "p" })).toBeTruthy();
     expect(screen.queryByText(/漏跑/)).toBeNull();
   });
 
@@ -533,5 +533,56 @@ describe("Scheduler matrix system tasks", () => {
       expect(calls.some(c => c.url.includes(`${DAILY}/restore`))).toBe(true);
       expect(calls.some(c => c.url.includes(`${CATCHUP}/restore`))).toBe(true);
     });
+  });
+});
+
+describe("independent scheduler reads", () => {
+  it("waits for the system list before claiming there are no schedules", async () => {
+    let resolveSystem!: (response: Response) => void;
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (String(url).includes("scope=system")) return new Promise<Response>(resolve => { resolveSystem = resolve; });
+      return jsonResponse({ jobs: [] });
+    }));
+    render(<SchedulerPage />);
+    await screen.findByText(/正在检查系统任务/);
+    expect(screen.queryByText("暂无周期调度任务")).toBeNull();
+    await act(async () => resolveSystem(jsonResponse({ jobs: [{
+      id: "legacy", title: "已有系统计划", backend: "launchd", enabled: true, schedule: "0 6 * * *",
+    }] })));
+    expect(await screen.findByText("已有系统计划")).toBeTruthy();
+    expect(screen.queryByText("暂无周期调度任务")).toBeNull();
+  });
+
+  it("shows managed plans while system discovery is still waiting and cancels it on exit", async () => {
+    let systemSignal: AbortSignal | undefined;
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).includes("scope=system")) {
+        systemSignal = init?.signal as AbortSignal;
+        return new Promise<Response>((_resolve, reject) => systemSignal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError"))));
+      }
+      if (String(url).includes("scope=managed")) return jsonResponse({ jobs: [{
+        id: "fast", title: "无需等待系统检查的计划", backend: "managed", enabled: true, schedule: "0 8 * * *",
+      }], dispatcher: { online: true, detail: "心跳正常" } });
+      return jsonResponse({});
+    }));
+    const view = render(<SchedulerPage />);
+    expect(await screen.findByText("无需等待系统检查的计划")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "编辑 fast" })).toBeTruthy();
+    expect(screen.getByText(/正在检查系统任务/)).toBeTruthy();
+    view.unmount();
+    expect(systemSignal?.aborted).toBe(true);
+  });
+
+  it("keeps managed plans visible when system inspection fails", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (String(url).includes("scope=system")) throw new TypeError("system inspection unavailable");
+      if (String(url).includes("scope=managed")) return jsonResponse({ jobs: [{
+        id: "ready", title: "正常读取的计划", backend: "managed", enabled: true, schedule: "0 8 * * *",
+      }] });
+      return jsonResponse({});
+    }));
+    render(<SchedulerPage />);
+    expect(await screen.findByText("正常读取的计划")).toBeTruthy();
+    expect((await screen.findByRole("alert")).textContent).toContain("系统任务读取失败");
   });
 });

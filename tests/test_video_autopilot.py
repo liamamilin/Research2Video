@@ -152,7 +152,7 @@ def test_a_draft_with_a_serious_finding_is_held_not_rendered_until_the_user_appr
     assert item_of(run["id"], 0)["state"] == "WORKING" and len(store.list_renders(script_id)) == 1
 
 
-def test_a_draft_that_would_be_spoken_wrongly_is_held_too(pilot_env, monkeypatch):
+def test_narration_wording_advice_is_recorded_without_blocking_core_approval(pilot_env, monkeypatch):
     run = batch(monkeypatch, 1)
     pilot.tick()
     script_id = item_of(run["id"], 0)["script_id"]
@@ -163,10 +163,26 @@ def test_a_draft_that_would_be_spoken_wrongly_is_held_too(pilot_env, monkeypatch
     store.update_version_audit(script_id, 1, sections=SECTIONS, meta={"checks": checks})
     pilot.tick()
     item = item_of(run["id"], 0)
-    assert item["state"] == "HELD" and "口播有问题" in item["note"] and store.list_renders(script_id) == []
+    assert item["gate"]["label"] == "partial" and item["gate"]["approved"] == "auto"
+    assert item["gate"]["ignored"]["warn"] == 1
+    assert store.get_script(script_id)["status"] == "APPROVED"
 
 
-def test_a_draft_whose_model_audit_never_ran_gets_its_audit_rerun_then_goes_on_labelled_unaudited(pilot_env, monkeypatch):
+def test_an_audited_draft_with_reader_advice_is_not_held(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id)
+    unclear = adapt_review.issue("N1", adapt_review.MUST, "比较方向没说清楚", 0, 0, source="model")
+    checks = adapt_review.assemble([], {"issues": [unclear]}, {"issues": []}, None, SECTIONS)
+    store.update_version_audit(script_id, 1, sections=SECTIONS, meta={"checks": checks})
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    assert item["gate"]["approved"] == "auto" and item["gate"]["ignored"]["warn"] == 1
+    assert store.get_script(script_id)["status"] == "APPROVED"
+
+
+def test_a_draft_whose_model_audit_never_ran_is_retried_then_held(pilot_env, monkeypatch):
     spawned, _ = pilot_env
     run = batch(monkeypatch, 1)
     pilot.tick()
@@ -178,7 +194,43 @@ def test_a_draft_whose_model_audit_never_ran_gets_its_audit_rerun_then_goes_on_l
     pilot.tick()
     item = item_of(run["id"], 0)
     assert item["gate"]["label"] == "unaudited" and item["gate"]["audited"] is False
+    assert item["state"] == "HELD" and item["gate"]["approved"] is False
+    assert store.get_script(script_id)["status"] == "DRAFT" and store.list_renders(script_id) == []
+
+
+def test_a_pending_fact_is_retried_then_held_without_automatic_approval(pilot_env, monkeypatch):
+    spawned, _ = pilot_env
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id)
+    current = store.get_version(script_id, 1)
+    sections = [{"title": "性能", "paragraphs": [{"text": "最多提升 70%。", "citations": [],
+                "evidence": "NEEDS_REVIEW", "review_reason": "缺少模型和硬件条件"}]}]
+    store.update_version_audit(script_id, 1, sections=sections, meta=current["meta"])
+    for _ in range(pilot.MAX_RETRIES):
+        pilot.tick()
+    assert spawned.count(script_id) == 1 + pilot.MAX_RETRIES
+    pilot.tick()
+    item = item_of(run["id"], 0)
+    assert item["state"] == "HELD" and item["gate"]["label"] == "verify"
+    assert item["gate"]["approved"] is False and "缺少模型和硬件条件" in item["note"]
+    assert store.get_script(script_id)["status"] == "DRAFT" and store.list_renders(script_id) == []
+
+
+def test_a_pending_fact_that_is_verified_on_retry_can_proceed(pilot_env, monkeypatch):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id, model_ran=False)
+    pilot.tick()
+    assert item_of(run["id"], 0)["retries"]["audit"] == 1
+    draft_version = store.get_version(script_id, 1)
+    checks = adapt_review.assemble([], {"issues": []}, {"issues": []}, None, SECTIONS)
+    store.update_version_audit(script_id, 1, sections=draft_version["sections"], meta={"checks": checks})
+    pilot.tick()
     assert store.get_script(script_id)["status"] == "APPROVED"
+    assert item_of(run["id"], 0)["gate"]["approved"] == "auto"
 
 
 def test_a_failed_script_is_resumed_twice_then_held(pilot_env, monkeypatch):
@@ -333,14 +385,14 @@ def test_a_roundup_marks_each_of_its_items_as_written(video_env):
     assert store.topic_ids_in_use() == {"2026-10-19/F2", "2026-10-19/F3"}
 
 
-def test_the_style_audit_can_report_as_a_warning_for_a_roundup(llm):
+def test_the_style_audit_remains_advisory_even_with_a_legacy_must_setting(llm):
     from core.video import audit as video_audit
 
     reply = '{"issues": [{"id": "S1P1", "quote": "一句话", "rule": "S1", "severity": "一般", "problem": "细节多", "why": "", "suggestion": ""}]}'
     llm.style_replies = [reply, reply]
     client = llm(None)
-    assert video_audit.style_issues(client, SECTIONS, "规范")[0]["severity"] == adapt_review.MUST
-    assert video_audit.style_issues(client, SECTIONS, "规范", adapt_review.WARN)[0]["severity"] == adapt_review.WARN
+    assert video_audit.style_issues(client, SECTIONS, "规范")[0]["severity"] == adapt_review.WARN
+    assert video_audit.style_issues(client, SECTIONS, "规范", adapt_review.MUST)[0]["severity"] == adapt_review.WARN
 
 
 def test_api_archiving_hides_a_script_without_deleting_it(client, video_env):
@@ -438,6 +490,21 @@ def test_a_failed_render_is_submitted_once_more_then_held(pilot_env, monkeypatch
     pilot.tick()
     assert len(store.list_renders(script_id)) == 2
     assert item_of(run["id"], 0)["state"] == "HELD" and "出片失败" in item_of(run["id"], 0)["note"]
+
+
+@pytest.mark.parametrize("code", ["SUBMIT_UNCONFIRMED", "DOWNLOAD_FAILED"])
+def test_uncertain_submissions_and_completed_copies_are_not_generated_again(pilot_env, monkeypatch, code):
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    draft(script_id)
+    pilot.tick()
+    pilot.tick()
+    render = store.list_renders(script_id)[0]
+    store.update_render(render["id"], status="FAILED", error_code=code)
+    pilot.tick()
+    assert len(store.list_renders(script_id)) == 1
+    assert item_of(run["id"], 0)["state"] == "HELD"
 
 
 def test_a_script_the_user_archives_is_not_approved_or_rendered_by_the_pipeline(pilot_env, monkeypatch):

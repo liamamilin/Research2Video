@@ -10,3 +10,5 @@ jobs:
 - ai_media/weekly_model_arena
 - ai_media/weekly_business_watch
 - ai_media/weekly_deep_research
+render:
+  video_speed: 1.25

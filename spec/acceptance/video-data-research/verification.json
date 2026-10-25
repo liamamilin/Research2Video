@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-24",
+  "scope": "Research and design only; no production analytics tab or background collection was installed",
+  "bilibili_requests": { "method": "GET", "count": 15, "writes": 0 },
+  "capability_checks": { "successful_endpoint_checks": 8, "unavailable_endpoint": "/x/web-interface/archive/stat", "unavailable_http_status": 404 },
+  "data_checks": {
+    "creator_catalog_count": 351,
+    "play_analysis_rows_returned": 30,
+    "public_video_owner_verified": true,
+    "seven_day_points": 7,
+    "seven_day_plays": 683,
+    "thirty_day_points": 30,
+    "thirty_day_plays": 987,
+    "daily_series_sum_matches_overview": true,
+    "platform_data_through": "2026-10-23",
+    "rate_not_labeled_strict_completion_rate": true,
+    "device_sources_not_labeled_recommendation_or_search_channels": true
+  },
+  "prototype": {
+    "data": "Real, allowlisted aggregate metrics and four verified video samples",
+    "javascript_syntax": "PASS",
+    "browser_seven_thirty_day_switch": "PASS",
+    "browser_title_search": "PASS; Huashu narrows four samples to one",
+    "browser_video_detail": "PASS; seven cumulative metrics, missing-history state, comment-count qualification",
+    "browser_visual_review": "PASS",
+    "screenshots": ["overview.png", "detail.png"]
+  },
+  "preservation": { "production_code_changed": false, "production_service_restarted": false, "scheduled_collection_enabled": false, "comments_sent": 0, "credentials_in_evidence": false },
+  "design": "../../video-data-tab.md",
+  "references": [
+    "https://github.com/inorilzy/bilibili-api/blob/main/bilibili_api/creative_center.py",
+    "https://github.com/inorilzy/bilibili-api/blob/main/bilibili_api/video.py",
+    "https://open.bilibili.com/"
+  ]
+}

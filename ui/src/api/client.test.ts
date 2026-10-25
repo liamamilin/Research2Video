@@ -21,10 +21,32 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
 describe("api()", () => {
+  it("bounds stalled read requests, including stalls while reading the response body", async () => {
+    vi.useFakeTimers();
+    fetchMock.mockImplementationOnce(async (_url, init) => ({
+      ok: true, status: 200,
+      text: () => new Promise((_resolve, reject) => {
+        init.signal.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")));
+      }),
+    }));
+    const pending = expect(api("/api/outputs", { timeoutMs: 50 })).rejects.toMatchObject({ code: "request_timeout" });
+    await vi.advanceTimersByTimeAsync(51);
+    await pending;
+  });
+
+  it("keeps stream cancellation attached after returning the live response", async () => {
+    const controller = new AbortController();
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
+    await api("/api/logs/stream", { responseType: "stream", signal: controller.signal });
+    controller.abort();
+    expect(fetchMock.mock.calls[0][1].signal.aborted).toBe(true);
+  });
+
   it("returns a live stream without buffering the body, preserving CSRF", async () => {
     document.cookie = "ai_research_csrf=csrf-123";
     const text = vi.fn();
@@ -120,6 +142,14 @@ describe("api()", () => {
     await expect(api("/api/things")).rejects.toBeInstanceOf(ApiError);
     expect(onAuthError).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("preserves the login session when refresh hits a temporary service failure", async () => {
+    const onAuthError = vi.fn();
+    setAuthErrorHandler(onAuthError);
+    fetchMock.mockResolvedValueOnce(fakeResponse(401)).mockResolvedValueOnce(fakeResponse(503));
+    await expect(api("/api/outputs")).rejects.toMatchObject({ code: "auth_unavailable" });
+    expect(onAuthError).not.toHaveBeenCalled();
   });
 
   it("wraps network errors as ApiError", async () => {

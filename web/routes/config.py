@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import copy
 import hashlib
 import logging
 import math
@@ -11,6 +12,7 @@ import time
 from io import StringIO
 from pathlib import Path
 from typing import Optional
+from functools import lru_cache
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
@@ -25,6 +27,11 @@ from web.services.yaml_io import parse_yaml, atomic_write, save_backup
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 logger = logging.getLogger(__name__)
+
+
+@lru_cache(maxsize=8)
+def _parsed_system_text(content: str) -> dict:
+    return parse_yaml(content)
 
 
 def system_config_lock():
@@ -276,32 +283,20 @@ def get_providers(user=Depends(require_admin)):
 
 
 @router.get("/providers/{provider_id}/models")
-def get_provider_models(provider_id: str, user=Depends(require_admin)):
+def get_provider_models(provider_id: str, refresh: bool = False, user=Depends(require_admin)):
     """The model ids a provider preset serves right now (its ``/models`` list), so the form can warn about an id the
     provider does not have instead of the first request failing with 404.
 
-    Only a preset's own address is asked, with that preset's own key: an arbitrary URL would let this route send a saved
-    key anywhere. Never an HTTP error for a provider that is down or has no key: ``error`` says why and ``models`` is empty.
+    Only a preset's own address receives its saved key. Lists and public official prices are cached for one hour;
+    ``refresh`` bypasses the cache. Upstream failure returns an error and any previous successful snapshot as stale.
     """
-    import httpx
+    from web.services.provider_catalog import get_catalog
+    from web.settings import get_settings
 
     preset = get_provider(provider_id)
     if preset is None:
         raise HTTPException(status_code=404, detail=ApiError.make("not_found", "没有这个服务商"))
-    headers = {k: v.replace("{session_id}", "models") for k, v in preset.extra_headers.items()}
-    key = os.environ.get(preset.api_key_env, "") if preset.api_key_env else ""
-    if key:
-        headers["Authorization"] = f"Bearer {key}"
-    elif preset.api_key_env:
-        return {"models": [], "error": f"还没填密钥 {preset.api_key_env}"}
-    try:
-        reply = httpx.get(preset.base_url.rstrip("/") + "/models", headers=headers, timeout=10.0)
-        if reply.status_code >= 400:
-            return {"models": [], "error": f"服务商返回 {reply.status_code}"}
-        items = reply.json().get("data") or []
-        return {"models": sorted({str(i["id"]) for i in items if isinstance(i, dict) and i.get("id")}), "error": None}
-    except (httpx.HTTPError, ValueError, AttributeError) as exc:
-        return {"models": [], "error": f"取不到模型列表：{type(exc).__name__}"}
+    return get_catalog(preset, get_settings().paths.state_dir, refresh=refresh)
 
 
 @router.get("/system")
@@ -335,7 +330,7 @@ def _get_system_config_locked():
         raw = f.read()
     mtime = os.path.getmtime(path)
 
-    parsed = parse_yaml(raw)
+    parsed = copy.deepcopy(_parsed_system_text(raw)) if len(raw) <= 128_000 else parse_yaml(raw)
     masked = _mask_secrets(parsed)
 
     return {

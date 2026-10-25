@@ -24,6 +24,8 @@ from typing import Optional
 
 import yaml
 
+from core.yaml_cache import load_yaml
+
 from .fileio import atomic_write
 
 KEY = re.compile(r"[a-z][a-z0-9_]{0,23}")
@@ -48,6 +50,7 @@ class Matrix:
     paused: tuple = ()   # Jobs whose timed runs were stopped by pausing the whole matrix (resuming turns them back on)
     monthly_searches: int = 0  # most searches its Jobs may use in a calendar month; 0 is no limit
     archived: bool = False     # put away: kept as it is (its Jobs still belong to it), hidden from the matrix list
+    render: dict = field(default_factory=dict)  # shared video defaults; explicit task fields override them
 
     @property
     def jobs(self) -> list[str]:
@@ -56,7 +59,8 @@ class Matrix:
     def as_dict(self) -> dict:
         return {"key": self.key, "name": self.name, "domain": self.domain, "keywords": list(self.keywords),
                 "jobs": [{"job": m.job, "copy_as": m.copy_as} for m in self.members], "errors": list(self.errors),
-                "paused": list(self.paused), "monthly_searches": self.monthly_searches, "archived": self.archived}
+                "paused": list(self.paused), "monthly_searches": self.monthly_searches, "archived": self.archived,
+                "render": self.render}
 
 
 def directory(config_dir: str) -> str:
@@ -85,7 +89,7 @@ def _read(path: str, key: str) -> Matrix:
     errors: list[str] = []
     try:
         with open(path, encoding="utf-8") as fh:
-            data = yaml.safe_load(fh) or {}
+            data = load_yaml(fh) or {}
     except (OSError, yaml.YAMLError) as exc:
         return Matrix(key=key, name=key, errors=(f"读不了：{str(exc)[:120]}",))
     if not isinstance(data, dict):
@@ -103,13 +107,19 @@ def _read(path: str, key: str) -> Matrix:
             continue
         if member.job not in [m.job for m in members]:
             members.append(member)
-    unknown = set(data) - {"name", "domain", "keywords", "jobs", "paused", "monthly_searches", "archived"}
+    from .video.production_settings import validate as validate_render
+    try:
+        render = validate_render(data.get("render"))
+    except ValueError as exc:
+        errors.append(str(exc))
+        render = {}
+    unknown = set(data) - {"name", "domain", "keywords", "jobs", "paused", "monthly_searches", "archived", "render"}
     if unknown:
         errors.append(f"不认识的字段：{', '.join(sorted(unknown))}")
     return Matrix(key=key, name=str(data.get("name") or key).strip(), domain=str(data.get("domain") or "").strip(),
                   keywords=tuple(_strings(data.get("keywords"))), members=tuple(members), errors=tuple(errors),
                   paused=tuple(_strings(data.get("paused"))), monthly_searches=_cap(data.get("monthly_searches"), errors),
-                  archived=data.get("archived") is True)
+                  archived=data.get("archived") is True, render=render)
 
 
 def load_all(config_dir: str = "config") -> dict[str, Matrix]:
@@ -180,16 +190,20 @@ def jobs_of_other_matrices(job_name: str, config_dir: str = "config") -> set[str
 
 
 def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members, paused=None,
-         monthly_searches=None, archived=None) -> None:
-    """Write a matrix file. ``paused``, ``monthly_searches`` and ``archived`` are kept as the file has them unless
+         monthly_searches=None, archived=None, render=None) -> None:
+    """Write a matrix file. ``paused``, ``monthly_searches``, ``archived`` and ``render`` are kept unless
     given (a rename never un-pauses, lifts the limit or un-archives)."""
-    before = load_all(config_dir).get(key) if paused is None or monthly_searches is None or archived is None else None
+    before = load_all(config_dir).get(key) if paused is None or monthly_searches is None or archived is None or render is None else None
     if paused is None:
         paused = before.paused if before else ()
     if monthly_searches is None:
         monthly_searches = before.monthly_searches if before else 0
     if archived is None:
         archived = before.archived if before else False
+    if render is None:
+        render = before.render if before else {}
+    from .video.production_settings import validate as validate_render
+    render = validate_render(render)
     data = {"name": name, "domain": domain, "keywords": _strings(keywords),
             "jobs": [m.job if not m.copy_as else {"job": m.job, "copy_as": m.copy_as} for m in members]}
     kept = [j for j in _strings(paused) if j in [m.job for m in members]]
@@ -199,6 +213,8 @@ def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members
         data["monthly_searches"] = int(monthly_searches)
     if archived:
         data["archived"] = True
+    if render:
+        data["render"] = render
     text = ("# 矩阵：一组 Job，共用一个领域和一套关键词（spec/matrices.md）。成员 Job 运行时，{keywords} 先放这里的关键词，\n"
             "# 再放 Job 自己的；{domain} 是这里的 domain。\n"
             + yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False))
@@ -219,7 +235,7 @@ def remove(config_dir: str, key: str) -> bool:
 WARN_RATIO = 0.8
 
 
-def history_of(job: str, jobs_dir: str = "jobs", limit: int = 5000) -> list[dict]:
+def history_of(job: str, jobs_dir: str = "jobs", limit: int = 5000, *, known_jobs: Optional[list[str]] = None) -> list[dict]:
     """A Job's run history, newest first. Older runs (the autopilot's, the command line's by file name) were filed under
     the Job's short file name; those count too, unless another Job has the same short name (then they cannot be told apart)."""
     from .config import list_jobs
@@ -227,20 +243,25 @@ def history_of(job: str, jobs_dir: str = "jobs", limit: int = 5000) -> list[dict
 
     entries = StateManager.get_history(job, limit=limit)
     short = job.rsplit("/", 1)[-1]
-    if short != job and sum(1 for other in list_jobs(jobs_dir) if other.rsplit("/", 1)[-1] == short) == 1:
+    if short == job:
+        return entries
+    names = known_jobs if known_jobs is not None else list_jobs(jobs_dir)
+    if sum(1 for other in names if other.rsplit("/", 1)[-1] == short) == 1:
         seen = {(e.get("ts"), e.get("status")) for e in entries}
         entries += [e for e in StateManager.get_history(short, limit=limit) if (e.get("ts"), e.get("status")) not in seen]
         entries.sort(key=lambda e: str(e.get("ts", "")), reverse=True)
     return entries
 
 
-def month_searches(matrix: Matrix, now=None, jobs_dir: str = "jobs") -> int:
+def month_searches(matrix: Matrix, now=None, jobs_dir: str = "jobs", *, known_jobs: Optional[list[str]] = None) -> int:
     """Searches the matrix's Jobs have used in the calendar month of ``now`` (what their run history recorded)."""
     from datetime import datetime
+    from .config import list_jobs
 
     month = (now or datetime.now().astimezone()).strftime("%Y-%m")
+    names = known_jobs if known_jobs is not None else list_jobs(jobs_dir)
     return sum(int((entry.get("usage") or {}).get("searches") or 0) for job in matrix.jobs
-               for entry in history_of(job, jobs_dir) if str(entry.get("ts", "")).startswith(month))
+               for entry in history_of(job, jobs_dir, known_jobs=names) if str(entry.get("ts", "")).startswith(month))
 
 
 def _jobs_dir(config_dir: str) -> str:

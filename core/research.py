@@ -90,12 +90,6 @@ def report_problem(content: str, tools_used: int = 0,
     for marker in _REFUSAL_MARKERS:
         if marker in lowered:
             return f"看起来是错误信息（含 {marker!r}）"
-    if tools_used == 0 and len(text) < min_chars:
-        return f"未做任何检索且仅 {len(text)} 字符（不足 {min_chars}）"
-    if len(text) < min_chars:
-        return f"仅 {len(text)} 字符，不足 {min_chars}"
-    if not _HEADING_RE.search(text) and not _URL_RE.search(text):
-        return "没有标题也没有任何引用链接"
     return None
 
 
@@ -156,7 +150,6 @@ class ResearchConfig:
     max_chars_per_call: int = 40000
     max_file_chars: int = 60000
     context_char_budget: int = 150000
-    min_report_chars: int = 400
 
     @classmethod
     def from_system(cls, sys_config: dict) -> "ResearchConfig":
@@ -168,47 +161,21 @@ class ResearchConfig:
             max_chars_per_call=int(cfg.get("max_chars_per_call", 40000)),
             max_file_chars=int(cfg.get("max_file_chars", 60000)),
             context_char_budget=int(cfg.get("context_char_budget", 150000)),
-            min_report_chars=int(cfg.get("min_report_chars", 400)),
         )
 
 
-_AGENT_SYSTEM_PROMPT = """\
-You are an autonomous research agent producing complete, evidence-based reports.
+_AGENT_SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+当前步骤：研究事情本身，为后续讲述提供具体资料。日期：{date}。
+找到值得讲的事情，保留能把它讲生动、讲明白的具体材料和原始链接，供后续作者展开讲述。
+工具：search_web(objective, queries) 检索资料；read_file/list_files 读取工作区资料。报告使用任务给定的语言和数据格式。"""
 
-Today's date: {date}.
-
-Available tools:
-- search_web(objective, queries): search the live web. Returns ranked sources \
-with excerpts. Call it multiple times with different angles before writing.
-- read_file(path): read a file from the project workspace (relative paths).
-- list_files(directory, pattern): list files in the workspace.
-
-Research rules:
-1. Gather evidence with search_web before writing. Prefer recent, primary sources.
-2. Cite the source URL for every factual claim, finding and price.
-3. Never invent facts, URLs, dates or prices. Mark anything unverified explicitly.
-4. Respect the time window and output language required by the task.
-5. When you have enough evidence, write the FINAL REPORT directly as your \
-reply (without calling tools), in Markdown, following the task's structure exactly.
-6. The final report must be self-contained: no meta commentary, no tool logs, \
-no notes about your research process.
-"""
-
-_PIPELINE_SYSTEM_PROMPT = """\
-You are a senior research analyst. Write the complete final report in Markdown \
-based on the task instructions and the provided web research results.
-
-Rules:
-- Follow the task's structure and output language exactly.
-- Cite the source URL for every factual finding and price.
-- Never invent facts or URLs. If the sources do not cover something, say so \
-explicitly instead of guessing.
-- Output ONLY the report - no preamble, no meta commentary.
-"""
+_PIPELINE_SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+当前步骤：研究事情本身，把有意思的发现、它的来龙去脉和具体细节写明白，原始资料链接随内容保留。
+报告使用任务给定的语言和数据格式。"""
 
 _PLANNER_PROMPT = """\
-You plan web research. Given the task below, output ONLY a JSON array of 5-8 \
-concise search queries (3-6 words each) covering its key information needs. \
+You plan web research. Given the task below, output ONLY a JSON array of focused search queries covering its key information needs. \
+Choose the number and wording for the task rather than filling a fixed quota. \
 Write the queries in the task's language (or English for technical topics). \
 No commentary, no code fences.
 
@@ -216,11 +183,7 @@ TASK:
 {task}
 """
 
-_FINALIZE_PROMPT = """\
-You have completed your research. Do not call any more tools. Write the \
-complete FINAL REPORT now in Markdown, following the task structure exactly \
-and citing source URLs for every finding.
-"""
+_FINALIZE_PROMPT = """根据已收集的素材完成报告，使用任务给定的语言和数据格式。"""
 
 
 class _NoSearch:
@@ -233,16 +196,9 @@ class _NoSearch:
         raise RuntimeError("this Job reads only its declared sources; web search is switched off for it")
 
 
-_FETCH_SYSTEM_PROMPT = """\
-You are a senior editor. Write the complete final report in Markdown from the task instructions and ONLY the \
-fetched source material appended to the task. You have no web search and no other knowledge to lean on.
-
-Rules:
-1. Every fact, number, date and URL must come from the fetched material. If it is not there, leave it out.
-2. Cite the source URL of each item exactly as it appears in the material; never invent or complete a URL.
-3. A figure that comes from a newsletter's summary rather than the linked original is second-hand: say so.
-4. Respect the output language and structure the task requires. No meta commentary, no notes about your process.
-"""
+_FETCH_SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+当前步骤：研究事情本身，把有意思的发现、它的来龙去脉和具体细节写明白，原始资料链接随内容保留。
+报告使用任务给定的语言和数据格式。"""
 
 
 class ResearchAgent:
@@ -274,6 +230,8 @@ class ResearchAgent:
         self._tools_used = 0
         # Every URL this run actually retrieved, for citation provenance checks.
         self.retrieved_urls: set[str] = set()
+        # Original text shown by the search/file tools, for downstream authors.
+        self.materials: list[str] = []
         self._timeout_seconds = int(timeout_seconds or 0)
         self._deadline = (
             time.time() + self._timeout_seconds if self._timeout_seconds else 0.0
@@ -402,33 +360,11 @@ class ResearchAgent:
                         f"模型输出在 {self.llm.config.max_tokens} tokens 处被截断，"
                         "报告不完整；请提高 ai.max_tokens 或缩小任务范围"
                     )
-                # Accept short replies when no research was performed: the
-                # model decided the task needs no tools (e.g. sanity tests).
-                if self._tools_used == 0 or len(content) >= self.config.min_report_chars:
-                    problem = report_problem(content, self._tools_used,
-                                             self.config.min_report_chars)
-                    if problem:
-                        raise LLMError(f"模型输出不是可用报告：{problem}")
-                    self._log_usage()
-                    return content
-                logger.warning(
-                    "Model replied without tools but report is too short "
-                    "(%d chars); asking for the full report",
-                    len(content),
-                )
-                if content:
-                    messages.append(response.assistant_message)
-                messages.append(
-                    {
-                        "role": "user",
-                        "content": (
-                            "That reply is too short to be the final report. "
-                            "Write the complete report now, following the task "
-                            "structure exactly."
-                        ),
-                    }
-                )
-                continue
+                problem = report_problem(content, self._tools_used)
+                if problem:
+                    raise LLMError(f"模型输出不是可用报告：{problem}")
+                self._log_usage()
+                return content
 
             messages.append(response.assistant_message)
             for tool_call in response.tool_calls:
@@ -515,6 +451,7 @@ class ResearchAgent:
         # research/ai run was flagged at 53% coverage with 42 "unmatched" URLs
         # that were all real sources the model had read in a snippet.
         self._remember_urls_in(rendered)
+        self.materials.append(rendered)
         return rendered
 
     def _tool_read_file(self, arguments: dict) -> str:
@@ -533,9 +470,11 @@ class ResearchAgent:
             return f"Error: cannot read {path}: {exc}"
         logger.info("Tool read_file: %s (%d chars)", path, len(content))
         self._remember_urls_in(content)
-        return self._truncate(
+        rendered = self._truncate(
             f"# {path}\n\n{content}", self.config.max_file_chars
         )
+        self.materials.append(rendered)
+        return rendered
 
     def _tool_list_files(self, arguments: dict) -> str:
         directory = str(arguments.get("directory") or ".").strip() or "."
@@ -581,11 +520,10 @@ class ResearchAgent:
                 SearchClient.format_results(results),
                 self.config.context_char_budget // 2,
             )
+            self.materials.append(sources)
         else:
             sources = (
-                "(web search unavailable or returned no results - write the "
-                "report from the task instructions and explicitly mark every "
-                "claim you could not verify)"
+                "(No web search results were supplied.)"
             )
 
         self._progress({"type": "phase", "phase": "writing_report"})

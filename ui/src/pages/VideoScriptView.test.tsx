@@ -145,7 +145,8 @@ function mockApi(detail: unknown = DETAIL) {
     if (String(url).includes("/api/video/styles")) return jsonResponse(CATALOG);
     if (String(url).includes("/publish")) {
       return jsonResponse({ title: "缓存前缀纪律", description: "", chapters: [], chapter_note: "", tags: [],
-        cover: { headline: "缓存前缀纪律", badge: "深度解读" }, references: [], warnings: [], version: 1 });
+        cover: { headline: "缓存前缀纪律", badge: "深度解读" }, references: [], warnings: [],
+        version: Number(new URL(String(url), "http://localhost").searchParams.get("version")) || 1 });
     }
     if (String(url).includes("/facts")) {
       return jsonResponse({ id: "sheet1", report_path: "", question: "", answer: "", concepts: [], facts: [
@@ -158,6 +159,10 @@ function mockApi(detail: unknown = DETAIL) {
       const body = JSON.parse(String(init?.body));
       return jsonResponse({ ...DETAIL, current_version: 2, version_shown: { ...DETAIL.version_shown, version: 2, sections: body.sections, edit_type: "EDITED" } });
     }
+    if (method === "POST" && String(url).endsWith("/render")) {
+      return jsonResponse({ id: "fast-render", script_id: "s1", version: 1, status: "SUBMITTING", title: "快速卡片", artifacts: [],
+        created_at: "2026-10-23T17:00:00+0800", updated_at: "2026-10-23T17:00:00+0800", autovideo_url: null });
+    }
     if (String(url).includes("/api/video/autovideo")) {
       return jsonResponse({ base_url: "x", reachable: true, ready: true, blockers: [], voices: [], error: null });
     }
@@ -165,9 +170,9 @@ function mockApi(detail: unknown = DETAIL) {
   }));
 }
 
-function renderPage() {
+function renderPage(path = "/video/s1") {
   render(
-    <MemoryRouter initialEntries={["/video/s1"]}>
+    <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="/video/:id" element={<VideoScriptViewPage />} />
       </Routes>
@@ -186,6 +191,26 @@ afterEach(() => {
 });
 
 describe("Video script review", () => {
+  it("starts rewriting from the prominent entry only after its scope is accepted", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => false));
+    renderPage();
+    const button = await screen.findByRole("button", { name: "重新生成文稿" });
+    fireEvent.click(button);
+    expect(calls.some(c => c.method === "POST")).toBe(false);
+    vi.stubGlobal("confirm", vi.fn(() => true));
+    fireEvent.click(button);
+    await waitFor(() => expect(calls.some(c => c.url.endsWith("/steps/write/rerun") && c.method === "POST")).toBe(true));
+    expect(calls.some(c => c.url.endsWith("/render") && c.method === "POST")).toBe(false);
+  });
+  it("submits the approved manuscript as fast cards only when explicitly selected", async () => {
+    mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1 });
+    renderPage("/video/s1?tab=render");
+    const button = await screen.findByRole("button", { name: "快速卡片出片" });
+    fireEvent.click(button);
+    await waitFor(() => expect(calls.some(c => c.url.endsWith("/render") && c.method === "POST")).toBe(true));
+    expect(calls.find(c => c.url.endsWith("/render") && c.method === "POST")?.body).toEqual({ production_mode: "fast" });
+  });
+
   it("shows each paragraph's evidence, citations and the length check", async () => {
     renderPage();
     await screen.findByText("一个时间戳让缓存折扣失效");
@@ -193,7 +218,7 @@ describe("Video script review", () => {
     expect(screen.getByText("无引用")).toBeTruthy();
     expect(screen.getByText("需核实")).toBeTruthy();
     expect(screen.getByText("docs.example.com")).toBeTruthy();
-    expect(screen.getByText("时长达标（比目标短 3%）")).toBeTruthy();
+    expect(screen.getByText("接近参考时长（比目标短 3%）")).toBeTruthy();
     expect(screen.getByText("去掉了 1 个不可信引用")).toBeTruthy();
   });
 
@@ -238,5 +263,93 @@ describe("Video script review", () => {
     expect(screen.getByText("批处理跑了两万次调用")).toBeTruthy();
     expect(screen.getByText("测验 1/2")).toBeTruthy();
     expect(screen.getByText("前缀稳不稳决定缓存省不省钱")).toBeTruthy();
+  });
+});
+
+
+describe("Script version context", () => {
+  const oldRender = { id: "old", version: 1, status: "COMPLETED", title: "旧版标题",
+    files: [{ name: "video.mp4", url: "/old.mp4", bytes: 1000 }], created_at: DETAIL.created_at };
+
+  it("shows the published label and automatically written publication on the document", async () => {
+    mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1, renders: [oldRender], publications: [
+      { id: "p1", version: 1, url: "https://www.bilibili.com/video/BV1xx411c7mD", published_on: "2026-10-24", recorded_by: "platform-manager" },
+    ] });
+    renderPage("/video/s1?tab=publish");
+    expect(await screen.findByText("已发布")).toBeTruthy();
+    expect(await screen.findByText("平台自动回写")).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "投稿到哔哩哔哩" })).toBeNull();
+  });
+
+  it("restores the selected historical publish version from the platform return link", async () => {
+    mockApi({ ...DETAIL, current_version: 2, version_shown: { ...DETAIL.version_shown, version: 2 },
+      renders: [{ ...oldRender, id: "new", version: 2 }, oldRender] });
+    renderPage("/video/s1?tab=publish&publish_version=1");
+    expect(await screen.findByLabelText("选择发布版本")).toHaveProperty("value", "1");
+    expect(screen.getByRole("link", { name: "投稿到哔哩哔哩" }).getAttribute("href")).toContain("render=old");
+  });
+
+  it.each(["DRAFT", "WRITING", "FAILED"])("keeps publication available for an older video while current status is %s", async (status) => {
+    mockApi({ ...DETAIL, status, stage: "改写后重新审计", current_version: 2, approved_version: 1,
+      version_shown: { ...DETAIL.version_shown, version: 2 }, renders: [oldRender] });
+    renderPage("/video/s1?tab=publish");
+    expect(await screen.findByRole("tab", { name: "发布" })).toBeTruthy();
+    expect(await screen.findByText("这是旧版 v1 的成片和发布包；当前文稿 v2 尚未用于此视频。")).toBeTruthy();
+    expect(screen.getByText("旧版标题")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "记录发布" })).toBeTruthy();
+    expect(calls.some(c => c.url.includes("/publish?version=1"))).toBe(true);
+    expect(calls.some(c => c.url.includes("/publish?version=2"))).toBe(false);
+    fireEvent.change(screen.getByPlaceholderText(/B 站视频链接/), { target: { value: "https://b23.tv/abcdef" } });
+    fireEvent.click(screen.getByRole("button", { name: "记录发布" }));
+    await waitFor(() => expect(calls.find(c => c.url.endsWith("/publications") && c.method === "POST")?.body)
+      .toEqual({ url: "https://b23.tv/abcdef", version: 1, render_id: "old" }));
+  });
+
+  it("opens the publication pack from the selected completed video and switches versions explicitly", async () => {
+    mockApi({ ...DETAIL, current_version: 3, approved_version: 2,
+      version_shown: { ...DETAIL.version_shown, version: 3 },
+      renders: [{ ...oldRender, id: "newer", version: 2, title: "第二版标题" }, oldRender] });
+    renderPage("/video/s1?tab=video");
+    fireEvent.change(await screen.findByLabelText("查看成片记录"), { target: { value: "old" } });
+    fireEvent.click(screen.getByRole("button", { name: "发布 v1：查看发布包与记录链接" }));
+    expect(await screen.findByLabelText("选择发布版本")).toHaveProperty("value", "1");
+    await screen.findByRole("button", { name: "记录发布" });
+    fireEvent.change(screen.getByLabelText("选择发布版本"), { target: { value: "2" } });
+    await waitFor(() => expect(calls.some(c => c.url.includes("/publish?version=2"))).toBe(true));
+    expect(screen.getByText("第二版标题")).toBeTruthy();
+  });
+
+  it("does not offer a publish tab for a draft whose only render failed", async () => {
+    mockApi({ ...DETAIL, renders: [{ ...oldRender, status: "FAILED" }] });
+    renderPage("/video/s1?tab=video");
+    await screen.findByRole("tab", { name: "成片" });
+    expect(screen.queryByRole("tab", { name: "发布" })).toBeNull();
+  });
+
+  it("shows measured total and copy time for a completed render", async () => {
+    mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1,
+      renders: [{ id: "measured", version: 1, status: "COMPLETED", files: [{ name: "video.mp4", url: "/measured.mp4" }],
+        created_at: DETAIL.created_at, timings: { elapsed_seconds: 314, download_seconds: .107 } }] });
+    renderPage("/video/s1?tab=video");
+    expect(await screen.findByText(/总耗时 314 秒/)).toBeTruthy();
+    expect(screen.getByText(/文件回传 0.11 秒/)).toBeTruthy();
+  });
+
+  it("shows historical versions read-only with an explicit return to current", async () => {
+    mockApi({ ...DETAIL, current_version: 2, versions: [{ ...DETAIL.version_shown, version: 2 }, DETAIL.version_shown] });
+    renderPage("/video/s1?version=1");
+    expect(await screen.findByText("历史版本（只读）")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "编辑" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "定稿 v1" })).toBeNull();
+    expect(screen.getByRole("button", { name: "返回当前 v2" })).toBeTruthy();
+  });
+
+  it("labels an older video and does not call it the current draft's progress", async () => {
+    mockApi({ ...DETAIL, current_version: 2, approved_version: 1,
+      version_shown: { ...DETAIL.version_shown, version: 2 },
+      renders: [{ id: "old", version: 1, status: "COMPLETED", files: [{ name: "video.mp4", url: "/old.mp4" }], created_at: DETAIL.created_at }] });
+    renderPage("/video/s1?tab=video");
+    expect(await screen.findByText("旧版 v1 成片，当前文稿为 v2")).toBeTruthy();
+    expect(screen.getByLabelText("下一步").textContent).not.toContain("成片完成");
   });
 });

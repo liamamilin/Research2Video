@@ -101,7 +101,7 @@ def test_the_engine_names_failed_sources_in_the_prompt_block(monkeypatch):
     engine = ResearchEngine.__new__(ResearchEngine)
     engine.config_dir = "config"
     block, (items, stats) = engine._fetch_sources_strict({"sources": ["a", "b"]})
-    assert "a: 1 items" in block and "b: 失败：HTTP 500" in block and "不得写成覆盖了它们" in block and items
+    assert "a: 1 items" in block and "b: 失败：HTTP 500" in block and "本次未取得内容的来源" in block and items
 
 
 class _FakeSearch:
@@ -123,7 +123,7 @@ def test_a_fetch_only_run_never_searches_and_credits_the_fetched_urls(monkeypatc
 
     monkeypatch.setattr(agent.llm, "chat", chat)
     out = agent.run_fetch_only("task https://in-prompt.test/x", fetched_urls=["https://a.test"], stats={"tldr:ai": 12})
-    assert out == "# report" and seen["tools"] is None and "ONLY the fetched" in seen["system"]
+    assert out == "# report" and seen["tools"] is None and "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。" in seen["system"]
     assert {"https://a.test", "https://in-prompt.test/x"} <= agent.retrieved_urls
     assert agent.get_usage()["fetched"] == {"tldr:ai": 12} and agent.get_usage()["searches"] == 0
     with pytest.raises(RuntimeError, match="switched off"):

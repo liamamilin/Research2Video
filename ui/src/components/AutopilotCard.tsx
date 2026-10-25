@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   cancelAutopilotRun, getAutopilot, listCellCoverage, setPlanSpec, startAutopilotRun,
-  type AutopilotItem, type AutopilotPlan, type AutopilotRun, type AutopilotSpec, type CellCoverage,
+  type AutopilotItem, type AutopilotPlan, type AutopilotRun, type AutopilotSpec, type BoardItem, type CellCoverage,
 } from "@/api/video";
 import { CredibilityBadge } from "@/components/CredibilityBadge";
 import { TimeStamp } from "@/components/TimeStamp";
@@ -23,7 +23,9 @@ function when(epoch: number | null): string {
 }
 
 /** 自动流水线：每周计划、最近一批每条视频走到哪一步。只写到成片，不发布。 */
-export function AutopilotCard() {
+export function AutopilotCard({ currentItems = [] }: {
+  currentItems?: Pick<BoardItem, "script_id" | "title" | "version" | "note" | "credibility">[];
+}) {
   const user = useAuthStore((s) => s.user);
   const canEdit = user?.role === "editor" || user?.role === "admin";
   const [plans, setPlans] = useState<AutopilotPlan[]>([]);
@@ -54,7 +56,7 @@ export function AutopilotCard() {
         setCounts(init);
       })
       .catch(() => undefined);
-  }, [editing]);
+  }, [editing, cells.length, plans]);
 
   const specNow = (): AutopilotSpec => ({
     picks: Object.entries(counts).filter(([cell, n]) => n > 0 && cells.some((c) => c.cell === cell)).map(([cell, count]) => ({ cell, count })),
@@ -91,7 +93,7 @@ export function AutopilotCard() {
 
   if (!plans.length && !run && !canEdit) return null;
   return (
-    <section className="card space-y-2" aria-label="自动流水线">
+    <section className="card p-4 space-y-2" aria-label="自动流水线">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="font-medium text-sm flex-1">自动流水线</h2>
         {canEdit && run?.status === "RUNNING" ? (
@@ -154,18 +156,20 @@ export function AutopilotCard() {
           </p>
           {run.items.length === 0 ? <p className="text-xs text-text-muted">正在挑选选题…</p> : null}
           <ul className="divide-y divide-border">
-            {run.items.map((item) => (
+            {run.items.map((item) => {
+              const current = currentItems.find((c) => c.script_id === item.script_id);
+              return (
               <li key={item.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2">
-                <span className={cn("badge border", STATE[item.state].cls)}>{STATE[item.state].label}</span>
+                <span className={cn("badge border", STATE[item.state].cls)}>{run.status === "RUNNING" ? "" : "批次结果："}{STATE[item.state].label}</span>
                 {item.script_id ? (
-                  <Link to={`/video/${item.script_id}`} className="text-sm font-medium text-accent hover:underline">{item.topic.title}</Link>
+                  <Link to={`/video/${item.script_id}`} className="text-sm font-medium text-accent hover:underline">{current?.title ?? item.topic.title}</Link>
                 ) : (
                   <span className="text-sm font-medium">{item.topic.title}</span>
                 )}
-                <span className="text-xs text-text-muted">{item.note}</span>
-                <CredibilityBadge value={item.credibility ?? (item.gate?.label && item.gate.text ? { tier: item.gate.label, text: item.gate.text, reasons: item.gate.reasons ?? [], cited_share: null } : null)} />
+                <span className="text-xs text-text-muted">{current ? `当前 v${current.version}：${current.note}` : item.note}</span>
+                <CredibilityBadge value={current?.credibility ?? item.credibility ?? (item.gate?.label && item.gate.text ? { tier: item.gate.label, text: item.gate.text, reasons: item.gate.reasons ?? [], cited_share: null } : null)} />
               </li>
-            ))}
+            );})}
           </ul>
         </>
       ) : (

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Loader2, MessageSquareText, Plus, Send, Square } from "lucide-react";
@@ -92,7 +92,12 @@ function ApplicationAssistant({ username, readOnly }: { username: string; readOn
   const runningId = useRef<string>();
   const submitting = useRef(false);
   const bottom = useRef<HTMLDivElement>(null);
-  useEffect(() => { bottom.current?.scrollIntoView?.({ behavior: busy ? "auto" : "smooth" }); }, [messages, busy]);
+  const composer = useRef<HTMLTextAreaElement>(null);
+  const follow = useRef(true);
+  const context = params.get("video") ? { label: "来自视频文稿", href: `/video/${encodeURIComponent(params.get("video")!)}` }
+    : params.get("job") ? { label: `来自任务 ${params.get("job")}`, href: `/jobs/${encodeURIComponent(params.get("job")!)}` }
+    : params.get("report") ? { label: `来自报告 ${params.get("report")!.split("/").pop()}`, href: `/reports/view?path=${encodeURIComponent(params.get("report")!)}` } : null;
+  useEffect(() => { if (follow.current) bottom.current?.scrollIntoView?.({ behavior: "auto" }); }, [messages, busy]);
   useEffect(() => {
     let active = true;
     let timer: ReturnType<typeof setTimeout>;
@@ -126,7 +131,7 @@ function ApplicationAssistant({ username, readOnly }: { username: string; readOn
   const send = async (example?: string) => {
     const text = (example ?? input).trim();
     if (!text || restoring || restoreError || busy || submitting.current || pendingConversations.has(storageKey)) return;
-    submitting.current = true; setInput(""); setBusy(true);
+    follow.current = true; submitting.current = true; setInput(""); setBusy(true);
     const pending = submitConversation(storageKey, text, messages, conversationId.current);
     runningId.current = pending.requestId;
     const update = (current: AssistantMessage[], progress: string) => { setMessages(current); setStatus(progress); };
@@ -149,19 +154,20 @@ function ApplicationAssistant({ username, readOnly }: { username: string; readOn
   }, [storageKey]);
   const disabled = busy || restoring || !!restoreError;
   return <div className="h-full min-h-[420px] max-w-4xl mx-auto flex flex-col gap-4">
-    <div className="flex items-center gap-3">
-      <div className="flex-1"><h1 className="text-lg font-semibold">助手</h1><p className="text-xs text-text-muted mt-1">
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="flex-1 min-w-[14rem]"><h1 className="text-lg font-semibold">助手</h1><p className="text-xs text-text-muted mt-1">
         {readOnly ? "查询任务、报告与情报轮次。当前账号为只读权限；账号操作仅限本人。" : "通过对话处理视频文稿、选题、成片和发布记录，也能管理研究任务、报告和应用设置。"}
       </p></div>
       <button className="btn text-xs" disabled={disabled || messages.length === 0} onClick={() => { setRestoring(true); setRecoverVersion((n) => n + 1); }}>核验结果</button>
       <button className="btn text-xs" disabled={disabled || messages.length === 0} onClick={() => void fresh()}><Plus className="w-3.5 h-3.5" />新对话</button>
     </div>
+    {context ? <div className="card p-3 flex flex-wrap gap-2 text-xs text-text-muted"><span>{context.label}</span><Link className="text-accent hover:underline ml-auto" to={context.href}>返回原页面 ↗</Link></div> : null}
     {restoring && <p className="text-xs text-text-muted">正在恢复对话与操作回执…</p>}
     {restoreError && <div className="card p-3 text-xs text-danger" role="alert">{restoreError}<button className="btn text-xs ml-3" onClick={() => { setRestoring(true); setRecoverVersion((n) => n+1); }}>重新读取对话</button></div>}
-    <div className="flex-1 min-h-0 overflow-y-auto space-y-5 pr-1" aria-label="对话记录" style={{ colorScheme: "dark" }}>
+    <div className="flex-1 min-h-0 overflow-y-auto space-y-5 pr-1" aria-label="对话记录" onScroll={(event) => { const el = event.currentTarget; follow.current = el.scrollHeight - el.scrollTop - el.clientHeight < 96; }} style={{ colorScheme: "dark" }}>
       {messages.length === 0 && <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-4 text-center">
-        <MessageSquareText className="w-9 h-9 text-accent" /><div><p className="font-medium">想处理什么？</p><p className="text-sm text-text-muted mt-2">可以查报告、管理任务、调整周期，再接着处理执行结果。</p></div>
-        <div className="flex flex-wrap justify-center gap-2">{EXAMPLES.filter((_, i) => !readOnly || i !== 2).map((example) => <button key={example} className="btn text-xs" disabled={disabled} onClick={() => void send(example)}>{example}</button>)}</div>
+        <MessageSquareText className="w-9 h-9 text-accent" /><div><p className="font-medium">想处理什么？</p><p className="text-sm text-text-muted mt-2">选择一个示例填入输入框，也可以直接描述要处理的工作。</p></div>
+        <div className="flex flex-wrap justify-center gap-2">{EXAMPLES.filter((_, i) => !readOnly || i !== 2).map((example) => <button key={example} className="btn text-xs" disabled={disabled} onClick={() => { setInput(example); composer.current?.focus(); }}>{example}</button>)}</div>
       </div>}
       {messages.map((message, index) => <div key={index} className={message.role === "user" ? "ml-auto max-w-[90%] sm:max-w-[80%]" : "max-w-full"}>
         <div className="text-xs text-text-muted mb-2">{message.role === "user" ? "你" : "助手"}</div>
@@ -181,11 +187,12 @@ function ApplicationAssistant({ username, readOnly }: { username: string; readOn
       {messages.length > 0 && <div ref={bottom} />}
     </div>
     <form className="card p-3 flex items-end gap-3" onSubmit={(event) => { event.preventDefault(); void send(); }}>
-      <textarea className="input resize-none border-0 focus:ring-0 flex-1 min-w-0" rows={2} aria-label="消息" placeholder="例如：让这个 Job 每周一九点运行，使用上海时区"
+      <textarea ref={composer} className="input resize-none border-0 focus:ring-0 flex-1 min-w-0" rows={2} aria-label="消息" placeholder="例如：让这个 Job 每周一九点运行，使用上海时区"
         value={input} maxLength={8000} disabled={disabled} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
           if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); void send(); }
         }} />
       {busy ? <button type="button" className="btn mb-1" onClick={() => void stop()}><Square className="w-3.5 h-3.5" />停止响应</button> : <button type="submit" className="btn btn-primary mb-1" disabled={disabled || !input.trim()}><Send className="w-3.5 h-3.5" />发送</button>}
     </form>
+    <p className="text-[11px] text-text-muted">Enter 发送 · Shift + Enter 换行 · 执行结果会保留在对话中，可用「核验结果」重新读取。</p>
   </div>;
 }

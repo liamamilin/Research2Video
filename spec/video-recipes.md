@@ -2,6 +2,8 @@
 
 状态：已实现（2026-10-20）。替代 `config/video_matrix.yaml`（四个维度拼格子）和 `config/video_columns.yaml`。
 
+2026-10-23 质量优先：配方定义定位与目标，数量和风格为参考，事实、来源和成立条件优先。完整边界见 [video-quality-policy.md](video-quality-policy.md)。
+
 2026-10-21 起，配方也是生产配置的「写法」：一套生产配置就是挂在矩阵某个 Job 上的一个配方，见 `spec/production.md`。配方本身没变。
 
 ## 为什么
@@ -20,6 +22,8 @@
 调研和出片这两段可以不写在配方里，而是引用共用部件（见下面「共用部件」）：`research: {template: …}`、
 `output: {use: …}`。配方里同一段再写的字段优先于部件，所以“大体照部件、个别字段不同”直接在配方里写那个字段。
 
+2026-10-23：新增 `output: {use: fast_cards}`，复用完整定稿、声音、来源与栏目包装，选择 `production_mode: fast`、`video_form: information_cards`、`visual_style: editorial_light`。`output` 也支持显式 `production_recipe`、`production_mode`、`visual_style`；这些设置作为文稿配方上下文交给 AutoVideo 统一解析，矩阵 `render` 和本次显式选择可继续覆盖。旧 `motion` 部件及旧配方默认保持。定稿页同时提供普通与“快速卡片出片”入口；快速入口仅影响本次。
+
 ```yaml
 name: 快讯                      # 显示名
 description: …                  # 一句话说明，进提示词
@@ -31,7 +35,7 @@ tags:                           # 只用于选题页的网格摆放（类型 × 
   type: {key: quick_take, name: 快讯}
   format: {key: short, name: B 站横屏短}
 audience: 开发者                 # 选题没写目标受众时用它
-target_minutes: 1.25            # 调研提示词、字数预算、长度检查都按它
+target_minutes: 1.25            # 参考时长，用于上下文、篇幅参考与偏差显示，不强制裁切
 
 topic:
   kind: single                  # single 一条选题 / roundup 几条快讯合成一期 / comparison 两个对象对比
@@ -47,17 +51,17 @@ research:
     …
 
 writing:
-  pipeline: single              # single 一次写稿 + 审计 / adapt 五步改编（只给 3 分钟以上的稿子）
+  pipeline: single              # single 一次写稿 + 审计 / adapt 五步改编；短稿也可选 adapt
   default_style: {depth: intermediate, tone: news}
   allowed_tones: [news, concise]
   sections: [2, 4]
   paragraph_units: [20, 90]
-  required_roles: [钩子, 行动]
+  required_roles: [钩子, 行动]   # 沿用字段名；角色与节数是建议，可合并，不凑内容
   revise_rounds: 2              # 只对 adapt：审校后的修改轮数，0–5
   pause_after_plan: false       # 只对 adapt：方案定好后停下等你确认再写稿；默认 false，批次的文稿从不停（spec/video-steps.md）
   audit:
     model: review               # review 用 system.yaml 的 review_ai / writer 用写稿模型
-    style_severity: must        # 一次写稿的风格审计：must 必须改 / warn 只提醒
+    style_severity: warn        # 风格只提醒；兼容旧 must，但不强制改写或阻断
     timeout_seconds: 240        # 一次写稿的审计时间上限
   style: |                      # 写稿规范，进提示词
     …
@@ -103,8 +107,8 @@ output:
   还只有开发者）；2 个出片部件 `motion`（信息动效）、`auto_form`（自动选形态）；2 份观众档案 `developer`、`non_tech`。
   盘点不调研，没有调研模板。
 - **整份报告的配方**（`topic.whole_report: true`，不写 `topic.sources`）：`deep_dive`、`report_digest` 报告速览、`top_finding` 本期头条、
-  `action_list` 行动清单。后三个 `research.mode: none`、`status: experimental`：报告本身就是调研，只是讲法不同（挑 3–5 件 / 只讲一个 / 收成三件要做的事）。
-  `adapt` 写稿要 3 分钟以上，所以 90 秒的头条用 `single`。
+  `action_list` 行动清单。后三个 `research.mode: none`、`status: experimental`：报告本身就是调研，只是讲法不同（速览 / 聚焦一个发现 / 有依据的行动清单）。
+  当前头条默认 `single`，也可以选择 `adapt`，不设 3 分钟门槛。
 - 文稿版本的 `meta.cell` 除了配方文件的 `sha256`，还记 `resolved_sha256`（拼好部件之后的内容）和 `uses`（引用了哪些部件
   及其哈希）。只改了部件时，从这两项能看出来。
 - 引用的部件不存在或坏了，只有引用它的配方标“有错”，其他配方照常。
@@ -136,7 +140,7 @@ text:                         # 配方按名字插进去的文字，名字用小
 
 ### 时长
 
-`target_minutes` 是配方自己的时长。配方可以再写 `minutes_range: [最短, 最长]`（分钟，半分钟一档，自己的时长要在里面），表示它的文字没有写死多长，生产配置可以把时长改成范围里的数。没写，配置就不能改它的时长。改了时长的栏目叫 `<栏目名>-m8`、`<栏目名>-m7p5`，除了 `target_minutes` 和名字，设置和原栏目一模一样；它们不在栏目列表里，`recipes.find` 按名字现生成。保存配方时范围两头各要能建起来（比如五步改编的栏目不能短于 3 分钟）。
+`target_minutes` 是配方自己的参考时长，并非成片上限。配方可以再写 `minutes_range: [最短, 最长]`（分钟，半分钟一档，参考时长要在里面），生产配置可把参考目标改成范围里的数。没写，配置就不能另选参考目标，但实际稿件仍允许为质量浮动。改了目标的栏目叫 `<栏目名>-m8`、`<栏目名>-m7p5`，除了 `target_minutes` 和名字，设置和原栏目一模一样；它们不在栏目列表里，`recipes.find` 按名字现生成。保存配方时范围两头各要能建起来。
 
 ### 调研可以不做
 
@@ -155,9 +159,7 @@ text:                         # 配方按名字插进去的文字，名字用小
 - 一个文件坏了只影响它自己：它在列表里标“有错”，不能建文稿，其他配方照常可用。
 - 文稿版本的 `meta.cell` 记录用的是哪个配方：`recipe`、文件内容的 `sha256`、`cell`（四个 tags 拼成的 id）、`status`。
   以前的版本记的是矩阵格子和各维度 version，照旧可读。
-- 组合检查：`adapt` 要求 `target_minutes` ≥ 3；`research.mode: job` 必须有 prompt；`none` 的配方建文稿时选题必须带报告
-  （否则 422 `report_required`）。一次写稿的配方没有「换风格」（以前会被强行走五步改编，75 秒的快讯过不了改编的
-  3–5 个理解目标）。
+- 组合检查：`research.mode: job` 必须有 prompt；`none` 的配方建文稿时选题必须带报告（否则 422 `report_required`）。`adapt` 不再要求至少 3 分钟或固定理解目标数量。一次写稿配方使用自己的流程，不强行套入五步改编。
 
 ## 接口与界面
 
@@ -192,5 +194,5 @@ text:                         # 配方按名字插进去的文字，名字用小
 - 写稿、改编（拆事实 / 定方案 / 写稿 / 审校）、审计的**系统提示词**：它们规定模型输出的 JSON 结构，代码按这个结构解析，
   并带 `PROMPT_VERSION`；放开编辑一改就可能解析不了。配方里能改的是栏目相关的文字（调研提示词、写稿规范）。
 - 写稿流程只有两种（`single`、`adapt`），还不能自由拼步骤（比如“定方案后停下等人确认”“只重写不重定方案”）。
-- 改编的常量：理解目标 3–5 个、事实上限每 100 字一条（最少 8 条）——系统提示词里写着同样的数字，要一起改。
+- 质量策略在 `core/video/policy.py`：理解目标、事实条数和表达数量不设公共硬上限，规则阈值只用于显示建议。
 - 出口只有 AutoVideo 横屏；竖屏、只要文稿 / Markdown 还没有。

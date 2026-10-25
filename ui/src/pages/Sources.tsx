@@ -1,27 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { listSources, type SourceCatalog, type SourceRow } from "@/api/sources";
+import { listSources, type SourceRow } from "@/api/sources";
 import { ErrorState } from "@/components/ErrorState";
 import { TimeStamp } from "@/components/TimeStamp";
-import { errorMessage } from "@/lib/toast";
+import { RefreshCw } from "lucide-react";
+import { usePageResource } from "@/lib/use-page-resource";
 import { cn } from "@/lib/utils";
 
 type Filter = "all" | "used" | "unused" | "failing";
 
 /** 信息源：每个源只登记一次，各矩阵的 Job 引用它；这里看谁在用、最近一次抓取怎么样。 */
 export function SourcesPage() {
-  const [catalog, setCatalog] = useState<SourceCatalog | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { data: catalog, error, loading, reload: load } = usePageResource(listSources);
   const [filter, setFilter] = useState<Filter>("all");
   const [tag, setTag] = useState("");
   const [text, setText] = useState("");
-
-  const load = useCallback(() => {
-    listSources()
-      .then((body) => (setCatalog(body), setError(null)))
-      .catch((e) => setError(errorMessage(e, "读取信息源失败")));
-  }, []);
-  useEffect(load, [load]);
 
   const tags = useMemo(() => Array.from(new Set((catalog?.sources ?? []).flatMap((s) => s.tags))).sort(), [catalog]);
   const shown = useMemo(() => {
@@ -33,24 +26,24 @@ export function SourcesPage() {
       (!needle || `${s.name} ${s.id} ${s.spec} ${s.note}`.toLowerCase().includes(needle)));
   }, [catalog, filter, tag, text]);
 
-  if (error) return <ErrorState error={error} onRetry={load} />;
-  if (!catalog) return <ErrorState empty="加载中…" />;
+  if (!catalog) return <ErrorState error={error} onRetry={load} empty="加载中…" />;
 
   const failing = catalog.sources.filter((s) => s.last?.error).length;
   const FILTERS: [Filter, string][] = [["all", `全部 ${catalog.sources.length}`], ["used", "有 Job 在用"], ["unused", "还没人用"], ["failing", `最近抓取失败 ${failing}`]];
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold">信息源</h1>
+      {error ? <ErrorState error={error} onRetry={load} compact /> : null}
+      <div className="flex flex-wrap items-start gap-3"><div className="flex-1">
+        <h1 className="text-xl font-semibold tracking-tight">信息源</h1>
         <p className="text-xs text-text-muted mt-1">
-          每个源只在 config/sources.yaml 里登记一次；Job 的 sources 里写 <code>source:id</code> 引用一个，写 <code>tag:标签</code> 引用一类。
-          一个源可以被多个矩阵的 Job 共用。
-        </p>
+          查看共享信息源、引用它的研究任务，以及最近一次抓取结果。
+        </p></div><button className="btn text-xs" disabled={loading} onClick={load}><RefreshCw className="h-3.5 w-3.5" />刷新</button>
       </div>
+      <details className="text-xs text-text-muted"><summary className="cursor-pointer">登记与引用信息源</summary><p className="mt-2">在 config/sources.yaml 中登记来源；Job 使用 source:id 引用一个来源，或使用 tag:标签 引用一组。</p></details>
 
       {catalog.problems.length ? (
-        <section className="card space-y-1 border-danger" aria-label="引用错误">
+        <section className="card p-4 space-y-1 border-danger" aria-label="引用错误">
           <h2 className="text-sm font-medium text-danger">有 Job 引用了注册表里没有的源（这些 Job 跑不起来）</h2>
           <ul className="text-xs space-y-1">
             {catalog.problems.map((p) => (
@@ -71,7 +64,7 @@ export function SourcesPage() {
           <option value="">全部标签</option>
           {tags.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
-        <input className="input text-xs py-1 w-48" placeholder="搜索名称、网址、备注" value={text} onChange={(e) => setText(e.target.value)} />
+        <input className="input text-xs py-1 w-48" placeholder="搜索名称、网址、备注" aria-label="搜索信息源" value={text} onChange={(e) => setText(e.target.value)} />
         <span className="ml-auto text-xs text-text-muted">显示 {shown.length} / {catalog.sources.length}</span>
       </div>
 

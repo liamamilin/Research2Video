@@ -4,7 +4,7 @@ import { listReports, getReportTree, searchReports, getReportCategories, listTag
 import { cn, formatTokens } from "@/lib/utils";
 import { ErrorState, RoleGate } from "@/components/ErrorState";
 import { errorMessage, useToast } from "@/lib/toast";
-import { Search, FileText, FolderOpen, Star } from "lucide-react";
+import { Search, FileText, FolderOpen, Star, RefreshCw } from "lucide-react";
 
 const UI_STATE_KEY = "ai-research-console:reports-ui";
 
@@ -141,6 +141,14 @@ export function ReportsPage() {
   };
 
   // Search state
+  const initialSearch = useRef(true);
+  const searchSeq = useRef(0);
+  const previousSearch = useRef("");
+  const previousListScope = useRef("");
+  const previousTreeScope = useRef("");
+  const [searchedQuery, setSearchedQuery] = useState("");
+  const [searchError, setSearchError] = useState("");
+  const [treeError, setTreeError] = useState("");
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchTotal, setSearchTotal] = useState(0);
@@ -168,6 +176,7 @@ export function ReportsPage() {
   const listSeq = useRef(0);
   const treeSeq = useRef(0);
 
+  const localDay = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   const dateBounds = useCallback((): { since?: string; until?: string } => {
     if (customFrom || customTo) return { since: customFrom || undefined, until: customTo || undefined };
     if (range === "all") return {};
@@ -175,19 +184,19 @@ export function ReportsPage() {
     const shift = (days: number) => {
       const d = new Date(today);
       d.setDate(d.getDate() - days);
-      return d.toISOString().slice(0, 10);
+      return localDay(d);
     };
-    if (range === "today") return { since: today.toISOString().slice(0, 10) };
+    if (range === "today") return { since: localDay(today) };
     if (range === "yesterday") {
       const y = new Date(today); y.setDate(y.getDate() - 1);
-      return { since: y.toISOString().slice(0, 10), until: y.toISOString().slice(0, 10) };
+      return { since: localDay(y), until: localDay(y) };
     }
     if (range === "3d") return { since: shift(2) };
     if (range === "7d") return { since: shift(6) };
     if (range === "30d") return { since: shift(29) };
     if (range === "month") {
       const first = new Date(today.getFullYear(), today.getMonth(), 1);
-      return { since: first.toISOString().slice(0, 10) };
+      return { since: localDay(first) };
     }
     return {};
   }, [range, customFrom, customTo]);
@@ -209,6 +218,8 @@ export function ReportsPage() {
   ) => {
     const activeScope = scopeArg ?? scope;
     const activeTag = tagArg ?? tag;
+    const scopeKey = JSON.stringify([activeFilterParams(), pageNum, cat || category, activeScope, activeTag, sort]);
+    if (previousListScope.current !== scopeKey) { setReports([]); previousListScope.current = scopeKey; }
     const seq = ++listSeq.current;
     setLoading(true);
     try {
@@ -232,13 +243,14 @@ export function ReportsPage() {
     } catch (err: unknown) {
       if (seq !== listSeq.current) return;
       setError(errorMessage(err, "无法加载报告列表"));
-      setReports([]);
     } finally {
       if (seq === listSeq.current) setLoading(false);
     }
   }, [scope, tag, sort, category, activeFilterParams]);
 
   const fetchTree = useCallback(async () => {
+    const scopeKey = JSON.stringify(activeFilterParams());
+    if (previousTreeScope.current !== scopeKey) { setTree([]); previousTreeScope.current = scopeKey; }
     const seq = ++treeSeq.current;
     try {
       const [treeData, cats, tagData] = await Promise.all([
@@ -250,12 +262,10 @@ export function ReportsPage() {
       setTree(treeData);
       setCategories(cats);
       setTags(tagData.tags || []);
-      setError("");
+      setTreeError("");
     } catch (err: unknown) {
       if (seq !== treeSeq.current) return;
-      setError(errorMessage(err, "无法加载目录与分类"));
-      setTree([]);
-      setCategories([]);
+      setTreeError(errorMessage(err, "无法加载目录与分类"));
     }
   }, [activeFilterParams]);
 
@@ -269,14 +279,12 @@ export function ReportsPage() {
   const handleScope = (next: "all" | "fav" | "unread") => {
     setScope(next);
     setPage(1);
-    fetchReports(1, category, next);
   };
 
   const handleTagFilter = (next: string) => {
     const value = tag === next ? "" : next;
     setTag(value);
     setPage(1);
-    fetchReports(1, category, scope, value);
   };
 
   const toggleFavorite = async (item: any) => {
@@ -291,45 +299,40 @@ export function ReportsPage() {
     }
   };
 
-  useEffect(() => {
-    fetchTree();
-    fetchReports(1);
-  }, [fetchTree, fetchReports]);
+  useEffect(() => { void fetchTree(); }, [fetchTree]);
+  useEffect(() => { void fetchReports(1); }, [fetchReports]);
 
-  const handleSearch = async () => {
-    if (!query.trim()) {
-      fetchReports(1, category);
-      setSearchResults([]);
-      setSearchTotal(0);
-      return;
-    }
+  const handleSearch = useCallback(async () => {
+    const term = query.trim();
+    const seq = ++searchSeq.current;
+    if (previousSearch.current !== term) { setSearchResults([]); setSearchTotal(0); previousSearch.current = term; }
+    setSearchedQuery(term); setSearchError("");
+    setSearchParams(term ? { q: term } : {}, { replace: true });
+    if (!term) { setSearchResults([]); setSearchTotal(0); setSearching(false); return; }
     setSearching(true);
     try {
-      const data = await searchReports(query.trim(), 50);
-      setSearchResults(data.results);
-      setSearchTotal(data.total);
-    } catch {
-      setSearchResults([]);
-      setSearchTotal(0);
-    } finally {
-      setSearching(false);
-    }
-    setSearchParams({ q: query });
-  };
+      const data = await searchReports(term, 50);
+      if (seq === searchSeq.current) { setSearchResults(data.results); setSearchTotal(data.total); }
+    } catch (e) { if (seq === searchSeq.current) setSearchError(errorMessage(e, "全文搜索失败")); }
+    finally { if (seq === searchSeq.current) setSearching(false); }
+  }, [query, setSearchParams]);
+  useEffect(() => {
+    if (initialSearch.current) { initialSearch.current = false; if (query.trim()) void handleSearch(); }
+  }, [handleSearch, query]);
+  useEffect(() => () => { ++listSeq.current; ++treeSeq.current; ++searchSeq.current; }, []);
 
   const handleCategoryFilter = (cat: string) => {
     setCategory(cat);
     setPage(1);
-    fetchReports(1, cat);
   };
 
-  const isSearching = query.trim().length > 0;
+  const isSearching = searchedQuery.length > 0;
   const displayResults = isSearching ? searchResults : reports;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold flex-1">报告</h1>
+        <div className="flex-1"><h1 className="text-xl font-semibold tracking-tight">报告</h1><p className="text-xs text-text-muted mt-1">按日期与分类浏览研究资料，或通过全文搜索查找证据。</p></div><button className="btn text-xs" disabled={loading || searching} onClick={() => { if (isSearching) void handleSearch(); else { void fetchReports(page); void fetchTree(); } }}><RefreshCw className="h-3.5 w-3.5" />刷新</button>
         {!isSearching && total > 0 && (
           <span className="text-xs text-text-muted">共 {total} 篇</span>
         )}
@@ -347,11 +350,13 @@ export function ReportsPage() {
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
         </div>
+        {isSearching ? <button className="btn text-xs" onClick={() => { ++searchSeq.current; setQuery(""); setSearchedQuery(""); setSearchError(""); setSearching(false); setSearchParams({}); }}>退出搜索</button> : null}
         <button onClick={handleSearch} disabled={searching} className="btn btn-primary">
           {searching ? "搜索中..." : "搜索"}
         </button>
       </div>
 
+      {treeError ? <ErrorState error={treeError} onRetry={fetchTree} compact /> : null}
       <div className="flex gap-4">
         {/* Tree sidebar */}
         <div className="hidden lg:block w-56 shrink-0">
@@ -371,7 +376,7 @@ export function ReportsPage() {
               >
                 {tree.map((entry) => (
                   <TreeEntry
-                    key={entry.name}
+                    key={entry.path || entry.name || entry.title}
                     entry={entry}
                     depth={0}
                     openDirs={openDirs ?? []}
@@ -487,48 +492,20 @@ export function ReportsPage() {
             </div>
           )}
 
-          {/* Category pills */}
-          {!isSearching && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              <button
-                onClick={() => handleCategoryFilter("")}
-                className={cn("badge border cursor-pointer hover:bg-bg-hover",
-                  !category ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border"
-                )}
-              >
-                全部
-              </button>
-              {categories.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => handleCategoryFilter(c)}
-                  className={cn("badge border cursor-pointer hover:bg-bg-hover",
-                    category === c ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border"
-                  )}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-          )}
+          {!isSearching ? <select aria-label="报告分类" className="input text-xs w-auto max-w-full mb-3" value={category} onChange={(e) => handleCategoryFilter(e.target.value)}><option value="">全部分类</option>{categories.map((c) => <option key={c} value={c}>{c}</option>)}</select> : null}
 
           {/* Results */}
           {isSearching && (
             <p className="text-sm text-text-muted mb-2">
-              搜索 "{query}" — {searchTotal} 条结果
+              搜索 "{searchedQuery}" — {searchTotal} 条结果（全文搜索覆盖整个报告库）
             </p>
           )}
 
-          {loading || searching ? (
+          {(isSearching ? searchError : error) ? <ErrorState error={isSearching ? searchError : error} onRetry={() => isSearching ? void handleSearch() : void fetchReports(page, category, scope, tag)} compact /> : null}
+          {(isSearching ? searching : loading) ? (
             <div className="text-sm text-text-muted">加载中...</div>
-          ) : error ? (
-            <ErrorState
-              error={error}
-              onRetry={() => fetchReports(page, category, scope, tag)}
-              empty="没有报告"
-            />
-          ) : displayResults.length === 0 ? (
-            <div className="card p-6 text-center text-text-muted text-sm">暂无报告</div>
+          ) : (isSearching ? searchError : error) && displayResults.length === 0 ? null : displayResults.length === 0 ? (
+            <div className="card p-6 text-center text-text-muted text-sm">{isSearching ? "没有匹配的搜索结果" : "当前筛选下没有报告"}{!isSearching ? <button className="btn text-xs ml-3" onClick={() => { setRange("all"); setCategory(""); setScope("all"); setTag(""); setCustomFrom(""); setCustomTo(""); setLatestOnly(false); }}>查看全部报告</button> : null}</div>
           ) : (
             <div className="space-y-2">
               {displayResults.map((item: any) => (
@@ -702,7 +679,7 @@ function TreeEntry({
         </button>
         {open && entry.children?.map((child: any) => (
           <TreeEntry
-            key={child.name}
+            key={child.path || child.name || child.title}
             entry={child}
             depth={depth + 1}
             openDirs={openDirs}

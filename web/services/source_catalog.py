@@ -32,7 +32,7 @@ def catalog(config_dir: str, jobs_dir: str, state_dir: str) -> dict:
         if not declared:
             continue
         try:
-            specs = sources.resolve(declared, config_dir)
+            specs = sources.resolve(declared, config_dir, registry=registry)
         except sources.RegistryError as exc:
             problems.append({"job": name, "problem": str(exc)})
             continue

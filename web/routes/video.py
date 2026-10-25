@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import Query, APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from core.video import columns as video_columns
 from core.video.autovideo import AutoVideoError, AutoVideoUnreachable
-from core.video import credibility, excerpt, store
+from core.video import credibility, excerpt, outputs, progress, store
 from core.video import plans as video_plans
 from core.video import steps as video_steps
 from core.video import topics as video_topics
@@ -46,9 +46,11 @@ class _Columns(dict):
     """The columns that build. One built for another length than its recipe's, or without its research (``deep_dive-m8``,
     ``flash-nr``) is not listed, there being no list of every length: it is made when a script asks for it."""
 
-    def __init__(self, config_dir: str, columns: dict):
+    def __init__(self, config_dir: str, columns: dict, every_recipe: Optional[dict] = None):
         super().__init__(columns)
         self._config_dir = config_dir
+        self._recipes = every_recipe
+        self._variants: dict = {}
 
     def get(self, key, default=None):
         if key in self:
@@ -56,9 +58,13 @@ class _Columns(dict):
         from core.video import recipes
 
         if recipes.split_variant_key(key):
-            recipe = recipes.find(self._config_dir, key)
-            if recipe is not None and recipe.column is not None:
-                return recipe.column
+            if key not in self._variants:
+                if self._recipes is None:
+                    self._recipes = recipes.expanded(self._config_dir)
+                recipe = recipes.find(self._config_dir, key, every=self._recipes)
+                self._variants[key] = recipe.column if recipe is not None else None
+            if self._variants[key] is not None:
+                return self._variants[key]
         return default
 
 
@@ -67,7 +73,8 @@ def _known_columns() -> dict:
     from core.video import recipes
 
     config_dir = get_settings().paths.config_dir
-    return _Columns(config_dir, {key: r.column for key, r in recipes.expanded(config_dir).items() if r.column is not None})
+    every = recipes.expanded(config_dir)
+    return _Columns(config_dir, {key: r.column for key, r in every.items() if r.column is not None}, every)
 
 
 def _creatable(key: str):
@@ -101,6 +108,7 @@ def _render_out(render: dict) -> dict:
             "attempt_count", "resolved_video_form", "error_code", "error_message",
             "submitted_at", "completed_at", "created_at", "updated_at")},
         "source_chars": len(render["source_text"]),
+        "timings": video_render.render_timings(render),
         "autovideo_url": client.job_page_url(render["autovideo_job_id"]) if render["autovideo_job_id"] else None,
         "files": [
             {**a, "url": f"/api/video/renders/{render['id']}/files/{a['name']}"}
@@ -109,15 +117,16 @@ def _render_out(render: dict) -> dict:
     }
 
 
-def _script_summary(script: dict, published: Optional[set] = None) -> dict:
-    current = store.get_version(script["id"], script["current_version"]) if script["current_version"] else None
+def _script_summary(script: dict, published: Optional[dict] = None, *, versions: Optional[dict] = None) -> dict:
+    current = (versions.get(script["id"]) if versions is not None else
+               store.get_version(script["id"], script["current_version"]) if script["current_version"] else None)
     return {
         **script,
         "credibility": credibility.label(current, auditing=bool(script.get("stage"))) if current else None,
         "auto": script.get("created_by") == "autopilot",
         "title": current["title"] if current else script["topic"].get("title", ""),
         "length_check": current["length_check"] if current else None,
-        "published": script["id"] in (published if published is not None else store.published_script_ids()),
+        "published": progress.is_published(script, (published if published is not None else store.published_versions_by_script()).get(script["id"], set())),
     }
 
 
@@ -129,8 +138,8 @@ def list_columns(user=Depends(require_viewer)) -> list[dict]:
     from core.video import recipes as matrix
 
     config_dir = get_settings().paths.config_dir
-    return [{**c.as_dict(), "status": (matrix.provenance(config_dir, c.key) or {}).get("status", "enabled")}
-            for c in _columns().values()]
+    return [{**r.column.as_dict(), "status": r.status}
+            for r in matrix.expanded(config_dir).values() if r.usable]
 
 
 @router.get("/cells")
@@ -157,7 +166,8 @@ def home_board(user=Depends(require_viewer)) -> dict:
     """Counts per pipeline stage and what needs the user, for the home page."""
     from web.services import video_board
 
-    return video_board.board(_known_columns())
+    paths = get_settings().paths
+    return video_board.board(_known_columns(), config_dir=paths.config_dir, jobs_dir=paths.jobs_dir)
 
 
 @router.get("/alerts")
@@ -226,10 +236,14 @@ def _topics():
 @router.get("/topics/sources")
 def list_topic_sources(user=Depends(require_viewer)) -> list[dict]:
     """Every job that declares ``topics:`` (and ``manual``): its newest report, and why a report gave no topics."""
-    from core.video import topic_store
     from web.services import video_autopilot
 
-    rows = video_autopilot.sync_topics()
+    return _topic_source_rows(video_autopilot.sync_topics())
+
+
+def _topic_source_rows(rows: list[dict]) -> list[dict]:
+    from core.video import topic_store
+
     errors = topic_store.import_errors()
     for row in rows:
         failed = errors.get(row["name"], [])
@@ -241,17 +255,41 @@ def list_topic_sources(user=Depends(require_viewer)) -> list[dict]:
                     "count": len(manual)}]
 
 
+@router.get("/topics/browser")
+def topic_browser(user=Depends(require_viewer)) -> dict:
+    """One fresh snapshot for the topic picker's first screen, including its default source's topics."""
+    from web.services import video_autopilot
+
+    cells = list_cells(user=user)
+    rows = video_autopilot.sync_topics()
+    coverage = video_autopilot.coverage(cells=cells, source_rows=rows)
+    sources = _topic_source_rows(rows)
+    current = next((c for c in coverage if c["cell"] == "flash"), None)
+    current = current or next((c for c in coverage if c["sources"]), None) or next(iter(coverage), None)
+    source = (current["sources"][0] if current["sources"] else "manual" if current["autopilot"] else "") if current else ""
+    # Unknown sources stay visible in the coverage warning; no topics are invented for them.
+    known = {"manual"} | {value for row in rows for value in (row["name"], row["job"])}
+    initial = _topic_listing(source, None) if source in known else {"round": None, "rounds": [], "topics": []}
+    return {"cells": cells, "coverage": coverage, "sources": sources, "initial": {"source": source, **initial}}
+
+
 @router.get("/topics")
 def list_topics(round: Optional[str] = None, source: str = "opportunities",
                 user=Depends(require_viewer)) -> dict:
     """Topics of one report of a source (the newest by default); ``source=manual`` lists the ones added by hand."""
     from web.services import video_autopilot
 
-    topic_store = _topics()
+    _topics()
     if not video_autopilot.known_source(source):
         raise HTTPException(422, detail=ApiError.make(
             "unknown_source", f"没有叫 {source} 的选题来源：在 Job 的 YAML 里写 topics: 才能当来源"))
-    round_date, topics = topic_store.load(source, round)
+    return _topic_listing(source, round)
+
+
+def _topic_listing(source: str, round_date: Optional[str]) -> dict:
+    from core.video import topic_store
+
+    round_date, topics = topic_store.load(source, round_date)
     used = store.topic_ids_in_use()
     published = store.published_topic_ids()
     covered = store.scripts_by_topic()
@@ -511,11 +549,20 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
 
 
 @router.get("/scripts")
-def list_scripts(limit: int = 100, archived: bool = False, user=Depends(require_viewer)) -> list[dict]:
-    published = store.published_script_ids()
-    renders = store.latest_render_by_script()
-    return [{**_script_summary(s, published), "render": renders.get(s["id"])}
-            for s in store.list_scripts(limit=min(max(limit, 1), 500), archived=archived)]
+def list_scripts(limit: int = 100000, archived: bool = False, user=Depends(require_viewer)) -> list[dict]:
+    published = store.published_versions_by_script()
+    renders = store.render_statuses_by_script()
+    scripts = store.list_scripts(limit=100000) + store.list_scripts(limit=100000, archived=True)
+    paths = get_settings().paths
+    owners, _ = outputs.script_owners(paths.config_dir, paths.jobs_dir, scripts)
+    scripts = sorted((s for s in scripts if bool(s.get("archived") or owners[s["id"]]["matrix_archived"]) == archived),
+                     key=lambda s: (s["created_at"], s["id"]), reverse=True)[:min(max(limit, 1), 100000)]
+    versions = store.current_versions([s["id"] for s in scripts])
+    columns = _known_columns()
+    return [{**_script_summary(s, published, versions=versions),
+             **{k: v for k, v in owners[s["id"]].items() if k != "matrix_archived"},
+             "column_label": owners[s["id"]]["production_name"] or (columns.get(s["column_key"]).name if columns.get(s["column_key"]) else s["column_key"]),
+             **progress.render_state(s, renders.get(s["id"], []))} for s in scripts]
 
 
 class ArchiveIn(BaseModel):
@@ -542,6 +589,8 @@ def archive_script(script_id: str, body: Optional[ArchiveIn] = None, user=Depend
 
 @router.get("/scripts/{script_id}")
 def get_script(script_id: str, version: Optional[int] = None, user=Depends(require_viewer)) -> dict:
+    from web.services.video_configuration import context
+    from web.services import platform_manager
     script = _script_or_404(script_id)
     shown = version or script["current_version"]
     current = store.get_version(script_id, shown) if shown else None
@@ -555,10 +604,12 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         "credibility": credibility.label(current, auditing=bool(script.get("stage"))) if current else None,
         "auto": script.get("created_by") == "autopilot",
         "column": column.as_dict() if column else None,
+        "configuration": context(script, current, get_settings().paths.config_dir, get_settings().paths.jobs_dir),
         "version_shown": current,
         "versions": store.list_versions(script_id),
         "renders": [_render_out(r) for r in store.list_renders(script_id)],
         "publications": store.list_publications(script_id),
+        "platform_uploads": platform_manager.script_uploads(script_id),
         "rechecks": store.list_rechecks(script_id)[:5],
         # research → write → audit → approve → render, read off the records above; and who started what
         "steps": video_executor.steps_of(script),
@@ -767,13 +818,16 @@ def _publication_fields(body: PublicationIn, script: dict) -> dict:
         if day > date.today() + timedelta(days=1):
             raise HTTPException(422, detail=ApiError.make("bad_date", "发布日期不能在未来"))
         published_on = body.published_on
-    version = body.version or script["approved_version"]
-    if version is not None and store.get_version(script["id"], version) is None:
-        raise _not_found("这个版本")
+    render = None
     if body.render_id is not None:
         render = store.get_render(body.render_id)
         if render is None or render["script_id"] != script["id"]:
             raise _not_found("这次出片")
+    version = body.version or (render["version"] if render else script["approved_version"])
+    if version is not None and store.get_version(script["id"], version) is None:
+        raise _not_found("这个版本")
+    if render and render["version"] != version:
+        raise HTTPException(422, detail=ApiError.make("version_mismatch", "发布记录的文稿版本与所选成片不一致。"))
     return {"url": body.url.strip(), "published_on": published_on, "version": version, "render_id": body.render_id,
             "platform": body.platform, "note": body.note.strip()}
 
@@ -834,7 +888,10 @@ def approve_script(script_id: str, body: Optional[ApproveIn] = None, user=Depend
     version = (body.version if body else None) or script["current_version"]
     if store.get_version(script_id, version) is None:
         raise _not_found("这个版本")
-    video_executor.approve(script_id, version, user["username"])
+    try:
+        video_executor.approve(script_id, version, user["username"])
+    except video_executor.StepError as exc:
+        raise HTTPException(409, detail=ApiError.make("approve_not_allowed", str(exc))) from exc
     audit.log("video_script_approve", user=user["username"], target=script_id, result=f"v{version}")
     return get_script(script_id, user=user)
 
@@ -843,6 +900,7 @@ class RenderIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     voice_id: Optional[str] = None
+    production_mode: Optional[Literal["standard", "fast"]] = None
 
 
 @router.post("/scripts/{script_id}/render", status_code=202)
@@ -852,7 +910,8 @@ def render_script(script_id: str, body: Optional[RenderIn] = None, user=Depends(
     if script["status"] != "APPROVED":
         raise HTTPException(409, detail=ApiError.make("not_approved", "请先定稿再出片"))
     try:
-        render = video_executor.render(script_id, user["username"], voice_id=body.voice_id if body else None)
+        render = video_executor.render(script_id, user["username"], voice_id=body.voice_id if body else None,
+                                       **({"production_mode": body.production_mode} if body and body.production_mode is not None else {}))
     except video_executor.StepError as exc:
         raise HTTPException(409, detail=ApiError.make("render_not_allowed", str(exc))) from exc
     audit.log("video_render", user=user["username"], target=script_id, result=render["id"])
@@ -1016,12 +1075,15 @@ def autopilot_overview(user=Depends(require_viewer)) -> dict:
     from core.video import autopilot_store
 
     runs = autopilot_store.list_runs(limit=10)
+    ids = [item["script_id"] for run in runs for item in run.get("items", []) if item.get("script_id")]
+    versions = store.current_versions(ids)
+    with store.connect() as conn:
+        auditing = {row["id"] for row in conn.execute("SELECT id FROM scripts WHERE COALESCE(stage, '') != ''")}
     for run in runs:  # the label as it is now (an edit or a finished audit changes it), not the one at approval time
         for item in run.get("items", []):
-            script = store.get_script(item["script_id"]) if item.get("script_id") else None
-            current = store.get_version(script["id"], script["current_version"]) if script and script["current_version"] else None
+            current = versions.get(item.get("script_id"))
             if current:
-                item["credibility"] = credibility.label(current, auditing=bool(script.get("stage")))
+                item["credibility"] = credibility.label(current, auditing=item["script_id"] in auditing)
     return {"plans": autopilot_store.list_plans(), "runs": runs}
 
 

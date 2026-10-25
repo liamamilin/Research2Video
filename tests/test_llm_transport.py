@@ -615,3 +615,17 @@ def test_an_empty_reply_from_every_model_fails_and_says_so(monkeypatch):
     monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: None)
     with pytest.raises(LLMError, match="a, b"):
         client.chat([{"role": "user", "content": "x"}])
+
+
+def test_provider_filter_is_reported_without_retrying_or_switching_models(monkeypatch):
+    client = make_client(model="a", fallback_models=["b"], max_retries=2)
+    calls = []
+
+    def filtered(_messages, **kwargs):
+        calls.append(client._active_model())
+        return reply("", finish_reason="content_filter")
+
+    monkeypatch.setattr(client, "_chat_cancellable", filtered)
+    with pytest.raises(LLMError, match="content_filter"):
+        client.chat([{"role": "user", "content": "x"}])
+    assert calls == ["a"]

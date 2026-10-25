@@ -77,9 +77,55 @@ describe("Matrices", () => {
   it("lists each matrix with its domain and Jobs, and the Jobs in none", async () => {
     at("/matrices");
     const card = await screen.findByRole("link", { name: "AI 矩阵" });
-    expect(card.textContent).toContain("2 个 Job");
-    expect(card.textContent).toContain("关键词写在各个 Job 里");
-    expect(screen.getByText(/还有 1 个 Job 不在任何矩阵里：独立游戏/)).toBeTruthy();
+    expect(card.textContent).toContain("2 个研究任务");
+    expect(card.textContent).toContain("手动运行");
+    expect(screen.getByText("未分组任务")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "独立游戏" }).getAttribute("href")).toBe("/jobs/research%2Fgames");
+  });
+
+  it("filters by live matrix health, separates archived matrices and searches source tasks", async () => {
+    const running = { ...AI, members: [{ ...AI.members[0], is_running: true, state: { ...AI.members[0].state, last_status: "failed" } }] };
+    const failed = { ...AI, key: "medical", name: "医疗矩阵", members: [{ ...AI.members[0], job: "medical/daily", state: { ...AI.members[0].state, last_status: "failed" } }] };
+    const archived = { ...AI, key: "old", name: "旧矩阵", archived: true };
+    vi.mocked(fetch).mockResolvedValue({ ok: true, status: 200, text: async () => JSON.stringify({ matrices: [running, failed, archived], ungrouped: [] }) } as Response);
+    at("/matrices");
+    expect(await screen.findByRole("button", { name: "需要关注 1" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "正在运行 1" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "旧矩阵" })).toBeNull();
+    fireEvent.change(screen.getByLabelText("矩阵范围"), { target: { value: "1" } });
+    expect(screen.getByRole("link", { name: "旧矩阵" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "AI 矩阵" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "需要关注 1" }));
+    expect(screen.getByRole("link", { name: "医疗矩阵" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "旧矩阵" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "使用中的矩阵 2" }));
+    fireEvent.change(screen.getByLabelText("搜索矩阵"), { target: { value: "medical/daily" } });
+    expect(screen.getByRole("link", { name: "医疗矩阵" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "AI 矩阵" })).toBeNull();
+  });
+
+  it("retries a failed list request and preserves a successful list on a later refresh failure", async () => {
+    vi.mocked(fetch).mockRejectedValueOnce(new TypeError("offline"));
+    at("/matrices");
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(screen.queryByText("还没有矩阵")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "重试" }));
+    await screen.findByRole("link", { name: "AI 矩阵" });
+    vi.mocked(fetch).mockRejectedValueOnce(new TypeError("offline"));
+    fireEvent.click(screen.getByRole("button", { name: "刷新矩阵" }));
+    expect(await screen.findByText("暂时显示上次读取的矩阵。")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "AI 矩阵" })).toBeTruthy();
+  });
+
+  it("keeps management off the task workspace and loads ungrouped tasks only for settings", async () => {
+    at("/matrices/ai");
+    await screen.findByRole("link", { name: "AI Flash Discovery" });
+    expect(calls.some((c) => c.url.endsWith("/api/matrices"))).toBe(false);
+    expect(screen.queryByRole("button", { name: "归档" })).toBeNull();
+    fireEvent.click(screen.getByRole("tab", { name: "矩阵设置" }));
+    await screen.findByLabelText("放进来的 Job");
+    expect(calls.some((c) => c.url.endsWith("/api/matrices"))).toBe(true);
+    expect(screen.getByRole("button", { name: "归档" })).toBeTruthy();
   });
 
   it("shows each Job's schedule and last run, and adds a Job by sending the new member list", async () => {
@@ -88,6 +134,7 @@ describe("Matrices", () => {
     expect(screen.getByText("手动")).toBeTruthy();
     expect(screen.getByText("定时（已暂停） 0 8 * * 1")).toBeTruthy();
     expect(screen.getByText("还没跑过")).toBeTruthy();
+    fireEvent.click(screen.getByRole("tab", { name: "矩阵设置" }));
     fireEvent.change(await screen.findByLabelText("放进来的 Job"), { target: { value: "research/games" } });
     fireEvent.click(screen.getByText("放进来"));
     await waitFor(() => expect(calls.some((c) => c.method === "PUT")).toBe(true));
@@ -104,6 +151,17 @@ describe("Matrices", () => {
     ]);  // the Job whose report is not a list of items has one too
     expect(screen.getAllByText("还没配").length).toBe(2);  // the whole-report Job too: it can take a config now
     expect(screen.queryByLabelText("视频配置")).toBeNull();  // no section at the bottom any more
+  });
+
+  it("saves video speed once for the matrix and explains task inheritance", async () => {
+    at("/matrices/ai?tab=settings");
+    const speed = await screen.findByRole("combobox", { name: "默认输出倍速" });
+    expect((speed as HTMLSelectElement).value).toBe("1");
+    expect(screen.getByText(/本矩阵内所有研究任务的视频统一继承/)).toBeTruthy();
+    fireEvent.change(speed, { target: { value: "1.25" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存倍速" }));
+    await waitFor(() => expect(calls.find((c) => c.method === "PUT" && c.url.endsWith("/api/matrices/ai"))?.body).toMatchObject({ render: { video_speed: 1.25 } }));
+    expect(calls.filter((c) => c.method !== "GET" && c.url.includes("/api/production"))).toHaveLength(0);
   });
 
   it("the Job's own page is that Job's configs: no Job to pick, and a whole-report Job can be given one", async () => {
@@ -131,6 +189,7 @@ describe("Matrices", () => {
 
   it("copies with new keywords only the Jobs that have a neutral template", async () => {
     at("/matrices/ai");
+    fireEvent.click(await screen.findByRole("tab", { name: "矩阵设置" }));
     fireEvent.click(await screen.findByText("换关键词复制", { selector: "button" }));
     const form = screen.getByRole("region", { name: "换关键词复制" });
     expect(form.textContent).toContain("暂不能复制（提示词里写死了「AI 与软件开发」）：AI 深度");
@@ -219,6 +278,7 @@ describe("Matrices", () => {
   it("shows the next week of timed runs, with a warning when too many are due together", async () => {
     at("/matrices/ai?tab=week");
     expect(await screen.findByText("接下来 7 天")).toBeTruthy();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(9);
     expect(screen.getByText(/同时到点 3 个：A、B、C/)).toBeTruthy();
     expect(screen.getAllByText("05:00").length).toBeGreaterThan(0);
     expect(screen.getAllByText("20 次").length).toBeGreaterThan(0);
@@ -230,7 +290,7 @@ describe("Matrices", () => {
     fireEvent.click(await screen.findByRole("tab", { name: "运行记录" }));
     expect(await screen.findByLabelText("按 Job 筛")).toBeTruthy();
     expect(screen.queryByLabelText("矩阵里的 Job")).toBeNull();
-    fireEvent.click(screen.getByRole("tab", { name: "Job" }));
+    fireEvent.click(screen.getByRole("tab", { name: "研究任务" }));
     expect(await screen.findByLabelText("矩阵里的 Job")).toBeTruthy();
   });
 
@@ -256,6 +316,7 @@ describe("Matrices", () => {
     }));
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     at("/matrices/ai");
+    fireEvent.click(await screen.findByRole("tab", { name: "矩阵设置" }));
     fireEvent.click(await screen.findByRole("button", { name: "整个暂停" }));
     expect(await screen.findByText(/矩阵已暂停：1 个 Job 的定时没在跑/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "恢复定时" }));
@@ -272,6 +333,7 @@ describe("Matrices", () => {
       PRODUCTION = [{ job: "monitoring/ai_flash_discovery", auto: 0 }];
       at("/matrices/ai");
       expect((await screen.findByRole("link", { name: "最新报告还没写视频 →" })).getAttribute("href")).toBe("/matrices/ai/video/monitoring%2Fai_flash_discovery");
+      expect(screen.getByRole("link", { name: "查看报告" }).getAttribute("href")).toBe("/reports/view?path=flash%2Fc.md");
       cleanup();
       flash.latest_report = { path: "output/flash/c.md", ts: "x", scripts: 3 };
       at("/matrices/ai");
@@ -299,7 +361,8 @@ describe("Matrices", () => {
   it("shows the month's search limit against what is used, and lets an admin set it", async () => {
     useAuthStore.setState({ user: { username: "a", role: "admin" } as never });
     at("/matrices/ai");
-    expect(await screen.findByText(/没设（Job 想跑多少跑多少）/)).toBeTruthy();
+    fireEvent.click(await screen.findByRole("tab", { name: "矩阵设置" }));
+    expect(await screen.findByText("未设置上限")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "设上限" }));
     fireEvent.change(screen.getByLabelText("每月搜索上限"), { target: { value: "500" } });
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
@@ -326,6 +389,9 @@ describe("Matrices", () => {
     PRODUCTION = [{ key: "orphan", name: "孤儿配置", job: "research/gone", errors: ["Job 不在了"] }, { key: "fine", name: "好的", job: "research/deep", errors: [] }];
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     at("/matrices");
+    await screen.findByRole("link", { name: "AI 矩阵" });
+    expect(calls.some((c) => c.url.includes("/api/production"))).toBe(false);
+    fireEvent.click(screen.getByText("配置检查"));
     expect(await screen.findByText("1 套视频配置挂的 Job 不在任何矩阵里")).toBeTruthy();
     expect(screen.getByText("research/gone")).toBeTruthy();
     expect(screen.queryByText("好的")).toBeNull(); // its Job is in a matrix

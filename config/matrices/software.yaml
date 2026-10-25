@@ -5,3 +5,5 @@ keywords: []
 jobs:
 - software/software_daily
 - software/software_weekly
+render:
+  video_speed: 1.25

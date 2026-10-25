@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePageResource } from "@/lib/use-page-resource";
 import { api } from "@/api/client";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "@/components/ErrorState";
@@ -19,6 +20,7 @@ interface ScheduledJob {
   enabled: boolean;
   backend?: "cron" | "launchd" | "managed";
   job_name?: string;
+  job_label?: string;
   timezone?: string;
   missed_policy?: string;
   max_retries?: number;
@@ -61,6 +63,22 @@ interface JobScheduleState {
   schedule: string;
   last_ran_at?: string;
 }
+interface ScheduleData {
+  jobs: ScheduledJob[];
+  health?: { jobs: JobScheduleState[] };
+  timezone?: string;
+  warnings?: string[];
+  dispatcher?: Dispatcher;
+  removed_system_jobs?: RemovedSystemJob[];
+  others?: OtherSchedule[];
+}
+async function loadSchedules(scope: "managed" | "system", signal: AbortSignal) {
+  const data = await api<ScheduleData>("/api/scheduler", { query: { scope }, signal });
+  if (!Array.isArray(data.jobs)) throw new Error("调度数据格式异常，请重试");
+  return data;
+}
+const loadManaged = (signal: AbortSignal) => loadSchedules("managed", signal);
+const loadSystem = (signal: AbortSignal) => loadSchedules("system", signal);
 interface Preview { schedule: string; timezone: string; next_runs: string[]; requestedTimezone?: string }
 const EMPTY = { id: "", job_name: "", schedule: "0 8 * * *", command: "", timezone: "local", missed_policy: "latest", max_retries: 2, expected_version: null as number | null };
 const STATUS = { ok: "有运行证据", paused: "已暂停", overdue: "需要检查", unverified: "待验证", no_schedule: "时间待检查", running: "运行中", queued: "等待执行", retry: "等待重试", cancelled: "上次已取消" };
@@ -81,11 +99,9 @@ const displayTime = (iso?: string) => iso ? iso.slice(0, 16).replace("T", " ") :
 export function SchedulerPage() {
   const focusedPlan = new URLSearchParams(window.location.search).get('plan');
   const toast = useToast();
-  const [dispatcher, setDispatcher] = useState<Dispatcher | null>(null);
   const [historyId, setHistoryId] = useState("");
-  const [jobs, setJobs] = useState<ScheduledJob[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [scheduleQuery, setScheduleQuery] = useState("");
+  const [statusScope, setStatusScope] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
@@ -95,40 +111,32 @@ export function SchedulerPage() {
   const [schedulable, setSchedulable] = useState<SchedulableJob[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState("");
-  const [states, setStates] = useState<Record<string, JobScheduleState>>({});
   const [jobQuery, setJobQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState("");
-  const [timezone, setTimezone] = useState("服务器本地时区");
-  const [warnings, setWarnings] = useState<string[]>([]);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [previewError, setPreviewError] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [removed, setRemoved] = useState<RemovedSystemJob[]>([]);
-  const [others, setOthers] = useState<OtherSchedule[]>([]);
+  const managed = usePageResource(loadManaged, showForm || busy ? 0 : 15000);
+  const system = usePageResource(loadSystem, showForm || busy ? 0 : 60000);
+  const jobs = useMemo(() => [...new Map([...(system.data?.jobs || []), ...(managed.data?.jobs || [])].map(j => [j.id, j])).values()], [system.data, managed.data]);
+  const states = useMemo(() => Object.fromEntries([...(system.data?.health?.jobs || []), ...(managed.data?.health?.jobs || [])].map(s => [s.id, s])), [system.data, managed.data]);
+  const dispatcher = managed.data?.dispatcher || null;
+  const timezone = managed.data?.timezone || system.data?.timezone || "服务器本地时区";
+  const warnings = [...new Set([...(managed.data?.warnings || []), ...(system.data?.warnings || [])])];
+  const removed = system.data?.removed_system_jobs || [];
+  const others = system.data?.others || [];
+  const loaded = !!managed.data || !!system.data;
+  const awaitingFirstJobs = !jobs.length && ((!managed.data && managed.loading) || (!system.data && system.loading));
+  const loading = managed.loading;
+  const error = [managed.error && `研究计划读取失败：${managed.error}`, system.error && `系统任务读取失败：${system.error}`].filter(Boolean).join("；");
+  const fetchJobs = async () => {
+    void system.reload();
+    await managed.reload();
+  };
+  const focusReady = jobs.some(j => j.id === focusedPlan);
   useEffect(() => {
-    if (!loading && focusedPlan) document.getElementById(`schedule-${focusedPlan}`)?.scrollIntoView?.({ block: 'center' });
-  }, [loading, focusedPlan]);
-
-  const fetchJobs = useCallback(async (quiet = false) => {
-    if (!quiet) setLoading(true);
-    setError("");
-    try {
-      const data = await api<{ jobs: ScheduledJob[]; health?: { jobs: JobScheduleState[] }; timezone?: string; warnings?: string[]; dispatcher?: Dispatcher; removed_system_jobs?: RemovedSystemJob[]; others?: OtherSchedule[] }>("/api/scheduler");
-      setJobs(data.jobs);
-      setDispatcher(data.dispatcher || null);
-      setStates(Object.fromEntries((data.health?.jobs || []).map(entry => [entry.id, entry])));
-      setTimezone(data.timezone || "服务器本地时区");
-      setWarnings(data.warnings || []);
-      setRemoved(data.removed_system_jobs || []);
-      setOthers(data.others || []);
-    } catch (err) { setError(errorMessage(err, "加载失败")); }
-    finally { setLoading(false); }
-  }, []);
-  useEffect(() => { void fetchJobs(); }, [fetchJobs]);
-  useEffect(() => {
-    const timer = window.setInterval(() => { if (!document.hidden && !showForm && !busy) void fetchJobs(true); }, 15000);
-    return () => window.clearInterval(timer);
-  }, [fetchJobs, showForm, busy]);
+    if (focusReady && focusedPlan) document.getElementById(`schedule-${focusedPlan}`)?.scrollIntoView?.({ block: 'center' });
+  }, [focusReady, focusedPlan]);
 
   const fetchCatalog = useCallback(async () => {
     setCatalogLoading(true);
@@ -235,6 +243,8 @@ export function SchedulerPage() {
   // system agents get their trigger from somewhere else.
   const legacyEdit = !!editing && !isSystemEdit && editingJob?.backend !== "managed";
   const filteredJobs = schedulable.filter(job => `${job.name} ${job.label} ${job.description}`.toLowerCase().includes(jobQuery.trim().toLowerCase()));
+  const visibleSchedules = jobs.filter((j) => (!scheduleQuery || `${j.title} ${j.id} ${j.job_name} ${j.job_label || ""}`.toLowerCase().includes(scheduleQuery.trim().toLowerCase())) &&
+    (!statusScope || (statusScope === "enabled" ? j.enabled : statusScope === "paused" ? !j.enabled : ["overdue", "unverified", "no_schedule"].includes(states[j.id]?.status))));
   const hasLaunchd = jobs.some(job => job.backend === "launchd");
   const needsAttention = Object.values(states).filter(s => ["overdue", "unverified", "no_schedule"].includes(s.status)).length;
   const previewValid = preview?.schedule === form.schedule.trim().split(/\s+/).join(" ") && preview.requestedTimezone === form.timezone && !!preview?.next_runs?.length;
@@ -244,16 +254,16 @@ export function SchedulerPage() {
 
   return <div className="space-y-5">
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex-1 min-w-48"><h1 className="text-lg font-semibold">周期调度</h1><p className="text-xs text-text-muted mt-1">安排研究任务，确认下一次运行与实际执行状态。</p></div>
+      <div className="flex-1 min-w-48"><h1 className="text-xl font-semibold tracking-tight">周期调度</h1><p className="text-xs text-text-muted mt-1">安排研究任务，确认下一次运行与实际执行状态。</p></div>
       <button onClick={() => setShowHelp(!showHelp)} className="btn text-xs"><HelpCircle className="w-3.5 h-3.5" />帮助</button>
       <button onClick={() => fetchJobs()} disabled={loading || !!busy} className="btn text-xs"><RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />刷新</button>
       <button disabled={!!busy} onClick={() => showForm ? setShowForm(false) : openNew()} className="btn btn-primary text-xs">{showForm ? "收起表单" : "+ 新建调度"}</button>
     </div>
 
     <div className="card p-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-      <span><strong className="text-lg mr-1.5">{jobs.filter(j => j.enabled).length}</strong>已启用</span>
-      <span className="text-text-muted">{jobs.filter(j => !j.enabled).length} 个已暂停</span>
-      <span className={needsAttention ? "text-warning" : "text-text-muted"}>{needsAttention} 个待检查 / 验证</span>
+      <span><strong className="text-lg mr-1.5">{loaded ? jobs.filter(j => j.enabled).length : "—"}</strong>已启用</span>
+      <span className="text-text-muted">{loaded ? jobs.filter(j => !j.enabled).length : "—"} 个已暂停</span>
+      <span className={needsAttention ? "text-warning" : "text-text-muted"}>{loaded ? needsAttention : "—"} 个待检查 / 验证</span>
       <span className="ml-auto text-xs text-text-muted flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />{timezone}</span>
     </div>
 
@@ -275,6 +285,7 @@ export function SchedulerPage() {
       <p className="text-text-muted">托管计划以实际报告生成结果判定成功，执行和重试记录可在卡片中查看。</p>
       <p className="text-text-muted">情报矩阵的每日运行与漏跑补偿是系统任务，可直接在本页改时间、暂停、删除与恢复；修改的是已安装的 launchd 配置，重新运行安装脚本会覆盖它。</p>
     </div>}
+    {system.loading && !system.data ? <p role="status" className="text-xs text-text-muted">正在检查系统任务，研究计划可先查看和操作…</p> : null}
     {warnings.map(w => <div key={w} role="alert" className="card border-warning/50 p-3 text-sm text-warning">{w}</div>)}
     {msg && <div role="alert" className="card border-danger/50 p-3 text-sm text-danger">{msg}</div>}
 
@@ -320,7 +331,10 @@ export function SchedulerPage() {
       <div className="flex justify-end gap-2"><button className="btn" disabled={!!busy} onClick={() => setShowForm(false)}>取消</button><button className="btn btn-primary" onClick={save} disabled={!!busy || !canSave || !previewValid || previewLoading}>{busy === "save" ? "保存中…" : editing ? "保存修改" : "创建调度"}</button></div>
     </div>}
 
-    {loading ? <p className="text-sm text-text-muted">加载中…</p> : error ? <ErrorState error={error} onRetry={() => fetchJobs()} /> : jobs.length === 0 ? <div className="card p-10 text-center space-y-2">
+    {error && jobs.length > 0 ? <ErrorState error={error} onRetry={() => fetchJobs()} compact /> : null}
+    {jobs.length ? <div className="flex flex-wrap items-center gap-3"><input className="input max-w-sm text-xs" aria-label="搜索调度计划" placeholder="搜索计划名称或研究任务" value={scheduleQuery} onChange={(e) => setScheduleQuery(e.target.value)} /><select aria-label="调度状态" className="input w-auto text-xs" value={statusScope} onChange={(e) => setStatusScope(e.target.value)}><option value="">全部状态</option><option value="enabled">已启用</option><option value="paused">已暂停</option><option value="attention">待检查 / 验证</option></select><span className="text-xs text-text-muted ml-auto">显示 {visibleSchedules.length} / {jobs.length}</span></div> : null}
+    {loaded && jobs.length > 0 && !visibleSchedules.length ? <p className="text-sm text-text-muted">没有符合筛选的计划</p> : null}
+    {awaitingFirstJobs ? <p className="text-sm text-text-muted">加载中…</p> : error && !jobs.length ? <ErrorState error={error} onRetry={() => fetchJobs()} /> : jobs.length === 0 ? <div className="card p-10 text-center space-y-2">
       <Clock className="w-8 h-8 mx-auto text-text-muted" />
       {/* Deleting the last system task empties this list, so the empty state has
           to stop claiming nothing was ever set up -- and it must not be the only
@@ -330,13 +344,13 @@ export function SchedulerPage() {
         ? "每日情报轮次不会再自动运行。恢复下面的系统任务即可按原频率继续。"
         : "创建计划后，可在这里查看下一次运行和执行状态。"}</p>
       <button className="btn mt-2" onClick={openNew}>{removed.length > 0 ? "仍然新建计划" : "创建第一个计划"}</button>
-    </div> : <div className="space-y-3">{jobs.map(job => {
+    </div> : <div className="space-y-3">{visibleSchedules.map(job => {
       const state = states[job.id];
       const isSystem = job.backend === "launchd";
       const editable = job.editable !== false;
       return <div key={job.id} id={`schedule-${job.id}`} className={cn("card p-4 space-y-3", state?.status === "overdue" && "border-danger/50", focusedPlan === job.id && "ring-1 ring-accent")}>
         <div className="flex flex-wrap items-start gap-3"><div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2"><h2 className="text-sm font-medium break-all">{job.title || job.id}</h2><span className="text-[10px] border border-border rounded px-1.5 py-0.5 text-text-muted">{job.backend === "managed" ? "托管计划 · 自动补跑" : isSystem ? "情报矩阵 · 系统任务" : "旧 cron"}</span>
+          <div className="flex flex-wrap items-center gap-2"><h2 className="text-sm font-medium break-all">{job.job_name ? <a href={`/jobs/${encodeURIComponent(job.job_name)}`} className="hover:text-accent hover:underline">{job.job_label || job.title || job.job_name}</a> : job.title || job.id}</h2><span className="text-[10px] border border-border rounded px-1.5 py-0.5 text-text-muted">{job.backend === "managed" ? "托管计划 · 自动补跑" : isSystem ? "情报矩阵 · 系统任务" : "旧 cron"}</span>
             <span className={cn("text-xs", !job.enabled ? "text-text-muted" : state?.status === "ok" ? "text-success" : "text-warning")}>{!job.enabled ? "已暂停" : state ? (job.backend === "managed" && state.status === "ok" ? "正常" : STATUS[state.status]) : "待验证"}</span></div>
           <p className="mt-1.5 text-sm text-text-muted">{job.schedule_label || scheduleSummary(expression(job))}{job.backend === "managed" && <span className="ml-2 text-xs">· {job.timezone === "local" ? timezone : job.timezone}</span>}</p>
           {isSystem && !job.enabled && <p className="mt-1 text-xs text-warning">已暂停：情报矩阵不会自动运行，恢复后按原频率继续。</p>}
@@ -348,8 +362,9 @@ export function SchedulerPage() {
         </div>}</div>
         <div className="grid sm:grid-cols-2 gap-2 text-xs"><p><span className="text-text-muted mr-2">下次计划</span>{!job.enabled ? "暂停期间不执行" : job.next_runs?.[0] ? displayTime(job.next_runs[0]) : isSystem ? "由系统安排检查" : "暂无预览"}</p><p><span className="text-text-muted mr-2">{job.backend === "managed" ? "最近执行" : "最近运行证据"}</span>{displayTime(state?.last_ran_at)}</p></div>
         {state && <div role={state.status === "overdue" ? "alert" : undefined} className={cn("text-xs p-2.5 rounded bg-bg-hover", state.status === "overdue" ? "text-danger" : "text-text-muted")}>
-          {state.status === "overdue" && <p className="flex gap-1.5 items-center font-medium mb-1"><AlertTriangle className="w-3.5 h-3.5" />{job.backend === "managed" ? "执行异常" : "漏跑"}：{job.id}</p>}
-          {state.status === "paused" && <p className="mb-1">已暂停：{job.id}</p>}{state.detail}
+          {state.status === "overdue" && <p className="flex gap-1.5 items-center font-medium mb-1"><AlertTriangle className="w-3.5 h-3.5" />{job.backend === "managed" ? "上次执行未完成" : "存在漏跑记录"}</p>}
+          {state.status === "paused" && <p className="mb-1">已暂停</p>}
+          {/ModelDeprecated|has been deprecated/.test(state.detail) ? <><p>上次请求的模型已被服务商停用，请确认当前模型配置。</p><details className="mt-2"><summary className="cursor-pointer">原始错误信息</summary><pre className="whitespace-pre-wrap break-all mt-2">{state.detail}</pre></details></> : state.detail}
         </div>}
         {job.backend === "managed" ? <div className="space-y-3 border-t border-border pt-2">
           <div className="flex flex-wrap justify-between gap-2 text-xs text-text-muted"><span>{job.missed_policy === "skip" ? "错过即跳过" : "错过时合并补跑"} · 失败最多重试 {job.max_retries} 次</span><button className="text-accent" onClick={() => setHistoryId(historyId === job.id ? "" : job.id)}>{historyId === job.id ? "收起执行记录" : "查看执行记录"}</button></div>

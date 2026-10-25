@@ -17,6 +17,7 @@ watchfiles>=0.21
 python-dotenv>=1.0
 markdown>=3.5              # HTML export for reports
 nh3>=0.2.15                # sanitize that export (report bodies are untrusted)
+qrcode[pil]>=7.4,<9        # Bilibili account login QR image
 
 # Optional: keyless DuckDuckGo fallback for web search
 # duckduckgo-search>=6.0

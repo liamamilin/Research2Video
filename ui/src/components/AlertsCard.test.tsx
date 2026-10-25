@@ -27,6 +27,20 @@ afterEach(() => {
 });
 
 describe("Automation alerts card", () => {
+  it("keeps compact alerts collapsed, groups repeats, and separates the raw diagnostic details", async () => {
+    const detail = "Error code: 410 ModelDeprecated: model has been deprecated";
+    stub([0, 1].map((n) => ({ key: `deprecated-${n}`, kind: "job_failed", at: 1792443629 - n, title: "Job x 失败", detail, link: "/jobs/x" })));
+    render(<MemoryRouter><AlertsCard compact /></MemoryRouter>);
+    const toggle = await screen.findByRole("button", { name: /自动化提醒/ });
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByText("研究任务使用的模型已停用")).toBeNull();
+    fireEvent.click(toggle);
+    expect(screen.getAllByText("研究任务使用的模型已停用")).toHaveLength(1);
+    expect(screen.getByText("重复 2 次")).toBeTruthy();
+    expect(screen.getByText(detail).closest("details")?.open).toBe(false);
+    expect(vi.mocked(fetch).mock.calls.some(([, options]) => options?.method === "POST")).toBe(false);
+  });
+
   it("lists what went wrong on its own, with the cause, and an editor can acknowledge one", async () => {
     useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
     const calls: { url: string; method?: string; body?: string }[] = [];

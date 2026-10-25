@@ -1,9 +1,13 @@
 """Run the adaptation: fact sheet → plan → draft → three audits, with up to two rounds of fixes.
 
-A round rewrites only the flagged paragraphs, serious factual problems first,
+A fact-repair round rewrites the flagged paragraphs, serious factual problems first,
 then re-runs the rule checks and the newcomer's read on the whole script (flow
 is a whole-script property) and the fact audit on the changed paragraphs. The
 best version seen is kept.
+
+Concrete listening problems then get a whole-script editorial proposal. It may
+change the title and structure; a fresh full audit and editorial comparison
+decide whether to keep it. Failed proposals preserve the checked original.
 
 A serious factual problem that survives the rounds loses its sentence. The
 auditor's quote must really be in the paragraph; the opening paragraph and the
@@ -15,13 +19,16 @@ approval: whatever is left is shown to the reviewer.
 from __future__ import annotations
 
 import copy
+import json
 import re
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Optional
+from core.errors import CancelledError
 
-from .. import length, writer
+from .. import editorial, length, writer
+from ..policy import is_core_issue
 from . import draft, facts, review
 from . import plan as planning
 from .common import AdaptError, pid
@@ -55,14 +62,21 @@ def _audit(client, auditor, sections, plan, sheet, column, style, problems: list
     reading = fact_check = None
     try:
         reading = review.newcomer(client, sections, plan, style)
+    except CancelledError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - optional checks must not prevent the fact audit
+        problems.append(f"表达审计没有完成（只作提醒）：{exc}")
+    try:
         if previous and previous.get("audit") is not None and changed is not None:
-            fact_check = review.fact_audit(auditor, sections, plan, sheet, reading, hints, only=changed)
+            fact_check = review.fact_audit(auditor, sections, plan, sheet, reading or {}, hints, only=changed)
             kept = [i for i in previous["audit"]["issues"] if pid(i["section"], i["paragraph"]) not in changed]
             fact_check["issues"] = kept + fact_check["issues"]
         else:
-            fact_check = review.fact_audit(auditor, sections, plan, sheet, reading, hints)
-    except AdaptError as exc:
-        problems.append(f"模型审计没有完成：{exc}")
+            fact_check = review.fact_audit(auditor, sections, plan, sheet, reading or {}, hints)
+    except CancelledError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - keep the draft and expose the unfinished fact audit
+        problems.append(f"事实审计没有完成：{exc}")
     return {"checks": review.assemble(rule_issues, reading, fact_check, plan, sections),
             "reading": reading, "audit": fact_check}
 
@@ -97,12 +111,13 @@ def _delete_serious(sections: list[dict], state: dict, plan: dict) -> list[dict]
 
 
 def _mark_evidence(sections: list[dict], issues: list[dict]) -> None:
-    """A paragraph with a serious finding left is not "cited", whatever its links say."""
+    """An unresolved factual finding needs review regardless of its severity."""
     for item in issues:
-        if item["severity"] != review.SERIOUS or item["paragraph"] is None:
+        if not is_core_issue(item) or item["paragraph"] is None:
             continue
         para = sections[item["section"]]["paragraphs"][item["paragraph"]]
         para["evidence"] = "NEEDS_REVIEW"
+        para["review_reason"] = item["problem"]
         note = f"事实审计：{item['problem']}"
         para["note"] = f"{para['note']}；{note}" if para.get("note") and note not in para["note"] else note
 
@@ -155,10 +170,26 @@ def _plan(client, *, report, citation_check, topic, column, style, sheet, on_she
     return plan, problems, sheet
 
 
+def _editorial_plan(plan: dict, brief: dict, column) -> dict:
+    """Use the new story's facts and purpose, never old positional quiz targets."""
+    beats = brief.get("beats") or [{"point": brief["throughline"], "facts": brief["facts"]}]
+    budgets = length.allocate(length.budget_for(column.target_minutes, column.voice_id), [1] * len(beats))
+    return {**plan, "core_message": brief["angle"], "selected_facts": brief["facts"],
+            "question": "", "goals": [], "chain": [],
+            "glossary": [], "misconceptions": [], "actions": [], "must_cover": [], "left_out": [],
+            "scope_out": brief.get("leave_out") or [],
+            "hook": {"kind": "editorial", "idea": brief.get("opening", ""),
+                     "facts": brief.get("opening_facts") or []},
+            "beats": [{"title": b["point"][:32], "point": b["point"], "role": "", "terms": [],
+                       "facts": b.get("facts") or [], "connection": b.get("connection", ""), "budget": units}
+                      for b, units in zip(beats, budgets)]}
+
+
 def _write(client, auditor, *, report, plan, sheet, column, style, problems: list[str], stage,
            usage_before: Optional[dict] = None) -> Adapted:
     """Steps ③–⑤ from a plan: draft, audits and fix rounds. ``problems`` are the plan step's, kept first."""
     problems = list(problems)
+    column_style = column.script_style + "\n" + json.dumps(style.as_dict(), ensure_ascii=False)
     stage("写稿")
     title, sections, raw_description = draft.write(client, plan, sheet, style, column)
     writer._require_chinese(sections)
@@ -166,26 +197,117 @@ def _write(client, auditor, *, report, plan, sheet, column, style, problems: lis
     stage("审校")
     state = _audit(client, auditor, sections, plan, sheet, column, style, problems)
     initial = copy.deepcopy(state["checks"]["issues"])
-    best = (sections, state)
     rounds = 0
-    while not state["checks"]["summary"]["passed"] and rounds < getattr(column, "revise_rounds", MAX_ROUNDS) and state["reading"] is not None:
-        todo = review.targets(sections, state["checks"])
-        if not todo:
+    repair_rounds = 0
+    editorial_used = False
+    editorial_attempt = None
+    editorial_attempts = []
+
+    def repair_current(sections, state):
+        nonlocal rounds, repair_rounds
+        best = (sections, state, rounds)
+        while repair_rounds < getattr(column, "revise_rounds", MAX_ROUNDS) and state["audit"] is not None:
+            todo = review.targets(sections, state["checks"])
+            if not todo:
+                break
+            rounds += 1
+            repair_rounds += 1
+            stage("修改")
+            try:
+                sections, changed = _revise(client, sections, todo, plan, sheet, style)
+            except AdaptError as exc:
+                problems.append(f"第 {rounds} 轮修改没有成功：{exc}")
+                break
+            if not changed:
+                break
+            stage("审校")
+            state = _audit(client, auditor, sections, plan, sheet, column, style, problems, previous=state, changed=changed)
+            if (state["audit"] is not None
+                    and state["checks"]["summary"]["rank"] <= best[1]["checks"]["summary"]["rank"]
+                    and (state["checks"]["summary"]["passed"] or not best[1]["checks"]["summary"]["passed"])):
+                best = (sections, state, rounds)
+        return copy.deepcopy(best[0]), copy.deepcopy(best[1])
+
+    # Whole-script editing can solve the cause of a listening problem and its
+    # factual symptoms together; every proposed manuscript is audited below.
+    if not review.editorial_targets(sections, state["checks"]):
+        sections, state = repair_current(sections, state)
+
+    for _ in range(editorial.MAX_ROUNDS):
+        feedback = review.editorial_targets(sections, state["checks"])
+        if not feedback or state["audit"] is None:
             break
+        for key, notes in review.targets(sections, state["checks"]).items():
+            feedback.setdefault(key, []).extend(notes)
+        editorial_used = True
         rounds += 1
-        stage("修改")
+        editorial_attempt = {"applied": False, "mode": "whole_script", "before_title": title,
+                             "before": copy.deepcopy(sections), "targets": feedback,
+                             "prompt_version": editorial.PROMPT_VERSION}
+        editorial_attempts.append(editorial_attempt)
+        attempt_problems: list[str] = []
         try:
-            sections, changed = _revise(client, sections, todo, plan, sheet, style)
-        except AdaptError as exc:
-            problems.append(f"第 {rounds} 轮修改没有成功：{exc}")
+            stage("主编打磨")
+            column_style = column.script_style + "\n" + json.dumps(style.as_dict(), ensure_ascii=False)
+            proposal = editorial.rewrite(client, title=title, sections=sections,
+                                         material=editorial.source_material(sheet), direction=plan,
+                                         feedback=feedback, column_style=column_style,
+                                         target_minutes=column.target_minutes, sheet=sheet,
+                                         history=editorial_attempts[:-1])
+            candidate = draft.finalize(proposal["sections"], sheet)
+            for raw_section, section in zip(proposal["sections"], candidate):
+                for raw, para in zip(raw_section["paragraphs"], section["paragraphs"]):
+                    if raw.get("needs_review"):
+                        para.update(evidence="NEEDS_REVIEW",
+                                    review_reason=raw.get("review_reason") or "主编改写仍有未解决的事实疑点")
+            writer._require_chinese(candidate)
+            candidate_plan = _editorial_plan(plan, proposal["editorial_brief"], column)
+            editorial_attempt.update(title=proposal["title"], sections=copy.deepcopy(candidate),
+                                     editorial_brief=proposal["editorial_brief"])
+            stage("整篇复审")
+            # No old paragraph ids or findings survive reordering or deletion.
+            candidate_state = _audit(client, auditor, candidate, candidate_plan, sheet, column, style, attempt_problems)
+            repairs = []
+            for _ in range(getattr(column, "revise_rounds", MAX_ROUNDS)):
+                if candidate_state["checks"]["summary"]["passed"] or candidate_state["audit"] is None:
+                    break
+                todo = review.targets(candidate, candidate_state["checks"])
+                if not todo:
+                    break
+                before_repair = copy.deepcopy(candidate)
+                candidate, changed = _revise(client, candidate, todo, candidate_plan, sheet, style)
+                if not changed:
+                    break
+                rounds += 1
+                stage("编辑稿事实复审")
+                candidate_state = _audit(client, auditor, candidate, candidate_plan, sheet, column, style, attempt_problems)
+                repairs.append({"before": before_repair, "sections": copy.deepcopy(candidate),
+                                "checks": copy.deepcopy(candidate_state["checks"])})
+            editorial_attempt["source_repairs"] = repairs
+            editorial_attempt["sections"] = copy.deepcopy(candidate)
+            editorial_attempt["checks"] = copy.deepcopy(candidate_state["checks"])
+            if candidate_state["checks"]["summary"]["passed"]:
+                decision = editorial.compare(client, before_title=title, before=sections,
+                                             after_title=proposal["title"], after=candidate,
+                                             column_style=column_style)
+                editorial_attempt["decision"] = decision
+                if decision["choice"] == "B":
+                    title, sections, state = proposal["title"], candidate, candidate_state
+                    plan = candidate_plan
+                    raw_description = proposal.get("description") or {"summary": title}
+                    editorial_attempt["applied"] = True
+            else:
+                editorial_attempt["reason"] = "编辑稿未通过事实复核，保留此前已核对的文稿"
+        except CancelledError:
+            raise
+        except Exception as exc:  # noqa: BLE001 - retain the checked draft and failed attempt
+            attempt_problems.append(f"主编打磨没有完成：{type(exc).__name__}: {exc}")
+        editorial_attempt["problems"] = attempt_problems
+        if not editorial_attempt["applied"] and not editorial_attempt.get("decision"):
             break
-        if not changed:
-            break
-        stage("审校")
-        state = _audit(client, auditor, sections, plan, sheet, column, style, problems, previous=state, changed=changed)
-        if state["checks"]["summary"]["rank"] <= best[1]["checks"]["summary"]["rank"]:
-            best = (sections, state)
-    sections, state = copy.deepcopy(best[0]), copy.deepcopy(best[1])
+
+    if not state["checks"]["summary"]["passed"]:
+        sections, state = repair_current(sections, state)
 
     deletions = _delete_serious(sections, state, plan)
     if deletions:
@@ -201,7 +323,13 @@ def _write(client, auditor, *, report, plan, sheet, column, style, problems: lis
     _mark_evidence(sections, state["checks"]["issues"])
 
     checks = {**state["checks"], "rounds": rounds, "deletions": deletions,
-              "initial": _resolved(initial, state["checks"]["issues"])}
+              "initial": _resolved(initial, state["checks"]["issues"]), "editorial_attempted": editorial_used}
+    headline_result = None
+    if checks.get("audits_complete") and checks["summary"]["passed"]:
+        from .. import headline
+        stage("标题打磨")
+        headline_result = headline.finish(client, title=title, sections=sections, column_style=column_style)
+        title = headline_result["title"]
     budgets = [b["budget"] for b in plan["beats"]] if len(plan["beats"]) == len(sections) else None
     meta = {
         "writer": "adapt",
@@ -210,8 +338,11 @@ def _write(client, auditor, *, report, plan, sheet, column, style, problems: lis
         "fact_sheet_id": facts.sheet_id(report),
         "plan": plan,
         "checks": checks,
+        **({"headline": headline_result} if headline_result else {}),
         "description": draft.description(raw_description, sections, plan, sheet),
         "usage": _sum_usage(usage_before, client.usage) if usage_before else dict(client.usage),
+        **({"editorial_attempt": editorial.retained_attempt(editorial_attempts),
+            "editorial_attempts": editorial_attempts} if editorial_attempt is not None else {}),
         "problems": problems + writer.lint(sections),
     }
     if auditor is not client:

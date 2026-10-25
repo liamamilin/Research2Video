@@ -114,7 +114,7 @@ export function StylePanel({
   const tones = (catalog?.tones ?? []).filter((t) => !allowed.length || allowed.includes(t.key));
 
   return (
-    <section className="card text-sm flex flex-wrap items-center gap-x-4 gap-y-2">
+    <section className="card p-4 text-sm flex flex-wrap items-center gap-x-4 gap-y-2">
       <span>
         风格：<b>{current?.label ?? "短稿一次成稿（这个栏目不分风格）"}</b>
       </span>
@@ -145,6 +145,7 @@ export function StylePanel({
 }
 
 export function ChecksPanel({ checks }: { checks: ScriptChecks }) {
+  if (checks.mode === "on_request") return <section className="card p-4 text-sm text-text-muted">本版直接根据素材生成，未进行自动审校。</section>;
   const { summary, newcomer, quiz } = checks;
   const unhandled = checks.issues.filter((i) => i.severity === "serious");
   const general = checks.issues.filter((i) => i.section === null && i.severity !== "serious");
@@ -152,7 +153,7 @@ export function ChecksPanel({ checks }: { checks: ScriptChecks }) {
   const deleted = checks.initial.filter((i) => i.resolved === "deleted").length;
   const audits: AuditName[] = ["fact", "comprehension", "communication"];
   return (
-    <section className="card text-sm space-y-3">
+    <section className="card p-4 text-sm space-y-3">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <h2 className="font-medium">审校</h2>
         {checks.model_ran ? (
@@ -167,6 +168,8 @@ export function ChecksPanel({ checks }: { checks: ScriptChecks }) {
           </span>
         ) : null}
       </div>
+
+      <p className="text-xs text-text-muted">事实与引用问题需要核实；理解、风格和时长检查提供建议，不按数量或评分强制改写。</p>
 
       <div className="grid gap-2 sm:grid-cols-3 text-xs">
         {audits.map((name) => {
@@ -276,12 +279,13 @@ export function IssueList({ checks, si, pi }: { checks: ScriptChecks | undefined
   if (!checks) return null;
   const items = checks.issues.filter((i) => i.section === si && i.paragraph === pi);
   if (!items.length) return null;
+  const serious = items.filter((i) => i.audit === "fact" && i.severity === "serious" && !i.resolved);
+  const advice = items.filter((i) => !serious.includes(i));
   return (
-    <ul className="text-xs space-y-1.5">
-      {items.map((issue, i) => (
-        <IssueRow key={i} issue={issue} />
-      ))}
-    </ul>
+    <div className="text-xs space-y-1.5">
+      {serious.length ? <ul className="space-y-1.5">{serious.map((issue, i) => <IssueRow key={i} issue={issue} />)}</ul> : null}
+      {advice.length ? <details><summary className="cursor-pointer text-text-muted">审校建议 {advice.length} 条</summary><ul className="space-y-1.5 mt-2">{advice.map((issue, i) => <IssueRow key={i} issue={issue} />)}</ul></details> : null}
+    </div>
   );
 }
 
@@ -307,7 +311,7 @@ export function FactChips({ ids, facts }: { ids: string[] | undefined; facts: Re
 
 export function PlanPanel({ plan, open = false }: { plan: ScriptPlan; open?: boolean }) {
   return (
-    <details className="card text-sm" open={open}>
+    <details className="card p-4 text-sm" open={open}>
       <summary className="cursor-pointer font-medium">讲述方案</summary>
       <div className="mt-3 space-y-3">
         {plan.question ? (
@@ -426,7 +430,7 @@ export function PlanPanel({ plan, open = false }: { plan: ScriptPlan; open?: boo
 
 export function DescriptionPanel({ description }: { description: ScriptDescription }) {
   return (
-    <details className="card text-sm">
+    <details className="card p-4 text-sm">
       <summary className="cursor-pointer font-medium">视频简介（不朗读）</summary>
       <div className="mt-3 space-y-2 text-xs">
         {description.summary ? <p className="text-sm">{description.summary}</p> : null}

@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from web import audit as audit_module
 from web.deps import require_admin, require_viewer
 from web.models import ApiError
+from core.fileio import tail_lines
 
 router = APIRouter(tags=["logs"])
 
@@ -37,14 +38,12 @@ def get_global_logs(
         return {"lines": [], "total": 0}
 
     try:
-        with open(log_path, "r", encoding="utf-8", errors="replace") as f:
-            all_lines = f.readlines()
+        recent = tail_lines(log_path, lines)
     except OSError:
         return {"lines": [], "total": 0}
 
-    tail_lines = all_lines[-lines:]
     return {
-        "lines": [l.rstrip("\n") for l in tail_lines],
-        "total": len(tail_lines),
+        "lines": [l.rstrip("\n") for l in recent],
+        "total": len(recent),
         "path": log_path,
     }

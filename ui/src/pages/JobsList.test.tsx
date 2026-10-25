@@ -80,12 +80,12 @@ afterEach(() => {
 });
 
 describe("Jobs category picker", () => {
-  it("shows category filter pills with counts", async () => {
+  it("shows a category filter with counts", async () => {
     render(<MemoryRouter><JobsListPage /></MemoryRouter>);
     await waitFor(() => {
       expect(screen.getByText(/全部分类/)).toBeTruthy();
     });
-    const researchPill = screen.getByTitle("research：1 个 job");
+    const researchPill = screen.getByRole("option", { name: "research（1）" });
     expect(researchPill.textContent).toContain("1");
   });
 
@@ -94,7 +94,7 @@ describe("Jobs category picker", () => {
     await waitFor(() => {
       expect(screen.getByText("research/a")).toBeTruthy();
     });
-    fireEvent.click(screen.getByTitle("monitoring：1 个 job"));
+    fireEvent.change(screen.getByLabelText("任务分类"), { target: { value: "monitoring" } });
     expect(screen.queryByText("research/a")).toBeNull();
     expect(screen.getByText("monitoring/b")).toBeTruthy();
   });
@@ -202,11 +202,11 @@ describe("JobsList filters", () => {
     mockJobs();
     await renderList();
 
-    fireEvent.change(screen.getByPlaceholderText("搜索..."), { target: { value: "rag" } });
+    fireEvent.change(screen.getByLabelText("搜索研究任务"), { target: { value: "rag" } });
     await waitFor(() => expect(screen.queryByText("monitoring/fresh")).toBeNull());
     expect(screen.getByText("research/old")).toBeTruthy();
 
-    fireEvent.change(screen.getByPlaceholderText("搜索..."), { target: { value: "刚建的" } });
+    fireEvent.change(screen.getByLabelText("搜索研究任务"), { target: { value: "刚建的" } });
     await waitFor(() => expect(screen.getByText("monitoring/fresh")).toBeTruthy());
   });
 
@@ -224,7 +224,7 @@ describe("JobsList filters", () => {
     await renderList();
 
     fireEvent.click(screen.getByText("停用"));
-    fireEvent.change(screen.getByPlaceholderText("搜索..."), { target: { value: "nothing" } });
+    fireEvent.change(screen.getByLabelText("搜索研究任务"), { target: { value: "nothing" } });
     await waitFor(() => expect(screen.getByText("0 / 3")).toBeTruthy());
 
     fireEvent.click(screen.getByText("清除筛选"));

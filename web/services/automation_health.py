@@ -16,6 +16,7 @@ from typing import Optional
 from urllib.parse import quote
 
 from core.video import autopilot_store as ap
+from core.fileio import tail_lines
 from web.settings import get_settings
 
 #: How far back to look.
@@ -44,8 +45,7 @@ def _alert(key: str, kind: str, at: float, title: str, detail: str = "", link: s
 def _history(state_dir: str, name: str) -> list[dict]:
     path = os.path.join(state_dir, "history", name.replace("/", "_").replace("\\", "_") + ".jsonl")
     try:
-        with open(path, encoding="utf-8") as fh:
-            lines = fh.readlines()[-2000:]
+        lines = tail_lines(path, 2000)
     except OSError:
         return []
     out = []

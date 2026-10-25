@@ -31,3 +31,5 @@ jobs:
 - research/ai_automation_systems_research
 - research/ai_survey
 archived: true
+render:
+  video_speed: 1.25

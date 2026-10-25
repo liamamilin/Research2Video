@@ -246,3 +246,15 @@ describe("JobDetail YAML preflight", () => {
     expect(screen.queryByText("有未保存的修改")).toBeNull();
   });
 });
+
+
+it("keeps unsaved YAML and its conflict baseline when refreshing task status", async () => {
+  mockApi(); renderPage();
+  fireEvent.click(await screen.findByRole("button", { name: "YAML 配置" }));
+  const editor = await screen.findByLabelText("yaml");
+  fireEvent.change(editor, { target: { value: 'name: "本地编辑"\nprompt: "保留"\n' } });
+  mockApi({ job: { ...JOB, yaml_content: 'name: "外部编辑"\n', yaml_mtime: 2 } });
+  fireEvent.click(screen.getByRole("button", { name: "刷新状态" }));
+  await waitFor(() => expect((screen.getByLabelText("yaml") as HTMLTextAreaElement).value).toContain("本地编辑"));
+  expect((screen.getByLabelText("yaml") as HTMLTextAreaElement).value).not.toContain("外部编辑");
+});

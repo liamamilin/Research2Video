@@ -1,5 +1,6 @@
 import { api } from "./client";
 import type { JobState } from "./types";
+import type { ProductionConfig } from "./production";
 
 // 矩阵：一组 Job，共用一个领域和一套关键词（spec/matrices.md）
 export interface MatrixMember {
@@ -51,6 +52,7 @@ export interface Matrix {
   monthly_searches?: number; // 每月最多几次搜索，0 是不限
   archived?: boolean; // 收起来了：矩阵列表默认不显示，Job 和已有文稿都不动
   searches_this_month?: number; // 本月已用（只在设了上限的矩阵详情里有）
+  render?: ProductionConfig["render"]; // 矩阵内视频的共用默认设置
 }
 
 export interface MatrixFields {
@@ -59,10 +61,11 @@ export interface MatrixFields {
   keywords: string[];
   jobs?: string[];
   monthly_searches?: number; // 不写是不动，0 是不限
+  render?: ProductionConfig["render"];
 }
 
-export const listMatrices = () => api<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] }>("/api/matrices");
-export const getMatrix = (key: string) => api<Matrix>(`/api/matrices/${encodeURIComponent(key)}`);
+export const listMatrices = (signal?: AbortSignal) => api<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] }>("/api/matrices", { signal });
+export const getMatrix = (key: string, signal?: AbortSignal) => api<Matrix>(`/api/matrices/${encodeURIComponent(key)}`, { signal });
 export const createMatrix = (body: MatrixFields & { key: string }) => api<Matrix>("/api/matrices", { method: "POST", body });
 export const updateMatrix = (key: string, body: MatrixFields) =>
   api<Matrix>(`/api/matrices/${encodeURIComponent(key)}`, { method: "PUT", body });
@@ -97,8 +100,8 @@ export interface MatrixRun {
   items: number; // 这份报告有几条（条目列表才有，0 是整份的）
 }
 export interface RunsQuery { job?: string; status?: string; days?: number; order?: "asc" | "desc"; limit?: number; offset?: number }
-export const listMatrixRuns = (key: string, q: RunsQuery = {}) =>
-  api<{ runs: MatrixRun[]; total: number; more: boolean }>(`/api/matrices/${encodeURIComponent(key)}/runs`, { query: { ...q } });
+export const listMatrixRuns = (key: string, q: RunsQuery = {}, signal?: AbortSignal) =>
+  api<{ runs: MatrixRun[]; total: number; more: boolean }>(`/api/matrices/${encodeURIComponent(key)}/runs`, { query: { ...q }, signal });
 
 export interface MatrixCalendar {
   now: string;
@@ -108,7 +111,7 @@ export interface MatrixCalendar {
   clashes: { ts: string; jobs: string[] }[];
   concurrent_runs: number;
 }
-export const getMatrixCalendar = (key: string) => api<MatrixCalendar>(`/api/matrices/${encodeURIComponent(key)}/calendar`);
+export const getMatrixCalendar = (key: string, signal?: AbortSignal) => api<MatrixCalendar>(`/api/matrices/${encodeURIComponent(key)}/calendar`, { signal });
 
 /** 关键词输入框：逗号、顿号或换行分开 */
 export const splitKeywords = (text: string) => [...new Set(text.split(/[,，、\n]/).map((k) => k.trim()).filter(Boolean))];

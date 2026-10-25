@@ -21,9 +21,37 @@ afterEach(() => {
 });
 
 describe("Publish queue", () => {
+  it("shows this login's last list immediately on return, then replaces it with fresh statuses", async () => {
+    useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
+    render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
+    await screen.findByText("Gemini 4 Argon 上线");
+    cleanup();
+    let finish!: (response: Response) => void;
+    vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>((resolve) => { finish = resolve; })));
+    render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
+    expect(screen.getByText("Gemini 4 Argon 上线")).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toBe("正在更新成片状态…");
+    finish({ ok: true, status: 200, text: async () => JSON.stringify([{ ...ROWS[0], title: "最新成片" }]) } as Response);
+    expect(await screen.findByText("最新成片")).toBeTruthy();
+    expect(screen.queryByText("Gemini 4 Argon 上线")).toBeNull();
+    expect(screen.queryByText("正在更新成片状态…")).toBeNull();
+  });
+
+  it("does not reuse the previous login's list for another login", async () => {
+    useAuthStore.setState({ user: { username: "first", role: "editor" } as never });
+    render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
+    await screen.findByText("Gemini 4 Argon 上线");
+    cleanup();
+    useAuthStore.setState({ user: { username: "second", role: "viewer" } as never });
+    vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>(() => {})));
+    render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
+    expect(screen.queryByText("Gemini 4 Argon 上线")).toBeNull();
+    expect(screen.getByText("正在读取成片…")).toBeTruthy();
+  });
+
   it("shows what is ready to publish, what is published and the freshness warnings", async () => {
     render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
-    expect(await screen.findByText("待发布", { selector: "span" })).toBeTruthy();
+    expect(await screen.findByText("待核实", { selector: "span" })).toBeTruthy();
     expect(screen.getByText("已发布", { selector: "span" })).toBeTruthy();
     expect(screen.getByText("有严重问题", { selector: "span" })).toBeTruthy();
     expect(screen.getByText(/成片完成 .*10-20 10:30/)).toBeTruthy();
@@ -35,6 +63,7 @@ describe("Publish queue", () => {
   it("filters by credibility label, so a video with a serious finding is easy to pick out", async () => {
     render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
     await screen.findByText("Gemini 4 Argon 上线");
+    fireEvent.click(screen.getByRole("button", { name: "筛选" }));
     fireEvent.change(screen.getByLabelText("可信度"), { target: { value: "trusted" } });
     await waitFor(() => expect(screen.queryByText("Gemini 4 Argon 上线")).toBeNull());
     expect(screen.getByText("已发的一期")).toBeTruthy();

@@ -1,0 +1,298 @@
+{
+  "completion": {
+    "rows": 30,
+    "nonzero_rate_count": 30,
+    "range": {
+      "rate": {
+        "min": 306,
+        "max": 5114
+      },
+      "duration": {
+        "min": 91,
+        "max": 2502
+      },
+      "avg_duration": {
+        "min": 14,
+        "max": 299
+      },
+      "avg_play_time_value": {
+        "min": 0,
+        "max": 0
+      },
+      "view": {
+        "min": 0,
+        "max": 123
+      },
+      "ctime": {
+        "min": 1782316107,
+        "max": 1792626227
+      }
+    },
+    "sample": [
+      {
+        "bvid": "BV11Ljo6jE1X",
+        "rate": 2093,
+        "duration": 558,
+        "avg_duration": 116,
+        "avg_play_time_value": 0,
+        "view": 1
+      },
+      {
+        "bvid": "BV1X37v6YELg",
+        "rate": 1818,
+        "duration": 337,
+        "avg_duration": 61,
+        "avg_play_time_value": 0,
+        "view": 0
+      },
+      {
+        "bvid": "BV1Ao7L6wEA2",
+        "rate": 1800,
+        "duration": 313,
+        "avg_duration": 56,
+        "avg_play_time_value": 0,
+        "view": 2
+      }
+    ]
+  },
+  "overview": {
+    "play": 683,
+    "play_last": 119,
+    "fan": -6,
+    "fan_last": -1,
+    "like": 0,
+    "fav": 0,
+    "coin": 0,
+    "dm": 0,
+    "comment": 0,
+    "share": 0,
+    "log_date": 20261023
+  },
+  "play_graph": {
+    "tendency": [
+      {
+        "date_key": 1792166400,
+        "total_inc": 7,
+        "sub_total_inc": 1
+      },
+      {
+        "date_key": 1792252800,
+        "total_inc": 25,
+        "sub_total_inc": 7
+      },
+      {
+        "date_key": 1792339200,
+        "total_inc": 84,
+        "sub_total_inc": 37
+      },
+      {
+        "date_key": 1792425600,
+        "total_inc": 13,
+        "sub_total_inc": 4
+      },
+      {
+        "date_key": 1792512000,
+        "total_inc": 97,
+        "sub_total_inc": 48
+      },
+      {
+        "date_key": 1792598400,
+        "total_inc": 383,
+        "sub_total_inc": 50
+      },
+      {
+        "date_key": 1792684800,
+        "total_inc": 74,
+        "sub_total_inc": 6
+      }
+    ],
+    "rank_days": 7
+  },
+  "sources": {
+    "play_proportion": {
+      "android": 0,
+      "h5": 0,
+      "ios": 0,
+      "new_h5": 50,
+      "new_mobile": 7844,
+      "new_others": 0,
+      "new_ott": 50,
+      "new_pc": 2054,
+      "other": 0,
+      "out": 0,
+      "pc": 0,
+      "tv": 0
+    },
+    "audience_proportion": {
+      "fans": 197,
+      "guest": 791
+    },
+    "single_arc_inc_count": 10
+  },
+  "checked_at": "2026-10-24T18:41:43.631185+08:00",
+  "overview_30d": {
+    "play": 987,
+    "fan": -6,
+    "like": 0,
+    "fav": 0,
+    "coin": 0,
+    "dm": 0,
+    "comment": 0,
+    "share": 0,
+    "log_date": 20261023
+  },
+  "play_graph_30d": {
+    "tendency": [
+      {
+        "date_key": 1790179200,
+        "total_inc": 17,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1790265600,
+        "total_inc": 16,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1790352000,
+        "total_inc": 13,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1790438400,
+        "total_inc": 17,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1790524800,
+        "total_inc": 9,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1790611200,
+        "total_inc": 10,
+        "sub_total_inc": 1
+      },
+      {
+        "date_key": 1790697600,
+        "total_inc": 6,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1790784000,
+        "total_inc": 10,
+        "sub_total_inc": 1
+      },
+      {
+        "date_key": 1790870400,
+        "total_inc": 13,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1790956800,
+        "total_inc": 10,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1791043200,
+        "total_inc": 7,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1791129600,
+        "total_inc": 6,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1791216000,
+        "total_inc": 9,
+        "sub_total_inc": 4
+      },
+      {
+        "date_key": 1791302400,
+        "total_inc": 6,
+        "sub_total_inc": 2
+      },
+      {
+        "date_key": 1791388800,
+        "total_inc": 19,
+        "sub_total_inc": 1
+      },
+      {
+        "date_key": 1791475200,
+        "total_inc": 17,
+        "sub_total_inc": 2
+      },
+      {
+        "date_key": 1791561600,
+        "total_inc": 58,
+        "sub_total_inc": 29
+      },
+      {
+        "date_key": 1791648000,
+        "total_inc": 14,
+        "sub_total_inc": 2
+      },
+      {
+        "date_key": 1791734400,
+        "total_inc": 7,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1791820800,
+        "total_inc": 9,
+        "sub_total_inc": 2
+      },
+      {
+        "date_key": 1791907200,
+        "total_inc": 13,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1791993600,
+        "total_inc": 12,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1792080000,
+        "total_inc": 6,
+        "sub_total_inc": 0
+      },
+      {
+        "date_key": 1792166400,
+        "total_inc": 7,
+        "sub_total_inc": 1
+      },
+      {
+        "date_key": 1792252800,
+        "total_inc": 25,
+        "sub_total_inc": 7
+      },
+      {
+        "date_key": 1792339200,
+        "total_inc": 84,
+        "sub_total_inc": 37
+      },
+      {
+        "date_key": 1792425600,
+        "total_inc": 13,
+        "sub_total_inc": 4
+      },
+      {
+        "date_key": 1792512000,
+        "total_inc": 97,
+        "sub_total_inc": 48
+      },
+      {
+        "date_key": 1792598400,
+        "total_inc": 383,
+        "sub_total_inc": 50
+      },
+      {
+        "date_key": 1792684800,
+        "total_inc": 74,
+        "sub_total_inc": 6
+      }
+    ]
+  }
+}

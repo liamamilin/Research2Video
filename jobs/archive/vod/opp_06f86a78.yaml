@@ -1,0 +1,19 @@
+{
+  "name": "opp_06f86a78",
+  "description": "VOD 选题深度调研：should I stay on SQLAlchemy 2.0 or move to 2.1 for a production ORM codebase",
+  "enabled": true,
+  "keywords": [
+    "2.1.5",
+    "should I stay on SQLAlchemy 2.0 or move to 2.1 for a production ORM codebase"
+  ],
+  "language": "en",
+  "schedule": {
+    "type": "manual"
+  },
+  "runtime": {
+    "timeout_seconds": 3600,
+    "skip_if_running": true
+  },
+  "prompt": "你是一名技术研究员，为一位制作 AI / 软件类知识视频的创作者做选题调研。你的报告会被另一套系统读取：它会逐个打开你引用的网址，只采信真正能打开、并且确实写了这件事的页面。所以每个关键判断都要给出原始网址。\n\n## 选题\n- 标题：should I stay on SQLAlchemy 2.0 or move to 2.1 for a production ORM codebase\n- 核心问题：should I stay on SQLAlchemy 2.0 or move to 2.1 for a production ORM codebase\n- 为什么是现在：未说明\n- 触发事件：sqlalchemy/sqlalchemy: 2.1.5 — \n# 2.1.5\n\nReleased: October 16, 2026\n## orm\n\n\n-   **[orm] [feature]** Added the `_orm.Unmapped` annotation and the\n    `_orm.unmapped_column()` construct, providing a declarative-compatible\n    approach to having \"excluded\" columns in a Declarative model, that is,\n    columns that are part of the `_schema.Table` but are not mapped,\n    replacing the use of `_orm.Mapper.exclude_properties` for this\n    purpose when using a Declarative mapping.\n    \n    References: [#13650](https://www.sqlalchemy.\n\nUser impact: SQLAlchemy ORM developers using Declarative models with excluded/unmapped columns are affected: they can now define excluded columns via the `Unmapped` annotation and `unmapped_column()` instead of `Mapper.exclude_properties`, requiring learning the new pattern and potentially migrating existing model definitions.\n- 关键词：{keywords}\n\n## 任务\n围绕核心问题做深度调研：先直接回答，再给出支撑它的证据、反方证据和仍未确定的部分。证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。\n输出语言：{language}。\n\n## 证据规则\n1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。\n2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。\n3. 核心结论尽量由两个相互独立的来源支撑；只有厂商自己的说法时，标注「厂商自述，未独立验证」。\n4. 给出反方证据或失败案例；确实找不到时写明「未找到反方证据」。\n5. 区分「已证实」「有迹象」「推测」，不把推测写成事实。\n\n## 输出结构\n### 1. 直接回答\n### 2. 关键事实（表格：事实 | 置信度 | 来源编号）\n### 3. 争议与反方证据\n### 4. 仍未确定的问题\n### 5. 适合视频的讲述角度（不超过 3 条）\n### 6. 来源清单\n编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址\n",
+  "output": "output/vod/{datetime}_opp_06f86a78.md"
+}

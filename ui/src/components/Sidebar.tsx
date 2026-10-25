@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes, Layers, Rss } from "lucide-react";
+import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes, Layers, Rss, PanelsTopLeft } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import { AccountModal } from "./AccountModal";
@@ -12,6 +12,7 @@ const mainItems = [
   { to: "/", label: "视频看板", icon: LayoutDashboard },
   { to: "/video", label: "文稿", icon: Clapperboard },
   { to: "/publish", label: "成片与发布", icon: Send },
+  { to: "/platforms", label: "平台管理", icon: PanelsTopLeft },
   { to: "/ask", label: "助手", icon: MessageSquareText },
 ];
 

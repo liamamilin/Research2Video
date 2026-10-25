@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-24",
+  "feature": "Optional post-publication first comment, common template, and optional pin",
+  "backend_first_comment_regression": {
+    "file": "tests/test_platform_first_comment.py",
+    "passed": 26,
+    "details": "25 cases passed together; final disconnected-policy compatibility case passed after the last route adjustment."
+  },
+  "ui_regression": {
+    "files_passed": 57,
+    "tests_passed": 436
+  },
+  "lint": "PASS",
+  "ui_build": "PASS",
+  "python_compile": "PASS",
+  "configuration_validation": "PASS",
+  "diff_check": "PASS",
+  "full_backend_check": {
+    "initial": {
+      "passed": 2072,
+      "failed": 20,
+      "errors": 8,
+      "skipped": 3
+    },
+    "followup": {
+      "passed": 138,
+      "skipped": 2,
+      "files": [
+        "tests/test_assistant_maintenance.py",
+        "tests/test_gateway.py",
+        "tests/test_launcher.py",
+        "tests/test_remember_and_gateway_api.py",
+        "tests/test_platform_first_comment.py",
+        "tests/test_platforms.py"
+      ],
+      "details": "All files containing initial failures reran successfully outside the filesystem/network sandbox using isolated configurations and fake Bilibili APIs. The automatic-upload fixture was corrected to complete its render after auto-upload was enabled."
+    }
+  },
+  "browser_acceptance": {
+    "account_settings": "PASS: common text and default-pin controls work",
+    "upload_form": "PASS: per-upload comment toggle, body, optional pin, common-template button",
+    "screenshots": [
+      "template.png",
+      "upload-form.png"
+    ],
+    "example_text_saved": false,
+    "upload_submitted_during_qa": false
+  },
+  "production_state_check": {
+    "existing_uploads": 2,
+    "existing_first_comment_status": "DISABLED",
+    "existing_first_comment_ids": "empty",
+    "default_template_enabled": false,
+    "default_template_text": "empty",
+    "real_comments_sent_for_testing": 0,
+    "backfill_existing_uploads": false
+  },
+  "api_reference": "https://github.com/inorilzy/bilibili-api/blob/main/bilibili_api/comment.py",
+  "data_tab": "Deferred for separate design, as requested",
+  "deployment": {
+    "old_pid": 93376,
+    "old_instance": "9cd113d0073d4fd1a93fc229b89c0c62",
+    "idle_checks_passed": true,
+    "new_pid": 95562,
+    "new_instance": "b52f7ee094c94519801c774e651c5a7f",
+    "health_status": 200
+  }
+}

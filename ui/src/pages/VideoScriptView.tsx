@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   approveVideoScript,
   archiveVideoScript,
   getAutoVideoStatus,
   getVideoFacts,
-  getVideoRender,
   getVideoScript,
   listVideoStyles,
   renderVideoScript,
   restyleVideoScript,
+  rerunVideoStep,
   saveVideoScript,
   type AutoVideoStatus,
   type Evidence,
@@ -24,12 +24,15 @@ import { CredibilityBadge } from "@/components/CredibilityBadge";
 import { ReportReuse } from "@/components/ReportReuse";
 import { PlanReview } from "@/components/PlanReview";
 import { ScriptSteps } from "@/components/ScriptSteps";
+import { ScriptIteration } from "@/components/ScriptIteration";
 import { TimeStamp } from "@/components/TimeStamp";
 import { ErrorState } from "@/components/ErrorState";
+import { PublicationFlow } from "@/components/PublicationFlow";
+import { UPLOAD_LABEL } from "@/lib/platform-links";
 import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
-import { cn, timeAgo } from "@/lib/utils";
-import { nextStep, TAB_LABEL, type ScriptTab } from "./videoNext";
+import { cn } from "@/lib/utils";
+import { currentPublications, nextStep, renderForVersion, TAB_LABEL, type ScriptTab } from "./videoNext";
 import { ChecksPanel, DescriptionPanel, FactChips, IssueList, PlanPanel, StylePanel } from "./VideoAdaptation";
 import { PublishPanel, RenderFolder } from "./VideoPublish";
 import { STATUS_CLASS, STATUS_LABEL, minutes } from "./VideoScripts";
@@ -41,7 +44,7 @@ const EVIDENCE: Record<Evidence, { label: string; cls: string }> = {
 };
 
 const LENGTH: Record<string, { label: string; cls: string }> = {
-  OK: { label: "时长达标", cls: "text-success" },
+  OK: { label: "接近参考时长", cls: "text-success" },
   OVER: { label: "偏长", cls: "text-warning" },
   UNDER: { label: "偏短", cls: "text-warning" },
 };
@@ -83,6 +86,7 @@ export function VideoScriptViewPage() {
   const [detail, setDetail] = useState<VideoScriptDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [reuseOpen, setReuseOpen] = useState(false);
   const [draftTitle, setDraftTitle] = useState("");
   const [draftSections, setDraftSections] = useState<ScriptSection[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
@@ -90,47 +94,40 @@ export function VideoScriptViewPage() {
   const [voice, setVoice] = useState("");
   const [catalog, setCatalog] = useState<StyleCatalog | null>(null);
   const [facts, setFacts] = useState<Record<string, Fact>>({});
+  const [publishVersion, setPublishVersion] = useState<number | null>(null);
 
+  const flight = useRef<AbortController | null>(null);
   const load = useCallback(async () => {
+    if (flight.current) return;
+    const controller = new AbortController(); flight.current = controller;
     try {
-      setDetail(await getVideoScript(id, versionParam));
-      setError(null);
+      const fresh = await getVideoScript(id, versionParam, controller.signal);
+      if (!controller.signal.aborted) { setDetail(fresh); setError(null); }
     } catch (e) {
-      setError(errorMessage(e, "加载文稿失败"));
-    }
+      if (!controller.signal.aborted) setError(errorMessage(e, "加载文稿失败"));
+    } finally { if (flight.current === controller) flight.current = null; }
   }, [id, versionParam]);
 
   useEffect(() => {
-    load();
+    setDetail(null); setError(null); setEditing(false); setPublishVersion(null); void load();
+    return () => { flight.current?.abort(); flight.current = null; };
   }, [load]);
 
-  // Poll while research/writing or a render is in flight.
-  const latestRender = detail?.renders[0] ?? null;
-  const busyServer =
-    detail != null &&
-    (["RESEARCHING", "WRITING"].includes(detail.status) ||
-      Boolean(detail.stage) || // a rerun audit: DRAFT while the audits run
-      (latestRender != null && RENDER_ACTIVE.includes(latestRender.status)));
+  const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || Boolean(detail.stage) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.platform_uploads?.some(task => ["QUEUED", "UPLOADING", "SUBMITTED"].includes(task.status)));
   useEffect(() => {
-    if (!busyServer || editing) return;
-    const timer = setInterval(async () => {
-      if (latestRender && RENDER_ACTIVE.includes(latestRender.status)) {
-        try {
-          const fresh = await getVideoRender(latestRender.id);
-          setDetail((d) => (d ? { ...d, renders: d.renders.map((r) => (r.id === fresh.id ? fresh : r)) } : d));
-          return;
-        } catch {
-          // fall through to a full reload
-        }
-      }
-      load();
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [busyServer, editing, latestRender, load]);
+    if (editing) return;
+    const refresh = () => { if (!document.hidden) void load(); };
+    const timer = busyServer ? window.setInterval(refresh, 5000) : undefined;
+    document.addEventListener("visibilitychange", refresh);
+    return () => { if (timer) clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+  }, [busyServer, editing, load]);
 
   useEffect(() => {
-    if (canEdit && catalog === null) listVideoStyles().then(setCatalog).catch(() => undefined);
-  }, [canEdit, catalog]);
+    if (!canEdit || detail?.column?.writer !== "adapt" || catalog) return;
+    const controller = new AbortController();
+    listVideoStyles(controller.signal).then((value) => { if (!controller.signal.aborted) setCatalog(value); }).catch(() => undefined);
+    return () => controller.abort();
+  }, [canEdit, detail?.column?.writer, catalog]);
 
   // The fact sheet behind the version on screen, for the fact labels' tooltips.
   const sheetId = detail?.version_shown?.meta?.fact_sheet_id;
@@ -140,35 +137,47 @@ export function VideoScriptViewPage() {
       setFacts({});
       return;
     }
-    getVideoFacts(id, shownVersion)
-      .then((sheet) => setFacts(Object.fromEntries(sheet.facts.map((f) => [f.id, f]))))
-      .catch(() => setFacts({}));
+    const controller = new AbortController(); setFacts({});
+    getVideoFacts(id, shownVersion, controller.signal)
+      .then((sheet) => { if (!controller.signal.aborted) setFacts(Object.fromEntries(sheet.facts.map((f) => [f.id, f]))); })
+      .catch(() => { if (!controller.signal.aborted) setFacts({}); });
+    return () => controller.abort();
   }, [id, sheetId, shownVersion]);
 
+  const needsRenderStatus = detail?.status === "APPROVED" && (search.get("tab") === "video" || (!search.get("tab") && nextStep(detail).tab === "video"));
   useEffect(() => {
-    if (detail?.status === "APPROVED" && autovideo === null) {
-      getAutoVideoStatus().then(setAutovideo).catch(() => undefined);
-    }
-  }, [detail?.status, autovideo]);
+    if (!canEdit || !needsRenderStatus || autovideo) return;
+    const controller = new AbortController();
+    getAutoVideoStatus(controller.signal).then((value) => { if (!controller.signal.aborted) setAutovideo(value); }).catch(() => undefined);
+    return () => controller.abort();
+  }, [canEdit, needsRenderStatus, autovideo]);
 
-  if (error) return <ErrorState error={error} onRetry={load} />;
-  if (!detail) return <ErrorState empty="加载中..." />;
+  if (!detail) return <ErrorState error={error ?? undefined} empty="加载中..." onRetry={load} />;
 
   const shown = detail.version_shown;
   const isCurrent = shown?.version === detail.current_version;
+  const writable = canEdit && isCurrent && !detail.stage;
   const check = shown?.length_check;
   const problems = shown?.meta?.problems ?? [];
-  const step = nextStep(detail);
+  const step = isCurrent || !shown ? nextStep(detail) : { tab: "draft" as const, text: `正在查看历史 v${shown.version}。返回当前 v${detail.current_version} 后可继续审校、编辑与定稿。`, tone: "wait" };
   const staged = ["DRAFT", "APPROVED"].includes(detail.status);
-  const tabs: ScriptTab[] = !staged
+  const completed = detail.renders.filter((r) => r.status === "COMPLETED");
+  const publishVersions = [...new Set(completed.map((r) => r.version))];
+  const publishingVersion = publishVersions.find((v) => v === (publishVersion ?? Number(search.get("publish_version"))))
+    ?? publishVersions.find((v) => v === shown?.version) ?? publishVersions[0] ?? shown?.version;
+  const publishingRender = completed.find((r) => r.version === publishingVersion && r.files?.some(file => file.name === "video.mp4")) ?? completed.find((r) => r.version === publishingVersion);
+  const publishingUpload = detail.platform_uploads?.find(task => task.version === publishingVersion);
+  const currentPublished = currentPublications(detail).length > 0;
+  const currentUpload = detail.platform_uploads?.find(task => task.version === detail.current_version);
+  const tabs: ScriptTab[] = !staged && !detail.renders.length && !detail.publications?.length
     ? []
-    : detail.status === "APPROVED"
+    : detail.status === "APPROVED" || completed.length || detail.publications?.length
       ? ["draft", "review", "video", "publish"]
       : detail.renders.length
         ? ["draft", "review", "video"]
         : ["draft", "review"];
   const asked = search.get("tab") as ScriptTab | null;
-  const tab: ScriptTab = editing || !staged ? "draft" : asked && tabs.includes(asked) ? asked : step.tab;
+  const tab: ScriptTab = editing || !tabs.length ? "draft" : asked && tabs.includes(asked) ? asked : step.tab;
   const goTab = (t: ScriptTab) =>
     setSearch((prev) => {
       const next = new URLSearchParams(prev);
@@ -177,7 +186,7 @@ export function VideoScriptViewPage() {
     });
 
   function startEdit() {
-    if (!shown) return;
+    if (!shown || !writable) return;
     setDraftTitle(shown.title);
     setDraftSections(structuredClone(shown.sections));
     setEditing(true);
@@ -222,17 +231,29 @@ export function VideoScriptViewPage() {
     }
   }
 
-  async function render() {
+  async function render(mode?: "fast") {
     setBusy("render");
     try {
-      const made = await renderVideoScript(id, voice || undefined);
+      const made = mode ? await renderVideoScript(id, voice || undefined, mode) : await renderVideoScript(id, voice || undefined);
       setDetail((d) => (d ? { ...d, renders: [made, ...d.renders] } : d));
-      toast.success("已交给 AutoVideo", "成片通常需要 15–30 分钟");
+      goTab("video");
+      toast.success("已交给 AutoVideo", "正在后台制作，完成后可在这里查看");
     } catch (e) {
       toast.error("出片没有开始", errorMessage(e));
     } finally {
       setBusy(null);
     }
+  }
+
+  async function rewrite() {
+    if (!window.confirm("用同一份研究报告，按当前配方重新生成文稿并审校？将保存为新版本，旧稿和旧视频保留。新稿需要重新定稿后再出片。")) return;
+    setBusy("rewrite");
+    try {
+      setDetail(await rerunVideoStep(id, "write"));
+      setSearch({ tab: "draft" });
+      toast.success("已开始重新生成文稿", "沿用原报告，完成后可查看新版本");
+    } catch (e) { toast.error("没有开始重新生成", errorMessage(e)); }
+    finally { setBusy(null); }
   }
 
   async function restyle(depth: string, tone: string) {
@@ -261,20 +282,22 @@ export function VideoScriptViewPage() {
   const reportPath = detail.report_path.replace(/^output\//, "");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 max-w-6xl">
+      {error ? <ErrorState error={error} onRetry={load} compact /> : null}
       <Link to="/video" className="text-xs text-accent hover:underline">
         ← 视频文稿
       </Link>
 
       <div className="flex flex-wrap items-start gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className={cn("badge border", STATUS_CLASS[detail.status])}>{STATUS_LABEL[detail.status]}</span>
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <span className={cn("badge border", currentPublished ? "bg-success/15 text-success border-success/30" : STATUS_CLASS[detail.status])}>{currentPublished ? "已发布" : STATUS_LABEL[detail.status]}</span>
+            {!currentPublished && currentUpload ? <span className="badge border border-border">{UPLOAD_LABEL[currentUpload.status] || currentUpload.status}</span> : null}
             <CredibilityBadge value={detail.credibility} />
             {detail.auto ? <span className="badge border border-border text-text-muted">自动流水线</span> : null}
             {detail.column ? <span className="text-xs text-text-muted">{detail.column.name}</span> : null}
             {detail.approved_version ? (
-              <span className="text-xs text-success">定稿 v{detail.approved_version}</span>
+              <span className="text-xs text-text-muted">{detail.approved_version === detail.current_version ? "定稿" : "旧版定稿"} v{detail.approved_version}</span>
             ) : null}
           </div>
           {editing ? (
@@ -298,7 +321,7 @@ export function VideoScriptViewPage() {
             ) : null}
           </p>
         </div>
-        {canEdit && shown && ["DRAFT", "APPROVED"].includes(detail.status) ? (
+        {writable && shown && ["DRAFT", "APPROVED"].includes(detail.status) ? (
           <div className="flex gap-2">
             {editing ? (
               <>
@@ -325,10 +348,13 @@ export function VideoScriptViewPage() {
         ) : null}
       </div>
 
+      {shown ? <ScriptIteration detail={detail} canEdit={canEdit} canManageModels={user?.role === "admin"} isCurrent={isCurrent} editing={editing} busy={busy}
+        onRewrite={rewrite} onRender={() => render()} onVideo={() => goTab("video")} /> : null}
+
       <section
         aria-label="下一步"
         className={cn(
-          "card text-sm flex flex-wrap items-center gap-x-3 gap-y-2",
+          "card p-4 text-sm flex flex-wrap items-center gap-x-3 gap-y-2",
           step.tone === "bad" && "border-danger/40",
           step.tone === "todo" && "border-accent",
         )}
@@ -342,7 +368,14 @@ export function VideoScriptViewPage() {
         ) : null}
       </section>
 
-      <ScriptSteps detail={detail} canEdit={canEdit} onChanged={setDetail} />
+      {shown ? <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-text-muted">{isCurrent ? "当前版本" : "历史版本（只读）"}</span><b>v{shown.version}</b>
+        {detail.versions.length > 1 ? <select aria-label="查看文稿版本" className="input w-auto text-xs py-1" value={shown.version} disabled={editing} onChange={(e) => setSearch(e.target.value === String(detail.current_version) ? {} : { version: e.target.value })}>{detail.versions.map((v) => <option key={v.version} value={v.version}>v{v.version}{v.version === detail.current_version ? " · 当前" : ""}{v.version === detail.approved_version ? " · 已定稿" : ""}</option>)}</select> : null}
+        {!isCurrent ? <button className="text-accent hover:underline" onClick={() => setSearch({})}>返回当前 v{detail.current_version}</button> : null}
+        {reportPath ? <Link className="ml-auto text-accent hover:underline" to={`/reports/view?path=${encodeURIComponent(reportPath)}`}>源研究报告 ↗</Link> : null}
+      </div> : null}
+
+      <ScriptSteps detail={detail} canEdit={writable} onChanged={setDetail} showRewrite={false} />
 
       {detail.pending_plan ? (
         <PlanReview key={detail.pending_plan.id} detail={detail} canEdit={canEdit} onChanged={setDetail} />
@@ -369,7 +402,7 @@ export function VideoScriptViewPage() {
       ) : null}
 
       {["RESEARCHING", "WRITING"].includes(detail.status) ? (
-        <section className="card text-sm space-y-1">
+        <section className="card p-4 text-sm space-y-1">
           <p>
             {detail.status === "RESEARCHING"
               ? "研究 agent 正在检索并撰写带引用的报告，通常需要 3–10 分钟。"
@@ -400,16 +433,16 @@ export function VideoScriptViewPage() {
       ) : null}
 
       {check && tab === "draft" ? (
-        <section className="card text-sm flex flex-wrap items-center gap-x-6 gap-y-2">
+        <section className="card p-4 text-sm flex flex-wrap items-center gap-x-6 gap-y-2">
           <span>
             约 <b>{minutes(check.estimated_seconds)}</b>（{check.spoken_length} 字）
           </span>
-          {check.target_minutes ? (
+          {check.target_minutes && shown?.checks?.mode !== "on_request" ? (
             <span className="text-text-muted">
-              目标 {check.target_minutes} 分钟（{check.budget} 字）
+              配方参考 {check.target_minutes} 分钟（约 {check.budget} 朗读单位；质量优先，可浮动）
             </span>
           ) : null}
-          {check.status ? (
+          {check.status && shown?.checks?.mode !== "on_request" ? (
             <span className={LENGTH[check.status].cls}>
               {LENGTH[check.status].label}
               {check.ratio ? `（${deviation(check.ratio)}）` : ""}
@@ -432,7 +465,10 @@ export function VideoScriptViewPage() {
       ) : null}
 
       {detail.report_id && tab === "draft" ? (
-        <ReportReuse scriptId={detail.id} reportId={detail.report_id} canEdit={canEdit} />
+        <details className="card" onToggle={(e) => setReuseOpen(e.currentTarget.open)}>
+          <summary className="p-3 cursor-pointer text-xs text-text-muted">沿用这份研究，查看其他文稿或另写一篇</summary>
+          {reuseOpen ? <div className="px-3 pb-3"><ReportReuse scriptId={detail.id} reportId={detail.report_id} canEdit={writable} /></div> : null}
+        </details>
       ) : null}
 
       {shown && tab === "draft" ? (
@@ -440,7 +476,7 @@ export function VideoScriptViewPage() {
           key={`${shown.version}-${catalog ? "ready" : "loading"}`}
           detail={detail}
           catalog={catalog}
-          canRestyle={canEdit && !editing && ["DRAFT", "APPROVED"].includes(detail.status) && Boolean(detail.report_path) && detail.column?.writer === "adapt"}
+          canRestyle={writable && !editing && ["DRAFT", "APPROVED"].includes(detail.status) && Boolean(detail.report_path) && detail.column?.writer === "adapt"}
           busy={busy === "restyle"}
           onRestyle={restyle}
         />
@@ -449,7 +485,7 @@ export function VideoScriptViewPage() {
         detail.status === "APPROVED" ? (
           <details className="text-sm">
             <summary className="cursor-pointer text-text-muted">
-              审校记录（已定稿，{shown.checks.summary.passed ? "当时通过" : `当时有 ${shown.checks.summary.serious} 处必须改，已由你决定`}）
+              审校记录（已定稿，{shown.checks.mode === "on_request" ? "未进行自动审校" : shown.checks.summary.passed ? "当时通过" : `当时有 ${shown.checks.summary.serious} 处必须改，已由你决定`}）
             </summary>
             <div className="mt-2">
               <ChecksPanel checks={shown.checks} />
@@ -462,30 +498,8 @@ export function VideoScriptViewPage() {
       {shown?.meta?.plan && !editing && tab === "review" ? <PlanPanel plan={shown.meta.plan} /> : null}
       {shown?.meta?.description && !editing && tab === "review" ? <DescriptionPanel description={shown.meta.description} /> : null}
 
-      {detail.versions.length > 1 && tab === "draft" ? (
-        <div className="flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="text-text-muted">版本</span>
-          {detail.versions.map((v) => (
-            <button
-              key={v.version}
-              onClick={() => setSearch(v.version === detail.current_version ? {} : { version: String(v.version) })}
-              disabled={editing}
-              className={cn(
-                "badge border cursor-pointer",
-                v.version === shown?.version ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover",
-              )}
-              title={`${v.edit_type === "EDITED" ? "编辑" : "生成"}${v.style ? ` · ${v.style}` : ""} · ${v.created_by || ""} · ${timeAgo(v.created_at)}`}
-            >
-              v{v.version}
-              {detail.approved_version === v.version ? " ✓" : ""}
-            </button>
-          ))}
-          {!isCurrent ? <span className="text-text-muted">（正在看旧版本）</span> : null}
-        </div>
-      ) : null}
-
       {(tab === "draft" ? sections : []).map((section, si) => (
-        <section key={si} className="card space-y-3">
+        <section key={si} className="card p-5 space-y-3">
           <div className="flex items-baseline gap-3">
             <span className="font-mono text-xs text-accent">{String(si + 1).padStart(2, "0")}</span>
             {editing ? (
@@ -502,7 +516,7 @@ export function VideoScriptViewPage() {
             {check?.sections[si] ? (
               <span className="text-xs text-text-muted">
                 {check.sections[si].spoken_length}
-                {check.sections[si].budget ? ` / ${check.sections[si].budget}` : ""} 字
+                {check.sections[si].budget && shown?.checks?.mode !== "on_request" ? ` / ${check.sections[si].budget}` : ""} 字
               </span>
             ) : null}
           </div>
@@ -536,17 +550,35 @@ export function VideoScriptViewPage() {
         </section>
       ))}
 
-      {tab === "publish" && detail.renders.find((r) => r.status === "COMPLETED") ? (
-        <RenderFolder render={detail.renders.find((r) => r.status === "COMPLETED")!} canEdit={canEdit} />
+      {tab === "publish" ? (
+        <section className="card p-4 space-y-2" aria-label="发布版本">
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="font-medium">发布版本</h2>
+            {publishVersions.length ? <select className="input w-auto text-sm" aria-label="选择发布版本" value={publishingVersion} onChange={(e) => setPublishVersion(Number(e.target.value))}>
+              {publishVersions.map((v) => <option key={v} value={v}>文稿 v{v} · {(detail.publications ?? []).some(row => row.version === v) ? "已发布" : UPLOAD_LABEL[detail.platform_uploads?.find(task => task.version === v)?.status ?? ""] || "成片完成"}</option>)}
+            </select> : <span className="text-sm">文稿 v{publishingVersion} · 尚未出片</span>}
+          </div>
+          <p className="text-sm">{publishingRender?.title ?? shown?.title}</p>
+          <p className="text-xs text-text-muted">标题、简介和发布记录对应文稿 v{publishingVersion}。平台投稿公开后会自动回填，也可补录手动发布的视频。</p>
+          {publishingVersion !== detail.current_version ? <p className="text-xs text-warning">这是旧版 v{publishingVersion} 的成片和发布包；当前文稿 v{detail.current_version} 尚未用于此视频。</p> : null}
+        </section>
       ) : null}
 
-      {detail.status === "APPROVED" && tab === "publish" ? (
+      {tab === "publish" && publishingVersion ? <PublicationFlow scriptId={detail.id} version={publishingVersion} render={publishingRender} publications={publishingVersion === detail.current_version ? currentPublications(detail).map(row => ({ ...row, version: publishingVersion })) : detail.publications ?? []} upload={publishingUpload} canEdit={canEdit} /> : null}
+
+      {tab === "publish" && publishingRender ? (
+        <RenderFolder render={publishingRender} canEdit={canEdit} />
+      ) : null}
+
+      {tab === "publish" ? (
         <PublishPanel
+          key={`${detail.id}:${publishingVersion}:${publishingRender?.id ?? ""}`}
           scriptId={detail.id}
-          version={detail.approved_version ?? undefined}
-          refreshKey={latestRender?.status}
+          version={publishingVersion}
+          renderId={publishingRender?.id}
+          refreshKey={publishingRender?.status}
           canEdit={canEdit}
-          recheckEnabled={Boolean(detail.column?.recheck)}
+          recheckEnabled={Boolean(detail.column?.recheck) && detail.status === "APPROVED" && !detail.stage && publishingVersion === detail.approved_version}
           publications={detail.publications}
           rechecks={detail.rechecks}
           onChanged={load}
@@ -555,13 +587,15 @@ export function VideoScriptViewPage() {
 
       {(detail.status === "APPROVED" || detail.renders.length) && tab === "video" ? (
         <RenderPanel
+          key={shown?.version ?? detail.current_version}
           detail={detail}
           autovideo={autovideo}
           voice={voice}
           setVoice={setVoice}
-          canRender={canEdit && detail.status === "APPROVED"}
+          canRender={writable && detail.status === "APPROVED"}
           busy={busy === "render"}
           onRender={render}
+          onPublish={(version) => { setPublishVersion(version); goTab("publish"); }}
         />
       ) : null}
     </div>
@@ -576,6 +610,7 @@ function RenderPanel({
   canRender,
   busy,
   onRender,
+  onPublish,
 }: {
   detail: VideoScriptDetail;
   autovideo: AutoVideoStatus | null;
@@ -583,20 +618,25 @@ function RenderPanel({
   setVoice: (v: string) => void;
   canRender: boolean;
   busy: boolean;
-  onRender: () => void;
+  onRender: (mode?: "fast") => void;
+  onPublish: (version: number) => void;
 }) {
-  const latest: VideoRender | null = detail.renders[0] ?? null;
+  const [selectedId, setSelectedId] = useState("");
+  const current = renderForVersion(detail, detail.version_shown?.version ?? detail.current_version);
+  const latest: VideoRender | null = detail.renders.find((r) => r.id === selectedId) ?? current ?? detail.renders[0] ?? null;
+  const historical = latest != null && latest.version !== detail.current_version;
   const active = latest != null && RENDER_ACTIVE.includes(latest.status);
   const video = latest?.status === "COMPLETED" ? latest.files.find((f) => f.name === "video.mp4") : undefined;
   const notReady = autovideo != null && (!autovideo.reachable || !autovideo.ready);
 
   return (
-    <section className="card space-y-3 text-sm">
+    <section className="card p-5 space-y-3 text-sm">
       <div className="flex items-center gap-2">
         <h2 className="font-medium flex-1">成片</h2>
         {latest ? <span className="badge border border-border">{RENDER_LABEL[latest.status]}</span> : null}
         {latest ? <TimeStamp value={latest.completed_at ?? latest.created_at} label={latest.completed_at ? "完成" : "提交"} /> : null}
       </div>
+      {detail.renders.length ? <div className="flex flex-wrap items-center gap-2 text-xs"><select aria-label="查看成片记录" className="input w-auto max-w-full text-xs" value={latest?.id ?? ""} onChange={(e) => setSelectedId(e.target.value)}>{detail.renders.map((r) => <option key={r.id} value={r.id}>v{r.version} · {RENDER_LABEL[r.status]} · {r.created_at.replace("T", " ").slice(0,16)}</option>)}</select>{historical ? <span className="text-warning">旧版 v{latest.version} 成片，当前文稿为 v{detail.current_version}</span> : <span className="text-text-muted">当前文稿 v{detail.current_version}</span>}</div> : null}
       {notReady ? (
         <p className="text-warning text-xs">
           {autovideo?.reachable
@@ -612,6 +652,7 @@ function RenderPanel({
             <a href={video.url} download={video.name} className="text-accent hover:underline">
               下载成片
             </a>
+            <button className="text-accent hover:underline" onClick={() => onPublish(latest.version)}>发布 v{latest.version}：查看发布包与记录链接</button>
             {latest.files.some((f) => f.name === "captions.srt") ? (
               <a href={latest.files.find((f) => f.name === "captions.srt")!.url} download="captions.srt" className="text-accent hover:underline">
                 字幕
@@ -631,11 +672,18 @@ function RenderPanel({
         </div>
       ) : null}
 
+      {latest?.status === "COMPLETED" && latest.timings?.elapsed_seconds != null ? (
+        <p className="text-xs text-text-muted">
+          总耗时 {Math.round(latest.timings.elapsed_seconds)} 秒
+          {latest.timings.download_seconds != null ? ` · 文件回传 ${latest.timings.download_seconds.toFixed(2)} 秒` : ""}
+        </p>
+      ) : null}
+
       {latest && active ? (
         <p className="text-text-muted">
           {RENDER_LABEL[latest.status]}
           {latest.active_stage ? ` · ${latest.active_stage}` : ""} · 定稿 v{latest.version}，{latest.source_chars} 字。
-          成片通常需要 15–30 分钟，可以离开此页。
+          正在后台制作，完成后会自动回传，可以离开此页。
         </p>
       ) : null}
       {latest && (latest.status === "FAILED" || latest.status === "CANCELLED") ? (
@@ -657,8 +705,13 @@ function RenderPanel({
           </select>
         ) : null}
         {canRender ? (
-          <button className="btn btn-primary text-xs" onClick={onRender} disabled={busy || active || notReady}>
+          <button className="btn btn-primary text-xs" onClick={() => onRender()} disabled={busy || (current != null && RENDER_ACTIVE.includes(current.status)) || notReady}>
             {busy ? "提交中..." : latest ? `用定稿 v${detail.approved_version} 重新出片` : `用定稿 v${detail.approved_version} 出片`}
+          </button>
+        ) : null}
+        {canRender ? (
+          <button className="btn btn-secondary text-xs" onClick={() => onRender("fast")} disabled={busy || (current != null && RENDER_ACTIVE.includes(current.status)) || notReady}>
+            快速卡片出片
           </button>
         ) : null}
         {latest?.autovideo_url ? (

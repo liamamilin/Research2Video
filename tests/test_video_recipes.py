@@ -39,7 +39,7 @@ def test_every_shipped_recipe_builds_and_the_keys_scripts_use_still_resolve():
     assert [r.status for r in every.values()][:3] == ["enabled"] * 3  # enabled ones are listed first
     # a script may name a recipe by the cell id its tags spell
     assert video_columns.get(CONFIG, "ai-developer-quick_take-short").key == "flash"
-    assert every["deep_dive"].column.writer == "adapt" and every["flash"].column.writer == "legacy"
+    assert every["deep_dive"].column.writer == "legacy" and every["flash"].column.writer == "legacy"
     assert every["ai-developer-roundup-long"].column.research_mode == "none"
 
 
@@ -57,7 +57,6 @@ def test_a_broken_file_is_reported_on_its_own_and_does_not_stop_the_others(tmp_p
 
 
 @pytest.mark.parametrize("change, message", [
-    (("pipeline: single", "pipeline: adapt"), "五步改编"),          # 1.5 minutes is too short to adapt
     (("  mode: job\n", "  mode: none\n"), None),                    # no research of its own: fine
     (("  prompt: 核实 {topic_title}：{topic.变化}，{topic.不存在的字段}\n", ""), "research_prompt"),
     (("pipeline: single", "pipeline: five_steps"), "pipeline"),
@@ -72,6 +71,11 @@ def test_what_a_recipe_may_say(change, message):
     else:
         with pytest.raises(video_columns.ColumnError, match=message):
             recipes.validate("x", text)
+
+
+def test_short_recipes_can_choose_five_step_adaptation():
+    built = recipes.validate("x", MINIMAL.replace("pipeline: single", "pipeline: adapt")).column
+    assert built.writer == "adapt" and built.target_minutes == 1.5
 
 
 def test_a_blocked_recipe_makes_no_new_script_but_its_old_ones_still_resolve(tmp_path):
@@ -248,9 +252,9 @@ def test_the_recipe_wins_over_the_shared_file_and_an_edit_to_a_template_reaches_
     flash.write_text(flash.read_text(encoding="utf-8").replace(
         "  template: quick_take\n", "  template: quick_take\n  timeout_seconds: 900\n"), encoding="utf-8")
     template = Path(recipes.research_template_path(str(config), "quick_take"))
-    template.write_text(template.read_text(encoding="utf-8").replace("核实这条变化", "先核实这条变化"), encoding="utf-8")
+    template.write_text(template.read_text(encoding="utf-8") + "\n  这份模板已更新。\n", encoding="utf-8")
     column = recipes.load(str(config))["flash"].column
-    assert column.research_timeout_seconds == 900 and "先核实这条变化" in column.research_prompt
+    assert column.research_timeout_seconds == 900 and "这份模板已更新。" in column.research_prompt
 
 
 @pytest.mark.parametrize("change, message", [
@@ -285,11 +289,11 @@ def test_api_parts_read_save_refuse_a_breaking_edit_and_copy(client, video_env):
     refused = client.put("/api/video/recipes/parts/research/quick_take", headers=_csrf(client),
                          json={"content": broken})
     assert refused.status_code == 422 and "flash" in refused.text
-    edited = part["content"].replace("核实这条变化", "先核实这条变化")
+    edited = part["content"] + "\n  这份模板已更新。\n"
     saved = client.put("/api/video/recipes/parts/research/quick_take", headers=_csrf(client),
                        json={"content": edited, "expected_mtime": part["mtime"]})
     assert saved.status_code == 200, saved.text
-    assert "先核实这条变化" in video_columns.get(str(video_env / "config"), "flash").research_prompt
+    assert "这份模板已更新。" in video_columns.get(str(video_env / "config"), "flash").research_prompt
     assert list((video_env / "state" / "backups").glob("video_part_research_quick_take_*.yaml"))
 
     copied = client.post("/api/video/recipes/parts/research", headers=_csrf(client),

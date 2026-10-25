@@ -168,12 +168,21 @@ def get_run(run_id: str) -> dict | None:
 
 
 def list_runs(limit: int = 20, status: Optional[str] = None) -> list[dict]:
-    q, args = "SELECT id FROM autopilot_runs", ()
+    q, args = "SELECT * FROM autopilot_runs", ()
     if status:
         q, args = q + " WHERE status = ?", (status,)
     with connect() as conn:
-        ids = [r["id"] for r in conn.execute(q + " ORDER BY started_at DESC LIMIT ?", (*args, limit))]
-    return [get_run(i) for i in ids]
+        runs = [_dec(r, _RUN_JSON) for r in conn.execute(q + " ORDER BY started_at DESC LIMIT ?", (*args, limit))]
+        by_id = {r["id"]: r for r in runs}
+        ids = list(by_id)
+        for run in runs:
+            run["items"] = []
+        for offset in range(0, len(ids), 500):
+            group = ids[offset:offset + 500]
+            marks = ",".join("?" for _ in group)
+            for row in conn.execute(f"SELECT * FROM autopilot_items WHERE run_id IN ({marks}) ORDER BY run_id, slot", group):
+                by_id[row["run_id"]]["items"].append(_dec(row, _ITEM_JSON))
+    return runs
 
 
 def update_run(run_id: str, **fields: Any) -> None:

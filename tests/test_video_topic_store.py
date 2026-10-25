@@ -71,6 +71,64 @@ def test_reports_are_imported_once_with_the_ids_they_always_had(video_env):
         assert conn.execute("SELECT imported_at FROM topic_imports").fetchall() == imported
 
 
+def test_topic_browser_loads_sources_and_recipes_once_and_includes_first_topics(client, video_env, monkeypatch):
+    from core.video import recipes
+
+    reports(video_env)
+    _login(client)
+    scans, catalogs = [], []
+    real_sources, real_catalog = topic_store.sources, recipes.catalog
+
+    def sources_once(jobs_dir):
+        scans.append(jobs_dir)
+        return real_sources(jobs_dir)
+
+    def catalog_once(config_dir):
+        catalogs.append(config_dir)
+        return real_catalog(config_dir)
+
+    monkeypatch.setattr(topic_store, "sources", sources_once)
+    monkeypatch.setattr(recipes, "catalog", catalog_once)
+    response = client.get("/api/video/topics/browser")
+    assert response.status_code == 200
+    body = response.json()
+    assert len(scans) == len(catalogs) == 1
+    assert body["cells"] and body["coverage"] and body["sources"]
+    assert body["initial"]["source"] == "flash"
+    assert [t["id"] for t in body["initial"]["topics"]] == ["2026-10-19/F1", "2026-10-19/F2"]
+    assert body["initial"]["rounds"] == ["2026-10-19"]
+    assert not any(c["unknown_sources"] for c in body["coverage"])
+
+    path = video_env / "output/flash/2026-10-19_ai_flash_discovery.md"
+    path.write_text(DISCOVERY.replace("### 1.1", "### 1.1 最新修订："), encoding="utf-8")
+    second = client.get("/api/video/topics/browser").json()
+    assert "最新修订" in second["initial"]["topics"][0]["title"]
+    assert len(scans) == len(catalogs) == 2
+
+
+@pytest.mark.parametrize("declared, expected_source", [([], "manual"), (["missing"], "missing")])
+def test_topic_browser_handles_manual_only_and_unknown_sources(video_env, monkeypatch, declared, expected_source):
+    from web.routes import video
+
+    topic_store.add_manual("只有手动来源的选题", {})
+    cell = {"key": "one", "usable": True, "label": "One", "status": "enabled",
+            "topic_sources": declared, "column": {"topic_kind": "single"}}
+    monkeypatch.setattr(video, "list_cells", lambda **kwargs: [cell])
+    body = video.topic_browser(user={})
+    assert body["initial"]["source"] == expected_source
+    assert [t["title"] for t in body["initial"]["topics"]] == ([] if declared else ["只有手动来源的选题"])
+    assert body["coverage"][0]["unknown_sources"] == declared
+
+
+def test_topic_browser_has_an_empty_snapshot_when_no_cells_are_available(video_env, monkeypatch):
+    from web.routes import video
+
+    monkeypatch.setattr(video, "list_cells", lambda **kwargs: [])
+    body = video.topic_browser(user={})
+    assert body["coverage"] == []
+    assert body["initial"] == {"source": "", "round": None, "rounds": [], "topics": []}
+
+
 def test_a_rewritten_report_replaces_its_topics(video_env):
     reports(video_env)
     pilot.sync_topics()

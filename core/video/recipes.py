@@ -46,10 +46,12 @@ import hashlib
 import json
 import os
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Optional
 
 import yaml
+
+from core.yaml_cache import load_yaml
 
 from . import columns
 
@@ -68,8 +70,8 @@ _SECTIONS = {
     "research": {"mode", "timeout_seconds", "language", "prompt", "optional"},
     "writing": {"pipeline", "style", "sections", "paragraph_units", "required_roles", "default_style",
                 "allowed_tones", "revise_rounds", "pause_after_plan", "audit"},
-    "output": {"target", "voice_id", "video_form", "allowed_forms", "creative_intent", "source_card", "package",
-               "recheck"},
+    "output": {"target", "voice_id", "video_form", "allowed_forms", "creative_intent", "source_card", "package", "packaging",
+               "recheck", "production_recipe", "production_mode", "visual_style"},
 }
 #: sections that may name a shared part (``use``), and where research templates live under the jobs folder
 PART_SECTIONS = ("writing", "output")
@@ -168,7 +170,7 @@ def research_template_path(config_dir: str, name: str) -> str:
 
 
 def part_path(config_dir: str, section: str, name: str) -> str:
-    if section not in PART_SECTIONS:
+    if section not in (*PART_SECTIONS, "packaging"):
         raise columns.ColumnError(f"只有 {', '.join(PART_SECTIONS)} 能引用部件")
     if not KEY.fullmatch(name or ""):
         raise columns.ColumnError(f"部件名 {name!r} 只能用小写字母、数字、下划线、连字符")
@@ -203,7 +205,7 @@ def _read_mapping(path: str, what: str) -> tuple[dict, str]:
                 text = fh.read()
         except OSError:
             raise columns.ColumnError(f"找不到{what}：{path}") from None
-    data = yaml.safe_load(text) or {}
+    data = load_yaml(text) or {}
     if not isinstance(data, dict):
         raise columns.ColumnError(f"{what}的根必须是映射：{path}")
     return data, hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -318,6 +320,19 @@ def resolve(key: str, data: dict, config_dir: Optional[str], audience: Optional[
                 raise columns.ColumnError(f"部件 {section}/{own['use']} 不认识这些字段：{', '.join(sorted(extra))}")
             uses[section] = {"kind": "part", "name": str(own["use"]), "path": path, "sha256": sha}
             out[section] = {**base, **{k: v for k, v in own.items() if k != "use"}}
+    packaging = (out.get("output") or {}).get("packaging")
+    if packaging is not None:
+        if not isinstance(packaging, dict):
+            raise columns.ColumnError("output.packaging 须为映射")
+        if "use" in packaging:
+            if config_dir is None:
+                raise columns.ColumnError("引用包装方案需要 config 目录")
+            from .packaging import merge
+            path = part_path(config_dir, "packaging", str(packaging["use"]))
+            shared, sha = _read_mapping(path, f"包装方案 {packaging['use']}")
+            uses["packaging"] = {"kind": "part", "name": str(packaging["use"]), "path": path, "sha256": sha}
+            packaging = merge(shared, {k: v for k, v in packaging.items() if k != "use"})
+            out["output"] = {**out["output"], "packaging": packaging}
     if audience:
         values = {**(profile.get("text") or {}), "name": profile["name"], "key": audience}
         if profile.get("depth") is not None:
@@ -379,9 +394,13 @@ def to_flat(key: str, data: dict) -> dict:
         "creative_intent": output.get("creative_intent"),
         "source_card": output.get("source_card"),
         "package": output.get("package"),
+        "packaging": output.get("packaging"),
         "recheck": output.get("recheck"),
     }
     flat.update({k: v for k, v in plain.items() if v is not None})
+    if any(k in output for k in ("production_recipe", "production_mode", "visual_style")):
+        from .production_settings import FIELDS
+        flat["production_settings"] = {k: output[k] for k in FIELDS if k in output}
     structure = {k: writing[k] for k in ("sections", "paragraph_units", "required_roles") if writing.get(k) is not None}
     if structure:
         flat["structure"] = structure
@@ -422,7 +441,7 @@ def parse(key: str, text: str, path: str = "", config_dir: Optional[str] = None,
     uses: dict = {}
     offered: tuple[str, ...] = ()
     try:
-        data = yaml.safe_load(text) or {}
+        data = load_yaml(text) or {}
         if not isinstance(data, dict):
             raise columns.ColumnError(f"配方 {key} 的根必须是映射")
         written = data
@@ -513,8 +532,12 @@ def load(config_dir: str) -> dict[str, Recipe]:
         if ext not in (".yaml", ".yml") or stem.startswith(("_", ".")) or not KEY.fullmatch(stem):
             continue
         path = os.path.join(folder, name)
-        with open(path, encoding="utf-8") as fh:
-            out[stem] = parse(stem, fh.read(), path, config_dir)
+        try:
+            with open(path, encoding="utf-8") as fh:
+                out[stem] = parse(stem, fh.read(), path, config_dir)
+        except OSError as exc:
+            out[stem] = Recipe(key=stem, path=path, sha256="", status="blocked", base=stem,
+                               error=f"读不了配方：{exc}", reason=f"读不了配方：{exc}", label=stem)
     order = {status: i for i, status in enumerate(STATUSES)}
     return dict(sorted(out.items(), key=lambda kv: order[kv[1].status]))  # enabled first, then by file name
 
@@ -532,8 +555,12 @@ def expanded(config_dir: str) -> dict[str, Recipe]:
     for key, base in every.items():
         if len(base.audiences) < 2 or base.error:
             continue
-        with open(base.path, encoding="utf-8") as fh:
-            text = fh.read()
+        try:
+            with open(base.path, encoding="utf-8") as fh:
+                text = fh.read()
+        except OSError as exc:
+            out[key] = replace(base, column=None, status="blocked", error=f"读不了配方：{exc}")
+            continue
         for audience in base.audiences[1:]:
             name = variant_key(base, audience)
             if name not in out:
@@ -565,9 +592,10 @@ def split_variant_key(key: str) -> Optional[tuple[str, Optional[float], bool]]:
     return found.group(1), minutes, bool(found.group(4))
 
 
-def find(config_dir: str, key: str) -> Optional[Recipe]:
+def find(config_dir: str, key: str, *, every: Optional[dict[str, Recipe]] = None) -> Optional[Recipe]:
     """A recipe by its key, or by the cell id its tags spell, or built for another length than a recipe's own."""
-    every = expanded(config_dir)
+    if every is None:
+        every = expanded(config_dir)
     if key in every:
         return every[key]
     cell = next((r for r in every.values() if r.cell_id == key), None)
@@ -594,7 +622,7 @@ def provenance(config_dir: str, key: str) -> Optional[dict]:
                      for section, u in recipe.uses.items()} or None}
 
 
-PART_KINDS = {"research": "调研模板", "output": "出片部件", "writing": "写稿部件", "audience": "给谁看"}
+PART_KINDS = {"research": "调研模板", "output": "出片部件", "writing": "写稿部件", "audience": "给谁看", "packaging": "包装方案"}
 
 
 def part_file(config_dir: str, kind: str, name: str) -> str:
@@ -610,7 +638,7 @@ def parts(config_dir: str) -> list[dict]:
     """Every shared part there is, with the recipe files that use it."""
     every = expanded(config_dir)
     folders = {"research": os.path.join(jobs_dir_for(config_dir), RESEARCH_TEMPLATES)}
-    folders.update({kind: os.path.join(config_dir, PARTS_DIR, kind) for kind in (*PART_SECTIONS, AUDIENCE_DIR)})
+    folders.update({kind: os.path.join(config_dir, PARTS_DIR, kind) for kind in (*PART_SECTIONS, AUDIENCE_DIR, "packaging")})
     out = []
     for kind, folder in folders.items():
         if not os.path.isdir(folder):

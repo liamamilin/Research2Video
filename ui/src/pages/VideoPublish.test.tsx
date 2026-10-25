@@ -48,6 +48,24 @@ describe("Publish pack", () => {
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(PACK.description));
   });
 
+  it("includes report material in the copied description and offers clickable original links", async () => {
+    const references = [
+      { title: "日食传说", url: "https://museum.example/eclipse/", date: "2026-10-21", cited: true },
+      { title: "补充资料", url: "https://library.example/letter/", date: "2026-10-21", cited: false },
+    ];
+    const linked = { ...PACK, references, description: `${PACK.description}\n\n参考来源（文稿引用）：\n${references[0].url}\n\n报告补充资料：\n${references[1].url}` };
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(linked) })));
+    render(<PublishPanel scriptId="s1" version={2} />);
+    await screen.findByText("资料来源（2）");
+    fireEvent.click(screen.getByText("资料来源（2）"));
+    expect(screen.getByRole("link", { name: "日食传说" }).getAttribute("href")).toBe(references[0].url);
+    expect(screen.getByRole("link", { name: "补充资料" }).getAttribute("href")).toBe(references[1].url);
+    fireEvent.click(screen.getAllByText("复制")[1]);
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(linked.description));
+    fireEvent.click(screen.getByRole("button", { name: "复制资料链接" }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(references.map((r) => `${r.title}\n${r.url}`).join("\n\n")));
+  });
+
   it("starts a recheck for a flash script and shows the latest verdict", async () => {
     const done = { id: "r1", version: 2, status: "DONE", verdict: "有变化", summary: "输入价 12 月涨到 4 美元", error: null,
       created_at: "2026-10-19T10:00:00+0800", finished_at: "2026-10-19T10:05:00+0800" } as const;
@@ -67,7 +85,7 @@ describe("Publish pack", () => {
     expect(screen.getByText("https://www.bilibili.com/video/BV1old")).toBeTruthy();
     fireEvent.change(screen.getByPlaceholderText(/B 站视频链接/), { target: { value: "https://b23.tv/abcdef" } });
     fireEvent.click(screen.getByText("记录发布"));
-    await waitFor(() => expect(calls.find((c) => c.method === "POST")?.body).toEqual({ url: "https://b23.tv/abcdef" }));
+    await waitFor(() => expect(calls.find((c) => c.method === "POST")?.body).toEqual({ url: "https://b23.tv/abcdef", version: 2 }));
   });
 });
 

@@ -15,6 +15,7 @@ from web.deps import require_editor, require_viewer
 from web.indexer import db as index_db
 from web.models import ApiError
 from web.settings import get_settings
+from web.services.report_presentation import fallback_title
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
 
@@ -282,6 +283,11 @@ def list_reports(
                                     **filters.as_kwargs())
 
     for item in data.get("items", []):
+        if not item.get("title"):
+            try:
+                item["title"] = fallback_title(resolve_output_file(item["path"]))
+            except HTTPException:
+                pass  # An outdated index entry remains readable as its filename.
         meta = meta_map.get(report_meta.normalize_rel(item.get("path", "")))
         item["meta"] = meta
         item["quality"] = _quality_summary(meta)
@@ -513,6 +519,11 @@ def search(
     results = index_db.search_reports(q.strip(), limit=limit)
     meta_map = report_meta.load_all()
     for item in results:
+        if not item.get("title"):
+            try:
+                item["title"] = fallback_title(resolve_output_file(item["path"]))
+            except HTTPException:
+                pass
         meta = meta_map.get(report_meta.normalize_rel(item.get("path", "")))
         item["meta"] = meta
         item["quality"] = _quality_summary(meta)

@@ -67,10 +67,9 @@ class ProviderPreset:
     # Model ids we know the endpoint serves. A *hint* for the model field, not a
     # validation list: any OpenAI-compatible id the provider accepts will work.
     models: list = field(default_factory=list)
-    # Which of those ids cost nothing (a curated hint, not fetched live --
-    # the endpoints have no pricing API). Put the free ones in ai.model /
-    # review_ai.model and the rest in fallback_models so a quota-exhausted
-    # free model fails over to a paid one instead of failing the job.
+    # Bootstrap hints for clients without live discovery. The settings page
+    # uses web/services/provider_catalog.py instead: endpoint IDs intersected
+    # with current official prices and documented free-model IDs.
     free_models: list = field(default_factory=list)
     note: str = ""
 

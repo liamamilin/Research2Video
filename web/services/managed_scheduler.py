@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import re
+import yaml
 
 from core import cron, schedule_host
 from core.schedule_runner import Runtime, canonical_job
@@ -47,14 +48,29 @@ def save(job_name: str, expression: str, *, schedule_id: str | None = None,
     return describe(plan)
 
 
-def describe(plan: dict) -> dict:
-    record = store().runs(plan['id'], 1)
+def describe(plan: dict, *, records: list[dict] | None = None) -> dict:
+    from core.config import load_job
+
+    record = store().runs(plan['id'], 1) if records is None else records
     last = record[0] if record else None
     next_runs = cron.fire_times(cron.parse_schedule(plan['schedule']), datetime.now(zone(plan['timezone'])))
+    try:
+        from core.platform_analytics_store import INTERNAL_JOB
+        config = {'name': 'B站视频数据采集'} if plan['job_name'] == INTERNAL_JOB else load_job(get_settings().paths.jobs_dir, plan['job_name']) or {}
+        name = config.get('name') or plan['job_name']
+    except (OSError, ValueError, TypeError, AttributeError, yaml.YAMLError):
+        name = plan['job_name']
     return {**plan, **cron.parse_schedule(plan['schedule']), 'enabled': bool(plan['enabled']),
-            'backend': 'managed', 'editable': True, 'title': plan['job_name'],
+            'backend': 'managed', 'editable': True, 'title': plan['job_name'], 'job_label': name,
             'command': '', 'next_runs': [r.isoformat(timespec='seconds') for r in next_runs] if plan['enabled'] else [],
             'last_run': last, 'pending_due_at': iso(plan['next_run_at'], plan['timezone'])}
+
+
+def describe_all(storage: ScheduleStore) -> list[dict]:
+    """Share one store and one history snapshot across the list."""
+    plans = storage.list()
+    latest = storage.latest_runs([plan['id'] for plan in plans])
+    return [describe(plan, records=[latest[plan['id']]] if plan['id'] in latest else []) for plan in plans]
 
 
 def classify(plan: dict, host: dict) -> dict:
@@ -81,7 +97,8 @@ def classify(plan: dict, host: dict) -> dict:
         elif code == 'cancelled':
             state, detail = 'cancelled', '上次运行已由用户取消，未自动重试；后续周期仍按计划执行'
         else:
-            state, detail = 'ok', '最近一次执行成功，报告已生成'
+            from core.platform_analytics_store import INTERNAL_JOB
+            state, detail = 'ok', '最近一次采集执行成功' if plan['job_name'] == INTERNAL_JOB else '最近一次执行成功，报告已生成'
     return {'id': plan['id'], 'status': state, 'detail': detail, 'schedule': plan['schedule'],
             'last_ran_at': iso(last.get('started_at'), plan['timezone']) if last else None}
 
@@ -100,10 +117,10 @@ def health_report(state_dir: str) -> dict:
     if not plans:
         return {'status': 'ok', 'detail': '暂无托管计划', 'jobs': [], 'overdue': 0, 'paused': 0}
     host = storage.health()
+    latest = storage.latest_runs([plan['id'] for plan in plans])
     jobs = []
     for plan in plans:
-        record = storage.runs(plan['id'], 1)
-        jobs.append(classify({**plan, 'last_run': record[0] if record else None}, host))
+        jobs.append(classify({**plan, 'last_run': latest.get(plan['id'])}, host))
     overdue = sum(j['status'] == 'overdue' for j in jobs)
     return {'status': 'error' if overdue else 'ok', 'detail': f"{len(plans)} 个托管计划；{host['detail']}",
             'jobs': jobs, 'overdue': overdue, 'paused': sum(j['status'] == 'paused' for j in jobs)}

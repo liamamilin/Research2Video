@@ -21,6 +21,26 @@ _process_locks: dict[str, threading.Lock] = {}
 _registry_lock = threading.Lock()
 
 
+def tail_lines(path: str, limit: int) -> list[str]:
+    """Read the last complete text lines from the end, without loading the log's old prefix."""
+    from io import StringIO
+
+    if limit <= 0:
+        return []
+    chunks, breaks = [], 0
+    with open(path, "rb") as handle:
+        position = handle.seek(0, os.SEEK_END)
+        while position > 0 and breaks <= limit:
+            size = min(position, 65536)
+            position -= size
+            handle.seek(position)
+            chunk = handle.read(size)
+            chunks.append(chunk)
+            breaks += chunk.count(b"\n")
+    text = b"".join(reversed(chunks)).decode("utf-8", "replace")
+    return StringIO(text, newline=None).readlines()[-limit:]
+
+
 def _thread_lock(key: str) -> threading.Lock:
     with _registry_lock:
         return _process_locks.setdefault(key, threading.Lock())

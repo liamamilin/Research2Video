@@ -23,6 +23,7 @@ type RequestOpts = {
   body?: unknown;
   signal?: AbortSignal;
   responseType?: "stream";
+  timeoutMs?: number;
   query?: Record<string, string | number | undefined>;
 };
 
@@ -40,21 +41,51 @@ export function setAuthErrorHandler(handler: (() => void) | null) {
 
 // --- Token refresh ---
 
-let _refreshing: Promise<boolean> | null = null;
+type RefreshResult = "ok" | "expired" | "unavailable";
+let _refreshing: Promise<RefreshResult> | null = null;
 
-async function tryRefresh(): Promise<boolean> {
+async function request(url: string, init: RequestInit, timeoutMs: number, stream = false) {
+  // Keep the caller's signal attached to a live stream after its headers arrive.
+  if (stream && timeoutMs <= 0) {
+    const resp = await fetch(url, init);
+    return { resp, text: resp.ok ? "" : await resp.text() };
+  }
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  const signal = init.signal;
+  let timedOut = false;
+  if (signal?.aborted) controller.abort();
+  else signal?.addEventListener("abort", cancel, { once: true });
+  const timer = timeoutMs > 0 ? setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs) : undefined;
+  try {
+    const resp = await fetch(url, { ...init, signal: controller.signal });
+    const text = resp.ok && stream ? "" : await resp.text();
+    return { resp, text };
+  } catch (err) {
+    if (timedOut) throw new ApiError(0, "request_timeout", "服务响应超时，请重试");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", cancel);
+  }
+}
+
+async function tryRefresh(): Promise<RefreshResult> {
   if (_refreshing) return _refreshing;
   _refreshing = (async () => {
     try {
       const csrf = getCookie("ai_research_csrf");
-      const resp = await fetch("/api/auth/refresh", {
+      const { resp } = await request("/api/auth/refresh", {
         method: "POST",
         credentials: "include",
         headers: csrf ? { "X-CSRF-Token": csrf } : undefined,
-      });
-      return resp.ok;
+      }, 10_000);
+      return resp.ok ? "ok" : [401, 403].includes(resp.status) ? "expired" : "unavailable";
     } catch {
-      return false;
+      return "unavailable";
     } finally {
       _refreshing = null;
     }
@@ -95,14 +126,15 @@ export async function api<T = unknown>(
   }
 
   let resp: Response;
+  let text: string;
   try {
-    resp = await fetch(url, {
+    ({ resp, text } = await request(url, {
       method,
       headers,
       body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
       signal: opts.signal,
       credentials: "include",
-    });
+    }, opts.timeoutMs ?? (method === "GET" && opts.responseType !== "stream" ? 30_000 : 0), opts.responseType === "stream"));
   } catch (err) {
     if (err instanceof TypeError || (err instanceof Error && err.name === "AbortError")) {
       throw new ApiError(0, "network_error", "网络请求失败: " + (err as Error).message);
@@ -118,7 +150,6 @@ export async function api<T = unknown>(
   if (resp.ok && opts.responseType === "stream") return resp as T;
 
   let data: unknown = null;
-  const text = await resp.text();
   if (text) {
     try {
       data = JSON.parse(text);
@@ -131,7 +162,10 @@ export async function api<T = unknown>(
     // Auto-refresh on 401 (only once per request)
     if (resp.status === 401 && !_retried) {
       const ok = await tryRefresh();
-      if (ok) return api<T>(path, opts, true);
+      if (ok === "ok") return api<T>(path, opts, true);
+      if (ok === "unavailable") {
+        throw new ApiError(503, "auth_unavailable", "会话刷新暂时失败，请重试");
+      }
     }
 
     // If refresh failed or already retried, fire the logout callback -- once.

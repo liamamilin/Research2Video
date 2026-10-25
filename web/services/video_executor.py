@@ -22,6 +22,8 @@ from typing import Optional
 
 from core.video import columns as video_columns
 from core.video import credibility, steps, store
+from core.video.audience_copy import submission_problem
+from core.video.policy import is_core_issue
 from web.services import video_render, video_workflow
 from web.settings import get_settings
 
@@ -115,19 +117,21 @@ def _rerun_audit(script: dict, by: str) -> dict:
         raise StepError("五步改编的审校是写稿的一部分，要重来就重写")
     store.update_script(script["id"], status="DRAFT", stage="事实审计", error=None)
     video_workflow.spawn(script["id"], by)  # a script with a saved draft resumes at its audits
-    steps.log(script["id"], "audit", "rerun", "重跑事实和风格审计（不改稿子）", by=by)
+    steps.log(script["id"], "audit", "rerun", "重跑事实、风格和新观众审计，必要时自动改写复审", by=by)
     return store.get_script(script["id"])
 
 
-def _render(script: dict, by: str, voice_id: Optional[str] = None) -> dict:
+def _render(script: dict, by: str, voice_id: Optional[str] = None, production_mode: Optional[str] = None) -> dict:
     if script["status"] != "APPROVED":
         raise StepError("请先定稿再出片")
     try:
-        render = video_render.create(script, voice_id=voice_id)
+        render = video_render.create(script, voice_id=voice_id, recover_download=True, **({"production_mode": production_mode} if production_mode is not None else {}))
     except video_render.RenderError as exc:
         raise StepError(str(exc)) from exc
     video_render.start(render["id"])
-    steps.log(script["id"], "render", "start", f"出片 v{script['approved_version']}", by=by)
+    resumed = render["status"] == "DOWNLOADING"
+    steps.log(script["id"], "render", "resume" if resumed else "start",
+              "继续复制已生成的成片" if resumed else f"出片 v{script['approved_version']}", by=by)
     return render
 
 
@@ -163,15 +167,21 @@ def discard_plan(script_id: str, by: str) -> dict:
     return script
 
 
-def render(script_id: str, by: str, voice_id: Optional[str] = None) -> dict:
+def render(script_id: str, by: str, voice_id: Optional[str] = None, production_mode: Optional[str] = None) -> dict:
     """The user's 出片 button: the approved version to AutoVideo. Returns the render."""
     script = store.get_script(script_id)
     if script is None:
         raise StepError("没有这篇文稿")
-    return _render(script, by, voice_id)
+    return _render(script, by, voice_id, **({"production_mode": production_mode} if production_mode is not None else {}))
 
 
 def approve(script_id: str, version: int, by: str) -> None:
+    found = store.get_version(script_id, version)
+    if found is None:
+        raise StepError("没有这个文稿版本")
+    problem = submission_problem(found)
+    if problem:
+        raise StepError(problem)
     store.update_script(script_id, status="APPROVED", approved_version=version)
     steps.log(script_id, "approve", "approve", f"v{version}", by=by)
 
@@ -179,7 +189,7 @@ def approve(script_id: str, version: int, by: str) -> None:
 # --- a batch's script --------------------------------------------------------
 
 #: Credibility tiers (core/video/credibility.py) that keep a batch's script from being rendered unseen.
-HOLD_TIERS = ("serious", "spoken")
+HOLD_TIERS = ("serious", "verify", "unaudited")
 
 
 def judge(script: dict, column) -> dict:
@@ -189,8 +199,12 @@ def judge(script: dict, column) -> dict:
     label = credibility.label(version)
     checks = video_workflow.rule_checks(version, column)
     summary = checks.get("summary") or {}
-    return {"label": label["tier"], "text": label["text"], "reasons": label["reasons"],
-            "cited_share": label["cited_share"], "audited": bool(checks.get("model_ran")),
+    core = [i for i in checks.get("issues", []) if is_core_issue(i)]
+    return {"label": label["tier"], "text": label["text"],
+            "reasons": label["reasons"] + ([] if label["tier"] in HOLD_TIERS else [i["problem"] for i in core]),
+            "core_issues": len(core),
+            "cited_share": label["cited_share"],
+            "audited": bool(checks.get("model_ran")),
             "ignored": {"must": max(0, int(summary.get("must", 0)) - int(summary.get("rule_must", 0))),
                         "warn": int(summary.get("warn", 0))},
             "version": version["version"]}
@@ -227,18 +241,21 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
         if script.get("stage"):  # audits running
             return out
         verdict = judge(script, column)
-        if not verdict["audited"] and tries("audit") < MAX_RETRIES and can_start_script:
+        needs_audit = verdict["label"] != "generated" and (not verdict["audited"] or verdict["label"] == "verify")
+        if needs_audit and tries("audit") < MAX_RETRIES and can_start_script:
+            reason = "仍有待核实段落" if verdict["audited"] else "审计没有跑完"
             video_workflow.spawn(script["id"], "autopilot")  # current_version set → only the audits rerun
-            steps.log(script["id"], "audit", "rerun", f"审计没有跑完，第 {tries('audit') + 1} 次重跑", by="autopilot")
-            out.update(bump="audit", item={"note": "审计没有跑完，重跑审计"})
+            steps.log(script["id"], "audit", "rerun", f"{reason}，第 {tries('audit') + 1} 次重跑", by="autopilot")
+            out.update(bump="audit", item={"note": f"{reason}，重跑审计"})
             out["took"]["script"] = True
             return out
-        if not verdict["audited"] and tries("audit") < MAX_RETRIES:
+        if needs_audit and tries("audit") < MAX_RETRIES:
             return out  # wait for a free slot to rerun the audit
-        if verdict["label"] in HOLD_TIERS:
-            # after the audits and the one rewrite, a serious finding or a phrase that would be spoken wrongly is
-            # still there: no render is queued for it. Approving the script by hand sends it on (reopen_approved).
+        if verdict["label"] in HOLD_TIERS or verdict["core_issues"]:
+            # Automatic repair/retries are exhausted. Keep the concrete verdict for review; explicit approval
+            # by the user can still send it on (reopen_approved).
             out["hold"] = f"文稿没过审（{verdict['text']}），没有出片：" + "；".join(verdict["reasons"][:3]) + "。看过文稿、确认后再出片"
+            out["item"] = {"gate": {**verdict, "approved": False}}
             return out
         # any other label: the video is made, the label is shown next to it, and the user decides what to publish
         store.update_script(script["id"], status="APPROVED", approved_version=verdict["version"])
@@ -266,6 +283,11 @@ def _render_auto(script: dict, can_start_render: bool, out: dict, retries: Optio
     # fixed: an account out of balance, a key) do not count against the script
     forgiven = str((retries or {}).get("renders_forgiven_before") or "")
     failed = [r for r in current if r["status"] in ("FAILED", "CANCELLED") and r["created_at"] > forgiven]
+    latest = current[0] if current else None
+    if latest and latest["status"] == "FAILED" and latest.get("error_code") in {"SUBMIT_UNCONFIRMED", "DOWNLOAD_FAILED"}:
+        out["hold"] = ("提交结果尚未确认，请先在 AutoVideo 作品库核对任务" if latest["error_code"] == "SUBMIT_UNCONFIRMED"
+                       else "成片已生成但复制失败，点击重跑可继续复制，无需重新生成")
+        return out
     if len(failed) > RENDER_RETRIES:
         out["hold"] = f"出片失败 {len(failed)} 次：{failed[0].get('error_message')}"
         return out

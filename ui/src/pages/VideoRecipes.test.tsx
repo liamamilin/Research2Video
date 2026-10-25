@@ -51,6 +51,18 @@ afterEach(() => {
 });
 
 describe("Video recipes page", () => {
+  it("keeps the originating manuscript across shared-part links and protects unsaved edits on return", async () => {
+    page("/video-recipes/flash?from=s1");
+    const editor = await screen.findByLabelText("配方 YAML");
+    expect(screen.getByRole("link", { name: "motion" }).getAttribute("href")).toBe("/video-recipes/parts/output/motion?from=s1");
+    const back = screen.getByRole("link", { name: "← 返回文稿，继续迭代" });
+    expect(back.getAttribute("href")).toBe("/video/s1?tab=draft");
+    fireEvent.change(editor, { target: { value: "label: 尚未保存" } });
+    fireEvent.click(back);
+    expect(screen.getByRole("alert").textContent).toContain("有未保存的修改");
+    expect((screen.getByLabelText("配方 YAML") as HTMLTextAreaElement).value).toBe("label: 尚未保存");
+    expect(calls.some(c => c.method === "PUT")).toBe(false);
+  });
   it("lists the audiences a recipe offers, each linked to its profile, and the column each one is", async () => {
     page("/video-recipes/flash");
     const link = await screen.findByRole("link", { name: "non_tech" });
@@ -85,4 +97,16 @@ describe("Video recipes page", () => {
     expect(((await screen.findByLabelText("部件 YAML")) as HTMLTextAreaElement).readOnly).toBe(true);
     expect(screen.queryByRole("button", { name: "保存" })).toBeNull();
   });
+});
+
+
+it("keeps a changed recipe until the author explicitly discards it before switching", async () => {
+  page("/video-recipes/flash");
+  const editor = await screen.findByLabelText("配方 YAML");
+  fireEvent.change(editor, { target: { value: "label: 保留修改" } });
+  fireEvent.click(screen.getByRole("link", { name: "quick_take" }));
+  expect(screen.getByRole("alert").textContent).toContain("有未保存的修改");
+  expect((screen.getByLabelText("配方 YAML") as HTMLTextAreaElement).value).toBe("label: 保留修改");
+  fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+  expect(screen.queryByRole("alert")).toBeNull();
 });

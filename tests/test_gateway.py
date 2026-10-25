@@ -50,6 +50,7 @@ class FakeApp:
         self.hits: list[str] = []
         self.stream_started = threading.Event()
         self.release = threading.Event()
+        self.health_status = 200
         outer = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -67,8 +68,10 @@ class FakeApp:
 
             def do_GET(self):
                 outer.hits.append(self.path)
-                if self.path.startswith("/api/health"):
+                if self.path == "/api/live":
                     self._send(200, b'{"status":"ok"}')
+                elif self.path.startswith("/api/health"):
+                    self._send(outer.health_status, b'{"status":"error"}')
                 elif self.path.startswith("/stream"):
                     self.send_response(200)
                     self.send_header("Content-Type", "text/event-stream")
@@ -168,6 +171,15 @@ def test_proxies_a_request_to_the_app(front):
     assert payload["path"] == "/api/reports?page=2"
     # The app must see its real port, not the public one.
     assert payload["host"].endswith(str(_app.port))
+
+
+def test_gateway_uses_liveness_so_dependency_failures_do_not_block_repair_pages(front):
+    base, app = front
+    app.health_status = 503
+    app.hits.clear()
+    status, _ = get(f"{base}/api/config")
+    assert status == 200
+    assert app.hits == ["/api/live", "/api/config"]
 
 
 def test_forwards_the_request_body_and_csrf_header(front):

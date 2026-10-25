@@ -1,0 +1,43 @@
+name: deep_dive_d8d44faa
+description: 深度解读：你的 Agent 可以篡改自己的执行记录：证据链完整性的实战含义
+enabled: true
+keywords:
+  - 你的 Agent 可以篡改自己的执行记录
+  - 证据链完整性的实战含义
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 3600
+  skip_if_running: true
+prompt: |-
+  你是一名技术研究员，为一位制作 AI / 软件类知识视频的创作者做选题调研。你的报告会被写成一篇约 6 分钟的口播文稿，文稿里的每个事实都要能追溯到你引用的网页，所以每个关键判断都要给出原始网址。
+
+  ## 选题
+  - 标题：你的 Agent 可以篡改自己的执行记录：证据链完整性的实战含义
+  - 核心角度：一级证据必须外部可复算，agent 自述轨迹只能当导航层
+  - 目标受众：金融、医疗、国企等受监管行业的工程负责人；做 AI 生成代码评审的人
+  - 为什么有人在乎：2026-09-24 提交的 arXiv:2609.30266《LLM Agents Can Easily Tamper With Their Own Traces》指出异步监控、事故调查与合规审计普遍隐含「agent 无法篡改自身记录」的假设，并对该假设给出反例性结论（未验证：具体攻击面、被测试 harness 数量与成功率未完整呈现；发布日期 2026-09-24，https://arxiv.org/abs/2609.30266 ）。同期 Qodo 报告显示仅 45% 组织具备「AI 活动 → 对应代码变更」的可追溯证据（报告页 2026-09-22，窗口边界项；新闻稿 2026-09-23；https://www.qodo.ai/blog/state-of-ai-code-quality-report-2026 ；https://www.globenewswire.com/news-release/2026/09/23/3367496/0/en/qodo-s-2026-state-of-ai-code-quality-report-reveals-growing-verification-challenge-as-agentic-development-scales.html ；行业解读 2026-09-24：https://futurumgroup.com/insights/ai-code-generation-scaled-verification-didnt ）。
+  - 建议大纲：① 三种「看起来像证据」的东西 → ② 一级证据定义（commit SHA + 文件哈希 + 工具原始输出 + 执行日志）→ ③ 报告 schema 改造示例 → ④ 45% 溯源缺口意味着什么商业机会
+
+  ## 任务
+  围绕这个选题做深度调研：先直接回答它要回答的问题，再给出支撑证据、反方证据和仍未确定的部分。证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。
+  输出语言：{language}。
+
+  ## 证据规则
+  1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。
+  2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
+  3. 核心结论尽量由两个相互独立的来源支撑；只有厂商自己的说法时，标注「厂商自述，未独立验证」。
+  4. 给出反方证据或失败案例；确实找不到时写明「未找到反方证据」。
+  5. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
+  6. 数字（价格、版本号、日期、比例）照来源原样写，注明口径。
+
+  ## 输出结构
+  ### 1. 直接回答
+  ### 2. 关键事实（表格：事实 | 置信度 | 来源编号）
+  ### 3. 争议与反方证据
+  ### 4. 仍未确定的问题
+  ### 5. 适合视频的讲述角度（不超过 3 条）
+  ### 6. 来源清单
+  编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址
+output: output/video/{datetime}_deep_dive_d8d44faa.md

@@ -158,8 +158,18 @@ class Supervisor:
     def healthy(self) -> bool:
         conn = http.client.HTTPConnection("127.0.0.1", self.app_port, timeout=self.health_timeout)
         try:
-            conn.request("GET", "/api/health")
-            return conn.getresponse().status < 500
+            # Dependency diagnostics write probes/read databases and belong to
+            # /api/health. A config error must not prevent opening Settings to fix it.
+            conn.request("GET", "/api/live")
+            response = conn.getresponse()
+            response.read()
+            if response.status == 404:  # rolling upgrade from an older app
+                conn.close()
+                conn = http.client.HTTPConnection("127.0.0.1", self.app_port, timeout=self.health_timeout)
+                conn.request("GET", "/api/health")
+                response = conn.getresponse()
+                response.read()
+            return response.status == 200
         except (OSError, http.client.HTTPException):
             return False
         finally:

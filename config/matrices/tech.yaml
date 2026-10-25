@@ -5,3 +5,5 @@ keywords: []
 jobs:
 - tech/tech_daily
 - tech/tech_weekly
+render:
+  video_speed: 1.25

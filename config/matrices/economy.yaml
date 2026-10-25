@@ -5,3 +5,5 @@ keywords: []
 jobs:
 - economy/economy_daily
 - economy/economy_weekly
+render:
+  video_speed: 1.25

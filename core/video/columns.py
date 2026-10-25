@@ -11,10 +11,7 @@ from dataclasses import dataclass, field
 
 from .length import MAX_MINUTES, MIN_MINUTES
 
-#: The five-step adaptation needs room for 3–5 comprehension goals and a causal chain (spec/video-adaptation.md).
-ADAPT_MIN_MINUTES = 3
-
-VIDEO_FORMS = ("auto", "information_motion", "process_diagram")
+VIDEO_FORMS = ("auto", "information_motion", "process_diagram", "kinetic_typography", "image_slideshow", "chat_dialogue", "information_cards")
 #: What a script of the column is made from: one topic (single), several items of a discovery report cut into a
 #: list video (roundup), or two subjects set against each other (comparison); see spec/video-matrix.md.
 TOPIC_KINDS = ("single", "roundup", "comparison")
@@ -64,6 +61,7 @@ class Column:
     #: The non-content parts of a video (intro, outro, accent colour), see ``package`` in spec/video-short-forms.md.
     #: Empty means the video is the content alone.
     package: dict = field(default_factory=dict)
+    packaging: dict | None = None
     #: End the video on a source card listing what the script cites (AutoVideo ``sources``).
     source_card: bool = False
     #: Who the column is for, as a short label for on-screen and prompt text; empty for a column with no audience.
@@ -83,8 +81,8 @@ class Column:
     #: The topic fields the writer is shown, in order; empty: the writer's default (``DEFAULT_TOPIC_FIELDS``).
     topic_fields: tuple[str, ...] = ()
     audit_model: str = "review"
-    #: How a style finding of the one-call writer's audit counts: ``must`` (fix before approving) or ``warn``.
-    audit_style_severity: str = "must"
+    #: Legacy setting accepted on read; expression findings remain advisory under the quality-first policy.
+    audit_style_severity: str = "warn"
     #: Time limit of the one-call writer's audit call; 0 means the default (240 s, twice that from 3 minutes on).
     audit_timeout_seconds: int = 0
     #: Fix rounds of the five-step adaptation.
@@ -92,6 +90,10 @@ class Column:
     #: Stop the five-step adaptation once the plan is made, until the user confirms it (spec/video-steps.md).
     #: Never for a batch's scripts: a batch does not wait for the user.
     pause_after_plan: bool = False
+    production_recipe: str = ""
+    production_mode: str = "standard"
+    visual_style: str = "legacy"
+    production_settings: dict = field(default_factory=dict)
 
     def writer_topic_fields(self) -> tuple[str, ...]:
         return self.topic_fields or DEFAULT_TOPIC_FIELDS[self.writer]
@@ -108,6 +110,7 @@ class Column:
             "default_style": {"depth": self.default_depth, "tone": self.default_tone},
             "allowed_tones": list(self.allowed_tones),
             "package": self.package,
+            "packaging": self.packaging,
             "source_card": self.source_card,
             "audience": self.audience,
             "allowed_forms": list(self.allowed_forms) or [self.video_form],
@@ -115,6 +118,8 @@ class Column:
             "recheck": self.recheck,
             "research_mode": self.research_mode,
             "topic_sources": list(self.topic_sources),
+            **({"production_recipe": self.production_recipe, "production_mode": self.production_mode,
+                "visual_style": self.visual_style} if self.production_settings else {}),
         }
 
 
@@ -188,6 +193,16 @@ def _flag(key: str, name: str, raw) -> bool:
     return raw
 
 
+def _packaging(key: str, raw) -> dict | None:
+    if raw is None:
+        return None
+    from .packaging import validate
+    try:
+        return validate(raw)
+    except ValueError as exc:
+        raise ColumnError(f"栏目 {key} 的 {exc}") from exc
+
+
 _INTENT_KEYS = ("purpose", "audience", "tone", "focus")
 
 
@@ -240,6 +255,9 @@ def build(key: str, raw: dict) -> Column:
     """One column from its flat settings (``recipes.to_flat`` of a recipe file)."""
     if not isinstance(raw, dict):
         raise ColumnError(f"栏目 {key} 的配置必须是映射")
+    if raw.get("packaging") is not None and raw.get("package"):
+        raise ColumnError(f"栏目 {key} 的 packaging 与旧 package 不能同时配置")
+    _flag(key, "source_card", raw.get("source_card"))
     try:
         minutes = float(raw.get("target_minutes", 6))
     except (TypeError, ValueError) as exc:
@@ -247,6 +265,11 @@ def build(key: str, raw: dict) -> Column:
     minutes = int(minutes) if minutes == int(minutes) else minutes
     if not MIN_MINUTES <= minutes <= MAX_MINUTES:
         raise ColumnError(f"栏目 {key} 的 target_minutes 应在 {MIN_MINUTES}–{MAX_MINUTES} 之间")
+    from .production_settings import validate as validate_production
+    try:
+        production_settings = validate_production(raw.get("production_settings"))
+    except ValueError as exc:
+        raise ColumnError(f"栏目 {key}：{exc}") from exc
     form = str(raw.get("video_form", "auto"))
     if form not in VIDEO_FORMS:
         raise ColumnError(f"栏目 {key} 的 video_form 应为 {', '.join(VIDEO_FORMS)} 之一")
@@ -276,7 +299,7 @@ def build(key: str, raw: dict) -> Column:
     audit_model = str(audit.get("model") or "review")
     if audit_model not in AUDIT_MODELS:
         raise ColumnError(f"栏目 {key} 的 audit.model 应为 {', '.join(AUDIT_MODELS)} 之一")
-    severity = str(audit.get("style_severity") or "must")
+    severity = str(audit.get("style_severity") or "warn")
     if severity not in SEVERITIES:
         raise ColumnError(f"栏目 {key} 的 audit.style_severity 应为 {', '.join(SEVERITIES)} 之一")
     try:
@@ -289,9 +312,6 @@ def build(key: str, raw: dict) -> Column:
     pause = _flag(key, "pause_after_plan", raw.get("pause_after_plan"))
     if pause and writer != "adapt":
         raise ColumnError(f"栏目 {key}：pause_after_plan 只用于五步改编（writing.pipeline: adapt），一次写成没有方案这一步")
-    if writer == "adapt" and minutes < ADAPT_MIN_MINUTES:
-        raise ColumnError(f"栏目 {key}：五步改编（adapt）是给 {ADAPT_MIN_MINUTES} 分钟以上的稿子设计的，"
-                          f"{minutes} 分钟的稿子用 single")
     topic_fields = raw.get("topic_fields") or ()
     if not isinstance(topic_fields, (list, tuple)) or not all(isinstance(f, str) and f.strip() for f in topic_fields):
         raise ColumnError(f"栏目 {key} 的 topic_fields 应为字段名列表")
@@ -304,6 +324,10 @@ def build(key: str, raw: dict) -> Column:
         description=str(raw.get("description") or ""),
         target_minutes=minutes,
         video_form=form,
+        production_recipe=str(production_settings.get("production_recipe", "")),
+        production_mode=production_settings.get("production_mode", "standard"),
+        visual_style=production_settings.get("visual_style", "legacy"),
+        production_settings=production_settings,
         research_prompt=prompt,
         script_style=str(raw.get("script_style") or "").strip(),
         research_timeout_seconds=int(raw.get("research_timeout_seconds", 3600)),
@@ -316,7 +340,9 @@ def build(key: str, raw: dict) -> Column:
         sections=_pair(key, "sections", structure.get("sections"), (4, 6)),
         paragraph_units=_pair(key, "paragraph_units", structure.get("paragraph_units"), (60, 140)),
         package=_package(key, raw.get("package")),
-        source_card=_flag(key, "source_card", raw.get("source_card")),
+        packaging=_packaging(key, raw.get("packaging")),
+        source_card=((raw["packaging"].get("enabled", True) and raw["packaging"].get("source_card", {}).get("enabled", True))
+                     if raw.get("packaging") is not None else _flag(key, "source_card", raw.get("source_card"))),
         audience=str(raw.get("audience") or ""),
         allowed_forms=forms,
         creative_intent=_intent(key, raw.get("creative_intent")),

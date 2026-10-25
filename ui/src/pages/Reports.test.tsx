@@ -35,6 +35,7 @@ function mockFetch() {
     return jsonResponse({ items: [], total: 0, page: 1, pages: 1 });
   });
   vi.stubGlobal("fetch", fn);
+  return fn;
 }
 
 beforeEach(() => {
@@ -98,6 +99,17 @@ describe("Reports tree state", () => {
 });
 
 describe("Reports filters", () => {
+  it("changes list sorting without refetching the unchanged directory and facets", async () => {
+    const fetcher = mockFetch();
+    render(<MemoryRouter><ReportsPage /></MemoryRouter>);
+    await waitFor(() => expect(fetcher.mock.calls.some(([url]) => String(url).startsWith("/api/reports?"))).toBe(true));
+    const treeReads = fetcher.mock.calls.filter(([url]) => String(url).includes("/api/reports/tree")).length;
+    fireEvent.change(screen.getByLabelText("排序方式"), { target: { value: "title" } });
+    await waitFor(() => expect(fetcher.mock.calls.some(([url]) => String(url).includes("sort=title"))).toBe(true));
+    expect(fetcher.mock.calls.filter(([url]) => String(url).includes("/api/reports/tree"))).toHaveLength(treeReads);
+    expect(fetcher.mock.calls.filter(([url]) => String(url).includes("/api/reports/categories"))).toHaveLength(1);
+  });
+
   const ITEM = { path: "research/a.md", title: "A", category: "research", favorite: false };
 
   function mockWith(extra: { total?: number; tree?: any[] } = {}) {
@@ -256,5 +268,22 @@ describe("Reports filter race", () => {
     expect(listCall).toBeTruthy();
     expect(listCall).toMatch(/since=\d{4}-\d{2}-\d{2}/);
     expect((screen.getByLabelText("按时间筛选") as HTMLSelectElement).value).toBe("today");
+  });
+});
+
+
+describe("Report search recovery", () => {
+  it("keeps browsing results while typing, and shows a failed search with retry", async () => {
+    const base = (fetch as ReturnType<typeof vi.fn>).getMockImplementation()!;
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => String(url).includes("/api/reports/search")
+      ? ({ ok: false, status: 503, statusText: "Search offline", text: async () => JSON.stringify({ error: { message: "搜索暂时不可用" } }) }) as Response
+      : String(url).includes("/api/reports?") ? jsonResponse({ items: [{ path: "today.md", title: "当前报告" }], total: 1, pages: 1 }) : base(url)));
+    render(<MemoryRouter><ReportsPage /></MemoryRouter>);
+    expect(await screen.findByText("当前报告")).toBeTruthy();
+    fireEvent.change(screen.getByPlaceholderText("搜索报告全文..."), { target: { value: "缓存" } });
+    expect(screen.getByText("当前报告")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "搜索" }));
+    expect(await screen.findByText(/搜索暂时不可用/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "重试" })).toBeTruthy();
   });
 });

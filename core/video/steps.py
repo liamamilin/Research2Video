@@ -95,29 +95,32 @@ def derive(script: dict, version: Optional[dict], renders: list[dict], *, resear
     elif not has_version or status in ("WRITING", "PLAN_READY"):
         audit = _step("audit", "PENDING")
     elif checks.get("model_ran"):
-        audit = _step("audit", "DONE")
+        audit = _step("audit", "DONE", "事实审计完成；表达检查有未完成项" if checks.get("audits_complete") is False else "")
+    elif checks.get("mode") == "on_request":
+        audit = _step("audit", "SKIPPED", "按需发起")
     elif checks.get("model_checks_stale"):  # a hand edit re-runs only the rule checks
         audit = _step("audit", "INCOMPLETE", "改过稿子，模型审计没有对这一版重跑")
     else:
-        audit = _step("audit", "INCOMPLETE", "模型审计没有跑完，只有规则检查")
+        audit = _step("audit", "INCOMPLETE", "文稿审计没有全部跑完" if checks.get("model_ran")
+                      else "模型审计没有跑完，只有规则检查")
 
     approved = script.get("approved_version")
-    if approved:
+    current_approved = approved and approved == script.get("current_version") and status == "APPROVED"
+    if current_approved:
         approve = _step("approve", "DONE", f"v{approved}")
     elif has_version and status == "DRAFT" and not stage:
-        approve = _step("approve", "WAITING", "批次在跑时会自动定稿；批次结束了就等你定稿"
-                        if script.get("created_by") == "autopilot" else "等你定稿")
+        approve = _step("approve", "WAITING", f"当前 v{script['current_version']} 等待定稿")
     else:
         approve = _step("approve", "PENDING")
 
-    current = [r for r in renders if approved and r["version"] == approved]
-    if any(r["status"] == "COMPLETED" for r in current):
-        render = _step("render", "DONE")
-    elif any(r["status"] in store.ACTIVE_RENDER_STATUSES for r in current):
+    current = [r for r in renders if r["version"] == script.get("current_version")]
+    if any(r["status"] in store.ACTIVE_RENDER_STATUSES for r in current):
         render = _step("render", "RUNNING", next(r["status"] for r in current if r["status"] in store.ACTIVE_RENDER_STATUSES))
+    elif any(r["status"] == "COMPLETED" for r in current):
+        render = _step("render", "DONE")
     elif current:
         render = _step("render", "FAILED", current[0].get("error_message") or "")
-    elif approved:
+    elif current_approved:
         render = _step("render", "WAITING", "定稿了，还没出片")
     else:
         render = _step("render", "PENDING")

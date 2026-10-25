@@ -5,3 +5,5 @@ keywords: []
 jobs:
 - company/company_daily
 - company/company_weekly
+render:
+  video_speed: 1.25

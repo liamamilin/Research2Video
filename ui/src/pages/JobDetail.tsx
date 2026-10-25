@@ -5,7 +5,8 @@ import { ApiError } from "@/api/client";
 import type { JobDetail as JobDetailType } from "@/api/types";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Play, Square, Trash2 } from "lucide-react";
+import { ArrowLeft, Play, Square, Trash2, RefreshCw } from "lucide-react";
+import { ErrorState } from "@/components/ErrorState";
 import { DeleteJobDialog } from "@/components/DeleteJobDialog";
 import { useLogStream, type LogEvent } from "@/hooks/useLogStream";
 import { getJobLogs, type PersistedLogRecord, type PersistedRun } from "@/api";
@@ -17,6 +18,10 @@ type Tab = "overview" | "yaml" | "logs" | "history";
 
 export function JobDetailPage() {
   const { name } = useParams<{ name: string }>();
+  return <JobWorkspace key={name} name={name} />;
+}
+
+function JobWorkspace({ name }: { name?: string }) {
   const user = useAuthStore((s) => s.user);
   const [job, setJob] = useState<JobDetailType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,6 +31,8 @@ export function JobDetailPage() {
   // Run history
   const [history, setHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState("");
+  const [historyRetry, setHistoryRetry] = useState(0);
 
   // Run state
   const [runBusy, setRunBusy] = useState(false);
@@ -35,6 +42,7 @@ export function JobDetailPage() {
   const [pastLogs, setPastLogs] = useState<PersistedLogRecord[]>([]);
   const [pastRuns, setPastRuns] = useState<PersistedRun[]>([]);
   const [pastLoading, setPastLoading] = useState(false);
+  const [pastError, setPastError] = useState("");
 
   // YAML editing state
   const [editYaml, setEditYaml] = useState("");
@@ -56,6 +64,8 @@ export function JobDetailPage() {
 
   const canEdit = user?.role === "editor" || user?.role === "admin";
   const hasChanges = editYaml !== originalYaml;
+  const dirty = useRef(false); dirty.current = hasChanges;
+  const flight = useRef<AbortController | null>(null);
   const toast = useToast();
 
   // SSE log stream. The tab is the only thing that gates it: a second flag
@@ -71,38 +81,33 @@ export function JobDetailPage() {
   });
 
   const fetchJob = useCallback(async () => {
-    if (!name) return;
+    if (!name || flight.current) return;
+    const controller = new AbortController(); flight.current = controller;
     setLoading(true);
-    setError("");
     try {
-      const data = await getJob(decodeURIComponent(name));
-      setJob(data);
-      setEditYaml(data.yaml_content);
-      setOriginalYaml(data.yaml_content);
-      setWarnings([]);
-      setSaveError("");
-      setLastSaveResult("");
+      const data = await getJob(decodeURIComponent(name), controller.signal);
+      if (controller.signal.aborted) return;
+      // A status refresh must not erase an unsaved edit or its conflict baseline.
+      setJob((previous) => dirty.current && previous ? { ...data, yaml_content: previous.yaml_content, yaml_mtime: previous.yaml_mtime } : data);
+      if (!dirty.current) { setEditYaml(data.yaml_content); setOriginalYaml(data.yaml_content); }
+      setError("");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "加载失败");
-    } finally {
-      setLoading(false);
-    }
+      if (!controller.signal.aborted) setError(errorMessage(err, "加载任务失败"));
+    } finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
   }, [name]);
 
-  useEffect(() => {
-    fetchJob();
-  }, [fetchJob]);
+  useEffect(() => { void fetchJob(); return () => { flight.current?.abort(); flight.current = null; }; }, [fetchJob]);
 
   const loadPastLogs = useCallback(async () => {
     if (!name) return;
     setPastLoading(true);
     try {
       const data = await getJobLogs(decodeURIComponent(name), { limit: 2000 });
+      setPastError("");
       setPastRuns(Array.isArray(data.runs) ? data.runs : []);
       setPastLogs(Array.isArray(data.events) ? data.events : []);
-    } catch {
-      setPastRuns([]);
-      setPastLogs([]);
+    } catch (e) {
+      setPastError(errorMessage(e, "历史日志读取失败"));
     } finally {
       setPastLoading(false);
     }
@@ -112,11 +117,13 @@ export function JobDetailPage() {
   useEffect(() => {
     if (tab !== "history" || !decodedNameForHistory) return;
     setHistoryLoading(true);
+    let active = true;
     getJobHistory(decodedNameForHistory, 50)
-      .then((rows) => setHistory(Array.isArray(rows) ? rows : []))
-      .catch(() => setHistory([]))
-      .finally(() => setHistoryLoading(false));
-  }, [tab, decodedNameForHistory]);
+      .then((rows) => { if (active) { setHistory(Array.isArray(rows) ? rows : []); setHistoryError(""); } })
+      .catch((e) => { if (active) setHistoryError(errorMessage(e, "运行历史读取失败")); })
+      .finally(() => { if (active) setHistoryLoading(false); });
+    return () => { active = false; };
+  }, [tab, decodedNameForHistory, historyRetry]);
 
   // When SSE finishes, refetch job to get updated state/output.
   // No need to stop the stream here: the hook already closed the EventSource
@@ -225,7 +232,7 @@ export function JobDetailPage() {
         editYaml,
         job.yaml_mtime
       );
-      setOriginalYaml(editYaml);
+      dirty.current = false; setOriginalYaml(editYaml);
       setValidation(null);
       setWarnings(result.warnings || []);
       setLastSaveResult("保存成功");
@@ -258,18 +265,18 @@ export function JobDetailPage() {
   }, [tab, name, isRunning, logEvents.length, loadPastLogs]);
 
 
-  if (loading) {
+  if (loading && !job) {
     return <div className="text-text-muted">加载中...</div>;
   }
 
-  if (error || !job) {
+  if (!job) {
     return (
       <div className="space-y-4">
         <Link to="/jobs" className="btn">
           <ArrowLeft className="w-4 h-4" />
           返回
         </Link>
-        <div className="card p-4 text-danger">{error || "Job not found"}</div>
+        <ErrorState error={error || "找不到这个任务"} onRetry={fetchJob} />
       </div>
     );
   }
@@ -290,6 +297,7 @@ export function JobDetailPage() {
 
   return (
     <div className="space-y-4">
+      {error ? <ErrorState error={error} onRetry={fetchJob} compact /> : null}
       <DeleteJobDialog
         jobName={deleting ? decodeURIComponent(name || "") : null}
         isRunning={isRunning}
@@ -298,13 +306,13 @@ export function JobDetailPage() {
         onClose={() => setDeleting(false)}
       />
       {/* Breadcrumb + actions */}
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex flex-wrap items-center gap-2 text-sm">
         <Link to="/jobs" className="text-text-muted hover:text-text">
           <ArrowLeft className="w-4 h-4 inline mr-1" />
           Jobs
         </Link>
         <span className="text-text-muted">/</span>
-        <span className="font-mono flex-1">{job.name}</span>
+        <span className="font-mono flex-1 min-w-40 break-all">{job.name}</span>
 
         <div className="flex items-center gap-2">
           <Link className="btn text-xs" to={`/ask?job=${encodeURIComponent(job.name)}`}>在助手中处理</Link>
@@ -342,6 +350,8 @@ export function JobDetailPage() {
         </div>
       </div>
 
+      <p className="text-xs text-text-muted">{job.description || "查看研究任务配置、运行结果和日志。"}</p>
+      <button className="btn text-xs" disabled={loading} onClick={fetchJob}><RefreshCw className="h-3.5 w-3.5" />刷新状态</button>
       {/* Tabs */}
       <div className="flex gap-0 border-b border-border">
         {tabs.map((t) => (
@@ -363,11 +373,14 @@ export function JobDetailPage() {
       {/* === Overview tab === */}
       {tab === "overview" && (
         <div className="space-y-4">
-          <div className="card divide-y divide-border">
+          <div className="grid sm:grid-cols-3 gap-3"><div className="card p-4"><p className="text-xs text-text-muted">当前状态</p><p className={cn("text-sm mt-2 font-medium", isRunning ? "text-accent" : statusColor[job.state?.last_status || ""])}>{isRunning ? "运行中" : ({ success: "已完成", failed: "上次运行失败", skipped: "已跳过", cancelled: "已取消" } as Record<string,string>)[job.state?.last_status || ""] || "尚未运行"}</p></div><div className="card p-4"><p className="text-xs text-text-muted">最近运行</p><p className="text-sm mt-2">{job.state?.last_run_at?.replace("T", " ").slice(0,16) || "—"}</p></div><div className="card p-4"><p className="text-xs text-text-muted">任务配置</p><p className="text-sm mt-2">{job.enabled ? "已启用" : "已停用"}{job.state?.last_duration_seconds != null ? ` · 上次耗时 ${Math.round(job.state.last_duration_seconds)} 秒` : ""}</p></div></div>
+          {job.state?.last_status === "failed" ? <section className="card p-4 border-danger/40 text-sm space-y-2"><h2 className="font-medium text-danger">上次运行未完成</h2><p className="text-text-muted">{/ModelDeprecated|has been deprecated/.test(job.state.last_error || "") ? "上次请求的模型已被服务商停用；重试前请确认当前模型配置。" : (job.state.last_error || "打开日志查看未完成的原因。").split("\n")[0].slice(0,180)}</p><div className="flex flex-wrap gap-3"><button className="btn text-xs" onClick={() => requestTab("logs")}>查看失败日志</button>{user?.role === "admin" ? <Link className="btn text-xs" to="/settings">检查模型与服务</Link> : null}</div>{job.state.last_error ? <details className="text-xs text-text-muted"><summary className="cursor-pointer">完整错误信息</summary><pre className="whitespace-pre-wrap break-all mt-2">{job.state.last_error}</pre></details> : null}</section> : null}
+          {job.state?.last_status === "success" && job.state.last_output ? <Link className="btn text-xs" to={`/reports/view?path=${encodeURIComponent(job.state.last_output.replace(/^output\//, ""))}`}>阅读本次研究报告 ↗</Link> : null}
+          <details className="card"><summary className="px-4 py-3 text-sm cursor-pointer">任务配置与上次运行详情</summary><div className="divide-y divide-border border-t border-border">
             <div className="px-4 py-3 flex items-center gap-4 text-sm">
               <span className="text-text-muted w-20 shrink-0">状态</span>
               <span className={cn(statusColor[job.state?.last_status || ""] || "text-text-muted")}>
-                {isRunning ? "运行中" : (job.state?.last_status || "未运行")}
+                {isRunning ? "运行中" : ({ success: "已完成", failed: "失败", skipped: "已跳过", cancelled: "已取消" } as Record<string,string>)[job.state?.last_status || ""] || "未运行"}
               </span>
             </div>
             <div className="px-4 py-3 flex items-center gap-4 text-sm">
@@ -424,9 +437,7 @@ export function JobDetailPage() {
                 {job.state.last_output && (
                   <div className="px-4 py-3 text-sm">
                     <span className="text-text-muted block mb-1">输出文件</span>
-                    <code className="text-xs bg-bg-hover px-1.5 py-0.5 rounded">
-                      {job.state.last_output}
-                    </code>
+                    <Link className="text-xs text-accent hover:underline break-all" to={`/reports/view?path=${encodeURIComponent(job.state.last_output.replace(/^output\//, ""))}`}>{job.state.last_output} ↗</Link>
                   </div>
                 )}
                 {job.state.last_error && (
@@ -439,10 +450,11 @@ export function JobDetailPage() {
                 )}
               </>
             )}
-          </div>
+          </div></details>
         </div>
       )}
 
+      {pastError && tab === "logs" ? <ErrorState error={pastError} onRetry={loadPastLogs} compact /> : null}
       {/* === YAML tab === */}
       {tab === "yaml" && (
         <div className="space-y-3">
@@ -526,6 +538,7 @@ export function JobDetailPage() {
       {/* === History tab === */}
       {tab === "history" && (
         <div className="space-y-3">
+          {historyError ? <ErrorState error={historyError} onRetry={() => setHistoryRetry((n) => n + 1)} compact /> : null}
           {historyLoading ? (
             <div className="text-sm text-text-muted">加载中...</div>
           ) : history.length === 0 ? (
@@ -741,7 +754,7 @@ function LogViewer({
       <div className="card p-6 text-center text-text-muted text-sm space-y-2">
         <div>
           {streamStatus === "finished"
-            ? "本次运行没有产生日志（服务重启后历史日志不保留）。"
+            ? "实时日志已结束；之前的执行记录可在下方历史日志中查看。"
             : "暂无日志。点击「运行」按钮启动 Job。"}
         </div>
         <button onClick={onRetry} className="btn text-xs">
@@ -761,10 +774,10 @@ function LogViewer({
           "bg-text-muted"
         )} />
         {streamStatus === "connected" && "实时"}
-        {streamStatus === "finished" && "已完成"}
+        {streamStatus === "finished" && "日志读取结束"}
         {streamStatus === "connecting" && "连接中"}
         {streamStatus === "error" && "错误"}
-        <span className="ml-auto">{events.length} lines</span>
+        <span className="ml-auto">{events.length} 条事件</span>
       </div>
       <div
         className="p-3 text-xs font-mono leading-relaxed max-h-[60vh] overflow-y-auto bg-[#0d1117]"

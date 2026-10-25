@@ -44,6 +44,26 @@ def test_fetch_rss_parses_items(monkeypatch):
     assert results[0].provider == "rss"
 
 
+def test_rss_keeps_available_full_content_instead_of_only_the_teaser():
+    body = "研发的具体过程。" * 80 + "末尾有一个重要的使用场景。"
+    xml = '<rss xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><item>'
+    xml += '<title>新发现</title><link>https://example.com/story</link><description>点击查看全文</description>'
+    xml += '<content:encoded><![CDATA[<p>' + body + '</p>]]></content:encoded></item></channel></rss>'
+    result = sources._parse_feed(xml, 1)[0]
+    assert result.excerpts == [body]
+    assert result.url == "https://example.com/story"
+
+
+def test_atom_xhtml_body_survives_with_nested_text():
+    xml = '''<feed xmlns="http://www.w3.org/2005/Atom"><entry><title>工具用法</title>
+      <link href="https://example.com/tool"/><summary>摘要</summary>
+      <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>先打开工具，<b>选择项目</b>，再运行。</p></div></content>
+      </entry></feed>'''
+    result = sources._parse_feed(xml, 1)[0]
+    assert "选择项目" in result.excerpts[0] and "再运行" in result.excerpts[0]
+    assert result.excerpts != ["摘要"]
+
+
 def test_fetch_arxiv_parses_atom(monkeypatch):
     monkeypatch.setattr(sources, "_get_text", lambda url, timeout, accept="*/*": ATOM_XML)
     results = sources.fetch_arxiv("agent memory", limit=3)
@@ -230,6 +250,40 @@ def test_load_registry_rejects_a_spec_no_adapter_reads(tmp_path):
     else:
         raise AssertionError("a spec without a known adapter must not load")
     assert sources.load_registry(_registry(tmp_path))["c"]["note"] == "官方统计"
+
+
+def test_registry_parse_cache_keeps_values_independent_and_detects_edits(tmp_path):
+    import os
+    import pytest
+
+    config = _registry(tmp_path)
+    path = tmp_path / "sources.yaml"
+    first = sources.load_registry(config)
+    first["a"]["tags"].append("changed")
+    assert sources.load_registry(config)["a"]["tags"] == ["tech", "robotics"]
+    before = path.stat()
+    path.write_text(REGISTRY.replace("Feed A", "Feed Z"), encoding="utf-8")
+    os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+    assert path.stat().st_size == before.st_size
+    assert sources.load_registry(config)["a"]["name"] == "Feed Z"
+    path.write_text("bad: [", encoding="utf-8")
+    with pytest.raises(sources.RegistryError):
+        sources.load_registry(config)
+    _registry(tmp_path)
+    assert sources.load_registry(config)["a"]["name"] == "Feed A"
+
+
+def test_resolve_uses_an_explicit_snapshot_even_when_empty(monkeypatch):
+    import pytest
+
+    def unexpected_load(*args):
+        raise AssertionError("an explicit registry must not be reread")
+
+    monkeypatch.setattr(sources, "load_registry", unexpected_load)
+    snapshot = {"a": {"spec": "rss:https://a.example/feed", "tags": ["tech"]}}
+    assert sources.resolve(["source:a", "tag:tech"], registry=snapshot) == ["rss:https://a.example/feed"]
+    with pytest.raises(sources.RegistryError, match="没有 a"):
+        sources.resolve(["source:a"], registry={})
 
 
 def test_the_shipped_registry_loads_and_every_tag_a_job_uses_exists():

@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils";
 import { Trash2, RefreshCw, Copy, Check } from "lucide-react";
 import { SystemConfig } from "@/components/SystemConfig";
 import { ShareLinks } from "@/components/ShareLinks";
+import { usePageResource } from "@/lib/use-page-resource";
+
+const loadGlobalLogs = (signal: AbortSignal) => api<{ lines: string[] }>("/api/logs/global?lines=500", { signal });
 
 type SettingsTab = "system" | "users" | "audit" | "logs";
 
@@ -33,7 +36,7 @@ export function SettingsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold flex-1">设置</h1>
+        <div className="flex-1"><h1 className="text-xl font-semibold tracking-tight">设置</h1><p className="text-xs text-text-muted mt-1">管理模型与服务配置、账号权限和系统运行记录。</p></div>
       </div>
 
       <div className="flex gap-0 border-b border-border">
@@ -53,7 +56,7 @@ export function SettingsPage() {
         ))}
       </div>
 
-      {tab === "system" && <SystemConfig />}
+      <div hidden={tab !== "system"}><SystemConfig /></div>
       {tab === "users" && <UserManagement />}
       {tab === "audit" && <AuditLog />}
       {tab === "logs" && <GlobalLogs />}
@@ -322,25 +325,9 @@ function AuditLog() {
 // --- Global Logs ---
 
 function GlobalLogs() {
-  const [lines, setLines] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [follow, setFollow] = useState(false);
-  const [linesError, setLinesError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = () =>
-      api<{ lines: string[] }>("/api/logs/global?lines=500")
-        .then((data) => { if (!cancelled) { setLines(data.lines); setLinesError(""); } })
-        .catch((err: unknown) => {
-          if (!cancelled) setLinesError(errorMessage(err, "无法加载全局日志"));
-        })
-        .finally(() => { if (!cancelled) setLoading(false); });
-    load();
-    if (!follow) return () => { cancelled = true; };
-    const timer = window.setInterval(load, 5000);
-    return () => { cancelled = true; window.clearInterval(timer); };
-  }, [follow]);
+  const { data, loading, error: linesError, reload } = usePageResource(loadGlobalLogs, follow ? 5000 : 0);
+  const lines = data?.lines ?? [];
 
   return (
     <div className="space-y-3">
@@ -348,7 +335,8 @@ function GlobalLogs() {
         <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} />
         自动刷新（5s）
       </label>
-      {loading ? (
+      {linesError && data ? <ErrorState error={linesError} onRetry={reload} compact /> : null}
+      {loading && !data ? (
         <div className="text-sm text-text-muted">加载中...</div>
       ) : lines.length === 0 ? (
         <div className="card p-4 text-center text-text-muted text-sm">

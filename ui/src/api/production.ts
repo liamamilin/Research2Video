@@ -20,6 +20,8 @@ export interface ProductionConfig {
   target_minutes: number;
   label: string;
   scripts: number;
+  render?: { production_recipe?: string; production_mode?: "standard" | "fast"; visual_style?: string; video_form?: string;
+    voice_id?: string; video_speed?: number; creative_intent?: Record<string, unknown>; packaging?: Record<string, unknown> };
 }
 
 export interface PendingItem {
@@ -32,8 +34,8 @@ export interface PendingItem {
   scripts: { id: string; status: string }[];
 }
 
-export const listProduction = (job?: string) =>
-  api<ProductionConfig[]>("/api/production", { query: job ? { job } : undefined });
+export const listProduction = (job?: string, signal?: AbortSignal) =>
+  api<ProductionConfig[]>("/api/production", { query: job ? { job } : undefined, signal });
 /** 整份报告的配置：这个 Job 最近的报告，每份写过没有 */
 export interface WholeReport {
   date: string;
@@ -44,7 +46,7 @@ export interface WholeReport {
 
 export const getPending = (key: string) =>
   api<{ report_date: string | null; report_path: string; items: PendingItem[]; reports?: WholeReport[] }>(`/api/production/${encodeURIComponent(key)}/pending`);
-export const addProduction = (body: { job: string; recipe: string; audience?: string; minutes?: number; reverify?: boolean; auto?: number; name?: string }) =>
+export const addProduction = (body: { job: string; recipe: string; audience?: string; minutes?: number; reverify?: boolean; auto?: number; name?: string; render?: ProductionConfig["render"] }) =>
   api<ProductionConfig>("/api/production", { method: "POST", body });
 export const removeProduction = (key: string) => api<{ ok: boolean }>(`/api/production/${encodeURIComponent(key)}`, { method: "DELETE" });
 export const writeFromProduction = (key: string, topicIds: string[]) =>

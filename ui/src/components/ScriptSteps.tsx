@@ -28,14 +28,14 @@ function rerunnable(step: ScriptStep, detail: VideoScriptDetail): { label: strin
     return { label: "重写", confirm: `用同一份研究报告重写一版？不再调研；会调用写稿模型，存成新版本，旧版本都保留。${approved}` };
   }
   // only a draft: the audit resumes as a draft, which would take an approved script's approval away
-  if (step.step === "audit" && detail.status === "DRAFT" && ["DONE", "INCOMPLETE"].includes(step.state) && detail.column?.writer !== "adapt") {
-    return { label: "重跑审计", confirm: "重跑事实和风格审计？不改稿子，会调用审校模型。" };
+  if (step.step === "audit" && detail.status === "DRAFT" && ["DONE", "INCOMPLETE", "SKIPPED"].includes(step.state) && detail.column?.writer !== "adapt") {
+    return { label: step.state === "SKIPPED" ? "发起审校" : "重跑审计", confirm: "发起事实、风格和理解检查？这会调用审校模型，并可能自动修改文稿。" };
   }
   return null;
 }
 
-export function ScriptSteps({ detail, canEdit, onChanged }: {
-  detail: VideoScriptDetail; canEdit: boolean; onChanged: (d: VideoScriptDetail) => void;
+export function ScriptSteps({ detail, canEdit, onChanged, showRewrite = true }: {
+  detail: VideoScriptDetail; canEdit: boolean; onChanged: (d: VideoScriptDetail) => void; showRewrite?: boolean;
 }) {
   const toast = useToast();
   const [busy, setBusy] = useState<StepName | null>(null);
@@ -62,7 +62,7 @@ export function ScriptSteps({ detail, canEdit, onChanged }: {
     <section className="card p-3 space-y-2" aria-label="生产步骤">
       <ol className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
         {steps.map((step, i) => {
-          const action = canEdit && !working ? rerunnable(step, detail) : null;
+          const action = canEdit && !working && (showRewrite || step.step !== "write") ? rerunnable(step, detail) : null;
           return (
             <li key={step.step} className="flex items-center gap-1.5" title={step.note || undefined}>
               <span className="text-text-muted">{i + 1}.</span>

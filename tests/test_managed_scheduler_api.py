@@ -303,3 +303,65 @@ def test_runs_created_before_the_migration_keep_their_plan_timezone(client, web_
     reopened = ScheduleStore(storage.state_dir)  # migration runs here
     runs = reopened.runs(plan_id)
     assert runs and runs[0]['timezone'] == 'Asia/Shanghai', "existing history lost its zone"
+
+
+def test_managed_list_never_waits_for_system_discovery(admin, monkeypatch):
+    from web.services import scheduler, schedule_overview
+    client, _, _, _ = admin
+    assert create(admin).status_code == 201
+    monkeypatch.setattr(scheduler, 'all_jobs', lambda: pytest.fail('managed read probed OS schedules'))
+    monkeypatch.setattr(schedule_overview, 'rows', lambda: pytest.fail('managed read loaded unrelated video history'))
+    response = client.get('/api/scheduler?scope=managed')
+    assert response.status_code == 200
+    assert len(response.json()['jobs']) == 1
+    assert response.json()['jobs'][0]['job_label'] == '新增 job'
+    assert response.json()['dispatcher']['online']
+    assert response.json()['removed_system_jobs'] == []
+
+
+def test_system_list_does_not_wait_for_managed_database(admin, monkeypatch):
+    from web.services import scheduler
+    client, _, _, _ = admin
+    monkeypatch.setattr(managed, 'store', lambda: pytest.fail('system read opened managed database'))
+    monkeypatch.setattr(scheduler, 'all_jobs', lambda: [])
+    response = client.get('/api/scheduler?scope=system')
+    assert response.status_code == 200
+    assert response.json()['dispatcher'] is None
+
+
+def test_existing_store_reads_do_not_request_a_writer_lock(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    storage = ScheduleStore(str(tmp_path))
+    storage.save('research/one', '0 8 * * *', now=1)
+    # A heartbeat/dispatcher writer must not block listing an initialized WAL DB.
+    with storage.connect(True) as writer, ThreadPoolExecutor(max_workers=1) as pool:
+        writer.execute("INSERT INTO scheduler_meta VALUES ('test', 'held')")
+        result = pool.submit(lambda: ScheduleStore(str(tmp_path)).list()).result(timeout=2)
+        assert result[0]['job_name'] == 'research/one'
+
+
+def test_latest_runs_keeps_same_slot_and_attempt_order_as_individual_reads(tmp_path, monkeypatch):
+    from contextlib import contextmanager
+    storage = ScheduleStore(str(tmp_path))
+    ids = []
+    for i in range(4):
+        plan = storage.save(f'research/job_{i}', '0 8 * * *', now=1)
+        ids.append(plan['id'])
+        storage.enqueue_due(plan['next_run_at'] + 1)
+    with storage.connect(True) as db:
+        for row in db.execute('SELECT id FROM schedule_runs').fetchall():
+            for attempt in (2, 1):
+                db.execute('INSERT INTO schedule_attempts(run_id,attempt,status) VALUES (?,?,?)', (row['id'], attempt, 'failed'))
+    expected = {key: storage.runs(key, 1)[0] for key in ids}
+    real_connect, calls = storage.connect, []
+
+    @contextmanager
+    def counted(*args, **kwargs):
+        calls.append(True)
+        with real_connect(*args, **kwargs) as db:
+            yield db
+
+    monkeypatch.setattr(storage, 'connect', counted)
+    assert storage.latest_runs(ids + ['missing', ids[0]]) == expected
+    assert len(calls) == 1
+    assert storage.latest_runs([]) == {}

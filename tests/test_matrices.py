@@ -151,6 +151,30 @@ MEDICAL = {"key": "medical", "name": "医疗矩阵", "domain": "医疗健康", "
            "jobs": ["monitoring/ai_flash_discovery"]}
 
 
+@pytest.mark.parametrize("speed", [1.25, 1.5])
+def test_api_matrix_speed_survives_rename_and_copy(client, matrix_env, speed):
+    _login(client)
+    body = {"name": "AI 矩阵", "domain": "AI", "keywords": [], "render": {"video_speed": speed}}
+    saved = client.put("/api/matrices/ai", json=body, headers=_csrf(client))
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["render"]["video_speed"] == speed
+    renamed = client.put("/api/matrices/ai", json={"name": "新名字"}, headers=_csrf(client))
+    assert renamed.status_code == 200 and renamed.json()["render"]["video_speed"] == speed
+    copied = client.post("/api/matrices/ai/copy", json=MEDICAL, headers=_csrf(client))
+    assert copied.status_code == 201, copied.text
+    assert copied.json()["render"]["video_speed"] == speed
+
+
+@pytest.mark.parametrize("speed", [True, False, 0, 1.2, 3, "fast"])
+def test_api_rejects_invalid_matrix_speed_without_changing_file(client, matrix_env, speed):
+    _login(client)
+    path = matrix_env / "config/matrices/ai.yaml"
+    before = path.read_bytes()
+    result = client.put("/api/matrices/ai", json={"name": "AI", "render": {"video_speed": speed}}, headers=_csrf(client))
+    assert result.status_code == 422
+    assert path.read_bytes() == before
+
+
 def test_api_lists_matrices_with_their_jobs_and_the_jobs_in_none(client, matrix_env):
     _login(client)
     body = client.get("/api/matrices").json()
@@ -176,7 +200,7 @@ def test_api_copying_a_matrix_makes_manual_jobs_with_their_own_topic_source(clie
     assert not sources["medical_flash_discovery"].error and not sources["flash"].error
     config = str(matrix_env / "config")
     prompt = _engine(config)._build_prompt(matrices.for_run(job, config))
-    assert "领域：医疗健康。关键词：新药审批, 医保政策。" in prompt and "AI" not in prompt
+    assert "医疗健康" in prompt and "关键词：新药审批, 医保政策" in prompt and "AI" not in prompt
     again = client.post("/api/matrices/medical/copy", json={**MEDICAL, "key": "finance", "domain": "金融",
                                                              "jobs": ["medical/flash_discovery"]}, headers=_csrf(client))
     assert again.status_code == 201  # a copy can be copied: it keeps its template

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from core import matrices
 from core.video import outputs, reports, store, topic_store
 from tests.test_production import prod_env  # noqa: F401
@@ -81,3 +83,35 @@ def test_config_counts_leave_out_failed_scripts_and_count_older_ones(prod_env):
         script = store.create_script("flash", {"id": "2026-10-19/F1", "title": "x"})
         store.update_script(script["id"], status=status)
     assert outputs.count_by_config(str(prod_env / "config"), str(prod_env / "jobs")) == {"flash": 1}
+
+
+@pytest.mark.parametrize("publication_version", [None, 1])
+def test_outputs_keep_old_videos_and_publications_separate_from_the_current_draft(video_env, publication_version):
+    script = store.create_script("flash", {"title": "选题"})
+    store.add_version(script["id"], title="原稿", sections=[], length_check={}, edit_type="GENERATED")
+    store.update_script(script["id"], status="APPROVED", approved_version=1)
+    render = store.create_render(script["id"], 1, title="原成片", source_text="x", source_sha256="0" * 64, request={})
+    store.update_render(render["id"], status="COMPLETED")
+    store.add_publication(script["id"], url="https://b23.tv/old", published_on="2026-10-20", version=publication_version)
+    assert _collect(video_env)["scripts"][0]["published"]
+    store.add_version(script["id"], title="新版草稿", sections=[], length_check={}, edit_type="EDITED")
+    store.update_script(script["id"], status="DRAFT")
+    row = _collect(video_env)["scripts"][0]
+    assert (row["title"], row["version"], row["render"], row["published"]) == ("新版草稿", 2, None, False)
+    assert row["has_previous_video"] and not row["has_video"]
+    assert row["credibility"]["tier"] == "unaudited"
+    store.update_script(script["id"], status="APPROVED", approved_version=2)
+    assert _collect(video_env)["scripts"][0]["render"] is None
+    assert not _collect(video_env)["scripts"][0]["published"]
+
+
+def test_a_failed_rerender_does_not_hide_a_completed_video_of_the_same_version(video_env):
+    script = store.create_script("flash", {"title": "选题"})
+    store.add_version(script["id"], title="已完成", sections=[], length_check={}, edit_type="GENERATED")
+    store.update_script(script["id"], status="APPROVED", approved_version=1)
+    done = store.create_render(script["id"], 1, title="成片", source_text="x", source_sha256="0" * 64, request={})
+    store.update_render(done["id"], status="COMPLETED")
+    failed = store.create_render(script["id"], 1, title="重制", source_text="x", source_sha256="0" * 64, request={})
+    store.update_render(failed["id"], status="FAILED")
+    row = _collect(video_env)["scripts"][0]
+    assert row["render"]["id"] == done["id"] and row["has_video"]

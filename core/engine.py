@@ -226,6 +226,15 @@ class ResearchEngine:
                 actual_path = self._save_output(cleaned, output_path)
                 report_path = self._output_reference(actual_path)
 
+                material = {}
+                try:
+                    from .report_material import save as save_material
+
+                    material = save_material(actual_path, cleaned,
+                                             [source_block, *getattr(agent, "materials", [])])
+                except OSError as exc:
+                    logger.warning("Original material snapshot skipped: %s", exc)
+
                 citation = self._check_citations(cleaned, agent)
                 # by file path, the name the matrix filter compares (a run may be started by a shorter name)
                 self._register_events(job.get("_file", job_name), report_path, cleaned)
@@ -234,7 +243,7 @@ class ResearchEngine:
 
                     append_record(report_path, job_name, usage=usage,
                                   duration_seconds=round(time.time() - start_time, 1),
-                                  extra={"citation_check": citation})
+                                  extra={"citation_check": citation, "material": material})
                 except Exception as exc:  # noqa: BLE001 - metadata is optional
                     logger.debug("report metadata skipped: %s", exc)
                 logger.info(
@@ -361,7 +370,7 @@ class ResearchEngine:
         failed = [f"- {spec}: {state}" for spec, state in stats.items() if not isinstance(state, int)]
         header = ("## Fetched sources\n\n" + "\n".join(
             f"- {spec}: {state if not isinstance(state, int) else f'{state} items'}" for spec, state in stats.items()))
-        note = ("\n\n以下来源本次没有抓到，报告不得写成覆盖了它们，并在末尾「来源清单」前注明：\n" + "\n".join(failed)) if failed else ""
+        note = ("\n\n本次未取得内容的来源：\n" + "\n".join(failed)) if failed else ""
         logger.info("Sources fetched: %s", stats)
         return f"{header}{note}\n\n{SearchClient.format_results(items)}", (items, stats)
 

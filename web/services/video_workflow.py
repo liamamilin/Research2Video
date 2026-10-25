@@ -14,6 +14,7 @@ pool must stay free for the job itself.
 
 from __future__ import annotations
 
+import copy
 import logging
 import os
 from dataclasses import is_dataclass, replace
@@ -22,7 +23,7 @@ import threading
 import time
 from typing import Optional
 
-from core import report_meta
+from core import report_material, report_meta
 from core.config import load_system_config
 from core.llm import LLMConfig
 from core.state import StateManager
@@ -67,7 +68,7 @@ def report_of(script: dict, report_path: str = "") -> str:
     item's part of it (core/video/excerpt.py). Raises OSError when the report or the item is not there."""
     from core.video import excerpt
 
-    text = _read_report(report_path or script["report_path"])
+    text = writer.report_body(_read_report(report_path or script["report_path"]))
     topic = script.get("topic") or {}
     if not topic.get("from_item"):
         return text
@@ -212,6 +213,11 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     _attach_report(script, report_path, column, started_by)
 
     if script["current_version"] and column.writer != "adapt":
+        version = store.get_version(script_id, script["current_version"])
+        optional = (version.get("meta", {}).get("checks") or {}).get("mode") == "on_request"
+        if optional and script.get("stage") != "事实审计":
+            store.update_script(script_id, status="DRAFT", stage=None, error=None)
+            return "DRAFT"
         # 2b. Resume: the draft was saved and the audits after it were cut off — only the audits are left.
         return _resume_audit(script_id, script, report, report_path, column)
     if script["current_version"]:
@@ -225,7 +231,7 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
 
 def _write(script_id: str, *, report: str, report_path: str, citation_check, column, topic: dict, started_by: str,
            llm_config: Optional[LLMConfig], failed_status: str = "FAILED", style=None) -> str:
-    """Write a new version from ``report`` (then audit it, for a one-call script). Returns DRAFT, or
+    """Write a new version directly from ``report``. Returns DRAFT, or
     ``failed_status`` when writing failed (a rewrite keeps the script a DRAFT: its earlier versions still stand)."""
     settings = get_settings()
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
@@ -259,9 +265,23 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         store.update_script(script_id, status="DRAFT", stage=None, error=None)
         return "DRAFT"
     try:
+        store.update_script(script_id, stage="写稿")
+        material_ref = (report_meta.get(report_path) or {}).get("material") or {}
+        full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
+        material = (report_material.read(material_ref, full_path, _read_report(report_path))
+                    if material_ref else "")
+        if topic.get("from_item") and material:
+            # A discovered topic is one item, not the entire feed. Keep the
+            # original blocks that contain its links, with its selected context.
+            from core.provenance import extract_urls, normalize_url
+
+            urls = {normalize_url(url) for url in extract_urls(report)}
+            parts = [part for part in material.split("\n\n---\n\n")
+                     if urls & {normalize_url(url) for url in extract_urls(part)}]
+            material = "\n\n---\n\n".join(parts)
         written = writer.write(
-            report=report,
-            citation_check=citation_check,
+            report=material or report,
+            citation_check=None if material else citation_check,
             topic=topic,
             column_style=column.script_style,
             target_minutes=column.target_minutes,
@@ -270,29 +290,25 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             paragraph_units=tuple(column.paragraph_units),
             topic_fields=column.writer_topic_fields(),
         )
+        written.meta["input_kind"] = "original_material" if material else "report"
+        if material:
+            written.meta["material"] = material_ref
     except writer.ScriptError as exc:
         store.update_script(script_id, status=failed_status, stage=None, error=f"写稿失败：{exc}")
         return failed_status
 
-    # The draft is shown at once with the rule checks; the audits then replace its checks when they are done.
     meta = {**written.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "cell": video_columns.provenance(settings.paths.config_dir, column.key)}
-    rule_issues = adapt_review.rules(written.sections, column=column, target_minutes=column.target_minutes)
-    version = store.add_version(
+    store.add_version(
         script_id,
         title=written.title,
         sections=written.sections,
         length_check=written.length_check,
         edit_type="GENERATED",
-        meta={**meta, "checks": _rules_only(rule_issues, None, written.sections),
-              "problems": list(written.meta.get("problems") or []) + ["事实审计和风格审计还在进行，完成后这里会更新。"]},
+        meta={**meta, "checks": adapt_review.unrequested()},
         created_by=started_by,
     )
-    store.update_script(script_id, status="DRAFT", error=None, stage="事实审计")
-    audit_meta = _audit_short(script_id, written, report, column, config, review_config, rule_issues)
-    store.update_version_audit(script_id, version, sections=written.sections, meta={**meta, **audit_meta},
-                               length_check=written.length_check)
-    store.update_script(script_id, stage=None)
+    store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"
 
 
@@ -319,12 +335,13 @@ def _resume_audit(script_id: str, script: dict, report: str, report_path: str, c
     version = store.get_version(script_id, script["current_version"])
     rule_issues = adapt_review.rules(version["sections"], column=column, target_minutes=column.target_minutes)
     store.update_script(script_id, status="DRAFT", error=None, stage="事实审计")
-    written = SimpleNamespace(sections=version["sections"], meta=version["meta"], length_check=version["length_check"])
+    written = SimpleNamespace(title=version["title"], sections=version["sections"], meta=version["meta"],
+                              length_check=version["length_check"])
     audit_meta = _audit_short(script_id, written, report, column, config, review_config, rule_issues)
     meta = {k: v for k, v in version["meta"].items() if k not in ("checks", "problems", "audit_usage")}
     store.update_version_audit(script_id, version["version"], sections=written.sections,
                                meta={**meta, "report_path": report_path, **audit_meta},
-                               length_check=written.length_check)
+                               length_check=written.length_check, title=written.title)
     store.update_script(script_id, stage=None)
     return "DRAFT"
 
@@ -348,92 +365,207 @@ def _audit_short(script_id: str, written, report: str, column, config, review_co
     try:
         checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues,
                                           column_style=column.script_style, audience=column.audience,
-                                          style_severity=(adapt_review.WARN if column.audit_style_severity == "warn"
-                                                          else adapt_review.MUST))
+                                          style_severity=adapt_review.WARN)
     except Exception as exc:  # noqa: BLE001 - an audit that crashes must not lose the draft
         logger.exception("fact audit of script %s failed", script_id)
         checks, note = _rules_only(rule_issues, None, written.sections), f"事实审计没有完成：{type(exc).__name__}: {exc}"
+    checks = _current_copy_checks(checks, written.sections, written.meta)
     problems = [p for p in (written.meta.get("problems") or []) if not p.startswith(STALE_AUDIT_NOTES)]
     problems += [note] if note else []
-    meta = {"checks": checks, "problems": problems, "audit_usage": dict(client.usage)}
-    return _revise_short(script_id, written, report, column, config, meta)
+    meta = {"checks": checks, "problems": problems, "audit_usage": dict(client.usage),
+            "audit_prompt_version": video_audit.PROMPT_VERSION}
+    # A failed fact audit provides no basis for model-driven repairs. Keep the
+    # draft and pending marks; resume the audit instead of making blind edits.
+    return _revise_short(script_id, written, report, column, config, meta) if checks.get("model_ran") else meta
 
 
 #: Notes a finished audit replaces: the one saying the audits were still running, and the ones saying one failed.
 STALE_AUDIT_NOTES = ("事实审计", "风格审计", "新观众审计")
-#: A script written in one call is rewritten at most this many times from its audits' findings.
-SHORT_REVISE_ROUNDS = 1
+#: Quality takes priority over the old single rewrite; still bound model calls when a draft cannot be repaired.
+SHORT_REVISE_ROUNDS = 3
 #: Rules whose finding a rewrite of a paragraph cannot fix (the length is the whole script's).
 UNREVISABLE_RULES = ("E4", "N3", "B1")
 
 
-def _revise_short(script_id: str, written, report: str, column, config, audit_meta: dict) -> dict:
-    """Rewrite the paragraphs the audits flagged (serious or must), once, then check the rewrite: the rule checks run
-    again and the fact audit reads the rewritten paragraphs. ``written.sections`` is replaced by the result.
+def _current_copy_checks(checks: dict, sections: list[dict], meta: dict) -> dict:
+    out = {**checks, "issues": adapt_review.current_issues(checks.get("issues", []), sections, meta)}
+    out["summary"] = adapt_review.summarize(out, len(sections))
+    return out
 
-    Without this the audits only describe the problems: a script they call repetitive or unintelligible would go
-    on to a render as it is. A rewrite that fails keeps the script and says so in ``problems``."""
+
+def _revise_short(script_id: str, written, report: str, column, config, audit_meta: dict, *,
+                  allow_editorial: bool = True) -> dict:
+    """Repair fact/source problems, then rerun the audits, up to the bounded quality budget.
+
+    Rewrites need explicit fact verdicts; an empty issue list cannot silently clear a review mark.
+    Concrete listening problems get bounded editorial passes, without becoming approval gates.
+    Failed calls preserve the draft and its unresolved findings."""
     from core.llm import LLMClient
     from core.video import audit as video_audit
+    from core.video import editorial as video_editorial
     from core.video.adapt.common import paragraphs as walk, pid
-    from core.video.adapt.pipeline import _mark_evidence, _resolved
+    from core.video.adapt.pipeline import _resolved
 
-    rounds = min(getattr(column, "revise_rounds", SHORT_REVISE_ROUNDS), SHORT_REVISE_ROUNDS)
+    rounds = min(5, max(getattr(column, "revise_rounds", 0), SHORT_REVISE_ROUNDS))
     checks = audit_meta["checks"]
-    sections = written.sections
-    open_issues = [i for i in checks["issues"] if i["rule"] not in UNREVISABLE_RULES]
-    todo = adapt_review.targets(sections, {**checks, "issues": open_issues, "newcomer": None})
-    if rounds < 1 or not todo:
-        return audit_meta
-    store.update_script(script_id, stage="按审计意见改写")
+    initial = list(checks["issues"])
     problems = list(audit_meta["problems"])
+    script = store.get_script(script_id) or {}
+    citation_check = (report_meta.get(script.get("report_path") or "") or {}).get("citation_check")
+    trusted = writer.trusted_urls(report, citation_check)
     client = LLMClient(config)
-    try:
-        revised, changed = video_audit.revise(client, sections, report, todo, column.script_style)
-    except Exception as exc:  # noqa: BLE001 - a failed rewrite keeps the script as audited
-        logger.exception("revising script %s failed", script_id)
-        return {**audit_meta, "problems": problems + [f"按审计意见改写没有成功：{type(exc).__name__}: {exc}"]}
-    if revised == sections:
-        return audit_meta
-    new_at = {id(p): (si, pi) for si, pi, p in walk(revised)}
-    old_at = {id(p): (si, pi) for si, pi, p in walk(sections)}
-    section_at = {id(s): si for si, s in enumerate(revised)}
-    rewritten = {new_at[id(p)] for p in changed}
-    rewritten_ids = {pid(si, pi) for si, pi in rewritten}
-
-    # The findings about paragraphs that stayed as they were are kept (at their new place); the rewritten ones are
-    # read again. Findings about the whole script or a whole section are redone by the rule checks below.
-    kept = []
-    for item in checks["issues"]:
-        if item["source"] != "model" or item["section"] is None or item["paragraph"] is None:
-            continue
-        para = sections[item["section"]]["paragraphs"][item["paragraph"]]
-        spot = new_at.get(id(para))
-        if spot is not None and spot not in rewritten:
-            kept.append({**item, "section": spot[0], "paragraph": spot[1]})
-    rule_issues = adapt_review.rules(revised, column=column, target_minutes=column.target_minutes)
-    fresh: list[dict] = []
-    if rewritten_ids and checks.get("model_ran"):
-        base = _llm_configs(None, column)[1] or config
-        auditor = LLMClient(replace(base, request_timeout=min(base.request_timeout, AUDIT_REQUEST_SECONDS),
-                                    timeout=min(base.timeout, AUDIT_TIMEOUT_SECONDS)) if is_dataclass(base) else base)
+    base = _llm_configs(None, column)[1] or config
+    auditor = LLMClient(replace(base, request_timeout=min(base.request_timeout, AUDIT_REQUEST_SECONDS),
+                                timeout=min(base.timeout, column.audit_timeout_seconds or AUDIT_TIMEOUT_SECONDS))
+                        if is_dataclass(base) else base)
+    completed = 0
+    repair_completed = 0
+    editorial_used = False
+    editorial_attempt = None
+    editorial_attempts = []
+    direction = written.meta.get("editorial_brief") or {}
+    candidate_repair_usage = []
+    editorial_limit = video_editorial.MAX_ROUNDS if allow_editorial else 0
+    for _ in range(rounds + editorial_limit + 1):
+        sections = written.sections
+        editorial = {}
+        open_issues = [i for i in checks["issues"]
+                       if (i["audit"] == "fact" or i.get("source") == "audience_copy")
+                       and i["rule"] not in UNREVISABLE_RULES]
+        todo = adapt_review.targets(sections, {**checks, "issues": open_issues, "newcomer": None})
+        for si, pi, para in walk(sections):
+            if para.get("evidence") == "NEEDS_REVIEW":
+                todo.setdefault(pid(si, pi), []).append("【待核实】" + (para.get("review_reason") or "对照报告补齐事实依据和适用条件"))
+        core_needed = bool(todo)
+        if len(editorial_attempts) < editorial_limit:
+            editorial = adapt_review.editorial_targets(sections, checks)
+            editorial_used = editorial_used or bool(editorial)
+            if editorial:
+                for key, notes in todo.items():
+                    editorial.setdefault(key, []).extend(notes)
+                editorial_attempt = {"applied": False, "before": copy.deepcopy(sections), "targets": editorial,
+                                     "before_title": written.title, "mode": "whole_script",
+                                     "prompt_version": video_editorial.PROMPT_VERSION}
+                editorial_attempts.append(editorial_attempt)
+        if not editorial and core_needed and repair_completed >= rounds:
+            break
+        if not todo and not editorial:
+            break
+        store.update_script(script_id, stage=f"{'主编打磨' if editorial else '按审计意见改写'}（第 {completed + 1} 轮）")
         try:
-            fresh = video_audit.fact_issues(auditor, revised, report, only=rewritten_ids)
-        except Exception as exc:  # noqa: BLE001
-            problems.append(f"改写后的事实审计没有完成：{type(exc).__name__}: {exc}；改写过的段落请对照来源核实")
-            for si, pi in rewritten:
-                revised[si]["paragraphs"][pi]["evidence"] = "NEEDS_REVIEW"
-    initial = [i for i in checks["issues"] if i["severity"] in (adapt_review.SERIOUS, adapt_review.MUST)]
-    merged = adapt_review.assemble(rule_issues, None, None, None, revised)
-    merged["issues"] = merged["issues"] + kept + fresh
-    merged["model_ran"] = checks.get("model_ran", False)
-    _mark_evidence(revised, fresh)
-    merged["summary"] = adapt_review.summarize(merged, len(revised))
-    merged.update({"rounds": 1, "deletions": [], "initial": _resolved(initial, merged["issues"])})
-    written.sections = revised
-    written.length_check = length.measure(revised, column.target_minutes, voice=column.voice_id or None)
-    return {**audit_meta, "checks": merged, "problems": problems,
-            "audit_usage": _sum_usage(audit_meta.get("audit_usage"), client.usage)}
+            if editorial:
+                source_sheet = written.meta.get("source_sheet")
+                proposal = video_editorial.rewrite(
+                    client, title=written.title, sections=sections,
+                    material=video_editorial.source_material(source_sheet) if source_sheet else writer.report_body(report),
+                    direction=direction, feedback=editorial,
+                    column_style=column.script_style, target_minutes=column.target_minutes,
+                    sheet=source_sheet, history=editorial_attempts[:-1],
+                )
+                revised_title = proposal["title"]
+                revised, _ = writer._finalize(writer._Script.model_validate(proposal), trusted,
+                                              column.target_minutes, column.voice_id or None)
+                writer._require_chinese(revised)
+                changed = [p for _, _, p in walk(revised)]
+                editorial_attempt.update(title=revised_title, sections=copy.deepcopy(revised),
+                                         editorial_brief=proposal["editorial_brief"])
+            else:
+                revised_title = written.title
+                revised, changed = video_audit.revise(client, sections, report, todo, column.script_style,
+                                                     trusted_sources=trusted)
+        except Exception as exc:  # noqa: BLE001 - retain the audited draft on a failed rewrite
+            logger.exception("revising script %s failed", script_id)
+            problems.append(f"按审计意见改写没有成功：{type(exc).__name__}: {exc}")
+            if editorial:
+                editorial_attempt["reason"] = problems[-1]
+            break
+        if revised == sections and revised_title == written.title:
+            break
+        changed_objects = {id(p) for p in changed}
+        rewritten_ids = {pid(si, pi) for si, pi, p in walk(revised) if id(p) in changed_objects}
+        store.update_script(script_id, stage="改写后重新审计")
+        rules = adapt_review.rules(revised, column=column, target_minutes=column.target_minutes)
+        previous_checks = checks
+        previous_problems = list(problems)
+        try:
+            checks, note = video_audit.audit(
+                auditor, revised, report, rule_issues=rules, column_style=column.script_style, audience=column.audience,
+                style_severity=adapt_review.WARN,
+                # Factual repairs must explicitly resolve the known doubt. A
+                # fresh editorial proposal may resolve listening and source
+                # problems together: audit its whole text, without inventing a doubt for every new
+                # paragraph merely because the narrative changed. Its own review
+                # flags and any findings still require explicit resolution.
+                verification_required=None if editorial else rewritten_ids,
+            )
+        except Exception as exc:  # noqa: BLE001 - never mistake an unexpected audit failure for approval
+            logger.exception("post-rewrite audit of script %s failed", script_id)
+            checks = _rules_only(rules, None, revised)
+            checks["audits_complete"] = False
+            video_audit.reconcile_evidence(revised, [], [], required=rewritten_ids)
+            note = f"事实审计没有完成：{type(exc).__name__}: {exc}"
+        problems = [p for p in problems if not p.startswith(STALE_AUDIT_NOTES)]
+        if note:
+            problems.append(note)
+        completed += 1
+        if not editorial:
+            repair_completed += 1
+        checks = _current_copy_checks(checks, revised, written.meta)
+        checks.update(rounds=completed, deletions=[], initial=_resolved(initial, checks["issues"]))
+        if editorial and not checks["summary"]["passed"] and checks.get("model_ran"):
+            # Keep a better story eligible for selection: repair its concrete
+            # source errors before comparing, without another editorial loop.
+            candidate = writer.WrittenScript(title=revised_title, sections=revised,
+                                             length_check=length.measure(revised, column.target_minutes),
+                                             meta=written.meta)
+            before_repair = copy.deepcopy(revised)
+            repair = _revise_short(script_id, candidate, report, column, config,
+                                   {"checks": checks, "problems": [], "audit_usage": {}},
+                                   allow_editorial=False)
+            candidate_repair_usage.append(repair.get("audit_usage"))
+            revised, checks = candidate.sections, repair["checks"]
+            completed += checks.get("rounds", 0)
+            editorial_attempt["source_repair"] = copy.deepcopy({"before": before_repair, **repair})
+            editorial_attempt["sections"] = copy.deepcopy(revised)
+            checks.update(rounds=completed, initial=_resolved(initial, checks["issues"]))
+        if editorial and not checks["summary"]["passed"]:
+            # A taste edit must not replace an already source-checked draft with
+            # newly misleading or unverified wording. Keep the attempt reviewable.
+            editorial_attempt.update(applied=False, sections=revised, checks=checks,
+                                     reason="编辑稿未通过事实复核，保留此前已核对的文稿", note=note)
+            checks = previous_checks
+            problems = previous_problems
+            if core_needed:
+                editorial_limit = 0
+                continue  # Repair the retained original using its completed audit.
+            break
+        if editorial:
+            editorial_attempt.update(checks=copy.deepcopy(checks))
+            try:
+                decision = video_editorial.compare(client, before_title=written.title, before=sections,
+                                                    after_title=revised_title, after=revised,
+                                                    column_style=column.script_style)
+                editorial_attempt["decision"] = decision
+            except Exception as exc:  # noqa: BLE001 - keep the checked original on an incomplete editorial comparison
+                editorial_attempt["reason"] = f"编辑比较没有完成：{type(exc).__name__}: {exc}"
+                checks, problems = previous_checks, previous_problems
+                break
+            if decision["choice"] != "B":
+                checks, problems = previous_checks, previous_problems
+                continue  # retain the better script; a rejected proposal can inform the next attempt
+            editorial_attempt["applied"] = True
+            direction = proposal["editorial_brief"]
+        written.title = revised_title
+        written.sections = revised
+        written.length_check = length.measure(revised, column.target_minutes, voice=column.voice_id or None)
+        if not checks.get("model_ran"):
+            break  # retry via the audit stage rather than rewriting against an incomplete audit
+    editorial_attempt = video_editorial.retained_attempt(editorial_attempts)
+    return {**audit_meta, "checks": {**checks, "editorial_attempted": editorial_used}, "problems": problems,
+            **({"editorial_attempt": editorial_attempt} if editorial_attempt else {}),
+            **({"editorial_attempts": editorial_attempts} if editorial_attempts else {}),
+            "audit_usage": _sum_usage(audit_meta.get("audit_usage"), client.usage, auditor.usage,
+                                      *candidate_repair_usage)}
 
 
 def _sum_usage(*usages: Optional[dict]) -> dict:
@@ -801,8 +933,16 @@ def rule_checks(version: dict, column) -> dict:
     """Checks for a version: the stored ones (older shapes converted), or the rule checks alone."""
     meta = version.get("meta") or {}
     if meta.get("checks"):
-        return adapt_review.normalize(meta["checks"], len(version["sections"]))
+        saved = adapt_review.normalize(meta["checks"], len(version["sections"]))
+        if saved.get("mode") == "on_request":
+            return saved
+        # Old model success cannot bypass a newly applicable local copy check.
+        # Overlay it for this read, preserving every stored audit and version.
+        checks = {**saved, "issues": adapt_review.current_issues(saved.get("issues", []), version["sections"], meta)}
+        checks["summary"] = adapt_review.summarize(checks, len(version["sections"]))
+        return checks
     issues = adapt_review.rules(version["sections"], column=column, target_minutes=column.target_minutes)
+    issues = adapt_review.current_issues(issues, version["sections"], meta)
     return _rules_only(issues, None, version["sections"])
 
 
@@ -827,6 +967,7 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
                     "text": str(p.get("text") or "").strip(),
                     "citations": [str(u) for u in p.get("citations") or []],
                     "evidence": p.get("evidence") or ("CITED" if p.get("citations") else "UNCITED"),
+                    **({"review_reason": str(p["review_reason"])} if p.get("review_reason") else {}),
                     "note": p.get("note"),
                     "facts": [str(f) for f in p.get("facts") or []],
                     "introduces": [str(t) for t in p.get("introduces") or []],
@@ -852,12 +993,13 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
                     para.pop(key)
 
     style = _style_of(base_meta, column) if sheet else None
-    issues = adapt_review.rules(clean, column=column, target_minutes=column.target_minutes,
-                                plan=plan, sheet=sheet, style=style)
-    meta: dict = {
-        "problems": writer.lint(clean),
-        "checks": _rules_only(issues, plan, clean, model_checks_stale=True),
-    }
+    if (base_meta.get("checks") or {}).get("mode") == "on_request":
+        meta = {"problems": [], "generation": "goal_first", "checks": adapt_review.unrequested()}
+    else:
+        issues = adapt_review.rules(clean, column=column, target_minutes=column.target_minutes,
+                                    plan=plan, sheet=sheet, style=style)
+        meta = {"problems": writer.lint(clean),
+                "checks": _rules_only(issues, plan, clean, model_checks_stale=True)}
     budgets = None
     if sheet:
         meta.update({k: base_meta.get(k) for k in ("writer", "style", "prompts", "fact_sheet_id", "plan",

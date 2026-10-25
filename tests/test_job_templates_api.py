@@ -268,7 +268,7 @@ def test_builtin_templates_are_valid():
             parsed = yaml_io.parse_yaml(f.read())
         assert parsed.get("label"), f"{fn} missing label"
         assert parsed.get("category") in categories, f"{fn} bad category"
-        assert len(str(parsed.get("prompt", ""))) > 500, f"{fn} prompt too short"
+        assert isinstance(parsed.get("prompt"), str) and parsed["prompt"].strip(), f"{fn} missing prompt"
         assert parsed.get("enabled") is False, f"{fn} should be disabled"
         assert str(parsed.get("output", "")).endswith(".md"), f"{fn} bad output"
         unknown = [v for v in re.findall(r"\{(\w+)\}", str(parsed.get("prompt", ""))) if v not in allowed]

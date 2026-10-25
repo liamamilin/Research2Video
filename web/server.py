@@ -6,6 +6,7 @@ import logging
 import os
 import json
 import threading
+import time
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -43,6 +44,7 @@ from web.routes.matrices import router as matrices_router
 from web.routes.sources import router as sources_router
 from web.routes.outputs import router as outputs_router
 from web.routes.production import router as production_router
+from web.routes.platforms import router as platforms_router
 from web.runner.registry import TaskRegistry
 from web.settings import get_settings
 from web.indexer import db as index_db
@@ -182,6 +184,30 @@ async def lifespan(app: FastAPI):
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):  # tests set this so no stray thread ticks against their data
         threading.Thread(target=autopilot_loop, name="video-autopilot", daemon=True).start()
 
+    def platform_loop() -> None:
+        from web.services import platform_manager
+
+        while not sweep_stop.wait(15):
+            try:
+                platform_manager.tick()
+            except Exception:  # don't expose provider responses or credential-bearing exceptions in logs
+                logger.warning("platform worker pass failed; will check again next pass")
+
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
+        threading.Thread(target=platform_loop, name="platform-worker", daemon=True).start()
+
+    def analytics_manual_loop() -> None:
+        from web.services import platform_analytics
+
+        while not sweep_stop.wait(15):
+            try:
+                platform_analytics.manual_tick()
+            except Exception:
+                logger.warning("video analytics manual pass failed; will check again next pass")
+
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
+        threading.Thread(target=analytics_manual_loop, name="analytics-manual", daemon=True).start()
+
     logger.info("Web UI started")
     app.state.instance_id = uuid.uuid4().hex
     yield
@@ -224,7 +250,7 @@ def create_app() -> FastAPI:
         try:
             path = request.url.path
             if (request.cookies.get("ai_research_access")
-                    and not path.startswith(("/assets", "/api/health"))
+                    and not path.startswith(("/assets", "/api/health", "/api/live"))
                     and path not in ("/favicon.ico", "/")):
                 from core import activity
 
@@ -243,7 +269,14 @@ def create_app() -> FastAPI:
         link from a shared report leaks the token to the destination.
         `frame-ancestors 'none'` stops the console being framed for clickjacking.
         """
+        started = time.perf_counter()
         response = await call_next(request)
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        response.headers["Server-Timing"] = f"app;dur={elapsed_ms:.1f}"
+        if elapsed_ms >= 1000 and request.url.path.startswith("/api/"):
+            route = request.scope.get("route")
+            logger.warning("Slow request: %s %s status=%s duration_ms=%.1f", request.method,
+                           getattr(route, "path", "/api/unknown"), response.status_code, elapsed_ms)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("Referrer-Policy", "no-referrer")
         response.headers.setdefault("X-Frame-Options", "DENY")
@@ -277,6 +310,13 @@ def create_app() -> FastAPI:
     app.add_middleware(RateLimitMiddleware)
 
     # ----- Unified error format -----
+
+    @app.exception_handler(Exception)
+    async def unexpected_error_handler(request: Request, exc: Exception):
+        error_id = uuid.uuid4().hex[:12]
+        logger.error("Request failed [%s]", error_id, exc_info=exc)
+        return JSONResponse(status_code=500, content=ApiError.make(
+            "internal_error", f"服务处理失败，请重试（错误编号：{error_id}）", {"error_id": error_id}))
 
     @app.exception_handler(StarletteHTTPException)
     async def http_exc_handler(request: Request, exc: StarletteHTTPException):
@@ -317,6 +357,12 @@ def create_app() -> FastAPI:
     app.include_router(sources_router)
     app.include_router(production_router)
     app.include_router(outputs_router)
+    app.include_router(platforms_router)
+
+    @app.get("/api/live")
+    async def live():
+        """Cheap gateway liveness; dependency diagnostics remain on /api/health."""
+        return {"status": "ok", "instance_id": getattr(app.state, "instance_id", None)}
 
     @app.get("/api/health")
     def health():
@@ -376,12 +422,18 @@ def create_app() -> FastAPI:
             after a rebuild with no error anywhere.
             """
 
+            async def check_config(self) -> None:
+                # The fixed build directory can disappear briefly while Vite
+                # replaces it. Missing assets should return 404, not prevent
+                # API startup or poison the mount until the next restart.
+                pass
+
             def file_response(self, *args, **kwargs):
                 resp = super().file_response(*args, **kwargs)
                 resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
                 return resp
 
-        app.mount("/assets", HashedAssets(directory=ui_dist / "assets"), name="assets")
+        app.mount("/assets", HashedAssets(directory=ui_dist / "assets", check_dir=False), name="assets")
 
         @app.get("/{full_path:path}")
         async def spa_fallback(full_path: str):
