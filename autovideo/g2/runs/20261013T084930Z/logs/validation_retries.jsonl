@@ -1,0 +1,3 @@
+{"stage": "storyboard", "attempt": 1, "error_code": "MODEL_INVALID_JSON", "error": "MODEL_INVALID_JSON: storyboard response was not valid JSON (finish_reason=length): Unterminated string starting at: line 1 column 3155 (char 3154)", "retry_limit": 3}
+{"stage": "storyboard", "attempt": 2, "error_code": "MODEL_INVALID_JSON", "error": "MODEL_INVALID_JSON: storyboard response was not valid JSON (finish_reason=length): Expecting value: line 1 column 1 (char 0)", "retry_limit": 3}
+{"stage": "storyboard", "attempt": 3, "error_code": "MODEL_SCHEMA_REJECTED", "error": "MODEL_SCHEMA_REJECTED: /scenes/1/beats/6/trigger/offset_ms: 1200 is greater than the maximum of 1000", "retry_limit": 3}

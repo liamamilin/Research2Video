@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/autovideo/video-ir-v0.2.schema.json",
+  "title": "AutoVideo Video IR 0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "video",
+    "source",
+    "style",
+    "assets",
+    "narration",
+    "scenes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.2"
+    },
+    "video": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "width",
+        "height",
+        "fps",
+        "duration_ms"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "width": {
+          "const": 1920
+        },
+        "height": {
+          "const": 1080
+        },
+        "fps": {
+          "const": 30
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 90000
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "language",
+        "text_sha256"
+      ],
+      "properties": {
+        "language": {
+          "const": "zh-CN"
+        },
+        "text_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "original_text": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preset"
+      ],
+      "properties": {
+        "preset": {
+          "const": "minimal_dark"
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "path",
+          "origin",
+          "sha256"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,63}$"
+          },
+          "type": {
+            "enum": [
+              "audio",
+              "image",
+              "video"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^assets/(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)*$"
+          },
+          "origin": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "narration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "audio_asset_id",
+        "segments",
+        "alignment"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audio_asset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "segments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "text",
+              "start_ms",
+              "end_ms"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "start_ms": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end_ms": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        },
+        "alignment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "method",
+            "granularity"
+          ],
+          "properties": {
+            "method": {
+              "enum": [
+                "provider",
+                "forced_aligner"
+              ]
+            },
+            "granularity": {
+              "enum": [
+                "phrase",
+                "word"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "start_ms",
+          "duration_ms",
+          "component",
+          "props",
+          "narration_segment_ids",
+          "purpose",
+          "visual_intent",
+          "beats"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "duration_ms": {
+            "type": "integer",
+            "minimum": 100
+          },
+          "component": {
+            "enum": [
+              "title_card",
+              "concept_reveal",
+              "flow_diagram",
+              "comparison",
+              "timeline",
+              "bar_chart"
+            ]
+          },
+          "props": {
+            "type": "object",
+            "description": "Discriminated at runtime by component schema; see schemas/components/"
+          },
+          "narration_segment_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "visual_intent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "viewer_understands",
+              "before",
+              "after"
+            ],
+            "properties": {
+              "viewer_understands": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 500
+              },
+              "before": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 500
+              },
+              "after": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 500
+              }
+            }
+          },
+          "beats": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 30,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "action",
+                "target_id",
+                "trigger"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                },
+                "action": {
+                  "enum": [
+                    "reveal",
+                    "highlight",
+                    "hide",
+                    "emphasize",
+                    "activate_path",
+                    "mark_disrupted",
+                    "emphasize_difference"
+                  ]
+                },
+                "target_id": {
+                  "type": "string",
+                  "pattern": "^(scene|title|subtitle|diff|node:[a-z][a-z0-9_]*|edge:[a-z][a-z0-9_]*|path:[a-z][a-z0-9_]*|line:[0-9]+|side:(left|right)|event:[a-z][a-z0-9_]*|bar:[0-9]+)$"
+                },
+                "trigger": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "segment_id",
+                    "boundary",
+                    "offset_ms"
+                  ],
+                  "properties": {
+                    "segment_id": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+                    },
+                    "boundary": {
+                      "enum": [
+                        "start",
+                        "end"
+                      ]
+                    },
+                    "offset_ms": {
+                      "type": "integer",
+                      "minimum": -1000,
+                      "maximum": 1000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "audio_mix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "narration_gain_db"
+      ],
+      "properties": {
+        "narration_gain_db": {
+          "type": "number",
+          "minimum": -12,
+          "maximum": 6
+        },
+        "music": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "asset_id",
+            "gain_db",
+            "ducking"
+          ],
+          "properties": {
+            "asset_id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,47}$"
+            },
+            "gain_db": {
+              "type": "number",
+              "minimum": -45,
+              "maximum": -10
+            },
+            "ducking": {
+              "type": "boolean"
+            }
+          }
+        },
+        "sfx": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "asset_id",
+              "beat_id",
+              "gain_db"
+            ],
+            "properties": {
+              "asset_id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "beat_id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "gain_db": {
+                "type": "number",
+                "minimum": -40,
+                "maximum": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

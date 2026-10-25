@@ -1,0 +1,610 @@
+{
+  "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+  "version": 3,
+  "title": "续航手机最抢眼，五件新品变化速览",
+  "sections": [
+    {
+      "title": "本期地图",
+      "paragraphs": [
+        {
+          "text": "这期看五件新品和行业变化。一款大电池手机，一款降噪耳机，以及音频公司 Bose 收购音频品牌 Skullcandy 的消息。还有一台可翻转笔记本，和一款宽幅折叠手机。",
+          "citations": [
+            "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html",
+            "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php",
+            "https://www.gsmarena.com/bose_acquires_skullcandy-news-75162.php",
+            "https://www.notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html",
+            "https://www.notebookcheck.net/Xiaomi-18-Fold-review-Big-display-big-performance-big-compromises.1428903.0.html"
+          ],
+          "evidence": "CITED",
+          "note": "原网页核验修订；旧报告、v1/v2 和原待核实记录保留",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "五件产品与报告一一对应：Motorola Edge 70 Max 为大电池手机、Oppo Enco X4 为旗舰降噪耳机、Bose 与 Skullcandy 为媒体报道的收购消息、Acer Swift Spin 14 AI 为可翻转笔记本、Xiaomi 18 Fold 为宽幅折叠双 OLED 屏手机；「收购的消息」是对报道本身的概括，正文 S4P1 明确说「正在收购」，未声称交易已完成。",
+            "sources": [
+              "https://gsmarena.com/bose_acquires_skullcandy-news-75162.php",
+              "https://gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php",
+              "https://notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html",
+              "https://notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html",
+              "https://notebookcheck.net/Xiaomi-18-Fold-review-Big-display-big-performance-big-compromises.1428903.0.html"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "大电池旗舰手机",
+      "paragraphs": [
+        {
+          "text": "Motorola Edge 70 Max 是一款围绕大电池设计、主打旗舰功能和续航的手机。Notebookcheck 的评测肯定了它的续航表现，也肯定了机身手感。价格较低同样是这篇评测给出的评价。",
+          "citations": [
+            "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「围绕大电池设计、主打旗舰功能和续航」「肯定续航」「肯定机身手感」「评测认为当前价格较低」均与 Notebookcheck 评测摘要一致，价格评价明确归属于评测；改写后已删除报告没有的「大电池没有让机身笨重」这一因果判断，保留了「肯定机身手感」的原始说法。",
+            "sources": [
+              "https://notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html"
+            ]
+          },
+          "revision": {
+            "before": "Motorola Edge 70 Max 是一款围绕大电池设计、主打旗舰功能和续航的手机。Notebookcheck 的评测肯定了它的续航表现，也认为大电池没有让机身显得笨重。价格较低同样是这篇评测给出的评价。",
+            "proposed": "Motorola Edge 70 Max 是一款围绕大电池设计、主打旗舰功能和续航的手机。Notebookcheck 的评测肯定了它的续航表现，也肯定了机身手感。价格较低同样是这篇评测给出的评价。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        },
+        {
+          "text": "Notebookcheck 也提醒，这款手机的存储不能扩展，更新支持也比较有限，而且相关信息还有冲突。续航和手感是看点，但这些取舍也要一起看。",
+          "citations": [
+            "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「存储不能扩展」「更新支持有限」「相关信息有冲突」三项均与报告表述一致；改写后恢复了报告已确认的「更新支持有限」，不再只留下不确定性，也未反向夸大。",
+            "sources": [
+              "https://notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html"
+            ]
+          },
+          "revision": {
+            "before": "Notebookcheck 也提醒，这款手机的存储不能扩展，更新支持还存在不确定性。续航和手感是看点，但这些取舍也要一起看。",
+            "proposed": "Notebookcheck 也提醒，这款手机的存储不能扩展，更新支持也比较有限，而且相关信息还有冲突。续航和手感是看点，但这些取舍也要一起看。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        }
+      ]
+    },
+    {
+      "title": "旗舰降噪耳机",
+      "paragraphs": [
+        {
+          "text": "Oppo Enco X4 是 Oppo 推出的旗舰降噪耳机，已在国际市场首发。GSMArena 的开箱上手介绍，它采用音频品牌 Dynaudio 的调音，包装里有耳机及 S、M、L 三种硅胶耳套。",
+          "citations": [
+            "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php"
+          ],
+          "evidence": "CITED",
+          "note": "原网页核验修订；旧报告、v1/v2 和原待核实记录保留",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "旗舰降噪耳机、刚国际首发、Dynaudio（音频品牌）调音、盒内 S/M/L 硅胶耳套，均与 GSMArena 开箱上手一致，规格与数量没有改动。",
+            "sources": [
+              "https://gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php"
+            ]
+          }
+        },
+        {
+          "text": "GSMArena 作者在几次飞行中试用后，认为佩戴舒适、降噪有效。这是飞行场景下的试用感受，不能直接当作不同耳机在统一条件下的量化对比。",
+          "citations": [
+            "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php"
+          ],
+          "evidence": "CITED",
+          "note": "原网页核验修订；旧报告、v1/v2 和原待核实记录保留",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「几次飞行中试用」「佩戴舒适、降噪有效」与报告一致，并保留了报告的关键限定：这是有限使用场景中的主观体验，不能当作统一条件下的量化对比，未升级为降噪排名。",
+            "sources": [
+              "https://gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "音频品牌并购",
+      "paragraphs": [
+        {
+          "text": "据媒体 GSMArena 报道，音频公司 Bose Corporation 正在收购生活方式音频品牌 Skullcandy。双方在联合新闻稿里说，未来产品会结合 Bose 的音频专长，以及 Skullcandy 的设计和社群连接。",
+          "citations": [
+            "https://www.gsmarena.com/bose_acquires_skullcandy-news-75162.php"
+          ],
+          "evidence": "CITED",
+          "note": "原网页核验修订；旧报告、v1/v2 和原待核实记录保留",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「正在收购」保留了进行中、未交割的状态，并明确引用 GSMArena 报道及双方联合新闻稿；未来产品结合 Bose 音频专长与 Skullcandy 设计、社群的表述与报告一致。",
+            "sources": [
+              "https://gsmarena.com/bose_acquires_skullcandy-news-75162.php"
+            ]
+          }
+        },
+        {
+          "text": "新闻稿称，Skullcandy 将作为独立品牌保留在 Bose 的高端消费音频产品线中，并继续以 Park City, Utah 为基地。这是双方的未来规划，不能据此认定新品已经推出或价格已经改变。",
+          "citations": [
+            "https://www.gsmarena.com/bose_acquires_skullcandy-news-75162.php"
+          ],
+          "evidence": "CITED",
+          "note": "原网页核验修订；旧报告、v1/v2 和原待核实记录保留",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "独立品牌保留在 Bose 高端消费音频产品线、继续以 Park City, Utah 为基地，均与报告一致；并保留了「未来规划、不能据此认定新品上市或价格变化」的限定。",
+            "sources": [
+              "https://gsmarena.com/bose_acquires_skullcandy-news-75162.php"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "可翻转笔记本",
+      "paragraphs": [
+        {
+          "text": "Acer Swift Spin 14 AI 是可翻转笔记本，采用高通 Snapdragon 的 Windows ARM 处理器方案。Notebookcheck 的评测对它的性能进步给出积极评价，尤其是针对这类芯片适配的软件。部分 Windows 软件的兼容性，以及价格，仍是需要考虑的取舍。",
+          "citations": [
+            "https://www.notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html"
+          ],
+          "evidence": "CITED",
+          "note": "原网页核验修订；旧报告、v1/v2 和原待核实记录保留",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "可翻转笔记本、高通 Snapdragon for Windows ARM 方案、评测肯定性能与效率进步、特别提及 ARM 原生应用表现、x64 软件可靠性/使用场景差异与价格取舍，均与 Notebookcheck 评测一致；未把个别应用表现泛化成「所有软件都更快」。",
+            "sources": [
+              "https://notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "宽幅折叠手机",
+      "paragraphs": [
+        {
+          "text": "Xiaomi 18 Fold 是 Xiaomi 推出的宽幅折叠手机，配两块 OLED 显示屏。Notebookcheck 的评测肯定了宽幅形态和明亮的屏幕，也指出系统更新安排不清晰、部分软件功能存在限制。选它不能只看屏幕和硬件，还要看这些限制是否影响自己的使用。",
+          "citations": [
+            "https://www.notebookcheck.net/Xiaomi-18-Fold-review-Big-display-big-performance-big-compromises.1428903.0.html"
+          ],
+          "evidence": "CITED",
+          "note": "原网页核验修订；旧报告、v1/v2 和原待核实记录保留",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "宽幅折叠、两块 OLED 屏、肯定宽幅形态与屏幕亮度、指出系统更新安排不清晰及部分软件功能限制，均与 Notebookcheck 评测一致；结尾是基于软件限制的使用提醒，不是跨条件性能排名。",
+            "sources": [
+              "https://notebookcheck.net/Xiaomi-18-Fold-review-Big-display-big-performance-big-compromises.1428903.0.html"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "接下来关注什么",
+      "paragraphs": [
+        {
+          "text": "五件变化里，Motorola Edge 70 Max 值得关注的点，是续航和机身体积的取舍。Notebookcheck 的评价提供了一个线索，具体选购仍应结合实际续航测试和当地售价。",
+          "citations": [
+            "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「续航与机身体积的取舍」对应报告编辑重点；改写后已删除报告没有的五件产品间优先级排序；「结合实际续航测试和当地售价」与报告的实际选购提示一致，价格评价仍归属 Notebookcheck。",
+            "sources": [
+              "https://notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html"
+            ]
+          },
+          "revision": {
+            "before": "五件变化里，最值得继续关注 Motorola Edge 70 Max，重点是续航和体积能否兼顾。Notebookcheck 的评价提供了一个线索，具体选购仍应结合实际续航测试和当地售价。",
+            "proposed": "五件变化里，Motorola Edge 70 Max 值得关注的点，是续航和机身体积的取舍。Notebookcheck 的评价提供了一个线索，具体选购仍应结合实际续航测试和当地售价。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 638,
+    "estimated_seconds": 144,
+    "segments": 24,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.802,
+    "status": "UNDER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "本期地图",
+        "spoken_length": 61,
+        "budget": 112
+      },
+      {
+        "title": "大电池旗舰手机",
+        "spoken_length": 116,
+        "budget": 112
+      },
+      {
+        "title": "旗舰降噪耳机",
+        "spoken_length": 113,
+        "budget": 112
+      },
+      {
+        "title": "音频品牌并购",
+        "spoken_length": 124,
+        "budget": 112
+      },
+      {
+        "title": "可翻转笔记本",
+        "spoken_length": 79,
+        "budget": 112
+      },
+      {
+        "title": "宽幅折叠手机",
+        "spoken_length": 88,
+        "budget": 112
+      },
+      {
+        "title": "接下来关注什么",
+        "spoken_length": 57,
+        "budget": 111
+      }
+    ]
+  },
+  "edit_type": "EDITED",
+  "meta": {
+    "report_path": "state/video_editorial_sources/e118dc7db5f34c3ba90af0285b4688f5/verified-v3.txt",
+    "editorial_review": {
+      "base_version": 2,
+      "original_report_path": "output/consumer/2026-10-22_consumer_daily.md",
+      "source_packet_sha256": "9a3e99a185d1942a3d4184fb60a2c361ee059cad00a7ad8e5554495a0a64d993",
+      "source_corrections": [
+        "耳机 canonical URL handson",
+        "并购状态：正在收购，未声称完成交割",
+        "摘要缺项不等于来源缺项",
+        "原文支持的真实产品取舍替代研究免责声明"
+      ],
+      "verified_source_urls": [
+        "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html",
+        "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php",
+        "https://www.gsmarena.com/bose_acquires_skullcandy-news-75162.php",
+        "https://www.notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html",
+        "https://www.notebookcheck.net/Xiaomi-18-Fold-review-Big-display-big-performance-big-compromises.1428903.0.html"
+      ]
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "E4",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": null,
+          "quote": "",
+          "problem": "全片长度不足；这一部分 61 个朗读单位，预算 112",
+          "why": "时长偏离参考预算",
+          "suggestion": "事实与理解优先；需要缩短时先删重复和旁支，保留成立条件",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "E4",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": null,
+          "quote": "",
+          "problem": "全片长度不足；这一部分 79 个朗读单位，预算 112",
+          "why": "时长偏离参考预算",
+          "suggestion": "事实与理解优先；需要缩短时先删重复和旁支，保留成立条件",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "E4",
+          "severity": "warn",
+          "section": 5,
+          "paragraph": null,
+          "quote": "",
+          "problem": "全片长度不足；这一部分 88 个朗读单位，预算 112",
+          "why": "时长偏离参考预算",
+          "suggestion": "事实与理解优先；需要缩短时先删重复和旁支，保留成立条件",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "E4",
+          "severity": "warn",
+          "section": 6,
+          "paragraph": null,
+          "quote": "",
+          "problem": "全片长度不足；这一部分 57 个朗读单位，预算 111",
+          "why": "时长偏离参考预算",
+          "suggestion": "事实与理解优先；需要缩短时先删重复和旁支，保留成立条件",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "包装里有耳机及 S、M、L 三种硅胶耳套",
+          "problem": "这句讲的是包装配件和耳套尺寸，和这件耳机「是什么、变了什么、有什么影响」的主线无关，属于规范里该留在原始资料的技术参数；同一段还塞进了首发市场、Dynaudio 调音等内容，注意力被分散。",
+          "why": "观众只听一遍，配件尺码对他们判断这款耳机没有帮助，却挤掉了对降噪和音质这些关键点的注意力。",
+          "suggestion": "删掉「包装里有耳机及 S、M、L 三种硅胶耳套」，篇幅留给 Dynaudio 调音对听感意味着什么，或者降噪表现。",
+          "source": "model"
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "价格较低同样是这篇评测给出的评价。",
+          "problem": "只说「价格较低」，没交代和什么比、是什么价位或币种，缺了比较基线，违反规范里数字和比较要说清口径、保留比较对象的要求。",
+          "why": "观众不知道「低」是相对同价位机型、上一代还是别的什么，没法据此判断值不值。",
+          "suggestion": "补出比较对象和价格口径，比如和哪类机型比、落在什么价位；如果对判断没帮助，就整句删掉。",
+          "source": "model"
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "Notebookcheck 的评测肯定了它的续航表现，也肯定了机身手感。",
+          "problem": "Notebookcheck 是观众完全陌生的机构名，稿子里从头到尾没交代它是什么，违反规范解释机构名的要求。",
+          "why": "观众不知道这条评价来自什么样的机构，也就没法判断该给多大权重。",
+          "suggestion": "首次出现时交代一句「评测机构 Notebookcheck 的评测」，后文再用简称。",
+          "source": "model"
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "而且相关信息还有冲突",
+          "problem": "没说清是哪方面的信息、和什么冲突，观众无法理解这条限制具体指什么，违反规范讲清关系和影响、有争议处直接说清楚的要求。",
+          "why": "这句留了个观众接不住的悬念，听完仍不知道更新支持到底存在什么问题。",
+          "suggestion": "说清是哪项信息（比如系统更新年限的说法）存在冲突、冲突在哪；如果对判断没影响，就删掉这半句。",
+          "source": "model"
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "Acer Swift Spin 14 AI 是可翻转笔记本，采用高通 Snapdragon 的 Windows ARM 处理器方案。",
+          "problem": "「Windows ARM」是没解释的缩写，观众不懂 ARM 是什么，而它正是后文「部分 Windows 软件的兼容性」问题的根源，违反规范解释专业名词和缩写的要求。",
+          "why": "不理解这种芯片方案和常见 Windows 笔记本的区别，就听不懂为什么软件兼容性会成为取舍。",
+          "suggestion": "用一句有依据的白话交代，比如「用的是 ARM 架构的芯片，和常见 Windows 笔记本的芯片架构不同」，再讲兼容性。",
+          "source": "model"
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 6,
+          "paragraph": 0,
+          "quote": "Notebookcheck 的评价提供了一个线索，具体选购仍应结合实际续航测试和当地售价。",
+          "problem": "结尾没讲清为什么这件值得继续关注、接下来看什么信号，而是用「结合实际续航测试和当地售价」这类空泛的选购建议收尾，违反规范对结尾的要求，也属于用泛泛提醒补结构。",
+          "why": "观众听完没有一个明确的后续落点，结尾没兑现开场说的「值得关注」。",
+          "suggestion": "换成具体的后续观察信号，比如这款手机的续航在更多独立测试中是否稳定、实际售价公布后的定位；删掉空泛的选购建议。",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "这五件新品和行业变化，跟我买手机、耳机或笔记本有什么关系？为什么值得现在听？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“价格较低”是跟什么比？同价位旗舰、前代还是别的手机？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "更新支持比较有限，具体是几年？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“相关信息还有冲突”指哪条信息冲突？会影响购买判断吗？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "Skullcandy 作为独立品牌保留在 Bose 的高端消费音频产品线中，这句话具体是什么意思？它还算独立运营吗？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "Windows ARM 处理器方案和普通 Windows 笔记本有什么不同？为什么软件要专门适配？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "部分 Windows 软件兼容性限制具体影响哪些常用软件？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "价格是偏高还是偏低，跟什么比？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 5,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "宽幅折叠是什么形态？和普通折叠屏手机比有什么不同？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 5,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "系统更新安排不清晰，是没公布几年吗？部分软件功能受限具体是哪些？怎么判断是否影响自己？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 6,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "前面只肯定机身手感，这里说“机身体积的取舍”，大电池到底让体积或重量牺牲了什么？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 6,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "结尾只回扣五件中的手机，其他四件没有收束，听起来像没讲完。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 22,
+        "rule_must": 0,
+        "questions": 11,
+        "lost": 1,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 12
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 10
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 1,
+      "deletions": [],
+      "initial": []
+    },
+    "problems": [],
+    "audit_usage": {
+      "requests": 7,
+      "prompt_tokens": 18187,
+      "completion_tokens": 31877,
+      "total_tokens": 50064
+    },
+    "audit_prompt_version": 9
+  },
+  "created_by": "用户授权·原网页核验修订",
+  "created_at": "2026-10-23T20:06:46+0800"
+}

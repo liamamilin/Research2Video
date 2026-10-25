@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "value",
+    "label"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 46
+    },
+    "value": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 12,
+      "pattern": "\\d"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 34
+    },
+    "note": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 46
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/autovideo/components/big_number.schema.json",
+  "title": "AutoVideo big_number props v0.2"
+}

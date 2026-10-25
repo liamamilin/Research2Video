@@ -1,0 +1,1024 @@
+{
+  "scenes": [
+    {
+      "id": "c1_s1",
+      "component": "title_card",
+      "props": {
+        "title": "预算横评，只缺两个数字",
+        "subtitle": "每个模型跑一次花多少钱、又花了多久"
+      },
+      "narration_segment_ids": [
+        "c1_n1"
+      ],
+      "headline": "预算横评，只缺两个数字",
+      "source_quotes": [
+        "你在给 crewAI 的 eval --models 做模型横评，为的是拿数字去申请预算，最想知道两件事：每个模型跑一次花多少钱、又花了多久。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n1",
+          "quote": "你在给 crewAI 的 eval --models 做模型横评"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c1_n1",
+          "quote": "最想知道两件事：每个模型跑一次花多少钱、又花了多久"
+        }
+      ]
+    },
+    {
+      "id": "c1_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "花费为什么归不到一次运行",
+        "lines": [
+          "归因断点：多步骤 crew、重试与子代理让花费散开",
+          "现有工具：大多只统计到单次 LLM 调用这一层"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n2"
+      ],
+      "headline": "花费为什么归不到一次运行",
+      "source_quotes": [
+        "而现实是，多步骤 crew、重试和子代理，让花费很难归因到某一次运行或某个客户，现有工具大多只停在单次 LLM 调用这一层。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n2",
+          "quote": "而现实是"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c1_n2",
+          "quote": "多步骤 crew、重试和子代理，让花费很难归因到某一次运行或某个客户"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c1_n2",
+          "quote": "现有工具大多只停在单次 LLM 调用这一层"
+        }
+      ]
+    },
+    {
+      "id": "c1_s3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "升级 1.15.27，报告自带",
+        "lines": [
+          "内置报告：每次运行的成本与耗时都有",
+          "省掉埋点：不用自己动手记录",
+          "升级很轻：重跑同一条命令就行"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n3",
+        "c1_n4"
+      ],
+      "headline": "升级 1.15.27，报告自带",
+      "source_quotes": [
+        "好消息是：从 crewAI 1.15.27 起，crewai eval --models 自带每次运行的成本与耗时报告，你不用自己埋点。",
+        "升级动作很轻，重跑同一条命令就行。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n3",
+          "quote": "好消息是：从 crewAI 1.15.27 起"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c1_n3",
+          "quote": "crewai eval --models 自带每次运行的成本与耗时报告"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c1_n3",
+          "quote": "你不用自己埋点"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c1_n4",
+          "quote": "升级动作很轻，重跑同一条命令就行"
+        }
+      ]
+    },
+    {
+      "id": "c1_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "口径没定义，先实跑再报数",
+        "lines": [
+          "输出格式：没有官方文档定义",
+          "time 口径：同样没有官方定义",
+          "确认方式：必须自己实跑确认"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n5"
+      ],
+      "headline": "口径没定义，先实跑再报数",
+      "source_quotes": [
+        "但先打个预防针：输出格式和 time 的口径都没有官方文档定义，必须自己实跑确认。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n5",
+          "quote": "但先打个预防针"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c1_n5",
+          "quote": "输出格式和 time 的口径"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c1_n5",
+          "quote": "都没有官方文档定义"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c1_n5",
+          "quote": "必须自己实跑确认"
+        }
+      ]
+    },
+    {
+      "id": "c2_s1",
+      "component": "title_card",
+      "props": {
+        "title": "1.15.27 发布说明：成本与时间跟踪",
+        "subtitle": "crewai eval --models 新增每次运行成本与时间跟踪，且不再重复打印进度行"
+      },
+      "narration_segment_ids": [
+        "c2_n1",
+        "c2_n2",
+        "c2_n3"
+      ],
+      "headline": "1.15.27 发布说明：成本与时间跟踪",
+      "source_quotes": [
+        "结论先落在证据上。",
+        "crewAI 1.15.27 的 release notes 里明确列了一条特性：在 crewai eval --models 中实现每次运行的成本与时间跟踪，同时不再重复打印进度行。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n1",
+          "quote": "结论先落在证据上"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c2_n2",
+          "quote": "release notes 里明确列了一条特性"
+        }
+      ]
+    },
+    {
+      "id": "c2_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "官方原话，版本自带",
+        "lines": [
+          "来源可信：官方发布说明原话，不是推测",
+          "版本自带：你要的那个数字无需另找"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n4",
+        "c2_n5"
+      ],
+      "headline": "官方原话，版本自带",
+      "source_quotes": [
+        "这是官方发布说明的原话，不是我们的推测。",
+        "也就是说，你要的那个数字，是版本自带的。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n4",
+          "quote": "这是官方发布说明的原话"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c2_n4",
+          "quote": "不是我们的推测"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c2_n5",
+          "quote": "你要的那个数字，是版本自带的"
+        }
+      ]
+    },
+    {
+      "id": "c2_s3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "提交 ed71a6f 改了什么",
+        "lines": [
+          "提交标题：per-run cost and time, and no repeated progress",
+          "改动位置：eval_crew.py 与它的测试文件",
+          "功能归属：CLI 实验性 eval 模块，不是公开稳定 API",
+          "测试同步：一起改了，不是顺手一提交"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n6",
+        "c2_n7",
+        "c2_n8"
+      ],
+      "headline": "提交 ed71a6f 改了什么",
+      "source_quotes": [
+        "对应提交是 ed71a6f，标题就写着 per-run cost and time, and no repeated progress。",
+        "改动落在 eval_crew.py 和它的测试文件里，意味着这个功能住在 CLI 的实验性 eval 模块，而不是公开稳定的 API。",
+        "测试也一起改了，说明这不是顺手一提交。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n6",
+          "quote": "对应提交是 ed71a6f"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c2_n6",
+          "quote": "标题就写着 per-run cost and time"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c2_n7",
+          "quote": "改动落在 eval_crew.py 和它的测试文件里"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c2_n7",
+          "quote": "而不是公开稳定的 API"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c2_n8",
+          "quote": "测试也一起改了"
+        }
+      ]
+    },
+    {
+      "id": "c2_s4",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "旧版：已打印行的列表",
+          "items": [
+            "轮询交替时同一行反复刷屏"
+          ]
+        },
+        "right": {
+          "label": "新版：集合 set",
+          "items": [
+            "每行只打印一次，噪音消失",
+            "以前被刷屏劝退的，可以重试"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c2_n9",
+        "c2_n10",
+        "c2_n11",
+        "c2_n12"
+      ],
+      "headline": "输出噪音：列表刷屏，集合只打一次",
+      "source_quotes": [
+        "顺带修掉的是输出噪音。",
+        "旧版进度显示用的是『已打印行的列表』，轮询交替时同一行会反复刷屏；",
+        "这次换成了集合 set，每行只打印一次，噪音就没了。",
+        "如果你以前被刷屏刷到放弃看输出，这次值得重试。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c2_n9",
+          "quote": "顺带修掉的是输出噪音"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c2_n11",
+          "quote": "这次换成了集合 set"
+        }
+      ]
+    },
+    {
+      "id": "c2_s5",
+      "component": "title_card",
+      "props": {
+        "title": "升级到 1.15.27 或以上即可",
+        "subtitle": "留神：噪音修复暂无独立第三方复现，仅由发布说明与提交 diff 支撑"
+      },
+      "narration_segment_ids": [
+        "c2_n13",
+        "c2_n14"
+      ],
+      "headline": "升级到 1.15.27 或以上即可",
+      "source_quotes": [
+        "所以升级动作很轻：把 crewai 升到 1.15.27 或以上，重跑同一条命令就能拿到数字。",
+        "唯一要留神的是，没有独立第三方报告复现过这个噪音修复，它目前只由发布说明和提交 diff 支撑。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n13",
+          "quote": "所以升级动作很轻"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c2_n14",
+          "quote": "唯一要留神的是"
+        }
+      ]
+    },
+    {
+      "id": "c3_s1",
+      "component": "title_card",
+      "props": {
+        "title": "先纠正第一个误解",
+        "subtitle": "这不是一个新命令"
+      },
+      "narration_segment_ids": [
+        "c3_n1"
+      ],
+      "headline": "先纠正第一个误解",
+      "source_quotes": [
+        "先纠正第一个误解：这不是一个新命令。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n1",
+          "quote": "先纠正第一个误解"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c3_n1",
+          "quote": "这不是一个新命令"
+        }
+      ]
+    },
+    {
+      "id": "c3_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "版本与报告",
+        "lines": [
+          "v1.15.24：加入 eval --models 与 llm_overlay",
+          "用途：换模型和角色",
+          "v1.15.27：补上成本与耗时报告",
+          "升级含义：不是装新东西，是打开报告"
+        ]
+      },
+      "narration_segment_ids": [
+        "c3_n2",
+        "c3_n3",
+        "c3_n4",
+        "c3_n5"
+      ],
+      "headline": "版本与报告",
+      "source_quotes": [
+        "crewAI 的文档把 v1.15.24（2026 年 10 月 7 日）标为加入了 crewai eval --models 和 llm_overlay，用来换模型和角色；1.15.27 只是给这个既有命令补上了成本与耗时报告。所以升级不是装新东西，是把报告打开。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n2",
+          "quote": "crewAI 的文档"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c3_n2",
+          "quote": "v1.15.24"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c3_n3",
+          "quote": "用来换模型和角色"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c3_n4",
+          "quote": "1.15.27 只是给这个既有命令补上了成本与耗时报告。"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c3_n5",
+          "quote": "所以升级不是装新东西，是把报告打开。"
+        }
+      ]
+    },
+    {
+      "id": "c3_s3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "数字藏在对比输出",
+        "lines": [
+          "第二个误解：数字不会单独打印一行",
+          "对比位置：_print_comparison 读取 comparison['models']",
+          "计算方式：按模型逐行，按维度算 grade",
+          "每行含义：一个模型的一次运行"
+        ]
+      },
+      "narration_segment_ids": [
+        "c3_n6",
+        "c3_n7",
+        "c3_n8",
+        "c3_n9"
+      ],
+      "headline": "数字藏在对比输出",
+      "source_quotes": [
+        "第二个误解：数字会单独打印一行。更可能的位置是对比输出——eval_crew.py 里的 _print_comparison 会从 comparison['models'] 按模型逐行读取数据，再按维度算 grade。对比表的每一行，就是一个模型的一次运行。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n6",
+          "quote": "第二个误解"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c3_n6",
+          "quote": "数字会单独打印一行"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c3_n7",
+          "quote": "更可能的位置是对比输出"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c3_n8",
+          "quote": "按模型逐行读取数据，再按维度算 grade。"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c3_n9",
+          "quote": "对比表的每一行，就是一个模型的一次运行。"
+        }
+      ]
+    },
+    {
+      "id": "c3_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "这是推断，不是事实",
+        "lines": [
+          "推断性质：LIKELY，置信度约 0.55",
+          "证据缺口：没有文档，也没有实跑确认",
+          "使用方式：当『先翻对比表』的预期，别当事实"
+        ]
+      },
+      "narration_segment_ids": [
+        "c3_n10",
+        "c3_n11"
+      ],
+      "headline": "这是推断，不是事实",
+      "source_quotes": [
+        "但这是 LIKELY 推断，置信度大约 0.55，既没有文档也没有实跑确认。把它当成『先翻对比表』的预期，别当成事实。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n10",
+          "quote": "但这是 LIKELY 推断"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c3_n10",
+          "quote": "置信度大约 0.55"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c3_n10",
+          "quote": "既没有文档也没有实跑确认"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c3_n11",
+          "quote": "把它当成『先翻对比表』的预期"
+        }
+      ]
+    },
+    {
+      "id": "c3_s5",
+      "component": "concept_reveal",
+      "props": {
+        "title": "先锁版本，再横评",
+        "lines": [
+          "版本变化：v1.15.28 增加中断位置报告",
+          "操作建议：横评前锁版本",
+          "文档缺口：官方 CLI 文档搜不到 eval --models 参考章节"
+        ]
+      },
+      "narration_segment_ids": [
+        "c3_n12",
+        "c3_n13"
+      ],
+      "headline": "先锁版本，再横评",
+      "source_quotes": [
+        "另外版本还在动：v1.15.28 又给 eval 加了『报告停止的模型在哪里中断』，所以横评前建议锁版本。官方 CLI 文档目前也搜不到 eval --models 的参考章节。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n12",
+          "quote": "另外版本还在动"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c3_n12",
+          "quote": "v1.15.28 又给 eval 加了『报告停止的模型在哪里中断』"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c3_n12",
+          "quote": "所以横评前建议锁版本"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c3_n13",
+          "quote": "官方 CLI 文档目前也搜不到 eval --models 的参考章节"
+        }
+      ]
+    },
+    {
+      "id": "c4_s1",
+      "component": "concept_reveal",
+      "props": {
+        "title": "时间口径未定",
+        "lines": [
+          "报告 time：未说明是整段运行的墙钟时长，还是调用耗时之和",
+          "延迟不能混用：用户等待与模型调用是两回事",
+          "SLA：口径没定，数字写不进去"
+        ]
+      },
+      "narration_segment_ids": [
+        "c4_n1",
+        "c4_n2",
+        "c4_n3",
+        "c4_n4"
+      ],
+      "headline": "时间口径未定",
+      "source_quotes": [
+        "口径一，时间。没有任何来源说明报告里的 time 是整段运行的墙钟时长，还是各次 LLM 调用耗时之和。",
+        "如果你要的是延迟，这两个数不能混用——一个是用户等待，一个只是模型调用。",
+        "口径没定，这个数字就没法写进 SLA。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n1",
+          "quote": "口径一，时间。"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c4_n2",
+          "quote": "没有任何来源说明报告里的 time 是整段运行的墙钟时长"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c4_n3",
+          "quote": "这两个数不能混用"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c4_n4",
+          "quote": "这个数字就没法写进 SLA"
+        }
+      ]
+    },
+    {
+      "id": "c4_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "计价：屏幕美元是估算",
+        "lines": [
+          "屏幕美元：大概率是估算，不是账单",
+          "CrewAI：UsageMetrics 采集 token 用量和请求指标",
+          "LiteLLM：completion 返回 response_cost",
+          "成本折算：用 cost_per_token 与 completion_cost 对照成本表"
+        ]
+      },
+      "narration_segment_ids": [
+        "c4_n5",
+        "c4_n6",
+        "c4_n7",
+        "c4_n8",
+        "c4_n9"
+      ],
+      "headline": "计价：屏幕美元是估算",
+      "source_quotes": [
+        "口径二，计价。屏幕上的美元大概率是估算，不是账单。",
+        "CrewAI 的 UsageMetrics 在执行期采集 token 用量和请求指标，LiteLLM 在 completion 上返回 response_cost，再用 cost_per_token 和 completion_cost 对照模型成本表折算成美元。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n5",
+          "quote": "口径二，计价。"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c4_n6",
+          "quote": "屏幕上的美元大概率是估算，不是账单。"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c4_n7",
+          "quote": "CrewAI 的 UsageMetrics 在执行期采集 token 用量和请求指标"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c4_n8",
+          "quote": "LiteLLM 在 completion 上返回 response_cost"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c4_n9",
+          "quote": "对照模型成本表折算成美元。"
+        }
+      ]
+    },
+    {
+      "id": "c4_s3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "链路与实付仍待确认",
+        "lines": [
+          "链路推断：没来源确认 eval 走哪条路径",
+          "实付偏离：缓存、批处理和协议价会拉开屏幕数字与实付",
+          "judge token：评分模型自身用量是否计入 sweep 未确认",
+          "运行环境：login、部署项目与托管延迟均未确认"
+        ]
+      },
+      "narration_segment_ids": [
+        "c4_n10",
+        "c4_n11",
+        "c4_n12",
+        "c4_n13"
+      ],
+      "headline": "链路与实付仍待确认",
+      "source_quotes": [
+        "但没有任何来源确认 eval 命令走的到底是哪一条路径，这一层是链路推断。",
+        "这意味着缓存、批处理和协议价都会让你实付偏离屏幕上的数字。",
+        "另外，评分用的 judge 模型自己花的 token 有没有算进这轮 sweep，目前也没有确认。",
+        "还有一点：这条命令是否要求 crewai login 和已部署项目也没确认——如果它跑在 AMP 托管环境，报出来的时间根本不是你本地的延迟。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n10",
+          "quote": "但没有任何来源确认"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c4_n10",
+          "quote": "这一层是链路推断"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c4_n11",
+          "quote": "缓存、批处理和协议价都会让你实付偏离屏幕上的数字"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c4_n12",
+          "quote": "评分用的 judge 模型自己花的 token 有没有算进这轮 sweep"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c4_n13",
+          "quote": "这条命令是否要求 crewai login 和已部署项目也没确认"
+        }
+      ]
+    },
+    {
+      "id": "c4_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "格式细节需实跑",
+        "lines": [
+          "输出格式：列名、小数位、货币符号都得实跑确认",
+          "CI 输出：有没有面向 CI 的 JSON 输出未知",
+          "provider 差异：上报 token 方式不同，表现可能不一致"
+        ]
+      },
+      "narration_segment_ids": [
+        "c4_n14",
+        "c4_n15",
+        "c4_n16"
+      ],
+      "headline": "格式细节需实跑",
+      "source_quotes": [
+        "口径三，格式。列名、小数位、货币符号，以及有没有面向 CI 的 JSON 输出，全都得实跑才知道；不同 provider 上报 token 的方式不同，表现也可能不一致。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n14",
+          "quote": "口径三，格式。"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c4_n15",
+          "quote": "列名、小数位、货币符号"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c4_n15",
+          "quote": "有没有面向 CI 的 JSON 输出"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c4_n16",
+          "quote": "不同 provider 上报 token 的方式不同，表现也可能不一致。"
+        }
+      ]
+    },
+    {
+      "id": "c4_s5",
+      "component": "concept_reveal",
+      "props": {
+        "title": "先跑一次最小 sweep",
+        "lines": [
+          "跑最小 sweep：用一次真实运行完成验证",
+          "存档输出：保留原始输出文件",
+          "写清口径：版本号、provider 和 latency 定义",
+          "判断可用：至少知道屏幕数字能否拿去开会"
+        ]
+      },
+      "narration_segment_ids": [
+        "c4_n17",
+        "c4_n18"
+      ],
+      "headline": "先跑一次最小 sweep",
+      "source_quotes": [
+        "落地动作就一个：跑一次最小 sweep，把输出原件存档，写清版本号、provider 和你的 latency 定义。",
+        "跑完这一次，你至少知道屏幕上那个数长什么样、能不能拿去开会。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n17",
+          "quote": "落地动作就一个：跑一次最小 sweep"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c4_n17",
+          "quote": "跑一次最小 sweep"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c4_n17",
+          "quote": "把输出原件存档"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c4_n17",
+          "quote": "写清版本号、provider 和你的 latency 定义"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c4_n18",
+          "quote": "至少知道屏幕上那个数长什么样、能不能拿去开会"
+        }
+      ]
+    },
+    {
+      "id": "c5_s1",
+      "component": "title_card",
+      "props": {
+        "title": "单步延迟：CLI 之外的三条路",
+        "subtitle": "不是每次运行一行汇总，而是单步毫秒级拆分"
+      },
+      "narration_segment_ids": [
+        "c5_n1"
+      ],
+      "headline": "单步延迟：CLI 之外的三条路",
+      "source_quotes": [
+        "如果你真正要的是单步延迟，而不是每次运行一行汇总，CLI 之外有三条路。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c5_n1",
+          "quote": "如果你真正要的是单步延迟"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c5_n1",
+          "quote": "而不是每次运行一行汇总"
+        }
+      ]
+    },
+    {
+      "id": "c5_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "CrewAI 内置 tracing：记录什么，代价是什么",
+        "lines": [
+          "记录内容：agent 决策、任务时间线、工具与 LLM 调用",
+          "查看方式：CrewAI AMP 平台，需 AMP 账号并 crewai login",
+          "代价：依赖 AMP 托管平台，离线用户要另外确认"
+        ]
+      },
+      "narration_segment_ids": [
+        "c5_n2",
+        "c5_n3",
+        "c5_n4"
+      ],
+      "headline": "CrewAI 内置 tracing：记录什么，代价是什么",
+      "source_quotes": [
+        "第一条是 CrewAI 内置 tracing：它记录 agent 决策、任务执行时间线、工具调用和 LLM 调用，在 CrewAI AMP 平台上查看，需要 AMP 账号并执行 crewai login。",
+        "代价是它依赖 AMP 托管平台，本地纯离线跑的用户得另外确认能不能用。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c5_n2",
+          "quote": "第一条是 CrewAI 内置 tracing"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c5_n2",
+          "quote": "agent 决策、任务执行时间线"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c5_n3",
+          "quote": "需要 AMP 账号并执行 crewai login"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c5_n4",
+          "quote": "代价是它依赖 AMP 托管平台"
+        }
+      ]
+    },
+    {
+      "id": "c5_s3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "DeepEval 集成：直接打印单步耗时",
+        "lines": [
+          "输出形式：trace 直接打印每个 span 的耗时",
+          "示例数值：agent 240ms、LLM 82ms、tool 44ms",
+          "证据等级：来自二手材料，未在自有环境复现"
+        ]
+      },
+      "narration_segment_ids": [
+        "c5_n5",
+        "c5_n6",
+        "c5_n7"
+      ],
+      "headline": "DeepEval 集成：直接打印单步耗时",
+      "source_quotes": [
+        "第二条是 DeepEval 的 CrewAI 集成：它的 trace 输出会直接打印每个 span 的耗时，比如 agent span 240ms、LLM span 82ms、tool span 44ms。",
+        "证据等级偏低的意思是，这个例子来自二手材料，没在我们自己的环境里复现过。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c5_n5",
+          "quote": "第二条是 DeepEval 的 CrewAI 集成"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c5_n5",
+          "quote": "它的 trace 输出会直接打印每个 span 的耗时"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c5_n6",
+          "quote": "LLM span 82ms、tool span 44ms"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c5_n7",
+          "quote": "证据等级偏低的意思是"
+        }
+      ]
+    },
+    {
+      "id": "c5_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "第三条路：Braintrust 经 OpenTelemetry 接入",
+        "lines": [
+          "用途：做追踪、评估和性能分析"
+        ]
+      },
+      "narration_segment_ids": [
+        "c5_n8"
+      ],
+      "headline": "第三条路：Braintrust 经 OpenTelemetry 接入",
+      "source_quotes": [
+        "第三条是 Braintrust，通过 OpenTelemetry 接入 CrewAI，做追踪、评估和性能分析。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c5_n8",
+          "quote": "第三条是 Braintrust"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c5_n8",
+          "quote": "做追踪、评估和性能分析"
+        }
+      ]
+    },
+    {
+      "id": "c5_s5",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "三条路径的现状",
+          "items": [
+            "都还没验证能否与 eval 对比输出联动"
+          ]
+        },
+        "right": {
+          "label": "选型先想清楚",
+          "items": [
+            "要每次运行一行汇总",
+            "还是单步毫秒级拆分"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c5_n9"
+      ],
+      "headline": "联动未验证，先定粒度：汇总还是拆分",
+      "source_quotes": [
+        "要注意的是，这三条路都还没验证能不能和 eval 的对比输出联动，选型前先想清楚你要的是每次运行一行汇总，还是单步毫秒级拆分。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c5_n9",
+          "quote": "要注意的是，这三条路都还没验证能不能和 eval 的对比输出联动"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c5_n9",
+          "quote": "选型前先想清楚你要的是每次运行一行汇总"
+        }
+      ]
+    },
+    {
+      "id": "c5_s6",
+      "component": "concept_reveal",
+      "props": {
+        "title": "本周就能做完的三件事",
+        "lines": [
+          "锁版本：升到 1.15.27 以上，1.15.28 又改了 eval",
+          "跑一次 sweep：如实记录对比表里的 cost 和 time",
+          "对齐口径：先确认 time 定义，别把运行耗时当延迟承诺"
+        ]
+      },
+      "narration_segment_ids": [
+        "c5_n10",
+        "c5_n11",
+        "c5_n12",
+        "c5_n13"
+      ],
+      "headline": "本周就能做完的三件事",
+      "source_quotes": [
+        "最后是本周就能做完的三件事。",
+        "一，升到 1.15.27 以上并锁住版本——1.15.28 刚又改了 eval，小版本之间输出可能变；",
+        "二，跑一次 sweep，如实记录对比表里的 cost 和 time；",
+        "三，先确认 time 的口径再拿去汇报，别把运行耗时当成延迟承诺给业务方。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c5_n10",
+          "quote": "最后是本周就能做完的三件事"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c5_n11",
+          "quote": "一，升到 1.15.27 以上并锁住版本"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c5_n12",
+          "quote": "二，跑一次 sweep"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c5_n13",
+          "quote": "三，先确认 time 的口径再拿去汇报"
+        }
+      ]
+    }
+  ]
+}

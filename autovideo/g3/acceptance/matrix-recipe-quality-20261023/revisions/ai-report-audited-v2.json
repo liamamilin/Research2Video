@@ -1,0 +1,2001 @@
+{
+  "script_id": "56aa643847d44a13b897972ff6e3d2cc",
+  "version": 2,
+  "title": "开源项目两种变化：视频能指着改，训练能沿用 PyTorch",
+  "sections": [
+    {
+      "title": "本期看点",
+      "paragraphs": [
+        {
+          "text": "这次看两个方向不同的开源项目。Huashu Motion 把编码 Agent 用到动画和合成里，修改意见可以指向具体画面；TorchNeuron 则让用 AWS Trainium 的开发者，能更贴近熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion",
+            "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "复核摘要显示 Huashu Motion 的 README 说明编码 Agent 用于动画、合成和指向帧的编辑并附演示；TorchNeuron 是 Trainium 的原生 PyTorch 后端，支持 eager、torch.compile。讲稿只作方向性概括，未声称实测效果，也未把后端兼容说成性能提升。改写已删去摘要不支持的「宣传片」用途。",
+            "sources": [
+              "https://github.com/alchaincyf/huashu-motion",
+              "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+            ]
+          },
+          "revision": {
+            "before": "这次看两个不同方向的开源项目。Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。TorchNeuron 则面向使用亚马逊自研芯片的开发者，让他们沿用熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+            "proposed": "这次看两个方向不同的开源项目。Huashu Motion 把编码 Agent 用到动画和合成里，修改意见可以指向具体画面；TorchNeuron 则让用 AWS Trainium 的开发者，能更贴近熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        }
+      ]
+    },
+    {
+      "title": "Huashu Motion：指着画面提修改",
+      "paragraphs": [
+        {
+          "text": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，让“改这里”落到具体帧上。仓库也放了演示；这是项目方的展示，实际效果还要看具体创作流程。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "复核摘要明确说明仓库支持指向具体帧进行编辑并附有演示；讲稿把演示归为项目方展示、说明实际效果取决于创作流程，归因与限定一致。原稿中「关联场景、元素和代码位置」这一摘要不支持的细节已删除。",
+            "sources": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ]
+          },
+          "revision": {
+            "before": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，意见还能关联场景、元素和代码位置。这样，“改这里”就有了具体落点。仓库也给出了演示，但这些演示属于项目展示，不能替代我们对不同题材的实测。",
+            "proposed": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，让“改这里”落到具体帧上。仓库也放了演示；这是项目方的展示，实际效果还要看具体创作流程。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        },
+        {
+          "text": "许可证也有明确说明：项目代码和文档采用 MIT 许可证。使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。不能把主仓库的 MIT 标签理解为所有附带内容都可以随意使用。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "复核摘要记载项目代码与文档采用 MIT，而捆绑的第三方部分和作者角色有另行说明的条件，讲稿的许可证表述及「不能把 MIT 标签理解为所有附带内容都可随意使用」的提醒与之一致。",
+            "sources": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "TorchNeuron：沿用熟悉的工作方式",
+      "paragraphs": [
+        {
+          "text": "PyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。",
+          "citations": [
+            "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "博客写明 TorchNeuron 是 Trainium 的原生 PyTorch 后端，10 月 20 日进入公开测试，支持 Trainium2/3、eager execution、torch.compile 与 NKI，采用 Apache-2.0；讲稿逐项对应，且把发布日期表述为计划进入测试，未超出原文范围。",
+            "sources": [
+              "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+            ]
+          }
+        },
+        {
+          "text": "不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。",
+          "citations": [
+            "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "讲稿保留了复核摘要中的限定：公开测试与特定芯片支持是本次发布范围，接口兼容不等于普遍的性能提升或零迁移成本，需回到具体模型和环境验证，与来源的成立条件一致。",
+            "sources": [
+              "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "各自解决哪一步",
+      "paragraphs": [
+        {
+          "text": "这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion",
+            "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "结尾建议依据任务与支持范围再评估实际效果，与两份来源的范围限定一致；「别只看项目热度」对应复核摘要中「历史热度只是当时快照」的限定，未把项目自述或热度当作质量证明。",
+            "sources": [
+              "https://github.com/alchaincyf/huashu-motion",
+              "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 479,
+    "estimated_seconds": 108,
+    "segments": 19,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.599,
+    "status": "UNDER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "本期看点",
+        "spoken_length": 80,
+        "budget": 196
+      },
+      {
+        "title": "Huashu Motion：指着画面提修改",
+        "spoken_length": 148,
+        "budget": 196
+      },
+      {
+        "title": "TorchNeuron：沿用熟悉的工作方式",
+        "spoken_length": 170,
+        "budget": 196
+      },
+      {
+        "title": "各自解决哪一步",
+        "spoken_length": 81,
+        "budget": 195
+      }
+    ]
+  },
+  "edit_type": "EDITED",
+  "meta": {
+    "acceptance_batch": "matrix-recipe-quality-20261023",
+    "report_path": "state/video_editorial_sources/matrix-recipe-quality-20261023/ai-report-checked-v2.md",
+    "source_review": {
+      "checked_source_urls": [
+        "https://github.com/alchaincyf/huashu-motion",
+        "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+      ],
+      "packet_sha256": "441e6d71f5f8883e9d0deada4ecd368158f5165b00cdabeb848250731f5cd8f1",
+      "original_script_id": "4c4e99e98a3449fb9c5f4978b712c534"
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "这次看两个方向不同的开源项目。Huashu Motion 把编码 Agent 用到动画和合成里，修改意见可以指向具体画面；TorchNeuron 则让用 AWS Trainium 的开发者，能更贴近熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+          "problem": "开场把两个方向完全不同的项目并列成“这次看两个”，没有给出为什么放在一期、先听哪个的理由，听起来像报目录。",
+          "why": "观众不知道主线，两个项目都听容易散，也不容易记住各自的价值。",
+          "suggestion": "先用 Huashu Motion 的“修改意见落到具体帧”作为开场钩子，讲完再用“另一个方向是训练后端”自然过渡；如果要并列，先给一句共同线索，比如都在缩短开发者从表达到结果的路径，再展开。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "PyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。",
+          "problem": "一句话里塞了发布计划、两代芯片、即时执行/编译/底层内核三种路径和许可证，最后才落到开发者价值；参数像清单，听众来不及判断哪个和迁移成本有关。",
+          "why": "注意力被分散，容易只记住一堆名词，抓不住“沿用已有代码”这个重点。",
+          "suggestion": "先讲定位和开发者价值，再只保留与迁移最相关的支持范围；即时执行、编译和底层内核三条路径选一条对“少改代码”最有解释力的讲，其余留简介。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。",
+          "problem": "“作者角色”搭配不自然，和“组件、素材”并列时听众会卡住，不清楚指角色形象还是作者身份。",
+          "why": "许可证这段信息密度高，一个费解词会让观众丢掉整句，甚至误解 MIT 的覆盖范围。",
+          "suggestion": "改成“第三方组件、素材或角色形象”，并直接说清以各自许可证为准。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。",
+          "problem": "前文已经说“值得看能否沿用已有代码”，这里又用三句否定性免责反复讲不一定更快、不一定无成本、要验证，没有新增具体信息。",
+          "why": "节奏被拖住，观众听到的是防杠声明，而不是更清楚的判断依据。",
+          "suggestion": "压缩成一句范围限制即可，例如“这次只到公开测试，覆盖 Trainium 二代和三代；是否更快、迁移多贵，要看具体模型”，删掉“不自动证明”“不能直接推出”这类重复推导。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。",
+          "problem": "结尾重复前文两个方向，再补一句“先看任务和支持范围，再看实际效果，别只看热度”的通用建议，没有留下这期最值得记住的具体判断。",
+          "why": "观众听完最后一段得不到新收获，像模板收尾。",
+          "suggestion": "删掉通用建议，把结尾收在两者各自最该验证的一件事上：视频工具看指向帧能否减少来回沟通，训练后端看现有 PyTorch 代码要改多少。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "编码 Agent 在“指向某一帧”之后具体做什么？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“即时执行、编译和底层内核开发路径”三个术语连在一起，没有说明各自解决什么，非编译器方向的开发者容易跟丢。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“公开测试和特定芯片支持，仍是这次发布的范围”没说明具体限制，听起来像泛泛的免责声明，容易一带而过。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 8,
+        "rule_must": 0,
+        "questions": 1,
+        "lost": 2,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 3
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 5
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 1,
+      "deletions": [],
+      "initial": [
+        {
+          "audit": "fact",
+          "rule": "D1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。",
+          "problem": "复核摘要只支持编码 Agent 用于动画、合成和指向帧编辑，没有提到“宣传片”这一具体用途；这里把用途扩成了宣传片。",
+          "why": "会让观众以为官方仓库明确覆盖宣传片制作，超出已核对资料的支持范围。",
+          "suggestion": "改为“动画和合成”或“动画制作”，删除“宣传片”。",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "fact",
+          "rule": "D1",
+          "severity": "serious",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "意见还能关联场景、元素和代码位置。",
+          "problem": "复核摘要只说明可以指向某一帧进行编辑，没有提到意见能关联场景、元素和代码位置。",
+          "why": "这是对官方仓库功能的具体扩展描述，可能让观众误以为已有这些关联能力。",
+          "suggestion": "收窄为“意见可以定位到具体帧”；如要保留场景、元素、代码位置，应补充仓库原文依据。",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "这次看两个不同方向的开源项目。Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。TorchNeuron 则面向使用亚马逊自研芯片的开发者，让他们沿用熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+          "problem": "开场先并列两个不相关项目，再用“一个改变视频怎么改，一个改变模型怎么跑”做抽象对照；Huashu 的编码 Agent 怎么参与动画、TorchNeuron 的 PyTorch 兼容到底改变什么，都没有具体落点。",
+          "why": "听众在头十秒不知道哪个最值得听，也看不出两件事为什么要放在一期，注意力被摊薄。",
+          "suggestion": "选一个主项目开场，直接讲最有价值的具体变化，例如“指着某一帧提意见，能落到场景、元素和代码位置”；另一个只在能形成对照时用一句带过。若坚持并列，先给一个共同问题，不要只报两个方向。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "仓库也给出了演示，但这些演示属于项目展示，不能替代我们对不同题材的实测。",
+          "problem": "刚讲完演示能定位修改，马上补一句“不能替代实测”，但没有指出演示缺什么；这像防御性免责声明，不是信息。",
+          "why": "节奏被打断，观众会怀疑演示到底值不值得看，却得不到具体判断。",
+          "suggestion": "删掉，或改成有信息量的限制，比如官方演示只覆盖了哪类素材、没展示哪类场景；没有具体疑点就不提。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "许可证也有明确说明：项目代码和文档采用 MIT 许可证。使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。不能把主仓库的 MIT 标签理解为所有附带内容都可以随意使用。",
+          "problem": "许可证说明连续用“还要分别遵守”“不能把……理解为……”做合规提醒，和前面的产品机制并列，显得比核心工作流还重；“作者角色”也不像自然口播词。",
+          "why": "听众会觉得在听法务说明，核心工作流反而没展开，对判断是否值得看帮助有限。",
+          "suggestion": "压成一句“代码和文档是 MIT，第三方组件和素材另有条件”，把“作者角色”换成具体类别或删掉；省下的篇幅用来讲定位修改的流程和限制。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "PyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。",
+          "problem": "一段里塞进发布日期、芯片代际、即时执行/编译/内核路径和许可证，但没有解释“原生 PyTorch 后端”对开发者的实际差别；最后“值得看的是能否沿用”又把看点设成问题，没有回答。",
+          "why": "听众只能记住一串名词，抓不住这次变化的机制和取舍，也不知道该关注什么。",
+          "suggestion": "先给一句定位：它让 Trainium 上的 PyTorch 工作流少改哪一层；再从三种路径里选一个对判断最有用的展开。许可证和芯片代际留到需要时或简介；把“值得看的是能否沿用”换成已确认的判断，或明确说现在还不能回答。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。",
+          "problem": "用“不过”转进一段泛泛风险提示；“仍是这次发布的范围”拗口，“特定芯片支持”也像在说一个功能而不是限制，后面“并不自动证明……也不能直接推出……”连续否定，像免责声明。",
+          "why": "刚对“沿用 PyTorch”产生兴趣就被压回去，却没得到具体限制，观众只听到“都要验证”。",
+          "suggestion": "把范围限制改成一句具体事实：“这次只到公开测试，覆盖 Trainium 2/3。”若资料支持，只保留一条具体的兼容或迁移限制；不要泛泛提醒所有模型都要实测。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。",
+          "problem": "结尾把开头的“两个方向”再说一遍，最后落到“先看任务和支持范围，再看实际效果，别只看项目热度”的通用建议；没有新增判断。",
+          "why": "听完没有留下具体收获，像把目录和注意事项又念了一遍。",
+          "suggestion": "用一句具体判断收尾：这期真正值得记住的是，Huashu Motion 把“改这里”变成了可定位的指令；TorchNeuron 还要看它把 PyTorch 兼容做到哪一层。删掉“别只看热度”这类通用劝告。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“编码 Agent”是指写代码的智能体吗？在动画和宣传片语境里，容易先被听成视频编码。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "意见关联到“代码位置”，是指能直接落到生成画面的代码吗？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "最后一句突然转到“我们的实测”，但前文没有交代测试范围和结果，听众会分神去想验证问题，削弱工具能力这条主线。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“作者角色”指什么？是作者身份、角色素材，还是第三方人物形象？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "许可证本身对开发者有用，但这段像法务备注，术语一含糊就会让节奏断掉。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“公开测试和特定芯片支持，仍是这次发布的范围”是在说发布只限于公开测试和特定芯片，还是说这两项属于发布内容？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "这句抽象，容易让人跟丢；后面“熟悉接口不等于更快、迁移无成本”才是重点。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        }
+      ],
+      "editorial_attempted": true
+    },
+    "problems": [],
+    "audit_usage": {
+      "requests": 13,
+      "prompt_tokens": 26022,
+      "completion_tokens": 85477,
+      "total_tokens": 111499
+    },
+    "audit_prompt_version": 12,
+    "editorial_attempt": {
+      "applied": false,
+      "before": [
+        {
+          "title": "本期看点",
+          "paragraphs": [
+            {
+              "text": "这次看两个方向不同的开源项目。Huashu Motion 把编码 Agent 用到动画和合成里，修改意见可以指向具体画面；TorchNeuron 则让用 AWS Trainium 的开发者，能更贴近熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion",
+                "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+              ],
+              "evidence": "CITED",
+              "note": "已按审计意见改写",
+              "fact_verification": {
+                "status": "verified",
+                "reason": "复核摘要显示 Huashu Motion 的 README 说明编码 Agent 用于动画、合成和指向帧的编辑并附演示；TorchNeuron 是 Trainium 的原生 PyTorch 后端，支持 eager、torch.compile。讲稿只作方向性概括，未声称实测效果，也未把后端兼容说成性能提升。改写已删去摘要不支持的「宣传片」用途。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion",
+                  "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+                ]
+              },
+              "revision": {
+                "before": "这次看两个不同方向的开源项目。Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。TorchNeuron 则面向使用亚马逊自研芯片的开发者，让他们沿用熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+                "proposed": "这次看两个方向不同的开源项目。Huashu Motion 把编码 Agent 用到动画和合成里，修改意见可以指向具体画面；TorchNeuron 则让用 AWS Trainium 的开发者，能更贴近熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+                "accepted": true,
+                "lost_conditions": []
+              }
+            }
+          ]
+        },
+        {
+          "title": "Huashu Motion：指着画面提修改",
+          "paragraphs": [
+            {
+              "text": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，让“改这里”落到具体帧上。仓库也放了演示；这是项目方的展示，实际效果还要看具体创作流程。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": "已按审计意见改写",
+              "fact_verification": {
+                "status": "verified",
+                "reason": "复核摘要明确说明仓库支持指向具体帧进行编辑并附有演示；讲稿把演示归为项目方展示、说明实际效果取决于创作流程，归因与限定一致。原稿中「关联场景、元素和代码位置」这一摘要不支持的细节已删除。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              },
+              "revision": {
+                "before": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，意见还能关联场景、元素和代码位置。这样，“改这里”就有了具体落点。仓库也给出了演示，但这些演示属于项目展示，不能替代我们对不同题材的实测。",
+                "proposed": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，让“改这里”落到具体帧上。仓库也放了演示；这是项目方的展示，实际效果还要看具体创作流程。",
+                "accepted": true,
+                "lost_conditions": []
+              }
+            },
+            {
+              "text": "许可证也有明确说明：项目代码和文档采用 MIT 许可证。使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。不能把主仓库的 MIT 标签理解为所有附带内容都可以随意使用。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "复核摘要记载项目代码与文档采用 MIT，而捆绑的第三方部分和作者角色有另行说明的条件，讲稿的许可证表述及「不能把 MIT 标签理解为所有附带内容都可随意使用」的提醒与之一致。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "TorchNeuron：沿用熟悉的工作方式",
+          "paragraphs": [
+            {
+              "text": "PyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。",
+              "citations": [
+                "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "博客写明 TorchNeuron 是 Trainium 的原生 PyTorch 后端，10 月 20 日进入公开测试，支持 Trainium2/3、eager execution、torch.compile 与 NKI，采用 Apache-2.0；讲稿逐项对应，且把发布日期表述为计划进入测试，未超出原文范围。",
+                "sources": [
+                  "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+                ]
+              }
+            },
+            {
+              "text": "不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。",
+              "citations": [
+                "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "讲稿保留了复核摘要中的限定：公开测试与特定芯片支持是本次发布范围，接口兼容不等于普遍的性能提升或零迁移成本，需回到具体模型和环境验证，与来源的成立条件一致。",
+                "sources": [
+                  "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "各自解决哪一步",
+          "paragraphs": [
+            {
+              "text": "这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion",
+                "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "结尾建议依据任务与支持范围再评估实际效果，与两份来源的范围限定一致；「别只看项目热度」对应复核摘要中「历史热度只是当时快照」的限定，未把项目自述或热度当作质量证明。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion",
+                  "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "targets": {
+        "S1P1": [
+          "【编辑建议，按实际效果取舍】开场把两个方向完全不同的项目并列成“这次看两个”，没有给出为什么放在一期、先听哪个的理由，听起来像报目录。；建议：先用 Huashu Motion 的“修改意见落到具体帧”作为开场钩子，讲完再用“另一个方向是训练后端”自然过渡；如果要并列，先给一句共同线索，比如都在缩短开发者从表达到结果的路径，再展开。"
+        ],
+        "S3P1": [
+          "【编辑建议，按实际效果取舍】一句话里塞了发布计划、两代芯片、即时执行/编译/底层内核三种路径和许可证，最后才落到开发者价值；参数像清单，听众来不及判断哪个和迁移成本有关。；建议：先讲定位和开发者价值，再只保留与迁移最相关的支持范围；即时执行、编译和底层内核三条路径选一条对“少改代码”最有解释力的讲，其余留简介。",
+          "【编辑建议，按实际效果取舍】“即时执行、编译和底层内核开发路径”三个术语连在一起，没有说明各自解决什么，非编译器方向的开发者容易跟丢。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S2P2": [
+          "【编辑建议，按实际效果取舍】“作者角色”搭配不自然，和“组件、素材”并列时听众会卡住，不清楚指角色形象还是作者身份。；建议：改成“第三方组件、素材或角色形象”，并直接说清以各自许可证为准。"
+        ],
+        "S3P2": [
+          "【编辑建议，按实际效果取舍】前文已经说“值得看能否沿用已有代码”，这里又用三句否定性免责反复讲不一定更快、不一定无成本、要验证，没有新增具体信息。；建议：压缩成一句范围限制即可，例如“这次只到公开测试，覆盖 Trainium 二代和三代；是否更快、迁移多贵，要看具体模型”，删掉“不自动证明”“不能直接推出”这类重复推导。",
+          "【编辑建议，按实际效果取舍】“公开测试和特定芯片支持，仍是这次发布的范围”没说明具体限制，听起来像泛泛的免责声明，容易一带而过。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S4P1": [
+          "【编辑建议，按实际效果取舍】结尾重复前文两个方向，再补一句“先看任务和支持范围，再看实际效果，别只看热度”的通用建议，没有留下这期最值得记住的具体判断。；建议：删掉通用建议，把结尾收在两者各自最该验证的一件事上：视频工具看指向帧能否减少来回沟通，训练后端看现有 PyTorch 代码要改多少。"
+        ]
+      },
+      "before_title": "开源项目两种变化：视频能指着改，训练能沿用 PyTorch",
+      "mode": "whole_script",
+      "prompt_version": 5,
+      "title": "指向某一帧再提修改：Huashu Motion 的动画编辑入口",
+      "sections": [
+        {
+          "title": "先说这一帧",
+          "paragraphs": [
+            {
+              "text": "给动画提修改，常常得说清“是哪一帧”。Huashu Motion 的官方仓库展示了一种更直接的方式：指向某一帧，再说要改什么。这里的重点不是又一个视频生成器，而是它把修改意见放到了画面里的具体位置上。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "按仓库的说明，Huashu Motion 用编码 Agent 来做动画和合成，指向某一帧编辑是它提供的一种交互，仓库里也附了演示链接。也就是说，观众看到的不是一个孤立的“点一下”功能，而是这套动画、合成工作流里的修改入口。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "意见锚在画面上",
+          "paragraphs": [
+            {
+              "text": "这个交互改变的地方很具体：修改意见不再只靠一段文字去描述，而是先落到某一帧，再说这一帧要改什么。对动画和合成来说，帧就是讨论修改时最自然的坐标之一；目标画面被指出来，双方至少少了一层“你说的是哪个时刻”的歧义。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "所以它值得注意的，不是凭空多了一个按钮，而是把“改哪里”和“改成什么”拆成了两步：先在画面上定位，再用语言说修改。这个顺序如果稳定，修改目标会更明确；但它到底能不能稳定，不能靠一段演示下结论。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "MIT 不是全部",
+          "paragraphs": [
+            {
+              "text": "讲到这里，落地前还有一个开发者会实际碰到的边界：许可证。Huashu Motion 的代码和文档采用 MIT，但仓库里捆绑的第三方组件、素材，以及作者的角色形象，另有各自写明的条件。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "这意味着不能把“主仓库是 MIT”直接理解成“仓库里所有内容都能随意使用”。要复用什么，需要对着具体组件、素材和角色形象看它自己的条件。这个边界不影响理解交互，但会影响能不能直接拿来做项目。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "演示之外看什么",
+          "paragraphs": [
+            {
+              "text": "最后要守住效果边界。官方仓库附的演示属于项目方展示，不是我们的实测；它能说明项目想让你看到什么，不能证明不同题材、不同流程里都能顺利落在那一帧。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "实际效果要看具体创作流程。最值得验证的问题也很集中：这个交互能不能把意见准确落到那一帧，减少来回确认。要是做不到，指向帧就只是一个好看的动作；要是能做到，它改变的才是提修改的方式。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "所以，Huashu Motion 这次最值得记的，不是某个夸张的效果数字，而是把修改意见锚到具体帧这个入口。演示可以先看，结论要留到真实流程里。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "editorial_brief": {
+        "considered": [
+          "双项目并列讲“两种变化”：能覆盖两个名字，但 Huashu Motion 和 TorchNeuron 没有共同任务，开场只能报目录，3 分钟内每个都只能点到为止，放弃。",
+          "以 TorchNeuron 为主：对用 Trainium 的开发者有实际价值，但核心是原生后端和公测范围，eager、torch.compile、NKI 这些词需要逐个解释，面向泛开发者偏窄，适合另做一期。",
+          "把两者用“缩短从表达到结果的路径”串起来：听起来有共同线索，但实际仍是两个独立故事，容易变成抽象概括加两个例子，主线不具体，放弃。",
+          "只讲 Huashu Motion 的“指向帧修改”：一个交互就能让观众立刻理解变化，且能用官方演示、项目方展示的边界和 MIT 附带条件撑起具体判断，选这个。"
+        ],
+        "angle": "这期只讲 Huashu Motion 的一个具体变化：动画和合成的修改多了一个画面上的入口——指向某一帧说“改这里”，把意见锚到具体帧。",
+        "viewer_value": "开发者能马上看懂这个交互改变了什么，也不会把项目方演示当成实测效果，或用主仓库的 MIT 许可证覆盖所有附带内容。",
+        "throughline": "从一个具体的修改场景切入：给动画或合成指向某一帧提意见；再交代项目定位——编码 Agent 用于动画和合成；然后说明这个交互为什么有价值；接着补上代码 MIT 但第三方组件、素材和作者角色形象另有条件这条使用边界；最后回到演示只是项目方展示，真正要看它能否在具体流程里减少来回确认。",
+        "keep": [
+          "“指向某一帧提修改”这一核心交互，用来让观众立刻理解变化。",
+          "“编码 Agent 用于动画和合成”的项目定位，避免把它误讲成单纯视频生成器。",
+          "官方仓库附有演示，但演示属于项目方展示、不是我们实测，用来守住效果边界。",
+          "代码和文档 MIT，第三方组件、素材、作者角色形象另有条件，作为开发者使用前的实际提醒。",
+          "结尾落在“能否准确落到那一帧、减少来回沟通”，不扩展成通用建议。"
+        ],
+        "leave_out": [
+          "TorchNeuron 的整套材料：原生 PyTorch 后端、10 月 20 日公测、Trainium2/3、eager、torch.compile、NKI、Apache-2.0；与 Huashu Motion 没有共同任务，并列会回到报目录，单独讲又需要大量术语解释，留作另一期。",
+          "历史热度：只是当时快照，不能说明质量，也会把结尾引向“别只看热度”的通用建议。",
+          "第三方组件、素材和作者角色的具体许可证条款：材料只支持“另有条件”，逐条展开会变成法律清单，偏离交互主线。",
+          "指向帧之后具体如何定位场景、元素或代码位置：复核摘要不支持，不能补机制。",
+          "旧稿“两个方向完全不同的开源项目”结构：没有共同线索，开场像目录，放弃。"
+        ],
+        "facts": [
+          "F1",
+          "F2",
+          "F3"
+        ],
+        "openings": [
+          "给动画提修改，常常得说清“是哪一帧”。Huashu Motion 的官方仓库展示了一种更直接的方式：指向某一帧，再说要改什么。理由：从一个具体动作进入，观众立刻知道这期讲什么。",
+          "如果一个视频工具能让你指着画面说“改这里”，它改变的不只是交互，还有修改意见的落点。理由：更直接地点出价值，但比第一版抽象。",
+          "这次不看又一个视频生成模型，而看一个更小的变化：修改意见可以钉在某一帧上。理由：有反差，但“不看”开头略绕，且容易把重点引到“不是生成模型”。"
+        ],
+        "opening": "给动画提修改，常常得说清“是哪一帧”。Huashu Motion 的官方仓库展示了一种更直接的方式：指向某一帧，再说要改什么。",
+        "opening_facts": [
+          "F1"
+        ],
+        "beats": [
+          {
+            "point": "Huashu Motion 的定位是用编码 Agent 做动画和合成；指向帧编辑是其中一种交互，仓库附了演示。",
+            "facts": [
+              "F1"
+            ],
+            "connection": "开场给了具体操作，接着要交代它在项目里的位置，否则听众会以为这只是一个普通生成工具。"
+          },
+          {
+            "point": "指向帧把修改意见从一段描述变成画面上的锚点；如果这个交互在真实流程里稳定，价值是少解释“哪一帧”，让修改目标更明确。",
+            "facts": [
+              "F1"
+            ],
+            "connection": "知道它是什么之后，自然要问这个操作到底改变了什么。"
+          },
+          {
+            "point": "代码和文档采用 MIT，但捆绑的第三方组件、素材和作者角色形象另有条件；不能把主仓库的 MIT 当成所有附带内容都能随意使用。",
+            "facts": [
+              "F2"
+            ],
+            "connection": "价值讲完，落地前先遇到许可证这个硬边界，这是开发者会实际碰到的问题。"
+          },
+          {
+            "point": "官方演示只是项目方展示，不能替代不同题材的实测；实际效果取决于具体创作流程，最该验证的是它能否把意见准确落到那一帧、减少来回沟通。",
+            "facts": [
+              "F1",
+              "F3"
+            ],
+            "connection": "许可边界清楚后，回到效果本身：演示能不能代表实际，是这期最该留下的问号。"
+          }
+        ],
+        "material": "选题只做 Huashu Motion。来源：官方仓库 https://github.com/alchaincyf/huashu-motion（检索于 2026-10-23）。\n\nF1：README 描述该项目用编码 Agent 做动画和合成，并支持指向某一帧进行编辑（point-at-frame edits）；仓库附有演示链接。注意：这是项目方主张和演示，不是我们的实测。\n\nF2：代码和文档采用 MIT 许可证；仓库中捆绑的第三方组件、素材，以及作者的角色形象，另有各自写明的条件。不要概括成“主仓库 MIT，所以所有内容都能随意用”。\n\nF3：项目方的演示不能证明我们亲自测试过效果；实际效果要看具体创作流程。可用的问题意识：这个交互能不能把意见准确落到那一帧，减少来回确认。\n\n不要写：实际测试结论、性能或效率提升、减少沟通的具体幅度、指向后如何定位场景/元素/代码位置。也不要扩展到 TorchNeuron 或第二个项目。"
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "也就是说，观众看到的不是一个孤立的“点一下”功能，而是这套动画、合成工作流里的修改入口。",
+            "problem": "这句话在给交互下意义判断，但没有告诉听众点中一帧之后具体发生什么；后面 S2P2 又用同样句式重复这个判断。",
+            "why": "开发者听完只知道“是个入口”，脑子里没有可操作的画面，很难判断它和普通视频生成或编辑有什么不同。",
+            "suggestion": "删掉这层“不是孤立功能”的概括，换成仓库演示能支撑的一步具体流程：如何选帧、输入什么修改、Agent 接着做什么；如果演示只到选帧，就明确说演示停在这里。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "所以它值得注意的，不是凭空多了一个按钮，而是把“改哪里”和“改成什么”拆成了两步：先在画面上定位，再用语言说修改。这个顺序如果稳定，修改目标会更明确；但它到底能不能稳定，不能靠一段演示下结论。",
+            "problem": "整句把 S2P1 的“帧是修改坐标”换一种说法再说一遍，并提前进入“演示不能下结论”的免责；主线在这里停住。",
+            "why": "听众已经理解了定位帧减少歧义，再听一遍会觉得内容在空转，容易失去耐心。",
+            "suggestion": "保留“改哪里和改成什么拆两步”这个有力概括，和 S2P1 合并；把“能不能稳定”留到结尾一次说清，不在这里先垫一句。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "这意味着不能把“主仓库是 MIT”直接理解成“仓库里所有内容都能随意使用”。要复用什么，需要对着具体组件、素材和角色形象看它自己的条件。这个边界不影响理解交互，但会影响能不能直接拿来做项目。",
+            "problem": "第一句重复 S3P1 的“MIT 不等于全部可用”，第二句又重复“要看具体条件”，一段话没有增加新的判断。",
+            "why": "许可证本身是开发者关心的信息，但重复表述会让它像例行免责，听众容易跳过。",
+            "suggestion": "压成一句：“MIT 覆盖的是主仓库代码和文档，仓库里捆绑的组件、素材和角色形象要分别看条款。”保留“角色形象”这个具体边界即可。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "最后要守住效果边界。官方仓库附的演示属于项目方展示，不是我们的实测；它能说明项目想让你看到什么，不能证明不同题材、不同流程里都能顺利落在那一帧。",
+            "problem": "最后一段用独立成段的方式交代“演示不是实测”，和 S1P2 已提演示、S2P2 已提“不能靠演示下结论”重复；免责声明占了结尾。",
+            "why": "听众听到这里会觉得视频在反复打补丁，而不是给出结论；真正的判断被淹没。",
+            "suggestion": "把限制缩成 S1P2 提到演示时的一句“这是项目方演示，不是独立实测”，删掉 S4P1 整段；结尾直接用 S4P2 的验证问题收束。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 2,
+            "quote": "所以，Huashu Motion 这次最值得记的，不是某个夸张的效果数字，而是把修改意见锚到具体帧这个入口。演示可以先看，结论要留到真实流程里。",
+            "problem": "“不是某个夸张的效果数字”在全文没有对应对象，像先立一个靶子再否定；结尾又回到“演示可以先看，结论要留到真实流程”的通用免责。",
+            "why": "听众会疑惑哪里来的效果数字，也会觉得最后没有新鲜收获，结尾偏空。",
+            "suggestion": "删掉“夸张的效果数字”这半句，把结尾压成一句具体判断：这个入口的价值在把修改意见锚到具体帧，接下来就看它能否在真实流程里减少来回确认。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“编码 Agent”到底指什么？是它自己写动画、合成代码，还是我在界面里指挥它改画面？这决定我能不能想象这个交互怎么用。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "只说仓库附了演示链接，却没说演示里能看到什么；“不是孤立按钮，而是工作流入口”还是概括，脑子里没有具体画面。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "这一段和上一段都在解释“帧是坐标、先定位再改”，没有新增具体信息；一个实际修改的例子都没有，听到这里容易觉得在原地打转。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“这个顺序如果稳定”没说明稳定指什么：每次都能点准，还是 Agent 每次都能按那句话改对？含糊的限定像免责声明。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“作者的角色形象”为什么单独提？它和普通第三方素材的授权问题有什么区别？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "从交互突然跳到 MIT 和角色形象，缺少一句“为什么现在要谈许可证”，容易感觉换题。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "前面没有出现过“效果数字”，这里突然否定“夸张的效果数字”，会让我愣一下，也显得像套话。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "audits_complete": true,
+        "pending_review": false,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 12,
+          "rule_must": 0,
+          "questions": 2,
+          "lost": 5,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 7
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 5
+            }
+          },
+          "passed": true,
+          "rank": 0
+        },
+        "rounds": 2,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。",
+            "problem": "复核摘要只支持编码 Agent 用于动画、合成和指向帧编辑，没有提到“宣传片”这一具体用途；这里把用途扩成了宣传片。",
+            "why": "会让观众以为官方仓库明确覆盖宣传片制作，超出已核对资料的支持范围。",
+            "suggestion": "改为“动画和合成”或“动画制作”，删除“宣传片”。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "serious",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "意见还能关联场景、元素和代码位置。",
+            "problem": "复核摘要只说明可以指向某一帧进行编辑，没有提到意见能关联场景、元素和代码位置。",
+            "why": "这是对官方仓库功能的具体扩展描述，可能让观众误以为已有这些关联能力。",
+            "suggestion": "收窄为“意见可以定位到具体帧”；如要保留场景、元素、代码位置，应补充仓库原文依据。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这次看两个不同方向的开源项目。Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。TorchNeuron 则面向使用亚马逊自研芯片的开发者，让他们沿用熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+            "problem": "开场先并列两个不相关项目，再用“一个改变视频怎么改，一个改变模型怎么跑”做抽象对照；Huashu 的编码 Agent 怎么参与动画、TorchNeuron 的 PyTorch 兼容到底改变什么，都没有具体落点。",
+            "why": "听众在头十秒不知道哪个最值得听，也看不出两件事为什么要放在一期，注意力被摊薄。",
+            "suggestion": "选一个主项目开场，直接讲最有价值的具体变化，例如“指着某一帧提意见，能落到场景、元素和代码位置”；另一个只在能形成对照时用一句带过。若坚持并列，先给一个共同问题，不要只报两个方向。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "仓库也给出了演示，但这些演示属于项目展示，不能替代我们对不同题材的实测。",
+            "problem": "刚讲完演示能定位修改，马上补一句“不能替代实测”，但没有指出演示缺什么；这像防御性免责声明，不是信息。",
+            "why": "节奏被打断，观众会怀疑演示到底值不值得看，却得不到具体判断。",
+            "suggestion": "删掉，或改成有信息量的限制，比如官方演示只覆盖了哪类素材、没展示哪类场景；没有具体疑点就不提。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "许可证也有明确说明：项目代码和文档采用 MIT 许可证。使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。不能把主仓库的 MIT 标签理解为所有附带内容都可以随意使用。",
+            "problem": "许可证说明连续用“还要分别遵守”“不能把……理解为……”做合规提醒，和前面的产品机制并列，显得比核心工作流还重；“作者角色”也不像自然口播词。",
+            "why": "听众会觉得在听法务说明，核心工作流反而没展开，对判断是否值得看帮助有限。",
+            "suggestion": "压成一句“代码和文档是 MIT，第三方组件和素材另有条件”，把“作者角色”换成具体类别或删掉；省下的篇幅用来讲定位修改的流程和限制。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "PyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。",
+            "problem": "一段里塞进发布日期、芯片代际、即时执行/编译/内核路径和许可证，但没有解释“原生 PyTorch 后端”对开发者的实际差别；最后“值得看的是能否沿用”又把看点设成问题，没有回答。",
+            "why": "听众只能记住一串名词，抓不住这次变化的机制和取舍，也不知道该关注什么。",
+            "suggestion": "先给一句定位：它让 Trainium 上的 PyTorch 工作流少改哪一层；再从三种路径里选一个对判断最有用的展开。许可证和芯片代际留到需要时或简介；把“值得看的是能否沿用”换成已确认的判断，或明确说现在还不能回答。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。",
+            "problem": "用“不过”转进一段泛泛风险提示；“仍是这次发布的范围”拗口，“特定芯片支持”也像在说一个功能而不是限制，后面“并不自动证明……也不能直接推出……”连续否定，像免责声明。",
+            "why": "刚对“沿用 PyTorch”产生兴趣就被压回去，却没得到具体限制，观众只听到“都要验证”。",
+            "suggestion": "把范围限制改成一句具体事实：“这次只到公开测试，覆盖 Trainium 2/3。”若资料支持，只保留一条具体的兼容或迁移限制；不要泛泛提醒所有模型都要实测。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。",
+            "problem": "结尾把开头的“两个方向”再说一遍，最后落到“先看任务和支持范围，再看实际效果，别只看项目热度”的通用建议；没有新增判断。",
+            "why": "听完没有留下具体收获，像把目录和注意事项又念了一遍。",
+            "suggestion": "用一句具体判断收尾：这期真正值得记住的是，Huashu Motion 把“改这里”变成了可定位的指令；TorchNeuron 还要看它把 PyTorch 兼容做到哪一层。删掉“别只看热度”这类通用劝告。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“编码 Agent”是指写代码的智能体吗？在动画和宣传片语境里，容易先被听成视频编码。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "意见关联到“代码位置”，是指能直接落到生成画面的代码吗？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "最后一句突然转到“我们的实测”，但前文没有交代测试范围和结果，听众会分神去想验证问题，削弱工具能力这条主线。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“作者角色”指什么？是作者身份、角色素材，还是第三方人物形象？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "许可证本身对开发者有用，但这段像法务备注，术语一含糊就会让节奏断掉。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“公开测试和特定芯片支持，仍是这次发布的范围”是在说发布只限于公开测试和特定芯片，还是说这两项属于发布内容？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "这句抽象，容易让人跟丢；后面“熟悉接口不等于更快、迁移无成本”才是重点。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "decision": {
+        "listening": {
+          "A": "开场“这次看两个方向不同的开源项目”让我愿意继续，因为紧接的“修改意见可以指向具体画面”和“更贴近熟悉的 PyTorch 工作方式”都是具体变化。真正带来兴趣的是“指向某一帧提出修改意见，让‘改这里’落到具体帧上”。许可证段从交互转到“主仓库的 MIT 标签”时略硬；到 TorchNeuron 的“即时执行、编译和底层内核开发路径”时术语堆叠，我有一瞬跟丢，但随后“支持熟悉的接口，并不自动证明所有模型都更快”把我拉回主线。",
+          "B": "开场“给动画提修改，常常得说清‘是哪一帧’”让我愿意继续，具体兴趣落在“指向某一帧，再说要改什么”。第二段“不是孤立的‘点一下’功能，而是这套动画、合成工作流里的修改入口”也清楚。但第三、四段反复解释“先在画面上定位，再用语言说修改”“把‘改哪里’和‘改成什么’拆成两步”，我开始走神，因为同一判断被换词重复；许可证段后“最后要守住效果边界”又回到演示，主线被打断，结尾“结论要留到真实流程里”也偏空。"
+        },
+        "choice": "A",
+        "reason": "A 开场后每段都在推进新材料：指向帧的交互、MIT 不等于全部内容可用的边界、TorchNeuron 的测试范围和“支持熟悉接口不自动证明更快”的限制，听起来更像一条向前走的速览。B 虽聚焦 Huashu Motion，且“指向帧”的切入点更好，但中段连续用“这个交互改变的地方很具体”“所以它值得注意的”反复解释同一件事，许可证和效果边界又两次收束，导致主线变慢；这种重复比 A 的术语密度更影响我继续听。",
+        "remaining": [
+          "A 的 TorchNeuron 段“即时执行、编译和底层内核开发路径”术语密度偏高，普通开发者可能在此短暂走神。",
+          "A 从 Huashu Motion 交互直接转到许可证“主仓库的 MIT 标签”，转场略像报告条目，可以更自然地说明为什么此时要讲使用边界。"
+        ]
+      }
+    },
+    "editorial_attempts": [
+      {
+        "applied": false,
+        "before": [
+          {
+            "title": "本期看点",
+            "paragraphs": [
+              {
+                "text": "这次看两个方向不同的开源项目。Huashu Motion 把编码 Agent 用到动画和合成里，修改意见可以指向具体画面；TorchNeuron 则让用 AWS Trainium 的开发者，能更贴近熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion",
+                  "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+                ],
+                "evidence": "CITED",
+                "note": "已按审计意见改写",
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "复核摘要显示 Huashu Motion 的 README 说明编码 Agent 用于动画、合成和指向帧的编辑并附演示；TorchNeuron 是 Trainium 的原生 PyTorch 后端，支持 eager、torch.compile。讲稿只作方向性概括，未声称实测效果，也未把后端兼容说成性能提升。改写已删去摘要不支持的「宣传片」用途。",
+                  "sources": [
+                    "https://github.com/alchaincyf/huashu-motion",
+                    "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+                  ]
+                },
+                "revision": {
+                  "before": "这次看两个不同方向的开源项目。Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。TorchNeuron 则面向使用亚马逊自研芯片的开发者，让他们沿用熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+                  "proposed": "这次看两个方向不同的开源项目。Huashu Motion 把编码 Agent 用到动画和合成里，修改意见可以指向具体画面；TorchNeuron 则让用 AWS Trainium 的开发者，能更贴近熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+                  "accepted": true,
+                  "lost_conditions": []
+                }
+              }
+            ]
+          },
+          {
+            "title": "Huashu Motion：指着画面提修改",
+            "paragraphs": [
+              {
+                "text": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，让“改这里”落到具体帧上。仓库也放了演示；这是项目方的展示，实际效果还要看具体创作流程。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": "已按审计意见改写",
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "复核摘要明确说明仓库支持指向具体帧进行编辑并附有演示；讲稿把演示归为项目方展示、说明实际效果取决于创作流程，归因与限定一致。原稿中「关联场景、元素和代码位置」这一摘要不支持的细节已删除。",
+                  "sources": [
+                    "https://github.com/alchaincyf/huashu-motion"
+                  ]
+                },
+                "revision": {
+                  "before": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，意见还能关联场景、元素和代码位置。这样，“改这里”就有了具体落点。仓库也给出了演示，但这些演示属于项目展示，不能替代我们对不同题材的实测。",
+                  "proposed": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，让“改这里”落到具体帧上。仓库也放了演示；这是项目方的展示，实际效果还要看具体创作流程。",
+                  "accepted": true,
+                  "lost_conditions": []
+                }
+              },
+              {
+                "text": "许可证也有明确说明：项目代码和文档采用 MIT 许可证。使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。不能把主仓库的 MIT 标签理解为所有附带内容都可以随意使用。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "复核摘要记载项目代码与文档采用 MIT，而捆绑的第三方部分和作者角色有另行说明的条件，讲稿的许可证表述及「不能把 MIT 标签理解为所有附带内容都可随意使用」的提醒与之一致。",
+                  "sources": [
+                    "https://github.com/alchaincyf/huashu-motion"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "TorchNeuron：沿用熟悉的工作方式",
+            "paragraphs": [
+              {
+                "text": "PyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。",
+                "citations": [
+                  "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "博客写明 TorchNeuron 是 Trainium 的原生 PyTorch 后端，10 月 20 日进入公开测试，支持 Trainium2/3、eager execution、torch.compile 与 NKI，采用 Apache-2.0；讲稿逐项对应，且把发布日期表述为计划进入测试，未超出原文范围。",
+                  "sources": [
+                    "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+                  ]
+                }
+              },
+              {
+                "text": "不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。",
+                "citations": [
+                  "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "讲稿保留了复核摘要中的限定：公开测试与特定芯片支持是本次发布范围，接口兼容不等于普遍的性能提升或零迁移成本，需回到具体模型和环境验证，与来源的成立条件一致。",
+                  "sources": [
+                    "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "各自解决哪一步",
+            "paragraphs": [
+              {
+                "text": "这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion",
+                  "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "结尾建议依据任务与支持范围再评估实际效果，与两份来源的范围限定一致；「别只看项目热度」对应复核摘要中「历史热度只是当时快照」的限定，未把项目自述或热度当作质量证明。",
+                  "sources": [
+                    "https://github.com/alchaincyf/huashu-motion",
+                    "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "targets": {
+          "S1P1": [
+            "【编辑建议，按实际效果取舍】开场把两个方向完全不同的项目并列成“这次看两个”，没有给出为什么放在一期、先听哪个的理由，听起来像报目录。；建议：先用 Huashu Motion 的“修改意见落到具体帧”作为开场钩子，讲完再用“另一个方向是训练后端”自然过渡；如果要并列，先给一句共同线索，比如都在缩短开发者从表达到结果的路径，再展开。"
+          ],
+          "S3P1": [
+            "【编辑建议，按实际效果取舍】一句话里塞了发布计划、两代芯片、即时执行/编译/底层内核三种路径和许可证，最后才落到开发者价值；参数像清单，听众来不及判断哪个和迁移成本有关。；建议：先讲定位和开发者价值，再只保留与迁移最相关的支持范围；即时执行、编译和底层内核三条路径选一条对“少改代码”最有解释力的讲，其余留简介。",
+            "【编辑建议，按实际效果取舍】“即时执行、编译和底层内核开发路径”三个术语连在一起，没有说明各自解决什么，非编译器方向的开发者容易跟丢。；建议：放慢、补一步推理，或换个说法"
+          ],
+          "S2P2": [
+            "【编辑建议，按实际效果取舍】“作者角色”搭配不自然，和“组件、素材”并列时听众会卡住，不清楚指角色形象还是作者身份。；建议：改成“第三方组件、素材或角色形象”，并直接说清以各自许可证为准。"
+          ],
+          "S3P2": [
+            "【编辑建议，按实际效果取舍】前文已经说“值得看能否沿用已有代码”，这里又用三句否定性免责反复讲不一定更快、不一定无成本、要验证，没有新增具体信息。；建议：压缩成一句范围限制即可，例如“这次只到公开测试，覆盖 Trainium 二代和三代；是否更快、迁移多贵，要看具体模型”，删掉“不自动证明”“不能直接推出”这类重复推导。",
+            "【编辑建议，按实际效果取舍】“公开测试和特定芯片支持，仍是这次发布的范围”没说明具体限制，听起来像泛泛的免责声明，容易一带而过。；建议：放慢、补一步推理，或换个说法"
+          ],
+          "S4P1": [
+            "【编辑建议，按实际效果取舍】结尾重复前文两个方向，再补一句“先看任务和支持范围，再看实际效果，别只看热度”的通用建议，没有留下这期最值得记住的具体判断。；建议：删掉通用建议，把结尾收在两者各自最该验证的一件事上：视频工具看指向帧能否减少来回沟通，训练后端看现有 PyTorch 代码要改多少。"
+          ]
+        },
+        "before_title": "开源项目两种变化：视频能指着改，训练能沿用 PyTorch",
+        "mode": "whole_script",
+        "prompt_version": 5,
+        "title": "指向某一帧再提修改：Huashu Motion 的动画编辑入口",
+        "sections": [
+          {
+            "title": "先说这一帧",
+            "paragraphs": [
+              {
+                "text": "给动画提修改，常常得说清“是哪一帧”。Huashu Motion 的官方仓库展示了一种更直接的方式：指向某一帧，再说要改什么。这里的重点不是又一个视频生成器，而是它把修改意见放到了画面里的具体位置上。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "按仓库的说明，Huashu Motion 用编码 Agent 来做动画和合成，指向某一帧编辑是它提供的一种交互，仓库里也附了演示链接。也就是说，观众看到的不是一个孤立的“点一下”功能，而是这套动画、合成工作流里的修改入口。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "意见锚在画面上",
+            "paragraphs": [
+              {
+                "text": "这个交互改变的地方很具体：修改意见不再只靠一段文字去描述，而是先落到某一帧，再说这一帧要改什么。对动画和合成来说，帧就是讨论修改时最自然的坐标之一；目标画面被指出来，双方至少少了一层“你说的是哪个时刻”的歧义。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "所以它值得注意的，不是凭空多了一个按钮，而是把“改哪里”和“改成什么”拆成了两步：先在画面上定位，再用语言说修改。这个顺序如果稳定，修改目标会更明确；但它到底能不能稳定，不能靠一段演示下结论。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "MIT 不是全部",
+            "paragraphs": [
+              {
+                "text": "讲到这里，落地前还有一个开发者会实际碰到的边界：许可证。Huashu Motion 的代码和文档采用 MIT，但仓库里捆绑的第三方组件、素材，以及作者的角色形象，另有各自写明的条件。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "这意味着不能把“主仓库是 MIT”直接理解成“仓库里所有内容都能随意使用”。要复用什么，需要对着具体组件、素材和角色形象看它自己的条件。这个边界不影响理解交互，但会影响能不能直接拿来做项目。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "演示之外看什么",
+            "paragraphs": [
+              {
+                "text": "最后要守住效果边界。官方仓库附的演示属于项目方展示，不是我们的实测；它能说明项目想让你看到什么，不能证明不同题材、不同流程里都能顺利落在那一帧。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "实际效果要看具体创作流程。最值得验证的问题也很集中：这个交互能不能把意见准确落到那一帧，减少来回确认。要是做不到，指向帧就只是一个好看的动作；要是能做到，它改变的才是提修改的方式。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "所以，Huashu Motion 这次最值得记的，不是某个夸张的效果数字，而是把修改意见锚到具体帧这个入口。演示可以先看，结论要留到真实流程里。",
+                "citations": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          }
+        ],
+        "editorial_brief": {
+          "considered": [
+            "双项目并列讲“两种变化”：能覆盖两个名字，但 Huashu Motion 和 TorchNeuron 没有共同任务，开场只能报目录，3 分钟内每个都只能点到为止，放弃。",
+            "以 TorchNeuron 为主：对用 Trainium 的开发者有实际价值，但核心是原生后端和公测范围，eager、torch.compile、NKI 这些词需要逐个解释，面向泛开发者偏窄，适合另做一期。",
+            "把两者用“缩短从表达到结果的路径”串起来：听起来有共同线索，但实际仍是两个独立故事，容易变成抽象概括加两个例子，主线不具体，放弃。",
+            "只讲 Huashu Motion 的“指向帧修改”：一个交互就能让观众立刻理解变化，且能用官方演示、项目方展示的边界和 MIT 附带条件撑起具体判断，选这个。"
+          ],
+          "angle": "这期只讲 Huashu Motion 的一个具体变化：动画和合成的修改多了一个画面上的入口——指向某一帧说“改这里”，把意见锚到具体帧。",
+          "viewer_value": "开发者能马上看懂这个交互改变了什么，也不会把项目方演示当成实测效果，或用主仓库的 MIT 许可证覆盖所有附带内容。",
+          "throughline": "从一个具体的修改场景切入：给动画或合成指向某一帧提意见；再交代项目定位——编码 Agent 用于动画和合成；然后说明这个交互为什么有价值；接着补上代码 MIT 但第三方组件、素材和作者角色形象另有条件这条使用边界；最后回到演示只是项目方展示，真正要看它能否在具体流程里减少来回确认。",
+          "keep": [
+            "“指向某一帧提修改”这一核心交互，用来让观众立刻理解变化。",
+            "“编码 Agent 用于动画和合成”的项目定位，避免把它误讲成单纯视频生成器。",
+            "官方仓库附有演示，但演示属于项目方展示、不是我们实测，用来守住效果边界。",
+            "代码和文档 MIT，第三方组件、素材、作者角色形象另有条件，作为开发者使用前的实际提醒。",
+            "结尾落在“能否准确落到那一帧、减少来回沟通”，不扩展成通用建议。"
+          ],
+          "leave_out": [
+            "TorchNeuron 的整套材料：原生 PyTorch 后端、10 月 20 日公测、Trainium2/3、eager、torch.compile、NKI、Apache-2.0；与 Huashu Motion 没有共同任务，并列会回到报目录，单独讲又需要大量术语解释，留作另一期。",
+            "历史热度：只是当时快照，不能说明质量，也会把结尾引向“别只看热度”的通用建议。",
+            "第三方组件、素材和作者角色的具体许可证条款：材料只支持“另有条件”，逐条展开会变成法律清单，偏离交互主线。",
+            "指向帧之后具体如何定位场景、元素或代码位置：复核摘要不支持，不能补机制。",
+            "旧稿“两个方向完全不同的开源项目”结构：没有共同线索，开场像目录，放弃。"
+          ],
+          "facts": [
+            "F1",
+            "F2",
+            "F3"
+          ],
+          "openings": [
+            "给动画提修改，常常得说清“是哪一帧”。Huashu Motion 的官方仓库展示了一种更直接的方式：指向某一帧，再说要改什么。理由：从一个具体动作进入，观众立刻知道这期讲什么。",
+            "如果一个视频工具能让你指着画面说“改这里”，它改变的不只是交互，还有修改意见的落点。理由：更直接地点出价值，但比第一版抽象。",
+            "这次不看又一个视频生成模型，而看一个更小的变化：修改意见可以钉在某一帧上。理由：有反差，但“不看”开头略绕，且容易把重点引到“不是生成模型”。"
+          ],
+          "opening": "给动画提修改，常常得说清“是哪一帧”。Huashu Motion 的官方仓库展示了一种更直接的方式：指向某一帧，再说要改什么。",
+          "opening_facts": [
+            "F1"
+          ],
+          "beats": [
+            {
+              "point": "Huashu Motion 的定位是用编码 Agent 做动画和合成；指向帧编辑是其中一种交互，仓库附了演示。",
+              "facts": [
+                "F1"
+              ],
+              "connection": "开场给了具体操作，接着要交代它在项目里的位置，否则听众会以为这只是一个普通生成工具。"
+            },
+            {
+              "point": "指向帧把修改意见从一段描述变成画面上的锚点；如果这个交互在真实流程里稳定，价值是少解释“哪一帧”，让修改目标更明确。",
+              "facts": [
+                "F1"
+              ],
+              "connection": "知道它是什么之后，自然要问这个操作到底改变了什么。"
+            },
+            {
+              "point": "代码和文档采用 MIT，但捆绑的第三方组件、素材和作者角色形象另有条件；不能把主仓库的 MIT 当成所有附带内容都能随意使用。",
+              "facts": [
+                "F2"
+              ],
+              "connection": "价值讲完，落地前先遇到许可证这个硬边界，这是开发者会实际碰到的问题。"
+            },
+            {
+              "point": "官方演示只是项目方展示，不能替代不同题材的实测；实际效果取决于具体创作流程，最该验证的是它能否把意见准确落到那一帧、减少来回沟通。",
+              "facts": [
+                "F1",
+                "F3"
+              ],
+              "connection": "许可边界清楚后，回到效果本身：演示能不能代表实际，是这期最该留下的问号。"
+            }
+          ],
+          "material": "选题只做 Huashu Motion。来源：官方仓库 https://github.com/alchaincyf/huashu-motion（检索于 2026-10-23）。\n\nF1：README 描述该项目用编码 Agent 做动画和合成，并支持指向某一帧进行编辑（point-at-frame edits）；仓库附有演示链接。注意：这是项目方主张和演示，不是我们的实测。\n\nF2：代码和文档采用 MIT 许可证；仓库中捆绑的第三方组件、素材，以及作者的角色形象，另有各自写明的条件。不要概括成“主仓库 MIT，所以所有内容都能随意用”。\n\nF3：项目方的演示不能证明我们亲自测试过效果；实际效果要看具体创作流程。可用的问题意识：这个交互能不能把意见准确落到那一帧，减少来回确认。\n\n不要写：实际测试结论、性能或效率提升、减少沟通的具体幅度、指向后如何定位场景/元素/代码位置。也不要扩展到 TorchNeuron 或第二个项目。"
+        },
+        "checks": {
+          "version": 2,
+          "issues": [
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 1,
+              "quote": "也就是说，观众看到的不是一个孤立的“点一下”功能，而是这套动画、合成工作流里的修改入口。",
+              "problem": "这句话在给交互下意义判断，但没有告诉听众点中一帧之后具体发生什么；后面 S2P2 又用同样句式重复这个判断。",
+              "why": "开发者听完只知道“是个入口”，脑子里没有可操作的画面，很难判断它和普通视频生成或编辑有什么不同。",
+              "suggestion": "删掉这层“不是孤立功能”的概括，换成仓库演示能支撑的一步具体流程：如何选帧、输入什么修改、Agent 接着做什么；如果演示只到选帧，就明确说演示停在这里。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "所以它值得注意的，不是凭空多了一个按钮，而是把“改哪里”和“改成什么”拆成了两步：先在画面上定位，再用语言说修改。这个顺序如果稳定，修改目标会更明确；但它到底能不能稳定，不能靠一段演示下结论。",
+              "problem": "整句把 S2P1 的“帧是修改坐标”换一种说法再说一遍，并提前进入“演示不能下结论”的免责；主线在这里停住。",
+              "why": "听众已经理解了定位帧减少歧义，再听一遍会觉得内容在空转，容易失去耐心。",
+              "suggestion": "保留“改哪里和改成什么拆两步”这个有力概括，和 S2P1 合并；把“能不能稳定”留到结尾一次说清，不在这里先垫一句。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "这意味着不能把“主仓库是 MIT”直接理解成“仓库里所有内容都能随意使用”。要复用什么，需要对着具体组件、素材和角色形象看它自己的条件。这个边界不影响理解交互，但会影响能不能直接拿来做项目。",
+              "problem": "第一句重复 S3P1 的“MIT 不等于全部可用”，第二句又重复“要看具体条件”，一段话没有增加新的判断。",
+              "why": "许可证本身是开发者关心的信息，但重复表述会让它像例行免责，听众容易跳过。",
+              "suggestion": "压成一句：“MIT 覆盖的是主仓库代码和文档，仓库里捆绑的组件、素材和角色形象要分别看条款。”保留“角色形象”这个具体边界即可。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "最后要守住效果边界。官方仓库附的演示属于项目方展示，不是我们的实测；它能说明项目想让你看到什么，不能证明不同题材、不同流程里都能顺利落在那一帧。",
+              "problem": "最后一段用独立成段的方式交代“演示不是实测”，和 S1P2 已提演示、S2P2 已提“不能靠演示下结论”重复；免责声明占了结尾。",
+              "why": "听众听到这里会觉得视频在反复打补丁，而不是给出结论；真正的判断被淹没。",
+              "suggestion": "把限制缩成 S1P2 提到演示时的一句“这是项目方演示，不是独立实测”，删掉 S4P1 整段；结尾直接用 S4P2 的验证问题收束。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 2,
+              "quote": "所以，Huashu Motion 这次最值得记的，不是某个夸张的效果数字，而是把修改意见锚到具体帧这个入口。演示可以先看，结论要留到真实流程里。",
+              "problem": "“不是某个夸张的效果数字”在全文没有对应对象，像先立一个靶子再否定；结尾又回到“演示可以先看，结论要留到真实流程”的通用免责。",
+              "why": "听众会疑惑哪里来的效果数字，也会觉得最后没有新鲜收获，结尾偏空。",
+              "suggestion": "删掉“夸张的效果数字”这半句，把结尾压成一句具体判断：这个入口的价值在把修改意见锚到具体帧，接下来就看它能否在真实流程里减少来回确认。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "“编码 Agent”到底指什么？是它自己写动画、合成代码，还是我在界面里指挥它改画面？这决定我能不能想象这个交互怎么用。",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "只说仓库附了演示链接，却没说演示里能看到什么；“不是孤立按钮，而是工作流入口”还是概括，脑子里没有具体画面。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "这一段和上一段都在解释“帧是坐标、先定位再改”，没有新增具体信息；一个实际修改的例子都没有，听到这里容易觉得在原地打转。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "“这个顺序如果稳定”没说明稳定指什么：每次都能点准，还是 Agent 每次都能按那句话改对？含糊的限定像免责声明。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "“作者的角色形象”为什么单独提？它和普通第三方素材的授权问题有什么区别？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "从交互突然跳到 MIT 和角色形象，缺少一句“为什么现在要谈许可证”，容易感觉换题。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 2,
+              "quote": "",
+              "problem": "前面没有出现过“效果数字”，这里突然否定“夸张的效果数字”，会让我愣一下，也显得像套话。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model"
+            }
+          ],
+          "quiz": {
+            "items": [],
+            "score": null
+          },
+          "newcomer": null,
+          "core_message_match": null,
+          "core_message_note": "",
+          "model_ran": true,
+          "audits_complete": true,
+          "pending_review": false,
+          "summary": {
+            "serious": 0,
+            "must": 0,
+            "warn": 12,
+            "rule_must": 0,
+            "questions": 2,
+            "lost": 5,
+            "quiz_score": null,
+            "low_scores": [],
+            "by_audit": {
+              "fact": {
+                "serious": 0,
+                "must": 0,
+                "warn": 0
+              },
+              "comprehension": {
+                "serious": 0,
+                "must": 0,
+                "warn": 7
+              },
+              "communication": {
+                "serious": 0,
+                "must": 0,
+                "warn": 5
+              }
+            },
+            "passed": true,
+            "rank": 0
+          },
+          "rounds": 2,
+          "deletions": [],
+          "initial": [
+            {
+              "audit": "fact",
+              "rule": "D1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。",
+              "problem": "复核摘要只支持编码 Agent 用于动画、合成和指向帧编辑，没有提到“宣传片”这一具体用途；这里把用途扩成了宣传片。",
+              "why": "会让观众以为官方仓库明确覆盖宣传片制作，超出已核对资料的支持范围。",
+              "suggestion": "改为“动画和合成”或“动画制作”，删除“宣传片”。",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "fact",
+              "rule": "D1",
+              "severity": "serious",
+              "section": 1,
+              "paragraph": 0,
+              "quote": "意见还能关联场景、元素和代码位置。",
+              "problem": "复核摘要只说明可以指向某一帧进行编辑，没有提到意见能关联场景、元素和代码位置。",
+              "why": "这是对官方仓库功能的具体扩展描述，可能让观众误以为已有这些关联能力。",
+              "suggestion": "收窄为“意见可以定位到具体帧”；如要保留场景、元素、代码位置，应补充仓库原文依据。",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "这次看两个不同方向的开源项目。Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。TorchNeuron 则面向使用亚马逊自研芯片的开发者，让他们沿用熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+              "problem": "开场先并列两个不相关项目，再用“一个改变视频怎么改，一个改变模型怎么跑”做抽象对照；Huashu 的编码 Agent 怎么参与动画、TorchNeuron 的 PyTorch 兼容到底改变什么，都没有具体落点。",
+              "why": "听众在头十秒不知道哪个最值得听，也看不出两件事为什么要放在一期，注意力被摊薄。",
+              "suggestion": "选一个主项目开场，直接讲最有价值的具体变化，例如“指着某一帧提意见，能落到场景、元素和代码位置”；另一个只在能形成对照时用一句带过。若坚持并列，先给一个共同问题，不要只报两个方向。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 0,
+              "quote": "仓库也给出了演示，但这些演示属于项目展示，不能替代我们对不同题材的实测。",
+              "problem": "刚讲完演示能定位修改，马上补一句“不能替代实测”，但没有指出演示缺什么；这像防御性免责声明，不是信息。",
+              "why": "节奏被打断，观众会怀疑演示到底值不值得看，却得不到具体判断。",
+              "suggestion": "删掉，或改成有信息量的限制，比如官方演示只覆盖了哪类素材、没展示哪类场景；没有具体疑点就不提。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "许可证也有明确说明：项目代码和文档采用 MIT 许可证。使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。不能把主仓库的 MIT 标签理解为所有附带内容都可以随意使用。",
+              "problem": "许可证说明连续用“还要分别遵守”“不能把……理解为……”做合规提醒，和前面的产品机制并列，显得比核心工作流还重；“作者角色”也不像自然口播词。",
+              "why": "听众会觉得在听法务说明，核心工作流反而没展开，对判断是否值得看帮助有限。",
+              "suggestion": "压成一句“代码和文档是 MIT，第三方组件和素材另有条件”，把“作者角色”换成具体类别或删掉；省下的篇幅用来讲定位修改的流程和限制。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "PyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。",
+              "problem": "一段里塞进发布日期、芯片代际、即时执行/编译/内核路径和许可证，但没有解释“原生 PyTorch 后端”对开发者的实际差别；最后“值得看的是能否沿用”又把看点设成问题，没有回答。",
+              "why": "听众只能记住一串名词，抓不住这次变化的机制和取舍，也不知道该关注什么。",
+              "suggestion": "先给一句定位：它让 Trainium 上的 PyTorch 工作流少改哪一层；再从三种路径里选一个对判断最有用的展开。许可证和芯片代际留到需要时或简介；把“值得看的是能否沿用”换成已确认的判断，或明确说现在还不能回答。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。",
+              "problem": "用“不过”转进一段泛泛风险提示；“仍是这次发布的范围”拗口，“特定芯片支持”也像在说一个功能而不是限制，后面“并不自动证明……也不能直接推出……”连续否定，像免责声明。",
+              "why": "刚对“沿用 PyTorch”产生兴趣就被压回去，却没得到具体限制，观众只听到“都要验证”。",
+              "suggestion": "把范围限制改成一句具体事实：“这次只到公开测试，覆盖 Trainium 2/3。”若资料支持，只保留一条具体的兼容或迁移限制；不要泛泛提醒所有模型都要实测。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。",
+              "problem": "结尾把开头的“两个方向”再说一遍，最后落到“先看任务和支持范围，再看实际效果，别只看项目热度”的通用建议；没有新增判断。",
+              "why": "听完没有留下具体收获，像把目录和注意事项又念了一遍。",
+              "suggestion": "用一句具体判断收尾：这期真正值得记住的是，Huashu Motion 把“改这里”变成了可定位的指令；TorchNeuron 还要看它把 PyTorch 兼容做到哪一层。删掉“别只看热度”这类通用劝告。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "“编码 Agent”是指写代码的智能体吗？在动画和宣传片语境里，容易先被听成视频编码。",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "意见关联到“代码位置”，是指能直接落到生成画面的代码吗？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "最后一句突然转到“我们的实测”，但前文没有交代测试范围和结果，听众会分神去想验证问题，削弱工具能力这条主线。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": false
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "“作者角色”指什么？是作者身份、角色素材，还是第三方人物形象？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "许可证本身对开发者有用，但这段像法务备注，术语一含糊就会让节奏断掉。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": false
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "“公开测试和特定芯片支持，仍是这次发布的范围”是在说发布只限于公开测试和特定芯片，还是说这两项属于发布内容？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "这句抽象，容易让人跟丢；后面“熟悉接口不等于更快、迁移无成本”才是重点。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": true
+            }
+          ]
+        },
+        "decision": {
+          "listening": {
+            "A": "开场“这次看两个方向不同的开源项目”让我愿意继续，因为紧接的“修改意见可以指向具体画面”和“更贴近熟悉的 PyTorch 工作方式”都是具体变化。真正带来兴趣的是“指向某一帧提出修改意见，让‘改这里’落到具体帧上”。许可证段从交互转到“主仓库的 MIT 标签”时略硬；到 TorchNeuron 的“即时执行、编译和底层内核开发路径”时术语堆叠，我有一瞬跟丢，但随后“支持熟悉的接口，并不自动证明所有模型都更快”把我拉回主线。",
+            "B": "开场“给动画提修改，常常得说清‘是哪一帧’”让我愿意继续，具体兴趣落在“指向某一帧，再说要改什么”。第二段“不是孤立的‘点一下’功能，而是这套动画、合成工作流里的修改入口”也清楚。但第三、四段反复解释“先在画面上定位，再用语言说修改”“把‘改哪里’和‘改成什么’拆成两步”，我开始走神，因为同一判断被换词重复；许可证段后“最后要守住效果边界”又回到演示，主线被打断，结尾“结论要留到真实流程里”也偏空。"
+          },
+          "choice": "A",
+          "reason": "A 开场后每段都在推进新材料：指向帧的交互、MIT 不等于全部内容可用的边界、TorchNeuron 的测试范围和“支持熟悉接口不自动证明更快”的限制，听起来更像一条向前走的速览。B 虽聚焦 Huashu Motion，且“指向帧”的切入点更好，但中段连续用“这个交互改变的地方很具体”“所以它值得注意的”反复解释同一件事，许可证和效果边界又两次收束，导致主线变慢；这种重复比 A 的术语密度更影响我继续听。",
+          "remaining": [
+            "A 的 TorchNeuron 段“即时执行、编译和底层内核开发路径”术语密度偏高，普通开发者可能在此短暂走神。",
+            "A 从 Huashu Motion 交互直接转到许可证“主仓库的 MIT 标签”，转场略像报告条目，可以更自然地说明为什么此时要讲使用边界。"
+          ]
+        }
+      }
+    ]
+  },
+  "created_by": "用户授权·样本质量修订",
+  "created_at": "2026-10-24T10:20:36+0800"
+}

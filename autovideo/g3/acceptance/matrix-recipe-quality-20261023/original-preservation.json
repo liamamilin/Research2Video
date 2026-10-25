@@ -1,0 +1,58 @@
+[
+  {
+    "case": "ai-flash",
+    "script_id": "07c8442c5baa4807bf1d32b21e8a543f",
+    "version": 1,
+    "unchanged": true,
+    "sha256": "38a528c2903941a9a3992cd1c828e4e53ee37d9e6a8f9ed403cd82c872fb6c46"
+  },
+  {
+    "case": "industry",
+    "script_id": "a8ba608f47204a0182ad0f52bf7de28d",
+    "version": 1,
+    "unchanged": true,
+    "sha256": "16d6fce4e23fcbdf7c1f5ab0b826315b7e2f90d92e2e2b5e51f3bc2aff202e79"
+  },
+  {
+    "case": "ai-deep",
+    "script_id": "c076368cd731433b94f0dacde7ce36a2",
+    "version": 1,
+    "unchanged": true,
+    "sha256": "8b251c1501a0264c57d48d00929d875b0962a36cc0252a3900b8ce763258fe97"
+  },
+  {
+    "case": "ai-report",
+    "script_id": "4c4e99e98a3449fb9c5f4978b712c534",
+    "version": 1,
+    "unchanged": true,
+    "sha256": "5099e838032c4886831f4a16e9b6af15ac17f42054dea265f7303a65e4ab3fe0"
+  },
+  {
+    "case": "company",
+    "script_id": "4c63a878b25b4c96b7f8fa67f0824da0",
+    "version": 1,
+    "unchanged": true,
+    "sha256": "59e68c48d9b3d40602bbf91ecb7fa0f960eb71ea54e529b3e9deb186947df071"
+  },
+  {
+    "case": "science",
+    "script_id": "f30f9b94c3a345da82069fac22b24b4f",
+    "version": 1,
+    "unchanged": true,
+    "sha256": "3b380fd6537faae5c753a8db946ef4c714ceefe62d01c58e42cd14fc257e9490"
+  },
+  {
+    "case": "history",
+    "script_id": "41fa2d69fc044c188c8e86bfd0aab336",
+    "version": 1,
+    "unchanged": true,
+    "sha256": "0fb34cce8a956b585f3c408548eff5a815db8d2e8437469047695ff6a79eaaeb"
+  },
+  {
+    "case": "consumer",
+    "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+    "version": 5,
+    "unchanged": true,
+    "sha256": "ccc882c645b3ae7df65834f79b17d2dc1a871008dc138eb0b90b1faf4dcf0b36"
+  }
+]

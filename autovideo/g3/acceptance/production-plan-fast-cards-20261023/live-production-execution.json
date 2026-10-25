@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "production_plan_sha256": "732f4d1258a9cd707c865f126a112ea229a1e6cdeef9a600542ae4a1e7feb4b1",
+  "executor": "ffmpeg_cards",
+  "encoder": "h264_videotoolbox",
+  "fallbacks": [],
+  "render_seconds": 28.465,
+  "form": "information_cards",
+  "style": {
+    "id": "editorial_light",
+    "version": 1,
+    "background": "#f3f5f1",
+    "surface": "#ffffff",
+    "text": "#182720",
+    "muted": "#637168",
+    "accent": "#1f7a4d",
+    "warning": "#9b650c",
+    "subtitle": "#182720"
+  },
+  "page_count": 31,
+  "manual_page_copy": false,
+  "packaging_owner": "shared_package_stage",
+  "music": {
+    "selection": null,
+    "background_music_generated": false
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "placed": true,
+  "how": "replaced the final text scene",
+  "scene": "c3_s1",
+  "segment": "c3_n1",
+  "sources": [
+    {
+      "title": "Opus 5.5 定价更新（样例）",
+      "url": "https://www.example.com/news/opus-5-5-pricing",
+      "date": "2026-10-16"
+    },
+    {
+      "title": "GPT-6 Sol 价格页（样例）",
+      "url": "https://pricing.example.org/gpt-6-sol",
+      "date": "2026-10-16"
+    }
+  ]
+}

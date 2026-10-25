@@ -1,0 +1,30 @@
+{
+  "job": {
+    "job_id": "2f232cbb-3271-4bab-a681-5d6a5aab9761",
+    "status": "COMPLETED",
+    "video_form": "information_motion",
+    "duration_mode": "content",
+    "attempt_count": 1
+  },
+  "artifact_names": [
+    "captions.srt",
+    "chapters.json",
+    "content-outline.json",
+    "execution-log.txt",
+    "information-plan.json",
+    "information-timing.json",
+    "manifest.json",
+    "model-cost.json",
+    "narration.json",
+    "qa.json",
+    "storyboard.json",
+    "video-ir.json",
+    "video.mp4"
+  ],
+  "range": {
+    "status": 206,
+    "content_type": "video/mp4",
+    "content_range": "bytes 0-1023/17066342",
+    "bytes": 1024
+  }
+}

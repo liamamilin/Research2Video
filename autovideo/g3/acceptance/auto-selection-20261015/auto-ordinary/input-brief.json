@@ -1,0 +1,92 @@
+{
+  "status": "ready",
+  "recommended_form": "information_motion",
+  "reason": "原文主旨是任务交接时应说明的要点清单，包括目标、背景、完成标准等并列信息，适合用信息动效逐项呈现；没有步骤、分支或系统流转关系，不需要画流程图。",
+  "ordered_unit_ids": [
+    "u1",
+    "u2",
+    "u3",
+    "u4",
+    "u6",
+    "u7"
+  ],
+  "excluded_units": [
+    {
+      "unit_id": "u5",
+      "reason": "duplicate",
+      "duplicate_of": "u2"
+    },
+    {
+      "unit_id": "u8",
+      "reason": "paste_noise",
+      "duplicate_of": null
+    }
+  ],
+  "issues": [
+    {
+      "kind": "duplicate",
+      "message": "u2 与 u5 文本完全一致，保留 u2，将 u5 标为重复项。",
+      "source_quotes": [
+        "任务交接要讲清楚目标、背景、完成标准。",
+        "任务交接要讲清楚目标、背景、完成标准。"
+      ],
+      "blocking": false
+    },
+    {
+      "kind": "noise",
+      "message": "u8 是页码类粘贴噪声，不属于讲解内容。",
+      "source_quotes": [
+        "第 1 页 / 共 1 页"
+      ],
+      "blocking": false
+    }
+  ],
+  "requested_form": "auto",
+  "selected_form": "information_motion",
+  "selection_mode": "automatic",
+  "source_sha256": "67084b77aa19c4c3741845894e9b694441bd8c1685ed02a7e042e33f367c3dc0",
+  "source_units": [
+    {
+      "id": "u1",
+      "text": "沟通笔记，后面要用。",
+      "separator": ""
+    },
+    {
+      "id": "u2",
+      "text": "任务交接要讲清楚目标、背景、完成标准。",
+      "separator": "\n"
+    },
+    {
+      "id": "u3",
+      "text": "目标就是要交付什么，比如要一页本周需求进展摘要。",
+      "separator": ""
+    },
+    {
+      "id": "u4",
+      "text": "背景包括给谁看、使用场景以及已有记录。",
+      "separator": "\n"
+    },
+    {
+      "id": "u5",
+      "text": "任务交接要讲清楚目标、背景、完成标准。",
+      "separator": "\n"
+    },
+    {
+      "id": "u6",
+      "text": "标准可以列出完成项、阻塞问题、待讨论的决定。",
+      "separator": ""
+    },
+    {
+      "id": "u7",
+      "text": "没有记录的信息标明待确认，别猜。",
+      "separator": "\n"
+    },
+    {
+      "id": "u8",
+      "text": "第 1 页 / 共 1 页",
+      "separator": ""
+    }
+  ],
+  "prepared_sha256": "40757621a228cca79a63ffc911523c2a6b7fc1cd4fe93347ac597e57189f7580",
+  "source_rewritten": false
+}

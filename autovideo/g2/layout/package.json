@@ -1,0 +1,6 @@
+{
+  "name": "autovideo-diagram-layout",
+  "private": true,
+  "version": "0.1.0",
+  "dependencies": {"elkjs": "0.12.0"}
+}

@@ -1,0 +1,11 @@
+{
+  "status": "preexisting_mismatch",
+  "path": "AGENTS.md",
+  "manifest_bytes": 2923,
+  "actual_bytes": 3015,
+  "head_equals_working_file": true,
+  "manifest_sha256": "ca0ba69ca59b98b66b6145838bec323863116ff591353b6015658eb78a59cb73",
+  "actual_sha256": "4a545e896e4c5dde9cc1831f4937e35d8c9f10f1788fa1339af98b7c4ca9a063",
+  "manifest_changed": false,
+  "note": "verify_design_snapshot.py stops here; source-tree packaging test also includes runtime files outside the document manifest."
+}

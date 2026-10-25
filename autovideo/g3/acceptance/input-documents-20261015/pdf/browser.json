@@ -1,0 +1,23 @@
+{
+  "mode": "pdf",
+  "extracted": "设备借用流程\n员工先提交设备借用申请。\n管理员检查设备是否可用。\n有可用设备时，管理员登记借用并通知员工领取。\n没有可用设备时，申请进入等待名单。\n设备归还后，管理员按等待顺序通知员工。\n领取设备后，本次申请结束。",
+  "submitted": "设备借用流程\n员工先提交设备借用申请。\n管理员检查设备是否可用。\n有可用设备时，管理员登记借用并通知员工领取。\n没有可用设备时，申请进入等待名单。\n设备归还后，管理员按等待顺序通知员工。\n领取设备后，本次申请结束。",
+  "default_form": "auto",
+  "job_id": "45e3bf98-8686-4478-8e82-a7e3e8f4af88",
+  "document_source": "输入文档\n\n设备借用.pdf · 提取 107 字\n\n下载原文档\n\n已提取 PDF 文字；图片、图表不自动转录，复杂分栏或表格的阅读顺序可在正文中调整。",
+  "input_document": {
+    "filename": "设备借用.pdf",
+    "format": "pdf",
+    "bytes": 46394,
+    "original_sha256": "dae0428e5af287d2d65d320d76b28a2b4e668dd365bea21815ec74842ec46469",
+    "extracted_sha256": "130cc6f0a08f2249dd9153e27d17314ac49bde96aa34b748889842906a785666",
+    "char_count": 107,
+    "warnings": [
+      "已提取 PDF 文字；图片、图表不自动转录，复杂分栏或表格的阅读顺序可在正文中调整。"
+    ],
+    "page_count": 1,
+    "source_edited": false,
+    "submitted_source_sha256": "130cc6f0a08f2249dd9153e27d17314ac49bde96aa34b748889842906a785666"
+  },
+  "download_matches_original": true
+}

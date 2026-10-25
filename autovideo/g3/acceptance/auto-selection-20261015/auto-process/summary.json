@@ -1,0 +1,466 @@
+{
+  "case": "auto-process",
+  "job_id": "7b7923fa-d685-4634-aaab-79cad1ae3f85",
+  "status": "COMPLETED",
+  "error_code": null,
+  "retryable": false,
+  "analysis": {
+    "requested_form": "auto",
+    "selected_form": "process_diagram",
+    "recommended_form": "process_diagram",
+    "selection_mode": "automatic",
+    "status": "ready",
+    "reason": "整片围绕借书申请的处理流程展开，包含申请后查库存、有库存与无库存的分支、候补顺序、归还后通知以及取书结束，适合用流程图按步骤和条件分支清晰展示。",
+    "issues": [
+      {
+        "kind": "duplicate",
+        "message": "“有库存就保留图书，通知读者取书；没有库存就候补。”这句话在原文中出现两次，内容完全一致，已保留第一次出现的表述，第二次作为重复项排除。",
+        "source_quotes": [
+          "有库存就保留图书，通知读者取书；没有库存就候补。"
+        ],
+        "blocking": false
+      },
+      {
+        "kind": "duplicate",
+        "message": "“借书流程笔记：读者提交借书申请后系统查库存。”与后文“读者提交借书申请后系统查库存。”内容近似重复，但后一句缺少前面的说明词，并非逐字重复，因此两者都保留。",
+        "source_quotes": [
+          "借书流程笔记：读者提交借书申请后系统查库存。",
+          "读者提交借书申请后系统查库存。"
+        ],
+        "blocking": false
+      }
+    ],
+    "retained_units": 6,
+    "excluded_units": 1
+  },
+  "llm_calls": 5,
+  "qa": {
+    "status": "PASS",
+    "gate": "G2",
+    "real_llm": true,
+    "real_tts": true,
+    "mock_calls": 0,
+    "model": "deepseek-flash",
+    "llm_call_count": 5,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 695,
+      "duration_seconds": 23.168,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.99994683483461,
+      "decoded_rms": 0.08154763281345367,
+      "full_decode": "PASS"
+    },
+    "timeline": {
+      "ir_frames": 695,
+      "scene_count": 4,
+      "beat_count": 36,
+      "alignment_granularity": "phrase"
+    },
+    "visual_beats": {
+      "c1_s1_b0": {
+        "action": "reveal",
+        "target_id": "node:apply",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.014369695216049383
+      },
+      "c1_s1_b1": {
+        "action": "reveal",
+        "target_id": "node:check_stock",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.014369695216049383
+      },
+      "c1_s1_b2": {
+        "action": "reveal",
+        "target_id": "edge:e1",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.014369695216049383
+      },
+      "c1_s1_b3": {
+        "action": "highlight",
+        "target_id": "node:apply",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.014369695216049383
+      },
+      "c1_s1_b4": {
+        "action": "highlight",
+        "target_id": "node:check_stock",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.014369695216049383
+      },
+      "c1_s1_b5": {
+        "action": "highlight",
+        "target_id": "edge:e1",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.014369695216049383
+      },
+      "c1_s1_b6": {
+        "action": "reveal",
+        "target_id": "node:check_stock",
+        "beat_frame": 128,
+        "before_frame": 125,
+        "after_frame": 132,
+        "changed_pixel_ratio": 0.026052758487654322
+      },
+      "c1_s1_b7": {
+        "action": "reveal",
+        "target_id": "node:hold_notify",
+        "beat_frame": 128,
+        "before_frame": 125,
+        "after_frame": 132,
+        "changed_pixel_ratio": 0.026052758487654322
+      },
+      "c1_s1_b8": {
+        "action": "reveal",
+        "target_id": "edge:e2",
+        "beat_frame": 128,
+        "before_frame": 125,
+        "after_frame": 132,
+        "changed_pixel_ratio": 0.026052758487654322
+      },
+      "c1_s1_b9": {
+        "action": "highlight",
+        "target_id": "node:check_stock",
+        "beat_frame": 128,
+        "before_frame": 125,
+        "after_frame": 132,
+        "changed_pixel_ratio": 0.026052758487654322
+      },
+      "c1_s1_b10": {
+        "action": "highlight",
+        "target_id": "node:hold_notify",
+        "beat_frame": 128,
+        "before_frame": 125,
+        "after_frame": 132,
+        "changed_pixel_ratio": 0.026052758487654322
+      },
+      "c1_s1_b11": {
+        "action": "highlight",
+        "target_id": "edge:e2",
+        "beat_frame": 128,
+        "before_frame": 125,
+        "after_frame": 132,
+        "changed_pixel_ratio": 0.026052758487654322
+      },
+      "c1_s1_b12": {
+        "action": "reveal",
+        "target_id": "node:check_stock",
+        "beat_frame": 266,
+        "before_frame": 263,
+        "after_frame": 270,
+        "changed_pixel_ratio": 0.030249324845679014
+      },
+      "c1_s1_b13": {
+        "action": "reveal",
+        "target_id": "node:waitlist",
+        "beat_frame": 266,
+        "before_frame": 263,
+        "after_frame": 270,
+        "changed_pixel_ratio": 0.030249324845679014
+      },
+      "c1_s1_b14": {
+        "action": "reveal",
+        "target_id": "edge:e3",
+        "beat_frame": 266,
+        "before_frame": 263,
+        "after_frame": 270,
+        "changed_pixel_ratio": 0.030249324845679014
+      },
+      "c1_s1_b15": {
+        "action": "highlight",
+        "target_id": "node:check_stock",
+        "beat_frame": 266,
+        "before_frame": 263,
+        "after_frame": 270,
+        "changed_pixel_ratio": 0.030249324845679014
+      },
+      "c1_s1_b16": {
+        "action": "highlight",
+        "target_id": "node:waitlist",
+        "beat_frame": 266,
+        "before_frame": 263,
+        "after_frame": 270,
+        "changed_pixel_ratio": 0.030249324845679014
+      },
+      "c1_s1_b17": {
+        "action": "highlight",
+        "target_id": "edge:e3",
+        "beat_frame": 266,
+        "before_frame": 263,
+        "after_frame": 270,
+        "changed_pixel_ratio": 0.030249324845679014
+      },
+      "c1_s2_b0": {
+        "action": "reveal",
+        "target_id": "node:return_book",
+        "beat_frame": 369,
+        "before_frame": 366,
+        "after_frame": 373,
+        "changed_pixel_ratio": 0.01697048611111111
+      },
+      "c1_s2_b1": {
+        "action": "reveal",
+        "target_id": "node:notify_order",
+        "beat_frame": 369,
+        "before_frame": 366,
+        "after_frame": 373,
+        "changed_pixel_ratio": 0.01697048611111111
+      },
+      "c1_s2_b2": {
+        "action": "reveal",
+        "target_id": "edge:e4",
+        "beat_frame": 369,
+        "before_frame": 366,
+        "after_frame": 373,
+        "changed_pixel_ratio": 0.01697048611111111
+      },
+      "c1_s2_b3": {
+        "action": "highlight",
+        "target_id": "node:return_book",
+        "beat_frame": 369,
+        "before_frame": 366,
+        "after_frame": 373,
+        "changed_pixel_ratio": 0.01697048611111111
+      },
+      "c1_s2_b4": {
+        "action": "highlight",
+        "target_id": "node:notify_order",
+        "beat_frame": 369,
+        "before_frame": 366,
+        "after_frame": 373,
+        "changed_pixel_ratio": 0.01697048611111111
+      },
+      "c1_s2_b5": {
+        "action": "highlight",
+        "target_id": "edge:e4",
+        "beat_frame": 369,
+        "before_frame": 366,
+        "after_frame": 373,
+        "changed_pixel_ratio": 0.01697048611111111
+      },
+      "c1_s3_b0": {
+        "action": "reveal",
+        "target_id": "node:no_notice",
+        "beat_frame": 484,
+        "before_frame": 481,
+        "after_frame": 488,
+        "changed_pixel_ratio": 0.018660783179012347
+      },
+      "c1_s3_b1": {
+        "action": "reveal",
+        "target_id": "node:direct_pickup",
+        "beat_frame": 484,
+        "before_frame": 481,
+        "after_frame": 488,
+        "changed_pixel_ratio": 0.018660783179012347
+      },
+      "c1_s3_b2": {
+        "action": "reveal",
+        "target_id": "edge:e5",
+        "beat_frame": 484,
+        "before_frame": 481,
+        "after_frame": 488,
+        "changed_pixel_ratio": 0.018660783179012347
+      },
+      "c1_s3_b3": {
+        "action": "highlight",
+        "target_id": "node:no_notice",
+        "beat_frame": 484,
+        "before_frame": 481,
+        "after_frame": 488,
+        "changed_pixel_ratio": 0.018660783179012347
+      },
+      "c1_s3_b4": {
+        "action": "highlight",
+        "target_id": "node:direct_pickup",
+        "beat_frame": 484,
+        "before_frame": 481,
+        "after_frame": 488,
+        "changed_pixel_ratio": 0.018660783179012347
+      },
+      "c1_s3_b5": {
+        "action": "highlight",
+        "target_id": "edge:e5",
+        "beat_frame": 484,
+        "before_frame": 481,
+        "after_frame": 488,
+        "changed_pixel_ratio": 0.018660783179012347
+      },
+      "c1_s4_b0": {
+        "action": "reveal",
+        "target_id": "node:reader_pickup",
+        "beat_frame": 606,
+        "before_frame": 603,
+        "after_frame": 610,
+        "changed_pixel_ratio": 0.013290412808641976
+      },
+      "c1_s4_b1": {
+        "action": "reveal",
+        "target_id": "node:application_end",
+        "beat_frame": 606,
+        "before_frame": 603,
+        "after_frame": 610,
+        "changed_pixel_ratio": 0.013290412808641976
+      },
+      "c1_s4_b2": {
+        "action": "reveal",
+        "target_id": "edge:e6",
+        "beat_frame": 606,
+        "before_frame": 603,
+        "after_frame": 610,
+        "changed_pixel_ratio": 0.013290412808641976
+      },
+      "c1_s4_b3": {
+        "action": "highlight",
+        "target_id": "node:reader_pickup",
+        "beat_frame": 606,
+        "before_frame": 603,
+        "after_frame": 610,
+        "changed_pixel_ratio": 0.013290412808641976
+      },
+      "c1_s4_b4": {
+        "action": "highlight",
+        "target_id": "node:application_end",
+        "beat_frame": 606,
+        "before_frame": 603,
+        "after_frame": 610,
+        "changed_pixel_ratio": 0.013290412808641976
+      },
+      "c1_s4_b5": {
+        "action": "highlight",
+        "target_id": "edge:e6",
+        "beat_frame": 606,
+        "before_frame": 603,
+        "after_frame": 610,
+        "changed_pixel_ratio": 0.013290412808641976
+      }
+    },
+    "scene_samples": [
+      {
+        "scene_id": "c1_s1",
+        "frame": 0,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 180,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 360,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-009.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 361,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-010.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 418,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-013.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 475,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-014.png"
+      },
+      {
+        "scene_id": "c1_s3",
+        "frame": 476,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+      },
+      {
+        "scene_id": "c1_s3",
+        "frame": 537,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-018.png"
+      },
+      {
+        "scene_id": "c1_s3",
+        "frame": 597,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-019.png"
+      },
+      {
+        "scene_id": "c1_s4",
+        "frame": 598,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-020.png"
+      },
+      {
+        "scene_id": "c1_s4",
+        "frame": 646,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-023.png"
+      },
+      {
+        "scene_id": "c1_s4",
+        "frame": 694,
+        "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-024.png"
+      }
+    ],
+    "contact_sheet": "artifacts/contact-sheet.jpg",
+    "captions": {
+      "burned_in": true,
+      "srt": "artifacts/captions.srt",
+      "alignment": "phrase-level measured PCM activity"
+    },
+    "video_form": "process_diagram",
+    "duration_mode": "content",
+    "content": {
+      "chapter_count": 1,
+      "coverage": {
+        "source_units_considered": 6,
+        "planned_points": 5,
+        "referenced_points": 5,
+        "all_planned_points_referenced": true
+      },
+      "duration_method": "complete measured narration; no duration fitting or clipping"
+    },
+    "diagram": {
+      "layout_engine": "elkjs-0.12.0",
+      "coordinates_authored_by_model": false,
+      "scene_count": 4,
+      "cue_timing": "estimated within measured phrases",
+      "minimum_node_font_px": 36
+    }
+  },
+  "manifest_hashes": 82,
+  "artifacts": [
+    "captions.srt",
+    "chapters.json",
+    "content-outline.json",
+    "diagram-layout.json",
+    "diagram-plan.json",
+    "diagram-timing.json",
+    "execution-log.txt",
+    "input-brief.json",
+    "manifest.json",
+    "model-cost.json",
+    "narration.json",
+    "prepared-source.txt",
+    "qa.json",
+    "storyboard.json",
+    "video-ir.json",
+    "video.mp4"
+  ],
+  "range_download": "PASS"
+}

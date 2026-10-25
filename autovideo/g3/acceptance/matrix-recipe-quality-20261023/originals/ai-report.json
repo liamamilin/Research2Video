@@ -1,0 +1,517 @@
+{
+  "script": {
+    "id": "4c4e99e98a3449fb9c5f4978b712c534",
+    "column_key": "report_digest",
+    "topic": {
+      "id": null,
+      "title": "2026-10-22_ai_opensource_radar",
+      "fields": {
+        "目标受众": "开发者"
+      },
+      "from_report": "output/radar/2026-10-22_ai_opensource_radar.md",
+      "report_id": "0719173f68414803b3772841d4156801"
+    },
+    "status": "APPROVED",
+    "research_job": "",
+    "report_path": "output/radar/2026-10-22_ai_opensource_radar.md",
+    "current_version": 1,
+    "approved_version": 1,
+    "error": null,
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T16:24:27+0800",
+    "updated_at": "2026-10-22T16:42:04+0800",
+    "heartbeat_at": 1792658513.1842508,
+    "stage": null,
+    "archived": 0,
+    "report_id": "0719173f68414803b3772841d4156801",
+    "production": "ai_media_opensource_digest"
+  },
+  "version": {
+    "script_id": "4c4e99e98a3449fb9c5f4978b712c534",
+    "version": 1,
+    "title": "Huashu Motion 做宣传片，另有四项",
+    "sections": [
+      {
+        "title": "本期地图",
+        "paragraphs": [
+          {
+            "text": "这期讲五件：编码 Agent 做宣传片，图文模型处理图文，图像转视频模型生成视频，Agent 联网协作，开源后端让 PyTorch 模型执行框架沿用代码和工具，在 AWS 的 AI 加速器 Trainium 上运行。",
+            "citations": [],
+            "evidence": "UNCITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      },
+      {
+        "title": "Huashu Motion 做宣传片",
+        "paragraphs": [
+          {
+            "text": "Huashu Motion 是一个开源项目，把编码 Agent 用在商业宣传片生产上。这里的编码 Agent，指 Claude Code、Codex 这类能执行开发任务的工具。",
+            "citations": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "它让 Claude Code、Codex 这类编码 Agent 作曲、生成商业宣传片，还能指着画面修改。代码使用 JavaScript，仓库主题覆盖动画、动态图形、发布视频和 Agent 技能。",
+            "citations": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "它以 1295 个 GitHub star 在近期新建项目里居首。这里的 star 就是 GitHub 收藏数。实际成片效果还没有说明。",
+            "citations": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "DeepSeek 处理图文",
+        "paragraphs": [
+          {
+            "text": "DeepSeek V4.1 Flash 是一个 image-text-to-text 开源模型。白话说，它接收图像和文字，再输出文字。它的下载量是 42122 次，下载量就是模型被下载的次数。",
+            "citations": [
+              "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "条目只给出任务类型和热度指标，模型规格、性能和部署要求目前都没有说明。",
+            "citations": [
+              "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "LTX 图像转视频",
+        "paragraphs": [
+          {
+            "text": "LTX-2.5 是一个 image-to-video 开源模型，输入图像，输出动态视频。它把静态画面转成视频，能力边界从任务类型上就很明确。",
+            "citations": [
+              "https://huggingface.co/Lightricks/LTX-2.5"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "它的下载量是 2057942 次，下载量就是模型被下载的次数；这个数字在这期 Hugging Face 热门模型里最高。",
+            "citations": [
+              "https://huggingface.co/Lightricks/LTX-2.5"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "它的许可证标为 other，具体使用条件没有展开。对准备直接使用的团队，授权范围是采用前必须核对的一项。",
+            "citations": [
+              "https://huggingface.co/Lightricks/LTX-2.5"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "Reason 连接 Agent",
+        "paragraphs": [
+          {
+            "text": "Reason Network 是一个用 Rust 编程语言编写的开源项目，让团队里的多个编码 Agent 通过网络互相通信。它聚焦多 Agent 协作，也就是让不同 Agent 彼此连接，而不是各自孤立运行。",
+            "citations": [
+              "https://github.com/reason-machines/reason-network"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "通信采用点对点方式，也就是 Agent 两两直接交换信息。这个项目有 937 个 GitHub star，在同期 Agent 类新项目中位居前列。这里的 star 是 GitHub 收藏数。",
+            "citations": [
+              "https://github.com/reason-machines/reason-network"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "项目描述较简短，具体通信架构没有说明。对于要评估多 Agent 通信的团队，当前条目缺少关键落地信息。",
+            "citations": [
+              "https://github.com/reason-machines/reason-network"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "TorchNeuron 后端",
+        "paragraphs": [
+          {
+            "text": "TorchNeuron 是让 PyTorch 模型工作流在 AWS Trainium 上执行的原生开源后端。这里的重点是保留原有 PyTorch 工作流，并让它们直接面向 Trainium 运行。",
+            "citations": [
+              "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "项目方说，模型代码、库和工具可以继续使用。eager execution 是用来研究和调试的执行方式；具体机制及其与常规方式的区别，没有说明。项目许可证为 Apache 2.0。",
+            "citations": [
+              "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "目前它还处于公开 Beta。现有介绍没有给出版本号、star 或性能数据，想评估 Trainium 工作流的人，可参考的实现信息仍然有限。",
+            "citations": [
+              "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "先试哪一项",
+        "paragraphs": [
+          {
+            "text": "如果你是用 Claude Code 或 Codex 制作商业宣传片的开发者，这期最值得先试 Huashu Motion，第一步就是打开仓库，用现有 Agent 试做一段宣传片。",
+            "citations": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "length_check": {
+      "spoken_length": 781,
+      "estimated_seconds": 180,
+      "segments": 36,
+      "units_per_second": 4.35,
+      "voice": "voxcpm_anchor",
+      "target_minutes": 3,
+      "budget": 783,
+      "ratio": 0.999,
+      "status": "OK",
+      "tolerance": 0.15,
+      "sections": [
+        {
+          "title": "本期地图",
+          "spoken_length": 66,
+          "budget": 112
+        },
+        {
+          "title": "Huashu Motion 做宣传片",
+          "spoken_length": 137,
+          "budget": 112
+        },
+        {
+          "title": "DeepSeek 处理图文",
+          "spoken_length": 86,
+          "budget": 112
+        },
+        {
+          "title": "LTX 图像转视频",
+          "spoken_length": 131,
+          "budget": 112
+        },
+        {
+          "title": "Reason 连接 Agent",
+          "spoken_length": 158,
+          "budget": 112
+        },
+        {
+          "title": "TorchNeuron 后端",
+          "spoken_length": 154,
+          "budget": 112
+        },
+        {
+          "title": "先试哪一项",
+          "spoken_length": 49,
+          "budget": 111
+        }
+      ]
+    },
+    "edit_type": "GENERATED",
+    "meta": {
+      "attempts": 1,
+      "usage": {
+        "requests": 1,
+        "prompt_tokens": 3094,
+        "completion_tokens": 26118,
+        "total_tokens": 29212
+      },
+      "problems": [],
+      "trusted_urls": 9,
+      "report_path": "output/radar/2026-10-22_ai_opensource_radar.md",
+      "written_at": "2026-10-22T16:27:34+0800",
+      "cell": {
+        "recipe": "report_digest",
+        "sha256": "4f2c17fdf3ce4aed3406fe0060abf74f721ff4590646cd019d5c5a40de0a5acb",
+        "cell": "ai-developer-digest-long",
+        "status": "experimental",
+        "parts": {
+          "domain": {
+            "key": "ai"
+          },
+          "type": {
+            "key": "digest"
+          },
+          "format": {
+            "key": "long"
+          },
+          "audience": {
+            "key": "developer"
+          }
+        },
+        "resolved_sha256": "eb244e7337286c3eee6d43c53fe31f7517e9080562a80e6791d4df50fe2f0b5d",
+        "uses": {
+          "audience": {
+            "kind": "audience",
+            "name": "developer",
+            "sha256": "c0b372a3cfcb6286f9729adad1bda1aa0acafbd484d3e4999b5361b7260b2d24"
+          },
+          "output": {
+            "kind": "part",
+            "name": "motion",
+            "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+          }
+        }
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这期讲五件：编码 Agent 做宣传片，图文模型处理图文，图像转视频模型生成视频，Agent 联网协作，开源后端让 Py…",
+            "problem": "句子有 66 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 6,
+            "paragraph": 0,
+            "quote": "如果你是用 Claude Code 或 Codex 制作商业宣传片的开发者，这期最值得先试 Huashu Motion，…",
+            "problem": "句子有 49 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 2,
+            "quote": "它以 1295 个 GitHub star 在近期新建项目里居首。",
+            "problem": "排名范围被泛化。报告限定的是“本批近 7 天新建 GitHub 项目”，讲稿改成了没有明确批次和时限的“近期新建项目”。",
+            "why": "1295 这一数字只能支持该项目在本批近 7 天新建 GitHub 项目中 star 最高，不能直接支持范围更大的近期新建项目排名。",
+            "suggestion": "恢复限定口径，说明它是在“本批近 7 天新建 GitHub 项目”中 star 最高。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "它把静态画面转成视频，能力边界从任务类型上就很明确。",
+            "problem": "讲稿把任务类型放大成了“能力边界很明确”的确定性结论。报告只确认其任务类型为 image-to-video、能够将输入图像转换为视频，同时说明生成效果暂无说明。",
+            "why": "任务类型只能明确输入和输出模态，不能证明模型的时长、画质、效果及完整能力边界已经清楚。“很明确”会让听众误以为相关能力已得到验证。",
+            "suggestion": "只陈述其任务类型和图像转视频能力，并补充具体生成效果和能力边界暂无说明。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D7",
+            "severity": "warn",
+            "section": 6,
+            "paragraph": 0,
+            "quote": "如果你是用 Claude Code 或 Codex 制作商业宣传片的开发者，这期最值得先试 Huashu Motion，第一步就是打开仓库，用现有 Agent 试做一段宣传片。",
+            "problem": "商业场景下的试用建议没有交代关键前提。报告虽然支持用 Claude Code、Codex 制作和迭代宣传片，但明确说明 Huashu Motion 的许可证与成片效果暂无说明，也没有证据支持它是无条件“最值得先试”的项目。",
+            "why": "star 数和“最值得讲”只能说明关注度，不能确认授权范围或实际成片可用性。面向商业宣传片开发者直接给出首选和第一步建议，却不提示核对许可证及实测效果，可能让使用者据报告未支持的信息进入实际采用流程。",
+            "suggestion": "将其表述为候选试用项目，并补充先核对仓库许可证、用小样实测效果后再决定是否用于商业发布；不要把“最值得”和“第一步”写成无条件结论。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "代码使用 JavaScript，仓库主题覆盖动画、动态图形、发布视频和 Agent 技能。",
+            "problem": "规范要求每件事围绕“是什么→能做什么→一个最该知道的限制”展开，这里却另塞实现语言和仓库主题标签；后半句与本条的能力和取舍无关，信息密度过低。",
+            "why": "仓库标签不能帮助观众判断 Huashu Motion 能做什么、是否值得试，只会增加一次听读中的信息负担。",
+            "suggestion": "删掉“仓库主题覆盖动画、动态图形、发布视频和 Agent 技能”；如果 JavaScript 也不影响是否试用，整句删除。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 2,
+            "quote": "它以 1295 个 GitHub star 在近期新建项目里居首。",
+            "problem": "这里把 star 数和名次直接作为该项目的结论，违反“不拿数字当结论”的数字规则。",
+            "why": "观众容易把热门程度误听成项目质量或实用性的结论，而脚本尚未提供成片效果这一真正影响取舍的信息。",
+            "suggestion": "删掉本句及下一句 star 释义，只保留“实际成片效果还没有说明”这一项限制。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "条目只给出任务类型和热度指标，模型规格、性能和部署要求目前都没有说明。",
+            "problem": "一段并列讲了规格、性能和部署要求三个缺口，违反每件事只讲“一个最该知道的限制”的要求。",
+            "why": "三个缺口没有主次，听众听完后仍不知道哪一项最影响是否采用。",
+            "suggestion": "从规格、性能和部署要求中只选一个最影响开发者取舍的缺口，用一句话讲清，其余删掉。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "这个数字在这期 Hugging Face 热门模型里最高。",
+            "problem": "这里把下载量数字直接下成“最高”的结论，违反“不拿数字当结论”的数字规则。",
+            "why": "下载量高只能说明下载次数多，不能替代对生成效果和使用边界的判断。",
+            "suggestion": "删掉这一句；如果下载量不用于说明任何实际取舍，连同上一句及其释义一起删掉。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 4,
+            "paragraph": 1,
+            "quote": "这个项目有 937 个 GitHub star，在同期 Agent 类新项目中位居前列。",
+            "problem": "这里用 star 数和名次给项目作结论，违反“不拿数字当结论”的数字规则。",
+            "why": "热度名次不能说明多 Agent 通信是否适合团队采用，反而可能掩盖真正影响取舍的架构信息。",
+            "suggestion": "删掉“位居前列”；如果 star 数不用于说明实际取舍，连同本句及下一句释义一起删掉。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 2,
+            "quote": "现有介绍没有给出版本号、star 或性能数据，想评估 Trainium 工作流的人，可参考的实现信息仍然有限。",
+            "problem": "上一句“公开 Beta”已经构成一项限制，这句又并列加入版本号、star、性能数据三项缺失，形成第二组限制，违反每件事只讲一个最该知道的限制。",
+            "why": "多项缺口同时出现会稀释公开测试状态这一主要取舍点，让观众听不出当前采用风险到底是什么。",
+            "suggestion": "删掉整句，保留“目前它还处于公开 Beta。”作为唯一限制，并用一句白话说明它对尝鲜采用者的影响。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "项目方说，模型代码、库和工具可以继续使用。",
+            "problem": "讲稿把报告中的“TLDR 摘要称”改成了“项目方说”，来源归属不一致；报告并未说明该说法直接来自项目方。",
+            "why": "这会改变信息的出处和证据链，把二手摘要的表述误写成项目方的直接表述。能力描述本身有报告依据，问题主要在来源归属失真。",
+            "suggestion": "改为“TLDR 摘要称，Trainium 上的 PyTorch 工作流可以继续使用已有模型代码、库和工具。”",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "summary": {
+          "serious": 0,
+          "must": 1,
+          "warn": 11,
+          "rule_must": 1,
+          "questions": 0,
+          "lost": 0,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 4
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "communication": {
+              "serious": 0,
+              "must": 1,
+              "warn": 7
+            }
+          },
+          "passed": false,
+          "rank": 1
+        },
+        "rounds": 1,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "PyTorch 和 AWS Trainium 分别是什么？尤其 Trainium 属于哪类 AWS 运行平台，开发者为什么要把现有工作流放到它上面？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "eager execution 具体指哪种执行方式，与 PyTorch 的常规执行方式有什么区别？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "audit_usage": {
+        "requests": 4,
+        "prompt_tokens": 9539,
+        "completion_tokens": 62054,
+        "total_tokens": 71593
+      }
+    },
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T16:27:34+0800"
+  }
+}

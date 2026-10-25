@@ -1,0 +1,1404 @@
+{
+  "script_id": "d6e2e0e5b0c54e7898ca23ea8b6e7ec0",
+  "version": 1,
+  "title": "合成世界练出的 agent，能力带得走吗？拆开 WildAWM 看",
+  "sections": [
+    {
+      "title": "一个人的第 11 天，被合成出来了",
+      "paragraphs": [
+        {
+          "text": "先看一条具体的任务。数据集里有个样例，编号 08951d-d11-h1：一个叫 Elena Vasquez 的虚构用户，电脑上的第 11 天，正赶上考试周。任务要求 agent 跳过她原计划里的剩菜，改做一道地中海烤鱼，写进 Allrecipes 的周四晚餐计划——还得写出脚本、把它跑起来。同一个人的同一个世界里还有第二条任务：先审计这周的做饭记录、核对日程，再给选中的鱼发一条带验证的评价。",
+          "facts": [
+            "F15",
+            "F16"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://huggingface.co/datasets/ChilleD/WildAWM"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "这两条都不是人写的剧本，是流水线合成出来的。2026 年 10 月 19 日，WildAWM 的论文、代码、环境与任务、训练好的权重一次性同日放出：341 个长程「环境-任务」对，部分任务要超过 100 个 agent 步才能走完。按作者自己的说法，GPT-6-Astra 在这批任务上只解出 60%。",
+          "facts": [
+            "F1",
+            "F12",
+            "F13"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://huggingface.co/datasets/ChilleD/WildAWM",
+            "https://huggingface.co/ChilleD/WildAWM-35B-A3B",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "但真正值得追问的不是它能造世界，而是造出来的世界，练出来的能力能不能带走。",
+          "facts": [
+            "F18"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "从工具沙箱到一台会过日子的电脑",
+      "paragraphs": [
+        {
+          "text": "要理解它改了什么，得先看它换掉了哪个单位。以前做 agent 训练环境，常见做法是一个工具一个沙箱：一个浏览器、一个终端、一个数据库，任务在里头闭环。WildAWM 把单位换成了「某个虚构用户在第 d 天的整台电脑」，论文里写成 W(c,d)。c 是 persona，d 是天数。状态按天累积：第 3 天没处理完的事、没删的文件、没回的消息，到第 11 天还留在桌面上。这就不是静态沙箱了。",
+          "facts": [
+            "F8"
+          ],
+          "introduces": [
+            "世界状态 W(c,d)"
+          ],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "更关键的是，这台电脑同时开着三种接口：WebHarbor 提供的网站图形界面、MCP 服务、还有命令行。三种接口共享同一份世界状态。你在网页上改了晚餐计划，命令行那边读到的就是改过的；你在终端里跑脚本生成了文件，MCP 的工具调用也能看见它。",
+          "facts": [
+            "F6"
+          ],
+          "introduces": [
+            "三接口共享状态"
+          ],
+          "recap": false,
+          "citations": [
+            "https://arxiv.org/html/2610.26828",
+            "https://github.com/MSR-Orchard/WildAWM"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "这一步的价值不在于「环境更大」，而在于任务第一次可以真的多跳。前面那条任务从命令行起步，要查日历、动食谱网站，最后还得写代码跑起来——四个 hop，跨三种接口。如果三种接口各自是独立沙箱，这种任务根本拼不出来。这些世界由 coding agent 构造，产物是可 Docker 启动、可回放的实例，跟着仓库一起开源。",
+          "facts": [
+            "F16",
+            "F22",
+            "F15"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://huggingface.co/datasets/ChilleD/WildAWM",
+            "https://arxiv.org/html/2610.26828",
+            "https://github.com/MSR-Orchard/WildAWM"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "任务和标准答案，是一起写出来的",
+      "paragraphs": [
+        {
+          "text": "接下来的问题是：任务和标准答案从哪来。流水线分两段。第一段造世界：coding agent 按 persona 和天数，把一个个有状态、会演化的电脑搭出来。第二段在这些世界状态上探索任务——注意，任务是和验证器一起写的。写完不算数，还要过质量门。",
+          "facts": [
+            "F8"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "质量门盯的是合成数据最容易崩的三件事：这任务到底解不解得开、难度够不够、验证器靠不靠谱。手段有三样。一是异构 agent rollout，让不同的 agent 真去跑一遍，跑不通的直接筛掉。二是多 judge 交叉核对，报告一致性统计 κ——几个裁判打分得对得上。三是反事实探针：故意喂一份「说得好听其实做错了」的答案，看裁判会不会被骗。",
+          "facts": [
+            "F10",
+            "F23"
+          ],
+          "introduces": [
+            "异构 agent rollout",
+            "多 judge 一致性 κ",
+            "反事实探针"
+          ],
+          "recap": false,
+          "citations": [
+            "https://arxiv.org/html/2610.26828",
+            "https://github.com/MSR-Orchard/WildAWM"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "为什么质检在这里不是锦上添花，是命门？因为题目和标准答案是同一条流水线生成的。出题的人顺手写标准答案，如果没人真去做一遍、没人交叉判一遍，你根本不知道这套题是难，还是错。",
+          "facts": [
+            "F10"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://arxiv.org/html/2610.26828",
+            "https://github.com/MSR-Orchard/WildAWM"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "通过质量门的 {task, environment, verifier} 三元组，一份数据同时供三处使用：SFT、在线 RL，还有评测。效率确实高。但也正是这个「一份三用」，埋下了后面那个最难回答的问题。",
+          "facts": [
+            "F9"
+          ],
+          "introduces": [
+            "task/environment/verifier 三元组"
+          ],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "「实质性提升」这四个字，现在能支持多少结论",
+      "paragraphs": [
+        {
+          "text": "论文摘要说，只用这些合成世界训练了两个不同规模的 Qwen 模型，在覆盖 web、claw、computer-use 三类的 8 个分布外 benchmark 上拿到「实质性提升」。先把这个说法的性质摆清楚：它是作者自己的总结，我们能看到的是概括；具体每一项涨了多少，并没有逐项摆出来。",
+          "facts": [
+            "F18"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "更值得听的是一个具体质疑。有二手评审指出：评测时用的 harness、system prompt 和工具，跟 RL rollout 是同一套；而评测里负责描述视觉画面的工具，用的正是 Qwen3.6-35B-A3B——它就是 35B 那个策略的基座，而且还在训练环里。",
+          "facts": [
+            "F26"
+          ],
+          "introduces": [
+            "harness 复用"
+          ],
+          "recap": false,
+          "citations": [
+            "https://pith.science/paper/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "打个比方：考试用的答题卡、笔和监考老师，跟平时练习一模一样。考得好，可能有一部分原因是熟门熟路。这层「熟悉」在真实部署里未必存在。所以那部分增益，可能相当程度来自适应同一套工具栈，而不是跨域泛化。",
+          "facts": [
+            "F26"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://pith.science/paper/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "再看那个 60%。它是作者自评，步数预算和评测协议没有核实，也没跟别的基准做同口径对照。所以不能拿它说「合成任务比真实机器更难」。能说的只是一个方向性判断：合成世界看上去并不比真实机器明显更容易。把这两件事放一起，稳妥的读法只有一句：工具栈适应，加轻度泛化。",
+          "facts": [
+            "F13",
+            "F26"
+          ],
+          "introduces": [
+            "stack adaptation"
+          ],
+          "recap": false,
+          "citations": [
+            "https://arxiv.org/html/2610.26828",
+            "https://pith.science/paper/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "可抄的是骨架，不是那 341 个世界",
+      "paragraphs": [
+        {
+          "text": "那对正在给团队造 agent 训练数据或评测集的人，这东西该怎么用？我的判断是：最值得拿走的不是那 341 个世界，是那副骨架，三段：用 coding agent 生成有状态、会演化的环境；任务与验证器一起生成、一起质检；训练和评测共用同一套三元组格式。还有那套质检组合——异构 rollout、跨 judge 一致性、反事实探针——搬到代码生成、SQL agent、RAG 评测集上，逻辑是一样的：只要题目和答案出自同一条流水线，你就得想办法从外面验它。",
+          "facts": [
+            "F33"
+          ],
+          "introduces": [
+            "三段结构"
+          ],
+          "recap": false,
+          "citations": [],
+          "evidence": "NEEDS_REVIEW",
+          "note": "用到了没有可追溯依据的事实：F33"
+        },
+        {
+          "text": "成本要算清楚。它不在模型调用，在工程基建：Python 3.12 以上、uv、Docker、Node.js，uv sync 一条命令装齐；还得从固定版本的 WebHarbor 镜像里拷 15 个网站镜像的初始种子，涉及 creator、agent、mcp 三类 Docker 镜像。",
+          "facts": [
+            "F11",
+            "F34"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM"
+          ],
+          "evidence": "NEEDS_REVIEW",
+          "note": "用到了没有可追溯依据的事实：F34"
+        },
+        {
+          "text": "所以分两条路。只想评测或者直接微调：hf download 拿现成的 341 对，配上已发布的 35B-A3B 或 4B 权重，跳过整个合成阶段。想自己扩世界、复刻流水线：先拿一个 persona 的一天跑通，确认那 15 个站点种子和三类镜像能到位，再谈规模化。",
+          "facts": [
+            "F14",
+            "F19",
+            "F20",
+            "F34"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://huggingface.co/datasets/ChilleD/WildAWM",
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://huggingface.co/ChilleD/WildAWM-35B-A3B"
+          ],
+          "evidence": "NEEDS_REVIEW",
+          "note": "用到了没有可追溯依据的事实：F34"
+        },
+        {
+          "text": "回到开头那个问题。当一个世界同时用来训练和评测，最先涨的可能不是能力，是默契。这不是说这套东西没价值——它能造出跨三种接口连续多跳的任务，这件事本身就值得学。但「合成世界能训出带得走的能力」这句话，现在还没到能说的时候。",
+          "facts": [
+            "F9",
+            "F26"
+          ],
+          "introduces": [],
+          "recap": true,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://pith.science/paper/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1798,
+    "estimated_seconds": 403,
+    "segments": 71,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 6,
+    "budget": 1566,
+    "ratio": 1.12,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "一个人的第 11 天，被合成出来了",
+        "spoken_length": 282,
+        "budget": 235
+      },
+      {
+        "title": "从工具沙箱到一台会过日子的电脑",
+        "spoken_length": 358,
+        "budget": 282
+      },
+      {
+        "title": "任务和标准答案，是一起写出来的",
+        "spoken_length": 354,
+        "budget": 391
+      },
+      {
+        "title": "「实质性提升」这四个字，现在能支持多少结论",
+        "spoken_length": 380,
+        "budget": 345
+      },
+      {
+        "title": "可抄的是骨架，不是那 341 个世界",
+        "spoken_length": 424,
+        "budget": 313
+      }
+    ]
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "writer": "adapt",
+    "style": {
+      "depth": "intermediate",
+      "tone": "explainer",
+      "label": "进阶 · 讲解通俗",
+      "presets": [
+        "intermediate@3",
+        "explainer@4"
+      ]
+    },
+    "prompts": {
+      "facts": 5,
+      "plan": 8,
+      "draft": 11,
+      "review": 7
+    },
+    "fact_sheet_id": "d87f8e3cb2dd158065ea0d202edc71aa824d87867501d1e8bfafc4e31702cf60",
+    "plan": {
+      "question": "当训练电脑操作 agent 的「世界」可以整台合成出来时，练出来的能力是能带走的，还是只在这套工具栈里生效？",
+      "audience": {
+        "knows": [
+          "Docker / 容器化运行环境的基本用法",
+          "LLM agent 的工具调用、CLI 与图形界面交互的基本形态",
+          "SFT 与在线 RL 这类后训练概念"
+        ],
+        "lacks": [
+          "合成环境流水线的具体构造方式",
+          "computer-use 评测里 harness 复用带来的归因问题",
+          "同一套 task/environment/verifier 三元组如何同时供训练与评测"
+        ],
+        "cares": "正在给自己团队造 agent 训练数据或评测集，想判断这类「世界合成」开源发布值不值得投入、哪部分能抄",
+        "takeaway": "WildAWM 真正改的是合成单位：从单个工具环境，变成 persona 在第 d 天累积出的整台电脑，GUI、MCP、CLI 共享同一份状态，任务因此能跨接口长程多跳。但它把同一套世界、任务、验证器同时用于训练和评测，当前能稳妥主张的是工具栈适应加轻度泛化，不是普适迁移；可复制的是三段结构和质检组合，成本在工程基建。"
+      },
+      "goals": [
+        {
+          "question": "WildAWM 相比「单个工具环境」的合成思路，关键变化是什么？",
+          "answer": "合成单位变成了 persona 在第 d 天累积出的整台电脑状态。同一个世界里同时存在网页图形界面、MCP 服务和命令行，三种接口共享状态，所以任务可以跨接口连续多跳，部分任务要超过 100 个 agent 步。世界由 coding agent 构造，产物是可 Docker 启动、可回放的实例。",
+          "facts": [
+            "F6",
+            "F8",
+            "F12",
+            "F16",
+            "F22"
+          ]
+        },
+        {
+          "question": "任务和验证器怎么被批量造出来、又怎么保证质量？",
+          "answer": "两阶段：先造按天演化的世界状态；再在这些状态上探索任务，把任务和验证器一起写，然后过 execution-based quality gates。质量门盯的是合成数据最容易崩的三件事——任务可不可解、难度够不够、验证器靠不靠谱，手段包括异构 agent rollout、多 judge 一致性 κ 和反事实探针。被接受的 {task, environment, verifier} 三元组同时供 SFT、在线 RL 与评测。",
+          "facts": [
+            "F8",
+            "F9",
+            "F10",
+            "F23"
+          ]
+        },
+        {
+          "question": "「8 个 OOD benchmark 实质性提升」能信到什么程度？",
+          "answer": "这是作者在摘要里的自述，摘要没给逐项分数，报告也没能在正文逐项对上。更关键的是有二手评审指出：评测复用了与 RL rollout 相同的 harness、system prompt 与工具，而视觉描述工具用的正是 Qwen3.6-35B-A3B，也就是 35B 策略的基座、还在训练环内。所以增益可能相当程度来自「适应同一套工具栈」。稳妥的读法是 stack adaptation 加轻度泛化。",
+          "facts": [
+            "F18",
+            "F26"
+          ]
+        },
+        {
+          "question": "想用的人该从哪下手，成本在哪？",
+          "answer": "只想评测或微调，直接下载现成的 341 个环境-任务对，配合已发布权重，跳过合成阶段；要自己扩世界，才需要付全套基建成本。运行依赖 Python 3.12+、uv、Docker、Node.js，用 uv sync 装齐，还要从固定版本的 WebHarbor 镜像里拷贝 15 个网站镜像种子，涉及 creator / agent / mcp 三类 Docker 镜像。真正可复制的是三段结构，不是那 341 个世界。",
+          "facts": [
+            "F14",
+            "F19",
+            "F20",
+            "F11",
+            "F33",
+            "F34"
+          ]
+        }
+      ],
+      "chain": [
+        {
+          "step": "WildAWM 把世界状态定义成 persona 在第 d 天累积出的整台电脑，不是静态沙箱",
+          "facts": [
+            "F8"
+          ]
+        },
+        {
+          "step": "同一个世界里 GUI、MCP、CLI 三种接口共享状态，任务因此能跨接口连续多跳；样例里第 11 天的任务要查日程、改食谱网站、写并运行脚本",
+          "facts": [
+            "F6",
+            "F15",
+            "F16",
+            "F12"
+          ]
+        },
+        {
+          "step": "世界由 coding agent 构造，产物是可 Docker 启动、可回放的实例，并随仓库开源",
+          "facts": [
+            "F22"
+          ]
+        },
+        {
+          "step": "在这些世界状态上合成任务，任务和验证器一起写，再过质量门：异构 rollout、多 judge 一致性 κ、反事实探针，分别盯可解性、难度和验证器可靠性",
+          "facts": [
+            "F8",
+            "F10",
+            "F23"
+          ]
+        },
+        {
+          "step": "被接受的 {task, environment, verifier} 同时供 SFT、在线 RL 和评测——这是效率来源，也是后来归因争议的根源",
+          "facts": [
+            "F9",
+            "F26"
+          ]
+        },
+        {
+          "step": "要真跑起来，需要 Python/uv/Docker/Node 和 WebHarbor 的 15 个站点种子，世界生成、agent 运行、MCP 服务分属三类镜像；成本在工程基建，不在模型调用",
+          "facts": [
+            "F11",
+            "F34"
+          ]
+        },
+        {
+          "step": "论文、代码、环境与任务、训练好的权重同日释出，341 对可直接下载；但泛化结论仍未经独立核实",
+          "facts": [
+            "F1",
+            "F14",
+            "F18",
+            "F19",
+            "F20"
+          ]
+        }
+      ],
+      "glossary": [
+        {
+          "term": "世界状态 W(c,d)",
+          "plain": "某个虚构用户 c 在第 d 天累积出来的个人电脑状态。",
+          "needs": [
+            "persona"
+          ],
+          "analogy": "像给一个人的电脑连拍了十几天快照：第 11 天的桌面上还留着第 3 天没处理完的事、没删的文件、没回的消息。",
+          "mapping": {
+            "c": "人格设定，比如 08951d-elena-vasquez",
+            "d": "第几天，样例里出现过 day: 11",
+            "W": "那一天的整机状态，含文件、数据库、可用技能"
+          },
+          "breaks": "这里的「演化」是流水线合成的，不是真人十几天真的用出来的痕迹。"
+        },
+        {
+          "term": "三接口合一",
+          "plain": "同一个环境里同时能看网页、调工具、敲命令行。",
+          "needs": [],
+          "analogy": "同一台电脑上，你可以用鼠标点网页订餐，可以让助手调日历接口，也可以开终端跑脚本——一件事能在三者之间来回倒手。",
+          "mapping": {
+            "图形界面": "WebHarbor 提供的网站镜像",
+            "MCP": "统一的工具调用接口",
+            "CLI": "命令行"
+          },
+          "breaks": "三种接口共享同一份世界状态，所以在一个接口里改了东西，另外两个接口能看见——这正是任务可以「多跳」的原因。"
+        },
+        {
+          "term": "验证器与质量门",
+          "plain": "验证器是判断任务有没有做对的检查程序；质量门是筛掉不可解、太简单、验证器不可靠的任务的那套检查。",
+          "needs": [
+            "rollout",
+            "LLM-as-judge"
+          ],
+          "analogy": "出题的人自己顺手写标准答案，再找几个不同的人去做一遍、找几个不同的老师去判一遍，还故意塞几份「说得漂亮但做错了」的卷子看老师会不会被骗。",
+          "mapping": {
+            "做一遍": "异构 agent rollout",
+            "几个老师": "多 judge 一致性 κ",
+            "塞错卷子": "反事实探针"
+          },
+          "breaks": "题目和标准答案是同一条流水线生成的，所以质检不是可选项，是这套方法的命门。"
+        },
+        {
+          "term": "harness 复用",
+          "plain": "评测时用的运行框架、system prompt 和工具，跟训练时是同一套。",
+          "needs": [],
+          "analogy": "考试用的答题卡格式、笔和监考老师，跟平时练习时一模一样；考得好可能有一部分原因是熟门熟路。",
+          "mapping": {
+            "同一套 harness": "OpenCode harness（二手来源）",
+            "同一个模型": "视觉描述工具用的 Qwen3.6-35B-A3B，也是 35B 策略的基座"
+          },
+          "breaks": "这层「熟悉」在真实部署里未必存在，所以增益不能直接读成跨域泛化。"
+        }
+      ],
+      "misconceptions": [
+        {
+          "wrong": "341 就是 341 个不同的软件或网站，规模很大。",
+          "fix": "是 341 个「环境-任务」对。同一个 persona、同一天的世界状态可以被多个任务复用——样例里 h1 和 h2 就在同一天、同一个人的世界里，一个做晚饭计划，一个写餐厅评价。真正的规模差异在任务的跳数和步数，部分任务要上百个 agent 步。"
+        },
+        {
+          "wrong": "作者说 GPT-6-Astra 只解出 60%，说明这些合成任务比真实机器上的任务更难。",
+          "fix": "不能直接这么比。这个 60% 是作者自评，步数预算与评测协议未核实，也没有和别的基准做同口径对照。能说的只是方向性判断：合成世界看上去并不比真实机器明显更容易。"
+        },
+        {
+          "wrong": "流水线完全由开源模型驱动，所以整条链路没有任何闭源依赖。",
+          "fix": "这是作者在摘要里对自家流水线的自述。报告见到的几处「交叉印证」其实是同一份摘要的转载或引用，不构成独立验证。"
+        }
+      ],
+      "actions": [
+        {
+          "condition": "想先看效果、或者直接拿数据微调，不打算自己造世界。",
+          "step": "用 hf download 取现成的 341 个环境-任务对，配合已发布的 WildAWM-35B-A3B 或 WildAWM-4B 权重，跳过整个合成阶段。",
+          "verify": "先在仓库给定的 harness 下跑通一条公开样例任务（如 wildawm/08951d-d11-h1），确认 Docker 运行时和工具调用链能起来。",
+          "needs": [
+            "F14",
+            "F15",
+            "F19",
+            "F20",
+            "F11"
+          ]
+        },
+        {
+          "condition": "想自己扩展世界或复刻流水线。",
+          "step": "先按三段结构拆：用 coding agent 生成有状态、按天演化的环境；任务与验证器一起生成、一起质检；训练和评测共用同一套三元组格式。再算基建账。",
+          "verify": "先用 uv sync 加 Docker 跑通 creator 阶段单个 persona 的单个天，确认 WebHarbor 那 15 个网站镜像种子能到位，再谈规模化。",
+          "needs": [
+            "F11",
+            "F22",
+            "F9",
+            "F33",
+            "F34"
+          ]
+        },
+        {
+          "condition": "想验证「到底是不是跨域泛化」。",
+          "step": "把评测 harness 与训练 harness 分开：换一套 system prompt、换一组工具、换掉那个兼作视觉描述的基座模型，再重测同一批任务。",
+          "verify": "看增益还剩多少。这是从共享 harness 的争议直接推出的检查方式，不是论文里做过的实验。",
+          "needs": [
+            "F26"
+          ]
+        }
+      ],
+      "must_cover": [
+        {
+          "item": "合成单位从单个工具环境变成 persona 第 d 天累积的整机电脑，三接口共享状态，才有长程跨接口任务",
+          "beat": 2
+        },
+        {
+          "item": "任务与验证器一起生成、一起过质量门，针对可解性、难度、验证器可靠性",
+          "beat": 3
+        },
+        {
+          "item": "同一套三元组同时供 SFT、在线 RL 与评测",
+          "beat": 3
+        },
+        {
+          "item": "评测与训练复用同一 harness 与 system prompt，视觉描述工具是策略基座，增益可能是工具栈适应",
+          "beat": 4
+        },
+        {
+          "item": "可复制的是三段结构；复现门槛在 uv/Docker/Node 与 WebHarbor 15 个站点种子、三类镜像，成本在基建",
+          "beat": 5
+        }
+      ],
+      "core_message": "WildAWM 最实质的一步，是把「合成环境」的单位从静态工具沙箱换成了一个虚构用户按天累积的整台电脑，让任务能在图形界面、MCP 和命令行之间连续多跳；而它把同一套环境-任务-验证器同时喂给训练和评测，既是效率来源，也让「泛化」这个结论最难站住。目前能稳妥主张的是工具栈适应加轻度泛化，不是合成世界就能普适迁移。",
+      "hook": {
+        "kind": "场景加反转",
+        "idea": "先讲一条真实存在的样例任务：同一个人、第 11 天、考试周，agent 要跳过计划里的剩菜、改做地中海烤鱼写进周四晚餐计划，还得写脚本并跑起来——这既不是人写的剧本，也不是某个真实网站的教程，是流水线自动合成的。紧接着给反转：2026 年 10 月 19 日论文、代码、环境与任务、权重同日释出，341 个环境-任务对，部分任务超过 100 个 agent 步，作者自评 GPT-6-Astra 只解出 60%；但最值得追问的不是它能造世界，而是造出来的世界能不能训出带得走的能力。",
+        "facts": [
+          "F1",
+          "F15",
+          "F16",
+          "F12",
+          "F13"
+        ]
+      },
+      "beats": [
+        {
+          "title": "一个人的第 11 天，被合成出来了",
+          "role": "钩子",
+          "point": "用一条具体样例把「合成世界」落到可感知的画面：同一个虚构用户的第 11 天，任务要跨日程、食谱网站和一段脚本，还要写进周四晚餐计划；同一世界里的 h2 任务则是在做完审计和日程核对后发一条评价。然后交代分量：论文、代码、环境与任务、训练好的权重一次性同日释出，341 个环境-任务对，部分任务超过 100 个 agent 步，作者自评 GPT-6-Astra 只解出其中 60%。但把悬念立住：这一切最值得追问的，是「合成出来的世界，练出来的能力能不能带走」。",
+          "facts": [
+            "F1",
+            "F15",
+            "F16",
+            "F12",
+            "F13"
+          ],
+          "terms": [
+            "世界状态 W(c,d)",
+            "persona",
+            "长程任务与 agent 步"
+          ],
+          "budget": 235
+        },
+        {
+          "title": "从工具沙箱到一台会过日子的电脑",
+          "role": "背景",
+          "point": "WildAWM 换的是合成单位，不是单纯把环境数量做大。环境变成 persona 在第 d 天的整台电脑，状态按天累积，图形界面、MCP、CLI 三种接口同时存在于同一个世界。这一步的价值不在「更大」，在于任务第一次可以真的多跳——样例里同一个人同一天的两个任务，一个要查日程、做计划、写脚本，另一个要在做完审计后跨三种接口发一条评价。世界由 coding agent 构造，产物是可 Docker 启动、可回放的实例。",
+          "facts": [
+            "F6",
+            "F8",
+            "F22",
+            "F16"
+          ],
+          "terms": [
+            "可执行环境",
+            "MCP",
+            "CLI",
+            "WebHarbor",
+            "Docker 镜像"
+          ],
+          "budget": 282
+        },
+        {
+          "title": "任务和标准答案，是一起写出来的",
+          "role": "机制",
+          "point": "两阶段：先用 coding agent 造世界状态；再在这些状态上探索任务，任务和验证器一起写，然后过质量门。质量门盯的是合成数据最容易崩的三件事——任务到底可不可解、难度够不够、验证器靠不靠谱，用的手段是异构 agent rollout、多 judge 一致性 κ、以及反事实探针，故意喂「说得好听但实际错了」的答案，看裁判会不会被骗。出来的 {task, environment, verifier} 三元组，同时供 SFT、在线 RL 和评测。这里要讲透的是：题目和标准答案出自同一条流水线，所以质检不是锦上添花，是这套方法能不能立住的前提。",
+          "facts": [
+            "F8",
+            "F9",
+            "F10",
+            "F23"
+          ],
+          "terms": [
+            "rollout",
+            "LLM-as-judge 与 κ",
+            "反事实探针",
+            "验证器",
+            "SFT 与在线 RL"
+          ],
+          "budget": 391
+        },
+        {
+          "title": "「实质性提升」这四个字，现在能承重多少",
+          "role": "反方",
+          "point": "摘要说只用合成世界训练了两个 Qwen 模型，在覆盖 web / claw / computer-use 三类的 8 个 OOD benchmark 上有实质性提升——但摘要没给逐项分数，报告也没能逐项对上。更值得听的是那个具体质疑：评测复用了与 RL rollout 同一套 harness、system prompt 与工具，而视觉描述工具用的正是 Qwen3.6-35B-A3B，也就是 35B 策略的基座、还在训练环内。这意味着增益可能有相当一部分来自「适应同一套工具栈」。再加上 GPT-6-Astra 那个 60% 的步数预算和评测协议未核实，不能拿去和别的基准直接比。能稳妥说的只剩一句：合成世界看上去并不比真实机器更容易，结论要读成 stack adaptation 加轻度泛化。",
+          "facts": [
+            "F18",
+            "F26",
+            "F13"
+          ],
+          "terms": [
+            "OOD benchmark",
+            "harness"
+          ],
+          "budget": 345
+        },
+        {
+          "title": "可抄的是骨架，不是那 341 个世界",
+          "role": "收束",
+          "point": "对做 agent 工具链的团队，值得拿走的是三段结构：用 coding agent 生成有状态、会演化的环境；任务与验证器一起生成、一起质检；训练与评测共用同一套三元组格式。那套「异构 rollout + 跨 judge 一致性 + 反事实探针」的质检组合，迁到代码生成、SQL agent、RAG 评测集上同样成立。成本不在模型调用，在工程基建——运行依赖 Python 3.12+、uv、Docker、Node.js，还要从固定版本的 WebHarbor 镜像里拷贝 15 个网站镜像种子，涉及 creator / agent / mcp 三类镜像。只想评测或微调，直接用现成的 341 对加已发布权重；要自己扩世界，才付全套。最后回到开场那个问题：当一个世界同时用来训练和评测，最先涨的可能不是能力，是默契。",
+          "facts": [
+            "F33",
+            "F34",
+            "F14",
+            "F19",
+            "F20",
+            "F11"
+          ],
+          "terms": [
+            "合成数据流水线",
+            "checkpoint 与后训练"
+          ],
+          "budget": 313
+        }
+      ],
+      "scope_out": [
+        "作者单位、论文编号与分类、仓库热度和页面投票数：对理解主线没有解释价值。",
+        "数据集 schema_version、样例字段全貌、sglang 启动参数与上下文长度：操作细节，留在模型卡和资料里。",
+        "五道质量门的逐门名单与消融实验：仅见于二手来源、未在报告层面核实，正文只讲质量门的目标和手段。",
+        "Claw-Eval 的任务数、rubric 数与 Pass^3 口径：属于另一个基准的细节，本期不展开。"
+      ],
+      "left_out": [],
+      "fit": {
+        "ok": true,
+        "note": "五节，约 6 分钟。第 3、4 节是重心，分别承担机制和争议；第 5 节把 F11 的基建门槛落到可执行判断。若压到 5 分钟，优先砍第 1 节里 h2 任务的复述，保留「同一世界、连续多跳、跨三种接口」这一句结论，但不删 F11 的依赖与 15 个站点种子。"
+      }
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "「11天」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule"
+        },
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "「3天」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule"
+        },
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "「11天」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule"
+        },
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "「4」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：()",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：，短横线区间",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "开场用编号、虚构用户名和两条任务细节堆信息，还没给出判断框架，第一遍容易抓不住重点。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "60% 算高还是低、跟什么比？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "发布日期、论文代码权重、任务数、步数、60% 一次抛出，略堆。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "三样质检手段并列，κ 突然出现，第一遍容易听成术语清单。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 3,
+          "quote": "",
+          "problem": "同一份三元组同时用于训练和评测，怎么避免评测泄漏或过拟合？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "视觉描述工具为什么算在训练环里，为什么会污染评测？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "harness、system prompt、工具、视觉工具、基座、训练环挤在一句里，信息过载。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 3,
+          "quote": "",
+          "problem": "既然评测同源，为什么还能下‘轻度泛化’的结论？依据是什么？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 3,
+          "quote": "",
+          "problem": "最后落到‘工具栈适应，加轻度泛化’稍显突然，‘轻度泛化’的证据没展开。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "15 个网站种子和 creator、agent、mcp 三类镜像各自要干什么？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "镜像、种子、依赖清单堆在一起，第一次听不容易记。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [
+          {
+            "id": "G1",
+            "question": "WildAWM 相比「单个工具环境」的合成思路，关键变化是什么？",
+            "expected": "合成单位变成了 persona 在第 d 天累积出的整台电脑状态。同一个世界里同时存在网页图形界面、MCP 服务和命令行，三种接口共享状态，所以任务可以跨接口连续多跳，部分任务要超过 100 个 agent 步。世界由 coding agent 构造，产物是可 Docker 启动、可回放的实例。",
+            "answer": "关键变化是把单位从‘一个工具一个沙箱’换成‘某个虚构用户在第 d 天的整台电脑’，状态按天累积，并且网站图形界面、MCP 服务和命令行三种接口共享同一份世界状态，因此能做出跨接口连续多跳的任务。",
+            "correct": true,
+            "note": "答出了合成单位变为 persona 第 d 天累积的整台电脑、状态按天累积、三接口共享状态因而可跨接口多跳，核心变化正确；只少提了部分任务超过 100 步和产物可 Docker 回放这两个细节，不影响判断。"
+          },
+          {
+            "id": "G2",
+            "question": "任务和验证器怎么被批量造出来、又怎么保证质量？",
+            "expected": "两阶段：先造按天演化的世界状态；再在这些状态上探索任务，把任务和验证器一起写，然后过 execution-based quality gates。质量门盯的是合成数据最容易崩的三件事——任务可不可解、难度够不够、验证器靠不靠谱，手段包括异构 agent rollout、多 judge 一致性 κ 和反事实探针。被接受的 {task, environment, verifier} 三元组同时供 SFT、在线 RL 与评测。",
+            "answer": "先用 coding agent 按 persona 和天数搭出有状态、会演化的电脑世界，再在这些状态上探索并生成任务，同时写验证器。质量门用异构 agent 真跑筛掉解不开的，用多个 judge 交叉核对一致性，再用反事实探针看验证器会不会被‘说得好听其实做错了’的答案骗过；通过后才留下 {task, environment, verifier} 三元组。",
+            "correct": true,
+            "note": "答出两阶段（coding agent 按 persona 和天数造有状态世界，再在状态上生成任务并同时写验证器）和三类质检手段（异构 agent 真跑、多 judge 一致性、反事实探针），方向正确；漏说三元组同时供 SFT、在线 RL 与评测，属细节遗漏。"
+          },
+          {
+            "id": "G3",
+            "question": "「8 个 OOD benchmark 实质性提升」能信到什么程度？",
+            "expected": "这是作者在摘要里的自述，摘要没给逐项分数，报告也没能在正文逐项对上。更关键的是有二手评审指出：评测复用了与 RL rollout 相同的 harness、system prompt 与工具，而视觉描述工具用的正是 Qwen3.6-35B-A3B，也就是 35B 策略的基座、还在训练环内。所以增益可能相当程度来自「适应同一套工具栈」。稳妥的读法是 stack adaptation 加轻度泛化。",
+            "answer": "‘实质性提升’目前只是作者概括，没有逐项涨多少。更关键的是评测用的 harness、system prompt 和工具跟 RL rollout 是同一套，评测里描述视觉画面的工具还是 35B 策略的基座模型、又在训练环里，所以增益可能相当一部分来自熟悉工具栈，而不是跨域泛化；60% 也是未核实协议的自评，不能拿来证明合成任务比真实机器更难。稳妥只能说工具栈适应加轻度泛化，不能当成强迁移证据。",
+            "correct": true,
+            "note": "正确指出「实质性提升」是作者概括、没有逐项分数，也正确复述了二手评审关于评测复用 RL harness、system prompt 与工具，以及视觉工具是 35B 策略基座且在训练环内的质疑，结论收在工具栈适应加轻度泛化。"
+          },
+          {
+            "id": "G4",
+            "question": "想用的人该从哪下手，成本在哪？",
+            "expected": "只想评测或微调，直接下载现成的 341 个环境-任务对，配合已发布权重，跳过合成阶段；要自己扩世界，才需要付全套基建成本。运行依赖 Python 3.12+、uv、Docker、Node.js，用 uv sync 装齐，还要从固定版本的 WebHarbor 镜像里拷贝 15 个网站镜像种子，涉及 creator / agent / mcp 三类 Docker 镜像。真正可复制的是三段结构，不是那 341 个世界。",
+            "answer": "只想评测或微调，就直接下载现成的 341 对，配上已发布的 35B-A3B 或 4B 权重，跳过合成阶段。想复刻或扩世界，就先让一个 persona 的一天跑通，确认 15 个网站种子和 creator、agent、mcp 三类 Docker 镜像能到位，再规模化。主要成本在工程基建，不在模型调用：Python 3.12+、uv、Docker、Node.js，以及镜像和种子准备。",
+            "correct": true,
+            "note": "两条路的划分（直接下载 341 对配已发布权重跳过合成，对比自建才付全套基建）、依赖清单和 15 个网站种子加 creator/agent/mcp 三类镜像都说对了，成本判断也落在工程基建上。"
+          }
+        ],
+        "score": 1.0
+      },
+      "newcomer": {
+        "retell": "我最记得的是：WildAWM 把合成环境从单个工具沙箱换成‘一个虚构用户某一天的整台电脑’，状态跨天累积，网页、MCP、终端共用一个世界，所以任务能真的跨接口多跳。它还把任务和验证器一起生成，再用异构 rollout、多 judge 和反事实探针质检，同一套三元组同时供 SFT、RL 和评测。讲者最关键的提醒是，训练和评测共用工具栈会让成绩有‘默契分’，所以那 341 个世界不是最该抄的，最该抄的是造有状态世界、任务验证器共同生成质检、以及三元组复用的骨架。",
+        "scores": {
+          "hook": 4,
+          "clarity": 4,
+          "pacing": 4,
+          "style": 4
+        },
+        "comments": "值得听，尤其对正在给团队造 agent 训练数据和评测集的人：它没有停在发布介绍，而是把可复用骨架、质检组合和评测归因风险讲清楚了。最该改的是 S4P2，把 harness 复用、视觉工具与被评策略同基座的关系拆成两三句慢讲，并补上‘轻度泛化’的依据或收窄说法；开场样例编号与任务细节、S5P2 的镜像清单也可压缩或分层，减少第一遍的信息负担。"
+      },
+      "core_message_match": true,
+      "core_message_note": "观众复述抓住方案主旨的全部要点：合成单位从单个工具沙箱换成某个虚构用户按天累积的整台电脑，状态跨天保留，网页界面、MCP 和命令行共用同一份状态，因此能跨接口多跳；任务与验证器一起生成并相互质检；三元组同时供 SFT、RL 和评测；重点提醒是训练与评测共用工具栈会产生「默契分」，真正值得学的是骨架而非 341 个世界；稳妥结论是工具栈适应加轻度泛化。没有把「合成世界即可普适泛化」说成结论，也没有漏掉「同一套三元组既是效率来源也是泛化结论最难成立之处」这层张力。",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": true,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 17,
+        "rule_must": 0,
+        "questions": 5,
+        "lost": 6,
+        "quiz_score": 1.0,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 11
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 2
+          }
+        },
+        "passed": false,
+        "rank": 0
+      },
+      "rounds": 1,
+      "deletions": [],
+      "initial": [
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "「11天」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule",
+          "resolved": false
+        },
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "「3天」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule",
+          "resolved": false
+        },
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "「11天」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule",
+          "resolved": false
+        },
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "「4」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule",
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "D5",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "摘要没给逐项分数",
+          "problem": "内部资料缺口进入口播，观众不知道所指资料，且容易误解为原来源缺少信息",
+          "why": "审稿人之间的话不该讲给观众",
+          "suggestion": "将研究缺口留在审校记录；删除或收窄无依据的结论，保留与具体主张相关的事实限定",
+          "source": "audience_copy",
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：()",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule",
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：，短横线区间",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "第二条任务和第一条是什么关系？为什么要在同一段里连讲两条？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "任务细节一口气堆上来：Allrecipes、周四晚餐、脚本、审计、评价，第一次听不容易马上抓住主线。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“只解出 60%”是任务通过率、步骤完成率，还是别的口径？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "日期、341 对、100 步、60% 数字密集，“只解出”又有歧义，会卡一下。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 3,
+          "quote": "",
+          "problem": "“一份三用”具体怎么同时喂 SFT、在线 RL 和评测，又怎么避免评测泄漏？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“实质性提升”到底多大？8 个 benchmark 各自如何？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "视觉描述工具是 35B 策略的基座、又在训练环里，为什么会抬高评测？它是给谁提供画面描述的？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“同一套 harness/system prompt/工具”和真实部署差在哪里？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "全片最关键的一段，但 Qwen3.6-35B-A3B、基座、训练环挤在一起，第一次听需要回放。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 3,
+          "quote": "",
+          "problem": "既然评测受同一套工具栈影响，“轻度泛化”还剩下什么依据？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 3,
+          "quote": "",
+          "problem": "“工具栈适应，加轻度泛化”下得太快，像突然给判词，想多听半步解释。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "工程成本到底多大？要多少存储、机器和时间？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "版本、uv sync、15 个站点种子、三类镜像连续列出，像安装清单，容易滑走；但对动手的人有用。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        }
+      ],
+      "editorial_attempted": false
+    },
+    "description": {
+      "summary": "拆解 WildAWM：它把合成环境的单位从单个工具沙箱换成虚构用户第 d 天累积的整台电脑，让 GUI、MCP、CLI 共享状态，任务因此能跨接口长程多跳；但它把同一套世界、任务、验证器同时用于训练和评测，所以「实质性提升」目前只能读成工具栈适应加轻度泛化。",
+      "details": [
+        "运行依赖 Python 3.12+、uv、Docker、Node.js，uv sync 安装；需从固定版本 WebHarbor 镜像拷贝 15 个网站镜像种子，涉及 creator / agent / mcp 三类镜像。",
+        "已发布权重：ChilleD/WildAWM-35B-A3B（基于 Qwen3.6-35B-A3B，纯文本服务，上下文 262144）与 ChilleD/WildAWM-4B。",
+        "数据集 ChilleD/WildAWM 可直接下载 341 个环境-任务对，跳过合成阶段；配套 Harbor hub 名为 wildawm。",
+        "样例任务 wildawm/08951d-d11-h1：difficulty hard、persona 08951d-elena-vasquez、day 11、hops 4、starting_interface cli、sites allrecipes、mcp_domains calendar 与 direct_messages。"
+      ],
+      "open_questions": [
+        "摘要所称 8 个 OOD benchmark 的确切名单与逐项分数未公开，无法判断提升集中在哪些任务类型。",
+        "GPT-6-Astra 的 60% 解出率所用的步数预算与评测协议未核实，不能与其他基准同口径比较。",
+        "多 judge 一致性 κ 的具体数值与统计口径未核实。"
+      ],
+      "not_covered": [],
+      "sources": [
+        {
+          "url": "https://huggingface.co/datasets/ChilleD/WildAWM",
+          "facts": [
+            "F15",
+            "F16",
+            "F1",
+            "F14"
+          ]
+        },
+        {
+          "url": "https://github.com/MSR-Orchard/WildAWM",
+          "facts": [
+            "F1",
+            "F8",
+            "F6",
+            "F22",
+            "F10",
+            "F9",
+            "F11",
+            "F14",
+            "F19",
+            "F20"
+          ]
+        },
+        {
+          "url": "https://huggingface.co/ChilleD/WildAWM-35B-A3B",
+          "facts": [
+            "F1",
+            "F19",
+            "F20"
+          ]
+        },
+        {
+          "url": "https://arxiv.org/html/2610.26828",
+          "facts": [
+            "F12",
+            "F13",
+            "F18",
+            "F8",
+            "F6",
+            "F22",
+            "F10",
+            "F23"
+          ]
+        },
+        {
+          "url": "https://pith.science/paper/2610.26828",
+          "facts": [
+            "F26"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "requests": 7,
+      "prompt_tokens": 41911,
+      "completion_tokens": 50415,
+      "total_tokens": 92326
+    },
+    "problems": [
+      "方案：用了不存在的事实编号：8 个 OOD benchmark 的逐项分数与完整名单, 质量门的逐门名单与消融实验",
+      "方案：结构参考：配方建议的角色未单独分节：行动，可合并讲述，不为凑角色新增内容"
+    ],
+    "review_usage": {
+      "requests": 2,
+      "prompt_tokens": 15045,
+      "completion_tokens": 9803,
+      "total_tokens": 24848
+    },
+    "report_path": "output/deep/2026-10-22_ai_deep_research.md",
+    "written_at": "2026-10-23T22:00:11+0800",
+    "cell": {
+      "recipe": "deep_dive",
+      "sha256": "6021b21ee32fad1341764045d92232ad89e94914d6608b7b759f1d7a3fac38ed",
+      "cell": "ai-developer-deep_dive-long",
+      "status": "enabled",
+      "parts": {
+        "domain": {
+          "key": "ai"
+        },
+        "type": {
+          "key": "deep_dive"
+        },
+        "format": {
+          "key": "long"
+        },
+        "audience": {
+          "key": "developer"
+        }
+      },
+      "resolved_sha256": "ef5d76564693ebf3dcabe5f979481d2e6fe5afdf21735f8b379eb6202e61b875",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "developer",
+          "sha256": "64030ba33845739f4a5b73135825fb8bf3cacc84e738458b78917713d35cb563"
+        },
+        "research": {
+          "kind": "research_template",
+          "name": "deep_dive",
+          "sha256": "1c3e184d0fb202a3e237756b3f6e9af81a186f1b89294d1afdc5ee4d395a8b4f"
+        },
+        "output": {
+          "kind": "part",
+          "name": "auto_form",
+          "sha256": "5492378c0be9d048c447a65fcab7b33e890e659c18013470a9269b0021896243"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    }
+  },
+  "created_by": "多矩阵质量验收",
+  "created_at": "2026-10-23T22:00:11+0800"
+}

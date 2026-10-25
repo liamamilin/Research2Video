@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "categories",
+    "values",
+    "unit",
+    "baseline_zero"
+  ],
+  "properties": {
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 25
+      }
+    },
+    "values": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1000000000000.0
+      }
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20
+    },
+    "baseline_zero": {
+      "const": true
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/autovideo/components/bar_chart.schema.json",
+  "title": "AutoVideo bar_chart props v0.2"
+}

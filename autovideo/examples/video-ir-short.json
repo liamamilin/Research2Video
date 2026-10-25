@@ -1,0 +1,91 @@
+{
+  "schema_version": "0.1",
+  "video": {
+    "title": "信号与噪声（结构示例）",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration_ms": 10500
+  },
+  "source": {
+    "language": "zh-CN",
+    "text_sha256": "38a2ca3573dedc7af0668f05b506ba56dc7a4994e26eb63953f5168544c53515",
+    "original_text": "发送者通过信道传递信息，但是噪声会干扰信号。"
+  },
+  "style": {
+    "preset": "minimal_dark",
+    "seed": 42
+  },
+  "assets": [
+    {
+      "id": "voice_main",
+      "type": "audio",
+      "path": "assets/voice.wav",
+      "origin": "example-placeholder-not-a-real-file"
+    }
+  ],
+  "narration": {
+    "text": "发送者通过信道传递信息。但是噪声会干扰信号。",
+    "audio_asset_id": "voice_main",
+    "segments": [
+      {
+        "id": "n1",
+        "text": "发送者通过信道传递信息。",
+        "start_ms": 0,
+        "end_ms": 5200
+      },
+      {
+        "id": "n2",
+        "text": "但是噪声会干扰信号。",
+        "start_ms": 5200,
+        "end_ms": 10500
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "id": "s1",
+      "start_ms": 0,
+      "duration_ms": 5200,
+      "component": "flow_diagram",
+      "props": {
+        "nodes": [
+          "发送者",
+          "信道",
+          "接收者"
+        ],
+        "edges": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      "narration_segment_ids": [
+        "n1"
+      ],
+      "purpose": "看见从发送者到接收者的信息路径"
+    },
+    {
+      "id": "s2",
+      "start_ms": 5200,
+      "duration_ms": 5300,
+      "component": "concept_reveal",
+      "props": {
+        "title": "噪声",
+        "lines": [
+          "扰动进入信道",
+          "收到的信号可能发生偏差"
+        ]
+      },
+      "narration_segment_ids": [
+        "n2"
+      ],
+      "purpose": "理解噪声可以改变收到的内容"
+    }
+  ]
+}

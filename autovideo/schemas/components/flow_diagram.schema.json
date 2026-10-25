@@ -1,0 +1,268 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "nodes",
+    "edges",
+    "paths"
+  ],
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "from",
+          "to"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 12
+          },
+          "relation": {
+            "enum": [
+              "flow",
+              "blocked"
+            ]
+          }
+        }
+      }
+    },
+    "paths": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "edge_ids"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$"
+          },
+          "edge_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,47}$"
+            }
+          }
+        }
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32
+    },
+    "takeaway": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height",
+        "font_size",
+        "edge_font_size",
+        "direction",
+        "scale",
+        "engine",
+        "nodes",
+        "edges"
+      ],
+      "properties": {
+        "width": {
+          "const": 1560
+        },
+        "height": {
+          "const": 500
+        },
+        "font_size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 36
+        },
+        "edge_font_size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 28
+        },
+        "direction": {
+          "enum": [
+            "RIGHT",
+            "DOWN"
+          ]
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "engine": {
+          "const": "elkjs-0.12.0"
+        },
+        "nodes": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "x",
+              "y",
+              "width",
+              "height",
+              "label_lines"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,23}$"
+              },
+              "x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1560
+              },
+              "y": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 500
+              },
+              "width": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 1560
+              },
+              "height": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 500
+              },
+              "label_lines": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 30
+                },
+                "maxItems": 8
+              }
+            }
+          },
+          "maxItems": 8
+        },
+        "edges": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "points"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,23}$"
+              },
+              "points": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "x",
+                    "y"
+                  ],
+                  "properties": {
+                    "x": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1560
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 500
+                    }
+                  }
+                },
+                "maxItems": 32
+              },
+              "label_x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1560
+              },
+              "label_y": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 500
+              }
+            }
+          },
+          "maxItems": 16
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/autovideo/components/flow_diagram.schema.json",
+  "title": "AutoVideo flow_diagram props v0.2"
+}

@@ -1,0 +1,70 @@
+{
+  "case": "science",
+  "technical_status": "PASS",
+  "manual_content_status": "PASS",
+  "render_id": "25801490d2e84c148c220d4170bd488a",
+  "job_id": "b22b6e61-255f-4d64-a459-fc7436fd7857",
+  "script_id": "2f494ba3d0ae48b2a1e9abba4d23a211",
+  "version": 3,
+  "title": "海床下七百米的坑：远古撞击怎样被还原",
+  "mode": "fast",
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/25801490d2e84c148c220d4170bd488a/video.mp4",
+  "content_seconds": 89.867,
+  "duration_seconds": 98.866667,
+  "scenes": 5,
+  "caption_mode": "short forced-aligned",
+  "caption_cues": 28,
+  "max_caption_characters": 24,
+  "max_caption_seconds": 4.45,
+  "narration_exact": true,
+  "cue_order_and_coverage": true,
+  "full_decode": true,
+  "artifact_hashes": 29,
+  "source_cards": [
+    {
+      "title": "Heriot-Watt University original researc…",
+      "url": "https://www.hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago",
+      "date": "2025-09-20"
+    }
+  ],
+  "decoded_frames": [
+    {
+      "scene": "card_1",
+      "seconds": 19.381600000000002,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/science/frames/scene-01.jpg"
+    },
+    {
+      "scene": "card_2",
+      "seconds": 40.184,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/science/frames/scene-02.jpg"
+    },
+    {
+      "scene": "card_3",
+      "seconds": 58.903,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/science/frames/scene-03.jpg"
+    },
+    {
+      "scene": "card_4",
+      "seconds": 74.1484,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/science/frames/scene-04.jpg"
+    },
+    {
+      "scene": "card_5",
+      "seconds": 88.5026,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/science/frames/scene-05.jpg"
+    }
+  ],
+  "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/science/contact.jpg",
+  "presentation": {
+    "preset": "information_cards"
+  },
+  "notes": [],
+  "manual_full_audio_listening": false,
+  "manual_review_method": "read final v3 against the opened university research announcement and later news report; inspect all five decoded scene frames",
+  "manual_notes": [
+    "主画面保留研究估计和约数，未把重建结果呈现为直接测量。",
+    "海床下七百米与坑深分开；2025原始研究与2026新闻转述分开，远古事件与当前预警分开。",
+    "研究估计/研究者报告标签确实出现在对应画面重点旁；28条短字幕原文、时序和全片解码通过。",
+    "未逐秒完整人工听音。"
+  ]
+}

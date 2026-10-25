@@ -1,0 +1,4 @@
+{"stage": "chapter-c7-narration", "attempt": 1, "error_code": "CONTENT_SOURCE_QUOTE", "error": "CONTENT_SOURCE_QUOTE: CONTENT_SOURCE_QUOTE: n3", "retry_limit": 3}
+{"stage": "chapter-c1-information", "attempt": 1, "error_code": "INFORMATION_CUE_QUOTE", "error": "INFORMATION_CUE_QUOTE: INFORMATION_CUE_QUOTE: c1_n4", "retry_limit": 3}
+{"stage": "chapter-c1-information", "attempt": 2, "error_code": "INFORMATION_OPENING_CUE", "error": "INFORMATION_OPENING_CUE: INFORMATION_OPENING_CUE: first element must begin with the first scene phrase", "retry_limit": 3}
+{"stage": "chapter-c1-information", "attempt": 3, "error_code": "INFORMATION_CUE_QUOTE", "error": "INFORMATION_CUE_QUOTE: INFORMATION_CUE_QUOTE: c1_n4", "retry_limit": 3}

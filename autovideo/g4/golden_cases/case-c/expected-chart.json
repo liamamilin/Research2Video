@@ -1,0 +1,7 @@
+{
+  "categories": ["蓝色纸飞机", "黄色纸飞机", "红色纸飞机"],
+  "values": [2, 4, 6],
+  "unit": "米",
+  "baseline_zero": true,
+  "fictional_notice_required": true
+}

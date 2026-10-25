@@ -1,0 +1,28 @@
+{
+  "health": [
+    {
+      "url": "http://127.0.0.1:8011/api/health",
+      "status": "ok",
+      "instance_id": null,
+      "worker_primary": true
+    },
+    {
+      "url": "http://127.0.0.1:8766/api/health",
+      "status": "ok",
+      "instance_id": "b469a26e7fc8435b844e7dc1077a4478",
+      "worker_primary": null
+    }
+  ],
+  "services": {
+    "autovideo": {
+      "pid": 96277,
+      "started_at": "2026-10-23T17:53:03.891105+08:00"
+    },
+    "research": {
+      "pid": 96292,
+      "port": 8766,
+      "instance_id": "b469a26e7fc8435b844e7dc1077a4478"
+    }
+  },
+  "databases_backed_up": true
+}

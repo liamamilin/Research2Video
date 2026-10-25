@@ -1,0 +1,130 @@
+{
+  "status": "PASS",
+  "asset_count": 7,
+  "common_unique_assets": 5,
+  "common_per_recipe": {
+    "ai_news": 2,
+    "how_to": 2,
+    "science_explainer": 2
+  },
+  "previews": [
+    {
+      "asset_id": "ambient_pad",
+      "preview": "original",
+      "http": 206
+    },
+    {
+      "asset_id": "ambient_pad",
+      "preview": "loop",
+      "http": 206
+    },
+    {
+      "asset_id": "ambient_pad",
+      "preview": "narration",
+      "http": 206
+    },
+    {
+      "asset_id": "layered_space",
+      "preview": "original",
+      "http": 206
+    },
+    {
+      "asset_id": "layered_space",
+      "preview": "loop",
+      "http": 206
+    },
+    {
+      "asset_id": "layered_space",
+      "preview": "narration",
+      "http": 206
+    },
+    {
+      "asset_id": "pulse_loop",
+      "preview": "original",
+      "http": 206
+    },
+    {
+      "asset_id": "pulse_loop",
+      "preview": "loop",
+      "http": 206
+    },
+    {
+      "asset_id": "pulse_loop",
+      "preview": "narration",
+      "http": 206
+    },
+    {
+      "asset_id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+      "preview": "original",
+      "http": 206
+    },
+    {
+      "asset_id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+      "preview": "loop",
+      "http": 206
+    },
+    {
+      "asset_id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+      "preview": "narration",
+      "http": 206
+    },
+    {
+      "asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "preview": "original",
+      "http": 206
+    },
+    {
+      "asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "preview": "loop",
+      "http": 206
+    },
+    {
+      "asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "preview": "narration",
+      "http": 206
+    },
+    {
+      "asset_id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+      "preview": "original",
+      "http": 206
+    },
+    {
+      "asset_id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+      "preview": "loop",
+      "http": 206
+    },
+    {
+      "asset_id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+      "preview": "narration",
+      "http": 206
+    },
+    {
+      "asset_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "preview": "original",
+      "http": 206
+    },
+    {
+      "asset_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "preview": "loop",
+      "http": 206
+    },
+    {
+      "asset_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "preview": "narration",
+      "http": 206
+    }
+  ],
+  "review_statuses": {
+    "ambient_pad": "pending",
+    "layered_space": "pending",
+    "pulse_loop": "pending",
+    "20b28e98-94d5-445f-a880-e350aefc0fea": "pending",
+    "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d": "pending",
+    "ca256ab4-1ac9-46c8-b0be-c814f81a55f6": "pending",
+    "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf": "pending"
+  },
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  }
+}

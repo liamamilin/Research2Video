@@ -1,0 +1,53 @@
+{
+  "/api/health": {
+    "status": "ok",
+    "worker_primary": true
+  },
+  "/api/jobs?limit=1&status=RUNNING": {
+    "total": 0,
+    "all_jobs": 160
+  },
+  "/api/jobs?limit=1&status=QUEUED": {
+    "total": 0,
+    "all_jobs": 160
+  },
+  "forms": {
+    "F08": {
+      "availability": "available",
+      "executors": [
+        "kinetic_typography"
+      ]
+    },
+    "F12": {
+      "availability": "available",
+      "executors": [
+        "image_slideshow"
+      ]
+    },
+    "F16": {
+      "availability": "available",
+      "executors": [
+        "chat_dialogue"
+      ]
+    }
+  },
+  "recipes": {
+    "ai_news": {
+      "version": 2,
+      "video_form": "kinetic_typography"
+    },
+    "how_to": {
+      "version": 2,
+      "video_form": "process_diagram"
+    },
+    "science_explainer": {
+      "version": 2,
+      "video_form": "auto"
+    }
+  },
+  "video_range": {
+    "status": 206,
+    "content_range": "bytes 0-1023/996624",
+    "received_bytes": 1024
+  }
+}

@@ -1,0 +1,392 @@
+{
+  "script": {
+    "id": "41fa2d69fc044c188c8e86bfd0aab336",
+    "column_key": "topic_digest",
+    "topic": {
+      "id": null,
+      "title": "历史与考古动态｜2026-10-22",
+      "fields": {
+        "目标受众": "大众观众"
+      },
+      "from_report": "output/history/2026-10-22_history_daily.md",
+      "report_id": "8d95210185a7417581fada7b6c621e19"
+    },
+    "status": "APPROVED",
+    "research_job": "",
+    "report_path": "output/history/2026-10-22_history_daily.md",
+    "current_version": 1,
+    "approved_version": 1,
+    "error": null,
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T21:50:54+0800",
+    "updated_at": "2026-10-22T22:07:28+0800",
+    "heartbeat_at": 1792678019.4335082,
+    "stage": null,
+    "archived": 0,
+    "report_id": "8d95210185a7417581fada7b6c621e19",
+    "production": "history_daily"
+  },
+  "version": {
+    "script_id": "41fa2d69fc044c188c8e86bfd0aab336",
+    "version": 1,
+    "title": "四件历史与考古新线索，最值得辨真伪的是日食传说",
+    "sections": [
+      {
+        "title": "本期地图",
+        "paragraphs": [
+          {
+            "text": "这期讲四件历史与考古动态：两名古代中国皇家天文学家因日食预报失算而被斩的传说；丹麦怎样用 3D 扫描把维京符文石记录下来；从意大利古橡树追看被称为黑死病的疫情怎样影响欧洲森林；林肯遇刺前的一封家书。",
+            "citations": [],
+            "evidence": "NEEDS_REVIEW",
+            "note": "已按审计意见改写"
+          }
+        ]
+      },
+      {
+        "title": "日食斩首传说",
+        "paragraphs": [
+          {
+            "text": "媒体报道称，传说涉及 2134 B.C.E.，也就是公元前 2134 年：两名古代中国皇家天文学家醉酒后没有预报日食，因此被斩。这个故事流传很久，但可能只是神话，真实性目前还没有定论。",
+            "citations": [
+              "https://www.smithsonianmag.com/history/were-two-chinese-astronomers-were-beheaded-for-failing-to-predict-an-eclipse-2134-bce-the-story-may-be-a-myth-but-it-underscores-the-real-risks-of-interpreting-celestial-events-180989715/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "所谓史料链，是支撑故事的当时文献、考古发现等材料怎样衔接、互相印证。媒体报道没有列出这些证据，也没说明专家从哪些迹象看出真实成分。这提醒人们，故事流传广泛，不等于史实可靠。",
+            "citations": [
+              "https://www.smithsonianmag.com/history/were-two-chinese-astronomers-were-beheaded-for-failing-to-predict-an-eclipse-2134-bce-the-story-may-be-a-myth-but-it-underscores-the-real-risks-of-interpreting-celestial-events-180989715/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      },
+      {
+        "title": "维京符文石扫描",
+        "paragraphs": [
+          {
+            "text": "媒体报道称，丹麦将用 3D 扫描研究维京符文石。这是项目采集石刻资料的方式。项目想从这些资料中寻找维京时代的政治网络、社会关系与权力结构，这是把实物遗迹变成研究资料的具体案例。",
+            "citations": [
+              "https://www.medievalists.net/2026/10/denmark-to-3d-scan-viking-runestones/"
+            ],
+            "evidence": "NEEDS_REVIEW",
+            "note": null
+          },
+          {
+            "text": "这项计划现在最明确的，是资料采集方式和研究问题。要扫描多少块石头、何时开始都没有说明，因此计划规模暂时无法判断；关于石刻会呈现怎样的政治网络，也不能先下结论。",
+            "citations": [
+              "https://www.medievalists.net/2026/10/denmark-to-3d-scan-viking-runestones/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "黑死病与古橡树",
+        "paragraphs": [
+          {
+            "text": "再看黑死病与欧洲森林。据媒体报道，意大利古橡树显示，黑死病帮助中世纪森林恢复。这个案例把疾病与森林的长期变化连在一起：黑死病过后，森林恢复的变化，没有只停留在事件发生时，而是作为环境影响延续下来。",
+            "citations": [
+              "https://www.medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests/"
+            ],
+            "evidence": "NEEDS_REVIEW",
+            "note": null
+          },
+          {
+            "text": "报道给出的时间尺度是近 700 年，意思是在这么久以后，影响仍然看得见。最需要留意的限制，是报道没有交代古橡树如何支持这条联系，也没有说明研究方法。因此，黑死病促成森林恢复，是这篇报道提出的判断，完整论证并未见于报道。",
+            "citations": [
+              "https://www.medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests/"
+            ],
+            "evidence": "NEEDS_REVIEW",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "林肯遇刺前家书",
+        "paragraphs": [
+          {
+            "text": "美国国会图书馆官方说，已收藏并数字化一封林肯家的家书。信是林肯夫人玛丽·林肯写给朋友的，写于亚伯拉罕·林肯遇刺前两个月。国会图书馆的史家说，它“简单、像闲谈”，并据此判断，玛丽当时平静而充满希望。",
+            "citations": [
+              "https://blogs.loc.gov/loc/2026/10/mary-lincoln-a-nice-chatty-little-letter-shortly-before-the-assassination-of-her-husband/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "这封信的价值，是提供接近重大事件前的书信视角。信里简短、像闲谈的语气，让人看到重大事件前家庭通信的日常一面；不过，对人物情绪的概括仍要放回这封信的原始语境中理解，不能脱离原文。",
+            "citations": [
+              "https://blogs.loc.gov/loc/2026/10/mary-lincoln-a-nice-chatty-little-letter-shortly-before-the-assassination-of-her-husband/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "继续关注的信号",
+        "paragraphs": [
+          {
+            "text": "最值得继续关注的是日食斩首传说。媒体报道说专家看到真实成分的迹象，却没说明具体是什么。以后若出现能相互印证的当时文献或考古发现，是最该看的信号。",
+            "citations": [
+              "https://www.smithsonianmag.com/history/were-two-chinese-astronomers-were-beheaded-for-failing-to-predict-an-eclipse-2134-bce-the-story-may-be-a-myth-but-it-underscores-the-real-risks-of-interpreting-celestial-events-180989715/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      }
+    ],
+    "length_check": {
+      "spoken_length": 816,
+      "estimated_seconds": 182,
+      "segments": 30,
+      "units_per_second": 4.35,
+      "voice": "voxcpm_anchor",
+      "target_minutes": 3,
+      "budget": 783,
+      "ratio": 1.014,
+      "status": "OK",
+      "tolerance": 0.15,
+      "sections": [
+        {
+          "title": "本期地图",
+          "spoken_length": 92,
+          "budget": 131
+        },
+        {
+          "title": "日食斩首传说",
+          "spoken_length": 154,
+          "budget": 131
+        },
+        {
+          "title": "维京符文石扫描",
+          "spoken_length": 152,
+          "budget": 131
+        },
+        {
+          "title": "黑死病与古橡树",
+          "spoken_length": 186,
+          "budget": 130
+        },
+        {
+          "title": "林肯遇刺前家书",
+          "spoken_length": 165,
+          "budget": 130
+        },
+        {
+          "title": "继续关注的信号",
+          "spoken_length": 67,
+          "budget": 130
+        }
+      ]
+    },
+    "edit_type": "GENERATED",
+    "meta": {
+      "attempts": 1,
+      "usage": {
+        "requests": 1,
+        "prompt_tokens": 3171,
+        "completion_tokens": 27926,
+        "total_tokens": 31097
+      },
+      "problems": [
+        "风格审计没有完成：LLMError: LLM call failed: LLM call exceeded timeout of 480s"
+      ],
+      "trusted_urls": 6,
+      "report_path": "output/history/2026-10-22_history_daily.md",
+      "written_at": "2026-10-22T21:56:24+0800",
+      "cell": {
+        "recipe": "topic_digest",
+        "sha256": "0e7e2de3f2297a0445e8e5ae7c1df0cf2ac8d13b209dbf26364f970be9d832b1",
+        "cell": "topics-general-digest-long",
+        "status": "experimental",
+        "parts": {
+          "domain": {
+            "key": "topics"
+          },
+          "type": {
+            "key": "digest"
+          },
+          "format": {
+            "key": "long"
+          },
+          "audience": {
+            "key": "general"
+          }
+        },
+        "resolved_sha256": "6c7dd97861b266e387a001d90e740ae9d3559dc85c2485c6982f8a70fdb9e990",
+        "uses": {
+          "audience": {
+            "kind": "audience",
+            "name": "general",
+            "sha256": "5521747ff4307b69dbb6b4dd1c542e50b32b344f6204d312ff85d1640bdf23e2"
+          },
+          "output": {
+            "kind": "part",
+            "name": "motion",
+            "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+          }
+        }
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "媒体报道称，传说涉及 2134 B.C.E.，也就是公元前 2134 年：两名古代中国皇家天文学家醉酒后没有预报日食，因…",
+            "problem": "句子有 52 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "项目想从这些资料中寻找维京时代的政治网络、社会关系与权力结构，这是把实物遗迹变成研究资料的具体案例。",
+            "problem": "句子有 47 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "这个案例把疾病与森林的长期变化连在一起：黑死病过后，森林恢复的变化，没有只停留在事件发生时，而是作为环境影响延续下来。",
+            "problem": "句子有 54 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 3,
+          "rule_must": 0,
+          "questions": 0,
+          "lost": 0,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 3
+            }
+          },
+          "passed": true,
+          "rank": 0
+        },
+        "rounds": 1,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这期讲四件历史与考古动态：辨认一个古代中国天文学家因日食被斩的传说，看看丹麦怎样扫描刻有维京文字的符文石，从意大利古橡树…",
+            "problem": "句子有 88 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D3",
+            "severity": "serious",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这期讲四件历史与考古动态：辨认一个古代中国天文学家因日食被斩的传说，看看丹麦怎样扫描刻有维京文字的符文石，从意大利古橡树追看被称为黑死病的疫情怎样影响欧洲森林，再读林肯遇刺前的一封家书。",
+            "problem": "讲稿将传说涉及的天文学家说成“一个”，报告明确给出的是“两名”。",
+            "why": "人数是这则传说的关键数字，由两名改成一个会改变事件规模，使受众对历史事实的理解与报告不一致。",
+            "suggestion": "将“一个古代中国天文学家”改为“两名古代中国皇家天文学家”。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“B.C.E.”是什么意思，是否指公元前2134年？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“史料链”具体指哪些材料之间怎样衔接和相互印证？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "前文没有说明专家指出了哪些“真实成分”迹象，这里所说的“专家所说”具体指什么？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "audit_usage": {
+        "requests": 3,
+        "prompt_tokens": 7832,
+        "completion_tokens": 14947,
+        "total_tokens": 22779
+      }
+    },
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T21:56:24+0800"
+  }
+}

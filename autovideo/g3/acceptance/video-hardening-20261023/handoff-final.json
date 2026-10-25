@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "scope": "real API/store/client transport recovery; no model or TTS calls",
+  "counts": {
+    "submit": 1,
+    "lookup": 1,
+    "video.mp4": 1,
+    "qa.json": 2
+  },
+  "job_count": 1,
+  "render_status": "COMPLETED",
+  "video_bytes": 3001263,
+  "video_sha256": "3e1b0021f3636d8544d2b9201fa3248acdd2620c7bcd9a2debeb915664f4ec2e",
+  "avoided_repeat_video_transfer_bytes": 3001263,
+  "job_id": "225000a9-4f64-445a-a8dd-4870f7e16733",
+  "render_id": "e540556c662c49089490cbacb467b577"
+}

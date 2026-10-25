@@ -1,0 +1,150 @@
+{
+  "scenes": [
+    {
+      "id": "opening",
+      "component": "title_card",
+      "props": {
+        "title": "信息从发送端经信道到接收端",
+        "subtitle": "发送端通过信道把信息传给接收端"
+      },
+      "narration_segment_ids": [
+        "n1"
+      ],
+      "purpose": "引出传输路线",
+      "visual_intent": {
+        "viewer_understands": "信息经信道从发送端到接收端",
+        "before": "未展示传输路线",
+        "after": "看到发送端信道接收端标题"
+      },
+      "beats": [
+        {
+          "id": "reveal_title",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n1",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "mechanism",
+      "component": "flow_diagram",
+      "props": {
+        "nodes": [
+          {
+            "id": "sender",
+            "label": "发送端"
+          },
+          {
+            "id": "channel",
+            "label": "信道"
+          },
+          {
+            "id": "receiver",
+            "label": "接收端"
+          }
+        ],
+        "edges": [
+          {
+            "id": "sender_to_channel",
+            "from": "sender",
+            "to": "channel"
+          },
+          {
+            "id": "channel_to_receiver",
+            "from": "channel",
+            "to": "receiver"
+          }
+        ],
+        "paths": [
+          {
+            "id": "delivery_path",
+            "edge_ids": [
+              "sender_to_channel",
+              "channel_to_receiver"
+            ]
+          }
+        ]
+      },
+      "narration_segment_ids": [
+        "n2",
+        "n3",
+        "n4",
+        "n5"
+      ],
+      "purpose": "展示噪声干扰传输",
+      "visual_intent": {
+        "viewer_understands": "噪声可能干扰信道传输信号",
+        "before": "发送端信道接收端未连线",
+        "after": "路径激活后接收端链路被标干扰"
+      },
+      "beats": [
+        {
+          "id": "reveal_flow",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n2",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "activate_delivery",
+          "action": "activate_path",
+          "target_id": "path:delivery_path",
+          "trigger": {
+            "segment_id": "n2",
+            "boundary": "start",
+            "offset_ms": 500
+          }
+        },
+        {
+          "id": "mark_noise",
+          "action": "mark_disrupted",
+          "target_id": "edge:channel_to_receiver",
+          "trigger": {
+            "segment_id": "n5",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "disclaimer",
+      "component": "concept_reveal",
+      "props": {
+        "title": "画面为概念示意",
+        "lines": [
+          "抽象图形演示信号受扰",
+          "仅表示概念示意"
+        ]
+      },
+      "narration_segment_ids": [
+        "n6"
+      ],
+      "purpose": "说明画面是概念示意",
+      "visual_intent": {
+        "viewer_understands": "图形演示只表示概念",
+        "before": "未说明画面性质",
+        "after": "看到概念示意提示"
+      },
+      "beats": [
+        {
+          "id": "reveal_disclaimer",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n6",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    }
+  ]
+}

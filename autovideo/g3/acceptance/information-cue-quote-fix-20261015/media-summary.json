@@ -1,0 +1,77 @@
+{
+  "job_id": "c94813f5-ce48-4f4a-9a5c-f5232888df40",
+  "attempt": 1,
+  "status": "COMPLETED",
+  "video_form": "information_motion",
+  "duration_mode": "content",
+  "source": "g3/data/jobs/eda487c3-f9a4-44de-989a-9b013f688fcf/input/source.txt (10065 chars, same material as the failed job)",
+  "before": {
+    "job_id": "eda487c3-f9a4-44de-989a-9b013f688fcf",
+    "status": "FAILED",
+    "error_code": "INFORMATION_CUE_QUOTE",
+    "message": "INFORMATION_CUE_QUOTE: c1_n4",
+    "detail": "cue.quote copied the segment's borrowed source excerpt ('并在 Gemini 应用中上线…') instead of the rewritten narration text ('Gemini 应用同时上线…'); rejected 3/3 attempts"
+  },
+  "after": {
+    "prompt_version": "g2-golden-general-v1.3",
+    "information_cue_quote_failures": 0,
+    "information_motion_retries": [
+      {
+        "stage": "chapter-c3-information",
+        "attempt": 1,
+        "error_code": "INFORMATION_OPENING_CUE",
+        "error": "INFORMATION_OPENING_CUE: s9 的第一个元素必须是 target side:left，且其 quote 为覆盖首段 c3_n23 旁白的开头连续片段；当前为 target side:left、segment c3_n23、quote 'OpenAI 公开了 722 篇内部模型生成的数学手稿'；该段旁白开头为 '研究侧还有一条：OpenAI 公开了 722 篇内部模型生成的数'，请从段首逐字复制",
+        "retry_limit": 3
+      }
+    ],
+    "all_retries": 4
+  },
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 18714,
+    "duration_seconds": 623.808,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.9999428269860168,
+    "decoded_rms": 0.08092954754829407,
+    "full_decode": "PASS"
+  },
+  "timeline": {
+    "ir_frames": 18714,
+    "scene_count": 47,
+    "beat_count": 150,
+    "alignment_granularity": "phrase"
+  },
+  "scenes": {
+    "total": 47,
+    "components": {
+      "title_card": 13,
+      "concept_reveal": 28,
+      "comparison": 6
+    }
+  },
+  "model": {
+    "llm_call_count": 22,
+    "cost_upper_bound_usd": 0.2089
+  },
+  "media_mp4": {
+    "path": "g3/data/jobs/c94813f5-ce48-4f4a-9a5c-f5232888df40/attempts/1/g2-run/artifacts/G2_自动生成.mp4",
+    "bytes": 73585060,
+    "sha256": "6f3e619e94f27f9fd1669e3a24cb42b5193ba960bbd3ddbcc9b0eca59e694a93"
+  },
+  "evidence_hashes": {
+    "before-failure-report.json": "b1ae59e678f3b4190c166b088f9c2dbd87b4f4ab0b12dfc51be40dabcbf734e0",
+    "before-validation_retries.jsonl": "f33deacc510c55c352276553617855f4e74c2988e28bd22f11078722bcf3df1f",
+    "qa.json": "8235c93e6d281364e7fbdf98e94d8fe2a4fef89e75c4d04a1e850786e79421b2",
+    "scene-c2-s2.png": "f5cfdcae31648ac579bc945266a64712df234e882efd6c19191caf0c0ade87cd",
+    "scene-c4-s4.png": "fb5d3485bcd8e5e4213b7c29f5f50cfb4fedb59643ed7ea0503af3583846e9b4",
+    "validation_retries.jsonl": "b1602e11fa16ae4a67a9f338a2ef8461e295bc77dcc161969fa16a6801e53522"
+  }
+}

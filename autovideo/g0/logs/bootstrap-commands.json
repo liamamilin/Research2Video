@@ -1,0 +1,73 @@
+{
+  "notes": "Commands issued during initial environment/bootstrap; their saved outputs are real. See commands.jsonl for instrumented render/media argv and timing.",
+  "commands": [
+    {
+      "command": "git status --short; git branch --show-current; git log -1 --oneline",
+      "result": "fatal: not a git repository"
+    },
+    {
+      "command": "node --version; npm --version; python3 --version; uname -m; sw_vers",
+      "result": "See environment.json"
+    },
+    {
+      "command": "say -v ?",
+      "result": "Tingting zh_CN available, NOT USED; license restricts public/commercial voices"
+    },
+    {
+      "command": "curl -I --max-time 15 https://raw.githubusercontent.com/remotion-dev/template-audiogram/main/package.json",
+      "result": "Sandbox DNS resolution failure, exit 6"
+    },
+    {
+      "command": "git clone --depth 1 https://github.com/remotion-dev/template-audiogram.git g0/vendor/remotion-audiogram",
+      "result": "Succeeded, pinned commit in trusted-source.json"
+    },
+    {
+      "command": "python3 -m venv g0/.venv; g0/.venv/bin/python -m pip install --disable-pip-version-check kokoro-onnx misaki[zh] soundfile pillow pytest jsonschema static-ffmpeg",
+      "result": "Succeeded; installed versions in requirements.lock. Initial tool transcript contains installation output; no complete on-disk install transcript was captured."
+    },
+    {
+      "command": "npm install --ignore-scripts --no-audit --no-fund --cache ../../.npm-cache",
+      "cwd": "g0/vendor/remotion-audiogram",
+      "log": "logs/npm-install.log"
+    },
+    {
+      "command": "curl -fL --max-time 300 -o g0/assets/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx",
+      "log": "logs/model-download.log"
+    },
+    {
+      "command": "curl -fL --max-time 120 -o g0/assets/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/voices-v1.0.bin",
+      "log": "logs/voices-download.log"
+    },
+    {
+      "command": "static_ffmpeg.run.get_or_fetch_platform_executables_else_raise(download_dir= g0/tools)",
+      "result": "Download/extract succeeded; package expected wrong output dir and raised FileNotFoundError. Kept log; actual files found at g0/darwin_arm64.",
+      "log": "logs/ffmpeg-install.log"
+    },
+    {
+      "command": "chmod u+x g0/darwin_arm64/ffmpeg g0/darwin_arm64/ffprobe; ffmpeg -version; ffprobe -version",
+      "logs": [
+        "logs/ffmpeg-version.log",
+        "logs/ffprobe-version.log"
+      ]
+    },
+    {
+      "command": "node node_modules/@remotion/cli/remotion-cli.js versions",
+      "cwd": "g0/vendor/remotion-audiogram",
+      "log": "logs/remotion-versions.log"
+    },
+    {
+      "command": "g0/.venv/bin/python -u g0/run_g0.py prepare",
+      "log": "logs/tts-generation.log"
+    },
+    {
+      "command": "g0/.venv/bin/python -m pytest tests -q",
+      "result": "22 passed, 1 original package coverage test failed due additional project files",
+      "log": "logs/design-tests.log"
+    },
+    {
+      "command": "g0/.venv/bin/python -u g0/verify_design_snapshot.py",
+      "result": "45 original files unchanged, 23 passed",
+      "log": "logs/design-snapshot-tests.log"
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+[
+  {
+    "name": "authored-narration.json",
+    "content_type": "application/json",
+    "bytes": 1182,
+    "sha256": "43aaefed6adaee431abf787cb4b8d3e1f62154514f172da67e18f843f3b10a60"
+  },
+  {
+    "name": "captions.srt",
+    "content_type": "application/x-subrip",
+    "bytes": 3954,
+    "sha256": "53a98d3798aa23dd5bf369489dfce18b21674f3f09c8d0f7e8da417d896a87f7"
+  },
+  {
+    "name": "chapters.json",
+    "content_type": "application/json",
+    "bytes": 13512,
+    "sha256": "e38b96ca56ffbf944c856401e216e4cf1bda1c9321f02b7521c5fd1657113568"
+  },
+  {
+    "name": "content-captions.srt",
+    "content_type": "application/x-subrip",
+    "bytes": 3954,
+    "sha256": "5165296a59b06a35188d36f97d11c8ec5dff83cd4a866ecd681fb622877a52e9"
+  },
+  {
+    "name": "content-chapters.json",
+    "content_type": "application/json",
+    "bytes": 13454,
+    "sha256": "e7809c86b6035b9c0f37f1e28bf4c655db81beb91761c756fe04ed85e95f7027"
+  },
+  {
+    "name": "content.mp4",
+    "content_type": "video/mp4",
+    "bytes": 30786550,
+    "sha256": "c1e2c49cfb07023ee1d9f3ad0db78712aa6128a20ed1993de4c144b4b8038cb5"
+  },
+  {
+    "name": "creative-form-plan.json",
+    "content_type": "application/json",
+    "bytes": 26385,
+    "sha256": "f61d68a49998ee2ca50c071fed21939031299141a07947087860bcb23e28b926"
+  },
+  {
+    "name": "execution-log.txt",
+    "content_type": "text/plain; charset=utf-8",
+    "bytes": 964,
+    "sha256": "c06b0af6c080b90eccd2196f6981d129a7944b8a69a967161d94ae8f186f2bc6"
+  },
+  {
+    "name": "fast-card-plan.json",
+    "content_type": "application/json",
+    "bytes": 13883,
+    "sha256": "b015945868d787477978f9d2138abcf9057babaa1553d0776891e30da551c29c"
+  },
+  {
+    "name": "generation-schedule.json",
+    "content_type": "application/json",
+    "bytes": 407,
+    "sha256": "5f89bc525b706158fb5a294f3b05534c969cf42370ea40d031b92ea572b435f1"
+  },
+  {
+    "name": "input-brief.json",
+    "content_type": "application/json",
+    "bytes": 5701,
+    "sha256": "4c5d7774d826a41f8446f958eb7fb511597a770e4a737a777af7e52214f3701d"
+  },
+  {
+    "name": "manifest.json",
+    "content_type": "application/json",
+    "bytes": 72475,
+    "sha256": "0977792a82520b002190bf3a1ac664456566089d40172f7bc8f47b8d7fc5791d"
+  },
+  {
+    "name": "model-cost.json",
+    "content_type": "application/json",
+    "bytes": 497,
+    "sha256": "656aca142efb7b9451e97a267e59e9b9fc386223b02950b218314378ce98b9b7"
+  },
+  {
+    "name": "narration-check.json",
+    "content_type": "application/json",
+    "bytes": 273,
+    "sha256": "415008ba8539bd4b067f5fdcdbaa26b583821b72e525388f071cf9cf5dca2058"
+  },
+  {
+    "name": "narration.json",
+    "content_type": "application/json",
+    "bytes": 32009,
+    "sha256": "5946fc610e9e448be24964a520e4f82b3ca3ca05a41b382488d1bf2e0f9e59f8"
+  },
+  {
+    "name": "package-qa.json",
+    "content_type": "application/json",
+    "bytes": 938,
+    "sha256": "139a51ae1e8aa438de83205b1d75c4ff269d0ada95d9f4425ef0f69869d6fba2"
+  },
+  {
+    "name": "package.json",
+    "content_type": "application/json",
+    "bytes": 5760,
+    "sha256": "400db6fd7d57e243eab9185d78211c211d30b3e02a6565709c59d73ba40b9652"
+  },
+  {
+    "name": "packaging-resolved.json",
+    "content_type": "application/json",
+    "bytes": 2502,
+    "sha256": "d584b53696730290873f73e9a533711be899f3123abe9bf8a77c6b3c29287b20"
+  },
+  {
+    "name": "prepared-source.txt",
+    "content_type": "text/plain; charset=utf-8",
+    "bytes": 2897,
+    "sha256": "ab3d13a2b3bbbc2d6ad8adc92797456c8fdc048eeb2e2f296e5dc8a9c2660707"
+  },
+  {
+    "name": "production-execution.json",
+    "content_type": "application/json",
+    "bytes": 683,
+    "sha256": "48a2bd54ca10758331e99fe8bfc0be332020d2dde1df985c8ec68888aed45244"
+  },
+  {
+    "name": "production-plan.json",
+    "content_type": "application/json",
+    "bytes": 6536,
+    "sha256": "ac3ec6fb99c062b2a0e1b9bea2913a57034a440be66e409fa4bff1b2d9eff44e"
+  },
+  {
+    "name": "qa.json",
+    "content_type": "application/json",
+    "bytes": 24800,
+    "sha256": "9ded0bcec7e3eccd498aeade069d497dbf9258f52b7513923da3d604c5c9fd80"
+  },
+  {
+    "name": "storyboard.json",
+    "content_type": "application/json",
+    "bytes": 26354,
+    "sha256": "5b1e9ba74bcec9f643ea2539fbaadf171fcd33e51596df2abf62359e38e4ebcb"
+  },
+  {
+    "name": "tts-metrics.json",
+    "content_type": "application/json",
+    "bytes": 1376,
+    "sha256": "749bf0fcc09976f366fc2516d96ab78fb5f91ef867279c87edb90deb4dfc4eed"
+  },
+  {
+    "name": "video-ir.json",
+    "content_type": "application/json",
+    "bytes": 42638,
+    "sha256": "5544e023f717fd75261886f09a4cf23a2853dd44d4f085afd08bcceab910582c"
+  },
+  {
+    "name": "video.mp4",
+    "content_type": "video/mp4",
+    "bytes": 9942511,
+    "sha256": "214ad5c31a2c7b9821e0b11c4a8deca6baff05ddeb5a957bcab3791a4ef51f49"
+  },
+  {
+    "name": "voice-report.json",
+    "content_type": "application/json",
+    "bytes": 10232,
+    "sha256": "7a3f77229dbbdbb55908f7998d04861cb05254b11299635970ebe96b1a76e643"
+  }
+]

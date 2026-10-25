@@ -1,0 +1,9 @@
+{
+  "title":"DeepInfer开源：推理引擎到线上服务，还差哪一层",
+  "sections":[
+    {"title":"引擎与服务的距离","paragraphs":[{"text":"下载到一套推理引擎，和搭好一个能接用户请求的服务，是两件事。DeepSeek 开源了为 V4.1 Flash 提供支持的推理框架 DeepInfer，采用 Apache-2.0 许可。它最值得看的，是引擎做了什么，以及服务层还需要补什么。","citations":["https://github.com/deepseek-ai/DeepInfer"]}]},
+    {"title":"服务层还要补什么","paragraphs":[{"text":"官方 README 把边界单独列了出来：完整服务还需要 KV 缓存系统、输入计算与输出生成的分离部署，以及多个副本之间的负载均衡。这些服务组件没有包含在本次发布里。不过，分离部署需要的大部分引擎功能已经实现，不能把组件未发布理解成引擎没有相关能力。","citations":["https://github.com/deepseek-ai/DeepInfer"]}]},
+    {"title":"优化要放回负载看","paragraphs":[{"text":"官方介绍了减少重复计算的有界重放，以及先由草稿模型提出候选、再由主模型校验的投机解码。后者的吞吐收益随并发变化，低并发下还可能变慢。值得借鉴的是这些取舍，不能把某个负载下的加速数字当成普遍收益。","citations":["https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"]}]},
+    {"title":"先核对能否接入","paragraphs":[{"text":"目前官方列出的硬件支持是 NVIDIA SM100 和华为昇腾 950。准备采用时，先对照自己的硬件和依赖，再看服务层需要补齐哪些组件。高吞吐不是下载仓库就自动得到的结果，最终还要放到自己的请求负载里验证。","citations":["https://github.com/deepseek-ai/DeepInfer"]}]}
+  ]
+}

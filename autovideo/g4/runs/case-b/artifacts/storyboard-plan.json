@@ -1,0 +1,130 @@
+{
+  "scenes": [
+    {
+      "id": "opening",
+      "component": "title_card",
+      "props": {
+        "title": "批处理与流处理的区别",
+        "subtitle": "批处理先收集一段时间的数据再集中处理"
+      },
+      "narration_segment_ids": [
+        "n1"
+      ],
+      "purpose": "点明主题并介绍批处理",
+      "visual_intent": {
+        "viewer_understands": "批处理先积累再集中处理",
+        "before": "未出现主题与批处理说明",
+        "after": "看到标题和批处理说明"
+      },
+      "beats": [
+        {
+          "id": "show_title",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n1",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "comparison",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "批处理",
+          "items": [
+            "先收集一段时间的数据",
+            "再把数据集中处理",
+            "先积累后处理"
+          ]
+        },
+        "right": {
+          "label": "流处理",
+          "items": [
+            "在数据到达时持续处理",
+            "信息可较早进入流程",
+            "到达后连续处理"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "n2",
+        "n3",
+        "n4"
+      ],
+      "purpose": "对照两种处理方式的时点与组织",
+      "visual_intent": {
+        "viewer_understands": "流处理到达即处理，批处理先积累再处理",
+        "before": "尚未出现两种方式对照",
+        "after": "两侧特点可见并高亮"
+      },
+      "beats": [
+        {
+          "id": "show_comparison",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n2",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "highlight_stream",
+          "action": "highlight",
+          "target_id": "side:right",
+          "trigger": {
+            "segment_id": "n3",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "highlight_batch",
+          "action": "highlight",
+          "target_id": "side:left",
+          "trigger": {
+            "segment_id": "n4",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "closing",
+      "component": "concept_reveal",
+      "props": {
+        "title": "两种方式的主要区别",
+        "lines": [
+          "批处理：先积累后处理",
+          "流处理：到达后连续处理"
+        ]
+      },
+      "narration_segment_ids": [
+        "n5"
+      ],
+      "purpose": "总结两种方式的核心区别",
+      "visual_intent": {
+        "viewer_understands": "一种先积累后处理，另一种到达后连续处理",
+        "before": "对照内容未总结",
+        "after": "看到两种方式的简短区别"
+      },
+      "beats": [
+        {
+          "id": "summarize",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n5",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    }
+  ]
+}

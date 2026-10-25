@@ -1,0 +1,76 @@
+{
+  "job_id": "28719468-b1e0-470a-b98e-5de666c9e2df",
+  "isolated_data": true,
+  "worker_enabled": false,
+  "snapshot": {
+    "schema_version": 1,
+    "catalog_sha256": "aa5022fb259057c263399c9c5f3d89f83e3f1901258b3fa38adb41f7ac9b415b",
+    "recipe": {
+      "version": 1,
+      "id": "science_explainer",
+      "name": "原理科普",
+      "description": "解释概念、因果与对比，根据材料选择图解或信息动效。",
+      "topics": [
+        "概念解释",
+        "原理说明",
+        "知识科普"
+      ],
+      "recommended_forms": [
+        "F09",
+        "F10"
+      ],
+      "defaults": {
+        "video_form": "auto",
+        "duration_mode": "content",
+        "creative_intent": {
+          "audience": "没有相关专业背景的普通读者",
+          "purpose": "讲清概念、关系与发生变化的原因",
+          "tone": "通俗、准确",
+          "focus": "区分概念示意与事实证据，保留条件、限制与例外"
+        },
+        "packaging": {
+          "preset": "common",
+          "label": "原理科普",
+          "intro": {
+            "seconds": 1.5
+          },
+          "outro": {
+            "seconds": 2.0
+          },
+          "source_card": {
+            "enabled": true
+          },
+          "sound": {
+            "enabled": false
+          }
+        }
+      },
+      "music": {
+        "mode": "none",
+        "suggested_forms": [
+          "MF08"
+        ],
+        "description": "以旁白和图解为主，正文不添加背景音乐。持续铺底为后续可选方向。"
+      }
+    },
+    "selection": {
+      "video_form": "information_motion",
+      "duration_mode": "content",
+      "target_duration_sec": 60,
+      "voice_id": "zf_xiaoxiao",
+      "video_speed": 1.0,
+      "creative_intent": {
+        "audience": "没有相关专业背景的普通读者",
+        "purpose": "讲清概念、关系与发生变化的原因",
+        "tone": "通俗、准确",
+        "focus": "区分概念示意与事实证据，保留条件、限制与例外"
+      }
+    },
+    "music": {
+      "mode": "none",
+      "background_music_generated": false
+    },
+    "packaging_sha256": "9bcfc512924514cde3f56d7e285d4064ec62c5d2c53e5042b276d7d09659b7d5",
+    "sha256": "a612b30d7984e35daa95000b1b7a33b0b5ec989b363db4acf39e1771c0176f20"
+  }
+}

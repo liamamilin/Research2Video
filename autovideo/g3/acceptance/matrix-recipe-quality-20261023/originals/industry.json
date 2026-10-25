@@ -1,0 +1,595 @@
+{
+  "script": {
+    "id": "a8ba608f47204a0182ad0f52bf7de28d",
+    "column_key": "topic_digest",
+    "topic": {
+      "id": null,
+      "title": "产业动态日报｜2026-10-22",
+      "fields": {
+        "目标受众": "大众观众"
+      },
+      "from_report": "output/industry/2026-10-22_industry_daily.md",
+      "report_id": "b6c053f903274a998dcfd0a7b198da6f"
+    },
+    "status": "APPROVED",
+    "research_job": "",
+    "report_path": "output/industry/2026-10-22_industry_daily.md",
+    "current_version": 1,
+    "approved_version": 1,
+    "error": null,
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T21:34:35+0800",
+    "updated_at": "2026-10-22T21:50:53+0800",
+    "heartbeat_at": 1792677003.2350662,
+    "stage": null,
+    "archived": 0,
+    "report_id": "b6c053f903274a998dcfd0a7b198da6f",
+    "production": "industry_daily"
+  },
+  "version": {
+    "script_id": "a8ba608f47204a0182ad0f52bf7de28d",
+    "version": 1,
+    "title": "芯片供应链与导航研究，隐性投入风险最值得看",
+    "sections": [
+      {
+        "title": "本期地图",
+        "paragraphs": [
+          {
+            "text": "这期看芯片供应链、材料和测试。先讲美国半导体制造背后的隐性投入风险，再看 iPhone 供应商变化、美国军事专用铝能力缺口、印度芯片测试设备选型，以及芯片计时和导航研究。",
+            "citations": [],
+            "evidence": "UNCITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "供应链隐性投入",
+        "paragraphs": [
+          {
+            "text": "媒体报道，美国半导体供应链依赖脆弱且不透明的投入品，也就是制造背后、报道没点名的依赖。媒体转述 Semiconductor Industry Association 的说法，却没说明它是什么组织、代表谁，也没解释风险为何出现。",
+            "citations": [
+              "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "供应链韧性不只看芯片工厂的制造能力，还要看制造背后的投入是否稳固。该组织呼吁政府与产业加强协作，讨论本土化和储备目标，但没说具体针对什么。",
+            "citations": [
+              "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "不过，报道没有给出具体投入品清单、本土化或储备目标数值，也没有执行结果，风险规模仍然无法量化。",
+            "citations": [
+              "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "苹果扩展供应网络",
+        "paragraphs": [
+          {
+            "text": "媒体报道，正在扩大 iPhone 供应网络的 Apple 新增了钛材供应商，并扩大一家先进薄膜厂商合作。报道没列出两家供应商的名称，也没解释先进薄膜是什么技术、用于哪些部件。",
+            "citations": [
+              "https://www.supplychaindive.com/news/apple-expands-us-supplier-network-for-iphone-materials-components/833496/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "Apple 对美国制造的承诺金额是 $600 billion（美元）。报道没给对应年份、期限、已投金额，也没说明覆盖哪些制造环节；没有此前投入金额，无法比较。",
+            "citations": [
+              "https://www.supplychaindive.com/news/apple-expands-us-supplier-network-for-iphone-materials-components/833496/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "报道没有说这些合作是否已经量产，也没有给出价格、性能或供货变化。承诺金额不等于新增产能已经形成。",
+            "citations": [
+              "https://www.supplychaindive.com/news/apple-expands-us-supplier-network-for-iphone-materials-components/833496/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "美国军用铝缺口",
+        "paragraphs": [
+          {
+            "text": "报道转述一份报告：美国没有冶炼厂能生产军事专用铝，相关军工材料依赖境外供应。报道没说明这种铝要满足哪些性能规格。",
+            "citations": [
+              "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "报告说，相关军工材料暴露在来自中国、俄罗斯和阿联酋的供应中断风险中。",
+            "citations": [
+              "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "报道没有说明受影响装备、缺口规模、替代来源或时间表。这是对现有冶炼能力的判断，不是新冶炼厂已经投产。",
+            "citations": [
+              "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "印度芯片测试选型",
+        "paragraphs": [
+          {
+            "text": "报道说 OSAT 是参与半导体测试和生产准备的企业，却没给全称，也未说明其他环节。NI 表示，Kaynes Semicon 选用了其半导体测试系统；报道没说明 NI 是哪家厂商，也未解释消息为何来自 NI。",
+            "citations": [
+              "https://www.eetimes.com/indias-osat-buildout-puts-semiconductor-testing-in-focus/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "按公司说法，选型之后会进入评估和准备生产阶段。如果后续投产，印度本地半导体测试供给可能增加。",
+            "citations": [
+              "https://www.eetimes.com/indias-osat-buildout-puts-semiconductor-testing-in-focus/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "从选型到量产，中间还有评估和生产准备。报道没给量产、产量、客户、投产日期或供给增加量，本地供给会增加多少仍不清楚。",
+            "citations": [
+              "https://www.eetimes.com/indias-osat-buildout-puts-semiconductor-testing-in-focus/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      },
+      {
+        "title": "光尺芯片导航研究",
+        "paragraphs": [
+          {
+            "text": "NIST 在研究新闻中介绍基于光的“光尺”芯片，用于精确计时；但没说明 NIST 的组织性质，也没解释芯片怎样用光测量。",
+            "citations": [
+              "https://www.nist.gov/news-events/news/2026/10/new-chip-based-tape-measure-light-could-revolutionize-mobile-timekeeping"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "它把精确计时与导航备用联系起来，在定位不可用或受干扰时提供关键导航信号。研究新闻没解释光测量与导航信号之间的转换原理。",
+            "citations": [
+              "https://www.nist.gov/news-events/news/2026/10/new-chip-based-tape-measure-light-could-revolutionize-mobile-timekeeping"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "不过，报道没有给出商业化、量产、性能指标或部署信息。这仍是研究阶段，不能当成已经可用的产品。",
+            "citations": [
+              "https://www.nist.gov/news-events/news/2026/10/new-chip-based-tape-measure-light-could-revolutionize-mobile-timekeeping"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "最该关注的信号",
+        "paragraphs": [
+          {
+            "text": "最值得继续关注的是美国半导体的隐性投入，因为它涉及制造能力之外的供应链韧性；接下来就看政府与产业是否公布具体投入品、本土化和储备目标。",
+            "citations": [],
+            "evidence": "UNCITED",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "length_check": {
+      "spoken_length": 912,
+      "estimated_seconds": 206,
+      "segments": 34,
+      "units_per_second": 4.35,
+      "voice": "voxcpm_anchor",
+      "target_minutes": 3,
+      "budget": 783,
+      "ratio": 1.147,
+      "status": "OK",
+      "tolerance": 0.15,
+      "sections": [
+        {
+          "title": "本期地图",
+          "spoken_length": 71,
+          "budget": 112
+        },
+        {
+          "title": "供应链隐性投入",
+          "spoken_length": 178,
+          "budget": 112
+        },
+        {
+          "title": "苹果扩展供应网络",
+          "spoken_length": 168,
+          "budget": 112
+        },
+        {
+          "title": "美国军用铝缺口",
+          "spoken_length": 128,
+          "budget": 112
+        },
+        {
+          "title": "印度芯片测试选型",
+          "spoken_length": 163,
+          "budget": 112
+        },
+        {
+          "title": "光尺芯片导航研究",
+          "spoken_length": 141,
+          "budget": 112
+        },
+        {
+          "title": "最该关注的信号",
+          "spoken_length": 63,
+          "budget": 111
+        }
+      ]
+    },
+    "edit_type": "GENERATED",
+    "meta": {
+      "attempts": 1,
+      "usage": {
+        "requests": 1,
+        "prompt_tokens": 3115,
+        "completion_tokens": 13083,
+        "total_tokens": 16198
+      },
+      "problems": [],
+      "trusted_urls": 6,
+      "report_path": "output/industry/2026-10-22_industry_daily.md",
+      "written_at": "2026-10-22T21:37:04+0800",
+      "cell": {
+        "recipe": "topic_digest",
+        "sha256": "0e7e2de3f2297a0445e8e5ae7c1df0cf2ac8d13b209dbf26364f970be9d832b1",
+        "cell": "topics-general-digest-long",
+        "status": "experimental",
+        "parts": {
+          "domain": {
+            "key": "topics"
+          },
+          "type": {
+            "key": "digest"
+          },
+          "format": {
+            "key": "long"
+          },
+          "audience": {
+            "key": "general"
+          }
+        },
+        "resolved_sha256": "6c7dd97861b266e387a001d90e740ae9d3559dc85c2485c6982f8a70fdb9e990",
+        "uses": {
+          "audience": {
+            "kind": "audience",
+            "name": "general",
+            "sha256": "5521747ff4307b69dbb6b4dd1c542e50b32b344f6204d312ff85d1640bdf23e2"
+          },
+          "output": {
+            "kind": "part",
+            "name": "motion",
+            "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+          }
+        }
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "先讲美国半导体制造背后的隐性投入风险，再看 iPhone 供应商变化、美国军事专用铝能力缺口、印度芯片测试设备选型，以及…",
+            "problem": "句子有 58 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 2,
+            "quote": "不过，报道没有给出具体投入品清单、本土化或储备目标数值，也没有执行结果，风险规模仍然无法量化。",
+            "problem": "句子有 42 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "有读不出来的符号：（）",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "warn",
+            "section": 4,
+            "paragraph": 1,
+            "quote": "按公司说法，选型之后会进入评估和准备生产阶段。",
+            "problem": "报告只说材料目前到了设备选定、评估和“准备生产”这些阶段，没有说明这些阶段是公司表述，也没有明确给出选型之后必然进入这些阶段的时间顺序。",
+            "why": "讲稿给原有阶段描述增加了公司表态这一来源归属和未来时序，超出了报告依据。",
+            "suggestion": "改为“报道目前只到设备选定、评估和‘准备生产’阶段”。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "媒体报道，正在扩大 iPhone 供应网络的 Apple 新增了钛材供应商，并扩大一家先进薄膜厂商合作。",
+            "problem": "讲稿把报告限定的“美国 iPhone 供应网络”写成了没有地域限定的“iPhone 供应网络”，扩大了事件范围。",
+            "why": "研究报告只支持 Apple 扩展美国 iPhone 供应商网络；去掉“美国”会让听众理解为 Apple 在整个 iPhone 供应网络扩张，超出了材料支持的范围。",
+            "suggestion": "补回地域限定，例如改为“媒体报道，正在扩大美国 iPhone 供应网络的 Apple 新增了钛材供应商，并扩大一家先进薄膜厂商合作。”",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 5,
+          "rule_must": 0,
+          "questions": 0,
+          "lost": 0,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 2
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 3
+            }
+          },
+          "passed": true,
+          "rank": 0
+        },
+        "rounds": 1,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "报道所说的“脆弱且不透明的投入品”具体指哪些东西，风险为什么会出现？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "Semiconductor Industry Association 是什么组织，代表哪些人发声？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "政府要“本土化”和“储备”的具体对象与目标分别是什么？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "具体新增了哪些钛材和先进薄膜供应商？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“先进薄膜”具体是什么技术或材料，用于 iPhone 的哪些部件？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "$600 billion 是多长时间内、覆盖哪些制造环节的承诺？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "这个数字与 Apple 此前已投入金额相比是什么规模？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“军事专用铝”具体要满足哪些性能规格，主要用于哪些装备？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "OSAT 的英文全称是什么，除了测试还包含哪些环节？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "NI 是哪家测试设备厂商，为什么由它发布这项选型信息？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 4,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "“设备被选定不等于新增产能”与前几段“承诺或选型不等于产能形成”的收尾重复，同一提醒换对象再说，节奏开始拖沓。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "NIST 是什么性质的组织，在研究中负责什么？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“光尺”芯片具体是什么，原理是什么？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "这种芯片如何把光测量出的精确计时转化成定位不可用或受干扰时的导航能力？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "audit_usage": {
+        "requests": 4,
+        "prompt_tokens": 9752,
+        "completion_tokens": 79682,
+        "total_tokens": 89434
+      }
+    },
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T21:37:05+0800"
+  }
+}

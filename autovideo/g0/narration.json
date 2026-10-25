@@ -1,0 +1,14 @@
+{
+  "title": "声音，如何变成波形？",
+  "source_text": "声音信号可以画成波形。说话时波形随语音上下起伏，短暂停顿时接近水平。本样片的波形根据实际合成语音计算，不是预设动画。",
+  "provider": "local_kokoro_onnx",
+  "model": "Kokoro-82M-v1.0",
+  "voice": "zf_xiaoxiao",
+  "speed": 1.0,
+  "segments": [
+    {"id": "n1", "text": "声音可以用波形表示。", "pause_after_ms": 350},
+    {"id": "n2", "text": "看，说话时，曲线随声音上下起伏。", "pause_after_ms": 350},
+    {"id": "n3", "text": "停顿一下，曲线就接近水平。", "pause_after_ms": 1100},
+    {"id": "n4", "text": "这条动画，直接来自真实的语音信号。", "pause_after_ms": 600}
+  ]
+}

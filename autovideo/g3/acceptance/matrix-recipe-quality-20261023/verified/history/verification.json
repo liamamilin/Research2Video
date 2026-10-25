@@ -1,0 +1,65 @@
+{
+  "case": "history",
+  "technical_status": "PASS",
+  "manual_content_status": "PASS",
+  "render_id": "1f19667056fd410bb44ec5d78b104fe5",
+  "job_id": "dc4e0f1b-f1a7-4e2f-bade-51c2a3ffa41c",
+  "script_id": "b117b237788241c18e55d82fa40e5da5",
+  "version": 3,
+  "title": "古橡树与黑死病：两处意大利种群提供什么线索",
+  "mode": "fast",
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/1f19667056fd410bb44ec5d78b104fe5/video.mp4",
+  "content_seconds": 70.467,
+  "duration_seconds": 79.466667,
+  "scenes": 4,
+  "caption_mode": "short forced-aligned",
+  "caption_cues": 21,
+  "max_caption_characters": 24,
+  "max_caption_seconds": 4.37,
+  "narration_exact": true,
+  "cue_order_and_coverage": true,
+  "full_decode": true,
+  "artifact_hashes": 29,
+  "source_cards": [
+    {
+      "title": "Ancient Oaks Reveal How the Black Death…",
+      "url": "https://www.medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests/",
+      "date": "2026-10-20"
+    }
+  ],
+  "decoded_frames": [
+    {
+      "scene": "card_1",
+      "seconds": 16.0712,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/history/frames/scene-01.jpg"
+    },
+    {
+      "scene": "card_2",
+      "seconds": 34.1028,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/history/frames/scene-02.jpg"
+    },
+    {
+      "scene": "card_3",
+      "seconds": 50.252,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/history/frames/scene-03.jpg"
+    },
+    {
+      "scene": "card_4",
+      "seconds": 68.25160000000001,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/history/frames/scene-04.jpg"
+    }
+  ],
+  "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/history/contact.jpg",
+  "presentation": {
+    "preset": "information_cards"
+  },
+  "notes": [],
+  "manual_full_audio_listening": false,
+  "manual_review_method": "read final v3 against opened Medievalists research report; inspect all four actual decoded scene frames",
+  "manual_notes": [
+    "研究者提出的解释在对应重点旁有标签，未把历史推断呈现为直接测得的普遍因果。",
+    "两处意大利种群、不能代表整个欧洲和不能排除气候等其他因素，均在主画面和旁白中保留。",
+    "21条短字幕完整覆盖；没有沿用“报道没附研究出处”的错误，没有把树木证据说成此前只有文献记录。",
+    "未逐秒完整人工听音。"
+  ]
+}

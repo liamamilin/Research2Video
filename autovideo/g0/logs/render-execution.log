@@ -1,0 +1,34 @@
+RUN remotion-render: ['/Users/milin/.nvm/versions/node/v22.21.1/bin/node', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/cli/remotion-cli.js', 'render', 'src/index.ts', 'Audiogram', '/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/artifacts/remotion-waveform.mp4', '--props=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/props.json', '--width=1920', '--height=1080', '--fps=30', '--duration=420', '--codec=h264', '--audio-codec=aac', '--pixel-format=yuv420p', '--concurrency=2', '--crf=18', '--browser-executable=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '--overwrite=false']
+DONE remotion-render: exit=1, seconds=6.388
+Bundling 8%
+Bundling 21%
+Bundling 69%
+Bundling 75%
+Bundling 81%
+Bundling 87%
+Bundling 93%
+Bundling 100%
+Getting composition
+[http://localhost:3000/g0-captions.json] Failed to load resource: the server responded with a status of 404 (Not Found)
+[http://localhost:3000/g0-narration.wav] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+An error occurred:
+ Error  Error: Error fetching /g0-narration.wav: 404 Not Found
+
+at node_modules/mediabunny/dist/modules/src/source.js:675
+673 │ if (!response.ok) {
+674 │     // eslint-disable-next-line @typescript-eslint/no-base-to-string
+675 │     throw new Error(`Error fetching ${String(this._url)}: ${response.status} ${response.statusText}`);
+676 │ }
+677 │ if (response.redirected) {
+678 │     // Modify our own root path so that future subrequests get made relative to the redirected URL
+
+
+Traceback (most recent call last):
+  File "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/run_g0.py", line 295, in <module>
+    actions[sys.argv[1]]()
+  File "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/run_g0.py", line 185, in render
+    command("remotion-render", [NODE, CLI, "render", "src/index.ts", "Audiogram",
+  File "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/run_g0.py", line 60, in command
+    raise RuntimeError(f"{label} failed")
+RuntimeError: remotion-render failed

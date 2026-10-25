@@ -1,0 +1,36 @@
+{
+  "environment": "127.0.0.1:18761; isolated /private/tmp data; worker disabled",
+  "checks": [
+    "Resource library and three recipe cards render",
+    "Video tab contains 17 stable forms and accurate availability",
+    "F01 existing video loads and plays in browser",
+    "Music tab contains 14 forms; search MF07 filters correctly",
+    "MF07 audio control changes from play to pause and progress is enabled",
+    "Five existing packaging components remain browsable",
+    "how_to applies process_diagram and tutorial packaging",
+    "ai_news applies information_motion while preserving entered title and source",
+    "science_explainer selects auto; explicit information_motion override survives reload",
+    "Recipe, source and packaging survive draft reload",
+    "Browser submission enters an isolated queued job and stores the recipe and explicit override",
+    "Isolated queued job cancelled after test",
+    "Desktop and narrow layouts visually inspected; narrow cards changed to one column"
+  ],
+  "viewports_observed_pixels": [
+    {
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "width": 622,
+      "height": 811
+    }
+  ],
+  "screenshots": [
+    "creation-recipes.png",
+    "resource-library.png",
+    "music-preview.png"
+  ],
+  "new_model_calls": 0,
+  "new_rendering": false,
+  "full_audio_listening_or_artistic_qa": false
+}

@@ -1,0 +1,2496 @@
+{
+  "script_id": "2f494ba3d0ae48b2a1e9abba4d23a211",
+  "version": 2,
+  "title": "海床下七百米的坑：一场没有目击者的远古撞击如何被还原",
+  "sections": [
+    {
+      "title": "看不见的坑",
+      "paragraphs": [
+        {
+          "text": "欧洲北海的海床下面，埋着一个陨石坑。它不在海床上，而在海床再往下大约七百米。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的小行星砸在这里，可能掀起超过一百米高的海浪。可这件事没有目击者，坑从海面上也看不见，那他们是怎么把它拼出来的？",
+          "citations": [
+            "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "坑埋在海床下约700米、撞击体直径约160米、年代约4300万至4600万年前、海浪超过100米，都与来源的估计一致；来源也确认赫瑞瓦特大学参与该研究，并说明这是对远古事件的估算，不是现代预警。代码把「七百」「四千三百万」「四千六百万」「一百六十」列为找不到依据，属于误报：这些数值在已核对的事实摘要中都有对应。",
+            "sources": [
+              "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "先给海底做CT",
+      "paragraphs": [
+        {
+          "text": "第一步不是潜到海底去找坑口，而是先给海底做一次“CT”。地震成像向地下发送声波，不同岩层反射回来的信号不一样，研究者把这些信号拼成地下剖面，坑的轮廓就从岩层里显出来。",
+          "citations": [
+            "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "来源明确把地震成像列为研究方法；把反射信号拼成地下剖面、显示坑的轮廓，是对该方法的准确转述。",
+            "sources": [
+              "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+            ]
+          }
+        },
+        {
+          "text": "但一张地下图像只能说明那里有个巨大的结构，还不能证明它就是撞击留下的。要确认，还得看石头本身。",
+          "citations": [
+            "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "来源把岩石显微分析与地震成像并列为相互独立的证据；本段说仅凭地下图像不足以确认撞击成因，符合来源的方法逻辑。",
+            "sources": [
+              "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "石头里的痕迹",
+      "paragraphs": [
+        {
+          "text": "研究者把那里的岩石放到显微镜下，在显微尺度上检查它有没有留下被撞击改造过的痕迹。这一步和地下成像看的是两件事：一个给形态，一个给成因。两边对上了，“这是撞击坑”才站得住。",
+          "citations": [
+            "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "来源提到岩石显微分析；本段把它与地下成像分别对应成因与形态，并以此作为确认撞击坑的依据，没有超出来源范围。",
+            "sources": [
+              "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "把坑变成浪",
+      "paragraphs": [
+        {
+          "text": "有了坑的形态，也有了岩石证据，接下来才是把坑翻译成一场事件。研究者把坑的大小、形态和岩石证据放进计算机模拟，反推需要多大的撞击能量；再看这股能量落进海里，海水会怎么响应。模拟给出的结果里，海浪可能超过一百米。",
+          "citations": [
+            "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "来源把计算机模拟列为方法之一，并给出海浪超过100米的估计；本段把模拟描述为反推撞击能量和海水响应，与该估计一致。",
+            "sources": [
+              "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+            ]
+          }
+        },
+        {
+          "text": "这里得停一下：超过一百米，是模拟算出来的估计，不是有人在四千多万年前拿尺子量到的。浪高越惊人，越要记住它是从坑和岩石反推出来的结果。",
+          "citations": [
+            "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "来源的成立条件明确说这是对远古事件的估算和研究重建；本段强调100米以上是模拟估计、不是实测，符合来源限定。代码指出「四千」找不到依据，属于误报：「四千多万年前」对应来源的约4300万至4600万年前。",
+            "sources": [
+              "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "怎么知道",
+      "paragraphs": [
+        {
+          "text": "所以这项研究真正有意思的，不只是“北海曾经可能有过大海啸”，而是它怎么被拼出来：地震成像先让我们看见地下七百米处的坑，岩石显微分析确认它挨过撞击，模拟再把坑翻译成能量和海浪。三条证据各管一段，接起来才是一个完整的故事。",
+          "citations": [
+            "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "总结的三条证据（地震成像、岩石显微分析、模拟）和坑深700米，都与来源一致；代码对「七百」的标记属于误报。",
+            "sources": [
+              "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+            ]
+          }
+        },
+        {
+          "text": "这也是对一个远古事件的估算和重建，不是今天北海的海啸风险预报或预警。它回答的是四千多万年前可能发生了什么，以及我们怎么能知道。",
+          "citations": [
+            "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "来源明确这是估算与重建、不是现代海啸预警或风险预报；本段保留了该限定，「四千多万年前」对应来源的约4300万至4600万年前。",
+            "sources": [
+              "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 628,
+    "estimated_seconds": 140,
+    "segments": 22,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.78,
+    "status": "UNDER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "看不见的坑",
+        "spoken_length": 123,
+        "budget": 157
+      },
+      {
+        "title": "先给海底做CT",
+        "spoken_length": 117,
+        "budget": 157
+      },
+      {
+        "title": "石头里的痕迹",
+        "spoken_length": 76,
+        "budget": 157
+      },
+      {
+        "title": "把坑变成浪",
+        "spoken_length": 154,
+        "budget": 156
+      },
+      {
+        "title": "怎么知道",
+        "spoken_length": 158,
+        "budget": 156
+      }
+    ]
+  },
+  "edit_type": "EDITED",
+  "meta": {
+    "acceptance_batch": "matrix-recipe-quality-20261023",
+    "report_path": "state/video_editorial_sources/matrix-recipe-quality-20261023/science-checked-v2.md",
+    "source_review": {
+      "checked_source_urls": [
+        "https://www.sciencedaily.com/releases/2026/10/261020085727.htm",
+        "https://www.sciencedaily.com/releases/2026/10/261020085025.htm",
+        "https://www.sciencedaily.com/releases/2026/10/261020085016.htm",
+        "https://www.sciencedaily.com/releases/2026/10/261020085023.htm"
+      ],
+      "packet_sha256": "39bd5d5738b87878ff6afadc4bd208734a90ef8eec8b3712ff67eab4870d7061",
+      "original_script_id": "f30f9b94c3a345da82069fac22b24b4f"
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的小行星砸在这里，可能掀起超过一百米高的海浪。",
+          "problem": "开场第二句就报出机构名和两个精确年代，与「直径一百六十米」叠在一起；一句里同时出现机构、年代区间、撞击体大小和浪高四个信息块，观众只能抓住最后一个。",
+          "why": "对陌生领域观众，突然的机构名让节目像研究汇报，容易中途划走；注意力被数据占去，那个「海床下埋着看不见的坑」的画面反而被挤掉。",
+          "suggestion": "删掉开场机构名，或后文交代来源时再顺带一句「这项研究有赫瑞瓦特大学参与」；开场只保留「一颗一百六十米左右的小行星砸出这个坑」和「海底下一百米级的浪」两个信息，年代留到需要时再给。",
+          "source": "model",
+          "editorial": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "这里得停一下：超过一百米，是模拟算出来的估计，不是有人在四千多万年前拿尺子量到的。浪高越惊人，越要记住它是从坑和岩石反推出来的结果。",
+          "problem": "开头「可能」「估计」已经交代过不确定；这里整段再说一遍，还用「得停一下」「越要记住」提醒观众。听感是作者不信任观众，节奏被打断。",
+          "why": "观众会觉得被当成外行反复提醒，本来最有冲击力的浪高数字也变成需要防备的说法。",
+          "suggestion": "删掉这一段，在上一段模拟结果后面接半句口语限定，比如「这个浪高是模拟反推出来的，没人真的见过」；不必单独成段，也不必训话式提醒。",
+          "source": "model",
+          "editorial": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "三条证据各管一段，接起来才是一个完整的故事。",
+          "problem": "这句前半段几乎逐条重播前文：地震成像、岩石分析、模拟；「各管一段，接起来才是一个完整的故事」是抽象总结，没给新内容，到结尾成了回放。",
+          "why": "观众已经跟着走完全程，再听一遍方法清单会失去耐心，最后记住的只有「他们用了三种方法」，不是那个惊人的事实。",
+          "suggestion": "压缩复述，只留一句话点明「眼睛看不到的坑，靠这三步被推出一场百米浪」；把落点放在画面感或反问上，比如「一个沉在海底七百米的坑，怎么变成一百米高的浪——这就是它最值得看的地方」，直接收，不必再罗列各步职责。",
+          "source": "model",
+          "editorial": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 1,
+          "quote": "这也是对一个远古事件的估算和重建，不是今天北海的海啸风险预报或预警。",
+          "problem": "结尾又用一次免责式澄清，内容与 S4P2「是估计不是量到的」重叠；下一句「以及我们怎么能知道」也已经在上文答过。",
+          "why": "观众听完最想带走的是「四千多万年前北海可能有过百米浪，这个结论怎么来的」，但结尾停在风险澄清上，像节目在自保，不是留判断，情绪收不回来。",
+          "suggestion": "删掉风险预报那句；如果想留下边界，用半句轻带，比如「这是四千多万年前的事，不是今天的预警」；结尾落在「我们怎么知道」或更强的判断句上，如「一个从海面上完全看不见的坑，撑起了一场百米浪的推演」。",
+          "source": "model",
+          "editorial": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "海床下七百米的岩石样本是怎么取到的？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 5,
+        "rule_must": 0,
+        "questions": 1,
+        "lost": 0,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 1
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 3,
+      "deletions": [],
+      "initial": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "一颗古老的小行星，怎样在北海留下撞击痕迹？每天几分钟的锻炼，对哪类人有帮助？空间站里的训练，又能告诉我们多少关于火星的事？这次看三条研究消息，把发现和它成立的条件放在一起。",
+          "problem": "开场三个问句并列，再加一句“这次看三条研究消息”，像目录预告，没有确定本期最值得听的重点。",
+          "why": "普通观众刚进来就被分散到三个方向，不知道最该跟哪条；结构说明也偏内部，不像内容本身在吸引人。",
+          "suggestion": "用一个最有冲击力的发现开场，例如“北海海底约七百米下埋着一个陨石坑，研究者估计它可能曾掀起超过一百米高的海啸”，再自然带出另外两条研究；不要连问三题，也不要在开场说明“看三条消息”。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "赫瑞瓦特大学参与的研究，结合地震成像、岩石显微分析和计算机模拟，重建了北海 Silverpit 撞击事件。",
+          "problem": "机构名和三种研究方法压在句首，真正有画面的“160米天体、百米海啸”被埋在后面。",
+          "why": "陌生观众先听到的是学术通报式的信息清单，容易在故事开始前走神。",
+          "suggestion": "先给发现和画面：“北海海底一个叫 Silverpit 的陨石坑，研究者估计，四千多万年前一颗约一百六十米宽的天体撞在这里，可能掀起超过一百米高的海啸。”再把地震成像、显微分析和模拟压缩成一句后置的方法说明。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "十月的新闻转述，和二零二五年发表的原始研究，也要分开。",
+          "problem": "这是内部选题核对，普通观众没看过底稿，也不需要在这里分辨新闻转述和原始研究的发表时间。",
+          "why": "它把撞击故事打断，让观众突然像在听编辑部流程，而不是听发现。",
+          "suggestion": "删掉这句。若需要边界，只保留自然的限定：“这是对古老撞击事件的重建，不是对今天北海海啸风险的预测。”前面的埋深纠错也可改成更顺的插入语：“坑现在埋在海床下约七百米——是埋藏深度，不是坑的深度。”",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "成立条件则是这批受试者、这种练习和十二周的观察周期。",
+          "problem": "“成立条件”“观察周期”像审稿备注，而且下一段又说“人群、锻炼内容和观察时间一变，结论的适用范围也需要重新判断”，同一层意思重复打转。",
+          "why": "观众刚听到“每天四分钟锻炼有改善”，马上被抽象限定拖慢，收获感被稀释。",
+          "suggestion": "只保留一次自然限定，例如：“研究对象是65岁以上的人，持续十二周；这不等于所有人每天四分钟都有效。”删掉“成立条件则是……”和下一段“人群、锻炼内容……”的重复表述。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "报道涉及密集的日常锻炼，以及返回后在模拟火星重力条件下的表现。这可以帮助研究者理解身体适应和训练作用，但不是已经在火星上完成了同样的测试。",
+          "problem": "这条没有讲出研究到底发现了什么，只有“报道涉及”和“可以帮助理解”，太空实验变成了空泛背景。",
+          "why": "观众听完不知道宇航员在模拟火星重力下表现如何，也不知道这条消息为什么值得占一段。",
+          "suggestion": "如果原资料有具体结果，直接把结果放到前面，说清观察到了什么变化；如果没有结果，建议把这条压缩成一句场景或直接舍弃，不要用“帮助理解”撑一段。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "看这类消息，既要看研究发现了什么，也要看对象是谁、条件是什么。保留这些条件，结论才不会在传播时变大。",
+          "problem": "这里变成媒体素养说教，而且和上一句“不是已经在火星上完成测试”重复。",
+          "why": "结尾没有留下具体发现或判断，观众听到的是提醒而不是内容，容易觉得节目在反复打预防针。",
+          "suggestion": "删掉说教句，只留一句具体边界：“这些表现是在模拟火星重力下测的，不是火星表面实测。”结尾可回到本期最值得记住的发现或问题。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“十月的新闻转述”和“二零二五年发表的原始研究”具体指什么？前面没提，我为什么要在这里把它们分开？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "从撞击事件突然转到“十月新闻”和“二零二五年原始研究”的时间区分，前面没有交代这两者是什么，听起来像内部备注，容易跟丢，也打断“发现是什么、条件是什么”的推进。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“宾州州立大学相关研究报道中”是指研究本身，还是新闻转述？我有点分不清这个结论该归给谁。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        }
+      ],
+      "editorial_attempted": true
+    },
+    "problems": [],
+    "audit_usage": {
+      "requests": 19,
+      "prompt_tokens": 42158,
+      "completion_tokens": 83085,
+      "total_tokens": 125243
+    },
+    "audit_prompt_version": 12,
+    "editorial_attempt": {
+      "applied": true,
+      "before": [
+        {
+          "title": "海底七百米下有个坑",
+          "paragraphs": [
+            {
+              "text": "先给你一个画面：今天的北海海面上，渔船和钻井平台照常作业。而在海床往下大约七百米的地方，埋着一个陨石坑。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体砸在了这里，可能掀起超过一百米高的海啸。一百六十米，大概是一个半足球场的长度；一百米高的浪，相当于三十多层楼。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "一百六十米天体、四千三百万到四千六百万年前、海床以下约七百米、超过一百米高的浪，四项都与复核记录中的来源估计一致（160 m impactor, roughly 43–46 million years ago, crater buried 700 m below seabed, waves over 100 m）；浪高用了「可能」「估计」式限定，符合来源「估计的古事件」性质；一百六十米约合一个半足球场、一百米约合三十多层楼，只是换算，没有改变比较方向或数量级。代码发现的「七百」「四千三百万」「千六百万」在来源中分别对应 700 米与 43–46 百万年，属于分词误报。",
+                "sources": [
+                  "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "没有目击者，怎么还原",
+          "paragraphs": [
+            {
+              "text": "问题是，这件事没有任何目击者。四千多万年过去，坑被沉积物盖得严严实实，从海面上什么都看不出来。研究者是靠三条线索把它拼出来的。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "「四千多万年过去」与来源的 roughly 43–46 million years ago 一致；坑被埋在海底沉积层之下、海面看不到，是来源「buried 700 m below seabed」的直接推论，没有额外添加时间、次数或金额。",
+                "sources": [
+                  "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                ]
+              }
+            },
+            {
+              "text": "第一条是地震成像，可以理解成给海底做CT：让声波穿进地层，不同岩层反射回来的信号不一样，把这些信号拼成地下剖面的图像，坑的形状和边界就显出来了。第二条是岩石显微分析：把坑里的岩石放到显微镜下，看它在撞击的极端压力和高温下被改造过的痕迹。第三条是计算机模拟：把坑的大小、形态和岩石证据放进去，反推当时撞击的能量，再看这样的能量落进海里，能掀起多高的浪。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "来源摘要明确列出 seismic imaging、rock microscopy、simulations 三种手段；讲稿对三者的通俗解释（声波成像、显微观察撞击改造痕迹、模拟反推能量与浪高）属于方法学解释，没有超出来源范围，也没有声称这些是我们自己的实测。",
+                "sources": [
+                  "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "七百米是埋深，不是坑深",
+          "paragraphs": [
+            {
+              "text": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。它如今被埋在海床以下约七百米，早已不是当年那个张着口的大坑。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": "已按审计意见改写",
+              "fact_verification": {
+                "status": "verified",
+                "reason": "改写后只说「埋在海床以下约七百米」，删去了来源未支持的「坑被沉积物填满」细节，与来源 crater buried 700 m below seabed 完全对应；「四百三十万到四千六百万年是一个区间」的表述与 roughly 43–46 million years ago 一致，没有把区间写成确定年份。",
+                "sources": [
+                  "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                ]
+              },
+              "revision": {
+                "before": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。坑自己早就被沉积物填满，上面又压着后来的地层，已经不是当年那个张着口的大坑了。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+                "proposed": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。它如今被埋在海床以下约七百米，早已不是当年那个张着口的大坑。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+                "accepted": true,
+                "lost_conditions": []
+              }
+            }
+          ]
+        },
+        {
+          "title": "百米浪高，是估计不是预警",
+          "paragraphs": [
+            {
+              "text": "那超过一百米高的海浪，是不是真的发生过？这是研究给出的估计，不是测量记录。现场没有仪器，也没有目击者，它是从撞击的能量和海水的条件推出来的一个可能结果。也正因为这样，这项研究讲的是四千多万年前发生过什么，不是今天北海的海啸风险有多高，更不是一条预警。把它当成预报来读，就完全跑偏了。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "「超过一百米高的浪是研究给出的估计、不是测量记录」与来源把浪高列为 reported estimate、事件为研究重建的限定一致；「不是今天北海的海啸风险，更不是预警」与复核记录的成立条件「ancient event and research reconstruction, not a modern warning forecast」一致，归因清晰。",
+                "sources": [
+                  "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                ]
+              }
+            },
+            {
+              "text": "我觉着这项研究最有意思的地方，不是那个吓人的浪高数字，而是它说明的一件事：一场没有目击者、现场还被埋在几百米海底的灾难，依然能被还原出时间、规模和大致过程。靠的不是想象，是地下的结构、岩石里的痕迹和一遍遍的模拟。只是还原归还原——浪究竟有多高，仍然是估计。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "「没有目击者、埋在几百米海底」与来源一致（七百米可约称为几百米），「浪高仍是估计」保留了来源的估计性质，属于对研究意义的定性概括，没有把推测说成定论。",
+                "sources": [
+                  "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "targets": {
+        "S1P1": [
+          "【编辑建议，按实际效果取舍】“北海”单独出现时，中文观众很容易先想到广西北海或北海公园，开场画面会落到错误地点。；建议：首次出现就改成“欧洲北海、英国以东的海面”或“英国以东的北海海面”，再保留渔船和钻井平台的画面。"
+        ],
+        "S3P1": [
+          "【编辑建议，按实际效果取舍】这句话像在纠正一份观众没看过的底稿，突然把讲述变成内部审稿；“读错”也不如“理解错”自然。；建议：删掉铺垫，直接顺着讲：“这个坑今天埋在海床以下约七百米——这是埋深，不是坑的深度。”"
+        ],
+        "S4P1": [
+          "【编辑建议，按实际效果取舍】前文已经用整段说明“估计、不是测量、不是今天风险”，这句再训诫一次，下一段又重复“仍然是估计”，边界说明盖过了发现本身。；建议：只保留一次清楚的边界，例如“浪高是模拟推断，不是实测，也不是今天的风险预警”，删掉“完全跑偏”；结尾直接落在“没有目击者、被埋几百米，也能还原时间、规模和过程”上。"
+        ]
+      },
+      "before_title": "北海海底七百米下，埋着四千多万年前的一场百米海啸",
+      "mode": "whole_script",
+      "prompt_version": 5,
+      "title": "海床下七百米的坑：一场没有目击者的远古撞击如何被还原",
+      "sections": [
+        {
+          "title": "看不见的坑",
+          "paragraphs": [
+            {
+              "text": "欧洲北海的海床下面，埋着一个陨石坑。它不在海床上，而在海床再往下大约七百米。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的小行星砸在这里，可能掀起超过一百米高的海浪。可这件事没有目击者，坑从海面上也看不见，那他们是怎么把它拼出来的？",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "先给海底做CT",
+          "paragraphs": [
+            {
+              "text": "第一步不是潜到海底去找坑口，而是先给海底做一次“CT”。地震成像向地下发送声波，不同岩层反射回来的信号不一样，研究者把这些信号拼成地下剖面，坑的轮廓就从岩层里显出来。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "但一张地下图像只能说明那里有个巨大的结构，还不能证明它就是撞击留下的。要确认，还得看石头本身。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "石头里的痕迹",
+          "paragraphs": [
+            {
+              "text": "研究者把那里的岩石放到显微镜下，在显微尺度上检查它有没有留下被撞击改造过的痕迹。这一步和地下成像看的是两件事：一个给形态，一个给成因。两边对上了，“这是撞击坑”才站得住。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "把坑变成浪",
+          "paragraphs": [
+            {
+              "text": "有了坑的形态，也有了岩石证据，接下来才是把坑翻译成一场事件。研究者把坑的大小、形态和岩石证据放进计算机模拟，反推需要多大的撞击能量；再看这股能量落进海里，海水会怎么响应。模拟给出的结果里，海浪可能超过一百米。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "这里得停一下：超过一百米，是模拟算出来的估计，不是有人在四千多万年前拿尺子量到的。浪高越惊人，越要记住它是从坑和岩石反推出来的结果。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "怎么知道",
+          "paragraphs": [
+            {
+              "text": "所以这项研究真正有意思的，不只是“北海曾经可能有过大海啸”，而是它怎么被拼出来：地震成像先让我们看见地下七百米处的坑，岩石显微分析确认它挨过撞击，模拟再把坑翻译成能量和海浪。三条证据各管一段，接起来才是一个完整的故事。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "这也是对一个远古事件的估算和重建，不是今天北海的海啸风险预报或预警。它回答的是四千多万年前可能发生了什么，以及我们怎么能知道。",
+              "citations": [
+                "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "editorial_brief": {
+        "considered": [
+          "事件冲击优先：用160米天体、百米海啸开场。吸引力强，但容易把估计讲成已发生的事实，边界说明会反复打断，弃。",
+          "纠错优先：解释七百米是埋深不是坑深。对没看过底稿的观众价值低，像内部审稿，弃。",
+          "方法侦探优先：从没有目击者、坑被埋切入，用地震成像、岩石显微、模拟三条证据回答‘怎么知道’。既保留冲击力，又让数字有来源，选这个。",
+          "研究意义优先：讲科学家能重建远古灾难。方向对，但太抽象；不如具体证据链有画面，作为主线收尾。"
+        ],
+        "angle": "这期讲一场没有目击者的远古撞击如何被还原：科学家用地下成像、岩石痕迹和模拟，把欧洲北海海床下约七百米的坑，拼成一次可能掀起百米海浪的事件；重点是‘怎么知道’，不是今天的海啸预警。",
+        "viewer_value": "观众会被‘看不见、没人见过，怎么还能知道’吸引；听完能理解三条证据如何互相咬合，也能分清远古重建和现代风险。",
+        "throughline": "从欧洲北海海面下埋着的坑切入，先立起‘没有目击者、坑也看不见’的疑问；再按‘怎么看见—怎么确认—怎么估算浪高’推进三条证据；最后只收一次边界：这是对远古事件的估计性重建，不是今天北海的海啸预报。",
+        "keep": [
+          "‘欧洲北海’要在开场说清，避免观众先想到广西北海或北海公园。",
+          "‘海床以下约七百米’作为埋深自然带出，不单独做纠错段；它支撑‘看不见’的疑问。",
+          "160米天体、4300万至4600万年前、超过100米浪高，作为报道给出的估计，撑起事件尺度，但始终用‘估计/可能’。",
+          "‘没有目击者、坑看不见’是核心疑问，让三条方法有目的。",
+          "三条证据链：地震成像给形态，岩石显微给撞击证据，模拟把证据转成能量和浪高；这是主线。",
+          "‘不是今天预警’只保留一次，放在结尾边界，防止误导。",
+          "赫瑞瓦特大学可作为来源归属提一次，不必展开机构介绍。"
+        ],
+        "leave_out": [
+          "‘七百米是埋深不是坑深’的独立纠错段：观众没看过底稿，独立成段会像内部审稿；只在叙述中自然说清。",
+          "反复说‘不是预警/不是测量’：一处边界足够，重复会盖过发现。",
+          "论文日期与新闻日期的差异、Nature Communications 2025 等内部核验信息：对观众理解主线无帮助。",
+          "其他 ScienceDaily 研究（抗阻训练、宇航员心脏、RNA）：与本主题无关。",
+          "足球场、楼层等尺度换算：数字本身已够具体，过多类比会分散对‘怎么还原’的注意力。",
+          "详细的地震成像原理（声波频率、岩层反射系数等）：口播不需要。",
+          "其他机构名单、参数、风险清单：不展开。"
+        ],
+        "facts": [
+          "F1",
+          "F2",
+          "F3"
+        ],
+        "openings": [
+          "欧洲北海的海床下面，埋着一个陨石坑。它不在海床上，而在海床再往下约七百米。研究者估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体砸在这里，可能掀起超过一百米高的海啸。可这件事没有目击者，坑也从海面上看不见——他们是怎么把它拼出来的？",
+          "如果没有目击者，也没有露出来的坑口，你怎么知道四千多万年前这里发生过一次撞击？欧洲北海海床下约七百米，就埋着这样一个坑。",
+          "一颗约一百六十米宽的天体，在四千多万年前砸进欧洲北海，可能掀起超过一百米高的海啸。今天从海面上什么都看不到。"
+        ],
+        "opening": "欧洲北海的海床下面，埋着一个陨石坑。它不在海床上，而在海床再往下约七百米。研究者估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体砸在这里，可能掀起超过一百米高的海啸。可这件事没有目击者，坑也从海面上看不见——他们是怎么把它拼出来的？",
+        "opening_facts": [
+          "F1"
+        ],
+        "beats": [
+          {
+            "point": "研究者不是找到露头的坑口，而是先给海底做‘CT’：地震成像用声波穿透地层，不同岩层反射信号不同，拼出地下剖面，坑的形状和边界就显出来。",
+            "facts": [
+              "F2"
+            ],
+            "connection": "可一张地下图像只能说明那里有个结构，还不能证明它是撞击造成的；观众会想知道下一步看什么。"
+          },
+          {
+            "point": "岩石显微分析从微观尺度检查岩石是否留下撞击改造的痕迹，给‘这是撞击坑’提供独立于图像的证据。",
+            "facts": [
+              "F2"
+            ],
+            "connection": "有了形态和岩石证据，才谈得上把坑的大小、形态反推成撞击能量，再看能量落进海里会怎样。"
+          },
+          {
+            "point": "计算机模拟把坑的大小、形态和岩石证据放进去，反推撞击能量，估算海水响应，得到可能超过一百米浪高的结果。",
+            "facts": [
+              "F1",
+              "F2"
+            ],
+            "connection": "浪高越惊人，越需要问：这是测出来的，还是算出来的？"
+          },
+          {
+            "point": "超过一百米是模拟估计，不是现场测量；这项研究重建的是四千多万年前的远古事件，不是今天北海的海啸风险或预警。真正值得记住的是，没有目击者、坑被埋在海床下约七百米，仍能靠地下结构、岩石痕迹和模拟拼出时间、规模和大致过程。",
+            "facts": [
+              "F1",
+              "F2",
+              "F3"
+            ],
+            "connection": "收束在‘怎么知道’，而不是‘今天会不会发生’。"
+          }
+        ],
+        "material": "入选资料包（编号供引用；来源为 ScienceDaily 对 Heriot-Watt University 研究的报道：https://www.sciencedaily.com/releases/2026/10/261020085727.htm）\n\nF1 事件估计：报道称一颗小行星撞入北海（North Sea）。报道给出的估计是：撞击体直径约160米；时间约4300万至4600万年前；陨石坑埋在海床以下约700米；可能掀起超过100米高的海浪/海啸。这些是研究重建的估计，不是现代观测记录。\n\nF2 方法：报道提到研究使用地震成像、岩石显微分析和计算机模拟。地震成像可理解为用声波探测地下结构；岩石显微分析可理解为在显微尺度检查岩石是否留下撞击改造的痕迹；模拟用于反推撞击能量和海水响应。\n\nF3 边界：这是对一个远古事件的估算和重建，不是对今天北海海啸风险的预报或预警。\n\n来源归属：报道涉及 Heriot-Watt University；底层 Nature Communications 论文标注为2025年。正文若不需要，可不提论文日期。"
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的小行星砸在这里，可能掀起超过一百米高的海浪。",
+            "problem": "开场第二句就报出机构名和两个精确年代，与「直径一百六十米」叠在一起；一句里同时出现机构、年代区间、撞击体大小和浪高四个信息块，观众只能抓住最后一个。",
+            "why": "对陌生领域观众，突然的机构名让节目像研究汇报，容易中途划走；注意力被数据占去，那个「海床下埋着看不见的坑」的画面反而被挤掉。",
+            "suggestion": "删掉开场机构名，或后文交代来源时再顺带一句「这项研究有赫瑞瓦特大学参与」；开场只保留「一颗一百六十米左右的小行星砸出这个坑」和「海底下一百米级的浪」两个信息，年代留到需要时再给。",
+            "source": "model",
+            "editorial": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "这里得停一下：超过一百米，是模拟算出来的估计，不是有人在四千多万年前拿尺子量到的。浪高越惊人，越要记住它是从坑和岩石反推出来的结果。",
+            "problem": "开头「可能」「估计」已经交代过不确定；这里整段再说一遍，还用「得停一下」「越要记住」提醒观众。听感是作者不信任观众，节奏被打断。",
+            "why": "观众会觉得被当成外行反复提醒，本来最有冲击力的浪高数字也变成需要防备的说法。",
+            "suggestion": "删掉这一段，在上一段模拟结果后面接半句口语限定，比如「这个浪高是模拟反推出来的，没人真的见过」；不必单独成段，也不必训话式提醒。",
+            "source": "model",
+            "editorial": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "三条证据各管一段，接起来才是一个完整的故事。",
+            "problem": "这句前半段几乎逐条重播前文：地震成像、岩石分析、模拟；「各管一段，接起来才是一个完整的故事」是抽象总结，没给新内容，到结尾成了回放。",
+            "why": "观众已经跟着走完全程，再听一遍方法清单会失去耐心，最后记住的只有「他们用了三种方法」，不是那个惊人的事实。",
+            "suggestion": "压缩复述，只留一句话点明「眼睛看不到的坑，靠这三步被推出一场百米浪」；把落点放在画面感或反问上，比如「一个沉在海底七百米的坑，怎么变成一百米高的浪——这就是它最值得看的地方」，直接收，不必再罗列各步职责。",
+            "source": "model",
+            "editorial": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 4,
+            "paragraph": 1,
+            "quote": "这也是对一个远古事件的估算和重建，不是今天北海的海啸风险预报或预警。",
+            "problem": "结尾又用一次免责式澄清，内容与 S4P2「是估计不是量到的」重叠；下一句「以及我们怎么能知道」也已经在上文答过。",
+            "why": "观众听完最想带走的是「四千多万年前北海可能有过百米浪，这个结论怎么来的」，但结尾停在风险澄清上，像节目在自保，不是留判断，情绪收不回来。",
+            "suggestion": "删掉风险预报那句；如果想留下边界，用半句轻带，比如「这是四千多万年前的事，不是今天的预警」；结尾落在「我们怎么知道」或更强的判断句上，如「一个从海面上完全看不见的坑，撑起了一场百米浪的推演」。",
+            "source": "model",
+            "editorial": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "海床下七百米的岩石样本是怎么取到的？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "audits_complete": true,
+        "pending_review": false,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 5,
+          "rule_must": 0,
+          "questions": 1,
+          "lost": 0,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 1
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 4
+            }
+          },
+          "passed": true,
+          "rank": 0
+        },
+        "rounds": 3,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "一颗古老的小行星，怎样在北海留下撞击痕迹？每天几分钟的锻炼，对哪类人有帮助？空间站里的训练，又能告诉我们多少关于火星的事？这次看三条研究消息，把发现和它成立的条件放在一起。",
+            "problem": "开场三个问句并列，再加一句“这次看三条研究消息”，像目录预告，没有确定本期最值得听的重点。",
+            "why": "普通观众刚进来就被分散到三个方向，不知道最该跟哪条；结构说明也偏内部，不像内容本身在吸引人。",
+            "suggestion": "用一个最有冲击力的发现开场，例如“北海海底约七百米下埋着一个陨石坑，研究者估计它可能曾掀起超过一百米高的海啸”，再自然带出另外两条研究；不要连问三题，也不要在开场说明“看三条消息”。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "赫瑞瓦特大学参与的研究，结合地震成像、岩石显微分析和计算机模拟，重建了北海 Silverpit 撞击事件。",
+            "problem": "机构名和三种研究方法压在句首，真正有画面的“160米天体、百米海啸”被埋在后面。",
+            "why": "陌生观众先听到的是学术通报式的信息清单，容易在故事开始前走神。",
+            "suggestion": "先给发现和画面：“北海海底一个叫 Silverpit 的陨石坑，研究者估计，四千多万年前一颗约一百六十米宽的天体撞在这里，可能掀起超过一百米高的海啸。”再把地震成像、显微分析和模拟压缩成一句后置的方法说明。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "十月的新闻转述，和二零二五年发表的原始研究，也要分开。",
+            "problem": "这是内部选题核对，普通观众没看过底稿，也不需要在这里分辨新闻转述和原始研究的发表时间。",
+            "why": "它把撞击故事打断，让观众突然像在听编辑部流程，而不是听发现。",
+            "suggestion": "删掉这句。若需要边界，只保留自然的限定：“这是对古老撞击事件的重建，不是对今天北海海啸风险的预测。”前面的埋深纠错也可改成更顺的插入语：“坑现在埋在海床下约七百米——是埋藏深度，不是坑的深度。”",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "成立条件则是这批受试者、这种练习和十二周的观察周期。",
+            "problem": "“成立条件”“观察周期”像审稿备注，而且下一段又说“人群、锻炼内容和观察时间一变，结论的适用范围也需要重新判断”，同一层意思重复打转。",
+            "why": "观众刚听到“每天四分钟锻炼有改善”，马上被抽象限定拖慢，收获感被稀释。",
+            "suggestion": "只保留一次自然限定，例如：“研究对象是65岁以上的人，持续十二周；这不等于所有人每天四分钟都有效。”删掉“成立条件则是……”和下一段“人群、锻炼内容……”的重复表述。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "报道涉及密集的日常锻炼，以及返回后在模拟火星重力条件下的表现。这可以帮助研究者理解身体适应和训练作用，但不是已经在火星上完成了同样的测试。",
+            "problem": "这条没有讲出研究到底发现了什么，只有“报道涉及”和“可以帮助理解”，太空实验变成了空泛背景。",
+            "why": "观众听完不知道宇航员在模拟火星重力下表现如何，也不知道这条消息为什么值得占一段。",
+            "suggestion": "如果原资料有具体结果，直接把结果放到前面，说清观察到了什么变化；如果没有结果，建议把这条压缩成一句场景或直接舍弃，不要用“帮助理解”撑一段。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "看这类消息，既要看研究发现了什么，也要看对象是谁、条件是什么。保留这些条件，结论才不会在传播时变大。",
+            "problem": "这里变成媒体素养说教，而且和上一句“不是已经在火星上完成测试”重复。",
+            "why": "结尾没有留下具体发现或判断，观众听到的是提醒而不是内容，容易觉得节目在反复打预防针。",
+            "suggestion": "删掉说教句，只留一句具体边界：“这些表现是在模拟火星重力下测的，不是火星表面实测。”结尾可回到本期最值得记住的发现或问题。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“十月的新闻转述”和“二零二五年发表的原始研究”具体指什么？前面没提，我为什么要在这里把它们分开？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "从撞击事件突然转到“十月新闻”和“二零二五年原始研究”的时间区分，前面没有交代这两者是什么，听起来像内部备注，容易跟丢，也打断“发现是什么、条件是什么”的推进。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“宾州州立大学相关研究报道中”是指研究本身，还是新闻转述？我有点分不清这个结论该归给谁。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          }
+        ]
+      },
+      "decision": {
+        "listening": {
+          "A": "开场“渔船和钻井平台照常作业”与“海床往下大约七百米”很快给我画面，接着“一百六十米，大概是一个半足球场的长度；一百米高的浪，相当于三十多层楼”让我具体感到规模，愿意继续听；“没有目击者”也勾住了我。中段“第一条……第二条……第三条……”虽清楚，但开始有点像方法清单；“这里有个特别容易读错的数字”和“时间也一样”又像插入纠错，我会短暂从故事里抽离。结尾“不是那个吓人的浪高数字……”拉回个人判断，记得住。",
+          "B": "开场“它不在海床上，而在海床再往下大约七百米”和“他们是怎么把它拼出来的”让我愿意继续听；“一张地下图像只能说明那里有个巨大的结构，还不能证明它就是撞击留下的。要确认，还得看石头本身”带来具体兴趣，像在解谜。后面“有了坑的形态……接下来才是把坑翻译成一场事件”“不是有人在四千多万年前拿尺子量到的”都在推进，我没跟丢；“拿尺子量到”也形象。结尾“以及我们怎么能知道”略抽象，但整体没走神。"
+        },
+        "choice": "B",
+        "reason": "B 的决定性差异是把三条证据变成连续追问：先看见坑，再追问“还不能证明它就是撞击留下的”，于是去看石头，最后才“把坑翻译成一场事件”。这让三种方法不再是并列条目，而是一步步解开；A 虽开场更有画面和尺度感，但“三条线索”加纠错段让我短暂从故事里抽离。B 的结尾不如 A 有个性，但整体听完更顺、更愿意跟着问下去。",
+        "remaining": [
+          "B 少了 A 那种“一个半足球场”“三十多层楼”的体感类比，海浪高度的冲击力弱一点；可补一个具体尺度。",
+          "结尾“以及我们怎么能知道”稍抽象，可以收得更具体、更有记忆点。"
+        ]
+      }
+    },
+    "editorial_attempts": [
+      {
+        "applied": true,
+        "before": [
+          {
+            "title": "本期三条科学线索",
+            "paragraphs": [
+              {
+                "text": "一颗古老的小行星，怎样在北海留下撞击痕迹？每天几分钟的锻炼，对哪类人有帮助？空间站里的训练，又能告诉我们多少关于火星的事？这次看三条研究消息，把发现和它成立的条件放在一起。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm",
+                  "https://www.sciencedaily.com/releases/2026/10/261020085025.htm",
+                  "https://www.sciencedaily.com/releases/2026/10/261020085016.htm"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "北海撞击：重建古老事件",
+            "paragraphs": [
+              {
+                "text": "赫瑞瓦特大学参与的研究，结合地震成像、岩石显微分析和计算机模拟，重建了北海 Silverpit 撞击事件。研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体撞入这里，可能掀起超过一百米高的海啸。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "来源摘要支持赫瑞瓦特大学参与、地震成像/岩石显微分析/计算机模拟、约160米天体、约4300万至4600万年前，以及可能超过100米高的海啸；『可能』保留了估计性质。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              },
+              {
+                "text": "陨石坑如今埋在海床以下约七百米。这个数字说的是埋藏位置，不能读成坑本身有七百米深。这是对古老事件的研究重建，也不是对今天北海海啸风险的预测。十月的新闻转述，和二零二五年发表的原始研究，也要分开。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "来源摘要明确陨石坑埋在海床以下约700米，并说明这是古老事件的研究重建、不是现代预警；新闻日期与2025年原始论文日期不同也一致。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "短时锻炼：人群和周期不能省",
+            "paragraphs": [
+              {
+                "text": "宾州州立大学相关研究报道中，六十五岁及以上的参与者，进行了十二周、每天约四分钟的阻力锻炼，力量、平衡和从椅子起身等表现得到改善。值得关注的是较短日常练习也可能带来帮助，成立条件则是这批受试者、这种练习和十二周的观察周期。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085025.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "来源标题和摘要支持65岁及以上人群、12周、每天约4分钟阻力锻炼，以及力量、平衡和从椅子起身等表现改善；并限定了研究人群和观察周期。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085025.htm"
+                  ]
+                }
+              },
+              {
+                "text": "这项研究不能直接变成“每个人每天四分钟就一定有效”的保证。人群、锻炼内容和观察时间一变，结论的适用范围也需要重新判断。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085025.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "来源明确不保证每个人有效、也不是临床治疗建议；本段据此收窄适用范围，未超出研究条件。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085025.htm"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "宇航员：模拟条件不是火星任务",
+            "paragraphs": [
+              {
+                "text": "另一项研究观察了十三名在国际空间站停留约六个月的宇航员。报道涉及密集的日常锻炼，以及返回后在模拟火星重力条件下的表现。这可以帮助研究者理解身体适应和训练作用，但不是已经在火星上完成了同样的测试。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085016.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "来源摘要支持13名国际空间站宇航员、约六个月、密集日常锻炼，以及返回后模拟火星重力条件下的表现；并明确不是已在火星完成同样测试。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085016.htm"
+                  ]
+                }
+              },
+              {
+                "text": "模拟条件下的结果，不能推出真实火星任务中的风险都已解决。看这类消息，既要看研究发现了什么，也要看对象是谁、条件是什么。保留这些条件，结论才不会在传播时变大。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085016.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "来源明确模拟条件不能证明真实火星任务的所有风险都已解决；本段是相应限定，没有扩大结论。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085016.htm"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "targets": {
+          "S1P1": [
+            "【编辑建议，按实际效果取舍】开场三个问句并列，再加一句“这次看三条研究消息”，像目录预告，没有确定本期最值得听的重点。；建议：用一个最有冲击力的发现开场，例如“北海海底约七百米下埋着一个陨石坑，研究者估计它可能曾掀起超过一百米高的海啸”，再自然带出另外两条研究；不要连问三题，也不要在开场说明“看三条消息”。"
+          ],
+          "S2P1": [
+            "【编辑建议，按实际效果取舍】机构名和三种研究方法压在句首，真正有画面的“160米天体、百米海啸”被埋在后面。；建议：先给发现和画面：“北海海底一个叫 Silverpit 的陨石坑，研究者估计，四千多万年前一颗约一百六十米宽的天体撞在这里，可能掀起超过一百米高的海啸。”再把地震成像、显微分析和模拟压缩成一句后置的方法说明。"
+          ],
+          "S2P2": [
+            "【编辑建议，按实际效果取舍】这是内部选题核对，普通观众没看过底稿，也不需要在这里分辨新闻转述和原始研究的发表时间。；建议：删掉这句。若需要边界，只保留自然的限定：“这是对古老撞击事件的重建，不是对今天北海海啸风险的预测。”前面的埋深纠错也可改成更顺的插入语：“坑现在埋在海床下约七百米——是埋藏深度，不是坑的深度。”",
+            "【编辑建议，按实际效果取舍】从撞击事件突然转到“十月新闻”和“二零二五年原始研究”的时间区分，前面没有交代这两者是什么，听起来像内部备注，容易跟丢，也打断“发现是什么、条件是什么”的推进。；建议：放慢、补一步推理，或换个说法"
+          ],
+          "S3P1": [
+            "【编辑建议，按实际效果取舍】“成立条件”“观察周期”像审稿备注，而且下一段又说“人群、锻炼内容和观察时间一变，结论的适用范围也需要重新判断”，同一层意思重复打转。；建议：只保留一次自然限定，例如：“研究对象是65岁以上的人，持续十二周；这不等于所有人每天四分钟都有效。”删掉“成立条件则是……”和下一段“人群、锻炼内容……”的重复表述。"
+          ],
+          "S4P1": [
+            "【编辑建议，按实际效果取舍】这条没有讲出研究到底发现了什么，只有“报道涉及”和“可以帮助理解”，太空实验变成了空泛背景。；建议：如果原资料有具体结果，直接把结果放到前面，说清观察到了什么变化；如果没有结果，建议把这条压缩成一句场景或直接舍弃，不要用“帮助理解”撑一段。"
+          ],
+          "S4P2": [
+            "【编辑建议，按实际效果取舍】这里变成媒体素养说教，而且和上一句“不是已经在火星上完成测试”重复。；建议：删掉说教句，只留一句具体边界：“这些表现是在模拟火星重力下测的，不是火星表面实测。”结尾可回到本期最值得记住的发现或问题。"
+          ]
+        },
+        "before_title": "北海撞击、短时锻炼与宇航员：研究结论要带着条件看",
+        "mode": "whole_script",
+        "prompt_version": 5,
+        "title": "北海海底七百米下，埋着四千多万年前的一场百米海啸",
+        "sections": [
+          {
+            "title": "海底七百米下有个坑",
+            "paragraphs": [
+              {
+                "text": "先给你一个画面：今天的北海海面上，渔船和钻井平台照常作业。而在海床往下大约七百米的地方，埋着一个陨石坑。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体砸在了这里，可能掀起超过一百米高的海啸。一百六十米，大概是一个半足球场的长度；一百米高的浪，相当于三十多层楼。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "一百六十米天体、四千三百万到四千六百万年前、海床以下约七百米、超过一百米高的浪，四项都与复核记录中的来源估计一致（160 m impactor, roughly 43–46 million years ago, crater buried 700 m below seabed, waves over 100 m）；浪高用了「可能」「估计」式限定，符合来源「估计的古事件」性质；一百六十米约合一个半足球场、一百米约合三十多层楼，只是换算，没有改变比较方向或数量级。代码发现的「七百」「四千三百万」「千六百万」在来源中分别对应 700 米与 43–46 百万年，属于分词误报。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "没有目击者，怎么还原",
+            "paragraphs": [
+              {
+                "text": "问题是，这件事没有任何目击者。四千多万年过去，坑被沉积物盖得严严实实，从海面上什么都看不出来。研究者是靠三条线索把它拼出来的。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "「四千多万年过去」与来源的 roughly 43–46 million years ago 一致；坑被埋在海底沉积层之下、海面看不到，是来源「buried 700 m below seabed」的直接推论，没有额外添加时间、次数或金额。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              },
+              {
+                "text": "第一条是地震成像，可以理解成给海底做CT：让声波穿进地层，不同岩层反射回来的信号不一样，把这些信号拼成地下剖面的图像，坑的形状和边界就显出来了。第二条是岩石显微分析：把坑里的岩石放到显微镜下，看它在撞击的极端压力和高温下被改造过的痕迹。第三条是计算机模拟：把坑的大小、形态和岩石证据放进去，反推当时撞击的能量，再看这样的能量落进海里，能掀起多高的浪。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "来源摘要明确列出 seismic imaging、rock microscopy、simulations 三种手段；讲稿对三者的通俗解释（声波成像、显微观察撞击改造痕迹、模拟反推能量与浪高）属于方法学解释，没有超出来源范围，也没有声称这些是我们自己的实测。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "七百米是埋深，不是坑深",
+            "paragraphs": [
+              {
+                "text": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。它如今被埋在海床以下约七百米，早已不是当年那个张着口的大坑。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": "已按审计意见改写",
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "改写后只说「埋在海床以下约七百米」，删去了来源未支持的「坑被沉积物填满」细节，与来源 crater buried 700 m below seabed 完全对应；「四百三十万到四千六百万年是一个区间」的表述与 roughly 43–46 million years ago 一致，没有把区间写成确定年份。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                },
+                "revision": {
+                  "before": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。坑自己早就被沉积物填满，上面又压着后来的地层，已经不是当年那个张着口的大坑了。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+                  "proposed": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。它如今被埋在海床以下约七百米，早已不是当年那个张着口的大坑。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+                  "accepted": true,
+                  "lost_conditions": []
+                }
+              }
+            ]
+          },
+          {
+            "title": "百米浪高，是估计不是预警",
+            "paragraphs": [
+              {
+                "text": "那超过一百米高的海浪，是不是真的发生过？这是研究给出的估计，不是测量记录。现场没有仪器，也没有目击者，它是从撞击的能量和海水的条件推出来的一个可能结果。也正因为这样，这项研究讲的是四千多万年前发生过什么，不是今天北海的海啸风险有多高，更不是一条预警。把它当成预报来读，就完全跑偏了。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "「超过一百米高的浪是研究给出的估计、不是测量记录」与来源把浪高列为 reported estimate、事件为研究重建的限定一致；「不是今天北海的海啸风险，更不是预警」与复核记录的成立条件「ancient event and research reconstruction, not a modern warning forecast」一致，归因清晰。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              },
+              {
+                "text": "我觉着这项研究最有意思的地方，不是那个吓人的浪高数字，而是它说明的一件事：一场没有目击者、现场还被埋在几百米海底的灾难，依然能被还原出时间、规模和大致过程。靠的不是想象，是地下的结构、岩石里的痕迹和一遍遍的模拟。只是还原归还原——浪究竟有多高，仍然是估计。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "「没有目击者、埋在几百米海底」与来源一致（七百米可约称为几百米），「浪高仍是估计」保留了来源的估计性质，属于对研究意义的定性概括，没有把推测说成定论。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "editorial_brief": {
+          "considered": [
+            "北海撞击单独展开：画面最强，事实链完整，能讲清‘怎么重建’和‘哪些是估计’；选它。",
+            "短时锻炼单独做：贴近生活，但材料只够说明人群和周期，缺效果大小与训练细节，容易变成标题党；不选。",
+            "宇航员火星测试单独做：有太空吸引力，但资料没有具体生理结果，旧稿只能空泛说‘帮助理解’；不选。",
+            "三条串成‘结论要带条件’：方法论正确，但观众没有共同焦点，容易变成目录和重复免责声明；放弃。",
+            "RNA研究：与本期无关，未选。"
+          ],
+          "angle": "这期讲北海海底一个被埋了四千多万年的撞击坑：研究者怎样用地下成像、岩石证据和模拟，重建出一颗约160米宽的天体可能掀起百米海啸的事件，以及为什么这只是重建、不是今天的预警。",
+          "viewer_value": "一个看不见的海底坑，怎么能还原出百米巨浪？具体画面和‘怎么知道’的悬念，能让普通观众愿意听；听完还能分清估计与预警。",
+          "throughline": "先用‘海底七百米下有坑、可能掀起百米海啸’建立画面；接着解释研究者如何靠地震成像、岩石显微分析和模拟拼出没有目击者的撞击；再把时间、埋深等数字说清，特别区分700米埋深和坑深；最后收在‘这是古老事件重建，不是现代风险预测’。",
+          "keep": [
+            "Silverpit 撞击事件：开场画面和整期主线。",
+            "约160米宽天体、约4300万至4600万年前、可能超过100米海啸：核心估计，支撑‘远古海啸’的具体感。",
+            "坑埋在海床下约700米，并说明不是坑深：关键防误读。",
+            "地震成像、岩石显微分析、计算机模拟：回答‘没有目击记录怎么重建’，让结论有来源。",
+            "赫瑞瓦特大学参与：自然归因，不展开机构介绍。",
+            "限定：研究重建、可能、非现代预警：避免把估计当预报。"
+          ],
+          "leave_out": [
+            "短时锻炼研究：与北海撞击无自然关系，且材料只够讲人群和周期，缺具体效果大小；会分散主线。",
+            "宇航员研究：资料没有具体生理结果，旧稿只能空泛说‘帮助理解’；不选。",
+            "RNA研究：与本期无关。",
+            "新闻转述与2025原始论文日期差异：内部核对，观众不需要，放进去会打断。",
+            "‘三条线索都要带条件’的方法论总主题：容易变成目录和重复免责声明；限定嵌入具体事实即可。",
+            "机构名单、方法全称、精确日期等背景：不服务主线时留资料。"
+          ],
+          "facts": [
+            "SD-HW-2026-10-21"
+          ],
+          "openings": [
+            "‘北海海底约七百米下，埋着一个陨石坑。研究者估计，四千多万年前，一颗约一百六十米宽的天体撞在这里，可能掀起超过一百米高的海啸。’——画面和悬念最强，先给发现再解释怎么知道；选它。",
+            "‘六十五岁以上的人，每天约四分钟锻炼，十二周后力量、平衡有改善。’——贴近生活，但这是另一条健康线，材料不足以展开效果大小；不选。",
+            "‘一场没有目击者的远古海啸，科学家怎么从海底读出来？’——有解释力，但偏抽象，适合放在画面之后，不适合第一句。",
+            "‘这次看三条研究消息……’——目录式开场，旧稿已暴露会散；不选。"
+          ],
+          "opening": "北海海底约七百米下，埋着一个陨石坑。研究者估计，四千多万年前，一颗约一百六十米宽的天体撞在这里，可能掀起超过一百米高的海啸。",
+          "opening_facts": [
+            "SD-HW-2026-10-21"
+          ],
+          "beats": [
+            {
+              "point": "Silverpit 坑被海底沉积物盖住，没有目击记录；研究者靠地震成像、岩石显微分析和计算机模拟，把这次撞击事件拼出来。",
+              "facts": [
+                "SD-HW-2026-10-21"
+              ],
+              "connection": "开场给了一个埋在海底的坑和百米浪高，观众自然会问：看不见现场，怎么知道发生过什么。"
+            },
+            {
+              "point": "研究者把时间收窄到约4300万至4600万年前；坑现在埋在海床下约700米，但这是埋藏深度，不是坑的深度。",
+              "facts": [
+                "SD-HW-2026-10-21"
+              ],
+              "connection": "知道方法后，观众需要把重建出的时间和位置落到具体数字，并避开最容易读错的700米。"
+            },
+            {
+              "point": "所谓超过100米高的海啸是研究估计，整个事件是古老撞击的重建，不是今天北海海啸风险的预测。",
+              "facts": [
+                "SD-HW-2026-10-21"
+              ],
+              "connection": "百米浪高最有冲击力，也最容易被当成现代预警；紧接着说明它说到哪，才能不夸大。"
+            },
+            {
+              "point": "这项研究真正让人记住的是：没有目击者的远古海啸，也能被地下结构和模拟还原；但还原出的浪高仍是估计。",
+              "facts": [
+                "SD-HW-2026-10-21"
+              ],
+              "connection": "边界讲清后，收束到重建本身的价值，而不是留下‘研究要带条件’的说教。"
+            }
+          ],
+          "material": "事实编号 SD-HW-2026-10-21。来源：ScienceDaily / Heriot-Watt University，2026-10-21，https://www.sciencedaily.com/releases/2026/10/261020085727.htm 。报道称，赫瑞瓦特大学参与的研究重建了北海 Silverpit 撞击事件；研究结合地震成像、岩石显微分析和计算机模拟。研究估计：约4300万至4600万年前，一颗约160米宽的天体撞击这里；陨石坑现在埋在海床以下约700米；可能掀起超过100米高的海啸。转述时保留“估计”“可能”“研究重建”。700米是坑的埋藏深度，不是坑本身的深度。这是对古老事件的重建，不是对今天北海海啸风险的预测或预警。报道日期与原始论文日期不同这一点属于内部核对，不建议进入口播。"
+        },
+        "source_repair": {
+          "before": [
+            {
+              "title": "海底七百米下有个坑",
+              "paragraphs": [
+                {
+                  "text": "先给你一个画面：今天的北海海面上，渔船和钻井平台照常作业。而在海床往下大约七百米的地方，埋着一个陨石坑。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体砸在了这里，可能掀起超过一百米高的海啸。一百六十米，大概是一个半足球场的长度；一百米高的浪，相当于三十多层楼。",
+                  "citations": [
+                    "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ],
+                  "evidence": "CITED",
+                  "note": null,
+                  "fact_verification": {
+                    "status": "verified",
+                    "reason": "来源给出160米撞击体、约4300–4600万年前、坑埋在海床下700米、浪高超过100米；讲稿保留「大约」「可能」，足球场与楼层只是对量级的通俗换算，未改变结论。",
+                    "sources": [
+                      "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "title": "没有目击者，怎么还原",
+              "paragraphs": [
+                {
+                  "text": "问题是，这件事没有任何目击者。四千多万年过去，坑被沉积物盖得严严实实，从海面上什么都看不出来。研究者是靠三条线索把它拼出来的。",
+                  "citations": [
+                    "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ],
+                  "evidence": "CITED",
+                  "note": null,
+                  "fact_verification": {
+                    "status": "verified",
+                    "reason": "「四千多万年」是对来源4300–4600万年的合理约数；「没有目击者、坑被埋住」与来源的古代事件重建定位一致。下一段列出的三条线索也正对应来源所述的地震成像、岩石显微分析与模拟。",
+                    "sources": [
+                      "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                    ]
+                  }
+                },
+                {
+                  "text": "第一条是地震成像，可以理解成给海底做CT：让声波穿进地层，不同岩层反射回来的信号不一样，把这些信号拼成地下剖面的图像，坑的形状和边界就显出来了。第二条是岩石显微分析：把坑里的岩石放到显微镜下，看它在撞击的极端压力和高温下被改造过的痕迹。第三条是计算机模拟：把坑的大小、形态和岩石证据放进去，反推当时撞击的能量，再看这样的能量落进海里，能掀起多高的浪。",
+                  "citations": [
+                    "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ],
+                  "evidence": "CITED",
+                  "note": null,
+                  "fact_verification": {
+                    "status": "verified",
+                    "reason": "来源明确提到地震成像、岩石显微分析与计算机模拟；讲稿对三者的通俗解释没有超出方法概述的范围。",
+                    "sources": [
+                      "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "title": "七百米是埋深，不是坑深",
+              "paragraphs": [
+                {
+                  "text": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。坑自己早就被沉积物填满，上面又压着后来的地层，已经不是当年那个张着口的大坑了。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+                  "citations": [
+                    "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ],
+                  "evidence": "NEEDS_REVIEW",
+                  "note": "事实审计：来源只说陨石坑埋在海床以下约700米，并没有说明坑的内部已经被沉积物填满。「填满」是讲稿额外添加的具体细节。",
+                  "review_reason": "来源只说陨石坑埋在海床以下约700米，并没有说明坑的内部已经被沉积物填满。「填满」是讲稿额外添加的具体细节。",
+                  "fact_verification": {
+                    "status": "needs_review",
+                    "reason": "来源只说陨石坑埋在海床以下约700米，并没有说明坑的内部已经被沉积物填满。「填满」是讲稿额外添加的具体细节。",
+                    "sources": [
+                      "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "title": "百米浪高，是估计不是预警",
+              "paragraphs": [
+                {
+                  "text": "那超过一百米高的海浪，是不是真的发生过？这是研究给出的估计，不是测量记录。现场没有仪器，也没有目击者，它是从撞击的能量和海水的条件推出来的一个可能结果。也正因为这样，这项研究讲的是四千多万年前发生过什么，不是今天北海的海啸风险有多高，更不是一条预警。把它当成预报来读，就完全跑偏了。",
+                  "citations": [
+                    "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ],
+                  "evidence": "CITED",
+                  "note": null,
+                  "fact_verification": {
+                    "status": "verified",
+                    "reason": "来源明确这是对古代事件的估计性重建，不是现代预警或风险预报；讲稿把浪高说成推算出的可能结果并排除预警读法，与来源限定一致，归因给研究也正确。",
+                    "sources": [
+                      "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                    ]
+                  }
+                },
+                {
+                  "text": "我觉着这项研究最有意思的地方，不是那个吓人的浪高数字，而是它说明的一件事：一场没有目击者、现场还被埋在几百米海底的灾难，依然能被还原出时间、规模和大致过程。靠的不是想象，是地下的结构、岩石里的痕迹和一遍遍的模拟。只是还原归还原——浪究竟有多高，仍然是估计。",
+                  "citations": [
+                    "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ],
+                  "evidence": "CITED",
+                  "note": null,
+                  "fact_verification": {
+                    "status": "verified",
+                    "reason": "总结落在「可被还原但浪高仍是估计」上，与来源所述研究重建性质一致，没有新增数据或扩大结论。",
+                    "sources": [
+                      "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "checks": {
+            "version": 2,
+            "issues": [
+              {
+                "audit": "communication",
+                "rule": "S1",
+                "severity": "warn",
+                "section": 0,
+                "paragraph": 0,
+                "quote": "今天的北海海面上，渔船和钻井平台照常作业。",
+                "problem": "“北海”单独出现时，中文观众很容易先想到广西北海或北海公园，开场画面会落到错误地点。",
+                "why": "地点一犹豫，后面的“海床七百米”“海啸”都要多花注意力重新对齐，开场建立的画面反而不稳。",
+                "suggestion": "首次出现就改成“欧洲北海、英国以东的海面”或“英国以东的北海海面”，再保留渔船和钻井平台的画面。",
+                "source": "model",
+                "editorial": true
+              },
+              {
+                "audit": "communication",
+                "rule": "S1",
+                "severity": "warn",
+                "section": 2,
+                "paragraph": 0,
+                "quote": "这里有个特别容易读错的数字：七百米。",
+                "problem": "这句话像在纠正一份观众没看过的底稿，突然把讲述变成内部审稿；“读错”也不如“理解错”自然。",
+                "why": "观众不知道谁读错了，只会觉得节奏被一个备课式提醒打断，从发现现场被拉回数字辨析。",
+                "suggestion": "删掉铺垫，直接顺着讲：“这个坑今天埋在海床以下约七百米——这是埋深，不是坑的深度。”",
+                "source": "model",
+                "editorial": true
+              },
+              {
+                "audit": "communication",
+                "rule": "S1",
+                "severity": "warn",
+                "section": 3,
+                "paragraph": 0,
+                "quote": "把它当成预报来读，就完全跑偏了。",
+                "problem": "前文已经用整段说明“估计、不是测量、不是今天风险”，这句再训诫一次，下一段又重复“仍然是估计”，边界说明盖过了发现本身。",
+                "why": "观众被反复提醒“别误会”，听到结尾只记住免责，反而弱化了“没有目击者也能还原灾难”这个最值得带走的点。",
+                "suggestion": "只保留一次清楚的边界，例如“浪高是模拟推断，不是实测，也不是今天的风险预警”，删掉“完全跑偏”；结尾直接落在“没有目击者、被埋几百米，也能还原时间、规模和过程”上。",
+                "source": "model",
+                "editorial": true
+              },
+              {
+                "audit": "comprehension",
+                "rule": "N1",
+                "severity": "warn",
+                "section": 0,
+                "paragraph": 0,
+                "quote": "",
+                "problem": "一颗直径约一百六十米的天体，怎么会推出超过一百米高的海啸？",
+                "why": "新观众在这里有疑问，后面的内容就听不进去",
+                "suggestion": "在这之前补上需要的解释",
+                "source": "model"
+              },
+              {
+                "audit": "comprehension",
+                "rule": "N1",
+                "severity": "warn",
+                "section": 1,
+                "paragraph": 1,
+                "quote": "",
+                "problem": "坑都被沉积物盖得严严实实了，岩石显微分析用的样本是怎么取到的？",
+                "why": "新观众在这里有疑问，后面的内容就听不进去",
+                "suggestion": "在这之前补上需要的解释",
+                "source": "model"
+              },
+              {
+                "audit": "comprehension",
+                "rule": "N1",
+                "severity": "warn",
+                "section": 2,
+                "paragraph": 0,
+                "quote": "",
+                "problem": "那这个坑本身有多深？",
+                "why": "新观众在这里有疑问，后面的内容就听不进去",
+                "suggestion": "在这之前补上需要的解释",
+                "source": "model"
+              }
+            ],
+            "quiz": {
+              "items": [],
+              "score": null
+            },
+            "newcomer": null,
+            "core_message_match": null,
+            "core_message_note": "",
+            "model_ran": true,
+            "audits_complete": true,
+            "pending_review": false,
+            "summary": {
+              "serious": 0,
+              "must": 0,
+              "warn": 6,
+              "rule_must": 0,
+              "questions": 3,
+              "lost": 0,
+              "quiz_score": null,
+              "low_scores": [],
+              "by_audit": {
+                "fact": {
+                  "serious": 0,
+                  "must": 0,
+                  "warn": 0
+                },
+                "comprehension": {
+                  "serious": 0,
+                  "must": 0,
+                  "warn": 3
+                },
+                "communication": {
+                  "serious": 0,
+                  "must": 0,
+                  "warn": 3
+                }
+              },
+              "passed": true,
+              "rank": 0
+            },
+            "rounds": 1,
+            "deletions": [],
+            "initial": [
+              {
+                "audit": "fact",
+                "rule": "D1",
+                "severity": "warn",
+                "section": 2,
+                "paragraph": 0,
+                "quote": "坑自己早就被沉积物填满，上面又压着后来的地层，已经不是当年那个张着口的大坑了。",
+                "problem": "来源只说陨石坑埋在海床以下约700米，并没有说明坑的内部已经被沉积物填满。「填满」是讲稿额外添加的具体细节。",
+                "why": "观众会把「坑被沉积物填满」当成研究给出的结论，但来源只支持「坑位于海床下700米」这一点；这属于有额外依据的事实描述。",
+                "suggestion": "改成「这个坑如今埋在海床以下约七百米，上面盖着后来的地层，已不是当年张着口的样子。」保留埋深与本段要纠正的读法，不加来源没有的坑内填充细节。",
+                "source": "model",
+                "resolved": true
+              },
+              {
+                "audit": "communication",
+                "rule": "S1",
+                "severity": "warn",
+                "section": 0,
+                "paragraph": 0,
+                "quote": "一百六十米，大概是一个半足球场的长度；一百米高的浪，相当于三十多层楼。",
+                "problem": "两个类比挤在一句话里，前一个还在用“足球场长度”去形容一个天体的直径，换算方向别扭。",
+                "why": "开场画面刚建立，观众就要连着做两次脑内换算，结果更直观的浪高冲击力反而被前一个类比冲淡了。",
+                "suggestion": "只留浪高“三十多层楼”这个更直观的类比；天体大小改成一句更省事的话（如“一个足球场都装不下”），或直接只给数字，把注意力留给浪。",
+                "source": "model",
+                "editorial": true,
+                "resolved": false
+              },
+              {
+                "audit": "communication",
+                "rule": "S1",
+                "severity": "warn",
+                "section": 2,
+                "paragraph": 0,
+                "quote": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。",
+                "problem": "这句像在向审稿人澄清，但前文 S1P1 写的是“海床往下大约七百米”，本来就说对了，这里再纠正一遍，等于替观众纠一个他们没犯的错。",
+                "why": "观众会以为前面漏听了什么，或者觉得被当成会读错的人来上课，听感从“听故事”掉到“对答案”。",
+                "suggestion": "去掉“容易读错”这层框架，把有用的画面直接往前推：“坑现在被沉积物填满了，上面又压着后来的地层，从海床往下要走七百米才碰得到它。”年代那句也顺手带过（“四千三百万到四千六百万年，是个区间”），不必单开一段。",
+                "source": "model",
+                "editorial": true,
+                "resolved": false
+              },
+              {
+                "audit": "communication",
+                "rule": "S1",
+                "severity": "warn",
+                "section": 3,
+                "paragraph": 0,
+                "quote": "也正因为这样，这项研究讲的是四千多万年前发生过什么，不是今天北海的海啸风险有多高，更不是一条预警。把它当成预报来读，就完全跑偏了。",
+                "problem": "三层否定叠在一起（不是风险、不是预警、不是预报），再加一句“完全跑偏了”的教训口吻，免责声明盖过内容，而且“没有目击者”在 S2P1 已经说过一次。",
+                "why": "观众本来在惊叹“海底埋着陨石坑”，这段反复提醒别想歪，注意力从发现本身转到了“作者怕我误会”。",
+                "suggestion": "收成一句，放在浪高第一次出现的地方或紧接其后：“这是模型推出来的估计，不是测量，跟今天北海的风险也不是一回事。”删掉“完全跑偏了”，也删掉重复的“没有目击者”。",
+                "source": "model",
+                "editorial": true,
+                "resolved": false
+              },
+              {
+                "audit": "communication",
+                "rule": "S1",
+                "severity": "warn",
+                "section": 3,
+                "paragraph": 1,
+                "quote": "只是还原归还原——浪究竟有多高，仍然是估计。",
+                "problem": "这已经是全文第四次说“这是估计”（S1P1、S4P1 两处、此处），而结尾本来该落在“没有目击者也能还原”这个新判断上，却又退回同一个限定。",
+                "why": "观众早就接受了“是估计”，最后再补一次，把收尾的语气又拉回去，前面那个有意思的结论反倒被压住。",
+                "suggestion": "结尾停在“靠的是地下的结构、岩石里的痕迹和一遍遍的模拟”就好，把“估计”的话在中间说一次说透；这样“没有目击者也能还原”才是落点。",
+                "source": "model",
+                "editorial": true,
+                "resolved": true
+              },
+              {
+                "audit": "comprehension",
+                "rule": "N1",
+                "severity": "warn",
+                "section": 1,
+                "paragraph": 1,
+                "quote": "",
+                "problem": "坑埋在七百米海底，岩石显微分析的样本是怎么取到的？",
+                "why": "新观众在这里有疑问，后面的内容就听不进去",
+                "suggestion": "在这之前补上需要的解释",
+                "source": "model",
+                "resolved": false
+              },
+              {
+                "audit": "comprehension",
+                "rule": "N2",
+                "severity": "warn",
+                "section": 1,
+                "paragraph": 1,
+                "quote": "",
+                "problem": "三条方法连着报，术语密度偏高，听到第三条时容易记不清前面两条分别证明了什么。",
+                "why": "新观众在这里跟不上，或可能理解错",
+                "suggestion": "放慢、补一步推理，或换个说法",
+                "source": "model",
+                "resolved": true
+              }
+            ],
+            "editorial_attempted": false
+          },
+          "problems": [],
+          "audit_usage": {
+            "requests": 4,
+            "prompt_tokens": 8808,
+            "completion_tokens": 11015,
+            "total_tokens": 19823
+          }
+        },
+        "checks": {
+          "version": 2,
+          "issues": [
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "今天的北海海面上，渔船和钻井平台照常作业。",
+              "problem": "“北海”单独出现时，中文观众很容易先想到广西北海或北海公园，开场画面会落到错误地点。",
+              "why": "地点一犹豫，后面的“海床七百米”“海啸”都要多花注意力重新对齐，开场建立的画面反而不稳。",
+              "suggestion": "首次出现就改成“欧洲北海、英国以东的海面”或“英国以东的北海海面”，再保留渔船和钻井平台的画面。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "这里有个特别容易读错的数字：七百米。",
+              "problem": "这句话像在纠正一份观众没看过的底稿，突然把讲述变成内部审稿；“读错”也不如“理解错”自然。",
+              "why": "观众不知道谁读错了，只会觉得节奏被一个备课式提醒打断，从发现现场被拉回数字辨析。",
+              "suggestion": "删掉铺垫，直接顺着讲：“这个坑今天埋在海床以下约七百米——这是埋深，不是坑的深度。”",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "把它当成预报来读，就完全跑偏了。",
+              "problem": "前文已经用整段说明“估计、不是测量、不是今天风险”，这句再训诫一次，下一段又重复“仍然是估计”，边界说明盖过了发现本身。",
+              "why": "观众被反复提醒“别误会”，听到结尾只记住免责，反而弱化了“没有目击者也能还原灾难”这个最值得带走的点。",
+              "suggestion": "只保留一次清楚的边界，例如“浪高是模拟推断，不是实测，也不是今天的风险预警”，删掉“完全跑偏”；结尾直接落在“没有目击者、被埋几百米，也能还原时间、规模和过程”上。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "一颗直径约一百六十米的天体，怎么会推出超过一百米高的海啸？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "坑都被沉积物盖得严严实实了，岩石显微分析用的样本是怎么取到的？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "那这个坑本身有多深？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model"
+            }
+          ],
+          "quiz": {
+            "items": [],
+            "score": null
+          },
+          "newcomer": null,
+          "core_message_match": null,
+          "core_message_note": "",
+          "model_ran": true,
+          "audits_complete": true,
+          "pending_review": false,
+          "summary": {
+            "serious": 0,
+            "must": 0,
+            "warn": 6,
+            "rule_must": 0,
+            "questions": 3,
+            "lost": 0,
+            "quiz_score": null,
+            "low_scores": [],
+            "by_audit": {
+              "fact": {
+                "serious": 0,
+                "must": 0,
+                "warn": 0
+              },
+              "comprehension": {
+                "serious": 0,
+                "must": 0,
+                "warn": 3
+              },
+              "communication": {
+                "serious": 0,
+                "must": 0,
+                "warn": 3
+              }
+            },
+            "passed": true,
+            "rank": 0
+          },
+          "rounds": 2,
+          "deletions": [],
+          "initial": [
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "一颗古老的小行星，怎样在北海留下撞击痕迹？每天几分钟的锻炼，对哪类人有帮助？空间站里的训练，又能告诉我们多少关于火星的事？这次看三条研究消息，把发现和它成立的条件放在一起。",
+              "problem": "开场三个问句并列，再加一句“这次看三条研究消息”，像目录预告，没有确定本期最值得听的重点。",
+              "why": "普通观众刚进来就被分散到三个方向，不知道最该跟哪条；结构说明也偏内部，不像内容本身在吸引人。",
+              "suggestion": "用一个最有冲击力的发现开场，例如“北海海底约七百米下埋着一个陨石坑，研究者估计它可能曾掀起超过一百米高的海啸”，再自然带出另外两条研究；不要连问三题，也不要在开场说明“看三条消息”。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 0,
+              "quote": "赫瑞瓦特大学参与的研究，结合地震成像、岩石显微分析和计算机模拟，重建了北海 Silverpit 撞击事件。",
+              "problem": "机构名和三种研究方法压在句首，真正有画面的“160米天体、百米海啸”被埋在后面。",
+              "why": "陌生观众先听到的是学术通报式的信息清单，容易在故事开始前走神。",
+              "suggestion": "先给发现和画面：“北海海底一个叫 Silverpit 的陨石坑，研究者估计，四千多万年前一颗约一百六十米宽的天体撞在这里，可能掀起超过一百米高的海啸。”再把地震成像、显微分析和模拟压缩成一句后置的方法说明。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "十月的新闻转述，和二零二五年发表的原始研究，也要分开。",
+              "problem": "这是内部选题核对，普通观众没看过底稿，也不需要在这里分辨新闻转述和原始研究的发表时间。",
+              "why": "它把撞击故事打断，让观众突然像在听编辑部流程，而不是听发现。",
+              "suggestion": "删掉这句。若需要边界，只保留自然的限定：“这是对古老撞击事件的重建，不是对今天北海海啸风险的预测。”前面的埋深纠错也可改成更顺的插入语：“坑现在埋在海床下约七百米——是埋藏深度，不是坑的深度。”",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "成立条件则是这批受试者、这种练习和十二周的观察周期。",
+              "problem": "“成立条件”“观察周期”像审稿备注，而且下一段又说“人群、锻炼内容和观察时间一变，结论的适用范围也需要重新判断”，同一层意思重复打转。",
+              "why": "观众刚听到“每天四分钟锻炼有改善”，马上被抽象限定拖慢，收获感被稀释。",
+              "suggestion": "只保留一次自然限定，例如：“研究对象是65岁以上的人，持续十二周；这不等于所有人每天四分钟都有效。”删掉“成立条件则是……”和下一段“人群、锻炼内容……”的重复表述。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "报道涉及密集的日常锻炼，以及返回后在模拟火星重力条件下的表现。这可以帮助研究者理解身体适应和训练作用，但不是已经在火星上完成了同样的测试。",
+              "problem": "这条没有讲出研究到底发现了什么，只有“报道涉及”和“可以帮助理解”，太空实验变成了空泛背景。",
+              "why": "观众听完不知道宇航员在模拟火星重力下表现如何，也不知道这条消息为什么值得占一段。",
+              "suggestion": "如果原资料有具体结果，直接把结果放到前面，说清观察到了什么变化；如果没有结果，建议把这条压缩成一句场景或直接舍弃，不要用“帮助理解”撑一段。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 1,
+              "quote": "看这类消息，既要看研究发现了什么，也要看对象是谁、条件是什么。保留这些条件，结论才不会在传播时变大。",
+              "problem": "这里变成媒体素养说教，而且和上一句“不是已经在火星上完成测试”重复。",
+              "why": "结尾没有留下具体发现或判断，观众听到的是提醒而不是内容，容易觉得节目在反复打预防针。",
+              "suggestion": "删掉说教句，只留一句具体边界：“这些表现是在模拟火星重力下测的，不是火星表面实测。”结尾可回到本期最值得记住的发现或问题。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "“十月的新闻转述”和“二零二五年发表的原始研究”具体指什么？前面没提，我为什么要在这里把它们分开？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": false
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "从撞击事件突然转到“十月新闻”和“二零二五年原始研究”的时间区分，前面没有交代这两者是什么，听起来像内部备注，容易跟丢，也打断“发现是什么、条件是什么”的推进。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "“宾州州立大学相关研究报道中”是指研究本身，还是新闻转述？我有点分不清这个结论该归给谁。",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": false
+            }
+          ],
+          "editorial_attempted": false
+        },
+        "decision": {
+          "listening": {
+            "A": "开场三连问把北海撞击、短时锻炼和宇航员并列，我第一反应是三条新闻速览，是否继续主要取决于我是否愿意听拼盘；‘大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体撞入这里，可能掀起超过一百米高的海啸’确实带来具体兴趣。但紧接着‘十月的新闻转述，和二零二五年发表的原始研究，也要分开’像插入编辑注释，随后‘宾州州立大学相关研究报道中’直接跳到锻炼，我从这里跟丢，感觉话题被硬切。后半段多次说‘不能直接变成……保证’‘人群、锻炼内容和观察时间一变’，像逐条补免责声明，压过了发现本身；结尾‘保留这些条件，结论才不会在传播时变大’也偏空泛。",
+            "B": "开场‘渔船和钻井平台照常作业’与‘海床往下大约七百米’的陨石坑形成画面，我愿意继续听；‘一百六十米，大概是一个半足球场的长度；一百米高的浪，相当于三十多层楼’把规模变得可感。‘这件事没有任何目击者……研究者是靠三条线索把它拼出来的’转场顺，地震成像比作给海底做CT，岩石显微分析和计算机模拟也各有作用。‘七百米是埋藏位置，不是坑本身有多深’和‘浪高是研究估计，不是测量记录’解释清楚。三条线索并列讲得略长，但没有让我跟丢；结尾‘浪究竟有多高，仍然是估计’留下记忆点。"
+          },
+          "choice": "B",
+          "reason": "决定性的听感差异在开场和转场：B先用北海海面与海底埋坑的画面把我带进一个具体谜题，再用‘没有目击者—三条线索’维持连续收听；A虽然也有百米海啸这样抓人的细节，但三问并列像新闻汇总，从撞击跳到锻炼时硬切，加上反复的条件提醒，让我中途走神。B的谨慎是贴着故事说的，A的条件说明更像编辑注释，压住了讲述。",
+          "remaining": [
+            "B讲三条研究线索时仍有轻微条目化，尤其显微分析和模拟可以更紧密地扣回‘如何还原这场海啸’，减少并列感。",
+            "B的‘我觉着’结尾有个性，但若追求栏目统一的客观口播，可稍微收紧作者感想，同时保留‘浪高仍是估计’这一记忆点。"
+          ]
+        }
+      },
+      {
+        "applied": true,
+        "before": [
+          {
+            "title": "海底七百米下有个坑",
+            "paragraphs": [
+              {
+                "text": "先给你一个画面：今天的北海海面上，渔船和钻井平台照常作业。而在海床往下大约七百米的地方，埋着一个陨石坑。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体砸在了这里，可能掀起超过一百米高的海啸。一百六十米，大概是一个半足球场的长度；一百米高的浪，相当于三十多层楼。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "一百六十米天体、四千三百万到四千六百万年前、海床以下约七百米、超过一百米高的浪，四项都与复核记录中的来源估计一致（160 m impactor, roughly 43–46 million years ago, crater buried 700 m below seabed, waves over 100 m）；浪高用了「可能」「估计」式限定，符合来源「估计的古事件」性质；一百六十米约合一个半足球场、一百米约合三十多层楼，只是换算，没有改变比较方向或数量级。代码发现的「七百」「四千三百万」「千六百万」在来源中分别对应 700 米与 43–46 百万年，属于分词误报。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "没有目击者，怎么还原",
+            "paragraphs": [
+              {
+                "text": "问题是，这件事没有任何目击者。四千多万年过去，坑被沉积物盖得严严实实，从海面上什么都看不出来。研究者是靠三条线索把它拼出来的。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "「四千多万年过去」与来源的 roughly 43–46 million years ago 一致；坑被埋在海底沉积层之下、海面看不到，是来源「buried 700 m below seabed」的直接推论，没有额外添加时间、次数或金额。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              },
+              {
+                "text": "第一条是地震成像，可以理解成给海底做CT：让声波穿进地层，不同岩层反射回来的信号不一样，把这些信号拼成地下剖面的图像，坑的形状和边界就显出来了。第二条是岩石显微分析：把坑里的岩石放到显微镜下，看它在撞击的极端压力和高温下被改造过的痕迹。第三条是计算机模拟：把坑的大小、形态和岩石证据放进去，反推当时撞击的能量，再看这样的能量落进海里，能掀起多高的浪。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "来源摘要明确列出 seismic imaging、rock microscopy、simulations 三种手段；讲稿对三者的通俗解释（声波成像、显微观察撞击改造痕迹、模拟反推能量与浪高）属于方法学解释，没有超出来源范围，也没有声称这些是我们自己的实测。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "七百米是埋深，不是坑深",
+            "paragraphs": [
+              {
+                "text": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。它如今被埋在海床以下约七百米，早已不是当年那个张着口的大坑。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": "已按审计意见改写",
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "改写后只说「埋在海床以下约七百米」，删去了来源未支持的「坑被沉积物填满」细节，与来源 crater buried 700 m below seabed 完全对应；「四百三十万到四千六百万年是一个区间」的表述与 roughly 43–46 million years ago 一致，没有把区间写成确定年份。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                },
+                "revision": {
+                  "before": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。坑自己早就被沉积物填满，上面又压着后来的地层，已经不是当年那个张着口的大坑了。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+                  "proposed": "这里有个特别容易读错的数字：七百米。它说的是这个坑今天埋得有多深——从海床往下要走七百米才碰到它——不是坑本身有多深。它如今被埋在海床以下约七百米，早已不是当年那个张着口的大坑。时间也一样，四千三百万到四千六百万年是一个区间，不是一个确定的年份。研究能给出的，就是这个量级的重建。",
+                  "accepted": true,
+                  "lost_conditions": []
+                }
+              }
+            ]
+          },
+          {
+            "title": "百米浪高，是估计不是预警",
+            "paragraphs": [
+              {
+                "text": "那超过一百米高的海浪，是不是真的发生过？这是研究给出的估计，不是测量记录。现场没有仪器，也没有目击者，它是从撞击的能量和海水的条件推出来的一个可能结果。也正因为这样，这项研究讲的是四千多万年前发生过什么，不是今天北海的海啸风险有多高，更不是一条预警。把它当成预报来读，就完全跑偏了。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "「超过一百米高的浪是研究给出的估计、不是测量记录」与来源把浪高列为 reported estimate、事件为研究重建的限定一致；「不是今天北海的海啸风险，更不是预警」与复核记录的成立条件「ancient event and research reconstruction, not a modern warning forecast」一致，归因清晰。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              },
+              {
+                "text": "我觉着这项研究最有意思的地方，不是那个吓人的浪高数字，而是它说明的一件事：一场没有目击者、现场还被埋在几百米海底的灾难，依然能被还原出时间、规模和大致过程。靠的不是想象，是地下的结构、岩石里的痕迹和一遍遍的模拟。只是还原归还原——浪究竟有多高，仍然是估计。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "「没有目击者、埋在几百米海底」与来源一致（七百米可约称为几百米），「浪高仍是估计」保留了来源的估计性质，属于对研究意义的定性概括，没有把推测说成定论。",
+                  "sources": [
+                    "https://sciencedaily.com/releases/2026/10/261020085727.htm"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "targets": {
+          "S1P1": [
+            "【编辑建议，按实际效果取舍】“北海”单独出现时，中文观众很容易先想到广西北海或北海公园，开场画面会落到错误地点。；建议：首次出现就改成“欧洲北海、英国以东的海面”或“英国以东的北海海面”，再保留渔船和钻井平台的画面。"
+          ],
+          "S3P1": [
+            "【编辑建议，按实际效果取舍】这句话像在纠正一份观众没看过的底稿，突然把讲述变成内部审稿；“读错”也不如“理解错”自然。；建议：删掉铺垫，直接顺着讲：“这个坑今天埋在海床以下约七百米——这是埋深，不是坑的深度。”"
+          ],
+          "S4P1": [
+            "【编辑建议，按实际效果取舍】前文已经用整段说明“估计、不是测量、不是今天风险”，这句再训诫一次，下一段又重复“仍然是估计”，边界说明盖过了发现本身。；建议：只保留一次清楚的边界，例如“浪高是模拟推断，不是实测，也不是今天的风险预警”，删掉“完全跑偏”；结尾直接落在“没有目击者、被埋几百米，也能还原时间、规模和过程”上。"
+          ]
+        },
+        "before_title": "北海海底七百米下，埋着四千多万年前的一场百米海啸",
+        "mode": "whole_script",
+        "prompt_version": 5,
+        "title": "海床下七百米的坑：一场没有目击者的远古撞击如何被还原",
+        "sections": [
+          {
+            "title": "看不见的坑",
+            "paragraphs": [
+              {
+                "text": "欧洲北海的海床下面，埋着一个陨石坑。它不在海床上，而在海床再往下大约七百米。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的小行星砸在这里，可能掀起超过一百米高的海浪。可这件事没有目击者，坑从海面上也看不见，那他们是怎么把它拼出来的？",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "先给海底做CT",
+            "paragraphs": [
+              {
+                "text": "第一步不是潜到海底去找坑口，而是先给海底做一次“CT”。地震成像向地下发送声波，不同岩层反射回来的信号不一样，研究者把这些信号拼成地下剖面，坑的轮廓就从岩层里显出来。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "但一张地下图像只能说明那里有个巨大的结构，还不能证明它就是撞击留下的。要确认，还得看石头本身。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "石头里的痕迹",
+            "paragraphs": [
+              {
+                "text": "研究者把那里的岩石放到显微镜下，在显微尺度上检查它有没有留下被撞击改造过的痕迹。这一步和地下成像看的是两件事：一个给形态，一个给成因。两边对上了，“这是撞击坑”才站得住。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "把坑变成浪",
+            "paragraphs": [
+              {
+                "text": "有了坑的形态，也有了岩石证据，接下来才是把坑翻译成一场事件。研究者把坑的大小、形态和岩石证据放进计算机模拟，反推需要多大的撞击能量；再看这股能量落进海里，海水会怎么响应。模拟给出的结果里，海浪可能超过一百米。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "这里得停一下：超过一百米，是模拟算出来的估计，不是有人在四千多万年前拿尺子量到的。浪高越惊人，越要记住它是从坑和岩石反推出来的结果。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "怎么知道",
+            "paragraphs": [
+              {
+                "text": "所以这项研究真正有意思的，不只是“北海曾经可能有过大海啸”，而是它怎么被拼出来：地震成像先让我们看见地下七百米处的坑，岩石显微分析确认它挨过撞击，模拟再把坑翻译成能量和海浪。三条证据各管一段，接起来才是一个完整的故事。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "这也是对一个远古事件的估算和重建，不是今天北海的海啸风险预报或预警。它回答的是四千多万年前可能发生了什么，以及我们怎么能知道。",
+                "citations": [
+                  "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          }
+        ],
+        "editorial_brief": {
+          "considered": [
+            "事件冲击优先：用160米天体、百米海啸开场。吸引力强，但容易把估计讲成已发生的事实，边界说明会反复打断，弃。",
+            "纠错优先：解释七百米是埋深不是坑深。对没看过底稿的观众价值低，像内部审稿，弃。",
+            "方法侦探优先：从没有目击者、坑被埋切入，用地震成像、岩石显微、模拟三条证据回答‘怎么知道’。既保留冲击力，又让数字有来源，选这个。",
+            "研究意义优先：讲科学家能重建远古灾难。方向对，但太抽象；不如具体证据链有画面，作为主线收尾。"
+          ],
+          "angle": "这期讲一场没有目击者的远古撞击如何被还原：科学家用地下成像、岩石痕迹和模拟，把欧洲北海海床下约七百米的坑，拼成一次可能掀起百米海浪的事件；重点是‘怎么知道’，不是今天的海啸预警。",
+          "viewer_value": "观众会被‘看不见、没人见过，怎么还能知道’吸引；听完能理解三条证据如何互相咬合，也能分清远古重建和现代风险。",
+          "throughline": "从欧洲北海海面下埋着的坑切入，先立起‘没有目击者、坑也看不见’的疑问；再按‘怎么看见—怎么确认—怎么估算浪高’推进三条证据；最后只收一次边界：这是对远古事件的估计性重建，不是今天北海的海啸预报。",
+          "keep": [
+            "‘欧洲北海’要在开场说清，避免观众先想到广西北海或北海公园。",
+            "‘海床以下约七百米’作为埋深自然带出，不单独做纠错段；它支撑‘看不见’的疑问。",
+            "160米天体、4300万至4600万年前、超过100米浪高，作为报道给出的估计，撑起事件尺度，但始终用‘估计/可能’。",
+            "‘没有目击者、坑看不见’是核心疑问，让三条方法有目的。",
+            "三条证据链：地震成像给形态，岩石显微给撞击证据，模拟把证据转成能量和浪高；这是主线。",
+            "‘不是今天预警’只保留一次，放在结尾边界，防止误导。",
+            "赫瑞瓦特大学可作为来源归属提一次，不必展开机构介绍。"
+          ],
+          "leave_out": [
+            "‘七百米是埋深不是坑深’的独立纠错段：观众没看过底稿，独立成段会像内部审稿；只在叙述中自然说清。",
+            "反复说‘不是预警/不是测量’：一处边界足够，重复会盖过发现。",
+            "论文日期与新闻日期的差异、Nature Communications 2025 等内部核验信息：对观众理解主线无帮助。",
+            "其他 ScienceDaily 研究（抗阻训练、宇航员心脏、RNA）：与本主题无关。",
+            "足球场、楼层等尺度换算：数字本身已够具体，过多类比会分散对‘怎么还原’的注意力。",
+            "详细的地震成像原理（声波频率、岩层反射系数等）：口播不需要。",
+            "其他机构名单、参数、风险清单：不展开。"
+          ],
+          "facts": [
+            "F1",
+            "F2",
+            "F3"
+          ],
+          "openings": [
+            "欧洲北海的海床下面，埋着一个陨石坑。它不在海床上，而在海床再往下约七百米。研究者估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体砸在这里，可能掀起超过一百米高的海啸。可这件事没有目击者，坑也从海面上看不见——他们是怎么把它拼出来的？",
+            "如果没有目击者，也没有露出来的坑口，你怎么知道四千多万年前这里发生过一次撞击？欧洲北海海床下约七百米，就埋着这样一个坑。",
+            "一颗约一百六十米宽的天体，在四千多万年前砸进欧洲北海，可能掀起超过一百米高的海啸。今天从海面上什么都看不到。"
+          ],
+          "opening": "欧洲北海的海床下面，埋着一个陨石坑。它不在海床上，而在海床再往下约七百米。研究者估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体砸在这里，可能掀起超过一百米高的海啸。可这件事没有目击者，坑也从海面上看不见——他们是怎么把它拼出来的？",
+          "opening_facts": [
+            "F1"
+          ],
+          "beats": [
+            {
+              "point": "研究者不是找到露头的坑口，而是先给海底做‘CT’：地震成像用声波穿透地层，不同岩层反射信号不同，拼出地下剖面，坑的形状和边界就显出来。",
+              "facts": [
+                "F2"
+              ],
+              "connection": "可一张地下图像只能说明那里有个结构，还不能证明它是撞击造成的；观众会想知道下一步看什么。"
+            },
+            {
+              "point": "岩石显微分析从微观尺度检查岩石是否留下撞击改造的痕迹，给‘这是撞击坑’提供独立于图像的证据。",
+              "facts": [
+                "F2"
+              ],
+              "connection": "有了形态和岩石证据，才谈得上把坑的大小、形态反推成撞击能量，再看能量落进海里会怎样。"
+            },
+            {
+              "point": "计算机模拟把坑的大小、形态和岩石证据放进去，反推撞击能量，估算海水响应，得到可能超过一百米浪高的结果。",
+              "facts": [
+                "F1",
+                "F2"
+              ],
+              "connection": "浪高越惊人，越需要问：这是测出来的，还是算出来的？"
+            },
+            {
+              "point": "超过一百米是模拟估计，不是现场测量；这项研究重建的是四千多万年前的远古事件，不是今天北海的海啸风险或预警。真正值得记住的是，没有目击者、坑被埋在海床下约七百米，仍能靠地下结构、岩石痕迹和模拟拼出时间、规模和大致过程。",
+              "facts": [
+                "F1",
+                "F2",
+                "F3"
+              ],
+              "connection": "收束在‘怎么知道’，而不是‘今天会不会发生’。"
+            }
+          ],
+          "material": "入选资料包（编号供引用；来源为 ScienceDaily 对 Heriot-Watt University 研究的报道：https://www.sciencedaily.com/releases/2026/10/261020085727.htm）\n\nF1 事件估计：报道称一颗小行星撞入北海（North Sea）。报道给出的估计是：撞击体直径约160米；时间约4300万至4600万年前；陨石坑埋在海床以下约700米；可能掀起超过100米高的海浪/海啸。这些是研究重建的估计，不是现代观测记录。\n\nF2 方法：报道提到研究使用地震成像、岩石显微分析和计算机模拟。地震成像可理解为用声波探测地下结构；岩石显微分析可理解为在显微尺度检查岩石是否留下撞击改造的痕迹；模拟用于反推撞击能量和海水响应。\n\nF3 边界：这是对一个远古事件的估算和重建，不是对今天北海海啸风险的预报或预警。\n\n来源归属：报道涉及 Heriot-Watt University；底层 Nature Communications 论文标注为2025年。正文若不需要，可不提论文日期。"
+        },
+        "checks": {
+          "version": 2,
+          "issues": [
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的小行星砸在这里，可能掀起超过一百米高的海浪。",
+              "problem": "开场第二句就报出机构名和两个精确年代，与「直径一百六十米」叠在一起；一句里同时出现机构、年代区间、撞击体大小和浪高四个信息块，观众只能抓住最后一个。",
+              "why": "对陌生领域观众，突然的机构名让节目像研究汇报，容易中途划走；注意力被数据占去，那个「海床下埋着看不见的坑」的画面反而被挤掉。",
+              "suggestion": "删掉开场机构名，或后文交代来源时再顺带一句「这项研究有赫瑞瓦特大学参与」；开场只保留「一颗一百六十米左右的小行星砸出这个坑」和「海底下一百米级的浪」两个信息，年代留到需要时再给。",
+              "source": "model",
+              "editorial": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 1,
+              "quote": "这里得停一下：超过一百米，是模拟算出来的估计，不是有人在四千多万年前拿尺子量到的。浪高越惊人，越要记住它是从坑和岩石反推出来的结果。",
+              "problem": "开头「可能」「估计」已经交代过不确定；这里整段再说一遍，还用「得停一下」「越要记住」提醒观众。听感是作者不信任观众，节奏被打断。",
+              "why": "观众会觉得被当成外行反复提醒，本来最有冲击力的浪高数字也变成需要防备的说法。",
+              "suggestion": "删掉这一段，在上一段模拟结果后面接半句口语限定，比如「这个浪高是模拟反推出来的，没人真的见过」；不必单独成段，也不必训话式提醒。",
+              "source": "model",
+              "editorial": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 4,
+              "paragraph": 0,
+              "quote": "三条证据各管一段，接起来才是一个完整的故事。",
+              "problem": "这句前半段几乎逐条重播前文：地震成像、岩石分析、模拟；「各管一段，接起来才是一个完整的故事」是抽象总结，没给新内容，到结尾成了回放。",
+              "why": "观众已经跟着走完全程，再听一遍方法清单会失去耐心，最后记住的只有「他们用了三种方法」，不是那个惊人的事实。",
+              "suggestion": "压缩复述，只留一句话点明「眼睛看不到的坑，靠这三步被推出一场百米浪」；把落点放在画面感或反问上，比如「一个沉在海底七百米的坑，怎么变成一百米高的浪——这就是它最值得看的地方」，直接收，不必再罗列各步职责。",
+              "source": "model",
+              "editorial": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 4,
+              "paragraph": 1,
+              "quote": "这也是对一个远古事件的估算和重建，不是今天北海的海啸风险预报或预警。",
+              "problem": "结尾又用一次免责式澄清，内容与 S4P2「是估计不是量到的」重叠；下一句「以及我们怎么能知道」也已经在上文答过。",
+              "why": "观众听完最想带走的是「四千多万年前北海可能有过百米浪，这个结论怎么来的」，但结尾停在风险澄清上，像节目在自保，不是留判断，情绪收不回来。",
+              "suggestion": "删掉风险预报那句；如果想留下边界，用半句轻带，比如「这是四千多万年前的事，不是今天的预警」；结尾落在「我们怎么知道」或更强的判断句上，如「一个从海面上完全看不见的坑，撑起了一场百米浪的推演」。",
+              "source": "model",
+              "editorial": false
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "海床下七百米的岩石样本是怎么取到的？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model"
+            }
+          ],
+          "quiz": {
+            "items": [],
+            "score": null
+          },
+          "newcomer": null,
+          "core_message_match": null,
+          "core_message_note": "",
+          "model_ran": true,
+          "audits_complete": true,
+          "pending_review": false,
+          "summary": {
+            "serious": 0,
+            "must": 0,
+            "warn": 5,
+            "rule_must": 0,
+            "questions": 1,
+            "lost": 0,
+            "quiz_score": null,
+            "low_scores": [],
+            "by_audit": {
+              "fact": {
+                "serious": 0,
+                "must": 0,
+                "warn": 0
+              },
+              "comprehension": {
+                "serious": 0,
+                "must": 0,
+                "warn": 1
+              },
+              "communication": {
+                "serious": 0,
+                "must": 0,
+                "warn": 4
+              }
+            },
+            "passed": true,
+            "rank": 0
+          },
+          "rounds": 3,
+          "deletions": [],
+          "initial": [
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "一颗古老的小行星，怎样在北海留下撞击痕迹？每天几分钟的锻炼，对哪类人有帮助？空间站里的训练，又能告诉我们多少关于火星的事？这次看三条研究消息，把发现和它成立的条件放在一起。",
+              "problem": "开场三个问句并列，再加一句“这次看三条研究消息”，像目录预告，没有确定本期最值得听的重点。",
+              "why": "普通观众刚进来就被分散到三个方向，不知道最该跟哪条；结构说明也偏内部，不像内容本身在吸引人。",
+              "suggestion": "用一个最有冲击力的发现开场，例如“北海海底约七百米下埋着一个陨石坑，研究者估计它可能曾掀起超过一百米高的海啸”，再自然带出另外两条研究；不要连问三题，也不要在开场说明“看三条消息”。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 0,
+              "quote": "赫瑞瓦特大学参与的研究，结合地震成像、岩石显微分析和计算机模拟，重建了北海 Silverpit 撞击事件。",
+              "problem": "机构名和三种研究方法压在句首，真正有画面的“160米天体、百米海啸”被埋在后面。",
+              "why": "陌生观众先听到的是学术通报式的信息清单，容易在故事开始前走神。",
+              "suggestion": "先给发现和画面：“北海海底一个叫 Silverpit 的陨石坑，研究者估计，四千多万年前一颗约一百六十米宽的天体撞在这里，可能掀起超过一百米高的海啸。”再把地震成像、显微分析和模拟压缩成一句后置的方法说明。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "十月的新闻转述，和二零二五年发表的原始研究，也要分开。",
+              "problem": "这是内部选题核对，普通观众没看过底稿，也不需要在这里分辨新闻转述和原始研究的发表时间。",
+              "why": "它把撞击故事打断，让观众突然像在听编辑部流程，而不是听发现。",
+              "suggestion": "删掉这句。若需要边界，只保留自然的限定：“这是对古老撞击事件的重建，不是对今天北海海啸风险的预测。”前面的埋深纠错也可改成更顺的插入语：“坑现在埋在海床下约七百米——是埋藏深度，不是坑的深度。”",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "成立条件则是这批受试者、这种练习和十二周的观察周期。",
+              "problem": "“成立条件”“观察周期”像审稿备注，而且下一段又说“人群、锻炼内容和观察时间一变，结论的适用范围也需要重新判断”，同一层意思重复打转。",
+              "why": "观众刚听到“每天四分钟锻炼有改善”，马上被抽象限定拖慢，收获感被稀释。",
+              "suggestion": "只保留一次自然限定，例如：“研究对象是65岁以上的人，持续十二周；这不等于所有人每天四分钟都有效。”删掉“成立条件则是……”和下一段“人群、锻炼内容……”的重复表述。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "报道涉及密集的日常锻炼，以及返回后在模拟火星重力条件下的表现。这可以帮助研究者理解身体适应和训练作用，但不是已经在火星上完成了同样的测试。",
+              "problem": "这条没有讲出研究到底发现了什么，只有“报道涉及”和“可以帮助理解”，太空实验变成了空泛背景。",
+              "why": "观众听完不知道宇航员在模拟火星重力下表现如何，也不知道这条消息为什么值得占一段。",
+              "suggestion": "如果原资料有具体结果，直接把结果放到前面，说清观察到了什么变化；如果没有结果，建议把这条压缩成一句场景或直接舍弃，不要用“帮助理解”撑一段。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 1,
+              "quote": "看这类消息，既要看研究发现了什么，也要看对象是谁、条件是什么。保留这些条件，结论才不会在传播时变大。",
+              "problem": "这里变成媒体素养说教，而且和上一句“不是已经在火星上完成测试”重复。",
+              "why": "结尾没有留下具体发现或判断，观众听到的是提醒而不是内容，容易觉得节目在反复打预防针。",
+              "suggestion": "删掉说教句，只留一句具体边界：“这些表现是在模拟火星重力下测的，不是火星表面实测。”结尾可回到本期最值得记住的发现或问题。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "“十月的新闻转述”和“二零二五年发表的原始研究”具体指什么？前面没提，我为什么要在这里把它们分开？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "从撞击事件突然转到“十月新闻”和“二零二五年原始研究”的时间区分，前面没有交代这两者是什么，听起来像内部备注，容易跟丢，也打断“发现是什么、条件是什么”的推进。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "“宾州州立大学相关研究报道中”是指研究本身，还是新闻转述？我有点分不清这个结论该归给谁。",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": false
+            }
+          ]
+        },
+        "decision": {
+          "listening": {
+            "A": "开场“渔船和钻井平台照常作业”与“海床往下大约七百米”很快给我画面，接着“一百六十米，大概是一个半足球场的长度；一百米高的浪，相当于三十多层楼”让我具体感到规模，愿意继续听；“没有目击者”也勾住了我。中段“第一条……第二条……第三条……”虽清楚，但开始有点像方法清单；“这里有个特别容易读错的数字”和“时间也一样”又像插入纠错，我会短暂从故事里抽离。结尾“不是那个吓人的浪高数字……”拉回个人判断，记得住。",
+            "B": "开场“它不在海床上，而在海床再往下大约七百米”和“他们是怎么把它拼出来的”让我愿意继续听；“一张地下图像只能说明那里有个巨大的结构，还不能证明它就是撞击留下的。要确认，还得看石头本身”带来具体兴趣，像在解谜。后面“有了坑的形态……接下来才是把坑翻译成一场事件”“不是有人在四千多万年前拿尺子量到的”都在推进，我没跟丢；“拿尺子量到”也形象。结尾“以及我们怎么能知道”略抽象，但整体没走神。"
+          },
+          "choice": "B",
+          "reason": "B 的决定性差异是把三条证据变成连续追问：先看见坑，再追问“还不能证明它就是撞击留下的”，于是去看石头，最后才“把坑翻译成一场事件”。这让三种方法不再是并列条目，而是一步步解开；A 虽开场更有画面和尺度感，但“三条线索”加纠错段让我短暂从故事里抽离。B 的结尾不如 A 有个性，但整体听完更顺、更愿意跟着问下去。",
+          "remaining": [
+            "B 少了 A 那种“一个半足球场”“三十多层楼”的体感类比，海浪高度的冲击力弱一点；可补一个具体尺度。",
+            "结尾“以及我们怎么能知道”稍抽象，可以收得更具体、更有记忆点。"
+          ]
+        }
+      }
+    ]
+  },
+  "created_by": "用户授权·样本质量修订",
+  "created_at": "2026-10-24T10:28:58+0800"
+}

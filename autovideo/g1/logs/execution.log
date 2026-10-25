@@ -1,0 +1,232 @@
+RUN pytest-g1: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/.venv/bin/python", "-m", "pytest", "g1/tests/test_video_ir_v0_2_runtime.py", "-q", "--disable-warnings"]
+COMMAND pytest-g1: exit=1, elapsed=0.566s, log=logs/pytest-g1.log
+.......F...FFF...                                                        [100%]
+=================================== FAILURES ===================================
+_ test_rejects_invalid_schema_semantics_and_references[<lambda>-UNSUPPORTED_ACTION] _
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-3839/test_rejects_invalid_schema_se4')
+mutate = <function <lambda> at 0x1099260e0>, expected = 'UNSUPPORTED_ACTION'
+
+    @pytest.mark.parametrize("mutate,expected", [
+        (lambda x: x.update(unknown=1), "SCHEMA_VALIDATION"),
+        (lambda x: x["scenes"][0].update(component="unknown_component"), "SCHEMA_VALIDATION"),
+        (lambda x: x["scenes"][0]["props"].update(extra="no"), "INVALID_COMPONENT_PROPS"),
+        (lambda x: x["scenes"][0]["beats"][0].update(action="not_registered"), "SCHEMA_VALIDATION"),
+        (lambda x: x["scenes"][0]["beats"][0].update(action="activate_path", target_id="path:main"), "UNSUPPORTED_ACTION"),
+        (lambda x: x["scenes"][0]["props"]["paths"][0].update(edge_ids=["missing"]), "INVALID_PATH_EDGE"),
+        (lambda x: x["scenes"][0]["beats"][0].update(target_id="node:missing"), "INVALID_BEAT_TARGET"),
+        (lambda x: x["source"].update(text_sha256="0" * 64), "SOURCE_HASH_MISMATCH"),
+    ])
+    def test_rejects_invalid_schema_semantics_and_references(tmp_path, mutate, expected):
+        root = make_root(tmp_path)
+        ir = base_ir(root)
+        mutate(ir)
+>       assert fault_code(ir, root) == expected
+
+g1/tests/test_video_ir_v0_2_runtime.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ir = {'schema_version': '0.2', 'video': {'title': '测试', 'width': 1920, 'height': 1080, 'fps': 30, ...}, 'source': {'languag...a3e385d785b6976e9c456dec46704f9111359', 'original_text': '传输示例。'}, 'style': {'preset': 'minimal_dark', 'seed': 7}, ...}
+root = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-3839/test_rejects_invalid_schema_se4/fixture')
+
+    def fault_code(ir: dict, root: Path) -> str:
+>       with pytest.raises(ValidationFault) as exc:
+E       Failed: DID NOT RAISE ValidationFault
+
+g1/tests/test_video_ir_v0_2_runtime.py:52: Failed
+_________ test_rejects_trigger_segment_present_but_not_owned_by_scene __________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-3839/test_rejects_trigger_segment_p0')
+
+    def test_rejects_trigger_segment_present_but_not_owned_by_scene(tmp_path):
+        root = make_root(tmp_path)
+        ir = base_ir(root)
+        ir["narration"]["segments"].append({"id": "n2", "text": "另一段。", "start_ms": 600, "end_ms": 900})
+        ir["scenes"][0]["beats"][0]["trigger"]["segment_id"] = "n2"
+>       assert fault_code(ir, root) == "TRIGGER_SEGMENT_NOT_IN_SCENE"
+E       AssertionError: assert 'NONMONOTONIC_NARRATION' == 'TRIGGER_SEGMENT_NOT_IN_SCENE'
+E         
+E         - TRIGGER_SEGMENT_NOT_IN_SCENE
+E         + NONMONOTONIC_NARRATION
+
+g1/tests/test_video_ir_v0_2_runtime.py:109: AssertionError
+____________ test_rejects_beat_time_that_resolves_outside_own_scene ____________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-3839/test_rejects_beat_time_that_re0')
+
+    def test_rejects_beat_time_that_resolves_outside_own_scene(tmp_path):
+        root = make_root(tmp_path)
+        ir = base_ir(root)
+        ir["narration"]["segments"] = [
+            {"id": "n1", "text": "第一段。", "start_ms": 100, "end_ms": 400},
+            {"id": "n2", "text": "第二段。", "start_ms": 600, "end_ms": 900},
+        ]
+        first = copy.deepcopy(ir["scenes"][0])
+        second = {**copy.deepcopy(first), "id": "s2", "start_ms": 500, "duration_ms": 500, "narration_segment_ids": ["n2"], "beats": []}
+        first["narration_segment_ids"] = ["n1"]
+        ir["scenes"] = [first, second]
+        ir["scenes"][0]["duration_ms"] = 500
+        ir["scenes"][0]["beats"][0]["trigger"]["boundary"] = "end"
+        ir["scenes"][0]["beats"][0]["trigger"]["offset_ms"] = 500
+>       assert fault_code(ir, root) == "BEAT_OUTSIDE_SCENE"
+E       AssertionError: assert 'SCHEMA_VALIDATION' == 'BEAT_OUTSIDE_SCENE'
+E         
+E         - BEAT_OUTSIDE_SCENE
+E         + SCHEMA_VALIDATION
+
+g1/tests/test_video_ir_v0_2_runtime.py:126: AssertionError
+__________________ test_rejects_duplicate_scene_and_beat_ids ___________________
+
+tmp_path = PosixPath('/private/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/pytest-of-milin/pytest-3839/test_rejects_duplicate_scene_a0')
+
+    def test_rejects_duplicate_scene_and_beat_ids(tmp_path):
+        root = make_root(tmp_path)
+        ir = base_ir(root)
+        ir["scenes"][0]["beats"].append(copy.deepcopy(ir["scenes"][0]["beats"][0]))
+        assert fault_code(ir, root) == "DUPLICATE_ID"
+        ir = base_ir(root)
+        ir["scenes"].append({**copy.deepcopy(ir["scenes"][0]), "start_ms": 1000, "duration_ms": 100, "beats": []})
+>       assert fault_code(ir, root) == "DUPLICATE_ID"
+E       AssertionError: assert 'SCHEMA_VALIDATION' == 'DUPLICATE_ID'
+E         
+E         - DUPLICATE_ID
+E         + SCHEMA_VALIDATION
+
+g1/tests/test_video_ir_v0_2_runtime.py:136: AssertionError
+=========================== short test summary info ============================
+FAILED g1/tests/test_video_ir_v0_2_runtime.py::test_rejects_invalid_schema_semantics_and_references[<lambda>-UNSUPPORTED_ACTION]
+FAILED g1/tests/test_video_ir_v0_2_runtime.py::test_rejects_trigger_segment_present_but_not_owned_by_scene
+FAILED g1/tests/test_video_ir_v0_2_runtime.py::test_rejects_beat_time_that_resolves_outside_own_scene
+FAILED g1/tests/test_video_ir_v0_2_runtime.py::test_rejects_duplicate_scene_and_beat_ids
+4 failed, 13 passed in 0.43s
+
+RUN pytest-g1: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/.venv/bin/python", "-m", "pytest", "g1/tests/test_video_ir_v0_2_runtime.py", "-q", "--disable-warnings"]
+COMMAND pytest-g1: exit=0, elapsed=0.457s, log=logs/pytest-g1-02.log
+G1 test: COMPLETE
+{"id": "n1", "text": "小安准备把一条信息发给小宁。", "start_ms": 250, "end_ms": 2912, "clip_start_sample": 6000, "clip_end_sample": 74832, "speech_first_sample": 850, "speech_last_sample": 62684, "pause_after_ms": 430, "sample_rate": 24000}
+{"id": "n2", "text": "信号沿着信道向接收方传送。", "start_ms": 3550, "end_ms": 6268, "clip_start_sample": 85152, "clip_end_sample": 155279, "speech_first_sample": 1241, "speech_last_sample": 64089, "pause_after_ms": 480, "sample_rate": 24000}
+{"id": "n3", "text": "这时，噪声进入信道并干扰信号。", "start_ms": 6957, "end_ms": 9844, "clip_start_sample": 166799, "clip_end_sample": 241167, "speech_first_sample": 1380, "speech_last_sample": 68251, "pause_after_ms": 460, "sample_rate": 24000}
+{"id": "n4", "text": "信息到达时，内容可能已经和原文不同。", "start_ms": 10509, "end_ms": 13900, "clip_start_sample": 252207, "clip_end_sample": 338447, "speech_first_sample": 850, "speech_last_sample": 80194, "pause_after_ms": 500, "sample_rate": 24000}
+{"id": "n5", "text": "这就是通信过程中噪声造成的影响。", "start_ms": 14609, "end_ms": 17758, "clip_start_sample": 350447, "clip_end_sample": 431055, "speech_first_sample": 1380, "speech_last_sample": 74543, "pause_after_ms": 0, "sample_rate": 24000}
+{"id": "n1", "text": "小安准备把一条信息发给小宁。", "start_ms": 250, "end_ms": 2912, "clip_start_sample": 6000, "clip_end_sample": 74832, "speech_first_sample": 850, "speech_last_sample": 62682, "pause_after_ms": 430, "sample_rate": 24000}
+{"id": "n2", "text": "信号沿着信道向接收方传送。", "start_ms": 3548, "end_ms": 6269, "clip_start_sample": 85152, "clip_end_sample": 155279, "speech_first_sample": 1182, "speech_last_sample": 64093, "pause_after_ms": 480, "sample_rate": 24000}
+{"id": "n3", "text": "这时，噪声进入信道并干扰信号。", "start_ms": 6957, "end_ms": 9844, "clip_start_sample": 166799, "clip_end_sample": 241167, "speech_first_sample": 1380, "speech_last_sample": 68251, "pause_after_ms": 460, "sample_rate": 24000}
+{"id": "n4", "text": "信息到达时，内容可能已经和原文不同。", "start_ms": 10509, "end_ms": 13900, "clip_start_sample": 252207, "clip_end_sample": 338447, "speech_first_sample": 831, "speech_last_sample": 80198, "pause_after_ms": 500, "sample_rate": 24000}
+{"id": "n5", "text": "这就是通信过程中噪声造成的影响。", "start_ms": 14609, "end_ms": 17758, "clip_start_sample": 350447, "clip_end_sample": 431055, "speech_first_sample": 1380, "speech_last_sample": 74543, "pause_after_ms": 0, "sample_rate": 24000}
+REAL TTS READY: 17.967s, 539 frames; audio SHA-256 d271ec2dce8b288763bd186c29ee75cf81fe0368653f39ea0d618cece9dd7041
+STEP prepare: PASS in 3.586s
+RUN pytest-g1: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/.venv/bin/python", "-m", "pytest", "g1/tests/test_video_ir_v0_2_runtime.py", "-q", "--disable-warnings"]
+COMMAND pytest-g1: exit=0, elapsed=0.517s, log=logs/pytest-g1-03.log
+STEP validate: FAIL in 0.0s: No module named 'g1'
+VALID IR 0.2: 539 frames; 9 beats; actual WAV 17.967s
+STEP validate: PASS in 0.088s
+G1 validate: COMPLETE
+RUN remotion-render: ["/Users/milin/.nvm/versions/node/v22.21.1/bin/node", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/cli/remotion-cli.js", "render", "src/index.ts", "G1CommunicationNoise", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "--props=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/render-props.json", "--public-dir=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/fixtures", "--width=1920", "--height=1080", "--fps=30", "--duration=539", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p", "--concurrency=2", "--crf=18", "--browser-executable=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "--overwrite=false"]
+COMMAND remotion-render: exit=1, elapsed=0.691s, log=logs/remotion-render.log
+Bundling 6%
+/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:269
+            reject(new Error([
+                   ^
+
+Error: Failed to launch the browser process!
+Error: Closed with null signal: SIGABRT
+    at ChildProcess.<anonymous> (/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:260:32)
+    at ChildProcess.emit (node:events:519:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+Troubleshooting: https://remotion.dev/docs/troubleshooting/browser-launch
+    at onClose (/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:269:20)
+    at ChildProcess.<anonymous> (/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:260:24)
+    at ChildProcess.emit (node:events:519:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+
+Node.js v22.21.1
+
+STEP render: FAIL in 0.692s: command failed: remotion-render (see /Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/logs/remotion-render.log)
+RUN remotion-render: ["/Users/milin/.nvm/versions/node/v22.21.1/bin/node", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/cli/remotion-cli.js", "render", "src/index.ts", "G1CommunicationNoise", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "--props=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/render-props.json", "--public-dir=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/fixtures", "--width=1920", "--height=1080", "--fps=30", "--duration=539", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p", "--concurrency=2", "--crf=18", "--browser-executable=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "--overwrite=false"]
+COMMAND remotion-render: exit=1, elapsed=0.401s, log=logs/remotion-render-02.log
+Bundling 6%
+/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:269
+            reject(new Error([
+                   ^
+
+Error: Failed to launch the browser process!
+Error: Closed with null signal: SIGABRT
+    at ChildProcess.<anonymous> (/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:260:32)
+    at ChildProcess.emit (node:events:519:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+Troubleshooting: https://remotion.dev/docs/troubleshooting/browser-launch
+    at onClose (/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:269:20)
+    at ChildProcess.<anonymous> (/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:260:24)
+    at ChildProcess.emit (node:events:519:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+
+Node.js v22.21.1
+
+STEP render: FAIL in 0.402s: command failed: remotion-render (see /Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/logs/remotion-render-02.log)
+RUN remotion-render: ["/Users/milin/.nvm/versions/node/v22.21.1/bin/node", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/cli/remotion-cli.js", "render", "src/index.ts", "G1CommunicationNoise", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "--props=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/render-props.json", "--public-dir=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/fixtures", "--width=1920", "--height=1080", "--fps=30", "--duration=539", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p", "--concurrency=2", "--crf=18", "--browser-executable=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "--overwrite=false"]
+COMMAND remotion-render: exit=0, elapsed=41.693s, log=logs/remotion-render-03.log
+STEP render: PASS in 41.695s
+G1 render: COMPLETE
+RUN ffprobe: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffprobe", "-v", "error", "-count_frames", "-show_streams", "-show_format", "-of", "json", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4"]
+COMMAND ffprobe: exit=0, elapsed=0.433s, log=logs/ffprobe.log
+RUN full-decode: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-map", "0:v:0", "-map", "0:a:0", "-f", "null", "-"]
+COMMAND full-decode: exit=0, elapsed=0.108s, log=logs/full-decode.log
+RUN decoded-audio: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vn", "-ac", "1", "-ar", "24000", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/decoded-audio.wav"]
+COMMAND decoded-audio: exit=0, elapsed=0.021s, log=logs/decoded-audio.log
+RUN frame-reveal_sender-before: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,5)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/reveal_sender-before-f0005.png"]
+COMMAND frame-reveal_sender-before: exit=0, elapsed=0.039s, log=logs/frame-reveal_sender-before.log
+RUN frame-reveal_sender-after: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,12)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/reveal_sender-after-f0012.png"]
+COMMAND frame-reveal_sender-after: exit=0, elapsed=0.04s, log=logs/frame-reveal_sender-after.log
+RUN frame-activate_main_path-before: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,117)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/activate_main_path-before-f0117.png"]
+COMMAND frame-activate_main_path-before: exit=0, elapsed=0.052s, log=logs/frame-activate_main_path-before.log
+RUN frame-activate_main_path-after: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,124)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/activate_main_path-after-f0124.png"]
+COMMAND frame-activate_main_path-after: exit=0, elapsed=0.054s, log=logs/frame-activate_main_path-after.log
+RUN frame-disrupt_channel-before: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,206)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/disrupt_channel-before-f0206.png"]
+COMMAND frame-disrupt_channel-before: exit=0, elapsed=0.062s, log=logs/frame-disrupt_channel-before.log
+RUN frame-disrupt_channel-after: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,213)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/disrupt_channel-after-f0213.png"]
+COMMAND frame-disrupt_channel-after: exit=0, elapsed=0.065s, log=logs/frame-disrupt_channel-after.log
+MEDIA PASS: 17.984s, 539 frames, real TTS audio correlation=0.99995
+STEP verify: PASS in 1.094s
+G1 verify: COMPLETE
+RUN pytest-g1: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/.venv/bin/python", "-m", "pytest", "g1/tests/test_video_ir_v0_2_runtime.py", "-q", "--disable-warnings"]
+COMMAND pytest-g1: exit=0, elapsed=0.484s, log=logs/pytest-g1-04.log
+G1 test: COMPLETE
+RUN remotion-render: ["/Users/milin/.nvm/versions/node/v22.21.1/bin/node", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/cli/remotion-cli.js", "render", "src/index.ts", "G1CommunicationNoise", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "--props=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/render-props.json", "--public-dir=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/fixtures", "--width=1920", "--height=1080", "--fps=30", "--duration=539", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p", "--concurrency=2", "--crf=18", "--browser-executable=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "--overwrite=false"]
+COMMAND remotion-render: exit=0, elapsed=39.376s, log=logs/remotion-render-04.log
+STEP render: PASS in 39.377s
+G1 render: COMPLETE
+RUN ffprobe: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffprobe", "-v", "error", "-count_frames", "-show_streams", "-show_format", "-of", "json", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4"]
+COMMAND ffprobe: exit=0, elapsed=0.407s, log=logs/ffprobe-02.log
+RUN full-decode: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-xerror", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-map", "0:v:0", "-map", "0:a:0", "-f", "null", "-"]
+COMMAND full-decode: exit=0, elapsed=0.09s, log=logs/full-decode-02.log
+RUN decoded-audio: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vn", "-ac", "1", "-ar", "24000", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/decoded-audio.wav"]
+COMMAND decoded-audio: exit=0, elapsed=0.021s, log=logs/decoded-audio-02.log
+RUN frame-reveal_sender-before: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,5)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/reveal_sender-before-f0005.png"]
+COMMAND frame-reveal_sender-before: exit=0, elapsed=0.036s, log=logs/frame-reveal_sender-before-02.log
+RUN frame-reveal_sender-after: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,12)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/reveal_sender-after-f0012.png"]
+COMMAND frame-reveal_sender-after: exit=0, elapsed=0.039s, log=logs/frame-reveal_sender-after-02.log
+RUN frame-activate_main_path-before: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,117)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/activate_main_path-before-f0117.png"]
+COMMAND frame-activate_main_path-before: exit=0, elapsed=0.053s, log=logs/frame-activate_main_path-before-02.log
+RUN frame-activate_main_path-after: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,124)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/activate_main_path-after-f0124.png"]
+COMMAND frame-activate_main_path-after: exit=0, elapsed=0.054s, log=logs/frame-activate_main_path-after-02.log
+RUN frame-disrupt_channel-before: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,206)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/disrupt_channel-before-f0206.png"]
+COMMAND frame-disrupt_channel-before: exit=0, elapsed=0.062s, log=logs/frame-disrupt_channel-before-02.log
+RUN frame-disrupt_channel-after: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/darwin_arm64/ffmpeg", "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/G1_通信噪声.mp4", "-vf", "select=eq(n\\,213)", "-frames:v", "1", "-update", "1", "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g1/artifacts/keyframes/disrupt_channel-after-f0213.png"]
+COMMAND frame-disrupt_channel-after: exit=0, elapsed=0.065s, log=logs/frame-disrupt_channel-after-02.log
+MEDIA PASS: 17.984s, 539 frames, real TTS audio correlation=0.99995
+STEP verify: PASS in 1.015s
+G1 verify: COMPLETE
+STEP report: PASS in 0.0s
+G1 report: COMPLETE
+RUN pytest-g1: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/.venv/bin/python", "-m", "pytest", "g1/tests/test_video_ir_v0_2_runtime.py", "-q", "--disable-warnings"]
+COMMAND pytest-g1: exit=0, elapsed=0.418s, log=logs/pytest-g1-05.log
+G1 test: COMPLETE
+STEP report: PASS in 0.0s
+G1 report: COMPLETE
+RUN pytest-g1: ["/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/.venv/bin/python", "-m", "pytest", "g1/tests/test_video_ir_v0_2_runtime.py", "-q", "--disable-warnings"]
+COMMAND pytest-g1: exit=0, elapsed=0.441s, log=logs/pytest-g1-06.log
+G1 test: COMPLETE
+STEP report: PASS in 0.0s
+G1 report: COMPLETE
+STEP report: PASS in 0.0s
+G1 report: COMPLETE

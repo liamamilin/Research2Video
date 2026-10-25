@@ -1,0 +1,10 @@
+STEP narration-plan: SKIPPED (复用原讲稿)
+STEP tts-and-align: SKIPPED (复用原配音)
+STEP storyboard-plan: SKIPPED (复用原画面内容)
+STEP draw-things-backgrounds: SKIPPED (本修订不生成背景图)
+STEP compile-ir: PASS in 0.03s
+STEP render: PASS in 54.65s
+MEDIA PASS: 23.915s, 717 frames, AAC/TTS correlation=0.99995
+STEP verify-media: PASS in 1.73s
+STEP package: PASS in 7.05s
+G2 PASS

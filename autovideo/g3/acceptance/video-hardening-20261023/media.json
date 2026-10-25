@@ -1,0 +1,24 @@
+{
+  "source_run": "g3/data/packaging-library-20261023/information-2",
+  "resources": {
+    "concurrency": 1,
+    "requested": "auto",
+    "logical_cpus": 12,
+    "physical_memory_bytes": 51539607552,
+    "video_form": "information_motion",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "crf": 18
+  },
+  "render_seconds": 68.539,
+  "content_seconds": 35.833333333333336,
+  "frames": 1075,
+  "decoded_frames_sha256": "34316f9a96f58e37a14c4fae4c736cfa38738a3ea64f373147d3f50001ca409e",
+  "ir_sha256": "4691e5efd78dbc111046f89f43bae867689d7ebaa5dbefd9ba53e70010ef8ed4",
+  "qa_status": "PASS",
+  "tts_correlation": 0.9999549626372158,
+  "new_llm_calls": 0,
+  "new_tts_calls": 0,
+  "output": "g3/data/video-hardening-20261023/media-1/artifacts/G2_自动生成.mp4"
+}

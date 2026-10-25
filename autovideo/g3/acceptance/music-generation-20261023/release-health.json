@@ -1,0 +1,51 @@
+{
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  },
+  "music_jobs": [
+    {
+      "id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "status": "COMPLETED",
+      "asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d"
+    },
+    {
+      "id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "status": "COMPLETED",
+      "asset_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf"
+    }
+  ],
+  "video_count": 171,
+  "music_assets": [
+    [
+      "ambient_pad",
+      "builtin",
+      true
+    ],
+    [
+      "layered_space",
+      "builtin",
+      true
+    ],
+    [
+      "pulse_loop",
+      "builtin",
+      true
+    ],
+    [
+      "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "generated",
+      true
+    ],
+    [
+      "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+      "uploaded",
+      true
+    ],
+    [
+      "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "generated",
+      true
+    ]
+  ]
+}

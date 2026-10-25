@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "checks": [
+    "资源库v5三份配方保留默认形式并增加对象展示／动态拼贴入口",
+    "配方＋对象展示带入创作，缺图片时生成按钮禁用并提示",
+    "纯文稿建议动态排版，建议加载不覆盖手动对象展示选择",
+    "点击建议后切换动态排版",
+    "点击推荐AI无词配乐后开启配乐且实际选中对应库资产",
+    "恢复默认关闭配乐及原素材选择后刷新，草稿恢复",
+    "对象展示真实成片播放，readyState=4，观察到currentTime=11.237496秒，随后暂停",
+    "歌曲分类显示仅作参考，并明确中文歌曲不纳入接入计划"
+  ],
+  "images_import_method": "真实本机HTTP接口；未打开浏览器文件选择器",
+  "screenshots": [
+    "object-browser.png",
+    "resources-browser.png"
+  ],
+  "human_audio_aesthetic_review": "pending"
+}

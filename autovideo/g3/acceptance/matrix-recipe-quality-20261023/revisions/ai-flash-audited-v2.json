@@ -1,0 +1,1004 @@
+{
+  "script_id": "630569acd6a048faae84e12ae3e83a65",
+  "version": 2,
+  "title": "DeepInfer 开源：是推理引擎，不是现成服务",
+  "sections": [
+    {
+      "title": "开源的是引擎",
+      "paragraphs": [
+        {
+          "text": "DeepSeek 在 10 月 20 日开源了 DeepInfer，Apache-2.0，仓库在 github.com/deepseek-ai/DeepInfer。先校准预期：这次开源的是离线推理引擎，不是能直接接用户请求的服务。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "官方仓库复核确认：DeepInfer 于 2026-10-20 公开宣布开源，采用 Apache-2.0 许可，仓库地址为 github.com/deepseek-ai/DeepInfer；本次发布的是 offline inference 引擎，入口为批量脚本，不属于可直接接收用户请求的服务。当前表述与来源一致，并清楚说明了开源范围。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "不是空仓库",
+      "paragraphs": [
+        {
+          "text": "入口很能说明问题：examples/offline_inference.py 提供的是批量 API，不是 HTTP 服务。你可以用它跑离线批量推理，但不能挂个域名就上线。仓库也不是空壳，这次包含分布式推理、投机解码、SWA 有界重放和结构化输出。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer",
+            "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告确认入口 examples/offline_inference.py 是批量 API，不是 HTTP 服务；开源内容为 distributed inference、speculative decoding、SWA bounded replay、structured outputs，与讲稿列举一致，未把未开源的缓存或负载均衡算进来。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer",
+              "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "服务层没放出来",
+      "paragraphs": [
+        {
+          "text": "缺的是服务层。README 写明，完整推理服务还需要 KV cache 系统、prefill/decode 分离部署，以及跨数据并行副本的负载均衡，这三项都不在本次发布里。官方理由是这些组件和内部基础设施耦合太深。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer",
+            "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "README 单列 \"not included in this release\" 一节，明确列出 KV cache 系统、prefill/decode 分离、跨数据并行副本负载均衡三项缺失，并说明原因是与内部基础设施耦合太深；讲稿转述准确，与来源一致。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer",
+              "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "先核对模型和硬件",
+      "paragraphs": [
+        {
+          "text": "所以现在先核对两个硬条件。当前支持的模型只有 DeepSeek-V4.1-Flash，默认 checkpoint 是 deepseek-ai/DeepSeek-V4.1-Flash-1017。硬件官方支持列表只有 NVIDIA SM100，需要 CUDA 13，和华为昇腾 Ascend 950，需要 CANN 9.2；Hopper 及更早架构不在这个列表。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告的已证实事实显示：支持模型仅 DeepSeek-V4.1-Flash，默认 checkpoint 为 deepseek-ai/DeepSeek-V4.1-Flash-1017；硬件官方列表只有 NVIDIA SM100（CUDA 13）与 Huawei Ascend 950（CANN 9.2），Hopper 及更早架构不在列表。讲稿准确复述了这些条件，并说明这些属于官方支持列表的范围。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer"
+            ]
+          }
+        },
+        {
+          "text": "还有一点容易忽略：batch-invariant 推理和确定性采样目前只在 NVIDIA 硬件可用。在这两项上，昇腾和 NVIDIA 不是完全等价。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告明确记载 batch-invariant inference 与 deterministic sampling 仅在 NVIDIA 硬件可用，并带有明确限定；讲稿保留了厂商来源中的限定条件，并据此说明昇腾与 NVIDIA 在这两项上不完全等价，与来源一致。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "怎么定位它",
+      "paragraphs": [
+        {
+          "text": "合起来看，DeepInfer 更像一份生产推理引擎参考，不是开箱即用的服务。想上线，服务层要自己补；想试跑，先确认模型和硬件在不在名单里。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "总结性判断与来源一致：开源的发布物是引擎而非完整服务，服务层组件（KV cache、PD 分离、负载均衡）需自行补齐；使用前需核对模型与硬件白名单。当前表述是准确概括，没有新增、放大或遗漏会改变结论的前提。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 380,
+    "estimated_seconds": 88,
+    "segments": 19,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 1.168,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "开源的是引擎",
+        "spoken_length": 52,
+        "budget": 66
+      },
+      {
+        "title": "不是空仓库",
+        "spoken_length": 77,
+        "budget": 65
+      },
+      {
+        "title": "服务层没放出来",
+        "spoken_length": 73,
+        "budget": 65
+      },
+      {
+        "title": "先核对模型和硬件",
+        "spoken_length": 125,
+        "budget": 65
+      },
+      {
+        "title": "怎么定位它",
+        "spoken_length": 53,
+        "budget": 65
+      }
+    ]
+  },
+  "edit_type": "EDITED",
+  "meta": {
+    "acceptance_batch": "matrix-recipe-quality-20261023",
+    "report_path": "state/video_editorial_sources/matrix-recipe-quality-20261023/ai-flash-checked-v2.md",
+    "source_review": {
+      "checked_source_urls": [
+        "https://github.com/deepseek-ai/DeepInfer",
+        "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+      ],
+      "packet_sha256": "46097ccc4c0321f18963bc01327268ea0a5a9210023e55f7eac07d1a9e189b3a",
+      "original_script_id": "07c8442c5baa4807bf1d32b21e8a543f"
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：/",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：/",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：/",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：/",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "先校准预期：这次开源的是离线推理引擎，不是能直接接用户请求的服务。",
+          "problem": "开场先做预期管理，把“不是服务”放在发布信息前，像在回应内部误读；后文又多次否定同一件事。",
+          "why": "观众第一耳朵先被提醒不能做什么，而不是这次发布带来了什么能力，容易觉得是在泼冷水，继续听的动力被削弱。",
+          "suggestion": "直接给变化和边界：“DeepSeek 开源了离线推理引擎 DeepInfer，带分布式推理、投机解码等能力；但服务层这次没放出来。”后文只在总结处点一次“不是开箱即用服务”。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "仓库也不是空壳，这次包含分布式推理、投机解码、SWA 有界重放和结构化输出。",
+          "problem": "“不是空壳”在回应一个没人提出的质疑；后半四个术语连排，没有主次和解释。",
+          "why": "听众难以判断这些能力对离线批量推理到底意味着什么，主线也从“入口是批量 API”滑向功能清单，注意力被术语拖散。",
+          "suggestion": "删掉“不是空壳”，按离线批量场景挑最能说明差异的一两项展开，例如“支持分布式推理和投机解码，也带结构化输出”；SWA 有界重放若不能一句讲清价值，可留资料。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "当前支持的模型只有 DeepSeek-V4.1-Flash，默认 checkpoint 是 deepseek-ai/DeepSeek-V4.1-Flash-1017。硬件官方支持列表只有 NVIDIA SM100，需要 CUDA 13，和华为昇腾 Ascend 950，需要 CANN 9.2；Hopper 及更早架构不在这个列表。",
+          "problem": "口播里塞入默认 checkpoint 全名和多个版本号，关键限制被精确字符串淹没。",
+          "why": "听众需要记住的是模型范围和硬件门槛，长 checkpoint 名记不住，反而增加理解负担。",
+          "suggestion": "口播保留“只支持 DeepSeek-V4.1-Flash；硬件官方只列 SM100+CUDA 13 和昇腾 950+CANN 9.2，Hopper 及更早不在列”，默认 checkpoint 名留在文稿或仓库链接里。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "四个功能点连续报名字，尤其“SWA 有界重放”没有解释，听众只能记住名词，难以判断它为什么能说明仓库不是空壳，容易在这里走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "SM100 对应哪些具体显卡或产品线？如果不认识这个代号，听众没法按“先确认硬件在不在名单里”自查。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "batch-invariant 推理具体指什么，为什么它和确定性采样在昇腾上不可用会影响使用？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "关键限制落在一个不熟悉的术语上，句子虽然短，但容易卡住或直接滑过去。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 11,
+        "rule_must": 0,
+        "questions": 2,
+        "lost": 2,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 7
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 2,
+      "deletions": [],
+      "initial": [
+        {
+          "audit": "fact",
+          "rule": "D1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "不过，分离部署需要的大部分引擎功能已经实现，不能把组件未发布理解成引擎没有相关能力。",
+          "problem": "报告和 README 只说明开源内容为 distributed inference、speculative decoding、SWA bounded replay、structured outputs，并把 prefill/decode 分离明确列在「not included in this release」；报告还指出要对外服务需自建 HTTP 层 + KV cache + 负载均衡 + PD 分离。「分离部署需要的大部分引擎功能已经实现」这一能力判断在报告和所引 README 中都找不到依据，属于新增说法。",
+          "why": "这句话会削弱「三项服务层组件未开源」这一核心边界：观众容易以为分离部署只差配置、拿现成引擎就能接上，从而低估自建工作量，与报告「要自己实现」的结论相反。该句引用的是仓库 README，而 README 恰恰只说这些组件未包含，不能支持该能力判断。",
+          "suggestion": "删除该句或改为有依据的中性表述，例如「README 说明这些组件与内部基础设施耦合太深，本次没有放出；要对外服务需自行补齐」，不要替官方推断未发布组件在引擎内是否已具备。",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "下载到一套推理引擎，和搭好一个能接用户请求的服务，是两件事。",
+          "problem": "开场先讲一个常识对比，第二句才报出 DeepSeek 开源 DeepInfer 这个新闻点，快讯的抓力被延后。",
+          "why": "观众前几秒不知道在说哪个项目，容易觉得是在听泛论，而不是一个值得知道的新变化。",
+          "suggestion": "把新闻点前置，同时保留对比，例如：“DeepSeek 开源了 V4.1 Flash 背后的推理框架 DeepInfer（Apache-2.0）。它值得看的是：引擎有了，但离能接用户请求的服务还差一层。”",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "不过，分离部署需要的大部分引擎功能已经实现，不能把组件未发布理解成引擎没有相关能力。",
+          "problem": "先列服务层缺口，再用“不过”转回引擎能力，转折生硬；“不能把……理解成……”像内部审稿时的防误解说明，绕且打断主线。",
+          "why": "观众要绕一下才知道“缺的是服务组件，不是引擎能力”，快讯里容易听丢重点。",
+          "suggestion": "改成正面并列的短句：“这些服务组件没有包含在本次发布里；分离部署所需的多数引擎能力已经具备，缺的是可直接用的服务层。”删掉“不能把……理解成……”。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "官方介绍了减少重复计算的有界重放，以及先由草稿模型提出候选、再由主模型校验的投机解码。",
+          "problem": "两个技术点并列成清单，有界重放只给了“减少重复计算”的标签，投机解码的机制又较长，主次不清；后面“值得借鉴的是这些取舍”进一步空泛收束。",
+          "why": "快讯很短，观众容易只记住几个术语，抓不住最该关注的取舍，也不知道为什么值得听。",
+          "suggestion": "先给主次：优先保留投机解码的机制和“低并发下可能变慢”的取舍；有界重放若资料不足就一句带过或删掉。删掉“值得借鉴的是这些取舍，不能把某个负载下的加速数字当成普遍收益”这类重复免责，把限制直接跟在投机解码后面。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "高吞吐不是下载仓库就自动得到的结果，最终还要放到自己的请求负载里验证。",
+          "problem": "结尾是通用正确提醒，前文已经说过服务层要补、要验证，这句没有推进，也没有落在具体信号上。",
+          "why": "听到最后没有获得新的判断，收尾变弱。",
+          "suggestion": "删掉这句，用硬件支持面收尾：“官方列出的硬件支持是 NVIDIA SM100 和昇腾 950，采用前先确认适配；服务层组件仍是主要门槛。”保留具体信息，不要补泛泛验证口号。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“KV 缓存系统”为什么算服务层、而不是引擎自带？它和后面的分离部署是什么关系，听不出缺的到底是缓存组件还是调度能力。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“有界重放”具体减少了哪类重复计算？只给名字和目的，还是不知道它和普通 KV 复用或缓存有什么区别。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“某个负载下的加速数字”前文没有出现任何数字，这句提醒显得抽象；两个优化一个只报名字、一个讲收益波动，容易跟丢到底该借鉴什么。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": true
+        }
+      ],
+      "editorial_attempted": true
+    },
+    "problems": [],
+    "audit_usage": {
+      "requests": 13,
+      "prompt_tokens": 49007,
+      "completion_tokens": 55027,
+      "total_tokens": 104034
+    },
+    "audit_prompt_version": 11,
+    "editorial_attempt": {
+      "applied": true,
+      "before": [
+        {
+          "title": "引擎与服务的距离",
+          "paragraphs": [
+            {
+              "text": "下载到一套推理引擎，和搭好一个能接用户请求的服务，是两件事。DeepSeek 开源了为 V4.1 Flash 提供支持的推理框架 DeepInfer，采用 Apache-2.0 许可。它最值得看的，是引擎做了什么，以及服务层还需要补什么。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "当前表述与来源一致：DeepInfer 是 DeepSeek 以 Apache-2.0 开源的推理框架，用于支持 V4.1 Flash；段落明确区分“引擎”和“能接用户请求的服务”，没有把开源仓库说成完整服务。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "服务层还要补什么",
+          "paragraphs": [
+            {
+              "text": "官方 README 把边界单独列了出来：完整服务还需要 KV 缓存系统、输入计算与输出生成的分离部署，以及多个副本之间的负载均衡。这三样都没有包含在本次发布里，README 给的理由是和内部基础设施耦合太深。要对外提供服务，就得自己补上这几层。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer",
+                "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+              ],
+              "evidence": "CITED",
+              "note": "已按审计意见改写",
+              "fact_verification": {
+                "status": "verified",
+                "reason": "当前表述准确对应 README 的边界说明：KV 缓存系统、prefill/decode 分离部署、跨数据并行副本的负载均衡均未包含在本次发布中，并保留了与内部基础设施耦合的理由；改写后已删除无来源支持的“分离部署需要的大部分引擎功能已经实现”这一能力判断。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer",
+                  "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+                ]
+              },
+              "revision": {
+                "before": "官方 README 把边界单独列了出来：完整服务还需要 KV 缓存系统、输入计算与输出生成的分离部署，以及多个副本之间的负载均衡。这些服务组件没有包含在本次发布里。不过，分离部署需要的大部分引擎功能已经实现，不能把组件未发布理解成引擎没有相关能力。",
+                "proposed": "官方 README 把边界单独列了出来：完整服务还需要 KV 缓存系统、输入计算与输出生成的分离部署，以及多个副本之间的负载均衡。这三样都没有包含在本次发布里，README 给的理由是和内部基础设施耦合太深。要对外提供服务，就得自己补上这几层。",
+                "accepted": true,
+                "lost_conditions": []
+              }
+            }
+          ]
+        },
+        {
+          "title": "优化要放回负载看",
+          "paragraphs": [
+            {
+              "text": "官方介绍了减少重复计算的有界重放，以及先由草稿模型提出候选、再由主模型校验的投机解码。后者的吞吐收益随并发变化，低并发下还可能变慢。值得借鉴的是这些取舍，不能把某个负载下的加速数字当成普遍收益。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "来源支持对 SWA 有界重放和 DSpark 投机解码的概括；同时明确 DSpark 的吞吐收益随并发变化，低并发下可为负收益。当前表述没有把厂商特定负载下的加速数字说成普遍收益。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "先核对能否接入",
+          "paragraphs": [
+            {
+              "text": "目前官方列出的硬件支持是 NVIDIA SM100 和华为昇腾 950。准备采用时，先对照自己的硬件和依赖，再看服务层需要补齐哪些组件。高吞吐不是下载仓库就自动得到的结果，最终还要放到自己的请求负载里验证。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "来源支持官方列出的硬件范围为 NVIDIA SM100 与华为昇腾 950；段落只作条件性提醒，要求对照硬件、依赖和实际请求负载验证，没有声称实测结果或无条件高吞吐。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "targets": {
+        "S1P1": [
+          "【编辑建议，按实际效果取舍】开场先抛一个抽象判断，真正的新闻（DeepSeek 开源自家推理框架）到第三句才出现。；建议：把新闻提到第一句：“DeepSeek 把给 V4.1 Flash 用的推理框架 DeepInfer 开源了，Apache-2.0。”第二句再用“但它只是引擎，不是能接请求的服务”接回原来的框架。"
+        ],
+        "S2P1": [
+          "【编辑建议，按实际效果取舍】上一句已经说了“完整服务还需要……”，“没有包含在本次发布里”和“就得自己补上这几层”是同一件事说两遍，中间那句理由才是新信息。；建议：合成一句：“这三样都不在这次发布里，官方说原因是和内部基础设施耦合太深，得自己补。”",
+          "【编辑建议，按实际效果取舍】三个待补组件一次性列出，但没有一个具体场景说明缺了会怎样，容易只记住名词，服务层边界仍然抽象。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S3P1": [
+          "【编辑建议，按实际效果取舍】解释的重点放反了：“有界重放”是这次发布才出现的说法，一句说明都没有；投机解码是开发者熟悉的通用技术，却花了半句复述机制。；建议：把半句留给“有界重放”说的是省掉哪部分重复计算，或者干脆不提；投机解码只留名字，篇幅让给后面“低并发可能变慢”这个真正的取舍。",
+          "【编辑建议，按实际效果取舍】有界重放和投机解码挤在一句里，术语密度高；刚想理解前者，后者又来了，容易跟丢。；建议：放慢、补一步推理，或换个说法",
+          "【编辑建议，按实际效果取舍】说“值得借鉴的是这些取舍”，但前面只明确讲了投机解码低并发可能变慢，取舍显得空。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S4P1": [
+          "【编辑建议，按实际效果取舍】两句都是通用劝告，所指不清，且和前文重复（服务层要补、吞吐要看负载）；“对照自己的硬件和依赖”也没落到这条新闻给出的信息上。；建议：要么删掉这两句，把结尾落在已给的硬件事实——官方支持同时列了 NVIDIA SM100 和昇腾 950——让听众自己判断；要么就这一条做一句具体的说明，不写通用提醒。",
+          "【编辑建议，按实际效果取舍】结尾“高吞吐不是下载仓库就自动得到”和开头“引擎不等于服务”意思接近，最后一段信息增量少，容易走神。；建议：放慢、补一步推理，或换个说法"
+        ]
+      },
+      "before_title": "DeepInfer开源：推理引擎到线上服务，还差哪一层",
+      "mode": "whole_script",
+      "prompt_version": 3,
+      "title": "DeepInfer 开源：是推理引擎，不是现成服务",
+      "sections": [
+        {
+          "title": "开源的是引擎",
+          "paragraphs": [
+            {
+              "text": "DeepSeek 在 10 月 20 日开源了 DeepInfer，Apache-2.0，仓库在 github.com/deepseek-ai/DeepInfer。先校准预期：这次开源的是离线推理引擎，不是能直接接用户请求的服务。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "不是空仓库",
+          "paragraphs": [
+            {
+              "text": "入口很能说明问题：examples/offline_inference.py 提供的是批量 API，不是 HTTP 服务。你可以用它跑离线批量推理，但不能挂个域名就上线。仓库也不是空壳，这次包含分布式推理、投机解码、SWA 有界重放和结构化输出。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer",
+                "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "服务层没放出来",
+          "paragraphs": [
+            {
+              "text": "缺的是服务层。README 写明，完整推理服务还需要 KV cache 系统、prefill/decode 分离部署，以及跨数据并行副本的负载均衡，这三项都不在本次发布里。官方理由是这些组件和内部基础设施耦合太深。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer",
+                "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "先核对模型和硬件",
+          "paragraphs": [
+            {
+              "text": "所以现在先核对两个硬条件。当前支持的模型只有 DeepSeek-V4.1-Flash，默认 checkpoint 是 deepseek-ai/DeepSeek-V4.1-Flash-1017。硬件官方支持列表只有 NVIDIA SM100，需要 CUDA 13，和华为昇腾 Ascend 950，需要 CANN 9.2；Hopper 及更早架构不在这个列表。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "还有一点容易忽略：batch-invariant 推理和确定性采样目前只在 NVIDIA 硬件可用。在这两项上，昇腾和 NVIDIA 不是完全等价。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "怎么定位它",
+          "paragraphs": [
+            {
+              "text": "合起来看，DeepInfer 更像一份生产推理引擎参考，不是开箱即用的服务。想上线，服务层要自己补；想试跑，先确认模型和硬件在不在名单里。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "editorial_brief": {
+        "considered": [
+          "讲法A：把重点放在“引擎不是服务”，用 KV 缓存、prefill/decode 分离、跨副本负载均衡三项缺失说明生产服务栈边界。选择：对开发者最有判断价值，也最能解释为什么不能下载即上线。",
+          "讲法B：讲 DSpark 投机解码和 SWA 有界重放两个优化技巧。取舍：技术细节有意思，但 1.25 分钟内要解释缓存未命中、草稿校验和并发曲线，容易术语过密；收益又多为厂商自述，不如服务边界稳。",
+          "讲法C：只讲硬件白名单：NVIDIA SM100 和昇腾 950。取舍：确实影响能否跑，但单条太窄，像参数提醒，缺少“开源了什么”的主线。",
+          "讲法D：讲单集群每日 155 万亿 token、每 GPU 小时 38 美元。取舍：数字抓眼，但口径是谷价收入不是利润，且无第三方独立复测；做主线会偏商业宣传，偏离开发者判断。"
+        ],
+        "angle": "DeepSeek 开源的 DeepInfer 是一个能离线跑的推理引擎，不是能直接接用户请求的服务；这期讲清它开源了什么、生产服务还缺哪几层，以及当前只面向哪个模型和哪些硬件。",
+        "viewer_value": "开发者能快速判断：这个仓库能不能直接拿来上线，如果不能，缺的是哪一块；同时知道它当前只支持 DeepSeek-V4.1-Flash，官方硬件列表只有 SM100 和昇腾 950，避免被“全面开源”四个字带偏。",
+        "throughline": "先给新闻：DeepSeek 以 Apache-2.0 开源了支撑 V4.1 Flash 的 DeepInfer。紧接着校准预期：它发布的是离线推理引擎，不是 HTTP 服务；能跑批量推理，不等于能接线上流量。然后解释服务层缺口：KV 缓存、prefill/decode 分离、跨副本负载均衡都没在这次发布里，官方理由是跟内部基础设施耦合太深。最后落到开发者最该先核对的条件：目前只面向 DeepSeek-V4.1-Flash，官方硬件列表只有 NVIDIA SM100 和华为昇腾 950。结尾停在“这是一份生产引擎参考，不是开箱即用的服务”。",
+        "keep": [
+          "DeepSeek 在 2026-10-20 开源 DeepInfer，Apache-2.0，仓库地址 github.com/deepseek-ai/DeepInfer；这是新闻本体，开场就要给。",
+          "DeepInfer 本次发布是离线推理，入口是 examples/offline_inference.py 的批量 API，不是 HTTP 服务；用来把“引擎”和“服务”的差别落到可操作层面。",
+          "开源内容包括 distributed inference、speculative decoding、SWA bounded replay、structured outputs；一句话说明它不是空仓库，避免只讲缺什么。",
+          "KV cache 系统、prefill/decode 分离部署、跨数据并行副本的负载均衡三项未包含在本次发布；这是“还差哪一层”的核心事实。",
+          "官方解释未包含的原因是这些组件与内部基础设施耦合太深；保留因果，避免让听众以为是遗漏。",
+          "当前支持模型仅 DeepSeek-V4.1-Flash；防止听众误以为这是一个通用推理引擎。",
+          "官方硬件支持列表是 NVIDIA SM100（需 CUDA 13）和华为昇腾 Ascend 950（需 CANN 9.2）；Hopper 及更早架构不在列表。这是开发者能否尝试的硬条件。",
+          "batch-invariant inference 和 deterministic sampling 仅在 NVIDIA 硬件可用；如果提到昇腾，保留这个限制，避免说成两边完全等价。"
+        ],
+        "leave_out": [
+          "单集群每日 155 万亿 token 和每 GPU 小时 38 美元：数字抓眼但属于厂商自述，且是谷价收入不是利润；放进 1.25 分钟会抢走“引擎/服务边界”的主线。",
+          "DSpark 投机解码的 +4%~7%、16 seq/rank 时 -1.5% 等负载曲线：有价值，但需要解释并发和草稿校验，篇幅不够会变成术语堆叠；这期不讲优化细节。",
+          "SWA 有界重放的“只重算最后 128 个 token、Prefill 计算量减半”：同样是有解释力的技巧，但会把主线拉到优化机制；本期只保留“开源内容里有它”即可，不展开。",
+          "128 卡最小高效部署、64+64 卡、prefill 8 卡机/decode 64–128 卡超节点：对判断“不是开箱即用”有帮助，但会引入过多部署参数；用“服务层缺失+硬件列表窄”已经足够。",
+          "3FS、100 PiB、缓存保留 3/7 天、96% 缓存命中、400ms 首字延迟：偏生产系统细节，和本期“开源边界”不是同一层信息。",
+          "star 数、HN 热度、分析师观点、与 vLLM/SGLang 的对比争议：传播背景或未定论比较，不能帮助听众判断这次发布实际给了什么。",
+          "发布日期争议、知乎链接无法直读等核实过程：观众不需要看内部核稿；正文直接用已确认的 2026-10-20 和官方仓库即可。"
+        ],
+        "material": "【事实1】2026-10-20，DeepSeek 公开开源 DeepInfer，仓库 https://github.com/deepseek-ai/DeepInfer ，许可证 Apache-2.0。\n【事实3】本次发布范围是 offline inference；示例入口 examples/offline_inference.py 是批量 API，不是 HTTP 服务。来源同上。\n【事实4】当前支持模型仅 DeepSeek-V4.1-Flash（默认 checkpoint 为 deepseek-ai/DeepSeek-V4.1-Flash-1017）。来源同上。\n【事实9】官方部署问答说开源支持 distributed inference、speculative decoding、SWA bounded replay、structured outputs 等；来源 https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md 。\n【事实8】README 明确：完整推理服务还需要 KV cache system、prefill/decode disaggregation、load balancing across data-parallel replicas，这三项不包含在本次发布；官方给的理由是与内部基础设施耦合太深。来源 https://github.com/deepseek-ai/DeepInfer 和上述部署问答。\n【事实5】官方硬件支持列表：NVIDIA SM100（需 CUDA 13）和华为昇腾 Ascend 950（需 CANN 9.2）；Hopper 及更早架构不在列表。条件：只能说“不在官方支持列表”，不要写成“实测完全不能跑”。来源 https://github.com/deepseek-ai/DeepInfer 。\n【事实7】batch-invariant inference 与 deterministic sampling 仅在 NVIDIA 硬件可用。来源 https://github.com/deepseek-ai/DeepInfer 。\n【概括限定】中文媒体会用“全面开源”，但一手 README 的边界是“引擎/离线推理”而非完整服务；口播可用“开源的是引擎，不是服务”这一概括。"
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "有配音可能读不自然的符号：/",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "有配音可能读不自然的符号：/",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "有配音可能读不自然的符号：/",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "有配音可能读不自然的符号：/",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "先校准预期：这次开源的是离线推理引擎，不是能直接接用户请求的服务。",
+            "problem": "开场先做预期管理，把“不是服务”放在发布信息前，像在回应内部误读；后文又多次否定同一件事。",
+            "why": "观众第一耳朵先被提醒不能做什么，而不是这次发布带来了什么能力，容易觉得是在泼冷水，继续听的动力被削弱。",
+            "suggestion": "直接给变化和边界：“DeepSeek 开源了离线推理引擎 DeepInfer，带分布式推理、投机解码等能力；但服务层这次没放出来。”后文只在总结处点一次“不是开箱即用服务”。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "仓库也不是空壳，这次包含分布式推理、投机解码、SWA 有界重放和结构化输出。",
+            "problem": "“不是空壳”在回应一个没人提出的质疑；后半四个术语连排，没有主次和解释。",
+            "why": "听众难以判断这些能力对离线批量推理到底意味着什么，主线也从“入口是批量 API”滑向功能清单，注意力被术语拖散。",
+            "suggestion": "删掉“不是空壳”，按离线批量场景挑最能说明差异的一两项展开，例如“支持分布式推理和投机解码，也带结构化输出”；SWA 有界重放若不能一句讲清价值，可留资料。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "当前支持的模型只有 DeepSeek-V4.1-Flash，默认 checkpoint 是 deepseek-ai/DeepSeek-V4.1-Flash-1017。硬件官方支持列表只有 NVIDIA SM100，需要 CUDA 13，和华为昇腾 Ascend 950，需要 CANN 9.2；Hopper 及更早架构不在这个列表。",
+            "problem": "口播里塞入默认 checkpoint 全名和多个版本号，关键限制被精确字符串淹没。",
+            "why": "听众需要记住的是模型范围和硬件门槛，长 checkpoint 名记不住，反而增加理解负担。",
+            "suggestion": "口播保留“只支持 DeepSeek-V4.1-Flash；硬件官方只列 SM100+CUDA 13 和昇腾 950+CANN 9.2，Hopper 及更早不在列”，默认 checkpoint 名留在文稿或仓库链接里。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "四个功能点连续报名字，尤其“SWA 有界重放”没有解释，听众只能记住名词，难以判断它为什么能说明仓库不是空壳，容易在这里走神。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "SM100 对应哪些具体显卡或产品线？如果不认识这个代号，听众没法按“先确认硬件在不在名单里”自查。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "batch-invariant 推理具体指什么，为什么它和确定性采样在昇腾上不可用会影响使用？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "关键限制落在一个不熟悉的术语上，句子虽然短，但容易卡住或直接滑过去。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "audits_complete": true,
+        "pending_review": false,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 11,
+          "rule_must": 0,
+          "questions": 2,
+          "lost": 2,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 4
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 7
+            }
+          },
+          "passed": true,
+          "rank": 0
+        },
+        "rounds": 2,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "不过，分离部署需要的大部分引擎功能已经实现，不能把组件未发布理解成引擎没有相关能力。",
+            "problem": "报告和 README 只说明开源内容为 distributed inference、speculative decoding、SWA bounded replay、structured outputs，并把 prefill/decode 分离明确列在「not included in this release」；报告还指出要对外服务需自建 HTTP 层 + KV cache + 负载均衡 + PD 分离。「分离部署需要的大部分引擎功能已经实现」这一能力判断在报告和所引 README 中都找不到依据，属于新增说法。",
+            "why": "这句话会削弱「三项服务层组件未开源」这一核心边界：观众容易以为分离部署只差配置、拿现成引擎就能接上，从而低估自建工作量，与报告「要自己实现」的结论相反。该句引用的是仓库 README，而 README 恰恰只说这些组件未包含，不能支持该能力判断。",
+            "suggestion": "删除该句或改为有依据的中性表述，例如「README 说明这些组件与内部基础设施耦合太深，本次没有放出；要对外服务需自行补齐」，不要替官方推断未发布组件在引擎内是否已具备。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "下载到一套推理引擎，和搭好一个能接用户请求的服务，是两件事。",
+            "problem": "开场先讲一个常识对比，第二句才报出 DeepSeek 开源 DeepInfer 这个新闻点，快讯的抓力被延后。",
+            "why": "观众前几秒不知道在说哪个项目，容易觉得是在听泛论，而不是一个值得知道的新变化。",
+            "suggestion": "把新闻点前置，同时保留对比，例如：“DeepSeek 开源了 V4.1 Flash 背后的推理框架 DeepInfer（Apache-2.0）。它值得看的是：引擎有了，但离能接用户请求的服务还差一层。”",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "不过，分离部署需要的大部分引擎功能已经实现，不能把组件未发布理解成引擎没有相关能力。",
+            "problem": "先列服务层缺口，再用“不过”转回引擎能力，转折生硬；“不能把……理解成……”像内部审稿时的防误解说明，绕且打断主线。",
+            "why": "观众要绕一下才知道“缺的是服务组件，不是引擎能力”，快讯里容易听丢重点。",
+            "suggestion": "改成正面并列的短句：“这些服务组件没有包含在本次发布里；分离部署所需的多数引擎能力已经具备，缺的是可直接用的服务层。”删掉“不能把……理解成……”。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "官方介绍了减少重复计算的有界重放，以及先由草稿模型提出候选、再由主模型校验的投机解码。",
+            "problem": "两个技术点并列成清单，有界重放只给了“减少重复计算”的标签，投机解码的机制又较长，主次不清；后面“值得借鉴的是这些取舍”进一步空泛收束。",
+            "why": "快讯很短，观众容易只记住几个术语，抓不住最该关注的取舍，也不知道为什么值得听。",
+            "suggestion": "先给主次：优先保留投机解码的机制和“低并发下可能变慢”的取舍；有界重放若资料不足就一句带过或删掉。删掉“值得借鉴的是这些取舍，不能把某个负载下的加速数字当成普遍收益”这类重复免责，把限制直接跟在投机解码后面。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "高吞吐不是下载仓库就自动得到的结果，最终还要放到自己的请求负载里验证。",
+            "problem": "结尾是通用正确提醒，前文已经说过服务层要补、要验证，这句没有推进，也没有落在具体信号上。",
+            "why": "听到最后没有获得新的判断，收尾变弱。",
+            "suggestion": "删掉这句，用硬件支持面收尾：“官方列出的硬件支持是 NVIDIA SM100 和昇腾 950，采用前先确认适配；服务层组件仍是主要门槛。”保留具体信息，不要补泛泛验证口号。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“KV 缓存系统”为什么算服务层、而不是引擎自带？它和后面的分离部署是什么关系，听不出缺的到底是缓存组件还是调度能力。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“有界重放”具体减少了哪类重复计算？只给名字和目的，还是不知道它和普通 KV 复用或缓存有什么区别。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“某个负载下的加速数字”前文没有出现任何数字，这句提醒显得抽象；两个优化一个只报名字、一个讲收益波动，容易跟丢到底该借鉴什么。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "decision": {
+        "choice": "B",
+        "reason": "B 的主线更硬：它没有停在“引擎不是服务”这个判断上，而是用 examples/offline_inference.py 提供批量 API 而非 HTTP 服务来证明边界，并给出开发者真正要核对的门槛——仅支持 DeepSeek-V4.1-Flash、NVIDIA SM100 需 CUDA 13、昇腾 950 需 CANN 9.2、Hopper 及更早不在列表，以及 batch-invariant 推理和确定性采样仅 NVIDIA 可用。这些信息直接影响“能不能试、缺哪层”，比 A 更具体、更有收获。A 的“投机解码收益随并发变化、低并发可能变慢”是有价值的提醒，但整体关键约束偏少，不足以压过 B 的可操作性。",
+        "remaining": [
+          "B 第四段口播密度偏高，默认 checkpoint 全名和 CUDA/CANN 版本连续读出不够顺耳，可只保留影响判断的版本信息。",
+          "“SWA 有界重放”首次出现时没有解释，目标开发者未必都能立刻接住。",
+          "“仓库也不是空壳”略带防御性，可改成更直接的功能定位。",
+          "可吸收 A 的提醒：投机解码的吞吐收益随并发变化，低并发下可能反而变慢，避免把加速数字当成普遍收益。"
+        ]
+      }
+    }
+  },
+  "created_by": "用户授权·样本质量修订",
+  "created_at": "2026-10-23T21:57:12+0800"
+}

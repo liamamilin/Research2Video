@@ -1,0 +1,289 @@
+{
+  "matrices": [
+    "ai",
+    "ai_media",
+    "company",
+    "consumer",
+    "culture",
+    "economy",
+    "geography",
+    "history",
+    "industry",
+    "science",
+    "software",
+    "tech"
+  ],
+  "base_recipes": [
+    "deep_dive",
+    "flash",
+    "point_short",
+    "action_list",
+    "ai-developer-comparison-long",
+    "ai-developer-roundup-long",
+    "report_digest",
+    "top_finding",
+    "topic_digest"
+  ],
+  "resolved_columns": {
+    "deep_dive": {
+      "writer": "adapt",
+      "video_form": "auto"
+    },
+    "flash": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "point_short": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "action_list": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "ai-developer-comparison-long": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "ai-developer-roundup-long": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "report_digest": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "top_finding": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "topic_digest": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "ai-non_tech-deep_dive-long": {
+      "writer": "adapt",
+      "video_form": "auto"
+    },
+    "ai-non_tech-quick_take-short": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "ai-non_tech-one_point-short": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "ai-non_tech-action_list-short": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "ai-non_tech-roundup-long": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "ai-non_tech-digest-long": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    },
+    "ai-non_tech-headline-short": {
+      "writer": "legacy",
+      "video_form": "information_motion"
+    }
+  },
+  "production_configs": {
+    "actionable_ai_agents_actionable": {
+      "recipe": "action_list",
+      "usable": true
+    },
+    "ai-developer-roundup-long": {
+      "recipe": "ai-developer-roundup-long",
+      "usable": true
+    },
+    "ai-non_tech-deep_dive-long": {
+      "recipe": "ai-non_tech-deep_dive-long",
+      "usable": true
+    },
+    "ai-non_tech-one_point-short": {
+      "recipe": "ai-non_tech-one_point-short",
+      "usable": true
+    },
+    "ai-non_tech-quick_take-short": {
+      "recipe": "ai-non_tech-quick_take-short",
+      "usable": true
+    },
+    "ai_media_arena_digest": {
+      "recipe": "report_digest",
+      "usable": true
+    },
+    "ai_media_business_digest": {
+      "recipe": "report_digest",
+      "usable": true
+    },
+    "ai_media_deep_dive": {
+      "recipe": "deep_dive",
+      "usable": true
+    },
+    "ai_media_opensource_digest": {
+      "recipe": "report_digest",
+      "usable": true
+    },
+    "analysis_ai_gap_analysis": {
+      "recipe": "top_finding",
+      "usable": true
+    },
+    "analysis_ai_trends": {
+      "recipe": "deep_dive",
+      "usable": true
+    },
+    "analysis_research_gap_analysis": {
+      "recipe": "top_finding",
+      "usable": true
+    },
+    "company_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "company_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "consumer_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "consumer_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "culture_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "culture_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "deep_dive": {
+      "recipe": "deep_dive",
+      "usable": true
+    },
+    "economy_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "economy_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "flash": {
+      "recipe": "flash",
+      "usable": true
+    },
+    "flash_daily": {
+      "recipe": "flash-nr",
+      "usable": true
+    },
+    "geography_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "geography_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "history_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "history_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "industry_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "industry_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "pai_00_collection_planner": {
+      "recipe": "top_finding",
+      "usable": true
+    },
+    "pai_01_model_and_pricing_radar": {
+      "recipe": "report_digest",
+      "usable": true
+    },
+    "pai_02_ai_coding_tools_radar": {
+      "recipe": "report_digest",
+      "usable": true
+    },
+    "pai_03_agent_workflow_radar": {
+      "recipe": "report_digest",
+      "usable": true
+    },
+    "pai_04_project_understanding_radar": {
+      "recipe": "report_digest",
+      "usable": true
+    },
+    "pai_05_context_rag_memory_radar": {
+      "recipe": "report_digest",
+      "usable": true
+    },
+    "pai_06_infra_and_eval_radar": {
+      "recipe": "ai-non_tech-digest-long",
+      "usable": true
+    },
+    "point_short": {
+      "recipe": "point_short",
+      "usable": true
+    },
+    "research_ai": {
+      "recipe": "deep_dive",
+      "usable": true
+    },
+    "research_ai_automation_systems_research": {
+      "recipe": "ai-non_tech-deep_dive-long",
+      "usable": true
+    },
+    "science_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "science_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "software_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "software_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "tech_daily": {
+      "recipe": "topic_digest",
+      "usable": true
+    },
+    "tech_weekly": {
+      "recipe": "topic_digest",
+      "usable": true
+    }
+  },
+  "coverage_method": "resolve every current production binding and run the common copy check; do not send other manuscripts to providers",
+  "entrypoints": [
+    "manual approval",
+    "manual render",
+    "render step rerun",
+    "assistant video actions",
+    "automatic matrix render",
+    "standalone authored narration",
+    "generated material narration",
+    "content-led chapter narration",
+    "narration revision",
+    "visual/media/background revision"
+  ],
+  "render_evidence": "verification.json"
+}

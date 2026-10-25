@@ -1,0 +1,470 @@
+{
+  "id": "dec92850600245a5a0d27fbcb084f38c",
+  "script_id": "630569acd6a048faae84e12ae3e83a65",
+  "version": 2,
+  "status": "COMPLETED",
+  "title": "DeepInfer 开源：是推理引擎，不是现成服务",
+  "source_text": "DeepSeek 在 10 月 20 日开源了 DeepInfer，Apache-2.0，仓库在 github.com/deepseek-ai/DeepInfer。先校准预期：这次开源的是离线推理引擎，不是能直接接用户请求的服务。\n\n入口很能说明问题：examples/offline_inference.py 提供的是批量 API，不是 HTTP 服务。你可以用它跑离线批量推理，但不能挂个域名就上线。仓库也不是空壳，这次包含分布式推理、投机解码、SWA 有界重放和结构化输出。\n\n缺的是服务层。README 写明，完整推理服务还需要 KV cache 系统、prefill/decode 分离部署，以及跨数据并行副本的负载均衡，这三项都不在本次发布里。官方理由是这些组件和内部基础设施耦合太深。\n\n所以现在先核对两个硬条件。当前支持的模型只有 DeepSeek-V4.1-Flash，默认 checkpoint 是 deepseek-ai/DeepSeek-V4.1-Flash-1017。硬件官方支持列表只有 NVIDIA SM100，需要 CUDA 13，和华为昇腾 Ascend 950，需要 CANN 9.2；Hopper 及更早架构不在这个列表。\n还有一点容易忽略：batch-invariant 推理和确定性采样目前只在 NVIDIA 硬件可用。在这两项上，昇腾和 NVIDIA 不是完全等价。\n\n合起来看，DeepInfer 更像一份生产推理引擎参考，不是开箱即用的服务。想上线，服务层要自己补；想试跑，先确认模型和硬件在不在名单里。",
+  "source_sha256": "357108786de4e41ee6bcf5812bf517792fa5b940100d839119e82b44e86cf3d4",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "开源的是引擎",
+        "paragraphs": [
+          "DeepSeek 在 10 月 20 日开源了 DeepInfer，Apache-2.0，仓库在 github.com/deepseek-ai/DeepInfer。先校准预期：这次开源的是离线推理引擎，不是能直接接用户请求的服务。"
+        ]
+      },
+      {
+        "title": "不是空仓库",
+        "paragraphs": [
+          "入口很能说明问题：examples/offline_inference.py 提供的是批量 API，不是 HTTP 服务。你可以用它跑离线批量推理，但不能挂个域名就上线。仓库也不是空壳，这次包含分布式推理、投机解码、SWA 有界重放和结构化输出。"
+        ]
+      },
+      {
+        "title": "服务层没放出来",
+        "paragraphs": [
+          "缺的是服务层。README 写明，完整推理服务还需要 KV cache 系统、prefill/decode 分离部署，以及跨数据并行副本的负载均衡，这三项都不在本次发布里。官方理由是这些组件和内部基础设施耦合太深。"
+        ]
+      },
+      {
+        "title": "先核对模型和硬件",
+        "paragraphs": [
+          "所以现在先核对两个硬条件。当前支持的模型只有 DeepSeek-V4.1-Flash，默认 checkpoint 是 deepseek-ai/DeepSeek-V4.1-Flash-1017。硬件官方支持列表只有 NVIDIA SM100，需要 CUDA 13，和华为昇腾 Ascend 950，需要 CANN 9.2；Hopper 及更早架构不在这个列表。",
+          "还有一点容易忽略：batch-invariant 推理和确定性采样目前只在 NVIDIA 硬件可用。在这两项上，昇腾和 NVIDIA 不是完全等价。"
+        ]
+      },
+      {
+        "title": "怎么定位它",
+        "paragraphs": [
+          "合起来看，DeepInfer 更像一份生产推理引擎参考，不是开箱即用的服务。想上线，服务层要自己补；想试跑，先确认模型和硬件在不在名单里。"
+        ]
+      }
+    ],
+    "duration_mode": "content",
+    "title": "DeepInfer 开源：是推理引擎，不是现成服务",
+    "sources": [
+      {
+        "title": "GitHub - deepseek-ai/DeepInfer 官方仓库",
+        "url": "https://github.com/deepseek-ai/DeepInfer",
+        "date": "2026-10-16"
+      },
+      {
+        "title": "DeepInfer 部署问答 doc/inference_deployment…",
+        "url": "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md",
+        "date": "2026-10-20"
+      }
+    ],
+    "production_context": {
+      "content_recipe": {
+        "id": "research:flash",
+        "settings": {
+          "video_form": "information_motion",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "focus": "材料称 DeepSeek 已将大部分推理框架开源。"
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "快讯",
+            "accent": "#1f7a4d",
+            "intro": {
+              "subtitle": "10月21日",
+              "seconds": 1.5,
+              "title": "DeepInfer 开源"
+            },
+            "outro": {
+              "lines": [
+                "面向开发者的 AI 快讯"
+              ],
+              "seconds": 3
+            },
+            "recipe": "flash"
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      }
+    },
+    "production_mode": "standard",
+    "idempotency_key": "research:dec92850600245a5a0d27fbcb084f38c"
+  },
+  "autovideo_job_id": "d212c1de-cada-4124-a2d9-a6b313c453c8",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "resolved_video_form": "information_motion",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 1008,
+      "sha256": "2cf535304c5267cc7774d3629f681fa12a78a94df324b8cf36a600cee9c60846"
+    },
+    {
+      "name": "caption-alignment.json",
+      "content_type": "application/json",
+      "bytes": 44163,
+      "sha256": "d37932d9da52e0282bf712a2f90ec1777b828d5d24fb670be47d8428f746ea2f"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 2325,
+      "sha256": "ea9a372b899970600938a6f0055524777de7ea683761e86e59a39c2e8c454b32"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 7800,
+      "sha256": "1481802c705200d93f49b8e29e1fe737fab08f5524183f6f8175cab80d32b2f4"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 2325,
+      "sha256": "8e66c9106863caa365ca7fb8c76865eb6b4dc1189a2b08f13339fc6359238bbb"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 7742,
+      "sha256": "3588403e6a78d7cdef8586c18b52335f78fd806021e50cbbf23b529fa1a8c31c"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 9164930,
+      "sha256": "02f0b786cf320c8f03285f84f90573b2856ec96821b79ef82148b5618b8125cb"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 981,
+      "sha256": "36113456aea21806f73b897f5c8362391483eeb04aa4739a38fb9a5df798831b"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 423,
+      "sha256": "4bb452d141b46f3ee64cc7e0189b812d3d4c7c367850735f7c161477a6c38023"
+    },
+    {
+      "name": "information-plan.json",
+      "content_type": "application/json",
+      "bytes": 14177,
+      "sha256": "76c4e0b1aeac9570875fc22e3b7915c2d3fc294347b299900d82fb251999d9c5"
+    },
+    {
+      "name": "information-timing.json",
+      "content_type": "application/json",
+      "bytes": 7345,
+      "sha256": "e84cbf7d54742508c731e0e20a1acda88b0f66c1c667aaca908b120ab5478ef0"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 3121,
+      "sha256": "e12d4d071c6995362a4fdca8cc9a2722bd9a1fc45ddcd54d99975bb51cd7eefc"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 53742,
+      "sha256": "f1a7712ae17c83f313d12cdd59d92c803e7aa8c88d459ea8db73553c3e5d80bc"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 6276,
+      "sha256": "ff738f9a3e50c9bb8b90a1dbf4c5da6efa30c7631b75af65916e109415d1d2ac"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 330,
+      "sha256": "ad953313fdbba9d1133ea9e2be5c8acb62d3c6514b377a15700e6dd89108157a"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 17598,
+      "sha256": "575e1d7887870546c289face41cd34caa64f4695c720f56964c21baf6ae18e17"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 938,
+      "sha256": "a41480ebd070f6cb31e8d9540f9b8641026db02c5d2a1b2f04eac301b4275fe8"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5818,
+      "sha256": "9159366c28dbf76b0c58e1e9c4784ee506eef8ee58a5faebffb76f72773f0092"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2537,
+      "sha256": "d383e0f7052eed7e4950749563deca257c077a20aa5636d2eda22a05f966db81"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 1401,
+      "sha256": "d68b7dc26349a7218e5e9c5a73e539516370579319277ebb703dcdce0ea4de4b"
+    },
+    {
+      "name": "production-execution.json",
+      "content_type": "application/json",
+      "bytes": 381,
+      "sha256": "f37a935e1427f46894c6b02def3b3740b37c1bd1446e1aadd33292255bf4c52b"
+    },
+    {
+      "name": "production-plan.json",
+      "content_type": "application/json",
+      "bytes": 6448,
+      "sha256": "e06853dd1247baa6dc0e6d9688bac04b28a9fc744e09d41a1da5fb524bcacce1"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 18096,
+      "sha256": "5d40efd903be9c0feb51cb6a3173c98e766fff85fd763ece849634a036cca2f9"
+    },
+    {
+      "name": "render-resources.json",
+      "content_type": "application/json",
+      "bytes": 207,
+      "sha256": "ccc32453372ac622e62a2ce0169d452a7f960f0de2d126b790977fcf74544d13"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 19180,
+      "sha256": "0db6f46c70649b86dafc72e9d65a1fc152b64439742c2b7d22b18d709a4c5820"
+    },
+    {
+      "name": "tts-metrics.json",
+      "content_type": "application/json",
+      "bytes": 1082,
+      "sha256": "59b734156308c9dd7bdcc571813590be8a1b37a9eba9c3fbd0d96b3077a5bdb6"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 28311,
+      "sha256": "0cb99d7ada4cba57c2f7b4a5d1ebea64d530a0e688d9a1459db5af2c873e3e36"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 7818642,
+      "sha256": "1c167443ded03f99c54c2dfaac6b1236560697adf38b1bff69d8c4b0eabdfb1b"
+    },
+    {
+      "name": "voice-report.json",
+      "content_type": "application/json",
+      "bytes": 6171,
+      "sha256": "48614318647d7467d063b319d3e358f9882cb5f8c4e7f06f0377040482b4cdd5"
+    }
+  ],
+  "submit_started_at": "2026-10-24T02:25:35.077936+00:00",
+  "submitted_at": "2026-10-24T10:25:35+0800",
+  "completed_at": "2026-10-24T10:31:25+0800",
+  "created_at": "2026-10-24T10:25:35+0800",
+  "updated_at": "2026-10-24T10:31:25+0800",
+  "heartbeat_at": 1792809075.267914,
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-24T02:25:35.059126+00:00",
+    "submit_seconds": 0.014,
+    "poll_seconds": 350.744,
+    "poll_count": 71,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-24T02:31:25.458+00:00",
+    "completion_observed_at": "2026-10-24T02:31:25.843170+00:00",
+    "download_seconds": 0.056,
+    "artifact_list_seconds": 0.002,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 1008
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 44163
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 2325
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 7800
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 2325
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 7742
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.037,
+        "reused": false,
+        "bytes": 9164930
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 981
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 423
+      },
+      {
+        "name": "information-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 14177
+      },
+      {
+        "name": "information-timing.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 7345
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 3121
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 53742
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 6276
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 330
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 17598
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 938
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 5818
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 2537
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 1401
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 381
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 6448
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 18096
+      },
+      {
+        "name": "render-resources.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 207
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 19180
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 1082
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 28311
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.017,
+        "reused": false,
+        "bytes": 7818642
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.002,
+        "reused": false,
+        "bytes": 6171
+      }
+    ],
+    "process_seconds": 350.851
+  }
+}

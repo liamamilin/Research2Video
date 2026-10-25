@@ -1,0 +1,135 @@
+{
+  "job_id": "9e1cc0bc-fa37-4916-820a-e0a95f2322bf",
+  "status": "COMPLETED",
+  "input_mode": "narration",
+  "video_form": "process_diagram",
+  "resolved_video_form": "process_diagram",
+  "duration_mode": "content",
+  "attempt_count": 1,
+  "artifacts_downloaded_and_sha256_verified": [
+    "authored-narration.json",
+    "captions.srt",
+    "chapters.json",
+    "diagram-layout.json",
+    "diagram-plan.json",
+    "diagram-timing.json",
+    "execution-log.txt",
+    "input-brief.json",
+    "manifest.json",
+    "model-cost.json",
+    "narration-check.json",
+    "narration.json",
+    "prepared-source.txt",
+    "qa.json",
+    "storyboard.json",
+    "video-ir.json",
+    "video.mp4"
+  ],
+  "spoken_text": {
+    "submitted_characters_without_whitespace": 195,
+    "spoken_characters_without_whitespace": 195,
+    "spoken_equals_submitted_ignoring_whitespace": true,
+    "captions_equal_segments": true,
+    "chapter_titles_equal": true,
+    "per_chapter": [
+      {
+        "chapter": 1,
+        "submitted_title": "升级前先确认版本",
+        "video_title": "升级前先确认版本",
+        "title_equal": true,
+        "segments": 2,
+        "text_equal_ignoring_whitespace": true,
+        "joined_matches_whitespace_normalized": true
+      },
+      {
+        "chapter": 2,
+        "submitted_title": "跑一次最小 sweep",
+        "video_title": "跑一次最小 sweep",
+        "title_equal": true,
+        "segments": 3,
+        "text_equal_ignoring_whitespace": true,
+        "joined_matches_whitespace_normalized": true
+      }
+    ]
+  },
+  "technical_text": {
+    "--models": {
+      "in_submitted": 1,
+      "in_captions": 1
+    },
+    "cost_per_token": {
+      "in_submitted": 0,
+      "in_captions": 0
+    },
+    "completion_cost": {
+      "in_submitted": 0,
+      "in_captions": 0
+    },
+    "_print_comparison": {
+      "in_submitted": 0,
+      "in_captions": 0
+    },
+    "comparison['models']": {
+      "in_submitted": 0,
+      "in_captions": 0
+    },
+    "eval_crew.py": {
+      "in_submitted": 0,
+      "in_captions": 0
+    },
+    "v1.15.24": {
+      "in_submitted": 0,
+      "in_captions": 0
+    },
+    "v1.15.28": {
+      "in_submitted": 0,
+      "in_captions": 0
+    },
+    "1.15.27": {
+      "in_submitted": 1,
+      "in_captions": 1
+    }
+  },
+  "dash_lookalikes_not_in_submitted": [],
+  "known_material_mode_defects": {
+    "duplicated_transition '前一步确认了数字是版本自带的'": false,
+    "implied_previous_episode '接着上回说'": false,
+    "detail_kept '用 cost_per_token 和 completion_cost 对照'": false
+  },
+  "qa": {
+    "status": "PASS",
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 844,
+      "duration_seconds": 28.139,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.9999368417388128,
+      "decoded_rms": 0.08142320811748505,
+      "full_decode": "PASS"
+    },
+    "narration_text": {
+      "status": "PASS",
+      "chapters": 2,
+      "segments": 5,
+      "characters": 220,
+      "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+      "checked": [
+        "narration-plan",
+        "video-ir",
+        "captions.srt",
+        "chapter-titles"
+      ]
+    }
+  },
+  "duration_seconds": 28.139,
+  "video_sha256": "ce5cd3c6339b7a043f5fe1d8bb6aa1efb0fd62f6f475e1cf9bb857f2a8c504d9",
+  "video_bytes": 1934509
+}

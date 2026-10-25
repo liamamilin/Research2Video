@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/.venv/lib/python3.10/site-packages/static_ffmpeg/run.py", line 105, in get_or_fetch_platform_executables_else_raise
+    return _get_or_fetch_platform_executables_else_raise_no_lock(
+  File "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/.venv/lib/python3.10/site-packages/static_ffmpeg/run.py", line 155, in _get_or_fetch_platform_executables_else_raise_no_lock
+    os.chmod(exe, exe_bits | read_bits)
+FileNotFoundError: [Errno 2] No such file or directory: 'g0/tools/ffmpeg'
+Downloading https://github.com/zackees/ffmpeg_bins/raw/main/v8.0/darwin_arm64.zip -> g0/tools.zip
+
+Download of https://github.com/zackees/ffmpeg_bins/raw/main/v8.0/darwin_arm64.zip -> g0/tools.zip completed.
+Extracting g0/tools.zip -> g0

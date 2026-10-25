@@ -1,0 +1,19 @@
+{
+  "autovideo_pid": 75160,
+  "research_pid": 64868,
+  "idle_checks": "PASS",
+  "status": "PASS",
+  "autovideo_pid_after": 79106,
+  "research_pid_after": 81249,
+  "autovideo_health": {
+    "status": "ok",
+    "worker_primary": true
+  },
+  "research_health": "ok",
+  "research_instance_id": "1ff3f797b1484f2d8be7f5a692a7a741",
+  "submission_protocol_live": true,
+  "database_version": 9,
+  "gateway_startup": "first wake returned transient 503; subsequent document and health both 200",
+  "forced_termination": false,
+  "static_asset_recovery_live": true
+}

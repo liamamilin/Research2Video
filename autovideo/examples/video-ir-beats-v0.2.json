@@ -1,0 +1,137 @@
+{
+  "schema_version": "0.2",
+  "video": {
+    "title": "信号与噪声（结构示例）",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration_ms": 10500
+  },
+  "source": {
+    "language": "zh-CN",
+    "text_sha256": "38a2ca3573dedc7af0668f05b506ba56dc7a4994e26eb63953f5168544c53515",
+    "original_text": "发送者通过信道传递信息，但是噪声会干扰信号。"
+  },
+  "style": {
+    "preset": "minimal_dark",
+    "seed": 42
+  },
+  "assets": [
+    {
+      "id": "voice_main",
+      "type": "audio",
+      "path": "assets/voice.wav",
+      "origin": "PLACEHOLDER_ONLY_NOT_RENDERABLE_REPLACE_WITH_REAL_TTS_AUDIO",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "narration": {
+    "text": "发送者通过信道传递信息。但是噪声会干扰信号。",
+    "audio_asset_id": "voice_main",
+    "segments": [
+      {
+        "id": "n1",
+        "text": "发送者通过信道传递信息。",
+        "start_ms": 0,
+        "end_ms": 5200
+      },
+      {
+        "id": "n2",
+        "text": "但是噪声会干扰信号。",
+        "start_ms": 5200,
+        "end_ms": 10500
+      }
+    ],
+    "alignment": {
+      "method": "forced_aligner",
+      "granularity": "phrase"
+    }
+  },
+  "scenes": [
+    {
+      "id": "s1",
+      "start_ms": 0,
+      "duration_ms": 10500,
+      "component": "flow_diagram",
+      "props": {
+        "nodes": [
+          {
+            "id": "sender",
+            "label": "发送者"
+          },
+          {
+            "id": "channel",
+            "label": "信道"
+          },
+          {
+            "id": "receiver",
+            "label": "接收者"
+          }
+        ],
+        "edges": [
+          {
+            "id": "s_to_c",
+            "from": "sender",
+            "to": "channel"
+          },
+          {
+            "id": "c_to_r",
+            "from": "channel",
+            "to": "receiver"
+          }
+        ],
+        "paths": [
+          {
+            "id": "main",
+            "edge_ids": [
+              "s_to_c",
+              "c_to_r"
+            ]
+          }
+        ]
+      },
+      "narration_segment_ids": [
+        "n1",
+        "n2"
+      ],
+      "purpose": "展示信号沿路径传递，并在噪声介入时产生干扰",
+      "visual_intent": {
+        "viewer_understands": "信号可以沿信道传递，而噪声会干扰这一过程",
+        "before": "画面中还未建立通信过程",
+        "after": "信号路径已经建立，但其后半段被标记为受到干扰"
+      },
+      "beats": [
+        {
+          "id": "beat_reveal",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "n1",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "beat_signal",
+          "action": "activate_path",
+          "target_id": "path:main",
+          "trigger": {
+            "segment_id": "n1",
+            "boundary": "start",
+            "offset_ms": 700
+          }
+        },
+        {
+          "id": "beat_interference",
+          "action": "mark_disrupted",
+          "target_id": "edge:c_to_r",
+          "trigger": {
+            "segment_id": "n2",
+            "boundary": "start",
+            "offset_ms": 450
+          }
+        }
+      ]
+    }
+  ]
+}

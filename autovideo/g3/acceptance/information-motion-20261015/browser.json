@@ -1,0 +1,31 @@
+{
+  "new_page": {
+    "mode": "content",
+    "maxLength": null,
+    "enabled": true
+  },
+  "forms": [
+    {
+      "value": "process_diagram",
+      "text": "流程动态图解"
+    },
+    {
+      "value": "information_motion",
+      "text": "简洁信息动效"
+    }
+  ],
+  "information": {
+    "form": "information_motion",
+    "mode": "content",
+    "enabled": true,
+    "backgroundCheckbox": false
+  },
+  "fixed_mode_switch": "PASS",
+  "content_mode_switch": "PASS",
+  "completed_page": {
+    "chapters": 6,
+    "seek_seconds": 20.3,
+    "mode_label": true,
+    "information_label": true
+  }
+}

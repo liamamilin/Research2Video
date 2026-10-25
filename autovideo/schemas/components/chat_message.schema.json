@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "chat_message trusted props",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "text",
+    "question",
+    "speaker",
+    "side"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 180
+    },
+    "speaker": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16
+    },
+    "side": {
+      "enum": [
+        "left",
+        "right"
+      ]
+    }
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "mode": "new",
+  "job_id": "f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93",
+  "parent_job_id": null,
+  "voice_id": "zm_yunxi",
+  "video_speed": 2.0,
+  "qa": {
+    "status": "PASS",
+    "gate": "G2",
+    "real_llm": true,
+    "real_tts": true,
+    "mock_calls": 0,
+    "model": "deepseek-flash",
+    "llm_call_count": 5,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 310,
+      "duration_seconds": 10.347,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.9999627764108036,
+      "decoded_rms": 0.04718724638223648,
+      "full_decode": "PASS"
+    },
+    "timeline": {
+      "ir_frames": 310,
+      "scene_count": 3,
+      "beat_count": 4,
+      "alignment_granularity": "phrase"
+    },
+    "visual_beats": {
+      "c1_s1_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 4,
+        "before_frame": 1,
+        "after_frame": 8,
+        "changed_pixel_ratio": 0.052472029320987656
+      },
+      "c1_s2_b0": {
+        "action": "reveal",
+        "target_id": "side:left",
+        "beat_frame": 74,
+        "before_frame": 71,
+        "after_frame": 78,
+        "changed_pixel_ratio": 0.058097029320987655
+      },
+      "c1_s2_b1": {
+        "action": "reveal",
+        "target_id": "side:right",
+        "beat_frame": 151,
+        "before_frame": 148,
+        "after_frame": 155,
+        "changed_pixel_ratio": 0.0521141975308642
+      },
+      "c1_s3_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 235,
+        "before_frame": 232,
+        "after_frame": 239,
+        "changed_pixel_ratio": 0.06374180169753087
+      }
+    },
+    "scene_samples": [
+      {
+        "scene_id": "c1_s1",
+        "frame": 0,
+        "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 35,
+        "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/keyframes/frame-004.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 69,
+        "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/keyframes/frame-005.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 70,
+        "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 150,
+        "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/keyframes/frame-010.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 230,
+        "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/keyframes/frame-012.png"
+      },
+      {
+        "scene_id": "c1_s3",
+        "frame": 231,
+        "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/keyframes/frame-013.png"
+      },
+      {
+        "scene_id": "c1_s3",
+        "frame": 270,
+        "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/keyframes/frame-016.png"
+      },
+      {
+        "scene_id": "c1_s3",
+        "frame": 309,
+        "file": "g3/data/jobs/f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93/attempts/1/g2-run/artifacts/keyframes/frame-017.png"
+      }
+    ],
+    "contact_sheet": "artifacts/contact-sheet.jpg",
+    "captions": {
+      "burned_in": true,
+      "srt": "artifacts/captions.srt",
+      "alignment": "phrase-level measured PCM activity"
+    },
+    "video_form": "information_motion",
+    "duration_mode": "content",
+    "information": {
+      "scene_count": 3,
+      "components": [
+        "comparison",
+        "title_card"
+      ],
+      "timing": "measured phrases; estimated within-phrase cues",
+      "theme": "minimal_light"
+    }
+  },
+  "manifest_hashes_verified": 74,
+  "range_download": "PASS"
+}

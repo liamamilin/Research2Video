@@ -1,0 +1,130 @@
+{
+  "job_id": "7b7923fa-d685-4634-aaab-79cad1ae3f85",
+  "title": "auto-process · 自动选择验收",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "fd7a900343e8790e58b2589616360e888740a0d1265d2e5e31ac05bf580256dc",
+  "source_char_count": 134,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zf_xiaoxiao",
+  "created_at": "2026-10-15T07:25:15.326+00:00",
+  "updated_at": "2026-10-15T07:31:24.452+00:00",
+  "version": 11,
+  "operation_type": "generate",
+  "parent_job_id": null,
+  "parent_attempt_no": null,
+  "scene_id": null,
+  "video_form": "auto",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "auto",
+    "selected_form": "process_diagram",
+    "recommended_form": "process_diagram",
+    "selection_mode": "automatic",
+    "status": "ready",
+    "reason": "整片围绕借书申请的处理流程展开，包含申请后查库存、有库存与无库存的分支、候补顺序、归还后通知以及取书结束，适合用流程图按步骤和条件分支清晰展示。",
+    "issues": [
+      {
+        "kind": "duplicate",
+        "message": "“有库存就保留图书，通知读者取书；没有库存就候补。”这句话在原文中出现两次，内容完全一致，已保留第一次出现的表述，第二次作为重复项排除。",
+        "source_quotes": [
+          "有库存就保留图书，通知读者取书；没有库存就候补。"
+        ],
+        "blocking": false
+      },
+      {
+        "kind": "duplicate",
+        "message": "“借书流程笔记：读者提交借书申请后系统查库存。”与后文“读者提交借书申请后系统查库存。”内容近似重复，但后一句缺少前面的说明词，并非逐字重复，因此两者都保留。",
+        "source_quotes": [
+          "借书流程笔记：读者提交借书申请后系统查库存。",
+          "读者提交借书申请后系统查库存。"
+        ],
+        "blocking": false
+      }
+    ],
+    "retained_units": 6,
+    "excluded_units": 1
+  },
+  "resolved_video_form": "process_diagram",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "COMPLETED",
+      "started_at": "2026-10-15T07:28:34.175+00:00",
+      "completed_at": "2026-10-15T07:31:24.452+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:28:34.175+00:00",
+          "completed_at": "2026-10-15T07:29:23.830+00:00",
+          "duration_seconds": 20.86,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:29:23.833+00:00",
+          "completed_at": "2026-10-15T07:29:28.096+00:00",
+          "duration_seconds": 4.47,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:29:28.099+00:00",
+          "completed_at": "2026-10-15T07:30:29.398+00:00",
+          "duration_seconds": 60.96,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T07:30:29.402+00:00",
+          "completed_at": "2026-10-15T07:30:29.405+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:30:29.408+00:00",
+          "completed_at": "2026-10-15T07:30:29.411+00:00",
+          "duration_seconds": 0.23,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:30:29.414+00:00",
+          "completed_at": "2026-10-15T07:31:22.276+00:00",
+          "duration_seconds": 52.96,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:31:22.288+00:00",
+          "completed_at": "2026-10-15T07:31:24.452+00:00",
+          "duration_seconds": 1.84,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}

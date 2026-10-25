@@ -1,0 +1,17 @@
+{
+  "g1/video_ir.py": "c720c4a6f6ef7027177fada4a56b059105dab1130d9849573879513376dd112a",
+  "g1/renderer/src/Root.tsx": "827762004c11aef2b12ba6811d780d5e6c302f96b051e9bb5bb2785f55a46d16",
+  "g2/process_diagram.py": "0b2df9206504a7c13e707be4355f6bdf08301132bb6899a269aa7193b213f786",
+  "g2/schemas/process-diagram-plan.schema.json": "3bcd8be103ef35107b4d7fdf7bc6e0035c2bebda110f4577509f50cd53319dc2",
+  "g2/layout/compile.cjs": "aac1df7b76dfd86f099beb32141230b802896839d69c6f8219d61d5ffac1a35f",
+  "g2/layout/package.json": "5b46f0da28c6d8f99b93b7410cafe35531dc2bdbce031ae2f98695548804e32f",
+  "g2/layout/package-lock.json": "3b735ab2d371967a926eecbb04389b3a35905a14fd0da20dcb59b4319fc21389",
+  "g2/run_g2.py": "feeb1e4bc04f0b5fbcf0518f42055d927d66624b40a39a77583ff547e402d8c5",
+  "g3/app.py": "7677771ed84a358103716ef260e7c68f3b0c4c2f9842c33a660b93c235091bda",
+  "g3/config.py": "65403b7afadc0872d489b85c374229877136a40277b5aeb9e072b644e2415071",
+  "g3/store.py": "07c87e0962c7d9a280405bf8c2b21c9daf3d5ee459dfc02f82f1ffe80f208429",
+  "g3/worker.py": "d821d792e4ecc7f848f2f7c5c9397cd8098fe985255178349b4331277f4fc95e",
+  "g3/web/src/main.tsx": "abe382a20c17a280fcec82166df9eac5a63c62dc7c1205a8095a7a2496d47024",
+  "g3/web/static/app.js": "7b1c4fc97c464f944ea6150bc6e7d6390b15b1d59dc7a6b2d04bb0aac272654d",
+  "schemas/components/flow_diagram.schema.json": "a0f59b08aa45a09d66e5b83036a0cb72c3ecc6ad8c6d13bb717d68fe678adf0e"
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "repository": "autovideo",
+    "path": "g3/store.py",
+    "sha256": "cb56807e5dc942de20925c66793322f5505f96f95a74bddcff6e7b537432f52c"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/app.py",
+    "sha256": "60960ddcd886682428f233ad1bf58298a5bbe8408dbc211e580f281a3e9483dd"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/worker.py",
+    "sha256": "008e95a0c6bf7688564f0ba4ab1f06f19a9ae84541fc2b41957aa79e2801e865"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/run_g2.py",
+    "sha256": "237fde04a590ba49692e67dde48d856a9deae9287a7b04a87b34a12e8daec9c3"
+  },
+  {
+    "repository": "research",
+    "path": "core/video/store.py",
+    "sha256": "ed855ce5e498e554784048cb56bd049edc158c3ad30a47a3290857489d141460"
+  },
+  {
+    "repository": "research",
+    "path": "core/video/autovideo.py",
+    "sha256": "42fb6e4ee0b3bb484ce8d55d9e7851ca5804f431ae640992028a92e419bb4d63"
+  },
+  {
+    "repository": "research",
+    "path": "web/services/video_render.py",
+    "sha256": "ec93cdb855b2e73f19e74afd0ee15ef319dcedb1da80a1d1c99b8fd87ff8c661"
+  },
+  {
+    "repository": "research",
+    "path": "web/services/video_executor.py",
+    "sha256": "1939b7d9fde00228b489215eb6cd3557e736abe1ad0e881baccee5b91f211b3f"
+  },
+  {
+    "repository": "research",
+    "path": "web/server.py",
+    "sha256": "9629706cf4889b72bcbe20dd4557a4b259d2e543a9d81ddd1628e6a0f29a5020"
+  }
+]

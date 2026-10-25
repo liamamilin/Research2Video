@@ -1,0 +1,63 @@
+{
+  "title": "谷歌虚拟电厂与下一代 Xbox：一边调用电，一边算成本",
+  "sections": [
+    {
+      "title": "两件商业变化",
+      "paragraphs": [
+        {
+          "text": "这次看两件商业消息：谷歌通过虚拟电厂寻找用电弹性，下一代 Xbox 则传出更高的成本预估。前者关系到数据中心怎么用电，后者关系到硬件成本如何传到售价。两件事都需要把已经达成的安排，和仍在估算的数字分清。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "虚拟电厂：协调需求",
+      "paragraphs": [
+        {
+          "text": "Fast Company 报道，谷歌与 Voltus 达成吉瓦级虚拟电厂安排。这里的“电厂”并不是新建一座发电站，而是协调分散的用电需求，让电网在需要时获得调节空间。它处理的是需求端的弹性，不能等同于增加同样规模的发电装机。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ]
+        },
+        {
+          "text": "报道把这项安排放在数据中心扩张和电网承压的背景下。对谷歌而言，除了寻找电力供应，也要考虑如何调整用电。合同规模说明了这项安排的量级，不能直接当成它在任意时刻都能提供的实际调节效果。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Xbox：预估还不是定价",
+      "paragraphs": [
+        {
+          "text": "另一篇 Fast Company 报道转述了一份据称来自微软内部的预估：代号 Project Helix 的下一代 Xbox，消费者价格可能在一千二百到一千八百美元之间。这里要保留“据报道”和“可能”，它不是微软已经公布的零售价。",
+          "citations": [
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ]
+        },
+        {
+          "text": "文章讨论了零部件成本压力，也指出，如果微软选择补贴硬件，售价仍可能下降。所以，一千八百美元是这份报道所述区间的上沿，不能改写成下一代 Xbox 就卖这个价。最终定价要看正式公布的信息。",
+          "citations": [
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "看清数字代表什么",
+      "paragraphs": [
+        {
+          "text": "这两件消息里的数字，代表的事情不同。虚拟电厂的规模，要和需求调节的运行条件一起看；下一代主机的价格预估，要和正式零售价分开看。把数字的身份看清楚，才能知道商业变化究竟落到了哪一步。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ]
+        }
+      ]
+    }
+  ]
+}

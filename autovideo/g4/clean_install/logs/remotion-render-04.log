@@ -1,0 +1,13 @@
+Bundling 8%
+Bundling 21%
+/private/tmp/autovideo-g4-cold-8fa65f1/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:269
+            reject(new Error([
+                   ^
+
+Error: Failed to launch the browser process!
+Troubleshooting: https://remotion.dev/docs/troubleshooting/browser-launch
+    at Socket.onClose (/private/tmp/autovideo-g4-cold-8fa65f1/g0/vendor/remotion-audiogram/node_modules/@remotion/renderer/dist/browser/BrowserRunner.js:269:20)
+    at Socket.emit (node:events:531:35)
+    at Pipe.<anonymous> (node:net:346:12)
+
+Node.js v22.21.1

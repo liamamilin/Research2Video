@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "ambient_pad",
+      "form_id": "MF08",
+      "name": "轻柔和声铺底",
+      "topics": [
+        "原理科普",
+        "操作教程"
+      ],
+      "source": "原创程序合成单层和声铺底，非真实环境录音、非模型生成；本例不声明可无缝循环。",
+      "source_sha256": "95802c0d6ab3f57601a42916bf66dd911085dc71e1a96fedc642954dcc4dd42e",
+      "relative_path": "tool/creator-studio/assets/music-complete/MF08.wav",
+      "provenance": "用户提供参考目录中的原创程序合成示例，非本轮模型生成"
+    },
+    {
+      "id": "layered_space",
+      "form_id": "MF09",
+      "name": "渐进层叠音景",
+      "topics": [
+        "AI快讯",
+        "产品更新"
+      ],
+      "source": "原创程序合成三层渐变音景，非真实乐器录音、非模型生成。",
+      "source_sha256": "27ca6b6733f72f8e745aa226b09b64b57df26145739b2338d64fb5af4bddd02f",
+      "relative_path": "tool/creator-studio/assets/music-complete/MF09.wav",
+      "provenance": "用户提供参考目录中的原创程序合成示例，非本轮模型生成"
+    },
+    {
+      "id": "pulse_loop",
+      "form_id": "MF12",
+      "name": "轻节奏循环",
+      "topics": [
+        "快讯",
+        "节奏短片"
+      ],
+      "source": "原创程序合成鼓循环；无旋律、无演唱，非真实鼓手录音。",
+      "source_sha256": "cceba9b40d2b86af433a7db7820b01d0384c395c331f004e94cf06b535825606",
+      "relative_path": "tool/creator-studio/assets/batch1/MF12.wav",
+      "provenance": "用户提供参考目录中的原创程序合成示例，非本轮模型生成"
+    }
+  ]
+}

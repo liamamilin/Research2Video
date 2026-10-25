@@ -1,0 +1,15 @@
+{
+  "speed": 1.25,
+  "source_content_seconds": 16.067,
+  "content_seconds": 12.867,
+  "packaged_video_seconds": 16.866667,
+  "full_decode": "PASS",
+  "playback": {
+    "speed": 1.25,
+    "source_duration_ms": 16067,
+    "method": "pitch-preserving audio tempo; synchronized captions and animation"
+  },
+  "media_qa": "PASS",
+  "package_qa": "PASS",
+  "video_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/cdcd6c6f-6656-46e3-8d85-907431acdc1c/attempts/1/g2-run/artifacts/package/video.mp4"
+}

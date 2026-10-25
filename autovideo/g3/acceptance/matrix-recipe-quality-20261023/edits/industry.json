@@ -1,0 +1,69 @@
+{
+  "title": "制造业回流，难补的是上游材料",
+  "sections": [
+    {
+      "title": "先看一个反直觉的空白",
+      "paragraphs": [
+        {
+          "text": "说起制造业回流，我们很容易想到新工厂和组装线。Manufacturing Dive 转述的一份经济分析却把镜头往上推了一截：美国目前没有冶炼厂能生产军事专用的高纯度铝。这是对特定军工材料供应风险的判断。",
+          "citations": [
+            "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/"
+          ]
+        },
+        {
+          "text": "限定词是军事专用的高纯度铝，不能扩大成美国没有铝冶炼业，或者所有铝材都造不了。这里要看的，是特定上游材料的本土生产能力。",
+          "citations": [
+            "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "空白为什么是安全问题",
+      "paragraphs": [
+        {
+          "text": "报告说，美国相关军工材料依赖境外供应，并可能受到来自中国、俄罗斯和阿联酋方向的供应中断影响。注意，是“可能”：不是说中断已经发生，而是这条线一旦出问题，本土没有现成的冶炼能力接上。对军工材料来说，平时看不出差别，断供时却很难临时找替代。",
+          "citations": [
+            "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "半导体也在同一道题上",
+      "paragraphs": [
+        {
+          "text": "如果只把这看成铝行业的小插曲，就看小了。美国半导体行业协会 SIA 对半导体供应链的判断是：它依赖“脆弱且不透明”的投入品。翻成日常话，脆弱就是断供时不容易换；不透明，就是这些投入品平时不在视野里，甚至未必清楚自己到底依赖谁。",
+          "citations": [
+            "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/"
+          ]
+        },
+        {
+          "text": "SIA 呼吁政府和产业加强协作，讨论本土化和储备。但这是行业在提方向，不是政策已经落地，更不是问题已经解决。",
+          "citations": [
+            "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "韧性不看工厂数量",
+      "paragraphs": [
+        {
+          "text": "铝和芯片看起来离得很远，却指向同一个难题：下游工厂可以建，上游关键材料却不一定有本土能力、替代来源和透明度。断供时换不了，平时又看不清，这才是供应链韧性最容易被低估的地方。",
+          "citations": [
+            "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/",
+            "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/"
+          ]
+        },
+        {
+          "text": "所以，制造业回流如果只数最后那座组装厂，供应链仍然可能脆弱。关键材料的生产能力、替代来源和供应透明度，要放在同一张图里看。工厂增加，并不自动等于供应链更有韧性。",
+          "citations": [
+            "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/",
+            "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/"
+          ]
+        }
+      ]
+    }
+  ]
+}

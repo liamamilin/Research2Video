@@ -1,0 +1,290 @@
+{
+  "job": {
+    "job_id": "a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7",
+    "title": "社区讲座：从报名到活动结束",
+    "status": "COMPLETED",
+    "active_stage": "COMPLETE",
+    "attempt_count": 2,
+    "cancel_requested": false,
+    "error_code": null,
+    "error_message": null,
+    "retryable": false,
+    "source_sha256": "2c222ea41ab78311d55594ff281ee650d876354481fff8cd2dc081af89224cc5",
+    "source_char_count": 2414,
+    "target_duration_sec": 60,
+    "theme": "minimal_dark",
+    "voice_id": "zf_xiaoxiao",
+    "created_at": "2026-10-15T05:42:27.927+00:00",
+    "updated_at": "2026-10-15T06:23:41.599+00:00",
+    "version": 16,
+    "operation_type": "generate",
+    "parent_job_id": null,
+    "parent_attempt_no": null,
+    "scene_id": null,
+    "video_form": "process_diagram",
+    "duration_mode": "content",
+    "attempts": [
+      {
+        "attempt_no": 2,
+        "status": "COMPLETED",
+        "started_at": "2026-10-15T05:53:52.625+00:00",
+        "completed_at": "2026-10-15T06:23:41.599+00:00",
+        "error_code": null,
+        "error_message": null,
+        "stages": [
+          {
+            "stage": "PLAN",
+            "status": "SUCCEEDED",
+            "started_at": "2026-10-15T05:53:52.625+00:00",
+            "completed_at": "2026-10-15T05:53:52.999+00:00",
+            "duration_seconds": 0.03,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "VOICE_ALIGN",
+            "status": "SUCCEEDED",
+            "started_at": "2026-10-15T05:53:53.014+00:00",
+            "completed_at": "2026-10-15T05:55:05.874+00:00",
+            "duration_seconds": 73.08,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "STORYBOARD",
+            "status": "SUCCEEDED",
+            "started_at": "2026-10-15T05:55:05.881+00:00",
+            "completed_at": "2026-10-15T06:04:24.085+00:00",
+            "duration_seconds": 557.91,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "SCENE_IMAGES",
+            "status": "SKIPPED",
+            "started_at": "2026-10-15T06:04:24.090+00:00",
+            "completed_at": "2026-10-15T06:04:24.093+00:00",
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "BUILD_IR",
+            "status": "SUCCEEDED",
+            "started_at": "2026-10-15T06:04:24.095+00:00",
+            "completed_at": "2026-10-15T06:04:24.804+00:00",
+            "duration_seconds": 0.94,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "RENDER",
+            "status": "SUCCEEDED",
+            "started_at": "2026-10-15T06:04:24.808+00:00",
+            "completed_at": "2026-10-15T06:23:07.137+00:00",
+            "duration_seconds": 1122.34,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "QUALITY_CHECK",
+            "status": "SUCCEEDED",
+            "started_at": "2026-10-15T06:23:07.146+00:00",
+            "completed_at": "2026-10-15T06:23:41.599+00:00",
+            "duration_seconds": 33.94,
+            "error_code": null,
+            "error_message": null
+          }
+        ]
+      },
+      {
+        "attempt_no": 1,
+        "status": "FAILED",
+        "started_at": "2026-10-15T05:42:27.985+00:00",
+        "completed_at": "2026-10-15T05:51:14.658+00:00",
+        "error_code": "DIAGRAM_SOURCE_QUOTE",
+        "error_message": "DIAGRAM_SOURCE_QUOTE: n_data_ok",
+        "stages": [
+          {
+            "stage": "PLAN",
+            "status": "SUCCEEDED",
+            "started_at": "2026-10-15T05:42:27.985+00:00",
+            "completed_at": "2026-10-15T05:45:44.514+00:00",
+            "duration_seconds": 196.28,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "VOICE_ALIGN",
+            "status": "SUCCEEDED",
+            "started_at": "2026-10-15T05:45:44.520+00:00",
+            "completed_at": "2026-10-15T05:46:57.712+00:00",
+            "duration_seconds": 72.99,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "STORYBOARD",
+            "status": "FAILED",
+            "started_at": "2026-10-15T05:46:57.720+00:00",
+            "completed_at": "2026-10-15T05:51:14.658+00:00",
+            "duration_seconds": null,
+            "error_code": "DIAGRAM_SOURCE_QUOTE",
+            "error_message": "DIAGRAM_SOURCE_QUOTE: n_data_ok"
+          },
+          {
+            "stage": "SCENE_IMAGES",
+            "status": "SKIPPED",
+            "started_at": null,
+            "completed_at": "2026-10-15T05:51:14.658+00:00",
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "BUILD_IR",
+            "status": "SKIPPED",
+            "started_at": null,
+            "completed_at": "2026-10-15T05:51:14.658+00:00",
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "RENDER",
+            "status": "SKIPPED",
+            "started_at": null,
+            "completed_at": "2026-10-15T05:51:14.658+00:00",
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "QUALITY_CHECK",
+            "status": "SKIPPED",
+            "started_at": null,
+            "completed_at": "2026-10-15T05:51:14.658+00:00",
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": {
+    "items": [
+      {
+        "name": "captions.srt",
+        "content_type": "application/x-subrip",
+        "bytes": 10351,
+        "sha256": "71da3c2f5aab1635358b330bd7db83769292aea577799bc48eafcce24e71b55b",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/captions.srt"
+      },
+      {
+        "name": "chapters.json",
+        "content_type": "application/json",
+        "bytes": 26661,
+        "sha256": "4419612d4bf1822b4ee24839d99bb14d4f52feddae630b8798863ae6d11eba78",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/chapters.json"
+      },
+      {
+        "name": "content-outline.json",
+        "content_type": "application/json",
+        "bytes": 23773,
+        "sha256": "173e3b41c7dbf85de18aa1c95606e26da9068e81f9fc0ccbe01433b80a1654d6",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/content-outline.json"
+      },
+      {
+        "name": "diagram-layout.json",
+        "content_type": "application/json",
+        "bytes": 113958,
+        "sha256": "ef0710db08251b2447680afb8d4b235735499971c466ebfd86e455bee35204fe",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/diagram-layout.json"
+      },
+      {
+        "name": "diagram-plan.json",
+        "content_type": "application/json",
+        "bytes": 109938,
+        "sha256": "7fe094e52ec3783a132115131652e100ddc7201aaf07b11e1c3c63da591e9f48",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/diagram-plan.json"
+      },
+      {
+        "name": "diagram-timing.json",
+        "content_type": "application/json",
+        "bytes": 138,
+        "sha256": "68c0177338aa1ca7a21da1dd47640e0399c1af55348f07b228a792a2265385dc",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/diagram-timing.json"
+      },
+      {
+        "name": "execution-log.txt",
+        "content_type": "text/plain; charset=utf-8",
+        "bytes": 2023,
+        "sha256": "08674bc1e65e3a23e62d3e224deeae30d4b21496fd6b6890651b26953c28ac20",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/execution-log.txt"
+      },
+      {
+        "name": "manifest.json",
+        "content_type": "application/json",
+        "bytes": 94886,
+        "sha256": "45ff6f88cc0632429400722b78406ba0c6e3b999ca559d50b534577eb14a3349",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/manifest.json"
+      },
+      {
+        "name": "model-cost.json",
+        "content_type": "application/json",
+        "bytes": 9877,
+        "sha256": "7e5afc6bcae54a813fa21c6bee81ffea8495a7b6aa0955e861c946764ea7cabf",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/model-cost.json"
+      },
+      {
+        "name": "narration.json",
+        "content_type": "application/json",
+        "bytes": 72361,
+        "sha256": "0205ad0c79c01973509edbbb287d4f5ae7349dcbd03c4e19c9f9ad9450ca77b9",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/narration.json"
+      },
+      {
+        "name": "qa.json",
+        "content_type": "application/json",
+        "bytes": 176399,
+        "sha256": "0f2bd87ac778cd812c8dde68ec284c39f1a5e8ea279c0173fd300b2d6404a13a",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/qa.json"
+      },
+      {
+        "name": "reused-plans.json",
+        "content_type": "application/json",
+        "bytes": 5149,
+        "sha256": "aa056cec639dd7645279ad6b8d72963c64b8e8e0c324ac7317d5c97502d37a59",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/reused-plans.json"
+      },
+      {
+        "name": "storyboard.json",
+        "content_type": "application/json",
+        "bytes": 371301,
+        "sha256": "a132cc3cb084843fa40de263b89f1ea8103970f86eb6ebf161aea144e97f0313",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/storyboard.json"
+      },
+      {
+        "name": "video-ir.json",
+        "content_type": "application/json",
+        "bytes": 407595,
+        "sha256": "4164c539fff6a7103e5be55783c7063bd96326efcfd802581ebc85cdbe851367",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/video-ir.json"
+      },
+      {
+        "name": "video.mp4",
+        "content_type": "video/mp4",
+        "bytes": 40126521,
+        "sha256": "4ff3205e5f83e06971b345fe2a1ea7f52972f7706259b3767789cf8963f84666",
+        "download_url": "/api/jobs/a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7/artifacts/video.mp4"
+      }
+    ]
+  },
+  "video_range": {
+    "status": 206,
+    "content_type": "video/mp4",
+    "content_range": "bytes 0-1023/40126521",
+    "bytes": 1024
+  }
+}

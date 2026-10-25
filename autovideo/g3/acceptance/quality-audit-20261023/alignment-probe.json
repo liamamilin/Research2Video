@@ -1,0 +1,4656 @@
+{
+  "version": 2,
+  "method": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+  "narration_sha256": "9bae36325021a8dc10449d28bc6e96756ea25d1ca7b2b39feeb31db8df80eb66",
+  "audio_sha256": "2e0f9970b1153f6e8f32cc52a8ec7ad3c40d2f247d479c2b8fd72b21500617b0",
+  "model": {
+    "repo": "mlx-community/Qwen3-ForcedAligner-0.6B-8bit",
+    "revision": "0e1a68e91d815300c7c9754b2a7639378b23db15",
+    "code": "installed mlx_audio only; no repository Python downloaded"
+  },
+  "model_sha256": "be19ef8ac4326d032e7673342930b14c2df30bd68c1632493b0f563e30829f91",
+  "generation_seconds": 4.974,
+  "cues": [
+    {
+      "segment_id": "c1_n1",
+      "text": "这期挑五件新品和行业变化：一款大电池手机、",
+      "char_start": 0,
+      "char_end": 21,
+      "start_ms": 360,
+      "end_ms": 4890
+    },
+    {
+      "segment_id": "c1_n1",
+      "text": "一款降噪耳机、音频公司 Bose 收购音频品牌 Skullcandy、",
+      "char_start": 21,
+      "char_end": 56,
+      "start_ms": 5000,
+      "end_ms": 10250
+    },
+    {
+      "segment_id": "c1_n1",
+      "text": "一台用 ARM 架构处理器的可翻转笔记本，",
+      "char_start": 56,
+      "char_end": 77,
+      "start_ms": 10440,
+      "end_ms": 13530
+    },
+    {
+      "segment_id": "c1_n2",
+      "text": "以及一款宽幅折叠手机。",
+      "char_start": 0,
+      "char_end": 11,
+      "start_ms": 13878,
+      "end_ms": 15801
+    },
+    {
+      "segment_id": "c1_n3",
+      "text": "它配 2块 OLED 屏，OLED 指有机发光屏。",
+      "char_start": 0,
+      "char_end": 25,
+      "start_ms": 16171,
+      "end_ms": 20221
+    },
+    {
+      "segment_id": "c2_n1",
+      "text": "Motorola Edge 70 Max 是一款围绕大电池设计、",
+      "char_start": 0,
+      "char_end": 32,
+      "start_ms": 21191,
+      "end_ms": 25081
+    },
+    {
+      "segment_id": "c2_n1",
+      "text": "主打旗舰功能和续航的手机。",
+      "char_start": 32,
+      "char_end": 45,
+      "start_ms": 25191,
+      "end_ms": 27684
+    },
+    {
+      "segment_id": "c2_n2",
+      "text": "Notebookcheck 的评测认为，手机品牌 Samsung 和 Apple 的顶级机型在续航上",
+      "char_start": 0,
+      "char_end": 50,
+      "start_ms": 28244,
+      "end_ms": 33734
+    },
+    {
+      "segment_id": "c2_n2",
+      "text": "很难与它竞争；",
+      "char_start": 50,
+      "char_end": 57,
+      "start_ms": 33734,
+      "end_ms": 34854
+    },
+    {
+      "segment_id": "c2_n3",
+      "text": "它的大电池没有让机身显得笨重，当前价格也比较低。",
+      "char_start": 0,
+      "char_end": 24,
+      "start_ms": 35217,
+      "end_ms": 39111
+    },
+    {
+      "segment_id": "c2_n4",
+      "text": "这套评价值得在意续航和手感的人留意，",
+      "char_start": 0,
+      "char_end": 18,
+      "start_ms": 39891,
+      "end_ms": 43141
+    },
+    {
+      "segment_id": "c2_n4",
+      "text": "因为它把重点放在两者能不能兼得。",
+      "char_start": 18,
+      "char_end": 34,
+      "start_ms": 43331,
+      "end_ms": 46021
+    },
+    {
+      "segment_id": "c2_n5",
+      "text": "材料没有给出量化续航、具体售价，也缺少缺点结论，",
+      "char_start": 0,
+      "char_end": 24,
+      "start_ms": 46587,
+      "end_ms": 50397
+    },
+    {
+      "segment_id": "c2_n5",
+      "text": "所以现在只能当作选购线索，不能拿来直接比参数。",
+      "char_start": 24,
+      "char_end": 47,
+      "start_ms": 50667,
+      "end_ms": 54717
+    },
+    {
+      "segment_id": "c3_n1",
+      "text": "Oppo Enco X4 是 Oppo 推出的旗舰降噪耳机，已在国际市场首发。",
+      "char_start": 0,
+      "char_end": 39,
+      "start_ms": 55732,
+      "end_ms": 61243
+    },
+    {
+      "segment_id": "c3_n2",
+      "text": "官方标称采用 Dynaudio 调音，Dynaudio 是音频品牌。",
+      "char_start": 0,
+      "char_end": 34,
+      "start_ms": 61723,
+      "end_ms": 66209
+    },
+    {
+      "segment_id": "c3_n3",
+      "text": "GSMArena 开箱时看到，包装里有 Enco X4 耳机，以及 S、M、",
+      "char_start": 0,
+      "char_end": 38,
+      "start_ms": 66769,
+      "end_ms": 72739
+    },
+    {
+      "segment_id": "c3_n3",
+      "text": "L 3种硅胶耳套。",
+      "char_start": 38,
+      "char_end": 47,
+      "start_ms": 72739,
+      "end_ms": 74419
+    },
+    {
+      "segment_id": "c3_n4",
+      "text": "开箱能确认包装内容和功能定位，",
+      "char_start": 0,
+      "char_end": 15,
+      "start_ms": 75301,
+      "end_ms": 78071
+    },
+    {
+      "segment_id": "c3_n4",
+      "text": "不能确认实际使用表现。",
+      "char_start": 15,
+      "char_end": 26,
+      "start_ms": 78261,
+      "end_ms": 80279
+    },
+    {
+      "segment_id": "c3_n5",
+      "text": "材料没有提供降噪、音质或续航数据，",
+      "char_start": 0,
+      "char_end": 17,
+      "start_ms": 80759,
+      "end_ms": 84009
+    },
+    {
+      "segment_id": "c3_n5",
+      "text": "所以不能据此判断实际听感和使用时长。",
+      "char_start": 17,
+      "char_end": 35,
+      "start_ms": 84119,
+      "end_ms": 87609
+    },
+    {
+      "segment_id": "c4_n1",
+      "text": "音频公司 Bose Corporation 已收购生活方式音频品牌 Skullcandy。",
+      "char_start": 0,
+      "char_end": 45,
+      "start_ms": 88717,
+      "end_ms": 93675
+    },
+    {
+      "segment_id": "c4_n2",
+      "text": "据媒体 GSMArena 报道，双方在联合新闻稿里说，",
+      "char_start": 0,
+      "char_end": 27,
+      "start_ms": 94155,
+      "end_ms": 98765
+    },
+    {
+      "segment_id": "c4_n2",
+      "text": "未来产品会结合 Bose 的音频专长，",
+      "char_start": 27,
+      "char_end": 46,
+      "start_ms": 98875,
+      "end_ms": 101885
+    },
+    {
+      "segment_id": "c4_n2",
+      "text": "以及 Skullcandy 的设计和社群连接。",
+      "char_start": 46,
+      "char_end": 69,
+      "start_ms": 101915,
+      "end_ms": 104685
+    },
+    {
+      "segment_id": "c4_n3",
+      "text": "Skullcandy 会保留在 Bose 的高端消费音频产品线中，",
+      "char_start": 0,
+      "char_end": 33,
+      "start_ms": 105612,
+      "end_ms": 109742
+    },
+    {
+      "segment_id": "c4_n3",
+      "text": "并继续以 Park City, Utah 为基地。",
+      "char_start": 33,
+      "char_end": 58,
+      "start_ms": 110012,
+      "end_ms": 112489
+    },
+    {
+      "segment_id": "c4_n4",
+      "text": "这对关注品牌延续和后续产品的人有参考价值。",
+      "char_start": 0,
+      "char_end": 21,
+      "start_ms": 112969,
+      "end_ms": 116729
+    },
+    {
+      "segment_id": "c4_n5",
+      "text": "材料没有给出收购金额、落地时间和具体产品计划，",
+      "char_start": 0,
+      "char_end": 23,
+      "start_ms": 117209,
+      "end_ms": 120859
+    },
+    {
+      "segment_id": "c4_n5",
+      "text": "所以不能据此期待立刻出现新品或价格变化。",
+      "char_start": 23,
+      "char_end": 43,
+      "start_ms": 120969,
+      "end_ms": 124539
+    },
+    {
+      "segment_id": "c5_n1",
+      "text": "Acer Swift Spin 14 AI 是可翻转笔记本。",
+      "char_start": 0,
+      "char_end": 30,
+      "start_ms": 125788,
+      "end_ms": 129146
+    },
+    {
+      "segment_id": "c5_n2",
+      "text": "它用 Snapdragon for Windows 方案，也就是 Windows 上的 ARM 架构处理器。",
+      "char_start": 0,
+      "char_end": 54,
+      "start_ms": 129626,
+      "end_ms": 135264
+    },
+    {
+      "segment_id": "c5_n3",
+      "text": "评测称，该方案 1年内进步明显，多项表现可与 AMD、",
+      "char_start": 0,
+      "char_end": 27,
+      "start_ms": 135824,
+      "end_ms": 140554
+    },
+    {
+      "segment_id": "c5_n3",
+      "text": "Intel 这两家传统处理器厂商的方案持平，",
+      "char_start": 27,
+      "char_end": 49,
+      "start_ms": 140554,
+      "end_ms": 143554
+    },
+    {
+      "segment_id": "c5_n3",
+      "text": "但没说明这个“1年”从哪一版起算。",
+      "char_start": 49,
+      "char_end": 66,
+      "start_ms": 143744,
+      "end_ms": 146096
+    },
+    {
+      "segment_id": "c5_n4",
+      "text": "它适合看重性能、也能接受更高价格的人。",
+      "char_start": 0,
+      "char_end": 19,
+      "start_ms": 146766,
+      "end_ms": 149756
+    },
+    {
+      "segment_id": "c5_n5",
+      "text": "评测认为，性能提升伴随明显更高的价格，",
+      "char_start": 0,
+      "char_end": 19,
+      "start_ms": 150316,
+      "end_ms": 154046
+    },
+    {
+      "segment_id": "c5_n5",
+      "text": "但没说明价格是跟哪类笔记本相比，",
+      "char_start": 19,
+      "char_end": 35,
+      "start_ms": 154156,
+      "end_ms": 157006
+    },
+    {
+      "segment_id": "c5_n5",
+      "text": "也没有跑分或具体售价。",
+      "char_start": 35,
+      "char_end": 46,
+      "start_ms": 157196,
+      "end_ms": 159006
+    },
+    {
+      "segment_id": "c5_n6",
+      "text": "因此，不适合把低价列为首要条件。",
+      "char_start": 0,
+      "char_end": 16,
+      "start_ms": 159474,
+      "end_ms": 162084
+    },
+    {
+      "segment_id": "c6_n1",
+      "text": "Xiaomi 18 Fold 是手机厂商 Xiaomi 推出的宽幅折叠手机，",
+      "char_start": 0,
+      "char_end": 38,
+      "start_ms": 163149,
+      "end_ms": 167759
+    },
+    {
+      "segment_id": "c6_n1",
+      "text": "配2块 OLED 显示屏。",
+      "char_start": 38,
+      "char_end": 51,
+      "start_ms": 167789,
+      "end_ms": 169823
+    },
+    {
+      "segment_id": "c6_n2",
+      "text": "Notebookcheck 认为，异常宽的形态、极亮的 OLED 显示屏和强大硬件，",
+      "char_start": 0,
+      "char_end": 42,
+      "start_ms": 170303,
+      "end_ms": 175953
+    },
+    {
+      "segment_id": "c6_n2",
+      "text": "为折叠产品带来新意。",
+      "char_start": 42,
+      "char_end": 52,
+      "start_ms": 176143,
+      "end_ms": 177900
+    },
+    {
+      "segment_id": "c6_n3",
+      "text": "它更值得关注的是宽幅形态和屏幕表现。",
+      "char_start": 0,
+      "char_end": 18,
+      "start_ms": 178680,
+      "end_ms": 181909
+    },
+    {
+      "segment_id": "c6_n4",
+      "text": "评测标题写着“并非毫无缺点”，却没列出具体缺点。",
+      "char_start": 0,
+      "char_end": 24,
+      "start_ms": 182309,
+      "end_ms": 186199
+    },
+    {
+      "segment_id": "c6_n5",
+      "text": "处理器、相机和续航也没有日常使用结论或数据，",
+      "char_start": 0,
+      "char_end": 22,
+      "start_ms": 186622,
+      "end_ms": 190302
+    },
+    {
+      "segment_id": "c6_n5",
+      "text": "不能据此比较。",
+      "char_start": 22,
+      "char_end": 29,
+      "start_ms": 190302,
+      "end_ms": 191262
+    },
+    {
+      "segment_id": "c7_n1",
+      "text": "最值得继续关注 Motorola Edge 70 Max，因为它直指续航、",
+      "char_start": 0,
+      "char_end": 37,
+      "start_ms": 192310,
+      "end_ms": 196800
+    },
+    {
+      "segment_id": "c7_n1",
+      "text": "体积和价格能否兼顾；",
+      "char_start": 37,
+      "char_end": 47,
+      "start_ms": 196800,
+      "end_ms": 198733
+    },
+    {
+      "segment_id": "c7_n2",
+      "text": "接下来只看一个信号：",
+      "char_start": 0,
+      "char_end": 10,
+      "start_ms": 199173,
+      "end_ms": 200823
+    },
+    {
+      "segment_id": "c7_n2",
+      "text": "是否出现量化续航数据和当地售价。",
+      "char_start": 10,
+      "char_end": 26,
+      "start_ms": 200933,
+      "end_ms": 203863
+    }
+  ],
+  "word_evidence": [
+    {
+      "segment_id": "c1_n1",
+      "items": [
+        {
+          "text": "这",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "期",
+          "start_ms": 320,
+          "end_ms": 640
+        },
+        {
+          "text": "挑",
+          "start_ms": 640,
+          "end_ms": 960
+        },
+        {
+          "text": "五",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "件",
+          "start_ms": 1120,
+          "end_ms": 1360
+        },
+        {
+          "text": "新",
+          "start_ms": 1360,
+          "end_ms": 1600
+        },
+        {
+          "text": "品",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "和",
+          "start_ms": 1760,
+          "end_ms": 2000
+        },
+        {
+          "text": "行",
+          "start_ms": 2000,
+          "end_ms": 2160
+        },
+        {
+          "text": "业",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "变",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "化",
+          "start_ms": 2480,
+          "end_ms": 2800
+        },
+        {
+          "text": "一",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "款",
+          "start_ms": 3280,
+          "end_ms": 3520
+        },
+        {
+          "text": "大",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "电",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "池",
+          "start_ms": 3840,
+          "end_ms": 4000
+        },
+        {
+          "text": "手",
+          "start_ms": 4000,
+          "end_ms": 4240
+        },
+        {
+          "text": "机",
+          "start_ms": 4240,
+          "end_ms": 4560
+        },
+        {
+          "text": "一",
+          "start_ms": 4800,
+          "end_ms": 4960
+        },
+        {
+          "text": "款",
+          "start_ms": 4960,
+          "end_ms": 5280
+        },
+        {
+          "text": "降",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "噪",
+          "start_ms": 5440,
+          "end_ms": 5600
+        },
+        {
+          "text": "耳",
+          "start_ms": 5600,
+          "end_ms": 5760
+        },
+        {
+          "text": "机",
+          "start_ms": 5760,
+          "end_ms": 6080
+        },
+        {
+          "text": "音",
+          "start_ms": 6240,
+          "end_ms": 6400
+        },
+        {
+          "text": "频",
+          "start_ms": 6400,
+          "end_ms": 6560
+        },
+        {
+          "text": "公",
+          "start_ms": 6560,
+          "end_ms": 6720
+        },
+        {
+          "text": "司",
+          "start_ms": 6720,
+          "end_ms": 7040
+        },
+        {
+          "text": "Bose",
+          "start_ms": 7120,
+          "end_ms": 7520
+        },
+        {
+          "text": "收",
+          "start_ms": 7840,
+          "end_ms": 8000
+        },
+        {
+          "text": "购",
+          "start_ms": 8000,
+          "end_ms": 8240
+        },
+        {
+          "text": "音",
+          "start_ms": 8240,
+          "end_ms": 8400
+        },
+        {
+          "text": "频",
+          "start_ms": 8400,
+          "end_ms": 8640
+        },
+        {
+          "text": "品",
+          "start_ms": 8640,
+          "end_ms": 8800
+        },
+        {
+          "text": "牌",
+          "start_ms": 8800,
+          "end_ms": 9040
+        },
+        {
+          "text": "Skullcandy",
+          "start_ms": 9040,
+          "end_ms": 9920
+        },
+        {
+          "text": "一",
+          "start_ms": 10240,
+          "end_ms": 10320
+        },
+        {
+          "text": "台",
+          "start_ms": 10320,
+          "end_ms": 10560
+        },
+        {
+          "text": "用",
+          "start_ms": 10560,
+          "end_ms": 10720
+        },
+        {
+          "text": "ARM",
+          "start_ms": 10720,
+          "end_ms": 11280
+        },
+        {
+          "text": "架",
+          "start_ms": 11280,
+          "end_ms": 11440
+        },
+        {
+          "text": "构",
+          "start_ms": 11440,
+          "end_ms": 11600
+        },
+        {
+          "text": "处",
+          "start_ms": 11600,
+          "end_ms": 11760
+        },
+        {
+          "text": "理",
+          "start_ms": 11760,
+          "end_ms": 11920
+        },
+        {
+          "text": "器",
+          "start_ms": 11920,
+          "end_ms": 12080
+        },
+        {
+          "text": "的",
+          "start_ms": 12080,
+          "end_ms": 12240
+        },
+        {
+          "text": "可",
+          "start_ms": 12240,
+          "end_ms": 12400
+        },
+        {
+          "text": "翻",
+          "start_ms": 12400,
+          "end_ms": 12640
+        },
+        {
+          "text": "转",
+          "start_ms": 12640,
+          "end_ms": 12800
+        },
+        {
+          "text": "笔",
+          "start_ms": 12800,
+          "end_ms": 12960
+        },
+        {
+          "text": "记",
+          "start_ms": 12960,
+          "end_ms": 13040
+        },
+        {
+          "text": "本",
+          "start_ms": 13040,
+          "end_ms": 13200
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n2",
+      "items": [
+        {
+          "text": "以",
+          "start_ms": 240,
+          "end_ms": 320
+        },
+        {
+          "text": "及",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "一",
+          "start_ms": 480,
+          "end_ms": 560
+        },
+        {
+          "text": "款",
+          "start_ms": 560,
+          "end_ms": 800
+        },
+        {
+          "text": "宽",
+          "start_ms": 800,
+          "end_ms": 1040
+        },
+        {
+          "text": "幅",
+          "start_ms": 1040,
+          "end_ms": 1280
+        },
+        {
+          "text": "折",
+          "start_ms": 1280,
+          "end_ms": 1520
+        },
+        {
+          "text": "叠",
+          "start_ms": 1520,
+          "end_ms": 1600
+        },
+        {
+          "text": "手",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "机",
+          "start_ms": 1760,
+          "end_ms": 2080
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n3",
+      "items": [
+        {
+          "text": "它",
+          "start_ms": 0,
+          "end_ms": 240
+        },
+        {
+          "text": "配",
+          "start_ms": 240,
+          "end_ms": 480
+        },
+        {
+          "text": "2",
+          "start_ms": 480,
+          "end_ms": 720
+        },
+        {
+          "text": "块",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "OLED",
+          "start_ms": 880,
+          "end_ms": 1520
+        },
+        {
+          "text": "屏",
+          "start_ms": 1520,
+          "end_ms": 1920
+        },
+        {
+          "text": "OLED",
+          "start_ms": 2240,
+          "end_ms": 2880
+        },
+        {
+          "text": "指",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "有",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "机",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "发",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "光",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "屏",
+          "start_ms": 3680,
+          "end_ms": 4000
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n1",
+      "items": [
+        {
+          "text": "Motorola",
+          "start_ms": 160,
+          "end_ms": 640
+        },
+        {
+          "text": "Edge",
+          "start_ms": 640,
+          "end_ms": 1120
+        },
+        {
+          "text": "70",
+          "start_ms": 1120,
+          "end_ms": 1440
+        },
+        {
+          "text": "Max",
+          "start_ms": 1440,
+          "end_ms": 1920
+        },
+        {
+          "text": "是",
+          "start_ms": 2000,
+          "end_ms": 2240
+        },
+        {
+          "text": "一",
+          "start_ms": 2240,
+          "end_ms": 2320
+        },
+        {
+          "text": "款",
+          "start_ms": 2320,
+          "end_ms": 2560
+        },
+        {
+          "text": "围",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "绕",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "大",
+          "start_ms": 2880,
+          "end_ms": 3120
+        },
+        {
+          "text": "电",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "池",
+          "start_ms": 3280,
+          "end_ms": 3440
+        },
+        {
+          "text": "设",
+          "start_ms": 3440,
+          "end_ms": 3680
+        },
+        {
+          "text": "计",
+          "start_ms": 3680,
+          "end_ms": 3920
+        },
+        {
+          "text": "主",
+          "start_ms": 4160,
+          "end_ms": 4400
+        },
+        {
+          "text": "打",
+          "start_ms": 4400,
+          "end_ms": 4640
+        },
+        {
+          "text": "旗",
+          "start_ms": 4640,
+          "end_ms": 4880
+        },
+        {
+          "text": "舰",
+          "start_ms": 4880,
+          "end_ms": 5040
+        },
+        {
+          "text": "功",
+          "start_ms": 5040,
+          "end_ms": 5280
+        },
+        {
+          "text": "能",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "和",
+          "start_ms": 5440,
+          "end_ms": 5600
+        },
+        {
+          "text": "续",
+          "start_ms": 5600,
+          "end_ms": 5840
+        },
+        {
+          "text": "航",
+          "start_ms": 5840,
+          "end_ms": 6080
+        },
+        {
+          "text": "的",
+          "start_ms": 6080,
+          "end_ms": 6080
+        },
+        {
+          "text": "手",
+          "start_ms": 6080,
+          "end_ms": 6320
+        },
+        {
+          "text": "机",
+          "start_ms": 6320,
+          "end_ms": 6560
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n2",
+      "items": [
+        {
+          "text": "Notebookcheck",
+          "start_ms": 240,
+          "end_ms": 960
+        },
+        {
+          "text": "的",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "评",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "测",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "认",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "为",
+          "start_ms": 1600,
+          "end_ms": 1920
+        },
+        {
+          "text": "手",
+          "start_ms": 2160,
+          "end_ms": 2400
+        },
+        {
+          "text": "机",
+          "start_ms": 2400,
+          "end_ms": 2560
+        },
+        {
+          "text": "品",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "牌",
+          "start_ms": 2720,
+          "end_ms": 3040
+        },
+        {
+          "text": "Samsung",
+          "start_ms": 3040,
+          "end_ms": 3520
+        },
+        {
+          "text": "和",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "Apple",
+          "start_ms": 3680,
+          "end_ms": 4080
+        },
+        {
+          "text": "的",
+          "start_ms": 4080,
+          "end_ms": 4160
+        },
+        {
+          "text": "顶",
+          "start_ms": 4160,
+          "end_ms": 4320
+        },
+        {
+          "text": "级",
+          "start_ms": 4320,
+          "end_ms": 4480
+        },
+        {
+          "text": "机",
+          "start_ms": 4480,
+          "end_ms": 4640
+        },
+        {
+          "text": "型",
+          "start_ms": 4640,
+          "end_ms": 4960
+        },
+        {
+          "text": "在",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "续",
+          "start_ms": 5120,
+          "end_ms": 5280
+        },
+        {
+          "text": "航",
+          "start_ms": 5280,
+          "end_ms": 5520
+        },
+        {
+          "text": "上",
+          "start_ms": 5520,
+          "end_ms": 5680
+        },
+        {
+          "text": "很",
+          "start_ms": 5680,
+          "end_ms": 5920
+        },
+        {
+          "text": "难",
+          "start_ms": 5920,
+          "end_ms": 6080
+        },
+        {
+          "text": "与",
+          "start_ms": 6080,
+          "end_ms": 6160
+        },
+        {
+          "text": "它",
+          "start_ms": 6160,
+          "end_ms": 6320
+        },
+        {
+          "text": "竞",
+          "start_ms": 6320,
+          "end_ms": 6480
+        },
+        {
+          "text": "争",
+          "start_ms": 6480,
+          "end_ms": 6720
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n3",
+      "items": [
+        {
+          "text": "它",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "的",
+          "start_ms": 320,
+          "end_ms": 400
+        },
+        {
+          "text": "大",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "电",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "池",
+          "start_ms": 720,
+          "end_ms": 960
+        },
+        {
+          "text": "没",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "有",
+          "start_ms": 1120,
+          "end_ms": 1200
+        },
+        {
+          "text": "让",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "机",
+          "start_ms": 1360,
+          "end_ms": 1600
+        },
+        {
+          "text": "身",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "显",
+          "start_ms": 1760,
+          "end_ms": 1920
+        },
+        {
+          "text": "得",
+          "start_ms": 1920,
+          "end_ms": 2000
+        },
+        {
+          "text": "笨",
+          "start_ms": 2000,
+          "end_ms": 2160
+        },
+        {
+          "text": "重",
+          "start_ms": 2160,
+          "end_ms": 2400
+        },
+        {
+          "text": "当",
+          "start_ms": 2640,
+          "end_ms": 2800
+        },
+        {
+          "text": "前",
+          "start_ms": 2800,
+          "end_ms": 3040
+        },
+        {
+          "text": "价",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "格",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "也",
+          "start_ms": 3360,
+          "end_ms": 3440
+        },
+        {
+          "text": "比",
+          "start_ms": 3440,
+          "end_ms": 3520
+        },
+        {
+          "text": "较",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "低",
+          "start_ms": 3680,
+          "end_ms": 4000
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n4",
+      "items": [
+        {
+          "text": "这",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "套",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "评",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "价",
+          "start_ms": 640,
+          "end_ms": 880
+        },
+        {
+          "text": "值",
+          "start_ms": 880,
+          "end_ms": 1040
+        },
+        {
+          "text": "得",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "在",
+          "start_ms": 1200,
+          "end_ms": 1440
+        },
+        {
+          "text": "意",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "续",
+          "start_ms": 1600,
+          "end_ms": 1840
+        },
+        {
+          "text": "航",
+          "start_ms": 1840,
+          "end_ms": 2080
+        },
+        {
+          "text": "和",
+          "start_ms": 2080,
+          "end_ms": 2160
+        },
+        {
+          "text": "手",
+          "start_ms": 2160,
+          "end_ms": 2400
+        },
+        {
+          "text": "感",
+          "start_ms": 2400,
+          "end_ms": 2560
+        },
+        {
+          "text": "的",
+          "start_ms": 2560,
+          "end_ms": 2640
+        },
+        {
+          "text": "人",
+          "start_ms": 2640,
+          "end_ms": 2800
+        },
+        {
+          "text": "留",
+          "start_ms": 2800,
+          "end_ms": 3040
+        },
+        {
+          "text": "意",
+          "start_ms": 3040,
+          "end_ms": 3280
+        },
+        {
+          "text": "因",
+          "start_ms": 3600,
+          "end_ms": 3760
+        },
+        {
+          "text": "为",
+          "start_ms": 3760,
+          "end_ms": 3920
+        },
+        {
+          "text": "它",
+          "start_ms": 3920,
+          "end_ms": 4080
+        },
+        {
+          "text": "把",
+          "start_ms": 4080,
+          "end_ms": 4240
+        },
+        {
+          "text": "重",
+          "start_ms": 4240,
+          "end_ms": 4400
+        },
+        {
+          "text": "点",
+          "start_ms": 4400,
+          "end_ms": 4560
+        },
+        {
+          "text": "放",
+          "start_ms": 4560,
+          "end_ms": 4720
+        },
+        {
+          "text": "在",
+          "start_ms": 4800,
+          "end_ms": 4960
+        },
+        {
+          "text": "两",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "者",
+          "start_ms": 5120,
+          "end_ms": 5360
+        },
+        {
+          "text": "能",
+          "start_ms": 5360,
+          "end_ms": 5520
+        },
+        {
+          "text": "不",
+          "start_ms": 5520,
+          "end_ms": 5600
+        },
+        {
+          "text": "能",
+          "start_ms": 5600,
+          "end_ms": 5680
+        },
+        {
+          "text": "兼",
+          "start_ms": 5680,
+          "end_ms": 5920
+        },
+        {
+          "text": "得",
+          "start_ms": 5920,
+          "end_ms": 6160
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n5",
+      "items": [
+        {
+          "text": "材",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "料",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "没",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "有",
+          "start_ms": 720,
+          "end_ms": 800
+        },
+        {
+          "text": "给",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "出",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "量",
+          "start_ms": 1120,
+          "end_ms": 1360
+        },
+        {
+          "text": "化",
+          "start_ms": 1360,
+          "end_ms": 1440
+        },
+        {
+          "text": "续",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "航",
+          "start_ms": 1600,
+          "end_ms": 1920
+        },
+        {
+          "text": "具",
+          "start_ms": 1920,
+          "end_ms": 2080
+        },
+        {
+          "text": "体",
+          "start_ms": 2080,
+          "end_ms": 2240
+        },
+        {
+          "text": "售",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "价",
+          "start_ms": 2400,
+          "end_ms": 2640
+        },
+        {
+          "text": "也",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "缺",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "少",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "缺",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "点",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "结",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "论",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "所",
+          "start_ms": 4240,
+          "end_ms": 4320
+        },
+        {
+          "text": "以",
+          "start_ms": 4320,
+          "end_ms": 4560
+        },
+        {
+          "text": "现",
+          "start_ms": 4560,
+          "end_ms": 4800
+        },
+        {
+          "text": "在",
+          "start_ms": 4800,
+          "end_ms": 4960
+        },
+        {
+          "text": "只",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "能",
+          "start_ms": 5120,
+          "end_ms": 5280
+        },
+        {
+          "text": "当",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "作",
+          "start_ms": 5440,
+          "end_ms": 5680
+        },
+        {
+          "text": "选",
+          "start_ms": 5680,
+          "end_ms": 5840
+        },
+        {
+          "text": "购",
+          "start_ms": 5840,
+          "end_ms": 6000
+        },
+        {
+          "text": "线",
+          "start_ms": 6000,
+          "end_ms": 6240
+        },
+        {
+          "text": "索",
+          "start_ms": 6240,
+          "end_ms": 6320
+        },
+        {
+          "text": "不",
+          "start_ms": 6720,
+          "end_ms": 6880
+        },
+        {
+          "text": "能",
+          "start_ms": 6880,
+          "end_ms": 6960
+        },
+        {
+          "text": "拿",
+          "start_ms": 6960,
+          "end_ms": 7120
+        },
+        {
+          "text": "来",
+          "start_ms": 7120,
+          "end_ms": 7280
+        },
+        {
+          "text": "直",
+          "start_ms": 7280,
+          "end_ms": 7440
+        },
+        {
+          "text": "接",
+          "start_ms": 7440,
+          "end_ms": 7600
+        },
+        {
+          "text": "比",
+          "start_ms": 7600,
+          "end_ms": 7680
+        },
+        {
+          "text": "参",
+          "start_ms": 7680,
+          "end_ms": 7920
+        },
+        {
+          "text": "数",
+          "start_ms": 7920,
+          "end_ms": 8160
+        }
+      ]
+    },
+    {
+      "segment_id": "c3_n1",
+      "items": [
+        {
+          "text": "Oppo",
+          "start_ms": 160,
+          "end_ms": 480
+        },
+        {
+          "text": "Enco",
+          "start_ms": 560,
+          "end_ms": 880
+        },
+        {
+          "text": "X4",
+          "start_ms": 880,
+          "end_ms": 1760
+        },
+        {
+          "text": "是",
+          "start_ms": 1760,
+          "end_ms": 1760
+        },
+        {
+          "text": "Oppo",
+          "start_ms": 1760,
+          "end_ms": 2160
+        },
+        {
+          "text": "推",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "出",
+          "start_ms": 2320,
+          "end_ms": 2560
+        },
+        {
+          "text": "的",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "旗",
+          "start_ms": 2720,
+          "end_ms": 2960
+        },
+        {
+          "text": "舰",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "降",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "噪",
+          "start_ms": 3280,
+          "end_ms": 3360
+        },
+        {
+          "text": "耳",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "机",
+          "start_ms": 3520,
+          "end_ms": 3840
+        },
+        {
+          "text": "已",
+          "start_ms": 4160,
+          "end_ms": 4240
+        },
+        {
+          "text": "在",
+          "start_ms": 4240,
+          "end_ms": 4400
+        },
+        {
+          "text": "国",
+          "start_ms": 4400,
+          "end_ms": 4640
+        },
+        {
+          "text": "际",
+          "start_ms": 4640,
+          "end_ms": 4720
+        },
+        {
+          "text": "市",
+          "start_ms": 4720,
+          "end_ms": 4880
+        },
+        {
+          "text": "场",
+          "start_ms": 4880,
+          "end_ms": 5040
+        },
+        {
+          "text": "首",
+          "start_ms": 5040,
+          "end_ms": 5280
+        },
+        {
+          "text": "发",
+          "start_ms": 5280,
+          "end_ms": 5600
+        }
+      ]
+    },
+    {
+      "segment_id": "c3_n2",
+      "items": [
+        {
+          "text": "官",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "方",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "标",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "称",
+          "start_ms": 640,
+          "end_ms": 960
+        },
+        {
+          "text": "采",
+          "start_ms": 960,
+          "end_ms": 1200
+        },
+        {
+          "text": "用",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "Dynaudio",
+          "start_ms": 1440,
+          "end_ms": 1760
+        },
+        {
+          "text": "调",
+          "start_ms": 2080,
+          "end_ms": 2320
+        },
+        {
+          "text": "音",
+          "start_ms": 2320,
+          "end_ms": 2560
+        },
+        {
+          "text": "Dynaudio",
+          "start_ms": 2880,
+          "end_ms": 3440
+        },
+        {
+          "text": "是",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "音",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "频",
+          "start_ms": 3840,
+          "end_ms": 4000
+        },
+        {
+          "text": "品",
+          "start_ms": 4000,
+          "end_ms": 4240
+        },
+        {
+          "text": "牌",
+          "start_ms": 4240,
+          "end_ms": 4560
+        }
+      ]
+    },
+    {
+      "segment_id": "c3_n3",
+      "items": [
+        {
+          "text": "GSMArena",
+          "start_ms": 240,
+          "end_ms": 1360
+        },
+        {
+          "text": "开",
+          "start_ms": 1360,
+          "end_ms": 1520
+        },
+        {
+          "text": "箱",
+          "start_ms": 1520,
+          "end_ms": 1760
+        },
+        {
+          "text": "时",
+          "start_ms": 1760,
+          "end_ms": 2080
+        },
+        {
+          "text": "看",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "到",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "包",
+          "start_ms": 2640,
+          "end_ms": 2880
+        },
+        {
+          "text": "装",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "里",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "有",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "Enco",
+          "start_ms": 3520,
+          "end_ms": 3840
+        },
+        {
+          "text": "X4",
+          "start_ms": 3840,
+          "end_ms": 4640
+        },
+        {
+          "text": "耳",
+          "start_ms": 4640,
+          "end_ms": 4640
+        },
+        {
+          "text": "机",
+          "start_ms": 4640,
+          "end_ms": 4960
+        },
+        {
+          "text": "以",
+          "start_ms": 5200,
+          "end_ms": 5360
+        },
+        {
+          "text": "及",
+          "start_ms": 5360,
+          "end_ms": 5600
+        },
+        {
+          "text": "S",
+          "start_ms": 5600,
+          "end_ms": 5920
+        },
+        {
+          "text": "M",
+          "start_ms": 5920,
+          "end_ms": 6160
+        },
+        {
+          "text": "L",
+          "start_ms": 6160,
+          "end_ms": 6240
+        },
+        {
+          "text": "3",
+          "start_ms": 6240,
+          "end_ms": 6480
+        },
+        {
+          "text": "种",
+          "start_ms": 6880,
+          "end_ms": 7040
+        },
+        {
+          "text": "硅",
+          "start_ms": 7040,
+          "end_ms": 7200
+        },
+        {
+          "text": "胶",
+          "start_ms": 7200,
+          "end_ms": 7360
+        },
+        {
+          "text": "耳",
+          "start_ms": 7360,
+          "end_ms": 7520
+        },
+        {
+          "text": "套",
+          "start_ms": 7520,
+          "end_ms": 7760
+        }
+      ]
+    },
+    {
+      "segment_id": "c3_n4",
+      "items": [
+        {
+          "text": "开",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "箱",
+          "start_ms": 400,
+          "end_ms": 720
+        },
+        {
+          "text": "能",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "确",
+          "start_ms": 880,
+          "end_ms": 1040
+        },
+        {
+          "text": "认",
+          "start_ms": 1040,
+          "end_ms": 1280
+        },
+        {
+          "text": "包",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "装",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "内",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "容",
+          "start_ms": 1760,
+          "end_ms": 1920
+        },
+        {
+          "text": "和",
+          "start_ms": 1920,
+          "end_ms": 2160
+        },
+        {
+          "text": "功",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "能",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "定",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "位",
+          "start_ms": 2640,
+          "end_ms": 2880
+        },
+        {
+          "text": "不",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "能",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "确",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "认",
+          "start_ms": 3680,
+          "end_ms": 3920
+        },
+        {
+          "text": "实",
+          "start_ms": 3920,
+          "end_ms": 4160
+        },
+        {
+          "text": "际",
+          "start_ms": 4160,
+          "end_ms": 4320
+        },
+        {
+          "text": "使",
+          "start_ms": 4320,
+          "end_ms": 4480
+        },
+        {
+          "text": "用",
+          "start_ms": 4480,
+          "end_ms": 4640
+        },
+        {
+          "text": "表",
+          "start_ms": 4640,
+          "end_ms": 4800
+        },
+        {
+          "text": "现",
+          "start_ms": 4800,
+          "end_ms": 5120
+        }
+      ]
+    },
+    {
+      "segment_id": "c3_n5",
+      "items": [
+        {
+          "text": "材",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "料",
+          "start_ms": 400,
+          "end_ms": 640
+        },
+        {
+          "text": "没",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "有",
+          "start_ms": 800,
+          "end_ms": 880
+        },
+        {
+          "text": "提",
+          "start_ms": 880,
+          "end_ms": 1040
+        },
+        {
+          "text": "供",
+          "start_ms": 1040,
+          "end_ms": 1280
+        },
+        {
+          "text": "降",
+          "start_ms": 1280,
+          "end_ms": 1520
+        },
+        {
+          "text": "噪",
+          "start_ms": 1520,
+          "end_ms": 1760
+        },
+        {
+          "text": "音",
+          "start_ms": 1760,
+          "end_ms": 2000
+        },
+        {
+          "text": "质",
+          "start_ms": 2000,
+          "end_ms": 2240
+        },
+        {
+          "text": "或",
+          "start_ms": 2240,
+          "end_ms": 2480
+        },
+        {
+          "text": "续",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "航",
+          "start_ms": 2640,
+          "end_ms": 2800
+        },
+        {
+          "text": "数",
+          "start_ms": 2800,
+          "end_ms": 3040
+        },
+        {
+          "text": "据",
+          "start_ms": 3040,
+          "end_ms": 3280
+        },
+        {
+          "text": "所",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "以",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "不",
+          "start_ms": 3840,
+          "end_ms": 4000
+        },
+        {
+          "text": "能",
+          "start_ms": 4000,
+          "end_ms": 4160
+        },
+        {
+          "text": "据",
+          "start_ms": 4160,
+          "end_ms": 4400
+        },
+        {
+          "text": "此",
+          "start_ms": 4400,
+          "end_ms": 4560
+        },
+        {
+          "text": "判",
+          "start_ms": 4560,
+          "end_ms": 4720
+        },
+        {
+          "text": "断",
+          "start_ms": 4720,
+          "end_ms": 4960
+        },
+        {
+          "text": "实",
+          "start_ms": 5040,
+          "end_ms": 5280
+        },
+        {
+          "text": "际",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "听",
+          "start_ms": 5440,
+          "end_ms": 5600
+        },
+        {
+          "text": "感",
+          "start_ms": 5600,
+          "end_ms": 5840
+        },
+        {
+          "text": "和",
+          "start_ms": 5840,
+          "end_ms": 6000
+        },
+        {
+          "text": "使",
+          "start_ms": 6000,
+          "end_ms": 6240
+        },
+        {
+          "text": "用",
+          "start_ms": 6240,
+          "end_ms": 6320
+        },
+        {
+          "text": "时",
+          "start_ms": 6320,
+          "end_ms": 6480
+        },
+        {
+          "text": "长",
+          "start_ms": 6480,
+          "end_ms": 6880
+        }
+      ]
+    },
+    {
+      "segment_id": "c4_n1",
+      "items": [
+        {
+          "text": "音",
+          "start_ms": 240,
+          "end_ms": 320
+        },
+        {
+          "text": "频",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "公",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "司",
+          "start_ms": 640,
+          "end_ms": 960
+        },
+        {
+          "text": "Bose",
+          "start_ms": 1040,
+          "end_ms": 1280
+        },
+        {
+          "text": "Corporation",
+          "start_ms": 1280,
+          "end_ms": 1920
+        },
+        {
+          "text": "已",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "收",
+          "start_ms": 2400,
+          "end_ms": 2640
+        },
+        {
+          "text": "购",
+          "start_ms": 2640,
+          "end_ms": 2800
+        },
+        {
+          "text": "生",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "活",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "方",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "式",
+          "start_ms": 3280,
+          "end_ms": 3600
+        },
+        {
+          "text": "音",
+          "start_ms": 3600,
+          "end_ms": 3760
+        },
+        {
+          "text": "频",
+          "start_ms": 3760,
+          "end_ms": 3920
+        },
+        {
+          "text": "品",
+          "start_ms": 3920,
+          "end_ms": 4080
+        },
+        {
+          "text": "牌",
+          "start_ms": 4080,
+          "end_ms": 4400
+        },
+        {
+          "text": "Skullcandy",
+          "start_ms": 4400,
+          "end_ms": 5120
+        }
+      ]
+    },
+    {
+      "segment_id": "c4_n2",
+      "items": [
+        {
+          "text": "据",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "媒",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "体",
+          "start_ms": 480,
+          "end_ms": 800
+        },
+        {
+          "text": "GSMArena",
+          "start_ms": 1200,
+          "end_ms": 2000
+        },
+        {
+          "text": "报",
+          "start_ms": 2000,
+          "end_ms": 2160
+        },
+        {
+          "text": "道",
+          "start_ms": 2160,
+          "end_ms": 2480
+        },
+        {
+          "text": "双",
+          "start_ms": 2640,
+          "end_ms": 2880
+        },
+        {
+          "text": "方",
+          "start_ms": 2880,
+          "end_ms": 3120
+        },
+        {
+          "text": "在",
+          "start_ms": 3120,
+          "end_ms": 3360
+        },
+        {
+          "text": "联",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "合",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "新",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "闻",
+          "start_ms": 3840,
+          "end_ms": 4000
+        },
+        {
+          "text": "稿",
+          "start_ms": 4000,
+          "end_ms": 4160
+        },
+        {
+          "text": "里",
+          "start_ms": 4160,
+          "end_ms": 4240
+        },
+        {
+          "text": "说",
+          "start_ms": 4240,
+          "end_ms": 4640
+        },
+        {
+          "text": "未",
+          "start_ms": 4880,
+          "end_ms": 4960
+        },
+        {
+          "text": "来",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "产",
+          "start_ms": 5120,
+          "end_ms": 5360
+        },
+        {
+          "text": "品",
+          "start_ms": 5360,
+          "end_ms": 5520
+        },
+        {
+          "text": "会",
+          "start_ms": 5600,
+          "end_ms": 5840
+        },
+        {
+          "text": "结",
+          "start_ms": 5840,
+          "end_ms": 6000
+        },
+        {
+          "text": "合",
+          "start_ms": 6000,
+          "end_ms": 6320
+        },
+        {
+          "text": "Bose",
+          "start_ms": 6320,
+          "end_ms": 6720
+        },
+        {
+          "text": "的",
+          "start_ms": 6720,
+          "end_ms": 6880
+        },
+        {
+          "text": "音",
+          "start_ms": 6880,
+          "end_ms": 7040
+        },
+        {
+          "text": "频",
+          "start_ms": 7040,
+          "end_ms": 7200
+        },
+        {
+          "text": "专",
+          "start_ms": 7200,
+          "end_ms": 7360
+        },
+        {
+          "text": "长",
+          "start_ms": 7360,
+          "end_ms": 7760
+        },
+        {
+          "text": "以",
+          "start_ms": 7920,
+          "end_ms": 8080
+        },
+        {
+          "text": "及",
+          "start_ms": 8080,
+          "end_ms": 8320
+        },
+        {
+          "text": "Skullcandy",
+          "start_ms": 8320,
+          "end_ms": 8960
+        },
+        {
+          "text": "的",
+          "start_ms": 8960,
+          "end_ms": 9040
+        },
+        {
+          "text": "设",
+          "start_ms": 9040,
+          "end_ms": 9280
+        },
+        {
+          "text": "计",
+          "start_ms": 9280,
+          "end_ms": 9520
+        },
+        {
+          "text": "和",
+          "start_ms": 9520,
+          "end_ms": 9680
+        },
+        {
+          "text": "社",
+          "start_ms": 9680,
+          "end_ms": 9920
+        },
+        {
+          "text": "群",
+          "start_ms": 9920,
+          "end_ms": 10080
+        },
+        {
+          "text": "连",
+          "start_ms": 10080,
+          "end_ms": 10240
+        },
+        {
+          "text": "接",
+          "start_ms": 10240,
+          "end_ms": 10560
+        }
+      ]
+    },
+    {
+      "segment_id": "c4_n3",
+      "items": [
+        {
+          "text": "Skullcandy",
+          "start_ms": 240,
+          "end_ms": 1040
+        },
+        {
+          "text": "会",
+          "start_ms": 1040,
+          "end_ms": 1280
+        },
+        {
+          "text": "保",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "留",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "在",
+          "start_ms": 1600,
+          "end_ms": 1840
+        },
+        {
+          "text": "Bose",
+          "start_ms": 1840,
+          "end_ms": 2240
+        },
+        {
+          "text": "的",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "高",
+          "start_ms": 2400,
+          "end_ms": 2640
+        },
+        {
+          "text": "端",
+          "start_ms": 2640,
+          "end_ms": 2800
+        },
+        {
+          "text": "消",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "费",
+          "start_ms": 2960,
+          "end_ms": 3200
+        },
+        {
+          "text": "音",
+          "start_ms": 3200,
+          "end_ms": 3280
+        },
+        {
+          "text": "频",
+          "start_ms": 3280,
+          "end_ms": 3440
+        },
+        {
+          "text": "产",
+          "start_ms": 3440,
+          "end_ms": 3680
+        },
+        {
+          "text": "品",
+          "start_ms": 3680,
+          "end_ms": 3760
+        },
+        {
+          "text": "线",
+          "start_ms": 3760,
+          "end_ms": 4000
+        },
+        {
+          "text": "中",
+          "start_ms": 4000,
+          "end_ms": 4240
+        },
+        {
+          "text": "并",
+          "start_ms": 4640,
+          "end_ms": 4800
+        },
+        {
+          "text": "继",
+          "start_ms": 4800,
+          "end_ms": 4960
+        },
+        {
+          "text": "续",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "以",
+          "start_ms": 5120,
+          "end_ms": 5360
+        },
+        {
+          "text": "Park",
+          "start_ms": 5360,
+          "end_ms": 5760
+        },
+        {
+          "text": "City",
+          "start_ms": 5760,
+          "end_ms": 6160
+        },
+        {
+          "text": "Utah",
+          "start_ms": 6160,
+          "end_ms": 6560
+        },
+        {
+          "text": "为",
+          "start_ms": 6560,
+          "end_ms": 6640
+        },
+        {
+          "text": "基",
+          "start_ms": 6640,
+          "end_ms": 6800
+        },
+        {
+          "text": "地",
+          "start_ms": 6800,
+          "end_ms": 7040
+        }
+      ]
+    },
+    {
+      "segment_id": "c4_n4",
+      "items": [
+        {
+          "text": "这",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "对",
+          "start_ms": 320,
+          "end_ms": 560
+        },
+        {
+          "text": "关",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "注",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "品",
+          "start_ms": 880,
+          "end_ms": 1040
+        },
+        {
+          "text": "牌",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "延",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "续",
+          "start_ms": 1360,
+          "end_ms": 1600
+        },
+        {
+          "text": "和",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "后",
+          "start_ms": 1760,
+          "end_ms": 2000
+        },
+        {
+          "text": "续",
+          "start_ms": 2000,
+          "end_ms": 2080
+        },
+        {
+          "text": "产",
+          "start_ms": 2080,
+          "end_ms": 2320
+        },
+        {
+          "text": "品",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "的",
+          "start_ms": 2480,
+          "end_ms": 2560
+        },
+        {
+          "text": "人",
+          "start_ms": 2560,
+          "end_ms": 2800
+        },
+        {
+          "text": "有",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "参",
+          "start_ms": 2960,
+          "end_ms": 3200
+        },
+        {
+          "text": "考",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "价",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "值",
+          "start_ms": 3520,
+          "end_ms": 3840
+        }
+      ]
+    },
+    {
+      "segment_id": "c4_n5",
+      "items": [
+        {
+          "text": "材",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "料",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "没",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "有",
+          "start_ms": 640,
+          "end_ms": 720
+        },
+        {
+          "text": "给",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "出",
+          "start_ms": 880,
+          "end_ms": 1040
+        },
+        {
+          "text": "收",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "购",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "金",
+          "start_ms": 1280,
+          "end_ms": 1520
+        },
+        {
+          "text": "额",
+          "start_ms": 1520,
+          "end_ms": 1840
+        },
+        {
+          "text": "落",
+          "start_ms": 1840,
+          "end_ms": 2000
+        },
+        {
+          "text": "地",
+          "start_ms": 2000,
+          "end_ms": 2080
+        },
+        {
+          "text": "时",
+          "start_ms": 2080,
+          "end_ms": 2320
+        },
+        {
+          "text": "间",
+          "start_ms": 2320,
+          "end_ms": 2560
+        },
+        {
+          "text": "和",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "具",
+          "start_ms": 2720,
+          "end_ms": 2800
+        },
+        {
+          "text": "体",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "产",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "品",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "计",
+          "start_ms": 3280,
+          "end_ms": 3520
+        },
+        {
+          "text": "划",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "所",
+          "start_ms": 3920,
+          "end_ms": 4080
+        },
+        {
+          "text": "以",
+          "start_ms": 4080,
+          "end_ms": 4240
+        },
+        {
+          "text": "不",
+          "start_ms": 4240,
+          "end_ms": 4400
+        },
+        {
+          "text": "能",
+          "start_ms": 4400,
+          "end_ms": 4560
+        },
+        {
+          "text": "据",
+          "start_ms": 4560,
+          "end_ms": 4640
+        },
+        {
+          "text": "此",
+          "start_ms": 4640,
+          "end_ms": 4800
+        },
+        {
+          "text": "期",
+          "start_ms": 4800,
+          "end_ms": 4960
+        },
+        {
+          "text": "待",
+          "start_ms": 4960,
+          "end_ms": 5280
+        },
+        {
+          "text": "立",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "刻",
+          "start_ms": 5440,
+          "end_ms": 5680
+        },
+        {
+          "text": "出",
+          "start_ms": 5680,
+          "end_ms": 5760
+        },
+        {
+          "text": "现",
+          "start_ms": 5760,
+          "end_ms": 6000
+        },
+        {
+          "text": "新",
+          "start_ms": 6000,
+          "end_ms": 6240
+        },
+        {
+          "text": "品",
+          "start_ms": 6240,
+          "end_ms": 6400
+        },
+        {
+          "text": "或",
+          "start_ms": 6400,
+          "end_ms": 6560
+        },
+        {
+          "text": "价",
+          "start_ms": 6560,
+          "end_ms": 6800
+        },
+        {
+          "text": "格",
+          "start_ms": 6800,
+          "end_ms": 6880
+        },
+        {
+          "text": "变",
+          "start_ms": 6880,
+          "end_ms": 7040
+        },
+        {
+          "text": "化",
+          "start_ms": 7040,
+          "end_ms": 7360
+        }
+      ]
+    },
+    {
+      "segment_id": "c5_n1",
+      "items": [
+        {
+          "text": "Acer",
+          "start_ms": 240,
+          "end_ms": 480
+        },
+        {
+          "text": "Swift",
+          "start_ms": 480,
+          "end_ms": 960
+        },
+        {
+          "text": "Spin",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "14",
+          "start_ms": 1120,
+          "end_ms": 2320
+        },
+        {
+          "text": "AI",
+          "start_ms": 2320,
+          "end_ms": 2320
+        },
+        {
+          "text": "是",
+          "start_ms": 2320,
+          "end_ms": 2560
+        },
+        {
+          "text": "可",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "翻",
+          "start_ms": 2720,
+          "end_ms": 2960
+        },
+        {
+          "text": "转",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "笔",
+          "start_ms": 3120,
+          "end_ms": 3200
+        },
+        {
+          "text": "记",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "本",
+          "start_ms": 3360,
+          "end_ms": 3520
+        }
+      ]
+    },
+    {
+      "segment_id": "c5_n2",
+      "items": [
+        {
+          "text": "它",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "用",
+          "start_ms": 320,
+          "end_ms": 560
+        },
+        {
+          "text": "Snapdragon",
+          "start_ms": 960,
+          "end_ms": 1360
+        },
+        {
+          "text": "for",
+          "start_ms": 1360,
+          "end_ms": 1600
+        },
+        {
+          "text": "Windows",
+          "start_ms": 1600,
+          "end_ms": 2160
+        },
+        {
+          "text": "方",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "案",
+          "start_ms": 2320,
+          "end_ms": 2560
+        },
+        {
+          "text": "也",
+          "start_ms": 2880,
+          "end_ms": 2960
+        },
+        {
+          "text": "就",
+          "start_ms": 2960,
+          "end_ms": 3040
+        },
+        {
+          "text": "是",
+          "start_ms": 3040,
+          "end_ms": 3280
+        },
+        {
+          "text": "Windows",
+          "start_ms": 3360,
+          "end_ms": 3840
+        },
+        {
+          "text": "上",
+          "start_ms": 3840,
+          "end_ms": 3920
+        },
+        {
+          "text": "的",
+          "start_ms": 4000,
+          "end_ms": 4240
+        },
+        {
+          "text": "ARM",
+          "start_ms": 4240,
+          "end_ms": 4720
+        },
+        {
+          "text": "架",
+          "start_ms": 4720,
+          "end_ms": 4960
+        },
+        {
+          "text": "构",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "处",
+          "start_ms": 5120,
+          "end_ms": 5280
+        },
+        {
+          "text": "理",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "器",
+          "start_ms": 5440,
+          "end_ms": 5760
+        }
+      ]
+    },
+    {
+      "segment_id": "c5_n3",
+      "items": [
+        {
+          "text": "评",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "测",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "称",
+          "start_ms": 560,
+          "end_ms": 880
+        },
+        {
+          "text": "该",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "方",
+          "start_ms": 1200,
+          "end_ms": 1440
+        },
+        {
+          "text": "案",
+          "start_ms": 1440,
+          "end_ms": 1520
+        },
+        {
+          "text": "1",
+          "start_ms": 1520,
+          "end_ms": 1600
+        },
+        {
+          "text": "年",
+          "start_ms": 1600,
+          "end_ms": 1840
+        },
+        {
+          "text": "内",
+          "start_ms": 1840,
+          "end_ms": 2000
+        },
+        {
+          "text": "进",
+          "start_ms": 2000,
+          "end_ms": 2240
+        },
+        {
+          "text": "步",
+          "start_ms": 2240,
+          "end_ms": 2320
+        },
+        {
+          "text": "明",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "显",
+          "start_ms": 2480,
+          "end_ms": 2800
+        },
+        {
+          "text": "多",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "项",
+          "start_ms": 3280,
+          "end_ms": 3440
+        },
+        {
+          "text": "表",
+          "start_ms": 3440,
+          "end_ms": 3680
+        },
+        {
+          "text": "现",
+          "start_ms": 3680,
+          "end_ms": 4000
+        },
+        {
+          "text": "可",
+          "start_ms": 4000,
+          "end_ms": 4160
+        },
+        {
+          "text": "与",
+          "start_ms": 4160,
+          "end_ms": 4320
+        },
+        {
+          "text": "AMD",
+          "start_ms": 4320,
+          "end_ms": 4880
+        },
+        {
+          "text": "Intel",
+          "start_ms": 4960,
+          "end_ms": 5280
+        },
+        {
+          "text": "这",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "两",
+          "start_ms": 5440,
+          "end_ms": 5600
+        },
+        {
+          "text": "家",
+          "start_ms": 5600,
+          "end_ms": 5760
+        },
+        {
+          "text": "传",
+          "start_ms": 5760,
+          "end_ms": 6000
+        },
+        {
+          "text": "统",
+          "start_ms": 6000,
+          "end_ms": 6160
+        },
+        {
+          "text": "处",
+          "start_ms": 6160,
+          "end_ms": 6320
+        },
+        {
+          "text": "理",
+          "start_ms": 6320,
+          "end_ms": 6400
+        },
+        {
+          "text": "器",
+          "start_ms": 6400,
+          "end_ms": 6640
+        },
+        {
+          "text": "厂",
+          "start_ms": 6640,
+          "end_ms": 6800
+        },
+        {
+          "text": "商",
+          "start_ms": 6800,
+          "end_ms": 6960
+        },
+        {
+          "text": "的",
+          "start_ms": 6960,
+          "end_ms": 7040
+        },
+        {
+          "text": "方",
+          "start_ms": 7040,
+          "end_ms": 7280
+        },
+        {
+          "text": "案",
+          "start_ms": 7280,
+          "end_ms": 7360
+        },
+        {
+          "text": "持",
+          "start_ms": 7360,
+          "end_ms": 7520
+        },
+        {
+          "text": "平",
+          "start_ms": 7520,
+          "end_ms": 7840
+        },
+        {
+          "text": "但",
+          "start_ms": 8160,
+          "end_ms": 8240
+        },
+        {
+          "text": "没",
+          "start_ms": 8240,
+          "end_ms": 8400
+        },
+        {
+          "text": "说",
+          "start_ms": 8400,
+          "end_ms": 8640
+        },
+        {
+          "text": "明",
+          "start_ms": 8640,
+          "end_ms": 8800
+        },
+        {
+          "text": "这",
+          "start_ms": 8800,
+          "end_ms": 8880
+        },
+        {
+          "text": "个",
+          "start_ms": 8880,
+          "end_ms": 8960
+        },
+        {
+          "text": "1",
+          "start_ms": 8960,
+          "end_ms": 9120
+        },
+        {
+          "text": "年",
+          "start_ms": 9120,
+          "end_ms": 9360
+        },
+        {
+          "text": "从",
+          "start_ms": 9360,
+          "end_ms": 9600
+        },
+        {
+          "text": "哪",
+          "start_ms": 9600,
+          "end_ms": 9680
+        },
+        {
+          "text": "一",
+          "start_ms": 9680,
+          "end_ms": 9760
+        },
+        {
+          "text": "版",
+          "start_ms": 9760,
+          "end_ms": 9920
+        },
+        {
+          "text": "起",
+          "start_ms": 9920,
+          "end_ms": 10080
+        },
+        {
+          "text": "算",
+          "start_ms": 10080,
+          "end_ms": 10400
+        }
+      ]
+    },
+    {
+      "segment_id": "c5_n4",
+      "items": [
+        {
+          "text": "它",
+          "start_ms": 0,
+          "end_ms": 160
+        },
+        {
+          "text": "适",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "合",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "看",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "重",
+          "start_ms": 720,
+          "end_ms": 800
+        },
+        {
+          "text": "性",
+          "start_ms": 800,
+          "end_ms": 1120
+        },
+        {
+          "text": "能",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "也",
+          "start_ms": 1360,
+          "end_ms": 1440
+        },
+        {
+          "text": "能",
+          "start_ms": 1520,
+          "end_ms": 1600
+        },
+        {
+          "text": "接",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "受",
+          "start_ms": 1760,
+          "end_ms": 1920
+        },
+        {
+          "text": "更",
+          "start_ms": 1920,
+          "end_ms": 2080
+        },
+        {
+          "text": "高",
+          "start_ms": 2080,
+          "end_ms": 2240
+        },
+        {
+          "text": "价",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "格",
+          "start_ms": 2400,
+          "end_ms": 2560
+        },
+        {
+          "text": "的",
+          "start_ms": 2560,
+          "end_ms": 2640
+        },
+        {
+          "text": "人",
+          "start_ms": 2640,
+          "end_ms": 2960
+        }
+      ]
+    },
+    {
+      "segment_id": "c5_n5",
+      "items": [
+        {
+          "text": "评",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "测",
+          "start_ms": 400,
+          "end_ms": 640
+        },
+        {
+          "text": "认",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "为",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "性",
+          "start_ms": 960,
+          "end_ms": 1200
+        },
+        {
+          "text": "能",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "提",
+          "start_ms": 1360,
+          "end_ms": 1520
+        },
+        {
+          "text": "升",
+          "start_ms": 1520,
+          "end_ms": 1840
+        },
+        {
+          "text": "伴",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "随",
+          "start_ms": 2320,
+          "end_ms": 2560
+        },
+        {
+          "text": "明",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "显",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "更",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "高",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "的",
+          "start_ms": 3200,
+          "end_ms": 3280
+        },
+        {
+          "text": "价",
+          "start_ms": 3280,
+          "end_ms": 3520
+        },
+        {
+          "text": "格",
+          "start_ms": 3520,
+          "end_ms": 3840
+        },
+        {
+          "text": "但",
+          "start_ms": 4080,
+          "end_ms": 4240
+        },
+        {
+          "text": "没",
+          "start_ms": 4240,
+          "end_ms": 4400
+        },
+        {
+          "text": "说",
+          "start_ms": 4400,
+          "end_ms": 4560
+        },
+        {
+          "text": "明",
+          "start_ms": 4560,
+          "end_ms": 4800
+        },
+        {
+          "text": "价",
+          "start_ms": 4880,
+          "end_ms": 5120
+        },
+        {
+          "text": "格",
+          "start_ms": 5120,
+          "end_ms": 5280
+        },
+        {
+          "text": "是",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "跟",
+          "start_ms": 5440,
+          "end_ms": 5600
+        },
+        {
+          "text": "哪",
+          "start_ms": 5600,
+          "end_ms": 5760
+        },
+        {
+          "text": "类",
+          "start_ms": 5760,
+          "end_ms": 5920
+        },
+        {
+          "text": "笔",
+          "start_ms": 5920,
+          "end_ms": 6080
+        },
+        {
+          "text": "记",
+          "start_ms": 6080,
+          "end_ms": 6240
+        },
+        {
+          "text": "本",
+          "start_ms": 6240,
+          "end_ms": 6320
+        },
+        {
+          "text": "相",
+          "start_ms": 6320,
+          "end_ms": 6560
+        },
+        {
+          "text": "比",
+          "start_ms": 6560,
+          "end_ms": 6800
+        },
+        {
+          "text": "也",
+          "start_ms": 7120,
+          "end_ms": 7280
+        },
+        {
+          "text": "没",
+          "start_ms": 7280,
+          "end_ms": 7360
+        },
+        {
+          "text": "有",
+          "start_ms": 7360,
+          "end_ms": 7520
+        },
+        {
+          "text": "跑",
+          "start_ms": 7520,
+          "end_ms": 7680
+        },
+        {
+          "text": "分",
+          "start_ms": 7680,
+          "end_ms": 8000
+        },
+        {
+          "text": "或",
+          "start_ms": 8000,
+          "end_ms": 8160
+        },
+        {
+          "text": "具",
+          "start_ms": 8160,
+          "end_ms": 8320
+        },
+        {
+          "text": "体",
+          "start_ms": 8320,
+          "end_ms": 8400
+        },
+        {
+          "text": "售",
+          "start_ms": 8400,
+          "end_ms": 8640
+        },
+        {
+          "text": "价",
+          "start_ms": 8640,
+          "end_ms": 8800
+        }
+      ]
+    },
+    {
+      "segment_id": "c5_n6",
+      "items": [
+        {
+          "text": "因",
+          "start_ms": 80,
+          "end_ms": 160
+        },
+        {
+          "text": "此",
+          "start_ms": 160,
+          "end_ms": 480
+        },
+        {
+          "text": "不",
+          "start_ms": 560,
+          "end_ms": 640
+        },
+        {
+          "text": "适",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "合",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "把",
+          "start_ms": 960,
+          "end_ms": 1040
+        },
+        {
+          "text": "低",
+          "start_ms": 1040,
+          "end_ms": 1280
+        },
+        {
+          "text": "价",
+          "start_ms": 1280,
+          "end_ms": 1520
+        },
+        {
+          "text": "列",
+          "start_ms": 1520,
+          "end_ms": 1680
+        },
+        {
+          "text": "为",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "首",
+          "start_ms": 1840,
+          "end_ms": 2000
+        },
+        {
+          "text": "要",
+          "start_ms": 2000,
+          "end_ms": 2160
+        },
+        {
+          "text": "条",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "件",
+          "start_ms": 2320,
+          "end_ms": 2560
+        }
+      ]
+    },
+    {
+      "segment_id": "c6_n1",
+      "items": [
+        {
+          "text": "Xiaomi",
+          "start_ms": 240,
+          "end_ms": 720
+        },
+        {
+          "text": "18",
+          "start_ms": 720,
+          "end_ms": 1120
+        },
+        {
+          "text": "Fold",
+          "start_ms": 1120,
+          "end_ms": 1520
+        },
+        {
+          "text": "是",
+          "start_ms": 1520,
+          "end_ms": 1680
+        },
+        {
+          "text": "手",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "机",
+          "start_ms": 1840,
+          "end_ms": 2000
+        },
+        {
+          "text": "厂",
+          "start_ms": 2000,
+          "end_ms": 2240
+        },
+        {
+          "text": "商",
+          "start_ms": 2240,
+          "end_ms": 2480
+        },
+        {
+          "text": "Xiaomi",
+          "start_ms": 2720,
+          "end_ms": 3120
+        },
+        {
+          "text": "推",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "出",
+          "start_ms": 3280,
+          "end_ms": 3440
+        },
+        {
+          "text": "的",
+          "start_ms": 3440,
+          "end_ms": 3520
+        },
+        {
+          "text": "宽",
+          "start_ms": 3520,
+          "end_ms": 3760
+        },
+        {
+          "text": "幅",
+          "start_ms": 3760,
+          "end_ms": 3920
+        },
+        {
+          "text": "折",
+          "start_ms": 3920,
+          "end_ms": 4080
+        },
+        {
+          "text": "叠",
+          "start_ms": 4080,
+          "end_ms": 4160
+        },
+        {
+          "text": "手",
+          "start_ms": 4160,
+          "end_ms": 4400
+        },
+        {
+          "text": "机",
+          "start_ms": 4400,
+          "end_ms": 4720
+        },
+        {
+          "text": "配",
+          "start_ms": 4880,
+          "end_ms": 5120
+        },
+        {
+          "text": "2",
+          "start_ms": 5120,
+          "end_ms": 5280
+        },
+        {
+          "text": "块",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "OLED",
+          "start_ms": 5520,
+          "end_ms": 6080
+        },
+        {
+          "text": "显",
+          "start_ms": 6240,
+          "end_ms": 6400
+        },
+        {
+          "text": "示",
+          "start_ms": 6400,
+          "end_ms": 6480
+        },
+        {
+          "text": "屏",
+          "start_ms": 6480,
+          "end_ms": 6800
+        }
+      ]
+    },
+    {
+      "segment_id": "c6_n2",
+      "items": [
+        {
+          "text": "Notebookcheck",
+          "start_ms": 160,
+          "end_ms": 960
+        },
+        {
+          "text": "认",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "为",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "异",
+          "start_ms": 1280,
+          "end_ms": 1520
+        },
+        {
+          "text": "常",
+          "start_ms": 1520,
+          "end_ms": 1760
+        },
+        {
+          "text": "宽",
+          "start_ms": 1760,
+          "end_ms": 1920
+        },
+        {
+          "text": "的",
+          "start_ms": 1920,
+          "end_ms": 2000
+        },
+        {
+          "text": "形",
+          "start_ms": 2000,
+          "end_ms": 2240
+        },
+        {
+          "text": "态",
+          "start_ms": 2240,
+          "end_ms": 2480
+        },
+        {
+          "text": "极",
+          "start_ms": 2800,
+          "end_ms": 3040
+        },
+        {
+          "text": "亮",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "的",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "OLED",
+          "start_ms": 3360,
+          "end_ms": 4080
+        },
+        {
+          "text": "显",
+          "start_ms": 4080,
+          "end_ms": 4240
+        },
+        {
+          "text": "示",
+          "start_ms": 4240,
+          "end_ms": 4320
+        },
+        {
+          "text": "屏",
+          "start_ms": 4320,
+          "end_ms": 4640
+        },
+        {
+          "text": "和",
+          "start_ms": 4640,
+          "end_ms": 4880
+        },
+        {
+          "text": "强",
+          "start_ms": 4880,
+          "end_ms": 5120
+        },
+        {
+          "text": "大",
+          "start_ms": 5120,
+          "end_ms": 5280
+        },
+        {
+          "text": "硬",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "件",
+          "start_ms": 5440,
+          "end_ms": 5680
+        },
+        {
+          "text": "为",
+          "start_ms": 6000,
+          "end_ms": 6160
+        },
+        {
+          "text": "折",
+          "start_ms": 6160,
+          "end_ms": 6320
+        },
+        {
+          "text": "叠",
+          "start_ms": 6320,
+          "end_ms": 6480
+        },
+        {
+          "text": "产",
+          "start_ms": 6480,
+          "end_ms": 6720
+        },
+        {
+          "text": "品",
+          "start_ms": 6720,
+          "end_ms": 6960
+        },
+        {
+          "text": "带",
+          "start_ms": 6960,
+          "end_ms": 7120
+        },
+        {
+          "text": "来",
+          "start_ms": 7120,
+          "end_ms": 7200
+        },
+        {
+          "text": "新",
+          "start_ms": 7200,
+          "end_ms": 7520
+        },
+        {
+          "text": "意",
+          "start_ms": 7520,
+          "end_ms": 7680
+        }
+      ]
+    },
+    {
+      "segment_id": "c6_n3",
+      "items": [
+        {
+          "text": "它",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "更",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "值",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "得",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "关",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "注",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "的",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "是",
+          "start_ms": 1280,
+          "end_ms": 1520
+        },
+        {
+          "text": "宽",
+          "start_ms": 1520,
+          "end_ms": 1760
+        },
+        {
+          "text": "幅",
+          "start_ms": 1760,
+          "end_ms": 1840
+        },
+        {
+          "text": "形",
+          "start_ms": 1840,
+          "end_ms": 2080
+        },
+        {
+          "text": "态",
+          "start_ms": 2080,
+          "end_ms": 2320
+        },
+        {
+          "text": "和",
+          "start_ms": 2320,
+          "end_ms": 2560
+        },
+        {
+          "text": "屏",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "幕",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "表",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "现",
+          "start_ms": 3040,
+          "end_ms": 3280
+        }
+      ]
+    },
+    {
+      "segment_id": "c6_n4",
+      "items": [
+        {
+          "text": "评",
+          "start_ms": 80,
+          "end_ms": 240
+        },
+        {
+          "text": "测",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "标",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "题",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "写",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "着",
+          "start_ms": 880,
+          "end_ms": 1200
+        },
+        {
+          "text": "并",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "非",
+          "start_ms": 1360,
+          "end_ms": 1600
+        },
+        {
+          "text": "毫",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "无",
+          "start_ms": 1760,
+          "end_ms": 1920
+        },
+        {
+          "text": "缺",
+          "start_ms": 1920,
+          "end_ms": 2080
+        },
+        {
+          "text": "点",
+          "start_ms": 2080,
+          "end_ms": 2320
+        },
+        {
+          "text": "却",
+          "start_ms": 2400,
+          "end_ms": 2560
+        },
+        {
+          "text": "没",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "列",
+          "start_ms": 2720,
+          "end_ms": 2960
+        },
+        {
+          "text": "出",
+          "start_ms": 2960,
+          "end_ms": 3200
+        },
+        {
+          "text": "具",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "体",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "缺",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "点",
+          "start_ms": 3680,
+          "end_ms": 3840
+        }
+      ]
+    },
+    {
+      "segment_id": "c6_n5",
+      "items": [
+        {
+          "text": "处",
+          "start_ms": 0,
+          "end_ms": 160
+        },
+        {
+          "text": "理",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "器",
+          "start_ms": 320,
+          "end_ms": 640
+        },
+        {
+          "text": "相",
+          "start_ms": 640,
+          "end_ms": 880
+        },
+        {
+          "text": "机",
+          "start_ms": 880,
+          "end_ms": 1040
+        },
+        {
+          "text": "和",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "续",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "航",
+          "start_ms": 1360,
+          "end_ms": 1680
+        },
+        {
+          "text": "也",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "没",
+          "start_ms": 1840,
+          "end_ms": 1920
+        },
+        {
+          "text": "有",
+          "start_ms": 1920,
+          "end_ms": 2080
+        },
+        {
+          "text": "日",
+          "start_ms": 2080,
+          "end_ms": 2160
+        },
+        {
+          "text": "常",
+          "start_ms": 2160,
+          "end_ms": 2400
+        },
+        {
+          "text": "使",
+          "start_ms": 2400,
+          "end_ms": 2560
+        },
+        {
+          "text": "用",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "结",
+          "start_ms": 2720,
+          "end_ms": 2960
+        },
+        {
+          "text": "论",
+          "start_ms": 2960,
+          "end_ms": 3040
+        },
+        {
+          "text": "或",
+          "start_ms": 3120,
+          "end_ms": 3200
+        },
+        {
+          "text": "数",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "据",
+          "start_ms": 3360,
+          "end_ms": 3680
+        },
+        {
+          "text": "不",
+          "start_ms": 3680,
+          "end_ms": 3760
+        },
+        {
+          "text": "能",
+          "start_ms": 3840,
+          "end_ms": 3920
+        },
+        {
+          "text": "据",
+          "start_ms": 3920,
+          "end_ms": 4080
+        },
+        {
+          "text": "此",
+          "start_ms": 4080,
+          "end_ms": 4240
+        },
+        {
+          "text": "比",
+          "start_ms": 4240,
+          "end_ms": 4400
+        },
+        {
+          "text": "较",
+          "start_ms": 4400,
+          "end_ms": 4560
+        }
+      ]
+    },
+    {
+      "segment_id": "c7_n1",
+      "items": [
+        {
+          "text": "最",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "值",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "得",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "继",
+          "start_ms": 720,
+          "end_ms": 800
+        },
+        {
+          "text": "续",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "关",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "注",
+          "start_ms": 1120,
+          "end_ms": 1360
+        },
+        {
+          "text": "Motorola",
+          "start_ms": 1360,
+          "end_ms": 1840
+        },
+        {
+          "text": "Edge",
+          "start_ms": 1840,
+          "end_ms": 2240
+        },
+        {
+          "text": "70",
+          "start_ms": 2240,
+          "end_ms": 2560
+        },
+        {
+          "text": "Max",
+          "start_ms": 2560,
+          "end_ms": 2960
+        },
+        {
+          "text": "因",
+          "start_ms": 3280,
+          "end_ms": 3360
+        },
+        {
+          "text": "为",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "它",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "直",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "指",
+          "start_ms": 3840,
+          "end_ms": 4000
+        },
+        {
+          "text": "续",
+          "start_ms": 4000,
+          "end_ms": 4160
+        },
+        {
+          "text": "航",
+          "start_ms": 4160,
+          "end_ms": 4560
+        },
+        {
+          "text": "体",
+          "start_ms": 4640,
+          "end_ms": 4800
+        },
+        {
+          "text": "积",
+          "start_ms": 4800,
+          "end_ms": 5040
+        },
+        {
+          "text": "和",
+          "start_ms": 5040,
+          "end_ms": 5280
+        },
+        {
+          "text": "价",
+          "start_ms": 5280,
+          "end_ms": 5440
+        },
+        {
+          "text": "格",
+          "start_ms": 5440,
+          "end_ms": 5680
+        },
+        {
+          "text": "能",
+          "start_ms": 5760,
+          "end_ms": 5840
+        },
+        {
+          "text": "否",
+          "start_ms": 5840,
+          "end_ms": 6000
+        },
+        {
+          "text": "兼",
+          "start_ms": 6000,
+          "end_ms": 6240
+        },
+        {
+          "text": "顾",
+          "start_ms": 6240,
+          "end_ms": 6480
+        }
+      ]
+    },
+    {
+      "segment_id": "c7_n2",
+      "items": [
+        {
+          "text": "接",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "下",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "来",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "只",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "看",
+          "start_ms": 880,
+          "end_ms": 1120
+        },
+        {
+          "text": "一",
+          "start_ms": 1120,
+          "end_ms": 1200
+        },
+        {
+          "text": "个",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "信",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "号",
+          "start_ms": 1440,
+          "end_ms": 1760
+        },
+        {
+          "text": "是",
+          "start_ms": 2000,
+          "end_ms": 2240
+        },
+        {
+          "text": "否",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "出",
+          "start_ms": 2400,
+          "end_ms": 2560
+        },
+        {
+          "text": "现",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "量",
+          "start_ms": 2720,
+          "end_ms": 2960
+        },
+        {
+          "text": "化",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "续",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "航",
+          "start_ms": 3280,
+          "end_ms": 3440
+        },
+        {
+          "text": "数",
+          "start_ms": 3440,
+          "end_ms": 3680
+        },
+        {
+          "text": "据",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "和",
+          "start_ms": 3840,
+          "end_ms": 4080
+        },
+        {
+          "text": "当",
+          "start_ms": 4080,
+          "end_ms": 4240
+        },
+        {
+          "text": "地",
+          "start_ms": 4240,
+          "end_ms": 4400
+        },
+        {
+          "text": "售",
+          "start_ms": 4400,
+          "end_ms": 4560
+        },
+        {
+          "text": "价",
+          "start_ms": 4560,
+          "end_ms": 4800
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "g2/input_preparation.py": "181aa8f0eff7ba64a4c684ace7d53fc9f92e04afb5a5d6fdcbe459c552a6fe9f",
+  "g2/schemas/input-brief.schema.json": "a7700c65442c9564d8698d1366e81e40c67fa668a71318c948f6075b8e2a13bb",
+  "g2/run_g2.py": "05b8a0c2933233e6e08080d0db566afe0f9faa02aa5592b760f1c010f7ecac5a",
+  "g2/content_video.py": "bfa28e6c69adf5f8ea432eaeb89368b89bef80d1a9e82e80bc4a659e0ce8ec0c",
+  "g3/app.py": "e578eecdaf30cfe9e496f9f60ff4bafe9b1462acf45735f44dbd201457ec0865",
+  "g3/store.py": "6bf824ce3dba3d2bc1825737c1fe11b4c3d3445b619687954a12ee45e1feb695",
+  "g3/worker.py": "35c2e2d850cf27343a57f005bc15f90cfcb5584ef5c7c485b89aade7ed7e4b84",
+  "g3/web/src/main.tsx": "29d19d0bbd4dddd9ead6e6a987b45e01826d5ccf249b7a5739629a4f2011e75e",
+  "g3/web/static/app.js": "09fc8fe78d4245247547f702fe7acb18a0d354a66e6377162b8e6dee54d22aa5"
+}

@@ -1,0 +1,30 @@
+{
+  "experiment_id": "h1-golden3-image-motion-v1",
+  "created_on": "2026-10-13",
+  "source_set": "M0 Golden-3",
+  "fixed_inputs": [
+    "Video IR v0.2",
+    "source narration WAV",
+    "subtitle text and timing",
+    "scene boundaries",
+    "1920x1080 at 30 fps"
+  ],
+  "variants": {
+    "A": "NOT_RUN_SANDBOX_RESOURCE_LIMITS_UNVERIFIED",
+    "B": "M0 controlled-component renderer",
+    "C": "AI-generated scene plate plus fixed components and bounded camera motion"
+  },
+  "pairs": [
+    {"pair_id": "pair-01", "case_id": "case-a", "scene_id": "opening", "asset_id": "a01_noise_opening"},
+    {"pair_id": "pair-02", "case_id": "case-a", "scene_id": "mechanism", "asset_id": "a02_noise_disruption"},
+    {"pair_id": "pair-03", "case_id": "case-b", "scene_id": "opening", "asset_id": "a03_batch_opening"},
+    {"pair_id": "pair-04", "case_id": "case-b", "scene_id": "comparison", "asset_id": "a04_batch_comparison"},
+    {"pair_id": "pair-05", "case_id": "case-c", "scene_id": "opening", "asset_id": "a06_data_categories"},
+    {"pair_id": "pair-06", "case_id": "case-c", "scene_id": "demo_chart", "asset_id": "a05_data_quiet"}
+  ],
+  "case_sources": {
+    "case-a": "g4/runs/case-a-retry",
+    "case-b": "g4/runs/case-b",
+    "case-c": "g4/runs/case-c-retry"
+  }
+}

@@ -1,0 +1,5 @@
+$ python3 -m pytest g4/tests g3/tests g2/tests g1/tests/test_video_ir_v0_2_runtime.py -q
+..................................................................       [100%]
+210 passed in 7.21s
+$ python3 -m pytest g2/tests/test_authored_narration.py g3/tests/test_g3_narration_mode.py -q
+43 passed in 1.15s

@@ -1,0 +1,13 @@
+{
+  "fast_cards": {
+    "caption_cues_checked": 53,
+    "caption_frames_checked": 85,
+    "minimum_caption_dark_pixels": 1882,
+    "minimum_glyph_f1": 0.9863121874177415,
+    "exact_srt_coverage": true,
+    "alignment": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+    "executor": "ffmpeg_cards",
+    "manual_page_copy": false
+  },
+  "probe_directory": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/quality-probes/card-quality-3g_5cpr4"
+}

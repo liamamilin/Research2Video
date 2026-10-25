@@ -1,0 +1,13 @@
+{
+  "before_pid": 88403,
+  "restart": {
+    "status": "ready",
+    "action": "started",
+    "pid": 90338,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "jobs_before": 237,
+  "jobs_after": 237,
+  "speed_125_supported": true
+}

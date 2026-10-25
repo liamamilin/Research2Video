@@ -1,0 +1,50 @@
+[
+  {
+    "scene_id": "c1_s1",
+    "component": "title_card",
+    "frame": 79,
+    "seconds": 2.6333333333333333,
+    "file": "c1_s1.png",
+    "headline": "把任务交代清楚"
+  },
+  {
+    "scene_id": "c1_s2",
+    "component": "concept_reveal",
+    "frame": 380,
+    "seconds": 12.666666666666666,
+    "file": "c1_s2.png",
+    "headline": "模糊交代的后果"
+  },
+  {
+    "scene_id": "c2_s2",
+    "component": "comparison",
+    "frame": 905,
+    "seconds": 30.166666666666668,
+    "file": "c2_s2.png",
+    "headline": "把“帮我做个总结”改得更具体"
+  },
+  {
+    "scene_id": "c6_s2",
+    "component": "title_card",
+    "frame": 4214,
+    "seconds": 140.46666666666667,
+    "file": "c6_s2.png",
+    "headline": "把目标、背景和标准说清楚"
+  },
+  {
+    "scene_id": "c5_s2",
+    "component": "comparison",
+    "frame": 3101,
+    "seconds": 103.36666666666666,
+    "file": "c5_s2.png",
+    "headline": "模糊交接与清楚交接"
+  },
+  {
+    "scene_id": "c4_s4",
+    "component": "comparison",
+    "frame": 2706,
+    "seconds": 90.2,
+    "file": "c4_s4.png",
+    "headline": "模糊说法与清楚交接"
+  }
+]

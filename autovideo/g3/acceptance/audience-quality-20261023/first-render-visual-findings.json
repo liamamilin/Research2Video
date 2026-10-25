@@ -1,0 +1,10 @@
+{
+  "technical_render": "PASS",
+  "visual_review": "NEEDS_REFINEMENT",
+  "render_id": "e12bedd138164aaf8ca22546ee9563d0",
+  "issues": [
+    "来源标签将肯定这一评价动词带入缺点的标签，改为中性来源名称",
+    "安全更新指标标题在同一卡片内重复，保留一处明确指标即可"
+  ],
+  "resolution": "保留本次输出；同一定稿正常重跑，沿用验证后的配音缓存"
+}

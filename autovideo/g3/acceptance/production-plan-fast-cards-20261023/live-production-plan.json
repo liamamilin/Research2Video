@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "settings": {
+    "content_notices": [
+      {
+        "chapter_index": 2,
+        "message": "本章节有内容待核实"
+      }
+    ],
+    "creative_intent": {
+      "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+      "purpose": "知识讲解",
+      "tone": "",
+      "focus": ""
+    },
+    "duration_mode": "content",
+    "music": null,
+    "packaging": {
+      "preset": "common",
+      "label": "专题速览",
+      "accent": "#1f7a4d",
+      "outro": {
+        "lines": [
+          "面向大众观众的专题速览"
+        ],
+        "seconds": 3
+      },
+      "recipe": "topic_digest"
+    },
+    "production_context": {
+      "content_recipe": {
+        "id": "research:topic_digest",
+        "settings": {
+          "video_form": "information_motion",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+            "focus": ""
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "专题速览",
+            "accent": "#1f7a4d",
+            "outro": {
+              "lines": [
+                "面向大众观众的专题速览"
+              ],
+              "seconds": 3
+            },
+            "recipe": "topic_digest"
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      }
+    },
+    "production_mode": "fast",
+    "production_recipe": null,
+    "target_duration_sec": 60,
+    "video_form": "information_cards",
+    "video_speed": 1.0,
+    "visual_style": "editorial_light",
+    "voice_id": "voxcpm_anchor"
+  },
+  "origins": {
+    "packaging.label": "content_recipe",
+    "packaging.accent": "content_recipe",
+    "packaging.enabled": "common",
+    "packaging.intro.component": "common",
+    "packaging.intro.enabled": "common",
+    "packaging.intro.seconds": "common",
+    "packaging.outro.component": "common",
+    "packaging.outro.enabled": "common",
+    "packaging.outro.seconds": "content_recipe",
+    "packaging.outro.lines": "content_recipe",
+    "packaging.badge.component": "common",
+    "packaging.badge.enabled": "common",
+    "packaging.source_card.component": "common",
+    "packaging.source_card.enabled": "common",
+    "packaging.source_card.seconds": "common",
+    "packaging.sound.component": "common",
+    "packaging.sound.enabled": "common",
+    "video_form": "request",
+    "production_mode": "request",
+    "visual_style": "request",
+    "duration_mode": "request",
+    "target_duration_sec": "common",
+    "voice_id": "content_recipe",
+    "video_speed": "common",
+    "creative_intent": "common",
+    "creative_intent.purpose": "content_recipe",
+    "creative_intent.audience": "content_recipe",
+    "creative_intent.focus": "content_recipe",
+    "packaging.preset": "content_recipe",
+    "packaging.recipe": "content_recipe",
+    "visual_style.accent": "packaging.accent"
+  },
+  "style": {
+    "id": "editorial_light",
+    "version": 1,
+    "background": "#f3f5f1",
+    "surface": "#ffffff",
+    "text": "#182720",
+    "muted": "#637168",
+    "accent": "#1f7a4d",
+    "warning": "#9b650c",
+    "subtitle": "#182720"
+  },
+  "executor": {
+    "id": "ffmpeg_cards",
+    "version": 1
+  },
+  "output": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30
+  },
+  "packaging_sha256": "c5b672a792ef276ef42580927ff5ef036c8663625f61f60356556cc693e9509b",
+  "packaging": {
+    "library": "autovideo-packaging",
+    "version": 1,
+    "catalog_sha256": "e604418d08c4c7db94510035d16a124ab3b94913cb481e1029ffb0d3d9f04414",
+    "selection": {
+      "preset": "common",
+      "label": "专题速览",
+      "accent": "#1f7a4d",
+      "outro": {
+        "lines": [
+          "面向大众观众的专题速览"
+        ],
+        "seconds": 3
+      },
+      "recipe": "topic_digest"
+    },
+    "components": {
+      "label": "专题速览",
+      "accent": "#1f7a4d",
+      "enabled": true,
+      "intro": {
+        "component": "stinger",
+        "enabled": true,
+        "seconds": 1.5
+      },
+      "outro": {
+        "component": "end_card",
+        "enabled": true,
+        "seconds": 3,
+        "lines": [
+          "面向大众观众的专题速览"
+        ]
+      },
+      "badge": {
+        "component": "corner_badge",
+        "enabled": true
+      },
+      "source_card": {
+        "component": "source_card",
+        "enabled": true,
+        "seconds": 4.5
+      },
+      "sound": {
+        "component": "synth_sting",
+        "enabled": true
+      }
+    },
+    "package": {
+      "accent": "#1f7a4d",
+      "badge": "专题速览",
+      "intro": {
+        "template": "stinger",
+        "title": "专题速览",
+        "seconds": 1.5,
+        "sound": "synth_sting"
+      },
+      "outro": {
+        "template": "end_card",
+        "title": "专题速览",
+        "seconds": 3,
+        "lines": [
+          "面向大众观众的专题速览"
+        ],
+        "sound": "synth_sting"
+      }
+    },
+    "badge": {
+      "text": "专题速览",
+      "color": "#1f7a4d"
+    },
+    "source_card": {
+      "template": "source_card",
+      "seconds": 4.5,
+      "title": "来源",
+      "sources": [
+        {
+          "title": "Motorola Edge 70 Max smartphone review",
+          "domain": "notebookcheck.net",
+          "date": "2026-10-21"
+        },
+        {
+          "title": "Bose acquires Skullcandy",
+          "domain": "gsmarena.com",
+          "date": "2026-10-22"
+        },
+        {
+          "title": "Acer Swift Spin 14 AI SFSP14 convertibl…",
+          "domain": "notebookcheck.net",
+          "date": "2026-10-21"
+        }
+      ]
+    },
+    "source_card_state": "enabled",
+    "component_versions": {
+      "intro": {
+        "id": "stinger",
+        "version": 1
+      },
+      "outro": {
+        "id": "end_card",
+        "version": 1
+      },
+      "badge": {
+        "id": "corner_badge",
+        "version": 1
+      },
+      "source_card": {
+        "id": "source_card",
+        "version": 1
+      },
+      "sound": {
+        "id": "synth_sting",
+        "version": 1
+      }
+    },
+    "sha256": "c5b672a792ef276ef42580927ff5ef036c8663625f61f60356556cc693e9509b"
+  },
+  "recipe_sha256": null,
+  "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+  "music": {
+    "selection": null,
+    "background_music_generated": false
+  },
+  "sha256": "732f4d1258a9cd707c865f126a112ea229a1e6cdeef9a600542ae4a1e7feb4b1"
+}

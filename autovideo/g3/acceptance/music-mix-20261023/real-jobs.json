@@ -1,0 +1,235 @@
+{
+  "count_before": 160,
+  "assets": {
+    "items": [
+      {
+        "id": "ambient_pad",
+        "form_id": "MF08",
+        "name": "轻柔和声铺底",
+        "topics": [
+          "原理科普",
+          "操作教程"
+        ],
+        "source": "原创程序合成单层和声铺底，非真实环境录音、非模型生成；本例不声明可无缝循环。",
+        "source_sha256": "95802c0d6ab3f57601a42916bf66dd911085dc71e1a96fedc642954dcc4dd42e",
+        "provenance": "用户提供参考目录中的原创程序合成示例，非本轮模型生成",
+        "preview_url": "/api/music-assets/ambient_pad/preview",
+        "kind": "builtin",
+        "available": true
+      },
+      {
+        "id": "layered_space",
+        "form_id": "MF09",
+        "name": "渐进层叠音景",
+        "topics": [
+          "AI快讯",
+          "产品更新"
+        ],
+        "source": "原创程序合成三层渐变音景，非真实乐器录音、非模型生成。",
+        "source_sha256": "27ca6b6733f72f8e745aa226b09b64b57df26145739b2338d64fb5af4bddd02f",
+        "provenance": "用户提供参考目录中的原创程序合成示例，非本轮模型生成",
+        "preview_url": "/api/music-assets/layered_space/preview",
+        "kind": "builtin",
+        "available": true
+      },
+      {
+        "id": "pulse_loop",
+        "form_id": "MF12",
+        "name": "轻节奏循环",
+        "topics": [
+          "快讯",
+          "节奏短片"
+        ],
+        "source": "原创程序合成鼓循环；无旋律、无演唱，非真实鼓手录音。",
+        "source_sha256": "cceba9b40d2b86af433a7db7820b01d0384c395c331f004e94cf06b535825606",
+        "provenance": "用户提供参考目录中的原创程序合成示例，非本轮模型生成",
+        "preview_url": "/api/music-assets/pulse_loop/preview",
+        "kind": "builtin",
+        "available": true
+      }
+    ],
+    "music_generation": false
+  },
+  "jobs": [
+    {
+      "parent": "b47da7c1-ca10-46b5-9148-99660278ff4b",
+      "request": {
+        "background_music": {
+          "enabled": true,
+          "asset_id": "ambient_pad",
+          "level_db": -18,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        }
+      },
+      "response": {
+        "job_id": "5e10c6f3-93a4-4743-9b91-4558f381530c",
+        "parent_job_id": "b47da7c1-ca10-46b5-9148-99660278ff4b",
+        "status": "QUEUED"
+      }
+    },
+    {
+      "parent": "8c8c600d-65c6-4310-83dc-80ca0f7f33b8",
+      "request": {
+        "background_music": {
+          "enabled": true,
+          "asset_id": "layered_space",
+          "level_db": -18,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        }
+      },
+      "response": {
+        "job_id": "008bbb17-51c6-42f9-8a13-bc678fba88f0",
+        "parent_job_id": "8c8c600d-65c6-4310-83dc-80ca0f7f33b8",
+        "status": "QUEUED"
+      }
+    },
+    {
+      "parent": "ca6b7c7c-5d97-484e-b822-4fdaf66e69a9",
+      "request": {
+        "background_music": {
+          "enabled": true,
+          "asset_id": "pulse_loop",
+          "level_db": -18,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        }
+      },
+      "response": {
+        "job_id": "d4d94a54-4852-4f7c-93a1-2c219633d660",
+        "parent_job_id": "ca6b7c7c-5d97-484e-b822-4fdaf66e69a9",
+        "status": "QUEUED"
+      }
+    },
+    {
+      "parent": "5e10c6f3-93a4-4743-9b91-4558f381530c",
+      "request": {
+        "background_music": {
+          "enabled": false
+        }
+      },
+      "response": {
+        "job_id": "985ebfcf-94e8-4655-bf47-36bc90bae511",
+        "parent_job_id": "5e10c6f3-93a4-4743-9b91-4558f381530c",
+        "status": "QUEUED"
+      }
+    },
+    {
+      "parent": "5e10c6f3-93a4-4743-9b91-4558f381530c",
+      "request": {
+        "background_music": {
+          "enabled": true,
+          "asset_id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+          "level_db": -24,
+          "loop": false,
+          "ducking": false,
+          "fade_seconds": 0.5
+        }
+      },
+      "response": {
+        "job_id": "930d7b32-904b-417e-a750-fa4679c00041",
+        "parent_job_id": "5e10c6f3-93a4-4743-9b91-4558f381530c",
+        "status": "QUEUED"
+      }
+    },
+    {
+      "request": {
+        "title": "第三阶段验收 · 新建配方与导入音乐",
+        "input_mode": "narration",
+        "chapters": [
+          {
+            "title": "配乐制作",
+            "paragraphs": [
+              "背景音乐用来衬托讲解。旁白出现时，配乐会自动压低。更换音乐会生成一个新版本，原来的画面、旁白和视频仍然保留。"
+            ]
+          }
+        ],
+        "production_recipe": "ai_news",
+        "duration_mode": "content",
+        "background_music": {
+          "enabled": true,
+          "asset_id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+          "level_db": -18,
+          "fade_seconds": 0.8
+        },
+        "packaging": {
+          "enabled": false
+        },
+        "video_speed": 1.5,
+        "idempotency_key": "stage3-music-fresh-standard",
+        "video_form": "kinetic_typography"
+      },
+      "response": {
+        "job_id": "5f9fb410-9347-43e3-b286-c81bb5fe47eb",
+        "status": "QUEUED",
+        "created_at": "2026-10-23T08:59:55.748+00:00",
+        "status_url": "/api/jobs/5f9fb410-9347-43e3-b286-c81bb5fe47eb"
+      }
+    },
+    {
+      "request": {
+        "title": "第三阶段验收 · 快速卡片配乐",
+        "input_mode": "narration",
+        "chapters": [
+          {
+            "title": "配乐制作",
+            "paragraphs": [
+              "背景音乐用来衬托讲解。旁白出现时，配乐会自动压低。更换音乐会生成一个新版本，原来的画面、旁白和视频仍然保留。"
+            ]
+          }
+        ],
+        "production_recipe": "ai_news",
+        "duration_mode": "content",
+        "background_music": {
+          "enabled": true,
+          "asset_id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+          "level_db": -18,
+          "fade_seconds": 0.8
+        },
+        "packaging": {
+          "enabled": false
+        },
+        "video_speed": 1.5,
+        "idempotency_key": "stage3-music-fresh-fast",
+        "production_mode": "fast",
+        "video_form": "information_cards",
+        "visual_style": "editorial_light"
+      },
+      "response": {
+        "job_id": "5c28e618-e897-4c11-a64b-a00c6875f95e",
+        "status": "QUEUED",
+        "created_at": "2026-10-23T08:59:55.759+00:00",
+        "status_url": "/api/jobs/5c28e618-e897-4c11-a64b-a00c6875f95e"
+      }
+    },
+    {
+      "parent": "5e10c6f3-93a4-4743-9b91-4558f381530c",
+      "endpoint": "media-revisions",
+      "request": {
+        "voice_id": "zm_yunxi",
+        "video_speed": 1.5
+      },
+      "response": {
+        "job_id": "7209fdfe-2780-41b1-9161-bad9c73f94d8",
+        "status": "QUEUED"
+      }
+    }
+  ],
+  "imported_asset": {
+    "id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+    "name": "导入验收_原创和声",
+    "filename": "导入验收_原创和声.wav",
+    "kind": "uploaded",
+    "duration_seconds": 14.0,
+    "sample_rate": 48000,
+    "channels": 2,
+    "sha256": "60620efbd4de8cb4eb1e489be18e8d769705ef8d41797db3a0058e7c0df2450e",
+    "source_sha256": "95802c0d6ab3f57601a42916bf66dd911085dc71e1a96fedc642954dcc4dd42e",
+    "source": "用户导入的本机音乐素材",
+    "preview_url": "/api/music-assets/ca256ab4-1ac9-46c8-b0be-c814f81a55f6/preview"
+  }
+}

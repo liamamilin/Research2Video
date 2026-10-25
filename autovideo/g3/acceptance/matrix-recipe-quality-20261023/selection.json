@@ -1,0 +1,74 @@
+[
+  {
+    "script_id": "07c8442c5baa4807bf1d32b21e8a543f",
+    "title": "DeepSeek 开源推理引擎 DeepInfer：给了引擎，没给服务",
+    "matrix": "AI 视频栏目",
+    "recipe": "flash",
+    "version": 1,
+    "source_report": "output/video/2026-10-23_10-29-50_flash_07c8442c.md",
+    "pending_review": 1
+  },
+  {
+    "script_id": "c076368cd731433b94f0dacde7ce36a2",
+    "title": "WildAWM造训练场，泛化仍待验",
+    "matrix": "AI 视频栏目",
+    "recipe": "deep_dive",
+    "version": 1,
+    "source_report": "output/deep/2026-10-22_ai_deep_research.md",
+    "pending_review": 0
+  },
+  {
+    "script_id": "4c4e99e98a3449fb9c5f4978b712c534",
+    "title": "Huashu Motion 做宣传片，另有四项",
+    "matrix": "AI 视频栏目",
+    "recipe": "report_digest",
+    "version": 1,
+    "source_report": "output/radar/2026-10-22_ai_opensource_radar.md",
+    "pending_review": 0
+  },
+  {
+    "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+    "title": "续航手机最抢眼，五件新品变化速览",
+    "matrix": "消费科技与购买决策",
+    "recipe": "topic_digest",
+    "version": 5,
+    "source_report": "state/video_editorial_sources/e118dc7db5f34c3ba90af0285b4688f5/verified-v5-with-source-index.txt",
+    "pending_review": 0
+  },
+  {
+    "script_id": "a8ba608f47204a0182ad0f52bf7de28d",
+    "title": "芯片供应链与导航研究，隐性投入风险最值得看",
+    "matrix": "产业与制造业",
+    "recipe": "topic_digest",
+    "version": 1,
+    "source_report": "output/industry/2026-10-22_industry_daily.md",
+    "pending_review": 0
+  },
+  {
+    "script_id": "4c63a878b25b4c96b7f8fa67f0824da0",
+    "title": "2026年10月22日商业动态：谷歌虚拟电厂抢眼",
+    "matrix": "商业与公司研究",
+    "recipe": "topic_digest",
+    "version": 1,
+    "source_report": "output/company/2026-10-22_company_daily.md",
+    "pending_review": 0
+  },
+  {
+    "script_id": "f30f9b94c3a345da82069fac22b24b4f",
+    "title": "北海海底撞击如何掀起巨型海啸",
+    "matrix": "科学与知识百科",
+    "recipe": "topic_digest",
+    "version": 1,
+    "source_report": "output/science/2026-10-22_science_daily.md",
+    "pending_review": 3
+  },
+  {
+    "script_id": "41fa2d69fc044c188c8e86bfd0aab336",
+    "title": "四件历史与考古新线索，最值得辨真伪的是日食传说",
+    "matrix": "历史与文明",
+    "recipe": "topic_digest",
+    "version": 1,
+    "source_report": "output/history/2026-10-22_history_daily.md",
+    "pending_review": 4
+  }
+]

@@ -1,0 +1,2295 @@
+{
+  "script_id": "5a35f4c46d924cdaa0f14cd387134e59",
+  "version": 2,
+  "title": "吉瓦级电厂，却没有一台新机组",
+  "sections": [
+    {
+      "title": "没有新机组的吉瓦级电厂",
+      "paragraphs": [
+        {
+          "text": "听到“吉瓦级电厂”，你大概会以为谷歌又要建一座发电站。恰恰相反，这笔交易里没有一台新的发电机组——它要调的不是发电，是用电。谷歌和 Voltus 签的是一份吉瓦级的需求响应协议，这个规模按可以聚合的用电需求算，不是按新装机的发电容量算。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "稿件明确说了「没有一台新的发电机组」和「按可以聚合的用电需求算」，这两点与来源对谷歌与 Voltus 吉瓦级需求响应协议的描述以及「需求侧灵活性不同于新建发电厂」这一限定一致；讲稿把这笔交易讲成「吉瓦级」也符合来源，没有把它说成「全球最大」或说「容量未公布」。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "用电怎么像电厂一样干活",
+      "paragraphs": [
+        {
+          "text": "所谓虚拟电厂，做法是把大量分散的用电户组织起来，当成一股可以收放的负荷：电网吃紧的时候，大家一起把一部分用电降下来；紧张过去了，再把用电补回去。对电网来说，这有点像多了一台能快起快停的机组，但它没有多烧一克燃料，也没有多发出一度电。它提供的是调节能力，属于需求侧的灵活性。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "这是对需求响应、虚拟电厂机制的定性解释，符合来源中「需求侧电网灵活性」的框架；稿件中没有把它表述成谷歌实测或行业共识数据，且「有点像多了一台能快起快停的机组」只是类比，没有说成事实。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        },
+        {
+          "text": "这里的关键区别是：新建电厂增加的是供给，虚拟电厂调整的是需求。一条路是“多发一点”，另一条路是“晚用一点、少用一点”。所以在看这类交易之前，第一件事是分清它动的是哪一头。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null,
+          "fact_verification": {
+            "status": "not_factual",
+            "reason": "这是供给与需求两组概念的过渡性框架说明，没有需要来源支持的具体事实主张。",
+            "sources": []
+          }
+        }
+      ]
+    },
+    {
+      "title": "十分之一的对比",
+      "paragraphs": [
+        {
+          "text": "规模上，这次不是小打小闹。报道提到，谷歌此前有一份 100 兆瓦的协议，只有这次新协议的十分之一。从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "代码发现标出的「100」确实有依据：来源写明谷歌早前一份协议为 100 MW，是新协议的十分之一；据此说「从 100 兆瓦到吉瓦级，跨度是十倍」与来源一致，且稿件已用「至少从合同规模看」限定为合同层面的比较，没有超出来源变成发电能力结论。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "为什么是现在",
+      "paragraphs": [
+        {
+          "text": "那谷歌为什么现在要做这件事？报道把这项安排放在数据中心扩张、电网承压的背景下。数据中心的用电量大，增长又快，电网在高峰时段会更吃紧。对谷歌这样的用电大户来说，问题不只是“去哪儿找更多的电”，还包括“用电能不能变得更听话”。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "来源确实把该安排置于数据中心扩张与电网承压的背景中，稿件中有「报道把……」的归因，问题和语境都没有超出来源。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "吉瓦级不等于吉瓦电厂",
+      "paragraphs": [
+        {
+          "text": "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。这两个数字量的不是一回事。吉瓦级说的是可以聚合起来参与调节的需求规模，是合同上的量级；它不是一台能持续满功率运转的机组，也不意味着电网随时要用，就能立刻拿出这么多电。真正能兑现多少，要看电网什么时候需要，以及那时能调动起多少负荷。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "稿件沿用来源的核心限定：吉瓦级属于可聚合的调节需求，与新建发电机组的容量不同；「真正能兑现多少取决于电网需要和可调动负荷」是对需求响应机制的定性说明，没有与来源冲突，也没有编造具体兑现量。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "用电大户成了调节资源",
+      "paragraphs": [
+        {
+          "text": "所以这笔交易真正的看点，不是合同上那个数字，而是角色的变化：过去说起用电大户，想到的往往是给电网添压力的一方；现在，同样的规模反过来也能变成帮电网卸压力的资源。数据中心扩张带来的电力紧张，可能有一部分不必靠多建电厂来解决，而是靠让用电更灵活来消化。这大概也是虚拟电厂最反常识的地方——它不缺电厂，缺的是在关键时刻愿意配合的用电。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "稿件把用电大户的角色变化讲成需求侧灵活性的意义，并用「可能有一部分」保留不确定性，没有升级为定论；也没有把「同类最大」等来源保留的说法写进正文。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 754,
+    "estimated_seconds": 168,
+    "segments": 26,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.932,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "没有新机组的吉瓦级电厂",
+        "spoken_length": 99,
+        "budget": 131
+      },
+      {
+        "title": "用电怎么像电厂一样干活",
+        "spoken_length": 196,
+        "budget": 131
+      },
+      {
+        "title": "十分之一的对比",
+        "spoken_length": 77,
+        "budget": 131
+      },
+      {
+        "title": "为什么是现在",
+        "spoken_length": 98,
+        "budget": 130
+      },
+      {
+        "title": "吉瓦级不等于吉瓦电厂",
+        "spoken_length": 134,
+        "budget": 130
+      },
+      {
+        "title": "用电大户成了调节资源",
+        "spoken_length": 150,
+        "budget": 130
+      }
+    ]
+  },
+  "edit_type": "EDITED",
+  "meta": {
+    "acceptance_batch": "matrix-recipe-quality-20261023",
+    "report_path": "state/video_editorial_sources/matrix-recipe-quality-20261023/company-checked-v2.md",
+    "source_review": {
+      "checked_source_urls": [
+        "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+        "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+      ],
+      "packet_sha256": "efed440127b839e7cdfc61a5f2dc3508c5b206458d97eb99a6c04273cf18f464",
+      "original_script_id": "4c63a878b25b4c96b7f8fa67f0824da0"
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。",
+          "problem": "前一句已经说 100 兆瓦只有新协议的十分之一，这里又把同一关系说成“十倍”；加上“不是小打小闹”和“不是小范围试水”，整段在反复证明“这次很大”。",
+          "why": "观众在规模这个点上被重复告知同一件事，节奏会拖；如果“吉瓦级”不是精确的 1 吉瓦，“十倍”还会让人误以为容量已经精确锁定。",
+          "suggestion": "压成一句，只保留对比和来源，例如“报道提到，谷歌此前有一份 100 兆瓦的协议；这次到吉瓦级，合同规模明显上了一个台阶”。如果来源确认正好是 1 吉瓦，再保留“十倍”，并删掉“小打小闹/试水”的重复判断。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。",
+          "problem": "开场已经用同一组话纠正过“吉瓦级不是新发电机组”，这里在讲完“为什么现在做”后又回到同一个纠正，像把进度条往回拖；“这两个数字量的不是一回事”也拗口。",
+          "why": "观众会觉得刚听懂的概念又被重讲一遍，主线从“角色变化”退回定义澄清，中后段容易失去耐心；真正的新信息——合同量级不等于随时可兑现——被重复的“误读”铺垫埋住。",
+          "suggestion": "删掉这段的重新铺垫，把“合同上的量级不等于实际能兑现，要看电网什么时候需要、能调动多少负荷”并进 S1P1 或 S3P1 的规模说明；若保留，改成“这两个说法不是一回事”，直接讲限制。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 5,
+          "paragraph": 0,
+          "quote": "现在，同样的规模反过来也能变成帮电网卸压力的资源。",
+          "problem": "“同样的规模”指代不清，听起来像谷歌全部用电规模都能反转成电网资源；前文刚说过真正能兑现多少要看可调负荷，这里又把反转说得太顺。",
+          "why": "观众可能把“可调节的一部分”理解成“同样大的用电都能随时卸掉”，对虚拟电厂的能力产生过度印象，结尾的说服力反而变弱。",
+          "suggestion": "把主语收窄到可调节部分，例如“其中可调节的那部分用电，可以从给电网添压力，变成帮电网卸压力”。保留角色反转的亮点，不扩大事实边界。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“需求响应协议”具体是什么意思？和后面说的虚拟电厂是什么关系，第一耳朵没接上。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "Voltus 是谁、谷歌在这笔交易里具体要做什么（少用电还是买调节服务），开场没交代，会让交易角色有点模糊。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "吉瓦和兆瓦怎么换算？不熟单位的人听到“100兆瓦到吉瓦级是十倍”会跟不上这个十倍怎么来的。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "前面再次解释“吉瓦级不是电厂”，和开场意思重复，容易觉得绕；到“真正能兑现多少”才重新有推进。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 7,
+        "rule_must": 0,
+        "questions": 3,
+        "lost": 1,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 3
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 1,
+      "deletions": [],
+      "initial": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "这次看两件商业消息：谷歌通过虚拟电厂寻找用电弹性，下一代 Xbox 则传出更高的成本预估。前者关系到数据中心怎么用电，后者关系到硬件成本如何传到售价。两件事都需要把已经达成的安排，和仍在估算的数字分清。",
+          "problem": "开场像内部读稿目录加写作提醒：先报两条不相干消息，再告诉观众“要把安排和估算分清”，却没有抛出一个具体的矛盾或问题。",
+          "why": "陌生观众不知道先关心哪一条，也听不出两条消息为什么值得放在一起，容易在开场就失去继续听的动机。",
+          "suggestion": "如果保留双条，删掉总括式“分清”提醒，给每条一句自己的钩子：谷歌这条用“数据中心不建电厂，而是把用电需求组织成可调节资源”切入；Xbox 这条用“内部预估的最高价如何反映硬件成本压力”切入。若两条没有真实关联，不必硬加共同主题，直接做两个短小分段。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "合同规模说明了这项安排的量级，不能直接当成它在任意时刻都能提供的实际调节效果。",
+          "problem": "这句只留下一个法律感很强的边界提醒，却没有讲虚拟电厂具体怎么“调节”，观众听完仍不知道这项安排在实际运行中是什么样。",
+          "why": "“任意时刻”“实际调节效果”都是抽象说法，听众只能记住一句限制，记不住机制，也很难感到这件事和自己有关。",
+          "suggestion": "先给一个可感知的运行场景：电网紧张时，把分散的数据中心用电需求集中起来临时响应；再说吉瓦级是合同可聚合的规模，不等于任何时刻都能调出同样多。把“任意时刻”换成观众能理解的运行条件。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "另一篇 Fast Company 报道转述了一份据称来自微软内部的预估：代号 Project Helix 的下一代 Xbox，消费者价格可能在一千二百到一千八百美元之间。这里要保留“据报道”和“可能”，它不是微软已经公布的零售价。",
+          "problem": "“这里要保留‘据报道’和‘可能’”是写稿备注，不是讲给观众的话；而且上一句已经交代了转述和可能，这里又重复一次。",
+          "why": "听众会被拉出新闻，感觉在听内部审稿，而不是在听一条值得知道的商业消息；注意力被花在措辞提醒上，而不是价格预估意味着什么。",
+          "suggestion": "把归属自然放进一句转述里：Fast Company 转述一份据称来自微软内部的预估，称 Project Helix 售价可能在 1200 到 1800 美元；微软尚未公布零售价。删掉“这里要保留”这类写作备注。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "文章讨论了零部件成本压力，也指出，如果微软选择补贴硬件，售价仍可能下降。所以，一千八百美元是这份报道所述区间的上沿，不能改写成下一代 Xbox 就卖这个价。最终定价要看正式公布的信息。",
+          "problem": "“所以……不能改写成……最终定价……”连续三次重复同一个边界；而“零部件成本压力”和“补贴硬件”这两个真正有解释力的点只是一笔带过。另外“售价仍可能下降”缺少比较对象，听起来像价格会随时间下跌。",
+          "why": "观众听到的是一串防御性免责声明，而不是成本压力与补贴之间的商业取舍；既没有增加理解，也消耗了耐心。",
+          "suggestion": "只留一次边界：1800 美元是报道所述区间的上沿，不是发布价。然后把篇幅放在取舍上：零部件成本上涨会推高成本，微软若补贴硬件，售价可能低于这个预估区间。把“仍可能下降”改成“可能低于这个预估区间”。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "这两件消息里的数字，代表的事情不同。虚拟电厂的规模，要和需求调节的运行条件一起看；下一代主机的价格预估，要和正式零售价分开看。把数字的身份看清楚，才能知道商业变化究竟落到了哪一步。",
+          "problem": "结尾把开场和两条的提醒又复述一遍，落点停在“数字的身份”这种抽象方法论上，没有留下一个具体的发现或判断。",
+          "why": "观众听完最后的记忆是一句读稿原则，而不是“谷歌在把数据中心用电变成可调节资源”或“Xbox 的成本压力最后由谁承担”，收获感被削弱。",
+          "suggestion": "用具体收束替代方法论总结：谷歌这条的看点是数据中心开始被当作可调节的电力资源；Xbox 这条的看点是成本压力最后由消费者承担，还是由微软用补贴吸收。若做双条，可留一个开放问题，不必再总结“数字身份”。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "吉瓦级大概是什么量级？是合同总规模，还是随时能调用的规模？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "合同规模为什么不能直接当成任意时刻的实际调节效果？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“数据中心扩张和电网承压”之后又讲合同规模与实际效果的区别，但没给具体场景，抽象限制连着出现，容易走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "如果微软补贴硬件，售价下降是相对一千二到一千八的预估，还是相对成本？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "前面刚说过“据报道、可能”，这里又强调“不能改写成就卖这个价”，免责重复，节奏有点拖。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "所以目前是一个已达成安排、一个仍只是预估，对吗？结尾能不能直接说清两件事各走到哪一步？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "总结偏抽象，“数字的身份”“商业变化落到哪一步”没有给出一句具体结论，听完的收获感弱。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": true
+        }
+      ],
+      "editorial_attempted": true
+    },
+    "problems": [],
+    "audit_usage": {
+      "requests": 15,
+      "prompt_tokens": 32537,
+      "completion_tokens": 67952,
+      "total_tokens": 100489
+    },
+    "audit_prompt_version": 12,
+    "editorial_attempt": {
+      "applied": true,
+      "before": [
+        {
+          "title": "两件商业变化",
+          "paragraphs": [
+            {
+              "text": "这次看两件商业消息：谷歌通过虚拟电厂寻找用电弹性，下一代 Xbox 则传出更高的成本预估。前者关系到数据中心怎么用电，后者关系到硬件成本如何传到售价。两件事都需要把已经达成的安排，和仍在估算的数字分清。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+                "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "开场把两条消息的范围限定为「谷歌通过虚拟电厂寻找用电弹性」和「下一代 Xbox 传出更高的成本预估」，并强调要区分已达成安排与仍在估算的数字，与来源一致：谷歌与 Voltus 的协议是已宣布的安排，Xbox 价格是转述的内部预估。两处事实段都列出了对应来源。",
+                "sources": [
+                  "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+                  "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "虚拟电厂：协调需求",
+          "paragraphs": [
+            {
+              "text": "Fast Company 报道，谷歌与 Voltus 达成吉瓦级虚拟电厂安排。这里的“电厂”并不是新建一座发电站，而是协调分散的用电需求，让电网在需要时获得调节空间。它处理的是需求端的弹性，不能等同于增加同样规模的发电装机。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "「与 Voltus 达成吉瓦级虚拟电厂安排」有来源支持：报道称谷歌与 Voltus 签下吉瓦级需求响应虚拟电厂协议，此前 100 MW 协议为其十分之一。讲稿并明确「不是新建发电站，而是协调分散用电需求」，与来源强调需求侧弹性区别于新建发电装机的限定一致，未把「同类中规模最大」这类判断写成定论。",
+                "sources": [
+                  "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ]
+              }
+            },
+            {
+              "text": "报道把这项安排放在数据中心扩张和电网承压的背景下。对谷歌而言，除了寻找电力供应，也要考虑如何调整用电。合同规模说明了这项安排的量级，不能直接当成它在任意时刻都能提供的实际调节效果。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "数据中心扩张与电网承压的背景来自报道；对合同规模与实际可提供调节效果作区分，是对需求响应容量的定性说明，没有给出报告之外的容量、时段或金额数字，也未断言来源未提供的信息。",
+                "sources": [
+                  "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "Xbox：预估还不是定价",
+          "paragraphs": [
+            {
+              "text": "另一篇 Fast Company 报道转述了一份据称来自微软内部的预估：代号 Project Helix 的下一代 Xbox，消费者价格可能在一千二百到一千八百美元之间。这里要保留“据报道”和“可能”，它不是微软已经公布的零售价。",
+              "citations": [
+                "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "价格区间 1,200–1,800 美元、代号 Project Helix、来源为「据称微软内部预估」，均与报道一致；讲稿明确保留「据报道」「可能」，并说明不是微软已公布的零售价，符合来源对「已报告的内部预测、非确认零售价」的限定。",
+                "sources": [
+                  "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+                ]
+              }
+            },
+            {
+              "text": "文章讨论了零部件成本压力，也指出，如果微软选择补贴硬件，售价仍可能下降。所以，一千八百美元是这份报道所述区间的上沿，不能改写成下一代 Xbox 就卖这个价。最终定价要看正式公布的信息。",
+              "citations": [
+                "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "零部件成本压力与「若补贴硬件售价可能下降」均为报道中给出的说法，讲稿把归因保留在报道层面；「1,800 美元是区间上沿、不能写成实际售价」与来源区间一致，未把未公布的正式定价说成已确定，也未声称报道没有发布节奏信息。",
+                "sources": [
+                  "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "看清数字代表什么",
+          "paragraphs": [
+            {
+              "text": "这两件消息里的数字，代表的事情不同。虚拟电厂的规模，要和需求调节的运行条件一起看；下一代主机的价格预估，要和正式零售价分开看。把数字的身份看清楚，才能知道商业变化究竟落到了哪一步。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+                "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "收尾只是重述两条消息数字的不同身份（虚拟电厂规模需结合运行条件、主机价格预估需与正式零售价分开），没有新增数字、时间或比较结论，与前文及来源限定一致。",
+                "sources": [
+                  "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+                  "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "targets": {
+        "S1P1": [
+          "【编辑建议，按实际效果取舍】开场像内部读稿目录加写作提醒：先报两条不相干消息，再告诉观众“要把安排和估算分清”，却没有抛出一个具体的矛盾或问题。；建议：如果保留双条，删掉总括式“分清”提醒，给每条一句自己的钩子：谷歌这条用“数据中心不建电厂，而是把用电需求组织成可调节资源”切入；Xbox 这条用“内部预估的最高价如何反映硬件成本压力”切入。若两条没有真实关联，不必硬加共同主题，直接做两个短小分段。"
+        ],
+        "S2P2": [
+          "【编辑建议，按实际效果取舍】这句只留下一个法律感很强的边界提醒，却没有讲虚拟电厂具体怎么“调节”，观众听完仍不知道这项安排在实际运行中是什么样。；建议：先给一个可感知的运行场景：电网紧张时，把分散的数据中心用电需求集中起来临时响应；再说吉瓦级是合同可聚合的规模，不等于任何时刻都能调出同样多。把“任意时刻”换成观众能理解的运行条件。",
+          "【编辑建议，按实际效果取舍】“数据中心扩张和电网承压”之后又讲合同规模与实际效果的区别，但没给具体场景，抽象限制连着出现，容易走神。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S3P1": [
+          "【编辑建议，按实际效果取舍】“这里要保留‘据报道’和‘可能’”是写稿备注，不是讲给观众的话；而且上一句已经交代了转述和可能，这里又重复一次。；建议：把归属自然放进一句转述里：Fast Company 转述一份据称来自微软内部的预估，称 Project Helix 售价可能在 1200 到 1800 美元；微软尚未公布零售价。删掉“这里要保留”这类写作备注。"
+        ],
+        "S3P2": [
+          "【编辑建议，按实际效果取舍】“所以……不能改写成……最终定价……”连续三次重复同一个边界；而“零部件成本压力”和“补贴硬件”这两个真正有解释力的点只是一笔带过。另外“售价仍可能下降”缺少比较对象，听起来像价格会随时间下跌。；建议：只留一次边界：1800 美元是报道所述区间的上沿，不是发布价。然后把篇幅放在取舍上：零部件成本上涨会推高成本，微软若补贴硬件，售价可能低于这个预估区间。把“仍可能下降”改成“可能低于这个预估区间”。",
+          "【编辑建议，按实际效果取舍】前面刚说过“据报道、可能”，这里又强调“不能改写成就卖这个价”，免责重复，节奏有点拖。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S4P1": [
+          "【编辑建议，按实际效果取舍】结尾把开场和两条的提醒又复述一遍，落点停在“数字的身份”这种抽象方法论上，没有留下一个具体的发现或判断。；建议：用具体收束替代方法论总结：谷歌这条的看点是数据中心开始被当作可调节的电力资源；Xbox 这条的看点是成本压力最后由消费者承担，还是由微软用补贴吸收。若做双条，可留一个开放问题，不必再总结“数字身份”。",
+          "【编辑建议，按实际效果取舍】总结偏抽象，“数字的身份”“商业变化落到哪一步”没有给出一句具体结论，听完的收获感弱。；建议：放慢、补一步推理，或换个说法"
+        ]
+      },
+      "before_title": "谷歌虚拟电厂与下一代 Xbox：一边调用电，一边算成本",
+      "mode": "whole_script",
+      "prompt_version": 5,
+      "title": "吉瓦级电厂，却没有一台新机组",
+      "sections": [
+        {
+          "title": "没有新机组的吉瓦级电厂",
+          "paragraphs": [
+            {
+              "text": "听到“吉瓦级电厂”，你大概会以为谷歌又要建一座发电站。恰恰相反，这笔交易里没有一台新的发电机组——它要调的不是发电，是用电。谷歌和 Voltus 签的是一份吉瓦级的需求响应协议，这个规模按可以聚合的用电需求算，不是按新装机的发电容量算。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "用电怎么像电厂一样干活",
+          "paragraphs": [
+            {
+              "text": "所谓虚拟电厂，做法是把大量分散的用电户组织起来，当成一股可以收放的负荷：电网吃紧的时候，大家一起把一部分用电降下来；紧张过去了，再把用电补回去。对电网来说，这有点像多了一台能快起快停的机组，但它没有多烧一克燃料，也没有多发出一度电。它提供的是调节能力，属于需求侧的灵活性。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "这里的关键区别是：新建电厂增加的是供给，虚拟电厂调整的是需求。一条路是“多发一点”，另一条路是“晚用一点、少用一点”。所以在看这类交易之前，第一件事是分清它动的是哪一头。",
+              "citations": [],
+              "evidence": "UNCITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "十分之一的对比",
+          "paragraphs": [
+            {
+              "text": "规模上，这次不是小打小闹。报道提到，谷歌此前有一份 100 兆瓦的协议，只有这次新协议的十分之一。从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "为什么是现在",
+          "paragraphs": [
+            {
+              "text": "那谷歌为什么现在要做这件事？报道把这项安排放在数据中心扩张、电网承压的背景下。数据中心的用电量大，增长又快，电网在高峰时段会更吃紧。对谷歌这样的用电大户来说，问题不只是“去哪儿找更多的电”，还包括“用电能不能变得更听话”。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "吉瓦级不等于吉瓦电厂",
+          "paragraphs": [
+            {
+              "text": "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。这两个数字量的不是一回事。吉瓦级说的是可以聚合起来参与调节的需求规模，是合同上的量级；它不是一台能持续满功率运转的机组，也不意味着电网随时要用，就能立刻拿出这么多电。真正能兑现多少，要看电网什么时候需要，以及那时能调动起多少负荷。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "用电大户成了调节资源",
+          "paragraphs": [
+            {
+              "text": "所以这笔交易真正的看点，不是合同上那个数字，而是角色的变化：过去说起用电大户，想到的往往是给电网添压力的一方；现在，同样的规模反过来也能变成帮电网卸压力的资源。数据中心扩张带来的电力紧张，可能有一部分不必靠多建电厂来解决，而是靠让用电更灵活来消化。这大概也是虚拟电厂最反常识的地方——它不缺电厂，缺的是在关键时刻愿意配合的用电。",
+              "citations": [
+                "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "editorial_brief": {
+        "considered": [
+          "双条并列（谷歌虚拟电厂＋下一代 Xbox 价格预估）：两条消息没有真实关联，开场容易变成目录，每条只剩边界提醒；放弃。",
+          "单讲 Xbox 的 1200–1800 美元预估：消费话题强，但核心是未确认的内部预估，能落地的硬事实少，容易讲成“这不是官方价”的辟谣；放弃。",
+          "单讲谷歌虚拟电厂：有“不建电厂的电厂”这个反常识钩子，有 100 兆瓦到吉瓦级的具体对比，也能带出数据中心扩张与电网承压的背景；选它。"
+        ],
+        "angle": "谷歌签下吉瓦级虚拟电厂，真正的新意不是多建一座电厂，而是把大型用电需求变成电网可以调节的资源。",
+        "viewer_value": "观众能听懂一个反常识的电力变化：不新增发电机组，也可能增加电网调节能力；以及数据中心扩张为什么让“怎么用电”变得重要。",
+        "throughline": "先用“吉瓦级电厂却没有新发电机组”制造反差，解释虚拟电厂实际调的是需求；再用此前 100 兆瓦协议只有这次十分之一的对比，说明规模；接着交代数据中心扩张和电网承压的背景；最后区分“需求响应规模”与“持续发电能力”，落到用电大户正在成为电网调节资源。",
+        "keep": [
+          "开场反常识：吉瓦级电厂却没有新增发电机组，抓住注意力。",
+          "虚拟电厂／需求响应的基本机制：协调分散用电需求，为电网提供调节能力；这是全文解释核心。",
+          "谷歌与 Voltus 的吉瓦级需求响应协议，以及此前 100 兆瓦协议只有十分之一，提供具体规模对比。",
+          "数据中心扩张与电网承压背景，解释谷歌为何需要需求侧灵活性。",
+          "需求侧灵活性不同于新建发电厂、合同规模不等于持续发电能力，防止把“吉瓦级”误读成新电厂。"
+        ],
+        "leave_out": [
+          "下一代 Xbox 的 1200–1800 美元预估、Project Helix、零部件成本和补贴：与谷歌电力主题没有真实关联，且是未确认的内部预估，放进 3 分钟双线会分散注意力。",
+          "报道称该交易“看起来是超大规模云厂商同类最大的一笔”：需要多重限定，且 100 兆瓦到吉瓦级的对比已足够说明规模，不必再塞排名。",
+          "合同金额、具体数据中心地点、响应时长、调用频率等细节：现有材料没有支撑，也不影响观众理解需求侧灵活性这个核心，不引入。",
+          "旧稿结尾“数字的身份”“商业变化落到哪一步”的方法论总结：抽象且复述前文，不能带来新的具体认识。"
+        ],
+        "facts": [],
+        "openings": [
+          "听到“吉瓦级电厂”，你可能会以为谷歌又要建一座发电站。恰恰相反，这笔交易里没有新的发电机组，它要调的是用电。——反差最强，直接抓住“不建电厂的电厂”这个反常识点。",
+          "数据中心越建越多，电网压力越来越大。谷歌的解法不是再建一座电厂，而是把用电需求组织起来，让它在电网需要时变得可调。——从观众能感知的电力压力切入，更平稳。",
+          "“虚拟电厂”听起来像文字游戏：没有新的发电机组，怎么叫电厂？谷歌和 Voltus 的这笔交易，答案在用电侧。——用问题开场，但会把注意力先放在名词解释上。"
+        ],
+        "opening": "听到“吉瓦级电厂”，你可能会以为谷歌又要建一座发电站。恰恰相反，这笔交易里没有新的发电机组，它要调的是用电。",
+        "opening_facts": [],
+        "beats": [
+          {
+            "point": "虚拟电厂不是新建发电站，而是把分散的用电需求组织起来，在电网需要时提供调节能力；它属于需求侧灵活性，不等于新增发电装机。",
+            "facts": [],
+            "connection": "开场说调的是用电，观众自然会问：用电怎么像电厂一样起作用？"
+          },
+          {
+            "point": "谷歌这次是和 Voltus 签下需求响应协议，规模达到吉瓦级；报道提到，谷歌此前一份 100 兆瓦协议只有这次新协议的十分之一，说明这不是一个小规模试点。",
+            "facts": [],
+            "connection": "知道它调什么之后，接下来最直接的问题是：这次规模有多大？"
+          },
+          {
+            "point": "报道把这项安排放在数据中心扩张和电网承压的背景下：对谷歌这样的用电大户来说，除了找更多电，也得考虑怎么调整用电。",
+            "facts": [],
+            "connection": "规模之外，观众会想知道谷歌为什么现在要做这种安排。"
+          },
+          {
+            "point": "吉瓦级描述的是需求响应可聚合的规模，不是一座能持续满功率发电的新机组；把它直接当成新增发电装机，就会误读这个数字。",
+            "facts": [],
+            "connection": "说到这里，最容易产生的误读是：吉瓦级是不是等于多了一座吉瓦电厂？需要把这个数字的身份说清。"
+          },
+          {
+            "point": "这期最值得记住的不是合同数字本身，而是大型用电户正在变成电网的一种调节资源；数据中心扩张带来的电力压力，可能有一部分要靠用电侧的灵活性来消化。",
+            "facts": [],
+            "connection": "把规模、背景和边界放在一起，最后能留下一个比合同数字更具体的判断。"
+          }
+        ],
+        "material": "Fast Company 报道（2026-10-22）：谷歌与 Voltus 签下吉瓦级需求响应虚拟电厂协议。报道提到，谷歌此前一份 100 兆瓦的协议，规模只有这次新协议的十分之一；并把这项安排放在谷歌数据中心扩张、电网承压的背景下。\n报道强调，这属于需求侧的电网灵活性，和新建一座发电厂不是一回事：它协调的是分散的用电需求，为电网提供调节能力，而不是增加发电装机。\n口播可用限定：吉瓦级是需求响应／可聚合需求的规模，不要写成一座持续满功率发电的新机组，也不要把合同规模说成随时都能输出同等电力。\n来源：https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。",
+            "problem": "前一句已经说 100 兆瓦只有新协议的十分之一，这里又把同一关系说成“十倍”；加上“不是小打小闹”和“不是小范围试水”，整段在反复证明“这次很大”。",
+            "why": "观众在规模这个点上被重复告知同一件事，节奏会拖；如果“吉瓦级”不是精确的 1 吉瓦，“十倍”还会让人误以为容量已经精确锁定。",
+            "suggestion": "压成一句，只保留对比和来源，例如“报道提到，谷歌此前有一份 100 兆瓦的协议；这次到吉瓦级，合同规模明显上了一个台阶”。如果来源确认正好是 1 吉瓦，再保留“十倍”，并删掉“小打小闹/试水”的重复判断。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。",
+            "problem": "开场已经用同一组话纠正过“吉瓦级不是新发电机组”，这里在讲完“为什么现在做”后又回到同一个纠正，像把进度条往回拖；“这两个数字量的不是一回事”也拗口。",
+            "why": "观众会觉得刚听懂的概念又被重讲一遍，主线从“角色变化”退回定义澄清，中后段容易失去耐心；真正的新信息——合同量级不等于随时可兑现——被重复的“误读”铺垫埋住。",
+            "suggestion": "删掉这段的重新铺垫，把“合同上的量级不等于实际能兑现，要看电网什么时候需要、能调动多少负荷”并进 S1P1 或 S3P1 的规模说明；若保留，改成“这两个说法不是一回事”，直接讲限制。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 0,
+            "quote": "现在，同样的规模反过来也能变成帮电网卸压力的资源。",
+            "problem": "“同样的规模”指代不清，听起来像谷歌全部用电规模都能反转成电网资源；前文刚说过真正能兑现多少要看可调负荷，这里又把反转说得太顺。",
+            "why": "观众可能把“可调节的一部分”理解成“同样大的用电都能随时卸掉”，对虚拟电厂的能力产生过度印象，结尾的说服力反而变弱。",
+            "suggestion": "把主语收窄到可调节部分，例如“其中可调节的那部分用电，可以从给电网添压力，变成帮电网卸压力”。保留角色反转的亮点，不扩大事实边界。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“需求响应协议”具体是什么意思？和后面说的虚拟电厂是什么关系，第一耳朵没接上。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "Voltus 是谁、谷歌在这笔交易里具体要做什么（少用电还是买调节服务），开场没交代，会让交易角色有点模糊。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "吉瓦和兆瓦怎么换算？不熟单位的人听到“100兆瓦到吉瓦级是十倍”会跟不上这个十倍怎么来的。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "前面再次解释“吉瓦级不是电厂”，和开场意思重复，容易觉得绕；到“真正能兑现多少”才重新有推进。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "audits_complete": true,
+        "pending_review": false,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 7,
+          "rule_must": 0,
+          "questions": 3,
+          "lost": 1,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 4
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 3
+            }
+          },
+          "passed": true,
+          "rank": 0
+        },
+        "rounds": 1,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这次看两件商业消息：谷歌通过虚拟电厂寻找用电弹性，下一代 Xbox 则传出更高的成本预估。前者关系到数据中心怎么用电，后者关系到硬件成本如何传到售价。两件事都需要把已经达成的安排，和仍在估算的数字分清。",
+            "problem": "开场像内部读稿目录加写作提醒：先报两条不相干消息，再告诉观众“要把安排和估算分清”，却没有抛出一个具体的矛盾或问题。",
+            "why": "陌生观众不知道先关心哪一条，也听不出两条消息为什么值得放在一起，容易在开场就失去继续听的动机。",
+            "suggestion": "如果保留双条，删掉总括式“分清”提醒，给每条一句自己的钩子：谷歌这条用“数据中心不建电厂，而是把用电需求组织成可调节资源”切入；Xbox 这条用“内部预估的最高价如何反映硬件成本压力”切入。若两条没有真实关联，不必硬加共同主题，直接做两个短小分段。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "合同规模说明了这项安排的量级，不能直接当成它在任意时刻都能提供的实际调节效果。",
+            "problem": "这句只留下一个法律感很强的边界提醒，却没有讲虚拟电厂具体怎么“调节”，观众听完仍不知道这项安排在实际运行中是什么样。",
+            "why": "“任意时刻”“实际调节效果”都是抽象说法，听众只能记住一句限制，记不住机制，也很难感到这件事和自己有关。",
+            "suggestion": "先给一个可感知的运行场景：电网紧张时，把分散的数据中心用电需求集中起来临时响应；再说吉瓦级是合同可聚合的规模，不等于任何时刻都能调出同样多。把“任意时刻”换成观众能理解的运行条件。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "另一篇 Fast Company 报道转述了一份据称来自微软内部的预估：代号 Project Helix 的下一代 Xbox，消费者价格可能在一千二百到一千八百美元之间。这里要保留“据报道”和“可能”，它不是微软已经公布的零售价。",
+            "problem": "“这里要保留‘据报道’和‘可能’”是写稿备注，不是讲给观众的话；而且上一句已经交代了转述和可能，这里又重复一次。",
+            "why": "听众会被拉出新闻，感觉在听内部审稿，而不是在听一条值得知道的商业消息；注意力被花在措辞提醒上，而不是价格预估意味着什么。",
+            "suggestion": "把归属自然放进一句转述里：Fast Company 转述一份据称来自微软内部的预估，称 Project Helix 售价可能在 1200 到 1800 美元；微软尚未公布零售价。删掉“这里要保留”这类写作备注。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "文章讨论了零部件成本压力，也指出，如果微软选择补贴硬件，售价仍可能下降。所以，一千八百美元是这份报道所述区间的上沿，不能改写成下一代 Xbox 就卖这个价。最终定价要看正式公布的信息。",
+            "problem": "“所以……不能改写成……最终定价……”连续三次重复同一个边界；而“零部件成本压力”和“补贴硬件”这两个真正有解释力的点只是一笔带过。另外“售价仍可能下降”缺少比较对象，听起来像价格会随时间下跌。",
+            "why": "观众听到的是一串防御性免责声明，而不是成本压力与补贴之间的商业取舍；既没有增加理解，也消耗了耐心。",
+            "suggestion": "只留一次边界：1800 美元是报道所述区间的上沿，不是发布价。然后把篇幅放在取舍上：零部件成本上涨会推高成本，微软若补贴硬件，售价可能低于这个预估区间。把“仍可能下降”改成“可能低于这个预估区间”。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "这两件消息里的数字，代表的事情不同。虚拟电厂的规模，要和需求调节的运行条件一起看；下一代主机的价格预估，要和正式零售价分开看。把数字的身份看清楚，才能知道商业变化究竟落到了哪一步。",
+            "problem": "结尾把开场和两条的提醒又复述一遍，落点停在“数字的身份”这种抽象方法论上，没有留下一个具体的发现或判断。",
+            "why": "观众听完最后的记忆是一句读稿原则，而不是“谷歌在把数据中心用电变成可调节资源”或“Xbox 的成本压力最后由谁承担”，收获感被削弱。",
+            "suggestion": "用具体收束替代方法论总结：谷歌这条的看点是数据中心开始被当作可调节的电力资源；Xbox 这条的看点是成本压力最后由消费者承担，还是由微软用补贴吸收。若做双条，可留一个开放问题，不必再总结“数字身份”。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "吉瓦级大概是什么量级？是合同总规模，还是随时能调用的规模？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "合同规模为什么不能直接当成任意时刻的实际调节效果？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“数据中心扩张和电网承压”之后又讲合同规模与实际效果的区别，但没给具体场景，抽象限制连着出现，容易走神。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "如果微软补贴硬件，售价下降是相对一千二到一千八的预估，还是相对成本？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "前面刚说过“据报道、可能”，这里又强调“不能改写成就卖这个价”，免责重复，节奏有点拖。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "所以目前是一个已达成安排、一个仍只是预估，对吗？结尾能不能直接说清两件事各走到哪一步？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "总结偏抽象，“数字的身份”“商业变化落到哪一步”没有给出一句具体结论，听完的收获感弱。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "decision": {
+        "listening": {
+          "A": "开场“这次看两件商业消息”像栏目摘要，缺少让我非听下去不可的钩子；直到“这里的‘电厂’并不是新建一座发电站，而是协调分散的用电需求”才产生具体兴趣，因为它把陌生概念翻成了可理解的用电调节。随后“另一篇 Fast Company 报道”从谷歌硬切到 Xbox，像从一段解释跳进第二条摘要，我在这里明显走神；结尾“把数字的身份看清楚”正确但偏总结陈词，没留下具体画面。",
+          "B": "开场“听到‘吉瓦级电厂’，你大概会以为谷歌又要建一座发电站。恰恰相反”直接抓住误区，我愿意继续；“没有一台新的发电机组——它要调的不是发电，是用电”给出清晰反差，“像多了一台能快起快停的机组，但没多烧一克燃料”让虚拟电厂一下子可感。中段从100兆瓦到吉瓦级、再到数据中心扩张，转场顺；但在“但这里最容易误读的一步”前后又重复“不是多一座吉瓦电厂”，稍显绕，不过没有跟丢。结尾“它不缺电厂，缺的是在关键时刻愿意配合的用电”有记忆点，也略口号化。"
+        },
+        "choice": "B",
+        "reason": "决定性差异在开头和中段维持兴趣的方式：A用“这次看两件商业消息”和“另一篇 Fast Company 报道”组织，像摘要拼接，我在转场处走神；B用“没有一台新机组”的悖论和“调的不是发电，是用电”的对比，把同一概念讲成可感知的动作。选B不是因为它覆盖更多，而是它让陌生概念在耳朵里立住了，转场也更顺。",
+        "remaining": [
+          "“不是多一座吉瓦电厂”这一区分在开头、中段和结尾反复出现，后两处可压缩，避免听众觉得绕。",
+          "结尾“缺的是在关键时刻愿意配合的用电”有记忆点但偏口号，若补一句具体条件——何时需要、如何调动——会更扎实。",
+          "B把解释重心几乎全放在虚拟电厂上，若节目开场或标题让听众预期还有第二条消息，会形成预期落差；这是节目预期管理问题，不是覆盖完整性问题。"
+        ]
+      }
+    },
+    "editorial_attempts": [
+      {
+        "applied": true,
+        "before": [
+          {
+            "title": "两件商业变化",
+            "paragraphs": [
+              {
+                "text": "这次看两件商业消息：谷歌通过虚拟电厂寻找用电弹性，下一代 Xbox 则传出更高的成本预估。前者关系到数据中心怎么用电，后者关系到硬件成本如何传到售价。两件事都需要把已经达成的安排，和仍在估算的数字分清。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+                  "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "开场把两条消息的范围限定为「谷歌通过虚拟电厂寻找用电弹性」和「下一代 Xbox 传出更高的成本预估」，并强调要区分已达成安排与仍在估算的数字，与来源一致：谷歌与 Voltus 的协议是已宣布的安排，Xbox 价格是转述的内部预估。两处事实段都列出了对应来源。",
+                  "sources": [
+                    "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "虚拟电厂：协调需求",
+            "paragraphs": [
+              {
+                "text": "Fast Company 报道，谷歌与 Voltus 达成吉瓦级虚拟电厂安排。这里的“电厂”并不是新建一座发电站，而是协调分散的用电需求，让电网在需要时获得调节空间。它处理的是需求端的弹性，不能等同于增加同样规模的发电装机。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "「与 Voltus 达成吉瓦级虚拟电厂安排」有来源支持：报道称谷歌与 Voltus 签下吉瓦级需求响应虚拟电厂协议，此前 100 MW 协议为其十分之一。讲稿并明确「不是新建发电站，而是协调分散用电需求」，与来源强调需求侧弹性区别于新建发电装机的限定一致，未把「同类中规模最大」这类判断写成定论。",
+                  "sources": [
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              },
+              {
+                "text": "报道把这项安排放在数据中心扩张和电网承压的背景下。对谷歌而言，除了寻找电力供应，也要考虑如何调整用电。合同规模说明了这项安排的量级，不能直接当成它在任意时刻都能提供的实际调节效果。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "数据中心扩张与电网承压的背景来自报道；对合同规模与实际可提供调节效果作区分，是对需求响应容量的定性说明，没有给出报告之外的容量、时段或金额数字，也未断言来源未提供的信息。",
+                  "sources": [
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "Xbox：预估还不是定价",
+            "paragraphs": [
+              {
+                "text": "另一篇 Fast Company 报道转述了一份据称来自微软内部的预估：代号 Project Helix 的下一代 Xbox，消费者价格可能在一千二百到一千八百美元之间。这里要保留“据报道”和“可能”，它不是微软已经公布的零售价。",
+                "citations": [
+                  "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "价格区间 1,200–1,800 美元、代号 Project Helix、来源为「据称微软内部预估」，均与报道一致；讲稿明确保留「据报道」「可能」，并说明不是微软已公布的零售价，符合来源对「已报告的内部预测、非确认零售价」的限定。",
+                  "sources": [
+                    "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+                  ]
+                }
+              },
+              {
+                "text": "文章讨论了零部件成本压力，也指出，如果微软选择补贴硬件，售价仍可能下降。所以，一千八百美元是这份报道所述区间的上沿，不能改写成下一代 Xbox 就卖这个价。最终定价要看正式公布的信息。",
+                "citations": [
+                  "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "零部件成本压力与「若补贴硬件售价可能下降」均为报道中给出的说法，讲稿把归因保留在报道层面；「1,800 美元是区间上沿、不能写成实际售价」与来源区间一致，未把未公布的正式定价说成已确定，也未声称报道没有发布节奏信息。",
+                  "sources": [
+                    "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "看清数字代表什么",
+            "paragraphs": [
+              {
+                "text": "这两件消息里的数字，代表的事情不同。虚拟电厂的规模，要和需求调节的运行条件一起看；下一代主机的价格预估，要和正式零售价分开看。把数字的身份看清楚，才能知道商业变化究竟落到了哪一步。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+                  "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "收尾只是重述两条消息数字的不同身份（虚拟电厂规模需结合运行条件、主机价格预估需与正式零售价分开），没有新增数字、时间或比较结论，与前文及来源限定一致。",
+                  "sources": [
+                    "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "targets": {
+          "S1P1": [
+            "【编辑建议，按实际效果取舍】开场像内部读稿目录加写作提醒：先报两条不相干消息，再告诉观众“要把安排和估算分清”，却没有抛出一个具体的矛盾或问题。；建议：如果保留双条，删掉总括式“分清”提醒，给每条一句自己的钩子：谷歌这条用“数据中心不建电厂，而是把用电需求组织成可调节资源”切入；Xbox 这条用“内部预估的最高价如何反映硬件成本压力”切入。若两条没有真实关联，不必硬加共同主题，直接做两个短小分段。"
+          ],
+          "S2P2": [
+            "【编辑建议，按实际效果取舍】这句只留下一个法律感很强的边界提醒，却没有讲虚拟电厂具体怎么“调节”，观众听完仍不知道这项安排在实际运行中是什么样。；建议：先给一个可感知的运行场景：电网紧张时，把分散的数据中心用电需求集中起来临时响应；再说吉瓦级是合同可聚合的规模，不等于任何时刻都能调出同样多。把“任意时刻”换成观众能理解的运行条件。",
+            "【编辑建议，按实际效果取舍】“数据中心扩张和电网承压”之后又讲合同规模与实际效果的区别，但没给具体场景，抽象限制连着出现，容易走神。；建议：放慢、补一步推理，或换个说法"
+          ],
+          "S3P1": [
+            "【编辑建议，按实际效果取舍】“这里要保留‘据报道’和‘可能’”是写稿备注，不是讲给观众的话；而且上一句已经交代了转述和可能，这里又重复一次。；建议：把归属自然放进一句转述里：Fast Company 转述一份据称来自微软内部的预估，称 Project Helix 售价可能在 1200 到 1800 美元；微软尚未公布零售价。删掉“这里要保留”这类写作备注。"
+          ],
+          "S3P2": [
+            "【编辑建议，按实际效果取舍】“所以……不能改写成……最终定价……”连续三次重复同一个边界；而“零部件成本压力”和“补贴硬件”这两个真正有解释力的点只是一笔带过。另外“售价仍可能下降”缺少比较对象，听起来像价格会随时间下跌。；建议：只留一次边界：1800 美元是报道所述区间的上沿，不是发布价。然后把篇幅放在取舍上：零部件成本上涨会推高成本，微软若补贴硬件，售价可能低于这个预估区间。把“仍可能下降”改成“可能低于这个预估区间”。",
+            "【编辑建议，按实际效果取舍】前面刚说过“据报道、可能”，这里又强调“不能改写成就卖这个价”，免责重复，节奏有点拖。；建议：放慢、补一步推理，或换个说法"
+          ],
+          "S4P1": [
+            "【编辑建议，按实际效果取舍】结尾把开场和两条的提醒又复述一遍，落点停在“数字的身份”这种抽象方法论上，没有留下一个具体的发现或判断。；建议：用具体收束替代方法论总结：谷歌这条的看点是数据中心开始被当作可调节的电力资源；Xbox 这条的看点是成本压力最后由消费者承担，还是由微软用补贴吸收。若做双条，可留一个开放问题，不必再总结“数字身份”。",
+            "【编辑建议，按实际效果取舍】总结偏抽象，“数字的身份”“商业变化落到哪一步”没有给出一句具体结论，听完的收获感弱。；建议：放慢、补一步推理，或换个说法"
+          ]
+        },
+        "before_title": "谷歌虚拟电厂与下一代 Xbox：一边调用电，一边算成本",
+        "mode": "whole_script",
+        "prompt_version": 5,
+        "title": "吉瓦级电厂，却没有一台新机组",
+        "sections": [
+          {
+            "title": "没有新机组的吉瓦级电厂",
+            "paragraphs": [
+              {
+                "text": "听到“吉瓦级电厂”，你大概会以为谷歌又要建一座发电站。恰恰相反，这笔交易里没有一台新的发电机组——它要调的不是发电，是用电。谷歌和 Voltus 签的是一份吉瓦级的需求响应协议，这个规模按可以聚合的用电需求算，不是按新装机的发电容量算。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "用电怎么像电厂一样干活",
+            "paragraphs": [
+              {
+                "text": "所谓虚拟电厂，做法是把大量分散的用电户组织起来，当成一股可以收放的负荷：电网吃紧的时候，大家一起把一部分用电降下来；紧张过去了，再把用电补回去。对电网来说，这有点像多了一台能快起快停的机组，但它没有多烧一克燃料，也没有多发出一度电。它提供的是调节能力，属于需求侧的灵活性。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "这里的关键区别是：新建电厂增加的是供给，虚拟电厂调整的是需求。一条路是“多发一点”，另一条路是“晚用一点、少用一点”。所以在看这类交易之前，第一件事是分清它动的是哪一头。",
+                "citations": [],
+                "evidence": "UNCITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "十分之一的对比",
+            "paragraphs": [
+              {
+                "text": "规模上，这次不是小打小闹。报道提到，谷歌此前有一份 100 兆瓦的协议，只有这次新协议的十分之一。从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "为什么是现在",
+            "paragraphs": [
+              {
+                "text": "那谷歌为什么现在要做这件事？报道把这项安排放在数据中心扩张、电网承压的背景下。数据中心的用电量大，增长又快，电网在高峰时段会更吃紧。对谷歌这样的用电大户来说，问题不只是“去哪儿找更多的电”，还包括“用电能不能变得更听话”。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "吉瓦级不等于吉瓦电厂",
+            "paragraphs": [
+              {
+                "text": "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。这两个数字量的不是一回事。吉瓦级说的是可以聚合起来参与调节的需求规模，是合同上的量级；它不是一台能持续满功率运转的机组，也不意味着电网随时要用，就能立刻拿出这么多电。真正能兑现多少，要看电网什么时候需要，以及那时能调动起多少负荷。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "用电大户成了调节资源",
+            "paragraphs": [
+              {
+                "text": "所以这笔交易真正的看点，不是合同上那个数字，而是角色的变化：过去说起用电大户，想到的往往是给电网添压力的一方；现在，同样的规模反过来也能变成帮电网卸压力的资源。数据中心扩张带来的电力紧张，可能有一部分不必靠多建电厂来解决，而是靠让用电更灵活来消化。这大概也是虚拟电厂最反常识的地方——它不缺电厂，缺的是在关键时刻愿意配合的用电。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          }
+        ],
+        "editorial_brief": {
+          "considered": [
+            "双条并列（谷歌虚拟电厂＋下一代 Xbox 价格预估）：两条消息没有真实关联，开场容易变成目录，每条只剩边界提醒；放弃。",
+            "单讲 Xbox 的 1200–1800 美元预估：消费话题强，但核心是未确认的内部预估，能落地的硬事实少，容易讲成“这不是官方价”的辟谣；放弃。",
+            "单讲谷歌虚拟电厂：有“不建电厂的电厂”这个反常识钩子，有 100 兆瓦到吉瓦级的具体对比，也能带出数据中心扩张与电网承压的背景；选它。"
+          ],
+          "angle": "谷歌签下吉瓦级虚拟电厂，真正的新意不是多建一座电厂，而是把大型用电需求变成电网可以调节的资源。",
+          "viewer_value": "观众能听懂一个反常识的电力变化：不新增发电机组，也可能增加电网调节能力；以及数据中心扩张为什么让“怎么用电”变得重要。",
+          "throughline": "先用“吉瓦级电厂却没有新发电机组”制造反差，解释虚拟电厂实际调的是需求；再用此前 100 兆瓦协议只有这次十分之一的对比，说明规模；接着交代数据中心扩张和电网承压的背景；最后区分“需求响应规模”与“持续发电能力”，落到用电大户正在成为电网调节资源。",
+          "keep": [
+            "开场反常识：吉瓦级电厂却没有新增发电机组，抓住注意力。",
+            "虚拟电厂／需求响应的基本机制：协调分散用电需求，为电网提供调节能力；这是全文解释核心。",
+            "谷歌与 Voltus 的吉瓦级需求响应协议，以及此前 100 兆瓦协议只有十分之一，提供具体规模对比。",
+            "数据中心扩张与电网承压背景，解释谷歌为何需要需求侧灵活性。",
+            "需求侧灵活性不同于新建发电厂、合同规模不等于持续发电能力，防止把“吉瓦级”误读成新电厂。"
+          ],
+          "leave_out": [
+            "下一代 Xbox 的 1200–1800 美元预估、Project Helix、零部件成本和补贴：与谷歌电力主题没有真实关联，且是未确认的内部预估，放进 3 分钟双线会分散注意力。",
+            "报道称该交易“看起来是超大规模云厂商同类最大的一笔”：需要多重限定，且 100 兆瓦到吉瓦级的对比已足够说明规模，不必再塞排名。",
+            "合同金额、具体数据中心地点、响应时长、调用频率等细节：现有材料没有支撑，也不影响观众理解需求侧灵活性这个核心，不引入。",
+            "旧稿结尾“数字的身份”“商业变化落到哪一步”的方法论总结：抽象且复述前文，不能带来新的具体认识。"
+          ],
+          "facts": [],
+          "openings": [
+            "听到“吉瓦级电厂”，你可能会以为谷歌又要建一座发电站。恰恰相反，这笔交易里没有新的发电机组，它要调的是用电。——反差最强，直接抓住“不建电厂的电厂”这个反常识点。",
+            "数据中心越建越多，电网压力越来越大。谷歌的解法不是再建一座电厂，而是把用电需求组织起来，让它在电网需要时变得可调。——从观众能感知的电力压力切入，更平稳。",
+            "“虚拟电厂”听起来像文字游戏：没有新的发电机组，怎么叫电厂？谷歌和 Voltus 的这笔交易，答案在用电侧。——用问题开场，但会把注意力先放在名词解释上。"
+          ],
+          "opening": "听到“吉瓦级电厂”，你可能会以为谷歌又要建一座发电站。恰恰相反，这笔交易里没有新的发电机组，它要调的是用电。",
+          "opening_facts": [],
+          "beats": [
+            {
+              "point": "虚拟电厂不是新建发电站，而是把分散的用电需求组织起来，在电网需要时提供调节能力；它属于需求侧灵活性，不等于新增发电装机。",
+              "facts": [],
+              "connection": "开场说调的是用电，观众自然会问：用电怎么像电厂一样起作用？"
+            },
+            {
+              "point": "谷歌这次是和 Voltus 签下需求响应协议，规模达到吉瓦级；报道提到，谷歌此前一份 100 兆瓦协议只有这次新协议的十分之一，说明这不是一个小规模试点。",
+              "facts": [],
+              "connection": "知道它调什么之后，接下来最直接的问题是：这次规模有多大？"
+            },
+            {
+              "point": "报道把这项安排放在数据中心扩张和电网承压的背景下：对谷歌这样的用电大户来说，除了找更多电，也得考虑怎么调整用电。",
+              "facts": [],
+              "connection": "规模之外，观众会想知道谷歌为什么现在要做这种安排。"
+            },
+            {
+              "point": "吉瓦级描述的是需求响应可聚合的规模，不是一座能持续满功率发电的新机组；把它直接当成新增发电装机，就会误读这个数字。",
+              "facts": [],
+              "connection": "说到这里，最容易产生的误读是：吉瓦级是不是等于多了一座吉瓦电厂？需要把这个数字的身份说清。"
+            },
+            {
+              "point": "这期最值得记住的不是合同数字本身，而是大型用电户正在变成电网的一种调节资源；数据中心扩张带来的电力压力，可能有一部分要靠用电侧的灵活性来消化。",
+              "facts": [],
+              "connection": "把规模、背景和边界放在一起，最后能留下一个比合同数字更具体的判断。"
+            }
+          ],
+          "material": "Fast Company 报道（2026-10-22）：谷歌与 Voltus 签下吉瓦级需求响应虚拟电厂协议。报道提到，谷歌此前一份 100 兆瓦的协议，规模只有这次新协议的十分之一；并把这项安排放在谷歌数据中心扩张、电网承压的背景下。\n报道强调，这属于需求侧的电网灵活性，和新建一座发电厂不是一回事：它协调的是分散的用电需求，为电网提供调节能力，而不是增加发电装机。\n口播可用限定：吉瓦级是需求响应／可聚合需求的规模，不要写成一座持续满功率发电的新机组，也不要把合同规模说成随时都能输出同等电力。\n来源：https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+        },
+        "checks": {
+          "version": 2,
+          "issues": [
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。",
+              "problem": "前一句已经说 100 兆瓦只有新协议的十分之一，这里又把同一关系说成“十倍”；加上“不是小打小闹”和“不是小范围试水”，整段在反复证明“这次很大”。",
+              "why": "观众在规模这个点上被重复告知同一件事，节奏会拖；如果“吉瓦级”不是精确的 1 吉瓦，“十倍”还会让人误以为容量已经精确锁定。",
+              "suggestion": "压成一句，只保留对比和来源，例如“报道提到，谷歌此前有一份 100 兆瓦的协议；这次到吉瓦级，合同规模明显上了一个台阶”。如果来源确认正好是 1 吉瓦，再保留“十倍”，并删掉“小打小闹/试水”的重复判断。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 4,
+              "paragraph": 0,
+              "quote": "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。",
+              "problem": "开场已经用同一组话纠正过“吉瓦级不是新发电机组”，这里在讲完“为什么现在做”后又回到同一个纠正，像把进度条往回拖；“这两个数字量的不是一回事”也拗口。",
+              "why": "观众会觉得刚听懂的概念又被重讲一遍，主线从“角色变化”退回定义澄清，中后段容易失去耐心；真正的新信息——合同量级不等于随时可兑现——被重复的“误读”铺垫埋住。",
+              "suggestion": "删掉这段的重新铺垫，把“合同上的量级不等于实际能兑现，要看电网什么时候需要、能调动多少负荷”并进 S1P1 或 S3P1 的规模说明；若保留，改成“这两个说法不是一回事”，直接讲限制。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 5,
+              "paragraph": 0,
+              "quote": "现在，同样的规模反过来也能变成帮电网卸压力的资源。",
+              "problem": "“同样的规模”指代不清，听起来像谷歌全部用电规模都能反转成电网资源；前文刚说过真正能兑现多少要看可调负荷，这里又把反转说得太顺。",
+              "why": "观众可能把“可调节的一部分”理解成“同样大的用电都能随时卸掉”，对虚拟电厂的能力产生过度印象，结尾的说服力反而变弱。",
+              "suggestion": "把主语收窄到可调节部分，例如“其中可调节的那部分用电，可以从给电网添压力，变成帮电网卸压力”。保留角色反转的亮点，不扩大事实边界。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "“需求响应协议”具体是什么意思？和后面说的虚拟电厂是什么关系，第一耳朵没接上。",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "Voltus 是谁、谷歌在这笔交易里具体要做什么（少用电还是买调节服务），开场没交代，会让交易角色有点模糊。",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "吉瓦和兆瓦怎么换算？不熟单位的人听到“100兆瓦到吉瓦级是十倍”会跟不上这个十倍怎么来的。",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model"
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 4,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "前面再次解释“吉瓦级不是电厂”，和开场意思重复，容易觉得绕；到“真正能兑现多少”才重新有推进。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model"
+            }
+          ],
+          "quiz": {
+            "items": [],
+            "score": null
+          },
+          "newcomer": null,
+          "core_message_match": null,
+          "core_message_note": "",
+          "model_ran": true,
+          "audits_complete": true,
+          "pending_review": false,
+          "summary": {
+            "serious": 0,
+            "must": 0,
+            "warn": 7,
+            "rule_must": 0,
+            "questions": 3,
+            "lost": 1,
+            "quiz_score": null,
+            "low_scores": [],
+            "by_audit": {
+              "fact": {
+                "serious": 0,
+                "must": 0,
+                "warn": 0
+              },
+              "comprehension": {
+                "serious": 0,
+                "must": 0,
+                "warn": 4
+              },
+              "communication": {
+                "serious": 0,
+                "must": 0,
+                "warn": 3
+              }
+            },
+            "passed": true,
+            "rank": 0
+          },
+          "rounds": 1,
+          "deletions": [],
+          "initial": [
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "这次看两件商业消息：谷歌通过虚拟电厂寻找用电弹性，下一代 Xbox 则传出更高的成本预估。前者关系到数据中心怎么用电，后者关系到硬件成本如何传到售价。两件事都需要把已经达成的安排，和仍在估算的数字分清。",
+              "problem": "开场像内部读稿目录加写作提醒：先报两条不相干消息，再告诉观众“要把安排和估算分清”，却没有抛出一个具体的矛盾或问题。",
+              "why": "陌生观众不知道先关心哪一条，也听不出两条消息为什么值得放在一起，容易在开场就失去继续听的动机。",
+              "suggestion": "如果保留双条，删掉总括式“分清”提醒，给每条一句自己的钩子：谷歌这条用“数据中心不建电厂，而是把用电需求组织成可调节资源”切入；Xbox 这条用“内部预估的最高价如何反映硬件成本压力”切入。若两条没有真实关联，不必硬加共同主题，直接做两个短小分段。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "合同规模说明了这项安排的量级，不能直接当成它在任意时刻都能提供的实际调节效果。",
+              "problem": "这句只留下一个法律感很强的边界提醒，却没有讲虚拟电厂具体怎么“调节”，观众听完仍不知道这项安排在实际运行中是什么样。",
+              "why": "“任意时刻”“实际调节效果”都是抽象说法，听众只能记住一句限制，记不住机制，也很难感到这件事和自己有关。",
+              "suggestion": "先给一个可感知的运行场景：电网紧张时，把分散的数据中心用电需求集中起来临时响应；再说吉瓦级是合同可聚合的规模，不等于任何时刻都能调出同样多。把“任意时刻”换成观众能理解的运行条件。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "另一篇 Fast Company 报道转述了一份据称来自微软内部的预估：代号 Project Helix 的下一代 Xbox，消费者价格可能在一千二百到一千八百美元之间。这里要保留“据报道”和“可能”，它不是微软已经公布的零售价。",
+              "problem": "“这里要保留‘据报道’和‘可能’”是写稿备注，不是讲给观众的话；而且上一句已经交代了转述和可能，这里又重复一次。",
+              "why": "听众会被拉出新闻，感觉在听内部审稿，而不是在听一条值得知道的商业消息；注意力被花在措辞提醒上，而不是价格预估意味着什么。",
+              "suggestion": "把归属自然放进一句转述里：Fast Company 转述一份据称来自微软内部的预估，称 Project Helix 售价可能在 1200 到 1800 美元；微软尚未公布零售价。删掉“这里要保留”这类写作备注。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "文章讨论了零部件成本压力，也指出，如果微软选择补贴硬件，售价仍可能下降。所以，一千八百美元是这份报道所述区间的上沿，不能改写成下一代 Xbox 就卖这个价。最终定价要看正式公布的信息。",
+              "problem": "“所以……不能改写成……最终定价……”连续三次重复同一个边界；而“零部件成本压力”和“补贴硬件”这两个真正有解释力的点只是一笔带过。另外“售价仍可能下降”缺少比较对象，听起来像价格会随时间下跌。",
+              "why": "观众听到的是一串防御性免责声明，而不是成本压力与补贴之间的商业取舍；既没有增加理解，也消耗了耐心。",
+              "suggestion": "只留一次边界：1800 美元是报道所述区间的上沿，不是发布价。然后把篇幅放在取舍上：零部件成本上涨会推高成本，微软若补贴硬件，售价可能低于这个预估区间。把“仍可能下降”改成“可能低于这个预估区间”。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "这两件消息里的数字，代表的事情不同。虚拟电厂的规模，要和需求调节的运行条件一起看；下一代主机的价格预估，要和正式零售价分开看。把数字的身份看清楚，才能知道商业变化究竟落到了哪一步。",
+              "problem": "结尾把开场和两条的提醒又复述一遍，落点停在“数字的身份”这种抽象方法论上，没有留下一个具体的发现或判断。",
+              "why": "观众听完最后的记忆是一句读稿原则，而不是“谷歌在把数据中心用电变成可调节资源”或“Xbox 的成本压力最后由谁承担”，收获感被削弱。",
+              "suggestion": "用具体收束替代方法论总结：谷歌这条的看点是数据中心开始被当作可调节的电力资源；Xbox 这条的看点是成本压力最后由消费者承担，还是由微软用补贴吸收。若做双条，可留一个开放问题，不必再总结“数字身份”。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "吉瓦级大概是什么量级？是合同总规模，还是随时能调用的规模？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "合同规模为什么不能直接当成任意时刻的实际调节效果？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "“数据中心扩张和电网承压”之后又讲合同规模与实际效果的区别，但没给具体场景，抽象限制连着出现，容易走神。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "如果微软补贴硬件，售价下降是相对一千二到一千八的预估，还是相对成本？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "前面刚说过“据报道、可能”，这里又强调“不能改写成就卖这个价”，免责重复，节奏有点拖。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "所以目前是一个已达成安排、一个仍只是预估，对吗？结尾能不能直接说清两件事各走到哪一步？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "总结偏抽象，“数字的身份”“商业变化落到哪一步”没有给出一句具体结论，听完的收获感弱。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": true
+            }
+          ]
+        },
+        "decision": {
+          "listening": {
+            "A": "开场“这次看两件商业消息”像栏目摘要，缺少让我非听下去不可的钩子；直到“这里的‘电厂’并不是新建一座发电站，而是协调分散的用电需求”才产生具体兴趣，因为它把陌生概念翻成了可理解的用电调节。随后“另一篇 Fast Company 报道”从谷歌硬切到 Xbox，像从一段解释跳进第二条摘要，我在这里明显走神；结尾“把数字的身份看清楚”正确但偏总结陈词，没留下具体画面。",
+            "B": "开场“听到‘吉瓦级电厂’，你大概会以为谷歌又要建一座发电站。恰恰相反”直接抓住误区，我愿意继续；“没有一台新的发电机组——它要调的不是发电，是用电”给出清晰反差，“像多了一台能快起快停的机组，但没多烧一克燃料”让虚拟电厂一下子可感。中段从100兆瓦到吉瓦级、再到数据中心扩张，转场顺；但在“但这里最容易误读的一步”前后又重复“不是多一座吉瓦电厂”，稍显绕，不过没有跟丢。结尾“它不缺电厂，缺的是在关键时刻愿意配合的用电”有记忆点，也略口号化。"
+          },
+          "choice": "B",
+          "reason": "决定性差异在开头和中段维持兴趣的方式：A用“这次看两件商业消息”和“另一篇 Fast Company 报道”组织，像摘要拼接，我在转场处走神；B用“没有一台新机组”的悖论和“调的不是发电，是用电”的对比，把同一概念讲成可感知的动作。选B不是因为它覆盖更多，而是它让陌生概念在耳朵里立住了，转场也更顺。",
+          "remaining": [
+            "“不是多一座吉瓦电厂”这一区分在开头、中段和结尾反复出现，后两处可压缩，避免听众觉得绕。",
+            "结尾“缺的是在关键时刻愿意配合的用电”有记忆点但偏口号，若补一句具体条件——何时需要、如何调动——会更扎实。",
+            "B把解释重心几乎全放在虚拟电厂上，若节目开场或标题让听众预期还有第二条消息，会形成预期落差；这是节目预期管理问题，不是覆盖完整性问题。"
+          ]
+        }
+      },
+      {
+        "applied": false,
+        "before": [
+          {
+            "title": "没有新机组的吉瓦级电厂",
+            "paragraphs": [
+              {
+                "text": "听到“吉瓦级电厂”，你大概会以为谷歌又要建一座发电站。恰恰相反，这笔交易里没有一台新的发电机组——它要调的不是发电，是用电。谷歌和 Voltus 签的是一份吉瓦级的需求响应协议，这个规模按可以聚合的用电需求算，不是按新装机的发电容量算。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "稿件明确说了「没有一台新的发电机组」和「按可以聚合的用电需求算」，这两点与来源对谷歌与 Voltus 吉瓦级需求响应协议的描述以及「需求侧灵活性不同于新建发电厂」这一限定一致；讲稿把这笔交易讲成「吉瓦级」也符合来源，没有把它说成「全球最大」或说「容量未公布」。",
+                  "sources": [
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "用电怎么像电厂一样干活",
+            "paragraphs": [
+              {
+                "text": "所谓虚拟电厂，做法是把大量分散的用电户组织起来，当成一股可以收放的负荷：电网吃紧的时候，大家一起把一部分用电降下来；紧张过去了，再把用电补回去。对电网来说，这有点像多了一台能快起快停的机组，但它没有多烧一克燃料，也没有多发出一度电。它提供的是调节能力，属于需求侧的灵活性。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "这是对需求响应、虚拟电厂机制的定性解释，符合来源中「需求侧电网灵活性」的框架；稿件中没有把它表述成谷歌实测或行业共识数据，且「有点像多了一台能快起快停的机组」只是类比，没有说成事实。",
+                  "sources": [
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              },
+              {
+                "text": "这里的关键区别是：新建电厂增加的是供给，虚拟电厂调整的是需求。一条路是“多发一点”，另一条路是“晚用一点、少用一点”。所以在看这类交易之前，第一件事是分清它动的是哪一头。",
+                "citations": [],
+                "evidence": "UNCITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "not_factual",
+                  "reason": "这是供给与需求两组概念的过渡性框架说明，没有需要来源支持的具体事实主张。",
+                  "sources": []
+                }
+              }
+            ]
+          },
+          {
+            "title": "十分之一的对比",
+            "paragraphs": [
+              {
+                "text": "规模上，这次不是小打小闹。报道提到，谷歌此前有一份 100 兆瓦的协议，只有这次新协议的十分之一。从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "代码发现标出的「100」确实有依据：来源写明谷歌早前一份协议为 100 MW，是新协议的十分之一；据此说「从 100 兆瓦到吉瓦级，跨度是十倍」与来源一致，且稿件已用「至少从合同规模看」限定为合同层面的比较，没有超出来源变成发电能力结论。",
+                  "sources": [
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "为什么是现在",
+            "paragraphs": [
+              {
+                "text": "那谷歌为什么现在要做这件事？报道把这项安排放在数据中心扩张、电网承压的背景下。数据中心的用电量大，增长又快，电网在高峰时段会更吃紧。对谷歌这样的用电大户来说，问题不只是“去哪儿找更多的电”，还包括“用电能不能变得更听话”。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "来源确实把该安排置于数据中心扩张与电网承压的背景中，稿件中有「报道把……」的归因，问题和语境都没有超出来源。",
+                  "sources": [
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "吉瓦级不等于吉瓦电厂",
+            "paragraphs": [
+              {
+                "text": "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。这两个数字量的不是一回事。吉瓦级说的是可以聚合起来参与调节的需求规模，是合同上的量级；它不是一台能持续满功率运转的机组，也不意味着电网随时要用，就能立刻拿出这么多电。真正能兑现多少，要看电网什么时候需要，以及那时能调动起多少负荷。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "稿件沿用来源的核心限定：吉瓦级属于可聚合的调节需求，与新建发电机组的容量不同；「真正能兑现多少取决于电网需要和可调动负荷」是对需求响应机制的定性说明，没有与来源冲突，也没有编造具体兑现量。",
+                  "sources": [
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "title": "用电大户成了调节资源",
+            "paragraphs": [
+              {
+                "text": "所以这笔交易真正的看点，不是合同上那个数字，而是角色的变化：过去说起用电大户，想到的往往是给电网添压力的一方；现在，同样的规模反过来也能变成帮电网卸压力的资源。数据中心扩张带来的电力紧张，可能有一部分不必靠多建电厂来解决，而是靠让用电更灵活来消化。这大概也是虚拟电厂最反常识的地方——它不缺电厂，缺的是在关键时刻愿意配合的用电。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null,
+                "fact_verification": {
+                  "status": "verified",
+                  "reason": "稿件把用电大户的角色变化讲成需求侧灵活性的意义，并用「可能有一部分」保留不确定性，没有升级为定论；也没有把「同类最大」等来源保留的说法写进正文。",
+                  "sources": [
+                    "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "targets": {
+          "S3P1": [
+            "【编辑建议，按实际效果取舍】前一句已经说 100 兆瓦只有新协议的十分之一，这里又把同一关系说成“十倍”；加上“不是小打小闹”和“不是小范围试水”，整段在反复证明“这次很大”。；建议：压成一句，只保留对比和来源，例如“报道提到，谷歌此前有一份 100 兆瓦的协议；这次到吉瓦级，合同规模明显上了一个台阶”。如果来源确认正好是 1 吉瓦，再保留“十倍”，并删掉“小打小闹/试水”的重复判断。"
+          ],
+          "S5P1": [
+            "【编辑建议，按实际效果取舍】开场已经用同一组话纠正过“吉瓦级不是新发电机组”，这里在讲完“为什么现在做”后又回到同一个纠正，像把进度条往回拖；“这两个数字量的不是一回事”也拗口。；建议：删掉这段的重新铺垫，把“合同上的量级不等于实际能兑现，要看电网什么时候需要、能调动多少负荷”并进 S1P1 或 S3P1 的规模说明；若保留，改成“这两个说法不是一回事”，直接讲限制。",
+            "【编辑建议，按实际效果取舍】前面再次解释“吉瓦级不是电厂”，和开场意思重复，容易觉得绕；到“真正能兑现多少”才重新有推进。；建议：放慢、补一步推理，或换个说法"
+          ],
+          "S6P1": [
+            "【编辑建议，按实际效果取舍】“同样的规模”指代不清，听起来像谷歌全部用电规模都能反转成电网资源；前文刚说过真正能兑现多少要看可调负荷，这里又把反转说得太顺。；建议：把主语收窄到可调节部分，例如“其中可调节的那部分用电，可以从给电网添压力，变成帮电网卸压力”。保留角色反转的亮点，不扩大事实边界。"
+          ]
+        },
+        "before_title": "吉瓦级电厂，却没有一台新机组",
+        "mode": "whole_script",
+        "prompt_version": 5,
+        "title": "谷歌的吉瓦级合同，买的不是电，是用电的弹性",
+        "sections": [
+          {
+            "title": "十倍规模，却没有机组",
+            "paragraphs": [
+              {
+                "text": "谷歌最近签了一份电力合同，规模是它此前一份同类协议的十倍。此前是100兆瓦，这次到了吉瓦级。可有意思的是，这份合同里没有一台发电机组。它买的不是更多的电，而是用电可以灵活调整的能力。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "这份协议是谷歌和Voltus签的，属于需求响应，也被归在虚拟电厂这一类。名字里有“电厂”，但它并不新增发电。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "没有机组，凭什么像电厂",
+            "paragraphs": [
+              {
+                "text": "那它凭什么按电厂的规模来算？需求响应和虚拟电厂，通常是把分散的可调节用电聚合起来。电网紧张时，让这些用电少一点，或者错开时间用；等紧张过去，再补回来。它提供的是调节能力，不增加发电量。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "所以“吉瓦级”量的不是一台能持续满功率输出的新机组，而是可以参与调节的需求规模。实际能兑现多少，要看电网什么时候需要，以及那一刻能调动多少负荷。它更像一份随时可以调用的缓冲，而不是一台一直转的发电机。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "为什么是用电大户",
+            "paragraphs": [
+              {
+                "text": "报道把这项安排放在数据中心扩张、电网承压的背景里。谷歌既是大型用电户，也能把其中可调节的那部分用电，从给电网添压力，变成帮电网卸压力。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "于是故事的重点就变了：不是“又多了一座电厂”，而是用电大户的角色变了。它不再只是被动地消耗电，在电网吃紧的时候，它也能让出一部分负荷，帮电网缓一口气。当然，这里说的是可调节的那部分，不是把谷歌的全部用电都当成资源。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          },
+          {
+            "title": "多一种工具，不是不用建电厂",
+            "paragraphs": [
+              {
+                "text": "更大的变化是思路。面对电力增长，除了多发一度电、再建一座电厂，还可以让用电更听话：该用的时候用，电网吃紧的时候让一让。可这不等于不用建电厂。需求响应是补充，不是替代。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              },
+              {
+                "text": "这份合同真正值得记住的，不是“谷歌又建了一座吉瓦级电厂”，而是“吉瓦级”也可以用来形容一份可调用的用电弹性。它最后能发挥多大作用，取决于电网什么时候需要，以及那时能调动多少负荷。",
+                "citations": [
+                  "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+                ],
+                "evidence": "CITED",
+                "note": null
+              }
+            ]
+          }
+        ],
+        "editorial_brief": {
+          "considered": [
+            "从“吉瓦级电厂却没有一台机组”的悖论切入：有冲击力，但容易把整期变成名词纠正；原稿已经反复回到同一个澄清，听众会觉得绕。适合作为开场一句，不适合做主线。",
+            "从“AI/数据中心电力焦虑”展开：观众关心，但现有材料只有一笔合同，缺少数据中心用电量、电网缺口等支撑，容易讲空。",
+            "从“100 兆瓦到吉瓦级的十倍跃迁”做新闻钩子：具体、可验证，能立刻建立变化；但只讲规模会变成数字新闻，必须接上需求响应的机制。",
+            "从“用电大户变成电网可调节资源”讲：能用上十倍合同、需求响应、数据中心扩张和角色反转，解释空间足，也不靠堆参数。选择这个，把十倍跃迁放在开场做证据。"
+          ],
+          "angle": "谷歌这份吉瓦级合同真正买的不是电，而是用电的弹性；它让数据中心这类大型用电需求，成为电网紧张时可以调用的一份调节能力。",
+          "viewer_value": "听完能分清“新增发电”和“需求响应”不是一回事，理解为什么科技公司的用电增长反而可能变成电网资源，以后看到“吉瓦级虚拟电厂”不会误读成又建了一座电厂。",
+          "throughline": "先用 100 兆瓦到吉瓦级的十倍合同制造一个具体变化：规模变大，却没有新发电机组。接着解释需求响应如何把可调节的用电聚合成一份“像电厂一样”的调节能力，并说清“吉瓦级”量的是可调需求，不是能持续满功率输出的机组。然后把镜头拉到数据中心扩张和电网承压，说明为什么用电大户开始被当成资源。最后收在“不是不建电厂，而是多了一种调节工具”这个判断上。",
+          "keep": [
+            "100 兆瓦到吉瓦级的十倍对比：用具体变化替代“规模很大”，作为开场的事实支点。",
+            "需求响应/虚拟电厂的机制：解释“没有机组凭什么像电厂”，让观众跟上。",
+            "需求侧灵活性与新建电厂的区别：这是全篇的核心概念，只讲一次，后文不再反复纠正。",
+            "数据中心扩张、电网承压的背景：回答为什么是现在，也把谷歌的用电增长和交易连起来。",
+            "用电大户角色反转，但只限可调节部分：给故事意义，同时避免把谷歌全部用电说成资源。",
+            "实际兑现取决于电网需要和可调用负荷；需求响应是补充不是替代：收束时的边界，防止夸大。"
+          ],
+          "leave_out": [
+            "Xbox 价格报道：与本期电力主题无关。",
+            "“超大规模云厂商中看起来最大”这一说法：需要额外限定，且不是主线必需，省去“最大”之争。",
+            "Voltus 公司背景、谷歌其他能源交易、数据中心具体用电量：材料没有充分支撑，展开会分散主线。",
+            "把“吉瓦级”换算成 1 吉瓦并反复解释单位：数字服务听感即可，不做参数课。",
+            "原稿中“不是小打小闹/不是小范围试水”和多次“不是电厂”的重复：同一判断说一遍就够。",
+            "“谷歌全部用电都能反转成电网资源”或“需求响应可以替代新建电厂”：超出材料，且会误导。"
+          ],
+          "facts": [
+            "F1",
+            "F2",
+            "F3"
+          ],
+          "openings": [
+            "用十倍合同规模开场：“规模是此前同类协议的十倍，但没有一台发电机组”。具体、可验证，能立刻建立反差。",
+            "用“吉瓦级电厂却没有机组”的悖论开场：有冲击力，但容易变成名词纠正，原稿已出现重复。",
+            "用数据中心电力焦虑开场：观众关心，但材料只有一笔合同，缺少更大范围数据，容易讲空。",
+            "用“用电大户变成资源”的判断开场：观点清楚，但缺少具体事实，容易像评论。"
+          ],
+          "opening": "谷歌最近签了一份电力合同，规模是它此前一份同类协议的十倍。但这份合同里没有一台发电机组——它买的不是更多的电，而是用电可以灵活调整的能力。",
+          "opening_facts": [
+            "F1",
+            "F2"
+          ],
+          "beats": [
+            {
+              "point": "这不是又建一座电厂，而是谷歌与 Voltus 的吉瓦级需求响应协议；此前同类协议是 100 兆瓦，只有这次的十分之一。",
+              "facts": [
+                "F1"
+              ],
+              "connection": "十倍差距让人自然想问：不建机组，它凭什么按电厂规模来算？"
+            },
+            {
+              "point": "这类安排常被叫做虚拟电厂：把可调节的用电聚合起来，电网紧张时少用一点或错开用，紧张过去再补回来；它提供的是调节能力，不增加发电量。",
+              "facts": [
+                "F3",
+                "F2"
+              ],
+              "connection": "可它毕竟不是发电机，“吉瓦级”到底在量什么，需要说清。"
+            },
+            {
+              "point": "“吉瓦级”量的是可参与调节的需求规模，不是一个能持续满功率输出的机组；实际能兑现多少，要看电网什么时候需要，以及那时能调动多少负荷。",
+              "facts": [
+                "F1",
+                "F2",
+                "F3"
+              ],
+              "connection": "这个限制不否定它的价值，反而解释了为什么数据中心扩张会让这种能力变得重要。"
+            },
+            {
+              "point": "报道把这项安排放在数据中心扩张、电网承压的背景里。谷歌既是大型用电户，也能把其中可调节的那部分用电，从给电网添压力变成帮电网卸压力。",
+              "facts": [
+                "F1"
+              ],
+              "connection": "于是故事的重点从“又多了一座电厂”转到“用电大户的角色变了”。"
+            },
+            {
+              "point": "更大的变化是思路：面对电力增长，除了多发一度电，还可以让用电更听话；但需求响应是一种补充，不是替代新建电厂。",
+              "facts": [
+                "F1",
+                "F2",
+                "F3"
+              ],
+              "connection": "角色反转听起来很顺，但观众自然会问：那是不是不用建电厂了？这里需要给一个边界。"
+            }
+          ],
+          "material": "F1（Fast Company，2026-10-22）：谷歌与 Voltus 签署了一份吉瓦级需求响应/虚拟电厂协议。报道称，谷歌此前一份同类协议为 100 兆瓦，是这份新协议的十分之一。报道把这项安排放在谷歌数据中心扩张、电网承压的背景下。\nF2：报道明确区分，需求侧的电网灵活性不同于新建发电厂；这类安排提供的是调节能力，不是新增发电机组。\nF3（解释概念时可用，不是报道披露的谷歌具体运行数据）：需求响应/虚拟电厂通常是把分散的可调节用电聚合起来，在电网紧张时降低或转移用电，帮电网平衡供需；它不增加发电量。\n限定：不要把“吉瓦级”写成一台能持续满功率运行的新机组；不要写“容量未公布”；不要编造谷歌具体如何让数据中心降负荷、能降多少。\n来源：https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+        },
+        "checks": {
+          "version": 2,
+          "issues": [
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 1,
+              "quote": "这份合同真正值得记住的，不是“谷歌又建了一座吉瓦级电厂”，而是“吉瓦级”也可以用来形容一份可调用的用电弹性。它最后能发挥多大作用，取决于电网什么时候需要，以及那时能调动多少负荷。",
+              "problem": "结尾后半句又把 S2P2 已经解释过的“实际能兑现多少，要看电网什么时候需要、能调动多少负荷”说了一遍，像绕回同一个点。",
+              "why": "观众听到结尾期待一个收束或新判断，重复限定会削弱“听完有所收获”的感觉。",
+              "suggestion": "保留 S2P2 的初次解释；结尾删掉重复的兑现条件，改为回扣真正的新意：用电大户的可调节负荷也能变成电网可调用的缓冲，需求响应是补充而非替代。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "当然，这里说的是可调节的那部分，不是把谷歌的全部用电都当成资源。",
+              "problem": "前一句已经说了“其中可调节的那部分用电”，这里再单独补一句限定，读起来像内部备注或免责声明。",
+              "why": "事实边界必要，但重复说明会拖慢节奏，让观众从“角色变化”这个重点上分神。",
+              "suggestion": "删掉这句，或把它压缩进前句，例如“只涉及可调节负荷，不是谷歌全部用电”；不要另起一句重复解释。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "报道把这项安排放在数据中心扩张、电网承压的背景里。",
+              "problem": "“报道”没有指向具体来源，句子像在转述内部资料，而不是直接对观众讲背景。",
+              "why": "观众不知道是谁说的，也不容易立刻感到数据中心扩张和这份合同之间的关系。",
+              "suggestion": "直接讲背景并自然归因：如“在数据中心扩张、电网承压的背景下，这项安排……”，或点明具体媒体/机构；把背景和谷歌的用电角色接得更紧。",
+              "source": "model",
+              "editorial": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 1,
+              "quote": "这份协议是谷歌和Voltus签的，属于需求响应，也被归在虚拟电厂这一类。",
+              "problem": "Voltus 是谁没有交代，紧接着又出现“需求响应”“虚拟电厂”两个陌生术语，普通观众会短暂失去落点。",
+              "why": "开场后的第二段正是建立理解框架的时候，名词堆叠会增加跟听成本。",
+              "suggestion": "给 Voltus 一个最短身份，如“一家叫 Voltus 的需求响应公司”；先用一句白话解释“电网紧张时让用电方主动少用一点”，再带出“虚拟电厂”这个叫法。",
+              "source": "model",
+              "editorial": true
+            }
+          ],
+          "quiz": {
+            "items": [],
+            "score": null
+          },
+          "newcomer": null,
+          "core_message_match": null,
+          "core_message_note": "",
+          "model_ran": true,
+          "audits_complete": true,
+          "pending_review": false,
+          "summary": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4,
+            "rule_must": 0,
+            "questions": 0,
+            "lost": 0,
+            "quiz_score": null,
+            "low_scores": [],
+            "by_audit": {
+              "fact": {
+                "serious": 0,
+                "must": 0,
+                "warn": 0
+              },
+              "comprehension": {
+                "serious": 0,
+                "must": 0,
+                "warn": 0
+              },
+              "communication": {
+                "serious": 0,
+                "must": 0,
+                "warn": 4
+              }
+            },
+            "passed": true,
+            "rank": 0
+          },
+          "rounds": 2,
+          "deletions": [],
+          "initial": [
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 0,
+              "paragraph": 0,
+              "quote": "这次看两件商业消息：谷歌通过虚拟电厂寻找用电弹性，下一代 Xbox 则传出更高的成本预估。前者关系到数据中心怎么用电，后者关系到硬件成本如何传到售价。两件事都需要把已经达成的安排，和仍在估算的数字分清。",
+              "problem": "开场像内部读稿目录加写作提醒：先报两条不相干消息，再告诉观众“要把安排和估算分清”，却没有抛出一个具体的矛盾或问题。",
+              "why": "陌生观众不知道先关心哪一条，也听不出两条消息为什么值得放在一起，容易在开场就失去继续听的动机。",
+              "suggestion": "如果保留双条，删掉总括式“分清”提醒，给每条一句自己的钩子：谷歌这条用“数据中心不建电厂，而是把用电需求组织成可调节资源”切入；Xbox 这条用“内部预估的最高价如何反映硬件成本压力”切入。若两条没有真实关联，不必硬加共同主题，直接做两个短小分段。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "合同规模说明了这项安排的量级，不能直接当成它在任意时刻都能提供的实际调节效果。",
+              "problem": "这句只留下一个法律感很强的边界提醒，却没有讲虚拟电厂具体怎么“调节”，观众听完仍不知道这项安排在实际运行中是什么样。",
+              "why": "“任意时刻”“实际调节效果”都是抽象说法，听众只能记住一句限制，记不住机制，也很难感到这件事和自己有关。",
+              "suggestion": "先给一个可感知的运行场景：电网紧张时，把分散的数据中心用电需求集中起来临时响应；再说吉瓦级是合同可聚合的规模，不等于任何时刻都能调出同样多。把“任意时刻”换成观众能理解的运行条件。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 0,
+              "quote": "另一篇 Fast Company 报道转述了一份据称来自微软内部的预估：代号 Project Helix 的下一代 Xbox，消费者价格可能在一千二百到一千八百美元之间。这里要保留“据报道”和“可能”，它不是微软已经公布的零售价。",
+              "problem": "“这里要保留‘据报道’和‘可能’”是写稿备注，不是讲给观众的话；而且上一句已经交代了转述和可能，这里又重复一次。",
+              "why": "听众会被拉出新闻，感觉在听内部审稿，而不是在听一条值得知道的商业消息；注意力被花在措辞提醒上，而不是价格预估意味着什么。",
+              "suggestion": "把归属自然放进一句转述里：Fast Company 转述一份据称来自微软内部的预估，称 Project Helix 售价可能在 1200 到 1800 美元；微软尚未公布零售价。删掉“这里要保留”这类写作备注。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "文章讨论了零部件成本压力，也指出，如果微软选择补贴硬件，售价仍可能下降。所以，一千八百美元是这份报道所述区间的上沿，不能改写成下一代 Xbox 就卖这个价。最终定价要看正式公布的信息。",
+              "problem": "“所以……不能改写成……最终定价……”连续三次重复同一个边界；而“零部件成本压力”和“补贴硬件”这两个真正有解释力的点只是一笔带过。另外“售价仍可能下降”缺少比较对象，听起来像价格会随时间下跌。",
+              "why": "观众听到的是一串防御性免责声明，而不是成本压力与补贴之间的商业取舍；既没有增加理解，也消耗了耐心。",
+              "suggestion": "只留一次边界：1800 美元是报道所述区间的上沿，不是发布价。然后把篇幅放在取舍上：零部件成本上涨会推高成本，微软若补贴硬件，售价可能低于这个预估区间。把“仍可能下降”改成“可能低于这个预估区间”。",
+              "source": "model",
+              "editorial": true,
+              "resolved": false
+            },
+            {
+              "audit": "communication",
+              "rule": "S1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "这两件消息里的数字，代表的事情不同。虚拟电厂的规模，要和需求调节的运行条件一起看；下一代主机的价格预估，要和正式零售价分开看。把数字的身份看清楚，才能知道商业变化究竟落到了哪一步。",
+              "problem": "结尾把开场和两条的提醒又复述一遍，落点停在“数字的身份”这种抽象方法论上，没有留下一个具体的发现或判断。",
+              "why": "观众听完最后的记忆是一句读稿原则，而不是“谷歌在把数据中心用电变成可调节资源”或“Xbox 的成本压力最后由谁承担”，收获感被削弱。",
+              "suggestion": "用具体收束替代方法论总结：谷歌这条的看点是数据中心开始被当作可调节的电力资源；Xbox 这条的看点是成本压力最后由消费者承担，还是由微软用补贴吸收。若做双条，可留一个开放问题，不必再总结“数字身份”。",
+              "source": "model",
+              "editorial": true,
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "吉瓦级大概是什么量级？是合同总规模，还是随时能调用的规模？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "合同规模为什么不能直接当成任意时刻的实际调节效果？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 1,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "“数据中心扩张和电网承压”之后又讲合同规模与实际效果的区别，但没给具体场景，抽象限制连着出现，容易走神。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "如果微软补贴硬件，售价下降是相对一千二到一千八的预估，还是相对成本？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 2,
+              "paragraph": 1,
+              "quote": "",
+              "problem": "前面刚说过“据报道、可能”，这里又强调“不能改写成就卖这个价”，免责重复，节奏有点拖。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N1",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "所以目前是一个已达成安排、一个仍只是预估，对吗？结尾能不能直接说清两件事各走到哪一步？",
+              "why": "新观众在这里有疑问，后面的内容就听不进去",
+              "suggestion": "在这之前补上需要的解释",
+              "source": "model",
+              "resolved": true
+            },
+            {
+              "audit": "comprehension",
+              "rule": "N2",
+              "severity": "warn",
+              "section": 3,
+              "paragraph": 0,
+              "quote": "",
+              "problem": "总结偏抽象，“数字的身份”“商业变化落到哪一步”没有给出一句具体结论，听完的收获感弱。",
+              "why": "新观众在这里跟不上，或可能理解错",
+              "suggestion": "放慢、补一步推理，或换个说法",
+              "source": "model",
+              "resolved": true
+            }
+          ]
+        },
+        "decision": {
+          "listening": {
+            "A": "开场“你大概会以为谷歌又要建一座发电站。恰恰相反”很像在纠正一个直觉，我愿意继续听；“它要调的不是发电，是用电”和“没有多烧一克燃料，也没有多发出一度电”把虚拟电厂讲成了具体动作。中段“这里的关键区别”到“最容易误读”连续重申供给与需求的区别，我有一点走神，但数据中心的背景和结尾“它不缺电厂，缺的是在关键时刻愿意配合的用电”又把我拉回来。",
+            "B": "开场“这份合同里没有一台发电机组……买的不是更多的电，而是用电可以灵活调整的能力”也能让我想听，“更像一份随时可以调用的缓冲”这个说法清楚。可是后面“于是故事重点就变了”“更大的变化是思路”“真正值得记住的”连续几次收束，我在第二次之后开始觉得在原地绕；最后“取决于电网什么时候需要，以及那时能调动多少负荷”又重复前文，注意力明显松掉。"
+          },
+          "choice": "A",
+          "reason": "A 的开场更像在直接纠正我的第一反应，后面的“快起快停的机组”和“没多烧一克燃料”让抽象交易立刻可感，结尾也有一句记得住的话。B 虽然更平稳，但中后段反复用“重点变了”“更大的变化”“真正值得记住”来总结同一件事，听感上像绕圈，削弱了继续听的劲头。",
+          "remaining": [
+            "A 中段“这里的关键区别”和“最容易误读”两次解释同一组供需区别，节奏略拖；“100兆瓦只有十分之一”和“跨度十倍”也是同一比较的重复，可压掉一处。",
+            "“需求侧灵活性”仍偏术语，前面的日常解释已经够用，这里可以换成更口语的说法，避免短暂卡顿。"
+          ]
+        }
+      }
+    ]
+  },
+  "created_by": "用户授权·样本质量修订",
+  "created_at": "2026-10-24T10:20:36+0800"
+}

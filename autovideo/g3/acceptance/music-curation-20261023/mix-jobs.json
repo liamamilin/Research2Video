@@ -1,0 +1,142 @@
+[
+  {
+    "recipe": "ai_news",
+    "parent": "3bf58b29-665e-4e7f-8c97-ac7e01dc34eb",
+    "asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+    "request": {
+      "background_music": {
+        "enabled": true,
+        "asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+        "level_db": -18,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2
+      }
+    },
+    "response": {
+      "job_id": "5a9eedd8-8e2d-462c-92ea-20189d2c819f",
+      "parent_job_id": "3bf58b29-665e-4e7f-8c97-ac7e01dc34eb",
+      "status": "QUEUED"
+    }
+  },
+  {
+    "recipe": "how_to",
+    "parent": "d4d94a54-4852-4f7c-93a1-2c219633d660",
+    "asset_id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+    "request": {
+      "background_music": {
+        "enabled": true,
+        "asset_id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+        "level_db": -18,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2
+      }
+    },
+    "response": {
+      "job_id": "7e4aeb7f-fbc8-4680-baf3-531229ca9dc6",
+      "parent_job_id": "d4d94a54-4852-4f7c-93a1-2c219633d660",
+      "status": "QUEUED"
+    }
+  },
+  {
+    "recipe": "science_explainer",
+    "parent": "1a43e8fa-3b3c-4559-aba4-fe48fee3b2d3",
+    "asset_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+    "request": {
+      "background_music": {
+        "enabled": true,
+        "asset_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+        "level_db": -18,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2
+      }
+    },
+    "response": {
+      "job_id": "9b03ae94-e9ac-484b-b003-2e4123ef1815",
+      "parent_job_id": "1a43e8fa-3b3c-4559-aba4-fe48fee3b2d3",
+      "status": "QUEUED"
+    }
+  },
+  {
+    "recipe": "ai_news",
+    "parent": "3bf58b29-665e-4e7f-8c97-ac7e01dc34eb",
+    "asset_id": "layered_space",
+    "request": {
+      "background_music": {
+        "enabled": true,
+        "asset_id": "layered_space",
+        "level_db": -18,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2
+      }
+    },
+    "response": {
+      "job_id": "28aefc33-95ba-43eb-b4b8-2ecd04fb6113",
+      "parent_job_id": "3bf58b29-665e-4e7f-8c97-ac7e01dc34eb",
+      "status": "QUEUED"
+    }
+  },
+  {
+    "recipe": "science_explainer",
+    "parent": "1a43e8fa-3b3c-4559-aba4-fe48fee3b2d3",
+    "asset_id": "ambient_pad",
+    "request": {
+      "background_music": {
+        "enabled": true,
+        "asset_id": "ambient_pad",
+        "level_db": -18,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2
+      }
+    },
+    "response": {
+      "job_id": "11c149b6-3bbd-4ad1-ae9f-2202d1684049",
+      "parent_job_id": "1a43e8fa-3b3c-4559-aba4-fe48fee3b2d3",
+      "status": "QUEUED"
+    }
+  },
+  {
+    "recipe": "reference",
+    "parent": "d4d94a54-4852-4f7c-93a1-2c219633d660",
+    "asset_id": "pulse_loop",
+    "request": {
+      "background_music": {
+        "enabled": true,
+        "asset_id": "pulse_loop",
+        "level_db": -18,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2
+      }
+    },
+    "response": {
+      "job_id": "3191f9dc-f944-47e5-9988-e331e877c6d4",
+      "parent_job_id": "d4d94a54-4852-4f7c-93a1-2c219633d660",
+      "status": "QUEUED"
+    }
+  },
+  {
+    "recipe": "reference",
+    "parent": "d4d94a54-4852-4f7c-93a1-2c219633d660",
+    "asset_id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+    "request": {
+      "background_music": {
+        "enabled": true,
+        "asset_id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+        "level_db": -18,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2
+      }
+    },
+    "response": {
+      "job_id": "1e5c5837-1092-4cae-b195-af80e5ef6ef6",
+      "parent_job_id": "d4d94a54-4852-4f7c-93a1-2c219633d660",
+      "status": "QUEUED"
+    }
+  }
+]

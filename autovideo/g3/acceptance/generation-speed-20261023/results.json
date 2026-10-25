@@ -1,0 +1,188 @@
+{
+  "render_benchmark": {
+    "scope": "Same preserved IR, PCM, captions, renderer source and quality flags; no model/TTS regeneration",
+    "variants": [
+      {
+        "source_run": "g3/data/packaging-library-20261023/information-2",
+        "resources": {
+          "concurrency": 1,
+          "requested": "1",
+          "logical_cpus": 12,
+          "physical_memory_bytes": 51539607552,
+          "width": 1920,
+          "height": 1080,
+          "fps": 30,
+          "crf": 18
+        },
+        "render_seconds": 68.249,
+        "content_seconds": 35.833333333333336,
+        "frames": 1075,
+        "decoded_frames_sha256": "34316f9a96f58e37a14c4fae4c736cfa38738a3ea64f373147d3f50001ca409e",
+        "ir_sha256": "4691e5efd78dbc111046f89f43bae867689d7ebaa5dbefd9ba53e70010ef8ed4",
+        "qa_status": "PASS",
+        "tts_correlation": 0.9999549626372826,
+        "new_llm_calls": 0,
+        "new_tts_calls": 0,
+        "output": "g3/data/generation-speed-20261023/information-c1/artifacts/G2_自动生成.mp4",
+        "ssim_against_c2": 0.998767,
+        "package_qa_status": "PASS"
+      },
+      {
+        "source_run": "g3/data/packaging-library-20261023/information-2",
+        "resources": {
+          "concurrency": 2,
+          "requested": "2",
+          "logical_cpus": 12,
+          "physical_memory_bytes": 51539607552,
+          "width": 1920,
+          "height": 1080,
+          "fps": 30,
+          "crf": 18
+        },
+        "render_seconds": 79.869,
+        "content_seconds": 35.833333333333336,
+        "frames": 1075,
+        "decoded_frames_sha256": "52c0194ffec76e28a0334e275e9f54b24b6742540ebcb622ec210eed7b96e185",
+        "ir_sha256": "4691e5efd78dbc111046f89f43bae867689d7ebaa5dbefd9ba53e70010ef8ed4",
+        "qa_status": "PASS",
+        "tts_correlation": 0.9999549626372826,
+        "new_llm_calls": 0,
+        "new_tts_calls": 0,
+        "output": "g3/data/generation-speed-20261023/information-c2/artifacts/G2_自动生成.mp4",
+        "ssim_against_c2": 1.0,
+        "package_qa_status": "PASS"
+      },
+      {
+        "source_run": "g3/data/packaging-library-20261023/information-2",
+        "resources": {
+          "concurrency": 4,
+          "requested": "4",
+          "logical_cpus": 12,
+          "physical_memory_bytes": 51539607552,
+          "width": 1920,
+          "height": 1080,
+          "fps": 30,
+          "crf": 18
+        },
+        "render_seconds": 100.591,
+        "content_seconds": 35.833333333333336,
+        "frames": 1075,
+        "decoded_frames_sha256": "b657dd90e7ef41aff6a05be80ac97b4307b34b796ae9b701b1f2d413ea4cbeff",
+        "ir_sha256": "4691e5efd78dbc111046f89f43bae867689d7ebaa5dbefd9ba53e70010ef8ed4",
+        "qa_status": "PASS",
+        "tts_correlation": 0.9999549626372826,
+        "new_llm_calls": 0,
+        "new_tts_calls": 0,
+        "output": "g3/data/generation-speed-20261023/information-c4/artifacts/G2_自动生成.mp4",
+        "ssim_against_c2": 0.998302,
+        "package_qa_status": "PASS"
+      },
+      {
+        "source_run": "g3/data/packaging-library-20261023/information-2",
+        "resources": {
+          "concurrency": 6,
+          "requested": "6",
+          "logical_cpus": 12,
+          "physical_memory_bytes": 51539607552,
+          "width": 1920,
+          "height": 1080,
+          "fps": 30,
+          "crf": 18
+        },
+        "render_seconds": 106.718,
+        "content_seconds": 35.833333333333336,
+        "frames": 1075,
+        "decoded_frames_sha256": "6f09b6918b02186ee61a8415ba291cca5abf36dfcff9a3330c5dbffa2f78b316",
+        "ir_sha256": "4691e5efd78dbc111046f89f43bae867689d7ebaa5dbefd9ba53e70010ef8ed4",
+        "qa_status": "PASS",
+        "tts_correlation": 0.9999549626372826,
+        "new_llm_calls": 0,
+        "new_tts_calls": 0,
+        "output": "g3/data/generation-speed-20261023/information-c6/artifacts/G2_自动生成.mp4",
+        "ssim_against_c2": 0.998113,
+        "package_qa_status": "PASS"
+      }
+    ],
+    "render_time_reduction_percent": 14.55,
+    "ssim_interpretation": "All compared to concurrency=2 using FFmpeg ssim; CRF and frame count unchanged. Encoding chunks differ, so byte or decoded-pixel identity is not expected."
+  },
+  "local_replay": {
+    "source_job": "g3/data/jobs/b82cfa5e-f988-476d-bdb5-0e0d341ae01a",
+    "total_seconds": 239.59,
+    "schedule": {
+      "mode": "parallel",
+      "content_mode": true,
+      "wall_seconds": 80.322,
+      "overlap_seconds": 58.003,
+      "steps": {
+        "storyboard-plan": {
+          "start_seconds": 0.0,
+          "end_seconds": 58.003,
+          "duration_seconds": 58.003,
+          "status": "SUCCEEDED"
+        },
+        "tts-and-align": {
+          "start_seconds": 0.0,
+          "end_seconds": 80.322,
+          "duration_seconds": 80.322,
+          "status": "SUCCEEDED"
+        }
+      }
+    },
+    "resources": {
+      "concurrency": 1,
+      "requested": "auto",
+      "logical_cpus": 12,
+      "physical_memory_bytes": 51539607552,
+      "video_form": "information_motion",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "crf": 18
+    },
+    "qa_status": "PASS",
+    "video_seconds": 72.085,
+    "new_llm_calls": 0,
+    "saved_responses_replayed": 4,
+    "real_tts": true,
+    "narration_check": {
+      "status": "PASS",
+      "chapters": 4,
+      "segments": 9,
+      "characters": 405,
+      "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+      "checked": [
+        "narration-plan",
+        "video-ir",
+        "captions.srt",
+        "chapter-titles"
+      ]
+    },
+    "simulated_model_latency": true,
+    "interpretation": "Local TTS/render/package are real. Model responses and optional latency are replayed; no new live LLM test.",
+    "package_qa_status": "PASS",
+    "package_seconds": 81.06666666666666
+  },
+  "validation": {
+    "offline_regression": {
+      "passed": 464,
+      "skipped": 1
+    },
+    "frontend_build": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "live_model_test": {
+    "status": "PASS_AUTHORIZED_REAL_RERUN",
+    "report": "topic-digest-rerun/README.md",
+    "comparison": "topic-digest-rerun/comparison.json",
+    "user_authorization": "授权本篇稿件，正常重跑并比较总耗时",
+    "job_id": "875a6e0c-3121-478a-89d1-27fa836324fe",
+    "execution_seconds": 645.118,
+    "previous_execution_seconds": 969.919,
+    "reduction_percent": 33.49,
+    "prior_attempt": {
+      "status": "NOT_RUN",
+      "reason": "Automatic approval rejected resending the saved manuscript to the external model. Replaced by network-disabled saved-response replay with exact request-message equality and optional recorded-latency simulation."
+    }
+  }
+}

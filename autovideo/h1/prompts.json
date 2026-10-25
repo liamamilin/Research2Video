@@ -1,0 +1,29 @@
+{
+  "created_on": "2026-10-13",
+  "prompts": [
+    {
+      "asset_id": "a01_noise_opening",
+      "text": "Use case: scientific-educational\nAsset type: wide background plate for a 1920x1080 Chinese explainer animation, scene about communication noise\nPrimary request: an abstract communication journey, a small luminous signal traveling through a calm channel between two distant abstract endpoints, with faint interference in the surrounding space\nStyle/medium: premium editorial science illustration, dimensional but clean, restrained and polished\nComposition/framing: 16:9 landscape, broad negative space across the center for precise vector labels and diagrams to be composited later; keep bright detail away from the lower subtitle area\nLighting/mood: calm, thoughtful, cinematic low-key lighting\nColor palette: deep navy, teal and a small warm coral accent\nConstraints: background plate only, no text, letters, numbers, logos, watermarks, UI, or readable symbols; no human faces; do not depict a specific real device"
+    },
+    {
+      "asset_id": "a02_noise_disruption",
+      "text": "Use case: scientific-educational\nAsset type: wide background plate for a 1920x1080 Chinese explainer animation, scene showing a signal disrupted by noise\nPrimary request: an abstract luminous waveform crossing a dark communication channel and meeting scattered interference particles; show a clear but non-alarming disruption while the path remains visible\nStyle/medium: premium editorial science illustration, clean dimensional 2D/3D hybrid\nComposition/framing: 16:9 landscape, keep the central horizontal band low-contrast and open for a precise vector flow diagram overlay; keep the bottom quarter dark for subtitles\nLighting/mood: focused, explanatory, not dramatic or threatening\nColor palette: deep navy, cool teal and restrained amber/coral\nConstraints: no text, letters, numbers, labels, logos, watermark, UI, or embedded diagram; no claims that every signal fails"
+    },
+    {
+      "asset_id": "a03_batch_opening",
+      "text": "Use case: scientific-educational\nAsset type: wide background plate for a 1920x1080 Chinese explainer animation, introductory scene about batch processing and stream processing\nPrimary request: a visual metaphor with one side showing a neat group of information cards waiting together and the other side showing a steady flow of individual glowing data particles, balanced as two distinct but related modes\nStyle/medium: polished editorial technology illustration, tactile paper and light, sophisticated and uncluttered\nComposition/framing: 16:9 landscape, balanced left and right halves with open middle and lower area for vector titles and captions; dark quiet background\nLighting/mood: clear, calm, analytical\nColor palette: deep indigo, teal, muted blue and small warm orange highlights\nConstraints: no text, letters, numbers, labels, logos, watermark, UI, or fake chart; do not imply either method is universally faster"
+    },
+    {
+      "asset_id": "a04_batch_comparison",
+      "text": "Use case: scientific-educational\nAsset type: wide background plate for a 1920x1080 Chinese explainer animation, comparison scene for batch versus stream processing\nPrimary request: an editorial visual comparison: on one side, several records collected into a single organized tray before moving; on the other, records moving one by one along a continuous illuminated path\nStyle/medium: refined science magazine illustration, clear forms, subtle depth, restrained detail\nComposition/framing: 16:9 landscape, two broad visual zones left and right, enough low-detail space for exact vector comparison cards to overlay; keep center open\nLighting/mood: balanced and informative, no action-movie drama\nColor palette: dark navy foundation, teal flow, muted blue, small amber accent\nConstraints: no text, letters, numbers, labels, logos, watermark, UI, arrows with symbols, or embedded data; do not state a performance winner"
+    },
+    {
+      "asset_id": "a05_data_quiet",
+      "text": "Use case: productivity-visual\nAsset type: wide background plate behind a programmatically rendered zero-baseline bar chart in a Chinese explainer\nPrimary request: quiet abstract data atmosphere with faint illuminated grid depth and a few soft geometric particles framing the edges\nStyle/medium: polished editorial data visualization background, subtle material texture, minimal and low contrast\nComposition/framing: 16:9 landscape, central two thirds very dark and nearly empty so accurate vector bars, labels, and numbers remain dominant; keep the bottom subtitle band clear\nLighting/mood: composed, precise and trustworthy\nColor palette: deep navy, muted teal and faint blue, no bright focal object\nConstraints: background only; no bars, chart, axes, numbers, letters, text, logos, watermark, UI, or implied data"
+    },
+    {
+      "asset_id": "a06_data_categories",
+      "text": "Use case: productivity-visual\nAsset type: wide background plate for the opening/closing scene of a Chinese explainer about illustrative values\nPrimary request: abstract geometric tokens arranged in three quiet clusters with subtle depth, suggesting categories without encoding quantities\nStyle/medium: premium editorial data illustration, minimal and trustworthy\nComposition/framing: 16:9 landscape, low-contrast edges and broad clear center for exact vector labels and programmatic chart; dark clean lower band for subtitles\nLighting/mood: neutral and explanatory\nColor palette: deep navy, muted blue, teal and a tiny amber accent\nConstraints: do not depict bars or a chart; no text, letters, numerals, labels, logos, watermark, or UI; do not visually imply any specific value or ranking"
+    }
+  ]
+}

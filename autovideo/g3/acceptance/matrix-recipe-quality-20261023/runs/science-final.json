@@ -1,0 +1,455 @@
+{
+  "id": "25801490d2e84c148c220d4170bd488a",
+  "script_id": "2f494ba3d0ae48b2a1e9abba4d23a211",
+  "version": 3,
+  "status": "COMPLETED",
+  "title": "海床下七百米的坑：远古撞击怎样被还原",
+  "source_text": "北海的海床下面，埋着一个陨石坑。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体撞入这里，可能掀起超过一百米高的海浪。坑如今埋在海床以下约七百米；七百米说的是埋藏位置，不是坑本身有这么深。\n\n研究者利用地震成像、岩石显微分析和计算机模拟，检验这个结构的撞击起源。地震成像帮助他们看地下结构；油井岩屑中发现的受冲击石英和长石，则提供了岩石层面的证据。可以把这理解为一边看形态，一边找撞击留下的痕迹。\n计算机模拟帮助重建可能的撞击情景。研究者报告的超过一百米的海浪，是对远古事件重建得到的估计，并不是当年的直接测量。这几类方法互相补充，不能只凭一个坑的外形，就认定所有细节都已经被还原。\n\n原始研究在二零二五年发表，二零二六年十月的报道是对它的转述。这个时间差也要看清：它讲的是一次古老撞击怎样被研究，不是今天北海的海啸预报或预警。\n这个故事值得记住的，不只是海浪有多高。地下结构、岩石记录和模型重建提供了不同的线索；把估计、证据和它们能支持的范围一起讲清，才更接近研究真正告诉我们的事。",
+  "source_sha256": "2c0a653c9bbf6d05e0d97d86947b13926b9a4871df13df958f296d2c991911b4",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "地下的撞击痕迹",
+        "paragraphs": [
+          "北海的海床下面，埋着一个陨石坑。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体撞入这里，可能掀起超过一百米高的海浪。坑如今埋在海床以下约七百米；七百米说的是埋藏位置，不是坑本身有这么深。"
+        ]
+      },
+      {
+        "title": "三类互相补充的证据",
+        "paragraphs": [
+          "研究者利用地震成像、岩石显微分析和计算机模拟，检验这个结构的撞击起源。地震成像帮助他们看地下结构；油井岩屑中发现的受冲击石英和长石，则提供了岩石层面的证据。可以把这理解为一边看形态，一边找撞击留下的痕迹。",
+          "计算机模拟帮助重建可能的撞击情景。研究者报告的超过一百米的海浪，是对远古事件重建得到的估计，并不是当年的直接测量。这几类方法互相补充，不能只凭一个坑的外形，就认定所有细节都已经被还原。"
+        ]
+      },
+      {
+        "title": "研究重建的范围",
+        "paragraphs": [
+          "原始研究在二零二五年发表，二零二六年十月的报道是对它的转述。这个时间差也要看清：它讲的是一次古老撞击怎样被研究，不是今天北海的海啸预报或预警。",
+          "这个故事值得记住的，不只是海浪有多高。地下结构、岩石记录和模型重建提供了不同的线索；把估计、证据和它们能支持的范围一起讲清，才更接近研究真正告诉我们的事。"
+        ]
+      }
+    ],
+    "duration_mode": "content",
+    "title": "海床下七百米的坑：远古撞击怎样被还原",
+    "sources": [
+      {
+        "title": "Heriot-Watt University original researc…",
+        "url": "https://www.hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago",
+        "date": "2025-09-20"
+      }
+    ],
+    "production_context": {
+      "content_recipe": {
+        "id": "research:topic_digest",
+        "settings": {
+          "video_form": "information_motion",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+            "focus": ""
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "专题速览",
+            "accent": "#1f7a4d",
+            "outro": {
+              "lines": [
+                "主要来源见简介"
+              ],
+              "seconds": 3
+            },
+            "recipe": "topic_digest",
+            "intro": {
+              "title": "海床下七百米的坑"
+            }
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      }
+    },
+    "production_mode": "fast",
+    "video_form": "information_cards",
+    "visual_style": "editorial_light",
+    "idempotency_key": "research:25801490d2e84c148c220d4170bd488a"
+  },
+  "autovideo_job_id": "b22b6e61-255f-4d64-a459-fc7436fd7857",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "resolved_video_form": "information_cards",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 844,
+      "sha256": "18a5bd911cbc8cbcb4d3310c523b92f87771aaee1d69cf48b5c1aca8022aae51"
+    },
+    {
+      "name": "caption-alignment.json",
+      "content_type": "application/json",
+      "bytes": 48658,
+      "sha256": "f819eb79b5851ca3c7b77b24d364b50e79ea06da03b64a7a6dbbfcdf2580ac36"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 2335,
+      "sha256": "25c1412bbfa87948caf53a1059f2e4e4cf03e791d9c9e671b477f8447f297722"
+    },
+    {
+      "name": "card-editorial.json",
+      "content_type": "application/json",
+      "bytes": 6849,
+      "sha256": "388009d8d8572d920d42de7fcb3aa685080e1b38837bb2e5c96875fde324ccb5"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 6592,
+      "sha256": "8167b3f9ab230b082d428a3677bbeca10f493f30f0c88bb59512f33a71e514d2"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 2335,
+      "sha256": "d93d66be6254963675ad491beca9fe765828103d8744a33c35c4fed2c5f08c11"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 6534,
+      "sha256": "353d2b87434c0863ae8464e29360f282039386c0e72b10421904fbdd26d39844"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 11536952,
+      "sha256": "0133988dadd5212f10d6c0e72d39f889cc6bd15d1ca6d40f4d54953a58e7ccf5"
+    },
+    {
+      "name": "creative-form-plan.json",
+      "content_type": "application/json",
+      "bytes": 4932,
+      "sha256": "5a9a88b52769439377765900f67b4b81739ace162760daa26ae681c01e34e853"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 963,
+      "sha256": "055d4ac740eed6eaf0ad9b5f8078f8a68eb528b07f1b71754699e849f4abc7c9"
+    },
+    {
+      "name": "fast-card-plan.json",
+      "content_type": "application/json",
+      "bytes": 3591,
+      "sha256": "f52dc7104d6a4d37b2f6b79c440cd86dc4611ba4ebdd5c7205b8d2898a90cf1a"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 418,
+      "sha256": "5d4bad6e372ec38a849d34b8f76230040e42d23d292b7c6f0ae60a2eb079206d"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 2920,
+      "sha256": "69cfbab501967fe627690293b69537564c42a96d933361200ea3ab316d52db06"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 50099,
+      "sha256": "d06be0ca6cbeaa56c6b5511f5694105eb0c8d58634496b96434ffcf37ac8140c"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 1630,
+      "sha256": "bf27197abacc6127a69d370460d5d247905256d1906e29353bb325886e75ad4f"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 330,
+      "sha256": "564819ca6ace1c896df7ab1021b9a0e9bbcd5a614a30b2d943c735dd64946601"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 15801,
+      "sha256": "c8677881b598ffba7291fcdf233bb13a2b9210fce8b627d6d486275b806d8ff4"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 955,
+      "sha256": "c7f1d77c141453fbeb48f543e89f1a35c747f7565b5eaf12773a12b54ea6016e"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5592,
+      "sha256": "f1b58fae0a7b3062204d29b1bbafc38e635ee1b58d0c94799e6c761e71a5359d"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2307,
+      "sha256": "593b74be03e5005e1aad4abb98da568c5e67adcbb584043585b6a58258be6b10"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 1372,
+      "sha256": "b055fb509273520ff64515cf68175505ad6c16c2b08837f32d59c6e9257fd3a4"
+    },
+    {
+      "name": "production-execution.json",
+      "content_type": "application/json",
+      "bytes": 744,
+      "sha256": "a7c88efe6ddf3ae44da5d1eb83bc71fad65b5cfc6278b8446249e2685c8a7235"
+    },
+    {
+      "name": "production-plan.json",
+      "content_type": "application/json",
+      "bytes": 6412,
+      "sha256": "50917af231abb18301a430500286dcbd7838e9d96b29fa2b368c3fd64d4a36f3"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 5657,
+      "sha256": "88aca35675ebebd2a6feb97c9a987662a1af066c908fd1fd04f3d4eeb85774f8"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 4901,
+      "sha256": "4d4c1268cef55f250071178a5aef7a2a4a9447de6d4b189b543f8c6456d5bbcc"
+    },
+    {
+      "name": "tts-metrics.json",
+      "content_type": "application/json",
+      "bytes": 868,
+      "sha256": "c1ba64c9d2f3ddd8b072c8d3db53ac3dea6f200fc5fb47c82e8bc64aefcd3451"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 12810,
+      "sha256": "82b84042c4a03ae1852167f022df7357cd510af8e5f2738dd68ad1018a65733a"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 4056800,
+      "sha256": "17c86aa71fd3e68107c43cd907c85ca152eb1b60a8a3376a6a92189521018eb3"
+    },
+    {
+      "name": "voice-report.json",
+      "content_type": "application/json",
+      "bytes": 4827,
+      "sha256": "77e141f72fe4dcbb79335a712a198bf7b1cba8944332e3173c8f413f3c646f8b"
+    }
+  ],
+  "submit_started_at": "2026-10-24T02:42:49.997327+00:00",
+  "submitted_at": "2026-10-24T10:42:50+0800",
+  "completed_at": "2026-10-24T10:57:36+0800",
+  "created_at": "2026-10-24T10:42:49+0800",
+  "updated_at": "2026-10-24T10:57:36+0800",
+  "heartbeat_at": 1792810650.3547158,
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-24T02:42:49.971391+00:00",
+    "submit_seconds": 0.015,
+    "poll_seconds": 886.217,
+    "poll_count": 178,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-24T02:57:31.904+00:00",
+    "completion_observed_at": "2026-10-24T02:57:36.236871+00:00",
+    "download_seconds": 0.06,
+    "artifact_list_seconds": 0.003,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 844
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.008,
+        "reused": false,
+        "bytes": 48658
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 2335
+      },
+      {
+        "name": "card-editorial.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 6849
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 6592
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 2335
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 6534
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.047,
+        "reused": false,
+        "bytes": 11536952
+      },
+      {
+        "name": "creative-form-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 4932
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 963
+      },
+      {
+        "name": "fast-card-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 3591
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 418
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 2920
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 50099
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 1630
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 330
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 15801
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 955
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 5592
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 2307
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 1372
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 744
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 6412
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 5657
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 4901
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 868
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 12810
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.016,
+        "reused": false,
+        "bytes": 4056800
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 4827
+      }
+    ],
+    "process_seconds": 886.335
+  }
+}

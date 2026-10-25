@@ -1,0 +1,166 @@
+{
+  "CreateJobRequest": {
+    "properties": {
+      "title": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 2
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Title"
+      },
+      "creative_intent": {
+        "$ref": "#/components/schemas/CreativeIntent"
+      },
+      "input_mode": {
+        "type": "string",
+        "enum": [
+          "material",
+          "narration"
+        ],
+        "title": "Input Mode",
+        "description": "material：source_text 是素材，AutoVideo 组织讲稿；narration：chapters 是定稿讲稿，逐字配音，只规划画面",
+        "default": "material"
+      },
+      "source_text": {
+        "anyOf": [
+          {
+            "type": "string",
+            "minLength": 50
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Source Text",
+        "description": "material 模式必填的素材正文；narration 模式不传，由 chapters 生成"
+      },
+      "chapters": {
+        "anyOf": [
+          {
+            "items": {
+              "$ref": "#/components/schemas/NarrationChapter"
+            },
+            "type": "array",
+            "minItems": 1
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Chapters",
+        "description": "narration 模式必填：按顺序的章节标题与讲稿段落"
+      },
+      "input_document_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Input Document Id"
+      },
+      "target_duration_sec": {
+        "type": "integer",
+        "maximum": 90.0,
+        "minimum": 10.0,
+        "title": "Target Duration Sec",
+        "default": 60
+      },
+      "duration_mode": {
+        "type": "string",
+        "enum": [
+          "fixed",
+          "content"
+        ],
+        "title": "Duration Mode",
+        "default": "fixed"
+      },
+      "theme": {
+        "type": "string",
+        "const": "minimal_dark",
+        "title": "Theme",
+        "default": "minimal_dark"
+      },
+      "voice_id": {
+        "type": "string",
+        "title": "Voice Id",
+        "default": "zf_xiaoxiao"
+      },
+      "video_speed": {
+        "type": "number",
+        "enum": [
+          0.5,
+          1.0,
+          1.5,
+          2.0
+        ],
+        "title": "Video Speed",
+        "default": 1.0
+      },
+      "use_draw_things": {
+        "type": "boolean",
+        "title": "Use Draw Things",
+        "default": false
+      },
+      "video_form": {
+        "type": "string",
+        "enum": [
+          "knowledge_cards",
+          "process_diagram",
+          "information_motion",
+          "auto"
+        ],
+        "title": "Video Form",
+        "default": "knowledge_cards"
+      }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "title": "CreateJobRequest"
+  },
+  "NarrationChapter": {
+    "properties": {
+      "title": {
+        "type": "string",
+        "maxLength": 32,
+        "minLength": 1,
+        "title": "Title",
+        "description": "章节标题，原样用作视频章节标题"
+      },
+      "paragraphs": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array",
+        "minItems": 1,
+        "title": "Paragraphs",
+        "description": "本章讲稿段落，按顺序逐字配音"
+      }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+      "title",
+      "paragraphs"
+    ],
+    "title": "NarrationChapter"
+  },
+  "post_/api/jobs_requestBody": {
+    "required": true,
+    "content": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/CreateJobRequest"
+        }
+      }
+    }
+  }
+}

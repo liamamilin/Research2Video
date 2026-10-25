@@ -1,0 +1,110 @@
+{
+  "mode": "content",
+  "duration_seconds": 40.333333333333336,
+  "chapters": [
+    {
+      "id": "c1",
+      "title": "Opus 降价了",
+      "question": "Opus 降价了",
+      "source_unit_ids": [
+        "u1",
+        "u2"
+      ],
+      "points": [
+        {
+          "id": "c1_p1",
+          "point": "Opus 5.5 输入价从每百万 token 5 美元降到 4 美元，输出价从 25 美元降到 20 美元，各降两成。",
+          "source_quotes": [
+            "Opus 5.5 输入价从每百万 token 5 美元降到 4 美元，输出价从 25 美元降到 20 美元，各降两成。"
+          ]
+        },
+        {
+          "id": "c1_p2",
+          "point": "同一天，OpenAI 的 GPT-6 Sol 把输入价砍到 2 美元，输出价砍到 10 美元。",
+          "source_quotes": [
+            "同一天，OpenAI 的 GPT-6 Sol 把输入价砍到 2 美元，输出价砍到 10 美元。"
+          ]
+        }
+      ],
+      "narration_segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ],
+      "start_ms": 1500,
+      "end_ms": 16367,
+      "scene_ids": [
+        "c1_s1",
+        "c1_s2"
+      ]
+    },
+    {
+      "id": "c2",
+      "title": "对你的账单意味着什么",
+      "question": "对你的账单意味着什么",
+      "source_unit_ids": [
+        "u3",
+        "u4"
+      ],
+      "points": [
+        {
+          "id": "c2_p1",
+          "point": "如果你的长任务主力是 Opus，同样的 token 量，账单直接少两成。",
+          "source_quotes": [
+            "如果你的长任务主力是 Opus，同样的 token 量，账单直接少两成。"
+          ]
+        },
+        {
+          "id": "c2_p2",
+          "point": "但别急着高兴：Sol 的输入价和输出价，都只有 Opus 5.5 的一半。",
+          "source_quotes": [
+            "但别急着高兴：Sol 的输入价和输出价，都只有 Opus 5.5 的一半。"
+          ]
+        }
+      ],
+      "narration_segment_ids": [
+        "c2_n1",
+        "c2_n2"
+      ],
+      "start_ms": 16367,
+      "end_ms": 29033,
+      "scene_ids": [
+        "c2_s1",
+        "c2_s2"
+      ]
+    },
+    {
+      "id": "c3",
+      "title": "现在做什么",
+      "question": "现在做什么",
+      "source_unit_ids": [
+        "u5"
+      ],
+      "points": [
+        {
+          "id": "c3_p1",
+          "point": "今天就拿你最贵的那条流水线，按新价格重算一遍月度预算，再决定要不要换主力模型。",
+          "source_quotes": [
+            "今天就拿你最贵的那条流水线，按新价格重算一遍月度预算，再决定要不要换主力模型。"
+          ]
+        }
+      ],
+      "narration_segment_ids": [
+        "c3_n1"
+      ],
+      "start_ms": 29033,
+      "end_ms": 37333,
+      "scene_ids": [
+        "c3_s1"
+      ]
+    }
+  ],
+  "coverage": {
+    "source_units_considered": 5,
+    "planned_points": 5,
+    "referenced_points": 5,
+    "all_planned_points_referenced": true
+  },
+  "limitation": "原文单元、知识点和旁白引用覆盖是结构性证据，不代替语义正确性与观看效果判断。",
+  "package_offset_ms": 1500,
+  "timeline": "packaged"
+}

@@ -1,0 +1,124 @@
+{
+  "job_id": "6b2fc6b3-0ac1-436c-a8d6-2ed5f381df36",
+  "title": "关键冲突 · 输入提示验证",
+  "status": "FAILED",
+  "active_stage": "PLAN",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": "INPUT_REQUIRES_CLARIFICATION",
+  "error_message": "同一场讲座出现了两个互相排斥的到场时间：一处写周五晚上七点，另一处写周六晚上七点；同时材料又强调本次讲座只有一个活动日期。无法据此确定唯一到场时间，需要明确到底是周五还是周六。",
+  "retryable": false,
+  "source_sha256": "9457f393e83f1507acd8468c5853ba1b5c19a76721142deed2f3f76c7cf6e127",
+  "source_char_count": 84,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zf_xiaoxiao",
+  "created_at": "2026-10-15T07:25:15.333+00:00",
+  "updated_at": "2026-10-15T07:31:30.890+00:00",
+  "version": 5,
+  "operation_type": "generate",
+  "parent_job_id": null,
+  "parent_attempt_no": null,
+  "scene_id": null,
+  "video_form": "auto",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "auto",
+    "selected_form": "information_motion",
+    "recommended_form": "information_motion",
+    "selection_mode": "automatic",
+    "status": "needs_input",
+    "reason": "现有材料只是要告知报名者一个到场时间，属于单点通知信息，没有步骤、分支或因果流转，因此整片适合用信息动效呈现；但时间本身在材料中互相矛盾，需先澄清后再讲。",
+    "issues": [
+      {
+        "kind": "conflict",
+        "message": "同一场讲座出现了两个互相排斥的到场时间：一处写周五晚上七点，另一处写周六晚上七点；同时材料又强调本次讲座只有一个活动日期。无法据此确定唯一到场时间，需要明确到底是周五还是周六。",
+        "source_quotes": [
+          "本次讲座只有一个活动日期，需要通知报名者按这个时间到场。",
+          "本次讲座确定于周五晚上七点举行。",
+          "本次讲座确定于周六晚上七点举行。",
+          "请根据这些已确认材料说明本次讲座的唯一到场时间。"
+        ],
+        "blocking": true
+      }
+    ],
+    "retained_units": 4,
+    "excluded_units": 0
+  },
+  "resolved_video_form": "information_motion",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "FAILED",
+      "started_at": "2026-10-15T07:31:24.456+00:00",
+      "completed_at": "2026-10-15T07:31:30.890+00:00",
+      "error_code": "INPUT_REQUIRES_CLARIFICATION",
+      "error_message": "同一场讲座出现了两个互相排斥的到场时间：一处写周五晚上七点，另一处写周六晚上七点；同时材料又强调本次讲座只有一个活动日期。无法据此确定唯一到场时间，需要明确到底是周五还是周六。",
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "FAILED",
+          "started_at": "2026-10-15T07:31:24.456+00:00",
+          "completed_at": "2026-10-15T07:31:30.890+00:00",
+          "duration_seconds": null,
+          "error_code": "INPUT_REQUIRES_CLARIFICATION",
+          "error_message": "同一场讲座出现了两个互相排斥的到场时间：一处写周五晚上七点，另一处写周六晚上七点；同时材料又强调本次讲座只有一个活动日期。无法据此确定唯一到场时间，需要明确到底是周五还是周六。"
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-15T07:31:30.890+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-15T07:31:30.890+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-15T07:31:30.890+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-15T07:31:30.890+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-15T07:31:30.890+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-15T07:31:30.890+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}

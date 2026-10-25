@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "render_id": "fc8c618db16e4a7bbc9a9ffdf7ecc7f1",
+  "job_id": "44d652ba-411d-4dec-b1ae-8f10b15c4f54",
+  "mp4": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/fc8c618db16e4a7bbc9a9ffdf7ecc7f1/video.mp4",
+  "artifacts_verified": 29,
+  "decode": "PASS",
+  "narration_unchanged": true,
+  "voice_pcm_file_unchanged": true,
+  "copy_preflight": "PASS",
+  "cards": 8,
+  "caption_cues": 38,
+  "source_card_entries": 3,
+  "qa": "PASS",
+  "package_qa": "PASS",
+  "content_duration_seconds": 149.933,
+  "duration_seconds": 158.933333,
+  "research_tests": {
+    "passed": 551
+  },
+  "autovideo_tests": {
+    "passed": 683,
+    "skipped": 1,
+    "historical_manifest_failed": 1
+  },
+  "visual_inspection": {
+    "decoded_frames": 16,
+    "pages": 8,
+    "result": "no visible clipping or internal notes; source/scenario labels retained",
+    "human_listening": false
+  },
+  "backend_activation": {
+    "old_pid": 21321,
+    "new_pid": 28102,
+    "port": 8766,
+    "idle_verified": true,
+    "live": true
+  }
+}

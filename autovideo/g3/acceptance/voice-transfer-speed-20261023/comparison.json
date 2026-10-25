@@ -1,0 +1,543 @@
+{
+  "baseline": {
+    "status": "PASS",
+    "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+    "version": 1,
+    "render_id": "768de6dbf8b6465eaf38a946cffbceee",
+    "autovideo_job_id": "2e6d0b88-3a2e-42c0-b67c-9b30af4e7c4d",
+    "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+    "production_plan_sha256": "732f4d1258a9cd707c865f126a112ea229a1e6cdeef9a600542ae4a1e7feb4b1",
+    "verified_downloads": 25,
+    "execution_seconds": 336.692,
+    "research_end_to_end_seconds": 453.0,
+    "engine_to_research_complete_gap_seconds": 116.308,
+    "previous_standard_execution_seconds": 645.118,
+    "execution_reduction_percent": 47.81,
+    "previous_research_end_to_end_seconds": 646.0,
+    "end_to_end_reduction_percent": 29.88,
+    "content_seconds": 203.9,
+    "package_seconds": 212.9,
+    "pages": 31,
+    "caption_cues_checked": 31,
+    "tts_correlation": 0.9999473774070917,
+    "llm_calls": 0,
+    "encoder": "h264_videotoolbox",
+    "interpretation": "Same approved narration and voice, fresh TTS. Different renderer and packaging; not an isolated renderer A/B. End-to-end gap includes polling/recovery/download; no finer bridge timing was recorded. Batch throughput was not measured.",
+    "tts_step_seconds": 243.79
+  },
+  "cold": {
+    "render_id": "94095a935dc140ae8fcee64186f7c311",
+    "autovideo_job_id": "31f763b4-be8a-4293-8323-4e7c4fcaa447",
+    "status": "COMPLETED",
+    "execution_seconds": 314.788,
+    "research_end_to_end_seconds": 321.0,
+    "tts_step_seconds": 222.98,
+    "stages": {
+      "prepare-input": 0.0,
+      "narration-plan": 0.0,
+      "storyboard-plan": 0.0,
+      "tts-and-align": 222.98,
+      "compile-ir": 0.18,
+      "render": 28.09,
+      "verify-media": 14.07,
+      "package": 49.04
+    },
+    "transfer": {
+      "process_runs": 1,
+      "last_process_started_at": "2026-10-23T09:54:16.938222+00:00",
+      "submit_seconds": 0.016,
+      "poll_seconds": 320.189,
+      "poll_count": 62,
+      "poll_failures": 0,
+      "remote_completed_at": "2026-10-23T09:59:31.897+00:00",
+      "completion_observed_at": "2026-10-23T09:59:37.186686+00:00",
+      "download_seconds": 0.132,
+      "artifact_list_seconds": 0.003,
+      "download_attempts": 1,
+      "download_workers": 4,
+      "artifacts": [
+        {
+          "name": "authored-narration.json",
+          "seconds": 0.009,
+          "reused": false,
+          "bytes": 1182
+        },
+        {
+          "name": "captions.srt",
+          "seconds": 0.009,
+          "reused": false,
+          "bytes": 3954
+        },
+        {
+          "name": "chapters.json",
+          "seconds": 0.01,
+          "reused": false,
+          "bytes": 13512
+        },
+        {
+          "name": "content-captions.srt",
+          "seconds": 0.009,
+          "reused": false,
+          "bytes": 3954
+        },
+        {
+          "name": "content-chapters.json",
+          "seconds": 0.006,
+          "reused": false,
+          "bytes": 13454
+        },
+        {
+          "name": "content.mp4",
+          "seconds": 0.119,
+          "reused": false,
+          "bytes": 30786550
+        },
+        {
+          "name": "creative-form-plan.json",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 26385
+        },
+        {
+          "name": "execution-log.txt",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 966
+        },
+        {
+          "name": "fast-card-plan.json",
+          "seconds": 0.006,
+          "reused": false,
+          "bytes": 13883
+        },
+        {
+          "name": "generation-schedule.json",
+          "seconds": 0.006,
+          "reused": false,
+          "bytes": 413
+        },
+        {
+          "name": "input-brief.json",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 5701
+        },
+        {
+          "name": "manifest.json",
+          "seconds": 0.006,
+          "reused": false,
+          "bytes": 73403
+        },
+        {
+          "name": "model-cost.json",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 497
+        },
+        {
+          "name": "narration-check.json",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 273
+        },
+        {
+          "name": "narration.json",
+          "seconds": 0.008,
+          "reused": false,
+          "bytes": 32009
+        },
+        {
+          "name": "package-qa.json",
+          "seconds": 0.006,
+          "reused": false,
+          "bytes": 938
+        },
+        {
+          "name": "package.json",
+          "seconds": 0.007,
+          "reused": false,
+          "bytes": 5760
+        },
+        {
+          "name": "packaging-resolved.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 2502
+        },
+        {
+          "name": "prepared-source.txt",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 2897
+        },
+        {
+          "name": "production-execution.json",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 683
+        },
+        {
+          "name": "production-plan.json",
+          "seconds": 0.008,
+          "reused": false,
+          "bytes": 6536
+        },
+        {
+          "name": "qa.json",
+          "seconds": 0.007,
+          "reused": false,
+          "bytes": 24800
+        },
+        {
+          "name": "storyboard.json",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 26354
+        },
+        {
+          "name": "tts-metrics.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 855
+        },
+        {
+          "name": "video-ir.json",
+          "seconds": 0.006,
+          "reused": false,
+          "bytes": 42638
+        },
+        {
+          "name": "video.mp4",
+          "seconds": 0.04,
+          "reused": false,
+          "bytes": 9942511
+        },
+        {
+          "name": "voice-report.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 8763
+        }
+      ],
+      "process_seconds": 320.468
+    },
+    "tts": {
+      "provider": "local_voxcpm_mlx",
+      "model": "VoxCPM2-8bit",
+      "voice": "voxcpm_anchor",
+      "sample_rate": 24000,
+      "duration_seconds": 203.9,
+      "generation_seconds": 222.9,
+      "cloud_requests": 0,
+      "cloud_api_cost": 0,
+      "local_compute_cost": "not measured",
+      "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f",
+      "voice_file_sha256": null,
+      "cache": {
+        "enabled": true,
+        "chapter_hits": 0,
+        "chapter_misses": 7,
+        "segment_hits": 0,
+        "segment_misses": 31,
+        "entry_keys": [],
+        "write_errors": [],
+        "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+        "fingerprint_seconds": 1.307,
+        "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+      },
+      "audio_sha256": "2e0f9970b1153f6e8f32cc52a8ec7ad3c40d2f247d479c2b8fd72b21500617b0"
+    },
+    "voice_performance": {
+      "compiled": true,
+      "load_seconds": 1.008,
+      "total_seconds": 221.047,
+      "reference_cache": {
+        "hits": 51,
+        "misses": 2,
+        "encode_seconds": 0.31
+      }
+    },
+    "cache": {
+      "enabled": true,
+      "chapter_hits": 0,
+      "chapter_misses": 7,
+      "segment_hits": 0,
+      "segment_misses": 31,
+      "entry_keys": [],
+      "write_errors": [],
+      "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+      "fingerprint_seconds": 1.307
+    },
+    "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+    "identical_pcm_to_previous": true,
+    "verified_files": 27,
+    "content_qa": "PASS",
+    "package_qa": "PASS",
+    "caption_cues_checked": 31,
+    "content_seconds": 203.9,
+    "packaged_seconds": 212.9,
+    "end_to_end_reduction_percent": 29.14,
+    "tts_reduction_percent": 8.54
+  },
+  "warm": {
+    "render_id": "7c13c419137b49449130b83d25f41030",
+    "autovideo_job_id": "47bd614a-b7cd-4227-a110-3bbd15283ddb",
+    "status": "COMPLETED",
+    "execution_seconds": 80.01,
+    "research_end_to_end_seconds": 90.0,
+    "tts_step_seconds": 1.43,
+    "stages": {
+      "prepare-input": 0.0,
+      "narration-plan": 0.0,
+      "storyboard-plan": 0.0,
+      "tts-and-align": 1.43,
+      "compile-ir": 0.08,
+      "render": 27.64,
+      "verify-media": 12.54,
+      "package": 37.93
+    },
+    "transfer": {
+      "process_runs": 1,
+      "last_process_started_at": "2026-10-23T10:00:08.425220+00:00",
+      "submit_seconds": 0.016,
+      "poll_seconds": 84.641,
+      "poll_count": 17,
+      "poll_failures": 0,
+      "remote_completed_at": "2026-10-23T10:01:28.477+00:00",
+      "completion_observed_at": "2026-10-23T10:01:33.126629+00:00",
+      "download_seconds": 5.005,
+      "artifact_list_seconds": 0.018,
+      "download_attempts": 1,
+      "download_workers": 4,
+      "artifacts": [
+        {
+          "name": "authored-narration.json",
+          "seconds": 0.051,
+          "reused": false,
+          "bytes": 1182
+        },
+        {
+          "name": "captions.srt",
+          "seconds": 0.368,
+          "reused": false,
+          "bytes": 3954
+        },
+        {
+          "name": "chapters.json",
+          "seconds": 0.014,
+          "reused": false,
+          "bytes": 13512
+        },
+        {
+          "name": "content-captions.srt",
+          "seconds": 1.015,
+          "reused": false,
+          "bytes": 3954
+        },
+        {
+          "name": "content-chapters.json",
+          "seconds": 1.023,
+          "reused": false,
+          "bytes": 13454
+        },
+        {
+          "name": "content.mp4",
+          "seconds": 4.92,
+          "reused": false,
+          "bytes": 30786550
+        },
+        {
+          "name": "creative-form-plan.json",
+          "seconds": 0.689,
+          "reused": false,
+          "bytes": 26385
+        },
+        {
+          "name": "execution-log.txt",
+          "seconds": 0.044,
+          "reused": false,
+          "bytes": 964
+        },
+        {
+          "name": "fast-card-plan.json",
+          "seconds": 0.037,
+          "reused": false,
+          "bytes": 13883
+        },
+        {
+          "name": "generation-schedule.json",
+          "seconds": 0.023,
+          "reused": false,
+          "bytes": 413
+        },
+        {
+          "name": "input-brief.json",
+          "seconds": 0.017,
+          "reused": false,
+          "bytes": 5701
+        },
+        {
+          "name": "manifest.json",
+          "seconds": 0.02,
+          "reused": false,
+          "bytes": 72698
+        },
+        {
+          "name": "model-cost.json",
+          "seconds": 0.023,
+          "reused": false,
+          "bytes": 497
+        },
+        {
+          "name": "narration-check.json",
+          "seconds": 0.015,
+          "reused": false,
+          "bytes": 273
+        },
+        {
+          "name": "narration.json",
+          "seconds": 1.062,
+          "reused": false,
+          "bytes": 32009
+        },
+        {
+          "name": "package-qa.json",
+          "seconds": 1.49,
+          "reused": false,
+          "bytes": 938
+        },
+        {
+          "name": "package.json",
+          "seconds": 1.486,
+          "reused": false,
+          "bytes": 5760
+        },
+        {
+          "name": "packaging-resolved.json",
+          "seconds": 0.439,
+          "reused": false,
+          "bytes": 2502
+        },
+        {
+          "name": "prepared-source.txt",
+          "seconds": 0.027,
+          "reused": false,
+          "bytes": 2897
+        },
+        {
+          "name": "production-execution.json",
+          "seconds": 0.026,
+          "reused": false,
+          "bytes": 683
+        },
+        {
+          "name": "production-plan.json",
+          "seconds": 0.027,
+          "reused": false,
+          "bytes": 6536
+        },
+        {
+          "name": "qa.json",
+          "seconds": 0.014,
+          "reused": false,
+          "bytes": 24800
+        },
+        {
+          "name": "storyboard.json",
+          "seconds": 0.017,
+          "reused": false,
+          "bytes": 26354
+        },
+        {
+          "name": "tts-metrics.json",
+          "seconds": 0.017,
+          "reused": false,
+          "bytes": 1377
+        },
+        {
+          "name": "video-ir.json",
+          "seconds": 0.027,
+          "reused": false,
+          "bytes": 42638
+        },
+        {
+          "name": "video.mp4",
+          "seconds": 2.025,
+          "reused": false,
+          "bytes": 9942511
+        },
+        {
+          "name": "voice-report.json",
+          "seconds": 0.056,
+          "reused": false,
+          "bytes": 10232
+        }
+      ],
+      "process_seconds": 89.783
+    },
+    "tts": {
+      "provider": "local_voxcpm_mlx",
+      "model": "VoxCPM2-8bit",
+      "voice": "voxcpm_anchor",
+      "sample_rate": 24000,
+      "duration_seconds": 203.9,
+      "generation_seconds": 1.383,
+      "cloud_requests": 0,
+      "cloud_api_cost": 0,
+      "local_compute_cost": "not measured",
+      "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f",
+      "voice_file_sha256": null,
+      "cache": {
+        "enabled": true,
+        "chapter_hits": 7,
+        "chapter_misses": 0,
+        "segment_hits": 31,
+        "segment_misses": 0,
+        "entry_keys": [
+          "47dffd92369b65b63af405bdf87ca06e1b053dfcc98cd022b5b8740abd71ccab",
+          "e9c7d7a44d3f1e7ac29c818740b539e625a08ce54214aedf5cf09fd30792922e",
+          "b4fcf06ec3da23182fc722c1015b28684d711636de359432010912ec0244e489",
+          "bf0c4abf0eb2bc90b13fd904d70509ad4e478dbc9074f18acf5bafeeb0adff5c",
+          "30bbcef814522086304b4f98a9bf8ca152bc176eda7b190be89678183357fdad",
+          "4645c385dd588e4e91a1a2cdb5b9a0604ae8b16e1e9b24000ffa9de2664a76cb",
+          "f9a05ff5a447dc6bd3a992f325ea3c2abccfb65fd0644583e2f06ad853f8e98d"
+        ],
+        "write_errors": [],
+        "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+        "fingerprint_seconds": 1.315,
+        "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+      },
+      "audio_sha256": "2e0f9970b1153f6e8f32cc52a8ec7ad3c40d2f247d479c2b8fd72b21500617b0"
+    },
+    "voice_performance": null,
+    "cache": {
+      "enabled": true,
+      "chapter_hits": 7,
+      "chapter_misses": 0,
+      "segment_hits": 31,
+      "segment_misses": 0,
+      "entry_keys": [
+        "47dffd92369b65b63af405bdf87ca06e1b053dfcc98cd022b5b8740abd71ccab",
+        "e9c7d7a44d3f1e7ac29c818740b539e625a08ce54214aedf5cf09fd30792922e",
+        "b4fcf06ec3da23182fc722c1015b28684d711636de359432010912ec0244e489",
+        "bf0c4abf0eb2bc90b13fd904d70509ad4e478dbc9074f18acf5bafeeb0adff5c",
+        "30bbcef814522086304b4f98a9bf8ca152bc176eda7b190be89678183357fdad",
+        "4645c385dd588e4e91a1a2cdb5b9a0604ae8b16e1e9b24000ffa9de2664a76cb",
+        "f9a05ff5a447dc6bd3a992f325ea3c2abccfb65fd0644583e2f06ad853f8e98d"
+      ],
+      "write_errors": [],
+      "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+      "fingerprint_seconds": 1.315
+    },
+    "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+    "identical_pcm_to_previous": true,
+    "verified_files": 27,
+    "content_qa": "PASS",
+    "package_qa": "PASS",
+    "caption_cues_checked": 31,
+    "content_seconds": 203.9,
+    "packaged_seconds": 212.9,
+    "end_to_end_reduction_percent": 80.13,
+    "tts_reduction_percent": 99.41
+  }
+}

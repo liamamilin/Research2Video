@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recommended_form",
+    "reason"
+  ],
+  "properties": {
+    "recommended_form": {
+      "enum": [
+        "process_diagram",
+        "information_motion"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    }
+  }
+}

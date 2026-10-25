@@ -1,0 +1,28 @@
+{
+  "mode": "user_authored",
+  "origin": "narration_create",
+  "text_sha256": "8e3bcd9ed73adc4eafad5067c86ddfd077c988b03a93171352662f273533e180",
+  "model_rewrite": false,
+  "whitespace_normalized_only": true,
+  "segments": 5,
+  "chapters": [
+    {
+      "id": "c1",
+      "title": "升级前先确认版本",
+      "segments": 2
+    },
+    {
+      "id": "c2",
+      "title": "跑一次最小 sweep",
+      "segments": 3
+    }
+  ],
+  "exact_text_check": {
+    "status": "PASS",
+    "chapters": 2,
+    "segments": 5,
+    "characters": 220,
+    "rule": "segments reproduce the script in order; only splitting and whitespace may differ"
+  },
+  "provenance": "上游定稿讲稿逐字配音；AutoVideo 只做分句、空白规整与画面规划。"
+}

@@ -1,0 +1,176 @@
+[
+  {
+    "name": "authored-narration.json",
+    "content_type": "application/json",
+    "bytes": 1182,
+    "sha256": "43aaefed6adaee431abf787cb4b8d3e1f62154514f172da67e18f843f3b10a60"
+  },
+  {
+    "name": "caption-alignment.json",
+    "content_type": "application/json",
+    "bytes": 94003,
+    "sha256": "4eafacd161b63a70c5ca6554dbfcf43b400ce6356c03878f7492bfd62055c6b9"
+  },
+  {
+    "name": "captions.srt",
+    "content_type": "application/x-subrip",
+    "bytes": 4724,
+    "sha256": "36c99bf2368890dce32fa432b7d73e22a597911360abd4f78e1c3d85a9d92658"
+  },
+  {
+    "name": "card-editorial.json",
+    "content_type": "application/json",
+    "bytes": 14173,
+    "sha256": "b8f057873b85fbbe5447e21002b5ef25d8655e695744f6a69ff0ac3adb5176b1"
+  },
+  {
+    "name": "chapters.json",
+    "content_type": "application/json",
+    "bytes": 13213,
+    "sha256": "d09f3bee9340b52cf40e28e62d5d5589c9e57a7e26462dc606a08696c35c36c3"
+  },
+  {
+    "name": "content-captions.srt",
+    "content_type": "application/x-subrip",
+    "bytes": 4724,
+    "sha256": "56c309ac1591f2e0ffbf9f1f6e1eea25158e21ee82b447a31fc1943b80df5c49"
+  },
+  {
+    "name": "content-chapters.json",
+    "content_type": "application/json",
+    "bytes": 13155,
+    "sha256": "491b03a23cb679bc74a84da57ab90a90ae57871d37ba03a3578e0a546171ba8a"
+  },
+  {
+    "name": "content.mp4",
+    "content_type": "video/mp4",
+    "bytes": 30452662,
+    "sha256": "0aeecb2b7490e26448f990bd57091aed9392abf3ee117dc472db400df0ca744d"
+  },
+  {
+    "name": "creative-form-plan.json",
+    "content_type": "application/json",
+    "bytes": 10782,
+    "sha256": "1155d082c70f2a4fc439dc9db234537c0d079a8aff3055e8954836439a196a6e"
+  },
+  {
+    "name": "execution-log.txt",
+    "content_type": "text/plain; charset=utf-8",
+    "bytes": 965,
+    "sha256": "a812976619ad8eaab8c59992f378b3b1b5418fba985c4c33946717ecf0609d92"
+  },
+  {
+    "name": "fast-card-plan.json",
+    "content_type": "application/json",
+    "bytes": 7962,
+    "sha256": "d4966e7e08c5ee7d65d4db4ed27de29adf100afca1fe56c5cfdc5dacd7024534"
+  },
+  {
+    "name": "generation-schedule.json",
+    "content_type": "application/json",
+    "bytes": 415,
+    "sha256": "369eeccf7ce9ae31c5ad113351129210a048c8193f8616cab99a60c8015d39ca"
+  },
+  {
+    "name": "input-brief.json",
+    "content_type": "application/json",
+    "bytes": 5701,
+    "sha256": "4c5d7774d826a41f8446f958eb7fb511597a770e4a737a777af7e52214f3701d"
+  },
+  {
+    "name": "manifest.json",
+    "content_type": "application/json",
+    "bytes": 83003,
+    "sha256": "6f84fb9e96535e203d0b9225737ef8092914c792f87ef8c135182e6db77483eb"
+  },
+  {
+    "name": "model-cost.json",
+    "content_type": "application/json",
+    "bytes": 2750,
+    "sha256": "767d8335470dfce3849acbb5305cc5c701254c669e2b18a66db4f1c65b43e53d"
+  },
+  {
+    "name": "narration-check.json",
+    "content_type": "application/json",
+    "bytes": 331,
+    "sha256": "94ab5f2e5e1c19aab4900018c3c8a54221856066d76c1a7404fd9d33f898dd6f"
+  },
+  {
+    "name": "narration.json",
+    "content_type": "application/json",
+    "bytes": 32009,
+    "sha256": "5946fc610e9e448be24964a520e4f82b3ca3ca05a41b382488d1bf2e0f9e59f8"
+  },
+  {
+    "name": "package-qa.json",
+    "content_type": "application/json",
+    "bytes": 938,
+    "sha256": "139a51ae1e8aa438de83205b1d75c4ff269d0ada95d9f4425ef0f69869d6fba2"
+  },
+  {
+    "name": "package.json",
+    "content_type": "application/json",
+    "bytes": 6025,
+    "sha256": "3e5d26e15006c5604a6472ee5aae1e56e1709ac5ecc6ffd54fa12d03ce458d86"
+  },
+  {
+    "name": "packaging-resolved.json",
+    "content_type": "application/json",
+    "bytes": 2711,
+    "sha256": "bcad9587fec2cc1698cd6b03adbe9e1f81567bb2eaf0d2feefe7ee03455db516"
+  },
+  {
+    "name": "prepared-source.txt",
+    "content_type": "text/plain; charset=utf-8",
+    "bytes": 2897,
+    "sha256": "ab3d13a2b3bbbc2d6ad8adc92797456c8fdc048eeb2e2f296e5dc8a9c2660707"
+  },
+  {
+    "name": "production-execution.json",
+    "content_type": "application/json",
+    "bytes": 745,
+    "sha256": "7137217a6096b7a5f12e54de1a24829c4d726541d077cbcc3650fcf1d8e1da51"
+  },
+  {
+    "name": "production-plan.json",
+    "content_type": "application/json",
+    "bytes": 7034,
+    "sha256": "0b7547e7e1ea486cec4ef373691a618b2189eb31b82b6ed859f7e4246f24b134"
+  },
+  {
+    "name": "qa.json",
+    "content_type": "application/json",
+    "bytes": 10926,
+    "sha256": "e51cf6a36067071450a9e211e44a6da52b609dde940a103971c62c4df0cecc35"
+  },
+  {
+    "name": "storyboard.json",
+    "content_type": "application/json",
+    "bytes": 10751,
+    "sha256": "34e1d005820dc5811e526f5255274b1538ccb29a6ee4fb7fe51953a941cf87b7"
+  },
+  {
+    "name": "tts-metrics.json",
+    "content_type": "application/json",
+    "bytes": 1377,
+    "sha256": "5f8504d66989743caaf5f5c540160693eb1f028a85544a0802a7613f6fe620ba"
+  },
+  {
+    "name": "video-ir.json",
+    "content_type": "application/json",
+    "bytes": 26046,
+    "sha256": "d71be824be14e29ddaafaa0f01b709a8fc7557966d6ca63c14f6ae6ed1b5884c"
+  },
+  {
+    "name": "video.mp4",
+    "content_type": "video/mp4",
+    "bytes": 9866063,
+    "sha256": "3185d957dd607c921e840b3b9227bb552d6d35c38ca95f6d40a3f6813edc09e5"
+  },
+  {
+    "name": "voice-report.json",
+    "content_type": "application/json",
+    "bytes": 10232,
+    "sha256": "6f8b007f3af92e215016aa8d63e6c38ead1e6a8960fde58846d814bed85a2a37"
+  }
+]

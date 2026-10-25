@@ -1,0 +1,550 @@
+{
+  "script": {
+    "id": "f30f9b94c3a345da82069fac22b24b4f",
+    "column_key": "topic_digest",
+    "topic": {
+      "id": null,
+      "title": "科学新发现日报｜2026-10-22",
+      "fields": {
+        "目标受众": "大众观众"
+      },
+      "from_report": "output/science/2026-10-22_science_daily.md",
+      "report_id": "557c7cfc5c7649fd82ae53c9fc925593"
+    },
+    "status": "APPROVED",
+    "research_job": "",
+    "report_path": "output/science/2026-10-22_science_daily.md",
+    "current_version": 1,
+    "approved_version": 1,
+    "error": null,
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T20:40:32+0800",
+    "updated_at": "2026-10-22T21:02:35+0800",
+    "heartbeat_at": 1792674119.275084,
+    "stage": null,
+    "archived": 0,
+    "report_id": "557c7cfc5c7649fd82ae53c9fc925593",
+    "production": "science_daily"
+  },
+  "version": {
+    "script_id": "f30f9b94c3a345da82069fac22b24b4f",
+    "version": 1,
+    "title": "北海海底撞击如何掀起巨型海啸",
+    "sections": [
+      {
+        "title": "本期地图",
+        "paragraphs": [
+          {
+            "text": "这期讲五件科学消息：远古小行星撞击海底后形成陨石坑和巨浪；过量信使 RNA 扰乱细胞供能；极短力量训练改善老年人的平衡、腿力和起身能力；宇航员的心脏应对火星任务；蚂蚁用毒腺发射黏网。",
+            "citations": [],
+            "evidence": "UNCITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "来源上，前四项的信息来自 ScienceDaily 的报道摘要，其中撞击、细胞供能和心脏研究没有列出原始发布机构；蚂蚁项来自 Science 的新闻报道。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085727.htm",
+              "https://www.sciencedaily.com/releases/2026/10/261020085023.htm",
+              "https://www.sciencedaily.com/releases/2026/10/261020085025.htm",
+              "https://www.sciencedaily.com/releases/2026/10/261020085016.htm",
+              "https://www.science.org/content/article/glue-gun-ant-fires-sticky-webs-its-enemies"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "北海撞击与巨浪",
+        "paragraphs": [
+          {
+            "text": "Silverpit Crater 是北海海床下的陨石坑。材料称，一枚宽 160 米的小行星撞击后形成这个坑，并触发巨型海啸。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+            ],
+            "evidence": "NEEDS_REVIEW",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "它的价值，是把“撞击如何变成巨型海啸”变成一条直观线索：天体碰撞能留下坑体，也能触发巨浪。具体研究方法没有交代，因此这条线索能说明事件链，却缺少方法层面的细节。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "过量RNA扰动供能",
+        "paragraphs": [
+          {
+            "text": "报道摘要称，过量的 mRNA（信使 RNA）能直接扰乱线粒体，影响细胞供能，而且不需要免疫系统参与。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085023.htm"
+            ],
+            "evidence": "NEEDS_REVIEW",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "这可能帮助解释病毒感染和某些年龄相关疾病造成的细胞损伤。具体机制仍不清楚，线索只指向过量 RNA 可能参与损伤。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085023.htm"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "极短力量训练",
+        "paragraphs": [
+          {
+            "text": "这项研究来自研究机构 Penn State。研究发现，参加研究的老年人每天做 4 分钟力量训练，平衡、腿力和从椅子起身的能力都有改善。研究方把这些变化与维持独立、降低跌倒风险联系起来。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085025.htm"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "参与者人数和改善幅度都没有给出，所以无法量化收益，也不能判断结果是否适用于所有人。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085025.htm"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "宇航员心脏测试",
+        "paragraphs": [
+          {
+            "text": "宇航员是进入太空执行任务的人。追踪材料称，这 13 名宇航员的心脏适应了失重环境，规律运动时尤其如此；在模拟火星环境的重力条件下，也没有出现重大问题。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085016.htm"
+            ],
+            "evidence": "NEEDS_REVIEW",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "这项追踪为判断心脏能否承受载人火星飞行提供了线索。模拟重力强度、运动方案和变化幅度都没有给出，因此还看不出它离真实火星任务有多远。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085016.htm"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "蚂蚁的黏网武器",
+        "paragraphs": [
+          {
+            "text": "Lordomyrma azumai 是一种蚂蚁，这个物种把原有的毒腺改造成了投射工具。毒腺是蚂蚁身体里的一种腺体，这种蚂蚁能向敌人发射有黏性的网状物。",
+            "citations": [
+              "https://www.science.org/content/article/glue-gun-ant-fires-sticky-webs-its-enemies"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "这项发现最直观的地方，是既有器官也能被改造成新工具。黏网的射程、黏性、毒腺原有功能和生态意义都没有交代，所以能讲清的是“怎么射”，实际作用有多大仍不清楚。",
+            "citations": [
+              "https://www.science.org/content/article/glue-gun-ant-fires-sticky-webs-its-enemies"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "最值得跟踪",
+        "paragraphs": [
+          {
+            "text": "最值得继续关注的是北海撞击与古海啸；接下来只盯一个信号，就是原始研究是否公开具体研究方法，因为现有信息正缺少这一环。",
+            "citations": [
+              "https://www.sciencedaily.com/releases/2026/10/261020085727.htm"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "length_check": {
+      "spoken_length": 746,
+      "estimated_seconds": 169,
+      "segments": 29,
+      "units_per_second": 4.35,
+      "voice": "voxcpm_anchor",
+      "target_minutes": 3,
+      "budget": 783,
+      "ratio": 0.938,
+      "status": "OK",
+      "tolerance": 0.15,
+      "sections": [
+        {
+          "title": "本期地图",
+          "spoken_length": 131,
+          "budget": 112
+        },
+        {
+          "title": "北海撞击与巨浪",
+          "spoken_length": 112,
+          "budget": 112
+        },
+        {
+          "title": "过量RNA扰动供能",
+          "spoken_length": 86,
+          "budget": 112
+        },
+        {
+          "title": "极短力量训练",
+          "spoken_length": 112,
+          "budget": 112
+        },
+        {
+          "title": "宇航员心脏测试",
+          "spoken_length": 128,
+          "budget": 112
+        },
+        {
+          "title": "蚂蚁的黏网武器",
+          "spoken_length": 123,
+          "budget": 112
+        },
+        {
+          "title": "最值得跟踪",
+          "spoken_length": 54,
+          "budget": 111
+        }
+      ]
+    },
+    "edit_type": "GENERATED",
+    "meta": {
+      "attempts": 1,
+      "usage": {
+        "requests": 1,
+        "prompt_tokens": 2956,
+        "completion_tokens": 28309,
+        "total_tokens": 31265
+      },
+      "problems": [],
+      "trusted_urls": 6,
+      "report_path": "output/science/2026-10-22_science_daily.md",
+      "written_at": "2026-10-22T20:43:46+0800",
+      "cell": {
+        "recipe": "topic_digest",
+        "sha256": "0e7e2de3f2297a0445e8e5ae7c1df0cf2ac8d13b209dbf26364f970be9d832b1",
+        "cell": "topics-general-digest-long",
+        "status": "experimental",
+        "parts": {
+          "domain": {
+            "key": "topics"
+          },
+          "type": {
+            "key": "digest"
+          },
+          "format": {
+            "key": "long"
+          },
+          "audience": {
+            "key": "general"
+          }
+        },
+        "resolved_sha256": "986625daf5528d8b8faccc00f7aee9e3806c891feb4324bb0cf1bc43146d3bee",
+        "uses": {
+          "audience": {
+            "kind": "audience",
+            "name": "general",
+            "sha256": "4f27533412fc216dfa3f9083a37f0cc10b96e41ecd69be0813a06d07f354001e"
+          },
+          "output": {
+            "kind": "part",
+            "name": "motion",
+            "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+          }
+        }
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "有读不出来的符号：（）",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "黏网的射程、黏性、毒腺原有功能和生态意义都没有交代，所以能讲清的是“怎么射”，实际作用有多大仍不清楚。",
+            "problem": "句子有 44 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "研究发现，参加研究的老年人每天做 4 分钟力量训练，平衡、腿力和从椅子起身的能力都有改善。",
+            "problem": "报告限定的研究对象是 65 岁以上者，改善是在 12 周训练后观察到的；讲稿把范围泛化为“老年人”，并省略了 12 周这一训练时长和见效条件。",
+            "why": "听众可能理解为任意年龄的老年人、训练任意时长都能获得相同改善，报告并不支持这种范围和条件。",
+            "suggestion": "明确限定为“65 岁以上、连续训练 12 周的研究结果”，并避免将其表述为普遍适用的训练方案。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "研究方把这些变化与维持独立、降低跌倒风险联系起来。",
+            "problem": "报告只说“材料把这些改善与维持独立、降低跌倒风险联系起来”，并未说这一联系出自研究方。",
+            "why": "讲稿新增了报告没有提供的归因主体，使材料中的叙述看起来像研究方已经确认的结论；虽然主要关联本身有报告依据，但归因并不准确。",
+            "suggestion": "改为“材料称”或“报道将这些变化与……联系起来”，不要明确归因于研究方。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "研究发现，参加研究的老年人每天做 4 分钟力量训练，平衡、腿力和从椅子起身的能力都有改善。",
+            "problem": "“4 分钟”交代了训练时长和单位，但没有说明对应研究的年份或期数，不符合数字须带年份或期数的规范。",
+            "why": "观众可能把这一时长当成不随研究时期变化的普遍建议，缺少时间背景也削弱了结果的参照范围。",
+            "suggestion": "若保留训练时长，按报告原样补上研究年份或期数；否则删去“4 分钟”，只说老年人进行短时力量训练后，相关行动能力有所改善。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "参与者人数和改善幅度都没有给出，所以无法量化收益，也不能判断结果是否适用于所有人。",
+            "problem": "同一小节同时讲了两个不同限制：缺少量化信息，以及无法判断普遍适用性；规范要求每件事只保留一个最该知道的限制。",
+            "why": "多个限制并列会让观众把注意力分散在报告缺了多少信息上，而不是记住这项训练最重要的判断边界。",
+            "suggestion": "只保留一个核心限制，例如保留“改善幅度没有给出，所以无法量化收益”，删去参与者人数和是否适用于所有人的并列说明。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 4,
+            "paragraph": 1,
+            "quote": "模拟重力强度、运动方案和变化幅度都没有给出，因此还看不出它离真实火星任务有多远。",
+            "problem": "这里把模拟重力强度、运动方案和变化幅度三项参数并列罗列，并将它们拆成多个信息缺口；规范要求每件事只讲一个最该知道的限制，避免参数清单式堆叠。",
+            "why": "观众要同时记忆三组未披露信息，容易感到信息过载，反而抓不住“离真实火星任务还有多远”这一核心边界。",
+            "suggestion": "把三项合并成一个限制，例如只说“关键模拟条件没有交代，因此还不能判断与真实火星任务的距离”，删除三项参数的并列罗列。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "黏网的射程、黏性、毒腺原有功能和生态意义都没有交代，所以能讲清的是“怎么射”，实际作用有多大仍不清楚。",
+            "problem": "同一句同时罗列射程、黏性、原有功能和生态意义四类缺口，既超出“一件事只讲一个最该知道的限制”的范围，也形成了参数和缺口堆叠。",
+            "why": "多种缺口会把蚂蚁发现讲成资料清单，稀释真正应让观众记住的结论边界，即这种新工具的实际作用尚不清楚。",
+            "suggestion": "删除“黏网的射程、黏性、毒腺原有功能和生态意义都没有交代”这组罗列，只保留“实际作用有多大仍不清楚”这一项限制。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D3",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这期讲五件科学消息：远古小行星撞击海底后形成陨石坑和巨浪；过量信使 RNA 扰乱细胞供能；极短力量训练改善老年人的平衡、腿力和起身能力；宇航员的心脏应对火星任务；蚂蚁用毒腺发射黏网。",
+            "problem": "报告的“本期条目”共有六项，讲稿却称“这期讲五件”，并漏掉了“天气预报延长至一个月”这一项。",
+            "why": "如果该句概括的是报告整期，五项与六项不一致，且遗漏会让听众误判本期内容范围。",
+            "suggestion": "若概括报告整期，改为“六件”并补入 AI 天气预报；若确实只选五项，明确说“这期精选五件”或“这期先讲五件”。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这期讲五件科学消息：远古小行星撞击海底后形成陨石坑和巨浪；过量信使 RNA 扰乱细胞供能；极短力量训练改善老年人的平衡、腿力和起身能力；宇航员的心脏应对火星任务；蚂蚁用毒腺发射黏网。",
+            "problem": "“宇航员的心脏应对火星任务”把报告中的“在模拟火星重力下没有重大问题”扩大成了应对火星任务，遗漏了“模拟”这一前提。",
+            "why": "报告只说模拟条件下未见重大问题，并将结果定位为评估长期飞行提供线索；讲稿的概括容易被理解为已经具备执行火星任务所需的心脏适应能力。后文虽补充了模拟条件，但本句仍有范围放大。",
+            "suggestion": "改为“宇航员的心脏通过模拟火星重力测试”或“宇航员心脏在模拟火星重力下未见重大问题”。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "warn",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "宇航员是进入太空执行任务的人。",
+            "problem": "这是一项事实性定义，但报告没有提供该定义，只提到追踪十三名宇航员、飞行期间失重以及模拟火星重力等结果。",
+            "why": "虽然该定义常见且不改变后文结论，但依据限定为本报告时，它仍属于报告之外新增的事实性说法。",
+            "suggestion": "删除这句定义，或在报告中补充可支持该定义的依据后再保留。",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 11,
+          "rule_must": 0,
+          "questions": 0,
+          "lost": 0,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 5
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 6
+            }
+          },
+          "passed": true,
+          "rank": 0
+        },
+        "rounds": 1,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这期讲五件科学发现：远古小行星撞击海底后怎样留下陨石坑和巨浪，细胞里过量的遗传物质怎样干扰供能，老年人怎样用极短力量训练…",
+            "problem": "句子有 100 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "serious",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "一枚宽 160 米的小行星撞击后形成这个坑，并触发巨型海啸。",
+            "problem": "报告对这一撞击因果链使用的是“材料称”，并明确注明信息来自 ScienceDaily 二手摘要、未作独立验证；讲稿却把撞击形成陨石坑并触发海啸写成了确定事实。",
+            "why": "这把尚未独立验证的二手转述升级为已证实的定论，超出了报告的确定性范围。",
+            "suggestion": "改为“材料称”或“二手摘要转述称”，并保留其未独立验证的来源属性。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "serious",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "线粒体是细胞把营养转成能量的结构。",
+            "problem": "报告只说过量 RNA 会扰乱线粒体并影响细胞供能，没有给出“线粒体把营养转成能量”这一具体机制性定义。",
+            "why": "研究报告是唯一事实来源，该事实性定义在报告中没有依据，无法仅凭报告核实。",
+            "suggestion": "删除这一定义，或先补充可核实的研究报告依据后再讲。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "serious",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "过量信使 RNA，也就是负责传递遗传指令的 RNA，能直接扰乱线粒体，不必先让免疫系统参与。",
+            "problem": "报告只把 mRNA 标为“信使 RNA”并说明其过量会影响线粒体，没有说明 mRNA“负责传递遗传指令”这一功能定义。",
+            "why": "讲稿加入了报告未提供的机制性事实，违反了只能依据报告作事实陈述的要求。",
+            "suggestion": "删除“也就是负责传递遗传指令的 RNA”这一解释，或补充可靠依据。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "serious",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "过量信使 RNA，也就是负责传递遗传指令的 RNA，能直接扰乱线粒体，不必先让免疫系统参与。",
+            "problem": "报告对“绕开免疫系统”的结论使用的是“材料称”，且注明二手摘要未作独立验证；讲稿直接表述为确定机制。",
+            "why": "未经独立验证的材料性说法被说成已经成立的事实，发生了确定性放大。",
+            "suggestion": "用“材料称”“报道摘要称”限定该结论，并说明其来源为未独立验证的二手摘要。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "serious",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "失重是人在太空飞行时几乎感觉不到重量的状态。",
+            "problem": "报告只提到“失重暴露”和模拟火星重力，没有给出失重的这一感官定义。",
+            "why": "这是讲稿额外加入的事实性定义，报告中没有依据，不能仅凭报告核实。",
+            "suggestion": "删除该定义，或先补充可核实的研究报告依据。",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "serious",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "对 13 名宇航员的追踪显示，规律运动期间，他们的心脏适应了飞行中的失重环境；在模拟火星重力的条件下，也没有出现重大问题。",
+            "problem": "报告称该结果来自对 13 名宇航员的追踪材料，同时明确说明原始发布机构未列出、信息未作独立验证；讲稿用“追踪显示”和确定语气把结论写成了已证实结果。",
+            "why": "这将材料性、未独立验证的结果升级为确定事实，超出了报告的证据确定性。",
+            "suggestion": "改为“材料称”或“二手摘要转述称”，并保留其未独立验证的来源限定。",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "audit_usage": {
+        "requests": 4,
+        "prompt_tokens": 9484,
+        "completion_tokens": 72913,
+        "total_tokens": 82397
+      }
+    },
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T20:43:46+0800"
+  }
+}

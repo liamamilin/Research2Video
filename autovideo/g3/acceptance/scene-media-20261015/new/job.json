@@ -1,0 +1,120 @@
+{
+  "job_id": "f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93",
+  "title": "普通话男声与双倍速 · 新建验证",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "fa63a0d48b87c587a7a1097984e598d2576851641a54f1433cfee4838c6ff47f",
+  "source_char_count": 76,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zm_yunxi",
+  "created_at": "2026-10-15T11:27:24.979+00:00",
+  "updated_at": "2026-10-15T11:33:33.434+00:00",
+  "version": 11,
+  "operation_type": "generate",
+  "parent_job_id": null,
+  "parent_attempt_no": null,
+  "scene_id": null,
+  "creative_intent": {
+    "audience": "",
+    "purpose": "",
+    "tone": "",
+    "focus": ""
+  },
+  "revision_mode": null,
+  "video_speed": 2.0,
+  "video_form": "auto",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "auto",
+    "selected_form": "information_motion",
+    "recommended_form": "information_motion",
+    "selection_mode": "automatic",
+    "status": "ready",
+    "reason": "内容是一套制作与发布活动通知前的核对方法，包含已确认信息、未确定信息和发布前复核的处理原则。整体以观点、方法、清单式信息为主，适合用信息演示逐条讲清；虽然包含先后核对动作，但核心不是必须画出的流程分支或系统流转。",
+    "issues": [],
+    "retained_units": 4,
+    "excluded_units": 0
+  },
+  "resolved_video_form": "information_motion",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "COMPLETED",
+      "started_at": "2026-10-15T11:31:48.796+00:00",
+      "completed_at": "2026-10-15T11:33:33.434+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:31:48.796+00:00",
+          "completed_at": "2026-10-15T11:32:13.253+00:00",
+          "duration_seconds": 19.38,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:32:13.256+00:00",
+          "completed_at": "2026-10-15T11:32:17.211+00:00",
+          "duration_seconds": 3.96,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:32:17.220+00:00",
+          "completed_at": "2026-10-15T11:33:06.557+00:00",
+          "duration_seconds": 49.41,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T11:33:06.564+00:00",
+          "completed_at": "2026-10-15T11:33:06.568+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:33:06.571+00:00",
+          "completed_at": "2026-10-15T11:33:06.932+00:00",
+          "duration_seconds": 0.07,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:33:06.934+00:00",
+          "completed_at": "2026-10-15T11:33:32.693+00:00",
+          "duration_seconds": 26.01,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T11:33:32.705+00:00",
+          "completed_at": "2026-10-15T11:33:33.434+00:00",
+          "duration_seconds": 0.75,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}

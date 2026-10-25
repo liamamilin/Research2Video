@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Source-grounded information motion plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "scenes"
+  ],
+  "properties": {
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "component",
+          "props",
+          "narration_segment_ids",
+          "headline"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^s[1-9][0-9]*$"
+          },
+          "component": {
+            "enum": [
+              "title_card",
+              "concept_reveal",
+              "comparison",
+              "big_number",
+              "bar_chart",
+              "price_change"
+            ]
+          },
+          "props": {
+            "type": "object"
+          },
+          "headline": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 46
+          },
+          "source_quotes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "narration_segment_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 48
+            }
+          },
+          "cues": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "target_id",
+                "segment_id",
+                "quote"
+              ],
+              "properties": {
+                "target_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 32
+                },
+                "segment_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 48
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,332 @@
+{
+  "sample": "Latest 20 successful attempts before optimization",
+  "records": [
+    {
+      "job_id": "b82cfa5e-f988-476d-bdb5-0e0d341ae01a",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 72.06666666666666,
+      "stages": {
+        "BUILD_IR": 0.05,
+        "PACKAGE": 15.61,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 4.55,
+        "RENDER": 159.12,
+        "STORYBOARD": 58.07,
+        "VOICE_ALIGN": 82.45
+      }
+    },
+    {
+      "job_id": "4df261bf-20b5-4b54-850f-8acc600dce3f",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 175.7,
+      "stages": {
+        "BUILD_IR": 0.1,
+        "PACKAGE": 32.77,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 9.4,
+        "RENDER": 375.27,
+        "STORYBOARD": 144.86,
+        "VOICE_ALIGN": 198.54
+      }
+    },
+    {
+      "job_id": "8ecb698f-a5a6-4e62-834d-d3d00b32df56",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 204.43333333333334,
+      "stages": {
+        "BUILD_IR": 0.13,
+        "PACKAGE": 38.58,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 12.16,
+        "RENDER": 433.23,
+        "STORYBOARD": 316.57,
+        "VOICE_ALIGN": 241.25
+      }
+    },
+    {
+      "job_id": "7e564357-fddf-4443-897d-354e73e5cfb6",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 151.56666666666666,
+      "stages": {
+        "BUILD_IR": 0.08,
+        "PACKAGE": 29.23,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 8.58,
+        "RENDER": 321.42,
+        "STORYBOARD": 209.96,
+        "VOICE_ALIGN": 156.8
+      }
+    },
+    {
+      "job_id": "ae10ed78-15c5-4651-87fb-a85b4e6d81f1",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 153.0,
+      "stages": {
+        "BUILD_IR": 0.08,
+        "PACKAGE": 28.24,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 8.77,
+        "RENDER": 325.52,
+        "STORYBOARD": 188.5,
+        "VOICE_ALIGN": 167.28
+      }
+    },
+    {
+      "job_id": "f92604ca-1750-42c5-b664-7015da1e13e3",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 203.9,
+      "stages": {
+        "BUILD_IR": 0.1,
+        "PACKAGE": 39.71,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 12.05,
+        "RENDER": 451.16,
+        "STORYBOARD": 233.77,
+        "VOICE_ALIGN": 232.45
+      }
+    },
+    {
+      "job_id": "3f39b6ba-831d-41c8-9a23-0f53d954146e",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 167.43333333333334,
+      "stages": {
+        "BUILD_IR": 0.09,
+        "PACKAGE": 32.87,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 8.9,
+        "RENDER": 356.67,
+        "STORYBOARD": 162.97,
+        "VOICE_ALIGN": 196.62
+      }
+    },
+    {
+      "job_id": "db319d23-4b6c-4bce-a4b0-2be18efb9864",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 165.36666666666667,
+      "stages": {
+        "BUILD_IR": 0.09,
+        "PACKAGE": 31.32,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 10.35,
+        "RENDER": 351.26,
+        "STORYBOARD": 165.24,
+        "VOICE_ALIGN": 178.45
+      }
+    },
+    {
+      "job_id": "9da745a5-07f7-44f2-b649-a8d536b45c8f",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 194.43333333333334,
+      "stages": {
+        "BUILD_IR": 0.11,
+        "PACKAGE": 36.34,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 11.16,
+        "RENDER": 412.19,
+        "STORYBOARD": 210.22,
+        "VOICE_ALIGN": 211.81
+      }
+    },
+    {
+      "job_id": "ed23a63a-cc34-4188-923c-bfa732090a97",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 378.0,
+      "stages": {
+        "BUILD_IR": 0.17,
+        "PACKAGE": 77.3,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 22.33,
+        "RENDER": 798.51,
+        "STORYBOARD": 319.0,
+        "VOICE_ALIGN": 447.87
+      }
+    },
+    {
+      "job_id": "e40c1f5a-6d83-443e-a207-9a5c9f48f39f",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 202.9,
+      "stages": {
+        "BUILD_IR": 0.11,
+        "PACKAGE": 38.5,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 11.68,
+        "RENDER": 430.52,
+        "STORYBOARD": 178.81,
+        "VOICE_ALIGN": 229.12
+      }
+    },
+    {
+      "job_id": "5f838a79-a379-46c5-9f88-12d38d860bed",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 197.6,
+      "stages": {
+        "BUILD_IR": 0.1,
+        "PACKAGE": 40.11,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 11.69,
+        "RENDER": 418.76,
+        "STORYBOARD": 328.25,
+        "VOICE_ALIGN": 231.69
+      }
+    },
+    {
+      "job_id": "9ef5516b-06f3-446f-b93a-894c895643fa",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 194.86666666666667,
+      "stages": {
+        "BUILD_IR": 0.11,
+        "PACKAGE": 39.69,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 11.49,
+        "RENDER": 414.19,
+        "STORYBOARD": 200.38,
+        "VOICE_ALIGN": 257.64
+      }
+    },
+    {
+      "job_id": "6eccec66-0557-4602-a238-2cc0b22a85d8",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 208.86666666666667,
+      "stages": {
+        "BUILD_IR": 0.11,
+        "PACKAGE": 40.18,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 11.7,
+        "RENDER": 442.69,
+        "STORYBOARD": 226.12,
+        "VOICE_ALIGN": 235.27
+      }
+    },
+    {
+      "job_id": "77346d28-4577-47ec-a8e2-af7f83ce555c",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 203.66666666666666,
+      "stages": {
+        "BUILD_IR": 0.1,
+        "PACKAGE": 38.85,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 11.67,
+        "RENDER": 430.64,
+        "STORYBOARD": 224.16,
+        "VOICE_ALIGN": 230.57
+      }
+    },
+    {
+      "job_id": "755e31ef-7986-49f6-9ed7-4d3715917cc0",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 170.86666666666667,
+      "stages": {
+        "BUILD_IR": 0.11,
+        "PACKAGE": 34.87,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 10.64,
+        "RENDER": 363.41,
+        "STORYBOARD": 84.91,
+        "VOICE_ALIGN": 196.64
+      }
+    },
+    {
+      "job_id": "9e3599e4-7cc3-4a09-9abe-8fa404c242c8",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 352.1,
+      "stages": {
+        "BUILD_IR": 0.15,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 19.05,
+        "RENDER": 740.87,
+        "STORYBOARD": 240.79,
+        "VOICE_ALIGN": 385.66
+      }
+    },
+    {
+      "job_id": "84cbf50e-3dd7-4142-8c73-bf331c37fbfc",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 161.23333333333332,
+      "stages": {
+        "BUILD_IR": 0.09,
+        "PACKAGE": 31.41,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 9.76,
+        "RENDER": 342.76,
+        "STORYBOARD": 134.76,
+        "VOICE_ALIGN": 185.78
+      }
+    },
+    {
+      "job_id": "8860ab5e-a309-41b2-a5db-f0ec227302d7",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 86.86666666666666,
+      "stages": {
+        "BUILD_IR": 0.06,
+        "PACKAGE": 16.63,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 4.77,
+        "RENDER": 186.32,
+        "STORYBOARD": 80.75,
+        "VOICE_ALIGN": 91.4
+      }
+    },
+    {
+      "job_id": "b345c42e-541b-45b6-a324-d6660bd56f67",
+      "voice": "voxcpm_anchor",
+      "input_mode": "narration",
+      "content_seconds": 79.53333333333333,
+      "stages": {
+        "BUILD_IR": 0.06,
+        "PACKAGE": 15.82,
+        "PLAN": 0.0,
+        "QUALITY_CHECK": 4.33,
+        "RENDER": 170.95,
+        "STORYBOARD": 64.71,
+        "VOICE_ALIGN": 86.39
+      }
+    }
+  ],
+  "stage_sum_seconds": {
+    "BUILD_IR": 2.0,
+    "PACKAGE": 658.03,
+    "PLAN": 0.0,
+    "QUALITY_CHECK": 215.03,
+    "RENDER": 7925.46,
+    "STORYBOARD": 3772.8,
+    "VOICE_ALIGN": 4243.68
+  },
+  "stage_share_percent": {
+    "BUILD_IR": 0.0,
+    "PACKAGE": 3.9,
+    "PLAN": 0.0,
+    "QUALITY_CHECK": 1.3,
+    "RENDER": 47.1,
+    "STORYBOARD": 22.4,
+    "VOICE_ALIGN": 25.2
+  },
+  "median_stage_seconds": {
+    "BUILD_IR": 0.1,
+    "PACKAGE": 34.87,
+    "PLAN": 0.0,
+    "QUALITY_CHECK": 10.9,
+    "RENDER": 393.73,
+    "STORYBOARD": 194.44,
+    "VOICE_ALIGN": 205.175
+  },
+  "estimated_serial_wait_avoidable_seconds": 3525.22
+}

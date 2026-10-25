@@ -1,0 +1,97 @@
+{
+  "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+  "version": 1,
+  "title": "续航手机最抢眼，五件新品变化速览",
+  "source_text": "这期挑五件新品和行业变化：一款大电池手机、一款降噪耳机、音频公司 Bose 收购音频品牌 Skullcandy、一台用 ARM 架构处理器的可翻转笔记本，以及一款宽幅折叠手机。它配 2块 OLED 屏，OLED 指有机发光屏。\n\nMotorola Edge 70 Max 是一款围绕大电池设计、主打旗舰功能和续航的手机。Notebookcheck 的评测认为，手机品牌 Samsung 和 Apple 的顶级机型在续航上很难与它竞争；它的大电池没有让机身显得笨重，当前价格也比较低。\n这套评价值得在意续航和手感的人留意，因为它把重点放在两者能不能兼得。材料没有给出量化续航、具体售价，也缺少缺点结论，所以现在只能当作选购线索，不能拿来直接比参数。\n\nOppo Enco X4 是 Oppo 推出的旗舰降噪耳机，已在国际市场首发。官方标称采用 Dynaudio 调音，Dynaudio 是音频品牌。GSMArena 开箱时看到，包装里有 Enco X4 耳机，以及 S、M、L 3种硅胶耳套。\n开箱能确认包装内容和功能定位，不能确认实际使用表现。材料没有提供降噪、音质或续航数据，所以不能据此判断实际听感和使用时长。\n\n音频公司 Bose Corporation 已收购生活方式音频品牌 Skullcandy。据媒体 GSMArena 报道，双方在联合新闻稿里说，未来产品会结合 Bose 的音频专长，以及 Skullcandy 的设计和社群连接。\nSkullcandy 会保留在 Bose 的高端消费音频产品线中，并继续以 Park City, Utah 为基地。这对关注品牌延续和后续产品的人有参考价值。材料没有给出收购金额、落地时间和具体产品计划，所以不能据此期待立刻出现新品或价格变化。\n\nAcer Swift Spin 14 AI 是可翻转笔记本。它用 Snapdragon for Windows 方案，也就是 Windows 上的 ARM 架构处理器。评测称，该方案 1年内进步明显，多项表现可与 AMD、Intel 这两家传统处理器厂商的方案持平，但没说明这个“1年”从哪一版起算。\n它适合看重性能、也能接受更高价格的人。评测认为，性能提升伴随明显更高的价格，但没说明价格是跟哪类笔记本相比，也没有跑分或具体售价。因此，不适合把低价列为首要条件。\n\nXiaomi 18 Fold 是手机厂商 Xiaomi 推出的宽幅折叠手机，配2块 OLED 显示屏。Notebookcheck 认为，异常宽的形态、极亮的 OLED 显示屏和强大硬件，为折叠产品带来新意。\n它更值得关注的是宽幅形态和屏幕表现。评测标题写着“并非毫无缺点”，却没列出具体缺点。处理器、相机和续航也没有日常使用结论或数据，不能据此比较。\n\n最值得继续关注 Motorola Edge 70 Max，因为它直指续航、体积和价格能否兼顾；接下来只看一个信号：是否出现量化续航数据和当地售价。",
+  "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "本期地图",
+        "paragraphs": [
+          "这期挑五件新品和行业变化：一款大电池手机、一款降噪耳机、音频公司 Bose 收购音频品牌 Skullcandy、一台用 ARM 架构处理器的可翻转笔记本，以及一款宽幅折叠手机。它配 2块 OLED 屏，OLED 指有机发光屏。"
+        ]
+      },
+      {
+        "title": "大电池旗舰手机",
+        "paragraphs": [
+          "Motorola Edge 70 Max 是一款围绕大电池设计、主打旗舰功能和续航的手机。Notebookcheck 的评测认为，手机品牌 Samsung 和 Apple 的顶级机型在续航上很难与它竞争；它的大电池没有让机身显得笨重，当前价格也比较低。",
+          "这套评价值得在意续航和手感的人留意，因为它把重点放在两者能不能兼得。材料没有给出量化续航、具体售价，也缺少缺点结论，所以现在只能当作选购线索，不能拿来直接比参数。"
+        ]
+      },
+      {
+        "title": "旗舰降噪耳机",
+        "paragraphs": [
+          "Oppo Enco X4 是 Oppo 推出的旗舰降噪耳机，已在国际市场首发。官方标称采用 Dynaudio 调音，Dynaudio 是音频品牌。GSMArena 开箱时看到，包装里有 Enco X4 耳机，以及 S、M、L 3种硅胶耳套。",
+          "开箱能确认包装内容和功能定位，不能确认实际使用表现。材料没有提供降噪、音质或续航数据，所以不能据此判断实际听感和使用时长。"
+        ]
+      },
+      {
+        "title": "音频品牌并购",
+        "paragraphs": [
+          "音频公司 Bose Corporation 已收购生活方式音频品牌 Skullcandy。据媒体 GSMArena 报道，双方在联合新闻稿里说，未来产品会结合 Bose 的音频专长，以及 Skullcandy 的设计和社群连接。",
+          "Skullcandy 会保留在 Bose 的高端消费音频产品线中，并继续以 Park City, Utah 为基地。这对关注品牌延续和后续产品的人有参考价值。材料没有给出收购金额、落地时间和具体产品计划，所以不能据此期待立刻出现新品或价格变化。"
+        ]
+      },
+      {
+        "title": "可翻转笔记本",
+        "paragraphs": [
+          "Acer Swift Spin 14 AI 是可翻转笔记本。它用 Snapdragon for Windows 方案，也就是 Windows 上的 ARM 架构处理器。评测称，该方案 1年内进步明显，多项表现可与 AMD、Intel 这两家传统处理器厂商的方案持平，但没说明这个“1年”从哪一版起算。",
+          "它适合看重性能、也能接受更高价格的人。评测认为，性能提升伴随明显更高的价格，但没说明价格是跟哪类笔记本相比，也没有跑分或具体售价。因此，不适合把低价列为首要条件。"
+        ]
+      },
+      {
+        "title": "宽幅折叠手机",
+        "paragraphs": [
+          "Xiaomi 18 Fold 是手机厂商 Xiaomi 推出的宽幅折叠手机，配2块 OLED 显示屏。Notebookcheck 认为，异常宽的形态、极亮的 OLED 显示屏和强大硬件，为折叠产品带来新意。",
+          "它更值得关注的是宽幅形态和屏幕表现。评测标题写着“并非毫无缺点”，却没列出具体缺点。处理器、相机和续航也没有日常使用结论或数据，不能据此比较。"
+        ]
+      },
+      {
+        "title": "接下来关注什么",
+        "paragraphs": [
+          "最值得继续关注 Motorola Edge 70 Max，因为它直指续航、体积和价格能否兼顾；接下来只看一个信号：是否出现量化续航数据和当地售价。"
+        ]
+      }
+    ],
+    "video_form": "information_motion",
+    "duration_mode": "content",
+    "creative_intent": {
+      "purpose": "知识讲解",
+      "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+      "focus": ""
+    },
+    "title": "续航手机最抢眼，五件新品变化速览",
+    "packaging": {
+      "preset": "common",
+      "label": "专题速览",
+      "accent": "#1f7a4d",
+      "outro": {
+        "lines": [
+          "面向大众观众的专题速览"
+        ],
+        "seconds": 3
+      },
+      "recipe": "topic_digest"
+    },
+    "sources": [
+      {
+        "title": "Motorola Edge 70 Max smartphone review",
+        "url": "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html",
+        "date": "2026-10-21"
+      },
+      {
+        "title": "Bose acquires Skullcandy",
+        "url": "https://www.gsmarena.com/bose_acquires_skullcandy-news-75162.php",
+        "date": "2026-10-22"
+      },
+      {
+        "title": "Acer Swift Spin 14 AI SFSP14 convertibl…",
+        "url": "https://www.notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html",
+        "date": "2026-10-21"
+      }
+    ],
+    "voice_id": "voxcpm_anchor"
+  }
+}

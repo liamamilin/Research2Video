@@ -1,0 +1,39 @@
+{
+  "label": {
+    "tier": "verify",
+    "text": "有待核实",
+    "reasons": [
+      "2 段被标为需要核实：第 3 节第 1 段、第 3 节第 2 段"
+    ],
+    "cited_share": 0.75
+  },
+  "flagged_paragraphs": [
+    {
+      "section": 3,
+      "paragraph": 1,
+      "text": "Oppo Enco X4 是 Oppo 推出的旗舰降噪耳机，已在国际市场首发。官方标称采用 Dynaudio 调音，Dynaudio 是音频品牌。GSMArena 开箱时看到，包装里有 Enco X4 耳机，以及 S、M、L 3种硅胶耳套。",
+      "citations": [],
+      "evidence": "NEEDS_REVIEW",
+      "note": "去掉了 1 个不在报告可信来源里的引用"
+    },
+    {
+      "section": 3,
+      "paragraph": 2,
+      "text": "开箱能确认包装内容和功能定位，不能确认实际使用表现。材料没有提供降噪、音质或续航数据，所以不能据此判断实际听感和使用时长。",
+      "citations": [],
+      "evidence": "NEEDS_REVIEW",
+      "note": "去掉了 1 个不在报告可信来源里的引用"
+    }
+  ],
+  "origin": {
+    "report": "output/consumer/2026-10-22_consumer_daily.md",
+    "citation_check": {
+      "total": 6,
+      "matched": 5,
+      "unmatched": 1,
+      "retrieved_count": 45,
+      "unmatched_url": "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_hands-on-news-75155.php",
+      "reachability": null
+    }
+  }
+}

@@ -1,0 +1,759 @@
+{
+  "script_id": "5a35f4c46d924cdaa0f14cd387134e59",
+  "version": 1,
+  "title": "不建电厂的千兆瓦电厂，和可能卖1800美元的下一代Xbox",
+  "sections": [
+    {
+      "title": "不建电厂的千兆瓦电厂",
+      "paragraphs": [
+        {
+          "text": "一家公司宣布要搞一座千兆瓦级的电厂，但这座电厂不会真的建起来。Google 这次说的，是一座虚拟电厂。消息来自 Fast Company 10 月 22 日的报道。千兆瓦级是报道给出的规模说法，具体容量没有披露。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「千兆瓦级」是报告原文「gigawatt-sized」的准确中文译法（gigawatt 即千兆瓦），并非编造的数字；「具体容量没有披露」与报告注明的「材料未给出具体容量数字」一致；10 月 22 日与来源日期一致。代码发现的「千」属于这一译名，不是没有依据的数字。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        },
+        {
+          "text": "虚拟电厂这个名字，容易让人以为是把发电机组藏在了什么地方。但 Fast Company 报道的这笔交易，重点不在新建发电：它靠的是利用现有电网，在关键时段把整体用电需求降下来。用电最紧张的时候少用一点，电网就多出一点余量。它是在调整需求，而非增加供给。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+            "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「利用现有电网、在关键时段降低整体用电需求、调整需求而非增加供给」与研究报告对 Fast Company 报道的转述一致；改写后仍保留「重点不在新建发电」和「调整需求而非增加供给」的限定，没有删除会改变结论的条件。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          },
+          "revision": {
+            "before": "虚拟电厂这个名字容易让人以为是把发电机组藏起来了。它其实不发电。材料里的解释很朴素：利用现有电网，在关键时段把整体用电需求降下来。用电高峰少用一点，等于凭空多出来一点供电余量。它不增加供给，它调整需求。",
+            "proposed": "虚拟电厂这个名字，容易让人以为是把发电机组藏在了什么地方。但 Fast Company 报道的这笔交易，重点不在新建发电：它靠的是利用现有电网，在关键时段把整体用电需求降下来。用电最紧张的时候少用一点，电网就多出一点余量。它是在调整需求，而非增加供给。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        },
+        {
+          "text": "这个思路，和大型科技公司这几年的常规动作正好相反。为了数据中心，不少公司选择新建电厂、增加发电。报道把 Google 这笔交易描述成提高现有电网的利用率，还说它看起来可能是大型科技企业同类交易里最大的一笔。这是报道的判断，不是交易条款。还有一点得说清楚：材料没有讲这笔交易是专门为 AI 数据中心服务的。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「看起来可能是大型科技企业同类交易里最大的一笔」与报告说法一致，并且讲稿明确把它归因为报道的判断，没有称为交易条款或行业共识；「材料没有讲这笔交易是专门为 AI 数据中心服务的」是说明研究材料未收录，而不是断言原始报道或现实中不存在，因此不构成把摘要缺失说成来源缺失。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "内存涨价，主机变贵",
+      "paragraphs": [
+        {
+          "text": "同样是科技公司扩张，换个地方看，账就落到了游戏机上。Fast Company 报道预计，下一代 Xbox 可能卖到 1800 美元。",
+          "citations": [
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「下一代 Xbox 可能卖到 1800 美元」与报告一致：1800 美元是报道标题中的可能价格，讲稿用了「报道预计」「可能」，保留了推测性质。",
+            "sources": [
+              "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+            ]
+          }
+        },
+        {
+          "text": "这不是微软公布的售价，报道里也没有上市日期。它给出的理由是：微软和索尼都在开发下一代主机，而 AI 企业对内存芯片的需求激增，把内存成本推了上去。现有的设备近期已经涨过价，下一代相比之下还可能更高。",
+          "citations": [
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ],
+          "evidence": "NEEDS_REVIEW",
+          "note": "事实审计：研究材料只说明「材料未给出正式售价或上市日期」；讲稿却把「材料没有收录」写成了「报道里也没有」。",
+          "fact_verification": {
+            "status": "needs_review",
+            "reason": "研究材料只说明「材料未给出正式售价或上市日期」；讲稿却把「材料没有收录」写成了「报道里也没有」。",
+            "sources": [
+              "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+            ]
+          },
+          "review_reason": "研究材料只说明「材料未给出正式售价或上市日期」；讲稿却把「材料没有收录」写成了「报道里也没有」。"
+        },
+        {
+          "text": "内存是游戏机成本里躲不开的一块。AI 公司买得越多，这块芯片就越紧，价格可能再一层层往下游传。玩家最后在货架上看到的那个数字，可能会受到上游芯片需求的影响。",
+          "citations": [
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+            "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "讲稿用「芯片就越紧」「可能再一层层往下游传」「可能会受到影响」等表述来传达价格传导，与研究报告中「AI 企业芯片需求可能传导到主机售价」的推测一致；改写后去掉了「其实是上游抢产能的结果」这类确定性说法，保留了可能性限定。",
+            "sources": [
+              "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+            ]
+          },
+          "revision": {
+            "before": "内存是游戏机成本里躲不开的一块。AI 公司买得越多，这块芯片就越紧，价格再一层层往下游传。玩家最后在货架上看到的那个数字，其实是上游抢产能的结果。",
+            "proposed": "内存是游戏机成本里躲不开的一块。AI 公司买得越多，这块芯片就越紧，价格可能再一层层往下游传。玩家最后在货架上看到的那个数字，可能会受到上游芯片需求的影响。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        }
+      ]
+    },
+    {
+      "title": "账最后算在谁头上",
+      "paragraphs": [
+        {
+          "text": "把这两件事放在一起看，能看到科技公司扩张的需求正在从机房里往外溢：一头是电，一头是内存芯片。但两条线走到消费者面前的方式不一样。Google 这条线，报道讲的是在关键时段调度用电、提高现有电网利用率；价格传导的讨论，主要落在内存和游戏机这条线上。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+            "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+            "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "改写后已经区分两条线：Google 这条线讲的是在关键时段调度用电、提高现有电网利用率；价格传导讨论只落在内存和游戏机线上。这与研究报告一致，没有把电力线并入「落到消费者价格」的同一方向。",
+            "sources": [
+              "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          },
+          "revision": {
+            "before": "把这两件事放在一起看，能看到同一条线：科技公司扩张带来的需求，正在从机房里往外溢。一头是电，一头是内存芯片。它眼下还不是一张已经开出的账单，但压力的方向很清楚——最后可能落到消费者看得见的价格上。",
+            "proposed": "把这两件事放在一起看，能看到科技公司扩张的需求正在从机房里往外溢：一头是电，一头是内存芯片。但两条线走到消费者面前的方式不一样。Google 这条线，报道讲的是在关键时段调度用电、提高现有电网利用率；价格传导的讨论，主要落在内存和游戏机这条线上。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        },
+        {
+          "text": "差别也在这里。虚拟电厂是把精力花在“什么时候用电”上，需求可以挪、可以削、可以安排；内存涨价就没那么多腾挪空间，价格可能被推着往上走。同样是扩张，一个还能靠调度，一个可能得靠涨价来消化。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+            "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+            "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "「需求可以挪、可以削、可以安排」与虚拟电厂在关键时段降低整体用电需求的机制一致；内存一侧用「可能被推着往上走」「可能得靠涨价来消化」，保留了研究报告中的可能性，没有写成必然转嫁或唯一机制。",
+            "sources": [
+              "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          },
+          "revision": {
+            "before": "最有意思的是应对方式的差别。虚拟电厂是把精力花在“什么时候用电”上，需求可以挪，可以削，可以安排。内存涨价就没那么多腾挪空间了，只能让价格去消化。同样是扩张，一个还能靠调度，一个只能靠转嫁。",
+            "proposed": "差别也在这里。虚拟电厂是把精力花在“什么时候用电”上，需求可以挪、可以削、可以安排；内存涨价就没那么多腾挪空间，价格可能被推着往上走。同样是扩张，一个还能靠调度，一个可能得靠涨价来消化。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        },
+        {
+          "text": "所以这期最值得记住的画面，可能是：一座千兆瓦级的电厂不用打地基；而下一代游戏机的价格标签，可能会先感受到这轮 AI 热潮的温度。后者目前还只是报道的预计——如果这些压力真的传下去，问题就是它被算在谁头上。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+            "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+            "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+            "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "讲稿用「可能是」「可能会」「目前还只是报道的预计」「如果这些压力真的传下去」等条件表达，已经删除把成本转嫁当成定论的说法，与研究报告对下一代主机价格只是报道预计、传导只是可能的定位一致；对虚拟电厂也未声称有价格传导。",
+            "sources": [
+              "https://fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          },
+          "revision": {
+            "before": "所以这期最值得记住的画面是：一座千兆瓦级的电厂不用打地基，而下一代游戏机的价格标签，可能先感受到这轮 AI 热潮的温度。企业扩张的账总得有人付，问题只是，它被算在谁头上。",
+            "proposed": "所以这期最值得记住的画面，可能是：一座千兆瓦级的电厂不用打地基；而下一代游戏机的价格标签，可能会先感受到这轮 AI 热潮的温度。后者目前还只是报道的预计——如果这些压力真的传下去，问题就是它被算在谁头上。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 792,
+    "estimated_seconds": 178,
+    "segments": 32,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.988,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "不建电厂的千兆瓦电厂",
+        "spoken_length": 313,
+        "budget": 261
+      },
+      {
+        "title": "内存涨价，主机变贵",
+        "spoken_length": 201,
+        "budget": 261
+      },
+      {
+        "title": "账最后算在谁头上",
+        "spoken_length": 278,
+        "budget": 261
+      }
+    ]
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 2,
+      "prompt_tokens": 5437,
+      "completion_tokens": 8251,
+      "total_tokens": 13688
+    },
+    "problems": [],
+    "editorial_brief": {
+      "considered": [
+        "只讲 Google 虚拟电厂：开场有反差，但材料只有“千兆瓦级”和一句机制解释，缺容量、地点、合作方，单独撑 3 分钟容易空。",
+        "只讲下一代 Xbox 可能卖 1800 美元：对玩家最有感，但价格只是报道标题中的可能值，材料没有官方定价和上市时间，单条讲容易变成价格猜测。",
+        "把 AI 的物理成本串起来：Google 解决电，Xbox 反映内存涨价，两条都具体且互补，能解释科技扩张怎样外溢到基础设施和消费品。选这个。",
+        "讲资本退潮：金融科技融资下降叠加高估值创业公司被并购，逻辑完整，但公司名陌生、缺收购价，和普通观众的距离更远，可留作另一期。",
+        "按六条日报全讲：信息全，但 3 分钟只能每事一句，没有主线，听完记不住。"
+      ],
+      "angle": "科技巨头扩张正在算两笔新账——电和内存：Google 用虚拟电厂少建电厂，下一代 Xbox 却可能因 AI 抢内存而变贵。",
+      "viewer_value": "不熟悉商业新闻的观众也能看懂：AI 热潮不只在模型和融资里，它会改变电力安排，也会落到游戏机这种消费品的价格上；同时弄明白虚拟电厂不是真的建一座电厂，而是调度用电。",
+      "throughline": "先用“不建发电厂却搞出千兆瓦级电厂”的反差开场，解释虚拟电厂是在关键时段压低整体用电需求；再把镜头切到玩家熟悉的游戏机，说明 AI 企业对内存芯片的需求怎样推高下一代 Xbox 的可能售价；最后收束到同一件事：科技扩张的成本正从机房外溢到电网和消费者，企业要么调度现有资源，要么让成本落到别处。",
+      "keep": [
+        "Google 宣布 gigawatt-sized 虚拟电厂交易，Fast Company 转述；作用：开场反差和主线第一例。条件：只说千兆瓦级，没给具体容量。",
+        "材料对 VPP 的解释：利用现有电网，在关键时段降低整体电力需求；作用：让观众听懂“不建电厂”到底怎么做到。不要扩写成材料没说的具体控制设备。",
+        "材料把 VPP 与“大型科技公司为数据中心新建电厂”对照，认为它选择提高现有电网利用率；报道称这看起来可能是大型科技企业同类交易中最大的一笔。作用：建立“电力安排也是竞争”的判断。条件：这是材料判断/推测，不是交易条款。",
+        "报道预计下一代 Xbox 可能售价 1800 美元；材料称 Microsoft 与 Sony 正在开发下一代主机，AI 企业需求激增推高内存芯片成本，现有设备近期已涨价。作用：把 AI 成本落到观众熟悉的消费品价格上。条件：这是报道标题中的可能价格，不是正式售价，也没有上市日期。",
+        "材料没有明确说 Google 这笔交易专门服务 AI 数据中心；讲述时只能说科技公司扩张涉及电力安排，不能补成“Google 的 VPP 专门为 AI 省电”。作用：防止两条线被硬连成因果。"
+      ],
+      "leave_out": [
+        "全球金融科技融资：106 亿美元、环比降 28.4%、同比降 21.4%——是另一条资本市场线，材料没有把它和 AI/电力成本联系起来；放进 3 分钟会打断主线。",
+        "高估值创业公司被并购：Airtable、Headspace、Miro 等，材料没有收购价或估值金额，观众也不熟；要讲清楚得补很多背景，收益不如前两条具体。",
+        "Kroger 关店：至少 50 家、18 个州、约 60 家计划——线下零售收缩，和本期“科技扩张的成本”无关；讲了会变成日报串烧。",
+        "SEC 与 AMF 监管合作备忘录：监管协作安排，专业且离大众远；没有公司经营或价格变化，不适合这期。",
+        "报告目录、来源清单和其他条目的数字：不进入口播，避免把讲述变成条目表。"
+      ],
+      "material": "【选定材料：Google 虚拟电厂 + 下一代 Xbox 价格】\n1. 条目 2.1（Fast Company，2026-10-22，https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant）：Google 宣布一项 gigawatt-sized（千兆瓦级）虚拟电厂（VPP）交易；材料未给出具体容量数字。报道称，这份交易通过利用现有电网，在关键时段降低整体电力需求；并称它看起来可能是大型科技企业同类交易中最大的一笔。材料同时提到大型科技公司为数据中心新建电厂，并把 Google 的安排与“新建电厂”对照，认为它选择提高现有电网利用率——这是材料判断，不是交易条款。材料没有明确说这笔 Google 交易专门服务 AI 数据中心。VPP 在材料中的解释就是利用现有电网、在关键时段降低整体电力需求；不要扩写成具体控制电池、家庭用电等材料没说的机制。\n2. 条目 2.3（Fast Company，2026-10-22，https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why）：报道预计下一代 Xbox 可能售价 $1,800；这是报道标题给出的可能价格，材料未给出正式售价或上市日期。材料称 Microsoft 与 Sony 正在开发下一代游戏主机，AI 企业需求激增正推高内存芯片成本；材料还称现有设备近期已经涨价，下一代主机相比之下可能更高。\n3. 可用于连接两条线的背景：科技公司扩张不只在软件，也涉及电力安排；AI 芯片需求会传导到消费电子成本。注意：第一条只能支持“科技公司扩张涉及电力”，不能补成“Google 的 VPP 专门为 AI 数据中心省电”。第二条的 $1,800 只能作为报道预计，不能说成微软公布售价。"
+    },
+    "editorial_prompt_version": 3,
+    "trusted_urls": 6,
+    "report_path": "output/company/2026-10-22_company_daily.md",
+    "written_at": "2026-10-23T22:01:32+0800",
+    "cell": {
+      "recipe": "topic_digest",
+      "sha256": "4835ac05a94a9200484e626cc4ac0816b2815c527a1df641fa98a8cec43ea45c",
+      "cell": "topics-general-digest-long",
+      "status": "experimental",
+      "parts": {
+        "domain": {
+          "key": "topics"
+        },
+        "type": {
+          "key": "digest"
+        },
+        "format": {
+          "key": "long"
+        },
+        "audience": {
+          "key": "general"
+        }
+      },
+      "resolved_sha256": "701a66afd6257b7fad3670ad76113d4fefdc9d7f847884dea2b69025a692dc82",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "general",
+          "sha256": "66403ba136c135bc1f7f02ed1b5848c17223124c38a4067a3442f4bf48358e45"
+        },
+        "output": {
+          "kind": "part",
+          "name": "motion",
+          "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "fact",
+          "rule": "D1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "这不是微软公布的售价，报道里也没有上市日期。",
+          "problem": "研究材料只说明「材料未给出正式售价或上市日期」；讲稿却把「材料没有收录」写成了「报道里也没有」。",
+          "why": "「研究报告没有收录」不等于「原报道没有提供」。观众会以为已经核实过原文，确认原文没有上市日期；实际上这一说法没有依据，而且可能和原报道冲突。",
+          "suggestion": "改为「这不是微软公布的售价，目前也没有公布上市日期」。把对报道内容的断言，改成对官方是否公布信息的判断。",
+          "source": "model"
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "消息来自 Fast Company 10 月 22 日的报道。千兆瓦级是报道给出的规模说法，具体容量没有披露。",
+          "problem": "开场钩子刚立住，立刻接来源、口径和未披露信息，像审稿备注，打断“电厂不建”的悬念。",
+          "why": "观众刚被吸引就被流程信息拖慢，容易把后面当成资料汇编。",
+          "suggestion": "先解释虚拟电厂怎么做到“不建电厂”，来源在解释后自然带出；“具体容量没有披露”与主旨关系弱，可删。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 2,
+          "quote": "这是报道的判断，不是交易条款。还有一点得说清楚：材料没有讲这笔交易是专门为 AI 数据中心服务的。",
+          "problem": "连续两句免责声明，尤其“材料没有讲”像内部审稿备注；“不是交易条款”与“判断”对举也让观众困惑。",
+          "why": "打断从电力到芯片的主线推进，观众听到的是我们不知道什么，而不是发现。",
+          "suggestion": "删“这是报道的判断，不是交易条款”；如需边界，改成自然一句“报道没有把它和某个 AI 数据中心直接挂钩”，后移到过渡处或省略。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "同样是科技公司扩张，换个地方看，账就落到了游戏机上。",
+          "problem": "从 Google 虚拟电厂直接跳到 Xbox 价格，缺少因果桥；“换个地方看”只提示换场，没有告诉观众为什么换。",
+          "why": "主线断成两条新闻拼接，观众不知道为什么还要听游戏机。",
+          "suggestion": "用 AI 抢内存芯片做过渡：“AI 扩张不只抢电，也在抢内存——游戏机先感到价格压力。”再进 Xbox 预计售价。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "这不是微软公布的售价，报道里也没有上市日期。",
+          "problem": "先否定再给信息，把有吸引力的 1800 美元预计压后；上市日期与当前主线无关，增加信息负担。",
+          "why": "观众被免责声明挡在门外，数字冲击力被削弱。",
+          "suggestion": "先讲“报道预计下一代 Xbox 可能卖到 1800 美元，原因是 AI 抢内存”，随后自然补“这是报道预计，不是微软公布售价”；上市日期可删。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 2,
+          "quote": "后者目前还只是报道的预计——如果这些压力真的传下去，问题就是它被算在谁头上。",
+          "problem": "“它”指代不清，可能指价格压力、成本或涨价；且“目前还只是报道的预计”又一次免责声明，削弱结尾。",
+          "why": "观众最后记忆点模糊，不知道问题落在谁头上。",
+          "suggestion": "改成“下一代游戏机涨价目前只是报道预计；如果成本压力继续下传，最后买单的会是谁？”",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "Google 具体让谁少用电？是它自己的数据中心，还是普通家庭和其他企业？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "这不就是错峰用电吗，为什么能叫“电厂”？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "“同类交易”指哪种交易，“最大一笔”是按金额、容量还是覆盖范围算？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "“这是报道的判断，不是交易条款”和“材料没有讲”连着出现，像内部审稿备注，容易让我从故事里出戏。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "上一段已经说过 AI 抢内存会推高成本，这一段又重复“一层层往下游传”，没有新增信息，容易走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "Google 的虚拟电厂对普通消费者到底有什么可感的影响？它和游戏机涨价除了“科技扩张”外还有什么联系？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": true,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 12,
+        "rule_must": 0,
+        "questions": 4,
+        "lost": 2,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 1
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 6
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 5
+          }
+        },
+        "passed": false,
+        "rank": 1
+      },
+      "rounds": 3,
+      "deletions": [],
+      "initial": [
+        {
+          "audit": "fact",
+          "rule": "D2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "虚拟电厂这个名字容易让人以为是把发电机组藏起来了。它其实不发电。",
+          "problem": "报告只描述了 Google 这笔 VPP 交易通过利用现有电网、在关键时段压低整体用电需求来运作，并没有说虚拟电厂普遍不发电；虚拟电厂通常可以聚合分布式发电、储能和可调负荷。",
+          "why": "把单笔交易的需量响应机制说成虚拟电厂的普遍定义，范围被放大，观众会误以为所有虚拟电厂都不包含发电资源。",
+          "suggestion": "改成“在这笔交易里，它不新建发电机组，靠的是把关键时段的用电需求降下来”，把限定放回 Google 这笔交易。",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "fact",
+          "rule": "D2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 2,
+          "quote": "玩家最后在货架上看到的那个数字，其实是上游抢产能的结果。",
+          "problem": "报告只说 AI 企业对内存芯片的需求“可能”传导到主机售价，讲稿用“其实是”把这种可能性写成确定因果，还加入了报告没有的“抢产能”机制。",
+          "why": "观众会以为下一代主机涨价已经由 AI 需求确定导致，而不是报道中的推测；这改变了结论的确定性。",
+          "suggestion": "改成“玩家最后在货架上看到的数字，可能会受到上游芯片需求的影响”，保留“可能”并去掉“抢产能”。",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "材料里的解释很朴素：利用现有电网，在关键时段把整体用电需求降下来。",
+          "problem": "“材料里的解释”把内部资料口吻带进正文，观众会感觉不是在听讲述，而是在听转述审稿材料；“利用现有电网”搭配也别扭，核心概念要多停一拍才懂。",
+          "why": "刚建立起来的“虚拟电厂是什么”被打断，听众容易从故事里掉出来。",
+          "suggestion": "改成面向观众的说法，如：“说白了，它靠现有电网和用户，在关键时段把整体用电需求压下来。”后文“不增加供给，调整需求”可以保留。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 2,
+          "quote": "这是报道的判断，不是交易条款。还有一点得说清楚：材料没有讲这笔交易是专门为 AI 数据中心服务的。",
+          "problem": "连续两句免责和材料备注，语气从讲Google怎么做切到内部核对；“交易条款”对普通观众也不是必要概念。",
+          "why": "观众会感到被拉出主线，注意力从“虚拟电厂怎么用”转到“材料到底说了什么”。",
+          "suggestion": "把来源归因和事实边界并成一句自然表述，例如：“报道说，这可能是同类交易里最大的一笔，但没有把它和某个AI数据中心直接挂钩。”保留“提高现有电网利用率”这个有用信息。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "同样是科技公司扩张，换个地方看，账就落到了游戏机上。",
+          "problem": "从Google电力交易硬切到Xbox，过渡词抽象，“账落到游戏机上”在价格还没出现时显得跳。",
+          "why": "观众需要重新判断为什么突然讲游戏机，容易在这一句掉线。",
+          "suggestion": "用具体对象和价格切入：“再把视线从电网移到游戏机：据 Fast Company 报道，下一代 Xbox 可能卖到1800美元。”先让观众知道要讲什么，再解释原因。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "这不是微软公布的售价，报道里也没有上市日期。它给出的理由是：微软和索尼都在开发下一代主机，而 AI 企业对内存芯片的需求激增，把内存成本推了上去。现有的设备近期已经涨过价，下一代相比之下还可能更高。",
+          "problem": "开头两个限定连着出现，其中“没有上市日期”和价格主线关系不大；“它给出的理由”指代含混；最后“下一代相比之下还可能更高”没交代是比现价还是比1800美元高。",
+          "why": "观众刚被1800美元吸引，就被免责和指代绕住，不知道这个预测到底怎么成立。",
+          "suggestion": "压缩成清楚的因果链：“这还不是微软公布的售价。报道的判断是，微软和索尼都在开发下一代主机，AI公司抢内存把成本推高；现在在售的Xbox已经涨过价，下一代可能更贵。”删掉上市日期，明确比较对象。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "科技公司的扩张成本，正在从机房往外溢。一头溢到电网上，一头溢到消费者手里的设备上。",
+          "problem": "虚拟电厂是Google参与需求侧调度，不是“成本溢到电网”；把它和游戏机涨价并列为“成本外溢”，会让前文刚讲清的“不增加供给、调整需求”又变成模糊大词。",
+          "why": "听众可能觉得最后为了拔高硬把两件事捏在一起，削弱对主线的信任。",
+          "suggestion": "把共同点落在“AI热潮带来的压力外溢到机房外”，并保留两条不同路径：一边是电网要学着调度需求，一边是内存涨价传到设备价签。不要用“成本溢到电网”概括虚拟电厂。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "内存涨价就没那么多腾挪空间了，只能让价格去消化。同样是扩张，一个还能靠调度，一个只能靠转嫁。",
+          "problem": "“只能”把报道的预测说成确定结果，抹掉了前文“可能卖到1800美元”的不确定性；对比虽然漂亮，但把复杂应对简化成二选一。",
+          "why": "观众可能把价格预测听成定局，也会觉得结论比前文证据跑得快。",
+          "suggestion": "收窄为：“落到游戏机上，腾挪空间小得多，成本更容易变成售价。一个还能调度需求，一个更容易把成本转给买家。”保留对比，但别把“可能”说成“只能”。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 2,
+          "quote": "企业扩张的账总得有人付，问题只是，它被算在谁头上。",
+          "problem": "结尾从具体两件事拔到“总得有人付”的宏大判断，带煽动感；虚拟电厂不是“付账”，而是调度需求，和前文解释不完全咬合。",
+          "why": "观众最后记住的可能是口号，而不是这期最具体的发现，甚至会觉得两件事被强行归成一种账。",
+          "suggestion": "收回到具体画面：“电厂可以不用打地基，游戏机的价签却可能先变；AI扩张的影响，已经跑到机房外。”如果保留“谁承担”的问题，也把它落在“电网调度”和“消费者价签”两条具体路径上。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "千兆瓦级说的是它能替代的发电量，还是能削减的用电量？不解释这个量级，开场的反差有点悬空。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "前面只说“宣布要搞”，这里突然说“这笔交易”，Google到底和谁交易、交易内容是什么？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "“这是报道的判断，不是交易条款”像审稿备注，突然打断听感。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "1800 美元对应哪一档 Xbox？如果下一代有多个型号，这个预测是在说入门价还是高配价？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "这一段基本复述上一段的内存涨价传导，没有新例子或新变化，容易走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "虚拟电厂不是 Google 的应对办法吗，怎么又说成本溢到电网上？这里“溢到电网”指的是电网压力还是电费？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "把虚拟电厂和内存涨价并成同一方向，转折太快，我跟不上为什么是一回事。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "虚拟电厂是 Google 可以主动调度，游戏机价格是整个市场转嫁，这两个应对方式真能直接对比吗？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "结尾说“账总得有人付”，但电网那一头到底谁付、怎么付，前文没落地。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        }
+      ],
+      "editorial_attempted": false
+    },
+    "audit_usage": {
+      "requests": 15,
+      "prompt_tokens": 41412,
+      "completion_tokens": 89714,
+      "total_tokens": 131126
+    },
+    "audit_prompt_version": 11
+  },
+  "created_by": "多矩阵质量验收",
+  "created_at": "2026-10-23T22:01:32+0800"
+}

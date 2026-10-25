@@ -1,0 +1,177 @@
+{
+  "layouts": [
+    {
+      "name": "new-1440",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1425,
+      "pageHeight": 1274,
+      "buttonTop": 627,
+      "sourceFont": "14px"
+    },
+    {
+      "name": "new-1280",
+      "width": 1280,
+      "height": 800,
+      "scrollWidth": 1265,
+      "pageHeight": 1274,
+      "buttonTop": 627,
+      "sourceFont": "14px"
+    },
+    {
+      "name": "new-1024",
+      "width": 1024,
+      "height": 768,
+      "scrollWidth": 1009,
+      "pageHeight": 1270,
+      "buttonTop": 625,
+      "sourceFont": "14px"
+    },
+    {
+      "name": "new-390",
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "pageHeight": 1953,
+      "buttonTop": 1303,
+      "sourceFont": "14px"
+    },
+    {
+      "name": "library-1440",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1425,
+      "pageHeight": 1414,
+      "buttonTop": null,
+      "sourceFont": null
+    },
+    {
+      "name": "long-1440",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1425,
+      "pageHeight": 1011,
+      "buttonTop": null,
+      "sourceFont": null
+    },
+    {
+      "name": "detail-1280",
+      "width": 1280,
+      "height": 800,
+      "scrollWidth": 1265,
+      "pageHeight": 984,
+      "buttonTop": null,
+      "sourceFont": null
+    },
+    {
+      "name": "detail-1024",
+      "width": 1024,
+      "height": 768,
+      "scrollWidth": 1009,
+      "pageHeight": 971,
+      "buttonTop": null,
+      "sourceFont": null
+    },
+    {
+      "name": "detail-390",
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "pageHeight": 1359,
+      "buttonTop": null,
+      "sourceFont": null
+    }
+  ],
+  "checks": [
+    "draft_reload_source_title",
+    "draft_voice_speed_reload",
+    "real_cached_accent_preview",
+    "real_docx_upload_draft_association_reload",
+    "library_all_records_pagination",
+    "library_status_and_identifier_search",
+    "search_empty_state",
+    "real_existing_mp4_playback",
+    "tab_switch_preserves_scene_draft",
+    "keyboard_tabs_and_saved_narration",
+    "version_parent_navigation",
+    "completed_revision_status_consistency",
+    "create_visual_narration_media_submit_payloads_and_error_feedback",
+    "legacy_draw_things_background_editor_preserved",
+    "no_video_jobs_created",
+    "desktop_and_narrow_layouts_no_overflow",
+    "long_scene_list_bounded",
+    "material_clarification_state"
+  ],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:8011/api/jobs/1332041b-b1e1-4c4d-a1ae-3ae12702572b/media-revisions",
+      "body": {
+        "voice_id": "zf_xiaoxiao",
+        "video_speed": 2
+      }
+    },
+    {
+      "url": "http://127.0.0.1:8011/api/jobs/1332041b-b1e1-4c4d-a1ae-3ae12702572b/visual-revisions",
+      "body": {
+        "scene_id": "c1_s2",
+        "changes": {
+          "title": "界面验收 · 临时场景标题"
+        },
+        "instruction": ""
+      }
+    },
+    {
+      "url": "http://127.0.0.1:8011/api/jobs/1332041b-b1e1-4c4d-a1ae-3ae12702572b/revisions",
+      "body": {
+        "mode": "narration",
+        "text": "这是前端请求验收用的讲稿。保留原版，按当前讲稿重新组织画面。",
+        "title": "会议记录 · 画面修订 · 修订版",
+        "creative_intent": {
+          "audience": "",
+          "purpose": "",
+          "tone": "",
+          "focus": ""
+        }
+      }
+    },
+    {
+      "url": "http://127.0.0.1:8011/api/jobs",
+      "body": {
+        "title": "会议记录",
+        "source_text": "会议记录的三个重点\n\n会议记录用于让没参加会议的同事了解结果。记录只保留必要背景，重点区分以下三类信息。\n\n决定\t记录已经确定的事项，避免把讨论意见写成结论。\n\n行动\t写清负责人和下一步动作，便于会后跟进。\n\n待确认\t未达成共识的信息标为待确认，不猜测补齐。",
+        "input_document_id": "3572acc6-9cb7-4103-9d35-3d5ba7237cfa",
+        "target_duration_sec": 60,
+        "duration_mode": "content",
+        "theme": "minimal_dark",
+        "voice_id": "qwen_eric",
+        "video_speed": 1.5,
+        "video_form": "auto",
+        "creative_intent": {
+          "audience": "",
+          "purpose": "",
+          "tone": "",
+          "focus": ""
+        },
+        "use_draw_things": false
+      }
+    }
+  ],
+  "errors": [],
+  "sample": {
+    "duration": 6.72,
+    "error": null
+  },
+  "actualCounts": {
+    "total": 33,
+    "completed": 29,
+    "running": 0,
+    "needs_input": 1
+  },
+  "playback": {
+    "width": 1920,
+    "duration": 31.573,
+    "error": null,
+    "time": 2.461267
+  },
+  "status": "PASS"
+}

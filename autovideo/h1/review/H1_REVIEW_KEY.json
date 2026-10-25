@@ -1,0 +1,108 @@
+{
+  "warning": "Experimenter-only key. Do not give to reviewers before scoring is locked.",
+  "seed": 20261013,
+  "pairs": {
+    "pair-01": {
+      "pair_id": "pair-01",
+      "samples": {
+        "left": {
+          "sample_code": "8306B88094",
+          "file": "h1/review/materials/sample-8306B88094.mp4",
+          "variant": "C",
+          "sha256": "2cd03effb0ba463753dfc72593f03d34a69e352854d00b8166d5812f94285727"
+        },
+        "right": {
+          "sample_code": "5E1D4DD3A2",
+          "file": "h1/review/materials/sample-5E1D4DD3A2.mp4",
+          "variant": "B",
+          "sha256": "ac30e50777e68a956e92188c8ad03e993ed4210f2bc6f99b6d4b7af379ce71e6"
+        }
+      }
+    },
+    "pair-02": {
+      "pair_id": "pair-02",
+      "samples": {
+        "left": {
+          "sample_code": "4785621755",
+          "file": "h1/review/materials/sample-4785621755.mp4",
+          "variant": "B",
+          "sha256": "7e38022751e221bc20a82a79b546a4f9021c402b7b1255b820e8d039bc761e96"
+        },
+        "right": {
+          "sample_code": "F41B08E7BE",
+          "file": "h1/review/materials/sample-F41B08E7BE.mp4",
+          "variant": "C",
+          "sha256": "569ae289f43f6047184c2a56e6f9cfe877fe66c4b00686adcfbf6b0c9b2eaad0"
+        }
+      }
+    },
+    "pair-03": {
+      "pair_id": "pair-03",
+      "samples": {
+        "left": {
+          "sample_code": "A42CBE3A2F",
+          "file": "h1/review/materials/sample-A42CBE3A2F.mp4",
+          "variant": "C",
+          "sha256": "7c4946a302e4e7728ac577404fc689dd49a613d16a230b913f7978d5de7845e0"
+        },
+        "right": {
+          "sample_code": "F67B465C81",
+          "file": "h1/review/materials/sample-F67B465C81.mp4",
+          "variant": "B",
+          "sha256": "d0bcfd50158a4516f3eb153fd5c54ba53f6d19ffd189775179833b8d86635426"
+        }
+      }
+    },
+    "pair-04": {
+      "pair_id": "pair-04",
+      "samples": {
+        "left": {
+          "sample_code": "43E92E2E1E",
+          "file": "h1/review/materials/sample-43E92E2E1E.mp4",
+          "variant": "C",
+          "sha256": "d7d41811accd79e0193d316d37c7f0fed5c884f98d8962c3981b3a27757659e9"
+        },
+        "right": {
+          "sample_code": "028FBEF573",
+          "file": "h1/review/materials/sample-028FBEF573.mp4",
+          "variant": "B",
+          "sha256": "4775d62225042db5eccf3c2102281a085faeb9873a85d8abf71768d0d5958c0f"
+        }
+      }
+    },
+    "pair-05": {
+      "pair_id": "pair-05",
+      "samples": {
+        "left": {
+          "sample_code": "55F6039E39",
+          "file": "h1/review/materials/sample-55F6039E39.mp4",
+          "variant": "B",
+          "sha256": "5b89fe6601f238559bd6d33515ffc1e2fc0ca30ad95937a0c18233b6050ad4bf"
+        },
+        "right": {
+          "sample_code": "F4F5655CBB",
+          "file": "h1/review/materials/sample-F4F5655CBB.mp4",
+          "variant": "C",
+          "sha256": "8a6e75d4c751b67566523a7a594477242da67eb8008ab409c49c3a04f582dce7"
+        }
+      }
+    },
+    "pair-06": {
+      "pair_id": "pair-06",
+      "samples": {
+        "left": {
+          "sample_code": "5B1C361B9F",
+          "file": "h1/review/materials/sample-5B1C361B9F.mp4",
+          "variant": "C",
+          "sha256": "7e947ddaa71296dc7dbdec0d51d098f3f9c07da21e89c162dddfbc55125c8a63"
+        },
+        "right": {
+          "sample_code": "F1B5DDDE84",
+          "file": "h1/review/materials/sample-F1B5DDDE84.mp4",
+          "variant": "B",
+          "sha256": "8609d02f30c69b04a2952f77b6a6383cf724de970e8ef5256df83df5b53373df"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1062 @@
+[
+  {
+    "case": "auto-ordinary",
+    "job_id": "07207738-9e49-4ce9-a3d1-decf527e0b31",
+    "status": "COMPLETED",
+    "error_code": null,
+    "retryable": false,
+    "analysis": {
+      "requested_form": "auto",
+      "selected_form": "information_motion",
+      "recommended_form": "information_motion",
+      "selection_mode": "automatic",
+      "status": "ready",
+      "reason": "原文主旨是任务交接时应说明的要点清单，包括目标、背景、完成标准等并列信息，适合用信息动效逐项呈现；没有步骤、分支或系统流转关系，不需要画流程图。",
+      "issues": [
+        {
+          "kind": "duplicate",
+          "message": "u2 与 u5 文本完全一致，保留 u2，将 u5 标为重复项。",
+          "source_quotes": [
+            "任务交接要讲清楚目标、背景、完成标准。",
+            "任务交接要讲清楚目标、背景、完成标准。"
+          ],
+          "blocking": false
+        },
+        {
+          "kind": "noise",
+          "message": "u8 是页码类粘贴噪声，不属于讲解内容。",
+          "source_quotes": [
+            "第 1 页 / 共 1 页"
+          ],
+          "blocking": false
+        }
+      ],
+      "retained_units": 6,
+      "excluded_units": 2
+    },
+    "llm_calls": 6,
+    "qa": {
+      "status": "PASS",
+      "gate": "G2",
+      "real_llm": true,
+      "real_tts": true,
+      "mock_calls": 0,
+      "model": "deepseek-flash",
+      "llm_call_count": 6,
+      "video": {
+        "codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "frames": 1098,
+        "duration_seconds": 36.608,
+        "full_decode": "PASS"
+      },
+      "audio": {
+        "codec": "aac",
+        "sample_rate": "48000",
+        "channels": 2,
+        "decoded_tts_correlation": 0.999946556625606,
+        "decoded_rms": 0.08057776838541031,
+        "full_decode": "PASS"
+      },
+      "timeline": {
+        "ir_frames": 1098,
+        "scene_count": 4,
+        "beat_count": 12,
+        "alignment_granularity": "phrase"
+      },
+      "visual_beats": {
+        "c1_s1_b0": {
+          "action": "reveal",
+          "target_id": "title",
+          "beat_frame": 8,
+          "before_frame": 5,
+          "after_frame": 12,
+          "changed_pixel_ratio": 0.03591579861111111
+        },
+        "c1_s1_b1": {
+          "action": "reveal",
+          "target_id": "subtitle",
+          "beat_frame": 76,
+          "before_frame": 73,
+          "after_frame": 80,
+          "changed_pixel_ratio": 0.0031664737654320987
+        },
+        "c1_s2_b0": {
+          "action": "reveal",
+          "target_id": "title",
+          "beat_frame": 133,
+          "before_frame": 130,
+          "after_frame": 137,
+          "changed_pixel_ratio": 0.04172887731481482
+        },
+        "c1_s2_b1": {
+          "action": "reveal",
+          "target_id": "line:0",
+          "beat_frame": 200,
+          "before_frame": 197,
+          "after_frame": 204,
+          "changed_pixel_ratio": 0.0047395833333333335
+        },
+        "c1_s2_b2": {
+          "action": "reveal",
+          "target_id": "line:1",
+          "beat_frame": 216,
+          "before_frame": 213,
+          "after_frame": 220,
+          "changed_pixel_ratio": 0.007827449845679013
+        },
+        "c1_s2_b3": {
+          "action": "reveal",
+          "target_id": "line:2",
+          "beat_frame": 233,
+          "before_frame": 230,
+          "after_frame": 237,
+          "changed_pixel_ratio": 0.010142264660493828
+        },
+        "c2_s1_b0": {
+          "action": "reveal",
+          "target_id": "title",
+          "beat_frame": 353,
+          "before_frame": 350,
+          "after_frame": 357,
+          "changed_pixel_ratio": 0.042798996913580245
+        },
+        "c2_s1_b1": {
+          "action": "reveal",
+          "target_id": "line:0",
+          "beat_frame": 421,
+          "before_frame": 418,
+          "after_frame": 425,
+          "changed_pixel_ratio": 0.00611207561728395
+        },
+        "c2_s1_b2": {
+          "action": "reveal",
+          "target_id": "line:1",
+          "beat_frame": 577,
+          "before_frame": 574,
+          "after_frame": 581,
+          "changed_pixel_ratio": 0.052863618827160494
+        },
+        "c2_s1_b3": {
+          "action": "reveal",
+          "target_id": "line:2",
+          "beat_frame": 772,
+          "before_frame": 769,
+          "after_frame": 776,
+          "changed_pixel_ratio": 0.048541666666666664
+        },
+        "c2_s2_b0": {
+          "action": "reveal",
+          "target_id": "title",
+          "beat_frame": 942,
+          "before_frame": 939,
+          "after_frame": 946,
+          "changed_pixel_ratio": 0.05722849151234568
+        },
+        "c2_s2_b1": {
+          "action": "reveal",
+          "target_id": "subtitle",
+          "beat_frame": 1022,
+          "before_frame": 1019,
+          "after_frame": 1026,
+          "changed_pixel_ratio": 0.006470871913580247
+        }
+      },
+      "scene_samples": [
+        {
+          "scene_id": "c1_s1",
+          "frame": 0,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+        },
+        {
+          "scene_id": "c1_s1",
+          "frame": 62,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-004.png"
+        },
+        {
+          "scene_id": "c1_s1",
+          "frame": 124,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-007.png"
+        },
+        {
+          "scene_id": "c1_s2",
+          "frame": 125,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-008.png"
+        },
+        {
+          "scene_id": "c1_s2",
+          "frame": 231,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-016.png"
+        },
+        {
+          "scene_id": "c1_s2",
+          "frame": 336,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-018.png"
+        },
+        {
+          "scene_id": "c2_s1",
+          "frame": 337,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-019.png"
+        },
+        {
+          "scene_id": "c2_s1",
+          "frame": 635,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-026.png"
+        },
+        {
+          "scene_id": "c2_s1",
+          "frame": 933,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-029.png"
+        },
+        {
+          "scene_id": "c2_s2",
+          "frame": 934,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-030.png"
+        },
+        {
+          "scene_id": "c2_s2",
+          "frame": 1016,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-033.png"
+        },
+        {
+          "scene_id": "c2_s2",
+          "frame": 1097,
+          "file": "g3/data/jobs/07207738-9e49-4ce9-a3d1-decf527e0b31/attempts/1/g2-run/artifacts/keyframes/frame-036.png"
+        }
+      ],
+      "contact_sheet": "artifacts/contact-sheet.jpg",
+      "captions": {
+        "burned_in": true,
+        "srt": "artifacts/captions.srt",
+        "alignment": "phrase-level measured PCM activity"
+      },
+      "video_form": "information_motion",
+      "duration_mode": "content",
+      "information": {
+        "scene_count": 4,
+        "components": [
+          "concept_reveal",
+          "title_card"
+        ],
+        "timing": "measured phrases; estimated within-phrase cues",
+        "theme": "minimal_light"
+      }
+    },
+    "manifest_hashes": 94,
+    "artifacts": [
+      "captions.srt",
+      "chapters.json",
+      "content-outline.json",
+      "execution-log.txt",
+      "information-plan.json",
+      "information-timing.json",
+      "input-brief.json",
+      "manifest.json",
+      "model-cost.json",
+      "narration.json",
+      "prepared-source.txt",
+      "qa.json",
+      "storyboard.json",
+      "video-ir.json",
+      "video.mp4"
+    ],
+    "range_download": "PASS"
+  },
+  {
+    "case": "auto-process",
+    "job_id": "7b7923fa-d685-4634-aaab-79cad1ae3f85",
+    "status": "COMPLETED",
+    "error_code": null,
+    "retryable": false,
+    "analysis": {
+      "requested_form": "auto",
+      "selected_form": "process_diagram",
+      "recommended_form": "process_diagram",
+      "selection_mode": "automatic",
+      "status": "ready",
+      "reason": "整片围绕借书申请的处理流程展开，包含申请后查库存、有库存与无库存的分支、候补顺序、归还后通知以及取书结束，适合用流程图按步骤和条件分支清晰展示。",
+      "issues": [
+        {
+          "kind": "duplicate",
+          "message": "“有库存就保留图书，通知读者取书；没有库存就候补。”这句话在原文中出现两次，内容完全一致，已保留第一次出现的表述，第二次作为重复项排除。",
+          "source_quotes": [
+            "有库存就保留图书，通知读者取书；没有库存就候补。"
+          ],
+          "blocking": false
+        },
+        {
+          "kind": "duplicate",
+          "message": "“借书流程笔记：读者提交借书申请后系统查库存。”与后文“读者提交借书申请后系统查库存。”内容近似重复，但后一句缺少前面的说明词，并非逐字重复，因此两者都保留。",
+          "source_quotes": [
+            "借书流程笔记：读者提交借书申请后系统查库存。",
+            "读者提交借书申请后系统查库存。"
+          ],
+          "blocking": false
+        }
+      ],
+      "retained_units": 6,
+      "excluded_units": 1
+    },
+    "llm_calls": 5,
+    "qa": {
+      "status": "PASS",
+      "gate": "G2",
+      "real_llm": true,
+      "real_tts": true,
+      "mock_calls": 0,
+      "model": "deepseek-flash",
+      "llm_call_count": 5,
+      "video": {
+        "codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "frames": 695,
+        "duration_seconds": 23.168,
+        "full_decode": "PASS"
+      },
+      "audio": {
+        "codec": "aac",
+        "sample_rate": "48000",
+        "channels": 2,
+        "decoded_tts_correlation": 0.99994683483461,
+        "decoded_rms": 0.08154763281345367,
+        "full_decode": "PASS"
+      },
+      "timeline": {
+        "ir_frames": 695,
+        "scene_count": 4,
+        "beat_count": 36,
+        "alignment_granularity": "phrase"
+      },
+      "visual_beats": {
+        "c1_s1_b0": {
+          "action": "reveal",
+          "target_id": "node:apply",
+          "beat_frame": 8,
+          "before_frame": 5,
+          "after_frame": 12,
+          "changed_pixel_ratio": 0.014369695216049383
+        },
+        "c1_s1_b1": {
+          "action": "reveal",
+          "target_id": "node:check_stock",
+          "beat_frame": 8,
+          "before_frame": 5,
+          "after_frame": 12,
+          "changed_pixel_ratio": 0.014369695216049383
+        },
+        "c1_s1_b2": {
+          "action": "reveal",
+          "target_id": "edge:e1",
+          "beat_frame": 8,
+          "before_frame": 5,
+          "after_frame": 12,
+          "changed_pixel_ratio": 0.014369695216049383
+        },
+        "c1_s1_b3": {
+          "action": "highlight",
+          "target_id": "node:apply",
+          "beat_frame": 8,
+          "before_frame": 5,
+          "after_frame": 12,
+          "changed_pixel_ratio": 0.014369695216049383
+        },
+        "c1_s1_b4": {
+          "action": "highlight",
+          "target_id": "node:check_stock",
+          "beat_frame": 8,
+          "before_frame": 5,
+          "after_frame": 12,
+          "changed_pixel_ratio": 0.014369695216049383
+        },
+        "c1_s1_b5": {
+          "action": "highlight",
+          "target_id": "edge:e1",
+          "beat_frame": 8,
+          "before_frame": 5,
+          "after_frame": 12,
+          "changed_pixel_ratio": 0.014369695216049383
+        },
+        "c1_s1_b6": {
+          "action": "reveal",
+          "target_id": "node:check_stock",
+          "beat_frame": 128,
+          "before_frame": 125,
+          "after_frame": 132,
+          "changed_pixel_ratio": 0.026052758487654322
+        },
+        "c1_s1_b7": {
+          "action": "reveal",
+          "target_id": "node:hold_notify",
+          "beat_frame": 128,
+          "before_frame": 125,
+          "after_frame": 132,
+          "changed_pixel_ratio": 0.026052758487654322
+        },
+        "c1_s1_b8": {
+          "action": "reveal",
+          "target_id": "edge:e2",
+          "beat_frame": 128,
+          "before_frame": 125,
+          "after_frame": 132,
+          "changed_pixel_ratio": 0.026052758487654322
+        },
+        "c1_s1_b9": {
+          "action": "highlight",
+          "target_id": "node:check_stock",
+          "beat_frame": 128,
+          "before_frame": 125,
+          "after_frame": 132,
+          "changed_pixel_ratio": 0.026052758487654322
+        },
+        "c1_s1_b10": {
+          "action": "highlight",
+          "target_id": "node:hold_notify",
+          "beat_frame": 128,
+          "before_frame": 125,
+          "after_frame": 132,
+          "changed_pixel_ratio": 0.026052758487654322
+        },
+        "c1_s1_b11": {
+          "action": "highlight",
+          "target_id": "edge:e2",
+          "beat_frame": 128,
+          "before_frame": 125,
+          "after_frame": 132,
+          "changed_pixel_ratio": 0.026052758487654322
+        },
+        "c1_s1_b12": {
+          "action": "reveal",
+          "target_id": "node:check_stock",
+          "beat_frame": 266,
+          "before_frame": 263,
+          "after_frame": 270,
+          "changed_pixel_ratio": 0.030249324845679014
+        },
+        "c1_s1_b13": {
+          "action": "reveal",
+          "target_id": "node:waitlist",
+          "beat_frame": 266,
+          "before_frame": 263,
+          "after_frame": 270,
+          "changed_pixel_ratio": 0.030249324845679014
+        },
+        "c1_s1_b14": {
+          "action": "reveal",
+          "target_id": "edge:e3",
+          "beat_frame": 266,
+          "before_frame": 263,
+          "after_frame": 270,
+          "changed_pixel_ratio": 0.030249324845679014
+        },
+        "c1_s1_b15": {
+          "action": "highlight",
+          "target_id": "node:check_stock",
+          "beat_frame": 266,
+          "before_frame": 263,
+          "after_frame": 270,
+          "changed_pixel_ratio": 0.030249324845679014
+        },
+        "c1_s1_b16": {
+          "action": "highlight",
+          "target_id": "node:waitlist",
+          "beat_frame": 266,
+          "before_frame": 263,
+          "after_frame": 270,
+          "changed_pixel_ratio": 0.030249324845679014
+        },
+        "c1_s1_b17": {
+          "action": "highlight",
+          "target_id": "edge:e3",
+          "beat_frame": 266,
+          "before_frame": 263,
+          "after_frame": 270,
+          "changed_pixel_ratio": 0.030249324845679014
+        },
+        "c1_s2_b0": {
+          "action": "reveal",
+          "target_id": "node:return_book",
+          "beat_frame": 369,
+          "before_frame": 366,
+          "after_frame": 373,
+          "changed_pixel_ratio": 0.01697048611111111
+        },
+        "c1_s2_b1": {
+          "action": "reveal",
+          "target_id": "node:notify_order",
+          "beat_frame": 369,
+          "before_frame": 366,
+          "after_frame": 373,
+          "changed_pixel_ratio": 0.01697048611111111
+        },
+        "c1_s2_b2": {
+          "action": "reveal",
+          "target_id": "edge:e4",
+          "beat_frame": 369,
+          "before_frame": 366,
+          "after_frame": 373,
+          "changed_pixel_ratio": 0.01697048611111111
+        },
+        "c1_s2_b3": {
+          "action": "highlight",
+          "target_id": "node:return_book",
+          "beat_frame": 369,
+          "before_frame": 366,
+          "after_frame": 373,
+          "changed_pixel_ratio": 0.01697048611111111
+        },
+        "c1_s2_b4": {
+          "action": "highlight",
+          "target_id": "node:notify_order",
+          "beat_frame": 369,
+          "before_frame": 366,
+          "after_frame": 373,
+          "changed_pixel_ratio": 0.01697048611111111
+        },
+        "c1_s2_b5": {
+          "action": "highlight",
+          "target_id": "edge:e4",
+          "beat_frame": 369,
+          "before_frame": 366,
+          "after_frame": 373,
+          "changed_pixel_ratio": 0.01697048611111111
+        },
+        "c1_s3_b0": {
+          "action": "reveal",
+          "target_id": "node:no_notice",
+          "beat_frame": 484,
+          "before_frame": 481,
+          "after_frame": 488,
+          "changed_pixel_ratio": 0.018660783179012347
+        },
+        "c1_s3_b1": {
+          "action": "reveal",
+          "target_id": "node:direct_pickup",
+          "beat_frame": 484,
+          "before_frame": 481,
+          "after_frame": 488,
+          "changed_pixel_ratio": 0.018660783179012347
+        },
+        "c1_s3_b2": {
+          "action": "reveal",
+          "target_id": "edge:e5",
+          "beat_frame": 484,
+          "before_frame": 481,
+          "after_frame": 488,
+          "changed_pixel_ratio": 0.018660783179012347
+        },
+        "c1_s3_b3": {
+          "action": "highlight",
+          "target_id": "node:no_notice",
+          "beat_frame": 484,
+          "before_frame": 481,
+          "after_frame": 488,
+          "changed_pixel_ratio": 0.018660783179012347
+        },
+        "c1_s3_b4": {
+          "action": "highlight",
+          "target_id": "node:direct_pickup",
+          "beat_frame": 484,
+          "before_frame": 481,
+          "after_frame": 488,
+          "changed_pixel_ratio": 0.018660783179012347
+        },
+        "c1_s3_b5": {
+          "action": "highlight",
+          "target_id": "edge:e5",
+          "beat_frame": 484,
+          "before_frame": 481,
+          "after_frame": 488,
+          "changed_pixel_ratio": 0.018660783179012347
+        },
+        "c1_s4_b0": {
+          "action": "reveal",
+          "target_id": "node:reader_pickup",
+          "beat_frame": 606,
+          "before_frame": 603,
+          "after_frame": 610,
+          "changed_pixel_ratio": 0.013290412808641976
+        },
+        "c1_s4_b1": {
+          "action": "reveal",
+          "target_id": "node:application_end",
+          "beat_frame": 606,
+          "before_frame": 603,
+          "after_frame": 610,
+          "changed_pixel_ratio": 0.013290412808641976
+        },
+        "c1_s4_b2": {
+          "action": "reveal",
+          "target_id": "edge:e6",
+          "beat_frame": 606,
+          "before_frame": 603,
+          "after_frame": 610,
+          "changed_pixel_ratio": 0.013290412808641976
+        },
+        "c1_s4_b3": {
+          "action": "highlight",
+          "target_id": "node:reader_pickup",
+          "beat_frame": 606,
+          "before_frame": 603,
+          "after_frame": 610,
+          "changed_pixel_ratio": 0.013290412808641976
+        },
+        "c1_s4_b4": {
+          "action": "highlight",
+          "target_id": "node:application_end",
+          "beat_frame": 606,
+          "before_frame": 603,
+          "after_frame": 610,
+          "changed_pixel_ratio": 0.013290412808641976
+        },
+        "c1_s4_b5": {
+          "action": "highlight",
+          "target_id": "edge:e6",
+          "beat_frame": 606,
+          "before_frame": 603,
+          "after_frame": 610,
+          "changed_pixel_ratio": 0.013290412808641976
+        }
+      },
+      "scene_samples": [
+        {
+          "scene_id": "c1_s1",
+          "frame": 0,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+        },
+        {
+          "scene_id": "c1_s1",
+          "frame": 180,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+        },
+        {
+          "scene_id": "c1_s1",
+          "frame": 360,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-009.png"
+        },
+        {
+          "scene_id": "c1_s2",
+          "frame": 361,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-010.png"
+        },
+        {
+          "scene_id": "c1_s2",
+          "frame": 418,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-013.png"
+        },
+        {
+          "scene_id": "c1_s2",
+          "frame": 475,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-014.png"
+        },
+        {
+          "scene_id": "c1_s3",
+          "frame": 476,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+        },
+        {
+          "scene_id": "c1_s3",
+          "frame": 537,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-018.png"
+        },
+        {
+          "scene_id": "c1_s3",
+          "frame": 597,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-019.png"
+        },
+        {
+          "scene_id": "c1_s4",
+          "frame": 598,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-020.png"
+        },
+        {
+          "scene_id": "c1_s4",
+          "frame": 646,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-023.png"
+        },
+        {
+          "scene_id": "c1_s4",
+          "frame": 694,
+          "file": "g3/data/jobs/7b7923fa-d685-4634-aaab-79cad1ae3f85/attempts/1/g2-run/artifacts/keyframes/frame-024.png"
+        }
+      ],
+      "contact_sheet": "artifacts/contact-sheet.jpg",
+      "captions": {
+        "burned_in": true,
+        "srt": "artifacts/captions.srt",
+        "alignment": "phrase-level measured PCM activity"
+      },
+      "video_form": "process_diagram",
+      "duration_mode": "content",
+      "content": {
+        "chapter_count": 1,
+        "coverage": {
+          "source_units_considered": 6,
+          "planned_points": 5,
+          "referenced_points": 5,
+          "all_planned_points_referenced": true
+        },
+        "duration_method": "complete measured narration; no duration fitting or clipping"
+      },
+      "diagram": {
+        "layout_engine": "elkjs-0.12.0",
+        "coordinates_authored_by_model": false,
+        "scene_count": 4,
+        "cue_timing": "estimated within measured phrases",
+        "minimum_node_font_px": 36
+      }
+    },
+    "manifest_hashes": 82,
+    "artifacts": [
+      "captions.srt",
+      "chapters.json",
+      "content-outline.json",
+      "diagram-layout.json",
+      "diagram-plan.json",
+      "diagram-timing.json",
+      "execution-log.txt",
+      "input-brief.json",
+      "manifest.json",
+      "model-cost.json",
+      "narration.json",
+      "prepared-source.txt",
+      "qa.json",
+      "storyboard.json",
+      "video-ir.json",
+      "video.mp4"
+    ],
+    "range_download": "PASS"
+  },
+  {
+    "case": "conflict",
+    "job_id": "6b2fc6b3-0ac1-436c-a8d6-2ed5f381df36",
+    "status": "FAILED",
+    "error_code": "INPUT_REQUIRES_CLARIFICATION",
+    "retryable": false,
+    "analysis": {
+      "requested_form": "auto",
+      "selected_form": "information_motion",
+      "recommended_form": "information_motion",
+      "selection_mode": "automatic",
+      "status": "needs_input",
+      "reason": "现有材料只是要告知报名者一个到场时间，属于单点通知信息，没有步骤、分支或因果流转，因此整片适合用信息动效呈现；但时间本身在材料中互相矛盾，需先澄清后再讲。",
+      "issues": [
+        {
+          "kind": "conflict",
+          "message": "同一场讲座出现了两个互相排斥的到场时间：一处写周五晚上七点，另一处写周六晚上七点；同时材料又强调本次讲座只有一个活动日期。无法据此确定唯一到场时间，需要明确到底是周五还是周六。",
+          "source_quotes": [
+            "本次讲座只有一个活动日期，需要通知报名者按这个时间到场。",
+            "本次讲座确定于周五晚上七点举行。",
+            "本次讲座确定于周六晚上七点举行。",
+            "请根据这些已确认材料说明本次讲座的唯一到场时间。"
+          ],
+          "blocking": true
+        }
+      ],
+      "retained_units": 4,
+      "excluded_units": 0
+    },
+    "llm_calls": 1,
+    "has_video": false
+  },
+  {
+    "case": "auto-ordinary-final",
+    "job_id": "47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e",
+    "status": "COMPLETED",
+    "error_code": null,
+    "retryable": false,
+    "analysis": {
+      "requested_form": "auto",
+      "selected_form": "information_motion",
+      "recommended_form": "information_motion",
+      "selection_mode": "automatic",
+      "status": "ready",
+      "reason": "材料是一套任务交接的说明清单，重点在目标、背景、完成标准分别包含什么，适合逐条用信息动效呈现，而不是画成有先后依赖的流程图。",
+      "issues": [
+        {
+          "kind": "duplicate",
+          "message": "关于任务交接要讲清楚目标、背景、完成标准的内容重复出现了一次，保留其中一处即可，另一处不重复讲解。",
+          "source_quotes": [
+            "任务交接要讲清楚目标、背景、完成标准。",
+            "任务交接要讲清楚目标、背景、完成标准。"
+          ],
+          "blocking": false
+        },
+        {
+          "kind": "noise",
+          "message": "开头的“沟通笔记，后面要用。”属于整理用途备注，页码“第 1 页 / 共 1 页”属于页面噪声，都不作为讲解内容。",
+          "source_quotes": [
+            "沟通笔记，后面要用。",
+            "第 1 页 / 共 1 页"
+          ],
+          "blocking": false
+        }
+      ],
+      "retained_units": 5,
+      "excluded_units": 3
+    },
+    "llm_calls": 4,
+    "qa": {
+      "status": "PASS",
+      "gate": "G2",
+      "real_llm": true,
+      "real_tts": true,
+      "mock_calls": 0,
+      "model": "deepseek-flash",
+      "llm_call_count": 4,
+      "video": {
+        "codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "frames": 721,
+        "duration_seconds": 24.043,
+        "full_decode": "PASS"
+      },
+      "audio": {
+        "codec": "aac",
+        "sample_rate": "48000",
+        "channels": 2,
+        "decoded_tts_correlation": 0.9999500693706949,
+        "decoded_rms": 0.08158014714717865,
+        "full_decode": "PASS"
+      },
+      "timeline": {
+        "ir_frames": 721,
+        "scene_count": 5,
+        "beat_count": 14,
+        "alignment_granularity": "phrase"
+      },
+      "visual_beats": {
+        "c1_s1_b0": {
+          "action": "reveal",
+          "target_id": "title",
+          "beat_frame": 8,
+          "before_frame": 5,
+          "after_frame": 12,
+          "changed_pixel_ratio": 0.05086371527777778
+        },
+        "c1_s1_b1": {
+          "action": "reveal",
+          "target_id": "subtitle",
+          "beat_frame": 95,
+          "before_frame": 92,
+          "after_frame": 99,
+          "changed_pixel_ratio": 0.005295621141975309
+        },
+        "c1_s2_b0": {
+          "action": "reveal",
+          "target_id": "title",
+          "beat_frame": 176,
+          "before_frame": 173,
+          "after_frame": 180,
+          "changed_pixel_ratio": 0.04098427854938272
+        },
+        "c1_s2_b1": {
+          "action": "reveal",
+          "target_id": "line:0",
+          "beat_frame": 230,
+          "before_frame": 227,
+          "after_frame": 234,
+          "changed_pixel_ratio": 0.00839747299382716
+        },
+        "c1_s3_b0": {
+          "action": "reveal",
+          "target_id": "title",
+          "beat_frame": 323,
+          "before_frame": 320,
+          "after_frame": 327,
+          "changed_pixel_ratio": 0.03723572530864198
+        },
+        "c1_s3_b1": {
+          "action": "reveal",
+          "target_id": "line:0",
+          "beat_frame": 349,
+          "before_frame": 346,
+          "after_frame": 353,
+          "changed_pixel_ratio": 0.005270061728395062
+        },
+        "c1_s3_b2": {
+          "action": "reveal",
+          "target_id": "line:1",
+          "beat_frame": 370,
+          "before_frame": 367,
+          "after_frame": 374,
+          "changed_pixel_ratio": 0.0077179783950617285
+        },
+        "c1_s3_b3": {
+          "action": "reveal",
+          "target_id": "line:2",
+          "beat_frame": 407,
+          "before_frame": 404,
+          "after_frame": 411,
+          "changed_pixel_ratio": 0.008213734567901235
+        },
+        "c1_s4_b0": {
+          "action": "reveal",
+          "target_id": "title",
+          "beat_frame": 456,
+          "before_frame": 453,
+          "after_frame": 460,
+          "changed_pixel_ratio": 0.041066743827160496
+        },
+        "c1_s4_b1": {
+          "action": "reveal",
+          "target_id": "line:0",
+          "beat_frame": 499,
+          "before_frame": 496,
+          "after_frame": 503,
+          "changed_pixel_ratio": 0.004661458333333333
+        },
+        "c1_s4_b2": {
+          "action": "reveal",
+          "target_id": "line:1",
+          "beat_frame": 521,
+          "before_frame": 518,
+          "after_frame": 525,
+          "changed_pixel_ratio": 0.0070134066358024695
+        },
+        "c1_s4_b3": {
+          "action": "reveal",
+          "target_id": "line:2",
+          "beat_frame": 548,
+          "before_frame": 545,
+          "after_frame": 552,
+          "changed_pixel_ratio": 0.008910590277777778
+        },
+        "c1_s5_b0": {
+          "action": "reveal",
+          "target_id": "title",
+          "beat_frame": 602,
+          "before_frame": 599,
+          "after_frame": 606,
+          "changed_pixel_ratio": 0.04987750771604938
+        },
+        "c1_s5_b1": {
+          "action": "reveal",
+          "target_id": "subtitle",
+          "beat_frame": 699,
+          "before_frame": 696,
+          "after_frame": 703,
+          "changed_pixel_ratio": 0.004858217592592593
+        }
+      },
+      "scene_samples": [
+        {
+          "scene_id": "c1_s1",
+          "frame": 0,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+        },
+        {
+          "scene_id": "c1_s1",
+          "frame": 83,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-004.png"
+        },
+        {
+          "scene_id": "c1_s1",
+          "frame": 166,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-007.png"
+        },
+        {
+          "scene_id": "c1_s2",
+          "frame": 167,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-008.png"
+        },
+        {
+          "scene_id": "c1_s2",
+          "frame": 241,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-013.png"
+        },
+        {
+          "scene_id": "c1_s2",
+          "frame": 314,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-014.png"
+        },
+        {
+          "scene_id": "c1_s3",
+          "frame": 315,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+        },
+        {
+          "scene_id": "c1_s3",
+          "frame": 381,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-022.png"
+        },
+        {
+          "scene_id": "c1_s3",
+          "frame": 446,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-025.png"
+        },
+        {
+          "scene_id": "c1_s4",
+          "frame": 447,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-026.png"
+        },
+        {
+          "scene_id": "c1_s4",
+          "frame": 520,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-032.png"
+        },
+        {
+          "scene_id": "c1_s4",
+          "frame": 593,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-036.png"
+        },
+        {
+          "scene_id": "c1_s5",
+          "frame": 594,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-037.png"
+        },
+        {
+          "scene_id": "c1_s5",
+          "frame": 657,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-040.png"
+        },
+        {
+          "scene_id": "c1_s5",
+          "frame": 720,
+          "file": "g3/data/jobs/47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e/attempts/1/g2-run/artifacts/keyframes/frame-043.png"
+        }
+      ],
+      "contact_sheet": "artifacts/contact-sheet.jpg",
+      "captions": {
+        "burned_in": true,
+        "srt": "artifacts/captions.srt",
+        "alignment": "phrase-level measured PCM activity"
+      },
+      "video_form": "information_motion",
+      "duration_mode": "content",
+      "information": {
+        "scene_count": 5,
+        "components": [
+          "concept_reveal",
+          "title_card"
+        ],
+        "timing": "measured phrases; estimated within-phrase cues",
+        "theme": "minimal_light"
+      }
+    },
+    "manifest_hashes": 94,
+    "artifacts": [
+      "captions.srt",
+      "chapters.json",
+      "content-outline.json",
+      "execution-log.txt",
+      "information-plan.json",
+      "information-timing.json",
+      "input-brief.json",
+      "manifest.json",
+      "model-cost.json",
+      "narration.json",
+      "prepared-source.txt",
+      "qa.json",
+      "storyboard.json",
+      "video-ir.json",
+      "video.mp4"
+    ],
+    "range_download": "PASS"
+  }
+]

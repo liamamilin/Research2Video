@@ -1,0 +1,26 @@
+{
+  "provider": "local_voxcpm_mlx",
+  "model": "VoxCPM2-8bit",
+  "voice": "voxcpm_anchor",
+  "sample_rate": 24000,
+  "duration_seconds": 203.9,
+  "generation_seconds": 222.9,
+  "cloud_requests": 0,
+  "cloud_api_cost": 0,
+  "local_compute_cost": "not measured",
+  "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f",
+  "voice_file_sha256": null,
+  "cache": {
+    "enabled": true,
+    "chapter_hits": 0,
+    "chapter_misses": 7,
+    "segment_hits": 0,
+    "segment_misses": 31,
+    "entry_keys": [],
+    "write_errors": [],
+    "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+    "fingerprint_seconds": 1.307,
+    "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+  },
+  "audio_sha256": "2e0f9970b1153f6e8f32cc52a8ec7ad3c40d2f247d479c2b8fd72b21500617b0"
+}

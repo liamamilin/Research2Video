@@ -1,0 +1,16 @@
+{
+  "before": {
+    "pid": 37819,
+    "started_at": "2026-10-23T17:17:50.213198+08:00",
+    "base_url": "http://127.0.0.1:8011"
+  },
+  "restart": {
+    "status": "ready",
+    "action": "started",
+    "pid": 66142,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "jobs_before": 169,
+  "jobs_after": 169
+}

@@ -1,0 +1,14 @@
+{
+  "new_page": {
+    "mode": "content",
+    "maxLength": null,
+    "enabled": true
+  },
+  "fixed_mode_switch": "PASS",
+  "content_mode_switch": "PASS",
+  "completed_page": {
+    "chapters": 7,
+    "seek_seconds": 49.2,
+    "mode_label": true
+  }
+}

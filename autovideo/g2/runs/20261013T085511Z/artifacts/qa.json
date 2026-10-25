@@ -1,0 +1,127 @@
+{
+  "status": "PASS",
+  "gate": "G2",
+  "real_llm": true,
+  "real_tts": true,
+  "mock_calls": 0,
+  "model": "deepseek-flash",
+  "llm_call_count": 3,
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 523,
+    "duration_seconds": 17.451,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.9999405413857055,
+    "decoded_rms": 0.080523781478405,
+    "full_decode": "PASS"
+  },
+  "timeline": {
+    "ir_frames": 523,
+    "scene_count": 3,
+    "beat_count": 5,
+    "alignment_granularity": "phrase"
+  },
+  "visual_beats": {
+    "reveal_intro_path": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 8,
+      "before_frame": 5,
+      "after_frame": 12,
+      "changed_pixel_ratio": 0.028569155092592592
+    },
+    "reveal_comm_flow": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 134,
+      "before_frame": 131,
+      "after_frame": 138,
+      "changed_pixel_ratio": 0.023119695216049382
+    },
+    "activate_main_path": {
+      "action": "activate_path",
+      "target_id": "path:main_path",
+      "beat_frame": 149,
+      "before_frame": 146,
+      "after_frame": 153,
+      "changed_pixel_ratio": 0.01681375385802469
+    },
+    "disrupt_channel_signal": {
+      "action": "mark_disrupted",
+      "target_id": "edge:channel_to_receiver",
+      "beat_frame": 242,
+      "before_frame": 239,
+      "after_frame": 246,
+      "changed_pixel_ratio": 0.0378515625
+    },
+    "reveal_noise_caveat": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 393,
+      "before_frame": 390,
+      "after_frame": 397,
+      "changed_pixel_ratio": 0.01878954475308642
+    }
+  },
+  "scene_samples": [
+    {
+      "scene_id": "opening",
+      "frame": 0,
+      "file": "runs/20261013T085511Z/artifacts/keyframes/frame-001.png"
+    },
+    {
+      "scene_id": "opening",
+      "frame": 63,
+      "file": "runs/20261013T085511Z/artifacts/keyframes/frame-004.png"
+    },
+    {
+      "scene_id": "opening",
+      "frame": 125,
+      "file": "runs/20261013T085511Z/artifacts/keyframes/frame-005.png"
+    },
+    {
+      "scene_id": "flow",
+      "frame": 126,
+      "file": "runs/20261013T085511Z/artifacts/keyframes/frame-006.png"
+    },
+    {
+      "scene_id": "flow",
+      "frame": 255,
+      "file": "runs/20261013T085511Z/artifacts/keyframes/frame-013.png"
+    },
+    {
+      "scene_id": "flow",
+      "frame": 383,
+      "file": "runs/20261013T085511Z/artifacts/keyframes/frame-014.png"
+    },
+    {
+      "scene_id": "caveat",
+      "frame": 384,
+      "file": "runs/20261013T085511Z/artifacts/keyframes/frame-015.png"
+    },
+    {
+      "scene_id": "caveat",
+      "frame": 453,
+      "file": "runs/20261013T085511Z/artifacts/keyframes/frame-018.png"
+    },
+    {
+      "scene_id": "caveat",
+      "frame": 522,
+      "file": "runs/20261013T085511Z/artifacts/keyframes/frame-019.png"
+    }
+  ],
+  "contact_sheet": "artifacts/contact-sheet.jpg",
+  "captions": {
+    "burned_in": true,
+    "srt": "artifacts/captions.srt",
+    "alignment": "phrase-level measured PCM activity"
+  }
+}

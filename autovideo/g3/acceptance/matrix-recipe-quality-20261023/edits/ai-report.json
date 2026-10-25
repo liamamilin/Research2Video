@@ -1,0 +1,63 @@
+{
+  "title": "开源项目两种变化：视频能指着改，训练能沿用 PyTorch",
+  "sections": [
+    {
+      "title": "本期看点",
+      "paragraphs": [
+        {
+          "text": "这次看两个不同方向的开源项目。Huashu Motion 把编码 Agent 用到动画和宣传片，还把修改意见定位到具体画面。TorchNeuron 则面向使用亚马逊自研芯片的开发者，让他们沿用熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion",
+            "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Huashu Motion：指着画面提修改",
+      "paragraphs": [
+        {
+          "text": "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，意见还能关联场景、元素和代码位置。这样，“改这里”就有了具体落点。仓库也给出了演示，但这些演示属于项目展示，不能替代我们对不同题材的实测。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ]
+        },
+        {
+          "text": "许可证也有明确说明：项目代码和文档采用 MIT 许可证。使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。不能把主仓库的 MIT 标签理解为所有附带内容都可以随意使用。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "TorchNeuron：沿用熟悉的工作方式",
+      "paragraphs": [
+        {
+          "text": "PyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。",
+          "citations": [
+            "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+          ]
+        },
+        {
+          "text": "不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。",
+          "citations": [
+            "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "各自解决哪一步",
+      "paragraphs": [
+        {
+          "text": "这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion",
+            "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/"
+          ]
+        }
+      ]
+    }
+  ]
+}

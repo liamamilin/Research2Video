@@ -1,0 +1,10 @@
+{
+  "purpose": "Keep this mapping from reviewers until they submit their coded scores.",
+  "shuffle_seed": 20261015,
+  "mapping": {
+    "clip-01": "g4/runs/case-b/artifacts/G2_自动生成.mp4",
+    "clip-02": "g4/runs/case-c-retry/artifacts/G2_自动生成.mp4",
+    "clip-03": "g4/runs/case-a-retry/artifacts/G2_自动生成.mp4"
+  },
+  "limitation": "The spoken subject may reveal the case despite hiding run labels."
+}

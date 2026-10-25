@@ -1,0 +1,221 @@
+{
+  "schema_version": "0.2",
+  "video": {
+    "title": "信息传输中的噪声干扰",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration_ms": 17967
+  },
+  "source": {
+    "language": "zh-CN",
+    "original_text": "小安准备把一条信息发给小宁。信号沿着信道向接收方传送。这时，噪声进入信道并干扰信号。信息到达时，内容可能已经和原文不同。这就是通信过程中噪声造成的影响。",
+    "text_sha256": "81259063ef92a1d3668f202b232054eaa936379d458d9800f0df23d131f622cf"
+  },
+  "style": {
+    "preset": "minimal_dark",
+    "seed": 20261013
+  },
+  "assets": [
+    {
+      "id": "communication_voice",
+      "type": "audio",
+      "path": "assets/communications_noise.wav",
+      "origin": "local Kokoro-82M v1.0 TTS; separately generated Chinese phrases",
+      "sha256": "d271ec2dce8b288763bd186c29ee75cf81fe0368653f39ea0d618cece9dd7041"
+    }
+  ],
+  "narration": {
+    "text": "小安准备把一条信息发给小宁。信号沿着信道向接收方传送。这时，噪声进入信道并干扰信号。信息到达时，内容可能已经和原文不同。这就是通信过程中噪声造成的影响。",
+    "audio_asset_id": "communication_voice",
+    "segments": [
+      {
+        "id": "n1",
+        "text": "小安准备把一条信息发给小宁。",
+        "start_ms": 250,
+        "end_ms": 2912
+      },
+      {
+        "id": "n2",
+        "text": "信号沿着信道向接收方传送。",
+        "start_ms": 3548,
+        "end_ms": 6269
+      },
+      {
+        "id": "n3",
+        "text": "这时，噪声进入信道并干扰信号。",
+        "start_ms": 6957,
+        "end_ms": 9844
+      },
+      {
+        "id": "n4",
+        "text": "信息到达时，内容可能已经和原文不同。",
+        "start_ms": 10509,
+        "end_ms": 13900
+      },
+      {
+        "id": "n5",
+        "text": "这就是通信过程中噪声造成的影响。",
+        "start_ms": 14609,
+        "end_ms": 17758
+      }
+    ],
+    "alignment": {
+      "method": "provider",
+      "granularity": "phrase"
+    }
+  },
+  "scenes": [
+    {
+      "id": "communication_flow",
+      "start_ms": 0,
+      "duration_ms": 17967,
+      "component": "flow_diagram",
+      "props": {
+        "nodes": [
+          {
+            "id": "sender",
+            "label": "发送端 · 小安"
+          },
+          {
+            "id": "channel",
+            "label": "传输信道"
+          },
+          {
+            "id": "receiver",
+            "label": "接收端 · 小宁"
+          }
+        ],
+        "edges": [
+          {
+            "id": "sender_to_channel",
+            "from": "sender",
+            "to": "channel"
+          },
+          {
+            "id": "channel_to_receiver",
+            "from": "channel",
+            "to": "receiver"
+          }
+        ],
+        "paths": [
+          {
+            "id": "main",
+            "edge_ids": [
+              "sender_to_channel",
+              "channel_to_receiver"
+            ]
+          }
+        ]
+      },
+      "narration_segment_ids": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5"
+      ],
+      "purpose": "说明信息沿信道传送时受到噪声干扰后可能发生改变",
+      "visual_intent": {
+        "viewer_understands": "噪声会在传输过程中干扰信号，使接收内容与发送内容不同。",
+        "before": "发送端和信道逐步显现，传输路径尚未启动。",
+        "after": "信号沿路径移动，在信道到接收端的边上出现噪声干扰。"
+      },
+      "beats": [
+        {
+          "id": "reveal_sender",
+          "action": "reveal",
+          "target_id": "node:sender",
+          "trigger": {
+            "segment_id": "n1",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "reveal_channel",
+          "action": "reveal",
+          "target_id": "node:channel",
+          "trigger": {
+            "segment_id": "n1",
+            "boundary": "end",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "reveal_sender_edge",
+          "action": "reveal",
+          "target_id": "edge:sender_to_channel",
+          "trigger": {
+            "segment_id": "n1",
+            "boundary": "end",
+            "offset_ms": 80
+          }
+        },
+        {
+          "id": "reveal_receiver",
+          "action": "reveal",
+          "target_id": "node:receiver",
+          "trigger": {
+            "segment_id": "n2",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "reveal_receiver_edge",
+          "action": "reveal",
+          "target_id": "edge:channel_to_receiver",
+          "trigger": {
+            "segment_id": "n2",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "activate_main_path",
+          "action": "activate_path",
+          "target_id": "path:main",
+          "trigger": {
+            "segment_id": "n2",
+            "boundary": "start",
+            "offset_ms": 450
+          }
+        },
+        {
+          "id": "disrupt_channel",
+          "action": "mark_disrupted",
+          "target_id": "edge:channel_to_receiver",
+          "trigger": {
+            "segment_id": "n3",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "highlight_receiver",
+          "action": "highlight",
+          "target_id": "node:receiver",
+          "trigger": {
+            "segment_id": "n4",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "highlight_channel",
+          "action": "highlight",
+          "target_id": "node:channel",
+          "trigger": {
+            "segment_id": "n5",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        }
+      ]
+    }
+  ],
+  "audio_mix": {
+    "narration_gain_db": 0
+  }
+}

@@ -1,0 +1,1 @@
+{"stage": "narration", "attempt": 1, "error_code": "MODEL_INVALID_JSON", "error": "MODEL_INVALID_JSON: narration response was not valid JSON: Expecting value: line 32 column 12 (char 739)", "retry_limit": 3}

@@ -1,0 +1,227 @@
+{
+  "status": "PASS",
+  "case_id": "case-c",
+  "source_to_mp4": {
+    "source": "g4/golden_cases/case-c/source.txt",
+    "narration": "artifacts/final-narration-plan.json",
+    "tts": "fixtures/assets/communications_noise.wav",
+    "alignment": "artifacts/alignment.json",
+    "video_ir": "fixtures/video-ir-v0.2.json",
+    "video": "artifacts/G2_自动生成.mp4",
+    "captions": "artifacts/captions.srt"
+  },
+  "real_generation": {
+    "model": "deepseek-flash",
+    "real_llm": true,
+    "real_tts": true,
+    "mock_calls": 0,
+    "call_count": 2
+  },
+  "budget": {
+    "status": "PASS",
+    "calls": 2,
+    "upper_bound_usd": 0.0079275,
+    "cap_usd": 0.089813
+  },
+  "semantic": {
+    "chart_source_match": "PASS",
+    "fictional_data_disclosure": "PASS"
+  },
+  "media": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 584,
+    "duration_seconds": 19.477,
+    "audio_codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "full_decode": "PASS",
+    "tts_correlation": 0.9999439325449542
+  },
+  "layout_and_visual": {
+    "runtime_ir_validation": "PASS",
+    "frame_count": 19,
+    "samples": [
+      {
+        "labels": [
+          "opening:start"
+        ],
+        "frame": 0,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "opening:middle"
+        ],
+        "frame": 43,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "opening:end"
+        ],
+        "frame": 86,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "demo_chart:start"
+        ],
+        "frame": 87,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "demo_chart:middle"
+        ],
+        "frame": 285,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "demo_chart:end"
+        ],
+        "frame": 483,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "closing:start"
+        ],
+        "frame": 484,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "closing:middle"
+        ],
+        "frame": 533,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "closing:end"
+        ],
+        "frame": 583,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "show_title:before"
+        ],
+        "frame": 5,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "show_title:after"
+        ],
+        "frame": 12,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "show_chart:before"
+        ],
+        "frame": 93,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "show_chart:after"
+        ],
+        "frame": 100,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "highlight_blue:before"
+        ],
+        "frame": 185,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "highlight_blue:after"
+        ],
+        "frame": 192,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "highlight_red:before"
+        ],
+        "frame": 286,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "highlight_red:after"
+        ],
+        "frame": 293,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "show_disclaimer:before"
+        ],
+        "frame": 490,
+        "outer_2pct_high_signal_ratio": 0.0
+      },
+      {
+        "labels": [
+          "show_disclaimer:after"
+        ],
+        "frame": 497,
+        "outer_2pct_high_signal_ratio": 0.0
+      }
+    ],
+    "beat_before_after": {
+      "show_title": {
+        "id": "show_title",
+        "action": "reveal",
+        "frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.019447820216049384
+      },
+      "show_chart": {
+        "id": "show_chart",
+        "action": "reveal",
+        "frame": 96,
+        "before_frame": 93,
+        "after_frame": 100,
+        "changed_pixel_ratio": 0.14796055169753086
+      },
+      "highlight_blue": {
+        "id": "highlight_blue",
+        "action": "highlight",
+        "frame": 188,
+        "before_frame": 185,
+        "after_frame": 192,
+        "changed_pixel_ratio": 0.028270158179012347
+      },
+      "highlight_red": {
+        "id": "highlight_red",
+        "action": "highlight",
+        "frame": 289,
+        "before_frame": 286,
+        "after_frame": 293,
+        "changed_pixel_ratio": 0.07530719521604938
+      },
+      "show_disclaimer": {
+        "id": "show_disclaimer",
+        "action": "reveal",
+        "frame": 493,
+        "before_frame": 490,
+        "after_frame": 497,
+        "changed_pixel_ratio": 0.01822482638888889
+      }
+    },
+    "layout_edge_signal_is_nonblocking": true,
+    "contact_sheet": "g4/runs/case-c-retry/g4-qc/keyframes/contact-sheet.jpg"
+  },
+  "output_directory": "g4/runs/case-c-retry"
+}

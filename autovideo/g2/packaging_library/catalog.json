@@ -1,0 +1,23 @@
+{
+  "library": "autovideo-packaging",
+  "version": 1,
+  "components": {
+    "stinger": {"slot": "intro", "version": 1, "label": "栏目片头"},
+    "end_card": {"slot": "outro", "version": 1, "label": "栏目片尾"},
+    "corner_badge": {"slot": "badge", "version": 1, "label": "栏目角标"},
+    "source_card": {"slot": "source_card", "version": 1, "label": "来源卡"},
+    "synth_sting": {"slot": "sound", "version": 1, "label": "上行提示音"}
+  },
+  "presets": {
+    "common": {
+      "label": "知识讲解",
+      "accent": "#1f7a4d",
+      "enabled": true,
+      "intro": {"component": "stinger", "enabled": true, "seconds": 1.5},
+      "outro": {"component": "end_card", "enabled": true, "seconds": 2.5},
+      "badge": {"component": "corner_badge", "enabled": true},
+      "source_card": {"component": "source_card", "enabled": true, "seconds": 4.5},
+      "sound": {"component": "synth_sting", "enabled": true}
+    }
+  }
+}

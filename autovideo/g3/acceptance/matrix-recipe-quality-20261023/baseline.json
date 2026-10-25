@@ -1,0 +1,157 @@
+[
+  {
+    "case": "ai-flash",
+    "title": "DeepSeek 开源推理引擎 DeepInfer：给了引擎，没给服务",
+    "recipe": "flash",
+    "production": "",
+    "original_script_id": "07c8442c5baa4807bf1d32b21e8a543f",
+    "version": 1,
+    "version_sha256": "38a528c2903941a9a3992cd1c828e4e53ee37d9e6a8f9ed403cd82c872fb6c46",
+    "characters": 516,
+    "pending_review": 1,
+    "internal_note_findings": [],
+    "render_id": null
+  },
+  {
+    "case": "industry",
+    "title": "芯片供应链与导航研究，隐性投入风险最值得看",
+    "recipe": "topic_digest",
+    "production": "industry_daily",
+    "original_script_id": "a8ba608f47204a0182ad0f52bf7de28d",
+    "version": 1,
+    "version_sha256": "16d6fce4e23fcbdf7c1f5ab0b826315b7e2f90d92e2e2b5e51f3bc2aff202e79",
+    "characters": 1122,
+    "pending_review": 0,
+    "internal_note_findings": [],
+    "render_id": "1b08ea61bf524d6f9dfad7756ddf5395",
+    "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/1b08ea61bf524d6f9dfad7756ddf5395/video.mp4",
+    "presentation": {
+      "preset": "information_motion"
+    },
+    "scenes": 30,
+    "narration_segments": 34,
+    "content_seconds": 204.433
+  },
+  {
+    "case": "ai-deep",
+    "title": "WildAWM造训练场，泛化仍待验",
+    "recipe": "deep_dive",
+    "production": "ai_media_deep_dive",
+    "original_script_id": "c076368cd731433b94f0dacde7ce36a2",
+    "version": 1,
+    "version_sha256": "8b251c1501a0264c57d48d00929d875b0962a36cc0252a3900b8ce763258fe97",
+    "characters": 2027,
+    "pending_review": 0,
+    "internal_note_findings": [],
+    "render_id": "62b4b38488564a10af1224a4b638800c",
+    "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/62b4b38488564a10af1224a4b638800c/video.mp4",
+    "presentation": {
+      "preset": "information_motion"
+    },
+    "scenes": 43,
+    "narration_segments": 70,
+    "content_seconds": 378.0
+  },
+  {
+    "case": "ai-report",
+    "title": "Huashu Motion 做宣传片，另有四项",
+    "recipe": "report_digest",
+    "production": "ai_media_opensource_digest",
+    "original_script_id": "4c4e99e98a3449fb9c5f4978b712c534",
+    "version": 1,
+    "version_sha256": "5099e838032c4886831f4a16e9b6af15ac17f42054dea265f7303a65e4ab3fe0",
+    "characters": 1283,
+    "pending_review": 0,
+    "internal_note_findings": [],
+    "render_id": "7ab930b9db41409d8323b727c8fbc3d8",
+    "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/7ab930b9db41409d8323b727c8fbc3d8/video.mp4",
+    "presentation": {
+      "preset": "information_motion"
+    },
+    "scenes": 26,
+    "narration_segments": 36,
+    "content_seconds": 194.867
+  },
+  {
+    "case": "company",
+    "title": "2026年10月22日商业动态：谷歌虚拟电厂抢眼",
+    "recipe": "topic_digest",
+    "production": "company_daily",
+    "original_script_id": "4c63a878b25b4c96b7f8fa67f0824da0",
+    "version": 1,
+    "version_sha256": "59e68c48d9b3d40602bbf91ecb7fa0f960eb71ea54e529b3e9deb186947df071",
+    "characters": 1050,
+    "pending_review": 0,
+    "internal_note_findings": [],
+    "render_id": "e0d4d5b9da7c4ffb9044b6cecc78e6e0",
+    "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/e0d4d5b9da7c4ffb9044b6cecc78e6e0/video.mp4",
+    "presentation": {
+      "preset": "information_motion"
+    },
+    "scenes": 29,
+    "narration_segments": 35,
+    "content_seconds": 194.433
+  },
+  {
+    "case": "science",
+    "title": "北海海底撞击如何掀起巨型海啸",
+    "recipe": "topic_digest",
+    "production": "science_daily",
+    "original_script_id": "f30f9b94c3a345da82069fac22b24b4f",
+    "version": 1,
+    "version_sha256": "3b380fd6537faae5c753a8db946ef4c714ceefe62d01c58e42cd14fc257e9490",
+    "characters": 911,
+    "pending_review": 3,
+    "internal_note_findings": [],
+    "render_id": "6157d7deee694bb5808b912d7034c997",
+    "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/6157d7deee694bb5808b912d7034c997/video.mp4",
+    "presentation": {
+      "preset": "information_motion"
+    },
+    "scenes": 25,
+    "narration_segments": 29,
+    "content_seconds": 165.367
+  },
+  {
+    "case": "history",
+    "title": "四件历史与考古新线索，最值得辨真伪的是日食传说",
+    "recipe": "topic_digest",
+    "production": "history_daily",
+    "original_script_id": "41fa2d69fc044c188c8e86bfd0aab336",
+    "version": 1,
+    "version_sha256": "0fb34cce8a956b585f3c408548eff5a815db8d2e8437469047695ff6a79eaaeb",
+    "characters": 918,
+    "pending_review": 4,
+    "internal_note_findings": [],
+    "render_id": "787d322e62bf45eda66d83cd3450948b",
+    "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/787d322e62bf45eda66d83cd3450948b/video.mp4",
+    "presentation": {
+      "preset": "information_motion"
+    },
+    "scenes": 22,
+    "narration_segments": 30,
+    "content_seconds": 175.7
+  },
+  {
+    "case": "consumer",
+    "title": "续航手机最抢眼，五件新品变化速览",
+    "recipe": "topic_digest",
+    "production": "consumer_daily",
+    "original_script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+    "version": 5,
+    "version_sha256": "ccc882c645b3ae7df65834f79b17d2dc1a871008dc138eb0b90b1faf4dcf0b36",
+    "characters": 907,
+    "pending_review": 0,
+    "internal_note_findings": [],
+    "render_id": "fc8c618db16e4a7bbc9a9ffdf7ecc7f1",
+    "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/fc8c618db16e4a7bbc9a9ffdf7ecc7f1/video.mp4",
+    "presentation": {
+      "preset": "information_cards"
+    },
+    "scenes": 8,
+    "narration_segments": 24,
+    "content_seconds": 149.933,
+    "short_caption_cues": 38,
+    "editorial_pages": 8
+  }
+]

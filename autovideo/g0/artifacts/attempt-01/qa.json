@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "scope": "G0 mechanical checks only",
+  "video": {
+    "codec": "h264",
+    "size": [
+      1920,
+      1080
+    ],
+    "fps": "30/1",
+    "frames": 420,
+    "duration": 14.0,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "correlation_with_real_tts": 0.997903916343222,
+    "full_decode": "PASS"
+  },
+  "animation": {
+    "source": "actual PCM waveform via unchanged Remotion Oscilloscope",
+    "silent_frame": 287,
+    "keyframe_wave_metrics": {
+      "0": {
+        "cyan_pixels": 13440,
+        "vertical_span_px": 8
+      },
+      "22": {
+        "cyan_pixels": 93549,
+        "vertical_span_px": 116
+      },
+      "56": {
+        "cyan_pixels": 44329,
+        "vertical_span_px": 70
+      },
+      "130": {
+        "cyan_pixels": 90119,
+        "vertical_span_px": 149
+      },
+      "210": {
+        "cyan_pixels": 97526,
+        "vertical_span_px": 149
+      },
+      "287": {
+        "cyan_pixels": 13441,
+        "vertical_span_px": 9
+      },
+      "405": {
+        "cyan_pixels": 13448,
+        "vertical_span_px": 9
+      },
+      "419": {
+        "cyan_pixels": 13448,
+        "vertical_span_px": 9
+      }
+    }
+  },
+  "captions": {
+    "segments": 4,
+    "source": "measured generated-utterance sample boundaries",
+    "word_alignment": "NOT CLAIMED",
+    "same_srt_and_burned_timeline": true
+  },
+  "human_listening_review": "NOT PERFORMED",
+  "human_playback_acceptance": "PENDING USER"
+}

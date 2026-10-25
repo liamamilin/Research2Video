@@ -1,0 +1,23 @@
+{
+  "activated_at": "2026-10-23T14:28:21.927175+08:00",
+  "previous_pid": 47403,
+  "service": {
+    "status": "ready",
+    "action": "started",
+    "pid": 55435,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  },
+  "active_jobs_before_reload": 0,
+  "source_sha256": {
+    "g2/run_g2.py": "1807cc94189cdd871bd223989e2dccd4bca4801ea2cb28583fb13b9b4e09f772",
+    "g2/performance.py": "c227bcaf557f36c3cd2ae4057a743efab40097d5df61305ffccea5f4ff72be3a",
+    "g3/worker.py": "b0dc92f19cc7d26c710fb172600a890ea5f4ea7e69c254f35b8a4e70e8f4ad84",
+    "g3/store.py": "0b1f1551c1bb3c8649288219d304dcbb3c687ce36435b5e96bec1dc9d15da3c4",
+    "g3/web/static/app.js": "162e3ac5c528ff4403df5e68d7d3fb3364f6d8190a76ea627a4fd435609fd3c2"
+  }
+}

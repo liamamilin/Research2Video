@@ -1,0 +1,127 @@
+{
+  "status": "PASS",
+  "gate": "G2",
+  "real_llm": true,
+  "real_tts": true,
+  "mock_calls": 0,
+  "model": "deepseek-flash",
+  "llm_call_count": 2,
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 535,
+    "duration_seconds": 17.835,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.9999534052087266,
+    "decoded_rms": 0.08131032437086105,
+    "full_decode": "PASS"
+  },
+  "timeline": {
+    "ir_frames": 535,
+    "scene_count": 3,
+    "beat_count": 5,
+    "alignment_granularity": "phrase"
+  },
+  "visual_beats": {
+    "show_title": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 8,
+      "before_frame": 5,
+      "after_frame": 12,
+      "changed_pixel_ratio": 0.02531105324074074
+    },
+    "show_comparison": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 133,
+      "before_frame": 130,
+      "after_frame": 137,
+      "changed_pixel_ratio": 0.022454185956790124
+    },
+    "highlight_stream": {
+      "action": "highlight",
+      "target_id": "side:right",
+      "beat_frame": 232,
+      "before_frame": 229,
+      "after_frame": 236,
+      "changed_pixel_ratio": 0.015678047839506173
+    },
+    "highlight_batch": {
+      "action": "highlight",
+      "target_id": "side:left",
+      "beat_frame": 323,
+      "before_frame": 320,
+      "after_frame": 327,
+      "changed_pixel_ratio": 0.01565972222222222
+    },
+    "summarize": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 427,
+      "before_frame": 424,
+      "after_frame": 431,
+      "changed_pixel_ratio": 0.0227391975308642
+    }
+  },
+  "scene_samples": [
+    {
+      "scene_id": "opening",
+      "frame": 0,
+      "file": "g4/runs/case-b/artifacts/keyframes/frame-001.png"
+    },
+    {
+      "scene_id": "opening",
+      "frame": 62,
+      "file": "g4/runs/case-b/artifacts/keyframes/frame-004.png"
+    },
+    {
+      "scene_id": "opening",
+      "frame": 124,
+      "file": "g4/runs/case-b/artifacts/keyframes/frame-005.png"
+    },
+    {
+      "scene_id": "comparison",
+      "frame": 125,
+      "file": "g4/runs/case-b/artifacts/keyframes/frame-006.png"
+    },
+    {
+      "scene_id": "comparison",
+      "frame": 272,
+      "file": "g4/runs/case-b/artifacts/keyframes/frame-011.png"
+    },
+    {
+      "scene_id": "comparison",
+      "frame": 418,
+      "file": "g4/runs/case-b/artifacts/keyframes/frame-014.png"
+    },
+    {
+      "scene_id": "closing",
+      "frame": 419,
+      "file": "g4/runs/case-b/artifacts/keyframes/frame-015.png"
+    },
+    {
+      "scene_id": "closing",
+      "frame": 477,
+      "file": "g4/runs/case-b/artifacts/keyframes/frame-018.png"
+    },
+    {
+      "scene_id": "closing",
+      "frame": 534,
+      "file": "g4/runs/case-b/artifacts/keyframes/frame-019.png"
+    }
+  ],
+  "contact_sheet": "artifacts/contact-sheet.jpg",
+  "captions": {
+    "burned_in": true,
+    "srt": "artifacts/captions.srt",
+    "alignment": "phrase-level measured PCM activity"
+  }
+}

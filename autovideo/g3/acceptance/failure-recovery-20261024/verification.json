@@ -1,0 +1,225 @@
+{
+  "videos": [
+    {
+      "render_id": "607c0414cc9c43f9b574ef1699a036d6",
+      "job_id": "d6545513-38fe-4279-a95e-6ad9fa9ef4d7",
+      "title": "想保护30%的自然，地图上却压着油气区块",
+      "status": "COMPLETED",
+      "version": 2,
+      "original_render_id": "b02ed1d0d350449e98b2d8038b818353",
+      "artifacts_verified": 31,
+      "source_unchanged": true,
+      "video": "state/video_renders/607c0414cc9c43f9b574ef1699a036d6/video.mp4",
+      "media_qa": "PASS",
+      "full_decode": "PASS",
+      "content_seconds": 94.336,
+      "package_seconds": 98.833333,
+      "caption_count": 33,
+      "minimum_caption_ms": 966,
+      "reused_chapters": 2,
+      "voice_cache": {
+        "enabled": true,
+        "chapter_hits": 3,
+        "chapter_misses": 0,
+        "segment_hits": 19,
+        "segment_misses": 0,
+        "entry_keys": [
+          "dc1a27b795ba6e428c20d74a9d960565b293553ab935e4bb97d92045297b34aa",
+          "2335cbc05b4ecd6fe89e402b8f6638d60143fc1b2ff0f7c88450aeed44bb7544",
+          "929e35c0517f433326bbde4845f706e72756f3848be232a9dc297e1273a9408c"
+        ],
+        "write_errors": [],
+        "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+        "fingerprint_seconds": 1.347,
+        "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+      },
+      "llm_calls": 1,
+      "http_failures": [],
+      "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/d6545513-38fe-4279-a95e-6ad9fa9ef4d7/attempts/2/g2-run/artifacts/package/contact-sheet.jpg"
+    },
+    {
+      "render_id": "0a267fe490fd4d069ab64497ed047e96",
+      "job_id": "24e39280-0515-480d-b2f6-409f43110628",
+      "title": "编码 Agent 开始接宣传片：Huashu Motion 想让你指着画面改",
+      "status": "COMPLETED",
+      "version": 2,
+      "original_render_id": "2044193c0e9e432fbe64a5b5d0bb62a3",
+      "artifacts_verified": 31,
+      "source_unchanged": true,
+      "video": "state/video_renders/0a267fe490fd4d069ab64497ed047e96/video.mp4",
+      "media_qa": "PASS",
+      "full_decode": "PASS",
+      "content_seconds": 105.045,
+      "package_seconds": 114.033333,
+      "caption_count": 40,
+      "minimum_caption_ms": 703,
+      "reused_chapters": 2,
+      "voice_cache": {
+        "enabled": true,
+        "chapter_hits": 2,
+        "chapter_misses": 1,
+        "segment_hits": 15,
+        "segment_misses": 10,
+        "entry_keys": [
+          "51c880dc865f3b3be7cedfa454a2f9b54578785ebeb5f8bd11577d83f842c190",
+          "0f852e0dcfa41f1168d89617cb072a350d2ecaacfca5c3aaa20aea160fa1a760"
+        ],
+        "write_errors": [],
+        "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+        "fingerprint_seconds": 1.243,
+        "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+      },
+      "llm_calls": 1,
+      "http_failures": [],
+      "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/24e39280-0515-480d-b2f6-409f43110628/attempts/2/g2-run/artifacts/package/contact-sheet.jpg"
+    },
+    {
+      "render_id": "0bc5310d19874fd789043677e17936cf",
+      "job_id": "6a96797b-ce40-4fa5-9122-ca544c0894ea",
+      "title": "不点下拉框，Replit Agent 的请求现在先落到 OpenAI",
+      "status": "COMPLETED",
+      "version": 2,
+      "original_render_id": "6c4e2293bc354a779e68493529411061",
+      "artifacts_verified": 31,
+      "source_unchanged": true,
+      "video": "state/video_renders/0bc5310d19874fd789043677e17936cf/video.mp4",
+      "media_qa": "PASS",
+      "full_decode": "PASS",
+      "content_seconds": 147.435,
+      "package_seconds": 156.433333,
+      "caption_count": 53,
+      "minimum_caption_ms": 890,
+      "reused_chapters": 4,
+      "voice_cache": {
+        "enabled": true,
+        "chapter_hits": 4,
+        "chapter_misses": 0,
+        "segment_hits": 34,
+        "segment_misses": 0,
+        "entry_keys": [
+          "1936bab38fa9b366b7ac8739e820a8260714fceee2b34f1bb8538337b9ab7a0c",
+          "fdb3e2ed41b0866c53050ce36762b7d494c863a5bcebae72b7061a57f291feb5",
+          "f46984567b7f806d247978532d78db10babb9cab1bd4b0ed4a65ce79aa627b4c",
+          "1e6f40dcc9ad68ea0e95ad127a0b099a5ae8269155a41a0a328570417740f202"
+        ],
+        "write_errors": [],
+        "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+        "fingerprint_seconds": 1.305,
+        "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+      },
+      "llm_calls": 0,
+      "http_failures": [],
+      "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/6a96797b-ce40-4fa5-9122-ca544c0894ea/attempts/2/g2-run/artifacts/package/contact-sheet.jpg",
+      "original_replit_audio_preserved": true
+    },
+    {
+      "render_id": "ea7686eaf0394575b5024488f6dd2f30",
+      "job_id": "5c468114-9e64-49b6-bdb4-ef4b9214d543",
+      "title": "名字叫电厂，却没有发电机：Google 想靠少用电补电网缺口",
+      "status": "COMPLETED",
+      "version": 2,
+      "original_render_id": "9687a82ed8a147cd882c3f8717fed805",
+      "artifacts_verified": 31,
+      "source_unchanged": true,
+      "video": "state/video_renders/ea7686eaf0394575b5024488f6dd2f30/video.mp4",
+      "media_qa": "PASS",
+      "full_decode": "PASS",
+      "content_seconds": 90.069,
+      "package_seconds": 99.066667,
+      "caption_count": 36,
+      "minimum_caption_ms": 1010,
+      "reused_chapters": 2,
+      "voice_cache": {
+        "enabled": true,
+        "chapter_hits": 4,
+        "chapter_misses": 0,
+        "segment_hits": 20,
+        "segment_misses": 0,
+        "entry_keys": [
+          "93bec8cf388555a2ff5fd67139ce0ca46cc903af383aa3a06999ffe9e5b084aa",
+          "f8fac45c080f1d575d48868cd14993b7564c4fc1ea3992554b6d6c22ec312fc2",
+          "eb1ad8f37ab14123d9197f6b8ff217003c647834675494a64182392afea6cabd",
+          "9d75cf47818c32cfaa8fd10a2e2b002c248c3a13534aa157df848e1e000addd7"
+        ],
+        "write_errors": [],
+        "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+        "fingerprint_seconds": 1.239,
+        "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+      },
+      "llm_calls": 2,
+      "http_failures": [],
+      "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/5c468114-9e64-49b6-bdb4-ef4b9214d543/attempts/2/g2-run/artifacts/package/contact-sheet.jpg"
+    },
+    {
+      "render_id": "84cd2b028b9c4334a07f67cfbb57aca6",
+      "job_id": "b8ce6e19-27ba-4e9f-8af4-d27770e069b9",
+      "title": "最高分模型出第一段要等近11分钟：这周模型榜没有全能冠军",
+      "status": "COMPLETED",
+      "version": 2,
+      "original_render_id": "3ec1c298f46e457fb460152215a6db36",
+      "artifacts_verified": 30,
+      "source_unchanged": true,
+      "video": "state/video_renders/84cd2b028b9c4334a07f67cfbb57aca6/video.mp4",
+      "media_qa": "PASS",
+      "full_decode": "PASS",
+      "content_seconds": 139.307,
+      "package_seconds": 148.3,
+      "caption_count": 47,
+      "minimum_caption_ms": 880,
+      "reused_chapters": 0,
+      "voice_cache": {
+        "enabled": true,
+        "chapter_hits": 5,
+        "chapter_misses": 0,
+        "segment_hits": 34,
+        "segment_misses": 0,
+        "entry_keys": [
+          "254094752fd23328b329e8c41a501476d4d82e01393466ddb717c489d7ed2d19",
+          "a240d1187853955d97deff4e41f11cf2edb4b75e1eee41461b1d06e9ec43a715",
+          "90d7071139f68c19dd0ffbb5388806627bd7d1f832017882a7385a0e84c25bb2",
+          "efe3d01b61327ae70f89160d4d39d094116fdebb8eadcde3b3abb2d909bbbb38",
+          "78d0155725186efbf2821b9159f70ee0a71ff24e314dfcd3749b021e9efbd106"
+        ],
+        "write_errors": [],
+        "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+        "fingerprint_seconds": 1.298,
+        "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+      },
+      "llm_calls": 10,
+      "http_failures": [],
+      "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/b8ce6e19-27ba-4e9f-8af4-d27770e069b9/attempts/1/g2-run/artifacts/package/contact-sheet.jpg"
+    }
+  ],
+  "original_attempt_files_unchanged": 253,
+  "tests": {
+    "passed": 716,
+    "skipped": 1,
+    "deselected_existing_manifest_check": 1
+  },
+  "fixes": [
+    "readable caption tail",
+    "Chinese-adjacent numeric extraction",
+    "bounded HTTP 5xx retry with per-request accounting"
+  ],
+  "research_backend_restart": {
+    "old_pid": 40323,
+    "old_instance": "2fe141108295418385db2d3cfcddc775",
+    "idle_checks_passed": true,
+    "new_pid": 83761,
+    "new_instance": "27dc288a5473404dbe7118b37f9a482e",
+    "health_status": 200
+  },
+  "browser_checks": {
+    "replit_latest_mp4_link": "/api/video/renders/0bc5310d19874fd789043677e17936cf/files/video.mp4",
+    "replit_state": "待发布",
+    "existing_bilibili_task": "47adae5d1f5a41b58e43c867137f42d3",
+    "existing_bilibili_state_after_restart": "PUBLISHED",
+    "existing_bilibili_bvid": "BV1QUHA6XEH8"
+  },
+  "visual_checks": {
+    "critical_replit_caption": "replit-caption-frame.png",
+    "nature_number": "nature-number-frame.png",
+    "ui": "replit-recovered-ui.png",
+    "scene_contact_sheets_reviewed": 5
+  }
+}

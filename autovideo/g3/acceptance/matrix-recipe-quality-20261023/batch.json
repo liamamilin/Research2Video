@@ -1,0 +1,167 @@
+{
+  "batch": "matrix-recipe-quality-20261023",
+  "selection": "8 manuscripts / 6 matrices / 4 existing recipe families",
+  "uncovered_recipes": [
+    "point_short",
+    "action_list",
+    "ai-developer-comparison-long",
+    "ai-developer-roundup-long",
+    "top_finding"
+  ],
+  "cases": [
+    {
+      "key": "ai-flash",
+      "original_script_id": "07c8442c5baa4807bf1d32b21e8a543f",
+      "original_version": 1,
+      "original_title": "DeepSeek 开源推理引擎 DeepInfer：给了引擎，没给服务",
+      "recipe": "flash",
+      "production": "",
+      "mode": "standard",
+      "focus": "快讯：硬件支持、官方数字与适用条件",
+      "source_report": "output/video/2026-10-23_10-29-50_flash_07c8442c.md",
+      "state": "DRAFT",
+      "script_id": "630569acd6a048faae84e12ae3e83a65",
+      "last_state": [
+        "DRAFT",
+        null,
+        1
+      ],
+      "version": 1,
+      "error": null
+    },
+    {
+      "key": "industry",
+      "original_script_id": "a8ba608f47204a0182ad0f52bf7de28d",
+      "original_version": 1,
+      "original_title": "芯片供应链与导航研究，隐性投入风险最值得看",
+      "recipe": "topic_digest",
+      "production": "industry_daily",
+      "mode": "fast",
+      "focus": "产业：承诺和落地、研究和产品的区别",
+      "source_report": "output/industry/2026-10-22_industry_daily.md",
+      "state": "DRAFT",
+      "script_id": "9f25f92c1eb54ab195abdbda84e29d37",
+      "last_state": [
+        "DRAFT",
+        null,
+        1
+      ],
+      "version": 1,
+      "error": null
+    },
+    {
+      "key": "ai-deep",
+      "original_script_id": "c076368cd731433b94f0dacde7ce36a2",
+      "original_version": 1,
+      "original_title": "WildAWM造训练场，泛化仍待验",
+      "recipe": "deep_dive",
+      "production": "ai_media_deep_dive",
+      "mode": "standard",
+      "focus": "深度改编：论文自报、泛化和未证实解释",
+      "source_report": "output/deep/2026-10-22_ai_deep_research.md",
+      "state": "DRAFT",
+      "script_id": "d6e2e0e5b0c54e7898ca23ea8b6e7ec0",
+      "last_state": [
+        "DRAFT",
+        null,
+        1
+      ],
+      "version": 1,
+      "error": null
+    },
+    {
+      "key": "ai-report",
+      "original_script_id": "4c4e99e98a3449fb9c5f4978b712c534",
+      "original_version": 1,
+      "original_title": "Huashu Motion 做宣传片，另有四项",
+      "recipe": "report_digest",
+      "production": "ai_media_opensource_digest",
+      "mode": "fast",
+      "focus": "报告速览：任务类型、热度、许可证",
+      "source_report": "output/radar/2026-10-22_ai_opensource_radar.md",
+      "state": "DRAFT",
+      "script_id": "56aa643847d44a13b897972ff6e3d2cc",
+      "last_state": [
+        "DRAFT",
+        null,
+        1
+      ],
+      "version": 1,
+      "error": null
+    },
+    {
+      "key": "company",
+      "original_script_id": "4c63a878b25b4c96b7f8fa67f0824da0",
+      "original_version": 1,
+      "original_title": "2026年10月22日商业动态：谷歌虚拟电厂抢眼",
+      "recipe": "topic_digest",
+      "production": "company_daily",
+      "mode": "fast",
+      "focus": "商业：报道预计、计划数量与实际结果",
+      "source_report": "output/company/2026-10-22_company_daily.md",
+      "state": "DRAFT",
+      "script_id": "5a35f4c46d924cdaa0f14cd387134e59",
+      "last_state": [
+        "DRAFT",
+        null,
+        1
+      ],
+      "version": 1,
+      "error": null
+    },
+    {
+      "key": "science",
+      "original_script_id": "f30f9b94c3a345da82069fac22b24b4f",
+      "original_version": 1,
+      "original_title": "北海海底撞击如何掀起巨型海啸",
+      "recipe": "topic_digest",
+      "production": "science_daily",
+      "mode": "fast",
+      "focus": "科学：研究归属、受试人群和结论强度",
+      "source_report": "output/science/2026-10-22_science_daily.md",
+      "state": "DRAFT",
+      "script_id": "2f494ba3d0ae48b2a1e9abba4d23a211",
+      "last_state": [
+        "DRAFT",
+        null,
+        1
+      ],
+      "version": 1,
+      "error": null
+    },
+    {
+      "key": "history",
+      "original_script_id": "41fa2d69fc044c188c8e86bfd0aab336",
+      "original_version": 1,
+      "original_title": "四件历史与考古新线索，最值得辨真伪的是日食传说",
+      "recipe": "topic_digest",
+      "production": "history_daily",
+      "mode": "fast",
+      "focus": "历史：传说、学者解释与已证实史实",
+      "source_report": "output/history/2026-10-22_history_daily.md",
+      "state": "DRAFT",
+      "script_id": "b117b237788241c18e55d82fa40e5da5",
+      "last_state": [
+        "DRAFT",
+        null,
+        1
+      ],
+      "version": 1,
+      "error": null
+    },
+    {
+      "key": "consumer",
+      "original_script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+      "original_version": 5,
+      "original_title": "续航手机最抢眼，五件新品变化速览",
+      "recipe": "topic_digest",
+      "production": "consumer_daily",
+      "mode": "fast",
+      "focus": "已核验 v5 对照：测试场景、有限体验与未来计划",
+      "source_report": "state/video_editorial_sources/e118dc7db5f34c3ba90af0285b4688f5/verified-v5-with-source-index.txt",
+      "state": "CONTROL",
+      "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+      "version": 5
+    }
+  ]
+}

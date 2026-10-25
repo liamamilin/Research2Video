@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "note": "Concurrent workspace changes were preserved; original acceptance hashes remain unchanged in their own record. Submission/progress/command recovery tests and real-MP4 handoff were rerun on the current files.",
+  "concurrently_changed_files": [
+    "autovideo/g3/store.py",
+    "autovideo/g3/app.py",
+    "autovideo/g2/run_g2.py"
+  ],
+  "current_hashes": [
+    {
+      "repository": "autovideo",
+      "path": "g3/store.py",
+      "sha256": "331a5f9bc4f41413a0645245fe5975b21de796022b8159564c63de125ad0535e"
+    },
+    {
+      "repository": "autovideo",
+      "path": "g3/app.py",
+      "sha256": "9c826c1538685fbf1bea4298dbdd312e6a29354d289528adef6e65e2c4408a0e"
+    },
+    {
+      "repository": "autovideo",
+      "path": "g3/worker.py",
+      "sha256": "008e95a0c6bf7688564f0ba4ab1f06f19a9ae84541fc2b41957aa79e2801e865"
+    },
+    {
+      "repository": "autovideo",
+      "path": "g2/run_g2.py",
+      "sha256": "b913794b87020d97d803605af0a2fa3e2900c65b839775ed2c04d5046992832b"
+    },
+    {
+      "repository": "research",
+      "path": "core/video/store.py",
+      "sha256": "ed855ce5e498e554784048cb56bd049edc158c3ad30a47a3290857489d141460"
+    },
+    {
+      "repository": "research",
+      "path": "core/video/autovideo.py",
+      "sha256": "42fb6e4ee0b3bb484ce8d55d9e7851ca5804f431ae640992028a92e419bb4d63"
+    },
+    {
+      "repository": "research",
+      "path": "web/services/video_render.py",
+      "sha256": "ec93cdb855b2e73f19e74afd0ee15ef319dcedb1da80a1d1c99b8fd87ff8c661"
+    },
+    {
+      "repository": "research",
+      "path": "web/services/video_executor.py",
+      "sha256": "1939b7d9fde00228b489215eb6cd3557e736abe1ad0e881baccee5b91f211b3f"
+    },
+    {
+      "repository": "research",
+      "path": "web/server.py",
+      "sha256": "9629706cf4889b72bcbe20dd4557a4b259d2e543a9d81ddd1628e6a0f29a5020"
+    }
+  ]
+}

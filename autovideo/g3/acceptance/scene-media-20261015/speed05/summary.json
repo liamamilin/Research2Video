@@ -1,0 +1,130 @@
+{
+  "mode": "speed05",
+  "job_id": "d47b903e-a899-4433-a2cb-6a0ba7a90fc8",
+  "parent_job_id": "64140056-fed2-465f-a5c1-4269f3c0332d",
+  "voice_id": "zf_xiaoxiao",
+  "video_speed": 0.5,
+  "qa": {
+    "status": "PASS",
+    "gate": "REVISION",
+    "real_llm": false,
+    "real_tts": false,
+    "mock_calls": 0,
+    "model": "deepseek-flash",
+    "llm_call_count": 0,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 1390,
+      "duration_seconds": 46.336,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.9999534539720247,
+      "decoded_rms": 0.08160899579524994,
+      "full_decode": "PASS"
+    },
+    "timeline": {
+      "ir_frames": 1390,
+      "scene_count": 2,
+      "beat_count": 5,
+      "alignment_granularity": "phrase"
+    },
+    "visual_beats": {
+      "c1_s1_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 15,
+        "before_frame": 12,
+        "after_frame": 19,
+        "changed_pixel_ratio": 0.0400366512345679
+      },
+      "c1_s1_b1": {
+        "action": "reveal",
+        "target_id": "line:0",
+        "beat_frame": 309,
+        "before_frame": 306,
+        "after_frame": 313,
+        "changed_pixel_ratio": 0.044524016203703706
+      },
+      "c1_s1_b2": {
+        "action": "reveal",
+        "target_id": "line:1",
+        "beat_frame": 637,
+        "before_frame": 634,
+        "after_frame": 641,
+        "changed_pixel_ratio": 0.03856626157407408
+      },
+      "c1_s1_b3": {
+        "action": "reveal",
+        "target_id": "line:2",
+        "beat_frame": 882,
+        "before_frame": 879,
+        "after_frame": 886,
+        "changed_pixel_ratio": 0.04381221064814815
+      },
+      "c1_s2_b0": {
+        "action": "reveal",
+        "target_id": "title",
+        "beat_frame": 1173,
+        "before_frame": 1170,
+        "after_frame": 1177,
+        "changed_pixel_ratio": 0.052078510802469134
+      }
+    },
+    "scene_samples": [
+      {
+        "scene_id": "c1_s1",
+        "frame": 0,
+        "file": "g3/data/jobs/d47b903e-a899-4433-a2cb-6a0ba7a90fc8/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 578,
+        "file": "g3/data/jobs/d47b903e-a899-4433-a2cb-6a0ba7a90fc8/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+      },
+      {
+        "scene_id": "c1_s1",
+        "frame": 1155,
+        "file": "g3/data/jobs/d47b903e-a899-4433-a2cb-6a0ba7a90fc8/attempts/1/g2-run/artifacts/keyframes/frame-011.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 1156,
+        "file": "g3/data/jobs/d47b903e-a899-4433-a2cb-6a0ba7a90fc8/attempts/1/g2-run/artifacts/keyframes/frame-012.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 1273,
+        "file": "g3/data/jobs/d47b903e-a899-4433-a2cb-6a0ba7a90fc8/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+      },
+      {
+        "scene_id": "c1_s2",
+        "frame": 1389,
+        "file": "g3/data/jobs/d47b903e-a899-4433-a2cb-6a0ba7a90fc8/attempts/1/g2-run/artifacts/keyframes/frame-016.png"
+      }
+    ],
+    "contact_sheet": "artifacts/contact-sheet.jpg",
+    "captions": {
+      "burned_in": true,
+      "srt": "artifacts/captions.srt",
+      "alignment": "phrase-level measured PCM activity"
+    },
+    "operation": "media_revision",
+    "reused_narration": true,
+    "video_form": "information_motion",
+    "voice_id": "zf_xiaoxiao",
+    "video_speed": 0.5
+  },
+  "narration_text_unchanged": true,
+  "parent_video_unchanged": true,
+  "screen_content_unchanged": true,
+  "expected_seconds": 46.334,
+  "manifest_hashes_verified": 60,
+  "range_download": "PASS"
+}

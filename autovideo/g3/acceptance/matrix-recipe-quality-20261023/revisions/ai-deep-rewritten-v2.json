@@ -1,0 +1,1630 @@
+{
+  "script_id": "d6e2e0e5b0c54e7898ca23ea8b6e7ec0",
+  "version": 2,
+  "title": "WildAWM：给电脑操作 Agent 造一个能判对错的世界",
+  "sections": [
+    {
+      "title": "缺的不是截图，是能判对错的世界",
+      "paragraphs": [
+        {
+          "text": "训练一个会操作电脑的 Agent，常见做法是给它看大量屏幕截图和操作录屏。可问题是，看懂了不等于会做。真实的电脑又没法批量复制成千上万台，让它反复练；一个任务到底做没做完，也很难自动判定。WildAWM 换了个切入点：它不收集更多截图，而是合成一个能真的动手、也能自动判对错的个人电脑世界。Agent 的操作不会只停留在画面上，还会真的改变这个世界的状态。",
+          "facts": [
+            "F1",
+            "F5"
+          ],
+          "introduces": [
+            "可执行世界"
+          ],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "三类入口，一套状态",
+      "paragraphs": [
+        {
+          "text": "这个世界由三类东西拼起来。第一类是文件和命令行，Agent 可以创建、修改文件，跑命令；第二类是 MCP 服务，它把外部工具以 Agent 能调用的方式接进来；第三类是镜像网站，让网页操作有一个能打开的落点。",
+          "facts": [
+            "F1"
+          ],
+          "introduces": [
+            "MCP 服务"
+          ],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "关键在于“共享”。这三类属于同一个世界，并非三个各自独立的沙盒；论文说，它们共享同一套 GUI、MCP 和 CLI 状态。也就是说，Agent 在浏览器里点了一下、改了某个设置，命令行那边再去读，读到的是同一个世界里的结果。任务是落在这份共享状态上的，所以做没做成，有东西可以对。这跟只给模型看一段操作录屏，是两件不同的事。",
+          "facts": [
+            "F1",
+            "F5"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "任务和判卷规则一起合成",
+      "paragraphs": [
+        {
+          "text": "世界能执行之后，下一个问题是：任务从哪来，谁来判断做没做完。WildAWM 的做法是把任务和验证器一起生成。出题的时候，判卷规则同时写好。所谓任务验证器，就是一段程序，它检查的是世界状态有没有变成任务要求的样子。",
+          "facts": [
+            "F2",
+            "F6"
+          ],
+          "introduces": [
+            "任务验证器"
+          ],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "光有验证器还不够。合成出来的任务里会混进一些“碰巧能过”的：Agent 什么都没干，状态刚好满足条件；或者换一条执行路径就过不了；再或者把条件稍微改一下，验证器照样放行，这说明它判的其实不是任务想要的那件事。所以流水线里还有几道筛子：质量门在两阶段合成流程里筛掉不合格的任务和环境；异构执行检查换个执行方式，看结果还对不对得上；反事实探针则通过改变条件观察世界的反应，把一换条件就露馅的任务挑出来。",
+          "facts": [
+            "F2",
+            "F6"
+          ],
+          "introduces": [
+            "质量门",
+            "异构执行检查",
+            "反事实探针"
+          ],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "论文第 5.2 节做了质量门的消融，第 5.3 节做了强化学习的消融。这说明这套筛子有单独检验，并非只在流程图上存在。这一步的取舍其实很清楚：重点在于让造出来的任务真的可判、经得起筛，单纯增加任务数量并不是目标。",
+          "facts": [
+            "F9"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "341 对环境和八个 OOD 基准说明了什么",
+      "paragraphs": [
+        {
+          "text": "公开出来的规模是 341 个环境-任务对，官方仓库里能拿到，模型链接也在。仓库的评测表列出了八个外部 OOD 基准，每个基准的任务数量和指标类型都写了。所以它不只是实验室内部的自测。",
+          "facts": [
+            "F3",
+            "F4"
+          ],
+          "introduces": [
+            "OOD 基准"
+          ],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "作者报告的结果里，两个 Qwen 模型在这八个具名 OOD 基准上都取得了提升；GPT-6-Astra 在论文所述的评测协议下，解决任务的比例是 60%。这两条都要看清它们的性质：它们是论文作者在自家协议下的自述结果，报告里没有记录第三方独立复测。发布代码和数据，跟有人独立跑出同样的数字，是两回事；60% 也不等于真实用户电脑上的成功率。",
+          "facts": [
+            "F7",
+            "F8"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "还有一个常被提起的点，叫 harness 效应，说的是评测装置本身可能影响结果。这个目前仍然只是假设，没有被确立为污染，也不是对结果的唯一解释。把它当成“分数已经证明虚高”来引用，就说过头了。",
+          "facts": [
+            "F10"
+          ],
+          "introduces": [
+            "harness 效应"
+          ],
+          "recap": false,
+          "citations": [
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "想自己复现，先得搭工程环境。仓库列出的依赖包括 Python 3.12、Docker 和 Node.js，不是装个包就能跑；模型调用也不能默认零成本。别把 341 个环境-任务对当成开箱即用的复现包。",
+          "facts": [
+            "F3",
+            "F12",
+            "F13"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "该追的是流水线，不是单个分数",
+      "paragraphs": [
+        {
+          "text": "回到开头那个问题：真正稀缺的是什么。答案是能一条龙批量造出环境、任务、判定和筛选的流水线，并非更多的操作截图。WildAWM 值得跟的地方就在这里：它把可执行世界、任务验证器和几道筛子串成了一条能扩展的合成路径。",
+          "facts": [
+            "F2",
+            "F6"
+          ],
+          "introduces": [],
+          "recap": true,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "至于它到底有多强，答案不在那一个 60% 里。要看有没有人独立复现，要看验证器判的是不是任务真正要求的那件事，还要看这套合成世界能不能继续迁移到没见过的任务上。分数是路标，流水线才是路。",
+          "facts": [
+            "F3",
+            "F7"
+          ],
+          "introduces": [],
+          "recap": false,
+          "citations": [
+            "https://github.com/MSR-Orchard/WildAWM",
+            "https://arxiv.org/html/2610.26828"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1250,
+    "estimated_seconds": 280,
+    "segments": 51,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 6,
+    "budget": 1566,
+    "ratio": 0.779,
+    "status": "UNDER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "缺的不是截图，是能判对错的世界",
+        "spoken_length": 147,
+        "budget": 150
+      },
+      {
+        "title": "三类入口，一套状态",
+        "spoken_length": 209,
+        "budget": 281
+      },
+      {
+        "title": "任务和判卷规则一起合成",
+        "spoken_length": 359,
+        "budget": 452
+      },
+      {
+        "title": "341 对环境和八个 OOD 基准说明了什么",
+        "spoken_length": 362,
+        "budget": 482
+      },
+      {
+        "title": "该追的是流水线，不是单个分数",
+        "spoken_length": 173,
+        "budget": 201
+      }
+    ]
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "writer": "adapt",
+    "style": {
+      "depth": "intermediate",
+      "tone": "explainer",
+      "label": "进阶 · 讲解通俗",
+      "presets": [
+        "intermediate@3",
+        "explainer@4"
+      ]
+    },
+    "prompts": {
+      "facts": 6,
+      "plan": 9,
+      "draft": 12,
+      "review": 7
+    },
+    "fact_sheet_id": "fdddd0574a20c8ec703d6934364e7b1520fecece9c7d1b8db113e59d39bed518",
+    "plan": {
+      "question": "WildAWM 用合成出的个人电脑世界训练电脑操作 Agent，真正改变的是哪一环？",
+      "audience": {
+        "knows": [
+          "知道 Agent、GUI/CLI、MCP、OOD 基准、消融实验这些基础名词",
+          "了解训练数据与环境会影响 Agent 能力"
+        ],
+        "lacks": [
+          "不清楚 WildAWM 的可执行世界由什么组成",
+          "不清楚任务验证器、质量门、反事实探针在合成流程里的分工",
+          "容易把作者报告分数当成独立复现或真实部署成功率"
+        ],
+        "cares": "关心电脑操作 Agent 的训练环境能否规模化、任务判定是否可信、合成世界能否迁移到分布外任务，以及复现成本。",
+        "takeaway": "WildAWM 的突破点是把可执行 PC 世界、任务验证器和筛选流程一起合成，让任务能执行、能判定，并尽量筛掉假通过；341 对环境和作者报告的 OOD 提升、60% 仍是作者协议下的结果，独立复现与 harness 影响仍待检验。"
+      },
+      "goals": [
+        {
+          "question": "为什么 WildAWM 要造可执行世界，而不是只收操作截图？",
+          "answer": "电脑操作任务需要落在可执行、可判定的共享状态上；文件与命令行、MCP 服务和镜像网站在同一个世界里改状态，任务完成才有依据。",
+          "facts": [
+            "F1",
+            "F5"
+          ]
+        },
+        {
+          "question": "合成流程里最关键的取舍是什么？",
+          "answer": "不是单纯多造任务，而是任务和验证器一起生成，再用质量门、异构执行检查和反事实探针筛掉不合格或碰巧通过的任务或环境；论文还给出了质量门与 RL 消融。",
+          "facts": [
+            "F2",
+            "F6",
+            "F9"
+          ]
+        },
+        {
+          "question": "作者报告的规模和效果该怎么读？",
+          "answer": "341 个环境-任务对和八个外部 OOD 基准说明评测面不小；Qwen 提升与 GPT-6-Astra 的 60% 是作者在所述协议下的自述，报告未记录第三方独立复测，harness 效应仍是假设，复现还要工程环境且成本未量化。",
+          "facts": [
+            "F3",
+            "F4",
+            "F7",
+            "F8",
+            "F10",
+            "F12",
+            "F13"
+          ]
+        }
+      ],
+      "chain": [
+        {
+          "step": "训练电脑操作 Agent 需要能反复执行、能判定完成的环境。",
+          "facts": [
+            "F1",
+            "F5"
+          ]
+        },
+        {
+          "step": "WildAWM 把可执行世界组织成文件与命令行、MCP 服务和镜像网站三类要素，并共享同一套 GUI/MCP/CLI 状态。",
+          "facts": [
+            "F1",
+            "F5"
+          ]
+        },
+        {
+          "step": "为了让任务可判，任务与验证器共同合成，再用质量门、异构执行检查和反事实探针筛选。",
+          "facts": [
+            "F2",
+            "F6",
+            "F9"
+          ]
+        },
+        {
+          "step": "官方发布 341 个环境-任务对；仓库评测表列出八个外部 OOD 基准，作者报告两个 Qwen 模型提升和 GPT-6-Astra 的 60%。",
+          "facts": [
+            "F3",
+            "F4",
+            "F7",
+            "F8"
+          ]
+        },
+        {
+          "step": "这些是作者协议下的自述，报告没有记录第三方独立复测；harness 效应仍是假设；复现需工程环境，成本未量化。",
+          "facts": [
+            "F7",
+            "F8",
+            "F10",
+            "F12",
+            "F13"
+          ]
+        }
+      ],
+      "glossary": [
+        {
+          "term": "可执行世界",
+          "plain": "能真的改文件、跑命令、调 MCP 服务、打开镜像网站，而且这些操作共享同一套状态的环境。",
+          "needs": [
+            "GUI/CLI 基础"
+          ],
+          "analogy": "像一个能反复折腾、会留下状态的小电脑，而不是只能看的操作录屏。",
+          "mapping": {},
+          "breaks": "材料只说明这三类要素共享状态，不等于完整复制任意真实 PC。"
+        },
+        {
+          "term": "任务验证器",
+          "plain": "和任务一起生成、用来判定任务是否完成的程序。",
+          "needs": [
+            "任务定义"
+          ],
+          "analogy": "出题时把答案和判卷规则一起写好。",
+          "mapping": {},
+          "breaks": "它判定的是合成任务定义内的完成，不等于真实工作全部完成。"
+        },
+        {
+          "term": "质量门",
+          "plain": "两阶段合成流程里用于筛除不合格任务或环境的检查环节。",
+          "needs": [
+            "合成流程"
+          ],
+          "analogy": "出厂前的质检关卡。",
+          "mapping": {},
+          "breaks": "论文做了质量门消融，但不代表所有坏任务都能拦住。"
+        },
+        {
+          "term": "反事实探针",
+          "plain": "通过改变条件观察世界反应，用来筛选的检查手段。",
+          "needs": [
+            "任务验证器",
+            "执行检查"
+          ],
+          "analogy": "换个问法看答案会不会跟着变。",
+          "mapping": {},
+          "breaks": "它是筛选工具，不是对真实部署效果的保证。"
+        },
+        {
+          "term": "异构执行检查",
+          "plain": "在不同执行方式下做一致性检查，用来筛选任务或环境的环节。",
+          "needs": [
+            "执行路径",
+            "一致性检查"
+          ],
+          "analogy": "同一道题换条解法做，看结果是否仍然对得上。",
+          "mapping": {},
+          "breaks": "它帮助排除换条路径就不过的任务，不等于覆盖所有执行差异。"
+        },
+        {
+          "term": "OOD 基准",
+          "plain": "训练分布之外的评测集合，用来观察模型能不能迁移到没见过的任务。",
+          "needs": [
+            "基准"
+          ],
+          "analogy": "学完之后做没练过的题。",
+          "mapping": {},
+          "breaks": "作者报告两个 Qwen 模型在八个具名 OOD 基准上均提升，但报告没有记录第三方独立复测；不能推成任意真实部署都提升。"
+        },
+        {
+          "term": "harness 效应",
+          "plain": "评测装置或评测流程本身对结果造成影响的可能性。",
+          "needs": [
+            "评测协议"
+          ],
+          "analogy": "像考试用的答题卡本身影响成绩，但现在只是怀疑，没有证实。",
+          "mapping": {},
+          "breaks": "材料明确说这仍是假设，尚未确立为污染，也不是唯一解释。"
+        }
+      ],
+      "misconceptions": [
+        {
+          "wrong": "WildAWM 只是生成截图或录屏的训练数据集。",
+          "fix": "它合成的是可执行世界，文件与命令行、MCP 服务和镜像网站共享同一套状态，任务能在其中被执行和判定。"
+        },
+        {
+          "wrong": "60% 是真实部署成功率，或者已被第三方复现。",
+          "fix": "这是论文作者在所述评测协议下的自述结果；报告没有记录第三方独立复测，仓库发布和模型自述不等同独立复现。"
+        },
+        {
+          "wrong": "harness 效应已经证明结果被污染。",
+          "fix": "报告明确说这仍是假设，尚未确立为污染，也不是对结果的唯一解释。"
+        },
+        {
+          "wrong": "公开 341 个环境-任务对就能零成本复现。",
+          "fix": "复现先要搭 Python 3.12、Docker、Node.js 的工程环境；报告未量化耗时或模型调用成本，不能据此断言模型调用没有成本。"
+        }
+      ],
+      "actions": [
+        {
+          "condition": "要引用论文里的效果数字",
+          "step": "把 GPT-6-Astra 的 60% 和两个 Qwen 在八个 OOD 基准上的提升标成作者自述，并带上所述评测协议；不要写成第三方复现或任意部署成功率。",
+          "verify": "能在论文附录的评测协议、仓库评测表和消融节找到对应设置。",
+          "needs": [
+            "F4",
+            "F7",
+            "F8",
+            "F9"
+          ]
+        },
+        {
+          "condition": "想判断这套合成世界是否值得跟进",
+          "step": "先看仓库 341 个环境-任务对的覆盖，再按仓库依赖搭一个最小工程环境跑通一对任务，观察共享状态和验证器判定。",
+          "verify": "任务能在文件/命令行、MCP 服务、镜像网站共享状态下执行，并得到验证器判定；同时把模型调用成本单独计入。",
+          "needs": [
+            "F3",
+            "F4",
+            "F12",
+            "F13"
+          ]
+        }
+      ],
+      "must_cover": [
+        {
+          "item": "可执行世界由文件与命令行、MCP 服务和镜像网站组合，并共享 GUI/MCP/CLI 状态",
+          "beat": 2
+        },
+        {
+          "item": "任务与验证器共同合成，质量门、异构执行检查和反事实探针用于筛选",
+          "beat": 3
+        },
+        {
+          "item": "官方发布 341 个环境-任务对",
+          "beat": 4
+        },
+        {
+          "item": "仓库评测表列出八个外部 OOD 基准；Qwen 提升和 GPT-6-Astra 的 60% 是作者自述",
+          "beat": 4
+        },
+        {
+          "item": "harness 效应仍是假设；复现需工程环境，报告未量化成本",
+          "beat": 4
+        }
+      ],
+      "core_message": "WildAWM 的核心不是造更多操作截图，而是把可执行 PC 世界、任务验证器和筛选流程一起合成，让任务能执行、能判定，并尽量筛掉假通过。它发布了 341 个环境-任务对，作者报告了两个 Qwen 模型在八个具名 OOD 基准上的提升和 GPT-6-Astra 的 60%，但这些仍是作者协议下的自述；独立复现、harness 影响和成本边界仍需检验。",
+      "hook": {
+        "kind": "场景+矛盾",
+        "idea": "训练电脑操作 Agent，真正稀缺的不是更多屏幕截图，而是一个能反复操作、还能判定对错的世界。WildAWM 的做法是把个人电脑做成可执行世界：文件、命令行、MCP 服务和镜像网站共享同一套状态，任务和验证器一起生成。",
+        "facts": [
+          "F1",
+          "F5",
+          "F6"
+        ]
+      },
+      "beats": [
+        {
+          "title": "缺的不是截图，是能判对错的世界",
+          "role": "钩子",
+          "point": "训练电脑操作 Agent，真实电脑难批量复现，任务完成也难自动判定；WildAWM 的切入点是合成一个可执行的个人电脑世界，让操作真的落到状态变化上。",
+          "facts": [
+            "F1",
+            "F5"
+          ],
+          "terms": [
+            "可执行世界"
+          ],
+          "budget": 150,
+          "connection": "先立起主线：问题不只在模型，也在训练环境。"
+        },
+        {
+          "title": "三类入口，一套状态",
+          "role": "概念",
+          "point": "这个世界由文件与命令行、MCP 服务和镜像网站三类要素组合；论文说它们共享同一套 GUI/MCP/CLI 状态。不是三套割裂的模拟，而是任务可以在同一个世界里被执行和判定。",
+          "facts": [
+            "F1",
+            "F5"
+          ],
+          "terms": [
+            "可执行世界",
+            "MCP 服务",
+            "CLI",
+            "GUI"
+          ],
+          "budget": 281,
+          "connection": "世界能执行之后，下一步自然会问：任务和判定标准怎么批量造出来。"
+        },
+        {
+          "title": "任务和判卷规则一起合成",
+          "role": "机制",
+          "point": "两阶段合成流程里，任务和任务验证器共同生成，再由质量门筛；异构执行检查和反事实探针也是筛选环节，用来排除换条路径就不过、或换个条件就露馅的假通过。关键不是造更多任务，而是让任务真的可判、可筛。论文 5.2 节的质量门消融说明这个筛子被单独检验过。",
+          "facts": [
+            "F2",
+            "F6",
+            "F9"
+          ],
+          "terms": [
+            "任务验证器",
+            "质量门",
+            "异构执行检查",
+            "反事实探针",
+            "消融实验"
+          ],
+          "budget": 452,
+          "connection": "有了可执行世界和可判定的任务，再看公开规模和外部评测给了什么信号。"
+        },
+        {
+          "title": "341 对环境和八个 OOD 基准说明了什么",
+          "role": "证据",
+          "point": "官方仓库发布 341 个环境-任务对；仓库评测表列出八个外部 OOD 基准。作者报告两个 Qwen 模型在八个具名 OOD 基准上均提升，GPT-6-Astra 在所述评测协议下解决任务比例 60%。这些结果说明它不只是内部玩具，但都是作者协议下的自述，报告没有记录第三方独立复测；harness 效应仍是假设，不是已确立的污染。复现先要搭工程环境，报告未量化耗时和模型调用成本，不能当成零成本。",
+          "facts": [
+            "F3",
+            "F4",
+            "F7",
+            "F8",
+            "F10",
+            "F12",
+            "F13"
+          ],
+          "terms": [
+            "OOD 基准",
+            "环境-任务对",
+            "harness 效应"
+          ],
+          "budget": 482,
+          "connection": "既然单个分数有边界，最后要把注意力从 60% 挪回这条合成流水线本身。"
+        },
+        {
+          "title": "该追的是流水线，不是单个分数",
+          "role": "收束",
+          "point": "WildAWM 真正值得跟的是把可执行世界、任务验证器和筛选流程串成一条可扩展的合成流水线。它给电脑操作 Agent 提供了一条值得追的工程路径；评估它要看独立复现、任务判定是否可信、能否继续迁移到外部环境，而不只看一个 60%。",
+          "facts": [
+            "F2",
+            "F6",
+            "F3",
+            "F7"
+          ],
+          "terms": [],
+          "budget": 201,
+          "connection": "回到开场：合成世界能不能成为训练基础设施，答案取决于独立复现和迁移证据。"
+        }
+      ],
+      "scope_out": [
+        "不展开外部基准的逐项结果和评测协议细节，只交代它们用于评测和作者报告的整体结论。",
+        "不把 harness 效应讲成已证实的污染；材料只支持它是待检验假设。",
+        "不写成安装教程，只交代复现的工程前置和成本边界。"
+      ],
+      "left_out": [],
+      "fit": {
+        "ok": true,
+        "note": "约 6 分钟，5 节；机制和结果边界占主要篇幅。若需压缩，可合并第 1、2 节，不删第 4 节的结果边界。"
+      }
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "「千」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "质量门、异构执行检查、反事实探针各自拦哪类问题，听的时候容易混。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "三个筛子连着报名字，密度有点高，想倒回去确认各自分工。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "论文第 5.2 节、5.3 节这种节号像内部备注，和主线关系弱，容易想划走。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "两个 Qwen 模型提升了多少、相对谁提升？60% 的分母是什么？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [
+          {
+            "id": "G1",
+            "question": "为什么 WildAWM 要造可执行世界，而不是只收操作截图？",
+            "expected": "电脑操作任务需要落在可执行、可判定的共享状态上；文件与命令行、MCP 服务和镜像网站在同一个世界里改状态，任务完成才有依据。",
+            "answer": "只收截图和录屏，Agent 看懂了也不等于会做；真实电脑又难批量复制，任务是否完成也难自动判定。可执行世界让操作真的改变共享状态，任务能落在这份状态上自动验证。",
+            "correct": true,
+            "note": "答出了截图/录屏不足、真实电脑难批量复制且难自动判定，以及可执行世界让操作改变共享状态并可自动验证，意思正确。"
+          },
+          {
+            "id": "G2",
+            "question": "合成流程里最关键的取舍是什么？",
+            "expected": "不是单纯多造任务，而是任务和验证器一起生成，再用质量门、异构执行检查和反事实探针筛掉不合格或碰巧通过的任务或环境；论文还给出了质量门与 RL 消融。",
+            "answer": "不是单纯堆任务数量，而是把任务和验证器一起合成，再用质量门、异构执行检查和反事实探针筛掉碰巧能过、换路径就不过、改条件仍放行的任务，让任务真正可判、经得起筛。",
+            "correct": true,
+            "note": "答出了不是堆任务数量，而是任务与验证器共同合成，并用质量门、异构执行检查和反事实探针筛掉不合格任务；未提消融不影响该问核心。"
+          },
+          {
+            "id": "G3",
+            "question": "作者报告的规模和效果该怎么读？",
+            "expected": "341 个环境-任务对和八个外部 OOD 基准说明评测面不小；Qwen 提升与 GPT-6-Astra 的 60% 是作者在所述协议下的自述，报告未记录第三方独立复测，harness 效应仍是假设，复现还要工程环境且成本未量化。",
+            "answer": "公开规模是 341 个环境-任务对，仓库评测表列出八个外部 OOD 基准；作者报告两个 Qwen 模型在这些基准上提升，GPT-6-Astra 在论文协议下解决任务比例 60%。这些都是作者自述结果，没有第三方独立复测，60% 也不等于真实用户电脑上的成功率；harness 效应目前只是假设，不能说分数已被证明虚高。",
+            "correct": true,
+            "note": "正确读出 341 个环境-任务对、八个 OOD 基准、Qwen 提升和 60% 均为作者协议下自述，缺少独立复测，且 harness 仍只是假设；未提复现成本不影响该问主要判断。"
+          }
+        ],
+        "score": 1.0
+      },
+      "newcomer": {
+        "retell": "我记住的是：WildAWM 的重点不是多收截图，而是造一个能动手、状态会变、还能自动判对错的电脑世界。它把文件/命令行、MCP 工具和镜像网站放进同一套共享状态里，再把任务和验证器一起生成，并用几道筛子挑掉假通过的任务。公开了 341 个环境-任务对和八个 OOD 基准，作者报告了提升和一个 60%，但这只是作者协议下的结果，没有独立复测。复现还要 Python、Docker、Node.js 等工程环境。最后真正值得追的是可批量造环境、任务、判定和筛选的流水线，而不是单个分数；还要看独立复现、验证器是否判对事、能不能迁移到没见过的任务。",
+        "scores": {
+          "hook": 4,
+          "clarity": 4,
+          "pacing": 4,
+          "style": 4
+        },
+        "comments": "值得听：主线清楚，一直围绕“稀缺的是可执行、可判定、可筛选的合成流水线，不是截图或单个分数”，最后也兑现了。最该改的是 S3P2 到 S3P3：三个筛子连着报名字容易糊，论文节号又像内部备注；用一个具体任务说明哪道筛子拦下什么，会比列检查名更好跟。S4P2 说 Qwen 模型有提升但没给幅度和基线，听众很难判断效果，只能记住“作者自述”。"
+      },
+      "core_message_match": true,
+      "core_message_note": "观众复述与方案主旨一致：强调可执行共享状态、任务与验证器共同合成、质量筛子、341 个环境-任务对和八个 OOD 基准，并正确指出作者自述、缺少独立复测、harness 仍属假设，以及真正值得追的是流水线而非单个分数。",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 5,
+        "rule_must": 0,
+        "questions": 2,
+        "lost": 2,
+        "quiz_score": 1.0,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 1
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 2,
+      "deletions": [],
+      "initial": [
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "「千」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule",
+          "resolved": false
+        },
+        {
+          "audit": "fact",
+          "rule": "D6",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 3,
+          "quote": "",
+          "problem": "「341」在标注的事实里找不到",
+          "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+          "suggestion": "照事实写，或补标依据的事实",
+          "source": "rule",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "质量门和反事实探针听起来都在筛任务，它们的分工区别是什么？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“两阶段合成流程”是哪两阶段？前面没有交代。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "三种失败模式后面接三个筛子名，术语密集，连续听容易只记住“有几道筛子”，分不清质量门、异构执行检查、反事实探针各管什么。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "为什么突然提强化学习的消融？它和前面讲的合成筛子是什么关系？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "“论文第 5.2 节”“第 5.3 节”像内部审稿备注，不像对观众说话；突然插进来的 RL 消融打断主线。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "harness 效应是谁在提？具体指什么？为什么这里要专门说它？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 2,
+          "quote": "",
+          "problem": "突然引入一个此前没铺垫的争议点，像在回应外部讨论，但观众不知道在回应谁，容易走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "fact",
+          "rule": "D1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 3,
+          "quote": "报告没有给出环境搭建耗时，也没有量化模型调用成本，所以别把 341 个环境-任务对理解成零成本的复现包。",
+          "problem": "底稿只说明我们这份报告没有给出耗时和成本数字，并没有依据表明论文或仓库没有披露这些信息；口播把「材料没说明」改成了「报告没给出」，变成了对来源内容的一种无依据缺失断言。",
+          "why": "观众会把它理解成原论文或仓库的缺陷，而实际上这只是我们手头资料的缺口；按规则，不能把检索备注当成讲稿内容。",
+          "suggestion": "去掉关于来源缺失的断言，改成不涉及来源的表述，例如「复现要先搭工程环境，模型调用等成本得自己估，别把 341 个环境-任务对当成零成本的复现包」。",
+          "source": "model",
+          "resolved": true
+        }
+      ],
+      "editorial_attempted": true
+    },
+    "description": {
+      "summary": "WildAWM 合成的不只是操作截图，而是一个能执行、能判定的个人电脑世界：文件与命令行、MCP 服务和镜像网站共享同一套状态，任务与验证器共同生成，再用质量门、异构执行检查和反事实探针筛掉假通过。作者发布了 341 个环境-任务对，并报告两个 Qwen 模型在八个具名 OOD 基准上提升、GPT-6-Astra 在所述协议下达到 60%。",
+      "details": [
+        "341 这一数字同时出现在官方仓库和论文正文中",
+        "仓库评测表列出八个外部基准，并给出每个基准的任务数量和指标类型",
+        "论文第 5.2、5.3 节分别给出质量门消融和 RL 消融，附录列评测协议与基准清单",
+        "仓库安装依赖包括 Python 3.12、Docker、Node.js",
+        "60% 与 Qwen 提升均为作者在其所述评测协议下的自述结果，报告未记录第三方独立复测"
+      ],
+      "open_questions": [
+        "第三方独立复现能否得到与作者报告一致的 OOD 提升和 60% 解决率",
+        "harness 效应对结果的影响有多大，目前仍是未证实的假设",
+        "环境搭建与模型调用的实际成本未被量化，规模化复现的门槛尚不清楚"
+      ],
+      "not_covered": [],
+      "sources": [
+        {
+          "url": "https://github.com/MSR-Orchard/WildAWM",
+          "facts": [
+            "F1",
+            "F2",
+            "F3",
+            "F4",
+            "F12",
+            "F13"
+          ]
+        },
+        {
+          "url": "https://arxiv.org/html/2610.26828",
+          "facts": [
+            "F5",
+            "F6",
+            "F9",
+            "F3",
+            "F7",
+            "F8",
+            "F10"
+          ]
+        }
+      ]
+    },
+    "usage": {
+      "requests": 10,
+      "prompt_tokens": 36972,
+      "completion_tokens": 55706,
+      "total_tokens": 92678
+    },
+    "editorial_attempt": {
+      "applied": false,
+      "mode": "whole_script",
+      "before_title": "WildAWM：给电脑操作 Agent 造一个能判对错的世界",
+      "before": [
+        {
+          "title": "缺的不是截图，是能判对错的世界",
+          "paragraphs": [
+            {
+              "text": "训练一个会操作电脑的 Agent，常见做法是给它看大量屏幕截图和操作录屏。可问题是，看懂了不等于会做。真实的电脑又没法批量复制成千上万台，让它反复练；一个任务到底做没做完，也很难自动判定。WildAWM 换了个切入点：它不收集更多截图，而是合成一个能真的动手、也能自动判对错的个人电脑世界。Agent 的操作不会只停留在画面上，还会真的改变这个世界的状态。",
+              "facts": [
+                "F1",
+                "F5"
+              ],
+              "introduces": [
+                "可执行世界"
+              ],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "三类入口，一套状态",
+          "paragraphs": [
+            {
+              "text": "这个世界由三类东西拼起来。第一类是文件和命令行，Agent 可以创建、修改文件，跑命令；第二类是 MCP 服务，它把外部工具以 Agent 能调用的方式接进来；第三类是镜像网站，让网页操作有一个能打开的落点。",
+              "facts": [
+                "F1"
+              ],
+              "introduces": [
+                "MCP 服务"
+              ],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "关键在于“共享”。这三类属于同一个世界，并非三个各自独立的沙盒；论文说，它们共享同一套 GUI、MCP 和 CLI 状态。也就是说，Agent 在浏览器里点了一下、改了某个设置，命令行那边再去读，读到的是同一个世界里的结果。任务是落在这份共享状态上的，所以做没做成，有东西可以对。这跟只给模型看一段操作录屏，是两件不同的事。",
+              "facts": [
+                "F1",
+                "F5"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "任务和判卷规则一起合成",
+          "paragraphs": [
+            {
+              "text": "世界能执行之后，下一个问题是：任务从哪来，谁来判断做没做完。WildAWM 的做法是把任务和验证器一起生成。出题的时候，判卷规则同时写好。所谓任务验证器，就是一段程序，它检查的是世界状态有没有变成任务要求的样子。",
+              "facts": [
+                "F2",
+                "F6"
+              ],
+              "introduces": [
+                "任务验证器"
+              ],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "光有验证器还不够。合成出来的任务里会混进一些“碰巧能过”的：Agent 什么都没干，状态刚好满足条件；或者换一条执行路径就过不了；再或者把条件稍微改一下，验证器照样放行，这说明它判的其实不是任务想要的那件事。所以流水线里还有几道筛子：质量门在两阶段合成流程里筛掉不合格的任务和环境；异构执行检查换个执行方式，看结果还对不对得上；反事实探针则通过改变条件观察世界的反应，把一换条件就露馅的任务挑出来。",
+              "facts": [
+                "F2",
+                "F6"
+              ],
+              "introduces": [
+                "质量门",
+                "异构执行检查",
+                "反事实探针"
+              ],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "论文第 5.2 节做了质量门的消融，第 5.3 节做了强化学习的消融。这说明这套筛子有单独检验，并非只在流程图上存在。这一步的取舍其实很清楚：重点在于让造出来的任务真的可判、经得起筛，单纯增加任务数量并不是目标。",
+              "facts": [
+                "F9"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "341 对环境和八个 OOD 基准说明了什么",
+          "paragraphs": [
+            {
+              "text": "公开出来的规模是 341 个环境-任务对，官方仓库里能拿到，模型链接也在。仓库的评测表列出了八个外部 OOD 基准，每个基准的任务数量和指标类型都写了。所以它不只是实验室内部的自测。",
+              "facts": [
+                "F3",
+                "F4"
+              ],
+              "introduces": [
+                "OOD 基准"
+              ],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "作者报告的结果里，两个 Qwen 模型在这八个具名 OOD 基准上都取得了提升；GPT-6-Astra 在论文所述的评测协议下，解决任务的比例是 60%。这两条都要看清它们的性质：它们是论文作者在自家协议下的自述结果，报告里没有记录第三方独立复测。发布代码和数据，跟有人独立跑出同样的数字，是两回事；60% 也不等于真实用户电脑上的成功率。",
+              "facts": [
+                "F7",
+                "F8"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "还有一个常被提起的点，叫 harness 效应，说的是评测装置本身可能影响结果。这个目前仍然只是假设，没有被确立为污染，也不是对结果的唯一解释。把它当成“分数已经证明虚高”来引用，就说过头了。",
+              "facts": [
+                "F10"
+              ],
+              "introduces": [
+                "harness 效应"
+              ],
+              "recap": false,
+              "citations": [
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "想自己复现，先得搭工程环境。仓库列出的依赖包括 Python 3.12、Docker 和 Node.js，不是装个包就能跑；模型调用也不能默认零成本。别把 341 个环境-任务对当成开箱即用的复现包。",
+              "facts": [
+                "F3",
+                "F12",
+                "F13"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "该追的是流水线，不是单个分数",
+          "paragraphs": [
+            {
+              "text": "回到开头那个问题：真正稀缺的是什么。答案是能一条龙批量造出环境、任务、判定和筛选的流水线，并非更多的操作截图。WildAWM 值得跟的地方就在这里：它把可执行世界、任务验证器和几道筛子串成了一条能扩展的合成路径。",
+              "facts": [
+                "F2",
+                "F6"
+              ],
+              "introduces": [],
+              "recap": true,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "至于它到底有多强，答案不在那一个 60% 里。要看有没有人独立复现，要看验证器判的是不是任务真正要求的那件事，还要看这套合成世界能不能继续迁移到没见过的任务上。分数是路标，流水线才是路。",
+              "facts": [
+                "F3",
+                "F7"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "targets": {
+        "S3P2": [
+          "【编辑建议，按实际效果取舍】三个筛子连着报名字，密度有点高，想倒回去确认各自分工。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S3P3": [
+          "【编辑建议，按实际效果取舍】论文第 5.2 节、5.3 节这种节号像内部备注，和主线关系弱，容易想划走。；建议：放慢、补一步推理，或换个说法"
+        ]
+      },
+      "prompt_version": 4,
+      "title": "WildAWM：自动判卷才是合成环境的命门",
+      "sections": [
+        {
+          "title": "判卷比点鼠标更难",
+          "paragraphs": [
+            {
+              "text": "训练电脑操作 Agent，最麻烦的一步往往不是让它点鼠标、敲命令，而是事后判断：这件事到底做完了没有。人可以盯着屏幕确认，成千上万个训练任务却没法靠人挨个看。WildAWM 想解决的就是这一步。它不只造一个能操作的 PC 世界，还让任务和判卷器一起生成，再筛掉那些看起来通过、其实没判对的样本。",
+              "facts": [
+                "F2",
+                "F6"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "能读能改的共享状态",
+          "paragraphs": [
+            {
+              "text": "先说什么样的环境，才配得上“自动判卷”这四个字。截图和录屏只能看，不能做：画面停在目标页面，不代表真的改了什么，更不代表以后还查得到。WildAWM 造的可执行世界由三类东西组成：文件与命令行、MCP 服务，还有镜像网站。",
+              "facts": [
+                "F1"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "关键在于，这几类东西共享同一套 GUI、MCP 和命令行状态。可以想象这样一个场景：Agent 在浏览器界面里改了一个设置，命令行里再去读，读到的是同一个变化；反过来，从命令行写进去的东西，界面上也会跟着变。状态能被读到、能互相对上，判定才有落脚点。检查器不用去猜屏幕上一堆像素是什么意思，直接去看世界变成了什么样。",
+              "facts": [
+                "F5"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "任务和验证器一起写",
+          "paragraphs": [
+            {
+              "text": "那任务和判卷规则从哪来？这是 WildAWM 和“多造点截图”最不一样的地方：任务不是单独出的，验证器和任务一起生成。验证器要检查的东西也很直接，就是世界状态有没有变成任务要求的样子。换句话说，判卷规则不是等任务造完再从外面补一句“看看这个”，出题的时候规则就在一起写。",
+              "facts": [
+                "F2",
+                "F6"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "假通过从哪里来",
+          "paragraphs": [
+            {
+              "text": "这也正是合成环境最容易出问题的地方：验证器可能只认表面条件。任务说把文件放进某个目录，验证器就只看目录里有没有这个名字；文件内容对不对、是不是绕开界面从别的路子塞进去的，它不管。这样的样本会显示“通过”，但 Agent 没学到任务真正想让它做的事，等于假通过。所以整条流水线必须再加一层筛子，而且筛子不是流程装饰。",
+              "facts": [
+                "F2",
+                "F6"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "三道筛子各防什么",
+          "paragraphs": [
+            {
+              "text": "按论文的描述，筛选分成几道分工不同的关卡。质量门放在两阶段合成流程里，先把不合格的任务和环境挡掉。异构执行检查是换一种执行方式，把同一个任务再走一遍，看结果还成不成立。如果换个路径就过不了，或者结果对不上，说明任务和验证器之间没有锁死，更像在考某条固定路线，而不是考能力。",
+              "facts": [
+                "F2",
+                "F6"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "反事实探针则改变条件，看任务会不会露出破绽。一个只在特定措辞、特定初始状态下才“成立”的任务，本来就该被挑出来。三道关卡防的不是同一件事：质量门筛掉明显不合格的，异构执行检查复核稳定性，反事实探针专门戳穿表面成立的任务。合起来，才是对假通过的一次围堵。",
+              "facts": [
+                "F6"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "341 对与 60% 的边界",
+          "paragraphs": [
+            {
+              "text": "规模上，仓库公开了 341 个环境-任务对，也给了模型链接。成绩方面，作者报告两个 Qwen 模型在八个具名的分布外基准上都有提升；GPT-6-Astra 在论文所述的评测协议下，解决任务的比例是 60%。",
+              "facts": [
+                "F3",
+                "F7",
+                "F8"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "这些数字值得知道，边界同样值得知道：它们都是作者在自己协议下报告的结果，报告里没有记录第三方独立复测。60% 说的是在这套评测协议下、这些任务里的解决比例，不是“真实用户电脑上 60% 的操作都能成”。换一套任务分布、换一种判定口径，这个数就不能直接搬过去用。所以更该追问的，不是分数又高了多少，而是判卷器判的是不是任务真正要求的那件事。",
+              "facts": [
+                "F7"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "命门在判卷质量",
+          "paragraphs": [
+            {
+              "text": "所以 WildAWM 真正值得看的，不是又一个高分模型，而是它把几件事串成了一条可以扩展的合成路径：状态共享、能执行的世界，跟任务一起写出来的验证器，再配上专门拦假通过的筛选。这条路成不成立，不取决于能造出多少环境，而取决于验证器判的是不是任务真正要求的那件事，以及别人能不能复现这套流程。回到开头那个麻烦：造出世界只是第一步，让判卷器不骗人，才是这套流水线要过的关。",
+              "facts": [
+                "F2",
+                "F6",
+                "F7"
+              ],
+              "introduces": [],
+              "recap": false,
+              "citations": [
+                "https://github.com/MSR-Orchard/WildAWM",
+                "https://arxiv.org/html/2610.26828"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "editorial_brief": {
+        "considered": [
+          "按‘环境—任务—验证器—筛选—结果—复现’全面介绍：信息完整，但原稿已经证明会把三道筛子压成名单，还把节号和复现细节带进来，6分钟主线容易散。",
+          "只讲共享状态的可执行世界：机制具体、好懂，但会漏掉 WildAWM 最值得讲的任务与验证器共生成，以及假通过筛选，价值只剩一半。",
+          "从60%和OOD提升切入做可信度审查：有新闻点，但材料只支持‘作者自述、未独立复现’，容易变成打假，讲不清它到底怎么造数据。",
+          "选中‘自动判卷才是命门’：用共享状态解释为什么能判，用任务与验证器共生成解释怎么判，用筛子解释怎么防判错，最后用341和60%划边界；一条因果线，保留原稿真正有价值的发现。"
+        ],
+        "angle": "这期讲 WildAWM 怎么把‘出题’和‘判卷’一起造：共享状态让操作可检查，任务和验证器一起生成，筛选再挡住假通过；自动判卷器是否可靠，才是这套合成流水线的命门。",
+        "viewer_value": "开发者能抓住一个判断合成环境质量的标准：界面像不像不是关键，状态是否共享、验证器是否真的检查任务要求才关键；同时知道60%和OOD提升是作者协议下的自述，不该当成独立复现或真实用户成功率。",
+        "throughline": "先让观众看到截图训练缺的是可执行、可检查的状态；再理解任务和验证器为什么要一起生成；接着明白筛子不是流程装饰，而是防验证器被骗；最后把341对和60%放回作者自述的边界，留下‘判卷质量才是命门’的判断。",
+        "keep": [
+          "共享状态的可执行世界（F1、F5）：解释为什么 WildAWM 能自动判定，而不是停留在看截图；用‘浏览器改设置，命令行读到同一状态’这种具体关系来支撑。",
+          "任务与验证器共同生成（F2、F6）：本期主线核心，说明判卷规则不是事后补的，而是出题时一起写。",
+          "三道筛选的分工（F2、F6）：用‘筛不合格、换路径复核、改条件露馅’讲清各自防什么，替代原稿连报名。",
+          "341对与作者报告结果（F3、F7、F8）：给规模和证据边界，防止把60%当真实成功率或独立复现。",
+          "结尾判断（F2、F6、F7）：把注意力从分数拉回判卷质量和独立复现，与开场‘自动判卷难’呼应。"
+        ],
+        "leave_out": [
+          "论文5.2、5.3节号和消融细节：内部备注感强，原稿已造成划走；对‘判卷器怎么造、怎么筛’不是必需。",
+          "harness 效应假设（F10）：仍是假设，展开容易让观众误以为分数已被证明虚高，且会分散判卷主线。",
+          "Python 3.12、Docker、Node.js 等复现依赖和调用成本（F12、F13）：会把结尾拖进工程清单；只需保留‘独立复现未记录’这一层边界。",
+          "八个基准各自的任务数量、指标类型和逐基准数值：属于清单和附录材料，6分钟口播不展开。",
+          "虚构人格与日期演化（F11）：未核实、无法定位来源，不用。",
+          "发布日期、arXiv 编号、模型链接位置：不服务主线，除非作者需要一句出处。",
+          "真实用户成功率、成本具体数字：报告没有给出，不能编造，也不展开。"
+        ],
+        "facts": [
+          "F1",
+          "F5",
+          "F2",
+          "F6",
+          "F3",
+          "F7",
+          "F8"
+        ],
+        "openings": [
+          "从‘自动出题容易、自动判卷难’切入：一上来给出矛盾，观众会想知道判卷器怎么造、又怎么防它判错。",
+          "从跨入口场景切入：Agent 在浏览器改设置，命令行读到同一状态；画面具体，能直接解释共享状态为什么让自动判定成为可能，但铺垫稍长。",
+          "从60%切入：先给抓眼数字，再转向判卷质量；有新闻性，但容易让整期变成对分数的可信度审查，偏离机制主线。"
+        ],
+        "opening": "训练电脑操作 Agent，最麻烦的一步往往不是让它点鼠标，而是判断它到底有没有把事做完。WildAWM 想解决的就是这一步：它不只造一个能操作的 PC 世界，还让任务和判卷器一起生成，再想办法筛掉那些看起来通过、其实没判对的样本。",
+        "beats": [
+          {
+            "point": "截图和录屏只能看不能做；WildAWM 造的是由文件与命令行、MCP 服务、镜像网站组成、共享同一套状态的可执行 PC 世界，Agent 的操作会真的改变环境。",
+            "facts": [
+              "F1",
+              "F5"
+            ],
+            "connection": "状态能被读到、能对得上，才谈得上自动判定任务有没有完成，所以下一步自然要问：任务和判卷规则从哪来。"
+          },
+          {
+            "point": "任务不是单独出，验证器和任务一起生成；验证器检查的是世界状态有没有变成任务要求的样子。",
+            "facts": [
+              "F2",
+              "F6"
+            ],
+            "connection": "可验证器也可能只认表面条件，合成任务里会混进假通过，所以流水线必须再筛。"
+          },
+          {
+            "point": "筛选各有分工：质量门在两阶段合成中筛掉不合格任务和环境，异构执行检查换一种执行方式复核，反事实探针改变条件看任务会不会露馅。",
+            "facts": [
+              "F2",
+              "F6"
+            ],
+            "connection": "到这里，WildAWM 和‘更多截图’的真正区别才完整：它是一条出题、判卷、筛题连起来的流水线；那公开规模和成绩能说明什么？"
+          },
+          {
+            "point": "仓库公开341个环境-任务对和模型链接；作者报告两个 Qwen 在八个具名 OOD 基准上提升，GPT-6-Astra 在所述协议下解决任务比例60%。这些都是作者协议下的自述，报告未记录第三方独立复测，60%也不等于真实用户电脑上的成功率。",
+            "facts": [
+              "F3",
+              "F7",
+              "F8"
+            ],
+            "connection": "所以更该追问的不是分数多高，而是判卷器判的是不是任务真正要求的那件事，筛子是否真的挡住假通过。"
+          },
+          {
+            "point": "WildAWM 的价值不是又一个高分模型，而是把可执行世界、任务验证器和筛选流程串成可扩展的合成路径；这条路成不成立，取决于验证器质量和独立复现。",
+            "facts": [
+              "F2",
+              "F6",
+              "F7"
+            ],
+            "connection": "回到开头，自动判卷仍是瓶颈：造出世界只是第一步，让判卷器不骗人、让别人也能复现，才是这套流水线要过的关。"
+          }
+        ],
+        "material": "{\"facts\": [{\"id\": \"F1\", \"claim\": \"WildAWM 的可执行世界由文件与命令行（files/CLI）、MCP 服务和镜像网站三类要素组合而成。\", \"confidence\": \"已证实\", \"sources\": [\"https://github.com/MSR-Orchard/WildAWM\"], \"caveat\": \"仓库页面检索于 2026-10-23，属持续更新的一手来源。\", \"derived_from\": [], \"formula\": \"\"}, {\"id\": \"F5\", \"claim\": \"论文描述的可执行 PC 世界共享同一套 GUI/MCP/CLI 状态。\", \"confidence\": \"已证实\", \"sources\": [\"https://arxiv.org/html/2610.26828\"], \"caveat\": \"\", \"derived_from\": [], \"formula\": \"\"}, {\"id\": \"F2\", \"claim\": \"WildAWM 的两阶段合成流程包含任务验证器（task verifiers）和质量门（quality gates）。\", \"confidence\": \"已证实\", \"sources\": [\"https://github.com/MSR-Orchard/WildAWM\"], \"caveat\": \"\", \"derived_from\": [], \"formula\": \"\"}, {\"id\": \"F6\", \"claim\": \"论文描述的方法包括任务与验证器共同合成、异构执行检查和反事实探针；执行检查和反事实检查用于筛选。\", \"confidence\": \"已证实\", \"sources\": [\"https://arxiv.org/html/2610.26828\"], \"caveat\": \"\", \"derived_from\": [], \"formula\": \"\"}, {\"id\": \"F3\", \"claim\": \"WildAWM 官方仓库提供 341 个环境-任务对（environment-task pairs）和模型链接；论文也说明作者发布了这 341 个环境-任务对。\", \"confidence\": \"已证实\", \"sources\": [\"https://github.com/MSR-Orchard/WildAWM\", \"https://arxiv.org/html/2610.26828\"], \"caveat\": \"341 这一数字同时出现在仓库（检索于 2026-10-23）与论文正文中。\", \"derived_from\": [], \"formula\": \"\"}, {\"id\": \"F7\", \"claim\": \"论文作者报告 GPT-6-Astra 在所述评测协议下解决任务的比例为 60%。\", \"confidence\": \"厂商自述\", \"sources\": [\"https://arxiv.org/html/2610.26828\"], \"caveat\": \"这是论文作者在其所述协议下的自述结果，报告未记录第三方独立复测；仓库发布和模型自述不等同于独立复现，也不等于任意真实部署都能复现。\", \"derived_from\": [], \"formula\": \"\"}, {\"id\": \"F8\", \"claim\": \"论文作者报告两个 Qwen 模型在八个具名 OOD（分布外）基准上均取得提升。\", \"confidence\": \"厂商自述\", \"sources\": [\"https://arxiv.org/html/2610.26828\"], \"caveat\": \"属作者自述结果，有具体评测设置；报告未记录独立复现，具体逐基准数值见论文附录的评测协议与基准清单。\", \"derived_from\": [], \"formula\": \"\"}]}"
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "fact",
+            "rule": "D6",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "「千」在标注的事实里找不到",
+            "why": "数字在标注的事实里找不到，可能是编的、算的或记错的",
+            "suggestion": "照事实写，或补标依据的事实",
+            "source": "rule"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "质量门说的“不合格”具体指什么？和后面两道筛子怎么区分？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "60% 是在 WildAWM 的 341 个任务上，还是在八个 OOD 基准上？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“也给了模型链接”像资料清单，对听主线没帮助。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "人可以盯着屏幕确认，成千上万个训练任务却没法靠人挨个看。",
+            "problem": "「成千上万」这个量级没有事实底稿依据：底稿里能查到的规模是 341 个环境-任务对，没有提到任何「千」级的任务量；这句话也没有「比如」「假设」等说明。",
+            "why": "它紧接「WildAWM 想解决的就是这一步」，观众容易把「成千上万」当成 WildAWM 自己的任务规模，从而把规模放大到与 341 对不符的量级。",
+            "suggestion": "删掉这个量级，或改成「成批的训练任务没法靠人挨个看」。",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [
+            {
+              "id": "G1",
+              "question": "为什么 WildAWM 要造可执行世界，而不是只收操作截图？",
+              "expected": "电脑操作任务需要落在可执行、可判定的共享状态上；文件与命令行、MCP 服务和镜像网站在同一个世界里改状态，任务完成才有依据。",
+              "answer": "因为截图和录屏只能看、不能做：画面停在目标页面，不代表真的改了状态，也不代表之后还查得到。可执行世界里的文件与命令行、MCP 服务、镜像网站共享状态，Agent 改了一处，另一路能读到同一个变化，检查器可以直接看世界状态，判卷才有落脚点。",
+              "correct": true,
+              "note": "答出了截图/录屏不能改状态，以及文件与命令行、MCP、镜像网站共享同一世界状态、检查器可直接看状态，判卷才有依据。"
+            },
+            {
+              "id": "G2",
+              "question": "合成流程里最关键的取舍是什么？",
+              "expected": "不是单纯多造任务，而是任务和验证器一起生成，再用质量门、异构执行检查和反事实探针筛掉不合格或碰巧通过的任务或环境；论文还给出了质量门与 RL 消融。",
+              "answer": "最关键的不是多造截图，而是任务和验证器一起生成，让验证器直接检查世界状态有没有变成任务要求；再用质量门、异构执行检查和反事实探针筛掉表面通过、换条路径就不成立、或只在特定条件下才成立的假样本。",
+              "correct": true,
+              "note": "答出了关键取舍是任务与验证器一起生成，并用质量门、异构执行检查、反事实探针筛掉假通过；未提消融只是次要遗漏。"
+            },
+            {
+              "id": "G3",
+              "question": "作者报告的规模和效果该怎么读？",
+              "expected": "341 个环境-任务对和八个外部 OOD 基准说明评测面不小；Qwen 提升与 GPT-6-Astra 的 60% 是作者在所述协议下的自述，报告未记录第三方独立复测，harness 效应仍是假设，复现还要工程环境且成本未量化。",
+              "answer": "341 个环境-任务对是公开规模；两个 Qwen 在八个 OOD 基准上有提升、GPT-6-Astra 60% 都是作者在自己评测协议下报告的结果，没有第三方独立复测。60% 是这套协议和这些任务里的解决比例，不是真实用户电脑上的成功率，也不能换一套任务分布或判定口径直接搬用。",
+              "correct": true,
+              "note": "正确说明 341 对为公开规模、Qwen 与 60% 属作者协议下自述且无第三方复测，并指出 60% 不是真实用户电脑成功率、不能跨口径搬用。"
+            }
+          ],
+          "score": 1.0
+        },
+        "newcomer": {
+          "retell": "我最记得的是，这类训练环境真正的难点不是让 Agent 会点鼠标，而是让判卷器不骗人。WildAWM 把文件与命令行、MCP 和镜像网站做成共享状态的可执行世界，任务和验证器一起生成，再用质量门、异构执行检查和反事实探针拦假通过。341 对环境和作者报告的成绩只是边界内的结果，60% 不是真实电脑成功率；能不能信、能不能复现，最终看验证器判的是不是任务真正要求的事。",
+          "scores": {
+            "hook": 4,
+            "clarity": 4,
+            "pacing": 4,
+            "style": 4
+          },
+          "comments": "值得听：主线抓的是“判卷可信”而不是又一个高分，三道筛子的分工和 60% 的边界都讲清了，目标观众能带走一个判断框架。最值得改的是复现成本只被点名为关键，却没有给可感知的门槛，而这是目标观众明确关心的；另外 S6P1 的“模型链接/八个具名基准”略资料腔，60% 对应哪组任务可以再明确一句。"
+        },
+        "core_message_match": true,
+        "core_message_note": "复述抓住了方案主旨：难点在判卷器不骗人，可执行世界共享状态、任务与验证器共同合成、再用质量门/异构执行检查/反事实探针拦截假通过；341 对与作者报告的 60% 被限定为协议内自述、不等于真实电脑成功率，并落到可复现性——与方案主旨一致。",
+        "model_ran": true,
+        "audits_complete": true,
+        "pending_review": false,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 5,
+          "rule_must": 0,
+          "questions": 2,
+          "lost": 1,
+          "quiz_score": 1.0,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 2
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 3
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            }
+          },
+          "passed": false,
+          "rank": 1
+        }
+      },
+      "reason": "编辑稿未通过事实复核，保留此前已核对的文稿",
+      "problems": []
+    },
+    "problems": [
+      "方案：用了不存在的事实编号：复现依赖的具体版本与安装步骤, 外部基准的逐项结果与评测协议细节",
+      "方案：结构参考：配方建议的角色未单独分节：反方、行动，可合并讲述，不为凑角色新增内容"
+    ],
+    "review_usage": {
+      "requests": 3,
+      "prompt_tokens": 12908,
+      "completion_tokens": 12945,
+      "total_tokens": 25853
+    },
+    "report_path": "state/video_editorial_sources/matrix-recipe-quality-20261023/ai-deep-checked-v2.md",
+    "written_at": "2026-10-23T22:17:59+0800",
+    "cell": {
+      "recipe": "deep_dive",
+      "sha256": "6021b21ee32fad1341764045d92232ad89e94914d6608b7b759f1d7a3fac38ed",
+      "cell": "ai-developer-deep_dive-long",
+      "status": "enabled",
+      "parts": {
+        "domain": {
+          "key": "ai"
+        },
+        "type": {
+          "key": "deep_dive"
+        },
+        "format": {
+          "key": "long"
+        },
+        "audience": {
+          "key": "developer"
+        }
+      },
+      "resolved_sha256": "ef5d76564693ebf3dcabe5f979481d2e6fe5afdf21735f8b379eb6202e61b875",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "developer",
+          "sha256": "64030ba33845739f4a5b73135825fb8bf3cacc84e738458b78917713d35cb563"
+        },
+        "research": {
+          "kind": "research_template",
+          "name": "deep_dive",
+          "sha256": "1c3e184d0fb202a3e237756b3f6e9af81a186f1b89294d1afdc5ee4d395a8b4f"
+        },
+        "output": {
+          "kind": "part",
+          "name": "auto_form",
+          "sha256": "5492378c0be9d048c447a65fcab7b33e890e659c18013470a9269b0021896243"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    }
+  },
+  "created_by": "用户授权·深度样本原文复核重写",
+  "created_at": "2026-10-23T22:17:59+0800"
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AutoVideo NarrationPlan G2 v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "core_message",
+    "necessary_points",
+    "omissions",
+    "ambiguities",
+    "segments"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "core_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "necessary_points": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "point",
+          "source_quotes"
+        ],
+        "properties": {
+          "point": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_quotes": {
+            "type": "array",
+            "minItems": 0,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "omissions": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "ambiguities": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "source_quotes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^n[1-9][0-9]*$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_quotes": {
+            "type": "array",
+            "minItems": 0,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

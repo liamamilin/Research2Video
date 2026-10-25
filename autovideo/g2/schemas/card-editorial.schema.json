@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pages"
+  ],
+  "properties": {
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "points"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "quote": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "segment_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "在这段旁白开始时展开此项，引用该页面 narration 的段 id；省略则从页面开头显示"
+                }
+              }
+            }
+          },
+          "heading": {
+            "type": "string",
+            "minLength": 1
+          },
+          "layout": {
+            "enum": [
+              "focus",
+              "comparison",
+              "steps",
+              "notes"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

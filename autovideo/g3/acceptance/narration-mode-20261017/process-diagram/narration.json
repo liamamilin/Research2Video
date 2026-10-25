@@ -1,0 +1,168 @@
+{
+  "title": "升级 crewAI 并跑一次最小 sweep",
+  "core_message": "升级 crewAI 并跑一次最小 sweep",
+  "necessary_points": [
+    {
+      "id": "c1_p1",
+      "point": "升级 crewAI 之前，先运行 pip show crewai 查看当前版本。",
+      "source_quotes": [
+        "升级 crewAI 之前，先运行 pip show crewai 查看当前版本。"
+      ]
+    },
+    {
+      "id": "c1_p2",
+      "point": "如果版本低于 1.15.27，就执行 pip install --upgrade crewai，然后再运行一次 pip show crewai 确认版本。",
+      "source_quotes": [
+        "如果版本低于 1.15.27，就执行 pip install --upgrade crewai，然后再运行一次 pip show crewai 确认版本。"
+      ]
+    },
+    {
+      "id": "c2_p1",
+      "point": "版本确认后，运行 crewai eval --models 跑一次最小 sweep。",
+      "source_quotes": [
+        "版本确认后，运行 crewai eval --models 跑一次最小 sweep。"
+      ]
+    },
+    {
+      "id": "c2_p2",
+      "point": "命令结束后先看对比表：如果每一行都有 cost 和 time，就把输出原件存档；",
+      "source_quotes": [
+        "命令结束后先看对比表：如果每一行都有 cost 和 time，就把输出原件存档；"
+      ]
+    },
+    {
+      "id": "c2_p3",
+      "point": "如果缺少这两列，就回到第一步检查版本。",
+      "source_quotes": [
+        "如果缺少这两列，就回到第一步检查版本。"
+      ]
+    }
+  ],
+  "omissions": [],
+  "ambiguities": [],
+  "segments": [
+    {
+      "id": "c1_n1",
+      "text": "升级 crewAI 之前，先运行 pip show crewai 查看当前版本。",
+      "chapter_id": "c1",
+      "point_ids": [
+        "c1_p1"
+      ],
+      "source_quotes": [
+        "升级 crewAI 之前，先运行 pip show crewai 查看当前版本。"
+      ]
+    },
+    {
+      "id": "c1_n2",
+      "text": "如果版本低于 1.15.27，就执行 pip install --upgrade crewai，然后再运行一次 pip show crewai 确认版本。",
+      "chapter_id": "c1",
+      "point_ids": [
+        "c1_p2"
+      ],
+      "source_quotes": [
+        "如果版本低于 1.15.27，就执行 pip install --upgrade crewai，然后再运行一次 pip show crewai 确认版本。"
+      ]
+    },
+    {
+      "id": "c2_n1",
+      "text": "版本确认后，运行 crewai eval --models 跑一次最小 sweep。",
+      "chapter_id": "c2",
+      "point_ids": [
+        "c2_p1"
+      ],
+      "source_quotes": [
+        "版本确认后，运行 crewai eval --models 跑一次最小 sweep。"
+      ]
+    },
+    {
+      "id": "c2_n2",
+      "text": "命令结束后先看对比表：如果每一行都有 cost 和 time，就把输出原件存档；",
+      "chapter_id": "c2",
+      "point_ids": [
+        "c2_p2"
+      ],
+      "source_quotes": [
+        "命令结束后先看对比表：如果每一行都有 cost 和 time，就把输出原件存档；"
+      ]
+    },
+    {
+      "id": "c2_n3",
+      "text": "如果缺少这两列，就回到第一步检查版本。",
+      "chapter_id": "c2",
+      "point_ids": [
+        "c2_p3"
+      ],
+      "source_quotes": [
+        "如果缺少这两列，就回到第一步检查版本。"
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "id": "c1",
+      "title": "升级前先确认版本",
+      "question": "升级前先确认版本",
+      "source_unit_ids": [
+        "u1",
+        "u2"
+      ],
+      "points": [
+        {
+          "id": "c1_p1",
+          "point": "升级 crewAI 之前，先运行 pip show crewai 查看当前版本。",
+          "source_quotes": [
+            "升级 crewAI 之前，先运行 pip show crewai 查看当前版本。"
+          ]
+        },
+        {
+          "id": "c1_p2",
+          "point": "如果版本低于 1.15.27，就执行 pip install --upgrade crewai，然后再运行一次 pip show crewai 确认版本。",
+          "source_quotes": [
+            "如果版本低于 1.15.27，就执行 pip install --upgrade crewai，然后再运行一次 pip show crewai 确认版本。"
+          ]
+        }
+      ],
+      "narration_segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ]
+    },
+    {
+      "id": "c2",
+      "title": "跑一次最小 sweep",
+      "question": "跑一次最小 sweep",
+      "source_unit_ids": [
+        "u3",
+        "u4"
+      ],
+      "points": [
+        {
+          "id": "c2_p1",
+          "point": "版本确认后，运行 crewai eval --models 跑一次最小 sweep。",
+          "source_quotes": [
+            "版本确认后，运行 crewai eval --models 跑一次最小 sweep。"
+          ]
+        },
+        {
+          "id": "c2_p2",
+          "point": "命令结束后先看对比表：如果每一行都有 cost 和 time，就把输出原件存档；",
+          "source_quotes": [
+            "命令结束后先看对比表：如果每一行都有 cost 和 time，就把输出原件存档；"
+          ]
+        },
+        {
+          "id": "c2_p3",
+          "point": "如果缺少这两列，就回到第一步检查版本。",
+          "source_quotes": [
+            "如果缺少这两列，就回到第一步检查版本。"
+          ]
+        }
+      ],
+      "narration_segment_ids": [
+        "c2_n1",
+        "c2_n2",
+        "c2_n3"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,472 @@
+{
+  "id": "036881b69af844e78cc8fe36d753affc",
+  "script_id": "5a35f4c46d924cdaa0f14cd387134e59",
+  "version": 3,
+  "status": "COMPLETED",
+  "title": "吉瓦级虚拟电厂，调的是用电",
+  "source_text": "据 Fast Company 报道，谷歌和 Voltus 签订了一份吉瓦级的需求响应协议。这类虚拟电厂调节的是用电需求，并不是按同样规模新建一座发电站。这个规模按可以聚合的用电需求算，和新增发电装机容量的含义不同。\n\n所谓需求侧的虚拟电厂，可以把分散的用电需求组织起来，在电网需要时减少或错开一部分用电。这里的调节能力来自用电方式的变化，和新建一台发电机组增加供给，是两种不同的机制。\n这里的关键区别是：新建电厂增加的是供给，虚拟电厂调整的是需求。一条路是“多发一点”，另一条路是“晚用一点、少用一点”。所以在看这类交易之前，第一件事是分清它动的是哪一头。\n\n规模上，这次不是小打小闹。报道提到，谷歌此前有一份 100 兆瓦的协议，只有这次新协议的十分之一。从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。\n\n那谷歌为什么现在要做这件事？报道把这项安排放在数据中心扩张、电网承压的背景下。数据中心的用电量大，增长又快，电网在高峰时段会更吃紧。对谷歌这样的用电大户来说，问题不只是“去哪儿找更多的电”，还包括“用电能不能变得更听话”。\n\n但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。这两个数字量的不是一回事。吉瓦级说的是可以聚合起来参与调节的需求规模，是合同上的量级；它不是一台能持续满功率运转的机组，也不意味着电网随时要用，就能立刻拿出这么多电。真正能兑现多少，要看电网什么时候需要，以及那时能调动起多少负荷。\n\n这笔交易的看点，是让用电大户也参与需求调节。它能提供多少帮助，需要放到实际运行条件下观察。不能只凭合同规模，就把调节能力当成新增发电量。",
+  "source_sha256": "510e7af757630867b831fceac9757a74f674c544681328b145068835e3fe85c8",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "没有新机组的吉瓦级电厂",
+        "paragraphs": [
+          "据 Fast Company 报道，谷歌和 Voltus 签订了一份吉瓦级的需求响应协议。这类虚拟电厂调节的是用电需求，并不是按同样规模新建一座发电站。这个规模按可以聚合的用电需求算，和新增发电装机容量的含义不同。"
+        ]
+      },
+      {
+        "title": "用电怎么像电厂一样干活",
+        "paragraphs": [
+          "所谓需求侧的虚拟电厂，可以把分散的用电需求组织起来，在电网需要时减少或错开一部分用电。这里的调节能力来自用电方式的变化，和新建一台发电机组增加供给，是两种不同的机制。",
+          "这里的关键区别是：新建电厂增加的是供给，虚拟电厂调整的是需求。一条路是“多发一点”，另一条路是“晚用一点、少用一点”。所以在看这类交易之前，第一件事是分清它动的是哪一头。"
+        ]
+      },
+      {
+        "title": "十分之一的对比",
+        "paragraphs": [
+          "规模上，这次不是小打小闹。报道提到，谷歌此前有一份 100 兆瓦的协议，只有这次新协议的十分之一。从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。"
+        ]
+      },
+      {
+        "title": "为什么是现在",
+        "paragraphs": [
+          "那谷歌为什么现在要做这件事？报道把这项安排放在数据中心扩张、电网承压的背景下。数据中心的用电量大，增长又快，电网在高峰时段会更吃紧。对谷歌这样的用电大户来说，问题不只是“去哪儿找更多的电”，还包括“用电能不能变得更听话”。"
+        ]
+      },
+      {
+        "title": "吉瓦级不等于吉瓦电厂",
+        "paragraphs": [
+          "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。这两个数字量的不是一回事。吉瓦级说的是可以聚合起来参与调节的需求规模，是合同上的量级；它不是一台能持续满功率运转的机组，也不意味着电网随时要用，就能立刻拿出这么多电。真正能兑现多少，要看电网什么时候需要，以及那时能调动起多少负荷。"
+        ]
+      },
+      {
+        "title": "用电大户成了调节资源",
+        "paragraphs": [
+          "这笔交易的看点，是让用电大户也参与需求调节。它能提供多少帮助，需要放到实际运行条件下观察。不能只凭合同规模，就把调节能力当成新增发电量。"
+        ]
+      }
+    ],
+    "duration_mode": "content",
+    "title": "吉瓦级虚拟电厂，调的是用电",
+    "sources": [
+      {
+        "title": "How Google is building a gigawatt-scale…",
+        "url": "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+        "date": "2026-10-22"
+      }
+    ],
+    "production_context": {
+      "content_recipe": {
+        "id": "research:topic_digest",
+        "settings": {
+          "video_form": "information_motion",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+            "focus": ""
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "专题速览",
+            "accent": "#1f7a4d",
+            "outro": {
+              "lines": [
+                "主要来源见简介"
+              ],
+              "seconds": 3
+            },
+            "recipe": "topic_digest",
+            "intro": {
+              "title": "吉瓦级虚拟电厂"
+            }
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      }
+    },
+    "production_mode": "fast",
+    "video_form": "information_cards",
+    "visual_style": "editorial_light",
+    "idempotency_key": "research:036881b69af844e78cc8fe36d753affc"
+  },
+  "autovideo_job_id": "260d5805-4d54-43ad-a065-906920aa3b9c",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "resolved_video_form": "information_cards",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 1150,
+      "sha256": "8806913d57266d55de8d746a04e498c3b02fc9f02912b4bc829145acae8a99e5"
+    },
+    {
+      "name": "caption-alignment.json",
+      "content_type": "application/json",
+      "bytes": 69513,
+      "sha256": "f3a8bf5ab1b068f87bcb7c2ae1ec6159e9234df8a31456f768d44105cb284584"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 3440,
+      "sha256": "e8bb4c9ea92a41e22f5c1d2c97ebbeeddf46c9e83a67143140e4dd5b563a9093"
+    },
+    {
+      "name": "card-editorial.json",
+      "content_type": "application/json",
+      "bytes": 9255,
+      "sha256": "13fbe5d7dabd27645c61f97b56f19999044b8db7cc9cedd49d94186bc6dbf5d0"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 10003,
+      "sha256": "80732f49387e5da54019835272395d4b5e483387094c82dbfb54f8c1158e2f75"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 3440,
+      "sha256": "4379714b07759b857d0c28352f583445424f9b28ff83f2bad5dbd77a849624d9"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 9945,
+      "sha256": "d7c6daabb77502f850a1c36083b4ae5aac24fb03a63ed809a366324c5351dd9e"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 15870798,
+      "sha256": "726ba9a9af4487799a9c7cf9f22d9fc81c129e1eca04f0a9bf2e5e127b9fde97"
+    },
+    {
+      "name": "creative-form-plan.json",
+      "content_type": "application/json",
+      "bytes": 6854,
+      "sha256": "06a10ddfa99edc922c778535d72865c5e69cdb561c63e9bcc27e05b6500f9567"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 966,
+      "sha256": "dd445ac7d717be620bdf61f574a04d48f88cbbbd5a1c41fadccd36e985626384"
+    },
+    {
+      "name": "fast-card-plan.json",
+      "content_type": "application/json",
+      "bytes": 4293,
+      "sha256": "c7c14f06261b438fa954fde7cbca8315d034d43bf854ee3792924d9f89bc33f7"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 424,
+      "sha256": "2e244bd81962a557ed910a735f04450fd83e80e8e95a957c1773c2325df953db"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 4327,
+      "sha256": "71061f8bc2c8582232c213f804b31eb8c0d60c7619732de5c468c0bbb4513d8d"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 63029,
+      "sha256": "82a8d10fbba9857f59882691772b0d294568d29e65f70aa09d540857f53450f2"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 1630,
+      "sha256": "ce0debeeab66d4c002ca7807f1e5d5588258169c372954d4e52a09731c2e877b"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 330,
+      "sha256": "6a717597d1df673d0d25876bc7bea7aef0bdc05f2a0df03c6e8e20b2a7049783"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 23366,
+      "sha256": "1cb7f2e64796110de3c89f5a8a0a585370f4317e970984951978855d39f4fbf2"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 956,
+      "sha256": "53a0f04b53fbd42ca236b543794e67f14dcb4c2491ffa24b6a1bc8c904d161f4"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5592,
+      "sha256": "ad44e49068cf6e107cd2f0efc0b37e12a3f7b73c8a09a7f6198b8510ad187b3c"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2305,
+      "sha256": "3c1bc8c7db3ccf2a7559d979d6a5f986bfe6968b4b416b75da3e0e37fb48207a"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 2027,
+      "sha256": "9f8482f63867295d6d3d93ef86aa7100c3e13483842584d3fbb606dcdb9ed5f6"
+    },
+    {
+      "name": "production-execution.json",
+      "content_type": "application/json",
+      "bytes": 744,
+      "sha256": "00613087664d61d378141391280f0116537e84965fab84877916a890703f1e54"
+    },
+    {
+      "name": "production-plan.json",
+      "content_type": "application/json",
+      "bytes": 6404,
+      "sha256": "4814b7175ff3a9c150a11be0d880c95119b3186e43a4d3b44cd64ecffb181858"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 7143,
+      "sha256": "11f3f5eed900d6992a16a30f24a1fa120d07c67397d81bd1c5505690b86ee29b"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 6823,
+      "sha256": "1cc9146c7efa38cee4e9b7dc664d36ccb138da6a8fe61f1c129b996b858499ca"
+    },
+    {
+      "name": "tts-metrics.json",
+      "content_type": "application/json",
+      "bytes": 870,
+      "sha256": "5ec1824ba812e02ac16c59e745d48f94a35e19130621c716290c19b82805f355"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 18108,
+      "sha256": "51b956ef3d8662f5b719717938f8e41dfb62a07aaa90e46c770391212c5b8979"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 5561733,
+      "sha256": "c9a9e94614c326b3b3be553e4e16248b37ba475f74c2aa337bf6cfb55cf137de"
+    },
+    {
+      "name": "voice-report.json",
+      "content_type": "application/json",
+      "bytes": 6662,
+      "sha256": "6b385533461e167eb4307fe9db6ffc89bb11104afbbffadcfa951fd44822cf3a"
+    }
+  ],
+  "submit_started_at": "2026-10-24T02:34:13.766307+00:00",
+  "submitted_at": "2026-10-24T10:34:13+0800",
+  "completed_at": "2026-10-24T10:55:25+0800",
+  "created_at": "2026-10-24T10:34:13+0800",
+  "updated_at": "2026-10-24T10:55:25+0800",
+  "heartbeat_at": 1792810514.368264,
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-24T02:34:13.742107+00:00",
+    "submit_seconds": 0.016,
+    "poll_seconds": 1271.846,
+    "poll_count": 255,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-24T02:55:21.881+00:00",
+    "completion_observed_at": "2026-10-24T02:55:25.637259+00:00",
+    "download_seconds": 0.069,
+    "artifact_list_seconds": 0.003,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.008,
+        "reused": false,
+        "bytes": 1150
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.009,
+        "reused": false,
+        "bytes": 69513
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 3440
+      },
+      {
+        "name": "card-editorial.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 9255
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 10003
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 3440
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 9945
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.056,
+        "reused": false,
+        "bytes": 15870798
+      },
+      {
+        "name": "creative-form-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 6854
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 966
+      },
+      {
+        "name": "fast-card-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 4293
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 424
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 4327
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 63029
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 1630
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 330
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 23366
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 956
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 5592
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 2305
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 2027
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 744
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 6404
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 7143
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 6823
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 870
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 18108
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.02,
+        "reused": false,
+        "bytes": 5561733
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 6662
+      }
+    ],
+    "process_seconds": 1271.981
+  }
+}

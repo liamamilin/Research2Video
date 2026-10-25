@@ -1,0 +1,11 @@
+{
+  "g3/app.py": "5498e096079e1d883c37d5f2030b5a30a9f2d643dd1f5a74623bba692c8079fc",
+  "g3/store.py": "9056f8bc006abdd197e9c0cc7812447c5b275a90031150cd38f051282c623750",
+  "g3/input_documents.py": "cb68ac482739953192e90a5d7572a0e29d67e9358c952050dff1ba99079d32c9",
+  "g3/requirements.txt": "715f56630c38e90b5d05469abcd9b68cee7234a12831b8b77a6661c96135a2c2",
+  "g3/web/src/main.tsx": "05ee49228a65aaccd7516cc58b05b224fc3edb109caf6d7b6cb2598656d327e0",
+  "g3/web/src/visual.css": "7376b09b61a76dc2ed402ea0363705e5fd82978fc9467be8d40eb048ff1488bb",
+  "g3/web/static/app.js": "081a4c0e2548f57107df003080b17fbba776bab838abea7e1d423f9e6d32dabb",
+  "g3/web/static/app.css": "494faabf7f38fd5913302cc7f60afe5eefe1229825378f48117abf99a695b5e9",
+  "g3/tests/test_input_documents.py": "31d24fc0b69ccf9c52fa445af01af6c55a23fe65b662e9a61047e658933a982a"
+}

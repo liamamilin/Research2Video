@@ -1,0 +1,234 @@
+{
+  "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+  "title": "续航手机最抢眼，五件新品变化速览",
+  "version": 1,
+  "old": {
+    "job_id": "f92604ca-1750-42c5-b664-7015da1e13e3",
+    "title": "续航手机最抢眼，五件新品变化速览",
+    "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+    "voice_id": "voxcpm_anchor",
+    "version_attempt": 1,
+    "started_at": "2026-10-22T13:35:57.976+00:00",
+    "completed_at": "2026-10-22T13:52:07.895+00:00",
+    "execution_seconds": 969.919,
+    "stages": {
+      "BUILD_IR": {
+        "stage": "BUILD_IR",
+        "status": "SUCCEEDED",
+        "duration_seconds": 0.1
+      },
+      "PACKAGE": {
+        "stage": "PACKAGE",
+        "status": "SUCCEEDED",
+        "duration_seconds": 39.71
+      },
+      "PLAN": {
+        "stage": "PLAN",
+        "status": "SUCCEEDED",
+        "duration_seconds": 0.0
+      },
+      "QUALITY_CHECK": {
+        "stage": "QUALITY_CHECK",
+        "status": "SUCCEEDED",
+        "duration_seconds": 12.05
+      },
+      "RENDER": {
+        "stage": "RENDER",
+        "status": "SUCCEEDED",
+        "duration_seconds": 451.16
+      },
+      "SCENE_IMAGES": {
+        "stage": "SCENE_IMAGES",
+        "status": "SKIPPED",
+        "duration_seconds": null
+      },
+      "STORYBOARD": {
+        "stage": "STORYBOARD",
+        "status": "SUCCEEDED",
+        "duration_seconds": 233.77
+      },
+      "VOICE_ALIGN": {
+        "stage": "VOICE_ALIGN",
+        "status": "SUCCEEDED",
+        "duration_seconds": 232.45
+      }
+    },
+    "schedule": null,
+    "resources": {
+      "concurrency": 2,
+      "source": "previous fixed CLI setting"
+    },
+    "content_seconds": 203.9,
+    "package_seconds": 206.9,
+    "scene_count": 29,
+    "audio_pcm_sha256": "2e0f9970b1153f6e8f32cc52a8ec7ad3c40d2f247d479c2b8fd72b21500617b0",
+    "model_requested": [
+      "deepseek-v4.1-flash"
+    ],
+    "model_response": [
+      "deepseek-flash"
+    ],
+    "model_calls": 7,
+    "model_api_seconds": 233.61,
+    "content_qa": "PASS",
+    "package_qa": "PASS",
+    "tts_correlation": 0.9999498061266826,
+    "narration_check": {
+      "status": "PASS",
+      "chapters": 7,
+      "segments": 31,
+      "characters": 1220,
+      "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+      "checked": [
+        "narration-plan",
+        "video-ir",
+        "captions.srt",
+        "chapter-titles"
+      ]
+    },
+    "root": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/f92604ca-1750-42c5-b664-7015da1e13e3/attempts/1/g2-run"
+  },
+  "new": {
+    "job_id": "875a6e0c-3121-478a-89d1-27fa836324fe",
+    "title": "续航手机最抢眼，五件新品变化速览",
+    "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+    "voice_id": "voxcpm_anchor",
+    "version_attempt": 1,
+    "started_at": "2026-10-23T06:44:10.300+00:00",
+    "completed_at": "2026-10-23T06:54:55.418+00:00",
+    "execution_seconds": 645.118,
+    "stages": {
+      "BUILD_IR": {
+        "stage": "BUILD_IR",
+        "status": "SUCCEEDED",
+        "duration_seconds": 0.09
+      },
+      "PACKAGE": {
+        "stage": "PACKAGE",
+        "status": "SUCCEEDED",
+        "duration_seconds": 41.67
+      },
+      "PLAN": {
+        "stage": "PLAN",
+        "status": "SUCCEEDED",
+        "duration_seconds": 0.0
+      },
+      "QUALITY_CHECK": {
+        "stage": "QUALITY_CHECK",
+        "status": "SUCCEEDED",
+        "duration_seconds": 10.51
+      },
+      "RENDER": {
+        "stage": "RENDER",
+        "status": "SUCCEEDED",
+        "duration_seconds": 368.55
+      },
+      "SCENE_IMAGES": {
+        "stage": "SCENE_IMAGES",
+        "status": "SKIPPED",
+        "duration_seconds": null
+      },
+      "STORYBOARD": {
+        "stage": "STORYBOARD",
+        "status": "SUCCEEDED",
+        "duration_seconds": 220.73
+      },
+      "VOICE_ALIGN": {
+        "stage": "VOICE_ALIGN",
+        "status": "SUCCEEDED",
+        "duration_seconds": 223.7
+      }
+    },
+    "schedule": {
+      "mode": "parallel",
+      "content_mode": true,
+      "wall_seconds": 223.697,
+      "overlap_seconds": 220.728,
+      "steps": {
+        "storyboard-plan": {
+          "start_seconds": 0.0,
+          "end_seconds": 220.728,
+          "duration_seconds": 220.728,
+          "status": "SUCCEEDED"
+        },
+        "tts-and-align": {
+          "start_seconds": 0.0,
+          "end_seconds": 223.696,
+          "duration_seconds": 223.696,
+          "status": "SUCCEEDED"
+        }
+      }
+    },
+    "resources": {
+      "concurrency": 1,
+      "requested": "auto",
+      "logical_cpus": 12,
+      "physical_memory_bytes": 51539607552,
+      "video_form": "information_motion",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "crf": 18
+    },
+    "content_seconds": 203.9,
+    "package_seconds": 212.9,
+    "scene_count": 26,
+    "audio_pcm_sha256": "2e0f9970b1153f6e8f32cc52a8ec7ad3c40d2f247d479c2b8fd72b21500617b0",
+    "model_requested": [
+      "deepseek-v4.1-flash"
+    ],
+    "model_response": [
+      "deepseek-flash"
+    ],
+    "model_calls": 8,
+    "model_api_seconds": 220.6,
+    "content_qa": "PASS",
+    "package_qa": "PASS",
+    "tts_correlation": 0.9999498061266826,
+    "narration_check": {
+      "status": "PASS",
+      "chapters": 7,
+      "segments": 31,
+      "characters": 1220,
+      "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+      "checked": [
+        "narration-plan",
+        "video-ir",
+        "captions.srt",
+        "chapter-titles"
+      ]
+    },
+    "root": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/875a6e0c-3121-478a-89d1-27fa836324fe/attempts/1/g2-run"
+  },
+  "saved_seconds": 324.801,
+  "reduction_percent": 33.49,
+  "same_source": true,
+  "identical_measured_pcm": true,
+  "changed_request_fields": [
+    "package",
+    "packaging",
+    "sources"
+  ],
+  "research_end_to_end_seconds": {
+    "old": 972.0,
+    "new": 646.0
+  },
+  "new_render_id": "731409486486403cb6ca46f23f004b64",
+  "video_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/731409486486403cb6ca46f23f004b64/video.mp4",
+  "script_url": "http://127.0.0.1:8775/video/e118dc7db5f34c3ba90af0285b4688f5",
+  "warning_unchanged": [
+    {
+      "text": "Oppo Enco X4 是 Oppo 推出的旗舰降噪耳机，已在国际市场首发。官方标称采用 Dynaudio 调音，Dynaudio 是音频品牌。GSMArena 开箱时看到，包装里有 Enco X4 耳机，以及 S、M、L 3种硅胶耳套。",
+      "citations": [],
+      "evidence": "NEEDS_REVIEW",
+      "note": "去掉了 1 个不在报告可信来源里的引用"
+    },
+    {
+      "text": "开箱能确认包装内容和功能定位，不能确认实际使用表现。材料没有提供降噪、音质或续航数据，所以不能据此判断实际听感和使用时长。",
+      "citations": [],
+      "evidence": "NEEDS_REVIEW",
+      "note": "去掉了 1 个不在报告可信来源里的引用"
+    }
+  ],
+  "interpretation": "Real end-to-end rerun, same approved narration and voice, fresh LLM storyboard. Updated packaging and differing generated scenes mean this is not an isolated renderer A/B test."
+}

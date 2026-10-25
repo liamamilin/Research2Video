@@ -1,0 +1,4 @@
+STEP visual-plan: PASS in 126.13s
+STEP visual-render: PASS in 131.32s
+STEP visual-verify: PASS in 2.65s
+{"status": "PASS", "gate": "VISUAL_NARRATIVE_EXPERIMENT", "real_llm": true, "reused_real_tts": true, "new_tts_calls": 0, "video": {"duration_seconds": 60.437, "frames": 1813, "width": 1920, "height": 1080, "fps": "30/1", "full_decode": "PASS"}, "audio": {"source_wav_sha256": "051061afb2694e955b8bb2e70a49863aa5531d83abb59b917468fcba07cb13ad", "decoded_tts_correlation": 0.9999399678020094, "decoded_audio_identical_to_baseline": true}, "scene_count": 6, "human_authored_storyboard": false, "quality_limit": "Media PASS proves playback and preserved audio. Viewer comprehension and preference need human comparison."}

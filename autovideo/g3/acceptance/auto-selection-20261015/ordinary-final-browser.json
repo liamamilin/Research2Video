@@ -1,0 +1,36 @@
+{
+  "new_page": {
+    "form": "auto",
+    "mode": "content",
+    "maxLength": null,
+    "enabled": true
+  },
+  "forms": [
+    {
+      "value": "auto",
+      "text": "自动选择（推荐）"
+    },
+    {
+      "value": "process_diagram",
+      "text": "流程动态图解"
+    },
+    {
+      "value": "information_motion",
+      "text": "简洁信息动效"
+    }
+  ],
+  "information": {
+    "form": "information_motion",
+    "mode": "content",
+    "enabled": true,
+    "backgroundCheckbox": false
+  },
+  "fixed_mode_switch": "PASS",
+  "content_mode_switch": "PASS",
+  "completed_page": {
+    "chapters": 1,
+    "seek_seconds": 0,
+    "mode_label": true,
+    "information_label": true
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "job_id": "47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e",
+  "title": "普通笔记 · 制作备注整理验证",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "67084b77aa19c4c3741845894e9b694441bd8c1685ed02a7e042e33f367c3dc0",
+  "source_char_count": 146,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zf_xiaoxiao",
+  "created_at": "2026-10-15T07:31:30.172+00:00",
+  "updated_at": "2026-10-15T07:33:19.119+00:00",
+  "version": 11,
+  "operation_type": "generate",
+  "parent_job_id": null,
+  "parent_attempt_no": null,
+  "scene_id": null,
+  "video_form": "auto",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "auto",
+    "selected_form": "information_motion",
+    "recommended_form": "information_motion",
+    "selection_mode": "automatic",
+    "status": "ready",
+    "reason": "材料是一套任务交接的说明清单，重点在目标、背景、完成标准分别包含什么，适合逐条用信息动效呈现，而不是画成有先后依赖的流程图。",
+    "issues": [
+      {
+        "kind": "duplicate",
+        "message": "关于任务交接要讲清楚目标、背景、完成标准的内容重复出现了一次，保留其中一处即可，另一处不重复讲解。",
+        "source_quotes": [
+          "任务交接要讲清楚目标、背景、完成标准。",
+          "任务交接要讲清楚目标、背景、完成标准。"
+        ],
+        "blocking": false
+      },
+      {
+        "kind": "noise",
+        "message": "开头的“沟通笔记，后面要用。”属于整理用途备注，页码“第 1 页 / 共 1 页”属于页面噪声，都不作为讲解内容。",
+        "source_quotes": [
+          "沟通笔记，后面要用。",
+          "第 1 页 / 共 1 页"
+        ],
+        "blocking": false
+      }
+    ],
+    "retained_units": 5,
+    "excluded_units": 3
+  },
+  "resolved_video_form": "information_motion",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "COMPLETED",
+      "started_at": "2026-10-15T07:31:30.894+00:00",
+      "completed_at": "2026-10-15T07:33:19.119+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:31:30.894+00:00",
+          "completed_at": "2026-10-15T07:31:56.592+00:00",
+          "duration_seconds": 14.54,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:31:56.602+00:00",
+          "completed_at": "2026-10-15T07:32:01.226+00:00",
+          "duration_seconds": 4.31,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:32:01.232+00:00",
+          "completed_at": "2026-10-15T07:32:22.614+00:00",
+          "duration_seconds": 21.42,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": "2026-10-15T07:32:22.619+00:00",
+          "completed_at": "2026-10-15T07:32:22.623+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:32:22.625+00:00",
+          "completed_at": "2026-10-15T07:32:22.628+00:00",
+          "duration_seconds": 0.03,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:32:22.630+00:00",
+          "completed_at": "2026-10-15T07:33:17.670+00:00",
+          "duration_seconds": 54.98,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-15T07:33:17.679+00:00",
+          "completed_at": "2026-10-15T07:33:19.119+00:00",
+          "duration_seconds": 1.54,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}

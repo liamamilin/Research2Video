@@ -1,0 +1,1012 @@
+{
+  "library": "autovideo-creative-resources",
+  "version": 5,
+  "provenance": {
+    "taxonomy_version": "1.1.0",
+    "source": "AI创作/tool/creator-studio/sources/recovered-upstream-20261020.json",
+    "source_sha256": "ee823afc61917ad399990532f27096574a5f9667248a5fbd3c381dcb54fb7cc2",
+    "media_scope": "案例展示，不代表新用户内容已具备自动生产能力。"
+  },
+  "forms": [
+    {
+      "id": "F01",
+      "name": "镜头叙事",
+      "group": "场景与人物",
+      "kind": "video",
+      "description": "通过多个场景、景别和动作的衔接讲故事。",
+      "topics": [
+        "故事短片",
+        "情绪叙事"
+      ],
+      "structure": [
+        "建立人物与地点",
+        "近景发现问题",
+        "动作改变局面",
+        "结果回应开头"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F01.mp4",
+        "sha256": "1d2ee8b36abf7bad014a7ebcb27543f74f361f91be06c688bd78f49ed5b2aead",
+        "source": "原创程序绘制动画；非AI生成，非真人拍摄",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F02",
+      "name": "人物口播",
+      "group": "场景与人物",
+      "kind": "video",
+      "description": "一个出镜人物主要对观众讲话。",
+      "topics": [
+        "观点讲解",
+        "人物访谈"
+      ],
+      "structure": [
+        "开场观点",
+        "理由一",
+        "理由二",
+        "一句收束"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。"
+    },
+    {
+      "id": "F03",
+      "name": "对话表演",
+      "group": "场景与人物",
+      "kind": "video",
+      "description": "两个或更多角色互相回应，可正反打或同框。",
+      "topics": [
+        "情景演示",
+        "故事短片"
+      ],
+      "structure": [
+        "同框建立关系",
+        "A提出问题",
+        "B回应并行动",
+        "共同结果"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F03.mp4",
+        "sha256": "4f3b21aacd7c306d08067d6c4f2181f89a08b94e68deceafc962ffc1590a2e7e",
+        "source": "原创自绘双角色无声字幕表演；非真人，无合成配音",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F04",
+      "name": "对象展示",
+      "group": "场景与人物",
+      "kind": "video",
+      "description": "围绕商品、物件、空间或单一主体展示细节与变化。",
+      "topics": [
+        "产品介绍",
+        "对象展示"
+      ],
+      "structure": [
+        "整体轮廓",
+        "一个关键细节",
+        "一次使用或状态变化",
+        "整体回看"
+      ],
+      "availability": "available",
+      "executors": [
+        "object_showcase"
+      ],
+      "capability_note": "已有图片配合主图、细节栏和素材说明展示；支持 1–12 张图片及整体／细节／对比标注。按提交顺序组织，不识别或编造图片事实。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F04.mp4",
+        "sha256": "b9b4c6219499a66f9df137ab8c6e0e518341cf53d5e22d7fba7c726d752d083b",
+        "source": "原创虚构桌灯示意动画；非实物产品拍摄或性能测量",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F05",
+      "name": "角色动画",
+      "group": "动画表现",
+      "kind": "video",
+      "description": "由角色身体、表情或动作推进画面。",
+      "topics": [
+        "故事短片",
+        "角色表达"
+      ],
+      "structure": [
+        "角色准备",
+        "动作发起",
+        "接触与重心变化",
+        "完成后的反应"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F05.mp4",
+        "sha256": "19ae5c5843447323b5ba713389e8e0ee2f91cf5cf9607e3d238874e809a88b1f",
+        "source": "原创程序绘制动画；非AI生成，非真人拍摄",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F06",
+      "name": "动态插画",
+      "group": "动画表现",
+      "kind": "video",
+      "description": "保留插画构图，局部元素轻动，通常不频繁换镜。",
+      "topics": [
+        "情绪短片",
+        "视觉氛围"
+      ],
+      "structure": [
+        "固定背景与相机",
+        "独立局部运动",
+        "前景遮挡与保护区域"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F06.mp4",
+        "sha256": "4253ae9bb27d1eafd8369262f4788a378cf7c837c243bac389e94b1cdb3a90d4",
+        "source": "原创程序自绘分层插画；按既有F06-layered-1六秒/30fps合同补真实图层、遮罩和传统合成示例",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F07",
+      "name": "定格风动画",
+      "group": "动画表现",
+      "kind": "video",
+      "description": "逐帧感、手工材料感和不完全连续的运动。",
+      "topics": [
+        "创意短片",
+        "手工展示"
+      ],
+      "structure": [
+        "材料与场景建立",
+        "离散步进",
+        "一次停顿或转向",
+        "落位"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F07.mp4",
+        "sha256": "07a4dc15013efee3d25c458948ab252b9fb5efc49a88eb4f4fd43038c79bb8d0",
+        "source": "原创程序模拟8姿态/秒剪纸定格风；非相机逐格实拍",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F08",
+      "name": "动态排版",
+      "group": "动态图形",
+      "kind": "video",
+      "description": "文字是主视觉，通过出现、缩放、位移或字形重排表达节奏。",
+      "topics": [
+        "AI快讯",
+        "原理科普"
+      ],
+      "structure": [
+        "可选标题",
+        "按原文组织阅读片段",
+        "可选收尾"
+      ],
+      "availability": "available",
+      "executors": [
+        "kinetic_typography"
+      ],
+      "capability_note": "跟随真实配音逐句排版，文字分组进入；支持完整材料、逐字讲稿和现有包装。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/f08Video.mp4",
+        "sha256": "b7682e2626fc028c94f564fa244555d8b6fbf22ebcd52e4e4d677128f1b35085",
+        "source": "既有F08历史无声程序排版成片，未重渲染",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F09",
+      "name": "图形动画",
+      "group": "动态图形",
+      "kind": "video",
+      "description": "形状、图标和视觉元素的运动、变形、组合。",
+      "topics": [
+        "原理科普"
+      ],
+      "structure": [
+        "一个基础形状",
+        "分裂与展开",
+        "组合成新形",
+        "形状落定"
+      ],
+      "availability": "partial",
+      "executors": [
+        "information_motion"
+      ],
+      "capability_note": "现有简洁信息动效支持部分文字与图形表达，专用形式模板尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F09.mp4",
+        "sha256": "7fbfd6c8123a78d6ca1a99cb6241458fb9eebeb63626ef805f42640778ee4635",
+        "source": "原创程序绘制动画；非AI生成，非真人拍摄",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F10",
+      "name": "信息图动画（图表／流程）",
+      "group": "动态图形",
+      "kind": "video",
+      "description": "图表、数字、流程随时间改变，信息关系必须准确。",
+      "topics": [
+        "AI快讯",
+        "操作教程",
+        "原理科普"
+      ],
+      "structure": [
+        "问题/目标",
+        "步骤一",
+        "步骤二",
+        "步骤三",
+        "总结"
+      ],
+      "availability": "available",
+      "executors": [
+        "process_diagram",
+        "information_motion"
+      ],
+      "capability_note": "可用现有流程动态图解或简洁信息动效制作；具体图表与动作受注册组件范围约束。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/batch1/F10.mp4",
+        "sha256": "1947a05e999a4dd90c880483040ba4430d43fd0ca3213cd88f1e29f1ff38fa5a",
+        "source": "原创程序图形动画",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F11",
+      "name": "抽象视觉动画",
+      "group": "动态图形",
+      "kind": "video",
+      "description": "光、色、纹理、粒子等非具象变化是主视觉。",
+      "topics": [
+        "视觉氛围",
+        "音乐视觉"
+      ],
+      "structure": [
+        "低密度进入",
+        "色线扩张",
+        "粒子流动",
+        "密度回收"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F11.mp4",
+        "sha256": "4e8f57d44797d4271ff0451ec78ece7e0b8dc02e1a1955e869d1ce4e5767fe7f",
+        "source": "原创程序绘制动画；非AI生成，非真人拍摄",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F12",
+      "name": "图片轮播",
+      "group": "图像与版面",
+      "kind": "video",
+      "description": "图片按顺序切换、转场或平移缩放，图片仍是主要单位。",
+      "topics": [
+        "旅行记录",
+        "作品展示"
+      ],
+      "structure": [
+        "第一张建立主题",
+        "第二张补充细节",
+        "第三张收束",
+        "末图停留"
+      ],
+      "availability": "available",
+      "executors": [
+        "image_slideshow"
+      ],
+      "capability_note": "上传 1–12 张图片按顺序轮播，或通过本机 Draw Things 自动生成 3 张概念插画；配音字幕同步，图片不作为事实证据。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F12.mp4",
+        "sha256": "b3b02ad8aa85ffa30719a83876547c305b408be18311b18c81ba9a9f235abe4f",
+        "source": "三张原创程序绘制静态插画轮播；非摄影作品",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F13",
+      "name": "动态拼贴",
+      "group": "图像与版面",
+      "kind": "video",
+      "description": "照片、剪纸、纹理、文字等多层素材在同一版面重组。",
+      "topics": [
+        "活动宣传",
+        "情绪短片"
+      ],
+      "structure": [
+        "底纸与主图",
+        "第二材料叠入",
+        "标签与剪纸重排",
+        "整版落定"
+      ],
+      "availability": "available",
+      "executors": [
+        "dynamic_collage"
+      ],
+      "capability_note": "将已有图片与实际旁白要点组合成多层版面；支持 1–12 张图片、图片说明与逐句配音，不要求录屏或拍摄。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F13.mp4",
+        "sha256": "22f364cccd3950a4b9494bfcffb45d2280845f3312e5c0b52a6c982b90a4ea0b",
+        "source": "原创程序绘制多层纸纹/剪纸/小图拼贴；无外部照片",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F14",
+      "name": "分镜漫画",
+      "group": "图像与版面",
+      "kind": "video",
+      "description": "以格、页、画框为单位推进叙事，局部动作/镜头移动辅助。",
+      "topics": [
+        "故事短片",
+        "情景科普"
+      ],
+      "structure": [
+        "第一格设问",
+        "第二格尝试",
+        "第三格转折",
+        "整页回看"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F14.mp4",
+        "sha256": "0e10cbad24e04e743f068fb13344a5a124c0b4d55671779138cb0f7fa2cf7fae",
+        "source": "原创程序绘制动画；非AI生成，非真人拍摄",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F15",
+      "name": "界面演示",
+      "group": "屏幕与界面",
+      "kind": "video",
+      "description": "界面操作、光标、缩放和高亮构成主要画面。",
+      "topics": [
+        "操作教程"
+      ],
+      "structure": [
+        "目标与起始状态",
+        "动作一",
+        "动作二",
+        "动作三",
+        "结果回看"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/batch1/F15.mp4",
+        "sha256": "44859a70c4315f2c29146b68040053b1ad79c4a04910aa217f8aa70ae9f8b298",
+        "source": "原创虚构界面动画；不是实际产品录屏或已实现App",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F16",
+      "name": "聊天对话体",
+      "group": "屏幕与界面",
+      "kind": "video",
+      "description": "消息气泡、输入状态、头像和回复节奏承载故事。",
+      "topics": [
+        "对话故事",
+        "情景演示"
+      ],
+      "structure": [
+        "一条询问",
+        "输入停顿",
+        "一次回应",
+        "补充与收束"
+      ],
+      "availability": "available",
+      "executors": [
+        "chat_dialogue"
+      ],
+      "capability_note": "按章节问题和实际讲稿自动呈现问答；保留显式说话人标记。当前统一旁白配音，画面注明演绎对话。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F16.mp4",
+        "sha256": "07654680296a8cc285f06551e2a8090f50e2d1de8bdaac203417d4bb83bba171",
+        "source": "原创程序绘制动画；非AI生成，非真人拍摄",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "F17",
+      "name": "镜头混剪",
+      "group": "场景与人物",
+      "kind": "video",
+      "description": "以已有或生成的多个镜头按节奏、情绪或视觉关系剪接，不要求构成完整故事。",
+      "topics": [
+        "活动回顾",
+        "情绪短片"
+      ],
+      "structure": [
+        "色彩建立",
+        "同向运动连接",
+        "形状匹配",
+        "节奏加密",
+        "色彩回声",
+        "留白收尾"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "分类与结构参考已收录，自动制作尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/video-complete/F17.mp4",
+        "sha256": "686786450997b7cac70561e8b76910ab068da444dab74f3a57145d1bdfef4760",
+        "source": "三个原创动画源镜头的六段混剪；保留源片与EDL，无音乐同步声明",
+        "kind": "video",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "MF01",
+      "name": "独唱",
+      "group": "歌曲与声乐",
+      "kind": "music",
+      "description": "一个主要演唱声音，可以清唱，也可以有伴奏。",
+      "topics": [
+        "主题歌曲",
+        "情绪叙事"
+      ],
+      "structure": [
+        "歌词与段落",
+        "人声与编曲意图",
+        "演唱及逐字听审"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "保留形式与历史案例参考；中文歌曲不纳入接入计划，近期制作以无词配乐为主。",
+      "reference_only": true
+    },
+    {
+      "id": "MF02",
+      "name": "对唱/合唱",
+      "group": "歌曲与声乐",
+      "kind": "music",
+      "description": "两个或更多声音轮流唱，或一起唱。",
+      "topics": [
+        "活动主题",
+        "多角色表达"
+      ],
+      "structure": [
+        "声音A提出",
+        "声音B回应",
+        "A/B或两组一起收束"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "保留形式与历史案例参考；中文歌曲不纳入接入计划，近期制作以无词配乐为主。",
+      "reference_only": true
+    },
+    {
+      "id": "MF03",
+      "name": "说唱",
+      "group": "歌曲与声乐",
+      "kind": "music",
+      "description": "词句跟随节拍进行节奏化表达。",
+      "topics": [
+        "节奏叙事",
+        "音乐短视频"
+      ],
+      "structure": [
+        "第一句提出画面",
+        "第二句延伸",
+        "第三句转向",
+        "第四句落稳"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "保留形式与历史案例参考；中文歌曲不纳入接入计划，近期制作以无词配乐为主。",
+      "reference_only": true
+    },
+    {
+      "id": "MF04",
+      "name": "无词人声",
+      "group": "歌曲与声乐",
+      "kind": "music",
+      "description": "用哼唱、元音等声音表达旋律或和声，不依赖完整歌词。",
+      "topics": [
+        "视觉氛围",
+        "情绪短片"
+      ],
+      "structure": [
+        "准备与进入",
+        "无词旋律弧线",
+        "一次轻微变化",
+        "放松结束"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "可查看音乐形式与案例，或导入此类音乐用于背景配乐；尚未提供这类内置素材和独立音乐生成。"
+    },
+    {
+      "id": "MF05",
+      "name": "单件独奏",
+      "group": "器乐",
+      "kind": "music",
+      "description": "以一种乐器的演奏为主体。",
+      "topics": [
+        "对象展示",
+        "情绪短片"
+      ],
+      "structure": [
+        "动机出现",
+        "少量发展",
+        "自然结束"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "可查看音乐形式与案例，或导入此类音乐用于背景配乐；尚未提供这类内置素材和独立音乐生成。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/batch1/MF05.wav",
+        "sha256": "ee0921fe3991baf28fcca5db1ce118fffdfd98d64821279fda77f79ef9e22cc1",
+        "source": "合成拨弦音色示范；非真实木吉他演奏。96BPM/C大调仅用于这个原创示例。",
+        "kind": "music",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "MF06",
+      "name": "多件合奏",
+      "group": "器乐",
+      "kind": "music",
+      "description": "多种乐器互相配合完成音乐。",
+      "topics": [
+        "故事短片",
+        "场景配乐"
+      ],
+      "structure": [
+        "伴奏声部先建立落点",
+        "主旋律进入并与伴奏错开",
+        "两声部共同收束"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "可查看音乐形式与案例，或导入此类音乐用于背景配乐；尚未提供这类内置素材和独立音乐生成。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/music-complete/MF06.wav",
+        "sha256": "cf64545c1e37d7de85974272eb5d7f3f08effce6aa7e6292380a9e9c574296a6",
+        "source": "原创程序合成双声部合奏示范（拨弦与簧管风格音色），非真实乐器录音、非模型生成。",
+        "kind": "music",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "MF07",
+      "name": "电子编排",
+      "group": "器乐",
+      "kind": "music",
+      "description": "以合成器、电子节拍等声音组合出完整音乐。",
+      "topics": [
+        "科技主题",
+        "节奏短片"
+      ],
+      "structure": [
+        "短开场",
+        "音乐动机与适度发展",
+        "自然收尾"
+      ],
+      "availability": "partial",
+      "executors": [],
+      "capability_note": "已接入 ACE-Step 本机无词配乐生成与入库，支持 10–30 秒；可搭配已有视频形式，听感需试听确认。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/instrumentalAudio.wav",
+        "sha256": "05455d95664d5091324bb4d87e5fd88264bf18ff5799cf57338717dd54cf446e",
+        "source": "既有B02-c1历史音频；来源记录原样保留，本轮未重做、未新调用模型，7/7额度不恢复",
+        "kind": "music",
+        "review": "人工观看／听审待完成"
+      },
+      "generation_styles": [
+        "ambient",
+        "piano",
+        "electronic"
+      ]
+    },
+    {
+      "id": "MF08",
+      "name": "持续铺底",
+      "group": "氛围音乐与音景",
+      "kind": "music",
+      "description": "让一层连贯声音持续存在，不突出频繁的段落转折。",
+      "topics": [
+        "原理科普",
+        "操作教程"
+      ],
+      "structure": [
+        "平滑进入",
+        "同一层音色持续保持",
+        "平滑退出"
+      ],
+      "availability": "partial",
+      "executors": [],
+      "capability_note": "已接入本机音乐素材、试听与背景配乐混音；保留原示例来源，独立音乐生成尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/music-complete/MF08.wav",
+        "sha256": "95802c0d6ab3f57601a42916bf66dd911085dc71e1a96fedc642954dcc4dd42e",
+        "source": "原创程序合成单层和声铺底，非真实环境录音、非模型生成；本例不声明可无缝循环。",
+        "kind": "music",
+        "review": "人工观看／听审待完成"
+      },
+      "music_assets": [
+        "ambient_pad"
+      ]
+    },
+    {
+      "id": "MF09",
+      "name": "渐变层叠",
+      "group": "氛围音乐与音景",
+      "kind": "music",
+      "description": "声音一层层加入、退出或缓慢改变。",
+      "topics": [
+        "过程推进",
+        "情绪递进"
+      ],
+      "structure": [
+        "底层独立出现",
+        "第二层进入",
+        "第三层加入形成最厚处",
+        "上层退出并留下底层收束"
+      ],
+      "availability": "partial",
+      "executors": [],
+      "capability_note": "已接入本机音乐素材、试听与背景配乐混音；保留原示例来源，独立音乐生成尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/music-complete/MF09.wav",
+        "sha256": "27ca6b6733f72f8e745aa226b09b64b57df26145739b2338d64fb5af4bddd02f",
+        "source": "原创程序合成三层渐变音景，非真实乐器录音、非模型生成。",
+        "kind": "music",
+        "review": "人工观看／听审待完成"
+      },
+      "music_assets": [
+        "layered_space"
+      ]
+    },
+    {
+      "id": "MF10",
+      "name": "环境声与音乐融合",
+      "group": "氛围音乐与音景",
+      "kind": "music",
+      "description": "鸟声、雨声等环境声音成为音乐的一部分。",
+      "topics": [
+        "自然主题",
+        "场景氛围"
+      ],
+      "structure": [
+        "环境先出现",
+        "音乐在环境声间进入",
+        "二者交替留白",
+        "音乐与环境一起退去"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "可查看音乐形式与案例，或导入此类音乐用于背景配乐；尚未提供这类内置素材和独立音乐生成。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/music-complete/MF10.wav",
+        "sha256": "37b4b4de277e3923ca71d57b76650e60307728b21451f870cc555eac3af56cbc",
+        "source": "原创程序合成雨声效果与钟音混音；雨声不是现场录制，钟音不是实奏，均非模型生成。",
+        "kind": "music",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "MF11",
+      "name": "音乐短句",
+      "group": "短音乐素材",
+      "kind": "music",
+      "description": "一小段可辨认的旋律或乐器表达。",
+      "topics": [
+        "AI快讯"
+      ],
+      "structure": [
+        "短动机",
+        "一次回应或变化",
+        "明确落点与尾音"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "可查看音乐形式与案例，或导入此类音乐用于背景配乐；尚未提供这类内置素材和独立音乐生成。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/music-complete/MF11.wav",
+        "sha256": "bd090bb88393112823264be7fdd985069de06cf1ed8aee034a1fcdeab33872ca",
+        "source": "原创程序合成钟琴风格音乐短句，非真实钟琴演奏、非模型生成。",
+        "kind": "music",
+        "review": "人工观看／听审待完成"
+      }
+    },
+    {
+      "id": "MF12",
+      "name": "节奏/伴奏循环",
+      "group": "短音乐素材",
+      "kind": "music",
+      "description": "一小段节奏或伴奏可以接着重复播放。",
+      "topics": [
+        "节奏短片",
+        "段落循环"
+      ],
+      "structure": [],
+      "availability": "partial",
+      "executors": [],
+      "capability_note": "已接入本机音乐素材、试听与背景配乐混音；保留原示例来源，独立音乐生成尚未接入。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/batch1/MF12.wav",
+        "sha256": "cceba9b40d2b86af433a7db7820b01d0384c395c331f004e94cf06b535825606",
+        "source": "原创程序合成鼓循环；无旋律、无演唱，非真实鼓手录音。",
+        "kind": "music",
+        "review": "人工观看／听审待完成"
+      },
+      "music_assets": [
+        "pulse_loop"
+      ]
+    },
+    {
+      "id": "MF13",
+      "name": "人声/和声片段",
+      "group": "短音乐素材",
+      "kind": "music",
+      "description": "可加入其他音乐中的一段唱句、哼唱或和声。",
+      "topics": [
+        "声乐编排",
+        "短音乐素材"
+      ],
+      "structure": [
+        "同时进入",
+        "和弦换位/更替",
+        "回到落点",
+        "留尾音"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "可查看音乐形式与案例，或导入此类音乐用于背景配乐；尚未提供这类内置素材和独立音乐生成。"
+    },
+    {
+      "id": "MF14",
+      "name": "音乐转场",
+      "group": "短音乐素材",
+      "kind": "music",
+      "description": "用上扬、下落、重音或收尾把两个段落接起来。",
+      "topics": [
+        "AI快讯"
+      ],
+      "structure": [
+        "转场前的上下文",
+        "短暂蓄势",
+        "明确切换落点",
+        "转场后与自然尾部"
+      ],
+      "availability": "planned",
+      "executors": [],
+      "capability_note": "可查看音乐形式与案例，或导入此类音乐用于背景配乐；尚未提供这类内置素材和独立音乐生成。",
+      "example": {
+        "relative_path": "tool/creator-studio/assets/music-complete/MF14.wav",
+        "sha256": "d3246645818c3b3a76781e07bddccc131c7361781d484ae998fda7d4ef9a300b",
+        "source": "原创程序合成音乐转场及前后文，非真实乐器录音、非模型生成；切换落点为5秒。",
+        "kind": "music",
+        "review": "人工观看／听审待完成"
+      }
+    }
+  ],
+  "recipes": [
+    {
+      "version": 5,
+      "id": "ai_news",
+      "name": "AI 快讯",
+      "description": "突出新变化、核心数字与来源，适合产品更新和行业动态。",
+      "topics": [
+        "AI产品更新",
+        "行业动态",
+        "新闻简报"
+      ],
+      "recommended_forms": [
+        "F08",
+        "F10",
+        "F12",
+        "F04",
+        "F13"
+      ],
+      "defaults": {
+        "video_form": "kinetic_typography",
+        "duration_mode": "content",
+        "creative_intent": {
+          "audience": "关注 AI 的普通读者",
+          "purpose": "讲清新变化、影响与来源",
+          "tone": "简洁、客观",
+          "focus": "区分已知事实与尚未确认的信息，不补充材料之外的结论"
+        },
+        "packaging": {
+          "preset": "common",
+          "label": "AI快讯",
+          "intro": {
+            "seconds": 1.0
+          },
+          "outro": {
+            "seconds": 1.5
+          },
+          "source_card": {
+            "enabled": true
+          },
+          "sound": {
+            "enabled": true
+          }
+        },
+        "background_music": {
+          "enabled": false,
+          "asset_id": "layered_space",
+          "level_db": -18,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        }
+      },
+      "music": {
+        "mode": "optional",
+        "suggested_forms": [
+          "MF09"
+        ],
+        "asset_id": "layered_space",
+        "description": "可开启渐进音景，保持新闻旁白清楚；片头片尾仍用原提示音。 可在资源库选择已生成的音乐搭配本次配方。",
+        "generation_style": "electronic"
+      },
+      "material_guidance": "有图片可选动态拼贴；有对象整体、细节或对比图片可选对象展示。纯文稿沿用原形式。"
+    },
+    {
+      "version": 5,
+      "id": "how_to",
+      "name": "操作教程",
+      "description": "按操作顺序解释步骤、分支和注意事项，适合使用指南。",
+      "topics": [
+        "操作指南",
+        "使用教程",
+        "工作流程"
+      ],
+      "recommended_forms": [
+        "F10",
+        "F12",
+        "F16",
+        "F04",
+        "F13"
+      ],
+      "defaults": {
+        "video_form": "process_diagram",
+        "duration_mode": "content",
+        "creative_intent": {
+          "audience": "第一次接触该操作的使用者",
+          "purpose": "讲清操作顺序、条件与注意事项",
+          "tone": "清晰、直接",
+          "focus": "仅使用素材中已有的步骤、分支与结果，不编造界面或操作"
+        },
+        "packaging": {
+          "preset": "common",
+          "label": "操作教程",
+          "intro": {
+            "enabled": false
+          },
+          "outro": {
+            "seconds": 1.5
+          },
+          "sound": {
+            "enabled": false
+          }
+        },
+        "background_music": {
+          "enabled": false,
+          "asset_id": "ambient_pad",
+          "level_db": -18,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        }
+      },
+      "music": {
+        "mode": "optional",
+        "suggested_forms": [
+          "MF08"
+        ],
+        "asset_id": "ambient_pad",
+        "description": "默认优先操作旁白，可开启轻柔铺底并自动压低配乐。 可在资源库选择已生成的音乐搭配本次配方。",
+        "generation_style": "piano"
+      },
+      "material_guidance": "有图片可选动态拼贴；有对象整体、细节或对比图片可选对象展示。纯文稿沿用原形式。"
+    },
+    {
+      "version": 5,
+      "id": "science_explainer",
+      "name": "原理科普",
+      "description": "解释概念、因果与对比，根据材料选择图解或信息动效。",
+      "topics": [
+        "概念解释",
+        "原理说明",
+        "知识科普"
+      ],
+      "recommended_forms": [
+        "F09",
+        "F10",
+        "F16",
+        "F12",
+        "F04",
+        "F13"
+      ],
+      "defaults": {
+        "video_form": "auto",
+        "duration_mode": "content",
+        "creative_intent": {
+          "audience": "没有相关专业背景的普通读者",
+          "purpose": "讲清概念、关系与发生变化的原因",
+          "tone": "通俗、准确",
+          "focus": "区分概念示意与事实证据，保留条件、限制与例外"
+        },
+        "packaging": {
+          "preset": "common",
+          "label": "原理科普",
+          "intro": {
+            "seconds": 1.5
+          },
+          "outro": {
+            "seconds": 2.0
+          },
+          "source_card": {
+            "enabled": true
+          },
+          "sound": {
+            "enabled": false
+          }
+        },
+        "background_music": {
+          "enabled": false,
+          "asset_id": "ambient_pad",
+          "level_db": -18,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        }
+      },
+      "music": {
+        "mode": "optional",
+        "suggested_forms": [
+          "MF08"
+        ],
+        "asset_id": "ambient_pad",
+        "description": "可开启轻柔和声铺底，讲解时自动压低，保留条件与例外的可听性。 可在资源库选择已生成的音乐搭配本次配方。",
+        "generation_style": "ambient"
+      },
+      "material_guidance": "有图片可选动态拼贴；有对象整体、细节或对比图片可选对象展示。纯文稿沿用原形式。"
+    }
+  ]
+}

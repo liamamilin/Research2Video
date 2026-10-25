@@ -1,0 +1,1 @@
+{"stage": "chapter-c2-diagram", "attempt": 1, "error_code": "DIAGRAM_TECHNICAL_TEXT", "error": "DIAGRAM_TECHNICAL_TEXT: c2_sweep_flow 的画面文字 'cost/time' 不是旁白或素材中的原样写法；命令、参数、代码、文件名和版本号须逐字照抄，例如 --models 不能写成 –models 或 -models", "retry_limit": 3}

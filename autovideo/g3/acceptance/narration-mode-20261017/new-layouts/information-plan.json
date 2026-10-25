@@ -1,0 +1,1700 @@
+{
+  "scenes": [
+    {
+      "id": "c1_s1",
+      "component": "title_card",
+      "props": {
+        "title": "假设你有个每晚跑的脚本",
+        "subtitle": "系统提示第一行是当前时间"
+      },
+      "narration_segment_ids": [
+        "c1_n1"
+      ],
+      "headline": "假设你有个每晚跑的脚本",
+      "source_quotes": [
+        "假设你有个每晚跑的脚本，系统提示第一行是当前时间。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n1",
+          "quote": "假设你有个每晚跑的脚本"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c1_n1",
+          "quote": "系统提示第一行是当前时间"
+        }
+      ]
+    },
+    {
+      "id": "c1_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "同一份开头 2 万 token，跑 100 次",
+        "lines": [
+          "输入价：Opus 5.5 每百万 token 4 美元",
+          "2 万 token：8 美分"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n2",
+        "c1_n3",
+        "c1_n4"
+      ],
+      "headline": "同一份开头 2 万 token，跑 100 次",
+      "source_quotes": [
+        "同一份开头 2 万 token，跑 100 次。",
+        "Opus 5.5 输入价每百万 token 4 美元。",
+        "2 万 token 就是 8 美分。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n2",
+          "quote": "同一份开头 2 万 token，跑 100 次"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c1_n3",
+          "quote": "Opus 5.5 输入价每百万 token 4 美元"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c1_n4",
+          "quote": "2 万 token 就是 8 美分"
+        }
+      ]
+    },
+    {
+      "id": "c1_s3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "开头每次变，就得每次重存",
+        "lines": [
+          "计费：按输入价的 1.25 倍收",
+          "单次：10 美分",
+          "100 次：10 美元"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n5",
+        "c1_n6",
+        "c1_n7"
+      ],
+      "headline": "开头每次变，就得每次重存",
+      "source_quotes": [
+        "可开头每次变，就得每次重存，按输入价的 1.25 倍收。",
+        "一次 10 美分。",
+        "100 次就是 10 美元。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n5",
+          "quote": "可开头每次变，就得每次重存"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c1_n5",
+          "quote": "按输入价的 1.25 倍收"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c1_n6",
+          "quote": "一次 10 美分"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c1_n7",
+          "quote": "100 次就是 10 美元"
+        }
+      ]
+    },
+    {
+      "id": "c1_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "开头不改呢？",
+        "lines": [
+          "第一次：10 美分",
+          "后面 99 次：付原价百分之五，每次 0.4 美分",
+          "加起来：约半美元",
+          "差的就是那一行时间戳"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n8",
+        "c1_n9",
+        "c1_n10",
+        "c1_n11",
+        "c1_n12"
+      ],
+      "headline": "开头不改呢？",
+      "source_quotes": [
+        "开头不改呢？",
+        "只有第一次 10 美分。",
+        "后面 99 次付原价的百分之五，每次 0.4 美分。",
+        "加起来约半美元。",
+        "差的就是那一行时间戳。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n8",
+          "quote": "开头不改呢？"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c1_n9",
+          "quote": "只有第一次 10 美分"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c1_n10",
+          "quote": "后面 99 次付原价的百分之五"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c1_n11",
+          "quote": "加起来约半美元"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c1_n12",
+          "quote": "差的就是那一行时间戳"
+        }
+      ]
+    },
+    {
+      "id": "c1_s5",
+      "component": "concept_reveal",
+      "props": {
+        "title": "先把结论放这儿",
+        "lines": [
+          "前提：模型被任务锁死，你换不了更便宜的小模型",
+          "顺序：先稳住请求开头，再压缩提示词，最后才谈换模型"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n13",
+        "c1_n14",
+        "c1_n15"
+      ],
+      "headline": "先把结论放这儿",
+      "source_quotes": [
+        "先把结论放这儿。",
+        "要是模型被任务锁死了，也就是你换不了更便宜的小模型。",
+        "那顺序是：先稳住请求开头，再压缩提示词，最后才谈换模型。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n13",
+          "quote": "先把结论放这儿"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c1_n14",
+          "quote": "要是模型被任务锁死了"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c1_n15",
+          "quote": "那顺序是：先稳住请求开头"
+        }
+      ]
+    },
+    {
+      "id": "c1_s6",
+      "component": "concept_reveal",
+      "props": {
+        "title": "提示缓存：把开头那段的处理结果存下来",
+        "lines": [
+          "复用：下次开头一样就直接复用",
+          "计费：按更便宜的价计费",
+          "匹配：从第一个字节起一字不差"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n16",
+        "c1_n17",
+        "c1_n18"
+      ],
+      "headline": "提示缓存：把开头那段的处理结果存下来",
+      "source_quotes": [
+        "这里的提示缓存，就是把开头那段的处理结果存下来。",
+        "下次开头一样就直接复用，按更便宜的价计费。",
+        "它认的不是意思差不多，是从第一个字节起一字不差。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n16",
+          "quote": "这里的提示缓存，就是把开头那段的处理结果存下来"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c1_n17",
+          "quote": "下次开头一样就直接复用"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c1_n17",
+          "quote": "按更便宜的价计费"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c1_n18",
+          "quote": "它认的不是意思差不多，是从第一个字节起一字不差"
+        }
+      ]
+    },
+    {
+      "id": "c1_s7",
+      "component": "title_card",
+      "props": {
+        "title": "这笔账我们一步步算",
+        "subtitle": "提示缓存认的是从第一个字节起一字不差"
+      },
+      "narration_segment_ids": [
+        "c1_n19"
+      ],
+      "headline": "这笔账我们一步步算",
+      "source_quotes": [
+        "这笔账我们一步步算。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c1_n19",
+          "quote": "这笔账我们一步步算"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c1_n19",
+          "quote": "这笔账我们一步步算"
+        }
+      ]
+    },
+    {
+      "id": "c2_s1",
+      "component": "title_card",
+      "props": {
+        "title": "从一家咖啡店说起",
+        "subtitle": "你常去的那家咖啡店"
+      },
+      "narration_segment_ids": [
+        "c2_n1"
+      ],
+      "headline": "从一家咖啡店说起",
+      "source_quotes": [
+        "打个比方，就像你常去的那家咖啡店。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n1",
+          "quote": "打个比方"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c2_n1",
+          "quote": "就像你常去的那家咖啡店"
+        }
+      ]
+    },
+    {
+      "id": "c2_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "店主记住的整套点单流程",
+        "lines": [
+          "点单顺序：先报会员号，再点饮品，最后加料",
+          "原样记下：店主把整套流程记下来",
+          "老样子：下次只说一句，就能秒出杯",
+          "前缀：从第一个 token 起往后数的一整段"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n2",
+        "c2_n3",
+        "c2_n4"
+      ],
+      "headline": "店主记住的整套点单流程",
+      "source_quotes": [
+        "你进门先报会员号，再说点什么饮品，最后说加什么料。",
+        "店主把你这整套点单流程原封不动记下来，下次你只说一句老样子，他就能秒出杯。",
+        "缓存里的这套流程，就叫前缀：从请求第一个 token 开始往后数的那一整段。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n2",
+          "quote": "你进门先报会员号"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c2_n2",
+          "quote": "你进门先报会员号"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c2_n3",
+          "quote": "店主把你这整套点单流程原封不动记下来"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c2_n3",
+          "quote": "下次你只说一句老样子"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c2_n4",
+          "quote": "缓存里的这套流程，就叫前缀"
+        }
+      ]
+    },
+    {
+      "id": "c2_s3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "匹配是逐字节的，一个字节都不能差",
+        "lines": [
+          "逐字节匹配：一个字节都不能差",
+          "多一个空格：就不算一样",
+          "多一行日期：同样不算一样"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n5",
+        "c2_n6"
+      ],
+      "headline": "匹配是逐字节的，一个字节都不能差",
+      "source_quotes": [
+        "为什么强调一整段？因为匹配是逐字节的：一个字节都不能差，多一个空格、多一行日期，就不算一样。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n5",
+          "quote": "为什么强调一整段？"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c2_n6",
+          "quote": "因为匹配是逐字节的"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c2_n6",
+          "quote": "多一个空格"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c2_n6",
+          "quote": "多一行日期"
+        }
+      ]
+    },
+    {
+      "id": "c2_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "请求有固定顺序，缓存从开头比",
+        "lines": [
+          "工具定义：排在最前面",
+          "系统提示：夹在中间",
+          "消息：接在后面",
+          "断开点：比到哪段断了，往后全作废"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n7",
+        "c2_n8"
+      ],
+      "headline": "请求有固定顺序，缓存从开头比",
+      "source_quotes": [
+        "请求本身就是这个顺序：工具定义在前，系统提示在中，消息在后。缓存就按这个顺序从开头往后比，比到哪一段断了，从那往后全作废。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n7",
+          "quote": "请求本身就是这个顺序"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c2_n7",
+          "quote": "工具定义在前"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c2_n7",
+          "quote": "系统提示在中"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c2_n7",
+          "quote": "消息在后"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c2_n8",
+          "quote": "比到哪一段断了"
+        }
+      ]
+    },
+    {
+      "id": "c2_s5",
+      "component": "concept_reveal",
+      "props": {
+        "title": "改工具定义，代价最大",
+        "lines": [
+          "工具在最前面：一改就牵连后面全部",
+          "系统提示、消息：全跟着作废"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n9",
+        "c2_n10"
+      ],
+      "headline": "改工具定义，代价最大",
+      "source_quotes": [
+        "所以改工具定义，代价最大。工具在最前面，你一改，它后面的系统提示、消息全跟着作废。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n9",
+          "quote": "所以改工具定义"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c2_n10",
+          "quote": "工具在最前面"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c2_n10",
+          "quote": "它后面的系统提示、消息全跟着作废"
+        }
+      ]
+    },
+    {
+      "id": "c2_s6",
+      "component": "title_card",
+      "props": {
+        "title": "不是缓存坏了，是从改动处对不上",
+        "subtitle": "后面的全认不出来"
+      },
+      "narration_segment_ids": [
+        "c2_n11"
+      ],
+      "headline": "不是缓存坏了，是从改动处对不上",
+      "source_quotes": [
+        "不是缓存坏了，是缓存从你改动的那个字节起就对不上，后面的全认不出来。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c2_n11",
+          "quote": "不是缓存坏了"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c2_n11",
+          "quote": "后面的全认不出来"
+        }
+      ]
+    },
+    {
+      "id": "c3_s1",
+      "component": "title_card",
+      "props": {
+        "title": "先说钱：缓存有两个价",
+        "subtitle": "写入和读取，价格不同"
+      },
+      "narration_segment_ids": [
+        "c3_n1",
+        "c3_n2"
+      ],
+      "headline": "先说钱：缓存有两个价",
+      "source_quotes": [
+        "先说钱。缓存有两个价。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n1",
+          "quote": "先说钱。"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c3_n2",
+          "quote": "缓存有两个价。"
+        }
+      ]
+    },
+    {
+      "id": "c3_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "写入 1.25 倍，读取 0.05 倍",
+        "lines": [
+          "缓存写入：首次存前缀，5 分钟有效期按输入价 1.25 倍",
+          "缓存读取：Opus 5.5 和 Sonnet 5.5 上按输入价 0.05 倍",
+          "两价并列：写入 1.25 倍，读取 0.05 倍"
+        ]
+      },
+      "narration_segment_ids": [
+        "c3_n3",
+        "c3_n4",
+        "c3_n5",
+        "c3_n6"
+      ],
+      "headline": "写入 1.25 倍，读取 0.05 倍",
+      "source_quotes": [
+        "第一次把前缀存进去，叫缓存写入，5 分钟有效期的价格是输入价的 1.25 倍，也就是比平时多收四分之一。",
+        "存好之后再用，叫缓存读取。",
+        "在 Opus 5.5 和 Sonnet 5.5 上，读取价是输入价的 0.05 倍，只付原价的百分之五。",
+        "把两个价放一起看。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n3",
+          "quote": "第一次把前缀存进去，叫缓存写入"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c3_n3",
+          "quote": "5 分钟有效期的价格是输入价的 1.25 倍"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c3_n5",
+          "quote": "读取价是输入价的 0.05 倍"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c3_n6",
+          "quote": "把两个价放一起看。"
+        }
+      ]
+    },
+    {
+      "id": "c3_s3",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "前缀对得上",
+          "items": [
+            "这次走缓存读取",
+            "按 0.05 倍算"
+          ]
+        },
+        "right": {
+          "label": "前缀对不上",
+          "items": [
+            "重新写进缓存",
+            "按 1.25 倍算"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c3_n7",
+        "c3_n8"
+      ],
+      "headline": "前缀对得上走读取，对不上走写入",
+      "source_quotes": [
+        "前缀对得上，这次走读取，按 0.05 倍算；对不上，这段就得重新写进缓存，按 1.25 倍算。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c3_n7",
+          "quote": "前缀对得上，这次走读取，按 0.05 倍算；"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c3_n8",
+          "quote": "对不上，这段就得重新写进缓存，按 1.25 倍算。"
+        }
+      ]
+    },
+    {
+      "id": "c3_s4",
+      "component": "big_number",
+      "props": {
+        "title": "两边一除，25 倍",
+        "value": "25 倍",
+        "label": "写入价与读取价的比值"
+      },
+      "narration_segment_ids": [
+        "c3_n9"
+      ],
+      "headline": "两边一除，25 倍",
+      "source_quotes": [
+        "两边一除，25 倍。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n9",
+          "quote": "两边一除，25 倍。"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c3_n9",
+          "quote": "25 倍。"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c3_n9",
+          "quote": "25 倍。"
+        }
+      ]
+    },
+    {
+      "id": "c3_s5",
+      "component": "concept_reveal",
+      "props": {
+        "title": "这不是折扣，是一个开关",
+        "lines": [
+          "前缀稳：你走缓存读取",
+          "前缀抖：你走缓存写入",
+          "写一次：够按读取价读 25 次"
+        ]
+      },
+      "narration_segment_ids": [
+        "c3_n10",
+        "c3_n11",
+        "c3_n12",
+        "c3_n13"
+      ],
+      "headline": "这不是折扣，是一个开关",
+      "source_quotes": [
+        "这不是折扣力度的问题，是一个开关：前缀稳，你走读取；前缀抖，你走写入。",
+        "写一次的钱，够你按读取价读 25 次。",
+        "回到开头那个脚本。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n10",
+          "quote": "这不是折扣力度的问题"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c3_n10",
+          "quote": "前缀稳，你走读取"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c3_n11",
+          "quote": "前缀抖，你走写入。"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c3_n12",
+          "quote": "写一次的钱，够你按读取价读 25 次。"
+        }
+      ]
+    },
+    {
+      "id": "c3_s6",
+      "component": "bar_chart",
+      "props": {
+        "categories": [
+          "前缀稳",
+          "每次都重写"
+        ],
+        "values": [
+          0.5,
+          10
+        ],
+        "unit": "美元",
+        "baseline_zero": true
+      },
+      "narration_segment_ids": [
+        "c3_n14",
+        "c3_n15"
+      ],
+      "headline": "同样 100 次调用：约半美元与 10 美元",
+      "source_quotes": [
+        "同样 100 次调用，前缀稳，账单约半美元；每次都重写，10 美元。"
+      ],
+      "cues": [
+        {
+          "target_id": "bar:0",
+          "segment_id": "c3_n14",
+          "quote": "同样 100 次调用，前缀稳，账单约半美元；"
+        },
+        {
+          "target_id": "bar:1",
+          "segment_id": "c3_n15",
+          "quote": "每次都重写，10 美元。"
+        }
+      ]
+    },
+    {
+      "id": "c3_s7",
+      "component": "big_number",
+      "props": {
+        "title": "10 美元除以半美元，是 20 倍",
+        "value": "20 倍",
+        "label": "10 美元除以半美元的倍数",
+        "note": "别和 25 倍弄混"
+      },
+      "narration_segment_ids": [
+        "c3_n16",
+        "c3_n17"
+      ],
+      "headline": "10 美元除以半美元，是 20 倍",
+      "source_quotes": [
+        "10 美元除以半美元，是 20 倍。",
+        "别和 25 倍弄混。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c3_n16",
+          "quote": "10 美元除以半美元，是 20 倍。"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c3_n16",
+          "quote": "20 倍。"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c3_n16",
+          "quote": "20 倍。"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c3_n17",
+          "quote": "别和 25 倍弄混。"
+        }
+      ]
+    },
+    {
+      "id": "c3_s8",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "25 倍",
+          "items": [
+            "写入价和读取价的单价之比"
+          ]
+        },
+        "right": {
+          "label": "20 倍",
+          "items": [
+            "这 100 次调用的总账差"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c3_n18",
+        "c3_n19"
+      ],
+      "headline": "25 倍是单价之比，20 倍是总账差",
+      "source_quotes": [
+        "25 倍是写入价和读取价的单价之比。",
+        "20 倍是这 100 次的总账差。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c3_n18",
+          "quote": "25 倍是写入价和读取价的单价之比。"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c3_n19",
+          "quote": "20 倍是这 100 次的总账差。"
+        }
+      ]
+    },
+    {
+      "id": "c4_s1",
+      "component": "title_card",
+      "props": {
+        "title": "缓存只认逐字节一致的前缀",
+        "subtitle": "从请求开头算起，一字不差"
+      },
+      "narration_segment_ids": [
+        "c4_n1"
+      ],
+      "headline": "缓存只认逐字节一致的前缀",
+      "source_quotes": [
+        "缓存只认从请求开头逐字节一致的前缀。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n1",
+          "quote": "先收一下：缓存只认从请求开头逐字节一致的前缀。"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c4_n1",
+          "quote": "缓存只认从请求开头逐字节一致的前缀"
+        }
+      ]
+    },
+    {
+      "id": "c4_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "命中读 0.05 倍，未命中写 1.25 倍",
+        "lines": [
+          "命中：按 0.05 倍读",
+          "未命中：按 1.25 倍写"
+        ]
+      },
+      "narration_segment_ids": [
+        "c4_n2"
+      ],
+      "headline": "命中读 0.05 倍，未命中写 1.25 倍",
+      "source_quotes": [
+        "命中按 0.05 倍读，没命中按 1.25 倍写。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n2",
+          "quote": "命中按 0.05 倍读，没命中按 1.25 倍写。"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c4_n2",
+          "quote": "命中按 0.05 倍读"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c4_n2",
+          "quote": "没命中按 1.25 倍写"
+        }
+      ]
+    },
+    {
+      "id": "c4_s3",
+      "component": "big_number",
+      "props": {
+        "title": "隔了 25 倍",
+        "value": "25 倍",
+        "label": "命中读与未命中写的价差"
+      },
+      "narration_segment_ids": [
+        "c4_n3"
+      ],
+      "headline": "隔了 25 倍",
+      "source_quotes": [
+        "隔了 25 倍。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n3",
+          "quote": "隔了 25 倍。"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c4_n3",
+          "quote": "隔了 25 倍"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c4_n3",
+          "quote": "隔了 25 倍"
+        }
+      ]
+    },
+    {
+      "id": "c4_s4",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "不开缓存",
+          "items": [
+            "按原价算"
+          ]
+        },
+        "right": {
+          "label": "开了但次次重写",
+          "items": [
+            "总价是原价的 1.25 倍",
+            "比不开还多四分之一"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c4_n4",
+        "c4_n5"
+      ],
+      "headline": "开了但次次重写，比不开还贵",
+      "source_quotes": [
+        "不开缓存按原价算。",
+        "开了但次次重写，总价就是原价的 1.25 倍，比不开还多四分之一。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c4_n4",
+          "quote": "不开缓存按原价算。"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c4_n5",
+          "quote": "开了但次次重写，总价就是原价的 1.25 倍，比不开还多四分之一。"
+        }
+      ]
+    },
+    {
+      "id": "c4_s5",
+      "component": "bar_chart",
+      "props": {
+        "categories": [
+          "不开缓存",
+          "次次重写"
+        ],
+        "values": [
+          8,
+          10
+        ],
+        "unit": "美元",
+        "baseline_zero": true
+      },
+      "narration_segment_ids": [
+        "c4_n6",
+        "c4_n7"
+      ],
+      "headline": "同一份 2 万 token 跑 100 次的总价",
+      "source_quotes": [
+        "同一份 2 万 token 跑 100 次。",
+        "不开缓存 8 美元，次次重写 10 美元。"
+      ],
+      "cues": [
+        {
+          "target_id": "bar:0",
+          "segment_id": "c4_n6",
+          "quote": "同一份 2 万 token 跑 100 次。"
+        },
+        {
+          "target_id": "bar:1",
+          "segment_id": "c4_n7",
+          "quote": "不开缓存 8 美元，次次重写 10 美元。"
+        }
+      ]
+    },
+    {
+      "id": "c4_s6",
+      "component": "concept_reveal",
+      "props": {
+        "title": "前缀稳定性：让开头那段一字不差",
+        "lines": [
+          "一字不差：开头那段每次调用都相同",
+          "别掺变量：时间戳、随机 ID、用户名"
+        ]
+      },
+      "narration_segment_ids": [
+        "c4_n8"
+      ],
+      "headline": "前缀稳定性：让开头那段一字不差",
+      "source_quotes": [
+        "前缀稳定性，就是让开头那一段每次调用都一字不差，别掺时间戳、随机 ID、用户名这类每次都变的东西。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n8",
+          "quote": "前缀稳定性，就是让开头那一段每次调用都一字不差"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c4_n8",
+          "quote": "就是让开头那一段每次调用都一字不差"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c4_n8",
+          "quote": "别掺时间戳、随机 ID、用户名这类每次都变的东西"
+        }
+      ]
+    },
+    {
+      "id": "c4_s7",
+      "component": "concept_reveal",
+      "props": {
+        "title": "命中率：真正按读取价计费的比例",
+        "lines": [
+          "命中率：一批请求里按读取价计费的比例"
+        ]
+      },
+      "narration_segment_ids": [
+        "c4_n9"
+      ],
+      "headline": "命中率：真正按读取价计费的比例",
+      "source_quotes": [
+        "还有个词叫命中率：一批请求里，真正按读取价计费的比例。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n9",
+          "quote": "还有个词叫命中率：一批请求里，真正按读取价计费的比例。"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c4_n9",
+          "quote": "一批请求里，真正按读取价计费的比例"
+        }
+      ]
+    },
+    {
+      "id": "c4_s8",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "研究团队实测",
+          "items": [
+            "降本 41% 到 80%",
+            "首 token 延迟缩短 13% 到 31%"
+          ]
+        },
+        "right": {
+          "label": "厂商宣传",
+          "items": [
+            "最高九成"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c4_n10",
+        "c4_n11",
+        "c4_n12"
+      ],
+      "headline": "厂商宣传最高九成，实测明显没到",
+      "source_quotes": [
+        "有研究团队在四家厂商、长程任务上实测，降本落在 41% 到 80%。",
+        "首 token 延迟，也就是从发出请求到出第一个字的等待，缩短 13% 到 31%。",
+        "厂商宣传的最高九成，实测明显没到。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c4_n10",
+          "quote": "有研究团队在四家厂商、长程任务上实测，降本落在 41% 到 80%。"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c4_n12",
+          "quote": "厂商宣传的最高九成，实测明显没到。"
+        }
+      ]
+    },
+    {
+      "id": "c4_s9",
+      "component": "title_card",
+      "props": {
+        "title": "命中率比折扣率更值得盯",
+        "subtitle": "只看折扣率，会漏掉真正按读取价计费的比例"
+      },
+      "narration_segment_ids": [
+        "c4_n13"
+      ],
+      "headline": "命中率比折扣率更值得盯",
+      "source_quotes": [
+        "所以命中率比折扣率更值得盯。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c4_n13",
+          "quote": "所以命中率比折扣率更值得盯。"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c4_n13",
+          "quote": "命中率比折扣率更值得盯"
+        }
+      ]
+    },
+    {
+      "id": "c5_s1",
+      "component": "title_card",
+      "props": {
+        "title": "前缀稳不稳，就是那 25 倍的开关",
+        "subtitle": "但这个排序还差两个前提"
+      },
+      "headline": "前缀稳不稳，就是那 25 倍的开关",
+      "narration_segment_ids": [
+        "c5_n1",
+        "c5_n2"
+      ],
+      "source_quotes": [
+        "前面算清了账：前缀稳不稳，就是那 25 倍的开关。",
+        "但这得补两个前提。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c5_n1",
+          "quote": "前面算清了账：前缀稳不稳"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c5_n2",
+          "quote": "但这得补两个前提。"
+        }
+      ]
+    },
+    {
+      "id": "c5_s2",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "模型能力锁定",
+          "items": [
+            "没法换更便宜的模型"
+          ]
+        },
+        "right": {
+          "label": "要是允许降级",
+          "items": [
+            "换模型的杠杆更大",
+            "按输入价算，Haiku 5.5 和 Opus 5.5 差 40 倍"
+          ]
+        }
+      },
+      "headline": "前提一：模型能力锁定，换不了更便宜的模型",
+      "narration_segment_ids": [
+        "c5_n3",
+        "c5_n4"
+      ],
+      "source_quotes": [
+        "第一，模型能力锁定：你没法换更便宜的模型。",
+        "要是允许降级，换模型的杠杆更大：按输入价算，Haiku 5.5 和 Opus 5.5 差 40 倍。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c5_n3",
+          "quote": "第一，模型能力锁定：你没法换更便宜的模型。"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c5_n4",
+          "quote": "要是允许降级，换模型的杠杆更大"
+        }
+      ]
+    },
+    {
+      "id": "c5_s3",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "25 倍",
+          "items": [
+            "是缓存读写价之比"
+          ]
+        },
+        "right": {
+          "label": "40 倍",
+          "items": [
+            "是两档模型的输入价之比"
+          ]
+        }
+      },
+      "headline": "25 倍和 40 倍，口径不同",
+      "narration_segment_ids": [
+        "c5_n5"
+      ],
+      "source_quotes": [
+        "这两个倍数口径不同：25 倍是缓存读写价之比，40 倍是两档模型的输入价之比。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c5_n5",
+          "quote": "这两个倍数口径不同：25 倍是缓存读写价之比"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c5_n5",
+          "quote": "40 倍是两档模型的输入价之比"
+        }
+      ]
+    },
+    {
+      "id": "c5_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "第二，提示压缩也不是免费的",
+        "lines": [
+          "怎么压：用工具把提示词本身改短，token 数变少",
+          "代价：内容会丢一点，效果可能下降"
+        ]
+      },
+      "headline": "第二，提示压缩也不是免费的",
+      "narration_segment_ids": [
+        "c5_n6",
+        "c5_n7"
+      ],
+      "source_quotes": [
+        "第二，提示压缩也不是免费的。",
+        "提示压缩就是用工具把提示词本身改短，token 数变少，但内容会丢一点，效果可能下降。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c5_n6",
+          "quote": "第二，提示压缩也不是免费的。"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c5_n7",
+          "quote": "提示压缩就是用工具把提示词本身改短，token 数变少"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c5_n7",
+          "quote": "但内容会丢一点，效果可能下降"
+        }
+      ]
+    },
+    {
+      "id": "c5_s5",
+      "component": "big_number",
+      "props": {
+        "title": "工具声称最高 20 倍压缩比",
+        "value": "20 倍",
+        "label": "压完只剩原长度的二十分之一",
+        "note": "但那是最高值"
+      },
+      "headline": "工具声称最高 20 倍压缩比",
+      "narration_segment_ids": [
+        "c5_n8",
+        "c5_n9"
+      ],
+      "source_quotes": [
+        "有工具声称最高能到 20 倍压缩比，意思是压完只剩原长度的二十分之一。",
+        "但那是最高值。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c5_n8",
+          "quote": "有工具声称最高能到 20 倍压缩比"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c5_n8",
+          "quote": "20 倍压缩比"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c5_n8",
+          "quote": "意思是压完只剩原长度的二十分之一"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c5_n9",
+          "quote": "但那是最高值"
+        }
+      ]
+    },
+    {
+      "id": "c5_s6",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "前缀断链：按倍数翻",
+          "items": [
+            "单价直接乘 25"
+          ]
+        },
+        "right": {
+          "label": "提示压缩：按比例省",
+          "items": [
+            "最高 20 倍压缩比，压完只剩原长度的二十分之一"
+          ]
+        }
+      },
+      "headline": "一个按比例省，一个按倍数翻，不是一个量级",
+      "narration_segment_ids": [
+        "c5_n10",
+        "c5_n11"
+      ],
+      "source_quotes": [
+        "前缀断链不一样，那是单价直接乘 25。",
+        "一个按比例省，一个按倍数翻，不是一个量级。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c5_n10",
+          "quote": "前缀断链不一样，那是单价直接乘 25。"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c5_n11",
+          "quote": "一个按比例省"
+        }
+      ]
+    },
+    {
+      "id": "c5_s7",
+      "component": "concept_reveal",
+      "props": {
+        "title": "排序按公开单价推出，还没被实验验证",
+        "lines": [
+          "依据：按公开单价推出，没找到对照实验或厂商基准",
+          "把握：方向有把握，具体省多少要看你自己",
+          "口径：账单上的写入和读取 token"
+        ]
+      },
+      "headline": "排序按公开单价推出，还没被实验验证",
+      "narration_segment_ids": [
+        "c5_n12",
+        "c5_n13"
+      ],
+      "source_quotes": [
+        "最后，先稳前缀、再压提示、最后换模型这个排序，是按公开单价推出来的，我没找到对照实验或厂商基准。",
+        "它的方向我有把握，但具体到你的业务能省多少，还得看你自己账单上的写入和读取 token。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c5_n12",
+          "quote": "最后，先稳前缀、再压提示、最后换模型这个排序"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c5_n12",
+          "quote": "我没找到对照实验或厂商基准"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c5_n13",
+          "quote": "它的方向我有把握"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c5_n13",
+          "quote": "还得看你自己账单上的写入和读取 token"
+        }
+      ]
+    },
+    {
+      "id": "c6_s1",
+      "component": "title_card",
+      "props": {
+        "title": "先做最便宜的：清前缀",
+        "subtitle": "清前缀是最便宜的第一步"
+      },
+      "narration_segment_ids": [
+        "c6_n1"
+      ],
+      "headline": "先做最便宜的：清前缀",
+      "source_quotes": [
+        "先做最便宜的：清前缀。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c6_n1",
+          "quote": "先做最便宜的"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c6_n1",
+          "quote": "清前缀"
+        }
+      ]
+    },
+    {
+      "id": "c6_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "别在前缀里放每次都变的内容",
+        "lines": [
+          "别放变动内容：时间戳、随机 ID、用户名、当前日期",
+          "放到末尾：挪到 messages 最后一条",
+          "只留不变部分：顺序也别乱调"
+        ]
+      },
+      "narration_segment_ids": [
+        "c6_n2",
+        "c6_n3"
+      ],
+      "headline": "别在前缀里放每次都变的内容",
+      "source_quotes": [
+        "工具定义或系统提示里，别再放时间戳、随机 ID、用户名、当前日期这类每次都变的内容，挪到 messages 最后一条。",
+        "头部只留永远不变的部分，顺序也别乱调。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c6_n2",
+          "quote": "工具定义或系统提示里"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c6_n2",
+          "quote": "别再放时间戳、随机 ID、用户名、当前日期"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c6_n2",
+          "quote": "挪到 messages 最后一条"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c6_n3",
+          "quote": "顺序也别乱调"
+        }
+      ]
+    },
+    {
+      "id": "c6_s3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "再管批处理：TTL 是缓存能存多久",
+        "lines": [
+          "TTL：缓存能存多久，过期就得重写",
+          "两档 TTL：5 分钟和 1 小时"
+        ]
+      },
+      "narration_segment_ids": [
+        "c6_n4",
+        "c6_n5",
+        "c6_n6"
+      ],
+      "headline": "再管批处理：TTL 是缓存能存多久",
+      "source_quotes": [
+        "再管批处理。",
+        "TTL 是缓存能存多久，过期就得重写。",
+        "它分两档，5 分钟和 1 小时。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c6_n4",
+          "quote": "再管批处理"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c6_n5",
+          "quote": "TTL 是缓存能存多久"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c6_n6",
+          "quote": "它分两档，5 分钟和 1 小时"
+        }
+      ]
+    },
+    {
+      "id": "c6_s4",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "5 分钟档",
+          "items": [
+            "批处理常常超过 5 分钟",
+            "请求异步乱序，顺序控制不了",
+            "命中只是尽力而为"
+          ]
+        },
+        "right": {
+          "label": "1 小时档",
+          "items": [
+            "给命中多留点时间",
+            "代价是写入溢价更高"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c6_n7",
+        "c6_n8",
+        "c6_n9"
+      ],
+      "headline": "批处理超 5 分钟：1 小时档能多留命中时间",
+      "source_quotes": [
+        "批处理常常超过 5 分钟，请求又是异步乱序跑的，顺序你控制不了，命中只是尽力而为，别指望前面的请求先把缓存热起来。",
+        "可以换成 1 小时，给命中多留点时间。",
+        "代价是写入溢价更高。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c6_n7",
+          "quote": "批处理常常超过 5 分钟"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c6_n8",
+          "quote": "可以换成 1 小时，给命中多留点时间"
+        }
+      ]
+    },
+    {
+      "id": "c6_s5",
+      "component": "bar_chart",
+      "props": {
+        "categories": [
+          "5 分钟档",
+          "1 小时档"
+        ],
+        "values": [
+          1.25,
+          2
+        ],
+        "unit": "倍输入价",
+        "baseline_zero": true
+      },
+      "narration_segment_ids": [
+        "c6_n10",
+        "c6_n11"
+      ],
+      "headline": "写入溢价：1 小时档是输入价的 2 倍",
+      "source_quotes": [
+        "5 分钟那档是输入价的 1.25 倍。",
+        "1 小时那档是 2 倍。"
+      ],
+      "cues": [
+        {
+          "target_id": "bar:0",
+          "segment_id": "c6_n10",
+          "quote": "5 分钟那档是输入价的 1.25 倍"
+        },
+        {
+          "target_id": "bar:1",
+          "segment_id": "c6_n11",
+          "quote": "1 小时那档是 2 倍"
+        }
+      ]
+    },
+    {
+      "id": "c6_s6",
+      "component": "concept_reveal",
+      "props": {
+        "title": "最后验证：写入只在第一次，读取都大于零",
+        "lines": [
+          "看用量面板：写入 token 只在第一次出现",
+          "看读取 token：之后每次都大于零",
+          "写入太多：前缀还在抖",
+          "逐字节比对：相邻两次请求的完整请求体"
+        ]
+      },
+      "narration_segment_ids": [
+        "c6_n12",
+        "c6_n13",
+        "c6_n14",
+        "c6_n15"
+      ],
+      "headline": "最后验证：写入只在第一次，读取都大于零",
+      "source_quotes": [
+        "最后验证。",
+        "看账单或用量面板，缓存写入 token 应该只在第一次出现，之后每次读取 token 都大于零；",
+        "如果每次都有大量写入，前缀还在抖。",
+        "也可以把相邻两次请求的完整请求体逐字节比一遍。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c6_n12",
+          "quote": "最后验证"
+        },
+        {
+          "target_id": "line:0",
+          "segment_id": "c6_n13",
+          "quote": "看账单或用量面板，缓存写入 token 应该只在第一次出现"
+        },
+        {
+          "target_id": "line:1",
+          "segment_id": "c6_n13",
+          "quote": "之后每次读取 token 都大于零"
+        },
+        {
+          "target_id": "line:2",
+          "segment_id": "c6_n14",
+          "quote": "如果每次都有大量写入，前缀还在抖"
+        },
+        {
+          "target_id": "line:3",
+          "segment_id": "c6_n15",
+          "quote": "也可以把相邻两次请求的完整请求体逐字节比一遍"
+        }
+      ]
+    },
+    {
+      "id": "c6_s7",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "时间戳留在头部",
+          "items": [
+            "账单：10 美元"
+          ]
+        },
+        "right": {
+          "label": "时间戳挪到最后一条",
+          "items": [
+            "账单：回到半块钱"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c6_n16"
+      ],
+      "headline": "把时间戳挪走，账从 10 美元回到半块钱",
+      "source_quotes": [
+        "回到开头那个脚本：把时间戳挪走，账就从 10 美元回到半块钱。"
+      ],
+      "cues": [
+        {
+          "target_id": "side:left",
+          "segment_id": "c6_n16",
+          "quote": "回到开头那个脚本"
+        },
+        {
+          "target_id": "side:right",
+          "segment_id": "c6_n16",
+          "quote": "把时间戳挪走，账就从 10 美元回到半块钱"
+        }
+      ]
+    },
+    {
+      "id": "c6_s8",
+      "component": "title_card",
+      "props": {
+        "title": "模型被任务锁死时：先稳前缀，再压提示，最后换模型",
+        "subtitle": "记住这个顺序，别急着换模型"
+      },
+      "narration_segment_ids": [
+        "c6_n17"
+      ],
+      "headline": "模型被任务锁死时：先稳前缀，再压提示，最后换模型",
+      "source_quotes": [
+        "记住这个顺序：模型被任务锁死时，先稳前缀，再压提示，最后才谈换模型。"
+      ],
+      "cues": [
+        {
+          "target_id": "title",
+          "segment_id": "c6_n17",
+          "quote": "记住这个顺序"
+        },
+        {
+          "target_id": "subtitle",
+          "segment_id": "c6_n17",
+          "quote": "先稳前缀，再压提示"
+        }
+      ]
+    }
+  ]
+}

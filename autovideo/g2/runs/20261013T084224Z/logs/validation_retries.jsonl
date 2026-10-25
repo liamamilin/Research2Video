@@ -1,0 +1,3 @@
+{"stage": "storyboard", "attempt": 1, "error_code": "MODEL_INVALID_JSON", "error": "MODEL_INVALID_JSON: storyboard response was not valid JSON (finish_reason=length): Expecting value: line 1 column 1 (char 0)", "retry_limit": 3}
+{"stage": "storyboard", "attempt": 2, "error_code": "MODEL_INVALID_JSON", "error": "MODEL_INVALID_JSON: storyboard response was not valid JSON (finish_reason=length): Expecting value: line 1 column 1 (char 0)", "retry_limit": 3}
+{"stage": "storyboard", "attempt": 3, "error_code": "MODEL_INVALID_JSON", "error": "MODEL_INVALID_JSON: storyboard response was not valid JSON (finish_reason=length): Unterminated string starting at: line 1 column 2157 (char 2156)", "retry_limit": 3}

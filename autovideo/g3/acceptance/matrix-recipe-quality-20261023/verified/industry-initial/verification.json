@@ -1,0 +1,59 @@
+{
+  "case": "industry",
+  "technical_status": "PASS",
+  "manual_content_status": "FAIL",
+  "render_id": "04554d2380e446ff9be3743f42ab1e07",
+  "job_id": "2a2e98c2-b158-414d-9400-5df97a88dc60",
+  "script_id": "9f25f92c1eb54ab195abdbda84e29d37",
+  "version": 2,
+  "title": "新工厂之外，美国军工高纯铝缺在哪",
+  "mode": "fast",
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/04554d2380e446ff9be3743f42ab1e07/video.mp4",
+  "content_seconds": 104.033,
+  "duration_seconds": 108.533333,
+  "scenes": 5,
+  "caption_mode": "short forced-aligned",
+  "caption_cues": 33,
+  "max_caption_characters": 42,
+  "max_caption_seconds": 4.24,
+  "narration_exact": true,
+  "cue_order_and_coverage": true,
+  "full_decode": true,
+  "artifact_hashes": 29,
+  "source_cards": [],
+  "decoded_frames": [
+    {
+      "scene": "card_1",
+      "seconds": 22.3336,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-01.jpg"
+    },
+    {
+      "scene": "card_2",
+      "seconds": 45.8484,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-02.jpg"
+    },
+    {
+      "scene": "card_3",
+      "seconds": 69.357,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-03.jpg"
+    },
+    {
+      "scene": "card_4",
+      "seconds": 91.67960000000001,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-04.jpg"
+    },
+    {
+      "scene": "card_5",
+      "seconds": 103.6418,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-05.jpg"
+    }
+  ],
+  "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/contact.jpg",
+  "presentation": {
+    "preset": "information_cards"
+  },
+  "notes": [],
+  "manual_notes": [
+    "画面将不存在特定生产能力拆成“没有冶炼厂”和“能生产军工专用高纯铝”两项，改变主张范围；输出保留，已修复公共逻辑后另出新片。"
+  ]
+}

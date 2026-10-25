@@ -1,0 +1,37 @@
+{
+  "case_id": "case-a",
+  "variant": "C",
+  "command": [
+    "/Users/milin/.nvm/versions/node/v22.21.1/bin/node",
+    "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/g0/vendor/remotion-audiogram/node_modules/@remotion/cli/remotion-cli.js",
+    "render",
+    "src/index.ts",
+    "H1ImageMotion",
+    "/Users/milin/2026/软件开发/AutoVideo_Final_Docs/h1/runs/case-a/C_image_motion_v3_full.mp4",
+    "--props=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/h1/runs/case-a/render-props.json",
+    "--public-dir=/Users/milin/2026/软件开发/AutoVideo_Final_Docs/h1/renderer/public",
+    "--width=1920",
+    "--height=1080",
+    "--fps=30",
+    "--duration=599",
+    "--codec=h264",
+    "--audio-codec=aac",
+    "--pixel-format=yuv420p",
+    "--concurrency=2",
+    "--crf=18",
+    "--browser-executable=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "--overwrite=false"
+  ],
+  "started_utc": "2026-10-13T11:55:42.124200+00:00",
+  "source_video": "g4/runs/case-a-retry/artifacts/G2_自动生成.mp4",
+  "source_video_sha256": "3c90eb169463c740a5c1f92442872e881556f34a4fa1de4a9e0a7955e6c241bd",
+  "source_props_sha256": "5ec4a10e834911a0264e560b0e0e3d9cc123030095f6f63ff9e833e569d80f2e",
+  "source_audio_sha256": "f455511897839170b4d23d0838420e715709db9d1c40bd3f6c23e05574c6883c",
+  "scene_backdrops": {
+    "opening": "assets/a01_noise_opening.png",
+    "mechanism": "assets/a02_noise_disruption.png"
+  },
+  "exit_code": 0,
+  "elapsed_seconds": 43.857,
+  "log_path": "h1/runs/case-a/render-v3.log"
+}

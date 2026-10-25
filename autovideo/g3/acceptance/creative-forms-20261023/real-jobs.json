@@ -1,0 +1,159 @@
+{
+  "images": [
+    {
+      "image_id": "5e0f2205-67c5-4f1b-9aa0-0d3e3530f862",
+      "filename": "image-01.png",
+      "width": 960,
+      "height": 540,
+      "sha256": "2c8a8162316a436c7fec6785bb46c68307de68a84a2644184ef9b80b209f7893",
+      "bytes": 6785,
+      "preview_url": "/api/creative-images/5e0f2205-67c5-4f1b-9aa0-0d3e3530f862"
+    },
+    {
+      "image_id": "eb54d9fd-7eb8-4fb1-9a8b-aea98a1a820e",
+      "filename": "image-02.png",
+      "width": 960,
+      "height": 540,
+      "sha256": "2c6a8962b5667f58b8819971dc8d5d0b4bddc0ee7aa6d06728a716e1d6b9dbfb",
+      "bytes": 5911,
+      "preview_url": "/api/creative-images/eb54d9fd-7eb8-4fb1-9a8b-aea98a1a820e"
+    },
+    {
+      "image_id": "74c36640-985a-4e57-b883-6135e5a40945",
+      "filename": "image-03.png",
+      "width": 960,
+      "height": 540,
+      "sha256": "d30b19d94d121e4cc49677b165be4fea9ff322de90d9f99d2cd0eeb1c813856e",
+      "bytes": 4923,
+      "preview_url": "/api/creative-images/74c36640-985a-4e57-b883-6135e5a40945"
+    }
+  ],
+  "jobs": [
+    {
+      "request": {
+        "title": "第二阶段验收 · AI快讯动态排版",
+        "production_recipe": "ai_news",
+        "video_form": "kinetic_typography",
+        "source_text": "以下为虚构产品的功能更新示例，不是真实新闻。星桥笔记本次增加了离线草稿：断网时保存正文，重新联网后由用户确认再同步。已有搜索和导出功能继续保留。这次更新不包含多人协作，也没有公布同步速度或使用人数。请讲清新增能力、使用条件和未包含的功能。",
+        "duration_mode": "content",
+        "voice_id": "zf_xiaoxiao",
+        "idempotency_key": "stage2-accept-04791c6d-651c-496c-82ec-925d4a3a8d90"
+      },
+      "response": {
+        "job_id": "8c8c600d-65c6-4310-83dc-80ca0f7f33b8",
+        "status": "QUEUED",
+        "created_at": "2026-10-23T07:48:11.318+00:00",
+        "status_url": "/api/jobs/8c8c600d-65c6-4310-83dc-80ca0f7f33b8"
+      }
+    },
+    {
+      "request": {
+        "title": "第二阶段验收 · 图片轮播",
+        "production_recipe": "how_to",
+        "video_form": "image_slideshow",
+        "source_text": "用三张原创程序绘制的插画说明一天中的三次短暂停留：第一张是晨光中的小山，出门前看看远处；第二张是午后窗边的一杯茶，放下手里的事情休息片刻；第三张是暮色里的河岸，傍晚回顾当天的安排。这是虚构的日常场景，用于展示图片轮播，不是摄影记录，也不作健康效果承诺。",
+        "duration_mode": "content",
+        "slideshow_images": [
+          "5e0f2205-67c5-4f1b-9aa0-0d3e3530f862",
+          "eb54d9fd-7eb8-4fb1-9a8b-aea98a1a820e",
+          "74c36640-985a-4e57-b883-6135e5a40945"
+        ],
+        "voice_id": "zf_xiaoxiao",
+        "idempotency_key": "stage2-accept-29ea5796-1d71-4990-b4e2-0d0d1403a725"
+      },
+      "response": {
+        "job_id": "870c702e-6a1a-4971-b392-d08aa89a91fa",
+        "status": "QUEUED",
+        "created_at": "2026-10-23T07:48:11.327+00:00",
+        "status_url": "/api/jobs/870c702e-6a1a-4971-b392-d08aa89a91fa"
+      }
+    },
+    {
+      "request": {
+        "title": "第二阶段验收 · 原理科普对话体",
+        "production_recipe": "science_explainer",
+        "video_form": "chat_dialogue",
+        "input_mode": "narration",
+        "chapters": [
+          {
+            "title": "缓存与原始数据",
+            "paragraphs": [
+              "观众：缓存是什么？",
+              "讲解：缓存是临时保存的一份数据副本，便于之后再次读取。",
+              "观众：有缓存就不用原始数据了吗？",
+              "讲解：仍然需要保留原始数据。副本可能过期，使用时要考虑更新条件。"
+            ]
+          }
+        ],
+        "duration_mode": "content",
+        "voice_id": "zf_xiaoxiao",
+        "idempotency_key": "stage2-accept-8fce26a1-5d46-4461-b533-ede69c41eb8a"
+      },
+      "response": {
+        "job_id": "d065a643-cdbe-4af6-a9a5-85c589c1bd23",
+        "status": "QUEUED",
+        "created_at": "2026-10-23T07:48:11.335+00:00",
+        "status_url": "/api/jobs/d065a643-cdbe-4af6-a9a5-85c589c1bd23"
+      }
+    }
+  ],
+  "revisions": [
+    {
+      "parent": "870c702e-6a1a-4971-b392-d08aa89a91fa",
+      "request": {
+        "mode": "source",
+        "text": "用三张原创程序绘制的插画说明一天中的三次短暂停留：第一张是晨光中的小山，出门前看看远处；第二张是午后窗边的一杯茶，放下手里的事情休息片刻；第三张是暮色里的河岸，傍晚回顾当天的安排。这是虚构的日常场景，用于展示图片轮播，不是摄影记录，也不作健康效果承诺。",
+        "title": "第二阶段验收 · 图片轮播 · 修正版"
+      },
+      "response": {
+        "job_id": "ca6b7c7c-5d97-484e-b822-4fdaf66e69a9",
+        "parent_job_id": "870c702e-6a1a-4971-b392-d08aa89a91fa",
+        "status": "QUEUED",
+        "status_url": "/api/jobs/ca6b7c7c-5d97-484e-b822-4fdaf66e69a9"
+      }
+    },
+    {
+      "parent": "d065a643-cdbe-4af6-a9a5-85c589c1bd23",
+      "request": {
+        "mode": "narration",
+        "text": "观众：缓存是什么？\n讲解：缓存是临时保存的一份数据副本，便于之后再次读取。\n观众：有缓存就不用原始数据了吗？\n讲解：仍然需要保留原始数据。副本可能过期，使用时要考虑更新条件。",
+        "title": "第二阶段验收 · 原理科普对话体 · 修正版"
+      },
+      "response": {
+        "job_id": "b47da7c1-ca10-46b5-9148-99660278ff4b",
+        "parent_job_id": "d065a643-cdbe-4af6-a9a5-85c589c1bd23",
+        "status": "QUEUED",
+        "status_url": "/api/jobs/b47da7c1-ca10-46b5-9148-99660278ff4b"
+      }
+    }
+  ],
+  "additional_checks": [
+    {
+      "parent": "870c702e-6a1a-4971-b392-d08aa89a91fa",
+      "endpoint": "media-revisions",
+      "request": {
+        "voice_id": "zm_yunxi",
+        "video_speed": 1.5
+      },
+      "response": {
+        "job_id": "f2998b79-89a8-4280-9dd9-9ef214a87c20",
+        "status": "QUEUED"
+      }
+    },
+    {
+      "parent": "d065a643-cdbe-4af6-a9a5-85c589c1bd23",
+      "endpoint": "revisions",
+      "request": {
+        "mode": "source",
+        "title": "第二阶段验收 · 自动科普问答",
+        "text": "缓存是临时保存的一份数据副本，便于之后再次读取。原始数据仍然需要保留。缓存副本可能过期，使用时需要考虑更新条件。缓存的用途是方便再次读取，不能据此认为副本始终与原始数据一致。材料未提供性能测试，因此不增加速度提升数字或具体系统案例。"
+      },
+      "response": {
+        "job_id": "18d66772-e819-4435-aeeb-0b2131b533a6",
+        "parent_job_id": "d065a643-cdbe-4af6-a9a5-85c589c1bd23",
+        "status": "QUEUED",
+        "status_url": "/api/jobs/18d66772-e819-4435-aeeb-0b2131b533a6"
+      }
+    }
+  ]
+}

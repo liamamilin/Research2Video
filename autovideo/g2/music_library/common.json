@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "description": "用途和节奏为整理建议；技术检查与人工听感确认分开记录",
+  "assets": [
+    {
+      "id": "ambient_pad",
+      "asset_sha256": "60620efbd4de8cb4eb1e489be18e8d769705ef8d41797db3a0058e7c0df2450e",
+      "source_sha256": "95802c0d6ab3f57601a42916bf66dd911085dc71e1a96fedc642954dcc4dd42e",
+      "display_name": "通用 · 轻柔铺底",
+      "recipe_ids": [
+        "how_to",
+        "science_explainer"
+      ],
+      "rhythm": "弱",
+      "purpose": "步骤讲解、概念解释；以旁白为主的轻柔持续背景",
+      "common": true
+    },
+    {
+      "id": "layered_space",
+      "asset_sha256": "55c16a8babab2ae89c7def932b9f3e05decc0d7db8af2067598cbde2ae1d326c",
+      "source_sha256": "27ca6b6733f72f8e745aa226b09b64b57df26145739b2338d64fb5af4bddd02f",
+      "display_name": "快讯 · 渐进音景",
+      "recipe_ids": [
+        "ai_news"
+      ],
+      "rhythm": "轻",
+      "purpose": "产品更新、变化概览；需要适度推进感的新闻讲解",
+      "common": true
+    },
+    {
+      "id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "asset_sha256": "8d4bfa2764a9fea5a459b154d8924e270dce4f160e94e77e3691adbb75769077",
+      "display_name": "快讯 · 轻快电子",
+      "recipe_ids": [
+        "ai_news"
+      ],
+      "rhythm": "中",
+      "purpose": "科技快讯、产品发布；较轻快的电子编排方向",
+      "common": true
+    },
+    {
+      "id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+      "asset_sha256": "742829e592cf73cb8be49232055e63ed2090f0ceb1295e4f1bc9c0e72d9df30e",
+      "display_name": "教程 · 温暖钢琴",
+      "recipe_ids": [
+        "how_to"
+      ],
+      "rhythm": "轻",
+      "purpose": "操作教程、方法说明；温和、留出讲解空间的钢琴方向",
+      "common": true
+    },
+    {
+      "id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "asset_sha256": "e800afd236b782062780a2bdc00b7b2a68b7a4f7febd91f2acf5db30887f022f",
+      "display_name": "科普 · 舒缓氛围",
+      "recipe_ids": [
+        "science_explainer"
+      ],
+      "rhythm": "弱",
+      "purpose": "原理科普、概念解释；舒缓、稀疏的氛围方向",
+      "common": true
+    },
+    {
+      "id": "pulse_loop",
+      "asset_sha256": "103feabb74a31d3083368cc4f597cca6dec45c670b46465ce0a422cac28b0032",
+      "source_sha256": "cceba9b40d2b86af433a7db7820b01d0384c395c331f004e94cf06b535825606",
+      "display_name": "备选 · 轻节奏循环",
+      "recipe_ids": [],
+      "rhythm": "中",
+      "purpose": "节奏短片的备选鼓循环；密集旁白使用前先试听",
+      "common": false
+    },
+    {
+      "id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+      "asset_sha256": "60620efbd4de8cb4eb1e489be18e8d769705ef8d41797db3a0058e7c0df2450e",
+      "display_name": "导入参考 · 原创和声",
+      "recipe_ids": [],
+      "rhythm": "待确认",
+      "purpose": "原有本机导入参考，听审确认后再决定用途",
+      "common": false
+    }
+  ]
+}

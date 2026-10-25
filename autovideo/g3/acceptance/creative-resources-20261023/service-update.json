@@ -1,0 +1,21 @@
+{
+  "old_pid": 55435,
+  "service": {
+    "status": "ready",
+    "action": "started",
+    "pid": 75160,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "existing_jobs_before": 153,
+  "existing_jobs_after": 153,
+  "forms": 31,
+  "recipes": [
+    "ai_news",
+    "how_to",
+    "science_explainer"
+  ],
+  "worker_primary": true,
+  "stop_signal": "SIGTERM",
+  "force_stop": false
+}

@@ -1,0 +1,82 @@
+{
+  "status": "ready",
+  "recommended_form": "process_diagram",
+  "reason": "整片围绕借书申请的处理流程展开，包含申请后查库存、有库存与无库存的分支、候补顺序、归还后通知以及取书结束，适合用流程图按步骤和条件分支清晰展示。",
+  "ordered_unit_ids": [
+    "u1",
+    "u2",
+    "u3",
+    "u5",
+    "u6",
+    "u7"
+  ],
+  "excluded_units": [
+    {
+      "unit_id": "u4",
+      "reason": "duplicate",
+      "duplicate_of": "u2"
+    }
+  ],
+  "issues": [
+    {
+      "kind": "duplicate",
+      "message": "“有库存就保留图书，通知读者取书；没有库存就候补。”这句话在原文中出现两次，内容完全一致，已保留第一次出现的表述，第二次作为重复项排除。",
+      "source_quotes": [
+        "有库存就保留图书，通知读者取书；没有库存就候补。"
+      ],
+      "blocking": false
+    },
+    {
+      "kind": "duplicate",
+      "message": "“借书流程笔记：读者提交借书申请后系统查库存。”与后文“读者提交借书申请后系统查库存。”内容近似重复，但后一句缺少前面的说明词，并非逐字重复，因此两者都保留。",
+      "source_quotes": [
+        "借书流程笔记：读者提交借书申请后系统查库存。",
+        "读者提交借书申请后系统查库存。"
+      ],
+      "blocking": false
+    }
+  ],
+  "requested_form": "auto",
+  "selected_form": "process_diagram",
+  "selection_mode": "automatic",
+  "source_sha256": "fd7a900343e8790e58b2589616360e888740a0d1265d2e5e31ac05bf580256dc",
+  "source_units": [
+    {
+      "id": "u1",
+      "text": "借书流程笔记：读者提交借书申请后系统查库存。",
+      "separator": ""
+    },
+    {
+      "id": "u2",
+      "text": "有库存就保留图书，通知读者取书；没有库存就候补。",
+      "separator": "\n"
+    },
+    {
+      "id": "u3",
+      "text": "图书归还后，按候补顺序通知读者。",
+      "separator": ""
+    },
+    {
+      "id": "u4",
+      "text": "有库存就保留图书，通知读者取书；没有库存就候补。",
+      "separator": "\n"
+    },
+    {
+      "id": "u5",
+      "text": "读者提交借书申请后系统查库存。",
+      "separator": "\n"
+    },
+    {
+      "id": "u6",
+      "text": "未收到取书通知时，不能直接领取图书。",
+      "separator": ""
+    },
+    {
+      "id": "u7",
+      "text": "读者取书后本次申请结束。",
+      "separator": ""
+    }
+  ],
+  "prepared_sha256": "473e917e1435ac32edfad3ad386850a363770a06025f8a372d5322da3065240a",
+  "source_rewritten": false
+}

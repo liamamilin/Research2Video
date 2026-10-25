@@ -1,0 +1,43 @@
+{
+  "report_path": "state/video_editorial_sources/e118dc7db5f34c3ba90af0285b4688f5/verified-v3.txt",
+  "original_report_path": "output/consumer/2026-10-22_consumer_daily.md",
+  "citation_check": {
+    "total": 5,
+    "matched": 5,
+    "unmatched": 0,
+    "coverage": 1.0,
+    "unmatched_examples": [],
+    "retrieved_count": 5,
+    "checked_at": null,
+    "reachability": null,
+    "citation_audit": null
+  },
+  "sources": [
+    {
+      "title": "Motorola Edge 70 Max",
+      "url": "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html",
+      "supported_claims": "Notebookcheck 第三方评测，2026-10-21。大电池、旗舰功能和续航是主要卖点。评测肯定续航与机身手感，认为当前价格较低；同时指出存储不能扩展，更新支持有限且相关信息有冲突。原网页包含续航测试、价格和缺点，不能从旧摘要未收录推断原网页没有。这里只保留定性评价，不跨测试条件比较其他品牌。"
+    },
+    {
+      "title": "Oppo Enco X4",
+      "url": "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php",
+      "supported_claims": "GSMArena 作者 Ivan 的开箱上手，2026-10-22。产品为 Oppo 旗舰降噪耳机，刚国际首发；Dynaudio 调音，Dynaudio 为音频品牌。盒内有耳机及 S、M、L 硅胶耳套。作者在几次飞行试用后认为佩戴舒适、降噪有效，这是有限使用场景中的主观体验，不能当作统一条件的量化降噪排名。原网页确实有试用体验，并非只有包装信息。旧 URL 把 handson 错写为 hands-on。"
+    },
+    {
+      "title": "Bose 与 Skullcandy",
+      "url": "https://www.gsmarena.com/bose_acquires_skullcandy-news-75162.php",
+      "supported_claims": "GSMArena 媒体报道，2026-10-22，引述双方联合新闻稿：Bose 正在收购 Skullcandy；报道没有证明交易交割已完成。未来产品拟结合 Bose 音频专长及 Skullcandy 设计和社群；Skullcandy 将作为独立品牌留在 Bose 高端消费音频产品线，继续以 Park City, Utah 为基地。这是未来规划，不能推断新品已上市或价格已变化。"
+    },
+    {
+      "title": "Acer Swift Spin 14 AI",
+      "url": "https://www.notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html",
+      "supported_claims": "Notebookcheck 第三方可翻转笔记本评测，2026-10-21。采用高通 Snapdragon for Windows ARM 方案。评测对性能和效率进步给出积极评价，特别提及 ARM 原生应用表现；也提醒一般 Windows x64 软件的可靠性/使用场景差异及价格取舍。不能泛化成所有软件都更快。原网页有具体测试和价格，不使用旧摘要的没说明表述。"
+    },
+    {
+      "title": "Xiaomi 18 Fold",
+      "url": "https://www.notebookcheck.net/Xiaomi-18-Fold-review-Big-display-big-performance-big-compromises.1428903.0.html",
+      "supported_claims": "Notebookcheck 第三方评测，2026-10-20。宽幅折叠手机，两块 OLED 显示屏。评测肯定宽幅形态、屏幕亮度与硬件，同时指出部分软件功能限制、系统更新安排不清晰等问题。原网页有续航、相机评价与具体缺点，不能说标题有缺点而全文没列。这里只保留形态/屏幕及软件取舍，不生成跨条件性能排名。"
+    }
+  ],
+  "version": 3
+}

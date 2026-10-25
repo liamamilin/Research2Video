@@ -1,0 +1,232 @@
+{
+  "unsupported_reason": null,
+  "scenes": [
+    {
+      "id": "c1_s1",
+      "title": "升级前如何确认版本？",
+      "takeaway": "先查版本，低于阈值再升级并再次确认",
+      "narration_segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ],
+      "nodes": [
+        {
+          "id": "c1_view",
+          "label": "查看当前版本",
+          "source_quote": "升级 crewAI 之前，先运行 pip show crewai 查看当前版本。"
+        },
+        {
+          "id": "c1_check",
+          "label": "版本低于 1.15.27",
+          "source_quote": "如果版本低于 1.15.27"
+        },
+        {
+          "id": "c1_upgrade",
+          "label": "执行升级",
+          "source_quote": "就执行 pip install --upgrade crewai"
+        },
+        {
+          "id": "c1_recheck",
+          "label": "再次确认版本",
+          "source_quote": "然后再运行一次 pip show crewai 确认版本。"
+        }
+      ],
+      "edges": [
+        {
+          "id": "c1_e1",
+          "from": "c1_view",
+          "to": "c1_check",
+          "label": "低于",
+          "source_quote": "如果版本低于 1.15.27",
+          "relation": "flow"
+        },
+        {
+          "id": "c1_e2",
+          "from": "c1_check",
+          "to": "c1_upgrade",
+          "label": "执行",
+          "source_quote": "就执行 pip install --upgrade crewai",
+          "relation": "flow"
+        },
+        {
+          "id": "c1_e3",
+          "from": "c1_upgrade",
+          "to": "c1_recheck",
+          "label": "再确认",
+          "source_quote": "然后再运行一次 pip show crewai 确认版本。",
+          "relation": "flow"
+        }
+      ],
+      "cues": [
+        {
+          "segment_id": "c1_n1",
+          "quote": "升级 crewAI 之前，先运行 pip show crewai 查看当前版本。",
+          "node_ids": [
+            "c1_view"
+          ],
+          "edge_ids": []
+        },
+        {
+          "segment_id": "c1_n2",
+          "quote": "如果版本低于 1.15.27",
+          "node_ids": [
+            "c1_view",
+            "c1_check"
+          ],
+          "edge_ids": [
+            "c1_e1"
+          ]
+        },
+        {
+          "segment_id": "c1_n2",
+          "quote": "就执行 pip install --upgrade crewai",
+          "node_ids": [
+            "c1_check",
+            "c1_upgrade"
+          ],
+          "edge_ids": [
+            "c1_e2"
+          ]
+        },
+        {
+          "segment_id": "c1_n2",
+          "quote": "然后再运行一次 pip show crewai 确认版本",
+          "node_ids": [
+            "c1_upgrade",
+            "c1_recheck"
+          ],
+          "edge_ids": [
+            "c1_e3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c2_s1",
+      "title": "最小 sweep 何时运行",
+      "takeaway": "版本确认后跑一次最小 sweep",
+      "narration_segment_ids": [
+        "c2_n1"
+      ],
+      "nodes": [
+        {
+          "id": "verify_version",
+          "label": "确认版本",
+          "source_quote": "版本确认后"
+        },
+        {
+          "id": "run_sweep",
+          "label": "运行最小 sweep",
+          "source_quote": "运行 crewai eval --models 跑一次最小 sweep"
+        }
+      ],
+      "edges": [
+        {
+          "id": "verify_to_run",
+          "from": "verify_version",
+          "to": "run_sweep",
+          "label": "版本确认后",
+          "source_quote": "版本确认后，运行 crewai eval --models 跑一次最小 sweep。",
+          "relation": "flow"
+        }
+      ],
+      "cues": [
+        {
+          "segment_id": "c2_n1",
+          "quote": "版本确认后",
+          "node_ids": [
+            "verify_version"
+          ],
+          "edge_ids": []
+        },
+        {
+          "segment_id": "c2_n1",
+          "quote": "运行 crewai eval --models 跑一次最小 sweep",
+          "node_ids": [
+            "run_sweep",
+            "verify_version"
+          ],
+          "edge_ids": [
+            "verify_to_run"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c2_s2",
+      "title": "对比表怎么判断",
+      "takeaway": "两列齐全就存档，缺少这两列就回到第一步检查版本",
+      "narration_segment_ids": [
+        "c2_n2",
+        "c2_n3"
+      ],
+      "nodes": [
+        {
+          "id": "view_table",
+          "label": "查看对比表",
+          "source_quote": "命令结束后先看对比表"
+        },
+        {
+          "id": "archive_output",
+          "label": "存档输出原件",
+          "source_quote": "就把输出原件存档"
+        },
+        {
+          "id": "back_check_version",
+          "label": "回到第一步检查版本",
+          "source_quote": "就回到第一步检查版本"
+        }
+      ],
+      "edges": [
+        {
+          "id": "table_to_archive",
+          "from": "view_table",
+          "to": "archive_output",
+          "label": "两列齐全",
+          "source_quote": "如果每一行都有 cost 和 time，就把输出原件存档",
+          "relation": "flow"
+        },
+        {
+          "id": "table_to_check",
+          "from": "view_table",
+          "to": "back_check_version",
+          "label": "缺少这两列",
+          "source_quote": "如果缺少这两列，就回到第一步检查版本",
+          "relation": "flow"
+        }
+      ],
+      "cues": [
+        {
+          "segment_id": "c2_n2",
+          "quote": "命令结束后先看对比表",
+          "node_ids": [
+            "view_table"
+          ],
+          "edge_ids": []
+        },
+        {
+          "segment_id": "c2_n2",
+          "quote": "如果每一行都有 cost 和 time，就把输出原件存档",
+          "node_ids": [
+            "view_table",
+            "archive_output"
+          ],
+          "edge_ids": [
+            "table_to_archive"
+          ]
+        },
+        {
+          "segment_id": "c2_n3",
+          "quote": "如果缺少这两列，就回到第一步检查版本",
+          "node_ids": [
+            "view_table",
+            "back_check_version"
+          ],
+          "edge_ids": [
+            "table_to_check"
+          ]
+        }
+      ]
+    }
+  ]
+}

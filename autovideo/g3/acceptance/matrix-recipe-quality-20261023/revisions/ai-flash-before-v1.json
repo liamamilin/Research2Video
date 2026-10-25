@@ -1,0 +1,1251 @@
+{
+  "script_id": "630569acd6a048faae84e12ae3e83a65",
+  "version": 1,
+  "title": "DeepSeek 开源推理引擎：开的是引擎，不是服务",
+  "sections": [
+    {
+      "title": "开的是引擎",
+      "paragraphs": [
+        {
+          "text": "DeepSeek 把内部跑 V4.1 Flash 的生产推理框架开源了，叫 DeepInfer，Apache-2.0。几天时间接近两万 star，但整个仓库只有四次代码提交——这更像一次发布，不是一个成熟项目。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "仓库确为 deepseek-ai/DeepInfer、Apache-2.0；报告记载 10-22 约 19,000 stars（「接近两万」成立）、仅 4 次 commit（截至 10-22 的社区观测），「更像一次发布而非成熟项目」是基于这两项事实的定性判断，未超出依据。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer"
+            ]
+          }
+        },
+        {
+          "text": "更关键的是它开了什么。README 里专门有一节，标题写得很直白：构建一个完整推理服务所必需、但本次不包含——KV cache 系统、prefill 和 decode 分离，还有跨数据并行副本的负载均衡，三样都没给，理由是跟内部基础设施耦合太深。仓库的入口是 examples 下的离线批量脚本，没有 HTTP 服务端。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer",
+            "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "README 专节标题为 Required for a complete inference service (not included in this release)，列出 KV cache system、prefill/decode disaggregation、跨数据并行副本的负载均衡三项及「与内部基础设施耦合」的理由；入口为 examples/offline_inference.py 的离线批量 API，无 HTTP 服务。表述与来源一致。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer",
+              "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "能跑的范围很窄",
+      "paragraphs": [
+        {
+          "text": "模型只有 DeepSeek-V4.1-Flash 一个；硬件只有 NVIDIA SM100 配 CUDA 13，或者昇腾 950 配 CANN 9.2，Hopper 及更早都不在名单里。官方说的最小高效部署，是 64 卡 prefill 加 64 卡 decode。所以对大多数人来说，这套代码跑不起来。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告确认支持模型仅 DeepSeek-V4.1-Flash，硬件仅 NVIDIA SM100（CUDA 13）与昇腾 950（CANN 9.2），Hopper 及更早不在列表；最小「高效」部署为 64 卡 prefill + 64 卡 decode。「对大多数人跑不起来」与硬件白名单极窄、个人难以自建生产级部署的判断一致。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "值得读的两个取舍",
+      "paragraphs": [
+        {
+          "text": "那它剩下的价值在哪？在读它怎么省算力。一个是 SWA 有界重放：缓存没命中时，只重算最后 128 个 token，厂商说 prefill 的总计算量因此少了接近一半。另一个是 DSpark 投机解码：草稿模型一次提 5 个 token，再用一个 confidence head 判断哪些值得校验，每步被校验的草稿 token 少了三成左右。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "部署问答原文支持三处：SWA 有界重放只重算最后 128 个 token、厂商称 Prefill 总计算量减少近一半；DSpark 草稿模型一次提 5 个 token、confidence head 预测接受率、每步被校验草稿 token 减少约 30%。「厂商说」的归因在同段自然承接，且均为厂商自述口径。",
+            "sources": [
+              "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+            ]
+          }
+        },
+        {
+          "text": "但 DSpark 的收益得看并发。第三方整理的厂商曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%。厂商说的「生产负载下吞吐涨 4% 到 7%」，只在那个高并发点上成立——低并发下它是亏的。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer",
+            "https://neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950",
+            "https://hitlistai.com/posts/2026-10-23/deepinfer"
+          ],
+          "evidence": "CITED",
+          "note": "已按审计意见改写",
+          "fact_verification": {
+            "status": "verified",
+            "reason": "NeoTeo 整理的厂商曲线为 16 seq/rank 时 −1.5% 至 96 seq/rank 时 +11.0%，与讲稿数字一致；讲稿已把来源标为「第三方整理的厂商曲线」，并把 +4%~7% 限定为厂商在高并发生产负载点的说法，低并发负收益的限定保留，未把厂商数据冒充实测或普遍规律。",
+            "sources": [
+              "https://hitlistai.com/posts/2026-10-23/deepinfer",
+              "https://neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950"
+            ]
+          },
+          "revision": {
+            "before": "但 DSpark 的收益得看并发。厂商自己的曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%——低并发下它是亏的。这个条件，比那个加速数字更值得记住。",
+            "proposed": "但 DSpark 的收益得看并发。第三方整理的厂商曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%。厂商说的「生产负载下吞吐涨 4% 到 7%」，只在那个高并发点上成立——低并发下它是亏的。",
+            "accepted": true,
+            "lost_conditions": []
+          }
+        }
+      ]
+    },
+    {
+      "title": "两个数字的限定",
+      "paragraphs": [
+        {
+          "text": "厂商还给了两个更大的数：单集群每天服务 155 万亿 token，每 GPU 小时收入 38 美元，注意限定——是谷价，是收入不是利润。到 10 月 23 号，还没有第三方独立基准。所以这个仓库现在最实际的用法，是花一个下午去读它那两个取舍；至于它能不能撑起一个服务，还得等。",
+          "citations": [
+            "https://github.com/deepseek-ai/DeepInfer",
+            "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "部署问答给出单集群每日 155 trillion tokens、每 GPU 小时 38 美元且限定 at valley pricing；官方定价页确认谷价为高峰价一半，报告确认该数字是收入非利润；截至 2026-10-23 无第三方独立基准（Bloomberg、NeoTeo 等均如此表述）。讲稿保留了「谷价」「收入不是利润」「无第三方独立基准」三项关键限定，归因为厂商自述；结尾「读取舍、能否撑起服务还得等」与报告「拿来读和抄的工程参考」的判断一致。",
+            "sources": [
+              "https://api-docs.deepseek.com/zh-cn/quick_start/pricing",
+              "https://github.com/deepseek-ai/DeepInfer"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 536,
+    "estimated_seconds": 120,
+    "segments": 22,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 1.25,
+    "budget": 326,
+    "ratio": 1.605,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "开的是引擎",
+        "spoken_length": 167,
+        "budget": 82
+      },
+      {
+        "title": "能跑的范围很窄",
+        "spoken_length": 81,
+        "budget": 82
+      },
+      {
+        "title": "值得读的两个取舍",
+        "spoken_length": 180,
+        "budget": 81
+      },
+      {
+        "title": "两个数字的限定",
+        "spoken_length": 108,
+        "budget": 81
+      }
+    ]
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 2,
+      "prompt_tokens": 9746,
+      "completion_tokens": 8490,
+      "total_tokens": 18236
+    },
+    "problems": [],
+    "editorial_brief": {
+      "considered": [
+        "从厂商数字切入（单集群一天 155 万亿 token、每 GPU 小时 38 美元）：传播力最强，最容易做钩子；但两个数都只有 DeepSeek 自述、没有第三方测过，拿它当主线等于替厂商复述口径，开发者听完也拿不走可用的判断。可作为结尾的一句信号，不做主轴。",
+        "从两个工程技巧切入（SWA 有界重放 + DSpark 投机解码）：对开发者最干货，思路也不绑硬件；但脱离“开源”这个新闻点就变成技术科普，还要先花篇幅解释背景，1.25 分钟里塞不下，且开场缺少“为什么要现在听”。",
+        "从“开源的是引擎不是服务”切入（选用）：这一条直接改变开发者的行动判断——能不能拿来跑、要不要花时间看。README 里那节“完整推理服务所需、本次不包含”是硬证据，且和中文媒体“全面开源”的传播形成落差，落差本身有信息量。后半段再用 SWA 的技巧兑现“那它值什么”，主线不空。",
+        "从“和 vLLM/SGLang 差多少”切入：这是社区最想知道的问题，但公开材料里没有经过确认的对比数据，HN 上的质疑也没有结论；拿它做主线只能停在猜测，不出稿。",
+        "从日期、标题、参数逐项纠错切入：属于内部审稿问题，观众没看过底稿，逐条纠正只会打断节奏；只在事实层面按 10-20 宣布、引擎而非服务来讲，不向观众交代纠错过程。"
+      ],
+      "angle": "DeepSeek 把跑 V4.1 Flash 的生产推理引擎开源了，但开的是引擎不是服务——这决定了你拿到手是拿来读、拿来抄它怎么省算力，而不是拿来部署。",
+      "viewer_value": "省掉开发者打开仓库后的一段弯路：先知道哪三块关键组件没给、硬件只认哪两种卡，再知道这份代码里真正值得读的是哪两个省算力的取舍，以及其中一个在低并发下会变慢。听完能判断值不值得花一个下午去看。",
+      "throughline": "先用“生产推理框架开源、几天近两万 star”给出听的理由，紧接着翻到 README 那节“本次不包含”，把“引擎不是服务”这件事落到三块缺失组件和离线脚本入口上；再补硬件与模型白名单，说明多数人跑不起来。然后回答“那它还有什么价值”：把 SWA 只重算最后 128 个 token、DSpark 少校验约三成草稿这两个具体取舍讲清楚，并当场给出 DSpark 在低并发下是负收益的条件。结尾回到厂商那两个没有第三方验证的数字，留一个值得关注的信号。",
+      "keep": [
+        "2026-10-20 DeepSeek 官方开源 DeepInfer，Apache-2.0，仓库 github.com/deepseek-ai/DeepInfer——新闻本体，也是开场的事实基础。",
+        "README 单列一节“Required for a complete inference service (not included in this release)”，列出 KV cache 系统、prefill/decode 分离、跨数据并行副本的负载均衡三项未开源——这是“引擎不是服务”的硬证据，全篇的支点。",
+        "入口是 examples/offline_inference.py 的离线批量 API，没有 HTTP 服务端——让“不能拿来跑服务”变成可验证的具体事实。",
+        "支持模型仅 DeepSeek-V4.1-Flash；硬件仅 NVIDIA SM100（CUDA 13）与昇腾 Ascend 950（CANN 9.2），Hopper 及更早不在列表——决定绝大多数听众的实际处境。",
+        "最小高效部署 64 卡 prefill + 64 卡 decode——一个数字就说明自建门槛，不用展开集群拓扑。",
+        "已开源能力原文：distributed inference、speculative decoding、SWA bounded replay、structured outputs——界定“开源了什么”，避免观众以为只有壳子。",
+        "SWA 有界重放：缓存未命中时只重算最后 128 个 token，厂商称 prefill 总计算量减少近一半——本期最值得带走的技术细节，解释力最强。",
+        "DSpark：草稿模型一次提 5 个 token，confidence head 判断哪些值得校验，每步被校验草稿 token 减少约 30%——第二个可借鉴思路，一句话说清机制。",
+        "DSpark 收益随并发变化：16 seq/rank 时 −1.5%，96 seq/rank 时 +11.0%——必须保留的条件，否则“提速”会被误读成稳赚。",
+        "厂商自述 155 trillion tokens/day per cluster、每 GPU 小时 38 美元；口径是谷价（off-peak）下的收入而非利润；截至 2026-10-23 无第三方独立基准——结尾的信号，带上限定再说。",
+        "框架最初主要基于 vLLM 构建——一句背景，解释为什么它对熟悉 vLLM 的人读起来不陌生。",
+        "传播量级：几天内约 1.9 万 star，代码提交仅 4 次——用来说明这是一次发布而不是成熟项目，支撑“拿来读”的判断。"
+      ],
+      "leave_out": [
+        "官方定价页的人民币单价（缓存命中 0.02/0.04 元、输出 4/8 元每百万 token）与峰谷时段规则——只有要核算成本时才需要，本期不核算。",
+        "3FS 约 100 PiB、按 128 token 块写入、Agent 流量留 3 天——属于未开源的缓存层内部实现，讲了反而把注意力从“没给你”引开。",
+        "线上口径 77K 输入、96% 缓存命中、首字约 400ms、单卡 prefill 6 万/150 万 tokens/s——细节密度高、都是自述，对“引擎不是服务”这条主线没有增量。",
+        "官方性能图的 4 卡 prefill + 64 卡 decode 测试配置——与 128 卡门槛重复，一句话已够。",
+        "昇腾 950 路径无公开实测、batch-invariant 与 deterministic sampling 仅 NVIDIA 可用——坑属实，但在 1.25 分钟里会挤掉 SWA 的位置；对多数听众 SM100 门槛已经排除了这个分支。",
+        "DSpark 的具体实现细节、SWA 与窗口大小的关系等机制展开——留作观众自己去仓库看。",
+        "分析师观点（Omdia、J. Gold Associates）、2025 年 vLLM fork 的前科、与 vLLM/SGLang 的性能对比——前两个是评论，第三个没有确认数据。",
+        "Hacker News 2160 分、1900+ forks、star 时间线逐日数字——保留量级即可，精确数字不增加理解。",
+        "日期口径的内部纠正（10-20 宣布 vs 10-16 建仓 vs 10-21 转载）、候选材料中 caching/load balancing 的错误、许可证“未给”的错误——属于编辑流程，不在口播里向观众交代。",
+        "知乎原文链接的验证过程与二手交叉确认路径——不引用该文，也不提它。"
+      ],
+      "material": "【发布与仓库】\n1. 2026-10-20，DeepSeek 官方宣布开源内部推理框架 DeepInfer；GitHub 仓库 github.com/deepseek-ai/DeepInfer 创建于 2026-10-16，10-20 才公开宣传。许可 Apache-2.0；配套 deepseek-recipe 为 MIT。[1][3][13][14] https://github.com/deepseek-ai/DeepInfer\n2. 框架最初主要基于 vLLM 构建，另参考 SGLang 与 TensorRT-LLM（README 自述）。[1][3][5]\n3. 传播量级：10-21 约 13,900 star；10-22 约 19,000 star、1,900+ forks；代码仅 4 次 commit（第三方观测，截至 10-22）。[14][17]\n\n【开源范围：引擎，不是服务】\n4. README 有一节标题为 \"Required for a complete inference service (not included in this release)\"，列出三项未包含：KV cache system、prefill/decode disaggregation、load balancing across data-parallel replicas；理由是与内部基础设施耦合太深。[1][3][5][6]\n5. 本次发布为 offline inference，入口是 examples/offline_inference.py 的批量 API，不是 HTTP 服务端。[1][5][18]\n6. 官方部署问答原文列出的已支持能力：\"distributed inference, speculative decoding, SWA bounded replay, structured outputs, and more\"。[2] https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md\n7. 中文媒体口径为「全面开源」（第一财经、21 世纪经济报道），英文一手材料措辞为 \"offline inference with the core features needed for serving at scale\"。[1][5][10][11][17]\n\n【支持范围】\n8. 支持模型仅 DeepSeek-V4.1-Flash，默认 checkpoint deepseek-ai/DeepSeek-V4.1-Flash-1017。[1][3]\n9. 支持硬件仅 NVIDIA SM100（需 CUDA 13）与华为昇腾 Ascend 950（需 CANN 9.2）；Hopper 及更早架构不在列表。构建要求 Linux、GCC ≥ 13、Python 3.12。[3][5][7]\n10. 最小「高效」部署：64 卡 prefill + 64 卡 decode（共 128 卡）；1+1 可部署但非高效配置。生产形态为 prefill 用 8 卡机、decode 用 64–128 卡超节点，两阶段卡数比接近 1:1。[3][7][8][19]\n11. batch-invariant inference 与 deterministic sampling 仅在 NVIDIA 硬件可用。[3][7]\n\n【值得读的两个取舍】\n12. SWA bounded replay：缓存未命中时只重算最后 128 个 token；厂商称 Prefill 总计算量减少近一半。[2][3][8][20]\n13. DSpark 投机解码：草稿模型一次提 5 个 token，confidence head 预测接受率；厂商称每步被校验的草稿 token 减少约 30%，生产负载下吞吐 +4%~7%。[2][3][6][19]\n14. DSpark 收益随并发剧烈变化：厂商曲线显示 16 seq/rank 时 −1.5%，96 seq/rank 时 +11.0%——低并发可能反而变慢。[7]\n\n【厂商口径的数字】\n15. 厂商自述：单集群每日服务 155 trillion tokens；每 GPU 小时收入 38 美元，原文限定 \"at valley pricing\"（谷价）——是收入（revenue）不是利润。[2][3][4][13]\n16. 谷价 = 高峰价的一半；高峰时段为北京时间周一至周五 9:00–12:00、14:00–18:00（官方定价页）。[12] https://api-docs.deepseek.com/zh-cn/quick_start/pricing/\n17. 截至 2026-10-23，无任何第三方独立基准；Bloomberg、The Next Web、NeoTeo 三家均明确指出这一点。[4][6][7]\n\n【外部反应（仅作判断参考，不一定要讲）】\n18. vLLM 项目方在 X 上感谢 DeepSeek 承认社区基础，表示会把 DeepInfer 的思路吸收进后续对 V4.1-Flash 的支持。[6]\n19. HN 讨论 2,160 分登顶、800+ comments，主流质疑集中在「跟 vLLM/SGLang 到底差多少」，但页面没有确认的对比数据。[15]"
+    },
+    "editorial_prompt_version": 3,
+    "trusted_urls": 21,
+    "report_path": "output/video/2026-10-23_10-29-50_flash_07c8442c.md",
+    "written_at": "2026-10-23T21:45:47+0800",
+    "cell": {
+      "recipe": "flash",
+      "sha256": "c9e8d9872438cbb28240e0a2b3bc6fad5f8990afa3fd8b32849c0c0031647798",
+      "cell": "ai-developer-quick_take-short",
+      "status": "enabled",
+      "parts": {
+        "domain": {
+          "key": "ai"
+        },
+        "type": {
+          "key": "quick_take"
+        },
+        "format": {
+          "key": "short"
+        },
+        "audience": {
+          "key": "developer"
+        }
+      },
+      "resolved_sha256": "c144bb8ad5e94debf0106251cc556f64fed5eb9a355ef3a10daddffbdbde0a14",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "developer",
+          "sha256": "64030ba33845739f4a5b73135825fb8bf3cacc84e738458b78917713d35cb563"
+        },
+        "research": {
+          "kind": "research_template",
+          "name": "quick_take",
+          "sha256": "f9067443ecae9171d39186ad683704bed678e45caa6bd5563f2603522b3025e5"
+        },
+        "output": {
+          "kind": "part",
+          "name": "motion",
+          "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：/",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule"
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "更关键的是它开了什么。README 里专门有一节，标题写得很直白：构建一个完整推理服务所必需、但本次不包含——KV cache 系统、prefill 和 decode 分离，还有跨数据并行副本的负载均衡，三样都没给，理由是跟内部基础设施耦合太深。",
+          "problem": "说“开了什么”却马上列“不包含”，听众预期落空；实际开源范围（离线批量示例）被放到最后，主线绕了一下。",
+          "why": "观众要多转一道弯才知道仓库到底能干什么，容易误以为它开了完整服务。",
+          "suggestion": "先交代实际范围，再列缺口：“它开出来的不是完整服务端，而是 examples 下的离线批量推理示例；README 明确说 KV cache、PD 分离、跨 DP 副本负载均衡都没给，因为耦合内部基础设施太深。”",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "第三方整理的厂商曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%。厂商说的「生产负载下吞吐涨 4% 到 7%」，只在那个高并发点上成立——低并发下它是亏的。",
+          "problem": "“第三方整理”是来源噪音；“负 1.5%”没说是吞吐还是延迟；“只在那个高并发点上”把区间说得过窄，像只在一个测试点成立。",
+          "why": "听众抓不住比较口径，也会怀疑结论是不是挑点。",
+          "suggestion": "改成：“按厂商曲线，16 seq/rank 时吞吐 -1.5%，96 时 +11%；4%-7% 的提升只出现在高并发区间，低并发会亏。”保留归因，删掉整理过程。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "厂商还给了两个更大的数：单集群每天服务 155 万亿 token，每 GPU 小时收入 38 美元，注意限定——是谷价，是收入不是利润。",
+          "problem": "从技术取舍突然跳到内部生产规模和收入，两个数没有直接解释开源代码的价值；“注意限定”像审稿备注，打断收束。",
+          "why": "听众不知道这些数该用来判断什么，甚至可能把内部生产数据误当成开源版效果。",
+          "suggestion": "删掉这两个数，或压成一句限定背景：“官方还给过内部生产规模，但 38 美元/GPU 小时是谷价收入、不是利润，也不能证明开源代码效果；目前没有第三方基准。”然后接“先读两个取舍”。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "既然 KV cache、prefill/decode 分离和负载均衡都没给，DeepInfer 实际开源的核心模块是什么？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "仓库入口是 examples 下的离线批量脚本、没有 HTTP 服务端，那它为什么能被称为生产推理框架？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "开头说“更关键的是它开了什么”，紧接着全列“不包含”，预期会落空一下，需要自己转成“那到底开了啥”。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“最小高效部署”是 64 卡 prefill 加 64 卡 decode，那有没有更小规模能跑但效率低的配置？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“大多数人跑不起来”是指完全无法运行，还是无法达到官方的高效部署？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "SM100、CUDA 13、昇腾 950、CANN 9.2、64+64 卡连续报出，型号和卡数密度高但缺少规模参照，容易只记住“跑不起来”而走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "SWA 是什么？为什么缓存没命中时只重算最后 128 个 token，就能让 prefill 总计算量少接近一半？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "SWA 没解释就进入“有界重放”，紧接着 DSpark、confidence head，名词密度高，容易从省算力的思路里跟丢。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "16 seq/rank 和 96 seq/rank 具体指什么？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "曲线在 96 时是正 11%，厂商却说生产负载吞吐涨 4% 到 7%，这两个收益口径怎么对应？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "负 1.5%、正 11%、4% 到 7% 连着出现，基准和单位没对齐时，听起来像在算账，容易只记住“高并发才赚”而跟丢为什么。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“谷价”是指电费低谷价，还是算力售价的低谷价？这会决定 38 美元/GPU 小时该怎么理解。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "155 万亿 token/天和 38 美元/GPU 小时规模太大，个人开发者没体感，容易觉得离自己远而走神；最后拉回读代码才重新有收获。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 17,
+        "rule_must": 0,
+        "questions": 8,
+        "lost": 5,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 13
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 1,
+      "deletions": [],
+      "initial": [
+        {
+          "audit": "communication",
+          "rule": "E1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "有配音可能读不自然的符号：/",
+          "why": "配音读不出这些符号",
+          "suggestion": "改成文字说法",
+          "source": "rule",
+          "resolved": false
+        },
+        {
+          "audit": "fact",
+          "rule": "D4",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "厂商自己的曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%",
+          "problem": "这段数字来自第三方整理的厂商曲线（NeoTeo / HitlistAI 的报道），但本段列出的可信引用只有 GitHub 仓库首页，仓库首页并不能支持这组 seq/rank 收益数据。讲稿里说的“厂商自己的曲线”，在报告中的依据是厂商数据经第三方整理，不是仓库原文。",
+          "why": "观众会把这组低并发负收益的结论当成仓库里可以直接核对的内容；实际出处是二手整理，引用对不上。数字本身没错，但出处标错了，属于引用不能支持当前表述。",
+          "suggestion": "把引用换成含该曲线的来源（如 NeoTeo 报道或 HitlistAI 文章），或把话说成“据第三方整理的厂商曲线”，并保留 16 seq/rank 负 1.5%、96 seq/rank 正 11% 这两个点。",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "厂商自己的曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%",
+          "problem": "百分数没有说明是吞吐、加速比还是成本变化，听众听到“负 1.5%”会不知道在亏什么。",
+          "why": "这是全稿少数能纠正“投机解码一定加速”的关键条件，指代不清会削弱它的价值。",
+          "suggestion": "补清楚指标和方向，例如：“DSpark 的吞吐增益在 16 seq/rank 时约 -1.5%，到 96 才约 +11%。”",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "单集群每天155万亿token、每GPU小时38美元，是DeepSeek内部生产集群的运营数据，还是DeepInfer这套开源代码的实测结果？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“谷价”具体指什么口径？是电力谷时价格下的收入，还是某种计价条件？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "10月23号是哪一年？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "前面一直在讲代码里的省算力取舍，这里突然转到单集群token量和GPU小时收入，若没立即说清这些数字和开源代码价值的关系，容易短暂跟丢。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model",
+          "resolved": false
+        }
+      ],
+      "editorial_attempted": true
+    },
+    "audit_usage": {
+      "requests": 13,
+      "prompt_tokens": 59207,
+      "completion_tokens": 59125,
+      "total_tokens": 118332
+    },
+    "audit_prompt_version": 11,
+    "editorial_attempt": {
+      "applied": false,
+      "before": [
+        {
+          "title": "开的是引擎",
+          "paragraphs": [
+            {
+              "text": "DeepSeek 把内部跑 V4.1 Flash 的生产推理框架开源了，叫 DeepInfer，Apache-2.0。几天时间接近两万 star，但整个仓库只有四次代码提交——这更像一次发布，不是一个成熟项目。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "仓库确为 deepseek-ai/DeepInfer、Apache-2.0；报告记载 10-22 约 19,000 stars（「接近两万」成立）、仅 4 次 commit（截至 10-22 的社区观测），「更像一次发布而非成熟项目」是基于这两项事实的定性判断，未超出依据。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer"
+                ]
+              }
+            },
+            {
+              "text": "更关键的是它开了什么。README 里专门有一节，标题写得很直白：构建一个完整推理服务所必需、但本次不包含——KV cache 系统、prefill 和 decode 分离，还有跨数据并行副本的负载均衡，三样都没给，理由是跟内部基础设施耦合太深。仓库的入口是 examples 下的离线批量脚本，没有 HTTP 服务端。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer",
+                "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "README 专节标题为 Required for a complete inference service (not included in this release)，列出 KV cache system、prefill/decode disaggregation、跨数据并行副本的负载均衡三项及「与内部基础设施耦合」的理由；入口为 examples/offline_inference.py 的离线批量 API，无 HTTP 服务。表述与来源一致。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer",
+                  "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "能跑的范围很窄",
+          "paragraphs": [
+            {
+              "text": "模型只有 DeepSeek-V4.1-Flash 一个；硬件只有 NVIDIA SM100 配 CUDA 13，或者昇腾 950 配 CANN 9.2，Hopper 及更早都不在名单里。官方说的最小高效部署，是 64 卡 prefill 加 64 卡 decode。所以对大多数人来说，这套代码跑不起来。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "报告确认支持模型仅 DeepSeek-V4.1-Flash，硬件仅 NVIDIA SM100（CUDA 13）与昇腾 950（CANN 9.2），Hopper 及更早不在列表；最小「高效」部署为 64 卡 prefill + 64 卡 decode。「对大多数人跑不起来」与硬件白名单极窄、个人难以自建生产级部署的判断一致。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "值得读的两个取舍",
+          "paragraphs": [
+            {
+              "text": "那它剩下的价值在哪？在读它怎么省算力。一个是 SWA 有界重放：缓存没命中时，只重算最后 128 个 token，厂商说 prefill 的总计算量因此少了接近一半。另一个是 DSpark 投机解码：草稿模型一次提 5 个 token，再用一个 confidence head 判断哪些值得校验，每步被校验的草稿 token 少了三成左右。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "部署问答原文支持三处：SWA 有界重放只重算最后 128 个 token、厂商称 Prefill 总计算量减少近一半；DSpark 草稿模型一次提 5 个 token、confidence head 预测接受率、每步被校验草稿 token 减少约 30%。「厂商说」的归因在同段自然承接，且均为厂商自述口径。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+                ]
+              }
+            },
+            {
+              "text": "但 DSpark 的收益得看并发。第三方整理的厂商曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%。厂商说的「生产负载下吞吐涨 4% 到 7%」，只在那个高并发点上成立——低并发下它是亏的。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer",
+                "https://neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950",
+                "https://hitlistai.com/posts/2026-10-23/deepinfer"
+              ],
+              "evidence": "CITED",
+              "note": "已按审计意见改写",
+              "fact_verification": {
+                "status": "verified",
+                "reason": "NeoTeo 整理的厂商曲线为 16 seq/rank 时 −1.5% 至 96 seq/rank 时 +11.0%，与讲稿数字一致；讲稿已把来源标为「第三方整理的厂商曲线」，并把 +4%~7% 限定为厂商在高并发生产负载点的说法，低并发负收益的限定保留，未把厂商数据冒充实测或普遍规律。",
+                "sources": [
+                  "https://hitlistai.com/posts/2026-10-23/deepinfer",
+                  "https://neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950"
+                ]
+              },
+              "revision": {
+                "before": "但 DSpark 的收益得看并发。厂商自己的曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%——低并发下它是亏的。这个条件，比那个加速数字更值得记住。",
+                "proposed": "但 DSpark 的收益得看并发。第三方整理的厂商曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%。厂商说的「生产负载下吞吐涨 4% 到 7%」，只在那个高并发点上成立——低并发下它是亏的。",
+                "accepted": true,
+                "lost_conditions": []
+              }
+            }
+          ]
+        },
+        {
+          "title": "两个数字的限定",
+          "paragraphs": [
+            {
+              "text": "厂商还给了两个更大的数：单集群每天服务 155 万亿 token，每 GPU 小时收入 38 美元，注意限定——是谷价，是收入不是利润。到 10 月 23 号，还没有第三方独立基准。所以这个仓库现在最实际的用法，是花一个下午去读它那两个取舍；至于它能不能撑起一个服务，还得等。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer",
+                "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "部署问答给出单集群每日 155 trillion tokens、每 GPU 小时 38 美元且限定 at valley pricing；官方定价页确认谷价为高峰价一半，报告确认该数字是收入非利润；截至 2026-10-23 无第三方独立基准（Bloomberg、NeoTeo 等均如此表述）。讲稿保留了「谷价」「收入不是利润」「无第三方独立基准」三项关键限定，归因为厂商自述；结尾「读取舍、能否撑起服务还得等」与报告「拿来读和抄的工程参考」的判断一致。",
+                "sources": [
+                  "https://api-docs.deepseek.com/zh-cn/quick_start/pricing",
+                  "https://github.com/deepseek-ai/DeepInfer"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "targets": {
+        "S1P2": [
+          "【编辑建议，按实际效果取舍】说“开了什么”却马上列“不包含”，听众预期落空；实际开源范围（离线批量示例）被放到最后，主线绕了一下。；建议：先交代实际范围，再列缺口：“它开出来的不是完整服务端，而是 examples 下的离线批量推理示例；README 明确说 KV cache、PD 分离、跨 DP 副本负载均衡都没给，因为耦合内部基础设施太深。”",
+          "【编辑建议，按实际效果取舍】开头说“更关键的是它开了什么”，紧接着全列“不包含”，预期会落空一下，需要自己转成“那到底开了啥”。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S3P2": [
+          "【编辑建议，按实际效果取舍】“第三方整理”是来源噪音；“负 1.5%”没说是吞吐还是延迟；“只在那个高并发点上”把区间说得过窄，像只在一个测试点成立。；建议：改成：“按厂商曲线，16 seq/rank 时吞吐 -1.5%，96 时 +11%；4%-7% 的提升只出现在高并发区间，低并发会亏。”保留归因，删掉整理过程。",
+          "【编辑建议，按实际效果取舍】负 1.5%、正 11%、4% 到 7% 连着出现，基准和单位没对齐时，听起来像在算账，容易只记住“高并发才赚”而跟丢为什么。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S4P1": [
+          "【编辑建议，按实际效果取舍】从技术取舍突然跳到内部生产规模和收入，两个数没有直接解释开源代码的价值；“注意限定”像审稿备注，打断收束。；建议：删掉这两个数，或压成一句限定背景：“官方还给过内部生产规模，但 38 美元/GPU 小时是谷价收入、不是利润，也不能证明开源代码效果；目前没有第三方基准。”然后接“先读两个取舍”。",
+          "【编辑建议，按实际效果取舍】155 万亿 token/天和 38 美元/GPU 小时规模太大，个人开发者没体感，容易觉得离自己远而走神；最后拉回读代码才重新有收获。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S2P1": [
+          "【编辑建议，按实际效果取舍】SM100、CUDA 13、昇腾 950、CANN 9.2、64+64 卡连续报出，型号和卡数密度高但缺少规模参照，容易只记住“跑不起来”而走神。；建议：放慢、补一步推理，或换个说法"
+        ],
+        "S3P1": [
+          "【编辑建议，按实际效果取舍】SWA 没解释就进入“有界重放”，紧接着 DSpark、confidence head，名词密度高，容易从省算力的思路里跟丢。；建议：放慢、补一步推理，或换个说法"
+        ]
+      },
+      "before_title": "DeepSeek 开源推理引擎：开的是引擎，不是服务",
+      "mode": "whole_script",
+      "prompt_version": 3,
+      "title": "DeepSeek 开源的 DeepInfer：先别急着部署，它更像一份省算力样本",
+      "sections": [
+        {
+          "title": "开源的是引擎，不是服务",
+          "paragraphs": [
+            {
+              "text": "10 月 20 日，DeepSeek 开源了 DeepInfer，Apache-2.0，听着像是把支撑自家生产推理的引擎整包放出来了。先把范围说清：这一版是离线推理，入口是 examples/offline_inference.py 里的批量 API，没有 HTTP 服务。想 clone 下来起个端口对外服务，这条路不存在。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer",
+                "https://siliconangle.com/2026/10/20/deepseek-open-sources-deepinfer-the-inference-framework-behind-its-production-services/"
+              ],
+              "evidence": "NEEDS_REVIEW",
+              "note": "事实审计：报告的说法是「本次发布不含 API server，要对外服务需自建 HTTP 层、KV cache、负载均衡和 PD 分离」，也就是没有现成路径，但并非路径不存在。讲稿把「未包含」说成了「不可能」，超出了来源范围。",
+              "review_reason": "报告的说法是「本次发布不含 API server，要对外服务需自建 HTTP 层、KV cache、负载均衡和 PD 分离」，也就是没有现成路径，但并非路径不存在。讲稿把「未包含」说成了「不可能」，超出了来源范围。",
+              "fact_verification": {
+                "status": "needs_review",
+                "reason": "报告的说法是「本次发布不含 API server，要对外服务需自建 HTTP 层、KV cache、负载均衡和 PD 分离」，也就是没有现成路径，但并非路径不存在。讲稿把「未包含」说成了「不可能」，超出了来源范围。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer",
+                  "https://siliconangle.com/2026/10/20/deepseek-open-sources-deepinfer-the-inference-framework-behind-its-production-services"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "少的是服务化的骨架",
+          "paragraphs": [
+            {
+              "text": "缺的东西 README 自己列了。有个专节叫「完整推理服务所需、本次未包含」：KV cache 系统、prefill/decode 分离、跨数据并行副本的负载均衡，三样都没给，理由是跟内部基础设施耦合太深。而这三样恰好是服务化的骨架：缓存放哪、prefill 和 decode 怎么分池、请求怎么在副本间分。缺了它们，剩下的是引擎内核，不是服务。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md",
+                "https://github.com/deepseek-ai/DeepInfer"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "README 确有「完整推理服务所需、本次未包含」一节，列出的正是 KV cache 系统、prefill/decode 分离、跨数据并行副本的负载均衡三项，理由为与内部基础设施耦合过深；把这些称作服务化骨架与「引擎内核不是服务」的定性一致。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer",
+                  "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "只认新卡，还要 64+64",
+          "paragraphs": [
+            {
+              "text": "就算只想跑，门槛也不低。模型只支持 DeepSeek-V4.1-Flash；卡只认 NVIDIA SM100 和昇腾 950，Hopper 及更早的架构全不在列表里。官方给的最小高效部署是 64 卡 prefill 加 64 卡 decode，1+1 也能起来，但不是高效配置。对大多数人，这是读的仓库，不是跑的仓库。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer",
+                "https://www.neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "报告确认支持模型仅 DeepSeek-V4.1-Flash，硬件仅 NVIDIA SM100 与昇腾 950，Hopper 及更早不在列表；最小「高效」部署为 64 卡 prefill + 64 卡 decode，1+1 可部署但非高效配置。「对大多数人这是读的仓库不是跑的仓库」与报告中个人开发者难以自建生产级部署的判断一致。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer",
+                  "https://neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "只重算最后 128 个 token",
+          "paragraphs": [
+            {
+              "text": "那值得读的是什么。挑一个：SWA bounded replay，有界重放。缓存未命中时 prefill 得重算，DeepInfer 的做法是只重算最后 128 个 token，不管上下文多长，重放量都压在 128 这个量级上。厂商说 prefill 总计算量因此少了近一半。省下的不是算得更快，是本来看上去不必重算的那部分。",
+              "citations": [
+                "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "SWA bounded replay 只重算最后 128 个 token、以及「Prefill 总计算量减少近一半」的说法与部署问答一致，且后半句明确标注为「厂商说」，归因正确，未冒充实测。",
+                "sources": [
+                  "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "当工程参考读，不是部署包",
+          "paragraphs": [
+            {
+              "text": "这个数字目前只有厂商口径，截至 10 月 23 日还没有第三方独立基准。所以定位清楚一点：把它当一份能读的省算力工程样本，看它怎么在缓存和重放上省开销；部署包这三个字，还得再等等。",
+              "citations": [
+                "https://www.bloomberg.com/news/articles/2026-10-20/deepseek-unveils-open-source-tool-to-help-cut-ai-operating-costs",
+                "https://thenextweb.com/news/deepseek-deepinfer-open-source-inference-engine",
+                "https://www.neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "「截至 10 月 23 日无第三方独立基准」由 Bloomberg、The Next Web、NeoTeo 三家独立材料共同确认，厂商数据仍属厂商自述；把发布定位为「能读的省算力工程样本」「部署包还得再等等」与报告「开源的是引擎不是服务，服务化组件未给」的结论一致。",
+                "sources": [
+                  "https://bloomberg.com/news/articles/2026-10-20/deepseek-unveils-open-source-tool-to-help-cut-ai-operating-costs",
+                  "https://neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950",
+                  "https://thenextweb.com/news/deepseek-deepinfer-open-source-inference-engine"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "editorial_brief": {
+        "considered": [
+          "讲法A：按事件全景讲——开源、star、范围、硬件、两个优化、收入数字。信息最全，但1.25分钟里名词和数字密度过高，原稿已经证明会让人跟丢；舍弃。",
+          "讲法B：只讲“开的是引擎不是服务”——用 README 三缺项和硬件门槛说明不能部署。预期校正清楚，但听完只记得“跑不了”，缺少开发者能带走的东西；只作为主线的一部分保留。",
+          "讲法C（采用）：以“一份能读的省算力样本，不是能部署的服务”为主线：先交代实际开源范围，再用 SWA 有界重放兑现“值得读”，硬件门槛一句压住。保留原稿最有价值的发现，砍掉 DSpark 并发曲线和收入规模。",
+          "讲法D：以 DSpark 低并发负收益为新闻点，提醒别被 4%-7% 误导。有洞察，但要先解释投机解码和并发条件，太挤，且会把主事件窄化成单个优化；舍弃。"
+        ],
+        "angle": "这期不讲“DeepSeek 又开源了一个大项目”，而是讲清楚：DeepInfer 是一份能读的省算力工程样本，不是能直接部署的服务——最值得看的是它怎么把缓存未命中时的 prefill 重算压到最后 128 个 token。",
+        "viewer_value": "开发者如果被“生产推理引擎开源”吸引，先知道它不能直接起服务，避免预期落差；同时能带走一个可借鉴的省算力机制，判断值不值得花时间读仓库。",
+        "throughline": "开场先校正预期：开源的是引擎和离线批量示例，不是服务；接着用 README 缺的 KV cache、PD 分离、跨 DP 负载均衡解释为什么；再用只认 SM100/昇腾 950、最小高效 64+64 卡说明大多数人跑不起来；然后转向唯一展开的技术点 SWA 有界重放，讲清只重算最后 128 个 token、厂商称 prefill 计算量少近一半；最后用厂商口径和无第三方独立基准收束，落到“当工程参考读，不是部署包”。",
+        "keep": [
+          "2026-10-20 官方开源 DeepInfer，Apache-2.0，仓库地址——新闻由头和可核查出处。",
+          "本次发布是 offline inference，入口是 examples/offline_inference.py 的批量 API，没有 HTTP 服务——先把实际范围说清，避免“服务”预期。",
+          "README 专节列明未包含 KV cache 系统、prefill/decode 分离、跨数据并行副本负载均衡，理由是与内部基础设施耦合太深——解释为什么它是引擎不是服务。",
+          "仅支持 DeepSeek-V4.1-Flash；硬件仅 NVIDIA SM100（CUDA 13）与昇腾 950（CANN 9.2），Hopper 及更早不支持；官方最小高效部署为 64 卡 prefill + 64 卡 decode——说明大多数人不能直接跑。口播可压缩型号版本，保留“只认新卡、64+64”。",
+          "SWA bounded replay：缓存未命中时只重算最后 128 个 token，厂商称 Prefill 总计算量减少近一半——兑现“值得读”的具体机制。",
+          "上述性能数字是厂商自述；截至 2026-10-23 无第三方独立基准——限定结论，不把厂商口径当实测。"
+        ],
+        "leave_out": [
+          "155 万亿 token/天、每 GPU 小时 38 美元收入及谷价/利润限定——规模数字离个人开发者远，且解释不了开源代码价值；原稿在此打断收束。",
+          "DSpark 投机解码、一次提 5 个草稿 token、confidence head、每步少校验约 30%、4%-7% 吞吐，以及 16/96 seq/rank 负收益曲线——需要额外解释投机解码和并发条件，会抢走主线；1.25 分钟只保留一个技术点。",
+          "star 数、fork 数、4 次 commit、HN 分数——传播热度不是本次变化的核心，容易把快讯变成发布新闻。",
+          "完整硬件型号、CUDA/CANN 版本、GCC/Python/Linux 构建要求——对“不能直接部署”只需一句门槛，完整参数留在资料。",
+          "batch-invariant inference 与 deterministic sampling 仅 NVIDIA 可用、昇腾侧无公开实测——细节会分散，不影响主线。",
+          "3FS、100 PiB KV cache、77K 输入/96% 命中/400ms 首字延迟等生产规模数据——属于服务层内部实现，和开源代码能读什么关系弱。",
+          "分析师观点、vLLM 项目方回应、2025 年 vLLM fork 前科——背景评论，不服务当前讲述。",
+          "日期争议、知乎链接未能直读等核实过程——观众无需知道。"
+        ],
+        "material": "【事件与许可】#1/#2：DeepInfer 于 2026-10-20 公开宣布开源；仓库 github.com/deepseek-ai/DeepInfer，许可 Apache-2.0。来源：https://github.com/deepseek-ai/DeepInfer ；https://siliconangle.com/2026/10/20/deepseek-open-sources-deepinfer-the-inference-framework-behind-its-production-services/\n\n【实际范围】#3：本次发布为 offline inference（离线推理），入口是 examples/offline_inference.py 的批量 API，不是 HTTP 服务。来源：https://github.com/deepseek-ai/DeepInfer\n\n【未开源的服务层】#8：KV cache 系统、prefill/decode 分离、跨数据并行副本的负载均衡三项未开源；README 专节标题为 Required for a complete inference service (not included in this release)，理由是与内部基础设施耦合太深。来源：https://github.com/deepseek-ai/DeepInfer ；https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md\n\n【支持范围】#4/#5/#17：支持模型仅 DeepSeek-V4.1-Flash；硬件仅 NVIDIA SM100（需 CUDA 13）与华为昇腾 Ascend 950（需 CANN 9.2），Hopper 及更早架构不在列表；官方最小高效部署为 64 卡 prefill + 64 卡 decode，1+1 可部署但非高效配置。来源：https://github.com/deepseek-ai/DeepInfer ；https://www.neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950\n\n【可读的机制】#16：SWA bounded replay（SWA 有界重放）：缓存未命中时只重算最后 128 个 token；厂商称 Prefill 总计算量因此减少近一半。这是厂商自述，不是第三方实测。来源：https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md\n\n【验证状态】#23：截至 2026-10-23，没有第三方独立基准；Bloomberg、The Next Web、NeoTeo 均确认这一点。来源：https://www.bloomberg.com/news/articles/2026-10-20/deepseek-unveils-open-source-tool-to-help-cut-ai-operating-costs ；https://thenextweb.com/news/deepseek-deepinfer-open-source-inference-engine ；https://www.neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950"
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "有配音可能读不自然的符号：/",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "有配音可能读不自然的符号：/",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "想 clone 下来起个端口对外服务，这条路不存在。",
+            "problem": "报告的说法是「本次发布不含 API server，要对外服务需自建 HTTP 层、KV cache、负载均衡和 PD 分离」，也就是没有现成路径，但并非路径不存在。讲稿把「未包含」说成了「不可能」，超出了来源范围。",
+            "why": "观众会以为 DeepInfer 完全无法对外提供服务，而实际上报告给出的是「门槛高、要自己补齐服务化组件」；这会让判断从「要补很多工程」变成「根本做不到」，与报告结论（这是引擎不是服务，可自建但门槛 128 卡起）不一致。",
+            "suggestion": "改为「想 clone 下来直接起个端口对外服务，没有现成的这条路」，把「不存在」收窄为「没有现成方案」。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "10 月 20 日，DeepSeek 开源了 DeepInfer，Apache-2.0，听着像是把支撑自家生产推理的引擎整包放出来了。先把范围说清：这一版是离线推理，入口是 examples/offline_inference.py 里的批量 API，没有 HTTP 服务。",
+            "problem": "开场用“听着像”先制造“整包生产引擎”的期待，再澄清不是服务；真正值得听的 SWA bounded replay 到 S4 才出现，快讯主线被限制条件拖住。",
+            "why": "开发者前几句只接收到“没有 HTTP 服务”，容易觉得标题党或与己无关，没耐心听到后面的技术点。",
+            "suggestion": "把开源事实和可读价值前置：DeepSeek 以 Apache-2.0 开源离线批量推理引擎 DeepInfer，值得看的是它如何减少缓存未命中后的重算；紧接一句边界“不含 HTTP 服务，不是部署包”，再展开缺失组件和硬件门槛。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "有个专节叫「完整推理服务所需、本次未包含」：KV cache 系统、prefill/decode 分离、跨数据并行副本的负载均衡，三样都没给，理由是跟内部基础设施耦合太深。而这三样恰好是服务化的骨架：缓存放哪、prefill 和 decode 怎么分池、请求怎么在副本间分。",
+            "problem": "同一组三项缺失先列术语，又用“缓存放哪……请求怎么在副本间分”解释一遍，口播形成回环；理由“耦合太深”夹在中间，句子变长。",
+            "why": "听众要记两遍同一组名词，节奏被拖慢，“这是引擎内核不是服务”的判断反而不够利落。",
+            "suggestion": "合并成一次：README 专节列明 KV cache、prefill/decode 分离、跨副本负载均衡没包含，因为与内部基础设施耦合太深；这些正是服务化骨架，所以留下的是引擎内核。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "官方给的最小高效部署是 64 卡 prefill 加 64 卡 decode，1+1 也能起来，但不是高效配置。",
+            "problem": "“1+1 也能起来”在口播里指代不清，听众不知道是单卡 prefill 加单卡 decode，还是两台机器、两个进程。",
+            "why": "这是判断能不能试跑的关键门槛，含糊会让人低估或高估实际成本。",
+            "suggestion": "把 1+1 展开成具体配置，例如“单卡 prefill 加单卡 decode 也能跑，但不是高效配置”；若原意不是这个，就写清卡数和角色。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "厂商说 prefill 总计算量因此少了近一半。省下的不是算得更快，是本来看上去不必重算的那部分。",
+            "problem": "“省下的不是算得更快，是本来看上去不必重算的那部分”对比对象不清，“本来看上去不必重算”读起来矛盾，收益被说抽象了。",
+            "why": "听众容易把“prefill 总计算量少近一半”误听成整体推理快一倍，也抓不住这个优化的实际价值。",
+            "suggestion": "改成直白对比：“收益不在单步算得更快，而在缓存未命中时少做无效重算；按厂商说法，prefill 总计算量少了近一半。”",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "README 说这三样‘本次未包含’，是 DeepInfer 没做这些能力，还是做了但没开源？这会影响我怎么理解‘缺的是服务骨架’。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "‘1+1 也能起来’是指 1 卡 prefill 加 1 卡 decode 吗？这里第一次听会顿一下。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "SM100、昇腾 950 和 64+64 连着出现，信息密度偏高；我容易从‘门槛很高’滑成只记型号和卡数，不知道哪个才是判断自己能不能跑的关键。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "SWA 是什么？这里只给英文缩写，第一次听只能猜。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "只重算最后 128 个 token 为什么不会丢上下文？缓存未命中时不是应该重算缺失的那部分吗？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "前面说缺 KV cache 系统，这里的‘缓存未命中’指什么缓存？两个说法怎么接上？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "prefill 总计算量少近一半，是相对什么基线、在什么场景下算的？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "‘省下的不是算得更快，是本来看上去不必重算的那部分’这句绕，听到这里容易不知道到底省的是时间、算力还是正确性代价。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "128 token 和上下文长度无关这个反直觉点只用一句带过，没跟上就可能只记住一个数字。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "audits_complete": true,
+        "pending_review": true,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 16,
+          "rule_must": 0,
+          "questions": 6,
+          "lost": 3,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 1
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 9
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 6
+            }
+          },
+          "passed": false,
+          "rank": 1
+        },
+        "rounds": 2,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "有配音可能读不自然的符号：/",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D4",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "厂商自己的曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%",
+            "problem": "这段数字来自第三方整理的厂商曲线（NeoTeo / HitlistAI 的报道），但本段列出的可信引用只有 GitHub 仓库首页，仓库首页并不能支持这组 seq/rank 收益数据。讲稿里说的“厂商自己的曲线”，在报告中的依据是厂商数据经第三方整理，不是仓库原文。",
+            "why": "观众会把这组低并发负收益的结论当成仓库里可以直接核对的内容；实际出处是二手整理，引用对不上。数字本身没错，但出处标错了，属于引用不能支持当前表述。",
+            "suggestion": "把引用换成含该曲线的来源（如 NeoTeo 报道或 HitlistAI 文章），或把话说成“据第三方整理的厂商曲线”，并保留 16 seq/rank 负 1.5%、96 seq/rank 正 11% 这两个点。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "厂商自己的曲线里，16 seq/rank 的时候是负 1.5%，到 96 才变成正 11%",
+            "problem": "百分数没有说明是吞吐、加速比还是成本变化，听众听到“负 1.5%”会不知道在亏什么。",
+            "why": "这是全稿少数能纠正“投机解码一定加速”的关键条件，指代不清会削弱它的价值。",
+            "suggestion": "补清楚指标和方向，例如：“DSpark 的吞吐增益在 16 seq/rank 时约 -1.5%，到 96 才约 +11%。”",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "单集群每天155万亿token、每GPU小时38美元，是DeepSeek内部生产集群的运营数据，还是DeepInfer这套开源代码的实测结果？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“谷价”具体指什么口径？是电力谷时价格下的收入，还是某种计价条件？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "10月23号是哪一年？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "前面一直在讲代码里的省算力取舍，这里突然转到单集群token量和GPU小时收入，若没立即说清这些数字和开源代码价值的关系，容易短暂跟丢。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": false
+          }
+        ]
+      },
+      "reason": "编辑稿未通过事实复核，保留此前已核对的文稿",
+      "note": ""
+    }
+  },
+  "created_by": "多矩阵质量验收",
+  "created_at": "2026-10-23T21:45:47+0800"
+}
