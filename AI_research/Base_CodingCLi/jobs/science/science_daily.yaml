@@ -1,0 +1,33 @@
+name: 科学新发现日报
+description: 每天值得关注的几项科学新发现（读 Quanta、Science、Nature、Phys.org、ScienceDaily 抓取的内容），不联网搜索
+enabled: true
+keywords:
+- 科学新发现
+- 科普
+- 研究进展
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+search: false
+sources_limit: 8
+sources:
+- source:science_news
+- source:quanta
+- source:nature
+- source:phys_org
+- source:sciencedaily
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：从近期材料里发现值得讲给观众听的新事情。关注科学发现中值得好奇的问题，以及人们怎样一步步弄明白它，保留能把事情讲生动、讲明白的具体材料。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: output/science/{date}_science_daily.md

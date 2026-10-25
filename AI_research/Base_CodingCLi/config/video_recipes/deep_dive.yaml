@@ -1,0 +1,43 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 深度解读
+description: 陪{{audience}}深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。
+status: enabled
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: deep_dive
+    name: 深度解读
+  format:
+    key: long
+    name: B 站横屏长
+audiences: [developer, non_tech]
+target_minutes: 6
+minutes_range: [4, 8]
+topic:
+  kind: single
+  sources: [opportunities]
+  whole_report: true
+  fields: [核心角度, 目标受众, 为什么有人在乎]
+research:
+  template: deep_dive
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: explainer
+  style: |
+    陪{{audience}}深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。
+output:
+  use: auto_form
+  packaging:
+    use: common
+    label: 深度解读
+    outro:
+      lines:
+      - 面向{{audience}}的 深度解读
+      seconds: 2.5

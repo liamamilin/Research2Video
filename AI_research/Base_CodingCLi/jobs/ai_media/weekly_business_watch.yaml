@@ -1,0 +1,31 @@
+name: "AI 商业观察（每周）"
+description: "本周 AI 行业的商业动向：产品、定价、公司动作、政策（读 Import AI、The Rundown、TLDR 抓取的内容，不联网搜索）"
+enabled: true
+keywords:
+  - AI 商业
+  - 定价
+  - 公司动态
+language: "zh"
+schedule:
+  type: "manual"
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+search: false
+sources_limit: 12
+sources:
+  - "rss:https://www.therundown.ai/feed"
+  - "rss:https://importai.substack.com/feed"
+  - "tldr:ai"
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：为关心 AI 的观众找到值得讲的商业变化，追到产品、用户和生意实际发生改变的地方。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: "output/business/{date}_ai_business_watch.md"

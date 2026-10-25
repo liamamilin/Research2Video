@@ -1,0 +1,5 @@
+# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。
+job: science/science_weekly
+recipe: topic_digest
+audience: general
+auto: 1

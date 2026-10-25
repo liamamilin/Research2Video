@@ -1,0 +1,33 @@
+name: "AI 开源雷达（每日）"
+description: "最近几天值得开发者关注的 AI 开源项目、热门模型和论文（读 GitHub、Hugging Face、TLDR 抓取的内容，不联网搜索）"
+enabled: true
+keywords:
+  - 开源项目
+  - 开源模型
+  - 论文
+language: "zh"
+schedule:
+  type: "manual"
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+search: false
+sources_limit: 10
+sources:
+  - "gh_new:llm"
+  - "gh_new:agent"
+  - "hf_models:trending"
+  - "hf_papers:daily"
+  - "tldr:ai"
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：为开发者发现值得了解或尝试的开源进展，找到项目实际在解决的问题，以及能让人看懂它的用法和细节。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: "output/radar/{date}_ai_opensource_radar.md"

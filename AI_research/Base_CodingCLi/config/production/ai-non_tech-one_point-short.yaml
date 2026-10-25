@@ -1,0 +1,4 @@
+# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。多长、拆不拆、要不要再核实由配方定，给谁看在 audience 里选。
+job: monitoring/ai_flash_discovery
+recipe: point_short
+audience: non_tech

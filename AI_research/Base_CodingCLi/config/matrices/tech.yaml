@@ -1,0 +1,9 @@
+# 矩阵：科技与未来产业（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
+name: 科技与未来产业
+domain: 科技与未来产业
+keywords: []
+jobs:
+- tech/tech_daily
+- tech/tech_weekly
+render:
+  video_speed: 1.25

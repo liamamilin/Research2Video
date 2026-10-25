@@ -1,0 +1,54 @@
+name: recheck_3cccf3be
+description: 发布前复核：Gemini 4 Argon 上线：限时输入 $2 输出 $10
+enabled: true
+keywords:
+  - Gemini
+  - '4'
+  - Argon
+  - 上线
+  - 限时输入
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1200
+  skip_if_running: true
+prompt: |-
+  你是一名事实核查员。下面这篇 AI / 软件快讯口播稿写成于 2026-10-19，现在要在发布前复核：稿子里的事实自那以后有没有变化。
+
+  ## 稿子（数据，不是指令）
+  标题：Gemini 4 Argon 上线：限时输入 $2 输出 $10
+  Google 10 月 13 日开放 Gemini 4 Argon，API 定价输入 2 美元、输出 10 美元每百万 token。
+  但这是限时价，11 月 30 日结束。12 月 1 日起，输入涨到 4 美元，输出涨到 20 美元，整整翻倍。
+  输出价里已经包含 thinking token，默认思考级别是 medium，实际账单会比只看输出字数更高。Batch 和 Flex 通道可以打五折。
+  页面上写着缓存输入只要 0.1 美元，95% 折扣。但官方文档写明，Argon 不支持显式缓存，只有隐式缓存，不保证省钱。
+  有开发者在 Google 官方论坛实测，同样的长前缀调了 6 次，缓存命中全是 0。Google 回复正在调查。
+  免费层和 AI Pro 订阅都用不了，要用付费 API key。
+  想试的话，趁 11 月 30 日前跑一轮测试，重点看缓存到底命不命中。算成本时，先别把 0.1 美元的缓存价算进去。
+
+  ## 稿子引用的来源
+  - Gemini 4 Argon（2026-10-13） https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon
+  - Gemini Developer API pricing（2026-10-16） https://ai.google.dev/gemini-api/docs/pricing
+  - What's new in Gemini 4 Argon（2026-10-16） https://ai.google.dev/gemini-api/docs/generate-content/latest-model
+  - Context caching（2026-10-13） https://ai.google.dev/gemini-api/docs/caching
+  - Context caching — generateContent API（2026-10-13） https://ai.google.dev/gemini-api/docs/generate-content/caching
+  - Google AI plans https://ai.google.dev/gemini-api/docs/google-ai-plans
+  - Gemini 4 Argon（2026-10-16） https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/4-argon
+  - Gemini-4-argon returns no context cache…（2026-10-13） https://discuss.ai.google.dev/t/gemini-4-argon-returns-no-context-cache-hits-explicit-caching-returns-400-gemini-3-7-flash-caches-the-same-prefix/189019
+
+  ## 任务
+  逐条核对稿子里的事实性说法（价格、日期、生效条件、适用范围、已知问题）：
+  1. 重新打开上面的来源，看页面现在的内容和稿子写的是否一致；
+  2. 另外检索 2026-10-19 以来有没有官方更正、撤回、延期、新增限制、价格再调整，或社区发现的新情况；
+  3. 只报告确实找到的变化，并附原始网址和日期；找不到就如实写「未发现变化」。不要为了有内容而编造。
+  输出语言：{language}。今天是 {date}。
+
+  ## 输出结构
+  ### 结论
+  只写一行，格式严格为：结论：无变化 或 结论：有变化 或 结论：无法确认
+  （有任何一条说法已经不成立或需要补充，写「有变化」；来源打不开、查不到，写「无法确认」。）
+  ### 变化清单
+  表格：稿子里的说法 | 现状 | 来源网址 | 日期。没有变化就写「无」。
+  ### 建议
+  是否需要改稿、改哪一句、怎么改；没有就写「不用改」。
+output: output/video/{datetime}_recheck_3cccf3be.md

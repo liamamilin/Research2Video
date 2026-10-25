@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.AI_research/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# macOS
+.DS_Store
+*.app
+scripts/.launcher.rendered.applescript
+scripts/.start_server.rendered.sh
+# Rendered copies a test writes next to the original (it must live there: the
+# script derives the project directory from $0). A crashed run leaves them
+# behind with this machine's absolute paths in them.
+scripts/.*.test.sh
+
+# Logs
+logs/
+
+# State (locks + run records)
+state/
+
+# Output
+output/
+# …but the video recipes' shared output parts are config, not run output
+!config/video_parts/output/
+
+# Temp
+*.tmp
+*.bak
+
+# Node
+node_modules/
+ui/dist/
+*.tsbuildinfo
+
+# Test caches
+.pytest_cache/
+.mypy_cache/
+
+# Environment / Secrets
+.env
+.env.local
+secrets/
+
+# coverage
+.coverage
+htmlcov/

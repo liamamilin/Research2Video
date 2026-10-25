@@ -1,0 +1,33 @@
+name: 产业动态日报
+description: 近期值得关注的产业和制造业动态（读 Supply Chain Dive、Manufacturing Dive、EE Times、Semiconductor Digest、NIST 抓取的内容），不联网搜索
+enabled: true
+keywords:
+- 制造业
+- 产业链
+- 半导体
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+search: false
+sources_limit: 8
+sources:
+- source:supply_chain_dive
+- source:manufacturing_dive
+- source:eetimes
+- source:semiconductor_digest
+- source:nist_manufacturing
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：从近期材料里发现值得讲给观众听的新事情。关注产业与制造业中的具体变化，以及它怎样影响东西被造出来，保留能把事情讲生动、讲明白的具体材料。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: output/industry/{date}_industry_daily.md

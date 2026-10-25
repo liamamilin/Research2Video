@@ -1,0 +1,282 @@
+"""The macOS launcher applet and its detached starter.
+
+These tests guard the three ways the launcher silently broke before: a stale
+absolute path, an applet compiled without stay-open (the watchdog never runs),
+and a `nohup ... &` chain written inline into `do shell script` (which blocks
+until the server exits).
+"""
+
+from __future__ import annotations
+
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+import pytest
+
+REPO = Path(__file__).resolve().parents[1]
+TEMPLATE = REPO / "scripts" / "launcher.applescript.in"
+STARTER = REPO / "scripts" / "start_server_detached.sh"
+BUILD = REPO / "scripts" / "build_launcher.sh"
+
+darwin_only = pytest.mark.skipif(
+    sys.platform != "darwin", reason="the launcher is a macOS applet")
+
+
+def _template_text() -> str:
+    return TEMPLATE.read_text(encoding="utf-8")
+
+
+def test_template_declares_every_placeholder_the_builder_substitutes():
+    text = _template_text()
+    builder = BUILD.read_text(encoding="utf-8")
+    for placeholder in ("@PROJECT_DIR@", "@PYTHON_BIN@", "@LOG_FILE@",
+                        "@START_SCRIPT@", "@STATE_DIR@"):
+        assert placeholder in text, f"{placeholder} missing from the template"
+        assert placeholder in builder, f"{placeholder} is never substituted"
+
+
+def test_template_has_no_hardcoded_user_paths():
+    """A clone on another machine must not inherit someone else's paths."""
+    text = _template_text()
+    assert "/Users/" not in text, "template bakes in a user-specific path"
+    assert str(REPO) not in text
+
+
+def test_builder_substitutes_every_placeholder():
+    out = subprocess.run(
+        ["/bin/sh", "-c",
+         f"sed -e 's|@PROJECT_DIR@|{REPO}|g' -e 's|@PYTHON_BIN@|/bin/python3|g' "
+         f"-e 's|@LOG_FILE@|/tmp/x.log|g' -e 's|@START_SCRIPT@|/tmp/s.sh|g' "
+         f"-e 's|@STATE_DIR@|/tmp/state|g' "
+         f"{TEMPLATE}"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    leftovers = re.findall(r"@[A-Z_]+@", out)
+    assert leftovers == [], f"unsubstituted placeholders: {leftovers}"
+
+
+@darwin_only
+def test_template_compiles_with_stay_open():
+    """Without -s the applet quits after `run`, and on idle never fires."""
+    builder = BUILD.read_text(encoding="utf-8")
+    assert re.search(r"osacompile\s+-s\b", builder), \
+        "build_launcher.sh must pass -s (stay-open) or the watchdog is dead code"
+
+    tmp = REPO / "scripts" / ".test_launcher.applescript"
+    tmp.write_text(
+        _template_text()
+        .replace("@PROJECT_DIR@", str(REPO))
+        .replace("@PYTHON_BIN@", sys.executable)
+        .replace("@LOG_FILE@", "/tmp/launcher_test.log")
+        .replace("@START_SCRIPT@", str(REPO / "scripts" / "start_server_detached.sh")),
+        encoding="utf-8",
+    )
+    try:
+        result = subprocess.run(
+            ["osacompile", "-s", "-o", "/tmp/launcher_test_check.scpt", str(tmp)],
+            capture_output=True, text=True)
+        assert result.returncode == 0, result.stderr
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def test_watchdog_guards_are_wired():
+    text = _template_text()
+    assert "on idle" in text
+    assert "return 60" in text, "the idle interval must be returned or the app quits"
+    # A stale server holding the port has to be stopped before a restart.
+    assert "on stopStaleServer" in text
+    assert "state/server.pid" in text
+    # `notify` is reserved AppleScript terminology; a handler named that fails
+    # to compile, which cost one debugging round.
+    assert "on postNotification(" in text
+    assert not re.search(r"^\ton notify\(", text, re.M)
+
+
+# --- app icon ----------------------------------------------------------------
+#
+# The applet showed the stock AppleScript ribbon for as long as it existed. Two
+# independent reasons: build_launcher.sh copied the icon with `/usr/bin/cp`
+# (which does not exist on macOS -- cp is /bin/cp) behind
+# `2>/dev/null || true`, so the copy failed silently; and it only wrote
+# applet.icns, while an applet also ships Contents/Resources/Assets.car and
+# Info.plist declares the icon via CFBundleIconName, which current macOS
+# prefers over the .icns. Either one alone leaves the stock icon on screen.
+
+ICON_DIR = REPO / "scripts" / "icon"
+
+
+def test_icon_source_and_artifacts_are_tracked():
+    assert (ICON_DIR / "AppIcon.svg").is_file(), "the icon's editable source is missing"
+    assert (REPO / "scripts" / "build_icons.sh").is_file()
+    assert (REPO / "scripts" / "launcher.icns").is_file(), \
+        "build_launcher.sh only applies an icon when this exists"
+
+
+def test_builder_installs_both_the_icns_and_the_asset_catalog():
+    """The catalog, not the .icns, is what current macOS renders."""
+    builder = BUILD.read_text(encoding="utf-8")
+    assert "applet.icns" in builder
+    assert "Assets.car" in builder, \
+        "an applet's Assets.car wins over applet.icns; it must be replaced too"
+
+
+def test_builder_never_uses_a_nonexistent_cp_path():
+    """`/usr/bin/cp` does not exist on macOS; `/bin/cp` does.
+
+    It was hidden behind `2>/dev/null || true`, so the icon copy failed without
+    a word -- the whole reason the icon never changed.
+    """
+    import shutil
+
+    for script in (BUILD, REPO / "scripts" / "build_icons.sh"):
+        # Ignore comments: the fix's own explanation names the bad path.
+        code = "\n".join(
+            line for line in script.read_text(encoding="utf-8").splitlines()
+            if not line.lstrip().startswith("#"))
+        assert "/usr/bin/cp" not in code, (
+            f"{script.name} copies with /usr/bin/cp, which does not exist; "
+            f"use `cp` ({shutil.which('cp')})")
+    # The scripts resolve cp through PATH; Linux commonly uses /usr/bin/cp.
+    assert shutil.which("cp") is not None
+
+
+def test_icon_assets_are_actually_large_enough_to_be_real_art():
+    """A stub or a placeholder must not pass as the shipped icon."""
+    icns = REPO / "scripts" / "launcher.icns"
+    assert icns.stat().st_size > 50_000, "launcher.icns looks like a placeholder"
+
+
+@darwin_only
+def test_built_app_carries_the_custom_catalog_and_icon_name():
+    """End-to-end: after a build the bundle declares and ships the new icon."""
+    import plistlib
+
+    app = REPO / "AREC.app"
+    if not app.is_dir():
+        pytest.skip("AREC.app not built in this checkout")
+
+    plist = plistlib.loads((app / "Contents" / "Info.plist").read_bytes())
+    # osacompile names the icon "applet"; the catalog is built under that name.
+    assert plist.get("CFBundleIconName") == "applet"
+
+    stock_catalog = 383_672  # size of the catalog osacompile writes
+    catalog = app / "Contents" / "Resources" / "Assets.car"
+    assert catalog.is_file()
+    assert catalog.stat().st_size != stock_catalog, (
+        "the bundle still carries osacompile's stock Assets.car, so the Dock "
+        "will keep showing the AppleScript ribbon")
+
+
+def test_starter_detaches_and_returns_immediately(tmp_path):
+    """`do shell script` waits for the command; the starter must not block."""
+    starter = STARTER.read_text(encoding="utf-8")
+    assert "nohup" in starter and "disown" in starter
+    assert 'rm -f "$PID_FILE"' in starter, "a stale pid file confuses the launcher"
+    # It must exit on its own rather than waiting for the server.
+    assert re.search(r"^exit 0\s*$", starter, re.M)
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="spawns a real server")
+def test_starter_returns_before_the_server_is_ready(tmp_path):
+    """The launcher calls this and must get control back immediately."""
+    repo = REPO
+    rendered = repo / "scripts" / ".start_server.test.sh"
+    rendered.write_text(
+        STARTER.read_text(encoding="utf-8").replace(
+            "@PYTHON_BIN@", sys.executable),
+        encoding="utf-8",
+    )
+    port_free = _port_is_free(8765)
+    if not port_free:
+        pytest.skip("port 8765 is busy; not spawning a second server")
+    try:
+        started = time.time()
+        result = subprocess.run(["/bin/bash", str(rendered)],
+                                capture_output=True, text=True, timeout=30)
+        elapsed = time.time() - started
+        assert result.returncode == 0, result.stderr
+        assert elapsed < 10, f"starter blocked for {elapsed:.1f}s"
+    finally:
+        rendered.unlink(missing_ok=True)
+        _wait_for(lambda: _port_is_free(8765), timeout=60) or _kill_port()
+
+
+def _port_is_free(port: int) -> bool:
+    import socket
+
+    with socket.socket() as s:
+        s.settimeout(0.3)
+        return s.connect_ex(("127.0.0.1", port)) != 0
+
+
+def _kill_port() -> None:
+    subprocess.run("lsof -ti :8765 | xargs kill -9",
+                   shell=True, capture_output=True)
+
+
+def _wait_for(predicate, timeout: float = 30) -> bool:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if predicate():
+            return True
+        time.sleep(0.5)
+    return False
+
+
+def test_app_bundle_name_is_consistent():
+    """The bundle name, the builder and the docs must agree.
+
+    A rename that only touches the filesystem leaves build_launcher.sh writing
+    the old name again, so the next rebuild silently resurrects it.
+    """
+    builder = BUILD.read_text(encoding="utf-8")
+    readme = (REPO / "README.md").read_text(encoding="utf-8")
+    match = re.search(r'APP_NAME="([^"]+)"', builder)
+    assert match, "build_launcher.sh does not define APP_NAME"
+    app_name = match.group(1)
+    assert app_name == "AREC.app", f"unexpected app bundle name: {app_name}"
+    assert f"`{app_name}`" in readme, f"README does not mention {app_name}"
+    assert "AI Research Console.app" not in readme, \
+        "README still points at the old bundle name"
+    # Notifications are how the launcher talks when something fails.
+    assert 'with title "AREC"' in _template_text()
+
+
+def test_idle_watchdog_rules_are_wired():
+    """The app closes on idleness, but never while a job is running."""
+    text = _template_text()
+    assert "property idleMinutes : 30" in text
+    assert "property unhealthyMinutes : 30" in text
+
+    assert "on shouldQuitForIdle" in text
+    body = text[text.index("on shouldQuitForIdle"):text.index("on openBrowser")]
+    # A running job vetoes the quit, whatever the idle time is.
+    assert "runningJobs()) > 0 then return false" in body
+    # Unknown activity must not be guessed into a quit.
+    assert "idleSec < 0 then return false" in body
+    assert "idleSec > idleMinutes * 60" in body
+
+    # And the idle handler consults it after the health check passes.
+    idle_handler = text[text.index("on idle"):]
+    assert "shouldQuitForIdle()" in idle_handler
+    assert "healthOk() and my shouldQuitForIdle()" in idle_handler
+
+
+def test_activity_file_shape_matches_what_python_writes():
+    """The applet and core.activity must agree on the file format."""
+    text = _template_text()
+    assert 'activityValue("last_activity")' in text
+    assert 'activityValue("running")' in text
+    assert "@STATE_DIR@/app_activity.env" in text
+
+    env_module = (REPO / "core" / "activity.py").read_text(encoding="utf-8")
+    assert 'f"last_activity={stamp}\\nrunning={_running}\\n"' in env_module
+    assert 'time.strftime("%Y-%m-%d %H:%M:%S"' in env_module
+    # A Unix epoch would overflow AppleScript's 32-bit integers.
+    assert "last_activity_epoch" not in text

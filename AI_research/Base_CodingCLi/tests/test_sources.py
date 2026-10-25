@@ -1,0 +1,301 @@
+"""Tests for subscription source adapters."""
+
+from __future__ import annotations
+
+import json
+
+from core import sources
+
+RSS_XML = """<?xml version="1.0"?>
+<rss version="2.0"><channel>
+  <item>
+    <title>Release 1.2</title>
+    <link>https://example.com/rel-1-2</link>
+    <description>&lt;p&gt;Big &lt;b&gt;update&lt;/b&gt; here&lt;/p&gt;</description>
+    <pubDate>Mon, 01 Sep 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>Release 1.1</title>
+    <link>https://example.com/rel-1-1</link>
+    <description>Older</description>
+  </item>
+</channel></rss>
+"""
+
+ATOM_XML = """<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <title>Paper A</title>
+    <link rel="alternate" href="https://arxiv.org/abs/2609.00001"/>
+    <summary>Abstract text</summary>
+    <updated>2026-09-20T00:00:00Z</updated>
+  </entry>
+</feed>
+"""
+
+
+def test_fetch_rss_parses_items(monkeypatch):
+    monkeypatch.setattr(sources, "_get_text", lambda url, timeout, accept="*/*": RSS_XML)
+    results = sources.fetch_rss("https://example.com/feed.xml", limit=5)
+    assert len(results) == 2
+    assert results[0].title == "Release 1.2"
+    assert results[0].url == "https://example.com/rel-1-2"
+    assert results[0].excerpts == ["Big update here"]
+    assert results[0].provider == "rss"
+
+
+def test_rss_keeps_available_full_content_instead_of_only_the_teaser():
+    body = "研发的具体过程。" * 80 + "末尾有一个重要的使用场景。"
+    xml = '<rss xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><item>'
+    xml += '<title>新发现</title><link>https://example.com/story</link><description>点击查看全文</description>'
+    xml += '<content:encoded><![CDATA[<p>' + body + '</p>]]></content:encoded></item></channel></rss>'
+    result = sources._parse_feed(xml, 1)[0]
+    assert result.excerpts == [body]
+    assert result.url == "https://example.com/story"
+
+
+def test_atom_xhtml_body_survives_with_nested_text():
+    xml = '''<feed xmlns="http://www.w3.org/2005/Atom"><entry><title>工具用法</title>
+      <link href="https://example.com/tool"/><summary>摘要</summary>
+      <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml"><p>先打开工具，<b>选择项目</b>，再运行。</p></div></content>
+      </entry></feed>'''
+    result = sources._parse_feed(xml, 1)[0]
+    assert "选择项目" in result.excerpts[0] and "再运行" in result.excerpts[0]
+    assert result.excerpts != ["摘要"]
+
+
+def test_fetch_arxiv_parses_atom(monkeypatch):
+    monkeypatch.setattr(sources, "_get_text", lambda url, timeout, accept="*/*": ATOM_XML)
+    results = sources.fetch_arxiv("agent memory", limit=3)
+    assert results[0].title == "Paper A"
+    assert results[0].url == "https://arxiv.org/abs/2609.00001"
+    assert results[0].provider == "arxiv"
+    assert results[0].publish_date.startswith("2026-09-20")
+
+
+def test_fetch_github_releases(monkeypatch):
+    payload = json.dumps([
+        {"tag_name": "v2.0", "name": "v2.0 Big", "html_url": "https://github.com/o/r/releases/tag/v2.0",
+         "published_at": "2026-09-18T10:00:00Z", "body": "notes"},
+    ]).encode()
+
+    class Resp:
+        def read(self):
+            return payload
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    monkeypatch.setattr(sources.urllib.request, "urlopen", lambda req, timeout=None: Resp())
+    results = sources.fetch_github_releases("o/r", limit=3)
+    assert results[0].title == "o/r v2.0 Big"
+    assert results[0].publish_date == "2026-09-18"
+    assert results[0].provider == "github"
+
+
+def test_fetch_hn(monkeypatch):
+    data = {"hits": [
+        {"title": "Show HN: X", "url": "https://x.test", "created_at": "2026-09-19T00:00:00Z",
+         "objectID": "1"},
+        {"title": "Ask HN: Y", "story_text": "text", "created_at": "2026-09-18T00:00:00Z",
+         "objectID": "2"},
+    ]}
+    monkeypatch.setattr(sources, "_get_json", lambda url, timeout: data)
+    results = sources.fetch_hn("agent", limit=5)
+    assert results[0].url == "https://x.test"
+    assert results[1].url == "https://news.ycombinator.com/item?id=2"
+    assert results[1].provider == "hn"
+
+
+def test_fetch_source_dispatch_and_unknown():
+    assert sources.fetch_source("nope:whatever") == []
+    assert sources.fetch_source("rss:") == []
+
+
+def test_engine_injects_sources_block(tmp_path, monkeypatch):
+    from core.engine import ResearchEngine
+
+    engine = ResearchEngine(config_dir=str(tmp_path / "config"),
+                            jobs_dir=str(tmp_path / "jobs"))
+    monkeypatch.setattr(sources, "fetch_all", lambda specs, limit_per_source=8: [
+        sources.SearchResult(title="Release", url="https://x.test/1",
+                             excerpts=["body"])])
+
+    block = engine._fetch_sources_block({"sources": ["github:o/r"]})
+    assert "Pre-fetched subscription sources" in block
+    assert "https://x.test/1" in block
+    assert engine._fetch_sources_block({}) == ""
+
+
+def test_engine_sources_failure_is_silent(tmp_path, monkeypatch):
+    from core.engine import ResearchEngine
+
+    engine = ResearchEngine(config_dir=str(tmp_path / "config"),
+                            jobs_dir=str(tmp_path / "jobs"))
+
+    def boom(specs, limit_per_source=8):
+        raise OSError("network down")
+
+    monkeypatch.setattr(sources, "fetch_all", boom)
+    assert engine._fetch_sources_block({"sources": ["rss:https://x/feed"]}) == ""
+
+
+def test_fetch_all_dedupes_and_survives_failures(monkeypatch):
+    def fake_fetch(spec, limit=8, timeout=20):
+        if "bad" in spec:
+            raise OSError("boom")
+        return [
+            sources.SearchResult(title="A", url="https://dup.test/1", excerpts=["x"]),
+            sources.SearchResult(title="B", url="https://b.test/2", excerpts=["y"]),
+        ]
+
+    monkeypatch.setattr(sources, "fetch_source", fake_fetch)
+    results = sources.fetch_all(["rss:https://bad.test/f", "hn:q"])
+    assert [r.title for r in results] == ["A", "B"]
+
+
+RDF_XML = """<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns="http://purl.org/rss/1.0/">
+  <channel rdf:about="https://example.org/feed"><title>Journal</title></channel>
+  <item rdf:about="https://example.org/a">
+    <title><![CDATA[<i>De novo</i> design of enzymes]]></title>
+    <link>https://example.org/a</link>
+    <description>Short abstract</description>
+    <dc:date>2026-10-21</dc:date>
+  </item>
+  <item rdf:about="https://example.org/b"><title>No link element</title><dc:date>2026-10-20</dc:date></item>
+</rdf:RDF>
+"""
+
+
+def test_fetch_rss_reads_rss_1_0_rdf_feeds(monkeypatch):
+    monkeypatch.setattr(sources, "_get_text", lambda url, timeout, accept="*/*": RDF_XML)
+    results = sources.fetch_rss("https://example.org/feed", limit=5)
+    assert [r.title for r in results] == ["De novo design of enzymes", "No link element"]
+    assert results[0].url == "https://example.org/a" and results[0].excerpts == ["Short abstract"]
+    assert results[0].publish_date == "2026-10-21"
+    assert results[1].url == "https://example.org/b" and results[1].excerpts == []  # the item's rdf:about stands in for a link
+
+
+def test_fetch_worldbank_gives_the_latest_value_with_the_year_before_per_country(monkeypatch):
+    def row(country, iso, date, value):
+        return {"indicator": {"id": "NY.GDP.MKTP.KD.ZG", "value": "GDP growth (annual %)"}, "country": {"value": country},
+                "countryiso3code": iso, "date": date, "value": value}
+
+    payload = json.dumps([{"page": 1}, [row("China", "CHN", "2025", 4.96), row("China", "CHN", "2024", 4.958),
+                                        row("World", "WLD", "2025", None), row("World", "WLD", "2024", 2.9)]])
+    seen = []
+    monkeypatch.setattr(sources, "_get_text", lambda url, timeout, accept="*/*": (seen.append(url), payload)[1])
+    results = sources.fetch_source("wb:NY.GDP.MKTP.KD.ZG@CHN;WLD", limit=8)
+    assert "/country/CHN;WLD/indicator/NY.GDP.MKTP.KD.ZG" in seen[0] and "mrv=2" in seen[0]
+    by_title = {r.title: r for r in results}
+    china = by_title["China · GDP growth (annual %)"]
+    assert china.excerpts == ["China，GDP growth (annual %)：2025 年 4.96（2024 年 4.958）"]
+    assert china.url == "https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG?locations=CHN" and china.provider == "worldbank"
+    world = by_title["World · GDP growth (annual %)"]  # a missing year is skipped, not shown as 0
+    assert world.publish_date == "2024" and "2025" not in world.excerpts[0]
+
+
+REGISTRY = """
+a:
+  name: Feed A
+  spec: rss:https://a.example/feed
+  tags: [tech, robotics]
+b:
+  name: Feed B
+  spec: rss:https://b.example/feed
+  tags: [tech]
+c:
+  name: Data C
+  spec: wb:NY.GDP.MKTP.KD.ZG
+  tags: [economy]
+  note: 官方统计
+"""
+
+
+def _registry(tmp_path, text=REGISTRY):
+    (tmp_path / "sources.yaml").write_text(text, encoding="utf-8")
+    return str(tmp_path)
+
+
+def test_resolve_expands_ids_and_tags_in_order_without_repeats(tmp_path):
+    config = _registry(tmp_path)
+    assert sources.resolve(["source:b", "tag:tech", "gh_new:llm", "source:a"], config) == [
+        "rss:https://b.example/feed", "rss:https://a.example/feed", "gh_new:llm"]
+    assert sources.resolve(["rss:https://x/feed", "tldr:ai"], config) == ["rss:https://x/feed", "tldr:ai"]  # nothing to look up
+    assert sources.resolve(["rss:https://x/feed"], str(tmp_path / "missing")) == ["rss:https://x/feed"]  # no registry needed
+
+
+def test_resolve_refuses_a_source_or_tag_the_registry_does_not_have(tmp_path):
+    config = _registry(tmp_path)
+    for spec in ("source:nope", "tag:nothing"):
+        try:
+            sources.resolve([spec], config)
+        except sources.RegistryError as exc:
+            assert spec.split(":")[1] in str(exc)
+        else:
+            raise AssertionError(f"{spec} should have been refused")
+
+
+def test_load_registry_rejects_a_spec_no_adapter_reads(tmp_path):
+    bad = _registry(tmp_path, "x:\n  name: X\n  spec: ftp://example.com/a\n")
+    try:
+        sources.load_registry(bad)
+    except sources.RegistryError as exc:
+        assert "x" in str(exc)
+    else:
+        raise AssertionError("a spec without a known adapter must not load")
+    assert sources.load_registry(_registry(tmp_path))["c"]["note"] == "官方统计"
+
+
+def test_registry_parse_cache_keeps_values_independent_and_detects_edits(tmp_path):
+    import os
+    import pytest
+
+    config = _registry(tmp_path)
+    path = tmp_path / "sources.yaml"
+    first = sources.load_registry(config)
+    first["a"]["tags"].append("changed")
+    assert sources.load_registry(config)["a"]["tags"] == ["tech", "robotics"]
+    before = path.stat()
+    path.write_text(REGISTRY.replace("Feed A", "Feed Z"), encoding="utf-8")
+    os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+    assert path.stat().st_size == before.st_size
+    assert sources.load_registry(config)["a"]["name"] == "Feed Z"
+    path.write_text("bad: [", encoding="utf-8")
+    with pytest.raises(sources.RegistryError):
+        sources.load_registry(config)
+    _registry(tmp_path)
+    assert sources.load_registry(config)["a"]["name"] == "Feed A"
+
+
+def test_resolve_uses_an_explicit_snapshot_even_when_empty(monkeypatch):
+    import pytest
+
+    def unexpected_load(*args):
+        raise AssertionError("an explicit registry must not be reread")
+
+    monkeypatch.setattr(sources, "load_registry", unexpected_load)
+    snapshot = {"a": {"spec": "rss:https://a.example/feed", "tags": ["tech"]}}
+    assert sources.resolve(["source:a", "tag:tech"], registry=snapshot) == ["rss:https://a.example/feed"]
+    with pytest.raises(sources.RegistryError, match="没有 a"):
+        sources.resolve(["source:a"], registry={})
+
+
+def test_the_shipped_registry_loads_and_every_tag_a_job_uses_exists():
+    import yaml
+
+    registry = sources.load_registry("config")
+    assert len(registry) > 50
+    tags = {t for e in registry.values() for t in e["tags"]}
+    for path in __import__("glob").glob("jobs/**/*.yaml", recursive=True):
+        job = yaml.safe_load(open(path, encoding="utf-8")) or {}
+        for spec in job.get("sources") or []:
+            if str(spec).startswith("tag:"):
+                assert spec[4:] in tags, f"{path}: {spec}"
+            if str(spec).startswith("source:"):
+                assert spec[7:] in registry, f"{path}: {spec}"

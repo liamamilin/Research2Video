@@ -1,0 +1,4 @@
+# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。
+job: ai_media/weekly_business_watch
+recipe: report_digest
+auto: 1

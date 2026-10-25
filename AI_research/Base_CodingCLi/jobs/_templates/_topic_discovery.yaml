@@ -1,0 +1,33 @@
+name: "<主题> 选题发现"
+label: "选题发现"
+category: "monitoring"
+description: "为视频找选题：报告里每个 ### 标题加 - **字段**：值 就是一个选题，跑完自动进选题池（topics: 块）"
+enabled: false
+keywords:
+  - <keyword1>
+  - <keyword2>
+language: "zh"
+schedule:
+  type: "manual"
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：发现视频选题并整理素材。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown。
+  ### 1. 选题标题
+  - **核心角度**：内容
+  - **目标受众**：观众
+  - **证据来源**：链接
+output: "output/topic_discovery/{date}_{name}.md"
+# 选题来源（spec/video-topics.md）：prefix 是选题编号的字母（D1、D2…），每个来源要不同，建好后按需改
+topics:
+  format: items
+  prefix: D

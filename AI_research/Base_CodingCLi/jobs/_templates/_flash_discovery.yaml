@@ -1,0 +1,37 @@
+name: "<领域> 快讯发现"
+label: "快讯发现"
+category: "monitoring"
+description: "近 7 天这个领域值得讲的新变化：围绕新闻价值、具体细节和可靠材料挑选素材，领域和关键词来自矩阵（spec/matrices.md）"
+enabled: false
+# 放进矩阵时这里可以空着：运行时先放矩阵的关键词，再放这里的
+keywords:
+  - <keyword1>
+  - <keyword2>
+language: "zh"
+schedule:
+  type: "manual"
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+# 2026-10-20 用医疗关键词试跑过（spec/product-redesign.md 第 7 节）：9 条，几乎都有一手来源，能直接导进选题。
+# 不预设观众：给谁看是写稿时的事（同一节第 5 条）。
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：发现视频选题并整理素材。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown。
+  ### 1.1 选题标题
+  - **一句话**：内容
+  - **发布日期**：日期
+  - **证据来源**：链接
+
+  ### 来源清单
+  素材链接。
+output: "output/flash_discovery/{date}_{name}.md"
+# 复制矩阵时会加上选题来源（topics: format flash，alias 和 prefix 按矩阵取，refresh: false）。
+# 自己用这个模板建 Job 时，要加 topics 就得写自己的 prefix：F 已经是 AI 快讯在用的。

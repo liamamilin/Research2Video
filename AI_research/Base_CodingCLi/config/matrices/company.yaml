@@ -1,0 +1,9 @@
+# 矩阵：商业与公司研究（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
+name: 商业与公司研究
+domain: 商业与公司
+keywords: []
+jobs:
+- company/company_daily
+- company/company_weekly
+render:
+  video_speed: 1.25

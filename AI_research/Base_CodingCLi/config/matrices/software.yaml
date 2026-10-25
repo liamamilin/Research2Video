@@ -1,0 +1,9 @@
+# 矩阵：软件与数字工具（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
+name: 软件与数字工具
+domain: 软件与数字工具
+keywords: []
+jobs:
+- software/software_daily
+- software/software_weekly
+render:
+  video_speed: 1.25

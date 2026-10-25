@@ -1,0 +1,174 @@
+# System configuration
+
+logging:
+  level: "INFO"
+  file: "logs/ai_research.log"
+
+# ---------------------------------------------------------------------------
+# LLM API (OpenAI-compatible chat completions). No CLI dependency.
+# opencode go:  https://opencode.ai/zen/go/v1  (subscription; sends session
+#               id + custom user agent as required by the Go docs)
+# opencode zen: https://opencode.ai/zen/v1     (pay-as-you-go, needs credits)
+# local Ollama: http://localhost:11434/v1      (free, slower)
+# ---------------------------------------------------------------------------
+ai:
+  model: "deepseek-v4.1-flash"              # any OpenAI-compatible model id
+  base_url: "https://opencode.ai/zen/go/v1"
+  api_key_env: "LLM_API_KEY"                # env var holding the API key
+  embedding_model: "bge-m3:latest"          # empty = keyword-only QA (no semantic search)
+  embedding_base_url: "http://localhost:11434/v1"   # local Ollama embeddings
+  embedding_api_key_env: ""                 # Ollama needs no key
+  timeout: 1800                             # per-request wall clock ceiling (s)
+  request_timeout: 600                      # single HTTP attempt (s)
+  max_tokens: 32768
+  temperature: 0.3
+  max_retries: 3
+  stream: true                              # stream report generation for live progress
+  # reasoning_content: "auto"               # auto|always|never; DeepSeek
+  #                                          # thinking mode requires echo
+  # extra_body: {}                          # provider-specific fields
+  extra_headers:
+    x-opencode-session: "ses_{session_id}"  # stable id per job conversation
+    User-Agent: "BaseCodingCLi-ResearchAgent/2.0"
+  pricing:                                # optional, for cost estimates
+    input_per_1m: 0.15                    # deepseek-v4.1-flash (Go, off-peak)
+    output_per_1m: 0.60
+  # --- local fallback example ---
+  # model: "qwen3.8:27b-mlx"
+  # base_url: "http://localhost:11434/v1"
+  # api_key_env: ""
+
+# ---------------------------------------------------------------------------
+# Web search API
+# provider: parallel (https://docs.parallel.ai) | duckduckgo (keyless)
+# ---------------------------------------------------------------------------
+search:
+  provider: "parallel"                      # parallel | tavily | brave | serper | duckduckgo
+  api_key_env: "PARALLEL_API_KEY"
+  api_key_envs:                             # per-provider keys (switch provider freely)
+    tavily: "TAVILY_API_KEY"
+    brave: "BRAVE_API_KEY"
+    serper: "SERPER_API_KEY"
+  mode: "advanced"                          # turbo | fast | basic | advanced
+  max_results: 10
+  max_chars_per_result: 3000
+  max_chars_total: 60000
+  after_date: ""                            # optional YYYY-MM-DD freshness bound
+  timeout: 60
+  fallback_provider: "duckduckgo"
+  # fallback_providers: ["tavily"]          # optional extra fallbacks in order
+
+# ---------------------------------------------------------------------------
+# Question answering over indexed reports
+# ---------------------------------------------------------------------------
+qa:
+  # Trades relevance against freshness. 0 = pure relevance (a June report can
+  # outrank today's), 0.25 = a report one half-life newer earns a quarter-score
+  # bonus. Raise it if answers keep quoting stale findings as current news.
+  recency_weight: 0.25
+  # How many days until a report's recency bonus halves.
+  recency_half_life_days: 30
+  # Candidate pool multiplier: recency cannot promote a report that was never
+  # recalled, so the pool is overfetched beyond the requested limit. This is
+  # not a speed knob -- every stored chunk is compared and only then truncated.
+  # At 3 the pool was 60 chunks out of 6104 and the current round's answer was
+  # often not in it at all; measured over 31 questions, 32..96 all scored the
+  # same, so the default sits in the middle of that plateau.
+  overfetch: 64
+  # Which rounds an answer may come from. 1 = the newest round, widening only
+  # if that leaves too little to answer with. Every round writes the same nine
+  # stage reports, so a question matches a dozen copies of the same section and
+  # the embedding picks the wrong one: an older copy outranked the current
+  # round's in 25 of 31 questions, because newer reports are longer and denser.
+  # Set 0 to search the whole archive (questions naming a date always do).
+  round_scope: 1
+
+# ---------------------------------------------------------------------------
+# Research agent
+# mode: auto (agent with pipeline fallback) | agent | pipeline
+# ---------------------------------------------------------------------------
+research:
+  mode: "auto"
+  max_rounds: 12
+  max_searches: 12
+  context_char_budget: 150000
+  # Cross-round event memory: {reported_events} lists sources already cited in
+  # recent rounds so daily digests stop repeating them as new findings.
+  event_memory:
+    enabled: true
+    days: 7
+    limit: 15
+  # Citation provenance: compare every URL in the finished report against the
+  # URLs this run actually retrieved, and optionally probe the unmatched ones
+  # (those are the likely hallucinations / 404s). Results land in
+  # report_meta.jsonl and the run log; they never fail a run.
+  citation_check:
+    enabled: true
+    min_coverage: 0.6           # citation coverage below this is flagged (null = off)
+    verify_unreachable: false   # true = HTTP HEAD/GET the unmatched URLs
+    max_checks: 10              # cap probes per report
+    timeout: 5.0                # seconds per probe
+
+# ---------------------------------------------------------------------------
+# Monthly budget guardrail (uses ai.pricing for the cost estimate)
+# ---------------------------------------------------------------------------
+budget:
+  monthly_usd_limit: 20      # USD per calendar month; 0 disables the guardrail
+  warn_ratio: 0.8            # warn at 80% of the limit
+  block_pipeline: true       # refuse to start a round or single job when over budget
+
+# ---------------------------------------------------------------------------
+# Notifications: webhook / 企业微信 / 飞书 / email (any combination).
+# Events: failed | cancelled | success | round_finished
+# Test delivery: python run.py --test-notify
+# Prefer *_url_env so webhook secrets stay in .env (never committed).
+# ---------------------------------------------------------------------------
+notifications:
+  enabled: false
+  notify_on:
+  - failed
+  - cancelled
+  - round_finished
+  timeout: 10                  # per-channel HTTP timeout (s)
+  digest:                      # 轮次完成时推送内容摘要（Top 行动等）
+    enabled: true
+    max_actions: 5
+  webhook_url: ""              # Slack/Discord compatible JSON POST (or env)
+  webhook_url_env: "NOTIFY_WEBHOOK_URL"
+  wecom:                       # 企业微信群机器人
+    enabled: false
+    webhook_url: ""            # https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=...
+    webhook_url_env: "WECOM_WEBHOOK_URL"
+  feishu:                      # 飞书群机器人
+    enabled: false
+    webhook_url: ""            # https://open.feishu.cn/open-apis/bot/v2/hook/...
+    webhook_url_env: "FEISHU_WEBHOOK_URL"
+    secret_env: "FEISHU_BOT_SECRET"   # 仅当机器人启用「签名校验」时必填
+  pushplus:                    # 个人微信直推（pushplus.plus，微信扫码登录）
+    enabled: false
+    token_env: "PUSHPLUS_TOKEN"
+    topic: ""                  # 可选：群组编码，推送给一组人
+  serverchan:                  # 个人微信直推（sct.ftqq.com）
+    enabled: false
+    sendkey_env: "SERVERCHAN_SENDKEY"
+  email:
+    enabled: false
+    smtp_host: ""
+    smtp_port: 465
+    smtp_user: ""
+    smtp_password_env: "SMTP_PASSWORD"   # password read from .env / environment
+    from_addr: ""
+    to_addrs: []
+    use_ssl: true              # false = STARTTLS on smtp_port (usually 587)
+
+defaults:
+  output_dir: "output"
+
+# ---------------------------------------------------------------------------
+# Optional report cleanup pass (disabled by default)
+# ---------------------------------------------------------------------------
+extraction:
+  enabled: false
+  model: "deepseek-v4-flash"
+  base_url: "https://opencode.ai/zen/v1"
+  api_key_env: "EXTRACTION_API_KEY"

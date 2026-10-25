@@ -1,0 +1,20 @@
+# 视频调研模板（spec/video-recipes.md）：配方写 research: {template: deep_dive} 引用它，每篇文稿的调研 Job 由它生成。
+# prompt 里的 {topic.<字段>}、{topic_title} 等由选题填，{date} 等由 Job 运行时填。
+
+name: 视频调研：深度解读
+description: 围绕值得追问的问题准备有价值、可追溯的素材，供编辑选择角度与讲述顺序。
+language: zh
+runtime:
+  timeout_seconds: 3600
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。
+  研究方向：沿着这个问题深入寻找能推进理解的线索，准备一段值得听下去的讲述所需的材料。
+  选题：{topic_title}
+  目标观众：{topic_audience}
+  选题资料：{topic.一句话}
+  来源资料：{topic_sources}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；末尾「### 来源清单」记录素材链接。

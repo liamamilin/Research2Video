@@ -1,0 +1,36 @@
+name: 文化艺术周观察
+description: 每周挑一个文化主题讲清楚：作品或流派是什么、怎么形成、评论者怎么看（读艺术、音乐、设计类来源抓取的内容），不联网搜索
+enabled: true
+keywords:
+- 艺术
+- 音乐
+- 设计
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+search: false
+sources_limit: 10
+sources:
+- source:hyperallergic
+- source:colossal
+- source:open_culture
+- source:artnet
+- source:smithsonian_arts
+- source:pitchfork
+- source:dezeen
+- source:jazztimes
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：回看这一周的材料，找到值得继续追问的变化和联系。关注作品、创作者和文化现象背后的故事与感受，保留能把事情讲生动、讲明白的具体材料。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: output/culture/{date}_culture_weekly.md

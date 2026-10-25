@@ -1,0 +1,314 @@
+"""System-supervised dispatcher and isolated workers for every registered job."""
+from __future__ import annotations
+
+from dataclasses import dataclass
+import hashlib
+import logging
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import threading
+import time
+
+from core.fileio import file_lock
+from core.schedule_store import ScheduleStore
+
+logger = logging.getLogger(__name__)
+SCRIPT = Path(__file__).resolve().parents[1] / 'scripts' / 'dispatch_schedules.py'
+
+
+@dataclass(frozen=True)
+class Runtime:
+    workspace: str
+    state_dir: str
+    jobs_dir: str
+    config_dir: str
+    logs_dir: str
+
+    @classmethod
+    def from_settings(cls, settings):
+        workspace = str(Path(settings.paths.config_dir).resolve().parent)
+        return cls(workspace, *(str(Path(getattr(settings.paths, name)).resolve())
+                               for name in ('state_dir', 'jobs_dir', 'config_dir', 'logs_dir')))
+
+    def arguments(self) -> list[str]:
+        args = []
+        for name, value in vars(self).items():
+            args.extend(['--' + name.replace('_', '-'), value])
+        return args
+
+    def identity(self) -> dict:
+        return vars(self)
+
+
+def canonical_job(runtime: Runtime, name: str) -> tuple[str, dict]:
+    """Resolve aliases once and ensure the selected YAML stays inside jobs_dir."""
+    from core.platform_analytics_store import INTERNAL_JOB
+    if name == INTERNAL_JOB:
+        return name, {'name': 'B站视频数据采集', '_file': name, 'enabled': True,
+                      'runtime': {'timeout_seconds': 300}}
+    from core.config import load_job
+    job = load_job(runtime.jobs_dir, name)
+    if not job:
+        raise ValueError('研究任务不存在，请刷新任务列表')
+    canonical = job['_file']
+    root = Path(runtime.jobs_dir).resolve()
+    paths = [root / (canonical + suffix) for suffix in ('.yaml', '.yml')]
+    if not any(p.is_file() and p.resolve().is_relative_to(root) for p in paths):
+        raise ValueError('任务路径超出 jobs 目录')
+    if not job.get('enabled', True):
+        raise ValueError('此 job 已停用，请先在任务配置中启用')
+    if not str(job.get('prompt') or '').strip():
+        raise ValueError('任务 prompt 为空，无法运行')
+    return canonical, job
+
+
+def run_lock(store: ScheduleStore, run_id: str) -> str:
+    return str(Path(store.state_dir) / 'schedule-locks' / run_id)
+
+
+def recover(store: ScheduleStore, now: float | None = None) -> int:
+    """An expired lease alone is insufficient: a live worker's OS lock wins."""
+    recovered = 0
+    for run in store.expired(now):
+        try:
+            with file_lock(run_lock(store, run['id']), timeout=0):
+                store.finish(run['id'], 'interrupted', '执行进程中断，已按重试策略处理', now=now)
+                recovered += 1
+        except TimeoutError:
+            pass
+    return recovered
+
+
+def spawn_worker(runtime: Runtime, run: dict) -> None:
+    """Spawn by argument vector, with no shell and no dependency on the Web PID."""
+    log_dir = Path(runtime.logs_dir) / 'schedules'
+    log_dir.mkdir(parents=True, exist_ok=True)
+    with (log_dir / f"{run['id']}.log").open('ab') as log:
+        process = subprocess.Popen([sys.executable, str(SCRIPT), *runtime.arguments(), '--worker', run['id']],
+                                   cwd=runtime.workspace, stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                                   start_new_session=True)
+    # Reap finished children without blocking subsequent ticks.
+    threading.Thread(target=process.wait, daemon=True).start()
+
+
+_last_poke = 0.0
+
+
+def autopilot_due(state_dir: str, now: float, runtime: Runtime | None = None) -> bool:
+    """Whether the video pipeline has something to do: a weekly plan that is due, or a batch still running.
+
+    Reads video.db directly (stdlib only) so this works while the web app is down. With ``runtime`` it also asks whether a
+    Job with auto configs has a new report to write from."""
+    import sqlite3
+    path = Path(state_dir) / 'video.db'
+    if not path.is_file():
+        return False
+    try:
+        with sqlite3.connect(f'file:{path}?mode=ro', uri=True, timeout=2) as db:
+            if db.execute("SELECT 1 FROM autopilot_runs WHERE status = 'RUNNING' LIMIT 1").fetchone():
+                return True
+            if db.execute("SELECT 1 FROM autopilot_plans WHERE enabled = 1 AND next_fire IS NOT NULL"
+                          " AND next_fire <= ? LIMIT 1", (now,)).fetchone():
+                return True
+    except sqlite3.Error:
+        return False
+    return runtime is not None and auto_due(runtime, now)
+
+
+def auto_due(runtime: Runtime, now: float) -> bool:
+    """Whether a Job with auto configs has a new report to write from (core/video/auto.py): nothing else wakes the
+    console after a scheduled run, and an idle console is closed by its launcher."""
+    from core.video import auto
+
+    try:
+        return bool(auto.pending(runtime.config_dir, runtime.jobs_dir, runtime.state_dir, runtime.workspace, now))
+    except Exception:
+        logger.exception('Auto-write check failed')
+        return False
+
+
+def gateway_port(runtime: Runtime, default: int = 8765) -> int:
+    """The gateway's public port, from config/web.yaml (``server.port``)."""
+    try:
+        import yaml
+        with open(Path(runtime.config_dir) / 'web.yaml', encoding='utf-8') as fh:
+            return int(((yaml.safe_load(fh) or {}).get('server') or {}).get('port') or default)
+    except (OSError, ValueError, TypeError, ImportError):
+        return default
+
+
+def poke_autopilot(runtime: Runtime, now: float, interval: float = 30.0, port: int | None = None) -> bool:
+    """Wake the console (through its gateway, which starts it on demand) while the video pipeline has work.
+
+    The pipeline itself runs inside the app; this only makes sure the app is up to run it."""
+    global _last_poke
+    port = port or gateway_port(runtime)
+    if now - _last_poke < interval or not autopilot_due(runtime.state_dir, now, runtime):
+        return False
+    _last_poke = now
+    import http.client
+    import json
+    import socket
+    # Loopback first, then this host's LAN address: another program may own 127.0.0.1:<port> while the gateway
+    # listens on every other address (it does on this host), and only the gateway answers with JSON.
+    hosts = ['127.0.0.1']
+    try:
+        probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        probe.connect(('192.0.2.1', 9))
+        hosts.append(probe.getsockname()[0])
+        probe.close()
+    except OSError:
+        pass
+    for host in hosts:
+        try:
+            conn = http.client.HTTPConnection(host, port, timeout=5)
+            conn.request('GET', '/api/health')
+            body = conn.getresponse().read()
+            conn.close()
+            json.loads(body)
+            return True
+        except (OSError, ValueError):
+            continue  # not the gateway, or it is down; try the next address, then the next tick asks again
+    return True
+
+
+def dispatch_once(runtime: Runtime, store: ScheduleStore, now: float | None = None, spawn=spawn_worker) -> int:
+    """Recover dead claims, enqueue due slots, and dispatch at most two workers."""
+    now = time.time() if now is None else now
+    recover(store, now)
+    store.enqueue_due(now)
+    launched = 0
+    for _ in range(2):
+        run = store.claim(now)
+        if not run:
+            break
+        try:
+            spawn(runtime, run)
+            launched += 1
+        except Exception as exc:
+            store.finish(run['id'], 'failed', f'启动执行进程失败：{exc}', now=now)
+    try:
+        poke_autopilot(runtime, now)
+    except Exception:
+        logger.exception('Video pipeline wake-up failed')
+    store.heartbeat({'checked_at': now, 'status': 'ok', 'pid': os.getpid(), 'runtime': runtime.identity()})
+    return launched
+
+
+def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event) -> tuple[str, str, str | None]:
+    """Use the research engine's actual result, not run.py's historical exit code."""
+    from core.platform_analytics_store import INTERNAL_JOB
+    if job_name == INTERNAL_JOB:
+        from web.services.platform_analytics import run_scheduled
+        return run_scheduled(runtime.state_dir, cancel)
+    from core import state, lock, report_meta
+    from core.budget import pipeline_allowed
+    from core.config import load_system_config
+    from core.engine import ResearchEngine
+    state.use_state_dir(runtime.state_dir)
+    lock._LOCK_DIR = str(Path(runtime.state_dir) / 'locks')
+    report_meta.META_FILE = str(Path(runtime.state_dir) / 'report_meta.jsonl')
+    try:
+        canonical, job = canonical_job(runtime, job_name)
+    except ValueError as exc:
+        return 'blocked', str(exc), None
+    allowed, reason = pipeline_allowed(load_system_config(runtime.config_dir))
+    if not allowed:
+        return 'blocked', reason, None
+    from core.matrices import cap_block
+    reason = cap_block(canonical, runtime.config_dir)
+    if reason:
+        return 'blocked', reason, None
+    # The engine shares its own per-job lock with CLI/Web manual runs.
+    engine = ResearchEngine(config_dir=runtime.config_dir, jobs_dir=runtime.jobs_dir,
+                            workspace_dir=runtime.workspace, cancel_token=cancel, user='scheduler')
+    output = engine.run_job(canonical)
+    if output and Path(output).is_file():
+        return 'success', '', str(Path(output).resolve())
+    last = state.StateManager.get(canonical) or {}
+    return 'failed', ('任务超过运行时限' if cancel.is_set() else last.get('last_error') or '任务未生成报告，可能已有同名任务运行'), None
+
+
+def work(runtime: Runtime, run_id: str, execute=execute_job) -> None:
+    """Run one claimed slot under OS locks, with a lease and a bounded lifetime."""
+    store = ScheduleStore(runtime.state_dir)
+    run = store.run(run_id)
+    if not run:
+        return
+    job_key = hashlib.sha256(run['job_name'].encode()).hexdigest()
+    cancel, done = threading.Event(), threading.Event()
+    try:
+        with file_lock(run_lock(store, run_id), timeout=0):
+            try:
+                with file_lock(str(Path(runtime.state_dir) / 'schedule-job-locks' / job_key), timeout=0):
+                    if not store.start(run_id, os.getpid()):
+                        return
+                    try:
+                        _, job = canonical_job(runtime, run['job_name'])
+                        config = job.get('runtime') or {}
+                        timeout = min(max(int(config.get('timeout_seconds') or 3600), 60), 86400)
+                    except (ValueError, TypeError, AttributeError) as exc:
+                        store.finish(run_id, 'blocked', str(exc))
+                        return
+                    def heartbeat():
+                        renewed = 0.0
+                        while not done.wait(0.5):
+                            try:
+                                current = store.run(run_id)
+                                if current and current.get('cancel_requested'):
+                                    cancel.set()
+                                if time.monotonic() - renewed >= 10:
+                                    store.renew(run_id)
+                                    renewed = time.monotonic()
+                            except Exception:
+                                logger.exception('Worker heartbeat failed')
+                    def deadline():
+                        if not done.wait(timeout):
+                            cancel.set()
+                            if not done.wait(60):
+                                # Release OS locks by exiting; the dispatcher detects the lost lease.
+                                os._exit(124)
+                    threading.Thread(target=heartbeat, daemon=True).start()
+                    threading.Thread(target=deadline, daemon=True).start()
+                    if threading.current_thread() is threading.main_thread():
+                        signal.signal(signal.SIGTERM, lambda *_: cancel.set())
+                    try:
+                        status, error, output = execute(runtime, run['job_name'], cancel)
+                        store.finish(run_id, status, error, output)
+                    except Exception as exc:
+                        logger.exception('Scheduled job failed')
+                        store.finish(run_id, 'failed', str(exc))
+                    finally:
+                        done.set()
+            except TimeoutError:
+                store.finish(run_id, 'failed', '同一 job 已有执行进程，稍后重试')
+    except TimeoutError:
+        # A duplicate worker for the same run must not modify its owner's claim.
+        return
+
+
+def serve(runtime: Runtime, once: bool = False) -> None:
+    """Keep dispatching independently of the Web service; launchd supervises us."""
+    os.chdir(runtime.workspace)
+    store = ScheduleStore(runtime.state_dir)
+    stop = threading.Event()
+    signal.signal(signal.SIGTERM, lambda *_: stop.set())
+    signal.signal(signal.SIGINT, lambda *_: stop.set())
+    try:
+        with file_lock(str(Path(runtime.state_dir) / 'schedule-dispatcher'), timeout=0):
+            while not stop.is_set():
+                try:
+                    dispatch_once(runtime, store)
+                except Exception as exc:
+                    logger.exception('Dispatcher tick failed')
+                    store.heartbeat({'checked_at': time.time(), 'status': 'error', 'error': str(exc),
+                                     'pid': os.getpid(), 'runtime': runtime.identity()})
+                if once:
+                    return
+                stop.wait(10)
+            store.heartbeat({'checked_at': time.time(), 'status': 'stopped', 'runtime': runtime.identity()})
+    except TimeoutError:
+        logger.info('Another dispatcher already owns this state directory')

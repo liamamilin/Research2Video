@@ -1,0 +1,745 @@
+{
+  "ai-developer-comparison-long": {
+    "status": "experimental",
+    "label": "对比 · 开发者 · B 站横屏长",
+    "tags": {
+      "domain": {
+        "key": "ai",
+        "name": "AI 与软件"
+      },
+      "audience": {
+        "key": "developer",
+        "name": "开发者"
+      },
+      "type": {
+        "key": "comparison",
+        "name": "对比"
+      },
+      "format": {
+        "key": "long",
+        "name": "B 站横屏长"
+      }
+    },
+    "cell_id": "ai-developer-comparison-long",
+    "resolved_sha256": "30a2c324308341cb280f924c587064805c04f13324cd3ab366ac5aebb26a6d63",
+    "column": {
+      "key": "ai-developer-comparison-long",
+      "name": "对比",
+      "description": "陪开发者弄明白这些对象各自适合什么，沿着真正影响选择的差别展开，听完能作出自己的判断。",
+      "target_minutes": 4.5,
+      "video_form": "information_motion",
+      "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：从开发者实际会遇到的选择出发，寻找能解释这些对象差别的使用场景和具体材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}\n对比对象：{topic_subjects}\n对比维度：{topic_dimensions}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+      "script_style": "陪开发者弄明白这些对象各自适合什么，沿着真正影响选择的差别展开，听完能作出自己的判断。",
+      "research_timeout_seconds": 2400,
+      "writer": "legacy",
+      "voice_id": "voxcpm_anchor",
+      "default_depth": "intermediate",
+      "default_tone": "explainer",
+      "allowed_tones": [],
+      "required_roles": [],
+      "sections": [
+        4,
+        6
+      ],
+      "paragraph_units": [
+        60,
+        140
+      ],
+      "package": {},
+      "packaging": {
+        "preset": "common",
+        "accent": "#1f7a4d",
+        "label": "对比",
+        "outro": {
+          "lines": [
+            "对比"
+          ],
+          "seconds": 2.5
+        }
+      },
+      "source_card": true,
+      "audience": "开发者",
+      "allowed_forms": [
+        "information_motion"
+      ],
+      "creative_intent": {
+        "purpose": "知识讲解"
+      },
+      "topic_kind": "comparison",
+      "recheck": false,
+      "research_mode": "job",
+      "research_language": "zh",
+      "topic_sources": [],
+      "topic_fields": [
+        "核心角度",
+        "目标受众",
+        "条目数",
+        "条目",
+        "对比对象",
+        "对比维度"
+      ],
+      "audit_model": "review",
+      "audit_style_severity": "warn",
+      "audit_timeout_seconds": 0,
+      "revise_rounds": 2,
+      "pause_after_plan": false,
+      "production_recipe": "",
+      "production_mode": "standard",
+      "visual_style": "legacy",
+      "production_settings": {}
+    }
+  },
+  "ai-developer-roundup-long": {
+    "status": "experimental",
+    "label": "盘点 · 开发者 · B 站横屏长",
+    "tags": {
+      "domain": {
+        "key": "ai",
+        "name": "AI 与软件"
+      },
+      "type": {
+        "key": "roundup",
+        "name": "盘点"
+      },
+      "format": {
+        "key": "long",
+        "name": "B 站横屏长"
+      },
+      "audience": {
+        "key": "developer",
+        "name": "开发者"
+      }
+    },
+    "cell_id": "ai-developer-roundup-long",
+    "resolved_sha256": "33fbb8e6e62a59a78d66f9b558da90654e1cf8728fc6ce2c7a050155ace1e140",
+    "column": {
+      "key": "ai-developer-roundup-long",
+      "name": "盘点",
+      "description": "从这批变化里为开发者选出值得听的内容，找到它们之间有意思的联系，让整期像一次发现之旅。",
+      "target_minutes": 4,
+      "video_form": "information_motion",
+      "research_prompt": "",
+      "script_style": "从这批变化里为开发者选出值得听的内容，找到它们之间有意思的联系，让整期像一次发现之旅。",
+      "research_timeout_seconds": 3600,
+      "writer": "legacy",
+      "voice_id": "voxcpm_anchor",
+      "default_depth": "intermediate",
+      "default_tone": "concise",
+      "allowed_tones": [],
+      "required_roles": [],
+      "sections": [
+        4,
+        6
+      ],
+      "paragraph_units": [
+        60,
+        140
+      ],
+      "package": {},
+      "packaging": {
+        "preset": "common",
+        "accent": "#1f7a4d",
+        "label": "盘点",
+        "outro": {
+          "lines": [
+            "AI 盘点"
+          ],
+          "seconds": 2.5
+        }
+      },
+      "source_card": true,
+      "audience": "开发者",
+      "allowed_forms": [
+        "information_motion"
+      ],
+      "creative_intent": {
+        "purpose": "知识讲解"
+      },
+      "topic_kind": "roundup",
+      "recheck": false,
+      "research_mode": "none",
+      "research_language": "zh",
+      "topic_sources": [
+        "flash"
+      ],
+      "topic_fields": [
+        "核心角度",
+        "目标受众",
+        "条目数",
+        "条目",
+        "对比对象",
+        "对比维度"
+      ],
+      "audit_model": "review",
+      "audit_style_severity": "warn",
+      "audit_timeout_seconds": 0,
+      "revise_rounds": 2,
+      "pause_after_plan": false,
+      "production_recipe": "",
+      "production_mode": "standard",
+      "visual_style": "legacy",
+      "production_settings": {}
+    }
+  },
+  "ai-non_tech-deep_dive-long": {
+    "status": "experimental",
+    "label": "深度解读 · 普通用户 · B 站横屏长",
+    "tags": {
+      "domain": {
+        "key": "ai",
+        "name": "AI 与软件"
+      },
+      "type": {
+        "key": "deep_dive",
+        "name": "深度解读"
+      },
+      "format": {
+        "key": "long",
+        "name": "B 站横屏长"
+      },
+      "audience": {
+        "key": "non_tech",
+        "name": "普通用户"
+      }
+    },
+    "cell_id": "ai-non_tech-deep_dive-long",
+    "resolved_sha256": "e8b5db12966fb92e140b303f3be460a0d1c8d60c1f642e3f0145464ca4428874",
+    "column": {
+      "key": "ai-non_tech-deep_dive-long",
+      "name": "深度解读",
+      "description": "陪普通用户深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。",
+      "target_minutes": 6,
+      "video_form": "auto",
+      "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：沿着这个问题深入寻找能推进理解的线索，准备一段值得听下去的讲述所需的材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+      "script_style": "陪普通用户深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。",
+      "research_timeout_seconds": 3600,
+      "writer": "legacy",
+      "voice_id": "voxcpm_anchor",
+      "default_depth": "intro",
+      "default_tone": "explainer",
+      "allowed_tones": [],
+      "required_roles": [],
+      "sections": [
+        4,
+        6
+      ],
+      "paragraph_units": [
+        60,
+        140
+      ],
+      "package": {},
+      "packaging": {
+        "preset": "common",
+        "accent": "#1f7a4d",
+        "label": "深度解读",
+        "outro": {
+          "lines": [
+            "面向普通用户的 深度解读"
+          ],
+          "seconds": 2.5
+        }
+      },
+      "source_card": true,
+      "audience": "普通用户",
+      "allowed_forms": [
+        "auto",
+        "information_motion",
+        "process_diagram"
+      ],
+      "creative_intent": {
+        "purpose": "知识讲解",
+        "audience": "会用 ChatGPT、Claude 这类 AI 工具、但不写代码的人；画面优先日常表达，必要的术语、参数和计费口径要解释清楚"
+      },
+      "topic_kind": "single",
+      "recheck": false,
+      "research_mode": "job",
+      "research_language": "zh",
+      "topic_sources": [
+        "opportunities"
+      ],
+      "topic_fields": [
+        "核心角度",
+        "目标受众",
+        "为什么有人在乎"
+      ],
+      "audit_model": "review",
+      "audit_style_severity": "warn",
+      "audit_timeout_seconds": 0,
+      "revise_rounds": 2,
+      "pause_after_plan": false,
+      "production_recipe": "",
+      "production_mode": "standard",
+      "visual_style": "legacy",
+      "production_settings": {}
+    }
+  },
+  "ai-non_tech-one_point-short": {
+    "status": "experimental",
+    "label": "一个知识点 · 普通用户 · B 站横屏短",
+    "tags": {
+      "domain": {
+        "key": "ai",
+        "name": "AI 与软件"
+      },
+      "type": {
+        "key": "one_point",
+        "name": "一个知识点"
+      },
+      "format": {
+        "key": "short",
+        "name": "B 站横屏短"
+      },
+      "audience": {
+        "key": "non_tech",
+        "name": "普通用户"
+      }
+    },
+    "cell_id": "ai-non_tech-one_point-short",
+    "resolved_sha256": "3fd046538b3bbf0f352674c43247b6e33b98dc672044a4ac8d98542533f7d6f2",
+    "column": {
+      "key": "ai-non_tech-one_point-short",
+      "name": "一个知识点",
+      "description": "带普通用户弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。",
+      "target_minutes": 1.5,
+      "video_form": "information_motion",
+      "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：围绕观众对这个知识点的疑问寻找解释、例子和有意思的发现。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+      "script_style": "带普通用户弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。",
+      "research_timeout_seconds": 1800,
+      "writer": "legacy",
+      "voice_id": "voxcpm_anchor",
+      "default_depth": "intro",
+      "default_tone": "explainer",
+      "allowed_tones": [],
+      "required_roles": [],
+      "sections": [
+        4,
+        6
+      ],
+      "paragraph_units": [
+        60,
+        140
+      ],
+      "package": {},
+      "packaging": {
+        "preset": "common",
+        "accent": "#1f7a4d",
+        "label": "一个知识点",
+        "outro": {
+          "lines": [
+            "面向普通用户的 知识点"
+          ],
+          "seconds": 2.5
+        }
+      },
+      "source_card": true,
+      "audience": "普通用户",
+      "allowed_forms": [
+        "information_motion"
+      ],
+      "creative_intent": {
+        "purpose": "知识讲解",
+        "audience": "会用 ChatGPT、Claude 这类 AI 工具、但不写代码的人；画面优先日常表达，必要的术语、参数和计费口径要解释清楚"
+      },
+      "topic_kind": "single",
+      "recheck": false,
+      "research_mode": "job",
+      "research_language": "zh",
+      "topic_sources": [
+        "flash"
+      ],
+      "topic_fields": [
+        "核心角度",
+        "目标受众",
+        "条目数",
+        "条目",
+        "对比对象",
+        "对比维度"
+      ],
+      "audit_model": "review",
+      "audit_style_severity": "warn",
+      "audit_timeout_seconds": 0,
+      "revise_rounds": 2,
+      "pause_after_plan": false,
+      "production_recipe": "",
+      "production_mode": "standard",
+      "visual_style": "legacy",
+      "production_settings": {}
+    }
+  },
+  "ai-non_tech-quick_take-short": {
+    "status": "experimental",
+    "label": "快讯 · 普通用户 · B 站横屏短",
+    "tags": {
+      "domain": {
+        "key": "ai",
+        "name": "AI 与软件"
+      },
+      "type": {
+        "key": "quick_take",
+        "name": "快讯"
+      },
+      "format": {
+        "key": "short",
+        "name": "B 站横屏短"
+      },
+      "audience": {
+        "key": "non_tech",
+        "name": "普通用户"
+      }
+    },
+    "cell_id": "ai-non_tech-quick_take-short",
+    "resolved_sha256": "eb382128fd746032c6da4128fff76e34a821275ac630e212418d095ec6aaaa8b",
+    "column": {
+      "key": "ai-non_tech-quick_take-short",
+      "name": "快讯",
+      "description": "让普通用户抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。",
+      "target_minutes": 1.25,
+      "video_form": "information_motion",
+      "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}；{topic_change}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+      "script_style": "让普通用户抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。",
+      "research_timeout_seconds": 1500,
+      "writer": "legacy",
+      "voice_id": "voxcpm_anchor",
+      "default_depth": "intro",
+      "default_tone": "news",
+      "allowed_tones": [],
+      "required_roles": [],
+      "sections": [
+        4,
+        6
+      ],
+      "paragraph_units": [
+        60,
+        140
+      ],
+      "package": {},
+      "packaging": {
+        "preset": "common",
+        "accent": "#1f7a4d",
+        "label": "快讯",
+        "intro": {
+          "subtitle": "{date}",
+          "seconds": 1.5
+        },
+        "outro": {
+          "lines": [
+            "面向普通用户的 快讯"
+          ],
+          "seconds": 3
+        }
+      },
+      "source_card": true,
+      "audience": "普通用户",
+      "allowed_forms": [
+        "information_motion"
+      ],
+      "creative_intent": {
+        "purpose": "知识讲解",
+        "audience": "会用 ChatGPT、Claude 这类 AI 工具、但不写代码的人；画面优先日常表达，必要的术语、参数和计费口径要解释清楚"
+      },
+      "topic_kind": "single",
+      "recheck": true,
+      "research_mode": "job",
+      "research_language": "zh",
+      "topic_sources": [
+        "flash"
+      ],
+      "topic_fields": [
+        "核心角度",
+        "目标受众",
+        "条目数",
+        "条目",
+        "对比对象",
+        "对比维度"
+      ],
+      "audit_model": "review",
+      "audit_style_severity": "warn",
+      "audit_timeout_seconds": 0,
+      "revise_rounds": 2,
+      "pause_after_plan": false,
+      "production_recipe": "",
+      "production_mode": "standard",
+      "visual_style": "legacy",
+      "production_settings": {}
+    }
+  },
+  "deep_dive": {
+    "status": "enabled",
+    "label": "深度解读 · 开发者 · B 站横屏长",
+    "tags": {
+      "domain": {
+        "key": "ai",
+        "name": "AI 与软件"
+      },
+      "type": {
+        "key": "deep_dive",
+        "name": "深度解读"
+      },
+      "format": {
+        "key": "long",
+        "name": "B 站横屏长"
+      },
+      "audience": {
+        "key": "developer",
+        "name": "开发者"
+      }
+    },
+    "cell_id": "ai-developer-deep_dive-long",
+    "resolved_sha256": "b2849715138d79dc9615bf7928bec338a6bcd98fb7d10cf37b125f74cbd5c301",
+    "column": {
+      "key": "deep_dive",
+      "name": "深度解读",
+      "description": "陪开发者深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。",
+      "target_minutes": 6,
+      "video_form": "auto",
+      "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：沿着这个问题深入寻找能推进理解的线索，准备一段值得听下去的讲述所需的材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+      "script_style": "陪开发者深入弄明白一个值得追问的问题，沿着材料中的线索推进，带来比初看时更深一层的理解。",
+      "research_timeout_seconds": 3600,
+      "writer": "legacy",
+      "voice_id": "voxcpm_anchor",
+      "default_depth": "intermediate",
+      "default_tone": "explainer",
+      "allowed_tones": [],
+      "required_roles": [],
+      "sections": [
+        4,
+        6
+      ],
+      "paragraph_units": [
+        60,
+        140
+      ],
+      "package": {},
+      "packaging": {
+        "preset": "common",
+        "accent": "#1f7a4d",
+        "label": "深度解读",
+        "outro": {
+          "lines": [
+            "面向开发者的 深度解读"
+          ],
+          "seconds": 2.5
+        }
+      },
+      "source_card": true,
+      "audience": "开发者",
+      "allowed_forms": [
+        "auto",
+        "information_motion",
+        "process_diagram"
+      ],
+      "creative_intent": {
+        "purpose": "知识讲解"
+      },
+      "topic_kind": "single",
+      "recheck": false,
+      "research_mode": "job",
+      "research_language": "zh",
+      "topic_sources": [
+        "opportunities"
+      ],
+      "topic_fields": [
+        "核心角度",
+        "目标受众",
+        "为什么有人在乎"
+      ],
+      "audit_model": "review",
+      "audit_style_severity": "warn",
+      "audit_timeout_seconds": 0,
+      "revise_rounds": 2,
+      "pause_after_plan": false,
+      "production_recipe": "",
+      "production_mode": "standard",
+      "visual_style": "legacy",
+      "production_settings": {}
+    }
+  },
+  "flash": {
+    "status": "enabled",
+    "label": "快讯 · 开发者 · B 站横屏短",
+    "tags": {
+      "domain": {
+        "key": "ai",
+        "name": "AI 与软件"
+      },
+      "type": {
+        "key": "quick_take",
+        "name": "快讯"
+      },
+      "format": {
+        "key": "short",
+        "name": "B 站横屏短"
+      },
+      "audience": {
+        "key": "developer",
+        "name": "开发者"
+      }
+    },
+    "cell_id": "ai-developer-quick_take-short",
+    "resolved_sha256": "a1c4d03fe6e1d6a6aa21b5ceb72b1ba7da7c2f1168e1c9d6dd6170e6c6e682f3",
+    "column": {
+      "key": "flash",
+      "name": "快讯",
+      "description": "让开发者抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。",
+      "target_minutes": 1.25,
+      "video_form": "information_motion",
+      "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}；{topic_change}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+      "script_style": "让开发者抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。",
+      "research_timeout_seconds": 1500,
+      "writer": "legacy",
+      "voice_id": "voxcpm_anchor",
+      "default_depth": "intermediate",
+      "default_tone": "news",
+      "allowed_tones": [],
+      "required_roles": [],
+      "sections": [
+        4,
+        6
+      ],
+      "paragraph_units": [
+        60,
+        140
+      ],
+      "package": {},
+      "packaging": {
+        "preset": "common",
+        "accent": "#1f7a4d",
+        "label": "快讯",
+        "intro": {
+          "subtitle": "{date}",
+          "seconds": 1.5
+        },
+        "outro": {
+          "lines": [
+            "面向开发者的 快讯"
+          ],
+          "seconds": 3
+        }
+      },
+      "source_card": true,
+      "audience": "开发者",
+      "allowed_forms": [
+        "information_motion"
+      ],
+      "creative_intent": {
+        "purpose": "知识讲解"
+      },
+      "topic_kind": "single",
+      "recheck": true,
+      "research_mode": "job",
+      "research_language": "zh",
+      "topic_sources": [
+        "flash"
+      ],
+      "topic_fields": [
+        "核心角度",
+        "目标受众",
+        "条目数",
+        "条目",
+        "对比对象",
+        "对比维度"
+      ],
+      "audit_model": "review",
+      "audit_style_severity": "warn",
+      "audit_timeout_seconds": 0,
+      "revise_rounds": 2,
+      "pause_after_plan": false,
+      "production_recipe": "",
+      "production_mode": "standard",
+      "visual_style": "legacy",
+      "production_settings": {}
+    }
+  },
+  "point_short": {
+    "status": "enabled",
+    "label": "一个知识点 · 开发者 · B 站横屏短",
+    "tags": {
+      "domain": {
+        "key": "ai",
+        "name": "AI 与软件"
+      },
+      "type": {
+        "key": "one_point",
+        "name": "一个知识点"
+      },
+      "format": {
+        "key": "short",
+        "name": "B 站横屏短"
+      },
+      "audience": {
+        "key": "developer",
+        "name": "开发者"
+      }
+    },
+    "cell_id": "ai-developer-one_point-short",
+    "resolved_sha256": "402172406c50a0ee206e0341412c2de3460f72c18a6c3c49d7f579dfb669fa18",
+    "column": {
+      "key": "point_short",
+      "name": "一个知识点",
+      "description": "带开发者弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。",
+      "target_minutes": 1.5,
+      "video_form": "information_motion",
+      "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：围绕观众对这个知识点的疑问寻找解释、例子和有意思的发现。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
+      "script_style": "带开发者弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。",
+      "research_timeout_seconds": 1800,
+      "writer": "legacy",
+      "voice_id": "voxcpm_anchor",
+      "default_depth": "intermediate",
+      "default_tone": "explainer",
+      "allowed_tones": [],
+      "required_roles": [],
+      "sections": [
+        4,
+        6
+      ],
+      "paragraph_units": [
+        60,
+        140
+      ],
+      "package": {},
+      "packaging": {
+        "preset": "common",
+        "accent": "#1f7a4d",
+        "label": "一个知识点",
+        "outro": {
+          "lines": [
+            "面向开发者的 知识点"
+          ],
+          "seconds": 2.5
+        }
+      },
+      "source_card": true,
+      "audience": "开发者",
+      "allowed_forms": [
+        "information_motion"
+      ],
+      "creative_intent": {
+        "purpose": "知识讲解"
+      },
+      "topic_kind": "single",
+      "recheck": false,
+      "research_mode": "job",
+      "research_language": "zh",
+      "topic_sources": [
+        "flash"
+      ],
+      "topic_fields": [
+        "核心角度",
+        "目标受众",
+        "条目数",
+        "条目",
+        "对比对象",
+        "对比维度"
+      ],
+      "audit_model": "review",
+      "audit_style_severity": "warn",
+      "audit_timeout_seconds": 0,
+      "revise_rounds": 2,
+      "pause_after_plan": false,
+      "production_recipe": "",
+      "production_mode": "standard",
+      "visual_style": "legacy",
+      "production_settings": {}
+    }
+  }
+}

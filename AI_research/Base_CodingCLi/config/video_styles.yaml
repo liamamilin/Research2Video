@@ -1,0 +1,60 @@
+# 深浅决定解释尺度，语气提供创作方向；都不是逐条达标的写作模板。
+# 修改预设后递增 version，旧文稿保留当时使用的版本记录。
+depths:
+  intro:
+    name: 入门
+    version: 4
+    audience: 对话题有兴趣、但没有专业基础的观众
+    max_new_terms_per_section: 0
+    guidance: |
+      从普通观众熟悉的事物进入，具体、生动、容易理解。
+  intermediate:
+    name: 进阶
+    version: 4
+    audience: 了解基础名词、希望获得新认识的从业者或爱好者
+    max_new_terms_per_section: 0
+    guidance: |
+      写给了解基础名词的观众，重点是这次有意思的新认识。
+  expert:
+    name: 专家
+    version: 3
+    audience: 熟悉领域日常工作、关心关键判断和细节的从业者
+    max_new_terms_per_section: 0
+    guidance: |
+      写给熟悉领域的观众，突出有分量的机制、细节和判断。
+tones:
+  concise:
+    name: 简洁干货
+    version: 4
+    guidance: |
+      利落、有重点，让有价值的内容自然展开。
+    example: |
+      先记住一个区别：这次开放的是推理引擎。要把它接成完整的在线服务，还有部件需要自己补。这比一个提速百分比更影响接入决定。
+  explainer:
+    name: 讲解通俗
+    version: 5
+    guidance: |
+      像有经验的人把一个值得弄明白的问题讲通。
+    example: |
+      你可以把引擎理解成厨房里负责做菜的部分。餐厅真要营业，还得接单、排队、把菜送出去。拿到了引擎，不等于拿到了整家餐厅。
+  playful:
+    name: 风趣口语
+    version: 5
+    guidance: |
+      像懂行的朋友聊天，轻松、有观察、有个性。
+    example: |
+      引擎搬回家了，先别急着挂上营业牌。缓存怎么管、请求怎么分，还得自己接着搭。开源这两个字后面，真正要看的就是开到了哪一层。
+  story:
+    name: 故事案例
+    version: 3
+    guidance: |
+      用有意思的事情、人物或场景推进，让观众愿意跟下去。
+    example: |
+      假设你看到开源消息，准备把它接进现有服务。打开项目说明才发现，关键的缓存管理并不在这次发布里。此时再看清单，问题就从「能快多少」变成了「我们还要自己补什么」。
+  news:
+    name: 新闻播报
+    version: 4
+    guidance: |
+      抓住新闻点，清楚、直接地讲述变化与意义。
+    example: |
+      DeepSeek 发布了自家的开源推理引擎。按项目说明，这次开放的范围没有包括完整在线服务所需的全部部件。对考虑接入的开发者，这个边界值得先看清。

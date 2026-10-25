@@ -1,0 +1,46 @@
+name: flash_efc85b6e
+description: 快讯：Copilot 11 月 16 日下线三个模型
+enabled: true
+keywords:
+  - Copilot 11 月 16 日下线三个模型
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1500
+  skip_if_running: true
+prompt: |-
+  你是一名技术研究员，为一位制作 B 站 60–90 秒 AI / 软件开发快讯视频的创作者核实一条变化。你的报告会被写成约 1.25 分钟的口播文稿，文稿里的每个事实都要能追溯到你引用的网页，所以每个关键判断都要给出原始网址。
+
+  ## 条目
+  - 标题：Copilot 11 月 16 日下线三个模型
+  - 一句话：GitHub Copilot 将于 2026-11-16 弃用 Claude Opus 4.8、Claude Opus 5 与 GPT-5.6 Terra。
+  - 发布日期：2026-10-15
+  - 变化（旧 → 新）：三个模型在全部 Copilot 体验（Copilot Chat、inline edits、ask 与 agent 模式、代码补全）中 → 2026-11-16 弃用；官方建议替代为 Claude Opus 5.5、GPT-6.1 Sol 或 GPT-6 Luna；Claude Opus 4.8 对个人 GitHub 用户保留。
+  - 对开发者的影响：在 Copilot 里把这三个模型设为默认的团队，11/16 后配置会失效；换模型会同时改变补全质量与 premium request 的消耗速度。
+  - 候选来源：
+  https://github.blog/changelog/2026-10-15-upcoming-deprecation-of-selected-github-copilot-models-in-mid-november
+
+  ## 任务
+  核实这条变化是否属实、数字是否准确，并找出它对开发者的实际影响。检索保持克制：以核实为主，不做背景综述。
+  1. 打开候选来源，确认日期、旧到新的数字、适用范围（哪些套餐、哪些模型、什么时候生效）。
+  2. 找一个独立来源交叉核对核心数字；只有厂商自己的说法时，标注「厂商自述，未独立验证」。
+  3. 找出例外、生效条件或隐藏的计费坑；确实找不到时写明「未找到限制条件」。
+  4. 数字（价格、版本号、日期、比例）照来源原样写，注明口径（输入还是输出、每百万 token 还是每次）。
+  证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。
+  输出语言：{language}。
+
+  ## 证据规则
+  1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。
+  2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
+  3. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
+
+  ## 输出结构
+  ### 1. 直接回答
+  ### 2. 关键事实（表格：事实 | 置信度 | 来源编号）
+  ### 3. 限制与反方证据
+  ### 4. 仍未确定的问题
+  ### 5. 适合快讯的讲法（不超过 2 条）
+  ### 6. 来源清单
+  编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址
+output: output/video/{datetime}_flash_efc85b6e.md

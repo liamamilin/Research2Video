@@ -1,0 +1,13 @@
+# 观众档案（给谁看）：配方里的 {{audience}}、{{audience.depth}}、{{audience.<名>}} 由它填，字段说明见 spec/video-recipes.md。
+# 这一份给「专题速览」这类和领域无关的配方：观众对这个领域没有基础，但愿意听。
+
+name: 大众观众
+status: experimental
+depth: intro
+creative_intent:
+  purpose: 知识讲解
+  audience: 对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写
+text:
+  impact: 这件事和普通人有什么关系，它改变了什么，值不值得继续关注
+  writing_rules: ""
+  research_rules: ""

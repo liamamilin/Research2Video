@@ -1,0 +1,31 @@
+name: "AI 模型竞技场（每周）"
+description: "本周模型排行与热门模型：智能指数、价格、速度（读 Artificial Analysis、Hugging Face、The Rundown 抓取的内容，不联网搜索）"
+enabled: true
+keywords:
+  - 模型排行
+  - 模型价格
+  - 开源模型
+language: "zh"
+schedule:
+  type: "manual"
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+search: false
+sources_limit: 20
+sources:
+  - "aa:models"
+  - "hf_models:trending"
+  - "rss:https://www.therundown.ai/feed"
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：帮助开发者理解本周模型选择发生了什么变化，从真实使用场景看各模型的特点与差别。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: "output/arena/{date}_ai_model_arena.md"

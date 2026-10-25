@@ -1,0 +1,367 @@
+"""Product API contracts for creating any job with a durable recurring plan."""
+import time
+from types import SimpleNamespace
+
+import pytest
+
+from core.schedule_store import ScheduleStore
+from web.services import managed_scheduler as managed
+
+
+@pytest.fixture
+def admin(client, web_env, monkeypatch):
+    root, _ = web_env
+    calls = []
+    def online():
+        calls.append(True)
+        managed.store().heartbeat({'checked_at': time.time(), 'status': 'ok',
+                                  'runtime': managed.runtime().identity()})
+        return {'online': True}
+    monkeypatch.setattr(managed, 'ensure_online', online)
+    client.post('/api/auth/login', json={'username': 'admin', 'password': 'admin-pass-123'})
+    return client, root, {'X-CSRF-Token': client.cookies.get('ai_research_csrf')}, calls
+
+
+def create(admin, **extra):
+    client, _, headers, _ = admin
+    return client.post('/api/jobs', headers=headers, json={
+        'name': '新增 job', 'category': 'research', 'description': '含 "引号" 的任务',
+        'prompt': '第一行\n第二行', 'output': 'output/recurring_{datetime}.md',
+        'recurrence': {'schedule': '0 8 * * *', 'timezone': 'Asia/Shanghai'}, **extra})
+
+
+def test_new_job_and_plan_create_atomically_without_touching_cron(admin, monkeypatch):
+    from web.services import scheduler
+    monkeypatch.setattr(scheduler, '_set_crontab', lambda *_: pytest.fail('new plan wrote cron'))
+    client, root, headers, calls = admin
+    response = create(admin)
+    assert response.status_code == 201, response.text
+    storage = ScheduleStore(str(root / 'state'))
+    plan = storage.list()[0]
+    assert plan['job_name'] == 'research/新增_job'
+    assert plan['enabled'] and plan['max_retries'] == 2 and calls
+    assert storage.runs(plan['id']) == []  # Registration never runs a paid job immediately.
+    listing = client.get('/api/scheduler').json()
+    item = next(j for j in listing['jobs'] if j['id'] == plan['id'])
+    assert item['backend'] == 'managed' and len(item['next_runs']) == 3
+    assert listing['dispatcher']['online'] and listing['health']['status'] == 'ok'
+    job = client.get('/api/jobs/research/新增_job').json()
+    assert job['prompt'] == '第一行\n第二行'
+    assert client.put(f"/api/scheduler/{plan['id']}/toggle", headers=headers, json={'enabled': False}).status_code == 200
+    assert client.put(f"/api/scheduler/{plan['id']}", headers=headers, json={'schedule': '0 9 * * *'}).json()['enabled'] is False
+    assert client.delete('/api/jobs/research/新增_job', headers=headers).status_code == 200
+    assert storage.list() == []
+
+
+def test_linux_managed_plan_stays_healthy_without_launchctl(admin, monkeypatch):
+    from web.services import scheduler
+
+    monkeypatch.setattr(scheduler, "sys", SimpleNamespace(platform="linux"))
+    monkeypatch.setattr(scheduler.subprocess, "run",
+                        lambda *_args, **_kwargs: pytest.fail("Linux probed launchctl"))
+    client, _, _, _ = admin
+
+    response = create(admin)
+    assert response.status_code == 201, response.text
+    listing = client.get('/api/scheduler').json()
+
+    assert listing['dispatcher']['online']
+    assert listing['health']['status'] == 'ok'
+    assert listing['warnings'] == []
+    assert any(job['backend'] == 'managed' for job in listing['jobs'])
+    assert all(job['backend'] != 'launchd' for job in listing['jobs'])
+
+
+def test_alias_cannot_create_duplicate_plan(admin):
+    client, _, headers, _ = admin
+    assert create(admin).status_code == 201
+    response = client.post('/api/scheduler', headers=headers, json={
+        'job_name': '新增_job', 'schedule': '0 12 * * *'})
+    assert response.status_code == 409
+    assert len(managed.store().list()) == 1
+
+
+@pytest.mark.parametrize('extra', [
+    {'schedule': '0 25 * * *'}, {'schedule': '0 8 * * *', 'timezone': 'Nowhere/Invalid'},
+    {'schedule': '0 8 * * *', 'max_retries': 6}, {'schedule': '0 8 * * *', 'max_retries': True},
+    {'schedule': '0 8 * * *', 'missed_policy': 'all'},
+])
+def test_invalid_recurrence_does_not_create_partial_job(admin, extra):
+    _, root, _, calls = admin
+    assert create(admin, recurrence=extra).status_code == 422
+    assert not list((root / 'jobs').rglob('*.yaml')) and not calls
+
+
+def test_host_offline_is_not_reported_as_success(admin, monkeypatch):
+    _, root, _, _ = admin
+    def offline():
+        raise RuntimeError('no dispatcher heartbeat')
+    monkeypatch.setattr(managed, 'ensure_online', offline)
+    response = create(admin)
+    assert response.status_code == 503 and 'heartbeat' in response.text
+    assert not list((root / 'jobs').rglob('*.yaml')) and not managed.store().list()
+
+
+def test_plan_persistence_failure_rolls_back_new_job(admin, monkeypatch):
+    _, root, _, _ = admin
+    def fail(*_, **kwargs):
+        raise OSError('disk full')
+    monkeypatch.setattr(managed, 'save', fail)
+    assert create(admin).status_code == 503
+    assert not list((root / 'jobs').rglob('*.yaml'))
+
+
+def test_editor_cannot_create_recurring_job(client, web_env, monkeypatch):
+    monkeypatch.setattr(managed, 'ensure_online', lambda: pytest.fail('editor started dispatcher'))
+    client.post('/api/auth/login', json={'username': 'editor', 'password': 'editor-pass-123'})
+    result = client.post('/api/jobs', headers={'X-CSRF-Token': client.cookies.get('ai_research_csrf')},
+                         json={'name': 'x', 'recurrence': {'schedule': '* * * * *'}})
+    assert result.status_code == 403
+
+
+def test_missing_disabled_and_legacy_id_collision_rejected(admin):
+    client, root, headers, _ = admin
+    (root / 'jobs/off.yaml').write_text('enabled: false\nprompt: test\n')
+    for name in ('missing', 'off', '../escape'):
+        assert client.post('/api/scheduler', headers=headers, json={'job_name': name, 'schedule': '* * * * *'}).status_code == 422
+    create(admin, recurrence=None)
+    assert client.post('/api/scheduler', headers=headers, json={
+        'id': 'test_job', 'job_name': '新增_job', 'schedule': '* * * * *'}).status_code == 409
+
+
+def test_execution_history_timezone_and_delete_while_running(admin):
+    client, root, headers, _ = admin
+    create(admin)
+    storage = managed.store()
+    plan = storage.list()[0]
+    storage.enqueue_due(plan['next_run_at'])
+    run = storage.claim(plan['next_run_at'])
+    storage.start(run['id'], 123, plan['next_run_at'])
+    assert client.delete('/api/jobs/research/新增_job', headers=headers).status_code == 409
+    assert (root / 'jobs/research/新增_job.yaml').exists()
+    history = client.get(f"/api/scheduler/{plan['id']}/runs").json()['runs'][0]
+    assert history['due_at_iso'].endswith('+08:00') and history['started_at_iso']
+    storage.finish(run['id'], 'success')
+    assert client.delete(f"/api/scheduler/{plan['id']}", headers=headers).status_code == 200
+    assert client.get(f"/api/scheduler/{plan['id']}/runs").json()['runs'][0]['status'] == 'success'
+
+
+def test_concurrent_creates_cannot_clobber_each_other(admin, monkeypatch):
+    """Two creates of the same name must not leave a plan without its job file.
+
+    The old path checked ``isfile()`` and then renamed, so both requests passed
+    the check; the one that lost the plan's unique index removed the file the
+    winner had just created, and the plan pointed at nothing.
+    """
+    import os
+    import threading
+    import time
+
+    from web.services import yaml_io
+
+    client, root, headers, _ = admin
+    start = threading.Barrier(2)
+    results: list[int] = []
+    lock = threading.Lock()
+
+    real_create = yaml_io.atomic_create
+
+    def slow_create(path, content):
+        # Widen the window so both requests reach the exclusive publish together.
+        start.wait(timeout=5)
+        time.sleep(0.2)
+        return real_create(path, content)
+
+    monkeypatch.setattr(yaml_io, 'atomic_create', slow_create)
+
+    def attempt():
+        start.wait(timeout=5)
+        response = client.post('/api/jobs', headers=headers, json={
+            'name': '并发 job', 'category': 'research', 'description': '竞态',
+            'prompt': '正文', 'output': 'output/race_{datetime}.md',
+            'recurrence': {'schedule': '0 8 * * *', 'timezone': 'Asia/Shanghai'}})
+        with lock:
+            results.append(response.status_code)
+
+    threads = [threading.Thread(target=attempt) for _ in range(2)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=20)
+
+    assert sorted(results) == [201, 409]
+    # The endpoint normalises the file name, so assert on what it wrote.
+    job_file = os.path.join(root, 'jobs', 'research', '并发_job.yaml')
+    assert os.path.isfile(job_file), "the winning job file was deleted by the loser"
+    plans = ScheduleStore(managed.store().state_dir).list()
+    assert [p['job_name'] for p in plans] == ['research/并发_job']
+
+
+def test_a_failed_plan_leaves_no_job_file_behind(admin, monkeypatch):
+    """The documented all-or-nothing rollback, checked on disk."""
+    import os
+
+    client, root, headers, _ = admin
+
+    def refuse(*_args, **_kwargs):
+        raise RuntimeError('计划写入失败')
+
+    monkeypatch.setattr(managed, 'save', refuse)
+    # _mutate turns any persistence failure into 503, not a bare 500.
+    assert create(admin).status_code == 503
+    assert not os.path.exists(os.path.join(root, 'jobs', 'research', '新增_job.yaml'))
+    assert ScheduleStore(managed.store().state_dir).list() == []
+
+
+def test_a_rollback_never_deletes_a_file_it_did_not_create(admin, monkeypatch):
+    """A losing request must leave the winner's file untouched."""
+    import os
+
+    client, root, headers, _ = admin
+    job_file = os.path.join(root, 'jobs', 'research', '新增_job.yaml')
+    os.makedirs(os.path.dirname(job_file), exist_ok=True)
+    with open(job_file, 'w', encoding='utf-8') as fh:
+        fh.write('name: 别人创建的\nprompt: 保留我\n')
+
+    def refuse(*_args, **_kwargs):
+        raise RuntimeError('计划写入失败')
+
+    monkeypatch.setattr(managed, 'save', refuse)
+    create(admin)
+    assert os.path.isfile(job_file)
+    with open(job_file, encoding='utf-8') as fh:
+        assert '保留我' in fh.read()
+
+
+def test_a_new_plan_is_not_reported_as_verified(admin):
+    """Saving a plan proves the dispatcher, never the model: no green yet."""
+    client, _, headers, _ = admin
+    assert create(admin).status_code == 201
+
+    listing = client.get('/api/scheduler', headers=headers).json()
+    managed_job = next(j for j in listing['jobs'] if j['backend'] == 'managed')
+    state = next(s for s in listing['health']['jobs'] if s['id'] == managed_job['id'])
+    assert state['status'] == 'unverified'
+    assert '尚未执行过' in state['detail']
+
+
+def test_history_keeps_its_timezone_after_the_plan_is_deleted(admin):
+    """History outlives its plan, so each run must remember its own zone.
+
+    Rendering a stored epoch needs a timezone. Once the plan is gone there is
+    nothing left to ask, and the old fallback to the server's local zone
+    silently shifted every timestamp of an Asia/Shanghai plan.
+    """
+    client, _, headers, _ = admin
+    assert create(admin).status_code == 201
+    plan_id = ScheduleStore(managed.store().state_dir).list()[0]['id']
+
+    storage = managed.store()
+    # A due slot becomes a queued run, without executing anything.
+    storage.enqueue_due(now=storage.get(plan_id)['next_run_at'] + 1)
+    assert storage.runs(plan_id), "expected one queued run for the history test"
+
+    assert client.delete(f'/api/scheduler/{plan_id}', headers=headers).status_code == 200
+    assert storage.get(plan_id) is None
+
+    history = client.get(f'/api/scheduler/{plan_id}/runs', headers=headers).json()
+    assert history['runs'], "history must survive plan deletion"
+    assert history['runs'][0]['due_at_iso'].endswith('+08:00')
+    assert history['runs'][0]['timezone'] == 'Asia/Shanghai'
+
+
+def test_runs_created_before_the_migration_keep_their_plan_timezone(client, web_env,
+                                                                   monkeypatch, admin):
+    """An older schedules.db has no timezone column; history must still be right."""
+    import sqlite3
+
+    assert create(admin).status_code == 201
+    storage = managed.store()
+    plan_id = storage.list()[0]['id']
+    storage.enqueue_due(now=storage.get(plan_id)['next_run_at'] + 1)
+
+    # Rebuild the table the way an old install looks: no timezone column.
+    with sqlite3.connect(storage.path) as db:
+        db.execute("ALTER TABLE schedule_runs RENAME TO schedule_runs_old")
+        db.execute('''CREATE TABLE schedule_runs (
+            id TEXT PRIMARY KEY, schedule_id TEXT NOT NULL, job_name TEXT NOT NULL,
+            version INTEGER NOT NULL, due_at REAL NOT NULL, status TEXT NOT NULL,
+            attempt INTEGER NOT NULL DEFAULT 0, max_retries INTEGER NOT NULL,
+            ready_at REAL NOT NULL, lease_until REAL, pid INTEGER,
+            started_at REAL, finished_at REAL, error TEXT NOT NULL DEFAULT '',
+            output_path TEXT, created_at REAL NOT NULL,
+            UNIQUE(schedule_id, version, due_at))''')
+        columns = ('id, schedule_id, job_name, version, due_at, status, attempt, max_retries, '
+                   'ready_at, lease_until, pid, started_at, finished_at, error, output_path, created_at')
+        db.execute(f"INSERT INTO schedule_runs ({columns}) "
+                   f"SELECT {columns} FROM schedule_runs_old")
+        db.execute("DROP TABLE schedule_runs_old")
+    with sqlite3.connect(storage.path) as raw:
+        old_columns = {row[1] for row in raw.execute('PRAGMA table_info(schedule_runs)')}
+    assert 'timezone' not in old_columns, "the fixture must look like an old install"
+
+    reopened = ScheduleStore(storage.state_dir)  # migration runs here
+    runs = reopened.runs(plan_id)
+    assert runs and runs[0]['timezone'] == 'Asia/Shanghai', "existing history lost its zone"
+
+
+def test_managed_list_never_waits_for_system_discovery(admin, monkeypatch):
+    from web.services import scheduler, schedule_overview
+    client, _, _, _ = admin
+    assert create(admin).status_code == 201
+    monkeypatch.setattr(scheduler, 'all_jobs', lambda: pytest.fail('managed read probed OS schedules'))
+    monkeypatch.setattr(schedule_overview, 'rows', lambda: pytest.fail('managed read loaded unrelated video history'))
+    response = client.get('/api/scheduler?scope=managed')
+    assert response.status_code == 200
+    assert len(response.json()['jobs']) == 1
+    assert response.json()['jobs'][0]['job_label'] == '新增 job'
+    assert response.json()['dispatcher']['online']
+    assert response.json()['removed_system_jobs'] == []
+
+
+def test_system_list_does_not_wait_for_managed_database(admin, monkeypatch):
+    from web.services import scheduler
+    client, _, _, _ = admin
+    monkeypatch.setattr(managed, 'store', lambda: pytest.fail('system read opened managed database'))
+    monkeypatch.setattr(scheduler, 'all_jobs', lambda: [])
+    response = client.get('/api/scheduler?scope=system')
+    assert response.status_code == 200
+    assert response.json()['dispatcher'] is None
+
+
+def test_existing_store_reads_do_not_request_a_writer_lock(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    storage = ScheduleStore(str(tmp_path))
+    storage.save('research/one', '0 8 * * *', now=1)
+    # A heartbeat/dispatcher writer must not block listing an initialized WAL DB.
+    with storage.connect(True) as writer, ThreadPoolExecutor(max_workers=1) as pool:
+        writer.execute("INSERT INTO scheduler_meta VALUES ('test', 'held')")
+        result = pool.submit(lambda: ScheduleStore(str(tmp_path)).list()).result(timeout=2)
+        assert result[0]['job_name'] == 'research/one'
+
+
+def test_latest_runs_keeps_same_slot_and_attempt_order_as_individual_reads(tmp_path, monkeypatch):
+    from contextlib import contextmanager
+    storage = ScheduleStore(str(tmp_path))
+    ids = []
+    for i in range(4):
+        plan = storage.save(f'research/job_{i}', '0 8 * * *', now=1)
+        ids.append(plan['id'])
+        storage.enqueue_due(plan['next_run_at'] + 1)
+    with storage.connect(True) as db:
+        for row in db.execute('SELECT id FROM schedule_runs').fetchall():
+            for attempt in (2, 1):
+                db.execute('INSERT INTO schedule_attempts(run_id,attempt,status) VALUES (?,?,?)', (row['id'], attempt, 'failed'))
+    expected = {key: storage.runs(key, 1)[0] for key in ids}
+    real_connect, calls = storage.connect, []
+
+    @contextmanager
+    def counted(*args, **kwargs):
+        calls.append(True)
+        with real_connect(*args, **kwargs) as db:
+            yield db
+
+    monkeypatch.setattr(storage, 'connect', counted)
+    assert storage.latest_runs(ids + ['missing', ids[0]]) == expected
+    assert len(calls) == 1
+    assert storage.latest_runs([]) == {}

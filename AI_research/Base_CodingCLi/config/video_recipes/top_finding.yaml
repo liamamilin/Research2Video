@@ -1,0 +1,41 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 这一份是「整份报告」配方：不挑条目、不再调研，直接从 Job 的整份报告写（topic.whole_report: true）。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 本期头条
+description: 从材料中挑出最值得{{audience}}听的一个发现，把它讲透，让人明白它为什么值得专门讲一期。
+status: experimental
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: headline
+    name: 本期头条
+  format:
+    key: short
+    name: B 站横屏短
+audiences: [developer, non_tech]
+target_minutes: 1.5
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: concise
+  style: |
+    从材料中挑出最值得{{audience}}听的一个发现，把它讲透，让人明白它为什么值得专门讲一期。
+output:
+  use: motion
+  packaging:
+    use: common
+    label: 本期头条
+    outro:
+      lines:
+      - 面向{{audience}}的 本期头条
+      seconds: 2.5

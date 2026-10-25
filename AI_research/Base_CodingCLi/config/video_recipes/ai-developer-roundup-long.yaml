@@ -1,0 +1,42 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 盘点
+description: 从这批变化里为{{audience}}选出值得听的内容，找到它们之间有意思的联系，让整期像一次发现之旅。
+status: experimental
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: roundup
+    name: 盘点
+  format:
+    key: long
+    name: B 站横屏长
+audiences: [developer, non_tech]
+target_minutes: 4
+minutes_range: [3, 6]
+topic:
+  kind: roundup
+  sources: [flash]
+  fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: concise
+  style: |
+    从这批变化里为{{audience}}选出值得听的内容，找到它们之间有意思的联系，让整期像一次发现之旅。
+output:
+  use: motion
+  packaging:
+    use: common
+    label: 盘点
+    outro:
+      lines:
+      - AI 盘点
+      seconds: 2.5

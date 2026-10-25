@@ -1,0 +1,33 @@
+name: 每日软件发现
+description: 每天值得看的新软件和开源项目（读 Product Hunt、Show HN、GitHub Blog、Changelog、GitHub 新项目抓取的内容），不联网搜索
+enabled: true
+keywords:
+- 软件发现
+- 开源工具
+- 效率工具
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+search: false
+sources_limit: 8
+sources:
+- source:product_hunt
+- source:hn_show
+- source:github_blog
+- source:changelog
+- source:gh_new_selfhosted
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：从近期材料里发现值得讲给观众听的新事情。关注软件工具怎样解决一个实际问题，以及它用起来是什么样，保留能把事情讲生动、讲明白的具体材料。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: output/software/{date}_software_daily.md

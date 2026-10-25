@@ -1,0 +1,33 @@
+name: 世界与地球动态
+description: 近期值得讲的地理、生态和世界遗产动态（读 Atlas Obscura、Mongabay、Geographical、UNESCO、USGS 抓取的内容），不联网搜索
+enabled: true
+keywords:
+- 地理
+- 世界遗产
+- 地球
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+search: false
+sources_limit: 8
+sources:
+- source:atlas_obscura
+- source:mongabay
+- source:geographical
+- source:unesco_wh
+- source:usgs_quakes
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：从近期材料里发现值得讲给观众听的新事情。关注一个地方为什么会是今天这样，以及正在发生的变化，保留能把事情讲生动、讲明白的具体材料。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: output/geography/{date}_geography_daily.md

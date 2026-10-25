@@ -1,0 +1,198 @@
+"""Q&A routes: hybrid retrieval + LLM answer with citations."""
+
+from __future__ import annotations
+
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+
+from core.config import load_system_config
+from core.qa import ask_with_fallback, format_citations
+from web import audit
+from web.deps import require_editor, require_viewer
+from web.indexer import db as index_db
+from web.indexer import vectors
+from web.models import ApiError
+from web.settings import get_settings
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/qa", tags=["qa"])
+
+
+def _embed_query(question: str, sys_config: dict) -> list[float]:
+    """Embed a question; empty vector means FTS-only retrieval."""
+    try:
+        from core.embeddings import EmbeddingClient
+
+        client = EmbeddingClient.from_system(sys_config)
+        return client.embed([question])[0]
+    except Exception as exc:  # noqa: BLE001 - semantic is optional
+        import logging
+
+        logging.getLogger(__name__).info("Semantic retrieval disabled: %s", exc)
+        return []
+
+
+def _llm_factory(sys_config: dict):
+    from core.llm import LLMClient, LLMConfig
+
+    def make():
+        return LLMClient(LLMConfig.from_system(sys_config))
+
+    return make
+
+
+def _retrieval_number(cfg: dict, key: str, default, cast):
+    """Read a config number, keeping an explicit 0 and rejecting junk."""
+    raw = cfg.get(key, default)
+    if raw is None or raw == "":
+        return cast(default)
+    try:
+        return cast(raw)
+    except (TypeError, ValueError):
+        logger.warning("qa.%s is not a %s; using %s", key, cast.__name__, default)
+        return cast(default)
+
+
+def _retrieval_settings(sys_config) -> dict:
+    """Read the retrieval knobs, clamped so a typo cannot invert the ranking."""
+    qa_cfg = sys_config.get("qa") or {}
+    weight = _retrieval_number(qa_cfg, "recency_weight", 0, float)
+    half_life = _retrieval_number(qa_cfg, "recency_half_life_days", 30, float)
+    overfetch = _retrieval_number(qa_cfg, "overfetch", 64, int)
+    scope = _retrieval_number(qa_cfg, "round_scope", 1, int)
+    return {
+        "recency_weight": min(1.0, max(0.0, weight)),
+        "half_life_days": max(0.0, half_life),
+        # The ceiling was 10, which silently capped the candidate pool at 60
+        # chunks and kept the current round's answer out of it. The pool is
+        # truncation after an exhaustive scan, so the number is a memory
+        # decision, not a speed one; the cap only guards a typo.
+        "overfetch": min(256, max(1, overfetch)),
+        # 0 searches the whole archive. 1 answers from the newest round, which
+        # is what a daily report's questions mean.
+        "round_scope": min(30, max(0, scope)),
+    }
+
+
+@router.post("")
+def ask_question(payload: dict, request: Request, limit: int = Query(6, ge=1, le=20),
+                 user=Depends(require_viewer)):
+    """Answer a question across indexed reports, with citations."""
+    question = (payload.get("question") or "").strip()
+    if len(question) < 2:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=ApiError.make("invalid_question", "question 至少 2 个字符"),
+        )
+
+    sys_config = load_system_config(get_settings().paths.config_dir)
+    query_vector = _embed_query(question, sys_config)
+    retrieval = _retrieval_settings(sys_config)
+    hits = vectors.hybrid_search(question, query_vector or None, limit=limit,
+                                 **retrieval)
+
+    if not hits:
+        return {"answer": "没有检索到相关资料，请尝试换一个问法或先运行/重建索引。",
+                "citations": [], "mode": "fts" if not query_vector else "hybrid",
+                "retrieval": retrieval}
+
+    result = ask_with_fallback(question, hits, _llm_factory(sys_config))
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=ApiError.make("llm_failed", "生成回答失败（LLM 调用异常）",
+                                 {"citations": format_citations(hits)}),
+        )
+
+    audit.log(
+        "qa_ask",
+        user=user["username"],
+        result="success",
+        details={"question": question[:120], "hits": len(hits)},
+        ip=request.client.host if request.client else None,
+    )
+    try:
+        from core import state as state_mod
+
+        # use_state_dir is a module function, not a StateManager method: calling
+        # it on the class raised AttributeError, and the blanket except below
+        # swallowed it, so every Q&A call recorded no usage at all and the
+        # monthly budget could not see it.
+        state_mod.use_state_dir(get_settings().paths.state_dir)
+        state_mod.StateManager.record_usage(
+            "qa", user["username"], result.get("usage") or None)
+    except Exception as exc:  # noqa: BLE001 - accounting must not fail the answer
+        logger.warning("QA usage not recorded: %s", exc)
+
+    return {
+        "answer": result["answer"],
+        "citations": result["citations"],
+        "mode": "hybrid" if query_vector else "fts",
+        "usage": result.get("usage") or {},
+        "retrieval": retrieval,
+    }
+
+
+@router.post("/reindex")
+def reindex_vectors(request: Request, limit: int = Query(200, ge=1, le=2000),
+                    purge: bool = Query(False, description="drop all vectors first (full rebuild)"),
+                    prune: bool = Query(True, description="drop vectors whose report no longer exists"),
+                    user=Depends(require_editor)):
+    """Embed reports that are missing/stale in the vector store."""
+    sys_config = load_system_config(get_settings().paths.config_dir)
+    try:
+        from core.embeddings import EmbeddingClient
+
+        client = EmbeddingClient.from_system(sys_config)
+    except Exception as exc:  # noqa: BLE001 - report as a config problem
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=ApiError.make("embeddings_not_configured", str(exc)),
+        )
+
+    settings = get_settings()
+    import os
+
+    from web.indexer import vector_sync
+
+    purged = None
+    if purge:
+        purged = vector_sync.purge_all()
+    pruned = vector_sync.prune_orphans(settings.paths.output_dir,
+                                        settings.paths.state_dir) if prune else None
+
+    reports = index_db.list_reports(page=1, per_page=limit)["items"]
+    embedded = skipped = failed = 0
+    for item in reports:
+        rel = item["path"]
+        full = os.path.join(settings.paths.output_dir, rel)
+        if not os.path.isfile(full):
+            continue
+        try:
+            with open(full, "r", encoding="utf-8", errors="replace") as f:
+                content = f.read()
+            if not vectors.needs_embedding(rel, content, client.model):
+                skipped += 1
+                continue
+            vectors.index_report(rel, content, client.embed, model=client.model)
+            embedded += 1
+        except Exception as exc:  # noqa: BLE001 - keep indexing the rest
+            failed += 1
+            import logging
+
+            logging.getLogger(__name__).warning("Embed %s failed: %s", rel, str(exc)[:150])
+
+    audit.log(
+        "qa_reindex",
+        user=user["username"],
+        result="success",
+        details={"embedded": embedded, "skipped": skipped, "failed": failed},
+        ip=request.client.host if request.client else None,
+    )
+    return {"embedded": embedded, "skipped": skipped, "failed": failed,
+            "purged": purged,
+            "pruned": pruned,
+            "coverage": vector_sync.coverage(settings.paths.state_dir),
+            "stats": vectors.index_stats()}

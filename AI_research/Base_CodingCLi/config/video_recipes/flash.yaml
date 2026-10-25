@@ -1,0 +1,46 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 快讯
+description: 让{{audience}}抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。
+status: enabled
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: quick_take
+    name: 快讯
+  format:
+    key: short
+    name: B 站横屏短
+audiences: [developer, non_tech]
+target_minutes: 1.25
+topic:
+  kind: single
+  sources: [flash]
+  fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
+research:
+  template: quick_take
+  optional: true
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: news
+  style: |
+    让{{audience}}抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。
+output:
+  use: motion
+  packaging:
+    use: common
+    label: 快讯
+    intro:
+      subtitle: '{date}'
+      seconds: 1.5
+    outro:
+      lines:
+      - 面向{{audience}}的 快讯
+      seconds: 3
+  recheck: true

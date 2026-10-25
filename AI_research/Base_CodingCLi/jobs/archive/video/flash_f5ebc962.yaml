@@ -1,0 +1,49 @@
+name: flash_f5ebc962
+description: 快讯：Claude Code 默认开启 fork 子代理
+enabled: true
+keywords:
+  - Claude Code 默认开启 fork 子代理
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1500
+  skip_if_running: true
+prompt: |-
+  你是一名技术研究员，为一位制作 B 站 60–90 秒 AI / 软件开发快讯视频的创作者核实一条变化。你的报告会被写成约 1.25 分钟的口播文稿，文稿里的每个事实都要能追溯到你引用的网页，所以每个关键判断都要给出原始网址。
+
+  ## 条目
+  - 标题：Claude Code 默认开启 fork 子代理
+  - 一句话：v2.1.302 起 fork 子代理覆盖 CLI、SDK 与桌面端。
+  - 发布日期：2026-10-16
+  - 变化（旧 → 新）：终端早已默认开启 fork 子代理 → `claude -p`、Agent SDK、桌面端和 VS Code 从 v2.1.302 起也默认开启；`CLAUDE_CODE_FORK_SUBAGENT=0` 可全局关闭，`claude mcp serve` 不提供 fork。
+  - 对开发者的影响：未显式配置的 CLI、SDK 和 IDE 会话升级后会改变并发结构与缓存路径；fork 继承完整父会话并默认使用 5 分钟 prompt cache，而主会话为 1 小时。Anthropic 未量化默认开启后的费用增幅，仍需以自己的长会话账单为准。
+  - 候选来源：
+  https://github.com/anthropics/claude-code/releases/tag/v2.1.302
+  https://code.claude.com/docs/en/changelog
+  https://code.claude.com/docs/en/sub-agents
+  https://code.claude.com/docs/en/prompt-caching
+
+  ## 任务
+  核实这条变化是否属实、数字是否准确，并找出它对开发者的实际影响。检索保持克制：以核实为主，不做背景综述。
+  1. 打开候选来源，确认日期、旧到新的数字、适用范围（哪些套餐、哪些模型、什么时候生效）。
+  2. 找一个独立来源交叉核对核心数字；只有厂商自己的说法时，标注「厂商自述，未独立验证」。
+  3. 找出例外、生效条件或隐藏的计费坑；确实找不到时写明「未找到限制条件」。
+  4. 数字（价格、版本号、日期、比例）照来源原样写，注明口径（输入还是输出、每百万 token 还是每次）。
+  证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。
+  输出语言：{language}。
+
+  ## 证据规则
+  1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。
+  2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。
+  3. 区分「已证实」「有迹象」「推测」，不把推测写成事实。
+
+  ## 输出结构
+  ### 1. 直接回答
+  ### 2. 关键事实（表格：事实 | 置信度 | 来源编号）
+  ### 3. 限制与反方证据
+  ### 4. 仍未确定的问题
+  ### 5. 适合快讯的讲法（不超过 2 条）
+  ### 6. 来源清单
+  编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址
+output: output/video/{datetime}_flash_f5ebc962.md

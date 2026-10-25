@@ -1,0 +1,34 @@
+name: 公司与商业模式周观察
+description: 每周挑一个商业主题讲清楚：一家公司或一种商业模式怎么赚钱、凭什么竞争（读 McKinsey、HBR 同类来源、Crunchbase、YC、SEC 新闻稿抓取的内容），不联网搜索
+enabled: true
+keywords:
+- 公司研究
+- 商业模式
+- 创业融资
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1800
+  skip_if_running: true
+search: false
+sources_limit: 10
+sources:
+- source:mckinsey
+- source:crunchbase_news
+- source:yc_blog
+- source:fast_company
+- source:sec_press
+- source:ft_home
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：回看这一周的材料，找到值得继续追问的变化和联系。关注公司正在做的选择，及其如何改变产品、竞争和人们的生活，保留能把事情讲生动、讲明白的具体材料。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: output/company/{date}_company_weekly.md

@@ -1,0 +1,509 @@
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { RefreshCw } from "lucide-react";
+import { listMatrices } from "@/api/matrices";
+import { usePageResource } from "@/lib/use-page-resource";
+import { DeleteJobDialog } from "@/components/DeleteJobDialog";
+import { listJobs, createJob, listTemplates, listJobCategories, type JobCategory, type JobTemplate } from "@/api";
+import type { JobSummary } from "@/api/types";
+import { useAuthStore } from "@/lib/auth-store";
+import { cn, shortTime, timeAgo } from "@/lib/utils";
+import { TemplateGrid } from "@/components/TemplateGrid";
+import { ErrorState } from "@/components/ErrorState";
+import { TemplateLibrary } from "@/components/TemplateLibrary";
+import { CronBuilder } from "@/components/CronBuilder";
+
+function normalizeCategory(value: string): string {
+  return value.trim().toLowerCase().replace(/^[\s/]+|[\s/]+$/g, "");
+}
+
+function StatusBadge({ status }: { status: string | null }) {
+  if (!status) return <span className="text-text-muted">—</span>;
+  const colors: Record<string, string> = {
+    success: "bg-green-900/40 text-green-400 border-green-800",
+    failed: "bg-red-900/40 text-red-400 border-red-800",
+    skipped: "bg-yellow-900/40 text-yellow-400 border-yellow-800",
+  };
+  return (
+    <span className={cn("badge border", colors[status] || "bg-gray-800 text-gray-400")}>
+      {({ success: "已完成", failed: "失败", skipped: "已跳过", cancelled: "已取消" } as Record<string,string>)[status] || status}
+    </span>
+  );
+}
+
+export function JobsListPage() {
+  const { data: jobData, error, loading, reload: fetchJobs } = usePageResource(listJobs, 15000);
+  const jobs = jobData ?? [];
+  const { data: matrices } = usePageResource(listMatrices);
+  const [params] = useSearchParams();
+  const [matrix, setMatrix] = useState(params.get("matrix") || "");
+  const owner = (job: string) => matrices?.matrices?.find((m) => m.jobs.some((j) => j.job === job));
+  const jobLabel = (job: string) => owner(job)?.members.find((j) => j.job === job)?.name || job;
+  const [filter, setFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  // The same questions the reports page answers: what is new, what is running,
+  // what did I just create.
+  const [statusFilter, setStatusFilter] = useState<"all" | "enabled" | "disabled" | "running" | "failed">(() => ["enabled", "disabled", "running", "failed"].includes(params.get("status") || "") ? params.get("status") as "running" : "all");
+  const [range, setRange] = useState<"all" | "today" | "7d" | "30d">("all");
+  const [sort, setSort] = useState<"modified" | "name" | "ran" | "never">("modified");
+  const [highlight, setHighlight] = useState<string | null>(null);
+  const [categories, setCategories] = useState<JobCategory[]>([]);
+  const user = useAuthStore((s) => s.user);
+  const canEdit = user?.role === "editor" || user?.role === "admin";
+
+  // Create form state
+  const [showCreate, setShowCreate] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [templates, setTemplates] = useState<JobTemplate[]>([]);
+  const [creating, setCreating] = useState(false);
+  const [createMsg, setCreateMsg] = useState("");
+  const [recurring, setRecurring] = useState(false);
+  const [recurrence, setRecurrence] = useState("0 8 * * *");
+  const [form, setForm] = useState({
+    name: "", template: "", category: "", description: "",
+    language: "zh", keywords: "", prompt: "", output: "",
+  });
+
+  const fetchTemplates = async () => {
+    try {
+      const data = await listTemplates();
+      setTemplates(data.templates || []);
+    } catch {
+      setTemplates([]);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const data = await listJobCategories();
+      setCategories(data.categories || []);
+    } catch {
+      setCategories([]);
+    }
+  };
+
+  useEffect(() => { fetchCategories(); }, []);
+
+  const openCreate = async () => {
+    setShowCreate(true);
+    setCreateMsg("");
+    fetchTemplates();
+  };
+
+  const applyTemplate = (t: JobTemplate) => {
+    setForm((f) => ({
+      ...f,
+      template: t.filename,
+      prompt: t.prompt || f.prompt,
+      output: t.output_template || f.output,
+      language: t.language || f.language,
+      description: f.description || t.description,
+      keywords: f.keywords || (t.keywords || []).join(", "),
+      category: f.category || t.category,
+    }));
+  };
+
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const handleDelete = (jobName: string) => setDeleting(jobName);
+
+  const handleCreate = async () => {
+    if (!form.name.trim()) { setCreateMsg("请输入 Job 名称"); return; }
+    setCreating(true);
+    setCreateMsg("");
+    try {
+      await createJob({
+        name: form.name.trim(),
+        template: form.template || undefined,
+        category: form.category || undefined,
+        description: form.description,
+        language: form.language,
+        keywords: form.keywords.split(",").map((k: string) => k.trim()).filter(Boolean),
+        prompt: form.prompt || undefined,
+        output: form.output || undefined,
+        ...(recurring ? { recurrence: { schedule: recurrence, timezone: 'local', missed_policy: 'latest', max_retries: 2 } } : {}),
+      });
+      setShowCreate(false);
+      setRecurring(false);
+      const created = form.name.trim();
+      setForm({ name: "", template: "", category: "", description: "", language: "zh", keywords: "", prompt: "", output: "" });
+      // A new job must be visible: any active filter could hide it, and the
+      // category it landed in may not be the selected one.
+      setFilter("");
+      setRange("all");
+      setStatusFilter("all");
+      setCategoryFilter("");
+      setSort("modified");
+      setHighlight(created);
+      window.setTimeout(() => setHighlight(null), 8000);
+      fetchJobs();
+      fetchCategories();
+    } catch (err: any) {
+      setCreateMsg(err.message || "创建失败");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const matchesTime = (j: JobSummary) => {
+    if (range === "all") return true;
+    const stamp = j.file_mtime;
+    if (!stamp) return false;
+    // file_mtime is epoch seconds; Date.now() is milliseconds.
+    const days = (Date.now() - stamp * 1000) / 86_400_000;
+    if (range === "today") return days < 1;
+    if (range === "7d") return days <= 7;
+    return days <= 30;
+  };
+
+  const visible = jobs.filter((j) => {
+    if (matrix && (owner(j.name)?.key || "_independent") !== matrix) return false;
+    if (statusFilter === "failed" && j.state?.last_status !== "failed") return false;
+    if (statusFilter === "enabled" && !j.enabled) return false;
+    if (statusFilter === "disabled" && j.enabled) return false;
+    if (statusFilter === "running" && !j.is_running) return false;
+    if (!matchesTime(j)) return false;
+    if (filter) {
+      const q = filter.toLowerCase();
+      const hay = [j.name, jobLabel(j.name), owner(j.name)?.name, j.description, ...(j.keywords || [])].join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const sortValue = (j: JobSummary): number => {
+    if (sort === "modified") return -(j.file_mtime || 0);
+    if (sort === "ran") return -(Date.parse(j.state?.last_run_at || "") || 0);
+    if (sort === "never") return j.state?.last_run_at ? 1 : 0;
+    return 0;
+  };
+  const ordered = [...visible].sort((a, b) => {
+    if (sort === "name") return a.name.localeCompare(b.name, "zh-Hans-CN");
+    const diff = sortValue(a) - sortValue(b);
+    return diff !== 0 ? diff : a.name.localeCompare(b.name, "zh-Hans-CN");
+  });
+
+  const groups = new Map<string, JobSummary[]>();
+  for (const j of ordered) {
+    const cat = j.category || "(uncategorized)";
+    if (!groups.has(cat)) groups.set(cat, []);
+    groups.get(cat)!.push(j);
+  }
+
+  // Category is the outer grouping; the text search now also covers
+  // description and keywords, so matching happens above, not here.
+  const filtered = new Map<string, JobSummary[]>();
+  for (const [cat, items] of groups) {
+    if (categoryFilter && cat !== categoryFilter) continue;
+    if (items.length) filtered.set(cat, items);
+  }
+  const visibleCount = [...filtered.values()].reduce((n, items) => n + items.length, 0);
+
+  return (
+    <div className="space-y-4">
+      <DeleteJobDialog
+        jobName={deleting}
+        isRunning={Boolean(jobs.find((j) => j.name === deleting)?.is_running)}
+        onDeleted={() => { setDeleting(null); fetchJobs(); }}
+        onClose={() => setDeleting(null)}
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex-1"><h1 className="text-xl font-semibold tracking-tight">Jobs</h1><p className="text-xs text-text-muted mt-1">按矩阵或分类查找研究任务，查看运行结果与任务配置。</p></div><button className="btn text-xs" disabled={loading} onClick={fetchJobs}><RefreshCw className="h-3.5 w-3.5" />刷新</button>
+        <input
+          className="input max-w-xs"
+          aria-label="搜索研究任务"
+          placeholder="搜索任务名称或关键词"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
+        {canEdit && (
+          <button onClick={() => setShowLibrary(true)} className="btn text-xs" title="管理 Prompt 模板（新建/编辑/删除）">
+            模板库
+          </button>
+        )}
+        {canEdit && (
+          <button onClick={openCreate} className="btn btn-primary text-xs">
+            + 新建
+          </button>
+        )}
+      </div>
+
+      {/* Status / time / sort: find the job you just made */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {([["all", "全部"], ["enabled", "启用"], ["disabled", "停用"], ["running", "运行中"], ["failed", "上次失败"]] as const).map(([key, label]) => (
+          <button
+            key={key}
+            aria-pressed={statusFilter === key}
+            onClick={() => setStatusFilter(key)}
+            className={cn("badge border cursor-pointer hover:bg-bg-hover",
+              statusFilter === key ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border")}
+          >
+            {label}
+          </button>
+        ))}
+        <span className="text-text-muted/50 px-1" aria-hidden="true">|</span>
+        <select
+          className="input text-xs py-1 w-auto"
+          value={range}
+          aria-label="按最后修改时间筛选"
+          onChange={(e) => setRange(e.target.value as typeof range)}
+        >
+          <option value="all">全部时间</option>
+          <option value="today">今天修改</option>
+          <option value="7d">近 7 天修改</option>
+          <option value="30d">近 30 天修改</option>
+        </select>
+        <select
+          className="input text-xs py-1 w-auto"
+          value={sort}
+          aria-label="排序方式"
+          onChange={(e) => setSort(e.target.value as typeof sort)}
+        >
+          <option value="modified">最近修改</option>
+          <option value="ran">最近运行</option>
+          <option value="never">从未运行优先</option>
+          <option value="name">名称 A→Z</option>
+        </select>
+        {(statusFilter !== "all" || range !== "all" || filter || matrix || categoryFilter) && (
+          <button
+            onClick={() => { setStatusFilter("all"); setRange("all"); setFilter(""); setMatrix(""); setCategoryFilter(""); }}
+            className="chip border border-border text-text-muted"
+          >
+            清除筛选
+          </button>
+        )}
+        <span className="ml-auto text-xs text-text-muted tabular-nums">
+          {visibleCount} / {jobs.length}
+        </span>
+      </div>
+
+      {matrices?.matrices?.length ? <div className="flex flex-wrap items-center gap-3"><select aria-label="任务矩阵" className="input w-auto max-w-full text-xs" value={matrix} onChange={(e) => setMatrix(e.target.value)}><option value="">全部矩阵</option>{matrices.matrices.map((m) => <option key={m.key} value={m.key}>{m.name}{m.archived ? "（已归档）" : ""}</option>)}<option value="_independent">独立任务</option></select>{matrix && matrix !== "_independent" ? <Link className="text-xs text-accent hover:underline" to={`/matrices/${encodeURIComponent(matrix)}`}>进入矩阵工作区 ↗</Link> : null}</div> : null}
+      {categories.length ? <select aria-label="任务分类" className="input w-auto max-w-full text-xs" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}><option value="">全部分类</option>{categories.map((cat) => <option key={cat.name} value={cat.name}>{cat.name}（{cat.count}）</option>)}</select> : null}
+
+      {/* Create form */}
+      {showCreate && (
+        <div className="card p-4 space-y-3">
+          <h2 className="text-sm font-medium">新建 Job</h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-text-muted mb-0.5">
+                名称 *<span className="ml-1 opacity-70">= Prompt 里的 {"{name}"}</span>
+              </label>
+              <input className="input" placeholder="如: My Research" value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-xs text-text-muted mb-0.5">分类（子目录）</label>
+              <input
+                className="input"
+                list="job-categories"
+                placeholder="选择已有分类或输入新分类"
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: normalizeCategory(e.target.value) })}
+              />
+              <datalist id="job-categories">
+                {categories.map((cat) => (
+                  <option key={cat.name} value={cat.name}>{cat.count} 个 job</option>
+                ))}
+              </datalist>
+              {categories.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.name}
+                      type="button"
+                      onClick={() => setForm({ ...form, category: cat.name })}
+                      title={`使用分类 ${cat.name}`}
+                      className={cn("badge border cursor-pointer hover:bg-bg-hover transition",
+                        form.category === cat.name
+                          ? "bg-accent-solid text-white border-accent"
+                          : "bg-bg-card border-border")}
+                    >
+                      {cat.name} <span className="opacity-60">{cat.count}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {form.category && !categories.some((c) => c.name === form.category) && (
+                <p className="text-[11px] text-warning mt-1">
+                  将新建分类「{form.category}」— 确认没有拼写错误，或改用上方已有分类
+                </p>
+              )}
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs text-text-muted mb-0.5">描述</label>
+              <input className="input" placeholder="可选" value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-xs text-text-muted mb-0.5">语言</label>
+              <select className="input" value={form.language}
+                onChange={(e) => setForm({ ...form, language: e.target.value })}>
+                <option value="zh">中文</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-text-muted mb-0.5">
+                关键词（逗号分隔）<span className="ml-1 opacity-70">= {"{keywords}"}</span>
+              </label>
+              <input className="input" placeholder="AI, agents" value={form.keywords}
+                onChange={(e) => setForm({ ...form, keywords: e.target.value })} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs text-text-muted mb-0.5">
+                Prompt <span className="ml-1 opacity-70">（必填，可用模板变量）</span>
+              </label>
+              <textarea className="input font-mono text-xs min-h-[80px]" placeholder="Research {name} with keywords: {keywords}..."
+                value={form.prompt} onChange={(e) => setForm({ ...form, prompt: e.target.value })} />
+              <p className="text-[11px] text-text-muted mt-1">
+                可用变量：{"{name}"} {"{keywords}"} {"{language}"} {"{date}"} {"{date_1d_ago}"}{" "}
+                {"{date_7d_ago}"} {"{time}"} {"{datetime}"} {"{recent_outcomes}"}（上一轮已判定结果）{"{reported_events}"}（已报道来源）；
+                输出路径模板支持 {"{name}"} {"{date}"} {"{time}"} {"{datetime}"}。建议写清：角色、目标、输出结构、每条发现的证据要求（发布日期 + 来源 URL）。
+              </p>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs text-text-muted mb-0.5">输出路径模板（可选）</label>
+              <input className="input font-mono text-xs" placeholder="output/{date}_{name}.md"
+                value={form.output} onChange={(e) => setForm({ ...form, output: e.target.value })} />
+            </div>
+            <div className="sm:col-span-2">
+              <div className="flex items-center gap-2 mb-1">
+                <label className="block text-xs text-text-muted">从模板开始（可选）</label>
+                <button type="button" onClick={() => setForm({ ...form, template: "" })}
+                  className={cn("px-2 py-0.5 text-[11px] rounded border transition",
+                    !form.template ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover")}>
+                  不用模板
+                </button>
+                <button type="button" onClick={() => setShowLibrary(true)}
+                  className="text-[11px] text-accent hover:underline">
+                  管理/新建模板 →
+                </button>
+                {form.template && (
+                  <span className="text-[11px] text-text-muted">已选：{form.template}</span>
+                )}
+              </div>
+              <div className="border border-border rounded-md p-2 max-h-[240px] overflow-auto">
+                <TemplateGrid
+                  templates={templates}
+                  selectedKey={
+                    templates.find((t) => t.filename === form.template)?.key
+                  }
+                  onSelect={applyTemplate}
+                  compact
+                  emptyHint="暂无模板，点「管理/新建模板」创建，或直接手写 Prompt。"
+                />
+              </div>
+              <p className="text-[11px] text-text-muted mt-1">
+                选中模板会把它的 prompt / 输出路径 / 关键词填入下方表单，接下来只需改 <code>name</code> 与 <code>keywords</code>。
+              </p>
+            </div>
+          </div>
+
+          {user?.role === 'admin' && <div className="border-t border-border pt-3 space-y-3">
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={recurring} onChange={e => setRecurring(e.target.checked)} />创建后自动周期运行</label>
+            {recurring && <><CronBuilder value={recurrence} onChange={setRecurrence} /><p className="text-xs text-text-muted">按本机时区执行。休眠后合并补跑一次，失败最多重试 2 次；关闭页面不影响运行。创建后可在「周期调度」调整策略并查看执行记录。</p></>}
+          </div>}
+          {createMsg && <div className="text-sm text-danger">{createMsg}</div>}
+          <div className="flex gap-2">
+            <button onClick={handleCreate} disabled={creating} className="btn btn-primary">
+              {creating ? "创建中..." : "创建"}
+            </button>
+            <button onClick={() => setShowCreate(false)} className="btn">取消</button>
+          </div>
+        </div>
+      )}
+
+      {/* Job list */}
+      {error && jobData ? <ErrorState error={error} onRetry={fetchJobs} compact /> : null}
+      {loading && !jobData ? (
+        <div className="text-sm text-text-muted">加载中...</div>
+      ) : error && !jobData ? (
+        <ErrorState error={error} onRetry={fetchJobs} />
+      ) : jobs.length === 0 ? (
+        <div className="card p-8 text-center text-sm text-text-muted space-y-2">
+          <div>还没有任何 Job</div>
+          {canEdit && <div className="text-xs">点右上角「+ 新建」，可以从模板库创建第一个 Job。</div>}
+        </div>
+      ) : visibleCount === 0 ? <section className="card p-8 text-center text-sm text-text-muted">没有符合筛选的任务</section> : (
+        <div className="space-y-4">
+          {[...filtered.entries()].map(([cat, items]) => (
+            <div key={cat} className="card">
+              <div className="px-4 py-2 border-b border-border text-xs text-text-muted uppercase">
+                {cat}
+              </div>
+              <div className="divide-y divide-border">
+                {items.map((j) => (
+                  <Link
+                    key={j.name}
+                    to={`/jobs/${encodeURIComponent(j.name)}`}
+                    data-job={j.name}
+                    className={cn(
+                      "flex flex-wrap sm:flex-nowrap items-center gap-3 px-4 py-3 hover:bg-bg-hover transition text-sm",
+                      highlight === j.name && "bg-accent/15 ring-1 ring-inset ring-accent/50",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "w-2 h-2 rounded-full shrink-0",
+                        j.enabled ? "bg-success" : "bg-text-muted"
+                      )}
+                      title={j.enabled ? "enabled" : "disabled"}
+                    />
+                    <div className="flex-1 min-w-0"><div className="truncate">{jobLabel(j.name)}</div><p className="text-xs text-text-muted truncate mt-1">{owner(j.name)?.name ? `${owner(j.name)!.name} · ` : ""}{jobLabel(j.name) !== j.name ? j.name : j.description || "独立研究任务"}</p></div>
+                    {j.is_running && (
+                      <span className="inline-flex items-center gap-1 text-xs text-accent shrink-0">
+                        <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                        运行中
+                      </span>
+                    )}
+                    <StatusBadge status={j.state?.last_status || null} />
+                    {j.state?.last_run_at && (
+                      <span className="text-text-muted text-xs shrink-0" title={j.state.last_run_at}>
+                        {shortTime(j.state.last_run_at)} · {timeAgo(j.state.last_run_at)}
+                      </span>
+                    )}
+                    {canEdit && (
+                      <button
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(j.name); }}
+                        className="text-text-muted hover:text-danger text-xs px-1.5 py-0.5 shrink-0 border border-transparent hover:border-danger/50 rounded"
+                        title={`删除 job ${j.name}`}
+                        aria-label={`删除 job ${j.name}`}
+                      >
+                        删除
+                      </button>
+                    )}
+                    {(j.keywords || []).length > 0 && (
+                      <span className="hidden lg:flex gap-1">
+                        {(j.keywords || []).slice(0, 2).map((kw: string) => (
+                          <span key={kw} className="badge bg-bg-hover border border-border">
+                            {kw}
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {canEdit && (
+        <TemplateLibrary
+          open={showLibrary}
+          onClose={() => {
+            setShowLibrary(false);
+            fetchTemplates();
+          }}
+          onUse={(t) => {
+            setShowCreate(true);
+            applyTemplate(t);
+          }}
+        />
+      )}
+    </div>
+  );
+}

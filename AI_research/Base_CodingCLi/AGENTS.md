@@ -1,0 +1,171 @@
+# AI Research System
+
+Automated AI research report generation via LLM API + web search API + Web UI console.
+Single YAML job file = everything.
+
+## Quick Start
+
+```bash
+pip install -r requirements.txt   # Python dependencies
+cp .env.example .env              # then set LLM_API_KEY / PARALLEL_API_KEY
+python run.py --list              # See available jobs
+python run.py daily_ai_agents     # Run one
+python run.py --validate          # Check configs
+
+# Web UI
+python run_web.py create-admin <username> <password>
+python run_web.py serve           # http://localhost:8765
+```
+
+## How It Works (CLI)
+
+```
+Job YAML → render prompt → ResearchAgent → final Markdown report
+                              ├── LLMClient.chat()       (OpenAI-compatible API)
+                              ├── SearchClient.search()  (Parallel / DuckDuckGo)
+                              └── tools: search_web, read_file, list_files
+```
+
+The research agent runs a multi-round tool-calling loop: the model searches the
+web (often several times with different angles), reads prior reports from the
+workspace when the task references them (e.g. synthesis stages), then writes
+the complete report as its final reply. The engine saves that reply to the
+job's `output` path — no CLI agent, no guard instructions.
+
+When the endpoint/model does not support tool calling, `research.mode: auto`
+falls back to pipeline mode: plan queries → batched search → single-shot
+generation.
+
+## Configuration
+
+| File | Contents |
+|------|----------|
+| `config/system.yaml` | `ai` (LLM endpoint), `search` (provider + limits), `research` (loop limits), optional `extraction` cleanup |
+| `.env` | `LLM_API_KEY`, `PARALLEL_API_KEY` (env vars referenced by system.yaml) |
+| `jobs/*.yaml` | Per-job prompt, keywords, output path, `runtime.timeout_seconds` |
+
+The LLM endpoint must be OpenAI-compatible (`/chat/completions`). Works with
+opencode zen, OpenAI, DeepSeek, local Ollama (`http://localhost:11434/v1`,
+empty `api_key_env`), etc.
+
+## How It Works (Web UI)
+
+```
+React SPA → FastAPI → core/engine.py (with cancel_token + progress_cb)
+  SSE stream → real-time log display
+  FTS5 index → full-text report search
+  JWT auth → role-based access (viewer / editor / admin)
+```
+
+With `gateway.enabled` (config/web.yaml) a stdlib-only front door owns the public
+port and starts the app on demand, so a bookmarked URL revives the app and the LAN
+switch can expose it to a phone. The app then always listens on
+`gateway.app_port`, loopback only. See `spec/gateway.md`.
+
+## Conventions
+
+- **Python 3.10+**, type annotations, docstrings on public methods
+- **Logging** via `utils/logger.py` → setup_logger()
+- **Error handling**: catch, log, return None (never crash)
+- **Config**: YAML only, no Python config files
+- **LLM access**: OpenAI-compatible HTTP API only — never shell out to CLI agents
+- **Frontend**: React 18 + Vite + TypeScript + TailwindCSS
+- **Model output is untrusted**: sanitize HTML before serving it
+  (`core/render.py`), and validate a report before saving it
+  (`core/research.py:report_problem`) — a refusal or an error string must fail
+  the job, not become the day's report
+- **The agent's file tools stay inside the research material**:
+  `core/research.py:is_sensitive_path` refuses `.env`, `*.db` and `config/`
+  even though they sit inside the workspace
+
+## Scheduling
+
+New recurring plans use `core/schedule_store.py` (SQLite) and the standalone
+`core/schedule_runner.py`, supervised by launchd on macOS. Register a plan through
+Web "周期调度" or the explicit `recurrence` field when creating a job. Run
+`python scripts/install_scheduler.py` to install/verify the dispatcher.
+Do not register new ordinary jobs via cron. Existing cron remains a compatibility
+path. The matrix's two LaunchAgents (`com.arec.pipeline.daily` /
+`.catchup`) are editable from the same page via `web/services/launchd_agents.py`
+(edit / pause / restorable delete); see `spec/scheduling.md`.
+Tests must isolate state and mock installation; never touch real user cron/agents.
+
+### After a round: check the artifacts
+
+```bash
+python scripts/check_round_quality.py            # newest round
+python scripts/check_round_quality.py 2026-09-28 # a specific one
+```
+
+A round can report 10/10 and still be wrong in ways nothing else notices: the
+synthesis stages ran with no upstream documents, the watchlist parsed to
+nothing, a citation figure was measured with a broken extractor. This reads the
+finished round and fails loudly on each of those. Exit code 1 means problems.
+Run it after a round, and before believing a number on the rounds page.
+
+Note that a recorded citation count is written once, at run time. If the URL
+extractor changes later, past rounds keep the old figure -- the checker reports
+that as stale rather than pretending the number is current.
+
+## After changing retrieval: measure it
+
+Retrieval quality is not reviewable by reading the diff, and asking the model
+whether it got what it needed costs an LLM call per sample and answers a
+different question. `scripts/eval_retrieval.py` is the cheap objective version:
+a question, a phrase that only appears in the passage that should answer it,
+and the round that passage belongs to.
+
+```bash
+python scripts/eval_retrieval.py            # 15 questions against the newest round
+python scripts/eval_retrieval.py --verbose  # also print what was recalled
+```
+
+It scores two things, and the second is the one that catches the real failure:
+the answering passage may be absent, or it may be present while the results are
+padded with older rounds discussing the same subject. Before trusting a score,
+read the marker check -- it refuses to report if a gold phrase is not in the
+index, because a marker the reports do not contain measures nothing.
+
+This measures retrieval only, and strictly: it wants the exact section, so a
+neighbouring passage that would have answered the question still counts as a
+miss. When changing ranking, read the difference in this number and, for a
+handful of questions, the answer the model actually produces.
+
+## Adding a Job
+
+Create a YAML file in the appropriate `jobs/` subdirectory (or copy from `jobs/_templates/`):
+
+```yaml
+name: "My Research"
+description: "My custom research"
+enabled: true
+keywords: [topic1, topic2]
+language: "zh"
+runtime:
+  timeout_seconds: 3600
+prompt: |
+  Research {name} with keywords: {keywords}.
+  Generate a report in Markdown. Cite source URLs for every finding.
+output: "output/my_job_{date}.md"
+```
+
+### Job categories
+
+| Directory | Purpose | Example |
+|-----------|---------|---------|
+| `monitoring/` | Daily monitoring, quick checks | `daily_ai_agents` |
+| `research/` | Deep surveys, literature reviews | `ai_survey` |
+| `practice/` | Real-world applications, case studies | `ai_agents_practice` |
+| `analysis/` | Trend analysis, gap/opportunity detection | `ai_trends` |
+| `actionable/` | Research-to-action plans | `ai_agents_actionable` |
+| `_templates/` | Reusable job templates (ignored by engine) | `_daily.yaml` |
+
+Jobs can be referenced by basename (`daily_ai_agents`) or full path (`monitoring/daily_ai_agents`).
+
+## Web UI Roles
+
+| Role | Permissions |
+|------|------------|
+| `viewer` | Browse jobs, reports, logs. Read-only. |
+| `editor` | Viewer + trigger/cancel runs, edit job YAML |
+| `admin` | Editor + system config, user management, audit log |

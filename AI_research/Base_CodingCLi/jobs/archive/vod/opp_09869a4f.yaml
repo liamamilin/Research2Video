@@ -1,0 +1,19 @@
+{
+  "name": "opp_09869a4f",
+  "description": "VOD 选题深度调研：are the pydantic 2.14 changes actually breaking or safe to upgrade from 2.13",
+  "enabled": true,
+  "keywords": [
+    "2026-10-08",
+    "are the pydantic 2.14 changes actually breaking or safe to upgrade from 2.13"
+  ],
+  "language": "en",
+  "schedule": {
+    "type": "manual"
+  },
+  "runtime": {
+    "timeout_seconds": 3600,
+    "skip_if_running": true
+  },
+  "prompt": "你是一名技术研究员，为一位制作 AI / 软件类知识视频的创作者做选题调研。你的报告会被另一套系统读取：它会逐个打开你引用的网址，只采信真正能打开、并且确实写了这件事的页面。所以每个关键判断都要给出原始网址。\n\n## 选题\n- 标题：are the pydantic 2.14 changes actually breaking or safe to upgrade from 2.13\n- 核心问题：are the pydantic 2.14 changes actually breaking or safe to upgrade from 2.13\n- 为什么是现在：未说明\n- 触发事件：pydantic/pydantic: v2.14.0 2026-10-08 — ### What's Changed\r\n\r\nThe highlights of the v2.14 release are available in the [blog post](https://pydantic.dev/articles/pydantic-v2-14-release).\r\nSeveral minor changes (considered non-breaking changes according to our [versioning policy](https://pydantic.dev/docs/validation/2.14/get-started/version-policy/#pydantic-v2)) are also included in this release. Make sure to look into them before upgrading.\r\n\r\nThis release drops support for Python 3.9 and adds support for Python 3.15.\r\n\r\n#### New Featu\n\nUser impact: Python developers and AI/ML engineers using pydantic (directly or via FastAPI, LangChain, OpenAI SDK, etc.) who run Python 3.9 must either upgrade their interpreter or stay pinned to pydantic v2.13.x; teams on newer Python gain 3.15 support and should review the non-breaking minor changes and new features before bumping the dependency, updating lockfiles and CI matrices.\n- 关键词：{keywords}\n\n## 任务\n围绕核心问题做深度调研：先直接回答，再给出支撑它的证据、反方证据和仍未确定的部分。证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。\n输出语言：{language}。\n\n## 证据规则\n1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。\n2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。\n3. 核心结论尽量由两个相互独立的来源支撑；只有厂商自己的说法时，标注「厂商自述，未独立验证」。\n4. 给出反方证据或失败案例；确实找不到时写明「未找到反方证据」。\n5. 区分「已证实」「有迹象」「推测」，不把推测写成事实。\n\n## 输出结构\n### 1. 直接回答\n### 2. 关键事实（表格：事实 | 置信度 | 来源编号）\n### 3. 争议与反方证据\n### 4. 仍未确定的问题\n### 5. 适合视频的讲述角度（不超过 3 条）\n### 6. 来源清单\n编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址\n",
+  "output": "output/vod/{datetime}_opp_09869a4f.md"
+}

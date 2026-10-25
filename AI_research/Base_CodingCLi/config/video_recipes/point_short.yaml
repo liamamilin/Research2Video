@@ -1,0 +1,41 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# research.template 是 jobs/_templates/video_research/ 下的调研模板，output.use 是 config/video_parts/output/ 下的出片部件。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 一个知识点
+description: 带{{audience}}弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。
+status: enabled
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: one_point
+    name: 一个知识点
+  format:
+    key: short
+    name: B 站横屏短
+audiences: [developer, non_tech]
+target_minutes: 1.5
+topic:
+  kind: single
+  sources: [flash]
+  fields: [核心角度, 目标受众, 条目数, 条目, 对比对象, 对比维度]
+research:
+  template: one_point
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: explainer
+  style: |
+    带{{audience}}弄懂一个有意思的知识点，从他们容易产生的疑问出发，讲到恍然大悟。
+output:
+  use: motion
+  packaging:
+    use: common
+    label: 一个知识点
+    outro:
+      lines:
+      - 面向{{audience}}的 知识点
+      seconds: 2.5

@@ -1,0 +1,840 @@
+"""
+LLM API client - OpenAI-compatible chat completions.
+
+Direct HTTP API access (no CLI subprocess). Supports tool calling for the
+research agent, cancellable calls, retries with backoff, and usage tracking.
+
+Configured via ``system.yaml``::
+
+    ai:
+      model: "qwen3.8:27b-mlx"
+      base_url: "http://localhost:11434/v1"
+      api_key_env: "LLM_API_KEY"   # optional for local endpoints
+      timeout: 1800                # per-request wall clock ceiling (seconds)
+      request_timeout: 600         # single HTTP attempt (seconds)
+      max_tokens: 32768
+      temperature: 0.3
+      max_retries: 3
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import random
+import threading
+import time
+import uuid
+from dataclasses import dataclass, field
+from typing import Any, Callable, Optional
+
+from .errors import CancelledError, LLMConfigError, LLMError, LLMUnsupportedError
+
+logger = logging.getLogger(__name__)
+
+try:
+    from openai import OpenAI
+
+    _OPENAI_AVAILABLE = True
+except ImportError:  # pragma: no cover - dependency guard
+    OpenAI = None  # type: ignore[assignment]
+    _OPENAI_AVAILABLE = False
+
+_RETRYABLE_STATUS = {408, 409, 429, 500, 502, 503, 504, 529}
+_RETRYABLE_NAMES = {
+    "APIConnectionError",
+    "APITimeoutError",
+    "InternalServerError",
+    "RateLimitError",
+    "EmptyReplyError",
+}
+
+
+class EmptyReplyError(Exception):
+    """The model answered with nothing at all (no text, no tool call): retried like a transient failure, and when it
+    keeps happening the next fallback model takes over."""
+#: Provider error codes that mean the connection broke, not that the request
+#: was wrong. Seen live: a gateway reported a reset mid-stream as a plain
+#: APIError with no HTTP status, so neither check above caught it.
+_RETRYABLE_CODES = {"upstream_stream_interrupted"}
+#: Provider error codes for "the account is out of money/quota", distinct from
+#: a transient failure: retrying the same model never helps, only a different
+#: (or cheaper) model or a top-up does. Seen live from an OpenAI-compatible
+#: gateway: ``{"code": "insufficient_balance", "details": {"coding_plan_exhausted": true}}``.
+_QUOTA_EXHAUSTED_CODES = {"insufficient_balance", "quota_exhausted"}
+#: Statuses that say "this model cannot serve you", not "the request was wrong": the key is refused for it (401/403),
+#: or it is gone (404 not found, 410 deprecated). Another model on the same endpoint may still answer.
+_MODEL_REFUSED_STATUS = {401: "鉴权被拒绝", 403: "没有权限使用它", 404: "不存在", 410: "已下线"}
+#: A 400/422 whose text blames the model itself (never a tool-calling complaint: that is LLMUnsupportedError).
+_MODEL_UNUSABLE_WORDS = ("deprecated", "model_not_found", "modeldeprecated", "model not found", "unknown model",
+                         "invalid model", "model is not available", "model not available", "does not exist",
+                         "not supported model", "model is not supported", "no longer available", "decommissioned")
+
+
+@dataclass
+class LLMConfig:
+    """LLM endpoint configuration."""
+
+    model: str = ""
+    base_url: str = ""
+    api_key: str = ""
+    # Name of the env var the key came from. Kept only so an unauthenticated
+    # 401 can say *why* no Authorization header was sent.
+    api_key_env: str = ""
+    timeout: int = 1800
+    request_timeout: int = 600
+    max_tokens: int = 32768
+    temperature: float = 0.3
+    max_retries: int = 3
+    reasoning_content: str = "auto"   # auto | always | never (DeepSeek echo)
+    stream: bool = True               # stream text-only calls (live progress)
+    extra_body: dict = field(default_factory=dict)
+    extra_headers: dict = field(default_factory=dict)
+    # Tried in order, same provider and key, when ``model`` answers with a
+    # quota/billing error (see ``_is_quota_exhausted``) -- never for an
+    # ordinary transient failure, which retries the same model instead. Put a
+    # free model in ``model`` and paid ones here so a quota-exhausted free
+    # model fails over instead of failing the job; once switched, a client
+    # keeps using the fallback for the rest of its calls (see ``_active_model``).
+    fallback_models: list = field(default_factory=list)
+
+    def validate(self) -> None:
+        if not self.model:
+            raise LLMConfigError("ai.model is not configured in system.yaml")
+        if not self.base_url:
+            raise LLMConfigError("ai.base_url is not configured in system.yaml")
+
+    @classmethod
+    def from_system(cls, sys_config: dict, section: str = "ai") -> "LLMConfig":
+        """Build a config from a system.yaml mapping (typically the ``ai`` key)."""
+        from .providers import is_valid_env_name
+
+        cfg = sys_config.get(section, {}) or {}
+        api_key_env = cfg.get("api_key_env")
+        api_key = os.environ.get(api_key_env, "") if api_key_env else ""
+        if api_key_env and not api_key:
+            # A value that is not a variable name is a key pasted into the name
+            # field: `os.environ.get` then returns "", no Authorization header is
+            # sent, and a hosted endpoint answers 401 invalid_api_key -- which
+            # reads as "the key is wrong" when in fact no key was sent at all.
+            if not is_valid_env_name(str(api_key_env)):
+                logger.error(
+                    "ai.api_key_env=%r is not an environment-variable name; it "
+                    "looks like an API key pasted into the wrong field. Put the "
+                    "key in the secrets card (.env) and the variable name "
+                    "(e.g. LLM_API_KEY) here. Requesting WITHOUT auth.",
+                    api_key_env,
+                )
+            else:
+                logger.warning(
+                    "Environment variable '%s' not set; requesting without auth "
+                    "(fine for local endpoints, will fail for hosted ones)",
+                    api_key_env,
+                )
+        return cls(
+            model=cfg.get("model", ""),
+            base_url=(cfg.get("base_url") or "").rstrip("/"),
+            api_key=api_key,
+            api_key_env=str(api_key_env or ""),
+            timeout=int(cfg.get("timeout", 1800)),
+            request_timeout=int(cfg.get("request_timeout", 600)),
+            max_tokens=int(cfg.get("max_tokens", 32768)),
+            temperature=float(cfg.get("temperature", 0.3)),
+            max_retries=int(cfg.get("max_retries", 3)),
+            reasoning_content=str(cfg.get("reasoning_content", "auto")),
+            stream=bool(cfg.get("stream", True)),
+            extra_body=cfg.get("extra_body") or {},
+            extra_headers=cfg.get("extra_headers") or {},
+            fallback_models=[str(m) for m in (cfg.get("fallback_models") or [])],
+        )
+
+
+@dataclass
+class ToolCall:
+    """A single tool call requested by the model."""
+
+    id: str
+    name: str
+    arguments: dict
+
+
+@dataclass
+class ChatResponse:
+    """Normalized chat completion response."""
+
+    content: str = ""
+    tool_calls: list[ToolCall] = field(default_factory=list)
+    finish_reason: str = ""
+    usage: dict = field(default_factory=dict)
+    reasoning_content: str = ""
+    echo_reasoning: bool = False
+    # The model that actually answered -- ``config.model`` unless a quota
+    # error fell back to one of ``config.fallback_models``.
+    model: str = ""
+
+    @property
+    def assistant_message(self) -> dict:
+        """Message dict suitable for appending to the conversation history.
+
+        DeepSeek thinking mode requires the assistant message to carry back
+        ``reasoning_content`` when it contains tool calls; other providers
+        ignore/reject unknown message fields, so echoing is opt-in.
+        """
+        msg: dict[str, Any] = {"role": "assistant"}
+        if self.content:
+            msg["content"] = self.content
+        if self.tool_calls:
+            msg["content"] = self.content or ""
+            msg["tool_calls"] = [
+                {
+                    "id": tc.id,
+                    "type": "function",
+                    "function": {
+                        "name": tc.name,
+                        "arguments": json.dumps(tc.arguments, ensure_ascii=False),
+                    },
+                }
+                for tc in self.tool_calls
+            ]
+        if self.echo_reasoning and self.reasoning_content:
+            msg["reasoning_content"] = self.reasoning_content
+        return msg
+
+
+def _normalize_content(content: Any) -> str:
+    """Flatten string or multimodal content parts into plain text."""
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, dict):
+                text = item.get("text")
+                if text:
+                    parts.append(str(text))
+            elif item:
+                parts.append(str(item))
+        return "\n".join(parts)
+    return str(content)
+
+
+class LLMClient:
+    """OpenAI-compatible chat client with retries and cancellation."""
+
+    def __init__(
+        self,
+        config: LLMConfig,
+        cancel_token: Optional[threading.Event] = None,
+        progress_cb=None,
+    ):
+        if not _OPENAI_AVAILABLE:
+            raise LLMConfigError(
+                "The 'openai' package is required for LLM API calls. "
+                "Install it with: pip install openai"
+            )
+        config.validate()
+        self.config = config
+        self._cancel = cancel_token or threading.Event()
+        self._progress = progress_cb or (lambda _: None)
+        self._session_id = "ses_" + uuid.uuid4().hex
+        # Index into ``_model_list()``: 0 is ``config.model``, >0 is a
+        # fallback a quota error switched to. Never resets, so once this
+        # client switches away from an exhausted model it stays switched for
+        # the rest of the job rather than re-trying the known-bad one.
+        self._model_idx = 0
+        self._client = self._make_client()
+        self.usage = {
+            "requests": 0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+        }
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def chat(
+        self,
+        messages: list[dict],
+        tools: Optional[list[dict]] = None,
+        tool_choice: Optional[str] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        stream: Optional[bool] = None,
+        on_delta: Optional[Callable[[str], None]] = None,
+    ) -> ChatResponse:
+        """Run one chat completion, with retries and cancellation.
+
+        Raises ``CancelledError`` when the cancel token is set and
+        ``LLMUnsupportedError`` when the endpoint rejects tool calling.
+        """
+        attempt = 0
+        emitted = False
+        use_stream = stream if stream is not None else (self.config.stream and not tools)
+
+        def emit(text: str) -> None:
+            nonlocal emitted
+            if on_delta:
+                emitted = True
+                on_delta(text)
+
+        while True:
+            if self._cancel.is_set():
+                raise CancelledError("Cancelled before LLM call")
+
+            try:
+                if use_stream:
+                    response = self._chat_cancellable(
+                        messages,
+                        _stream=True,
+                        tools=tools,
+                        tool_choice=tool_choice,
+                        on_delta=emit,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                else:
+                    response = self._chat_cancellable(
+                        messages,
+                        tools=tools,
+                        tool_choice=tool_choice,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                    )
+                if response.finish_reason == "content_filter":
+                    raise LLMError("模型服务过滤了本次请求（finish_reason=content_filter），没有可用的完整结果")
+                if self._is_empty_reply(response):
+                    raise EmptyReplyError("模型返回了空内容")
+                return response
+            except (CancelledError, LLMUnsupportedError):
+                raise
+            except Exception as exc:
+                # Never replay a prefix the caller has already displayed.
+                if emitted:
+                    raise self._classify(exc) from exc
+                if not self._is_retryable(exc):
+                    reason = self._model_unusable_reason(exc)
+                    if reason and self._switch_model(reason, exc):
+                        attempt = 0  # the new model gets its own transient-retry budget
+                        continue
+                    raise self._classify(exc) from exc
+                attempt += 1
+                if attempt > self.config.max_retries:
+                    # this model kept failing on its own budget: try the next one before giving up
+                    if self._switch_model("重试用尽仍失败", exc):
+                        attempt = 0
+                        continue
+                    raise LLMError(
+                        f"LLM call failed after {attempt} attempts{self._tried()}: {exc}"
+                    ) from exc
+                delay = min(2 ** attempt + random.random(), 30.0)
+                logger.warning(
+                    "LLM call failed (attempt %d/%d): %s — retrying in %.1fs",
+                    attempt,
+                    self.config.max_retries + 1,
+                    self._short(exc),
+                    delay,
+                )
+                self._sleep_cancellable(delay)
+
+    def _model_list(self) -> list[str]:
+        """``[config.model, *config.fallback_models]``, de-duplicated in order."""
+        out: list[str] = []
+        for model in [self.config.model, *(self.config.fallback_models or [])]:
+            if model and model not in out:
+                out.append(model)
+        return out
+
+    def _active_model(self) -> str:
+        """The model the next request uses: ``config.model`` or a fallback switched to.
+
+        ``_model_idx`` defaults to 0 via ``getattr`` so a client built by
+        tests with ``LLMClient.__new__`` (skipping ``__init__``) still works.
+        """
+        models = self._model_list()
+        idx = getattr(self, "_model_idx", 0)
+        if not models:
+            return self.config.model
+        return models[min(idx, len(models) - 1)]
+
+    def _advance_model(self) -> bool:
+        """Switch to the next fallback model. False when there is none left."""
+        idx = getattr(self, "_model_idx", 0)
+        if idx + 1 >= len(self._model_list()):
+            return False
+        self._model_idx = idx + 1
+        return True
+
+    def _is_quota_exhausted(self, exc: Exception) -> bool:
+        """A billing/quota rejection, not a transient failure: retrying the
+        same model will not help, but a fallback model might."""
+        status = getattr(exc, "status_code", None)
+        if status == 402:
+            return True
+        code = getattr(exc, "code", None)
+        if code in _QUOTA_EXHAUSTED_CODES:
+            return True
+        lowered = self._short(exc, 500).lower()
+        return "insufficient balance" in lowered or "insufficient_balance" in lowered or "credit" in lowered
+
+    def _model_unusable_reason(self, exc: Exception) -> str:
+        """Why this model cannot serve the request, or ``""`` when a different model would not help.
+
+        Switching models is for failures that belong to the model or to the account's access to it: out of quota
+        (402 or a balance message), key refused (401/403), model missing or deprecated (404/410, or a 400/422 that
+        blames the model). A bad request, a tool-calling complaint or a content problem fails the same way on every
+        model, so those are not in here."""
+        if self._is_quota_exhausted(exc):
+            return "额度或余额用完"
+        status = getattr(exc, "status_code", None)
+        text = self._short(exc, 500).lower()
+        if status in _MODEL_REFUSED_STATUS:
+            return _MODEL_REFUSED_STATUS[status]
+        if status in (400, 422) and not ("tool" in text or "function" in text) and any(w in text for w in _MODEL_UNUSABLE_WORDS):
+            return "不可用"
+        if status is None and any(w in text for w in ("deprecated", "model_not_found")):
+            return "已下线或不存在"
+        return ""
+
+    def _switch_model(self, reason: str, exc: Exception) -> bool:
+        """Move to the next fallback model for ``reason``; False (and nothing changes) when none is left."""
+        previous = self._active_model()
+        if not self._advance_model():
+            return False
+        logger.warning("LLM model %r %s, switching to fallback %r: %s", previous, reason, self._active_model(),
+                       self._short(exc))
+        if not hasattr(self, "model_switches"):
+            self.model_switches = []
+        self.model_switches.append({"from": previous, "to": self._active_model(), "reason": reason})
+        return True
+
+    def _tried(self) -> str:
+        """`` (tried: a, b)`` once a fallback was used, so a final error names every model it went through."""
+        models = self._model_list()
+        if len(models) < 2:
+            return ""
+        return f" (tried: {', '.join(models[: getattr(self, '_model_idx', 0) + 1])})"
+
+    @staticmethod
+    def _is_empty_reply(response: "ChatResponse") -> bool:
+        """No text and no tool call although the model stopped on its own: it produced nothing to use. A reply cut off
+        by the token limit is a different failure and is reported as one downstream."""
+        return (not (response.content or "").strip() and not response.tool_calls
+                and (response.finish_reason or "stop") == "stop")
+
+    def close(self) -> None:
+        """Close the underlying HTTP client."""
+        try:
+            self._client.close()
+        except Exception:
+            pass
+
+    # ------------------------------------------------------------------
+    # Internals
+    # ------------------------------------------------------------------
+
+    def _make_client(self):
+        return OpenAI(
+            base_url=self.config.base_url,
+            api_key=self.config.api_key or "not-needed",
+            timeout=self.config.request_timeout,
+            max_retries=0,
+            default_headers=self._resolved_headers(),
+        )
+
+    def _resolved_headers(self) -> Optional[dict]:
+        """Resolve header placeholders such as ``{session_id}``.
+
+        A stable session id per client lets gateways (e.g. OpenCode Go)
+        optimize routing and prompt caching for one job conversation.
+        """
+        if not self.config.extra_headers:
+            return None
+        headers = {}
+        for key, value in self.config.extra_headers.items():
+            headers[key] = str(value).replace("{session_id}", self._session_id)
+        return headers
+
+    def _ensure_client(self):
+        if self._client is None:
+            self._client = self._make_client()
+        return self._client
+
+    def _chat_cancellable(self, messages, **kwargs) -> ChatResponse:
+        """Run the blocking HTTP call in a worker thread so cancellation can
+        abort it by closing the HTTP client."""
+        box: dict[str, Any] = {}
+
+        def worker():
+            try:
+                if kwargs.pop("_stream", False):
+                    box["resp"] = self._chat_once_stream(messages, **kwargs)
+                else:
+                    box["resp"] = self._chat_once(messages, **kwargs)
+            except BaseException as exc:  # noqa: BLE001 - re-raised in caller
+                box["err"] = exc
+
+        thread = threading.Thread(target=worker, daemon=True)
+        thread.start()
+
+        start = time.time()
+        deadline = start + self.config.timeout
+        last_beat = start
+        heartbeat_interval = 15.0
+        while thread.is_alive():
+            if self._cancel.is_set():
+                self._abort()
+                thread.join(timeout=2)
+                raise CancelledError("LLM call cancelled")
+            now = time.time()
+            if now > deadline:
+                self._abort()
+                thread.join(timeout=2)
+                raise LLMError(
+                    f"LLM call exceeded timeout of {self.config.timeout}s"
+                )
+            if now - last_beat >= heartbeat_interval:
+                self._progress(
+                    {"type": "heartbeat", "elapsed": int(now - start)}
+                )
+                last_beat = now
+            thread.join(timeout=0.25)
+
+        if "err" in box:
+            raise box["err"]
+        return box["resp"]
+
+    def _chat_once_stream(self, messages, temperature=None,
+                          max_tokens=None, tools=None, tool_choice=None,
+                          on_delta=None) -> ChatResponse:
+        """Stream text and assemble tool arguments before exposing tool calls.
+
+        Emits throttled ``generating`` progress events and accumulates text
+        and reasoning deltas. Falls back gracefully when the endpoint does
+        not support ``stream_options``.
+        """
+        client = self._ensure_client()
+        base = {
+            "model": self._active_model(),
+            "messages": messages,
+            "temperature": (
+                self.config.temperature if temperature is None else temperature
+            ),
+            "max_tokens": (
+                self.config.max_tokens if max_tokens is None else max_tokens
+            ),
+        }
+        if tools:
+            base["tools"] = tools
+            base["tool_choice"] = tool_choice or "auto"
+        if self.config.extra_body:
+            base["extra_body"] = self.config.extra_body
+
+        stream = None
+        try:
+            stream = client.chat.completions.create(
+                **base, stream=True,
+                stream_options={"include_usage": True},
+            )
+        except Exception as exc:  # noqa: BLE001 - retry without usage option
+            if "stream_options" not in self._short(exc, 500).lower():
+                raise
+            logger.debug("Endpoint rejected stream_options; retrying without it")
+            stream = client.chat.completions.create(**base, stream=True)
+
+        content_parts: list[str] = []
+        reasoning_parts: list[str] = []
+        tool_parts: dict[int, dict] = {}
+        usage: dict = {}
+        finish_reason = ""
+        started = time.time()
+        deadline = started + self.config.timeout
+        last_emit = started
+        emit_interval = 2.0
+
+        try:
+            for chunk in stream:
+                if self._cancel.is_set():
+                    raise CancelledError("LLM streaming cancelled")
+                now = time.time()
+                if now > deadline:
+                    raise LLMError(
+                        f"LLM call exceeded timeout of {self.config.timeout}s"
+                    )
+
+                chunk_usage = getattr(chunk, "usage", None)
+                if chunk_usage is not None:
+                    usage = {
+                        "prompt_tokens": getattr(chunk_usage, "prompt_tokens", 0) or 0,
+                        "completion_tokens": getattr(chunk_usage, "completion_tokens", 0) or 0,
+                        "total_tokens": getattr(chunk_usage, "total_tokens", 0) or 0,
+                    }
+
+                choices = getattr(chunk, "choices", None) or []
+                if choices:
+                    choice = choices[0]
+                    if getattr(choice, "finish_reason", None):
+                        finish_reason = choice.finish_reason
+                    delta = getattr(choice, "delta", None)
+                    if delta is not None:
+                        text = getattr(delta, "content", None)
+                        if text:
+                            content_parts.append(text)
+                            if on_delta:
+                                on_delta(text)
+                        for tc in getattr(delta, "tool_calls", None) or []:
+                            part = tool_parts.setdefault(tc.index, {"id": "", "name": "", "arguments": ""})
+                            if getattr(tc, "id", None):
+                                part["id"] = tc.id
+                            fn = getattr(tc, "function", None)
+                            if fn is not None:
+                                part["name"] += getattr(fn, "name", None) or ""
+                                part["arguments"] += getattr(fn, "arguments", None) or ""
+                        reasoning = getattr(delta, "reasoning_content", None)
+                        if reasoning is None:
+                            extra = getattr(delta, "model_extra", None) or {}
+                            reasoning = extra.get("reasoning_content")
+                        if reasoning:
+                            reasoning_parts.append(str(reasoning))
+
+                if now - last_emit >= emit_interval:
+                    self._progress({
+                        "type": "generating",
+                        "chars": sum(len(p) for p in content_parts),
+                        "reasoning_chars": sum(len(p) for p in reasoning_parts),
+                        "elapsed": int(now - started),
+                    })
+                    last_emit = now
+        finally:
+            try:
+                stream.close()
+            except Exception:
+                pass
+
+        content = "".join(content_parts)
+        tool_calls: list[ToolCall] = []
+        if tools and (not finish_reason or (tool_parts and finish_reason == "length")):
+            raise LLMError("LLM tool stream ended before completion")
+        for index, part in sorted(tool_parts.items()):
+            try:
+                arguments = json.loads(part["arguments"] or "{}")
+            except json.JSONDecodeError as exc:
+                raise LLMError("LLM streamed incomplete tool arguments") from exc
+            if not part["name"] or not isinstance(arguments, dict):
+                raise LLMError("LLM streamed invalid tool arguments")
+            tool_calls.append(ToolCall(id=part["id"] or f"call_{index}",
+                                       name=part["name"], arguments=arguments))
+        if usage:
+            self.usage["requests"] += 1
+            for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
+                self.usage[key] += usage.get(key, 0)
+        elif content:
+            # Endpoint omitted usage: approximate so budgets stay meaningful
+            approx = max(1, len(content) // 4)
+            usage = {"prompt_tokens": 0, "completion_tokens": approx,
+                     "total_tokens": approx, "estimated": True}
+            self.usage["requests"] += 1
+            self.usage["completion_tokens"] += approx
+            self.usage["total_tokens"] += approx
+
+        return ChatResponse(
+            content=content,
+            tool_calls=tool_calls,
+            finish_reason=finish_reason,
+            usage=usage,
+            reasoning_content="".join(reasoning_parts),
+            echo_reasoning=self._should_echo_reasoning(),
+            model=self._active_model(),
+        )
+
+    def _chat_once(self, messages, tools=None, tool_choice=None,
+                   temperature=None, max_tokens=None) -> ChatResponse:
+        client = self._ensure_client()
+        kwargs: dict[str, Any] = {
+            "model": self._active_model(),
+            "messages": messages,
+            "temperature": (
+                self.config.temperature if temperature is None else temperature
+            ),
+            "max_tokens": (
+                self.config.max_tokens if max_tokens is None else max_tokens
+            ),
+        }
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = tool_choice or "auto"
+        if self.config.extra_body:
+            kwargs["extra_body"] = self.config.extra_body
+
+        raw = client.chat.completions.create(**kwargs)
+        return self._parse_response(raw)
+
+    def _parse_response(self, raw) -> ChatResponse:
+        usage = getattr(raw, "usage", None)
+        usage_dict = {}
+        if usage is not None:
+            usage_dict = {
+                "prompt_tokens": getattr(usage, "prompt_tokens", 0) or 0,
+                "completion_tokens": getattr(usage, "completion_tokens", 0) or 0,
+                "total_tokens": getattr(usage, "total_tokens", 0) or 0,
+            }
+            self.usage["requests"] += 1
+            for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
+                self.usage[key] += usage_dict.get(key, 0)
+
+        if not getattr(raw, "choices", None):
+            raise LLMError("LLM returned no choices")
+
+        choice = raw.choices[0]
+        message = choice.message
+        tool_calls: list[ToolCall] = []
+        for tc in getattr(message, "tool_calls", None) or []:
+            fn = getattr(tc, "function", None)
+            if fn is None:
+                continue
+            arguments: dict = {}
+            raw_args = getattr(fn, "arguments", "") or ""
+            if isinstance(raw_args, dict):
+                arguments = raw_args
+            else:
+                try:
+                    arguments = json.loads(raw_args) if raw_args.strip() else {}
+                except json.JSONDecodeError:
+                    logger.warning("Malformed tool arguments: %s", raw_args[:200])
+                    arguments = {}
+            tool_calls.append(
+                ToolCall(
+                    id=getattr(tc, "id", "") or f"call_{len(tool_calls)}",
+                    name=getattr(fn, "name", "") or "",
+                    arguments=arguments,
+                )
+            )
+
+        reasoning = getattr(message, "reasoning_content", None)
+        if reasoning is None:
+            extra = getattr(message, "model_extra", None) or {}
+            reasoning = extra.get("reasoning_content")
+
+        return ChatResponse(
+            content=_normalize_content(getattr(message, "content", "")),
+            tool_calls=tool_calls,
+            finish_reason=getattr(choice, "finish_reason", "") or "",
+            usage=usage_dict,
+            reasoning_content=_normalize_content(reasoning),
+            echo_reasoning=self._should_echo_reasoning(),
+            model=self._active_model(),
+        )
+
+    def _should_echo_reasoning(self) -> bool:
+        """Whether to send reasoning_content back on assistant messages.
+
+        ``auto`` enables it for DeepSeek models, whose thinking mode returns
+        400 ('reasoning_content ... must be passed back') otherwise.
+        """
+        mode = (self.config.reasoning_content or "auto").lower()
+        if mode == "always":
+            return True
+        if mode == "never":
+            return False
+        return "deepseek" in (self._active_model() or "").lower()
+
+    def _abort(self) -> None:
+        """Force-close the HTTP client to abort an in-flight request."""
+        try:
+            self._client.close()
+        except Exception:
+            pass
+        self._client = None
+
+    def _is_retryable(self, exc: Exception) -> bool:
+        status = getattr(exc, "status_code", None)
+        if status in _RETRYABLE_STATUS:
+            return True
+        code = getattr(exc, "code", None)
+        if code in _RETRYABLE_CODES or any(f"[code={c}]" in str(exc) for c in _RETRYABLE_CODES):
+            return True
+        return type(exc).__name__ in _RETRYABLE_NAMES
+
+    def _classify(self, exc: Exception) -> LLMError:
+        """Map provider errors into our error hierarchy."""
+        import httpx
+
+        if isinstance(exc, httpx.TimeoutException):
+            return LLMError(f"LLM request timed out: {exc}")
+
+        status = getattr(exc, "status_code", None)
+        text = self._short(exc)
+        lowered = text.lower()
+        if status == 400 and (
+            "tool" in lowered or "function" in lowered or "tool_choice" in lowered
+        ):
+            return LLMUnsupportedError(
+                f"Endpoint/model does not support tool calling: {text}"
+            )
+        if status in (401, 403):
+            return LLMError(self._auth_message(status, text) + self._tried())
+        if self._is_quota_exhausted(exc):
+            models_tried = self._model_list()[: getattr(self, "_model_idx", 0) + 1]
+            tried = f" (tried: {', '.join(models_tried)})" if len(self._model_list()) > 1 else ""
+            return LLMError(
+                f"LLM account has insufficient credits/balance{tried}: {text}"
+            )
+        if status == 404:
+            return LLMError(
+                f"LLM model or endpoint not found (404): {text}. "
+                f"Check ai.model='{self._active_model()}' and ai.base_url="
+                f"'{self.config.base_url}'"
+            )
+        return LLMError(f"LLM call failed{self._tried()}: {text}")
+
+    def _auth_message(self, status: int, text: str) -> str:
+        """Explain an auth failure, including *why* no key was sent.
+
+        A bare ``invalid_api_key`` 401 is the same message whether the key is
+        wrong or was never attached, and the two have completely different
+        fixes. When the config names an env var we could not read, say so.
+        """
+        from .providers import find_provider_by_base_url, is_valid_env_name
+
+        env_name = self.config.api_key_env
+        if self.config.api_key or not env_name:
+            # A key was sent and still rejected. The most common cause is a key
+            # that belongs to a different vendor than base_url points at, so
+            # name the endpoint when we recognize it.
+            preset = find_provider_by_base_url(self.config.base_url)
+            if preset is not None:
+                return (
+                    f"LLM auth failed ({status}): {text}。"
+                    f"已发送密钥但被拒绝：请确认该密钥属于当前服务商"
+                    f"（{preset.label}，{preset.base_url}），"
+                    f"不同服务商的密钥不能混用。"
+                )
+            return f"LLM auth failed ({status}): {text}"
+        if not is_valid_env_name(env_name):
+            return (
+                f"LLM auth failed ({status}): 未发送 Authorization 头。"
+                f"ai.api_key_env 的值 {env_name!r} 不是一个环境变量名，"
+                f"看起来是把 API Key 填进了“密钥环境变量”输入框。"
+                f"请在“API 密钥”卡片填写密钥，这里只填变量名（如 LLM_API_KEY）。"
+                f"原始错误: {text}"
+            )
+        return (
+            f"LLM auth failed ({status}): 未发送 Authorization 头，"
+            f"因为环境变量 '{env_name}' 未设置（.env 中没有该变量，"
+            f"或保存密钥后服务未重新读取）。原始错误: {text}"
+        )
+
+    @staticmethod
+    def _short(exc: Exception, limit: int = 300) -> str:
+        return str(exc).replace("\n", " ")[:limit]
+
+    def _sleep_cancellable(self, seconds: float) -> None:
+        end = time.time() + seconds
+        while time.time() < end:
+            if self._cancel.is_set():
+                raise CancelledError("Cancelled during retry backoff")
+            time.sleep(min(0.25, end - time.time()))

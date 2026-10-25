@@ -1,0 +1,179 @@
+{
+  "checked_at": 1792841589.7886012,
+  "uid": "382769913",
+  "catalog_total": 360,
+  "matrices": [
+    {
+      "key": "matrix:ai_media",
+      "name": "AI 视频栏目",
+      "videos": 11,
+      "public_videos": 11,
+      "view_samples": 11,
+      "stale_samples": 0,
+      "rate_samples": 11,
+      "rate_views": 88,
+      "rate_favorites": 0,
+      "view": 88,
+      "median_view": 6,
+      "favorite_rate": 0.0
+    },
+    {
+      "key": "matrix:science",
+      "name": "科学与知识百科",
+      "videos": 1,
+      "public_videos": 1,
+      "view_samples": 1,
+      "stale_samples": 0,
+      "rate_samples": 1,
+      "rate_views": 76,
+      "rate_favorites": 0,
+      "view": 76,
+      "median_view": 76,
+      "favorite_rate": 0.0
+    },
+    {
+      "key": "matrix:consumer",
+      "name": "消费科技与购买决策",
+      "videos": 1,
+      "public_videos": 1,
+      "view_samples": 1,
+      "stale_samples": 0,
+      "rate_samples": 1,
+      "rate_views": 1,
+      "rate_favorites": 0,
+      "view": 1,
+      "median_view": 1,
+      "favorite_rate": 0.0
+    },
+    {
+      "key": "matrix:company",
+      "name": "商业与公司研究",
+      "videos": 2,
+      "public_videos": 2,
+      "view_samples": 2,
+      "stale_samples": 0,
+      "rate_samples": 2,
+      "rate_views": 0,
+      "rate_favorites": 0,
+      "view": 0,
+      "median_view": 0.0,
+      "favorite_rate": null
+    },
+    {
+      "key": "matrix:culture",
+      "name": "文化与艺术",
+      "videos": 1,
+      "public_videos": 1,
+      "view_samples": 1,
+      "stale_samples": 0,
+      "rate_samples": 1,
+      "rate_views": 0,
+      "rate_favorites": 0,
+      "view": 0,
+      "median_view": 0,
+      "favorite_rate": null
+    },
+    {
+      "key": "matrix:economy",
+      "name": "财经与经济",
+      "videos": 1,
+      "public_videos": 1,
+      "view_samples": 1,
+      "stale_samples": 0,
+      "rate_samples": 1,
+      "rate_views": 0,
+      "rate_favorites": 0,
+      "view": 0,
+      "median_view": 0,
+      "favorite_rate": null
+    },
+    {
+      "key": "matrix:industry",
+      "name": "产业与制造业",
+      "videos": 1,
+      "public_videos": 1,
+      "view_samples": 1,
+      "stale_samples": 0,
+      "rate_samples": 1,
+      "rate_views": 0,
+      "rate_favorites": 0,
+      "view": 0,
+      "median_view": 0,
+      "favorite_rate": null
+    },
+    {
+      "key": "matrix:software",
+      "name": "软件与数字工具",
+      "videos": 1,
+      "public_videos": 1,
+      "view_samples": 1,
+      "stale_samples": 0,
+      "rate_samples": 1,
+      "rate_views": 0,
+      "rate_favorites": 0,
+      "view": 0,
+      "median_view": 0,
+      "favorite_rate": null
+    },
+    {
+      "key": "matrix:tech",
+      "name": "科技与未来产业",
+      "videos": 1,
+      "public_videos": 1,
+      "view_samples": 1,
+      "stale_samples": 0,
+      "rate_samples": 1,
+      "rate_views": 0,
+      "rate_favorites": 0,
+      "view": 0,
+      "median_view": 0,
+      "favorite_rate": null
+    },
+    {
+      "key": "unlinked",
+      "name": "未关联矩阵",
+      "videos": 340,
+      "public_videos": 333,
+      "view_samples": 333,
+      "stale_samples": 0,
+      "rate_samples": 333,
+      "rate_views": 133509,
+      "rate_favorites": 3129,
+      "view": 133509,
+      "median_view": 187,
+      "favorite_rate": 0.02343662225018538
+    }
+  ],
+  "filtered_science": {
+    "total": 1,
+    "bvids": [
+      "BV1QUHA6XEH8"
+    ]
+  },
+  "account_overview_unchanged_by_matrix": true,
+  "periodic_runs": [
+    {
+      "status": "success",
+      "started_at": 1792841404.669864,
+      "finished_at": 1792841406.4193091
+    },
+    {
+      "status": "success",
+      "started_at": 1792841105.4952881,
+      "finished_at": 1792841105.605429
+    },
+    {
+      "status": "success",
+      "started_at": 1792840805.240115,
+      "finished_at": 1792840805.360236
+    }
+  ],
+  "validation": {
+    "python": [
+      "2119 passed, 3 skipped, 47 warnings in 225.50s (0:03:45)"
+    ],
+    "frontend": "444 passed",
+    "full_check": true,
+    "ui": "正式页面矩阵汇总展开、科学矩阵筛选1条、矩阵信息显示已核对"
+  }
+}

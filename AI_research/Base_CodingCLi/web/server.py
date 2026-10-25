@@ -1,0 +1,467 @@
+"""FastAPI application entry point."""
+
+from __future__ import annotations
+
+import logging
+import os
+import json
+import threading
+import time
+import uuid
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+from fastapi import Depends, FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from web.auth import db as user_db
+from web.auth.routes import router as auth_router
+from web.deps import require_admin
+from web.models import ApiError
+from web.ratelimit import RateLimitMiddleware
+from web.routes.jobs import router as jobs_router
+from web.routes.reports import router as reports_router
+from web.routes.config import router as config_router
+from web.routes.users import router as users_router
+from web.routes.logs import router as logs_router
+from web.routes.scheduler import router as scheduler_router
+from web.routes.deploy import router as deploy_router
+from web.routes.usage import router as usage_router
+from web.routes.pipeline import router as pipeline_router
+from web.routes.tracking import router as tracking_router
+from web.routes.share import router as share_router
+from web.routes.qa import router as qa_router
+from web.routes.assistant import router as assistant_router
+from web.routes.setup import router as setup_router
+from web.routes.gateway import router as gateway_router
+from web.routes.video import router as video_router
+from web.routes.video_recipes import router as video_recipes_router
+from web.routes.matrices import router as matrices_router
+from web.routes.sources import router as sources_router
+from web.routes.outputs import router as outputs_router
+from web.routes.production import router as production_router
+from web.routes.platforms import router as platforms_router
+from web.runner.registry import TaskRegistry
+from web.settings import get_settings
+from web.indexer import db as index_db
+from web.indexer.scanner import full_scan
+from web.indexer.watcher import start_watcher
+
+logger = logging.getLogger("ai_research.web")
+
+
+def _schedule_check(state_dir: str) -> dict:
+    """Schedule state as a health-check entry (missed runs, paused jobs)."""
+    from web.services.scheduler import schedule_health
+
+    report = schedule_health(state_dir=state_dir, repo_dir=os.getcwd())
+    from web.services.managed_scheduler import health_report
+    managed = health_report(state_dir)
+    if managed['jobs']:
+        legacy = report if report.get('jobs') or report.get('orphan_headers') else {'status': 'ok', 'jobs': [], 'detail': ''}
+        severity = {'ok': 0, 'warn': 1, 'unknown': 1, 'error': 2}
+        report = {
+            'status': max((legacy['status'], managed['status']), key=lambda s: severity.get(s, 1)),
+            'detail': '；'.join(filter(None, [managed['detail'], legacy.get('detail')])),
+            'jobs': managed['jobs'] + legacy.get('jobs', []),
+            'overdue': managed['overdue'] + legacy.get('overdue', 0),
+            'paused': managed['paused'] + legacy.get('paused', 0),
+        }
+    status_map = {"error": "error", "warn": "warn", "unknown": "warn", "ok": "ok"}
+    return {
+        "name": "schedule",
+        "status": status_map.get(report.get("status", "unknown"), "warn"),
+        "detail": report.get("detail", ""),
+        "jobs": report.get("jobs", []),
+        "overdue": report.get("overdue", 0),
+        "paused": report.get("paused", 0),
+    }
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    settings = get_settings()
+    from core import state as state_store, lock as job_locks, report_meta
+    state_store.use_state_dir(settings.paths.state_dir)
+    job_locks._LOCK_DIR = str(Path(settings.paths.state_dir) / 'locks')
+    report_meta.META_FILE = str(Path(settings.paths.state_dir) / 'report_meta.jsonl')
+    from utils.logger import attach_file_logging
+    from web.runner import pipeline as pipeline_runner
+
+    log_cfg = {}
+    try:
+        from core.config import load_system_config
+        log_cfg = (load_system_config(settings.paths.config_dir).get("logging") or {})
+    except Exception:
+        pass
+    attach_file_logging(
+        log_cfg.get("file") or os.path.join(settings.paths.logs_dir, "ai_research.log"),
+        level=log_cfg.get("level", "INFO"),
+    )
+
+    loaded = pipeline_runner.load_persisted_rounds()
+    if loaded:
+        logger.info("Loaded %d persisted pipeline round(s)", loaded)
+
+    user_db.init_db()
+
+    # Initialize report indexer
+    init_result = index_db.init_db()
+    if init_result.get("fts_rebuilt"):
+        # Tokenizer migration: the FTS table was recreated, so the documents
+        # must be re-read before search works again.
+        logger.warning("Full-text index rebuilt; rescanning reports...")
+    scan_result = full_scan(settings.paths.output_dir)
+    if scan_result["indexed"] > 0:
+        logger.info("Indexed %d reports from %s", scan_result["indexed"], settings.paths.output_dir)
+    elif scan_result["indexed"] == 0:
+        logger.info("No reports found in %s", settings.paths.output_dir)
+    # Start incremental file watcher
+    start_watcher(settings.paths.output_dir, state_dir=settings.paths.state_dir)
+
+    # Video scripts: research or writing cut off by a restart cannot resume;
+    # renders can, from what their ledger rows record.
+    from core.video import store as video_store
+    from web.services import video_render
+
+    def recover_video_work() -> None:
+        interrupted = video_store.fail_interrupted()
+        if interrupted:
+            logger.info("Settled %d interrupted video script(s)", interrupted)
+        resumed = video_render.resume_active()
+        if resumed:
+            logger.info("Resumed %d in-flight video render(s)", resumed)
+
+    video_store.use_state_dir(settings.paths.state_dir)
+    video_store.init_db()
+    recover_video_work()
+
+    # Startup alone misses work cut off less than STALE_AFTER_SECONDS before
+    # this instance started (the gateway revives the app on the next request,
+    # often within seconds), so keep looking while serving. Only rows whose
+    # heartbeat has stopped are touched; live work beats every 20 s.
+    sweep_stop = threading.Event()
+
+    def sweep_video_work() -> None:
+        while not sweep_stop.wait(video_store.HEARTBEAT_SECONDS * 3):
+            try:
+                recover_video_work()
+            except Exception:  # noqa: BLE001 - the sweep must outlive one bad pass
+                logger.exception("video recovery sweep failed")
+
+    threading.Thread(target=sweep_video_work, name="video-recovery-sweep", daemon=True).start()
+
+    # The unattended pipeline: due weekly plans start a batch, running batches advance one step per tick.
+    from web.services import video_autopilot
+
+    def autopilot_loop() -> None:
+        while not sweep_stop.wait(30):
+            try:
+                video_autopilot.tick()
+            except Exception:  # noqa: BLE001 - one bad tick must not stop the loop
+                logger.exception("video autopilot tick failed")
+
+    from core.video import archive as video_archive
+
+    def archive_loop() -> None:
+        """Finished video data goes to the archive disk and leaves this one a week later (core/video/archive.py)."""
+        paths = get_settings().paths
+        while not sweep_stop.wait(600):
+            try:
+                if video_archive.due(paths.state_dir):
+                    result = video_archive.run(paths.config_dir, paths.state_dir, video_store.list_all_renders())
+                    logger.info("video archive pass: %s", result)
+            except Exception:  # noqa: BLE001 - one bad pass must not stop the loop
+                logger.exception("video archive pass failed")
+
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
+        threading.Thread(target=archive_loop, name="video-archive", daemon=True).start()
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):  # tests set this so no stray thread ticks against their data
+        threading.Thread(target=autopilot_loop, name="video-autopilot", daemon=True).start()
+
+    def platform_loop() -> None:
+        from web.services import platform_manager
+
+        while not sweep_stop.wait(15):
+            try:
+                platform_manager.tick()
+            except Exception:  # don't expose provider responses or credential-bearing exceptions in logs
+                logger.warning("platform worker pass failed; will check again next pass")
+
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
+        threading.Thread(target=platform_loop, name="platform-worker", daemon=True).start()
+
+    def analytics_manual_loop() -> None:
+        from web.services import platform_analytics
+
+        while not sweep_stop.wait(15):
+            try:
+                platform_analytics.manual_tick()
+            except Exception:
+                logger.warning("video analytics manual pass failed; will check again next pass")
+
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
+        threading.Thread(target=analytics_manual_loop, name="analytics-manual", daemon=True).start()
+
+    logger.info("Web UI started")
+    app.state.instance_id = uuid.uuid4().hex
+    yield
+    sweep_stop.set()
+    # Shutdown: cancel all running tasks
+    registry = TaskRegistry()
+    running = registry.all_running()
+    for job_name in running:
+        logger.info("Cancelling running job on shutdown: %s", job_name)
+        registry.cancel(job_name)
+    logger.info("Web UI shutting down")
+
+
+def create_app() -> FastAPI:
+    settings = get_settings()
+    app = FastAPI(title="AI Research Console", version="0.1.0", lifespan=lifespan)
+
+    @app.middleware("http")
+    async def record_user_activity(request: Request, call_next):
+        """Publish who is using the console, for the launcher's idle watchdog.
+
+        Only authenticated traffic counts, and static assets are skipped: a
+        page load fires a burst of asset requests, which would look like a
+        busy user long after they closed the tab.
+        """
+        if not getattr(app.state, 'runtime_published', False) and getattr(app.state, 'instance_id', None):
+            try:
+                pending = Path(settings.paths.state_dir) / f'app_runtime-{os.getpid()}.json'
+                runtime = json.loads(pending.read_text())
+                if runtime.get('pid') == os.getpid():
+                    from web.services.yaml_io import atomic_write
+                    runtime['instance_id'] = app.state.instance_id
+                    atomic_write(str(Path(settings.paths.state_dir) / 'app_runtime.json'), json.dumps(runtime))
+                    atomic_write(runtime['pid_file'], str(os.getpid()))
+                    app.state.runtime_published = True
+                    pending.unlink(missing_ok=True)  # its contents live in app_runtime.json now
+            except (OSError, ValueError, KeyError):
+                pass
+        response = await call_next(request)
+        try:
+            path = request.url.path
+            if (request.cookies.get("ai_research_access")
+                    and not path.startswith(("/assets", "/api/health", "/api/live"))
+                    and path not in ("/favicon.ico", "/")):
+                from core import activity
+
+                activity.use_state_dir(settings.paths.state_dir)
+                activity.mark_activity()
+        except Exception:  # noqa: BLE001 - telemetry must not affect responses
+            pass
+        return response
+
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        """Baseline hardening headers on every response.
+
+        `Referrer-Policy: no-referrer` is not cosmetic here: share tokens live
+        in the URL path (``/api/share/{token}``), so without it every outbound
+        link from a shared report leaks the token to the destination.
+        `frame-ancestors 'none'` stops the console being framed for clickjacking.
+        """
+        started = time.perf_counter()
+        response = await call_next(request)
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        response.headers["Server-Timing"] = f"app;dur={elapsed_ms:.1f}"
+        if elapsed_ms >= 1000 and request.url.path.startswith("/api/"):
+            route = request.scope.get("route")
+            logger.warning("Slow request: %s %s status=%s duration_ms=%.1f", request.method,
+                           getattr(route, "path", "/api/unknown"), response.status_code, elapsed_ms)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            # The SPA is a Vite build with hashed assets; no inline script and
+            # no remote origins. Monaco (incl. its worker) is bundled and
+            # self-hosted too, see ui/src/lib/monaco.ts.
+            "default-src 'self'; script-src 'self'; "
+            "style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; "
+            "connect-src 'self'; font-src 'self' data:; "
+            "object-src 'none'; base-uri 'self'; form-action 'self'; "
+            "frame-ancestors 'none'",
+        )
+        if settings.auth.cookie_secure:
+            response.headers.setdefault(
+                "Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        return response
+
+    # CORS for dev mode
+    if settings.cors.enabled:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors.origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
+    # Rate limiting
+    app.add_middleware(RateLimitMiddleware)
+
+    # ----- Unified error format -----
+
+    @app.exception_handler(Exception)
+    async def unexpected_error_handler(request: Request, exc: Exception):
+        error_id = uuid.uuid4().hex[:12]
+        logger.error("Request failed [%s]", error_id, exc_info=exc)
+        return JSONResponse(status_code=500, content=ApiError.make(
+            "internal_error", f"服务处理失败，请重试（错误编号：{error_id}）", {"error_id": error_id}))
+
+    @app.exception_handler(StarletteHTTPException)
+    async def http_exc_handler(request: Request, exc: StarletteHTTPException):
+        if isinstance(exc.detail, dict) and "error" in exc.detail:
+            return JSONResponse(status_code=exc.status_code, content=exc.detail)
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=ApiError.make("http_error", str(exc.detail)),
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_handler(request: Request, exc: RequestValidationError):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content=ApiError.make("validation_error", "请求参数无效", {"errors": exc.errors()}),
+        )
+
+    # ----- Routers -----
+    app.include_router(auth_router)
+    app.include_router(jobs_router)
+    app.include_router(reports_router)
+    app.include_router(config_router)
+    app.include_router(users_router)
+    app.include_router(logs_router)
+    app.include_router(scheduler_router)
+    app.include_router(deploy_router)
+    app.include_router(usage_router)
+    app.include_router(pipeline_router)
+    app.include_router(tracking_router)
+    app.include_router(share_router)
+    app.include_router(qa_router)
+    app.include_router(assistant_router)
+    app.include_router(setup_router)
+    app.include_router(gateway_router)
+    app.include_router(video_recipes_router)
+    app.include_router(video_router)
+    app.include_router(matrices_router)
+    app.include_router(sources_router)
+    app.include_router(production_router)
+    app.include_router(outputs_router)
+    app.include_router(platforms_router)
+
+    @app.get("/api/live")
+    async def live():
+        """Cheap gateway liveness; dependency diagnostics remain on /api/health."""
+        return {"status": "ok", "instance_id": getattr(app.state, "instance_id", None)}
+
+    @app.get("/api/health")
+    def health():
+        """Liveness plus real dependency checks; 503 when something is broken."""
+        from core.health import run_checks
+
+        settings = get_settings()
+        result = run_checks(
+            state_dir=settings.paths.state_dir,
+            output_dir=settings.paths.output_dir,
+            config_dir=settings.paths.config_dir,
+            deep=False,
+        )
+        result['instance_id'] = getattr(app.state, 'instance_id', None)
+        return JSONResponse(
+            status_code=503 if result["status"] == "error" else 200,
+            content=result,
+        )
+
+    @app.get("/api/health/detailed")
+    def health_detailed(user=Depends(require_admin)):
+        """Full health report including index, vector, schedule and last-round state."""
+        from core.health import run_checks, stale_locks
+
+        settings = get_settings()
+        result = run_checks(
+            state_dir=settings.paths.state_dir,
+            output_dir=settings.paths.output_dir,
+            config_dir=settings.paths.config_dir,
+            deep=True,
+        )
+        result["stale_locks"] = stale_locks(settings.paths.state_dir)
+        schedule = _schedule_check(settings.paths.state_dir)
+        result["schedule"] = schedule
+        # Keep the aggregate in sync: the schedule check is part of health.
+        result["checks"].append(schedule)
+        if schedule["status"] == "error":
+            result["errors"].append(schedule["name"])
+            result["status"] = "error"
+        elif schedule["status"] == "warn" and "schedule" not in result["warnings"]:
+            result["warnings"].append(schedule["name"])
+            if result["status"] == "ok":
+                result["status"] = "warn"
+        return result
+
+    # ----- Static SPA (production) -----
+    ui_dist = Path(__file__).resolve().parent.parent / "ui" / "dist"
+    if ui_dist.is_dir():
+        class HashedAssets(StaticFiles):
+            """Immutable caching for content-hashed filenames.
+
+            Vite puts a content hash in every asset name, so a given URL can
+            never mean two different files. Saying so explicitly stops the
+            browser from revalidating each one on every page load -- and, more
+            importantly, stops it from *heuristically* caching the entry
+            document, which is what left this console running a stale bundle
+            after a rebuild with no error anywhere.
+            """
+
+            async def check_config(self) -> None:
+                # The fixed build directory can disappear briefly while Vite
+                # replaces it. Missing assets should return 404, not prevent
+                # API startup or poison the mount until the next restart.
+                pass
+
+            def file_response(self, *args, **kwargs):
+                resp = super().file_response(*args, **kwargs)
+                resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+                return resp
+
+        app.mount("/assets", HashedAssets(directory=ui_dist / "assets", check_dir=False), name="assets")
+
+        @app.get("/{full_path:path}")
+        async def spa_fallback(full_path: str):
+            # Anything not handled by API routes returns index.html
+            if full_path.startswith("api/"):
+                return JSONResponse(
+                    status_code=404,
+                    content=ApiError.make("not_found", "API not found"),
+                )
+            index = ui_dist / "index.html"
+            if index.is_file():
+                # no-store, not no-cache: the document names the current asset
+                # hashes, so a cached copy is guaranteed to be the wrong one.
+                return FileResponse(index, headers={
+                    "Cache-Control": "no-store, must-revalidate",
+                })
+            return JSONResponse(status_code=404, content=ApiError.make("not_found", "Not found"))
+    else:
+
+        @app.get("/")
+        def root():
+            return {
+                "message": "AI Research Console API",
+                "ui": "UI not built. Run: cd ui && npm run build",
+                "docs": "/docs",
+            }
+
+    return app
+
+
+app = create_app()

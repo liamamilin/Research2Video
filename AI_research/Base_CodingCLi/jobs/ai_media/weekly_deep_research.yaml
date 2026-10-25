@@ -1,0 +1,29 @@
+name: "AI 深度研究（每周）"
+description: "每周挑一个主题深挖：先读 Import AI、Hugging Face 论文选题，再用少量联网搜索补一手证据（本栏目是唯一联网搜索的）"
+enabled: true
+keywords:
+  - 深度研究
+  - 技术趋势
+language: "zh"
+schedule:
+  type: "manual"
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+max_searches: 6
+sources_limit: 12
+sources:
+  - "rss:https://importai.substack.com/feed"
+  - "hf_papers:daily"
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  这次研究要帮助观众理解：为开发者找到值得深入讲述的技术问题，沿着问题补齐具体材料，让后续作者能带观众从疑问走到理解。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+output: "output/deep/{date}_ai_deep_research.md"

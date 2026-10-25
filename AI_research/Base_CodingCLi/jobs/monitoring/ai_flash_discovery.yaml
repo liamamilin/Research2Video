@@ -1,0 +1,46 @@
+name: "AI Flash Discovery"
+description: "近 2 天 AI 与软件开发领域值得讲的变化（读 TLDR AI、The Rundown 抓取的内容，不联网搜索）：围绕有价值的变化挑选素材"
+enabled: true
+keywords:
+  - 新模型发布
+  - API 价格变化
+  - AI 编程工具更新
+  - agent 框架发布
+  - 开源模型发布
+  - 额度与限流变化
+language: "zh"
+schedule:
+  type: "manual"
+search: false            # 只读下面声明的订阅源，不联网搜索（core/engine.py）
+sources_limit: 10
+sources:
+  - "tldr:ai"
+  - "rss:https://www.therundown.ai/feed"
+  - "hf_models:trending"
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
+  研究方向：为开发者发现值得讲成一期快讯的新变化，留下能解释它的新意、用途和影响的具体素材。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  数据格式：Markdown。
+  ### 1.1 选题标题
+  - **一句话**：内容
+  - **发布日期**：日期
+  - **证据来源**：链接
+
+  ### 来源清单
+  素材链接。
+output: "output/flash/{date}_ai_flash_discovery.md"
+# 选题来源（spec/video-topics.md）：报告里的 ### 1.1 条目导入选题表，编号 F1、F2…；自动流水线可在当天没有报告时启动它
+topics:
+  alias: flash
+  format: flash
+  refresh: true

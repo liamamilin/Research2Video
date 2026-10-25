@@ -1,0 +1,615 @@
+"""Pipeline round orchestration.
+
+Runs the ``practical_ai_intelligence`` 10-stage intelligence round
+(P0 -> P1-P6 -> P7-P8 -> P9) in-process, reusing the web job runner so each
+stage streams over SSE and records state/usage like a normal job run.
+
+Dependency groups (matching scripts/run_practical_intelligence.sh):
+    P0      collection planner
+    P1-P6   radar collection (parallel)
+    P7-P8   analysis (depends on P1-P6 files)
+    P9      synthesis (depends on P7+P8 files)
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import re
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+from typing import Optional
+
+from core.budget import pipeline_allowed
+from core.engine import ResearchEngine
+from core.pipeline_docs import (
+    GROUPS,
+    PIPELINE_DIR,
+    STAGE_DEPS,
+    STAGE_FILE,
+    STAGE_LABEL,
+    STAGES,
+    UPSTREAM_CHAR_BUDGET,
+    collect_upstream,
+)
+from web.runner.executor import run_job_in_thread
+from web.runner.registry import TaskRegistry
+
+logger = logging.getLogger("ai_research.web.pipeline")
+
+
+_rounds: dict[str, dict] = {}
+_lock = threading.RLock()
+_persist_lock = threading.RLock()
+
+# Persisted round states (survives server restarts)
+_STATE_FILE = os.path.join("state", "pipeline_rounds.json")
+_KEEP_ROUNDS = 20
+
+
+# ---------------------------------------------------------------------------
+# Persistence
+# ---------------------------------------------------------------------------
+
+
+def _serialize(state: dict) -> dict:
+    """Internal state -> JSON-safe public dict."""
+    stages = [
+        {k: v for k, v in stage.items() if not k.startswith("_")}
+        for stage in state["stages"].values()
+    ]
+    return {
+        "date": state["date"],
+        "status": state["status"],
+        "trigger": state.get("trigger", ""),
+        "started_at": state.get("started_at"),
+        "finished_at": state.get("finished_at"),
+        "stages": stages,
+    }
+
+
+def _deserialize(data: dict) -> dict:
+    """Public dict -> internal state."""
+    stages = {}
+    for stage in data.get("stages", []):
+        key = stage.get("key", "")
+        if not key:
+            continue
+        stages[key] = dict(stage)
+    return {
+        "date": data["date"],
+        "status": data.get("status", "unknown"),
+        "trigger": data.get("trigger", ""),
+        "started_at": data.get("started_at"),
+        "finished_at": data.get("finished_at"),
+        "cancel_requested": False,
+        "stages": stages,
+    }
+
+
+def _persist(state: dict) -> None:
+    """Write one round state to disk (atomic, capped history). Never raises.
+
+    Delegates to ``core.rounds`` so cron-driven rounds recorded by the CLI
+    live in the same file and the Rounds page shows both.
+    """
+    try:
+        from core.rounds import upsert_round
+
+        upsert_round(
+            state["date"],
+            status=state["status"],
+            trigger=state.get("trigger", ""),
+            stages=_serialize(state)["stages"],
+            started_at=state.get("started_at"),
+            finished_at=state.get("finished_at"),
+        )
+    except Exception as exc:  # noqa: BLE001 - persistence must never break runs
+        logger.warning("Failed to persist round state: %s", exc)
+
+
+def load_persisted_rounds() -> int:
+    """Load persisted rounds into memory (called at server startup).
+
+    Rounds that were 'running' when the process died are marked
+    'interrupted'. Returns the number of rounds loaded.
+    """
+    try:
+        from core.rounds import list_rounds, mark_interrupted
+
+        mark_interrupted()
+        persisted = list_rounds()
+    except Exception as exc:  # noqa: BLE001 - never block startup
+        logger.warning("Failed to load persisted rounds: %s", exc)
+        return 0
+
+    with _lock:
+        for payload in persisted:
+            date = payload.get("date")
+            if not date or date in _rounds:
+                continue
+            _rounds[date] = _deserialize(payload)
+    return len(persisted)
+
+
+# ---------------------------------------------------------------------------
+# State access
+# ---------------------------------------------------------------------------
+
+
+def list_round_states() -> list[dict]:
+    """Return in-memory round run states (most recent first)."""
+    with _lock:
+        return sorted(_rounds.values(), key=lambda r: r["date"], reverse=True)
+
+
+def get_round_state(date: str) -> Optional[dict]:
+    """Return the public (serializable) run state for a round date."""
+    with _lock:
+        state = _rounds.get(date)
+    return _public_state(state) if state else None
+
+
+def cancel_round() -> bool:
+    """Request cancellation of the running round. Returns True if signalled."""
+    with _lock:
+        for state in _rounds.values():
+            if state["status"] == "running":
+                state["cancel_requested"] = True
+                break
+        else:
+            return False
+
+    registry = TaskRegistry()
+    for job_name in [f"{PIPELINE_DIR}/{key}" for key, _, _ in STAGES]:
+        registry.cancel(job_name)
+    return True
+
+
+# ---------------------------------------------------------------------------
+# Round execution
+# ---------------------------------------------------------------------------
+
+
+def start_round(config_dir: str, jobs_dir: str, concurrency: int = 3,
+                trigger: str = "web") -> dict:
+    """Start today's round in a background thread. Raises if one is running."""
+    allowed, reason = pipeline_allowed()
+    if not allowed:
+        raise RuntimeError(reason)
+
+    date = datetime.now().strftime("%Y-%m-%d")
+
+    with _lock:
+        for state in _rounds.values():
+            if state["status"] == "running":
+                raise RuntimeError("已有一轮正在运行")
+
+        state = {
+            "date": date,
+            "status": "running",
+            "trigger": trigger,
+            "started_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+            "finished_at": None,
+            "cancel_requested": False,
+            "stages": {
+                key: {
+                    "key": key,
+                    "label": STAGE_LABEL[key],
+                    "file": STAGE_FILE[key],
+                    "status": "pending",
+                    "group": next(
+                        g for g, keys in GROUPS if key in keys
+                    ),
+                }
+                for key, _, _ in STAGES
+            },
+        }
+        _rounds[date] = state
+    _persist(state)
+
+    thread = threading.Thread(
+        target=_run_round,
+        args=(state, config_dir, jobs_dir, max(1, min(int(concurrency), 6))),
+        daemon=True,
+        name=f"pipeline-{date}",
+    )
+    thread.start()
+    logger.info("Round %s started (concurrency=%d, trigger=%s)",
+                date, concurrency, trigger)
+    return _public_state(state)
+
+
+def _notify_round(state: dict, results: dict[str, str],
+                  config_dir: str = "config") -> None:
+    """Best-effort round summary notification (webhook)."""
+    try:
+        from core.config import load_system_config
+        from core.notify import send
+
+        failed = [k for k, v in results.items() if v != "success"]
+        summary = f"状态 {state['status']} · 完成 {len(results) - len(failed)}/{len(results)}"
+        if failed:
+            summary += " · 失败: " + ", ".join(failed)
+
+        message = summary
+        try:
+            sys_cfg = load_system_config(config_dir)
+            digest_cfg = (sys_cfg.get("notifications") or {}).get("digest") or {}
+            if digest_cfg.get("enabled", True):
+                from core.digest import digest_for_round
+
+                output_dir = (sys_cfg.get("defaults") or {}).get(
+                    "output_dir", "output")
+                digest = digest_for_round(
+                    state["date"], output_dir,
+                    pipeline_dir=PIPELINE_DIR,
+                    results=results,
+                    max_actions=int(digest_cfg.get("max_actions", 5)),
+                )
+                if digest:
+                    message = digest["text"]
+        except Exception as exc:  # noqa: BLE001 - digest is optional
+            logger.debug("Round digest skipped: %s", exc)
+
+        send(
+            "round_finished",
+            f"情报轮次 {state['date']}",
+            message,
+            fields={
+                "date": state["date"],
+                "status": state["status"],
+                "failed_stages": failed,
+            },
+        )
+    except Exception as exc:  # noqa: BLE001 - notifications never break runs
+        logger.debug("Round notification skipped: %s", exc)
+
+
+def _export_round_artifacts(state: dict, config_dir: str) -> None:
+    """Best-effort JSON artifacts (actions, watchlist, sources) for a round."""
+    if any(stage.get('status') not in ('success', 'skipped') for stage in state.get('stages', {}).values()):
+        logger.warning('Round %s has unfinished/stale stages; retaining prior artifacts without resyncing them', state['date'])
+        return
+    try:
+        from core.artifacts import export_round_artifacts
+        from core.config import load_system_config
+
+        output_dir = (load_system_config(config_dir).get("defaults") or {}).get(
+            "output_dir", "output")
+        round_dir = os.path.join(output_dir, PIPELINE_DIR, state["date"])
+        written = export_round_artifacts(round_dir, date=state["date"])
+        if written:
+            logger.info("Round %s artifacts exported", state["date"])
+            _sync_round_tracking(state["date"], written)
+            # The artifact contract reports drift it could not map -- a column
+            # the parser does not recognise, a section that came out empty.
+            # Those warnings were collected and then dropped here, so a run
+            # started from the UI reported "artifacts exported" and nothing
+            # else, and a round whose tests table had lost its success
+            # criteria looked exactly like a clean one. The CLI path has always
+            # surfaced them through the finish summary.
+            for name, payload in written.items():
+                for warning in (payload or {}).get("warnings") or []:
+                    logger.warning("Round %s artifact %s: %s",
+                                   state["date"], name, warning)
+    except Exception as exc:  # noqa: BLE001 - artifacts are best-effort
+        logger.warning("Round %s artifact export failed: %s", state["date"], exc)
+
+
+def _sync_round_tracking(date: str, written: dict) -> None:
+    """Feed exported artifacts into the tracking store (best-effort)."""
+    try:
+        from core import tracking
+        from web.settings import get_settings
+
+        tracking.use_state_dir(get_settings().paths.state_dir)
+        actions_payload = written.get("action_items.json") or {}
+        watchlist_payload = written.get("watchlist.json") or {}
+        counts = tracking.sync_round(
+            date,
+            actions_payload.get("actions"),
+            actions_payload.get("tests"),
+            watchlist_payload.get("items"),
+        )
+        logger.info("Round %s tracking synced (%d new, %d updated)",
+                    date, counts["new"], counts["updated"])
+    except Exception as exc:  # noqa: BLE001 - tracking is best-effort
+        logger.warning("Round %s tracking sync failed: %s", date, exc)
+
+
+def downstream_closure(keys) -> list[str]:
+    """Stages that consume the output of any of ``keys`` (transitively)."""
+    result: set[str] = set()
+    pending = {k for k in keys}
+    while pending:
+        affected = result | pending
+        dependents = {
+            stage for stage, deps in STAGE_DEPS.items()
+            if any(dep in affected for dep in deps)
+        }
+        new = dependents - affected
+        if not new:
+            break
+        result |= new
+        pending = new
+    return [key for key, _, _ in STAGES if key in result]
+
+
+def plan_retry(file_stages: dict, previous: dict,
+               invalidate_downstream: bool = True) -> dict:
+    """Stages a retry must run, plus the downstream stages it invalidates."""
+    needed = _stages_needing_rerun(file_stages, previous)
+    downstream = downstream_closure(needed) if invalidate_downstream else []
+    return {
+        "needed": needed,
+        "invalidated": downstream,
+        "run": needed + [k for k in downstream if k not in needed],
+    }
+
+
+def _stages_needing_rerun(file_stages: dict, previous: dict) -> list[str]:
+    """Stages to re-run: output missing, or last attempt truly failed.
+
+    ``skipped`` means "already complete in an earlier retry" and must NOT
+    trigger a rerun (regression guard).
+    """
+    rerun_statuses = {"failed", "cancelled", "interrupted", "stale"}
+    needed: list[str] = []
+    for key, _, _ in STAGES:
+        status = (previous.get(key) or {}).get("status", "")
+        if (not file_stages[key]["exists"]) or status in rerun_statuses:
+            needed.append(key)
+    return needed
+
+
+def start_retry(config_dir: str, jobs_dir: str, output_dir: str,
+                concurrency: int = 3, trigger: str = "web",
+                date: Optional[str] = None,
+                invalidate_downstream: bool = True,
+                force_stages: Optional[list[str]] = None) -> dict:
+    """Re-run the unfinished stages of a round (missing/failed/interrupted).
+
+    Stages that consumed the output of a re-run stage are invalidated and
+    re-run too, unless ``invalidate_downstream`` is disabled — otherwise a
+    round could report success while its synthesis still reflects the old
+    upstream documents.
+    """
+    date = date or datetime.now().strftime("%Y-%m-%d")
+    if force_stages and any(key not in STAGE_LABEL for key in force_stages):
+        raise RuntimeError('未知阶段，请使用轮次详情返回的完整阶段 key')
+
+    file_stages = {s["key"]: s for s in build_round_files(date, output_dir)}
+
+    with _lock:
+        for existing in _rounds.values():
+            if existing["status"] == "running":
+                raise RuntimeError("已有一轮正在运行")
+
+        previous = _rounds.get(date, {}).get("stages", {})
+        plan = plan_retry(file_stages, previous, invalidate_downstream)
+        if force_stages:
+            needed = list(dict.fromkeys(force_stages))
+            downstream = downstream_closure(needed)
+            plan = {'needed': needed, 'invalidated': downstream,
+                    'run': needed + [key for key in downstream if key not in needed]}
+            unresolved = set(_stages_needing_rerun(file_stages, previous)) - set(plan['run'])
+            missing_inputs = sorted({dep for key in plan['run'] for dep in STAGE_DEPS.get(key, ()) if dep in unresolved})
+            if missing_inputs:
+                raise RuntimeError('所选阶段依赖未完成的上游：' + ', '.join(missing_inputs) + '；请先补跑，或明确将这些阶段一并加入重跑范围')
+        needed = plan["needed"]
+        run_set = set(plan["run"])
+        invalidated = set(plan["invalidated"])
+
+        if not needed:
+            raise RuntimeError("该轮次已全部完成，无需补跑")
+
+        state = {
+            "date": date,
+            "status": "running",
+            "trigger": trigger,
+            "started_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+            "finished_at": None,
+            "cancel_requested": False,
+            "stages": {
+                key: {
+                    "key": key,
+                    "label": STAGE_LABEL[key],
+                    "file": STAGE_FILE[key],
+                    "status": "stale" if key in invalidated
+                              else ("pending" if key in run_set else "skipped"),
+                    "group": next(g for g, keys in GROUPS if key in keys),
+                    "invalidated": key in invalidated,
+                }
+                for key, _, _ in STAGES
+            },
+        }
+        _rounds[date] = state
+    _persist(state)
+
+    thread = threading.Thread(
+        target=_run_round,
+        args=(state, config_dir, jobs_dir,
+              max(1, min(int(concurrency), 6)), run_set),
+        daemon=True,
+        name=f"pipeline-retry-{date}",
+    )
+    thread.start()
+    logger.info(
+        "Round %s retry: %d stage(s) to run%s",
+        date, len(run_set),
+        f"; invalidated downstream: {', '.join(k[:2] for k in plan['invalidated'])}"
+        if plan["invalidated"] else "",
+    )
+    public = _public_state(state)
+    public["rerun_stages"] = needed
+    public["invalidated_stages"] = plan["invalidated"]
+    return public
+
+
+def _public_state(state: dict) -> dict:
+    with _lock:
+        return {
+            "date": state["date"],
+            "status": state["status"],
+            "trigger": state["trigger"],
+            "started_at": state["started_at"],
+            "finished_at": state["finished_at"],
+            "stages": list(state["stages"].values()),
+        }
+
+
+def _set_stage(state: dict, key: str, status: str, **extra):
+    with _lock:
+        stage = state["stages"][key]
+        stage["status"] = status
+        stage.update(extra)
+    _persist(state)
+
+
+def _run_stage(state: dict, key: str, task, config_dir: str, jobs_dir: str):
+    """Run one stage. Marks it 'running' only when the worker picks it up."""
+    _set_stage(state, key, "running")
+    run_job_in_thread(task, config_dir, jobs_dir, False,
+                      date_override=state["date"])
+
+
+def _cancelled(state: dict) -> bool:
+    with _lock:
+        return bool(state["cancel_requested"])
+
+
+def _run_round(state: dict, config_dir: str, jobs_dir: str, concurrency: int,
+               stage_filter: Optional[set[str]] = None):
+    registry = TaskRegistry()
+    workspace_dir = None
+    results: dict[str, str] = {}
+
+    try:
+        for group_name, stage_keys in GROUPS:
+            active = [k for k in stage_keys
+                      if stage_filter is None or k in stage_filter]
+            if not active:
+                continue
+
+            if _cancelled(state):
+                for key in active:
+                    _set_stage(state, key, "cancelled")
+                continue
+
+            logger.info("Round %s: group %s (%d stages)",
+                        state["date"], group_name, len(active))
+            with ThreadPoolExecutor(
+                max_workers=min(concurrency, len(active)),
+                thread_name_prefix=f"round-{group_name}",
+            ) as pool:
+                futures = {}
+                for key in active:
+                    stale_dependencies = [dep for dep in STAGE_DEPS.get(key, [])
+                                          if (stage_filter is None or dep in stage_filter) and results.get(dep) != 'success']
+                    if stale_dependencies:
+                        _set_stage(state, key, 'stale', error='上游阶段未成功，保留旧报告供查阅，未生成本次新结论：' + ', '.join(stale_dependencies))
+                        results[key] = 'stale'
+                        continue
+                    job_name = f"{PIPELINE_DIR}/{key}"
+                    _set_stage(state, key, "queued")
+
+                    # Hand the synthesis stages the documents they depend on.
+                    round_dir = os.path.join(
+                        os.path.dirname(os.path.abspath(config_dir)),
+                        "output", PIPELINE_DIR, state["date"])
+                    upstream, notes = collect_upstream(key, round_dir)
+                    if notes:
+                        logger.info("Stage %s upstream: %s",
+                                    key, "; ".join(notes))
+                    if upstream:
+                        logger.info("Stage %s received %d chars of upstream material",
+                                    key, len(upstream))
+
+                    engine_stub = ResearchEngine(
+                        config_dir=config_dir, jobs_dir=jobs_dir,
+                        workspace_dir=workspace_dir,
+                        user=state.get("trigger") or "pipeline",
+                    )
+                    task = registry.start(job_name, "pipeline", engine_stub)
+                    task.prompt_vars = {"upstream_reports": upstream}
+                    future = pool.submit(
+                        _run_stage, state, key, task, config_dir, jobs_dir
+                    )
+                    task.future = future
+                    futures[future] = (key, task)
+
+                for future in futures:
+                    key, task = futures[future]
+                    try:
+                        future.result()
+                        status = task.status
+                    except Exception as exc:  # noqa: BLE001 - recorded per stage
+                        logger.exception("Stage %s crashed", key)
+                        status = "failed"
+                        _set_stage(state, key, status, error=str(exc)[:300])
+                        results[key] = status
+                        continue
+                    results[key] = status
+                    if status != "running":
+                        _set_stage(state, key, status)
+
+            if _cancelled(state):
+                logger.info("Round %s cancellation requested", state["date"])
+
+        with _lock:
+            failed = [k for k, s in results.items() if s != "success"]
+            if state["cancel_requested"]:
+                state["status"] = "cancelled"
+            elif not failed:
+                state["status"] = "success"
+            elif len(failed) == len(results):
+                state["status"] = "failed"
+            else:
+                state["status"] = "partial"
+            state["finished_at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+        _persist(state)
+        _export_round_artifacts(state, config_dir)
+        _notify_round(state, results, config_dir)
+        logger.info("Round %s finished: %s (failed: %s)",
+                    state["date"], state["status"], ", ".join(failed) or "none")
+    except Exception as exc:  # noqa: BLE001 - never kill the server
+        logger.exception("Round %s crashed", state["date"])
+        with _lock:
+            state["status"] = "failed"
+            state["finished_at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        _persist(state)
+
+
+# ---------------------------------------------------------------------------
+# Output inspection
+# ---------------------------------------------------------------------------
+
+
+def build_round_files(date: str, output_root: str) -> list[dict]:
+    """Return per-stage output file metadata for a given round date."""
+    import os
+
+    round_dir = os.path.join(output_root, PIPELINE_DIR, date)
+    live = get_round_state(date)
+    live_stages = {s["key"]: s for s in (live or {}).get("stages", [])}
+
+    stages = []
+    for key, filename, label in STAGES:
+        full = os.path.join(round_dir, filename)
+        exists = os.path.isfile(full)
+        info = {
+            "key": key,
+            "label": label,
+            "file": f"{PIPELINE_DIR}/{date}/{filename}",
+            "exists": exists,
+            "size": os.path.getsize(full) if exists else 0,
+            "mtime": os.path.getmtime(full) if exists else None,
+            "status": live_stages.get(key, {}).get("status")
+            or ("done" if exists else "missing"),
+        }
+        stages.append(info)
+    return stages

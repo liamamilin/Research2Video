@@ -1,0 +1,740 @@
+{
+  "checked_at": "2026-10-24T18:40:38.651520+08:00",
+  "uid": "382769913",
+  "read_only": true,
+  "requests": 9,
+  "checks": [
+    {
+      "name": "video_view",
+      "path": "/x/web-interface/view",
+      "scope": "video",
+      "params": {
+        "bvid": "BV1SqHK6oEm8"
+      },
+      "http_status": 200,
+      "code": 0,
+      "schema": {
+        "bvid": "str",
+        "aid": "int",
+        "videos": "int",
+        "tid": "int",
+        "tid_v2": "int",
+        "tname": "str",
+        "tname_v2": "str",
+        "copyright": "int",
+        "pic": "str",
+        "title": "str",
+        "pubdate": "int",
+        "ctime": "int",
+        "desc": "str",
+        "desc_v2": {
+          "type": "list",
+          "length": 1,
+          "item": {
+            "raw_text": "str",
+            "type": "int",
+            "biz_id": "int"
+          }
+        },
+        "state": "int",
+        "duration": "int",
+        "rights": {
+          "bp": "int",
+          "elec": "int",
+          "download": "int",
+          "movie": "int",
+          "pay": "int",
+          "hd5": "int",
+          "no_reprint": "int",
+          "autoplay": "int",
+          "ugc_pay": "int",
+          "is_cooperation": "int",
+          "ugc_pay_preview": "int",
+          "no_background": "int",
+          "clean_mode": "int",
+          "is_stein_gate": "int",
+          "is_360": "int",
+          "no_share": "int",
+          "arc_pay": "int",
+          "free_watch": "int"
+        },
+        "owner": {
+          "mid": "int",
+          "name": "str",
+          "face": "str"
+        },
+        "stat": {
+          "aid": "int",
+          "view": "int",
+          "danmaku": "int",
+          "reply": "int",
+          "favorite": "int",
+          "coin": "int",
+          "share": "int",
+          "now_rank": "int",
+          "his_rank": "int",
+          "like": "int",
+          "dislike": "int",
+          "evaluation": "str",
+          "vt": "int"
+        },
+        "argue_info": {
+          "argue_msg": "str",
+          "argue_type": "int",
+          "argue_link": "str"
+        },
+        "dynamic": "str",
+        "cid": "int",
+        "dimension": {
+          "width": "int",
+          "height": "int",
+          "rotate": "int"
+        },
+        "premiere": "null",
+        "teenage_mode": "int",
+        "is_chargeable_season": "bool",
+        "is_story": "bool",
+        "is_upower_exclusive": "bool",
+        "is_upower_play": "bool",
+        "is_upower_preview": "bool",
+        "enable_vt": "int",
+        "vt_display": "str",
+        "is_upower_exclusive_with_qa": "bool",
+        "is_hua_sheng": "bool",
+        "no_cache": "bool",
+        "pages": {
+          "type": "list",
+          "length": 1,
+          "item": {
+            "cid": "int",
+            "page": "int",
+            "from": "str",
+            "part": "str",
+            "duration": "int",
+            "vid": "str",
+            "weblink": "str",
+            "dimension": {
+              "width": "int",
+              "height": "int",
+              "rotate": "int"
+            },
+            "first_frame": "str",
+            "ctime": "int"
+          }
+        },
+        "subtitle": {
+          "allow_submit": "bool",
+          "list": {
+            "type": "list",
+            "length": 1,
+            "item": {
+              "id": "int",
+              "lan": "str",
+              "lan_doc": "str",
+              "is_lock": "bool",
+              "subtitle_url": "str",
+              "type": "int",
+              "id_str": "str",
+              "ai_type": "int",
+              "ai_status": "int",
+              "subtitle_height": "null",
+              "author": {
+                "mid": "int",
+                "name": "str",
+                "sex": "str",
+                "face": "str",
+                "sign": "str",
+                "rank": "int",
+                "birthday": "int",
+                "is_fake_account": "int",
+                "is_deleted": "int",
+                "in_reg_audit": "int",
+                "is_senior_member": "int",
+                "name_render": "NoneType",
+                "handle": "str"
+              }
+            }
+          }
+        },
+        "is_season_display": "bool",
+        "user_garb": {
+          "url_image_ani_cut": "str"
+        },
+        "honor_reply": {},
+        "like_icon": "str",
+        "need_jump_bv": "bool",
+        "disable_show_up_info": "bool",
+        "is_story_play": "int",
+        "is_view_self": "bool"
+      },
+      "video": {
+        "title": "编码 Agent 开始接宣传片：Huashu Motion 想让你指着画面改",
+        "bvid": "BV1SqHK6oEm8",
+        "aid": 117495339944570,
+        "cid": 43014095081,
+        "pubdate": 1792836804,
+        "duration": 115,
+        "tid": 231,
+        "tname": "",
+        "state": 0
+      },
+      "metrics": {
+        "view": 4,
+        "like": 0,
+        "coin": 0,
+        "favorite": 0,
+        "reply": 1,
+        "danmaku": 0,
+        "share": 0
+      },
+      "seconds": 1.42
+    },
+    {
+      "name": "video_stat",
+      "path": "/x/web-interface/archive/stat",
+      "scope": "video",
+      "params": {
+        "bvid": "BV1QUHA6XEH8"
+      },
+      "http_status": 404,
+      "seconds": 1.5
+    },
+    {
+      "name": "creator_archives",
+      "path": "/x/web/archives",
+      "scope": "account",
+      "params": {
+        "pn": 1,
+        "ps": 5,
+        "status": "pubed,not_pubed,is_pubing"
+      },
+      "http_status": 200,
+      "code": 0,
+      "schema": {
+        "class": {
+          "pubed": "int",
+          "not_pubed": "int",
+          "is_pubing": "int"
+        },
+        "apply_count": {
+          "neglected": "int",
+          "pending": "int",
+          "processed": "int",
+          "expired": "int"
+        },
+        "type": {
+          "type": "list",
+          "length": 21,
+          "item": {
+            "tid": "int",
+            "name": "str",
+            "count": "int"
+          }
+        },
+        "archives": "null",
+        "arc_audits": {
+          "type": "list",
+          "length": 5,
+          "item": {
+            "Archive": {
+              "aid": "int",
+              "bvid": "str",
+              "mid": "int",
+              "tid": "int",
+              "tp_info": "null",
+              "title": "str",
+              "author": "str",
+              "cover": "str",
+              "reject_reason": "str",
+              "reject_reason_url": "str",
+              "modify_advise": "str",
+              "problem_description": "str",
+              "problem_description_title": "str",
+              "reject_reason_id": "int",
+              "picture_data": "null",
+              "reject_video_explain": "null",
+              "tag": "str",
+              "duration": "int",
+              "audit_version": "int",
+              "copyright": "int",
+              "no_reprint": "int",
+              "ugcpay": "int",
+              "order_id": "int",
+              "order_name": "str",
+              "adorder_id": "int",
+              "adorder_name": "str",
+              "adorder_no": "str",
+              "adorder_state": "null",
+              "online_time": "int",
+              "desc": "str",
+              "mission_id": "int",
+              "mission_name": "str",
+              "forward": "int",
+              "attribute": "int",
+              "state": "int",
+              "primary_region": "str",
+              "primary_state": "int",
+              "is_interoperable": "bool",
+              "is_primary_oversea": "bool",
+              "is_from_white_version": "bool",
+              "is_white_owned": "bool",
+              "is_cross_end": "bool",
+              "state_desc": "str",
+              "state_descv3": {
+                "aegis_tag": "int",
+                "xcode_tag": "int",
+                "submit_tag": "str",
+                "delay_tag": "int",
+                "state_tag": "str"
+              },
+              "state_panel": "int",
+              "source": "str",
+              "desc_format_id": "int",
+              "attrs": {
+                "is_coop": "int",
+                "is_owner": "int",
+                "is_dynamic": "int",
+                "is_360": "int",
+                "no_public": "int",
+                "live": "int",
+                "is_premiere": "int",
+                "is_played": "int",
+                "is_playlet": "int"
+              },
+              "porder": "null",
+              "dynamic": "str",
+              "poi_object": "null",
+              "dtime": "int",
+              "ptime": "int",
+              "ctime": "int",
+              "ugcpay_info": "null",
+              "staffs": "null",
+              "vote": "null",
+              "activity": "null",
+              "interactive": "int",
+              "hl": "null",
+              "no_background": "int",
+              "dynamic_video": "int",
+              "no_public": "int",
+              "is_360": "int",
+              "bs_editor": "int"
+            },
+            "Videos": {
+              "type": "list",
+              "length": 0,
+              "item": null
+            },
+            "stat": {
+              "aid": "int",
+              "view": "int",
+              "danmaku": "int",
+              "reply": "int",
+              "favorite": "int",
+              "coin": "int",
+              "share": "int",
+              "now_rank": "int",
+              "his_rank": "int",
+              "like": "int",
+              "dislike": "int",
+              "vt": "int",
+              "vv": "int",
+              "fav_g": "int",
+              "like_g": "int"
+            },
+            "state_panel": "int",
+            "parent_tname": "str",
+            "typename": "str",
+            "open_appeal": "int",
+            "appeal": {
+              "open_apid": "int",
+              "reject": "str",
+              "jump_url": "str"
+            },
+            "fast_pub": "null",
+            "captions_count": "int",
+            "ai_captions_count": "int",
+            "activity": "null",
+            "app_rules": "null",
+            "web_rules": {
+              "more_oper": {
+                "type": "list",
+                "length": 1,
+                "item": "dict"
+              },
+              "out_oper": "null"
+            },
+            "hl": "null",
+            "honors": "null",
+            "notify_icons": "null",
+            "bs_editor": {
+              "type": "list",
+              "length": 0,
+              "item": null
+            },
+            "copyright": "null",
+            "display_fields": {
+              "type": "list",
+              "length": 7,
+              "item": {
+                "name": "str",
+                "desc": "str",
+                "value": "int",
+                "icon_url": "dict"
+              }
+            },
+            "problem_detail": "null",
+            "cid_list": {
+              "type": "list",
+              "length": 1,
+              "item": "int"
+            },
+            "ai_chapter_tips": {
+              "type": "list",
+              "length": 0,
+              "item": null
+            }
+          }
+        },
+        "page": {
+          "pn": "int",
+          "ps": "int",
+          "count": "int"
+        },
+        "tip": "str",
+        "interact_test": "bool",
+        "rich_tip": "null",
+        "copyright_banner": {
+          "state": "int",
+          "ignore_cnt": "int",
+          "ignore_limit": "int",
+          "expose_cnt": "int",
+          "expose_limit": "int"
+        },
+        "play_type": "int",
+        "show_process_detail": "bool",
+        "have_cross_arc": "bool"
+      },
+      "total": 351,
+      "sample_stat_schemas": [
+        {
+          "aid": "int",
+          "view": "int",
+          "danmaku": "int",
+          "reply": "int",
+          "favorite": "int",
+          "coin": "int",
+          "share": "int",
+          "now_rank": "int",
+          "his_rank": "int",
+          "like": "int",
+          "dislike": "int",
+          "vt": "int",
+          "vv": "int",
+          "fav_g": "int",
+          "like_g": "int"
+        },
+        {
+          "aid": "int",
+          "view": "int",
+          "danmaku": "int",
+          "reply": "int",
+          "favorite": "int",
+          "coin": "int",
+          "share": "int",
+          "now_rank": "int",
+          "his_rank": "int",
+          "like": "int",
+          "dislike": "int",
+          "vt": "int",
+          "vv": "int",
+          "fav_g": "int",
+          "like_g": "int"
+        },
+        {
+          "aid": "int",
+          "view": "int",
+          "danmaku": "int",
+          "reply": "int",
+          "favorite": "int",
+          "coin": "int",
+          "share": "int",
+          "now_rank": "int",
+          "his_rank": "int",
+          "like": "int",
+          "dislike": "int",
+          "vt": "int",
+          "vv": "int",
+          "fav_g": "int",
+          "like_g": "int"
+        }
+      ],
+      "sample_videos": [
+        {
+          "title": "名字叫电厂，却没有发电机：Google 想靠少用电补电网缺口",
+          "bvid": "BV1zfHK6kE1U",
+          "state": 0,
+          "stat": {
+            "view": 0,
+            "like": 0,
+            "coin": 0,
+            "favorite": 0,
+            "reply": 1,
+            "danmaku": 0,
+            "share": 0
+          }
+        },
+        {
+          "title": "摩托罗拉 Edge 70 Max续航近28小时",
+          "bvid": "BV1rRHK6LE2z",
+          "state": 0,
+          "stat": {
+            "view": 0,
+            "like": 0,
+            "coin": 0,
+            "favorite": 0,
+            "reply": 1,
+            "danmaku": 0,
+            "share": 0
+          }
+        },
+        {
+          "title": "Artificial Analysis 10月22日的模型榜",
+          "bvid": "BV1rRHK6LEsR",
+          "state": 0,
+          "stat": {
+            "view": 0,
+            "like": 0,
+            "coin": 0,
+            "favorite": 0,
+            "reply": 1,
+            "danmaku": 0,
+            "share": 0
+          }
+        }
+      ],
+      "seconds": 1.41
+    },
+    {
+      "name": "account_overview",
+      "path": "/x/web/data/v2/overview/stat/num",
+      "scope": "account",
+      "params": {
+        "period": 0,
+        "s_locale": "zh_CN",
+        "tab": 0
+      },
+      "http_status": 200,
+      "code": 0,
+      "schema": {
+        "play": "int",
+        "play_last": "int",
+        "visitor": "int",
+        "visitor_last": "int",
+        "fan": "int",
+        "fan_last": "int",
+        "like": "int",
+        "like_last": "int",
+        "fav": "int",
+        "fav_last": "int",
+        "coin": "int",
+        "coin_last": "int",
+        "dm": "int",
+        "dm_last": "int",
+        "comment": "int",
+        "comment_last": "int",
+        "share": "int",
+        "share_last": "int",
+        "elec": "int",
+        "elec_last": "int",
+        "vt": "int",
+        "vt_last": "int",
+        "log_date": "int"
+      },
+      "seconds": 1.43
+    },
+    {
+      "name": "account_play_trend",
+      "path": "/x/web/data/v2/overview/stat/graph",
+      "scope": "account",
+      "params": {
+        "period": 0,
+        "s_locale": "zh_CN",
+        "type": "play"
+      },
+      "http_status": 200,
+      "code": 0,
+      "schema": {
+        "tendency": {
+          "type": "list",
+          "length": 7,
+          "item": {
+            "date_key": "int",
+            "total_inc": "int",
+            "sub_total_inc": "int"
+          }
+        },
+        "data_tendency": {
+          "play": {
+            "type": "list",
+            "length": 7,
+            "item": {
+              "date_key": "int",
+              "total_inc": "int",
+              "sub_total_inc": "int"
+            }
+          }
+        },
+        "tendency_rank": {
+          "type": "list",
+          "length": 7,
+          "item": {
+            "date_key": "int",
+            "arc_ranks": {
+              "type": "list",
+              "length": 3,
+              "item": {
+                "title": "str",
+                "rn": "int",
+                "daily": "int",
+                "avid": "int",
+                "cover": "str",
+                "bvid": "str"
+              }
+            }
+          }
+        }
+      },
+      "seconds": 1.41
+    },
+    {
+      "name": "account_play_sources",
+      "path": "/x/web/data/v2/overview/source",
+      "scope": "account",
+      "params": {
+        "s_locale": "zh_CN"
+      },
+      "http_status": 200,
+      "code": 0,
+      "schema": {
+        "play_proportion": {
+          "android": "int",
+          "h5": "int",
+          "ios": "int",
+          "new_h5": "int",
+          "new_mobile": "int",
+          "new_others": "int",
+          "new_ott": "int",
+          "new_pc": "int",
+          "other": "int",
+          "out": "int",
+          "pc": "int",
+          "tv": "int"
+        },
+        "audience_proportion": {
+          "fans": "int",
+          "guest": "int"
+        },
+        "play_inc": "int",
+        "single_arc_inc": {
+          "type": "list",
+          "length": 10,
+          "item": {
+            "aid": "int",
+            "bvid": "str",
+            "incr": "int",
+            "title": "str",
+            "daytime": "int",
+            "ptime": "int",
+            "interactive": "int",
+            "cover": "str"
+          }
+        }
+      },
+      "seconds": 1.31
+    },
+    {
+      "name": "account_completion_comparison",
+      "path": "/x/web/data/playanalysis",
+      "scope": "account",
+      "params": {
+        "copyright": 0
+      },
+      "http_status": 200,
+      "code": 0,
+      "schema": {
+        "arc_play_list": {
+          "type": "list",
+          "length": 30,
+          "item": {
+            "aid": "int",
+            "bvid": "str",
+            "view": "int",
+            "rate": "int",
+            "ctime": "int",
+            "duration": "int",
+            "avg_duration": "int",
+            "title": "str",
+            "avg_play_time_value": "int"
+          }
+        }
+      },
+      "seconds": 1.45
+    },
+    {
+      "name": "account_fans_overview",
+      "path": "/x/web/data/v2/fans/stat/num",
+      "scope": "account",
+      "params": {
+        "period": 0
+      },
+      "http_status": 200,
+      "code": 0,
+      "schema": {
+        "follow": "int",
+        "follow_last": "int",
+        "unfollow": "int",
+        "unfollow_last": "int",
+        "all_fans_acc": "int",
+        "all_fans": "int",
+        "interact_fans": "int",
+        "interact_fans_per": "int",
+        "interact_pass_per": "int",
+        "over_peer_percent": "int",
+        "log_date": "int"
+      },
+      "seconds": 1.61
+    },
+    {
+      "name": "account_fans_trend",
+      "path": "/x/web/data/v2/fans/stat/graph",
+      "scope": "account",
+      "params": {
+        "period": 0,
+        "type": "all_fans"
+      },
+      "http_status": 200,
+      "code": 0,
+      "schema": {
+        "tendency": {
+          "type": "list",
+          "length": 7,
+          "item": {
+            "date_key": "int",
+            "total_inc": "int"
+          }
+        },
+        "data_tendency": {
+          "all_fans": {
+            "type": "list",
+            "length": 7,
+            "item": {
+              "date_key": "int",
+              "total_inc": "int"
+            }
+          }
+        }
+      },
+      "seconds": 1.56
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# 快速信息卡片。配方显式引用此部件后生效；不改变原 motion 部件。
+target: autovideo
+voice_id: voxcpm_anchor
+video_form: information_cards
+allowed_forms: [information_cards]
+production_mode: fast
+visual_style: editorial_light
+creative_intent:
+  purpose: 知识讲解

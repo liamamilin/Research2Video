@@ -1,0 +1,19 @@
+{
+  "name": "opp_f59571c3",
+  "description": "VOD 选题深度调研：how much does a 30% vs 70% prompt cache hit rate cost per month on Opus 5.5",
+  "enabled": true,
+  "keywords": [
+    "90",
+    "how much does a 30% vs 70% prompt cache hit rate cost per month on Opus 5.5"
+  ],
+  "language": "en",
+  "schedule": {
+    "type": "manual"
+  },
+  "runtime": {
+    "timeout_seconds": 3600,
+    "skip_if_running": true
+  },
+  "prompt": "你是一名技术研究员，为一位制作 AI / 软件类知识视频的创作者做选题调研。你的报告会被另一套系统读取：它会逐个打开你引用的网址，只采信真正能打开、并且确实写了这件事的页面。所以每个关键判断都要给出原始网址。\n\n## 选题\n- 标题：how much does a 30% vs 70% prompt cache hit rate cost per month on Opus 5.5\n- 核心问题：how much does a 30% vs 70% prompt cache hit rate cost per month on Opus 5.5\n- 为什么是现在：未说明\n- 触发事件：缓存前缀纪律：一个时间戳就能让 90% 的折扣失效 — 内容类型：实操教程 + 视频演示（before/after 账单对照）\n目标受众：所有高频调用长系统提示词的开发者；R/Python 用户做的定时批处理流水线\n用户痛点：知道有 prompt caching，但命中率上不去，省不下钱\n核心角度：**前缀稳定性 > 压缩率 > 模型选择**——这是本期单位经济性变化带来的优先级翻转\n为什么有人在乎：Anthropic 文档明确 prompt caching 按 **tools → system → messages** 顺序对请求前缀做哈希，命中要求前缀与近期请求**逐字节一致**，直到缓存断点（2026-09-22 随 Opus 5.5 开放的会话中途系统消息/工具变更 beta，窗口边界项，https://platform.claude.com/docs/en/build-with-claude/mid-conversation-system-messages ）；OpenAI 同期发布 GPT-6 的提示缓存改进（2026-09-22，窗口边界项，https://openai.com/index/better-prompt-caching-for-gpt-6 ）。而缓存读取 vs 正常输入价的差距达到 10–20 倍（Sonnet 5.5：$0.20 vs $2；Opus 5.5：$0.20 vs $4，https://platform.claude.com/docs/en/models/sonnet-5-5/overview ）。\n建议标题：《把缓存命中率从 30% 拉到 70%：前缀稳定化的六条硬规则》\n建议大纲：① 缓存哈希三段结构 → ② 六大前缀污染源（时间戳、随机排序、动态 ID、目录树快照、会话状态、工具列表顺序）→ ③ 重构后账单对照 → ④ 代码片段：缓存断点放置与逐字节一致性自检\n\nUser impact: Developers and teams running high-frequency calls with long system prompts, tools, or batch pipelines (R/Python scheduled jobs) are affected: unstable prefixes silently break cache hits and can inflate input-token spend by 10–20x. They need to re-order and stabilize request prefixes (tools → system → messages), pin deterministic ordering/IDs, and place cache breakpoints correctly to cut costs and latency.\n- 关键词：{keywords}\n\n## 任务\n围绕核心问题做深度调研：先直接回答，再给出支撑它的证据、反方证据和仍未确定的部分。证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。\n输出语言：{language}。\n\n## 证据规则\n1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。\n2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。\n3. 核心结论尽量由两个相互独立的来源支撑；只有厂商自己的说法时，标注「厂商自述，未独立验证」。\n4. 给出反方证据或失败案例；确实找不到时写明「未找到反方证据」。\n5. 区分「已证实」「有迹象」「推测」，不把推测写成事实。\n\n## 输出结构\n### 1. 直接回答\n### 2. 关键事实（表格：事实 | 置信度 | 来源编号）\n### 3. 争议与反方证据\n### 4. 仍未确定的问题\n### 5. 适合视频的讲述角度（不超过 3 条）\n### 6. 来源清单\n编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址\n",
+  "output": "output/vod/{datetime}_opp_f59571c3.md"
+}

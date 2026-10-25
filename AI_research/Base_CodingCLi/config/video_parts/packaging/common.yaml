@@ -1,0 +1,4 @@
+# 所有配方引用的通用包装设置；完整组件默认值由 AutoVideo 的包装库提供。
+# 每个配方的 output.packaging 可以逐项覆盖；关闭组件请明确写 enabled: false。
+preset: common
+accent: '#1f7a4d'

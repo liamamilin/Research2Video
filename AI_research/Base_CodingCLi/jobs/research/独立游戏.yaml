@@ -1,0 +1,37 @@
+name: 独立游戏
+description: 为新进入领域的团队研究独立游戏的作品、创作、发行与玩家，准备值得展开讲述的材料
+enabled: true
+keywords:
+- 独立游戏
+- Indie Game
+- 独立开发者
+- 游戏开发
+- 独立工作室
+- Steam
+- itch.io
+- 像素游戏
+- Roguelike
+- Metroidvania
+- 叙事游戏
+- 生存游戏
+- 模拟经营
+- 策略游戏
+- RPG
+- 游戏设计
+- 关卡设计
+- 游戏美术
+- 游戏原型
+- Game Jam
+language: zh
+schedule:
+  type: monthly
+  time: 08:00
+  timezone: Asia/Shanghai
+runtime:
+  timeout_seconds: 7200
+  skip_if_running: true
+prompt: '研究 {name}，帮助新进入领域的团队理解值得关注的作品、玩家在意什么，以及开发者如何把作品做出来并找到观众。围绕 {keywords}，从近期作品、开发者经历、创作方法和发行变化展开，也追溯理解它们需要的背景。
+
+
+  用具体作品、人物、做法、数据和原始资料链接，把值得继续追问的事情讲清楚，为后续视频讲述准备有内容的材料。'
+output: output/research/{date}_{name}.md

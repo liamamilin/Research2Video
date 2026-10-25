@@ -1,0 +1,9 @@
+# 矩阵：产业与制造业（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
+name: 产业与制造业
+domain: 产业与制造业
+keywords: []
+jobs:
+- industry/industry_daily
+- industry/industry_weekly
+render:
+  video_speed: 1.25

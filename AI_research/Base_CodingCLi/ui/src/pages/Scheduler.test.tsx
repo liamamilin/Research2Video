@@ -1,0 +1,588 @@
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { SchedulerPage } from "./Scheduler";
+
+const JOBS = {
+  jobs: [
+    {
+      name: "practical_ai_intelligence/01_model_and_pricing_radar",
+      label: "Model and Pricing Radar",
+      description: "track model pricing changes",
+      enabled: true,
+      schedule_type: "daily",
+      command: "cd /proj && python run.py practical_ai_intelligence/01_model_and_pricing_radar >> logs/cron_x.log 2>&1",
+    },
+    {
+      name: "daily_ai_agents",
+      label: "Daily AI Agents",
+      description: "daily agents news",
+      enabled: false,
+      schedule_type: "manual",
+      command: "cd /proj && python run.py daily_ai_agents >> logs/cron_y.log 2>&1",
+    },
+  ],
+  project_dir: "/proj",
+  python: "/proj/.AI_research/bin/python",
+};
+
+function jsonResponse(body: unknown): Response {
+  return {
+    ok: true,
+    status: 200,
+    statusText: "ok",
+    text: async () => JSON.stringify(body),
+  } as Response;
+}
+
+function mockFetch(jobs = JOBS) {
+  const calls: { url: string; init?: RequestInit }[] = [];
+  const fn = vi.fn(async (url: string, init?: RequestInit) => {
+    const path = String(url);
+    calls.push({ url: path, init });
+    if (path.includes("/preview")) return jsonResponse({ schedule: "0 8 * * *", timezone: "Asia/Shanghai", next_runs: ["2026-09-26T08:00:00+08:00"] });
+    if (path.includes("/api/scheduler/jobs")) return jsonResponse(jobs);
+    if (path.includes("/api/scheduler") && init?.method === "POST") {
+      return jsonResponse({ ok: true });
+    }
+    if (path.includes("/api/scheduler")) return jsonResponse({ jobs: [], total: 0 });
+    return jsonResponse({});
+  });
+  vi.stubGlobal("fetch", fn);
+  return calls;
+}
+
+beforeEach(() => {
+  mockFetch();
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
+
+describe("Scheduler job picker", () => {
+  it("creates a durable job plan with an automatic ID and no shell command input", async () => {
+    const calls = mockFetch();
+    render(<SchedulerPage />);
+    fireEvent.click(screen.getByText(/新建调度/));
+
+    await waitFor(() => {
+      expect(screen.getByText("Model and Pricing Radar")).toBeTruthy();
+    });
+    fireEvent.click(screen.getByText("Model and Pricing Radar"));
+
+    expect(screen.queryByPlaceholderText("如: cd /path && python run.py daily_ai_agents")).toBeNull();
+    const create = screen.getByRole('button', {name: '创建调度'}) as HTMLButtonElement;
+    await waitFor(() => expect(create.disabled).toBe(false));
+    fireEvent.click(create);
+    await waitFor(() => expect(calls.some(c => c.init?.method === 'POST')).toBe(true));
+    const payload = JSON.parse(calls.find(c => c.init?.method === 'POST')!.init!.body as string);
+    expect(payload.job_name).toBe(JOBS.jobs[0].name);
+    expect(payload.id).toBe('');
+    expect(payload.missed_policy).toBe('latest');
+    expect(payload.max_retries).toBe(2);
+
+  });
+
+  it("filters the job list by query", async () => {
+    render(<SchedulerPage />);
+    fireEvent.click(screen.getByText(/新建调度/));
+
+    await waitFor(() => {
+      expect(screen.getByText("Daily AI Agents")).toBeTruthy();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("搜索 job 名称或描述…（如 radar、daily、practical）"), {
+      target: { value: "pricing" },
+    });
+
+    expect(screen.queryByText("Daily AI Agents")).toBeNull();
+    expect(screen.getByText("Model and Pricing Radar")).toBeTruthy();
+  });
+
+  it("marks disabled jobs", async () => {
+    render(<SchedulerPage />);
+    fireEvent.click(screen.getByText(/新建调度/));
+    await waitFor(() => {
+      expect(screen.getByText("已停用")).toBeTruthy();
+    });
+  });
+});
+
+describe("Scheduler missed-run banners", () => {
+  const CRON_JOB = {
+    id: "practical_ai_intelligence",
+    minute: "0",
+    hour: "6",
+    day_of_month: "*",
+    month: "*",
+    day_of_week: "*",
+    command: "bash scripts/run_practical_intelligence.sh >> logs/cron_pipeline.log 2>&1",
+    enabled: true,
+  };
+
+  function mockScheduler(health: unknown) {
+    const fn = vi.fn(async (url: string) => {
+      const path = String(url);
+      if (path.includes("/api/scheduler/jobs")) return jsonResponse(JOBS);
+      if (path.includes("/api/scheduler")) {
+        return jsonResponse({ jobs: [CRON_JOB], total: 1, health });
+      }
+      return jsonResponse({});
+    });
+    vi.stubGlobal("fetch", fn);
+  }
+
+  it("shows an overdue banner with the missed slot", async () => {
+    mockScheduler({
+      jobs: [{
+        id: "practical_ai_intelligence",
+        status: "overdue",
+        schedule: "0 6 * * *",
+        last_expected_at: "2026-09-24T06:00:00",
+        last_ran_at: "2026-09-21T06:10:00",
+        missed_hours: 79,
+        detail: "上次应运行 09-24 06:00，但最近一次实际运行是 09-21 06:10",
+      }],
+      overdue: 1,
+      paused: 0,
+    });
+    render(<SchedulerPage />);
+    expect(await screen.findByText("存在漏跑记录")).toBeTruthy();
+    expect(screen.getByText(/上次应运行 09-24 06:00/)).toBeTruthy();
+  });
+
+  it("shows a paused banner without claiming a failure", async () => {
+    mockScheduler({
+      jobs: [{
+        id: "practical_ai_intelligence",
+        status: "paused",
+        schedule: "0 6 * * *",
+        detail: "调度已暂停，cron 不会触发该任务",
+      }],
+      overdue: 0,
+      paused: 1,
+    });
+    render(<SchedulerPage />);
+    expect(await screen.findByText("已暂停", { selector: "p" })).toBeTruthy();
+    expect(screen.queryByText(/漏跑/)).toBeNull();
+  });
+
+  it("stays silent when every job is on time", async () => {
+    mockScheduler({
+      jobs: [{ id: "practical_ai_intelligence", status: "ok", schedule: "0 6 * * *", detail: "最近一次实际运行：09-24 06:12" }],
+      overdue: 0,
+      paused: 0,
+    });
+    render(<SchedulerPage />);
+    await waitFor(() => {
+      expect(screen.getByText("practical_ai_intelligence")).toBeTruthy();
+    });
+    expect(screen.queryByText(/漏跑/)).toBeNull();
+    expect(screen.queryByText(/已暂停：/)).toBeNull();
+  });
+});
+
+
+describe("Schedule editing and previews", () => {
+  it("switches selected jobs and refuses disabled ones", async () => {
+    const calls = mockFetch({ ...JOBS, jobs: [...JOBS.jobs, {...JOBS.jobs[0], name: 'research/中文任务', label: '中文任务'}] });
+    render(<SchedulerPage />);
+    fireEvent.click(screen.getByText(/新建调度/));
+    fireEvent.click(await screen.findByText("Model and Pricing Radar"));
+    expect((screen.getByText('Daily AI Agents').closest('button') as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByText("中文任务"));
+    const create = screen.getByRole('button', {name: '创建调度'}) as HTMLButtonElement;
+    await waitFor(() => expect(create.disabled).toBe(false));
+    fireEvent.click(create);
+    await waitFor(() => expect(calls.some(c => c.init?.method === 'POST')).toBe(true));
+    expect(JSON.parse(calls.find(c => c.init?.method === 'POST')!.init!.body as string).job_name).toBe('research/中文任务');
+  });
+
+  it("shows system agents without cron edit, pause or delete controls", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ jobs: [{
+      id: "com.arec.pipeline.daily", title: "情报矩阵 · 每日运行", backend: "launchd", editable: false,
+      enabled: true, schedule_label: "每天 06:00", next_runs: ["2026-09-26T06:00:00+08:00"], command: "ensure_round.py",
+    }], timezone: "Asia/Shanghai (UTC+0800)" })));
+    render(<SchedulerPage />);
+    expect(await screen.findByText("情报矩阵 · 每日运行")).toBeTruthy();
+    expect(screen.getByText("2026-09-26 06:00")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /暂停 com.arec/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /编辑 com.arec/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /删除 com.arec/ })).toBeNull();
+  });
+
+  it("lists the video batches and maintenance read-only, with where to change them and an empty last batch", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({ jobs: [], total: 0, others: [
+      { id: "video:p1", kind: "video_batch", title: "每周二早上一批", schedule: "0 5 * * 2", enabled: true,
+        next_run: "2026-10-27T05:00:00+0800", where: "看板首页的「无人值守流水线」卡片", link: "/", cost: "搜索额度",
+        last_run: { status: "DONE", note: "没有可写的新选题", started_at: "2026-10-20T05:00:29+0800", empty: true, done: 0, items: 0 } },
+      { id: "com.arec.maintenance", kind: "maintenance", title: "每日维护", schedule: "30 4 * * *", enabled: true,
+        next_run: null, where: "launchd；本页只读", link: null, cost: "",
+        last_run: { status: "ok", note: "", started_at: "2026-10-20T04:30:00+0800" } },
+    ] })));
+    render(<SchedulerPage />);
+    expect(await screen.findByText("每周二早上一批")).toBeTruthy();
+    expect(screen.getByText("上次空跑")).toBeTruthy();
+    expect(screen.getByText("没有可写的新选题")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /无人值守流水线/ }).getAttribute("href")).toBe("/");
+    expect(screen.getByText("每日维护")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /暂停 video:p1|删除 com.arec.maintenance/ })).toBeNull();
+  });
+
+  it("previews a changed schedule and saves an edit with PUT", async () => {
+    const calls: { url: string; method?: string; body?: string }[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      calls.push({ url: String(url), method: init?.method, body: init?.body as string });
+      if (String(url).includes("/preview")) return jsonResponse({ schedule: "0 9 * * *", timezone: "Asia/Shanghai", next_runs: ["2026-09-26T09:00:00+08:00"] });
+      if (init?.method === "PUT") return jsonResponse({ ok: true });
+      return jsonResponse({ jobs: [{ id: "report", minute: "0", hour: "8", day_of_month: "*", month: "*", day_of_week: "*", command: "echo report", enabled: false }] });
+    }));
+    render(<SchedulerPage />);
+    fireEvent.click(await screen.findByRole("button", { name: "编辑 report" }));
+    fireEvent.change(screen.getByLabelText("执行时间"), { target: { value: "09:00" } });
+    await screen.findByText("2026-09-26 09:00");
+    expect(screen.getByText(/当前已暂停/)).toBeTruthy();
+    fireEvent.click(screen.getByText("保存修改"));
+    await waitFor(() => expect(calls.some(c => c.method === "PUT" && c.url === "/api/scheduler/report")).toBe(true));
+    const body = JSON.parse(calls.find(c => c.method === "PUT")!.body!);
+    expect(body.schedule).toBe("0 9 * * *");
+    expect(body.command).toBe("echo report");
+  });
+});
+
+describe("managed plan status honesty", () => {
+  const MANAGED = {
+    id: "research/夜间巡检",
+    backend: "managed",
+    title: "夜间巡检",
+    enabled: true,
+    schedule: "0 3 * * *",
+    schedule_label: "0 3 * * *",
+    timezone: "Asia/Shanghai",
+  };
+
+  function mockManaged(state: unknown) {
+    const fn = vi.fn(async (url: string) => {
+      const path = String(url);
+      if (path.includes("/api/scheduler/jobs")) return jsonResponse({ jobs: [], total: 0 });
+      if (path.includes("/api/scheduler")) {
+        return jsonResponse({
+          jobs: [MANAGED], total: 1,
+          dispatcher: { online: true, detail: "执行器在线", age_seconds: 3 },
+          health: { jobs: [state], overdue: 0, paused: 0, detail: "" },
+        });
+      }
+      return jsonResponse({});
+    });
+    vi.stubGlobal("fetch", fn);
+  }
+
+  it("does not call a never-run plan healthy", async () => {
+    // The executor being online proves the dispatcher, never the model. A plan
+    // that has never produced a run has no evidence at all.
+    mockManaged({ id: MANAGED.id, status: "unverified", schedule: "0 3 * * *",
+                   detail: "计划已保存，尚未执行过；第一次执行后才能确认模型与网络真的可用" });
+    render(<SchedulerPage />);
+    expect(await screen.findByText("待验证")).toBeTruthy();
+    expect(screen.queryByText("正常")).toBeNull();
+    expect(screen.getByText(/尚未执行过/)).toBeTruthy();
+    expect(screen.getByText(/周期执行器在线/)).toBeTruthy();
+  });
+
+  it("shows healthy only after a run actually succeeded", async () => {
+    mockManaged({ id: MANAGED.id, status: "ok", schedule: "0 3 * * *",
+                   detail: "最近一次执行成功，报告已生成", last_ran_at: "2026-09-25T03:01:00+08:00" });
+    render(<SchedulerPage />);
+    expect(await screen.findByText("正常")).toBeTruthy();
+    expect(screen.getByText(/最近一次执行成功/)).toBeTruthy();
+  });
+});
+
+describe("write failures stay visible", () => {
+  const MANAGED = {
+    id: "research/夜间巡检", backend: "managed", title: "夜间巡检", enabled: true,
+    schedule: "0 3 * * *", schedule_label: "0 3 * * *", timezone: "Asia/Shanghai",
+  };
+
+  function errorResponse(status: number, code: string, message: string): Response {
+    return {
+      ok: false, status, statusText: "error",
+      text: async () => JSON.stringify({ error: { code, message, details: {} } }),
+    } as Response;
+  }
+
+  const PICKABLE = {
+    jobs: [{ name: "research/夜间巡检", label: "夜间巡检", description: "可被调度的任务",
+             enabled: true, schedule_type: "manual", command: "cd /proj && python run.py x" }],
+    total: 1,
+  };
+
+  function mockWithFailure(fail: (url: string, init?: RequestInit) => Response | null) {
+    const fn = vi.fn(async (url: string, init?: RequestInit) => {
+      const path = String(url);
+      const forced = fail(path, init);
+      if (forced) return forced;
+      if (path.includes("/preview")) return jsonResponse({ schedule: "0 8 * * *", timezone: "Asia/Shanghai", next_runs: ["2026-09-26T08:00:00+08:00"] });
+      if (path.includes("/api/scheduler/jobs")) return jsonResponse(PICKABLE);
+      if (path.includes("/api/scheduler")) {
+        return jsonResponse({
+          jobs: [MANAGED], total: 1,
+          dispatcher: { online: true, detail: "执行器在线", age_seconds: 3 },
+          health: { jobs: [{ id: MANAGED.id, status: "unverified", schedule: "0 3 * * *", detail: "尚未执行过" }], overdue: 0, paused: 0, detail: "" },
+        });
+      }
+      return jsonResponse({});
+    });
+    vi.stubGlobal("fetch", fn);
+  }
+
+  it("reports a rejected create instead of closing the form", async () => {
+    mockWithFailure((url, init) =>
+      init?.method === "POST" && url.includes("/api/scheduler")
+        ? errorResponse(409, "schedule_conflict", "这个 job 已有周期计划，请编辑现有计划")
+        : null);
+    render(<SchedulerPage />);
+    fireEvent.click(screen.getByText(/新建调度/));
+    // The card and the picker both carry the name; the picker button is the one
+    // inside the form dialog.
+    fireEvent.click((await screen.findAllByText("夜间巡检"))[0]);
+    const create = screen.getByRole("button", { name: /创建调度/ }) as HTMLButtonElement;
+    await waitFor(() => expect(create.disabled).toBe(false));
+    fireEvent.click(create);
+
+    expect((await screen.findByRole("alert")).textContent).toContain("这个 job 已有周期计划");
+    // The form must stay open so the user can fix it instead of losing the input.
+    expect(screen.getByRole("button", { name: /创建调度/ })).toBeTruthy();
+  });
+
+  it("reports a rejected delete", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    mockWithFailure((_url, init) =>
+      init?.method === "DELETE" ? errorResponse(500, "internal", "删除失败，请重试") : null);
+    render(<SchedulerPage />);
+    fireEvent.click(await screen.findByRole("button", { name: /删除 research\/夜间巡检/ }));
+    expect((await screen.findByRole("alert")).textContent).toContain("删除失败");
+  });
+
+  it("reports a rejected pause", async () => {
+    mockWithFailure((url, init) =>
+      init?.method === "PUT" && url.includes("/toggle")
+        ? errorResponse(503, "host_offline", "执行器离线") : null);
+    render(<SchedulerPage />);
+    fireEvent.click(await screen.findByRole("button", { name: /暂停 research\/夜间巡检/ }));
+    expect((await screen.findByRole("alert")).textContent).toContain("执行器离线");
+  });
+
+  it("keeps the plan on screen when pausing fails", async () => {
+    mockWithFailure((url, init) =>
+      init?.method === "PUT" && url.includes("/toggle")
+        ? errorResponse(409, "conflict", "计划正在执行中") : null);
+    render(<SchedulerPage />);
+    fireEvent.click(await screen.findByRole("button", { name: /暂停 research\/夜间巡检/ }));
+    expect((await screen.findByRole("alert")).textContent).toContain("计划正在执行中");
+    expect(screen.getByText("夜间巡检")).toBeTruthy();
+  });
+});
+
+describe("Scheduler matrix system tasks", () => {
+  const DAILY = "com.arec.pipeline.daily";
+  const CATCHUP = "com.arec.pipeline.catchup";
+
+  const SYSTEM = [
+    {
+      id: DAILY, backend: "launchd", kind: "daily", editable: true, installed: true, loaded: true,
+      enabled: true, minute: "0", hour: "6", command: "ensure_round.py", schedule: "0 6 * * *",
+      title: "情报矩阵 · 每日运行", schedule_label: "每天 06:00", next_runs: ["2026-09-27T06:00:00+08:00"],
+    },
+    {
+      id: CATCHUP, backend: "launchd", kind: "interval", editable: true, installed: true, loaded: true,
+      enabled: true, minute: "", hour: "", command: "ensure_round.py", schedule: "*/30 * * * *",
+      title: "情报矩阵 · 漏跑补偿", schedule_label: "每 30 分钟检查", next_runs: [],
+    },
+  ];
+
+  function mockSystem(removed: unknown[] = [], jobs: unknown[] = SYSTEM) {
+    const calls: { url: string; init?: RequestInit }[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      const path = String(url);
+      calls.push({ url: path, init });
+      if (path.includes("/preview")) {
+        return jsonResponse({ schedule: "0 6 * * *", timezone: "Asia/Shanghai", next_runs: ["2026-09-27T06:00:00+08:00"] });
+      }
+      if (path.includes("/api/scheduler/jobs")) {
+        return jsonResponse({ jobs: [], project_dir: "/proj", python: "/proj/.venv/bin/python" });
+      }
+      if (path.includes("/restore")) return jsonResponse({ ok: true, label: DAILY, installed: true });
+      if (path.includes("/api/scheduler")) {
+        return jsonResponse({
+          jobs, total: jobs.length, removed_system_jobs: removed,
+          dispatcher: { online: true, detail: "执行器在线", age_seconds: 3 },
+          health: { jobs: [], overdue: 0, paused: 0, detail: "" },
+        });
+      }
+      return jsonResponse({});
+    }));
+    return calls;
+  }
+
+  it("offers edit, pause and delete on the system tasks", async () => {
+    mockSystem();
+    render(<SchedulerPage />);
+    expect(await screen.findByRole("button", { name: `编辑 ${DAILY}` })).toBeTruthy();
+    expect(screen.getByRole("button", { name: `暂停 ${DAILY}` })).toBeTruthy();
+    expect(screen.getByRole("button", { name: `删除 ${DAILY}` })).toBeTruthy();
+    expect(screen.getByRole("button", { name: `编辑 ${CATCHUP}` })).toBeTruthy();
+    // The old page said "本页只读" and hid every control.
+    expect(screen.queryByText(/本页只读/)).toBeNull();
+  });
+
+  it("opens the editor on the real cron expression, not undefined fields", async () => {
+    mockSystem();
+    render(<SchedulerPage />);
+    fireEvent.click(await screen.findByRole("button", { name: `编辑 ${DAILY}` }));
+    expect(await screen.findByText(/这是情报矩阵的系统任务/)).toBeTruthy();
+    // "0 6 * * *" must decode to 每天 06:00. Before the fix the card carried no
+    // dom/month/dow, so the editor opened on "0 6 undefined undefined undefined".
+    const time = screen.getByLabelText("执行时间") as HTMLInputElement;
+    expect(time.value).toBe("06:00");
+    expect(document.body.textContent).not.toContain("undefined");
+    // A launchd agent has no timezone / missed-policy / retry of its own.
+    expect(screen.queryByLabelText("执行时区")).toBeNull();
+    expect(screen.queryByLabelText("补跑策略")).toBeNull();
+  });
+
+  it("saves only the trigger for a system task", async () => {
+    const calls = mockSystem();
+    render(<SchedulerPage />);
+    fireEvent.click(await screen.findByRole("button", { name: `编辑 ${DAILY}` }));
+    const save = (await screen.findByRole("button", { name: /保存修改/ })) as HTMLButtonElement;
+    await waitFor(() => expect(save.disabled).toBe(false));
+    fireEvent.click(save);
+    await waitFor(() => expect(calls.some(c => c.init?.method === "PUT")).toBe(true));
+    const body = JSON.parse(calls.find(c => c.init?.method === "PUT")!.init!.body as string);
+    expect(body).toEqual({ schedule: "0 6 * * *" });
+  });
+
+  it("warns that deleting stops the matrix and can be undone", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    const calls = mockSystem();
+    render(<SchedulerPage />);
+    fireEvent.click(await screen.findByRole("button", { name: `删除 ${DAILY}` }));
+    expect(confirm).toHaveBeenCalled();
+    expect(String(confirm.mock.calls[0][0])).toContain("不再自动运行");
+    expect(String(confirm.mock.calls[0][0])).toContain("恢复");
+    await waitFor(() => expect(calls.some(c => c.init?.method === "DELETE")).toBe(true));
+  });
+
+  it("pauses a system task through the toggle endpoint", async () => {
+    const calls = mockSystem();
+    render(<SchedulerPage />);
+    fireEvent.click(await screen.findByRole("button", { name: `暂停 ${DAILY}` }));
+    await waitFor(() => expect(calls.some(c => c.url.includes("/toggle"))).toBe(true));
+    expect(calls.find(c => c.url.includes("/toggle"))!.init!.body).toBe(JSON.stringify({ enabled: false }));
+  });
+
+  it("restores a deleted system task", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const calls = mockSystem([{ label: DAILY, kind: "daily", deleted_at: "20260926_101500", schedule: "0 6 * * *" }]);
+    render(<SchedulerPage />);
+    expect(await screen.findByText("已删除的系统任务")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: `恢复 ${DAILY}` }));
+    await waitFor(() => expect(calls.some(c => c.url.includes(`${DAILY}/restore`) && c.init?.method === "POST")).toBe(true));
+  });
+
+  it("does not offer restore for a plan that was never a system task", async () => {
+    mockSystem([]);
+    render(<SchedulerPage />);
+    await screen.findByRole("button", { name: `编辑 ${DAILY}` });
+    expect(screen.queryByText("已删除的系统任务")).toBeNull();
+  });
+
+  it("keeps restore reachable after the last system task is deleted", async () => {
+    // The trap this guards: the restore list used to render inside the
+    // jobs.length > 0 branch, so deleting the last system task removed the only
+    // way to undo it. Two days of reports went missing that way.
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const calls = mockSystem(
+      [{ label: DAILY, kind: "daily", deleted_at: "20260926_213037", schedule: "0 6 * * *", installed: false }],
+      [],
+    );
+    render(<SchedulerPage />);
+
+    // The empty state must not claim nothing was ever configured.
+    expect(await screen.findByText("情报矩阵的系统任务已全部删除")).toBeTruthy();
+    expect(screen.queryByText("创建第一个计划")).toBeNull();
+
+    const restoreBtn = screen.getByRole("button", { name: `恢复 ${DAILY}` });
+    fireEvent.click(restoreBtn);
+    await waitFor(() => expect(calls.some(c => c.url.includes(`${DAILY}/restore`) && c.init?.method === "POST")).toBe(true));
+  });
+
+  it("restores every deleted system task in one click", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const calls = mockSystem([
+      { label: DAILY, kind: "daily", deleted_at: "20260926_213037", schedule: "0 6 * * *", installed: false },
+      { label: CATCHUP, kind: "interval", deleted_at: "20260926_213039", schedule: "*/30 * * * *", installed: false },
+    ], []);
+    render(<SchedulerPage />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "全部恢复" }));
+    await waitFor(() => {
+      expect(calls.some(c => c.url.includes(`${DAILY}/restore`))).toBe(true);
+      expect(calls.some(c => c.url.includes(`${CATCHUP}/restore`))).toBe(true);
+    });
+  });
+});
+
+describe("independent scheduler reads", () => {
+  it("waits for the system list before claiming there are no schedules", async () => {
+    let resolveSystem!: (response: Response) => void;
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (String(url).includes("scope=system")) return new Promise<Response>(resolve => { resolveSystem = resolve; });
+      return jsonResponse({ jobs: [] });
+    }));
+    render(<SchedulerPage />);
+    await screen.findByText(/正在检查系统任务/);
+    expect(screen.queryByText("暂无周期调度任务")).toBeNull();
+    await act(async () => resolveSystem(jsonResponse({ jobs: [{
+      id: "legacy", title: "已有系统计划", backend: "launchd", enabled: true, schedule: "0 6 * * *",
+    }] })));
+    expect(await screen.findByText("已有系统计划")).toBeTruthy();
+    expect(screen.queryByText("暂无周期调度任务")).toBeNull();
+  });
+
+  it("shows managed plans while system discovery is still waiting and cancels it on exit", async () => {
+    let systemSignal: AbortSignal | undefined;
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).includes("scope=system")) {
+        systemSignal = init?.signal as AbortSignal;
+        return new Promise<Response>((_resolve, reject) => systemSignal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError"))));
+      }
+      if (String(url).includes("scope=managed")) return jsonResponse({ jobs: [{
+        id: "fast", title: "无需等待系统检查的计划", backend: "managed", enabled: true, schedule: "0 8 * * *",
+      }], dispatcher: { online: true, detail: "心跳正常" } });
+      return jsonResponse({});
+    }));
+    const view = render(<SchedulerPage />);
+    expect(await screen.findByText("无需等待系统检查的计划")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "编辑 fast" })).toBeTruthy();
+    expect(screen.getByText(/正在检查系统任务/)).toBeTruthy();
+    view.unmount();
+    expect(systemSignal?.aborted).toBe(true);
+  });
+
+  it("keeps managed plans visible when system inspection fails", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (String(url).includes("scope=system")) throw new TypeError("system inspection unavailable");
+      if (String(url).includes("scope=managed")) return jsonResponse({ jobs: [{
+        id: "ready", title: "正常读取的计划", backend: "managed", enabled: true, schedule: "0 8 * * *",
+      }] });
+      return jsonResponse({});
+    }));
+    render(<SchedulerPage />);
+    expect(await screen.findByText("正常读取的计划")).toBeTruthy();
+    expect((await screen.findByRole("alert")).textContent).toContain("系统任务读取失败");
+  });
+});

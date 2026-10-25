@@ -1,0 +1,42 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 这一份是「整份报告」配方：不挑条目、不再调研，直接从 Job 的整份报告写（topic.whole_report: true）。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 行动清单
+description: 帮助{{audience}}把材料中的启发变成自己能用的做法，听着有收获，也知道接下来可以怎样尝试。
+status: experimental
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: action_list
+    name: 行动清单
+  format:
+    key: short
+    name: B 站横屏短
+audiences: [developer, non_tech]
+target_minutes: 2.5
+minutes_range: [2, 4]
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: explainer
+  style: |
+    帮助{{audience}}把材料中的启发变成自己能用的做法，听着有收获，也知道接下来可以怎样尝试。
+output:
+  use: motion
+  packaging:
+    use: common
+    label: 行动清单
+    outro:
+      lines:
+      - 面向{{audience}}的 行动清单
+      seconds: 3

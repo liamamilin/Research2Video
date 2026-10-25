@@ -1,0 +1,19 @@
+{
+  "name": "opp_640260af",
+  "description": "VOD 选题深度调研：Cost comparison: chunked context with cache writes vs one 300K direct call on GPT-6 Sol at the 272K threshold",
+  "enabled": true,
+  "keywords": [
+    "272K",
+    "Cost comparison: chunked context with cache writes vs one 300K direct call on GPT-6 Sol at the 272K threshold"
+  ],
+  "language": "en",
+  "schedule": {
+    "type": "manual"
+  },
+  "runtime": {
+    "timeout_seconds": 3600,
+    "skip_if_running": true
+  },
+  "prompt": "你是一名技术研究员，为一位制作 AI / 软件类知识视频的创作者做选题调研。你的报告会被另一套系统读取：它会逐个打开你引用的网址，只采信真正能打开、并且确实写了这件事的页面。所以每个关键判断都要给出原始网址。\n\n## 选题\n- 标题：Cost comparison: chunked context with cache writes vs one 300K direct call on GPT-6 Sol at the 272K threshold\n- 核心问题：Cost comparison: chunked context with cache writes vs one 300K direct call on GPT-6 Sol at the 272K threshold\n- 为什么是现在：未说明\n- 触发事件：长上下文计费陷阱：>272K 的请求，是整次请求翻倍 — 内容类型：避坑指南（图文 + 可复制检查清单）\n目标受众：习惯「把整个仓库塞进上下文」的 agent 开发者；做长文档分析的数据分析师\n用户痛点：以为只有超出部分加价，结果账单翻倍\n核心角度：把「阈值拦截」做成路由层的硬规则\n为什么有人在乎：OpenAI 官方文档明确：**GPT-6 Sol 输入超过 272K token 的请求，整次请求的输入与缓存费率按 2x 计、输出按 1.5x 计**；缓存写入按未缓存输入价的 1.25x；区域化处理另加 10% 溢价（2026-09-22 随模型发布同步文档，窗口边界项，https://developers.openai.com/api/docs/models/gpt-6-sol ）。这是最容易被预算模型低估的一类坑。\n建议标题：《272K 之后没有「只加一点钱」：长上下文账单翻倍的三个真实原因》\n建议大纲：① 阈值计价图示（分块 vs 直投）→ ② 三种替代方案成本对比（超长直投 / 分块 + 缓存 / 换 1M 上下文模型）→ ③ 路由层告警与上下文裁剪实现 → ④ 上线前的 5 条检查项\n\nUser impact: Agent developers and long-document analysts who send large contexts (>272K tokens) to GPT-6 Sol will see entire-request billing double for input and increase 1.5x for output, plus cache-write and regional premiums. They must add threshold checks at the routing layer, trim or chunk context, or migrate to a larger-window model to avoid unexpected budget overruns.\n- 关键词：{keywords}\n\n## 任务\n围绕核心问题做深度调研：先直接回答，再给出支撑它的证据、反方证据和仍未确定的部分。证据以 {date_7d_ago} 至 {date} 的信息为主；更早的关键资料可以用，但要注明原始日期。\n输出语言：{language}。\n\n## 证据规则\n1. 每个关键判断附来源网址和发布日期。优先官方文档、发布说明、代码仓库、论文、定价页等一手来源；媒体和社区帖子只作补充。\n2. 网址必须是你实际检索到的真实页面，禁止编造、猜测或拼接网址；不确定就不写。\n3. 核心结论尽量由两个相互独立的来源支撑；只有厂商自己的说法时，标注「厂商自述，未独立验证」。\n4. 给出反方证据或失败案例；确实找不到时写明「未找到反方证据」。\n5. 区分「已证实」「有迹象」「推测」，不把推测写成事实。\n\n## 输出结构\n### 1. 直接回答\n### 2. 关键事实（表格：事实 | 置信度 | 来源编号）\n### 3. 争议与反方证据\n### 4. 仍未确定的问题\n### 5. 适合视频的讲述角度（不超过 3 条）\n### 6. 来源清单\n编号列表，每行一个来源：编号. 标题 | 一手/二手 | 发布日期 | 完整网址\n",
+  "output": "output/vod/{datetime}_opp_640260af.md"
+}

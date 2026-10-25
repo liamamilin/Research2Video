@@ -1,0 +1,720 @@
+import { api } from "./client";
+import type { TokenResponse, User, JobSummary, JobDetail } from "./types";
+
+// --- Auth ---
+
+export async function login(username: string, password: string, remember = false): Promise<TokenResponse> {
+  return api("/api/auth/login", {
+    method: "POST",
+    body: { username, password, remember },
+  });
+}
+
+export async function logout(): Promise<void> {
+  return api("/api/auth/logout", { method: "POST" });
+}
+
+export async function refresh(): Promise<TokenResponse> {
+  return api("/api/auth/refresh", { method: "POST" });
+}
+
+export async function getMe(): Promise<User> {
+  return api("/api/auth/me");
+}
+
+// --- Jobs ---
+
+export async function listJobs(signal?: AbortSignal): Promise<JobSummary[]> {
+  return api("/api/jobs", { signal });
+}
+
+export async function getJob(name: string, signal?: AbortSignal): Promise<JobDetail> {
+  return api(`/api/jobs/${encodeURIComponent(name)}`, { signal });
+}
+
+export async function getJobState(name: string): Promise<JobDetail["state"]> {
+  return api(`/api/jobs/${encodeURIComponent(name)}/state`);
+}
+
+export interface JobYamlValidation {
+  ok: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+/** Preflight a job YAML edit without saving it. */
+export async function validateJobYaml(name: string, yamlContent: string): Promise<JobYamlValidation> {
+  return api(`/api/jobs/${encodeURIComponent(name)}/validate`, {
+    method: "POST",
+    body: { yaml_content: yamlContent },
+  });
+}
+
+export async function updateJobYaml(
+  name: string,
+  yamlContent: string,
+  expectedMtime?: number | null
+): Promise<{ ok: boolean; warnings: string[]; backup_path?: string }> {
+  return api(`/api/jobs/${encodeURIComponent(name)}`, {
+    method: "PUT",
+    body: { yaml_content: yamlContent, expected_mtime: expectedMtime ?? null },
+  });
+}
+
+export async function runJob(name: string): Promise<{ ok: boolean; task_id: string; started_at: string }> {
+  return api(`/api/jobs/${encodeURIComponent(name)}/run`, { method: "POST" });
+}
+
+export async function createJob(data: {
+  name: string;
+  template?: string;
+  category?: string;
+  description?: string;
+  language?: string;
+  keywords?: string[];
+  prompt?: string;
+  output?: string;
+  recurrence?: { schedule: string; timezone: string; missed_policy: string; max_retries: number };
+}): Promise<any> {
+  return api("/api/jobs", { method: "POST", body: data });
+}
+
+export interface JobTemplate {
+  key: string;
+  name: string;
+  filename: string;
+  label: string;
+  category: string;
+  description: string;
+  builtin: boolean;
+  variables: string[];
+  output_template: string;
+  updated_at: string;
+  job_name?: string;
+  prompt?: string;
+  keywords?: string[];
+  language?: string;
+  timeout_seconds?: number | null;
+  schedule?: Record<string, any> | null;
+  content: string;
+}
+
+export interface TemplateInput {
+  key?: string;
+  label?: string;
+  category?: string;
+  description?: string;
+  prompt?: string;
+  name?: string;
+  keywords?: string[];
+  language?: string;
+  output?: string;
+  timeout_seconds?: number;
+  schedule?: { type?: string; time?: string; timezone?: string } | null;
+}
+
+export async function listTemplates(): Promise<{ templates: JobTemplate[] }> {
+  return api("/api/jobs/templates");
+}
+
+export async function createTemplate(data: TemplateInput): Promise<JobTemplate> {
+  return api("/api/jobs/templates", { method: "POST", body: data });
+}
+
+export async function updateTemplate(key: string, data: TemplateInput): Promise<JobTemplate> {
+  return api(`/api/jobs/templates/${encodeURIComponent(key)}`, { method: "PUT", body: data });
+}
+
+export async function deleteTemplate(key: string): Promise<{ ok: boolean; key: string }> {
+  return api(`/api/jobs/templates/${encodeURIComponent(key)}`, { method: "DELETE" });
+}
+
+export interface HealthCheck {
+  name: string;
+  status: "ok" | "warn" | "error";
+  detail: string;
+  [key: string]: unknown;
+}
+
+export interface HealthReport {
+  status: "ok" | "warn" | "error";
+  checked_at: string;
+  deep: boolean;
+  checks: HealthCheck[];
+  errors: string[];
+  warnings: string[];
+  stale_locks?: string[];
+}
+
+export async function getHealth(detailed = false, signal?: AbortSignal): Promise<HealthReport> {
+  return api(detailed ? "/api/health/detailed" : "/api/health", { signal });
+}
+
+export interface JobCategory {
+  name: string;
+  count: number;
+}
+
+export async function listJobCategories(): Promise<{ categories: JobCategory[] }> {
+  return api("/api/jobs/categories");
+}
+
+export async function cancelJob(name: string): Promise<{ ok: boolean; cancelled: boolean }> {
+  return api(`/api/jobs/${encodeURIComponent(name)}/cancel`, { method: "POST" });
+}
+
+export interface PersistedRun {
+  run_id: string;
+  status: string;
+  started_at: string;
+  finished_at: string;
+  events: number;
+}
+
+export interface PersistedLogRecord {
+  run_id: string;
+  ts: string;
+  event: LogEventLike;
+}
+
+export interface LogEventLike {
+  type?: string;
+  level?: string;
+  message?: string;
+  status?: string;
+  phase?: string;
+  event_type?: string;
+  [key: string]: unknown;
+}
+
+export async function getJobLogs(
+  name: string,
+  params?: { run_id?: string; limit?: number }
+): Promise<{ runs: PersistedRun[]; events: PersistedLogRecord[]; run: PersistedRun | null; live: boolean }> {
+  return api(`/api/jobs/${encodeURIComponent(name)}/logs`, { query: params as any });
+}
+
+export async function getJobHistory(name: string, limit = 50): Promise<any[]> {
+  return api(`/api/jobs/${encodeURIComponent(name)}/history`, { query: { limit } });
+}
+
+// --- Reports ---
+
+export interface ReportFilterParams {
+  page?: number;
+  per_page?: number;
+  category?: string;
+  job?: string;
+  favorite?: boolean;
+  tag?: string;
+  unread?: boolean;
+  /** Report date (from the path) bounds, YYYY-MM-DD. */
+  since?: string;
+  until?: string;
+  /** Only the newest pipeline round. */
+  latest_round?: boolean;
+  sort?: "recent" | "oldest" | "title" | "size" | "coverage";
+}
+
+export async function listReports(params?: ReportFilterParams): Promise<{ items: any[]; total: number; page: number; pages: number }> {
+  return api("/api/reports", { query: params as any });
+}
+
+export async function getReportMeta(path: string): Promise<any> {
+  return api("/api/reports/meta", { query: { path } });
+}
+
+export async function updateReportMeta(
+  path: string,
+  payload: { favorite?: boolean; tags?: string[]; read?: boolean; rating?: number; rating_note?: string },
+): Promise<any> {
+  return api("/api/reports/meta", { method: "PATCH", body: { path, ...payload } });
+}
+
+export async function listTags(): Promise<{ tags: { tag: string; count: number }[] }> {
+  return api("/api/reports/tags");
+}
+
+export async function createShareLink(
+  path: string,
+  ttlHours = 168,
+): Promise<{ token: string; path: string; expires_at: number; url: string }> {
+  return api("/api/reports/share", {
+    method: "POST",
+    body: { path, ttl_hours: ttlHours },
+  });
+}
+
+export async function emailReport(path: string, to?: string[]): Promise<{ ok: boolean }> {
+  return api("/api/reports/email", {
+    method: "POST",
+    body: to && to.length ? { path, to } : { path },
+  });
+}
+
+export interface SetupStatus {
+  needs_admin: boolean;
+  llm_configured: boolean;
+  search_configured: boolean;
+}
+
+export async function getSetupStatus(): Promise<SetupStatus> {
+  return api("/api/setup/status");
+}
+
+export interface QaCitation {
+  index: number;
+  path: string;
+  title: string;
+  snippet: string;
+  source: string;
+  score: number;
+}
+
+export interface QaAnswer {
+  answer: string;
+  citations: QaCitation[];
+  mode: string;
+  usage?: Record<string, number>;
+}
+
+export async function askQuestion(question: string, limit = 6): Promise<QaAnswer> {
+  return api("/api/qa", { method: "POST", body: { question }, query: { limit } });
+}
+
+export interface AssistantAction {
+  tool: string;
+  ok: boolean;
+  message: string;
+  job_name?: string | null;
+  href?: string;
+  download_url?: string;
+  rollback_id?: string;
+  maintenance_id?: string;
+  background_id?: string;
+  operation_id?: string;
+  references?: { type: string; id: string; href: string; date?: string; title?: string }[];
+  detail?: { schedule?: string; timezone?: string; enabled?: boolean; next_runs?: string[]; executor_online?: boolean;
+    last_run?: { id: string; status: string; started_at?: number; finished_at?: number; href?: string; report?: { href: string } } | null };
+  input_card?: { id: string; title: string; description: string; fields: { name: string; label: string; type: string }[] };
+}
+
+export interface AssistantMessage {
+  role: "user" | "assistant";
+  content: string;
+  actions?: AssistantAction[];
+  error?: string | null;
+  continuation?: AssistantContinuation;
+}
+
+export interface AssistantContinuation {
+  reason: string; steps: number; reports_complete: number; remaining_report_count: number;
+  next_reports: string[]; report_reads: { path: string; next_offset: number; complete: boolean }[];
+}
+
+export interface AssistantReply {
+  answer: string;
+  actions: AssistantAction[];
+  error?: string | null;
+  conversation_id?: string;
+  request_id?: string;
+  status?: string;
+  continuation?: AssistantContinuation;
+}
+
+export interface AssistantConversation {
+  id: string;
+  requests: { id: string; message: string; status: string; result: AssistantReply }[];
+}
+
+export const getAssistantConversation = (id?: string) => api<AssistantConversation>(
+  id ? `/api/assistant/conversations/${id}` : "/api/assistant/conversation");
+export const newAssistantConversation = () => api<{ id: string }>("/api/assistant/conversations", { method: "POST" });
+export const stopAssistantResponse = (id: string) => api(`/api/assistant/requests/${id}/stop`, { method: "POST" });
+export const getAssistantInput = (id: string) => api<{ status: string; result?: { rollback_id?: string } }>(`/api/assistant/inputs/${id}`);
+export interface AssistantInputVerification { status: string; message: string; tokens?: { id: number; name: string; created_at: string; revoked: boolean }[];
+  configured?: boolean; header_names?: string[]; user?: { username: string; role: string; disabled: boolean } | null; rollback_id?: string | null; }
+export const verifyAssistantInput = (id: string) => api<AssistantInputVerification>(`/api/assistant/inputs/${id}/verify`);
+export const getAssistantConfigRecovery = () => api<{ rollback_id: string | null }>("/api/assistant/configuration/recovery");
+export const submitAssistantInput = (id: string, body: Record<string, string>) => api<{ token?: string; rollback_id?: string }>(`/api/assistant/inputs/${id}`, { method: "POST", body });
+export const rollbackAssistantConfiguration = (id: string) => api(`/api/assistant/rollback/${id}`, { method: "POST" });
+export const getAssistantBackground = (id: string) => api<{ status: string; progress?: { stage?: string; completed?: number; total?: number }; error?: string }>(`/api/assistant/background/${id}`);
+export const getAssistantMaintenance = (id: string) => api<{ status: string; error?: string }>(`/api/assistant/maintenance/${id}`);
+
+export type AssistantEvent =
+  | { type: "reset" }
+  | { type: "delta"; text: string }
+  | { type: "action"; action: AssistantAction }
+  | { type: "status"; message: string }
+  | { type: "done"; result: AssistantReply };
+
+export async function chatWithAssistant(
+  message: string, history: AssistantMessage[], onEvent: (event: AssistantEvent) => void,
+  options: { conversation_id?: string; request_id?: string; signal?: AbortSignal } = {},
+): Promise<AssistantReply> {
+  const response = await api<Response>("/api/assistant/stream", {
+    method: "POST",
+    responseType: "stream",
+    signal: options.signal,
+    body: {
+      message,
+      ...(options.conversation_id ? { conversation_id: options.conversation_id } : {}),
+      ...(options.request_id ? { request_id: options.request_id } : {}),
+      history: history.slice(-20).map((item) => ({
+        role: item.role,
+        content: (item.content + (item.actions?.length
+          ? "\n操作结果：\n" + item.actions.map((a) => `${a.ok ? "成功" : "失败"}：${a.message}`).join("\n")
+          : "")).slice(0, 24000),
+      })),
+    },
+  });
+  if (!response.body) throw new Error("无法读取助手输出流");
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let result: AssistantReply | undefined;
+
+  const dispatch = (block: string) => {
+    const data = block.split(/\r?\n/).filter((line) => line.startsWith("data:"))
+      .map((line) => line.slice(5).trimStart()).join("\n");
+    if (!data) return; // SSE comments are connection heartbeats.
+    const event = JSON.parse(data) as AssistantEvent;
+    onEvent(event);
+    if (event.type === "done") result = event.result;
+  };
+
+  try {
+    while (!result) {
+      const { value, done } = await reader.read();
+      buffer += done ? decoder.decode() : decoder.decode(value, { stream: true });
+      let separator = /\r?\n\r?\n/.exec(buffer);
+      while (separator) {
+        dispatch(buffer.slice(0, separator.index));
+        buffer = buffer.slice(separator.index + separator[0].length);
+        separator = /\r?\n\r?\n/.exec(buffer);
+      }
+      if (done) break;
+    }
+    if (!result) throw new Error("助手连接中断，已保留收到的回复和操作结果");
+    return result;
+  } finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+
+export async function reindexVectors(limit = 200): Promise<{
+  embedded: number;
+  skipped: number;
+  failed: number;
+  stats: { documents: number; chunks: number };
+}> {
+  return api("/api/qa/reindex", { method: "POST", query: { limit } });
+}
+
+export interface SharedReport {
+  path: string;
+  title: string;
+  content: string;
+  size: number;
+  expires_at: number | null;
+  shared_by: string;
+}
+
+export async function getSharedReport(token: string): Promise<SharedReport> {
+  return api(`/api/share/${encodeURIComponent(token)}`);
+}
+
+// --- Share links ------------------------------------------------------------
+
+export interface ShareLink {
+  jti: string;
+  path: string;
+  by: string;
+  created_at: number;
+  expires_at: number;
+  revoked_at: number | null;
+  expired: boolean;
+  /** live | expired | revoked */
+  state: "live" | "expired" | "revoked";
+}
+
+export async function listShareLinks(includeExpired = false): Promise<{ links: ShareLink[] }> {
+  return api("/api/reports/shares", {
+    query: includeExpired ? { include_expired: "true" } : undefined,
+  });
+}
+
+export async function revokeShareLink(jti: string): Promise<{ ok: boolean; revoked: boolean }> {
+  return api(`/api/reports/shares/${encodeURIComponent(jti)}/revoke`, { method: "POST" });
+}
+
+type TreeQuery = {
+  category?: string;
+  job?: string;
+  favorite?: boolean;
+  tag?: string;
+  unread?: boolean;
+  since?: string;
+  until?: string;
+  latest_round?: boolean;
+};
+
+export async function getReportTree(params?: TreeQuery): Promise<any[]> {
+  return api("/api/reports/tree", { query: params as any });
+}
+
+export async function getReportRaw(path: string, signal?: AbortSignal): Promise<{ path: string; content: string; size: number }> {
+  return api("/api/reports/raw", { query: { path }, signal });
+}
+
+export async function searchReports(q: string, limit = 20): Promise<{ results: any[]; total: number }> {
+  return api("/api/reports/search", { query: { q, limit } });
+}
+
+export async function getReportStats(signal?: AbortSignal): Promise<{ total: number; total_size_bytes: number; categories: number }> {
+  return api("/api/reports/stats", { signal });
+}
+
+export async function getReportCategories(): Promise<string[]> {
+  return api("/api/reports/categories");
+}
+
+// --- Usage ---
+
+export interface UsageSummary {
+  days: number;
+  totals: {
+    runs: number;
+    runs_with_usage: number;
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+    searches: number;
+  };
+  per_day: { day: string; runs: number; prompt_tokens: number; completion_tokens: number; total_tokens: number }[];
+  per_job: { job_name: string; runs: number; total_tokens: number }[];
+  per_model: { model: string; runs: number; prompt_tokens: number; completion_tokens: number; total_tokens: number }[];
+  estimated_cost_usd: number | null;
+  pricing: { input_per_1m?: number | null; output_per_1m?: number | null };
+  per_user?: { user: string; runs: number; total_tokens: number; searches: number }[];
+  budget?: {
+    limit: number;
+    spent: number;
+    ratio: number;
+    warn: boolean;
+    exceeded: boolean;
+    block_pipeline: boolean;
+    tokens: number;
+    has_pricing: boolean;
+    window_start?: string;
+    per_user?: { user: string; runs: number; total_tokens: number; searches: number }[];
+  };
+}
+
+export async function getUsage(days = 30, month = false, signal?: AbortSignal): Promise<UsageSummary> {
+  return api("/api/usage", { query: month ? { month: "true" } : { days }, signal });
+}
+
+export interface RatingSummary {
+  count: number;
+  average: number | null;
+  per_job: { job_name: string; count: number; average: number }[];
+}
+
+export async function getRatings(signal?: AbortSignal): Promise<RatingSummary> {
+  return api("/api/usage/ratings", { signal });
+}
+
+// --- Pipeline rounds ---
+
+export interface RoundStage {
+  key: string;
+  label: string;
+  file: string;
+  exists: boolean;
+  size: number;
+  mtime: number | null;
+  tokens?: number;
+  status: string; // done | missing | running | success | failed | cancelled | pending | skipped
+}
+
+export interface RoundArtifact {
+  name: string;
+  size: number;
+  /** What the artifact says went wrong while producing it. */
+  warnings?: string[];
+  /** Parsed to zero items -- not the same as a round with nothing to say. */
+  empty?: boolean;
+}
+
+export interface Round {
+  date: string;
+  done: number;
+  total: number;
+  tokens_total?: number;
+  stages: RoundStage[];
+  artifacts?: RoundArtifact[];
+  /** Only on the single-round endpoint; re-reads the round's documents. */
+  warnings?: string[];
+  live: {
+    date: string;
+    status: string;
+    trigger: string;
+    started_at: string;
+    finished_at: string | null;
+    stages: { key: string; label: string; status: string; group: string }[];
+  } | null;
+}
+
+export interface RoundsResponse {
+  rounds: Round[];
+  running: boolean;
+  groups: { name: string; stages: string[] }[];
+}
+
+export async function getRounds(limit = 14, signal?: AbortSignal): Promise<RoundsResponse> {
+  return api("/api/pipeline/rounds", { query: { limit }, signal });
+}
+
+export async function runRound(concurrency = 3): Promise<Round["live"]> {
+  return api("/api/pipeline/run", { method: "POST", body: { concurrency } });
+}
+
+export async function cancelRound(): Promise<{ ok: boolean }> {
+  return api("/api/pipeline/cancel", { method: "POST" });
+}
+
+export async function retryRound(
+  concurrency = 3,
+  invalidateDownstream = true
+): Promise<{ invalidated_stages?: string[]; rerun_stages?: string[] }> {
+  return api("/api/pipeline/retry", {
+    method: "POST",
+    body: { concurrency, date: null, invalidate_downstream: invalidateDownstream },
+  });
+}
+
+// --- Round item tracking ---
+
+export interface TrackedItem {
+  id: string;
+  kind: "action" | "test" | "watch";
+  text: string;
+  priority: string;
+  first_seen: string;
+  last_seen: string;
+  times_seen: number;
+  status: "open" | "done" | "dropped";
+  note: string;
+  updated_at: string;
+}
+
+export interface CarryOver {
+  date: string | null;
+  new: TrackedItem[];
+  continuing: TrackedItem[];
+  open_stale: TrackedItem[];
+}
+
+export async function getTrackedItems(params?: {
+  kind?: string;
+  status?: string;
+  limit?: number;
+}): Promise<{ items: TrackedItem[]; carry_over: CarryOver }> {
+  return api("/api/pipeline/actions", { query: params as Record<string, string | number | undefined> });
+}
+
+export async function updateTrackedItem(
+  id: string,
+  payload: { status?: string; note?: string },
+): Promise<TrackedItem> {
+  return api(`/api/pipeline/actions/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export interface DiffRow {
+  [key: string]: string;
+}
+
+export interface RoundDiff {
+  from: string | null;
+  to: string;
+  actions: { added: DiffRow[]; removed: DiffRow[]; persisted: DiffRow[] };
+  tests: { added: DiffRow[]; removed: DiffRow[]; persisted: DiffRow[] };
+  watchlist: { added: DiffRow[]; removed: DiffRow[]; persisted: DiffRow[] };
+  sources: { added: string[]; removed: string[]; new_domains: string[] };
+  counts: Record<string, number>;
+}
+
+export async function getRoundDiff(date: string, against?: string): Promise<RoundDiff> {
+  return api(`/api/pipeline/rounds/${encodeURIComponent(date)}/diff`, {
+    query: against ? { against } : undefined,
+  });
+}
+
+export async function getRound(date: string): Promise<Round> {
+  return api(`/api/pipeline/rounds/${encodeURIComponent(date)}`);
+}
+
+// --- Account / user management ---
+
+export async function updateUser(
+  userId: number,
+  payload: { role?: string; disabled?: boolean; password?: string; revoke_sessions?: boolean },
+): Promise<User> {
+  return api(`/api/users/${userId}`, { method: "PATCH", body: payload });
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ ok: boolean }> {
+  return api("/api/auth/change-password", {
+    method: "POST",
+    body: { current_password: currentPassword, new_password: newPassword },
+  });
+}
+
+export async function listMySessions(): Promise<{
+  sessions: { jti: string; kind: string; expires_at: number; current: boolean }[];
+}> {
+  return api("/api/auth/sessions");
+}
+
+export async function revokeMySession(jti: string): Promise<{ ok: boolean }> {
+  return api(`/api/auth/sessions/${encodeURIComponent(jti)}`, { method: "DELETE" });
+}
+
+export async function deleteJob(name: string): Promise<{ ok: boolean; deleted: string; backup_path?: string | null }> {
+  return api(`/api/jobs/${encodeURIComponent(name)}`, { method: "DELETE" });
+}
+
+// --- API tokens (programmatic access) ---
+
+export interface ApiToken {
+  id: number;
+  name: string;
+  prefix: string;
+  created_at: string | null;
+  last_used_at: string | null;
+  expires_at: number | null;
+  revoked?: boolean;
+}
+
+export async function listApiTokens(): Promise<{ tokens: ApiToken[] }> {
+  return api("/api/auth/tokens");
+}
+
+export async function createApiToken(
+  name: string,
+  expiresDays?: number,
+): Promise<ApiToken & { token: string }> {
+  return api("/api/auth/tokens", {
+    method: "POST",
+    body: expiresDays ? { name, expires_days: expiresDays } : { name },
+  });
+}
+
+export async function revokeApiToken(id: number): Promise<{ ok: boolean }> {
+  return api(`/api/auth/tokens/${id}`, { method: "DELETE" });
+}

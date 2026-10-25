@@ -1,0 +1,43 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 这一份是「整份报告」配方：不挑条目、不再调研，直接从 Job 的整份报告写（topic.whole_report: true）。
+# 它和「报告速览」的做法一样，只是不绑 AI 这个领域：给十个非 AI 矩阵（科技、商业、财经……）用，观众是大众观众。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 专题速览
+description: 带{{audience}}看见这个领域里有意思的新事情，把相关的发现串成一次好听的讲述，听过后对这个世界多懂一点。
+status: experimental
+tags:
+  domain:
+    key: topics
+    name: 综合专题
+  type:
+    key: digest
+    name: 专题速览
+  format:
+    key: long
+    name: B 站横屏长
+audiences: [general]
+target_minutes: 3
+minutes_range: [3, 6]
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: concise
+  style: |
+    带{{audience}}看见这个领域里有意思的新事情，把相关的发现串成一次好听的讲述，听过后对这个世界多懂一点。
+output:
+  use: motion
+  packaging:
+    use: common
+    label: 专题速览
+    outro:
+      lines:
+      - 主要来源见简介
+      seconds: 3

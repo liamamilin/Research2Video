@@ -1,0 +1,42 @@
+# 文稿配方：一份文件就是一种文稿的完整做法（调研 → 写稿 → 出片），字段说明见 spec/video-recipes.md。
+# 这一份是「整份报告」配方：不挑条目、不再调研，直接从 Job 的整份报告写（topic.whole_report: true）。
+# 改完在「文稿配方」页保存会先校验；新配方从现有配方复制。
+
+name: 报告速览
+description: 从这份材料中找到{{audience}}最值得知道的变化，组织成有重点、有联系的一次讲述，让人听完记得住这期的发现。
+status: experimental
+tags:
+  domain:
+    key: ai
+    name: AI 与软件
+  type:
+    key: digest
+    name: 报告速览
+  format:
+    key: long
+    name: B 站横屏长
+audiences: [developer, non_tech]
+target_minutes: 3
+minutes_range: [3, 6]
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style:
+    depth: '{{audience.depth}}'
+    tone: concise
+  style: |
+    从这份材料中找到{{audience}}最值得知道的变化，组织成有重点、有联系的一次讲述，让人听完记得住这期的发现。
+output:
+  use: motion
+  packaging:
+    use: common
+    label: 报告速览
+    outro:
+      lines:
+      - 面向{{audience}}的 报告速览
+      seconds: 3

@@ -1,0 +1,14 @@
+# 矩阵：AI 视频栏目的 5 个 Job（2026-10-22 重新设计，spec/ai-media-columns.md）。每天 2 个、每周 3 个；
+# 除「深度研究」外都只读抓取的订阅源，不联网搜索。原来的 26 个 Job 留在「AI 矩阵」里，没有周期，不会自己运行。
+name: AI 视频栏目
+domain: AI 与软件开发
+keywords: []
+jobs:
+- job: monitoring/ai_flash_discovery
+  copy_as: _flash_discovery
+- ai_media/daily_opensource_radar
+- ai_media/weekly_model_arena
+- ai_media/weekly_business_watch
+- ai_media/weekly_deep_research
+render:
+  video_speed: 1.25
