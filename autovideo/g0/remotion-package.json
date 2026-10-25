@@ -25,7 +25,10 @@
     "react-dom": "19.2.3",
     "remotion": "^4.0.0",
     "zod": "4.5.4",
-    "echarts": "6.1.0"
+    "echarts": "6.1.0",
+    "lucide-react": "0.460.0",
+    "@remotion/lottie": "4.0.535",
+    "lottie-web": "5.13.0"
   },
   "devDependencies": {
     "@remotion/eslint-config-flat": "^4.0.0",

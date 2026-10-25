@@ -1,0 +1,24 @@
+{
+  "action": "load unified objects and motions",
+  "previous_pid": 12268,
+  "service": {
+    "status": "ready",
+    "action": "started",
+    "pid": 59567,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "before": {
+    "total": 283,
+    "completed": 208,
+    "running": 0,
+    "needs_input": 1
+  },
+  "after": {
+    "total": 283,
+    "completed": 208,
+    "running": 0,
+    "needs_input": 1
+  },
+  "formal_jobs_preserved": true
+}

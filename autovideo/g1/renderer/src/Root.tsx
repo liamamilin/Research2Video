@@ -1,6 +1,8 @@
 import React from 'react';
 import {DataChart} from './DataChart';
 import {ScatterChart} from './ScatterChart';
+import {VisualObject, SvgVisualObject, visualFor} from './VisualObjects';
+import {ObjectFlow} from './ObjectFlow';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {CornerBadge, type Badge} from './Packaging';
 import {CreativeVideo, type CreativePreset} from './CreativeForms';
@@ -94,11 +96,13 @@ function ProcessDiagram({scene, frame}: {scene: Scene; frame: number}) {
         </g>;
       })}
       {layout.nodes.map((node: any) => {
-        const target=`node:${node.id}`, active=focused.has(target), blocked=blockedTargets.has(node.id);
+        const target=`node:${node.id}`, active=focused.has(target), blocked=blockedTargets.has(node.id), icon=visualFor(scene,target);
+        const glyphSize=54*layout.scale;
         return <g key={node.id} opacity={alpha(target)}>
           <Panel x={node.x} y={node.y} w={node.width} h={node.height} fill={blocked ? '#372331' : active ? '#183C50' : colors.panel} stroke={blocked ? colors.red : active ? colors.cyan : colors.border} r={18}/>
           {active && <rect x={node.x+8} y={node.y+8} width={node.width-16} height={node.height-16} rx={12} fill="none" stroke={blocked ? colors.red : colors.cyan} opacity={.12+.09*Math.sin(frame/7)}/>}
-          {node.label_lines.map((line: string, i: number) => <Text key={i} x={node.x+node.width/2} y={node.y+node.height/2+(i-(node.label_lines.length-1)/2)*layout.font_size*1.28} size={layout.font_size} weight={active ? 650 : 500}>{line}</Text>)}
+          {icon && <SvgVisualObject scene={scene} target={target} frame={frame} x={node.x+(node.width-glyphSize)/2} y={node.y+22*layout.scale} size={glyphSize} color={colors.cyan}/>}
+          {node.label_lines.map((line: string, i: number) => <Text key={i} x={node.x+node.width/2} y={icon ? node.y+(112+i*46)*layout.scale : node.y+node.height/2+(i-(node.label_lines.length-1)/2)*layout.font_size*1.28} size={layout.font_size} weight={active ? 650 : 500}>{line}</Text>)}
         </g>;
       })}
     </g>
@@ -271,15 +275,15 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
       <div style={{...motion('title'),width:84,height:5,background:paper.green,marginTop:38,borderRadius:3}}/>
       {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? S(36) : S(42),lineHeight:1.65,color:paper.muted}}><Tech text={p.subtitle}/></div>}
     </div> : <>
-      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : 'title')}}><Tech text={heading}/></div>
+      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...(scene.component==='comparison' && p.visuals?.length ? {opacity:ease((frame-scene.start_frame)/16)} : motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : scene.component === 'flow_diagram' ? 'scene' : 'title'))}}><Tech text={heading}/></div>
       {scene.component === 'concept_reveal' && <div style={{position:'absolute',left:140,top:p.lines.length === 4 ? 330 : 360,width:1640,display:'grid',gridTemplateColumns:`repeat(${p.lines.length === 4 ? 2 : p.lines.length}, 1fr)`,gap:28}}>
         {p.lines.map((line: string,i: number) => {
           const match = line.match(/^([^：:]{1,16})[：:]\s*([\s\S]+)$/);
           const label = match ? match[1] : line, body = match ? match[2] : '';
-          const active = latest === `line:${i}`, compact = p.lines.length === 4;
-          return <div key={i} style={{...panelStyle,...motion(`line:${i}`),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? paper.green : paper.line}`}}>
-            <div style={{fontSize:22,color:paper.green,fontWeight:600,letterSpacing:2,marginBottom:compact ? 10 : 29}}>{String(i+1).padStart(2,'0')}</div>
-            <div style={{...textStyle,fontWeight:650,fontSize:S(compact || label.length > 10 ? 36 : 42),lineHeight:1.4}}><Tech text={label}/></div>
+          const target=`line:${i}`, active = latest === target, compact = p.lines.length === 4, icon=visualFor(scene,target);
+          const labelStyle={...textStyle,fontWeight:650,fontSize:S(compact || label.length > 10 ? 36 : 42),lineHeight:1.4};
+          return <div key={i} style={{...panelStyle,...motion(target),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? paper.green : paper.line}`}}>
+            {icon ? compact ? <div style={{display:'flex',alignItems:'center',gap:18}}><VisualObject scene={scene} target={target} frame={frame} size={52}/><div style={{...labelStyle,flex:1}}><Tech text={label}/></div></div> : <><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}><VisualObject scene={scene} target={target} frame={frame} size={64}/><span style={{fontSize:20,color:paper.muted}}>{String(i+1).padStart(2,'0')}</span></div><div style={labelStyle}><Tech text={label}/></div></> : <><div style={{fontSize:22,color:paper.green,fontWeight:600,letterSpacing:2,marginBottom:compact ? 10 : 29}}>{String(i+1).padStart(2,'0')}</div><div style={labelStyle}><Tech text={label}/></div></>}
             {body && <div style={{...textStyle,color:paper.muted,fontSize:S(compact ? 28 : p.lines.length === 3 ? 30 : 34),lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}><Tech text={body}/></div>}
           </div>;
         })}
@@ -288,11 +292,12 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
         {(['left','right'] as const).map((side) => {
           const data=p[side], total=data.items.join('').length, bodySize=S(total > 130 ? 30 : 34);
           return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${side === 'right' ? paper.green : paper.line}`}}>
-            <div style={{...textStyle,color:side === 'right' ? paper.green : paper.muted,fontSize:S(data.label.length > 20 ? 34 : 42),lineHeight:1.4,fontWeight:650,marginBottom:30}}><Tech text={data.label}/></div>
+            <div style={{display:'flex',alignItems:'center',gap:20,marginBottom:30}}><VisualObject scene={scene} target={`side:${side}`} frame={frame} size={64}/><div style={{...textStyle,flex:1,minWidth:0,color:side === 'right' ? paper.green : paper.muted,fontSize:S(data.label.length > 20 ? 34 : 42),lineHeight:1.4,fontWeight:650}}><Tech text={data.label}/></div></div>
             <div style={{display:'flex',flexDirection:'column',gap:20}}>{data.items.map((item: string,i: number) => <div key={i} style={{display:'flex',gap:15,fontSize:bodySize,lineHeight:1.5}}><span style={{color:paper.green}}>·</span><span style={textStyle}><Tech text={item}/></span></div>)}</div>
           </div>;
         })}
       </div>}
+      {scene.component === 'flow_diagram' && <ObjectFlow scene={scene} frame={frame}/>}
       {scene.component === 'scatter_chart' && <ScatterChart scene={scene} frame={frame}/>}
       {scene.component === 'data_chart' && <DataChart scene={scene} frame={frame}/>}
       {scene.component === 'big_number' && <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 72px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center'}}>

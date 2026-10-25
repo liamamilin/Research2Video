@@ -15,6 +15,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 from PIL import ImageFont
+from g1.visual_language import component_schema, validate_references
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -73,8 +74,7 @@ def _unique(items, key, path, label):
 
 
 def _validate_component(component: str, props: dict[str, Any], path: str):
-    schema_path = COMPONENT_SCHEMA_DIR / f"{component}.schema.json"
-    validator = Draft202012Validator(_schema(schema_path))
+    validator = Draft202012Validator(component_schema(component))
     errors = sorted(validator.iter_errors(props), key=lambda e: tuple(str(x) for x in e.path))
     if errors:
         error = errors[0]
@@ -205,7 +205,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         if information:
             schema["properties"]["style"]["properties"]["preset"] = {"const": "minimal_light"}
             motion_scene = copy.deepcopy(schema["properties"]["scenes"]["items"])
-            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"] + (["data_chart", "scatter_chart", "object_showcase", "material_collage"] if presentation["preset"] == "explanation" else [])}
+            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"] + (["data_chart", "scatter_chart", "flow_diagram", "object_showcase", "material_collage"] if presentation["preset"] == "explanation" else [])}
             motion_scene["properties"]["beats"].pop("maxItems", None)
             motion_scene["properties"]["beats"]["items"]["properties"]["action"] = {"const": "reveal"}
             motion_scene["properties"]["beats"]["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
@@ -233,7 +233,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         if not isinstance(ir.get("scenes"), list) or not ir["scenes"] or any(not isinstance(s, dict) or not (
                 (creative and s.get("component") in allowed_creative)
                 or (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"}
-                    | ({"data_chart", "scatter_chart", "object_showcase", "material_collage"} if presentation["preset"] == "explanation" else set()))
+                    | ({"data_chart", "scatter_chart", "flow_diagram", "object_showcase", "material_collage"} if presentation["preset"] == "explanation" else set()))
                 or (not information and s.get("component") == "flow_diagram" and isinstance(s.get("props"), dict) and "layout" in s["props"])) for s in ir["scenes"]):
             _fail("CONTENT_COMPONENT_UNSUPPORTED", "/scenes", "chapter extension requires laid-out flow diagrams or explicit information motion")
     if isinstance(ir, dict) and "playback" in ir:
@@ -323,6 +323,11 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
 
         # Component invariants not expressed by the authored JSON Schemas.
         props = scene["props"]
+        if props.get("visuals"):
+            try:
+                validate_references(scene["component"], props)
+            except ValueError as exc:
+                _fail("VISUAL_OBJECT_REFERENCE", f"{sp}/props/visuals", str(exc))
         if scene["component"] == "kinetic_text" and "layout" in props:
             if props["text"] != "\n".join(p["text"] for p in props["points"]):
                 _fail("CARD_TEXT_MISMATCH", f"{sp}/props/text", "card text must preserve its displayed points")

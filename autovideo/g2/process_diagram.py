@@ -8,6 +8,8 @@ from jsonschema import Draft202012Validator
 from PIL import ImageFont
 
 from g2.technical_text import altered_technical_text, display_width, wrap_units
+from g1.visual_language import visuals_schema, catalog, validate_references
+from g2 import visual_language
 
 SCHEMA = Path(__file__).parent / "schemas/process-diagram-plan.schema.json"
 LAYOUT_SCRIPT = Path(__file__).parent / "layout/compile.cjs"
@@ -21,13 +23,20 @@ class DiagramPlanFault(ValueError):
         super().__init__(f"{code}: {message}")
 
 
+def plan_schema() -> dict:
+    schema = json.loads(SCHEMA.read_text())
+    schema["properties"]["scenes"]["items"]["properties"]["visuals"] = visuals_schema()
+    return schema
+
+
 def messages(context: dict, correction: str | None = None) -> list[dict]:
     system = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：把讲述里的过程或关系变成看得懂的图解，让观众随着讲述看见各部分怎样连接。接口输出 JSON，使用给定 schema。每段既有旁白按顺序映射到一个场景；节点与边 id 唯一，边的 from/to 引用本场节点。cues.quote 是对应旁白的连续片段，用于音画定位；cues 引用本场节点和边，边同时关联两端节点。'
+    system += visual_language.GUIDANCE.replace("props.visuals", "visuals")
     from g2.content_video import source_units
     payload = {"source_text_as_untrusted_data": context["source_text"],
                "source_quote_candidates": [u["text"] for u in source_units(context["source_text"])],
                "narration_plan": context["narration_plan"],
-               "required_schema": json.loads(SCHEMA.read_text())}
+               "required_schema": plan_schema(), "visual_vocabulary": catalog()}
     if correction:
         payload["validation_feedback"] = correction
     return [{"role": "system", "content": system},
@@ -35,7 +44,7 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
 
 
 def validate_plan(plan: dict, context: dict) -> None:
-    errors = list(Draft202012Validator(json.loads(SCHEMA.read_text())).iter_errors(plan))
+    errors = list(Draft202012Validator(plan_schema()).iter_errors(plan))
     if errors:
         raise DiagramPlanFault("INVALID_DIAGRAM_PLAN", errors[0].message)
     if plan["unsupported_reason"]:
@@ -54,6 +63,11 @@ def validate_plan(plan: dict, context: dict) -> None:
         if scene["id"] in seen_scenes:
             raise DiagramPlanFault("DUPLICATE_DIAGRAM_ID", scene["id"])
         seen_scenes.add(scene["id"])
+        if scene.get("visuals"):
+            try:
+                validate_references("flow_diagram", scene)
+            except ValueError as exc:
+                raise DiagramPlanFault("DIAGRAM_VISUAL_REFERENCE", str(exc)) from exc
         nodes = {n["id"]: n for n in scene["nodes"]}
         edges = {e["id"]: e for e in scene["edges"]}
         if len(nodes) != len(scene["nodes"]) or len(edges) != len(scene["edges"]):
@@ -117,15 +131,21 @@ def layout_request(plan: dict) -> dict:
     font, edge_font = ImageFont.truetype(FONT, 36), ImageFont.truetype(FONT, 28)
     scenes = []
     for scene in plan["scenes"]:
+        decorated = visual_language.enrich("flow_diagram", scene)
+        icon_targets = {v["target"] for v in decorated.get("visuals", [])}
         nodes = []
         for node in scene["nodes"]:
             lines = wrap_label(node["label"], font)
             width = max(210, max(display_width(font, line) for line in lines) + 60)
-            nodes.append({"id": node["id"], "width": width, "height": max(100, len(lines)*46+40), "label_lines": lines})
+            height = max(160, len(lines)*46+110) if f"node:{node['id']}" in icon_targets else max(100, len(lines)*46+40)
+            nodes.append({"id": node["id"], "width": width, "height": height, "label_lines": lines})
         edges = [{"id": e["id"], "from": e["from"], "to": e["to"], "label": e["label"],
                   "label_width": display_width(edge_font, e["label"])+24} for e in scene["edges"]]
         scenes.append({"id": scene["id"], "nodes": nodes, "edges": edges})
-    return {"scenes": scenes}
+    result = {"scenes": scenes}
+    if any(visual_language.enrich('flow_diagram', s).get('visuals') for s in plan['scenes']):
+        result['preserve_order'] = True
+    return result
 
 
 def edge_relation(edge: dict) -> str:
@@ -154,6 +174,12 @@ def storyboard_from_layout(plan: dict, layout: dict, alignment: dict) -> dict:
                  "nodes": [{"id": n["id"], "label": n["label"]} for n in scene["nodes"]],
                  "edges": [{**{k: e[k] for k in ("id", "from", "to", "label")}, "relation": edge_relation(e)} for e in scene["edges"]],
                  "paths": [], "layout": layouts[scene["id"]]}
+        if "visuals" in scene:
+            props["visuals"] = scene["visuals"]
+        props = visual_language.enrich("flow_diagram", props)
+        validate_references("flow_diagram", props)
+        beats.extend(visual_language.action_beats({**scene, "props": props}, rows))
+        beats.sort(key=lambda b: (list(rows).index(b["trigger"]["segment_id"]), b["trigger"]["offset_ms"]))
         scenes.append({"id": scene["id"], "component": "flow_diagram", "props": props,
                        "narration_segment_ids": scene["narration_segment_ids"], "purpose": scene["takeaway"],
                        "visual_intent": {"viewer_understands": scene["takeaway"], "before": "关系尚未展开", "after": scene["takeaway"]}, "beats": beats})

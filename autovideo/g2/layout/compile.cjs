@@ -4,7 +4,7 @@ const ELK = require('elkjs/lib/elk.bundled.js');
 const elk = new ELK();
 const WIDTH = 1560, HEIGHT = 500;
 
-async function layoutScene(scene) {
+async function layoutScene(scene, preserveOrder = false) {
   const candidates = [];
   for (const direction of ['RIGHT', 'DOWN']) {
     const graph = {
@@ -12,7 +12,9 @@ async function layoutScene(scene) {
       layoutOptions: {'elk.algorithm': 'layered', 'elk.direction': direction,
         'elk.edgeRouting': 'ORTHOGONAL', 'elk.spacing.nodeNode': '50',
         'elk.layered.spacing.nodeNodeBetweenLayers': '72',
-        'elk.padding': '[top=30,left=30,bottom=30,right=30]', 'elk.randomSeed': '1'},
+        'elk.padding': '[top=30,left=30,bottom=30,right=30]', 'elk.randomSeed': '1',
+        ...(preserveOrder ? {'elk.layered.cycleBreaking.strategy':'MODEL_ORDER',
+          'elk.layered.considerModelOrder.strategy':'NODES_AND_EDGES'} : {})},
       children: scene.nodes.map((n) => ({id: n.id, width: n.width, height: n.height})),
       edges: scene.edges.map((e) => ({id: e.id, sources: [e.from], targets: [e.to],
         ...(e.label ? {labels: [{id: `${e.id}_label`, text: e.label, width: e.label_width, height: 34}]} : {})})),
@@ -40,6 +42,6 @@ async function layoutScene(scene) {
 (async () => {
   const request=JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
   const scenes=[];
-  for (const scene of request.scenes) scenes.push({id: scene.id, layout: await layoutScene(scene)});
+  for (const scene of request.scenes) scenes.push({id: scene.id, layout: await layoutScene(scene, request.preserve_order === true)});
   process.stdout.write(JSON.stringify({scenes}));
 })().catch((error) => {process.stderr.write(String(error)); process.exitCode=1;});

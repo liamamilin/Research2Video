@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "objects": [
+    {"id":"database","label":"数据库","keywords":["数据库","资料库","database"]},
+    {"id":"server","label":"服务器","keywords":["服务器","服务端","server"]},
+    {"id":"file","label":"文件","keywords":["文件","文档","附件","file","document"]},
+    {"id":"folder","label":"文件夹","keywords":["文件夹","目录","folder"]},
+    {"id":"search","label":"搜索","keywords":["检索","搜索","查询","search","retrieval"]},
+    {"id":"user","label":"用户","keywords":["用户","使用者","个人","user"]},
+    {"id":"users","label":"团队","keywords":["团队","协作","人群","team"]},
+    {"id":"clock","label":"时间","keywords":["耗时","时间","延迟","等待","time","latency"]},
+    {"id":"cost","label":"费用","keywords":["成本","费用","价格","预算","cost","price"]},
+    {"id":"cloud","label":"云端","keywords":["云端","云服务","云计算","cloud"]},
+    {"id":"code","label":"代码","keywords":["代码","编程","脚本","code"]},
+    {"id":"network","label":"连接","keywords":["连接","网络","请求","接口","network","request"]},
+    {"id":"chart","label":"数据图表","keywords":["图表","趋势","统计","chart"]},
+    {"id":"brain","label":"模型","keywords":["模型","推理","人工智能","model"]},
+    {"id":"cpu","label":"计算","keywords":["芯片","处理器","算力","cpu","gpu"]},
+    {"id":"shield","label":"保护","keywords":["隐私","权限","加密","保护"]},
+    {"id":"globe","label":"世界","keywords":["全球","地球","世界","网站"]},
+    {"id":"book","label":"知识","keywords":["书籍","知识","学习","阅读"]},
+    {"id":"leaf","label":"自然","keywords":["植物","生态","自然","环境"]},
+    {"id":"atom","label":"科学","keywords":["原子","物理","化学","科学实验"]},
+    {"id":"building","label":"建筑","keywords":["建筑","城市","工厂","机构"]},
+    {"id":"settings","label":"设置","keywords":["设置","配置","参数"]},
+    {"id":"result","label":"结果","keywords":["结果","输出","报告","result","output"]}
+  ],
+  "actions": {
+    "send":"发送、上传或传递对象",
+    "process":"正在处理、解析或检索",
+    "complete":"结果生成、处理完成",
+    "disconnect":"连接中断或断开"
+  }
+}

@@ -896,6 +896,8 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     shutil.copyfile(PROJECT / "g1/renderer/src/ImageMaterials.tsx", src / "ImageMaterials.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/DataChart.tsx", src / "DataChart.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/ScatterChart.tsx", src / "ScatterChart.tsx")
+    for name in ("VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx"):
+        shutil.copyfile(PROJECT / "g1/renderer/src" / name, src / name)
     (src / "index.ts").write_text("import {registerRoot} from 'remotion';\nimport {Root} from './Root';\n\nregisterRoot(Root);\n", encoding="utf-8")
     ensure_renderer_dependency_link(renderer)
     props_path = ARTIFACTS / "render-props.json"

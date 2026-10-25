@@ -1,0 +1,24 @@
+{
+  "job_id": "624b62b6-a429-4de0-9b53-2406001b505e",
+  "parent_job_id": "9a0aa83f-1713-406c-a1e8-c2e90a0fc7c4",
+  "engine_data": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-visual-language/bda6ed3f5f69416487f08cddc20094a1",
+  "voice_unchanged": true,
+  "screen_text_and_objects_unchanged": true,
+  "layout_order": "narration",
+  "original_real_model_plan": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/visual-language-20261026-final",
+  "components": [
+    "flow_diagram",
+    "concept_reveal",
+    "comparison",
+    "price_change"
+  ],
+  "media": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 1330,
+    "duration_seconds": 44.352,
+    "full_decode": "PASS"
+  }
+}

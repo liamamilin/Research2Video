@@ -11,6 +11,8 @@ from PIL import ImageFont
 import re
 
 from g2.technical_text import altered_technical_text, display_width, wrap_units
+from g1.visual_language import component_schema, validate_references
+from g2 import visual_language
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / "g2/schemas/information-motion-plan.schema.json"
@@ -69,6 +71,8 @@ def targets(component: str, props: dict) -> list[str]:
         return ["title", *[f"line:{i}" for i in range(count + bool(props.get("takeaway")))]]
     if component == "title_card":
         return ["title", *(["subtitle"] if props.get("subtitle") else [])]
+    if component == "flow_diagram":
+        return ["scene", *[f"node:{n['id']}" for n in props["nodes"]], *[f"edge:{e['id']}" for e in props["edges"]]]
     if component == "concept_reveal":
         return ["title", *[f"line:{i}" for i in range(len(props["lines"]))]]
     if component == "big_number":
@@ -166,14 +170,18 @@ def validate_text_fit(scene: dict, large: bool = False) -> None:
         count = len(props["lines"])
         compact = count == 4
         width = (1640 - 28 * ((2 if compact else count) - 1)) / (2 if compact else count)
-        for line in props["lines"]:
+        for index, line in enumerate(props["lines"]):
             match = re.match(r"^([^：:]{1,16})[：:]\s*([\s\S]+)$", line)
             label, body = (match[1], match[2]) if match else (line, "")
             label_size = S(36 if compact or len(label) > 10 else 42)
             body_size = S(28 if compact else 30 if count == 3 else 34)
             text_width = int(width - (68 if compact else 72))
-            height = (50 if compact else 68) + 31 + (10 if compact else 29)
-            height += text_lines(label, label_size, text_width) * label_size * 1.4
+            icon = any(v['target'] == f'line:{index}' for v in props.get('visuals', []))
+            label_height = text_lines(label, label_size, text_width - (70 if icon and compact else 0)) * label_size * 1.4
+            if icon:
+                height = 50 + max(52, label_height) if compact else 68 + 64 + 22 + label_height
+            else:
+                height = (50 if compact else 68) + 31 + (10 if compact else 29) + label_height
             if body:
                 height += (10 if compact else 22) + text_lines(body, body_size, text_width) * body_size * (1.5 if compact else 1.6)
             if height > (250 if compact else 440):
@@ -237,7 +245,9 @@ def validate_text_fit(scene: dict, large: bool = False) -> None:
             data = props[side]
             size = S(30 if len("".join(data["items"])) > 130 else 34)
             label_size = S(34 if len(data["label"]) > 20 else 42)
-            height = 68 + text_lines(data["label"], label_size, 718) * label_size * 1.4 + 30
+            icon = any(v['target'] == f'side:{side}' for v in props.get('visuals', []))
+            label_height = text_lines(data['label'], label_size, 634 if icon else 718) * label_size * 1.4
+            height = 68 + (max(64, label_height) if icon else label_height) + 30
             height += sum(text_lines(item, size, 685) * size * 1.5 for item in data["items"]) + 20 * (len(data["items"])-1)
             if height > 500:
                 raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}/{side}: comparison text exceeds its panel; condense text or split the comparison")
@@ -367,12 +377,12 @@ def fidelity_issues(plan: dict, context: dict) -> list[str]:
 def messages(context: dict, correction: str | None = None) -> list[dict]:
     system = '根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：为讲述设计信息动效。让观众看见数字的大小、对象的差别或事物间的关系，画面随着讲述帮助理解。接口输出 JSON，使用 component_props_schemas 中的受控组件。场景连续覆盖旁白，场景 id 为 s1、s2…；headline 与有 title 字段的 props.title 一致。结构见 required_schema。'
     from g2.audience_copy import GUIDANCE
-    system += "\n" + GUIDANCE
+    system += "\n" + GUIDANCE + "\n" + visual_language.GUIDANCE
     if context.get("verbatim"):
         system += VERBATIM_RULES
     if context.get("large_text"):
         system += LARGE_TEXT_RULES
-    catalog = {name: json.loads((ROOT / f"schemas/components/{name}.schema.json").read_text()) for name in COMPONENTS}
+    catalog = {name: component_schema(name) for name in COMPONENTS}
     # The motion renderer reveals comparison sides. The legacy renderer's
     # separate highlight strip is not implemented in this presentation.
     catalog["comparison"]["properties"].pop("highlights", None)
@@ -384,7 +394,7 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
         scene_schema["properties"].pop(field, None)
     payload = {"source_text_as_untrusted_data": context["source_text"],
                "narration_plan": narration_brief(context["narration_plan"]), "component_props_schemas": catalog,
-               "required_schema": schema}
+               "required_schema": schema, "visual_vocabulary": visual_language.catalog()}
     if correction:
         payload["validation_feedback"] = correction
     return [{"role": "system", "content": system}, {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}]
@@ -406,13 +416,19 @@ def validate_plan(plan: dict, context: dict) -> None:
     # A chart that prints 0.5 for the narration's 半美元 is not altering a technical token.
     reference += "\n" + " ".join(number for _, number in _derived_numbers(reference))
     for scene in plan["scenes"]:
-        component, props = scene["component"], scene["props"]
-        schema = json.loads((ROOT / f"schemas/components/{component}.schema.json").read_text())
+        component = scene["component"]
+        props = scene["props"] = visual_language.enrich(component, scene["props"])
+        schema = component_schema(component)
         errors = list(Draft202012Validator(schema).iter_errors(props))
         if errors:
             raise InformationFault("INFORMATION_PROPS", errors[0].message)
         if component == "bar_chart" and len(props["categories"]) != len(props["values"]):
             raise InformationFault("INFORMATION_PROPS", f"{scene['id']}: bar_chart needs one value per category")
+        if props.get("visuals"):
+            try:
+                validate_references(component, props)
+            except ValueError as exc:
+                raise InformationFault("INFORMATION_PROPS", str(exc)) from exc
         validate_text_fit(scene, bool(context.get("large_text")))
         if component not in ("comparison", "bar_chart") and props["title"] != scene["headline"]:
             raise InformationFault("INFORMATION_HEADLINE", scene["id"])
@@ -592,6 +608,8 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
     Phrase boundaries are measured. Within-phrase positions are estimates,
     as with the legacy character-position cues, and are recorded as such.
     """
+    if scene["component"] == "flow_diagram":
+        return visual_language.flow_cues(scene, rows)
     required = targets(scene["component"], scene["props"])
     speech = [rows[sid] for sid in scene["narration_segment_ids"]]
     total = sum(len(row["text"]) for row in speech)
@@ -655,6 +673,7 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
                 row = speech[last[0]]
                 cue.update(segment_id=row['id'], quote=row['text'][last[1]:last[1]+1], character_index=last[1])
             last = max(last, position)
+    visual_language.align_object_cues(scene, result, speech)
     return result
 
 
@@ -662,6 +681,7 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
     rows = {r["id"]: r for r in alignment["rows"]}
     scenes, timing = [], []
     for scene in plan["scenes"]:
+        scene = {**scene, "props": visual_language.enrich(scene["component"], scene["props"])}
         beats = []
         order = list(rows)
         if scene["component"] == "source_card":
@@ -683,6 +703,8 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
             beats.append(beat)
             timing.append({"scene_id": scene["id"], **cue, "automatic": automatic,
                            "estimated_start_ms": row["start_ms"] + offset})
+        beats.extend(visual_language.action_beats(scene, rows))
+        beats.sort(key=lambda b: (order.index(b["trigger"]["segment_id"]), b["trigger"].get("offset_ms", 0)))
         scenes.append({"id": scene["id"], "component": scene["component"], "props": scene["props"],
                        "narration_segment_ids": scene["narration_segment_ids"], "purpose": scene["headline"],
                        "visual_intent": {"viewer_understands": scene["headline"], "before": "要点尚未展开", "after": scene["headline"]}, "beats": beats})

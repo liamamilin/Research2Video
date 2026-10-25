@@ -1,0 +1,44 @@
+[
+  {
+    "scene": "card_1",
+    "target": "edge:e1",
+    "seconds": 6.233333333333334,
+    "file": "flow_diagram-edge-e1.png"
+  },
+  {
+    "scene": "card_1",
+    "target": "node:result",
+    "seconds": 9.466666666666667,
+    "file": "flow_diagram-node-result.png"
+  },
+  {
+    "scene": "card_2",
+    "target": "line:0",
+    "seconds": 17.3,
+    "file": "concept_reveal-line-0.png"
+  },
+  {
+    "scene": "card_2",
+    "target": "line:1",
+    "seconds": 20.400000000000002,
+    "file": "concept_reveal-line-1.png"
+  },
+  {
+    "scene": "card_2",
+    "target": "line:2",
+    "seconds": 23.733333333333334,
+    "file": "concept_reveal-line-2.png"
+  },
+  {
+    "scene": "card_3",
+    "target": "side:right",
+    "seconds": 33.800000000000004,
+    "file": "comparison-side-right.png"
+  },
+  {
+    "scene": "card_4",
+    "target": "line:2",
+    "seconds": 44.266666666666666,
+    "file": "price_change-line-2.png"
+  }
+]

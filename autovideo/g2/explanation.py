@@ -7,10 +7,12 @@ from jsonschema import Draft202012Validator, ValidationError
 
 from g2 import information_motion as motion
 from g2.card_editorial import groups
+from g1.visual_language import component_schema, catalog, validate_references
+from g2 import visual_language, process_diagram
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / 'g2/schemas/explanation-plan.schema.json'
-COMPONENTS = (*motion.COMPONENTS, 'data_chart', 'scatter_chart')
+COMPONENTS = (*motion.COMPONENTS, 'data_chart', 'scatter_chart', 'flow_diagram')
 
 
 def enabled(saved: dict, form: str) -> bool:
@@ -39,8 +41,13 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
               'reveal_phrases填写讲稿中引出每个时间点（trend）或每个系列（grouped）的短语，帮助画面跟随旁白。'
               '有可用图片的普通说明会自动展示图片；讲到数据时优先用数字或图表。'
               '画面文字简洁，不把整段旁白贴上屏。只返回符合required_schema的JSON。')
-    payload = {'title': context['title'], 'groups': context['groups'],
-               'component_props_schemas': {name: json.loads((ROOT / f'schemas/components/{name}.schema.json').read_text()) for name in COMPONENTS},
+    system += ('明确的传递过程可以用flow_diagram：2到5个节点，edges连接已有节点，paths填空数组，附title和takeaway；布局由程序生成。' + visual_language.GUIDANCE)
+    schemas = {name: component_schema(name) for name in COMPONENTS}
+    schemas['flow_diagram']['properties'].pop('layout', None)
+    for field in ('nodes', 'edges'):
+        schemas['flow_diagram']['properties'][field]['items']['properties']['id']['pattern'] = '^[a-z][a-z0-9_]{0,23}$'
+    payload = {'title': context['title'], 'groups': context['groups'], 'visual_vocabulary': catalog(),
+               'component_props_schemas': schemas,
                'required_schema': json.loads(SCHEMA.read_text())}
     if context.get('instruction'):
         payload['visual_preference'] = context['instruction']
@@ -55,8 +62,19 @@ def validate(plan: dict, context: dict) -> None:
     if [p['id'] for p in plan['pages']] != [g['id'] for g in context['groups']]:
         raise ValueError('画面页需要按顺序覆盖输入分组')
     for page in plan['pages']:
-        props = page['props']
-        Draft202012Validator(json.loads((ROOT / f"schemas/components/{page['component']}.schema.json").read_text())).validate(props)
+        props = page['props'] = visual_language.enrich(page['component'], page['props'])
+        Draft202012Validator(component_schema(page['component'])).validate(props)
+        if 'visuals' in props:
+            validate_references(page['component'], props)
+        if page['component'] == 'flow_diagram':
+            ids = {n['id'] for n in props['nodes']}
+            if (len(ids) != len(props['nodes']) or len(ids) > 5
+                    or len({e['id'] for e in props['edges']}) != len(props['edges'])
+                    or any(len(item['id']) > 24 for item in [*props['nodes'], *props['edges']])
+                    or any(e['from'] not in ids or e['to'] not in ids for e in props['edges'])):
+                raise ValueError('流程图使用2到5个独立节点，连线连接已有节点')
+            if not props.get('title') or not props.get('takeaway'):
+                raise ValueError('流程图需要标题和讲解结语')
         if page['component'] == 'data_chart':
             if any(len(s['values']) != len(props['categories']) for s in props['series']):
                 raise ValueError('每个图表系列需要与横轴项数量一致')
@@ -72,7 +90,7 @@ def validate(plan: dict, context: dict) -> None:
                 raise ValueError('散点图强调对象需要在本图中存在')
         elif page['component'] == 'bar_chart' and len(props['categories']) != len(props['values']):
             raise ValueError('条形图需要每项对应一个数值')
-        if page['component'] not in {'data_chart', 'scatter_chart'}:
+        if page['component'] not in {'data_chart', 'scatter_chart', 'flow_diagram'}:
             motion.validate_text_fit({'id': page['id'], 'component': page['component'], 'props': props}, False)
 
 
@@ -118,7 +136,7 @@ def plan_storyboard(pipeline, narration: dict, saved: dict) -> dict:
 def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, assets: list[dict]) -> dict:
     """Combine paragraph pictures and native data/text scenes on the same measured timeline."""
     scenes = []
-    data = {'data_chart', 'scatter_chart', 'big_number', 'price_change', 'bar_chart'}
+    data = {'data_chart', 'scatter_chart', 'big_number', 'price_change', 'bar_chart', 'flow_diagram'}
     rows = saved.get('image_materials', [])
     for page, group in zip(plan['pages'], plan['groups']):
         component, props = page['component'], page['props']
@@ -132,6 +150,16 @@ def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, asset
             props = {'title': group['title'], 'text': (' '.join(props.get('lines', [])) or props.get('subtitle') or group['text'])[:80], 'images': images, 'focus_indices': list(range(len(images)))}
         scenes.append({'id': page['id'], 'component': component, 'props': props,
                        'headline': props.get('title', group['title']), 'narration_segment_ids': group['segment_ids']})
+    diagrams = [s for s in scenes if s['component'] == 'flow_diagram']
+    if diagrams:
+        request = pipeline.ARTIFACTS / 'object-layout-request.json'
+        pipeline.write_json(request, process_diagram.layout_request({'scenes': [{**s['props'], 'id': s['id']} for s in diagrams]}))
+        raw = pipeline._run_fixed_command('object-layout', [pipeline.NODE, process_diagram.LAYOUT_SCRIPT, request], pipeline.PROJECT, timeout=60)
+        layouts = json.loads(raw)
+        pipeline.write_json(pipeline.ARTIFACTS / 'object-layout.json', layouts)
+        by_id = {s['id']: s['layout'] for s in layouts['scenes']}
+        for scene in diagrams:
+            scene['props'] = {**scene['props'], 'layout': by_id[scene['id']]}
     board = motion.compile_storyboard({'scenes': scenes}, alignment, pipeline)
     board.update(image_assets=assets, presentation='explanation')
     pipeline.write_json(pipeline.ARTIFACTS / 'explanation-plan.json', plan)

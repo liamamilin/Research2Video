@@ -1,0 +1,279 @@
+{
+  "pages": [
+    {
+      "id": "card_1",
+      "component": "flow_diagram",
+      "props": {
+        "title": "一次查询的协作流程",
+        "takeaway": "用户上传、服务器转交、数据库检索，结果返回用户",
+        "nodes": [
+          {
+            "id": "user",
+            "label": "用户"
+          },
+          {
+            "id": "server",
+            "label": "服务器"
+          },
+          {
+            "id": "database",
+            "label": "数据库"
+          },
+          {
+            "id": "result",
+            "label": "结果"
+          }
+        ],
+        "edges": [
+          {
+            "id": "e1",
+            "from": "user",
+            "to": "server",
+            "label": "上传文件",
+            "relation": "flow"
+          },
+          {
+            "id": "e2",
+            "from": "server",
+            "to": "database",
+            "label": "检索请求",
+            "relation": "flow"
+          },
+          {
+            "id": "e3",
+            "from": "database",
+            "to": "result",
+            "label": "检索完成",
+            "relation": "flow"
+          },
+          {
+            "id": "e4",
+            "from": "result",
+            "to": "user",
+            "label": "返回结果",
+            "relation": "flow"
+          }
+        ],
+        "paths": [
+          {
+            "id": "path_main",
+            "edge_ids": [
+              "e1",
+              "e2",
+              "e3",
+              "e4"
+            ]
+          }
+        ],
+        "visuals": [
+          {
+            "target": "node:user",
+            "icon": "user",
+            "action": "send",
+            "phrase": "用户上传文件"
+          },
+          {
+            "target": "node:server",
+            "icon": "server",
+            "phrase": "服务器接收请求"
+          },
+          {
+            "target": "node:database",
+            "icon": "database",
+            "action": "process",
+            "phrase": "再到数据库中检索"
+          },
+          {
+            "target": "node:result",
+            "icon": "result",
+            "action": "complete",
+            "phrase": "最后把结果返回给用户"
+          }
+        ]
+      }
+    },
+    {
+      "id": "card_2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "三个不同状态",
+        "lines": [
+          "处理文件：内容正在解析",
+          "生成结果：输出已经准备好",
+          "连接中断：请求停止，等待重新连接"
+        ],
+        "visuals": [
+          {
+            "target": "line:0",
+            "icon": "file",
+            "action": "process",
+            "phrase": "处理文件时"
+          },
+          {
+            "target": "line:1",
+            "icon": "result",
+            "action": "complete",
+            "phrase": "生成结果时"
+          },
+          {
+            "target": "line:2",
+            "icon": "network",
+            "action": "disconnect",
+            "phrase": "连接中断时"
+          }
+        ]
+      }
+    },
+    {
+      "id": "card_3",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "本地服务器",
+          "items": [
+            "便于掌控运行环境"
+          ]
+        },
+        "right": {
+          "label": "云端服务",
+          "items": [
+            "便于多端访问"
+          ]
+        },
+        "highlights": [
+          "按团队的工作方式选择即可"
+        ],
+        "visuals": [
+          {
+            "target": "side:left",
+            "icon": "server",
+            "phrase": "本地服务器便于掌控运行环境"
+          },
+          {
+            "target": "side:right",
+            "icon": "cloud",
+            "phrase": "云端服务便于多端访问"
+          }
+        ]
+      }
+    },
+    {
+      "id": "card_4",
+      "component": "price_change",
+      "props": {
+        "title": "月费变化",
+        "unit": "美元",
+        "rows": [
+          {
+            "label": "月费",
+            "before": "20",
+            "after": "25",
+            "change": "5",
+            "direction": "up"
+          }
+        ],
+        "staged": true
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "card_1",
+      "chapter_id": "c1",
+      "title": "对象、状态与选择",
+      "segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ],
+      "text": "从一次文件查询看系统如何协作。用户上传文件，服务器接收请求，再到数据库中检索，最后把结果返回给用户。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n1",
+          "text": "从一次文件查询看系统如何协作。"
+        },
+        {
+          "id": "c1_n2",
+          "text": "用户上传文件，服务器接收请求，再到数据库中检索，最后把结果返回给用户。"
+        }
+      ],
+      "image_indices": []
+    },
+    {
+      "id": "card_2",
+      "chapter_id": "c1",
+      "title": "对象、状态与选择",
+      "segment_ids": [
+        "c1_n3",
+        "c1_n4",
+        "c1_n5",
+        "c1_n6"
+      ],
+      "text": "文件处理、结果生成和连接中断，是三个不同的状态。处理文件时，内容正在解析。生成结果时，输出已经准备好。连接中断时，请求停止，等待重新连接。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n3",
+          "text": "文件处理、结果生成和连接中断，是三个不同的状态。"
+        },
+        {
+          "id": "c1_n4",
+          "text": "处理文件时，内容正在解析。"
+        },
+        {
+          "id": "c1_n5",
+          "text": "生成结果时，输出已经准备好。"
+        },
+        {
+          "id": "c1_n6",
+          "text": "连接中断时，请求停止，等待重新连接。"
+        }
+      ],
+      "image_indices": []
+    },
+    {
+      "id": "card_3",
+      "chapter_id": "c1",
+      "title": "对象、状态与选择",
+      "segment_ids": [
+        "c1_n7",
+        "c1_n8",
+        "c1_n9"
+      ],
+      "text": "再对比本地服务器和云端服务。本地服务器便于掌控运行环境，云端服务便于多端访问。按团队的工作方式选择即可。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n7",
+          "text": "再对比本地服务器和云端服务。"
+        },
+        {
+          "id": "c1_n8",
+          "text": "本地服务器便于掌控运行环境，云端服务便于多端访问。"
+        },
+        {
+          "id": "c1_n9",
+          "text": "按团队的工作方式选择即可。"
+        }
+      ],
+      "image_indices": []
+    },
+    {
+      "id": "card_4",
+      "chapter_id": "c1",
+      "title": "对象、状态与选择",
+      "segment_ids": [
+        "c1_n10"
+      ],
+      "text": "最后看价格变化：月费从20美元变成25美元，增加5美元。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n10",
+          "text": "最后看价格变化：月费从20美元变成25美元，增加5美元。"
+        }
+      ],
+      "image_indices": []
+    }
+  ]
+}

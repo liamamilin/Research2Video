@@ -168,6 +168,65 @@
                 }
               }
             }
+          },
+          "visuals": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "target",
+                "icon"
+              ],
+              "properties": {
+                "target": {
+                  "type": "string",
+                  "pattern": "^(line:[0-3]|side:(left|right)|node:[a-z][a-z0-9_]{0,47})$"
+                },
+                "icon": {
+                  "enum": [
+                    "database",
+                    "server",
+                    "file",
+                    "folder",
+                    "search",
+                    "user",
+                    "users",
+                    "clock",
+                    "cost",
+                    "cloud",
+                    "code",
+                    "network",
+                    "chart",
+                    "brain",
+                    "cpu",
+                    "shield",
+                    "globe",
+                    "book",
+                    "leaf",
+                    "atom",
+                    "building",
+                    "settings",
+                    "result"
+                  ]
+                },
+                "action": {
+                  "enum": [
+                    "none",
+                    "send",
+                    "process",
+                    "complete",
+                    "disconnect"
+                  ]
+                },
+                "phrase": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              }
+            }
           }
         }
       }

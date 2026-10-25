@@ -29,7 +29,8 @@
               "bar_chart",
               "price_change",
               "data_chart",
-              "scatter_chart"
+              "scatter_chart",
+              "flow_diagram"
             ]
           },
           "props": {

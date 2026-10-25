@@ -1,0 +1,16 @@
+{
+  "renderer": "Remotion 4.0.535 / @remotion/lottie 4.0.535",
+  "lottie_web": "5.13.0",
+  "lucide_react": "0.460.0",
+  "moving_frame": 24,
+  "hold_frames": [
+    90,
+    120
+  ],
+  "hold_pixels_equal": true,
+  "clips": [
+    "process",
+    "complete",
+    "disconnect"
+  ]
+}
