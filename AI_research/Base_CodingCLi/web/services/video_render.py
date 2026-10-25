@@ -158,6 +158,11 @@ def packaging_request(column: video_columns.Column, topic: dict) -> dict:
 
 def source_card_request(script: dict, version: dict) -> list[dict]:
     """The script's ``sources`` for the closing source card; empty when the report cannot be read or cites none."""
+    if script.get("topic", {}).get("article"):
+        from web.services.video_articles import source_of
+        source = source_of(script)
+        return ([{"title": source["title"][:40], "url": source["source_url"], "date": source["published_on"]}]
+                if source.get("source_url") and source.get("published_on") else [])
     try:
         report = video_workflow.report_of(script)
     except (OSError, KeyError, TypeError):
@@ -208,6 +213,16 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
     version = store.get_version(script["id"], version_no)
     if version is None:
         raise RenderError("找不到定稿版本，请重新选择文稿版本")
+    from core.video.article_writer import readiness
+    if problem := readiness(version):
+        raise RenderError(problem)
+    if script.get("topic", {}).get("article"):
+        from core.video.articles import ArticleError
+        from web.services.video_articles import source_of
+        try:
+            source_of(script)
+        except ArticleError as exc:
+            raise RenderError(str(exc)) from exc
     column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
     chapter_list = chapters(version)
     text, sha = narration_source(chapter_list)
@@ -318,6 +333,41 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
             request["production_mode"] = production_mode
             if production_mode == "fast":
                 request.update(video_form="information_cards", visual_style="editorial_light")
+    if script["topic"].get("article"):
+        from copy import deepcopy
+        article = script["topic"]["article"]
+        source = article["source"]
+        context = request.get("production_context") or {}
+        settings = (context.get("content_recipe") or {}).get("settings") or {}
+        matrix_values = (context.get("matrix") or {}).get("settings") or {}
+        creative = {**settings.get("creative_intent", {}), **matrix_values.get("creative_intent", {}),
+                    **request.get("creative_intent", {})}
+        creative["purpose"] = ("文学朗读：画面使用主题、意象或短引句，保留原文情绪与叙事视角，不改成事实清单，不新增人物或经历。"
+                               if article["kind"] == "literary" else
+                               "文章讲解：画面提炼原文重点，保留数字、否定、条件和不确定性；上传文章未经外部事实核验，不强化结论。"
+                               "每张画面上的数字都要同时带上对象和成立条件，不从其他段落借数字却省略限定，也不补造对比项。")
+        creative["focus"] = version["title"]
+        request["creative_intent"] = creative
+        from core.video.packaging import merge
+        packaging = merge(merge(settings.get("packaging", {}), matrix_values.get("packaging", {})),
+                          request.get("packaging", {}))
+        packaging = deepcopy(packaging)
+        if not script.get("production"):
+            packaging["label"] = "文章朗读" if article["mode"] == "read" else "文章解读"
+        if not source.get("source_url") and packaging.get("outro", {}).get("lines"):
+            packaging["outro"]["lines"] = [("感谢收听" if article["mode"] == "read" else "感谢观看")
+                                            if line == "主要来源见简介" else line
+                                            for line in packaging["outro"]["lines"]]
+        if "package" in request:
+            legacy = deepcopy(request["package"])
+            if not source.get("source_url") and legacy.get("outro", {}).get("lines"):
+                legacy["outro"]["lines"] = [("感谢收听" if article["mode"] == "read" else "感谢观看")
+                                              if line == "主要来源见简介" else line
+                                              for line in legacy["outro"]["lines"]]
+            request["package"] = legacy
+        else:
+            request["packaging"] = packaging
+    request["visual_storytelling"] = not (script["topic"].get("article", {}).get("kind") == "literary")
     from core.video import screenshots
     try:
         materials = screenshots.render_materials(script["id"], version, get_client().base_url)

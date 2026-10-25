@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { VideoScriptDetail } from "@/api/video";
-import { nextStep } from "./videoNext";
+import { nextStep, currentPublications } from "./videoNext";
 
 function detail(over: Partial<VideoScriptDetail>): VideoScriptDetail {
   return { status: "DRAFT", renders: [], publications: [], version_shown: null, current_version: 1, versions: [{ version: 1 }], ...over } as unknown as VideoScriptDetail;
@@ -41,4 +41,17 @@ describe("nextStep", () => {
     const checks = { summary: { passed: false, serious: 0, must: 3 } };
     expect(nextStep(detail({ version_shown: { checks } as never })).text).not.toContain("必须改");
   });
+});
+
+
+it("does not assign an unknown legacy publication version to the current draft", () => {
+  const d = detail({ status: "APPROVED", publications: [{ version: null, platform: "bilibili" }] as never });
+  expect(currentPublications(d)).toEqual([]);
+  expect(nextStep(d)).toMatchObject({ tab: "video", tone: "todo" });
+});
+
+
+it("keeps polling guidance for the Douyin worker RUNNING status", () => {
+  const d = detail({ status: "APPROVED", distributions: [{ version: 1, platform: "douyin", status: "UPLOADING", task: { status: "RUNNING" } }] as never });
+  expect(nextStep(d)).toMatchObject({ tab: "publish", tone: "wait" });
 });

@@ -120,6 +120,12 @@ def cover_text(title: str, column) -> dict:
 
 def reference_lines(version: dict, report: str) -> list[dict]:
     """Attach the report's source material, recording which links the script explicitly cites."""
+    article = (version.get("meta") or {}).get("article")
+    if article:
+        source = article["source"]
+        return ([{"title": source["title"], "url": source["source_url"], "date": source.get("published_on", ""),
+                  "kind": "用户提供的文章，未做外部事实核验", "cited": True}]
+                if source.get("source_url") else [])
     from core import report_material
 
     meta = version.get("meta") or {}
@@ -199,7 +205,8 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
     elif not chapters:
         warnings.append(f"视频不足 {CHAPTERS_MIN} 个章节，简介里不放章节。")
     if not refs:
-        warnings.append("报告中没有找到可提取的资料链接。" if report else "研究报告暂时无法读取，未能附上资料来源。")
+        warnings.append("文章未提供来源链接；未生成来源卡，也未进行外部事实核验。" if (version.get("meta") or {}).get("article")
+                        else "报告中没有找到可提取的资料链接。" if report else "研究报告暂时无法读取，未能附上资料来源。")
     dateless = [r for r in refs if not r["date"]]
     if dateless:
         warnings.append(f"{len(dateless)} 个来源没有发布日期，简介里只写了网址。")

@@ -433,7 +433,7 @@ def create_job(payload: dict, user=Depends(require_editor)):
                 base_data["name"] = name
             if description:
                 base_data["description"] = description
-            if keywords:
+            if 'keywords' in payload:
                 base_data["keywords"] = keywords
             if language:
                 base_data["language"] = language
@@ -451,6 +451,19 @@ def create_job(payload: dict, user=Depends(require_editor)):
         base_content = _default_job_yaml(name, description, language, keywords, prompt, output)
 
     parsed = yaml_io.parse_yaml(base_content)
+    if payload.get('display_name'):
+        parsed['name'] = str(payload['display_name']).strip()
+    if payload.get('sources') is not None:
+        from core import sources as source_registry
+        subscriptions = payload['sources']
+        if not isinstance(subscriptions, list) or any(not isinstance(s, str) for s in subscriptions):
+            raise HTTPException(422, 'sources 需要来源字符串列表')
+        try:
+            source_registry.resolve(subscriptions, settings.paths.config_dir)
+        except source_registry.RegistryError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        parsed['sources'] = subscriptions
+    base_content = yaml_io.dump_yaml(parsed)
     references = payload.get('source_references')
     if references:
         if not isinstance(references, list) or len(references) > 30:

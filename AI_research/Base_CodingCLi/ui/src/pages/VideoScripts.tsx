@@ -13,6 +13,8 @@ import {
   type VideoScriptSummary,
   type VideoTopic,
 } from "@/api/video";
+import { DistributionSummary, DistributionFilters } from "@/components/DistributionSummary";
+import { matchesDistribution } from "@/lib/distributions";
 import { CredibilityBadge, TIER_LABEL } from "@/components/CredibilityBadge";
 import { ErrorState } from "@/components/ErrorState";
 import { FilterBar, inRange, matchesText, RANGE_FACET, useFilters, type Facet } from "@/components/FilterBar";
@@ -21,6 +23,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { errorMessage, useToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { DraftQualityPanel } from "./VideoQuality";
+import { ArticleCreate } from "@/components/ArticleCreate";
 
 export const STATUS_LABEL: Record<ScriptStatus, string> = {
   RESEARCHING: "研究中",
@@ -45,7 +48,6 @@ export type Stage = ScriptStatus | "rendering" | "rendered" | "render_failed" | 
 const RENDERING = ["SUBMITTING", "QUEUED", "RUNNING", "DOWNLOADING"];
 
 export function stageOf(s: { status: ScriptStatus; published?: boolean; render?: { status: string } | null }): Stage {
-  if (s.published) return "published";
   if (s.status !== "APPROVED" || !s.render) return s.status;
   if (s.render.status === "COMPLETED") return "rendered";
   return RENDERING.includes(s.render.status) ? "rendering" : s.render.status === "FAILED" ? "render_failed" : s.status;
@@ -115,8 +117,8 @@ export function VideoScriptsPage() {
   // 生产配置派生出来的栏目（如 flash-nr）不在格子目录里：用配置的名字，不显示内部的键
   const [configNames, setConfigNames] = useState<Record<string, string>>({});
   const [params, setParams] = useSearchParams();
-  const filters = useFilters(["status", "column", "tier", "source", "range", "matrix", "archived"]);
-  const requestedStatus = params.get("status") ?? "unpublished";
+  const filters = useFilters(["status", "column", "tier", "source", "range", "matrix", "archived", "platform", "distribution"]);
+  const requestedStatus = params.get("status") ?? "all";
   const statusFilter = ["archived", "all"].includes(requestedStatus) ? "" : requestedStatus;
   const highlight = params.get("topic");
   const [cellId, setCellId] = useState<string>(params.get("cell") ?? "");
@@ -134,6 +136,8 @@ export function VideoScriptsPage() {
   const [manual, setManual] = useState({ title: "", angle: "", audience: "" });
   // 新建的表单很长，平时收起来，让列表在最上面；从选题页带着选题过来时直接展开
   const [creating, setCreating] = useState(Boolean(params.get("topic") || params.get("topics") || params.get("cell")));
+  const [articleOpen, setArticleOpen] = useState(false);
+  const [articleMounted, setArticleMounted] = useState(false);
 
   const showArchived = filters.values.archived === "1" || filters.values.status === "archived";
   const scripts = result?.archived === showArchived ? result.scripts : null;
@@ -185,13 +189,14 @@ export function VideoScriptsPage() {
   const scope = (scripts ?? []).filter((s) => !f.matrix || (s.matrix || "_independent") === f.matrix);
   const matrixOptions = [...new Map((scripts ?? []).map((s) => [s.matrix || "_independent", s.matrix_name || "独立视频"]))];
   const columnName = (key: string) => (scripts ?? []).find((s) => s.column_key === key)?.column_label || cells.find((c) => c.key === key)?.label?.split(" · ").slice(0, 2).join(" · ") || configNames[key] || key;
-  const matchesStatus = (x: VideoScriptSummary, key: string) => key === "unpublished" ? !x.published : chipOf(x) === key;
+  const matchesStatus = (x: VideoScriptSummary, key: string) => key === "unpublished" ? !x.published : key === "published" ? Boolean(x.published) : chipOf(x) === key;
   const chipCount = (key: string) => scope.filter((x) => matchesStatus(x, key)).length;
   const shownScripts = scope.filter(
     (x) =>
       (!f.column || x.column_key === f.column) &&
       (!f.tier || x.credibility?.tier === f.tier) &&
       (!f.source || (f.source === "auto") === Boolean(x.auto)) &&
+      matchesDistribution(x.distributions, f.platform, f.distribution, x.published) &&
       inRange(x.created_at, f.range) &&
       matchesText(f.q, x.title, x.topic?.title, x.job_name, x.job, x.matrix_name) &&
       (!statusFilter || matchesStatus(x, statusFilter)),
@@ -225,7 +230,7 @@ export function VideoScriptsPage() {
       .finally(() => { if (!controller.signal.aborted) setTopicLoading(false); });
     return () => { controller.abort(); };
   }, [creating, cellId, column, kind, source, sourceRound, topicRetry]);
-  useEffect(() => { setLimit(24); }, [f.q, f.matrix, f.column, f.tier, f.source, f.range, statusFilter, showArchived]);
+  useEffect(() => { setLimit(24); }, [f.q, f.matrix, f.column, f.tier, f.source, f.range, f.platform, f.distribution, statusFilter, showArchived]);
 
   useEffect(() => {
     if (highlight && topics.some((t) => t.id === highlight)) {
@@ -256,8 +261,10 @@ export function VideoScriptsPage() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div><h1 className="text-xl font-semibold tracking-tight">视频文稿</h1><p className="text-xs text-text-muted mt-1">按矩阵查找文稿，查看当前版本、事实审计与制作进度。</p></div>
-        <div className="flex flex-wrap gap-2"><button className="btn text-xs" aria-label="刷新文稿" disabled={loading} onClick={load}><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />刷新</button>{canEdit ? <button className={cn("btn text-xs", !creating && "btn-primary")} aria-expanded={creating} onClick={() => setCreating(!creating)}>{creating ? "收起新建" : "＋ 新建文稿"}</button> : null}</div>
+        <div className="flex flex-wrap gap-2"><button className="btn text-xs" aria-label="刷新文稿" disabled={loading} onClick={load}><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />刷新</button>{canEdit ? <button className={cn("btn text-xs", !creating && "btn-primary")} aria-expanded={creating} onClick={() => { setCreating(!creating); setArticleOpen(false); }}>{creating ? "收起新建" : "＋ 新建文稿"}</button> : null}</div>
       </header>
+      {canEdit ? <button className="btn text-xs" aria-expanded={articleOpen} onClick={() => { setArticleMounted(true); setArticleOpen(!articleOpen); setCreating(false); }}>{articleOpen ? "收起文章创作" : "粘贴／上传文章"}</button> : null}
+      {articleMounted && canEdit ? <div hidden={!articleOpen}><ArticleCreate onCreated={id => navigate(`/video/${id}`)} /></div> : null}
       {creating && canEdit && (!column || cellLoading) ? <section className="card p-4 text-sm space-y-3">{cellError ? <ErrorState error={cellError} onRetry={() => setCellRetry((n) => n + 1)} compact /> : cellLoading ? <p role="status" className="text-text-muted">正在读取文稿配方…</p> : <><p>所选配方暂不可用，请选择其他配方。</p><select aria-label="选择可用配方" className="input text-xs" value={cellId} onChange={(e) => setCellId(e.target.value)}><option value="">选择配方</option>{cells.filter((c) => c.usable).map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}</select><Link className="text-xs text-accent" to="/video-recipes">查看文稿配方</Link></>}</section> : null}
 
       {canEdit && cell && column && creating ? (
@@ -501,9 +508,10 @@ export function VideoScriptsPage() {
       <div className="flex flex-wrap gap-2 items-center">
         <select aria-label="文稿矩阵" className="input w-auto max-w-full text-xs" value={f.matrix} onChange={(e) => setParams((old) => { const next = new URLSearchParams(old); ["q", "status", "column", "tier", "source", "range"].forEach((k) => next.delete(k)); if (showArchived) next.set("archived", "1"); if (e.target.value) next.set("matrix", e.target.value); else next.delete("matrix"); return next; }, { replace: true })}><option value="">全部矩阵</option>{matrixOptions.map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select>
         <select aria-label="文稿归档范围" className="input w-auto text-xs" value={showArchived ? "1" : ""} onChange={(e) => setParams((old) => { const next = new URLSearchParams(old); ["status", "matrix"].forEach((k) => next.delete(k)); if (e.target.value) next.set("archived", "1"); else next.delete("archived"); return next; }, { replace: true })}><option value="">使用中</option><option value="1">已归档</option></select>
+        <DistributionFilters platform={f.platform} status={f.distribution} onPlatform={v => filters.set("platform", v)} onStatus={v => filters.set("distribution", v)} />
         <button className="btn text-xs" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}><SlidersHorizontal className="h-3.5 w-3.5" />筛选{f.column || f.tier || f.source || f.range ? " · 已启用" : ""}</button>
       </div>
-      {scripts ? <div className="flex flex-wrap items-center gap-2" aria-label="状态">{([["", "全部"], ...CHIPS.map((c) => [c, c === "RESEARCHING" ? "研究/写稿中" : c === "unpublished" ? "未发布" : STAGE_LABEL[c as Stage]])] as [string, string][]).filter(([key]) => key === "" || key === "unpublished" || statusFilter === key || chipCount(key) > 0).map(([key, label]) => <button key={key} aria-pressed={statusFilter === key} onClick={() => filters.set("status", key || "all")} className={cn("badge border cursor-pointer", statusFilter === key ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover")}>{label} {key ? chipCount(key) : scope.length}</button>)}</div> : null}
+      {scripts ? <div className="flex flex-wrap items-center gap-2" aria-label="状态">{([["", "全部"], ...CHIPS.map((c) => [c, c === "RESEARCHING" ? "研究/写稿中" : c === "unpublished" ? "从未发布到任何平台" : STAGE_LABEL[c as Stage]])] as [string, string][]).filter(([key]) => key === "" || key === "unpublished" || statusFilter === key || chipCount(key) > 0).map(([key, label]) => <button key={key} aria-pressed={statusFilter === key} onClick={() => filters.set("status", key || "all")} className={cn("badge border cursor-pointer", statusFilter === key ? "bg-accent-solid text-white border-accent" : "bg-bg-card border-border hover:bg-bg-hover")}>{label} {key ? chipCount(key) : scope.length}</button>)}</div> : null}
       <FilterBar facets={advanced ? facets : []} filters={filters} shown={shownScripts.length} total={scope.length} placeholder="搜索文稿或来源任务" />
       {error ? <div><ErrorState error={error} onRetry={load} compact />{scripts ? <p className="text-xs text-warning mt-2">暂时显示上次读取的文稿。</p> : null}</div> : null}
       {scripts === null && !error ? <div className="card p-8 text-sm text-text-muted" role="status">正在读取文稿…</div> : null}
@@ -511,7 +519,7 @@ export function VideoScriptsPage() {
         <thead className="text-xs text-text-muted border-b border-border"><tr><th className="text-left font-normal px-4 py-3">文稿与来源</th><th className="text-left font-normal px-4 py-3">制作进度</th><th className="text-left font-normal px-4 py-3">事实审计</th><th className="text-left font-normal px-4 py-3">创建时间</th></tr></thead>
         <tbody>{shownScripts.slice(0, limit).map((s, i) => <Fragment key={s.id}>{i === 0 || dayLabel(s.created_at) !== dayLabel(shownScripts[i - 1].created_at) ? <tr className="bg-bg-hover/50"><td colSpan={4} className="px-4 py-2 text-xs text-text-muted">{dayLabel(s.created_at)}</td></tr> : null}<tr className="border-b border-border last:border-0 hover:bg-bg-hover">
           <td className="px-4 py-3 min-w-60"><Link to={`/video/${s.id}`} className="font-medium text-sm leading-6 hover:text-accent hover:underline">{s.title}</Link><div className="text-xs text-text-muted flex flex-wrap gap-x-2 gap-y-1 mt-1"><span>{s.matrix_name || "独立视频"}</span>{s.current_version ? <span>v{s.current_version}</span> : null}{s.has_previous_video ? <span>有旧版成片</span> : null}{s.auto ? <span>自动生成</span> : null}</div><p className="text-xs text-text-muted mt-1">{columnName(s.column_key)}{s.length_check?.estimated_seconds ? ` · 预计口播 ${minutes(s.length_check.estimated_seconds)}` : ""}</p>{s.job_name ? <p className="text-xs text-text-muted mt-1">{s.job_name}</p> : null}</td>
-          <td className="px-4 py-3 align-top pt-4"><span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>{STAGE_LABEL[stageOf(s)]}{s.stage ? ` · ${s.stage}` : ""}</span></td>
+          <td className="px-4 py-3 align-top pt-4"><span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>{STAGE_LABEL[stageOf(s)]}{s.stage ? ` · ${s.stage}` : ""}</span><div className="mt-2"><DistributionSummary rows={s.distributions} /></div></td>
           <td className="px-4 py-3 align-top pt-4"><Link to={`/video/${s.id}?tab=review`} className="inline-flex hover:opacity-80" aria-label={`查看审校：${s.title}`}><CredibilityBadge value={s.credibility} /></Link></td>
           <td className="px-4 py-3 align-top pt-4"><TimeStamp value={s.created_at} staleDays={Infinity} /></td>
         </tr></Fragment>)}</tbody>

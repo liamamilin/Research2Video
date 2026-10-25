@@ -56,8 +56,9 @@ def steps_of(script: dict) -> list[dict]:
 def create(column_key: str, topic: dict, started_by: str) -> dict:
     """A new script, researching (or writing, from a given report) right away."""
     script = video_workflow.start(column_key, topic, started_by=started_by)
-    first = "write" if topic.get("from_report") else "research"
-    steps.log(script["id"], first, "start", "用已有的研究报告" if first == "write" else "", by=started_by)
+    first = "write" if topic.get("from_report") or topic.get("article") else "research"
+    steps.log(script["id"], first, "start", "使用手动导入的文章" if topic.get("article") else
+              "用已有的研究报告" if first == "write" else "", by=started_by)
     return script
 
 
@@ -97,13 +98,14 @@ def _resume_research(script: dict, by: str) -> dict:
 
 
 def _rewrite(script: dict, by: str) -> dict:
-    if not script.get("report_path"):
+    if not script.get("report_path") and not script["topic"].get("article"):
         raise StepError("还没有研究报告，先完成调研")
     try:
         video_workflow.rewrite(script["id"], started_by=by)
     except video_workflow.RestyleError as exc:
         raise StepError(str(exc)) from exc
-    steps.log(script["id"], "write", "rerun", "用同一份研究报告重写，存成新版本", by=by)
+    steps.log(script["id"], "write", "rerun", "用同一篇文章生成新版本" if script["topic"].get("article") else
+              "用同一份研究报告重写，存成新版本", by=by)
     return store.get_script(script["id"])
 
 
@@ -113,11 +115,12 @@ def _rerun_audit(script: dict, by: str) -> dict:
         raise StepError("已经定稿了：重跑审计会把它退回草稿。要重审就先重写，或改稿后再定稿")
     if not script.get("current_version") or script["status"] != "DRAFT":
         raise StepError("还没有草稿，不能审计")
-    if column_of(script).writer == "adapt":
+    if column_of(script).writer == "adapt" and not script["topic"].get("article"):
         raise StepError("五步改编的审校是写稿的一部分，要重来就重写")
     store.update_script(script["id"], status="DRAFT", stage="事实审计", error=None)
     video_workflow.spawn(script["id"], by)  # a script with a saved draft resumes at its audits
-    steps.log(script["id"], "audit", "rerun", "重跑事实、风格和新观众审计，必要时自动改写复审", by=by)
+    steps.log(script["id"], "audit", "rerun", "重新对照文章核对当前版本" if script["topic"].get("article") else
+              "重跑事实、风格和新观众审计，必要时自动改写复审", by=by)
     return store.get_script(script["id"])
 
 
@@ -179,6 +182,17 @@ def approve(script_id: str, version: int, by: str) -> None:
     found = store.get_version(script_id, version)
     if found is None:
         raise StepError("没有这个文稿版本")
+    from core.video.article_writer import readiness
+    problem = readiness(found)
+    if problem:
+        raise StepError(problem)
+    if (found.get("meta") or {}).get("article"):
+        from core.video.articles import ArticleError
+        from web.services.video_articles import source_of
+        try:
+            source_of(store.get_script(script_id))
+        except ArticleError as exc:
+            raise StepError(str(exc)) from exc
     problem = submission_problem(found)
     if problem:
         raise StepError(problem)
@@ -221,6 +235,20 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
     tries = lambda key: int((retries or {}).get(key, 0))  # noqa: E731
     if status in ("RESEARCHING", "WRITING"):
         return out
+    if status in ("DRAFT", "APPROVED") and script.get("current_version"):
+        from core.video import content_guard
+
+        # Older daily/weekly drafts also pass this gate before spending another render attempt.
+        paths = get_settings().paths
+        version = store.get_version(script["id"], script["current_version"])
+        try:
+            content_guard.check(content_guard.with_policy(script), version["sections"], paths.config_dir, paths.jobs_dir)
+        except content_guard.DuplicateContent as exc:
+            if content_guard.archive_duplicate(script["id"], str(exc), [p["script_id"] for p in exc.peers]):
+                out["item"] = {"state": "CANCELLED", "note": str(exc)}
+            else:
+                out["hold"] = str(exc)
+            return out
     if status == "PLAN_READY":  # a batch's write never pauses; this one was paused by hand
         out["hold"] = "方案在等你确认"
         return out

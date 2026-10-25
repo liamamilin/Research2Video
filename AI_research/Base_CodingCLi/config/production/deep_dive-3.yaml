@@ -1,0 +1,5 @@
+job: research/assistant_ops_acceptance_20261025
+recipe: deep_dive
+auto: 0
+render:
+  video_speed: 1.5

@@ -198,6 +198,7 @@ describe("Video script review", () => {
     try {
       renderPage();
       await screen.findByText("一个时间戳让缓存折扣失效");
+      await waitFor(() => expect(timers.mock.calls.some(([,milliseconds]) => milliseconds === 5000)).toBe(true));
       const refresh=timers.mock.calls.find(([,milliseconds]) => milliseconds===5000)?.[0];
       expect(typeof refresh).toBe("function");
       mockApi({...DETAIL,version_shown:{...DETAIL.version_shown,title:"已收到自动发布回执"},distributions:[{...distribution,status:"PUBLISHED",task:{...distribution.task,status:"PUBLISHED",work_id:"3xexactwork"},publications:[{id:"pub",version:1,platform:"kuaishou",account_uid:"owner",url:"https://www.kuaishou.com/short-video/3xexactwork",confirmed_at:"2026-10-25T17:00:00+0800"}]}]});
@@ -285,6 +286,14 @@ describe("Video script review", () => {
 describe("Script version context", () => {
   const oldRender = { id: "old", version: 1, status: "COMPLETED", title: "旧版标题",
     files: [{ name: "video.mp4", url: "/old.mp4", bytes: 1000 }], created_at: DETAIL.created_at };
+
+  it("opens the precise render linked by an assistant task card", async () => {
+    mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1,
+      renders: [{ ...oldRender, id: "new-attempt", files: [{ name: "video.mp4", url: "/new.mp4" }] }, oldRender] });
+    renderPage("/video/s1?tab=video&version=1&render=old");
+    expect(await screen.findByLabelText("查看成片记录")).toHaveProperty("value", "old");
+    expect(screen.getByRole("link", { name: "下载成片" }).getAttribute("href")).toBe("/old.mp4");
+  });
 
   it("shows the published label and automatically written publication on the document", async () => {
     mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1, renders: [oldRender], publications: [

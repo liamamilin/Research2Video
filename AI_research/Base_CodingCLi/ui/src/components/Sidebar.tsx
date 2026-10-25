@@ -54,7 +54,7 @@ export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate?: () =
       )}
     >
       <div className="p-4 border-b border-border">
-        <h2 className="font-semibold text-sm">AI Research Console</h2>
+        <h2 className="font-semibold text-sm">研映 · Research2Video</h2>
         {user && (
           <button
             onClick={() => setAccountOpen(true)}

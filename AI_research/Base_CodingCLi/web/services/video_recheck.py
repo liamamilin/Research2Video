@@ -151,7 +151,7 @@ def freshness(script: dict, version: dict, column, rechecks: list[dict], now: Op
     import time
     from datetime import datetime
 
-    if not column.recheck:
+    if not column.recheck or script.get("topic", {}).get("article"):
         return {"required": False, "warnings": []}
     now = now if now is not None else time.time()
     try:

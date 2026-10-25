@@ -19,14 +19,14 @@ def _fetched(entry: dict) -> dict:
     return (entry.get("usage") or {}).get("fetched") or {}
 
 
-def catalog(config_dir: str, jobs_dir: str, state_dir: str) -> dict:
+def catalog(config_dir: str, jobs_dir: str, state_dir: str, *, job_names: list[str] | None = None) -> dict:
     """``{sources: [...], problems: [...]}``; ``problems`` are Jobs whose source names the registry does not have."""
     registry = sources.load_registry(config_dir)
-    by_spec: dict[str, dict] = {}
+    by_spec: dict[str, list[dict]] = {}
     for key, entry in registry.items():
-        by_spec[entry["spec"]] = {"id": key, **entry, "used_by": [], "last": None}
+        by_spec.setdefault(entry['spec'], []).append({"id": key, **entry, "used_by": [], "last": None})
     problems: list[dict] = []
-    for name in list_jobs(jobs_dir):
+    for name in list_jobs(jobs_dir) if job_names is None else job_names:
         job = load_job(jobs_dir, name) or {}
         declared = list(job.get("sources") or [])
         if not declared:
@@ -39,16 +39,21 @@ def catalog(config_dir: str, jobs_dir: str, state_dir: str) -> dict:
         history = _history(state_dir, name) + (_history(state_dir, name.rsplit("/", 1)[-1]) if "/" in name else [])
         history = sorted(history, key=lambda e: e.get("ts") or "")[-RUNS_READ:]
         for spec in specs:
-            row = by_spec.setdefault(spec, {"id": "", "name": spec, "spec": spec, "tags": [], "note": "", "used_by": [], "last": None})
-            row["used_by"].append({"job": name, "name": job.get("name") or name})
-            for entry in reversed(history):
-                state = _fetched(entry).get(spec)
-                if state is None:
+            candidates = by_spec.setdefault(spec, [{"id": "", "name": spec, "spec": spec, "tags": [], "note": "", "used_by": [], "last": None}])
+            for row in candidates:
+                references = {str(s).strip() for s in declared}
+                if row['id'] and not (spec in references or 'source:' + row['id'] in references or
+                                      any('tag:' + tag in references for tag in row['tags'])):
                     continue
-                seen = {"at": entry.get("ts"), "job": name, "items": state if isinstance(state, int) else 0,
-                        "error": state if isinstance(state, str) else ""}
-                if row["last"] is None or (seen["at"] or "") > (row["last"]["at"] or ""):
-                    row["last"] = seen
-                break
-    rows = sorted(by_spec.values(), key=lambda r: (not r["used_by"], r["id"] == "", r["name"].lower()))
+                row["used_by"].append({"job": name, "name": job.get("name") or name})
+                for entry in reversed(history):
+                    state = _fetched(entry).get(spec)
+                    if state is None:
+                        continue
+                    seen = {"at": entry.get("ts"), "job": name, "items": state if isinstance(state, int) else 0,
+                            "error": state if isinstance(state, str) else ""}
+                    if row["last"] is None or (seen["at"] or "") > (row["last"]["at"] or ""):
+                        row["last"] = seen
+                    break
+    rows = sorted([row for group in by_spec.values() for row in group], key=lambda r: (not r["used_by"], r["id"] == "", r["name"].lower()))
     return {"sources": rows, "problems": problems}

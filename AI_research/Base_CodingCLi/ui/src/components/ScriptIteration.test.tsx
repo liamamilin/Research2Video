@@ -19,6 +19,12 @@ function show(detail = BASE, extras = {}) {
 }
 
 describe("Iteration entry points", () => {
+  it("regenerates article scripts without a research report", () => {
+    const actions = show({ ...BASE, report_path: "", topic: { title: "散文", article: { mode: "read", kind: "literary" } } } as VideoScriptDetail);
+    fireEvent.click(screen.getByRole("button", { name: "重新生成文稿" }));
+    expect(actions.onRewrite).toHaveBeenCalledOnce();
+    expect(screen.getByText(/沿用保存的文章与本次处理方式/)).toBeTruthy();
+  });
   it("distinguishes new draft and old video, links exact config and requires approval before rendering", () => {
     const actions = show();
     expect(screen.getByText(/这个视频仍使用旧稿/)).toBeTruthy();

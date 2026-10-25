@@ -25,6 +25,7 @@ import { ReportReuse } from "@/components/ReportReuse";
 import { PlanReview } from "@/components/PlanReview";
 import { ScriptSteps } from "@/components/ScriptSteps";
 import { ScriptIteration } from "@/components/ScriptIteration";
+import { VideoComparisonPanel } from "@/components/VideoComparison";
 import { TimeStamp } from "@/components/TimeStamp";
 import { ErrorState } from "@/components/ErrorState";
 import { DistributionSummary } from "@/components/DistributionSummary";
@@ -38,6 +39,7 @@ import { currentPublications, nextStep, renderForVersion, TAB_LABEL, type Script
 import { ChecksPanel, DescriptionPanel, FactChips, IssueList, PlanPanel, StylePanel } from "./VideoAdaptation";
 import { PublishPanel, RenderFolder } from "./VideoPublish";
 import { STATUS_CLASS, STATUS_LABEL, minutes } from "./VideoScripts";
+import { ArticleSource } from "@/components/ArticleSource";
 import { ScriptScreenshots } from "@/components/ScriptScreenshots";
 
 const EVIDENCE: Record<Evidence, { label: string; cls: string }> = {
@@ -178,6 +180,7 @@ export function VideoScriptViewPage() {
       : detail.renders.length
         ? ["draft", "review", "video"]
         : ["draft", "review"];
+  if (detail.versions.length > 1 || detail.renders.length > 1) tabs.push('compare');
   const asked = search.get("tab") as ScriptTab | null;
   const tab: ScriptTab = editing || !tabs.length ? "draft" : asked && tabs.includes(asked) ? asked : step.tab;
   const goTab = (t: ScriptTab) =>
@@ -248,12 +251,12 @@ export function VideoScriptViewPage() {
   }
 
   async function rewrite() {
-    if (!window.confirm("用同一份研究报告，按当前配方重新生成文稿并审校？将保存为新版本，旧稿和旧视频保留。新稿需要重新定稿后再出片。")) return;
+    if (!window.confirm(detail?.topic.article ? "用保存的文章，按本次选择的处理方式重新生成文稿并审校？将保存为新版本，旧稿和旧视频保留。" : "用同一份研究报告，按当前配方重新生成文稿并审校？将保存为新版本，旧稿和旧视频保留。新稿需要重新定稿后再出片。")) return;
     setBusy("rewrite");
     try {
       setDetail(await rerunVideoStep(id, "write"));
       setSearch({ tab: "draft" });
-      toast.success("已开始重新生成文稿", "沿用原报告，完成后可查看新版本");
+      toast.success("已开始重新生成文稿", detail?.topic.article ? "沿用保存的文章，完成后可查看新版本" : "沿用原报告，完成后可查看新版本");
     } catch (e) { toast.error("没有开始重新生成", errorMessage(e)); }
     finally { setBusy(null); }
   }
@@ -351,7 +354,7 @@ export function VideoScriptViewPage() {
       </div>
 
       {shown ? <ScriptIteration detail={detail} canEdit={canEdit} canManageModels={user?.role === "admin"} isCurrent={isCurrent} editing={editing} busy={busy}
-        onRewrite={rewrite} onRender={() => render()} onVideo={() => goTab("video")} /> : null}
+        onRewrite={rewrite} onRender={() => render()} onVideo={() => goTab("video")} onCompare={() => goTab('compare')} /> : null}
 
       <section
         aria-label="下一步"
@@ -467,6 +470,7 @@ export function VideoScriptViewPage() {
       ) : null}
 
       {shown && !editing && (tab === "draft" || tab === "video") ? <ScriptScreenshots key={`${detail.id}-${shown.version}-${renderForVersion(detail, shown.version)?.id ?? ""}`} id={detail.id} version={shown.version} canEdit={writable && ["DRAFT", "APPROVED"].includes(detail.status)} /> : null}
+      {detail.topic.article && tab === "draft" ? <ArticleSource key={detail.id} id={detail.id} mode={detail.topic.article.mode} /> : null}
       {detail.report_id && tab === "draft" ? (
         <details className="card" onToggle={(e) => setReuseOpen(e.currentTarget.open)}>
           <summary className="p-3 cursor-pointer text-xs text-text-muted">沿用这份研究，查看其他文稿或另写一篇</summary>
@@ -474,7 +478,7 @@ export function VideoScriptViewPage() {
         </details>
       ) : null}
 
-      {shown && tab === "draft" ? (
+      {shown && !detail.topic.article && tab === "draft" ? (
         <StylePanel
           key={`${shown.version}-${catalog ? "ready" : "loading"}`}
           detail={detail}
@@ -537,7 +541,7 @@ export function VideoScriptViewPage() {
                 <p className="text-sm leading-relaxed">{p.text}</p>
               )}
               <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                <span className={cn("badge border", EVIDENCE[p.evidence]?.cls)}>{EVIDENCE[p.evidence]?.label ?? p.evidence}</span>
+                {!detail.topic.article || p.evidence !== "UNCITED" ? <span className={cn("badge border", EVIDENCE[p.evidence]?.cls)}>{EVIDENCE[p.evidence]?.label ?? p.evidence}</span> : null}
                 {p.citations.map((url) => (
                   <a key={url} href={url} target="_blank" rel="noreferrer" className="text-accent hover:underline">
                     {host(url)}
@@ -589,9 +593,11 @@ export function VideoScriptViewPage() {
         />
       ) : null}
 
+      {tab === 'compare' && <VideoComparisonPanel detail={detail} />}
       {(detail.status === "APPROVED" || detail.renders.length) && tab === "video" ? (
         <RenderPanel
-          key={shown?.version ?? detail.current_version}
+          key={`${shown?.version ?? detail.current_version}:${search.get('render') || ''}`}
+          initialRenderId={search.get('render') || ''}
           detail={detail}
           autovideo={autovideo}
           voice={voice}
@@ -607,6 +613,7 @@ export function VideoScriptViewPage() {
 }
 
 function RenderPanel({
+  initialRenderId,
   detail,
   autovideo,
   voice,
@@ -616,6 +623,7 @@ function RenderPanel({
   onRender,
   onPublish,
 }: {
+  initialRenderId: string;
   detail: VideoScriptDetail;
   autovideo: AutoVideoStatus | null;
   voice: string;
@@ -625,7 +633,7 @@ function RenderPanel({
   onRender: (mode?: "fast") => void;
   onPublish: (version: number) => void;
 }) {
-  const [selectedId, setSelectedId] = useState("");
+  const [selectedId, setSelectedId] = useState(initialRenderId);
   const current = renderForVersion(detail, detail.version_shown?.version ?? detail.current_version);
   const latest: VideoRender | null = detail.renders.find((r) => r.id === selectedId) ?? current ?? detail.renders[0] ?? null;
   const historical = latest != null && latest.version !== detail.current_version;

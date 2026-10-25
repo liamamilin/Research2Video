@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-25",
+  "scope": "快手和小红书旧投稿结果核对及接入修复",
+  "changes": [
+    "小红书兼容result=0及data.id响应；保留严格状态与作品ID校验",
+    "解析前持久保存脱敏回执；失败时仍让平台响应返回页面",
+    "仅重新解析已保存响应恢复状态，不重发POST",
+    "异常记录保留静态阶段与底层类型",
+    "快手兼容当前账号接口并要求明确登录标记",
+    "新增禁止最终发布的准备诊断与完整路由拦截测试",
+    "快手上传入口改为按文件类型选择并等待SPA挂载，不依赖旧CSS按钮；排除封面输入框和歧义控件",
+    "快手自定义发布控件通过唯一可见精确文字定位；歧义控件停止、点击异常不重试",
+    "上传完成后再次处理延迟新手引导",
+    "快手新旧最终投稿地址共用一次提交保护及回执持久化，覆盖交替地址防重测试"
+  ],
+  "tests": {
+    "backend": 451,
+    "compile": "passed",
+    "diff_check": "passed",
+    "diagnostic_route_tests": "known/new publishing, delete and foreign endpoints abort before network"
+  },
+  "verification": {
+    "kuaishou": {
+      "id": "928f567ec27d4d4492f11b192e19d659",
+      "status": "RECORDED",
+      "phase": "登录有效",
+      "error": ""
+    },
+    "xiaohongshu": {
+      "id": "5c6f515eb6d0466894cd31bf9945e442",
+      "status": "RECORDED",
+      "phase": "登录有效",
+      "error": ""
+    }
+  },
+  "existing_uploads": {
+    "kuaishou": {
+      "id": "110310c21d644efdb3041e5b727f4def",
+      "status": "UNKNOWN",
+      "work_id": "",
+      "updated_at": 1792910246.255471,
+      "submission_started_recorded": false,
+      "saved_submission_response": false
+    },
+    "xiaohongshu": {
+      "id": "34b993b4567c4d1eb65da30ba9043df9",
+      "status": "UNKNOWN",
+      "work_id": "",
+      "updated_at": 1792910397.321036,
+      "submission_started_recorded": true,
+      "saved_submission_response": false
+    }
+  },
+  "original_uploads_unchanged": true,
+  "existing_publications_unchanged": true,
+  "new_publication_requests_sent": 0,
+  "backend_instance": "50d62cfd7c4b45e9a3fe2c6001016cad",
+  "remaining": [
+    "快手准备链路已通过，尚未执行真实投稿或验证新版投稿回执",
+    "小红书回执解析修复后的真实投稿仍待验收",
+    "两条旧UNKNOWN任务保留，不能据准备验收直接标为已发布"
+  ],
+  "automatic_review": "用户明确授权仅素材上传及发布前准备后已获准执行；最终发布始终拦截，没有绕过审批。",
+  "user_confirmation": {
+    "works_absent_on_both_platforms": true,
+    "computer_unlocked": true,
+    "kuaishou_asset_upload_preparation_authorized": true
+  },
+  "kuaishou_preparation": {
+    "reached_asset_upload": true,
+    "asset_upload_completed": true,
+    "provider_asset_result": 1,
+    "file_fragments": 9,
+    "reached_final_submit_guard": true,
+    "final_publish_requests_intercepted": 1,
+    "final_publish_requests_sent": 0,
+    "completed": true,
+    "submission_endpoint": "/rest/cp/works/v2/video/pc/isolation/submit"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-25",
+  "platform": "kuaishou",
+  "scope": "用户实际发布的机器人视频回执恢复与链接补录",
+  "job_id": "6b6d791d285d46aabbcafbfd6c365d75",
+  "script_id": "7137446fe8e444188b4b4bc6e460f480",
+  "version": 1,
+  "render_id": "3a210bc1da6846478c9119395fda843c",
+  "title": "机器人砍掉了小拇指：这周，技术落地开始寄账单",
+  "account": {
+    "uid": "3865622650",
+    "name": "奇奇"
+  },
+  "provider_submission_response": {
+    "http_status": 200,
+    "body": {
+      "result": 1,
+      "data": {}
+    }
+  },
+  "cause": "平台明确接受投稿，但省略公开作品ID；旧解析器将其误归为UNKNOWN。",
+  "recovery": {
+    "before": "UNKNOWN",
+    "receipt_reparsed_as": "SUBMITTED",
+    "after": "PUBLISHED",
+    "phase": "已发布（用户确认），作品链接已回写文稿",
+    "work_id": "3x432buhnb5ryma",
+    "url": "https://www.kuaishou.com/short-video/3x432buhnb5ryma",
+    "publication_id": "fae47dd8cdb7487a9ba9d0fbf9b76f07",
+    "source": "manual",
+    "confirmed_by": "user",
+    "automatically_confirmed_public": false,
+    "share_token_saved": false
+  },
+  "public_page_observation": {
+    "author": "奇奇",
+    "title": "@奇奇(O3x4f8nh2cbdfu6k) 的精彩视频-快手",
+    "media": "浏览器显示无法播放媒体，未将该页面视为自动公开状态证据"
+  },
+  "new_publish_requests_sent_by_agent": 0,
+  "old_model_ranking_tasks_unchanged": true,
+  "other_platform_publications_unchanged": true,
+  "new_behavior": [
+    "快手result=1且缺少作品ID时保留为已投稿，等待补链接，不自动重投",
+    "重启和已保存回执恢复沿用同一规则",
+    "旧UNKNOWN且没有接受回执的任务可由编辑明确确认不存在，再恢复单独手动重试入口；操作记录及原尝试保留"
+  ],
+  "tests": {
+    "backend": 472,
+    "ui_component": 36,
+    "ui_build": "passed",
+    "ui_lint": "passed"
+  },
+  "remaining": [
+    "快手自动作品归属及审核/公开状态核对仍须单独验收",
+    "小红书修复后的真实投稿待验收",
+    "模型榜单两条旧任务不属于本次机器人视频，未改写或重投"
+  ],
+  "deployment": {
+    "backend_instance": "65ddebd05c1a4351aca55892bd56c47a",
+    "backend_pid": 94356,
+    "gateway_http_status": 200,
+    "ui_verified": "已发布（用户确认），作品链接已回写文稿；作品ID及平台链接均可见",
+    "screenshot": "kuaishou-robot-publication-20261025.png",
+    "douyin_inflight_upload_preserved": true,
+    "douyin_inflight_upload_after_reload": "SUBMITTED",
+    "compile": "passed",
+    "diff_check": "passed"
+  }
+}

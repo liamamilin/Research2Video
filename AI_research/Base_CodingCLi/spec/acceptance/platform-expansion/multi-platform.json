@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-25",
+  "scope": [
+    "bilibili",
+    "douyin"
+  ],
+  "checks": {
+    "full_python": {
+      "passed": 2219,
+      "skipped": 3
+    },
+    "publishing_regression": {
+      "passed": 116
+    },
+    "final_distribution_regression": {
+      "passed": 14
+    },
+    "ui": {
+      "passed": 457
+    },
+    "typescript": "passed",
+    "eslint": "passed",
+    "build": "passed",
+    "diff_check": "passed"
+  },
+  "deployment": {
+    "healthy_instance": "a3c82b59749f457ebf46ffef91f3f580",
+    "pid": 52151,
+    "backup": "state/backups/multi-platform-20261025-120137",
+    "bilibili_records_preserved": 38,
+    "accounts_from_confirmed_receipts": 32,
+    "unknown_accounts_preserved": 6
+  },
+  "live_ui": {
+    "bilibili_published_douyin_preparable": true,
+    "inline_douyin_editor": true,
+    "douyin_unpublished_filter_preserves_bilibili_published_asset": true,
+    "pending_douyin_work": "7700436961890209034",
+    "pending_work_status": "SUBMITTED",
+    "task_deep_link_and_exact_version_return": true,
+    "new_real_uploads_for_acceptance": 0
+  },
+  "screenshots": [
+    "multi-platform-document.png",
+    "multi-platform-filter.png"
+  ]
+}

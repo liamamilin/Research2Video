@@ -43,7 +43,13 @@ def overview(script_id: str, version: int = Query(ge=1), user=Depends(require_vi
     script, current = _version(script_id, version)
     listed = []
     try:
-        listed.extend(sources.report_sources(video_workflow.report_of(script), fallback=True))
+        if script.get("topic", {}).get("article"):
+            from web.services.video_articles import source_of
+            source = source_of(script)
+            if source.get("source_url"):
+                listed.append({"url": source["source_url"], "title": source["title"]})
+        else:
+            listed.extend(sources.report_sources(video_workflow.report_of(script), fallback=True))
     except (OSError, KeyError, TypeError, ValueError):
         pass
     for section in current["sections"]:

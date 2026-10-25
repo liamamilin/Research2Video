@@ -26,8 +26,12 @@ def test_recurring_job_followup_and_request_deduplication(client, web_env, monke
                     'recurrence': {'schedule': '0 9 * * 1', 'timezone': 'Asia/Shanghai'}}, request_id='recurring-command-001')
     assert first['actions'][0]['detail']['next_runs']
     assert first['actions'][0]['detail']['timezone'] == 'Asia/Shanghai'
+    assert first['actions'][0]['href'] == '/jobs/research%2Fmemory'
     plan = managed.store().list()[0]
     assert plan['job_name'] == 'research/memory'
+    from web.services.assistant_store import AssistantStore
+    receipt = AssistantStore().receipt(first['actions'][0]['operation_id'], {'id': 1, 'username': 'admin'})['result']
+    assert receipt['schedule_href'] == '/scheduler?plan=' + plan['id']
     cid = first['conversation_id']
     changed = command(client, monkeypatch, 'manage_schedule', {'action': 'update', 'schedule_id': plan['id'], 'schedule': '0 9 * * 5'}, conversation_id=cid)
     assert changed['actions'][0]['ok']

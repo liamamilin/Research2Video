@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import Field
 from . import Arguments, Tool
 from web.routes import video
+from web.services.assistant_video_state import duration, review
 
 #: What a started action costs, in the receipt, so the assistant can say it before and after.
 COSTS = {
@@ -16,12 +17,15 @@ COSTS = {
 
 
 class VideoQuery(Arguments):
-    action: Literal['board', 'list', 'find', 'get', 'topics', 'cells', 'quality', 'references'] = 'board'
+    action: Literal['board', 'list', 'find', 'get', 'compare', 'publish', 'topics', 'cells', 'quality', 'references'] = 'board'
     script_id: str = ''
     text: str = ''
     status: Literal['RESEARCHING', 'WRITING', 'PLAN_READY', 'DRAFT', 'APPROVED', 'FAILED'] | None = None
     source: Literal['flash', 'opportunities'] = 'flash'
     limit: int = Field(default=30, ge=1, le=100)
+    from_version: int | None = Field(default=None, ge=1)
+    to_version: int | None = Field(default=None, ge=1)
+    version: int | None = Field(default=None, ge=1)
 
 
 def _href(script_id: str) -> str:
@@ -37,12 +41,12 @@ def _brief(s: dict) -> dict:
 def _detail(script_id: str, user) -> dict:
     d = video.get_script(script_id, user=user)
     shown = d.get('version_shown') or {}
-    checks = shown.get('checks') or {}
     return {
         'script_id': script_id, 'title': shown.get('title') or d['topic'].get('title'), 'column': d['column_key'],
         'status': d['status'], 'stage': d.get('stage'), 'error': d.get('error'),
         'current_version': d['current_version'], 'approved_version': d.get('approved_version'),
-        'length': shown.get('length_check'), 'check_summary': checks.get('summary'),
+        'length': duration(shown), 'review': review(shown, running=bool(d.get('stage'))),
+        'check_summary': review(shown, running=bool(d.get('stage')))['summary'],
         'problems': (shown.get('meta') or {}).get('problems'),
         'renders': [{k: r[k] for k in ('id', 'version', 'status', 'active_stage', 'error_message')} for r in d['renders'][:5]],
         'publications': d['publications'],
@@ -52,6 +56,21 @@ def _detail(script_id: str, user) -> dict:
 
 
 def query(a, request, user):
+    if a.action == 'publish':
+        from core.video.content_guard import publishing_block
+        from web.services import distributions
+        script = video._script_or_404(a.script_id)
+        number = a.version or script.get('approved_version') or script['current_version']
+        return {'script_id': script['id'], 'version': number,
+                'package': video.get_publish_pack(script['id'], version=number, user=user),
+                'targets': [t for t in distributions.overview([script]).get(script['id'], []) if t['version'] == number],
+                'publishing_block': publishing_block(script),
+                'href': f"/video/{script['id']}?tab=publish&version={number}",
+                'note': '只读发布包与该版本的本地发布记录、各平台任务；不上传，不发布。'}
+    if a.action == 'compare':
+        if a.from_version is None or a.to_version is None:
+            raise ValueError('对比需要 from_version 和 to_version，请先查询版本')
+        return video.compare_script(a.script_id, a.from_version, a.to_version, user=user)
     if a.action == 'board':
         return video.home_board(user=user)
     if a.action == 'cells':
@@ -133,7 +152,27 @@ def change(a, request, user):
 
 
 TOOLS = {
-    'query_video': Tool(VideoQuery, '查视频流水线：board各阶段数量和待处理清单；list/find按状态或标题查文稿；get一篇文稿的状态、审校摘要、成片、发布记录、复核；topics快讯或内容机会候选（含是否已写稿/已发布）；cells可选的栏目格子及状态；quality初稿被改动的程度。references在B站和YouTube找别人做的参考视频（text是主题；只返回标题和链接，不下载；花一次搜索额度，开始前说一句）；其余都只查内部数据。', query, label='查询视频'),
+    'query_video': Tool(VideoQuery, '查视频流水线：board各阶段数量和待处理清单；list/find按状态或标题查文稿；get一篇文稿的状态、审校摘要、成片、发布记录、复核；compare用script_id、from_version、to_version对比已存文稿、配置和对应视频，返回可打开的对比入口；publish用script_id和version读取发布包（标题、简介、原始资料链接）及该版本各平台发布记录与上传任务，验收样片也可只读；topics快讯或内容机会候选（含是否已写稿/已发布）；cells可选的栏目格子及状态；quality初稿被改动的程度。references在B站和YouTube找别人做的参考视频（text是主题；只返回标题和链接，不下载；花一次搜索额度，开始前说一句）；其余都只查内部数据。', query, label='查询视频'),
     'create_video': Tool(VideoCreate, '用栏目+选题开始一篇文稿（盘点用topic_ids，对比用subjects+dimensions，快讯/深度用topic_id或title）。会消耗搜索额度和数分钟，开始前先说明；只写到草稿，不会定稿或出片。返回已启动回执，需再查实际状态。', create, 'editor', True, '创建视频文稿'),
-    'manage_video': Tool(VideoChange, '对已有文稿：approve定稿（只在用户明确说定稿时）、restyle换风格重写、recheck发布前复核（快讯）、render生成成片、add_publication记录用户提供的B站链接和日期、delete_publication删除记录。不会向任何平台发布。render/recheck/restyle开始前说明耗时，返回只代表已启动。', change, 'editor', True, '管理视频文稿'),
+    'manage_video': Tool(VideoChange, '对已有文稿：approve定稿（用户要求定稿或完整制作视频时）、restyle换风格重写、recheck发布前复核、render生成成片、add_publication记录链接、delete_publication删除记录。此工具不执行上传；真实发布使用operate_application。返回started只代表已启动。', change, 'editor', True, '管理视频文稿'),
 }
+
+
+class ContinueVideo(Arguments):
+    script_id: str
+
+
+def continue_video(a, request, user):
+    from core.video import autopilot_store, store
+    script = store.get_script(a.script_id)
+    if not script:
+        raise ValueError('视频文稿不存在')
+    if script.get('archived'):
+        raise ValueError('文稿已归档，先明确恢复后再制作')
+    run = autopilot_store.adopt_script(script, started_by=user['username'])
+    return {'script_id': script['id'], 'batch_id': run['id'], 'href': _href(script['id']),
+            'status': 'started', 'submitted': True, 'message': '已交给视频 workflow，写稿、定稿与出片会在后台继续；工作区显示实际结果。'}
+
+
+TOOLS['continue_video'] = Tool(ContinueVideo, '用户明确要求完整制作视频时，在创建文稿后调用，或将已有文稿继续制作到成片。使用现有持久视频workflow，不需等写稿结束后再手动定稿/出片；重复调用复用正在进行的批次。只写草稿时不要调用。耗时取决于队列；提交不代表成片完成。',
+                               continue_video, 'editor', True, '继续制作视频')

@@ -205,6 +205,24 @@ def test_llm_failure_after_creation_keeps_actual_result(client, web_env, monkeyp
     assert (web_env[0] / "jobs" / "research" / "new.yaml").exists()
 
 
+def test_expired_stream_auth_stops_without_retrying_or_replaying_completed_work(client, web_env, monkeypatch):
+    from fastapi import HTTPException
+    from web import deps
+
+    def expire(messages, options):
+        def denied(request):
+            raise HTTPException(401, 'token 无效')
+        monkeypatch.setattr(deps, 'current_user', denied)
+        return tool('list_jobs')
+
+    fake_llm(monkeypatch, [tool('create_job', name='Kept', prompt='Research topic'), expire])
+    result = client.post('/api/assistant', headers=login(client), json={'message': '创建任务再查询'}).json()
+    assert result['actions'][0]['ok'] and not result['actions'][1]['ok']
+    assert len(result['actions']) == 2 and '认证已失效' in result['error']
+    assert result['continuation']['reason'] == 'authentication'
+    assert (web_env[0] / 'jobs/research/kept.yaml').exists()
+
+
 def test_unsupported_model_reports_configuration_problem(client, monkeypatch):
     from core.errors import LLMUnsupportedError
 

@@ -52,8 +52,11 @@ def check_jobs(jobs_dir: str = "jobs") -> bool:
                 issues.append("missing 'name'")
             if not job.get("prompt"):
                 issues.append("missing 'prompt'")
-            if not job.get("keywords"):
-                issues.append("missing 'keywords' (will produce empty search)")
+            # Keywords are optional: the research agent plans searches from the
+            # prompt, and source-backed jobs can use fetched material directly.
+            if "keywords" in job and (not isinstance(job["keywords"], list) or
+                                      any(not isinstance(word, str) for word in job["keywords"])):
+                issues.append("'keywords' must be a list of strings")
 
             if issues:
                 errors.append(f"{name}: {', '.join(issues)}")

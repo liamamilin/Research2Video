@@ -1,0 +1,39 @@
+{
+  "verified_at": "2026-10-25T03:04:24.015201+00:00",
+  "checks": {
+    "command": "bash scripts/check.sh",
+    "result": "passed",
+    "backend_passed": 2207,
+    "backend_skipped": 3,
+    "ui_passed": 451,
+    "douyin_offline_passed": 47,
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed",
+    "diff_check": "passed"
+  },
+  "live": {
+    "qr_rendered": true,
+    "phone_confirmation_reported": true,
+    "account_verified": true,
+    "publishing_executed": false,
+    "scope": "account_connection_only",
+    "saved_login_reverified": true,
+    "credentials_permissions": "0600"
+  },
+  "receipts": {
+    "mock_single_submission_guard": "passed",
+    "exact_owner_and_visibility": "passed",
+    "exact_script_version_writeback": "passed",
+    "real_upload_receipt": "not_executed_per_user_request"
+  },
+  "runtime": {
+    "upstream": "dreammis/social-auto-upload",
+    "commit": "3847fff01f5434a8a32829833163cd6723cabc59",
+    "isolation": "dedicated_venv_and_browser"
+  },
+  "notes": [
+    "Initial sandbox run could not bind loopback sockets; full check was rerun outside that restriction.",
+    "Standalone worker import regression and pre-verification cleanup are covered by offline tests."
+  ]
+}

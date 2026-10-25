@@ -44,6 +44,60 @@ def list_configs(job: str = "", user=Depends(require_viewer)) -> list[dict]:
     return [{**c.as_dict(), "scripts": made.get(c.key, 0)} for c in configs.values() if not job or c.job == job]
 
 
+@router.get('/{key}/settings')
+def config_settings(key: str, user=Depends(require_viewer)) -> dict:
+    import hashlib
+    from pathlib import Path
+    from core import matrices
+    from core.video.production_settings import inherit
+    config = _get(key)
+    path = Path(production.directory(get_settings().paths.config_dir)) / (key + '.yaml')
+    matrix = matrices.of_job(config.job, get_settings().paths.config_dir)
+    return {**config.as_dict(), 'revision': hashlib.sha256(path.read_bytes()).hexdigest(),
+            'effective_render': inherit(matrix.render if matrix else {}, config.render)}
+
+
+class RenderSettingsIn(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    expected_revision: str = Field(min_length=1)
+    render: dict = Field(default_factory=dict)
+    inherit: list[str] = Field(default_factory=list)
+    auto: int | None = Field(default=None, ge=0, le=10)
+
+
+@router.patch('/{key}/settings')
+def update_render_settings(key: str, body: RenderSettingsIn, user=Depends(require_editor)) -> dict:
+    import hashlib
+    from pathlib import Path
+    from core.fileio import file_lock
+    from core.video.production_settings import FIELDS, inherit, validate
+    from web.services import yaml_io
+    _get(key)
+    path = Path(production.directory(get_settings().paths.config_dir)) / (key + '.yaml')
+    if set(body.inherit) - FIELDS or set(body.inherit) & set(body.render):
+        raise _error(422, 'invalid_render', '恢复继承使用顶层视频字段，不能同时覆盖同一个字段')
+    try:
+        patch = validate(body.render)
+        with file_lock(str(path)):
+            old = path.read_bytes().decode('utf-8')
+            if hashlib.sha256(old.encode()).hexdigest() != body.expected_revision:
+                raise _error(409, 'config_changed', '任务视频配置已变化，请重新读取 settings 后再修改')
+            data = yaml_io.parse_yaml(old)
+            overrides = dict(data.get('render') or {})
+            for field in body.inherit:
+                overrides.pop(field, None)
+            if body.render or body.inherit:
+                data['render'] = validate(inherit(overrides, patch))
+            if body.auto is not None:
+                data['auto'] = body.auto
+            backup = yaml_io.save_backup(str(path), old)
+            yaml_io.atomic_write(str(path), yaml_io.dump_yaml(data))
+    except ValueError as exc:
+        raise _error(422, 'invalid_render', str(exc)) from exc
+    audit.log('production_render', user=user['username'], target=key, details={'backup': backup, 'inherit': body.inherit, 'auto': body.auto})
+    return config_settings(key, user=user)
+
+
 @router.get("/{key}/pending")
 def pending(key: str, user=Depends(require_viewer)) -> dict:
     """The newest report's items, each saying whether this config's recipe already wrote it or it was set aside."""
@@ -83,7 +137,8 @@ def _whole_files(config: production.Config) -> list[tuple[str, str]]:
 
 def _whole_reports(config: production.Config) -> list[dict]:
     return [{"date": date, "path": path, "written": bool(mine), "scripts": mine}
-            for date, path in _whole_files(config)[:WHOLE_LISTED] for mine in [reports.scripts_of(path, config.recipe)]]
+            for date, path in _whole_files(config)[:WHOLE_LISTED]
+            for mine in [[s for s in reports.scripts_of(path, config.recipe) if not s.get('archived')]]]
 
 
 class ConfigIn(BaseModel):
@@ -166,6 +221,8 @@ class WriteIn(BaseModel):
 
     topic_ids: list[str] = Field(default_factory=list, max_length=10)
     report_path: str = ""  # a whole-report config: which of the Job's reports to write from
+    report_sha256: str = Field(default='', pattern=r'^([0-9a-f]{64})?$')
+    rewrite_existing: bool = False
 
 
 @router.post("/{key}/write", status_code=202)
@@ -214,7 +271,28 @@ def _write_whole(config: production.Config, body: WriteIn, request: Request, use
     files = {path for _, path in _whole_files(config)}
     if body.report_path not in files:  # never a path from the request that is not this Job's report
         raise _error(422, "not_from_this_job", f"{body.report_path} 不是 {config.job} 的报告")
-    if reports.scripts_of(body.report_path, config.recipe):
+    if body.rewrite_existing and not body.report_sha256:
+        raise _error(422, 'report_revision_required', '接续更新后的报告需要本次报告的 SHA256')
+    if body.report_sha256:
+        import hashlib
+        from pathlib import Path
+        from web.services import video_workflow
+        full = Path(video_workflow.workspace_dir()) / body.report_path
+        if hashlib.sha256(full.read_bytes()).hexdigest() != body.report_sha256:
+            raise _error(409, 'report_changed', '报告已经变化，请重新核对本次研究结果')
+    previous = [s for s in reports.scripts_of(body.report_path, config.recipe) if not s.get('archived')]
+    if previous and body.rewrite_existing:
+        owned = [s for row in previous if (s := store.get_script(row['id']))
+                 and s.get('production') == config.key and not s.get('archived')]
+        if not owned:
+            raise _error(409, 'report_owner_changed', '已有文稿不属于这个生产配置，不会重写其他配置的文稿')
+        before = max(owned, key=lambda s: (s['created_at'], s['id']))
+        target = max([v['version'] for v in store.list_versions(before['id'])] or [0]) + 1
+        script = video.rerun_step(before['id'], 'write', user=user)
+        audit.log('production_rewrite', user=user['username'], target=config.key,
+                  details={'script_id': before['id'], 'target_version': target, 'report_sha256': body.report_sha256})
+        return [{**script, 'production': config.key, 'target_version': target}]
+    if previous:
         raise _error(409, "already_written", "这份报告已经用这套配置写过了")
     record = reports.record_file(body.report_path, job=config.job, created_by=user["username"])
     script = video.create_script(video.ScriptCreateIn(column=config.recipe, report_id=record["id"]), request, user)

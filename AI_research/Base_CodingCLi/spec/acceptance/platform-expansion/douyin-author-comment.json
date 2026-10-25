@@ -1,0 +1,48 @@
+{
+  "checked_at": "2026-10-25T12:43:32+0800",
+  "work_id": "7700436961890209034",
+  "script_id": "2e2c466e8b1b4174ab65ebb0faf15dbc",
+  "version": 1,
+  "upload_status": "PUBLISHED",
+  "public_evidence": "anonymous_video_detail",
+  "publications": [
+    {
+      "script_id": "2e2c466e8b1b4174ab65ebb0faf15dbc",
+      "version": 1,
+      "platform": "douyin",
+      "url": "https://www.douyin.com/video/7700436961890209034",
+      "render_id": "cb807b68f63f409c9aa5e448e165d68f",
+      "published_on": "2026-10-25",
+      "recorded_by": "platform-manager"
+    }
+  ],
+  "comment": {
+    "job_id": "13842b2978114f8883d38f18c2e128af",
+    "job_count": 1,
+    "status": "SENT",
+    "comment_id": "@jfNo5LdJRknxssRd77Pvu9V5pS6QYiz+K68qPaxujaFAtg6fR4wnWI00IRZ29Op5gcaPdlABeYEV0kaatRGoZA==",
+    "read_back": true,
+    "submitted_text_sha256": "c291f5ed49cb5c37f8ee2c9e0b0770c37a437d13ed27df2ec4c2116ed479f7c1",
+    "original_paragraphs_preserved_in_request": true,
+    "platform_normalized_whitespace": true,
+    "creator_list_matches": 1,
+    "creator_list_comment_count": 1,
+    "new_upload_for_acceptance": false,
+    "template_changed": false,
+    "pin_supported": false,
+    "anonymous_display_confirmed": false,
+    "anonymous_page_observation": "匿名作品页当前显示暂无评论；创作中心已回读，不推断公开展示或审核状态。"
+  },
+  "validation": {
+    "full_check_log": "/tmp/douyin-comment-final-check.log",
+    "focused_backend_passed": 103,
+    "full_backend_passed": 2258,
+    "full_backend_skipped": 3,
+    "full_ui_passed": 461,
+    "typecheck": true,
+    "lint": true,
+    "build": true,
+    "full_check_passed": true
+  },
+  "screenshot": "douyin-author-comment.png"
+}

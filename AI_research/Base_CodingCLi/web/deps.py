@@ -15,6 +15,19 @@ _ROLE_RANK = {"viewer": 0, "editor": 1, "admin": 2}
 
 _SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 
+# An object key cannot be supplied through HTTP headers, cookies or JSON. Only
+# an in-process ASGI transport may delegate a previously authorized batch.
+_BACKGROUND_ACTOR = object()
+
+
+def delegate_background(scope: dict, user_id: int) -> None:
+    scope[_BACKGROUND_ACTOR] = user_id
+
+
+def inherit_background(source: dict, target: dict) -> None:
+    if _BACKGROUND_ACTOR in source:
+        target[_BACKGROUND_ACTOR] = source[_BACKGROUND_ACTOR]
+
 
 def _user_from_api_token(request: Request) -> Optional[dict]:
     """Resolve a user from an ``Authorization: Bearer air_...`` API token."""
@@ -40,6 +53,11 @@ def _user_from_api_token(request: Request) -> Optional[dict]:
 
 def current_user(request: Request) -> dict:
     """Resolve the current user from the access cookie or an API token."""
+    if _BACKGROUND_ACTOR in request.scope:
+        user = user_db.get_user_by_id(request.scope[_BACKGROUND_ACTOR])
+        if not user or user.get('disabled'):
+            raise HTTPException(403, '批次所属账号已停用，后续操作已停止')
+        return {**user, '_auth': 'background'}
     token_user = _user_from_api_token(request)
     if token_user:
         return token_user
@@ -78,7 +96,7 @@ def require_role(min_role: str) -> Callable:
 
     def _dep(request: Request, user: dict = Depends(current_user)) -> dict:
         # CSRF check for unsafe methods (skipped for API-token auth: no cookies)
-        if request.method not in _SAFE_METHODS and user.get("_auth") != "token":
+        if request.method not in _SAFE_METHODS and user.get("_auth") not in ("token", "background"):
             cookie_csrf = request.cookies.get(CSRF_COOKIE)
             header_csrf = request.headers.get("x-csrf-token")
             if not cookie_csrf or cookie_csrf != header_csrf:

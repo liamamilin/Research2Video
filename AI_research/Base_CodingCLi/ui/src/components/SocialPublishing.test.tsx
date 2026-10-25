@@ -73,6 +73,21 @@ function show(platform: Platform = "xiaohongshu", query = "") {
   </MemoryRouter>);
 }
 
+it("offers connection recovery while keeping checking tied to the original upload", async () => {
+  overviews.xiaohongshu.definition.capabilities.public_check = true;
+  overviews.xiaohongshu.uploads = [job("xiaohongshu", { status: "SUBMITTED", work_id: "6ade22190000000033018ae8",
+    progress: {label:"回查暂不可用",state:"waiting",active:false,needs_attention:true,
+      recovery:{kind:"connection",label:"检查平台连接",href:"/platforms?platform=xiaohongshu&task=xiaohongshu-task",
+        message:"请恢复原账号登录后继续核对。",resumable:true}} })];
+  show();
+  expect(await screen.findByText("请恢复原账号登录后继续核对。")).toBeTruthy();
+  expect(screen.getByRole("link", {name:"检查平台连接"}).getAttribute("href")).toBe("#platform-connection");
+  expect(writes()).toEqual([]);
+  fireEvent.click(screen.getByRole("button", {name:"核对发布结果"}));
+  await waitFor(() => expect(api).toHaveBeenCalledWith("/api/platforms/social/xiaohongshu/uploads/xiaohongshu-task/reconcile", {method:"POST",body:{video:""}}));
+  expect(writes()).toHaveLength(1);
+});
+
 function connect(platform: Platform) {
   overviews[platform].account = { connected: true, uid: ACCOUNT, name: `${definition(platform).name}测试账号` };
 }

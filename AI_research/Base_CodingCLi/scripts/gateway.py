@@ -65,7 +65,7 @@ _STARTING_PAGE = """<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="refresh" content="2">
-<title>AI Research Console · 正在启动</title>
+<title>研映 · Research2Video · 正在启动</title>
 <style>
   :root {{ color-scheme: dark; }}
   body {{ margin:0; min-height:100vh; display:flex; align-items:center;
@@ -83,7 +83,7 @@ _STARTING_PAGE = """<!doctype html>
 </style></head>
 <body><div class="box">
   <div class="spin"></div>
-  <h1>正在启动 AI Research Console</h1>
+  <h1>正在启动 研映 · Research2Video</h1>
   <p>检测到后台服务未运行，已自动拉起。启动需要十几秒（要建立报告索引）。</p>
   <p>已等待 <span class="clock" id="t">0</span> 秒，页面每 2 秒自动刷新，就绪后直接进入。</p>
   <p class="note">若超过一分钟仍在等待，请查看项目日志
@@ -154,6 +154,7 @@ class Supervisor:
         self._started_at: float | None = None
         self.spawns = 0
         self.last_error = ""
+        self._child: subprocess.Popen | None = None
 
     def healthy(self) -> bool:
         conn = http.client.HTTPConnection("127.0.0.1", self.app_port, timeout=self.health_timeout)
@@ -178,10 +179,9 @@ class Supervisor:
     def claimed(self) -> bool:
         """Whether anything already holds the app port.
 
-        A booting app binds the port before it finishes its startup work (the
-        indexer warm-up alone takes ~12s) and answers nothing until then.
-        Without this check, a request arriving after the cooldown would fork a
-        second server into a port that is already taken.
+        A listener may be warming up or belong to another launcher. It must
+        not get a competing server just because its health probe timed out.
+        Our own child is tracked separately while it has not bound yet.
         """
         probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         probe.settimeout(min(1.0, self.health_timeout))
@@ -201,6 +201,10 @@ class Supervisor:
             # while the app is booting, and each must not fork a server.
             if self.healthy():
                 return True, "running"
+            # Uvicorn completes startup/indexing before binding its listener.
+            # A live child still owns this boot even after the retry cooldown.
+            if self._child is not None and self._child.poll() is None:
+                return False, "starting"
             if self.claimed():
                 # Something owns the port and is not answering yet, so it is
                 # still coming up rather than crashed.
@@ -257,6 +261,7 @@ class Supervisor:
                 cwd=str(self.project), stdout=handle, stderr=handle,
                 stdin=subprocess.DEVNULL, start_new_session=True, env=env,
             )
+        self._child = child
         threading.Thread(target=child.wait, daemon=True, name='reap-app').start()
 
     def status(self) -> dict:

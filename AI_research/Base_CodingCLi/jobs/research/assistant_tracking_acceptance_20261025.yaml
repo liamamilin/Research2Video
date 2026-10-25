@@ -1,0 +1,8 @@
+name: Assistant Tracking Acceptance 20261025
+description: ''
+enabled: false
+keywords: []
+language: zh
+prompt: 阅读本地素材 output/workflow_samples_20261025/flash/report.md，选其中 Recursive Flint
+  项目，写一份面向开发者的简短研究摘要，说明它是什么以及值得关注之处，附素材里的原始资料链接。
+output: output/assistant_tracking_acceptance_20261025_repeat_{date}.md

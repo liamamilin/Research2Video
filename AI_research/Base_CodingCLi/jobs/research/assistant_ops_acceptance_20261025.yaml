@@ -1,0 +1,7 @@
+name: Assistant Ops Acceptance 20261025
+description: 矩阵运营验收用研究任务：跟踪本地编程 Agent 公开进展，整理开发者关心的新能力和实际取舍。
+enabled: false
+keywords: []
+language: zh
+prompt: 跟踪本地编程 Agent 的公开进展，整理开发者关心的新能力和实际取舍
+output: output/{date}_Assistant_Ops_Acceptance_20261025.md

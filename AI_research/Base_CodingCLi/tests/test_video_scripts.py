@@ -1463,11 +1463,11 @@ def test_api_a_publication_records_a_link_and_a_date_and_marks_the_script_and_to
     script = _approved(client)
     _login(client)
     url = f"/api/video/scripts/{script['id']}/publications"
-    made = client.post(url, headers=_csrf(client), json={"url": "https://www.bilibili.com/video/BV1xx", "published_on": "2026-10-19"})
+    made = client.post(url, headers=_csrf(client), json={"url": "https://www.bilibili.com/video/BV1xx411c7mD", "published_on": "2026-10-19"})
     assert made.status_code == 201, made.text
     assert made.json()["version"] == 1 and made.json()["title"] == "Gemini 4 Argon 上线" and made.json()["published_on"] == "2026-10-19"
     detail = client.get(f"/api/video/scripts/{script['id']}").json()
-    assert [p["url"] for p in detail["publications"]] == ["https://www.bilibili.com/video/BV1xx"]
+    assert [p["url"] for p in detail["publications"]] == ["https://www.bilibili.com/video/BV1xx411c7mD"]
     assert [s["published"] for s in client.get("/api/video/scripts").json()] == [True]
     # a second upload (b23.tv short links count) is another record, newest day first
     client.post(url, headers=_csrf(client), json={"url": "https://b23.tv/abc", "published_on": "2026-10-20"})

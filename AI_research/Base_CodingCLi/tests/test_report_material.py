@@ -72,3 +72,15 @@ def test_missing_material_keeps_older_reports_usable(video_env, llm, monkeypatch
     assert video_workflow.run(script["id"], llm_config=object()) == "DRAFT"
     assert REPORT in llm.calls[0][1]["content"]
     assert store.get_version(script["id"], 1)["meta"]["input_kind"] == "report"
+
+
+def test_rewrite_reads_the_selected_source_after_topic_renaming(video_env):
+    path = video_env / "renamed-topic.md"
+    path.write_text("### 1.1 原选题\n- **一句话**：原来保存的素材摘要\n\n### 1.2 其他\n无关内容")
+    script = {"report_path": str(path), "topic": {"title": "链路样片 · 新名称", "from_item": "old-id",
+              "fields": {"一句话": "原来保存的素材摘要"}}}
+    assert "原来保存的素材摘要" in video_workflow.report_of(script)
+    assert "无关内容" not in video_workflow.report_of(script)
+    script["topic"]["from_item_title"] = "原选题"
+    script["topic"]["fields"] = {}
+    assert "原来保存的素材摘要" in video_workflow.report_of(script)

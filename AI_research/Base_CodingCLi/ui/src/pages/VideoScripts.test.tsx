@@ -172,8 +172,9 @@ describe("Video script cell picker", () => {
       </MemoryRouter>,
     );
     expect(await screen.findByText("草稿一篇")).toBeTruthy();
+    expect(screen.getByText("已发一篇")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "从未发布到任何平台 1" }));
     expect(screen.queryByText("已发一篇")).toBeNull();
-    expect(screen.getByRole("button", { name: "未发布 1" }).getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "全部 2" }));
     expect(screen.getByText("已发一篇")).toBeTruthy();
     expect(screen.getByRole("button", { name: "全部 2" }).getAttribute("aria-pressed")).toBe("true");
@@ -264,7 +265,7 @@ describe("Script list scope and independent loading", () => {
     render(<MemoryRouter initialEntries={["/video?status=all"]}><VideoScriptsPage /></MemoryRouter>);
     expect(await screen.findByText("已经发布的文稿")).toBeTruthy();
     expect(screen.getByRole("button", { name: "全部 3" }).getAttribute("aria-pressed")).toBe("true");
-    fireEvent.click(screen.getByRole("button", { name: "未发布 2" }));
+    fireEvent.click(screen.getByRole("button", { name: "从未发布到任何平台 2" }));
     expect(screen.queryByText("已经发布的文稿")).toBeNull();
   });
   it("filters unpublished current versions across stages and keeps matrix counts", async () => {
@@ -274,13 +275,13 @@ describe("Script list scope and independent loading", () => {
     ];
     vi.stubGlobal("fetch", vi.fn(async () => jsonResponse(scripts)));
     render(<MemoryRouter initialEntries={["/video?status=unpublished"]}><VideoScriptsPage /></MemoryRouter>);
-    const unpublished = await screen.findByRole("button", { name: "未发布 3" });
+    const unpublished = await screen.findByRole("button", { name: "从未发布到任何平台 3" });
     expect(unpublished.getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByText("矩阵甲的文稿")).toBeTruthy();
     expect(screen.getByText("矩阵甲成片未发布")).toBeTruthy();
     expect(screen.queryByText("矩阵甲已发布")).toBeNull();
     fireEvent.change(screen.getByLabelText("文稿矩阵"), { target: { value: "a" } });
-    expect(screen.getByRole("button", { name: "未发布 2" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "从未发布到任何平台 2" })).toBeTruthy();
     expect(screen.queryByText("矩阵乙的文稿")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "已发布 1" }));
     expect(screen.getByText("矩阵甲已发布")).toBeTruthy();

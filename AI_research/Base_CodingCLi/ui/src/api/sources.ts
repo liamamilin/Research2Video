@@ -12,8 +12,16 @@ export interface SourceRow {
 }
 
 export interface SourceCatalog {
+  revision?: string;
+  adapters?: string[];
   sources: SourceRow[];
   problems: { job: string; problem: string }[]; // Job 里写了注册表没有的源或标签
 }
 
 export const listSources = (signal?: AbortSignal) => api<SourceCatalog>("/api/sources", { signal });
+export const getSource = (id: string) => api<SourceRow & { revision: string }>(`/api/sources/${encodeURIComponent(id)}`);
+export const saveSource = (id: string, revision: string, fields: { name: string; spec: string; tags: string[]; note: string }, create = false) => api(
+  create ? '/api/sources' : `/api/sources/${encodeURIComponent(id)}`, { method: create ? 'POST' : 'PATCH',
+    body: { ...(create ? { id } : {}), expected_revision: revision, fields } });
+export const deleteSource = (id: string, revision: string) => api(`/api/sources/${encodeURIComponent(id)}`, {
+  method: 'DELETE', query: { expected_revision: revision } });

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import asyncio
 import os
 import json
 import threading
@@ -16,6 +17,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.background import BackgroundTasks
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from web.auth import db as user_db
@@ -36,6 +38,7 @@ from web.routes.tracking import router as tracking_router
 from web.routes.share import router as share_router
 from web.routes.qa import router as qa_router
 from web.routes.assistant import router as assistant_router
+from web.routes.assistant_batches import router as assistant_batches_router
 from web.routes.setup import router as setup_router
 from web.routes.gateway import router as gateway_router
 from web.routes.video import router as video_router
@@ -212,6 +215,17 @@ async def lifespan(app: FastAPI):
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
         threading.Thread(target=douyin_loop, name="douyin-worker", daemon=True).start()
 
+    def assistant_batch_loop() -> None:
+        from web.services import assistant_batches
+        while not sweep_stop.wait(3):
+            try:
+                asyncio.run(assistant_batches.tick(app))
+            except Exception:
+                logger.exception('assistant batch pass failed')
+
+    if not os.environ.get('AREC_NO_AUTOPILOT_LOOP'):
+        threading.Thread(target=assistant_batch_loop, name='assistant-batches', daemon=True).start()
+
     def social_loop(platform: str) -> None:
         from web.services import social_publishing
         while not sweep_stop.wait(5):
@@ -252,7 +266,7 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="AI Research Console", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="研映 · Research2Video", version="0.1.0", lifespan=lifespan)
 
     @app.middleware("http")
     async def record_user_activity(request: Request, call_next):
@@ -283,8 +297,18 @@ def create_app() -> FastAPI:
                     and path not in ("/favicon.ico", "/")):
                 from core import activity
 
-                activity.use_state_dir(settings.paths.state_dir)
-                activity.mark_activity()
+                def mark_activity() -> None:
+                    try:
+                        activity.use_state_dir(settings.paths.state_dir)
+                        activity.mark_activity()
+                    except Exception:  # noqa: BLE001 - bookkeeping must not fail a completed response
+                        pass
+
+                background = BackgroundTasks()
+                if response.background is not None:
+                    background.add_task(response.background)
+                background.add_task(mark_activity)
+                response.background = background
         except Exception:  # noqa: BLE001 - telemetry must not affect responses
             pass
         return response
@@ -378,6 +402,7 @@ def create_app() -> FastAPI:
     app.include_router(share_router)
     app.include_router(qa_router)
     app.include_router(assistant_router)
+    app.include_router(assistant_batches_router)
     app.include_router(setup_router)
     app.include_router(gateway_router)
     app.include_router(video_recipes_router)
@@ -427,17 +452,8 @@ def create_app() -> FastAPI:
         )
         result["stale_locks"] = stale_locks(settings.paths.state_dir)
         schedule = _schedule_check(settings.paths.state_dir)
-        result["schedule"] = schedule
-        # Keep the aggregate in sync: the schedule check is part of health.
-        result["checks"].append(schedule)
-        if schedule["status"] == "error":
-            result["errors"].append(schedule["name"])
-            result["status"] = "error"
-        elif schedule["status"] == "warn" and "schedule" not in result["warnings"]:
-            result["warnings"].append(schedule["name"])
-            if result["status"] == "ok":
-                result["status"] = "warn"
-        return result
+        from web.services.health_status import complete_health
+        return complete_health(result, schedule, settings.paths.state_dir)
 
     # ----- Static SPA (production) -----
     ui_dist = Path(__file__).resolve().parent.parent / "ui" / "dist"
@@ -487,7 +503,7 @@ def create_app() -> FastAPI:
         @app.get("/")
         def root():
             return {
-                "message": "AI Research Console API",
+                "message": "研映 · Research2Video API",
                 "ui": "UI not built. Run: cd ui && npm run build",
                 "docs": "/docs",
             }

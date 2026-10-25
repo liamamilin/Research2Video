@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from typing import Literal
+from urllib.parse import quote
 
 from fastapi import HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -51,6 +52,8 @@ class CreateJob(Arguments):
     language: str = "zh"
     output: str = ""
     template: str = ""
+    display_name: str = ''
+    sources: list[str] | None = None
     recurrence: Recurrence | None = None
     source_references: list[SourceReference] = Field(default_factory=list)
 
@@ -130,13 +133,17 @@ def execute_tool(name: str, arguments: dict, request: Request, user: dict) -> di
                 items.append(data)
         return {"items": items, "total": len(items)}
     if name == "create_job":
-        result = jobs.create_job(args.model_dump(exclude_none=True), user=user)
+        payload = args.model_dump(exclude_none=True)
+        if 'keywords' not in args.model_fields_set:
+            payload.pop('keywords', None)
+        result = jobs.create_job(payload, user=user)
         if isinstance(result, BaseModel):
-            response = {"job_name": result.name, "job": result.model_dump(mode="json")}
+            response = {"job_name": result.name, "job": result.model_dump(mode="json"), 'href': '/jobs/' + quote(result.name, safe='')}
             if args.recurrence:
                 from web.services import managed_scheduler as managed
                 plan = next(p for p in managed.store().list() if p['job_name'] == result.name)
-                response.update(schedule_id=plan['id'], plan=managed.describe(plan), href='/scheduler')
+                response.update(schedule_id=plan['id'], plan=managed.describe(plan),
+                                schedule_href='/scheduler?plan=' + quote(plan['id'], safe=''))
                 response['plan']['dispatcher'] = managed.store().health()
             return response
         return result
@@ -145,7 +152,7 @@ def execute_tool(name: str, arguments: dict, request: Request, user: dict) -> di
     canonical = detail.name
     if name == "get_job":
         data = yaml_io.parse_yaml(detail.yaml_content)
-        return {"job_name": canonical, "expected_mtime": detail.yaml_mtime,
+        return {"job_name": canonical, "href": '/jobs/' + quote(canonical, safe=''), "expected_mtime": detail.yaml_mtime,
                 "config": {k: data.get(k) for k in (
                     "name", "description", "prompt", "keywords", "language", "enabled", "output", "sources", "source_references")},
                 "timeout_seconds": detail.timeout_seconds,

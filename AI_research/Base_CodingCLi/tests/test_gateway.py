@@ -327,6 +327,46 @@ def test_respawn_cooldown_blocks_a_retry_storm(tmp_path):
     assert sup.spawns == 1
 
 
+def test_slow_start_before_port_binding_keeps_one_child_and_retries_after_exit(tmp_path, monkeypatch):
+    """Uvicorn runs startup/indexing before listening, which can exceed the cooldown."""
+    now = [100.0]
+    children = []
+
+    class Child:
+        def __init__(self):
+            self.done = threading.Event()
+
+        def poll(self):
+            return 1 if self.done.is_set() else None
+
+        def wait(self):
+            self.done.wait(timeout=10)
+            return self.poll()
+
+    def spawn(*args, **kwargs):
+        child = Child()
+        children.append(child)
+        return child
+
+    monkeypatch.setattr(gateway.subprocess, "Popen", spawn)
+    monkeypatch.setattr(gateway.time, "monotonic", lambda: now[0])
+    sup = gateway.Supervisor(app_port=8766, project=tmp_path, cooldown=10)
+    monkeypatch.setattr(sup, "healthy", lambda: False)
+    monkeypatch.setattr(sup, "claimed", lambda: False)
+    try:
+        assert sup.ensure() == (False, "starting")
+        now[0] += 120
+        for _ in range(5):
+            assert sup.ensure() == (False, "starting")
+        assert len(children) == sup.spawns == 1
+        children[0].done.set()
+        assert sup.ensure() == (False, "starting")
+        assert len(children) == sup.spawns == 2
+    finally:
+        for child in children:
+            child.done.set()
+
+
 def test_a_booting_app_is_not_respawned_over(tmp_path):
     """The app binds its port ~12s before it answers; that gap must not fork a server.
 

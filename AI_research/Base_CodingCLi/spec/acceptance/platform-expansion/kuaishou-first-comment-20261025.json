@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-25",
+  "feature": "kuaishou-first-comment",
+  "validation": {
+    "backend_tests_passed": 603,
+    "ui_tests_passed": 82,
+    "build": "passed",
+    "lint": "passed",
+    "diff_check": "passed"
+  },
+  "live_readonly": {
+    "uid": "3865622650",
+    "work_id": "3x432buhnb5ryma",
+    "home_matches": true,
+    "list_valid": true,
+    "comment_count": 0,
+    "composer_count": 1,
+    "send_button_count": 1,
+    "comment_submission_attempted": false
+  },
+  "external_comment_posts": 1,
+  "live_send_acceptance": "provider_accepted_exact_id; visibility_readback_pending",
+  "dryrun_with_real_session": "not_executed_auto_review_rejected_risk_of_accidental_comment",
+  "pin_comment": "not_enabled",
+  "sources": [
+    {
+      "url": "https://p23-plat.wskwai.com/kos/nlav11104/static/ks-cp/js/articleComment.5a0e74df.js",
+      "sha256": "bd9a751ce95cce6206d971a941e837aaef7b470eefb4f91aac81f41fd7815b57"
+    },
+    {
+      "url": "https://p23-plat.wskwai.com/kos/nlav11104/static/ks-cp/js/6551.61ae1458.js",
+      "sha256": "8515a48fe00b7d9a80704436b979a518a2972487209d9a55385c2bbd901e4297"
+    }
+  ],
+  "live_send": {
+    "uid": "3865622650",
+    "work_id": "3x432buhnb5ryma",
+    "parent_id": "6b6d791d285d46aabbcafbfd6c365d75",
+    "job_id": "d0feeb07fdb640fcb49a801ec4c69095",
+    "status": "SENT",
+    "comment_id": "1189533470970",
+    "submission_started_at": 1792922870.462844,
+    "read_back": false,
+    "user_authorized_exact_text_and_target": true,
+    "upload_jobs_unchanged": 2,
+    "first_comment_jobs": 1,
+    "publications_unchanged": 2,
+    "checked_at": 1792923120.774039,
+    "check_attempts": 1,
+    "next_check_at": 1792923135.774039,
+    "phase": "评论暂未回读，继续自动只读核对，不重发"
+  },
+  "runtime": {
+    "pid": 23256,
+    "instance_id": "729a636f438644c195277a3d49869331"
+  },
+  "automatic_comment_check": "enabled_read_only_with_backoff",
+  "screenshot": "kuaishou-first-comment-20261025.png"
+}

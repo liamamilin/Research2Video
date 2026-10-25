@@ -129,6 +129,8 @@ def shipments(columns: dict, *, limit: int = 100000, config_dir: str = "config",
     render_statuses = store.render_statuses_by_script()
     chosen_renders = {s["id"]: progress.render_state(s, render_statuses.get(s["id"], []))["render"] for s in scripts}
     details = store.shipment_rows([s["id"] for s in scripts], [r["id"] for r in chosen_renders.values() if r])
+    from web.services import distributions
+    distribution_rows = distributions.overview(scripts)
     rows = []
     for script in scripts:
         owner = owners[script["id"]]
@@ -152,6 +154,7 @@ def shipments(columns: dict, *, limit: int = 100000, config_dir: str = "config",
                                                    "version": latest["version"], "error": latest.get("error_message"),
                                                    "completed_at": latest.get("completed_at")},
             "video_url": f"/api/video/renders/{latest['id']}/files/video.mp4" if video and latest["status"] == "COMPLETED" else None,
-            "publications": publications, "warnings": warnings,
+            "publications": [p for p in publications if not p.get("removed_at")], "warnings": warnings,
+            "distributions": [d for d in distribution_rows[script["id"]] if d["version"] == script["current_version"]],
         })
     return rows

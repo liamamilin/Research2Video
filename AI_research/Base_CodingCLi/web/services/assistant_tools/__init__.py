@@ -21,8 +21,8 @@ class Tool:
 
 
 def registry() -> dict[str, Tool]:
-    from . import work, reports, intelligence, administration, video
-    return {**work.TOOLS, **reports.TOOLS, **intelligence.TOOLS, **administration.TOOLS, **video.TOOLS}
+    from . import work, reports, intelligence, administration, video, application, management, activity, operations
+    return {**work.TOOLS, **reports.TOOLS, **intelligence.TOOLS, **administration.TOOLS, **video.TOOLS, **application.TOOLS, **management.TOOLS, **activity.TOOLS, **operations.TOOLS}
 
 
 def definitions(role: str) -> list[dict]:

@@ -1,0 +1,26 @@
+{
+  "checked_at": "2026-10-25T03:12:13.804412+00:00",
+  "upload_task": "d3f58c5cad5741aea2a8cb607638db89",
+  "script_id": "2e2c466e8b1b4174ab65ebb0faf15dbc",
+  "version": 1,
+  "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+  "work_id": "7700436961890209034",
+  "submission_status": "SUBMITTED",
+  "accepted_receipt_verified": true,
+  "ownership_verified": true,
+  "public_confirmed": false,
+  "publication_record_written": false,
+  "reconciliation_checks": [
+    {
+      "status": "RECORDED",
+      "owned": true,
+      "public_confirmed": false
+    },
+    {
+      "status": "RECORDED",
+      "owned": true,
+      "public_confirmed": false
+    }
+  ],
+  "new_submission_during_check": false
+}

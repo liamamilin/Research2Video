@@ -1,0 +1,17 @@
+name: Pyodide 浏览器 Python 验收
+description: 验收用研究任务：根据 Pyodide 公开仓库与发行说明，研究 Python 在浏览器中运行的原理与实际价值，整理可讲成视频的素材与原始资料链接。
+enabled: false
+keywords: []
+language: zh
+schedule:
+  type: monthly
+  time: 09:00
+  timezone: Asia/Shanghai
+runtime:
+  timeout_seconds: 10800
+  skip_if_running: true
+prompt: |-
+  根据 Pyodide 的公开仓库及发行说明，研究 Python 为什么可以在浏览器里运行，它解决了什么实际问题；为开发者准备值得讲成视频的素材与原始资料链接。
+output: output/assistant_app_acceptance_20261025_{date}.md
+sources:
+  - source:assistant_pyodide_check

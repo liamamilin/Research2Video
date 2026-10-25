@@ -1,0 +1,193 @@
+{
+  "date": "2026-10-25",
+  "archived_scripts": 7,
+  "archived_completed_videos": 5,
+  "archived_failed_render_drafts": 1,
+  "archived": [
+    {
+      "script_id": "9ea9a1f68610498bb88d421ebf54e0cf",
+      "title": "AI公司季度营收168亿，为什么反而不敢上市了？",
+      "scope": "matrix:company",
+      "report": "output/company/2026-10-25_company_daily.md",
+      "recipe": "topic_digest",
+      "created_at": "2026-10-25T08:42:19+0800",
+      "status": "APPROVED",
+      "sequence": 111,
+      "published": false,
+      "protected": false,
+      "sample": false,
+      "rendered": true,
+      "sources": [
+        "news.crunchbase.com/public/ai-ipo-wave-anthropic-openai-delay-gurtu-airrived"
+      ],
+      "reason": "同矩阵重复主选题；保留：年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "duplicate_of": [
+        "2e2c466e8b1b4174ab65ebb0faf15dbc"
+      ]
+    },
+    {
+      "script_id": "0105f4dfdce94d99902c956b3a225b8c",
+      "title": "波兰要把一片一万两千年的森林，变成挡坦克的屏障",
+      "scope": "matrix:geography",
+      "report": "output/geography/2026-10-25_geography_weekly.md",
+      "recipe": "topic_digest",
+      "created_at": "2026-10-25T08:50:49+0800",
+      "status": "APPROVED",
+      "sequence": 122,
+      "published": false,
+      "protected": false,
+      "sample": false,
+      "rendered": true,
+      "sources": [
+        "news.mongabay.com/short-article/2026/10/can-a-swamp-stop-an-army",
+        "news.mongabay.com/video/2026/10/restoring-a-12000-year-old-forest-to-help-defend-polands-border"
+      ],
+      "reason": "同矩阵重复主选题；保留：用沼泽挡坦克：波兰把一片1.2万年的森林写进了国防计划",
+      "duplicate_of": [
+        "632e1ee1bbc34b2f80100a92818e81e0"
+      ]
+    },
+    {
+      "script_id": "6b25f8720cbc49d9877ebe3885afb136",
+      "title": "1816年没有夏天：一场火山爆发，怎么逼出了《弗兰肯斯坦》和吸血鬼",
+      "scope": "matrix:history",
+      "report": "output/history/2026-10-25_history_weekly.md",
+      "recipe": "topic_digest",
+      "created_at": "2026-10-25T08:52:55+0800",
+      "status": "APPROVED",
+      "sequence": 125,
+      "published": false,
+      "protected": false,
+      "sample": false,
+      "rendered": true,
+      "sources": [
+        "daily.jstor.org/frankenstein-the-vampyre-and-the-spirit-of-the-humanities"
+      ],
+      "reason": "同矩阵重复主选题；保留：没有夏天的那一年，《弗兰肯斯坦》诞生了",
+      "duplicate_of": [
+        "877bdac069f74bf998832a27eadecd54"
+      ]
+    },
+    {
+      "script_id": "938f95b78bd74e70a86971f40d266146",
+      "title": "这种小蛇逃命不靠爬，靠滚，比滑行快四倍",
+      "scope": "matrix:science",
+      "report": "output/science/2026-10-25_science_daily.md",
+      "recipe": "topic_digest",
+      "created_at": "2026-10-25T08:54:30+0800",
+      "status": "APPROVED",
+      "sequence": 127,
+      "published": false,
+      "protected": false,
+      "sample": false,
+      "rendered": true,
+      "sources": [
+        "sciencedaily.com/releases/2026/10/261023023718.htm"
+      ],
+      "reason": "同矩阵重复主选题；保留：蛇不爬，改滚：这种小蛇逃跑比爬快4倍",
+      "duplicate_of": [
+        "244223b70ec84ae995593b8fc306e775"
+      ]
+    },
+    {
+      "script_id": "a041308997b140518eaedcc13b3e5054",
+      "title": "蛇滚得比爬快四倍，这周科学还翻了几张旧答案",
+      "scope": "matrix:science",
+      "report": "output/science/2026-10-25_science_weekly.md",
+      "recipe": "topic_digest",
+      "created_at": "2026-10-25T08:55:33+0800",
+      "status": "APPROVED",
+      "sequence": 128,
+      "published": false,
+      "protected": false,
+      "sample": false,
+      "rendered": true,
+      "sources": [
+        "sciencedaily.com/releases/2026/10/261023023718.htm"
+      ],
+      "reason": "同矩阵重复主选题；保留：蛇不爬，改滚：这种小蛇逃跑比爬快4倍",
+      "duplicate_of": [
+        "244223b70ec84ae995593b8fc306e775"
+      ]
+    },
+    {
+      "script_id": "06464086e686447fba2684295f971360",
+      "title": "科学家重算了《星夜》的星空：凡·高画的那晚，可能不是六月",
+      "scope": "matrix:culture",
+      "report": "output/culture/2026-10-25_culture_daily.md",
+      "recipe": "topic_digest",
+      "created_at": "2026-10-25T08:46:58+0800",
+      "status": "APPROVED",
+      "sequence": 116,
+      "published": false,
+      "protected": false,
+      "sample": false,
+      "rendered": false,
+      "sources": [
+        "hyperallergic.com/scientists-contest-dating-of-van-goghs-the-starry-night"
+      ],
+      "reason": "同矩阵重复主选题；保留：星星改了梵高的日期，一只猫当了物理学家——这周的文化新闻比小说好看",
+      "duplicate_of": [
+        "c1524905196d41bea575ab50beaa5e72"
+      ]
+    }
+  ],
+  "skipped": [],
+  "published_before_sha256": "a385074cdf1df41b03eedecede2dbaff83b80648c03f6cfe940a89c5c09852f2",
+  "published_after_sha256": "a385074cdf1df41b03eedecede2dbaff83b80648c03f6cfe940a89c5c09852f2",
+  "published_unchanged": true,
+  "manual_archived_scripts": 6,
+  "automatically_blocked": [
+    {
+      "script_id": "f1c063f9607d4c8381f5a530685035e1",
+      "title": "删掉用户名单，GitHub 的星标曲线反而更好画了",
+      "reason": "同矩阵其他报告已讲过该选题：一部红米手机，10 秒干完了 1.6 万美元显卡的活",
+      "duplicate_of": [
+        "ba1300f5538f44618104f901ace60ebc"
+      ],
+      "rendered": false
+    }
+  ],
+  "archived_drafts": 2,
+  "verification": {
+    "targeted_python_passed": 424,
+    "new_guard_final_passed": 26,
+    "full_python_passed": 2663,
+    "full_python_skipped": 3,
+    "sandbox_failures_rechecked_passed": 27,
+    "ui_passed": 495,
+    "typecheck": true,
+    "lint": true,
+    "build": true,
+    "config_validation": true,
+    "diff_check": true,
+    "published_final_unchanged": true,
+    "final_api_ready": true,
+    "candidate_ui_verified": true,
+    "final_guard_distribution_passed": 36
+  },
+  "runtime": {
+    "old_instance": "9a21bc5e8d064beab58ad9ecc28828a7",
+    "instance": {
+      "status": "ok",
+      "instance_id": "522c7e7a25db43dfb0db6374264718d3"
+    },
+    "loaded_latest": true,
+    "pid": 29720,
+    "preserved_job": {
+      "job_id": "a77381f2-f394-462a-a9f9-7a38c06b7e76",
+      "status": "COMPLETED",
+      "active_stage": "COMPLETE",
+      "attempt_count": 1
+    },
+    "final_reload": {
+      "old_instance": "522c7e7a25db43dfb0db6374264718d3",
+      "instance": {
+        "status": "ok",
+        "instance_id": "464f8022683047bda56fca30e643973c"
+      },
+      "loaded_latest": true,
+      "pid": 30338
+    }
+  }
+}

@@ -61,6 +61,24 @@ def test_month_history_discovers_jobs_once_and_never_attributes_ambiguous_short_
     assert len(scans) == 1
 
 
+def test_matrix_schedule_snapshot_uses_one_store_and_batch_history(video_env, monkeypatch):
+    from web.routes import matrices as matrix_routes
+    from web.services import managed_scheduler as managed
+
+    storage = managed.store()
+    for index in range(6):
+        storage.save(f"research/task_{index}", "0 2 * * *", timezone="UTC")
+    opened = []
+    monkeypatch.setattr(managed, "store", lambda: opened.append(1) or storage)
+    monkeypatch.setattr(storage, "runs", lambda *args: (_ for _ in ()).throw(AssertionError("per-plan history read")))
+
+    plans = matrix_routes._plans()
+
+    assert len(plans) == 6 and len(opened) == 1
+    assert all(plan["enabled"] and plan["next_runs"] and plan["period"]["kind"] == "daily"
+               for plan in plans.values())
+
+
 def test_batch_run_list_uses_one_connection_and_keeps_items_and_status_filter(video_env, monkeypatch):
     ids = []
     for i in range(8):

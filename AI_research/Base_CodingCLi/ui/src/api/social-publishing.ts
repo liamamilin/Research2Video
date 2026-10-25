@@ -1,6 +1,7 @@
 import { api } from "./client";
 import type { PublishAdaptationResult } from "@/lib/publish-text";
 import type { FirstComment, UploadCandidate } from "./platforms";
+import type { PublicationProgress } from "./assistant-workspace";
 export type SocialDefinition = {
   id: string; name: string; creator_url: string; title_min: number; title_limit: number; description_limit: number; tag_limit: number; tag_length_limit?: number;
   combined_limit: number | null; public_check_gap: string; upload_note?: string; ownership_check?: boolean; acceptance: string;
@@ -11,6 +12,7 @@ export type SocialJob = {
   id: string; kind: string; platform: string; status: string; phase: string; error: string; work_id: string; url: string;
   script_id: string; version: number; render_id: string; created_at: number; updated_at: number; can_retry: boolean;
   can_confirm_absent?: boolean;
+  progress?: PublicationProgress;
   login_purpose?: "comments";
   first_comment?: { id: string; status: string; phase: string; error: string; text: string; comment_id: string; read_back: boolean; can_retry: boolean } | null;
   verification?: { automatic: boolean; attempts?: number; checked_at?: number; next_check_at?: number; state?: string; reason?: string };

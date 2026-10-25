@@ -321,6 +321,8 @@ def test_preview_preserves_saved_topics_even_if_draft_exceeds_current_limit(soci
 
     output = manager.preview("kuaishou", row["id"])
     assert output["draft"]["payload"] == saved
+    assert output['title'] == saved['title']
+    assert output['adaptation']['before'] == saved
     assert output["tags"] == topics[:3]
     assert not output["warnings"]
     assert video_store.distribution_draft(row, "kuaishou", OWNER["uid"])["payload"] == saved

@@ -101,6 +101,42 @@ def test_an_older_batch_gets_the_free_slot_before_a_newer_one(pilot_env, monkeyp
     assert [i["state"] for i in ap.get_run(newer["id"])["items"]] == ["WORKING", "PENDING", "PENDING"]
 
 
+@pytest.mark.parametrize("oldest_render_status", ["COMPLETED", "QUEUED"])
+def test_execution_includes_batches_beyond_the_recent_list_and_counts_their_renders(
+    pilot_env, monkeypatch, oldest_render_status,
+):
+    _, started = pilot_env
+    monkeypatch.setattr(pilot, "fire_auto", lambda: 0)
+    runs, scripts = [], []
+    for index in range(25):
+        script = store.create_script("flash", topic(index + 1))
+        draft(script["id"])
+        store.update_script(script["id"], status="APPROVED", approved_version=1)
+        run = ap.create_run({"refresh": False}, [{"column_key": "flash", "topic": topic(index + 1)}])
+        ap.update_run(run["id"], stage="ITEMS", started_at=time.time() - 100 + index)
+        ap.update_item(run["items"][0]["id"], script_id=script["id"], state="WORKING")
+        runs.append(run)
+        scripts.append(store.get_script(script["id"]))
+    oldest_render = video_render.create(scripts[0])
+    store.update_render(oldest_render["id"], status=oldest_render_status)
+    assert len(ap.list_runs(status="RUNNING")) == 20  # the UI still has its recent-list limit
+    assert len(ap.list_runs(limit=None, status="RUNNING")) == 25
+
+    pilot.tick()
+
+    if oldest_render_status == "COMPLETED":
+        assert ap.get_run(runs[0]["id"])["status"] == "DONE"
+        assert item_of(runs[0]["id"], 0)["state"] == "DONE"
+        assert len(store.list_renders(scripts[1]["id"])) == 1  # the oldest waiting batch wins
+        assert len(started) == 1
+    else:
+        assert ap.get_run(runs[0]["id"])["status"] == "RUNNING"
+        assert not store.list_renders(scripts[1]["id"])
+        assert set(started) == {oldest_render["id"]}  # follow the existing render, never resubmit
+    assert all(not store.list_renders(script["id"]) for script in scripts[2:])
+    assert len(store.list_renders(scripts[0]["id"])) == 1
+
+
 def test_a_clean_draft_is_approved_automatically_and_rendered_once(pilot_env, monkeypatch, autovideo):
     spawned, started = pilot_env
     run = batch(monkeypatch, 1)

@@ -72,7 +72,7 @@ def uid(platform: str) -> str:
 def public_job(platform: str, row: dict, *, comments: dict | None = None) -> dict:
     verification = row['result'].get('verification', {})
     value = {**{k: row[k] for k in ('id','kind','status','phase','error','work_id','script_id','version','render_id','created_at','updated_at')},
-            'platform': platform, 'payload': {k: row['payload'][k] for k in ('title','description','tags','first_comment') if k in row['payload']},
+            'platform': platform, 'account_uid': row['uid'], 'payload': {k: row['payload'][k] for k in ('title','description','tags','first_comment') if k in row['payload']},
             'url': row['result'].get('url', ''),
             'verification': {'automatic': platform in EVIDENCE and row['kind'] == 'UPLOAD' and row['status'] in ('UNKNOWN','SUBMITTED'),
                              **{k: verification[k] for k in ('attempts','checked_at','next_check_at','state','reason') if k in verification}},
@@ -80,6 +80,9 @@ def public_job(platform: str, row: dict, *, comments: dict | None = None) -> dic
             'can_retry': row['status'] in ('FAILED','CANCELLED') and bool(row['result'].get('confirmed_not_submitted'))}
     if row['kind'] == 'LOGIN' and row['payload'].get('purpose') == 'comments':
         value['login_purpose'] = 'comments'
+    if row['kind'] == 'UPLOAD':
+        from web.services.publication_state import describe
+        value['progress'] = describe(platform, row['id'], value)
     if row['kind'] == 'UPLOAD' and platform in COMMENT_PLATFORMS:
         child = (comments if comments is not None else store(platform).comments(row['uid'])).get(row['id'])
         value['first_comment'] = None if not child else {
@@ -250,6 +253,8 @@ def preview(platform: str, render_id: str) -> dict:
     from core.social.publish_text import default_comment
     adaptation = adapt(pack, platform)
     draft = preview_draft(render,platform)
+    if draft.get('draft'):
+        adaptation = adapt(pack, platform, draft['draft']['payload'])
     spec = definition(platform)
     warnings = list(pack.get('warnings',[])) + list(pack.get('freshness',{}).get('warnings',[]))
     tags = list(pack['tags'])
@@ -486,6 +491,8 @@ def apply_check(platform: str, db: SocialStore, check: dict) -> None:
         state = 'unknown'
     tracking = {'attempts': attempts, 'checked_at': check['updated_at'],
                 'next_check_at': check['updated_at'] + delay(attempts), 'state': state, 'reason': STATE_LABELS[state]}
+    if receipt.get('status_details'):
+        tracking['status_details'] = receipt['status_details']
     result = {**parent['result'], 'verification': tracking}
     fields = {'result': result}
     if (check['status'] == 'DONE' and receipt.get('uid') == parent['uid'] and receipt.get('owned') is True):

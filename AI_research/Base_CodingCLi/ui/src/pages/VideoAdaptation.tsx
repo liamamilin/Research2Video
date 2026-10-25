@@ -145,6 +145,11 @@ export function StylePanel({
 }
 
 export function ChecksPanel({ checks }: { checks: ScriptChecks }) {
+  if (checks.scope === "article_fidelity") return <section className="card p-4 text-sm space-y-3">
+    <h2 className="font-medium">原文忠实度审校 · {checks.model_checks_stale || !checks.fidelity_checked ? "待核对当前版本" : checks.summary.passed ? "通过" : "有问题需处理"}</h2>
+    <p className="text-xs text-text-muted">{checks.article_summary || "对照保存的文章核对原意与限定条件。"} 此项不代表完成外部事实核验。</p>
+    {checks.issues.length ? <ul className="space-y-2 text-xs">{checks.issues.map((item, i) => <IssueRow key={i} issue={item} showWhere />)}</ul> : null}
+  </section>;
   if (checks.mode === "on_request") return <section className="card p-4 text-sm text-text-muted">本版直接根据素材生成，未进行自动审校。</section>;
   const { summary, newcomer, quiz } = checks;
   const unhandled = checks.issues.filter((i) => i.severity === "serious");

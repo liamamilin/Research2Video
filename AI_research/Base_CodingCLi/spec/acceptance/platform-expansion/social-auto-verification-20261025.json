@@ -1,0 +1,257 @@
+{
+  "date": "2026-10-25",
+  "scope": "快手与小红书发布后自动核对、公开确认和文稿发布记录同步",
+  "deployment": {
+    "pid": 6286,
+    "host": "127.0.0.1",
+    "port": 8766,
+    "python": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/../.AI_research/bin/python",
+    "config_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/web.yaml",
+    "started": 1792920991.7462442,
+    "pid_file": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/server.pid",
+    "instance_id": "d496ae401f334b758cb596fa3602abe9"
+  },
+  "tests": {
+    "backend_regression": 565,
+    "backend_after_final_adjustment": 156,
+    "ui_regression": 67,
+    "ui_after_final_adjustment": 41,
+    "build": "passed",
+    "lint": "passed",
+    "compile": "passed",
+    "diff_check": "passed"
+  },
+  "live_readonly_verification": [
+    {
+      "platform": "kuaishou",
+      "result": {
+        "uid": "3865622650",
+        "work_id": "3x432buhnb5ryma",
+        "owned": true,
+        "public": true,
+        "platform_state": "published",
+        "check_reason": "已公开",
+        "evidence": "kuaishou_creator_public",
+        "published_at": 1792918129.078,
+        "url": "https://www.kuaishou.com/short-video/3x432buhnb5ryma"
+      }
+    },
+    {
+      "platform": "xiaohongshu",
+      "result": {
+        "uid": "657b2244000000002002c62b",
+        "work_id": "",
+        "owned": false,
+        "public": false,
+        "platform_state": "missing",
+        "check_reason": "暂未找到匹配作品",
+        "evidence": "",
+        "published_at": null,
+        "url": ""
+      }
+    }
+  ],
+  "platforms": {
+    "kuaishou": {
+      "uploads": [
+        {
+          "id": "6b6d791d285d46aabbcafbfd6c365d75",
+          "kind": "UPLOAD",
+          "status": "PUBLISHED",
+          "phase": "已发布（用户确认），作品链接已回写文稿",
+          "error": "",
+          "work_id": "3x432buhnb5ryma",
+          "script_id": "7137446fe8e444188b4b4bc6e460f480",
+          "version": 1,
+          "render_id": "3a210bc1da6846478c9119395fda843c",
+          "created_at": 1792918005.03458,
+          "updated_at": 1792918939.3750138,
+          "platform": "kuaishou",
+          "payload": {
+            "title": "机器人砍掉了小拇指：这周，技术落地开始寄账单",
+            "description": "这周科技新闻里，有一个细节特别小，小到很容易被划过去：波士顿动力给他们的 Atlas 人形机器人换了一双新手。\n\n00:00 第一笔账 机器人先学会了放弃\n01:22 第二笔账 AI 的账单 藏在你看不见的地\n02:40 第三笔账 最贵的那度电 其实已经付过了\n03:55 第四笔账 最缺的零件 是人\n05:18 账单不是坏消息\n",
+            "tags": [
+              "专题速览",
+              "大众观众",
+              "AI"
+            ]
+          },
+          "url": "https://www.kuaishou.com/short-video/3x432buhnb5ryma",
+          "verification": {
+            "automatic": false
+          },
+          "can_confirm_absent": false,
+          "can_retry": false
+        },
+        {
+          "id": "110310c21d644efdb3041e5b727f4def",
+          "kind": "UPLOAD",
+          "status": "UNKNOWN",
+          "phase": "投稿结果待核对",
+          "error": "快手上传流程未完成，请查看投稿回执；如果已发出请求，系统不会自动重投。",
+          "work_id": "",
+          "script_id": "6e2913ae92e24736a8522832e4291234",
+          "version": 1,
+          "render_id": "4553fa64ca124d16a1d5556ef59566dd",
+          "created_at": 1792910208.805853,
+          "updated_at": 1792921140.060215,
+          "platform": "kuaishou",
+          "payload": {
+            "title": "artificialanalysis.ai 前 20 名只差 8 分，价格差 24 倍：模型榜单的正确读法",
+            "description": "10 月 25 日这份榜单更新了，第一名是 Claude Opus 5.5 的 max 档，智能指数 58。\n\n00:00 第一名要你等九分二十二秒 花 5 98\n00:38 同一个模型 从 medium 调到 ma\n01:20 Kimi 的 2 97 秒和 Sol 的\n02:15 开源侧同一周发生的事 量化版下载量是原版\n03:20 所以下周你的默认值该怎么改\n",
+            "tags": [
+              "开发者",
+              "AI",
+              "model"
+            ]
+          },
+          "url": "",
+          "verification": {
+            "automatic": true,
+            "attempts": 7,
+            "checked_at": 1792921136.203085,
+            "next_check_at": 1792922936.203085,
+            "state": "missing",
+            "reason": "暂未找到匹配作品"
+          },
+          "can_confirm_absent": true,
+          "can_retry": false
+        }
+      ],
+      "latest_checks": [
+        {
+          "id": "a2ed4bd2e5a54a77a8c2c47eca97ce50",
+          "kind": "RECONCILE",
+          "status": "RECORDED",
+          "phase": "作品核对完成",
+          "created_at": 1792921113.9370298,
+          "updated_at": 1792921140.068944
+        },
+        {
+          "id": "2e3ac638bfb14766b564cac504dbbbf4",
+          "kind": "RECONCILE",
+          "status": "RECORDED",
+          "phase": "作品核对完成",
+          "created_at": 1792920883.353893,
+          "updated_at": 1792920909.233603
+        },
+        {
+          "id": "ec84b2b570c34d7f9eaa218fe2deaee6",
+          "kind": "RECONCILE",
+          "status": "RECORDED",
+          "phase": "作品核对完成",
+          "created_at": 1792920551.43432,
+          "updated_at": 1792920583.029235
+        }
+      ]
+    },
+    "xiaohongshu": {
+      "uploads": [
+        {
+          "id": "34b993b4567c4d1eb65da30ba9043df9",
+          "kind": "UPLOAD",
+          "status": "UNKNOWN",
+          "phase": "投稿结果待核对",
+          "error": "未取得明确的小红书投稿回执，请到创作服务平台核对，系统不会自动重投。",
+          "work_id": "",
+          "script_id": "6e2913ae92e24736a8522832e4291234",
+          "version": 1,
+          "render_id": "4553fa64ca124d16a1d5556ef59566dd",
+          "created_at": 1792910253.869942,
+          "updated_at": 1792921062.761215,
+          "platform": "xiaohongshu",
+          "payload": {
+            "title": "模型榜单的正确读法",
+            "description": "10 月 25 日这份榜单更新了，第一名是 Claude Opus 5.5 的 max 档，智能指数 58。\n\n00:00 第一名要你等九分二十二秒 花 5 98\n00:38 同一个模型 从 medium 调到 ma\n01:20 Kimi 的 2 97 秒和 Sol 的\n02:15 开源侧同一周发生的事 量化版下载量是原版\n03:20 所以下周你的默认值该怎么改\n\n参考来源（文稿引用）：\n· Artificial Analysis Models Leaderboard https://artificialanalysis.ai/leaderboards/models\n· DeepSeek-V4.1-Flash-1017 https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017\n· RecursiveSI/flint https://huggingface.co/RecursiveSI/flint\n· Qwen/Qwen3.8-27B https://huggingface.co/Qwen/Qwen3.8-27B\n· unsloth/flint-GGUF https://huggingface.co/unsloth/flint-GGUF\n· Lightricks/LTX-2.5 https://huggingface.co/Lightricks/LTX-2.5\n· black-forest-labs/flux-3-image-klein-comfy https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy\n",
+            "tags": [
+              "报告速览",
+              "开发者",
+              "AI",
+              "model",
+              "arena",
+              "名只差",
+              "价格差"
+            ]
+          },
+          "url": "",
+          "verification": {
+            "automatic": true,
+            "attempts": 6,
+            "checked_at": 1792921062.5194502,
+            "next_check_at": 1792921662.5194502,
+            "state": "missing",
+            "reason": "暂未找到匹配作品"
+          },
+          "can_confirm_absent": true,
+          "can_retry": false
+        }
+      ],
+      "latest_checks": [
+        {
+          "id": "23b5ba45414841198a41dc57e21144de",
+          "kind": "RECONCILE",
+          "status": "RECORDED",
+          "phase": "作品核对完成",
+          "created_at": 1792921042.2109718,
+          "updated_at": 1792921062.76705
+        },
+        {
+          "id": "2bb534501e7841e284c94276f8b472dd",
+          "kind": "RECONCILE",
+          "status": "RECORDED",
+          "phase": "作品核对完成",
+          "created_at": 1792920707.739022,
+          "updated_at": 1792920741.2603111
+        },
+        {
+          "id": "8dba2f286eb646178473ae8e4c2f8369",
+          "kind": "RECONCILE",
+          "status": "RECORDED",
+          "phase": "作品核对完成",
+          "created_at": 1792920556.906878,
+          "updated_at": 1792920583.709546
+        }
+      ]
+    }
+  },
+  "no_republication": {
+    "kuaishou": {
+      "new_upload_jobs": 0,
+      "payload_target_and_submit_guard_unchanged": true
+    },
+    "xiaohongshu": {
+      "new_upload_jobs": 0,
+      "payload_target_and_submit_guard_unchanged": true
+    }
+  },
+  "limits": [
+    "小红书尚无真实已公开笔记用于正向验收；签名后的作品查询已实测通过，公开/审核/权限组合由隔离测试覆盖。",
+    "缺少作品ID且无法同时匹配时间、时长与唯一上传标识或标题时，保持待核对，可补准确链接；不会自动重投。"
+  ],
+  "source_contract": {
+    "kuaishou-articleManage.f297ace2.js": {
+      "sha256": "7c2a2d6a3dd401b97b1b504dbcf77557abd2aa2ef5313a8aca2dd07465974545",
+      "bytes": 133508
+    },
+    "xiaohongshu-98.6a90c3f6.js": {
+      "sha256": "7f92a4769937c7263a0fe88018a9908d7776227335b663e45eb860733a6d20e8",
+      "bytes": 56079
+    },
+    "xiaohongshu-4108.10b0aee5.js": {
+      "sha256": "4438f8f349d685dfca057555ab3f295264ace20d2dd852f6f099dbe416ea6d2d",
+      "bytes": 43024
+    },
+    "xiaohongshu-2298.361e1e68.js": {
+      "sha256": "1d4a2ee3dbba70085097cd4ea25c3c61c919f9125e3daeaece6fa3df50135543",
+      "bytes": 4505
+    },
+    "xiaohongshu-index.a3508693.js": {
+      "sha256": "d56e953a2b832b68d1a5b163b73b82718d2298eaabecfaf6f77f95980d19b14a",
+      "bytes": 932277
+    }
+  },
+  "screenshots": [
+    "social-auto-verification-kuaishou-20261025.png",
+    "social-auto-verification-xiaohongshu-20261025.png"
+  ]
+}

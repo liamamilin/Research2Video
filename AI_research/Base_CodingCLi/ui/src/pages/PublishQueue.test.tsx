@@ -52,12 +52,12 @@ describe("Publish queue", () => {
   it("shows what is ready to publish, what is published and the freshness warnings", async () => {
     render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
     expect(await screen.findByText("待核实", { selector: "span" })).toBeTruthy();
-    expect(screen.getByText("已发布", { selector: "span" })).toBeTruthy();
+    expect(screen.getByText("已发布至 1 个平台", { selector: "span" })).toBeTruthy();
     expect(screen.getByText("有严重问题", { selector: "span" })).toBeTruthy();
     expect(screen.getByText(/成片完成 .*10-20 10:30/)).toBeTruthy();
     expect(screen.getByText("快讯超过 24 小时建议复核")).toBeTruthy();
     expect(screen.getByText("看成片").getAttribute("href")).toBe("/api/video/renders/r1/files/video.mp4");
-    expect(screen.getByText("发布包与记录 →").closest("a")?.getAttribute("href")).toBe("/video/s1?tab=publish");
+    expect(screen.getByText("各平台发布与记录 →").closest("a")?.getAttribute("href")).toBe("/video/s1?tab=publish");
   });
 
   it("filters by credibility label, so a video with a serious finding is easy to pick out", async () => {
@@ -79,4 +79,20 @@ describe("Publish queue", () => {
     render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
     expect(await screen.findAllByRole("button", { name: "在访达中显示" })).toHaveLength(1); // only the finished one
   });
+});
+
+it("finds a Bilibili-published asset under Douyin unpublished and retains its distribution entry", async () => {
+  const target = (platform: string, status: string) => ({ platform, status, current_account: true, account_uid: platform, publications: [] });
+  vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify([
+    { ...ROWS[0], title: "已发B站可发抖音", distributions: [target("bilibili", "PUBLISHED"), target("douyin", "UNPUBLISHED")] },
+    { ...ROWS[0], script_id: "both", title: "两个平台已发布", distributions: [target("bilibili", "PUBLISHED"), target("douyin", "PUBLISHED")] },
+  ]) }) as Response));
+  useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
+  render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
+  await screen.findByText("已发B站可发抖音");
+  fireEvent.change(screen.getByLabelText("发布平台"), { target: { value: "douyin" } });
+  fireEvent.change(screen.getByLabelText("平台发布状态"), { target: { value: "UNPUBLISHED" } });
+  expect(screen.getByText("已发B站可发抖音")).toBeTruthy();
+  expect(screen.queryByText("两个平台已发布")).toBeNull();
+  expect(screen.getByRole("link", { name: "各平台发布与记录 →" }).getAttribute("href")).toBe("/video/s1?tab=publish");
 });

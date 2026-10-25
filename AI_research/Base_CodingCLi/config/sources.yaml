@@ -1,9 +1,3 @@
-# 信息源注册表：每个源只在这里写一次；Job 的 sources 里用 `source:<id>` 引用单个源，用 `tag:<标签>` 引用一类
-# （也可以继续直接写 `rss:网址` 这样的完整写法）。标签没有固定含义，Job 要什么就按什么标签取。
-# spec 的写法见 core/sources.py 开头；note 写这个源的限制：只有标题、付费、版权、抓取偶尔失败等。
-# 2026-10-22 逐个用项目自己的抓取器试过，下面的都抓到了条目。
-
-# --- AI（AI 视频栏目现有 Job 用的；Job 里还是完整写法，后面改引用也不影响抓取） ---
 tldr_ai:
   name: TLDR AI
   spec: tldr:ai
@@ -37,8 +31,6 @@ gh_new_agent:
   name: GitHub 新项目 · agent
   spec: gh_new:agent
   tags: [ai, software]
-
-# --- 科技 ---
 ieee_spectrum:
   name: IEEE Spectrum
   spec: rss:https://spectrum.ieee.org/feeds/feed.rss
@@ -186,8 +178,6 @@ medievalists:
   name: Medievalists.net
   spec: rss:https://www.medievalists.net/feed/
   tags: [history]
-
-# --- 软件 ---
 product_hunt:
   name: Product Hunt
   spec: rss:https://www.producthunt.com/feed
@@ -242,8 +232,6 @@ engadget:
   name: Engadget
   spec: rss:https://www.engadget.com/rss.xml
   tags: [consumer]
-
-# --- 产业与制造 ---
 nist_news:
   name: NIST 新闻
   spec: rss:https://www.nist.gov/news-events/news/rss.xml
@@ -273,8 +261,6 @@ semiconductor_digest:
   name: Semiconductor Digest
   spec: rss:https://www.semiconductor-digest.com/feed/
   tags: [industry, semiconductors]
-
-# --- 文化与艺术 ---
 hyperallergic:
   name: Hyperallergic
   spec: rss:https://hyperallergic.com/feed/
@@ -308,8 +294,6 @@ jazztimes:
   name: JazzTimes
   spec: rss:https://jazztimes.com/feed/
   tags: [culture, music]
-
-# --- 地理 ---
 unesco_wh:
   name: UNESCO 世界遗产新闻
   spec: rss:https://whc.unesco.org/en/news/rss/
@@ -335,3 +319,9 @@ usgs_quakes:
   spec: rss:https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.atom
   tags: [geography, data]
   note: 一周里常常只有几条
+assistant_pyodide_check:
+  name: Pyodide 公开发行说明
+  tags:
+    - assistant-check
+  note: 验收用共享信息源
+  spec: github:pyodide/pyodide

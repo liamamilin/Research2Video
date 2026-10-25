@@ -60,7 +60,7 @@ export function LoginPage() {
   return (
     <div className="flex h-screen items-center justify-center bg-bg">
       <div className="w-full max-w-sm px-6">
-        <h1 className="text-xl font-semibold text-center mb-6">AI Research Console</h1>
+        <h1 className="text-xl font-semibold text-center mb-6">研映 · Research2Video</h1>
         {setup?.needs_admin && (
           <div className="card p-3 mb-4 text-xs space-y-1 border-accent/50">
             <div className="font-medium">首次使用</div>

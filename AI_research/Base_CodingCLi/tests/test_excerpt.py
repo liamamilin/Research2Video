@@ -28,3 +28,17 @@ def test_no_such_item_is_none_rather_than_the_whole_report():
 def test_an_item_with_no_cited_sources_gets_no_source_list():
     text = "### 1.1 无来源的条目\n- **一句话**：x\n\n### 来源清单\n1. a | 一手 | 2026-10-01 | https://example.com/a\n"
     assert excerpt.item_excerpt(text, "无来源的条目") == "### 1.1 无来源的条目\n- **一句话**：x\n"
+
+
+def test_renamed_item_uses_its_frozen_summary_without_other_topics():
+    text = "### 1.1 原标题\n- **一句话**：本地编程的新变化 [1]\n\n### 1.2 其他选题\n- **一句话**：其他事情 [2]\n\n### 来源清单\n1. 原始来源 https://example.com/one\n2. 其他来源 https://example.com/two\n"
+    part = excerpt.item_excerpt(text, "修改后的标题", summary="本地编程的新变化 [1]")
+    assert part.startswith("### 1.1 原标题")
+    assert "https://example.com/one" in part
+    assert "其他选题" not in part and "https://example.com/two" not in part
+    assert excerpt.item_excerpt(text, "修改后的标题", summary="本地编程") is None
+
+
+def test_ambiguous_summary_does_not_choose_an_item():
+    text = "### 1.1 一个条目\n- **一句话**：同一句话\n### 1.2 另一个条目\n- **一句话**：同一句话\n"
+    assert excerpt.item_excerpt(text, "新标题", summary="同一句话") is None

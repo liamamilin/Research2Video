@@ -95,12 +95,22 @@ def run_query(a, request, user):
     from web.services.assistant_artifacts import report_reference
     if a.source == 'manual':
         from web.services.jobs_assistant import _detail
-        _detail(a.job_name, user)
+        detail = _detail(a.job_name, user)
+        from web.services.yaml_io import parse_yaml
+        title = (parse_yaml(detail.yaml_content) or {}).get('name') or a.job_name
         data = jobs.get_job_logs(a.job_name, request, run_id=a.run_id or None, limit=a.limit, user=user)
         task = jobs._registry.get(a.job_name)
-        return {'source': 'manual', 'job_name': a.job_name, **data,
+        future = getattr(task, 'future', None)
+        active = bool(task and (task.status == 'running' or future and not future.done()))
+        current = {'id': task.task_id, 'status': task.status, 'active': active} if task else None
+        selected = data.get('run')
+        if selected and current and current['id'] == selected['run_id'] and active:
+            data['run'] = {**selected, 'status': current['status']}
+        if selected and selected.get('status') == 'running' and (not current or current['id'] != selected['run_id'] or not active):
+            data['run'] = {**selected, 'status': 'interrupted', 'logged_status': 'running'}
+        return {'source': 'manual', 'job_name': a.job_name, 'title': title, **data,
                 'report': report_reference((data.get('run') or {}).get('output_path')),
-                'current': {'id': task.task_id, 'status': task.status} if task else None,
+                'current': current,
                 'href': '/jobs/' + quote(a.job_name, safe='')}
     from web.deps import require_admin
     require_admin(request, user=user)

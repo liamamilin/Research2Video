@@ -65,7 +65,9 @@ def derive(script: dict, version: Optional[dict], renders: list[dict], *, resear
     failed_before_report = status == "FAILED" and not has_report and not has_version
     error = script.get("error") or ""
 
-    if topic.get("from_report"):
+    if topic.get("article"):
+        research = _step("research", "SKIPPED", "使用手动导入文章，未调研")
+    elif topic.get("from_report"):
         research = _step("research", "SKIPPED", "用已有的研究报告，没有再调研")
     elif has_report:
         research = _step("research", "DONE")
@@ -84,7 +86,7 @@ def derive(script: dict, version: Optional[dict], renders: list[dict], *, resear
         write = _step("write", "RUNNING", stage or "")
     elif has_version:
         write = _step("write", "DONE", f"v{script['current_version']}")
-    elif status == "FAILED" and has_report:
+    elif status == "FAILED" and (has_report or topic.get("article")):
         write = _step("write", "FAILED", error)
     else:
         write = _step("write", "PENDING")
@@ -94,6 +96,8 @@ def derive(script: dict, version: Optional[dict], renders: list[dict], *, resear
         audit = _step("audit", "RUNNING", stage)
     elif not has_version or status in ("WRITING", "PLAN_READY"):
         audit = _step("audit", "PENDING")
+    elif checks.get("scope") == "article_fidelity" and checks.get("fidelity_checked"):
+        audit = _step("audit", "DONE", "已核对原文忠实度；未做外部事实核验")
     elif checks.get("model_ran"):
         audit = _step("audit", "DONE", "事实审计完成；表达检查有未完成项" if checks.get("audits_complete") is False else "")
     elif checks.get("mode") == "on_request":

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { Link, Outlet, useLocation, useNavigationType } from "react-router-dom";
+import { AssistantDrawer } from "./AssistantDrawer";
 import { Sidebar } from "./Sidebar";
 import { useAppStore } from "@/lib/app-store";
 import { cn } from "@/lib/utils";
@@ -62,7 +63,7 @@ export function Layout() {
           <button onClick={toggleSidebar} className="btn p-1" aria-label="切换侧栏">
             <Menu className="w-5 h-5" />
           </button>
-          <span className="text-sm font-medium">AI Research Console</span>
+          <span className="text-sm font-medium">研映 · Research2Video</span>
         </header>
 
         <main ref={main} className="flex-1 overflow-y-auto p-4 lg:p-6">
@@ -73,6 +74,7 @@ export function Layout() {
         <Outlet />
         </main>
       </div>
+      <AssistantDrawer />
     </div>
   );
 }

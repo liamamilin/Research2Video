@@ -10,7 +10,7 @@ import time
 import uuid
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, Request, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -21,9 +21,16 @@ from web.deps import require_viewer
 from web.services import jobs_assistant
 from web.services.assistant_store import AssistantStore
 from web.settings import get_settings
+from web.services.assistant_workspace import Context
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/assistant", tags=["assistant"])
+
+
+@router.get('/capabilities')
+def capabilities(request: Request, user=Depends(require_viewer)):
+    from web.services.assistant_tools.operations import capabilities as query
+    return query(request, user)
 
 
 class Message(BaseModel):
@@ -38,6 +45,7 @@ class ChatRequest(BaseModel):
     history: list[Message] = Field(default_factory=list, max_length=20)
     conversation_id: str | None = Field(default=None, pattern=r'^[a-f0-9]{32}$')
     request_id: str = Field(default_factory=lambda: uuid.uuid4().hex, pattern=r'^[a-zA-Z0-9_-]{8,80}$')
+    context: Context | None = None
 
 
 _active: dict[str, threading.Event] = {}
@@ -47,6 +55,30 @@ _active_lock = threading.Lock()
 @router.get('/conversation')
 def latest_conversation(user=Depends(require_viewer)):
     return AssistantStore().conversation(user)
+
+
+@router.get('/conversations')
+def list_conversations(user=Depends(require_viewer)):
+    return AssistantStore().conversations(user)
+
+
+@router.get('/workspace')
+async def assistant_workspace(request: Request, conversation_id: str, context: str | None = None,
+                              user=Depends(require_viewer)):
+    from web.services.assistant_workspace import workspace
+    try:
+        parsed = json.loads(context) if context is not None else None
+        selected = Context.model_validate(parsed).model_dump() if parsed is not None else None
+        return await workspace(request, user, conversation_id, selected, explicit=context is not None)
+    except ValueError as exc:
+        raise HTTPException(422, '上下文或会话不可用：' + str(exc)) from exc
+
+
+@router.get('/tasks')
+async def assistant_tasks(request: Request, limit: int = Query(default=20, ge=1, le=100), user=Depends(require_viewer)):
+    """Live research, video and publication work across this account's conversations."""
+    from web.services.assistant_workspace import task_center
+    return await task_center(request, user, limit)
 
 
 @router.get('/conversations/{conversation_id}')
@@ -60,6 +92,19 @@ def read_conversation(conversation_id: str, user=Depends(require_viewer)):
 @router.post('/conversations')
 def new_conversation(user=Depends(require_viewer)):
     return {'id': AssistantStore().new_conversation(user)}
+
+
+class ContextChange(BaseModel):
+    context: Context | None = None
+
+
+@router.put('/conversations/{conversation_id}/context')
+def change_context(conversation_id: str, payload: ContextChange, user=Depends(require_viewer)):
+    try:
+        AssistantStore().set_context(user, conversation_id, payload.context.model_dump() if payload.context else None)
+        return {'ok': True}
+    except ValueError as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 
 @router.post('/requests/{request_id}/stop')
@@ -274,7 +319,18 @@ def _respond(payload, request, user, on_event=None, cancel_token=None):
         raise HTTPException(409, str(exc)) from exc
     metadata = {'conversation_id': conversation['id'], 'request_id': payload.request_id}
     if not started:
+        from web.services.assistant_delivery import canonical_links
+        previous['answer'] = canonical_links(previous.get('answer') or '', conversation['refs'])
         return {**previous, **metadata}
+    if 'context' in payload.model_fields_set:
+        conversation['context'] = payload.context.model_dump() if payload.context else None
+        storage.set_context(user, conversation['id'], conversation['context'])
+    if conversation.get('context'):
+        from web.services.assistant_workspace import href
+        current = conversation['context']
+        context_ref = {'type': current['kind'], 'id': current['id'], 'href': href(current['kind'], current['id'])}
+        conversation['refs'] = [r for r in conversation['refs'] if (r['type'], r['id']) != (current['kind'], current['id'])] + [context_ref]
+        storage.references(conversation['id'], conversation['refs'])
     token = cancel_token if cancel_token is not None else threading.Event()
     with _active_lock:
         _active[payload.request_id] = token

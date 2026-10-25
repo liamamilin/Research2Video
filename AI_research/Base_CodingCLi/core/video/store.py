@@ -231,13 +231,16 @@ def _encode(fields: dict, json_fields: tuple[str, ...]) -> dict:
 
 
 def create_script(column_key: str, topic: dict, created_by: str = "") -> dict:
+    from core.video.content_guard import is_sample
+
     now = _now()
     script_id = uuid.uuid4().hex
     with connect(write=True) as conn:
         conn.execute(
             "INSERT INTO scripts (id, column_key, topic, status, created_by, created_at, updated_at,"
-            " heartbeat_at) VALUES (?, ?, ?, 'RESEARCHING', ?, ?, ?, ?)",
-            (script_id, column_key, json.dumps(topic, ensure_ascii=False), created_by, now, now, time.time()),
+            " heartbeat_at, archived) VALUES (?, ?, ?, 'RESEARCHING', ?, ?, ?, ?, ?)",
+            (script_id, column_key, json.dumps(topic, ensure_ascii=False), created_by, now, now, time.time(),
+             int(is_sample({"created_by": created_by, "topic": topic}))),
         )
     return get_script(script_id)
 

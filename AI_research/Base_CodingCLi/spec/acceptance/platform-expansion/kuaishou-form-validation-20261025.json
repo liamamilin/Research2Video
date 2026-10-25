@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-25",
+  "scope": "快手发布包默认话题与表单校验；未执行投稿、重投或保存用户草稿",
+  "cause": "通用发布包预填7个话题，超过快手适配器3个话题限制，表单禁用但未说明原因",
+  "changes": [
+    "按平台限制生成默认话题；源发布包不变",
+    "已有草稿不自动截断",
+    "明确显示标题、简介、话题和合计限制错误",
+    "话题超限时提供保留前N个按钮，点击只修改表单"
+  ],
+  "checks": {
+    "backend": 134,
+    "frontend": 41,
+    "lint": "passed",
+    "production_build": "passed",
+    "live_browser": [
+      "新预览默认3/3话题",
+      "输入7话题时显示7/3并禁用提交",
+      "点击保留前3个后恢复保存与提交按钮；未点击这两个按钮"
+    ]
+  },
+  "existing_upload": {
+    "id": "110310c21d644efdb3041e5b727f4def",
+    "status": "UNKNOWN",
+    "work_id": "",
+    "submission_started_recorded": false,
+    "limitation": "后续尝试任务没有可靠作品回执；旧错误仅保留通用提示，无法恢复底层异常。未修改任务或重投。"
+  },
+  "backend_instance": "03ab941eca2f4e7ab7ca6fd15d0e1273",
+  "screenshots": [
+    "kuaishou-topic-validation-20261025.png",
+    "kuaishou-topic-corrected-20261025.png"
+  ]
+}

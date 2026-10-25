@@ -16,7 +16,7 @@ CHECK_DELAYS = (15, 30, 60, 120, 300, 600, 1800, 3600)
 EVIDENCE = {'kuaishou': 'kuaishou_creator_public', 'xiaohongshu': 'xiaohongshu_creator_public'}
 STATE_LABELS = {
     'published': '已公开', 'reviewing': '平台审核中', 'processing': '平台处理中',
-    'scheduled': '等待定时发布', 'private': '仅自己可见', 'rejected': '平台审核未通过',
+    'scheduled': '等待定时发布', 'private': '非公开可见', 'rejected': '平台审核未通过',
     'missing': '暂未找到匹配作品', 'ambiguous': '找到多个候选，需核对作品链接',
     'unknown': '平台状态暂未确认', 'unavailable': '暂时无法回查，请核对平台登录',
 }
@@ -115,10 +115,14 @@ def receipt(platform: str, uid: str, row: dict | None, state: str = 'missing') -
     work_id = row.get('work_id', '') if row else ''
     domain_path = {'kuaishou': ('www.kuaishou.com', 'short-video'),
                    'xiaohongshu': ('www.xiaohongshu.com', 'explore')}[platform]
+    details = {key: value for key, value in (row or {}).get('status_details', {}).items()
+               if key in ('tab_status', 'permission_code', 'high_self', 'schedule_post_time')
+               and (value is None or type(value) in (int, bool))}
     return {'uid': uid, 'work_id': work_id, 'owned': bool(row), 'public': state == 'published',
             'platform_state': state, 'check_reason': STATE_LABELS[state],
             'evidence': EVIDENCE[platform] if state == 'published' else '',
             'published_at': row.get('published_at') if row else None,
+            **({'status_details': details} if details else {}),
             'url': f'https://{domain_path[0]}/{domain_path[1]}/{work_id}' if work_id else ''}
 
 

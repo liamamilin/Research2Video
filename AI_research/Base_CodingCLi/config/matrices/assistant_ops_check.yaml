@@ -1,0 +1,11 @@
+# 矩阵：一组 Job，共用一个领域和一套关键词（spec/matrices.md）。成员 Job 运行时，{keywords} 先放这里的关键词，
+# 再放 Job 自己的；{domain} 是这里的 domain。
+name: 助手运营验收
+domain: 开发者工具
+keywords:
+- 本地Agent
+jobs:
+- research/assistant_iteration_acceptance_20261025
+- research/assistant_ops_acceptance_20261025
+render:
+  video_speed: 1.25

@@ -1,0 +1,144 @@
+{
+  "checked_at": "2026-10-25T09:51:23+0800",
+  "commit": "3847fff01f5434a8a32829833163cd6723cabc59",
+  "checks": [
+    {
+      "name": "cli-help",
+      "returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "douyin-login-help",
+      "returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "douyin-upload-video-help",
+      "returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "douyin-missing-account",
+      "returncode": 1,
+      "passed": true
+    },
+    {
+      "name": "douyin-missing-file",
+      "returncode": 2,
+      "passed": true
+    },
+    {
+      "name": "kuaishou-login-help",
+      "returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "kuaishou-upload-video-help",
+      "returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "kuaishou-missing-account",
+      "returncode": 1,
+      "passed": true
+    },
+    {
+      "name": "kuaishou-missing-file",
+      "returncode": 2,
+      "passed": true
+    }
+  ],
+  "upstream_tests": [
+    {
+      "name": "upstream-cli-tests",
+      "returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "upstream-douyin-declaration-tests",
+      "returncode": 1,
+      "passed": false
+    }
+  ],
+  "receipt_contracts": [
+    {
+      "file": "sau_commands/douyin.py",
+      "function": "upload_video",
+      "returns": [
+        "account_file"
+      ],
+      "returns_work_id": false,
+      "result": "returns account_file, not a structured platform work receipt",
+      "source_sha256": "e0349b61a0874f2ef3be25cda79f73a40ca6456344067bb52f39a1805bd90212"
+    },
+    {
+      "file": "sau_commands/kuaishou.py",
+      "function": "upload_kuaishou_video",
+      "returns": [
+        "account_file"
+      ],
+      "returns_work_id": false,
+      "result": "returns account_file, not a structured platform work receipt",
+      "source_sha256": "002ed40da1eef95ca1f39e5e28698572d133f68f23d50b034a53df62692eada4"
+    }
+  ],
+  "runtime_adjustments": [
+    "Created conf.py from conf.example.py inside isolated source directory",
+    "Installed tinycss2==1.4.0 and webencodings==0.5.1: declared dependency missing from upstream uv.lock",
+    "Renamed upstream tests/examples to hidden directories to avoid application pytest discovery"
+  ],
+  "real_account_login": false,
+  "real_upload": false,
+  "production_database_access": false,
+  "application_code_changed": false,
+  "cli_smoke_passed": true,
+  "upstream_tests_passed": false,
+  "ready_for_automated_publishing": false,
+  "live_receipt_verification": "not performed; requires account connection and an explicitly chosen video",
+  "browser_runtime": [
+    {
+      "path": "state/platforms/runtime/social-auto-upload/browsers/chromium-1208/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
+      "exists": true,
+      "executable": true
+    },
+    {
+      "path": "state/platforms/runtime/social-auto-upload/browsers/chromium_headless_shell-1208/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+      "exists": true,
+      "executable": true
+    },
+    {
+      "path": "state/platforms/runtime/social-auto-upload/browsers/ffmpeg-1011/ffmpeg-mac",
+      "exists": true,
+      "executable": true
+    }
+  ],
+  "provenance": {
+    "repository": "https://github.com/dreammis/social-auto-upload",
+    "commit": "3847fff01f5434a8a32829833163cd6723cabc59",
+    "archive_sha256": "c9863454741a32ce778811ebfd3a37981c095e67e2455cd16ef62981cae3cdfa",
+    "files": {
+      "LICENSE": "8fd1171ac198090942b3e7f15887ec682cf010227e7afe74ee97f57351fd9f36",
+      "pyproject.toml": "a12f96afa3e61a2a87ba62d5804a9983228b8c8b7e288fbfe0df878911eb619d",
+      "uv.lock": "0432f18ef9555f31284cb3dcff2211d3875ec8841a7d9019fbe95623cc37c8df",
+      "sau_cli.py": "86466798cc2bd556c24124623b7090d921d27abd617beb07a839e5198f353258",
+      "sau_commands/douyin.py": "e0349b61a0874f2ef3be25cda79f73a40ca6456344067bb52f39a1805bd90212",
+      "sau_commands/kuaishou.py": "002ed40da1eef95ca1f39e5e28698572d133f68f23d50b034a53df62692eada4",
+      "uploader/douyin_uploader/main.py": "3177c721671dca941a408dabffe23b6a633c6b60f12df1fa331008087d8eadd6",
+      "uploader/ks_uploader/main.py": "fc97d1f83aa0d531284365d2e54a6e043bef420f8b8088b3e90b9ed785326c66"
+    },
+    "credentials": false,
+    "published": false
+  },
+  "upstream_test_counts": {
+    "cli": {
+      "passed": 17,
+      "failed": 0
+    },
+    "douyin_declaration": {
+      "passed": 5,
+      "failed": 1,
+      "errors": 1
+    }
+  },
+  "scope": "Local candidate preflight only. CLI checks passed; upstream tests and live work-ID verification are incomplete."
+}

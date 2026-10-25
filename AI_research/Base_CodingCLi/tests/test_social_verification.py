@@ -70,11 +70,26 @@ def test_kuaishou_uses_exact_numeric_user_id_and_never_rounds_it():
     ({'permission_code': 1}, 'private'), ({'permission_code': 2}, 'private'),
     ({'permission_code': 3}, 'private'), ({'permission_code': 4}, 'private'),
     ({'permission_code': False}, 'unknown'), ({'permission_code': 99}, 'unknown'),
-    ({'high_self': 1}, 'private'), ({'high_self': True}, 'private'), ({'high_self': None}, 'unknown'),
+    ({'high_self': 1}, 'private'), ({'high_self': True}, 'private'), ({'high_self': None}, 'published'),
     ({'schedule_post_time': NOW + 100}, 'unknown'), ({'schedule_post_time': None}, 'unknown'),
     ({'tab_status': '1'}, 'unknown'), ({'tab_status': True}, 'unknown')])
 def test_xiaohongshu_needs_explicit_public_permissions_and_published_tab(changes, state):
     assert parse_xhs(xhs_row(**changes))[0]['state'] == state
+
+
+def test_xiaohongshu_optional_restriction_does_not_hide_published_works():
+    row = xhs_row()
+    del row['high_self']
+    parsed = parse_xhs(row)[0]
+    assert parsed['state'] == 'published'
+    from core.social.verification import receipt
+    value = receipt('xiaohongshu', '657b2244000000002002c62b', parsed)
+    assert value['public'] and value['status_details'] == {
+        'tab_status': 1, 'permission_code': 0, 'high_self': None, 'schedule_post_time': 0}
+    row['permission_code'] = None
+    assert parse_xhs(row)[0]['state'] == 'unknown'
+    row['permission_code'] = 1
+    assert parse_xhs(row)[0]['state'] == 'private'
 
 
 @pytest.mark.parametrize('data', [{'result': True, 'data': {'list': []}}, {'result': 0, 'data': {'list': []}},

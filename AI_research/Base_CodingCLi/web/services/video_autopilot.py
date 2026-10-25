@@ -158,7 +158,8 @@ def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
     if [s for s in reports.scripts_of(relative, pick["column"]) if not s.get("archived")]:
         return None  # written already (by hand, or by an earlier batch); one put away does not count: that is how a redo is asked for
     record = reports.record_file(relative, job=spec.get("job", ""), created_by="autopilot")
-    topic = {**reports.topic_for(record, workspace), "from_report": relative, "report_id": record["id"]}
+    topic = {**reports.topic_for(record, workspace), "from_report": relative, "report_id": record["id"],
+             "matrix_dedup": {"job": spec.get("job") or record.get("job", ""), "policy": "matrix-source-v1"}}
     return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
 
 
@@ -310,6 +311,12 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
     if not item["script_id"]:
         if not can_start_script:
             return took
+        from core.video import content_guard
+
+        paths = get_settings().paths
+        if content_guard.writing_peer(item["topic"], paths.config_dir, paths.jobs_dir):
+            ap.update_item(item["id"], note="等待同矩阵前一份报告写稿完成，再检查选题重复")
+            return took
         script = video_executor.create(item["column_key"], _prepare(item), "autopilot")
         if item.get("production"):
             store.update_script(script["id"], production=item["production"])
@@ -359,7 +366,7 @@ def tick() -> int:
             fire_due_plans()
             fire_auto()
             reopen_approved()
-            runs = sorted(ap.list_runs(status="RUNNING"), key=lambda r: r["started_at"])  # oldest first: see below
+            runs = sorted(ap.list_runs(limit=None, status="RUNNING"), key=lambda r: r["started_at"])  # oldest first: see below
             if runs:  # a batch in flight counts as use of the console: the launcher's idle watchdog must not close it
                 from core import activity
 
@@ -442,7 +449,7 @@ def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
         ap.update_run(run["id"], stage="ITEMS")
         run = ap.get_run(run["id"])
     if counts is None:  # a batch ticked on its own: the work in flight is its own and every other running batch's
-        counts = _in_flight(ap.list_runs(status="RUNNING"))
+        counts = _in_flight(ap.list_runs(limit=None, status="RUNNING"))
     for item in run["items"]:
         took = advance(item, can_start_script=counts["scripts"] < MAX_SCRIPTS, can_start_render=counts["renders"] < MAX_RENDERS)
         counts["scripts"] += took["script"]

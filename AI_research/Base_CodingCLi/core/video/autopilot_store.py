@@ -167,12 +167,36 @@ def get_run(run_id: str) -> dict | None:
     return run
 
 
-def list_runs(limit: int = 20, status: Optional[str] = None) -> list[dict]:
+def adopt_script(script: dict, *, started_by: str) -> dict:
+    """Continue an existing script to video with the normal durable batch worker."""
+    run_id, now = uuid.uuid4().hex, _now()
+    with connect(write=True) as conn:
+        existing = conn.execute("SELECT r.id FROM autopilot_runs r JOIN autopilot_items i ON i.run_id=r.id "
+                                "WHERE i.script_id=? AND r.status='RUNNING' AND i.state NOT IN ('DONE','FAILED','HELD','CANCELLED') LIMIT 1",
+                                (script['id'],)).fetchone()
+        if existing:
+            run_id = existing['id']
+        else:
+            conn.execute("INSERT INTO autopilot_runs (id,spec,status,stage,started_by,started_at,created_at,updated_at) "
+                         "VALUES (?,?,'RUNNING','ITEMS',?,?,?,?)",
+                         (run_id, json.dumps({'picks': [], 'refresh': False}), started_by, time.time(), now, now))
+            conn.execute("INSERT INTO autopilot_items (id,run_id,slot,column_key,topic,script_id,state,production,updated_at) "
+                         "VALUES (?,?,0,?,?,?,'WORKING',?,?)",
+                         (uuid.uuid4().hex, run_id, script['column_key'], json.dumps(script['topic'], ensure_ascii=False),
+                          script['id'], script.get('production') or '', now))
+    return get_run(run_id)
+
+
+def list_runs(limit: Optional[int] = 20, status: Optional[str] = None) -> list[dict]:
+    """Recent batches for display; ``limit=None`` reads every matching batch for execution."""
     q, args = "SELECT * FROM autopilot_runs", ()
     if status:
         q, args = q + " WHERE status = ?", (status,)
     with connect() as conn:
-        runs = [_dec(r, _RUN_JSON) for r in conn.execute(q + " ORDER BY started_at DESC LIMIT ?", (*args, limit))]
+        q += " ORDER BY started_at DESC"
+        if limit is not None:
+            q, args = q + " LIMIT ?", (*args, limit)
+        runs = [_dec(r, _RUN_JSON) for r in conn.execute(q, args)]
         by_id = {r["id"]: r for r in runs}
         ids = list(by_id)
         for run in runs:

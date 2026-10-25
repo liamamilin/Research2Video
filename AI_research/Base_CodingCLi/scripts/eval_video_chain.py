@@ -129,6 +129,7 @@ def report_case(out: Path, key: str) -> dict:
 
 
 def script_case(out: Path, key: str, index: dict) -> dict:
+    require_isolated_store(out)
     job, audience = CASES[key]
     report = index.get("reports", {}).get(job, {})
     if report.get("status") != "COMPLETED":
@@ -140,7 +141,7 @@ def script_case(out: Path, key: str, index: dict) -> dict:
     column = (recipes.variant_key(base, audience_key)
               if base.audiences and audience_key != base.audiences[0] else key)
     recorded = reports.record_file(str(report_path), job=job, created_by="chain-validation")
-    topic = {"title": (load_job(str(ROOT / "jobs"), job) or {})["name"],
+    topic = {"title": (load_job(str(ROOT / "jobs"), job) or {})["name"], "test_sample": True,
              "fields": {"目标受众": audience}, "from_report": str(report_path), "report_id": recorded["id"]}
     if key == "flash":
         source = topic_store.resolve(str(ROOT / "jobs"), job)
@@ -172,6 +173,7 @@ def script_case(out: Path, key: str, index: dict) -> dict:
 
 
 def media_case(out: Path, key: str, index: dict, provider: str, mode: str | None) -> dict:
+    require_isolated_store(out)
     previous = index.get("scripts", {}).get(key, {})
     if previous.get("status") != "DRAFT":
         raise ValueError(f"Generate a script first: {key}")
@@ -234,6 +236,13 @@ def validation_output(path: Path) -> Path:
     if not resolved.is_relative_to((ROOT / "state/validation").resolve()):
         raise ValueError("Use --output state/validation/<name>; validation artifacts must stay outside production reports")
     return resolved
+
+
+def require_isolated_store(out: Path) -> None:
+    """Programmatic callers must use the same isolated ledger as the CLI; never create samples in production."""
+    expected = validation_output(out) / "isolated-state" / "video.db"
+    if Path(store.db_path()).resolve() != expected:
+        raise ValueError("验收样片必须使用输出目录下的 isolated-state/video.db，不能写入正式视频数据库")
 
 
 def main() -> int:

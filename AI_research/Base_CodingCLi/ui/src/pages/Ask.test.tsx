@@ -13,7 +13,10 @@ function stream(result: unknown) {
 function server(options: { requests?: unknown[]; send?: () => Response } = {}) {
   const fetch = vi.fn(async (url: string, init?: RequestInit) => {
     if (url === "/api/assistant/conversation" || url === `/api/assistant/conversations/${cid}`) return json({ id: cid, requests: options.requests || [] });
-    if (url === "/api/assistant/conversations") return json({ id: "b".repeat(32) });
+    if (url.startsWith('/api/assistant/workspace')) return json({ objects: [], operations: [], active: false });
+    if (url.startsWith('/api/assistant/tasks')) return json({ tasks: [], total: 0, active: false });
+    if (url === "/api/assistant/conversations") return init?.method === 'POST' ? json({ id: "b".repeat(32) }) : json([{ id: cid, title: '之前的工作', updated: 1, request_count: 1 }]);
+    if (url.endsWith('/context')) return json({ ok: true });
     if (url.includes("/stop")) return json({ status: "stop_requested" });
     if (url === "/api/assistant/stream") return options.send ? options.send() : stream({ answer: "已完成。", actions: [], conversation_id: cid });
     throw new Error(`Unexpected request ${url} ${init?.method}`);
@@ -30,6 +33,49 @@ function send(text: string) {
 beforeEach(() => { sessionStorage.clear(); useAuthStore.setState({ user: { username: "admin", role: "admin" } as never }); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 describe("Application assistant", () => {
+  it('opens the task center directly from a verified action link', async () => {
+    const fetcher = server();
+    render(<MemoryRouter initialEntries={['/ask?tasks=1']}><AskPage /></MemoryRouter>);
+    expect(await screen.findByRole('heading', { name: '任务中心' })).toBeTruthy();
+    expect(await screen.findByText(/暂无助手操作任务/)).toBeTruthy();
+    expect(fetcher.mock.calls.some(([url]) => url.startsWith('/api/assistant/workspace'))).toBe(false);
+  });
+  it('opens a task-center conversation link instead of the tab last-used conversation', async () => {
+    const target = 'd'.repeat(32);
+    sessionStorage.setItem('jobs-assistant:admin:id', cid);
+    const fetcher = vi.fn(async (url: string) => {
+      if (url === `/api/assistant/conversations/${target}`) return json({ id: target, requests: [{ id: 'r', message: '原任务',
+        status: 'completed', result: { answer: '原对话的结果', actions: [] } }] });
+      if (url.startsWith('/api/assistant/workspace')) return json({ objects: [], operations: [], active: false });
+      throw new Error(`Unexpected request ${url}`);
+    });
+    vi.stubGlobal('fetch', fetcher);
+    render(<MemoryRouter initialEntries={[`/ask?conversation=${target}`]}><AskPage /></MemoryRouter>);
+    expect(await screen.findByText('原对话的结果')).toBeTruthy();
+    expect(fetcher.mock.calls.some(([url]) => url === `/api/assistant/conversations/${cid}`)).toBe(false);
+  });
+
+  it('continues a task in its original conversation with a prefilled request and no automatic send', async () => {
+    const target = 'e'.repeat(32);
+    const fetcher = vi.fn(async (url: string) => {
+      if (url === '/api/assistant/conversation' || url === `/api/assistant/conversations/${cid}`) return json({ id: cid, requests: [] });
+      if (url === `/api/assistant/conversations/${target}`) return json({ id: target, context: { kind: 'job', id: 'research/memory' },
+        requests: [{ id: 'old', message: '研究记忆', status: 'completed', result: { answer: '旧运行的回执', actions: [] } }] });
+      if (url.startsWith('/api/assistant/workspace')) return json({ objects: [], operations: [], active: false });
+      if (url.startsWith('/api/assistant/tasks')) return json({ active: false, total: 1, tasks: [{ id: 'old', conversation_id: target,
+        message: '研究记忆', created: 1, status: 'failed', active: false, changes: [], videos: [],
+        runs: [{ source: 'manual', run_id: 'exact-old-run', job_name: 'research/memory', status: 'failed', state: 'failed', active: false,
+          label: '研究失败', href: '/jobs/research%2Fmemory' }] }] });
+      throw new Error(`Unexpected request ${url}`);
+    });
+    vi.stubGlobal('fetch', fetcher);
+    await renderAsk(); fireEvent.click(screen.getByRole('button', { name: '任务中心' }));
+    fireEvent.click(await screen.findByText('检查本次运行'));
+    await screen.findByText('旧运行的回执');
+    expect((screen.getByLabelText('消息') as HTMLTextAreaElement).value).toContain('exact-old-run');
+    expect(screen.getByText('当前对象：研究任务')).toBeTruthy();
+    expect(fetcher.mock.calls.some(([url]) => url.includes('/stream'))).toBe(false);
+  });
   it("restores actual server receipts without replay and carries the conversation ID", async () => {
     const fetch = server({ requests: [{ id: "old", message: "创建任务", status: "completed", result: { answer: "已创建。", actions: [{ tool: "create_job", ok: true, job_name: "research/memory", message: "创建记忆任务" }] } }] });
     await renderAsk(); expect(screen.getByText("已创建。")).toBeTruthy();
@@ -106,7 +152,7 @@ describe("Application assistant", () => {
     });
     await renderAsk();
     expect(screen.getByText('A 的结果')).toBeTruthy();
-    expect(fetch.mock.calls[fetch.mock.calls.length - 1]?.[0]).toBe(`/api/assistant/conversations/${cid}`);
+    expect(fetch.mock.calls.filter(([url]) => /\/conversations\//.test(url)).slice(-1)[0]?.[0]).toBe(`/api/assistant/conversations/${cid}`);
   });
   it('reads actual receipts after disconnect without a second model request', async () => {
     const fetch = server({ send: () => ({ ok: true, status: 200, body: new ReadableStream({ start(c) { c.close(); } }) } as Response) });
@@ -141,4 +187,36 @@ it("fills an example without submitting a model request", async () => {
   fireEvent.click(screen.getByRole("button", { name: "看看有哪些文稿等我审" }));
   expect((screen.getByLabelText("消息") as HTMLTextAreaElement).value).toBe("看看有哪些文稿等我审");
   expect(fetch.mock.calls.filter(([url]) => url.endsWith("/stream"))).toHaveLength(0);
+});
+
+it('switches historical conversations without sending another model request', async () => {
+  const fetch = server(); await renderAsk();
+  fireEvent.click(screen.getByText('历史对话'));
+  fireEvent.click(await screen.findByText('之前的工作'));
+  await waitFor(() => expect((screen.getByLabelText('消息') as HTMLTextAreaElement).disabled).toBe(false));
+  expect(fetch.mock.calls.some(([url]) => url === `/api/assistant/conversations/${cid}`)).toBe(true);
+  expect(fetch.mock.calls.some(([url]) => url.endsWith('/stream'))).toBe(false);
+});
+
+it('sends the selected page object as structured context without auto-submitting it', async () => {
+  const fetch = server();
+  render(<MemoryRouter initialEntries={['/ask?recipe=flash']}><AskPage /></MemoryRouter>);
+  await waitFor(() => expect((screen.getByLabelText('消息') as HTMLTextAreaElement).disabled).toBe(false));
+  expect(screen.getByText('当前对象：配方')).toBeTruthy();
+  expect(fetch.mock.calls.some(([url]) => url.endsWith('/stream'))).toBe(false);
+  send('读一下这个配方'); await screen.findByText('已完成。');
+  const request = fetch.mock.calls.find(([url]) => url.endsWith('/stream'));
+  expect(JSON.parse(String(request?.[1]?.body)).context).toEqual({ kind: 'recipe', id: 'flash' });
+});
+
+
+it('persists removal of the current object without sending a model request', async () => {
+  const fetch = server();
+  render(<MemoryRouter initialEntries={['/ask?recipe=flash']}><AskPage /></MemoryRouter>);
+  await waitFor(() => expect((screen.getByLabelText('消息') as HTMLTextAreaElement).disabled).toBe(false));
+  fireEvent.click(screen.getByLabelText('移除当前对象'));
+  await waitFor(() => expect(screen.queryByText('当前对象：配方')).toBeNull());
+  const request = fetch.mock.calls.find(([url]) => url.endsWith('/context'));
+  expect(JSON.parse(String(request?.[1]?.body)).context).toBeNull();
+  expect(fetch.mock.calls.some(([url]) => url.endsWith('/stream'))).toBe(false);
 });

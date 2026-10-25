@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-25",
+  "feature": "xiaohongshu-first-comment",
+  "validation": {
+    "backend_related_tests_passed": 763,
+    "latest_xhs_specific_tests_passed": 56,
+    "ui_tests_passed": 87,
+    "build": "passed",
+    "lint": "passed",
+    "diff_check": "passed"
+  },
+  "external_comment_posts": 0,
+  "external_video_submissions": 0,
+  "pin_comment": "not_enabled",
+  "templates": {
+    "scope": "platform_account",
+    "applies_to": "future_submissions_only",
+    "existing_tasks": "snapshot_unchanged",
+    "live_default_enabled": false
+  },
+  "automatic_comment_checks": "read_only_with_backoff; no_resend_on_unknown",
+  "live_comment_login": {
+    "id": "e13ea33df579462893335eae76fe35ff",
+    "status": "FAILED",
+    "phase": "请用小红书原账号扫码，连接评论登录",
+    "error": "小红书评论登录二维码已过期，请重新获取；未更换原投稿账号。",
+    "platform_verification": "scan_recognized; sms_verification_dialog_service_unavailable",
+    "main_uid_verified": false,
+    "user_decision": "defer_comment_login; do_not_retry_now",
+    "future_verification_wait_seconds": 900
+  },
+  "live_jobs": [
+    {
+      "id": "34b993b4567c4d1eb65da30ba9043df9",
+      "kind": "UPLOAD",
+      "status": "UNKNOWN",
+      "work_id": ""
+    }
+  ],
+  "live_send_acceptance": "pending_exact_public_xhs_work_and_separate_comment_authorization",
+  "sources": [
+    {
+      "url": "https://fe-static.xhscdn.com/formula-static/xhs-pc-web/public/resource/js/index.a9f61821.js",
+      "sha256": "b5190af94bacbda50fe63a8b52824995b25140b51ebca01ebf065eabe54bb6a1"
+    },
+    {
+      "url": "https://fe-static.xhscdn.com/formula-static/xhs-pc-web/public/resource/js/async/Login.e4afc82b.js",
+      "sha256": "a4a8efd970aa0f59fcc16c681e9f16558e17abd77bc465e85aba90a18e079194"
+    },
+    {
+      "url": "https://fe-static.xhscdn.com/formula-static/xhs-pc-web/public/resource/js/vendor-dynamic.6e584070.js",
+      "sha256": "1618913b376b9ae9cfe7dc490baa4cf8cdb69c7116d758ced7ff33a29fac3516"
+    }
+  ],
+  "screenshot": "xiaohongshu-first-comment-20261025.png",
+  "checked_at": 1792927374.309536,
+  "screenshots": [
+    "xiaohongshu-first-comment-20261025.png",
+    "xiaohongshu-first-comment-editor-20261025.png"
+  ]
+}

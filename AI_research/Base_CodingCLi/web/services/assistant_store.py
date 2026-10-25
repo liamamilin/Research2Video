@@ -39,6 +39,8 @@ class AssistantStore:
                     id TEXT PRIMARY KEY, user_id TEXT NOT NULL, kind TEXT NOT NULL,
                     parameters TEXT NOT NULL, status TEXT NOT NULL, created REAL NOT NULL,
                     result TEXT);
+                CREATE INDEX IF NOT EXISTS requests_user_created ON requests(user_id,created);
+                CREATE INDEX IF NOT EXISTS operations_request_created ON operations(request_id,created);
             ''')
             if not db.in_transaction:
                 db.execute('BEGIN IMMEDIATE')
@@ -46,6 +48,8 @@ class AssistantStore:
             for name, declaration in (('owner', "TEXT NOT NULL DEFAULT ''"), ('updated', 'REAL NOT NULL DEFAULT 0')):
                 if name not in columns:
                     db.execute(f'ALTER TABLE protected_inputs ADD COLUMN {name} {declaration}')
+            if 'context' not in {row[1] for row in db.execute('PRAGMA table_info(conversations)')}:
+                db.execute("ALTER TABLE conversations ADD COLUMN context TEXT NOT NULL DEFAULT 'null'")
 
     @contextmanager
     def db(self):
@@ -79,6 +83,7 @@ class AssistantStore:
                     row = db.execute('SELECT * FROM conversations WHERE id=?', (key,)).fetchone()
             result = dict(row)
             result['refs'] = json.loads(result['refs'])
+            result['context'] = json.loads(result['context'])
             records = list(reversed(db.execute('SELECT * FROM requests WHERE conversation_id=? ORDER BY created DESC LIMIT 60', (row['id'],)).fetchall()))
             result['requests'] = []
             for record in records:
@@ -100,6 +105,10 @@ class AssistantStore:
                         'job_name': operation_result.get('job_name'),
                         'message': f"{operation['tool']}：" + ('已记录完成' if complete else '结果待核验，请先查询业务状态，勿重放整条请求')})
                 item.pop('owner')
+                from web.services.assistant_delivery import canonical_links
+                links = result['refs'] + [ref for action in item['result'].get('actions', [])
+                                          for ref in action.get('references', [])]
+                item['result']['answer'] = canonical_links(item['result'].get('answer') or '', links)
                 result['requests'].append(item)
             return result
 
@@ -139,12 +148,63 @@ class AssistantStore:
                        (key, identity(user), time.time()))
         return key
 
-    def operation(self, request_id: str, tool: str, arguments: dict) -> str:
+    def conversations(self, user: dict) -> list[dict]:
+        with self.db() as db:
+            return [dict(row) for row in db.execute('''
+                SELECT c.id,c.updated,
+                COALESCE((SELECT substr(message,1,60) FROM requests WHERE conversation_id=c.id ORDER BY created LIMIT 1),'新对话') AS title,
+                (SELECT count(*) FROM requests WHERE conversation_id=c.id) AS request_count
+                FROM conversations c WHERE c.user_id=? ORDER BY c.updated DESC LIMIT 80''', (identity(user),))]
+
+    def set_context(self, user: dict, conversation_id: str, context: dict | None):
+        with self.db() as db:
+            if not db.execute('UPDATE conversations SET context=? WHERE id=? AND user_id=?',
+                              (json.dumps(context, ensure_ascii=False), conversation_id, identity(user))).rowcount:
+                raise ValueError('对话不存在或无权访问')
+
+    def operations(self, user: dict, conversation_id: str) -> list[dict]:
+        self.conversation(user, conversation_id)  # Ownership check also applies to empty conversations.
+        with self.db() as db:
+            rows = db.execute('''SELECT o.* FROM operations o JOIN requests r ON o.request_id=r.id
+                WHERE r.conversation_id=? AND r.user_id=? ORDER BY o.created DESC LIMIT 80''',
+                (conversation_id, identity(user))).fetchall()
+            return [{**dict(row), 'arguments': json.loads(row['arguments']),
+                     'result': json.loads(row['result']) if row['result'] else {}} for row in rows]
+
+    def recent_work(self, user: dict, limit: int = 20) -> dict:
+        """Page this user's operation requests; plain questions do not bury work."""
+        from web.services import assistant_tools, jobs_assistant
+        writes = sorted(set(jobs_assistant.TOOLS) - jobs_assistant.READ_TOOLS |
+                        {name for name, spec in assistant_tools.registry().items() if spec.write})
+        marks = ','.join('?' for _ in writes)
+        where = f'''r.user_id=? AND EXISTS (
+            SELECT 1 FROM operations o WHERE o.request_id=r.id AND
+            (o.tool IN ({marks}) OR o.tool='query_run' OR (o.tool='query_publishing' AND
+             (json_extract(o.result,'$.publication_tasks') IS NOT NULL OR
+              json_extract(o.result,'$.publication_preparations') IS NOT NULL))))'''
+        with self.db() as db:
+            values = (identity(user), *writes)
+            total = db.execute(f'SELECT count(*) FROM requests r WHERE {where}', values).fetchone()[0]
+            records = [dict(r) for r in db.execute(f'''SELECT r.id,r.conversation_id,r.message,r.status,r.owner,r.created
+                FROM requests r WHERE {where} ORDER BY r.created DESC LIMIT ?''', (*values, limit))]
+            ids = [r['id'] for r in records]
+            if not ids:
+                return {'records': [], 'operations': [], 'total': total}
+            rows = db.execute(f"SELECT * FROM operations WHERE request_id IN ({','.join('?' for _ in ids)}) ORDER BY created DESC", ids).fetchall()
+        for record in records:
+            if record.pop('owner') != OWNER and record['status'] == 'running':
+                record['status'] = 'interrupted'
+        operations = [{**dict(row), 'arguments': json.loads(row['arguments']),
+                       'result': json.loads(row['result']) if row['result'] else {}} for row in rows]
+        return {'records': list(reversed(records)), 'operations': operations, 'total': total}
+
+    def operation(self, request_id: str, tool: str, arguments: dict, task: dict | None = None) -> str:
         from web.services.assistant_safety import redact
         key = uuid.uuid4().hex
         with self.db() as db:
             db.execute('INSERT INTO operations VALUES (?,?,?,?,?,?,?)',
-                       (key, request_id, tool, json.dumps(redact(arguments), ensure_ascii=False), 'started', None, time.time()))
+                       (key, request_id, tool, json.dumps(redact(arguments), ensure_ascii=False), 'started',
+                        json.dumps({'task': task}, ensure_ascii=False) if task else None, time.time()))
         return key
 
     def complete(self, key: str, result: dict, ok: bool):

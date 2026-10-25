@@ -62,6 +62,9 @@ def work_records(data: Any, owner_id: str, target: str = '') -> list[dict]:
     tab_status 1 published, 2 auditing, 3 not passed, 4 scheduled.
     permission_code 0 public, 1 private, 2/3 restricted, 4 friends-only.
     The UI also prevents opening a work when high_self or schedule_post_time is set.
+    high_self is an optional restriction flag: the official note-card gate tests
+    its truthiness, so absent/null is not a restriction. Published tab and public
+    permission still have to be explicit.
     """
     if (not isinstance(data, dict) or any(type(data[k]) is not int or data[k] != 0 for k in ('code','result') if k in data)
             or ('success' in data and data['success'] is not True)
@@ -90,13 +93,15 @@ def work_records(data: Any, owner_id: str, target: str = '') -> list[dict]:
             elif tab == 1 and type(permission) is int:
                 if permission in (1,2,3,4) or row.get('high_self') is True or type(row.get('high_self')) is int and row['high_self'] != 0:
                     state = 'private'
-                elif (permission == 0 and (row.get('high_self') is False or type(row.get('high_self')) is int and row['high_self'] == 0)
+                elif (permission == 0 and (row.get('high_self') is None or row.get('high_self') is False or type(row.get('high_self')) is int and row['high_self'] == 0)
                       and type(row.get('schedule_post_time')) is int and row['schedule_post_time'] == 0):
                     state = 'published'
         video = row.get('video_info') if isinstance(row.get('video_info'), dict) else {}
         output.append({'work_id': row['id'], 'title': row.get('display_title',''),
                        'published_at': _note_time(row.get('time')), 'duration_seconds': video.get('duration'),
-                       'state': state})
+                       'state': state, 'status_details': {
+                           key: row.get(key) if type(row.get(key)) in (int, bool) else None
+                           for key in ('tab_status', 'permission_code', 'high_self', 'schedule_post_time')}})
     return output
 
 

@@ -6,6 +6,8 @@ import { TimeStamp } from "@/components/TimeStamp";
 import { RefreshCw } from "lucide-react";
 import { usePageResource } from "@/lib/use-page-resource";
 import { cn } from "@/lib/utils";
+import { SourceEditor } from '@/components/SourceEditor';
+import { useAuthStore } from '@/lib/auth-store';
 
 type Filter = "all" | "used" | "unused" | "failing";
 
@@ -15,6 +17,9 @@ export function SourcesPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [tag, setTag] = useState("");
   const [text, setText] = useState("");
+  const [editing, setEditing] = useState<string | null>(null);
+  const role = useAuthStore(s => s.user?.role);
+  const editable = role === 'admin' || role === 'editor';
 
   const tags = useMemo(() => Array.from(new Set((catalog?.sources ?? []).flatMap((s) => s.tags))).sort(), [catalog]);
   const shown = useMemo(() => {
@@ -38,9 +43,11 @@ export function SourcesPage() {
         <h1 className="text-xl font-semibold tracking-tight">信息源</h1>
         <p className="text-xs text-text-muted mt-1">
           查看共享信息源、引用它的研究任务，以及最近一次抓取结果。
-        </p></div><button className="btn text-xs" disabled={loading} onClick={load}><RefreshCw className="h-3.5 w-3.5" />刷新</button>
+        </p></div>{editable && catalog.revision && <button className="btn-primary text-xs" onClick={() => setEditing('')}>新增信息源</button>}
+        <button className="btn text-xs" disabled={loading} onClick={load}><RefreshCw className="h-3.5 w-3.5" />刷新</button>
       </div>
-      <details className="text-xs text-text-muted"><summary className="cursor-pointer">登记与引用信息源</summary><p className="mt-2">在 config/sources.yaml 中登记来源；Job 使用 source:id 引用一个来源，或使用 tag:标签 引用一组。</p></details>
+      <details className="text-xs text-text-muted"><summary className="cursor-pointer">登记与引用信息源</summary><p className="mt-2">在此页或通过助手登记来源，研究任务使用 source:id 引用一个来源，或使用 tag:标签 引用一组。删除前会检查引用任务。</p></details>
+      {editing !== null && catalog.revision && <SourceEditor key={editing} id={editing || undefined} revision={catalog.revision} onClose={() => setEditing(null)} onSaved={load} />}
 
       {catalog.problems.length ? (
         <section className="card p-4 space-y-1 border-danger" aria-label="引用错误">
@@ -79,7 +86,7 @@ export function SourcesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {shown.map((s) => <Row key={s.spec} s={s} />)}
+            {shown.map((s) => <Row key={s.id || s.spec} s={s} onEdit={editable && s.id ? () => setEditing(s.id) : undefined} />)}
           </tbody>
         </table>
         {!shown.length ? <ErrorState empty="没有符合的信息源" compact /> : null}
@@ -88,13 +95,14 @@ export function SourcesPage() {
   );
 }
 
-function Row({ s }: { s: SourceRow }) {
+function Row({ s, onEdit }: { s: SourceRow; onEdit?: () => void }) {
   return (
     <tr className="align-top">
       <td className="px-4 py-2 min-w-[14rem]">
         <div>{s.name}{s.id ? null : <span className="ml-2 text-xs text-warning">没登记</span>}</div>
         <div className="text-xs text-text-muted font-mono break-all">{s.id ? `${s.id} · ` : ""}{s.spec}</div>
         {s.note ? <div className="text-xs text-text-muted mt-1">{s.note}</div> : null}
+        {onEdit && <button className="text-xs text-accent mt-1" onClick={onEdit}>修改来源</button>}
       </td>
       <td className="px-4 py-2 text-xs text-text-muted">{s.tags.join("、") || "—"}</td>
       <td className="px-4 py-2 text-xs">

@@ -67,10 +67,12 @@ def test_normal_render_automatically_captures_registers_maps_and_freezes_before_
     render = video_render.create(row)
     assert acquired == [] and render["visuals"]["state"] == "pending"
     original = copy.deepcopy(render["request"])
+    assert original["visual_storytelling"] is True
     assert video_render.process(render["id"]) == "COMPLETED"
     assert acquired == [URL] and engine.uploads == 1
     submitted = engine.posts[0]
     assert submitted["video_form"] == "object_showcase"
+    assert submitted["visual_storytelling"] is True
     assert submitted["image_materials"][0]["placements"] == [{"chapter_index": 0, "paragraph_index": 1}]
     saved = store.get_render(render["id"])
     assert saved["request"] == original

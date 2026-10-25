@@ -28,7 +28,7 @@ from core.config import load_system_config
 from core.llm import LLMConfig
 from core.state import StateManager
 from core.video import columns as video_columns
-from core.video import length, store, writer
+from core.video import content_guard, length, store, writer
 from core.video import plans as video_plans
 from core.video.adapt import draft as adapt_draft
 from core.video.adapt import facts as adapt_facts
@@ -66,13 +66,17 @@ def _read_report(report_path: str) -> str:
 def report_of(script: dict, report_path: str = "") -> str:
     """The text a script is written and checked against: its report, or for an item written without research that
     item's part of it (core/video/excerpt.py). Raises OSError when the report or the item is not there."""
+    if script.get("topic", {}).get("article"):
+        from web.services.video_articles import source_of
+        return source_of(script)["text"]
     from core.video import excerpt
 
     text = writer.report_body(_read_report(report_path or script["report_path"]))
     topic = script.get("topic") or {}
     if not topic.get("from_item"):
         return text
-    part = excerpt.item_excerpt(text, topic.get("title") or "")
+    part = excerpt.item_excerpt(text, topic.get("from_item_title") or topic.get("title") or "",
+                                summary=(topic.get("fields") or {}).get("一句话") or "")
     if part is None:
         raise OSError(f"报告里找不到条目「{topic.get('title')}」，没法只用它那一节写稿")
     return part
@@ -132,6 +136,8 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     if column.audience and not (fields.get("目标受众") or "").strip():
         fields["目标受众"] = column.audience  # a topic that names no audience is for the cell's
     script = store.create_script(column.key, topic, created_by=started_by)
+    if topic.get("article"):
+        store.update_script(script["id"], status="WRITING", production=topic.get("article_production", ""))
     spawn(script["id"], started_by)
     return script
 
@@ -172,6 +178,15 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     script = store.get_script(script_id)
     column = video_columns.get(settings.paths.config_dir, script["column_key"])
     topic = script["topic"]
+
+    if topic.get("article"):
+        from web.services import video_articles
+        if script["current_version"]:
+            if script.get("stage"):
+                return video_articles.audit(script)
+            store.update_script(script_id, status="DRAFT", stage=None, error=None)
+            return "DRAFT"
+        return video_articles.write(script, started_by=started_by, llm_config=llm_config)
 
     # 1. Research: an ordinary job, unless the topic comes with a report already (a short video cut from a longer
     # one is written from that one's research, its sources and citation check).
@@ -233,11 +248,30 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
            llm_config: Optional[LLMConfig], failed_status: str = "FAILED", style=None) -> str:
     """Write a new version directly from ``report``. Returns DRAFT, or
     ``failed_status`` when writing failed (a rewrite keeps the script a DRAFT: its earlier versions still stand)."""
+    if topic.get("article"):
+        from web.services import video_articles
+        return video_articles.write(store.get_script(script_id), started_by=started_by, llm_config=llm_config)
     settings = get_settings()
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
+    script = content_guard.with_policy(store.get_script(script_id))
+    guarded = bool(script["topic"].get("matrix_dedup"))
+    dedup_meta, filtered_material = {}, ""
+    if guarded:
+        store.update_script(script_id, topic=script["topic"])
+        topic = script["topic"]
+        reference = (report_meta.get(report_path) or {}).get("material") or {}
+        full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
+        original = report_material.read(reference, full_path, _read_report(report_path)) if reference else ""
+        try:
+            report, filtered_material, dedup_meta = content_guard.prepare(
+                script, report, original, settings.paths.config_dir, settings.paths.jobs_dir)
+        except content_guard.DuplicateContent as exc:
+            return _duplicate_script(script_id, exc, failed_status)
     config, review_config = _llm_configs(llm_config, column)
     if column.writer == "adapt":
+        if guarded and filtered_material:
+            report, citation_check = filtered_material, None
         try:
             style = style or video_styles.resolve(settings.paths.config_dir, column)
             waiting = video_plans.open_plan(script_id)
@@ -259,6 +293,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                 _adapt_version(script_id, report=report, report_path=report_path, citation_check=citation_check,
                                column=column, topic=topic, style=style, started_by=started_by, llm_config=config,
                                review_llm_config=review_config)
+        except content_guard.DuplicateContent as exc:
+            return _duplicate_script(script_id, exc, failed_status)
         except (AdaptError, writer.ScriptError, video_styles.StyleError) as exc:
             store.update_script(script_id, status=failed_status, stage=None, error=f"改编失败：{exc}")
             return failed_status
@@ -270,6 +306,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
         material = (report_material.read(material_ref, full_path, _read_report(report_path))
                     if material_ref else "")
+        if guarded:
+            material = filtered_material
         if topic.get("from_item") and material:
             # A discovered topic is one item, not the entire feed. Keep the
             # original blocks that contain its links, with its selected context.
@@ -283,7 +321,9 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             report=material or report,
             citation_check=None if material else citation_check,
             topic=topic,
-            column_style=column.script_style,
+            column_style=column.script_style + (
+                "\n本矩阵近期已经讲过以下选题，请从剩余素材选择新选题，标题、开场和正文都不要复述："
+                + "；".join(p["title"] for p in dedup_meta.get("peers", [])) if dedup_meta.get("peers") else ""),
             target_minutes=column.target_minutes,
             llm_config=config,
             voice=column.voice_id or None,
@@ -293,6 +333,11 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         written.meta["input_kind"] = "original_material" if material else "report"
         if material:
             written.meta["material"] = material_ref
+        if guarded:
+            content_guard.check(script, written.sections, settings.paths.config_dir, settings.paths.jobs_dir)
+            written.meta["content_dedup"] = dedup_meta
+    except content_guard.DuplicateContent as exc:
+        return _duplicate_script(script_id, exc, failed_status)
     except writer.ScriptError as exc:
         store.update_script(script_id, status=failed_status, stage=None, error=f"写稿失败：{exc}")
         return failed_status
@@ -310,6 +355,13 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     )
     store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"
+
+
+def _duplicate_script(script_id: str, exc: content_guard.DuplicateContent, failed_status: str) -> str:
+    reason = str(exc)
+    if content_guard.archive_duplicate(script_id, reason, [p["script_id"] for p in exc.peers]):
+        store.update_script(script_id, status=failed_status, stage=None, error=reason)
+    return failed_status
 
 
 def _attach_report(script: dict, report_path: str, column, started_by: str) -> None:
@@ -605,6 +657,9 @@ def _adapt_version(script_id: str, *, report: str, report_path: str, citation_ch
         on_sheet=lambda sheet: store.save_fact_sheet(sheet_id, report_path=report_path, sheet=sheet),
         on_stage=lambda name: store.update_script(script_id, stage=name),
     )
+    paths = get_settings().paths
+    content_guard.check(content_guard.with_policy(store.get_script(script_id)), adapted.sections,
+                        paths.config_dir, paths.jobs_dir)
     return store.add_version(
         script_id,
         title=adapted.title,
@@ -809,7 +864,7 @@ def restyle(script_id: str, *, depth: Optional[str] = None, tone: Optional[str] 
     try:
         report_of(script)
     except OSError as exc:
-        raise RestyleError(f"读不到研究报告 {script['report_path']}") from exc
+        raise RestyleError(f"无法使用研究报告 {script['report_path']}：{exc}") from exc
     column = video_columns.get(settings.paths.config_dir, script["column_key"])
     if column.writer != "adapt":
         raise RestyleError(f"配方 {column.key} 一次写成（writing.pipeline: single），没有换风格这一步；"
@@ -830,12 +885,12 @@ def rewrite(script_id: str, *, started_by: str = "") -> dict:
     script = store.get_script(script_id)
     if script["status"] not in ("DRAFT", "APPROVED", "FAILED") or script_id in _active:
         raise RestyleError(f"文稿当前是 {script['status']}，不能重写")
-    if not script["report_path"]:
+    if not script["report_path"] and not script["topic"].get("article"):
         raise RestyleError("这篇文稿没有研究报告，不能重写")
     try:
         report_of(script)
     except OSError as exc:
-        raise RestyleError(f"读不到研究报告 {script['report_path']}") from exc
+        raise RestyleError(f"无法使用研究报告 {script['report_path']}：{exc}") from exc
     store.update_script(script_id, status="WRITING", stage="排队", error=None, heartbeat_at=time.time())
     threading.Thread(target=run_rewrite, args=(script_id,),
                      kwargs={"started_by": started_by, "previous_status": script["status"]},
@@ -993,7 +1048,12 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
                     para.pop(key)
 
     style = _style_of(base_meta, column) if sheet else None
-    if (base_meta.get("checks") or {}).get("mode") == "on_request":
+    if base_meta.get("article"):
+        from core.video.article_writer import edited_checks
+        from web.services.video_articles import source_of
+        meta = {"article": base_meta["article"], "input_kind": "article",
+                "checks": edited_checks(clean, base_meta, source_of(script))}
+    elif (base_meta.get("checks") or {}).get("mode") == "on_request":
         meta = {"problems": [], "generation": "goal_first", "checks": adapt_review.unrequested()}
     else:
         issues = adapt_review.rules(clean, column=column, target_minutes=column.target_minutes,
@@ -1010,7 +1070,8 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
         script_id,
         title=title.strip(),
         sections=clean,
-        length_check=length.measure(clean, column.target_minutes, section_budgets=budgets, voice=column.voice_id),
+        length_check=length.measure(clean, None if base_meta.get("article") else column.target_minutes,
+                                    section_budgets=budgets, voice=column.voice_id),
         edit_type="EDITED",
         meta=meta,
         created_by=edited_by,

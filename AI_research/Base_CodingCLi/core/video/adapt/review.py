@@ -382,7 +382,10 @@ def summarize(checks: dict, section_count: int) -> dict:
                   if checks.get("newcomer") is not None and scores.get(k, 0) < PASS_SCORE]
     score = (checks.get("quiz") or {}).get("score")
     core = [i for i in issues if is_core_issue(i)]
-    passed = bool(checks.get("model_ran") and not core and not checks.get("pending_review"))
+    if checks.get("scope") == "article_fidelity":
+        core = [i for i in issues if i.get("severity") in {MUST, SERIOUS}]
+    ran = checks.get("fidelity_checked") if checks.get("scope") == "article_fidelity" else checks.get("model_ran")
+    passed = bool(ran and not core and not checks.get("pending_review") and not checks.get("model_checks_stale"))
     return {"serious": serious, "must": sum(1 for i in issues if i["severity"] == MUST),
             "warn": sum(1 for i in issues if i["severity"] == WARN), "rule_must": rule_must,
             "questions": questions, "lost": lost, "quiz_score": score, "low_scores": low_scores,

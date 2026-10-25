@@ -101,6 +101,9 @@ export interface CheckIssue {
 
 export interface ScriptChecks {
   version: 2;
+  scope?: "article_fidelity";
+  fidelity_checked?: boolean;
+  article_summary?: string;
   mode?: "on_request";
   issues: CheckIssue[];
   quiz: {
@@ -262,7 +265,7 @@ export interface VideoRender {
 export interface VideoScriptSummary {
   id: string;
   column_key: string;
-  topic: { id: string | null; title: string; fields?: Record<string, string> };
+  topic: { id: string | null; title: string; fields?: Record<string, string>; article?: { mode: "read" | "adapt"; kind: "literary" | "information" } };
   status: ScriptStatus;
   stage?: string | null;
   research_job: string;
@@ -358,6 +361,21 @@ export interface VideoScriptDetail extends VideoScriptSummary {
   events?: ScriptEvent[]; // 谁在什么时候启动 / 重跑了哪一步
   pending_plan?: PendingPlan | null; // 配方 writing.pause_after_plan：方案定好后等你确认
 }
+
+export interface VideoComparisonSide {
+  version: number; title: string; sections: ScriptSection[]; created_at: string;
+  duration: { estimated_seconds?: number; target_minutes?: number; binding: boolean };
+  configuration: { recipe?: string; recipe_sha256?: string; creative_direction?: string; parts: Record<string, unknown> };
+  report: { path: string; href: string } | null; render: VideoRender | null; renders: VideoRender[]; script_href: string;
+}
+export interface VideoComparison {
+  script_id: string; before: VideoComparisonSide; after: VideoComparisonSide;
+  sections: { index: number; changed: boolean; before: ScriptSection | null; after: ScriptSection | null }[];
+  changes: { title: boolean; changed_sections: number; configuration_fields: string[]; same_report: boolean | null };
+  href: string; note: string;
+}
+export const getVideoComparison = (id: string, before: number, after: number, beforeRender: string, afterRender: string, signal?: AbortSignal) => api<VideoComparison>(
+  `/api/video/scripts/${id}/compare`, { query: { from_version: before, to_version: after, before_render: beforeRender || undefined, after_render: afterRender || undefined }, signal });
 
 export interface PendingPlan {
   id: string;

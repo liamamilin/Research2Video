@@ -28,6 +28,8 @@ from web.services import video_executor, video_render, video_workflow
 from web.settings import get_settings
 
 router = APIRouter(prefix="/api/video", tags=["video"])
+from web.routes.video_articles import router as article_router
+router.include_router(article_router)
 from web.routes.video_screenshots import router as screenshots_router
 router.include_router(screenshots_router)
 
@@ -585,7 +587,12 @@ def archive_script(script_id: str, body: Optional[ArchiveIn] = None, user=Depend
     flag = body.archived if body else True
     if flag and script["status"] in ("RESEARCHING", "WRITING"):
         raise HTTPException(409, detail=ApiError.make("busy", "文稿还在研究或写稿，完成后才能归档"))
-    store.update_script(script_id, archived=1 if flag else 0)
+    fields = {"archived": 1 if flag else 0}
+    if not flag and script["topic"].get("content_archive"):
+        topic = dict(script["topic"])
+        topic["restored_content_archive"] = topic.pop("content_archive")
+        fields.update(topic=topic, error=None)
+    store.update_script(script_id, **fields)
     if flag:
         from core.video import autopilot_store
 
@@ -625,6 +632,15 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         # the plan waiting for the user, when the recipe pauses after the plan (writing.pause_after_plan)
         "pending_plan": _plan_out(video_plans.pending(script_id)) if script["status"] == "PLAN_READY" else None,
     }
+
+
+@router.get('/scripts/{script_id}/compare')
+def compare_script(script_id: str, from_version: int = Query(ge=1), to_version: int = Query(ge=1),
+                   before_render: str = '', after_render: str = '', user=Depends(require_viewer)) -> dict:
+    """Compare saved script versions and their actual videos; never starts a generation."""
+    from web.services.video_comparison import compare
+    return compare(_script_or_404(script_id), from_version, to_version,
+                   [_render_out(r) for r in store.list_renders(script_id)], before_render, after_render)
 
 
 def _plan_out(row: Optional[dict]) -> Optional[dict]:

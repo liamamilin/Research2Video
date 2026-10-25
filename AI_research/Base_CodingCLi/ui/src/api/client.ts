@@ -106,7 +106,7 @@ export async function api<T = unknown>(
   };
 
   if (opts.body !== undefined) {
-    headers["Content-Type"] = "application/json";
+    if (!(opts.body instanceof FormData)) headers["Content-Type"] = "application/json";
   }
 
   // CSRF for unsafe methods
@@ -131,7 +131,7 @@ export async function api<T = unknown>(
     ({ resp, text } = await request(url, {
       method,
       headers,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      body: opts.body instanceof FormData ? opts.body : opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
       signal: opts.signal,
       credentials: "include",
     }, opts.timeoutMs ?? (method === "GET" && opts.responseType !== "stream" ? 30_000 : 0), opts.responseType === "stream"));

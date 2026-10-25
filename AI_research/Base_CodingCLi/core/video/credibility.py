@@ -69,6 +69,13 @@ def label(version: dict | None, *, auditing: bool = False) -> dict:
         reasons.append(f"{reviewed} 段被标为需要核实：" + "、".join(to_check))
     if spoken:
         reasons.append("口播里会读出：" + "、".join(sorted({i["rule"] + (" 审稿用语" if i["rule"] == "D5" else " 不能说的话") for i in spoken})))
+    if (version.get("meta") or {}).get("article"):
+        pending = not checks or not checks.get("fidelity_checked") or checks.get("model_checks_stale")
+        must = any(i.get("severity") in {"must", "serious"} for i in issues)
+        tier = "serious" if serious else "verify" if reviewed or must else "unaudited" if pending else "generated"
+        return {"tier": tier, "text": TIERS[tier] if tier != "generated" else "已核对原文",
+                "reasons": reasons + (["当前版本需重新核对原文"] if pending else [])
+                           + ["仅核对原文一致性与忠实度，未做外部事实核验"], "cited_share": share}
     if not ran:
         reasons.append("事实审计还在进行" if auditing else "文稿审计没有全部跑完" if fact_ran
                        else "事实审计没有跑完，没有人核对过事实")

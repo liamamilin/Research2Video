@@ -30,10 +30,10 @@ class Diagnostic(Arguments):
 def diagnose(a, request, user):
     from web.routes import config, logs
     from web.services import assistant_background
-    from core import health
     settings = get_settings()
     if a.action == 'health':
-        return redact(health.run_checks(settings.paths.state_dir, settings.paths.output_dir, settings.paths.config_dir, deep=True))
+        from web.services.assistant_management import _native
+        return _native(request, 'GET', '/api/health/detailed')
     if a.action == 'logs':
         return redact(logs.get_global_logs(lines=a.lines, user=user))
     if a.action == 'audit':

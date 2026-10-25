@@ -36,7 +36,7 @@ export function ShareViewPage() {
     <div className="min-h-screen bg-bg text-text">
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
         <div className="flex items-center gap-2 text-sm text-text-muted">
-          <span className="font-semibold text-text">AI Research Console</span>
+          <span className="font-semibold text-text">研映 · Research2Video</span>
           <span>· 分享报告（只读）</span>
         </div>
 

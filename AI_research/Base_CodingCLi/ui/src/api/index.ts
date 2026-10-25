@@ -324,6 +324,7 @@ export interface AssistantReply {
 
 export interface AssistantConversation {
   id: string;
+  context?: import('./assistant-workspace').AssistantContext | null;
   requests: { id: string; message: string; status: string; result: AssistantReply }[];
 }
 
@@ -350,7 +351,7 @@ export type AssistantEvent =
 
 export async function chatWithAssistant(
   message: string, history: AssistantMessage[], onEvent: (event: AssistantEvent) => void,
-  options: { conversation_id?: string; request_id?: string; signal?: AbortSignal } = {},
+  options: { conversation_id?: string; request_id?: string; signal?: AbortSignal; context?: import('./assistant-workspace').AssistantContext | null } = {},
 ): Promise<AssistantReply> {
   const response = await api<Response>("/api/assistant/stream", {
     method: "POST",
@@ -358,6 +359,7 @@ export async function chatWithAssistant(
     signal: options.signal,
     body: {
       message,
+      ...('context' in options ? { context: options.context } : {}),
       ...(options.conversation_id ? { conversation_id: options.conversation_id } : {}),
       ...(options.request_id ? { request_id: options.request_id } : {}),
       history: history.slice(-20).map((item) => ({

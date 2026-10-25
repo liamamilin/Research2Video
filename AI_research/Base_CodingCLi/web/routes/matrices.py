@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import re
 import string
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
@@ -31,6 +32,7 @@ router = APIRouter(prefix="/api/matrices", tags=["matrices"])
 
 
 class MatrixIn(BaseModel):
+    expected_revision: str | None = None
     key: str = ""
     name: str
     domain: str = ""
@@ -79,8 +81,8 @@ def _plans() -> dict[str, dict]:
         from web.services import managed_scheduler as managed
 
         out = {}
-        for plan in managed.store().list():
-            shown = managed.describe(plan)
+        for shown in managed.describe_all(managed.store()):
+            plan = shown
             out[plan["job_name"]] = {"id": plan["id"], "schedule": plan["schedule"], "timezone": plan["timezone"],
                                      "enabled": shown["enabled"], "next_runs": shown["next_runs"][:1],
                                      "period": periods.from_cron(plan["schedule"]),
@@ -216,13 +218,19 @@ def create_matrix(payload: MatrixIn, user=Depends(require_editor)):
 
 @router.put("/{key}")
 def update_matrix(key: str, payload: MatrixIn, user=Depends(require_editor)):
-    matrix = _get(key)
-    if not payload.name.strip():
-        raise _error(422, "missing_name", "矩阵要有名字")
-    members = _members(payload.jobs, matrix) if payload.jobs is not None else list(matrix.members)
-    matrices.save(_dirs()[0], key, name=payload.name.strip(), domain=payload.domain.strip(),
-                  keywords=_keywords(payload.keywords), members=members, monthly_searches=payload.monthly_searches,
-                  render=payload.render)
+    import hashlib
+    from core.fileio import file_lock
+    path = Path(matrices.directory(_dirs()[0])) / (key + '.yaml')
+    with file_lock(str(path)):
+        matrix = _get(key)
+        if payload.expected_revision and hashlib.sha256(path.read_bytes()).hexdigest() != payload.expected_revision:
+            raise _error(409, 'matrix_changed', '矩阵已变化，请重新读取后保存')
+        if not payload.name.strip():
+            raise _error(422, "missing_name", "矩阵要有名字")
+        members = _members(payload.jobs, matrix) if payload.jobs is not None else list(matrix.members)
+        matrices.save(_dirs()[0], key, name=payload.name.strip(), domain=payload.domain.strip(),
+                      keywords=_keywords(payload.keywords), members=members, monthly_searches=payload.monthly_searches,
+                      render=payload.render)
     audit.log("matrix_update", user=user["username"], target=key,
               details={"monthly_searches": payload.monthly_searches} if payload.monthly_searches is not None else None)
     return get_matrix(key, user)

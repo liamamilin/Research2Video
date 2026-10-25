@@ -1,0 +1,132 @@
+{
+  "job_id": "110310c21d644efdb3041e5b727f4def",
+  "platform": "kuaishou",
+  "publishing_protection_active": true,
+  "final_publish_requests_intercepted": 1,
+  "blocked_unknown_mutations": 97,
+  "blocked_endpoints": [
+    "other-host",
+    "cp.kuaishou.com/rest/v2/creator/pc/notification/:id",
+    "cp.kuaishou.com/rest/v2/creator/pc/satisfy/list",
+    "cp.kuaishou.com/rest/cp/creator/pc/magnetic/guide",
+    "cp.kuaishou.com/rest/wd/relation/isFollow",
+    "cp.kuaishou.com/rest/cp/works/v2/video/pc/realize/entrance",
+    "cp.kuaishou.com/rest/cp/works/v2/video/pc/realize/banner/entrance",
+    "cp.kuaishou.com/rest/cp/works/v2/video/pc/publish/time",
+    "cp.kuaishou.com/rest/v2/creator/activity/pc/list",
+    "cp.kuaishou.com/rest/cp/works/v2/video/pc/publishInfo/snapshot/save",
+    "cp.kuaishou.com/rest/cp/works/v4/video/pc/cover/edit/recommend/query",
+    "cp.kuaishou.com/rest/cp/works/v2/common/pc/report"
+  ],
+  "operations": {
+    "account_lookup": 4,
+    "creator_lookup": 29,
+    "upload_pre": 1,
+    "topic_lookup": 13,
+    "file_fragment": 9,
+    "file_complete": 1,
+    "upload_finish": 1,
+    "asset_prepare": 1,
+    "cover_prepare": 1
+  },
+  "failure": null,
+  "responses": {
+    "account_lookup": {
+      "200": 4
+    },
+    "creator_lookup": {
+      "200": 27
+    },
+    "upload_pre": {
+      "200": 1
+    },
+    "topic_lookup": {
+      "200": 13
+    },
+    "file_fragment": {
+      "200": 9
+    },
+    "file_complete": {
+      "200": 1
+    },
+    "upload_finish": {
+      "200": 1
+    },
+    "asset_prepare": {
+      "200": 1
+    },
+    "cover_prepare": {
+      "200": 1
+    }
+  },
+  "request_failures": {},
+  "provider_results": {
+    "upload_pre": {
+      "result": 1
+    },
+    "file_fragment": {
+      "result": 1
+    },
+    "file_complete": {
+      "result": 1
+    },
+    "upload_finish": {
+      "result": 1
+    }
+  },
+  "phase": "打开上传页面",
+  "account_response": {
+    "schema": {
+      "result": "int",
+      "currentTime": "int",
+      "data": {
+        "ab": {
+          "enablePhotoDiagnoseV3Switch": "bool",
+          "enableAuthorFavorDiagnoseV2": "bool",
+          "cpPublishSearch": "bool",
+          "enablePhotoBonusSwitch": "bool",
+          "enableAigcWorkflowSwitch": "bool",
+          "favorAbGroupWithGray": "int",
+          "enableNewHomeVersion2025": "bool",
+          "enablePlatformBonus": "bool",
+          "enableNewGrowthContainer": "bool",
+          "enablePhotoFavorV2Switch": "bool",
+          "enableMilestoneAndStrategyTask": "bool",
+          "cpPublishNewPage2024": "bool",
+          "enableGaoXinLaHuiSwitch": "bool",
+          "enableNewGrowthTaskV2": "bool",
+          "enableFavorPromotion": "bool",
+          "enableNewHomeVersionV4": "bool",
+          "enablePublish": "bool"
+        },
+        "role": "int",
+        "isGrOrPr": "bool",
+        "roles": "list",
+        "userAvatar": "str",
+        "userName": "str",
+        "userId": "int",
+        "article": "bool",
+        "logined": "bool",
+        "enableNotificationV3": "bool",
+        "appType": "int",
+        "userKwaiId": "NoneType",
+        "showCreator": "bool"
+      },
+      "message": "str"
+    },
+    "public_fields": {
+      "data.userName": "奇奇",
+      "data.userId": "3865622650"
+    },
+    "result": 1
+  },
+  "upload_surfaces": [
+    {
+      "page": "cp.kuaishou.com/article/publish/video",
+      "frame": "cp.kuaishou.com/article/publish/video",
+      "file_inputs": 2,
+      "notices": [],
+      "upload_buttons": []
+    }
+  ]
+}

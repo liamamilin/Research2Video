@@ -1,0 +1,203 @@
+{
+  "date": "2026-10-25",
+  "scope": [
+    "kuaishou",
+    "xiaohongshu",
+    "weixin_channels"
+  ],
+  "registered_platforms": [
+    "bilibili",
+    "douyin",
+    "kuaishou",
+    "xiaohongshu",
+    "weixin_channels"
+  ],
+  "implementation": {
+    "separate_adapters": true,
+    "account_scoped_credentials": true,
+    "platform_scoped_queue": true,
+    "per_version_distribution_drafts": true,
+    "explicit_upload_only": true,
+    "persistent_single_submit_budget": true,
+    "service_workers_blocked": true,
+    "automatic_unknown_retry": false
+  },
+  "capabilities": {
+    "kuaishou": {
+      "account_connection": "live_verified",
+      "manual_upload": "implemented_pending_live_acceptance",
+      "ownership_check": true,
+      "automatic_public_check": false,
+      "first_comment": false,
+      "pin_comment": false,
+      "analytics": false
+    },
+    "xiaohongshu": {
+      "account_connection": "live_verified",
+      "manual_upload": "implemented_pending_live_acceptance",
+      "ownership_check": false,
+      "automatic_public_check": false,
+      "first_comment": false,
+      "pin_comment": false,
+      "analytics": false
+    },
+    "weixin_channels": {
+      "account_connection": "implemented_pending_live_acceptance",
+      "manual_upload": "implemented_pending_live_acceptance",
+      "ownership_check": false,
+      "automatic_public_check": false,
+      "first_comment": false,
+      "pin_comment": false,
+      "analytics": false
+    }
+  },
+  "sources": {
+    "social_auto_upload_commit": "3847fff01f5434a8a32829833163cd6723cabc59",
+    "aitoearn_commit": "cb894a43b2d23cc1ad67d9e7729b1d86cf9360bd"
+  },
+  "tests": {
+    "full_check": {
+      "command": "bash scripts/check.sh",
+      "result": "passed",
+      "backend_passed": 2602,
+      "backend_skipped": 3,
+      "ui_passed": 495,
+      "compile": true,
+      "configuration": true,
+      "typecheck": true,
+      "lint": true,
+      "production_build": true
+    },
+    "adapters": {
+      "kuaishou": 61,
+      "xiaohongshu": 104,
+      "weixin_channels": 85
+    },
+    "cross_platform_links_and_distribution": 55,
+    "shared_queue_and_worker": 46,
+    "qr_renewal": 2,
+    "new_ui_cases": 34,
+    "isolated_runtime_cli_smoke": {
+      "platforms": 3,
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "job": "nonexistent; no browser or provider actions"
+    },
+    "final_shared_regression": {
+      "passed": 103,
+      "command": "pytest tests/test_social_publishing.py tests/test_social_distribution_links.py tests/test_social_login_refresh.py -q"
+    },
+    "kuaishou_login_mount_regression": {
+      "passed": 64,
+      "scope": "Kuaishou adapter and QR renewal",
+      "fix": "Wait for asynchronously mounted passport form before QR switch; no agreement or credential interaction."
+    },
+    "kuaishou_creator_identity_regression": {
+      "passed": 120,
+      "scope": "Kuaishou identity, queue, worker, QR renewal",
+      "fix": "Creator-only passport login uses exact signed creator home/infoV2 response; no cross-domain token copying; fresh verifier contexts and waiting QR covered."
+    },
+    "hide_weixin_channels": {
+      "ui_passed": 490,
+      "backend_related_passed": 117,
+      "typecheck": true,
+      "lint": true,
+      "production_build": true
+    }
+  },
+  "live_acceptance": {
+    "new_account_login_performed": true,
+    "real_upload_performed": false,
+    "real_comment_performed": false,
+    "status": "kuaishou_and_xiaohongshu_verified_weixin_deferred_by_user",
+    "kuaishou": {
+      "login": "verified_and_saved",
+      "account_id_sha256": "1e8457b04c9a19012919b984a9fecfbfca3fa2e796d4088cccf87ca80936a173",
+      "credential_mode": "0600",
+      "upload_performed": false,
+      "saved_session_recheck": "passed; separate worker returned same UID and login valid",
+      "screenshot": "kuaishou-connected.png"
+    },
+    "xiaohongshu": {
+      "login": "verified_and_saved",
+      "account_id_sha256": "32977400c56b3092f4eec61c5e01f315c29d3562ae16e88a072a232ff6400f51",
+      "credential_mode": "0600",
+      "upload_performed": false,
+      "saved_session_recheck": "passed; separate worker returned same UID and login valid",
+      "screenshot": "xiaohongshu-connected.png"
+    },
+    "weixin_channels": {
+      "login": "deferred_by_user",
+      "browser_tool_layout_inspection": "blocked_by_site_safety_policy; no workaround attempted",
+      "upload_performed": false,
+      "human_scan_confirmation": "received",
+      "account_saved": false,
+      "automatic_attempts": "stopped",
+      "note": "User requested not to log in or use WeChat Channels for now; login-loop investigation deferred."
+    }
+  },
+  "limits": [
+    "No new platform is automatically marked public from a redirect or process exit.",
+    "Unknown submission outcomes cannot be automatically retried.",
+    "Weixin sph share code is not treated as a work ID.",
+    "Manual publication records retain manual confirmation provenance."
+  ],
+  "deployment": {
+    "database_backup": "state/backups/social-platforms-20261025-130856",
+    "previous_instance": "193b411d426949fba9523b82ac8991c1",
+    "ui_verification": {
+      "kuaishou": "passed; disconnected, 0 uploads",
+      "xiaohongshu": "passed; disconnected, 0 uploads",
+      "weixin_channels": "passed; disconnected, 0 uploads",
+      "platform_selector": 5,
+      "bilibili": "passed; connected, original 32 upload receipts preserved",
+      "douyin": "passed; connected, 2 public uploads and existing sent author comment preserved"
+    },
+    "instance": "2dbb5e92dda641818e5935c68aa72dc1",
+    "pid": 86152,
+    "screenshots": [
+      "kuaishou-entry.png",
+      "xiaohongshu-entry.png",
+      "weixin-channels-entry.png"
+    ],
+    "hide_weixin_channels": {
+      "loaded": true,
+      "ui_selector": [
+        "bilibili",
+        "douyin",
+        "kuaishou",
+        "xiaohongshu"
+      ],
+      "old_page_link": "falls back to Bilibili without requesting video-channel API",
+      "catalog": "four active platforms verified",
+      "old_api": "platform_deferred verified",
+      "screenshot": "four-platforms.png"
+    }
+  },
+  "adapter_sha256": {
+    "weixin_channels.py": "5a603a3df0a43862d87c459992c7dae0e5b22c49bad27a919522b2a3799e1a60",
+    "kuaishou.py": "79d03f45210311a5cdf64efc121bc13c76f99de0cc00b8c7a38d15bf495088ec",
+    "xiaohongshu.py": "b3e935026dde0e28de976791df95334a450759fce6e683f503a4eba7e1dd70f4"
+  },
+  "visible_platforms": [
+    "bilibili",
+    "douyin",
+    "kuaishou",
+    "xiaohongshu"
+  ],
+  "deferred_platforms": {
+    "weixin_channels": {
+      "decision_date": "2026-10-25",
+      "requested_by": "user",
+      "state": "hidden_and_paused",
+      "resume": "only on a new explicit user request after login repair and acceptance",
+      "adapter_and_data_retained": true,
+      "background_dispatch_enabled": false,
+      "management_api": "409 platform_deferred",
+      "record": "spec/platform-expansion.md"
+    }
+  }
+}

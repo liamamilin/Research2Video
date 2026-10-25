@@ -7,6 +7,8 @@ from urllib.parse import urlsplit, urlunsplit
 
 def secret_key(key: str) -> bool:
     name = key.lower()
+    if name in ('cookie', 'cookies', 'credentials', 'set-cookie'):
+        return True
     if name.endswith(('_tokens', '_token_minutes', '_token_days')) or name.startswith('tokens_') or name in ('tokens', 'token_id', 'token_count', 'token_name'):
         return False
     return (not name.endswith(('_env', '_envs')) and
@@ -37,7 +39,8 @@ def redact(value):
             if secret_key(key) and len(secret) >= 6:
                 value = value.replace(secret, '[已隐藏]')
         value = re.sub(r'(?i)(bearer\s+)[A-Za-z0-9_.~-]+', r'\1[已隐藏]', value)
-        value = re.sub(r'(?i)(api[_-]?key|password|secret|token)([\s\"\x27:=]+)[^\s,;\"\x27}]+', r'\1\2[已隐藏]', value)
+        value = re.sub(r'(?i)(\b(?:token|password|secret|api[_-]?key)\s+)[A-Za-z0-9_./+=~-]{16,}', r'\1[已隐藏]', value)
+        value = re.sub(r'(?i)(api[_-]?key|password|secret|token)([\"\x27]?\s*[:=]\s*[\"\x27]?)[^\s,;\"\x27}]+', r'\1\2[已隐藏]', value)
         return value
     return value
 
