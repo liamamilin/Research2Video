@@ -241,7 +241,7 @@ def shift_chapters(chapters: dict, offset_ms: int, total_seconds: float) -> dict
 
 def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path, voice_wav: Path, artifacts: Path,
                   work: Path | None = None, packaging_record: dict | None = None,
-                  source_in_content: bool = False) -> dict:
+                  source_in_content: bool = False, visual_theme: dict | None = None) -> dict:
     """Render clips, concatenate, verify, and write the package artifacts. Returns the package record."""
     import numpy as np
     import soundfile as sf
@@ -281,8 +281,13 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
     clips: dict[str, dict] = {}
     for part, cfg, frames in parts:
         frame_dir = work / f"{part}-frames"
+        component = ((packaging_record or {}).get("component_versions") or {}).get(part, {})
+        # Explicit legacy package requests do not have a component snapshot.
+        # Keep their v1 output instead of silently changing a historical API.
+        version = 1 if (packaging_record or {}).get("legacy_request") else component.get("version", 1)
         try:
-            render_clip_frames(cfg["template"], cfg, config["accent"], frames, frame_dir)
+            render_clip_frames(cfg["template"], cfg, config["accent"], frames, frame_dir,
+                               version=version, theme=visual_theme)
             encode_clip(runner, ffmpeg, frame_dir, work / f"{part}.mp4")
         except PackageFault:
             raise
@@ -364,6 +369,8 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
               "timelines": "captions.srt/chapters.json 保持内容时间线；package/ 下的同名文件已加上片头时长"}
     if packaging_record:
         record["packaging"] = packaging_record
+        if visual_theme is not None:
+            record["visual_theme"] = visual_theme
         record["source_card"] = {"frames": source_frames, "seconds": source_frames / FPS,
                                  "offset_ms": offset_ms + round(content_frames * 1000 / FPS),
                                  "state": "in_content" if source_in_content else packaging_record["source_card_state"]}

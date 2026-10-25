@@ -1,0 +1,355 @@
+{
+  "tests": {
+    "engine": {
+      "passed": 567,
+      "skipped": 1
+    },
+    "typescript": "PASS",
+    "renderer_bundle": "PASS"
+  },
+  "original": {
+    "job_id": "53acd7a5-f44e-49ac-82d7-2d49dd25a60a",
+    "engine_data": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-data-storytelling-v2/1c03945fff834845aad031af84b51147",
+    "components": [
+      "object_showcase",
+      "scatter_chart",
+      "scatter_chart",
+      "data_chart",
+      "concept_reveal"
+    ],
+    "chart_kinds": [
+      "trend"
+    ],
+    "presentation": {
+      "preset": "explanation"
+    },
+    "real_tts": true,
+    "real_llm": true,
+    "scatter_scenes": [
+      {
+        "id": "card_2",
+        "start_ms": 7443,
+        "duration_ms": 27062,
+        "component": "scatter_chart",
+        "props": {
+          "title": "方案成本与速度",
+          "x_label": "月成本",
+          "x_unit": "美元",
+          "y_label": "处理速度",
+          "y_unit": "次/秒",
+          "x_hint": "越低越省",
+          "y_hint": "越高越快",
+          "points": [
+            {
+              "name": "方案A",
+              "x": 8,
+              "y": 40
+            },
+            {
+              "name": "方案B",
+              "x": 12,
+              "y": 75
+            },
+            {
+              "name": "方案C",
+              "x": 18,
+              "y": 90
+            },
+            {
+              "name": "方案D",
+              "x": 10,
+              "y": 55
+            }
+          ],
+          "takeaway": "B在成本和速度之间更均衡",
+          "takeaway_phrase": "整体看，B在成本和速度之间更均衡。",
+          "reveal_phrases": [
+            "方案A每月8美元、每秒40次；",
+            "方案B每月12美元、每秒75次；",
+            "方案C每月18美元、每秒90次；",
+            "方案D每月10美元、每秒55次。"
+          ],
+          "focus_indices": [
+            1
+          ],
+          "focus_steps": [
+            {
+              "indices": [
+                0,
+                3
+              ],
+              "phrase": "先比较A和D，A更省钱。",
+              "caption": "A 更省钱"
+            },
+            {
+              "indices": [
+                1,
+                2
+              ],
+              "phrase": "再看B和C，C速度更高。",
+              "caption": "C 速度更高"
+            }
+          ]
+        },
+        "narration_segment_ids": [
+          "c1_n2",
+          "c1_n3",
+          "c1_n4",
+          "c1_n5",
+          "c1_n6",
+          "c1_n7",
+          "c1_n8",
+          "c1_n9"
+        ],
+        "purpose": "方案成本与速度",
+        "visual_intent": {
+          "viewer_understands": "方案成本与速度",
+          "before": "要点尚未展开",
+          "after": "方案成本与速度"
+        },
+        "beats": [
+          {
+            "id": "card_2_b0",
+            "action": "reveal",
+            "target_id": "title",
+            "trigger": {
+              "segment_id": "c1_n2",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_2_b1",
+            "action": "reveal",
+            "target_id": "line:0",
+            "trigger": {
+              "segment_id": "c1_n3",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_2_b2",
+            "action": "reveal",
+            "target_id": "line:1",
+            "trigger": {
+              "segment_id": "c1_n4",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_2_b3",
+            "action": "reveal",
+            "target_id": "line:2",
+            "trigger": {
+              "segment_id": "c1_n5",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_2_b4",
+            "action": "reveal",
+            "target_id": "line:3",
+            "trigger": {
+              "segment_id": "c1_n6",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_2_b5",
+            "action": "reveal",
+            "target_id": "line:4",
+            "trigger": {
+              "segment_id": "c1_n7",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_2_b6",
+            "action": "reveal",
+            "target_id": "line:5",
+            "trigger": {
+              "segment_id": "c1_n8",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_2_b7",
+            "action": "reveal",
+            "target_id": "line:6",
+            "trigger": {
+              "segment_id": "c1_n9",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          }
+        ]
+      },
+      {
+        "id": "card_3",
+        "start_ms": 34505,
+        "duration_ms": 20277,
+        "component": "scatter_chart",
+        "props": {
+          "title": "模型成本与得分",
+          "x_label": "单次成本",
+          "x_unit": "美元",
+          "y_label": "任务得分",
+          "y_unit": "分",
+          "x_hint": "越低越省",
+          "y_hint": "越高越好",
+          "points": [
+            {
+              "name": "轻量版",
+              "x": 0.002,
+              "y": 72
+            },
+            {
+              "name": "标准版",
+              "x": 0.006,
+              "y": 86
+            },
+            {
+              "name": "增强版",
+              "x": 0.01,
+              "y": 91
+            }
+          ],
+          "takeaway": "标准版兼顾成本和得分",
+          "takeaway_phrase": "标准版兼顾成本和得分。",
+          "reveal_phrases": [
+            "轻量版每次0.002美元、任务得分72分；",
+            "标准版每次0.006美元、任务得分86分；",
+            "增强版每次0.01美元、任务得分91分。"
+          ],
+          "focus_indices": [
+            1
+          ]
+        },
+        "narration_segment_ids": [
+          "c1_n10",
+          "c1_n11",
+          "c1_n12",
+          "c1_n13",
+          "c1_n14"
+        ],
+        "purpose": "模型成本与得分",
+        "visual_intent": {
+          "viewer_understands": "模型成本与得分",
+          "before": "要点尚未展开",
+          "after": "模型成本与得分"
+        },
+        "beats": [
+          {
+            "id": "card_3_b0",
+            "action": "reveal",
+            "target_id": "title",
+            "trigger": {
+              "segment_id": "c1_n10",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_3_b1",
+            "action": "reveal",
+            "target_id": "line:0",
+            "trigger": {
+              "segment_id": "c1_n11",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_3_b2",
+            "action": "reveal",
+            "target_id": "line:1",
+            "trigger": {
+              "segment_id": "c1_n12",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_3_b3",
+            "action": "reveal",
+            "target_id": "line:2",
+            "trigger": {
+              "segment_id": "c1_n13",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          },
+          {
+            "id": "card_3_b4",
+            "action": "reveal",
+            "target_id": "line:3",
+            "trigger": {
+              "segment_id": "c1_n14",
+              "boundary": "start",
+              "offset_ms": 0
+            }
+          }
+        ]
+      }
+    ],
+    "media": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 2075,
+      "duration_seconds": 69.184,
+      "full_decode": "PASS"
+    }
+  },
+  "final": {
+    "job_id": "9bd9cc0d-6074-4199-a3c2-8091f751ef24",
+    "parent_job_id": "53acd7a5-f44e-49ac-82d7-2d49dd25a60a",
+    "engine_data": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-data-storytelling-v2/1c03945fff834845aad031af84b51147",
+    "voice_unchanged": true,
+    "screen_data_unchanged": true,
+    "original_real_model_plan": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/data-storytelling-v2-20261025-first",
+    "components": [
+      "object_showcase",
+      "scatter_chart",
+      "scatter_chart",
+      "data_chart",
+      "concept_reveal"
+    ],
+    "media": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 2075,
+      "duration_seconds": 69.184,
+      "full_decode": "PASS"
+    }
+  },
+  "visual_review": [
+    "point appearance",
+    "single object metrics",
+    "A/D comparison",
+    "B/C comparison",
+    "B conclusion",
+    "fractional costs",
+    "dense names",
+    "equal coordinates",
+    "negative values"
+  ],
+  "layout_fixtures": "controlled trusted component fixtures; not model-generated scenes",
+  "scope": "upstream content -> automatic visual composition; no new content audit",
+  "flat_range_video": {
+    "kind": "controlled layout fixture, no narration",
+    "frames": "80",
+    "seconds": "2.666667",
+    "full_decode": "PASS",
+    "path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/scatter-layout-v2-20261025-flat/flat-range.mp4"
+  }
+}

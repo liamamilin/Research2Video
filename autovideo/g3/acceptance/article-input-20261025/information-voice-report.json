@@ -1,0 +1,177 @@
+{
+  "voice": "voxcpm_anchor",
+  "steps": 10,
+  "chain": "guarded",
+  "anchor_units_per_second": 4.81,
+  "segments": [
+    {
+      "id": "c1_n1",
+      "chapter": "c1",
+      "seconds": 3.2,
+      "units": 14,
+      "units_per_second": 4.95,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 5.369,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n2",
+      "chapter": "c1",
+      "seconds": 0.8,
+      "units": 3,
+      "units_per_second": 6.04,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 1.046,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n3",
+      "chapter": "c1",
+      "seconds": 3.84,
+      "units": 17,
+      "units_per_second": 5.0,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 4.054,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n4",
+      "chapter": "c1",
+      "seconds": 4.8,
+      "units": 26,
+      "units_per_second": 5.86,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 5.095,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n5",
+      "chapter": "c1",
+      "seconds": 4.0,
+      "units": 18,
+      "units_per_second": 4.87,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 4.133,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c2_n1",
+      "chapter": "c2",
+      "seconds": 4.16,
+      "units": 21,
+      "units_per_second": 5.54,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 4.283,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c2_n2",
+      "chapter": "c2",
+      "seconds": 2.24,
+      "units": 11,
+      "units_per_second": 5.54,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 2.377,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c2_n3",
+      "chapter": "c2",
+      "seconds": 6.4,
+      "units": 31,
+      "units_per_second": 5.13,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 6.775,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c2_n4",
+      "chapter": "c2",
+      "seconds": 7.68,
+      "units": 39,
+      "units_per_second": 5.16,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 8.115,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c3_n1",
+      "chapter": "c3",
+      "seconds": 4.8,
+      "units": 21,
+      "units_per_second": 4.74,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 4.842,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c3_n2",
+      "chapter": "c3",
+      "seconds": 4.64,
+      "units": 19,
+      "units_per_second": 4.47,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 4.844,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c3_n3",
+      "chapter": "c3",
+      "seconds": 6.88,
+      "units": 35,
+      "units_per_second": 5.3,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 7.176,
+      "in_range": true,
+      "cache_hit": false
+    }
+  ],
+  "performance": {
+    "compiled": true,
+    "load_seconds": 1.381,
+    "total_seconds": 60.17,
+    "reference_cache": {
+      "hits": 16,
+      "misses": 2,
+      "encode_seconds": 0.77
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "chapter_hits": 0,
+    "chapter_misses": 3,
+    "segment_hits": 0,
+    "segment_misses": 12,
+    "entry_keys": [],
+    "write_errors": [
+      "cache budget reached; audio still generated normally",
+      "cache budget reached; audio still generated normally",
+      "cache budget reached; audio still generated normally"
+    ],
+    "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+    "fingerprint_seconds": 1.282
+  }
+}

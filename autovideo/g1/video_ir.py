@@ -147,8 +147,12 @@ def _validate_targets(component, props, action, target, path):
         # big_number: line:0 is the value, line:1 the label, line:2 the optional note.
         if component == "big_number":
             limit = 3 if "note" in props else 2
+        elif component == "scatter_chart":
+            limit = len(props["points"]) + len(props.get("focus_steps", [])) + bool(props.get("takeaway") or props.get("focus_indices"))
+        elif component == "data_chart":
+            limit = len(props["categories"] if props["kind"] == "trend" else props["series"]) + bool(props.get("takeaway"))
         elif component == "price_change":  # one line per row
-            limit = len(props.get("rows", []))
+            limit = len(props.get("rows", [])) * (3 if props.get("staged") else 1)
         elif component == "source_card":  # one line per source
             limit = len(props.get("sources", []))
         else:
@@ -191,17 +195,17 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         schema["properties"]["scenes"]["items"] = {"anyOf": [original_scene, diagram_scene]}
     presentation = ir.get("presentation") if isinstance(ir, dict) else None
     # density "large" is the short-form text scale (see g2/information_motion.py); the key is optional.
-    information = isinstance(presentation, dict) and presentation.get("preset") == "information_motion" \
+    information = isinstance(presentation, dict) and presentation.get("preset") in ("information_motion", "explanation") \
         and set(presentation) <= {"preset", "density"}
     creative_components = {"information_cards": "kinetic_text", "kinetic_typography": "kinetic_text", "image_slideshow": "photo_slide", "chat_dialogue": "chat_message", "object_showcase": "object_showcase", "dynamic_collage": "material_collage"}
     creative = isinstance(presentation, dict) and isinstance(presentation.get("preset"), str) and presentation["preset"] in creative_components
     if isinstance(ir, dict) and "presentation" in ir:
         schema["properties"]["presentation"] = {"type": "object", "additionalProperties": False,
-            "required": ["preset"], "properties": {"preset": {"const": "information_motion"}, "density": {"const": "large"}}}
+            "required": ["preset"], "properties": {"preset": {"enum": ["information_motion", "explanation"]}, "density": {"const": "large"}}}
         if information:
             schema["properties"]["style"]["properties"]["preset"] = {"const": "minimal_light"}
             motion_scene = copy.deepcopy(schema["properties"]["scenes"]["items"])
-            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"]}
+            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"] + (["data_chart", "scatter_chart", "object_showcase", "material_collage"] if presentation["preset"] == "explanation" else [])}
             motion_scene["properties"]["beats"].pop("maxItems", None)
             motion_scene["properties"]["beats"]["items"]["properties"]["action"] = {"const": "reveal"}
             motion_scene["properties"]["beats"]["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
@@ -228,7 +232,8 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         schema["properties"]["scenes"].pop("maxItems", None)
         if not isinstance(ir.get("scenes"), list) or not ir["scenes"] or any(not isinstance(s, dict) or not (
                 (creative and s.get("component") in allowed_creative)
-                or (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"})
+                or (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"}
+                    | ({"data_chart", "scatter_chart", "object_showcase", "material_collage"} if presentation["preset"] == "explanation" else set()))
                 or (not information and s.get("component") == "flow_diagram" and isinstance(s.get("props"), dict) and "layout" in s["props"])) for s in ir["scenes"]):
             _fail("CONTENT_COMPONENT_UNSUPPORTED", "/scenes", "chapter extension requires laid-out flow diagrams or explicit information motion")
     if isinstance(ir, dict) and "playback" in ir:
@@ -324,6 +329,15 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
             if any(p.get("segment_id") and p["segment_id"] not in scene["narration_segment_ids"]
                    for p in props["points"]):
                 _fail("CARD_SEGMENT_MISMATCH", f"{sp}/props/points", "card reveals must use this scene's narration")
+        if scene["component"] == "scatter_chart":
+            indices = [*props.get("focus_indices", []), *[i for step in props.get("focus_steps", []) for i in step["indices"]]]
+            if any(i >= len(props["points"]) for i in indices):
+                _fail("CHART_LAYOUT_INVALID", f"{sp}/props", "scatter emphasis must reference an existing point")
+        if scene["component"] == "data_chart":
+            if any(len(s["values"]) != len(props["categories"]) for s in props["series"]):
+                _fail("CHART_CARDINALITY_MISMATCH", f"{sp}/props/series", "series must match categories")
+            if props.get("focus_series", 0) >= len(props["series"]) or props.get("focus_index", 0) >= len(props["categories"]) or not any(v is not None for s in props["series"] for v in s["values"]):
+                _fail("CHART_LAYOUT_INVALID", f"{sp}/props", "chart requires a visible value and an existing focus category")
         if scene["component"] == "bar_chart" and len(props["categories"]) != len(props["values"]):
             _fail("CHART_CARDINALITY_MISMATCH", f"{sp}/props/values", "values and categories must have equal length")
         if scene["component"] == "flow_diagram":
@@ -356,7 +370,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
                                 and node["y"] < other["y"]+other["height"] and node["y"]+node["height"] > other["y"]):
                             _fail("DIAGRAM_LAYOUT_OVERLAP", lp, "diagram nodes overlap")
 
-        if creative:
+        if creative or information:
             if scene["component"] in {"photo_slide", "object_showcase", "material_collage"}:
                 for item in props["images"]:
                     image = next((a for a in ir["assets"] if a["id"] == item["image_asset_id"]), None)

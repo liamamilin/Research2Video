@@ -1,0 +1,488 @@
+{
+  "id": "88dc324cfab94c65ae62a907d3ac48bd",
+  "script_id": "4f8a373b7827456ab9b231d4b75b3d18",
+  "version": 2,
+  "status": "COMPLETED",
+  "title": "水没烧开也会蒸发，但降温效果不能想当然",
+  "source_text": "水一定要烧开，才会变成水蒸气吗？不一定。蒸发，指的是液态水转变为气态水的过程。常压下，水的沸点约为100摄氏度，但蒸发并不只发生在沸点。温度较低时，水也能蒸发，只是速度通常更慢。\n\n蒸发需要能量，因此会带走周围环境的一部分热量。这也是蒸发式冷却的原理。不过，效果会受到环境湿度等条件影响，较干燥的环境更适合使用这种方式。在潮湿环境里，不能直接照搬同样的降温预期，更不能由此推断所有房间都可以不用常规空调。\n\n蒸发也参与自然界的水循环，使水从地表进入大气。凝结则是相反的变化：水蒸气重新变成液态水。理解这两个方向，就能把杯子里的水逐渐减少，与空气中的水重新形成水滴联系起来。",
+  "source_sha256": "2181cae7e3bc0937a36e6e2e75d24cef37f1fd293b8bf163ba8842d5f5c02502",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "水没到100℃也能蒸发",
+        "paragraphs": [
+          "水一定要烧开，才会变成水蒸气吗？不一定。蒸发，指的是液态水转变为气态水的过程。常压下，水的沸点约为100摄氏度，但蒸发并不只发生在沸点。温度较低时，水也能蒸发，只是速度通常更慢。"
+        ]
+      },
+      {
+        "title": "会吸热，但不等于随便降温",
+        "paragraphs": [
+          "蒸发需要能量，因此会带走周围环境的一部分热量。这也是蒸发式冷却的原理。不过，效果会受到环境湿度等条件影响，较干燥的环境更适合使用这种方式。在潮湿环境里，不能直接照搬同样的降温预期，更不能由此推断所有房间都可以不用常规空调。"
+        ]
+      },
+      {
+        "title": "蒸发和凝结，是一对反方向",
+        "paragraphs": [
+          "蒸发也参与自然界的水循环，使水从地表进入大气。凝结则是相反的变化：水蒸气重新变成液态水。理解这两个方向，就能把杯子里的水逐渐减少，与空气中的水重新形成水滴联系起来。"
+        ]
+      }
+    ],
+    "duration_mode": "content",
+    "title": "水没烧开也会蒸发，但降温效果不能想当然",
+    "sources": [
+      {
+        "title": "水不必烧开才蒸发",
+        "url": "https://www.usgs.gov/water-science-school/science/evaporation-and-water-cycle",
+        "date": "2019-06-08"
+      }
+    ],
+    "production_context": {
+      "content_recipe": {
+        "id": "research:topic_digest",
+        "settings": {
+          "video_form": "information_motion",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+            "focus": ""
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "专题速览",
+            "accent": "#1f7a4d",
+            "outro": {
+              "lines": [
+                "主要来源见简介"
+              ],
+              "seconds": 3
+            },
+            "recipe": "topic_digest",
+            "intro": {
+              "title": "水没烧开也会蒸发"
+            }
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      },
+      "matrix": {
+        "id": "research-production:science_daily",
+        "settings": {
+          "video_speed": 1.25
+        }
+      }
+    },
+    "creative_intent": {
+      "purpose": "文章讲解：画面提炼原文重点，保留数字、否定、条件和不确定性；上传文章未经外部事实核验，不强化结论。每张画面上的数字都要同时带上对象和成立条件，不从其他段落借数字却省略限定，也不补造对比项。",
+      "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+      "focus": "水没烧开也会蒸发，但降温效果不能想当然"
+    },
+    "packaging": {
+      "preset": "common",
+      "label": "专题速览",
+      "accent": "#1f7a4d",
+      "outro": {
+        "lines": [
+          "主要来源见简介"
+        ],
+        "seconds": 3
+      },
+      "recipe": "topic_digest",
+      "intro": {
+        "title": "水没烧开也会蒸发"
+      }
+    },
+    "idempotency_key": "research:88dc324cfab94c65ae62a907d3ac48bd"
+  },
+  "autovideo_job_id": "b995c2fb-2937-4b57-aa86-ab3a93e330b5",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "resolved_video_form": "information_motion",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 874,
+      "sha256": "b152ea1f60d27cfefc05f45753acd1fcbe99701cebc0e733f0df615efbff3919"
+    },
+    {
+      "name": "caption-alignment.json",
+      "content_type": "application/json",
+      "bytes": 29604,
+      "sha256": "c57544f4782cc60ca30b6e58035d497fb6fdcc30dfc6b8d0ca1110ad59ddf501"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 1390,
+      "sha256": "fd83f6fe376b26360656cd9fb145744f3e3deaf20afb2959dde798326f628b9c"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 5103,
+      "sha256": "77de91167aabbb9aea6e72ed4dd956f23d9d0b63a38adcb28613d98c89d6ed6b"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 1390,
+      "sha256": "6a99d98f4798c57a22e70ec506c1cab94dfb6616fa625f4070658cd228c22f53"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 5045,
+      "sha256": "12b8fa02d4e74d4c2013b3ea13b7c53160fc771078e96491060c9a8b401c8b78"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 5669266,
+      "sha256": "1558eac798a36ba4c724e6fd097eb5c956a193c52572457595a392a03ee57e23"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 963,
+      "sha256": "072ead51ac65948441fe0c5c7b17bbad498c3a7f622fe5fc222113435709e5e3"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 421,
+      "sha256": "bdf367874b61872e967698cd87bfff27a81f559ab9bf0cc838289f1d05c88113"
+    },
+    {
+      "name": "information-plan.json",
+      "content_type": "application/json",
+      "bytes": 4644,
+      "sha256": "abe126f5054965052a66aa19b98e4ff04761560ea173bbd9ed19c781c155b627"
+    },
+    {
+      "name": "information-timing.json",
+      "content_type": "application/json",
+      "bytes": 6993,
+      "sha256": "416fc04f6b9cd02b56e8178725be3fe91e50d3838e44672750068cbf91358378"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 2311,
+      "sha256": "684c56d727592de0216188922bbf246d02a9fc3e67b3674fd1bdec78c0418737"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 44767,
+      "sha256": "7a211df5ba8fc3a8ba139bb4875918a94751cb8034afe8d9e084647a289f2792"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 3866,
+      "sha256": "9e2cff8616fcc84ef5085f3ad795610803302f413dc6ce4b8a9ce8c4ba834019"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 330,
+      "sha256": "616ff52b87b160172af44618483b30984dba329e1cf4a7e34a71fc0a4210e145"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 11074,
+      "sha256": "d2bdf5546b46dbe714e4697a2d2bac3d1d91366d89a9bb8f53c5b7772fe609a7"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 936,
+      "sha256": "a546fe9cf92e6a06367cdbffbf0ca05415d45c46a30f3c8faf201345f093176b"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5683,
+      "sha256": "2611ff5878a10d30d5793050c8e9aa2a2e1af7e8012ea721386d01346724ef64"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2289,
+      "sha256": "1ec165e6ce3a2f3d06d648bab20c2f95eaf01ca5d69ec06e4ff0756f7ec578f3"
+    },
+    {
+      "name": "playback.json",
+      "content_type": "application/json",
+      "bytes": 132,
+      "sha256": "d0abab335dfad065d6e992483b7b315e2f61547bf43dbf8913612a71e80f2b67"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 845,
+      "sha256": "1f766b290cc6626c51cb7775e50ec4d515c098afd2c57e8b02da7d6423ea2444"
+    },
+    {
+      "name": "production-execution.json",
+      "content_type": "application/json",
+      "bytes": 381,
+      "sha256": "8ccfcf201a8a18b139aa6f995d0730ab1798d36e84142680ecbdfaa259c72812"
+    },
+    {
+      "name": "production-plan.json",
+      "content_type": "application/json",
+      "bytes": 6618,
+      "sha256": "73df752926faecd1beda97127e91d10a2b138168d1dbb39acf141100c4607785"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 14405,
+      "sha256": "c9d5809cd5323ac5236bca6f1f5eea36e080b6b448647456a233322dcbf93e02"
+    },
+    {
+      "name": "render-resources.json",
+      "content_type": "application/json",
+      "bytes": 207,
+      "sha256": "ccc32453372ac622e62a2ce0169d452a7f960f0de2d126b790977fcf74544d13"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 15153,
+      "sha256": "b14f73c53ad2546077ef6fd5b1e32b3ef170024bc569c97052faaf79598b9b80"
+    },
+    {
+      "name": "tts-metrics.json",
+      "content_type": "application/json",
+      "bytes": 1058,
+      "sha256": "27744459d2bc62fc9d090b7e40103139220be1c46e9f11a47d164743ba7155b5"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 21474,
+      "sha256": "70024559db184521a63fbbdbbcdc9eb22066163af1495c7c546e67e14bfa1dd1"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 5437030,
+      "sha256": "7776a7a3ab196e71ed47d99e49fb6753299f495f64f9d3c317b270899ac12a83"
+    },
+    {
+      "name": "voice-report.json",
+      "content_type": "application/json",
+      "bytes": 3962,
+      "sha256": "c869899f97e99436a1873de6e90e9d0cde1a4dfef7e521fdf62000c3c99749eb"
+    }
+  ],
+  "submit_started_at": "2026-10-25T09:48:11.319124+00:00",
+  "submitted_at": "2026-10-25T17:48:11+0800",
+  "completed_at": "2026-10-25T17:51:01+0800",
+  "created_at": "2026-10-25T17:48:11+0800",
+  "updated_at": "2026-10-25T17:51:01+0800",
+  "heartbeat_at": 1792921851.385569,
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-25T09:48:11.302179+00:00",
+    "submit_seconds": 0.016,
+    "poll_seconds": 170.304,
+    "poll_count": 35,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-25T09:50:58.628+00:00",
+    "completion_observed_at": "2026-10-25T09:51:01.647340+00:00",
+    "download_seconds": 0.055,
+    "artifact_list_seconds": 0.002,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 874
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 29604
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 1390
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 5103
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 1390
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 5045
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.035,
+        "reused": false,
+        "bytes": 5669266
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 963
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 421
+      },
+      {
+        "name": "information-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 4644
+      },
+      {
+        "name": "information-timing.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 6993
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 2311
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 44767
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 3866
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 330
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 11074
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 936
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 5683
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 2289
+      },
+      {
+        "name": "playback.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 132
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 845
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 381
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 6618
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 14405
+      },
+      {
+        "name": "render-resources.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 207
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 15153
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 1058
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 21474
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.016,
+        "reused": false,
+        "bytes": 5437030
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 3962
+      }
+    ],
+    "process_seconds": 170.415
+  }
+}

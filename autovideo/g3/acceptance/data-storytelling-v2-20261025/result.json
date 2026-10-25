@@ -1,0 +1,24 @@
+{
+  "job_id": "9bd9cc0d-6074-4199-a3c2-8091f751ef24",
+  "parent_job_id": "53acd7a5-f44e-49ac-82d7-2d49dd25a60a",
+  "engine_data": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-data-storytelling-v2/1c03945fff834845aad031af84b51147",
+  "voice_unchanged": true,
+  "screen_data_unchanged": true,
+  "original_real_model_plan": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/data-storytelling-v2-20261025-first",
+  "components": [
+    "object_showcase",
+    "scatter_chart",
+    "scatter_chart",
+    "data_chart",
+    "concept_reveal"
+  ],
+  "media": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 2075,
+    "duration_seconds": 69.184,
+    "full_decode": "PASS"
+  }
+}

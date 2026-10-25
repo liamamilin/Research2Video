@@ -771,6 +771,10 @@ def compile_ir(narration: dict, board: dict, alignment: dict) -> dict:
         ir["presentation"] = {"preset": form}
         ir["style"]["preset"] = "minimal_light"
         ir["assets"].extend(board.get("image_assets", []))
+    if board.get("presentation") == "explanation":
+        ir["presentation"] = {"preset": "explanation"}
+        ir["style"]["preset"] = "minimal_light"
+        ir["assets"].extend(a for a in board.get("image_assets", []) if a["id"] not in {x["id"] for x in ir["assets"]})
     if CONTENT_MODE:
         from g2.content_video import content_structure
         ir["content_structure"] = content_structure(narration)
@@ -890,6 +894,8 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     shutil.copyfile(PROJECT / "g1/renderer/src/Packaging.tsx", src / "Packaging.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/CreativeForms.tsx", src / "CreativeForms.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/ImageMaterials.tsx", src / "ImageMaterials.tsx")
+    shutil.copyfile(PROJECT / "g1/renderer/src/DataChart.tsx", src / "DataChart.tsx")
+    shutil.copyfile(PROJECT / "g1/renderer/src/ScatterChart.tsx", src / "ScatterChart.tsx")
     (src / "index.ts").write_text("import {registerRoot} from 'remotion';\nimport {Root} from './Root';\n\nregisterRoot(Root);\n", encoding="utf-8")
     ensure_renderer_dependency_link(renderer)
     props_path = ARTIFACTS / "render-props.json"
@@ -1176,10 +1182,10 @@ def run_package_stage(config: dict) -> dict:
     from g2 import package_stage
     record = packaging_record()
     source_in_content = False
-    if record and record.get("source_card") and IR_PATH.is_file():
+    ir = json.loads(IR_PATH.read_text(encoding="utf-8")) if IR_PATH.is_file() else None
+    if record and record.get("source_card") and ir is not None:
         from g2.package_kit import PackageConfigError
         from g2.packaging_library import source_already_rendered
-        ir = json.loads(IR_PATH.read_text(encoding="utf-8"))
         try:
             source_in_content = source_already_rendered(record, ir)
         except PackageConfigError as exc:
@@ -1191,9 +1197,12 @@ def run_package_stage(config: dict) -> dict:
         except G2Fault as exc:
             raise package_stage.PackageFault("PACKAGE_COMMAND_FAILED", exc.message) from exc
 
+    from g2.packaging_library.templates import visual_theme
+    plan = (PACKAGING_INPUT or {}).get("production_plan") or {}
     return package_stage.build_package(runner, FFMPEG, FFPROBE, config=config, content_video=VIDEO_PATH,
                                        voice_wav=ASSETS / "communications_noise.wav", artifacts=ARTIFACTS,
-                                       packaging_record=record, source_in_content=source_in_content)
+                                       packaging_record=record, source_in_content=source_in_content,
+                                       visual_theme=visual_theme(ir, plan.get("style")))
 
 
 def run_all() -> dict:
@@ -1218,6 +1227,33 @@ def run_all() -> dict:
     if CONTENT_MODE and form not in {"process_diagram", "information_motion"} | FORMS.keys():
         raise G2Fault("CONTENT_FORM_UNSUPPORTED", "请选择流程动态图解或简洁信息动效以按内容组织")
     narration = run_step("narration-plan", narration_stage)
+    from g2 import explanation
+    saved_visuals = json.loads((PROJECT_INPUT.parent / "input.json").read_text(encoding="utf-8"))
+    if explanation.enabled(saved_visuals, form):
+        narration, alignment, plan = run_planning_stages(narration,
+            lambda final: explanation.plan_storyboard(sys.modules[__name__], final, saved_visuals))
+        assets = []
+        if saved_visuals.get("image_materials"):
+            from g2.creative_forms import prepare_images
+            assets = run_step("draw-things-backgrounds", prepare_images, sys.modules[__name__], narration)
+        else:
+            skip_step("draw-things-backgrounds", "按段落编排图表与现有组件")
+        board = explanation.compile_storyboard(sys.modules[__name__], plan, alignment, saved_visuals, assets)
+        compiled = run_step("compile-ir", validate_compile_stage, narration, board, alignment)
+        if CONTENT_MODE:
+            from g2.content_video import write_chapter_evidence
+            write_chapter_evidence(sys.modules[__name__], narration, compiled)
+        renderer_root = RUN_ROOT / "renderer"
+        run_step("render", lambda: render(compiled, renderer_root=renderer_root))
+        qa = run_step("verify-media", verify_media, compiled, alignment)
+        qa.update(video_form=form, visual_storytelling=True,
+                  information={"scene_count": len(board["scenes"]), "components": sorted({s["component"] for s in board["scenes"]}),
+                               "timing": "speech-led mixed scenes", "theme": "minimal_light"})
+        add_narration_check(qa)
+        write_json(ARTIFACTS / "qa.json", qa)
+        write_call_summary()
+        write_manifest(renderer_root=renderer_root)
+        return qa
     if form in FORMS:
         from g2 import creative_forms
         narration, alignment, board = run_planning_stages(narration,

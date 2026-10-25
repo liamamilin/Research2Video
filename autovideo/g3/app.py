@@ -253,6 +253,7 @@ class CreateJobRequest(BaseModel):
         return value
     use_draw_things: bool = False
     video_form: Literal["knowledge_cards", "process_diagram", "information_motion", "auto", "kinetic_typography", "image_slideshow", "chat_dialogue", "information_cards", "object_showcase", "dynamic_collage"] = "knowledge_cards"
+    visual_storytelling: bool = False
     slideshow_images: list[str] = Field(default_factory=list, max_length=12)
     image_materials: list[ImageMaterial] = Field(default_factory=list, max_length=12)
 
@@ -917,7 +918,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
                 payload["content_notices"] = [{"chapter_index": None, "message": "原稿有内容待核实，修订后仍需核对来源"}]
             if request.mode == "source":
                 try:
-                    fields = ("title", "source_text", "target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "creative_intent", "video_speed", "slideshow_images", "image_materials", "production_mode", "visual_style", "production_context", "content_notices")
+                    fields = ("title", "source_text", "target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "creative_intent", "video_speed", "slideshow_images", "image_materials", "visual_storytelling", "production_mode", "visual_style", "production_context", "content_notices")
                     packaging_fields = ("packaging",) if payload.get("packaging_resolved") else ("package",)
                     checked = CreateJobRequest(**{k: payload[k] for k in (*fields, *packaging_fields) if k in payload})
                 except ValidationError as exc:

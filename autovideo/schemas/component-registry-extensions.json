@@ -1,5 +1,5 @@
 {
-  "registry_version": "0.2-ext3",
+  "registry_version": "0.2-ext5",
   "notes": "Runtime extensions for explicit information_motion and creative presentations; each presentation permits only its registered components. The frozen v0.2 registry (component-registry-v0.2.json) is unchanged; g1/video_ir.load_registry() merges these entries. big_number reveals title, then line:0 (value), line:1 (label) and line:2 (note, if present): the frozen beat target pattern has no other names. price_change reveals title and one row per line:N (1-2 rows). source_card reveals title and one source per line:N; its props come from the request's sources, never from the model.",
   "components": {
     "big_number": {
@@ -69,6 +69,26 @@
       "actions": {
         "reveal": [
           "scene"
+        ]
+      }
+    },
+    "data_chart": {
+      "props_schema": "components/data_chart.schema.json",
+      "actions": {
+        "reveal": [
+          "scene",
+          "title",
+          "line:*"
+        ]
+      }
+    },
+    "scatter_chart": {
+      "props_schema": "components/scatter_chart.schema.json",
+      "actions": {
+        "reveal": [
+          "scene",
+          "title",
+          "line:*"
         ]
       }
     }

@@ -1,0 +1,29 @@
+{
+  "job_id": "fe571a39-7a95-492d-b60d-227c2f8ced3b",
+  "engine_data": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-data-storytelling/b24c51235a5c446586b887d9f27c2e6c",
+  "components": [
+    "object_showcase",
+    "price_change",
+    "data_chart",
+    "data_chart",
+    "concept_reveal"
+  ],
+  "chart_kinds": [
+    "trend",
+    "grouped"
+  ],
+  "presentation": {
+    "preset": "explanation"
+  },
+  "real_tts": true,
+  "real_llm": true,
+  "media": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 1516,
+    "duration_seconds": 50.539,
+    "full_decode": "PASS"
+  }
+}

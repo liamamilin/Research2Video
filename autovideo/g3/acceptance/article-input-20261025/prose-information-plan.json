@@ -1,0 +1,125 @@
+{
+  "scenes": [
+    {
+      "id": "c1_s1",
+      "component": "title_card",
+      "props": {
+        "title": "窗边的一把椅子",
+        "subtitle": "雨停之后，把自己安放一会儿"
+      },
+      "narration_segment_ids": [
+        "c1_n1"
+      ],
+      "headline": "窗边的一把椅子"
+    },
+    {
+      "id": "c1_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "雨刚停",
+        "lines": [
+          "一滴落下去",
+          "另一滴才慢慢聚拢",
+          "叶尖像藏着未说完的句子"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n2",
+        "c1_n3"
+      ],
+      "headline": "雨刚停"
+    },
+    {
+      "id": "c1_s3",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "今天没有",
+          "items": [
+            "非读完不可的书",
+            "非赶上的一班车"
+          ]
+        },
+        "right": {
+          "label": "手边只有",
+          "items": [
+            "一杯凉了的茶",
+            "一本摊开的书"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c1_n4",
+        "c1_n5",
+        "c1_n6"
+      ],
+      "headline": "没有非做不可的事"
+    },
+    {
+      "id": "c1_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "风翻过一页",
+        "lines": [
+          "停在我昨天留下折角的地方",
+          "远处车轮碾过积水",
+          "忽然想起放学的路"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n7",
+        "c1_n8",
+        "c1_n9"
+      ],
+      "headline": "风翻过一页"
+    },
+    {
+      "id": "c1_s5",
+      "component": "concept_reveal",
+      "props": {
+        "title": "慢一点，傍晚就长一点",
+        "lines": [
+          "绕开大路",
+          "踩着湿漉漉的石板",
+          "慢慢走回家"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n10"
+      ],
+      "headline": "慢一点，傍晚就长一点"
+    },
+    {
+      "id": "c1_s6",
+      "component": "concept_reveal",
+      "props": {
+        "title": "天色暗下来",
+        "lines": [
+          "没有开灯",
+          "把杯子移到一旁",
+          "给书腾出一点地方"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n11",
+        "c1_n12"
+      ],
+      "headline": "天色暗下来"
+    },
+    {
+      "id": "c1_s7",
+      "component": "concept_reveal",
+      "props": {
+        "title": "今天也可以这样过去",
+        "lines": [
+          "没有什么特别的收获",
+          "却把自己好好地安放了一会儿"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n13"
+      ],
+      "headline": "今天也可以这样过去"
+    }
+  ]
+}

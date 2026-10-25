@@ -1,0 +1,225 @@
+{
+  "pages": [
+    {
+      "id": "card_1",
+      "component": "concept_reveal",
+      "props": {
+        "title": "截图功能说明",
+        "lines": [
+          "画面会放大对应区域",
+          "帮助我们找到正在介绍的功能"
+        ]
+      }
+    },
+    {
+      "id": "card_2",
+      "component": "price_change",
+      "props": {
+        "title": "订阅价格变化",
+        "unit": "美元",
+        "rows": [
+          {
+            "label": "订阅",
+            "before": "20",
+            "after": "25",
+            "change": "5",
+            "direction": "up"
+          }
+        ],
+        "staged": true
+      }
+    },
+    {
+      "id": "card_3",
+      "component": "data_chart",
+      "props": {
+        "title": "月度使用量趋势",
+        "kind": "trend",
+        "unit": "万次",
+        "categories": [
+          "一月",
+          "二月",
+          "三月",
+          "四月"
+        ],
+        "series": [
+          {
+            "name": "使用量",
+            "values": [
+              12,
+              18,
+              16,
+              30
+            ]
+          }
+        ],
+        "takeaway": "四月达到这几个月的最高点",
+        "focus_index": 3,
+        "reveal_phrases": [
+          "一月是12万次",
+          "二月18万次",
+          "三月16万次",
+          "四月30万次"
+        ]
+      }
+    },
+    {
+      "id": "card_4",
+      "component": "data_chart",
+      "props": {
+        "title": "两款工具任务耗时对比",
+        "kind": "grouped",
+        "unit": "秒",
+        "categories": [
+          "写作",
+          "编程",
+          "检索"
+        ],
+        "series": [
+          {
+            "name": "工具A",
+            "values": [
+              10,
+              16,
+              12
+            ]
+          },
+          {
+            "name": "工具B",
+            "values": [
+              8,
+              14,
+              9
+            ]
+          }
+        ],
+        "takeaway": "工具B在这三种任务上都更快",
+        "focus_series": 1,
+        "reveal_phrases": [
+          "工具A分别是10秒、16秒和12秒",
+          "工具B分别是8秒、14秒和9秒"
+        ]
+      }
+    },
+    {
+      "id": "card_5",
+      "component": "concept_reveal",
+      "props": {
+        "title": "画面编排要点",
+        "lines": [
+          "页面说明、数字变化与图表结合",
+          "观众能跟着讲述看见重点"
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "card_1",
+      "chapter_id": "c1",
+      "title": "画面表达示例",
+      "segment_ids": [
+        "c1_n1"
+      ],
+      "text": "先看页面中的截图功能说明，画面会放大对应区域，帮助我们找到正在介绍的功能。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n1",
+          "text": "先看页面中的截图功能说明，画面会放大对应区域，帮助我们找到正在介绍的功能。"
+        }
+      ],
+      "image_indices": [
+        0
+      ]
+    },
+    {
+      "id": "card_2",
+      "chapter_id": "c1",
+      "title": "画面表达示例",
+      "segment_ids": [
+        "c1_n2",
+        "c1_n3"
+      ],
+      "text": "订阅价格从20美元变成25美元，增加5美元。先看旧价格，再看新价格，最后突出增加的部分。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n2",
+          "text": "订阅价格从20美元变成25美元，增加5美元。"
+        },
+        {
+          "id": "c1_n3",
+          "text": "先看旧价格，再看新价格，最后突出增加的部分。"
+        }
+      ],
+      "image_indices": []
+    },
+    {
+      "id": "card_3",
+      "chapter_id": "c1",
+      "title": "画面表达示例",
+      "segment_ids": [
+        "c1_n4",
+        "c1_n5"
+      ],
+      "text": "接着看月度使用量的趋势，一月是12万次，二月18万次，三月16万次，四月30万次。四月达到这几个月的最高点。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n4",
+          "text": "接着看月度使用量的趋势，一月是12万次，二月18万次，三月16万次，四月30万次。"
+        },
+        {
+          "id": "c1_n5",
+          "text": "四月达到这几个月的最高点。"
+        }
+      ],
+      "image_indices": []
+    },
+    {
+      "id": "card_4",
+      "chapter_id": "c1",
+      "title": "画面表达示例",
+      "segment_ids": [
+        "c1_n6",
+        "c1_n7",
+        "c1_n8"
+      ],
+      "text": "再比较两款工具在写作、编程和检索三种任务上的耗时。工具A分别是10秒、16秒和12秒，工具B分别是8秒、14秒和9秒。工具B在这三种任务上都更快。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n6",
+          "text": "再比较两款工具在写作、编程和检索三种任务上的耗时。"
+        },
+        {
+          "id": "c1_n7",
+          "text": "工具A分别是10秒、16秒和12秒，工具B分别是8秒、14秒和9秒。"
+        },
+        {
+          "id": "c1_n8",
+          "text": "工具B在这三种任务上都更快。"
+        }
+      ],
+      "image_indices": []
+    },
+    {
+      "id": "card_5",
+      "chapter_id": "c1",
+      "title": "画面表达示例",
+      "segment_ids": [
+        "c1_n9"
+      ],
+      "text": "把页面、数字变化和数据图表放在一起，观众就能跟着讲述看见重点。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n9",
+          "text": "把页面、数字变化和数据图表放在一起，观众就能跟着讲述看见重点。"
+        }
+      ],
+      "image_indices": []
+    }
+  ]
+}

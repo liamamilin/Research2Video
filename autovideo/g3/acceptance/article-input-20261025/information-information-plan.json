@@ -1,0 +1,185 @@
+{
+  "scenes": [
+    {
+      "id": "c1_s1",
+      "component": "title_card",
+      "props": {
+        "title": "水一定要烧开才会蒸发吗？",
+        "subtitle": "不一定。蒸发不只发生在沸点。"
+      },
+      "narration_segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ],
+      "headline": "水一定要烧开才会蒸发吗？"
+    },
+    {
+      "id": "c1_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "蒸发：液态水变成气态水",
+        "lines": [
+          "液态水 → 气态水",
+          "不需要先把水烧开"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n3"
+      ],
+      "headline": "蒸发：液态水变成气态水"
+    },
+    {
+      "id": "c1_s3",
+      "component": "big_number",
+      "props": {
+        "title": "沸点约100℃，但蒸发不只发生在沸点",
+        "value": "约100℃",
+        "label": "常压下水的沸点",
+        "note": "低于沸点时也能蒸发"
+      },
+      "narration_segment_ids": [
+        "c1_n4"
+      ],
+      "headline": "沸点约100℃，但蒸发不只发生在沸点"
+    },
+    {
+      "id": "c1_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "温度较低时也能蒸发",
+        "lines": [
+          "水依然会变成水蒸气",
+          "速度通常更慢"
+        ]
+      },
+      "narration_segment_ids": [
+        "c1_n5"
+      ],
+      "headline": "温度较低时也能蒸发"
+    },
+    {
+      "id": "c2_s1",
+      "component": "concept_reveal",
+      "props": {
+        "title": "蒸发要吸热，会带走周围热量",
+        "lines": [
+          "蒸发需要能量",
+          "能量从周围环境来",
+          "所以会带走周围一部分热量"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n1"
+      ],
+      "headline": "蒸发要吸热，会带走周围热量"
+    },
+    {
+      "id": "c2_s2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "蒸发式冷却：靠蒸发吸热",
+        "lines": [
+          "水蒸发时吸收热量",
+          "周围环境因此损失热量",
+          "这就是蒸发式冷却的原理"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n2"
+      ],
+      "headline": "蒸发式冷却：靠蒸发吸热"
+    },
+    {
+      "id": "c2_s3",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "较干燥环境",
+          "items": [
+            "更适合使用蒸发式冷却"
+          ]
+        },
+        "right": {
+          "label": "潮湿环境",
+          "items": [
+            "效果会受湿度等条件影响",
+            "不能照搬同样的降温预期"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c2_n3"
+      ],
+      "headline": "干燥环境更适合，潮湿环境别照搬"
+    },
+    {
+      "id": "c2_s4",
+      "component": "concept_reveal",
+      "props": {
+        "title": "潮湿环境，别推断不用空调",
+        "lines": [
+          "潮湿环境不能照搬同样的降温预期",
+          "更不能推断所有房间都可以不用常规空调"
+        ]
+      },
+      "narration_segment_ids": [
+        "c2_n4"
+      ],
+      "headline": "潮湿环境，别推断不用空调"
+    },
+    {
+      "id": "c3_s1",
+      "component": "concept_reveal",
+      "props": {
+        "title": "蒸发：水从地表进入大气",
+        "lines": [
+          "地表的水变成水蒸气，进入大气",
+          "这是水在自然界循环的一个方向"
+        ]
+      },
+      "narration_segment_ids": [
+        "c3_n1"
+      ],
+      "headline": "蒸发：水从地表进入大气"
+    },
+    {
+      "id": "c3_s2",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "蒸发",
+          "items": [
+            "液态水 → 水蒸气",
+            "水从地表进入大气"
+          ]
+        },
+        "right": {
+          "label": "凝结",
+          "items": [
+            "水蒸气 → 液态水",
+            "与蒸发方向相反"
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c3_n2"
+      ],
+      "headline": "凝结：与蒸发相反的方向"
+    },
+    {
+      "id": "c3_s3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "把两个方向连起来看",
+        "lines": [
+          "杯子里的水逐渐减少：蒸发",
+          "空气中的水重新形成水滴：凝结"
+        ]
+      },
+      "narration_segment_ids": [
+        "c3_n3"
+      ],
+      "headline": "把两个方向连起来看"
+    }
+  ]
+}

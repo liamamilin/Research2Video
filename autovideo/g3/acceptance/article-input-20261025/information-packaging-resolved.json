@@ -1,0 +1,111 @@
+{
+  "library": "autovideo-packaging",
+  "version": 2,
+  "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+  "selection": {
+    "preset": "common",
+    "label": "专题速览",
+    "accent": "#1f7a4d",
+    "outro": {
+      "lines": [
+        "主要来源见简介"
+      ],
+      "seconds": 3
+    },
+    "recipe": "topic_digest",
+    "intro": {
+      "title": "水没烧开也会蒸发"
+    }
+  },
+  "components": {
+    "label": "专题速览",
+    "accent": "#1f7a4d",
+    "enabled": true,
+    "intro": {
+      "component": "stinger",
+      "enabled": true,
+      "seconds": 1.5,
+      "title": "水没烧开也会蒸发"
+    },
+    "outro": {
+      "component": "end_card",
+      "enabled": true,
+      "seconds": 3,
+      "lines": [
+        "主要来源见简介"
+      ]
+    },
+    "badge": {
+      "component": "corner_badge",
+      "enabled": true
+    },
+    "source_card": {
+      "component": "source_card",
+      "enabled": true,
+      "seconds": 4.5
+    },
+    "sound": {
+      "component": "synth_sting",
+      "enabled": true
+    }
+  },
+  "package": {
+    "accent": "#1f7a4d",
+    "badge": "专题速览",
+    "intro": {
+      "template": "stinger",
+      "title": "水没烧开也会蒸发",
+      "seconds": 1.5,
+      "sound": "synth_sting"
+    },
+    "outro": {
+      "template": "end_card",
+      "title": "专题速览",
+      "seconds": 3,
+      "lines": [
+        "主要来源见简介"
+      ],
+      "sound": "synth_sting"
+    }
+  },
+  "badge": {
+    "text": "专题速览",
+    "color": "#1f7a4d"
+  },
+  "source_card": {
+    "template": "source_card",
+    "seconds": 4.5,
+    "title": "来源",
+    "sources": [
+      {
+        "title": "水不必烧开才蒸发",
+        "domain": "usgs.gov",
+        "date": "2019-06-08"
+      }
+    ]
+  },
+  "source_card_state": "enabled",
+  "component_versions": {
+    "intro": {
+      "id": "stinger",
+      "version": 1
+    },
+    "outro": {
+      "id": "end_card",
+      "version": 2
+    },
+    "badge": {
+      "id": "corner_badge",
+      "version": 1
+    },
+    "source_card": {
+      "id": "source_card",
+      "version": 2
+    },
+    "sound": {
+      "id": "synth_sting",
+      "version": 1
+    }
+  },
+  "sha256": "074b3bc7493409aa2eb080be760c98da1b6bfdd4ebbc8dacb1a4f6f7c6200504"
+}

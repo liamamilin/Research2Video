@@ -1,0 +1,182 @@
+{
+  "status": "PASS",
+  "config": {
+    "accent": "#1f7a4d",
+    "badge": "包装验收",
+    "outro": {
+      "template": "end_card",
+      "title": "包装验收",
+      "seconds": 1.0
+    }
+  },
+  "fps": 30,
+  "intro": {
+    "frames": 0,
+    "seconds": 0.0,
+    "offset_ms": 0,
+    "sound": null
+  },
+  "content": {
+    "frames": 60,
+    "seconds": 2.0,
+    "offset_ms": 0,
+    "source": "content.mp4"
+  },
+  "outro": {
+    "frames": 30,
+    "seconds": 1.0,
+    "offset_ms": 3000,
+    "sound": {
+      "sound": null
+    }
+  },
+  "total_frames": 120,
+  "total_seconds": 4.0,
+  "offset_ms": 0,
+  "checks": {
+    "full_decode": "PASS",
+    "format": {
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "sample_rate": "48000",
+      "channels": 2,
+      "uniform_across_frames": true
+    },
+    "duration": {
+      "frames": 120,
+      "seconds": 4.0,
+      "expected_frames": 120,
+      "expected_seconds": 4.0,
+      "tolerance_seconds": 0.035333333333333335
+    },
+    "content_audio": {
+      "shifted_by_frames": 0,
+      "offset_samples": 0,
+      "correlation": 0.9855891513835832,
+      "rms": 0.03995717689394951
+    },
+    "seam_loudness": {
+      "speech_active_db": -27.97,
+      "min_margin_db": 3.0,
+      "regions": {}
+    }
+  },
+  "files": {
+    "video": "package/video.mp4",
+    "captions": null,
+    "chapters": null,
+    "contact_sheet": "package/contact-sheet.jpg"
+  },
+  "timelines": "captions.srt/chapters.json 保持内容时间线；package/ 下的同名文件已加上片头时长",
+  "packaging": {
+    "library": "autovideo-packaging",
+    "version": 2,
+    "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+    "selection": {
+      "label": "包装验收",
+      "intro": {
+        "enabled": false
+      },
+      "outro": {
+        "seconds": 1
+      },
+      "source_card": {
+        "seconds": 1
+      },
+      "sound": {
+        "enabled": false
+      },
+      "preset": "common"
+    },
+    "components": {
+      "label": "包装验收",
+      "accent": "#1f7a4d",
+      "enabled": true,
+      "intro": {
+        "component": "stinger",
+        "enabled": false,
+        "seconds": 1.5
+      },
+      "outro": {
+        "component": "end_card",
+        "enabled": true,
+        "seconds": 1
+      },
+      "badge": {
+        "component": "corner_badge",
+        "enabled": true
+      },
+      "source_card": {
+        "component": "source_card",
+        "enabled": true,
+        "seconds": 1
+      },
+      "sound": {
+        "component": "synth_sting",
+        "enabled": false
+      }
+    },
+    "package": {
+      "accent": "#1f7a4d",
+      "badge": "包装验收",
+      "outro": {
+        "template": "end_card",
+        "title": "包装验收",
+        "seconds": 1
+      }
+    },
+    "badge": {
+      "text": "包装验收",
+      "color": "#1f7a4d"
+    },
+    "source_card": {
+      "template": "source_card",
+      "seconds": 1,
+      "title": "来源",
+      "sources": [
+        {
+          "title": "包装测试来源",
+          "domain": "example.com",
+          "date": "2026-10-25"
+        }
+      ]
+    },
+    "source_card_state": "enabled",
+    "component_versions": {
+      "intro": {
+        "id": "stinger",
+        "version": 1
+      },
+      "outro": {
+        "id": "end_card",
+        "version": 2
+      },
+      "badge": {
+        "id": "corner_badge",
+        "version": 1
+      },
+      "source_card": {
+        "id": "source_card",
+        "version": 2
+      },
+      "sound": {
+        "id": "synth_sting",
+        "version": 1
+      }
+    },
+    "sha256": "d6f41982d76a6b14e579890c8dc2ac88bcf06a10fa1e1140dbbb35ba65642815"
+  },
+  "visual_theme": {
+    "id": "legacy_dark",
+    "background": "#0b1020",
+    "text": "#f3f6fc",
+    "muted": "#a9b7cd"
+  },
+  "source_card": {
+    "frames": 30,
+    "seconds": 1.0,
+    "offset_ms": 2000,
+    "state": "enabled"
+  }
+}

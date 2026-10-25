@@ -142,7 +142,7 @@ def prepare(pipeline, ir: dict) -> dict:
 
 def supports_short_captions(ir: dict) -> bool:
     """Both current narrated-video executors share the same caption track."""
-    return ir.get("presentation", {}).get("preset") in (None, "information_motion", "information_cards")
+    return ir.get("presentation", {}).get("preset") in (None, "information_motion", "explanation", "information_cards")
 
 
 def render_cues(pipeline, ir: dict) -> list[dict] | None:

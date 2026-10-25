@@ -61,16 +61,18 @@ function InformationCard({ir, scene, frame, badge}: {ir: any; scene: any; frame:
   </AbsoluteFill>;
 }
 
-export function CreativeVideo({ir, badge}: {ir: any; badge?: Badge}) {
+export function CreativeVideo({ir, badge, showCaptions = false}: {ir: any; badge?: Badge; showCaptions?: boolean}) {
   const frame = useCurrentFrame();
   const scene = ir.scenes.find((s: any) => frame >= s.start_frame && frame < s.end_frame) || ir.scenes[ir.scenes.length - 1];
   if (!scene) return <AbsoluteFill style={{background: cream}}/>;
   const p = scene.props;
+  const caption = showCaptions && (ir.caption_cues ?? ir.narration.segments).find((s: any) => frame >= Math.round(s.start_ms*.03) && frame < Math.round(s.end_ms*.03));
   if (ir.presentation.preset === 'information_cards') return <InformationCard ir={ir} scene={scene} frame={frame} badge={badge}/>;
   const index = ir.scenes.indexOf(scene);
   const phrase = ir.narration.segments.find((s: any) => s.id === scene.narration_segment_ids[0]);
   const start = phrase.start_ms * .03;
-  const end = phrase.end_ms * .03;
+  const lastPhrase = ir.narration.segments.find((s: any) => s.id === scene.narration_segment_ids[scene.narration_segment_ids.length-1]);
+  const end = lastPhrase.end_ms * .03;
   const enter = interpolate(frame - scene.start_frame, [0, 12], [0, 1], clamp);
   const progress = interpolate(frame, [start, end], [0, 1], clamp);
   const mode: CreativePreset = scene.component === 'kinetic_text' ? 'kinetic_typography' : ir.presentation.preset;
@@ -101,7 +103,8 @@ export function CreativeVideo({ir, badge}: {ir: any; badge?: Badge}) {
       {p.side !== 'left' && <div style={{alignSelf:p.side === 'left' ? 'flex-start' : 'flex-end',maxWidth:1350,opacity:enter,transform:`translateY(${(1-enter)*20}px)`}}><div style={{fontSize:24,color:muted,marginBottom:12,textAlign:p.side === 'left' ? 'left' : 'right'}}>{p.speaker}</div><div style={{padding:'34px 44px',background:green,color:'#FFFFFF',borderRadius:p.side === 'left' ? '8px 30px 30px 30px' : '30px 8px 30px 30px',fontSize:p.text.length > 60 ? 44 : 52,lineHeight:1.65,overflowWrap:'anywhere',boxShadow:'0 12px 30px #23796816'}}>{spokenText}</div></div>}
     </div>}
     {['object_showcase','dynamic_collage'].includes(mode) && <ImageMaterials props={p} mode={mode} frame={frame} start={scene.start_frame} progress={progress} durationFrames={scene.end_frame-scene.start_frame}/>}
-    {footer}<div style={{position:'absolute',bottom:0,left:0,height:5,width:`${100*(frame+1)/ir.total_frames}%`,background:green}}/>
+    {!showCaptions && footer}
+    {caption && <div style={{position:'absolute',left:100,right:100,bottom:60,display:'flex',justifyContent:'center'}}><div style={{padding:'14px 28px',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:32,lineHeight:1.45,textAlign:'center'}}>{caption.text}</div></div>}<div style={{position:'absolute',bottom:0,left:0,height:5,width:`${100*(frame+1)/ir.total_frames}%`,background:green}}/>
     <Audio src={staticFile(ir.audio_public_file)}/>
   </AbsoluteFill>;
 }

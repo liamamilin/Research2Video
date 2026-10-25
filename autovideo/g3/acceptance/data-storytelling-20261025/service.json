@@ -1,0 +1,24 @@
+{
+  "old_pid": 62283,
+  "new_service": {
+    "status": "ready",
+    "action": "started",
+    "pid": 95987,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "jobs_preserved": 283,
+  "new_api_option": true,
+  "before_summary": {
+    "total": 283,
+    "completed": 208,
+    "running": 0,
+    "needs_input": 1
+  },
+  "after_summary": {
+    "total": 283,
+    "completed": 208,
+    "running": 0,
+    "needs_input": 1
+  }
+}

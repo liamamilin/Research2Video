@@ -324,7 +324,7 @@ class JobStore:
         keys = ("target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "video_speed")
         options = {key: saved.get(key, job.get(key)) for key in keys}
         options["use_draw_things"] = saved.get("use_draw_things", False)
-        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved"):
+        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "visual_storytelling", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved"):
             if saved.get(key) is not None:
                 options[key] = saved[key]
         return {"job_id": job_id, "title": job["title"], "source_text": source, "narration_text": narration,
@@ -391,7 +391,7 @@ class JobStore:
             "scene_id": scene_id,
             "prompt_extra": prompt_extra,
         }
-        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved"):
+        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "visual_storytelling", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved"):
             if input_payload.get(key) is not None:
                 request[key] = input_payload[key]
         return self.create_job(job_id, request)

@@ -1,0 +1,18 @@
+{
+  "prose": {
+    "title": "窗边的一把椅子",
+    "mode": "read",
+    "kind": "literary",
+    "origin": "original",
+    "author": "验收原创散文"
+  },
+  "information": {
+    "title": "水不必烧开才蒸发",
+    "mode": "adapt",
+    "kind": "information",
+    "origin": "copied",
+    "author": "据 USGS Water Science School 整理",
+    "source_url": "https://www.usgs.gov/water-science-school/science/evaporation-and-water-cycle",
+    "published_on": "2019-06-08"
+  }
+}

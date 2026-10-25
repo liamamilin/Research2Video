@@ -1,0 +1,1541 @@
+{
+  "version": 2,
+  "method": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+  "narration_sha256": "93da2505ef76b71b076701ddddbfc1f4ae122132d6c654a49f952c8b727d27b9",
+  "audio_sha256": "ea85d6f900f8bb36d0766861fae521b344b1693306e42c61b4c0f37dc40c8881",
+  "model": {
+    "repo": "mlx-community/Qwen3-ForcedAligner-0.6B-8bit",
+    "revision": "0e1a68e91d815300c7c9754b2a7639378b23db15",
+    "code": "installed mlx_audio only; no repository Python downloaded"
+  },
+  "model_sha256": "be19ef8ac4326d032e7673342930b14c2df30bd68c1632493b0f563e30829f91",
+  "generation_seconds": 2.997,
+  "cues": [
+    {
+      "segment_id": "c1_n1",
+      "text": "我把椅子往窗边挪了挪。",
+      "char_start": 0,
+      "char_end": 11,
+      "start_ms": 440,
+      "end_ms": 2186
+    },
+    {
+      "segment_id": "c1_n2",
+      "text": "雨刚停，屋檐还在滴水，一滴落下去，另一滴才慢慢聚拢。",
+      "char_start": 0,
+      "char_end": 26,
+      "start_ms": 2556,
+      "end_ms": 7270
+    },
+    {
+      "segment_id": "c1_n3",
+      "text": "院子里的树没有说话，",
+      "char_start": 0,
+      "char_end": 10,
+      "start_ms": 7830,
+      "end_ms": 9480
+    },
+    {
+      "segment_id": "c1_n3",
+      "text": "叶尖却像藏着许多尚未说完的句子。",
+      "char_start": 10,
+      "char_end": 26,
+      "start_ms": 9670,
+      "end_ms": 12520
+    },
+    {
+      "segment_id": "c1_n4",
+      "text": "桌上那杯茶早已凉了。",
+      "char_start": 0,
+      "char_end": 10,
+      "start_ms": 13286,
+      "end_ms": 15046
+    },
+    {
+      "segment_id": "c1_n5",
+      "text": "我端起来，又放下。",
+      "char_start": 0,
+      "char_end": 9,
+      "start_ms": 15632,
+      "end_ms": 16912
+    },
+    {
+      "segment_id": "c1_n6",
+      "text": "今天没有非读完不可的书，也没有非赶上的一班车。",
+      "char_start": 0,
+      "char_end": 23,
+      "start_ms": 17340,
+      "end_ms": 21150
+    },
+    {
+      "segment_id": "c1_n7",
+      "text": "风从窗缝里进来，把摊开的书页翻过一张，",
+      "char_start": 0,
+      "char_end": 19,
+      "start_ms": 21634,
+      "end_ms": 24964
+    },
+    {
+      "segment_id": "c1_n7",
+      "text": "停在我昨天留下折角的地方。",
+      "char_start": 19,
+      "char_end": 32,
+      "start_ms": 25154,
+      "end_ms": 27334
+    },
+    {
+      "segment_id": "c1_n8",
+      "text": "远处有人推着自行车经过，车轮轻轻碾过积水。",
+      "char_start": 0,
+      "char_end": 21,
+      "start_ms": 28114,
+      "end_ms": 32038
+    },
+    {
+      "segment_id": "c1_n9",
+      "text": "我听见那点声响，忽然想起小时候放学的路。",
+      "char_start": 0,
+      "char_end": 20,
+      "start_ms": 32518,
+      "end_ms": 35688
+    },
+    {
+      "segment_id": "c1_n10",
+      "text": "那时我们总绕开大路，踩着湿漉漉的石板回家，",
+      "char_start": 0,
+      "char_end": 21,
+      "start_ms": 36318,
+      "end_ms": 39568
+    },
+    {
+      "segment_id": "c1_n10",
+      "text": "仿佛慢一点，傍晚就能长一点。",
+      "char_start": 21,
+      "char_end": 35,
+      "start_ms": 39598,
+      "end_ms": 41648
+    },
+    {
+      "segment_id": "c1_n11",
+      "text": "天色渐渐暗下来。",
+      "char_start": 0,
+      "char_end": 8,
+      "start_ms": 42649,
+      "end_ms": 44159
+    },
+    {
+      "segment_id": "c1_n12",
+      "text": "我没有开灯，只把杯子移到一旁，给书腾出一点地方。",
+      "char_start": 0,
+      "char_end": 24,
+      "start_ms": 44639,
+      "end_ms": 48312
+    },
+    {
+      "segment_id": "c1_n13",
+      "text": "窗外最后一滴雨水落下时，我觉得，",
+      "char_start": 0,
+      "char_end": 16,
+      "start_ms": 48792,
+      "end_ms": 51802
+    },
+    {
+      "segment_id": "c1_n13",
+      "text": "今天也可以这样过去：没有什么特别的收获，",
+      "char_start": 16,
+      "char_end": 36,
+      "start_ms": 51802,
+      "end_ms": 54802
+    },
+    {
+      "segment_id": "c1_n13",
+      "text": "却把自己好好地安放了一会儿。",
+      "char_start": 36,
+      "char_end": 50,
+      "start_ms": 54802,
+      "end_ms": 56555
+    }
+  ],
+  "word_evidence": [
+    {
+      "segment_id": "c1_n1",
+      "items": [
+        {
+          "text": "我",
+          "start_ms": 240,
+          "end_ms": 320
+        },
+        {
+          "text": "把",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "椅",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "子",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "往",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "窗",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "边",
+          "start_ms": 1120,
+          "end_ms": 1360
+        },
+        {
+          "text": "挪",
+          "start_ms": 1360,
+          "end_ms": 1520
+        },
+        {
+          "text": "了",
+          "start_ms": 1520,
+          "end_ms": 1600
+        },
+        {
+          "text": "挪",
+          "start_ms": 1680,
+          "end_ms": 1920
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n2",
+      "items": [
+        {
+          "text": "雨",
+          "start_ms": 0,
+          "end_ms": 160
+        },
+        {
+          "text": "刚",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "停",
+          "start_ms": 320,
+          "end_ms": 640
+        },
+        {
+          "text": "屋",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "檐",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "还",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "在",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "滴",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "水",
+          "start_ms": 1600,
+          "end_ms": 1920
+        },
+        {
+          "text": "一",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "滴",
+          "start_ms": 2400,
+          "end_ms": 2560
+        },
+        {
+          "text": "落",
+          "start_ms": 2560,
+          "end_ms": 2720
+        },
+        {
+          "text": "下",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "去",
+          "start_ms": 2880,
+          "end_ms": 3200
+        },
+        {
+          "text": "另",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "一",
+          "start_ms": 3520,
+          "end_ms": 3600
+        },
+        {
+          "text": "滴",
+          "start_ms": 3600,
+          "end_ms": 3760
+        },
+        {
+          "text": "才",
+          "start_ms": 3760,
+          "end_ms": 4000
+        },
+        {
+          "text": "慢",
+          "start_ms": 4000,
+          "end_ms": 4160
+        },
+        {
+          "text": "慢",
+          "start_ms": 4160,
+          "end_ms": 4320
+        },
+        {
+          "text": "聚",
+          "start_ms": 4320,
+          "end_ms": 4480
+        },
+        {
+          "text": "拢",
+          "start_ms": 4480,
+          "end_ms": 4640
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n3",
+      "items": [
+        {
+          "text": "院",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "子",
+          "start_ms": 400,
+          "end_ms": 480
+        },
+        {
+          "text": "里",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "的",
+          "start_ms": 640,
+          "end_ms": 720
+        },
+        {
+          "text": "树",
+          "start_ms": 720,
+          "end_ms": 960
+        },
+        {
+          "text": "没",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "有",
+          "start_ms": 1120,
+          "end_ms": 1200
+        },
+        {
+          "text": "说",
+          "start_ms": 1200,
+          "end_ms": 1440
+        },
+        {
+          "text": "话",
+          "start_ms": 1440,
+          "end_ms": 1760
+        },
+        {
+          "text": "叶",
+          "start_ms": 2080,
+          "end_ms": 2240
+        },
+        {
+          "text": "尖",
+          "start_ms": 2240,
+          "end_ms": 2560
+        },
+        {
+          "text": "却",
+          "start_ms": 2560,
+          "end_ms": 2640
+        },
+        {
+          "text": "像",
+          "start_ms": 2640,
+          "end_ms": 2800
+        },
+        {
+          "text": "藏",
+          "start_ms": 2800,
+          "end_ms": 3040
+        },
+        {
+          "text": "着",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "许",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "多",
+          "start_ms": 3360,
+          "end_ms": 3600
+        },
+        {
+          "text": "尚",
+          "start_ms": 3600,
+          "end_ms": 3840
+        },
+        {
+          "text": "未",
+          "start_ms": 3840,
+          "end_ms": 3920
+        },
+        {
+          "text": "说",
+          "start_ms": 3920,
+          "end_ms": 4160
+        },
+        {
+          "text": "完",
+          "start_ms": 4160,
+          "end_ms": 4240
+        },
+        {
+          "text": "的",
+          "start_ms": 4240,
+          "end_ms": 4320
+        },
+        {
+          "text": "句",
+          "start_ms": 4320,
+          "end_ms": 4560
+        },
+        {
+          "text": "子",
+          "start_ms": 4560,
+          "end_ms": 4800
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n4",
+      "items": [
+        {
+          "text": "桌",
+          "start_ms": 0,
+          "end_ms": 240
+        },
+        {
+          "text": "上",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "那",
+          "start_ms": 400,
+          "end_ms": 480
+        },
+        {
+          "text": "杯",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "茶",
+          "start_ms": 640,
+          "end_ms": 960
+        },
+        {
+          "text": "早",
+          "start_ms": 960,
+          "end_ms": 1200
+        },
+        {
+          "text": "已",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "凉",
+          "start_ms": 1280,
+          "end_ms": 1520
+        },
+        {
+          "text": "了",
+          "start_ms": 1520,
+          "end_ms": 1680
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n5",
+      "items": [
+        {
+          "text": "我",
+          "start_ms": 0,
+          "end_ms": 80
+        },
+        {
+          "text": "端",
+          "start_ms": 80,
+          "end_ms": 320
+        },
+        {
+          "text": "起",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "来",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "又",
+          "start_ms": 640,
+          "end_ms": 720
+        },
+        {
+          "text": "放",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "下",
+          "start_ms": 960,
+          "end_ms": 1200
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n6",
+      "items": [
+        {
+          "text": "今",
+          "start_ms": 80,
+          "end_ms": 240
+        },
+        {
+          "text": "天",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "没",
+          "start_ms": 400,
+          "end_ms": 480
+        },
+        {
+          "text": "有",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "非",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "读",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "完",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "不",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "可",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "的",
+          "start_ms": 1440,
+          "end_ms": 1520
+        },
+        {
+          "text": "书",
+          "start_ms": 1520,
+          "end_ms": 1920
+        },
+        {
+          "text": "也",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "没",
+          "start_ms": 2320,
+          "end_ms": 2400
+        },
+        {
+          "text": "有",
+          "start_ms": 2400,
+          "end_ms": 2480
+        },
+        {
+          "text": "非",
+          "start_ms": 2480,
+          "end_ms": 2720
+        },
+        {
+          "text": "赶",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "上",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "的",
+          "start_ms": 3040,
+          "end_ms": 3120
+        },
+        {
+          "text": "一",
+          "start_ms": 3120,
+          "end_ms": 3200
+        },
+        {
+          "text": "班",
+          "start_ms": 3200,
+          "end_ms": 3440
+        },
+        {
+          "text": "车",
+          "start_ms": 3440,
+          "end_ms": 3760
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n7",
+      "items": [
+        {
+          "text": "风",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "从",
+          "start_ms": 400,
+          "end_ms": 640
+        },
+        {
+          "text": "窗",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "缝",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "里",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "进",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "来",
+          "start_ms": 1280,
+          "end_ms": 1600
+        },
+        {
+          "text": "把",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "摊",
+          "start_ms": 1840,
+          "end_ms": 2080
+        },
+        {
+          "text": "开",
+          "start_ms": 2080,
+          "end_ms": 2240
+        },
+        {
+          "text": "的",
+          "start_ms": 2240,
+          "end_ms": 2320
+        },
+        {
+          "text": "书",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "页",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "翻",
+          "start_ms": 2640,
+          "end_ms": 2880
+        },
+        {
+          "text": "过",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "一",
+          "start_ms": 3040,
+          "end_ms": 3120
+        },
+        {
+          "text": "张",
+          "start_ms": 3120,
+          "end_ms": 3360
+        },
+        {
+          "text": "停",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "在",
+          "start_ms": 3840,
+          "end_ms": 4160
+        },
+        {
+          "text": "我",
+          "start_ms": 4160,
+          "end_ms": 4160
+        },
+        {
+          "text": "昨",
+          "start_ms": 4160,
+          "end_ms": 4320
+        },
+        {
+          "text": "天",
+          "start_ms": 4320,
+          "end_ms": 4640
+        },
+        {
+          "text": "留",
+          "start_ms": 4640,
+          "end_ms": 4720
+        },
+        {
+          "text": "下",
+          "start_ms": 4720,
+          "end_ms": 4960
+        },
+        {
+          "text": "折",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "角",
+          "start_ms": 5120,
+          "end_ms": 5280
+        },
+        {
+          "text": "的",
+          "start_ms": 5280,
+          "end_ms": 5360
+        },
+        {
+          "text": "地",
+          "start_ms": 5360,
+          "end_ms": 5520
+        },
+        {
+          "text": "方",
+          "start_ms": 5520,
+          "end_ms": 5760
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n8",
+      "items": [
+        {
+          "text": "远",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "处",
+          "start_ms": 320,
+          "end_ms": 560
+        },
+        {
+          "text": "有",
+          "start_ms": 640,
+          "end_ms": 720
+        },
+        {
+          "text": "人",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "推",
+          "start_ms": 880,
+          "end_ms": 1120
+        },
+        {
+          "text": "着",
+          "start_ms": 1120,
+          "end_ms": 1200
+        },
+        {
+          "text": "自",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "行",
+          "start_ms": 1360,
+          "end_ms": 1520
+        },
+        {
+          "text": "车",
+          "start_ms": 1520,
+          "end_ms": 1680
+        },
+        {
+          "text": "经",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "过",
+          "start_ms": 1840,
+          "end_ms": 2160
+        },
+        {
+          "text": "车",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "轮",
+          "start_ms": 2640,
+          "end_ms": 2880
+        },
+        {
+          "text": "轻",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "轻",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "碾",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "过",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "积",
+          "start_ms": 3520,
+          "end_ms": 3760
+        },
+        {
+          "text": "水",
+          "start_ms": 3760,
+          "end_ms": 4000
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n9",
+      "items": [
+        {
+          "text": "我",
+          "start_ms": 160,
+          "end_ms": 240
+        },
+        {
+          "text": "听",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "见",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "那",
+          "start_ms": 560,
+          "end_ms": 640
+        },
+        {
+          "text": "点",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "声",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "响",
+          "start_ms": 960,
+          "end_ms": 1280
+        },
+        {
+          "text": "忽",
+          "start_ms": 1360,
+          "end_ms": 1520
+        },
+        {
+          "text": "然",
+          "start_ms": 1520,
+          "end_ms": 1680
+        },
+        {
+          "text": "想",
+          "start_ms": 1680,
+          "end_ms": 1920
+        },
+        {
+          "text": "起",
+          "start_ms": 1920,
+          "end_ms": 2080
+        },
+        {
+          "text": "小",
+          "start_ms": 2080,
+          "end_ms": 2240
+        },
+        {
+          "text": "时",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "候",
+          "start_ms": 2400,
+          "end_ms": 2480
+        },
+        {
+          "text": "放",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "学",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "的",
+          "start_ms": 2880,
+          "end_ms": 2960
+        },
+        {
+          "text": "路",
+          "start_ms": 2960,
+          "end_ms": 3200
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n10",
+      "items": [
+        {
+          "text": "那",
+          "start_ms": 80,
+          "end_ms": 240
+        },
+        {
+          "text": "时",
+          "start_ms": 240,
+          "end_ms": 480
+        },
+        {
+          "text": "我",
+          "start_ms": 480,
+          "end_ms": 560
+        },
+        {
+          "text": "们",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "总",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "绕",
+          "start_ms": 880,
+          "end_ms": 1040
+        },
+        {
+          "text": "开",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "大",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "路",
+          "start_ms": 1360,
+          "end_ms": 1600
+        },
+        {
+          "text": "踩",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "着",
+          "start_ms": 1840,
+          "end_ms": 1920
+        },
+        {
+          "text": "湿",
+          "start_ms": 1920,
+          "end_ms": 2160
+        },
+        {
+          "text": "漉",
+          "start_ms": 2160,
+          "end_ms": 2240
+        },
+        {
+          "text": "漉",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "的",
+          "start_ms": 2400,
+          "end_ms": 2480
+        },
+        {
+          "text": "石",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "板",
+          "start_ms": 2640,
+          "end_ms": 2800
+        },
+        {
+          "text": "回",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "家",
+          "start_ms": 2960,
+          "end_ms": 3200
+        },
+        {
+          "text": "仿",
+          "start_ms": 3360,
+          "end_ms": 3440
+        },
+        {
+          "text": "佛",
+          "start_ms": 3440,
+          "end_ms": 3600
+        },
+        {
+          "text": "慢",
+          "start_ms": 3600,
+          "end_ms": 3840
+        },
+        {
+          "text": "一",
+          "start_ms": 3840,
+          "end_ms": 3920
+        },
+        {
+          "text": "点",
+          "start_ms": 3920,
+          "end_ms": 4080
+        },
+        {
+          "text": "傍",
+          "start_ms": 4240,
+          "end_ms": 4400
+        },
+        {
+          "text": "晚",
+          "start_ms": 4400,
+          "end_ms": 4480
+        },
+        {
+          "text": "就",
+          "start_ms": 4480,
+          "end_ms": 4640
+        },
+        {
+          "text": "能",
+          "start_ms": 4640,
+          "end_ms": 4800
+        },
+        {
+          "text": "长",
+          "start_ms": 4800,
+          "end_ms": 4960
+        },
+        {
+          "text": "一",
+          "start_ms": 4960,
+          "end_ms": 5040
+        },
+        {
+          "text": "点",
+          "start_ms": 5040,
+          "end_ms": 5280
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n11",
+      "items": [
+        {
+          "text": "天",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "色",
+          "start_ms": 400,
+          "end_ms": 640
+        },
+        {
+          "text": "渐",
+          "start_ms": 640,
+          "end_ms": 880
+        },
+        {
+          "text": "渐",
+          "start_ms": 880,
+          "end_ms": 960
+        },
+        {
+          "text": "暗",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "下",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "来",
+          "start_ms": 1280,
+          "end_ms": 1600
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n12",
+      "items": [
+        {
+          "text": "我",
+          "start_ms": 160,
+          "end_ms": 160
+        },
+        {
+          "text": "没",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "有",
+          "start_ms": 320,
+          "end_ms": 400
+        },
+        {
+          "text": "开",
+          "start_ms": 400,
+          "end_ms": 640
+        },
+        {
+          "text": "灯",
+          "start_ms": 640,
+          "end_ms": 960
+        },
+        {
+          "text": "只",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "把",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "杯",
+          "start_ms": 1440,
+          "end_ms": 1680
+        },
+        {
+          "text": "子",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "移",
+          "start_ms": 1840,
+          "end_ms": 1920
+        },
+        {
+          "text": "到",
+          "start_ms": 1920,
+          "end_ms": 2080
+        },
+        {
+          "text": "一",
+          "start_ms": 2080,
+          "end_ms": 2160
+        },
+        {
+          "text": "旁",
+          "start_ms": 2160,
+          "end_ms": 2480
+        },
+        {
+          "text": "给",
+          "start_ms": 2480,
+          "end_ms": 2560
+        },
+        {
+          "text": "书",
+          "start_ms": 2560,
+          "end_ms": 2800
+        },
+        {
+          "text": "腾",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "出",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "一",
+          "start_ms": 3120,
+          "end_ms": 3200
+        },
+        {
+          "text": "点",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "地",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "方",
+          "start_ms": 3520,
+          "end_ms": 3760
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n13",
+      "items": [
+        {
+          "text": "窗",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "外",
+          "start_ms": 400,
+          "end_ms": 640
+        },
+        {
+          "text": "最",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "后",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "一",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "滴",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "雨",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "水",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "落",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "下",
+          "start_ms": 1760,
+          "end_ms": 2000
+        },
+        {
+          "text": "时",
+          "start_ms": 2000,
+          "end_ms": 2320
+        },
+        {
+          "text": "我",
+          "start_ms": 2640,
+          "end_ms": 2720
+        },
+        {
+          "text": "觉",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "得",
+          "start_ms": 2880,
+          "end_ms": 3120
+        },
+        {
+          "text": "今",
+          "start_ms": 3120,
+          "end_ms": 3280
+        },
+        {
+          "text": "天",
+          "start_ms": 3280,
+          "end_ms": 3520
+        },
+        {
+          "text": "也",
+          "start_ms": 3520,
+          "end_ms": 3600
+        },
+        {
+          "text": "可",
+          "start_ms": 3600,
+          "end_ms": 3680
+        },
+        {
+          "text": "以",
+          "start_ms": 3680,
+          "end_ms": 3760
+        },
+        {
+          "text": "这",
+          "start_ms": 3760,
+          "end_ms": 3840
+        },
+        {
+          "text": "样",
+          "start_ms": 3840,
+          "end_ms": 4000
+        },
+        {
+          "text": "过",
+          "start_ms": 4000,
+          "end_ms": 4160
+        },
+        {
+          "text": "去",
+          "start_ms": 4160,
+          "end_ms": 4480
+        },
+        {
+          "text": "没",
+          "start_ms": 4720,
+          "end_ms": 4880
+        },
+        {
+          "text": "有",
+          "start_ms": 4880,
+          "end_ms": 4960
+        },
+        {
+          "text": "什",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "么",
+          "start_ms": 5120,
+          "end_ms": 5200
+        },
+        {
+          "text": "特",
+          "start_ms": 5200,
+          "end_ms": 5360
+        },
+        {
+          "text": "别",
+          "start_ms": 5360,
+          "end_ms": 5520
+        },
+        {
+          "text": "的",
+          "start_ms": 5520,
+          "end_ms": 5600
+        },
+        {
+          "text": "收",
+          "start_ms": 5600,
+          "end_ms": 5760
+        },
+        {
+          "text": "获",
+          "start_ms": 5760,
+          "end_ms": 6080
+        },
+        {
+          "text": "却",
+          "start_ms": 6160,
+          "end_ms": 6240
+        },
+        {
+          "text": "把",
+          "start_ms": 6240,
+          "end_ms": 6400
+        },
+        {
+          "text": "自",
+          "start_ms": 6400,
+          "end_ms": 6560
+        },
+        {
+          "text": "己",
+          "start_ms": 6560,
+          "end_ms": 6640
+        },
+        {
+          "text": "好",
+          "start_ms": 6640,
+          "end_ms": 6800
+        },
+        {
+          "text": "好",
+          "start_ms": 6800,
+          "end_ms": 6960
+        },
+        {
+          "text": "地",
+          "start_ms": 6960,
+          "end_ms": 7120
+        },
+        {
+          "text": "安",
+          "start_ms": 7120,
+          "end_ms": 7200
+        },
+        {
+          "text": "放",
+          "start_ms": 7200,
+          "end_ms": 7360
+        },
+        {
+          "text": "了",
+          "start_ms": 7360,
+          "end_ms": 7520
+        },
+        {
+          "text": "一",
+          "start_ms": 7520,
+          "end_ms": 7600
+        },
+        {
+          "text": "会",
+          "start_ms": 7600,
+          "end_ms": 7760
+        },
+        {
+          "text": "儿",
+          "start_ms": 7760,
+          "end_ms": 7840
+        }
+      ]
+    }
+  ]
+}

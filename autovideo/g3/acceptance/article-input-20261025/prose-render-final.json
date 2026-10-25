@@ -1,0 +1,427 @@
+{
+  "id": "36e210ef8f1c48dfbed420b56df55f4b",
+  "script_id": "9e434b006041459c883596a81de80676",
+  "version": 1,
+  "status": "COMPLETED",
+  "title": "窗边的一把椅子",
+  "source_text": "我把椅子往窗边挪了挪。雨刚停，屋檐还在滴水，一滴落下去，另一滴才慢慢聚拢。院子里的树没有说话，叶尖却像藏着许多尚未说完的句子。\n桌上那杯茶早已凉了。我端起来，又放下。今天没有非读完不可的书，也没有非赶上的一班车。风从窗缝里进来，把摊开的书页翻过一张，停在我昨天留下折角的地方。\n远处有人推着自行车经过，车轮轻轻碾过积水。我听见那点声响，忽然想起小时候放学的路。那时我们总绕开大路，踩着湿漉漉的石板回家，仿佛慢一点，傍晚就能长一点。\n天色渐渐暗下来。我没有开灯，只把杯子移到一旁，给书腾出一点地方。窗外最后一滴雨水落下时，我觉得，今天也可以这样过去：没有什么特别的收获，却把自己好好地安放了一会儿。",
+  "source_sha256": "8ebf1db90bfee9e5f684721a7dd9cc410e86915c10a1c8ff980cb4c633c42103",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "窗边的一把椅子",
+        "paragraphs": [
+          "我把椅子往窗边挪了挪。雨刚停，屋檐还在滴水，一滴落下去，另一滴才慢慢聚拢。院子里的树没有说话，叶尖却像藏着许多尚未说完的句子。",
+          "桌上那杯茶早已凉了。我端起来，又放下。今天没有非读完不可的书，也没有非赶上的一班车。风从窗缝里进来，把摊开的书页翻过一张，停在我昨天留下折角的地方。",
+          "远处有人推着自行车经过，车轮轻轻碾过积水。我听见那点声响，忽然想起小时候放学的路。那时我们总绕开大路，踩着湿漉漉的石板回家，仿佛慢一点，傍晚就能长一点。",
+          "天色渐渐暗下来。我没有开灯，只把杯子移到一旁，给书腾出一点地方。窗外最后一滴雨水落下时，我觉得，今天也可以这样过去：没有什么特别的收获，却把自己好好地安放了一会儿。"
+        ]
+      }
+    ],
+    "video_form": "information_motion",
+    "duration_mode": "content",
+    "creative_intent": {
+      "purpose": "文学朗读：画面使用主题、意象或短引句，保留原文情绪与叙事视角，不改成事实清单，不新增人物或经历。",
+      "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+      "focus": "窗边的一把椅子"
+    },
+    "title": "窗边的一把椅子",
+    "packaging": {
+      "preset": "common",
+      "label": "文章朗读",
+      "accent": "#1f7a4d",
+      "outro": {
+        "lines": [
+          "感谢收听"
+        ],
+        "seconds": 3
+      },
+      "recipe": "topic_digest",
+      "intro": {
+        "title": "窗边的一把椅子"
+      }
+    },
+    "voice_id": "voxcpm_anchor",
+    "idempotency_key": "research:36e210ef8f1c48dfbed420b56df55f4b"
+  },
+  "autovideo_job_id": "8518e542-e034-4776-89aa-dad4c60a27e7",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "resolved_video_form": "information_motion",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 657,
+      "sha256": "20c48ba99cab14c229888cc1f6fe8684b1858c929a4789489421945dce70abad"
+    },
+    {
+      "name": "caption-alignment.json",
+      "content_type": "application/json",
+      "bytes": 31019,
+      "sha256": "e50873685f9aa43bc22fdcfef35f6729c52c20ccce0c064b33018b28fa389d94"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 1505,
+      "sha256": "9874b090feb2e7d3c004878a9e188bcdbfb15702353b4713ecfde0d503b9a4dc"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 4647,
+      "sha256": "463ed2dc1d17b151e14278768435726efe283f4898ba94821eb7f401f52d5869"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 1505,
+      "sha256": "ed44ccd66701d9fa2b32bcd546e50bc2cc9f0b660169b947ebce09a034cbb79a"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 4589,
+      "sha256": "d448886e63e1789e6e514f57327329760759775cb1d22bb4b223250cd3573b5d"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 4720932,
+      "sha256": "b21f938b421df7a545ebe9d686854140d19492f8d58e30e6c426dce72a5f0854"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 962,
+      "sha256": "774e93a287e451a208ae9c1e63dec4f1ce4b5e0b0e4e35988bab48e1caa50ba2"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 415,
+      "sha256": "1092c5dda5b31a749f7b39c032ac5b76ccf82b8858384b58f46050cc08a7090e"
+    },
+    {
+      "name": "information-plan.json",
+      "content_type": "application/json",
+      "bytes": 2797,
+      "sha256": "24842aa2379d9caccb938dacaa5d3c811fa1b2cdbb0194355038bdbed3a97755"
+    },
+    {
+      "name": "information-timing.json",
+      "content_type": "application/json",
+      "bytes": 4926,
+      "sha256": "04aca82bd534b353bce2adea8b2e948c91efcf87fa034b5b2fc01e739feffe26"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 2437,
+      "sha256": "f93d0154b2ebb4bc8a0d4735346b89bf83da2598409e99e881703cfb8af06aff"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 34891,
+      "sha256": "00166f56e12f18f680e29c29456bdb717fe0be099402cfa6a7ad13ddef6d3b2d"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 1622,
+      "sha256": "60c6e529022015d616a063eff8ede369636baf5c3fdfc8a67666859d8ad84e25"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 330,
+      "sha256": "bdae5b03422d7eecbe93a2e3246e7f7accda91777e39753a98305b9023708b58"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 11212,
+      "sha256": "a498544fb3e7f6bde9436b65658e17bb1c391e28778d825f7e5b1e9c038ffad4"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 956,
+      "sha256": "3cfe218bc105678790f47f5d574f5b5cd9030f00b880f028390e19039cd660d6"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5445,
+      "sha256": "eb601a4b2618b37fed252ac811d1cdcccb1fe0675ade6e90602875acd3820083"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2038,
+      "sha256": "b25f424443d836d7278f0fa67c59920dd6a376b067f3f24cb18062c433970219"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 889,
+      "sha256": "bb9f40229d4609d81373bcd155835ec924d63387d14578e6eca6b0225e0e6adb"
+    },
+    {
+      "name": "production-execution.json",
+      "content_type": "application/json",
+      "bytes": 381,
+      "sha256": "49b4575bee2e5d028628af6dbcef4b5abe7e3389aa1db25b09f9c820ca90a2f6"
+    },
+    {
+      "name": "production-plan.json",
+      "content_type": "application/json",
+      "bytes": 5154,
+      "sha256": "b9f3bc865dfd60dce8fa29431a4ce2094c7941e21285dfb2f66d587341364316"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 10189,
+      "sha256": "d41531952f6bc4bc2116f3ced22eaaf3d0d633176fd4d5287c83208767a117cb"
+    },
+    {
+      "name": "render-resources.json",
+      "content_type": "application/json",
+      "bytes": 207,
+      "sha256": "ccc32453372ac622e62a2ce0169d452a7f960f0de2d126b790977fcf74544d13"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 9761,
+      "sha256": "b1a25488cb7696446dc67d200f3fe60bc4407eed4b7829f08f4002779c5c8016"
+    },
+    {
+      "name": "tts-metrics.json",
+      "content_type": "application/json",
+      "bytes": 934,
+      "sha256": "bd6393301893d4ab76eac8a3cbde6e90b97372bcc1e892316f8eb9fc7cb97dab"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 15680,
+      "sha256": "bc2d766146032ed4c5530429235bc55e1c85a6a04a00bc130ac4bd5842dd3eb5"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 4027024,
+      "sha256": "4a3f46d0a95f2c95828508776071fa2d533d3be81d7bbc7f6d1c11ed90756fa3"
+    },
+    {
+      "name": "voice-report.json",
+      "content_type": "application/json",
+      "bytes": 4114,
+      "sha256": "c46e994ff0fe033e92bbec8c7a8b7f59387598c89989284fa30b07a467b4731b"
+    }
+  ],
+  "submit_started_at": "2026-10-25T09:29:53.807174+00:00",
+  "submitted_at": "2026-10-25T17:29:53+0800",
+  "completed_at": "2026-10-25T17:35:05+0800",
+  "created_at": "2026-10-25T17:29:53+0800",
+  "updated_at": "2026-10-25T17:35:05+0800",
+  "heartbeat_at": 1792920905.601514,
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-25T09:29:53.731578+00:00",
+    "submit_seconds": 0.04,
+    "poll_seconds": 311.24,
+    "poll_count": 60,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-25T09:35:05.031+00:00",
+    "completion_observed_at": "2026-10-25T09:35:05.152772+00:00",
+    "download_seconds": 0.53,
+    "artifact_list_seconds": 0.008,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.01,
+        "reused": false,
+        "bytes": 657
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.013,
+        "reused": false,
+        "bytes": 31019
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.011,
+        "reused": false,
+        "bytes": 1505
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.015,
+        "reused": false,
+        "bytes": 4647
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.034,
+        "reused": false,
+        "bytes": 1505
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.04,
+        "reused": false,
+        "bytes": 4589
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.139,
+        "reused": false,
+        "bytes": 4720932
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.034,
+        "reused": false,
+        "bytes": 962
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.012,
+        "reused": false,
+        "bytes": 415
+      },
+      {
+        "name": "information-plan.json",
+        "seconds": 0.031,
+        "reused": false,
+        "bytes": 2797
+      },
+      {
+        "name": "information-timing.json",
+        "seconds": 0.035,
+        "reused": false,
+        "bytes": 4926
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.051,
+        "reused": false,
+        "bytes": 2437
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.052,
+        "reused": false,
+        "bytes": 34891
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.043,
+        "reused": false,
+        "bytes": 1622
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.019,
+        "reused": false,
+        "bytes": 330
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.025,
+        "reused": false,
+        "bytes": 11212
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.037,
+        "reused": false,
+        "bytes": 956
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.029,
+        "reused": false,
+        "bytes": 5445
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.112,
+        "reused": false,
+        "bytes": 2038
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.079,
+        "reused": false,
+        "bytes": 889
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.106,
+        "reused": false,
+        "bytes": 381
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.032,
+        "reused": false,
+        "bytes": 5154
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.092,
+        "reused": false,
+        "bytes": 10189
+      },
+      {
+        "name": "render-resources.json",
+        "seconds": 0.153,
+        "reused": false,
+        "bytes": 207
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.085,
+        "reused": false,
+        "bytes": 9761
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.129,
+        "reused": false,
+        "bytes": 934
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.114,
+        "reused": false,
+        "bytes": 15680
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.158,
+        "reused": false,
+        "bytes": 4027024
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.062,
+        "reused": false,
+        "bytes": 4114
+      }
+    ],
+    "process_seconds": 312.004
+  }
+}

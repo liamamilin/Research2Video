@@ -1,0 +1,129 @@
+{
+  "status": "PASS",
+  "source_render_id": "cda392edba3e4c9490a465f0e78ad6f0",
+  "title": "星星改了梵高的日期，一只猫当了物理学家——这周的文化新闻比小说好看",
+  "visual_theme": {
+    "id": "information_motion",
+    "background": "#f7f8f5",
+    "text": "#202d28",
+    "muted": "#69756e",
+    "dot_grid": true
+  },
+  "elapsed_seconds": 31.75,
+  "original_hashes_preserved": {
+    "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/cda392edba3e4c9490a465f0e78ad6f0/video.mp4": "07ce21c63958f5db48369477858cd7f707ee515e7852196c2642754eb8375359",
+    "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/cda392edba3e4c9490a465f0e78ad6f0/content.mp4": "6ecac2df7f4f2e15c0b4e9a879e06ed9b0cc717190c6a3bb2ffae63e7dc5a9fe",
+    "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/cda392edba3e4c9490a465f0e78ad6f0/captions.srt": "593dabf28a801a288e5b2f6f09ff10fb25493cb4debe7d82629a1695ab9f4987",
+    "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/cda392edba3e4c9490a465f0e78ad6f0/package.json": "858a5507633b727f1c793ede928de2248d6967a98cd8dc091603cc1861cae4c7",
+    "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/9de6e93d-47cb-40c8-9a7e-a9a6b8b1f3ce/attempts/1/g2-run/fixtures/assets/communications_noise.wav": "5956897372d3f6b6ad03863e59fb8f3b773426243f45fe778c4ae6857d76e21e"
+  },
+  "settings_unchanged": true,
+  "caption_timeline_identical": true,
+  "total_frames_unchanged": true,
+  "model_and_tts_calls": 0,
+  "checks": {
+    "full_decode": "PASS",
+    "format": {
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "sample_rate": "48000",
+      "channels": 2,
+      "uniform_across_frames": true
+    },
+    "duration": {
+      "frames": 5594,
+      "seconds": 186.466667,
+      "expected_frames": 5594,
+      "expected_seconds": 186.46666666666667,
+      "tolerance_seconds": 0.035333333333333335
+    },
+    "content_audio": {
+      "shifted_by_frames": 45,
+      "offset_samples": 36000,
+      "correlation": 0.9998705527245771,
+      "rms": 0.07053489983081818
+    },
+    "seam_loudness": {
+      "speech_active_db": -22.0,
+      "min_margin_db": 3.0,
+      "regions": {
+        "intro": {
+          "active_db": -26.92,
+          "margin_db": 4.92,
+          "peak": 0.169
+        },
+        "outro": {
+          "active_db": -26.91,
+          "margin_db": 4.91,
+          "peak": 0.1681
+        }
+      }
+    }
+  },
+  "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/outro-match-20261025/corrected/package/video.mp4",
+  "old_component_versions": {
+    "intro": {
+      "id": "stinger",
+      "version": 1
+    },
+    "outro": {
+      "id": "end_card",
+      "version": 1
+    },
+    "badge": {
+      "id": "corner_badge",
+      "version": 1
+    },
+    "source_card": {
+      "id": "source_card",
+      "version": 1
+    },
+    "sound": {
+      "id": "synth_sting",
+      "version": 1
+    }
+  },
+  "new_component_versions": {
+    "intro": {
+      "id": "stinger",
+      "version": 1
+    },
+    "outro": {
+      "id": "end_card",
+      "version": 2
+    },
+    "badge": {
+      "id": "corner_badge",
+      "version": 1
+    },
+    "source_card": {
+      "id": "source_card",
+      "version": 2
+    },
+    "sound": {
+      "id": "synth_sting",
+      "version": 1
+    }
+  },
+  "manual_visual_review": "PASS",
+  "manual_visual_scope": [
+    "corrected outro at 184.5s",
+    "last content scene at 182.5s",
+    "fast outro smoke",
+    "dark source card smoke"
+  ],
+  "narration_human_listening": "Not repeated; source voice unchanged and correlation PASS",
+  "source_hint_check": {
+    "publish_reference_count": 18,
+    "dated_references": 0,
+    "source_card_state": "no_sources",
+    "reason": "Sources available in description, publication dates unavailable; do not fabricate dates."
+  },
+  "tests": {
+    "autovideo_regression": "724 passed, 1 skipped; 2 loopback permission failures",
+    "loopback_rerun": "2 passed with temporary local socket permission",
+    "research_contracts": "18 passed",
+    "diff_check": "PASS"
+  }
+}

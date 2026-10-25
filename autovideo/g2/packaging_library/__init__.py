@@ -187,6 +187,8 @@ def prepare_request(request: dict) -> dict:
         # Preserve the old wire format, including independent per-clip sound choices.
         record["package"] = package
         record["legacy_request"] = True
+        for slot in ("outro", "source_card"):
+            record["component_versions"][slot]["version"] = 1
         record["sha256"] = _digest({k: v for k, v in record.items() if k != "sha256"})
         request.update(package=package, packaging_resolved=record)
         return request

@@ -1,0 +1,100 @@
+{
+  "library": "autovideo-packaging",
+  "version": 2,
+  "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+  "selection": {
+    "preset": "common",
+    "label": "文章朗读",
+    "accent": "#1f7a4d",
+    "outro": {
+      "lines": [
+        "感谢收听"
+      ],
+      "seconds": 3
+    },
+    "recipe": "topic_digest",
+    "intro": {
+      "title": "窗边的一把椅子"
+    }
+  },
+  "components": {
+    "label": "文章朗读",
+    "accent": "#1f7a4d",
+    "enabled": true,
+    "intro": {
+      "component": "stinger",
+      "enabled": true,
+      "seconds": 1.5,
+      "title": "窗边的一把椅子"
+    },
+    "outro": {
+      "component": "end_card",
+      "enabled": true,
+      "seconds": 3,
+      "lines": [
+        "感谢收听"
+      ]
+    },
+    "badge": {
+      "component": "corner_badge",
+      "enabled": true
+    },
+    "source_card": {
+      "component": "source_card",
+      "enabled": true,
+      "seconds": 4.5
+    },
+    "sound": {
+      "component": "synth_sting",
+      "enabled": true
+    }
+  },
+  "package": {
+    "accent": "#1f7a4d",
+    "badge": "文章朗读",
+    "intro": {
+      "template": "stinger",
+      "title": "窗边的一把椅子",
+      "seconds": 1.5,
+      "sound": "synth_sting"
+    },
+    "outro": {
+      "template": "end_card",
+      "title": "文章朗读",
+      "seconds": 3,
+      "lines": [
+        "感谢收听"
+      ],
+      "sound": "synth_sting"
+    }
+  },
+  "badge": {
+    "text": "文章朗读",
+    "color": "#1f7a4d"
+  },
+  "source_card": null,
+  "source_card_state": "no_sources",
+  "component_versions": {
+    "intro": {
+      "id": "stinger",
+      "version": 1
+    },
+    "outro": {
+      "id": "end_card",
+      "version": 2
+    },
+    "badge": {
+      "id": "corner_badge",
+      "version": 1
+    },
+    "source_card": {
+      "id": "source_card",
+      "version": 2
+    },
+    "sound": {
+      "id": "synth_sting",
+      "version": 1
+    }
+  },
+  "sha256": "b94d167dab47413f72f6466e6229fb39f01c8e5bc19b624f4825cc31728907ef"
+}

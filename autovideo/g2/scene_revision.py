@@ -98,6 +98,9 @@ def run_revision(p):
 
 
 def replan_scene(p,old,narration,ir,instruction):
+    if ir.get('presentation',{}).get('preset')=='explanation':
+        from g2.explanation import replan_scene as replan_explanation
+        return replan_explanation(p,old,narration,ir,instruction)
     if ir.get('presentation',{}).get('preset')=='information_cards':
         from g2.card_editorial import replan_scene as replan_card
         return replan_card(p,old,narration,instruction)

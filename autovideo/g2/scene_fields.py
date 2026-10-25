@@ -19,6 +19,20 @@ def editable_fields(scene: dict) -> list[dict]:
         for i,row in enumerate(p['rows']):
             add(f'rows.{i}.label',f'第 {i+1} 行名称',row['label']);add(f'rows.{i}.before',f'第 {i+1} 行旧值',row['before']);add(f'rows.{i}.after',f'第 {i+1} 行新值',row['after'])
             if 'change' in row:add(f'rows.{i}.change',f'第 {i+1} 行幅度',row['change'])
+    if c=='data_chart':
+        add('title','场景标题',p['title']);add('unit','单位',p['unit'])
+        if 'takeaway' in p:add('takeaway','结尾强调',p['takeaway'])
+        for i,text in enumerate(p['categories']):add(f'categories.{i}',f'横轴 {i+1}',text)
+        for i,series in enumerate(p['series']):add(f'series.{i}.name',f'系列 {i+1}',series['name'])
+    if c=='scatter_chart':
+        add('title','场景标题',p['title'])
+        for key,label in [('x_label','横轴名称'),('x_unit','横轴单位'),('y_label','纵轴名称'),('y_unit','纵轴单位'),('x_hint','横轴提示'),('y_hint','纵轴提示'),('takeaway','结尾强调')]:
+            if key in p:add(key,label,p[key])
+        for i,point in enumerate(p['points']):
+            add(f'points.{i}.name',f'对象 {i+1}',point['name'])
+            if 'note' in point:add(f'points.{i}.note',f'对象 {i+1} 说明',point['note'])
+        for i,step in enumerate(p.get('focus_steps',[])):
+            if 'caption' in step:add(f'focus_steps.{i}.caption',f'强调 {i+1}',step['caption'])
     if c=='bar_chart':
         for i,text in enumerate(p['categories']):add(f'categories.{i}',f'第 {i+1} 条名称',text)
         add('unit','单位',p['unit'])

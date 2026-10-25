@@ -1,4 +1,6 @@
 import React from 'react';
+import {DataChart} from './DataChart';
+import {ScatterChart} from './ScatterChart';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {CornerBadge, type Badge} from './Packaging';
 import {CreativeVideo, type CreativePreset} from './CreativeForms';
@@ -6,7 +8,7 @@ import {CreativeVideo, type CreativePreset} from './CreativeForms';
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
 type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]};
 type Segment = {id: string; text: string; start_ms: number; end_ms: number};
-type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; caption_cues?: Pick<Segment, 'text' | 'start_ms' | 'end_ms'>[]; presentation?: {preset: 'information_motion' | CreativePreset; density?: 'large'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
+type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; caption_cues?: Pick<Segment, 'text' | 'start_ms' | 'end_ms'>[]; presentation?: {preset: 'information_motion' | 'explanation' | CreativePreset; density?: 'large'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
 
 const colors = {bg: '#0B1020', panel: '#121B2E', border: '#293750', text: '#F3F6FC', muted: '#A9B7CD', cyan: '#4ED5E6', blue: '#6798FF', orange: '#FFAA55', red: '#FF6175', green: '#64D8A5'};
 const font = '"Hiragino Sans GB", "PingFang SC", sans-serif';
@@ -291,6 +293,8 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
           </div>;
         })}
       </div>}
+      {scene.component === 'scatter_chart' && <ScatterChart scene={scene} frame={frame}/>}
+      {scene.component === 'data_chart' && <DataChart scene={scene} frame={frame}/>}
       {scene.component === 'big_number' && <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 72px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center'}}>
         <div style={{...motion('line:0'),...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
         <div style={{...motion('line:1'),...textStyle,fontSize:S(46),fontWeight:650,lineHeight:1.35,marginTop:24}}><Tech text={p.label}/></div>
@@ -307,9 +311,13 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
           {p.unit && <div style={{...motion('title'),...textStyle,fontSize:S(36),lineHeight:1.4,color:paper.muted,marginBottom:20}}><Tech text={p.unit}/></div>}
           <div style={{display:'flex',flexDirection:'column',gap:34}}>
             {rows.map((row: any, i: number) => {
-              const beat = reveals.find((b) => b.target_id === `line:${i}`);
-              const later = (delay: number) => beat ? ease((frame-beat.frame-delay)/14) : 0;
-              return <div key={i} style={{...motion(`line:${i}`),display:'flex',alignItems:'center',gap:36,lineHeight:1.1}}>
+              const rowTarget = `line:${p.staged ? i*3 : i}`;
+              const beat = reveals.find((b) => b.target_id === rowTarget);
+              const later = (delay: number) => {
+                const target = p.staged ? reveals.find(b => b.target_id === `line:${i*3+(delay===8?1:2)}`) : beat;
+                return target ? ease((frame-target.frame-(p.staged?0:delay))/14) : 0;
+              };
+              return <div key={i} style={{...motion(rowTarget),display:'flex',alignItems:'center',gap:36,lineHeight:1.1}}>
                 <div style={{...textStyle,width:400,flex:'none',fontSize:S(46),fontWeight:650,lineHeight:1.35}}><Tech text={row.label}/></div>
                 <div style={{flex:1,display:'flex',alignItems:'center',minWidth:0}}>
                   <Value text={row.before} color={paper.muted}/>
@@ -355,7 +363,18 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
   </AbsoluteFill>;
 }
 
+function ExplanationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
+  const frame = useCurrentFrame();
+  const scene = ir.scenes.find(s => frame >= s.start_frame && frame < s.end_frame) ?? ir.scenes[ir.scenes.length-1];
+  if (['object_showcase', 'material_collage'].includes(scene.component)) {
+    const preset = scene.component === 'material_collage' ? 'dynamic_collage' : 'object_showcase';
+    return <CreativeVideo ir={{...ir,presentation:{preset}}} badge={badge} showCaptions/>;
+  }
+  return <InformationVideo ir={ir} badge={badge}/>;
+}
+
 function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge}) {
+  if (props.ir.presentation?.preset === 'explanation') return <ExplanationVideo {...props}/>;
   if (['information_cards', 'kinetic_typography', 'image_slideshow', 'chat_dialogue', 'object_showcase', 'dynamic_collage'].includes(props.ir.presentation?.preset || '')) return <CreativeVideo ir={props.ir} badge={props.badge}/>;
   return props.ir.presentation?.preset === 'information_motion' ? <InformationVideo ir={props.ir} badge={props.badge}/> : <LegacyVideo {...props}/>;
 }

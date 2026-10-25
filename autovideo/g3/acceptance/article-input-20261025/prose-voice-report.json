@@ -1,0 +1,187 @@
+{
+  "voice": "voxcpm_anchor",
+  "steps": 10,
+  "chain": "guarded",
+  "anchor_units_per_second": 4.81,
+  "segments": [
+    {
+      "id": "c1_n1",
+      "chapter": "c1",
+      "seconds": 2.24,
+      "units": 10,
+      "units_per_second": 5.39,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 3.202,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n2",
+      "chapter": "c1",
+      "seconds": 5.12,
+      "units": 22,
+      "units_per_second": 4.68,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 5.333,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n3",
+      "chapter": "c1",
+      "seconds": 5.12,
+      "units": 24,
+      "units_per_second": 4.9,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 5.389,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n4",
+      "chapter": "c1",
+      "seconds": 2.08,
+      "units": 9,
+      "units_per_second": 4.68,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 2.377,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n5",
+      "chapter": "c1",
+      "seconds": 1.6,
+      "units": 7,
+      "units_per_second": 4.98,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 1.805,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n6",
+      "chapter": "c1",
+      "seconds": 4.16,
+      "units": 21,
+      "units_per_second": 5.58,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 4.244,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n7",
+      "chapter": "c1",
+      "seconds": 6.08,
+      "units": 29,
+      "units_per_second": 5.06,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 6.122,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n8",
+      "chapter": "c1",
+      "seconds": 4.48,
+      "units": 19,
+      "units_per_second": 4.81,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 4.795,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n9",
+      "chapter": "c1",
+      "seconds": 3.52,
+      "units": 18,
+      "units_per_second": 5.15,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 3.866,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n10",
+      "chapter": "c1",
+      "seconds": 5.6,
+      "units": 31,
+      "units_per_second": 5.61,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 6.002,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n11",
+      "chapter": "c1",
+      "seconds": 1.92,
+      "units": 7,
+      "units_per_second": 4.54,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 2.093,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n12",
+      "chapter": "c1",
+      "seconds": 4.0,
+      "units": 21,
+      "units_per_second": 5.63,
+      "attempts": 1,
+      "prompt": "previous",
+      "generation_seconds": 4.139,
+      "in_range": true,
+      "cache_hit": false
+    },
+    {
+      "id": "c1_n13",
+      "chapter": "c1",
+      "seconds": 8.16,
+      "units": 45,
+      "units_per_second": 5.77,
+      "attempts": 1,
+      "prompt": "anchor",
+      "generation_seconds": 8.662,
+      "in_range": true,
+      "cache_hit": false
+    }
+  ],
+  "performance": {
+    "compiled": true,
+    "load_seconds": 1.112,
+    "total_seconds": 59.809,
+    "reference_cache": {
+      "hits": 15,
+      "misses": 2,
+      "encode_seconds": 0.298
+    }
+  },
+  "cache": {
+    "enabled": true,
+    "chapter_hits": 0,
+    "chapter_misses": 1,
+    "segment_hits": 0,
+    "segment_misses": 13,
+    "entry_keys": [],
+    "write_errors": [
+      "cache budget reached; audio still generated normally"
+    ],
+    "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+    "fingerprint_seconds": 1.418
+  }
+}

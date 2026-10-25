@@ -1,0 +1,111 @@
+{
+  "id": "e20bee522c814d57a62a98b3a7e1a5bd",
+  "script_id": "4f8a373b7827456ab9b231d4b75b3d18",
+  "version": 2,
+  "status": "SUBMITTING",
+  "title": "水没烧开也会蒸发，但降温效果不能想当然",
+  "source_text": "水一定要烧开，才会变成水蒸气吗？不一定。蒸发，指的是液态水转变为气态水的过程。常压下，水的沸点约为100摄氏度，但蒸发并不只发生在沸点。温度较低时，水也能蒸发，只是速度通常更慢。\n\n蒸发需要能量，因此会带走周围环境的一部分热量。这也是蒸发式冷却的原理。不过，效果会受到环境湿度等条件影响，较干燥的环境更适合使用这种方式。在潮湿环境里，不能直接照搬同样的降温预期，更不能由此推断所有房间都可以不用常规空调。\n\n蒸发也参与自然界的水循环，使水从地表进入大气。凝结则是相反的变化：水蒸气重新变成液态水。理解这两个方向，就能把杯子里的水逐渐减少，与空气中的水重新形成水滴联系起来。",
+  "source_sha256": "2181cae7e3bc0937a36e6e2e75d24cef37f1fd293b8bf163ba8842d5f5c02502",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "水没到100℃也能蒸发",
+        "paragraphs": [
+          "水一定要烧开，才会变成水蒸气吗？不一定。蒸发，指的是液态水转变为气态水的过程。常压下，水的沸点约为100摄氏度，但蒸发并不只发生在沸点。温度较低时，水也能蒸发，只是速度通常更慢。"
+        ]
+      },
+      {
+        "title": "会吸热，但不等于随便降温",
+        "paragraphs": [
+          "蒸发需要能量，因此会带走周围环境的一部分热量。这也是蒸发式冷却的原理。不过，效果会受到环境湿度等条件影响，较干燥的环境更适合使用这种方式。在潮湿环境里，不能直接照搬同样的降温预期，更不能由此推断所有房间都可以不用常规空调。"
+        ]
+      },
+      {
+        "title": "蒸发和凝结，是一对反方向",
+        "paragraphs": [
+          "蒸发也参与自然界的水循环，使水从地表进入大气。凝结则是相反的变化：水蒸气重新变成液态水。理解这两个方向，就能把杯子里的水逐渐减少，与空气中的水重新形成水滴联系起来。"
+        ]
+      }
+    ],
+    "duration_mode": "content",
+    "title": "水没烧开也会蒸发，但降温效果不能想当然",
+    "sources": [
+      {
+        "title": "水不必烧开才蒸发",
+        "url": "https://www.usgs.gov/water-science-school/science/evaporation-and-water-cycle",
+        "date": "2019-06-08"
+      }
+    ],
+    "production_context": {
+      "content_recipe": {
+        "id": "research:topic_digest",
+        "settings": {
+          "video_form": "information_motion",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+            "focus": ""
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "专题速览",
+            "accent": "#1f7a4d",
+            "outro": {
+              "lines": [
+                "主要来源见简介"
+              ],
+              "seconds": 3
+            },
+            "recipe": "topic_digest",
+            "intro": {
+              "title": "水没烧开也会蒸发"
+            }
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      },
+      "matrix": {
+        "id": "research-production:science_daily",
+        "settings": {
+          "video_speed": 1.25
+        }
+      }
+    },
+    "creative_intent": {
+      "purpose": "文章讲解：画面提炼原文重点，保留数字、否定、条件和不确定性；上传文章未经外部事实核验，不强化结论。",
+      "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+      "focus": "水没烧开也会蒸发，但降温效果不能想当然"
+    },
+    "packaging": {
+      "preset": "common",
+      "label": "专题速览",
+      "accent": "#1f7a4d",
+      "outro": {
+        "lines": [
+          "主要来源见简介"
+        ],
+        "seconds": 3
+      },
+      "recipe": "topic_digest",
+      "intro": {
+        "title": "水没烧开也会蒸发"
+      }
+    },
+    "idempotency_key": "research:e20bee522c814d57a62a98b3a7e1a5bd"
+  },
+  "autovideo_job_id": null,
+  "active_stage": null,
+  "attempt_count": 0,
+  "resolved_video_form": null,
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [],
+  "submit_started_at": null,
+  "submitted_at": null,
+  "completed_at": null,
+  "created_at": "2026-10-25T17:38:45+0800",
+  "updated_at": "2026-10-25T17:38:45+0800",
+  "heartbeat_at": null,
+  "timings": {}
+}

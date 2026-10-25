@@ -37,3 +37,10 @@ Use concise imperative subjects; history also includes `feat(scope): ...` and `f
 ## Security & Configuration
 
 Keep credentials in ignored `.env` files; exclude databases, model weights, and generated data. Preserve outputs and attempts. Validate model output; execute only trusted renderer components.
+
+## 当前产品重点与协作偏好
+
+- 现阶段优先把上游内容用视频展示好：画面表达、重点引导、旁白同步、观看节奏及各矩阵的自动化接入。
+- 在视频呈现环节，将上游给出的讲稿、数据、计算结果和结论作为确定的输入。例如上游说“价格从20变成25，增加5”，直接设计相应画面。
+- 默认不主动扩展出处追溯、事实核实、重新计算、内容审查、防错闸门或人工确认流程；这些约束性工作目前不是产品重点。用户明确要求时再处理。
+- 方案讨论和开发验证围绕所请求的功能、实际画面效果及自动流程展开，避免将任务范围转向额外的内容校验。

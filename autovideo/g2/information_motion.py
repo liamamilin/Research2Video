@@ -59,6 +59,14 @@ def narration_brief(narration_plan: dict) -> dict:
 
 
 def targets(component: str, props: dict) -> list[str]:
+    if component in {"object_showcase", "material_collage"}:
+        return ["scene"]
+    if component == "scatter_chart":
+        count = len(props["points"]) + len(props.get("focus_steps", []))
+        return ["title", *[f"line:{i}" for i in range(count + bool(props.get("takeaway") or props.get("focus_indices")))]]
+    if component == "data_chart":
+        count = len(props["categories"] if props["kind"] == "trend" else props["series"])
+        return ["title", *[f"line:{i}" for i in range(count + bool(props.get("takeaway")))]]
     if component == "title_card":
         return ["title", *(["subtitle"] if props.get("subtitle") else [])]
     if component == "concept_reveal":
@@ -68,7 +76,7 @@ def targets(component: str, props: dict) -> list[str]:
     if component == "bar_chart":
         return [f"bar:{i}" for i in range(len(props["categories"]))]
     if component == "price_change":
-        return ["title", *[f"line:{i}" for i in range(len(props["rows"]))]]
+        return ["title", *[f"line:{i}" for i in range(len(props["rows"]) * (3 if props.get("staged") else 1))]]
     return ["side:left", "side:right"]
 
 
@@ -596,6 +604,57 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
                                "quote": row["text"][position:position + 1], "character_index": position})
                 break
             position -= len(row["text"])
+    if scene['component'] == 'price_change' and scene['props'].get('staged'):
+        phrases = [value for row in scene['props']['rows'] for value in (row['before'], row['after'], row.get('change', ''))]
+        cursor = 0
+        text = ''.join(row['text'] for row in speech)
+        for cue, value in zip(result[1:], phrases):
+            number = re.search(r'[-+]?\d[\d,]*(?:\.\d+)?', value)
+            phrase = number[0] if number else value
+            at = text.find(phrase, cursor) if phrase else -1
+            if at < 0:
+                continue
+            cursor = at + len(phrase)
+            for row in speech:
+                if at < len(row['text']):
+                    cue.update(segment_id=row['id'], quote=phrase, character_index=at)
+                    break
+                at -= len(row['text'])
+    if scene['component'] in {'data_chart', 'scatter_chart'}:
+        props = scene['props']
+        phrases = list(props.get('reveal_phrases', []))
+        if scene['component'] == 'scatter_chart':
+            phrases = [(phrases[i] if i < len(phrases) and phrases[i] else p['name']) for i, p in enumerate(props['points'])]
+            phrases += [step['phrase'] for step in props.get('focus_steps', [])]
+            phrases += [props.get('takeaway_phrase', '')]
+        text = ''.join(row['text'] for row in speech)
+        cursor = 0
+        for cue in result:
+            if not cue['target_id'].startswith('line:'):
+                continue
+            index = int(cue['target_id'].split(':')[1])
+            if index >= len(phrases) or not phrases[index]:
+                continue
+            at = text.find(phrases[index], cursor)
+            if at >= 0:
+                cursor = at + len(phrases[index])
+                for row in speech:
+                    if at < len(row['text']):
+                        # A visual phrase can cross a TTS split; its start determines the reveal.
+                        cue.update(segment_id=row['id'], quote=row['text'][at:at+1], character_index=at)
+                        if phrases[index] in row['text'][at:]:
+                            cue['quote'] = phrases[index]
+                        break
+                    at -= len(row['text'])
+        # A takeaway follows the last data reveal, even when the sentence names the conclusion first.
+        order = {row['id']: i for i, row in enumerate(speech)}
+        last = (0, 0)
+        for cue in result:
+            position = (order[cue['segment_id']], cue['character_index'])
+            if position < last:
+                row = speech[last[0]]
+                cue.update(segment_id=row['id'], quote=row['text'][last[1]:last[1]+1], character_index=last[1])
+            last = max(last, position)
     return result
 
 

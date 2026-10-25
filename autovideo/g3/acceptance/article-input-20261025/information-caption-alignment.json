@@ -1,0 +1,1470 @@
+{
+  "version": 2,
+  "method": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+  "narration_sha256": "1fc98f0c717f3372138161eebb1c275aab0500c873e153245b618a3f2eb55afd",
+  "audio_sha256": "fcc9716162ce0a2b456c503d2f110b93b810d200a087732d009cb9d00955f387",
+  "model": {
+    "repo": "mlx-community/Qwen3-ForcedAligner-0.6B-8bit",
+    "revision": "0e1a68e91d815300c7c9754b2a7639378b23db15",
+    "code": "installed mlx_audio only; no repository Python downloaded"
+  },
+  "model_sha256": "be19ef8ac4326d032e7673342930b14c2df30bd68c1632493b0f563e30829f91",
+  "generation_seconds": 2.722,
+  "cues": [
+    {
+      "segment_id": "c1_n1",
+      "text": "水一定要烧开，才会变成水蒸气吗？",
+      "char_start": 0,
+      "char_end": 16,
+      "start_ms": 310,
+      "end_ms": 2527
+    },
+    {
+      "segment_id": "c1_n2",
+      "text": "不一定。",
+      "char_start": 0,
+      "char_end": 4,
+      "start_ms": 2981,
+      "end_ms": 3413
+    },
+    {
+      "segment_id": "c1_n3",
+      "text": "蒸发，指的是液态水转变为气态水的过程。",
+      "char_start": 0,
+      "char_end": 19,
+      "start_ms": 3899,
+      "end_ms": 6574
+    },
+    {
+      "segment_id": "c1_n4",
+      "text": "常压下，水的沸点约为100摄氏度，",
+      "char_start": 0,
+      "char_end": 17,
+      "start_ms": 6870,
+      "end_ms": 8910
+    },
+    {
+      "segment_id": "c1_n4",
+      "text": "但蒸发并不只发生在沸点。",
+      "char_start": 17,
+      "char_end": 29,
+      "start_ms": 8910,
+      "end_ms": 10482
+    },
+    {
+      "segment_id": "c1_n5",
+      "text": "温度较低时，水也能蒸发，只是速度通常更慢。",
+      "char_start": 0,
+      "char_end": 21,
+      "start_ms": 10888,
+      "end_ms": 13796
+    },
+    {
+      "segment_id": "c2_n1",
+      "text": "蒸发需要能量，因此会带走周围环境的一部分热量。",
+      "char_start": 0,
+      "char_end": 23,
+      "start_ms": 14595,
+      "end_ms": 17585
+    },
+    {
+      "segment_id": "c2_n2",
+      "text": "这也是蒸发式冷却的原理。",
+      "char_start": 0,
+      "char_end": 12,
+      "start_ms": 17991,
+      "end_ms": 19536
+    },
+    {
+      "segment_id": "c2_n3",
+      "text": "不过，效果会受到环境湿度等条件影响，",
+      "char_start": 0,
+      "char_end": 18,
+      "start_ms": 19878,
+      "end_ms": 22248
+    },
+    {
+      "segment_id": "c2_n3",
+      "text": "较干燥的环境更适合使用这种方式。",
+      "char_start": 18,
+      "char_end": 34,
+      "start_ms": 22438,
+      "end_ms": 24648
+    },
+    {
+      "segment_id": "c2_n4",
+      "text": "在潮湿环境里，不能直接照搬同样的降温预期，",
+      "char_start": 0,
+      "char_end": 21,
+      "start_ms": 24992,
+      "end_ms": 27842
+    },
+    {
+      "segment_id": "c2_n4",
+      "text": "更不能由此推断所有房间都可以不用常规空调。",
+      "char_start": 21,
+      "char_end": 42,
+      "start_ms": 27872,
+      "end_ms": 30962
+    },
+    {
+      "segment_id": "c3_n1",
+      "text": "蒸发也参与自然界的水循环，使水从地表进入大气。",
+      "char_start": 0,
+      "char_end": 23,
+      "start_ms": 31875,
+      "end_ms": 35377
+    },
+    {
+      "segment_id": "c3_n2",
+      "text": "凝结则是相反的变化：水蒸气重新变成液态水。",
+      "char_start": 0,
+      "char_end": 21,
+      "start_ms": 35783,
+      "end_ms": 39141
+    },
+    {
+      "segment_id": "c3_n3",
+      "text": "理解这两个方向，就能把杯子里的水逐渐减少，",
+      "char_start": 0,
+      "char_end": 21,
+      "start_ms": 39547,
+      "end_ms": 42237
+    },
+    {
+      "segment_id": "c3_n3",
+      "text": "与空气中的水重新形成水滴联系起来。",
+      "char_start": 21,
+      "char_end": 38,
+      "start_ms": 42347,
+      "end_ms": 44787
+    }
+  ],
+  "word_evidence": [
+    {
+      "segment_id": "c1_n1",
+      "items": [
+        {
+          "text": "水",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "一",
+          "start_ms": 480,
+          "end_ms": 480
+        },
+        {
+          "text": "定",
+          "start_ms": 480,
+          "end_ms": 560
+        },
+        {
+          "text": "要",
+          "start_ms": 560,
+          "end_ms": 720
+        },
+        {
+          "text": "烧",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "开",
+          "start_ms": 880,
+          "end_ms": 1120
+        },
+        {
+          "text": "才",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "会",
+          "start_ms": 1360,
+          "end_ms": 1440
+        },
+        {
+          "text": "变",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "成",
+          "start_ms": 1600,
+          "end_ms": 1680
+        },
+        {
+          "text": "水",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "蒸",
+          "start_ms": 1840,
+          "end_ms": 1920
+        },
+        {
+          "text": "气",
+          "start_ms": 1920,
+          "end_ms": 2160
+        },
+        {
+          "text": "吗",
+          "start_ms": 2160,
+          "end_ms": 2320
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n2",
+      "items": [
+        {
+          "text": "不",
+          "start_ms": 80,
+          "end_ms": 160
+        },
+        {
+          "text": "一",
+          "start_ms": 160,
+          "end_ms": 240
+        },
+        {
+          "text": "定",
+          "start_ms": 240,
+          "end_ms": 400
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n3",
+      "items": [
+        {
+          "text": "蒸",
+          "start_ms": 160,
+          "end_ms": 240
+        },
+        {
+          "text": "发",
+          "start_ms": 240,
+          "end_ms": 480
+        },
+        {
+          "text": "指",
+          "start_ms": 480,
+          "end_ms": 560
+        },
+        {
+          "text": "的",
+          "start_ms": 560,
+          "end_ms": 640
+        },
+        {
+          "text": "是",
+          "start_ms": 640,
+          "end_ms": 880
+        },
+        {
+          "text": "液",
+          "start_ms": 960,
+          "end_ms": 1040
+        },
+        {
+          "text": "态",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "水",
+          "start_ms": 1200,
+          "end_ms": 1440
+        },
+        {
+          "text": "转",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "变",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "为",
+          "start_ms": 1760,
+          "end_ms": 1920
+        },
+        {
+          "text": "气",
+          "start_ms": 1920,
+          "end_ms": 2080
+        },
+        {
+          "text": "态",
+          "start_ms": 2080,
+          "end_ms": 2160
+        },
+        {
+          "text": "水",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "的",
+          "start_ms": 2320,
+          "end_ms": 2400
+        },
+        {
+          "text": "过",
+          "start_ms": 2400,
+          "end_ms": 2560
+        },
+        {
+          "text": "程",
+          "start_ms": 2560,
+          "end_ms": 2720
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n4",
+      "items": [
+        {
+          "text": "常",
+          "start_ms": 0,
+          "end_ms": 160
+        },
+        {
+          "text": "压",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "下",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "水",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "的",
+          "start_ms": 640,
+          "end_ms": 720
+        },
+        {
+          "text": "沸",
+          "start_ms": 720,
+          "end_ms": 880
+        },
+        {
+          "text": "点",
+          "start_ms": 880,
+          "end_ms": 1040
+        },
+        {
+          "text": "约",
+          "start_ms": 1120,
+          "end_ms": 1200
+        },
+        {
+          "text": "为",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "100",
+          "start_ms": 1280,
+          "end_ms": 1600
+        },
+        {
+          "text": "摄",
+          "start_ms": 1600,
+          "end_ms": 1680
+        },
+        {
+          "text": "氏",
+          "start_ms": 1680,
+          "end_ms": 1760
+        },
+        {
+          "text": "度",
+          "start_ms": 1760,
+          "end_ms": 2000
+        },
+        {
+          "text": "但",
+          "start_ms": 2080,
+          "end_ms": 2160
+        },
+        {
+          "text": "蒸",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "发",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "并",
+          "start_ms": 2480,
+          "end_ms": 2720
+        },
+        {
+          "text": "不",
+          "start_ms": 2720,
+          "end_ms": 2720
+        },
+        {
+          "text": "只",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "发",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "生",
+          "start_ms": 3040,
+          "end_ms": 3120
+        },
+        {
+          "text": "在",
+          "start_ms": 3120,
+          "end_ms": 3200
+        },
+        {
+          "text": "沸",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "点",
+          "start_ms": 3360,
+          "end_ms": 3600
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n5",
+      "items": [
+        {
+          "text": "温",
+          "start_ms": 160,
+          "end_ms": 240
+        },
+        {
+          "text": "度",
+          "start_ms": 240,
+          "end_ms": 320
+        },
+        {
+          "text": "较",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "低",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "时",
+          "start_ms": 640,
+          "end_ms": 960
+        },
+        {
+          "text": "水",
+          "start_ms": 960,
+          "end_ms": 1200
+        },
+        {
+          "text": "也",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "能",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "蒸",
+          "start_ms": 1440,
+          "end_ms": 1520
+        },
+        {
+          "text": "发",
+          "start_ms": 1520,
+          "end_ms": 1840
+        },
+        {
+          "text": "只",
+          "start_ms": 1840,
+          "end_ms": 1920
+        },
+        {
+          "text": "是",
+          "start_ms": 1920,
+          "end_ms": 2080
+        },
+        {
+          "text": "速",
+          "start_ms": 2080,
+          "end_ms": 2240
+        },
+        {
+          "text": "度",
+          "start_ms": 2240,
+          "end_ms": 2320
+        },
+        {
+          "text": "通",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "常",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "更",
+          "start_ms": 2640,
+          "end_ms": 2720
+        },
+        {
+          "text": "慢",
+          "start_ms": 2720,
+          "end_ms": 2960
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n1",
+      "items": [
+        {
+          "text": "蒸",
+          "start_ms": 160,
+          "end_ms": 240
+        },
+        {
+          "text": "发",
+          "start_ms": 240,
+          "end_ms": 400
+        },
+        {
+          "text": "需",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "要",
+          "start_ms": 560,
+          "end_ms": 640
+        },
+        {
+          "text": "能",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "量",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "因",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "此",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "会",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "带",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "走",
+          "start_ms": 1760,
+          "end_ms": 1840
+        },
+        {
+          "text": "周",
+          "start_ms": 1840,
+          "end_ms": 2000
+        },
+        {
+          "text": "围",
+          "start_ms": 2000,
+          "end_ms": 2080
+        },
+        {
+          "text": "环",
+          "start_ms": 2080,
+          "end_ms": 2240
+        },
+        {
+          "text": "境",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "的",
+          "start_ms": 2400,
+          "end_ms": 2480
+        },
+        {
+          "text": "一",
+          "start_ms": 2480,
+          "end_ms": 2560
+        },
+        {
+          "text": "部",
+          "start_ms": 2560,
+          "end_ms": 2640
+        },
+        {
+          "text": "分",
+          "start_ms": 2640,
+          "end_ms": 2720
+        },
+        {
+          "text": "热",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "量",
+          "start_ms": 2880,
+          "end_ms": 3040
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n2",
+      "items": [
+        {
+          "text": "这",
+          "start_ms": 160,
+          "end_ms": 240
+        },
+        {
+          "text": "也",
+          "start_ms": 240,
+          "end_ms": 320
+        },
+        {
+          "text": "是",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "蒸",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "发",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "式",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "冷",
+          "start_ms": 960,
+          "end_ms": 1040
+        },
+        {
+          "text": "却",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "的",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "原",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "理",
+          "start_ms": 1440,
+          "end_ms": 1600
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n3",
+      "items": [
+        {
+          "text": "不",
+          "start_ms": 160,
+          "end_ms": 160
+        },
+        {
+          "text": "过",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "效",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "果",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "会",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "受",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "到",
+          "start_ms": 960,
+          "end_ms": 1040
+        },
+        {
+          "text": "环",
+          "start_ms": 1040,
+          "end_ms": 1280
+        },
+        {
+          "text": "境",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "湿",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "度",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "等",
+          "start_ms": 1760,
+          "end_ms": 1760
+        },
+        {
+          "text": "条",
+          "start_ms": 1760,
+          "end_ms": 2000
+        },
+        {
+          "text": "件",
+          "start_ms": 2000,
+          "end_ms": 2160
+        },
+        {
+          "text": "影",
+          "start_ms": 2160,
+          "end_ms": 2240
+        },
+        {
+          "text": "响",
+          "start_ms": 2240,
+          "end_ms": 2400
+        },
+        {
+          "text": "较",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "干",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "燥",
+          "start_ms": 3040,
+          "end_ms": 3120
+        },
+        {
+          "text": "的",
+          "start_ms": 3120,
+          "end_ms": 3200
+        },
+        {
+          "text": "环",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "境",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "更",
+          "start_ms": 3520,
+          "end_ms": 3680
+        },
+        {
+          "text": "适",
+          "start_ms": 3680,
+          "end_ms": 3840
+        },
+        {
+          "text": "合",
+          "start_ms": 3840,
+          "end_ms": 4000
+        },
+        {
+          "text": "使",
+          "start_ms": 4000,
+          "end_ms": 4160
+        },
+        {
+          "text": "用",
+          "start_ms": 4160,
+          "end_ms": 4240
+        },
+        {
+          "text": "这",
+          "start_ms": 4240,
+          "end_ms": 4320
+        },
+        {
+          "text": "种",
+          "start_ms": 4320,
+          "end_ms": 4480
+        },
+        {
+          "text": "方",
+          "start_ms": 4480,
+          "end_ms": 4640
+        },
+        {
+          "text": "式",
+          "start_ms": 4640,
+          "end_ms": 4800
+        }
+      ]
+    },
+    {
+      "segment_id": "c2_n4",
+      "items": [
+        {
+          "text": "在",
+          "start_ms": 80,
+          "end_ms": 160
+        },
+        {
+          "text": "潮",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "湿",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "环",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "境",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "里",
+          "start_ms": 800,
+          "end_ms": 880
+        },
+        {
+          "text": "不",
+          "start_ms": 960,
+          "end_ms": 1040
+        },
+        {
+          "text": "能",
+          "start_ms": 1040,
+          "end_ms": 1120
+        },
+        {
+          "text": "直",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "接",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "照",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "搬",
+          "start_ms": 1600,
+          "end_ms": 1760
+        },
+        {
+          "text": "同",
+          "start_ms": 1760,
+          "end_ms": 2000
+        },
+        {
+          "text": "样",
+          "start_ms": 2000,
+          "end_ms": 2080
+        },
+        {
+          "text": "的",
+          "start_ms": 2080,
+          "end_ms": 2160
+        },
+        {
+          "text": "降",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "温",
+          "start_ms": 2320,
+          "end_ms": 2400
+        },
+        {
+          "text": "预",
+          "start_ms": 2400,
+          "end_ms": 2480
+        },
+        {
+          "text": "期",
+          "start_ms": 2480,
+          "end_ms": 2800
+        },
+        {
+          "text": "更",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "不",
+          "start_ms": 3120,
+          "end_ms": 3200
+        },
+        {
+          "text": "能",
+          "start_ms": 3200,
+          "end_ms": 3280
+        },
+        {
+          "text": "由",
+          "start_ms": 3280,
+          "end_ms": 3440
+        },
+        {
+          "text": "此",
+          "start_ms": 3440,
+          "end_ms": 3600
+        },
+        {
+          "text": "推",
+          "start_ms": 3600,
+          "end_ms": 3760
+        },
+        {
+          "text": "断",
+          "start_ms": 3760,
+          "end_ms": 3920
+        },
+        {
+          "text": "所",
+          "start_ms": 4080,
+          "end_ms": 4240
+        },
+        {
+          "text": "有",
+          "start_ms": 4240,
+          "end_ms": 4320
+        },
+        {
+          "text": "房",
+          "start_ms": 4320,
+          "end_ms": 4480
+        },
+        {
+          "text": "间",
+          "start_ms": 4480,
+          "end_ms": 4640
+        },
+        {
+          "text": "都",
+          "start_ms": 4640,
+          "end_ms": 4800
+        },
+        {
+          "text": "可",
+          "start_ms": 4800,
+          "end_ms": 4960
+        },
+        {
+          "text": "以",
+          "start_ms": 4960,
+          "end_ms": 4960
+        },
+        {
+          "text": "不",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "用",
+          "start_ms": 5120,
+          "end_ms": 5200
+        },
+        {
+          "text": "常",
+          "start_ms": 5200,
+          "end_ms": 5360
+        },
+        {
+          "text": "规",
+          "start_ms": 5360,
+          "end_ms": 5440
+        },
+        {
+          "text": "空",
+          "start_ms": 5440,
+          "end_ms": 5600
+        },
+        {
+          "text": "调",
+          "start_ms": 5600,
+          "end_ms": 5920
+        }
+      ]
+    },
+    {
+      "segment_id": "c3_n1",
+      "items": [
+        {
+          "text": "蒸",
+          "start_ms": 160,
+          "end_ms": 240
+        },
+        {
+          "text": "发",
+          "start_ms": 240,
+          "end_ms": 480
+        },
+        {
+          "text": "也",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "参",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "与",
+          "start_ms": 800,
+          "end_ms": 880
+        },
+        {
+          "text": "自",
+          "start_ms": 880,
+          "end_ms": 960
+        },
+        {
+          "text": "然",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "界",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "的",
+          "start_ms": 1280,
+          "end_ms": 1280
+        },
+        {
+          "text": "水",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "循",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "环",
+          "start_ms": 1600,
+          "end_ms": 1840
+        },
+        {
+          "text": "使",
+          "start_ms": 2080,
+          "end_ms": 2240
+        },
+        {
+          "text": "水",
+          "start_ms": 2240,
+          "end_ms": 2480
+        },
+        {
+          "text": "从",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "地",
+          "start_ms": 2640,
+          "end_ms": 2800
+        },
+        {
+          "text": "表",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "进",
+          "start_ms": 2960,
+          "end_ms": 3120
+        },
+        {
+          "text": "入",
+          "start_ms": 3120,
+          "end_ms": 3200
+        },
+        {
+          "text": "大",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "气",
+          "start_ms": 3360,
+          "end_ms": 3600
+        }
+      ]
+    },
+    {
+      "segment_id": "c3_n2",
+      "items": [
+        {
+          "text": "凝",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "结",
+          "start_ms": 320,
+          "end_ms": 560
+        },
+        {
+          "text": "则",
+          "start_ms": 560,
+          "end_ms": 640
+        },
+        {
+          "text": "是",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "相",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "反",
+          "start_ms": 960,
+          "end_ms": 1120
+        },
+        {
+          "text": "的",
+          "start_ms": 1120,
+          "end_ms": 1120
+        },
+        {
+          "text": "变",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "化",
+          "start_ms": 1280,
+          "end_ms": 1520
+        },
+        {
+          "text": "水",
+          "start_ms": 1760,
+          "end_ms": 1920
+        },
+        {
+          "text": "蒸",
+          "start_ms": 1920,
+          "end_ms": 2080
+        },
+        {
+          "text": "气",
+          "start_ms": 2080,
+          "end_ms": 2320
+        },
+        {
+          "text": "重",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "新",
+          "start_ms": 2480,
+          "end_ms": 2640
+        },
+        {
+          "text": "变",
+          "start_ms": 2640,
+          "end_ms": 2800
+        },
+        {
+          "text": "成",
+          "start_ms": 2800,
+          "end_ms": 2960
+        },
+        {
+          "text": "液",
+          "start_ms": 2960,
+          "end_ms": 3040
+        },
+        {
+          "text": "态",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "水",
+          "start_ms": 3200,
+          "end_ms": 3440
+        }
+      ]
+    },
+    {
+      "segment_id": "c3_n3",
+      "items": [
+        {
+          "text": "理",
+          "start_ms": 160,
+          "end_ms": 240
+        },
+        {
+          "text": "解",
+          "start_ms": 240,
+          "end_ms": 320
+        },
+        {
+          "text": "这",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "两",
+          "start_ms": 480,
+          "end_ms": 560
+        },
+        {
+          "text": "个",
+          "start_ms": 560,
+          "end_ms": 640
+        },
+        {
+          "text": "方",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "向",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "就",
+          "start_ms": 1040,
+          "end_ms": 1120
+        },
+        {
+          "text": "能",
+          "start_ms": 1120,
+          "end_ms": 1280
+        },
+        {
+          "text": "把",
+          "start_ms": 1280,
+          "end_ms": 1360
+        },
+        {
+          "text": "杯",
+          "start_ms": 1360,
+          "end_ms": 1520
+        },
+        {
+          "text": "子",
+          "start_ms": 1520,
+          "end_ms": 1600
+        },
+        {
+          "text": "里",
+          "start_ms": 1600,
+          "end_ms": 1680
+        },
+        {
+          "text": "的",
+          "start_ms": 1680,
+          "end_ms": 1760
+        },
+        {
+          "text": "水",
+          "start_ms": 1760,
+          "end_ms": 2000
+        },
+        {
+          "text": "逐",
+          "start_ms": 2080,
+          "end_ms": 2160
+        },
+        {
+          "text": "渐",
+          "start_ms": 2160,
+          "end_ms": 2320
+        },
+        {
+          "text": "减",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "少",
+          "start_ms": 2480,
+          "end_ms": 2720
+        },
+        {
+          "text": "与",
+          "start_ms": 2960,
+          "end_ms": 3040
+        },
+        {
+          "text": "空",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "气",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "中",
+          "start_ms": 3360,
+          "end_ms": 3440
+        },
+        {
+          "text": "的",
+          "start_ms": 3440,
+          "end_ms": 3520
+        },
+        {
+          "text": "水",
+          "start_ms": 3520,
+          "end_ms": 3760
+        },
+        {
+          "text": "重",
+          "start_ms": 3760,
+          "end_ms": 3920
+        },
+        {
+          "text": "新",
+          "start_ms": 3920,
+          "end_ms": 4080
+        },
+        {
+          "text": "形",
+          "start_ms": 4080,
+          "end_ms": 4240
+        },
+        {
+          "text": "成",
+          "start_ms": 4240,
+          "end_ms": 4320
+        },
+        {
+          "text": "水",
+          "start_ms": 4320,
+          "end_ms": 4480
+        },
+        {
+          "text": "滴",
+          "start_ms": 4480,
+          "end_ms": 4720
+        },
+        {
+          "text": "联",
+          "start_ms": 4720,
+          "end_ms": 4880
+        },
+        {
+          "text": "系",
+          "start_ms": 4880,
+          "end_ms": 4960
+        },
+        {
+          "text": "起",
+          "start_ms": 4960,
+          "end_ms": 5120
+        },
+        {
+          "text": "来",
+          "start_ms": 5120,
+          "end_ms": 5280
+        }
+      ]
+    }
+  ]
+}
