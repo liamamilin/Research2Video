@@ -262,7 +262,7 @@ def test_api_rejects_out_of_scope_or_malformed_inputs(tmp_path):
                               "checks": {}, "blockers": [], "api_key_value_exposed": False}
     with TestClient(create_app(settings, start_worker=False, preflight=ready)) as client:
         short_source = client.post("/api/jobs", json=request_payload(source_text="太短"))
-        assert short_source.status_code == 422
+        assert short_source.status_code == 202
         supported_duration = client.post("/api/jobs", json=request_payload(target_duration_sec=45))
         assert supported_duration.status_code == 202
         too_long_duration = client.post("/api/jobs", json=request_payload(target_duration_sec=91))

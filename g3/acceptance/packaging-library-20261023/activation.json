@@ -1,0 +1,15 @@
+{
+  "time": "2026-10-23T14:02:35.025538+08:00",
+  "autovideo": {
+    "status": "ready",
+    "action": "started",
+    "pid": 47403,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "component_count": 5,
+  "research": {
+    "pid": 47442,
+    "health": "ok"
+  }
+}

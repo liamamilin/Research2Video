@@ -1,0 +1,17 @@
+{
+  "old_pid": 79214,
+  "result": {
+    "status": "ready",
+    "action": "started",
+    "pid": 79680,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "previous_jobs_preserved": 171,
+  "previous_artifact_records_preserved": 2140,
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  },
+  "loaded_production_plan_compatibility_fix": true
+}

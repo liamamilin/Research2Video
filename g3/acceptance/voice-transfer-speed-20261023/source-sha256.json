@@ -1,0 +1,72 @@
+[
+  {
+    "repository": "autovideo",
+    "path": "g2/voice_cache.py",
+    "sha256": "8dec6df8cd1070128d3e0ad607a13b81f3877a1d3edc1f637f47c823e4f36862"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/voice_performance.py",
+    "sha256": "d78d7cd4eeca5467a1bd0478df493cc2b976d570d64ff5074ecb10ab273b809e"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/voxcpm_voice.py",
+    "sha256": "ef939cd1689466d520c4bf8e8865ab3a15fbe8a09e07a5b7da8d70a9a85a6434"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/run_g2.py",
+    "sha256": "d5ce3e39e89efa61bd435d07d45f03ab2de53a5897e87fc004969ee296e64b4a"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/worker.py",
+    "sha256": "5a5c8aad9f9a6f63038ddfca83693679aa2dca44f995d7153c5679618a84a2e7"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/tests/test_voice_cache.py",
+    "sha256": "7ff49aa3b7cc5cfdc2207e47ab4089d848d62d7c43b8aea860676bf7dd2df589"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "core/video/autovideo.py",
+    "sha256": "f8ae9622b212808266b63c38e4e8b5cd149f402a5a8077fe9a6155b1ad44c7b2"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "core/video/store.py",
+    "sha256": "275207a10d4f27f9c5a87ab43c6540068308c9dad613257b432b0b80e1630d17"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "web/services/video_render.py",
+    "sha256": "5f309b5626a283d209afd0e39896d2cd3021b691510cea0cd8fb64859dba8c2b"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "web/routes/video.py",
+    "sha256": "5a6ba3fc818696110133c8d8e95dd369e3cb28d15715dcd1861f98225234eb93"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "ui/src/pages/VideoScriptView.tsx",
+    "sha256": "0cf02133e43a67c8396cccae5184bd62b0e89ab440dc0b528d3080dc14f77d0c"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "ui/src/pages/videoNext.ts",
+    "sha256": "958054dcf379138f7bdd83ef625e558d77b5c96863cbf2f12efaa79758231baa"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "ui/src/api/video.ts",
+    "sha256": "cca5defcbcb2cd32114ff30e2a84174cfa34d3445274ab8e683a1ccc8f7f9f1f"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "tests/test_video_transfer_performance.py",
+    "sha256": "95b54f195d75b45af06cebdeb36d07130422c944468201b80b626dcfffb35ede"
+  }
+]

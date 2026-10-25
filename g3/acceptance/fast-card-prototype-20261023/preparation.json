@@ -1,0 +1,16 @@
+{
+  "seconds": 1.224,
+  "pages": 27,
+  "body_pages": 24,
+  "subtitle_cues": 33,
+  "frames": 6387,
+  "duration_seconds": 212.9,
+  "source_text_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+  "source_audio_sha256": "2e0f9970b1153f6e8f32cc52a8ec7ad3c40d2f247d479c2b8fd72b21500617b0",
+  "tts_reused": true,
+  "storyboard_reused": false,
+  "manual_page_copy": true,
+  "external_api_calls": 0,
+  "narration_and_subtitle_text": "PASS",
+  "source_review_flag": "preserved on headphone cards"
+}

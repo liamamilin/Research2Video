@@ -1,0 +1,782 @@
+{
+  "status": "PASS",
+  "gate": "G2",
+  "real_llm": false,
+  "real_tts": true,
+  "mock_calls": 0,
+  "model": "deepseek-v4.1-flash",
+  "llm_call_count": 0,
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 6117,
+    "duration_seconds": 203.9,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.9999473774070917,
+    "decoded_rms": 0.05807396396994591,
+    "full_decode": "PASS"
+  },
+  "timeline": {
+    "ir_frames": 6117,
+    "scene_count": 31,
+    "beat_count": 31,
+    "alignment_granularity": "phrase"
+  },
+  "visual_beats": {
+    "cf_1_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 8,
+      "before_frame": 5,
+      "after_frame": 12,
+      "changed_pixel_ratio": 0.010384837962962964
+    },
+    "cf_2_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 411,
+      "before_frame": 408,
+      "after_frame": 415,
+      "changed_pixel_ratio": 0.03331645447530864
+    },
+    "cf_3_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 485,
+      "before_frame": 482,
+      "after_frame": 489,
+      "changed_pixel_ratio": 0.002710744598765432
+    },
+    "cf_4_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 632,
+      "before_frame": 629,
+      "after_frame": 636,
+      "changed_pixel_ratio": 0.005443190586419753
+    },
+    "cf_5_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 842,
+      "before_frame": 839,
+      "after_frame": 846,
+      "changed_pixel_ratio": 0.006645447530864198
+    },
+    "cf_6_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 1053,
+      "before_frame": 1050,
+      "after_frame": 1057,
+      "changed_pixel_ratio": 0.003992573302469136
+    },
+    "cf_7_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 1193,
+      "before_frame": 1190,
+      "after_frame": 1197,
+      "changed_pixel_ratio": 0.0060050154320987655
+    },
+    "cf_8_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 1394,
+      "before_frame": 1391,
+      "after_frame": 1398,
+      "changed_pixel_ratio": 0.007923900462962962
+    },
+    "cf_9_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 1669,
+      "before_frame": 1666,
+      "after_frame": 1673,
+      "changed_pixel_ratio": 0.004741512345679012
+    },
+    "cf_10_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 1848,
+      "before_frame": 1845,
+      "after_frame": 1852,
+      "changed_pixel_ratio": 0.003804976851851852
+    },
+    "cf_11_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 1997,
+      "before_frame": 1994,
+      "after_frame": 2001,
+      "changed_pixel_ratio": 0.005048225308641976
+    },
+    "cf_12_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 2253,
+      "before_frame": 2250,
+      "after_frame": 2257,
+      "changed_pixel_ratio": 0.0044372106481481485
+    },
+    "cf_13_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 2419,
+      "before_frame": 2416,
+      "after_frame": 2423,
+      "changed_pixel_ratio": 0.0060209297839506175
+    },
+    "cf_14_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 2656,
+      "before_frame": 2653,
+      "after_frame": 2660,
+      "changed_pixel_ratio": 0.004494116512345679
+    },
+    "cf_15_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 2821,
+      "before_frame": 2818,
+      "after_frame": 2825,
+      "changed_pixel_ratio": 0.00875096450617284
+    },
+    "cf_16_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 3163,
+      "before_frame": 3160,
+      "after_frame": 3167,
+      "changed_pixel_ratio": 0.005939429012345679
+    },
+    "cf_17_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 3386,
+      "before_frame": 3383,
+      "after_frame": 3390,
+      "changed_pixel_ratio": 0.0035715663580246915
+    },
+    "cf_18_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 3513,
+      "before_frame": 3510,
+      "after_frame": 3517,
+      "changed_pixel_ratio": 0.00738425925925926
+    },
+    "cf_19_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 3768,
+      "before_frame": 3765,
+      "after_frame": 3772,
+      "changed_pixel_ratio": 0.0025684799382716048
+    },
+    "cf_20_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 3885,
+      "before_frame": 3882,
+      "after_frame": 3889,
+      "changed_pixel_ratio": 0.005320698302469136
+    },
+    "cf_21_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 4069,
+      "before_frame": 4066,
+      "after_frame": 4073,
+      "changed_pixel_ratio": 0.009048996913580246
+    },
+    "cf_22_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 4403,
+      "before_frame": 4400,
+      "after_frame": 4407,
+      "changed_pixel_ratio": 0.0033386381172839505
+    },
+    "cf_23_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 4504,
+      "before_frame": 4501,
+      "after_frame": 4508,
+      "changed_pixel_ratio": 0.007722318672839506
+    },
+    "cf_24_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 4783,
+      "before_frame": 4780,
+      "after_frame": 4787,
+      "changed_pixel_ratio": 0.002486496913580247
+    },
+    "cf_25_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 4889,
+      "before_frame": 4886,
+      "after_frame": 4893,
+      "changed_pixel_ratio": 0.005335648148148148
+    },
+    "cf_26_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 5106,
+      "before_frame": 5103,
+      "after_frame": 5110,
+      "changed_pixel_ratio": 0.006518614969135803
+    },
+    "cf_27_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 5357,
+      "before_frame": 5354,
+      "after_frame": 5361,
+      "changed_pixel_ratio": 0.0033140432098765433
+    },
+    "cf_28_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 5468,
+      "before_frame": 5465,
+      "after_frame": 5472,
+      "changed_pixel_ratio": 0.0039313271604938275
+    },
+    "cf_29_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 5599,
+      "before_frame": 5596,
+      "after_frame": 5603,
+      "changed_pixel_ratio": 0.0048992091049382715
+    },
+    "cf_30_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 5766,
+      "before_frame": 5763,
+      "after_frame": 5770,
+      "changed_pixel_ratio": 0.005952449845679012
+    },
+    "cf_31_enter": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 5969,
+      "before_frame": 5966,
+      "after_frame": 5973,
+      "changed_pixel_ratio": 0.004273244598765432
+    }
+  },
+  "scene_samples": [
+    {
+      "scene_id": "cf_1",
+      "frame": 0,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+    },
+    {
+      "scene_id": "cf_1",
+      "frame": 204,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-004.png"
+    },
+    {
+      "scene_id": "cf_1",
+      "frame": 408,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-005.png"
+    },
+    {
+      "scene_id": "cf_2",
+      "frame": 409,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+    },
+    {
+      "scene_id": "cf_2",
+      "frame": 444,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-008.png"
+    },
+    {
+      "scene_id": "cf_2",
+      "frame": 479,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-009.png"
+    },
+    {
+      "scene_id": "cf_3",
+      "frame": 480,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-010.png"
+    },
+    {
+      "scene_id": "cf_3",
+      "frame": 550,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-013.png"
+    },
+    {
+      "scene_id": "cf_3",
+      "frame": 619,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-014.png"
+    },
+    {
+      "scene_id": "cf_4",
+      "frame": 620,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+    },
+    {
+      "scene_id": "cf_4",
+      "frame": 728,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-018.png"
+    },
+    {
+      "scene_id": "cf_4",
+      "frame": 835,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-019.png"
+    },
+    {
+      "scene_id": "cf_5",
+      "frame": 836,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-020.png"
+    },
+    {
+      "scene_id": "cf_5",
+      "frame": 942,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-023.png"
+    },
+    {
+      "scene_id": "cf_5",
+      "frame": 1048,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-024.png"
+    },
+    {
+      "scene_id": "cf_6",
+      "frame": 1049,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-025.png"
+    },
+    {
+      "scene_id": "cf_6",
+      "frame": 1116,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-028.png"
+    },
+    {
+      "scene_id": "cf_6",
+      "frame": 1182,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-029.png"
+    },
+    {
+      "scene_id": "cf_7",
+      "frame": 1183,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-030.png"
+    },
+    {
+      "scene_id": "cf_7",
+      "frame": 1285,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-033.png"
+    },
+    {
+      "scene_id": "cf_7",
+      "frame": 1387,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-034.png"
+    },
+    {
+      "scene_id": "cf_8",
+      "frame": 1388,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-035.png"
+    },
+    {
+      "scene_id": "cf_8",
+      "frame": 1522,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-038.png"
+    },
+    {
+      "scene_id": "cf_8",
+      "frame": 1655,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-039.png"
+    },
+    {
+      "scene_id": "cf_9",
+      "frame": 1656,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-040.png"
+    },
+    {
+      "scene_id": "cf_9",
+      "frame": 1749,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-043.png"
+    },
+    {
+      "scene_id": "cf_9",
+      "frame": 1842,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-044.png"
+    },
+    {
+      "scene_id": "cf_10",
+      "frame": 1843,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-045.png"
+    },
+    {
+      "scene_id": "cf_10",
+      "frame": 1917,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-048.png"
+    },
+    {
+      "scene_id": "cf_10",
+      "frame": 1991,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-049.png"
+    },
+    {
+      "scene_id": "cf_11",
+      "frame": 1992,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-050.png"
+    },
+    {
+      "scene_id": "cf_11",
+      "frame": 2117,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-053.png"
+    },
+    {
+      "scene_id": "cf_11",
+      "frame": 2242,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-054.png"
+    },
+    {
+      "scene_id": "cf_12",
+      "frame": 2243,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-055.png"
+    },
+    {
+      "scene_id": "cf_12",
+      "frame": 2328,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-058.png"
+    },
+    {
+      "scene_id": "cf_12",
+      "frame": 2413,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-059.png"
+    },
+    {
+      "scene_id": "cf_13",
+      "frame": 2414,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-060.png"
+    },
+    {
+      "scene_id": "cf_13",
+      "frame": 2528,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-063.png"
+    },
+    {
+      "scene_id": "cf_13",
+      "frame": 2642,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-064.png"
+    },
+    {
+      "scene_id": "cf_14",
+      "frame": 2643,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-065.png"
+    },
+    {
+      "scene_id": "cf_14",
+      "frame": 2729,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-068.png"
+    },
+    {
+      "scene_id": "cf_14",
+      "frame": 2815,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-069.png"
+    },
+    {
+      "scene_id": "cf_15",
+      "frame": 2816,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-070.png"
+    },
+    {
+      "scene_id": "cf_15",
+      "frame": 2984,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-073.png"
+    },
+    {
+      "scene_id": "cf_15",
+      "frame": 3152,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-074.png"
+    },
+    {
+      "scene_id": "cf_16",
+      "frame": 3153,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-075.png"
+    },
+    {
+      "scene_id": "cf_16",
+      "frame": 3266,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-078.png"
+    },
+    {
+      "scene_id": "cf_16",
+      "frame": 3379,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-079.png"
+    },
+    {
+      "scene_id": "cf_17",
+      "frame": 3380,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-080.png"
+    },
+    {
+      "scene_id": "cf_17",
+      "frame": 3443,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-083.png"
+    },
+    {
+      "scene_id": "cf_17",
+      "frame": 3506,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-084.png"
+    },
+    {
+      "scene_id": "cf_18",
+      "frame": 3507,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-085.png"
+    },
+    {
+      "scene_id": "cf_18",
+      "frame": 3631,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-088.png"
+    },
+    {
+      "scene_id": "cf_18",
+      "frame": 3754,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-089.png"
+    },
+    {
+      "scene_id": "cf_19",
+      "frame": 3755,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-090.png"
+    },
+    {
+      "scene_id": "cf_19",
+      "frame": 3817,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-093.png"
+    },
+    {
+      "scene_id": "cf_19",
+      "frame": 3879,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-094.png"
+    },
+    {
+      "scene_id": "cf_20",
+      "frame": 3880,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-095.png"
+    },
+    {
+      "scene_id": "cf_20",
+      "frame": 3971,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-098.png"
+    },
+    {
+      "scene_id": "cf_20",
+      "frame": 4062,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-099.png"
+    },
+    {
+      "scene_id": "cf_21",
+      "frame": 4063,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-100.png"
+    },
+    {
+      "scene_id": "cf_21",
+      "frame": 4228,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-103.png"
+    },
+    {
+      "scene_id": "cf_21",
+      "frame": 4392,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-104.png"
+    },
+    {
+      "scene_id": "cf_22",
+      "frame": 4393,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-105.png"
+    },
+    {
+      "scene_id": "cf_22",
+      "frame": 4445,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-108.png"
+    },
+    {
+      "scene_id": "cf_22",
+      "frame": 4497,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-109.png"
+    },
+    {
+      "scene_id": "cf_23",
+      "frame": 4498,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-110.png"
+    },
+    {
+      "scene_id": "cf_23",
+      "frame": 4638,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-113.png"
+    },
+    {
+      "scene_id": "cf_23",
+      "frame": 4777,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-114.png"
+    },
+    {
+      "scene_id": "cf_24",
+      "frame": 4778,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-115.png"
+    },
+    {
+      "scene_id": "cf_24",
+      "frame": 4827,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-118.png"
+    },
+    {
+      "scene_id": "cf_24",
+      "frame": 4875,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-119.png"
+    },
+    {
+      "scene_id": "cf_25",
+      "frame": 4876,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-120.png"
+    },
+    {
+      "scene_id": "cf_25",
+      "frame": 4988,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-123.png"
+    },
+    {
+      "scene_id": "cf_25",
+      "frame": 5099,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-124.png"
+    },
+    {
+      "scene_id": "cf_26",
+      "frame": 5100,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-125.png"
+    },
+    {
+      "scene_id": "cf_26",
+      "frame": 5223,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-128.png"
+    },
+    {
+      "scene_id": "cf_26",
+      "frame": 5346,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-129.png"
+    },
+    {
+      "scene_id": "cf_27",
+      "frame": 5347,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-130.png"
+    },
+    {
+      "scene_id": "cf_27",
+      "frame": 5405,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-133.png"
+    },
+    {
+      "scene_id": "cf_27",
+      "frame": 5462,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-134.png"
+    },
+    {
+      "scene_id": "cf_28",
+      "frame": 5463,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-135.png"
+    },
+    {
+      "scene_id": "cf_28",
+      "frame": 5528,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-138.png"
+    },
+    {
+      "scene_id": "cf_28",
+      "frame": 5592,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-139.png"
+    },
+    {
+      "scene_id": "cf_29",
+      "frame": 5593,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-140.png"
+    },
+    {
+      "scene_id": "cf_29",
+      "frame": 5673,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-143.png"
+    },
+    {
+      "scene_id": "cf_29",
+      "frame": 5752,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-144.png"
+    },
+    {
+      "scene_id": "cf_30",
+      "frame": 5753,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-145.png"
+    },
+    {
+      "scene_id": "cf_30",
+      "frame": 5859,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-148.png"
+    },
+    {
+      "scene_id": "cf_30",
+      "frame": 5965,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-149.png"
+    },
+    {
+      "scene_id": "cf_31",
+      "frame": 5966,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-150.png"
+    },
+    {
+      "scene_id": "cf_31",
+      "frame": 6041,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-152.png"
+    },
+    {
+      "scene_id": "cf_31",
+      "frame": 6116,
+      "file": "g3/data/jobs/d2189a00-ac9b-46a6-a1a1-b5a377b8c25f/attempts/1/g2-run/artifacts/keyframes/frame-153.png"
+    }
+  ],
+  "contact_sheet": "artifacts/contact-sheet.jpg",
+  "captions": {
+    "burned_in": true,
+    "srt": "artifacts/captions.srt",
+    "alignment": "phrase-level measured PCM activity"
+  },
+  "fast_cards": {
+    "caption_cues_checked": 31,
+    "minimum_caption_dark_pixels": 2200,
+    "executor": "ffmpeg_cards",
+    "manual_page_copy": false
+  },
+  "video_form": "information_cards",
+  "duration_mode": "content",
+  "creative_form": {
+    "scene_count": 31,
+    "registered_component": "kinetic_text",
+    "timing": "one page per measured narration phrase",
+    "voice": "single narrator"
+  },
+  "narration_text": {
+    "status": "PASS",
+    "chapters": 7,
+    "segments": 31,
+    "characters": 1220,
+    "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+    "checked": [
+      "narration-plan",
+      "video-ir",
+      "captions.srt",
+      "chapter-titles"
+    ]
+  }
+}

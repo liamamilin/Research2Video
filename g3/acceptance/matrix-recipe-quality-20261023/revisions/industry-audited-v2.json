@@ -1,0 +1,1005 @@
+{
+  "script_id": "9f25f92c1eb54ab195abdbda84e29d37",
+  "version": 2,
+  "title": "新工厂之外，美国军工高纯铝缺在哪",
+  "sections": [
+    {
+      "title": "一个反直觉的缺口",
+      "paragraphs": [
+        {
+          "text": "说到制造业回流，画面通常是新工厂、组装线。但行业媒体 Manufacturing Dive 最近转述的一项分析，指向一个更靠上游的空白：美国没有正在运行的冶炼厂，能生产军工专用的高纯度铝。这个范围要说准：不是美国整个铝业都停摆，也不是所有铝都做不了，而是军工需要的那一档高纯度铝，本土没有现成运行能力。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "这为什么算供应链风险？因为这类材料的关键不在最后组装，而在能不能在本土炼出来。供应线一旦出问题，美国本土没有现成冶炼能力接上。这里说的是分析对潜在供应中断风险的判断，不是已经发生断供。按 Manufacturing Dive 的转述，这来自经济学家 Adam Hersh 的分析。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "不是铝的孤例",
+      "paragraphs": [
+        {
+          "text": "如果只看铝，这像一条冷门工业信息。但芯片供应链给出了同一种“上游盲区”。美国半导体行业协会 SIA 提醒，美国芯片供应链依赖一些脆弱且不透明的投入品，并呼吁就本土化和储备加强协作。这里要听清：这仍是行业提出的方向，不是已经落地的政策。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "数工厂，还是数能力",
+      "paragraphs": [
+        {
+          "text": "铝和芯片看起来离得很远，却共同说明：供应链的薄弱点，可能不在最后建了多少工厂，而在平时不容易看见的上游材料。判断制造业回流有没有真正增强韧性，不能只数工厂数量；还要看关键材料有没有本土能力、有没有替代来源、供应链是否看得清依赖关系。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "所以，回到开头那个空白：新工厂当然重要，但只问“建了几座”还不够。更该问的是，上游关键材料的能力跟上了吗？",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null,
+          "fact_verification": {
+            "status": "not_factual",
+            "reason": "这是承接开头的反问式过渡，没有新增事实主张或数据。",
+            "sources": []
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 477,
+    "estimated_seconds": 106,
+    "segments": 17,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.589,
+    "status": "UNDER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "一个反直觉的缺口",
+        "spoken_length": 224,
+        "budget": 261
+      },
+      {
+        "title": "不是铝的孤例",
+        "spoken_length": 102,
+        "budget": 261
+      },
+      {
+        "title": "数工厂，还是数能力",
+        "spoken_length": 151,
+        "budget": 261
+      }
+    ]
+  },
+  "edit_type": "EDITED",
+  "meta": {
+    "acceptance_batch": "matrix-recipe-quality-20261023",
+    "report_path": "state/video_editorial_sources/matrix-recipe-quality-20261023/industry-checked-v2.md",
+    "source_review": {
+      "checked_source_urls": [
+        "https://www.supplychaindive.com/news/apple-expands-us-supplier-network-for-iphone-materials-components/833496/",
+        "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/",
+        "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/",
+        "https://www.nist.gov/news-events/news/2026/10/new-chip-based-tape-measure-light-could-revolutionize-mobile-timekeeping"
+      ],
+      "packet_sha256": "d965bc9aabf04410c0aa7fcecf0da0831ca0b8df0f8d0f16e24835b7a51d11bf",
+      "original_script_id": "a8ba608f47204a0182ad0f52bf7de28d"
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "这个范围要说准：不是美国整个铝业都停摆，也不是所有铝都做不了，而是军工需要的那一档高纯度铝，本土没有现成运行能力。",
+          "problem": "发现刚出来就接一串否定式限定，像审稿备注，不像对观众说话。",
+          "why": "普通观众刚被“军工高纯度铝没有运行能力”抓住，就被范围说明打断，注意力从发现转到排除项。",
+          "suggestion": "把边界压成一句自然口语，例如“注意，说的是军工需要的那一档高纯度铝，不是整个美国铝业停摆”；保留“不是所有铝都不行”的事实边界，删掉重复排除。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "供应线一旦出问题，美国本土没有现成冶炼能力接上。",
+          "problem": "与上一段“本土没有现成运行能力”重复，且“供应线一旦出问题”和“能不能在本土炼出来”绕回同一层意思。",
+          "why": "观众会觉得风险解释在原地打转，没获得新信息。",
+          "suggestion": "合并成一句机制：这类材料一旦供应中断，美国本土没有在运行的高纯度铝冶炼能力补位；再自然接“这是潜在风险判断，不是已断供”。保留归因但不要重复能力缺失。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "如果只看铝，这像一条冷门工业信息。但芯片供应链给出了同一种“上游盲区”。美国半导体行业协会 SIA 提醒，美国芯片供应链依赖一些脆弱且不透明的投入品，并呼吁就本土化和储备加强协作。",
+          "problem": "从铝跳到芯片只有“同一种上游盲区”的断言，SIA 这句又只有“脆弱且不透明”的笼统说法，没有具体上游材料或机制。",
+          "why": "陌生观众会问“芯片到底怎么了、和铝哪里像”，类比接不上，主线从具体发现滑向泛泛呼吁。",
+          "suggestion": "要么删掉芯片段，把篇幅留给高纯度铝为什么难替代、谁需要；要么补一个 SIA 材料里的具体上游环节或材料，说明它同样卡在最后组装之外，再保留一句自然归因。没有具体例子就不要用芯片硬撑类比。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "所以，回到开头那个空白：新工厂当然重要，但只问“建了几座”还不够。更该问的是，上游关键材料的能力跟上了吗？",
+          "problem": "与上一段“不能只数工厂数量；还要看关键材料有没有本土能力……”几乎同义重复，结尾没有新增记忆点。",
+          "why": "观众刚听完总结又听一遍改写，收束感变弱，最后问句也因太泛而留不住。",
+          "suggestion": "删掉重复的“新工厂当然重要……还不够”，直接落到更具体的高纯度铝判断或问题，例如“真正的短板可能藏在冶炼这一环，而不是新工厂数量”；保留前文已建立的替代来源维度，不必再列清单。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "现在美国军工需要的高纯度铝到底从哪来？是依赖进口、库存，还是别的方式？不知道来源，就很难感受这个风险有多大。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "这段主要在重复“本土没有现成能力接上”，但没有给出依赖来源或受影响程度，风险感停在概念上，容易让人走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "SIA说的脆弱且不透明的投入品具体指什么？为什么这能算和铝同一种“上游盲区”？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "从铝突然切到芯片，只给了一句行业提醒，没有具体对应案例，类比显得有点泛，容易觉得在听泛泛的供应链话题。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "这里列了本土能力、替代来源、依赖关系几条判断标准，但前面没有展开，听起来像总结口号，注意力容易散。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 9,
+        "rule_must": 0,
+        "questions": 2,
+        "lost": 3,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 5
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 4,
+      "deletions": [],
+      "initial": [
+        {
+          "audit": "fact",
+          "rule": "D2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "脆弱就是断供时不容易换；不透明，就是这些投入品平时不在视野里，甚至未必清楚自己到底依赖谁。",
+          "problem": "讲稿把 SIA 说的「脆弱」解释成「断供时不容易换」，等于加入了一个来源没有支撑的替代性判断。原网页复核明确列出成立条件：投入品脆弱，并不能证明不存在替代品。",
+          "why": "观众会由此以为「难以替换」已是这次评估的结论，实际上来源只说投入品脆弱、不透明，并把替代可能性留作未定；这会把有前提的行业判断说成已经确定的事实。",
+          "suggestion": "改为「脆弱，是指这些投入品容易受到供应中断的冲击；不透明，是指它们平时不在视野里，甚至未必清楚自己到底依赖谁。」不要替来源给出替代难易的结论。",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "说起制造业回流，我们很容易想到新工厂和组装线。Manufacturing Dive 转述的一份经济分析却把镜头往上推了一截：美国目前没有冶炼厂能生产军事专用的高纯度铝。这是对特定军工材料供应风险的判断。",
+          "problem": "开场先垫一句常识，再抛出媒体名和“经济分析”，普通观众要跨过两层铺垫才知道发现是什么；“军事专用高纯度铝”又显得像小众军工细节，吸引力被压住。",
+          "why": "第一耳可能觉得这是离自己很远的军工材料，不容易产生“为什么要继续听”的理由。",
+          "suggestion": "直接以发现切入：先说“美国军工需要的高纯度铝，本土居然没有一家冶炼厂能生产”，保留“军工用”限定，再把 Manufacturing Dive 的来源后置一句交代。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "限定词是军事专用的高纯度铝，不能扩大成美国没有铝冶炼业，或者所有铝材都造不了。这里要看的，是特定上游材料的本土生产能力。",
+          "problem": "单独成段的“限定词是……不能扩大成……”像审稿批注，先教育观众别误解，打断刚建立的发现感。",
+          "why": "观众还没进入供应链问题，就先被防御性说明拦住，容易觉得枯燥、像在上课。",
+          "suggestion": "删掉这个独立限定段，把边界并进上一段一句：“这里说的是军工用高纯度铝，不是美国整个铝冶炼业。”然后直接进入供应风险。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "报告说，美国相关军工材料依赖境外供应，并可能受到来自中国、俄罗斯和阿联酋方向的供应中断影响。注意，是“可能”：不是说中断已经发生，而是这条线一旦出问题，本土没有现成的冶炼能力接上。对军工材料来说，平时看不出差别，断供时却很难临时找替代。",
+          "problem": "“相关军工材料”指代偏虚，紧接着“注意，是‘可能’”又把重点拉到措辞纠正上，连续限定削弱了风险本身的讲述。",
+          "why": "观众容易从“哪里可能断供”跳到“作者在澄清用词”，主线变慢，也记不住具体断供对象。",
+          "suggestion": "改成“报告说，这种高纯度铝依赖境外供应，可能受中国、俄罗斯和阿联酋方向供应中断影响。关键不是中断已经发生，而是一旦出问题，本土没有现成冶炼能力接上。”保留条件和名单，但少一段说教。",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "如果只把这看成铝行业的小插曲，就看小了。美国半导体行业协会 SIA 对半导体供应链的判断是：它依赖“脆弱且不透明”的投入品。翻成日常话，脆弱就是断供时不容易换；不透明，就是这些投入品平时不在视野里，甚至未必清楚自己到底依赖谁。",
+          "problem": "从铝突然跳到 SIA 和半导体，“看小了”是空过渡，观众不知道芯片为什么接在这里；“投入品”“脆弱且不透明”也偏术语。",
+          "why": "主线在这里容易断掉，普通观众可能觉得换了话题，失去跟下去的线索。",
+          "suggestion": "先用“铝不是孤例”明确连接，再讲人话：“芯片制造也依赖一些关键材料，这些材料断供时不好换，平时又看不清自己依赖谁。”然后交代 SIA。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "SIA 呼吁政府和产业加强协作，讨论本土化和储备。但这是行业在提方向，不是政策已经落地，更不是问题已经解决。",
+          "problem": "“呼吁协作、讨论本土化和储备”没有具体信息，后面“不是政策落地，更不是问题解决”又是防御性说明，像为了交代而交代。",
+          "why": "观众听到的是空泛表态加免责，容易走神，也冲淡前面“脆弱且不透明”的判断。",
+          "suggestion": "如果对主线没有解释价值就删掉；若要保留，压成一句：“SIA 提的是行业建议，还不是已落地政策。”",
+          "source": "model",
+          "editorial": true,
+          "resolved": false
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 1,
+          "quote": "所以，制造业回流如果只数最后那座组装厂，供应链仍然可能脆弱。关键材料的生产能力、替代来源和供应透明度，要放在同一张图里看。工厂增加，并不自动等于供应链更有韧性。",
+          "problem": "结尾把“生产能力、替代来源、透明度”和“工厂增加不等于韧性”重复总结了一遍，上一段已经说过同义判断，收束变成绕圈。",
+          "why": "观众听到最后没有得到新的推进，只觉得同一句话换说法反复说，削弱记忆点。",
+          "suggestion": "压缩成一句最有力的判断即可，例如：“所以，制造业回流如果只数最后那座组装厂，供应链仍可能脆弱——工厂增加，不等于韧性增加。”删掉中间清单复述。",
+          "source": "model",
+          "editorial": true,
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“军事专用的高纯度铝”具体特殊在哪、为什么普通冶炼厂替不了？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "中国、俄罗斯和阿联酋是实际供应来源，还是可能造成断供的风险方向？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": false
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“投入品”具体指材料、设备还是零部件？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model",
+          "resolved": true
+        }
+      ],
+      "editorial_attempted": true
+    },
+    "problems": [],
+    "audit_usage": {
+      "requests": 21,
+      "prompt_tokens": 60896,
+      "completion_tokens": 77975,
+      "total_tokens": 138871
+    },
+    "audit_prompt_version": 11,
+    "editorial_attempt": {
+      "applied": true,
+      "before": [
+        {
+          "title": "先看一个反直觉的空白",
+          "paragraphs": [
+            {
+              "text": "说起制造业回流，我们很容易想到新工厂和组装线。Manufacturing Dive 转述的一份经济分析却把镜头往上推了一截：美国目前没有冶炼厂能生产军事专用的高纯度铝。这是对特定军工材料供应风险的判断。",
+              "citations": [
+                "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "原网页复核记录明确写着：经济学者 Adam Hersh 的分析认为，美国没有运行中的冶炼厂能生产军事专用高纯铝，属于对潜在供应中断风险的判断。讲稿把来源交代为「Manufacturing Dive 转述的一份经济分析」，与来源归属一致；「军事专用的高纯度铝」也保留了来源的限定范围，没有扩大为美国没有铝冶炼业。",
+                "sources": [
+                  "https://manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591"
+                ]
+              }
+            },
+            {
+              "text": "限定词是军事专用的高纯度铝，不能扩大成美国没有铝冶炼业，或者所有铝材都造不了。这里要看的，是特定上游材料的本土生产能力。",
+              "citations": [
+                "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "本段是对上一段的限定澄清，与复核记录中「This does not mean the US has no ordinary aluminum production」的成立条件完全一致：把范围限定在军事专用高纯度铝和特定上游材料，没有断言美国完全没有铝冶炼能力。",
+                "sources": [
+                  "https://manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "空白为什么是安全问题",
+          "paragraphs": [
+            {
+              "text": "报告说，美国相关军工材料依赖境外供应，并可能受到来自中国、俄罗斯和阿联酋方向的供应中断影响。注意，是“可能”：不是说中断已经发生，而是这条线一旦出问题，本土没有现成的冶炼能力接上。对军工材料来说，平时看不出差别，断供时却很难临时找替代。",
+              "citations": [
+                "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "来源报告把影响表述为对潜在供应中断的暴露，讲稿用「可能」限定，没有说中断已经发生；「本土没有现成的冶炼能力接上」直接对应「没有运行中的冶炼厂能生产军事专用高纯铝」这一事实。中国、俄罗斯、阿联酋三个方向来自研究条目对该报告风险暴露的转述，与复核记录不冲突。",
+                "sources": [
+                  "https://manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "半导体也在同一道题上",
+          "paragraphs": [
+            {
+              "text": "如果只把这看成铝行业的小插曲，就看小了。SIA 对美国半导体供应链的判断是：它依赖“脆弱且不透明”的投入品。换成日常话，脆弱，是这些投入品容易受到供应中断的冲击；不透明，是它们平时不在视野里，供应链上的人甚至未必清楚到底依赖谁。",
+              "citations": [
+                "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/",
+                "https://supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485"
+              ],
+              "evidence": "CITED",
+              "note": "已按审计意见改写",
+              "fact_verification": {
+                "status": "verified",
+                "reason": "复核记录确认 SIA 的关切是「vulnerable and opaque inputs」（脆弱且不透明的投入品），原报道标题亦为 hidden inputs。讲稿对「脆弱」「不透明」的日常化解释没有超出这两个词的含义，也没有把 SIA 说成政策制定方；改写后删去了材料未说明的全称展开，只保留 SIA，反而更贴合来源。",
+                "sources": [
+                  "https://supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485"
+                ]
+              },
+              "revision": {
+                "before": "如果只把这看成铝行业的小插曲，就看小了。美国半导体行业协会 SIA 对半导体供应链的判断是：它依赖“脆弱且不透明”的投入品。翻成日常话，脆弱就是断供时不容易换；不透明，就是这些投入品平时不在视野里，甚至未必清楚自己到底依赖谁。",
+                "proposed": "如果只把这看成铝行业的小插曲，就看小了。SIA 对美国半导体供应链的判断是：它依赖“脆弱且不透明”的投入品。换成日常话，脆弱，是这些投入品容易受到供应中断的冲击；不透明，是它们平时不在视野里，供应链上的人甚至未必清楚到底依赖谁。",
+                "accepted": true,
+                "lost_conditions": []
+              }
+            },
+            {
+              "text": "SIA 呼吁政府和产业加强协作，讨论本土化和储备。但这是行业在提方向，不是政策已经落地，更不是问题已经解决。",
+              "citations": [
+                "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "复核记录显示 SIA 呼吁政府与产业就本土化和储备加强协作，这属于协会提出的方向，而不是已实施政策；讲稿明确区分「行业在提方向」与「政策已经落地」「问题已经解决」，没有把呼吁当成已执行措施。",
+                "sources": [
+                  "https://supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "韧性不看工厂数量",
+          "paragraphs": [
+            {
+              "text": "铝和芯片看起来离得很远，却都指向同一类问题：真正难补的，往往不是最后那座工厂，而是上游。铝这边，问题很具体：那份分析认为，美国没有运行中的冶炼厂能生产军事专用的高纯度铝。芯片这边，SIA 的担忧则是关键投入品脆弱、不透明，供应链未必看得清自己到底依赖谁；它呼吁政府和企业就本土化、储备加强协作，但这还是行业提出的方向。",
+              "citations": [
+                "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/",
+                "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/",
+                "https://manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591",
+                "https://supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485"
+              ],
+              "evidence": "CITED",
+              "note": "已按审计意见改写",
+              "fact_verification": {
+                "status": "verified",
+                "reason": "本段把铝与芯片并列，但两条线各自保留了来源性质与归属：铝是「那份分析认为」美国没有运行中冶炼厂能生产军事专用高纯铝；芯片是 SIA 认为关键投入品脆弱、不透明，并呼吁协作本土化与储备，且点明仍是行业方向。改写后已删除原先没有来源支持的「临时切换未必来得及」这一速度判断，「真正难补的，往往不是最后那座工厂，而是上游」是有「往往」限定的定性概括，与两份来源的具体发现（无可用本土冶炼能力、投入品隐蔽且脆弱）不矛盾，未构成新的独立事实断言。",
+                "sources": [
+                  "https://manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591",
+                  "https://supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485"
+                ]
+              },
+              "revision": {
+                "before": "铝和芯片看起来离得很远，却指向同一个难题：下游工厂可以建，上游关键材料却不一定有本土能力。铝卡在特定高纯铝的冶炼上；芯片更隐蔽，问题在于关键投入不够透明，行业未必看得清自己依赖了谁。平时不显眼，真遇到供应中断，临时切换未必来得及。",
+                "proposed": "铝和芯片看起来离得很远，却都指向同一类问题：真正难补的，往往不是最后那座工厂，而是上游。铝这边，问题很具体：那份分析认为，美国没有运行中的冶炼厂能生产军事专用的高纯度铝。芯片这边，SIA 的担忧则是关键投入品脆弱、不透明，供应链未必看得清自己到底依赖谁；它呼吁政府和企业就本土化、储备加强协作，但这还是行业提出的方向。",
+                "accepted": true,
+                "lost_conditions": []
+              }
+            },
+            {
+              "text": "所以，制造业回流如果只数最后那座组装厂，供应链仍然可能脆弱。关键材料的生产能力、替代来源和供应透明度，要放在同一张图里看。工厂增加，并不自动等于供应链更有韧性。",
+              "citations": [
+                "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/",
+                "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "结语把「工厂增加不等于供应链更有韧性」建立在两条来源之上：铝的瓶颈在特定高纯铝冶炼能力，芯片的风险在关键投入品隐蔽且脆弱。建议关注材料生产能力、替代来源与供应透明度，与来源机制一致，没有承诺具体效果或与报告结论相悖，也未引入新的数字或时效条件。",
+                "sources": [
+                  "https://manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591",
+                  "https://supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "targets": {
+        "S1P2": [
+          "【编辑建议，按实际效果取舍】开头刚抛出发现，马上用“不能扩大成”做边界纠偏，像在念审稿备注；观众还没进入风险，先被要求记住限定。；建议：压成一句自然事实：“这里说的是军工用的高纯度铝，不是整个铝业。”然后马上回到“断供时本土没有现成产能”这个后果；后半句可删或后移。"
+        ],
+        "S2P1": [
+          "【编辑建议，按实际效果取舍】“相关军工材料”指向偏虚，三个国家方向连续出现却缺少解释；紧接着“注意，是‘可能’”像内部提醒，打断讲述。；建议：先说清“这种高纯铝依赖境外，而且一旦断供，本土没有现成冶炼能力接上”，地缘风险用一句“可能受境外供应中断影响”带过；若保留“可能”，用正常口语一次讲清，不要“注意”。"
+        ],
+        "S3P1": [
+          "【编辑建议，按实际效果取舍】从铝突然切到半导体，SIA 没有自然交代，“它”指代不清，“投入品”也偏抽象；观众需要重新猜这段为什么出现。；建议：先用共同问题搭桥：“铝的问题在上游，芯片也一样。”自然说“半导体产业协会（SIA）提到美国芯片供应链依赖一些脆弱且不透明的关键材料”，再用一句解释脆弱和不透明，避免“它依赖”这种指代。"
+        ],
+        "S3P2": [
+          "【编辑建议，按实际效果取舍】前句已经说“呼吁”，后句连续“不是……更不是……”像免责声明，节奏拖。；建议：压成一句“目前这只是行业倡议，政策还没落地”，保留边界即可。"
+        ],
+        "S4P1": [
+          "【编辑建议，按实际效果取舍】几乎逐句复述前文铝和芯片的细节，没有新增判断；结尾总结变成重复空转。；建议：只留共同点：“铝和芯片的共同点不在最后那座工厂，而在上游关键材料。”然后直接接 S4P2 的结论；不要重讲“没有冶炼厂”和 SIA 细节。",
+          "【编辑建议，按实际效果取舍】这段把铝和芯片前面讲过的内容又总结了一遍，几乎没有新增信息，听到这里容易觉得重复、想快进。；建议：放慢、补一步推理，或换个说法"
+        ]
+      },
+      "before_title": "制造业回流，难补的是上游材料",
+      "mode": "whole_script",
+      "prompt_version": 4,
+      "title": "新工厂之外，美国军工高纯铝缺在哪",
+      "sections": [
+        {
+          "title": "一个反直觉的缺口",
+          "paragraphs": [
+            {
+              "text": "说到制造业回流，画面通常是新工厂、组装线。但行业媒体 Manufacturing Dive 最近转述的一项分析，指向一个更靠上游的空白：美国没有正在运行的冶炼厂，能生产军工专用的高纯度铝。这个范围要说准：不是美国整个铝业都停摆，也不是所有铝都做不了，而是军工需要的那一档高纯度铝，本土没有现成运行能力。",
+              "citations": [],
+              "evidence": "UNCITED",
+              "note": null
+            },
+            {
+              "text": "这为什么算供应链风险？因为这类材料的关键不在最后组装，而在能不能在本土炼出来。供应线一旦出问题，美国本土没有现成冶炼能力接上。这里说的是分析对潜在供应中断风险的判断，不是已经发生断供。按 Manufacturing Dive 的转述，这来自经济学家 Adam Hersh 的分析。",
+              "citations": [],
+              "evidence": "UNCITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "不是铝的孤例",
+          "paragraphs": [
+            {
+              "text": "如果只看铝，这像一条冷门工业信息。但芯片供应链给出了同一种“上游盲区”。美国半导体行业协会 SIA 提醒，美国芯片供应链依赖一些脆弱且不透明的投入品，并呼吁就本土化和储备加强协作。这里要听清：这仍是行业提出的方向，不是已经落地的政策。",
+              "citations": [],
+              "evidence": "UNCITED",
+              "note": null
+            }
+          ]
+        },
+        {
+          "title": "数工厂，还是数能力",
+          "paragraphs": [
+            {
+              "text": "铝和芯片看起来离得很远，却共同说明：供应链的薄弱点，可能不在最后建了多少工厂，而在平时不容易看见的上游材料。判断制造业回流有没有真正增强韧性，不能只数工厂数量；还要看关键材料有没有本土能力、有没有替代来源、供应链是否看得清依赖关系。",
+              "citations": [],
+              "evidence": "UNCITED",
+              "note": null
+            },
+            {
+              "text": "所以，回到开头那个空白：新工厂当然重要，但只问“建了几座”还不够。更该问的是，上游关键材料的能力跟上了吗？",
+              "citations": [],
+              "evidence": "UNCITED",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "editorial_brief": {
+        "considered": [
+          "只讲军工高纯铝缺口：具体、反直觉，能抓住人；但若停在铝，容易像一条冷门工业信息，所以用 SIA 的芯片供应链提醒做短对照。",
+          "铝和半导体并列双案例：能说明“上游材料”共性，但原稿正是在切换和总结处显得跳跃、重复；3 分钟内两条线等长讲会散。",
+          "只讲 SIA 的“隐性投入”风险：贴近芯片话题，但材料没有点名具体投入品，口播容易变成抽象的风险提示，吸引力弱于高纯铝缺口。",
+          "从苹果扩展美国供应商切入：观众熟悉，但材料只到供应商合作和承诺金额，和军工高纯铝不是同一类问题，容易把话题带成企业供应链新闻。"
+        ],
+        "angle": "制造业回流最容易被看见的是新工厂，但真正难补的常常是上游关键材料——美国军工需要的高纯度铝，就没有正在运行的本土冶炼厂能生产。",
+        "viewer_value": "用一个具体、反直觉的军工材料缺口，让观众理解供应链韧性不只看最后建了多少工厂；同时不把“军工专用高纯铝”夸大成美国整个铝业，也不把行业倡议说成已落地政策。",
+        "throughline": "先被“没有本土冶炼厂能生产军工级高纯铝”这个缺口抓住；接着明白缺口意味着供应中断时本土没有现成上游能力；再由 SIA 对芯片供应链的提醒看到这不是铝的孤例；最后形成一个判断：看制造业回流，不能只数组装厂，要问关键材料能力、替代来源和供应透明度。",
+        "keep": [
+          "军工专用高纯度铝的限定范围，以及“美国没有正在运行的冶炼厂能生产它”这一具体缺口；这是全片的钩子。",
+          "该分析对潜在供应中断风险的判断，以及本土没有现成冶炼能力接上的后果；这解释它为什么不是冷门工业信息。",
+          "Manufacturing Dive 转述经济学家 Adam Hersh 分析的来源归属；保证说法有出处，不把分析写成已发生断供。",
+          "SIA 关于芯片供应链依赖脆弱且不透明投入品的提醒，以及呼吁就本土化和储备加强协作；用来显示这不是铝的孤例。",
+          "SIA 的呼吁仍属行业方向、不是已落地政策；防止把倡议讲成问题已解决。",
+          "“工厂数量不等于供应链韧性”的收束判断；这是观众最值得带走的认识。"
+        ],
+        "leave_out": [
+          "苹果扩展美国供应商网络及 1 亿美元、6000 亿美元等承诺数字：会变成企业供应链新闻，且与军工高纯铝不是同一类上游能力问题。",
+          "印度 OSAT 测试设备选型：只到设备选定和准备生产阶段，和本期主线关系弱。",
+          "Everspin 的 MRAM 机会判断：属于 CEO 专访中的市场判断，没有订单或量产信息，容易分散。",
+          "NIST 芯片“光尺”：研究阶段的光学计时与导航应用，不是制造业上游材料问题。",
+          "中国、俄罗斯、阿联酋等具体供应方向：最高优先级的原网页复核只说到潜在供应中断，没有列出这些国家；列出来会增加地理名单却不帮助理解主线。",
+          "受影响装备、缺口规模、替代来源和时间表：材料没有提供，不能用猜测补足。",
+          "对 SIA 本土化和储备目标的详细展开：材料没有具体清单和数值，讲长会变成抽象政策讨论。"
+        ],
+        "facts": [
+          "2.3",
+          "2.1"
+        ],
+        "openings": [
+          "说到制造业回流，画面通常是新工厂、组装线。但行业媒体 Manufacturing Dive 最近转述的一项分析，指向一个更靠上游的空白：美国没有正在运行的冶炼厂，能生产军工专用的高纯度铝。理由：具体、反直觉，且自然交代来源。",
+          "苹果在扩大美国供应商网络，这类新闻很容易让人觉得制造业正在回流。但把镜头移到军工材料，会看到另一种缺口：不是最后组装，而是上游高纯铝没有本土冶炼能力。理由：用熟悉公司切入，但苹果的承诺金额和供应商细节会分散主线，不如直接讲铝。",
+          "SIA 提醒，美国芯片供应链依赖一些脆弱且不透明的投入品。理由：切中供应链风险，但“投入品”没有具体名字，开场较抽象，听众不容易立刻进入。"
+        ],
+        "opening": "说到制造业回流，画面通常是新工厂、组装线。但行业媒体 Manufacturing Dive 最近转述的一项分析，指向一个更靠上游的空白：美国没有正在运行的冶炼厂，能生产军工专用的高纯度铝。",
+        "beats": [
+          {
+            "point": "观众先认清缺口的确切范围：不是美国没有铝冶炼业，而是军工专用的高纯度铝没有正在运行的本土冶炼能力。",
+            "facts": [
+              "2.3"
+            ],
+            "connection": "这个缺口足够反直觉，观众会追问：一条军工材料的冶炼能力，为什么算供应链风险？"
+          },
+          {
+            "point": "这类材料的关键不在最后组装，而在能不能在本土炼出来；一旦供应线出问题，本土没有现成冶炼能力接上。",
+            "facts": [
+              "2.3"
+            ],
+            "connection": "如果只是铝的个案，故事还不够大；芯片供应链提供了同一种“上游盲区”的另一个例子。"
+          },
+          {
+            "point": "SIA 提醒，美国芯片供应链依赖一些脆弱且不透明的投入品，并呼吁就本土化和储备加强协作；这仍是行业提出的方向，不是已经落地的政策。",
+            "facts": [
+              "2.1"
+            ],
+            "connection": "铝和芯片看似离得远，却共同说明：供应链的薄弱点可能不在最后的工厂，而在平时不容易看见的上游材料。"
+          },
+          {
+            "point": "判断制造业回流是否增强韧性，不能只数最后建了多少工厂；还要看关键材料有没有本土能力、有没有替代来源、供应链是否看得清依赖关系。",
+            "facts": [
+              "2.3",
+              "2.1"
+            ],
+            "connection": "结尾把两个案例收束成一个可带走的问题：新工厂之外，上游材料能力跟上了吗？"
+          }
+        ],
+        "material": ""
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这个范围要说准：不是美国整个铝业都停摆，也不是所有铝都做不了，而是军工需要的那一档高纯度铝，本土没有现成运行能力。",
+            "problem": "发现刚出来就接一串否定式限定，像审稿备注，不像对观众说话。",
+            "why": "普通观众刚被“军工高纯度铝没有运行能力”抓住，就被范围说明打断，注意力从发现转到排除项。",
+            "suggestion": "把边界压成一句自然口语，例如“注意，说的是军工需要的那一档高纯度铝，不是整个美国铝业停摆”；保留“不是所有铝都不行”的事实边界，删掉重复排除。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "供应线一旦出问题，美国本土没有现成冶炼能力接上。",
+            "problem": "与上一段“本土没有现成运行能力”重复，且“供应线一旦出问题”和“能不能在本土炼出来”绕回同一层意思。",
+            "why": "观众会觉得风险解释在原地打转，没获得新信息。",
+            "suggestion": "合并成一句机制：这类材料一旦供应中断，美国本土没有在运行的高纯度铝冶炼能力补位；再自然接“这是潜在风险判断，不是已断供”。保留归因但不要重复能力缺失。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "如果只看铝，这像一条冷门工业信息。但芯片供应链给出了同一种“上游盲区”。美国半导体行业协会 SIA 提醒，美国芯片供应链依赖一些脆弱且不透明的投入品，并呼吁就本土化和储备加强协作。",
+            "problem": "从铝跳到芯片只有“同一种上游盲区”的断言，SIA 这句又只有“脆弱且不透明”的笼统说法，没有具体上游材料或机制。",
+            "why": "陌生观众会问“芯片到底怎么了、和铝哪里像”，类比接不上，主线从具体发现滑向泛泛呼吁。",
+            "suggestion": "要么删掉芯片段，把篇幅留给高纯度铝为什么难替代、谁需要；要么补一个 SIA 材料里的具体上游环节或材料，说明它同样卡在最后组装之外，再保留一句自然归因。没有具体例子就不要用芯片硬撑类比。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "所以，回到开头那个空白：新工厂当然重要，但只问“建了几座”还不够。更该问的是，上游关键材料的能力跟上了吗？",
+            "problem": "与上一段“不能只数工厂数量；还要看关键材料有没有本土能力……”几乎同义重复，结尾没有新增记忆点。",
+            "why": "观众刚听完总结又听一遍改写，收束感变弱，最后问句也因太泛而留不住。",
+            "suggestion": "删掉重复的“新工厂当然重要……还不够”，直接落到更具体的高纯度铝判断或问题，例如“真正的短板可能藏在冶炼这一环，而不是新工厂数量”；保留前文已建立的替代来源维度，不必再列清单。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "现在美国军工需要的高纯度铝到底从哪来？是依赖进口、库存，还是别的方式？不知道来源，就很难感受这个风险有多大。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "这段主要在重复“本土没有现成能力接上”，但没有给出依赖来源或受影响程度，风险感停在概念上，容易让人走神。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "SIA说的脆弱且不透明的投入品具体指什么？为什么这能算和铝同一种“上游盲区”？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "从铝突然切到芯片，只给了一句行业提醒，没有具体对应案例，类比显得有点泛，容易觉得在听泛泛的供应链话题。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "这里列了本土能力、替代来源、依赖关系几条判断标准，但前面没有展开，听起来像总结口号，注意力容易散。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "audits_complete": true,
+        "pending_review": false,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 9,
+          "rule_must": 0,
+          "questions": 2,
+          "lost": 3,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 5
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 4
+            }
+          },
+          "passed": true,
+          "rank": 0
+        },
+        "rounds": 4,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "脆弱就是断供时不容易换；不透明，就是这些投入品平时不在视野里，甚至未必清楚自己到底依赖谁。",
+            "problem": "讲稿把 SIA 说的「脆弱」解释成「断供时不容易换」，等于加入了一个来源没有支撑的替代性判断。原网页复核明确列出成立条件：投入品脆弱，并不能证明不存在替代品。",
+            "why": "观众会由此以为「难以替换」已是这次评估的结论，实际上来源只说投入品脆弱、不透明，并把替代可能性留作未定；这会把有前提的行业判断说成已经确定的事实。",
+            "suggestion": "改为「脆弱，是指这些投入品容易受到供应中断的冲击；不透明，是指它们平时不在视野里，甚至未必清楚自己到底依赖谁。」不要替来源给出替代难易的结论。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "说起制造业回流，我们很容易想到新工厂和组装线。Manufacturing Dive 转述的一份经济分析却把镜头往上推了一截：美国目前没有冶炼厂能生产军事专用的高纯度铝。这是对特定军工材料供应风险的判断。",
+            "problem": "开场先垫一句常识，再抛出媒体名和“经济分析”，普通观众要跨过两层铺垫才知道发现是什么；“军事专用高纯度铝”又显得像小众军工细节，吸引力被压住。",
+            "why": "第一耳可能觉得这是离自己很远的军工材料，不容易产生“为什么要继续听”的理由。",
+            "suggestion": "直接以发现切入：先说“美国军工需要的高纯度铝，本土居然没有一家冶炼厂能生产”，保留“军工用”限定，再把 Manufacturing Dive 的来源后置一句交代。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "限定词是军事专用的高纯度铝，不能扩大成美国没有铝冶炼业，或者所有铝材都造不了。这里要看的，是特定上游材料的本土生产能力。",
+            "problem": "单独成段的“限定词是……不能扩大成……”像审稿批注，先教育观众别误解，打断刚建立的发现感。",
+            "why": "观众还没进入供应链问题，就先被防御性说明拦住，容易觉得枯燥、像在上课。",
+            "suggestion": "删掉这个独立限定段，把边界并进上一段一句：“这里说的是军工用高纯度铝，不是美国整个铝冶炼业。”然后直接进入供应风险。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "报告说，美国相关军工材料依赖境外供应，并可能受到来自中国、俄罗斯和阿联酋方向的供应中断影响。注意，是“可能”：不是说中断已经发生，而是这条线一旦出问题，本土没有现成的冶炼能力接上。对军工材料来说，平时看不出差别，断供时却很难临时找替代。",
+            "problem": "“相关军工材料”指代偏虚，紧接着“注意，是‘可能’”又把重点拉到措辞纠正上，连续限定削弱了风险本身的讲述。",
+            "why": "观众容易从“哪里可能断供”跳到“作者在澄清用词”，主线变慢，也记不住具体断供对象。",
+            "suggestion": "改成“报告说，这种高纯度铝依赖境外供应，可能受中国、俄罗斯和阿联酋方向供应中断影响。关键不是中断已经发生，而是一旦出问题，本土没有现成冶炼能力接上。”保留条件和名单，但少一段说教。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "如果只把这看成铝行业的小插曲，就看小了。美国半导体行业协会 SIA 对半导体供应链的判断是：它依赖“脆弱且不透明”的投入品。翻成日常话，脆弱就是断供时不容易换；不透明，就是这些投入品平时不在视野里，甚至未必清楚自己到底依赖谁。",
+            "problem": "从铝突然跳到 SIA 和半导体，“看小了”是空过渡，观众不知道芯片为什么接在这里；“投入品”“脆弱且不透明”也偏术语。",
+            "why": "主线在这里容易断掉，普通观众可能觉得换了话题，失去跟下去的线索。",
+            "suggestion": "先用“铝不是孤例”明确连接，再讲人话：“芯片制造也依赖一些关键材料，这些材料断供时不好换，平时又看不清自己依赖谁。”然后交代 SIA。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "SIA 呼吁政府和产业加强协作，讨论本土化和储备。但这是行业在提方向，不是政策已经落地，更不是问题已经解决。",
+            "problem": "“呼吁协作、讨论本土化和储备”没有具体信息，后面“不是政策落地，更不是问题解决”又是防御性说明，像为了交代而交代。",
+            "why": "观众听到的是空泛表态加免责，容易走神，也冲淡前面“脆弱且不透明”的判断。",
+            "suggestion": "如果对主线没有解释价值就删掉；若要保留，压成一句：“SIA 提的是行业建议，还不是已落地政策。”",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "所以，制造业回流如果只数最后那座组装厂，供应链仍然可能脆弱。关键材料的生产能力、替代来源和供应透明度，要放在同一张图里看。工厂增加，并不自动等于供应链更有韧性。",
+            "problem": "结尾把“生产能力、替代来源、透明度”和“工厂增加不等于韧性”重复总结了一遍，上一段已经说过同义判断，收束变成绕圈。",
+            "why": "观众听到最后没有得到新的推进，只觉得同一句话换说法反复说，削弱记忆点。",
+            "suggestion": "压缩成一句最有力的判断即可，例如：“所以，制造业回流如果只数最后那座组装厂，供应链仍可能脆弱——工厂增加，不等于韧性增加。”删掉中间清单复述。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“军事专用的高纯度铝”具体特殊在哪、为什么普通冶炼厂替不了？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "中国、俄罗斯和阿联酋是实际供应来源，还是可能造成断供的风险方向？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“投入品”具体指材料、设备还是零部件？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "decision": {
+        "listening": {
+          "A": "开场从“新工厂和组装线”转到“美国目前没有冶炼厂能生产军事专用的高纯度铝”，这个发现很抓人，我会想继续听；“来自中国、俄罗斯和阿联酋方向”也让风险有了具体方向。但紧接着“限定词是……不能扩大成……”像在听编辑注释，我从故事里被拉出来；后面“注意，是‘可能’”也有同样感觉。SIA 的转场“如果只把这看成铝行业的小插曲，就看小了”有效，可第六段又把铝和芯片逐点复述一遍（“铝这边，问题很具体……”“芯片这边，SIA 的担忧……”），我在那里明显走神；结尾“工厂增加，并不自动等于供应链更有韧性”虽然清楚，但新鲜感已被复述消耗。",
+          "B": "开场同样有画面，“指向一个更靠上游的空白”和标题里的“缺在哪”让我知道重点。“这个范围要说准：不是美国整个铝业都停摆……”把限定说得像讲述的一部分，比单独解释限定词顺。“这为什么算供应链风险？”把逻辑接住；“如果只看铝，这像一条冷门工业信息。但芯片供应链给出了同一种‘上游盲区’”是我最愿意跟的转场，没有断。缺点是“脆弱且不透明”没有被展开成日常话，风险画面略抽象；第三段末尾突然出现 Adam Hersh 的名字，像补来源，稍微打断。结尾反问让我收住，但不算特别有余味。"
+        },
+        "choice": "B",
+        "reason": "决定性差异是听完时的注意力是否连续。A 在第六段把已经讲过的铝和芯片判断成段复述，具体句子如“铝这边，问题很具体……”“芯片这边，SIA 的担忧……”让我明显走神；B 用“如果只看铝……但芯片供应链给出了同一种‘上游盲区’”完成转场，并用“更该问的是，上游关键材料的能力跟上了吗？”收束，没有重复清单。A 的限定和“可能”说明虽有用，但连续以“限定词是”“注意，是”出现，听感更像校对；B 把范围限定融进开场讲述，所以我更愿意跟 B 听完。",
+        "remaining": [
+          "B 对 SIA 所说“脆弱且不透明”没有拆成日常语言，风险仍偏抽象；可补一个具体依赖场景，让听众感到“不透明”到底意味着什么。",
+          "第三段末尾“按 Manufacturing Dive 的转述，这来自经济学家 Adam Hersh 的分析”出现得像补来源，打断前一句的风险解释；可更早或更自然地交代。",
+          "结尾反问顺畅但略常规，若前面补一个具体细节，结尾可以更有记忆点。"
+        ]
+      }
+    }
+  },
+  "created_by": "用户授权·样本质量修订",
+  "created_at": "2026-10-23T22:03:41+0800"
+}

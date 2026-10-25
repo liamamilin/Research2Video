@@ -22,6 +22,8 @@ def run_revision(p):
     if (p.ARTIFACTS/'prepared-source.txt').exists():p.PREPARED_SOURCE=(p.ARTIFACTS/'prepared-source.txt').read_text()
     ir=json.loads(p.IR_PATH.read_text());before=deepcopy(ir)
     narration=json.loads((p.ARTIFACTS/'final-narration-plan.json').read_text())
+    from g2.audience_copy import require_copy
+    require_copy(p, '\n'.join(segment['text'] for segment in narration['segments']))
     voice_changed=saved['voice_id']!=saved.get('parent_voice_id','zf_xiaoxiao')
     alignment={}
     p.skip_step('narration-plan','复用原讲稿')
@@ -59,6 +61,7 @@ def run_revision(p):
             for b in scene['beats']:
                 t=b['trigger'];old=old_rows[t['segment_id']];new=rows[t['segment_id']]
                 t['offset_ms']=round(t['offset_ms']*(new['end_ms']-new['start_ms'])/max(1,old['end_ms']-old['start_ms']))
+        board['image_assets']=[a for a in before['assets'] if a['type']=='image']
         generated=p.compile_ir(narration,board,alignment)
         # Presentation and chapter identities stay as saved in the parent.
         for key in ['presentation','content_structure']:
@@ -78,7 +81,12 @@ def run_revision(p):
     if 'content_structure' in ir:
         from g2.content_video import write_chapter_evidence
         write_chapter_evidence(p,narration,compiled)
-    write_captions(p,ir['narration']['segments'])
+    from g2.caption_alignment import supports_short_captions
+    if supports_short_captions(ir):
+        from g2.caption_alignment import prepare as prepare_short_captions
+        prepare_short_captions(p,ir)
+    else:
+        write_captions(p,ir['narration']['segments'])
     if saved['operation_type']=='media_revision':
         p.write_json(p.ARTIFACTS/'media-revision.json',{'parent_job_id':saved['parent_job_id'],'voice_id':p.VOICE,'video_speed':p.OUTPUT_SPEED,'voice_resynthesized':voice_changed,'narration_unchanged':True,'screen_content_unchanged':all(a['props']==b['props'] for a,b in zip(before['scenes'],ir['scenes']))})
     renderer=p.RUN_ROOT/'renderer'
@@ -90,6 +98,9 @@ def run_revision(p):
 
 
 def replan_scene(p,old,narration,ir,instruction):
+    if ir.get('presentation',{}).get('preset')=='information_cards':
+        from g2.card_editorial import replan_scene as replan_card
+        return replan_card(p,old,narration,instruction)
     from g2 import information_motion as motion,process_diagram as diagram
     is_info=ir.get('presentation',{}).get('preset')=='information_motion'
     module=motion if is_info else diagram

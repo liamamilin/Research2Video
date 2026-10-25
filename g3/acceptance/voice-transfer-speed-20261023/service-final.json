@@ -1,0 +1,14 @@
+{
+  "old_pid": 96292,
+  "new_pid": 12822,
+  "before": {
+    "scripts": 83,
+    "renders": 112
+  },
+  "after": {
+    "scripts": 83,
+    "renders": 112
+  },
+  "health": "ok",
+  "latest_timing_api_and_ui_loaded": true
+}

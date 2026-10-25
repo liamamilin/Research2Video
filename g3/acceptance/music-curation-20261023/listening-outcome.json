@@ -1,0 +1,24 @@
+{
+  "status": "paused_after_partial_listening",
+  "accepted": false,
+  "scope": "文字／图解／旁白视频的背景配乐",
+  "user_decision": "部分试听发现共同问题，后续未继续试听，背景配乐先不做，仅记录问题。",
+  "issues": [
+    "部分原曲单独试听偏吵",
+    "混音试听衔接不自然，具体位置尚未定位",
+    "混音中的背景配乐几乎听不见"
+  ],
+  "reviewed_assets": [
+    "ambient_pad",
+    "20b28e98-94d5-445f-a880-e350aefc0fea"
+  ],
+  "unreviewed_assets": [
+    "layered_space",
+    "pulse_loop",
+    "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+    "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+    "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf"
+  ],
+  "new_generation_or_mix_tuning": "stopped",
+  "existing_assets_and_functions": "preserved"
+}

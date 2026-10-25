@@ -1,0 +1,49 @@
+{
+  "choices": {
+    "ai_news": {
+      "job_id": "3bf58b29-665e-4e7f-8c97-ac7e01dc34eb",
+      "title": "第一批验收 · 动态拼贴 · 配乐修订",
+      "duration_seconds": 57.8
+    },
+    "how_to": {
+      "job_id": "d4d94a54-4852-4f7c-93a1-2c219633d660",
+      "title": "第二阶段验收 · 图片轮播 · 修正版 · 配乐修订",
+      "duration_seconds": 51.633
+    }
+  },
+  "preexisting_unavailable_inputs_skipped": [
+    "f6e34975-d0ac-409a-98b1-51cbe0c08896",
+    "0b97170d-3e0f-4c6c-98ef-f451fe7dea31",
+    "c94813f5-ce48-4f4a-9a5c-f5232888df40",
+    "eda487c3-f9a4-44de-989a-9b013f688fcf",
+    "53e45b7f-6944-4851-b959-0b2b9f2c3d20",
+    "0fd09c09-86de-4740-8093-6b292731b61d",
+    "f81085d1-c5ba-4e67-ac6e-fa5d75b0fc93",
+    "a1611f69-83b9-4751-ad1e-d7640c0a8ced",
+    "a87044d6-153e-44f0-ab2f-b32ada357917",
+    "d47b903e-a899-4433-a2cb-6a0ba7a90fc8",
+    "a6a6723d-ff90-4b2f-919a-2c63f5fe9f96",
+    "f220d141-fecd-4de1-9082-4bb9e3e82d22",
+    "1332041b-b1e1-4c4d-a1ae-3ae12702572b",
+    "45e3bf98-8686-4478-8e82-a7e3e8f4af88",
+    "d8bd6324-645e-492b-a2f0-340cfbe7bedd",
+    "2d6a9bbf-1861-4530-a018-ac39a8122f08",
+    "64140056-fed2-465f-a5c1-4269f3c0332d",
+    "47a3a7c6-9a79-46eb-b0e3-6ea5e0261f8e",
+    "7b7923fa-d685-4634-aaab-79cad1ae3f85",
+    "07207738-9e49-4ce9-a3d1-decf527e0b31",
+    "2f232cbb-3271-4bab-a681-5d6a5aab9761",
+    "a4ae8c5f-81de-42ab-8144-8bb7e9b3edf7",
+    "34f111f8-b8f7-435c-aef4-c73c2a93ea5f",
+    "7a05ed7a-36a7-4aed-89db-9682406edc9c",
+    "8dadf18e-fb6f-4b56-a69f-7c843212e9bc",
+    "dcfe52a1-5926-48ba-97d0-1fd99728e0cb",
+    "877e83a6-b9a7-41b2-a433-22a847a4e97c",
+    "cc87bd7c-b451-436e-9fe1-5d2ed107161c",
+    "d8422838-b741-4c70-90c0-bc5864829b23",
+    "c7432694-45ee-4770-86ac-6ade02778658",
+    "520801e1-e2a1-42fc-83c6-099c4f36a6c0",
+    "84e04a6b-85d7-4f9f-b658-26349cc3722b",
+    "657867ac-6fda-422c-8be2-b792ba52cadb"
+  ]
+}

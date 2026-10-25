@@ -98,12 +98,7 @@ def _prompt_for_scene(scene: dict) -> str:
     purpose = re.sub(r"[\x00-\x1f\x7f]", " ", str(purpose))[:120].strip()
     after = re.sub(r"[\x00-\x1f\x7f]", " ", str(after))[:120].strip()
     subject = "；".join(value for value in (purpose, after) if value)
-    return (
-        "16:9 横幅中文知识动画背景图，精致的科学杂志编辑插画，克制而清晰，深海军蓝、青绿与少量暖橙，"
-        "有轻微空间层次，主体靠画面边缘，中央留出干净低细节区域供精确矢量图解叠加，底部较暗以容纳字幕。"
-        f"本场景意图：{subject}。只画抽象、辅助性的场景气氛，不要画文字、字母、数字、标签、图表、箭头、"
-        "示意图、标志、水印、界面或可读符号。"
-    )
+    return "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。当前步骤：生成16:9场景背景。场景素材：" + subject
 
 
 def _validate_png(raw: bytes) -> tuple[int, int]:
@@ -139,7 +134,7 @@ def generate_scene_backgrounds(board: dict, fixture_root: Path, artifacts_dir: P
         prompt = _prompt_for_scene(scene)
         request_body = json.dumps({
             "prompt": prompt,
-            "negative_prompt": "text, letters, numbers, labels, typography, logo, watermark, UI, chart, diagram, arrow, clutter",
+            "negative_prompt": "",
             "width": IMAGE_WIDTH,
             "height": IMAGE_HEIGHT,
         }, ensure_ascii=False).encode("utf-8")
@@ -211,7 +206,7 @@ def regenerate_scene_background(board: dict, scene_id: str, fixture_root: Path, 
         prompt += f" 用户补充要求：{prompt_extra}。"
     body = json.dumps({
         "prompt": prompt,
-        "negative_prompt": "text, letters, numbers, labels, typography, logo, watermark, UI, chart, diagram, arrow, clutter",
+        "negative_prompt": "",
         "width": IMAGE_WIDTH,
         "height": IMAGE_HEIGHT,
     }, ensure_ascii=False).encode("utf-8")

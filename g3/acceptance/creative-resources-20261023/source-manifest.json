@@ -1,0 +1,65 @@
+{
+  "scope": "final workspace sources including preserved concurrent changes",
+  "files": [
+    {
+      "path": "g2/creative_library/__init__.py",
+      "bytes": 5826,
+      "sha256": "df3822e815a12f292e4e37e00696b57e81ec963ee7082334f5511612e18f7392"
+    },
+    {
+      "path": "g2/creative_library/catalog.json",
+      "bytes": 31322,
+      "sha256": "73e17253fa72448fc4e9b666b1e478d6a27aa2051a69e908197ceae1c75b2309"
+    },
+    {
+      "path": "g3/app.py",
+      "bytes": 35470,
+      "sha256": "60960ddcd886682428f233ad1bf58298a5bbe8408dbc211e580f281a3e9483dd"
+    },
+    {
+      "path": "g3/store.py",
+      "bytes": 47637,
+      "sha256": "cb56807e5dc942de20925c66793322f5505f96f95a74bddcff6e7b537432f52c"
+    },
+    {
+      "path": "g3/worker.py",
+      "bytes": 24117,
+      "sha256": "008e95a0c6bf7688564f0ba4ab1f06f19a9ae84541fc2b41957aa79e2801e865"
+    },
+    {
+      "path": "g3/web/src/main.tsx",
+      "bytes": 69333,
+      "sha256": "1e5e2655543e0d2cc822995c78728d5138159773129c3f7f234992934540e10e"
+    },
+    {
+      "path": "g3/web/src/CreativeResources.tsx",
+      "bytes": 8959,
+      "sha256": "63b41efc1f67c77e84ad70f5ba569ce2703647b91783cfce686d6979b2716a0f"
+    },
+    {
+      "path": "g3/web/src/creative-resources.css",
+      "bytes": 4143,
+      "sha256": "7a41363558db96be2ab933af2214ab682120c24f99bcc08e3241c7256aa35777"
+    },
+    {
+      "path": "g3/web/static/app.js",
+      "bytes": 272775,
+      "sha256": "dc4fe165f5d0d25a456efced59a3d941496ddfc0b3d90382cada38d40afb81b6"
+    },
+    {
+      "path": "g3/web/static/app.css",
+      "bytes": 36493,
+      "sha256": "da24aac623a4afb307414b95c37305be1b7802862bcd49fc436f23b4de527cf6"
+    },
+    {
+      "path": "g2/tests/test_creative_library.py",
+      "bytes": 4643,
+      "sha256": "847b788109e631feccf5da5c406fc0c04ad7891ffbb00e6da1f04d623c252647"
+    },
+    {
+      "path": "g3/tests/test_creative_resources_api.py",
+      "bytes": 8213,
+      "sha256": "3f49631bdd593441fc51069168212065f12f7309c67f8764e26232b59a638209"
+    }
+  ]
+}

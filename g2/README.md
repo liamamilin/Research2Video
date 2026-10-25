@@ -35,6 +35,8 @@ G4 三个真实案例的运行、独立 ffprobe/解码、抽帧、布局风险�
 
 内容模式重试时，仅复用前次尝试中原始模型输入完全一致、且重新通过当前校验的规划；`reused-plans.json` 保留来源与哈希，复用不记作新 API 调用。原请求、响应及失败记录保留。章节目前按原文顺序组织；乱序素材的跨章节重排尚未实现。
 
+模型接口返回临时服务错误（500、502–504、520–524）时，同一请求、同一模型最多额外重试两次，分别等待 2、4 秒。每次失败和重试都单独保留请求/响应与 `logs/http-retries.jsonl` 记录，并计入现有调用次数及保守费用上限；预算不足或连续失败就停止。401/403、402、429 和输入错误不采用这项重试；原有 402 显式备用模型策略保留，切换模型同样保留独立调用记录。
+
 ## 简洁信息动效
 
 设置 `AUTOVIDEO_G2_VIDEO_FORM=information_motion`，可与 `AUTOVIDEO_G2_DURATION_MODE=content` 一起使用。`information_motion.py` 按内容生成场景，复用注册的 `title_card`、`concept_reveal`、`comparison` 与 `bar_chart`，另有只用于此形式的 `big_number`；标题、要点卡片、对比两侧、条形和大数字按旁白引用依次淡入、轻移。无需新增模型服务或布局依赖。
@@ -62,3 +64,49 @@ G4 三个真实案例的运行、独立 ffprobe/解码、抽帧、布局风险�
 Web 修订任务由 worker 设置 `AUTOVIDEO_G2_LOCK_NARRATION=1`，`authored_script.py` 保留用户文字与标点，仅将长句分成字幕可容纳的短语；跳过模型讲稿重写和输入去重。仍使用真实配音、经过校验的分镜规划及媒体 QA，不执行自由生成代码。`authored-narration.json` 保存作者与文本哈希。
 
 worker 通过受控输入 JSON 向模型阶段传递可选 `creative_intent`；为空时不改变原请求。复用规划时将偏好一起比较，偏好不同不会复用旧模型输入。用户修订讲稿是本版本制作依据，原材料与原视频由父任务保留。
+
+## 包装与辅助素材组件库（2026-10-23）
+
+新任务的片头、片尾、角标、来源卡和提示音统一由 `g2/packaging_library/` 注册与解析，省略配置继承 `common`，可用 `packaging` 按配方/任务覆盖或显式关闭。来源卡现在是完整正文之后的独立片段，支持流程图，原有叙述绑定来源卡仅保留历史兼容。CLI、API 和所有修订入口共用保存的配置快照。详见 [../g3/PACKAGING_LIBRARY.md](../g3/PACKAGING_LIBRARY.md)。
+
+## 出片耗时优化（2026-10-23）
+
+内容模式的讲稿已经定稿，配音不再改写文字，因此配音与分镜现在同时执行；两者都完成且通过校验后，才编译实测时间线。指定时长模式仍先完成配音和时长拟合，再按最终讲稿规划分镜。模型请求内容、重试次数和费用上限保持原规则，只有分镜线程会调用模型。
+
+macOS 的简洁信息动效采用实测更快的单路渲染：同一份 35.83 秒 IR 的 1/2/4/6 路渲染分别耗时 68.25/79.87/100.59/106.72 秒。其他形式和平台保留两路上限；低 CPU 或内存机器会下调。分辨率 1920×1080、30 fps、H.264 CRF 18、AAC 和全部媒体检查保持一致。
+
+每次任务新增 `artifacts/generation-schedule.json`（阶段重叠和实际耗时）及 `artifacts/render-resources.json`（实际资源配置和画质参数）。CLI 可用 `AUTOVIDEO_G2_PARALLEL_PLANNING=0` 恢复顺序执行，或用 `AUTOVIDEO_G2_RENDER_CONCURRENCY=2` 指定渲染并发；默认值为按已验证形式选取的 `auto`。无效并发配置明确失败，不自动重试。
+
+测量方法、历史耗时、实片和本地回放验收见 [`generation-speed-20261023`](../g3/acceptance/generation-speed-20261023/README.md)。
+
+## 创作形式第二阶段（2026-10-23）
+
+`AUTOVIDEO_G2_VIDEO_FORM` 新增 `kinetic_typography`、`image_slideshow`、`chat_dialogue`。素材整理/逐字讲稿、实际配音、分章、字幕、包装和 QA 复用原链路，由 `creative_forms.py` 把最终讲稿编译为对应已注册组件；图片只接受冻结且哈希匹配的资产，或来自原本机 Draw Things API 的校验输出。形式与配方入口、图片请求和版本边界见 [CREATIVE_FORMS.md](../g3/CREATIVE_FORMS.md)。
+
+## 背景音乐第三阶段（2026-10-23）
+
+`music_library/` 管理注册素材、配置范围和冻结哈希；`music_mix.py` 在原正文／包装验收之后独立混音，复制原视频流，保留未混音视频和分轨。`music-revision` 复用父版本已验证的原视频和旁白；换曲始终从未混音文件开始。标准 Remotion 与快速 FFmpeg 卡片共用该阶段。启用音乐必须有任务目录内的冻结 `asset.wav` 及记录；不直接使用远程 URL 或任意路径。主要参数、输出和 QA 标准见 [MUSIC_MIX.md](../g3/MUSIC_MIX.md)。
+
+## AI 音乐第四阶段（2026-10-23）
+
+`music_engine/` 提供独立、离线的 ACE-Step MPS 单次推理适配，校验固定源码／权重并创建任务私有检查点视图；不运行参考工程旧试验入口。Web 音乐任务与视频共享单 worker 排队，生成成功后通过既有音乐导入校验入库，后续视频继续使用已冻结素材。推理参数、模型路径、生命周期和验证边界见 [MUSIC_GENERATION.md](../g3/MUSIC_GENERATION.md)。
+
+## 重点画面与共享短句字幕验收（2026-10-24）
+
+`information_cards` 将主画面与原旁白分开：按原稿段落分组，规划器只返回原文候选短语编号；程序解析为逐字引用并去除包含关系的重复重点，普通页最多三点，概览列出原章节标题。`card-editorial.json` 保存原文、引用、完整归属及限制句。Video IR 仍要求旁白覆盖一次、按序、位于所属场景，画面重点必须出自所属旁白或原概览标题；其他创作形式保留逐句卡片规则。
+
+字幕通过本机 Qwen3 ForcedAligner 对已有 PCM 和原文做对齐，再按语义标点拆成短句，不重新合成或按字数估算时间。`caption-alignment.json` 保存模型来源、权重和音轨哈希、逐词时间及逐字覆盖区间；SRT、烧录 ASS 与该计划一致。字幕中点和空白间隔对照独立渲染的预期字形，黑块、错误文字和遗漏会失败。英文单词、数字单位保持完整，浅色角标自动使用深色字。
+
+短句接近上限时为尾句保留至少一段可读文字，必要时优先使用较早的标点，避免把「交易」拆成「交」和单独 179ms 的「易。」。逐字覆盖、对齐来源、时间范围与最短 200ms 的检查继续保留。数字来源校验识别紧邻中文的写法（如「超过61.5万平方公里」），同时排除 ASCII 标识符内的数字后缀；未在旁白/素材出现的数值仍然拒绝。
+
+快速卡片、信息动效与流程图的新片及修订均需要 `g3/data/voice-runtime/bin/python` 中已有的 MLX Audio，以及固定权重目录 `g3/data/voice-models/qwen3-forced-aligner-0.6b-8bit/`。当前配置为 `mlx-community/Qwen3-ForcedAligner-0.6B-8bit`，revision `0e1a68e91d815300c7c9754b2a7639378b23db15`，`model.safetensors` SHA-256 为 `be19ef8ac4326d032e7673342930b14c2df30bd68c1632493b0f563e30829f91`。仅下载 JSON、词表和 safetensors，不下载或执行远程 Python；运行时 `HF_HUB_OFFLINE=1`。目录内 `autovideo-model-source.json` 含 `repo`、`revision` 和 `code` 来源说明。缺少运行时或模型时返回 `CAPTION_ALIGNER_NOT_CONFIGURED`，不会退回估算字幕。接口依据 [MLX Audio 官方说明](https://github.com/Blaizzy/mlx-audio/blob/main/mlx_audio/stt/models/qwen3_asr/README.md)。
+
+信息动效与流程图通过同一 `caption-alignment.json` 向可信 Remotion 渲染器提供独立短句轨道，逐条校验原文覆盖与 SRT 一致性；不改变旁白、场景触发或 Video IR 合约。历史输出未保存短句轨道时保持原字幕。快速卡片另做上述 ASS 字形像素验收；普通动画检查实际渲染轨道并抽查真实解码画面，不冒充同一种像素验收。其他创意形式不在本轮实片验收范围。
+
+换声音或倍速后重新对齐短字幕；画面修订保留其他页面与原限制句。共同包装和配乐阶段沿用。本轮同一定稿 31 张逐句卡片改为 12 张重点卡，31 条字幕改为 53 条；原 PCM 与最终成片解码音轨均与旧版完全相同，真实出片和 29 份回传文件已验证。完整等待 166 秒，其中重点规划 87.47 秒、字幕对齐约 4.7 秒；这轮以表达质量为目标，不作为纯提速或批量吞吐测量。证据见 [verification.json](../g3/acceptance/card-quality-20261023/verification.json)。
+
+## 观众文案与限定标签（2026-10-23）
+
+新快速卡片把来源与测试条件附在对应重点旁，不再自动复制整段限制句。重点和标签逐字对应原文证据，否定、推测、范围和测试场景不得在提炼时丢失；数字前的指标标题已在同页显示时不重复。来源名使用中性标签，连接句保留主体与列表上下文。
+
+含“材料未提供”等明确内部研究备注的原稿会在分镜模型调用前报 `CARD_EDITORIAL_SOURCE_GAP`，需先修订上游稿件。历史 `card-editorial` v1 的声音/速度修订仍保留旧限定句布局，新的 v2 记录及新提炼页使用逐项短标签。验收见 `g3/acceptance/audience-quality-20261023/`。

@@ -1,0 +1,426 @@
+{
+  "script_id": "5a35f4c46d924cdaa0f14cd387134e59",
+  "version": 3,
+  "title": "吉瓦级虚拟电厂，调的是用电",
+  "sections": [
+    {
+      "title": "没有新机组的吉瓦级电厂",
+      "paragraphs": [
+        {
+          "text": "据 Fast Company 报道，谷歌和 Voltus 签订了一份吉瓦级的需求响应协议。这类虚拟电厂调节的是用电需求，并不是按同样规模新建一座发电站。这个规模按可以聚合的用电需求算，和新增发电装机容量的含义不同。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告确认谷歌与 Voltus 达成需求响应 VPP 协议，并写明此前 100 MW 协议为新协议的十分之一，即新协议为吉瓦级；同时明确需求侧灵活性与新建发电厂不同。讲稿对规模、机制差异和归因的表述与来源一致。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "用电怎么像电厂一样干活",
+      "paragraphs": [
+        {
+          "text": "所谓需求侧的虚拟电厂，可以把分散的用电需求组织起来，在电网需要时减少或错开一部分用电。这里的调节能力来自用电方式的变化，和新建一台发电机组增加供给，是两种不同的机制。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告将交易定性为需求响应 VPP；讲稿关于把分散用电需求组织起来、在电网需要时减少或错开用电的解释，与该定性一致，未超出概念说明。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        },
+        {
+          "text": "这里的关键区别是：新建电厂增加的是供给，虚拟电厂调整的是需求。一条路是“多发一点”，另一条路是“晚用一点、少用一点”。所以在看这类交易之前，第一件事是分清它动的是哪一头。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null,
+          "fact_verification": {
+            "status": "not_factual",
+            "reason": "纯概念性对比与过渡，说明供给与需求两种机制，没有需要来源支持的具体事实主张。",
+            "sources": []
+          }
+        }
+      ]
+    },
+    {
+      "title": "十分之一的对比",
+      "paragraphs": [
+        {
+          "text": "规模上，这次不是小打小闹。报道提到，谷歌此前有一份 100 兆瓦的协议，只有这次新协议的十分之一。从 100 兆瓦到吉瓦级，跨度是十倍，至少从合同规模看，这已经不是一次小范围试水。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告明确写道此前的 100 MW 协议是新协议的十分之一，因此新协议为 1 GW（吉瓦级），100 MW 到 1 GW 为十倍；代码对「100」的提示与报告原文不符，本段数字有依据，比较方向正确。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "为什么是现在",
+      "paragraphs": [
+        {
+          "text": "那谷歌为什么现在要做这件事？报道把这项安排放在数据中心扩张、电网承压的背景下。数据中心的用电量大，增长又快，电网在高峰时段会更吃紧。对谷歌这样的用电大户来说，问题不只是“去哪儿找更多的电”，还包括“用电能不能变得更听话”。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告将交易放在数据中心扩张和电网承压的背景下，讲稿的转述与来源一致，没有额外添加时间、金额或次数。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "吉瓦级不等于吉瓦电厂",
+      "paragraphs": [
+        {
+          "text": "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。这两个数字量的不是一回事。吉瓦级说的是可以聚合起来参与调节的需求规模，是合同上的量级；它不是一台能持续满功率运转的机组，也不意味着电网随时要用，就能立刻拿出这么多电。真正能兑现多少，要看电网什么时候需要，以及那时能调动起多少负荷。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告强调需求侧灵活性与新建发电厂不同；讲稿对吉瓦级是需求调节规模、并非持续满功率机组，以及实际兑现取决于调用条件的解释，与该定性一致，且未把合同规模当成实际出力。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "用电大户成了调节资源",
+      "paragraphs": [
+        {
+          "text": "这笔交易的看点，是让用电大户也参与需求调节。它能提供多少帮助，需要放到实际运行条件下观察。不能只凭合同规模，就把调节能力当成新增发电量。",
+          "citations": [
+            "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "结论与报告强调的需求侧调节不等同于新增发电量一致，且明确把实际帮助留待运行观察，没有把合同规模等同于新增发电量。",
+            "sources": [
+              "https://fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 603,
+    "estimated_seconds": 136,
+    "segments": 23,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.754,
+    "status": "UNDER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "没有新机组的吉瓦级电厂",
+        "spoken_length": 82,
+        "budget": 131
+      },
+      {
+        "title": "用电怎么像电厂一样干活",
+        "spoken_length": 150,
+        "budget": 131
+      },
+      {
+        "title": "十分之一的对比",
+        "spoken_length": 77,
+        "budget": 131
+      },
+      {
+        "title": "为什么是现在",
+        "spoken_length": 98,
+        "budget": 130
+      },
+      {
+        "title": "吉瓦级不等于吉瓦电厂",
+        "spoken_length": 134,
+        "budget": 130
+      },
+      {
+        "title": "用电大户成了调节资源",
+        "spoken_length": 62,
+        "budget": 130
+      }
+    ]
+  },
+  "edit_type": "EDITED",
+  "meta": {
+    "problems": [],
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "据 Fast Company 报道，谷歌和 Voltus 签订了一份吉瓦级的需求响应协议。这类虚拟电厂调节的是用电需求，并不是按同样规模新建一座发电站。这个规模按可以聚合的用电需求算，和新增发电装机容量的含义不同。",
+          "problem": "开场先交代来源，接着连续两句半都在预先纠正误读（“并不是……”“含义不同”），把同一个否定说了两遍，却没有一句讲清谷歌到底承诺了什么、这件事为什么反常。",
+          "why": "观众头十秒听到的是媒体名和两个否定句，无法理解自己为什么要继续听，容易在这里划走。",
+          "suggestion": "首句先给交易本身最反常识的事实：一家用电极大的公司签下吉瓦级合同，答应在电网吃紧时把用电降下来。把“不是新建电厂”这个区别留到第一次需要解释的地方说一遍，不在同一小节里反复说。可以直接把 S3P1 的“此前 100 兆瓦、这次十倍”提到开场当钩子，让规模变化先确立这条新闻的分量。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "这里的关键区别是：新建电厂增加的是供给，虚拟电厂调整的是需求。一条路是“多发一点”，另一条路是“晚用一点、少用一点”。所以在看这类交易之前，第一件事是分清它动的是哪一头。",
+          "problem": "前半句是 S2P1 已经说过的“和新建一台发电机组增加供给，是两种不同的机制”，只是换了说法；结尾那句“第一件事是分清它动的是哪一头”是在教观众怎么看新闻，不是内容本身。",
+          "why": "观众会觉得上一段刚听过一遍，这一段等于没往前走；被教“该怎么理解”也容易产生被说教的反感。",
+          "suggestion": "删掉前半句和结尾的指导语，只保留“多发一点”和“晚用一点、少用一点”这组具体说法，并入 S2P1 合成一段：先说机制，再用这组对白收住。这样一句话就把区别说透，不再占两段。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "但这里最容易误读的一步，是把“吉瓦级”直接听成“多了一座吉瓦电厂”。",
+          "problem": "这个转折摆出的是“新误区”的姿态，但这个区别前面已经讲过两遍，这里是第三次；这一段真正的新信息“真正能兑现多少，要看电网什么时候需要、那时能调动起多少负荷”反而被埋在末尾。",
+          "why": "主线原地打转，观众会觉得一直在听同一句话，注意力会明显掉下来，而唯一有增量的判断他们可能已经走神漏掉。",
+          "suggestion": "把这个转折句删掉，本段直接从新信息开场：合同上的量级不等于随时能拿出的电，能兑现多少取决于电网高峰时它被叫到几次、每次能压下去多少。用一次具体的调度情境把这句话讲实，不再重复“不是电厂”。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "对谷歌这样的用电大户来说，问题不只是“去哪儿找更多的电”，还包括“用电能不能变得更听话”。",
+          "problem": "全篇讲了两遍“用电需求可以被调节”的抽象机制，却没有一处告诉观众，数据中心到底能调什么、怎么调；到这一段本该落到具体场景，却仍然停在一句拟人化的概括上。",
+          "why": "陌生观众听完只知道“用电可以变灵活”，脑子里没有画面，很难判断这件事靠不靠谱，也记不住。",
+          "suggestion": "用报道中已有的细节给一个具体场景：数据中心的哪些负荷可以推迟或压下来、在什么时段发生，哪怕只说清一类，也比“变得更听话”有用。若材料里确实没有这类细节，就把这句改成明确的表述，例如“用电高峰时把一部分非紧急负载往后挪”，不要用比喻替代解释。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 5,
+          "paragraph": 0,
+          "quote": "它能提供多少帮助，需要放到实际运行条件下观察。不能只凭合同规模，就把调节能力当成新增发电量。",
+          "problem": "结尾落在“有待观察”上，而且第四次重复“别当成新增发电量”，前面已经说过三遍。",
+          "why": "听完没有可带走的东西，观众记不住这期的重点，也感受不到这条新闻到底改变了什么。",
+          "suggestion": "收在一个具体的判断或开放问题上：值得注意的不是这个数字多大，而是一个数据中心级别的用电大户开始把自己的用电当成可调节的资源来签合同；至于合同上那一个吉瓦能兑现多少，取决于高峰时它真正被调用几次。用这个判断收尾，不再加“有待观察”。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "需求响应协议和后面说的虚拟电厂是一回事吗？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "开场连续出现 Fast Company、Voltus、吉瓦级、需求响应协议等名词，还没给场景就先堆信息，容易让人不想继续听。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "上一段已经说过调节用电需求不是新建电站，这里又从头解释一遍，没有带来新信息，容易走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“供给/需求”的区别已经讲过一次，这里第三次讲，节奏拖；“动的是哪一头”也略抽象。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "100 兆瓦到吉瓦级，放在谷歌的用电量里到底算多大？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "只有合同上的十倍跨度，没有可感知的参照，数字听完容易滑过去。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "合同上的吉瓦级，实际到底能兑现多少？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 4,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "又回到“不是电厂”的提醒，和前面重复，听到这里会觉得绕。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 5,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "结尾说要看实际运行条件，但没给观众一个判断这次交易分量的抓手，收束偏空。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 14,
+        "rule_must": 0,
+        "questions": 3,
+        "lost": 6,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 9
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 5
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "editorial_attempted": false
+    },
+    "source_review": {
+      "checked_source_urls": [
+        "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+        "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+      ],
+      "packet_sha256": "efed440127b839e7cdfc61a5f2dc3508c5b206458d97eb99a6c04273cf18f464",
+      "original_script_id": "4c63a878b25b4c96b7f8fa67f0824da0"
+    },
+    "report_path": "state/video_editorial_sources/matrix-recipe-quality-20261023/company-checked-v2.md",
+    "acceptance_batch": "matrix-recipe-quality-20261023",
+    "audit_usage": {
+      "requests": 3,
+      "prompt_tokens": 5263,
+      "completion_tokens": 19081,
+      "total_tokens": 24344
+    },
+    "manual_edit_reason": "补充明确报道归属，删去燃料和用电恢复的绝对化类比，保持需求调节与发电装机的区别"
+  },
+  "created_by": "用户授权·样本最终事实复核",
+  "created_at": "2026-10-24T10:30:31+0800"
+}

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "checks": [
+    "生成表单实际提交30秒电子配乐",
+    "24秒氛围和30秒电子配乐均显示已入库并出现在原音乐素材列表",
+    "资源库试听实际到达24秒结尾，随后暂停于13.113秒，readyState=4",
+    "配方下拉框可选生成音乐，应用AI快讯后开启并选择对应配乐",
+    "检查完成后恢复原AI快讯默认关闭音乐的空白草稿",
+    "正式服务最终更新后页面重载，两首音乐及使用入口保留"
+  ],
+  "screenshots": [
+    "generated-music-library.png",
+    "generated-in-background.png"
+  ],
+  "human_listening_score": "pending; not claimed"
+}

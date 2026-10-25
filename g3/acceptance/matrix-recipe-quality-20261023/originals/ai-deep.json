@@ -1,0 +1,1735 @@
+{
+  "script": {
+    "id": "c076368cd731433b94f0dacde7ce36a2",
+    "column_key": "deep_dive",
+    "topic": {
+      "id": null,
+      "title": "本周深度研究：WildAWM —— 用「合成出的个人电脑世界」训练电脑操作 Agent",
+      "fields": {
+        "目标受众": "开发者"
+      },
+      "from_report": "output/deep/2026-10-22_ai_deep_research.md",
+      "report_id": "2cd742818fc149ff8623991a370c9e05"
+    },
+    "status": "APPROVED",
+    "research_job": "",
+    "report_path": "output/deep/2026-10-22_ai_deep_research.md",
+    "current_version": 1,
+    "approved_version": 1,
+    "error": null,
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T18:07:44+0800",
+    "updated_at": "2026-10-22T19:20:33+0800",
+    "heartbeat_at": 1792668007.8094661,
+    "stage": null,
+    "archived": 0,
+    "report_id": "2cd742818fc149ff8623991a370c9e05",
+    "production": "ai_media_deep_dive"
+  },
+  "version": {
+    "script_id": "c076368cd731433b94f0dacde7ce36a2",
+    "version": 1,
+    "title": "WildAWM造训练场，泛化仍待验",
+    "sections": [
+      {
+        "title": "先说结论：它造的是训练场",
+        "paragraphs": [
+          {
+            "text": "WildAWM 是合成个人电脑世界、任务和自动验收器的开源项目。它造的世界不是截图，而是能启动、可操作的训练场。模型练完后，能迁移到没见过的任务和环境吗？泛化增益要看的，就是这种迁移是否带来提升。",
+            "facts": [
+              "F2",
+              "F6",
+              "F10",
+              "F12",
+              "F22"
+            ],
+            "introduces": [
+              "WildAWM（Agent world model）"
+            ],
+            "recap": false,
+            "citations": [
+              "https://github.com/MSR-Orchard/WildAWM",
+              "https://huggingface.co/datasets/ChilleD/WildAWM",
+              "https://huggingface.co/ChilleD/WildAWM-35B-A3B",
+              "https://arxiv.org/html/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "为什么重要？电脑操作 Agent 不只要看懂屏幕，还要让动作改变环境，再由机器判断任务是否完成。WildAWM 把这三件事放在同一套流水线里。论文、代码、环境任务和训练好的模型检查点都已公开，也有从安装到评测的复现路径。现有证据更支持“训练场能搭起来”，还不能说明模型到了陌生环境仍能稳定迁移。",
+            "facts": [
+              "F2",
+              "F6",
+              "F10",
+              "F12",
+              "F27",
+              "F30"
+            ],
+            "introduces": [],
+            "recap": false,
+            "citations": [
+              "https://github.com/MSR-Orchard/WildAWM",
+              "https://huggingface.co/datasets/ChilleD/WildAWM",
+              "https://huggingface.co/ChilleD/WildAWM-35B-A3B",
+              "https://arxiv.org/html/2610.26828",
+              "https://pith.science/paper/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "不是录屏，而是一座模拟街区",
+        "paragraphs": [
+          {
+            "text": "可执行环境不是静态截图，而是能启动、接受操作、调用工具并保存状态的环境。MCP，也就是模型上下文协议，是模型调用工具的接口，不是环境本身。在 WildAWM 里，MCP 服务是 Agent 调用工具的入口；网站镜像、本地文件和命令行，是同一电脑里的其他操作入口。无论走哪个入口，改动都落在同一份状态上。",
+            "facts": [
+              "F6"
+            ],
+            "introduces": [
+              "可执行环境",
+              "MCP（Model Context Protocol）"
+            ],
+            "recap": false,
+            "citations": [
+              "https://arxiv.org/html/2610.26828",
+              "https://github.com/MSR-Orchard/WildAWM"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "把它想成一座模拟街区。Agent 像学车办事的学员，个人电脑世界像带多个窗口、道路和记录的街区。任务是一条办事路线，验证器像只按规则判分的考场系统。比如你先用网页填表，再从 MCP 服务读取内容。最后用命令行核对文件时，街区里的状态必须接着前一步变化。这样才能练长流程，而不是猜下一张截图。",
+            "facts": [
+              "F6"
+            ],
+            "introduces": [],
+            "recap": false,
+            "citations": [
+              "https://arxiv.org/html/2610.26828",
+              "https://github.com/MSR-Orchard/WildAWM"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "先造世界，再造会验收的路线",
+        "paragraphs": [
+          {
+            "text": "有了可变化的世界，接着生成可验收的任务。XAI task synthesis 是第二阶段的任务合成，不是随手写几句提示。它会探索任务、编写任务和验证器，并收集不同 Agent 的执行轨迹。团队称整条流水线完全由开源模型驱动，不依赖专有前沿模型，但还没有第三方审计。",
+            "facts": [
+              "F7",
+              "F8",
+              "F10"
+            ],
+            "introduces": [
+              "XAI task synthesis"
+            ],
+            "recap": false,
+            "citations": [
+              "https://arxiv.org/html/2610.26828",
+              "https://github.com/MSR-Orchard/WildAWM"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "人格—日期状态，是用哪个人格和哪一天定位世界。人格先选定人物，日期再确定演化到哪一天。比如你隔一天重跑同一任务，看到的是这个人格截至当天的文件与网页累积状态，不是从空白桌面开始。",
+            "facts": [
+              "F6",
+              "F9"
+            ],
+            "introduces": [
+              "人格—日期状态 W(c,d)"
+            ],
+            "recap": false,
+            "citations": [
+              "https://arxiv.org/html/2610.26828",
+              "https://github.com/MSR-Orchard/WildAWM"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "探索任务，是先让 Agent 在世界里实际尝试目标，并记录结果。系统再据此编写任务与验证器，还收集不同 Agent 的执行轨迹，也就是实际运行留下的记录。轨迹用于后续筛选，候选物不会生成完就直接采用。",
+            "facts": [
+              "F10"
+            ],
+            "introduces": [],
+            "recap": false,
+            "citations": [
+              "https://github.com/MSR-Orchard/WildAWM",
+              "https://arxiv.org/html/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "到这里，路线已经清楚：先造世界，再造任务，最后筛候选物。候选物要过五道执行式质量门。直白说，路线必须真能跑通，多个判定器还要交叉核对。再改掉关键条件，看判分是否仍然可靠。论文只给出了组合机制，没有把各组件分别拿掉再测，也就没有单独的消融结果。所以它能筛掉明显不稳的候选物，不等于绝对可靠。",
+            "facts": [
+              "F10",
+              "F11"
+            ],
+            "introduces": [
+              "执行式质量门"
+            ],
+            "recap": true,
+            "citations": [
+              "https://github.com/MSR-Orchard/WildAWM",
+              "https://arxiv.org/html/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "发布出来以后，证据到哪一层",
+        "paragraphs": [
+          {
+            "text": "筛过质量门后，产物被封装成任务、环境和验证器三元组。也就是把要完成什么、在哪里运行、怎样自动判定完成绑在一起。它因此成了一个可复用的训练与评测单元。设计用途包括监督微调、在线强化学习和评测，但三种用法没有分别给出独立实验。",
+            "facts": [
+              "F12"
+            ],
+            "introduces": [
+              "任务—环境—验证器三元组"
+            ],
+            "recap": false,
+            "citations": [
+              "https://github.com/MSR-Orchard/WildAWM",
+              "https://arxiv.org/html/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "项目发布的不是一个空壳仓库。论文、代码、环境与任务、训练好的模型检查点都已公开。流水线还产出了 341 个长程环境与任务对，仓库给出从依赖安装、镜像构建、数据下载到评测的路径。公开解决的是可检查性，不等于结果已经独立复现。",
+            "facts": [
+              "F2",
+              "F15",
+              "F27"
+            ],
+            "introduces": [],
+            "recap": false,
+            "citations": [
+              "https://github.com/MSR-Orchard/WildAWM",
+              "https://huggingface.co/datasets/ChilleD/WildAWM",
+              "https://huggingface.co/ChilleD/WildAWM-35B-A3B",
+              "https://arxiv.org/html/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "先说清 OOD benchmark，它检验模型在训练时没见过的任务或环境上能否迁移。数字均来自论文自报。GPT-6-Astra 解出 WildAWM 任务的 60%，按汇总比例算，未解出 40%。步数预算和逐任务计分协议还没有第三方验证。仅用合成世界训练的两个 Qwen 模型，在 8 个 OOD 基准上取得提升。到这里，能确定的是数据与流水线已发布，成绩边界仍停在论文层面。",
+            "facts": [
+              "F2",
+              "F15",
+              "F17",
+              "F18",
+              "F21",
+              "F22"
+            ],
+            "introduces": [
+              "OOD benchmark"
+            ],
+            "recap": false,
+            "citations": [
+              "https://github.com/MSR-Orchard/WildAWM",
+              "https://huggingface.co/datasets/ChilleD/WildAWM",
+              "https://huggingface.co/ChilleD/WildAWM-35B-A3B",
+              "https://arxiv.org/html/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "反方：也许它只是更熟悉评测外壳",
+        "paragraphs": [
+          {
+            "text": "这些成绩还不能直接证明世界级泛化，也就是在陌生任务和环境里稳定迁移。反方最值得听：成绩也可能来自更熟悉评测外壳。Harness，也就是代理运行外壳，是把模型、系统提示词、工具和执行循环打包起来的 Agent 运行框架。官方评测和训练若共享同一套工具与提示组合，模型或许只是适应了这套外壳。这目前只是解释，不是实验已经证明的结果。",
+            "facts": [
+              "F30"
+            ],
+            "introduces": [
+              "Harness（代理运行外壳）"
+            ],
+            "recap": false,
+            "citations": [
+              "https://pith.science/paper/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "到这里，证据还有三个缺口。质量门各组件没有单独的消融结果，OOD 基准的名单和逐项分数也不透明。模拟街区毕竟不是完整互联网，验证器也只是程序规则，不是真人。公开代码只解决能不能检查，不解决是否已经独立复现。所以现有证据较强地支持流水线可行，却还不足以断言实现了纯粹的世界级泛化。",
+            "facts": [
+              "F2",
+              "F11",
+              "F22",
+              "F27",
+              "F30"
+            ],
+            "introduces": [],
+            "recap": true,
+            "citations": [
+              "https://github.com/MSR-Orchard/WildAWM",
+              "https://huggingface.co/datasets/ChilleD/WildAWM",
+              "https://huggingface.co/ChilleD/WildAWM-35B-A3B",
+              "https://arxiv.org/html/2610.26828",
+              "https://pith.science/paper/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "这周把宣传语变成三个检查",
+        "paragraphs": [
+          {
+            "text": "准备把 WildAWM 数据加入训练集或评测集时，先抽检环境与任务对。打开任务、环境和验证器，跑正确流程，再提交错误结果。若正确结果通过、错误结果被拒绝，且网页、MCP 和命令行状态一致，才算真配套。",
+            "facts": [
+              "F6",
+              "F12",
+              "F15"
+            ],
+            "introduces": [],
+            "recap": false,
+            "citations": [
+              "https://arxiv.org/html/2610.26828",
+              "https://github.com/MSR-Orchard/WildAWM",
+              "https://huggingface.co/datasets/ChilleD/WildAWM"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "想估算复现成本时，先按仓库路径跑通一个官方任务，再扩大批次。记录故障落在依赖、镜像、网站还是接口。同一任务能重复运行，环境和验证器结果也可解释，再继续扩容。",
+            "facts": [
+              "F6",
+              "F27"
+            ],
+            "introduces": [],
+            "recap": false,
+            "citations": [
+              "https://arxiv.org/html/2610.26828",
+              "https://github.com/MSR-Orchard/WildAWM"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "准备按 OOD 提升做模型选型时，固定模型、任务和预算。同一批任务换官方 harness 和自有 harness，提示词、工具和权限尽量不变。优势保留才算更强证据，明显缩水就先标成工具栈适配。顺序是先验任务、再验复现、最后验泛化。",
+            "facts": [
+              "F30"
+            ],
+            "introduces": [],
+            "recap": false,
+            "citations": [
+              "https://pith.science/paper/2610.26828"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "length_check": {
+      "spoken_length": 1659,
+      "estimated_seconds": 375,
+      "segments": 70,
+      "units_per_second": 4.35,
+      "voice": "voxcpm_anchor",
+      "target_minutes": 6,
+      "budget": 1566,
+      "ratio": 1.042,
+      "status": "OK",
+      "tolerance": 0.15,
+      "sections": [
+        {
+          "title": "先说结论：它造的是训练场",
+          "spoken_length": 203,
+          "budget": 235
+        },
+        {
+          "title": "不是录屏，而是一座模拟街区",
+          "spoken_length": 241,
+          "budget": 235
+        },
+        {
+          "title": "先造世界，再造会验收的路线",
+          "spoken_length": 389,
+          "budget": 344
+        },
+        {
+          "title": "发布出来以后，证据到哪一层",
+          "spoken_length": 330,
+          "budget": 313
+        },
+        {
+          "title": "反方：也许它只是更熟悉评测外壳",
+          "spoken_length": 264,
+          "budget": 235
+        },
+        {
+          "title": "这周把宣传语变成三个检查",
+          "spoken_length": 232,
+          "budget": 204
+        }
+      ]
+    },
+    "edit_type": "GENERATED",
+    "meta": {
+      "writer": "adapt",
+      "style": {
+        "depth": "intermediate",
+        "tone": "explainer",
+        "label": "进阶 · 讲解通俗",
+        "presets": [
+          "intermediate@1",
+          "explainer@2"
+        ]
+      },
+      "prompts": {
+        "facts": 2,
+        "plan": 3,
+        "draft": 4,
+        "review": 3
+      },
+      "fact_sheet_id": "96034d949bf873e1221527bcd702f298bb10f62d629f29d167a213ac220ad530",
+      "plan": {
+        "question": "WildAWM 如何把合成的个人电脑变成可训练、可验收、可复现的电脑操作环境，又有哪些证据不能证明它的泛化能力？",
+        "audience": {
+          "knows": [
+            "用过至少一种 LLM Agent 或工具调用项目",
+            "知道 token、API、模型等基础名词",
+            "能阅读代码、配置和评测脚本"
+          ],
+          "lacks": [
+            "不一定理解 MCP、可执行环境、OOD benchmark 和 harness 的区别",
+            "不知道 WildAWM 发布的究竟是截图、模拟器，还是能实际运行的训练环境",
+            "没有现成方法判断论文增益来自世界级泛化，还是评测工具栈适配"
+          ],
+          "cares": "能否复现、任务和验证器是否可靠、训练效果是否可信，以及接入自己项目要付出多少成本",
+          "takeaway": "能用一套检查方法验证 WildAWM：先看任务—环境—验证器是否一致，再跑通最小复现，最后通过更换 harness 判断泛化增益是否稳定"
+        },
+        "goals": [
+          {
+            "question": "WildAWM 到底造了什么，而不只是造了哪些截图？",
+            "answer": "它合成可实际操作的电脑世界，让网页界面、MCP 工具、本地文件和命令行共享状态；再把任务、运行环境和自动验收器封装成可复用单元。",
+            "facts": [
+              "F6",
+              "F8",
+              "F9",
+              "F12"
+            ]
+          },
+          {
+            "question": "任务和验证器怎样生成，为什么不是随便写几个提示词？",
+            "answer": "系统会实际探索任务、编写任务与验证器、收集不同代理的执行轨迹，再经过五道执行式质量门，包括实际执行、多判定器交叉核对和反事实测试。",
+            "facts": [
+              "F10",
+              "F11"
+            ]
+          },
+          {
+            "question": "开发者现在能拿到哪些东西？",
+            "answer": "论文、代码、环境与任务、训练好的模型以及 341 个环境—任务对均已发布，仓库还提供从安装、镜像构建到评测的复现路径。",
+            "facts": [
+              "F2",
+              "F15",
+              "F27"
+            ]
+          },
+          {
+            "question": "论文中的效果说明了什么，又不能说明什么？",
+            "answer": "论文自报 GPT-6-Astra 解出 60% 的任务，合成世界训练的模型在 8 个 OOD 基准上取得提升；但计分协议、逐项分数未核实，共享 harness 也可能解释部分增益，因此只能较有力地支持流水线可行，尚不能坐实世界级泛化。",
+            "facts": [
+              "F17",
+              "F18",
+              "F22",
+              "F30"
+            ]
+          }
+        ],
+        "chain": [
+          {
+            "step": "要让 Agent 练习长程电脑操作，环境必须真的能运行、继续操作并保留累积状态，因此 WildAWM 把网页、MCP、本地文件和命令行放进同一个合成世界。",
+            "facts": [
+              "F6",
+              "F9"
+            ]
+          },
+          {
+            "step": "该系统先做 World synthesis，再做 XAI task synthesis；团队称整条流水线由开源模型驱动，但没有第三方审计。",
+            "facts": [
+              "F7",
+              "F8"
+            ]
+          },
+          {
+            "step": "任务阶段会探索任务、编写任务和验证器，并收集不同代理实际执行任务所得的轨迹。",
+            "facts": [
+              "F10"
+            ]
+          },
+          {
+            "step": "候选产物还要经过五道质量门，包括实际执行、多个判定器交叉核对和反事实测试。",
+            "facts": [
+              "F10",
+              "F11"
+            ]
+          },
+          {
+            "step": "通过筛选后，任务、环境和验证器组成三元组，可设计用于模型后训练和评测；项目已发布 341 对数据及复现路径。",
+            "facts": [
+              "F2",
+              "F12",
+              "F15",
+              "F27"
+            ]
+          },
+          {
+            "step": "论文进一步自报：GPT-6-Astra 解出 60% 的任务、其余 40% 未解出，仅用合成世界训练的两个 Qwen 模型在 8 个 OOD 基准上取得提升。",
+            "facts": [
+              "F17",
+              "F18",
+              "F21",
+              "F22"
+            ]
+          },
+          {
+            "step": "由于共享评测工具栈也可能带来适应增益，现有证据更能说明 WildAWM 的合成与复现流程可行，尚不足以证明其实现了纯粹的世界级泛化。",
+            "facts": [
+              "F2",
+              "F11",
+              "F30"
+            ]
+          }
+        ],
+        "glossary": [
+          {
+            "term": "WildAWM（Agent world model）",
+            "plain": "一套合成个人电脑世界，并继续生成任务和自动验收器的开源研究与训练项目。",
+            "needs": [
+              "可执行环境",
+              "MCP",
+              "任务—环境—验证器三元组"
+            ],
+            "analogy": "像给电脑操作 Agent 建一座会变化的模拟街区，让它练习真实的办事流程。",
+            "mapping": {
+              "Agent": "学车或办事的学员",
+              "个人电脑世界": "带多个办事窗口、道路和记录的模拟街区",
+              "任务": "一条具体的办事路线",
+              "环境": "街区及其当前状态",
+              "验证器": "只按规则判断路线是否完成的考场系统",
+              "执行式质量门": "路线必须真能跑通，且改变条件后判分仍可靠的筛选",
+              "累积状态": "街区随日期发生的现实变化"
+            },
+            "breaks": "模拟街区不能完整复制真实互联网的混乱；验证器是程序和判定规则，不是真人；生成的人格与历史不等于真正的人类意识。"
+          },
+          {
+            "term": "可执行环境",
+            "plain": "能够真正启动、接受操作、调用工具并保存状态的环境，而不只是静态截图或文字描述。",
+            "needs": [],
+            "analogy": "",
+            "mapping": {},
+            "breaks": ""
+          },
+          {
+            "term": "MCP（Model Context Protocol）",
+            "plain": "一种让模型以统一方式调用外部工具的接口；这里它与网页、本地文件和命令行操作同一个电脑世界。",
+            "needs": [
+              "API"
+            ],
+            "analogy": "",
+            "mapping": {},
+            "breaks": ""
+          },
+          {
+            "term": "人格—日期状态 W(c,d)",
+            "plain": "用“哪个人格处在哪一天”定位世界截至当天的累积状态，而不是每次任务都从空白环境开始。",
+            "needs": [
+              "可执行环境"
+            ],
+            "analogy": "",
+            "mapping": {},
+            "breaks": ""
+          },
+          {
+            "term": "执行式质量门",
+            "plain": "先让候选任务真的运行，再让多个判定器交叉核对，最后改变关键条件检查判断是否稳健；各组件的单独消融尚未核实。",
+            "needs": [
+              "可执行环境"
+            ],
+            "analogy": "",
+            "mapping": {},
+            "breaks": ""
+          },
+          {
+            "term": "任务—环境—验证器三元组",
+            "plain": "把要完成什么、在哪里运行、怎样自动判定完成绑在一起的可复用训练与评测单元。",
+            "needs": [
+              "可执行环境"
+            ],
+            "analogy": "",
+            "mapping": {},
+            "breaks": ""
+          },
+          {
+            "term": "OOD benchmark",
+            "plain": "用于检验模型在训练时没见过的任务或环境上还能不能迁移的基准。",
+            "needs": [
+              "训练分布"
+            ],
+            "analogy": "",
+            "mapping": {},
+            "breaks": ""
+          },
+          {
+            "term": "Harness（代理运行外壳）",
+            "plain": "把模型、系统提示词、工具和执行循环打包起来的评测运行框架；换 harness 可能改变 Agent 的表现。",
+            "needs": [
+              "Agent",
+              "MCP"
+            ],
+            "analogy": "",
+            "mapping": {},
+            "breaks": ""
+          }
+        ],
+        "misconceptions": [
+          {
+            "wrong": "合成世界只是更逼真的截图或模拟文字，Agent 仍然主要靠猜答案。",
+            "fix": "先解释它是一个可执行环境：网页、MCP、文件和命令行共享真实状态，任务会实际运行并产生验收反馈。"
+          },
+          {
+            "wrong": "通过质量门就意味着任务和验证器绝对可靠。",
+            "fix": "质量门能筛掉明显失败或判断不稳的候选物，但各组件没有单独的消融结果，仍需自行反例测试。"
+          },
+          {
+            "wrong": "论文和代码公开，就等于结果已经被独立复现。",
+            "fix": "公开只解决可检查性；复现路径不等于已复现，尤其逐项成绩、计分协议和训练细节尚未核实。"
+          },
+          {
+            "wrong": "在 8 个 OOD 基准上涨分，就已经证明是世界级泛化。",
+            "fix": "明确把共享 harness 列为替代解释：模型也可能只是更适应评测时的工具和提示词组合。"
+          }
+        ],
+        "actions": [
+          {
+            "condition": "准备把 WildAWM 数据加入自己的训练集或评测集时",
+            "step": "从仓库取得 341 个环境—任务对，抽样打开任务、环境和验证器；运行正确完成流程，再故意提交一个错误结果检查验证器。",
+            "verify": "正确结果能通过、错误结果会被拒绝，并且任务状态能在网页、MCP 和命令行之间保持一致。",
+            "needs": [
+              "任务—环境—验证器三元组",
+              "可执行环境",
+              "执行式质量门"
+            ]
+          },
+          {
+            "condition": "想评估采用 WildAWM 的实际复现成本时",
+            "step": "按仓库提供的安装、镜像构建、数据获取和评测路径，先跑通一个官方任务，再逐步扩大任务批次并记录环境故障。",
+            "verify": "同一任务能够重复运行，环境和验证器都给出可解释结果；跑不通的环节能明确定位到依赖、镜像、网站或接口。",
+            "needs": [
+              "可执行环境",
+              "MCP"
+            ]
+          },
+          {
+            "condition": "准备依据论文的 OOD 提升做模型选型时",
+            "step": "固定模型、任务和预算，用官方 harness 与自有 harness 各跑同一批任务，除运行外壳外尽量不改提示词、工具和权限。",
+            "verify": "若优势在自有 harness 中仍保留，只是更有力的泛化证据；若明显缩水，就先标记为工具栈适配，而非世界级泛化。",
+            "needs": [
+              "OOD benchmark",
+              "Harness（代理运行外壳）",
+              "任务—环境—验证器三元组"
+            ]
+          }
+        ],
+        "must_cover": [
+          {
+            "item": "用具体场景提出问题，并立即给出带证据边界的结论",
+            "beat": 1
+          },
+          {
+            "item": "解释可执行个人电脑，以及 GUI、MCP、命令行共享同一状态",
+            "beat": 2
+          },
+          {
+            "item": "讲清两阶段合成流程、人格—日期状态和执行式质量门",
+            "beat": 3
+          },
+          {
+            "item": "交代发布物、341 个环境—任务对及论文效果数字",
+            "beat": 4
+          },
+          {
+            "item": "说明共享 harness 的反方解释和未核实部分",
+            "beat": 5
+          },
+          {
+            "item": "给出本周可执行的三项验证动作",
+            "beat": 6
+          }
+        ],
+        "core_message": "WildAWM造可执行电脑世界，泛化增益仍待核验",
+        "hook": {
+          "kind": "场景",
+          "idea": "假设你把 Agent 放进刚生成的虚拟电脑：网页、工具接口和命令行共享同一份状态。WildAWM 就是一套这样合成电脑世界、任务和自动验收器的项目。结论：可复现路径已公开，但泛化增益仍可能受评测工具栈影响。",
+          "facts": [
+            "F6",
+            "F10",
+            "F12",
+            "F27",
+            "F30"
+          ]
+        },
+        "beats": [
+          {
+            "title": "先说结论：它造的是训练场",
+            "role": "钩子",
+            "point": "WildAWM 把合成电脑变成能运行任务、能自动验收的训练场；流水线与复现路径已经公开，但泛化增益仍可能包含评测工具栈带来的适应。",
+            "facts": [
+              "F6",
+              "F10",
+              "F12",
+              "F27",
+              "F30"
+            ],
+            "terms": [
+              "WildAWM（Agent world model）"
+            ],
+            "budget": 235
+          },
+          {
+            "title": "不是录屏，而是一座模拟街区",
+            "role": "概念",
+            "point": "像给 Agent 建一座模拟街区：网页镜像、MCP 服务和本地文件与命令行共享同一份状态，因此任务可以跨入口继续。",
+            "facts": [
+              "F6"
+            ],
+            "terms": [
+              "可执行环境",
+              "MCP"
+            ],
+            "budget": 235
+          },
+          {
+            "title": "先造世界，再造会验收的路线",
+            "role": "机制",
+            "point": "团队称流水线全由开源模型驱动；系统按人格和日期累积世界状态，再探索任务、编写验证器，并用实际执行、多判定器核对和反事实测试筛掉不稳路线。",
+            "facts": [
+              "F7",
+              "F8",
+              "F9",
+              "F10",
+              "F11"
+            ],
+            "terms": [
+              "人格—日期状态 W(c,d)",
+              "执行式质量门"
+            ],
+            "budget": 344
+          },
+          {
+            "title": "发布出来以后，证据到哪一层",
+            "role": "证据",
+            "point": "通过筛选的任务、环境和验证器被封装成三元组；项目发布 341 对数据、代码和训练好的模型。效果仍属论文自报：GPT-6-Astra 解出 60%、其余 40% 未解出，两个模型在 8 个 OOD 基准上被称为取得提升，但计分协议和逐项分数尚未核实。",
+            "facts": [
+              "F2",
+              "F12",
+              "F15",
+              "F17",
+              "F18",
+              "F21",
+              "F22",
+              "F27"
+            ],
+            "terms": [
+              "任务—环境—验证器三元组",
+              "OOD benchmark"
+            ],
+            "budget": 313
+          },
+          {
+            "title": "反方：也许它只是更熟悉评测外壳",
+            "role": "反方",
+            "point": "最关键的反方不是代码没公开，而是增益可能部分来自适应同一 harness；这仍是推测。质量门组件没有单独消融，OOD 名单和逐项分数也未核实，所以目前更能证明流水线可行，还不足以断言世界级泛化。",
+            "facts": [
+              "F11",
+              "F22",
+              "F30"
+            ],
+            "terms": [
+              "Harness（代理运行外壳）"
+            ],
+            "budget": 235
+          },
+          {
+            "title": "这周把宣传语变成三个检查",
+            "role": "行动",
+            "point": "抽检任务—环境—验证器是否一致，跑通仓库提供的最小复现路径，再用自有 harness 复测；只有换运行外壳后优势仍稳定，才能把它写成更可信的泛化证据。",
+            "facts": [
+              "F6",
+              "F10",
+              "F11",
+              "F12",
+              "F15",
+              "F27",
+              "F30"
+            ],
+            "terms": [],
+            "budget": 204
+          }
+        ],
+        "scope_out": [
+          "前作沿革及前代工具环境规模",
+          "完整依赖版本、网站镜像种子和模型服务配置",
+          "逐个 OOD benchmark 名称、分数及未核实消融",
+          "合成成本、训练超参和漏斗统计",
+          "各类模型上下文长度、许可和部署参数"
+        ],
+        "left_out": [
+          {
+            "fact": "F1",
+            "reason": "时间线不是理解机制的必要信息",
+            "to_description": true
+          },
+          {
+            "fact": "F3",
+            "reason": "上游来源未直接核实，且不是理解 WildAWM 所必需",
+            "to_description": false
+          },
+          {
+            "fact": "F4",
+            "reason": "数据来自未直接核实的 fork，偏离本期主线",
+            "to_description": false
+          },
+          {
+            "fact": "F5",
+            "reason": "与 F6、F9 重复，且属于厂商自述",
+            "to_description": true
+          },
+          {
+            "fact": "F13",
+            "reason": "属于复现操作细节，放入简介更合适",
+            "to_description": true
+          },
+          {
+            "fact": "F14",
+            "reason": "站点依赖细节不影响核心理解路径",
+            "to_description": true
+          },
+          {
+            "fact": "F16",
+            "reason": "缺少任务数量和步数分布，不能据此量化长程比例",
+            "to_description": true
+          },
+          {
+            "fact": "F19",
+            "reason": "下载与评测路径已由 F15、F27 支撑，hub 细节放简介",
+            "to_description": true
+          },
+          {
+            "fact": "F20",
+            "reason": "只检查了预览行，不能代表全量数据",
+            "to_description": true
+          },
+          {
+            "fact": "F23",
+            "reason": "模型卡细节可查，但不影响核心问题与验证路径",
+            "to_description": true
+          },
+          {
+            "fact": "F24",
+            "reason": "属于部署参数，且模型卡参数口径未解释",
+            "to_description": true
+          },
+          {
+            "fact": "F25",
+            "reason": "部署细节不影响研究机制和证据判断",
+            "to_description": true
+          },
+          {
+            "fact": "F26",
+            "reason": "缺少其基座、上下文和许可信息，本期不据此比较模型",
+            "to_description": true
+          },
+          {
+            "fact": "F28",
+            "reason": "各任务的 κ 数值未核实，不能用来加强结论",
+            "to_description": false
+          },
+          {
+            "fact": "F29",
+            "reason": "只能作为共享 harness 风险的线索，不能当作直接核实的论文事实",
+            "to_description": true
+          },
+          {
+            "fact": "F31",
+            "reason": "缺口本身已在反方节说明，不能列出猜测结果",
+            "to_description": false
+          },
+          {
+            "fact": "F32",
+            "reason": "未与论文正文逐项对应，不能作为 benchmark 清单",
+            "to_description": false
+          },
+          {
+            "fact": "F33",
+            "reason": "无法在论文正文核实，不能进入数字证据",
+            "to_description": false
+          },
+          {
+            "fact": "F34",
+            "reason": "相关正文数字未能读通，只适合列为待核验项",
+            "to_description": false
+          },
+          {
+            "fact": "F35",
+            "reason": "README 未点名具体 harness，不能作为机制事实",
+            "to_description": false
+          },
+          {
+            "fact": "F36",
+            "reason": "正文数字未能核实，且会挤占机制与行动内容",
+            "to_description": false
+          },
+          {
+            "fact": "F37",
+            "reason": "任务集合和计分口径不同，不能与 WildAWM 的 60% 直接比较",
+            "to_description": false
+          },
+          {
+            "fact": "F38",
+            "reason": "属于单个外部基准背景，不能证明 WildAWM 的泛化效果",
+            "to_description": false
+          }
+        ],
+        "fit": {
+          "ok": true,
+          "note": "6 节可控制在约 1566 个朗读单位内；每节规划 2–3 段，机制与证据节承载主要内容，依赖、逐项分数和消融移入简介，避免硬塞。"
+        }
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "comprehension",
+            "rule": "C1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": null,
+            "quote": "",
+            "problem": "这一部分引入了 3 个新概念，档位上限是 2",
+            "why": "术语先用后解释，观众在第一次听到时就卡住了",
+            "suggestion": "把解释挪到第一次出现的地方，或先讲它依赖的概念",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "比如你隔一天重跑同一任务，看到的是这个人格截至当天的文件与网页累积状态，不是从空白桌面开始。",
+            "problem": "句子有 43 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "流水线还产出了 341 个长程环境与任务对，仓库给出从依赖安装、镜像构建、数据下载到评测的路径。",
+            "problem": "句子有 42 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "网站镜像、本地文件和命令行是由 MCP 服务统一暴露给 Agent，还是 Agent 可以绕过 MCP 直接操作？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“MCP 服务是入口”和“其他操作入口”并列，听起来 MCP 可能是总入口，也可能只是一个平行入口，没完全说清层级。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 3,
+            "quote": "",
+            "problem": "五道执行式质量门分别检查什么？目前只听懂了能跑通、多个判定器交叉核对和改条件测试。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 3,
+            "quote": "",
+            "problem": "“再改掉关键条件”后验证器应该通过还是拒绝没有说明，所以这一步怎样证明判分可靠听起来跳了一步。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "“解出 60%”里的成功判定、任务数和步数预算具体是什么？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "两个 Qwen 的提升是相对哪个基线、幅度多大，8 个 OOD 基准分别是哪些？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "官方训练和官方评测事实上是否共享同一套工具、系统提示和执行外壳，还是这里只提出一种可能？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "要估算的“复现成本”具体包括时间、算力、API 或存储费用，还是主要指安装和排障工作量？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D7",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "想估算复现成本时，先按仓库路径跑通一个官方任务，再扩大批次。记录故障落在依赖、镜像、网站还是接口。同一任务能重复运行，环境和验证器结果也可解释，再继续扩容。",
+            "problem": "这些步骤主要测故障类型和复现稳定性，没有采集通常意义上的成本指标，也没有给出样本量和外推方法，因而达不到“估算复现成本”的目标。",
+            "why": "按仓库路径安装依赖、构建镜像并下载数据，挑一个官方任务运行；记录失败来自依赖、镜像、网站还是接口，再重复运行同一任务并检查环境和验证器结果，随后逐批扩大。这个流程可以得到故障类型、失败次数、重复稳定性和大致排障负担。但它没有记录耗时、CPU/GPU 时间、内存、token、费用或每批样本量，因此不能据此估算复现所需的时间、算力或金钱成本；仅跑一个官方任务也不足以外推整批成本。",
+            "suggestion": "增加每项任务的耗时、算力或 GPU 时间、内存、token 或费用、重试次数等记录，并用多个代表性任务估算批量成本；如果不增加这些指标，就把目标改为“验证复现稳定性与排障负担”。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "WildAWM 是合成个人电脑世界、任务和自动验收器的开源项目。",
+            "problem": "F2只证实WildAWM发布了代码，底稿没有说明代码采用允许开源使用、修改和再分发的许可证。F7所说的“开源模型”只修饰流水线使用的模型，不能证明项目本身属于开源项目。",
+            "why": "把“发布代码”提升为“开源项目”扩大了代码的授权状态，可能使受众误以为项目的使用、修改和再分发权限已经得到明确确认。",
+            "suggestion": "改为“已发布代码的项目”；若要保留“开源”，应先核实并引用仓库的许可证。",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [
+            {
+              "id": "G1",
+              "question": "WildAWM 到底造了什么，而不只是造了哪些截图？",
+              "expected": "它合成可实际操作的电脑世界，让网页界面、MCP 工具、本地文件和命令行共享状态；再把任务、运行环境和自动验收器封装成可复用单元。",
+              "answer": "WildAWM 造的是可以启动、操作并保存状态的合成个人电脑训练场，同时配有任务和自动验证器，而不只是静态截图。",
+              "correct": true,
+              "note": "回答准确抓住了可启动、可操作、可保存状态的合成电脑环境以及配套任务和自动验证器，虽未展开共享状态与可复用单元，但核心含义与要点一致。"
+            },
+            {
+              "id": "G2",
+              "question": "任务和验证器怎样生成，为什么不是随便写几个提示词？",
+              "expected": "系统会实际探索任务、编写任务与验证器、收集不同代理的执行轨迹，再经过五道执行式质量门，包括实际执行、多判定器交叉核对和反事实测试。",
+              "answer": "任务与验证器通过 XAI task synthesis 生成：先让 Agent 在可变化的世界里实际探索目标并留下执行轨迹，再根据探索结果和多 Agent 轨迹编写任务与验证器；候选物还要通过五道执行式质量门，包括跑通流程、多个判定器交叉核对以及改变关键条件测试判分稳定性，之后才会被采用。",
+              "correct": true,
+              "note": "回答涵盖了实际探索、编写任务与验证器、收集异构轨迹以及执行、交叉核对和反事实测试等五道质量门。"
+            },
+            {
+              "id": "G3",
+              "question": "开发者现在能拿到哪些东西？",
+              "expected": "论文、代码、环境与任务、训练好的模型以及 341 个环境—任务对均已发布，仓库还提供从安装、镜像构建到评测的复现路径。",
+              "answer": "开发者能拿到论文、代码、环境与任务、训练好的模型检查点，以及从依赖安装、镜像构建、数据下载到评测的路径；流水线还产出了 341 个长程环境与任务对。",
+              "correct": true,
+              "note": "回答列出了论文、代码、环境与任务、模型检查点、复现路径和341个长程环境—任务对，与要点一致。"
+            },
+            {
+              "id": "G4",
+              "question": "论文中的效果说明了什么，又不能说明什么？",
+              "expected": "论文自报 GPT-6-Astra 解出 60% 的任务，合成世界训练的模型在 8 个 OOD 基准上取得提升；但计分协议、逐项分数未核实，共享 harness 也可能解释部分增益，因此只能较有力地支持流水线可行，尚不能坐实世界级泛化。",
+              "answer": "论文报告 GPT-6-Astra 解出 WildAWM 任务的 60%，两个仅用合成世界训练的 Qwen 模型在 8 个 OOD 基准上取得提升；这些结果支持训练场和流水线可行，也显示了一些论文自报的迁移增益。但它们不能证明模型能在陌生环境中稳定迁移或实现了纯粹的世界级泛化，因为组件没有单独消融、OOD 基准名单和逐项分数不透明、步数与计分协议未经第三方验证、还存在适应 harness 和提示工具组合的解释，而且尚不能确认结果已被独立复现。",
+              "correct": true,
+              "note": "回答正确区分了论文自报的60%解题率、8个OOD基准上的迁移增益及其局限，并提到消融、计分协议、共享harness和独立复现等关键限制。"
+            }
+          ],
+          "score": 1.0
+        },
+        "newcomer": {
+          "retell": "WildAWM 公开了一套带任务和自动验证器的可执行合成电脑训练场，但目前证据主要证明流水线可行并显示了一些 OOD 增益，尚不能证明真正稳定的世界级泛化，因此接入前应依次检查任务可靠性、复现成本和不同 harness 下的泛化表现。",
+          "scores": {
+            "hook": 4,
+            "clarity": 4,
+            "pacing": 4,
+            "style": 5
+          },
+          "comments": "整体能把 WildAWM 讲成“可执行训练场—任务生成—证据边界—接入检查”，模拟街区的类比基本都能对应真实组件，重点也足够克制。语言自然，没有夸张或网络用语，但五道质量门、OOD 基线和复现成本口径略显像论文提纲，还可以再落地一些。"
+        },
+        "core_message_match": true,
+        "core_message_note": "复述与方案主旨一致：都强调WildAWM构建了可执行电脑世界及其任务和验证器，同时指出现有OOD增益证据尚不足以坐实稳定的世界级泛化。复述增加的接入前核查只是同方向的细化。",
+        "model_ran": true,
+        "summary": {
+          "serious": 0,
+          "must": 8,
+          "warn": 5,
+          "rule_must": 0,
+          "questions": 6,
+          "lost": 2,
+          "quiz_score": 1.0,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 2
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 8,
+              "warn": 1
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 2
+            }
+          },
+          "passed": true,
+          "rank": 8
+        },
+        "rounds": 1,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "communication",
+            "rule": "C5",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "这一段 59 个朗读单位，栏目要求 60–140",
+            "why": "段落太长听着累，太短讲不清",
+            "suggestion": "拆分或合并到栏目要求的长度",
+            "source": "rule",
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "流水线还产出了 341 个长程环境与任务对，仓库给出从依赖安装、镜像构建、数据下载到评测的路径。",
+            "problem": "句子有 42 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "WildAWM 的“合成电脑世界”具体是可实际启动并接受操作的环境，还是一组合成的网页、文件和操作记录？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "这里说的“泛化增益”具体要证明模型能迁移到哪些陌生任务或环境？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "MCP 是调用工具的接口而不是环境，那么它在 WildAWM 中具体连接哪些工具、又是电脑上的哪个部件？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“在这里，它和网页、本地文件、命令行操作的是同一台电脑”中的“它”到底指 MCP 接口还是使用这些工具的模型或 Agent，指代略有歧义。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "这里的“XAI 任务合成”具体指什么，为什么不是普通的任务生成？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“人格—日期状态”里的人格和日期分别怎样决定文件、网页及其累积状态？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "只用“随日期累积变化”概括，没有具体例子，核心机制听完后仍然偏抽象。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "系统“探索任务”的具体步骤是什么，探索结果又怎样变成任务和验证器？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "收集不同 Agent 的真实轨迹，是为了生成、筛选还是修订任务和验证器？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "从收集真实轨迹到写出可验收任务和验证器的关键生成步骤没有交代，推理像是跳了一步。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 3,
+            "quote": "",
+            "problem": "“候选物”指单独的任务、环境、验证器，还是它们的组合？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 3,
+            "quote": "",
+            "problem": "五道执行式质量门分别是什么，是否就是文中提到的跑通、交叉核对和改条件这几类？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 3,
+            "quote": "",
+            "problem": "“多个判定器”和任务本身的“验证器”有什么区别？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 3,
+            "quote": "",
+            "problem": "说了有五道质量门却没有逐项展开，也没明确“关键条件”具体改什么，读者知道会筛选，但仍不清楚完整筛选标准。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "GPT-6-Astra 是什么模型，它解出 60% 时采用什么评分口径？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "两个 Qwen 模型的提升是相对哪个基线，具体幅度和逐项分数是多少？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "“按汇总比例算，未解出 40%”容易让人以为每个任务都是严格通过或失败的二元计分，但稿中并未说明是否如此。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 4,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "官方训练与评测实际上是否共享同一套工具、系统提示和 harness 配置，还是这里只提出一种可能？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“提交错误结果”具体是提交错误答案、伪造状态，还是运行一条失败轨迹？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "怎样用可操作的方法判断网页、MCP 和命令行三处状态一致？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "三处状态一致是实操检查的核心，但这里只给了结果标准，没有说明具体比较什么、如何发现不一致。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "估算复现成本要记录哪些量，比如机器时间、API 或模型费用和人工排障时间？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“环境和验证器结果可解释”具体要排除哪些异常才算通过？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "给了试跑和扩量的流程，却没有定义成本口径，因此最后究竟能估出什么成本并不直观。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "切换官方 harness 和自有 harness 时，除提示词、工具和权限外还必须固定哪些变量？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "“优势明显缩水”的判定阈值是什么？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "从优势缩水直接标成工具栈适配略跳，其他实现差异没有被完全排除，而且“明显”没有量化。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 2,
+            "quote": "轨迹来自真实运行，所以任务做错时，环境状态和执行反馈也会一起改变。",
+            "problem": "底稿只证实系统收集实际执行的 rollout，且世界共享状态；并未保证每个错误任务都会改变环境状态。",
+            "why": "错误执行可能是只读查询、无效动作或仅给出了错误答案，环境状态未必发生变化。“会一起改变”把可能发生的状态变化说成了必然结果。",
+            "suggestion": "改为“错误动作可能改变环境状态，执行反馈会记录该次尝试”或“轨迹会反映动作造成的状态变化及收到的反馈”。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "fact",
+            "rule": "D7",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "想估算复现成本时，先按仓库路径跑通一个官方任务，再扩大批次。记录故障落在依赖、镜像、网站还是接口。同一任务能重复运行，环境和验证器结果也可解释，再继续扩容。",
+            "problem": "这些步骤主要测故障类型和复现稳定性，没有采集通常意义上的成本指标，也没有给出样本量和外推方法，因而达不到“估算复现成本”的目标。",
+            "why": "按仓库路径安装依赖、构建镜像并下载数据，挑一个官方任务运行；记录失败来自依赖、镜像、网站还是接口，再重复运行同一任务并检查环境和验证器结果，随后逐批扩大。这个流程可以得到故障类型、失败次数、重复稳定性和大致排障负担。但它没有记录耗时、CPU/GPU 时间、内存、token、费用或每批样本量，因此不能据此估算复现所需的时间、算力或金钱成本；仅跑一个官方任务也不足以外推整批成本。",
+            "suggestion": "增加每项任务的耗时、算力或 GPU 时间、内存、token 或费用、重试次数等记录，并用多个代表性任务估算批量成本；如果不增加这些指标，就把目标改为“验证复现稳定性与排障负担”。",
+            "source": "model",
+            "resolved": false
+          }
+        ]
+      },
+      "description": {
+        "summary": "WildAWM把网页、MCP、本地文件和命令行放进可执行的个人电脑世界，并生成任务与自动验收器；现有证据支持流水线可行，但共享评测外壳仍可能解释部分泛化增益。",
+        "details": [
+          "发布：2026 年 10 月 19 日，项目一次性公开论文、代码、环境与任务以及训练好的模型检查点。",
+          "机制：流水线分为 World synthesis 和 XAI task synthesis；前者按人格 c 与第 d 天构造累积状态 W(c,d)，后者探索任务、编写验证器并收集异构 Agent 轨迹。",
+          "数据规模：流水线产出 341 个长程环境与任务对。",
+          "任务产物：通过质量门后形成任务、环境和验证器三元组，设计用途为 SFT、在线 RL 和评测；三种用途没有分别给出独立实验。",
+          "质量门：候选产物要过五道执行式质量门，组合包括异构 Agent 轨迹、跨判定器一致性检查和反事实探针；各组成部分没有单独消融结果。",
+          "论文自报：GPT-6-Astra 解出 60% 的 WildAWM 任务；按汇总比例推导，未解出比例为 40%。步数预算、逐任务计分协议和逐项分数尚无第三方验证。",
+          "OOD 结果：论文称，两个不同规模的 Qwen 模型仅用 WildAWM 合成世界训练后，在覆盖 web、claw、computer-use 三类的 8 个 OOD benchmark 上取得提升；完整名单和逐项分数尚无第三方验证。",
+          "开源口径：团队称整条合成流水线完全由开源模型驱动，不依赖专有前沿模型；这一说法尚无第三方审计。",
+          "证据边界：公开代码只解决可检查性，不等于独立复现；共享 harness 带来的适应效应仍是替代解释，尚未被单独排除。"
+        ],
+        "open_questions": [
+          "五道质量门的逐门名称与各自贡献是什么？",
+          "质量门各组成部分的单独消融结果是什么？",
+          "8 个 OOD benchmark 的完整名单、逐项分数和计分协议是什么？",
+          "更换 harness 后，两个 Qwen 模型的提升还保留多少？",
+          "公开结果是否已有独立团队完整复现？"
+        ],
+        "not_covered": [
+          "论文《Agent World Model in the Wild: Computer-Use Agent Environment Synthesis》于 2026-10-19 以 arXiv:2610.26828、cs.AI 提交。",
+          "WildAWM 将 AWM 的工具环境扩展为具有人格、历史并随时间演化的个人电脑世界。",
+          "运行 WildAWM 需要 Python 3.12 及以上版本、uv、Docker 和 Node.js。",
+          "WildAWM 需要从固定版本的 WebHarbor 镜像取得 15 个网站镜像的初始种子。",
+          "WildAWM 的部分任务需要超过 100 个 agent 步才能完成。",
+          "ChilleD/WildAWM 数据集可直接下载 341 个环境—任务对，配套 Harbor hub 名为 wildawm。",
+          "HF 预览中的同一 persona 后续任务延续前序 cook-log 审计和日程核对，并跨 CLI、MCP、Web 三种接口执行。",
+          "ChilleD/WildAWM-35B-A3B 以 Qwen3.6-35B-A3B 为基座，并在 WildAWM XAI 任务集上后训练。",
+          "WildAWM-35B-A3B 以纯文本方式服务，上下文长度为 262144。",
+          "官方为 WildAWM-35B-A3B 给出的服务配置使用 sglang 0.5.15.post1、BF16 和 Qwen 工具调用及推理解析器。",
+          "项目还发布了 ChilleD/WildAWM-4B checkpoint。",
+          "二手 AI 审稿称 OOD 评测复用了 RL rollout 的 OpenCode harness、system prompt 和工具，视觉描述工具还使用策略的 Qwen3.6-35B-A3B 基座。"
+        ],
+        "sources": [
+          {
+            "url": "https://github.com/MSR-Orchard/WildAWM",
+            "facts": [
+              "F2",
+              "F6",
+              "F10",
+              "F12",
+              "F27",
+              "F7",
+              "F8",
+              "F9",
+              "F11",
+              "F15",
+              "F5",
+              "F13",
+              "F14",
+              "F19",
+              "F23",
+              "F26"
+            ]
+          },
+          {
+            "url": "https://huggingface.co/datasets/ChilleD/WildAWM",
+            "facts": [
+              "F2",
+              "F15",
+              "F19",
+              "F20"
+            ]
+          },
+          {
+            "url": "https://huggingface.co/ChilleD/WildAWM-35B-A3B",
+            "facts": [
+              "F2",
+              "F23",
+              "F24",
+              "F25"
+            ]
+          },
+          {
+            "url": "https://arxiv.org/html/2610.26828",
+            "facts": [
+              "F6",
+              "F10",
+              "F12",
+              "F22",
+              "F7",
+              "F8",
+              "F9",
+              "F11",
+              "F15",
+              "F17",
+              "F18",
+              "F21",
+              "F1",
+              "F5",
+              "F16"
+            ]
+          },
+          {
+            "url": "https://pith.science/paper/2610.26828",
+            "facts": [
+              "F30",
+              "F29"
+            ]
+          },
+          {
+            "url": "https://agientry.com/en/papers/paper-2610.26828",
+            "facts": [
+              "F1"
+            ]
+          }
+        ]
+      },
+      "usage": {
+        "requests": 11,
+        "prompt_tokens": 56319,
+        "completion_tokens": 280777,
+        "total_tokens": 337096
+      },
+      "problems": [],
+      "review_usage": {
+        "requests": 2,
+        "prompt_tokens": 8780,
+        "completion_tokens": 33503,
+        "total_tokens": 42283
+      },
+      "report_path": "output/deep/2026-10-22_ai_deep_research.md",
+      "written_at": "2026-10-22T19:20:19+0800",
+      "cell": {
+        "recipe": "deep_dive",
+        "sha256": "ce165f8e86b4a24abe8372e55b31c844f9989878b820b935e34010ff0564e74e",
+        "cell": "ai-developer-deep_dive-long",
+        "status": "enabled",
+        "parts": {
+          "domain": {
+            "key": "ai"
+          },
+          "type": {
+            "key": "deep_dive"
+          },
+          "format": {
+            "key": "long"
+          },
+          "audience": {
+            "key": "developer"
+          }
+        },
+        "resolved_sha256": "847ca102e234ba1520d2b033798978fce1c925882ba0ee6c7e9d26dc69fab81c",
+        "uses": {
+          "audience": {
+            "kind": "audience",
+            "name": "developer",
+            "sha256": "c0b372a3cfcb6286f9729adad1bda1aa0acafbd484d3e4999b5361b7260b2d24"
+          },
+          "research": {
+            "kind": "research_template",
+            "name": "deep_dive",
+            "sha256": "f51e2e3e24a048ff231eed1d524cb31edc505b1517edc5a21199f407c210851c"
+          },
+          "output": {
+            "kind": "part",
+            "name": "auto_form",
+            "sha256": "5492378c0be9d048c447a65fcab7b33e890e659c18013470a9269b0021896243"
+          }
+        }
+      }
+    },
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T19:20:19+0800"
+  }
+}

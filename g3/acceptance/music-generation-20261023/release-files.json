@@ -1,0 +1,17 @@
+{
+  "g2/music_engine/__init__.py": "63fb51de08c122d7c82c36032db47f5a9ae22233d316e19e637ed3d1d97afaaa",
+  "g2/music_engine/runtime.py": "cb9ea9f5960c690737cb97fc2bcfb9762fbe0f163d766bd9763aefb8d8d515d6",
+  "g2/music_engine/generate.py": "1480abfcbfa3b2f3792295e63559f8a4e097b9f34eb22481b2a6af658e5bf037",
+  "g2/music_engine/runtime-manifest.json": "8879b0e87b07a56bfb268f301fab65e8bb12e16da7225af5b434b69abd1cbf36",
+  "g3/music_jobs.py": "4683813e9c1a478fe94072d6725d67fb5b3610238e940c84280e8af72b428a86",
+  "g3/music_generation.py": "51b17b41a2ab3789619e6211dd13c8880c17e91a640fa70662c7007c9a72fa8f",
+  "g3/music_assets.py": "f7d2ea02c067ef752a4b1aae39ba9f9339b57ff13192f47fc7278486b488766b",
+  "g3/app.py": "a19db2705f886406e8e7fddbb9153d77dca208dcf703fb0541b1911a201d8e0c",
+  "g3/worker.py": "2777469c5915f38d20ce7d670046402a0e69e1af299a8f0773e99d32af103b96",
+  "g3/web/src/MusicGenerator.tsx": "c2729c864d61e3dd8e0a3bccc4eb330387bbcc95352b4a87300f70980fa06c81",
+  "g3/web/src/MusicOptions.tsx": "79cf6b82990d5de49c608cca64b820b0fcacf852868ba89806b596a2d667da4d",
+  "g3/web/src/CreativeResources.tsx": "fb64a60d952d0d6d7a8a1a05ff0db5c05105e128242875cf45a065835bf68f13",
+  "g3/web/src/main.tsx": "ce1f54ccd9cec63d2cbef79e4060094d5948644f3deb2792dfabc51f20075cf6",
+  "g3/web/static/app.js": "b2924b7aa8fa211917bc8c2f6d6167bd430aeac2bc11428bc5683fb887b1ac95",
+  "g3/web/static/app.css": "5cc9344567b3ecf2a7f46a171c1c8d941e028b76f97f6535f2519b760150ade4"
+}

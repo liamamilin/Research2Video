@@ -1,0 +1,586 @@
+{
+  "script": {
+    "id": "4c63a878b25b4c96b7f8fa67f0824da0",
+    "column_key": "topic_digest",
+    "topic": {
+      "id": null,
+      "title": "商业动态日报｜2026年10月22日",
+      "fields": {
+        "目标受众": "大众观众"
+      },
+      "from_report": "output/company/2026-10-22_company_daily.md",
+      "report_id": "23b2df08bb1a42beb4ab8958645d2e12"
+    },
+    "status": "APPROVED",
+    "research_job": "",
+    "report_path": "output/company/2026-10-22_company_daily.md",
+    "current_version": 1,
+    "approved_version": 1,
+    "error": null,
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T20:20:36+0800",
+    "updated_at": "2026-10-22T20:54:36+0800",
+    "heartbeat_at": 1792673667.28703,
+    "stage": null,
+    "archived": 0,
+    "report_id": "23b2df08bb1a42beb4ab8958645d2e12",
+    "production": "company_daily"
+  },
+  "version": {
+    "script_id": "4c63a878b25b4c96b7f8fa67f0824da0",
+    "version": 1,
+    "title": "2026年10月22日商业动态：谷歌虚拟电厂抢眼",
+    "sections": [
+      {
+        "title": "本期商业地图",
+        "paragraphs": [
+          {
+            "text": "这期看资金、技术和经营的变化：一家科技公司借电网调节用电，用科技做金融的公司整体投资变少，游戏机为什么变贵，估值很高的创业公司被收购，超市关店。",
+            "citations": [],
+            "evidence": "UNCITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      },
+      {
+        "title": "谷歌的虚拟电厂",
+        "paragraphs": [
+          {
+            "text": "谷歌（Google）是科技公司。虚拟电厂，是借助现有电网，在关键时段降低整体用电需求的安排。谷歌宣布了一项 gigawatt-sized 交易，也就是吉瓦级的虚拟电厂。",
+            "citations": [
+              "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "这笔交易和大型科技公司为数据中心新建电厂的做法形成对比。它利用现有电网，在关键时刻降低整体电力需求，也说明科技公司扩张的竞争不只在软件，还涉及电力安排。",
+            "citations": [
+              "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "它看起来可能是大型科技企业同类交易中最大的一笔。报道没有给出具体容量，确切规模仍是未知数。",
+            "citations": [
+              "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "金融科技融资转冷",
+        "paragraphs": [
+          {
+            "text": "金融科技初创企业，是从事金融科技业务、通过融资支持扩张的创业公司。融资额，是一定时期内获得的投资总额。全球融资额和交易数量都在下降。",
+            "citations": [
+              "https://news.crunchbase.com/venture/q3-2026-fintech-startup-funding-deal-count-fell-ai/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "2026 年第三季度融资额比 2025 年第三季度下降 21.4%。资金和交易同时转弱，说明支持行业扩张的资本与交易活跃度都在减弱。",
+            "citations": [
+              "https://news.crunchbase.com/venture/q3-2026-fintech-startup-funding-deal-count-fell-ai/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "Crunchbase News 报道给出了这组数字，但没有列出具体交易数量。对大众来说，这仍可作为观察科技创业热度的一个窗口。",
+            "citations": [
+              "https://news.crunchbase.com/venture/q3-2026-fintech-startup-funding-deal-count-fell-ai/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "AI推高主机成本",
+        "paragraphs": [
+          {
+            "text": "下一代 Xbox，是微软正在开发的新一代游戏主机；Xbox 是微软的游戏主机品牌。AI 是人工智能，也就是让机器处理智能任务的技术。",
+            "citations": [
+              "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "下一代 Xbox 可能售价 $1,800。背后的价格压力来自 AI 企业需求激增，内存芯片成本因此上升；现有游戏设备近期也已涨价。",
+            "citations": [
+              "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "这个价格只出现在 Fast Company 的报道标题里，正式售价和上市日期都没有给出，目前只能当作一种可能。",
+            "citations": [
+              "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "高估值公司被收购",
+        "paragraphs": [
+          {
+            "text": "高估值创业公司，是上一轮融资时估值很高的创业企业；并购，是被其他公司收购。2021 年高估值创业潮中的一批公司，近月陆续找到买家。",
+            "citations": [
+              "https://news.crunchbase.com/ma/acquired-boom-era-startups-ezcater-anyscale/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "报道没交代收购原因，也没说买家看重什么，只提到一些公司多年没有再融资。",
+            "citations": [
+              "https://news.crunchbase.com/ma/acquired-boom-era-startups-ezcater-anyscale/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "报道没有提供收购价、融资额或估值金额。成交估值仍远低于此前高点，但具体回升多少，仍没有答案。",
+            "citations": [
+              "https://news.crunchbase.com/ma/acquired-boom-era-startups-ezcater-anyscale/"
+            ],
+            "evidence": "CITED",
+            "note": null
+          }
+        ]
+      },
+      {
+        "title": "Kroger关闭大批门店",
+        "paragraphs": [
+          {
+            "text": "Kroger 是一家杂货巨头，也就是经营杂货超市的零售企业。公司曾在业绩电话会上表示，将关闭经营不佳的门店。",
+            "citations": [
+              "https://www.fastcompany.com/91627379/kroger-closing-stores-2026-list-doomed-locations-updated"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "Fast Company 复查发现，此后至少 50 家旗下超市已经关闭。关店承诺大多已经落地，门店减少也会改变相关州消费者可选择的线下网点。",
+            "citations": [
+              "https://www.fastcompany.com/91627379/kroger-closing-stores-2026-list-doomed-locations-updated"
+            ],
+            "evidence": "CITED",
+            "note": null
+          },
+          {
+            "text": "公司原计划关闭约 60 家，复查统计的是此后实际关了多少家。两个数字时间点不同，不能把计划数量当成已关数量。",
+            "citations": [
+              "https://www.fastcompany.com/91627379/kroger-closing-stores-2026-list-doomed-locations-updated"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      },
+      {
+        "title": "接下来继续关注",
+        "paragraphs": [
+          {
+            "text": "接下来最值得盯的是谷歌会不会公布虚拟电厂交易的具体容量，因为这关系到科技公司扩张时如何安排数据中心电力。",
+            "citations": [],
+            "evidence": "UNCITED",
+            "note": null
+          }
+        ]
+      }
+    ],
+    "length_check": {
+      "spoken_length": 863,
+      "estimated_seconds": 197,
+      "segments": 35,
+      "units_per_second": 4.35,
+      "voice": "voxcpm_anchor",
+      "target_minutes": 3,
+      "budget": 783,
+      "ratio": 1.093,
+      "status": "OK",
+      "tolerance": 0.15,
+      "sections": [
+        {
+          "title": "本期商业地图",
+          "spoken_length": 65,
+          "budget": 112
+        },
+        {
+          "title": "谷歌的虚拟电厂",
+          "spoken_length": 169,
+          "budget": 112
+        },
+        {
+          "title": "金融科技融资转冷",
+          "spoken_length": 162,
+          "budget": 112
+        },
+        {
+          "title": "AI推高主机成本",
+          "spoken_length": 141,
+          "budget": 112
+        },
+        {
+          "title": "高估值公司被收购",
+          "spoken_length": 131,
+          "budget": 112
+        },
+        {
+          "title": "Kroger关闭大批门店",
+          "spoken_length": 145,
+          "budget": 112
+        },
+        {
+          "title": "接下来继续关注",
+          "spoken_length": 50,
+          "budget": 111
+        }
+      ]
+    },
+    "edit_type": "GENERATED",
+    "meta": {
+      "attempts": 1,
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 6126,
+        "completion_tokens": 51806,
+        "total_tokens": 57932
+      },
+      "problems": [],
+      "trusted_urls": 6,
+      "report_path": "output/company/2026-10-22_company_daily.md",
+      "written_at": "2026-10-22T20:32:33+0800",
+      "cell": {
+        "recipe": "topic_digest",
+        "sha256": "0e7e2de3f2297a0445e8e5ae7c1df0cf2ac8d13b209dbf26364f970be9d832b1",
+        "cell": "topics-general-digest-long",
+        "status": "experimental",
+        "parts": {
+          "domain": {
+            "key": "topics"
+          },
+          "type": {
+            "key": "digest"
+          },
+          "format": {
+            "key": "long"
+          },
+          "audience": {
+            "key": "general"
+          }
+        },
+        "resolved_sha256": "986625daf5528d8b8faccc00f7aee9e3806c891feb4324bb0cf1bc43146d3bee",
+        "uses": {
+          "audience": {
+            "kind": "audience",
+            "name": "general",
+            "sha256": "4f27533412fc216dfa3f9083a37f0cc10b96e41ecd69be0813a06d07f354001e"
+          },
+          "output": {
+            "kind": "part",
+            "name": "motion",
+            "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+          }
+        }
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这期看资金、技术和经营的变化：一家科技公司借电网调节用电，用科技做金融的公司整体投资变少，游戏机为什么变贵，估值很高的创…",
+            "problem": "句子有 65 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "有读不出来的符号：（）",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "它利用现有电网，在关键时刻降低整体电力需求，也说明科技公司扩张的竞争不只在软件，还涉及电力安排。",
+            "problem": "句子有 44 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C4",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "2026 年第三季度融资额比 2025 年第三季度下降 21.4%。",
+            "problem": "一句话里有 3 个数字",
+            "why": "听觉记不住一句里的多个数字",
+            "suggestion": "一句只留一两个数，其余换成参照或放进简介",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 6,
+            "paragraph": 0,
+            "quote": "接下来最值得盯的是谷歌会不会公布虚拟电厂交易的具体容量，因为这关系到科技公司扩张时如何安排数据中心电力。",
+            "problem": "句子有 50 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "虚拟电厂，是借助现有电网，在关键时段降低整体用电需求的安排。",
+            "problem": "将报告中针对谷歌这笔交易的做法泛化成虚拟电厂的一般定义，并省略了“材料称”的来源限定。",
+            "why": "报告描述的是这笔VPP交易如何利用现有电网、降低关键时段需求，并未把这一机制界定为所有虚拟电厂的通用属性；讲稿扩大了适用范围，也提高了确定性。",
+            "suggestion": "改为“据报道，这笔虚拟电厂交易借助现有电网，在关键时段降低整体电力需求。”",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "它利用现有电网，在关键时刻降低整体电力需求，也说明科技公司扩张的竞争不只在软件，还涉及电力安排。",
+            "problem": "省略了报告中的“材料称”，把媒体转述谷歌公告的内容改成了确定事实。",
+            "why": "报告的来源性质是Fast Company转述Google宣布的交易，并未注明该机制经过独立验证；讲稿直接陈述交易机制，确定性高于报告。",
+            "suggestion": "在机制描述前加来源限定，如“据报道，这笔交易利用现有电网，在关键时刻降低整体电力需求”。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "背后的价格压力来自 AI 企业需求激增，内存芯片成本因此上升；现有游戏设备近期也已涨价。",
+            "problem": "去掉了报告对媒体报道的归属，把AI需求、内存芯片成本和现有设备涨价之间的因果链说成确定结论。",
+            "why": "报告使用的是“材料称”和“材料还称”，讲稿却以确定语气陈述这两项媒体判断；其中价格本身仍只是可能售价，因此问题不改变整体价格预测，但归因措辞不够准确。",
+            "suggestion": "改为“据报道，AI企业需求激增正在推高内存芯片成本；报道还称现有游戏设备近期已经涨价。”",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "谷歌宣布了一项 gigawatt-sized 交易，也就是吉瓦级的虚拟电厂。",
+            "problem": "首次出现“gigawatt-sized／吉瓦级”时只是把英文译成中文，没有用白话解释“吉瓦”所衡量的是电力规模以及这一规模对普通观众意味着什么，不符合术语首次出现要解释的要求。",
+            "why": "没有电气知识的观众无法判断这是多大的项目，而且可能把“吉瓦级”误听成一个具体容量。",
+            "suggestion": "首次出现时改成日常说法，明确这是以十亿瓦计的用电规模；若报告没有具体容量，就不要让表述看起来像精确数值。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "这笔交易和大型科技公司为数据中心新建电厂的做法形成对比。",
+            "problem": "“数据中心”是专业术语，首次出现时没有解释，违反专业名词首次出现要当场用白话说明的要求。",
+            "why": "观众不知道数据中心是什么，也就难以理解新建电厂与科技公司扩张之间的关联。",
+            "suggestion": "首次出现时补一句日常解释，例如说明数据中心是集中放服务器和算力设备的机房；后文再直接使用该词。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 2,
+            "quote": "它看起来可能是大型科技企业同类交易中最大的一笔。",
+            "problem": "“可能是同类最大”属于比较性事实判断，却没有说明这是谷歌或官方公司的说法，还是媒体报道；紧接着又说具体容量未知，没有明确指出这一排名目前也没有定论。",
+            "why": "观众可能把一句带推测色彩的比较判断当成已经核实的事实。",
+            "suggestion": "若这是公司说法，就明确说“谷歌说，这可能是同类最大的一笔”；若是媒体报道，就明确说“媒体报道称”。若报告没有明确依据，直接删掉这句，只保留规模尚未确定的信息。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "金融科技初创企业，是从事金融科技业务、通过融资支持扩张的创业公司。",
+            "problem": "用“从事金融科技业务”解释“金融科技初创企业”属于循环解释，没有说明金融科技具体指什么，违反首次出现的专业术语要用白话解释的要求。",
+            "why": "观众仍不知道这类公司提供的是哪类金融服务，也难以理解后面的融资和行业热度指标。",
+            "suggestion": "先说明金融科技就是利用互联网或手机提供支付、放贷等金融服务，再解释这类初创公司是靠融资扩张的新公司。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "下一代 Xbox 可能售价 $1,800。",
+            "problem": "金额只写成“$1,800”，没有明确说明是美元等哪一种货币；同时该价格没有对应到明确年份或期数。下一句虽然说上市日期未定，但没有直接说明这个数字缺少时间口径。",
+            "why": "观众无法确定币种和报价对应的时间，容易把未经确认的标题价格当成某个确定年份的官方售价。",
+            "suggestion": "按报告原币种写明具体货币名称，并直接补上“因上市日期未定，该报价暂无对应年份或期数”的时间口径。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 5,
+            "paragraph": 1,
+            "quote": "Fast Company 复查发现，此后至少 50 家旗下超市已经关闭。",
+            "problem": "“50”虽然说明是门店数量，但没有对应的年份或明确起止时期；“此后”只回指前面的业绩电话会，观众不知道那次会议发生在何时、统计截至何时。",
+            "why": "无法判断这 50 家是长期累计、某一年度还是近期数量，容易对关店规模和时间作出错误判断。",
+            "suggestion": "补上报告中的明确起止时间或统计截止时间，并说明“至少 50 家”对应的是哪一段时期。",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "summary": {
+          "serious": 0,
+          "must": 1,
+          "warn": 13,
+          "rule_must": 1,
+          "questions": 0,
+          "lost": 0,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 3
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "communication": {
+              "serious": 0,
+              "must": 1,
+              "warn": 10
+            }
+          },
+          "passed": false,
+          "rank": 1
+        },
+        "rounds": 1,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "这期看五个方向：科技公司怎样安排电力，金融科技企业获得的投资怎么变，游戏主机硬件成本从哪里来，高估值创业公司为何被收购，…",
+            "problem": "句子有 65 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "这五个分散的领域为什么放在同一期，它们共同说明什么，对普通观众分别有什么影响？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 4,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "这些高估值创业公司究竟为什么会被收购，买家看重的到底是什么？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "must",
+            "section": 4,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "上一段已经说过这些公司“找到买家”，这里又说“有人找到了买家”，重复了同一件事，没有补充收购原因。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 5,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "公司此前计划关闭多少家？既然没有给出计划数量，“大多已经落地”是相对于多少家判断的？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "audit_usage": {
+        "requests": 4,
+        "prompt_tokens": 9478,
+        "completion_tokens": 88032,
+        "total_tokens": 97510
+      }
+    },
+    "created_by": "autopilot",
+    "created_at": "2026-10-22T20:32:33+0800"
+  }
+}

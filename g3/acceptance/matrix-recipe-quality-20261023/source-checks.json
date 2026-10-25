@@ -1,0 +1,175 @@
+{
+  "method": "Publisher pages opened and read on 2026-10-23 and 2026-10-24; concise paraphrases for this authorized acceptance batch, not independent experiments",
+  "checks": [
+    {
+      "case": "ai-flash",
+      "url": "https://github.com/deepseek-ai/DeepInfer",
+      "publisher": "DeepSeek official repository",
+      "date": "持续更新，检索于2026-10-23",
+      "facts": "README lists NVIDIA SM100 and Huawei Ascend 950. KV cache system, prefill/decode disaggregation and replica load balancing are required service components not included in this release. License is Apache-2.0. NVIDIA-only invariance and deterministic sampling are explicitly qualified.",
+      "must_keep": "Engine release is distinct from a complete serving system; do not equate off-list hardware with an independently tested impossibility."
+    },
+    {
+      "case": "ai-flash",
+      "url": "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md",
+      "publisher": "DeepSeek official deployment Q&A",
+      "date": "持续更新，检索于2026-10-23",
+      "facts": "The team reports 155 trillion tokens/day per cluster and US$38 revenue per GPU-hour at valley pricing. Revenue is not profit. Deployment conditions and concurrency matter to optimizations.",
+      "must_keep": "Attribute figures to the team and retain pricing basis; no investment-return promise or universal acceleration claim."
+    },
+    {
+      "case": "ai-deep",
+      "url": "https://github.com/MSR-Orchard/WildAWM",
+      "publisher": "WildAWM official repository",
+      "date": "持续更新，检索于2026-10-23",
+      "facts": "Executable worlds combine files/CLI, MCP services and mirrored websites. Two-stage synthesis includes task verifiers and quality gates. 341 environment-task pairs and model links are available. Evaluation table explicitly lists eight external benchmarks with task counts and metric types.",
+      "must_keep": "Release and model self-report are distinct from independent reproduction. Do not say the benchmark names are undisclosed."
+    },
+    {
+      "case": "ai-report",
+      "url": "https://github.com/alchaincyf/huashu-motion",
+      "publisher": "Huashu Motion official repository",
+      "date": "持续更新，检索于2026-10-23",
+      "facts": "README describes coding-agent animation, composition and point-at-frame edits and links demonstrations. Code/documents use MIT; bundled third-party parts and the author's character have separately stated conditions.",
+      "must_keep": "Project claims and demonstrations do not prove our own tested quality. Summary omitted license/effect information is not proof the repository omits it. Historical popularity is a dated snapshot."
+    },
+    {
+      "case": "ai-report",
+      "url": "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/",
+      "publisher": "PyTorch official blog",
+      "date": "2026-10-19",
+      "facts": "TorchNeuron is a native PyTorch backend for Trainium, announced for public beta October 20 under Apache-2.0. It supports eager execution, torch.compile and NKI on Trainium2/3.",
+      "must_keep": "Supported platforms and beta scope; backend compatibility is not a universal measured performance improvement."
+    },
+    {
+      "case": "industry",
+      "url": "https://www.supplychaindive.com/news/apple-expands-us-supplier-network-for-iphone-materials-components/833496/",
+      "publisher": "Supply Chain Dive",
+      "date": "2026-10-21",
+      "facts": "Article names Perryman for titanium and Qnity Electronics for camera films, specific iPhone products, a commitment of up to US$100 million over three years with Perryman, within Apple's four-year US$600 billion manufacturing commitment.",
+      "must_keep": "Commitment is not money already spent, and is distinct from the Perryman amount. The original article has concrete materials, products and periods; do not claim it gives none."
+    },
+    {
+      "case": "industry",
+      "url": "https://www.supplychaindive.com/news/us-semiconductor-supply-chain-relies-on-vulnerable-hidden-inputs/833485/",
+      "publisher": "Supply Chain Dive",
+      "date": "2026-10-20",
+      "facts": "Reports SIA concerns about vulnerable and opaque inputs and calls for government-industry coordination over onshoring and stockpiling.",
+      "must_keep": "Association assessment and requested action are distinct from a policy already implemented; vulnerability does not prove no substitute can exist."
+    },
+    {
+      "case": "industry",
+      "url": "https://www.manufacturingdive.com/news/us-faces-national-security-risks-without-aluminum-smelters-report/833591/",
+      "publisher": "Manufacturing Dive",
+      "date": "2026-10-21",
+      "facts": "Reports economist Adam Hersh's analysis that no operating US smelter can produce military-specific high-purity aluminum, with exposure to potential supply disruptions. This does not mean the US has no ordinary aluminum production.",
+      "must_keep": "Military-specific scope, report attribution; not a claim that the US has no aluminum smelters of any kind."
+    },
+    {
+      "case": "industry",
+      "url": "https://www.nist.gov/news-events/news/2026/10/new-chip-based-tape-measure-light-could-revolutionize-mobile-timekeeping",
+      "publisher": "NIST",
+      "date": "2026-10-16",
+      "facts": "Research concerns chip-scale frequency combs as rulers for light and components for portable optical clocks. NIST/JQI describe a two-laser microresonator approach and potential navigation applications.",
+      "must_keep": "Potential research application is not an already deployed backup-navigation product."
+    },
+    {
+      "case": "company",
+      "url": "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+      "publisher": "Fast Company",
+      "date": "2026-10-22",
+      "facts": "Article describes Google's demand-response VPP agreement with Voltus. Its earlier 100 MW agreement is one-tenth the new deal; Google's data-center growth and grid constraints are the context. The deal appears largest of its kind from a hyperscaler.",
+      "must_keep": "Demand-side grid flexibility is distinct from building a new generating plant. 'Appears largest of its kind' must not become an unqualified world's-largest claim. Do not say capacity is not given."
+    },
+    {
+      "case": "science",
+      "url": "https://www.sciencedaily.com/releases/2026/10/261020085727.htm",
+      "publisher": "ScienceDaily / Heriot-Watt University",
+      "date": "2026-10-21",
+      "facts": "Article identifies the university and describes seismic imaging, rock microscopy and simulations. Reported estimates: 160 m impactor, roughly 43–46 million years ago, crater buried 700 m below seabed, waves over 100 m. Underlying Nature Communications paper is dated 2025.",
+      "must_keep": "Estimated ancient event and research reconstruction, not a modern warning forecast. News article date differs from underlying study date; do not claim methods or institution are absent."
+    },
+    {
+      "case": "science",
+      "url": "https://www.sciencedaily.com/releases/2026/10/261020085025.htm",
+      "publisher": "ScienceDaily / Penn State",
+      "date": "2026-10-21",
+      "facts": "Reports improvements after a 12-week short daily resistance-exercise intervention in adults 65 or older, including strength, balance and rising from a chair.",
+      "must_keep": "Study population and duration; no guarantee for every person and no clinical treatment recommendation."
+    },
+    {
+      "case": "science",
+      "url": "https://www.sciencedaily.com/releases/2026/10/261020085016.htm",
+      "publisher": "ScienceDaily / Northwestern University",
+      "date": "2026-10-21",
+      "facts": "Study followed 13 ISS astronauts for about six months. Intensive daily exercise and simulated Martian gravity after return are part of the reported context.",
+      "must_keep": "Simulated conditions in studied astronauts do not demonstrate all risks of an actual Mars mission are resolved."
+    },
+    {
+      "case": "science",
+      "url": "https://www.sciencedaily.com/releases/2026/10/261020085023.htm",
+      "publisher": "ScienceDaily / Texas A&M University",
+      "date": "2026-10-21",
+      "facts": "Laboratory research links excess RNA during poxvirus infection with mitochondrial impairment and possible disease implications.",
+      "must_keep": "Experimental context and potential implications; not proof of a clinical disease cause or a vaccine safety conclusion."
+    },
+    {
+      "case": "history",
+      "url": "https://www.smithsonianmag.com/history/were-two-chinese-astronomers-were-beheaded-for-failing-to-predict-an-eclipse-2134-bce-the-story-may-be-a-myth-but-it-underscores-the-real-risks-of-interpreting-celestial-events-180989715/",
+      "publisher": "Smithsonian Magazine",
+      "date": "2026-10-21",
+      "facts": "Article distinguishes the Hsi/Ho legend from documented history and presents named scholars' differing interpretations; versions differ in date and even whether an eclipse was involved.",
+      "must_keep": "Legend, expert interpretation and documented history remain distinct; do not assert the named execution as established fact or claim no interpretive basis is described."
+    },
+    {
+      "case": "history",
+      "url": "https://www.medievalists.net/2026/10/denmark-to-3d-scan-viking-runestones/",
+      "publisher": "Medievalists.net",
+      "date": "2026-10-21",
+      "facts": "Article describes the planned 2027–2031 runestone project and Denmark's approximately 260 surviving runestones. It names funding and institutions.",
+      "must_keep": "Planned research and proposed questions are not already established political-network findings. Do not claim no dates or scale appear in the article."
+    },
+    {
+      "case": "history",
+      "url": "https://www.medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests/",
+      "publisher": "Medievalists.net",
+      "date": "2026-10-20",
+      "facts": "Article describes radiocarbon dating of two Italian oak populations and an interpretation linking reduced human pressure after the Black Death with forest regeneration.",
+      "must_keep": "Specific populations and historical inference, not all-European forests or a method-free claim."
+    },
+    {
+      "case": "history",
+      "url": "https://blogs.loc.gov/loc/2026/10/mary-lincoln-a-nice-chatty-little-letter-shortly-before-the-assassination-of-her-husband/",
+      "publisher": "Library of Congress",
+      "date": "2026-10-21",
+      "facts": "Library describes Mary Lincoln's February 15, 1865 letter to Caroline Wright and provides a link to the digitized letter, roughly two months before Abraham Lincoln's assassination.",
+      "must_keep": "Emotion is a historian's reading of this letter, not a complete psychological judgment of the writer."
+    },
+    {
+      "case": "ai-deep",
+      "url": "https://arxiv.org/html/2610.26828",
+      "publisher": "WildAWM authors / arXiv",
+      "date": "2026-10-19",
+      "facts": "Paper describes executable PC worlds with shared GUI/MCP/CLI state, task/verifier co-synthesis, heterogeneous execution checks and counterfactual probes. Authors release 341 environment-task pairs, report GPT-6-Astra solving 60%, and report two Qwen models improving across eight named OOD benchmarks. Sections 5.2 and 5.3 present quality-gate and RL ablations; appendices list evaluation protocols and benchmarks.",
+      "must_keep": "Author-reported results under the described protocol; do not claim there are no ablations, benchmark names or per-benchmark results. Hypotheses about harness effects remain hypotheses, not established contamination or the sole explanation."
+    },
+    {
+      "case": "company",
+      "url": "https://www.fastcompany.com/91627597/the-next-xbox-could-cost-1800-heres-why",
+      "publisher": "Fast Company",
+      "date": "2026-10-22",
+      "checked_date": "2026-10-24",
+      "facts": "Article relays a reported Microsoft internal projection of US$1,200–1,800 for Project Helix. Hardware subsidies could lower the price. Neither company has publicly commented on expected next-generation retail prices; official release dates have not been announced. The article does discuss reported launch targets.",
+      "must_keep": "Reported projection, not confirmed retail pricing. Do not say the article contains no launch timing. Component-cost explanation is attributed to the article."
+    },
+    {
+      "case": "science",
+      "url": "https://www.hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago",
+      "publisher": "Heriot-Watt University original research news",
+      "date": "2025-09-20",
+      "checked_date": "2026-10-24",
+      "facts": "University reports newly available seismic data, microscopic analysis of oil-well rock cuttings, shocked quartz/feldspar at crater-floor depth and numerical models. The team estimates a 160 m impactor about 43–46 million years ago; crater is buried 700 m below the seabed, and reconstructed waves exceed 100 m. This is a 2025 research announcement.",
+      "must_keep": "Do not invent the exact chronological research procedure or assert that every evidence type was directly input to the numerical model. Methods provide complementary evidence; reconstructed ancient event is distinct from present-day warning."
+    }
+  ]
+}

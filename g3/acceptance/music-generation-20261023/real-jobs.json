@@ -1,0 +1,155 @@
+{
+  "count_before": 169,
+  "music_jobs": [
+    {
+      "request": {
+        "name": "第四阶段验收 · 科普轻柔氛围",
+        "style": "ambient",
+        "description": "Soft background, minimal percussion, space for clear spoken narration.",
+        "duration_seconds": 24,
+        "seed": 42610,
+        "idempotency_key": "stage4-real-ambient-42610"
+      },
+      "response": {
+        "id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+        "status": "QUEUED",
+        "stage": "QUEUED",
+        "parent_id": null,
+        "created_at": "2026-10-23T09:27:40.354629+00:00",
+        "updated_at": "2026-10-23T09:27:40.354636+00:00",
+        "error_code": null,
+        "error_message": null,
+        "asset_id": null,
+        "request": {
+          "name": "第四阶段验收 · 科普轻柔氛围",
+          "style": "ambient",
+          "description": "Soft background, minimal percussion, space for clear spoken narration.",
+          "duration_seconds": 24,
+          "bpm": null,
+          "seed": 42610
+        },
+        "settings": {
+          "name": "第四阶段验收 · 科普轻柔氛围",
+          "style": "ambient",
+          "description": "Soft background, minimal percussion, space for clear spoken narration.",
+          "duration_seconds": 24,
+          "bpm": 72,
+          "seed": 42610,
+          "caption": "Gentle ambient instrumental background for spoken explanation. Warm soft synthesizer pads, sparse plucked notes, subtle rounded bass, minimal percussion, calm and spacious, restrained dynamics. Soft background, minimal percussion, space for clear spoken narration. No vocals, no speech, no singing.",
+          "keyscale": "C Major",
+          "instrumental": true,
+          "topics": [
+            "原理科普",
+            "操作教程"
+          ],
+          "lyrics": "[Instrumental]",
+          "inference_steps": 8,
+          "thinking": false,
+          "engine": "ACE-Step 1.5 turbo",
+          "code_revision": "ca1e85fe9430179831e6bc6be790c332190a3866",
+          "weight_revision": "19671f406d603126926c1b7e2adc169acbcade22"
+        },
+        "cancel_requested": false
+      }
+    },
+    {
+      "origin": "browser_form",
+      "response": {
+        "id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+        "status": "RUNNING",
+        "stage": "VERIFYING",
+        "parent_id": null,
+        "created_at": "2026-10-23T09:32:59.375590+00:00",
+        "updated_at": "2026-10-23T09:32:59.904378+00:00",
+        "error_code": null,
+        "error_message": null,
+        "asset_id": null,
+        "request": {
+          "name": "第四阶段验收 · 快讯轻快电子",
+          "style": "electronic",
+          "description": "Light steady pulse, restrained drums, clear background for technology narration.",
+          "duration_seconds": 30,
+          "bpm": null,
+          "seed": 42611
+        },
+        "settings": {
+          "name": "第四阶段验收 · 快讯轻快电子",
+          "style": "electronic",
+          "description": "Light steady pulse, restrained drums, clear background for technology narration.",
+          "duration_seconds": 30,
+          "bpm": 110,
+          "seed": 42611,
+          "caption": "Light electronic instrumental background for technology news. Warm analog synthesizer chords, clean plucked melody, rounded bass and an understated drum machine groove, bright and focused, restrained dynamics. Light steady pulse, restrained drums, clear background for technology narration. No vocals, no speech, no singing.",
+          "keyscale": "A Minor",
+          "instrumental": true,
+          "topics": [
+            "AI快讯",
+            "产品更新"
+          ],
+          "lyrics": "[Instrumental]",
+          "inference_steps": 8,
+          "thinking": false,
+          "engine": "ACE-Step 1.5 turbo",
+          "code_revision": "ca1e85fe9430179831e6bc6be790c332190a3866",
+          "weight_revision": "19671f406d603126926c1b7e2adc169acbcade22"
+        },
+        "cancel_requested": false
+      }
+    }
+  ],
+  "video_jobs": [
+    {
+      "request": {
+        "title": "第四阶段验收 · AI 配乐与科普对话",
+        "production_recipe": "science_explainer",
+        "video_form": "chat_dialogue",
+        "input_mode": "narration",
+        "chapters": [
+          {
+            "title": "生成音乐的复用",
+            "paragraphs": [
+              "观众：生成的音乐能重复使用吗？",
+              "讲解：可以。音乐保存到创作资源库后，可给不同视频选用。",
+              "观众：换配乐会覆盖原视频吗？",
+              "讲解：不会。系统生成新的配乐版本，原画面和旁白会保留。"
+            ]
+          }
+        ],
+        "duration_mode": "content",
+        "background_music": {
+          "enabled": true,
+          "asset_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+          "level_db": -18,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        },
+        "idempotency_key": "stage4-video-generated-ambient"
+      },
+      "response": {
+        "job_id": "4837354c-c8fd-45fc-ba55-3f284a68f667",
+        "status": "QUEUED",
+        "created_at": "2026-10-23T09:33:37.542+00:00",
+        "status_url": "/api/jobs/4837354c-c8fd-45fc-ba55-3f284a68f667"
+      }
+    },
+    {
+      "parent": "008bbb17-51c6-42f9-8a13-bc678fba88f0",
+      "request": {
+        "background_music": {
+          "enabled": true,
+          "asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+          "level_db": -18,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        }
+      },
+      "response": {
+        "job_id": "64f2cd64-84df-447e-98e7-05e2b4c2905d",
+        "parent_job_id": "008bbb17-51c6-42f9-8a13-bc678fba88f0",
+        "status": "QUEUED"
+      }
+    }
+  ]
+}

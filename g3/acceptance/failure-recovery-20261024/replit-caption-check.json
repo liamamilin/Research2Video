@@ -1,0 +1,26 @@
+{
+  "all_34_segments_passed": true,
+  "caption_count": 53,
+  "minimum_caption_ms": 890,
+  "audio_sha256": "d1884fc345084b6fbb605e41f90cca06d7cde519890839b5202f6d5cffffc766",
+  "narration_sha256": "8d2401d540efd3e3723c08a3aa8868dd4e0d1022773d27b4c7af802cc7659604",
+  "repaired_segment_cues": [
+    {
+      "segment_id": "c2_n5",
+      "text": "而一个多月前，",
+      "char_start": 0,
+      "char_end": 7,
+      "start_ms": 56968,
+      "end_ms": 57858
+    },
+    {
+      "segment_id": "c2_n5",
+      "text": "双方才刚刚宣布过一笔同样规模的交易。",
+      "char_start": 7,
+      "char_end": 25,
+      "start_ms": 57858,
+      "end_ms": 60317
+    }
+  ],
+  "full_caption_evidence": "g3/data/failure-recovery-20261024/replit/caption-alignment.json"
+}

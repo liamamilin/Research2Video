@@ -1,0 +1,80 @@
+{
+  "case": "ai-report",
+  "technical_status": "PASS",
+  "manual_content_status": "PASS",
+  "render_id": "d5db2571c793435d9209b075b85b4bb0",
+  "job_id": "4b040968-452f-493c-9601-b1a38d3e7f8b",
+  "script_id": "56aa643847d44a13b897972ff6e3d2cc",
+  "version": 2,
+  "title": "开源项目两种变化：视频能指着改，训练能沿用 PyTorch",
+  "mode": "fast",
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/d5db2571c793435d9209b075b85b4bb0/video.mp4",
+  "content_seconds": 110.6,
+  "duration_seconds": 119.6,
+  "scenes": 6,
+  "caption_mode": "short forced-aligned",
+  "caption_cues": 30,
+  "max_caption_characters": 52,
+  "max_caption_seconds": 6.37,
+  "narration_exact": true,
+  "cue_order_and_coverage": true,
+  "full_decode": true,
+  "artifact_hashes": 29,
+  "source_cards": [
+    {
+      "title": "alchaincyf/huashu-motion",
+      "url": "https://github.com/alchaincyf/huashu-motion",
+      "date": "2026-10-23"
+    },
+    {
+      "title": "Introducing TorchNeuron",
+      "url": "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/",
+      "date": "2026-10-19"
+    }
+  ],
+  "decoded_frames": [
+    {
+      "scene": "card_1",
+      "seconds": 17.8296,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-report/frames/scene-01.jpg"
+    },
+    {
+      "scene": "card_2",
+      "seconds": 34.5616,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-report/frames/scene-02.jpg"
+    },
+    {
+      "scene": "card_3",
+      "seconds": 51.832800000000006,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-report/frames/scene-03.jpg"
+    },
+    {
+      "scene": "card_4",
+      "seconds": 73.5488,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-report/frames/scene-04.jpg"
+    },
+    {
+      "scene": "card_5",
+      "seconds": 91.24080000000001,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-report/frames/scene-05.jpg"
+    },
+    {
+      "scene": "card_6",
+      "seconds": 108.58539999999999,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-report/frames/scene-06.jpg"
+    }
+  ],
+  "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-report/contact.jpg",
+  "presentation": {
+    "preset": "information_cards"
+  },
+  "notes": [],
+  "manual_full_audio_listening": false,
+  "manual_review_method": "read current v2 against opened official project and PyTorch blog; inspect all six decoded scene frames",
+  "manual_notes": [
+    "画面按两个项目的用途和限制提炼，未将整段口播复制到主画面；英文项目名和字幕换行保持完整。",
+    "许可证明确限定项目代码与文档，第三方组件/素材/角色的单独条件仍在；演示归属于项目方。",
+    "Trainium二代/三代与公开测试范围保留，不把支持接口推成普遍提速或零迁移成本；30条短字幕覆盖完整。",
+    "未逐秒完整人工听音。"
+  ]
+}

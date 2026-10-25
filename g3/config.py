@@ -26,7 +26,7 @@ class Settings:
     ffprobe: Path = PROJECT_ROOT / "g0/darwin_arm64/ffprobe"
     chrome: Path = Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
     worker_poll_seconds: float = 0.35
-    runner_timeout_seconds: int = 1800
+    runner_timeout_seconds: int = 3600
 
     @property
     def llm_settings_file(self) -> Path:

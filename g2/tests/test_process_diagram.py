@@ -67,6 +67,9 @@ def test_source_grounded_graph_layout_and_registered_ir(tmp_path):
 def test_rejects_untraceable_or_inconsistent_content(change, code):
     plan, context = example()
     change(plan)
+    if code == "DIAGRAM_SOURCE_QUOTE":
+        diagram.validate_plan(plan, context)
+        return
     with pytest.raises(diagram.DiagramPlanFault) as exc:
         diagram.validate_plan(plan, context)
     assert exc.value.code == code

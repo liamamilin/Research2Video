@@ -1,0 +1,18 @@
+{
+  "g3/app.py": "b922ce0f2a2e62382f1936e241cae2964b360879811632c00fc0df105b8b1cc3",
+  "g3/creative_images.py": "32e4cd4589b00ffa0179bf45597da0099876974a4f82db917efeea98a9b08c18",
+  "g2/creative_forms.py": "045f33f36b406e9399868b143f98ababc3e89d875dfdb3f1faa085209e9eada7",
+  "g2/creative_recommendations.py": "36ebcece27004e160472fbe81615ca681883a8f29b3744fbfe3c3aa5168e7331",
+  "g2/production_plan.py": "f5d3f17e14ad743d8a3c7877e64e4d7424ed0e63838d1b3f68a8d5463566b6b8",
+  "g2/creative_library/catalog.json": "e4609aa0c52d62532e3d8edb65e3f27f4b53b4c53d10dbcbe01529279c076b5d",
+  "g1/renderer/src/ImageMaterials.tsx": "2e0462bb09afcead978a2ca947746957896309b3ebc8360bf25a4802df5e44e5",
+  "g1/renderer/src/CreativeForms.tsx": "eb76ceef816fd472d320ea2e530c9294f8be101382d052d627faf3b7ba558072",
+  "g1/renderer/src/Root.tsx": "b2e1a6137a21fc37a864d16583bc3b7612000bdacb869e18ba7cb45ae49d78bb",
+  "g1/video_ir.py": "7513661b87cc005e31f0c3da796a7f2753037d13b9a4c047175680b0162855d2",
+  "g3/web/src/CreativeSuggestions.tsx": "54271b60179443054f6c0a2dad682040634b8b53937eef9dfbbf71186575f2ea",
+  "g3/web/src/SlideshowImages.tsx": "315fac7bcfa60683b4086c481d7672fce64a276e8b03992fb6d1cb25ea8aa7ab",
+  "g3/web/src/CreativeResources.tsx": "0b55ed6bd013e882421d8b6616d4a9e87ce9820412392cfa69a1d8d58d00b071",
+  "g3/web/src/main.tsx": "c405051a573845da2e7c15a026f47389c11c7a622ec50f835c55d941898c1630",
+  "g3/web/static/app.js": "2ddde53f3dc8e7a968bef6d616ead6f587de1c625c09b607957700f398419859",
+  "g3/web/static/app.css": "4f06616f545f192932189ce46f5b0b962cb1018c3ac28fecec707ede248947ad"
+}

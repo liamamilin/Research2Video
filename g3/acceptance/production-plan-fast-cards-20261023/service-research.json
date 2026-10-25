@@ -1,0 +1,16 @@
+{
+  "old_pid": 22571,
+  "new_pid": 43002,
+  "old_instance": "b90424ee66874883bfce7d454fd39943",
+  "new_instance": "938be57180c14dac88750471b1519126",
+  "counts_before": {
+    "scripts": 83,
+    "renders": 109
+  },
+  "counts_after": {
+    "scripts": 83,
+    "renders": 109
+  },
+  "fast_render_schema": true,
+  "health": "ok"
+}

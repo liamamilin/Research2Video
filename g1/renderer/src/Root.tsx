@@ -1,10 +1,12 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
+import {CornerBadge, type Badge} from './Packaging';
+import {CreativeVideo, type CreativePreset} from './CreativeForms';
 
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
 type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]};
 type Segment = {id: string; text: string; start_ms: number; end_ms: number};
-type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; presentation?: {preset: 'information_motion'; density?: 'large'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
+type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; caption_cues?: Pick<Segment, 'text' | 'start_ms' | 'end_ms'>[]; presentation?: {preset: 'information_motion' | CreativePreset; density?: 'large'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
 
 const colors = {bg: '#0B1020', panel: '#121B2E', border: '#293750', text: '#F3F6FC', muted: '#A9B7CD', cyan: '#4ED5E6', blue: '#6798FF', orange: '#FFAA55', red: '#FF6175', green: '#64D8A5'};
 const font = '"Hiragino Sans GB", "PingFang SC", sans-serif';
@@ -208,7 +210,7 @@ function SceneVisual({scene, frame}: {scene: Scene; frame: number}) {
   }
 }
 
-function LegacyVideo({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: Record<string, string>}) {
+function LegacyVideo({ir, sceneBackdrops = {}, badge}: {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge}) {
   const frame = useCurrentFrame();
   const scene = ir.scenes.find((candidate) => frame >= candidate.start_frame && frame < candidate.end_frame) ?? ir.scenes[ir.scenes.length-1];
   const chapters = ir.content_structure?.chapters || [];
@@ -219,14 +221,14 @@ function LegacyVideo({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: 
   const sceneProgress = (frame - scene.start_frame) / Math.max(1, scene.end_frame - scene.start_frame - 1);
   const zoom = interpolate(sceneProgress, [0, 1], [1.035, 1.095], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   const panX = interpolate(sceneProgress, [0, 1], [10, -10], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const caption = ir.narration.segments.find((s) => {
+  const caption = (ir.caption_cues ?? ir.narration.segments).find((s) => {
     const start = Math.floor((s.start_ms*ir.video.fps+500)/1000), end = Math.floor((s.end_ms*ir.video.fps+500)/1000);
     return frame >= start && frame < end;
   });
   return <AbsoluteFill style={{backgroundColor: colors.bg, color: colors.text, fontFamily: font}}>
     {safeBackdrop && <Img src={safeBackdrop} style={{position: 'absolute', zIndex: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.58, filter: 'blur(18px)', transformOrigin: 'center', transform: `translateX(${panX}px) scale(${zoom * 1.08})`}}/>}
     {safeBackdrop && <AbsoluteFill style={{zIndex: 1, background: 'linear-gradient(90deg, rgba(5,10,19,.50), rgba(5,10,19,.36) 50%, rgba(5,10,19,.50)), linear-gradient(0deg, rgba(5,10,19,.72), rgba(5,10,19,.22) 48%, rgba(5,10,19,.46)'}}/>}
-    <AbsoluteFill style={{zIndex: 2}}><div style={{position: 'absolute', left: 80, top: 54, color: colors.cyan, fontSize: 24, letterSpacing: 2}}>AUTOVIDEO　/　G1 · Video IR 0.2</div><div style={{position: 'absolute', right: 82, top: 56, color: colors.muted, fontSize: 22}}>知识动画　·　真实中文旁白</div><SceneVisual scene={scene} frame={frame}/>{chapterIndex >= 0 && <div style={{position: 'absolute', left: 180, top: 124, color: colors.muted, fontSize: 26}}>第 {chapterIndex+1} / {chapters.length} 章 · <Tech text={chapters[chapterIndex].title}/></div>}</AbsoluteFill>
+    <AbsoluteFill style={{zIndex: 2}}>{badge ? <CornerBadge badge={badge} dark/> : <div style={{position: 'absolute', left: 80, top: 54, color: colors.cyan, fontSize: 24, letterSpacing: 2}}>AUTOVIDEO　/　G1 · Video IR 0.2</div>}<div style={{position: 'absolute', right: 82, top: 56, color: colors.muted, fontSize: 22}}>知识动画　·　真实中文旁白</div><SceneVisual scene={scene} frame={frame}/>{chapterIndex >= 0 && <div style={{position: 'absolute', left: 180, top: 124, color: colors.muted, fontSize: 26}}>第 {chapterIndex+1} / {chapters.length} 章 · <Tech text={chapters[chapterIndex].title}/></div>}</AbsoluteFill>
     <AbsoluteFill style={{zIndex: 3, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92, pointerEvents: 'none'}}>{caption && <div style={{minWidth: 320, maxWidth: 1680, minHeight: 72, padding: '13px 28px', borderRadius: 18, background: 'rgba(5,10,19,.88)', border: `1px solid ${colors.border}`, color: colors.text, textAlign: 'center', fontSize: caption.text.length > 32 ? 30 : 38, lineHeight: 1.4, overflowWrap: 'anywhere', boxSizing: 'border-box'}}><Tech text={caption.text}/></div>}</AbsoluteFill>
     <Audio src={staticFile(ir.audio_public_file)} volume={Math.pow(10, 0/20)}/>
   </AbsoluteFill>;
@@ -235,7 +237,6 @@ function LegacyVideo({ir, sceneBackdrops = {}}: {ir: Timeline; sceneBackdrops?: 
 // A separate presentation for the same validated, registered content components.
 const paper = {bg:'#F7F8F5', ink:'#202D28', muted:'#69756E', green:'#17784B', line:'#E1E8E1'};
 const ease = (value: number) => 1-Math.pow(1-Math.max(0, Math.min(1, value)), 3);
-type Badge = {text?: string; color: string};
 function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
   const frame = useCurrentFrame();
   const sceneIndex = Math.max(0, ir.scenes.findIndex((s) => frame >= s.start_frame && frame < s.end_frame));
@@ -243,7 +244,7 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
   // Short videos (presentation.density 'large') scale every text size by 1.3; g2/information_motion.py::scaled() mirrors this for text fit.
   const large = ir.presentation?.density === 'large';
   const S = (size: number) => large ? Math.round(size * 1.3) : size;
-  const caption = ir.narration.segments.find((s) => frame >= Math.floor((s.start_ms*30+500)/1000) && frame < Math.floor((s.end_ms*30+500)/1000));
+  const caption = (ir.caption_cues ?? ir.narration.segments).find((s) => frame >= Math.floor((s.start_ms*30+500)/1000) && frame < Math.floor((s.end_ms*30+500)/1000));
   const chapters = ir.content_structure?.chapters || [];
   const chapterIndex = chapters.findIndex((c) => c.narration_segment_ids.includes(scene.narration_segment_ids[0]));
   const reveals = scene.beats.filter((b) => b.action === 'reveal');
@@ -261,7 +262,7 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
   const chartLike = scene.component === 'comparison' || scene.component === 'bar_chart';
   const heading = chartLike ? scene.purpose : p.title;
   return <AbsoluteFill style={{background:paper.bg, color:paper.ink, fontFamily:font, backgroundImage:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
-    <div style={{position:'absolute', left:140, top:70, display:'flex', alignItems:'center', gap:14, fontSize:22, letterSpacing:2, color:badge ? badge.color : paper.green}}><span style={{width:9,height:9,borderRadius:3,background:badge ? badge.color : paper.green}}/>{badge ? badge.text : <>AUTOVIDEO <span style={{color:paper.muted, letterSpacing:0, marginLeft:12}}>知识讲解</span></>}</div>
+    <CornerBadge badge={badge}/>
     <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
     {scene.component === 'title_card' ? <div style={{position:'absolute',left:180,top:285,width:1520}}>
       <div style={{...motion('title'), ...textStyle, fontSize:large ? (p.title.length > 20 ? S(66) : S(83)) : p.title.length > 30 ? 76 : 92, lineHeight:1.35,fontWeight:700,letterSpacing:-1,maxWidth:1450}}><Tech text={p.title}/></div>
@@ -355,6 +356,7 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
 }
 
 function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge}) {
+  if (['information_cards', 'kinetic_typography', 'image_slideshow', 'chat_dialogue', 'object_showcase', 'dynamic_collage'].includes(props.ir.presentation?.preset || '')) return <CreativeVideo ir={props.ir} badge={props.badge}/>;
   return props.ir.presentation?.preset === 'information_motion' ? <InformationVideo ir={props.ir} badge={props.badge}/> : <LegacyVideo {...props}/>;
 }
 

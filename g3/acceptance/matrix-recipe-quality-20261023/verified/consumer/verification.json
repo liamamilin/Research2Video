@@ -1,0 +1,94 @@
+{
+  "case": "consumer",
+  "technical_status": "PASS",
+  "manual_content_status": "PASS",
+  "render_id": "b1816354ecef4eb7abf3361c8da300b2",
+  "job_id": "a3f69e66-6dc3-42c3-b727-0a602ad35ae4",
+  "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+  "version": 5,
+  "title": "续航手机最抢眼，五件新品变化速览",
+  "mode": "fast",
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/b1816354ecef4eb7abf3361c8da300b2/video.mp4",
+  "content_seconds": 149.933,
+  "duration_seconds": 158.933333,
+  "scenes": 8,
+  "caption_mode": "short forced-aligned",
+  "caption_cues": 38,
+  "max_caption_characters": 37,
+  "max_caption_seconds": 5.52,
+  "narration_exact": true,
+  "cue_order_and_coverage": true,
+  "full_decode": true,
+  "artifact_hashes": 29,
+  "source_cards": [
+    {
+      "title": "Motorola Edge 70 Max 评测",
+      "url": "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html",
+      "date": "2026-10-21"
+    },
+    {
+      "title": "Oppo Enco X4 开箱与试用",
+      "url": "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php",
+      "date": "2026-10-22"
+    },
+    {
+      "title": "Acer Swift Spin 14 AI 评测",
+      "url": "https://www.notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html",
+      "date": "2026-10-21"
+    }
+  ],
+  "decoded_frames": [
+    {
+      "scene": "card_1",
+      "seconds": 13.5792,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/consumer/frames/scene-01.jpg"
+    },
+    {
+      "scene": "card_2",
+      "seconds": 32.7598,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/consumer/frames/scene-02.jpg"
+    },
+    {
+      "scene": "card_3",
+      "seconds": 48.510400000000004,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/consumer/frames/scene-03.jpg"
+    },
+    {
+      "scene": "card_4",
+      "seconds": 66.9316,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/consumer/frames/scene-04.jpg"
+    },
+    {
+      "scene": "card_5",
+      "seconds": 87.15780000000001,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/consumer/frames/scene-05.jpg"
+    },
+    {
+      "scene": "card_6",
+      "seconds": 108.8356,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/consumer/frames/scene-06.jpg"
+    },
+    {
+      "scene": "card_7",
+      "seconds": 131.1226,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/consumer/frames/scene-07.jpg"
+    },
+    {
+      "scene": "card_8",
+      "seconds": 148.2654,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/consumer/frames/scene-08.jpg"
+    }
+  ],
+  "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/consumer/contact.jpg",
+  "presentation": {
+    "preset": "information_cards"
+  },
+  "notes": [],
+  "manual_review_method": "read current manuscript against opened publisher sources; inspect one real decoded frame per scene at 80% of scene duration",
+  "manual_full_audio_listening": false,
+  "manual_notes": [
+    "逐页抽查8张实际解码画面，主画面为概览和重点列表，字幕为独立短句。",
+    "续航28小时附Wi-Fi网页浏览条件；耳机体验附几次飞行试用；收购和未来产品计划保留归属；更新支持三年/五年的口径差异并列保留。",
+    "未逐秒人工听完整音轨；同步依据为真实音频强制对齐及字幕覆盖/时序校验。"
+  ]
+}

@@ -18,9 +18,7 @@
           "component",
           "props",
           "narration_segment_ids",
-          "headline",
-          "source_quotes",
-          "cues"
+          "headline"
         ],
         "properties": {
           "id": {

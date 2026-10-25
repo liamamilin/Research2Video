@@ -50,6 +50,8 @@ AutoVideo 的维护者负责启动本地服务、配置 DeepSeek 密钥和本地
 
 ### 请求
 
+可选 `production_recipe` 引用 AutoVideo 的制作配方：`ai_news`（AI 快讯）、`how_to`（操作教程）、`science_explainer`（原理科普）。省略的形式、时长模式、创作偏好与包装字段继承配方默认，显式设置优先；原调用不传此字段时行为保持。`GET /api/creative-resources` 提供目录、题材建议、案例与实际接入状态。详情见 [创作资源库](g3/CREATIVE_RESOURCES.md)。
+
 `POST /api/jobs`，`Content-Type: application/json`。
 
 以下是可直接作为联调材料的有效示例；实际使用时替换标题和正文：
@@ -117,18 +119,29 @@ curl --fail --silent --show-error \
 - **章节标题取自 `chapters[].title`**，原样用于画面章节标签与 `chapters.json`；标题本身不朗读。
 - **画面仍自动规划。** `video_form: "auto"` 时只让模型为整片选择 `information_motion` 或 `process_diagram`（不读改、不剔除讲稿内容）；场景、卡片、流程图与动画节拍按每章讲稿自动生成。
 - 时长由讲稿和实际配音决定，因此必须传 `duration_mode: "content"`。
-- **来源卡（可选 `sources`）。** `narration` 模式可附 `sources: [{title, url, date}]`，片尾出现一张「来源」卡，每条显示标题、域名和发布日期；不传则没有来源卡。约定：
-  - 1–3 条；`title` 1–40 字符、单行；`url` 必须是带域名的 `http`/`https` 网址（不含空白，≤300 字符），画面只显示去掉 `www.` 的域名；`date` 为存在的 `YYYY-MM-DD`；不接受其他字段。只用于 `narration` 模式，且 `video_form` 必须是 `information_motion` 或 `auto`（`auto` 选成流程图时不出现来源卡）。
-  - **来源文字不是旁白，也不进入旁白。** 它既不朗读，也不参与「画面文字贴口播」的核对：来源卡的文字由请求里的 `sources` 在本地生成（模型不写），生成后必须与请求数据逐字一致，否则以 `INFORMATION_SOURCE_TEXT` 失败。这条豁免只覆盖来源卡本身：来源标题里的数字和术语**不会**被加入旁白的核对依据，其他场景的数字与命令、版本号等仍必须出自旁白。
-  - 来源卡占用片尾一句旁白的画面（因为场景必须逐段覆盖旁白）：最后一个场景有两句以上且最后一句没有被它的节拍引用时，取走最后一句；最后一个场景只有一句且是文字类场景（标题、要点、对比）时，由来源卡替换；数据类场景（数字、价格、图表）不会被替换，改为从章内较前、能让出一句的场景取。都不行时不出来源卡，原因写入 `artifacts/source-card.json`（任务仍成功）。
-  - 来源标题或域名过长、条数过多导致排不下时，任务以 `INFORMATION_SOURCE_CARD` 失败，`error_message` 说明原因；缩短标题后重新提交。
-  - 修订任务（讲稿修订、场景修订）不继承 `sources`；来源卡场景不能被重排，其文字不能编辑。
-- **短视频大字号。** 讲稿全文 ≤ 560 字（约 60–120 秒）时，信息动效整片的文字放大到 1.3 倍（IR 里 `presentation.density: "large"`），每屏容量相应变小，规划器会写得更短。更长的视频沿用原字号。
-- 任务保存的原稿 `source.txt` 由章节生成：章内段落以换行连接、章与章之间空一行；`source_sha256` 对应这份文本。
+- **来源卡（可选 `sources`）。** 可附 `sources: [{title, url, date}]`（1–3 条），素材和定稿讲稿、信息动效和流程图均可用。来源卡由组件库在完整正文之后生成独立片段，不朗读、不占用旁白场景。标题、域名、日期只来自请求；日期必须是存在的 `YYYY-MM-DD`，标题最多 40 字，显示域名最多 80 字符。不传来源时记录 `no_sources`，可以用 `packaging.source_card.enabled: false` 关闭。重试及修订继承保存的来源与包装配置。历史任务仍保留原产物和时间线。
+
+### 包装与辅助素材库（`packaging`，默认启用）
+
+所有新任务默认继承 `common`，包括片头 1.5 秒、片尾 2.5 秒、栏目角标、来源卡（有数据时 4.5 秒）和片头片尾提示音。`GET /api/packaging` 返回五类已注册组件和通用默认。配方只提交引用及参数覆盖，组件不运行模型生成代码。
+
+```json
+"packaging": {
+  "preset": "common",
+  "recipe": "flash",
+  "label": "快讯",
+  "intro": {"subtitle": "10月23日"},
+  "outro": {"seconds": 3, "lines": ["面向开发者的 AI 快讯"]}
+}
+```
+
+单独关闭某组件用 `{enabled: false}`，例如 `intro: {enabled: false}`；整套关闭用 `packaging: {enabled: false}`。新 `packaging` 与旧 `package` 互斥。配置在任务创建时解析并保存版本、组件引用、最终参数和完整性哈希；修订及重试沿用快照。来源卡和片头片尾位于正文之外，成片时长为所有启用片段之和。`packaging-resolved.json` 提供配置记录。
+
+详细配置、入口、文件和时间线规则见 [g3/PACKAGING_LIBRARY.md](g3/PACKAGING_LIBRARY.md)。
 
 ### 包装套件（可选 `package`：片头与片尾）
 
-一条视频 = 内容部分 + 非内容部分。非内容部分（片头 stinger、片尾 end_card）**不进 Video IR**：IR v0.2 要求每个场景至少有一个旁白段，音频 QA 要求成片音轨与配音的相关系数不低于 0.98。内容视频照常渲染并通过原有的媒体 QA、原话校验（这些一律不动），然后由独立的 `PACKAGE` 阶段把片头、片尾接在它前后，成片就是打包后的视频。请求里没有 `package` 时行为与以前完全一样（`PACKAGE` 阶段显示「已跳过」，不产生新文件）。
+一条视频 = 内容部分 + 非内容部分。非内容部分（片头 stinger、片尾 end_card）**不进 Video IR**：IR v0.2 要求每个场景至少有一个旁白段，音频 QA 要求成片音轨与配音的相关系数不低于 0.98。内容视频照常渲染并通过原有的媒体 QA、原话校验（这些一律不动），然后由独立的 `PACKAGE` 阶段把片头、片尾接在它前后，成片就是打包后的视频。本节为旧 `package` 调用格式，显式提交时保留原片段选择；省略 `package` 和 `packaging` 的新任务启用通用组件库。
 
 ```json
 "package": {
@@ -139,13 +152,14 @@ curl --fail --silent --show-error \
 }
 ```
 
-- **角标 `badge`（可选）**：短文字，≤ 12 字单行，写栏目名（如「快讯」）。带 `package` 的任务，内容画面左上角的角标改由套件提供：有 `badge` 时显示「色点 + badge 文字」，色点和文字用 `accent`；没传 `badge` 时只显示 `accent` 色点，不写产品名和「知识讲解」。**没有 `package` 的任务保持原样**（显示「AUTOVIDEO 知识讲解」）。目前只改了简洁信息动效（`information_motion`）版式的角标；旧版式和流程图解版式（左上角「AUTOVIDEO / G1 · Video IR 0.2」等）不变。角标作为渲染参数传给渲染器，不进 Video IR。\n- **字段**：`accent` 必填，`#rrggbb`；`intro`、`outro` 各自可选，**至少给一个**（例如知识点栏目只要片尾）。模板名只认 `stinger`（片头）和 `end_card`（片尾）；`seconds` 在 0.5–5 之间，按 30 fps 取整到帧；`title` ≤ 12 字；`subtitle`（仅片头）≤ 24 字；`lines`（仅片尾）最多 3 行、每行 ≤ 30 字；`sound` 可选，是套件里提示音的名字（小写字母、数字、下划线，必须在套件里存在，目前只有 `synth_sting`）。多余字段、错位字段（如片尾的 `subtitle`）一律以 422 拒绝，任务不会创建。不带 `sound` 时片头片尾是静音的。
+- **角标 `badge`（可选）**：≤12 字单行栏目名。通过可信角标组件显示，信息动效与流程图均支持；未给角标时隐藏该标识。
+- **字段**：`accent` 必填，`#rrggbb`；`intro`、`outro` 至少给一个。模板为 `stinger`/`end_card`；时长 0.5–5 秒；标题 ≤12 字，片头副标题 ≤24 字，片尾最多3行、每行≤30字；`sound` 只能引用注册音效。额外或错位字段在创建前拒绝。
 - **文字只来自请求**：模板用固定版式（片头：主色底、白字标题加副标题；片尾：浅底、主色竖条、标题与说明行）逐帧绘制，不经过模型，文字过长时只缩字号、不截断。日期等动态内容由上游写进 `subtitle`，AutoVideo 不替换 `{date}`。
 - **提示音**：套件目录 `g2/package_kit/` 里的声音是带来源和授权的资产（`kit.json` 记录 `source`、`license`、`author`、`sha256`）。第一版 `synth_sting` 由确定性脚本 `synth_sounds.py` 合成（原创，无授权问题，音质有限）。换成自己的音乐文件只需要换 `sounds/` 里的文件并更新 `kit.json` 的元数据和 sha256，流程不变；打包时校验 sha256，文件与元数据不符会拒绝。
 - **响度**：提示音按内容视频**实际播放**的人声有效电平（50 ms 窗口，高于 −45 dBFS 才计入）自动降低 6 dB 混入，并在片头/片尾片段内裁短、淡出，不会渗进内容。成片检查要求提示音至少比人声低 3 dB 且不削波，否则以 `PACKAGE_SEAM_LOUDNESS` 失败。
 - **产物**：`video.mp4` 是**打包后的成片**；`content.mp4` 是内容视频本身（未打包，也是原话校验、内容 QA 针对的那个文件）。时间线：`captions.srt`、`chapters.json` 已加上片头长度，与 `video.mp4` 对齐；内容时间线的版本另存为 `content-captions.srt`、`content-chapters.json`。`package.json` 记录片头/内容/片尾的帧数与偏移（`offset_ms` 是片头时长）、提示音元数据与每项检查结果；`package-qa.json` 是检查报告；`package-contact-sheet.jpg` 是接触表。上游发布时间戳时用 `chapters.json`（已含偏移）。网页播放器播放打包后的成片，章节和场景跳转自动加上片头偏移。
-- **打包后的检查（全部通过才算完成）**：完整解码；帧数等于片头 + 内容 + 片尾，时长误差不超过一帧；尺寸、帧率、采样率、声道与内容视频一致且全片没有中途变化；内容部分的音轨相关系数按片头长度错开后重算，仍须 ≥ 0.98；接缝处提示音响度。失败码：`PACKAGE_DECODE_FAILED`、`PACKAGE_DURATION_MISMATCH`、`PACKAGE_FORMAT_MISMATCH`、`PACKAGE_AUDIO_MISMATCH`、`PACKAGE_SEAM_LOUDNESS`；另有 `PACKAGE_CONFIG_INVALID`、`PACKAGE_CONTENT_MISSING`、`PACKAGE_RENDER_FAILED`、`PACKAGE_COMMAND_FAILED`、`PACKAGE_UNVERIFIED`（请求了打包但没有通过的检查报告，绝不发布未验证的成片）。`PACKAGE_CONFIG_INVALID`、`PACKAGE_CONTENT_MISSING`、`PACKAGE_FORMAT_MISMATCH`、`PACKAGE_UNVERIFIED` 的 `retryable` 为 `false`，其余可重试。阶段名 `PACKAGE`（页面显示「加片头片尾」），排在 `QUALITY_CHECK` 之后；历史任务没有这一阶段。
-- **重试与修订**：重试沿用保存的请求，会重新打包。讲稿修订、原稿修订、画面修订、声音与速度修订、场景背景重生成都**继承父任务的 `package`**，并在新内容视频上重新打包（章节、字幕按新内容重算偏移）；这一点与 `sources` 不同。场景预览取自 `content.mp4`，不受片头影响。
+- **打包后的检查（全部通过才算完成）**：完整解码；帧数等于片头 + 内容 + 来源卡（如有）+ 片尾，时长误差不超过一帧；尺寸、帧率、采样率、声道与内容视频一致且全片没有中途变化；内容部分的音轨相关系数按片头长度错开后重算，仍须 ≥ 0.98；接缝处提示音响度。失败码：`PACKAGE_DECODE_FAILED`、`PACKAGE_DURATION_MISMATCH`、`PACKAGE_FORMAT_MISMATCH`、`PACKAGE_AUDIO_MISMATCH`、`PACKAGE_SEAM_LOUDNESS`；另有 `PACKAGE_CONFIG_INVALID`、`PACKAGE_CONTENT_MISSING`、`PACKAGE_RENDER_FAILED`、`PACKAGE_COMMAND_FAILED`、`PACKAGE_UNVERIFIED`（请求了打包但没有通过的检查报告，绝不发布未验证的成片）。`PACKAGE_CONFIG_INVALID`、`PACKAGE_CONTENT_MISSING`、`PACKAGE_FORMAT_MISMATCH`、`PACKAGE_UNVERIFIED` 的 `retryable` 为 `false`，其余可重试。阶段名 `PACKAGE`（页面显示「加片头片尾」），排在 `QUALITY_CHECK` 之后；历史任务没有这一阶段。
+- **重试与修订**：重试沿用保存的请求，会重新打包。讲稿修订、原稿修订、画面修订、声音与速度修订、场景背景重生成都**继承父任务的 `package`**，并在新内容视频上重新打包（章节、字幕按新内容重算偏移），并继承来源数据与组件库快照。场景预览取自 `content.mp4`，不受片头影响。
 - 提示音只加在片头、片尾；**不做背景音乐垫底**，也不做竖屏。
 
 ### 响应
@@ -161,19 +175,21 @@ curl --fail --silent --show-error \
 }
 ```
 
-**收到响应后立即保存 `job_id`，再开始等待。** 每次重新 `POST /api/jobs` 都会创建新任务。
+**收到响应后立即保存 `job_id`，再开始等待。** 推荐为一次出片传入稳定的 `idempotency_key`；只有不传该字段，或换用新标识，才会创建另一条任务。带标识的重复请求仍返回 202，状态可能已是终态。
 
 ### 字段约定
 
 | 字段 | 当前约定 |
 | --- | --- |
+| `idempotency_key` | 可选，一次出片的唯一标识，1–128 字符，首字符为英文字母或数字，其余允许字母、数字、`.`、`_`、`:`、`-`。同标识和同请求返回原任务；请求不同返回 409 `IDEMPOTENCY_CONFLICT`。重新制作应换新标识 |
 | `input_mode` | 可选，默认 `material`。`material`：`source_text` 是素材，AutoVideo 组织讲稿；`narration`：`chapters` 是定稿讲稿，逐字配音 |
 | `source_text` | `material` 模式必填；去除首尾空白后至少 50 个字符，不允许 NUL。保持事实、条件、数字、例子及必要说明清楚完整。`narration` 模式不得传入 |
 | `chapters` | `narration` 模式必填，`material` 模式不得传入。非空数组，按顺序；每项只含 `title`（1–32 字符、单行）与 `paragraphs`（非空字符串数组，每段去除首尾空白后不能为空，不允许 NUL）。不接受 `visual_cues` 等其他字段 |
 | `sources` | 可选，仅 `narration` 模式：片尾来源卡，1–3 项，每项 `title`（1–40 字符、单行）、`url`（带域名的 http/https）、`date`（`YYYY-MM-DD`）。详见上文「来源卡」 |
 | `package` | 可选：片头（`stinger`）和片尾（`end_card`）加主色与提示音，出片后单独打包；任何模式都可用。详见上文「包装套件」 |
 | `title` | 可选；传入时长度 2–80。省略或为 `null` 时，服务端从正文截取任务标题；不要传空字符串 |
-| `video_form` | 推荐显式传 `auto`；可指定 `process_diagram` 或 `information_motion` |
+| `video_form` | 推荐显式传 `auto`；可指定 `process_diagram`、`information_motion`、`kinetic_typography`、`image_slideshow` 或 `chat_dialogue` |
+| `slideshow_images` | 图片轮播的有序上传图片 UUID 数组，0–12 个；为空时需 Draw Things，其他形式仅可省略/为空 |
 | `duration_mode` | 推荐显式传 `content`，按完整内容和实际配音组织章节与时长；`narration` 模式必须为 `content` |
 | `voice_id` | 可选，默认 `zf_xiaoxiao`；以 `/api/voices` 返回的可用 ID 为准 |
 | `video_speed` | 可选，默认 `1`；允许 `0.5`、`1`、`1.5`、`2`，会同步影响导出视频的音频、字幕和动画 |
@@ -323,7 +339,7 @@ Pydantic 参数校验的 422 响应则可能是 `detail` 数组，包含 `loc`�
 
 ## 7. 业务编号与防重复提交
 
-当前没有服务端幂等键、`content_id` 字段或 `Idempotency-Key` 语义；即使发送同样正文，多次创建请求也会产生多个任务。
+`POST /api/jobs` 支持 JSON 字段 `idempotency_key`。服务端在 SQLite 事务中校验请求摘要、创建工作区并入队，同一标识的并发请求只创建一条任务。摘要覆盖文稿、音色、视频形式、来源、包装等全部提交设置；更换设置而复用标识返回 409。记录在服务重启后保留；已完成或失败任务的重复提交也返回原任务，不会自动重新执行。请求已接受后，即使生成依赖暂时不可用，仍能查询和重放原提交。
 
 上游保存一份映射即可，存储方式由上游现有系统决定：
 
@@ -337,15 +353,18 @@ Pydantic 参数校验的 422 响应则可能是 `detail` 数组，包含 `loc`�
 
 对同一内容版本和制作设置，应先查上游映射，有任务编号就恢复查询。上游的并发执行也应共享这份映射，避免两个执行器同时提交。
 
-**创建请求超时或连接中断而未收到 `job_id` 时，结果可能未知。** 任务可能已经创建；不要直接无限重发 POST。上游应标记为“提交结果待核对”，可用下列查询辅助查找，再按提交时间、标题及 `source_sha256` 对账：
+**创建请求超时或连接中断而未收到 `job_id` 时，结果可能未知。** 已使用幂等标识的请求可按同一标识精确查找，或有上限地重发同一请求、同一标识。不要为网络重试生成新标识。未传标识的历史任务只能辅助对账；出现多条匹配时应等待人工确认，不能随便选一条。
 
 ```text
 GET /api/jobs?limit=50&offset=0
 GET /api/jobs?limit=50&offset=50
 GET /api/jobs?q=标题关键词
+GET /api/jobs?idempotency_key=research%3A上游出片编号
 ```
 
-`q` 应进行 URL 编码，可按标题或任务编号查询。列表返回 `items` / `total` / `limit` / `offset`；`limit` 最大 50。对账只是恢复辅助手段，**当前不能保证创建请求恰好执行一次**。需要无歧义的自动恢复时，应先由 AutoVideo 补齐幂等提交协议，再更新本文。
+查询参数须 URL 编码。`idempotency_key` 为精确筛选；任务详情和列表均返回该字段，历史任务为 `null`。列表返回 `items` / `total` / `limit` / `offset`；`limit` 最大 50。HTTP `Idempotency-Key` 请求头和独立 `content_id` 字段尚未实现。
+
+上游应校验下载文件的大小和 SHA-256；中断后重试时可复用两者均匹配的完整文件。若远端已完成但本地复制失败，应继续下载该 `job_id` 的成片，避免重新生成视频。
 
 ## 8. 可选：上传文档与内容修订
 
@@ -383,7 +402,6 @@ GET /api/jobs?q=标题关键词
 | 能力 | 当前状态与对接决定 |
 | --- | --- |
 | 正式产品 CLI | **未封装。** 上游使用 HTTP；未来 CLI 可作为同一 API 的客户端 |
-| 服务端幂等提交 / 上游业务编号 | **未实现。** 当前由上游记录映射，并对提交结果未知作显式处理 |
 | 完成回调 / Webhook | **未实现。** 当前轮询 |
 | 跨机器鉴权与远程分发 | **未实现。** 当前按同机接入 |
 
@@ -407,6 +425,39 @@ GET /api/jobs?q=标题关键词
 - 同一内容已有映射时复用原任务；提交结果未知时进入对账处理。
 - `narration` 模式：下载 `narration.json` 后，将各段 `text` 与提交的段落比对（忽略空白差异），并检查 `narration-check.json` 的 `status` 为 `PASS`。
 
-本文只确定现有接口和建议的对接行为，没有新增 CLI、幂等或回调。
+服务端幂等提交已实现（2026-10-23）；CLI 与完成回调仍未实现。
 
 实现核对来源：仓库 `g3/app.py`（HTTP 与请求校验）、`g3/store.py`（任务/版本/文件）、`g3/worker.py`（执行和错误）、`g2/authored_script.py`（按原稿配音与逐字校验）、`g3/README.md`（本地使用）。字段细节可结合运行实例的 OpenAPI 查阅。
+
+## 11. 第二阶段创作形式与图片输入（2026-10-23）
+
+`video_form` 新增 `kinetic_typography`（F08）、`image_slideshow`（F12）、`chat_dialogue`（F16）；均可用于 `material` 或 `narration`，以及 `content` 或 `fixed` 时长。通过 `production_recipe` 关联已有三份题材配方；显式形式覆盖配方默认，旧任务快照不变。`auto` 仍选择原有两种主形式。
+
+轮播可先 multipart `POST /api/creative-images` 上传静态 PNG/JPEG/WebP，再将有序返回的 UUID 数组放入 `slideshow_images`（最多 12，不能重复）。不传图片时，需要本机 Draw Things 就绪；否则 503，提示上传图片或连接服务。其余形式不接受该字段的非空值。上传预览由 `GET /api/creative-images/{image_id}` 提供。原有创建、查询、下载、幂等、重试及版本接口保持兼容。
+
+三种新形式支持素材/讲稿、声音/倍速修订；单场景 AI 重排仍限原有流程图解与简洁信息动效。详见 `g3/CREATIVE_FORMS.md`。
+
+## 12. 第三阶段音乐素材与混音（2026-10-23）
+
+`GET /api/music-assets` 列出注册与本机导入的音乐。multipart `POST /api/music-assets` 上传 `file`，支持 WAV／MP3／FLAC／OGG，最大 32 MiB、1–600 秒；返回 UUID 与试听地址。新建任务可传 `background_music: {enabled:true, asset_id:"ambient_pad", level_db:-18, ducking:true, loop:true, fade_seconds:1.2}`。素材 ID 接受目录注册项或已导入 UUID，不接受路径／URL。音量范围 −30 至 −12 dB，淡化范围 0.1–3 秒；显式 `enabled:false` 关闭。
+
+配乐、来源和素材哈希随任务及制作计划冻结，重试和派生版本使用冻结文件。三份制作配方 v3 提供题材音乐推荐，默认关闭。旧任务不自动加音乐。最终 `video.mp4` 包含混音，另保留 `unmixed.mp4`、`music-mix.json`、`mix-qa.json`；启用配乐时可下载参考混音与配乐分轨。原旁白／包装检查保持，随后独立 `AUDIO_MIX` 验证最终音视频。
+
+`POST /api/jobs/{id}/music-revisions` 使用同一 `background_music` 对象创建独立版本，复用原画面／旁白；关闭配乐恢复保留的原片。原素材／讲稿、声音／速度等修订接口继续可用并继承音乐。音乐生成仍为未实现能力。详细合同及真实样片见 `g3/MUSIC_MIX.md`。
+
+## 13. 第四阶段 AI 音乐生成（2026-10-23）
+
+先 `GET /api/music-generation/status` 查询本机文件就绪状态，再 `POST /api/music-jobs`，例如 `{"name":"科普配乐","style":"ambient","duration_seconds":24,"description":"Soft background for narration.","seed":42610,"idempotency_key":"music-001"}`。支持 `ambient`、`piano`、`electronic` 三种风格方向；时长 10–30 整数秒，名称 2–80 字符，描述最多 220 字符，可选种子 0–2147483647 与 BPM 50–160。请求不接受路径、URL、歌词或客户端制作结果。
+
+轮询 `GET /api/music-jobs/{id}`；成功时 `asset_id` 自动登记到原音乐素材库。把该 ID 用于现有 `background_music`，可与 `production_recipe` 一起提交视频，或创建配乐修订版。状态、种子、模型身份及生成来源随任务保留。`POST /api/music-jobs/{id}/cancel` 可取消等待／运行任务；失败或取消后 `POST /api/music-jobs/{id}/retry` 创建独立新任务，原输出和历史不覆盖。相同幂等标识与请求返回原任务，设置不同返回 409；不自动重试生成。
+
+音乐在本机 ACE-Step 独立进程中制作，与视频队列共用单 worker；当前完整校验／加载会使一次制作需数分钟，上游应保存音乐任务 ID 并轮询，随后跨视频复用资产。生成不依赖视频内容模型密钥，不自动下载模型或调用外部音乐 API。第三阶段中“音乐生成未实现”为当时边界；当前无词配乐范围、API 与实片证据见 `g3/MUSIC_GENERATION.md`。
+
+## 统一制作计划与快速卡片（2026-10-23）
+
+新增 `production_mode: fast`、`video_form: information_cards`、`visual_style: editorial_light`；保留标准路线。支持 `production_context` 分层设置及核实提示。合同、解析预览、重试兼容和完整例子见 [制作计划说明](g3/PRODUCTION_PLAN.md)。新任务提供 `production-plan.json`、`production-execution.json`，快速卡片另有 `fast-card-plan.json`。
+
+
+## 14. 文稿与图片第一批（2026-10-23）
+
+新增对象展示 object_showcase 与动态拼贴 dynamic_collage，复用原图片登记接口；任务可传 image_materials（image_id、caption、role），支持三份题材配方、原稿／讲稿、声音／速度及配乐修订继承。POST /api/creative-recommendations 提供基于已有素材的形式／无词配乐建议，不自动改设置或启动生成。字段、示例和输入边界见 [IMAGE_MATERIALS.md](g3/IMAGE_MATERIALS.md)。旧客户端和旧配方快照保持原行为。

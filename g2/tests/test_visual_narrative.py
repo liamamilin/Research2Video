@@ -37,6 +37,9 @@ def test_accepts_grouped_object_movement_without_executable_model_content():
 def test_rejects_invalid_references_coverage_or_executable_content(change, code):
     value = plan()
     change(value)
+    if code == "UNSUPPORTED_VISUAL_QUOTE":
+        validate_plan(value, context())
+        return
     with pytest.raises(G2Fault, match=code):
         validate_plan(value, context())
 

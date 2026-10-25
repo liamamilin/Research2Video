@@ -23,7 +23,7 @@ NORMAL["intro"]["seconds"] = 1.5
 
 def body(**extra):
     return {"title": "快讯样片", "input_mode": "narration", "chapters": CHAPTERS, "video_form": "information_motion",
-            "duration_mode": "content", **extra}
+            "duration_mode": "content", **({"packaging": {"enabled": False}} if "package" not in extra and "packaging" not in extra else {}), **extra}
 
 
 def saved_input(client, jid):
@@ -80,7 +80,7 @@ def test_package_is_validated_at_the_api(tmp_path, config, message):
 
 
 def test_package_stage_follows_the_media_check_in_the_stage_list():
-    assert STAGES[-2:] == ("QUALITY_CHECK", "PACKAGE")
+    assert STAGES[-3:] == ("QUALITY_CHECK", "PACKAGE", "AUDIO_MIX")
 
 
 # --- worker ----------------------------------------------------------------------------------------

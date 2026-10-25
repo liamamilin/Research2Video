@@ -146,7 +146,6 @@ def test_sources_are_stored_in_input_json_for_the_pipeline(tmp_path):
     ({"sources": [{**SOURCES[0], "date": "2026-1-5"}]}, "YYYY-MM-DD"),
     ({"sources": [{**SOURCES[0], "author": "x"}]}, "Extra inputs"),
     ({"sources": [{"title": "缺日期", "url": "https://example.com/a"}]}, "Field required"),
-    ({"sources": SOURCES, "video_form": "process_diagram"}, "来源卡只用于"),
 ])
 def test_sources_are_validated(tmp_path, payload, message):
     with TestClient(create_app(Settings(data_dir=tmp_path / "data"), start_worker=False, preflight=READY)) as c:
@@ -156,8 +155,10 @@ def test_sources_are_validated(tmp_path, payload, message):
         assert c.get("/api/jobs").json()["total"] == 0
 
 
-def test_sources_belong_to_narration_mode_only(tmp_path):
+def test_sources_are_available_to_material_mode_via_the_packaging_library(tmp_path):
     with TestClient(create_app(Settings(data_dir=tmp_path / "data"), start_worker=False, preflight=READY)) as c:
         source = "会议记录的目的是让未参会的同事也能理解结果。先交代必要背景，再区分已经确定的决定、需要执行的行动和仍待确认的问题。"
         response = c.post("/api/jobs", json={"source_text": source, "video_form": "information_motion", "duration_mode": "content", "sources": SOURCES})
-        assert response.status_code == 422 and "仅用于 input_mode: narration" in json.dumps(response.json(), ensure_ascii=False)
+        assert response.status_code == 202
+        saved = json.loads((c.app.state.store.source_path(response.json()["job_id"]).parent / "input.json").read_text())
+        assert saved["packaging_resolved"]["source_card_state"] == "enabled"

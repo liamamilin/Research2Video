@@ -1,0 +1,45 @@
+{
+  "old_pid": 19598,
+  "result": {
+    "status": "ready",
+    "action": "started",
+    "pid": 37819,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "jobs_before": 168,
+  "jobs_after": 168,
+  "capabilities": {
+    "schema_version": 1,
+    "modes": [
+      "standard",
+      "fast"
+    ],
+    "styles": {
+      "legacy": {
+        "version": 1,
+        "description": "保留各既有形式的原始视觉定义"
+      },
+      "editorial_light": {
+        "version": 1,
+        "background": "#f3f5f1",
+        "surface": "#ffffff",
+        "text": "#182720",
+        "muted": "#637168",
+        "accent": "#1f7a4d",
+        "warning": "#9b650c",
+        "subtitle": "#182720"
+      }
+    },
+    "fast": {
+      "forms": [
+        "information_cards"
+      ],
+      "styles": [
+        "editorial_light"
+      ],
+      "executor": "ffmpeg_cards",
+      "background_music": true
+    }
+  }
+}

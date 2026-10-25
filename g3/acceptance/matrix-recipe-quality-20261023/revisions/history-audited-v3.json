@@ -1,0 +1,317 @@
+{
+  "script_id": "b117b237788241c18e55d82fa40e5da5",
+  "version": 3,
+  "title": "古橡树与黑死病：两处意大利种群提供什么线索",
+  "sections": [
+    {
+      "title": "古树留下的线索",
+      "paragraphs": [
+        {
+          "text": "黑死病之后，森林怎样发生变化？中世纪新闻网转述的一项研究，从意大利两处古橡树种群寻找线索。研究者使用放射性碳测年，重建树木开始生长的时期，再把这些年代和历史上的人口变化放在一起观察。",
+          "citations": [
+            "https://www.medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests/"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告确认研究对象为意大利两处橡树种群，方法是放射性碳测年，并将测年结果与黑死病后人类压力下降、森林恢复的解释相联系；讲稿把方法、对象和「与历史人口变化放在一起观察」的定位与来源一致，没有添加报告外的年代、样本量或地点细节。",
+            "sources": [
+              "https://medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "研究者怎样解释",
+      "paragraphs": [
+        {
+          "text": "他们提出的解释是：黑死病之后人口减少，人类活动对土地的压力下降，为森林恢复创造了条件。这里讲的是研究者根据树木年代和历史背景提出的解释，不是古树直接告诉我们，当时每一块地为什么被放弃。",
+          "citations": [
+            "https://www.medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests/"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告将该联系表述为「an interpretation linking reduced human pressure after the Black Death with forest regeneration」，讲稿明确标注这是研究者提出的解释，并主动区分「解释」与「古树直接说明每块地为何被放弃」，与来源的推论性质一致。",
+            "sources": [
+              "https://medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "两处种群的范围",
+      "paragraphs": [
+        {
+          "text": "这类证据的价值，是让树木记录和历史资料可以相互参照。但证据来自两处意大利种群，不能自动代表整个欧洲。年代上的对应支持这种解释，也不能单凭它排除气候等其他因素的作用。",
+          "citations": [
+            "https://www.medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests/"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告的成立条件明确指出这是两处意大利特定种群与历史推论，不能扩展到全欧森林；讲稿保留「两处意大利种群」「不能自动代表整个欧洲」，并把年代对应定位为支持性而非排他性证据，没有把有前提的结论说成定论。",
+            "sources": [
+              "https://medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "保留发现，也保留边界",
+      "paragraphs": [
+        {
+          "text": "所以，这条消息可以带走一个具体认识：古树能够为研究历史上的森林恢复提供可测量的线索。至于更大范围的土地变化，还需要结合不同地区和不同类型的证据判断。两处种群的发现，和整个欧洲的结论，是不同的范围。",
+          "citations": [
+            "https://www.medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests/"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "结尾概括只保留了来源支持的定性结论（古树为历史森林恢复研究提供可测量线索），并再次区分两处种群与全欧范围，没有引入报告外的数字、因果定论或普适推广。",
+            "sources": [
+              "https://medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 335,
+    "estimated_seconds": 75,
+    "segments": 11,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.414,
+    "status": "UNDER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "古树留下的线索",
+        "spoken_length": 84,
+        "budget": 196
+      },
+      {
+        "title": "研究者怎样解释",
+        "spoken_length": 85,
+        "budget": 196
+      },
+      {
+        "title": "两处种群的范围",
+        "spoken_length": 76,
+        "budget": 196
+      },
+      {
+        "title": "保留发现，也保留边界",
+        "spoken_length": 90,
+        "budget": 195
+      }
+    ]
+  },
+  "edit_type": "EDITED",
+  "meta": {
+    "problems": [],
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "黑死病之后，森林怎样发生变化？",
+          "problem": "开场问题有吸引力，但后文没有给出森林变化的具体答案，很快转去讲测年方法和证据范围，主线没有兑现。",
+          "why": "观众被“森林怎样变化”勾起好奇，听完却只知道有研究、有线索，不知道黑死病后森林到底发生了什么，容易中途失去兴趣。",
+          "suggestion": "在开篇后尽快交代研究者实际观察到的对应关系：哪类树木生长信号、对应哪段人口变化，用这个具体发现立住主线；两处意大利种群和方法限制后置。若原始材料没有更具体的方向，就把开场问题改成“研究者怎样知道森林恢复”，不要用未兑现的悬念。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "这里讲的是研究者根据树木年代和历史背景提出的解释，不是古树直接告诉我们，当时每一块地为什么被放弃。",
+          "problem": "刚提出“人口减少、森林恢复”的解释，就插入一段很长的限定，措辞像审稿备注，“每一块地为什么被放弃”过细，打断听感。",
+          "why": "观众还没接收到足够信息，就先被提醒“不是直接告诉我们”，会觉得研究没结论、内容不可靠，注意力从发现转到免责。",
+          "suggestion": "压成一句必要限定，例如“这是根据树木年代与人口变化的对应关系提出的解释，不是树木直接记录下来的原因”，删掉“每一块地为什么被放弃”，然后继续讲具体发现。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "这类证据的价值，是让树木记录和历史资料可以相互参照。但证据来自两处意大利种群，不能自动代表整个欧洲。年代上的对应支持这种解释，也不能单凭它排除气候等其他因素的作用。",
+          "problem": "连续三句都在讲证据价值和边界，“不能代表”“不能排除”叠在一起，没有推进新信息，像在研究备注里打转。",
+          "why": "观众听到的是一串限制，容易觉得这项研究没有明确收获，也会因为缺少新细节而走神。",
+          "suggestion": "合并成一句最必要的边界：“两处意大利种群只能说明局部，年代对得上也还不能单独证明是人口下降造成森林恢复。”然后回到它能补充什么，例如“但它能补上历史资料看不到的森林恢复时间”。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "所以，这条消息可以带走一个具体认识：古树能够为研究历史上的森林恢复提供可测量的线索。至于更大范围的土地变化，还需要结合不同地区和不同类型的证据判断。两处种群的发现，和整个欧洲的结论，是不同的范围。",
+          "problem": "结尾没有留下新的发现或判断，“可以带走一个具体认识”是套话，最后又重复“两处不等于整个欧洲”，信息空转。",
+          "why": "听完只记住范围限制，不知道本期最值得记住的发现是什么，收尾显得弱而重复。",
+          "suggestion": "删掉“可以带走一个具体认识”和最后重复范围句，用本期最具体的判断收束，例如“这两处古橡树显示森林恢复发生在人口剧变之后；但要画欧洲图景，还得看更多地区”。具体强度按原始资料收窄，不额外拔高。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "研究者用古橡树年代到底发现了什么？树木开始生长的时期是否集中在黑死病之后？现在只交代了方法，没交代结果。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "‘人口减少—土地压力下降—森林恢复’这个解释，是数据直接显示出来的，还是研究者结合历史背景提出的推测？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "‘年代上的对应’具体指哪两个时间对上了？前面没有说树木年代显示了什么，这里很难判断支持力度。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "‘这类证据的价值，是让树木记录和历史资料可以相互参照’偏抽象，且缺少具体对应结果，听起来像在重复方法上的限制，推进感弱。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "听完仍不清楚这两处古橡树种群实际发生了什么：是树木更新增多、森林扩张，还是只是年代分布有变化？",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 3,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "结尾又强调‘两处种群不等于整个欧洲’，和上一段重复；开场问‘森林怎样变化’，收尾主要落在证据范围上，容易觉得没得到具体历史答案。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 10,
+        "rule_must": 0,
+        "questions": 4,
+        "lost": 2,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 6
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "editorial_attempted": false
+    },
+    "acceptance_batch": "matrix-recipe-quality-20261023",
+    "report_path": "state/video_editorial_sources/matrix-recipe-quality-20261023/history-checked-v3.md",
+    "source_review": {
+      "checked_source_urls": [
+        "https://www.smithsonianmag.com/history/were-two-chinese-astronomers-were-beheaded-for-failing-to-predict-an-eclipse-2134-bce-the-story-may-be-a-myth-but-it-underscores-the-real-risks-of-interpreting-celestial-events-180989715/",
+        "https://www.medievalists.net/2026/10/denmark-to-3d-scan-viking-runestones/",
+        "https://www.medievalists.net/2026/10/ancient-oaks-reveal-how-the-black-death-changed-europes-forests/",
+        "https://blogs.loc.gov/loc/2026/10/mary-lincoln-a-nice-chatty-little-letter-shortly-before-the-assassination-of-her-husband/"
+      ],
+      "packet_sha256": "f0a4864fae3418aeb72adbfb7d923b8b833d80cd5e0b61626922182aee6f2e15",
+      "original_script_id": "41fa2d69fc044c188c8e86bfd0aab336"
+    },
+    "audit_usage": {
+      "requests": 3,
+      "prompt_tokens": 4945,
+      "completion_tokens": 8026,
+      "total_tokens": 12971
+    }
+  },
+  "created_by": "用户授权·样本质量修订",
+  "created_at": "2026-10-24T10:42:46+0800"
+}

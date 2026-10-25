@@ -1,5 +1,15 @@
 # G3 本地应用
 
+已整理快讯／教程／科普常用无词配乐候选，并提供钢琴实测、用途／循环标记、原曲／接缝／实际旁白试听及明确的听感确认记录。原生成、导入和混音入口保留。见 [常用配乐与试听验收](MUSIC_CURATION.md)。
+
+文稿与图片第一批增加对象展示、动态拼贴和按实际素材推荐形式／无词配乐。上游沿用原图片登记接口，可附带说明和用途，无需录屏或拍摄。原默认形式、配方设置和历史版本保留。见 [输入与能力说明](IMAGE_MATERIALS.md)。
+
+动态排版、图片轮播和聊天对话体已接入自动生成，并关联资源库及三份制作配方。图片轮播支持上传图片或现有本机 Draw Things 自动插画；原有形式和功能继续保留。配置与边界见 [第二阶段形式说明](CREATIVE_FORMS.md)。
+
+创作页现可选择 AI 快讯、操作教程、原理科普三份制作配方；侧栏“创作资源库”统一浏览视频形式、音乐形式和包装组件。配置、接口、案例来源与当前能力见 [创作资源库与制作配方](CREATIVE_RESOURCES.md)。原视频创建、草稿、包装和修订入口保留。
+
+内容模式现在同时执行配音与分镜，任务详情可显示两个进行中的阶段，失败、取消和重启会正确收尾。所有出片入口共用 G2 的优化流程；下载文件新增“配音与分镜耗时记录”和“渲染资源与画质参数”。性能基线、验证范围及回退配置见 [`出片耗时优化`](../g2/README.md#出片耗时优化2026-10-23)。
+
 G3 提供本机 FastAPI + SQLite 服务和 React 界面，把已通过 G2 实测的生成流水线放进单 worker 队列。只绑定 `127.0.0.1`，不接受任意文件路径或生成代码；任务源文会存入独立任务工作区。生成讲稿与分镜时，源文会发送给 DeepSeek API；语音合成和视频渲染在本机执行。
 
 ## 配置与启动
@@ -110,7 +120,7 @@ API：`GET /api/jobs/{id}/editable-content`、`GET /api/jobs/{id}/revisions`、`
 
 ## 按原稿配音（API）
 
-上游已审定的讲稿可直接新建任务：`POST /api/jobs` 传 `input_mode: "narration"`、`chapters: [{"title", "paragraphs"}]`、`duration_mode: "content"`，`video_form` 为 `auto`、`information_motion` 或 `process_diagram`，不传 `source_text`。配音与字幕逐字采用讲稿，只做分句和空白规整；章节标题取自请求；画面规划（`auto` 时含形式选择）仍自动完成。分句后及生成 Video IR 后各校验一次，讲稿、Video IR 旁白、字幕或章节标题不一致时任务以 `NARRATION_TEXT_MISMATCH` 失败且不可重试。省略 `input_mode` 时仍是原素材模式。字段与示例见根目录 `UPSTREAM_INTEGRATION.md` 第 3 节，真实验收见 `NARRATION_MODE_ACCEPTANCE.md`。
+上游已审定的讲稿可直接新建任务：`POST /api/jobs` 传 `input_mode: "narration"`、`chapters: [{"title", "paragraphs"}]`、`duration_mode: "content"`，`video_form` 为 `auto`、`information_motion`、`process_diagram` 或本阶段三种新形式，不传 `source_text`。配音与字幕逐字采用讲稿，只做分句和空白规整；章节标题取自请求；画面规划（`auto` 时含形式选择）仍自动完成。分句后及生成 Video IR 后各校验一次，讲稿、Video IR 旁白、字幕或章节标题不一致时任务以 `NARRATION_TEXT_MISMATCH` 失败且不可重试。省略 `input_mode` 时仍是原素材模式。字段与示例见根目录 `UPSTREAM_INTEGRATION.md` 第 3 节，真实验收见 `NARRATION_MODE_ACCEPTANCE.md`。
 
 命令、参数、代码和版本号在字幕和画面中按原样显示：连续连字符之间留出间隔（`--models` 不再看成 `–models`），这类片段能放下时不在中间换行；模型生成的卡片或流程图文字改动它们时会被拒绝重写。
 
@@ -201,8 +211,22 @@ API：`GET /api/voices`、`GET /api/voices/{voice_id}/sample`；新建任务可�
 
 ## 上游内容工具接入
 
-开发者对接请直接阅读 [AutoVideo 上游工具对接指南](../UPSTREAM_INTEGRATION.md)：包含当前 HTTP 请求示例、任务状态、成片下载、失败恢复和业务编号映射，并明确标注尚未实现的最终稿新建、CLI、幂等与回调能力。
+开发者对接请直接阅读 [AutoVideo 上游工具对接指南](../UPSTREAM_INTEGRATION.md)：包含定稿讲稿、幂等提交、任务状态、成片下载、失败恢复和业务编号映射。一次出片使用固定的 `idempotency_key`，网络重试沿用标识，重新制作换新标识。CLI 与完成回调尚未实现。
 
 ## 程序坞启动
 
 本机已有 `~/Applications/AutoVideo.app` 轻量启动器并固定到程序坞。点击后自动启动或复用本地服务，再打开网页；后台制作独立于浏览器运行。重建与日志说明见 [本机启动器](launcher/README.md)。
+
+## 包装与辅助素材组件库
+
+新任务默认使用通用片头、片尾、角标、来源卡和提示音，可在创作页开关或按配方覆盖。配置、入口与时间线见 [PACKAGING_LIBRARY.md](PACKAGING_LIBRARY.md)。
+
+## 背景配乐与音乐素材
+
+创作资源库支持音乐试听和带入创作；新建页可导入 WAV／MP3／FLAC／OGG，设置音量、淡入淡出、循环和旁白时压低。三个题材配方推荐音乐但默认关闭；已完成作品在“声音”页更换或关闭配乐，生成独立版本并保留原片。素材身份及设置随任务冻结，修订继承。接口、混音门禁与实片证据见 [MUSIC_MIX.md](MUSIC_MIX.md)。
+
+第四阶段增加本机 AI 无词音乐生成：资源库内提交，完成后自动保存到原音乐素材库，可直接用于题材配方和背景配乐。新建／配乐修订内也可生成并选用。支持进度、取消、幂等提交和保留历史的重新生成，复用已安装 ACE-Step 权重，不自动下载。范围与接口见 [MUSIC_GENERATION.md](MUSIC_GENERATION.md)；第三阶段说明中的“生成尚未接入”为当时边界。
+
+## 统一制作计划与快速信息卡片
+
+新建页可显式选择“信息卡片 · 快速”，原形式和默认保留。API、配置来源、冻结与修订合同及研究系统接入见 [PRODUCTION_PLAN.md](PRODUCTION_PLAN.md)。

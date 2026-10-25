@@ -1,0 +1,524 @@
+{
+  "status": "PASS",
+  "script_version": 5,
+  "render_id": "74a6a1b7f7c847a3b5fbba00e138edd4",
+  "job_id": "575a5f92-f67c-48c1-a5be-cf76d4d538f9",
+  "video_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/74a6a1b7f7c847a3b5fbba00e138edd4/video.mp4",
+  "source_sha256": "70acb7484df6b57c111899e3de447a68934a21b13a1016455d3717e87d9aa47c",
+  "cards": 8,
+  "caption_cues": 38,
+  "narration_segments": 24,
+  "duration_seconds": 154.43333333333334,
+  "stages": {
+    "prepare-input": 0.0,
+    "narration-plan": 0.0,
+    "tts-and-align": 1.35,
+    "storyboard-plan": 63.07,
+    "compile-ir": 4.22,
+    "render": 19.95,
+    "verify-media": 10.05,
+    "package": 18.58
+  },
+  "verified_downloads": 29,
+  "qa": {
+    "status": "PASS",
+    "gate": "G2",
+    "real_llm": true,
+    "real_tts": true,
+    "mock_calls": 0,
+    "model": "deepseek-v4.1-flash",
+    "llm_call_count": 2,
+    "video": {
+      "codec": "h264",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 4498,
+      "duration_seconds": 149.933333,
+      "full_decode": "PASS"
+    },
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "decoded_tts_correlation": 0.9999626794823236,
+      "decoded_rms": 0.05857745558023453,
+      "full_decode": "PASS"
+    },
+    "timeline": {
+      "ir_frames": 4498,
+      "scene_count": 8,
+      "beat_count": 8,
+      "alignment_granularity": "phrase"
+    },
+    "visual_beats": {
+      "card_1_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 8,
+        "before_frame": 5,
+        "after_frame": 12,
+        "changed_pixel_ratio": 0.00423852237654321
+      },
+      "card_2_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 466,
+        "before_frame": 463,
+        "after_frame": 470,
+        "changed_pixel_ratio": 6.028163580246913e-05
+      },
+      "card_3_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 1069,
+        "before_frame": 1066,
+        "after_frame": 1073,
+        "changed_pixel_ratio": 0.0023543595679012346
+      },
+      "card_4_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 1511,
+        "before_frame": 1508,
+        "after_frame": 1515,
+        "changed_pixel_ratio": 0.005272472993827161
+      },
+      "card_5_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 2092,
+        "before_frame": 2089,
+        "after_frame": 2096,
+        "changed_pixel_ratio": 4.822530864197531e-07
+      },
+      "card_6_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 2705,
+        "before_frame": 2702,
+        "after_frame": 2709,
+        "changed_pixel_ratio": 4.1956018518518515e-05
+      },
+      "card_7_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 3365,
+        "before_frame": 3362,
+        "after_frame": 3369,
+        "changed_pixel_ratio": 4.1956018518518515e-05
+      },
+      "card_8_enter": {
+        "action": "reveal",
+        "target_id": "scene",
+        "beat_frame": 4036,
+        "before_frame": 4033,
+        "after_frame": 4040,
+        "changed_pixel_ratio": 0.004120370370370371
+      }
+    },
+    "scene_samples": [
+      {
+        "scene_id": "card_1",
+        "frame": 0,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+      },
+      {
+        "scene_id": "card_1",
+        "frame": 226,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-004.png"
+      },
+      {
+        "scene_id": "card_1",
+        "frame": 452,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-005.png"
+      },
+      {
+        "scene_id": "card_2",
+        "frame": 453,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+      },
+      {
+        "scene_id": "card_2",
+        "frame": 756,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-009.png"
+      },
+      {
+        "scene_id": "card_2",
+        "frame": 1058,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-010.png"
+      },
+      {
+        "scene_id": "card_3",
+        "frame": 1059,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-011.png"
+      },
+      {
+        "scene_id": "card_3",
+        "frame": 1278,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-014.png"
+      },
+      {
+        "scene_id": "card_3",
+        "frame": 1497,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+      },
+      {
+        "scene_id": "card_4",
+        "frame": 1498,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-016.png"
+      },
+      {
+        "scene_id": "card_4",
+        "frame": 1788,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-019.png"
+      },
+      {
+        "scene_id": "card_4",
+        "frame": 2078,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-020.png"
+      },
+      {
+        "scene_id": "card_5",
+        "frame": 2079,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-021.png"
+      },
+      {
+        "scene_id": "card_5",
+        "frame": 2385,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-024.png"
+      },
+      {
+        "scene_id": "card_5",
+        "frame": 2691,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-025.png"
+      },
+      {
+        "scene_id": "card_6",
+        "frame": 2692,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-026.png"
+      },
+      {
+        "scene_id": "card_6",
+        "frame": 3022,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-029.png"
+      },
+      {
+        "scene_id": "card_6",
+        "frame": 3351,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-030.png"
+      },
+      {
+        "scene_id": "card_7",
+        "frame": 3352,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-031.png"
+      },
+      {
+        "scene_id": "card_7",
+        "frame": 3687,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-034.png"
+      },
+      {
+        "scene_id": "card_7",
+        "frame": 4022,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-035.png"
+      },
+      {
+        "scene_id": "card_8",
+        "frame": 4023,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-036.png"
+      },
+      {
+        "scene_id": "card_8",
+        "frame": 4260,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-039.png"
+      },
+      {
+        "scene_id": "card_8",
+        "frame": 4497,
+        "file": "g3/data/jobs/575a5f92-f67c-48c1-a5be-cf76d4d538f9/attempts/1/g2-run/artifacts/keyframes/frame-040.png"
+      }
+    ],
+    "contact_sheet": "artifacts/contact-sheet.jpg",
+    "captions": {
+      "burned_in": true,
+      "srt": "artifacts/captions.srt",
+      "alignment": "phrase-level measured PCM activity"
+    },
+    "fast_cards": {
+      "caption_cues_checked": 38,
+      "caption_frames_checked": 63,
+      "minimum_caption_dark_pixels": 310,
+      "minimum_glyph_f1": 0.9855328158080452,
+      "exact_srt_coverage": true,
+      "alignment": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+      "executor": "ffmpeg_cards",
+      "manual_page_copy": false
+    },
+    "video_form": "information_cards",
+    "duration_mode": "content",
+    "creative_form": {
+      "scene_count": 8,
+      "registered_component": "kinetic_text",
+      "timing": "paragraph-based screen points; short forced-aligned captions",
+      "voice": "single narrator"
+    },
+    "narration_text": {
+      "status": "PASS",
+      "chapters": 7,
+      "segments": 24,
+      "characters": 901,
+      "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+      "caption_cues": 38,
+      "checked": [
+        "narration-plan",
+        "video-ir",
+        "captions.srt",
+        "chapter-titles",
+        "short-caption-exact-coverage"
+      ]
+    }
+  },
+  "package_qa": {
+    "status": "PASS",
+    "checks": {
+      "full_decode": "PASS",
+      "format": {
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "sample_rate": "48000",
+        "channels": 2,
+        "uniform_across_frames": true
+      },
+      "duration": {
+        "frames": 4633,
+        "seconds": 154.433333,
+        "expected_frames": 4633,
+        "expected_seconds": 154.43333333333334,
+        "tolerance_seconds": 0.035333333333333335
+      },
+      "content_audio": {
+        "shifted_by_frames": 45,
+        "offset_samples": 36000,
+        "correlation": 0.9999067371823065,
+        "rms": 0.05852046608924866
+      },
+      "seam_loudness": {
+        "speech_active_db": -23.61,
+        "min_margin_db": 3.0,
+        "regions": {
+          "intro": {
+            "active_db": -28.54,
+            "margin_db": 4.93,
+            "peak": 0.1401
+          },
+          "outro": {
+            "active_db": -28.53,
+            "margin_db": 4.92,
+            "peak": 0.14
+          }
+        }
+      }
+    }
+  },
+  "all_current_paragraphs_explicitly_verified": true,
+  "old_v1_and_review_marks_unchanged": true,
+  "same_pcm_as_first_v5_render": true,
+  "no_research_notes_in_narration": true,
+  "point_qualifiers_exact_and_scoped": true,
+  "no_repeated_metric_heading_when_already_on_card": true,
+  "full_decode": "PASS",
+  "editorial_advisories_retained": 15,
+  "transfer": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-23T12:35:41.749675+00:00",
+    "submit_seconds": 0.016,
+    "poll_seconds": 120.22,
+    "poll_count": 25,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-23T12:37:38.061+00:00",
+    "completion_observed_at": "2026-10-23T12:37:42.017320+00:00",
+    "download_seconds": 0.061,
+    "artifact_list_seconds": 0.002,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 1181
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 69736
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 3472
+      },
+      {
+        "name": "card-editorial.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 10682
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 10626
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 3472
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 10568
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.053,
+        "reused": false,
+        "bytes": 19216485
+      },
+      {
+        "name": "creative-form-plan.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 7243
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 965
+      },
+      {
+        "name": "fast-card-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 5371
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 418
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 4551
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 64510
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 2751
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 330
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 24723
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 955
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 5330
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 2065
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 2166
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 744
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 6135
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 7917
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 7212
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 1390
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 19174
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.018,
+        "reused": false,
+        "bytes": 6443225
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.002,
+        "reused": false,
+        "bytes": 8139
+      }
+    ],
+    "process_seconds": 120.347
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "music_assets": [
+    {
+      "id": "ambient_pad",
+      "name": "轻柔和声铺底",
+      "filename": "MF08.wav",
+      "kind": "builtin",
+      "duration_seconds": 14.0,
+      "sample_rate": 48000,
+      "channels": 2,
+      "sha256": "60620efbd4de8cb4eb1e489be18e8d769705ef8d41797db3a0058e7c0df2450e",
+      "source_sha256": "95802c0d6ab3f57601a42916bf66dd911085dc71e1a96fedc642954dcc4dd42e",
+      "source": "原创程序合成单层和声铺底，非真实环境录音、非模型生成；本例不声明可无缝循环。",
+      "form_id": "MF08",
+      "topics": [
+        "原理科普",
+        "操作教程"
+      ],
+      "provenance": "用户提供参考目录中的原创程序合成示例，非本轮模型生成",
+      "preview_url": "/api/music-assets/ambient_pad/preview",
+      "available": true
+    },
+    {
+      "id": "layered_space",
+      "name": "渐进层叠音景",
+      "filename": "MF09.wav",
+      "kind": "builtin",
+      "duration_seconds": 16.0,
+      "sample_rate": 48000,
+      "channels": 2,
+      "sha256": "55c16a8babab2ae89c7def932b9f3e05decc0d7db8af2067598cbde2ae1d326c",
+      "source_sha256": "27ca6b6733f72f8e745aa226b09b64b57df26145739b2338d64fb5af4bddd02f",
+      "source": "原创程序合成三层渐变音景，非真实乐器录音、非模型生成。",
+      "form_id": "MF09",
+      "topics": [
+        "AI快讯",
+        "产品更新"
+      ],
+      "provenance": "用户提供参考目录中的原创程序合成示例，非本轮模型生成",
+      "preview_url": "/api/music-assets/layered_space/preview",
+      "available": true
+    },
+    {
+      "id": "pulse_loop",
+      "name": "轻节奏循环",
+      "filename": "MF12.wav",
+      "kind": "builtin",
+      "duration_seconds": 9.6,
+      "sample_rate": 48000,
+      "channels": 2,
+      "sha256": "103feabb74a31d3083368cc4f597cca6dec45c670b46465ce0a422cac28b0032",
+      "source_sha256": "cceba9b40d2b86af433a7db7820b01d0384c395c331f004e94cf06b535825606",
+      "source": "原创程序合成鼓循环；无旋律、无演唱，非真实鼓手录音。",
+      "form_id": "MF12",
+      "topics": [
+        "快讯",
+        "节奏短片"
+      ],
+      "provenance": "用户提供参考目录中的原创程序合成示例，非本轮模型生成",
+      "preview_url": "/api/music-assets/pulse_loop/preview",
+      "available": true
+    },
+    {
+      "id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "name": "第四阶段验收 · 快讯轻快电子",
+      "filename": "第四阶段验收 · 快讯轻快电子.wav",
+      "kind": "generated",
+      "duration_seconds": 30.0,
+      "sample_rate": 48000,
+      "channels": 2,
+      "sha256": "8d4bfa2764a9fea5a459b154d8924e270dce4f160e94e77e3691adbb75769077",
+      "source_sha256": "cbf9003c23424a0d19c9520f8c3afa488cd8683f7fcfa4d7c99020cb9a422c76",
+      "source": "ACE-Step 1.5 本机 AI 生成的无词配乐；听感待试听确认。",
+      "generation_job_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "generation": {
+        "status": "PASS",
+        "file": "output/ea85c90f-1671-a939-9945-71d00c0cbe6e.wav",
+        "sha256": "cbf9003c23424a0d19c9520f8c3afa488cd8683f7fcfa4d7c99020cb9a422c76",
+        "engine": "ACE-Step 1.5 turbo",
+        "code_revision": "ca1e85fe9430179831e6bc6be790c332190a3866",
+        "weight_revision": "19671f406d603126926c1b7e2adc169acbcade22",
+        "seed": 42611,
+        "device": "mps",
+        "offload_to_cpu": true,
+        "model_load_seconds": 103.22739674989134,
+        "generation_seconds": 14.297598792240024,
+        "peak_rss_bytes": 14757822464,
+        "network": "offline",
+        "generation_calls": 1,
+        "human_review": "pending",
+        "instrumental_requested": true,
+        "request_sha256": "b61b9549f4486038b85d380f33cbc18c1dac122f7b58d9409a865442f50b29fe",
+        "request": {
+          "name": "第四阶段验收 · 快讯轻快电子",
+          "style": "electronic",
+          "description": "Light steady pulse, restrained drums, clear background for technology narration.",
+          "duration_seconds": 30,
+          "bpm": 110,
+          "seed": 42611,
+          "caption": "Light electronic instrumental background for technology news. Warm analog synthesizer chords, clean plucked melody, rounded bass and an understated drum machine groove, bright and focused, restrained dynamics. Light steady pulse, restrained drums, clear background for technology narration. No vocals, no speech, no singing.",
+          "keyscale": "A Minor",
+          "instrumental": true,
+          "topics": [
+            "AI快讯",
+            "产品更新"
+          ],
+          "lyrics": "[Instrumental]",
+          "inference_steps": 8,
+          "thinking": false,
+          "engine": "ACE-Step 1.5 turbo",
+          "code_revision": "ca1e85fe9430179831e6bc6be790c332190a3866",
+          "weight_revision": "19671f406d603126926c1b7e2adc169acbcade22"
+        }
+      },
+      "topics": [
+        "AI快讯",
+        "产品更新"
+      ],
+      "preview_url": "/api/music-assets/2a179dfe-bd70-4b03-86e7-a4f7e8c2512d/preview",
+      "available": true
+    },
+    {
+      "id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+      "name": "导入验收_原创和声",
+      "filename": "导入验收_原创和声.wav",
+      "kind": "uploaded",
+      "duration_seconds": 14.0,
+      "sample_rate": 48000,
+      "channels": 2,
+      "sha256": "60620efbd4de8cb4eb1e489be18e8d769705ef8d41797db3a0058e7c0df2450e",
+      "source_sha256": "95802c0d6ab3f57601a42916bf66dd911085dc71e1a96fedc642954dcc4dd42e",
+      "source": "用户导入的本机音乐素材",
+      "preview_url": "/api/music-assets/ca256ab4-1ac9-46c8-b0be-c814f81a55f6/preview",
+      "available": true
+    },
+    {
+      "id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "name": "第四阶段验收 · 科普轻柔氛围",
+      "filename": "第四阶段验收 · 科普轻柔氛围.wav",
+      "kind": "generated",
+      "duration_seconds": 24.0,
+      "sample_rate": 48000,
+      "channels": 2,
+      "sha256": "e800afd236b782062780a2bdc00b7b2a68b7a4f7febd91f2acf5db30887f022f",
+      "source_sha256": "c58e94971d9b79ecb988cd60556ffd624e0b24707d1e8aa410a316feda28632e",
+      "source": "ACE-Step 1.5 本机 AI 生成的无词配乐；听感待试听确认。",
+      "generation_job_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "generation": {
+        "status": "PASS",
+        "file": "output/59ed14bf-5c75-9e7b-9fce-47dd93cac6a7.wav",
+        "sha256": "c58e94971d9b79ecb988cd60556ffd624e0b24707d1e8aa410a316feda28632e",
+        "engine": "ACE-Step 1.5 turbo",
+        "code_revision": "ca1e85fe9430179831e6bc6be790c332190a3866",
+        "weight_revision": "19671f406d603126926c1b7e2adc169acbcade22",
+        "seed": 42610,
+        "device": "mps",
+        "offload_to_cpu": true,
+        "model_load_seconds": 110.52016437519342,
+        "generation_seconds": 16.769135457463562,
+        "peak_rss_bytes": 10243325952,
+        "network": "offline",
+        "generation_calls": 1,
+        "human_review": "pending",
+        "instrumental_requested": true,
+        "request_sha256": "a0a160321223e9d87d3648a96a5fb005124ff57851469d14492ac537ac893ed5",
+        "request": {
+          "name": "第四阶段验收 · 科普轻柔氛围",
+          "style": "ambient",
+          "description": "Soft background, minimal percussion, space for clear spoken narration.",
+          "duration_seconds": 24,
+          "bpm": 72,
+          "seed": 42610,
+          "caption": "Gentle ambient instrumental background for spoken explanation. Warm soft synthesizer pads, sparse plucked notes, subtle rounded bass, minimal percussion, calm and spacious, restrained dynamics. Soft background, minimal percussion, space for clear spoken narration. No vocals, no speech, no singing.",
+          "keyscale": "C Major",
+          "instrumental": true,
+          "topics": [
+            "原理科普",
+            "操作教程"
+          ],
+          "lyrics": "[Instrumental]",
+          "inference_steps": 8,
+          "thinking": false,
+          "engine": "ACE-Step 1.5 turbo",
+          "code_revision": "ca1e85fe9430179831e6bc6be790c332190a3866",
+          "weight_revision": "19671f406d603126926c1b7e2adc169acbcade22"
+        }
+      },
+      "topics": [
+        "原理科普",
+        "操作教程"
+      ],
+      "preview_url": "/api/music-assets/d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf/preview",
+      "available": true
+    }
+  ],
+  "music_jobs": [
+    {
+      "id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "status": "COMPLETED",
+      "stage": "COMPLETED",
+      "parent_id": null,
+      "created_at": "2026-10-23T09:32:59.375590+00:00",
+      "updated_at": "2026-10-23T09:37:18.424848+00:00",
+      "error_code": null,
+      "error_message": null,
+      "asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "request": {
+        "name": "第四阶段验收 · 快讯轻快电子",
+        "style": "electronic",
+        "description": "Light steady pulse, restrained drums, clear background for technology narration.",
+        "duration_seconds": 30,
+        "bpm": null,
+        "seed": 42611
+      },
+      "settings": {
+        "name": "第四阶段验收 · 快讯轻快电子",
+        "style": "electronic",
+        "description": "Light steady pulse, restrained drums, clear background for technology narration.",
+        "duration_seconds": 30,
+        "bpm": 110,
+        "seed": 42611,
+        "caption": "Light electronic instrumental background for technology news. Warm analog synthesizer chords, clean plucked melody, rounded bass and an understated drum machine groove, bright and focused, restrained dynamics. Light steady pulse, restrained drums, clear background for technology narration. No vocals, no speech, no singing.",
+        "keyscale": "A Minor",
+        "instrumental": true,
+        "topics": [
+          "AI快讯",
+          "产品更新"
+        ],
+        "lyrics": "[Instrumental]",
+        "inference_steps": 8,
+        "thinking": false,
+        "engine": "ACE-Step 1.5 turbo",
+        "code_revision": "ca1e85fe9430179831e6bc6be790c332190a3866",
+        "weight_revision": "19671f406d603126926c1b7e2adc169acbcade22"
+      },
+      "cancel_requested": false
+    },
+    {
+      "id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "status": "COMPLETED",
+      "stage": "COMPLETED",
+      "parent_id": null,
+      "created_at": "2026-10-23T09:27:40.354629+00:00",
+      "updated_at": "2026-10-23T09:32:40.759503+00:00",
+      "error_code": null,
+      "error_message": null,
+      "asset_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "request": {
+        "name": "第四阶段验收 · 科普轻柔氛围",
+        "style": "ambient",
+        "description": "Soft background, minimal percussion, space for clear spoken narration.",
+        "duration_seconds": 24,
+        "bpm": null,
+        "seed": 42610
+      },
+      "settings": {
+        "name": "第四阶段验收 · 科普轻柔氛围",
+        "style": "ambient",
+        "description": "Soft background, minimal percussion, space for clear spoken narration.",
+        "duration_seconds": 24,
+        "bpm": 72,
+        "seed": 42610,
+        "caption": "Gentle ambient instrumental background for spoken explanation. Warm soft synthesizer pads, sparse plucked notes, subtle rounded bass, minimal percussion, calm and spacious, restrained dynamics. Soft background, minimal percussion, space for clear spoken narration. No vocals, no speech, no singing.",
+        "keyscale": "C Major",
+        "instrumental": true,
+        "topics": [
+          "原理科普",
+          "操作教程"
+        ],
+        "lyrics": "[Instrumental]",
+        "inference_steps": 8,
+        "thinking": false,
+        "engine": "ACE-Step 1.5 turbo",
+        "code_revision": "ca1e85fe9430179831e6bc6be790c332190a3866",
+        "weight_revision": "19671f406d603126926c1b7e2adc169acbcade22"
+      },
+      "cancel_requested": false
+    }
+  ],
+  "video_jobs_total": 184,
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  }
+}

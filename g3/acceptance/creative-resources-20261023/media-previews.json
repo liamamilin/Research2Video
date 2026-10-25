@@ -1,0 +1,180 @@
+{
+  "scope": "read-only existing media; no generation or re-encoding",
+  "previews": [
+    {
+      "id": "F01",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/351598",
+      "bytes": 64
+    },
+    {
+      "id": "F03",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/82078",
+      "bytes": 64
+    },
+    {
+      "id": "F04",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/124976",
+      "bytes": 64
+    },
+    {
+      "id": "F05",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/83912",
+      "bytes": 64
+    },
+    {
+      "id": "F06",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/66542",
+      "bytes": 64
+    },
+    {
+      "id": "F07",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/75497",
+      "bytes": 64
+    },
+    {
+      "id": "F08",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/143430",
+      "bytes": 64
+    },
+    {
+      "id": "F09",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/254819",
+      "bytes": 64
+    },
+    {
+      "id": "F10",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/184161",
+      "bytes": 64
+    },
+    {
+      "id": "F11",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/5727285",
+      "bytes": 64
+    },
+    {
+      "id": "F12",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/392294",
+      "bytes": 64
+    },
+    {
+      "id": "F13",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/541083",
+      "bytes": 64
+    },
+    {
+      "id": "F14",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/73382",
+      "bytes": 64
+    },
+    {
+      "id": "F15",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/181355",
+      "bytes": 64
+    },
+    {
+      "id": "F16",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/61303",
+      "bytes": 64
+    },
+    {
+      "id": "F17",
+      "status": 206,
+      "type": "video/mp4",
+      "content_range": "bytes 0-63/192393",
+      "bytes": 64
+    },
+    {
+      "id": "MF05",
+      "status": 206,
+      "type": "audio/wav",
+      "content_range": "bytes 0-63/1764044",
+      "bytes": 64
+    },
+    {
+      "id": "MF06",
+      "status": 206,
+      "type": "audio/wav",
+      "content_range": "bytes 0-63/1536044",
+      "bytes": 64
+    },
+    {
+      "id": "MF07",
+      "status": 206,
+      "type": "audio/wav",
+      "content_range": "bytes 0-63/9216088",
+      "bytes": 64
+    },
+    {
+      "id": "MF08",
+      "status": 206,
+      "type": "audio/wav",
+      "content_range": "bytes 0-63/1792044",
+      "bytes": 64
+    },
+    {
+      "id": "MF09",
+      "status": 206,
+      "type": "audio/wav",
+      "content_range": "bytes 0-63/2048044",
+      "bytes": 64
+    },
+    {
+      "id": "MF10",
+      "status": 206,
+      "type": "audio/wav",
+      "content_range": "bytes 0-63/1536044",
+      "bytes": 64
+    },
+    {
+      "id": "MF11",
+      "status": 206,
+      "type": "audio/wav",
+      "content_range": "bytes 0-63/1024044",
+      "bytes": 64
+    },
+    {
+      "id": "MF12",
+      "status": 206,
+      "type": "audio/wav",
+      "content_range": "bytes 0-63/846764",
+      "bytes": 64
+    },
+    {
+      "id": "MF14",
+      "status": 206,
+      "type": "audio/wav",
+      "content_range": "bytes 0-63/1280044",
+      "bytes": 64
+    }
+  ]
+}

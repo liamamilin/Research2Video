@@ -1,0 +1,326 @@
+{
+  "script_id": "2f494ba3d0ae48b2a1e9abba4d23a211",
+  "version": 3,
+  "title": "海床下七百米的坑：远古撞击怎样被还原",
+  "sections": [
+    {
+      "title": "地下的撞击痕迹",
+      "paragraphs": [
+        {
+          "text": "北海的海床下面，埋着一个陨石坑。赫瑞瓦特大学参与的研究估计，大约四千三百万到四千六百万年前，一颗直径约一百六十米的天体撞入这里，可能掀起超过一百米高的海浪。坑如今埋在海床以下约七百米；七百米说的是埋藏位置，不是坑本身有这么深。",
+          "citations": [
+            "https://www.hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "三类互相补充的证据",
+      "paragraphs": [
+        {
+          "text": "研究者利用地震成像、岩石显微分析和计算机模拟，检验这个结构的撞击起源。地震成像帮助他们看地下结构；油井岩屑中发现的受冲击石英和长石，则提供了岩石层面的证据。可以把这理解为一边看形态，一边找撞击留下的痕迹。",
+          "citations": [
+            "https://www.hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "来源确实列出了地震数据、油井岩屑的显微分析、坑底深度的受冲击石英和长石以及数值模型，并将其描述为互补证据；讲稿中提出的“一边看形态，一边找撞击痕迹”是明确标出的理解性比喻，没有被说成研究者实际执行的步骤顺序，也没有声称所有证据类型都直接输入了模型。",
+            "sources": [
+              "https://hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago"
+            ]
+          }
+        },
+        {
+          "text": "计算机模拟帮助重建可能的撞击情景。研究者报告的超过一百米的海浪，是对远古事件重建得到的估计，并不是当年的直接测量。这几类方法互相补充，不能只凭一个坑的外形，就认定所有细节都已经被还原。",
+          "citations": [
+            "https://www.hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago"
+          ],
+          "evidence": "CITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "研究重建的范围",
+      "paragraphs": [
+        {
+          "text": "原始研究在二零二五年发表，二零二六年十月的报道是对它的转述。这个时间差也要看清：它讲的是一次古老撞击怎样被研究，不是今天北海的海啸预报或预警。",
+          "citations": [
+            "https://www.hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "这个故事值得记住的，不只是海浪有多高。地下结构、岩石记录和模型重建提供了不同的线索；把估计、证据和它们能支持的范围一起讲清，才更接近研究真正告诉我们的事。",
+          "citations": [
+            "https://www.hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "这段总结只概括来源已支持的内容：地下结构、岩石记录和模型重建提供不同线索，并强调应把估计、证据及其支持的适用范围一并说明；没有新增数字、归因或超出来源的结论。",
+            "sources": [
+              "https://hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 419,
+    "estimated_seconds": 94,
+    "segments": 16,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.52,
+    "status": "UNDER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "地下的撞击痕迹",
+        "spoken_length": 104,
+        "budget": 261
+      },
+      {
+        "title": "三类互相补充的证据",
+        "spoken_length": 179,
+        "budget": 261
+      },
+      {
+        "title": "研究重建的范围",
+        "spoken_length": 136,
+        "budget": 261
+      }
+    ]
+  },
+  "edit_type": "EDITED",
+  "meta": {
+    "problems": [],
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "研究者利用地震成像、岩石显微分析和计算机模拟，检验这个结构的撞击起源。地震成像帮助他们看地下结构；油井岩屑中发现的受冲击石英和长石，则提供了岩石层面的证据。",
+          "problem": "开场后立刻并列三个方法名，接着又重复解释其中两个；听众还没明白为什么要关心这些手段，就先要接住一串术语。",
+          "why": "对不熟悉地质的观众，这一段像研究摘要，容易在这里走神，后面真正有画面的“受冲击石英和长石”反而被埋住。",
+          "suggestion": "用一个问题带出证据，例如“怎么判断这不是普通海底坑？”然后只留最有画面的两项：地震成像看地下形态，油井岩屑里找到受冲击的石英和长石；把“岩石显微分析”和计算机模拟合并到后文，不先列全方法。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "这几类方法互相补充，不能只凭一个坑的外形，就认定所有细节都已经被还原。",
+          "problem": "这是一句抽象的免责式总结，没有说明哪些细节确定、哪些只是推测，和前一句“不是直接测量”意思重复。",
+          "why": "观众已经知道浪高是估算，再听“不能只凭外形”会觉得在绕圈子，主线从撞击故事退回到方法论表态。",
+          "suggestion": "删掉这句，或改成具体边界：地下形态和受冲击矿物支持撞击起源，超过一百米浪高只是模拟估算。不要用“所有细节”这种笼统说法。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "原始研究在二零二五年发表，二零二六年十月的报道是对它的转述。这个时间差也要看清：它讲的是一次古老撞击怎样被研究，不是今天北海的海啸预报或预警。",
+          "problem": "从撞击证据突然转到论文发表和报道时间，像在念内部核实记录；“这个时间差也要看清”把观众拉出故事。",
+          "why": "观众关心的是北海底下发生了什么，不是报道链条；这段会让人觉得视频在自我说明，节奏断掉。",
+          "suggestion": "删掉发表/报道时间差的展开，把必要的边界压成一句自然的话，例如“这是对远古撞击的研究，不是今天北海的海啸预警”；来源归因只留“这项研究”即可。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "这个故事值得记住的，不只是海浪有多高。地下结构、岩石记录和模型重建提供了不同的线索；把估计、证据和它们能支持的范围一起讲清，才更接近研究真正告诉我们的事。",
+          "problem": "结尾没有落到一个具体发现，而是重复“证据、估计、范围”的方法论总结；“更接近研究真正告诉我们的事”很空。",
+          "why": "听众听完只记得一句正确但没信息量的话，不会带走一个清晰的判断。",
+          "suggestion": "用具体结论收束：这个坑的价值在于不同线索拼出一次已经埋掉的远古撞击，而百米海浪是模型给出的可能画面；或者直接回到“海床下埋着一个撞击坑”的画面，不再做抽象总结。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“北海”指欧洲的北海，还是广西北海？这会决定我脑子里出现的是哪片海。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "坑本身有多大、多深？只说天体直径和埋深，我还不太能想象这个坑的规模。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“受冲击石英和长石”为什么能当作撞击证据？只报名字，我不知道它们特殊在哪。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "超过一百米的海浪高度，模拟是怎么估出来的？如果完全不解释，我只能选择信或不信。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "现在是二零二六年五月，怎么说“二零二六年十月的报道”？是笔误还是预发布？这会让我怀疑整段信息。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "突然插入论文发表和报道时间，还强调“时间差”，跟前面讲撞击证据的主线断开，容易走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "所以研究最终确认这是撞击坑了吗，还是只能说证据支持撞击解释？结尾没把结论说死，我不确定该记住什么。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "结尾又概括“地下结构、岩石记录和模型重建”，和前面重复，但没有给出更明确的收束，听完有点空。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 12,
+        "rule_must": 0,
+        "questions": 6,
+        "lost": 2,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 8
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 4
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "editorial_attempted": false
+    },
+    "acceptance_batch": "matrix-recipe-quality-20261023",
+    "report_path": "state/video_editorial_sources/matrix-recipe-quality-20261023/science-checked-v3.md",
+    "source_review": {
+      "checked_source_urls": [
+        "https://www.sciencedaily.com/releases/2026/10/261020085727.htm",
+        "https://www.sciencedaily.com/releases/2026/10/261020085025.htm",
+        "https://www.sciencedaily.com/releases/2026/10/261020085016.htm",
+        "https://www.sciencedaily.com/releases/2026/10/261020085023.htm",
+        "https://www.hw.ac.uk/news/2025/scientists-find-proof-that-an-asteroid-hit-the-north-sea-over-43-million-years-ago"
+      ],
+      "packet_sha256": "4ff2f52f6cca4f4b9f5290bcac6b3421f6ddcc99a94fc1cf99263421245003ec",
+      "original_script_id": "f30f9b94c3a345da82069fac22b24b4f"
+    },
+    "audit_usage": {
+      "requests": 3,
+      "prompt_tokens": 5306,
+      "completion_tokens": 10078,
+      "total_tokens": 15384
+    }
+  },
+  "created_by": "用户授权·样本质量修订",
+  "created_at": "2026-10-24T10:40:10+0800"
+}

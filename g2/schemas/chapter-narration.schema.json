@@ -25,12 +25,11 @@
           },
           "text": {
             "type": "string",
-            "minLength": 8,
-            "maxLength": 80
+            "minLength": 1
           },
           "source_quotes": {
             "type": "array",
-            "minItems": 1,
+            "minItems": 0,
             "items": {
               "type": "string",
               "minLength": 1
@@ -38,7 +37,7 @@
           },
           "point_ids": {
             "type": "array",
-            "minItems": 1,
+            "minItems": 0,
             "uniqueItems": true,
             "items": {
               "type": "string",

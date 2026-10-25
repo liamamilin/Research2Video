@@ -1,0 +1,158 @@
+{
+  "id": "731409486486403cb6ca46f23f004b64",
+  "status": "COMPLETED",
+  "autovideo_job_id": "875a6e0c-3121-478a-89d1-27fa836324fe",
+  "active_stage": "COMPLETE",
+  "created_at": "2026-10-23T14:44:10+0800",
+  "submitted_at": "2026-10-23T14:44:10+0800",
+  "completed_at": "2026-10-23T14:54:56+0800",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 1182,
+      "sha256": "43aaefed6adaee431abf787cb4b8d3e1f62154514f172da67e18f843f3b10a60"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 3954,
+      "sha256": "53a98d3798aa23dd5bf369489dfce18b21674f3f09c8d0f7e8da417d896a87f7"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 13436,
+      "sha256": "54c72c6638e535795be8280980095db9bd6102b08346fca3137c563a07bbbffa"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 3954,
+      "sha256": "5165296a59b06a35188d36f97d11c8ec5dff83cd4a866ecd681fb622877a52e9"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 13378,
+      "sha256": "bc75fc1e4e615b4527a3c38db3d40c5c02fa96d8c6298d60bfc242aa9abef222"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 17539125,
+      "sha256": "ed0435821960bb55229f7612d75cf62c81264b8b44b971fec9ca6e64e5859df2"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 869,
+      "sha256": "4ca713a8b94d80528108e4041db8886ba8741b5230e109cf3d34a393e7b3b3a3"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 427,
+      "sha256": "0e39a7f56ef45dfc52d1093b8fdaec9f9e5e04f75294698887a3524c3b2b1861"
+    },
+    {
+      "name": "information-plan.json",
+      "content_type": "application/json",
+      "bytes": 26265,
+      "sha256": "b9f4477dad9f7991e6cc057f261ad38089ab725fd3e9acda692fd7eec6d38ee6"
+    },
+    {
+      "name": "information-timing.json",
+      "content_type": "application/json",
+      "bytes": 13952,
+      "sha256": "3727bb2a0ca5d1fb058f8502422e8b8a0307f959a7368a4ddf0dbfc431d10019"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 5704,
+      "sha256": "7098e1a9ec84daba89bfb24a7797ce95c6f94161c9d0778c04cf2a3efb26ddc6"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 81075,
+      "sha256": "33e4820324f881a83ceb5fd3cde7d7a8741f8dcadd3cc6d58db6cc8d1c04c003"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 9742,
+      "sha256": "98668648e06bfaae8aed69f2db5277648ef579f7aa50a9f3fda0c36fccc0c6f1"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 273,
+      "sha256": "415008ba8539bd4b067f5fdcdbaa26b583821b72e525388f071cf9cf5dca2058"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 32009,
+      "sha256": "5946fc610e9e448be24964a520e4f82b3ca3ca05a41b382488d1bf2e0f9e59f8"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 939,
+      "sha256": "a766fae293b88e88d5e7363477fbb80c2e3a6011a6d38ce63631dde40698325d"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5761,
+      "sha256": "08d78211805a777cc131c04551a6705d3bc25cea2f124daf12ea2e80ccd57098"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2502,
+      "sha256": "d584b53696730290873f73e9a533711be899f3123abe9bf8a77c6b3c29287b20"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 2897,
+      "sha256": "ab3d13a2b3bbbc2d6ad8adc92797456c8fdc048eeb2e2f296e5dc8a9c2660707"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 31239,
+      "sha256": "c85903ba1f64e9b30826500d0551360eb2bdd950156e9fa68163a0964d28dc4f"
+    },
+    {
+      "name": "render-resources.json",
+      "content_type": "application/json",
+      "bytes": 207,
+      "sha256": "ccc32453372ac622e62a2ce0169d452a7f960f0de2d126b790977fcf74544d13"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 34913,
+      "sha256": "5e72ecd434e10f610bf7da6106ba4143ed28f64cd847477673f1e70ad5a43397"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 50938,
+      "sha256": "cc144207e6d1f64f107001828f0798497e0737dff89bd0779826be23d13d4bc5"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 14759556,
+      "sha256": "9e44013965bc9f62c8efcba0392e9ded7838ed9ff4ce76e52f56f9bfb1d8ede2"
+    }
+  ],
+  "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29"
+}

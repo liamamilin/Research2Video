@@ -1,0 +1,51 @@
+{
+  "request": {
+    "name": "教程 · 温暖钢琴",
+    "style": "piano",
+    "duration_seconds": 24,
+    "description": "Sparse gentle felt piano for clear spoken tutorial narration, simple repeating motif, quiet accompaniment, no dramatic changes.",
+    "seed": 42612,
+    "idempotency_key": "music-curation-20261023-piano-01"
+  },
+  "response": {
+    "id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+    "status": "QUEUED",
+    "stage": "QUEUED",
+    "parent_id": null,
+    "created_at": "2026-10-23T11:22:25.876527+00:00",
+    "updated_at": "2026-10-23T11:22:25.876533+00:00",
+    "error_code": null,
+    "error_message": null,
+    "asset_id": null,
+    "request": {
+      "name": "教程 · 温暖钢琴",
+      "style": "piano",
+      "description": "Sparse gentle felt piano for clear spoken tutorial narration, simple repeating motif, quiet accompaniment, no dramatic changes.",
+      "duration_seconds": 24,
+      "bpm": null,
+      "seed": 42612
+    },
+    "settings": {
+      "name": "教程 · 温暖钢琴",
+      "style": "piano",
+      "description": "Sparse gentle felt piano for clear spoken tutorial narration, simple repeating motif, quiet accompaniment, no dramatic changes.",
+      "duration_seconds": 24,
+      "bpm": 80,
+      "seed": 42612,
+      "caption": "Warm gentle instrumental background for narration. Soft felt piano, slow simple repeating motif, subtle sustained strings, quiet bass, light percussion, clear and reassuring, restrained dynamics. Sparse gentle felt piano for clear spoken tutorial narration, simple repeating motif, quiet accompaniment, no dramatic changes. No vocals, no speech, no singing.",
+      "keyscale": "C Major",
+      "instrumental": true,
+      "topics": [
+        "操作教程",
+        "日常叙事"
+      ],
+      "lyrics": "[Instrumental]",
+      "inference_steps": 8,
+      "thinking": false,
+      "engine": "ACE-Step 1.5 turbo",
+      "code_revision": "ca1e85fe9430179831e6bc6be790c332190a3866",
+      "weight_revision": "19671f406d603126926c1b7e2adc169acbcade22"
+    },
+    "cancel_requested": false
+  }
+}

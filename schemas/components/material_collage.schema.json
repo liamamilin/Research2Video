@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "material_collage trusted image material props",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "text",
+    "images",
+    "focus_indices"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "images": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "image_path",
+          "image_asset_id",
+          "caption",
+          "role"
+        ],
+        "properties": {
+          "image_path": {
+            "type": "string",
+            "pattern": "^assets/slideshow/image-[0-9]{2}\\.png$"
+          },
+          "image_asset_id": {
+            "type": "string",
+            "pattern": "^slide_image_[1-9][0-9]*$"
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "role": {
+            "enum": [
+              "reference",
+              "overall",
+              "detail",
+              "comparison"
+            ]
+          }
+        }
+      }
+    },
+    "focus_indices": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 11
+      }
+    }
+  }
+}

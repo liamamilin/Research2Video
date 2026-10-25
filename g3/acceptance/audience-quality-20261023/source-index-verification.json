@@ -1,0 +1,54 @@
+{
+  "same_audited_facts_prefix": true,
+  "audited_packet_sha256": "8c1dcfdfbd672455315bf1a3750f61530d979ec12d334469f2da51208a0bbd58",
+  "current_packet_sha256": "b60beff5b72df83f9e7fbdf592a38362769c8d6c456d2406fbac10b49fa4684a",
+  "bibliography": [
+    {
+      "title": "Motorola Edge 70 Max 评测",
+      "kind": "一手评测",
+      "date": "2026-10-21",
+      "url": "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html"
+    },
+    {
+      "title": "Oppo Enco X4 开箱与试用",
+      "kind": "一手开箱试用",
+      "date": "2026-10-22",
+      "url": "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php"
+    },
+    {
+      "title": "Bose 收购 Skullcandy",
+      "kind": "媒体报道",
+      "date": "2026-10-22",
+      "url": "https://www.gsmarena.com/bose_acquires_skullcandy-news-75162.php"
+    },
+    {
+      "title": "Acer Swift Spin 14 AI 评测",
+      "kind": "一手评测",
+      "date": "2026-10-21",
+      "url": "https://www.notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html"
+    },
+    {
+      "title": "Xiaomi 18 Fold 评测",
+      "kind": "一手评测",
+      "date": "2026-10-20",
+      "url": "https://www.notebookcheck.net/Xiaomi-18-Fold-review-Big-display-big-performance-big-compromises.1428903.0.html"
+    }
+  ],
+  "closing_card_sources": [
+    {
+      "title": "Motorola Edge 70 Max 评测",
+      "url": "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html",
+      "date": "2026-10-21"
+    },
+    {
+      "title": "Oppo Enco X4 开箱与试用",
+      "url": "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php",
+      "date": "2026-10-22"
+    },
+    {
+      "title": "Acer Swift Spin 14 AI 评测",
+      "url": "https://www.notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html",
+      "date": "2026-10-21"
+    }
+  ]
+}

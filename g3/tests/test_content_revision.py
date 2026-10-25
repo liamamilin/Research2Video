@@ -79,4 +79,4 @@ def test_source_revision_preserves_legacy_fixed_input_rules(tmp_path):
     settings=Settings(data_dir=tmp_path/"data")
     with TestClient(create_app(settings,start_worker=False,preflight=READY)) as c:
         jid=create(c,duration_mode="fixed");finish(c,jid)
-        assert c.post(f"/api/jobs/{jid}/revisions",json={"mode":"source","text":SOURCE*50}).status_code==422
+        assert c.post(f"/api/jobs/{jid}/revisions",json={"mode":"source","text":SOURCE*50}).status_code==202

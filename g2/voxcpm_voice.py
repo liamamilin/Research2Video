@@ -12,7 +12,7 @@ second, every chapter start snapped back). ``chain`` says how the previous sente
   chain    always continue the previous sentence (the drifting behaviour)
 """
 from pathlib import Path
-import json, os, re, sys
+import json, os, re, sys, time
 os.environ['HF_HUB_OFFLINE'] = '1'
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +47,7 @@ def active_seconds(audio, rate: int) -> float:
 
 
 def generate(plan_path: Path, output_dir: Path, voice: str):
+    started = time.monotonic()
     if voice not in VOXCPM_VOICES:
         raise ValueError('Unsupported local voice')
     plan_path = plan_path.resolve(); output_dir = output_dir.resolve()
@@ -59,6 +60,10 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
     chain = plan.get('voice_settings', {}).get('chain', 'guarded')
     if chain not in CHAIN_MODES:
         raise ValueError('Invalid chain mode')
+    options = {key: plan.get('voice_settings', {}).get(key, True)
+               for key in ('compile', 'reference_cache')}
+    if any(type(value) is not bool for value in options.values()):
+        raise ValueError('Invalid voice optimization setting')
     for segment in plan['segments']:
         if not isinstance(segment['id'], str) or not re.fullmatch(r'[a-z][a-z0-9_]{0,47}', segment['id']):
             raise ValueError('Invalid segment id')
@@ -70,14 +75,21 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
     from mlx_audio.tts.utils import load_model
     from scipy.signal import resample_poly
     _, model_dir, anchor_path = voxcpm_paths(ROOT)
+    load_started = time.monotonic()
     model = load_model(str(model_dir))
+    load_seconds = time.monotonic() - load_started
+    if options['compile']:
+        model.compile_model()
     anchor, anchor_rate = sf.read(str(anchor_path), dtype='float32')
     if anchor_rate != model.sample_rate:
         raise ValueError('Anchor clip must be recorded at the model sample rate')
     anchor_prompt = (anchor, VOXCPM_ANCHOR_TEXT)
+    from g2.voice_performance import ReferenceEncoderCache
+    reference_cache = ReferenceEncoderCache(model, anchor, mx.eval) if options['reference_cache'] else None
     anchor_rate = units(VOXCPM_ANCHOR_TEXT) / active_seconds(anchor, model.sample_rate)
     previous, previous_rate, chapter, report = anchor_prompt, None, None, []
     for segment in plan['segments']:
+        segment_started = time.monotonic()
         sid = segment['id']
         if segment.get('chapter_id') != chapter:
             chapter, previous, previous_rate = segment.get('chapter_id'), anchor_prompt, None
@@ -111,10 +123,14 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
         sf.write(output_dir / f'{sid}.wav', out, OUTPUT_RATE, subtype='PCM_16')
         report.append({'id': sid, 'chapter': chapter, 'seconds': round(len(out) / OUTPUT_RATE, 3), 'units': units(text),
                        'units_per_second': round(float(rate), 2), 'attempts': tries, 'prompt': 'anchor' if prompt is anchor_prompt else 'previous',
+                       'generation_seconds': round(time.monotonic() - segment_started, 3),
                        'in_range': bool(units(text) < MIN_UNITS or RATE_RANGE[0] <= rate <= RATE_RANGE[1])})
         print('VOICE', sid, len(out) / OUTPUT_RATE, flush=True)
     (output_dir / 'voice-report.json').write_text(json.dumps({'voice': voice, 'steps': steps, 'chain': chain, 'anchor_units_per_second': round(float(anchor_rate), 2),
-                                                                  'segments': report}, ensure_ascii=False, indent=2))
+                                                                  'segments': report,
+                                                                  'performance': {'compiled': options['compile'], 'load_seconds': round(load_seconds, 3),
+                                                                      'total_seconds': round(time.monotonic() - started, 3),
+                                                                      'reference_cache': reference_cache.report() if reference_cache else None}}, ensure_ascii=False, indent=2))
 
 
 if __name__ == '__main__':

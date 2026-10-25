@@ -66,7 +66,7 @@ def test_scene_background_generation_uses_loopback_and_writes_verified_manifest(
         body = json.loads(request.data)
         assert request.full_url == "http://127.0.0.1:7860/sdapi/v1/txt2img"
         assert body["width"] == 1280 and body["height"] == 720
-        assert "text" in body["negative_prompt"]
+        assert body["negative_prompt"] == ""
         assert timeout == 2
     for index, path in enumerate(result.values(), start=1):
         assert (fixture_root / path).read_bytes() == png

@@ -13,7 +13,7 @@ from typing import Iterator
 from uuid import UUID
 
 
-STAGES = ("PLAN", "VOICE_ALIGN", "STORYBOARD", "SCENE_IMAGES", "BUILD_IR", "RENDER", "QUALITY_CHECK", "PACKAGE")
+STAGES = ("PLAN", "VOICE_ALIGN", "STORYBOARD", "SCENE_IMAGES", "BUILD_IR", "RENDER", "QUALITY_CHECK", "PACKAGE", "AUDIO_MIX")
 TERMINAL_STATES = {"COMPLETED", "FAILED", "CANCELLED"}
 SCENE_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_]{0,47}$")
 
@@ -145,12 +145,18 @@ class JobStore:
                 "revision_mode": "TEXT",
                 "video_speed": "REAL NOT NULL DEFAULT 1",
                 "input_mode": "TEXT NOT NULL DEFAULT 'material'",
+                "production_recipe_json": "TEXT",
+                "production_plan_json": "TEXT",
+                "background_music_json": "TEXT",
+                "idempotency_key": "TEXT",
+                "request_sha256": "TEXT",
             }
             for name, definition in additions.items():
                 if name not in columns:
                     conn.execute(f"ALTER TABLE jobs ADD COLUMN {name} {definition}")
             conn.execute("CREATE INDEX IF NOT EXISTS jobs_parent_idx ON jobs(parent_job_id, created_at)")
-            conn.execute("PRAGMA user_version=7")
+            conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS jobs_submission_idx ON jobs(idempotency_key) WHERE idempotency_key IS NOT NULL")
+            conn.execute("PRAGMA user_version=10")
         finally:
             conn.close()
 
@@ -164,12 +170,88 @@ class JobStore:
 
     def create_job(self, job_id: str, request: dict, *, input_document: dict | None = None) -> dict:
         UUID(job_id)
+        key = request.get("idempotency_key")
+        fingerprint = self._request_digest(request)
+        job_dir = self.job_root / job_id
+        created = False
+        try:
+            # Serialize the lookup, workspace creation and insert. A concurrent
+            # replay must see the committed first job before creating any files.
+            with self._transaction() as conn:
+                existing = self._submission(conn, key, fingerprint, self._compatible_request_digests(request))
+                if existing:
+                    return self.get_job(existing)
+                job_dir.mkdir(exist_ok=False)
+                created = True
+                self._create_job(conn, job_id, request, input_document=input_document)
+                conn.execute("UPDATE jobs SET idempotency_key=?,request_sha256=? WHERE job_id=?",
+                             (key, fingerprint, job_id))
+        except BaseException:
+            if created:
+                import shutil
+                shutil.rmtree(job_dir, ignore_errors=True)
+            raise
+        return self.get_job(job_id)
+
+    @staticmethod
+    def _request_digest(request: dict) -> str:
+        submitted = {k: v for k, v in request.items() if k != "idempotency_key"}
+        if "_production_submitted" in submitted:
+            from g2.production_plan import FIELDS
+            explicit = submitted.pop("_production_submitted")
+            for key in FIELDS | {"production_recipe", "production_context", "background_music"}:
+                submitted.pop(key, None)
+            submitted["production_submission"] = explicit
+        return sha256_bytes(json.dumps(submitted, ensure_ascii=False, sort_keys=True,
+                                       separators=(",", ":")).encode("utf-8"))
+
+    @staticmethod
+    def _compatible_request_digests(request: dict) -> set[str]:
+        def old_digest(value):
+            return sha256_bytes(json.dumps({k: v for k, v in value.items() if k != "idempotency_key"},
+                ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode())
+        # Preserve exact replays from before production plans were introduced.
+        legacy = {k: v for k, v in request.items() if k != "_production_submitted"}
+        for key, default in {"production_mode": "standard", "visual_style": "legacy", "production_context": None,
+                             "content_notices": []}.items():
+            if legacy.get(key) == default:
+                legacy.pop(key, None)
+        return {old_digest(request), old_digest(legacy)}
+
+    @staticmethod
+    def _submission(conn: sqlite3.Connection, key: str | None, fingerprint: str, compatible: set[str] | None = None) -> str | None:
+        if key is None:
+            return None
+        row = conn.execute("SELECT job_id,request_sha256 FROM jobs WHERE idempotency_key=?", (key,)).fetchone()
+        if row is None:
+            return None
+        if row["request_sha256"] != fingerprint and row["request_sha256"] not in (compatible or set()):
+            raise StoreError("IDEMPOTENCY_CONFLICT", "此提交标识已用于另一组文稿或制作设置，请为新出片使用新的标识。")
+        return row["job_id"]
+
+    def find_submission(self, request: dict) -> dict | None:
+        """Look up an exact replay before checking today's generation readiness."""
+        conn = self._connect()
+        try:
+            job_id = self._submission(conn, request.get("idempotency_key"), self._request_digest(request), self._compatible_request_digests(request))
+        finally:
+            conn.close()
+        return self.get_job(job_id) if job_id else None
+
+    def _create_job(self, conn: sqlite3.Connection, job_id: str, request: dict,
+                    *, input_document: dict | None = None) -> None:
+        from g2.production_plan import prepare_request
         job_dir = (self.job_root / job_id).resolve()
         if not job_dir.is_relative_to(self.job_root.resolve()):
             raise StoreError("INVALID_WORKSPACE", "job workspace escaped its root")
-        job_dir.mkdir(parents=True, exist_ok=False)
         input_dir = job_dir / "input"
         input_dir.mkdir()
+        from g3.creative_images import freeze_images
+        from g3.music_assets import freeze as freeze_music
+        from g2.creative_library import prepare_request as prepare_resources
+        request = prepare_resources(request)
+        request = freeze_music(self.data_dir, input_dir, freeze_images(self.data_dir, input_dir, request))
+        request = prepare_request(request)
         source_text = request["source_text"]
         source_path = input_dir / "source.txt"
         tmp_path = input_dir / "source.txt.tmp"
@@ -197,9 +279,7 @@ class JobStore:
         # job_dir is resolved (the jobs folder may be a symlink to another disk), so build the stored path from the
         # unresolved root instead of taking it relative to data_dir
         source_rel = (self.job_root.relative_to(self.data_dir) / job_id / "input" / "source.txt").as_posix()
-        try:
-            with self._transaction() as conn:
-                conn.execute("""INSERT INTO jobs
+        conn.execute("""INSERT INTO jobs
                     (job_id,title,source_rel_path,source_sha256,source_char_count,target_duration_sec,theme,voice_id,
                      status,active_stage,created_at,updated_at,operation_type,parent_job_id,parent_attempt_no,scene_id,prompt_extra,video_form,duration_mode)
                     VALUES(?,?,?,?,?,?,?,?, 'QUEUED','PLAN',?,?,?,?,?,?,?,?,?)""",
@@ -208,14 +288,16 @@ class JobStore:
                      request.get("operation_type", "generate"), request.get("parent_job_id"),
                      request.get("parent_attempt_no"), request.get("scene_id"), request.get("prompt_extra", ""),
                      request.get("video_form", "knowledge_cards"), request.get("duration_mode", "fixed")))
-                conn.execute("UPDATE jobs SET creative_intent_json=?,revision_mode=?,video_speed=?,input_mode=? WHERE job_id=?",
+        conn.execute("UPDATE jobs SET creative_intent_json=?,revision_mode=?,video_speed=?,input_mode=? WHERE job_id=?",
                              (json.dumps(request.get("creative_intent", {}), ensure_ascii=False), request.get("revision_mode"),
                               request.get("video_speed",1), request.get("input_mode", "material"), job_id))
-        except Exception:
-            import shutil
-            shutil.rmtree(job_dir, ignore_errors=True)
-            raise
-        return self.get_job(job_id)
+        conn.execute("UPDATE jobs SET background_music_json=? WHERE job_id=?",
+                     (json.dumps(request["background_music_resolved"], ensure_ascii=False) if request.get("background_music_resolved") else None, job_id))
+        conn.execute("UPDATE jobs SET production_plan_json=? WHERE job_id=?",
+                     (json.dumps(request["production_plan"], ensure_ascii=False), job_id))
+        conn.execute("UPDATE jobs SET production_recipe_json=? WHERE job_id=?",
+                             (json.dumps(request["production_recipe_resolved"], ensure_ascii=False)
+                              if request.get("production_recipe_resolved") else None, job_id))
 
     def editable_content(self, job_id: str) -> dict:
         job = self.get_job(job_id)
@@ -242,8 +324,9 @@ class JobStore:
         keys = ("target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "video_speed")
         options = {key: saved.get(key, job.get(key)) for key in keys}
         options["use_draw_things"] = saved.get("use_draw_things", False)
-        if saved.get("package"):
-            options["package"] = saved["package"]  # revisions are repackaged with the parent's kit
+        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved"):
+            if saved.get(key) is not None:
+                options[key] = saved[key]
         return {"job_id": job_id, "title": job["title"], "source_text": source, "narration_text": narration,
                 "creative_intent": job["creative_intent"], "options": options}
 
@@ -251,7 +334,7 @@ class JobStore:
         self.get_job(job_id)
         conn = self._connect()
         try:
-            rows = conn.execute("SELECT * FROM jobs WHERE parent_job_id=? AND operation_type IN ('content_revision','visual_revision','media_revision') ORDER BY created_at DESC", (job_id,)).fetchall()
+            rows = conn.execute("SELECT * FROM jobs WHERE parent_job_id=? AND operation_type IN ('content_revision','visual_revision','media_revision','music_revision') ORDER BY created_at DESC", (job_id,)).fetchall()
             return [self._job_view(row, False) for row in rows]
         finally:
             conn.close()
@@ -308,8 +391,9 @@ class JobStore:
             "scene_id": scene_id,
             "prompt_extra": prompt_extra,
         }
-        if input_payload.get("package"):
-            request["package"] = input_payload["package"]
+        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved"):
+            if input_payload.get(key) is not None:
+                request[key] = input_payload[key]
         return self.create_job(job_id, request)
 
     def scene_edit_source(self, parent_job_id: str, attempt_no: int, scene_id: str) -> dict:
@@ -381,9 +465,15 @@ class JobStore:
                 error_code=?,error_message=? WHERE job_id=? AND attempt_no=? AND stage=?""",
                 (status, started_at, completed_at, duration_seconds, error_code, error_message,
                  job_id, attempt_no, stage))
-            if status == "RUNNING":
+            # Planning and voice can overlap. Keep the earliest running stage as
+            # the summary, including when the later stage finishes first.
+            states = {row["stage"]: row["status"] for row in conn.execute(
+                "SELECT stage,status FROM stages WHERE job_id=? AND attempt_no=?", (job_id, attempt_no))}
+            active = next((item for item in STAGES if states.get(item) == "FAILED"), None)
+            active = active or next((item for item in STAGES if states.get(item) == "RUNNING"), None)
+            if active:
                 conn.execute("UPDATE jobs SET active_stage=?,updated_at=?,version=version+1 WHERE job_id=? AND status='RUNNING'",
-                             (stage, now, job_id))
+                             (active, now, job_id))
 
     def request_cancel(self, job_id: str) -> dict:
         with self._transaction() as conn:
@@ -438,13 +528,15 @@ class JobStore:
             if stage in STAGES:
                 conn.execute("UPDATE stages SET status='FAILED',completed_at=?,error_code=?,error_message=? WHERE job_id=? AND attempt_no=? AND stage=?",
                              (now, error_code, error_message[:500], job_id, attempt_no, stage))
+            conn.execute("UPDATE stages SET status='INTERRUPTED',completed_at=?,error_code=?,error_message=? WHERE job_id=? AND attempt_no=? AND status='RUNNING'",
+                         (now, error_code, error_message[:500], job_id, attempt_no))
             conn.execute("UPDATE stages SET status='SKIPPED',completed_at=? WHERE job_id=? AND attempt_no=? AND status='PENDING'",
                          (now, job_id, attempt_no))
             conn.execute("UPDATE attempts SET status='FAILED',completed_at=?,runner_pid=NULL,error_code=?,error_message=? WHERE job_id=? AND attempt_no=?",
                          (now, error_code, error_message[:500], job_id, attempt_no))
-            conn.execute("""UPDATE jobs SET status='FAILED',cancel_requested=0,error_code=?,error_message=?,retryable=?,
+            conn.execute("""UPDATE jobs SET status='FAILED',active_stage=COALESCE(?,active_stage),cancel_requested=0,error_code=?,error_message=?,retryable=?,
                 updated_at=?,version=version+1 WHERE job_id=? AND status='RUNNING'""",
-                (error_code, error_message[:500], int(retryable), now, job_id))
+                (stage if stage in STAGES else None, error_code, error_message[:500], int(retryable), now, job_id))
 
     def mark_completed(self, job_id: str, attempt_no: int, artifacts: list[dict]) -> bool:
         now = utc_now()
@@ -462,7 +554,7 @@ class JobStore:
                 return False
             conn.execute("UPDATE stages SET status='SUCCEEDED',completed_at=? WHERE job_id=? AND attempt_no=? AND stage='QUALITY_CHECK'",
                          (now, job_id, attempt_no))
-            conn.execute("UPDATE stages SET status='SKIPPED',completed_at=? WHERE job_id=? AND attempt_no=? AND stage='PACKAGE' AND status IN ('PENDING','RUNNING')",
+            conn.execute("UPDATE stages SET status='SKIPPED',completed_at=? WHERE job_id=? AND attempt_no=? AND stage IN ('PACKAGE','AUDIO_MIX') AND status IN ('PENDING','RUNNING')",
                          (now, job_id, attempt_no))
             conn.execute("UPDATE attempts SET status='COMPLETED',completed_at=?,runner_pid=NULL WHERE job_id=? AND attempt_no=?",
                          (now, job_id, attempt_no))
@@ -499,10 +591,14 @@ class JobStore:
                     WHERE job_id=? AND status='RUNNING'""", (now, row["job_id"]))
         return recovered
 
-    def list_jobs(self, limit: int = 20, offset: int = 0, query: str = "", status: str = "") -> dict:
+    def list_jobs(self, limit: int = 20, offset: int = 0, query: str = "", status: str = "",
+                  idempotency_key: str = "") -> dict:
         conn = self._connect()
         try:
             clauses, params = [], []
+            if idempotency_key:
+                clauses.append("idempotency_key=?")
+                params.append(idempotency_key)
             if query.strip():
                 clauses.append("(instr(lower(title), lower(?)) > 0 OR instr(lower(job_id), lower(?)) > 0)")
                 params.extend([query.strip(), query.strip()])
@@ -550,6 +646,13 @@ class JobStore:
         result["creative_intent"] = json.loads(row["creative_intent_json"])
         result["revision_mode"] = row["revision_mode"]
         result["input_mode"] = row["input_mode"]
+        result["idempotency_key"] = row["idempotency_key"]
+        result["background_music_resolved"] = json.loads(row["background_music_json"]) if row["background_music_json"] else None
+        result["background_music"] = result["background_music_resolved"]["selection"] if result["background_music_resolved"] else {"enabled": False}
+        result["production_recipe_resolved"] = json.loads(row["production_recipe_json"]) if row["production_recipe_json"] else None
+        result["production_plan"] = json.loads(row["production_plan_json"]) if row["production_plan_json"] else None
+        result["production_mode"] = (result["production_plan"] or {}).get("settings", {}).get("production_mode", "standard")
+        result["visual_style"] = (result["production_plan"] or {}).get("settings", {}).get("visual_style", "legacy")
         result["video_speed"] = row["video_speed"]
         result["video_form"] = row["video_form"]
         result["duration_mode"] = row["duration_mode"]

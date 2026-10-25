@@ -1,0 +1,212 @@
+{
+  "status": "PASS",
+  "music_assets": [
+    {
+      "id": "ambient_pad",
+      "sha256": "60620efbd4de8cb4eb1e489be18e8d769705ef8d41797db3a0058e7c0df2450e",
+      "full_decode": "PASS",
+      "loop_sample_continuity": "PASS",
+      "listening": "pending"
+    },
+    {
+      "id": "layered_space",
+      "sha256": "55c16a8babab2ae89c7def932b9f3e05decc0d7db8af2067598cbde2ae1d326c",
+      "full_decode": "PASS",
+      "loop_sample_continuity": "PASS",
+      "listening": "pending"
+    },
+    {
+      "id": "pulse_loop",
+      "sha256": "103feabb74a31d3083368cc4f597cca6dec45c670b46465ce0a422cac28b0032",
+      "full_decode": "PASS",
+      "loop_sample_continuity": "PASS",
+      "listening": "pending"
+    },
+    {
+      "id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+      "sha256": "742829e592cf73cb8be49232055e63ed2090f0ceb1295e4f1bc9c0e72d9df30e",
+      "full_decode": "PASS",
+      "loop_sample_continuity": "PASS",
+      "listening": "pending"
+    },
+    {
+      "id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "sha256": "8d4bfa2764a9fea5a459b154d8924e270dce4f160e94e77e3691adbb75769077",
+      "full_decode": "PASS",
+      "loop_sample_continuity": "PASS",
+      "listening": "pending"
+    },
+    {
+      "id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+      "sha256": "60620efbd4de8cb4eb1e489be18e8d769705ef8d41797db3a0058e7c0df2450e",
+      "full_decode": "PASS",
+      "loop_sample_continuity": "PASS",
+      "listening": "pending"
+    },
+    {
+      "id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "sha256": "e800afd236b782062780a2bdc00b7b2a68b7a4f7febd91f2acf5db30887f022f",
+      "full_decode": "PASS",
+      "loop_sample_continuity": "PASS",
+      "listening": "pending"
+    }
+  ],
+  "mixes": [
+    {
+      "id": "5a9eedd8-8e2d-462c-92ea-20189d2c819f",
+      "recipe": "ai_news",
+      "asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "full_decode": "PASS",
+      "checks": {
+        "mixed_audio_correlation": 0.9999536468997187,
+        "recovered_narration_correlation": 0.9999533781096894,
+        "decoded_peak": 0.4712636470794678,
+        "speech_music_margin_db": 24.621993357252435,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 2894400,
+        "speech_samples_checked": 4375680,
+        "video_stream_sha256": "644beddb2e41d53f2a204847a114628e5e3a7fc5ed65f7e14162a11cbb11aca3",
+        "unchanged_video_stream": true
+      },
+      "duration_seconds": 60.3,
+      "real_loop_crossings": 1,
+      "video_sha256": "020959771948d0186cb569bbbaecb0c9d1f1ba4263b6598bf3cf1b9c1270b2da"
+    },
+    {
+      "id": "7e4aeb7f-fbc8-4680-baf3-531229ca9dc6",
+      "recipe": "how_to",
+      "asset_id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+      "full_decode": "PASS",
+      "checks": {
+        "mixed_audio_correlation": 0.9999611056143574,
+        "recovered_narration_correlation": 0.9999608381729708,
+        "decoded_peak": 0.4467787742614746,
+        "speech_music_margin_db": 24.03421308907142,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 2550400,
+        "speech_samples_checked": 3897600,
+        "video_stream_sha256": "39529b54fb3bb123874c9cbf080a6714a6eec41db220a744e9565db3589e7549",
+        "unchanged_video_stream": true
+      },
+      "duration_seconds": 53.133333,
+      "real_loop_crossings": 2,
+      "video_sha256": "d026b18b29c78d92aafd13191ce0c314053a65fcab19fb65a07f511829405e60"
+    },
+    {
+      "id": "9b03ae94-e9ac-484b-b003-2e4123ef1815",
+      "recipe": "science_explainer",
+      "asset_id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "full_decode": "PASS",
+      "checks": {
+        "mixed_audio_correlation": 0.9999620501181627,
+        "recovered_narration_correlation": 0.9999618583983032,
+        "decoded_peak": 0.44668176770210266,
+        "speech_music_margin_db": 24.13123917510979,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 1105600,
+        "speech_samples_checked": 1488000,
+        "video_stream_sha256": "401c4aa2fc851af6e40179b82782756f496d019171f6ffdc83cd363bd4ebe155",
+        "unchanged_video_stream": true
+      },
+      "duration_seconds": 23.033333,
+      "real_loop_crossings": 0,
+      "video_sha256": "619f833eb6711fa86dc3ae25322f3e9f012ac26163527ea1b1e72df31053fbe2"
+    },
+    {
+      "id": "28aefc33-95ba-43eb-b4b8-2ecd04fb6113",
+      "recipe": "ai_news",
+      "asset_id": "layered_space",
+      "full_decode": "PASS",
+      "checks": {
+        "mixed_audio_correlation": 0.9999940375489296,
+        "recovered_narration_correlation": 0.9999939961585046,
+        "decoded_peak": 0.4593188166618347,
+        "speech_music_margin_db": 24.130776602019992,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 2894400,
+        "speech_samples_checked": 4375680,
+        "video_stream_sha256": "644beddb2e41d53f2a204847a114628e5e3a7fc5ed65f7e14162a11cbb11aca3",
+        "unchanged_video_stream": true
+      },
+      "duration_seconds": 60.3,
+      "real_loop_crossings": 3,
+      "video_sha256": "0838c4d24bf44f8d6557d5364bd31a925ea3607528b2b9bb6289f817deac4ca9"
+    },
+    {
+      "id": "11c149b6-3bbd-4ad1-ae9f-2202d1684049",
+      "recipe": "science_explainer",
+      "asset_id": "ambient_pad",
+      "full_decode": "PASS",
+      "checks": {
+        "mixed_audio_correlation": 0.9999929165794635,
+        "recovered_narration_correlation": 0.9999928659944131,
+        "decoded_peak": 0.44867077469825745,
+        "speech_music_margin_db": 24.324243606473654,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 1105600,
+        "speech_samples_checked": 1488000,
+        "video_stream_sha256": "401c4aa2fc851af6e40179b82782756f496d019171f6ffdc83cd363bd4ebe155",
+        "unchanged_video_stream": true
+      },
+      "duration_seconds": 23.033333,
+      "real_loop_crossings": 1,
+      "video_sha256": "3ba3262553cb133795d316dfd83c12502416a6f120fb9990fa5e344945e2d440"
+    },
+    {
+      "id": "3191f9dc-f944-47e5-9988-e331e877c6d4",
+      "recipe": "reference",
+      "asset_id": "pulse_loop",
+      "full_decode": "PASS",
+      "checks": {
+        "mixed_audio_correlation": 0.9999767807541404,
+        "recovered_narration_correlation": 0.9999767322971997,
+        "decoded_peak": 0.45016637444496155,
+        "speech_music_margin_db": 29.212264756708343,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 2550400,
+        "speech_samples_checked": 3897600,
+        "video_stream_sha256": "39529b54fb3bb123874c9cbf080a6714a6eec41db220a744e9565db3589e7549",
+        "unchanged_video_stream": true
+      },
+      "duration_seconds": 53.133333,
+      "real_loop_crossings": 5,
+      "video_sha256": "c66fc49bbcd3fddba7258b3fc1ec76861b2018b78ed09e69dc074bf84b266555"
+    },
+    {
+      "id": "1e5c5837-1092-4cae-b195-af80e5ef6ef6",
+      "recipe": "reference",
+      "asset_id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+      "full_decode": "PASS",
+      "checks": {
+        "mixed_audio_correlation": 0.9999968789468221,
+        "recovered_narration_correlation": 0.9999968534698944,
+        "decoded_peak": 0.4471151530742645,
+        "speech_music_margin_db": 24.09643470617557,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 2550400,
+        "speech_samples_checked": 3897600,
+        "video_stream_sha256": "39529b54fb3bb123874c9cbf080a6714a6eec41db220a744e9565db3589e7549",
+        "unchanged_video_stream": true
+      },
+      "duration_seconds": 53.133333,
+      "real_loop_crossings": 3,
+      "video_sha256": "beeccd7907333d4a35adeca7b16f9ef1116e602c728d50040a314e2d1d50d5ef"
+    }
+  ],
+  "manifest_files": 438,
+  "prior_artifact_records_unchanged": 2429,
+  "prior_music_assets_unchanged": 6,
+  "piano": {
+    "id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+    "duration_seconds": 24,
+    "full_decode": "PASS",
+    "generation_calls": 1,
+    "model_load_seconds": 139.9545792499557,
+    "generation_seconds": 15.439908833242953,
+    "seed": 42612,
+    "device": "mps",
+    "listening": "pending"
+  },
+  "video_count_before": 184,
+  "video_count_after": 191
+}

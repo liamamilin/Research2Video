@@ -1,0 +1,117 @@
+{
+  "status": "PASS",
+  "videos": [
+    {
+      "id": "1a43e8fa-3b3c-4559-aba4-fe48fee3b2d3",
+      "form": "object_showcase",
+      "operation_type": "generate",
+      "duration_seconds": 23.033333,
+      "full_decode": "PASS",
+      "qa": "PASS",
+      "package_qa": "PASS",
+      "video_sha256": "3ba3262553cb133795d316dfd83c12502416a6f120fb9990fa5e344945e2d440",
+      "images": 3,
+      "music_checks": {
+        "mixed_audio_correlation": 0.9999929165794635,
+        "recovered_narration_correlation": 0.9999928659944131,
+        "decoded_peak": 0.44867077469825745,
+        "speech_music_margin_db": 24.324243606473654,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 1105600,
+        "speech_samples_checked": 1488000,
+        "video_stream_sha256": "401c4aa2fc851af6e40179b82782756f496d019171f6ffdc83cd363bd4ebe155",
+        "unchanged_video_stream": true
+      },
+      "music_asset_id": "ambient_pad",
+      "music_generated": false
+    },
+    {
+      "id": "ccbb91b0-808b-447c-8b44-171bdaff064d",
+      "form": "dynamic_collage",
+      "operation_type": "generate",
+      "duration_seconds": 60.3,
+      "full_decode": "PASS",
+      "qa": "PASS",
+      "package_qa": "PASS",
+      "video_sha256": "1a31f46c9793cd18ec3e38c90f0ea56c91573291421150b7a5ffacbab63ea248",
+      "images": 3
+    },
+    {
+      "id": "268a3e75-c8ac-41d4-aae5-f8bfc1070977",
+      "form": "object_showcase",
+      "operation_type": "media_revision",
+      "duration_seconds": 16.533333,
+      "full_decode": "PASS",
+      "qa": "PASS",
+      "package_qa": "PASS",
+      "video_sha256": "2a464600239d7265fa4030e325e86bc68ba1ead0909e6fd2df42eaac92e900da",
+      "images": 3,
+      "music_checks": {
+        "mixed_audio_correlation": 0.9999936288941467,
+        "recovered_narration_correlation": 0.9999935860265309,
+        "decoded_peak": 0.4241633117198944,
+        "speech_music_margin_db": 24.01299047346899,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 793600,
+        "speech_samples_checked": 1025280,
+        "video_stream_sha256": "ce85686a726b19deec51cd86d960da8a8ca1a9e00d2037b74876eb88f05bf0e2",
+        "unchanged_video_stream": true
+      },
+      "music_asset_id": "ambient_pad",
+      "music_generated": false
+    },
+    {
+      "id": "3bf58b29-665e-4e7f-8c97-ac7e01dc34eb",
+      "form": "dynamic_collage",
+      "operation_type": "music_revision",
+      "duration_seconds": 60.3,
+      "full_decode": "PASS",
+      "qa": "PASS",
+      "package_qa": "PASS",
+      "video_sha256": "020959771948d0186cb569bbbaecb0c9d1f1ba4263b6598bf3cf1b9c1270b2da",
+      "images": 3,
+      "music_checks": {
+        "mixed_audio_correlation": 0.9999536468997187,
+        "recovered_narration_correlation": 0.9999533781096894,
+        "decoded_peak": 0.4712636470794678,
+        "speech_music_margin_db": 24.621993357252435,
+        "music_outside_content_peak": 0.0,
+        "samples_checked": 2894400,
+        "speech_samples_checked": 4375680,
+        "video_stream_sha256": "644beddb2e41d53f2a204847a114628e5e3a7fc5ed65f7e14162a11cbb11aca3",
+        "unchanged_video_stream": true
+      },
+      "music_asset_id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "music_generated": true
+    },
+    {
+      "id": "c9ffd874-b2b0-49c5-a8b6-571afe2287ba",
+      "form": "dynamic_collage",
+      "operation_type": "generate",
+      "duration_seconds": 9.941,
+      "full_decode": "PASS",
+      "qa": "PASS",
+      "package_qa": "not_requested",
+      "video_sha256": "73af8baa14d5ae013e46fb96c6944eb8adfc59ec4a074922e53a615633687b55",
+      "images": 1
+    },
+    {
+      "id": "4a17b183-c540-43f9-aed7-793d6b429314",
+      "form": "dynamic_collage",
+      "operation_type": "generate",
+      "duration_seconds": 12.971,
+      "full_decode": "PASS",
+      "qa": "PASS",
+      "package_qa": "not_requested",
+      "video_sha256": "806b1ec55f7fd9b825235a41778ee6e243b3eed9ea654344d977a0de70dd3717",
+      "images": 3
+    }
+  ],
+  "manifest_files": 504,
+  "prior_records": 174,
+  "prior_actual_videos": 2,
+  "count_before": 174,
+  "count_after": 180,
+  "music_jobs_total": 2,
+  "new_music_generation_calls": 0
+}

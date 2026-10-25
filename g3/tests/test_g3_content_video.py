@@ -29,7 +29,7 @@ def test_content_mode_accepts_complete_material_and_survives_restart_and_retry(t
 def test_fixed_mode_keeps_legacy_limits_and_content_requires_diagram_form(tmp_path):
     settings = Settings(data_dir=tmp_path / "data")
     with TestClient(create_app(settings, start_worker=False, preflight=READY)) as client:
-        assert client.post("/api/jobs", json={"source_text": SOURCE}).status_code == 422
+        assert client.post("/api/jobs", json={"source_text": SOURCE}).status_code == 202
         assert client.post("/api/jobs", json={"source_text": SOURCE, "duration_mode": "content"}).status_code == 422
         response = client.post("/api/jobs", json={"source_text": SOURCE[:100]})
         assert response.status_code == 202

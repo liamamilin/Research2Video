@@ -1,0 +1,25 @@
+{
+  "recorded_at": "2026-10-24T09:36:57.612586+00:00",
+  "targeted_initial_tests_passed": 106,
+  "runtime_regression": {
+    "passed": 716,
+    "skipped": 1,
+    "deselected": 1,
+    "deselected_test": "tests/test_final_release.py::test_manifest_hashes_and_file_coverage",
+    "reason": "Pre-existing frozen portable-package inventory includes neither runtime data nor current development files; recorded separately, not rewritten."
+  },
+  "source_files": [
+    {
+      "path": "g2/run_g2.py",
+      "sha256": "bd51b8071ad9ff50e918875b0bdfbf338b8b9949eec44de14464ca3b2e5f57d4"
+    },
+    {
+      "path": "g2/information_motion.py",
+      "sha256": "f17e3b608c2606e97b9109725c7ce98da224e6c7ba3392b99dcbfbf9e413cdb4"
+    },
+    {
+      "path": "g2/caption_alignment.py",
+      "sha256": "3ad0f79065a9787f688d2e54265aa45289ddccf33230790c175275da89d07f6c"
+    }
+  ]
+}

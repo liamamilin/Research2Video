@@ -1,0 +1,29 @@
+{
+  "old_pid": 28102,
+  "new_pid": 52977,
+  "port": 8766,
+  "idle_verified": true,
+  "live": true,
+  "web_owned_work_idle": true,
+  "independent_work_preserved": {
+    "owner_pid": 51844,
+    "owner_script": "/tmp/arec-minimax-editorial-verify.py",
+    "owner_script_sha256": "8e03f59ff62979e9ad6abc23c110a1f53f9ca1c8fb1326b5d649a7d5a2197404",
+    "before": {
+      "id": "bb6a3d490aed48dbb82eb0b8fbb9b9ba",
+      "status": "DRAFT",
+      "stage": "\u4e8b\u5b9e\u5ba1\u8ba1",
+      "current_version": 16,
+      "heartbeat_at": 1792811010.113966,
+      "error": null
+    },
+    "after": {
+      "id": "bb6a3d490aed48dbb82eb0b8fbb9b9ba",
+      "status": "DRAFT",
+      "stage": "\u4e8b\u5b9e\u5ba1\u8ba1",
+      "current_version": 16,
+      "heartbeat_at": 1792811010.113966,
+      "error": null
+    }
+  }
+}

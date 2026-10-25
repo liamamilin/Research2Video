@@ -1,0 +1,127 @@
+[
+  {
+    "name": "authored-narration.json",
+    "bytes": 1182,
+    "sha256": "43aaefed6adaee431abf787cb4b8d3e1f62154514f172da67e18f843f3b10a60"
+  },
+  {
+    "name": "captions.srt",
+    "bytes": 3954,
+    "sha256": "53a98d3798aa23dd5bf369489dfce18b21674f3f09c8d0f7e8da417d896a87f7"
+  },
+  {
+    "name": "chapters.json",
+    "bytes": 13512,
+    "sha256": "e38b96ca56ffbf944c856401e216e4cf1bda1c9321f02b7521c5fd1657113568"
+  },
+  {
+    "name": "content-captions.srt",
+    "bytes": 3954,
+    "sha256": "5165296a59b06a35188d36f97d11c8ec5dff83cd4a866ecd681fb622877a52e9"
+  },
+  {
+    "name": "content-chapters.json",
+    "bytes": 13454,
+    "sha256": "e7809c86b6035b9c0f37f1e28bf4c655db81beb91761c756fe04ed85e95f7027"
+  },
+  {
+    "name": "content.mp4",
+    "bytes": 30786550,
+    "sha256": "794dfc74d77d968a66dd93e578038adf25e67d01bff84517d88aa0754efc0262"
+  },
+  {
+    "name": "creative-form-plan.json",
+    "bytes": 26385,
+    "sha256": "f61d68a49998ee2ca50c071fed21939031299141a07947087860bcb23e28b926"
+  },
+  {
+    "name": "execution-log.txt",
+    "bytes": 920,
+    "sha256": "9164be77ec751ca6da52781bbd83d65c3b3369f79703216b6dc2f21be8821d2f"
+  },
+  {
+    "name": "fast-card-plan.json",
+    "bytes": 13883,
+    "sha256": "b015945868d787477978f9d2138abcf9057babaa1553d0776891e30da551c29c"
+  },
+  {
+    "name": "generation-schedule.json",
+    "bytes": 419,
+    "sha256": "426c3df7d14fd79fbbf6032c7328f6d31ac8e2dc2c3f1c0a16d4c957386acc24"
+  },
+  {
+    "name": "input-brief.json",
+    "bytes": 5701,
+    "sha256": "4c5d7774d826a41f8446f958eb7fb511597a770e4a737a777af7e52214f3701d"
+  },
+  {
+    "name": "manifest.json",
+    "bytes": 72923,
+    "sha256": "982f0e7e12936ddeacf502872be22cb2005b7825d2df5852818b86dc4ec465fb"
+  },
+  {
+    "name": "model-cost.json",
+    "bytes": 497,
+    "sha256": "656aca142efb7b9451e97a267e59e9b9fc386223b02950b218314378ce98b9b7"
+  },
+  {
+    "name": "narration-check.json",
+    "bytes": 273,
+    "sha256": "415008ba8539bd4b067f5fdcdbaa26b583821b72e525388f071cf9cf5dca2058"
+  },
+  {
+    "name": "narration.json",
+    "bytes": 32009,
+    "sha256": "5946fc610e9e448be24964a520e4f82b3ca3ca05a41b382488d1bf2e0f9e59f8"
+  },
+  {
+    "name": "package-qa.json",
+    "bytes": 938,
+    "sha256": "139a51ae1e8aa438de83205b1d75c4ff269d0ada95d9f4425ef0f69869d6fba2"
+  },
+  {
+    "name": "package.json",
+    "bytes": 5760,
+    "sha256": "400db6fd7d57e243eab9185d78211c211d30b3e02a6565709c59d73ba40b9652"
+  },
+  {
+    "name": "packaging-resolved.json",
+    "bytes": 2502,
+    "sha256": "d584b53696730290873f73e9a533711be899f3123abe9bf8a77c6b3c29287b20"
+  },
+  {
+    "name": "prepared-source.txt",
+    "bytes": 2897,
+    "sha256": "ab3d13a2b3bbbc2d6ad8adc92797456c8fdc048eeb2e2f296e5dc8a9c2660707"
+  },
+  {
+    "name": "production-execution.json",
+    "bytes": 683,
+    "sha256": "4f2c187b74dc0e97e0e941fa04fcb6a45323ebc7d3111eff19c15389d98bbf7b"
+  },
+  {
+    "name": "production-plan.json",
+    "bytes": 6536,
+    "sha256": "ac3ec6fb99c062b2a0e1b9bea2913a57034a440be66e409fa4bff1b2d9eff44e"
+  },
+  {
+    "name": "qa.json",
+    "bytes": 24800,
+    "sha256": "586dc43d71fcc8a07e52e265f616775a4ddf06fc887ca92da36395142be1c7ec"
+  },
+  {
+    "name": "storyboard.json",
+    "bytes": 26354,
+    "sha256": "5b1e9ba74bcec9f643ea2539fbaadf171fcd33e51596df2abf62359e38e4ebcb"
+  },
+  {
+    "name": "video-ir.json",
+    "bytes": 42638,
+    "sha256": "5544e023f717fd75261886f09a4cf23a2853dd44d4f085afd08bcceab910582c"
+  },
+  {
+    "name": "video.mp4",
+    "bytes": 9942511,
+    "sha256": "214ad5c31a2c7b9821e0b11c4a8deca6baff05ddeb5a957bcab3791a4ef51f49"
+  }
+]

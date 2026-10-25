@@ -1,0 +1,448 @@
+{
+  "id": "04554d2380e446ff9be3743f42ab1e07",
+  "script_id": "9f25f92c1eb54ab195abdbda84e29d37",
+  "version": 2,
+  "status": "COMPLETED",
+  "title": "新工厂之外，美国军工高纯铝缺在哪",
+  "source_text": "说到制造业回流，画面通常是新工厂、组装线。但行业媒体 Manufacturing Dive 最近转述的一项分析，指向一个更靠上游的空白：美国没有正在运行的冶炼厂，能生产军工专用的高纯度铝。这个范围要说准：不是美国整个铝业都停摆，也不是所有铝都做不了，而是军工需要的那一档高纯度铝，本土没有现成运行能力。\n这为什么算供应链风险？因为这类材料的关键不在最后组装，而在能不能在本土炼出来。供应线一旦出问题，美国本土没有现成冶炼能力接上。这里说的是分析对潜在供应中断风险的判断，不是已经发生断供。按 Manufacturing Dive 的转述，这来自经济学家 Adam Hersh 的分析。\n\n如果只看铝，这像一条冷门工业信息。但芯片供应链给出了同一种“上游盲区”。美国半导体行业协会 SIA 提醒，美国芯片供应链依赖一些脆弱且不透明的投入品，并呼吁就本土化和储备加强协作。这里要听清：这仍是行业提出的方向，不是已经落地的政策。\n\n铝和芯片看起来离得很远，却共同说明：供应链的薄弱点，可能不在最后建了多少工厂，而在平时不容易看见的上游材料。判断制造业回流有没有真正增强韧性，不能只数工厂数量；还要看关键材料有没有本土能力、有没有替代来源、供应链是否看得清依赖关系。\n所以，回到开头那个空白：新工厂当然重要，但只问“建了几座”还不够。更该问的是，上游关键材料的能力跟上了吗？",
+  "source_sha256": "bafb93e0b4ba65e62354873855ccec3bfa47e788cc2475500340866e76638b60",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "一个反直觉的缺口",
+        "paragraphs": [
+          "说到制造业回流，画面通常是新工厂、组装线。但行业媒体 Manufacturing Dive 最近转述的一项分析，指向一个更靠上游的空白：美国没有正在运行的冶炼厂，能生产军工专用的高纯度铝。这个范围要说准：不是美国整个铝业都停摆，也不是所有铝都做不了，而是军工需要的那一档高纯度铝，本土没有现成运行能力。",
+          "这为什么算供应链风险？因为这类材料的关键不在最后组装，而在能不能在本土炼出来。供应线一旦出问题，美国本土没有现成冶炼能力接上。这里说的是分析对潜在供应中断风险的判断，不是已经发生断供。按 Manufacturing Dive 的转述，这来自经济学家 Adam Hersh 的分析。"
+        ]
+      },
+      {
+        "title": "不是铝的孤例",
+        "paragraphs": [
+          "如果只看铝，这像一条冷门工业信息。但芯片供应链给出了同一种“上游盲区”。美国半导体行业协会 SIA 提醒，美国芯片供应链依赖一些脆弱且不透明的投入品，并呼吁就本土化和储备加强协作。这里要听清：这仍是行业提出的方向，不是已经落地的政策。"
+        ]
+      },
+      {
+        "title": "数工厂，还是数能力",
+        "paragraphs": [
+          "铝和芯片看起来离得很远，却共同说明：供应链的薄弱点，可能不在最后建了多少工厂，而在平时不容易看见的上游材料。判断制造业回流有没有真正增强韧性，不能只数工厂数量；还要看关键材料有没有本土能力、有没有替代来源、供应链是否看得清依赖关系。",
+          "所以，回到开头那个空白：新工厂当然重要，但只问“建了几座”还不够。更该问的是，上游关键材料的能力跟上了吗？"
+        ]
+      }
+    ],
+    "duration_mode": "content",
+    "title": "新工厂之外，美国军工高纯铝缺在哪",
+    "production_context": {
+      "content_recipe": {
+        "id": "research:topic_digest",
+        "settings": {
+          "video_form": "information_motion",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+            "focus": ""
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "专题速览",
+            "accent": "#1f7a4d",
+            "outro": {
+              "lines": [
+                "主要来源见简介"
+              ],
+              "seconds": 3
+            },
+            "recipe": "topic_digest",
+            "intro": {
+              "title": "新工厂之外"
+            }
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      }
+    },
+    "production_mode": "fast",
+    "video_form": "information_cards",
+    "visual_style": "editorial_light",
+    "idempotency_key": "research:04554d2380e446ff9be3743f42ab1e07"
+  },
+  "autovideo_job_id": "2a2e98c2-b158-414d-9400-5df97a88dc60",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "resolved_video_form": "information_cards",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 844,
+      "sha256": "66d254c10f74a62103066a101200885ad5dea3ed88b7bf0c1a34dfb0613647ea"
+    },
+    {
+      "name": "caption-alignment.json",
+      "content_type": "application/json",
+      "bytes": 55492,
+      "sha256": "2ba14a535d225613d689eb280799ffc6bf194af4b8f63b3292c737bb5537d5de"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 2762,
+      "sha256": "acae54d6e6ed4947f2345880c22dd784b8e4e5a3b020d1823d3a5d8866bad9d2"
+    },
+    {
+      "name": "card-editorial.json",
+      "content_type": "application/json",
+      "bytes": 7147,
+      "sha256": "68ee4366e7e79d3924d2a494f73ac50fcd30dd3cb67d43679f61801482cd8cda"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 7285,
+      "sha256": "679e69c753e2daf770c2af18b0203f65379cd9f419b02b764fd0a344dac22990"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 2762,
+      "sha256": "7e827c29713fa081ad962546063deaa9166fcbceb579689b490c948a91d33c19"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 7227,
+      "sha256": "9ea6de8ae0d4e9960ea918f6423b54068956e69a41ce62e963b1e8da8e4a8dfd"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 13504466,
+      "sha256": "15b6e05f4fff990a94ed70e20e61febc1a98cbfe932040422e0c091d58a7e7c6"
+    },
+    {
+      "name": "creative-form-plan.json",
+      "content_type": "application/json",
+      "bytes": 4972,
+      "sha256": "a694aa34fc759b294f73221a638e1cd3421dcbd7d112f3b503a8d3f0b3bb1862"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 966,
+      "sha256": "15b606afccfd318395ff7aee7a7dffdbf8d5815f0fb60f2126132a85c47a88e4"
+    },
+    {
+      "name": "fast-card-plan.json",
+      "content_type": "application/json",
+      "bytes": 3609,
+      "sha256": "42a85a180ba41dd2a7cf18b8ab311f5bf35af084caad6d351993d0be2eaae958"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 424,
+      "sha256": "c1f6c906fc4a380b26f969f8eb3aa5077431bb8122f95da43eb1a9461abba68b"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 3421,
+      "sha256": "f3343f86b66f7c612117b63b43a79611b7dba1e9a91c9eeeed51507010243688"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 53069,
+      "sha256": "302b2c8c5a9b58fb2dad1498c5270fa1b3bfd7144af2c6cf105ab33ed0e4f2bd"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 1630,
+      "sha256": "7c7544575ee72228cad375fc514935f07ca61fb7eca8d2cb8d54cbb72c39d4c8"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 330,
+      "sha256": "978da3ae67ecfbe0a1afe4389ea3e6a1e59cd0ec7eac51cca2dded853c7b321a"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 17753,
+      "sha256": "5f1505e7532e2f9d79c8f8f9164494e10bd4a6981ff6c7e0dfe6167f6678f29e"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 955,
+      "sha256": "6c3dcda45a745b4722c58ed8b6a19f3d2529f152e6bcf2b07e7918f84592614f"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5304,
+      "sha256": "0bb3b5248d4f83d07b91b33af2f117413a61e22b21296f72bfd9c79216ef9d87"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2047,
+      "sha256": "166a491b0cfdd7768adeef708a783c0181cd26f80677dadc27e4f7a9630fb2db"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 1624,
+      "sha256": "0493c7a3aa7ff271537cea6dc5d18b2405767e0c494a0bd0816d749fdf3d903f"
+    },
+    {
+      "name": "production-execution.json",
+      "content_type": "application/json",
+      "bytes": 744,
+      "sha256": "cd086598c9ceba0e00616b1b63175497b8932ff4b000de4e8a83272412afa6d2"
+    },
+    {
+      "name": "production-plan.json",
+      "content_type": "application/json",
+      "bytes": 6112,
+      "sha256": "aedd1ef9998c52ab1d6d6b013d130ce5cf01b99930a7b50853d2bcecdc4f85cc"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 5641,
+      "sha256": "463712a6f198dd3a45117ef995730e85d56bf771ef24e76b8508b068bd218cbd"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 4941,
+      "sha256": "400bf97919ce2a19bf285ae9f44d18cc23f4143b7437d301ac600ec2258a22f2"
+    },
+    {
+      "name": "tts-metrics.json",
+      "content_type": "application/json",
+      "bytes": 870,
+      "sha256": "49f7d4b7991aaebab13043971430d7f3a8dfa6d2aca1c71989f35781ce100eff"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 13733,
+      "sha256": "a3d8be960a16c08a1c28a79588f64eb47981994efcc6f36ad41ec001535de81c"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 4553066,
+      "sha256": "dbb5764ff8903022a78046bdd964d077baf61936acdaa7c24f706c841c2fd7be"
+    },
+    {
+      "name": "voice-report.json",
+      "content_type": "application/json",
+      "bytes": 5104,
+      "sha256": "19167c28329f9002d51fec13d114e6f6fc323b101fc39e865234207336444c51"
+    }
+  ],
+  "submit_started_at": "2026-10-24T02:18:26.987735+00:00",
+  "submitted_at": "2026-10-24T10:18:27+0800",
+  "completed_at": "2026-10-24T10:21:07+0800",
+  "created_at": "2026-10-24T10:18:26+0800",
+  "updated_at": "2026-10-24T10:21:07+0800",
+  "heartbeat_at": 1792808467.038858,
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-24T02:18:26.964463+00:00",
+    "submit_seconds": 0.018,
+    "poll_seconds": 160.272,
+    "poll_count": 33,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-24T02:21:06.609+00:00",
+    "completion_observed_at": "2026-10-24T02:21:07.288346+00:00",
+    "download_seconds": 0.06,
+    "artifact_list_seconds": 0.002,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.008,
+        "reused": false,
+        "bytes": 844
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 55492
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 2762
+      },
+      {
+        "name": "card-editorial.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 7147
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 7285
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 2762
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 7227
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.05,
+        "reused": false,
+        "bytes": 13504466
+      },
+      {
+        "name": "creative-form-plan.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 4972
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 966
+      },
+      {
+        "name": "fast-card-plan.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 3609
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 424
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 3421
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 53069
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 1630
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 330
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 17753
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 955
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 5304
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 2047
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 1624
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 744
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 6112
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 5641
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 4941
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 870
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 13733
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.017,
+        "reused": false,
+        "bytes": 4553066
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 5104
+      }
+    ],
+    "process_seconds": 160.397
+  }
+}

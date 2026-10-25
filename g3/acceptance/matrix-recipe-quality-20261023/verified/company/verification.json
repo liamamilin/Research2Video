@@ -1,0 +1,80 @@
+{
+  "case": "company",
+  "technical_status": "PASS",
+  "manual_content_status": "PASS",
+  "render_id": "036881b69af844e78cc8fe36d753affc",
+  "job_id": "260d5805-4d54-43ad-a065-906920aa3b9c",
+  "script_id": "5a35f4c46d924cdaa0f14cd387134e59",
+  "version": 3,
+  "title": "吉瓦级虚拟电厂，调的是用电",
+  "mode": "fast",
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/036881b69af844e78cc8fe36d753affc/video.mp4",
+  "content_seconds": 128.267,
+  "duration_seconds": 137.266667,
+  "scenes": 7,
+  "caption_mode": "short forced-aligned",
+  "caption_cues": 41,
+  "max_caption_characters": 37,
+  "max_caption_seconds": 5.25,
+  "narration_exact": true,
+  "cue_order_and_coverage": true,
+  "full_decode": true,
+  "artifact_hashes": 29,
+  "source_cards": [
+    {
+      "title": "How Google is building a gigawatt-scale…",
+      "url": "https://www.fastcompany.com/91627781/how-google-is-building-a-gigawatt-scale-power-plant-without-building-a-power-plant",
+      "date": "2026-10-22"
+    }
+  ],
+  "decoded_frames": [
+    {
+      "scene": "card_1",
+      "seconds": 16.5328,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/company/frames/scene-01.jpg"
+    },
+    {
+      "scene": "card_2",
+      "seconds": 33.5574,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/company/frames/scene-02.jpg"
+    },
+    {
+      "scene": "card_3",
+      "seconds": 49.0612,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/company/frames/scene-03.jpg"
+    },
+    {
+      "scene": "card_4",
+      "seconds": 65.1832,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/company/frames/scene-04.jpg"
+    },
+    {
+      "scene": "card_5",
+      "seconds": 85.1424,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/company/frames/scene-05.jpg"
+    },
+    {
+      "scene": "card_6",
+      "seconds": 111.3382,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/company/frames/scene-06.jpg"
+    },
+    {
+      "scene": "card_7",
+      "seconds": 127.1824,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/company/frames/scene-07.jpg"
+    }
+  ],
+  "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/company/contact.jpg",
+  "presentation": {
+    "preset": "information_cards"
+  },
+  "notes": [],
+  "manual_full_audio_listening": false,
+  "manual_review_method": "read final v3 against opened Fast Company VPP article; inspect all seven actual decoded scene frames",
+  "manual_notes": [
+    "需求调节与新建发电容量在画面中明确分开，吉瓦级合同不被当成随时可兑现的发电机组。",
+    "100兆瓦、十分之一和十倍均放在协议规模语境下，没有沿用具体容量未披露的错误。",
+    "41条独立短字幕，原文、时序和全片解码通过；首卡保留Fast Company归属。",
+    "未逐秒完整人工听音。"
+  ]
+}

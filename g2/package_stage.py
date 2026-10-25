@@ -11,6 +11,7 @@ import json
 import math
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
 from g2.package_kit import PackageConfigError, sound_asset, validate_package
@@ -62,91 +63,34 @@ def active_db(samples, rate: int) -> float:
     return float(10 * math.log10(max(float(np.mean(energy[loud])), 1e-12)))
 
 
-def probe(runner, ffprobe, path: Path, *, frames: bool = False) -> dict:
-    argv = [ffprobe, "-v", "error", *(["-count_frames"] if frames else []), "-show_streams", "-show_format",
+def probe(runner, ffprobe, path: Path, *, frames: bool = False, frame_formats: bool = False) -> dict:
+    # Counting and inspecting frames share one decode pass. Keep the independent
+    # ffmpeg -xerror decode gate in verify_package: ffprobe alone is not that gate.
+    inspection = (["-show_frames", "-show_entries",
+                   "stream:format:frame=media_type,stream_index,width,height,pix_fmt,sample_rate,channels"]
+                  if frame_formats else [])
+    argv = [ffprobe, "-v", "error", *(["-count_frames"] if frames or frame_formats else []), "-show_streams", "-show_format", *inspection,
             "-of", "json", path]
     info = json.loads(runner("probe", argv))
     streams = {s["codec_type"]: s for s in info["streams"]}
     if "video" not in streams or "audio" not in streams:
         raise PackageFault("PACKAGE_FORMAT_MISMATCH", f"{path.name} 缺少视频或音频流")
-    return {"video": streams["video"], "audio": streams["audio"], "format": info["format"]}
+    result = {"video": streams["video"], "audio": streams["audio"], "format": info["format"]}
+    if frame_formats:
+        formats = {}
+        for kind, fields in (("video", ("width", "height", "pix_fmt")), ("audio", ("sample_rate", "channels"))):
+            selected = [frame for frame in info.get("frames", [])
+                        if frame.get("media_type") == kind and frame.get("stream_index") == streams[kind]["index"]]
+            if len(selected) != int(streams[kind].get("nb_read_frames", -1)):
+                raise PackageFault("PACKAGE_FORMAT_MISMATCH", f"{kind} 逐帧检查数量与解码计数不一致")
+            formats[kind] = {tuple(frame.get(field) for field in fields) for frame in selected}
+        result["frame_formats"] = formats
+    return result
 
 
 # ---------------------------------------------------------------- templates
 
-def _luminance(color: str) -> float:
-    r, g, b = (int(color[i:i + 2], 16) / 255 for i in (1, 3, 5))
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-
-def _fit_font(text: str, size: int, max_width: int, minimum: int = 28):
-    from PIL import ImageFont
-    while True:
-        font = ImageFont.truetype(str(FONT), size, index=0)
-        if font.getlength(text) <= max_width or size <= minimum:
-            return font
-        size -= 2
-
-
-def _text_layer(text: str, font, color: str):
-    from PIL import Image, ImageDraw
-    box = font.getbbox(text)
-    layer = Image.new("RGBA", (box[2] - min(box[0], 0) + 8, box[3] + 12), (0, 0, 0, 0))
-    ImageDraw.Draw(layer).text((max(-box[0], 0), 0), text, font=font, fill=color)
-    return layer
-
-
-def _ease(x: float) -> float:
-    x = min(1.0, max(0.0, x))
-    return 1 - (1 - x) ** 3
-
-
-def _paste(canvas, layer, center_x: int, y: int, progress: float, rise: int = 28):
-    from PIL import Image
-    alpha = layer.getchannel("A").point(lambda v: int(v * progress))
-    faded = layer.copy()
-    faded.putalpha(alpha)
-    canvas.alpha_composite(faded, (int(center_x - layer.width / 2), int(y + (1 - progress) * rise)))
-
-
-def render_clip_frames(kind: str, cfg: dict, accent: str, frames: int, out_dir: Path) -> None:
-    """Draw the registered template ('stinger' or 'end_card') frame by frame as PNG files."""
-    from PIL import Image, ImageDraw
-    if not FONT.is_file():
-        raise PackageFault("PACKAGE_RENDER_FAILED", "缺少中文字体 Hiragino Sans GB")
-    out_dir.mkdir(parents=True, exist_ok=True)
-    on_accent = "#ffffff" if _luminance(accent) < 0.62 else "#101827"
-    if kind == "stinger":
-        title = _text_layer(cfg["title"], _fit_font(cfg["title"], 170, 1600), on_accent)
-        sub = _text_layer(cfg["subtitle"], _fit_font(cfg["subtitle"], 64, 1500), on_accent) if cfg.get("subtitle") else None
-        for i in range(frames):
-            t = i / FPS
-            canvas = Image.new("RGBA", (WIDTH, HEIGHT), accent)
-            draw = ImageDraw.Draw(canvas)
-            line_w = int(560 * _ease(t / 0.45))
-            draw.rectangle((WIDTH // 2 - line_w // 2, 632, WIDTH // 2 + line_w // 2, 640), fill=on_accent)
-            _paste(canvas, title, WIDTH // 2, 380, _ease(t / 0.35))
-            if sub:
-                _paste(canvas, sub, WIDTH // 2, 680, _ease((t - 0.2) / 0.35))
-            canvas.convert("RGB").save(out_dir / f"f{i:04d}.png")
-    elif kind == "end_card":
-        ink, soft = "#101827", "#475467"
-        title = _text_layer(cfg["title"], _fit_font(cfg["title"], 150, 1400), ink)
-        lines = [_text_layer(line, _fit_font(line, 52, 1500), soft) for line in cfg.get("lines", [])]
-        for i in range(frames):
-            t = i / FPS
-            canvas = Image.new("RGBA", (WIDTH, HEIGHT), "#f6f8fb")
-            draw = ImageDraw.Draw(canvas)
-            draw.rectangle((0, 0, 28, HEIGHT), fill=accent)
-            span = int(480 * _ease(t / 0.5))
-            top = 330 if lines else 400
-            draw.rectangle((WIDTH // 2 - span // 2, top + 235, WIDTH // 2 + span // 2, top + 243), fill=accent)
-            _paste(canvas, title, WIDTH // 2, top, _ease(t / 0.35))
-            for n, layer in enumerate(lines):
-                _paste(canvas, layer, WIDTH // 2, top + 290 + n * 86, _ease((t - 0.2 - 0.12 * n) / 0.35))
-            canvas.convert("RGB").save(out_dir / f"f{i:04d}.png")
-    else:
-        raise PackageFault("PACKAGE_CONFIG_INVALID", f"未注册的模板：{kind}")
+from g2.packaging_library.templates import render_clip_frames
 
 
 def encode_clip(runner, ffmpeg, frames_dir: Path, out: Path) -> None:
@@ -193,19 +137,12 @@ def cue_track(runner, ffmpeg, work: Path, name: str | None, frames: int, rate: i
 
 # ---------------------------------------------------------------- checks
 
-def _frame_set(runner, ffprobe, path: Path, stream: str, fields: str) -> set:
-    out = runner("probe-frames", [ffprobe, "-v", "error", "-select_streams", stream, "-show_entries",
-                                  f"frame={fields}", "-of", "json", path])
-    names = fields.split(",")
-    return {tuple(frame.get(name) for name in names) for frame in json.loads(out).get("frames", [])}
-
-
 def verify_package(runner, ffmpeg, ffprobe, packaged: Path, *, content_probe: dict, intro_frames: int,
                    content_frames: int, outro_frames: int, voice_wav: Path, work: Path,
-                   cue_names: dict | None = None) -> dict:
+                   cue_names: dict | None = None, source_frames: int = 0) -> dict:
     import numpy as np
     import soundfile as sf
-    expected_frames = intro_frames + content_frames + outro_frames
+    expected_frames = intro_frames + content_frames + source_frames + outro_frames
     expected_seconds = expected_frames / FPS
     checks: dict = {}
     try:
@@ -214,7 +151,7 @@ def verify_package(runner, ffmpeg, ffprobe, packaged: Path, *, content_probe: di
     except Exception as exc:
         raise PackageFault("PACKAGE_DECODE_FAILED", f"打包后的成片无法完整解码：{str(exc)[-200:]}") from exc
     checks["full_decode"] = "PASS"
-    info = probe(runner, ffprobe, packaged, frames=True)
+    info = probe(runner, ffprobe, packaged, frames=True, frame_formats=True)
     video, audio = info["video"], info["audio"]
     content_video, content_audio = content_probe["video"], content_probe["audio"]
     want = (content_video["width"], content_video["height"], content_video["avg_frame_rate"],
@@ -222,8 +159,8 @@ def verify_package(runner, ffmpeg, ffprobe, packaged: Path, *, content_probe: di
     got = (video["width"], video["height"], video["avg_frame_rate"], audio["sample_rate"], int(audio["channels"]))
     if want != got or (video["codec_name"], audio["codec_name"]) != ("h264", "aac"):
         raise PackageFault("PACKAGE_FORMAT_MISMATCH", f"打包成片 {got} 与内容视频 {want} 的尺寸/帧率/采样率/声道不一致")
-    sizes = _frame_set(runner, ffprobe, packaged, "v:0", "width,height,pix_fmt")
-    audio_formats = _frame_set(runner, ffprobe, packaged, "a:0", "sample_rate,channels")
+    sizes = info["frame_formats"]["video"]
+    audio_formats = info["frame_formats"]["audio"]
     if len(sizes) != 1 or len(audio_formats) != 1:
         raise PackageFault("PACKAGE_FORMAT_MISMATCH", f"成片中途格式变化：视频 {sorted(sizes)}，音频 {sorted(audio_formats)}")
     checks["format"] = {"width": got[0], "height": got[1], "fps": got[2], "sample_rate": got[3], "channels": got[4],
@@ -256,7 +193,7 @@ def verify_package(runner, ffmpeg, ffprobe, packaged: Path, *, content_probe: di
                                "rms": rms}
     speech_db = active_db(segment, voice_rate)
     regions = {"intro": decoded[:round(intro_frames * voice_rate / FPS)],
-               "outro": decoded[round((intro_frames + content_frames) * voice_rate / FPS):] if outro_frames else decoded[:0]}
+               "outro": decoded[round((intro_frames + content_frames + source_frames) * voice_rate / FPS):] if outro_frames else decoded[:0]}
     loudness = {"speech_active_db": round(speech_db, 2), "min_margin_db": SEAM_MIN_MARGIN_DB, "regions": {}}
     for part, samples in regions.items():
         if not (cue_names or {}).get(part):
@@ -303,12 +240,13 @@ def shift_chapters(chapters: dict, offset_ms: int, total_seconds: float) -> dict
 # ---------------------------------------------------------------- orchestration
 
 def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path, voice_wav: Path, artifacts: Path,
-                  work: Path | None = None) -> dict:
+                  work: Path | None = None, packaging_record: dict | None = None,
+                  source_in_content: bool = False) -> dict:
     """Render clips, concatenate, verify, and write the package artifacts. Returns the package record."""
     import numpy as np
     import soundfile as sf
     try:
-        config = validate_package(config)
+        config = validate_package(config, require_clips=packaging_record is None)
     except PackageConfigError as exc:
         raise PackageFault("PACKAGE_CONFIG_INVALID", str(exc)) from exc
     if not content_video.is_file():
@@ -337,6 +275,9 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
     for part, kind in (("intro", "stinger"), ("outro", "end_card")):
         if part in config:
             parts.append((part, config[part], frames_for(config[part]["seconds"])))
+    source_card = (packaging_record or {}).get("source_card")
+    if source_card and not source_in_content:
+        parts.append(("source_card", source_card, frames_for(source_card["seconds"])))
     clips: dict[str, dict] = {}
     for part, cfg, frames in parts:
         frame_dir = work / f"{part}-frames"
@@ -355,12 +296,15 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
 
     intro_frames = clips.get("intro", {}).get("frames", 0)
     outro_frames = clips.get("outro", {}).get("frames", 0)
+    source_frames = clips.get("source_card", {}).get("frames", 0)
     layout = "mono" if channels == 1 else "stereo"
     fmt = f"aformat=sample_fmts=fltp:sample_rates={rate}:channel_layouts={layout}"
     ordered: list[tuple[str, int, Path, Path | None]] = []
     if "intro" in clips:
         ordered.append(("intro", intro_frames, clips["intro"]["video"], clips["intro"]["audio"]))
     ordered.append(("content", content_frames, content_video, None))
+    if "source_card" in clips:
+        ordered.append(("source_card", source_frames, clips["source_card"]["video"], clips["source_card"]["audio"]))
     if "outro" in clips:
         ordered.append(("outro", outro_frames, clips["outro"]["video"], clips["outro"]["audio"]))
     input_args: list = []
@@ -392,9 +336,9 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
     cue_names = {part: clips[part]["sound"].get("sound") for part in clips}
     checks = verify_package(runner, ffmpeg, ffprobe, packaged, content_probe=content, intro_frames=intro_frames,
                             content_frames=content_frames, outro_frames=outro_frames, voice_wav=voice_wav,
-                            work=work, cue_names=cue_names)
+                            work=work, cue_names=cue_names, source_frames=source_frames)
     offset_ms = round(intro_frames * 1000 / FPS)
-    total_seconds = (intro_frames + content_frames + outro_frames) / FPS
+    total_seconds = (intro_frames + content_frames + source_frames + outro_frames) / FPS
     captions = artifacts / "captions.srt"
     if captions.is_file():
         (out_dir / "captions.srt").write_text(shift_srt(captions.read_text(encoding="utf-8"), offset_ms), encoding="utf-8")
@@ -403,21 +347,26 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
         (out_dir / "chapters.json").write_text(json.dumps(
             shift_chapters(json.loads(chapters.read_text(encoding="utf-8")), offset_ms, total_seconds),
             ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    contact_sheet(runner, ffmpeg, packaged, out_dir / "contact-sheet.jpg", intro_frames, content_frames, outro_frames, work)
+    contact_sheet(runner, ffmpeg, packaged, out_dir / "contact-sheet.jpg", intro_frames, content_frames, outro_frames, work, source_frames)
     record = {"status": "PASS", "config": config, "fps": FPS,
               "intro": {"frames": intro_frames, "seconds": intro_frames / FPS, "offset_ms": 0,
                         "sound": clips.get("intro", {}).get("sound")},
               "content": {"frames": content_frames, "seconds": content_frames / FPS, "offset_ms": offset_ms,
                           "source": content_video.name},
               "outro": {"frames": outro_frames, "seconds": outro_frames / FPS,
-                        "offset_ms": offset_ms + round(content_frames * 1000 / FPS),
+                        "offset_ms": offset_ms + round((content_frames + source_frames) * 1000 / FPS),
                         "sound": clips.get("outro", {}).get("sound")},
-              "total_frames": intro_frames + content_frames + outro_frames, "total_seconds": total_seconds,
+              "total_frames": intro_frames + content_frames + source_frames + outro_frames, "total_seconds": total_seconds,
               "offset_ms": offset_ms, "checks": checks,
               "files": {"video": "package/video.mp4", "captions": "package/captions.srt" if captions.is_file() else None,
                         "chapters": "package/chapters.json" if chapters.is_file() else None,
                         "contact_sheet": "package/contact-sheet.jpg"},
               "timelines": "captions.srt/chapters.json 保持内容时间线；package/ 下的同名文件已加上片头时长"}
+    if packaging_record:
+        record["packaging"] = packaging_record
+        record["source_card"] = {"frames": source_frames, "seconds": source_frames / FPS,
+                                 "offset_ms": offset_ms + round(content_frames * 1000 / FPS),
+                                 "state": "in_content" if source_in_content else packaging_record["source_card_state"]}
     (out_dir / "package.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (out_dir / "package-qa.json").write_text(json.dumps({"status": "PASS", "checks": checks}, ensure_ascii=False, indent=2) + "\n",
                                              encoding="utf-8")
@@ -428,28 +377,43 @@ def build_package(runner, ffmpeg, ffprobe, *, config: dict, content_video: Path,
     return record
 
 
-def contact_sheet(runner, ffmpeg, packaged: Path, target: Path, intro: int, content: int, outro: int, work: Path) -> None:
+def contact_sheet(runner, ffmpeg, packaged: Path, target: Path, intro: int, content: int, outro: int, work: Path,
+                  source_frames: int = 0) -> None:
     from PIL import Image, ImageDraw, ImageFont
-    total = intro + content + outro
+    total = intro + content + source_frames + outro
     picks = []
     if intro:
         picks += [("片头 开始", 0), ("片头 中段", intro // 2), ("片头 末帧", intro - 1)]
     picks += [("内容 首帧", intro), ("内容 末帧", intro + content - 1)]
+    if source_frames:
+        picks += [("来源卡", intro + content + source_frames // 2)]
     if outro:
-        picks += [("片尾 首帧", intro + content), ("片尾 中段", intro + content + outro // 2), ("片尾 末帧", total - 1)]
+        picks += [("片尾 首帧", intro + content + source_frames), ("片尾 中段", intro + content + source_frames + outro // 2), ("片尾 末帧", total - 1)]
     cell_w, cell_h = 640, 360
     cols = 3
     rows = math.ceil(len(picks) / cols)
     sheet = Image.new("RGB", (cell_w * cols, (cell_h + 30) * rows), "#101827")
     font = ImageFont.truetype(str(FONT), 20)
     draw = ImageDraw.Draw(sheet)
+    # A dedicated directory prevents stale frames from a previous attempt from
+    # satisfying the count check. Repeated picks still occupy their original cells.
+    frame_dir = Path(tempfile.mkdtemp(prefix="sheet-", dir=work))
+    targets = sorted({frame for _, frame in picks})
+    expression = "+".join(f"eq(n\\,{frame})" for frame in targets)
+    runner("package-sheet", [ffmpeg, "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", packaged,
+                             "-vf", f"select={expression}", "-vsync", "0", "-frames:v", str(len(targets)),
+                             frame_dir / "frame-%03d.png"])
+    images = sorted(frame_dir.glob("frame-*.png"))
+    if len(images) != len(targets):
+        raise PackageFault("PACKAGE_PREVIEW_MISMATCH", f"预览应有 {len(targets)} 帧，实际 {len(images)} 帧")
+    frame_map = dict(zip(targets, images))
     for n, (label, frame) in enumerate(picks):
-        png = work / f"sheet-{n}.png"
-        runner("package-sheet", [ffmpeg, "-nostdin", "-hide_banner", "-v", "error", "-y", "-i", packaged,
-                                 "-vf", f"select=eq(n\\,{frame})", "-vsync", "0", "-frames:v", "1", png])
-        image = Image.open(png).convert("RGB").resize((cell_w, cell_h))
+        with Image.open(frame_map[frame]) as png:
+            image = png.convert("RGB").resize((cell_w, cell_h))
         x, y = (n % cols) * cell_w, (n // cols) * (cell_h + 30)
         sheet.paste(image, (x, y + 30))
         draw.text((x + 10, y + 4), f"{label} · 帧 {frame}", font=font, fill="#F3F6FC")
-        png.unlink()
     sheet.save(target, quality=90)
+    for png in images:
+        png.unlink()
+    frame_dir.rmdir()

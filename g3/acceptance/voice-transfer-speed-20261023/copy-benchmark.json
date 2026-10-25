@@ -1,0 +1,16 @@
+[
+  {
+    "mode": "previous-sequential-new-clients",
+    "seconds": 0.315,
+    "files": 25,
+    "bytes": 41031235,
+    "all_size_sha_verified": true
+  },
+  {
+    "mode": "pooled-parallel-4",
+    "seconds": 0.107,
+    "files": 25,
+    "bytes": 41031235,
+    "all_size_sha_verified": true
+  }
+]

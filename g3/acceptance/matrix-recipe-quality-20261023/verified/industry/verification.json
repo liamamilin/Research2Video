@@ -1,0 +1,63 @@
+{
+  "case": "industry",
+  "technical_status": "PASS",
+  "manual_content_status": "PASS",
+  "render_id": "95dd730a31dd4a21b42e3a22ff344ead",
+  "job_id": "1e62eed0-5ba5-44a6-b44f-de03c50daaec",
+  "script_id": "9f25f92c1eb54ab195abdbda84e29d37",
+  "version": 2,
+  "title": "新工厂之外，美国军工高纯铝缺在哪",
+  "mode": "fast",
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/95dd730a31dd4a21b42e3a22ff344ead/video.mp4",
+  "content_seconds": 104.033,
+  "duration_seconds": 108.533333,
+  "scenes": 5,
+  "caption_mode": "short forced-aligned",
+  "caption_cues": 33,
+  "max_caption_characters": 42,
+  "max_caption_seconds": 4.24,
+  "narration_exact": true,
+  "cue_order_and_coverage": true,
+  "full_decode": true,
+  "artifact_hashes": 29,
+  "source_cards": [],
+  "decoded_frames": [
+    {
+      "scene": "card_1",
+      "seconds": 22.3336,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-01.jpg"
+    },
+    {
+      "scene": "card_2",
+      "seconds": 45.8484,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-02.jpg"
+    },
+    {
+      "scene": "card_3",
+      "seconds": 69.357,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-03.jpg"
+    },
+    {
+      "scene": "card_4",
+      "seconds": 91.67960000000001,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-04.jpg"
+    },
+    {
+      "scene": "card_5",
+      "seconds": 103.6418,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/frames/scene-05.jpg"
+    }
+  ],
+  "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/industry/contact.jpg",
+  "presentation": {
+    "preset": "information_cards"
+  },
+  "notes": [],
+  "manual_review_method": "read current manuscript against opened publisher sources; inspect one real decoded frame per scene at 80% of scene duration",
+  "manual_full_audio_listening": false,
+  "manual_notes": [
+    "逐页抽查5张实际解码画面；首轮拆分否定与能力限定的问题已在通用候选生成和校验中修复，并重新出片。",
+    "军工专用高纯铝范围完整呈现；潜在断供风险与已经断供分开，SIA建议与落地政策分开；Manufacturing Dive来源标签保留。",
+    "未逐秒人工听完整音轨；同步依据为真实音频强制对齐及字幕覆盖/时序校验。"
+  ]
+}

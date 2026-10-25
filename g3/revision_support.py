@@ -6,14 +6,20 @@ from g2.scene_fields import editable_fields,apply_changes
 from g3.store import StoreError
 
 
-def source(store,jid):
+def source(store,jid, *, allow_legacy=False):
     parent=store.get_job(jid)
     if parent['status']!='COMPLETED':raise StoreError('REVISION_NOT_ALLOWED','请先等待本任务完成。')
-    if (parent.get('resolved_video_form') or parent.get('video_form')) not in {'process_diagram','information_motion'}:
+    if not allow_legacy and (parent.get('resolved_video_form') or parent.get('video_form')) not in {'process_diagram','information_motion','kinetic_typography','image_slideshow','chat_dialogue','information_cards','object_showcase','dynamic_collage'}:
         raise StoreError('REVISION_FORM_UNSUPPORTED','场景与配音修订适用于流程图解和简洁信息动效。')
     paths={}
     for name in ['video-ir.json','video.mp4','narration.json','manifest.json']:
         paths[name]=store.artifact_path(jid,name)[0]
+    if allow_legacy:
+        # Music revisions consume this original rather than the already mixed video.
+        try:
+            paths['unmixed.mp4']=store.artifact_path(jid,'unmixed.mp4')[0]
+        except StoreError as exc:
+            if exc.code!='ARTIFACT_NOT_FOUND':raise
     attempt=store.job_root/jid/'attempts'/str(parent['attempt_count']);base=attempt.resolve(strict=True)
     manifest=json.loads(paths['manifest.json'].read_text())
     project=Path(__file__).resolve().parents[1]
@@ -47,6 +53,8 @@ def create_revision(store,jid,request,kind):
              'operation_type':kind,'parent_job_id':jid,'parent_attempt_no':parent['attempt_count'],
              'parent_voice_id':parent['voice_id'],'voice_id':parent['voice_id'],'video_speed':parent.get('video_speed',1)}
     if kind=='visual_revision':
+        if settings['video_form'] in {'kinetic_typography','image_slideshow','chat_dialogue','information_cards','object_showcase','dynamic_collage'}:
+            raise StoreError('REVISION_FORM_UNSUPPORTED','此形式请通过讲稿修订调整画面文字；声音与速度可以单独修订。')
         selected=next((s for s in ir['scenes'] if s['id']==request['scene_id']),None)
         if selected is None:raise StoreError('SCENE_NOT_FOUND','场景不存在。')
         changes=request.get('changes',{})

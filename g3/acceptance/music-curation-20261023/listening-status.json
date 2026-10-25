@@ -1,0 +1,67 @@
+[
+  {
+    "id": "ambient_pad",
+    "name": "通用 · 轻柔铺底",
+    "review": {
+      "asset_sha256": "60620efbd4de8cb4eb1e489be18e8d769705ef8d41797db3a0058e7c0df2450e",
+      "listened": true,
+      "no_unexpected_vocals": false,
+      "natural_loop": true,
+      "narration_friendly": false,
+      "note": "1. 通用 · 轻柔铺底 有点太吵了, 声音. 2. 混音试听 衔接不自然,  混音里面背景音几乎听不见",
+      "status": "needs_work",
+      "basis": "manual_listening",
+      "checked_at": "2026-10-23T11:42:28.391136+00:00"
+    }
+  },
+  {
+    "id": "layered_space",
+    "name": "快讯 · 渐进音景",
+    "review": {
+      "status": "pending"
+    }
+  },
+  {
+    "id": "pulse_loop",
+    "name": "备选 · 轻节奏循环",
+    "review": {
+      "status": "pending"
+    }
+  },
+  {
+    "id": "20b28e98-94d5-445f-a880-e350aefc0fea",
+    "name": "教程 · 温暖钢琴",
+    "review": {
+      "asset_sha256": "742829e592cf73cb8be49232055e63ed2090f0ceb1295e4f1bc9c0e72d9df30e",
+      "listened": true,
+      "no_unexpected_vocals": false,
+      "natural_loop": false,
+      "narration_friendly": false,
+      "note": "混音里面背景音几乎听不见",
+      "status": "needs_work",
+      "basis": "manual_listening",
+      "checked_at": "2026-10-23T11:42:48.309770+00:00"
+    }
+  },
+  {
+    "id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+    "name": "快讯 · 轻快电子",
+    "review": {
+      "status": "pending"
+    }
+  },
+  {
+    "id": "ca256ab4-1ac9-46c8-b0be-c814f81a55f6",
+    "name": "导入参考 · 原创和声",
+    "review": {
+      "status": "pending"
+    }
+  },
+  {
+    "id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+    "name": "科普 · 舒缓氛围",
+    "review": {
+      "status": "pending"
+    }
+  }
+]

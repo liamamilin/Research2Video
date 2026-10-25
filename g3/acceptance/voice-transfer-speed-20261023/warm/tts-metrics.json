@@ -1,0 +1,34 @@
+{
+  "provider": "local_voxcpm_mlx",
+  "model": "VoxCPM2-8bit",
+  "voice": "voxcpm_anchor",
+  "sample_rate": 24000,
+  "duration_seconds": 203.9,
+  "generation_seconds": 1.383,
+  "cloud_requests": 0,
+  "cloud_api_cost": 0,
+  "local_compute_cost": "not measured",
+  "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f",
+  "voice_file_sha256": null,
+  "cache": {
+    "enabled": true,
+    "chapter_hits": 7,
+    "chapter_misses": 0,
+    "segment_hits": 31,
+    "segment_misses": 0,
+    "entry_keys": [
+      "47dffd92369b65b63af405bdf87ca06e1b053dfcc98cd022b5b8740abd71ccab",
+      "e9c7d7a44d3f1e7ac29c818740b539e625a08ce54214aedf5cf09fd30792922e",
+      "b4fcf06ec3da23182fc722c1015b28684d711636de359432010912ec0244e489",
+      "bf0c4abf0eb2bc90b13fd904d70509ad4e478dbc9074f18acf5bafeeb0adff5c",
+      "30bbcef814522086304b4f98a9bf8ca152bc176eda7b190be89678183357fdad",
+      "4645c385dd588e4e91a1a2cdb5b9a0604ae8b16e1e9b24000ffa9de2664a76cb",
+      "f9a05ff5a447dc6bd3a992f325ea3c2abccfb65fd0644583e2f06ad853f8e98d"
+    ],
+    "write_errors": [],
+    "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+    "fingerprint_seconds": 1.315,
+    "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+  },
+  "audio_sha256": "2e0f9970b1153f6e8f32cc52a8ec7ad3c40d2f247d479c2b8fd72b21500617b0"
+}

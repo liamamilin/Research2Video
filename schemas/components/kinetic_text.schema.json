@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "kinetic_text trusted props",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "text"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "layout": {
+      "enum": [
+        "focus",
+        "comparison",
+        "steps",
+        "notes"
+      ]
+    },
+    "points": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string"
+          },
+          "segment_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "layout"
+        ]
+      },
+      "then": {
+        "required": [
+          "points"
+        ]
+      },
+      "else": {
+        "properties": {
+          "title": {
+            "maxLength": 80
+          },
+          "text": {
+            "maxLength": 80
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "layout"
+        ],
+        "properties": {
+          "layout": {
+            "const": "comparison"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "points": {
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      }
+    }
+  ]
+}

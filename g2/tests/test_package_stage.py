@@ -82,6 +82,25 @@ def test_intro_only_without_sound_is_silent_and_skips_loudness(content, tmp_path
     assert record["checks"]["duration"]["frames"] == 90
 
 
+def test_library_source_card_is_an_independent_clip_without_stealing_content(content, tmp_path):
+    from g2.packaging_library import resolve
+
+    selection = resolve({"intro": {"enabled": False}, "outro": {"enabled": False},
+                         "source_card": {"seconds": .5}, "sound": {"enabled": False}},
+                        sources=[{"title": "验收来源", "url": "https://example.com/a", "date": "2026-10-23"}])
+    artifacts = tmp_path / "artifacts"
+    artifacts.mkdir()
+    shutil.copy(content["root"] / "captions.srt", artifacts)
+    shutil.copy(content["root"] / "chapters.json", artifacts)
+    record = ps.build_package(ps.default_runner, FFMPEG, FFPROBE, config=selection["package"],
+                              content_video=content["video"], voice_wav=content["wav"], artifacts=artifacts,
+                              packaging_record=selection)
+    assert record["content"]["frames"] == 75 and record["source_card"]["frames"] == 15
+    assert record["intro"]["frames"] == record["outro"]["frames"] == 0
+    assert record["total_frames"] == 90 and record["checks"]["content_audio"]["correlation"] >= .98
+    assert (artifacts / "package/captions.srt").read_text() == (content["root"] / "captions.srt").read_text()
+
+
 def test_content_correlation_is_rechecked_after_the_intro_offset(content, tmp_path):
     _, out = package(content, tmp_path)
     work = tmp_path / "w"
@@ -240,7 +259,7 @@ def test_badge_is_optional_and_normalised():
 
 
 def test_renderer_label_comes_from_the_package_only_when_there_is_one():
-    source = (ROOT / "g1/renderer/src/Root.tsx").read_text(encoding="utf-8")
+    source = (ROOT / "g1/renderer/src/Packaging.tsx").read_text(encoding="utf-8")
     assert "badge ? badge.text : <>AUTOVIDEO" in source  # no badge prop keeps the product label unchanged
     run = (ROOT / "g2/run_g2.py").read_text(encoding="utf-8")
     assert 'props["badge"] = {"text": package.get("badge", ""), "color": package["accent"]}' in run

@@ -32,7 +32,7 @@ def pipe(root):
     return SimpleNamespace(FIXTURE_ROOT=root,ARTIFACTS=artifacts,FFMPEG=ROOT/'g0/darwin_arm64/ffmpeg',PROJECT=ROOT,SAMPLE_RATE=24000,FPS=30,_run_fixed_command=run,digest=lambda p:hashlib.sha256(p.read_bytes()).hexdigest(),write_json=lambda path,v:path.write_text(json.dumps(v)))
 
 
-@pytest.mark.parametrize('speed',[.5,1,1.5,2])
+@pytest.mark.parametrize('speed',[.5,1,1.25,1.5,2])
 def test_audio_speed_preserves_pitch_and_sync_and_can_restore(tmp_path,speed):
     ir=ir_for(tmp_path);p=pipe(tmp_path);original=deepcopy(ir)
     original_audio=(tmp_path/'assets/communications_noise.wav').read_bytes()
@@ -93,6 +93,19 @@ def test_versioned_scene_and_media_requests_preserve_parent_and_options(tmp_path
         assert c.get('/api/jobs/'+media.json()['job_id']).json()['video_speed']==2
         assert c.get('/api/jobs/'+jid).json()==parent
         assert len(c.get('/api/jobs/'+jid+'/revisions').json()['items'])==2
+
+
+def test_quarter_speed_is_supported_for_new_jobs_and_media_revisions(tmp_path):
+    with TestClient(create_app(Settings(data_dir=tmp_path/'data'),start_worker=False,preflight=READY)) as c:
+        assert 1.25 in c.get('/api/voices').json()['speeds']
+        parent=complete_parent(c)
+        revised=c.post('/api/jobs/'+parent+'/media-revisions',json={'video_speed':1.25})
+        assert revised.status_code==202,revised.text
+        assert c.get('/api/jobs/'+revised.json()['job_id']).json()['video_speed']==1.25
+        assert c.get('/api/jobs/'+parent).json()['video_speed']==1.5
+        created=c.post('/api/jobs',json={'source_text':SOURCE,'video_speed':1.25})
+        assert created.status_code==202,created.text
+        assert c.get('/api/jobs/'+created.json()['job_id']).json()['video_speed']==1.25
 
 
 def test_invalid_scope_rate_voice_and_corrupt_parent_rejected(tmp_path):

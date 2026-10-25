@@ -1,0 +1,21 @@
+{
+  "status": "AUTHORIZED_AND_SUBMITTED",
+  "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+  "approved_version": 1,
+  "title": "续航手机最抢眼，五件新品变化速览",
+  "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+  "same_text_as_previous": true,
+  "sections": 7,
+  "paragraphs": 12,
+  "spoken_characters": 1215,
+  "voice_id": "voxcpm_anchor",
+  "video_form": "information_motion",
+  "external_service": "https://amr-link.open-design.ai/v1",
+  "model": "deepseek-v4.1-flash",
+  "previous_job_id": "f92604ca-1750-42c5-b664-7015da1e13e3",
+  "previous_render_id": "4cd17fc068594962a721fd4cff6a3af4",
+  "prepared_at": "2026-10-23T14:43:19.810304+08:00",
+  "automatic_review_rejection": "User authorized rerun and timing comparison; reviewer requires explicit authorization to resend this specific manuscript to the configured external model.",
+  "user_authorization": "授权本篇稿件，正常重跑并比较总耗时",
+  "render_id": "731409486486403cb6ca46f23f004b64"
+}

@@ -1,0 +1,137 @@
+[
+  {
+    "repository": "autovideo",
+    "path": "g2/production_plan.py",
+    "sha256": "17aa512fae63e8758ccf0cf20d88adecc3aff23f98072d6b183243cbd1e5f034"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/fast_cards.py",
+    "sha256": "b056184523e525b09c918131e669490ad78670564177fc202a4f7a0fa2dec3f9"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/run_g2.py",
+    "sha256": "81aeba952e53a81b19f7945f7ace23ed1326b7a304c68b083131cd6eda751a50"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/creative_forms.py",
+    "sha256": "52acb29db86c38b4e79fe0f71df2424b8ffd32055b26a9ef9a2ce6c8c697d407"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g1/video_ir.py",
+    "sha256": "0a8795bc012a731b55833d5f969c6a7648ed05b4e0b72ec8b952bd591ab4543e"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/app.py",
+    "sha256": "a19db2705f886406e8e7fddbb9153d77dca208dcf703fb0541b1911a201d8e0c"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/store.py",
+    "sha256": "d96baa9f17e97c03799b06b70cfb2a6848840d6b3091f1f85b799d8e4a401675"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/worker.py",
+    "sha256": "2777469c5915f38d20ce7d670046402a0e69e1af299a8f0773e99d32af103b96"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/revision_support.py",
+    "sha256": "620bc253dee73a28bfde9193516c8e5ecb3e6c682f319ad6c46270651d27fe4e"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/web/src/main.tsx",
+    "sha256": "ce1f54ccd9cec63d2cbef79e4060094d5948644f3deb2792dfabc51f20075cf6"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/web/src/CreativeResources.tsx",
+    "sha256": "fb64a60d952d0d6d7a8a1a05ff0db5c05105e128242875cf45a065835bf68f13"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/web/static/app.js",
+    "sha256": "713c972637e755b72855b0dbf4ffcd708899b8e0611284e424dd62c77363e92d"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/web/static/app.css",
+    "sha256": "5cc9344567b3ecf2a7f46a171c1c8d941e028b76f97f6535f2519b760150ade4"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/tests/test_production_plan.py",
+    "sha256": "8fb529325475fe7d995dcb012490a871e6fbb99d360e6ad2ea513f5da570cddb"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g2/tests/test_fast_cards.py",
+    "sha256": "65b3fef8d45b82970cb408d7c9d820e72e5c304f28eec40d19a2fb82fe872ea7"
+  },
+  {
+    "repository": "autovideo",
+    "path": "g3/tests/test_production_plan_api.py",
+    "sha256": "9595755c93effbc124cc9b6dd233fa2330f83c53fd2c5a0e86798f5abb3fdbce"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "core/video/production_settings.py",
+    "sha256": "79f68fdd59bc00bb5b01ce0d8c46d8adb85a7dbd8b70c052937dad44d985d32b"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "core/video/production.py",
+    "sha256": "0aa0aa7fde6ba69a0e863c2ec3aae34da4d4847bacb36d8da9d9bc9943e8417f"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "core/video/columns.py",
+    "sha256": "55aa23dd1bf928c9b84f7210bd8ac19740773265512349be4f28724604ba2ed3"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "core/video/recipes.py",
+    "sha256": "f8e326eb327919b115ed7ee3fc67ae751a4af755159810a494ec7cb04911e643"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "web/services/video_render.py",
+    "sha256": "4c69e28cc9201cbb17e46d9d5502a352a55c5ad06b3d2d6b1e01de67e0823169"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "web/services/video_executor.py",
+    "sha256": "e364ac585f11902efdc0f9288deac8073602a5a83478bbb23a36d60142bd4728"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "web/routes/video.py",
+    "sha256": "1dd5a45a4daa09ad7b24b8901876961286dd5fd1d42c2b69dd236c65c0b0dc54"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "web/routes/production.py",
+    "sha256": "bc4319984d4c06acb233feb5e155ed518a987e96374170f5d07f6107ab98cac0"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "config/video_parts/output/fast_cards.yaml",
+    "sha256": "5dcf5e8331dda35ae572916ccd3fb8c5e78a841a68e83901597103bdec9be26f"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "ui/src/pages/VideoScriptView.tsx",
+    "sha256": "cc1e1e39ca517c1ab4b698856b3ce15f23664e8045947bb394ea81648559fb0b"
+  },
+  {
+    "repository": "Base_CodingCLi",
+    "path": "tests/test_video_production_plan.py",
+    "sha256": "5b3b3c69df010838aaa1010c1470047e5378fc3a83bb9b818f414a18502fc4ce"
+  }
+]

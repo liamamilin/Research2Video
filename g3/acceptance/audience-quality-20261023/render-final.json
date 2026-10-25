@@ -1,0 +1,489 @@
+{
+  "id": "55528b0e09de411594e33afd1286a0b1",
+  "script_id": "e118dc7db5f34c3ba90af0285b4688f5",
+  "version": 5,
+  "status": "COMPLETED",
+  "title": "续航手机最抢眼，五件新品变化速览",
+  "source_text": "这期看五件新品和行业变化：手机的长续航、耳机的降噪体验，还有音频品牌收购、可翻转笔记本和宽幅折叠手机。亮点各不相同，落到实际使用，也各有要看的取舍。\n\nMotorola Edge 70 Max 是一款主打大电池和续航的手机。在科技评测网站 Notebookcheck 的 Wi-Fi 网页浏览测试中，它的续航接近28小时；评测也肯定了它的机身手感。续航和机身体积怎么平衡，仍是这款手机要看的取舍。\n不过，它的存储不能扩展。安全更新支持还存在口径差异：Notebookcheck 评测记录，厂商官网写三年，公司向媒体回复五年。两种说法之间的差别，会影响长期使用预期。\n\nOppo Enco X4 是 Oppo 的旗舰降噪耳机，已经国际首发。科技媒体 GSMArena 的开箱上手介绍，它采用 Dynaudio 调音，Dynaudio 是音频品牌。GSMArena 作者在几次飞行中试用后，认为佩戴舒适、降噪有效。\n\n另一条变化发生在品牌层面。GSMArena 报道，音频公司 Bose 正在收购 Skullcandy，后者是生活方式音频品牌。双方的联合新闻稿说，Skullcandy 会保留自己的品牌，未来产品计划结合 Bose 的音频专长和 Skullcandy 的设计。\n\nAcer Swift Spin 14 AI 是一台屏幕能翻转的 Windows 笔记本。它采用高通的 ARM 架构处理器，与常见 AMD、Intel Windows 机型的芯片架构不同，部分软件需要适配。Notebookcheck 对它运行原生适配软件时的性能进步给出积极评价。选这类机器，先确认自己常用的软件能否正常使用。\n\nXiaomi 18 Fold 走的是宽幅折叠路线，展开后提供较宽的操作区域，配两块 OLED 显示屏。Notebookcheck 肯定了它的形态和屏幕亮度，也点出具体取舍：系统更新安排不清晰，扬声器的低音偏弱。屏幕是亮点，软件支持和听感也会影响日常体验。\n\n这期最抢眼的是手机续航，但判断新品，亮点和代价要放在一起看：手机的更新支持、耳机的试用场景、电脑的软件适配，以及折叠屏的日常取舍。品牌收购，则要看后续产品如何落地。",
+  "source_sha256": "70acb7484df6b57c111899e3de447a68934a21b13a1016455d3717e87d9aa47c",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "本期地图",
+        "paragraphs": [
+          "这期看五件新品和行业变化：手机的长续航、耳机的降噪体验，还有音频品牌收购、可翻转笔记本和宽幅折叠手机。亮点各不相同，落到实际使用，也各有要看的取舍。"
+        ]
+      },
+      {
+        "title": "大电池旗舰手机",
+        "paragraphs": [
+          "Motorola Edge 70 Max 是一款主打大电池和续航的手机。在科技评测网站 Notebookcheck 的 Wi-Fi 网页浏览测试中，它的续航接近28小时；评测也肯定了它的机身手感。续航和机身体积怎么平衡，仍是这款手机要看的取舍。",
+          "不过，它的存储不能扩展。安全更新支持还存在口径差异：Notebookcheck 评测记录，厂商官网写三年，公司向媒体回复五年。两种说法之间的差别，会影响长期使用预期。"
+        ]
+      },
+      {
+        "title": "旗舰降噪耳机",
+        "paragraphs": [
+          "Oppo Enco X4 是 Oppo 的旗舰降噪耳机，已经国际首发。科技媒体 GSMArena 的开箱上手介绍，它采用 Dynaudio 调音，Dynaudio 是音频品牌。GSMArena 作者在几次飞行中试用后，认为佩戴舒适、降噪有效。"
+        ]
+      },
+      {
+        "title": "音频品牌并购",
+        "paragraphs": [
+          "另一条变化发生在品牌层面。GSMArena 报道，音频公司 Bose 正在收购 Skullcandy，后者是生活方式音频品牌。双方的联合新闻稿说，Skullcandy 会保留自己的品牌，未来产品计划结合 Bose 的音频专长和 Skullcandy 的设计。"
+        ]
+      },
+      {
+        "title": "可翻转笔记本",
+        "paragraphs": [
+          "Acer Swift Spin 14 AI 是一台屏幕能翻转的 Windows 笔记本。它采用高通的 ARM 架构处理器，与常见 AMD、Intel Windows 机型的芯片架构不同，部分软件需要适配。Notebookcheck 对它运行原生适配软件时的性能进步给出积极评价。选这类机器，先确认自己常用的软件能否正常使用。"
+        ]
+      },
+      {
+        "title": "宽幅折叠手机",
+        "paragraphs": [
+          "Xiaomi 18 Fold 走的是宽幅折叠路线，展开后提供较宽的操作区域，配两块 OLED 显示屏。Notebookcheck 肯定了它的形态和屏幕亮度，也点出具体取舍：系统更新安排不清晰，扬声器的低音偏弱。屏幕是亮点，软件支持和听感也会影响日常体验。"
+        ]
+      },
+      {
+        "title": "接下来关注什么",
+        "paragraphs": [
+          "这期最抢眼的是手机续航，但判断新品，亮点和代价要放在一起看：手机的更新支持、耳机的试用场景、电脑的软件适配，以及折叠屏的日常取舍。品牌收购，则要看后续产品如何落地。"
+        ]
+      }
+    ],
+    "duration_mode": "content",
+    "title": "续航手机最抢眼，五件新品变化速览",
+    "sources": [
+      {
+        "title": "Motorola Edge 70 Max 评测",
+        "url": "https://www.notebookcheck.net/Motorola-Edge-70-Max-smartphone-review-Record-breaking-battery-life-and-flagship-features-at-a-low-price.1430009.0.html",
+        "date": "2026-10-21"
+      },
+      {
+        "title": "Oppo Enco X4 开箱与试用",
+        "url": "https://www.gsmarena.com/oppo_enco_x4_unboxing_and_handson-news-75155.php",
+        "date": "2026-10-22"
+      },
+      {
+        "title": "Acer Swift Spin 14 AI 评测",
+        "url": "https://www.notebookcheck.net/Acer-Swift-Spin-14-AI-SFSP14-convertible-review-Snapdragon-X2E-shines.1423784.0.html",
+        "date": "2026-10-21"
+      }
+    ],
+    "production_context": {
+      "content_recipe": {
+        "id": "research:topic_digest",
+        "settings": {
+          "video_form": "information_motion",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "audience": "对这个领域没有专业基础、但愿意花几分钟弄明白一件事的人；画面少用术语和缩写",
+            "focus": ""
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "专题速览",
+            "accent": "#1f7a4d",
+            "outro": {
+              "lines": [
+                "主要来源见简介"
+              ],
+              "seconds": 3
+            },
+            "recipe": "topic_digest",
+            "intro": {
+              "title": "续航手机最抢眼"
+            }
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      }
+    },
+    "voice_id": "voxcpm_anchor",
+    "production_mode": "fast",
+    "video_form": "information_cards",
+    "visual_style": "editorial_light",
+    "idempotency_key": "research:55528b0e09de411594e33afd1286a0b1"
+  },
+  "autovideo_job_id": "817e12eb-54a4-426e-8ca3-4ef17ce62de2",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "resolved_video_form": "information_cards",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 1181,
+      "sha256": "7223cc07114e583f5fdfaa860930252c7dc089f83504c01e1c28f07b53ad5353"
+    },
+    {
+      "name": "caption-alignment.json",
+      "content_type": "application/json",
+      "bytes": 69736,
+      "sha256": "a0fa9f51a0bac975653b893237678ef099e1c55f789e5c35d8bdfca8c731715e"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 3472,
+      "sha256": "d8966266ef5b9418d79faa0edd80b388733caed441847e6ed3bdedf02d9381a1"
+    },
+    {
+      "name": "card-editorial.json",
+      "content_type": "application/json",
+      "bytes": 11022,
+      "sha256": "6bddbb72283191c6bd1984b607d7ec042d543d2936f9861d0ef88892d0ac0c5f"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 10626,
+      "sha256": "bf2aff020acf022f1b30796d0683eb7c7fbadc6ef4a1fe7f11f353272ae9c727"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 3472,
+      "sha256": "3cb565d92996d2b9177b06a5b63f28be98fb2431edd175bd1f930dd934b86ffc"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 10568,
+      "sha256": "0bd4d51539d44778207622a7ce8dc729bd9814210c889389be7db70f612ca1cb"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 19010202,
+      "sha256": "41b094066b3ef8ca48b0a8c9af134b1871db081e86b921ad2248bd64a29c9ecd"
+    },
+    {
+      "name": "creative-form-plan.json",
+      "content_type": "application/json",
+      "bytes": 7171,
+      "sha256": "971b86a16d38ef3e047ae2bfbc9a3e25889bae46fa8865a84dd1d6dcb498d6e3"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 964,
+      "sha256": "ca24b61d1fd9212438f562bc4e015b6e99d67c06230ee5cadf14d8d52f73672d"
+    },
+    {
+      "name": "fast-card-plan.json",
+      "content_type": "application/json",
+      "bytes": 5409,
+      "sha256": "15b52f3ef3da6ee505fc57a2ba76ad6585c1e63ce4297ed048a1e8e35675010a"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 417,
+      "sha256": "699a3c0897bc3fc966e50aa4cace868a52b377bdd788e0f7c6e5e902cc3e26fc"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 4551,
+      "sha256": "7ccbadb217be7ec33c1002fa6de5fe561bddff5d535f1e76aad88576507d4866"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 64744,
+      "sha256": "a21137af3ea6f7548dabaa36363846457212ac48345067c6e7e1216386cb35c6"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 2753,
+      "sha256": "c17712624c09bbdae42bc069c85acd738dc5b8b413c561b9aee13ad5715a7b65"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 330,
+      "sha256": "8906ff4d67338a30307b472de7c465306c91ec5e162ec3c87860d379ed148550"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 24723,
+      "sha256": "fe863b91ee2733179d67527a92b8467a943a77a3e43d7916cf45d0d0fc666427"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 957,
+      "sha256": "1eef07646260d36b1d49a87e9f811e32e94026d37d64de675b961fc6a37276b6"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5863,
+      "sha256": "405ae2d5d851226888ed60c346c28723f1c29d44df4fa71d8dade9f3862d7b01"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2555,
+      "sha256": "3034710cb80cd099218b71f3f6f39184cb12b95108b87d4164ff884460336266"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 2166,
+      "sha256": "b3c09deb5b7106eadce12fed0fb7c322af62c4de2c82e0c0b431e775064294df"
+    },
+    {
+      "name": "production-execution.json",
+      "content_type": "application/json",
+      "bytes": 744,
+      "sha256": "709cb529a9b6c7d24c04515be2373cf6436a09335061213bb36a5ed7bad2a927"
+    },
+    {
+      "name": "production-plan.json",
+      "content_type": "application/json",
+      "bytes": 6667,
+      "sha256": "7ca1745aeb29c886a72d5808ac1ef38b8823b46a996d63cea630bbf8dc935044"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 7918,
+      "sha256": "9d1251dc2c98d630228e64bcfc5d8bebe7f6d2442e740f9c4c160855e7c29b4d"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 7140,
+      "sha256": "b1b6f1538abd1bd5021283f1fc9772733107f9f899f7904d2ea9194beaca566a"
+    },
+    {
+      "name": "tts-metrics.json",
+      "content_type": "application/json",
+      "bytes": 1389,
+      "sha256": "f2f51deb47a74d17272ab3e4b9d5898a4d4de54575f2d942428e1d1fd208fb41"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 19102,
+      "sha256": "f5c28840a1262c8fed60e92a8d006f1e0cff31fae426133922b49dd5598a6cab"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 6606586,
+      "sha256": "3081152ef1748191a9c9e318d8a146492fe53c901e40e7c6ec3fe6bc31be3120"
+    },
+    {
+      "name": "voice-report.json",
+      "content_type": "application/json",
+      "bytes": 8139,
+      "sha256": "d0a5c852ab1de616083cc67430d8d4a6ac8701b173f3ccfc65bfb511b47c0f20"
+    }
+  ],
+  "submit_started_at": "2026-10-23T12:47:20.317146+00:00",
+  "submitted_at": "2026-10-23T20:47:20+0800",
+  "completed_at": "2026-10-23T20:49:25+0800",
+  "created_at": "2026-10-23T20:47:20+0800",
+  "updated_at": "2026-10-23T20:49:25+0800",
+  "heartbeat_at": 1792759760.347135,
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-23T12:47:20.298896+00:00",
+    "submit_seconds": 0.014,
+    "poll_seconds": 125.23,
+    "poll_count": 26,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-23T12:49:23.591+00:00",
+    "completion_observed_at": "2026-10-23T12:49:25.567997+00:00",
+    "download_seconds": 0.082,
+    "artifact_list_seconds": 0.002,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 1181
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.009,
+        "reused": false,
+        "bytes": 69736
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 3472
+      },
+      {
+        "name": "card-editorial.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 11022
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 10626
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 3472
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 10568
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.07,
+        "reused": false,
+        "bytes": 19010202
+      },
+      {
+        "name": "creative-form-plan.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 7171
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 964
+      },
+      {
+        "name": "fast-card-plan.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 5409
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 417
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 4551
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 64744
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 2753
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 330
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 24723
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 957
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 5863
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 2555
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 2166
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 744
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 6667
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 7918
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 7140
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 1389
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 19102
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.022,
+        "reused": false,
+        "bytes": 6606586
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 8139
+      }
+    ],
+    "process_seconds": 125.364
+  }
+}

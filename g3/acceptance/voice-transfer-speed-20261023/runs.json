@@ -1,0 +1,15 @@
+{
+  "cold": {
+    "id": "94095a935dc140ae8fcee64186f7c311",
+    "status": "RUNNING",
+    "autovideo_job_id": "31f763b4-be8a-4293-8323-4e7c4fcaa447",
+    "created_at": "2026-10-23T17:54:16+0800",
+    "timings": "{\"process_runs\": 1, \"last_process_started_at\": \"2026-10-23T09:54:16.938222+00:00\", \"submit_seconds\": 0.016}"
+  },
+  "warm": {
+    "id": "7c13c419137b49449130b83d25f41030",
+    "status": "RUNNING",
+    "autovideo_job_id": "47bd614a-b7cd-4227-a110-3bbd15283ddb",
+    "created_at": "2026-10-23T18:00:08+0800"
+  }
+}

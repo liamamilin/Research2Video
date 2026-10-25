@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "forms": [
+    {
+      "id": "object_showcase",
+      "name": "对象展示",
+      "reason": "已有整体、细节或对比标注，可围绕同一对象组织图片；按提交顺序展示。"
+    },
+    {
+      "id": "dynamic_collage",
+      "name": "动态拼贴",
+      "reason": "已有 3 张图片，可与讲稿要点组合成版面，无需录屏或拍摄。"
+    }
+  ],
+  "music": [
+    {
+      "id": "ambient_pad",
+      "name": "轻柔和声铺底",
+      "preview_url": "/api/music-assets/ambient_pad/preview",
+      "kind": "builtin",
+      "reason": "题材标签与配方匹配；配方已有的无词配乐；文稿包含相关题材词"
+    },
+    {
+      "id": "d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf",
+      "name": "第四阶段验收 · 科普轻柔氛围",
+      "preview_url": "/api/music-assets/d6aad378-4e2c-42e7-a89b-9f0d4aa3dcbf/preview",
+      "kind": "generated",
+      "reason": "题材标签与配方匹配；生成风格与配方方向匹配；文稿包含相关题材词"
+    },
+    {
+      "id": "2a179dfe-bd70-4b03-86e7-a4f7e8c2512d",
+      "name": "第四阶段验收 · 快讯轻快电子",
+      "preview_url": "/api/music-assets/2a179dfe-bd70-4b03-86e7-a4f7e8c2512d/preview",
+      "kind": "generated",
+      "reason": "已有无词配乐，可试听后复用"
+    }
+  ],
+  "basis": "基于已提交图片的数量／标注、配方和音乐标签；未识别图片内容，未调用模型。",
+  "music_note": "优先复用已入库的无词配乐；生成条件不等于人工听审，使用前可试听。",
+  "automatic_changes": false
+}

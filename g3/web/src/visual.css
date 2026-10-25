@@ -59,3 +59,8 @@
 .scene-preview-item .secondary-button { margin-top: 10px; }
 @media(max-width:940px) { .scene-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .scene-thumb-grid button { flex-basis: 165px; } }
 @media(max-width:560px) { .document-upload { padding: 12px; } .document-upload-heading { flex-wrap: wrap; gap: 9px; } .document-upload-heading > svg { display: none; } .document-upload-heading > div { flex-basis: 100%; } .document-upload-heading .secondary-button { height: 32px; } .creative-preferences .settings-grid, .scene-fields { grid-template-columns: minmax(0,1fr); } .document-upload-heading > div > span { font-size: 10px; } .scene-thumb-grid button { flex-basis: 145px; } .incomplete-layout .revision-editor { padding: 18px; } .revision-modes { gap: 10px 16px; } }
+
+.packaging-options {display:grid;gap:14px;padding:18px 0;}
+.packaging-options > label {display:flex;align-items:center;gap:10px;font-size:13px;}
+.packaging-options > label.setting {display:grid;gap:8px;}
+.packaging-options small {color:#829789;margin-left:auto;font-size:11px;}

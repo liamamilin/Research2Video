@@ -1,0 +1,117 @@
+{
+  "case": "ai-flash",
+  "technical_status": "PASS",
+  "manual_content_status": "PENDING",
+  "render_id": "d7290c96e8e44c31b3a7a737c31b9b1c",
+  "job_id": "74a42380-c29f-4600-8d7b-86682f53a488",
+  "script_id": "630569acd6a048faae84e12ae3e83a65",
+  "version": 2,
+  "title": "DeepInfer 开源：是推理引擎，不是现成服务",
+  "mode": "standard",
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/d7290c96e8e44c31b3a7a737c31b9b1c/video.mp4",
+  "content_seconds": 105.7,
+  "duration_seconds": 114.7,
+  "scenes": 15,
+  "caption_mode": "phrase",
+  "caption_cues": 19,
+  "max_caption_characters": 74,
+  "max_caption_seconds": 11.336,
+  "narration_exact": true,
+  "cue_order_and_coverage": true,
+  "full_decode": true,
+  "artifact_hashes": 28,
+  "source_cards": [
+    {
+      "title": "GitHub - deepseek-ai/DeepInfer 官方仓库",
+      "url": "https://github.com/deepseek-ai/DeepInfer",
+      "date": "2026-10-16"
+    },
+    {
+      "title": "DeepInfer 部署问答 doc/inference_deployment…",
+      "url": "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md",
+      "date": "2026-10-20"
+    }
+  ],
+  "decoded_frames": [
+    {
+      "scene": "c1_s1",
+      "seconds": 5.9344,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-01.jpg"
+    },
+    {
+      "scene": "c1_s2",
+      "seconds": 10.092600000000001,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-02.jpg"
+    },
+    {
+      "scene": "c1_s3",
+      "seconds": 15.9406,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-03.jpg"
+    },
+    {
+      "scene": "c2_s1",
+      "seconds": 24.4448,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-04.jpg"
+    },
+    {
+      "scene": "c2_s2",
+      "seconds": 30.0098,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-05.jpg"
+    },
+    {
+      "scene": "c2_s3",
+      "seconds": 37.3122,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-06.jpg"
+    },
+    {
+      "scene": "c3_s1",
+      "seconds": 40.438199999999995,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-07.jpg"
+    },
+    {
+      "scene": "c3_s2",
+      "seconds": 50.2548,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-08.jpg"
+    },
+    {
+      "scene": "c3_s3",
+      "seconds": 56.4498,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-09.jpg"
+    },
+    {
+      "scene": "c4_s1",
+      "seconds": 60.019400000000005,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-10.jpg"
+    },
+    {
+      "scene": "c4_s2",
+      "seconds": 68.25919999999999,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-11.jpg"
+    },
+    {
+      "scene": "c4_s3",
+      "seconds": 80.69839999999999,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-12.jpg"
+    },
+    {
+      "scene": "c4_s4",
+      "seconds": 91.75880000000001,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-13.jpg"
+    },
+    {
+      "scene": "c5_s1",
+      "seconds": 99.485,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-14.jpg"
+    },
+    {
+      "scene": "c5_s2",
+      "seconds": 105.938,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/frames/scene-15.jpg"
+    }
+  ],
+  "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-flash/contact.jpg",
+  "presentation": {
+    "preset": "information_motion"
+  },
+  "notes": []
+}

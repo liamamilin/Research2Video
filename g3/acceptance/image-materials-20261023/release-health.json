@@ -1,0 +1,11 @@
+{
+  "service_ready": true,
+  "jobs_total": 180,
+  "music_jobs_total": 2,
+  "invalid_caption_http": 422,
+  "pure_text_form": "process_diagram",
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  }
+}

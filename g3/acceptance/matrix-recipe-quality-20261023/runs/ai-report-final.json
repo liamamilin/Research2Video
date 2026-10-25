@@ -1,0 +1,465 @@
+{
+  "id": "d5db2571c793435d9209b075b85b4bb0",
+  "script_id": "56aa643847d44a13b897972ff6e3d2cc",
+  "version": 2,
+  "status": "COMPLETED",
+  "title": "开源项目两种变化：视频能指着改，训练能沿用 PyTorch",
+  "source_text": "这次看两个方向不同的开源项目。Huashu Motion 把编码 Agent 用到动画和合成里，修改意见可以指向具体画面；TorchNeuron 则让用 AWS Trainium 的开发者，能更贴近熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。\n\n按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，让“改这里”落到具体帧上。仓库也放了演示；这是项目方的展示，实际效果还要看具体创作流程。\n许可证也有明确说明：项目代码和文档采用 MIT 许可证。使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。不能把主仓库的 MIT 标签理解为所有附带内容都可以随意使用。\n\nPyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。\n不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。\n\n这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。",
+  "source_sha256": "34880e57c5ff4801b8b0efc7ea022875d8cf68a4cdf441f83833aef0e6c40e6e",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "本期看点",
+        "paragraphs": [
+          "这次看两个方向不同的开源项目。Huashu Motion 把编码 Agent 用到动画和合成里，修改意见可以指向具体画面；TorchNeuron 则让用 AWS Trainium 的开发者，能更贴近熟悉的 PyTorch 工作方式。一个改变视频怎么改，一个改变模型怎么跑。"
+        ]
+      },
+      {
+        "title": "Huashu Motion：指着画面提修改",
+        "paragraphs": [
+          "按 Huashu Motion 官方仓库的介绍，用户可以在视频预览里指向某一帧提出修改意见，让“改这里”落到具体帧上。仓库也放了演示；这是项目方的展示，实际效果还要看具体创作流程。",
+          "许可证也有明确说明：项目代码和文档采用 MIT 许可证。使用其中的第三方组件、素材和作者角色时，还要分别遵守它们写明的条件。不能把主仓库的 MIT 标签理解为所有附带内容都可以随意使用。"
+        ]
+      },
+      {
+        "title": "TorchNeuron：沿用熟悉的工作方式",
+        "paragraphs": [
+          "PyTorch 官方博客介绍，TorchNeuron 是面向 AWS Trainium 的原生 PyTorch 后端，计划于十月二十日进入公开测试。它支持 Trainium 二代和三代，提供即时执行、编译和底层内核开发路径，代码采用 Apache 二点零许可证。对开发者来说，值得看的是能否沿用已有代码和工作习惯。",
+          "不过，公开测试和特定芯片支持，仍是这次发布的范围。支持熟悉的接口，并不自动证明所有模型都更快，也不能直接推出迁移没有成本。速度和兼容性，最终要放回具体模型和环境里验证。"
+        ]
+      },
+      {
+        "title": "各自解决哪一步",
+        "paragraphs": [
+          "这两个项目的方向很清楚：视频工具让修改意见更容易落到具体画面；训练后端让特定硬件更贴近现有开发方式。判断它们是否适合自己，可以先看任务和支持范围，再看实际效果，别只看项目热度。"
+        ]
+      }
+    ],
+    "duration_mode": "content",
+    "title": "开源项目两种变化：视频能指着改，训练能沿用 PyTorch",
+    "sources": [
+      {
+        "title": "alchaincyf/huashu-motion",
+        "url": "https://github.com/alchaincyf/huashu-motion",
+        "date": "2026-10-23"
+      },
+      {
+        "title": "Introducing TorchNeuron",
+        "url": "https://pytorch.org/blog/introducing-torchneuron-native-pytorch-backend-for-aws-trainium/",
+        "date": "2026-10-19"
+      }
+    ],
+    "production_context": {
+      "content_recipe": {
+        "id": "research:report_digest",
+        "settings": {
+          "video_form": "information_motion",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "focus": ""
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "报告速览",
+            "accent": "#1f7a4d",
+            "outro": {
+              "lines": [
+                "面向开发者的 AI 报告速览"
+              ],
+              "seconds": 3
+            },
+            "recipe": "report_digest",
+            "intro": {
+              "title": "开源项目两种变化"
+            }
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      }
+    },
+    "production_mode": "fast",
+    "video_form": "information_cards",
+    "visual_style": "editorial_light",
+    "idempotency_key": "research:d5db2571c793435d9209b075b85b4bb0"
+  },
+  "autovideo_job_id": "4b040968-452f-493c-9601-b1a38d3e7f8b",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "resolved_video_form": "information_cards",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 956,
+      "sha256": "bde9d096d1ac97a0e8e1e901457e7ef0b29707d8a8198e5441bb7cb1fbb0521c"
+    },
+    {
+      "name": "caption-alignment.json",
+      "content_type": "application/json",
+      "bytes": 55421,
+      "sha256": "67f92d5ad2db8ad7e27a0e98f3f675227a8fedf4d9ed996d5414823861a6b3ba"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 2700,
+      "sha256": "6a8f969c469210a4bd19d3c6033f24aa62c52fe591ea9705417cf3b48092ff5a"
+    },
+    {
+      "name": "card-editorial.json",
+      "content_type": "application/json",
+      "bytes": 7914,
+      "sha256": "f048a5539b19c25fe54ead65f3423bfa5b41a1a63d3c978c3747ceebb0c1e005"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 7994,
+      "sha256": "718ff2615243effb95e52af7158924433ac895aefc10fd81c63e95642d077ec0"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 2700,
+      "sha256": "221382542d6d1969970b3d2cf8ecda281dd6da0532271ce452dc192644f866f3"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 7936,
+      "sha256": "924da22b1e458284bf5affadd8a8e85e646527d2014cf1f33c031124f9b581dc"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 15754053,
+      "sha256": "5493dd880bfcf16f7812baa3d2efaa7f492399ffde024b2e9a632df7fdaf87ec"
+    },
+    {
+      "name": "creative-form-plan.json",
+      "content_type": "application/json",
+      "bytes": 6082,
+      "sha256": "0e50533ed627d5be32511cb995240304248cc99a309b4ae51138b2009d133496"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 966,
+      "sha256": "a9e3e45bd3248d9d7652a18553623fc634589d71969a3bea25b1bd6b00ffcfc3"
+    },
+    {
+      "name": "fast-card-plan.json",
+      "content_type": "application/json",
+      "bytes": 3766,
+      "sha256": "f1779f31d405eedcd4aa1bc5cd302f298af4391418035803791c8fc87c98f2c8"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 424,
+      "sha256": "a6cd29b10e2c9d460d955e16cb2e8c1e95977bc3e63c3d1007b80953bf8e737d"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 3468,
+      "sha256": "13fc6f003966f96da2bbd191002e6abb89b2647d7acce41dfd0d19b3aec14aab"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 53238,
+      "sha256": "94f19ea9ed8d3b0d07a764520f282ac2d5ae16dde9e6f342d287de9aecb5f216"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 1630,
+      "sha256": "a30bdaf1ca6cd1cb4edef12e5b695a133d83a3a6bd65f8be6b0ccce280c99968"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 330,
+      "sha256": "ce006ee8b115608a82587da06323744233895453510a22b2c7a4779ffa46d91c"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 19128,
+      "sha256": "fb92773230962caf7e0cc6d3d2bb660e7d61341b5939aa6ea5778e20d41b802b"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 939,
+      "sha256": "085da6da2076c40f34ff4b6d12182ab24f05cc3aafa6350acb1dfb24f3d45319"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5722,
+      "sha256": "3af530299a82166270e1a13dbef6f6dc6e9a75695ecdb032f1e9265b0a0adfe3"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2454,
+      "sha256": "c34994899cbc126460a562433a9182937edde3345c2b69de23b02a5924afeb7e"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 1669,
+      "sha256": "1ca7e21c132b9ef449eaed1121c1c93903a36613e80fbf462ba6062d13b23c86"
+    },
+    {
+      "name": "production-execution.json",
+      "content_type": "application/json",
+      "bytes": 744,
+      "sha256": "aed76626d11931876afcbe4e6767198a9516667374a1daf6b09511a5aba4543f"
+    },
+    {
+      "name": "production-plan.json",
+      "content_type": "application/json",
+      "bytes": 6298,
+      "sha256": "d2e379133e1debf91701c10071af5cad3137a71adc337d257c51bf230d1076a7"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 6401,
+      "sha256": "5dd759f0bf7bb2a876612c106cd976a0898056e22f18c2b07facdc90ad7315dc"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 6051,
+      "sha256": "52e36ea73d4f309c5787c81e4e058ae84cab3cd09f699df8d1aa62fb65ca732d"
+    },
+    {
+      "name": "tts-metrics.json",
+      "content_type": "application/json",
+      "bytes": 857,
+      "sha256": "9b5aa799a17d6b36705fa09416e2b05f3947bb497b28b43223ec7d057f5a3c13"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 15456,
+      "sha256": "0697ebabe9ca29ea255407ab50213bcd98f159903a4eb706ecddf85a1be889d4"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 5209069,
+      "sha256": "8827614fdcd4e70e53253dc560cbef84e36cb7f15bfcad5f4b29a67312560375"
+    },
+    {
+      "name": "voice-report.json",
+      "content_type": "application/json",
+      "bytes": 5618,
+      "sha256": "0bc58127ebcf7d7bc19671919fc7fedfabe4c7a000ae41de13fa4cb7576afcf5"
+    }
+  ],
+  "submit_started_at": "2026-10-24T02:30:27.791131+00:00",
+  "submitted_at": "2026-10-24T10:30:27+0800",
+  "completed_at": "2026-10-24T10:52:34+0800",
+  "created_at": "2026-10-24T10:30:27+0800",
+  "updated_at": "2026-10-24T10:52:34+0800",
+  "heartbeat_at": 1792810348.421603,
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-24T02:30:27.772477+00:00",
+    "submit_seconds": 0.012,
+    "poll_seconds": 1327.031,
+    "poll_count": 266,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-24T02:52:30.209+00:00",
+    "completion_observed_at": "2026-10-24T02:52:34.848781+00:00",
+    "download_seconds": 0.062,
+    "artifact_list_seconds": 0.002,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 956
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 55421
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 2700
+      },
+      {
+        "name": "card-editorial.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 7914
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 7994
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 2700
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 7936
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.052,
+        "reused": false,
+        "bytes": 15754053
+      },
+      {
+        "name": "creative-form-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 6082
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 966
+      },
+      {
+        "name": "fast-card-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 3766
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 424
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 3468
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 53238
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 1630
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 330
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 19128
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 939
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 5722
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 2454
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 1669
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 744
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 6298
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 6401
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 6051
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 857
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 15456
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.017,
+        "reused": false,
+        "bytes": 5209069
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 5618
+      }
+    ],
+    "process_seconds": 1327.15
+  }
+}

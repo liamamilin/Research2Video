@@ -55,7 +55,7 @@ def sound_asset(name: str) -> dict:
     raise PackageConfigError(f"套件里没有提示音：{name}")
 
 
-def validate_package(value) -> dict:
+def validate_package(value, *, require_clips: bool = True) -> dict:
     """Validate and normalise a request ``package`` block. Unknown fields are rejected."""
     if not isinstance(value, dict):
         raise PackageConfigError("package 须为对象")
@@ -68,7 +68,7 @@ def validate_package(value) -> dict:
     result = {"accent": accent.lower()}
     if value.get("badge") is not None:
         result["badge"] = _text(value["badge"], "badge", LIMITS["badge"])
-    if value.get("intro") is None and value.get("outro") is None:
+    if require_clips and value.get("intro") is None and value.get("outro") is None:
         raise PackageConfigError("package 至少要有 intro 或 outro")
     for part in ("intro", "outro"):
         item = value.get(part)

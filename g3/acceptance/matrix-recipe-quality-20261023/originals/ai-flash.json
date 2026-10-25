@@ -1,0 +1,546 @@
+{
+  "script": {
+    "id": "07c8442c5baa4807bf1d32b21e8a543f",
+    "column_key": "flash",
+    "topic": {
+      "id": "2026-10-22/F5",
+      "round": "2026-10-22",
+      "code": "F5",
+      "title": "DeepSeek 推理框架据报大部分开源",
+      "fields": {
+        "一句话": "材料称 DeepSeek 已将大部分推理框架开源。",
+        "类别": "开源发布",
+        "主体": "DeepSeek / DeepInfer",
+        "发布日期": "2026-10-21",
+        "变化": "无 → 材料称 DeepSeek 大部分推理框架开源；DeepInfer 组合 distributed inference、caching、load balancing 与 speculative decoding。",
+        "对开发者的影响": "材料转述的厂商口径为“155 trillion tokens daily per cluster”和“$38 in revenue per GPU-hour”，均未独立验证。这些推理优化可作为自建方案参考，但材料未给仓库地址、许可证或可复现基准。",
+        "可做的动作": "补齐仓库地址、许可证和可复现基准后再评估，暂不替换现有推理组件。",
+        "可信度": "有迹象（仅二手来源；数字为厂商自述，未独立验证）",
+        "评分": "7/10",
+        "证据来源": "[5]",
+        "核心角度": "材料称 DeepSeek 已将大部分推理框架开源。",
+        "为什么有人在乎": "材料转述的厂商口径为“155 trillion tokens daily per cluster”和“$38 in revenue per GPU-hour”，均未独立验证。这些推理优化可作为自建方案参考，但材料未给仓库地址、许可证或可复现基准。",
+        "建议大纲": "补齐仓库地址、许可证和可复现基准后再评估，暂不替换现有推理组件。",
+        "来源网址": "https://zhuanlan.zhihu.com/p/2095560295930508953",
+        "来源明细": "DeepSeek V4.1 Flash: Large-Scale Inference Deployment (15 minute read) | 二手 | 2026-10-21 | https://zhuanlan.zhihu.com/p/2095560295930508953",
+        "目标受众": "开发者"
+      },
+      "score": 7.0,
+      "event_date": "2026-10-21",
+      "stale": false
+    },
+    "status": "DRAFT",
+    "research_job": "video/flash_07c8442c",
+    "report_path": "output/video/2026-10-23_10-29-50_flash_07c8442c.md",
+    "current_version": 1,
+    "approved_version": null,
+    "error": null,
+    "created_by": "autopilot",
+    "created_at": "2026-10-23T10:27:59+0800",
+    "updated_at": "2026-10-23T10:39:04+0800",
+    "heartbeat_at": 1792723133.027114,
+    "stage": null,
+    "archived": 0,
+    "report_id": "8623e7d0e57b40e38d8c5725fbbaf383",
+    "production": ""
+  },
+  "version": {
+    "script_id": "07c8442c5baa4807bf1d32b21e8a543f",
+    "version": 1,
+    "title": "DeepSeek 开源推理引擎 DeepInfer：给了引擎，没给服务",
+    "sections": [
+      {
+        "title": "开源的是引擎，不是服务",
+        "paragraphs": [
+          {
+            "text": "DeepSeek 把生产环境在用的推理引擎 DeepInfer 开源了，谁都能下载。它专门跑 V4.1 Flash 这个快速版模型，Apache-2.0 许可。",
+            "citations": [
+              "https://github.com/deepseek-ai/DeepInfer",
+              "https://siliconangle.com/2026/10/20/deepseek-open-sources-deepinfer-the-inference-framework-behind-its-production-services/",
+              "https://dailylaunch.org/p/deepinfer"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "但开源的是引擎，不是能对外服务的系统。缓存管理和多副本负载均衡这两项明确没给，仓库单列了一节写着本次发布不包含，理由是跟内部基础设施绑得太深。",
+            "citations": [
+              "https://github.com/deepseek-ai/DeepInfer",
+              "https://qz.com/deepseek-open-source-deepinfer-inference-software-ai-102026"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      },
+      {
+        "title": "只认两种卡",
+        "paragraphs": [
+          {
+            "text": "硬件也窄，只认英伟达最新的 SM100 和华为昇腾 950，H100、A100 这些更早的卡都不在支持列表里。",
+            "citations": [
+              "https://github.com/deepseek-ai/DeepInfer",
+              "https://www.neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          },
+          {
+            "text": "还有两项只在英伟达上可用：batch-invariant inference 和 deterministic sampling，保证同一份输入，不管怎么拼批、跑几次，结果都一样。昇腾用户拿不到。",
+            "citations": [
+              "https://www.neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950",
+              "https://siliconangle.com/2026/10/20/deepseek-open-sources-deepinfer-the-inference-framework-behind-its-production-services/"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      },
+      {
+        "title": "两个数字的口径",
+        "paragraphs": [
+          {
+            "text": "官方说单集群一天服务 155 万亿 token，每张卡每小时收入 38 美元。这是谷价时段——非高峰——的收入，不是利润，也还没第三方独立测过。",
+            "citations": [
+              "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md",
+              "https://www.bloomberg.com/news/articles/2026-10-20/deepseek-unveils-open-source-tool-to-help-cut-ai-operating-costs"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      },
+      {
+        "title": "值得抄的两个技巧",
+        "paragraphs": [
+          {
+            "text": "其中一个技巧是投机解码：草稿模型一次先提 5 个 token，主模型再校验哪些能用。高并发下吞吐能高 4% 到 7%，并发一低反而会变慢。",
+            "citations": [
+              "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md",
+              "https://www.neoteo.com/en/deepseek-opens-deepinfer-for-offline-inference-on-sm100-and-ascend-950"
+            ],
+            "evidence": "NEEDS_REVIEW",
+            "note": "已按审计意见改写；事实审计：报告把 DSpark 的 +4%~7% 明确标注为「厂商自述，未独立验证」，并注明这是「生产负载下」的厂商估计；「−1.5%」也只是 16 seq/rank 这一个测试点的数据。讲稿把两组厂商数据都写成无条件的事实结论，既没交代来源，也没说明这是单点数据。"
+          },
+          {
+            "text": "另一招是缓存没命中时，只重算最后 128 个 token，模型读输入那一步的总计算量能减近一半。想动手的话，先读仓库里那份部署问答。",
+            "citations": [
+              "https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md",
+              "https://github.com/deepseek-ai/DeepInfer"
+            ],
+            "evidence": "CITED",
+            "note": "已按审计意见改写"
+          }
+        ]
+      }
+    ],
+    "length_check": {
+      "spoken_length": 359,
+      "estimated_seconds": 81,
+      "segments": 14,
+      "units_per_second": 4.35,
+      "voice": "voxcpm_anchor",
+      "target_minutes": 1.25,
+      "budget": 326,
+      "ratio": 1.085,
+      "status": "OK",
+      "tolerance": 0.15,
+      "sections": [
+        {
+          "title": "开源的是引擎，不是服务",
+          "spoken_length": 108,
+          "budget": 82
+        },
+        {
+          "title": "只认两种卡",
+          "spoken_length": 91,
+          "budget": 82
+        },
+        {
+          "title": "两个数字的口径",
+          "spoken_length": 54,
+          "budget": 81
+        },
+        {
+          "title": "值得抄的两个技巧",
+          "spoken_length": 106,
+          "budget": 81
+        }
+      ]
+    },
+    "edit_type": "GENERATED",
+    "meta": {
+      "attempts": 2,
+      "usage": {
+        "requests": 2,
+        "prompt_tokens": 17316,
+        "completion_tokens": 15540,
+        "total_tokens": 32856
+      },
+      "problems": [],
+      "trusted_urls": 21,
+      "report_path": "output/video/2026-10-23_10-29-50_flash_07c8442c.md",
+      "written_at": "2026-10-23T10:36:57+0800",
+      "cell": {
+        "recipe": "flash",
+        "sha256": "e5b7bf0e5587ccd711e564d8282dbf4a2f0e363d181ae7fd92e4d05ca5c01b74",
+        "cell": "ai-developer-quick_take-short",
+        "status": "enabled",
+        "parts": {
+          "domain": {
+            "key": "ai"
+          },
+          "type": {
+            "key": "quick_take"
+          },
+          "format": {
+            "key": "short"
+          },
+          "audience": {
+            "key": "developer"
+          }
+        },
+        "resolved_sha256": "d407e8a8cbb4135f2afe8d41197626f66e89dd664bd5a47d86d1c38d38c5ae43",
+        "uses": {
+          "audience": {
+            "kind": "audience",
+            "name": "developer",
+            "sha256": "c0b372a3cfcb6286f9729adad1bda1aa0acafbd484d3e4999b5361b7260b2d24"
+          },
+          "research": {
+            "kind": "research_template",
+            "name": "quick_take",
+            "sha256": "0ad3387cd321060ec837587499ccde1bd9f232873f55fc083ecd3be84ca78f05"
+          },
+          "output": {
+            "kind": "part",
+            "name": "motion",
+            "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+          }
+        }
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "缓存管理和多副本负载均衡这两项明确没给，仓库单列了一节写着本次发布不包含，理由是跟内部基础设施绑得太深。",
+            "problem": "句子有 49 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C4",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "硬件也窄，只认英伟达最新的 SM100 和华为昇腾 950，H100、A100 这些更早的卡都不在支持列表里。",
+            "problem": "一句话里有 4 个数字",
+            "why": "听觉记不住一句里的多个数字",
+            "suggestion": "一句只留一两个数，其余换成参照或放进简介",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "C6",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "硬件也窄，只认英伟达最新的 SM100 和华为昇腾 950，H100、A100 这些更早的卡都不在支持列表里。",
+            "problem": "句子有 46 个字",
+            "why": "长句听到后面就忘了前面",
+            "suggestion": "拆成两三句",
+            "source": "rule"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "serious",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "高并发下吞吐能高 4% 到 7%，并发一低反而会变慢。",
+            "problem": "报告把 DSpark 的 +4%~7% 明确标注为「厂商自述，未独立验证」，并注明这是「生产负载下」的厂商估计；「−1.5%」也只是 16 seq/rank 这一个测试点的数据。讲稿把两组厂商数据都写成无条件的事实结论，既没交代来源，也没说明这是单点数据。",
+            "why": "听众会把厂商自报的收益当成已证实的性能提升；「并发一低反而会变慢」是把单个并发点的负值推广成普遍规律，属于范围放大，且与上一段对 155 万亿 / 38 美元明确做了「官方说、无第三方验证」的标注自相矛盾。",
+            "suggestion": "改为「厂商说生产负载下吞吐能高 4% 到 7%；它自己给的曲线里，并发降到 16 路时反而是负的 1.5%，而且这些数还没有第三方独立测过」。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "另一招是缓存没命中时，只重算最后 128 个 token，模型读输入那一步的总计算量能减近一半。",
+            "problem": "「Prefill 总计算量减少近一半」在报告里是 SWA bounded replay 的厂商自述，未经独立验证；讲稿用「能减近一半」把它说成了确定结果。",
+            "why": "确定性被抬高了一档：读者会以为这是实测结论，而实际上只有 DeepSeek 自己的说法，截至 2026-10-23 无第三方基准。",
+            "suggestion": "改为「厂商称缓存没命中时只重算最后 128 个 token，能把 Prefill 的总计算量砍掉近一半，这一项目前也没有独立验证」。",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "summary": {
+          "serious": 1,
+          "must": 0,
+          "warn": 4,
+          "rule_must": 0,
+          "questions": 0,
+          "lost": 0,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 1,
+              "must": 0,
+              "warn": 1
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 0
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 3
+            }
+          },
+          "passed": false,
+          "rank": 3
+        },
+        "rounds": 1,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "DeepSeek 10 月 20 日开源了 DeepInfer，这是它生产环境在用的推理引擎，专门跑 V4.1 Flash 这个快速版模型，Apache-2.0 许可。",
+            "problem": "规范要求第一句是钩子，只讲变化和它的数字，不罗列。这句话把「生产环境在用的推理引擎」「V4.1 Flash 版本」「Apache-2.0 许可」三件事塞进开头，许可证和模型版本号不是这条快讯的变化。",
+            "why": "观众第一句听到的是一串名词和版本号，抓不到「开源了什么、意味着什么」，很容易划走。",
+            "suggestion": "开头只留「DeepSeek 开源了生产环境在用的推理引擎 DeepInfer」这一个变化，把「V4.1 Flash」「Apache-2.0 许可」删掉或挪到后面一句。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "最小的高效部署是 64 张卡做 prefill、64 张卡做 decode。",
+            "problem": "规范要求上下文长度、输出上限、各档位价格这类参数除非就是变化本身，否则不讲。这句的「64 张卡 prefill + 64 张卡 decode」是部署规格参数，不是本段要点（硬件支持范围），而且一段里已经出现 SM100、昇腾 950、H100、A100 四个型号。",
+            "why": "观众刚记住「只支持两种芯片」，马上又被两组卡数砸中，关键信息被稀释。",
+            "suggestion": "删掉这一句；若确实要说门槛，只在讲「谁受影响」时用一句话给一个数字。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "厂商说高并发下吞吐高 4% 到 7%，每卡 16 个序列时却是负 1.5%。",
+            "problem": "规范要求数字只留最关键的 2–3 个。这一段一句话里有「4% 到 7%」「每卡 16 个序列」「负 1.5%」，加上前一句的「5 个 token」，全段共四个数字，其中「每卡 16 个序列时」还是档位限定条件，不属于变化本身。",
+            "why": "一连串百分比和档位条件听不清重点，观众记不住收益区间，也记不住负面情形。",
+            "suggestion": "只保留「高并发下吞吐高 4% 到 7%」这一个收益数字，删掉「每卡 16 个序列时却是负 1.5%」；负收益若重要，改成不带数字的一句「低并发下反而会变慢」。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "官方说 prefill 总计算量能减近一半",
+            "problem": "规范要求厂商说法第一次讲时提一次「官方说法」，同一条里不要每段都重复提醒。S3P1 已经说过「官方说」，S4P1 又说了「厂商说」，这里第三次重复。",
+            "why": "反复加同样的免责前缀会让听众觉得整条都在打折扣，削弱可信度，也占掉本可以讲变化的字数。",
+            "suggestion": "删掉这里的「官方说」，直接讲「缓存没命中时只重算最后 128 个 token，prefill 总计算量能减近一半」，只在第一次提厂商数据时保留一次提醒。",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "缓存管理和多副本负载均衡为什么是“能对外服务的系统”所必需的？缺少它们会造成什么？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "前面说这是生产环境在用的引擎，后面又说这两项没提供，开源版和生产版是什么关系？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "SM100 是什么？和 H100、A100 是什么关系？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "prefill 和 decode 分别是什么？为什么各要 64 张卡？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“最小的高效部署”是 128 张卡，这个规模是跟什么比？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "batch-invariant inference 和 deterministic sampling 分别是什么？没解释，听不懂这两项特性的价值。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "单集群有多少张卡、多大规模？不知道这个数才能判断 155 万亿 token 的效率。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“谷价时段”指什么？每张卡每小时 38 美元的收入是怎么来的、跟什么比？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“另一招”指哪一招？前面没有讲第一招。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“每卡 16 个序列”是什么负载条件？“负 1.5%”是吞吐下降吗，相对什么基线？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "缓存没命中时为什么只重算最后 128 个 token？这里的缓存指什么？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "must",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "prefill 总计算量能减近一半，是相对什么基线？",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "audit_usage": {
+        "requests": 4,
+        "prompt_tokens": 18954,
+        "completion_tokens": 15682,
+        "total_tokens": 34636
+      }
+    },
+    "created_by": "autopilot",
+    "created_at": "2026-10-23T10:36:57+0800"
+  }
+}

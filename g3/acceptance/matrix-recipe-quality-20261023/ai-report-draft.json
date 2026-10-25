@@ -1,0 +1,1068 @@
+{
+  "script_id": "56aa643847d44a13b897972ff6e3d2cc",
+  "version": 1,
+  "title": "这批新项目 star 最高的，是个做宣传片的编码 Agent",
+  "sections": [
+    {
+      "title": "最热的新项目不是模型",
+      "paragraphs": [
+        {
+          "text": "先看一个反差。在这一批统计的近 7 天新建 GitHub 项目里，star 最高的一项，不是哪个新模型，也不是什么推理框架，而是一个专门做商业宣传片的编码 Agent，叫 Huashu Motion。它拿到 1295 个 star，条目发布日期是 10 月 18 日，也就是说，它出现还不到一周。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "研究报告明确写明，Huashu Motion 是本批近 7 天新建 GitHub 项目中 star 最高的一项，star 为 1295，条目发布日期为 2026-10-18。讲稿中的 1295、10 月 18 日和「近 7 天新建项目中 star 最高」都与报告一致，并用「近 7 天新建 GitHub 项目」限定了比较范围，没有把范围扩大到模型或框架榜单。",
+            "sources": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ]
+          }
+        },
+        {
+          "text": "它是干什么的？按条目自己的描述，Huashu Motion 让 Claude Code、Codex 这类编码 Agent 来制作商业宣传片，而且可以指着画面修改。这话里有两层信息：一层是入口，你不用另开一个视频工具，就在平时写代码的 Agent 里干活；另一层是产物：它做出来的东西，是能继续被指认、被修改的。标签也印证了方向：claude-code、codex 是 Agent 入口，gsap、animation、motion-graphics 说明它走代码驱动动画这条路，launch-video 则点明使用场景，发布视频。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "讲稿先说明「按条目自己的描述」，归因清楚：报告称该项目让 Claude Code、Codex 等编码 Agent 制作并迭代商业宣传片，还支持「指着画面修改」。讲稿列出的 claude-code、codex、gsap、animation、motion-graphics、launch-video 都在报告的话题列表中；其中 gsap 是代码动画库，所以把它理解为「代码驱动动画」是有依据的定性概括。",
+            "sources": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "为什么指哪改哪更值钱",
+      "paragraphs": [
+        {
+          "text": "为什么“指哪改哪”值得单独讲？因为商业宣传片说到底是改出来的。改文案、调节奏、改某个镜头的停留时间，来几十轮都很正常。而现在的文生视频是什么体验？像抽卡。不满意，整段重新生成，代价是这一遍可能把上一版你已经满意的部分也一起改没了，还很难说清到底哪里变了。要把片子交出去，你需要的是能定位的修改，而不是再抽一次。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ],
+          "evidence": "UNCITED",
+          "note": null,
+          "fact_verification": {
+            "status": "not_factual",
+            "reason": "这一段是对商业宣传片修改流程和当前文生视频体验的定性评论，比如「像抽卡」「整段重新生成」，没有给出具体型号、数字或可核实的实测主张，因此不构成需要来源支持的事实陈述。",
+            "sources": []
+          }
+        },
+        {
+          "text": "这也是为什么，可编辑的中间产物比多一个生成按钮更贴近交付。一个视频在能被“指”之前，得先是能拆开、能定位的东西。不过边界得说清楚：指着画面修改是项目条目里的说法，具体怎么指、指到什么粒度，条目没有展开，是框选画面元素还是定位到某一帧，我们并不知道。所以现在不能把它写成已经验证过的逐帧编辑器。能确认的只有方向：它把视频当成代码工程来处理，改的是中间那层东西，而不是重新生成一个黑盒。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告只写到「可指着画面修改」，没有说明操作粒度；讲稿明确把这点标为「项目条目里的说法」，并说明条目没有展开是框选画面元素还是定位到某一帧，也没有把它写成已经验证过的逐帧编辑器。这与报告「描述较简短、细节未说明」的限定一致。「把视频当代码工程处理」也是依据编码 Agent 入口和 gsap/animation 标签作出的定性概括，没有冒充实测。",
+            "sources": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "太新，判断先留个口子",
+      "paragraphs": [
+        {
+          "text": "另一个现实是，它太新了。10 月 18 日的条目，1295 个 star，起量确实快，但 star 只能说明关注度，不能说明成片质量。许可证没写，成片效果也没有公开说明；一个做宣传片的工具，最终要拿片子说话。这两样都缺着，判断就得先留个口子。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ],
+          "evidence": "CITED",
+          "note": null,
+          "fact_verification": {
+            "status": "verified",
+            "reason": "报告写明条目发布于 2026-10-18、仍很新，star 为 1295，许可证与成片效果暂无说明。讲稿关于日期、star、许可证未写和成片效果没有公开说明的说法都与报告一致，并且正确指出 star 只能说明关注度，不能说明成片质量。",
+            "sources": [
+              "https://github.com/alchaincyf/huashu-motion"
+            ]
+          }
+        },
+        {
+          "text": "所以这期我更愿意把它看成一个信号，而不是一个结论。竞争点可能正在从“能不能生成一段视频”，挪到“交付之前能不能高效地改”。生成按钮已经不稀缺了，稀缺的是中间那层能被人指着改的东西。Huashu Motion 会不会是那个答案，得等它把交互和成片亮出来；但它现在站的位置，值得记一下。",
+          "citations": [
+            "https://github.com/alchaincyf/huashu-motion"
+          ],
+          "evidence": "UNCITED",
+          "note": null,
+          "fact_verification": {
+            "status": "not_factual",
+            "reason": "这一段是对行业竞争点和该项目意义的判断，使用「可能」「会不会」「得等」等明确限定。它没有提出新的事实性数据，也没有声称已验证交互或成片效果，属于评价性收尾，不构成需要来源支持的事实主张。",
+            "sources": []
+          }
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 762,
+    "estimated_seconds": 171,
+    "segments": 32,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 0.95,
+    "status": "OK",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "最热的新项目不是模型",
+        "spoken_length": 242,
+        "budget": 261
+      },
+      {
+        "title": "为什么指哪改哪更值钱",
+        "spoken_length": 310,
+        "budget": 261
+      },
+      {
+        "title": "太新，判断先留个口子",
+        "spoken_length": 210,
+        "budget": 261
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 2,
+      "prompt_tokens": 5358,
+      "completion_tokens": 11309,
+      "total_tokens": 16667
+    },
+    "problems": [],
+    "editorial_brief": {
+      "considered": [
+        "单点深挖 Huashu Motion：把落点放在‘视频从一次性生成变成可定位修改的工程’，比只报 star 最高更能解释它为什么值得开发者看。",
+        "把 Huashu Motion、Reason Network、Co-op Anything 串成‘编码 Agent 走出代码仓库’：覆盖面更大，但三个项目信息都薄，容易变成每项一句的名单，主线反而散。",
+        "做模型热度速览：DeepSeek V4.1 Flash 趋势分最高、LTX-2.5 下载最高；但报告没有规格和效果，只能报热度，对开发者的判断价值有限。",
+        "讲 Agent 基础设施：Reason Network 的 Agent 互联、MemT 的记忆、WildAWM 的环境合成、TorchNeuron 的 Trainium 后端；更硬核，但缺架构和评测，3 分钟讲不透，也会冲淡本期最具体的视频工作流。"
+      ],
+      "angle": "这期就讲 Huashu Motion：编码 Agent 开始接手商业宣传片，关键不是一键生成，而是让视频像工程一样能被指着某一帧改。",
+      "viewer_value": "开发者能看到一个具体的 Agent 落地样本：高修改量的内容生产，真正值钱的是可编辑的中间产物和定点修改，而不是再做一个生成按钮；做视频工具的人也能判断竞争点正在往交付前的迭代走。",
+      "throughline": "开场用‘这批 star 最高的新项目不是模型，而是一个做宣传片的编码 Agent’制造反差；接着讲它让 Claude Code、Codex 这类 Agent 制作商业宣传片，并支持指着画面改；然后把‘指画面改’和文生视频的抽卡式重生成对比，解释把视频当工程、修改能定位为什么重要；最后交代它 10 月 18 日才出现、许可证和成片效果没披露，留下观察点。",
+      "keep": [
+        "反直觉开场：本批近 7 天新建 GitHub 项目中 star 最高的不是模型，而是做宣传片的编码 Agent；给观众继续听的理由。",
+        "Huashu Motion 的核心定位：让编码 Agent 制作商业宣传片，并可指着画面修改；这是全篇事实核心。",
+        "star 1295、2026-10-18 条目发布、JavaScript，以及 agent-skills、animation、claude-code、codex、gsap、launch-video、motion-graphics、skills 标签；支撑‘很新、起量快、走代码驱动动画/Agent 工作流’的判断。",
+        "商业宣传片需要反复修改，定点修改与整段重生成的差别；解释为什么‘指画面改’比多一个视频模型更贴近实际交付。",
+        "限制：许可证、成片效果暂无说明，条目也没展开‘指着画面修改’的具体交互；避免把 star 数当成效果证明。"
+      ],
+      "leave_out": [
+        "DeepSeek V4.1 Flash、LTX-2.5 的热度与下载数据：缺模型规格和效果，展开会变成榜单播报，且偏离‘可修改的视频工程’。",
+        "Reason Network、Co-op Anything、MemT-1.0、WildAWM、TorchNeuron：各有价值，但与本期单点深挖无关，硬塞会稀释主线。",
+        "所有项目的完整话题标签、star/下载/点赞横向对比和来源表：不提供额外解释，容易堆参数。",
+        "报告目录和‘今日榜单’顺序：不逐条过，按讲述需要重组。"
+      ],
+      "material": "【2.1】Huashu Motion（开源项目）：条目描述称，它让编码 Agent 制作商业宣传片，并可指着画面修改。数据：star 1295；语言 JavaScript；话题 agent-skills、animation、claude-code、codex、gsap、launch-video、motion-graphics、skills。它是本批近 7 天新建 GitHub 项目中 star 最高的一项。条目发布于 2026-10-18。限制：许可证与成片效果暂无说明；条目未说明‘指着画面修改’的具体交互和实现方式，不能写成已验证的逐帧编辑器。话题中的 gsap、animation 只能支持‘代码驱动动画’方向，不能补出更多实现细节。链接：https://github.com/alchaincyf/huashu-motion"
+    },
+    "editorial_prompt_version": 3,
+    "trusted_urls": 9,
+    "report_path": "output/radar/2026-10-22_ai_opensource_radar.md",
+    "written_at": "2026-10-23T21:58:56+0800",
+    "cell": {
+      "recipe": "report_digest",
+      "sha256": "4f3830573ad0359c75e98238c8372d78f09a08999148d37f4c655dbbf3fbb3dc",
+      "cell": "ai-developer-digest-long",
+      "status": "experimental",
+      "parts": {
+        "domain": {
+          "key": "ai"
+        },
+        "type": {
+          "key": "digest"
+        },
+        "format": {
+          "key": "long"
+        },
+        "audience": {
+          "key": "developer"
+        }
+      },
+      "resolved_sha256": "034bb1aec0e6b67eb71c067a22f92344a0af7ece709026b3d402abb62fcfa07a",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "developer",
+          "sha256": "64030ba33845739f4a5b73135825fb8bf3cacc84e738458b78917713d35cb563"
+        },
+        "output": {
+          "kind": "part",
+          "name": "motion",
+          "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    },
+    "checks": {
+      "version": 2,
+      "issues": [
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "条目发布日期是 10 月 18 日",
+          "problem": "“条目”是报告内部的说法，口播里连续出现会让来源像审稿记录，而不是项目页面。",
+          "why": "观众没看过底稿，听到“条目”会短暂卡住，不知道是在说 GitHub 项目、报告行，还是某个数据库记录。",
+          "suggestion": "改成“项目页面显示 10 月 18 日发布”或“按项目自己的介绍”，后文也统一说“项目页面/README”。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "communication",
+          "rule": "S1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 0,
+          "quote": "另一个现实是，它太新了。10 月 18 日的条目，1295 个 star，起量确实快，但 star 只能说明关注度，不能说明成片质量。",
+          "problem": "日期、star 数和“太新”在开场已经讲过，这里再次复述，段落没有推进到新信息。",
+          "why": "观众会觉得在原地打转，尤其“star 只能说明关注度”是常见判断，重复后削弱后面真正新鲜的许可证和成片缺口。",
+          "suggestion": "直接从这里没出现过的信息切入：“项目没写许可证，也没有公开成片；所以先别把它当成熟工具。”删掉重复的日期和 star 数。",
+          "source": "model",
+          "editorial": true
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 0,
+          "quote": "",
+          "problem": "“这一批统计”是谁统计的、截止到哪天？不清楚范围，1295 个 star 是近 7 天最高这个反差就少了核对依据。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "Huashu Motion 到底是什么形态：给编码 Agent 用的插件、技能包/提示词，还是一个独立仓库？入口听懂了，但我还不知道它是什么东西。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "它产出的宣传片是代码渲染出的视频，还是生成一套网页动画工程？这关系到我怎么理解后面的“中间产物”。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N2",
+          "severity": "warn",
+          "section": 0,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "标签一口气列了 claude-code、codex、gsap、animation、motion-graphics、launch-video，方向能懂，但像报菜名，容易从这里开始走神。",
+          "why": "新观众在这里跟不上，或可能理解错",
+          "suggestion": "放慢、补一步推理，或换个说法",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 1,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "“中间产物”“中间那层东西”具体指什么？是生成的 GSAP 代码、时间线，还是某种场景描述？一直抽象说中间层，我还是不知道改的是什么。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        },
+        {
+          "audit": "comprehension",
+          "rule": "N1",
+          "severity": "warn",
+          "section": 2,
+          "paragraph": 1,
+          "quote": "",
+          "problem": "只凭一个刚出现不到一周的项目，说竞争点可能从“生成”转向“修改”，除了它还有别的依据吗？只听这个例子，我会先当个案。",
+          "why": "新观众在这里有疑问，后面的内容就听不进去",
+          "suggestion": "在这之前补上需要的解释",
+          "source": "model"
+        }
+      ],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": true,
+      "audits_complete": true,
+      "pending_review": false,
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 8,
+        "rule_must": 0,
+        "questions": 5,
+        "lost": 1,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 6
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 2
+          }
+        },
+        "passed": true,
+        "rank": 0
+      },
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "editorial_attempted": true
+    },
+    "audit_usage": {
+      "requests": 8,
+      "prompt_tokens": 21501,
+      "completion_tokens": 60583,
+      "total_tokens": 82084
+    },
+    "audit_prompt_version": 11,
+    "editorial_attempt": {
+      "applied": false,
+      "before": [
+        {
+          "title": "最热的新项目不是模型",
+          "paragraphs": [
+            {
+              "text": "先看一个反差。在这一批统计的近 7 天新建 GitHub 项目里，star 最高的一项，不是哪个新模型，也不是什么推理框架，而是一个专门做商业宣传片的编码 Agent，叫 Huashu Motion。它拿到 1295 个 star，条目发布日期是 10 月 18 日，也就是说，它出现还不到一周。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "研究报告明确写明，Huashu Motion 是本批近 7 天新建 GitHub 项目中 star 最高的一项，star 为 1295，条目发布日期为 2026-10-18。讲稿中的 1295、10 月 18 日和「近 7 天新建项目中 star 最高」都与报告一致，并用「近 7 天新建 GitHub 项目」限定了比较范围，没有把范围扩大到模型或框架榜单。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            },
+            {
+              "text": "它是干什么的？按条目自己的描述，Huashu Motion 让 Claude Code、Codex 这类编码 Agent 来制作商业宣传片，而且可以指着画面修改。这话里有两层信息：一层是入口，你不用另开一个视频工具，就在平时写代码的 Agent 里干活；另一层是产物：它做出来的东西，是能继续被指认、被修改的。标签也印证了方向：claude-code、codex 是 Agent 入口，gsap、animation、motion-graphics 说明它走代码驱动动画这条路，launch-video 则点明使用场景，发布视频。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "讲稿先说明「按条目自己的描述」，归因清楚：报告称该项目让 Claude Code、Codex 等编码 Agent 制作并迭代商业宣传片，还支持「指着画面修改」。讲稿列出的 claude-code、codex、gsap、animation、motion-graphics、launch-video 都在报告的话题列表中；其中 gsap 是代码动画库，所以把它理解为「代码驱动动画」是有依据的定性概括。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "为什么指哪改哪更值钱",
+          "paragraphs": [
+            {
+              "text": "为什么“指哪改哪”值得单独讲？因为商业宣传片说到底是改出来的。改文案、调节奏、改某个镜头的停留时间，来几十轮都很正常。而现在的文生视频是什么体验？像抽卡。不满意，整段重新生成，代价是这一遍可能把上一版你已经满意的部分也一起改没了，还很难说清到底哪里变了。要把片子交出去，你需要的是能定位的修改，而不是再抽一次。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "UNCITED",
+              "note": null,
+              "fact_verification": {
+                "status": "not_factual",
+                "reason": "这一段是对商业宣传片修改流程和当前文生视频体验的定性评论，比如「像抽卡」「整段重新生成」，没有给出具体型号、数字或可核实的实测主张，因此不构成需要来源支持的事实陈述。",
+                "sources": []
+              }
+            },
+            {
+              "text": "这也是为什么，可编辑的中间产物比多一个生成按钮更贴近交付。一个视频在能被“指”之前，得先是能拆开、能定位的东西。不过边界得说清楚：指着画面修改是项目条目里的说法，具体怎么指、指到什么粒度，条目没有展开，是框选画面元素还是定位到某一帧，我们并不知道。所以现在不能把它写成已经验证过的逐帧编辑器。能确认的只有方向：它把视频当成代码工程来处理，改的是中间那层东西，而不是重新生成一个黑盒。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "报告只写到「可指着画面修改」，没有说明操作粒度；讲稿明确把这点标为「项目条目里的说法」，并说明条目没有展开是框选画面元素还是定位到某一帧，也没有把它写成已经验证过的逐帧编辑器。这与报告「描述较简短、细节未说明」的限定一致。「把视频当代码工程处理」也是依据编码 Agent 入口和 gsap/animation 标签作出的定性概括，没有冒充实测。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "太新，判断先留个口子",
+          "paragraphs": [
+            {
+              "text": "另一个现实是，它太新了。10 月 18 日的条目，1295 个 star，起量确实快，但 star 只能说明关注度，不能说明成片质量。许可证没写，成片效果也没有公开说明；一个做宣传片的工具，最终要拿片子说话。这两样都缺着，判断就得先留个口子。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "报告写明条目发布于 2026-10-18、仍很新，star 为 1295，许可证与成片效果暂无说明。讲稿关于日期、star、许可证未写和成片效果没有公开说明的说法都与报告一致，并且正确指出 star 只能说明关注度，不能说明成片质量。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            },
+            {
+              "text": "所以这期我更愿意把它看成一个信号，而不是一个结论。竞争点可能正在从“能不能生成一段视频”，挪到“交付之前能不能高效地改”。生成按钮已经不稀缺了，稀缺的是中间那层能被人指着改的东西。Huashu Motion 会不会是那个答案，得等它把交互和成片亮出来；但它现在站的位置，值得记一下。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "UNCITED",
+              "note": null,
+              "fact_verification": {
+                "status": "not_factual",
+                "reason": "这一段是对行业竞争点和该项目意义的判断，使用「可能」「会不会」「得等」等明确限定。它没有提出新的事实性数据，也没有声称已验证交互或成片效果，属于评价性收尾，不构成需要来源支持的事实主张。",
+                "sources": []
+              }
+            }
+          ]
+        }
+      ],
+      "targets": {
+        "S1P1": [
+          "【编辑建议，按实际效果取舍】“条目”是报告内部的说法，口播里连续出现会让来源像审稿记录，而不是项目页面。；建议：改成“项目页面显示 10 月 18 日发布”或“按项目自己的介绍”，后文也统一说“项目页面/README”。"
+        ],
+        "S3P1": [
+          "【编辑建议，按实际效果取舍】日期、star 数和“太新”在开场已经讲过，这里再次复述，段落没有推进到新信息。；建议：直接从这里没出现过的信息切入：“项目没写许可证，也没有公开成片；所以先别把它当成熟工具。”删掉重复的日期和 star 数。"
+        ],
+        "S1P2": [
+          "【编辑建议，按实际效果取舍】标签一口气列了 claude-code、codex、gsap、animation、motion-graphics、launch-video，方向能懂，但像报菜名，容易从这里开始走神。；建议：放慢、补一步推理，或换个说法"
+        ]
+      },
+      "before_title": "这批新项目 star 最高的，是个做宣传片的编码 Agent",
+      "mode": "whole_script",
+      "prompt_version": 3,
+      "title": "star 数最高的不是模型：宣传片开始被当成可改的工程",
+      "sections": [
+        {
+          "title": "star 最高的不是模型",
+          "paragraphs": [
+            {
+              "text": "先看一个数字。这批近 7 天新建的 GitHub 项目里，star 数最高的是一个叫 Huashu Motion 的项目，1295 颗，项目日期是 2026-10-18。它不是新模型，也不是新框架，而是一个用编码 Agent 做商业宣传片的项目。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "报告明确给出 Huashu Motion 为近7天新建 GitHub 项目中 star 最高，star 1295，日期 2026-10-18，类型为开源项目而非模型或框架；当前表述与报告一致。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            },
+            {
+              "text": "先说明一下：star 高只说明大家在关注它，不代表成片能用。但这个项目的热度本身透露了一点：比起再多几个模型，开发者可能更关心交付那一段到底发生了什么。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "NEEDS_REVIEW",
+              "note": "事实审计：用一个项目的高星推断开发者整体更关心交付而非模型；报告只支持它在近7天新建 GitHub 项目中 star 最高，没有模型与交付工具的偏好比较。",
+              "review_reason": "用一个项目的高星推断开发者整体更关心交付而非模型；报告只支持它在近7天新建 GitHub 项目中 star 最高，没有模型与交付工具的偏好比较。",
+              "fact_verification": {
+                "status": "needs_review",
+                "reason": "用一个项目的高星推断开发者整体更关心交付而非模型；报告只支持它在近7天新建 GitHub 项目中 star 最高，没有模型与交付工具的偏好比较。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "改一句话，整段重来",
+          "paragraphs": [
+            {
+              "text": "商业宣传片很少一次成型。文案要调，节奏要压，镜头顺序要换，交到客户手里之前反复改是常态。",
+              "citations": [],
+              "evidence": "UNCITED",
+              "note": null
+            },
+            {
+              "text": "麻烦就在这儿：很多文生视频的工作流，你只是想改一句旁白，它却会按新提示词把整段重新生成一遍。原来已经很满意的那几秒也跟着变了。改一次像抽一次卡，越改越不敢动，因为不知道哪一次会把好东西改没了。",
+              "citations": [],
+              "evidence": "NEEDS_REVIEW",
+              "note": "事实审计：没有引用，报告也未提供关于文生视频工作流会整段重生成的依据；“很多”是范围较大的概括。",
+              "review_reason": "没有引用，报告也未提供关于文生视频工作流会整段重生成的依据；“很多”是范围较大的概括。",
+              "fact_verification": {
+                "status": "needs_review",
+                "reason": "没有引用，报告也未提供关于文生视频工作流会整段重生成的依据；“很多”是范围较大的概括。",
+                "sources": []
+              }
+            }
+          ]
+        },
+        {
+          "title": "画面变成能拆改的工程",
+          "paragraphs": [
+            {
+              "text": "Huashu Motion 的入口不太一样。按项目页面的说法，它是让 Claude Code、Codex 这类编码 Agent 来制作并迭代商业宣传片，还提到可以“指着画面修改”。这里要把话说清楚：这是项目自己的说法，不是第三方实测。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "报告称该项目用 Claude Code、Codex 等编码 Agent 制作并迭代宣传片，并支持“指着画面修改”；讲稿明确归因为项目页面说法，未冒充第三方实测。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            },
+            {
+              "text": "标签也提供了线索。claude-code、codex 是入口，说明这些操作是在编码 Agent 里完成的；gsap、animation、motion-graphics 指向代码驱动的动画；launch-video 则点明发布会视频这个场景。不用把标签全部念一遍，这几个已经足够看出它想做什么。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "报告列出 claude-code、codex、gsap、animation、motion-graphics、launch-video 等标签；讲稿据此解释入口、代码驱动动画和发布会视频场景，属于合理概括。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            },
+            {
+              "text": "入口和标签放在一起，大致能看出一种形态：画面更像一段用代码描述出来的东西，更容易定位和修改，并非一个黑盒视频。代码的好处在于，哪句文案、哪个元素、哪段时间轴，理论上都能单独拆出来改，不用整段推倒重来。这正好补上了刚才那个缺口：对交付来说，一个能定位修改的中间层，比再一个生成按钮更有用。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "NEEDS_REVIEW",
+              "note": "事实审计：从 gsap、animation 等标签和“指着画面修改”外推出代码描述、更容易定位、可拆文案/元素/时间轴、非黑盒；报告没有这些机制和粒度信息。",
+              "review_reason": "从 gsap、animation 等标签和“指着画面修改”外推出代码描述、更容易定位、可拆文案/元素/时间轴、非黑盒；报告没有这些机制和粒度信息。",
+              "fact_verification": {
+                "status": "needs_review",
+                "reason": "从 gsap、animation 等标签和“指着画面修改”外推出代码描述、更容易定位、可拆文案/元素/时间轴、非黑盒；报告没有这些机制和粒度信息。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            },
+            {
+              "text": "所以它值得讲的地方，在于竞争点可能在从“能不能生成”往“能不能改到可以交付”的方向挪，而“AI 又能做视频了”本身不是重点。项目自己用的词是“迭代”，这个词比“生成”更接近真实的交付流程。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "报告使用“制作并迭代宣传片”描述项目能力；讲稿说项目自己用“迭代”一词有依据，趋势判断也用了“可能”限定。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "title": "先把边界说清楚",
+          "paragraphs": [
+            {
+              "text": "但边界要讲清楚。项目描述很短，只说能指着画面改，没有说修改粒度：是能选中某个元素，还是能精确到某一帧？这些都没说。所以“可修改”不等于已经有一个逐帧编辑器，更不能替它想象出一个完整渲染管线。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            },
+            {
+              "text": "许可证也没写。这意味着它现在更像一个方向展示，还谈不上拿来就能复用的开源工具。没有许可证，“开源可复用”这个卖点站不住，star 数也补不上这一点。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "NEEDS_REVIEW",
+              "note": "事实审计：报告只说许可证“暂无说明”，讲稿写成“没有许可证”，并据此判定开源可复用站不住；缺信息不等于确认无许可证。",
+              "review_reason": "报告只说许可证“暂无说明”，讲稿写成“没有许可证”，并据此判定开源可复用站不住；缺信息不等于确认无许可证。",
+              "fact_verification": {
+                "status": "needs_review",
+                "reason": "报告只说许可证“暂无说明”，讲稿写成“没有许可证”，并据此判定开源可复用站不住；缺信息不等于确认无许可证。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            },
+            {
+              "text": "成片效果同样没有公开说明，项目 2026-10-18 才发布，非常新。这些都是判断时要扣掉的部分。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null,
+              "fact_verification": {
+                "status": "verified",
+                "reason": "报告明确称许可证与成片效果暂无说明，并记录日期为 2026-10-18，仍很新；当前表述与报告一致。",
+                "sources": [
+                  "https://github.com/alchaincyf/huashu-motion"
+                ]
+              }
+            },
+            {
+              "text": "所以比较合适的位置是：这是一个方向信号，还不是成熟结论。如果这个方向真的成立，以后看这类工具的标准可能会变：不再只问它生成得有多好看，还要问它交出来的东西改起来有多容易。Huashu Motion 已经给出了前半句，后半句还没证明。",
+              "citations": [
+                "https://github.com/alchaincyf/huashu-motion"
+              ],
+              "evidence": "CITED",
+              "note": null
+            }
+          ]
+        }
+      ],
+      "editorial_brief": {
+        "considered": [
+          "原稿把主线放在“指哪改哪”，这个洞察成立；但把“指着画面修改”具体化成“某一帧”超出了材料，且开场和风险段重复日期、star，标签也像报菜名。保留“修改比生成更接近交付”的核心，重新限定证据边界。",
+          "把本批多个项目串成榜单速览：能覆盖更多名字，但 3 分钟内会变成报菜名，而且无法解释 Huashu Motion 为什么值得单独讲。放弃。",
+          "只做 Huashu Motion 功能说明：入口、标签、限制。材料太薄，容易读 README，缺少观众能带走的判断。放弃。",
+          "从 star 最高做“开发者热度观察”：反差强，但 star 只说明关注度，不能支撑工具价值，容易夸大。只把 star 当开场钩子，不当结论。",
+          "选“视频交付的瓶颈正从生成转向可定位修改，编码 Agent 提供代码这层可改中间物”：既能用项目事实落地，又能给开发者一个判断框架；同时明确项目尚未证明修改粒度和成片质量。"
+        ],
+        "angle": "这期借 Huashu Motion 讲一个更实用的变化：宣传片开始被当成能定位修改的代码工程，而不只是一次性生成的黑盒；但项目目前只给出了方向，还没证明自己能改到多细。",
+        "viewer_value": "开发者能听懂为什么“可编辑的中间层”比再一个生成按钮更接近交付，也能学会看这类项目的边界：描述里的“可修改”不等于已经验证的逐帧编辑器，star 高也不等于成片可用。",
+        "throughline": "开场先给反差：最近一批新 GitHub 项目里 star 最高的不是模型，而是一个用编码 Agent 做宣传片的项目。随即把话题从热度拉到真正的问题：宣传片靠反复改，而很多文生视频工作流一改就整段重生成。接着解释 Huashu Motion 的不同入口——在 Claude Code、Codex 里做，标签又指向 GSAP 这类代码动画，所以它更像是把画面做成可拆改的工程。然后说明价值：交付需要能定位的修改，而不是再抽一次卡。最后收边界：项目只说可以指着画面改，没说粒度；许可证和成片也没公开，所以这是方向信号，不是成熟结论。",
+        "keep": [
+          "本批近 7 天新建 GitHub 项目中 star 最高：Huashu Motion，1295 star，项目日期 2026-10-18；只作开场钩子，并说明 star 代表关注度。",
+          "项目页面/报告描述：让 Claude Code、Codex 等编码 Agent 制作并迭代商业宣传片，并支持“指着画面修改”。这是项目自己的说法，不是第三方实测。",
+          "标签线索：claude-code、codex 说明入口；gsap、animation、motion-graphics、launch-video 说明代码驱动动画和发布视频场景。只选这几个，不逐个报全名单。",
+          "可展开的解释：商业宣传片通常要改文案、节奏、镜头；很多文生视频重生成会破坏已满意部分。因此可定位修改是交付价值。",
+          "限制：项目页面描述简短，未说明“指画面”是元素级还是帧级；许可证未说明，成片效果无公开说明；项目很新。",
+          "结论：可讲“竞争点可能从能不能生成转向交付前能不能高效改”，用“可能/信号”限定。"
+        ],
+        "leave_out": [
+          "DeepSeek V4.1 Flash、LTX-2.5、Reason Network、Co-op Anything、MemT-1.0、WildAWM、TorchNeuron：与本条主线无关，3 分钟内讲会分散注意力。",
+          "完整标签名单和 JavaScript 等参数：对解释“入口和代码驱动动画”没有额外价值，容易变成报菜名。",
+          "“某一帧修改”“逐帧编辑器”：材料只支持“指着画面修改”，具体粒度未说明，不能升级成帧级能力。",
+          "“开源可复用”的卖点：许可证未说明，不能把开源复用当成确定事实。",
+          "“作曲”这一表述：来源中含义不清，且对主线没有帮助，不采用。",
+          "成片质量、实际修改体验、完整渲染管线：没有公开说明或实测，不能编造。",
+          "风险段重复日期和 star 数：开场已交代，后文应直接讲许可证、成片和粒度未明。"
+        ],
+        "material": "【2.1 Huashu Motion｜https://github.com/alchaincyf/huashu-motion】\n- 范围与热度：在本批近 7 天新建 GitHub 项目中，Huashu Motion 的 star 数最高，为 1295；项目日期为 2026-10-18。star 只说明关注度，不能说明成片质量。\n- 项目描述：让 Claude Code、Codex 等编码 Agent 制作并迭代商业宣传片；项目称可“指着画面修改”。注意：这是项目页面/报告转述，未说明修改粒度，不能写成“某一帧”或“逐帧编辑器”。\n- 标签线索：话题包括 claude-code、codex、gsap、animation、motion-graphics、launch-video。claude-code/codex 支持“在编码 Agent 里干活”的入口；gsap/animation/motion-graphics 可谨慎支持“代码驱动动画”的定性概括；launch-video 点明发布视频场景。不要声称项目公开了完整渲染管线。\n- 限制：项目发布于 2026-10-18，仍很新；许可证未说明；成片效果没有公开说明；描述较短。不要把它称为已验证的成熟工具，也不要把“开源可复用”当卖点，因为许可证缺失。\n- 可用的分析支点（不是项目实测）：商业宣传片交付常需多轮改文案、节奏、镜头；不少文生视频工作流重生成会连带改掉已满意部分。因此“能定位修改的中间层”比再一个生成按钮更贴近交付。用“可能/值得关注”限定行业判断。"
+      },
+      "checks": {
+        "version": 2,
+        "issues": [
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "有配音可能读不自然的符号：，短横线区间",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "communication",
+            "rule": "E1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "有配音可能读不自然的符号：，短横线区间",
+            "why": "配音读不出这些符号",
+            "suggestion": "改成文字说法",
+            "source": "rule"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "但这个项目的热度本身透露了一点：比起再多几个模型，开发者可能更关心交付那一段到底发生了什么。",
+            "problem": "用一个项目的高星推断开发者整体更关心交付而非模型；报告只支持它在近7天新建 GitHub 项目中 star 最高，没有模型与交付工具的偏好比较。",
+            "why": "把单一项目的热度放大成开发者偏好趋势，会改变观众对榜单意义的判断。",
+            "suggestion": "收窄为“至少说明这个交付工具受到关注”，不要与“再多几个模型”作无数据比较；若要比较需补数据。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D4",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "很多文生视频的工作流，你只是想改一句旁白，它却会按新提示词把整段重新生成一遍。原来已经很满意的那几秒也跟着变了。改一次像抽一次卡，越改越不敢动，因为不知道哪一次会把好东西改没了。",
+            "problem": "没有引用，报告也未提供关于文生视频工作流会整段重生成的依据；“很多”是范围较大的概括。",
+            "why": "这是后文论证 Huashu Motion 价值的关键前提，未加限定会让观众把一种可能的工作流当成行业普遍情况。",
+            "suggestion": "补可信来源；或改成条件句并收窄范围，如“如果工作流只能按提示词整段重生成，改一处就可能影响已满意的片段”。",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 2,
+            "quote": "画面更像一段用代码描述出来的东西，更容易定位和修改，并非一个黑盒视频。代码的好处在于，哪句文案、哪个元素、哪段时间轴，理论上都能单独拆出来改，不用整段推倒重来。",
+            "problem": "从 gsap、animation 等标签和“指着画面修改”外推出代码描述、更容易定位、可拆文案/元素/时间轴、非黑盒；报告没有这些机制和粒度信息。",
+            "why": "观众会以为项目已经具备可定位的代码中间层和细粒度修改能力，而项目只说了可以指着画面改，后文也承认粒度未说明。",
+            "suggestion": "改成带条件的推测：“从 gsap 等标签推测，它可能采用代码驱动动画；但能否逐元素/逐帧修改，项目没有说明，不能据此认定它不是黑盒或能拆开文案、元素、时间轴。”",
+            "source": "model"
+          },
+          {
+            "audit": "fact",
+            "rule": "D1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "许可证也没写。这意味着它现在更像一个方向展示，还谈不上拿来就能复用的开源工具。没有许可证，“开源可复用”这个卖点站不住，star 数也补不上这一点。",
+            "problem": "报告只说许可证“暂无说明”，讲稿写成“没有许可证”，并据此判定开源可复用站不住；缺信息不等于确认无许可证。",
+            "why": "若项目其实有许可证只是报告未收录，观众会被误导为不可复用；即使确实没有，也应把结论写成待确认，而不是已确认。",
+            "suggestion": "改成“报告里没有看到许可证信息；在确认许可证前，不能把它当作可复用的开源工具”，不要直接说没有许可证。",
+            "source": "model"
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "先看一个数字。这批近 7 天新建的 GitHub 项目里，star 数最高的是一个叫 Huashu Motion 的项目，1295 颗，项目日期是 2026-10-18。它不是新模型，也不是新框架，而是一个用编码 Agent 做商业宣传片的项目。",
+            "problem": "用“榜单第一名”开场，star 数和日期先占了整段；随后又用“不是新模型，也不是新框架”作否定式铺垫，把真正有价值的信息，也就是用编码 Agent 做商业宣传片，放到最后半句。",
+            "why": "目标观众是开发者，star 排名本身不构成“值得听”的理由，前 20 秒听到的是名次、日期和两个否定，容易直接划走。",
+            "suggestion": "直接从变化切入：编码 Agent 被拿来交付商业宣传片，重点在“改”而不在“生成”。star 与发布时间压成一句背景，往后放，作为“确实有不少人在看”的佐证即可。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "先说明一下：star 高只说明大家在关注它，不代表成片能用。",
+            "problem": "开场第二段就给自己打折，而这个限定在结尾 S4P4 又完整说了一遍，同一层意思说了两到三次。",
+            "why": "观众刚被勾起兴趣就被按住，后续再听到同样的“这只是方向信号”会觉得原地打转，失去推进感。",
+            "suggestion": "删掉这句限定，只保留后半段那句有价值的观察：“比起再多几个模型，开发者可能更关心交付那一段发生了什么。”完整边界集中放到文末说一次。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 0,
+            "quote": "商业宣传片很少一次成型。文案要调，节奏要压，镜头顺序要换，交到客户手里之前反复改是常态。",
+            "problem": "整段在复述“宣传片要反复改”这个常识，四个并列短句只是把同一件事说了四遍。",
+            "why": "面向了解基础技术的开发者，这段没有新增信息，却推迟了他们最想知道的“这个项目到底怎么改”。",
+            "suggestion": "压成一句前提带过，比如“宣传片本来就是改出来的”，紧接着进入 S2P2 那个具体痛点：改一句旁白，整段重生成。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "不用把标签全部念一遍，这几个已经足够看出它想做什么。",
+            "problem": "讲稿在向观众交代自己的取舍过程，而前一句其实已经把标签念了一遍，观众要在脑中自己拼这些标签的含义。",
+            "why": "听到“不用把标签全部念一遍”会出戏，注意力从项目转到主播的写作动作上；标签清单本身对开发者的说服力也有限。",
+            "suggestion": "删掉这句自我说明，直接给结论：从标签看，它跑在编码 Agent 里，用 GSAP 这类代码驱动动画，场景是发布会视频。标签名只在能支撑结论时出现。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 3,
+            "quote": "所以它值得讲的地方，在于竞争点可能在从“能不能生成”往“能不能改到可以交付”的方向挪，而“AI 又能做视频了”本身不是重点。",
+            "problem": "一句话套了“值得讲的地方在于……可能在……往……挪，而……不是重点”四层结构，重心埋在中段，口播时听不出主句；“挪”也偏书面。",
+            "why": "这是全篇最该被记住的判断句，观众却要在耳朵里做语法分析，很可能听完只记得“AI 做视频”。",
+            "suggestion": "拆成两短句：“所以这期的看点不是 AI 又能做视频，而是竞争点可能在往‘能不能改到可以交付’上移。”判断句单独成句、放慢。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 2,
+            "quote": "成片效果同样没有公开说明，项目 2026-10-18 才发布，非常新。这些都是判断时要扣掉的部分。",
+            "problem": "发布日期在开场已经出现过，这里重复一次；“这些是判断时要扣掉的部分”是在向观众解释内部评估流程，而不是内容本身。",
+            "why": "结尾本该收拢判断，却先复述已知信息再补一句编辑说明，让收尾变松。",
+            "suggestion": "并进上一条边界：一句“项目刚发布，成片效果还没有公开”就够，删掉“判断时要扣掉的部分”。",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 3,
+            "quote": "Huashu Motion 已经给出了前半句，后半句还没证明。",
+            "problem": "“前半句”指生成出能用的片子，但稿子前面已明确说成片效果没有公开，这句等于把未验证的能力说成已经给出。",
+            "why": "观众会以为“能生成”这一半已被证实，与前面的谨慎表述自相矛盾，也高估了项目现状。",
+            "suggestion": "把“前半句”限定到它确实给出的东西上：“它给出了‘用代码做可定位修改的中间层’这个思路，能不能真改到可交付，还没证明。”",
+            "source": "model",
+            "editorial": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "近 7 天新建的项目，日期却是 2026-10-18，和当前时间对不上，这个数据让我先怀疑了一下。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "标签连续出现，像在念清单，听到 gsap 时短暂走神；后面解释成代码驱动动画才拉回。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 2,
+            "quote": "",
+            "problem": "‘画面是代码描述出来的’是项目页明确说的，还是仅从标签推出来的？如果只是推断，后面‘能单独拆改’就有点悬。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 3,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "前面没交代它是‘开源可复用’工具，这里突然把这个当卖点来扣分，我有点跳。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model"
+          }
+        ],
+        "quiz": {
+          "items": [],
+          "score": null
+        },
+        "newcomer": null,
+        "core_message_match": null,
+        "core_message_note": "",
+        "model_ran": true,
+        "audits_complete": true,
+        "pending_review": true,
+        "summary": {
+          "serious": 0,
+          "must": 0,
+          "warn": 17,
+          "rule_must": 0,
+          "questions": 3,
+          "lost": 1,
+          "quiz_score": null,
+          "low_scores": [],
+          "by_audit": {
+            "fact": {
+              "serious": 0,
+              "must": 0,
+              "warn": 4
+            },
+            "comprehension": {
+              "serious": 0,
+              "must": 0,
+              "warn": 4
+            },
+            "communication": {
+              "serious": 0,
+              "must": 0,
+              "warn": 9
+            }
+          },
+          "passed": false,
+          "rank": 4
+        },
+        "rounds": 1,
+        "deletions": [],
+        "initial": [
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "条目发布日期是 10 月 18 日",
+            "problem": "“条目”是报告内部的说法，口播里连续出现会让来源像审稿记录，而不是项目页面。",
+            "why": "观众没看过底稿，听到“条目”会短暂卡住，不知道是在说 GitHub 项目、报告行，还是某个数据库记录。",
+            "suggestion": "改成“项目页面显示 10 月 18 日发布”或“按项目自己的介绍”，后文也统一说“项目页面/README”。",
+            "source": "model",
+            "editorial": true,
+            "resolved": false
+          },
+          {
+            "audit": "communication",
+            "rule": "S1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 0,
+            "quote": "另一个现实是，它太新了。10 月 18 日的条目，1295 个 star，起量确实快，但 star 只能说明关注度，不能说明成片质量。",
+            "problem": "日期、star 数和“太新”在开场已经讲过，这里再次复述，段落没有推进到新信息。",
+            "why": "观众会觉得在原地打转，尤其“star 只能说明关注度”是常见判断，重复后削弱后面真正新鲜的许可证和成片缺口。",
+            "suggestion": "直接从这里没出现过的信息切入：“项目没写许可证，也没有公开成片；所以先别把它当成熟工具。”删掉重复的日期和 star 数。",
+            "source": "model",
+            "editorial": true,
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 0,
+            "quote": "",
+            "problem": "“这一批统计”是谁统计的、截止到哪天？不清楚范围，1295 个 star 是近 7 天最高这个反差就少了核对依据。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": false
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "Huashu Motion 到底是什么形态：给编码 Agent 用的插件、技能包/提示词，还是一个独立仓库？入口听懂了，但我还不知道它是什么东西。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "它产出的宣传片是代码渲染出的视频，还是生成一套网页动画工程？这关系到我怎么理解后面的“中间产物”。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N2",
+            "severity": "warn",
+            "section": 0,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "标签一口气列了 claude-code、codex、gsap、animation、motion-graphics、launch-video，方向能懂，但像报菜名，容易从这里开始走神。",
+            "why": "新观众在这里跟不上，或可能理解错",
+            "suggestion": "放慢、补一步推理，或换个说法",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 1,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "“中间产物”“中间那层东西”具体指什么？是生成的 GSAP 代码、时间线，还是某种场景描述？一直抽象说中间层，我还是不知道改的是什么。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          },
+          {
+            "audit": "comprehension",
+            "rule": "N1",
+            "severity": "warn",
+            "section": 2,
+            "paragraph": 1,
+            "quote": "",
+            "problem": "只凭一个刚出现不到一周的项目，说竞争点可能从“生成”转向“修改”，除了它还有别的依据吗？只听这个例子，我会先当个案。",
+            "why": "新观众在这里有疑问，后面的内容就听不进去",
+            "suggestion": "在这之前补上需要的解释",
+            "source": "model",
+            "resolved": true
+          }
+        ]
+      },
+      "reason": "编辑稿未通过事实复核，保留此前已核对的文稿",
+      "note": ""
+    }
+  },
+  "created_by": "多矩阵质量验收",
+  "created_at": "2026-10-23T21:58:56+0800"
+}

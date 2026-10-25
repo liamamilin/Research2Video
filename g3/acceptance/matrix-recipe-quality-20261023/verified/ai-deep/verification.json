@@ -1,0 +1,153 @@
+{
+  "case": "ai-deep",
+  "technical_status": "PASS",
+  "manual_content_status": "PASS",
+  "render_id": "5ff25ebdece54285941e6bab529da521",
+  "job_id": "c472d2b3-bb9f-49c1-95d6-e4382480d524",
+  "script_id": "d6e2e0e5b0c54e7898ca23ea8b6e7ec0",
+  "version": 5,
+  "title": "WildAWM：给电脑操作 Agent 造一个能判对错的世界",
+  "mode": "standard",
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/5ff25ebdece54285941e6bab529da521/video.mp4",
+  "content_seconds": 266.3,
+  "duration_seconds": 274.8,
+  "scenes": 21,
+  "caption_mode": "short forced-aligned",
+  "caption_cues": 79,
+  "max_caption_characters": 35,
+  "max_caption_seconds": 4.64,
+  "narration_exact": true,
+  "cue_order_and_coverage": true,
+  "full_decode": true,
+  "artifact_hashes": 30,
+  "source_cards": [
+    {
+      "title": "WildAWM 原始论文",
+      "url": "https://arxiv.org/html/2610.26828",
+      "date": "2026-10-19"
+    },
+    {
+      "title": "WildAWM 官方项目",
+      "url": "https://github.com/MSR-Orchard/WildAWM",
+      "date": "2026-10-23"
+    }
+  ],
+  "decoded_frames": [
+    {
+      "scene": "c1_s1",
+      "seconds": 9.1928,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-01.jpg"
+    },
+    {
+      "scene": "c1_s2",
+      "seconds": 17.3568,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-02.jpg"
+    },
+    {
+      "scene": "c1_s3",
+      "seconds": 26.4026,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-03.jpg"
+    },
+    {
+      "scene": "c1_s4",
+      "seconds": 33.144400000000005,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-04.jpg"
+    },
+    {
+      "scene": "c2_s1",
+      "seconds": 48.2644,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-05.jpg"
+    },
+    {
+      "scene": "c2_s2",
+      "seconds": 67.57039999999999,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-06.jpg"
+    },
+    {
+      "scene": "c2_s3",
+      "seconds": 79.10239999999999,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-07.jpg"
+    },
+    {
+      "scene": "c3_s1",
+      "seconds": 98.93039999999999,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-08.jpg"
+    },
+    {
+      "scene": "c3_s2",
+      "seconds": 117.0924,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-09.jpg"
+    },
+    {
+      "scene": "c3_s3",
+      "seconds": 129.44799999999998,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-10.jpg"
+    },
+    {
+      "scene": "c3_s4",
+      "seconds": 147.9748,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-11.jpg"
+    },
+    {
+      "scene": "c4_s1",
+      "seconds": 158.1984,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-12.jpg"
+    },
+    {
+      "scene": "c4_s2",
+      "seconds": 169.0096,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-13.jpg"
+    },
+    {
+      "scene": "c4_s3",
+      "seconds": 186.5664,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-14.jpg"
+    },
+    {
+      "scene": "c4_s4",
+      "seconds": 197.1624,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-15.jpg"
+    },
+    {
+      "scene": "c4_s5",
+      "seconds": 211.4038,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-16.jpg"
+    },
+    {
+      "scene": "c4_s6",
+      "seconds": 228.0216,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-17.jpg"
+    },
+    {
+      "scene": "c5_s1",
+      "seconds": 240.5616,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-18.jpg"
+    },
+    {
+      "scene": "c5_s2",
+      "seconds": 250.51479999999998,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-19.jpg"
+    },
+    {
+      "scene": "c5_s3",
+      "seconds": 262.5004,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-20.jpg"
+    },
+    {
+      "scene": "c5_s4",
+      "seconds": 267.24359999999996,
+      "frame": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/frames/scene-21.jpg"
+    }
+  ],
+  "contact_sheet": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/acceptance/matrix-recipe-quality-20261023/verified/ai-deep/contact.jpg",
+  "presentation": null,
+  "notes": [],
+  "manual_full_audio_listening": false,
+  "manual_review_method": "read final v5 against opened original paper and repository; inspect 21 real decoded scene frames and full-size hypothesis/result/boundary frames",
+  "manual_notes": [
+    "实际形式为流程图，21个场景以节点、关系和重点表达，没有把整段旁白堆到主画面。",
+    "79条独立短句字幕，最长4.64秒；原文、音轨及时间线校验和全片解码通过。",
+    "验证器误判以“会怎样”的问句演示，旁白明确标明是假设；60%与两个Qwen模型的结果说明作者协议，并另图保留不等于真实用户成功率、不等于独立复现的限制。",
+    "未逐秒人工听完整音轨。"
+  ]
+}

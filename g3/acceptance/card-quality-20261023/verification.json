@@ -1,0 +1,279 @@
+{
+  "status": "PASS",
+  "script_version": 1,
+  "render_id": "778449710a1541ec898093f85ec530e3",
+  "job_id": "9df508c1-d7c5-4466-ba1d-348a9c867abb",
+  "source_sha256": "14f3287f32a03dabdb1d02d67bf9c9163423864c49b94c002daf2801e966aa29",
+  "unchanged_pcm_sha256": "2e0f9970b1153f6e8f32cc52a8ec7ad3c40d2f247d479c2b8fd72b21500617b0",
+  "same_packaged_decoded_audio": "SHA256=049b3f160280adde7e39a4e2e18aa9ef28e906447f7a1afd2be083fea229b820",
+  "before_cards": 31,
+  "after_cards": 12,
+  "before_caption_cues": 31,
+  "after_caption_cues": 53,
+  "point_source_quotes_verified": true,
+  "original_qualifiers_verified": true,
+  "complete_short_caption_coverage": true,
+  "no_split_english_words": true,
+  "review_notice_pages": [
+    4,
+    5
+  ],
+  "verified_downloads": 29,
+  "duration_seconds": 212.9,
+  "engine_seconds": 162.467,
+  "end_to_end_seconds": 166.0,
+  "stages": {
+    "prepare-input": 0.0,
+    "narration-plan": 0.0,
+    "tts-and-align": 1.62,
+    "storyboard-plan": 87.47,
+    "compile-ir": 5.69,
+    "render": 27.21,
+    "verify-media": 13.77,
+    "package": 27.8
+  },
+  "transfer": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-23T11:13:00.557763+00:00",
+    "submit_seconds": 0.015,
+    "poll_seconds": 165.34,
+    "poll_count": 34,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-23T11:15:43.075+00:00",
+    "completion_observed_at": "2026-10-23T11:15:45.926932+00:00",
+    "download_seconds": 0.082,
+    "artifact_list_seconds": 0.002,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 1182
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 94003
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 4724
+      },
+      {
+        "name": "card-editorial.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 14173
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 13213
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 4724
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 13155
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.072,
+        "reused": false,
+        "bytes": 30452662
+      },
+      {
+        "name": "creative-form-plan.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 10782
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 965
+      },
+      {
+        "name": "fast-card-plan.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 7962
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 415
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 5701
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 83003
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 2750
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 331
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 32009
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.002,
+        "reused": false,
+        "bytes": 938
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 6025
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 2711
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 2897
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 745
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 7034
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 10926
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 10751
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 1377
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 26046
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.028,
+        "reused": false,
+        "bytes": 9866063
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 10232
+      }
+    ],
+    "process_seconds": 165.465
+  },
+  "caption_qa": {
+    "caption_cues_checked": 53,
+    "caption_frames_checked": 85,
+    "minimum_caption_dark_pixels": 1882,
+    "minimum_glyph_f1": 0.9863121874177415,
+    "exact_srt_coverage": true,
+    "alignment": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+    "executor": "ffmpeg_cards",
+    "manual_page_copy": false
+  },
+  "caption_alignment_seconds": 4.686,
+  "model": {
+    "repo": "mlx-community/Qwen3-ForcedAligner-0.6B-8bit",
+    "revision": "0e1a68e91d815300c7c9754b2a7639378b23db15",
+    "code": "installed mlx_audio only; no repository Python downloaded"
+  },
+  "packaging": {
+    "accent": "#1f7a4d",
+    "badge": "专题速览",
+    "intro": {
+      "template": "stinger",
+      "title": "续航手机最抢眼",
+      "seconds": 1.5,
+      "sound": "synth_sting"
+    },
+    "outro": {
+      "template": "end_card",
+      "title": "专题速览",
+      "seconds": 3.0,
+      "lines": [
+        "资料边界以正文说明为准",
+        "主要来源见简介"
+      ],
+      "sound": "synth_sting"
+    }
+  },
+  "interpretation": "Quality pass over unchanged authored speech. Added screen planning and forced alignment; not an isolated speed benchmark or batch throughput test.",
+  "development_failures_preserved": [
+    "5ff70841-7a88-4438-9e2d-b5b59ca7afd6",
+    "8ef8da4e-1bd7-4251-b2a4-003322ce39cd",
+    "2bd645c6-6595-474c-8431-9bccabadce0f"
+  ],
+  "browser_playback": {
+    "played_to_seconds": 83.041346,
+    "ready_state": 4,
+    "paused_for_review": true,
+    "screenshot": "completed.png"
+  },
+  "validation": {
+    "autovideo": "650 passed, 1 skipped; one pre-existing document-manifest failure",
+    "research_related": "151 passed",
+    "diff_check": "PASS"
+  }
+}

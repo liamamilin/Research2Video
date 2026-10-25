@@ -1,0 +1,73 @@
+{
+  "scope": "实际重渲染已保存的真实语音和 Video IR；无新增模型调用；sources 为明确的验收数据",
+  "cases": [
+    {
+      "case": "diagram-2",
+      "form": "process_diagram",
+      "video": "g3/data/packaging-library-20261023/diagram-2/artifacts/package/video.mp4",
+      "seconds": 36.63333333333333,
+      "intro_seconds": 1.5,
+      "outro_seconds": 2.5,
+      "source_card_seconds": 4.5,
+      "components": {
+        "intro": {
+          "id": "stinger",
+          "version": 1
+        },
+        "outro": {
+          "id": "end_card",
+          "version": 1
+        },
+        "badge": {
+          "id": "corner_badge",
+          "version": 1
+        },
+        "source_card": {
+          "id": "source_card",
+          "version": 1
+        },
+        "sound": {
+          "id": "synth_sting",
+          "version": 1
+        }
+      },
+      "full_decode": "PASS",
+      "audio_correlation": 0.9999306852506226,
+      "offset_ms": 1500
+    },
+    {
+      "case": "information-2",
+      "form": "information_motion",
+      "video": "g3/data/packaging-library-20261023/information-2/artifacts/package/video.mp4",
+      "seconds": 44.333333333333336,
+      "intro_seconds": 1.5,
+      "outro_seconds": 2.5,
+      "source_card_seconds": 4.5,
+      "components": {
+        "intro": {
+          "id": "stinger",
+          "version": 1
+        },
+        "outro": {
+          "id": "end_card",
+          "version": 1
+        },
+        "badge": {
+          "id": "corner_badge",
+          "version": 1
+        },
+        "source_card": {
+          "id": "source_card",
+          "version": 1
+        },
+        "sound": {
+          "id": "synth_sting",
+          "version": 1
+        }
+      },
+      "full_decode": "PASS",
+      "audio_correlation": 0.9998354342082867,
+      "offset_ms": 1500
+    }
+  ]
+}

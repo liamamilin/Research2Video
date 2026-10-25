@@ -1,0 +1,486 @@
+{
+  "id": "5ff25ebdece54285941e6bab529da521",
+  "script_id": "d6e2e0e5b0c54e7898ca23ea8b6e7ec0",
+  "version": 5,
+  "status": "COMPLETED",
+  "title": "WildAWM：给电脑操作 Agent 造一个能判对错的世界",
+  "source_text": "训练一个会操作电脑的 Agent，常见做法是给它看大量屏幕截图和操作录屏。可问题是，看懂了不等于会做。真实的电脑又没法批量复制成千上万台，让它反复练；一个任务到底做没做完，也很难自动判定。WildAWM 换了个切入点：它不收集更多截图，而是合成一个能真的动手、也能自动判对错的个人电脑世界。Agent 的操作不会只停留在画面上，还会真的改变这个世界的状态。\n\n这个世界由三类东西拼起来。第一类是文件和命令行，Agent 可以创建、修改文件，跑命令；第二类是 MCP 服务，它把外部工具以 Agent 能调用的方式接进来；第三类是镜像网站，让网页操作有一个能打开的落点。\n关键在于“共享”。这三类属于同一个世界，并非三个各自独立的沙盒；论文说，它们共享同一套 GUI、MCP 和 CLI 状态。也就是说，Agent 在浏览器里点了一下、改了某个设置，命令行那边再去读，读到的是同一个世界里的结果。任务是落在这份共享状态上的，所以做没做成，有东西可以对。这跟只给模型看一段操作录屏，是两件不同的事。\n\n世界能执行之后，下一个问题是：任务从哪来，谁来判断做没做完。WildAWM 的做法是把任务和验证器一起生成。出题的时候，判卷规则同时写好。所谓任务验证器，就是一段程序，它检查的是世界状态有没有变成任务要求的样子。\n合成的任务需要筛选，验证器本身也要经得起检查。论文的两阶段合成流程包含任务验证器和质量门，还用异构执行检查和反事实探针进行筛选。这些检查的目的，是减少任务或判定不可靠的情况。这里可以用一个假设来理解：如果任务要求创建文件，验证器却在文件没创建时也判通过，那就算得分再高，也不能说明任务真正完成。\n论文第 5.2 节做了质量门的消融，第 5.3 节做了强化学习的消融。这说明这套筛子有单独检验，并非只在流程图上存在。这一步的取舍其实很清楚：重点在于让造出来的任务真的可判、经得起筛，单纯增加任务数量并不是目标。\n\n公开出来的规模是 341 个环境-任务对，官方仓库里能拿到，模型链接也在。仓库的评测表列出了八个外部 OOD 基准，每个基准的任务数量和指标类型都写了。这些外部基准的名称、任务数量和指标，让评测范围更清楚。\n作者报告的结果里，两个 Qwen 模型在这八个具名 OOD 基准上都取得了提升；GPT-6-Astra 在论文所述的评测协议下，解决任务的比例是 60%。这两条都要看清它们的性质：它们是论文作者在所述协议下报告的结果。发布代码和数据，跟有人独立跑出同样的数字，是两回事；60% 也不等于真实用户电脑上的成功率。\n还有一个常被提起的点，叫 harness 效应，说的是评测装置本身可能影响结果。这个目前仍然只是假设，没有被确立为污染，也不是对结果的唯一解释。把它当成“分数已经证明虚高”来引用，就说过头了。\n想自己复现，先得搭工程环境。仓库列出的依赖包括 Python 3.12、Docker 和 Node.js，不是装个包就能跑；模型调用也不能默认零成本。别把 341 个环境-任务对当成开箱即用的复现包。\n\n回到开头那个问题：真正稀缺的是什么。答案是能一条龙批量造出环境、任务、判定和筛选的流水线，并非更多的操作截图。WildAWM 值得跟的地方就在这里：它把可执行世界、任务验证器和几道筛子串成了一条能扩展的合成路径。\n至于它到底有多强，答案不在那一个 60% 里。要看有没有人独立复现，要看验证器判的是不是任务真正要求的那件事，还要看这套合成世界能不能继续迁移到没见过的任务上。分数是路标，流水线才是路。",
+  "source_sha256": "f77ceac555ca38dc2348368b160cb580aff7f85b8292caed26555e8b2e180e84",
+  "request": {
+    "input_mode": "narration",
+    "chapters": [
+      {
+        "title": "缺的不是截图，是能判对错的世界",
+        "paragraphs": [
+          "训练一个会操作电脑的 Agent，常见做法是给它看大量屏幕截图和操作录屏。可问题是，看懂了不等于会做。真实的电脑又没法批量复制成千上万台，让它反复练；一个任务到底做没做完，也很难自动判定。WildAWM 换了个切入点：它不收集更多截图，而是合成一个能真的动手、也能自动判对错的个人电脑世界。Agent 的操作不会只停留在画面上，还会真的改变这个世界的状态。"
+        ]
+      },
+      {
+        "title": "三类入口，一套状态",
+        "paragraphs": [
+          "这个世界由三类东西拼起来。第一类是文件和命令行，Agent 可以创建、修改文件，跑命令；第二类是 MCP 服务，它把外部工具以 Agent 能调用的方式接进来；第三类是镜像网站，让网页操作有一个能打开的落点。",
+          "关键在于“共享”。这三类属于同一个世界，并非三个各自独立的沙盒；论文说，它们共享同一套 GUI、MCP 和 CLI 状态。也就是说，Agent 在浏览器里点了一下、改了某个设置，命令行那边再去读，读到的是同一个世界里的结果。任务是落在这份共享状态上的，所以做没做成，有东西可以对。这跟只给模型看一段操作录屏，是两件不同的事。"
+        ]
+      },
+      {
+        "title": "任务和判卷规则一起合成",
+        "paragraphs": [
+          "世界能执行之后，下一个问题是：任务从哪来，谁来判断做没做完。WildAWM 的做法是把任务和验证器一起生成。出题的时候，判卷规则同时写好。所谓任务验证器，就是一段程序，它检查的是世界状态有没有变成任务要求的样子。",
+          "合成的任务需要筛选，验证器本身也要经得起检查。论文的两阶段合成流程包含任务验证器和质量门，还用异构执行检查和反事实探针进行筛选。这些检查的目的，是减少任务或判定不可靠的情况。这里可以用一个假设来理解：如果任务要求创建文件，验证器却在文件没创建时也判通过，那就算得分再高，也不能说明任务真正完成。",
+          "论文第 5.2 节做了质量门的消融，第 5.3 节做了强化学习的消融。这说明这套筛子有单独检验，并非只在流程图上存在。这一步的取舍其实很清楚：重点在于让造出来的任务真的可判、经得起筛，单纯增加任务数量并不是目标。"
+        ]
+      },
+      {
+        "title": "341 对环境和八个 OOD 基准说明了什么",
+        "paragraphs": [
+          "公开出来的规模是 341 个环境-任务对，官方仓库里能拿到，模型链接也在。仓库的评测表列出了八个外部 OOD 基准，每个基准的任务数量和指标类型都写了。这些外部基准的名称、任务数量和指标，让评测范围更清楚。",
+          "作者报告的结果里，两个 Qwen 模型在这八个具名 OOD 基准上都取得了提升；GPT-6-Astra 在论文所述的评测协议下，解决任务的比例是 60%。这两条都要看清它们的性质：它们是论文作者在所述协议下报告的结果。发布代码和数据，跟有人独立跑出同样的数字，是两回事；60% 也不等于真实用户电脑上的成功率。",
+          "还有一个常被提起的点，叫 harness 效应，说的是评测装置本身可能影响结果。这个目前仍然只是假设，没有被确立为污染，也不是对结果的唯一解释。把它当成“分数已经证明虚高”来引用，就说过头了。",
+          "想自己复现，先得搭工程环境。仓库列出的依赖包括 Python 3.12、Docker 和 Node.js，不是装个包就能跑；模型调用也不能默认零成本。别把 341 个环境-任务对当成开箱即用的复现包。"
+        ]
+      },
+      {
+        "title": "该追的是流水线，不是单个分数",
+        "paragraphs": [
+          "回到开头那个问题：真正稀缺的是什么。答案是能一条龙批量造出环境、任务、判定和筛选的流水线，并非更多的操作截图。WildAWM 值得跟的地方就在这里：它把可执行世界、任务验证器和几道筛子串成了一条能扩展的合成路径。",
+          "至于它到底有多强，答案不在那一个 60% 里。要看有没有人独立复现，要看验证器判的是不是任务真正要求的那件事，还要看这套合成世界能不能继续迁移到没见过的任务上。分数是路标，流水线才是路。"
+        ]
+      }
+    ],
+    "duration_mode": "content",
+    "title": "WildAWM：给电脑操作 Agent 造一个能判对错的世界",
+    "sources": [
+      {
+        "title": "WildAWM 原始论文",
+        "url": "https://arxiv.org/html/2610.26828",
+        "date": "2026-10-19"
+      },
+      {
+        "title": "WildAWM 官方项目",
+        "url": "https://github.com/MSR-Orchard/WildAWM",
+        "date": "2026-10-23"
+      }
+    ],
+    "production_context": {
+      "content_recipe": {
+        "id": "research:deep_dive",
+        "settings": {
+          "video_form": "auto",
+          "creative_intent": {
+            "purpose": "知识讲解",
+            "focus": ""
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "深度解读",
+            "accent": "#1f7a4d",
+            "outro": {
+              "lines": [
+                "面向开发者的 AI 深度解读"
+              ],
+              "seconds": 2.5
+            },
+            "recipe": "deep_dive",
+            "intro": {
+              "title": "WildAWM"
+            }
+          },
+          "voice_id": "voxcpm_anchor"
+        }
+      }
+    },
+    "production_mode": "standard",
+    "idempotency_key": "research:5ff25ebdece54285941e6bab529da521"
+  },
+  "autovideo_job_id": "c472d2b3-bb9f-49c1-95d6-e4382480d524",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "resolved_video_form": "process_diagram",
+  "error_code": null,
+  "error_message": null,
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "content_type": "application/json",
+      "bytes": 1114,
+      "sha256": "1bea3ee7fbd0a51340895cbfb2a35ed48b68937d099281a95e1ca06e61f11768"
+    },
+    {
+      "name": "caption-alignment.json",
+      "content_type": "application/json",
+      "bytes": 138034,
+      "sha256": "b7fc70bb2b2c5ac9b1637a32619705ab34f68c5f90d8dfbd8b0d06383913cda7"
+    },
+    {
+      "name": "captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 6779,
+      "sha256": "4477fe6b7121bc7a42523ad4887293bda1654e27be49b52b0901f15cf61e68fd"
+    },
+    {
+      "name": "chapters.json",
+      "content_type": "application/json",
+      "bytes": 17904,
+      "sha256": "8e78d92f4a31aeca8e45c5d802e2206b2dda3ad23461d1c86da73118d176dfb2"
+    },
+    {
+      "name": "content-captions.srt",
+      "content_type": "application/x-subrip",
+      "bytes": 6779,
+      "sha256": "cd331b7be8185fb550819b8e5a041ce9b8a7967ebab2400cc796cc6746b5f31b"
+    },
+    {
+      "name": "content-chapters.json",
+      "content_type": "application/json",
+      "bytes": 17846,
+      "sha256": "c1f0f2e1e2a32bd5ff49dc83c26f8431ae03552b20d4428f0c95e6ee34d3e4c2"
+    },
+    {
+      "name": "content.mp4",
+      "content_type": "video/mp4",
+      "bytes": 18607939,
+      "sha256": "376b8f689c99f14931352a509a51aa7675fd40038fe9fedec174159530946e67"
+    },
+    {
+      "name": "diagram-layout.json",
+      "content_type": "application/json",
+      "bytes": 54100,
+      "sha256": "fd3570e49cac038fc7243158a2ffdb0c5ce3d0e922a775f7785f39e1f4dc563c"
+    },
+    {
+      "name": "diagram-plan.json",
+      "content_type": "application/json",
+      "bytes": 56807,
+      "sha256": "8f9a9a9117d2ff1f87e3dc6128c84672e7d69c1919f83d9017f376720de53fe7"
+    },
+    {
+      "name": "diagram-timing.json",
+      "content_type": "application/json",
+      "bytes": 138,
+      "sha256": "68c0177338aa1ca7a21da1dd47640e0399c1af55348f07b228a792a2265385dc"
+    },
+    {
+      "name": "execution-log.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 1204,
+      "sha256": "9beb4a6c75eb619774182614c32b45703c4ecdeb521c1005aab0b665cfb4d9cd"
+    },
+    {
+      "name": "generation-schedule.json",
+      "content_type": "application/json",
+      "bytes": 427,
+      "sha256": "88887502a50fbcedd3df51c0292a40614c7734ed104dbf3466a6563fd4a3d854"
+    },
+    {
+      "name": "input-brief.json",
+      "content_type": "application/json",
+      "bytes": 8084,
+      "sha256": "adde793abc2f2bfbd1237317872b91c32ad6210c875a9b53553065dc8f760bfa"
+    },
+    {
+      "name": "manifest.json",
+      "content_type": "application/json",
+      "bytes": 79644,
+      "sha256": "53f42ffd4618f209446dc03094fba5a89adec40fbf3325f9684eb83111282944"
+    },
+    {
+      "name": "model-cost.json",
+      "content_type": "application/json",
+      "bytes": 10743,
+      "sha256": "0ce4162f421867afac97b5f7173b030732a6960334fdfafc6a0d98e10fad1597"
+    },
+    {
+      "name": "narration-check.json",
+      "content_type": "application/json",
+      "bytes": 331,
+      "sha256": "a1c32a8faa7817ae063633254e03e41de76fa605ab6f608f2e53dff00ae2daea"
+    },
+    {
+      "name": "narration.json",
+      "content_type": "application/json",
+      "bytes": 45858,
+      "sha256": "6f9fb24e3385598cecc148058a98d3a96fb8b6c840eeddbb2a48b078adaa0418"
+    },
+    {
+      "name": "package-qa.json",
+      "content_type": "application/json",
+      "bytes": 938,
+      "sha256": "ae495201a4c2d655f9f73e597c8bc9123b67db2cb3a1cb0bb96679aa3b1f942a"
+    },
+    {
+      "name": "package.json",
+      "content_type": "application/json",
+      "bytes": 5648,
+      "sha256": "dcbfe17733caa8aa713b4a4f8826a950462c1fcea93258903fb26c58eb46426b"
+    },
+    {
+      "name": "packaging-resolved.json",
+      "content_type": "application/json",
+      "bytes": 2396,
+      "sha256": "1d339290fc5f13ec9868aa75a993edd4514a4a0e324a0045a34b7e7acebe39a6"
+    },
+    {
+      "name": "prepared-source.txt",
+      "content_type": "text/plain; charset=utf-8",
+      "bytes": 4040,
+      "sha256": "72d791f9661e0bfe420942144faa5ddbe211603742b5b63571ce8356b4f09eb7"
+    },
+    {
+      "name": "production-execution.json",
+      "content_type": "application/json",
+      "bytes": 378,
+      "sha256": "5ada6d5fd504f649967ae111432df49fadd07a22f64def6c322c2f0b01f2f4c8"
+    },
+    {
+      "name": "production-plan.json",
+      "content_type": "application/json",
+      "bytes": 5997,
+      "sha256": "e8ab193cfd6fe63876fe7db29abdcaa425c30d7e544bea94f210d98572763ff9"
+    },
+    {
+      "name": "qa.json",
+      "content_type": "application/json",
+      "bytes": 98733,
+      "sha256": "49113e8e35a1486b40cb7604785218f964bba8aa845afa4596eda0aafe4d87dc"
+    },
+    {
+      "name": "render-resources.json",
+      "content_type": "application/json",
+      "bytes": 191,
+      "sha256": "da36c460dfc36fa99a7d36b57a8e638728e216a6c532343f61980c2d42be7ccd"
+    },
+    {
+      "name": "storyboard.json",
+      "content_type": "application/json",
+      "bytes": 193634,
+      "sha256": "401e08983f2fd20c0f87831e71b67c5155e115982b8e13a2484e9b7e7c04010a"
+    },
+    {
+      "name": "tts-metrics.json",
+      "content_type": "application/json",
+      "bytes": 857,
+      "sha256": "83a001a308adbe441ac221c14a36c9e5e27ba47b2e34c6a52c720d6f09e9d11e"
+    },
+    {
+      "name": "video-ir.json",
+      "content_type": "application/json",
+      "bytes": 214901,
+      "sha256": "9dde412a887691f6adfb59e0957ad81d0eb1a09505619017d0eb71d8488ef350"
+    },
+    {
+      "name": "video.mp4",
+      "content_type": "video/mp4",
+      "bytes": 14492809,
+      "sha256": "3d6c4401eb54e9f19bcb1d665dc96142799f8f70b55abcf4a53935b413fe29ff"
+    },
+    {
+      "name": "voice-report.json",
+      "content_type": "application/json",
+      "bytes": 13246,
+      "sha256": "617b2deec2766a269019cc2c8e258a09e3541ec36fad3ac67667fdff3bf3bfaf"
+    }
+  ],
+  "submit_started_at": "2026-10-24T02:27:19.338117+00:00",
+  "submitted_at": "2026-10-24T10:27:19+0800",
+  "completed_at": "2026-10-24T10:49:56+0800",
+  "created_at": "2026-10-24T10:27:19+0800",
+  "updated_at": "2026-10-24T10:49:56+0800",
+  "heartbeat_at": 1792810179.926671,
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-24T02:27:19.316860+00:00",
+    "submit_seconds": 0.012,
+    "poll_seconds": 1357.131,
+    "poll_count": 272,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-24T02:49:56.246+00:00",
+    "completion_observed_at": "2026-10-24T02:49:56.490060+00:00",
+    "download_seconds": 0.069,
+    "artifact_list_seconds": 0.002,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 1114
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.007,
+        "reused": false,
+        "bytes": 138034
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 6779
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 17904
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 6779
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 17846
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 0.055,
+        "reused": false,
+        "bytes": 18607939
+      },
+      {
+        "name": "diagram-layout.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 54100
+      },
+      {
+        "name": "diagram-plan.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 56807
+      },
+      {
+        "name": "diagram-timing.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 138
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 1204
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.002,
+        "reused": false,
+        "bytes": 427
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.002,
+        "reused": false,
+        "bytes": 8084
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 79644
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 10743
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.002,
+        "reused": false,
+        "bytes": 331
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 45858
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 938
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 5648
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.006,
+        "reused": false,
+        "bytes": 2396
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 4040
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.005,
+        "reused": false,
+        "bytes": 378
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 5997
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 98733
+      },
+      {
+        "name": "render-resources.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 191
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 193634
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 857
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.004,
+        "reused": false,
+        "bytes": 214901
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 0.035,
+        "reused": false,
+        "bytes": 14492809
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.003,
+        "reused": false,
+        "bytes": 13246
+      }
+    ],
+    "process_seconds": 1357.249
+  }
+}

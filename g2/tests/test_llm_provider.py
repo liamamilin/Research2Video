@@ -192,3 +192,62 @@ def test_fallback_models_come_from_the_saved_settings_without_the_main_model_or_
     provider = lp.load(None, {"AUTOVIDEO_LLM_SETTINGS_FILE": str(saved)})
     assert provider.fallback_models == ("x", "y")
     assert lp.validate_settings({"base_url": "https://a/v1", "model": "m", "fallback_models": "m, z"})["fallback_models"] == ["z"]
+
+
+def test_transient_520_retries_same_request_and_preserves_each_attempt(monkeypatch, tmp_path):
+    sent, delays = [], []
+    monkeypatch.setattr(g2.time, "sleep", delays.append)
+
+    def urlopen(request, timeout=None):
+        sent.append(request.data)
+        if len(sent) < 3:
+            raise urllib.error.HTTPError(request.full_url, 520, "secret error body", {}, io.BytesIO(b"secret-key"))
+        return Reply(json.dumps({"choices": [{"message": {"content": '{"ok": true}'}}], "usage": {}}).encode())
+
+    assert _call(monkeypatch, tmp_path, lp.PRESETS["opendesign"], urlopen) == {"ok": True}
+    assert len(sent) == 3 and sent[0] == sent[1] == sent[2] and delays == [2, 4]
+    assert len(g2.CALL_RECORDS) == 3 and len(list((tmp_path / "calls").glob('*.response.json'))) == 3
+    assert len({r["response_file"] for r in g2.CALL_RECORDS}) == 3
+    diagnostics = (tmp_path / "logs/http-retries.jsonl").read_text()
+    assert "520" in diagnostics and "secret" not in diagnostics
+
+
+def test_persistent_520_stops_after_three_requests_without_switching_models(monkeypatch, tmp_path):
+    seen, delays = [], []
+    monkeypatch.setattr(g2.time, "sleep", delays.append)
+
+    def urlopen(request, timeout=None):
+        seen.append(json.loads(request.data)["model"])
+        raise urllib.error.HTTPError(request.full_url, 520, "x", {}, None)
+
+    provider = lp.replace(lp.PRESETS["opendesign"], fallback_models=("another-model",))
+    with pytest.raises(g2.G2Fault, match="HTTP 520"):
+        _call(monkeypatch, tmp_path, provider, urlopen)
+    assert seen == [provider.model] * 3 and delays == [2, 4]
+
+
+def test_transport_retries_respect_the_shared_call_budget(monkeypatch, tmp_path):
+    delays = []
+    monkeypatch.setattr(g2, "MAX_TOTAL_CALLS", 1)
+    monkeypatch.setattr(g2.time, "sleep", delays.append)
+
+    def urlopen(request, timeout=None):
+        raise urllib.error.HTTPError(request.full_url, 520, "x", {}, None)
+
+    with pytest.raises(g2.G2Fault, match="HTTP 520"):
+        _call(monkeypatch, tmp_path, lp.PRESETS["opendesign"], urlopen)
+    assert len(g2.CALL_RECORDS) == 1 and delays == []
+
+
+@pytest.mark.parametrize("status", [400, 401, 402, 403, 429])
+def test_client_and_quota_errors_do_not_enter_the_transient_retry_loop(monkeypatch, tmp_path, status):
+    sent = []
+    monkeypatch.setattr(g2.time, "sleep", lambda _: pytest.fail("client errors must not wait and retry"))
+
+    def urlopen(request, timeout=None):
+        sent.append(request)
+        raise urllib.error.HTTPError(request.full_url, status, "x", {}, None)
+
+    with pytest.raises(g2.G2Fault):
+        _call(monkeypatch, tmp_path, lp.PRESETS["opendesign"], urlopen)
+    assert len(sent) == len(g2.CALL_RECORDS) == 1

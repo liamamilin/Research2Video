@@ -193,6 +193,8 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
     # density "large" is the short-form text scale (see g2/information_motion.py); the key is optional.
     information = isinstance(presentation, dict) and presentation.get("preset") == "information_motion" \
         and set(presentation) <= {"preset", "density"}
+    creative_components = {"information_cards": "kinetic_text", "kinetic_typography": "kinetic_text", "image_slideshow": "photo_slide", "chat_dialogue": "chat_message", "object_showcase": "object_showcase", "dynamic_collage": "material_collage"}
+    creative = isinstance(presentation, dict) and isinstance(presentation.get("preset"), str) and presentation["preset"] in creative_components
     if isinstance(ir, dict) and "presentation" in ir:
         schema["properties"]["presentation"] = {"type": "object", "additionalProperties": False,
             "required": ["preset"], "properties": {"preset": {"const": "information_motion"}, "density": {"const": "large"}}}
@@ -205,6 +207,16 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
             motion_scene["properties"]["beats"]["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
             schema["properties"]["scenes"]["items"] = motion_scene
             schema["properties"]["scenes"].pop("maxItems", None)
+    if creative:
+        schema["properties"]["presentation"] = {"type": "object", "additionalProperties": False,
+            "required": ["preset"], "properties": {"preset": {"enum": list(creative_components)}}}
+        schema["properties"]["style"]["properties"]["preset"] = {"const": "minimal_light"}
+        scene_schema = copy.deepcopy(schema["properties"]["scenes"]["items"])
+        scene_schema["properties"]["component"] = {"const": creative_components[presentation["preset"]]}
+        scene_schema["properties"]["beats"]["items"]["properties"]["action"] = {"const": "reveal"}
+        schema["properties"]["scenes"]["items"] = scene_schema
+        schema["properties"]["scenes"].pop("maxItems", None)
+        schema["properties"]["scenes"]["minItems"] = 1
     if isinstance(ir, dict) and "content_structure" in ir:
         # Explicit runtime extension; the frozen MVP contract remains unchanged.
         schema["properties"]["content_structure"] = _schema(ROOT / "g2/schemas/content-structure.schema.json")
@@ -212,13 +224,14 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         schema["properties"]["video"]["properties"]["duration_ms"]["minimum"] = 1
         schema["properties"]["scenes"].pop("maxItems", None)
         if not isinstance(ir.get("scenes"), list) or not ir["scenes"] or any(not isinstance(s, dict) or not (
-                (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"})
+                (creative and s.get("component") == creative_components[presentation["preset"]])
+                or (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"})
                 or (not information and s.get("component") == "flow_diagram" and isinstance(s.get("props"), dict) and "layout" in s["props"])) for s in ir["scenes"]):
             _fail("CONTENT_COMPONENT_UNSUPPORTED", "/scenes", "chapter extension requires laid-out flow diagrams or explicit information motion")
     if isinstance(ir, dict) and "playback" in ir:
         schema["properties"]["playback"] = {"type":"object","additionalProperties":False,
             "required":["speed","source_duration_ms","method"],"properties":{
-                "speed":{"enum":[.5,1,1.5,2]},"source_duration_ms":{"type":"integer","minimum":1},
+                "speed":{"enum":[.5,1,1.25,1.5,2]},"source_duration_ms":{"type":"integer","minimum":1},
                 "method":{"const":"pitch-preserving audio tempo; synchronized captions and animation"}}}
         schema["properties"]["video"]["properties"]["duration_ms"].pop("maximum",None)
         schema["properties"]["video"]["properties"]["duration_ms"]["minimum"] = 1
@@ -265,6 +278,8 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         owner = {sid: c["id"] for c in chapters for sid in c["narration_segment_ids"]}
         if any(len({owner[sid] for sid in s["narration_segment_ids"]}) != 1 for s in ir["scenes"]):
             _fail("CONTENT_SCENE_CHAPTER", "/scenes", "a scene cannot cross a chapter boundary")
+    if creative and [sid for scene in ir["scenes"] for sid in scene["narration_segment_ids"]] != [s["id"] for s in narration["segments"]]:
+        _fail("CREATIVE_NARRATION_COVERAGE", "/scenes", "creative pages must cover every phrase once, in order")
     previous_end = 0
     for index, segment in enumerate(narration["segments"]):
         path = f"/narration/segments/{index}"
@@ -300,6 +315,12 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
 
         # Component invariants not expressed by the authored JSON Schemas.
         props = scene["props"]
+        if scene["component"] == "kinetic_text" and "layout" in props:
+            if props["text"] != "\n".join(p["text"] for p in props["points"]):
+                _fail("CARD_TEXT_MISMATCH", f"{sp}/props/text", "card text must preserve its displayed points")
+            if any(p.get("segment_id") and p["segment_id"] not in scene["narration_segment_ids"]
+                   for p in props["points"]):
+                _fail("CARD_SEGMENT_MISMATCH", f"{sp}/props/points", "card reveals must use this scene's narration")
         if scene["component"] == "bar_chart" and len(props["categories"]) != len(props["values"]):
             _fail("CHART_CARDINALITY_MISMATCH", f"{sp}/props/values", "values and categories must have equal length")
         if scene["component"] == "flow_diagram":
@@ -332,6 +353,15 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
                                 and node["y"] < other["y"]+other["height"] and node["y"]+node["height"] > other["y"]):
                             _fail("DIAGRAM_LAYOUT_OVERLAP", lp, "diagram nodes overlap")
 
+        if creative:
+            if scene["component"] in {"photo_slide", "object_showcase", "material_collage"}:
+                for item in props["images"]:
+                    image = next((a for a in ir["assets"] if a["id"] == item["image_asset_id"]), None)
+                    if not image or image["type"] != "image" or image["path"] != item["image_path"]:
+                        _fail("SLIDESHOW_ASSET_MISMATCH", f"{sp}/props/images", "slide must reference a registered image asset")
+            if scene["component"] in {"object_showcase", "material_collage"}:
+                if any(index >= len(props["images"]) for index in props["focus_indices"]):
+                    _fail("MATERIAL_IMAGE_INDEX", f"{sp}/props/focus_indices", "focus must reference an image in this scene")
         referenced = set(scene["narration_segment_ids"])
         if not referenced.issubset(segment_ids):
             _fail("MISSING_NARRATION_SEGMENT", f"{sp}/narration_segment_ids", "scene references a missing segment")
@@ -353,7 +383,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
                 _fail("TRIGGER_SEGMENT_NOT_IN_SCENE", f"{bp}/trigger/segment_id", sid)
             base = segments[sid]["start_ms"] if trigger["boundary"] == "start" else segments[sid]["end_ms"]
             absolute_ms = base + trigger["offset_ms"]
-            if ((information or (scene["component"] == "flow_diagram" and "layout" in props))
+            if ((information or creative or (scene["component"] == "flow_diagram" and "layout" in props))
                     and trigger["boundary"] == "start" and trigger["offset_ms"] >= 0
                     and absolute_ms > segments[sid]["end_ms"]):
                 _fail("DIAGRAM_CUE_OUTSIDE_PHRASE", f"{bp}/trigger", "cue extends beyond its own measured phrase")
@@ -382,7 +412,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
     return {"schema_version": "0.2", "video": ir["video"], "style": ir["style"],
             "narration": narration, "scenes": scheduled_scenes, "beats": all_beats,
             "total_frames": total_frames, **({"content_structure": structure} if structure else {}),
-            **({"presentation": ir["presentation"]} if information else {}),
+            **({"presentation": ir["presentation"]} if information or creative else {}),
             **({"playback": ir["playback"]} if "playback" in ir else {})}
 
 
