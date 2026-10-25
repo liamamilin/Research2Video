@@ -1,0 +1,28 @@
+# Keep the workspace's unrelated local directories out of this repository.
+/*
+!/.gitignore
+!/AGENTS.md
+!/README.md
+!/autovideo/
+!/AI_research/
+/AI_research/*
+!/AI_research/Base_CodingCLi/
+
+# Local credentials, environments, and runtime state.
+**/.DS_Store
+**/.env
+**/.env.*
+!**/.env.example
+**/__pycache__/
+**/.pytest_cache/
+/autovideo/.cache/
+/autovideo/state/
+/AI_research/Base_CodingCLi/config/*.lock
+/AI_research/Base_CodingCLi/jobs/video/
+
+# Keep raw acceptance run logs and temporary media locally.
+/autovideo/g3/acceptance/**/*.log
+/autovideo/g3/acceptance/**/*.txt
+/autovideo/g3/acceptance/**/*.jsonl
+/autovideo/g3/acceptance/**/*.ass
+/autovideo/g3/acceptance/**/*.mp4
