@@ -12,6 +12,29 @@ from g3.worker import G2ProcessRunner
 from g2 import creative_library
 
 
+def test_fast_mixed_materials_use_registered_images_and_keep_replay_snapshot(tmp_path):
+    from g3.tests.test_creative_forms_api import upload
+    from g2.production_plan import verify
+    with TestClient(create_app(Settings(data_dir=tmp_path), start_worker=False, preflight=READY)) as client:
+        image = upload(client)['image_id']
+        body = {'input_mode': 'narration', 'chapters': CHAPTERS, 'duration_mode': 'content',
+                'production_mode': 'fast', 'visual_storytelling': True,
+                'image_materials': [{'image_id': image, 'caption': '功能页面',
+                                    'placements': [{'chapter_index': 0, 'paragraph_index': 0}]}]}
+        response = client.post('/api/jobs', json=body)
+        assert response.status_code == 202, response.text
+        jid = response.json()['job_id']
+        saved = saved_input(client, jid)
+        assert saved['video_form'] == 'information_cards'
+        assert verify(saved)['executor']['id'] == 'hybrid_cards'
+        assert saved['slideshow_images_resolved'][0]['image_id'] == image
+        assert client.post('/api/jobs', json={**body, 'visual_storytelling': False}).status_code == 422
+        assert client.post('/api/jobs', json={**body, 'image_materials': [{'image_id': image}]}).status_code == 422
+        preview = client.post('/api/production/resolve', json=body)
+        assert preview.status_code == 200, preview.text
+        assert preview.json()['plan']['executor']['id'] == 'hybrid_cards'
+
+
 def test_fast_authored_job_replay_plan_and_snapshot_are_exposed(tmp_path):
     with TestClient(create_app(Settings(data_dir=tmp_path), start_worker=False, preflight=READY)) as client:
         body = {"input_mode": "narration", "chapters": CHAPTERS, "duration_mode": "content",

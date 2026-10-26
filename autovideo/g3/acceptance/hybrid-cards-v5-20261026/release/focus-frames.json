@@ -1,0 +1,20 @@
+[
+  {
+    "scene": "card_3",
+    "component": "object_showcase",
+    "frame": 927,
+    "file": "focus-object_showcase.png"
+  },
+  {
+    "scene": "card_5",
+    "component": "flow_diagram",
+    "frame": 1712,
+    "file": "focus-flow_diagram.png"
+  },
+  {
+    "scene": "card_6",
+    "component": "data_chart",
+    "frame": 2147,
+    "file": "focus-data_chart.png"
+  }
+]

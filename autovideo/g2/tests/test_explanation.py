@@ -26,7 +26,9 @@ def test_mixed_visuals_enabled_for_standard_matrix_forms_only():
     saved = {'visual_storytelling': True, 'chapters': [{'paragraphs': ['说明。']}]}
     for form in ('auto', 'information_motion', 'process_diagram', 'object_showcase', 'dynamic_collage', 'kinetic_typography'):
         assert explanation.enabled(saved, form)
-    assert not explanation.enabled({**saved, 'production_mode': 'fast'}, 'information_cards')
+    assert explanation.enabled({**saved, 'production_mode': 'fast'}, 'information_cards')
+    assert not explanation.enabled({**saved, 'production_mode': 'fast', 'visual_storytelling': False}, 'information_cards')
+    assert not explanation.enabled({**saved, 'production_mode': 'fast', 'production_plan': {'executor': {'id': 'ffmpeg_cards'}}}, 'information_cards')
     assert not explanation.enabled({**saved, 'visual_storytelling': False}, 'auto')
     assert not explanation.enabled({**saved, 'image_materials': [{'image_id': 'old-ordered-image'}]}, 'object_showcase')
 

@@ -17,8 +17,8 @@ logger = logging.getLogger("ai_research.web.video_visuals")
 
 def _with_materials(payload: dict, materials: list[dict]) -> dict:
     if materials:
-        payload.update(video_form="object_showcase", production_mode="standard", use_draw_things=False,
-                       image_materials=[{k: row[k] for k in ("image_id", "caption", "role", "placements", "source", "focus") if k in row} for row in materials])
+        visual_materials.attach(payload, dict(video_form="object_showcase", production_mode="standard", use_draw_things=False,
+                       image_materials=[{k: row[k] for k in ("image_id", "caption", "role", "placements", "source", "focus") if k in row} for row in materials]))
     return payload
 
 

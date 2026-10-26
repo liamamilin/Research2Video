@@ -1,0 +1,274 @@
+{
+  "version": 5,
+  "pages": [
+    {
+      "scene_id": "card_1",
+      "component": "title_card",
+      "executor": "ffmpeg_cards",
+      "start_frame": 0,
+      "end_frame": 295,
+      "narration_segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ],
+      "reveal_windows": [
+        {
+          "start_frame": 0,
+          "end_frame": 152,
+          "visible": []
+        },
+        {
+          "start_frame": 152,
+          "end_frame": 295,
+          "visible": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": "card_2",
+      "component": "concept_reveal",
+      "executor": "ffmpeg_cards",
+      "start_frame": 295,
+      "end_frame": 672,
+      "narration_segment_ids": [
+        "c1_n3",
+        "c1_n4",
+        "c1_n5"
+      ],
+      "reveal_windows": [
+        {
+          "start_frame": 295,
+          "end_frame": 401,
+          "visible": []
+        },
+        {
+          "start_frame": 401,
+          "end_frame": 483,
+          "visible": [
+            0
+          ]
+        },
+        {
+          "start_frame": 483,
+          "end_frame": 577,
+          "visible": [
+            0,
+            1
+          ]
+        },
+        {
+          "start_frame": 577,
+          "end_frame": 672,
+          "visible": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": "card_3",
+      "component": "object_showcase",
+      "executor": "remotion",
+      "start_frame": 672,
+      "end_frame": 1097,
+      "narration_segment_ids": [
+        "c1_n6",
+        "c1_n7",
+        "c1_n8"
+      ],
+      "reveal_windows": [
+        {
+          "start_frame": 672,
+          "end_frame": 1097,
+          "visible": null
+        }
+      ]
+    },
+    {
+      "scene_id": "card_4",
+      "component": "price_change",
+      "executor": "remotion",
+      "start_frame": 1097,
+      "end_frame": 1456,
+      "narration_segment_ids": [
+        "c1_n9",
+        "c1_n10",
+        "c1_n11"
+      ],
+      "reveal_windows": [
+        {
+          "start_frame": 1097,
+          "end_frame": 1456,
+          "visible": null
+        }
+      ]
+    },
+    {
+      "scene_id": "card_5",
+      "component": "flow_diagram",
+      "executor": "remotion",
+      "start_frame": 1456,
+      "end_frame": 1883,
+      "narration_segment_ids": [
+        "c1_n12",
+        "c1_n13",
+        "c1_n14"
+      ],
+      "reveal_windows": [
+        {
+          "start_frame": 1456,
+          "end_frame": 1883,
+          "visible": null
+        }
+      ]
+    },
+    {
+      "scene_id": "card_6",
+      "component": "data_chart",
+      "executor": "remotion",
+      "start_frame": 1883,
+      "end_frame": 2323,
+      "narration_segment_ids": [
+        "c1_n15",
+        "c1_n16",
+        "c1_n17",
+        "c1_n18"
+      ],
+      "reveal_windows": [
+        {
+          "start_frame": 1883,
+          "end_frame": 2323,
+          "visible": null
+        }
+      ]
+    },
+    {
+      "scene_id": "card_7",
+      "component": "concept_reveal",
+      "executor": "ffmpeg_cards",
+      "start_frame": 2323,
+      "end_frame": 2707,
+      "narration_segment_ids": [
+        "c1_n19",
+        "c1_n20",
+        "c1_n21"
+      ],
+      "reveal_windows": [
+        {
+          "start_frame": 2323,
+          "end_frame": 2428,
+          "visible": []
+        },
+        {
+          "start_frame": 2428,
+          "end_frame": 2511,
+          "visible": [
+            0
+          ]
+        },
+        {
+          "start_frame": 2511,
+          "end_frame": 2611,
+          "visible": [
+            0,
+            1
+          ]
+        },
+        {
+          "start_frame": 2611,
+          "end_frame": 2707,
+          "visible": [
+            0,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": "card_8_p1",
+      "component": "comparison",
+      "executor": "remotion",
+      "start_frame": 2707,
+      "end_frame": 3007,
+      "narration_segment_ids": [
+        "c1_n22",
+        "c1_n23"
+      ],
+      "reveal_windows": [
+        {
+          "start_frame": 2707,
+          "end_frame": 3007,
+          "visible": null
+        }
+      ]
+    },
+    {
+      "scene_id": "card_8_p2",
+      "component": "concept_reveal",
+      "executor": "remotion",
+      "start_frame": 3007,
+      "end_frame": 3174,
+      "narration_segment_ids": [
+        "c1_n24"
+      ],
+      "reveal_windows": [
+        {
+          "start_frame": 3007,
+          "end_frame": 3174,
+          "visible": null
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "executor": "ffmpeg_cards",
+      "start_frame": 0,
+      "end_frame": 672,
+      "scene_ids": [
+        "card_1",
+        "card_2"
+      ],
+      "render_seconds": 1.284
+    },
+    {
+      "executor": "remotion",
+      "start_frame": 672,
+      "end_frame": 2323,
+      "scene_ids": [
+        "card_3",
+        "card_4",
+        "card_5",
+        "card_6"
+      ],
+      "render_seconds": 120.284
+    },
+    {
+      "executor": "ffmpeg_cards",
+      "start_frame": 2323,
+      "end_frame": 2707,
+      "scene_ids": [
+        "card_7"
+      ],
+      "render_seconds": 0.612
+    },
+    {
+      "executor": "remotion",
+      "start_frame": 2707,
+      "end_frame": 3174,
+      "scene_ids": [
+        "card_8_p1",
+        "card_8_p2"
+      ],
+      "render_seconds": 37.884
+    }
+  ],
+  "manual_scene_selection": false,
+  "production_plan_sha256": "71b2d50badac1a025f1361e4bfe5a28c1f8329961b8e3ea8bbf3e136fb213942",
+  "shared_voice_and_captions": true
+}

@@ -866,8 +866,11 @@ def ensure_renderer_dependency_link(renderer: Path) -> Path:
 
 
 def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
-           *, renderer_root: Path | None = None) -> None:
+           *, renderer_root: Path | None = None, hybrid_segment: dict | None = None) -> None:
     package_request_from_intent()
+    if hybrid_segment is None and (PACKAGING_INPUT or {}).get('production_plan', {}).get('executor', {}).get('id') == 'hybrid_cards':
+        from g2.hybrid_cards import render as render_hybrid
+        return render_hybrid(sys.modules[__name__], compiled, renderer_root=renderer_root)
     if compiled.get("presentation", {}).get("preset") == "information_cards":
         from g2.fast_cards import render as render_cards
         try:
@@ -875,7 +878,7 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
         except ValueError as exc:
             raise G2Fault("FAST_CARD_LAYOUT_INVALID", str(exc)) from exc
     package_request_from_intent()
-    if PACKAGING_INPUT and PACKAGING_INPUT.get("production_plan"):
+    if hybrid_segment is None and PACKAGING_INPUT and PACKAGING_INPUT.get("production_plan"):
         plan = PACKAGING_INPUT["production_plan"]
         write_json(ARTIFACTS / "production-execution.json", {
             "schema_version": 1, "production_plan_sha256": plan["sha256"],
@@ -908,6 +911,8 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
                 if (ARTIFACTS / "caption-alignment.json").is_file() else None)
     if captions is not None:
         props["ir"]["caption_cues"] = captions
+    if hybrid_segment is not None:
+        props['fastCardBackgrounds'] = hybrid_segment['backgrounds']
     package = package_request_from_intent()
     if package:  # a packaged video carries the column's badge instead of the product label
         props["badge"] = {"text": package.get("badge", ""), "color": package["accent"]}
@@ -920,13 +925,17 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     except ValueError as exc:
         raise G2Fault("RENDER_CONFIG_INVALID", str(exc)) from exc
     write_json(ARTIFACTS / "render-resources.json", resources)
-    argv = [NODE, CLI, "render", "src/index.ts", "G2CommunicationNoise", VIDEO_PATH,
+    target = hybrid_segment['output'] if hybrid_segment else VIDEO_PATH
+    argv = [NODE, CLI, "render", "src/index.ts", "G2CommunicationNoise", target,
             f"--props={props_path}", f"--public-dir={FIXTURE_ROOT}", "--width=1920", "--height=1080", "--fps=30",
             f"--duration={compiled['total_frames']}", "--codec=h264", "--audio-codec=aac", "--pixel-format=yuv420p",
             f"--concurrency={resources['concurrency']}", "--crf=18", f"--browser-executable={CHROME}", "--overwrite=false",
             RENDER_NO_CACHE]
+    if hybrid_segment is not None:
+        argv.extend([f"--frames={hybrid_segment['start_frame']}-{hybrid_segment['end_frame'] - 1}", '--muted', '--color-space=bt709'])
     render_timeout = max(1200, math.ceil(compiled["total_frames"] / FPS * 6)) if CONTENT_MODE else 1200
-    _run_fixed_command("remotion-render", argv, renderer, timeout=render_timeout)
+    label = f"remotion-{hybrid_segment['label']}" if hybrid_segment else 'remotion-render'
+    _run_fixed_command(label, argv, renderer, timeout=render_timeout)
 
 
 def verify_media(compiled: dict, alignment: dict) -> dict:
@@ -1023,7 +1032,7 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
                        "beat_count": len(checked["beats"]), "alignment_granularity": "phrase"},
           "visual_beats": action_changes, "scene_samples": samples, "contact_sheet": "artifacts/contact-sheet.jpg",
           "captions": {"burned_in": True, "srt": "artifacts/captions.srt", "alignment": "phrase-level measured PCM activity"}}
-    if ir.get("presentation", {}).get("preset") == "information_cards":
+    if ir.get("presentation", {}).get("preset") == "information_cards" or (PACKAGING_INPUT or {}).get('production_plan', {}).get('executor', {}).get('id') == 'hybrid_cards':
         from g2.fast_cards import verify_captions
         verify_captions(sys.modules[__name__], qa)
     else:

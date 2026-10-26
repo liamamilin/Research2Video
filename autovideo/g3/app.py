@@ -299,14 +299,18 @@ class CreateJobRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_content_options(self):
+        mixed_cards = (self.production_mode == "fast" and self.video_form == "information_cards"
+                       and self.visual_storytelling and self.input_mode == "narration" and self.chapters)
         if self.image_materials:
-            if self.video_form not in {"object_showcase", "dynamic_collage"}:
+            if self.video_form not in {"object_showcase", "dynamic_collage"} and not mixed_cards:
                 raise ValueError("image_materials 用于对象展示或动态拼贴")
             ids = [item.image_id for item in self.image_materials]
             if len(set(ids)) != len(ids) or (self.slideshow_images and self.slideshow_images != ids):
                 raise ValueError("图片素材编号重复或与图片清单不一致")
             self.slideshow_images = ids
             mapped = [item.placements is not None for item in self.image_materials]
+            if mixed_cards and not all(mapped):
+                raise ValueError("快速混合画面的图片需要指定讲稿段落 placements")
             if any(mapped):
                 if not all(mapped) or self.input_mode != "narration" or not self.chapters:
                     raise ValueError("段落配图须全部明确指定 placements，并使用分章讲稿模式")
@@ -337,7 +341,7 @@ class CreateJobRequest(BaseModel):
         if self.duration_mode == "content":
             if self.video_form not in {"auto", "process_diagram", "information_motion", "kinetic_typography", "image_slideshow", "chat_dialogue", "information_cards", "object_showcase", "dynamic_collage"}:
                 raise ValueError("按内容组织请选择流程动态图解或简洁信息动效，也可选择动态排版、图片轮播和聊天对话体")
-        if self.slideshow_images and self.video_form not in {"image_slideshow", "object_showcase", "dynamic_collage"}:
+        if self.slideshow_images and self.video_form not in {"image_slideshow", "object_showcase", "dynamic_collage"} and not mixed_cards:
             raise ValueError("图片素材只用于图片轮播、对象展示或动态拼贴")
         if self.video_form in {"object_showcase", "dynamic_collage"}:
             if not self.slideshow_images:

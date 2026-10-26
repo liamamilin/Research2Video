@@ -101,7 +101,7 @@ def test_lost_submit_reconciles_frozen_images_without_recapture(enabled):
     assert len(acquired) == 1
 
 
-def test_explicit_empty_manual_choice_and_fast_cards_do_not_trigger_capture(enabled):
+def test_explicit_empty_manual_choice_skips_and_fast_mixed_mode_acquires(enabled):
     engine, acquired = enabled
     row = script()
     version = store.get_version(row["id"], 1)
@@ -112,9 +112,26 @@ def test_explicit_empty_manual_choice_and_fast_cards_do_not_trigger_capture(enab
     other = script()
     engine.statuses = ["COMPLETED"]
     fast = video_render.create(other, production_mode="fast")
-    assert fast["visuals"]["state"] == "skipped"
+    assert fast["visuals"]["state"] == "pending"
     assert video_render.process(fast["id"]) == "COMPLETED"
-    assert acquired == []
+    assert acquired == [URL]
+    assert engine.posts[-1]['production_mode'] == 'fast'
+    assert engine.posts[-1]['video_form'] == 'information_cards'
+    assert engine.posts[-1]['visual_storytelling'] is True
+    assert engine.posts[-1]['image_materials'][0]['placements'] == [{'chapter_index': 0, 'paragraph_index': 1}]
+
+
+def test_matrix_fast_setting_keeps_its_executor_when_automatic_images_arrive():
+    request = {'visual_storytelling': True, 'chapters': [{'title': '功能', 'paragraphs': ['页面功能。']}],
+               'production_context': {'matrix': {'id': 'app-check', 'settings': {
+                   'production_mode': 'fast', 'video_form': 'information_cards'}}}}
+    selected = {'video_form': 'object_showcase', 'production_mode': 'standard',
+                'image_materials': [{'image_id': 'existing', 'placements': [{'chapter_index': 0, 'paragraph_index': 0}]}]}
+    result = visuals.attach(copy.deepcopy(request), selected)
+    assert result['production_mode'] == 'fast' and result['video_form'] == 'information_cards'
+    assert result['visual_style'] == 'editorial_light'
+    assert result['image_materials'] == selected['image_materials']
+    assert not visuals.fast_visuals({**request, 'visual_storytelling': False})
 
 
 def test_snapshot_tampering_is_refused_before_network_submit(enabled):

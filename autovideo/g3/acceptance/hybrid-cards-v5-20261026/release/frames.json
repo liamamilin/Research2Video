@@ -1,0 +1,185 @@
+[
+  {
+    "file": "frame-001.png",
+    "frame": 277,
+    "seconds": 9.233,
+    "scene": "card_1",
+    "component": "title_card",
+    "state": "settled"
+  },
+  {
+    "file": "frame-002.png",
+    "frame": 654,
+    "seconds": 21.8,
+    "scene": "card_2",
+    "component": "concept_reveal",
+    "state": "settled"
+  },
+  {
+    "file": "frame-003.png",
+    "frame": 671,
+    "seconds": 22.367,
+    "scene": "card_3",
+    "state": "boundary-1"
+  },
+  {
+    "file": "frame-004.png",
+    "frame": 672,
+    "seconds": 22.4,
+    "scene": "card_3",
+    "state": "boundary+0"
+  },
+  {
+    "file": "frame-005.png",
+    "frame": 680,
+    "seconds": 22.667,
+    "scene": "card_3",
+    "state": "boundary+8"
+  },
+  {
+    "file": "frame-006.png",
+    "frame": 708,
+    "seconds": 23.6,
+    "scene": "card_3",
+    "component": "object_showcase",
+    "state": "opening"
+  },
+  {
+    "file": "frame-007.png",
+    "frame": 1079,
+    "seconds": 35.967,
+    "scene": "card_3",
+    "component": "object_showcase",
+    "state": "settled"
+  },
+  {
+    "file": "frame-008.png",
+    "frame": 1133,
+    "seconds": 37.767,
+    "scene": "card_4",
+    "component": "price_change",
+    "state": "opening"
+  },
+  {
+    "file": "frame-009.png",
+    "frame": 1438,
+    "seconds": 47.933,
+    "scene": "card_4",
+    "component": "price_change",
+    "state": "settled"
+  },
+  {
+    "file": "frame-010.png",
+    "frame": 1492,
+    "seconds": 49.733,
+    "scene": "card_5",
+    "component": "flow_diagram",
+    "state": "opening"
+  },
+  {
+    "file": "frame-011.png",
+    "frame": 1865,
+    "seconds": 62.167,
+    "scene": "card_5",
+    "component": "flow_diagram",
+    "state": "settled"
+  },
+  {
+    "file": "frame-012.png",
+    "frame": 1919,
+    "seconds": 63.967,
+    "scene": "card_6",
+    "component": "data_chart",
+    "state": "opening"
+  },
+  {
+    "file": "frame-013.png",
+    "frame": 2305,
+    "seconds": 76.833,
+    "scene": "card_6",
+    "component": "data_chart",
+    "state": "settled"
+  },
+  {
+    "file": "frame-014.png",
+    "frame": 2322,
+    "seconds": 77.4,
+    "scene": "card_7",
+    "state": "boundary-1"
+  },
+  {
+    "file": "frame-015.png",
+    "frame": 2323,
+    "seconds": 77.433,
+    "scene": "card_7",
+    "state": "boundary+0"
+  },
+  {
+    "file": "frame-016.png",
+    "frame": 2331,
+    "seconds": 77.7,
+    "scene": "card_7",
+    "state": "boundary+8"
+  },
+  {
+    "file": "frame-017.png",
+    "frame": 2689,
+    "seconds": 89.633,
+    "scene": "card_7",
+    "component": "concept_reveal",
+    "state": "settled"
+  },
+  {
+    "file": "frame-018.png",
+    "frame": 2706,
+    "seconds": 90.2,
+    "scene": "card_8_p1",
+    "state": "boundary-1"
+  },
+  {
+    "file": "frame-019.png",
+    "frame": 2707,
+    "seconds": 90.233,
+    "scene": "card_8_p1",
+    "state": "boundary+0"
+  },
+  {
+    "file": "frame-020.png",
+    "frame": 2715,
+    "seconds": 90.5,
+    "scene": "card_8_p1",
+    "state": "boundary+8"
+  },
+  {
+    "file": "frame-021.png",
+    "frame": 2743,
+    "seconds": 91.433,
+    "scene": "card_8_p1",
+    "component": "comparison",
+    "state": "opening"
+  },
+  {
+    "file": "frame-022.png",
+    "frame": 2989,
+    "seconds": 99.633,
+    "scene": "card_8_p1",
+    "component": "comparison",
+    "state": "settled"
+  },
+  {
+    "file": "frame-023.png",
+    "frame": 3043,
+    "seconds": 101.433,
+    "scene": "card_8_p2",
+    "component": "concept_reveal",
+    "state": "opening"
+  },
+  {
+    "file": "frame-024.png",
+    "frame": 3156,
+    "seconds": 105.2,
+    "scene": "card_8_p2",
+    "component": "concept_reveal",
+    "state": "settled"
+  }
+]

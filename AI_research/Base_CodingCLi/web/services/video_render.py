@@ -372,11 +372,8 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
     try:
         materials = screenshots.render_materials(script["id"], version, get_client().base_url)
         if materials:
-            # Explicit editorial choices override recipe defaults only for this
-            # render. Fast cards cannot accept images; reject that explicit choice.
-            if production_mode == "fast":
-                raise RenderError("当前版本已选择段落配图，请用标准制作；快速卡片不接收图片")
-            request.update(materials)
+            from core.video.visual_materials import attach
+            attach(request, materials)
         if recover_download:
             previous = store.list_renders(script["id"])
             latest = previous[0] if previous else None

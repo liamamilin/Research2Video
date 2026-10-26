@@ -395,7 +395,8 @@ def verify_captions(pipeline, qa: dict) -> dict:
     qa["fast_cards"] = {"caption_cues_checked": len(plan["cues"]), "caption_frames_checked": len(targets),
                         "minimum_caption_dark_pixels": min(counts), "minimum_glyph_f1": min(scores),
                         "exact_srt_coverage": True, "alignment": plan["method"],
-                        "executor": "ffmpeg_cards", "manual_page_copy": False}
+                        "executor": (getattr(pipeline, 'PACKAGING_INPUT', None) or {}).get('production_plan', {}).get('executor', {}).get('id', 'ffmpeg_cards'),
+                        "manual_page_copy": False}
     return qa
 
 

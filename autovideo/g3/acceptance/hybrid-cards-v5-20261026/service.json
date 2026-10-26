@@ -1,0 +1,32 @@
+{
+  "old_pid": 10570,
+  "new_server": {
+    "pid": 33490,
+    "started_at": "2026-10-26T12:27:28.822326+08:00",
+    "base_url": "http://127.0.0.1:8011"
+  },
+  "launch": {
+    "status": "ready",
+    "action": "started",
+    "pid": 33490,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  },
+  "before": {
+    "total": 294,
+    "completed": 217,
+    "running": 0,
+    "needs_input": 1
+  },
+  "after": {
+    "total": 294,
+    "completed": 217,
+    "running": 0,
+    "needs_input": 1
+  },
+  "scope": "Loaded hybrid fast-card API and executor; idle queue, existing jobs preserved"
+}

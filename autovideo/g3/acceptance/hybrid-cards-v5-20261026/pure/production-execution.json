@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "production_plan_sha256": "33c684d08bd18f628393964e929251aec40a9f952c1612103448d1a56885f597",
+  "executor": "ffmpeg_cards",
+  "encoder": "h264_videotoolbox",
+  "fallbacks": [],
+  "render_seconds": 14.884,
+  "form": "information_cards",
+  "style": {
+    "id": "editorial_light",
+    "version": 1,
+    "background": "#f3f5f1",
+    "surface": "#ffffff",
+    "text": "#182720",
+    "muted": "#637168",
+    "accent": "#1f7a4d",
+    "warning": "#9b650c",
+    "subtitle": "#182720"
+  },
+  "page_count": 8,
+  "editorial_layout_version": 4,
+  "caption_plan_version": 2,
+  "manual_page_copy": false,
+  "packaging_owner": "shared_package_stage",
+  "music": {
+    "mode": "none",
+    "selection": {
+      "enabled": false,
+      "level_db": -18.0,
+      "ducking": true,
+      "loop": true,
+      "fade_seconds": 1.2,
+      "asset_id": "layered_space"
+    },
+    "background_music_generated": false
+  }
+}

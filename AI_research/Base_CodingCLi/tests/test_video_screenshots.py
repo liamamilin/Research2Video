@@ -89,8 +89,10 @@ def test_registration_snapshot_binding_and_changed_script_are_checked(video_env,
     screenshots.select(script["id"], version, "object_showcase", [], engine.base_url)
     assert store.get_render(render["id"])["request"] == request
     screenshots.select(script["id"], version, "dynamic_collage", [material(asset)], engine.base_url)
-    with pytest.raises(video_render.RenderError, match="快速卡片"):
-        video_render.create(script, production_mode="fast")
+    store.update_render(render['id'], status='FAILED')
+    mixed = video_render.create(script, production_mode="fast")['request']
+    assert mixed['production_mode'] == 'fast' and mixed['video_form'] == 'information_cards'
+    assert mixed['image_materials'] == request['image_materials']
     changed = copy.deepcopy(version)
     changed["sections"][0]["paragraphs"][0]["text"] = "另一篇讲稿。"
     with pytest.raises(screenshots.ScreenshotError, match="不一致"):

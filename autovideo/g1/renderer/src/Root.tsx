@@ -425,7 +425,30 @@ function ExplanationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
   </AbsoluteFill>;
 }
 
-function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge}) {
+// Hybrid clips contain only the picture. FFmpeg adds one continuous voice and
+// caption track after joining them with the still cards.
+type FastCardBackgrounds = Record<string,{path:string;still:boolean}>;
+function FastCardsVideo({ir, backgrounds}: {ir: Timeline; backgrounds: FastCardBackgrounds}) {
+  const frame=useCurrentFrame();
+  const scenes=React.useMemo(()=>linkScenes(ir.scenes),[ir.scenes]);
+  const linked={...ir,scenes};
+  const scene=scenes.find(s=>frame>=s.start_frame&&frame<s.end_frame)??scenes[scenes.length-1];
+  const transition=transitionAt(scene,frame),previous=scene.previous_scene;
+  const picture=(current:Scene,at:number)=><AbsoluteFill>
+    <Img src={staticFile(backgrounds[current.id].path)} style={{width:1920,height:1080}}/>
+    {!backgrounds[current.id].still&&<div style={{position:'absolute',left:140,top:275,width:1640,height:531,overflow:'hidden'}}>
+      <div style={{position:'absolute',left:13,top:-227,width:1920,height:1080,transform:'scale(.84)',transformOrigin:'0 0'}}>
+        <InformationVideo ir={linked} sceneOverride={current} frameOverride={at} stageOnly/>
+      </div>
+    </div>}
+  </AbsoluteFill>;
+  return <AbsoluteFill>{picture(scene,frame)}
+    {transition.active&&previous&&<AbsoluteFill style={{opacity:1-transition.progress}}>{picture(previous,previous.end_frame-1)}</AbsoluteFill>}
+  </AbsoluteFill>;
+}
+
+function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge; fastCardBackgrounds?:FastCardBackgrounds}) {
+  if(props.fastCardBackgrounds)return <FastCardsVideo ir={props.ir} backgrounds={props.fastCardBackgrounds}/>;
   if (props.ir.presentation?.preset === 'explanation') return <ExplanationVideo {...props}/>;
   if (['information_cards', 'kinetic_typography', 'image_slideshow', 'chat_dialogue', 'object_showcase', 'dynamic_collage'].includes(props.ir.presentation?.preset || '')) return <CreativeVideo ir={props.ir} badge={props.badge}/>;
   return props.ir.presentation?.preset === 'information_motion' ? <InformationVideo ir={props.ir} badge={props.badge}/> : <LegacyVideo {...props}/>;

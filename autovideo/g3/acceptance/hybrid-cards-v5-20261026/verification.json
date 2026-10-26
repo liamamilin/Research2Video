@@ -1,0 +1,73 @@
+{
+  "version": 5,
+  "api_completed_job": "8815f6df-6f3a-4865-abc9-d5efdd8a782b",
+  "normal_api_flow": "COMPLETED",
+  "content": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 3174,
+    "duration_seconds": 105.8,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.9999656215344388,
+    "decoded_rms": 0.08130321651697159,
+    "full_decode": "PASS"
+  },
+  "captions": {
+    "caption_cues_checked": 30,
+    "caption_frames_checked": 53,
+    "minimum_caption_dark_pixels": 1991,
+    "minimum_glyph_f1": 0.9867439933719967,
+    "exact_srt_coverage": true,
+    "alignment": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+    "executor": "hybrid_cards",
+    "manual_page_copy": false
+  },
+  "stills": 1056,
+  "motion": 2118,
+  "components": [
+    "title_card",
+    "concept_reveal",
+    "object_showcase",
+    "price_change",
+    "flow_diagram",
+    "data_chart",
+    "concept_reveal",
+    "comparison",
+    "concept_reveal"
+  ],
+  "tests": {
+    "engine": {
+      "passed": 841,
+      "skipped": 1,
+      "deselected": 1
+    },
+    "research_related": 38,
+    "research_video_suite": {
+      "passed": 700,
+      "failed": 1,
+      "failure": "Pre-existing flash script_style golden mismatch; current HEAD recipe already differs from golden snapshot"
+    }
+  },
+  "checks": {
+    "typescript": "PASS",
+    "git_diff_check": "PASS",
+    "real_model": true,
+    "real_tts": true,
+    "visual_contact_review": "PASS",
+    "raw_clips_preserved": true,
+    "normalized_timescale": 90000,
+    "normalized_color": "BT.709 limited range"
+  },
+  "rollout": {
+    "autovideo": "loaded; 294 existing jobs preserved",
+    "research": "Current PID 2010 still predates V5; render submission and queued publication work remain active; restart deferred"
+  },
+  "git": "Commit scope: V5 hybrid production and acceptance; unrelated parallel-chat changes preserved"
+}

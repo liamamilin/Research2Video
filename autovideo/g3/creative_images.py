@@ -78,7 +78,8 @@ def freeze_images(data_dir: Path, input_dir: Path, request: dict) -> dict:
     ids = request.get("slideshow_images") or []
     if not ids:
         return request
-    if request.get("video_form") not in {"image_slideshow", "object_showcase", "dynamic_collage"} or len(ids) > MAX_IMAGES or len(set(ids)) != len(ids):
+    from g2.production_plan import hybrid_enabled
+    if (request.get("video_form") not in {"image_slideshow", "object_showcase", "dynamic_collage"} and not hybrid_enabled(request)) or len(ids) > MAX_IMAGES or len(set(ids)) != len(ids):
         raise ImageImportError("图片素材只用于图片轮播、对象展示或动态拼贴，最多 12 张且不能重复")
     if request.get("parent_job_id") and request.get("slideshow_images_resolved"):
         parent_id = str(UUID(request["parent_job_id"]))

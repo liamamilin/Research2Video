@@ -1,0 +1,967 @@
+{
+  "pages": [
+    {
+      "id": "card_1",
+      "component": "title_card",
+      "props": {
+        "title": "快速讲解也能看清重点",
+        "subtitle": "价格上涨之后，这个工具还值不值得用？",
+        "scene_flow": {
+          "version": 1,
+          "profile": "brief",
+          "entry": "cut",
+          "paragraph_ids": [
+            "card_1"
+          ],
+          "part_index": 1,
+          "part_count": 1
+        },
+        "story": {
+          "version": 1,
+          "role": "question",
+          "importance": "key",
+          "density": "light",
+          "entities": []
+        }
+      },
+      "story_role": "question",
+      "importance": "key",
+      "entities": [
+        {
+          "name": "这个工具"
+        }
+      ]
+    },
+    {
+      "id": "card_2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "观看顺序",
+        "lines": [
+          "使用界面 → 费用 → 文件处理路径",
+          "普通说明只保留几个要点",
+          "重点画面再展开"
+        ],
+        "visuals": [],
+        "scene_flow": {
+          "version": 1,
+          "profile": "brief",
+          "entry": "dissolve",
+          "paragraph_ids": [
+            "card_2"
+          ],
+          "part_index": 1,
+          "part_count": 1
+        },
+        "story": {
+          "version": 1,
+          "role": "bridge",
+          "importance": "normal",
+          "density": "normal",
+          "entities": []
+        }
+      },
+      "story_role": "bridge",
+      "importance": "normal",
+      "entities": [
+        {
+          "name": "使用界面"
+        },
+        {
+          "name": "费用"
+        },
+        {
+          "name": "文件处理路径"
+        }
+      ]
+    },
+    {
+      "id": "card_3",
+      "component": "concept_reveal",
+      "props": {
+        "title": "本地方案产品界面",
+        "lines": [
+          "上：单次成本、响应时间",
+          "下：上传材料 → 开始处理 → 查看结果"
+        ],
+        "visuals": [
+          {
+            "target": "line:0",
+            "icon": "clock"
+          },
+          {
+            "target": "line:1",
+            "icon": "result"
+          }
+        ]
+      },
+      "material_cues": [
+        {
+          "image_index": 0,
+          "region_index": 0,
+          "phrase": "上面是单次成本和响应时间"
+        },
+        {
+          "image_index": 0,
+          "region_index": 1,
+          "phrase": "下面是上传材料、开始处理、查看结果这条路径"
+        }
+      ],
+      "material_summary_phrase": "讲到哪个部分，就看页面里的对应位置。",
+      "story_role": "explain",
+      "importance": "key",
+      "entities": [
+        {
+          "name": "本地方案产品界面",
+          "targets": [
+            "image:0",
+            "region:0:0",
+            "region:0:1"
+          ]
+        },
+        {
+          "name": "单次成本",
+          "targets": [
+            "region:0:0"
+          ]
+        },
+        {
+          "name": "响应时间",
+          "targets": [
+            "region:0:0"
+          ]
+        },
+        {
+          "name": "文件处理流程",
+          "targets": [
+            "region:0:1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "card_4",
+      "component": "price_change",
+      "props": {
+        "title": "价格变化",
+        "unit": "元",
+        "rows": [
+          {
+            "label": "单次价格",
+            "before": "20",
+            "after": "25",
+            "change": "5",
+            "direction": "up"
+          }
+        ],
+        "staged": true
+      },
+      "story_role": "compare",
+      "importance": "key",
+      "entities": [
+        {
+          "name": "单次价格"
+        }
+      ]
+    },
+    {
+      "id": "card_5",
+      "component": "flow_diagram",
+      "props": {
+        "title": "一次请求的处理路径",
+        "nodes": [
+          {
+            "id": "user",
+            "label": "用户"
+          },
+          {
+            "id": "file",
+            "label": "文件"
+          },
+          {
+            "id": "server",
+            "label": "服务器处理"
+          },
+          {
+            "id": "result",
+            "label": "生成结果"
+          },
+          {
+            "id": "return_user",
+            "label": "返回用户"
+          }
+        ],
+        "edges": [
+          {
+            "id": "e1",
+            "from": "user",
+            "to": "file",
+            "label": "上传",
+            "relation": "flow"
+          },
+          {
+            "id": "e2",
+            "from": "file",
+            "to": "server",
+            "label": "提交",
+            "relation": "flow"
+          },
+          {
+            "id": "e3",
+            "from": "server",
+            "to": "result",
+            "label": "处理完成",
+            "relation": "flow"
+          },
+          {
+            "id": "e4",
+            "from": "result",
+            "to": "return_user",
+            "label": "返回",
+            "relation": "flow"
+          }
+        ],
+        "paths": [],
+        "takeaway": "上传文件 → 服务器处理 → 生成结果 → 返回用户",
+        "visuals": [
+          {
+            "target": "node:file",
+            "icon": "file",
+            "action": "send",
+            "phrase": "用户上传文件"
+          },
+          {
+            "target": "node:server",
+            "icon": "server",
+            "action": "process",
+            "phrase": "服务器开始处理"
+          },
+          {
+            "target": "node:result",
+            "icon": "result",
+            "action": "complete",
+            "phrase": "处理完成后生成结果"
+          },
+          {
+            "target": "node:return_user",
+            "icon": "network",
+            "action": "send",
+            "phrase": "再把结果返回给用户"
+          }
+        ]
+      },
+      "story_role": "explain",
+      "importance": "key",
+      "entities": [
+        {
+          "name": "用户",
+          "targets": [
+            "node:user"
+          ]
+        },
+        {
+          "name": "文件",
+          "targets": [
+            "node:file"
+          ]
+        },
+        {
+          "name": "服务器",
+          "targets": [
+            "node:server"
+          ]
+        },
+        {
+          "name": "结果",
+          "targets": [
+            "node:result"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "card_6",
+      "component": "data_chart",
+      "props": {
+        "title": "月度处理次数",
+        "kind": "trend",
+        "unit": "万次",
+        "categories": [
+          "一月",
+          "二月",
+          "三月"
+        ],
+        "series": [
+          {
+            "name": "处理次数",
+            "values": [
+              12,
+              18,
+              16
+            ]
+          }
+        ],
+        "takeaway": "二月更高，三月有所回落",
+        "focus_index": 1,
+        "reveal_phrases": [
+          "一月处理12万次",
+          "二月处理18万次",
+          "三月处理16万次"
+        ]
+      },
+      "story_role": "explain",
+      "importance": "key",
+      "entities": [
+        {
+          "name": "处理次数",
+          "targets": [
+            "series:0"
+          ]
+        },
+        {
+          "name": "二月高点",
+          "targets": [
+            "category:1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "card_7",
+      "component": "concept_reveal",
+      "props": {
+        "title": "把视线收回来",
+        "lines": [
+          "看懂页面、费用和过程",
+          "按自己的使用方式作选择",
+          "日常说明简洁，关键差异讲清"
+        ],
+        "visuals": [],
+        "scene_flow": {
+          "version": 1,
+          "profile": "brief",
+          "entry": "dissolve",
+          "paragraph_ids": [
+            "card_7"
+          ],
+          "part_index": 1,
+          "part_count": 1
+        },
+        "story": {
+          "version": 1,
+          "role": "bridge",
+          "importance": "normal",
+          "density": "normal",
+          "entities": []
+        }
+      },
+      "story_role": "bridge",
+      "importance": "normal",
+      "entities": [
+        {
+          "name": "使用界面"
+        },
+        {
+          "name": "费用"
+        },
+        {
+          "name": "处理过程"
+        }
+      ]
+    },
+    {
+      "id": "card_8_p1",
+      "component": "comparison",
+      "props": {
+        "left": {
+          "label": "价格变化",
+          "items": [
+            "20元 → 25元",
+            "增加5元"
+          ]
+        },
+        "right": {
+          "label": "处理流程",
+          "items": [
+            "从上传文件开始",
+            "到返回结果结束"
+          ]
+        },
+        "highlights": [
+          "价格变化：增加5元",
+          "处理流程：上传 → 返回"
+        ],
+        "visuals": [
+          {
+            "target": "side:left",
+            "icon": "cost"
+          }
+        ],
+        "scene_flow": {
+          "version": 1,
+          "profile": "brief",
+          "entry": "dissolve",
+          "paragraph_ids": [
+            "card_8"
+          ],
+          "part_index": 1,
+          "part_count": 2
+        },
+        "story": {
+          "version": 1,
+          "role": "recap",
+          "importance": "key",
+          "density": "normal",
+          "entities": [
+            {
+              "id": "e_ad9936ecaf4e",
+              "name": "价格变化",
+              "color": "#AF5969",
+              "targets": [
+                "side:left"
+              ]
+            },
+            {
+              "id": "e_fe24c05b12c3",
+              "name": "处理流程",
+              "color": "#17784B",
+              "targets": [
+                "side:right"
+              ]
+            }
+          ],
+          "recap": [
+            "card_5",
+            "card_6"
+          ]
+        }
+      },
+      "story_role": "recap",
+      "importance": "key",
+      "entities": [
+        {
+          "name": "价格变化",
+          "targets": [
+            "side:left"
+          ]
+        },
+        {
+          "name": "处理流程",
+          "targets": [
+            "side:right"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "card_8_p2",
+      "component": "concept_reveal",
+      "props": {
+        "title": "本次介绍的重点",
+        "lines": [
+          "价格：20元 → 25元",
+          "流程：上传文件 → 返回结果"
+        ],
+        "visuals": [],
+        "scene_flow": {
+          "version": 1,
+          "profile": "brief",
+          "entry": "dissolve",
+          "paragraph_ids": [
+            "card_8"
+          ],
+          "part_index": 2,
+          "part_count": 2
+        },
+        "story": {
+          "version": 1,
+          "role": "recap",
+          "importance": "normal",
+          "density": "normal",
+          "entities": [],
+          "recap": [
+            "card_5",
+            "card_6"
+          ]
+        }
+      },
+      "story_role": "recap",
+      "importance": "normal",
+      "entities": [
+        {
+          "name": "价格变化"
+        },
+        {
+          "name": "处理流程"
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": "card_1",
+      "chapter_id": "c1",
+      "title": "快速讲解也能看清重点",
+      "segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ],
+      "text": "价格上涨之后，这个工具还值不值得用？这期先看产品页面，再把价格变化和处理流程放到一起讲清楚。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n1",
+          "text": "价格上涨之后，这个工具还值不值得用？"
+        },
+        {
+          "id": "c1_n2",
+          "text": "这期先看产品页面，再把价格变化和处理流程放到一起讲清楚。"
+        }
+      ],
+      "image_indices": [],
+      "paragraph_ids": [
+        "card_1"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "duration_ms": 9288
+    },
+    {
+      "id": "card_2",
+      "chapter_id": "c1",
+      "title": "快速讲解也能看清重点",
+      "segment_ids": [
+        "c1_n3",
+        "c1_n4",
+        "c1_n5"
+      ],
+      "text": "先约定观看顺序。我们从使用界面出发，接着讲费用，再沿着文件的处理路径看结果。普通说明只保留几个要点，重点画面再展开。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n3",
+          "text": "先约定观看顺序。"
+        },
+        {
+          "id": "c1_n4",
+          "text": "我们从使用界面出发，接着讲费用，再沿着文件的处理路径看结果。"
+        },
+        {
+          "id": "c1_n5",
+          "text": "普通说明只保留几个要点，重点画面再展开。"
+        }
+      ],
+      "image_indices": [],
+      "paragraph_ids": [
+        "card_2"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "duration_ms": 12022
+    },
+    {
+      "id": "card_3",
+      "chapter_id": "c1",
+      "title": "快速讲解也能看清重点",
+      "segment_ids": [
+        "c1_n6",
+        "c1_n7",
+        "c1_n8"
+      ],
+      "text": "先看本地方案的产品界面。上面是单次成本和响应时间，下面是上传材料、开始处理、查看结果这条路径。讲到哪个部分，就看页面里的对应位置。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n6",
+          "text": "先看本地方案的产品界面。"
+        },
+        {
+          "id": "c1_n7",
+          "text": "上面是单次成本和响应时间，下面是上传材料、开始处理、查看结果这条路径。"
+        },
+        {
+          "id": "c1_n8",
+          "text": "讲到哪个部分，就看页面里的对应位置。"
+        }
+      ],
+      "image_indices": [
+        0
+      ],
+      "image_materials": [
+        {
+          "image_index": 0,
+          "caption": "本地方案产品界面",
+          "role": "overall",
+          "regions": [
+            {
+              "region_index": 0,
+              "label": "成本和响应时间"
+            },
+            {
+              "region_index": 1,
+              "label": "文件处理流程"
+            }
+          ]
+        }
+      ],
+      "paragraph_ids": [
+        "card_3"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "duration_ms": 13595
+    },
+    {
+      "id": "card_4",
+      "chapter_id": "c1",
+      "title": "快速讲解也能看清重点",
+      "segment_ids": [
+        "c1_n9",
+        "c1_n10",
+        "c1_n11"
+      ],
+      "text": "再看价格变化。旧价格是20元，新价格是25元，增加5元。先看到旧值，再出现新值，最后把增加的5元突出显示。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n9",
+          "text": "再看价格变化。"
+        },
+        {
+          "id": "c1_n10",
+          "text": "旧价格是20元，新价格是25元，增加5元。"
+        },
+        {
+          "id": "c1_n11",
+          "text": "先看到旧值，再出现新值，最后把增加的5元突出显示。"
+        }
+      ],
+      "image_indices": [],
+      "paragraph_ids": [
+        "card_4"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "duration_ms": 11397
+    },
+    {
+      "id": "card_5",
+      "chapter_id": "c1",
+      "title": "快速讲解也能看清重点",
+      "segment_ids": [
+        "c1_n12",
+        "c1_n13",
+        "c1_n14"
+      ],
+      "text": "把一次请求的过程串起来。用户上传文件，服务器开始处理，处理完成后生成结果，再把结果返回给用户。沿着这条路径看，就能跟上每一步发生了什么。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n12",
+          "text": "把一次请求的过程串起来。"
+        },
+        {
+          "id": "c1_n13",
+          "text": "用户上传文件，服务器开始处理，处理完成后生成结果，再把结果返回给用户。"
+        },
+        {
+          "id": "c1_n14",
+          "text": "沿着这条路径看，就能跟上每一步发生了什么。"
+        }
+      ],
+      "image_indices": [],
+      "paragraph_ids": [
+        "card_5"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "duration_ms": 13668
+    },
+    {
+      "id": "card_6",
+      "chapter_id": "c1",
+      "title": "快速讲解也能看清重点",
+      "segment_ids": [
+        "c1_n15",
+        "c1_n16",
+        "c1_n17",
+        "c1_n18"
+      ],
+      "text": "使用量也在变化。一月处理12万次，二月处理18万次，三月处理16万次。二月更高，三月有所回落。趋势图按月份逐步出现，最后停在二月的高点。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n15",
+          "text": "使用量也在变化。"
+        },
+        {
+          "id": "c1_n16",
+          "text": "一月处理12万次，二月处理18万次，三月处理16万次。"
+        },
+        {
+          "id": "c1_n17",
+          "text": "二月更高，三月有所回落。"
+        },
+        {
+          "id": "c1_n18",
+          "text": "趋势图按月份逐步出现，最后停在二月的高点。"
+        }
+      ],
+      "image_indices": [],
+      "paragraph_ids": [
+        "card_6"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "duration_ms": 14117
+    },
+    {
+      "id": "card_7",
+      "chapter_id": "c1",
+      "title": "快速讲解也能看清重点",
+      "segment_ids": [
+        "c1_n19",
+        "c1_n20",
+        "c1_n21"
+      ],
+      "text": "现在把视线收回来。看懂页面、费用和过程之后，就可以根据自己的使用方式作出选择。日常的说明保持简洁，关键差异单独讲清楚。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n19",
+          "text": "现在把视线收回来。"
+        },
+        {
+          "id": "c1_n20",
+          "text": "看懂页面、费用和过程之后，就可以根据自己的使用方式作出选择。"
+        },
+        {
+          "id": "c1_n21",
+          "text": "日常的说明保持简洁，关键差异单独讲清楚。"
+        }
+      ],
+      "image_indices": [],
+      "paragraph_ids": [
+        "card_7"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "duration_ms": 12243
+    },
+    {
+      "id": "card_8_p1",
+      "chapter_id": "c1",
+      "title": "快速讲解也能看清重点",
+      "segment_ids": [
+        "c1_n22",
+        "c1_n23"
+      ],
+      "text": "最后回顾两个重点：价格从20元变成25元，增加5元；处理过程从上传文件开始，到返回结果结束。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n22",
+          "text": "最后回顾两个重点：价格从20元变成25元，增加5元；"
+        },
+        {
+          "id": "c1_n23",
+          "text": "处理过程从上传文件开始，到返回结果结束。"
+        }
+      ],
+      "image_indices": [],
+      "paragraph_ids": [
+        "card_8"
+      ],
+      "part_index": 1,
+      "part_count": 2,
+      "duration_ms": 9438
+    },
+    {
+      "id": "card_8_p2",
+      "chapter_id": "c1",
+      "title": "快速讲解也能看清重点",
+      "segment_ids": [
+        "c1_n24"
+      ],
+      "text": "把价格变化和处理流程一起记住，就能理解这次介绍的重点。",
+      "overview": [],
+      "narration": [
+        {
+          "id": "c1_n24",
+          "text": "把价格变化和处理流程一起记住，就能理解这次介绍的重点。"
+        }
+      ],
+      "image_indices": [],
+      "paragraph_ids": [
+        "card_8"
+      ],
+      "part_index": 2,
+      "part_count": 2,
+      "duration_ms": 5092
+    }
+  ],
+  "direction_version": 4,
+  "assembly": {
+    "version": 3,
+    "profile": "brief",
+    "timing": "measured narration; existing phrase boundaries",
+    "video_speed": 1.0,
+    "input_paragraphs": 8,
+    "visual_units": 9,
+    "extra_model_calls": 0,
+    "units": [
+      {
+        "id": "card_1",
+        "chapter_id": "c1",
+        "paragraph_ids": [
+          "card_1"
+        ],
+        "part_index": 1,
+        "part_count": 1,
+        "narration_segment_ids": [
+          "c1_n1",
+          "c1_n2"
+        ],
+        "duration_ms": 9288,
+        "image_indices": [],
+        "operation": "keep"
+      },
+      {
+        "id": "card_2",
+        "chapter_id": "c1",
+        "paragraph_ids": [
+          "card_2"
+        ],
+        "part_index": 1,
+        "part_count": 1,
+        "narration_segment_ids": [
+          "c1_n3",
+          "c1_n4",
+          "c1_n5"
+        ],
+        "duration_ms": 12022,
+        "image_indices": [],
+        "operation": "keep"
+      },
+      {
+        "id": "card_3",
+        "chapter_id": "c1",
+        "paragraph_ids": [
+          "card_3"
+        ],
+        "part_index": 1,
+        "part_count": 1,
+        "narration_segment_ids": [
+          "c1_n6",
+          "c1_n7",
+          "c1_n8"
+        ],
+        "duration_ms": 13595,
+        "image_indices": [
+          0
+        ],
+        "operation": "keep"
+      },
+      {
+        "id": "card_4",
+        "chapter_id": "c1",
+        "paragraph_ids": [
+          "card_4"
+        ],
+        "part_index": 1,
+        "part_count": 1,
+        "narration_segment_ids": [
+          "c1_n9",
+          "c1_n10",
+          "c1_n11"
+        ],
+        "duration_ms": 11397,
+        "image_indices": [],
+        "operation": "keep"
+      },
+      {
+        "id": "card_5",
+        "chapter_id": "c1",
+        "paragraph_ids": [
+          "card_5"
+        ],
+        "part_index": 1,
+        "part_count": 1,
+        "narration_segment_ids": [
+          "c1_n12",
+          "c1_n13",
+          "c1_n14"
+        ],
+        "duration_ms": 13668,
+        "image_indices": [],
+        "operation": "keep"
+      },
+      {
+        "id": "card_6",
+        "chapter_id": "c1",
+        "paragraph_ids": [
+          "card_6"
+        ],
+        "part_index": 1,
+        "part_count": 1,
+        "narration_segment_ids": [
+          "c1_n15",
+          "c1_n16",
+          "c1_n17",
+          "c1_n18"
+        ],
+        "duration_ms": 14117,
+        "image_indices": [],
+        "operation": "keep"
+      },
+      {
+        "id": "card_7",
+        "chapter_id": "c1",
+        "paragraph_ids": [
+          "card_7"
+        ],
+        "part_index": 1,
+        "part_count": 1,
+        "narration_segment_ids": [
+          "c1_n19",
+          "c1_n20",
+          "c1_n21"
+        ],
+        "duration_ms": 12243,
+        "image_indices": [],
+        "operation": "keep"
+      },
+      {
+        "id": "card_8_p1",
+        "chapter_id": "c1",
+        "paragraph_ids": [
+          "card_8"
+        ],
+        "part_index": 1,
+        "part_count": 2,
+        "narration_segment_ids": [
+          "c1_n22",
+          "c1_n23"
+        ],
+        "duration_ms": 9438,
+        "image_indices": [],
+        "operation": "split"
+      },
+      {
+        "id": "card_8_p2",
+        "chapter_id": "c1",
+        "paragraph_ids": [
+          "card_8"
+        ],
+        "part_index": 2,
+        "part_count": 2,
+        "narration_segment_ids": [
+          "c1_n24"
+        ],
+        "duration_ms": 5092,
+        "image_indices": [],
+        "operation": "split"
+      }
+    ]
+  }
+}

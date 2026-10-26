@@ -1,0 +1,472 @@
+{
+  "job_id": "a79a1596-ec45-4734-9159-26257ab9ff87",
+  "title": "快速讲解也能看清重点",
+  "status": "COMPLETED",
+  "active_stage": "COMPLETE",
+  "attempt_count": 1,
+  "cancel_requested": false,
+  "error_code": null,
+  "error_message": null,
+  "retryable": false,
+  "source_sha256": "a6faf18f165a95d361b4a15e769f6e70bd5a4850620b003ff5de665e8e4a827b",
+  "source_char_count": 497,
+  "target_duration_sec": 60,
+  "theme": "minimal_dark",
+  "voice_id": "zf_xiaoxiao",
+  "created_at": "2026-10-26T04:15:31.713+00:00",
+  "updated_at": "2026-10-26T04:17:26.407+00:00",
+  "version": 13,
+  "operation_type": "generate",
+  "parent_job_id": null,
+  "parent_attempt_no": null,
+  "scene_id": null,
+  "creative_intent": {
+    "audience": "关注 AI 的普通读者",
+    "purpose": "讲清新变化、影响与来源",
+    "tone": "简洁、客观",
+    "focus": "区分已知事实与尚未确认的信息，不补充材料之外的结论"
+  },
+  "revision_mode": null,
+  "input_mode": "narration",
+  "idempotency_key": null,
+  "background_music_resolved": {
+    "schema_version": 1,
+    "selection": {
+      "enabled": false,
+      "level_db": -18.0,
+      "ducking": true,
+      "loop": true,
+      "fade_seconds": 1.2,
+      "asset_id": "layered_space"
+    },
+    "asset": null,
+    "music_generated": false,
+    "scope": "content_only",
+    "engine": "local-mix-v1",
+    "sha256": "f891467b49c02cf16180e3e7459571ec06b2f01844798185ff114b24f62e7ea5"
+  },
+  "background_music": {
+    "enabled": false,
+    "level_db": -18.0,
+    "ducking": true,
+    "loop": true,
+    "fade_seconds": 1.2,
+    "asset_id": "layered_space"
+  },
+  "production_recipe_resolved": {
+    "schema_version": 1,
+    "catalog_sha256": "c0341400a0d7d25079a2caa1f335b42a8f47cfca21d3a52bffdcfde95105a49b",
+    "recipe": {
+      "version": 5,
+      "id": "ai_news",
+      "name": "AI 快讯",
+      "description": "突出新变化、核心数字与来源，适合产品更新和行业动态。",
+      "topics": [
+        "AI产品更新",
+        "行业动态",
+        "新闻简报"
+      ],
+      "recommended_forms": [
+        "F08",
+        "F10",
+        "F12",
+        "F04",
+        "F13"
+      ],
+      "defaults": {
+        "video_form": "kinetic_typography",
+        "duration_mode": "content",
+        "creative_intent": {
+          "audience": "关注 AI 的普通读者",
+          "purpose": "讲清新变化、影响与来源",
+          "tone": "简洁、客观",
+          "focus": "区分已知事实与尚未确认的信息，不补充材料之外的结论"
+        },
+        "packaging": {
+          "preset": "common",
+          "label": "AI快讯",
+          "intro": {
+            "seconds": 1.0
+          },
+          "outro": {
+            "seconds": 1.5
+          },
+          "source_card": {
+            "enabled": true
+          },
+          "sound": {
+            "enabled": true
+          }
+        },
+        "background_music": {
+          "enabled": false,
+          "asset_id": "layered_space",
+          "level_db": -18,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        }
+      },
+      "music": {
+        "mode": "optional",
+        "suggested_forms": [
+          "MF09"
+        ],
+        "asset_id": "layered_space",
+        "description": "可开启渐进音景，保持新闻旁白清楚；片头片尾仍用原提示音。 可在资源库选择已生成的音乐搭配本次配方。",
+        "generation_style": "electronic"
+      },
+      "material_guidance": "有图片可选动态拼贴；有对象整体、细节或对比图片可选对象展示。纯文稿沿用原形式。"
+    },
+    "selection": {
+      "video_form": "information_cards",
+      "duration_mode": "content",
+      "target_duration_sec": 60,
+      "voice_id": "zf_xiaoxiao",
+      "video_speed": 1.0,
+      "creative_intent": {
+        "audience": "关注 AI 的普通读者",
+        "purpose": "讲清新变化、影响与来源",
+        "tone": "简洁、客观",
+        "focus": "区分已知事实与尚未确认的信息，不补充材料之外的结论"
+      },
+      "background_music": {
+        "enabled": false,
+        "level_db": -18.0,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2,
+        "asset_id": "layered_space"
+      }
+    },
+    "music": {
+      "mode": "none",
+      "background_music_generated": false
+    },
+    "packaging_sha256": "b55b7f7b63f55a8b02a5104bf2ae2db99ec5ca120ffe463c38801ec85cc25006",
+    "sha256": "ffdcd3564e2fc2270e52f59157979310949690b248697fb961eb3468674e99e9"
+  },
+  "production_plan": {
+    "schema_version": 1,
+    "settings": {
+      "background_music": {
+        "enabled": false,
+        "level_db": -18.0,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2,
+        "asset_id": "layered_space"
+      },
+      "content_notices": [],
+      "creative_intent": {
+        "audience": "关注 AI 的普通读者",
+        "purpose": "讲清新变化、影响与来源",
+        "tone": "简洁、客观",
+        "focus": "区分已知事实与尚未确认的信息，不补充材料之外的结论"
+      },
+      "duration_mode": "content",
+      "music": null,
+      "packaging": {
+        "preset": "common",
+        "label": "AI快讯",
+        "intro": {
+          "seconds": 1.0
+        },
+        "outro": {
+          "seconds": 1.5
+        },
+        "source_card": {
+          "enabled": true
+        },
+        "sound": {
+          "enabled": false
+        }
+      },
+      "production_context": null,
+      "production_mode": "fast",
+      "production_recipe": "ai_news",
+      "target_duration_sec": 60,
+      "video_form": "information_cards",
+      "video_speed": 1.0,
+      "visual_style": "editorial_light",
+      "voice_id": "zf_xiaoxiao"
+    },
+    "origins": {
+      "packaging.label": "production_recipe",
+      "packaging.accent": "common",
+      "packaging.enabled": "common",
+      "packaging.intro.component": "common",
+      "packaging.intro.enabled": "common",
+      "packaging.intro.seconds": "production_recipe",
+      "packaging.outro.component": "common",
+      "packaging.outro.enabled": "common",
+      "packaging.outro.seconds": "production_recipe",
+      "packaging.badge.component": "common",
+      "packaging.badge.enabled": "common",
+      "packaging.source_card.component": "common",
+      "packaging.source_card.enabled": "production_recipe",
+      "packaging.source_card.seconds": "common",
+      "packaging.sound.component": "common",
+      "packaging.sound.enabled": "request",
+      "video_form": "fast_capability_selection",
+      "production_mode": "request",
+      "visual_style": "fast_capability_selection",
+      "duration_mode": "request",
+      "target_duration_sec": "common",
+      "voice_id": "request",
+      "video_speed": "common",
+      "creative_intent": "common",
+      "creative_intent.audience": "production_recipe",
+      "creative_intent.purpose": "production_recipe",
+      "creative_intent.tone": "production_recipe",
+      "creative_intent.focus": "production_recipe",
+      "packaging.preset": "production_recipe",
+      "background_music.enabled": "production_recipe",
+      "background_music.asset_id": "production_recipe",
+      "background_music.level_db": "production_recipe",
+      "background_music.ducking": "production_recipe",
+      "background_music.loop": "production_recipe",
+      "background_music.fade_seconds": "production_recipe",
+      "visual_style.accent": "packaging.accent"
+    },
+    "style": {
+      "id": "editorial_light",
+      "version": 1,
+      "background": "#f3f5f1",
+      "surface": "#ffffff",
+      "text": "#182720",
+      "muted": "#637168",
+      "accent": "#1f7a4d",
+      "warning": "#9b650c",
+      "subtitle": "#182720"
+    },
+    "executor": {
+      "id": "ffmpeg_cards",
+      "version": 1
+    },
+    "output": {
+      "width": 1920,
+      "height": 1080,
+      "fps": 30
+    },
+    "packaging_sha256": "b55b7f7b63f55a8b02a5104bf2ae2db99ec5ca120ffe463c38801ec85cc25006",
+    "packaging": {
+      "library": "autovideo-packaging",
+      "version": 2,
+      "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+      "selection": {
+        "preset": "common",
+        "label": "AI快讯",
+        "intro": {
+          "seconds": 1.0
+        },
+        "outro": {
+          "seconds": 1.5
+        },
+        "source_card": {
+          "enabled": true
+        },
+        "sound": {
+          "enabled": false
+        }
+      },
+      "components": {
+        "label": "AI快讯",
+        "accent": "#1f7a4d",
+        "enabled": true,
+        "intro": {
+          "component": "stinger",
+          "enabled": true,
+          "seconds": 1.0
+        },
+        "outro": {
+          "component": "end_card",
+          "enabled": true,
+          "seconds": 1.5
+        },
+        "badge": {
+          "component": "corner_badge",
+          "enabled": true
+        },
+        "source_card": {
+          "component": "source_card",
+          "enabled": true,
+          "seconds": 4.5
+        },
+        "sound": {
+          "component": "synth_sting",
+          "enabled": false
+        }
+      },
+      "package": {
+        "accent": "#1f7a4d",
+        "badge": "AI快讯",
+        "intro": {
+          "template": "stinger",
+          "title": "AI快讯",
+          "seconds": 1.0
+        },
+        "outro": {
+          "template": "end_card",
+          "title": "AI快讯",
+          "seconds": 1.5
+        }
+      },
+      "badge": {
+        "text": "AI快讯",
+        "color": "#1f7a4d"
+      },
+      "source_card": null,
+      "source_card_state": "no_sources",
+      "component_versions": {
+        "intro": {
+          "id": "stinger",
+          "version": 1
+        },
+        "outro": {
+          "id": "end_card",
+          "version": 2
+        },
+        "badge": {
+          "id": "corner_badge",
+          "version": 1
+        },
+        "source_card": {
+          "id": "source_card",
+          "version": 2
+        },
+        "sound": {
+          "id": "synth_sting",
+          "version": 1
+        }
+      },
+      "sha256": "b55b7f7b63f55a8b02a5104bf2ae2db99ec5ca120ffe463c38801ec85cc25006"
+    },
+    "recipe_sha256": "ffdcd3564e2fc2270e52f59157979310949690b248697fb961eb3468674e99e9",
+    "source_sha256": "a6faf18f165a95d361b4a15e769f6e70bd5a4850620b003ff5de665e8e4a827b",
+    "music": {
+      "mode": "none",
+      "selection": {
+        "enabled": false,
+        "level_db": -18.0,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2,
+        "asset_id": "layered_space"
+      },
+      "background_music_generated": false
+    },
+    "music_record_sha256": "f891467b49c02cf16180e3e7459571ec06b2f01844798185ff114b24f62e7ea5",
+    "sha256": "33c684d08bd18f628393964e929251aec40a9f952c1612103448d1a56885f597"
+  },
+  "production_mode": "fast",
+  "visual_style": "editorial_light",
+  "video_speed": 1.0,
+  "video_form": "information_cards",
+  "duration_mode": "content",
+  "input_analysis": {
+    "requested_form": "information_cards",
+    "selected_form": "information_cards",
+    "recommended_form": "information_cards",
+    "selection_mode": "manual",
+    "status": "ready",
+    "reason": "按指定形式制作，定稿讲稿逐字配音。",
+    "issues": [],
+    "retained_units": 23,
+    "excluded_units": 0
+  },
+  "resolved_video_form": "information_cards",
+  "attempts": [
+    {
+      "attempt_no": 1,
+      "status": "COMPLETED",
+      "started_at": "2026-10-26T04:15:32.059+00:00",
+      "completed_at": "2026-10-26T04:17:26.407+00:00",
+      "error_code": null,
+      "error_message": null,
+      "stages": [
+        {
+          "stage": "PLAN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-26T04:15:32.059+00:00",
+          "completed_at": "2026-10-26T04:15:32.439+00:00",
+          "duration_seconds": 0.0,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "VOICE_ALIGN",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-26T04:15:32.442+00:00",
+          "completed_at": "2026-10-26T04:16:02.275+00:00",
+          "duration_seconds": 29.76,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "STORYBOARD",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-26T04:15:32.445+00:00",
+          "completed_at": "2026-10-26T04:16:43.044+00:00",
+          "duration_seconds": 70.81,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "SCENE_IMAGES",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-26T04:16:43.056+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "BUILD_IR",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-26T04:16:43.064+00:00",
+          "completed_at": "2026-10-26T04:16:47.319+00:00",
+          "duration_seconds": 4.21,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "RENDER",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-26T04:16:47.322+00:00",
+          "completed_at": "2026-10-26T04:17:02.211+00:00",
+          "duration_seconds": 14.88,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "QUALITY_CHECK",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-26T04:17:02.217+00:00",
+          "completed_at": "2026-10-26T04:17:26.407+00:00",
+          "duration_seconds": 6.74,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "PACKAGE",
+          "status": "SUCCEEDED",
+          "started_at": "2026-10-26T04:17:08.969+00:00",
+          "completed_at": "2026-10-26T04:17:26.027+00:00",
+          "duration_seconds": 17.01,
+          "error_code": null,
+          "error_message": null
+        },
+        {
+          "stage": "AUDIO_MIX",
+          "status": "SKIPPED",
+          "started_at": null,
+          "completed_at": "2026-10-26T04:17:26.032+00:00",
+          "duration_seconds": null,
+          "error_code": null,
+          "error_message": null
+        }
+      ]
+    }
+  ]
+}

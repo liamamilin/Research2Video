@@ -17,6 +17,10 @@ COMPONENTS = (*motion.COMPONENTS, 'data_chart', 'scatter_chart', 'flow_diagram')
 
 
 def enabled(saved: dict, form: str) -> bool:
+    if saved.get('production_mode') == 'fast' or form == 'information_cards':
+        from g2.production_plan import hybrid_enabled
+        return bool(form == 'information_cards' and hybrid_enabled(saved)
+                    and all(row.get('placements') for row in saved.get('image_materials', [])))
     return bool(saved.get('visual_storytelling') and (saved.get('chapters') or saved.get('revision_mode') == 'narration')
                 and saved.get('production_mode') != 'fast'
                 and form not in {'information_cards', 'chat_dialogue', 'image_slideshow'}
@@ -53,6 +57,13 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
     system += ('明确的传递过程可以用flow_diagram：2到5个节点，edges连接已有节点，paths填空数组，附title和takeaway；布局由程序生成。' + visual_language.GUIDANCE)
     from g2.story_direction import GUIDANCE
     system += GUIDANCE
+    if context.get('fast_cards'):
+        system += ('本片采用快速混合编排：开场、普通说明和承接优先用title_card或concept_reveal，'
+                   '这些普通卡片保持简洁，不添加visuals或actions。只在值得观众停下观看的重点处使用动画：'
+                   '数字变化用price_change，趋势/多组关系用图表，传递过程用flow_diagram。'
+                   '有已配图片的页面说明继续使用material_cues，让程序自动转为截图聚焦。'
+                   '关键概念可以标importance=key并使用图标；不要为普通过渡段强行画流程图。'
+                   '最后回顾前面的重点。用同一套讲述角色和对象名称串联卡片、截图、图表及流程。')
     schemas = {name: component_schema(name) for name in COMPONENTS}
     schemas['flow_diagram']['properties'].pop('layout', None)
     for field in ('nodes', 'edges'):
@@ -83,7 +94,13 @@ def validate(plan: dict, context: dict) -> None:
             if (cue['image_index'] >= len(materials) or
                     (cue.get('region_index') is not None and cue['region_index'] >= len(materials[cue['image_index']]['regions']))):
                 raise ValueError('图片镜头需要对应本段已有图片和区域')
-        props = page['props'] = visual_language.enrich(page['component'], page['props'])
+        props = page['props']
+        if (context.get('fast_cards') and page['component'] == 'concept_reveal'
+                and page.get('importance') != 'key' and 'visuals' not in props):
+            # A keyword in a bridge sentence must not turn the whole paragraph
+            # into a browser-rendered scene through the legacy icon fallback.
+            props = {**props, 'visuals': []}
+        props = page['props'] = visual_language.enrich(page['component'], props)
         Draft202012Validator(component_schema(page['component'])).validate(props)
         if 'visuals' in props:
             validate_references(page['component'], props)
@@ -152,6 +169,8 @@ def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | No
     for chapter in dict.fromkeys(g['chapter_id'] for g in input_groups):
         local = [g for g in input_groups if g['chapter_id'] == chapter]
         context = {'title': narration['title'], 'groups': local}
+        from g2.production_plan import hybrid_enabled
+        context['fast_cards'] = hybrid_enabled(saved)
         context['established_entities'] = list(dict.fromkeys(e['name'] for p in pages for e in p.get('entities', [])))
         if assembly:
             context['chapter_context'] = [{'id': g['id'], 'text': g['text']} for g in original if g['chapter_id'] == chapter]

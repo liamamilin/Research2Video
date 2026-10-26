@@ -13,6 +13,24 @@ from core.video import screenshots, store
 VERSION = 1
 
 
+def fast_visuals(request: dict) -> bool:
+    effective = {}
+    for name in ('content_recipe', 'matrix'):
+        effective.update((request.get('production_context', {}).get(name) or {}).get('settings') or {})
+    effective.update({k: request[k] for k in ('production_mode', 'video_form') if k in request})
+    return bool(request.get('visual_storytelling') and request.get('chapters')
+                and (effective.get('production_mode') == 'fast' or effective.get('video_form') == 'information_cards'))
+
+
+def attach(request: dict, materials: dict) -> dict:
+    """Keep fast production when pictures are attached by either automatic or saved selection."""
+    mixed = fast_visuals(request)
+    request.update(materials)
+    if mixed:
+        request.update(production_mode='fast', video_form='information_cards', visual_style='editorial_light')
+    return request
+
+
 class VisualPolicy(BaseModel):
     model_config = ConfigDict(extra="forbid")
     enabled: bool = False
@@ -120,7 +138,7 @@ def intent(script: dict, version: dict, request: dict, config: dict | None, repo
         state, reason = "manual", "使用人工保存的配图选择"
     elif request.get("image_materials"):
         state, reason = "manual", "使用已提交的图片素材"
-    elif effective.get("production_mode") == "fast" or effective.get("video_form") == "information_cards":
+    elif (effective.get("production_mode") == "fast" or effective.get("video_form") == "information_cards") and not fast_visuals(request):
         state, reason = "skipped", "快速卡片使用文字画面"
     elif (script.get("topic", {}).get("article") or {}).get("kind") == "literary":
         state, reason = "skipped", "文学朗读保留原有画面形式"

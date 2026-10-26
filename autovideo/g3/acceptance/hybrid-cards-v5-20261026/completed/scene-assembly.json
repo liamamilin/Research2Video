@@ -1,0 +1,163 @@
+{
+  "version": 3,
+  "profile": "brief",
+  "timing": "measured narration; existing phrase boundaries",
+  "video_speed": 1.0,
+  "input_paragraphs": 8,
+  "visual_units": 9,
+  "extra_model_calls": 0,
+  "units": [
+    {
+      "id": "card_1",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_1"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ],
+      "duration_ms": 9288,
+      "image_indices": [],
+      "operation": "keep"
+    },
+    {
+      "id": "card_2",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_2"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n3",
+        "c1_n4",
+        "c1_n5"
+      ],
+      "duration_ms": 12022,
+      "image_indices": [],
+      "operation": "keep"
+    },
+    {
+      "id": "card_3",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_3"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n6",
+        "c1_n7",
+        "c1_n8"
+      ],
+      "duration_ms": 13595,
+      "image_indices": [
+        0
+      ],
+      "operation": "keep"
+    },
+    {
+      "id": "card_4",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_4"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n9",
+        "c1_n10",
+        "c1_n11"
+      ],
+      "duration_ms": 11397,
+      "image_indices": [],
+      "operation": "keep"
+    },
+    {
+      "id": "card_5",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_5"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n12",
+        "c1_n13",
+        "c1_n14"
+      ],
+      "duration_ms": 13668,
+      "image_indices": [],
+      "operation": "keep"
+    },
+    {
+      "id": "card_6",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_6"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n15",
+        "c1_n16",
+        "c1_n17",
+        "c1_n18"
+      ],
+      "duration_ms": 14117,
+      "image_indices": [],
+      "operation": "keep"
+    },
+    {
+      "id": "card_7",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_7"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n19",
+        "c1_n20",
+        "c1_n21"
+      ],
+      "duration_ms": 12243,
+      "image_indices": [],
+      "operation": "keep"
+    },
+    {
+      "id": "card_8_p1",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_8"
+      ],
+      "part_index": 1,
+      "part_count": 2,
+      "narration_segment_ids": [
+        "c1_n22",
+        "c1_n23"
+      ],
+      "duration_ms": 9438,
+      "image_indices": [],
+      "operation": "split"
+    },
+    {
+      "id": "card_8_p2",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_8"
+      ],
+      "part_index": 2,
+      "part_count": 2,
+      "narration_segment_ids": [
+        "c1_n24"
+      ],
+      "duration_ms": 5092,
+      "image_indices": [],
+      "operation": "split"
+    }
+  ]
+}

@@ -32,6 +32,14 @@ class ProductionPlanError(ValueError):
     pass
 
 
+def hybrid_enabled(request: dict) -> bool:
+    """Opt in authored fast videos; historical frozen card jobs keep their executor."""
+    plan = request.get("production_plan")
+    return bool(request.get("production_mode") == "fast" and request.get("visual_storytelling")
+                and ((plan is not None and plan.get("executor", {}).get("id") == "hybrid_cards")
+                     or (plan is None and (request.get("chapters") or request.get("revision_mode") == "narration"))))
+
+
 def digest(value: dict) -> str:
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True,
                                      separators=(",", ":"), allow_nan=False).encode()).hexdigest()
@@ -117,7 +125,9 @@ def validate_capability(request: dict) -> None:
             raise ProductionPlanError("快速制作当前支持信息卡片与浅色编辑风格；请调整形式或选用标准制作")
         # Both executors feed the same post-QA music stage. Real fast-card mix
         # evidence: g3/acceptance/music-mix-20261023 (5c28e618).
-        if request.get("use_draw_things") or request.get("slideshow_images"):
+        mapped_images = hybrid_enabled(request) and request.get("image_materials") and all(
+            row.get("placements") for row in request["image_materials"])
+        if request.get("use_draw_things") or (request.get("slideshow_images") and not mapped_images):
             raise ProductionPlanError("快速卡片本阶段使用受控文字排版，不生成或接收轮播图片")
     elif form == "information_cards" or style != "legacy":
         raise ProductionPlanError("信息卡片与浅色编辑风格本阶段须选择快速制作")
@@ -129,6 +139,8 @@ def _binding(request: dict) -> dict:
     fields = FIELDS | {"production_recipe", "production_context", "content_notices", "music"}
     if request.get("video_form") in {"object_showcase", "dynamic_collage"}:
         fields |= {"slideshow_images", "slideshow_images_resolved", "image_materials"}
+    if hybrid_enabled(request):
+        fields |= {"visual_storytelling", "slideshow_images", "slideshow_images_resolved", "image_materials"}
     if "background_music" not in request:
         fields = fields - {"background_music"}
     return {key: copy.deepcopy(request.get(key)) for key in sorted(fields)}
@@ -187,6 +199,10 @@ def prepare_request(request: dict) -> dict:
         for key in FIELDS:
             if result.get(key) != parent["settings"].get(key):
                 origins.update(_origins({key: result.get(key)}, "revision"))
+        if result.get('operation_type') != 'content_revision':
+            # Media/music revisions reuse the parent's scenes without carrying
+            # authored chapters. Keep the parent's executor during resolution.
+            result['production_plan'] = parent
     else:
         original = result.pop("_production_submitted", None)
         if original is not None:
@@ -204,7 +220,8 @@ def prepare_request(request: dict) -> dict:
     plan = {
         "schema_version": 1, "settings": _binding(result), "origins": origins,
         "style": style,
-        "executor": {"id": "ffmpeg_cards" if result["production_mode"] == "fast" else "remotion", "version": 1},
+        "executor": {"id": ("hybrid_cards" if hybrid_enabled(result) else "ffmpeg_cards")
+                     if result["production_mode"] == "fast" else "remotion", "version": 1},
         "output": {"width": 1920, "height": 1080, "fps": 30},
         "packaging_sha256": result["packaging_resolved"]["sha256"],
         "packaging": copy.deepcopy(result["packaging_resolved"]),
@@ -227,4 +244,6 @@ def prepare_request(request: dict) -> dict:
 def capabilities() -> dict:
     return {"schema_version": 1, "modes": ["standard", "fast"], "styles": copy.deepcopy(STYLES),
             "fast": {"forms": ["information_cards"], "styles": ["editorial_light"],
-                     "executor": "ffmpeg_cards", "background_music": True}}
+                     "executor": "ffmpeg_cards", "background_music": True,
+                     "visual_storytelling": {"executor": "hybrid_cards", "input_mode": "narration",
+                         "mapped_images": True, "automatic_scene_selection": True}}}
