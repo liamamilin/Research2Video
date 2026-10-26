@@ -1,0 +1,31 @@
+{
+  "content": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 2864,
+    "duration_seconds": 95.467,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.9999420408263402,
+    "decoded_rms": 0.08025237917900085,
+    "full_decode": "PASS"
+  },
+  "packaged_seconds": 98.96666666666667,
+  "overview_focus_summary_frames": 21,
+  "engine_regression": {
+    "passed": 797,
+    "skipped": 1,
+    "deselected": 1
+  },
+  "typescript": "PASS",
+  "new_camera_model_calls": 0,
+  "source_job": "729eca97-4a40-4d26-9495-39183c8bad7d",
+  "original_real_model_and_voice": true,
+  "final_reuses_original_narration_and_audio": true
+}

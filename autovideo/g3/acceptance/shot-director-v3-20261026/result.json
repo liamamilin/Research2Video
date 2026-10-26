@@ -1,0 +1,25 @@
+{
+  "original_job_id": "22de61dd-fb01-44f8-9337-ff9e3c16a46d",
+  "render_run": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-v3-20261026-release/render-run",
+  "new_model_calls": 0,
+  "new_tts_calls": 0,
+  "original_narration_and_audio": true,
+  "components": [
+    "title_card",
+    "object_showcase",
+    "object_showcase",
+    "object_showcase",
+    "object_showcase",
+    "data_chart",
+    "concept_reveal"
+  ],
+  "media": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 2907,
+    "duration_seconds": 96.917,
+    "full_decode": "PASS"
+  }
+}

@@ -645,6 +645,13 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
             phrases = [(phrases[i] if i < len(phrases) and phrases[i] else p['name']) for i, p in enumerate(props['points'])]
             phrases += [step['phrase'] for step in props.get('focus_steps', [])]
             phrases += [props.get('takeaway_phrase', '')]
+        else:
+            keys = props['categories'] if props['kind'] == 'trend' else [s['name'] for s in props['series']]
+            # A grouped chart is revealed by series. If a plan supplies monthly
+            # phrases instead, the spoken series names give the useful anchors.
+            if len(phrases) != len(keys):
+                phrases = keys
+            phrases += [props.get('takeaway', '')]
         text = ''.join(row['text'] for row in speech)
         cursor = 0
         for cue in result:

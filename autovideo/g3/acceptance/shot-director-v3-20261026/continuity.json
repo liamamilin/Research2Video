@@ -1,0 +1,262 @@
+{
+  "boundaries": [
+    {
+      "scene": "card_3_p1",
+      "entry": "dissolve",
+      "start": 161,
+      "previousEnd": 161,
+      "contiguous": true,
+      "samePicturePose": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "scene": "card_3_p2",
+      "entry": "carry",
+      "start": 805,
+      "previousEnd": 805,
+      "contiguous": true,
+      "samePicturePose": true,
+      "before": [
+        {
+          "index": 0,
+          "width": 1078,
+          "height": 530,
+          "weight": 1,
+          "pose": {
+            "zoom": 1.9,
+            "x": -170.91599999999994,
+            "y": -148.877
+          }
+        }
+      ],
+      "after": [
+        {
+          "index": 0,
+          "width": 1078,
+          "height": 530,
+          "weight": 1,
+          "pose": {
+            "zoom": 1.9,
+            "x": -170.91599999999994,
+            "y": -148.877
+          }
+        }
+      ]
+    },
+    {
+      "scene": "card_3_p3",
+      "entry": "carry",
+      "start": 1468,
+      "previousEnd": 1468,
+      "contiguous": true,
+      "samePicturePose": true,
+      "before": [
+        {
+          "index": 0,
+          "width": 1078,
+          "height": 530,
+          "weight": 1,
+          "pose": {
+            "zoom": 1.9,
+            "x": -170.91599999999994,
+            "y": -476.99999999999994
+          }
+        }
+      ],
+      "after": [
+        {
+          "index": 0,
+          "width": 1078,
+          "height": 530,
+          "weight": 1,
+          "pose": {
+            "zoom": 1.9,
+            "x": -170.91599999999994,
+            "y": -476.99999999999994
+          }
+        }
+      ]
+    },
+    {
+      "scene": "card_3_p4",
+      "entry": "carry",
+      "start": 1937,
+      "previousEnd": 1937,
+      "contiguous": true,
+      "samePicturePose": true,
+      "before": [
+        {
+          "index": 0,
+          "width": 1078,
+          "height": 530,
+          "weight": 1,
+          "pose": {
+            "zoom": 1.2987012987012987,
+            "x": -322,
+            "y": -87.41558441558442
+          }
+        }
+      ],
+      "after": [
+        {
+          "index": 0,
+          "width": 1078,
+          "height": 530,
+          "weight": 1,
+          "pose": {
+            "zoom": 1.2987012987012987,
+            "x": -322,
+            "y": -87.41558441558442
+          }
+        }
+      ]
+    },
+    {
+      "scene": "card_4",
+      "entry": "dissolve",
+      "start": 2146,
+      "previousEnd": 2146,
+      "contiguous": true,
+      "samePicturePose": null,
+      "before": null,
+      "after": null
+    },
+    {
+      "scene": "card_5",
+      "entry": "cut",
+      "start": 2574,
+      "previousEnd": 2574,
+      "contiguous": true,
+      "samePicturePose": null,
+      "before": null,
+      "after": null
+    }
+  ],
+  "shots": [
+    {
+      "id": "card_1",
+      "shots": [
+        {
+          "kind": "overview",
+          "frame": 0,
+          "targets": []
+        }
+      ]
+    },
+    {
+      "id": "card_3_p1",
+      "shots": [
+        {
+          "kind": "overview",
+          "frame": 161,
+          "targets": []
+        },
+        {
+          "kind": "focus",
+          "frame": 209,
+          "targets": [
+            "region:0:0"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "card_3_p2",
+      "shots": [
+        {
+          "kind": "carry",
+          "frame": 805,
+          "targets": [
+            "region:0:0"
+          ]
+        },
+        {
+          "kind": "focus",
+          "frame": 813,
+          "targets": [
+            "region:0:1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "card_3_p3",
+      "shots": [
+        {
+          "kind": "carry",
+          "frame": 1468,
+          "targets": [
+            "region:0:1"
+          ]
+        },
+        {
+          "kind": "focus",
+          "frame": 1477,
+          "targets": [
+            "region:0:2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "card_3_p4",
+      "shots": [
+        {
+          "kind": "carry",
+          "frame": 1937,
+          "targets": [
+            "region:0:2"
+          ]
+        },
+        {
+          "kind": "summary",
+          "frame": 2092,
+          "targets": []
+        }
+      ]
+    },
+    {
+      "id": "card_4",
+      "shots": [
+        {
+          "kind": "overview",
+          "frame": 2146,
+          "targets": []
+        },
+        {
+          "kind": "focus",
+          "frame": 2228,
+          "targets": [
+            "category:0",
+            "category:1"
+          ]
+        },
+        {
+          "kind": "focus",
+          "frame": 2304,
+          "targets": [
+            "category:1",
+            "category:2",
+            "category:3"
+          ]
+        },
+        {
+          "kind": "summary",
+          "frame": 2495,
+          "targets": []
+        }
+      ]
+    },
+    {
+      "id": "card_5",
+      "shots": [
+        {
+          "kind": "overview",
+          "frame": 2574,
+          "targets": []
+        }
+      ]
+    }
+  ]
+}

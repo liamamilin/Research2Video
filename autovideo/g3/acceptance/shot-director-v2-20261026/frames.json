@@ -1,0 +1,165 @@
+[
+  {
+    "scene": "card_1",
+    "component": "object_showcase",
+    "kind": "overview",
+    "frame": 0,
+    "targets": [],
+    "capture_frame": 30,
+    "file": "card_1-00-overview.png"
+  },
+  {
+    "scene": "card_1",
+    "component": "object_showcase",
+    "kind": "focus",
+    "frame": 88,
+    "targets": [
+      "region:0:0"
+    ],
+    "capture_frame": 118,
+    "file": "card_1-01-focus.png"
+  },
+  {
+    "scene": "card_1",
+    "component": "object_showcase",
+    "kind": "focus",
+    "frame": 286,
+    "targets": [
+      "region:0:1"
+    ],
+    "capture_frame": 316,
+    "file": "card_1-02-focus.png"
+  },
+  {
+    "scene": "card_1",
+    "component": "object_showcase",
+    "kind": "summary",
+    "frame": 438,
+    "targets": [],
+    "capture_frame": 468,
+    "file": "card_1-03-summary.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "material_collage",
+    "kind": "overview",
+    "frame": 577,
+    "targets": [],
+    "capture_frame": 607,
+    "file": "card_2-00-overview.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "material_collage",
+    "kind": "focus",
+    "frame": 684,
+    "targets": [
+      "region:0:0"
+    ],
+    "capture_frame": 714,
+    "file": "card_2-01-focus.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "material_collage",
+    "kind": "focus",
+    "frame": 826,
+    "targets": [
+      "region:1:0"
+    ],
+    "capture_frame": 856,
+    "file": "card_2-02-focus.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "material_collage",
+    "kind": "summary",
+    "frame": 993,
+    "targets": [],
+    "capture_frame": 1023,
+    "file": "card_2-03-summary.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "data_chart",
+    "kind": "overview",
+    "frame": 1144,
+    "targets": [],
+    "capture_frame": 1174,
+    "file": "card_3-00-overview.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "data_chart",
+    "kind": "focus",
+    "frame": 1226,
+    "targets": [
+      "category:0",
+      "category:1"
+    ],
+    "capture_frame": 1256,
+    "file": "card_3-01-focus.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "data_chart",
+    "kind": "focus",
+    "frame": 1302,
+    "targets": [
+      "category:1",
+      "category:2",
+      "category:3"
+    ],
+    "capture_frame": 1332,
+    "file": "card_3-02-focus.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "data_chart",
+    "kind": "summary",
+    "frame": 1493,
+    "targets": [],
+    "capture_frame": 1523,
+    "file": "card_3-03-summary.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "object_showcase",
+    "kind": "overview",
+    "frame": 1565,
+    "targets": [],
+    "capture_frame": 1595,
+    "file": "card_4-00-overview.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "object_showcase",
+    "kind": "focus",
+    "frame": 1639,
+    "targets": [
+      "region:0:0"
+    ],
+    "capture_frame": 1669,
+    "file": "card_4-01-focus.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "object_showcase",
+    "kind": "focus",
+    "frame": 1725,
+    "targets": [
+      "region:0:1"
+    ],
+    "capture_frame": 1755,
+    "file": "card_4-02-focus.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "object_showcase",
+    "kind": "summary",
+    "frame": 1822,
+    "targets": [],
+    "capture_frame": 1852,
+    "file": "card_4-03-summary.png"
+  }
+]

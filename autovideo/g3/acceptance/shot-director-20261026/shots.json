@@ -1,0 +1,175 @@
+[
+  {
+    "id": "card_1",
+    "component": "flow_diagram",
+    "start": 0,
+    "end": 665,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 0,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 80,
+        "targets": [
+          "node:user",
+          "node:server"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 194,
+        "targets": [
+          "node:server",
+          "node:parser"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 305,
+        "targets": [
+          "node:parser",
+          "node:database"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 432,
+        "targets": [
+          "node:database",
+          "node:result"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 611,
+        "targets": []
+      }
+    ]
+  },
+  {
+    "id": "card_2",
+    "component": "data_chart",
+    "start": 665,
+    "end": 1214,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 665,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 740,
+        "targets": [
+          "category:0",
+          "category:1"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 842,
+        "targets": [
+          "category:1",
+          "category:2",
+          "category:3"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 1123,
+        "targets": []
+      }
+    ]
+  },
+  {
+    "id": "card_3",
+    "component": "data_chart",
+    "start": 1214,
+    "end": 1891,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 1214,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 1343,
+        "targets": [
+          "series:0",
+          "series:1"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 1757,
+        "targets": []
+      }
+    ]
+  },
+  {
+    "id": "card_4",
+    "component": "scatter_chart",
+    "start": 1891,
+    "end": 2864,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 1891,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 2001,
+        "targets": [
+          "point:0"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 2112,
+        "targets": [
+          "point:1"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 2230,
+        "targets": [
+          "point:2"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 2345,
+        "targets": [
+          "point:3"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 2466,
+        "targets": [
+          "point:0",
+          "point:1"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 2621,
+        "targets": [
+          "point:0",
+          "point:2"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 2767,
+        "targets": []
+      }
+    ]
+  }
+]

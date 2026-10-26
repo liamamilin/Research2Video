@@ -1,0 +1,36 @@
+{
+  "source_job_id": "367091ae-afbf-44fa-9023-08e468b47b5f",
+  "original_real_model_calls": 1,
+  "model_stages": [
+    "c1-explanation"
+  ],
+  "extra_camera_model_calls": 0,
+  "final_new_model_calls": 0,
+  "final_new_tts_calls": 0,
+  "original_narration_audio_and_images_preserved": true,
+  "content": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 1986,
+    "duration_seconds": 66.219,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.999943341029692,
+    "decoded_rms": 0.08175070583820343,
+    "full_decode": "PASS"
+  },
+  "packaged_seconds": 69.7,
+  "sampled_camera_frames": 16,
+  "typescript": "PASS",
+  "engine_regression": {
+    "passed": 808,
+    "skipped": 1,
+    "deselected": 1
+  }
+}

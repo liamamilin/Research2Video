@@ -1,0 +1,44 @@
+{
+  "status": "api_restart_deferred_busy",
+  "summary": {
+    "total": 289,
+    "completed": 211,
+    "running": 1,
+    "needs_input": 1
+  },
+  "active": [
+    {
+      "job_id": "08ec4c50-51b9-4a4b-b7ee-26c243bccc4b",
+      "status": "RUNNING",
+      "active_stage": "RENDER",
+      "attempt_count": 1,
+      "pipeline_has_v3_planning_option": false,
+      "schedule": {
+        "mode": "sequential",
+        "content_mode": true,
+        "wall_seconds": 800.454,
+        "overlap_seconds": 0,
+        "steps": {
+          "tts-and-align": {
+            "start_seconds": 0.0,
+            "end_seconds": 657.429,
+            "duration_seconds": 657.429,
+            "status": "SUCCEEDED"
+          },
+          "storyboard-plan": {
+            "start_seconds": 657.429,
+            "end_seconds": 800.454,
+            "duration_seconds": 143.025,
+            "status": "SUCCEEDED"
+          }
+        }
+      }
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  },
+  "generation_loading": "g3/worker.py starts a fresh g2/run_g2.py subprocess for each job; new generation tasks read current V3 sources",
+  "api_restart": "Idle-only restart skipped before sending any stop signal; active production left running"
+}

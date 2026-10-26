@@ -1,0 +1,91 @@
+[
+  {
+    "id": "card_1",
+    "component": "title_card"
+  },
+  {
+    "id": "card_3_p1",
+    "component": "concept_reveal",
+    "material_cues": [
+      {
+        "image_index": 0,
+        "region_index": 0,
+        "phrase": "先看左侧的文件区"
+      },
+      {
+        "image_index": 0,
+        "region_index": 0,
+        "phrase": "每个文件各占一行"
+      },
+      {
+        "image_index": 0,
+        "region_index": 0,
+        "phrase": "文件区保持在画面里"
+      }
+    ],
+    "material_summary_phrase": "文件区保持在画面里，我们接着解释这些材料将怎样参与后面的提问。"
+  },
+  {
+    "id": "card_3_p2",
+    "component": "concept_reveal",
+    "material_cues": [
+      {
+        "image_index": 0,
+        "region_index": 1,
+        "phrase": "接着看下方的提问区"
+      },
+      {
+        "image_index": 0,
+        "region_index": 1,
+        "phrase": "在输入框里写下想了解的问题"
+      },
+      {
+        "image_index": 0,
+        "region_index": 1,
+        "phrase": "讲解停在输入框附近"
+      }
+    ],
+    "material_summary_phrase": "观众能看到问题写在哪里，以及生成回答的按钮在哪里。"
+  },
+  {
+    "id": "card_3_p3",
+    "component": "concept_reveal",
+    "material_cues": [
+      {
+        "image_index": 0,
+        "region_index": 2,
+        "phrase": "再看右侧的结果区"
+      },
+      {
+        "image_index": 0,
+        "region_index": 2,
+        "phrase": "摘要先概括产品能力和主要变化"
+      },
+      {
+        "image_index": 0,
+        "region_index": 2,
+        "phrase": "行动建议接在后面"
+      }
+    ],
+    "material_summary_phrase": "阅读顺序清楚地排出来。"
+  },
+  {
+    "id": "card_3_p4",
+    "component": "concept_reveal",
+    "material_cues": [
+      {
+        "image_index": 0,
+        "phrase": "最后把文件、问题和回答连起来看"
+      }
+    ],
+    "material_summary_phrase": "这张工作台就形成了一条完整的使用路径。"
+  },
+  {
+    "id": "card_4",
+    "component": "data_chart"
+  },
+  {
+    "id": "card_5",
+    "component": "concept_reveal"
+  }
+]

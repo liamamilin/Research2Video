@@ -193,6 +193,10 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
     layout = json.loads(raw)
     pipeline.write_json(pipeline.ARTIFACTS / "diagram-layout.json", layout)
     board = storyboard_from_layout(plan, layout, alignment)
+    from g2.shot_director import attach, saved_request
+    saved = saved_request(pipeline)
+    if saved.get("visual_storytelling"):
+        attach(board, saved, pipeline)
     pipeline.write_json(pipeline.ARTIFACTS / "storyboard-plan.json", board)
     pipeline.write_json(pipeline.ARTIFACTS / "diagram-timing.json", {
         "phrase_alignment": "measured TTS activity", "within_phrase_cues": "estimated from quoted character position; not word alignment"})

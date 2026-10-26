@@ -1,0 +1,260 @@
+[
+  {
+    "id": "card_1",
+    "component": "title_card",
+    "start": 0,
+    "end": 161,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 0,
+        "targets": []
+      }
+    ],
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "cut",
+      "paragraph_ids": [
+        "card_1",
+        "card_2"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "cut",
+      "active": false,
+      "progress": 0,
+      "length": 1
+    }
+  },
+  {
+    "id": "card_3_p1",
+    "component": "object_showcase",
+    "start": 161,
+    "end": 805,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 161,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 209,
+        "targets": [
+          "region:0:0"
+        ]
+      }
+    ],
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "dissolve",
+      "paragraph_ids": [
+        "card_3"
+      ],
+      "part_index": 1,
+      "part_count": 4
+    },
+    "transition": {
+      "entry": "dissolve",
+      "active": true,
+      "progress": 0,
+      "length": 17
+    }
+  },
+  {
+    "id": "card_3_p2",
+    "component": "object_showcase",
+    "start": 805,
+    "end": 1468,
+    "shots": [
+      {
+        "kind": "carry",
+        "frame": 805,
+        "targets": [
+          "region:0:0"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 813,
+        "targets": [
+          "region:0:1"
+        ]
+      }
+    ],
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "carry",
+      "paragraph_ids": [
+        "card_3"
+      ],
+      "part_index": 2,
+      "part_count": 4
+    },
+    "transition": {
+      "entry": "carry",
+      "active": false,
+      "progress": 0,
+      "length": 17
+    }
+  },
+  {
+    "id": "card_3_p3",
+    "component": "object_showcase",
+    "start": 1468,
+    "end": 1937,
+    "shots": [
+      {
+        "kind": "carry",
+        "frame": 1468,
+        "targets": [
+          "region:0:1"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 1477,
+        "targets": [
+          "region:0:2"
+        ]
+      }
+    ],
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "carry",
+      "paragraph_ids": [
+        "card_3"
+      ],
+      "part_index": 3,
+      "part_count": 4
+    },
+    "transition": {
+      "entry": "carry",
+      "active": false,
+      "progress": 0,
+      "length": 17
+    }
+  },
+  {
+    "id": "card_3_p4",
+    "component": "object_showcase",
+    "start": 1937,
+    "end": 2146,
+    "shots": [
+      {
+        "kind": "carry",
+        "frame": 1937,
+        "targets": [
+          "region:0:2"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 2092,
+        "targets": []
+      }
+    ],
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "carry",
+      "paragraph_ids": [
+        "card_3"
+      ],
+      "part_index": 4,
+      "part_count": 4
+    },
+    "transition": {
+      "entry": "carry",
+      "active": false,
+      "progress": 0,
+      "length": 17
+    }
+  },
+  {
+    "id": "card_4",
+    "component": "data_chart",
+    "start": 2146,
+    "end": 2574,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 2146,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 2228,
+        "targets": [
+          "category:0",
+          "category:1"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 2304,
+        "targets": [
+          "category:1",
+          "category:2",
+          "category:3"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 2495,
+        "targets": []
+      }
+    ],
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "dissolve",
+      "paragraph_ids": [
+        "card_4"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "dissolve",
+      "active": true,
+      "progress": 0,
+      "length": 17
+    }
+  },
+  {
+    "id": "card_5",
+    "component": "concept_reveal",
+    "start": 2574,
+    "end": 2907,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 2574,
+        "targets": []
+      }
+    ],
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "cut",
+      "paragraph_ids": [
+        "card_5"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "cut",
+      "active": false,
+      "progress": 0,
+      "length": 17
+    }
+  }
+]

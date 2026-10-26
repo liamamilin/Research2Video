@@ -896,7 +896,7 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     shutil.copyfile(PROJECT / "g1/renderer/src/ImageMaterials.tsx", src / "ImageMaterials.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/DataChart.tsx", src / "DataChart.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/ScatterChart.tsx", src / "ScatterChart.tsx")
-    for name in ("VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx"):
+    for name in ("VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx", "ShotDirector.tsx", "DirectedMaterials.tsx"):
         shutil.copyfile(PROJECT / "g1/renderer/src" / name, src / name)
     (src / "index.ts").write_text("import {registerRoot} from 'remotion';\nimport {Root} from './Root';\n\nregisterRoot(Root);\n", encoding="utf-8")
     ensure_renderer_dependency_link(renderer)
@@ -1087,13 +1087,13 @@ def run_step(label: str, fn, *args):
     return result
 
 
-def run_planning_stages(narration: dict, planner) -> tuple[dict, dict, dict]:
-    """Plan visuals while synthesizing final content narration; fit fixed durations first.
+def run_planning_stages(narration: dict, planner, *, measured_storyboard: bool = False) -> tuple[dict, dict, dict]:
+    """Overlap ordinary planning, or await measured speech for visual assembly.
 
-    Only one thread calls the LLM. Both tasks finish before compilation or error
+    Only one thread calls the LLM. Parallel tasks finish before compilation or error
     propagation, preserving their artifacts without leaving background work running.
     """
-    parallel = CONTENT_MODE and os.environ.get("AUTOVIDEO_G2_PARALLEL_PLANNING", "1") != "0"
+    parallel = CONTENT_MODE and not measured_storyboard and os.environ.get("AUTOVIDEO_G2_PARALLEL_PLANNING", "1") != "0"
     started = time.monotonic()
     timings = {}
 
@@ -1127,7 +1127,9 @@ def run_planning_stages(narration: dict, planner) -> tuple[dict, dict, dict]:
             narration, alignment = results["voice"]
             return narration, alignment, results["storyboard"]
         narration, alignment = step("tts-and-align", fit_voiceover_to_duration, narration)
-        return narration, alignment, step("storyboard-plan", planner, narration)
+        plan = (step("storyboard-plan", planner, narration, alignment) if measured_storyboard
+                else step("storyboard-plan", planner, narration))
+        return narration, alignment, plan
     finally:
         wall = time.monotonic() - started
         overlap = 0.0
@@ -1137,6 +1139,7 @@ def run_planning_stages(narration: dict, planner) -> tuple[dict, dict, dict]:
                           - max(voice["start_seconds"], board["start_seconds"]))
         write_json(ARTIFACTS / "generation-schedule.json", {
             "mode": "parallel" if parallel else "sequential", "content_mode": CONTENT_MODE,
+            "measured_storyboard": measured_storyboard,
             "wall_seconds": round(wall, 3), "overlap_seconds": round(overlap, 3), "steps": timings})
 
 
@@ -1233,7 +1236,8 @@ def run_all() -> dict:
     saved_visuals = json.loads((PROJECT_INPUT.parent / "input.json").read_text(encoding="utf-8"))
     if explanation.enabled(saved_visuals, form):
         narration, alignment, plan = run_planning_stages(narration,
-            lambda final: explanation.plan_storyboard(sys.modules[__name__], final, saved_visuals))
+            lambda final, measured: explanation.plan_storyboard(sys.modules[__name__], final, saved_visuals, measured),
+            measured_storyboard=True)
         assets = []
         if saved_visuals.get("image_materials"):
             from g2.creative_forms import prepare_images
@@ -1267,6 +1271,9 @@ def run_all() -> dict:
             else:
                 saved_images = json.loads((PROJECT_INPUT.parent / "input.json").read_text(encoding="utf-8"))
                 board = creative_forms.attach_materials(board, assets, saved_images)
+                if saved_images.get('visual_storytelling'):
+                    from g2.shot_director import attach
+                    attach(board, saved_images, sys.modules[__name__], alignment)
         else:
             skip_step("draw-things-backgrounds", "此形式采用受控文字排版")
         write_json(ARTIFACTS / "creative-form-plan.json", {"form": form, **board})

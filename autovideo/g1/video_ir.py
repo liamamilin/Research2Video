@@ -16,6 +16,8 @@ from typing import Any
 from jsonschema import Draft202012Validator
 from PIL import ImageFont
 from g1.visual_language import component_schema, validate_references
+from g1.shot_language import COMPONENTS as SHOT_COMPONENTS, shot_schema, validate_shots
+from g1.scene_flow import COMPONENTS as FLOW_COMPONENTS, flow_schema
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,7 +76,12 @@ def _unique(items, key, path, label):
 
 
 def _validate_component(component: str, props: dict[str, Any], path: str):
-    validator = Draft202012Validator(component_schema(component))
+    schema = component_schema(component)
+    if component in SHOT_COMPONENTS:
+        schema["properties"]["shot_plan"] = shot_schema()
+    if component in FLOW_COMPONENTS:
+        schema["properties"]["scene_flow"] = flow_schema()
+    validator = Draft202012Validator(schema)
     errors = sorted(validator.iter_errors(props), key=lambda e: tuple(str(x) for x in e.path))
     if errors:
         error = errors[0]
@@ -221,6 +228,9 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
             allowed_creative.append("kinetic_text")
         scene_schema["properties"]["component"] = {"enum": allowed_creative}
         scene_schema["properties"]["beats"]["items"]["properties"]["action"] = {"const": "reveal"}
+        if presentation["preset"] in {"object_showcase", "dynamic_collage"}:
+            scene_schema["properties"]["beats"].pop("maxItems", None)
+            scene_schema["properties"]["beats"]["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
         schema["properties"]["scenes"]["items"] = scene_schema
         schema["properties"]["scenes"].pop("maxItems", None)
         schema["properties"]["scenes"]["minItems"] = 1
@@ -320,6 +330,11 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         if end_ms > ir["video"]["duration_ms"]:
             _fail("SCENE_OUT_OF_RANGE", f"{sp}/duration_ms", "scene extends beyond the video duration")
         _validate_component(scene["component"], scene["props"], sp)
+
+        try:
+            validate_shots(scene)
+        except ValueError as exc:
+            _fail("SHOT_REFERENCE", f"{sp}/props/shot_plan", str(exc))
 
         # Component invariants not expressed by the authored JSON Schemas.
         props = scene["props"]

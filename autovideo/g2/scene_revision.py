@@ -125,4 +125,7 @@ def replan_scene(p,old,narration,ir,instruction):
     plan['scenes'][0]['id']=old['id']
     rows=ir['narration']['segments'];alignment={'rows':rows}
     board=module.compile_storyboard(plan,alignment,p)
+    if old['props'].get('shot_plan'):
+        from g2.shot_director import attach
+        attach(board,{'_shot_profile':old['props']['shot_plan']['profile']},p)
     return board['scenes'][0]

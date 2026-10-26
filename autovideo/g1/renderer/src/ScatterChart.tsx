@@ -1,5 +1,6 @@
 import React from 'react';
 import {interpolate} from 'remotion';
+import {ShotLayer,CameraAxis,cameraAt,type Rect} from './ShotDirector';
 import {init, use} from 'echarts/core';
 import {ScatterChart as EChartsScatter} from 'echarts/charts';
 import {GridComponent} from 'echarts/components';
@@ -104,10 +105,17 @@ export function ScatterChart({scene,frame}: {scene:any;frame:number}) {
   const enter=interpolate(frame-start,[0,12],[0,1],clamp);
   const caption=ending?p.takeaway:activeStep>=0?steps[activeStep].caption:undefined;
   const unit=(label:string,value:string)=>label+(value?` · ${value}`:'');
+  const rects:Record<string,Rect>=Object.fromEntries(layout.positions.map((pos,i)=>{
+    const label=layout.labels[i], x=Math.min(pos.x-22,label.x), y=Math.min(pos.y-22,label.y);
+    return [`point:${i}`,{x,y,width:Math.max(pos.x+22,label.x+label.width)-x,height:Math.max(pos.y+22,label.y+label.height)-y}];
+  }));
+  const view={x:24,y:70,width:W-grid.right-10,height:H-125};
+  const camera=cameraAt(scene,frame,rects,view);
   return <div style={{position:'absolute',left:140,top:270,width:W,height:600,background:'#FFFFFF',border:'1px solid #E1E8E1',borderRadius:22,boxSizing:'border-box',overflow:'hidden',opacity:enter}}>
     <div style={{position:'absolute',left:grid.left,top:20,fontSize:28,color:'#526A60'}}>{unit(p.y_label,p.y_unit)}{p.y_hint&&<span style={{marginLeft:22,fontSize:23,color:'#849288'}}>{p.y_hint}</span>}</div>
-    <div style={{position:'absolute',left:0,top:0,width:W,height:H}} dangerouslySetInnerHTML={{__html:layout.axis}}/>
-    <div style={{position:'absolute',left:grid.left,top:H-43,width:W-grid.left-grid.right,textAlign:'center',fontSize:28,color:'#526A60'}}>{unit(p.x_label,p.x_unit)}{p.x_hint&&<div style={{fontSize:22,color:'#849288',marginTop:4}}>{p.x_hint}</div>}</div>
+    <ShotLayer scene={scene} frame={frame} rects={rects} view={view} width={W} height={H}>
+    <CameraAxis sceneId={scene.id} svg={layout.axis} zoom={camera.pose.zoom}/>
+
     {layout.dots.map((svg,i)=> {
       const reveal=interpolate(frame-times[i],[0,14],[0,1],clamp),pos=layout.positions[i];
       const dim=selected.length&&!selected.includes(i)?.45:1;
@@ -131,6 +139,8 @@ export function ScatterChart({scene,frame}: {scene:any;frame:number}) {
         </g>;
       })}
     </svg>
+    </ShotLayer>
+    <div style={{position:'absolute',left:grid.left,top:H-43,width:W-grid.left-grid.right,textAlign:'center',fontSize:28,color:'#526A60'}}>{unit(p.x_label,p.x_unit)}{p.x_hint&&<div style={{fontSize:22,color:'#849288',marginTop:4}}>{p.x_hint}</div>}</div>
     <div style={{position:'absolute',left:1240,top:82,width:350,display:'flex',flexDirection:'column',gap:14}}>
       <div style={{fontSize:23,color:'#849288',marginBottom:5}}>{selected.length>1?'放在一起比较':'当前讲解对象'}</div>
       {!selected.length&&<div style={{fontSize:30,color:'#849288',lineHeight:1.6}}>跟随讲述<br/>看见每个对象的位置</div>}

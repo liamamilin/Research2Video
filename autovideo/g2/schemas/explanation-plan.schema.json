@@ -35,6 +35,21 @@
           },
           "props": {
             "type": "object"
+          },
+          "material_cues": {
+            "type": "array", "maxItems": 48,
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["image_index", "phrase"],
+              "properties": {
+                "image_index": {"type": "integer", "minimum": 0, "maximum": 11},
+                "region_index": {"type": "integer", "minimum": 0, "maximum": 2},
+                "phrase": {"type": "string", "minLength": 1, "maxLength": 80}
+              }
+            }
+          },
+          "material_summary_phrase": {
+            "type": "string", "minLength": 1, "maxLength": 80
           }
         }
       }

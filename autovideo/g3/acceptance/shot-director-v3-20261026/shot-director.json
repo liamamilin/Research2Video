@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "profile": "explain",
+  "scenes": [
+    {
+      "scene_id": "card_3_p1",
+      "component": "object_showcase",
+      "version": 1,
+      "profile": "explain",
+      "cues": [
+        {
+          "beat_id": "material_d445713c76b2_0",
+          "targets": [
+            "region:0:0"
+          ]
+        },
+        {
+          "beat_id": "material_d445713c76b2_1",
+          "targets": [
+            "region:0:0"
+          ]
+        },
+        {
+          "beat_id": "material_d445713c76b2_2",
+          "targets": [
+            "region:0:0"
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": "card_3_p2",
+      "component": "object_showcase",
+      "version": 1,
+      "profile": "explain",
+      "cues": [
+        {
+          "beat_id": "material_2bcbfb007f11_0",
+          "targets": [
+            "region:0:1"
+          ]
+        },
+        {
+          "beat_id": "material_2bcbfb007f11_1",
+          "targets": [
+            "region:0:1"
+          ]
+        },
+        {
+          "beat_id": "material_2bcbfb007f11_2",
+          "targets": [
+            "region:0:1"
+          ]
+        }
+      ],
+      "summary_beat_id": "material_2bcbfb007f11_3"
+    },
+    {
+      "scene_id": "card_3_p3",
+      "component": "object_showcase",
+      "version": 1,
+      "profile": "explain",
+      "cues": [
+        {
+          "beat_id": "material_39a20d5296e5_0",
+          "targets": [
+            "region:0:2"
+          ]
+        },
+        {
+          "beat_id": "material_39a20d5296e5_1",
+          "targets": [
+            "region:0:2"
+          ]
+        },
+        {
+          "beat_id": "material_39a20d5296e5_2",
+          "targets": [
+            "region:0:2"
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": "card_3_p4",
+      "component": "object_showcase",
+      "version": 1,
+      "profile": "explain",
+      "cues": [
+        {
+          "beat_id": "material_697897f4d3bc_0",
+          "targets": [
+            "image:0"
+          ]
+        }
+      ],
+      "summary_beat_id": "material_697897f4d3bc_1"
+    },
+    {
+      "scene_id": "card_4",
+      "component": "data_chart",
+      "version": 1,
+      "profile": "explain",
+      "cues": [
+        {
+          "beat_id": "card_4_b1",
+          "targets": [
+            "category:0"
+          ]
+        },
+        {
+          "beat_id": "card_4_b2",
+          "targets": [
+            "category:0",
+            "category:1"
+          ]
+        },
+        {
+          "beat_id": "card_4_b3",
+          "targets": [
+            "category:1",
+            "category:2"
+          ]
+        },
+        {
+          "beat_id": "card_4_b4",
+          "targets": [
+            "category:2",
+            "category:3"
+          ]
+        }
+      ],
+      "summary_beat_id": "card_4_b5"
+    }
+  ],
+  "timing": "Measured speech and phrase cues; frame-driven overview, sustained focus, and summary",
+  "extra_model_calls": 0
+}

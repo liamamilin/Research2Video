@@ -1,0 +1,227 @@
+[
+  {
+    "scene": "card_1",
+    "component": "flow_diagram",
+    "kind": "overview",
+    "frame": 0,
+    "targets": [],
+    "capture_frame": 30,
+    "file": "card_1-00-overview.png"
+  },
+  {
+    "scene": "card_1",
+    "component": "flow_diagram",
+    "kind": "focus",
+    "frame": 80,
+    "targets": [
+      "node:user",
+      "node:server"
+    ],
+    "capture_frame": 110,
+    "file": "card_1-01-focus.png"
+  },
+  {
+    "scene": "card_1",
+    "component": "flow_diagram",
+    "kind": "focus",
+    "frame": 194,
+    "targets": [
+      "node:server",
+      "node:parser"
+    ],
+    "capture_frame": 224,
+    "file": "card_1-02-focus.png"
+  },
+  {
+    "scene": "card_1",
+    "component": "flow_diagram",
+    "kind": "focus",
+    "frame": 305,
+    "targets": [
+      "node:parser",
+      "node:database"
+    ],
+    "capture_frame": 335,
+    "file": "card_1-03-focus.png"
+  },
+  {
+    "scene": "card_1",
+    "component": "flow_diagram",
+    "kind": "focus",
+    "frame": 432,
+    "targets": [
+      "node:database",
+      "node:result"
+    ],
+    "capture_frame": 462,
+    "file": "card_1-04-focus.png"
+  },
+  {
+    "scene": "card_1",
+    "component": "flow_diagram",
+    "kind": "summary",
+    "frame": 611,
+    "targets": [],
+    "capture_frame": 641,
+    "file": "card_1-05-summary.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "data_chart",
+    "kind": "overview",
+    "frame": 665,
+    "targets": [],
+    "capture_frame": 695,
+    "file": "card_2-00-overview.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "data_chart",
+    "kind": "focus",
+    "frame": 740,
+    "targets": [
+      "category:0",
+      "category:1"
+    ],
+    "capture_frame": 770,
+    "file": "card_2-01-focus.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "data_chart",
+    "kind": "focus",
+    "frame": 842,
+    "targets": [
+      "category:1",
+      "category:2",
+      "category:3"
+    ],
+    "capture_frame": 872,
+    "file": "card_2-02-focus.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "data_chart",
+    "kind": "summary",
+    "frame": 1123,
+    "targets": [],
+    "capture_frame": 1153,
+    "file": "card_2-03-summary.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "data_chart",
+    "kind": "overview",
+    "frame": 1214,
+    "targets": [],
+    "capture_frame": 1244,
+    "file": "card_3-00-overview.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "data_chart",
+    "kind": "focus",
+    "frame": 1343,
+    "targets": [
+      "series:0",
+      "series:1"
+    ],
+    "capture_frame": 1373,
+    "file": "card_3-01-focus.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "data_chart",
+    "kind": "summary",
+    "frame": 1757,
+    "targets": [],
+    "capture_frame": 1787,
+    "file": "card_3-02-summary.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "scatter_chart",
+    "kind": "overview",
+    "frame": 1891,
+    "targets": [],
+    "capture_frame": 1921,
+    "file": "card_4-00-overview.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "scatter_chart",
+    "kind": "focus",
+    "frame": 2001,
+    "targets": [
+      "point:0"
+    ],
+    "capture_frame": 2031,
+    "file": "card_4-01-focus.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "scatter_chart",
+    "kind": "focus",
+    "frame": 2112,
+    "targets": [
+      "point:1"
+    ],
+    "capture_frame": 2142,
+    "file": "card_4-02-focus.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "scatter_chart",
+    "kind": "focus",
+    "frame": 2230,
+    "targets": [
+      "point:2"
+    ],
+    "capture_frame": 2260,
+    "file": "card_4-03-focus.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "scatter_chart",
+    "kind": "focus",
+    "frame": 2345,
+    "targets": [
+      "point:3"
+    ],
+    "capture_frame": 2375,
+    "file": "card_4-04-focus.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "scatter_chart",
+    "kind": "focus",
+    "frame": 2466,
+    "targets": [
+      "point:0",
+      "point:1"
+    ],
+    "capture_frame": 2496,
+    "file": "card_4-05-focus.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "scatter_chart",
+    "kind": "focus",
+    "frame": 2621,
+    "targets": [
+      "point:0",
+      "point:2"
+    ],
+    "capture_frame": 2651,
+    "file": "card_4-06-focus.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "scatter_chart",
+    "kind": "summary",
+    "frame": 2767,
+    "targets": [],
+    "capture_frame": 2797,
+    "file": "card_4-07-summary.png"
+  }
+]

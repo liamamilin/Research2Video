@@ -57,6 +57,23 @@ def setup_planning(monkeypatch, tmp_path, content=True):
     monkeypatch.delenv("AUTOVIDEO_G2_PARALLEL_PLANNING", raising=False)
 
 
+def test_measured_visual_planning_receives_finished_speech_before_one_model_pass(monkeypatch, tmp_path):
+    setup_planning(monkeypatch, tmp_path)
+    calls, aligned = [], {'rows': [{'id': 'n1', 'start_ms': 0, 'end_ms': 4000}]}
+    def voice(narration):
+        calls.append('voice')
+        return narration, aligned
+    def storyboard(narration, measured):
+        assert calls == ['voice'] and measured is aligned
+        calls.append('storyboard')
+        return {'scenes': []}
+    monkeypatch.setattr(pipeline, 'fit_voiceover_to_duration', voice)
+    pipeline.run_planning_stages({}, storyboard, measured_storyboard=True)
+    report = json.loads((tmp_path/'artifacts/generation-schedule.json').read_text())
+    assert report['mode'] == 'sequential' and report['measured_storyboard']
+    assert calls == ['voice', 'storyboard']
+
+
 def test_content_voice_and_storyboard_actually_overlap(monkeypatch, tmp_path):
     setup_planning(monkeypatch, tmp_path)
     barrier = threading.Barrier(2)

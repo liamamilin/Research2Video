@@ -1,0 +1,59 @@
+[
+  {
+    "id": "card_1",
+    "component": "concept_reveal",
+    "material_cues": [
+      {
+        "image_index": 0,
+        "region_index": 0,
+        "phrase": "左侧的文件区用来放入研究报告和产品说明"
+      },
+      {
+        "image_index": 0,
+        "region_index": 1,
+        "phrase": "接着看下方的提问区"
+      }
+    ],
+    "summary": "两个区域放在同一页，讲解时先看文件，再看问题。"
+  },
+  {
+    "id": "card_2",
+    "component": "comparison",
+    "material_cues": [
+      {
+        "image_index": 0,
+        "region_index": 0,
+        "phrase": "先看输入问题，提问区保留我们刚才写好的问题"
+      },
+      {
+        "image_index": 1,
+        "region_index": 0,
+        "phrase": "然后看输出结果，回答已经整理成材料摘要和下一步行动"
+      }
+    ],
+    "summary": "最后回到两张图一起看，从问题到回答的变化就清楚了。"
+  },
+  {
+    "id": "card_3",
+    "component": "data_chart",
+    "material_cues": [],
+    "summary": ""
+  },
+  {
+    "id": "card_4",
+    "component": "concept_reveal",
+    "material_cues": [
+      {
+        "image_index": 0,
+        "region_index": 0,
+        "phrase": "文件区保留研究报告和产品说明"
+      },
+      {
+        "image_index": 0,
+        "region_index": 1,
+        "phrase": "提问区承接我们想了解的问题"
+      }
+    ],
+    "summary": "把页面、输入输出和趋势放在一起，就能跟着讲解看清重点。"
+  }
+]

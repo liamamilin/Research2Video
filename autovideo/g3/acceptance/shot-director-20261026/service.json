@@ -1,0 +1,32 @@
+{
+  "old_pid": 59567,
+  "new_server": {
+    "pid": 72855,
+    "started_at": "2026-10-26T01:18:23.142477+08:00",
+    "base_url": "http://127.0.0.1:8011"
+  },
+  "launch": {
+    "status": "ready",
+    "action": "started",
+    "pid": 72855,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  },
+  "before": {
+    "total": 283,
+    "completed": 208,
+    "running": 0,
+    "needs_input": 1
+  },
+  "after": {
+    "total": 283,
+    "completed": 208,
+    "running": 0,
+    "needs_input": 1
+  },
+  "scope": "Loaded automatic native shot direction; idle queue, existing jobs preserved"
+}

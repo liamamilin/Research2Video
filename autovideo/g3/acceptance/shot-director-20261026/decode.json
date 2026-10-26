@@ -1,0 +1,10 @@
+{
+  "content.mp4": {
+    "returncode": 0,
+    "stderr": ""
+  },
+  "video.mp4": {
+    "returncode": 0,
+    "stderr": ""
+  }
+}

@@ -3,12 +3,14 @@ import {DataChart} from './DataChart';
 import {ScatterChart} from './ScatterChart';
 import {VisualObject, SvgVisualObject, visualFor} from './VisualObjects';
 import {ObjectFlow} from './ObjectFlow';
+import {cameraAt, carriesPicture, flowRects, linkScenes, transitionAt} from './ShotDirector';
+import {DirectedMaterials} from './DirectedMaterials';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {CornerBadge, type Badge} from './Packaging';
 import {CreativeVideo, type CreativePreset} from './CreativeForms';
 
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
-type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]};
+type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]; previous_scene?: Scene};
 type Segment = {id: string; text: string; start_ms: number; end_ms: number};
 type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; caption_cues?: Pick<Segment, 'text' | 'start_ms' | 'end_ms'>[]; presentation?: {preset: 'information_motion' | 'explanation' | CreativePreset; density?: 'large'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
 
@@ -59,6 +61,8 @@ function ProcessDiagram({scene, frame}: {scene: Scene; frame: number}) {
   const highlights = beats.filter((b) => b.action === 'highlight');
   const focusFrame = highlights[highlights.length-1]?.frame;
   const focused = new Set(highlights.filter((b) => b.frame === focusFrame).map((b) => b.target_id));
+  const camera = cameraAt(scene, frame, flowRects(scene.props), {x:0,y:0,width:1560,height:500});
+  if (camera.shot.kind === 'focus') camera.shot.targets.forEach(target => focused.add(target));
   const revealed = (target: string) => beats.find((b) => b.action === 'reveal' && b.target_id === target);
   const alpha = (target: string) => {
     const beat = revealed(target);
@@ -84,6 +88,8 @@ function ProcessDiagram({scene, frame}: {scene: Scene; frame: number}) {
     <Text x={960} y={220} size={48} weight={650}>{title}</Text>
     <g transform="translate(180 300)">
       <defs><marker id={markerId} viewBox="0 0 12 12" refX="11" refY="6" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill={colors.cyan}/></marker></defs>
+      <defs><clipPath id={`${scene.id}_camera_clip`}><rect width={1560} height={500}/></clipPath></defs>
+      <g clipPath={`url(#${scene.id}_camera_clip)`}><g transform={camera.transform}>
       {layout.edges.map((route: any) => {
         const edge=edgeMap[route.id], target=`edge:${route.id}`;
         const active=focused.has(target), blocked=edge.relation === 'blocked', color=blocked ? colors.red : active ? colors.cyan : colors.muted;
@@ -105,6 +111,7 @@ function ProcessDiagram({scene, frame}: {scene: Scene; frame: number}) {
           {node.label_lines.map((line: string, i: number) => <Text key={i} x={node.x+node.width/2} y={icon ? node.y+(112+i*46)*layout.scale : node.y+node.height/2+(i-(node.label_lines.length-1)/2)*layout.font_size*1.28} size={layout.font_size} weight={active ? 650 : 500}>{line}</Text>)}
         </g>;
       })}
+      </g></g>
     </g>
     {complete && <Text x={960} y={852} size={30} color={colors.muted}>{takeaway}</Text>}
   </svg>;
@@ -243,10 +250,11 @@ function LegacyVideo({ir, sceneBackdrops = {}, badge}: {ir: Timeline; sceneBackd
 // A separate presentation for the same validated, registered content components.
 const paper = {bg:'#F7F8F5', ink:'#202D28', muted:'#69756E', green:'#17784B', line:'#E1E8E1'};
 const ease = (value: number) => 1-Math.pow(1-Math.max(0, Math.min(1, value)), 3);
-function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
-  const frame = useCurrentFrame();
-  const sceneIndex = Math.max(0, ir.scenes.findIndex((s) => frame >= s.start_frame && frame < s.end_frame));
-  const scene = ir.scenes[sceneIndex], p = scene.props;
+function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=false, hideStage=false}:
+  {ir: Timeline; badge?: Badge; sceneOverride?:Scene; frameOverride?:number; stageOnly?:boolean; hideStage?:boolean}) {
+  const currentFrame = useCurrentFrame(), frame=frameOverride??currentFrame;
+  const sceneIndex = sceneOverride?ir.scenes.indexOf(sceneOverride):Math.max(0, ir.scenes.findIndex((s) => frame >= s.start_frame && frame < s.end_frame));
+  const scene = sceneOverride??ir.scenes[sceneIndex], p = scene.props;
   // Short videos (presentation.density 'large') scale every text size by 1.3; g2/information_motion.py::scaled() mirrors this for text fit.
   const large = ir.presentation?.density === 'large';
   const S = (size: number) => large ? Math.round(size * 1.3) : size;
@@ -267,15 +275,22 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
   const panelStyle: React.CSSProperties = {background:'#FFFFFF', border:`1px solid ${paper.line}`, borderRadius:22, boxShadow:'0 12px 32px rgba(26,50,35,.045)', boxSizing:'border-box'};
   const chartLike = scene.component === 'comparison' || scene.component === 'bar_chart';
   const heading = chartLike ? scene.purpose : p.title;
-  return <AbsoluteFill style={{background:paper.bg, color:paper.ink, fontFamily:font, backgroundImage:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
-    <CornerBadge badge={badge}/>
+  const materialScene = ['object_showcase','material_collage'].includes(scene.component);
+  const previous=scene.previous_scene;
+  const sameHeading=!!previous?.props.scene_flow && (chartLike?previous.purpose:previous.props.title)===heading;
+  const headingMotion=carriesPicture(scene)||sameHeading?{}:scene.component==='comparison' && p.visuals?.length
+    ? {opacity:ease((frame-scene.start_frame)/16)} : motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : scene.component === 'flow_diagram'||materialScene ? 'scene' : 'title');
+  return <AbsoluteFill style={{background:stageOnly?'transparent':paper.bg, color:paper.ink, fontFamily:font, backgroundImage:stageOnly?undefined:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
+    {!stageOnly&&<><CornerBadge badge={badge}/>
     <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
+    {scene.component!=='title_card'&&<div style={{position:'absolute',left:140,top:162,width:1640,fontSize:materialScene&&heading.length>40?40:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...headingMotion}}><Tech text={heading}/></div>}</>}
+    <div style={{position:'absolute',inset:0,display:hideStage?'none':undefined}}>
     {scene.component === 'title_card' ? <div style={{position:'absolute',left:180,top:285,width:1520}}>
       <div style={{...motion('title'), ...textStyle, fontSize:large ? (p.title.length > 20 ? S(66) : S(83)) : p.title.length > 30 ? 76 : 92, lineHeight:1.35,fontWeight:700,letterSpacing:-1,maxWidth:1450}}><Tech text={p.title}/></div>
       <div style={{...motion('title'),width:84,height:5,background:paper.green,marginTop:38,borderRadius:3}}/>
       {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? S(36) : S(42),lineHeight:1.65,color:paper.muted}}><Tech text={p.subtitle}/></div>}
     </div> : <>
-      <div style={{position:'absolute',left:140,top:162,width:1640,fontSize:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...(scene.component==='comparison' && p.visuals?.length ? {opacity:ease((frame-scene.start_frame)/16)} : motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : scene.component === 'flow_diagram' ? 'scene' : 'title'))}}><Tech text={heading}/></div>
+      {materialScene && <DirectedMaterials scene={scene} frame={frame}/>}
       {scene.component === 'concept_reveal' && <div style={{position:'absolute',left:140,top:p.lines.length === 4 ? 330 : 360,width:1640,display:'grid',gridTemplateColumns:`repeat(${p.lines.length === 4 ? 2 : p.lines.length}, 1fr)`,gap:28}}>
         {p.lines.map((line: string,i: number) => {
           const match = line.match(/^([^：:]{1,16})[：:]\s*([\s\S]+)$/);
@@ -362,20 +377,33 @@ function InformationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
         </div>;
       })()}
     </>}
-    <div style={{position:'absolute',bottom:60,left:120,right:120,display:'flex',justifyContent:'center',alignItems:'flex-end',minHeight:80}}>{caption && <div style={{maxWidth:1560,padding:'14px 28px',boxSizing:'border-box',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:large ? (caption.text.length > 32 ? 36 : 44) : caption.text.length > 32 ? 30 : 38,lineHeight:1.45,textAlign:'center',...textStyle}}><Tech text={caption.text}/></div>}</div>
+    </div>
+    {!stageOnly&&<><div style={{position:'absolute',bottom:60,left:120,right:120,display:'flex',justifyContent:'center',alignItems:'flex-end',minHeight:80}}>{caption && <div style={{maxWidth:1560,padding:'14px 28px',boxSizing:'border-box',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:large ? (caption.text.length > 32 ? 36 : 44) : caption.text.length > 32 ? 30 : 38,lineHeight:1.45,textAlign:'center',...textStyle}}><Tech text={caption.text}/></div>}</div>
     <div style={{position:'absolute',left:0,bottom:0,height:4,width:`${100*(frame+1)/ir.total_frames}%`,background:paper.green}}/>
-    <Audio src={staticFile(ir.audio_public_file)}/>
+    <Audio src={staticFile(ir.audio_public_file)}/></>}
   </AbsoluteFill>;
 }
 
 function ExplanationVideo({ir, badge}: {ir: Timeline; badge?: Badge}) {
   const frame = useCurrentFrame();
-  const scene = ir.scenes.find(s => frame >= s.start_frame && frame < s.end_frame) ?? ir.scenes[ir.scenes.length-1];
-  if (['object_showcase', 'material_collage'].includes(scene.component)) {
+  const scenes=React.useMemo(()=>linkScenes(ir.scenes),[ir.scenes]);
+  const linked={...ir,scenes};
+  const scene = scenes.find(s => frame >= s.start_frame && frame < s.end_frame) ?? scenes[scenes.length-1];
+  if (['object_showcase', 'material_collage'].includes(scene.component) && !scene.props.shot_plan) {
     const preset = scene.component === 'material_collage' ? 'dynamic_collage' : 'object_showcase';
     return <CreativeVideo ir={{...ir,presentation:{preset}}} badge={badge} showCaptions/>;
   }
-  return <InformationVideo ir={ir} badge={badge}/>;
+  const transition=transitionAt(scene,frame),previous=scene.previous_scene;
+  if(!transition.active||!previous)return <InformationVideo ir={linked} badge={badge}/>;
+  // Only the picture area dissolves. There is one uninterrupted audio track,
+  // caption layer and header; scene timing and chapter boundaries stay intact.
+  return <AbsoluteFill>
+    <InformationVideo ir={linked} badge={badge} hideStage/>
+    <AbsoluteFill style={{clipPath:'inset(280px 80px 150px 80px)'}}>
+      <AbsoluteFill style={{opacity:1-transition.progress}}><InformationVideo ir={linked} sceneOverride={previous} frameOverride={previous.end_frame-1} stageOnly/></AbsoluteFill>
+      <AbsoluteFill style={{opacity:transition.progress}}><InformationVideo ir={linked} sceneOverride={scene} frameOverride={frame} stageOnly/></AbsoluteFill>
+    </AbsoluteFill>
+  </AbsoluteFill>;
 }
 
 function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge}) {

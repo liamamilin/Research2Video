@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Audio, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {CornerBadge, type Badge} from './Packaging';
 import {ImageMaterials} from './ImageMaterials';
+import {DirectedMaterials} from './DirectedMaterials';
 
 export type CreativePreset = 'information_cards' | 'kinetic_typography' | 'image_slideshow' | 'chat_dialogue' | 'object_showcase' | 'dynamic_collage';
 const ink = '#213D39', green = '#237968', cream = '#F5F2E9', muted = '#73847B';
@@ -102,7 +103,7 @@ export function CreativeVideo({ir, badge, showCaptions = false}: {ir: any; badge
       <div style={{alignSelf:'flex-start',maxWidth:1330}}><div style={{fontSize:24,color:muted,marginBottom:12}}>观众 · 本章问题</div><div style={{padding:'24px 36px',background:'#FFFFFF',border:'1px solid #DFE5DC',borderRadius:'8px 30px 30px 30px',fontSize:p.question.length > 90 ? 29 : 36,lineHeight:1.5,overflowWrap:'anywhere'}}>{p.question}</div></div>
       {p.side !== 'left' && <div style={{alignSelf:p.side === 'left' ? 'flex-start' : 'flex-end',maxWidth:1350,opacity:enter,transform:`translateY(${(1-enter)*20}px)`}}><div style={{fontSize:24,color:muted,marginBottom:12,textAlign:p.side === 'left' ? 'left' : 'right'}}>{p.speaker}</div><div style={{padding:'34px 44px',background:green,color:'#FFFFFF',borderRadius:p.side === 'left' ? '8px 30px 30px 30px' : '30px 8px 30px 30px',fontSize:p.text.length > 60 ? 44 : 52,lineHeight:1.65,overflowWrap:'anywhere',boxShadow:'0 12px 30px #23796816'}}>{spokenText}</div></div>}
     </div>}
-    {['object_showcase','dynamic_collage'].includes(mode) && <ImageMaterials props={p} mode={mode} frame={frame} start={scene.start_frame} progress={progress} durationFrames={scene.end_frame-scene.start_frame}/>}
+    {['object_showcase','dynamic_collage'].includes(mode) && (p.shot_plan ? <DirectedMaterials scene={scene} frame={frame}/> : <ImageMaterials props={p} mode={mode} frame={frame} start={scene.start_frame} progress={progress} durationFrames={scene.end_frame-scene.start_frame}/>)}
     {!showCaptions && footer}
     {caption && <div style={{position:'absolute',left:100,right:100,bottom:60,display:'flex',justifyContent:'center'}}><div style={{padding:'14px 28px',background:'#29392F',color:'#FFFFFF',borderRadius:14,fontSize:32,lineHeight:1.45,textAlign:'center'}}>{caption.text}</div></div>}<div style={{position:'absolute',bottom:0,left:0,height:5,width:`${100*(frame+1)/ir.total_frames}%`,background:green}}/>
     <Audio src={staticFile(ir.audio_public_file)}/>

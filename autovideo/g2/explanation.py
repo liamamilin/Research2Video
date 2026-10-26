@@ -9,6 +9,7 @@ from g2 import information_motion as motion
 from g2.card_editorial import groups
 from g1.visual_language import component_schema, catalog, validate_references
 from g2 import visual_language, process_diagram
+from g2.material_shots import describe
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / 'g2/schemas/explanation-plan.schema.json'
@@ -25,7 +26,9 @@ def enabled(saved: dict, form: str) -> bool:
 
 def messages(context: dict, correction: str | None = None) -> list[dict]:
     system = ('你是视频画面编排师。上游讲稿、数据和结论已经确定，直接把它们展示好。'
-              '每个输入分组返回一页，保持id和顺序。重点是观看体验：观众应看哪里、何时看到差异、如何跟上讲解。'
+              '每个输入分组返回一页，保持id和顺序。分组已按实际配音时长拆合，可能是一长段的一部分或几个连续短段。'
+              '每页围绕本组讲解重点，结合同章上下文保持对象名称和讲述关系连贯；不重复贴出整章内容。'
+              '重点是观看体验：观众应看哪里、何时看到差异、如何跟上讲解。'
               '时间趋势用data_chart kind=trend；多组数据比较用kind=grouped；'
               '每个对象同时有两个数值维度时（例如成本和速度、价格和效果），优先用scatter_chart展示二维位置，points按讲述顺序排列。'
               '散点图分别填写x_label/x_unit、y_label/y_unit，每个点包含name/x/y，点数2到10个；可用group区分分组。'
@@ -38,8 +41,14 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
               '长序列提炼讲稿提到的关键节点，缺失值用null。不要把编号、年份或步骤编号当测量值。'
               'data_chart.takeaway用讲稿已有结论，focus_index指出要强调的横轴项；'
               'grouped可用focus_series强调结论对应的整个系列，避免随意聚焦单个类别。'
-              'reveal_phrases填写讲稿中引出每个时间点（trend）或每个系列（grouped）的短语，帮助画面跟随旁白。'
+              'reveal_phrases填写讲稿中引出每个时间点（trend）或每个系列（grouped）的短语；数量分别等于categories或series的数量。'
+              'grouped按系列展开；不要在reveal_phrases里按月份列出短语，也不要把总结句放进去。'
               '有可用图片的普通说明会自动展示图片；讲到数据时优先用数字或图表。'
+              '分组的image_materials给出已配好的图片和区域。为图片讲解填写material_cues，'
+              '按旁白顺序指定image_index、可选region_index和讲稿中引出该对象或区域的短语phrase。'
+              '同一张网页可按几个区域连续讲解；两张图片可先看左图、再看右图，最后一起比较。'
+              '已有页面或输入输出图片时，普通页面说明用概念或对比组织简短文字，由现有图片呈现，不另画抽象流程替代这些图片。'
+              'material_summary_phrase可填写引出总结或整体比较的讲稿原句。只安排画面，不改写旁白。'
               '画面文字简洁，不把整段旁白贴上屏。只返回符合required_schema的JSON。')
     system += ('明确的传递过程可以用flow_diagram：2到5个节点，edges连接已有节点，paths填空数组，附title和takeaway；布局由程序生成。' + visual_language.GUIDANCE)
     schemas = {name: component_schema(name) for name in COMPONENTS}
@@ -51,6 +60,8 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
                'required_schema': json.loads(SCHEMA.read_text())}
     if context.get('instruction'):
         payload['visual_preference'] = context['instruction']
+    if context.get('chapter_context'):
+        payload['chapter_context'] = context['chapter_context']
     if correction:
         payload['layout_feedback'] = correction
     return [{'role': 'system', 'content': system}, {'role': 'user', 'content': json.dumps(payload, ensure_ascii=False)}]
@@ -62,6 +73,12 @@ def validate(plan: dict, context: dict) -> None:
     if [p['id'] for p in plan['pages']] != [g['id'] for g in context['groups']]:
         raise ValueError('画面页需要按顺序覆盖输入分组')
     for page in plan['pages']:
+        group = next(g for g in context['groups'] if g['id'] == page['id'])
+        materials = group.get('image_materials', [])
+        for cue in page.get('material_cues', []):
+            if (cue['image_index'] >= len(materials) or
+                    (cue.get('region_index') is not None and cue['region_index'] >= len(materials[cue['image_index']]['regions']))):
+                raise ValueError('图片镜头需要对应本段已有图片和区域')
         props = page['props'] = visual_language.enrich(page['component'], page['props'])
         Draft202012Validator(component_schema(page['component'])).validate(props)
         if 'visuals' in props:
@@ -113,16 +130,26 @@ def paragraph_groups(pipeline, narration: dict, saved: dict) -> list[dict]:
     for group in result:
         group['narration'] = [{'id': sid, 'text': texts[sid]} for sid in group['segment_ids']]
         group['image_indices'] = pictures.get(group['segment_ids'][0], [])
+        if group['image_indices']:
+            group['image_materials'] = describe([saved['image_materials'][i] for i in group['image_indices']])
     return result
 
 
-def plan_storyboard(pipeline, narration: dict, saved: dict) -> dict:
+def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | None = None) -> dict:
     input_groups = paragraph_groups(pipeline, narration, saved)
+    original = input_groups
+    assembly = None
+    if alignment is not None:
+        from g2.scene_assembly import arrange
+        input_groups, assembly = arrange(input_groups, alignment, saved)
+        pipeline.write_json(pipeline.ARTIFACTS / 'scene-assembly.json', assembly)
     pages = []
     # One request per chapter; ordinary paragraphs still share the chapter's data context.
     for chapter in dict.fromkeys(g['chapter_id'] for g in input_groups):
         local = [g for g in input_groups if g['chapter_id'] == chapter]
         context = {'title': narration['title'], 'groups': local}
+        if assembly:
+            context['chapter_context'] = [{'id': g['id'], 'text': g['text']} for g in original if g['chapter_id'] == chapter]
         def check(value, ctx):
             try:
                 validate(value, ctx)
@@ -130,7 +157,7 @@ def plan_storyboard(pipeline, narration: dict, saved: dict) -> dict:
                 raise pipeline.G2Fault('EXPLANATION_LAYOUT', str(exc)) from exc
         plan = pipeline.generate_validated_plan(f'{chapter}-explanation', messages, SCHEMA, check, context)
         pages.extend(plan['pages'])
-    return {'pages': pages, 'groups': input_groups}
+    return {'pages': pages, 'groups': input_groups, **({'assembly': assembly} if assembly else {})}
 
 
 def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, assets: list[dict]) -> dict:
@@ -162,6 +189,11 @@ def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, asset
             scene['props'] = {**scene['props'], 'layout': by_id[scene['id']]}
     board = motion.compile_storyboard({'scenes': scenes}, alignment, pipeline)
     board.update(image_assets=assets, presentation='explanation')
+    from g2.shot_director import attach
+    attach(board, saved, pipeline, alignment, plan['pages'])
+    if plan.get('assembly'):
+        from g2.scene_assembly import connect
+        connect(board, plan['groups'], saved)
     pipeline.write_json(pipeline.ARTIFACTS / 'explanation-plan.json', plan)
     pipeline.write_json(pipeline.ARTIFACTS / 'storyboard-plan.json', board)
     return board
@@ -173,6 +205,9 @@ def replan_scene(pipeline, old: dict, narration: dict, ir: dict, instruction: st
     speech = [s for s in ir['narration']['segments'] if s['id'] in ids]
     group = {'id': old['id'], 'title': old['props'].get('title', old['purpose']),
              'text': ''.join(s['text'] for s in speech), 'segment_ids': ids, 'narration': speech, 'image_indices': []}
+    images = old['props'].get('images', []) if old['component'] in {'object_showcase', 'material_collage'} else []
+    if images:
+        group.update(image_indices=list(range(len(images))), image_materials=describe(images))
     context = {'title': narration['title'], 'groups': [group], 'instruction': instruction}
     def check(value, ctx):
         try:
@@ -180,4 +215,15 @@ def replan_scene(pipeline, old: dict, narration: dict, ir: dict, instruction: st
         except (ValueError, TypeError, KeyError, ValidationError) as exc:
             raise pipeline.G2Fault('EXPLANATION_LAYOUT', str(exc)) from exc
     plan = pipeline.generate_validated_plan(f"{old['id']}-explanation-revision", messages, SCHEMA, check, context)
-    return compile_storyboard(pipeline, {**plan, 'groups': [group]}, {'rows': speech}, {}, [])['scenes'][0]
+    saved = {'_shot_profile': old['props'].get('shot_plan', {}).get('profile', 'balanced'),
+             'image_materials': images}
+    assets = [{'id': image['image_asset_id'], 'path': image['image_path']} for image in images]
+    result = compile_storyboard(pipeline, {**plan, 'groups': [group]}, {'rows': speech}, saved, assets)['scenes'][0]
+    if old['props'].get('scene_flow'):
+        result['props']['scene_flow'] = {**old['props']['scene_flow'],
+            'entry': ('dissolve' if old['props']['scene_flow']['entry']=='carry'
+                      and result['component']!=old['component'] else old['props']['scene_flow']['entry'])}
+        if (result['component']==old['component'] and old['props'].get('shot_plan', {}).get('closing')=='hold'
+                and result['props'].get('shot_plan')):
+            result['props']['shot_plan']['closing'] = 'hold'
+    return result
