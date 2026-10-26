@@ -1,0 +1,15 @@
+schema_version: 1
+name: AI 专题系列
+matrix: ai_media
+type: series
+audience: 关注 AI 产品、技术与应用的观众
+promise: 围绕同一主题持续建立系统认识
+production_ids: []
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 固定栏目结构
+  - 混合画面
+status: planned
+notes: 目标栏目，尚未配置连续选题与期次。

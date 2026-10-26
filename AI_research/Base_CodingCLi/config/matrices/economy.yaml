@@ -7,3 +7,12 @@ jobs:
 - economy/economy_weekly
 render:
   video_speed: 1.25
+content:
+  name: 财经与经济
+  role: domain
+  audience: 关注经济变化与其影响的观众
+  status: configured
+  visual_focus:
+  - 趋势图
+  - 对比图
+  - 传导流程

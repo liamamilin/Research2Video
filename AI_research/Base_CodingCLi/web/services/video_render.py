@@ -282,7 +282,9 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
     config = production.get(paths.config_dir, paths.jobs_dir, script["production"]) if script.get("production") else None
     from core import matrices
     job = getattr(config, "job", "") if config else ""
-    if job:
+    if script.get("source_matrix_id"):
+        matrix = matrices.load_all(paths.config_dir).get(script["source_matrix_id"])
+    elif job:
         matrix = matrices.of_job(job, paths.config_dir)
     else:
         # Older scripts have no production key. Resolve their source Job using
@@ -302,8 +304,9 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         owners, _ = outputs.script_owners(paths.config_dir, paths.jobs_dir, related)
         owner = owners.get(script["id"], {})
         matrix = matrices.load_all(paths.config_dir).get(owner.get("matrix", ""))
-    from core.video.production_settings import inherit
-    matrix_settings = inherit(matrix.render if matrix else {}, config.render if config and config.usable else {})
+    from core.video import content_columns
+    matrix_settings = content_columns.render_settings(paths.config_dir, matrix, script.get("content_context") or {},
+                                                      config.render if config and config.usable else {})
     if column.production_settings or matrix_settings or production_mode is not None:
         if production_mode not in (None, "standard", "fast"):
             raise RenderError("未知制作档位")
@@ -322,7 +325,9 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
             request.pop(key, None)
         request["production_context"] = {"content_recipe": {"id": "research:" + column.key, "settings": content_settings}}
         if matrix_settings:
-            settings_id = "research-production:" + config.key if config else "research-matrix:" + matrix.key
+            settings_id = ("research-production:" + config.key if config else
+                           "research-matrix:" + matrix.key if matrix else
+                           "research-column:" + script.get("content_column_id", "unassigned"))
             request["production_context"]["matrix"] = {"id": settings_id,
                 "settings": {k: v for k, v in matrix_settings.items() if k != "production_recipe"}}
         if script["topic"].get("video_form"):
@@ -368,6 +373,10 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         else:
             request["packaging"] = packaging
     request["visual_storytelling"] = not (script["topic"].get("article", {}).get("kind") == "literary")
+    if direction := content_columns.render_direction(script.get("content_context") or {}):
+        intent = request.setdefault("creative_intent", {})
+        intent["purpose"] = (intent.get("purpose", "") + "\n" + direction).strip()
+        intent.setdefault("audience", (script.get("content_context") or {}).get("audience", "普通观众"))
     from core.video import screenshots
     try:
         materials = screenshots.render_materials(script["id"], version, get_client().base_url)

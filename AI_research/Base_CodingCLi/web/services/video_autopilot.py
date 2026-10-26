@@ -317,7 +317,10 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
         if content_guard.writing_peer(item["topic"], paths.config_dir, paths.jobs_dir):
             ap.update_item(item["id"], note="等待同矩阵前一份报告写稿完成，再检查选题重复")
             return took
-        script = video_executor.create(item["column_key"], _prepare(item), "autopilot")
+        topic = _prepare(item)
+        if item.get("production"):
+            topic = {**topic, "_production": item["production"]}
+        script = video_executor.create(item["column_key"], topic, "autopilot")
         if item.get("production"):
             store.update_script(script["id"], production=item["production"])
         ap.update_item(item["id"], script_id=script["id"], state="WORKING", note="已开始写稿")

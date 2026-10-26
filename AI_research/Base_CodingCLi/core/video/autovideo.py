@@ -101,6 +101,9 @@ class AutoVideoClient:
     def voices(self) -> list[dict]:
         return self._request("GET", "/api/voices").get("items", [])
 
+    def creative_resources(self) -> dict:
+        return self._request("GET", "/api/creative-resources", timeout=5)
+
     def create_job(self, payload: dict) -> dict:
         return self._request("POST", "/api/jobs", json=payload)
 

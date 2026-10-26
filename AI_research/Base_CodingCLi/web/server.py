@@ -408,6 +408,8 @@ def create_app() -> FastAPI:
     app.include_router(video_recipes_router)
     app.include_router(video_router)
     app.include_router(matrices_router)
+    from web.routes.content_columns import router as content_columns_router
+    app.include_router(content_columns_router)
     app.include_router(sources_router)
     app.include_router(production_router)
     app.include_router(outputs_router)

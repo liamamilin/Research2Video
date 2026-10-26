@@ -1,6 +1,6 @@
 {
   "library": "autovideo-creative-resources",
-  "version": 5,
+  "version": 6,
   "provenance": {
     "taxonomy_version": "1.1.0",
     "source": "AI创作/tool/creator-studio/sources/recovered-upstream-20261020.json",
@@ -1007,6 +1007,160 @@
         "generation_style": "ambient"
       },
       "material_guidance": "有图片可选动态拼贴；有对象整体、细节或对比图片可选对象展示。纯文稿沿用原形式。"
+    },
+    {
+      "version": 1,
+      "id": "mixed_explainer",
+      "name": "混合讲解",
+      "description": "围绕问题、原因和结论，按段落组合真实画面、图表、流程和轻量说明。",
+      "topics": [
+        "解读",
+        "深度研究",
+        "科普"
+      ],
+      "recommended_forms": [
+        "F10",
+        "F16",
+        "F12",
+        "F04"
+      ],
+      "defaults": {
+        "production_mode": "fast",
+        "visual_style": "editorial_light",
+        "video_form": "information_cards",
+        "visual_storytelling": true,
+        "duration_mode": "content",
+        "creative_intent": {
+          "audience": "当前栏目面向的观众",
+          "purpose": "围绕问题、原因和结论，按段落组合真实画面、图表、流程和轻量说明。",
+          "tone": "清楚、自然",
+          "focus": "先建立问题，再随旁白解释机制和关键关系，最后回顾结论。"
+        },
+        "packaging": {
+          "preset": "common",
+          "label": "混合讲解",
+          "intro": {
+            "seconds": 1.0
+          },
+          "outro": {
+            "seconds": 1.5
+          },
+          "sound": {
+            "enabled": false
+          }
+        },
+        "background_music": {
+          "enabled": false
+        }
+      },
+      "music": {
+        "mode": "none",
+        "suggested_forms": [],
+        "description": "默认保留清楚的旁白，不添加背景音乐。"
+      },
+      "material_guidance": "用于分章讲稿的跨领域画面组合。截图、图表、价格与流程可同片混用，普通段落使用轻量卡片；画面按输入素材和旁白自动编排。"
+    },
+    {
+      "version": 1,
+      "id": "mixed_comparison",
+      "name": "混合比较",
+      "description": "围绕对象与比较维度，组合截图、性能图、价格变化和适用情形。",
+      "topics": [
+        "模型横评",
+        "产品比较",
+        "公司与行业比较"
+      ],
+      "recommended_forms": [
+        "F10",
+        "F12",
+        "F04"
+      ],
+      "defaults": {
+        "production_mode": "fast",
+        "visual_style": "editorial_light",
+        "video_form": "information_cards",
+        "visual_storytelling": true,
+        "duration_mode": "content",
+        "creative_intent": {
+          "audience": "当前栏目面向的观众",
+          "purpose": "围绕对象与比较维度，组合截图、性能图、价格变化和适用情形。",
+          "tone": "清楚、自然",
+          "focus": "同一对象在截图、图表和比较卡中保持名称与颜色一致；先认识对象，再比较同一维度，结尾回顾取舍。"
+        },
+        "packaging": {
+          "preset": "common",
+          "label": "混合比较",
+          "intro": {
+            "seconds": 1.0
+          },
+          "outro": {
+            "seconds": 1.5
+          },
+          "sound": {
+            "enabled": false
+          }
+        },
+        "background_music": {
+          "enabled": false
+        }
+      },
+      "music": {
+        "mode": "none",
+        "suggested_forms": [],
+        "description": "默认保留清楚的旁白，不添加背景音乐。"
+      },
+      "material_guidance": "用于分章讲稿的跨领域画面组合。截图、图表、价格与流程可同片混用，普通段落使用轻量卡片；画面按输入素材和旁白自动编排。"
+    },
+    {
+      "version": 1,
+      "id": "mixed_tutorial",
+      "name": "混合步骤",
+      "description": "沿着操作过程，组合界面截图、步骤聚焦、分支流程和结果。",
+      "topics": [
+        "教程",
+        "方法实践",
+        "流程讲解"
+      ],
+      "recommended_forms": [
+        "F12",
+        "F16",
+        "F04"
+      ],
+      "defaults": {
+        "production_mode": "fast",
+        "visual_style": "editorial_light",
+        "video_form": "information_cards",
+        "visual_storytelling": true,
+        "duration_mode": "content",
+        "creative_intent": {
+          "audience": "当前栏目面向的观众",
+          "purpose": "沿着操作过程，组合界面截图、步骤聚焦、分支流程和结果。",
+          "tone": "清楚、自然",
+          "focus": "每一步先呈现当前操作位置，再展示动作与结果；有界面截图时聚焦相应区域，分支用流程讲清。"
+        },
+        "packaging": {
+          "preset": "common",
+          "label": "混合步骤",
+          "intro": {
+            "seconds": 1.0
+          },
+          "outro": {
+            "seconds": 1.5
+          },
+          "sound": {
+            "enabled": false
+          }
+        },
+        "background_music": {
+          "enabled": false
+        }
+      },
+      "music": {
+        "mode": "none",
+        "suggested_forms": [],
+        "description": "默认保留清楚的旁白，不添加背景音乐。"
+      },
+      "material_guidance": "用于分章讲稿的跨领域画面组合。截图、图表、价格与流程可同片混用，普通段落使用轻量卡片；画面按输入素材和旁白自动编排。"
     }
   ]
 }

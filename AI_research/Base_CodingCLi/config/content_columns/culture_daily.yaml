@@ -1,0 +1,16 @@
+schema_version: 1
+name: 文化与艺术每日观察
+matrix: culture
+type: news
+audience: 对作品、艺术与文化史感兴趣的观众
+promise: 发现文化与艺术的新变化并讲清影响
+production_ids:
+- culture_daily
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 作品图片
+  - 细节聚焦
+status: configured
+notes: ''

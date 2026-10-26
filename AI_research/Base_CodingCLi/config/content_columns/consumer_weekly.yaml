@@ -1,0 +1,17 @@
+schema_version: 1
+name: 消费与生活专题解读
+matrix: consumer
+type: explainer
+audience: 关注产品选择和日常生活的观众
+promise: 串联消费与生活的重要变化，理解原因与关系
+production_ids:
+- consumer_weekly
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 实物图片
+  - 对比卡
+  - 使用场景
+status: configured
+notes: ''

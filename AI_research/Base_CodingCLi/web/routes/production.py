@@ -41,7 +41,13 @@ def list_configs(job: str = "", user=Depends(require_viewer)) -> list[dict]:
     paths = get_settings().paths
     configs = _all()
     made = outputs.count_by_config(paths.config_dir, paths.jobs_dir, configs=configs)
-    return [{**c.as_dict(), "scripts": made.get(c.key, 0)} for c in configs.values() if not job or c.job == job]
+    from core.video import content_columns
+    columns = content_columns.load_all(paths.config_dir, configs=configs)
+    owners = {pid: c for c in columns.values() if not c.errors for pid in c.production_ids}
+    return [{**c.as_dict(), "scripts": made.get(c.key, 0),
+             **({"content_column_id": owners[c.key].key, "content_column_name": owners[c.key].name,
+                 "content_matrix_id": owners[c.key].matrix} if c.key in owners else {})}
+            for c in configs.values() if not job or c.job == job]
 
 
 @router.get('/{key}/settings')
@@ -49,12 +55,14 @@ def config_settings(key: str, user=Depends(require_viewer)) -> dict:
     import hashlib
     from pathlib import Path
     from core import matrices
-    from core.video.production_settings import inherit
+    from core.video import content_columns
     config = _get(key)
     path = Path(production.directory(get_settings().paths.config_dir)) / (key + '.yaml')
     matrix = matrices.of_job(config.job, get_settings().paths.config_dir)
+    context = content_columns.snapshot(get_settings().paths.config_dir, key, config.job)
     return {**config.as_dict(), 'revision': hashlib.sha256(path.read_bytes()).hexdigest(),
-            'effective_render': inherit(matrix.render if matrix else {}, config.render)}
+            'content_context': context,
+            'effective_render': content_columns.render_settings(get_settings().paths.config_dir, matrix, context, config.render)}
 
 
 class RenderSettingsIn(BaseModel):
@@ -249,7 +257,7 @@ def write(key: str, body: WriteIn, request: Request, user=Depends(require_editor
     made, failed = [], []
     for ask in asks:
         try:
-            script = video.create_script(ask, request, user)
+            script = video.create_script(ask.model_copy(update={"production": config.key}), request, user)
         except HTTPException as exc:
             if not made:
                 raise
@@ -295,7 +303,8 @@ def _write_whole(config: production.Config, body: WriteIn, request: Request, use
     if previous:
         raise _error(409, "already_written", "这份报告已经用这套配置写过了")
     record = reports.record_file(body.report_path, job=config.job, created_by=user["username"])
-    script = video.create_script(video.ScriptCreateIn(column=config.recipe, report_id=record["id"]), request, user)
+    script = video.create_script(video.ScriptCreateIn(column=config.recipe, production=config.key,
+                                                    report_id=record["id"]), request, user)
     store.update_script(script["id"], production=config.key)
     audit.log("production_write", user=user["username"], target=config.key, details={"report": body.report_path})
     return [{**script, "production": config.key}]

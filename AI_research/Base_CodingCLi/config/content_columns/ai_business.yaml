@@ -1,0 +1,17 @@
+schema_version: 1
+name: AI 商业观察
+matrix: ai_media
+type: explainer
+audience: 关注 AI 产品、技术与应用的观众
+promise: 理解 AI 商业变化背后的原因和影响
+production_ids:
+- ai_media_business_digest
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 财务图表
+  - 业务结构
+  - 流程
+status: configured
+notes: ''

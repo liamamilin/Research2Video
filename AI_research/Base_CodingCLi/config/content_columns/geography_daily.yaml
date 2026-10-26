@@ -1,0 +1,17 @@
+schema_version: 1
+name: 地理与世界每日观察
+matrix: geography
+type: news
+audience: 对国家、城市与地理现象感兴趣的观众
+promise: 发现地理与世界的新变化并讲清影响
+production_ids:
+- geography_daily
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 地图
+  - 空间变化
+  - 统计图
+status: configured
+notes: ''

@@ -1,0 +1,17 @@
+schema_version: 1
+name: 消费与生活每日观察
+matrix: consumer
+type: news
+audience: 关注产品选择和日常生活的观众
+promise: 发现消费与生活的新变化并讲清影响
+production_ids:
+- consumer_daily
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 实物图片
+  - 对比卡
+  - 使用场景
+status: configured
+notes: ''

@@ -9,3 +9,5 @@ render:
   video_speed: 1.25
   production_mode: fast
   video_form: information_cards
+content:
+  role: operations

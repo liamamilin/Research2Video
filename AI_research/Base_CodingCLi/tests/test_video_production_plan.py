@@ -120,3 +120,24 @@ def test_task_overrides_only_explicit_fields_including_nested_settings():
     merged["packaging"]["intro"]["seconds"] = 3
     assert defaults["packaging"]["intro"]["seconds"] == 1.5
     assert task["packaging"]["sound"] == {"enabled": False}
+
+
+def test_saved_column_keeps_source_defaults_when_binding_is_removed(video_env):
+    from core import matrices
+
+    config_dir = str(video_env / "config")
+    matrices.save(config_dir, "source", name="研究来源", domain="来源", keywords=[],
+                  members=[], render={"video_speed": 1.25})
+    matrices.save(config_dir, "business", name="业务领域", domain="业务", keywords=[],
+                  members=[], render={"video_speed": 1.5})
+    script = {**_approved_script(), "production": "removed", "source_matrix_id": "source",
+              "content_column_id": "model_review", "content_matrix_id": "business",
+              "content_context": {"column": "model_review", "column_name": "横评", "matrix": "business",
+                                  "render_inheritance": "source_compatible", "render": {"production_recipe": "mixed_comparison"}}}
+    rendered = video_render.create(script)
+    assert rendered["request"]["production_context"]["matrix"]["settings"]["video_speed"] == 1.25
+    assert rendered["request"]["production_recipe"] == "mixed_comparison"
+    store.update_render(rendered["id"], status="COMPLETED")
+    matrices.remove(config_dir, "source")
+    # A removed source still leaves the saved column's own settings usable.
+    assert video_render.create(script)["request"]["production_context"]["matrix"]["id"] == "research-column:model_review"

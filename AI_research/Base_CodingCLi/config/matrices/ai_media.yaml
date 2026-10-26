@@ -12,3 +12,12 @@ jobs:
 - ai_media/weekly_deep_research
 render:
   video_speed: 1.25
+content:
+  name: AI 与科技
+  role: domain
+  audience: 关注 AI 产品、技术与应用的观众
+  status: configured
+  visual_focus:
+  - 真实截图
+  - 性能图
+  - 产品演示

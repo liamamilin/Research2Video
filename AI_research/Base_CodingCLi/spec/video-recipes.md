@@ -1,5 +1,7 @@
 # 文稿配方（Video recipes）
 
+2026-10-26 概念整理：本页的配方是文稿生产实现，解析出的内部 `Column` 继续兼容旧记录；独立业务栏目已完成首轮实施，与共享栏目类型、视频制作配方的边界及验收见 [视频内容架构](video-content-architecture.md)。
+
 状态：已实现（2026-10-20）。替代 `config/video_matrix.yaml`（四个维度拼格子）和 `config/video_columns.yaml`。
 
 2026-10-23 质量优先：配方定义定位与目标，数量和风格为参考，事实、来源和成立条件优先。完整边界见 [video-quality-policy.md](video-quality-policy.md)。

@@ -7,3 +7,12 @@ jobs:
 - industry/industry_weekly
 render:
   video_speed: 1.25
+content:
+  name: 产业与制造
+  role: domain
+  audience: 关注技术、制造与供应链的观众
+  status: configured
+  visual_focus:
+  - 工艺流程
+  - 结构图
+  - 真实素材

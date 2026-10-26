@@ -74,6 +74,36 @@ const at = (path: string) =>
   );
 
 describe("Matrices", () => {
+  it("keeps business domains in the main list and research groups in the source view", async () => {
+    const business = { ...AI, content: { role: "domain", name: "AI 与科技", audience: "开发者" },
+      content_summary: { columns: 5, configured: 5, planned: 0 } };
+    const source = { ...AI, key: "software", name: "软件研究来源", content: { role: "source", parent: "ai" } };
+    vi.mocked(fetch).mockResolvedValue({ ok: true, status: 200, text: async () => JSON.stringify({ matrices: [business, source], ungrouped: [] }) } as Response);
+    at("/matrices");
+    expect(await screen.findByRole("link", { name: "AI 与科技" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "软件研究来源" })).toBeNull();
+    fireEvent.change(screen.getByLabelText("矩阵范围"), { target: { value: "sources" } });
+    expect(screen.getByRole("link", { name: "软件研究来源" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "AI 与科技" })).toBeNull();
+  });
+
+  it("opens business domains on columns and reads production only when research sources are requested", async () => {
+    const original = vi.mocked(fetch).getMockImplementation()!;
+    vi.mocked(fetch).mockImplementation(async (url, init) => {
+      const u = String(url);
+      if (u.includes("/api/content-columns")) return { ok: true, status: 200, text: async () => JSON.stringify({ types: [], columns: [] }) } as Response;
+      if (u.split("?")[0].endsWith("/api/matrices/ai")) return { ok: true, status: 200, text: async () => JSON.stringify({ ...AI,
+        content: { role: "domain", name: "AI 与科技" } }) } as Response;
+      return original(url, init);
+    });
+    at("/matrices/ai");
+    expect(await screen.findByRole("region", { name: "领域栏目" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "栏目" }).getAttribute("aria-selected")).toBe("true");
+    expect(calls.some((c) => c.url.includes("/api/production"))).toBe(false);
+    fireEvent.click(screen.getByRole("tab", { name: "研究来源" }));
+    await waitFor(() => expect(calls.some((c) => c.url.includes("/api/production"))).toBe(true));
+  });
+
   it("lists each matrix with its domain and Jobs, and the Jobs in none", async () => {
     at("/matrices");
     const card = await screen.findByRole("link", { name: "AI 矩阵" });

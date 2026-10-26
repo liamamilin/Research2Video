@@ -1,0 +1,17 @@
+schema_version: 1
+name: 科技前沿
+matrix: ai_media
+type: news
+audience: 关注 AI 产品、技术与应用的观众
+promise: 从现有研究来源持续发现新技术与工具变化
+production_ids:
+- tech_daily
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 真实截图
+  - 图表
+  - 重点卡
+status: configured
+notes: ''

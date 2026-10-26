@@ -1,0 +1,17 @@
+schema_version: 1
+name: 历史与文明专题解读
+matrix: history
+type: explainer
+audience: 对历史事件、人物与文明感兴趣的观众
+promise: 串联历史与文明的重要变化，理解原因与关系
+production_ids:
+- history_weekly
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 档案图片
+  - 地图
+  - 时间轴
+status: configured
+notes: ''

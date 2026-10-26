@@ -265,6 +265,11 @@ export interface VideoRender {
 export interface VideoScriptSummary {
   id: string;
   column_key: string;
+  content_column_id?: string;
+  content_column_name?: string;
+  content_matrix_id?: string;
+  source_matrix_id?: string;
+  content_context?: { column: string; column_name: string; matrix: string; source_matrix: string; type: string };
   topic: { id: string | null; title: string; fields?: Record<string, string>; article?: { mode: "read" | "adapt"; kind: "literary" | "information" } };
   status: ScriptStatus;
   stage?: string | null;

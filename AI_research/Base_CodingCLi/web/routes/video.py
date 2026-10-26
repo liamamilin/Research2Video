@@ -446,6 +446,7 @@ class ScriptCreateIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     column: str = "deep_dive"
+    production: str = Field(default="", description="来源生产绑定；业务栏目由该绑定确定，旧 column 仍是文稿配方")
     topic_id: Optional[str] = Field(default=None, description="A content-opportunity topic id, e.g. 2026-09-29/C3")
     topic: Optional[TopicIn] = None
     topic_ids: list[str] = Field(
@@ -490,6 +491,12 @@ def _comparison_topic(body: ScriptCreateIn) -> dict:
 @router.post("/scripts", status_code=202)
 def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_editor)) -> dict:
     chosen = _creatable(body.column)
+    if body.production:
+        from core.video import production
+        paths = get_settings().paths
+        config = production.get(paths.config_dir, paths.jobs_dir, body.production)
+        if config is None or not config.usable or config.recipe != chosen.key:
+            raise HTTPException(422, detail=ApiError.make("invalid_production", "生产绑定与文稿配方不匹配"))
     if body.video_form is not None and body.video_form not in (chosen.allowed_forms or (chosen.video_form,)):
         raise HTTPException(422, detail=ApiError.make(
             "form_not_allowed", f"这个栏目只能用这些视频形式：{', '.join(chosen.allowed_forms or (chosen.video_form,))}"))
@@ -548,6 +555,8 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
     if chosen.research_mode == "none" and not topic.get("from_report"):
         raise HTTPException(422, detail=ApiError.make(
             "report_required", "这个配方不做调研（research.mode: none）：要从已有文稿切（from_script）或选发现报告里的条目"))
+    if body.production:
+        topic = {**topic, "_production": body.production}
     script = video_executor.create(body.column, topic, user["username"])
     audit.log("video_script_create", user=user["username"], target=script["id"], result="started",
               ip=request.client.host if request.client else None)

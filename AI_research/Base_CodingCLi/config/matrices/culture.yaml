@@ -7,3 +7,11 @@ jobs:
 - culture/culture_weekly
 render:
   video_speed: 1.25
+content:
+  name: 文化与艺术
+  role: domain
+  audience: 对作品、艺术与文化史感兴趣的观众
+  status: configured
+  visual_focus:
+  - 作品图片
+  - 细节聚焦

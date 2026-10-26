@@ -7,3 +7,12 @@ jobs:
 - geography/geography_weekly
 render:
   video_speed: 1.25
+content:
+  name: 地理与世界
+  role: domain
+  audience: 对国家、城市与地理现象感兴趣的观众
+  status: configured
+  visual_focus:
+  - 地图
+  - 空间变化
+  - 统计图

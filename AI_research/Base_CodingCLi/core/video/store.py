@@ -41,7 +41,7 @@ STALE_AFTER_SECONDS = 120
 _DB_PATH_OVERRIDE: Optional[str] = None
 _lock = threading.Lock()
 
-_SCRIPT_JSON = ("topic",)
+_SCRIPT_JSON = ("topic", "content_context")
 _VERSION_JSON = ("sections", "length_check", "meta")
 _RENDER_JSON = ("request", "artifacts", "timings", "visuals", "submission_request")
 
@@ -191,6 +191,12 @@ def init_db() -> None:
             conn.execute("ALTER TABLE scripts ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
         if "production" not in columns:  # the production config that made it (spec/production.md); '' before them
             conn.execute("ALTER TABLE scripts ADD COLUMN production TEXT NOT NULL DEFAULT ''")
+        for name in ("content_column_id", "content_matrix_id", "source_matrix_id"):
+            if name not in columns:
+                conn.execute(f"ALTER TABLE scripts ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
+        if "content_context" not in columns:
+            conn.execute("ALTER TABLE scripts ADD COLUMN content_context TEXT NOT NULL DEFAULT '{}'")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_content_column ON scripts(content_column_id)")
         pub_columns = {r[1] for r in conn.execute("PRAGMA table_info(publications)")}
         for name in ("account_uid", "account_name", "work_id", "confirmed_at", "removed_at"):
             if name not in pub_columns:
@@ -230,17 +236,22 @@ def _encode(fields: dict, json_fields: tuple[str, ...]) -> dict:
 # --- Scripts -----------------------------------------------------------------
 
 
-def create_script(column_key: str, topic: dict, created_by: str = "") -> dict:
+def create_script(column_key: str, topic: dict, created_by: str = "", *, production: str = "",
+                  content_context: dict | None = None) -> dict:
     from core.video.content_guard import is_sample
 
     now = _now()
     script_id = uuid.uuid4().hex
+    context = content_context or {}
     with connect(write=True) as conn:
         conn.execute(
             "INSERT INTO scripts (id, column_key, topic, status, created_by, created_at, updated_at,"
-            " heartbeat_at, archived) VALUES (?, ?, ?, 'RESEARCHING', ?, ?, ?, ?, ?)",
+            " heartbeat_at, archived, production, content_column_id, content_matrix_id, source_matrix_id, content_context) "
+            "VALUES (?, ?, ?, 'RESEARCHING', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (script_id, column_key, json.dumps(topic, ensure_ascii=False), created_by, now, now, time.time(),
-             int(is_sample({"created_by": created_by, "topic": topic}))),
+             int(is_sample({"created_by": created_by, "topic": topic})), production,
+             context.get("column", ""), context.get("matrix", ""), context.get("source_matrix", ""),
+             json.dumps(context, ensure_ascii=False)),
         )
     return get_script(script_id)
 
@@ -583,6 +594,9 @@ def add_version(
     """Store a new version and make it current. Returns its number."""
     now = _now()
     with connect(write=True) as conn:
+        context = conn.execute("SELECT content_context FROM scripts WHERE id = ?", (script_id,)).fetchone()
+        if context and context[0] != "{}":
+            meta = {**(meta or {}), "content_context": json.loads(context[0])}
         current = conn.execute(
             "SELECT COALESCE(MAX(version), 0) FROM script_versions WHERE script_id = ?", (script_id,)
         ).fetchone()[0]

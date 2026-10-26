@@ -1,0 +1,18 @@
+schema_version: 1
+name: AI 模型横评
+matrix: ai_media
+type: comparison
+audience: 关注 AI 产品、技术与应用的观众
+promise: 讲清模型在关键维度上的差异与适用条件
+production_ids:
+- ai_media_arena_digest
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 对比图
+  - 性能图
+  - 价格卡
+  - 真实截图
+status: configured
+notes: 报告沿用整期输入，按对象、维度与适用条件展开，画面按当期素材混合组织。

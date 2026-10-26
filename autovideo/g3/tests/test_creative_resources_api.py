@@ -17,7 +17,8 @@ from g3.tests.test_g3_package import READY, CHAPTERS, PACKAGE, saved_input
 def test_recipe_end_to_end_material_and_authored_jobs(tmp_path, recipe, form):
     with TestClient(create_app(Settings(data_dir=tmp_path), start_worker=False, preflight=READY)) as client:
         data = client.get("/api/creative-resources").json()
-        assert {r["id"] for r in data["recipes"]} == {"ai_news", "how_to", "science_explainer"}
+        assert {r["id"] for r in data["recipes"]} == {
+            "ai_news", "how_to", "science_explainer", "mixed_explainer", "mixed_comparison", "mixed_tutorial"}
         for body in [{"source_text": "用于讲解的材料内容。" * 8}, {"input_mode": "narration", "chapters": CHAPTERS}]:
             response = client.post("/api/jobs", json={**body, "production_recipe": recipe})
             assert response.status_code == 202, response.text
@@ -36,6 +37,19 @@ def test_reject_unknown_recipe_injected_snapshot_and_unimplemented_form(tmp_path
             response = client.post("/api/jobs", json={"source_text": "完整的素材内容。" * 10, **extra})
             assert response.status_code == 422
         assert client.get("/api/jobs").json()["total"] == 0
+
+
+@pytest.mark.parametrize("recipe", ["mixed_explainer", "mixed_comparison", "mixed_tutorial"])
+def test_shared_presentation_profiles_select_hybrid_authored_production_and_freeze_policy(tmp_path, recipe):
+    with TestClient(create_app(Settings(data_dir=tmp_path), start_worker=False, preflight=READY)) as client:
+        response = client.post("/api/jobs", json={"input_mode": "narration", "chapters": CHAPTERS,
+                                                 "production_recipe": recipe})
+        assert response.status_code == 202, response.text
+        saved = saved_input(client, response.json()["job_id"])
+        assert saved["production_plan"]["executor"]["id"] == "hybrid_cards"
+        assert saved["visual_storytelling"] and saved["video_form"] == "information_cards"
+        assert saved["production_recipe_resolved"]["recipe"]["id"] == recipe
+        assert not saved["background_music"]["enabled"]
 
 
 def test_explicit_form_legacy_packaging_and_capability_errors(tmp_path):

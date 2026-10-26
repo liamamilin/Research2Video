@@ -20,6 +20,9 @@ export interface ProductionConfig {
   target_minutes: number;
   label: string;
   scripts: number;
+  content_column_id?: string;
+  content_column_name?: string;
+  content_matrix_id?: string;
   render?: { production_recipe?: string; production_mode?: "standard" | "fast"; visual_style?: string; video_form?: string;
     voice_id?: string; video_speed?: number; creative_intent?: Record<string, unknown>; packaging?: Record<string, unknown> };
 }

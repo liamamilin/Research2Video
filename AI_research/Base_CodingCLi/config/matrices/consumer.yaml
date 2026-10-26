@@ -7,3 +7,12 @@ jobs:
 - consumer/consumer_weekly
 render:
   video_speed: 1.25
+content:
+  name: 消费与生活
+  role: domain
+  audience: 关注产品选择和日常生活的观众
+  status: configured
+  visual_focus:
+  - 实物图片
+  - 对比卡
+  - 使用场景

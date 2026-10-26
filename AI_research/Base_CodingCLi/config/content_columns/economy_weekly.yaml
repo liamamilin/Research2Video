@@ -1,0 +1,17 @@
+schema_version: 1
+name: 财经与经济专题解读
+matrix: economy
+type: explainer
+audience: 关注经济变化与其影响的观众
+promise: 串联财经与经济的重要变化，理解原因与关系
+production_ids:
+- economy_weekly
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 趋势图
+  - 对比图
+  - 传导流程
+status: configured
+notes: ''

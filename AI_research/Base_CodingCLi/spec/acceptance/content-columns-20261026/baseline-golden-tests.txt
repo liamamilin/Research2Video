@@ -1,0 +1,55 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_shipped_recipes_come_out_exactly_as_they_were_written_out_per_audience __
+
+    def test_shipped_recipes_come_out_exactly_as_they_were_written_out_per_audience():
+        """Pin reviewed recipe expansion, including the quality-first editorial revision."""
+        gold = json.loads((ROOT / "tests" / "fixtures" / "recipe_columns.json").read_text(encoding="utf-8"))
+        now = recipes.expanded(CONFIG)
+        assert not [k for k, r in now.items() if r.error]
+        for key, want in gold.items():
+            r = now[key]
+            got = {"status": r.status, "label": r.label, "tags": r.tags, "cell_id": r.cell_id,
+                   "resolved_sha256": r.resolved_sha256, "column": dataclasses.asdict(r.column)}
+            # New optional production metadata defaults do not change the historical audience contract.
+            for field, default in {"production_recipe": "", "production_mode": "standard", "visual_style": "legacy", "production_settings": {}}.items():
+                if field not in want["column"] and got["column"].get(field) == default:
+                    got["column"].pop(field)
+            # Packaging is deliberately migrated to library references; all other column fields remain frozen.
+            got.pop("resolved_sha256")
+            want = {k: v for k, v in want.items() if k != "resolved_sha256"}
+            got["column"] = {k: v for k, v in got["column"].items() if k not in {"package", "packaging", "source_card"}}
+            want["column"] = {k: v for k, v in want["column"].items() if k not in {"package", "packaging", "source_card"}}
+>           assert json.loads(json.dumps(got, ensure_ascii=False)) == want, key
+E           AssertionError: ai-non_tech-quick_take-short
+E           assert {'cell_id': '...imental', ...} == {'cell_id': '...imental', ...}
+E
+E             Omitting 4 identical items, use -vv to show
+E             Differing items:
+E             {'column': {'allowed_forms': ['information_motion'], 'allowed_tones': [], 'audience': '普通用户', 'audit_model': 'review', ...}} != {'column': {'allowed_forms': ['information_motion'], 'allowed_tones': [], 'audience': '普通用户', 'audit_model': 'review', ...}}
+E             Use -v to get more diff
+
+tests/test_recipe_audiences.py:79: AssertionError
+_______________ test_a_shipped_column_resolves_as_it_did[flash] ________________
+
+key = 'flash'
+
+    @pytest.mark.parametrize("key", ["deep_dive", "flash", "point_short"])
+    def test_a_shipped_column_resolves_as_it_did(key):
+        want = json.loads(golden.GOLDEN.read_text(encoding="utf-8"))[key]
+        got = golden.snapshot()[key]
+        for part in want:
+>           assert got[part] == want[part], f"{key}: {part} changed; regenerate the snapshot only if the change is deliberate"
+E           AssertionError: flash: column changed; regenerate the snapshot only if the change is deliberate
+E           assert {'allowed_for...'review', ...} == {'allowed_for...'review', ...}
+E
+E             Omitting 36 identical items, use -vv to show
+E             Differing items:
+E             {'script_style': '从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。'} != {'script_style': '让开发者抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。'}
+E             Use -v to get more diff
+
+tests/test_video_golden.py:21: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_recipe_audiences.py::test_shipped_recipes_come_out_exactly_as_they_were_written_out_per_audience
+FAILED tests/test_video_golden.py::test_a_shipped_column_resolves_as_it_did[flash]
+2 failed in 1.68s

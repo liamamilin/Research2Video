@@ -1,0 +1,17 @@
+schema_version: 1
+name: 财经与经济每日观察
+matrix: economy
+type: news
+audience: 关注经济变化与其影响的观众
+promise: 发现财经与经济的新变化并讲清影响
+production_ids:
+- economy_daily
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 趋势图
+  - 对比图
+  - 传导流程
+status: configured
+notes: ''

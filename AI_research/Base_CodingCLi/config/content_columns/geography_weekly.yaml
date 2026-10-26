@@ -1,0 +1,17 @@
+schema_version: 1
+name: 地理与世界专题解读
+matrix: geography
+type: explainer
+audience: 对国家、城市与地理现象感兴趣的观众
+promise: 串联地理与世界的重要变化，理解原因与关系
+production_ids:
+- geography_weekly
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 地图
+  - 空间变化
+  - 统计图
+status: configured
+notes: ''

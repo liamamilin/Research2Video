@@ -12,6 +12,7 @@ import {
   type Matrix, type MatrixMember,
 } from "@/api/matrices";
 import { ProductionConfigs } from "@/components/ProductionConfigs";
+import { ContentColumns, MatrixContentSettings } from "@/components/ContentColumns";
 import { listProduction, removeProduction, type ProductionConfig } from "@/api/production";
 import { TimeStamp } from "@/components/TimeStamp";
 import { ErrorState } from "@/components/ErrorState";
@@ -36,7 +37,7 @@ function MatrixHealth({ matrix }: { matrix: Matrix }) {
       : s.scheduled ? "按计划运行" : matrix.members.length ? "手动运行" : "待添加任务";
   return <span className={cn("inline-flex items-center gap-1.5 text-xs", matrix.archived ? "text-text-muted"
     : s.running ? "text-accent" : s.attention ? "text-warning" : "text-text-muted")}>
-    <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />{label}
+    <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />{matrix.content?.role === "domain" ? "研究：" : ""}{label}
   </span>;
 }
 
@@ -68,6 +69,7 @@ function NewMatrixForm({ onDone }: { onDone: (key: string) => void }) {
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
   const [words, setWords] = useState("");
+  const [audience, setAudience] = useState("");
   const [busy, setBusy] = useState(false);
   if (!open) {
     return (
@@ -80,7 +82,8 @@ function NewMatrixForm({ onDone }: { onDone: (key: string) => void }) {
     if (busy) return;
     setBusy(true);
     try {
-      const made = await createMatrix({ key, name, domain, keywords: splitKeywords(words) });
+      const made = await createMatrix({ key, name, domain, keywords: splitKeywords(words),
+        content: { name, audience, role: "domain" } });
       onDone(made.key);
     } catch (e) {
       toast.error(errorMessage(e));
@@ -96,8 +99,9 @@ function NewMatrixForm({ onDone }: { onDone: (key: string) => void }) {
         <label className="space-y-1 text-xs">英文标识<input className="input" placeholder="英文名，如 medical" value={key} onChange={(e) => setKey(e.target.value)} /></label>
         <label className="space-y-1 text-xs">研究领域<input className="input" placeholder="领域，如 医疗健康" value={domain} onChange={(e) => setDomain(e.target.value)} /></label>
         <label className="space-y-1 text-xs">共用关键词<input className="input" placeholder="关键词，用逗号分开" value={words} onChange={(e) => setWords(e.target.value)} /></label>
+        <label className="space-y-1 text-xs sm:col-span-2">目标观众<input className="input" placeholder="这个领域主要面向谁" value={audience} onChange={(e) => setAudience(e.target.value)} /></label>
       </div>
-      <p className="text-xs text-text-muted">建好后再把 Job 放进来。想照着现有矩阵换关键词，去那个矩阵里点「换关键词复制」。</p>
+      <p className="text-xs text-text-muted">建好后添加栏目，并关联已有研究来源。需要新增研究任务时，可以在矩阵设置中管理。</p>
       <div className="flex gap-2">
         <button className="btn btn-primary text-xs" disabled={busy || !name.trim() || !key.trim()} onClick={submit}>
           {busy ? "创建中…" : "创建矩阵"}
@@ -176,12 +180,13 @@ export function MatricesPage() {
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); flight.current?.abort(); flight.current = null; };
   }, [load]);
   const rows = data?.matrices ?? [];
-  const active = rows.filter((m) => !m.archived);
-  const scope = archived === "1" ? rows.filter((m) => m.archived) : active;
+  const active = rows.filter((m) => !m.archived && (!m.content?.role || m.content.role === "domain"));
+  const sources = rows.filter((m) => !m.archived && m.content?.role && m.content.role !== "domain");
+  const scope = archived === "1" ? rows.filter((m) => m.archived) : archived === "sources" ? sources : active;
   const attention = active.filter((m) => summary(m).attention).length;
   const running = active.filter((m) => summary(m).running > 0).length;
   const shown = scope.filter((m) => (!status || (status === "attention" ? summary(m).attention : summary(m).running > 0))
-    && matchesText(q, m.name, m.domain, m.key, ...m.keywords, ...m.members.flatMap((j) => [j.name, j.job])))
+    && matchesText(q, m.content?.name, m.content?.audience, m.name, m.domain, m.key, ...m.keywords, ...m.members.flatMap((j) => [j.name, j.job])))
     .sort((a, b) => Number(summary(b).running > 0) - Number(summary(a).running > 0)
       || Number(summary(b).attention) - Number(summary(a).attention) || a.name.localeCompare(b.name, "zh-CN"));
   const changeScope = (archived: string, status = "") => setParams((old) => {
@@ -192,7 +197,7 @@ export function MatricesPage() {
   }, { replace: true });
   return <div className="space-y-5">
     <header className="flex flex-wrap items-start gap-3">
-      <div className="flex-1 min-w-48"><h1 className="text-xl font-semibold tracking-tight">矩阵</h1><p className="text-xs text-text-muted mt-1">按研究领域组织任务，跟进报告与视频产出。</p></div>
+      <div className="flex-1 min-w-48"><h1 className="text-xl font-semibold tracking-tight">矩阵</h1><p className="text-xs text-text-muted mt-1">领域决定研究什么，栏目决定交付什么，制作配方组织画面与节奏。</p></div>
       <button className="btn text-xs" aria-label="刷新矩阵" disabled={loading} onClick={load}><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />刷新</button>
       {canEdit ? <NewMatrixForm onDone={(key) => navigate(`/matrices/${key}`)} /> : null}
     </header>
@@ -207,21 +212,24 @@ export function MatricesPage() {
       </section>
       <div className="flex flex-wrap items-center gap-3">
         <label className="relative flex-1 min-w-40 max-w-sm"><Search className="absolute top-2.5 left-3 h-3.5 w-3.5 text-text-muted" /><input aria-label="搜索矩阵" type="search" placeholder="搜索矩阵、领域或研究任务" value={q} onChange={(e) => filters.set("q", e.target.value)} className="input text-xs pl-9" /></label>
-        <select className="input w-auto text-xs" aria-label="矩阵范围" value={archived === "1" ? "1" : ""} onChange={(e) => changeScope(e.target.value)}><option value="">使用中（{active.length}）</option><option value="1">已归档（{rows.length - active.length}）</option></select>
+        <select className="input w-auto text-xs" aria-label="矩阵范围" value={archived === "1" ? "1" : archived === "sources" ? "sources" : ""} onChange={(e) => changeScope(e.target.value)}><option value="">领域矩阵（{active.length}）</option>{sources.length ? <option value="sources">研究来源与运维分组（{sources.length}）</option> : null}<option value="1">已归档（{rows.filter((m) => m.archived).length}）</option></select>
         <span className="text-xs text-text-muted ml-auto">{shown.length} 个矩阵</span>{filters.active ? <button className="text-xs text-accent hover:underline" onClick={filters.clear}>清除筛选</button> : null}
       </div>
       {!shown.length ? <section className="card p-8 text-center space-y-2"><p className="text-sm">{q || status ? "没有符合条件的矩阵" : archived === "1" ? "还没有归档的矩阵" : "还没有矩阵"}</p><p className="text-xs text-text-muted">{q || status ? "调整搜索或清除筛选，再查看其他矩阵。" : "可以新建矩阵，再把研究任务加入其中。"}</p></section> : <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 items-start">
         {shown.map((m) => {
           const s = summary(m);
-          return <section key={m.key} className="card overflow-hidden" aria-label={`矩阵 ${m.name}`}>
-            <Link to={`/matrices/${m.key}`} aria-label={m.name} className="block p-4 space-y-3 hover:bg-bg-hover/50">
-              <div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="font-medium text-sm leading-6">{m.name}</h2><p className="text-xs text-text-muted mt-1">{m.domain || "待设置研究领域"}</p></div><ChevronRight className="w-4 h-4 text-text-muted shrink-0 mt-1" /></div>
+          const label = m.content?.name || m.name;
+          return <section key={m.key} className="card overflow-hidden" aria-label={`矩阵 ${label}`}>
+            <Link to={`/matrices/${m.key}`} aria-label={label} className="block p-4 space-y-3 hover:bg-bg-hover/50">
+              <div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="font-medium text-sm leading-6">{label}</h2><p className="text-xs text-text-muted mt-1">{m.content?.audience || m.domain || "待设置研究领域"}</p></div><ChevronRight className="w-4 h-4 text-text-muted shrink-0 mt-1" /></div>
+              {m.content_summary ? <p className="text-sm">{m.content_summary.columns} 个栏目<span className="text-xs text-text-muted ml-2">{m.content_summary.configured} 个已配置 · {m.content_summary.planned} 个待配置</span></p> : null}
+              {m.content?.status === "planned" ? <p className="text-xs text-warning">领域待接入来源与自动生产</p> : null}
               <MatrixHealth matrix={m} />
               <p className="text-xs text-text-muted">{m.members.length} 个研究任务 · {s.scheduled} 个定时任务</p>
               {m.keywords.length ? <p className="text-xs text-text-muted truncate" title={m.keywords.join("、")}>{m.keywords.slice(0, 3).join(" · ")}{m.keywords.length > 3 ? ` 等 ${m.keywords.length} 个关键词` : ""}</p> : null}
               <div className="text-xs text-text-muted">{s.latest ? <TimeStamp value={s.latest} label="最近运行" staleDays={Infinity} /> : "尚无运行记录"}</div>
             </Link>
-            <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-border text-xs"><Link className="text-accent hover:underline" to={`/matrices/${m.key}`}>研究任务<ChevronRight className="inline h-3.5 w-3.5 ml-1" /></Link>{!m.archived ? <Link className="text-text-muted hover:text-accent" to={`/?matrix=${encodeURIComponent(m.key)}&view=all`}>查看视频<ArrowUpRight className="inline h-3.5 w-3.5 ml-1" /></Link> : <span className="text-text-muted">已归档</span>}</div>
+            <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-border text-xs"><Link className="text-accent hover:underline" to={`/matrices/${m.key}`}>{m.content?.role === "domain" ? "查看栏目" : "研究任务"}<ChevronRight className="inline h-3.5 w-3.5 ml-1" /></Link>{!m.archived ? <Link className="text-text-muted hover:text-accent" to={`/?matrix=${encodeURIComponent(m.key)}&view=all`}>查看视频<ArrowUpRight className="inline h-3.5 w-3.5 ml-1" /></Link> : <span className="text-text-muted">已归档</span>}</div>
           </section>;
         })}
       </div>}
@@ -453,8 +461,10 @@ export function MatrixDetailPage() {
   const canEdit = useCanEdit();
   const isAdmin = useIsAdmin();
   const [params, setParams] = useSearchParams();
-  const tab = ["runs", "week", "settings"].includes(params.get("tab") ?? "") ? params.get("tab")! : "jobs";
   const [matrix, setMatrix] = useState<Matrix | null>(null);
+  const business = matrix?.content?.role === "domain";
+  const tab = ["columns", "jobs", "runs", "week", "settings"].includes(params.get("tab") ?? "")
+    ? params.get("tab")! : params.get("job") ? "jobs" : business ? "columns" : "jobs";
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -470,11 +480,13 @@ export function MatrixDetailPage() {
   const [memberError, setMemberError] = useState("");
   const [memberRetry, setMemberRetry] = useState(0);
   const flight = useRef<AbortController | null>(null);
+  const includeReports = useRef(false);
+  includeReports.current = tab === "jobs" && matrix?.key === key;
   const load = useCallback(async () => {
     if (flight.current) return;
     const controller = new AbortController(); flight.current = controller; setLoading(true);
     try {
-      const next = await getMatrix(key, controller.signal);
+      const next = await getMatrix(key, controller.signal, includeReports.current);
       if (next?.key !== key || !Array.isArray(next.members)) throw new Error("矩阵数据格式异常，请重试");
       if (!controller.signal.aborted) { setMatrix(next); setError(""); }
     } catch (e) { if (!controller.signal.aborted) setError(errorMessage(e)); }
@@ -486,12 +498,15 @@ export function MatrixDetailPage() {
     return () => { flight.current?.abort(); flight.current = null; };
   }, [load]);
   useEffect(() => {
-    if (tab !== "jobs") return;
+    if (tab !== "jobs" || matrix?.key !== key) return;
     const controller = new AbortController();
     listProduction(undefined, controller.signal).then((rows) => { if (!controller.signal.aborted) { if (!Array.isArray(rows)) throw new Error("视频配置数据异常"); setConfigs(rows); setConfigError(""); } })
       .catch((e) => { if (!controller.signal.aborted) setConfigError(errorMessage(e)); });
+    getMatrix(key, controller.signal).then((next) => {
+      if (!controller.signal.aborted && next.key === key) setMatrix(next);
+    }).catch((e) => { if (!controller.signal.aborted) setError(errorMessage(e)); });
     return () => { controller.abort(); };
-  }, [key, tab, configRetry]);
+  }, [key, tab, matrix?.key, configRetry]);
   useEffect(() => {
     if (tab !== "settings" || !canEdit) return;
     const controller = new AbortController();
@@ -501,11 +516,12 @@ export function MatrixDetailPage() {
   }, [key, tab, canEdit, memberRetry]);
   const anyRunning = !!matrix?.members.some((m) => m.is_running);
   useEffect(() => {
+    if (business && tab === "columns") return;
     const refresh = () => { if (!document.hidden) void load(); };
     const timer = window.setInterval(refresh, anyRunning ? 5000 : 30000);
     document.addEventListener("visibilitychange", refresh);
     return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
-  }, [anyRunning, load]);
+  }, [anyRunning, load, business, tab]);
   if (!matrix || matrix.key !== key) return <div className="space-y-4"><Link className="text-xs text-accent hover:underline" to="/matrices">← 全部矩阵</Link>{error ? <ErrorState error={error} onRetry={load} /> : <div className="card p-8 text-sm text-text-muted" role="status">正在读取矩阵…</div>}</div>;
   const stats = summary(matrix);
   const jobs = matrix.members.map((m) => m.job);
@@ -550,10 +566,10 @@ export function MatrixDetailPage() {
     } catch (e) { toast.error(errorMessage(e)); }
     finally { setBusy(false); }
   };
-  const selectTab = (value: string) => setParams((old) => { const next = new URLSearchParams(old); next.delete("job"); if (value === "jobs") next.delete("tab"); else next.set("tab", value); return next; }, { replace: true });
+  const selectTab = (value: string) => setParams((old) => { const next = new URLSearchParams(old); next.delete("job"); if (value === (business ? "columns" : "jobs")) next.delete("tab"); else next.set("tab", value); return next; }, { replace: true });
   return <div className="space-y-5">
     <header className="flex flex-wrap items-start justify-between gap-3">
-      <div className="space-y-2"><Link className="text-xs text-text-muted hover:text-accent" to="/matrices">← 全部矩阵</Link><h1 className="text-xl font-semibold tracking-tight">{matrix.name}</h1><div className="flex flex-wrap gap-3 items-center"><p className="text-xs text-text-muted">{matrix.domain || "待设置研究领域"}</p><MatrixHealth matrix={matrix} /></div></div>
+      <div className="space-y-2"><Link className="text-xs text-text-muted hover:text-accent" to="/matrices">← 全部矩阵</Link><h1 className="text-xl font-semibold tracking-tight">{matrix.content?.name || matrix.name}</h1><div className="flex flex-wrap gap-3 items-center"><p className="text-xs text-text-muted">{matrix.content?.audience || matrix.domain || "待设置研究领域"}</p><MatrixHealth matrix={matrix} /></div></div>
       <div className="flex flex-wrap gap-2"><button className="btn text-xs" aria-label="刷新矩阵详情" disabled={loading} onClick={load}><RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />刷新</button>{!matrix.archived ? <Link className="btn btn-primary text-xs" to={`/?matrix=${encodeURIComponent(matrix.key)}&view=all`}>查看视频<ArrowUpRight className="h-3.5 w-3.5" /></Link> : null}</div>
     </header>
     {error ? <div><ErrorState error={error} onRetry={load} compact /><p className="text-xs text-warning mt-2">暂时显示上次读取的数据。</p></div> : null}
@@ -563,8 +579,9 @@ export function MatrixDetailPage() {
     {matrix.monthly_searches ? <MonthlyLimit matrix={matrix} isAdmin={false} onSaved={setMatrix} /> : null}
     <section className="grid grid-cols-3 gap-3" aria-label="当前矩阵概况">{[{ label: "研究任务", value: matrix.members.length }, { label: "需要关注", value: stats.issues }, { label: "已启用定时", value: stats.scheduled }].map((s) => <div key={s.label} className="card p-3"><p className="text-xs text-text-muted">{s.label}</p><p className="text-xl font-semibold tabular-nums mt-1">{s.value}</p></div>)}</section>
     <div role="tablist" aria-label="矩阵工作区" className="flex flex-wrap gap-2 border-b border-border text-sm">
-      {([["jobs", "研究任务"], ["runs", "运行记录"], ["week", "周期"], ["settings", "矩阵设置"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={cn("px-3 py-2 -mb-px border-b-2", tab === id ? "border-accent text-text font-medium" : "border-transparent text-text-muted hover:text-text")} onClick={() => selectTab(id)}>{label}</button>)}
+      {([["columns", "栏目"], ["jobs", business ? "研究来源" : "研究任务"], ["runs", "运行记录"], ["week", "周期"], ["settings", "矩阵设置"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={cn("px-3 py-2 -mb-px border-b-2", tab === id ? "border-accent text-text font-medium" : "border-transparent text-text-muted hover:text-text")} onClick={() => selectTab(id)}>{label}</button>)}
     </div>
+    {tab === "columns" ? <ContentColumns key={matrix.key} matrix={matrix} canEdit={canEdit} /> : null}
     {tab === "runs" ? <MatrixRuns key={matrix.key} matrix={matrix} initialJob={params.get("job") ?? ""} /> : null}
     {tab === "week" ? <MatrixWeek matrix={matrix} onChanged={setMatrix} /> : null}
     {tab === "jobs" ? <section aria-label="矩阵里的 Job" className="space-y-3">
@@ -574,6 +591,7 @@ export function MatrixDetailPage() {
       {!matrix.members.length ? <div className="card p-8 text-center space-y-3"><p className="text-sm">还没有研究任务</p><p className="text-xs text-text-muted">把已有任务加入这个矩阵，即可跟进报告和视频。</p>{canEdit ? <button className="btn text-xs" onClick={() => selectTab("settings")}>添加研究任务</button> : null}</div> : null}
     </section> : null}
     {tab === "settings" ? <div className="space-y-4">
+      <MatrixContentSettings key={`content-${matrix.key}`} matrix={matrix} canEdit={canEdit} onSaved={setMatrix} />
       <section className="card p-4 space-y-3 text-sm" aria-label="领域和关键词"><h2 className="font-medium">研究范围</h2>{editing ? <>
         <label className="block space-y-1 text-xs">领域<input className="input" aria-label="领域" value={domain} onChange={(e) => setDomain(e.target.value)} /></label><label className="block space-y-1 text-xs">共用关键词<input className="input" aria-label="关键词" value={words} onChange={(e) => setWords(e.target.value)} /></label><p className="text-xs text-text-muted">各任务运行时会先使用这里的关键词，再追加自己的关键词。保存后，下次运行生效。</p>
         <div className="flex gap-2"><button className="btn btn-primary text-xs" disabled={busy} onClick={async () => { if (await save({ domain, keywords: splitKeywords(words) })) setEditing(false); }}>保存</button><button className="btn text-xs" disabled={busy} onClick={() => setEditing(false)}>取消</button></div>

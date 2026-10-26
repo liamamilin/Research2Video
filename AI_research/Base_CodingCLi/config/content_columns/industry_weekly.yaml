@@ -1,0 +1,17 @@
+schema_version: 1
+name: 产业与制造专题解读
+matrix: industry
+type: explainer
+audience: 关注技术、制造与供应链的观众
+promise: 串联产业与制造的重要变化，理解原因与关系
+production_ids:
+- industry_weekly
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 工艺流程
+  - 结构图
+  - 真实素材
+status: configured
+notes: ''

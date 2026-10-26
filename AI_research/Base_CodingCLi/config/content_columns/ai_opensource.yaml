@@ -1,0 +1,17 @@
+schema_version: 1
+name: 每日开源雷达
+matrix: ai_media
+type: news
+audience: 关注 AI 产品、技术与应用的观众
+promise: 发现开源项目及其用途和变化
+production_ids:
+- ai_media_opensource_digest
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 项目截图
+  - 产品画面
+  - 重点卡
+status: configured
+notes: ''

@@ -123,7 +123,8 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
         if not row["published"] and (script.get("archived") or is_sample(script) or script["status"] == "FAILED"):
             continue
         owner = owners[script["id"]]
-        key = f"matrix:{owner['matrix']}" if owner["matrix"] else f"job:{owner['job']}" if owner["job"] else ""
+        source_matrix = owner.get("source_matrix", owner["matrix"])
+        key = f"matrix:{source_matrix}" if source_matrix else f"job:{owner['job']}" if owner["job"] else ""
         result.append({"script_id": script["id"], "title": row["title"], "published": bool(row["published"]),
                        "created_at": script["created_at"],
                        "sequence": row["sequence"],

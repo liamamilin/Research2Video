@@ -1,0 +1,17 @@
+schema_version: 1
+name: 产业与制造每日观察
+matrix: industry
+type: news
+audience: 关注技术、制造与供应链的观众
+promise: 发现产业与制造的新变化并讲清影响
+production_ids:
+- industry_daily
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 工艺流程
+  - 结构图
+  - 真实素材
+status: configured
+notes: ''

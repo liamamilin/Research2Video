@@ -1,0 +1,593 @@
+{
+  "created_at": 1792996508.8139992,
+  "files": {
+    "config/production/actionable_ai_agents_actionable.yaml": {
+      "sha256": "bbd2d61cf6436b5ca26048d42515cf44e3bec67b21bdc5e8463cf8ffc7bb9a90",
+      "mtime_ns": 1792822220078505384
+    },
+    "config/production/ai-developer-roundup-long.yaml": {
+      "sha256": "59aa3abf7e1f88313560416a6309c6ccca29641d9b1b06ddc324dd5152bff6f7",
+      "mtime_ns": 1792822220078705884
+    },
+    "config/production/ai-non_tech-deep_dive-long-2.yaml": {
+      "sha256": "34e4e66e3ee3996999921f983df408e821157d651b05917b879d916a8cfcf426",
+      "mtime_ns": 1792842585514471235
+    },
+    "config/production/ai-non_tech-deep_dive-long.yaml": {
+      "sha256": "e7446b1b36eb92175819bc7dc7b68aa73cf07f4b6006a8242ff35ce782d73fbf",
+      "mtime_ns": 1792822220078933885
+    },
+    "config/production/ai-non_tech-headline-short.yaml": {
+      "sha256": "7bc0ad75321d3d08c3f17b9e855ea22e56e0c2b18ff7ed06d84986f36f3caed8",
+      "mtime_ns": 1792842756380076018
+    },
+    "config/production/ai-non_tech-one_point-short.yaml": {
+      "sha256": "e36399a02506aaef01cd9ee27fc7349b49f2b073bc13cf8ce0d7ebfb1eb94296",
+      "mtime_ns": 1792822220079165386
+    },
+    "config/production/ai-non_tech-quick_take-short.yaml": {
+      "sha256": "4512e028211ea8ff13b7d3e36350567cdda3f2fc1f2ab63fe7f030175db89266",
+      "mtime_ns": 1792822220079359928
+    },
+    "config/production/ai_media_arena_digest.yaml": {
+      "sha256": "b9b2beebf0e06b02861b9dfc75ac1667abebfca9e33a868bb1ecb92c28a29224",
+      "mtime_ns": 1792822220079561720
+    },
+    "config/production/ai_media_business_digest.yaml": {
+      "sha256": "9f02a98bc11cc63c88b4cd15992c7a4618b3940d97d058b91439273306208973",
+      "mtime_ns": 1792822220079727929
+    },
+    "config/production/ai_media_deep_dive.yaml": {
+      "sha256": "8cee5ad42daea8cf268ba276f8008432a0436a43c2c687ceefd062ec0731ad84",
+      "mtime_ns": 1792822220079910138
+    },
+    "config/production/ai_media_opensource_digest.yaml": {
+      "sha256": "3dad71057f4a5235790352abd99e35f9332924624c1274eb9763eb2b22c678cc",
+      "mtime_ns": 1792822220080109513
+    },
+    "config/production/analysis_ai_gap_analysis.yaml": {
+      "sha256": "b79a9b1d17cb52810fb9013bdc1673fe083749cd2a48f34aef011508944bd94c",
+      "mtime_ns": 1792822220080284180
+    },
+    "config/production/analysis_ai_trends.yaml": {
+      "sha256": "bae73149033abda8655605d77d9405b9d20f479d526c4dec5e99d3ea7a8b8e2a",
+      "mtime_ns": 1792822220080450389
+    },
+    "config/production/analysis_research_gap_analysis.yaml": {
+      "sha256": "fe53de1e2adaec9585dbe12e10c82e640457592662a4965cef99a26945f1862d",
+      "mtime_ns": 1792822220080615765
+    },
+    "config/production/company_daily.yaml": {
+      "sha256": "13f9ca511cf10f40d36b26d35b5ec5dff7a8319239c1019a87c171fb5a6cf8a4",
+      "mtime_ns": 1792845158511477796
+    },
+    "config/production/company_weekly.yaml": {
+      "sha256": "60c8c4ac0868d4b856e6220499fd417b2e4954da6a9638f3a5298ac717b5d06e",
+      "mtime_ns": 1792845158511889297
+    },
+    "config/production/consumer_daily.yaml": {
+      "sha256": "41b841c1f95e280e6c7891b6d7ef6583679e1e9b6fa9b7d6228b2282db3a26d4",
+      "mtime_ns": 1792845158512143506
+    },
+    "config/production/consumer_weekly.yaml": {
+      "sha256": "f6f2d76d1640f8d0ea383cd805e709a16fa4c130e36a89fd3d6473f4cf9603fc",
+      "mtime_ns": 1792845158512377840
+    },
+    "config/production/culture_daily.yaml": {
+      "sha256": "8731c8f9b8846540164e78dee2d07913436c1bf0cba137a56c854a94dcd42613",
+      "mtime_ns": 1792845158512635591
+    },
+    "config/production/culture_weekly.yaml": {
+      "sha256": "8bb7ddbdec77353278bf48cab8764f16cb1fc985fc6259a2e166583b903b0886",
+      "mtime_ns": 1792845158512866216
+    },
+    "config/production/deep_dive-2.yaml": {
+      "sha256": "24eeecd7390c74d8c700e5b80d2b8502b66342ae2f1f447be1a50053a1842903",
+      "mtime_ns": 1792923632929093747
+    },
+    "config/production/deep_dive-3.yaml": {
+      "sha256": "7b2e256c51facc36b7afd5e96b66f3d656173b0e75aa576ef362733fdf6bee23",
+      "mtime_ns": 1792923985115420106
+    },
+    "config/production/deep_dive-4.yaml": {
+      "sha256": "e280619a1fb67efb9ac0bcd22ee041f156ffa8d5c362379b9855f205ed0ff7b5",
+      "mtime_ns": 1792939020965781604
+    },
+    "config/production/deep_dive.yaml": {
+      "sha256": "6053572ad2e6965994190681c6101b8ffcc38b88ce194004c65325a48847d104",
+      "mtime_ns": 1792822220082259269
+    },
+    "config/production/economy_daily.yaml": {
+      "sha256": "1ceb3d9766d8e042744afed138bb083931bca125bf93d31d2a47bb5fb635a447",
+      "mtime_ns": 1792845158513100884
+    },
+    "config/production/economy_weekly.yaml": {
+      "sha256": "2c64466792fb6ba63f16ffc33333a375394f175e52de21612efa74f8bf50825d",
+      "mtime_ns": 1792845158513330968
+    },
+    "config/production/flash.yaml": {
+      "sha256": "9898a1fcef556bc54fb7f6b0ccc020094441cfdba0a7b62c7b2c9a8af82bb349",
+      "mtime_ns": 1792822220082827187
+    },
+    "config/production/flash_daily.yaml": {
+      "sha256": "a9ffbdb93b35a2ac409f4fd39d9fa704a3421868490d64562904dc867607ec95",
+      "mtime_ns": 1792822220083006063
+    },
+    "config/production/geography_daily.yaml": {
+      "sha256": "6a7d47fa28b14223d266ab2d111b9975371256056198d98d8244e5afc16a646f",
+      "mtime_ns": 1792845158513546676
+    },
+    "config/production/geography_weekly.yaml": {
+      "sha256": "8caca85e2df11ebbb677dad50f772633167b2dbd6766e01c597230440d517dad",
+      "mtime_ns": 1792845158513779219
+    },
+    "config/production/history_daily.yaml": {
+      "sha256": "bbdb04777df9ab162f429f05ddc6b2bb1f968b06d2b10b51d0c9d27b8f98dc3b",
+      "mtime_ns": 1792845158514049344
+    },
+    "config/production/history_weekly.yaml": {
+      "sha256": "95e7ab3fa4319056a6cac99864a819f496cc0ea34f734d0b5c8bed19ae215264",
+      "mtime_ns": 1792845158514304637
+    },
+    "config/production/industry_daily.yaml": {
+      "sha256": "280c1c16b2965346f30d65e3a742d98244e00f484db729e77639a8fefcb5ddd3",
+      "mtime_ns": 1792845158514519304
+    },
+    "config/production/industry_weekly.yaml": {
+      "sha256": "d6db139df33e7cbd75a4a534d95d066c114536f73f88f116a642c27a82eef9b9",
+      "mtime_ns": 1792845158514726680
+    },
+    "config/production/pai_00_collection_planner.yaml": {
+      "sha256": "f7d747ce0521c99c1ffddc95949bbfef126db3c6dd9372a7158f2128ee284fa4",
+      "mtime_ns": 1792822220084271191
+    },
+    "config/production/pai_01_model_and_pricing_radar.yaml": {
+      "sha256": "52a68045071b1da119994f0d848c2e30a765d597b0dadf1dfb3af20f150eb4f6",
+      "mtime_ns": 1792822220084423983
+    },
+    "config/production/pai_02_ai_coding_tools_radar.yaml": {
+      "sha256": "d910b8e5b51f1501a47d55192055681f8a04137a6af92b8248a2207036593a2f",
+      "mtime_ns": 1792822220084617150
+    },
+    "config/production/pai_03_agent_workflow_radar.yaml": {
+      "sha256": "8218020f2932307e92a1bcdfc2de51d375f709320a826252f554a3a9e08eea95",
+      "mtime_ns": 1792822220084788026
+    },
+    "config/production/pai_04_project_understanding_radar.yaml": {
+      "sha256": "d06a8430838cf954af20f1dfd8177ec92bdc8d72ff5744ddf77cfa4c5cf59972",
+      "mtime_ns": 1792822220084946485
+    },
+    "config/production/pai_05_context_rag_memory_radar.yaml": {
+      "sha256": "57c85b0932293018cb1830838ec1fd434628c3e17d16b930851fc9d06eb758d7",
+      "mtime_ns": 1792822220085121152
+    },
+    "config/production/pai_06_infra_and_eval_radar.yaml": {
+      "sha256": "dda5ac10a2c2553d1f89ec91da613d1386c2f75d610a834b78a16dbdbca64bbe",
+      "mtime_ns": 1792822220085277486
+    },
+    "config/production/point_short.yaml": {
+      "sha256": "9ac39f2090e9290402103d39c55acb2863975ce596cf65a717eb78f555a314c0",
+      "mtime_ns": 1792822220085458236
+    },
+    "config/production/research_ai.yaml": {
+      "sha256": "c40d728dd16d724d01f586086df124faf341ec7472cf3f6e821147b462aeec7c",
+      "mtime_ns": 1792822220085619695
+    },
+    "config/production/research_ai_automation_systems_research.yaml": {
+      "sha256": "55c87897773bbb487f61b1c308d9e61de35aa41c249af2240d40747af7f526e2",
+      "mtime_ns": 1792822220085805279
+    },
+    "config/production/science_daily.yaml": {
+      "sha256": "c3649568b69bdc44914a17182b95e1f8e78815b3c3a0b1cc64563e9451edd197",
+      "mtime_ns": 1792845158514935180
+    },
+    "config/production/science_weekly.yaml": {
+      "sha256": "2753922bfbe38a0480f2738b5d35dddb74d67c0b62d8b596b245c7c632caae18",
+      "mtime_ns": 1792845158515140722
+    },
+    "config/production/software_daily.yaml": {
+      "sha256": "6cef164cb30f2bedf92c5bc8856f188c0ce0b319a79bc616880e10ecf17ee889",
+      "mtime_ns": 1792845158515357390
+    },
+    "config/production/software_weekly.yaml": {
+      "sha256": "e29b20e0e6dec5c2a7c024bce195d650fc1dfed09f6caf73905a20075ae0121e",
+      "mtime_ns": 1792845158515587307
+    },
+    "config/production/tech_daily.yaml": {
+      "sha256": "681eecc5929588ad43a8bbac978e1a6d26985dfed0f2b1680dbd8d2b925212d0",
+      "mtime_ns": 1792845158515791474
+    },
+    "config/production/tech_weekly.yaml": {
+      "sha256": "8291973d14a04f2cfd8e7e06601e39124ece6c907c0010bedaf195d48e32121e",
+      "mtime_ns": 1792845158516059141
+    },
+    "jobs/_templates/_actionable.yaml": {
+      "sha256": "86ab736f659785e2d0de5a1b6010b3fce5d1c393edfb8513a3e48fb90dfd569f",
+      "mtime_ns": 1790190280000000000
+    },
+    "jobs/_templates/_analysis.yaml": {
+      "sha256": "c0825b295220e95fa0645256dd206ce06f85d09e3c331cf7e87c723546c194c1",
+      "mtime_ns": 1790187758000000000
+    },
+    "jobs/_templates/_daily.yaml": {
+      "sha256": "718e942ec6b157845744ecb456644d47f9dac0702a7fedca3822b0e5ac39f3e2",
+      "mtime_ns": 1790212291000000000
+    },
+    "jobs/_templates/_deep_dive.yaml": {
+      "sha256": "8ab08a34c58346823025cbadabbc084bcb4cb843374dd708396c65a85584c006",
+      "mtime_ns": 1790187750000000000
+    },
+    "jobs/_templates/_digest.yaml": {
+      "sha256": "ad9944879813883df8147f6021125e32dd819fcf8794692d8516e46493e1c19c",
+      "mtime_ns": 1790187801000000000
+    },
+    "jobs/_templates/_flash_discovery.yaml": {
+      "sha256": "3bdb316894bc8244738dde05dadca7929a8042b402a21b71d8a7add40c57cab8",
+      "mtime_ns": 1792851447987724287
+    },
+    "jobs/_templates/_lite.yaml": {
+      "sha256": "14891845a1c1ba07b7e7cca7c021ea9b3466c7c7b547edfbce9116de3b00c981",
+      "mtime_ns": 1790187734000000000
+    },
+    "jobs/_templates/_practice.yaml": {
+      "sha256": "785a8d550c58bdb0cf3df5dd9ceaf618418d54580fac2d0f13e261034f8bb219",
+      "mtime_ns": 1790187785000000000
+    },
+    "jobs/_templates/_risk_review.yaml": {
+      "sha256": "fb091fc7e3c376948a81e925ce807c1c5d839124d78fef465c49ef81e000de7b",
+      "mtime_ns": 1790187778000000000
+    },
+    "jobs/_templates/_survey.yaml": {
+      "sha256": "46b037ed96a895e31393d710e30fe6206c4009acda476b0f3af32055d66ec2c5",
+      "mtime_ns": 1790187743000000000
+    },
+    "jobs/_templates/_tool_comparison.yaml": {
+      "sha256": "b49ac92f52572959598aa9bb4ef14fd10b9695faf7a838cb48e5e753f39b28b2",
+      "mtime_ns": 1790187769000000000
+    },
+    "jobs/_templates/_topic_discovery.yaml": {
+      "sha256": "48951f25a1c5cfb030e63420d32f5bd463012841fa8c90bc647458fcd009ed18",
+      "mtime_ns": 1792851447989195166
+    },
+    "jobs/_templates/video_research/comparison_developer.yaml": {
+      "sha256": "a3820aceb78e4bbaf9ead388f9a290d2cb289fa76c98cd687e8206850467050c",
+      "mtime_ns": 1792858116005187580
+    },
+    "jobs/_templates/video_research/deep_dive.yaml": {
+      "sha256": "982e2e1fcc15febb344e58bb2b0a058ef8c49622d5576d4d42381ffc00e77bff",
+      "mtime_ns": 1792858116005120663
+    },
+    "jobs/_templates/video_research/one_point.yaml": {
+      "sha256": "2c857edf07eebef94d4da56ba720ff46b71b199d904740764c8afb79e1f15c98",
+      "mtime_ns": 1792858116004982371
+    },
+    "jobs/_templates/video_research/quick_take.yaml": {
+      "sha256": "2abf9be7c109cda75501d2dfdc6c9c1a536ddf321e53399e86b8e164a84e88fb",
+      "mtime_ns": 1792858116005054871
+    },
+    "jobs/actionable/ai_agents_actionable.yaml": {
+      "sha256": "20dd470208e1aa6d3da3c078ba94239996d89759a05e2556add1c229ce63a52b",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/ai_media/daily_opensource_radar.yaml": {
+      "sha256": "9d7daaffda64cc36d04edba968ba9b24464052ad9f142208e582509e2643d8f6",
+      "mtime_ns": 1792858116002396740
+    },
+    "jobs/ai_media/weekly_business_watch.yaml": {
+      "sha256": "9e998dc54a85cb5000f0579afa641a53a42152a2ce64f229f7e0c6d3dc458ad6",
+      "mtime_ns": 1792858116002677407
+    },
+    "jobs/ai_media/weekly_deep_research.yaml": {
+      "sha256": "07d74fd56e6b1a35c96d51d9fc09702c2256dfd0651eabfea3b12ae1b57ffd37",
+      "mtime_ns": 1792858116002863157
+    },
+    "jobs/ai_media/weekly_model_arena.yaml": {
+      "sha256": "a9576e5782944c55be56e0e64eabd4d6f94e52f2933c28e9923d8d0bc574a79a",
+      "mtime_ns": 1792858116002595823
+    },
+    "jobs/analysis/ai_gap_analysis.yaml": {
+      "sha256": "9e0bdd1fcb94c097c8f236d6345d17686d378958420f6279789b96a5ee0ff854",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/analysis/ai_trends.yaml": {
+      "sha256": "99007b61e4de0f2f4b5b117f4d7aa552039beb0cd1a4ec72f16ba2852ede38a4",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/analysis/research_gap_analysis.yaml": {
+      "sha256": "9cdf6a3a4e1627c8bcb30faedb9651091370c1ff66b4fa3a0b70920076dec655",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/archive/video/deep_dive_48fef9b1.yaml": {
+      "sha256": "7218f6cbbb809c0f1ca452cc7325b50aa61f66f87178637b36436d6fec095b6b",
+      "mtime_ns": 1792470340000000000
+    },
+    "jobs/archive/video/deep_dive_56435880.yaml": {
+      "sha256": "0ef4c81e9e3f291869d876cb8761d86aa1141c929ccf26a8a0bf06f35203dbc9",
+      "mtime_ns": 1792216672000000000
+    },
+    "jobs/archive/video/deep_dive_d8d44faa.yaml": {
+      "sha256": "0798f8d6c067aac66f221fae2020af64e7ade6b60a900c52f11ce913a86e8a1a",
+      "mtime_ns": 1792240271000000000
+    },
+    "jobs/archive/video/flash_039af880.yaml": {
+      "sha256": "acc0b688879d2605694d9d1bf3d62f2af3d191f3bdd3ad09f95fcb1edeb1c010",
+      "mtime_ns": 1792392300000000000
+    },
+    "jobs/archive/video/flash_6acee9c7.yaml": {
+      "sha256": "df470347a01963bd50b87747ca5b82c857de35dfcc496e1f7790f6276a2d53b4",
+      "mtime_ns": 1792424505000000000
+    },
+    "jobs/archive/video/flash_79c727e2.yaml": {
+      "sha256": "e7c9eb40fa0be519c5f9e98624d0323a49d973d1a0964af2f095751a85b5f315",
+      "mtime_ns": 1792605526000000000
+    },
+    "jobs/archive/video/flash_8ec3bb2a.yaml": {
+      "sha256": "b6f81676b934b4d9e452904b23228714f2255e2e5d08769ba4b39dba8bd53c0a",
+      "mtime_ns": 1792392240000000000
+    },
+    "jobs/archive/video/flash_9c4aad41.yaml": {
+      "sha256": "46d47947d829445edd64ad4e5d5c2bff5d6f55efd0595ab8e5d2a72424e63684",
+      "mtime_ns": 1792463559000000000
+    },
+    "jobs/archive/video/flash_a85ffe6d.yaml": {
+      "sha256": "45f1e93fce8e73593c769635a4220e4e760676edb7be781ec87b2e6381b5302a",
+      "mtime_ns": 1792462682000000000
+    },
+    "jobs/archive/video/flash_c2ec78a5.yaml": {
+      "sha256": "e4bda98e211492e20a62ffd789475760306b9a0d238f53db8c913a2a53b39e0f",
+      "mtime_ns": 1792499195000000000
+    },
+    "jobs/archive/video/flash_c5d88429.yaml": {
+      "sha256": "1d77f9489b10741afadb05c024403440e148f6e2334bba5deed655add1c74165",
+      "mtime_ns": 1792604588000000000
+    },
+    "jobs/archive/video/flash_efc85b6e.yaml": {
+      "sha256": "afc053e725fec9821a8f429caf60d952e6a198cdc5ead23a927012c19fac4490",
+      "mtime_ns": 1792462682000000000
+    },
+    "jobs/archive/video/flash_f5ebc962.yaml": {
+      "sha256": "fba8f8b9692fdffa633dc3b02dfe6a3edbbb5de8f8715ff4a8e00cd51cc00d81",
+      "mtime_ns": 1792603893000000000
+    },
+    "jobs/archive/video/point_short_18a54247.yaml": {
+      "sha256": "5bc0e910dfec82196d4908e582ee30149bcf4a4e0e031db1f871b1ace2f92231",
+      "mtime_ns": 1792606229000000000
+    },
+    "jobs/archive/video/point_short_4628e576.yaml": {
+      "sha256": "b358186d2c6e1b28c388a10da2808faa7ce0a3dd5d38af82ad92a1e9727ccc04",
+      "mtime_ns": 1792464318000000000
+    },
+    "jobs/archive/video/point_short_b61ad2dc.yaml": {
+      "sha256": "2d9dfce720a9f612bb337b60d401e3e61fafa8bb86f3d1f68c46b58f6ab5c59c",
+      "mtime_ns": 1792605892000000000
+    },
+    "jobs/archive/video/point_short_e3731576.yaml": {
+      "sha256": "2b0c3d3e4ac3ba08fa213f9b8ee3b2ce33f7f051c5c4a81733b2266fffe57ee8",
+      "mtime_ns": 1792463892000000000
+    },
+    "jobs/archive/video/recheck_3cccf3be.yaml": {
+      "sha256": "86642f5be2ea9d784fae7a503907f589e1bca21b4b6d952f02891092a4f8863a",
+      "mtime_ns": 1792413421000000000
+    },
+    "jobs/archive/vod/opp_06f86a78.yaml": {
+      "sha256": "8660447f93396aeceb4d3e4f87e0a847ebf08811da21146b79332f3cbfae97ea",
+      "mtime_ns": 1792200717000000000
+    },
+    "jobs/archive/vod/opp_09869a4f.yaml": {
+      "sha256": "ee4f0aa0cc22c74b418b43e3cbfceddad56b43203580014b8e0e000862876886",
+      "mtime_ns": 1792183985000000000
+    },
+    "jobs/archive/vod/opp_4356949f.yaml": {
+      "sha256": "166fb2eea89da62670c9f2f32218769aa0741b798a56619be285c27850ee547e",
+      "mtime_ns": 1792201352000000000
+    },
+    "jobs/archive/vod/opp_640260af.yaml": {
+      "sha256": "a3f454e8903b0c677fe4817cd7d6566bc7572825bb01b317f1a381ce700c789e",
+      "mtime_ns": 1792201706000000000
+    },
+    "jobs/archive/vod/opp_f59571c3.yaml": {
+      "sha256": "0afa18b9228d9e09c3623ac72902c91fa0a51d7e154da93a476f40f132f688dc",
+      "mtime_ns": 1792200400000000000
+    },
+    "jobs/company/company_daily.yaml": {
+      "sha256": "66bee66c798cab2cfccc0fd5c3b1b0475509aad0eabfb8c6ff11a84783ae2af4",
+      "mtime_ns": 1792858116002953866
+    },
+    "jobs/company/company_weekly.yaml": {
+      "sha256": "ad08b671df7aa8d0ad9cddab40b9c274b307c305b83f3f88d44a2c77f66b53a8",
+      "mtime_ns": 1792858116003043033
+    },
+    "jobs/consumer/consumer_daily.yaml": {
+      "sha256": "0bc8a2bcfca9bf017583dd3e41735d044831d75ef17807ed6ca8cf26c6d22cca",
+      "mtime_ns": 1792858116003129408
+    },
+    "jobs/consumer/consumer_weekly.yaml": {
+      "sha256": "53f2d3030c08f6f11ba60ba990697be36062cfd25ed1d9cf179b1267acb0fb1b",
+      "mtime_ns": 1792858116003341658
+    },
+    "jobs/culture/culture_daily.yaml": {
+      "sha256": "eb487677374d53a64db2c3653930252d7520776bedcc298af0f5ee68514ef29f",
+      "mtime_ns": 1792858116003424450
+    },
+    "jobs/culture/culture_weekly.yaml": {
+      "sha256": "79b2011e397d2e875745507ab1a48b194be14a18bac68fa3de2c0ab026f486fb",
+      "mtime_ns": 1792858116003504492
+    },
+    "jobs/economy/economy_daily.yaml": {
+      "sha256": "ec0d4590fa89d3159f63eff97419b17cf2303cbf3ca8d7a5ebf86ef7455fa475",
+      "mtime_ns": 1792858116003588576
+    },
+    "jobs/economy/economy_weekly.yaml": {
+      "sha256": "54253c32b1a2083c5a4eacd5737b33a668d392558beaf7a234115208b3a23c38",
+      "mtime_ns": 1792858116003772618
+    },
+    "jobs/geography/geography_daily.yaml": {
+      "sha256": "29b8bc0eeac7ec158cc4278c3de2493d91068463adb48aeac3b9f49404798d2d",
+      "mtime_ns": 1792858116003856827
+    },
+    "jobs/geography/geography_weekly.yaml": {
+      "sha256": "b0416668ffe89d5908689f9edde2a77c6a7ffa03ac268b3b474b7f3551893c06",
+      "mtime_ns": 1792858116003937952
+    },
+    "jobs/history/history_daily.yaml": {
+      "sha256": "152019cf6b8ce7c98fc3023df3c14c5c568239d4c4b6cdecab613244b6bbb582",
+      "mtime_ns": 1792858116004017285
+    },
+    "jobs/history/history_weekly.yaml": {
+      "sha256": "f2ec03f8caf4614aa9d79d5eb27cedf6bd33e4f3e5572b065e766c3c54b53ae8",
+      "mtime_ns": 1792858116004099494
+    },
+    "jobs/industry/industry_daily.yaml": {
+      "sha256": "f0fa786110eb4026262f16d016ecf4beb8ace9334947414aeba87fb5795056b3",
+      "mtime_ns": 1792860451625022043
+    },
+    "jobs/industry/industry_weekly.yaml": {
+      "sha256": "4e8ccbe8f131579466707f44f21278a7358b4a4386f9462e8e0300e95e7bb181",
+      "mtime_ns": 1792858116004254119
+    },
+    "jobs/monitoring/ai.yaml": {
+      "sha256": "a0673147462e77101841a81e27897d753c94ae24ea2941da4e4587b89a54d8f2",
+      "mtime_ns": 1792141948000000000
+    },
+    "jobs/monitoring/ai_flash_discovery.yaml": {
+      "sha256": "e8310efb440417e9dc873ad8e69daab98ed7549ad370caab7967f27d4015cd98",
+      "mtime_ns": 1792858116002252281
+    },
+    "jobs/monitoring/ai_monitoring.yaml": {
+      "sha256": "97fc3b1368cd70c7858ead04df171706fa43773a117c76d09e0e67bd7d675e39",
+      "mtime_ns": 1790250092000000000
+    },
+    "jobs/monitoring/daily_ai_agents.yaml": {
+      "sha256": "393f22c5973613c6aa827a156fafb49ea259fdf2b157382ad7952d2f33b22204",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/monitoring/人工智能.yaml": {
+      "sha256": "7e8f80fc0e8f479b2b62075ca131377628affd36a75c25ad035a89945e3d5df9",
+      "mtime_ns": 1790249927000000000
+    },
+    "jobs/practical_ai_intelligence/00_collection_planner.yaml": {
+      "sha256": "9defeb0c9eac758d9ada8b2a6ef9a7f93b54b624f6f7895c4a94f29ba9ab9e24",
+      "mtime_ns": 1790591501000000000
+    },
+    "jobs/practical_ai_intelligence/01_model_and_pricing_radar.yaml": {
+      "sha256": "58896309ed68d31c2fbbe267f930dedbc3ea1f6854dc5d7ed9b8a30bfe9f0fed",
+      "mtime_ns": 1781014751000000000
+    },
+    "jobs/practical_ai_intelligence/02_ai_coding_tools_radar.yaml": {
+      "sha256": "130a0fb71b07886ad0421abd7951209e25d00195bf5b16422c4d6e6db30d7000",
+      "mtime_ns": 1780751714000000000
+    },
+    "jobs/practical_ai_intelligence/03_agent_workflow_radar.yaml": {
+      "sha256": "493cb6f81b9255da60ea9141d6d87448240e528ce139d7ede7bb3dcf83c0e4dd",
+      "mtime_ns": 1780751715000000000
+    },
+    "jobs/practical_ai_intelligence/04_project_understanding_radar.yaml": {
+      "sha256": "9869befc6229ce1ac7fdd649fc03a214021f5c752b4bb38ff2c12a426cb6925b",
+      "mtime_ns": 1780751715000000000
+    },
+    "jobs/practical_ai_intelligence/05_context_rag_memory_radar.yaml": {
+      "sha256": "7288ecc8bf24138f4cc50e0ea87f3b6e0af24ae2a01e83c84687e5d15c8b13b2",
+      "mtime_ns": 1780751716000000000
+    },
+    "jobs/practical_ai_intelligence/06_infra_and_eval_radar.yaml": {
+      "sha256": "4bde59cc127984ff6c6c866ff5c9d2b147260cb97a93bde78825ac0b955d6ec8",
+      "mtime_ns": 1780751716000000000
+    },
+    "jobs/practical_ai_intelligence/07_product_content_opportunities.yaml": {
+      "sha256": "38c3e273b968ec16e3b12b0e5bf4cbc31579fe71a799d747cc4df27c4526a1c4",
+      "mtime_ns": 1792480831000000000
+    },
+    "jobs/practical_ai_intelligence/08_risk_and_alternatives.yaml": {
+      "sha256": "7cbb78d4404417337d08b77ae86dd91598f5fcf27190f307807d6d39baf45e7e",
+      "mtime_ns": 1790586272000000000
+    },
+    "jobs/practical_ai_intelligence/09_executive_synthesis_and_actions.yaml": {
+      "sha256": "d4fe86bd4791a2db45b2afa4e55d26edabe9e9302c667ac312065d810a68be67",
+      "mtime_ns": 1790586612000000000
+    },
+    "jobs/practice/ai_agents_practice.yaml": {
+      "sha256": "a786134eb96295f83502c935664d4cb8261e38eb86325665a17f7ca5493f5457",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/practice/ai_agents_practice_search.yaml": {
+      "sha256": "935fc48c3805d8978ff68506372b7fcc88c79a03906e1250dcd8b086b1a472c8",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/research/ai.yaml": {
+      "sha256": "6cd2e905bcfd46a0a448b88fa6c02673a6a592249117922df17017ce7d327c5f",
+      "mtime_ns": 1792141948000000000
+    },
+    "jobs/research/ai_agent_coding_tool_research.yaml": {
+      "sha256": "94c4c80a2a9b54d421374715158c2e16c6d78f83ad26d440123cb66093ef6fde",
+      "mtime_ns": 1779429085000000000
+    },
+    "jobs/research/ai_agents_latest_research.yaml": {
+      "sha256": "f12016a6acc714e4763daca9a1e72e4043b891ed3d240e7a67e044e55e28d8eb",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/research/ai_agents_survey_direct.yaml": {
+      "sha256": "02da531fd4e45b53398be3bbccf990e94243fbfb3da1904d52f73084b27736dc",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/research/ai_automation_systems_research.yaml": {
+      "sha256": "c73534cb1e41564abc22ce1b420ff3649a7a796bf22ffc0d2ebc4c9a9ecf680b",
+      "mtime_ns": 1790674407000000000
+    },
+    "jobs/research/ai_survey.yaml": {
+      "sha256": "febea2ffb03b9b906c349d8e0d1654da609629364e340502b5a3868c5bc5cc4a",
+      "mtime_ns": 1779418342000000000
+    },
+    "jobs/research/assistant_app_acceptance_20261025.yaml": {
+      "sha256": "e5572b20c843a10a330a9576dec061a261166d33d623d56cb2ba5768eda3a6c9",
+      "mtime_ns": 1792938074592003811
+    },
+    "jobs/research/assistant_iteration_acceptance_20261025.yaml": {
+      "sha256": "76c7bf80dcd0a3853b00c2abbe51661efc84286aefa2b80b85400cb411733747",
+      "mtime_ns": 1792919411984374638
+    },
+    "jobs/research/assistant_ops_acceptance_20261025.yaml": {
+      "sha256": "0111070237dd7c1290c5ac8b7729ab32e2bffb687d3db6fa3ecd227392f9df57",
+      "mtime_ns": 1792922927902856077
+    },
+    "jobs/research/assistant_tracking_acceptance_20261025.yaml": {
+      "sha256": "810397592c77bfc41fd246e27b241118a592a3e1a6b4481a0da2b09b18cdd8d5",
+      "mtime_ns": 1792944506273586770
+    },
+    "jobs/research/独立游戏.yaml": {
+      "sha256": "209aa8d7e1bd5bc972d4f50da0b87ed283444845c00bb949ddd3330112b4389e",
+      "mtime_ns": 1792866887186401452
+    },
+    "jobs/science/science_daily.yaml": {
+      "sha256": "bdf002126fd918cf8f3ffa677640252d67cfbb2c465222d5f7bdd8ff721bf1e2",
+      "mtime_ns": 1792858116004328828
+    },
+    "jobs/science/science_weekly.yaml": {
+      "sha256": "c2587fb9b9d73a50138354266f3d84c766dacbe3f500bf678786ab06ebd902ec",
+      "mtime_ns": 1792858116004407161
+    },
+    "jobs/software/software_daily.yaml": {
+      "sha256": "028a71d19dc8576a7a03712497eb9e1ac719cb4347caa41a0294cd574cc880c3",
+      "mtime_ns": 1792858116004485078
+    },
+    "jobs/software/software_weekly.yaml": {
+      "sha256": "fb6c9ac0bfc6b5a1580960bc5ebea19fc1af10346a3462488f1843d53ab0eca4",
+      "mtime_ns": 1792858116004560328
+    },
+    "jobs/tech/tech_daily.yaml": {
+      "sha256": "8c4ab7faac2a2110a653a37707220f7763ce6c8ac9c890ab577ded0d1c1845b0",
+      "mtime_ns": 1792858116004638203
+    },
+    "jobs/tech/tech_weekly.yaml": {
+      "sha256": "1f365db3722aff0d360b165c4783cae3660ad481b5a8b09b7510daec6fd3be00",
+      "mtime_ns": 1792858116004710620
+    },
+    "jobs/video/flash_07c8442c.yaml": {
+      "sha256": "769cfe9345377d62866ccdc7dea8d2562fd0f53c91cde465b30c8226dcb83a0d",
+      "mtime_ns": 1792722479867962468
+    },
+    "jobs/video/flash_bb6a3d49.yaml": {
+      "sha256": "f6c92436135a2e242b88ae5fe33f51b88f9a90974a5e990082508005aab1857b",
+      "mtime_ns": 1792722478946436907
+    }
+  }
+}

@@ -1,0 +1,17 @@
+schema_version: 1
+name: 科学与前沿专题解读
+matrix: science
+type: explainer
+audience: 对新研究与科学原理感兴趣的观众
+promise: 串联科学与前沿的重要变化，理解原因与关系
+production_ids:
+- science_weekly
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 原理动画
+  - 实验图
+  - 图表
+status: configured
+notes: ''

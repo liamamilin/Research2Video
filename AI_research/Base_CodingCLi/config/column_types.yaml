@@ -1,0 +1,32 @@
+schema_version: 1
+types:
+  news:
+    name: 快讯
+    promise: 迅速知道发生了什么，以及为什么重要
+    structure: [变化, 影响, 重点]
+    preferred_visuals: [重点卡, 真实截图, 关键数字]
+  explainer:
+    name: 解读
+    promise: 理解事件或概念背后的原因
+    structure: [问题, 机制, 例子, 结论]
+    preferred_visuals: [图表, 流程, 截图, 解释卡]
+  comparison:
+    name: 横评
+    promise: 理解多个对象的差异与适用条件
+    structure: [对象, 比较维度, 关键差异, 适用情形]
+    preferred_visuals: [对比图, 价格卡, 真实画面, 原理图]
+  tutorial:
+    name: 教程
+    promise: 按照步骤完成一个具体任务
+    structure: [目标, 准备, 操作, 结果]
+    preferred_visuals: [操作截图, 步骤演示, 局部聚焦, 流程]
+  deep_research:
+    name: 深度研究
+    promise: 理解完整问题、材料、争议与结论
+    structure: [问题, 多章节展开, 比较, 收束]
+    preferred_visuals: [多章节混合画面, 图表, 真实素材, 视觉回顾]
+  series:
+    name: 专题系列
+    promise: 围绕一个主题持续建立系统认识
+    structure: [系列定位, 本期问题, 本期进展, 后续关联]
+    preferred_visuals: [固定包装, 连续对象, 章节结构, 混合画面]

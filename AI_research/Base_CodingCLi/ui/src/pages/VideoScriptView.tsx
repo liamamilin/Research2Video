@@ -301,6 +301,8 @@ export function VideoScriptViewPage() {
             <CredibilityBadge value={detail.credibility} />
             {detail.auto ? <span className="badge border border-border text-text-muted">自动流水线</span> : null}
             {detail.column ? <span className="text-xs text-text-muted">{detail.column.name}</span> : null}
+            {detail.content_context?.column_name ? <Link className="text-xs text-accent hover:underline"
+              to={`/matrices/${detail.content_context.matrix}?tab=columns`}>栏目：{detail.content_context.column_name}</Link> : null}
             {detail.approved_version ? (
               <span className="text-xs text-text-muted">{detail.approved_version === detail.current_version ? "定稿" : "旧版定稿"} v{detail.approved_version}</span>
             ) : null}

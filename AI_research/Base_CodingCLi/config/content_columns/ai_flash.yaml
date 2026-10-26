@@ -1,0 +1,17 @@
+schema_version: 1
+name: AI 快讯
+matrix: ai_media
+type: news
+audience: 关注 AI 产品、技术与应用的观众
+promise: 讲清 AI 新变化、重要性和使用影响
+production_ids:
+- flash_daily
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 重点卡
+  - 真实截图
+  - 关键数字
+status: configured
+notes: ''

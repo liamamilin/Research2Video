@@ -9,3 +9,5 @@ jobs:
 - research/assistant_ops_acceptance_20261025
 render:
   video_speed: 1.25
+content:
+  role: operations

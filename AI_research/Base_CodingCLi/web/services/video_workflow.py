@@ -133,9 +133,18 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     settings = get_settings()
     column = video_columns.for_new_script(settings.paths.config_dir, column_key)
     fields = topic.setdefault("fields", {})
+    explicit_audience = bool((fields.get("目标受众") or "").strip())
     if column.audience and not (fields.get("目标受众") or "").strip():
         fields["目标受众"] = column.audience  # a topic that names no audience is for the cell's
-    script = store.create_script(column.key, topic, created_by=started_by)
+    from core.video import content_columns, production
+    topic = dict(topic)
+    production_id = topic.pop("_production", "") or topic.get("article_production", "")
+    config = production.get(settings.paths.config_dir, settings.paths.jobs_dir, production_id) if production_id else None
+    context = content_columns.snapshot(settings.paths.config_dir, production_id, config.job) if config else {}
+    if context.get("audience") and not explicit_audience:
+        fields["目标受众"] = context["audience"]
+    script = store.create_script(column.key, topic, created_by=started_by,
+                                 production=production_id, content_context=context)
     if topic.get("article"):
         store.update_script(script["id"], status="WRITING", production=topic.get("article_production", ""))
     spawn(script["id"], started_by)
@@ -255,6 +264,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
     script = content_guard.with_policy(store.get_script(script_id))
+    from core.video.content_columns import apply_script_context
+    column = apply_script_context(column, script.get("content_context") or {})
     guarded = bool(script["topic"].get("matrix_dedup"))
     dedup_meta, filtered_material = {}, ""
     if guarded:

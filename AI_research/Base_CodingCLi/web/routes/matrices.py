@@ -40,6 +40,15 @@ class MatrixIn(BaseModel):
     jobs: list[str] | None = None  # editing: the members, in order; creating: none yet
     monthly_searches: int | None = Field(default=None, ge=0, le=1_000_000)  # editing: none keeps it, 0 lifts it
     render: dict | None = None
+    content: dict | None = None
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, value):
+        try:
+            return matrices.content_metadata(value) if value is not None else None
+        except (ValueError, TypeError) as exc:
+            raise PydanticCustomError("content_settings", "{message}", {"message": str(exc)}) from exc
 
     @field_validator("render")
     @classmethod
@@ -162,7 +171,16 @@ def list_matrices(user=Depends(require_viewer)):
             continue
         job = load_job(jobs_dir, name) or {}
         ungrouped.append({"job": name, "name": job.get("name") or name})
-    return {"matrices": [_shown(m, jobs_dir, plans) for m in every.values()], "ungrouped": ungrouped}
+    from core.video import content_columns
+    columns = content_columns.load_all(config_dir, matrix_map=every)
+    counts = {}
+    for c in columns.values():
+        row = counts.setdefault(c.matrix, {"columns": 0, "configured": 0, "planned": 0})
+        row["columns"] += 1
+        row["planned" if c.status == "planned" else "configured"] += 1
+    return {"matrices": [{**_shown(m, jobs_dir, plans),
+                           **({"content_summary": counts.get(m.key, {"columns": 0, "configured": 0, "planned": 0})}
+                              if m.content else {})} for m in every.values()], "ungrouped": ungrouped}
 
 
 def _get(key: str) -> matrices.Matrix:
@@ -173,8 +191,8 @@ def _get(key: str) -> matrices.Matrix:
 
 
 @router.get("/{key}")
-def get_matrix(key: str, user=Depends(require_viewer)):
-    return _shown(_get(key), _dirs()[1], _plans(), reports=True)
+def get_matrix(key: str, user=Depends(require_viewer), reports: bool = True):
+    return _shown(_get(key), _dirs()[1], _plans(), reports=reports)
 
 
 def _new_key(key: str) -> str:
@@ -211,7 +229,7 @@ def create_matrix(payload: MatrixIn, user=Depends(require_editor)):
         raise _error(422, "missing_name", "矩阵要有名字")
     members = _members(payload.jobs or [], None)
     matrices.save(_dirs()[0], key, name=payload.name.strip(), domain=payload.domain.strip(),
-                  keywords=_keywords(payload.keywords), members=members, render=payload.render)
+                  keywords=_keywords(payload.keywords), members=members, render=payload.render, content=payload.content)
     audit.log("matrix_create", user=user["username"], target=key)
     return get_matrix(key, user)
 
@@ -230,7 +248,7 @@ def update_matrix(key: str, payload: MatrixIn, user=Depends(require_editor)):
         members = _members(payload.jobs, matrix) if payload.jobs is not None else list(matrix.members)
         matrices.save(_dirs()[0], key, name=payload.name.strip(), domain=payload.domain.strip(),
                       keywords=_keywords(payload.keywords), members=members, monthly_searches=payload.monthly_searches,
-                      render=payload.render)
+                      render=payload.render, content=payload.content)
     audit.log("matrix_update", user=user["username"], target=key,
               details={"monthly_searches": payload.monthly_searches} if payload.monthly_searches is not None else None)
     return get_matrix(key, user)

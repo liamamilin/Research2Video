@@ -43,7 +43,7 @@ def recipe(recipe_id: str) -> dict:
     for item in catalog()["recipes"]:
         if item["id"] == recipe_id:
             return item
-    raise CreativeResourceError("未知制作配方，请选择 AI 快讯、操作教程或原理科普")
+    raise CreativeResourceError("未知制作配方，请从已登记的制作配方中选择")
 
 
 def merge(base: dict, overrides: dict) -> dict:

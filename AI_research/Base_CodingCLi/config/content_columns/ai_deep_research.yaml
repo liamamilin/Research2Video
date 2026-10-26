@@ -1,0 +1,18 @@
+schema_version: 1
+name: AI 深度研究
+matrix: ai_media
+type: deep_research
+audience: 关注 AI 产品、技术与应用的观众
+promise: 围绕一个 AI 问题串起材料、不同观点和结论
+production_ids:
+- ai_media_deep_dive
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 多章节混合画面
+  - 图表
+  - 真实截图
+  - 视觉回顾
+status: configured
+notes: ''
