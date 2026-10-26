@@ -1,5 +1,6 @@
 import React from 'react';
 import {SvgVisualObject,visualFor} from './VisualObjects';
+import {objectColor} from './StoryDirection';
 import {cameraAt,flowRects} from './ShotDirector';
 
 export function ObjectFlow({scene,frame}:{scene:any;frame:number}) {
@@ -42,10 +43,10 @@ export function ObjectFlow({scene,frame}:{scene:any;frame:number}) {
       })}
       {layout.nodes.map((node:any)=>{
         const target=`node:${node.id}`, icon=visualFor(scene,target), high=focused.includes(target) || active===target || p.edges.some((e:any)=>active===`edge:${e.id}`&&(e.from===node.id||e.to===node.id));
-        const size=58*layout.scale, middle=node.y+node.height/2;
+        const size=58*layout.scale, middle=node.y+node.height/2,color=objectColor(scene,target,green);
         return <g key={node.id} opacity={alpha(target)}>
-          <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={18*layout.scale} fill={high?'#EDF6EF':'white'} stroke={high?green:'#DCE6DC'} strokeWidth={high?2.5:1.5}/>
-          {icon && <SvgVisualObject scene={scene} target={target} frame={frame} x={node.x+(node.width-size)/2} y={node.y+22*layout.scale} size={size}/>}
+          <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={18*layout.scale} fill={high?`${color}0D`:'white'} stroke={high?color:'#DCE6DC'} strokeWidth={high?2.5:1.5}/>
+          {icon && <SvgVisualObject scene={scene} target={target} frame={frame} x={node.x+(node.width-size)/2} y={node.y+22*layout.scale} size={size} color={color}/>}
           {node.label_lines.map((line:string,i:number)=><text key={i} x={node.x+node.width/2} y={icon ? node.y+(112+i*46)*layout.scale : middle+(i-(node.label_lines.length-1)/2)*layout.font_size*1.28} dominantBaseline="middle" textAnchor="middle" fontSize={layout.font_size} fontWeight={600} fill={ink}>{line}</text>)}
         </g>;
       })}

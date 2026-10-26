@@ -5,6 +5,7 @@ import {VisualObject, SvgVisualObject, visualFor} from './VisualObjects';
 import {ObjectFlow} from './ObjectFlow';
 import {cameraAt, carriesPicture, flowRects, linkScenes, transitionAt} from './ShotDirector';
 import {DirectedMaterials} from './DirectedMaterials';
+import {StoryObjects,objectColor,revealFrames} from './StoryDirection';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {CornerBadge, type Badge} from './Packaging';
 import {CreativeVideo, type CreativePreset} from './CreativeForms';
@@ -266,7 +267,7 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   const latest = shown[shown.length-1]?.target_id;
   const motion = (target: string): React.CSSProperties => {
     const beat = reveals.find((b) => b.target_id === target);
-    const t = beat ? ease((frame-beat.frame)/16) : 0;
+    const t = beat ? ease((frame-beat.frame)/revealFrames(scene)) : 0;
     return {opacity:t, transform:`translateY(${(1-t)*22}px)`, willChange:'transform, opacity'};
   };
   // 'pretty' keeps a line from ending on a single orphaned character ("美" / "分"). 'balance' was tried for headings and
@@ -277,15 +278,33 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   const heading = chartLike ? scene.purpose : p.title;
   const materialScene = ['object_showcase','material_collage'].includes(scene.component);
   const previous=scene.previous_scene;
+  const recapSources=(p.story?.recap??[]).map((id:string)=>ir.scenes.find(s=>s.id===id)).filter(Boolean) as Scene[];
   const sameHeading=!!previous?.props.scene_flow && (chartLike?previous.purpose:previous.props.title)===heading;
   const headingMotion=carriesPicture(scene)||sameHeading?{}:scene.component==='comparison' && p.visuals?.length
     ? {opacity:ease((frame-scene.start_frame)/16)} : motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : scene.component === 'flow_diagram'||materialScene ? 'scene' : 'title');
   return <AbsoluteFill style={{background:stageOnly?'transparent':paper.bg, color:paper.ink, fontFamily:font, backgroundImage:stageOnly?undefined:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
-    {!stageOnly&&<><CornerBadge badge={badge}/>
+    {!stageOnly&&<><CornerBadge badge={badge}/><StoryObjects scene={scene}/>
     <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
     {scene.component!=='title_card'&&<div style={{position:'absolute',left:140,top:162,width:1640,fontSize:materialScene&&heading.length>40?40:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...headingMotion}}><Tech text={heading}/></div>}</>}
     <div style={{position:'absolute',inset:0,display:hideStage?'none':undefined}}>
-    {scene.component === 'title_card' ? <div style={{position:'absolute',left:180,top:285,width:1520}}>
+    {recapSources.length ? <div data-story-recap={scene.id} style={{position:'absolute',left:140,top:300,width:1640,height:560,display:'flex',justifyContent:'center',gap:40,alignItems:'center'}}>
+      {recapSources.map((source,i)=>{
+        const width=recapSources.length===2?800:1120,scale=(width-48)/1640;
+        const at=reveals.find(b=>b.target_id===`line:${i}`)?.frame??scene.start_frame+18+i*24;
+        const alpha=ease((frame-at)/revealFrames(scene));
+        const identities=source.props.story?.entities.slice(0,3)??[],color=identities[0]?.color??paper.green;
+        const takeaway=source.props.takeaway||source.props.title||source.purpose;
+        return <div key={source.id} style={{width,flex:'none',padding:22,...panelStyle,borderTop:`4px solid ${color}`,opacity:alpha,transform:`translateY(${(1-alpha)*16}px)`}}>
+          <div style={{position:'relative',width:width-48,height:620*scale,overflow:'hidden',borderRadius:12}}>
+            <div style={{position:'absolute',left:-140*scale,top:-270*scale,width:1920,height:1080,transform:`scale(${scale})`,transformOrigin:'0 0'}}>
+              <InformationVideo ir={ir} sceneOverride={source} frameOverride={source.end_frame-1} stageOnly/>
+            </div>
+          </div>
+          <div style={{fontSize:takeaway.length>45?26:30,fontWeight:650,color,lineHeight:1.4,marginTop:18,...textStyle}}><Tech text={takeaway}/></div>
+          {!!identities.length&&<div style={{display:'flex',gap:20,fontSize:24,lineHeight:1.4,marginTop:7}}>{identities.map((entity:any)=><span key={entity.id} style={{color:entity.color}}>{entity.name}</span>)}</div>}
+        </div>;
+      })}
+    </div> : scene.component === 'title_card' ? <div style={{position:'absolute',left:180,top:285,width:1520}}>
       <div style={{...motion('title'), ...textStyle, fontSize:large ? (p.title.length > 20 ? S(66) : S(83)) : p.title.length > 30 ? 76 : 92, lineHeight:1.35,fontWeight:700,letterSpacing:-1,maxWidth:1450}}><Tech text={p.title}/></div>
       <div style={{...motion('title'),width:84,height:5,background:paper.green,marginTop:38,borderRadius:3}}/>
       {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? S(36) : S(42),lineHeight:1.65,color:paper.muted}}><Tech text={p.subtitle}/></div>}
@@ -297,17 +316,17 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
           const label = match ? match[1] : line, body = match ? match[2] : '';
           const target=`line:${i}`, active = latest === target, compact = p.lines.length === 4, icon=visualFor(scene,target);
           const labelStyle={...textStyle,fontWeight:650,fontSize:S(compact || label.length > 10 ? 36 : 42),lineHeight:1.4};
-          return <div key={i} style={{...panelStyle,...motion(target),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? paper.green : paper.line}`}}>
-            {icon ? compact ? <div style={{display:'flex',alignItems:'center',gap:18}}><VisualObject scene={scene} target={target} frame={frame} size={52}/><div style={{...labelStyle,flex:1}}><Tech text={label}/></div></div> : <><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}><VisualObject scene={scene} target={target} frame={frame} size={64}/><span style={{fontSize:20,color:paper.muted}}>{String(i+1).padStart(2,'0')}</span></div><div style={labelStyle}><Tech text={label}/></div></> : <><div style={{fontSize:22,color:paper.green,fontWeight:600,letterSpacing:2,marginBottom:compact ? 10 : 29}}>{String(i+1).padStart(2,'0')}</div><div style={labelStyle}><Tech text={label}/></div></>}
+          return <div key={i} style={{...panelStyle,...motion(target),height:compact ? 250 : 440,padding:compact ? '25px 34px' : '34px 36px',borderTop:`3px solid ${active ? objectColor(scene,target,paper.green) : paper.line}`}}>
+            {icon ? compact ? <div style={{display:'flex',alignItems:'center',gap:18}}><VisualObject scene={scene} target={target} frame={frame} size={52} color={objectColor(scene,target)}/><div style={{...labelStyle,flex:1}}><Tech text={label}/></div></div> : <><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}><VisualObject scene={scene} target={target} frame={frame} size={64} color={objectColor(scene,target)}/><span style={{fontSize:20,color:paper.muted}}>{String(i+1).padStart(2,'0')}</span></div><div style={labelStyle}><Tech text={label}/></div></> : <><div style={{fontSize:22,color:paper.green,fontWeight:600,letterSpacing:2,marginBottom:compact ? 10 : 29}}>{String(i+1).padStart(2,'0')}</div><div style={labelStyle}><Tech text={label}/></div></>}
             {body && <div style={{...textStyle,color:paper.muted,fontSize:S(compact ? 28 : p.lines.length === 3 ? 30 : 34),lineHeight:compact ? 1.5 : 1.6,marginTop:compact ? 10 : 22}}><Tech text={body}/></div>}
           </div>;
         })}
       </div>}
       {scene.component === 'comparison' && <div style={{position:'absolute',left:140,top:330,width:1640,display:'grid',gridTemplateColumns:'1fr 1fr',gap:44}}>
         {(['left','right'] as const).map((side) => {
-          const data=p[side], total=data.items.join('').length, bodySize=S(total > 130 ? 30 : 34);
-          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${side === 'right' ? paper.green : paper.line}`}}>
-            <div style={{display:'flex',alignItems:'center',gap:20,marginBottom:30}}><VisualObject scene={scene} target={`side:${side}`} frame={frame} size={64}/><div style={{...textStyle,flex:1,minWidth:0,color:side === 'right' ? paper.green : paper.muted,fontSize:S(data.label.length > 20 ? 34 : 42),lineHeight:1.4,fontWeight:650}}><Tech text={data.label}/></div></div>
+          const data=p[side], total=data.items.join('').length, bodySize=S(total > 130 ? 30 : 34),color=objectColor(scene,`side:${side}`,side==='right'?paper.green:paper.muted);
+          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:p.story?`${color}08`:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${p.story?color:side === 'right' ? paper.green : paper.line}`}}>
+            <div style={{display:'flex',alignItems:'center',gap:20,marginBottom:30}}><VisualObject scene={scene} target={`side:${side}`} frame={frame} size={64} color={p.story?color:paper.green}/><div style={{...textStyle,flex:1,minWidth:0,color,fontSize:S(data.label.length > 20 ? 34 : 42),lineHeight:1.4,fontWeight:650}}><Tech text={data.label}/></div></div>
             <div style={{display:'flex',flexDirection:'column',gap:20}}>{data.items.map((item: string,i: number) => <div key={i} style={{display:'flex',gap:15,fontSize:bodySize,lineHeight:1.5}}><span style={{color:paper.green}}>·</span><span style={textStyle}><Tech text={item}/></span></div>)}</div>
           </div>;
         })}
@@ -342,7 +361,7 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
                 <div style={{flex:1,display:'flex',alignItems:'center',minWidth:0}}>
                   <Value text={row.before} color={paper.muted}/>
                   <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:later(8)}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  <Value text={row.after} color={paper.green} opacity={later(8)}/>
+                  <Value text={row.after} color={objectColor(scene,rowTarget,paper.green)} opacity={later(8)}/>
                 </div>
                 {row.change && <div style={{flex:'none',padding:'6px 26px',borderRadius:18,background:row.direction === 'down' ? '#E3F3E9' : '#FBE8E4',color:row.direction === 'down' ? paper.green : '#B3402E',fontSize:badge,fontWeight:750,lineHeight:1.3,opacity:later(20),whiteSpace:'nowrap'}}>{row.direction === 'down' ? '−' : '+'}{row.change}</div>}
               </div>;
@@ -369,7 +388,7 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
             return <div key={i} style={{display:'flex',alignItems:'center',gap:32,opacity:Math.min(1, t*2.2)}}>
               <div style={{...textStyle,width:large ? 440 : 360,flex:'none',fontSize:S(count > 4 ? 30 : 34),fontWeight:600,lineHeight:1.3}}><Tech text={category}/></div>
               <div style={{flex:1,display:'flex',alignItems:'center',gap:20,minWidth:0}}>
-                <div style={{height:count > 4 ? 44 : 58,borderRadius:10,background:paper.green,width:`${Math.max(1.2, p.values[i]/top*72*t)}%`,flex:'none'}}/>
+                <div style={{height:count > 4 ? 44 : 58,borderRadius:10,background:objectColor(scene,`bar:${i}`,paper.green),width:`${Math.max(1.2, p.values[i]/top*72*t)}%`,flex:'none'}}/>
                 <div style={{...textStyle,fontSize:S(count > 4 ? 32 : 38),fontWeight:650,whiteSpace:'nowrap',color:paper.ink}}><Tech text={shownValue(p.values[i])}/></div>
               </div>
             </div>;

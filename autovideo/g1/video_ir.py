@@ -18,6 +18,7 @@ from PIL import ImageFont
 from g1.visual_language import component_schema, validate_references
 from g1.shot_language import COMPONENTS as SHOT_COMPONENTS, shot_schema, validate_shots
 from g1.scene_flow import COMPONENTS as FLOW_COMPONENTS, flow_schema
+from g1.story_language import COMPONENTS as STORY_COMPONENTS, story_schema, validate_story
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -81,6 +82,8 @@ def _validate_component(component: str, props: dict[str, Any], path: str):
         schema["properties"]["shot_plan"] = shot_schema()
     if component in FLOW_COMPONENTS:
         schema["properties"]["scene_flow"] = flow_schema()
+    if component in STORY_COMPONENTS:
+        schema["properties"]["story"] = story_schema()
     validator = Draft202012Validator(schema)
     errors = sorted(validator.iter_errors(props), key=lambda e: tuple(str(x) for x in e.path))
     if errors:
@@ -335,6 +338,10 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
             validate_shots(scene)
         except ValueError as exc:
             _fail("SHOT_REFERENCE", f"{sp}/props/shot_plan", str(exc))
+        try:
+            validate_story(scene, ir['scenes'][:scene_index])
+        except ValueError as exc:
+            _fail("STORY_REFERENCE", f"{sp}/props/story", str(exc))
 
         # Component invariants not expressed by the authored JSON Schemas.
         props = scene["props"]

@@ -37,19 +37,83 @@
             "type": "object"
           },
           "material_cues": {
-            "type": "array", "maxItems": 48,
+            "type": "array",
+            "maxItems": 48,
             "items": {
-              "type": "object", "additionalProperties": false,
-              "required": ["image_index", "phrase"],
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "image_index",
+                "phrase"
+              ],
               "properties": {
-                "image_index": {"type": "integer", "minimum": 0, "maximum": 11},
-                "region_index": {"type": "integer", "minimum": 0, "maximum": 2},
-                "phrase": {"type": "string", "minLength": 1, "maxLength": 80}
+                "image_index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 11
+                },
+                "region_index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2
+                },
+                "phrase": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
               }
             }
           },
           "material_summary_phrase": {
-            "type": "string", "minLength": 1, "maxLength": 80
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "story_role": {
+            "enum": [
+              "question",
+              "explain",
+              "compare",
+              "result",
+              "bridge",
+              "recap"
+            ]
+          },
+          "importance": {
+            "enum": [
+              "key",
+              "normal",
+              "support"
+            ]
+          },
+          "entities": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 32
+                },
+                "targets": {
+                  "type": "array",
+                  "maxItems": 16,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                }
+              }
+            }
           }
         }
       }

@@ -1,0 +1,81 @@
+{
+  "version": 3,
+  "profile": "brief",
+  "timing": "measured narration; existing phrase boundaries",
+  "video_speed": 1.0,
+  "input_paragraphs": 4,
+  "visual_units": 4,
+  "extra_model_calls": 0,
+  "units": [
+    {
+      "id": "card_1",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_1"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ],
+      "duration_ms": 8047,
+      "image_indices": [],
+      "operation": "keep"
+    },
+    {
+      "id": "card_2",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_2"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n3",
+        "c1_n4",
+        "c1_n5"
+      ],
+      "duration_ms": 12581,
+      "image_indices": [
+        0,
+        1
+      ],
+      "operation": "keep"
+    },
+    {
+      "id": "card_3",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_3"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n6",
+        "c1_n7",
+        "c1_n8",
+        "c1_n9"
+      ],
+      "duration_ms": 15283,
+      "image_indices": [],
+      "operation": "keep"
+    },
+    {
+      "id": "card_4",
+      "chapter_id": "c1",
+      "paragraph_ids": [
+        "card_4"
+      ],
+      "part_index": 1,
+      "part_count": 1,
+      "narration_segment_ids": [
+        "c1_n10",
+        "c1_n11"
+      ],
+      "duration_ms": 12246,
+      "image_indices": [],
+      "operation": "keep"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "old_pid": 44350,
+  "new_server": {
+    "pid": 10570,
+    "started_at": "2026-10-26T11:28:06.315516+08:00",
+    "base_url": "http://127.0.0.1:8011"
+  },
+  "launch": {
+    "status": "ready",
+    "action": "started",
+    "pid": 10570,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "health": {
+    "status": "ok",
+    "worker_primary": true
+  },
+  "before": {
+    "total": 290,
+    "completed": 213,
+    "running": 0,
+    "needs_input": 1
+  },
+  "after": {
+    "total": 290,
+    "completed": 213,
+    "running": 0,
+    "needs_input": 1
+  },
+  "scope": "Loaded narrative roles, stable visual identities and visual recaps; idle queue, existing jobs preserved"
+}

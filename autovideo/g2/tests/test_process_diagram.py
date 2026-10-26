@@ -36,6 +36,13 @@ def actual_layout(tmp_path, plan):
     return json.loads(result.stdout)
 
 
+def test_mixed_flow_layout_accepts_edges_without_optional_labels():
+    plan, _ = example()
+    del plan['scenes'][0]['edges'][0]['label']
+    edge = diagram.layout_request(plan)['scenes'][0]['edges'][0]
+    assert edge['label'] == '' and edge['label_width'] == 24
+
+
 def test_source_grounded_graph_layout_and_registered_ir(tmp_path):
     plan, context = example()
     diagram.validate_plan(plan, context)

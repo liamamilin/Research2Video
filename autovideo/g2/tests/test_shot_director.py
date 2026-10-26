@@ -101,11 +101,12 @@ def camera_runtime(tmp_path_factory):
     folder = tmp_path_factory.mktemp('shot-runtime')
     source = folder/'camera.ts'
     source.write_text('''
-import {cameraAt,shotsFor,materialAt,transitionAt} from CAMERA;
+import {cameraAt,shotsFor,materialAt,transitionAt,pacingFor} from CAMERA;
 import {imageRects} from MATERIALS;
 const input=JSON.parse(process.argv[2]);
 const scene=input.scene;
 console.log(JSON.stringify({shots:shotsFor(scene),
+  pacing:pacingFor(scene),
   transitions:input.frames.map(frame=>transitionAt(scene,frame)),
   material:scene.props.images?input.frames.map(frame=>materialAt(scene,frame)):null,
   image:input.image?imageRects(input.image,0,1000,500):null,

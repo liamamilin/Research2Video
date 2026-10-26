@@ -51,6 +51,8 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
               'material_summary_phrase可填写引出总结或整体比较的讲稿原句。只安排画面，不改写旁白。'
               '画面文字简洁，不把整段旁白贴上屏。只返回符合required_schema的JSON。')
     system += ('明确的传递过程可以用flow_diagram：2到5个节点，edges连接已有节点，paths填空数组，附title和takeaway；布局由程序生成。' + visual_language.GUIDANCE)
+    from g2.story_direction import GUIDANCE
+    system += GUIDANCE
     schemas = {name: component_schema(name) for name in COMPONENTS}
     schemas['flow_diagram']['properties'].pop('layout', None)
     for field in ('nodes', 'edges'):
@@ -62,6 +64,8 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
         payload['visual_preference'] = context['instruction']
     if context.get('chapter_context'):
         payload['chapter_context'] = context['chapter_context']
+    if context.get('established_entities'):
+        payload['established_entities'] = context['established_entities']
     if correction:
         payload['layout_feedback'] = correction
     return [{'role': 'system', 'content': system}, {'role': 'user', 'content': json.dumps(payload, ensure_ascii=False)}]
@@ -148,6 +152,7 @@ def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | No
     for chapter in dict.fromkeys(g['chapter_id'] for g in input_groups):
         local = [g for g in input_groups if g['chapter_id'] == chapter]
         context = {'title': narration['title'], 'groups': local}
+        context['established_entities'] = list(dict.fromkeys(e['name'] for p in pages for e in p.get('entities', [])))
         if assembly:
             context['chapter_context'] = [{'id': g['id'], 'text': g['text']} for g in original if g['chapter_id'] == chapter]
         def check(value, ctx):
@@ -157,7 +162,8 @@ def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | No
                 raise pipeline.G2Fault('EXPLANATION_LAYOUT', str(exc)) from exc
         plan = pipeline.generate_validated_plan(f'{chapter}-explanation', messages, SCHEMA, check, context)
         pages.extend(plan['pages'])
-    return {'pages': pages, 'groups': input_groups, **({'assembly': assembly} if assembly else {})}
+    return {'pages': pages, 'groups': input_groups, 'direction_version': 4,
+            **({'assembly': assembly} if assembly else {})}
 
 
 def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, assets: list[dict]) -> dict:
@@ -194,6 +200,9 @@ def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, asset
     if plan.get('assembly'):
         from g2.scene_assembly import connect
         connect(board, plan['groups'], saved)
+    if plan.get('direction_version') == 4 or any(p.get('story_role') for p in plan['pages']):
+        from g2.story_direction import attach as attach_story
+        attach_story(board, plan['pages'], plan['groups'], pipeline, saved.get('_story_entities'))
     pipeline.write_json(pipeline.ARTIFACTS / 'explanation-plan.json', plan)
     pipeline.write_json(pipeline.ARTIFACTS / 'storyboard-plan.json', board)
     return board
@@ -216,7 +225,13 @@ def replan_scene(pipeline, old: dict, narration: dict, ir: dict, instruction: st
             raise pipeline.G2Fault('EXPLANATION_LAYOUT', str(exc)) from exc
     plan = pipeline.generate_validated_plan(f"{old['id']}-explanation-revision", messages, SCHEMA, check, context)
     saved = {'_shot_profile': old['props'].get('shot_plan', {}).get('profile', 'balanced'),
-             'image_materials': images}
+             'image_materials': images,
+             '_story_entities': [e for s in ir.get('scenes', []) for e in s['props'].get('story', {}).get('entities', [])]}
+    if old['props'].get('story'):
+        page = plan['pages'][0]
+        page.setdefault('story_role', old['props']['story']['role'])
+        page.setdefault('importance', old['props']['story']['importance'])
+        page.setdefault('entities', [{k: e[k] for k in ('name', 'targets')} for e in old['props']['story']['entities']])
     assets = [{'id': image['image_asset_id'], 'path': image['image_path']} for image in images]
     result = compile_storyboard(pipeline, {**plan, 'groups': [group]}, {'rows': speech}, saved, assets)['scenes'][0]
     if old['props'].get('scene_flow'):
@@ -226,4 +241,7 @@ def replan_scene(pipeline, old: dict, narration: dict, ir: dict, instruction: st
         if (result['component']==old['component'] and old['props'].get('shot_plan', {}).get('closing')=='hold'
                 and result['props'].get('shot_plan')):
             result['props']['shot_plan']['closing'] = 'hold'
+    if (old['props'].get('story', {}).get('recap')
+            and result['props'].get('story', {}).get('role') == 'recap'):
+        result['props']['story']['recap'] = old['props']['story']['recap']
     return result

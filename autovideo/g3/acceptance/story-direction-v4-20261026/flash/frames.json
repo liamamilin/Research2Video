@@ -1,0 +1,191 @@
+[
+  {
+    "scene": "card_1",
+    "component": "title_card",
+    "kind": "overview",
+    "frame": 0,
+    "targets": [],
+    "capture_frame": 30,
+    "file": "card_1-00-overview.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "material_collage",
+    "kind": "overview",
+    "frame": 257,
+    "targets": [],
+    "capture_frame": 283,
+    "file": "card_2-00-overview.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "material_collage",
+    "kind": "focus",
+    "frame": 284,
+    "targets": [
+      "region:0:0"
+    ],
+    "capture_frame": 314,
+    "file": "card_2-01-focus.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "material_collage",
+    "kind": "focus",
+    "frame": 423,
+    "targets": [
+      "region:1:0"
+    ],
+    "capture_frame": 453,
+    "file": "card_2-02-focus.png"
+  },
+  {
+    "scene": "card_2",
+    "component": "material_collage",
+    "kind": "summary",
+    "frame": 544,
+    "targets": [],
+    "capture_frame": 574,
+    "file": "card_2-03-summary.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "scatter_chart",
+    "kind": "overview",
+    "frame": 651,
+    "targets": [],
+    "capture_frame": 681,
+    "file": "card_3-00-overview.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "scatter_chart",
+    "kind": "focus",
+    "frame": 786,
+    "targets": [
+      "point:0"
+    ],
+    "capture_frame": 816,
+    "file": "card_3-01-focus.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "scatter_chart",
+    "kind": "focus",
+    "frame": 909,
+    "targets": [
+      "point:1",
+      "point:0"
+    ],
+    "capture_frame": 939,
+    "file": "card_3-02-focus.png"
+  },
+  {
+    "scene": "card_3",
+    "component": "scatter_chart",
+    "kind": "summary",
+    "frame": 1040,
+    "targets": [],
+    "capture_frame": 1070,
+    "file": "card_3-03-summary.png"
+  },
+  {
+    "scene": "card_4",
+    "component": "comparison",
+    "kind": "overview",
+    "frame": 1127,
+    "targets": [],
+    "capture_frame": 1157,
+    "file": "card_4-00-overview.png"
+  },
+  {
+    "scene": "card_4",
+    "capture_frame": 1318,
+    "recap": [
+      "card_2",
+      "card_3"
+    ],
+    "file": "card_4-recap-middle.png"
+  },
+  {
+    "scene": "card_4",
+    "capture_frame": 1479,
+    "recap": [
+      "card_2",
+      "card_3"
+    ],
+    "file": "card_4-recap-ending.png"
+  },
+  {
+    "scene": "card_2",
+    "capture_frame": 256,
+    "entry": "dissolve",
+    "file": "card_2-boundary-before.png"
+  },
+  {
+    "scene": "card_2",
+    "capture_frame": 257,
+    "entry": "dissolve",
+    "file": "card_2-boundary-entry.png"
+  },
+  {
+    "scene": "card_2",
+    "capture_frame": 262,
+    "entry": "dissolve",
+    "file": "card_2-boundary-middle.png"
+  },
+  {
+    "scene": "card_2",
+    "capture_frame": 267,
+    "entry": "dissolve",
+    "file": "card_2-boundary-after.png"
+  },
+  {
+    "scene": "card_3",
+    "capture_frame": 650,
+    "entry": "dissolve",
+    "file": "card_3-boundary-before.png"
+  },
+  {
+    "scene": "card_3",
+    "capture_frame": 651,
+    "entry": "dissolve",
+    "file": "card_3-boundary-entry.png"
+  },
+  {
+    "scene": "card_3",
+    "capture_frame": 656,
+    "entry": "dissolve",
+    "file": "card_3-boundary-middle.png"
+  },
+  {
+    "scene": "card_3",
+    "capture_frame": 661,
+    "entry": "dissolve",
+    "file": "card_3-boundary-after.png"
+  },
+  {
+    "scene": "card_4",
+    "capture_frame": 1126,
+    "entry": "dissolve",
+    "file": "card_4-boundary-before.png"
+  },
+  {
+    "scene": "card_4",
+    "capture_frame": 1127,
+    "entry": "dissolve",
+    "file": "card_4-boundary-entry.png"
+  },
+  {
+    "scene": "card_4",
+    "capture_frame": 1132,
+    "entry": "dissolve",
+    "file": "card_4-boundary-middle.png"
+  },
+  {
+    "scene": "card_4",
+    "capture_frame": 1137,
+    "entry": "dissolve",
+    "file": "card_4-boundary-after.png"
+  }
+]

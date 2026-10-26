@@ -1,10 +1,11 @@
 import React from 'react';
+import {type Story} from './StoryDirection';
 
 export type Rect = {x:number;y:number;width:number;height:number};
 export type ShotPlan = {version:1;profile:'brief'|'balanced'|'explain';summary_beat_id?:string;
   closing?:'overview'|'hold';cues:{beat_id:string;targets:string[]}[]};
 type Scene = {component?:string;start_frame:number;end_frame:number;
-  previous_scene?:Scene;props:{shot_plan?:ShotPlan;scene_flow?:{entry:string;profile:keyof typeof PACING};images?:any[];focus_indices?:number[]};
+  previous_scene?:Scene;props:{shot_plan?:ShotPlan;scene_flow?:{entry:string;profile:keyof typeof PACING};story?:Story;images?:any[];focus_indices?:number[]};
   beats:{id:string;frame:number}[]};
 export type Shot = {kind:'overview'|'carry'|'focus'|'summary';frame:number;targets:string[]};
 type Pose = {zoom:number;x:number;y:number};
@@ -16,9 +17,22 @@ export const PACING = {
 const identity:Pose = {zoom:1,x:0,y:0};
 const clamp = (x:number,low:number,high:number)=>Math.max(low,Math.min(high,x));
 
+export function pacingFor(scene:Scene) {
+  const base=PACING[scene.props.shot_plan?.profile??scene.props.scene_flow?.profile??'balanced'];
+  const story=scene.props.story;
+  if(!story)return base;
+  const factors={question:[.7,.95,.7],explain:[1,1,1],compare:[1.1,1.3,1.15],
+    result:[.65,1.15,1.5],bridge:[.4,.8,.4],recap:[.65,1.25,1.45]}[story.role];
+  const reading=(story.density==='dense'?1.15:1)*(story.importance==='key'?1.15:story.importance==='support'?.85:1);
+  const hold=Math.max(18,Math.min(Math.round(base.hold*factors[1]*reading),Math.floor((scene.end_frame-scene.start_frame)*.22)));
+  return {...base,overview:Math.round(base.overview*factors[0]),hold,
+    summary:Math.round(base.summary*factors[2])};
+}
+
 export function carriesPicture(scene:Scene):boolean {
   const previous=scene.previous_scene;
   return !!(scene.props.scene_flow?.entry==='carry' && previous?.props.shot_plan && scene.props.shot_plan
+    && !scene.props.story?.recap?.length && !previous.props.story?.recap?.length
     && ['object_showcase','material_collage'].includes(scene.component??'') && scene.component===previous.component
     && JSON.stringify(scene.props.images)===JSON.stringify(previous.props.images)
     && JSON.stringify(scene.props.focus_indices)===JSON.stringify(previous.props.focus_indices));
@@ -35,7 +49,7 @@ export function linkScenes<T extends Scene>(scenes:T[]):T[] {
 export function transitionAt(scene:Scene,frame:number) {
   const previous=scene.previous_scene, flow=scene.props.scene_flow;
   const entry=carriesPicture(scene)?'carry':flow?.entry==='carry'?'dissolve':flow?.entry??'cut';
-  const length=previous?Math.max(1,Math.min(PACING[flow?.profile??'balanced'].transition,
+  const length=previous?Math.max(1,Math.min(pacingFor(scene).transition,
     Math.floor((scene.end_frame-scene.start_frame)/4),Math.floor((previous.end_frame-previous.start_frame)/4))):1;
   const t=clamp((frame-scene.start_frame)/length,0,1);
   return {entry,active:!!previous && entry==='dissolve' && t<1,progress:t*t*(3-2*t),length};
@@ -46,7 +60,8 @@ export function shotsFor(scene:Scene):Shot[] {
   const carried=carriesPicture(scene)?shotsFor(scene.previous_scene!).slice(-1)[0].targets:undefined;
   const overview:Shot={kind:carried?'carry':'overview',frame:start,targets:carried??[]};
   if(!plan)return [overview];
-  const pace=PACING[plan.profile];
+  const pace=pacingFor(scene);
+  if(scene.props.story?.role==='bridge')return [overview];
   if(end-start<pace.minScene){
     // A short final part already has its context from the previous page. Keep
     // that view, then restore the overview for its closing sentence.
@@ -91,7 +106,7 @@ function poseFor(shot:Shot,rects:Record<string,Rect>,view:Rect,maxZoom:number,ma
 }
 
 export function cameraAt(scene:Scene,frame:number,rects:Record<string,Rect>,view:Rect,margin={x:120,y:90}) {
-  const shots=shotsFor(scene), pace=PACING[scene.props.shot_plan?.profile??'balanced'];
+  const shots=shotsFor(scene), pace=pacingFor(scene);
   let index=0;
   shots.forEach((shot,i)=>{if(shot.frame<=frame)index=i;});
   const shot=shots[index], target=poseFor(shot,rects,view,pace.maxZoom,margin);
@@ -115,8 +130,7 @@ export function materialAt(scene:Scene & {component?:string;props:any},frame:num
     return pair ? [0,1] : chosen;
   };
   const images=selection(index), previous=selection(Math.max(0,index-1));
-  const profile=(scene.props.shot_plan?.profile??'balanced') as keyof typeof PACING;
-  const transition=PACING[profile].transition;
+  const transition=pacingFor(scene).transition;
   const t=clamp((frame-shots[index].frame)/transition,0,1);
   const ease=t*t*(3-2*t),blend=images.join('|')===previous.join('|')?1:ease;
   const weight=(shot:Shot,image:number)=>{

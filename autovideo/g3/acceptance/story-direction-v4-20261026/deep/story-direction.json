@@ -1,0 +1,138 @@
+{
+  "version": 4,
+  "extra_model_calls": 0,
+  "entities": [
+    {
+      "id": "e_52ee814bfe36",
+      "name": "本地方案",
+      "color": "#17784B"
+    },
+    {
+      "id": "e_8d7ca5463e9d",
+      "name": "云端方案",
+      "color": "#557DB2"
+    }
+  ],
+  "scenes": [
+    {
+      "scene_id": "card_1",
+      "component": "title_card",
+      "version": 1,
+      "role": "question",
+      "importance": "normal",
+      "density": "light",
+      "entities": []
+    },
+    {
+      "scene_id": "card_2",
+      "component": "material_collage",
+      "version": 1,
+      "role": "explain",
+      "importance": "normal",
+      "density": "dense",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "image:0",
+            "region:0:0",
+            "region:0:1"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "image:1",
+            "region:1:0"
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": "card_3",
+      "component": "data_chart",
+      "version": 1,
+      "role": "compare",
+      "importance": "key",
+      "density": "dense",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "series:0"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "series:1"
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": "card_4",
+      "component": "scatter_chart",
+      "version": 1,
+      "role": "compare",
+      "importance": "key",
+      "density": "normal",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "point:0"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "point:1"
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": "card_5",
+      "component": "comparison",
+      "version": 1,
+      "role": "recap",
+      "importance": "normal",
+      "density": "normal",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "side:left"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "side:right"
+          ]
+        }
+      ],
+      "recap": [
+        "card_3",
+        "card_4"
+      ]
+    }
+  ]
+}

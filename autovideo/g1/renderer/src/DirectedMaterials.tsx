@@ -1,6 +1,7 @@
 import React from 'react';
 import {Img,staticFile,interpolate} from 'remotion';
-import {cameraAt,carriesPicture,materialAt,PACING,type Rect} from './ShotDirector';
+import {cameraAt,carriesPicture,materialAt,pacingFor,type Rect} from './ShotDirector';
+import {objectColor} from './StoryDirection';
 
 const green='#17784B', ink='#202D28', muted='#69756E';
 const clamp=(value:number)=>Math.max(0,Math.min(1,value));
@@ -22,7 +23,7 @@ function MaterialPage({scene,image,index,frame,width,height,layer}:
   const layout=imageRects(image,index,width,height);
   const camera=cameraAt(scene,frame,layout.rects,{x:0,y:0,width,height},{x:width*.07,y:height*.07});
   const regions=(image.focus?.regions||[]).filter((_:any,j:number)=>camera.shot.targets.includes(`region:${index}:${j}`));
-  const pace=PACING[scene.props.shot_plan.profile as keyof typeof PACING];
+  const pace=pacingFor(scene);
   const draw=camera.shot.kind==='carry'?1:clamp((frame-camera.shot.frame-pace.transition*.7)/18);
   const mask=`${scene.id}_${index}_${layer}_shade`;
   return <div style={{position:'relative',width,height,overflow:'hidden',background:'white',borderRadius:12}}>
@@ -34,11 +35,12 @@ function MaterialPage({scene,image,index,frame,width,height,layer}:
           <rect width={1000} height={1000} fill="#132A23" mask={`url(#${mask})`} opacity={.13*draw}/>
           {regions.map((r:any,j:number)=>{
             const x=r.x1,y=r.y1,w=r.x2-x,h=r.y2-y;
-            const stroke={fill:'none',stroke:'#E48B48',strokeWidth:4,vectorEffect:'non-scaling-stroke' as const,
+            const regionIndex=image.focus.regions.indexOf(r);
+            const stroke={fill:'none',stroke:objectColor(scene,`region:${index}:${regionIndex}`,'#E48B48'),strokeWidth:4,vectorEffect:'non-scaling-stroke' as const,
               pathLength:1,strokeDasharray:1,strokeDashoffset:1-draw,strokeLinecap:'round' as const};
             return r.style==='circle'?<ellipse key={j} {...stroke} cx={x+w/2} cy={y+h/2} rx={w/2} ry={h/2}/>
               :r.style==='underline'?<path key={j} {...stroke} d={`M${x} ${y+h}H${x+w}`}/>
-                :r.style==='highlight'?<rect key={j} x={x} y={y} width={w*draw} height={h} fill="#F5C544" opacity={.25}/>
+                :r.style==='highlight'?<rect key={j} x={x} y={y} width={w*draw} height={h} fill={stroke.stroke} opacity={.25}/>
                   :<rect key={j} {...stroke} x={x} y={y} width={w} height={h} rx={8}/>;
           })}
         </svg>}
@@ -62,7 +64,7 @@ export function DirectedMaterials({scene,frame}:{scene:any;frame:number}) {
       {indices.map((i,slot)=>{
         const outer=pair?1080*weights[slot]:1100,width=outer-22;
         const image=p.images[i],focused=state.shot.targets.some(t=>Number(t.split(':')[1])===i);
-        return <div key={i} style={{width:outer,flex:'none',padding:10,border:`1px solid ${focused?green:'#E1E8E1'}`,borderRadius:18,background:'white',boxSizing:'border-box'}}>
+        return <div key={i} style={{width:outer,flex:'none',padding:10,border:`1px solid ${focused?objectColor(scene,`image:${i}`,green):'#E1E8E1'}`,borderRadius:18,background:'white',boxSizing:'border-box'}}>
           <MaterialPage scene={scene} image={image} index={i} frame={at} width={width} height={height} layer={layer}/>
           {pair&&<div style={{fontSize:24,color:muted,lineHeight:1.35,margin:'12px 8px 3px',height:65,overflow:'hidden'}}>{image.caption||`画面 ${i+1}`}</div>}
         </div>;

@@ -1,0 +1,343 @@
+[
+  {
+    "id": "card_1",
+    "component": "title_card",
+    "start": 0,
+    "end": 347,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 0,
+        "targets": []
+      }
+    ],
+    "story": {
+      "version": 1,
+      "role": "question",
+      "importance": "normal",
+      "density": "light",
+      "entities": []
+    },
+    "pacing": {
+      "overview": 34,
+      "hold": 71,
+      "summary": 38,
+      "transition": 17,
+      "maxZoom": 1.9,
+      "minScene": 210
+    },
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "cut",
+      "paragraph_ids": [
+        "card_1"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "cut",
+      "active": false,
+      "progress": 0,
+      "length": 1
+    }
+  },
+  {
+    "id": "card_2",
+    "component": "material_collage",
+    "start": 347,
+    "end": 769,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 347,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 434,
+        "targets": [
+          "region:0:0",
+          "region:0:1"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 561,
+        "targets": [
+          "region:1:0"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 655,
+        "targets": []
+      }
+    ],
+    "story": {
+      "version": 1,
+      "role": "explain",
+      "importance": "normal",
+      "density": "dense",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "image:0",
+            "region:0:0",
+            "region:0:1"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "image:1",
+            "region:1:0"
+          ]
+        }
+      ]
+    },
+    "pacing": {
+      "overview": 48,
+      "hold": 86,
+      "summary": 54,
+      "transition": 17,
+      "maxZoom": 1.9,
+      "minScene": 210
+    },
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "dissolve",
+      "paragraph_ids": [
+        "card_2"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "dissolve",
+      "active": true,
+      "progress": 0,
+      "length": 17
+    }
+  },
+  {
+    "id": "card_3",
+    "component": "data_chart",
+    "start": 769,
+    "end": 1327,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 769,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 851,
+        "targets": [
+          "series:0",
+          "series:1"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 1230,
+        "targets": []
+      }
+    ],
+    "story": {
+      "version": 1,
+      "role": "compare",
+      "importance": "key",
+      "density": "dense",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "series:0"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "series:1"
+          ]
+        }
+      ]
+    },
+    "pacing": {
+      "overview": 53,
+      "hold": 122,
+      "summary": 62,
+      "transition": 17,
+      "maxZoom": 1.9,
+      "minScene": 210
+    },
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "dissolve",
+      "paragraph_ids": [
+        "card_3"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "dissolve",
+      "active": true,
+      "progress": 0,
+      "length": 17
+    }
+  },
+  {
+    "id": "card_4",
+    "component": "scatter_chart",
+    "start": 1327,
+    "end": 1854,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 1327,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 1450,
+        "targets": [
+          "point:0",
+          "point:1"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 1776,
+        "targets": []
+      }
+    ],
+    "story": {
+      "version": 1,
+      "role": "compare",
+      "importance": "key",
+      "density": "normal",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "point:0"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "point:1"
+          ]
+        }
+      ]
+    },
+    "pacing": {
+      "overview": 53,
+      "hold": 112,
+      "summary": 62,
+      "transition": 17,
+      "maxZoom": 1.9,
+      "minScene": 210
+    },
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "dissolve",
+      "paragraph_ids": [
+        "card_4"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "dissolve",
+      "active": true,
+      "progress": 0,
+      "length": 17
+    }
+  },
+  {
+    "id": "card_5",
+    "component": "comparison",
+    "start": 1854,
+    "end": 2279,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 1854,
+        "targets": []
+      }
+    ],
+    "story": {
+      "version": 1,
+      "role": "recap",
+      "importance": "normal",
+      "density": "normal",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "side:left"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "side:right"
+          ]
+        }
+      ],
+      "recap": [
+        "card_3",
+        "card_4"
+      ]
+    },
+    "pacing": {
+      "overview": 31,
+      "hold": 93,
+      "summary": 78,
+      "transition": 17,
+      "maxZoom": 1.9,
+      "minScene": 210
+    },
+    "flow": {
+      "version": 1,
+      "profile": "explain",
+      "entry": "dissolve",
+      "paragraph_ids": [
+        "card_5"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "dissolve",
+      "active": true,
+      "progress": 0,
+      "length": 17
+    }
+  }
+]

@@ -1,0 +1,274 @@
+[
+  {
+    "id": "card_1",
+    "component": "title_card",
+    "start": 0,
+    "end": 257,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 0,
+        "targets": []
+      }
+    ],
+    "story": {
+      "version": 1,
+      "role": "question",
+      "importance": "normal",
+      "density": "light",
+      "entities": []
+    },
+    "pacing": {
+      "overview": 19,
+      "hold": 40,
+      "summary": 21,
+      "transition": 10,
+      "maxZoom": 1.65,
+      "minScene": 150
+    },
+    "flow": {
+      "version": 1,
+      "profile": "brief",
+      "entry": "cut",
+      "paragraph_ids": [
+        "card_1"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "cut",
+      "active": false,
+      "progress": 0,
+      "length": 1
+    }
+  },
+  {
+    "id": "card_2",
+    "component": "material_collage",
+    "start": 257,
+    "end": 651,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 257,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 284,
+        "targets": [
+          "region:0:0"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 423,
+        "targets": [
+          "region:1:0"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 544,
+        "targets": []
+      }
+    ],
+    "story": {
+      "version": 1,
+      "role": "explain",
+      "importance": "normal",
+      "density": "dense",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "image:0",
+            "region:0:0"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "image:1",
+            "region:1:0"
+          ]
+        }
+      ]
+    },
+    "pacing": {
+      "overview": 27,
+      "hold": 48,
+      "summary": 30,
+      "transition": 10,
+      "maxZoom": 1.65,
+      "minScene": 150
+    },
+    "flow": {
+      "version": 1,
+      "profile": "brief",
+      "entry": "dissolve",
+      "paragraph_ids": [
+        "card_2"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "dissolve",
+      "active": true,
+      "progress": 0,
+      "length": 10
+    }
+  },
+  {
+    "id": "card_3",
+    "component": "scatter_chart",
+    "start": 651,
+    "end": 1127,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 651,
+        "targets": []
+      },
+      {
+        "kind": "focus",
+        "frame": 786,
+        "targets": [
+          "point:0"
+        ]
+      },
+      {
+        "kind": "focus",
+        "frame": 909,
+        "targets": [
+          "point:1",
+          "point:0"
+        ]
+      },
+      {
+        "kind": "summary",
+        "frame": 1040,
+        "targets": []
+      }
+    ],
+    "story": {
+      "version": 1,
+      "role": "compare",
+      "importance": "key",
+      "density": "normal",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "point:0"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "point:1"
+          ]
+        }
+      ]
+    },
+    "pacing": {
+      "overview": 30,
+      "hold": 63,
+      "summary": 35,
+      "transition": 10,
+      "maxZoom": 1.65,
+      "minScene": 150
+    },
+    "flow": {
+      "version": 1,
+      "profile": "brief",
+      "entry": "dissolve",
+      "paragraph_ids": [
+        "card_3"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "dissolve",
+      "active": true,
+      "progress": 0,
+      "length": 10
+    }
+  },
+  {
+    "id": "card_4",
+    "component": "comparison",
+    "start": 1127,
+    "end": 1509,
+    "shots": [
+      {
+        "kind": "overview",
+        "frame": 1127,
+        "targets": []
+      }
+    ],
+    "story": {
+      "version": 1,
+      "role": "recap",
+      "importance": "key",
+      "density": "normal",
+      "entities": [
+        {
+          "id": "e_52ee814bfe36",
+          "name": "本地方案",
+          "color": "#17784B",
+          "targets": [
+            "side:left"
+          ]
+        },
+        {
+          "id": "e_8d7ca5463e9d",
+          "name": "云端方案",
+          "color": "#557DB2",
+          "targets": [
+            "side:right"
+          ]
+        }
+      ],
+      "recap": [
+        "card_2",
+        "card_3"
+      ]
+    },
+    "pacing": {
+      "overview": 18,
+      "hold": 60,
+      "summary": 44,
+      "transition": 10,
+      "maxZoom": 1.65,
+      "minScene": 150
+    },
+    "flow": {
+      "version": 1,
+      "profile": "brief",
+      "entry": "dissolve",
+      "paragraph_ids": [
+        "card_4"
+      ],
+      "part_index": 1,
+      "part_count": 1
+    },
+    "transition": {
+      "entry": "dissolve",
+      "active": true,
+      "progress": 0,
+      "length": 10
+    }
+  }
+]

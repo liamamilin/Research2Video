@@ -1,5 +1,6 @@
 import React from 'react';
 import {interpolate} from 'remotion';
+import {objectColor} from './StoryDirection';
 import {ShotLayer,CameraAxis,cameraAt,type Rect} from './ShotDirector';
 import {init, use} from 'echarts/core';
 import {LineChart, BarChart} from 'echarts/charts';
@@ -15,8 +16,8 @@ type Props = {title: string; kind: 'trend' | 'grouped'; unit: string; categories
 type Layers = {axis: string; series: string[]; focusX: number; positions: ({x:number;y:number}|null)[][]};
 const cache = new Map<string, Layers>();
 
-function layers(p: Props): Layers {
-  const key = JSON.stringify(p);
+function layers(p: Props, colors=palette): Layers {
+  const key = JSON.stringify({p,colors});
   const cached = cache.get(key);
   if (cached) return cached;
   const values = p.series.flatMap(s => s.values).filter((v): v is number => v !== null);
@@ -40,9 +41,9 @@ function layers(p: Props): Layers {
         series: p.series.map((s, i) => ({name: s.name, type: p.kind === 'trend' ? 'line' : 'bar',
           data: s.values.map(v => i === which ? v : null), silent: true, animation: false,
           connectNulls: false, smooth: false, symbol: 'circle', symbolSize: 15, showSymbol: true,
-          lineStyle: {width: 5, color: palette[i]}, itemStyle: {color: palette[i], borderRadius: [7, 7, 0, 0]},
+          lineStyle: {width: 5, color: colors[i]}, itemStyle: {color: colors[i], borderRadius: [7, 7, 0, 0]},
           barMaxWidth: 64, barGap: '25%', barCategoryGap: '40%',
-          label: {show: p.categories.length <= 5, position: 'top', color: palette[i], fontSize: 30, distance: 13}}))});
+          label: {show: p.categories.length <= 5, position: 'top', color: colors[i], fontSize: 30, distance: 13}}))});
       if (which < 0) {
         focusX = Number(chart.convertToPixel({xAxisIndex: 0}, p.focus_index ?? p.categories.length - 1));
         positions = p.series.map(s=>s.values.map((v,i)=>{
@@ -63,7 +64,8 @@ function layers(p: Props): Layers {
 
 export function DataChart({scene, frame}: {scene: any; frame: number}) {
   const p = scene.props as Props;
-  const chart = React.useMemo(() => layers(p), [p]);
+  const colors=p.series.map((_,i)=>objectColor(scene,`series:${i}`,palette[i]));
+  const chart = React.useMemo(() => layers(p,colors), [p,colors.join()]);
   const at = (target: string, fallback: number) => scene.beats.find((b: any) => b.target_id === target)?.frame ?? fallback;
   const start = scene.start_frame, end = scene.end_frame;
   const count = p.kind === 'trend' ? p.categories.length : p.series.length;
@@ -88,7 +90,7 @@ export function DataChart({scene, frame}: {scene: any; frame: number}) {
   const focusLabel=camera.shot.kind==='focus' ? camera.shot.targets.map(t=>t.startsWith('category:')?p.categories[Number(t.split(':')[1])]:p.series[Number(t.split(':')[1])]?.name).filter(Boolean).join(' → ') : '';
   return <div style={{position:'absolute',left:140,top:300,width:W,height:550,background:'#FFFFFF',border:'1px solid #E1E8E1',borderRadius:22,boxSizing:'border-box',overflow:'hidden'}}>
     <div style={{position:'absolute',left:122,top:23,fontSize:26,color:'#69756E'}}>{p.unit}</div>
-    <div style={{position:'absolute',right:70,top:22,display:'flex',gap:35}}>{p.series.map((s,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:12,fontSize:29,color:palette[i],fontWeight:selectedSeries.includes(i)||p.focus_series===i?700:500}}><span style={{width:22,height:7,background:palette[i],borderRadius:4}}/>{s.name}</div>)}</div>
+    <div style={{position:'absolute',right:70,top:22,display:'flex',gap:35}}>{p.series.map((s,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:12,fontSize:29,color:colors[i],fontWeight:selectedSeries.includes(i)||p.focus_series===i?700:500}}><span style={{width:22,height:7,background:colors[i],borderRadius:4}}/>{s.name}</div>)}</div>
     <ShotLayer scene={scene} frame={frame} rects={rects} view={view} width={W} height={H}>
     <CameraAxis sceneId={scene.id} svg={chart.axis} zoom={camera.pose.zoom}/>
     {chart.series.map((svg,i)=> {

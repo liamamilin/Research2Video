@@ -1,5 +1,6 @@
 import React from 'react';
 import {interpolate} from 'remotion';
+import {objectColor} from './StoryDirection';
 import {ShotLayer,CameraAxis,cameraAt,type Rect} from './ShotDirector';
 import {init, use} from 'echarts/core';
 import {ScatterChart as EChartsScatter} from 'echarts/charts';
@@ -57,13 +58,13 @@ function labels(points: Point[], positions: Layout['positions']): Label[] {
   return placed;
 }
 
-export function scatterLayout(p: Props): Layout {
-  const key = JSON.stringify(p);
+export function scatterLayout(p: Props, entityColors:(string|undefined)[]=[]): Layout {
+  const key = JSON.stringify({p,entityColors});
   const cached = cache.get(key);
   if (cached) return cached;
   const [xmin,xmax] = extent(p.points.map(v=>v.x)), [ymin,ymax] = extent(p.points.map(v=>v.y));
   const groups = Array.from(new Set(p.points.map(v=>v.group||'')));
-  const colors = p.points.map(v=>palette[groups.indexOf(v.group||'')%palette.length]);
+  const colors = p.points.map((v,i)=>entityColors[i]??palette[groups.indexOf(v.group||'')%palette.length]);
   let positions: Layout['positions'] = [];
   const draw = (index: number) => {
     const chart = init(null, undefined, {renderer:'svg',ssr:true,width:W,height:H});
@@ -88,7 +89,8 @@ export function scatterLayout(p: Props): Layout {
 
 export function ScatterChart({scene,frame}: {scene:any;frame:number}) {
   const p = scene.props as Props;
-  const layout = React.useMemo(()=>scatterLayout(p),[p]);
+  const colors=p.points.map((_,i)=>objectColor(scene,`point:${i}`,'')||undefined);
+  const layout = React.useMemo(()=>scatterLayout(p,colors),[p,colors.join()]);
   const start=scene.start_frame,end=scene.end_frame,count=p.points.length,steps=p.focus_steps||[];
   const at = (index:number,fallback:number) => scene.beats.find((b:any)=>b.target_id===`line:${index}`)?.frame??fallback;
   const times=p.points.map((_,i)=>at(i,start+(end-start)*(i+.3)/(count+steps.length+1)));
@@ -109,7 +111,8 @@ export function ScatterChart({scene,frame}: {scene:any;frame:number}) {
     const label=layout.labels[i], x=Math.min(pos.x-22,label.x), y=Math.min(pos.y-22,label.y);
     return [`point:${i}`,{x,y,width:Math.max(pos.x+22,label.x+label.width)-x,height:Math.max(pos.y+22,label.y+label.height)-y}];
   }));
-  const view={x:24,y:70,width:W-grid.right-10,height:H-125};
+  // Leave room for the rightmost tick label before the fixed metric cards.
+  const view={x:24,y:70,width:W-grid.right+30,height:H-125};
   const camera=cameraAt(scene,frame,rects,view);
   return <div style={{position:'absolute',left:140,top:270,width:W,height:600,background:'#FFFFFF',border:'1px solid #E1E8E1',borderRadius:22,boxSizing:'border-box',overflow:'hidden',opacity:enter}}>
     <div style={{position:'absolute',left:grid.left,top:20,fontSize:28,color:'#526A60'}}>{unit(p.y_label,p.y_unit)}{p.y_hint&&<span style={{marginLeft:22,fontSize:23,color:'#849288'}}>{p.y_hint}</span>}</div>

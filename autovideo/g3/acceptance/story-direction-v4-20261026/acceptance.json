@@ -1,0 +1,365 @@
+{
+  "baseline_commit": "534c0eade2a2230370265249120bddc6ec4ca434",
+  "repository": "https://github.com/liamamilin/Research2Video",
+  "cases": {
+    "flash": {
+      "job_id": "0d9e4c80-a461-490c-aa0d-3e7da4458e09",
+      "source": "g3/data/story-direction-v4-20261026-flash-ready",
+      "attempts": [
+        {
+          "attempt": 1,
+          "model_calls": 1,
+          "stages": [
+            "c1-explanation"
+          ],
+          "structure_retries": []
+        }
+      ],
+      "polish_model_calls": 0,
+      "polish_tts_calls": 0,
+      "content": {
+        "codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "frames": 1509,
+        "duration_seconds": 50.304,
+        "full_decode": "PASS"
+      },
+      "package": {
+        "full_decode": "PASS",
+        "format": {
+          "width": 1920,
+          "height": 1080,
+          "fps": "30/1",
+          "sample_rate": "48000",
+          "channels": 2,
+          "uniform_across_frames": true
+        },
+        "duration": {
+          "frames": 1584,
+          "seconds": 52.8,
+          "expected_frames": 1584,
+          "expected_seconds": 52.8,
+          "tolerance_seconds": 0.035333333333333335
+        },
+        "content_audio": {
+          "shifted_by_frames": 30,
+          "offset_samples": 24000,
+          "correlation": 0.9999414625491677,
+          "rms": 0.08061579614877701
+        },
+        "seam_loudness": {
+          "speech_active_db": -21.03,
+          "min_margin_db": 3.0,
+          "regions": {
+            "intro": {
+              "active_db": -26.3,
+              "margin_db": 5.27,
+              "peak": 0.1885
+            },
+            "outro": {
+              "active_db": -26.25,
+              "margin_db": 5.22,
+              "peak": 0.1879
+            }
+          }
+        }
+      },
+      "full_decode": {
+        "content.mp4": {
+          "returncode": 0,
+          "stderr": ""
+        },
+        "video.mp4": {
+          "returncode": 0,
+          "stderr": ""
+        }
+      },
+      "frame_count": 24,
+      "palette": {
+        "本地方案": [
+          "e_52ee814bfe36",
+          "#17784B"
+        ],
+        "云端方案": [
+          "e_8d7ca5463e9d",
+          "#557DB2"
+        ]
+      },
+      "recaps": [
+        {
+          "scene": "card_4",
+          "sources": [
+            "card_2",
+            "card_3"
+          ]
+        }
+      ],
+      "roles": [
+        "question",
+        "explain",
+        "compare",
+        "recap"
+      ],
+      "visual_review": [
+        "object colors across scenes",
+        "recap cards and readable takeaways",
+        "graph or chart focus",
+        "final recap and captions"
+      ]
+    },
+    "tutorial": {
+      "job_id": "95077ef1-4563-4ec0-b5a4-570a4e2a7cae",
+      "source": "g3/data/story-direction-v4-20261026-tutorial-final",
+      "attempts": [
+        {
+          "attempt": 1,
+          "model_calls": 1,
+          "stages": [
+            "c1-explanation"
+          ],
+          "structure_retries": []
+        },
+        {
+          "attempt": 2,
+          "model_calls": 1,
+          "stages": [
+            "c1-explanation"
+          ],
+          "structure_retries": []
+        }
+      ],
+      "polish_model_calls": 0,
+      "polish_tts_calls": 0,
+      "content": {
+        "codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "frames": 2101,
+        "duration_seconds": 70.037,
+        "full_decode": "PASS"
+      },
+      "package": {
+        "full_decode": "PASS",
+        "format": {
+          "width": 1920,
+          "height": 1080,
+          "fps": "30/1",
+          "sample_rate": "48000",
+          "channels": 2,
+          "uniform_across_frames": true
+        },
+        "duration": {
+          "frames": 2146,
+          "seconds": 71.533333,
+          "expected_frames": 2146,
+          "expected_seconds": 71.53333333333333,
+          "tolerance_seconds": 0.035333333333333335
+        },
+        "content_audio": {
+          "shifted_by_frames": 0,
+          "offset_samples": 0,
+          "correlation": 0.9999449378909097,
+          "rms": 0.08192268759012222
+        },
+        "seam_loudness": {
+          "speech_active_db": -20.96,
+          "min_margin_db": 3.0,
+          "regions": {}
+        }
+      },
+      "full_decode": {
+        "content.mp4": {
+          "returncode": 0,
+          "stderr": ""
+        },
+        "video.mp4": {
+          "returncode": 0,
+          "stderr": ""
+        }
+      },
+      "frame_count": 30,
+      "palette": {
+        "本地方案": [
+          "e_52ee814bfe36",
+          "#17784B"
+        ],
+        "云端方案": [
+          "e_8d7ca5463e9d",
+          "#557DB2"
+        ],
+        "上传材料": [
+          "e_150b74fc79d0",
+          "#C9813E"
+        ],
+        "结果": [
+          "e_bb7ef73495dd",
+          "#886CAD"
+        ]
+      },
+      "recaps": [
+        {
+          "scene": "card_5",
+          "sources": [
+            "card_3",
+            "card_4"
+          ]
+        }
+      ],
+      "roles": [
+        "question",
+        "compare",
+        "explain",
+        "compare",
+        "recap"
+      ],
+      "visual_review": [
+        "object colors across scenes",
+        "recap cards and readable takeaways",
+        "graph or chart focus",
+        "final recap and captions"
+      ]
+    },
+    "deep": {
+      "job_id": "e29d35f0-0fb8-4c4b-97a2-95ce72344d35",
+      "source": "g3/data/story-direction-v4-20261026-deep-ready",
+      "attempts": [
+        {
+          "attempt": 1,
+          "model_calls": 2,
+          "stages": [
+            "c1-explanation",
+            "c1-explanation"
+          ],
+          "structure_retries": [
+            {
+              "stage": "c1-explanation",
+              "attempt": 1,
+              "error_code": "EXPLANATION_LAYOUT",
+              "error": "EXPLANATION_LAYOUT: Additional properties are not allowed ('title' was unexpected)\n\nFailed validating 'additionalProperties' in schema:\n    {'type': 'object',\n     'additionalProperties': False,\n     'required': ['left', 'right'],\n     'properties': {'left': {'type': 'object',\n                             'additionalProperties': False,\n                             'required': ['label', 'items'],\n                             'properties': {'label': {'type': 'string',\n                                                      'minLength': 1,\n                                                      'maxLength': 40},\n                                            'items': {'type': 'array',\n                                                      'minItems': 1,\n                                                      'maxItems': 4,\n                                                      'items': {'type': 'string',\n                                                                'minLength': 1,\n                                                                'maxLength': 58}}}},\n                    'right': {'type': 'object',\n                              'additionalProperties': False,\n                              'required': ['label', 'items'],\n                              'properties': {'label': {'type': 'string',\n                                                       'minLength': 1,\n                                                       'maxLength': 40},\n                                             'items': {'type': 'array',\n                                                       'minItems': 1,\n                                                       'maxItems': 4,\n                                                       'items': {'type': 'string',\n                                                                 'minLength': 1,\n                                                                 'maxLength': 58}}}},\n                    'highlights': {'type': 'array',\n                                   'minItems': 1,\n                                   'maxItems': 4,\n                                   'items': {'type': 'string',\n                                             'minLength': 1,\n                                             'maxLength': 85}},\n                    'visuals': {'type': 'array',\n                                'maxItems': 8,\n                                'items': {'type': 'object',\n                                          'additionalProperties': False,\n                                          'required': ['target', 'icon'],\n                                          'properties': {'target': {'type': 'string',\n                                                                    'pattern': '^(line:[0-3]|side:(left|right)|node:[a-z][a-z0-9_]{0,47})$'},\n                                                         'icon': {'enum': ['database',\n                                                                           'server',\n                                                                           'file',\n                                                                           'folder',\n                                                                           'search',\n                                                                           'user',\n                                                                           'users',\n                                                                           'clock',\n                                                                           'cost',\n                                                                           'cloud',\n                                                                           'code',\n                                                                           'network',\n                                                                           'chart',\n                                                                           'brain',\n                                                                           'cpu',\n                                                                           'shield',\n                                                                           'globe',\n                                                                           'book',\n                                                                           'leaf',\n                                                                           'atom',\n                                                                           'building',\n                                                                           'settings',\n                                                                           'result']},\n                                                         'action': {'enum': ['none',\n                                                                             'send',\n                                                                             'process',\n                                                                             'complete',\n                                                                             'disconnect']},\n                                                         'phrase': {'type': 'string',\n                                                                    'minLength': 1,\n                                                                    'maxLength': 80}}}}},\n     '$schema': 'https://json-schema.org/draft/2020-12/schema',\n     '$id': 'https://example.local/autovideo/components/comparison.schema.json',\n     'title': 'AutoVideo comparison props v0.2'}\n\nOn instance:\n    {'title': '两张产品页面：同一组栏目',\n     'left': {'label': '本地方案', 'items': ['成本、响应时间、处理流程同页展示']},\n     'right': {'label': '云端方案', 'items': ['成本、响应时间、处理流程同页展示']},\n     'highlights': ['两条产品页面栏目一致', '讲解始终对应这两张页面'],\n     'visuals': [{'target': 'side:left',\n                  'icon': 'server',\n                  'phrase': '本地方案'},\n                 {'target': 'side:right',\n                  'icon': 'cloud',\n                  'phrase': '云端方案'}]}",
+              "retry_limit": 3
+            }
+          ]
+        }
+      ],
+      "polish_model_calls": 0,
+      "polish_tts_calls": 0,
+      "content": {
+        "codec": "h264",
+        "width": 1920,
+        "height": 1080,
+        "fps": "30/1",
+        "frames": 2279,
+        "duration_seconds": 75.968,
+        "full_decode": "PASS"
+      },
+      "package": {
+        "full_decode": "PASS",
+        "format": {
+          "width": 1920,
+          "height": 1080,
+          "fps": "30/1",
+          "sample_rate": "48000",
+          "channels": 2,
+          "uniform_across_frames": true
+        },
+        "duration": {
+          "frames": 2384,
+          "seconds": 79.466667,
+          "expected_frames": 2384,
+          "expected_seconds": 79.46666666666667,
+          "tolerance_seconds": 0.035333333333333335
+        },
+        "content_audio": {
+          "shifted_by_frames": 45,
+          "offset_samples": 36000,
+          "correlation": 0.999942176330574,
+          "rms": 0.0807134211063385
+        },
+        "seam_loudness": {
+          "speech_active_db": -21.07,
+          "min_margin_db": 3.0,
+          "regions": {}
+        }
+      },
+      "full_decode": {
+        "content.mp4": {
+          "returncode": 0,
+          "stderr": ""
+        },
+        "video.mp4": {
+          "returncode": 0,
+          "stderr": ""
+        }
+      },
+      "frame_count": 30,
+      "palette": {
+        "本地方案": [
+          "e_52ee814bfe36",
+          "#17784B"
+        ],
+        "云端方案": [
+          "e_8d7ca5463e9d",
+          "#557DB2"
+        ]
+      },
+      "recaps": [
+        {
+          "scene": "card_5",
+          "sources": [
+            "card_3",
+            "card_4"
+          ]
+        }
+      ],
+      "roles": [
+        "question",
+        "explain",
+        "compare",
+        "compare",
+        "recap"
+      ],
+      "visual_review": [
+        "object colors across scenes",
+        "recap cards and readable takeaways",
+        "graph or chart focus",
+        "final recap and captions"
+      ]
+    }
+  },
+  "formal_service": {
+    "old_pid": 44350,
+    "new_server": {
+      "pid": 10570,
+      "started_at": "2026-10-26T11:28:06.315516+08:00",
+      "base_url": "http://127.0.0.1:8011"
+    },
+    "launch": {
+      "status": "ready",
+      "action": "started",
+      "pid": 10570,
+      "url": "http://127.0.0.1:8011/#new",
+      "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+    },
+    "health": {
+      "status": "ok",
+      "worker_primary": true
+    },
+    "before": {
+      "total": 290,
+      "completed": 213,
+      "running": 0,
+      "needs_input": 1
+    },
+    "after": {
+      "total": 290,
+      "completed": 213,
+      "running": 0,
+      "needs_input": 1
+    },
+    "scope": "Loaded narrative roles, stable visual identities and visual recaps; idle queue, existing jobs preserved"
+  },
+  "validation": "830 full regression tests passed; 1 skipped, frozen manifest coverage test deselected; final identity tests 9 passed; TypeScript and diff checks passed"
+}

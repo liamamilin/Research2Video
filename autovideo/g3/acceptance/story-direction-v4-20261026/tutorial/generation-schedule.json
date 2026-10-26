@@ -1,0 +1,21 @@
+{
+  "mode": "sequential",
+  "content_mode": true,
+  "measured_storyboard": true,
+  "wall_seconds": 97.402,
+  "overlap_seconds": 0,
+  "steps": {
+    "tts-and-align": {
+      "start_seconds": 0.0,
+      "end_seconds": 42.904,
+      "duration_seconds": 42.904,
+      "status": "SUCCEEDED"
+    },
+    "storyboard-plan": {
+      "start_seconds": 42.904,
+      "end_seconds": 97.402,
+      "duration_seconds": 54.498,
+      "status": "SUCCEEDED"
+    }
+  }
+}

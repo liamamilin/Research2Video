@@ -1,0 +1,22 @@
+{
+  "original_job_id": "0d9e4c80-a461-490c-aa0d-3e7da4458e09",
+  "render_run": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-flash-ready/render-run",
+  "new_model_calls": 0,
+  "new_tts_calls": 0,
+  "original_narration_and_audio": true,
+  "components": [
+    "title_card",
+    "material_collage",
+    "scatter_chart",
+    "comparison"
+  ],
+  "media": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 1509,
+    "duration_seconds": 50.304,
+    "full_decode": "PASS"
+  }
+}

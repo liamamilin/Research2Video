@@ -139,8 +139,8 @@ def layout_request(plan: dict) -> dict:
             width = max(210, max(display_width(font, line) for line in lines) + 60)
             height = max(160, len(lines)*46+110) if f"node:{node['id']}" in icon_targets else max(100, len(lines)*46+40)
             nodes.append({"id": node["id"], "width": width, "height": height, "label_lines": lines})
-        edges = [{"id": e["id"], "from": e["from"], "to": e["to"], "label": e["label"],
-                  "label_width": display_width(edge_font, e["label"])+24} for e in scene["edges"]]
+        edges = [{"id": e["id"], "from": e["from"], "to": e["to"], "label": e.get("label", ""),
+                  "label_width": display_width(edge_font, e.get("label", ""))+24} for e in scene["edges"]]
         scenes.append({"id": scene["id"], "nodes": nodes, "edges": edges})
     result = {"scenes": scenes}
     if any(visual_language.enrich('flow_diagram', s).get('visuals') for s in plan['scenes']):
