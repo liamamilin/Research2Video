@@ -319,7 +319,7 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         content_settings = {k: v for k, v in column.production_settings.items() if k != "production_recipe"}
         # Old recipe values are explicit only when no new production reference was selected.
         if not column.production_recipe:
-            content_settings.update({k: request[k] for k in ("video_form", "creative_intent", "packaging", "voice_id") if k in request})
+            content_settings.update({k: request[k] for k in ("video_form", "creative_intent", "packaging", "voice_id", "brand") if k in request})
         else:
             for key in ("creative_intent", "packaging"):
                 if key in content_settings and key in request:
@@ -327,7 +327,7 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         recipe_ref = matrix_settings.get("production_recipe") or column.production_recipe
         if recipe_ref:
             request["production_recipe"] = recipe_ref
-        for key in ("video_form", "creative_intent", "packaging", "voice_id"):
+        for key in ("video_form", "creative_intent", "packaging", "voice_id", "brand"):
             request.pop(key, None)
         request["production_context"] = {"content_recipe": {"id": "research:" + column.key, "settings": content_settings}}
         if matrix_settings:

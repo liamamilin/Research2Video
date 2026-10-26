@@ -261,9 +261,11 @@ class JobStore:
         input_dir.mkdir()
         from g3.creative_images import freeze_images
         from g3.music_assets import freeze as freeze_music
+        from g3.brand_profiles import freeze as freeze_brand
         from g2.creative_library import prepare_request as prepare_resources
         request = prepare_resources(request)
         request = freeze_music(self.data_dir, input_dir, freeze_images(self.data_dir, input_dir, request))
+        request = freeze_brand(self.data_dir, input_dir, request)
         request = prepare_request(request)
         source_text = request["source_text"]
         source_path = input_dir / "source.txt"
@@ -337,7 +339,7 @@ class JobStore:
         keys = ("target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "video_speed")
         options = {key: saved.get(key, job.get(key)) for key in keys}
         options["use_draw_things"] = saved.get("use_draw_things", False)
-        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "visual_storytelling", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved"):
+        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "visual_storytelling", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved", "brand", "brand_resolved"):
             if saved.get(key) is not None:
                 options[key] = saved[key]
         return {"job_id": job_id, "title": job["title"], "source_text": source, "narration_text": narration,
@@ -404,7 +406,7 @@ class JobStore:
             "scene_id": scene_id,
             "prompt_extra": prompt_extra,
         }
-        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "visual_storytelling", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved"):
+        for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "visual_storytelling", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved", "brand", "brand_resolved"):
             if input_payload.get(key) is not None:
                 request[key] = input_payload[key]
         return self.create_job(job_id, request)

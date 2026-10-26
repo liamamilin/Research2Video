@@ -83,6 +83,30 @@ class AutoVideoClient:
     def health(self) -> dict:
         return self._request("GET", "/api/health")
 
+    def brands(self) -> dict:
+        return self._request("GET", "/api/brands")
+
+    def install_demo_brand(self) -> dict:
+        return self._request("POST", "/api/brands/demo/install")
+
+    def brand_request(self, method: str, key: str, body: dict, kind: str = "") -> dict:
+        if not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", key) or kind not in {"", "logo", "sonic"}:
+            raise ValueError("品牌或素材编号无效")
+        path = "/api/brands/" + key + ("/assets/" + kind if kind else "")
+        return self._request(method, path, json=body)
+
+    def brand_asset(self, key: str, kind: str) -> bytes:
+        if not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", key) or kind not in {"logo", "sonic"}:
+            raise ValueError("品牌或素材编号无效")
+        try:
+            with self._client() as client:
+                response = client.get(f"/api/brands/{key}/assets/{kind}")
+        except httpx.TransportError as exc:
+            raise AutoVideoUnreachable("AutoVideo 无响应") from exc
+        if response.status_code >= 400:
+            raise _error_from(response)
+        return response.content
+
     def config_status(self) -> dict:
         return self._request("GET", "/api/config/status")
 

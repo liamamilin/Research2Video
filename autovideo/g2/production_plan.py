@@ -13,7 +13,7 @@ from g2 import creative_library
 
 FIELDS = {
     "video_form", "production_mode", "visual_style", "duration_mode",
-    "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music",
+    "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music", "brand",
 }
 DEFAULTS = {
     "video_form": "knowledge_cards", "production_mode": "standard", "visual_style": "legacy",
@@ -143,6 +143,8 @@ def _binding(request: dict) -> dict:
         fields |= {"visual_storytelling", "slideshow_images", "slideshow_images_resolved", "image_materials"}
     if "background_music" not in request:
         fields = fields - {"background_music"}
+    if "brand" not in request:
+        fields = fields - {"brand"}
     return {key: copy.deepcopy(request.get(key)) for key in sorted(fields)}
 
 
@@ -179,6 +181,11 @@ def verify(request: dict) -> dict:
         raise ProductionPlanError("制作配方与冻结的制作计划不一致")
     if plan.get("music_record_sha256") != (request.get("background_music_resolved") or {}).get("sha256"):
         raise ProductionPlanError("配乐与冻结的制作计划不一致")
+    if plan.get("brand_record_sha256") != (request.get("brand_resolved") or {}).get("sha256"):
+        raise ProductionPlanError("品牌与冻结的制作计划不一致")
+    if request.get("brand_resolved"):
+        from g2.branding import check_record
+        check_record(request["brand_resolved"])
     validate_capability(request)
     return copy.deepcopy(plan)
 
@@ -236,6 +243,10 @@ def prepare_request(request: dict) -> dict:
         plan["music"] = {"mode": "background" if result["background_music"]["enabled"] else "none",
                          "selection": copy.deepcopy(result["background_music"]),
                          "background_music_generated": bool(result["background_music_resolved"].get("music_generated"))}
+    if result.get("brand_resolved") is not None:
+        if not any(key.startswith("brand.") for key in origins):
+            origins.update(_origins(result["brand"], "brand_default"))
+        plan["brand_record_sha256"] = result["brand_resolved"]["sha256"]
     plan["sha256"] = digest(plan)
     result["production_plan"] = plan
     return result

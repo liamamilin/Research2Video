@@ -19,6 +19,10 @@
 **/node_modules/
 /autovideo/.cache/
 /autovideo/state/
+# Installed brand identities, active selections and uploaded assets stay local.
+/autovideo/g3/data/brands/
+# Console captures include local account/path information; publish neutral demo frames only.
+/autovideo/g3/acceptance/brand-demo-20261026/settings*.png
 /AI_research/Base_CodingCLi/config/**/*.lock
 /AI_research/Base_CodingCLi/jobs/**/*.lock
 /AI_research/Base_CodingCLi/jobs/video/

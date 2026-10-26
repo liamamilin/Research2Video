@@ -101,3 +101,7 @@
 - Remotion 授权：https://www.remotion.dev/docs/license/pricing
 
 **提醒：** Remotion 为 source-available/特定许可软件，并非可无条件再授权的通用开源库；上线或团队人数变化时应重新核验条款。
+
+## Video brands
+
+See [BRANDING.md](BRANDING.md) for the reusable corner mark, end card and sonic cue, the neutral Demo installer, and local-only brand profiles. In the research console use 设置 → 视频品牌.

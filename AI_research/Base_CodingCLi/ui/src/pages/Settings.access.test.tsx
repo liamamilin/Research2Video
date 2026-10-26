@@ -28,6 +28,7 @@ function mockFetch() {
     }
     if (path.includes("/api/audit")) return jsonResponse({ entries: [] });
     if (path.includes("/api/users")) return jsonResponse({ users: [] });
+    if (path.includes("/api/video-brands")) return jsonResponse({ active: { enabled: false }, profiles: [] });
     if (path.includes("/api/logs")) return jsonResponse({ lines: [] });
     // The 系统配置 tab renders on mount too, so its two calls have to be shaped
     // correctly or the page throws before the card can be asserted on.
@@ -53,6 +54,18 @@ afterEach(() => {
 });
 
 describe("Settings access card", () => {
+  it("places video branding beside runtime logs and outside system config", async () => {
+    render(<SettingsPage />);
+    await screen.findByDisplayValue("http://127.0.0.1:8765/");
+    expect(screen.queryByRole("region", { name: "视频品牌" })).toBeNull();
+    const logs = screen.getByRole("button", { name: "运行日志" });
+    const brands = screen.getByRole("button", { name: "视频品牌" });
+    expect(logs.nextElementSibling).toBe(brands);
+    fireEvent.click(brands);
+    expect(await screen.findByText("当前默认：未启用")).toBeTruthy();
+    expect(brands.getAttribute("aria-pressed")).toBe("true");
+    expect(screen.queryByRole("button", { name: "保存配置" })).toBeNull();
+  });
   it("keeps both links readable without expanding anything", async () => {
     render(<SettingsPage />);
     // The lookup must not require a click: that was the whole point of the card.

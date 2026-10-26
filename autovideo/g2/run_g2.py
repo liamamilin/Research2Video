@@ -1487,6 +1487,9 @@ if __name__ == "__main__":
             run_step("mix-background-music", lambda: run_music_mix(sys.modules[__name__], saved_music, force=sys.argv[1] == "music-revision"))
         else:
             skip_step("mix-background-music", "本任务未启用背景配乐")
+        if saved_music.get("brand_resolved"):
+            from g2.brand_stage import run as run_brand
+            run_step("brand", lambda: run_brand(sys.modules[__name__], saved_music))
         append_log(COMMANDS_PATH, {"time_utc": datetime.now(timezone.utc).isoformat(), "label": "all",
                     "exit_code": 0, "elapsed_seconds": round(time.monotonic() - started, 3), "status": qa_result["status"]})
         private_renderer = RUN_ROOT / "renderer"
