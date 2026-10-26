@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-26T18:00:23+0800",
+  "checks": [
+    {
+      "legacy_directory": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders",
+      "resolved_directory": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片",
+      "new_file_resolved": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/.storage-check-vbsrsizh.tmp",
+      "external_write": true
+    },
+    {
+      "legacy_directory": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs",
+      "resolved_directory": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs",
+      "new_file_resolved": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/.storage-check-zasp3egp.tmp",
+      "external_write": true
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { AskPage } from "./Ask";
 import { useAuthStore } from "@/lib/auth-store";
@@ -33,6 +33,26 @@ function send(text: string) {
 beforeEach(() => { sessionStorage.clear(); useAuthStore.setState({ user: { username: "admin", role: "admin" } as never }); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 describe("Application assistant", () => {
+  it.each([
+    ['/ask?tasks=1', '/api/assistant/tasks'],
+    ['/ask', '/api/assistant/workspace'],
+  ])('loads %s panel once after initial conversation recovery', async (path, endpoint) => {
+    const base = server();
+    let finish!: () => void;
+    const recovery = new Promise<void>(resolve => { finish = resolve; });
+    const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === '/api/assistant/conversation') await recovery;
+      return base(url, init);
+    });
+    vi.stubGlobal('fetch', fetcher);
+    render(<MemoryRouter initialEntries={[path]}><AskPage /></MemoryRouter>);
+    expect(await screen.findByText('正在恢复工作区…')).toBeTruthy();
+    expect(fetcher.mock.calls.filter(([url]) => url.startsWith(endpoint))).toHaveLength(0);
+    await act(async () => { finish(); });
+    await waitFor(() => expect(screen.getByLabelText('消息')).toHaveProperty('disabled', false));
+    await waitFor(() => expect(fetcher.mock.calls.filter(([url]) => url.startsWith(endpoint))).toHaveLength(1));
+    expect(screen.queryByText('正在恢复工作区…')).toBeNull();
+  });
   it('opens the task center directly from a verified action link', async () => {
     const fetcher = server();
     render(<MemoryRouter initialEntries={['/ask?tasks=1']}><AskPage /></MemoryRouter>);

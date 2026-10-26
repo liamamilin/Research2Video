@@ -136,7 +136,7 @@ def index_missing(output_dir: str, known: set[str] | None = None) -> list[str]:
     return added
 
 
-def full_scan(output_dir: str) -> dict:
+def full_scan(output_dir: str, *, force: bool = True) -> dict:
     """Walk entire output_dir and index all markdown files.
 
     Returns scan stats.
@@ -151,12 +151,23 @@ def full_scan(output_dir: str) -> dict:
         logger.warning("Output directory does not exist: %s", output_dir)
         return {"indexed": 0, "errors": 0, "skipped": 0, "elapsed": 0}
 
+    known = {} if force else index_db.indexed_file_stats()
+
     for root, dirs, files in os.walk(output_path):
         dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
 
         for fn in files:
             full = os.path.join(root, fn)
             rel = os.path.relpath(full, output_path)
+
+            if rel in known and Path(full).resolve().is_relative_to(output_path.resolve()):
+                try:
+                    info = os.stat(full)
+                    if (info.st_mtime, info.st_size) == known[rel]:
+                        indexed += 1
+                        continue
+                except OSError:
+                    pass
 
             if index_file(output_dir, rel):
                 indexed += 1

@@ -74,7 +74,7 @@ def query(a, request, user):
     if a.action == 'board':
         return video.home_board(user=user)
     if a.action == 'cells':
-        return video.list_cells(user=user)
+        return {'cells': video.list_cells(user=user)}
     if a.action == 'quality':
         return video.draft_quality(user=user)
     if a.action == 'references':

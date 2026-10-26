@@ -1,32 +1,36 @@
-import type { ReactElement } from "react";
+import { lazy, Suspense, type ReactElement } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { AuthProvider } from "@/components/AuthProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Layout } from "@/components/Layout";
 import { LoginPage } from "@/pages/Login";
-import { DashboardPage } from "@/pages/Dashboard";
-import { HomeBoardPage } from "@/pages/HomeBoard";
-import { TopicsPage } from "@/pages/Topics";
-import { PublishQueuePage } from "@/pages/PublishQueue";
-import { JobsListPage } from "@/pages/JobsList";
-import { JobDetailPage } from "@/pages/JobDetail";
-import { ReportsPage } from "@/pages/Reports";
-import { ReportViewPage } from "@/pages/ReportView";
-import { SettingsPage } from "@/pages/Settings";
-import { SchedulerPage } from "@/pages/Scheduler";
-import { RoundsPage } from "@/pages/Rounds";
-import { AskPage } from "@/pages/Ask";
-import { ShareViewPage } from "@/pages/ShareView";
-import { VideoScriptsPage } from "@/pages/VideoScripts";
-import { VideoScriptViewPage } from "@/pages/VideoScriptView";
-import { VideoRecipesPage } from "@/pages/VideoRecipes";
-import { MatricesPage, MatrixDetailPage, MatrixJobVideoPage } from "@/pages/Matrices";
-import { SourcesPage } from "@/pages/Sources";
-import { OutputsPage } from "@/pages/Outputs";
-import { PlatformsPage } from "@/pages/Platforms";
 import { useAuthStore } from "@/lib/auth-store";
 import { ToastProvider } from "@/lib/toast";
+import { PageLoading } from "@/components/PageLoading";
+
+const DashboardPage = lazy(() => import("@/pages/Dashboard").then(m => ({ default: m.DashboardPage })));
+const HomeBoardPage = lazy(() => import("@/pages/HomeBoard").then(m => ({ default: m.HomeBoardPage })));
+const TopicsPage = lazy(() => import("@/pages/Topics").then(m => ({ default: m.TopicsPage })));
+const PublishQueuePage = lazy(() => import("@/pages/PublishQueue").then(m => ({ default: m.PublishQueuePage })));
+const JobsListPage = lazy(() => import("@/pages/JobsList").then(m => ({ default: m.JobsListPage })));
+const JobDetailPage = lazy(() => import("@/pages/JobDetail").then(m => ({ default: m.JobDetailPage })));
+const ReportsPage = lazy(() => import("@/pages/Reports").then(m => ({ default: m.ReportsPage })));
+const ReportViewPage = lazy(() => import("@/pages/ReportView").then(m => ({ default: m.ReportViewPage })));
+const SettingsPage = lazy(() => import("@/pages/Settings").then(m => ({ default: m.SettingsPage })));
+const SchedulerPage = lazy(() => import("@/pages/Scheduler").then(m => ({ default: m.SchedulerPage })));
+const RoundsPage = lazy(() => import("@/pages/Rounds").then(m => ({ default: m.RoundsPage })));
+const AskPage = lazy(() => import("@/pages/Ask").then(m => ({ default: m.AskPage })));
+const ShareViewPage = lazy(() => import("@/pages/ShareView").then(m => ({ default: m.ShareViewPage })));
+const VideoScriptsPage = lazy(() => import("@/pages/VideoScripts").then(m => ({ default: m.VideoScriptsPage })));
+const VideoScriptViewPage = lazy(() => import("@/pages/VideoScriptView").then(m => ({ default: m.VideoScriptViewPage })));
+const VideoRecipesPage = lazy(() => import("@/pages/VideoRecipes").then(m => ({ default: m.VideoRecipesPage })));
+const MatricesPage = lazy(() => import("@/pages/Matrices").then(m => ({ default: m.MatricesPage })));
+const MatrixDetailPage = lazy(() => import("@/pages/Matrices").then(m => ({ default: m.MatrixDetailPage })));
+const MatrixJobVideoPage = lazy(() => import("@/pages/Matrices").then(m => ({ default: m.MatrixJobVideoPage })));
+const SourcesPage = lazy(() => import("@/pages/Sources").then(m => ({ default: m.SourcesPage })));
+const OutputsPage = lazy(() => import("@/pages/Outputs").then(m => ({ default: m.OutputsPage })));
+const PlatformsPage = lazy(() => import("@/pages/Platforms").then(m => ({ default: m.PlatformsPage })));
 
 /** Blocks deep links to admin-only pages instead of letting every action 403. */
 export function AdminOnly({ children }: { children: ReactElement }) {
@@ -103,7 +107,7 @@ export default function App() {
       <ErrorBoundary>
         <ToastProvider>
           <AuthProvider>
-            <AppRoutes />
+            <Suspense fallback={<PageLoading />}><AppRoutes /></Suspense>
           </AuthProvider>
         </ToastProvider>
       </ErrorBoundary>

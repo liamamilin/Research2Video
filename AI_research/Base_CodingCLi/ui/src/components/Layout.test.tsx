@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { lazy } from "react";
 
 import { Layout } from "./Layout";
 import { useAppStore } from "@/lib/app-store";
@@ -52,6 +53,16 @@ afterEach(() => {
 });
 
 describe("Layout sidebar", () => {
+  it("keeps navigation available while the next page module loads", () => {
+    stubMatchMedia(true);
+    const PendingPage = lazy(() => new Promise<{ default: () => null }>(() => {}));
+    render(<MemoryRouter><Routes><Route element={<Layout />}>
+      <Route index element={<PendingPage />} />
+    </Route></Routes></MemoryRouter>);
+    expect(screen.getByRole("status").textContent).toBe("正在加载页面…");
+    expect(screen.getByRole("link", { name: "矩阵" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "让助手处理当前页面" })).toBeTruthy();
+  });
   it("starts a different page at the top while keeping the scroll position for same-page filters", () => {
     stubMatchMedia(true);
     const { container } = renderLayout();

@@ -12,6 +12,8 @@ import struct
 from typing import Iterator
 from uuid import UUID
 
+from g3.file_integrity import artifact_digest
+
 
 STAGES = ("PLAN", "VOICE_ALIGN", "STORYBOARD", "SCENE_IMAGES", "BUILD_IR", "RENDER", "QUALITY_CHECK", "PACKAGE", "AUDIO_MIX")
 TERMINAL_STATES = {"COMPLETED", "FAILED", "CANCELLED"}
@@ -62,7 +64,8 @@ class JobStore:
 
     def initialize(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        self.job_root.mkdir(parents=True, exist_ok=True)
+        if not self.job_root.is_symlink():
+            self.job_root.mkdir(parents=True, exist_ok=True)
         conn = self._connect()
         try:
             conn.execute("PRAGMA journal_mode=WAL")
@@ -168,6 +171,15 @@ class JobStore:
             conn.execute("UPDATE jobs SET input_analysis_json=?,updated_at=?,version=version+1 WHERE job_id=? AND attempt_count=? AND status='RUNNING'",
                          (json.dumps(compact, ensure_ascii=False), utc_now(), job_id, attempt_no))
 
+    def _require_storage(self) -> None:
+        if (self.data_dir / ".storage-migration").exists():
+            raise StoreError("STORAGE_MIGRATING", "正在切换视频输出目录，请稍后重试")
+        parts = self.job_root.resolve().parts
+        if len(parts) >= 3 and parts[1] == "Volumes" and not os.path.ismount(Path(*parts[:3])):
+            raise StoreError("STORAGE_OFFLINE", "视频输出硬盘未连接，请连接后重试")
+        if self.job_root.is_symlink() and not self.job_root.is_dir():
+            raise StoreError("STORAGE_OFFLINE", "视频输出目录不可用，请连接硬盘后重试")
+
     def create_job(self, job_id: str, request: dict, *, input_document: dict | None = None) -> dict:
         UUID(job_id)
         key = request.get("idempotency_key")
@@ -181,6 +193,7 @@ class JobStore:
                 existing = self._submission(conn, key, fingerprint, self._compatible_request_digests(request))
                 if existing:
                     return self.get_job(existing)
+                self._require_storage()
                 job_dir.mkdir(exist_ok=False)
                 created = True
                 self._create_job(conn, job_id, request, input_document=input_document)
@@ -420,6 +433,10 @@ class JobStore:
 
     def claim_next(self) -> dict | None:
         with self._transaction() as conn:
+            try:
+                self._require_storage()
+            except StoreError:
+                return None
             row = conn.execute("SELECT * FROM jobs WHERE status='QUEUED' ORDER BY created_at,job_id LIMIT 1").fetchone()
             if row is None:
                 return None
@@ -743,8 +760,7 @@ class JobStore:
             path = candidate.resolve(strict=True)
             if not path.is_relative_to(workspace) or not path.is_file():
                 raise StoreError("INVALID_ARTIFACT_PATH", "artifact path is outside the job attempt workspace")
-            raw = path.read_bytes()
-            if sha256_bytes(raw) != item["sha256"]:
+            if artifact_digest(path) != item["sha256"]:
                 raise StoreError("ARTIFACT_HASH_MISMATCH", "artifact integrity check failed")
             return path, dict(item)
         finally:

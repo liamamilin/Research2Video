@@ -27,6 +27,7 @@ from web.models import ApiError
 from web.ratelimit import RateLimitMiddleware
 from web.routes.jobs import router as jobs_router
 from web.routes.reports import router as reports_router
+from web.routes.video_storage import router as video_storage_router
 from web.routes.config import router as config_router
 from web.routes.users import router as users_router
 from web.routes.logs import router as logs_router
@@ -121,7 +122,7 @@ async def lifespan(app: FastAPI):
         # Tokenizer migration: the FTS table was recreated, so the documents
         # must be re-read before search works again.
         logger.warning("Full-text index rebuilt; rescanning reports...")
-    scan_result = full_scan(settings.paths.output_dir)
+    scan_result = full_scan(settings.paths.output_dir, force=bool(init_result.get("fts_rebuilt")))
     if scan_result["indexed"] > 0:
         logger.info("Indexed %d reports from %s", scan_result["indexed"], settings.paths.output_dir)
     elif scan_result["indexed"] == 0:
@@ -147,6 +148,8 @@ async def lifespan(app: FastAPI):
     from web.services import distributions
     distributions.migrate_confirmed_accounts()
     recover_video_work()
+    from web.services import video_storage
+    video_storage.resume()
 
     # Startup alone misses work cut off less than STALE_AFTER_SECONDS before
     # this instance started (the gateway revives the app on the next request,
@@ -158,6 +161,8 @@ async def lifespan(app: FastAPI):
         while not sweep_stop.wait(video_store.HEARTBEAT_SECONDS * 3):
             try:
                 recover_video_work()
+                from web.services import video_storage
+                video_storage.resume()
             except Exception:  # noqa: BLE001 - the sweep must outlive one bad pass
                 logger.exception("video recovery sweep failed")
 
@@ -169,7 +174,9 @@ async def lifespan(app: FastAPI):
     def autopilot_loop() -> None:
         while not sweep_stop.wait(30):
             try:
-                video_autopilot.tick()
+                from web.services import video_storage
+                if not video_storage.migration_pending():
+                    video_autopilot.tick()
             except Exception:  # noqa: BLE001 - one bad tick must not stop the loop
                 logger.exception("video autopilot tick failed")
 
@@ -293,21 +300,18 @@ def create_app() -> FastAPI:
         try:
             path = request.url.path
             if (request.cookies.get("ai_research_access")
+                    and not request.scope.get("console_internal_request")
                     and not path.startswith(("/assets", "/api/health", "/api/live"))
                     and path not in ("/favicon.ico", "/")):
                 from core import activity
 
-                def mark_activity() -> None:
-                    try:
-                        activity.use_state_dir(settings.paths.state_dir)
-                        activity.mark_activity()
-                    except Exception:  # noqa: BLE001 - bookkeeping must not fail a completed response
-                        pass
+                async def queue_activity() -> None:
+                    activity.mark_activity_background(settings.paths.state_dir)
 
                 background = BackgroundTasks()
                 if response.background is not None:
                     background.add_task(response.background)
-                background.add_task(mark_activity)
+                background.add_task(queue_activity)
                 response.background = background
         except Exception:  # noqa: BLE001 - telemetry must not affect responses
             pass
@@ -392,6 +396,7 @@ def create_app() -> FastAPI:
     app.include_router(jobs_router)
     app.include_router(reports_router)
     app.include_router(config_router)
+    app.include_router(video_storage_router)
     app.include_router(users_router)
     app.include_router(logs_router)
     app.include_router(scheduler_router)

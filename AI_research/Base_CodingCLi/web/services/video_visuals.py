@@ -23,8 +23,19 @@ def _with_materials(payload: dict, materials: list[dict]) -> dict:
 
 
 def acquire(need: dict, url: str, policy: dict, *, remaining: float) -> tuple[bytes, dict]:
-    from web.services.video_visual_acquire import acquire as acquire_region
-    return acquire_region(need, url, policy, remaining=remaining)
+    from core.video.capture_process import run
+    from web.settings import get_settings
+
+    def checkpoint(progress: dict) -> None:
+        policy["_model_calls"] = max(policy.get("_model_calls", 0), progress.get("model_calls", 0))
+        if callable(policy.get("_on_model_call")):
+            policy["_on_model_call"]()
+
+    return run("automatic", {
+        "need": need, "url": url, "remaining": remaining,
+        "policy": {key: value for key, value in policy.items() if key != "_on_model_call"},
+        "config_path": get_settings().source_path,
+    }, timeout_seconds=min(60, remaining), on_progress=checkpoint)
 
 
 def prepare(render: dict, client) -> tuple[dict, dict]:

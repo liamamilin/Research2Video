@@ -323,3 +323,31 @@ def test_downloading_from_a_job_whose_folder_was_archived_says_so_instead_of_fai
     with pytest.raises(StoreError) as caught:
         store.artifact_path(job_id, "video.mp4")
     assert caught.value.code == "ARTIFACT_ARCHIVED"
+
+
+def test_storage_migration_pauses_new_submissions_and_claims_without_losing_queue(tmp_path):
+    store = make_store(tmp_path)
+    queued = new_job(store)
+    marker = store.data_dir / '.storage-migration'
+    marker.touch()
+    with pytest.raises(StoreError) as caught:
+        new_job(store)
+    assert caught.value.code == 'STORAGE_MIGRATING'
+    assert store.claim_next() is None
+    assert store.get_job(queued)['status'] == 'QUEUED'
+    marker.unlink()
+    assert store.claim_next()['job_id'] == queued
+
+
+def test_unplugged_output_disk_never_creates_folders_on_internal_disk(tmp_path, monkeypatch):
+    store = make_store(tmp_path)
+    import shutil
+    shutil.rmtree(store.job_root)
+    store.job_root.symlink_to('/Volumes/unplugged-video-disk-TEST/jobs', target_is_directory=True)
+    monkeypatch.setattr('g3.store.os.path.ismount', lambda path: False)
+    store.initialize()  # history and API stay available while the disk is offline
+    with pytest.raises(StoreError) as caught:
+        new_job(store)
+    assert caught.value.code == 'STORAGE_OFFLINE'
+    assert store.claim_next() is None
+    assert not Path('/Volumes/unplugged-video-disk-TEST').exists()

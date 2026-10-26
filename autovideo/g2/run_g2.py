@@ -26,6 +26,7 @@ if str(PROJECT) not in sys.path:
     sys.path.insert(0, str(PROJECT))
 from g2 import llm_provider
 from g2.draw_things import generate_scene_backgrounds, regenerate_scene_background
+from g2.workspace import project_path
 
 #: The model service for every planning call: DeepSeek unless ``.env`` says otherwise (g2/llm_provider.py).
 PROVIDER = llm_provider.load(PROJECT / ".env")
@@ -96,9 +97,7 @@ MAX_PROJECTED_API_COST_USD = MAX_TOTAL_CALLS * (
 LLM_TIMEOUT_SECONDS = 240
 HTTP_RETRY_DELAYS = (2, 4)
 RETRYABLE_HTTP_STATUSES = {500, 502, 503, 504, 520, 521, 522, 523, 524}
-PROJECT_INPUT = Path(os.environ.get("AUTOVIDEO_G2_SOURCE_FILE", ROOT / "fixtures/case-a/source.txt")).expanduser().resolve()
-if not PROJECT_INPUT.is_relative_to(PROJECT):
-    raise RuntimeError("G2 source file must remain inside the project workspace")
+PROJECT_INPUT = project_path(PROJECT, Path(os.environ.get("AUTOVIDEO_G2_SOURCE_FILE", ROOT / "fixtures/case-a/source.txt")))
 NARRATION_SCHEMA_PATH = ROOT / "schemas/narration-plan.schema.json"
 STORYBOARD_SCHEMA_PATH = ROOT / "schemas/storyboard-plan.schema.json"
 REGISTRY_PATH = PROJECT / "schemas/component-registry-v0.2.json"
@@ -118,9 +117,7 @@ KOKORO_VOICES = PROJECT / "g0/assets/voices-v1.0.bin"
 RUN_ID = os.environ.get("AUTOVIDEO_G2_RUN_ID") or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 if not re.fullmatch(r"[A-Za-z0-9_-]{1,96}", RUN_ID):
     raise RuntimeError("AUTOVIDEO_G2_RUN_ID contains unsupported characters")
-RUN_ROOT = Path(os.environ.get("AUTOVIDEO_G2_RUN_DIR", ROOT / "runs" / RUN_ID)).expanduser().resolve()
-if not RUN_ROOT.is_relative_to(PROJECT):
-    raise RuntimeError("G2 run directory must remain inside the project workspace")
+RUN_ROOT = project_path(PROJECT, Path(os.environ.get("AUTOVIDEO_G2_RUN_DIR", ROOT / "runs" / RUN_ID)))
 FIXTURE_ROOT = RUN_ROOT / "fixtures"
 ASSETS = FIXTURE_ROOT / "assets"
 SEGMENTS_DIR = ASSETS / "segments"
@@ -143,8 +140,12 @@ def creative_messages(messages: list[dict]) -> list[dict]:
     if not path:
         return messages
     candidate = Path(path)
-    if candidate.is_symlink() or not candidate.resolve().is_relative_to(PROJECT):
+    if candidate.is_symlink():
         raise G2Fault("INVALID_INTENT_FILE", "创作偏好路径无效")
+    try:
+        candidate = project_path(PROJECT, candidate)
+    except ValueError as exc:
+        raise G2Fault("INVALID_INTENT_FILE", "创作偏好路径无效") from exc
     intent = json.loads(candidate.read_text()).get("creative_intent", {})
     intent = {k: v for k, v in intent.items() if k in {"audience", "purpose", "tone", "focus"} and isinstance(v, str) and v.strip()}
     if not intent:
@@ -456,14 +457,17 @@ def reuse_validated_plan(stage: str, source_builder, validator, context) -> dict
     previous_env = os.environ.get("AUTOVIDEO_G2_PREVIOUS_RUN_DIR")
     if not CONTENT_MODE or not previous_env:
         return None
-    previous = Path(previous_env).resolve()
-    if (not previous.is_relative_to(PROJECT) or previous.parent.parent != RUN_ROOT.parent.parent
+    try:
+        previous = project_path(PROJECT, Path(previous_env))
+    except ValueError:
+        return None
+    if (previous.parent.parent != RUN_ROOT.parent.parent
             or previous == RUN_ROOT):
         return None
     plan_path = previous / "artifacts" / f"{stage}-plan.json"
     request_path = previous / "artifacts/llm_calls" / f"{stage}-attempt-1.request.json"
     for path in (plan_path, request_path):
-        if not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(previous):
+        if not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(previous.resolve()):
             return None
     try:
         request = json.loads(request_path.read_text())

@@ -64,7 +64,7 @@ async def object_view(context: dict, request: Request, load_video=None) -> dict:
                         detail='固定范围，逐项接续；结果未知的提交不会自动重放。')
             item['tasks'] = [{'id': i['id'], 'title': i['title'], 'status': i['state'], 'error': i['error']} for i in data['items']]
         elif kind == 'matrix':
-            _, data = await native(request, 'GET', '/api/matrices/' + encoded)
+            _, data = await native(request, 'GET', '/api/matrices/' + encoded, query={'reports': False})
             item.update(title=data.get('name') or key, status='矩阵', detail='共用设置由未单独覆盖的任务继承')
             item['members'] = [{'job': m['job'], 'name': m['name'], 'enabled': m.get('enabled', False),
                                 'schedule': m.get('schedule'), 'href': href('job', m['job'])} for m in data.get('members', [])]
@@ -102,14 +102,16 @@ async def object_view(context: dict, request: Request, load_video=None) -> dict:
 
 
 async def workspace(request: Request, user: dict, conversation_id: str, context: dict | None = None, explicit: bool = False) -> dict:
-    storage = AssistantStore()
-    conversation = storage.conversation(user, conversation_id)
-    operations = storage.operations(user, conversation['id'])
+    def read():
+        storage = AssistantStore()
+        conversation = storage.conversation(user, conversation_id)
+        return conversation, storage.operations(user, conversation['id'])
+    conversation, operations = await asyncio.to_thread(read)
     return await project(request, user, conversation, operations, context, explicit=explicit)
 
 
 async def task_center(request: Request, user: dict, limit: int = 20) -> dict:
-    data = AssistantStore().recent_work(user, limit)
+    data = await asyncio.to_thread(lambda: AssistantStore().recent_work(user, limit))
     result = await project(request, user, {'id': None, 'requests': data['records'], 'refs': [], 'context': None},
                            data['operations'], card_limit=limit)
     return {'tasks': result['tasks'], 'active': result['active'], 'total': data['total'], 'limit': limit}
@@ -132,6 +134,15 @@ async def project(request: Request, user: dict, conversation: dict, operations: 
     recovered = recovered_operations(operations)
     reads = {}
     publication_reads = {}
+    publication_catalogs = {}
+    publication_ids = {}
+    for operation in operations:
+        result = operation.get('result') or {}
+        targets = [(target['platform'], target['id']) for target in result.get('publication_tasks', [])]
+        targets.extend(tuple(ref['id'].split(':', 1)) for ref in result.get('references', [])
+                       if ref.get('type') == 'upload' and ':' in ref['id'])
+        for platform, key in targets:
+            publication_ids.setdefault(platform, set()).add(key)
     research_reads = {}
     manual_reads = {}
 
@@ -152,10 +163,25 @@ async def project(request: Request, user: dict, conversation: dict, operations: 
         return await research_reads[key]
 
     async def load_publication(target):
-        from web.services.assistant_management import publication_task_view
+        from web.services.assistant_management import platform_path, publication_task_view
         key = (target['platform'], target['id'])
         if key not in publication_reads:
-            publication_reads[key] = asyncio.create_task(publication_task_view(target, request))
+            async def load():
+                platform = target['platform']
+                if len(publication_ids.get(platform, ())) < 2:
+                    return await publication_task_view(target, request)
+                try:
+                    if platform not in publication_catalogs:
+                        publication_catalogs[platform] = asyncio.create_task(native(request, 'GET', platform_path(platform)))
+                    _, catalog = await publication_catalogs[platform]
+                    row = next((item for item in catalog.get('uploads', []) if item['id'] == target['id']), None)
+                except (HTTPException, ValueError):
+                    row = None
+                # Old Bilibili receipts can fall outside its bounded overview.
+                # Preserve the native single-task lookup for missing entries.
+                return await publication_task_view(target, request, row=row)
+
+            publication_reads[key] = asyncio.create_task(load())
         return await publication_reads[key]
 
     async def load_video(key):

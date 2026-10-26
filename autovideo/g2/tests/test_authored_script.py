@@ -19,6 +19,17 @@ def test_long_paragraphs_are_caption_sized_without_clipping():
     with pytest.raises(ValueError):split_script(" \n ")
 
 
+@pytest.mark.parametrize("text, expected", [
+    ('他说：“先说目标。”再说步骤。', ['他说：“先说目标。”', '再说步骤。']),
+    ('题目是「完成了吗？」', ['题目是「完成了吗？」']),
+    ('结束了！？”下一句。', ['结束了！？”', '下一句。']),
+    ('先说明目标。\n“继续处理。”', ['先说明目标。', '“继续处理。”']),
+])
+def test_closing_punctuation_is_not_a_separate_voice_segment(text, expected):
+    assert split_script(text) == expected
+    assert ''.join(split_script(text)) == re.sub(r'\s', '', text)
+
+
 def test_custom_optional_intent_is_forwarded_and_empty_intent_does_not_change_messages(tmp_path,monkeypatch):
     source=[{"role":"system","content":"规则"},{"role":"user","content":"素材"}]
     monkeypatch.setattr(pipeline,"PROJECT",tmp_path)

@@ -71,7 +71,13 @@ def offline_mounts() -> list[str]:
     disk's path, and a program that creates folders along the way would quietly write the videos to the laptop
     under /Volumes. So a render is not started while a disk it needs is missing.
     """
-    return [str(m) for m in _video_config().get("require_mounts") or [] if not os.path.ismount(str(m))]
+    required = list(_video_config().get("require_mounts") or [])
+    from web.services.video_storage import paths, volume
+    for folder in (paths()[0] / "video_renders", paths()[1] / "jobs"):
+        mount = volume(folder)
+        if mount and str(mount) not in required:
+            required.append(str(mount))
+    return [str(m) for m in required if not os.path.ismount(str(m))]
 
 
 def get_client() -> AutoVideoClient:
@@ -504,6 +510,11 @@ def _advance(render_id: str, client: AutoVideoClient) -> str:
 
 def _submit(render: dict, client: AutoVideoClient) -> Optional[str]:
     timer = time.monotonic()
+    from web.services.video_storage import unavailable_reason
+    reason = unavailable_reason()
+    if reason:
+        _fail(render["id"], "STORAGE_UNAVAILABLE", reason)
+        return None
     offline = offline_mounts()
     if offline:
         _fail(render["id"], "DISK_OFFLINE", f"外接盘没有挂载：{'、'.join(offline)}。接上后再重试，这次没有出片")

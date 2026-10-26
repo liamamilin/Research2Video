@@ -77,13 +77,20 @@ async function tryRefresh(): Promise<RefreshResult> {
   if (_refreshing) return _refreshing;
   _refreshing = (async () => {
     try {
-      const csrf = getCookie("ai_research_csrf");
-      const { resp } = await request("/api/auth/refresh", {
-        method: "POST",
-        credentials: "include",
-        headers: csrf ? { "X-CSRF-Token": csrf } : undefined,
-      }, 10_000);
-      return resp.ok ? "ok" : [401, 403].includes(resp.status) ? "expired" : "unavailable";
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const csrf = getCookie("ai_research_csrf");
+        const { resp } = await request("/api/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+          headers: csrf ? { "X-CSRF-Token": csrf } : undefined,
+        }, 10_000);
+        if (resp.ok) return "ok";
+        if (resp.status === 401) return "expired";
+        // Another tab can rotate CSRF after we build these headers. Read the
+        // current cookie once more; a rejected CSRF check does not revoke login.
+        if (resp.status !== 403) return "unavailable";
+      }
+      return "unavailable";
     } catch {
       return "unavailable";
     } finally {

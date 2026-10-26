@@ -138,13 +138,16 @@ async def native(request: Request, method: str, path: str, *, query: dict | None
     headers = {k: request.headers[k] for k in ('cookie', 'authorization', 'x-csrf-token') if k in request.headers}
     async def authenticated_app(scope, receive, send):
         deps.inherit_background(request.scope, scope)
+        scope['console_internal_request'] = True
         await request.app(scope, receive, send)
     transport = httpx.ASGITransport(app=authenticated_app, client=(request.client.host if request.client else '127.0.0.1', 0))
     async with httpx.AsyncClient(transport=transport, base_url='http://assistant.local', headers=headers, timeout=30) as client:
         response = await client.request(method, path, params=query, json=body)
     if 'application/json' not in response.headers.get('content-type', ''):
         raise ValueError('此操作的结果需在原页面查看')
-    data = redact(response.json())
+    # Large platform receipts must not stop unrelated pages on the event loop.
+    import asyncio
+    data = await asyncio.to_thread(lambda: redact(response.json()))
     if response.is_error:
         raise HTTPException(response.status_code, data.get('detail', data))
     return response.status_code, data

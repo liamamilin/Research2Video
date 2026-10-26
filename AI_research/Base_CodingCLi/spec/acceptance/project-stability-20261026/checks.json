@@ -1,0 +1,25 @@
+{
+  "engine": [
+    "865 passed, 1 skipped, 1 deselected in 42.49s"
+  ],
+  "research_initial": [
+    "21 failed, 3175 passed, 3 skipped, 52 warnings, 8 errors in 341.73s (0:05:41)"
+  ],
+  "research_ports": [
+    "59 passed, 2 skipped in 39.01s"
+  ],
+  "ui": [
+    "stderr | src/pages/Outputs.test.tsx > Outputs > retries failed reads, then preserves the result if a later refresh fails",
+    " Test Files  76 passed (76)",
+    "      Tests  582 passed (582)"
+  ],
+  "config": [
+    "✓ All checks passed."
+  ],
+  "staged_frontend": {
+    "tests_passed": 573,
+    "lint": "PASS",
+    "build": "PASS",
+    "scope": "Commit snapshot excluding independent assistant overview changes; original workspace frontend result remains 582 passed."
+  }
+}

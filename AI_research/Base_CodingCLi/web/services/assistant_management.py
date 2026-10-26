@@ -293,12 +293,13 @@ def publishing_change(a, request, user):
             'remaining_render_ids': [e.render_id for e in entries[len(receipts) + len(failures):] if e]}
 
 
-async def publication_task_view(target: dict, request) -> dict:
+async def publication_task_view(target: dict, request, *, row: dict | None = None) -> dict:
     from web.services.publication_state import describe
     platform, key = target['platform'], target['id']
     item = {**target, 'href': platform_href(platform), 'active': False, 'state': 'waiting'}
     try:
-        _, row = await application.native(request, 'GET', platform_path(platform) + '/uploads/' + quote(key, safe=''))
+        if row is None:
+            _, row = await application.native(request, 'GET', platform_path(platform) + '/uploads/' + quote(key, safe=''))
         status = row.get('status', '')
         owner = row.get('uid') or row.get('account_uid') or target.get('account_uid') or ''
         profile = account(platform)

@@ -1,5 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { Link, Outlet, useLocation, useNavigationType } from "react-router-dom";
+import { PageLoading } from "./PageLoading";
 import { AssistantDrawer } from "./AssistantDrawer";
 import { Sidebar } from "./Sidebar";
 import { useAppStore } from "@/lib/app-store";
@@ -71,7 +72,7 @@ export function Layout() {
           <Link className="text-accent font-medium hover:underline" to={`/video/${encodeURIComponent(from)}?tab=draft`}>← 返回文稿，继续迭代</Link>
           <span className="text-text-muted">保存配置后回到文稿重新生成，已有结果会保留。</span>
         </div> : null}
-        <Outlet />
+        <Suspense fallback={<PageLoading />}><Outlet /></Suspense>
         </main>
       </div>
       <AssistantDrawer />

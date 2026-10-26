@@ -14,8 +14,11 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
     import soundfile as sf
     from mlx_audio.tts.utils import load_model
     if voice not in QWEN_VOICES:raise ValueError('Unsupported local voice')
-    plan_path=plan_path.resolve();output_dir=output_dir.resolve()
-    if not plan_path.is_relative_to(ROOT) or not output_dir.is_relative_to(ROOT):raise ValueError('Invalid voice workspace')
+    from g2.workspace import project_path
+    try:
+        plan_path=project_path(ROOT,plan_path);output_dir=project_path(ROOT,output_dir)
+    except ValueError as exc:
+        raise ValueError('Invalid voice workspace') from exc
     output_dir.mkdir(parents=True,exist_ok=True)
     model=load_model(str(qwen_paths(ROOT)[1]));speaker=QWEN_VOICES[voice][0]
     for segment in json.loads(plan_path.read_text())['segments']:

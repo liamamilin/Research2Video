@@ -83,6 +83,13 @@ def public_url(url: str) -> str:
 
 
 def capture(url: str, *, mode: str = "viewport", selector: str = "", clip: dict | None = None) -> tuple[bytes, dict]:
+    """Capture in a disposable process so a stuck driver cannot stall the API."""
+    from core.video.capture_process import run
+
+    return run("screenshot", {"url": url, "mode": mode, "selector": selector, "clip": clip})
+
+
+def _capture(url: str, *, mode: str = "viewport", selector: str = "", clip: dict | None = None) -> tuple[bytes, dict]:
     """Use a fresh anonymous Chromium context; never reuse publishing login state."""
     public_url(url)
     if mode not in {"viewport", "full_page", "element", "crop"}:

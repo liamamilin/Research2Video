@@ -7,6 +7,7 @@ This measures server handler work, not browser, authentication or gateway latenc
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import sqlite3
 import statistics
@@ -27,7 +28,8 @@ def main() -> None:
     from fastapi.encoders import jsonable_encoder
     from web.indexer import db as index_db
     from web.routes import config, jobs, logs, matrices, outputs, pipeline, production, reports, scheduler, sources, usage, video, video_recipes
-    from web.services import assistant_store
+    from web.services import assistant_store, douyin, platform_manager, social_publishing
+    from core.social.registry import active_platforms
 
     # Topic reads reconcile new reports into SQLite. Never let a benchmark
     # modify the running service's database or wait on its writers.
@@ -57,7 +59,11 @@ def main() -> None:
                 "health": lambda **kw: health.run_checks(),
                 "audit": lambda **kw: logs.get_audit_log(limit=500, **kw),
                 "runtime_logs": lambda **kw: logs.get_global_logs(lines=500, **kw),
+                "platform_bilibili": lambda **kw: platform_manager.overview(),
+                "platform_douyin": lambda **kw: douyin.overview(),
             }
+            for platform in active_platforms():
+                handlers[f"platform_{platform}"] = lambda platform=platform, **kw: social_publishing.overview(platform)
             filters = dict(category=None, job=None, favorite=None, tag=None, unread=None,
                            since=None, until=None, latest_round=False)
             handlers["report_tree"] = lambda **kw: reports.tree(**filters, **kw)
@@ -86,6 +92,17 @@ def main() -> None:
                 assistant_store.get_settings = lambda: snapshot
                 identity = latest[0] if latest else "benchmark"
                 handlers["assistant_recovery"] = lambda **kw: assistant_store.AssistantStore().conversation({"id": identity, "username": str(identity)})
+                from starlette.requests import Request
+                from web.deps import current_user
+                from web.server import create_app
+                from web.services import assistant_workspace
+                app = create_app()
+                user = {"id": identity, "username": str(identity), "role": "admin"}
+                app.dependency_overrides[current_user] = lambda: user
+                request = Request({"type": "http", "app": app, "headers": [],
+                                   "client": ("127.0.0.1", 0), "method": "GET", "scheme": "http",
+                                   "path": "/api/assistant/tasks", "query_string": b""})
+                handlers["assistant_tasks"] = lambda **kw: asyncio.run(assistant_workspace.task_center(request, user, 20))
             results = measure(handlers, args.iterations, jsonable_encoder)
         finally:
             assistant_store.get_settings = assistant_settings
@@ -100,13 +117,22 @@ def measure(handlers: dict, iterations: int, encode) -> dict:
     results = {}
     for name, handler in handlers.items():
         samples = []
+        serialization = []
+        totals = []
         try:
             for _ in range(iterations):
                 start = time.perf_counter()
                 data = handler(user={})
-                samples.append(round((time.perf_counter() - start) * 1000, 1))
+                handled = time.perf_counter()
+                payload = json.dumps(encode(data), ensure_ascii=False).encode()
+                finished = time.perf_counter()
+                samples.append(round((handled - start) * 1000, 1))
+                serialization.append(round((finished - handled) * 1000, 1))
+                totals.append(round((finished - start) * 1000, 1))
             results[name] = {"samples_ms": samples, "median_ms": statistics.median(samples), "max_ms": max(samples),
-                             "response_bytes": len(json.dumps(encode(data), ensure_ascii=False).encode())}
+                             "serialization_median_ms": statistics.median(serialization),
+                             "total_samples_ms": totals, "total_median_ms": statistics.median(totals),
+                             "response_bytes": len(payload)}
         except Exception as exc:
             results[name] = {"error": type(exc).__name__}
     return results

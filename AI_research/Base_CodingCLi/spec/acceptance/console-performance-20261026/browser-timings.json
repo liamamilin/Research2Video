@@ -1,0 +1,1801 @@
+{
+  "method": "Navigation/button action to primary content ready; includes browser automation overhead; not LCP/FCP",
+  "mainPaths": [
+    "/matrices",
+    "/outputs",
+    "/",
+    "/video",
+    "/publish",
+    "/platforms",
+    "/ask",
+    "/engine",
+    "/jobs",
+    "/rounds",
+    "/reports",
+    "/scheduler",
+    "/topics",
+    "/sources",
+    "/video-recipes",
+    "/settings"
+  ],
+  "pages": [
+    {
+      "path": "/matrices",
+      "title": "矩阵",
+      "pass": 1,
+      "observedReadyMs": 731,
+      "alerts": [],
+      "domNodes": 342,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/outputs",
+      "title": "产出",
+      "pass": 1,
+      "observedReadyMs": 1039,
+      "alerts": [],
+      "domNodes": 599,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/",
+      "title": "视频看板",
+      "pass": 1,
+      "observedReadyMs": 1305,
+      "alerts": [],
+      "domNodes": 450,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/video",
+      "title": "视频文稿",
+      "pass": 1,
+      "observedReadyMs": 1510,
+      "alerts": [],
+      "domNodes": 615,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/publish",
+      "title": "成片与发布",
+      "pass": 1,
+      "observedReadyMs": 735,
+      "alerts": [],
+      "domNodes": 1796,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/platforms",
+      "title": "平台管理",
+      "pass": 1,
+      "observedReadyMs": 693,
+      "alerts": [],
+      "domNodes": 1449,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/ask",
+      "title": "助手",
+      "pass": 1,
+      "observedReadyMs": 208,
+      "alerts": [],
+      "domNodes": 90,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/engine",
+      "title": "研究总览",
+      "pass": 1,
+      "observedReadyMs": 340,
+      "alerts": [],
+      "domNodes": 138,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/jobs",
+      "title": "Jobs",
+      "pass": 1,
+      "observedReadyMs": 331,
+      "alerts": [],
+      "domNodes": 747,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/rounds",
+      "title": "情报轮次",
+      "pass": 1,
+      "observedReadyMs": 237,
+      "alerts": [],
+      "domNodes": 195,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/reports",
+      "title": "报告",
+      "pass": 1,
+      "observedReadyMs": 445,
+      "alerts": [],
+      "domNodes": 741,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/scheduler",
+      "title": "周期调度",
+      "pass": 1,
+      "observedReadyMs": 369,
+      "alerts": [
+        "情报矩阵不会自动运行：系统任务 com.arec.pipeline.daily、com.arec.pipeline.catchup 已被删除，但 10 个阶段仍在 jobs/practical_ai_intelligence/。日报已停止生成，可在下方「已删除的系统任务」一键恢复。"
+      ],
+      "domNodes": 1103,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/topics",
+      "title": "选题",
+      "pass": 1,
+      "observedReadyMs": 343,
+      "alerts": [],
+      "domNodes": 191,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/sources",
+      "title": "信息源",
+      "pass": 1,
+      "observedReadyMs": 353,
+      "alerts": [],
+      "domNodes": 1088,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/video-recipes",
+      "title": "文稿配方",
+      "pass": 1,
+      "observedReadyMs": 316,
+      "alerts": [],
+      "domNodes": 110,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/settings",
+      "title": "设置",
+      "pass": 1,
+      "observedReadyMs": 423,
+      "alerts": [],
+      "domNodes": 553,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/matrices/company",
+      "title": "商业与公司研究",
+      "pass": 1,
+      "observedReadyMs": 993,
+      "alerts": [],
+      "domNodes": 113,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/matrices/company?tab=runs",
+      "title": "商业与公司研究",
+      "pass": 1,
+      "observedReadyMs": 1418,
+      "alerts": [],
+      "domNodes": 101,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/matrices/company?tab=week",
+      "title": "商业与公司研究",
+      "pass": 1,
+      "observedReadyMs": 785,
+      "alerts": [],
+      "domNodes": 106,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/matrices/company?tab=settings",
+      "title": "商业与公司研究",
+      "pass": 1,
+      "observedReadyMs": 1028,
+      "alerts": [],
+      "domNodes": 93,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/jobs/company%2Fcompany_weekly",
+      "title": "任务详情",
+      "pass": 1,
+      "observedReadyMs": 357,
+      "alerts": [],
+      "domNodes": 77,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/reports/view?path=company%2F2026-10-25_company_weekly.md",
+      "title": "公司与商业模式周观察：2026年10月19日—25日",
+      "pass": 1,
+      "observedReadyMs": 302,
+      "alerts": [],
+      "domNodes": 375,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=draft",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 1,
+      "observedReadyMs": 731,
+      "alerts": [],
+      "domNodes": 243,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=review",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 1,
+      "observedReadyMs": 529,
+      "alerts": [],
+      "domNodes": 179,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=video",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 1,
+      "observedReadyMs": 635,
+      "alerts": [],
+      "domNodes": 231,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=publish",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 1,
+      "observedReadyMs": 867,
+      "alerts": [],
+      "domNodes": 341,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=uploads",
+      "title": "平台管理",
+      "pass": 1,
+      "observedReadyMs": 299,
+      "alerts": [],
+      "domNodes": 1449,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=data",
+      "title": "平台管理",
+      "pass": 1,
+      "observedReadyMs": 583,
+      "alerts": [],
+      "domNodes": 594,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=comments",
+      "title": "平台管理",
+      "pass": 1,
+      "observedReadyMs": 325,
+      "alerts": [],
+      "domNodes": 120,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=settings",
+      "title": "平台管理",
+      "pass": 1,
+      "observedReadyMs": 209,
+      "alerts": [],
+      "domNodes": 100,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/platforms?platform=douyin",
+      "title": "平台管理",
+      "pass": 1,
+      "observedReadyMs": 206,
+      "alerts": [],
+      "domNodes": 15,
+      "loading": [
+        "正在读取抖音…"
+      ],
+      "phase": "before"
+    },
+    {
+      "path": "/platforms?platform=kuaishou",
+      "title": "平台管理 · 快手",
+      "pass": 1,
+      "observedReadyMs": 239,
+      "alerts": [],
+      "domNodes": 725,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/platforms?platform=xiaohongshu",
+      "title": "平台管理 · 小红书",
+      "pass": 1,
+      "observedReadyMs": 214,
+      "alerts": [],
+      "domNodes": 144,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/platforms?platform=douyin",
+      "title": "平台管理",
+      "pass": 2,
+      "observedReadyMs": 600,
+      "alerts": [],
+      "domNodes": 620,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/jobs/company%2Fcompany_weekly",
+      "title": "任务详情",
+      "pass": 2,
+      "observedReadyMs": 240,
+      "alerts": [],
+      "domNodes": 77,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/ask?overview=1",
+      "title": "助手",
+      "pass": 1,
+      "observedReadyMs": 1711,
+      "alerts": [],
+      "domNodes": 350,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/ask?tasks=1",
+      "title": "助手",
+      "pass": 1,
+      "observedReadyMs": 2829,
+      "alerts": [],
+      "domNodes": 1635,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/matrices/company/video/company%2Fcompany_weekly",
+      "title": "公司与商业模式周观察 · 视频配置",
+      "pass": 1,
+      "observedReadyMs": 3885,
+      "alerts": [],
+      "domNodes": 24,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/video-recipes/parts/packaging/common",
+      "title": "文稿配方",
+      "pass": 1,
+      "observedReadyMs": 245,
+      "alerts": [],
+      "domNodes": 35,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/video",
+      "title": "视频文稿",
+      "pass": 2,
+      "observedReadyMs": 678,
+      "alerts": [],
+      "domNodes": 615,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/scheduler",
+      "title": "周期调度",
+      "pass": 2,
+      "observedReadyMs": 219,
+      "alerts": [],
+      "domNodes": 1051,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/sources",
+      "title": "信息源",
+      "pass": 2,
+      "observedReadyMs": 313,
+      "alerts": [],
+      "domNodes": 1088,
+      "loading": [],
+      "phase": "before"
+    },
+    {
+      "path": "/ask?tasks=1",
+      "title": "助手",
+      "pass": 2,
+      "observedReadyMs": 2352,
+      "alerts": [],
+      "domNodes": 1635,
+      "loading": [],
+      "phase": "batch-only"
+    },
+    {
+      "path": "/ask?overview=1",
+      "title": "助手",
+      "pass": 2,
+      "observedReadyMs": 1364,
+      "alerts": [],
+      "domNodes": 350,
+      "loading": [],
+      "phase": "batch-only"
+    },
+    {
+      "path": "/ask?tasks=1",
+      "title": "助手",
+      "pass": 3,
+      "observedReadyMs": 2849,
+      "alerts": [],
+      "domNodes": 1635,
+      "loading": [],
+      "phase": "batch-only"
+    },
+    {
+      "path": "/ask?tasks=1",
+      "title": "助手",
+      "pass": 4,
+      "observedReadyMs": 2228,
+      "alerts": [],
+      "domNodes": 1635,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/ask?overview=1",
+      "title": "助手",
+      "pass": 4,
+      "observedReadyMs": 208,
+      "alerts": [],
+      "domNodes": 46,
+      "loading": [],
+      "phase": "backend-final",
+      "valid": false
+    },
+    {
+      "path": "/matrices",
+      "title": "矩阵",
+      "pass": 3,
+      "observedReadyMs": 460,
+      "alerts": [],
+      "domNodes": 342,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/ask?tasks=1",
+      "title": "助手",
+      "pass": 5,
+      "observedReadyMs": 3301,
+      "alerts": [],
+      "domNodes": 1635,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/ask?overview=1",
+      "title": "助手",
+      "pass": 5,
+      "observedReadyMs": 1817,
+      "alerts": [],
+      "domNodes": 350,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/matrices",
+      "title": "矩阵",
+      "pass": 4,
+      "observedReadyMs": 710,
+      "alerts": [],
+      "domNodes": 342,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/outputs",
+      "title": "产出",
+      "pass": 4,
+      "observedReadyMs": 957,
+      "alerts": [],
+      "domNodes": 599,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/",
+      "title": "视频看板",
+      "pass": 4,
+      "observedReadyMs": 1267,
+      "alerts": [],
+      "domNodes": 447,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/video",
+      "title": "视频文稿",
+      "pass": 4,
+      "observedReadyMs": 1447,
+      "alerts": [],
+      "domNodes": 615,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/publish",
+      "title": "成片与发布",
+      "pass": 4,
+      "observedReadyMs": 1267,
+      "alerts": [],
+      "domNodes": 1799,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/platforms",
+      "title": "平台管理",
+      "pass": 4,
+      "observedReadyMs": 377,
+      "alerts": [],
+      "domNodes": 1450,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/ask",
+      "title": "助手",
+      "pass": 4,
+      "observedReadyMs": 352,
+      "alerts": [],
+      "domNodes": 90,
+      "loading": [
+        "正在读取对象状态…"
+      ],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/engine",
+      "title": "研究总览",
+      "pass": 4,
+      "observedReadyMs": 1237,
+      "alerts": [],
+      "domNodes": 138,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/jobs",
+      "title": "Jobs",
+      "pass": 4,
+      "observedReadyMs": 1942,
+      "alerts": [],
+      "domNodes": 747,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/rounds",
+      "title": "情报轮次",
+      "pass": 4,
+      "observedReadyMs": 930,
+      "alerts": [],
+      "domNodes": 195,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/reports",
+      "title": "报告",
+      "pass": 4,
+      "observedReadyMs": 341,
+      "alerts": [],
+      "domNodes": 741,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/scheduler",
+      "title": "周期调度",
+      "pass": 4,
+      "observedReadyMs": 254,
+      "alerts": [],
+      "domNodes": 1051,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/topics",
+      "title": "选题",
+      "pass": 4,
+      "observedReadyMs": 355,
+      "alerts": [],
+      "domNodes": 194,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/sources",
+      "title": "信息源",
+      "pass": 4,
+      "observedReadyMs": 307,
+      "alerts": [],
+      "domNodes": 1088,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/video-recipes",
+      "title": "文稿配方",
+      "pass": 4,
+      "observedReadyMs": 216,
+      "alerts": [],
+      "domNodes": 77,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/settings",
+      "title": "设置",
+      "pass": 4,
+      "observedReadyMs": 329,
+      "alerts": [],
+      "domNodes": 553,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/matrices/company/video/company%2Fcompany_weekly",
+      "title": "公司与商业模式周观察 · 视频配置",
+      "pass": 4,
+      "observedReadyMs": 569,
+      "alerts": [],
+      "domNodes": 52,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/matrices/company",
+      "title": "商业与公司研究",
+      "pass": 4,
+      "observedReadyMs": 474,
+      "alerts": [],
+      "domNodes": 113,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/matrices/company?tab=runs",
+      "title": "商业与公司研究",
+      "pass": 4,
+      "observedReadyMs": 763,
+      "alerts": [],
+      "domNodes": 101,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/matrices/company?tab=week",
+      "title": "商业与公司研究",
+      "pass": 4,
+      "observedReadyMs": 466,
+      "alerts": [],
+      "domNodes": 106,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/matrices/company?tab=settings",
+      "title": "商业与公司研究",
+      "pass": 4,
+      "observedReadyMs": 486,
+      "alerts": [],
+      "domNodes": 93,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/jobs/company%2Fcompany_weekly",
+      "title": "任务详情",
+      "pass": 4,
+      "observedReadyMs": 251,
+      "alerts": [],
+      "domNodes": 77,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/reports/view?path=company%2F2026-10-25_company_weekly.md",
+      "title": "公司与商业模式周观察：2026年10月19日—25日",
+      "pass": 4,
+      "observedReadyMs": 299,
+      "alerts": [],
+      "domNodes": 375,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=draft",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 4,
+      "observedReadyMs": 437,
+      "alerts": [],
+      "domNodes": 243,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=review",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 4,
+      "observedReadyMs": 344,
+      "alerts": [],
+      "domNodes": 179,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=video",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 4,
+      "observedReadyMs": 360,
+      "alerts": [],
+      "domNodes": 231,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=publish",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 4,
+      "observedReadyMs": 355,
+      "alerts": [],
+      "domNodes": 341,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=uploads",
+      "title": "平台管理",
+      "pass": 4,
+      "observedReadyMs": 265,
+      "alerts": [],
+      "domNodes": 1450,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=data",
+      "title": "平台管理",
+      "pass": 4,
+      "observedReadyMs": 456,
+      "alerts": [],
+      "domNodes": 594,
+      "loading": [],
+      "phase": "backend-final"
+    },
+    {
+      "path": "/ask?tasks=1",
+      "title": "助手",
+      "pass": 6,
+      "observedReadyMs": 897,
+      "alerts": [],
+      "domNodes": 1635,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/ask?overview=1",
+      "title": "助手",
+      "pass": 6,
+      "observedReadyMs": 524,
+      "alerts": [],
+      "domNodes": 350,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/ask?tasks=1",
+      "title": "助手",
+      "pass": 7,
+      "observedReadyMs": 854,
+      "alerts": [],
+      "domNodes": 1635,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/matrices",
+      "title": "矩阵",
+      "pass": 5,
+      "observedReadyMs": 315,
+      "alerts": [],
+      "domNodes": 342,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/outputs",
+      "title": "产出",
+      "pass": 5,
+      "observedReadyMs": 709,
+      "alerts": [],
+      "domNodes": 599,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/",
+      "title": "视频看板",
+      "pass": 5,
+      "observedReadyMs": 1094,
+      "alerts": [],
+      "domNodes": 447,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video",
+      "title": "视频文稿",
+      "pass": 5,
+      "observedReadyMs": 1039,
+      "alerts": [],
+      "domNodes": 615,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/publish",
+      "title": "成片与发布",
+      "pass": 5,
+      "observedReadyMs": 1196,
+      "alerts": [],
+      "domNodes": 1799,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms",
+      "title": "平台管理",
+      "pass": 5,
+      "observedReadyMs": 424,
+      "alerts": [],
+      "domNodes": 1450,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/ask",
+      "title": "助手",
+      "pass": 5,
+      "observedReadyMs": 348,
+      "alerts": [],
+      "domNodes": 90,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/engine",
+      "title": "研究总览",
+      "pass": 5,
+      "observedReadyMs": 657,
+      "alerts": [],
+      "domNodes": 138,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/jobs",
+      "title": "Jobs",
+      "pass": 5,
+      "observedReadyMs": 901,
+      "alerts": [],
+      "domNodes": 747,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/rounds",
+      "title": "情报轮次",
+      "pass": 5,
+      "observedReadyMs": 1277,
+      "alerts": [],
+      "domNodes": 195,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/reports",
+      "title": "报告",
+      "pass": 5,
+      "observedReadyMs": 358,
+      "alerts": [],
+      "domNodes": 741,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/scheduler",
+      "title": "周期调度",
+      "pass": 5,
+      "observedReadyMs": 659,
+      "alerts": [
+        "情报矩阵不会自动运行：系统任务 com.arec.pipeline.daily、com.arec.pipeline.catchup 已被删除，但 10 个阶段仍在 jobs/practical_ai_intelligence/。日报已停止生成，可在下方「已删除的系统任务」一键恢复。"
+      ],
+      "domNodes": 1103,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/topics",
+      "title": "选题",
+      "pass": 5,
+      "observedReadyMs": 582,
+      "alerts": [],
+      "domNodes": 191,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/sources",
+      "title": "信息源",
+      "pass": 5,
+      "observedReadyMs": 460,
+      "alerts": [],
+      "domNodes": 1088,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video-recipes",
+      "title": "文稿配方",
+      "pass": 5,
+      "observedReadyMs": 429,
+      "alerts": [],
+      "domNodes": 110,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/settings",
+      "title": "设置",
+      "pass": 5,
+      "observedReadyMs": 320,
+      "alerts": [
+        "opencode zen（按量计费） 没有这个模型：deepseek-v4-flash。请从最新清单选择。"
+      ],
+      "domNodes": 959,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/matrices",
+      "title": "矩阵",
+      "pass": 6,
+      "observedReadyMs": 372,
+      "alerts": [],
+      "domNodes": 342,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/outputs",
+      "title": "产出",
+      "pass": 6,
+      "observedReadyMs": 809,
+      "alerts": [],
+      "domNodes": 599,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/",
+      "title": "视频看板",
+      "pass": 6,
+      "observedReadyMs": 607,
+      "alerts": [],
+      "domNodes": 447,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video",
+      "title": "视频文稿",
+      "pass": 6,
+      "observedReadyMs": 1165,
+      "alerts": [],
+      "domNodes": 615,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/publish",
+      "title": "成片与发布",
+      "pass": 6,
+      "observedReadyMs": 829,
+      "alerts": [],
+      "domNodes": 1799,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms",
+      "title": "平台管理",
+      "pass": 6,
+      "observedReadyMs": 537,
+      "alerts": [],
+      "domNodes": 1450,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/ask",
+      "title": "助手",
+      "pass": 6,
+      "observedReadyMs": 279,
+      "alerts": [],
+      "domNodes": 90,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/engine",
+      "title": "研究总览",
+      "pass": 6,
+      "observedReadyMs": 445,
+      "alerts": [],
+      "domNodes": 138,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/jobs",
+      "title": "Jobs",
+      "pass": 6,
+      "observedReadyMs": 465,
+      "alerts": [],
+      "domNodes": 747,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/rounds",
+      "title": "情报轮次",
+      "pass": 6,
+      "observedReadyMs": 2058,
+      "alerts": [],
+      "domNodes": 195,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/reports",
+      "title": "报告",
+      "pass": 6,
+      "observedReadyMs": 268,
+      "alerts": [],
+      "domNodes": 741,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/scheduler",
+      "title": "周期调度",
+      "pass": 6,
+      "observedReadyMs": 244,
+      "alerts": [],
+      "domNodes": 1051,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/topics",
+      "title": "选题",
+      "pass": 6,
+      "observedReadyMs": 379,
+      "alerts": [],
+      "domNodes": 194,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/sources",
+      "title": "信息源",
+      "pass": 6,
+      "observedReadyMs": 383,
+      "alerts": [],
+      "domNodes": 1088,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video-recipes",
+      "title": "文稿配方",
+      "pass": 6,
+      "observedReadyMs": 430,
+      "alerts": [],
+      "domNodes": 110,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/settings",
+      "title": "设置",
+      "pass": 6,
+      "observedReadyMs": 221,
+      "alerts": [],
+      "domNodes": 553,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/matrices/company",
+      "title": "商业与公司研究",
+      "pass": 5,
+      "observedReadyMs": 460,
+      "alerts": [],
+      "domNodes": 113,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/matrices/company?tab=runs",
+      "title": "商业与公司研究",
+      "pass": 5,
+      "observedReadyMs": 570,
+      "alerts": [],
+      "domNodes": 101,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/matrices/company?tab=week",
+      "title": "商业与公司研究",
+      "pass": 5,
+      "observedReadyMs": 448,
+      "alerts": [],
+      "domNodes": 106,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/matrices/company?tab=settings",
+      "title": "商业与公司研究",
+      "pass": 5,
+      "observedReadyMs": 768,
+      "alerts": [],
+      "domNodes": 93,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/jobs/company%2Fcompany_weekly",
+      "title": "任务详情",
+      "pass": 5,
+      "observedReadyMs": 256,
+      "alerts": [],
+      "domNodes": 77,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/reports/view?path=company%2F2026-10-25_company_weekly.md",
+      "title": "公司与商业模式周观察：2026年10月19日—25日",
+      "pass": 5,
+      "observedReadyMs": 283,
+      "alerts": [],
+      "domNodes": 375,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=draft",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 5,
+      "observedReadyMs": 415,
+      "alerts": [],
+      "domNodes": 243,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=review",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 5,
+      "observedReadyMs": 331,
+      "alerts": [],
+      "domNodes": 179,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=video",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 5,
+      "observedReadyMs": 330,
+      "alerts": [],
+      "domNodes": 231,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=publish",
+      "title": "年化收入670亿美元，这家AI公司为什么推迟上市？",
+      "pass": 5,
+      "observedReadyMs": 317,
+      "alerts": [],
+      "domNodes": 341,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=uploads",
+      "title": "平台管理",
+      "pass": 5,
+      "observedReadyMs": 344,
+      "alerts": [],
+      "domNodes": 1450,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=data",
+      "title": "平台管理",
+      "pass": 5,
+      "observedReadyMs": 535,
+      "alerts": [],
+      "domNodes": 594,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=comments",
+      "title": "平台管理",
+      "pass": 5,
+      "observedReadyMs": 316,
+      "alerts": [],
+      "domNodes": 120,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms?platform=bilibili&tab=settings",
+      "title": "平台管理",
+      "pass": 5,
+      "observedReadyMs": 212,
+      "alerts": [],
+      "domNodes": 100,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms?platform=douyin",
+      "title": "平台管理",
+      "pass": 5,
+      "observedReadyMs": 532,
+      "alerts": [],
+      "domNodes": 620,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms?platform=kuaishou",
+      "title": "平台管理 · 快手",
+      "pass": 5,
+      "observedReadyMs": 331,
+      "alerts": [],
+      "domNodes": 726,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms?platform=xiaohongshu",
+      "title": "平台管理 · 小红书",
+      "pass": 5,
+      "observedReadyMs": 215,
+      "alerts": [],
+      "domNodes": 145,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/matrices/company/video/company%2Fcompany_weekly",
+      "title": "公司与商业模式周观察 · 视频配置",
+      "pass": 5,
+      "observedReadyMs": 846,
+      "alerts": [],
+      "domNodes": 52,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video-recipes/parts/packaging/common",
+      "title": "文稿配方",
+      "pass": 5,
+      "observedReadyMs": 352,
+      "alerts": [],
+      "domNodes": 68,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/settings",
+      "title": "设置",
+      "pass": 7,
+      "observedReadyMs": 357,
+      "alerts": [],
+      "domNodes": 553,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/jobs/company%2Fcompany_weekly",
+      "title": "任务详情",
+      "pass": 6,
+      "observedReadyMs": 354,
+      "alerts": [],
+      "domNodes": 77,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/ask",
+      "title": "助手",
+      "pass": 7,
+      "observedReadyMs": 244,
+      "alerts": [],
+      "domNodes": 90,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video",
+      "title": "视频文稿",
+      "pass": 7,
+      "observedReadyMs": 1206,
+      "alerts": [],
+      "domNodes": 615,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/scheduler",
+      "title": "周期调度",
+      "pass": 7,
+      "observedReadyMs": 239,
+      "alerts": [],
+      "domNodes": 1051,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/sources",
+      "title": "信息源",
+      "pass": 7,
+      "observedReadyMs": 648,
+      "alerts": [],
+      "domNodes": 1088,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/jobs/company%2Fcompany_weekly",
+      "title": "任务详情",
+      "pass": 7,
+      "observedReadyMs": 250,
+      "alerts": [],
+      "domNodes": 77,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/matrices",
+      "title": "矩阵",
+      "pass": 8,
+      "observedReadyMs": 678,
+      "alerts": [],
+      "domNodes": 342,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/outputs",
+      "title": "产出",
+      "pass": 8,
+      "observedReadyMs": 659,
+      "alerts": [],
+      "domNodes": 599,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/",
+      "title": "视频看板",
+      "pass": 8,
+      "observedReadyMs": 926,
+      "alerts": [],
+      "domNodes": 447,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video",
+      "title": "视频文稿",
+      "pass": 8,
+      "observedReadyMs": 1124,
+      "alerts": [],
+      "domNodes": 615,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/publish",
+      "title": "成片与发布",
+      "pass": 8,
+      "observedReadyMs": 1729,
+      "alerts": [],
+      "domNodes": 1799,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/platforms",
+      "title": "平台管理",
+      "pass": 8,
+      "observedReadyMs": 497,
+      "alerts": [],
+      "domNodes": 1450,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/ask",
+      "title": "助手",
+      "pass": 8,
+      "observedReadyMs": 340,
+      "alerts": [],
+      "domNodes": 90,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/engine",
+      "title": "研究总览",
+      "pass": 8,
+      "observedReadyMs": 453,
+      "alerts": [],
+      "domNodes": 138,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/jobs",
+      "title": "Jobs",
+      "pass": 8,
+      "observedReadyMs": 677,
+      "alerts": [],
+      "domNodes": 729,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/rounds",
+      "title": "情报轮次",
+      "pass": 8,
+      "observedReadyMs": 524,
+      "alerts": [],
+      "domNodes": 195,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/reports",
+      "title": "报告",
+      "pass": 8,
+      "observedReadyMs": 249,
+      "alerts": [],
+      "domNodes": 741,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/scheduler",
+      "title": "周期调度",
+      "pass": 8,
+      "observedReadyMs": 352,
+      "alerts": [],
+      "domNodes": 1051,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/topics",
+      "title": "选题",
+      "pass": 8,
+      "observedReadyMs": 571,
+      "alerts": [],
+      "domNodes": 194,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/sources",
+      "title": "信息源",
+      "pass": 8,
+      "observedReadyMs": 329,
+      "alerts": [],
+      "domNodes": 1088,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/video-recipes",
+      "title": "文稿配方",
+      "pass": 8,
+      "observedReadyMs": 314,
+      "alerts": [],
+      "domNodes": 110,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/settings",
+      "title": "设置",
+      "pass": 8,
+      "observedReadyMs": 328,
+      "alerts": [],
+      "domNodes": 553,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/ask?tasks=1",
+      "title": "助手",
+      "pass": 8,
+      "observedReadyMs": 900,
+      "alerts": [],
+      "domNodes": 1635,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/ask?overview=1",
+      "title": "助手",
+      "pass": 8,
+      "observedReadyMs": 547,
+      "alerts": [],
+      "domNodes": 350,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/ask?tasks=1",
+      "title": "助手",
+      "pass": 9,
+      "observedReadyMs": 2900,
+      "alerts": [],
+      "domNodes": 1635,
+      "loading": [],
+      "phase": "final"
+    },
+    {
+      "path": "/matrices",
+      "title": "矩阵",
+      "pass": 9,
+      "observedReadyMs": 566,
+      "alerts": [],
+      "domNodes": 342,
+      "loading": [],
+      "phase": "final"
+    }
+  ],
+  "views": [
+    {
+      "view": "设置/用户管理",
+      "observedReadyMs": 2359,
+      "phase": "before"
+    },
+    {
+      "view": "设置/审计日志",
+      "observedReadyMs": 340,
+      "phase": "before"
+    },
+    {
+      "view": "设置/运行日志",
+      "observedReadyMs": 288,
+      "phase": "before"
+    },
+    {
+      "view": "任务详情/YAML 编辑器",
+      "observedReadyMs": 615,
+      "alerts": [],
+      "domNodes": 363,
+      "phase": "before"
+    },
+    {
+      "view": "任务详情/运行历史",
+      "observedReadyMs": 301,
+      "alerts": [],
+      "domNodes": 62,
+      "phase": "before"
+    },
+    {
+      "view": "任务详情/日志",
+      "observedReadyMs": 299,
+      "alerts": [],
+      "domNodes": 40,
+      "phase": "before"
+    },
+    {
+      "view": "助手/历史对话",
+      "observedReadyMs": 345,
+      "alerts": [],
+      "domNodes": 1669,
+      "phase": "before"
+    },
+    {
+      "view": "文稿/新建表单",
+      "observedReadyMs": 313,
+      "alerts": [],
+      "domNodes": 733,
+      "phase": "before"
+    },
+    {
+      "view": "文稿/文章创作表单",
+      "observedReadyMs": 307,
+      "alerts": [],
+      "domNodes": 720,
+      "phase": "before"
+    },
+    {
+      "view": "调度/新建表单",
+      "observedReadyMs": 327,
+      "alerts": [
+        "情报矩阵不会自动运行：系统任务 com.arec.pipeline.daily、com.arec.pipeline.catchup 已被删除，但 10 个阶段仍在 jobs/practical_ai_intelligence/。日报已停止生成，可在下方「已删除的系统任务」一键恢复。"
+      ],
+      "domNodes": 1480,
+      "phase": "before"
+    },
+    {
+      "view": "信息源/新增表单",
+      "observedReadyMs": 329,
+      "alerts": [],
+      "domNodes": 1111,
+      "phase": "before"
+    },
+    {
+      "view": "设置/用户管理",
+      "observedReadyMs": 355,
+      "alerts": [
+        "opencode zen（按量计费） 没有这个模型：deepseek-v4-flash。请从最新清单选择。"
+      ],
+      "domNodes": 987,
+      "phase": "final"
+    },
+    {
+      "view": "设置/审计日志",
+      "observedReadyMs": 520,
+      "alerts": [
+        "opencode zen（按量计费） 没有这个模型：deepseek-v4-flash。请从最新清单选择。"
+      ],
+      "domNodes": 4972,
+      "phase": "final"
+    },
+    {
+      "view": "设置/运行日志",
+      "observedReadyMs": 320,
+      "alerts": [
+        "opencode zen（按量计费） 没有这个模型：deepseek-v4-flash。请从最新清单选择。"
+      ],
+      "domNodes": 1468,
+      "phase": "final"
+    },
+    {
+      "view": "任务详情/YAML 编辑器",
+      "observedReadyMs": 384,
+      "alerts": [],
+      "domNodes": 82,
+      "phase": "final",
+      "valid": false
+    },
+    {
+      "view": "任务详情/运行历史",
+      "observedReadyMs": 303,
+      "alerts": [],
+      "domNodes": 62,
+      "phase": "final"
+    },
+    {
+      "view": "任务详情/日志",
+      "observedReadyMs": 282,
+      "alerts": [],
+      "domNodes": 40,
+      "phase": "final"
+    },
+    {
+      "view": "助手/历史对话",
+      "observedReadyMs": 297,
+      "alerts": [],
+      "domNodes": 124,
+      "phase": "final"
+    },
+    {
+      "view": "文稿/新建表单",
+      "observedReadyMs": 315,
+      "alerts": [],
+      "domNodes": 733,
+      "phase": "final"
+    },
+    {
+      "view": "文稿/文章创作表单",
+      "observedReadyMs": 337,
+      "alerts": [],
+      "domNodes": 720,
+      "phase": "final"
+    },
+    {
+      "view": "调度/新建表单",
+      "observedReadyMs": 465,
+      "alerts": [
+        "情报矩阵不会自动运行：系统任务 com.arec.pipeline.daily、com.arec.pipeline.catchup 已被删除，但 10 个阶段仍在 jobs/practical_ai_intelligence/。日报已停止生成，可在下方「已删除的系统任务」一键恢复。"
+      ],
+      "domNodes": 1483,
+      "phase": "final"
+    },
+    {
+      "view": "信息源/新增表单",
+      "observedReadyMs": 371,
+      "alerts": [],
+      "domNodes": 1111,
+      "phase": "final"
+    },
+    {
+      "view": "任务详情/YAML 编辑器",
+      "phase": "final",
+      "observedReadyMs": 363,
+      "ready": "visible Monaco textarea"
+    }
+  ]
+}

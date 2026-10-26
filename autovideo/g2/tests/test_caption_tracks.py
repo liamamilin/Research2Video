@@ -37,6 +37,23 @@ def test_an_entire_utterance_too_short_to_read_still_fails():
                    [{'text': '是', 'start_ms': 0, 'end_ms': 100}])
 
 
+def test_old_punctuation_only_voice_segment_keeps_its_text_and_timing():
+    from g2.caption_alignment import verify_plan
+    row = {'id': 'c1_n4', 'text': '”', 'start_ms': 7041, 'end_ms': 7106}
+    ir = {'narration': {'segments': [row]}}
+    cues = build_cues(row, [])
+    assert cues == [{'segment_id': 'c1_n4', 'text': '”', 'char_start': 0, 'char_end': 1,
+                     'start_ms': 7041, 'end_ms': 7106}]
+    verify_plan(ir, {'version': 2, 'narration_sha256': narration_hash(ir), 'cues': cues})
+
+
+def test_missing_spoken_segment_still_reports_its_identity():
+    from g2.caption_alignment import verify_plan
+    ir = {'narration': {'segments': [{'id': 'c1_n4', 'text': '继续。', 'start_ms': 0, 'end_ms': 1000}]}}
+    with pytest.raises(ValueError, match='缺少配音段：c1_n4'):
+        verify_plan(ir, {'version': 2, 'narration_sha256': narration_hash(ir), 'cues': []})
+
+
 def track(tmp_path):
     ir = {'narration': {'segments': [{'id': 'n1', 'text': '作者报告提升，但仅限该评测。', 'start_ms': 100, 'end_ms': 3200}]}}
     cues = [

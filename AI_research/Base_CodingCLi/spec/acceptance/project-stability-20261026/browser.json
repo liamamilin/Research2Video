@@ -1,0 +1,103 @@
+{
+  "scope": "Chrome logged-in admin; one navigation per page with lazy module/header and primary loading checks. Includes automation overhead; not LCP/FCP or load testing.",
+  "rows": [
+    {
+      "page": "矩阵",
+      "ms": 539,
+      "load_error": false,
+      "main_text_characters": 1234
+    },
+    {
+      "page": "产出",
+      "ms": 697,
+      "load_error": false,
+      "main_text_characters": 2302
+    },
+    {
+      "page": "视频看板",
+      "ms": 1192,
+      "load_error": false,
+      "main_text_characters": 743
+    },
+    {
+      "page": "文稿",
+      "ms": 1617,
+      "load_error": false,
+      "main_text_characters": 4361
+    },
+    {
+      "page": "成片与发布",
+      "ms": 815,
+      "load_error": false,
+      "main_text_characters": 24300
+    },
+    {
+      "page": "助手",
+      "ms": 884,
+      "load_error": false,
+      "main_text_characters": 8108
+    },
+    {
+      "page": "Jobs",
+      "ms": 476,
+      "load_error": false,
+      "main_text_characters": 9158
+    },
+    {
+      "page": "情报轮次",
+      "ms": 1428,
+      "load_error": false,
+      "main_text_characters": 1227
+    },
+    {
+      "page": "报告",
+      "ms": 1020,
+      "load_error": false,
+      "main_text_characters": 3659
+    },
+    {
+      "page": "周期调度",
+      "ms": 1012,
+      "load_error": false,
+      "main_text_characters": 4421
+    },
+    {
+      "page": "选题",
+      "ms": 1005,
+      "load_error": false,
+      "main_text_characters": 1362
+    },
+    {
+      "page": "信息源",
+      "ms": 1256,
+      "load_error": false,
+      "main_text_characters": 10135
+    },
+    {
+      "page": "文稿配方",
+      "ms": 306,
+      "load_error": false,
+      "main_text_characters": 480
+    },
+    {
+      "page": "设置",
+      "ms": 673,
+      "load_error": false,
+      "main_text_characters": 3766
+    },
+    {
+      "page": "平台管理",
+      "ms": 1109,
+      "load_error": false,
+      "main_text_characters": 14555
+    },
+    {
+      "page": "研究总览",
+      "ms": 284,
+      "load_error": false,
+      "main_text_characters": 112
+    }
+  ],
+  "assistant_drawer_opened": true,
+  "assistant_message_enabled": true
+}

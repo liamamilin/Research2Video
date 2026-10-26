@@ -9,7 +9,7 @@ from typing import Any, TextIO
 import yaml
 
 
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=1024)
 def _parse(text: str) -> Any:
     return yaml.safe_load(text)
 

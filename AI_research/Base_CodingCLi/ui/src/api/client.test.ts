@@ -152,6 +152,39 @@ describe("api()", () => {
     expect(onAuthError).not.toHaveBeenCalled();
   });
 
+  it("retries refresh with the latest CSRF cookie after another tab rotates it", async () => {
+    const onAuthError = vi.fn();
+    setAuthErrorHandler(onAuthError);
+    document.cookie = "ai_research_csrf=old-csrf";
+    fetchMock.mockResolvedValueOnce(fakeResponse(401))
+      .mockImplementationOnce(async () => {
+        document.cookie = "ai_research_csrf=new-csrf";
+        return fakeResponse(403, { error: { code: "csrf_failed" } });
+      })
+      .mockResolvedValueOnce(fakeResponse(200))
+      .mockResolvedValueOnce(fakeResponse(200, { ok: true }));
+    expect(await api("/api/assistant/workspace")).toEqual({ ok: true });
+    expect(fetchMock.mock.calls[1][1].headers["X-CSRF-Token"]).toBe("old-csrf");
+    expect(fetchMock.mock.calls[2][1].headers["X-CSRF-Token"]).toBe("new-csrf");
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      "/api/assistant/workspace", "/api/auth/refresh", "/api/auth/refresh", "/api/assistant/workspace",
+    ]);
+    expect(onAuthError).not.toHaveBeenCalled();
+  });
+
+  it("bounds rejected CSRF refreshes without logging out a potentially valid session", async () => {
+    const onAuthError = vi.fn();
+    setAuthErrorHandler(onAuthError);
+    fetchMock.mockResolvedValueOnce(fakeResponse(401))
+      .mockResolvedValueOnce(fakeResponse(403))
+      .mockResolvedValueOnce(fakeResponse(403));
+    await expect(api("/api/assistant/workspace")).rejects.toMatchObject({ code: "auth_unavailable" });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(onAuthError).not.toHaveBeenCalled();
+    fetchMock.mockResolvedValueOnce(fakeResponse(200, { ok: true }));
+    expect(await api("/api/assistant/workspace")).toEqual({ ok: true });
+  });
+
   it("wraps network errors as ApiError", async () => {
     fetchMock.mockRejectedValueOnce(new TypeError("Failed to fetch"));
 

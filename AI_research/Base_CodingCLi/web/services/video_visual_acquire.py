@@ -72,7 +72,7 @@ def review_candidates(need: dict, candidates: list[dict], policy: dict, *, remai
 
 def acquire(need: dict, url: str, policy: dict, *, remaining: float) -> tuple[bytes, dict]:
     if policy["version"] == 1:
-        return screenshots.capture(url)
+        return screenshots._capture(url)
     started = time.monotonic()
     with screenshots.page_for_capture(url, timeout_seconds=min(remaining, 40)) as page:
         snapshot = page.evaluate(REGIONS.read_text(encoding="utf-8"), "yy-" + uuid4().hex[:12])

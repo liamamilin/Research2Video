@@ -3,6 +3,7 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -14,6 +15,8 @@ from typing import BinaryIO
 
 from g3.config import Settings
 from g3.store import JobStore, STAGES
+
+logger = logging.getLogger(__name__)
 
 
 STEP_TO_STAGE = {
@@ -464,6 +467,9 @@ class SingleWorker:
         self.stop_event.set()
         if self.thread:
             self.thread.join(timeout=12)
+            if self.thread.is_alive():
+                logger.warning("Video worker is still stopping; retaining its exclusive lock")
+                return
         if self._lock_file:
             try:
                 fcntl.flock(self._lock_file.fileno(), fcntl.LOCK_UN)
@@ -473,10 +479,20 @@ class SingleWorker:
 
     def _loop(self) -> None:
         while not self.stop_event.is_set():
-            job = self.store.claim_next()
+            try:
+                job = self.store.claim_next()
+            except Exception:
+                # A temporary SQLite lock or filesystem outage must not kill
+                # the sole queue consumer for the rest of the app's lifetime.
+                logger.exception("Could not read video queue; retrying")
+                self.stop_event.wait(max(1.0, self.settings.worker_poll_seconds))
+                continue
             if job is None:
-                if self.idle_task and self.idle_task(self.stop_event):
-                    continue
+                try:
+                    if self.idle_task and self.idle_task(self.stop_event):
+                        continue
+                except Exception:
+                    logger.exception("Video worker idle task failed; queue remains active")
                 self.stop_event.wait(self.settings.worker_poll_seconds)
                 continue
             try:

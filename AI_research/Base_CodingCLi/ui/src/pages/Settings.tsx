@@ -5,6 +5,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import { Trash2, RefreshCw, Copy, Check } from "lucide-react";
+import { VideoStorageConfig } from "@/components/VideoStorageConfig";
 import { SystemConfig } from "@/components/SystemConfig";
 import { ShareLinks } from "@/components/ShareLinks";
 import { usePageResource } from "@/lib/use-page-resource";
@@ -56,7 +57,7 @@ export function SettingsPage() {
         ))}
       </div>
 
-      <div hidden={tab !== "system"}><SystemConfig /></div>
+      <div hidden={tab !== "system"} className="space-y-4"><VideoStorageConfig /><SystemConfig /></div>
       {tab === "users" && <UserManagement />}
       {tab === "audit" && <AuditLog />}
       {tab === "logs" && <GlobalLogs />}

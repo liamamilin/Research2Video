@@ -682,7 +682,7 @@ export function SystemConfig() {
         {error && <span className="text-xs text-danger">{error}</span>}
       </div>
 
-      {mode === "form" ? <nav className="flex flex-wrap gap-2 text-xs text-text-muted" aria-label="配置分组">{[["模型", "AI 模型"], ["密钥", "API 密钥"], ["搜索", "搜索服务"], ["语义检索", "语义检索"], ["研究", "研究 Agent"], ["预算", "预算护栏"], ["通知", "通知"]].map(([label, target]) => <button className="btn text-xs" key={target} onClick={() => document.getElementById(`setting-${target}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}>{label}</button>)}</nav> : null}
+      {mode === "form" ? <nav className="flex flex-wrap gap-2 text-xs text-text-muted" aria-label="配置分组">{[["存储", "视频存储"], ["模型", "AI 模型"], ["密钥", "API 密钥"], ["搜索", "搜索服务"], ["语义检索", "语义检索"], ["研究", "研究 Agent"], ["预算", "预算护栏"], ["通知", "通知"]].map(([label, target]) => <button className="btn text-xs" key={target} onClick={() => document.getElementById(`setting-${target}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}>{label}</button>)}</nav> : null}
       {mode === "yaml" ? (
         <Suspense fallback={<div className="text-sm text-text-muted py-6 text-center">加载编辑器...</div>}>
           <YamlEditor value={content} onChange={(value) => { setContent(value); setMessage(""); }} height="calc(100vh - 340px)" />

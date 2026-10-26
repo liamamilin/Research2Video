@@ -282,7 +282,8 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
     </section>
     {(workspaceOpen || taskCenterOpen) && <aside className={`${embedded ? 'absolute inset-0 z-10 bg-bg-card p-4 rounded-xl' : 'absolute inset-0 z-10 bg-bg-card p-4 lg:p-0 lg:static lg:w-96 lg:shrink-0'} overflow-y-auto border-l border-border lg:pl-5`}>
       <button className={`${embedded ? '' : 'lg:hidden'} btn text-xs mb-4`} onClick={() => { setWorkspaceOpen(false); setTaskCenterOpen(false); }}>返回对话</button>
-      {taskCenterOpen ? <AssistantTaskCenter revision={revision} busy={busy || restoring} onOpenConversation={openConversation} />
+      {restoring && revision === 0 ? <p role="status" className="text-xs text-text-muted">正在恢复工作区…</p>
+        : taskCenterOpen ? <AssistantTaskCenter revision={revision} busy={busy || restoring} onOpenConversation={openConversation} />
         : <AssistantWorkspacePanel conversationId={activeConversationId} context={selectedContext} revision={revision} onPrompt={(text) => { fill(text); if (embedded || window.innerWidth < 1024) setWorkspaceOpen(false); }} />}
     </aside>}
     </div>

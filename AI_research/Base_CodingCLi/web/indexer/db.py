@@ -380,6 +380,13 @@ def get_report(path: str) -> Optional[dict]:
     return _serialize_row(row) if row else None
 
 
+def indexed_file_stats() -> dict[str, tuple[float, int]]:
+    """Read scan metadata in one query, without rewriting unchanged FTS rows."""
+    with connect() as conn:
+        return {row['path']: (row['mtime'], row['size_bytes'])
+                for row in conn.execute('SELECT path, mtime, size_bytes FROM reports')}
+
+
 def set_report_meta(
     path: str,
     favorite: Optional[bool] = None,

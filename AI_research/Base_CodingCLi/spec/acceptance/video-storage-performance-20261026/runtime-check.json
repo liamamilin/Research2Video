@@ -1,0 +1,5 @@
+{
+  "python_prefix": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/voice-runtime",
+  "numpy_import": true,
+  "mlx_array": true
+}

@@ -26,18 +26,25 @@ def safe_url(value: str) -> str:
 
 
 def redact(value):
+    # A platform overview can contain thousands of text fields. Snapshot the
+    # configured values once per traversal; a later call still sees env edits.
+    secrets = tuple(secret for key, secret in os.environ.items()
+                    if secret_key(key) and len(secret) >= 6)
+    return _redact(value, secrets)
+
+
+def _redact(value, secrets: tuple[str, ...]):
     if isinstance(value, dict):
         return {k: ('[已配置]' if v else '[未配置]') if secret_key(k) else
-                ({str(h): '[已配置]' for h in v} if k == 'extra_headers' and isinstance(v, dict) else redact(v))
+                ({str(h): '[已配置]' for h in v} if k == 'extra_headers' and isinstance(v, dict) else _redact(v, secrets))
                 for k, v in value.items()}
     if isinstance(value, list):
-        return [redact(v) for v in value]
+        return [_redact(v, secrets) for v in value]
     if isinstance(value, str):
         # Exact configured env values also cover a credential echoed inside a
         # provider error or a log line, rather than only a dict's key name.
-        for key, secret in os.environ.items():
-            if secret_key(key) and len(secret) >= 6:
-                value = value.replace(secret, '[已隐藏]')
+        for secret in secrets:
+            value = value.replace(secret, '[已隐藏]')
         value = re.sub(r'(?i)(bearer\s+)[A-Za-z0-9_.~-]+', r'\1[已隐藏]', value)
         value = re.sub(r'(?i)(\b(?:token|password|secret|api[_-]?key)\s+)[A-Za-z0-9_./+=~-]{16,}', r'\1[已隐藏]', value)
         value = re.sub(r'(?i)(api[_-]?key|password|secret|token)([\"\x27]?\s*[:=]\s*[\"\x27]?)[^\s,;\"\x27}]+', r'\1\2[已隐藏]', value)

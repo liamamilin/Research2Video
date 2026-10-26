@@ -1,0 +1,12 @@
+{
+  "previous_pid": 4541,
+  "result": {
+    "status": "ready",
+    "action": "started",
+    "pid": 75796,
+    "url": "http://127.0.0.1:8011/#new",
+    "log_path": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/launcher/server.log"
+  },
+  "queues_idle": true,
+  "research_backend_unchanged": true
+}

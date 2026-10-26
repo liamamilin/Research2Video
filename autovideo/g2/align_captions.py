@@ -18,15 +18,17 @@ def align(ir_path: Path, output: Path) -> None:
     import soundfile as sf
     from scipy.signal import resample_poly
     from mlx_audio.stt.utils import load_model
-    from g2.caption_alignment import build_cues, narration_hash, verify_plan
+    from g2.caption_alignment import build_cues, narration_hash, verify_plan, word_spans
     started = time.monotonic()
-    ir_path, output = ir_path.resolve(), output.resolve()
-    if not ir_path.is_relative_to(ROOT) or not output.is_relative_to(ROOT):
-        raise ValueError("Invalid caption workspace")
+    from g2.workspace import project_path
+    try:
+        ir_path, output = project_path(ROOT, ir_path), project_path(ROOT, output)
+    except ValueError as exc:
+        raise ValueError("Invalid caption workspace") from exc
     ir = json.loads(ir_path.read_text())
     asset = next(a for a in ir["assets"] if a["id"] == ir["narration"]["audio_asset_id"])
     audio_path = (ir_path.parent / asset["path"]).resolve()
-    if not audio_path.is_relative_to(ir_path.parent):
+    if not audio_path.is_relative_to(ir_path.parent.resolve()):
         raise ValueError("Invalid narration audio path")
     audio_sha = hashlib.sha256(audio_path.read_bytes()).hexdigest()
     if asset["sha256"] != audio_sha:
@@ -44,9 +46,11 @@ def align(ir_path: Path, output: Path) -> None:
         from math import gcd
         divisor = gcd(rate, 16000)
         speech = resample_poly(samples[a:b], 16000 // divisor, rate // divisor).astype(np.float32)
-        result = model.generate(speech, text=row["text"], language="Chinese")
-        items = [{"text": item.text, "start_ms": round(item.start_time * 1000), "end_ms": round(item.end_time * 1000)}
-                 for item in result.items]
+        items = []
+        if word_spans(row["text"]):
+            result = model.generate(speech, text=row["text"], language="Chinese")
+            items = [{"text": item.text, "start_ms": round(item.start_time * 1000), "end_ms": round(item.end_time * 1000)}
+                     for item in result.items]
         cues.extend(build_cues(row, items))
         evidence.append({"segment_id": row["id"], "items": items})
         print(f"ALIGNED {row['id']}: {len(items)} units", flush=True)

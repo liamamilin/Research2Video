@@ -63,6 +63,14 @@ def build_cues(segment: dict, items: list[dict]) -> list[dict]:
     if [w[0] for w in words] != [i["text"] for i in items]:
         raise ValueError(f"{segment['id']} 对齐文本与原文不一致")
     duration = segment["end_ms"] - segment["start_ms"]
+    if not words:
+        # Older sentence splitting could leave a closing quote in its own
+        # silent segment. Preserve that character and its original interval.
+        if duration <= 0:
+            raise ValueError(f"{segment['id']} 对齐时间无效")
+        return [{"segment_id": segment["id"], "text": segment["text"],
+                 "char_start": 0, "char_end": len(segment["text"]),
+                 "start_ms": segment["start_ms"], "end_ms": segment["end_ms"]}]
     previous = 0
     for item in items:
         start, end = item["start_ms"], item["end_ms"]
@@ -104,7 +112,7 @@ def verify_plan(ir: dict, plan: dict) -> None:
     for row in rows:
         local = [c for c in plan["cues"] if c["segment_id"] == row["id"]]
         if not local:
-            raise ValueError("短字幕缺少配音段")
+            raise ValueError(f"短字幕缺少配音段：{row['id']}")
         cursor = 0
         for cue in local:
             if cue["char_start"] != cursor or cue["text"] != row["text"][cursor:cue["char_end"]]:

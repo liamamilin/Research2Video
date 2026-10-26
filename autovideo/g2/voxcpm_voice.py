@@ -50,9 +50,12 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
     started = time.monotonic()
     if voice not in VOXCPM_VOICES:
         raise ValueError('Unsupported local voice')
-    plan_path = plan_path.resolve(); output_dir = output_dir.resolve()
-    if not plan_path.is_relative_to(ROOT) or not output_dir.is_relative_to(ROOT):
-        raise ValueError('Invalid voice workspace')
+    from g2.workspace import project_path
+    try:
+        plan_path = project_path(ROOT, plan_path)
+        output_dir = project_path(ROOT, output_dir)
+    except ValueError as exc:
+        raise ValueError('Invalid voice workspace') from exc
     plan = json.loads(plan_path.read_text())
     steps = int(plan.get('voice_settings', {}).get('steps', 10))
     if not 4 <= steps <= 50:
