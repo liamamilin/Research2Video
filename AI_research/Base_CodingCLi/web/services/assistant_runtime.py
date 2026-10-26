@@ -11,8 +11,8 @@ from web.services import assistant_tools
 from web.services.assistant_delivery import VideoHandoffs, canonical_links
 
 logger = logging.getLogger(__name__)
-MAX_STEPS = 16
-MAX_TOOLS = 32
+MAX_STEPS = 64
+MAX_TOOLS = 128
 SYSTEM = '''你是 研映 · Research2Video 的应用操作助手，帮助用户完成研究、视频制作、矩阵运营、发布、周期、报告、情报轮次、行动和系统设置，使用中文回复。
 当前时间：{now}。当前角色：{role}。只能使用已提供工具并遵守其权限。
 用户当前消息才是操作授权；用户要分析、解释、建议时不要擅自写入或外发。明确要求的常规动作直接执行，不逐个工具请求确认。

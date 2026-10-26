@@ -116,3 +116,22 @@ def test_tool_limit_does_not_execute_the_pending_write_or_replay_successes(clien
     assert response['continuation']['pending_tools'] == ['create_job']
     assert (root / 'jobs/research/first.yaml').exists()
     assert not (root / 'jobs/research/second.yaml').exists()
+
+
+def test_default_tool_budget_executes_128_calls_and_preserves_the_129th(client, monkeypatch):
+    calls = [ToolCall(id=str(index), name='list_jobs', arguments={}) for index in range(129)]
+    fake_llm(monkeypatch, [ChatResponse(tool_calls=calls)])
+    result = client.post('/api/assistant', headers=login(client), json={'message': '查询已有任务'}).json()
+    assert len(result['actions']) == 128
+    assert all(action['ok'] for action in result['actions'])
+    assert result['continuation']['steps'] == 128
+    assert result['continuation']['pending_tools'] == ['list_jobs']
+
+
+def test_default_model_budget_allows_64_rounds_before_continuation(client, monkeypatch):
+    fake_llm(monkeypatch, [tool('list_jobs') for _ in range(65)])
+    result = client.post('/api/assistant', headers=login(client), json={'message': '继续读取任务信息'}).json()
+    assert len(result['actions']) == 64
+    assert all(action['ok'] for action in result['actions'])
+    assert result['continuation']['steps'] == 64
+    assert result['continuation']['pending_tools'] == []
