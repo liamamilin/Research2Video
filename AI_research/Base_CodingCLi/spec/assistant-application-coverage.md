@@ -6,6 +6,7 @@
 
 | 业务 | 操作入口 | 当前验证方式 |
 | --- | --- | --- |
+| 全局运营总览 | 助手顶部「全局总览」、`query_operations_overview` | 跨矩阵待处理 / 进行中 / 当前账号可发布；完整统计与分页、归属与版本、部分失败及权限回归；真实数据和助手查询见 [2026-10-26 验收](acceptance/assistant-overview-20261026.md) |
 | 矩阵、任务与继承 | `query_matrices`、`manage_matrix`、`configure_production` | 原生 API 回归；已有真实助手矩阵验收 |
 | 现有矩阵运营概览 | `inspect_matrix_operations` | 按矩阵聚合来源、任务、周期、继承与平台候选；平台队列注明范围；软件矩阵真实验收 |
 | 成套配置 | `configure_matrix_task` | 同一次操作连接矩阵、共享来源、研究任务和配方；返回准确生产配置 key；本轮真实助手复验 |

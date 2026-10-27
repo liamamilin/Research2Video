@@ -297,6 +297,18 @@ describe("Video script review", () => {
     expect(screen.getByText("测验 1/2")).toBeTruthy();
     expect(screen.getByText("前缀稳不稳决定缓存省不省钱")).toBeTruthy();
   });
+
+  it("loads draft-only styles and fact labels when entering the draft tab", async () => {
+    mockApi(ADAPTED);
+    renderPage("/video/s1?tab=review");
+    await screen.findByRole("tab", { name: "审校", selected: true });
+    expect(calls.some(c => /\/styles|\/facts/.test(c.url))).toBe(false);
+    fireEvent.click(screen.getByRole("tab", { name: "稿件" }));
+    await screen.findByLabelText("语气");
+    await waitFor(() => expect(screen.getByText("F3").getAttribute("title")).toContain("比不开缓存贵 25%"));
+    expect(calls.filter(c => c.url.includes("/styles"))).toHaveLength(1);
+    expect(calls.filter(c => c.url.includes("/facts"))).toHaveLength(1);
+  });
 });
 
 

@@ -92,6 +92,8 @@ def main() -> None:
                 assistant_store.get_settings = lambda: snapshot
                 identity = latest[0] if latest else "benchmark"
                 handlers["assistant_recovery"] = lambda **kw: assistant_store.AssistantStore().conversation({"id": identity, "username": str(identity)})
+                from web.services import assistant_overview
+                handlers["assistant_overview"] = lambda **kw: assistant_overview.overview({"id": identity, "username": str(identity), "role": "admin"}, limit=15)
                 from starlette.requests import Request
                 from web.deps import current_user
                 from web.server import create_app

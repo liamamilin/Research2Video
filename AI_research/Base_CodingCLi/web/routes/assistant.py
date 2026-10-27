@@ -46,6 +46,16 @@ def capabilities(request: Request, user=Depends(require_viewer)):
     return query(request, user)
 
 
+@router.get('/overview')
+def operations_overview(matrix: str = Query(default='', max_length=80),
+                        platform: str = Query(default='', max_length=40),
+                        view: Literal['attention', 'working', 'publish'] = 'attention',
+                        offset: int = Query(default=0, ge=0), limit: int = Query(default=20, ge=1, le=50),
+                        user=Depends(require_viewer)):
+    from web.services.assistant_overview import overview
+    return overview(user, matrix=matrix, platform=platform, view=view, offset=offset, limit=limit)
+
+
 class Message(BaseModel):
     model_config = ConfigDict(extra="forbid")
     role: Literal["user", "assistant"]

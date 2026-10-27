@@ -13,6 +13,11 @@ describe("Report reader", () => {
     await screen.findByText("第一部分");
     expect([...container.querySelectorAll("h2")].map((h) => h.id)).toEqual(["结论", "结论-1"]);
     expect(screen.getAllByRole("button", { name: "结论" })).toHaveLength(2);
+    const originalBody = container.querySelector(".md-body h2");
+    fireEvent.click(screen.getByRole("button", { name: "目录" }));
+    fireEvent.click(screen.getByRole("button", { name: "目录" }));
+    expect(container.querySelector(".md-body h2")).toBe(originalBody);
+    expect([...container.querySelectorAll("h2")].map((h) => h.id)).toEqual(["结论", "结论-1"]);
   });
 
   it("keeps the report readable after a refresh fails and offers retry", async () => {

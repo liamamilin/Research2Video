@@ -1,0 +1,108 @@
+{
+  "measured_at": "2026-10-26T22:17:21+0800",
+  "scope": "local read handlers with SQLite snapshots; excludes browser/auth/gateway",
+  "handlers": {
+    "assistant_recovery": {
+      "samples_ms": [
+        4.5,
+        3.2,
+        3.1
+      ],
+      "median_ms": 3.2,
+      "max_ms": 4.5,
+      "serialization_median_ms": 3.2,
+      "total_samples_ms": [
+        7.7,
+        6.3,
+        6.3
+      ],
+      "total_median_ms": 6.3,
+      "response_bytes": 95672
+    },
+    "assistant_overview": {
+      "samples_ms": [
+        237.9,
+        57.5,
+        55.1
+      ],
+      "median_ms": 57.5,
+      "max_ms": 237.9,
+      "serialization_median_ms": 0.3,
+      "total_samples_ms": [
+        238.2,
+        57.8,
+        55.4
+      ],
+      "total_median_ms": 57.8,
+      "response_bytes": 4598
+    },
+    "assistant_tasks": {
+      "samples_ms": [
+        443.6,
+        309.7,
+        268.5
+      ],
+      "median_ms": 309.7,
+      "max_ms": 443.6,
+      "serialization_median_ms": 6.5,
+      "total_samples_ms": [
+        450.1,
+        316.4,
+        274.9
+      ],
+      "total_median_ms": 316.4,
+      "response_bytes": 251988
+    },
+    "assistant_workspace_0": {
+      "samples_ms": [
+        365.6,
+        195.3,
+        186.8
+      ],
+      "median_ms": 195.3,
+      "max_ms": 365.6,
+      "serialization_median_ms": 0.8,
+      "total_samples_ms": [
+        366.5,
+        196.2,
+        187.6
+      ],
+      "total_median_ms": 196.2,
+      "response_bytes": 22824
+    },
+    "assistant_workspace_1": {
+      "samples_ms": [
+        163.7,
+        162.9,
+        167.1
+      ],
+      "median_ms": 163.7,
+      "max_ms": 167.1,
+      "serialization_median_ms": 0.3,
+      "total_samples_ms": [
+        164.0,
+        163.3,
+        167.5
+      ],
+      "total_median_ms": 164.0,
+      "response_bytes": 7792
+    },
+    "assistant_workspace_2": {
+      "samples_ms": [
+        206.8,
+        117.0,
+        123.5
+      ],
+      "median_ms": 123.5,
+      "max_ms": 206.8,
+      "serialization_median_ms": 1.0,
+      "total_samples_ms": [
+        207.8,
+        118.0,
+        124.4
+      ],
+      "total_median_ms": 124.4,
+      "response_bytes": 27061
+    }
+  }
+}

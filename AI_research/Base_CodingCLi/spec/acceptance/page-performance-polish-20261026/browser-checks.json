@@ -1,0 +1,541 @@
+{
+  "measurement": "Navigation to visible main content, includes automation overhead; cached lists refresh in background. Not LCP/FCP.",
+  "baselinePartial": [
+    {
+      "page": "产出",
+      "ms": 1903,
+      "error": false,
+      "characters": 2292
+    },
+    {
+      "page": "视频看板",
+      "ms": 619,
+      "error": false,
+      "characters": 618
+    },
+    {
+      "page": "文稿",
+      "ms": 1072,
+      "error": false,
+      "characters": 4441
+    },
+    {
+      "page": "成片与发布",
+      "ms": 706,
+      "error": false,
+      "characters": 23807
+    },
+    {
+      "page": "平台管理",
+      "ms": 827,
+      "error": false,
+      "characters": 14580
+    }
+  ],
+  "baselineRemaining": [
+    {
+      "page": "研究总览",
+      "ms": 5117,
+      "error": false,
+      "characters": 112,
+      "heading": "研究总览\n\n查看研究任务的运行、近期报告与资源使用情况。\n\n情报轮次 ↗\n刷新\n系统 正常\n全部 Job\n—\n已启用\n—\n运行中\n—\n上次失败\n—\n用量、预算与"
+    },
+    {
+      "page": "Jobs",
+      "ms": 315,
+      "error": false,
+      "characters": 9156,
+      "heading": "Jobs\n\n按矩阵或分类查找研究任务，查看运行结果与任务配置。\n\n刷新\n模板库\n+ 新建\n全部\n启用\n停用\n运行中\n上次失败\n|\n全部时间\n今天修改\n近 7 天"
+    },
+    {
+      "page": "情报轮次",
+      "ms": 254,
+      "error": false,
+      "characters": 1227,
+      "heading": "情报轮次\n\n跟踪多阶段研究的执行与产物，按轮次检查失败和待补跑的阶段。\n\n刷新\n补跑未完成阶段\n运行今日轮次\n2026-10-22\n4/10 完成\n2.03M "
+    },
+    {
+      "page": "报告",
+      "ms": 189,
+      "error": false,
+      "characters": 3659,
+      "heading": "报告\n\n按日期与分类浏览研究资料，或通过全文搜索查找证据。\n\n刷新\n共 25 篇\n搜索\n目录\n▾\narena\n1\n本周 AI 模型竞技场研究简报（2026-10"
+    },
+    {
+      "page": "周期调度",
+      "ms": 425,
+      "error": false,
+      "characters": 4998,
+      "heading": "周期调度\n\n安排研究任务，确认下一次运行与实际执行状态。\n\n帮助\n刷新\n+ 新建调度\n12已启用\n16 个已暂停\n0 个待检查 / 验证\nAsia/Shangh"
+    },
+    {
+      "page": "选题",
+      "ms": 439,
+      "error": false,
+      "characters": 1362,
+      "heading": "选题\n\n选择视频类型，再从对应来源挑选条目。整份报告改编可从矩阵研究任务进入。\n\n刷新选题\n视频类型\n深度解读 · 开发者 · B 站横屏长 · 8 条待写\n快"
+    },
+    {
+      "page": "信息源",
+      "ms": 311,
+      "error": false,
+      "characters": 10135,
+      "heading": "信息源\n\n查看共享信息源、引用它的研究任务，以及最近一次抓取结果。\n\n新增信息源\n刷新\n登记与引用信息源\n全部 74\n有 Job 在用\n还没人用\n最近抓取失败 "
+    },
+    {
+      "page": "文稿配方",
+      "ms": 225,
+      "error": false,
+      "characters": 624,
+      "heading": "文稿配方\n\n根据素材，产出目标观众愿意看、听得懂、想继续看的视频。这里调整每类视频的创作方向和生成方式，保存后用于新稿。\n\n文稿配方（9）\n\n深度解读 · 开发"
+    },
+    {
+      "page": "设置",
+      "ms": 499,
+      "error": false,
+      "characters": 2715,
+      "heading": "设置\n\n管理模型与服务配置、账号权限和系统运行记录。\n\n系统配置\n用户管理\n审计日志\n运行日志\n视频输出位置\n\n成片、制作文件和缓存保存到所选文件夹。切换时会一"
+    }
+  ],
+  "firstAfter": [
+    {
+      "page": "产出",
+      "ms": 460,
+      "error": false,
+      "characters": 2292
+    },
+    {
+      "page": "视频看板",
+      "ms": 720,
+      "error": false,
+      "characters": 618
+    },
+    {
+      "page": "文稿",
+      "ms": 524,
+      "error": false,
+      "characters": 4441
+    },
+    {
+      "page": "成片与发布",
+      "ms": 531,
+      "error": false,
+      "characters": 6225
+    },
+    {
+      "page": "平台管理",
+      "ms": 467,
+      "error": false,
+      "characters": 14580
+    },
+    {
+      "page": "助手",
+      "ms": 3396,
+      "error": false,
+      "characters": 17706
+    },
+    {
+      "page": "研究总览",
+      "ms": 1146,
+      "error": false,
+      "characters": 589
+    },
+    {
+      "page": "Jobs",
+      "ms": 1257,
+      "error": false,
+      "characters": 9156
+    },
+    {
+      "page": "情报轮次",
+      "ms": 2175,
+      "error": false,
+      "characters": 1227
+    },
+    {
+      "page": "报告",
+      "ms": 393,
+      "error": false,
+      "characters": 3659
+    },
+    {
+      "page": "周期调度",
+      "ms": 541,
+      "error": false,
+      "characters": 4998
+    },
+    {
+      "page": "选题",
+      "ms": 215,
+      "error": false,
+      "characters": 1407
+    },
+    {
+      "page": "信息源",
+      "ms": 832,
+      "error": false,
+      "characters": 10135
+    },
+    {
+      "page": "文稿配方",
+      "ms": 325,
+      "error": false,
+      "characters": 624
+    },
+    {
+      "page": "设置",
+      "ms": 691,
+      "error": false,
+      "characters": 2832
+    },
+    {
+      "page": "矩阵",
+      "ms": 630,
+      "error": false,
+      "characters": 1234
+    }
+  ],
+  "finalMain": [
+    {
+      "round": 1,
+      "page": "产出",
+      "ms": 645,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "视频看板",
+      "ms": 869,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "文稿",
+      "ms": 1505,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "成片与发布",
+      "ms": 354,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "平台管理",
+      "ms": 338,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "助手",
+      "ms": 2413,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "研究总览",
+      "ms": 399,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "Jobs",
+      "ms": 508,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "情报轮次",
+      "ms": 334,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "报告",
+      "ms": 396,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "周期调度",
+      "ms": 514,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "选题",
+      "ms": 340,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "信息源",
+      "ms": 714,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "文稿配方",
+      "ms": 252,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "设置",
+      "ms": 289,
+      "error": false
+    },
+    {
+      "round": 1,
+      "page": "矩阵",
+      "ms": 433,
+      "error": false
+    },
+    {
+      "round": 2,
+      "page": "产出",
+      "ms": 630,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "视频看板",
+      "ms": 502,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "文稿",
+      "ms": 453,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "成片与发布",
+      "ms": 369,
+      "error": false
+    },
+    {
+      "round": 2,
+      "page": "平台管理",
+      "ms": 311,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "助手",
+      "ms": 3341,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "研究总览",
+      "ms": 209,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "Jobs",
+      "ms": 315,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "情报轮次",
+      "ms": 290,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "报告",
+      "ms": 261,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "周期调度",
+      "ms": 313,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "选题",
+      "ms": 228,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "信息源",
+      "ms": 792,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "文稿配方",
+      "ms": 204,
+      "error": false
+    },
+    {
+      "round": 2,
+      "page": "设置",
+      "ms": 332,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    },
+    {
+      "round": 2,
+      "page": "矩阵",
+      "ms": 304,
+      "error": false,
+      "refreshError": false,
+      "refreshed": true
+    }
+  ],
+  "matrixTabs": [
+    {
+      "page": "矩阵/栏目",
+      "ms": 240,
+      "error": false
+    },
+    {
+      "page": "矩阵/研究来源",
+      "ms": 225,
+      "error": false
+    },
+    {
+      "page": "矩阵/运行记录",
+      "ms": 487,
+      "error": false
+    },
+    {
+      "page": "矩阵/周期",
+      "ms": 197,
+      "error": false
+    },
+    {
+      "page": "矩阵/矩阵设置",
+      "ms": 203,
+      "error": false
+    }
+  ],
+  "scriptTabs": [
+    {
+      "page": "文稿/稿件",
+      "ms": 215,
+      "error": false,
+      "characters": 1760
+    },
+    {
+      "page": "文稿/审校",
+      "ms": 193,
+      "error": false,
+      "characters": 451
+    },
+    {
+      "page": "文稿/成片",
+      "ms": 199,
+      "error": false,
+      "characters": 701
+    },
+    {
+      "page": "文稿/发布",
+      "ms": 205,
+      "error": false,
+      "characters": 819
+    },
+    {
+      "page": "文稿/版本对比",
+      "ms": 427,
+      "error": false,
+      "characters": 2909
+    }
+  ],
+  "settingsTabs": [
+    {
+      "page": "设置/用户管理",
+      "ms": 362,
+      "error": false,
+      "characters": 377
+    },
+    {
+      "page": "设置/审计日志",
+      "ms": 467,
+      "error": false,
+      "characters": 39880
+    },
+    {
+      "page": "设置/运行日志",
+      "ms": 500,
+      "error": false,
+      "characters": 77550
+    }
+  ],
+  "platforms": [
+    {
+      "page": "平台/哔哩哔哩（B站）",
+      "ms": 458,
+      "error": false,
+      "characters": 14580
+    },
+    {
+      "page": "平台/抖音",
+      "ms": 368,
+      "error": false,
+      "characters": 15750
+    },
+    {
+      "page": "平台/快手",
+      "ms": 306,
+      "error": false,
+      "characters": 13231
+    },
+    {
+      "page": "平台/小红书",
+      "ms": 184,
+      "error": false,
+      "characters": 3142
+    }
+  ],
+  "otherVerified": [
+    "任务视频配置",
+    "任务概览",
+    "任务 YAML 编辑器",
+    "任务日志",
+    "任务运行历史",
+    "报告正文及目录收起/展开",
+    "配方 YAML 编辑器",
+    "共享部件 YAML 编辑器"
+  ],
+  "publishPagination": {
+    "total": 82,
+    "initialCards": 24,
+    "afterShowMore": 48,
+    "refreshPassed": true
+  }
+}

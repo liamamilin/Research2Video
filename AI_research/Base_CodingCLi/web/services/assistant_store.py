@@ -85,6 +85,14 @@ class AssistantStore:
             result['refs'] = json.loads(result['refs'])
             result['context'] = json.loads(result['context'])
             records = list(reversed(db.execute('SELECT * FROM requests WHERE conversation_id=? ORDER BY created DESC LIMIT 60', (row['id'],)).fetchall()))
+            # Recover receipts in one indexed read, rather than one query per message.
+            operations_by_request: dict[str, list] = {}
+            if records:
+                ids = [record['id'] for record in records]
+                for operation in db.execute(
+                    f"SELECT * FROM operations WHERE request_id IN ({','.join('?' for _ in ids)}) ORDER BY created", ids
+                ):
+                    operations_by_request.setdefault(operation['request_id'], []).append(operation)
             result['requests'] = []
             for record in records:
                 item = dict(record)
@@ -95,7 +103,7 @@ class AssistantStore:
                     db.execute("UPDATE requests SET status='interrupted',result=? WHERE id=?",
                                (json.dumps(item['result'], ensure_ascii=False), item['id']))
                 known = {action.get('operation_id') for action in item['result'].get('actions', [])}
-                for operation in db.execute('SELECT * FROM operations WHERE request_id=? ORDER BY created', (item['id'],)).fetchall():
+                for operation in operations_by_request.get(item['id'], []):
                     if operation['id'] in known or item['status'] == 'running':
                         continue
                     operation_result = json.loads(operation['result']) if operation['result'] else {}
@@ -163,8 +171,12 @@ class AssistantStore:
                 raise ValueError('对话不存在或无权访问')
 
     def operations(self, user: dict, conversation_id: str) -> list[dict]:
-        self.conversation(user, conversation_id)  # Ownership check also applies to empty conversations.
         with self.db() as db:
+            # Ownership includes empty conversations, without decoding/recovering
+            # the entire history a second time when the workspace already read it.
+            if not db.execute('SELECT 1 FROM conversations WHERE id=? AND user_id=?',
+                              (conversation_id, identity(user))).fetchone():
+                raise ValueError('对话不存在或无权访问')
             rows = db.execute('''SELECT o.* FROM operations o JOIN requests r ON o.request_id=r.id
                 WHERE r.conversation_id=? AND r.user_id=? ORDER BY o.created DESC LIMIT 80''',
                 (conversation_id, identity(user))).fetchall()

@@ -6,6 +6,9 @@ import { lazy } from "react";
 import { Layout } from "./Layout";
 import { useAppStore } from "@/lib/app-store";
 import { useAuthStore } from "@/lib/auth-store";
+import { preloadPage } from "@/lib/page-modules";
+
+vi.mock("@/lib/page-modules", () => ({ preloadPage: vi.fn() }));
 
 function stubMatchMedia(matches: boolean) {
   vi.stubGlobal("matchMedia", vi.fn().mockImplementation((query: string) => ({
@@ -34,6 +37,7 @@ function renderLayout() {
 }
 
 beforeEach(() => {
+  vi.mocked(preloadPage).mockClear();
   useAuthStore.setState({
     user: {
       id: 1,
@@ -53,6 +57,19 @@ afterEach(() => {
 });
 
 describe("Layout sidebar", () => {
+  it("warms internal destination code on pointer, keyboard and touch intent", () => {
+    stubMatchMedia(true);
+    renderLayout();
+    const reports = screen.getByRole("link", { name: "报告" });
+    fireEvent.pointerOver(reports);
+    fireEvent.focus(reports);
+    fireEvent.touchStart(reports);
+    expect(preloadPage).toHaveBeenCalledTimes(3);
+    expect(preloadPage).toHaveBeenLastCalledWith("/reports");
+    expect(screen.getByText("home page")).toBeTruthy();
+    fireEvent.pointerOver(screen.getByRole("button", { name: "让助手处理当前页面" }));
+    expect(preloadPage).toHaveBeenCalledTimes(3);
+  });
   it("keeps navigation available while the next page module loads", () => {
     stubMatchMedia(true);
     const PendingPage = lazy(() => new Promise<{ default: () => null }>(() => {}));

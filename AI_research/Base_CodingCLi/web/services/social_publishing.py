@@ -233,14 +233,17 @@ def candidates(platform: str) -> list[dict]:
     owner = uid(platform)
     targets = {(r['script_id'],r['version']) for r in store(platform).list(uid=owner,kind='UPLOAD')}
     with video_store.connect() as conn:
-        rows = conn.execute("SELECT r.*,s.archived,s.status AS script_status,s.current_version,s.approved_version "
+        rows = conn.execute("SELECT r.id,r.script_id,r.version,r.title,r.completed_at,r.artifacts,"
+                            "s.archived,s.status AS script_status,s.current_version,s.approved_version "
                             "FROM renders r JOIN scripts s ON s.id=r.script_id "
-                            f"WHERE r.status='COMPLETED' AND {content_guard.PUBLISHABLE_SQL} "
-                            "ORDER BY r.completed_at DESC,r.created_at DESC").fetchall()
+                            f"WHERE r.status='COMPLETED' AND {content_guard.PUBLISHABLE_SQL} AND NOT EXISTS "
+                            "(SELECT 1 FROM publications p WHERE p.script_id=r.script_id AND p.version=r.version "
+                            "AND p.platform=? AND (p.account_uid=? OR p.account_uid='')) "
+                            "ORDER BY r.completed_at DESC,r.created_at DESC,r.id DESC", (platform, owner)).fetchall()
     seen, values = set(), []
     for raw in rows:
         row = dict(raw); target = (row['script_id'],row['version'])
-        if target in targets or target in seen or video_store.has_publication(*target,platform,owner):
+        if target in targets or target in seen:
             continue
         render = {'id':row['id'],'artifacts':json.loads(row['artifacts'])}
         if video_render.safe_file(render,'video.mp4') is None:

@@ -21,6 +21,18 @@ afterEach(() => {
 });
 
 describe("Publish queue", () => {
+  it("bounds initial cards, reveals the rest, and searches the entire list", async () => {
+    const many = Array.from({ length: 53 }, (_, index) => ({ ...ROWS[1], script_id: `s${index}`, title: `成片第${index}期` }));
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(many) }) as Response));
+    const { container } = render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
+    await screen.findByText("成片第0期");
+    expect(container.querySelectorAll("li")).toHaveLength(24);
+    fireEvent.click(screen.getByRole("button", { name: "显示更多成片" }));
+    expect(container.querySelectorAll("li")).toHaveLength(48);
+    fireEvent.change(screen.getByPlaceholderText("搜索视频或来源任务"), { target: { value: "成片第52期" } });
+    expect(await screen.findByText("成片第52期")).toBeTruthy();
+    expect(container.querySelectorAll("li")).toHaveLength(1);
+  });
   it("shows this login's last list immediately on return, then replaces it with fresh statuses", async () => {
     useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
     render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);

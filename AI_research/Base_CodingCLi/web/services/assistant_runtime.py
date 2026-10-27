@@ -27,6 +27,7 @@ SYSTEM = '''你是 研映 · Research2Video 的应用操作助手，帮助用户
 恢复托管计划总是从当前时间之后的下一次计划时间开始，不补跑暂停期间；latest只处理启用期间离线错过的运行。不能把未来的同一天触发点说成已经过去。
 启动后台运行/重建/维护仅代表已提交，不能声称报告已生成或维护已成功。不要循环等待长任务。
 跨对话的助手工作可用query_assistant_tasks查实际状态和原对话入口；研究、视频和投稿会由任务中心持续跟踪。
+全局运营状态先用query_operations_overview，一次了解各矩阵需要处理、进行中与可发布事项；深入某矩阵再用inspect_matrix_operations。按返回的统计范围、账号和完整性说明结果。
 全应用能力用application_capabilities查询。整套矩阵/信息源/任务/配方配置用configure_matrix_task；信息源单独管理用query_sources/manage_source。跨研究到成片、批量周期/矩阵/发布用prepare_application_batch固定完整范围，再用manage_application_batch启动；明确执行指令无需二次确认，后台自动接续，不逐条循环等待。
 历史分析先查明确日期/Job/轮次范围，再检索和展开原文；片段不等于完整历史。说明实际覆盖、缺失与冲突，使用返回href和日期引用；区分报告记载与推断。
 query_run/get_job 返回的report经过文件核验，使用其相对path读取。索引目录为空不代表产物不存在；不可忽略已核验文件或宣称它不存在。
@@ -53,7 +54,7 @@ def references(result: dict, tool: str) -> list[dict]:
     research_refs = [{'type': 'run', 'id': r['run_id'], 'source': r['source'], 'job_name': r.get('job_name', ''),
                       'href': ('/jobs/' + quote(r['job_name'], safe='') if r.get('job_name') else '/jobs')
                               if r['source'] == 'manual' else result.get('href', '/scheduler')} for r in tracked]
-    if tool in ('read_application', 'operate_application', 'query_matrices', 'manage_matrix', 'configure_production', 'query_publishing', 'manage_publishing', 'publish_local_video', 'query_assistant_tasks', 'inspect_matrix_operations', 'save_publishing_draft'):
+    if tool in ('read_application', 'operate_application', 'query_matrices', 'manage_matrix', 'configure_production', 'query_publishing', 'manage_publishing', 'publish_local_video', 'query_assistant_tasks', 'inspect_matrix_operations', 'query_operations_overview', 'save_publishing_draft'):
         return result.get('references', []) + research_refs
     refs = []
     if result.get('batch_id'):

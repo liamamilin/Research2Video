@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "ms": 1896,
+      "error": false,
+      "historyButton": true,
+      "characters": 12030
+    },
+    {
+      "ms": 1318,
+      "error": false,
+      "historyButton": true,
+      "characters": 12030
+    }
+  ],
+  "longTail": {
+    "completedSamples": 2,
+    "thirdSample": "Selector deadline reached while waiting for workspace; subsequent UI inspection confirmed returned data. Duration excluded."
+  },
+  "transcript": {
+    "initialAssistantReplies": 10,
+    "expandedAssistantReplies": 17
+  }
+}

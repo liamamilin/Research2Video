@@ -21,6 +21,7 @@ const RENDER_NOTE: Record<string, string> = {
 // Reuse this login's last list on return; always fetch fresh statuses in the background.
 // A different login gets a different user object, so its data is never reused.
 const previousShipments = new WeakMap<object, Shipment[]>();
+const PAGE_SIZE = 24;
 
 function state(s: Shipment): { label: string; cls: string } {
   if (s.render?.status === "COMPLETED") {
@@ -45,9 +46,13 @@ export function PublishQueuePage() {
   const { data, error, loading, reload } = usePageResource(load, 20000);
   const rows = data ?? (user ? previousShipments.get(user) : undefined) ?? null;
   const [advanced, setAdvanced] = useState(false);
-  const cellName = (key: string) => rows?.find((r) => r.column_key === key)?.column_label ?? key;
+  const columnNames = new Map(rows?.map(r => [r.column_key, r.column_label || r.column_key]));
+  const cellName = (key: string) => columnNames.get(key) ?? key;
 
   const { values: f } = filters;
+  const viewKey = JSON.stringify(f);
+  const [page, setPage] = useState({ key: viewKey, limit: PAGE_SIZE });
+  const limit = page.key === viewKey ? page.limit : PAGE_SIZE;
   const scope = (rows ?? []).filter((s) => !f.matrix || (s.matrix || "_independent") === f.matrix);
   const matrixOptions = [...new Map((rows ?? []).map((s) => [s.matrix || "_independent", s.matrix_name || "独立视频"]))];
   const shown = scope.filter(
@@ -60,6 +65,22 @@ export function PublishQueuePage() {
       inRange(s.render?.completed_at ?? s.created_at, f.range) &&
       matchesText(f.q, s.title, s.job_name, s.matrix_name),
   );
+  const groups = new Map<string, { name: string; total: number; rows: Shipment[] }>();
+  const stages = new Map<string, number>();
+  for (const row of scope) {
+    const label = state(row).label;
+    stages.set(label, (stages.get(label) ?? 0) + 1);
+  }
+  shown.forEach((row, index) => {
+    const key = row.matrix || "_independent";
+    let group = groups.get(key);
+    if (!group) {
+      group = { name: row.matrix_name || "独立视频", total: 0, rows: [] };
+      groups.set(key, group);
+    }
+    group.total++;
+    if (index < limit) group.rows.push(row);
+  });
   const facets: Facet[] = [
     { key: "stage", label: "阶段", options: ["待核实", "成片完成", "待出片", "生成中", "出片失败"].map((v) => ({ value: v, label: v })) },
     { key: "tier", label: "可信度", options: (Object.keys(TIER_LABEL) as (keyof typeof TIER_LABEL)[]).map((k) => ({ value: k, label: TIER_LABEL[k] })) },
@@ -74,12 +95,12 @@ export function PublishQueuePage() {
       {error ? <ErrorState error={error} onRetry={reload} compact /> : null}
       {rows && loading ? <p role="status" className="text-xs text-text-muted">正在更新成片状态…</p> : null}
       <div className="flex flex-wrap gap-2"><select aria-label="成片矩阵" className="input w-auto text-xs max-w-full" value={f.matrix} onChange={(e) => filters.set("matrix", e.target.value)}><option value="">全部矩阵</option>{matrixOptions.map(([key,name]) => <option key={key} value={key}>{name}</option>)}</select><DistributionFilters platform={f.platform} status={f.distribution} onPlatform={v => filters.set("platform", v)} onStatus={v => filters.set("distribution", v)} /><button className="btn text-xs" aria-expanded={advanced} onClick={() => setAdvanced(!advanced)}><SlidersHorizontal className="w-3.5 h-3.5" />筛选</button></div>
-      {rows ? <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{["待核实", "成片完成", "待出片", "出片失败"].map((label) => <button key={label} aria-pressed={f.stage === label} onClick={() => filters.set("stage", f.stage === label ? "" : label)} className={cn("card p-4 text-left hover:bg-bg-hover", f.stage === label && "border-accent")}><div className="text-xs text-text-muted">{label}</div><div className="text-2xl mt-1 font-semibold">{scope.filter((s) => state(s).label === label).length}</div></button>)}</div> : !error ? <ErrorState empty="正在读取成片…" /> : null}
+      {rows ? <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">{["待核实", "成片完成", "待出片", "出片失败"].map((label) => <button key={label} aria-pressed={f.stage === label} onClick={() => filters.set("stage", f.stage === label ? "" : label)} className={cn("card p-4 text-left hover:bg-bg-hover", f.stage === label && "border-accent")}><div className="text-xs text-text-muted">{label}</div><div className="text-2xl mt-1 font-semibold">{stages.get(label) ?? 0}</div></button>)}</div> : !error ? <ErrorState empty="正在读取成片…" /> : null}
       {rows ? <FilterBar facets={advanced ? facets : []} filters={filters} shown={shown.length} total={scope.length} placeholder="搜索视频或来源任务" /> : null}
       {rows && !shown.length ? <section className="card p-8 text-center text-sm text-text-muted">{rows.length ? "没有符合筛选的成片" : "还没有已定稿的文稿"}{filters.active ? <button className="btn text-xs ml-3" onClick={filters.clear}>清除筛选</button> : <Link className="text-accent ml-3 hover:underline" to="/video">查看文稿</Link>}</section> : null}
-      <div className={cn("grid gap-5 items-start", !f.matrix && "xl:grid-cols-2")}>{[...new Set(shown.map((s) => s.matrix || "_independent"))].map((matrix) => <section key={matrix} className="space-y-3"><h2 className="text-sm font-medium flex items-center gap-2">{shown.find((s) => (s.matrix || "_independent") === matrix)?.matrix_name || "独立视频"}<span className="text-xs font-normal text-text-muted">{shown.filter((s) => (s.matrix || "_independent") === matrix).length} 个视频</span></h2>
+      <div className={cn("grid gap-5 items-start", !f.matrix && "xl:grid-cols-2")}>{[...groups].filter(([, group]) => group.rows.length).map(([matrix, group]) => <section key={matrix} className="space-y-3"><h2 className="text-sm font-medium flex items-center gap-2">{group.name}<span className="text-xs font-normal text-text-muted">{group.total} 个视频</span></h2>
       <ul className={cn("grid gap-3", f.matrix && "xl:grid-cols-2")}>
-        {shown.filter((s) => (s.matrix || "_independent") === matrix).map((s) => {
+        {group.rows.map((s) => {
           const st = state(s);
           return (
             <li key={s.script_id} className="card p-4 space-y-3 min-w-0">
@@ -114,6 +135,10 @@ export function PublishQueuePage() {
           );
         })}
       </ul></section>)}</div>
+      {shown.length > PAGE_SIZE ? <div className="flex justify-center items-center gap-3 text-xs text-text-muted">
+        <span>已展示 {Math.min(limit, shown.length)} / {shown.length} 个视频</span>
+        {limit < shown.length ? <button className="btn text-xs" onClick={() => setPage({ key: viewKey, limit: limit + PAGE_SIZE })}>显示更多成片</button> : null}
+      </div> : null}
     </div>
   );
 }

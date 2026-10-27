@@ -118,6 +118,21 @@ export function VideoScriptViewPage() {
     return () => { flight.current?.abort(); flight.current = null; };
   }, [load]);
 
+  const staged = detail && ["DRAFT", "APPROVED"].includes(detail.status);
+  const localVideo = detail?.topic.local_video;
+  const tabs: ScriptTab[] = localVideo ? ['video', 'publish'] : !detail ? [] : !staged && !detail.renders.length && !detail.publications?.length
+    ? []
+    : detail.status === "APPROVED" || detail.renders.some(r => r.status === "COMPLETED") || detail.publications?.length
+      ? ["draft", "review", "video", "publish"]
+      : detail.renders.length
+        ? ["draft", "review", "video"]
+        : ["draft", "review"];
+  if (detail && (detail.versions.length > 1 || detail.renders.length > 1)) tabs.push('compare');
+  const asked = search.get("tab") as ScriptTab | null;
+  const current = detail?.version_shown?.version === detail?.current_version;
+  const defaultTab = detail && (current || !detail.version_shown) ? nextStep(detail).tab : "draft";
+  const tab: ScriptTab = editing || !tabs.length ? "draft" : asked && tabs.includes(asked) ? asked : defaultTab;
+
   const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || Boolean(detail.stage) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.distributions?.some(row => ["QUEUED", "UPLOADING", "RUNNING", "SUBMITTED"].includes(row.task?.status ?? "") || (["kuaishou","xiaohongshu"].includes(row.platform) && row.task?.status === "UNKNOWN")));
   useEffect(() => {
     if (editing) return;
@@ -128,17 +143,17 @@ export function VideoScriptViewPage() {
   }, [busyServer, editing, load]);
 
   useEffect(() => {
-    if (!canEdit || detail?.column?.writer !== "adapt" || catalog) return;
+    if (tab !== "draft" || !canEdit || detail?.topic.article || detail?.column?.writer !== "adapt" || catalog) return;
     const controller = new AbortController();
     listVideoStyles(controller.signal).then((value) => { if (!controller.signal.aborted) setCatalog(value); }).catch(() => undefined);
     return () => controller.abort();
-  }, [canEdit, detail?.column?.writer, catalog]);
+  }, [tab, canEdit, detail?.topic.article, detail?.column?.writer, catalog]);
 
   // The fact sheet behind the version on screen, for the fact labels' tooltips.
   const sheetId = detail?.version_shown?.meta?.fact_sheet_id;
   const shownVersion = detail?.version_shown?.version;
   useEffect(() => {
-    if (!sheetId) {
+    if (tab !== "draft" || !sheetId) {
       setFacts({});
       return;
     }
@@ -147,10 +162,9 @@ export function VideoScriptViewPage() {
       .then((sheet) => { if (!controller.signal.aborted) setFacts(Object.fromEntries(sheet.facts.map((f) => [f.id, f]))); })
       .catch(() => { if (!controller.signal.aborted) setFacts({}); });
     return () => controller.abort();
-  }, [id, sheetId, shownVersion]);
+  }, [tab, id, sheetId, shownVersion]);
 
-  const localVideo = detail?.topic.local_video;
-  const needsRenderStatus = detail?.status === "APPROVED" && (search.get("tab") === "video" || (!search.get("tab") && nextStep(detail).tab === "video")) && !localVideo;
+  const needsRenderStatus = detail?.status === "APPROVED" && tab === "video" && !localVideo;
   useEffect(() => {
     if (!canEdit || !needsRenderStatus || autovideo) return;
     const controller = new AbortController();
@@ -166,7 +180,6 @@ export function VideoScriptViewPage() {
   const check = shown?.length_check;
   const problems = shown?.meta?.problems ?? [];
   const step = isCurrent || !shown ? nextStep(detail) : { tab: "draft" as const, text: `正在查看历史 v${shown.version}。返回当前 v${detail.current_version} 后可继续审校、编辑与定稿。`, tone: "wait" };
-  const staged = ["DRAFT", "APPROVED"].includes(detail.status);
   const completed = detail.renders.filter((r) => r.status === "COMPLETED");
   const publishVersions = [...new Set(completed.map((r) => r.version))];
   const publishingVersion = publishVersions.find((v) => v === (publishVersion ?? Number(search.get("publish_version"))))
@@ -174,16 +187,6 @@ export function VideoScriptViewPage() {
   const publishingRender = completed.find((r) => r.version === publishingVersion && r.files?.some(file => file.name === "video.mp4")) ?? completed.find((r) => r.version === publishingVersion);
   const publishingUpload = detail.platform_uploads?.find(task => task.version === publishingVersion);
 
-  const tabs: ScriptTab[] = localVideo ? ["video", "publish"] : !staged && !detail.renders.length && !detail.publications?.length
-    ? []
-    : detail.status === "APPROVED" || completed.length || detail.publications?.length
-      ? ["draft", "review", "video", "publish"]
-      : detail.renders.length
-        ? ["draft", "review", "video"]
-        : ["draft", "review"];
-  if (detail.versions.length > 1 || detail.renders.length > 1) tabs.push('compare');
-  const asked = search.get("tab") as ScriptTab | null;
-  const tab: ScriptTab = editing || !tabs.length ? "draft" : asked && tabs.includes(asked) ? asked : step.tab;
   const goTab = (t: ScriptTab) =>
     setSearch((prev) => {
       const next = new URLSearchParams(prev);
