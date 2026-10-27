@@ -52,7 +52,7 @@ LLM_INPUT_PER_M, LLM_OUTPUT_PER_M = PROVIDER.input_per_m, PROVIDER.output_per_m
 PROMPT_VERSION = "goal-first-v3"
 FPS = 30
 SAMPLE_RATE = 24000
-from g2.voices import VOICE_IDS, SPEEDS, mlx_engine, qwen_paths
+from g2.voices import VOICE_IDS, SPEEDS, VOXCPM_DEFAULT_CHAIN, mlx_engine, qwen_paths
 from g2 import pauses, pronunciation
 VOICE = os.environ.get("AUTOVIDEO_G2_VOICE_ID", "zf_xiaoxiao")
 OUTPUT_SPEED = float(os.environ.get("AUTOVIDEO_G2_VIDEO_SPEED", "1"))
@@ -637,7 +637,7 @@ def synthesize_and_align(plan: dict) -> dict:
     cache_metrics = None
     if use_qwen:
         voice_settings = {"steps": int(os.environ.get("AUTOVIDEO_G2_VOXCPM_STEPS", "10")),
-                          "chain": os.environ.get("AUTOVIDEO_G2_VOXCPM_CHAIN", "guarded"),
+                          "chain": os.environ.get("AUTOVIDEO_G2_VOXCPM_CHAIN", VOXCPM_DEFAULT_CHAIN),
                           "compile": os.environ.get("AUTOVIDEO_G2_VOXCPM_COMPILE", "1") != "0",
                           "reference_cache": os.environ.get("AUTOVIDEO_G2_VOXCPM_REFERENCE_CACHE", "1") != "0"} if VOICE.startswith("voxcpm_") else {}
         cache_metrics = synthesize_mlx_voice(mlx, plan, voice_settings)

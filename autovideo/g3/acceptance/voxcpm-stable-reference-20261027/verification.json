@@ -1,0 +1,82 @@
+{
+  "baseline": {
+    "phrase_rms_std_db": 1.9238410274651436,
+    "phrase_rms_range_db": 6.353837739865774,
+    "median_rms_dbfs": -19.67989368944349,
+    "total_clipped_samples": 0,
+    "qa": {
+      "status": "PASS",
+      "duration_seconds": 48.96666666666667,
+      "frames": 1469,
+      "audio_correlation": 0.9999082303641278,
+      "full_decode": "PASS",
+      "real_tts": true,
+      "type": "offline_audio_comparison_with_static_label_card"
+    }
+  },
+  "anchor": {
+    "phrase_rms_std_db": 0.7842753389095808,
+    "phrase_rms_range_db": 2.8339465807913413,
+    "median_rms_dbfs": -22.194769712062023,
+    "total_clipped_samples": 0,
+    "qa": {
+      "status": "PASS",
+      "duration_seconds": 52.06666666666667,
+      "frames": 1562,
+      "audio_correlation": 0.9999341235272339,
+      "full_decode": "PASS",
+      "real_tts": true,
+      "type": "offline_audio_comparison_with_static_label_card"
+    }
+  },
+  "same_text_sentence_6": {
+    "baseline": {
+      "group": "baseline",
+      "id": "c1_n6",
+      "text": "牛津的 Toby Ord 从 OpenAI 发布 GPT-5.6 时顺手放出的几张 scaling 曲线里，把这个换算关系硬算了出来，",
+      "rms_dbfs": -17.31632457669114,
+      "peak": 0.884765625,
+      "clipped_samples": 0,
+      "hf_energy_share_pct": 10.840246565188052,
+      "quiet_mid_hf_proxy_db": -48.6998675786835
+    },
+    "anchor": {
+      "group": "anchor",
+      "id": "c1_n6",
+      "text": "牛津的 Toby Ord 从 OpenAI 发布 GPT-5.6 时顺手放出的几张 scaling 曲线里，把这个换算关系硬算了出来，",
+      "rms_dbfs": -21.91747889663771,
+      "peak": 0.745880126953125,
+      "clipped_samples": 0,
+      "hf_energy_share_pct": 3.656946065496715,
+      "quiet_mid_hf_proxy_db": -55.95068718884919
+    }
+  },
+  "sentence_6_loudness_matched_quiet_hf_change_db": -2.649665290219115,
+  "limitation": "Acoustic metrics support reduced continuation drift; no subjective listening assessment. Spectral proxy includes consonants and breath and is not measured SNR. This is a static-card audio comparison, not a replacement of the existing production film.",
+  "real_generation": {
+    "segments": 13,
+    "chain": "anchor",
+    "all_prompts_original_anchor": true,
+    "steps": 10,
+    "generation_seconds": 189.736,
+    "text_sha256": "59e5b893a92b855b510d11ecc0e9c6f8765aa5122a6e0242214f670c541cb9a7"
+  },
+  "source_render_id": "a760d4a7244e4a7c81e621053aec717b",
+  "production_integration": {
+    "shared_default": "g2/voices.py:VOXCPM_DEFAULT_CHAIN",
+    "default": "anchor",
+    "entry": "g2/voxcpm_voice.py",
+    "production_caller": "g2/run_g2.py",
+    "scope": "New VoxCPM speech synthesis across existing video forms and matrix jobs; explicit legacy overrides retained.",
+    "restart_required": false,
+    "original_tasks_and_media": "retained",
+    "cache": "Existing fingerprint binds mode and implementation; old chapters are not used for the changed default."
+  },
+  "tests": {
+    "passed": 907,
+    "skipped": 1,
+    "log_sha256": "21783a0e0da4de3e1c9576f26718b90d96f6b960649c861e26b2a0a28e72c0b6",
+    "log": "g3/data/voice-stability-20261027/regression-final.txt"
+  },
+  "completed_at": "2026-10-27T20:08:41.602419+08:00"
+}
