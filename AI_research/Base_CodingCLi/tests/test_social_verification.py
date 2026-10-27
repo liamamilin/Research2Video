@@ -130,6 +130,15 @@ def test_cover_url_correlation_drops_signatures_and_never_retains_auth_values():
     assert not any(value in str(correlations) for value in ('private','secret','https://','api_ph'))
 
 
+def test_old_opaque_cover_key_matches_same_key_under_creator_cdn_prefix():
+    key = 'video-covers/unique-upload-object-20261027-123456/frame.jpg'
+    old = [fingerprint(key)]
+    rows = parse_ks(ks_row(title='', publishCoverUrl='https://cdn.example/bucket/' + key + '?token=secret'))
+    assert select_work(rows, {'correlations': old, 'submitted_at': NOW - 10, 'duration_seconds': 90})[0]['work_id'] == WORK
+    assert select_work(rows, {'correlations': old, 'submitted_at': NOW - 86400, 'duration_seconds': 90}) == (None, 'missing')
+    assert 'secret' not in str(rows) and key not in str(rows)
+
+
 @pytest.mark.parametrize('method,url,body', [
     ('POST', 'https://cp.kuaishou.com/rest/cp/works/v2/video/pc/submit', None),
     ('POST', 'https://cp.kuaishou.com/rest/cp/works/v2/video/pc/isolation/submit', None),
@@ -250,6 +259,17 @@ def test_read_only_check_has_priority_without_overlapping_upload(social_env):
     assert db.claim(prefer_checks=True)['id'] == child['id']
     assert db.claim(prefer_checks=True) is None
     assert db.get(second['id'])['status'] == 'QUEUED'
+
+
+def test_original_upload_is_active_only_while_its_check_executes(social_env):
+    from web.services.publication_state import describe
+    db, parent = pending_job()
+    assert not describe('kuaishou', parent['id'], manager.public_job('kuaishou', parent))['active']
+    child = db.create('RECONCILE', parent['uid'], {'work_id': WORK}, parent_id=parent['id'])
+    db.claim(prefer_checks=True)
+    assert describe('kuaishou', parent['id'], manager.public_job('kuaishou', parent))['active']
+    db.update(child['id'], status='DONE', result={'platform_state': 'missing'})
+    assert not describe('kuaishou', parent['id'], manager.public_job('kuaishou', parent))['active']
 
 
 def test_late_check_does_not_override_manually_confirmed_publication(social_env):

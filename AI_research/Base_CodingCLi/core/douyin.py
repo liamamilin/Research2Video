@@ -14,6 +14,14 @@ class DouyinError(RuntimeError):
     """A user-readable failure without provider credentials or raw responses."""
 
 
+class DouyinLookupError(DouyinError):
+    """Distinguish a list failure from an actually completed, empty lookup."""
+    def __init__(self, message: str, code: str, *, state: str = 'unavailable'):
+        super().__init__(message)
+        self.code = code
+        self.state = state
+
+
 def work_id(value: str) -> str:
     value = value.strip()
     if WORK_ID.fullmatch(value):

@@ -18,6 +18,8 @@ from core.social.registry import PLATFORMS, DEFERRED_PLATFORMS, adapter, definit
 from core.social.store import SocialStore, ACTIVE
 from core.social.comments import clean_first_comment, COMMENT_PLATFORMS
 from core.social.verification import EVIDENCE, STATE_LABELS, delay, timestamp
+from core.social.verification import check_progress, lookup_revision
+from core.social.reconciliation import lookup_for
 from core.video import store as video_store
 from core.video.publication_identity import identify
 from scripts.douyin_worker import private_json
@@ -69,13 +71,16 @@ def uid(platform: str) -> str:
     return profile['uid']
 
 
-def public_job(platform: str, row: dict, *, comments: dict | None = None) -> dict:
+def public_job(platform: str, row: dict, *, comments: dict | None = None, checking: set[str] | None = None) -> dict:
     verification = row['result'].get('verification', {})
+    if row['kind'] == 'UPLOAD' and checking is None:
+        checking = {check['parent_id'] for check in store(platform).list(uid=row['uid'], kind='RECONCILE', statuses=ACTIVE)}
     value = {**{k: row[k] for k in ('id','kind','status','phase','error','work_id','script_id','version','render_id','created_at','updated_at')},
             'platform': platform, 'account_uid': row['uid'], 'payload': {k: row['payload'][k] for k in ('title','description','tags','first_comment') if k in row['payload']},
             'url': row['result'].get('url', ''),
-            'verification': {'automatic': platform in EVIDENCE and row['kind'] == 'UPLOAD' and row['status'] in ('UNKNOWN','SUBMITTED'),
-                             **{k: verification[k] for k in ('attempts','checked_at','next_check_at','state','reason') if k in verification}},
+            'verification': {'automatic': platform in EVIDENCE and row['kind'] == 'UPLOAD' and row['status'] in ('UNKNOWN','SUBMITTED') and not verification.get('exhausted'),
+                             'running': row['id'] in (checking or set()),
+                             **{k: verification[k] for k in ('attempts','checked_at','next_check_at','state','reason','exhausted') if k in verification}},
             'can_confirm_absent': row['status'] == 'UNKNOWN' and not row['work_id'] and row['result'].get('accepted') is not True,
             'can_retry': row['status'] in ('FAILED','CANCELLED') and bool(row['result'].get('confirmed_not_submitted'))}
     if row['kind'] == 'LOGIN' and row['payload'].get('purpose') == 'comments':
@@ -387,10 +392,11 @@ def overview(platform: str) -> dict:
     profile = account(platform); owner = profile.get('uid','')
     jobs=store(platform).list(uid=owner) if owner else []
     comments={r['parent_id']:r for r in jobs if r['kind']=='FIRST_COMMENT'}
+    checking = {r['parent_id'] for r in jobs if r['kind'] == 'RECONCILE' and r['status'] in ACTIVE}
     path=directory(platform)/'login.json'
     return {'definition':definition(platform),'account':profile,'runtime_ready':runtime()['ready'],
             'login_id':json.loads(path.read_text()).get('id') if path.is_file() else None,
-            'uploads':[public_job(platform,r,comments=comments) for r in jobs if r['kind']=='UPLOAD'],
+            'uploads':[public_job(platform,r,comments=comments,checking=checking) for r in jobs if r['kind']=='UPLOAD'],
             'settings':{'first_comment':store(platform).comment_settings(owner)} if owner else {},
             'checks':[public_job(platform,r) for r in jobs if r['kind'] in ('VERIFY','RECONCILE')][:10],
             'candidates':candidates(platform) if owner else []}
@@ -483,14 +489,12 @@ def apply_check(platform: str, db: SocialStore, check: dict) -> None:
             or parent['uid'] != account(platform).get('uid') or parent['status'] not in ('UNKNOWN','SUBMITTED')):
         return
     receipt = check['result']; previous = parent['result'].get('verification', {})
-    attempts = int(previous.get('attempts', 0)) + 1
     state = receipt.get('platform_state', 'unknown') if check['status'] == 'DONE' else 'unavailable'
     if state not in STATE_LABELS:
         state = 'unknown'
-    if check['status'] == 'DONE' and (receipt.get('uid') != parent['uid'] or (receipt.get('owned') is not True and state not in ('missing','ambiguous'))):
+    if check['status'] == 'DONE' and (receipt.get('uid') != parent['uid'] or (receipt.get('owned') is not True and state not in ('missing','ambiguous','metadata_missing'))):
         state = 'unknown'
-    tracking = {'attempts': attempts, 'checked_at': check['updated_at'],
-                'next_check_at': check['updated_at'] + delay(attempts), 'state': state, 'reason': STATE_LABELS[state]}
+    tracking = check_progress(previous, state, check['updated_at'], lookup_revision(check_lookup(parent)))
     if receipt.get('status_details'):
         tracking['status_details'] = receipt['status_details']
     result = {**parent['result'], 'verification': tracking}
@@ -524,7 +528,8 @@ def schedule_checks(platform: str, db: SocialStore) -> None:
         return
     now = time.time()
     pending = db.list(uid=current, kind='UPLOAD', statuses=('SUBMITTED','UNKNOWN'))
-    due = [row for row in pending if row['result'].get('verification', {}).get('next_check_at', row['updated_at'] + 15) <= now]
+    due = [row for row in pending if not row['result'].get('verification', {}).get('exhausted')
+           and (row['result'].get('verification', {}).get('next_check_at') or row['updated_at'] + 15) <= now]
     due.sort(key=lambda row: row['result'].get('verification', {}).get('next_check_at', row['updated_at'] + 15))
     if not due:
         return
@@ -533,10 +538,7 @@ def schedule_checks(platform: str, db: SocialStore) -> None:
 
 
 def check_lookup(row: dict) -> dict:
-    result = row['result']
-    return {'work_id': row['work_id'], 'title': row['payload'].get('title',''),
-            'submitted_at': result.get('submission_started_at') or row['created_at'],
-            'duration_seconds': result.get('duration_seconds'), 'correlations': result.get('correlations', [])}
+    return lookup_for(row)
 
 
 def recover_saved_receipts(platform: str, db: SocialStore) -> None:

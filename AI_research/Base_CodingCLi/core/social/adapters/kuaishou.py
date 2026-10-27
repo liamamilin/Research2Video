@@ -25,6 +25,7 @@ from urllib.parse import urlsplit
 
 from core.social.adapter import AdapterError
 from core.social.verification import asset_fingerprints, protect_context, receipt, select_work, timestamp
+from core.social.verification import lookup_diagnostics
 
 
 SOURCE_SHA256 = "fc97d1f83aa0d531284365d2e54a6e043bef420f8b8088b3e90b9ed785326c66"
@@ -173,6 +174,28 @@ def work_records(data: Any, owner_id: str, target: str = '') -> list[dict]:
                         'published_at': timestamp(row.get('uploadTime')), 'duration_seconds': row.get('durationSecond'),
                         'correlations': [*asset_fingerprints(row.get('unPublishCoverKey')), *asset_fingerprints(row.get('publishCoverUrl'))], 'state': state})
     return records
+
+
+async def _read_more_works(page: Any, records: list[dict], errors: list[Exception]) -> bool:
+    """The creator list uses infinite scroll; observe its next signed list request."""
+    count = len(records)
+    try:
+        await page.evaluate("""() => {
+          const nodes = [document.scrollingElement, ...document.querySelectorAll('*')];
+          for (const node of nodes) {
+            if (node && node.scrollHeight > node.clientHeight + 100 &&
+                (node === document.scrollingElement || /auto|scroll/.test(getComputedStyle(node).overflowY))) {
+              node.scrollTop = node.scrollHeight;
+            }
+          }
+        }""")
+        for _ in range(12):
+            await page.wait_for_timeout(250)
+            if len(records) > count or errors:
+                break
+    except Exception:
+        return False
+    return len(records) > count
 
 
 def _isolated_upstream() -> ModuleType:
@@ -520,7 +543,15 @@ class KuaishouAdapter:
             if not loaded:
                 raise AdapterError('暂未取得快手作品列表，请核对平台登录；系统会自动重查。')
             selected, reason = select_work(records, lookup)
-            return receipt(self.key, owner_id, selected, reason)
+            for _ in range(8):
+                if selected or reason == 'ambiguous' or not await _read_more_works(page, records, errors):
+                    break
+                if tasks:
+                    await asyncio.gather(*tasks)
+                if errors:
+                    raise AdapterError('快手后续作品列表未能读取，原投稿保留，将稍后核对。')
+                selected, reason = select_work(records, lookup)
+            return {**receipt(self.key, owner_id, selected, reason), 'lookup_diagnostics': lookup_diagnostics(records, lookup)}
         except AdapterError:
             raise
         except Exception:

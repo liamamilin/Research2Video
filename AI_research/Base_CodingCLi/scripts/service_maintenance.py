@@ -16,9 +16,28 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from web.services.yaml_io import atomic_write
 from core.processes import process_exited
+from core.maintenance_work import restart_gate, MaintenanceSuperseded
 
 
 def perform(path: Path):
+    # This helper is freshly loaded even when the running app predates a fix.
+    spec = json.loads(path.read_text())
+    try:
+        if spec['action'] in ('restart', 'shutdown'):
+            with restart_gate(Path(spec['state_dir']), expected_runtime=spec['runtime']):
+                _perform_idle(path)
+        else:
+            _perform_idle(path)
+    except Exception as exc:
+        spec.update(status='interrupted' if isinstance(exc, MaintenanceSuperseded) else 'failed',
+                    error=str(exc)[:500], updated=time.time())
+        if isinstance(exc, MaintenanceSuperseded):
+            spec.update(superseded=True, superseded_by_runtime=exc.runtime)
+        atomic_write(str(path), json.dumps(spec, ensure_ascii=False))
+        atomic_write(str(Path(spec['state_dir']) / 'assistant_maintenance.json'), json.dumps(spec, ensure_ascii=False))
+
+
+def _perform_idle(path: Path):
     spec = json.loads(path.read_text())
     runtime = spec['runtime']
     state = Path(spec['state_dir'])
@@ -31,6 +50,9 @@ def perform(path: Path):
         old_pid = spec['pid']
         if runtime['pid'] != old_pid or old_pid <= 1 or old_pid == os.getpid():
             raise ValueError('维护进程归属验证失败')
+        current = json.loads((state / 'app_runtime.json').read_text())
+        if current.get('pid') != old_pid or current.get('instance_id') != runtime.get('instance_id'):
+            raise ValueError('研究端实例已变更，未向旧 PID 发送信号；请核对当前服务')
         try:
             os.kill(old_pid, signal.SIGTERM)
         except ProcessLookupError:

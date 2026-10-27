@@ -110,6 +110,29 @@ class SocialStore:
             conn.execute("UPDATE jobs SET status='RUNNING',phase='准备',heartbeat=?,updated_at=? WHERE id=?", (now,now,row['id']))
         return self.get(row['id'])
 
+    def record_duration(self, key: str, duration: float) -> bool:
+        """Merge local metadata into the original pending upload, never reset its receipt."""
+        from core.social.verification import seconds
+        if seconds(duration) is None:
+            return False
+        with self.connect(write=True) as conn:
+            row = self.decode(conn.execute('SELECT * FROM jobs WHERE id=?', (key,)).fetchone())
+            if (not row or row['kind'] != 'UPLOAD' or row['status'] not in ('SUBMITTED', 'UNKNOWN')
+                    or seconds(row['result'].get('duration_seconds')) is not None):
+                return False
+            result = {**row['result'], 'duration_seconds': duration,
+                      'duration_source': 'existing_local_movie'}
+            if result.get('verification'):
+                result['verification'] = {**result['verification'], 'exhausted': False,
+                                          'next_check_at': time.time(),
+                                          'reason': '原视频时长已补齐，等待核对原投稿'}
+            conn.execute('INSERT INTO job_events(job_id,kind,actor,detail,created_at) VALUES (?,?,?,?,?)',
+                         (key, 'metadata_repaired', 'reconciliation',
+                          json.dumps({'field': 'duration_seconds', 'value': duration}), time.time()))
+            conn.execute('UPDATE jobs SET result=?,updated_at=? WHERE id=?',
+                         (json.dumps(result, ensure_ascii=False), time.time(), key))
+        return True
+
     def confirm_absent(self, key: str, uid: str, actor: str, expected_updated_at: float) -> bool:
         """Record a human absence decision without submitting or discarding the previous attempt."""
         with self.connect(write=True) as conn:

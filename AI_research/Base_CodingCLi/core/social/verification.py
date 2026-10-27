@@ -6,6 +6,7 @@ requires an exact upload fingerprint, or a unique title/time/duration match.
 from __future__ import annotations
 
 import hashlib
+import json
 import math
 import unicodedata
 from urllib.parse import urlsplit
@@ -13,13 +14,31 @@ from urllib.parse import urlsplit
 
 
 CHECK_DELAYS = (15, 30, 60, 120, 300, 600, 1800, 3600)
+MAX_UNRESOLVED_CHECKS = 8
 EVIDENCE = {'kuaishou': 'kuaishou_creator_public', 'xiaohongshu': 'xiaohongshu_creator_public'}
 STATE_LABELS = {
     'published': '已公开', 'reviewing': '平台审核中', 'processing': '平台处理中',
     'scheduled': '等待定时发布', 'private': '非公开可见', 'rejected': '平台审核未通过',
     'missing': '暂未找到匹配作品', 'ambiguous': '找到多个候选，需核对作品链接',
     'unknown': '平台状态暂未确认', 'unavailable': '暂时无法回查，请核对平台登录',
+    'metadata_missing': '本地视频时长暂不可读取，无法关联原投稿',
 }
+
+
+def lookup_revision(lookup: dict) -> str:
+    return hashlib.sha256(json.dumps(lookup, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+
+
+def check_progress(previous: dict, state: str, checked_at: float, revision: str) -> dict:
+    """Bound unresolved checks for unchanged input; retain the cumulative history."""
+    cycle = int(previous.get('attempts_for_input', 0)) + 1 if previous.get('input_revision') == revision else 1
+    exhausted = cycle >= MAX_UNRESOLVED_CHECKS and state in (
+        'missing', 'ambiguous', 'unknown', 'unavailable', 'metadata_missing')
+    return {'attempts': int(previous.get('attempts', 0)) + 1, 'attempts_for_input': cycle,
+            'input_revision': revision, 'checked_at': checked_at, 'state': state,
+            'exhausted': exhausted, 'next_check_at': None if exhausted else checked_at + delay(cycle),
+            'reason': STATE_LABELS.get(state, STATE_LABELS['unknown']) +
+                      ('；多次回查未解决，已保留原投稿，等待处理后继续核对' if exhausted else '')}
 
 
 def delay(attempts: int) -> int:
@@ -42,7 +61,18 @@ def asset_fingerprints(value: object) -> list[str]:
     except ValueError:
         return []
     if parts.scheme:
-        return [fingerprint('asset-path:' + parts.path)] if parts.scheme == 'https' and len(parts.path) >= 24 else []
+        if parts.scheme != 'https' or len(parts.path) < 24:
+            return []
+        values = {fingerprint('asset-path:' + parts.path)}
+        # The submit response may use an opaque object key while the creator
+        # list returns that same key under a CDN/bucket prefix. Retain exact
+        # long-key hashes; never retain or compare signed URL parameters.
+        segments = parts.path.strip('/').split('/')
+        for offset in range(len(segments)):
+            suffix = '/'.join(segments[offset:])
+            if len(suffix) >= 24:
+                values.update((fingerprint(suffix), fingerprint('/' + suffix)))
+        return sorted(values)
     return [fingerprint(value)]
 
 
@@ -106,6 +136,24 @@ def select_work(rows: list[dict], lookup: dict) -> tuple[dict | None, str]:
     if len(unique) == 1:
         return next(iter(unique.values())), ''
     return None, 'ambiguous' if len(unique) > 1 else 'missing'
+
+
+def lookup_diagnostics(rows: list[dict], lookup: dict) -> dict:
+    """Keep only work identifiers and matching metadata, never signed response data."""
+    title = text(lookup.get('title'))
+    candidates = [row for row in rows if title and text(row.get('title')) == title]
+    started, duration = timestamp(lookup.get('submitted_at')), seconds(lookup.get('duration_seconds'))
+    metadata_candidates = [row for row in rows if started is not None and duration is not None
+                           and timestamp(row.get('published_at')) is not None
+                           and seconds(row.get('duration_seconds')) is not None
+                           and started - 120 <= timestamp(row['published_at']) <= started + 900
+                           and abs(seconds(row['duration_seconds']) - duration) <= 2]
+    return {'records_seen': len(rows), 'title_matches': len(candidates),
+            'duration_available': seconds(lookup.get('duration_seconds')) is not None,
+            'metadata_candidates': [{key: row.get(key) for key in ('work_id', 'title', 'correlations', 'published_at', 'duration_seconds', 'state')}
+                                    for row in metadata_candidates[:3]],
+            'candidates': [{key: row.get(key) for key in ('work_id', 'published_at', 'duration_seconds', 'state')}
+                           for row in candidates[:3]]}
 
 
 def receipt(platform: str, uid: str, row: dict | None, state: str = 'missing') -> dict:
