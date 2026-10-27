@@ -28,7 +28,7 @@ from core.config import load_system_config
 from core.llm import LLMConfig
 from core.state import StateManager
 from core.video import columns as video_columns
-from core.video import content_guard, length, store, writer
+from core.video import content_guard, length, store, story_pool, writer
 from core.video import plans as video_plans
 from core.video.adapt import draft as adapt_draft
 from core.video.adapt import facts as adapt_facts
@@ -177,6 +177,10 @@ def run(script_id: str, *, started_by: str = "", llm_config: Optional[LLMConfig]
         return "FAILED"
     finally:
         _active.discard(script_id)
+        try:
+            story_pool.reconcile()
+        except Exception:  # recovery must not hide the author's original result
+            logger.exception("video event reservations could not be reconciled")
 
 
 def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> str:
@@ -267,6 +271,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     from core.video.content_columns import apply_script_context
     column = apply_script_context(column, script.get("content_context") or {})
     guarded = bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
+    config, review_config = _llm_configs(llm_config, column)
     dedup_meta, filtered_material = {}, ""
     if guarded:
         store.update_script(script_id, topic=script["topic"])
@@ -275,11 +280,38 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
         original = report_material.read(reference, full_path, _read_report(report_path)) if reference else ""
         try:
-            report, filtered_material, dedup_meta = content_guard.prepare(
-                script, report, original, settings.paths.config_dir, settings.paths.jobs_dir)
+            if story_pool.enabled(topic):
+                store.update_script(script_id, stage="选题")
+                key = content_guard.scope(topic["matrix_dedup"]["job"], settings.paths.config_dir)
+                story_pool.reconcile()
+                peers = content_guard.coverage(topic, settings.paths.config_dir, settings.paths.jobs_dir, script_id=script_id)
+                peers += story_pool.reservations(key, script_id)
+                if script["current_version"] and topic.get("story"):
+                    story = topic["story"]
+                    pool = story_pool.get(story["pool_id"])
+                else:
+                    if topic.get("from_item") and original:
+                        # A flash item cannot wander into another item from its feed.
+                        selected = content_guard.sources(report)
+                        original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original)
+                                                                 if content_guard.sources(p["text"]) & selected)
+                    pool = story_pool.load_or_create(key, report, original, peers, config)
+                    story, _ = story_pool.take(script_id, pool, peers)
+                topic = {**topic, "title": story["title"], "story": story}
+                script = {**script, "topic": topic}
+                filtered_material = story_pool.material_for(pool, story)
+                report = story_pool.brief(story) + "\n\n" + filtered_material
+                dedup_meta = story_pool.selection(script_id)
+                # Both legacy and adaptation writers see the same explicit event.
+                column = replace(column, script_style=column.script_style + "\n" + story_pool.brief(story))
+            else:
+                report, filtered_material, dedup_meta = content_guard.prepare(
+                    script, report, original, settings.paths.config_dir, settings.paths.jobs_dir)
+        except story_pool.NoCandidate as exc:
+            peers = [{"script_id": d["peer_id"], "title": d["title"]} for d in exc.decisions if d["peer_id"]]
+            return _duplicate_script(script_id, content_guard.DuplicateContent(peers, str(exc)), failed_status)
         except content_guard.DuplicateContent as exc:
             return _duplicate_script(script_id, exc, failed_status)
-    config, review_config = _llm_configs(llm_config, column)
     if column.writer == "adapt":
         if guarded and filtered_material:
             report, citation_check = filtered_material, None
@@ -319,7 +351,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                     if material_ref else "")
         if guarded:
             material = filtered_material
-        if topic.get("from_item") and material:
+        if topic.get("from_item") and material and not topic.get("story"):
             # A discovered topic is one item, not the entire feed. Keep the
             # original blocks that contain its links, with its selected context.
             from core.provenance import extract_urls, normalize_url
@@ -347,6 +379,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         if guarded:
             content_guard.check(script, written.sections, settings.paths.config_dir, settings.paths.jobs_dir)
             written.meta["content_dedup"] = dedup_meta
+        if topic.get("story"):
+            written.meta["story"] = topic["story"]
     except content_guard.DuplicateContent as exc:
         return _duplicate_script(script_id, exc, failed_status)
     except writer.ScriptError as exc:
@@ -363,6 +397,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         edit_type="GENERATED",
         meta={**meta, "checks": adapt_review.unrequested()},
         created_by=started_by,
+        story_claim=(topic.get("story") or {}).get("event_key", ""),
     )
     store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"
@@ -678,8 +713,10 @@ def _adapt_version(script_id: str, *, report: str, report_path: str, citation_ch
         length_check=adapted.length_check,
         edit_type="GENERATED",
         meta={**adapted.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-              "cell": video_columns.provenance(get_settings().paths.config_dir, column.key)},
+              "cell": video_columns.provenance(get_settings().paths.config_dir, column.key),
+              **({"story": topic["story"], "content_dedup": story_pool.selection(script_id)} if topic.get("story") else {})},
         created_by=started_by,
+        story_claim=(topic.get("story") or {}).get("event_key", ""),
     )
 
 

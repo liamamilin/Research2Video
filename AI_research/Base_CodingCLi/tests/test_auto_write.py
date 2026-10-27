@@ -125,6 +125,17 @@ def test_firing_records_the_report_so_it_is_written_once_and_each_script_records
     run = ap.get_run(run["id"])
     assert run["items"] and {i["production"] for i in run["items"]} == {"flash"}
     assert started == []  # the Job's own schedule made the report: the batch does not start it
+    # A matrix's first author now selects its event before the next one starts.
+    # Complete each mocked author so the following item can advance normally.
+    for _ in range(len(run["items"])):
+        for item in run["items"]:
+            script = store.get_script(item["script_id"]) if item["script_id"] else None
+            if script and not script["current_version"]:
+                store.add_version(script["id"], title=script["topic"]["title"], sections=[],
+                                  length_check={}, edit_type="GENERATED")
+                store.update_script(script["id"], status="DRAFT")
+        pilot.tick()
+        run = ap.get_run(run["id"])
     for item in run["items"]:
         script = store.get_script(item["script_id"])
         assert (script["production"], script["created_by"], script["column_key"]) == ("flash", "autopilot", "flash")

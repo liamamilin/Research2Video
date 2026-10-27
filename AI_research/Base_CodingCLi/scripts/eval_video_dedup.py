@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from core import sqlite_util
-from core.video import content_guard as guard, store
+from core.video import content_guard as guard, store, story_pool
 
 
 @contextmanager
@@ -52,8 +52,13 @@ def replay(database: Path, script_ids: list[str], config_dir: str, jobs_dir: str
                     "policy": guarded["topic"].get("matrix_dedup"), "result": "NO_VERSION", "peers": [],
                     "would_duplicate": False, "protected": guard.protected(script_id)}
             if version:
-                used = guard.cited_sources(version["sections"], lead=True) or guard.cited_sources(version["sections"])
-                peers = guard.duplicate_peers(used, guard.coverage(guarded["topic"], config_dir, jobs_dir, script_id=script_id))
+                history = guard.coverage(guarded["topic"], config_dir, jobs_dir, script_id=script_id)
+                story = (version.get("meta") or {}).get("story")
+                if story:
+                    peers = story_pool.duplicate(story, history)
+                else:
+                    used = guard.cited_sources(version["sections"], lead=True) or guard.cited_sources(version["sections"])
+                    peers = guard.duplicate_peers(used, history)
                 item.update(would_duplicate=bool(peers), peers=list(dict.fromkeys(p["script_id"] for p in peers)),
                             result="PROTECTED" if item["protected"] else "DUPLICATE" if peers else "ALLOW")
             result.append(item)

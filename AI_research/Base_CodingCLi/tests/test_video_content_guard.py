@@ -129,7 +129,7 @@ def test_pending_upload_receipt_prevents_automatic_archival_and_duplicate_mutati
     assert store.get_script(second["id"]) == before
 
 
-def test_flash_picking_skips_cross_day_story_and_same_batch_rewording(guard_env, monkeypatch):
+def test_flash_picking_defers_event_identity_and_keeps_finite_alternatives(guard_env, monkeypatch):
     from core.video import topic_store
     from core.video.topics import Topic
 
@@ -143,8 +143,11 @@ def test_flash_picking_skips_cross_day_story_and_same_batch_rewording(guard_env,
     monkeypatch.setattr(topic_store, "load", lambda source: ("2026-10-27", topics))
     monkeypatch.setattr(topic_store, "resolve", lambda jobs, source: topic_store.Source("flash", "science/daily", "科学"))
     picked = video_autopilot.pick_topics({"picks": [{"column": "flash", "count": 3, "source": "flash"}]})
-    assert [i["topic"]["id"] for i in picked] == ["2026-10-27/F3", "2026-10-27/F5"]
-    assert all(i["topic"]["matrix_dedup"]["policy"] == "matrix-source-v2" for i in picked)
+    # Shared URLs can carry an actual new result. The event organizer makes
+    # that decision before writing, and can replace old events with F5.
+    assert [i["topic"]["id"] for i in picked] == ["2026-10-27/F2", "2026-10-27/F3", "2026-10-27/F4"]
+    assert all(i["topic"]["matrix_dedup"]["policy"] == "matrix-story-v3" for i in picked)
+    assert [t["id"] for t in picked[0]["topic"]["_story_fallbacks"]] == ["2026-10-27/F5"]
 
 
 def test_already_queued_cross_day_topic_cancels_before_spawning_writer(guard_env, monkeypatch):
@@ -232,6 +235,26 @@ def test_sources_are_canonical_and_shared_reference_pages_remain_reusable():
     assert guard.source_key("https://developers.example.com/blog/new-model")
     assert guard.overlap({"a.example/critical-maxkb-ai-agent-flaw"}, {"b.example/critical-maxkb-ai-agent-flaw"})
     assert not guard.overlap({"a.example/openai-launches-gpt6"}, {"b.example/anthropic-ships-opus-55"})
+
+
+def test_extra_background_link_does_not_make_covered_core_event_fresh(guard_env):
+    script(guard_env, "science/daily")
+    topic = guard.policy_topic({"id": "2026-10-27/F2", "title": "同一个小蛇事件的新标题",
+                                "fields": {"证据来源": SNAKE, "相关资料": NEW}}, "science/daily")
+    paths = get_settings().paths
+    assert guard.topic_sources(topic) == {guard.source_key(SNAKE)}
+    with pytest.raises(guard.DuplicateContent):
+        guard.check_topic(topic, paths.config_dir, paths.jobs_dir)
+
+
+def test_new_event_can_reuse_covered_article_as_background(guard_env):
+    script(guard_env, "science/daily")
+    topic = guard.policy_topic({"title": "恐龙的新发现", "fields": {"证据来源": NEW, "背景资料": SNAKE}}, "science/daily")
+    paths = get_settings().paths
+    guard.check_topic(topic, paths.config_dir, paths.jobs_dir)
+    assert guard.topic_sources(topic) == {guard.source_key(NEW)}
+    topic["fields"] = {"证据来源": "[1]", "来源网址": NEW, "背景资料": SNAKE}
+    assert guard.topic_sources(topic) == {guard.source_key(NEW)}
 
 
 def test_new_comparison_with_one_old_reference_is_not_archived_as_a_duplicate(guard_env):

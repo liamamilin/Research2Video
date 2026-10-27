@@ -211,12 +211,13 @@ def init_db() -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT, script_id TEXT NOT NULL, version INTEGER NOT NULL,
             platform TEXT NOT NULL, account_uid TEXT NOT NULL, render_id TEXT NOT NULL,
             payload TEXT NOT NULL, saved_at TEXT NOT NULL)""")
-        from core.video import autopilot_store, plans, reports, steps, topic_store
+        from core.video import autopilot_store, plans, reports, steps, story_pool, topic_store
         autopilot_store.init(conn)
         plans.init(conn)
         topic_store.init(conn)
         steps.init(conn)
         reports.init(conn)  # after topic_store: it reads topic_imports to tell a source report from a research one
+        story_pool.init(conn)
 
 
 def _decode(row: sqlite3.Row | None, json_fields: tuple[str, ...]) -> dict | None:
@@ -590,6 +591,7 @@ def add_version(
     edit_type: str,
     meta: dict | None = None,
     created_by: str = "",
+    story_claim: str = "",
 ) -> int:
     """Store a new version and make it current. Returns its number."""
     now = _now()
@@ -601,6 +603,18 @@ def add_version(
             "SELECT COALESCE(MAX(version), 0) FROM script_versions WHERE script_id = ?", (script_id,)
         ).fetchone()[0]
         version = current + 1
+        if story_claim and not current:
+            # A cancelled/failed author must not save after its reservation was
+            # released and another configuration took that event.
+            claim = conn.execute("SELECT 1 FROM video_story_claims c JOIN scripts s ON s.id=c.script_id "
+                                 "WHERE c.script_id=? AND c.event_key=? AND c.state='ACTIVE' AND s.archived=0 "
+                                 "AND NOT EXISTS(SELECT 1 FROM autopilot_items i WHERE i.script_id=s.id "
+                                 "AND i.state IN ('CANCELLED','FAILED'))", (script_id, story_claim)).fetchone()
+            if not claim:
+                from core.video.story_pool import SelectionError
+
+                raise SelectionError("选题占用已释放或任务已取消，不再保存该初稿")
+            conn.execute("UPDATE video_story_claims SET state='COVERED',updated_at=? WHERE script_id=?", (now, script_id))
         conn.execute(
             "INSERT INTO script_versions (script_id, version, title, sections, length_check,"
             " edit_type, meta, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",

@@ -719,6 +719,14 @@ export interface Shipment {
 
 export const listShipments = (signal?: AbortSignal) => api<Shipment[]>("/api/video/shipments", { signal });
 
+export interface StorySelection {
+  pool_id: string;
+  candidates: number;
+  selected: string;
+  skipped: number;
+  decisions: { decision: string; title: string; peer_id: string; reason: string }[];
+}
+
 export interface AutopilotItem {
   id: string;
   slot: number;
@@ -729,7 +737,11 @@ export interface AutopilotItem {
   state: "PENDING" | "WORKING" | "HELD" | "DONE" | "FAILED" | "CANCELLED";
   note: string;
   credibility?: Credibility;
-  gate: { label?: CredibilityTier; text?: string; approved?: string; reasons?: string[]; ignored?: { must: number; warn: number } };
+  gate: {
+    label?: CredibilityTier; text?: string; approved?: string; reasons?: string[]; ignored?: { must: number; warn: number };
+    story_selection?: StorySelection;
+    story_attempts?: { script_id: string; title: string; reason: string; selection: StorySelection }[];
+  };
 }
 
 export interface AutopilotRun {

@@ -26,6 +26,18 @@ afterEach(() => {
 });
 
 describe("Autopilot card", () => {
+  it("shows selection and links to a covered event even when a current draft has another note", async () => {
+    const body = { ...BODY, runs: [{ ...BODY.runs[0], items: [{ ...BODY.runs[0].items[0], gate: {
+      story_selection: { pool_id: "pool", candidates: 2, selected: "恐龙新发现", skipped: 1,
+        decisions: [{ decision: "skip", title: "小蛇滚动逃跑", peer_id: "older", reason: "主事件已覆盖" }] },
+    } }] }] };
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(body) }) as Response));
+    render(<MemoryRouter><AutopilotCard /></MemoryRouter>);
+    expect(await screen.findByText(/候选 2，已选「恐龙新发现」/)).toBeTruthy();
+    expect(screen.getByText(/跳过「小蛇滚动逃跑」/)).toBeTruthy();
+    expect(screen.getByText("查看已覆盖文稿").getAttribute("href")).toBe("/video/older");
+  });
+
   it("uses the current draft title and audit label instead of an obsolete batch snapshot", async () => {
     const finished = { ...BODY, runs: [{ ...BODY.runs[0], status: "DONE" }] };
     vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(finished) }) as Response));

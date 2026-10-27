@@ -158,6 +158,9 @@ export function AutopilotCard({ currentItems = [] }: {
           <ul className="divide-y divide-border">
             {run.items.map((item) => {
               const current = currentItems.find((c) => c.script_id === item.script_id);
+              const selection = item.gate?.story_selection;
+              const skipped = [selection, ...(item.gate?.story_attempts ?? []).map((a) => a.selection)]
+                .flatMap((s) => s?.decisions ?? []).filter((d) => d.decision === "skip");
               return (
               <li key={item.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2">
                 <span className={cn("badge border", STATE[item.state].cls)}>{run.status === "RUNNING" ? "" : "批次结果："}{STATE[item.state].label}</span>
@@ -168,6 +171,16 @@ export function AutopilotCard({ currentItems = [] }: {
                 )}
                 <span className="text-xs text-text-muted">{current ? `当前 v${current.version}：${current.note}` : item.note}</span>
                 <CredibilityBadge value={current?.credibility ?? item.credibility ?? (item.gate?.label && item.gate.text ? { tier: item.gate.label, text: item.gate.text, reasons: item.gate.reasons ?? [], cited_share: null } : null)} />
+                {selection || skipped.length ? (
+                  <details className="w-full text-xs text-text-muted">
+                    <summary className="cursor-pointer">选题记录{selection ? `：候选 ${selection.candidates}，${selection.selected ? `已选「${selection.selected}」` : "排重后少做一条"}` : "：已自动改选"}</summary>
+                    <ul className="space-y-1 mt-1">
+                      {skipped.map((d, index) => (
+                        <li key={index}>跳过「{d.title}」：{d.reason} {d.peer_id ? <Link to={`/video/${d.peer_id}`} className="text-accent hover:underline">查看已覆盖文稿</Link> : null}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
               </li>
             );})}
           </ul>

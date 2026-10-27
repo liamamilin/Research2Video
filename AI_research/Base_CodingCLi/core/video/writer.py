@@ -89,6 +89,10 @@ def _request(report: str, topic: dict, column_style: str, target_minutes: float,
     names = set(topic_fields or TOPIC_FIELDS) - {"核心角度", "建议大纲", "评分", "条目数"}
     selected = "\n".join(f"- {name}：{value}" for name, value in fields.items() if name in names and name != "目标受众" and value)
     direction = f"## 这次想做的视频\n{column_style.strip()}\n\n" if column_style.strip() else ""
+    if topic.get("story"):
+        from core.video.story_pool import brief
+
+        direction += "## 已选主事件\n" + brief(topic["story"]) + "\n\n"
     return (
         f"## 目标观众\n{fields.get('目标受众') or '普通观众'}\n\n"
         f"{direction}"

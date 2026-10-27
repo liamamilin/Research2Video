@@ -30,7 +30,7 @@ from core.video import auto as video_auto
 from core.video import autopilot_store as ap
 from core.video import columns as video_columns
 from core.video import excerpt
-from core.video import store
+from core.video import store, story_pool
 from core.video import topic_store
 from web.services import video_executor, video_render, video_workflow  # noqa: F401 - tests patch the last two here
 from web.settings import get_settings
@@ -127,7 +127,6 @@ def pick_topics(spec: dict) -> list[dict]:
 
     paths = get_settings().paths
     config_dir = paths.config_dir
-    remembered = content_guard.history(config_dir, paths.jobs_dir)
     for pick in (resolve_pick(p) for p in spec.get("picks", [])):
         column = video_columns.get(config_dir, pick["column"])
         if pick.get("whole"):  # the Job's report as it is, one video: never a topic source
@@ -138,23 +137,25 @@ def pick_topics(spec: dict) -> list[dict]:
         _, topics = topic_store.load(pick.get("source", "flash"))
         source = topic_store.resolve(paths.jobs_dir, pick.get("source", "flash"))
         job = source.job if source else ""
-        key = content_guard.scope(job, config_dir)
+        candidates = [content_guard.policy_topic(excerpt.topic_for(column, topic), job)
+                      for topic in sorted(topics, key=lambda t: (bool(getattr(t, "stale", lambda: False)()), -(t.score or 0)))]
+        for candidate in candidates:
+            if candidate.get("matrix_dedup"):
+                candidate["matrix_dedup"]["policy"] = story_pool.POLICY
         # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
-        for topic in sorted(topics, key=lambda t: (bool(getattr(t, "stale", lambda: False)()), -(t.score or 0))):
+        for candidate in candidates:
             if len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
                 break
-            if topic.id in taken:
+            if candidate["id"] in taken:
                 continue
-            candidate = content_guard.policy_topic(excerpt.topic_for(column, topic), job)
-            used = content_guard.topic_sources(candidate)
-            peers = [p for p in remembered if p["scope"] == key] if key else []
-            if content_guard.duplicate_peers(used, peers):
-                logger.info("跳过重复选题 %s：同矩阵已使用来源", topic.id)
-                continue
-            taken.add(topic.id)
-            remembered.append({"scope": key, "sources": used, "script_id": "", "title": candidate.get("title", topic.id)})
+            taken.add(candidate["id"])
             items.append({"column_key": pick["column"], "topic": candidate,
                           "production": pick.get("production", ""), "pick": pick})
+        # A finite queue of alternatives lets semantic cross-day duplicates be
+        # replaced before writing; candidates do not reserve videos on their own.
+        for item in items:
+            if item["pick"] is pick and story_pool.enabled(item["topic"]):
+                item["topic"] = {**item["topic"], "_story_fallbacks": [dict(c) for c in candidates if c["id"] not in taken]}
     for item in items:
         del item["pick"]
     return items
@@ -173,7 +174,7 @@ def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
         return None  # written already (by hand, or by an earlier batch); one put away does not count: that is how a redo is asked for
     record = reports.record_file(relative, job=spec.get("job", ""), created_by="autopilot")
     topic = {**reports.topic_for(record, workspace), "from_report": relative, "report_id": record["id"],
-             "matrix_dedup": {"job": spec.get("job") or record.get("job", ""), "policy": "matrix-source-v2"}}
+             "matrix_dedup": {"job": spec.get("job") or record.get("job", ""), "policy": story_pool.POLICY}}
     return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
 
 
@@ -330,7 +331,7 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
         paths = get_settings().paths
         topic = content_guard.with_policy({"created_by": "autopilot", "topic": item["topic"]}, paths.jobs_dir)["topic"]
         if content_guard.writing_peer(topic, paths.config_dir, paths.jobs_dir):
-            ap.update_item(item["id"], note="等待同矩阵前一篇文稿完成，再从剩余材料选题")
+            ap.update_item(item["id"], note="等待同矩阵前一项确定主事件，再从剩余候选选题")
             return took
         try:
             content_guard.check_topic(topic, paths.config_dir, paths.jobs_dir)
@@ -350,11 +351,22 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
     if script is None:
         _fail(item, "文稿记录丢失")
         return took
-    if script.get("archived"):  # put away by the user: the pipeline does not approve or render it behind their back
-        ap.update_item(item["id"], state="CANCELLED", note="文稿已归档，不再继续")
+    selection = story_pool.selection(script["id"])
+    gate = {**(item.get("gate") or {}), **({"story_selection": selection} if selection else {})}
+    if selection:
+        ap.update_item(item["id"], gate=gate)
+    if script.get("archived"):
+        # Only our explicit exhausted selection can replace an item. A manual
+        # archival is final for this pipeline and never revives that script.
+        if selection and not selection["selected"] and script["topic"].get("content_archive"):
+            _reselect(item, script, gate)
+        else:
+            ap.update_item(item["id"], state="CANCELLED", note="文稿已归档，不再继续")
         return took
     out = video_executor.advance_auto(script, item.get("retries") or {}, can_start_script=can_start_script,
                                       can_start_render=can_start_render)
+    if out["item"] and "gate" in out["item"]:
+        out["item"]["gate"] = {**gate, **out["item"]["gate"]}
     if out["bump"]:
         _bump(item, out["bump"])
     if out["hold"]:
@@ -363,7 +375,26 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
         _hold(item, out["hold"])
     elif out["item"]:
         ap.update_item(item["id"], **out["item"])
+    if selection and script["status"] in ("WRITING", "RESEARCHING"):
+        ap.update_item(item["id"], note=f"已选主事件：{selection['selected']}；跳过 {selection['skipped']} 个重复候选")
     return out["took"]
+
+
+def _reselect(item: dict, script: dict, gate: dict) -> None:
+    alternatives = list(item["topic"].get("_story_fallbacks") or [])
+    attempts = list((item.get("gate") or {}).get("story_attempts") or [])
+    attempts.append({"script_id": script["id"], "title": script["topic"].get("title", ""),
+                     "reason": script.get("error") or "主事件均已覆盖", "selection": gate["story_selection"]})
+    taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
+    for index, topic in enumerate(alternatives):
+        if topic["id"] in taken:
+            continue
+        replacement = {**topic, "_story_fallbacks": alternatives[index+1:]}
+        ap.update_item(item["id"], topic=replacement, script_id=None, state="PENDING", retries={},
+                       gate={"story_attempts": attempts}, note=f"旧事件已覆盖，自动改选：{topic['title']}")
+        return
+    ap.update_item(item["id"], state="CANCELLED", gate={**gate, "story_attempts": attempts},
+                   note=f"候选不足，排重后少做一条：{script.get('error') or '主事件均已覆盖'}")
 
 
 def _prepare(item: dict) -> dict:
@@ -386,6 +417,7 @@ def tick() -> int:
     """Fire due plans, then advance every running batch one step. Safe to call from any process, any time."""
     try:
         with file_lock(os.path.join(get_settings().paths.state_dir, "autopilot-tick"), timeout=0):
+            story_pool.reconcile()
             fire_due_plans()
             fire_auto()
             reopen_approved()
@@ -497,7 +529,18 @@ def _summary(run: dict) -> str:
     counts: dict[str, int] = {}
     for i in run["items"]:
         counts[i["state"]] = counts.get(i["state"], 0) + 1
-    return "，".join(f"{k} {v}" for k, v in sorted(counts.items()))
+    current = [(i.get("gate") or {}).get("story_selection") for i in run["items"]]
+    current = [s for s in current if s]
+    selections = current + [a["selection"] for i in run["items"] for a in (i.get("gate") or {}).get("story_attempts", [])]
+    if not selections:
+        return "，".join(f"{k} {v}" for k, v in sorted(counts.items()))
+    pools = {s["pool_id"]: s["candidates"] for s in selections}
+    skipped = {(s["pool_id"], d["title"]) for s in selections for d in s["decisions"] if d["decision"] == "skip"}
+    replaced = sum(len((i.get("gate") or {}).get("story_attempts") or []) for i in run["items"])
+    shortages = sum(not s["selected"] for s in current)
+    return (f"候选 {sum(pools.values())}，采用 {sum(bool(s['selected']) for s in current)}，"
+            f"重复跳过 {len(skipped)}，改选 {replaced}，素材不足 {shortages}；" +
+            "，".join(f"{k} {v}" for k, v in sorted(counts.items())))
 
 
 # --- plans -----------------------------------------------------------------

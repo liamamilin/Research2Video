@@ -76,6 +76,8 @@ def upload_protected(state: Path) -> set[str]:
             continue
         with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
             conn.row_factory = sqlite3.Row
+            if not conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone():
+                continue  # a worker may have created its DB before initializing the queue
             for raw in conn.execute(f"SELECT * FROM {table}"):
                 row = dict(raw)
                 if table == "jobs" and row.get("kind") != "UPLOAD":
@@ -151,7 +153,7 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
     by_id = {s["id"]: s for s in scripts}
     cutoff = (datetime.now().astimezone() - timedelta(days=MEMORY_DAYS)).isoformat()[:10]
     with store.connect() as conn:
-        rows = conn.execute("SELECT v.script_id,v.version,v.title,v.sections,v.created_at,s.rowid AS sequence,"
+        rows = conn.execute("SELECT v.script_id,v.version,v.title,v.sections,v.meta,v.created_at,s.rowid AS sequence,"
                             "EXISTS(SELECT 1 FROM publications p WHERE p.script_id=v.script_id "
                             "AND (p.version=v.version OR p.version IS NULL)) AS published "
                             "FROM script_versions v JOIN scripts s ON s.id=v.script_id "
@@ -166,11 +168,18 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
         owner = owners[script["id"]]
         source_matrix = owner.get("source_matrix", owner["matrix"])
         key = f"matrix:{source_matrix}" if source_matrix else f"job:{owner['job']}" if owner["job"] else ""
+        sections = json.loads(row["sections"])
+        story = json.loads(row["meta"]).get("story") or {}
         result.append({"script_id": script["id"], "title": row["title"], "published": bool(row["published"]),
+                       "version": row["version"],
+                       "story": story,
+                       "summary": story.get("summary") or " ".join(p.get("text", "") for section in sections[:2]
+                                                                     for p in section.get("paragraphs", []))[:1200],
                        "created_at": script["created_at"],
                        "sequence": row["sequence"],
                        "scope": key, "report": script.get("report_path") or script["topic"].get("from_report", ""),
-                       "sources": cited_sources(json.loads(row["sections"]))})
+                       "sources": {k for u in story["primary_sources"] if (k := source_key(u))}
+                                  if story else cited_sources(sections)})
     return result
 
 
@@ -187,15 +196,18 @@ def coverage(topic: dict, config_dir: str, jobs_dir: str, *, script_id: str = ""
 
 def writing_peer(topic: dict, config_dir: str, jobs_dir: str, *, script_id: str = "") -> bool:
     """Reserve a matrix until its earlier first draft has usable sources; no same-report exemption."""
-    from core.video import outputs
+    from core.video import outputs, story_pool
 
     key = scope((topic.get("matrix_dedup") or {}).get("job", ""), config_dir)
     if not key:
         return False
     with store.connect() as conn:
         order = {r["id"]: r["sequence"] for r in conn.execute("SELECT id,rowid AS sequence FROM scripts")}
+        assigned = {r["script_id"] for r in conn.execute("SELECT script_id FROM video_story_claims WHERE state IN ('ACTIVE','COVERED')")}
+        cancelled = {r["script_id"] for r in conn.execute("SELECT script_id FROM autopilot_items WHERE state IN ('CANCELLED','FAILED')")}
     scripts = [s for s in store.list_scripts(limit=100000) if s["id"] != script_id and not s["current_version"]
-               and s["status"] in ("RESEARCHING", "WRITING") and not is_sample(s)]
+               and s["status"] in ("RESEARCHING", "WRITING") and not is_sample(s)
+               and s["id"] not in cancelled and not (story_pool.enabled(topic) and s["id"] in assigned)]
     owners, _ = outputs.script_owners(config_dir, jobs_dir, scripts)
     return any((f"matrix:{owners[s['id']]['source_matrix']}" if owners[s["id"]].get("source_matrix")
                 else scope(owners[s["id"]]["job"], config_dir)) == key
@@ -228,8 +240,13 @@ class DuplicateContent(RuntimeError):
 
 
 def topic_sources(topic: dict) -> set[str]:
-    """The discovery item's frozen evidence, independent of its date-prefixed ID."""
-    return sources(json.dumps(topic.get("fields") or {}, ensure_ascii=False))
+    """Core event evidence takes precedence over auxiliary links in discovery fields."""
+    fields = topic.get("fields") or {}
+    for name in ("主事件来源", "证据来源", "来源网址"):
+        primary = sources(json.dumps(fields.get(name) or "", ensure_ascii=False))
+        if primary:
+            return primary
+    return sources(json.dumps(fields, ensure_ascii=False))
 
 
 def duplicate_peers(used: set[str], peers: list[dict]) -> list[dict]:
@@ -240,6 +257,10 @@ def duplicate_peers(used: set[str], peers: list[dict]) -> list[dict]:
 
 
 def check_topic(topic: dict, config_dir: str, jobs_dir: str) -> None:
+    from core.video import story_pool
+
+    if story_pool.enabled(topic):
+        return  # The event pool, with history and explicit new developments, selects before writing.
     peers = duplicate_peers(topic_sources(topic), coverage(topic, config_dir, jobs_dir))
     if peers:
         raise DuplicateContent(peers)
@@ -269,8 +290,14 @@ def check(script: dict, sections: list[dict], config_dir: str, jobs_dir: str) ->
     if protected(script["id"]):
         return
     peers = coverage(script["topic"], config_dir, jobs_dir, script_id=script["id"])
-    used = cited_sources(sections, lead=True) or cited_sources(sections)
-    duplicates = duplicate_peers(used, peers)
+    story = script["topic"].get("story")
+    if story:
+        from core.video import story_pool
+
+        duplicates = story_pool.duplicate(story, peers + story_pool.reservations(story["scope"], script["id"]))
+    else:
+        used = cited_sources(sections, lead=True) or cited_sources(sections)
+        duplicates = duplicate_peers(used, peers)
     if duplicates:
         raise DuplicateContent(duplicates)
 
