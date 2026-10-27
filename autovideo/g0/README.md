@@ -33,4 +33,6 @@ g0/.venv/bin/python -u g0/verify_design_snapshot.py
 
 项目增加 G0 文件以后，原测试 `test_manifest_hashes_and_file_coverage` 的“目录里只能有设计发布清单文件”前提不再成立。不要修改冻结 `PACKAGE_MANIFEST.json` 去收录虚拟环境和依赖。
 
+`design_snapshot.py` 按冻结清单重建测试副本。持续更新的 `AGENTS.md`、`README.md`、`RELEASE_STATUS.md` 使用 `design_baseline/` 中从 Git 历史恢复的原始字节，来源版本记录在 `origins.json`；其余冻结文件沿用项目文件。所有输入仍核对原清单中的大小与 SHA-256。完整回归中的原设计包覆盖测试也使用同一副本，冻结清单与原测试保持不变。
+
 授权、费用、失败过程和未验证项详见根目录 `G0_REPORT.md`。

@@ -79,6 +79,13 @@ def test_shipped_recipes_come_out_exactly_as_they_were_written_out_per_audience(
         assert json.loads(json.dumps(got, ensure_ascii=False)) == want, key
 
 
+def test_shared_flash_brief_addresses_each_selected_audience():
+    every = recipes.expanded(CONFIG)
+    assert "从开发者熟悉" in every["flash"].column.script_style
+    public = every["ai-non_tech-quick_take-short"].column
+    assert "从普通用户熟悉" in public.script_style and "开发者" not in public.script_style
+
+
 def test_each_audience_is_a_column_named_by_the_cell_its_tags_spell(tmp_path):
     config = _config(tmp_path)
     every = recipes.expanded(config)

@@ -123,7 +123,10 @@ def test_the_batch_sees_a_discovery_started_from_the_jobs_page(jobs, monkeypatch
     assert pilot._discovery_running("monitoring/ai_flash_discovery")
 
 
-def test_api_list_and_acknowledge(client, jobs):
+def test_api_list_and_acknowledge(client, jobs, monkeypatch):
+    from functools import partial
+
+    monkeypatch.setattr(health, "alerts", partial(health.alerts, now=FIVE + 6 * 3600))
     run = morning_of_the_20th(jobs)
     ap.update_run(run["id"], status="DONE")
     _login(client, "viewer", "viewer-pass-123")

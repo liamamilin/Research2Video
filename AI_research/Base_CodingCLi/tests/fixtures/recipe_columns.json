@@ -388,7 +388,7 @@
       }
     },
     "cell_id": "ai-non_tech-quick_take-short",
-    "resolved_sha256": "eb382128fd746032c6da4128fff76e34a821275ac630e212418d095ec6aaaa8b",
+    "resolved_sha256": "da7399cfc6e274360c139d7dee315bf9bf5d9a2aa936a23f53873d51494a8bbc",
     "column": {
       "key": "ai-non_tech-quick_take-short",
       "name": "快讯",
@@ -396,7 +396,7 @@
       "target_minutes": 1.25,
       "video_form": "information_motion",
       "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}；{topic_change}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
-      "script_style": "让普通用户抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。",
+      "script_style": "从普通用户熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
       "research_timeout_seconds": 1500,
       "writer": "legacy",
       "voice_id": "voxcpm_anchor",
@@ -576,7 +576,7 @@
       }
     },
     "cell_id": "ai-developer-quick_take-short",
-    "resolved_sha256": "a1c4d03fe6e1d6a6aa21b5ceb72b1ba7da7c2f1168e1c9d6dd6170e6c6e682f3",
+    "resolved_sha256": "98670157a816fc49a5a97e3aa0adacac7b49ee860cfff9da0a7628a62e6087fd",
     "column": {
       "key": "flash",
       "name": "快讯",
@@ -584,7 +584,7 @@
       "target_minutes": 1.25,
       "video_form": "information_motion",
       "research_prompt": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n当前步骤：研究这个选题，把后续讲述用得上的具体资料写明白。\n研究方向：找到这个新变化最值得观众关心的地方，准备能把变化讲清楚的具体材料。\n选题：{topic_title}\n目标观众：{topic_audience}\n选题资料：{topic.一句话}；{topic_change}\n来源资料：{topic_sources}\n日期：{date}\n输出语言：{language}\n\n数据格式：Markdown；末尾「### 来源清单」记录素材链接。",
-      "script_style": "让开发者抓住一个新变化最值得关注的地方，听完就明白发生了什么，为什么值得自己关心。",
+      "script_style": "从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。",
       "research_timeout_seconds": 1500,
       "writer": "legacy",
       "voice_id": "voxcpm_anchor",
