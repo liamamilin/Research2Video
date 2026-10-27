@@ -1,18 +1,21 @@
 schema_version: 1
-name: AI 模型横评
+name: AI 模型观察
 matrix: ai_media
 type: comparison
-audience: 关注 AI 产品、技术与应用的观众
-promise: 讲清模型在关键维度上的差异与适用条件
+audience: 需要为实际工作选择模型的开发者和 AI 高频使用者
+promise: 帮观众围绕一个使用场景看懂模型差异，理解选择背后的取舍
 production_ids:
 - ai_media_arena_digest
 render_inheritance: source_compatible
-render: {}
+render:
+  packaging:
+    label: AI 模型观察
 presentation:
+  strategy: 先交代本期比较的问题，再按解释顺序逐步显示对象和数据；价格、速度和能力的关系用对比图或散点图表达，画面小标题点明当前比较的问题或差异。围绕旁白当前讲到的模型或档位安排重点，让完整对象名、单位和对应读数一起呈现，切换对象时同步切换高亮；同一对象保持一致配色。静态数据用静态比较呈现。
   preferred_visuals:
   - 对比图
   - 性能图
   - 价格卡
   - 真实截图
 status: configured
-notes: 报告沿用整期输入，按对象、维度与适用条件展开，画面按当期素材混合组织。
+notes: 从整期材料选择一个值得解释的使用场景或比较问题，如批量处理、交互响应或长文档。让本期收获能用一句具体的话概括，再围绕它选择模型、档位与相关维度，讲清最有解释力的差异以及观众为什么在意。材料中其他信息按这个问题的需要取舍，讲清取舍后自然收束。对象数量与展开顺序由材料和本期问题决定，标题点出观众关心的具体选择。涉及部署、生态等补充时，讲明它怎样改变本期场景下的取舍。

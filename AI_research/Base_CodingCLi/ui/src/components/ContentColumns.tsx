@@ -134,9 +134,14 @@ function ColumnEditor({ matrix, types, column, onSaved, onCancel }: {
       <p className="text-text-muted">制作配方组织画面与节奏，同一期可以混用截图、图表、流程和价格卡。任务的显式选择仍可覆盖栏目默认值。</p>
       <label className="block">画面偏好<input aria-label="画面偏好" className="input mt-1" value={visualsInput} onChange={(e) => setVisualsInput(e.target.value)} />
         <span className="block text-text-muted mt-1">用顿号分隔，例如：真实截图、性能图、价格卡。实际画面按讲稿和已有素材安排。</span></label>
+      <label className="block">画面讲述方式<textarea aria-label="画面讲述方式" className="input mt-1" rows={3}
+        value={value.presentation.strategy || ""} onChange={(e) => setValue({ ...value,
+          presentation: { ...value.presentation, strategy: e.target.value } })} />
+        <span className="block text-text-muted mt-1">说明怎样引导观众看重点，例如先展示页面，再放大相关区域；比较数据随旁白逐步出现。</span></label>
       {resourceError ? <p className="text-warning">制作配方目录暂未连接：{resourceError}。已有选择会保留。</p> : null}
     </fieldset>
-    <label className="block text-xs">栏目备注<textarea className="input mt-1" rows={2} value={value.notes} onChange={(e) => setValue({ ...value, notes: e.target.value })} /></label>
+    <label className="block text-xs">栏目创作方向<textarea aria-label="栏目创作方向" className="input mt-1" rows={4} value={value.notes} onChange={(e) => setValue({ ...value, notes: e.target.value })} />
+      <span className="block text-text-muted mt-1">作为本栏目的写稿目标，说明选材重点、要讲清的问题和讲述方式；留空时沿用文稿配方。</span></label>
     {error ? <p role="alert" className="text-xs text-danger">{error}</p> : null}
     <div className="flex gap-2"><button className="btn btn-primary text-xs" disabled={busy || !value.name.trim() || !value.promise.trim()} onClick={save}>{busy ? "保存中…" : "保存栏目"}</button>
       <button className="btn text-xs" disabled={busy} onClick={onCancel}>取消</button></div>
@@ -181,7 +186,8 @@ export function ContentColumns({ matrix, canEdit }: { matrix: Matrix; canEdit: b
         <span className="text-xs text-text-muted">{c.status === "planned" || !c.bindings.length ? "待配置" : c.auto_bindings ? "已接自动制作" : "手动制作"}</span></div>
         <p className="text-sm leading-6">{c.promise}</p><p className="text-xs text-text-muted">观众：{c.audience || matrix.content?.audience || "待设置"}</p>
         {c.presentation.preferred_visuals?.length ? <p className="text-xs text-text-muted">画面偏好：{c.presentation.preferred_visuals.join("、")}</p> : null}
-        {c.notes ? <p className="text-xs leading-5 text-text-muted">{c.notes}</p> : null}
+        {c.presentation.strategy ? <p className="text-xs leading-5 text-text-muted">画面讲述：{c.presentation.strategy}</p> : null}
+        {c.notes ? <p className="text-xs leading-5 text-text-muted">创作方向：{c.notes}</p> : null}
         {c.errors.length ? <p className="text-xs text-warning">{c.errors.join("；")}</p> : null}
         {c.bindings.length ? <div className="border-t border-border pt-3 space-y-2">{c.bindings.map((b) => <div key={b.key} className="text-xs flex justify-between gap-3">
           <div className="min-w-0"><p>{b.name || b.key}</p><p className="text-text-muted mt-1">当前写法：{b.label || b.recipe} · {b.auto ? "自动制作" : "手动制作"}</p></div>

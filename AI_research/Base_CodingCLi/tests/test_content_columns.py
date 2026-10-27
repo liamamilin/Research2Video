@@ -9,7 +9,7 @@ import pytest
 from core import matrices
 from core.video import auto, content_columns, production, store
 from tests.test_production import prod_env  # noqa: F401
-from tests.test_video_scripts import ROOT, _csrf, _login, video_env  # noqa: F401
+from tests.test_video_scripts import REPORT, ROOT, _csrf, _login, llm, script_json, video_env  # noqa: F401
 
 
 @pytest.fixture
@@ -36,7 +36,9 @@ def test_shipped_catalog_reuses_ten_domains_and_all_five_ai_bindings():
     for key in ("flash_daily", "ai_media_opensource_digest", "ai_media_arena_digest",
                 "ai_media_business_digest", "ai_media_deep_dive"):
         c = content_columns.for_production(config, key, configs=configs)
-        assert c and c.matrix == "ai_media" and not c.render
+        assert c and c.matrix == "ai_media"
+        assert set(c.render) == {"packaging"}
+        assert c.render["packaging"]["label"] == c.name
     assert matrices_by_key["tech"].content["role"] == matrices_by_key["software"].content["role"] == "source"
     assert matrices_by_key["ai"].archived
 
@@ -112,6 +114,39 @@ def test_shared_type_changes_editorial_goal_without_restricting_report_or_object
     assert result.research_prompt == recipe.research_prompt
     assert "对象数量沿用材料" in result.script_style and "讲清对象差异" in result.script_style
     assert content_columns.apply_script_context(recipe, {}) is recipe
+
+
+def test_column_brief_reaches_single_call_writer_and_saved_context_stays_frozen(column_env, llm):
+    from core.video import columns, writer
+
+    config = str(column_env / "config")
+    c = content_columns.load_all(config)["model_review"]
+    content_columns.save(config, c.key, {**c.data(), "notes": "围绕批量处理解释价格与响应速度的取舍。"})
+    context = content_columns.snapshot(config, "flash", "monitoring/ai_flash_discovery")
+    recipe = content_columns.apply_script_context(columns.get(config, "flash"), context)
+    assert columns.get(config, "flash").script_style not in recipe.script_style
+    llm.replies = [script_json()]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "批量任务怎样选模型"},
+                           column_style=recipe.script_style, target_minutes=recipe.target_minutes, llm_config=None)
+    assert len(llm.calls) == 1
+    assert "围绕批量处理解释价格与响应速度的取舍" in llm.calls[0][1]["content"]
+    assert written.meta["creative_direction"] == recipe.script_style
+    content_columns.save(config, c.key, {**c.data(), "notes": "改为长文档问题。"})
+    frozen = content_columns.apply_script_context(columns.get(config, "flash"), context)
+    assert frozen.script_style == recipe.script_style
+    assert "改为长文档问题" not in frozen.script_style
+
+
+def test_saved_presentation_strategy_reaches_render_direction_and_old_contexts_still_work(column_env):
+    config = str(column_env / "config")
+    c = content_columns.load_all(config)["model_review"]
+    content_columns.save(config, c.key, {**c.data(), "presentation": {
+        "strategy": "先出现价格，再突出响应速度；同一对象保持配色。", "preferred_visuals": ["散点图"]}})
+    context = content_columns.snapshot(config, "flash", "monitoring/ai_flash_discovery")
+    direction = content_columns.render_direction(context)
+    assert "先出现价格，再突出响应速度" in direction and "散点图" in direction
+    assert content_columns.render_direction({}) == ""
+    assert content_columns.render_direction({"column": "old", "promise": "旧目标"}) == "栏目：。讲解目标：旧目标。"
 
 
 def test_saved_business_owner_and_source_owner_remain_distinct(column_env):

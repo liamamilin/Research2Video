@@ -1,17 +1,21 @@
 schema_version: 1
-name: AI 商业观察
+name: AI 产业观察
 matrix: ai_media
 type: explainer
-audience: 关注 AI 产品、技术与应用的观众
-promise: 理解 AI 商业变化背后的原因和影响
+audience: 关心 AI 产品与使用生态的开发者、产品从业者和高频使用者
+promise: 帮观众理解一件 AI 商业变化如何影响产品、用户与实际用法
 production_ids:
 - ai_media_business_digest
 render_inheritance: source_compatible
-render: {}
+render:
+  packaging:
+    label: AI 产业观察
 presentation:
+  strategy: 从具体产品、套餐或使用场景切入，用价格对比和参与者关系图解释变化；先建立可读的对象与关系，再沿同一个商业问题随旁白突出当前参与者和影响。讲到收费或使用关系变化时，并列呈现变化前后的角色与位置；结尾回到关系或对比画面，完整展示本期要带走的变化。
   preferred_visuals:
-  - 财务图表
+  - 产品与套餐截图
+  - 价格对比
   - 业务结构
   - 流程
 status: configured
-notes: ''
+notes: 从材料中选择一个最值得解释的产品或商业变化，围绕收费、使用方式、分发渠道或竞争关系找到本期主线。让观众看懂参与者之间怎样联系、谁的行为可能改变，以及变化会影响哪种工作场景。相关公司动态作为解释主线的材料。标题点出产品或用户正在面对的变化，作者可以从一个具体例子或值得追问的问题展开。

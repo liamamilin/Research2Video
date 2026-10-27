@@ -56,13 +56,16 @@ describe("ContentColumns", () => {
     fireEvent.change(screen.getByLabelText("栏目名称"), { target: { value: "模型与成本横评" } });
     fireEvent.change(screen.getByLabelText("制作档位"), { target: { value: "fast" } });
     fireEvent.change(screen.getByLabelText("画面偏好"), { target: { value: "截图、价格卡、流程" } });
+    fireEvent.change(screen.getByLabelText("画面讲述方式"), { target: { value: "先展示价格，再展开速度差异。" } });
+    fireEvent.change(screen.getByLabelText("栏目创作方向"), { target: { value: "围绕交互任务讲清等待时间的取舍。" } });
     fireEvent.click(screen.getByRole("button", { name: "保存栏目" }));
     await waitFor(() => expect(calls.some((c) => c.method === "PUT")).toBe(true));
     const saved = calls.find((c) => c.method === "PUT")!;
     expect(saved.url).toContain("/api/content-columns/model_review");
     expect(saved.body?.expected_revision).toBe("revision-1");
     expect(saved.body?.render).toEqual({ production_mode: "fast", video_form: "information_cards", visual_style: "editorial_light" });
-    expect(saved.body?.presentation).toEqual({ preferred_visuals: ["截图", "价格卡", "流程"] });
+    expect(saved.body?.presentation).toEqual({ preferred_visuals: ["截图", "价格卡", "流程"], strategy: "先展示价格，再展开速度差异。" });
+    expect(saved.body?.notes).toBe("围绕交互任务讲清等待时间的取舍。");
     expect(calls.some((c) => c.method !== "GET" && c.url.includes("/api/production"))).toBe(false);
   });
 

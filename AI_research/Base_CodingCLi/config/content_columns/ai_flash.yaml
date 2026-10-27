@@ -2,16 +2,19 @@ schema_version: 1
 name: AI 快讯
 matrix: ai_media
 type: news
-audience: 关注 AI 产品、技术与应用的观众
-promise: 讲清 AI 新变化、重要性和使用影响
+audience: 已经在工作中使用 AI 的开发者和高频使用者
+promise: 让观众抓住一个 AI 重要变化，并理解它会怎样影响自己的用法
 production_ids:
 - flash_daily
 render_inheritance: source_compatible
-render: {}
+render:
+  packaging:
+    label: AI 快讯
 presentation:
+  strategy: 从页面整体交代对象，再聚焦本次变化所在的区域；把功能、操作、费用与额度的具体变化作为主画面，相关数字随旁白逐步出现。版本日期、热度和随口提到的阅读时间作为辅助标签，承接说明使用简洁卡片。
   preferred_visuals:
   - 重点卡
   - 真实截图
   - 关键数字
 status: configured
-notes: ''
+notes: 围绕本期一个最值得关注的变化，找到与观众具体工作任务的联系。可从新结果、使用中的问题或前后差异切入，讲清变化怎样影响能力、成本、门槛或操作方式。让每段推动新的理解，核心变化与直接影响讲清后自然收束。标题说出具体看点，开场直接面对观众，讲述顺序与节奏由作者选择。

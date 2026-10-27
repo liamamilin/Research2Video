@@ -1,18 +1,21 @@
 schema_version: 1
-name: AI 深度研究
+name: AI 深度解读
 matrix: ai_media
 type: deep_research
-audience: 关注 AI 产品、技术与应用的观众
-promise: 围绕一个 AI 问题串起材料、不同观点和结论
+audience: 希望理解 AI 技术如何影响实际工作的开发者和高频使用者
+promise: 陪观众从一个 AI 疑问走到机制理解，并能用于认识类似问题
 production_ids:
 - ai_media_deep_dive
 render_inheritance: source_compatible
-render: {}
+render:
+  packaging:
+    label: AI 深度解读
 presentation:
+  strategy: 用一组持续出现的对象承载贯穿本期的例子，先建立可读的整体关系，再随着解释逐步增加流程、关系和状态变化，让当前讲到的对象清楚可见。长段落用本步要形成的认识作画面小标题，帮助观众跟随推进；关键处回到例子，把抽象机制与具体过程对应，最后回顾核心关系与结论。
   preferred_visuals:
   - 多章节混合画面
   - 图表
   - 真实截图
   - 视觉回顾
 status: configured
-notes: ''
+notes: 围绕材料中一个值得持续理解的问题深入展开，选择能推动解释的线索与具体例子。让例子贯穿讲述，随着问题推进解释机制、作用与实际含义，帮助观众形成可以复用的认识。讲述深度由问题需要决定，相关比较和背景为主线服务；作者自主组织开场、段落与收束，标题体现本期真正要回答的疑问。
