@@ -123,7 +123,11 @@ def pick_topics(spec: dict) -> list[dict]:
     sync_topics()
     taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
     items: list[dict] = []
-    config_dir = get_settings().paths.config_dir
+    from core.video import content_guard
+
+    paths = get_settings().paths
+    config_dir = paths.config_dir
+    remembered = content_guard.history(config_dir, paths.jobs_dir)
     for pick in (resolve_pick(p) for p in spec.get("picks", [])):
         column = video_columns.get(config_dir, pick["column"])
         if pick.get("whole"):  # the Job's report as it is, one video: never a topic source
@@ -132,14 +136,24 @@ def pick_topics(spec: dict) -> list[dict]:
                 items.append({**item, "pick": pick})
             continue
         _, topics = topic_store.load(pick.get("source", "flash"))
+        source = topic_store.resolve(paths.jobs_dir, pick.get("source", "flash"))
+        job = source.job if source else ""
+        key = content_guard.scope(job, config_dir)
         # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
         for topic in sorted(topics, key=lambda t: (bool(getattr(t, "stale", lambda: False)()), -(t.score or 0))):
             if len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
                 break
             if topic.id in taken:
                 continue
+            candidate = content_guard.policy_topic(excerpt.topic_for(column, topic), job)
+            used = content_guard.topic_sources(candidate)
+            peers = [p for p in remembered if p["scope"] == key] if key else []
+            if content_guard.duplicate_peers(used, peers):
+                logger.info("跳过重复选题 %s：同矩阵已使用来源", topic.id)
+                continue
             taken.add(topic.id)
-            items.append({"column_key": pick["column"], "topic": excerpt.topic_for(column, topic),
+            remembered.append({"scope": key, "sources": used, "script_id": "", "title": candidate.get("title", topic.id)})
+            items.append({"column_key": pick["column"], "topic": candidate,
                           "production": pick.get("production", ""), "pick": pick})
     for item in items:
         del item["pick"]
@@ -159,7 +173,7 @@ def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
         return None  # written already (by hand, or by an earlier batch); one put away does not count: that is how a redo is asked for
     record = reports.record_file(relative, job=spec.get("job", ""), created_by="autopilot")
     topic = {**reports.topic_for(record, workspace), "from_report": relative, "report_id": record["id"],
-             "matrix_dedup": {"job": spec.get("job") or record.get("job", ""), "policy": "matrix-source-v1"}}
+             "matrix_dedup": {"job": spec.get("job") or record.get("job", ""), "policy": "matrix-source-v2"}}
     return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
 
 
@@ -314,10 +328,16 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
         from core.video import content_guard
 
         paths = get_settings().paths
-        if content_guard.writing_peer(item["topic"], paths.config_dir, paths.jobs_dir):
-            ap.update_item(item["id"], note="等待同矩阵前一份报告写稿完成，再检查选题重复")
+        topic = content_guard.with_policy({"created_by": "autopilot", "topic": item["topic"]}, paths.jobs_dir)["topic"]
+        if content_guard.writing_peer(topic, paths.config_dir, paths.jobs_dir):
+            ap.update_item(item["id"], note="等待同矩阵前一篇文稿完成，再从剩余材料选题")
             return took
-        topic = _prepare(item)
+        try:
+            content_guard.check_topic(topic, paths.config_dir, paths.jobs_dir)
+        except content_guard.DuplicateContent as exc:
+            ap.update_item(item["id"], state="CANCELLED", note=str(exc))
+            return took
+        topic = _prepare({**item, "topic": topic})
         if item.get("production"):
             topic = {**topic, "_production": item["production"]}
         script = video_executor.create(item["column_key"], topic, "autopilot")

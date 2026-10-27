@@ -263,10 +263,10 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     settings = get_settings()
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
-    script = content_guard.with_policy(store.get_script(script_id))
+    script = content_guard.with_policy(store.get_script(script_id), settings.paths.jobs_dir)
     from core.video.content_columns import apply_script_context
     column = apply_script_context(column, script.get("content_context") or {})
-    guarded = bool(script["topic"].get("matrix_dedup"))
+    guarded = bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
     dedup_meta, filtered_material = {}, ""
     if guarded:
         store.update_script(script_id, topic=script["topic"])
@@ -669,7 +669,7 @@ def _adapt_version(script_id: str, *, report: str, report_path: str, citation_ch
         on_stage=lambda name: store.update_script(script_id, stage=name),
     )
     paths = get_settings().paths
-    content_guard.check(content_guard.with_policy(store.get_script(script_id)), adapted.sections,
+    content_guard.check(content_guard.with_policy(store.get_script(script_id), paths.jobs_dir), adapted.sections,
                         paths.config_dir, paths.jobs_dir)
     return store.add_version(
         script_id,

@@ -240,9 +240,14 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
 
         # Older daily/weekly drafts also pass this gate before spending another render attempt.
         paths = get_settings().paths
+        guarded = content_guard.with_policy(script, paths.jobs_dir)
+        if (not content_guard.protected(script["id"])
+                and content_guard.writing_peer(guarded["topic"], paths.config_dir, paths.jobs_dir, script_id=script["id"])):
+            out["item"] = {"note": "等待同矩阵更早的文稿完成，再检查主选题重复"}
+            return out
         version = store.get_version(script["id"], script["current_version"])
         try:
-            content_guard.check(content_guard.with_policy(script), version["sections"], paths.config_dir, paths.jobs_dir)
+            content_guard.check(guarded, version["sections"], paths.config_dir, paths.jobs_dir)
         except content_guard.DuplicateContent as exc:
             if content_guard.archive_duplicate(script["id"], str(exc), [p["script_id"] for p in exc.peers]):
                 out["item"] = {"state": "CANCELLED", "note": str(exc)}
