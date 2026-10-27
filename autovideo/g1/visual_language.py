@@ -29,6 +29,9 @@ def component_schema(component: str) -> dict:
     schema = json.loads((ROOT / f'schemas/components/{component}.schema.json').read_text(encoding='utf-8'))
     if component in COMPONENTS:
         schema['properties']['visuals'] = visuals_schema()
+    if component == 'bar_chart':
+        # The complete unit may be displayed once in the scene heading.
+        schema['properties']['unit']['minLength'] = 0
     return schema
 
 

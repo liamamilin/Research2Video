@@ -3,6 +3,7 @@ import json
 from types import SimpleNamespace
 
 import pytest
+from jsonschema import ValidationError
 from g1.tests.test_video_ir_v0_2_runtime import base_ir, make_root
 from g1.video_ir import ValidationFault, validate_video_ir
 from g2 import explanation, information_motion as motion
@@ -42,6 +43,19 @@ def test_chart_cues_follow_spoken_months_across_phrases(tmp_path):
     assert cues[2]['quote'] == '二月' and cues[2]['segment_id'] == 'n2'
     assert cues[3]['quote'] == '三月' and cues[3]['segment_id'] == 'n2'
     assert [c['target_id'] for c in cues] == ['title', 'line:0', 'line:1', 'line:2', 'line:3']
+
+
+def test_fallback_chart_cues_keep_categories_and_values_unchanged():
+    props = chart()
+    props.pop('reveal_phrases')
+    props['takeaway'] = '这个总结应当只用于总结镜头，不应当成为第四个横轴分类'
+    before = copy.deepcopy(props)
+    scene = {'component': 'data_chart', 'props': props, 'narration_segment_ids': ['n1']}
+    speech = {'n1': {'id': 'n1', 'text': '一月12万次，二月18万次，三月16万次。', 'start_ms': 0, 'end_ms': 9000}}
+    first = motion.automatic_cues(scene, speech)
+    assert props == before
+    assert motion.automatic_cues(scene, speech) == first
+    assert props == before
 
 
 def test_paragraph_composition_keeps_images_and_native_charts_together(tmp_path):
@@ -117,3 +131,53 @@ def test_chart_screen_text_edit_preserves_upstream_data():
     changed = apply_changes(scene, {'title': '随讲述展开', 'series.0.name': '月度次数'})
     assert changed['props']['series'][0]['values'] == scene['props']['series'][0]['values']
     assert changed['props']['title'] == '随讲述展开'
+
+
+@pytest.mark.parametrize('unit, short_unit', [('%（16个=100）', '%'), ('相对总 token（%）', '%'),
+                                           ('% token（1个=100）', '%'), ('相对 token（16=100）', '')])
+def test_long_value_basis_moves_to_heading_without_changing_values(unit, short_unit, tmp_path):
+    group = {'id': 'card_7', 'title': '并行尝试的总 token', 'text': '更多并行尝试。',
+             'segment_ids': ['n1'], 'image_indices': []}
+    values = [25, 50, 100]
+    page = {'id': group['id'], 'component': 'bar_chart', 'props': {
+        'categories': ['1 个 Agent', '4 个 Agent', '16 个 Agent'],
+        'values': values.copy(), 'unit': unit, 'baseline_zero': True}}
+    context = {'title': '并行预算', 'groups': [group]}
+    plan = {'pages': [page]}
+    explanation.validate(plan, context)
+    assert page['props']['values'] == values
+    assert page['props']['unit'] == short_unit
+    assert group['title'] in page['headline'] and unit in page['headline']
+    normalized = copy.deepcopy(page)
+    explanation.validate(plan, context)
+    assert page == normalized
+    alignment = {'rows': [{'id': 'n1', 'text': group['text'], 'start_ms': 0, 'end_ms': 7000}]}
+    board = explanation.compile_storyboard(SimpleNamespace(ARTIFACTS=tmp_path, write_json=lambda *a: None),
+                                          {**plan, 'groups': [group]}, alignment, {}, [])
+    assert board['scenes'][0]['purpose'] == page['headline']
+    assert board['scenes'][0]['props']['values'] == values
+    root = make_root(tmp_path / 'contract')
+    ir = base_ir(root)
+    ir['scenes'][0].update(component='bar_chart', props=page['props'], purpose=page['headline'])
+    ir['scenes'][0]['beats'][0]['target_id'] = 'bar:0'
+    assert validate_video_ir(ir, root)['scenes'][0]['props']['unit'] == short_unit
+
+
+def test_comparison_title_alias_uses_existing_scene_heading(tmp_path):
+    group = {'id': 'card_5', 'title': '两种花法', 'text': '一个 AI 想更久，或多个 Agent 并行。',
+             'segment_ids': ['n1'], 'image_indices': []}
+    page = {'id': 'card_5', 'component': 'comparison', 'props': {
+        'title': '两种花法，不是一个科目',
+        'left': {'label': '单个 AI', 'items': ['更长思考']},
+        'right': {'label': '多个 Agent', 'items': ['并行尝试']}}}
+    plan = {'pages': [page]}
+    explanation.validate(plan, {'title': '预算', 'groups': [group]})
+    assert 'title' not in page['props']
+    assert page['headline'] == '两种花法，不是一个科目'
+    alignment = {'rows': [{'id': 'n1', 'text': group['text'], 'start_ms': 0, 'end_ms': 7000}]}
+    board = explanation.compile_storyboard(SimpleNamespace(ARTIFACTS=tmp_path, write_json=lambda *a: None),
+                                          {**plan, 'groups': [group]}, alignment, {}, [])
+    assert board['scenes'][0]['purpose'] == page['headline']
+    page['props']['unregistered_field'] = '仍然拒绝未知组件字段'
+    with pytest.raises(ValidationError, match='Additional properties'):
+        explanation.validate(plan, {'title': '预算', 'groups': [group]})

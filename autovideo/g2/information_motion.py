@@ -650,7 +650,7 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
             # A grouped chart is revealed by series. If a plan supplies monthly
             # phrases instead, the spoken series names give the useful anchors.
             if len(phrases) != len(keys):
-                phrases = keys
+                phrases = list(keys)
             phrases += [props.get('takeaway', '')]
         text = ''.join(row['text'] for row in speech)
         cursor = 0

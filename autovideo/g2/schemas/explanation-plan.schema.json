@@ -36,6 +36,10 @@
           "props": {
             "type": "object"
           },
+          "headline": {
+            "type": "string",
+            "minLength": 1
+          },
           "material_cues": {
             "type": "array",
             "maxItems": 48,

@@ -41,6 +41,8 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
               '结尾用focus_indices强调上游结论对应的1到3个对象，takeaway_phrase填写引出该结论的讲稿短语。'
               'x_hint/y_hint可提示讲稿已说出的维度含义，例如越低越省或越高越快。'
               '单个数字用big_number；旧值到新值用price_change；简单类别比较沿用bar_chart；其他内容用现有文字或对比组件。'
+              'comparison和bar_chart的大标题放在页级headline，不放进props。bar_chart.unit只写简短计量单位，'
+              '例如%；相对基准、分母和其他说明放在headline，不挤进每条数字标签。'
               '从本章讲稿组织图表数据，让时间顺序、系列名称、单位易读。趋势与多组比较图限制2到8个横轴项、最多3个系列；'
               '长序列提炼讲稿提到的关键节点，缺失值用null。不要把编号、年份或步骤编号当测量值。'
               'data_chart.takeaway用讲稿已有结论，focus_index指出要强调的横轴项；'
@@ -95,6 +97,11 @@ def validate(plan: dict, context: dict) -> None:
                     (cue.get('region_index') is not None and cue['region_index'] >= len(materials[cue['image_index']]['regions']))):
                 raise ValueError('图片镜头需要对应本段已有图片和区域')
         props = page['props']
+        if page['component'] in {'comparison', 'bar_chart'} and isinstance(props.get('title'), str) and props['title'].strip():
+            # These components already render their heading outside props.
+            title = props.pop('title')
+            heading = page.get('headline', title)
+            page['headline'] = heading if title in heading else f'{heading} · {title}'
         if (context.get('fast_cards') and page['component'] == 'concept_reveal'
                 and page.get('importance') != 'key' and 'visuals' not in props):
             # A keyword in a bridge sentence must not turn the whole paragraph
@@ -129,7 +136,19 @@ def validate(plan: dict, context: dict) -> None:
         elif page['component'] == 'bar_chart' and len(props['categories']) != len(props['values']):
             raise ValueError('条形图需要每项对应一个数值')
         if page['component'] not in {'data_chart', 'scatter_chart', 'flow_diagram'}:
-            motion.validate_text_fit({'id': page['id'], 'component': page['component'], 'props': props}, False)
+            scene = {'id': page['id'], 'component': page['component'], 'props': props}
+            try:
+                motion.validate_text_fit(scene, False)
+            except motion.InformationFault as exc:
+                unit = props.get('unit', '')
+                if page['component'] != 'bar_chart' or 'the value label' not in str(exc):
+                    raise
+                # Keep the supplied numbers and the complete basis visible,
+                # using the existing heading rather than repeating it per bar.
+                heading = page.get('headline', group['title'])
+                page['headline'] = heading if unit in heading else f'{heading} · {unit}'
+                props['unit'] = '%' if unit.replace('％', '%').count('%') == 1 else ''
+                motion.validate_text_fit(scene, False)
 
 
 def paragraph_groups(pipeline, narration: dict, saved: dict) -> list[dict]:
@@ -201,7 +220,8 @@ def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, asset
             component = 'material_collage' if len(images) == 2 else 'object_showcase'
             props = {'title': group['title'], 'text': (' '.join(props.get('lines', [])) or props.get('subtitle') or group['text'])[:80], 'images': images, 'focus_indices': list(range(len(images)))}
         scenes.append({'id': page['id'], 'component': component, 'props': props,
-                       'headline': props.get('title', group['title']), 'narration_segment_ids': group['segment_ids']})
+                       'headline': page.get('headline', props.get('title', group['title'])),
+                       'narration_segment_ids': group['segment_ids']})
     diagrams = [s for s in scenes if s['component'] == 'flow_diagram']
     if diagrams:
         request = pipeline.ARTIFACTS / 'object-layout-request.json'
