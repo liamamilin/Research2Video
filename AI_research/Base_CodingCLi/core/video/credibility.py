@@ -42,6 +42,8 @@ def label(version: dict | None, *, auditing: bool = False) -> dict:
     ``auditing``: the audits are still running, so "unaudited" is only for now."""
     if not version:
         return {"tier": "unaudited", "text": TIERS["unaudited"], "reasons": ["还没有文稿"], "cited_share": None}
+    if (version.get('meta') or {}).get('local_video'):
+        return {'tier': 'generated', 'text': '本地视频', 'reasons': [], 'cited_share': None}
     sections = version.get("sections") or []
     checks = (version.get("meta") or {}).get("checks")
     checks = review.normalize(checks, len(sections)) if checks else None

@@ -40,6 +40,9 @@ async def object_view(context: dict, request: Request, load_video=None) -> dict:
                         status=data['status'], version=data.get('current_version'), video_version=latest.get('version') if latest else None,
                         active=data['status'] in ('RESEARCHING', 'WRITING') or bool(data.get('stage')),
                         error=data.get('error'), links=(data.get('configuration') or {}).get('links', []))
+            item['local_video'] = bool((data.get('topic') or {}).get('local_video'))
+            if item['local_video']:
+                item.update(status='本地视频', links=[])
             item['renders'] = [{k: r.get(k) for k in ('id', 'version', 'status', 'active_stage', 'error_message')} for r in renders[:3]]
             item['active'] |= any(r.get('status') in ('QUEUED', 'RUNNING', 'SUBMITTING', 'DOWNLOADING') for r in renders[:3])
         elif kind == 'job':

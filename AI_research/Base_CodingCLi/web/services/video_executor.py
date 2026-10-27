@@ -72,6 +72,8 @@ def rerun(script_id: str, step: str, by: str) -> dict:
     script = store.get_script(script_id)
     if script is None:
         raise StepError("没有这篇文稿")
+    if script['topic'].get('local_video'):
+        raise StepError('这是本地导入成片，可直接发布；替换视频请提供新文件路径。')
     if step not in RERUNNABLE:
         raise StepError(f"这一步不能重跑：{step}（定稿在文稿页点「定稿」）")
     if script["status"] in ("RESEARCHING", "WRITING") or (script["status"] == "DRAFT" and script.get("stage")):

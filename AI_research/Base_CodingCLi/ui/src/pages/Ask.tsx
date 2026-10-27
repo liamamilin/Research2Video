@@ -15,7 +15,7 @@ import { listAssistantConversations, setAssistantContext, type ConversationSumma
 import { assistantContext, CONTEXT_LABELS } from "@/lib/assistant-context";
 import { useAuthStore } from "@/lib/auth-store";
 
-const EXAMPLES = ["查看各矩阵的任务与运行安排", "帮我创建一个研究矩阵", "看看有哪些文稿等我审", "看看有哪些视频可以发布", "检查发布队列里需要处理的问题", "检查今天有哪些任务失败了"];
+const EXAMPLES = ["查看各矩阵的任务与运行安排", "帮我创建一个研究矩阵", "看看有哪些文稿等我审", "看看有哪些视频可以发布", "我想把本地视频发布到指定平台", "检查发布队列里需要处理的问题", "检查今天有哪些任务失败了"];
 const READ_EXAMPLES = ["看看有哪些文稿等我审", "今天的快讯里有哪些选题还没写", "查看现有 Jobs", "查看发布进度"];
 interface PendingConversation {
   messages: AssistantMessage[];

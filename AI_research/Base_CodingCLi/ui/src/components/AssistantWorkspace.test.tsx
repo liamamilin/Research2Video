@@ -13,6 +13,17 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
+it('keeps imported video actions focused on publishing', async () => {
+  vi.mocked(fetch).mockResolvedValue({ ok: true, status: 200, text: async () => JSON.stringify({ active: false, operations: [],
+    objects: [{ kind: 'video', id: 'local', title: '本地演示', href: '/video/local', status: '本地视频', local_video: true, links: [],
+      renders: [{ id: 'render-local', version: 1, status: 'COMPLETED' }] }] }) } as Response);
+  render(<MemoryRouter><AssistantWorkspacePanel conversationId="c" context={null} revision={0} onPrompt={vi.fn()} /></MemoryRouter>);
+  const link = await screen.findByRole('link', { name: '查看发布信息' });
+  expect(link.getAttribute('href')).toBe('/video/local?tab=publish');
+  expect(screen.queryByText('重新生成文稿')).toBeNull();
+  expect(screen.queryByText('重新生成视频')).toBeNull();
+});
+
 it('shows manuscript and video versions and fills an action instead of submitting it', async () => {
   const prompt = vi.fn();
   render(<MemoryRouter><AssistantWorkspacePanel conversationId={'a'.repeat(32)} context={null} revision={0} onPrompt={prompt} /></MemoryRouter>);

@@ -183,6 +183,9 @@ def source_card_request(script: dict, version: dict) -> list[dict]:
 
 def publish_pack(script: dict, version: dict, column, *, render_id: str | None = None) -> dict:
     """The publish pack of ``version``; chapter times come from its newest completed render, if there is one."""
+    if (script.get('topic') or {}).get('local_video'):
+        from web.services.local_video import publish_pack as local_pack
+        return local_pack(script, version)
     from core.video import publish
 
     report = ""
@@ -213,6 +216,8 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
 
 def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None) -> dict:
     """Record a render of the script's approved version. Does not contact AutoVideo."""
+    if (script.get('topic') or {}).get('local_video'):
+        raise RenderError('这是本地导入成片，可直接发布；替换视频请提供新文件路径。')
     version_no = script.get("approved_version")
     if not version_no:
         raise RenderError("文稿还没有定稿，不能出片")

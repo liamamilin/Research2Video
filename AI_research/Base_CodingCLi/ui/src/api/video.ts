@@ -223,7 +223,7 @@ export interface ScriptVersion {
   title: string;
   sections: ScriptSection[];
   length_check: LengthCheck;
-  edit_type: "GENERATED" | "EDITED";
+  edit_type: "GENERATED" | "EDITED" | "IMPORTED";
   meta: {
     problems?: string[];
     attempts?: number;
@@ -270,7 +270,7 @@ export interface VideoScriptSummary {
   content_matrix_id?: string;
   source_matrix_id?: string;
   content_context?: { column: string; column_name: string; matrix: string; source_matrix: string; type: string };
-  topic: { id: string | null; title: string; fields?: Record<string, string>; article?: { mode: "read" | "adapt"; kind: "literary" | "information" } };
+  topic: { id: string | null; title: string; fields?: Record<string, string>; article?: { mode: "read" | "adapt"; kind: "literary" | "information" }; local_video?: { file_name: string; duration: number; width: number; height: number; size: number } };
   status: ScriptStatus;
   stage?: string | null;
   research_job: string;

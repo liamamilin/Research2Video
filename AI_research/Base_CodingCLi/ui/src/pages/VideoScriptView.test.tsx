@@ -191,6 +191,23 @@ afterEach(() => {
 });
 
 describe("Video script review", () => {
+  it('shows an imported local video with playback and publishing, without generation or AutoVideo dependency', async () => {
+    mockApi({ ...DETAIL, status: 'APPROVED', approved_version: 1, column: null,
+      topic: { title: '演示视频', id: null, local_video: { file_name: '演示视频.mp4', duration: 12, width: 1920, height: 1080, size: 2000 } },
+      version_shown: { ...DETAIL.version_shown, sections: [], meta: { local_video: true } },
+      renders: [{ id: 'r-local', version: 1, status: 'COMPLETED', created_at: '2026-10-27T09:00:00+08:00',
+        files: [{ name: 'video.mp4', url: '/api/video/renders/r-local/files/video.mp4', size: 2000 }] }] });
+    renderPage('/video/s1?tab=video');
+    expect(await screen.findByRole('heading', { name: '本地导入视频' })).toBeTruthy();
+    expect(screen.getByText('演示视频.mp4')).toBeTruthy();
+    expect(screen.getByRole('link', { name: '下载成片' }).getAttribute('href')).toContain('r-local');
+    expect(screen.queryByRole('tab', { name: '稿件' })).toBeNull();
+    expect(screen.queryByRole('tab', { name: '审校' })).toBeNull();
+    expect(screen.queryByText('重新生成文稿')).toBeNull();
+    expect(screen.queryByText('快速卡片出片')).toBeNull();
+    expect(calls.some(c => c.url.includes('/autovideo'))).toBe(false);
+    expect(calls.every(c => c.method === 'GET')).toBe(true);
+  });
   it("keeps polling a social UNKNOWN task and receives its automatic publication record", async () => {
     const distribution={platform:"kuaishou",script_id:"s1",version:1,account_uid:"owner",account_name:"测试作者",connected:true,current_account:true,status:"UNKNOWN",can_prepare:false,blocked_reason:"",draft:null,publications:[],task:{id:"task",status:"UNKNOWN",error:"",work_id:"",render_id:"r",updated_at:1}};
     mockApi({...DETAIL,distributions:[distribution]});

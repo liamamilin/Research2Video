@@ -17,14 +17,27 @@ from pydantic import BaseModel, ConfigDict, Field
 from core.config import load_system_config
 from core.llm import LLMClient, LLMConfig
 from web import audit
-from web.deps import require_viewer
+from web.deps import require_viewer, require_editor
 from web.services import jobs_assistant
 from web.services.assistant_store import AssistantStore
 from web.settings import get_settings
 from web.services.assistant_workspace import Context
+from web.services.local_video import LocalVideoRequest
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/assistant", tags=["assistant"])
+
+
+@router.post('/local-video')
+def local_video(payload: LocalVideoRequest, request: Request, user=Depends(require_editor)):
+    from web.services.local_video import execute
+    try:
+        result = execute(payload, request, user)
+    except (ValueError, OSError, TimeoutError) as exc:
+        raise HTTPException(409, str(exc)) from exc
+    audit.log('local_video_' + payload.action, user=user['username'], target=result['render_id'],
+              result=result.get('message') or '')
+    return result
 
 
 @router.get('/capabilities')

@@ -137,6 +137,8 @@ def categories() -> dict:
 
 
 def column_for(script: dict):
+    if (script.get('topic') or {}).get('local_video'):
+        return None
     from web.routes.video import _known_columns
 
     column = _known_columns().get(script["column_key"])
@@ -152,6 +154,8 @@ def eligible(render_id: str, *, automatic: bool = False) -> tuple[dict, dict, di
         raise Error("请选择已完成的成片。")
     if reason := content_guard.publishing_block(script):
         raise Error(reason)
+    if automatic and (script.get('topic') or {}).get('local_video'):
+        raise Error('本地视频按指定平台投稿，不加入全局自动投稿。')
     if automatic and (script.get("archived") or script["status"] != "APPROVED" or
                       script.get("approved_version") != render["version"] or script.get("current_version") != render["version"]):
         raise Error("自动投稿只处理未归档文稿的当前定稿成片。")
@@ -258,6 +262,7 @@ def candidate_catalog() -> tuple[list[dict], dict]:
     with video_store.connect() as conn:
         rows = conn.execute("SELECT r.id AS render_id,r.script_id,r.version,r.title,r.completed_at,r.artifacts,"
             "s.current_version,s.approved_version,s.status AS script_status,s.archived,"
+            "(json_extract(s.topic,'$.local_video') IS NOT NULL) AS local_video,"
             f"({content_guard.PUBLISHABLE_SQL}) AS publishable,"
             "EXISTS(SELECT 1 FROM publications p WHERE p.script_id=r.script_id AND p.version=r.version "
             "AND p.platform='bilibili' AND (p.account_uid=? OR p.account_uid='')) AS published FROM renders r JOIN scripts s ON s.id=r.script_id "
@@ -283,7 +288,7 @@ def candidate_catalog() -> tuple[list[dict], dict]:
             stats["queued_versions"] += 1
         elif row["publishable"]:
             result.append({k: row[k] for k in ("render_id", "script_id", "version", "title", "completed_at",
-                                             "current_version", "approved_version", "script_status", "archived")})
+                                             "current_version", "approved_version", "script_status", "archived", "local_video")})
     stats["unavailable_versions"] = len(all_versions - available)
     stats["ready_versions"] = len(result)
     return result, stats
@@ -437,7 +442,7 @@ def tick() -> None:
         config = db.settings()
         if config["auto_upload"]:
             for candidate in candidates():
-                if (candidate["archived"] or candidate["script_status"] != "APPROVED" or
+                if (candidate.get('local_video') or candidate["archived"] or candidate["script_status"] != "APPROVED" or
                     candidate["version"] != candidate["approved_version"] or candidate["version"] != candidate["current_version"]):
                     continue
                 try:

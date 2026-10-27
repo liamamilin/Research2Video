@@ -579,7 +579,7 @@ def list_scripts(limit: int = 100000, archived: bool = False, user=Depends(requi
     return [{**_script_summary(s, published, versions=versions),
              "distributions": [d for d in distribution_rows[s["id"]] if d["version"] == s["current_version"]],
              **{k: v for k, v in owners[s["id"]].items() if k != "matrix_archived"},
-             "column_label": owners[s["id"]]["production_name"] or (columns.get(s["column_key"]).name if columns.get(s["column_key"]) else s["column_key"]),
+             "column_label": '本地视频' if s['topic'].get('local_video') else owners[s["id"]]["production_name"] or (columns.get(s["column_key"]).name if columns.get(s["column_key"]) else s["column_key"]),
              **progress.render_state(s, renders.get(s["id"], []))} for s in scripts]
 
 
@@ -812,7 +812,7 @@ def get_publish_pack(script_id: str, version: Optional[int] = None, user=Depends
     if shown is None:
         raise _not_found("这个版本")
     column = _known_columns().get(script["column_key"])
-    if column is None:
+    if column is None and not script['topic'].get('local_video'):
         raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{script['column_key']}"))
     return video_render.publish_pack(script, shown, column)
 

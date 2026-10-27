@@ -211,6 +211,9 @@ def init_db() -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT, script_id TEXT NOT NULL, version INTEGER NOT NULL,
             platform TEXT NOT NULL, account_uid TEXT NOT NULL, render_id TEXT NOT NULL,
             payload TEXT NOT NULL, saved_at TEXT NOT NULL)""")
+        conn.execute("""CREATE TABLE IF NOT EXISTS local_video_assets (
+            sha256 TEXT PRIMARY KEY, script_id TEXT NOT NULL, render_id TEXT NOT NULL UNIQUE,
+            original_path TEXT NOT NULL, metadata TEXT NOT NULL, created_at TEXT NOT NULL)""")
         from core.video import autopilot_store, plans, reports, steps, story_pool, topic_store
         autopilot_store.init(conn)
         plans.init(conn)
@@ -235,6 +238,39 @@ def _encode(fields: dict, json_fields: tuple[str, ...]) -> dict:
 
 
 # --- Scripts -----------------------------------------------------------------
+
+
+def local_video_asset(sha256: str) -> dict | None:
+    with connect() as conn:
+        row = conn.execute('SELECT * FROM local_video_assets WHERE sha256=?', (sha256,)).fetchone()
+    return _decode(row, ('metadata',))
+
+
+def local_video_by_path(path: str) -> dict | None:
+    with connect() as conn:
+        row = conn.execute('SELECT * FROM local_video_assets WHERE original_path=? ORDER BY created_at DESC,rowid DESC LIMIT 1', (path,)).fetchone()
+    return _decode(row, ('metadata',))
+
+
+def register_local_video(sha256: str, path: str, metadata: dict, render_id: str, actor: str) -> dict:
+    """Register one completed media asset atomically; no research or writing is scheduled."""
+    now, sid = _now(), uuid.uuid4().hex
+    topic = {'id': None, 'title': metadata['title'], 'fields': {}, 'local_video': metadata}
+    with connect(write=True) as conn:
+        conn.execute('INSERT INTO scripts (id,column_key,topic,status,current_version,approved_version,created_by,created_at,updated_at) '
+                     'VALUES (?,?,?,\'APPROVED\',1,1,?,?,?)',
+                     (sid, 'local_video', json.dumps(topic, ensure_ascii=False), actor, now, now))
+        conn.execute('INSERT INTO script_versions (script_id,version,title,sections,length_check,edit_type,meta,created_by,created_at) '
+                     'VALUES (?,1,?,\'[]\',?,\'IMPORTED\',?,?,?)',
+                     (sid, metadata['title'], json.dumps({'estimated_seconds': metadata['duration']}),
+                      json.dumps({'local_video': metadata}, ensure_ascii=False), actor, now))
+        conn.execute('INSERT INTO renders (id,script_id,version,status,title,source_text,source_sha256,request,artifacts,created_at,updated_at,completed_at) '
+                     'VALUES (?,?,1,\'COMPLETED\',?,\'\',?,?,?,?,?,?)',
+                     (render_id, sid, metadata['title'], sha256, json.dumps({'origin': 'local_file', 'sha256': sha256}),
+                      json.dumps([{'name': 'video.mp4', 'size': metadata['size']}]), now, now, now))
+        conn.execute('INSERT INTO local_video_assets VALUES (?,?,?,?,?,?)',
+                     (sha256, sid, render_id, path, json.dumps(metadata, ensure_ascii=False), now))
+    return local_video_asset(sha256)
 
 
 def create_script(column_key: str, topic: dict, created_by: str = "", *, production: str = "",

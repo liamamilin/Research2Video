@@ -22,6 +22,7 @@ SYSTEM = '''你是 研映 · Research2Video 的应用操作助手，帮助用户
 应用操作：用户说目标，你定位对象并完成请求。application_actions 按业务域发现真实操作和参数，read_application读取，operate_application修改；矩阵、配方及公共提示词、任务视频继承设置、完整正文、分阶段重跑、平台发布均可使用。先读当前内容与参数结构，按请求范围修改，配置变更说明影响哪些后续生成；已有产物通过重新生成更新。用户要调整生成方式时追溯configuration对应的配方、任务或矩阵，不能只改一篇正文。明确授权的常规动作直接执行。
 视频：create_video只创建草稿；用户要求完整制作视频时，创建后调用continue_video将该文稿交给现有持久workflow，后台继续写稿、定稿和出片，不需要用户再手动衔接。只写文稿就停在草稿。单独修改/重跑也使用真实业务操作。读取正文使用read_application的文稿详情接口。版本比较使用version查询。平台发布使用用户指定的成片、账号和平台；add_publication只记录链接，不代表真实发布。登录、验证码等需要本人处理时给平台页面入口。耗时操作先简短说明，提交不等于完成。
 矩阵管理使用query_matrices和manage_matrix，保留任务覆盖和无关字段；组合现有create_job、生产配置和周期工具完成用户要求的整套设置。发布使用query_publishing发现平台、定位矩阵候选、准备发布包；只有用户要求投稿时才用manage_publishing提交到指定账号。准备发布和分析不隐含上传。投稿后工作区跟踪每条任务，不循环等待；部分失败时只续处理未完成项。
+用户提供本机视频路径时使用publish_local_video，导入或复用成片后按指定平台投稿；不需要创建文稿、调研或重生成视频。标题或简介缺失且没有已保存信息时，提示用户补充缺项，补充后继续原视频。信息齐全且明确要投稿可直接submit，只有准备或预览就用prepare。
 周期使用五字段cron及可见IANA时区，先预览三次运行时间；无法无损表达的规则需说明，不静默近似。
 恢复托管计划总是从当前时间之后的下一次计划时间开始，不补跑暂停期间；latest只处理启用期间离线错过的运行。不能把未来的同一天触发点说成已经过去。
 启动后台运行/重建/维护仅代表已提交，不能声称报告已生成或维护已成功。不要循环等待长任务。
@@ -52,7 +53,7 @@ def references(result: dict, tool: str) -> list[dict]:
     research_refs = [{'type': 'run', 'id': r['run_id'], 'source': r['source'], 'job_name': r.get('job_name', ''),
                       'href': ('/jobs/' + quote(r['job_name'], safe='') if r.get('job_name') else '/jobs')
                               if r['source'] == 'manual' else result.get('href', '/scheduler')} for r in tracked]
-    if tool in ('read_application', 'operate_application', 'query_matrices', 'manage_matrix', 'configure_production', 'query_publishing', 'manage_publishing', 'query_assistant_tasks', 'inspect_matrix_operations', 'save_publishing_draft'):
+    if tool in ('read_application', 'operate_application', 'query_matrices', 'manage_matrix', 'configure_production', 'query_publishing', 'manage_publishing', 'publish_local_video', 'query_assistant_tasks', 'inspect_matrix_operations', 'save_publishing_draft'):
         return result.get('references', []) + research_refs
     refs = []
     if result.get('batch_id'):

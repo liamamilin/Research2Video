@@ -149,7 +149,8 @@ export function VideoScriptViewPage() {
     return () => controller.abort();
   }, [id, sheetId, shownVersion]);
 
-  const needsRenderStatus = detail?.status === "APPROVED" && (search.get("tab") === "video" || (!search.get("tab") && nextStep(detail).tab === "video"));
+  const localVideo = detail?.topic.local_video;
+  const needsRenderStatus = detail?.status === "APPROVED" && (search.get("tab") === "video" || (!search.get("tab") && nextStep(detail).tab === "video")) && !localVideo;
   useEffect(() => {
     if (!canEdit || !needsRenderStatus || autovideo) return;
     const controller = new AbortController();
@@ -161,7 +162,7 @@ export function VideoScriptViewPage() {
 
   const shown = detail.version_shown;
   const isCurrent = shown?.version === detail.current_version;
-  const writable = canEdit && isCurrent && !detail.stage;
+  const writable = canEdit && isCurrent && !detail.stage && !localVideo;
   const check = shown?.length_check;
   const problems = shown?.meta?.problems ?? [];
   const step = isCurrent || !shown ? nextStep(detail) : { tab: "draft" as const, text: `正在查看历史 v${shown.version}。返回当前 v${detail.current_version} 后可继续审校、编辑与定稿。`, tone: "wait" };
@@ -173,7 +174,7 @@ export function VideoScriptViewPage() {
   const publishingRender = completed.find((r) => r.version === publishingVersion && r.files?.some(file => file.name === "video.mp4")) ?? completed.find((r) => r.version === publishingVersion);
   const publishingUpload = detail.platform_uploads?.find(task => task.version === publishingVersion);
 
-  const tabs: ScriptTab[] = !staged && !detail.renders.length && !detail.publications?.length
+  const tabs: ScriptTab[] = localVideo ? ["video", "publish"] : !staged && !detail.renders.length && !detail.publications?.length
     ? []
     : detail.status === "APPROVED" || completed.length || detail.publications?.length
       ? ["draft", "review", "video", "publish"]
@@ -296,14 +297,14 @@ export function VideoScriptViewPage() {
       <div className="flex flex-wrap items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className={cn("badge border", STATUS_CLASS[detail.status])}>{STATUS_LABEL[detail.status]}</span>
+            <span className={cn("badge border", STATUS_CLASS[detail.status])}>{localVideo ? '本地视频' : STATUS_LABEL[detail.status]}</span>
             <DistributionSummary rows={detail.distributions?.filter(d => d.version === detail.current_version)} publications={currentPublications(detail)} />
-            <CredibilityBadge value={detail.credibility} />
+            {!localVideo && <CredibilityBadge value={detail.credibility} />}
             {detail.auto ? <span className="badge border border-border text-text-muted">自动流水线</span> : null}
             {detail.column ? <span className="text-xs text-text-muted">{detail.column.name}</span> : null}
             {detail.content_context?.column_name ? <Link className="text-xs text-accent hover:underline"
               to={`/matrices/${detail.content_context.matrix}?tab=columns`}>栏目：{detail.content_context.column_name}</Link> : null}
-            {detail.approved_version ? (
+            {!localVideo && detail.approved_version ? (
               <span className="text-xs text-text-muted">{detail.approved_version === detail.current_version ? "定稿" : "旧版定稿"} v{detail.approved_version}</span>
             ) : null}
           </div>
@@ -312,12 +313,12 @@ export function VideoScriptViewPage() {
           ) : (
             <h1 className="text-lg font-semibold">{shown?.title ?? detail.title}</h1>
           )}
-          {detail.credibility && detail.credibility.tier !== "trusted" ? (
+          {!localVideo && detail.credibility && detail.credibility.tier !== "trusted" ? (
             <p className="text-xs text-text-muted mt-1">可信度提示：{detail.credibility.reasons.join("；")}</p>
           ) : null}
           <p className="text-xs text-text-muted mt-1">
             <TimeStamp value={detail.created_at} label="创建" className="mr-3" />
-            选题：{detail.topic.title}
+            {!localVideo && <>选题：{detail.topic.title}</>}
             <Link className="ml-3 text-accent hover:underline" to={`/ask?video=${encodeURIComponent(detail.id)}`}>
               在助手中处理
             </Link>
@@ -355,7 +356,9 @@ export function VideoScriptViewPage() {
         ) : null}
       </div>
 
-      {shown ? <ScriptIteration detail={detail} canEdit={canEdit} canManageModels={user?.role === "admin"} isCurrent={isCurrent} editing={editing} busy={busy}
+      {localVideo ? <section className="card p-4 space-y-2" aria-label="本地导入视频"><h2 className="font-medium">本地导入视频</h2>
+        <p className="text-sm">{localVideo.file_name}</p><p className="text-xs text-text-muted">{localVideo.width} × {localVideo.height} · {Math.round(localVideo.duration)} 秒 · 已保存成片副本，可直接准备发布信息和投稿。</p>
+      </section> : shown ? <ScriptIteration detail={detail} canEdit={canEdit} canManageModels={user?.role === "admin"} isCurrent={isCurrent} editing={editing} busy={busy}
         onRewrite={rewrite} onRender={() => render()} onVideo={() => goTab("video")} onCompare={() => goTab('compare')} /> : null}
 
       <section
@@ -382,7 +385,7 @@ export function VideoScriptViewPage() {
         {reportPath ? <Link className="ml-auto text-accent hover:underline" to={`/reports/view?path=${encodeURIComponent(reportPath)}`}>源研究报告 ↗</Link> : null}
       </div> : null}
 
-      <ScriptSteps detail={detail} canEdit={writable} onChanged={setDetail} showRewrite={false} />
+      {!localVideo && <ScriptSteps detail={detail} canEdit={writable} onChanged={setDetail} showRewrite={false} />}
 
       {detail.pending_plan ? (
         <PlanReview key={detail.pending_plan.id} detail={detail} canEdit={canEdit} onChanged={setDetail} />
@@ -471,7 +474,7 @@ export function VideoScriptViewPage() {
         </section>
       ) : null}
 
-      {shown && !editing && (tab === "draft" || tab === "video") ? <ScriptScreenshots key={`${detail.id}-${shown.version}-${renderForVersion(detail, shown.version)?.id ?? ""}`} id={detail.id} version={shown.version} canEdit={writable && ["DRAFT", "APPROVED"].includes(detail.status)} /> : null}
+      {!localVideo && shown && !editing && (tab === "draft" || tab === "video") ? <ScriptScreenshots key={`${detail.id}-${shown.version}-${renderForVersion(detail, shown.version)?.id ?? ""}`} id={detail.id} version={shown.version} canEdit={writable && ["DRAFT", "APPROVED"].includes(detail.status)} /> : null}
       {detail.topic.article && tab === "draft" ? <ArticleSource key={detail.id} id={detail.id} mode={detail.topic.article.mode} /> : null}
       {detail.report_id && tab === "draft" ? (
         <details className="card" onToggle={(e) => setReuseOpen(e.currentTarget.open)}>
@@ -641,7 +644,7 @@ function RenderPanel({
   const historical = latest != null && latest.version !== detail.current_version;
   const active = latest != null && RENDER_ACTIVE.includes(latest.status);
   const video = latest?.status === "COMPLETED" ? latest.files.find((f) => f.name === "video.mp4") : undefined;
-  const notReady = autovideo != null && (!autovideo.reachable || !autovideo.ready);
+  const notReady = !detail.topic.local_video && autovideo != null && (!autovideo.reachable || !autovideo.ready);
 
   return (
     <section className="card p-5 space-y-3 text-sm">
@@ -686,7 +689,7 @@ function RenderPanel({
         </div>
       ) : null}
 
-      {latest?.status === "COMPLETED" && latest.timings?.elapsed_seconds != null ? (
+      {!detail.topic.local_video && latest?.status === "COMPLETED" && latest.timings?.elapsed_seconds != null ? (
         <p className="text-xs text-text-muted">
           总耗时 {Math.round(latest.timings.elapsed_seconds)} 秒
           {latest.timings.download_seconds != null ? ` · 文件回传 ${latest.timings.download_seconds.toFixed(2)} 秒` : ""}
