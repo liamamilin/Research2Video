@@ -30,10 +30,17 @@ def artwork(config: dict, folder: Path, assets: Path, label: str = "") -> tuple[
         corner.alpha_composite(mark, (18 + (48-mark.width)//2, (76-mark.height)//2))
     else:
         draw.rounded_rectangle((22, 23, 50, 51), 7, fill=config["accent"])
-    face = font(config["name"], 26 if label else 28, 426)
-    draw.text((80, 27 if label else 38), config["name"], font=face, fill=config["text"], anchor="lm")
-    if label:
-        draw.text((80, 57), label, font=font(label, 18, 426), fill=config["accent"], anchor="lm")
+    subtitle = config["tagline"] if config.get("corner_tagline") and config["tagline"] else label
+    face = font(config["name"], 26 if subtitle else 28, 426)
+    draw.text((80, 27 if subtitle else 38), config["name"], font=face, fill=config["text"], anchor="lm")
+    if subtitle:
+        face = font(subtitle, 18, 426)
+        # Keep the full slogan on the end card; shorten only a crowded corner.
+        if face.getlength(subtitle) > 426:
+            while face.getlength(subtitle + "…") > 426:
+                subtitle = subtitle[:-1]
+            subtitle += "…"
+        draw.text((80, 57), subtitle, font=face, fill=config["accent"], anchor="lm")
     corner_path = folder / "corner.png"; corner.save(corner_path)
     tail = Image.new("RGBA", (1920, 1080), config["background"])
     draw = ImageDraw.Draw(tail)
@@ -45,7 +52,6 @@ def artwork(config: dict, folder: Path, assets: Path, label: str = "") -> tuple[
         draw.rounded_rectangle((916, 372, 1004, 460), 22, fill=config["accent"])
     draw.text((960, 565), config["name"], font=font(config["name"], 82, 1560), fill=config["text"], anchor="mm")
     draw.text((960, 690), config["tagline"], font=font(config["tagline"], 42, 1450), fill=config["text"], anchor="mm")
-    draw.text((960, 870), "RESEARCH  /  INSIGHT  /  VIDEO", font=ImageFont.truetype(FONT, 22), fill=config["accent"], anchor="mm")
     tail_path = folder / "outro.png"; tail.convert("RGB").save(tail_path)
     if config.get("intro_seconds", 0):
         head = Image.new("RGBA", (1920, 1080), config["background"])
@@ -93,6 +99,12 @@ def sonic_track(config: dict, assets: Path, output: Path, *, opening: bool = Fal
         sound *= min(1, .55/peak)
         audio[start:start+length] = sound
         meta.update(enabled=True, duration_seconds=length/48000, peak=float(np.max(np.abs(sound))))
+    cta_sound = bool(not opening and (config.get("cta") or {}).get("enabled")
+                     and config["cta"].get("sound"))
+    if cta_sound:
+        from g2 import brand_cta
+        audio += brand_cta.sound(48000, duration)
+    meta["cta_sound"] = {"enabled": cta_sound, "onsets_seconds": [.04, .16, .28] if cta_sound else []}
     sf.write(output, audio, 48000, subtype="PCM_16")
     return meta
 
@@ -121,7 +133,8 @@ def build(runner, ffmpeg: Path, ffprobe: Path, request: dict, input_dir: Path,
     config = {**config, "outro_seconds": tail_seconds}
     if "intro_seconds" in config:
         config["intro_seconds"] = intro_seconds
-    label = (request.get("packaging_resolved") or {}).get("components", {}).get("label", "")
+    # Show a selected column, never the common packaging preset's placeholder.
+    label = (request.get("packaging") or {}).get("label", "")
     corner, outro = artwork(config, output_dir, input_dir / "brand", label)
     sonic = sonic_track(config, input_dir / "brand", output_dir / "sonic.wav", tail_lead=cta_seconds+.2)
     intro_sonic = sonic_track(config, input_dir / "brand", output_dir / "intro.wav", opening=True) if intro_frames else {"enabled": False}
@@ -139,8 +152,10 @@ def build(runner, ffmpeg: Path, ffprobe: Path, request: dict, input_dir: Path,
         for path in brand_cta.artwork(config, output_dir, FONT):
             extra_inputs.extend(["-loop", "1", "-framerate", "30", "-i", path])
     reveal = config.get("corner_reveal_seconds", 0)
+    layout = (request.get("production_plan") or {}).get("brand_layout") or {"right": 48, "top": 36}
+    right, top = layout["right"], layout["top"]
     corner_filters = (f"[1:v]fps=30,format=rgba,fade=t=in:st=0:d={reveal}:alpha=1[corner];"
-                      f"[content][corner]overlay=x='W-w-48+24*(1-min(t/{reveal},1))':y=36:shortest=1[body];") if reveal else "[content][1:v]overlay=x=W-w-48:y=36:shortest=1[body];"
+                      f"[content][corner]overlay=x='W-w-{right}+24*(1-min(t/{reveal},1))':y={top}:shortest=1[body];") if reveal else f"[content][1:v]overlay=x=W-w-{right}:y={top}:shortest=1[body];"
     filters = (
         "[0:v]setpts=PTS-STARTPTS[content];"
         + corner_filters +
@@ -172,6 +187,7 @@ def build(runner, ffmpeg: Path, ffprobe: Path, request: dict, input_dir: Path,
             "intro_seconds": intro_seconds, "intro_sonic": intro_sonic,
             "content_seconds": duration, "outro_seconds": tail_seconds, "duration_seconds": expected,
             "corner_reveal_seconds": reveal, "brand_card_seconds": brand_card_frames/30,
+            "header_layout": layout,
             "cta": {"enabled": bool(cta_frames), "seconds": cta_seconds, "start_seconds": intro_seconds+duration,
                     "actions": [key for key, _ in brand_cta.ACTIONS] if cta_frames else []},
             "sonic": {**sonic, "start_seconds": intro_seconds+duration+sonic["start_seconds"]},

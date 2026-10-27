@@ -19,10 +19,10 @@ export function revealFrames(scene:Scene) {
   return story.role==='bridge'?10:story.role==='compare'||story.density==='dense'?22:story.importance==='key'?19:16;
 }
 
-export function StoryObjects({scene}:{scene:Scene}) {
+export function StoryObjects({scene,inline=false}:{scene:Scene;inline?:boolean}) {
   const entities=scene.props.story?.entities.slice(0,3)??[];
   if(!entities.length)return null;
-  return <div style={{position:'absolute',left:140,top:116,height:34,display:'flex',gap:16,alignItems:'center'}}>
+  return <div style={{position:inline?'relative':'absolute',left:inline?undefined:140,top:inline?undefined:116,height:34,display:'flex',gap:16,alignItems:'center',overflow:inline?'hidden':undefined}}>
     {entities.map(e=><div key={e.id} style={{display:'flex',alignItems:'center',gap:10,padding:'3px 14px',
       borderRadius:8,background:`${e.color}0D`,color:e.color,fontSize:23,fontWeight:600,lineHeight:1.25,maxWidth:480}}>
       <span style={{width:8,height:8,borderRadius:4,background:e.color,flex:'none'}}/>

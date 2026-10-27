@@ -12,6 +12,13 @@ class BrandError(ValueError):
     pass
 
 
+def header_layout(mode: str) -> dict:
+    """Shared top rail: content on the left, identity on the right."""
+    margin = 80 if mode == "fast" else 140
+    return {"version": 1, "left": margin, "right": margin, "top": 54,
+            "width": 520, "height": 76, "gap": 40}
+
+
 def digest(value: dict) -> str:
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True,
                                      separators=(",", ":"), allow_nan=False).encode()).hexdigest()
@@ -38,7 +45,7 @@ def selection(value: dict | None) -> dict | None:
 
 def profile(value: dict) -> dict:
     fields = {"id", "name", "tagline", "accent", "background", "text", "intro_seconds", "outro_seconds", "assets",
-              "corner_reveal_seconds", "cta"}
+              "corner_reveal_seconds", "cta", "apply_to_content", "corner_tagline"}
     if not isinstance(value, dict) or set(value) - fields:
         raise BrandError("品牌配置含不支持的字段")
     result = {"id": identity(value.get("id")), "name": value.get("name", ""),
@@ -68,15 +75,27 @@ def profile(value: dict) -> dict:
         if isinstance(seconds, bool) or not isinstance(seconds, (int, float)) or not 0 <= seconds <= 1.5:
             raise BrandError("开场角标渐显须为 0–1.5 秒")
         result["corner_reveal_seconds"] = seconds
+    if "apply_to_content" in value:
+        if not isinstance(value["apply_to_content"], bool):
+            raise BrandError("正文沿用品牌配色须为 true 或 false")
+        result["apply_to_content"] = value["apply_to_content"]
+    if "corner_tagline" in value:
+        if not isinstance(value["corner_tagline"], bool):
+            raise BrandError("角标显示品牌 Slogan 须为 true 或 false")
+        result["corner_tagline"] = value["corner_tagline"]
     if "cta" in value:
         cta = value["cta"]
-        if (not isinstance(cta, dict) or set(cta) - {"enabled", "message"}
+        if (not isinstance(cta, dict) or set(cta) - {"enabled", "message", "sound"}
                 or not isinstance(cta.get("enabled", True), bool)):
-            raise BrandError("互动引导只接受 enabled 和 message")
+            raise BrandError("互动引导只接受 enabled、message 和 sound")
         message = cta.get("message", "喜欢这期内容，欢迎")
         if not isinstance(message, str) or len(message) > 24 or any(ord(c) < 32 for c in message):
             raise BrandError("互动引导文案须为单行文字，最多 24 字")
         result["cta"] = {"enabled": cta.get("enabled", True), "message": message}
+        if "sound" in cta:
+            if not isinstance(cta["sound"], bool):
+                raise BrandError("互动短音效须为 true 或 false")
+            result["cta"]["sound"] = cta["sound"]
     assets = result["assets"]
     if not isinstance(assets, dict) or set(assets) - {"logo", "sonic"}:
         raise BrandError("品牌素材只支持 logo 和 sonic")
@@ -86,6 +105,25 @@ def profile(value: dict) -> dict:
                 or not re.fullmatch(r"[0-9a-f]{64}", asset.get("sha256", ""))
                 or asset.get("file") != asset["sha256"] + "." + ext):
             raise BrandError("品牌素材记录无效")
+    return result
+
+
+def content_style(style: dict, config: dict) -> dict:
+    """Freeze an opted-in brand palette into supported editorial card styles."""
+    result = copy.deepcopy(style)
+    if not config.get("apply_to_content") or style.get("id") != "editorial_light":
+        return result
+
+    def blend(foreground: str, background: str, amount: float) -> str:
+        channels = [round(int(foreground[i:i+2], 16)*amount + int(background[i:i+2], 16)*(1-amount))
+                    for i in (1, 3, 5)]
+        return "#" + "".join(f"{channel:02x}" for channel in channels)
+
+    background, text, accent = config["background"], config["text"], config["accent"]
+    result.update(background=background, text=text, subtitle=text, accent=accent,
+                  muted=blend(text, background, .64), line=blend(text, background, .14),
+                  inactive=blend(text, background, .25), soft=blend(accent, background, .06),
+                  palette_source="brand")
     return result
 
 

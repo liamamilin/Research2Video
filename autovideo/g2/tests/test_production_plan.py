@@ -88,3 +88,35 @@ def test_saved_v1_music_binding_layouts_remain_valid_and_reject_changes(layout):
     value["background_music"] = {"enabled": True, "level_db": -18}
     with pytest.raises(ProductionPlanError, match="任务配置"):
         verify(value)
+
+
+def test_brand_content_palette_is_opt_in_and_frozen_separately_from_packaging(tmp_path):
+    from g3 import brand_profiles
+    from g2.branding import BrandError
+    data = tmp_path / "data"
+    config = {"name": "Field Notes", "background": "#faf3e8", "text": "#242424", "accent": "#693c81"}
+    brand_profiles.save(data, "studio", config)
+
+    def make(name):
+        folder = tmp_path / name; folder.mkdir()
+        request = brand_profiles.freeze(data, folder, {"source_text": "先上传材料，再查看结果。",
+            "production_mode": "fast", "brand": {"profile": "studio"}})
+        return prepare_request(request)
+
+    historical = make("old")
+    assert "palette_source" not in historical["production_plan"]["style"]
+    brand_profiles.save(data, "studio", {**config, "apply_to_content": True})
+    saved = make("new")
+    style = verify(saved)["style"]
+    assert style["background"] == config["background"]
+    assert style["subtitle"] == style["text"] == config["text"]
+    assert style["accent"] == config["accent"]
+    assert saved["production_plan"]["origins"]["visual_style.background"] == "brand"
+    header = saved["production_plan"]["brand_layout"]
+    assert header["left"] == header["right"] == 80
+    assert 1920-header["right"]-header["width"]-header["gap"] < 1920-header["right"]-header["width"]
+    brand_profiles.save(data, "studio", {**config, "background": "#eeeeee", "apply_to_content": False})
+    assert prepare_request(saved) == saved
+    assert prepare_request(historical) == historical
+    with pytest.raises(BrandError):
+        brand_profiles.save(data, "studio", {**config, "apply_to_content": "yes"})

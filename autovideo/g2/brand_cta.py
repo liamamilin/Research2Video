@@ -8,6 +8,20 @@ ACTIONS = (("like", "点赞"), ("save", "收藏"), ("follow", "关注"))
 SECONDS = 1.5
 
 
+def sound(sample_rate: int, duration: float):
+    """Three quiet original plucks, timed to the icon entrances."""
+    import numpy as np
+    audio = np.zeros((round(sample_rate*duration), 2), dtype="float32")
+    for index, frequency in enumerate((523.251, 659.255, 783.991)):
+        start = round((.04+index*.12)*sample_rate)
+        t = np.arange(round(.11*sample_rate))/sample_rate
+        envelope = (1-np.exp(-t/.002))*np.exp(-t/.024)
+        signal = .12*envelope*(np.sin(2*np.pi*frequency*t)+.2*np.sin(4*np.pi*frequency*t))
+        length = min(len(t), len(audio)-start)
+        audio[start:start+length] += signal[:length, None]
+    return audio
+
+
 def artwork(config: dict, folder: Path, font_path: str) -> list[Path]:
     from PIL import Image, ImageDraw, ImageFont
     background = Image.new("RGB", (1920, 1080), config["background"])

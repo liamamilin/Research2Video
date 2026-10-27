@@ -35,3 +35,20 @@ def test_subtitles_escape_ass_markup_without_dropping_original_words(tmp_path):
     assert "0:00:01.50,0:00:02.70" in text
     assert r"\{示例\}" in text
     assert r"\\N保留" in text
+
+
+def test_brand_palette_reaches_background_progress_and_caption_strip(tmp_path):
+    from g2.branding import content_style
+    style = content_style({"id": "editorial_light", **STYLES["editorial_light"]}, {
+        "background": "#faf3e8", "text": "#242424", "accent": "#693c81", "apply_to_content": True})
+    card = tmp_path / "card.png"
+    draw_card({"props": {"title": "材料处理", "text": "上传后查看结果"}}, title="材料处理的三个步骤",
+              index=0, count=1, style=style, badge={"color": "#1f7a4d"}, notices=[], output=card)
+    image = Image.open(card)
+    assert image.getpixel((10, 10)) == (250, 243, 232)
+    assert image.getpixel((100, 67)) == (105, 60, 129)
+    ass = tmp_path / "captions.ass"
+    write_ass({"narration": {"segments": [{"start_ms": 0, "end_ms": 1000, "text": "原旁白保留。"}]}}, ass, style=style)
+    assert "&H00242424" in ass.read_text()
+    assert "&H00e8f3fa" in ass.read_text()
+    assert "&H00F1F5F3" not in ass.read_text()

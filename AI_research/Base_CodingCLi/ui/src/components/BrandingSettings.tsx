@@ -3,7 +3,7 @@ import { api } from "@/api/client";
 import { errorMessage } from "@/lib/toast";
 import { Star, ThumbsUp, UserPlus } from "lucide-react";
 
-type Brand = { id: string; name: string; tagline: string; accent: string; background: string; text: string; intro_seconds?: number; corner_reveal_seconds?: number; cta?: { enabled: boolean; message: string }; outro_seconds: number; assets?: Record<string, { file: string; sha256: string }> };
+type Brand = { id: string; name: string; tagline: string; accent: string; background: string; text: string; apply_to_content?: boolean; corner_tagline?: boolean; intro_seconds?: number; corner_reveal_seconds?: number; cta?: { enabled: boolean; message: string; sound?: boolean }; outro_seconds: number; assets?: Record<string, { file: string; sha256: string }> };
 type Catalog = { active: { enabled: boolean; profile?: string }; profiles: Brand[] };
 const ctaMessage = "喜欢这期内容，欢迎";
 const demo: Brand = { id: "demo", name: "Demo Studio", tagline: "把知识，变成画面。", accent: "#28775b", background: "#f5f6f2", text: "#172b23", intro_seconds: 0, corner_reveal_seconds: .6, cta: { enabled: true, message: ctaMessage }, outro_seconds: 4 };
@@ -65,22 +65,31 @@ export function BrandingSettings() {
         <div className="grid sm:grid-cols-2 gap-3">
           <label className="text-xs">品牌编号<input className="input w-full mt-1" value={draft.id} onChange={e => setDraft({ ...draft, id: e.target.value })} pattern="[a-z][a-z0-9_-]*" /></label>
           <label className="text-xs">品牌名称<input className="input w-full mt-1" value={draft.name} maxLength={48} onChange={e => setDraft({ ...draft, name: e.target.value })} /></label>
-          <label className="text-xs sm:col-span-2">片尾标语<input className="input w-full mt-1" value={draft.tagline} maxLength={64} onChange={e => setDraft({ ...draft, tagline: e.target.value })} /></label>
+          <label className="text-xs sm:col-span-2">品牌 Slogan<input className="input w-full mt-1" value={draft.tagline} maxLength={64} onChange={e => setDraft({ ...draft, tagline: e.target.value })} /></label>
           <label className="text-xs">片头时长（0 为关闭）<select className="input w-full mt-1" value={draft.intro_seconds ?? 0} onChange={e => setDraft({ ...draft, intro_seconds: Number(e.target.value) })}>
             {[0, .5, .8, 1, 1.2, 1.5, 2].map(n => <option key={n} value={n}>{n ? `${n} 秒独立片头` : "直接进入正文（推荐）"}</option>)}
           </select></label>
           <label className="text-xs">片尾时长（3–6 秒）<input className="input w-full mt-1" type="number" min={3} max={6} step={0.1} value={draft.outro_seconds} onChange={e => setDraft({ ...draft, outro_seconds: Number(e.target.value) })} /></label>
         </div>
         <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={Boolean(draft.corner_reveal_seconds)} onChange={e => setDraft({ ...draft, corner_reveal_seconds: e.target.checked ? .6 : 0 })} />开场角标轻柔渐显</label>
+        <div className="space-y-1">
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(draft.corner_tagline)} onChange={e => setDraft({ ...draft, corner_tagline: e.target.checked })} />角标显示品牌 Slogan</label>
+          <p className="text-xs text-text-muted">在品牌名下方显示，优先于栏目副标题；片尾完整保留。</p>
+        </div>
         <div className="rounded-lg border border-border p-3 space-y-2">
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(draft.cta?.enabled)} onChange={e => setDraft({ ...draft, cta: { message: draft.cta?.message ?? ctaMessage, enabled: e.target.checked } })} />品牌片尾前显示「点赞 · 收藏 · 关注」</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(draft.cta?.enabled)} onChange={e => setDraft({ ...draft, cta: { ...draft.cta, message: draft.cta?.message ?? ctaMessage, enabled: e.target.checked } })} />品牌片尾前显示「点赞 · 收藏 · 关注」</label>
           {draft.cta?.enabled && <>
-            <label className="block text-xs">互动引导文案<input className="input w-full mt-1" value={draft.cta.message} maxLength={24} onChange={e => setDraft({ ...draft, cta: { enabled: true, message: e.target.value } })} /></label>
+            <label className="block text-xs">互动引导文案<input className="input w-full mt-1" value={draft.cta.message} maxLength={24} onChange={e => setDraft({ ...draft, cta: { ...draft.cta, enabled: true, message: e.target.value } })} /></label>
+            <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={Boolean(draft.cta.sound)} onChange={e => setDraft({ ...draft, cta: { ...draft.cta!, sound: e.target.checked } })} />互动图标短音效</label>
             <p className="text-xs text-text-muted">通用图标与短动画占用片尾前 1.5 秒，片尾总时长保持 {draft.outro_seconds} 秒。</p>
           </>}
         </div>
         <div className="flex gap-4">{([['accent', '强调色'], ['background', '底色'], ['text', '文字色']] as const).map(([key, title]) =>
           <label key={key} className="text-xs flex items-center gap-2">{title}<input type="color" value={draft[key]} onChange={e => setDraft({ ...draft, [key]: e.target.value })} /></label>)}</div>
+        <div className="space-y-1">
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(draft.apply_to_content)} onChange={e => setDraft({ ...draft, apply_to_content: e.target.checked })} />正文沿用品牌配色</label>
+          <p className="text-xs text-text-muted">用于快速卡片与混合渲染的底色、文字、强调色和字幕。图表数据色与真实截图保留原有含义。</p>
+        </div>
         <div className="rounded-xl p-6 text-center space-y-2" style={{ background: draft.background, color: draft.text }}>
           {draft.cta?.enabled && <div className="pb-5 mb-4 border-b" style={{ borderColor: `${draft.accent}30` }}>
             <div className="text-sm mb-4">{draft.cta.message}</div>

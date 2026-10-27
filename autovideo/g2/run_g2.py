@@ -903,7 +903,7 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     shutil.copyfile(PROJECT / "g1/renderer/src/ImageMaterials.tsx", src / "ImageMaterials.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/DataChart.tsx", src / "DataChart.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/ScatterChart.tsx", src / "ScatterChart.tsx")
-    for name in ("VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx", "ShotDirector.tsx", "DirectedMaterials.tsx", "StoryDirection.tsx"):
+    for name in ("VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx", "ShotDirector.tsx", "DirectedMaterials.tsx", "StoryDirection.tsx", "ContentStyle.tsx"):
         shutil.copyfile(PROJECT / "g1/renderer/src" / name, src / name)
     (src / "index.ts").write_text("import {registerRoot} from 'remotion';\nimport {Root} from './Root';\n\nregisterRoot(Root);\n", encoding="utf-8")
     ensure_renderer_dependency_link(renderer)
@@ -917,6 +917,12 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
         props["ir"]["caption_cues"] = captions
     if hybrid_segment is not None:
         props['fastCardBackgrounds'] = hybrid_segment['backgrounds']
+    style = (PACKAGING_INPUT or {}).get("production_plan", {}).get("style", {})
+    if style.get("palette_source") == "brand":
+        props["contentStyle"] = style
+    layout = (PACKAGING_INPUT or {}).get("production_plan", {}).get("brand_layout")
+    if layout:
+        props["brandHeader"] = layout
     package = package_request_from_intent()
     if package:  # a packaged video carries the column's badge instead of the product label
         props["badge"] = {"text": package.get("badge", ""), "color": package["accent"]}

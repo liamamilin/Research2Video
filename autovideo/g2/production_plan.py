@@ -224,6 +224,13 @@ def prepare_request(request: dict) -> dict:
     if result["production_mode"] == "fast":
         style["accent"] = result["packaging_resolved"]["components"]["accent"]
         origins["visual_style.accent"] = "packaging.accent"
+    if result.get("brand_resolved"):
+        from g2.branding import check_record, content_style
+        config = check_record(result["brand_resolved"])["profile"]
+        style = content_style(style, config)
+        if style.get("palette_source") == "brand":
+            for field in ("background", "text", "subtitle", "accent", "muted", "line", "inactive", "soft"):
+                origins[f"visual_style.{field}"] = "brand"
     plan = {
         "schema_version": 1, "settings": _binding(result), "origins": origins,
         "style": style,
@@ -247,6 +254,8 @@ def prepare_request(request: dict) -> dict:
         if not any(key.startswith("brand.") for key in origins):
             origins.update(_origins(result["brand"], "brand_default"))
         plan["brand_record_sha256"] = result["brand_resolved"]["sha256"]
+        from g2.branding import header_layout
+        plan["brand_layout"] = header_layout(result["production_mode"])
     plan["sha256"] = digest(plan)
     result["production_plan"] = plan
     return result

@@ -53,3 +53,34 @@ it("can turn the generic call to action off while retaining the brand", async ()
   await screen.findByText(/品牌已保存/);
   expect(calls[0]).toMatchObject({ name: "Demo Studio", cta: { enabled: false }, intro_seconds: 0 });
 });
+
+it("saves content palette choice independently from the corner and CTA", async () => {
+  const calls: unknown[] = [];
+  vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+    if (init?.method === "PUT") { const body = JSON.parse(String(init.body)); calls.push(body); return reply(body); }
+    return reply({ active: { enabled: false }, profiles: [] });
+  }));
+  render(<BrandingSettings />);
+  await screen.findByText("当前默认：未启用");
+  expect((screen.getByLabelText("正文沿用品牌配色") as HTMLInputElement).checked).toBe(false);
+  fireEvent.click(screen.getByLabelText("正文沿用品牌配色"));
+  fireEvent.click(screen.getByRole("button", { name: "保存品牌" }));
+  await screen.findByText(/品牌已保存/);
+  expect(calls[0]).toMatchObject({ apply_to_content: true, cta: { enabled: true }, corner_reveal_seconds: .6 });
+});
+
+it("uses the editable brand slogan for the optional corner subtitle", async () => {
+  const calls: unknown[] = [];
+  vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+    if (init?.method === "PUT") { const body = JSON.parse(String(init.body)); calls.push(body); return reply(body); }
+    return reply({ active: { enabled: false }, profiles: [] });
+  }));
+  render(<BrandingSettings />);
+  await screen.findByText("当前默认：未启用");
+  fireEvent.change(screen.getByLabelText("品牌 Slogan"), { target: { value: "Make knowledge visible" } });
+  fireEvent.click(screen.getByLabelText("角标显示品牌 Slogan"));
+  fireEvent.click(screen.getByLabelText("互动图标短音效"));
+  fireEvent.click(screen.getByRole("button", { name: "保存品牌" }));
+  await screen.findByText(/品牌已保存/);
+  expect(calls[0]).toMatchObject({ tagline: "Make knowledge visible", corner_tagline: true, intro_seconds: 0, cta: { sound: true } });
+});

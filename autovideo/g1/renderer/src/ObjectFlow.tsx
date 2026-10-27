@@ -1,9 +1,11 @@
 import React from 'react';
+import {ContentStyleContext} from './ContentStyle';
 import {SvgVisualObject,visualFor} from './VisualObjects';
 import {objectColor} from './StoryDirection';
 import {cameraAt,flowRects} from './ShotDirector';
 
 export function ObjectFlow({scene,frame}:{scene:any;frame:number}) {
+  const palette = React.useContext(ContentStyleContext);
   const p=scene.props, layout=p.layout, reveal=scene.beats.filter((b:any)=>b.action==='reveal');
   const starts=(target:string)=>reveal.find((b:any)=>b.target_id===target)?.frame;
   const alpha=(target:string)=>{
@@ -11,7 +13,7 @@ export function ObjectFlow({scene,frame}:{scene:any;frame:number}) {
   };
   const active = reveal.filter((b:any)=>b.frame<=frame).sort((a:any,b:any)=>a.frame-b.frame).at(-1)?.target_id;
   const ends=new Map(layout.nodes.map((n:any)=>[n.id,n]));
-  const green='#17784B', ink='#202D28', soft='#69756E';
+  const green=palette?.accent??'#17784B', ink=palette?.text??'#202D28', soft=palette?.muted??'#69756E';
   const camera=cameraAt(scene,frame,flowRects(p),{x:0,y:0,width:1560,height:500});
   const clipId=`${scene.id}_camera_clip`;
   const focused=camera.shot.kind==='focus' ? camera.shot.targets : [];
@@ -38,14 +40,14 @@ export function ObjectFlow({scene,frame}:{scene:any;frame:number}) {
         return <g key={edge.id} opacity={ready ? alpha(target) : .1}>
           <polyline points={edge.points.map((v:any)=>`${v.x},${v.y}`).join(' ')} fill="none" stroke={color} strokeWidth={3} strokeLinejoin="round" strokeDasharray={blocked?'10 7':undefined} markerEnd={blocked?undefined:`url(#${scene.id}_object_arrow)`}/>
           {ready && t>=0 && t<1 && !blocked && <g transform={`translate(${point.x} ${point.y})`}><rect x={-9} y={-11} width={18} height={22} rx={3} fill="white" stroke={green} strokeWidth={2}/><path d="M-4 -3 H4 M-4 3 H4" stroke={green} strokeWidth={1.5}/></g>}
-          {data.label && <g><rect x={edge.label_x-data.label.length*layout.edge_font_size/2-10} y={edge.label_y-layout.edge_font_size/2-6} width={data.label.length*layout.edge_font_size+20} height={layout.edge_font_size+12} rx={5} fill="#F7F8F5"/><text x={edge.label_x} y={edge.label_y} dominantBaseline="middle" textAnchor="middle" fontSize={layout.edge_font_size} fill={soft}>{data.label}</text></g>}
+          {data.label && <g><rect x={edge.label_x-data.label.length*layout.edge_font_size/2-10} y={edge.label_y-layout.edge_font_size/2-6} width={data.label.length*layout.edge_font_size+20} height={layout.edge_font_size+12} rx={5} fill={palette?.background??'#F7F8F5'}/><text x={edge.label_x} y={edge.label_y} dominantBaseline="middle" textAnchor="middle" fontSize={layout.edge_font_size} fill={soft}>{data.label}</text></g>}
         </g>;
       })}
       {layout.nodes.map((node:any)=>{
         const target=`node:${node.id}`, icon=visualFor(scene,target), high=focused.includes(target) || active===target || p.edges.some((e:any)=>active===`edge:${e.id}`&&(e.from===node.id||e.to===node.id));
         const size=58*layout.scale, middle=node.y+node.height/2,color=objectColor(scene,target,green);
         return <g key={node.id} opacity={alpha(target)}>
-          <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={18*layout.scale} fill={high?`${color}0D`:'white'} stroke={high?color:'#DCE6DC'} strokeWidth={high?2.5:1.5}/>
+          <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={18*layout.scale} fill={high?`${color}0D`:palette?.surface??'white'} stroke={high?color:palette?.line??'#DCE6DC'} strokeWidth={high?2.5:1.5}/>
           {icon && <SvgVisualObject scene={scene} target={target} frame={frame} x={node.x+(node.width-size)/2} y={node.y+22*layout.scale} size={size} color={color}/>}
           {node.label_lines.map((line:string,i:number)=><text key={i} x={node.x+node.width/2} y={icon ? node.y+(112+i*46)*layout.scale : middle+(i-(node.label_lines.length-1)/2)*layout.font_size*1.28} dominantBaseline="middle" textAnchor="middle" fontSize={layout.font_size} fontWeight={600} fill={ink}>{line}</text>)}
         </g>;

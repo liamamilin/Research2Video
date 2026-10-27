@@ -1,4 +1,5 @@
 import React from 'react';
+import {ContentStyleContext, BrandHeaderContext, type ContentStyle, type BrandHeader} from './ContentStyle';
 import {DataChart} from './DataChart';
 import {ScatterChart} from './ScatterChart';
 import {VisualObject, SvgVisualObject, visualFor} from './VisualObjects';
@@ -250,9 +251,14 @@ function LegacyVideo({ir, sceneBackdrops = {}, badge}: {ir: Timeline; sceneBackd
 
 // A separate presentation for the same validated, registered content components.
 const paper = {bg:'#F7F8F5', ink:'#202D28', muted:'#69756E', green:'#17784B', line:'#E1E8E1'};
+const defaultPaper = paper;
 const ease = (value: number) => 1-Math.pow(1-Math.max(0, Math.min(1, value)), 3);
 function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=false, hideStage=false}:
   {ir: Timeline; badge?: Badge; sceneOverride?:Scene; frameOverride?:number; stageOnly?:boolean; hideStage?:boolean}) {
+  const contentStyle = React.useContext(ContentStyleContext);
+  const brandHeader = React.useContext(BrandHeaderContext);
+  const paper = contentStyle ? {bg:contentStyle.background, ink:contentStyle.text, muted:contentStyle.muted,
+    green:contentStyle.accent, line:contentStyle.line} : defaultPaper;
   const currentFrame = useCurrentFrame(), frame=frameOverride??currentFrame;
   const sceneIndex = sceneOverride?ir.scenes.indexOf(sceneOverride):Math.max(0, ir.scenes.findIndex((s) => frame >= s.start_frame && frame < s.end_frame));
   const scene = sceneOverride??ir.scenes[sceneIndex], p = scene.props;
@@ -273,7 +279,7 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   // 'pretty' keeps a line from ending on a single orphaned character ("美" / "分"). 'balance' was tried for headings and
   // split phrases worse ("账" / "从 10 美元…"), because Chinese text has no word gaps to balance on.
   const textStyle = {overflowWrap:'anywhere', whiteSpace:'normal', wordBreak:'normal', textWrap:'pretty'} as React.CSSProperties;
-  const panelStyle: React.CSSProperties = {background:'#FFFFFF', border:`1px solid ${paper.line}`, borderRadius:22, boxShadow:'0 12px 32px rgba(26,50,35,.045)', boxSizing:'border-box'};
+  const panelStyle: React.CSSProperties = {background:contentStyle?.surface??'#FFFFFF', border:`1px solid ${paper.line}`, borderRadius:22, boxShadow:'0 12px 32px rgba(26,50,35,.045)', boxSizing:'border-box'};
   const chartLike = scene.component === 'comparison' || scene.component === 'bar_chart';
   const heading = chartLike ? scene.purpose : p.title;
   const materialScene = ['object_showcase','material_collage'].includes(scene.component);
@@ -282,9 +288,11 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   const sameHeading=!!previous?.props.scene_flow && (chartLike?previous.purpose:previous.props.title)===heading;
   const headingMotion=carriesPicture(scene)||sameHeading?{}:scene.component==='comparison' && p.visuals?.length
     ? {opacity:ease((frame-scene.start_frame)/16)} : motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : scene.component === 'flow_diagram'||materialScene ? 'scene' : 'title');
-  return <AbsoluteFill style={{background:stageOnly?'transparent':paper.bg, color:paper.ink, fontFamily:font, backgroundImage:stageOnly?undefined:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
-    {!stageOnly&&<><CornerBadge badge={badge}/><StoryObjects scene={scene}/>
-    <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
+  return <AbsoluteFill style={{background:stageOnly?'transparent':paper.bg, color:paper.ink, fontFamily:font, backgroundImage:stageOnly||contentStyle?undefined:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
+    {!stageOnly&&<>{brandHeader ? <div data-brand-header="content" style={{position:'absolute',left:brandHeader.left,top:brandHeader.top,width:1920-brandHeader.left-brandHeader.right-brandHeader.width-brandHeader.gap,height:brandHeader.height,overflow:'hidden'}}>
+      <div style={{position:'absolute',top:10,left:0,right:0,height:34,color:paper.muted,fontSize:24,lineHeight:'34px',overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{scene.props.story?.entities?.length ? <StoryObjects scene={scene} inline/> : badge?.text||ir.video.title}</div>
+      <div style={{position:'absolute',top:46,left:0,right:0,fontSize:18,lineHeight:'24px',color:paper.muted,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{chapterIndex >= 0 && chapters.length > 1 ? `${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')} · ${chapters[chapterIndex].title}` : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
+    </div> : <><CornerBadge badge={badge}/><StoryObjects scene={scene}/><div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div></>}
     {scene.component!=='title_card'&&<div style={{position:'absolute',left:140,top:162,width:1640,fontSize:materialScene&&heading.length>40?40:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...headingMotion}}><Tech text={heading}/></div>}</>}
     <div style={{position:'absolute',inset:0,display:hideStage?'none':undefined}}>
     {recapSources.length ? <div data-story-recap={scene.id} style={{position:'absolute',left:140,top:300,width:1640,height:560,display:'flex',justifyContent:'center',gap:40,alignItems:'center'}}>
@@ -447,7 +455,12 @@ function FastCardsVideo({ir, backgrounds}: {ir: Timeline; backgrounds: FastCardB
   </AbsoluteFill>;
 }
 
-function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge; fastCardBackgrounds?:FastCardBackgrounds}) {
+type VideoProps = {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge; fastCardBackgrounds?:FastCardBackgrounds; contentStyle?:ContentStyle;brandHeader?:BrandHeader};
+function Video(props: VideoProps) {
+  return <ContentStyleContext.Provider value={props.contentStyle}><BrandHeaderContext.Provider value={props.brandHeader}><VideoContent {...props}/></BrandHeaderContext.Provider></ContentStyleContext.Provider>;
+}
+
+function VideoContent(props: VideoProps) {
   if(props.fastCardBackgrounds)return <FastCardsVideo ir={props.ir} backgrounds={props.fastCardBackgrounds}/>;
   if (props.ir.presentation?.preset === 'explanation') return <ExplanationVideo {...props}/>;
   if (['information_cards', 'kinetic_typography', 'image_slideshow', 'chat_dialogue', 'object_showcase', 'dynamic_collage'].includes(props.ir.presentation?.preset || '')) return <CreativeVideo ir={props.ir} badge={props.badge}/>;

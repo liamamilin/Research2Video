@@ -212,3 +212,18 @@ def test_generic_cta_is_optional_frozen_and_rejects_unknown_actions(tmp_path):
             assert client.put("/api/brands/demo", json={**DEMO, **bad}).status_code == 422
         frozen_input(client.app.state.store.source_path(jid).parent, prior)
         verify(prior)
+
+
+def test_corner_slogan_is_saved_frozen_and_can_be_disabled_independently(tmp_path):
+    with TestClient(create_app(Settings(data_dir=tmp_path), start_worker=False, preflight=READY)) as client:
+        for enabled in (True, False):
+            result = client.put("/api/brands/demo", json={**DEMO, "tagline": "Make knowledge visible", "corner_tagline": enabled})
+            assert result.status_code == 200, result.text
+            made = client.post("/api/jobs", json=body(brand={"profile": "demo"}))
+            jid = made.json()["job_id"]
+            saved = saved_input(client, jid)
+            assert saved["brand_resolved"]["profile"]["corner_tagline"] is enabled
+            verify(saved)
+            client.put("/api/brands/demo", json=DEMO)
+            frozen_input(client.app.state.store.source_path(jid).parent, saved)
+        assert client.put("/api/brands/demo", json={**DEMO, "corner_tagline": "yes"}).status_code == 422

@@ -82,7 +82,7 @@ def draw_editorial(draw, page: dict, style: dict, accent: str,
     result = []
     if layout == "focus" and len(points) == 1:
         point = points[0]
-        color = style["text"] if 0 in active else "#c7d2ca"
+        color = style["text"] if 0 in active else style.get("inactive", "#c7d2ca")
         if point.get("label"):
             draw_text(draw, point["label"], (155, 330), width=1570, size=34,
                       max_lines=1, minimum=26, color=accent if 0 in active else color)
@@ -108,10 +108,10 @@ def draw_editorial(draw, page: dict, style: dict, accent: str,
         x = 120 + index % columns * (panel_w + gap)
         y = 315 + index // columns * (panel_h + gap)
         shown = index in active
-        color = style["text"] if shown else "#c7d2ca"
+        color = style["text"] if shown else style.get("inactive", "#c7d2ca")
         if comparison:
             draw.rounded_rectangle((x, y, x + panel_w, y + panel_h), radius=22,
-                                   fill="#eaf2ed" if index == 0 else "#f2f4f0")
+                                   fill=style.get("soft", "#eaf2ed" if index == 0 else "#f2f4f0"))
         inset = 32 if comparison else 18
         label = point.get("label", "")
         if label:
@@ -154,20 +154,31 @@ def point_windows(page: dict | None, timing: dict, segments: list[dict]) -> list
 
 def draw_card(scene: dict, *, title: str, index: int, count: int, style: dict,
               badge: dict, notices: list[str], output: Path, editorial: dict | None = None,
-              visible_points: set[int] | None = None) -> dict:
+              visible_points: set[int] | None = None, header: dict | None = None) -> dict:
     image = Image.new("RGB", (1920, 1080), style["background"])
     draw = ImageDraw.Draw(image)
-    accent = badge.get("color") or style["accent"]
-    draw.rounded_rectangle((80, 62, 130, 72), radius=5, fill=accent)
-    draw_text(draw, title, (152, 43), width=1370, size=30, max_lines=2,
-              color=style["muted"], minimum=24)
-    if badge.get("text"):
+    accent = style["accent"] if style.get("palette_source") == "brand" else badge.get("color") or style["accent"]
+    if header:
+        left, top = header["left"], header["top"]
+        available = 1920-left-header["right"]-header["width"]-header["gap"]
+        face = font(26)
+        heading = title
+        while heading and face.getlength(heading) > available:
+            heading = heading[:-2] + "…" if len(heading) > 2 else ""
+        draw.text((left, top+27), heading, font=face, fill=style["muted"], anchor="lm")
+        draw.text((left, top+57), f"{index + 1:02d} / {count:02d}", font=font(18), fill=style["muted"], anchor="lm")
+    else:
+        draw.rounded_rectangle((80, 62, 130, 72), radius=5, fill=accent)
+        draw_text(draw, title, (152, 43), width=1370, size=30, max_lines=2,
+                  color=style["muted"], minimum=24)
+    if badge.get("text") and not header:
         draw.rounded_rectangle((1615, 42, 1840, 101), radius=16, fill=accent)
         draw_text(draw, badge["text"], (1638, 51), width=182, size=27, max_lines=1,
                   color=contrast_text(accent), minimum=14)
     draw_text(draw, scene["props"]["title"], (80, 140), width=1540, size=44,
               max_lines=2, color=style["text"], minimum=24)
-    draw.text((1710, 157), f"{index + 1:02d} / {count:02d}", font=font(25), fill=style["muted"])
+    if not header:
+        draw.text((1710, 157), f"{index + 1:02d} / {count:02d}", font=font(25), fill=style["muted"])
     draw.rounded_rectangle((80, 275, 1840, 806), radius=30, fill=style["surface"])
     if editorial and editorial.get("layout"):
         wrapped = draw_editorial(draw, editorial, style, accent, visible_points)
@@ -207,7 +218,7 @@ def draw_card(scene: dict, *, title: str, index: int, count: int, style: dict,
         draw.rounded_rectangle((80, 823, 1840, 875), radius=12, fill="#fff0cf")
         draw_text(draw, "；".join(notices), (104, 829), width=1690, size=25,
                   max_lines=1, color=style["warning"], minimum=18)
-    draw.line((80, 1048, 1840, 1048), fill="#dce5dd", width=4)
+    draw.line((80, 1048, 1840, 1048), fill=style.get("line", "#dce5dd"), width=4)
     draw.line((80, 1048, 80 + round(1760 * (index + 1) / count), 1048), fill=accent, width=5)
     image.save(output)
     return {"body_lines": wrapped, "body_text_unchanged": "".join(wrapped) == scene["props"]["text"].replace("\n", ""),
@@ -224,7 +235,7 @@ def _ass_text(value: str) -> str:
     return value.replace("\\", "\\\\").replace("{", "\\{").replace("}", "\\}")
 
 
-def write_ass(ir: dict, output: Path, cues: list[dict] | None = None) -> None:
+def write_ass(ir: dict, output: Path, cues: list[dict] | None = None, *, style: dict | None = None) -> None:
     header = """[Script Info]
 ScriptType: v4.00+
 PlayResX: 1920
@@ -236,6 +247,11 @@ Style: Caption,Hiragino Sans GB,44,&H00202718,&H00202718,&H00F1F5F3,&H00F1F5F3,0
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
+    if style and style.get("palette_source") == "brand":
+        def ass_color(color: str) -> str:
+            return "&H00" + color[5:7] + color[3:5] + color[1:3]
+        header = header.replace("&H00202718", ass_color(style["subtitle"]))
+        header = header.replace("&H00F1F5F3", ass_color(style["background"]))
     events = []
     face = font(44)
     for row in (cues if cues is not None else ir["narration"]["segments"]):
@@ -297,7 +313,7 @@ def render(pipeline, compiled: dict) -> None:
         windows = point_windows(page, timing, ir["narration"]["segments"])
         for stage, window in enumerate(windows):
             path = root / (f"card-{index:04d}.png" if stage == 0 else f"card-{index:04d}-{stage}.png")
-            layout = draw_card(scene, title=ir["video"]["title"], index=index, count=len(ir["scenes"]),
+            layout = draw_card(scene, header=plan.get("brand_layout"), title=ir["video"]["title"], index=index, count=len(ir["scenes"]),
                                style=plan["style"], badge=badge, notices=notices, output=path, editorial=page,
                                visible_points=set(window["visible"]) if window["visible"] is not None else None)
             frames = window["end_frame"] - window["start_frame"]
@@ -312,7 +328,7 @@ def render(pipeline, compiled: dict) -> None:
     from g2.caption_alignment import verify_plan
     captions = json.loads((pipeline.ARTIFACTS / "caption-alignment.json").read_text())
     verify_plan(ir, captions)
-    write_ass(ir, ass, captions["cues"])
+    write_ass(ir, ass, captions["cues"], style=plan["style"])
     pipeline.write_json(pipeline.ARTIFACTS / "fast-card-plan.json", {
         "version": 4, "method": "model-directed visual cards; measured speech reveals; short aligned captions",
         "manual_page_copy": False, "pages": evidence, "embedded_packaging": False,
@@ -368,14 +384,15 @@ def verify_captions(pipeline, qa: dict) -> dict:
     reference = pipeline.ARTIFACTS / "caption-reference"
     reference.mkdir(exist_ok=False)
     ass = reference / "expected.ass"
-    write_ass(ir, ass, plan["cues"])
+    style = ((getattr(pipeline, "PACKAGING_INPUT", None) or {}).get("production_plan") or {}).get("style", {})
+    write_ass(ir, ass, plan["cues"], style=style)
     ass_path = str(ass).replace("\\", "\\\\").replace(":", "\\:").replace("'", "'\\''")
     expression = "+".join(f"eq(n\\,{frame})" for frame in targets)
     pipeline._run_fixed_command("fast-caption-pixels", [pipeline.FFMPEG, "-nostdin", "-v", "error", "-y",
         "-i", pipeline.VIDEO_PATH, "-vf", f"select={expression}", "-vsync", "0", folder / "frame-%04d.png"], pipeline.PROJECT)
     files = sorted(folder.glob("*.png"))
     pipeline._run_fixed_command("fast-caption-reference", [pipeline.FFMPEG, "-nostdin", "-v", "error", "-y",
-        "-f", "lavfi", "-i", f"color=c=0xf3f5f1:s=1920x1080:r=30:d={ir['video']['duration_ms'] / 1000}",
+        "-f", "lavfi", "-i", f"color=c=0x{style.get('background', '#f3f5f1')[1:]}:s=1920x1080:r=30:d={ir['video']['duration_ms'] / 1000}",
         "-vf", f"ass=filename='{ass_path}',select={expression}", "-vsync", "0", reference / "frame-%04d.png"], pipeline.PROJECT)
     expected = sorted(reference.glob("*.png"))
     if len(files) != len(targets) or len(expected) != len(targets):
@@ -384,8 +401,15 @@ def verify_captions(pipeline, qa: dict) -> dict:
     for path, wanted in zip(files, expected):
         actual = np.asarray(Image.open(path).convert("RGB"))[878:1008, 90:1830]
         expected_pixels = np.asarray(Image.open(wanted).convert("RGB"))[878:1008, 90:1830]
-        observed = np.all(actual < 110, axis=2)
-        required = np.all(expected_pixels < 110, axis=2)
+        if style.get("palette_source") == "brand":
+            bg = np.array([int(style["background"][i:i+2], 16) for i in (1, 3, 5)])
+            fg = np.array([int(style["subtitle"][i:i+2], 16) for i in (1, 3, 5)])
+            delta = fg-bg
+            observed = ((actual.astype(float)-bg) @ delta) / max(1, delta @ delta) > .55
+            required = ((expected_pixels.astype(float)-bg) @ delta) / max(1, delta @ delta) > .55
+        else:
+            observed = np.all(actual < 110, axis=2)
+            required = np.all(expected_pixels < 110, axis=2)
         score = caption_mask_score(observed, required)
         if score < .90:
             raise pipeline.G2Fault("FAST_CAPTION_GLYPH_MISMATCH", f"字幕与原文的字形不一致：{path.name}，匹配 {score:.3f}")
