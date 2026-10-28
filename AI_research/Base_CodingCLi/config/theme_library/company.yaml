@@ -1,0 +1,258 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: company_models
+  name: 沿收入追问
+  title_pattern: '{公司}卖的是{产品}，主要靠哪一笔收入赚钱？'
+  outline:
+  - 从顾客的一次购买进入
+  - 画出产品与付费关系
+  - 展开主要收入和成本
+  - 回到这种模式适合的需求
+  examples: &id001
+  - title: Jeff Bezos' Original 1997 Letter to Amazon Shareholders
+    url: https://www.aboutamazon.com/news/company-news/amazons-original-1997-letter-to-shareholders
+    summary: 从用户体验、投入和长期经营关系理解公司的收入逻辑。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: company_models
+  name: 拆开一次交易
+  title_pattern: 买一次{产品}的钱，怎样流到{商业模式}里的不同角色？
+  outline:
+  - 从顾客的一次购买进入
+  - 对照同一问题中的对象与选择
+  - 画出产品与付费关系
+  - 展开主要收入和成本
+  - 回到这种模式适合的需求
+  examples: *id001
+- category: company_models
+  name: 模式对照
+  title_pattern: 同样满足{需求}，{模式A}与{模式B}为什么赚钱方式不同？
+  outline:
+  - 从顾客的一次购买进入
+  - 画出产品与付费关系
+  - 沿一个具体案例推进解释
+  - 展开主要收入和成本
+  - 回到这种模式适合的需求
+  examples: *id001
+- category: company_competition
+  name: 顾客选择
+  title_pattern: 同样提供{产品}，顾客为什么选择{公司}？
+  outline:
+  - 还原顾客要完成的事
+  - 对照两个具体选择
+  - 解释差异怎样产生
+  - 追到顾客和竞争者的下一步
+  examples: &id002
+  - title: Jeff Bezos' 2016 Letter to Amazon Shareholders
+    url: https://www.aboutamazon.com/news/company-news/2016-letter-to-shareholders
+    summary: 从具体组织决策和客户问题切入公司如何维持竞争力。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: company_competition
+  name: 竞争动作
+  title_pattern: '{公司}做了{具体动作}，改变了哪一项竞争关系？'
+  outline:
+  - 还原顾客要完成的事
+  - 对照同一问题中的对象与选择
+  - 对照两个具体选择
+  - 解释差异怎样产生
+  - 追到顾客和竞争者的下一步
+  examples: *id002
+- category: company_competition
+  name: 优势能否延续
+  title_pattern: '{公司}的{优势}在什么情况下更有用、又会遇到什么限制？'
+  outline:
+  - 还原顾客要完成的事
+  - 对照两个具体选择
+  - 沿一个具体案例推进解释
+  - 解释差异怎样产生
+  - 追到顾客和竞争者的下一步
+  examples: *id002
+- category: company_financials
+  name: 利润与现金
+  title_pattern: '{公司}看起来有利润，为什么现金流会{变化}？'
+  outline:
+  - 选一笔具体经营活动
+  - 展示收入支出和收付款时间
+  - 连接相关报表或指标
+  - 用业务过程解释读数
+  examples: &id003
+  - title: SEC.gov | Beginners' Guide to Financial Statements
+    url: https://www.sec.gov/about/reports-publications/beginners-guide-financial-statements
+    summary: 用不同报表回答公司收入、资产和现金流分别发生什么。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: company_financials
+  name: 一笔业务进报表
+  title_pattern: '{公司}完成一笔{业务}，会怎样体现在几张报表里？'
+  outline:
+  - 选一笔具体经营活动
+  - 对照同一问题中的对象与选择
+  - 展示收入支出和收付款时间
+  - 连接相关报表或指标
+  - 用业务过程解释读数
+  examples: *id003
+- category: company_financials
+  name: 指标背后的生意
+  title_pattern: 读懂{公司}的{指标}，需要先看懂哪项经营活动？
+  outline:
+  - 选一笔具体经营活动
+  - 展示收入支出和收付款时间
+  - 沿一个具体案例推进解释
+  - 连接相关报表或指标
+  - 用业务过程解释读数
+  examples: *id003
+- category: company_growth
+  name: 第一批用户
+  title_pattern: '{产品}刚起步时，第一批用户是怎样找到它的？'
+  outline:
+  - 描绘一个目标用户
+  - 跟随一次发现和尝试
+  - 找出转化与留存的关键动作
+  - 讨论阶段和可迁移做法
+  examples: &id004
+  - title: Do Things that Don't Scale
+    url: https://paulgraham.com/ds.html
+    summary: 从创业团队如何找到早期用户的具体动作理解增长过程。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: company_growth
+  name: 增长链条
+  title_pattern: 从第一次尝试到持续使用，{产品}在哪一步留住了用户？
+  outline:
+  - 描绘一个目标用户
+  - 对照同一问题中的对象与选择
+  - 跟随一次发现和尝试
+  - 找出转化与留存的关键动作
+  - 讨论阶段和可迁移做法
+  examples: *id004
+- category: company_growth
+  name: 渠道取舍
+  title_pattern: 为{用户群}提供{产品}，哪种获客方式更适合当前阶段？
+  outline:
+  - 描绘一个目标用户
+  - 跟随一次发现和尝试
+  - 沿一个具体案例推进解释
+  - 找出转化与留存的关键动作
+  - 讨论阶段和可迁移做法
+  examples: *id004
+- category: company_pricing
+  name: 套餐为何分层
+  title_pattern: '{公司}为什么把{产品}分成这些套餐？'
+  outline:
+  - 用一个顾客需求进入
+  - 列出真实可选产品或套餐
+  - 拆解价格与交付的关系
+  - 按需求解释选择路径
+  examples: &id005
+  - title: 'Pricing Strategy Guide: 10 Types and Examples (2026) - Shopify'
+    url: https://www.shopify.com/blog/pricing-strategies
+    summary: 用价格策略的不同情境组织产品定价与顾客选择问题。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: company_pricing
+  name: 定价路径
+  title_pattern: 给{产品}定价时，顾客实际在为什么付钱？
+  outline:
+  - 用一个顾客需求进入
+  - 对照同一问题中的对象与选择
+  - 列出真实可选产品或套餐
+  - 拆解价格与交付的关系
+  - 按需求解释选择路径
+  examples: *id005
+- category: company_pricing
+  name: 降价后的关系
+  title_pattern: '{产品}改变{收费方式}之后，收入与顾客选择怎样变化？'
+  outline:
+  - 用一个顾客需求进入
+  - 列出真实可选产品或套餐
+  - 沿一个具体案例推进解释
+  - 拆解价格与交付的关系
+  - 按需求解释选择路径
+  examples: *id005
+- category: company_operations
+  name: 跟随一张订单
+  title_pattern: 从下单到交付，{公司}的一张{订单}要经过什么？
+  outline:
+  - 选一张具体订单
+  - 沿交付路线跟随流转
+  - 解释等待和协作的位置
+  - 回到顾客最终收到什么
+  examples: &id006
+  - title: Toyota Production System | Vision & Philosophy | Company | Toyota Motor Corporation Official Global Website
+    url: https://global.toyota/en/company/vision-and-philosophy/production-system
+    summary: 围绕生产现场讲清准时化、发现问题与协作方式之间的关系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: company_operations
+  name: 瓶颈在哪里
+  title_pattern: '{业务}越忙越慢，是哪一处衔接限制了交付？'
+  outline:
+  - 选一张具体订单
+  - 对照同一问题中的对象与选择
+  - 沿交付路线跟随流转
+  - 解释等待和协作的位置
+  - 回到顾客最终收到什么
+  examples: *id006
+- category: company_operations
+  name: 改变一个环节
+  title_pattern: 把{运营环节}换一种做法，谁的工作和结果发生变化？
+  outline:
+  - 选一张具体订单
+  - 沿交付路线跟随流转
+  - 沿一个具体案例推进解释
+  - 解释等待和协作的位置
+  - 回到顾客最终收到什么
+  examples: *id006
+- category: company_organization
+  name: 一个决策怎样形成
+  title_pattern: '{公司}决定做{项目}，谁提供信息、谁作出决定？'
+  outline:
+  - 还原一次具体决策
+  - 认识角色与各自信息
+  - 跟随试验和反馈
+  - 解释组织方式的取舍
+  examples: &id007
+  - title: 'To our shareowners:'
+    url: https://ir.aboutamazon.com/files/doc_financials/annual/2015-Letter-to-Shareholders.PDF
+    summary: 借鉴用具体决策说明组织运转和长期经营取舍的案例结构。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: company_organization
+  name: 组织方式对照
+  title_pattern: 同一个{任务}，{团队方式A}与{团队方式B}怎样协作？
+  outline:
+  - 还原一次具体决策
+  - 对照同一问题中的对象与选择
+  - 认识角色与各自信息
+  - 跟随试验和反馈
+  - 解释组织方式的取舍
+  examples: *id007
+- category: company_organization
+  name: 从试验到规模
+  title_pattern: 一个小团队的{做法}，规模扩大后还怎样运转？
+  outline:
+  - 还原一次具体决策
+  - 认识角色与各自信息
+  - 沿一个具体案例推进解释
+  - 跟随试验和反馈
+  - 解释组织方式的取舍
+  examples: *id007
+- category: company_platforms
+  name: 平台连接谁
+  title_pattern: '{平台}连接了哪些人，一次{互动}怎样完成？'
+  outline:
+  - 跟随一次具体平台互动
+  - 画出供给使用与平台关系
+  - 解释分发与反馈机制
+  - 回到参与者各自的选择
+  examples: &id008
+  - title: How Netflix’s Recommendations System Works | Netflix Help Center
+    url: https://help.netflix.com/en/node/100639
+    summary: 借鉴用用户输入、排序过程与可见结果解释平台如何连接内容和用户。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: company_platforms
+  name: 推荐改变选择
+  title_pattern: '{平台}怎样把{内容或商品}送到可能需要它的人面前？'
+  outline:
+  - 跟随一次具体平台互动
+  - 对照同一问题中的对象与选择
+  - 画出供给使用与平台关系
+  - 解释分发与反馈机制
+  - 回到参与者各自的选择
+  examples: *id008
+- category: company_platforms
+  name: 生态的一处变化
+  title_pattern: '{平台规则}发生变化，提供者和使用者分别怎样调整？'
+  outline:
+  - 跟随一次具体平台互动
+  - 画出供给使用与平台关系
+  - 沿一个具体案例推进解释
+  - 解释分发与反馈机制
+  - 回到参与者各自的选择
+  examples: *id008

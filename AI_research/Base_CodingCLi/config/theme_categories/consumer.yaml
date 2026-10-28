@@ -1,0 +1,74 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: consumer_choices
+  name: T01 · 需求与选购
+  promise: 怎样从自己的需求缩小产品选择？
+  type: comparison
+  production_ids:
+  - consumer_weekly
+  keywords:
+  - 需求与选购 怎样从自己的需求缩小产品选择？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明具体使用者和环境；列出真正要完成的任务；比较影响任务的差异；给出按需求选择的路径。
+- key: consumer_experience
+  name: T02 · 使用场景与体验
+  promise: 一个产品细节怎样影响实际使用？
+  type: explainer
+  production_ids:
+  - consumer_weekly
+  keywords:
+  - 使用场景与体验 一个产品细节怎样影响实际使用？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随一次实际使用；标出与任务有关的细节；对照动作和结果；回到适合的人和场景。
+- key: consumer_specs
+  name: T03 · 参数与性能理解
+  promise: 怎样把参数变成可理解的使用差异？
+  type: explainer
+  production_ids:
+  - consumer_weekly
+  keywords:
+  - 参数与性能理解 怎样把参数变成可理解的使用差异？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。给出一项具体任务；展示与它有关的参数；连接测试和可见体验；解释实际选择的取舍。
+- key: consumer_value
+  name: T04 · 总成本与购买价值
+  promise: 一件产品从买入到后续使用要花什么？
+  type: comparison
+  production_ids:
+  - consumer_weekly
+  keywords:
+  - 总成本与购买价值 一件产品从买入到后续使用要花什么？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从现有设备和需求进入；列出买入维护和使用成本；对照实际可用的方案；按使用阶段理解价值。
+- key: consumer_repair
+  name: T05 · 维修与升级
+  promise: 产品怎样被拆开、维护并延长使用？
+  type: explainer
+  production_ids:
+  - consumer_weekly
+  keywords:
+  - 维修与升级 产品怎样被拆开、维护并延长使用？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。锁定一个问题与部件；展示进入和更换路径；解释设计与配套影响；回到维修后的使用。
+- key: consumer_care
+  name: T06 · 日常使用与保养
+  promise: 怎样理解设备状态并安排日常使用？
+  type: explainer
+  production_ids:
+  - consumer_weekly
+  keywords:
+  - 日常使用与保养 怎样理解设备状态并安排日常使用？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。描述可辨认的设备状态；连接内部过程与使用条件；展示对应的实际操作；回到日常使用安排。
+- key: consumer_ecosystems
+  name: T07 · 兼容与设备协作
+  promise: 几件设备怎样共同完成一项任务？
+  type: tutorial
+  production_ids:
+  - consumer_weekly
+  keywords:
+  - 兼容与设备协作 几件设备怎样共同完成一项任务？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确一个跨设备任务；展示设备和资料流向；跟随连接和交接动作；解释环境与使用的取舍。
+- key: consumer_privacy
+  name: T08 · 权限与信息使用
+  promise: 设备怎样使用账户、权限和个人资料？
+  type: explainer
+  production_ids:
+  - consumer_weekly
+  keywords:
+  - 权限与信息使用 设备怎样使用账户、权限和个人资料？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从具体功能和资料进入；标出账户权限与设备；展示设置和操作的影响；回到使用者的需求选择。

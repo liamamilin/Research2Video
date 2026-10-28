@@ -1,0 +1,261 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: geography_landforms
+  name: 沿一滴水旅行
+  title_pattern: 一滴水经过{流域}，怎样连接山地、河流和生活？
+  outline:
+  - 在地图上确定具体地方
+  - 跟随水和地形的路线
+  - 解释相互作用的过程
+  - 回到沿途生活和利用
+  examples: &id001
+  - title: Water Cycle Diagrams | U.S. Geological Survey
+    url: https://www.usgs.gov/water-science-school/science/water-cycle-diagrams
+    summary: 用示意图沿水的运动解释地形、水系与人类用水的位置关系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: geography_landforms
+  name: 地形为何这样形成
+  title_pattern: '{地形}的样子，是怎样在连续过程中形成的？'
+  outline:
+  - 在地图上确定具体地方
+  - 对照同一问题中的对象与选择
+  - 跟随水和地形的路线
+  - 解释相互作用的过程
+  - 回到沿途生活和利用
+  examples: *id001
+- category: geography_landforms
+  name: 同一河流不同地方
+  title_pattern: 沿{河流}从上游到下游，地形和利用方式怎样变化？
+  outline:
+  - 在地图上确定具体地方
+  - 跟随水和地形的路线
+  - 沿一个具体案例推进解释
+  - 解释相互作用的过程
+  - 回到沿途生活和利用
+  examples: *id001
+- category: geography_climate
+  name: 地方差异的来路
+  title_pattern: 同一个季节，{地方A}与{地方B}为什么天气体验不同？
+  outline:
+  - 呈现两个具体地方的体验
+  - 在地图和示意图上定位
+  - 连接相关空间与时间关系
+  - 回到地方差异
+  examples: &id002
+  - title: What Causes the Seasons? | NASA Space Place – NASA Science for Kids
+    url: https://spaceplace.nasa.gov/seasons/en
+    summary: 借鉴从熟悉季节现象进入地球空间关系的讲法。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: geography_climate
+  name: 位置改变体验
+  title_pattern: 把{地方}放到纬度、海陆和地形中看，能理解什么？
+  outline:
+  - 呈现两个具体地方的体验
+  - 对照同一问题中的对象与选择
+  - 在地图和示意图上定位
+  - 连接相关空间与时间关系
+  - 回到地方差异
+  examples: *id002
+- category: geography_climate
+  name: 沿一股空气移动
+  title_pattern: '{天气过程}怎样经过不同地形，改变沿途体验？'
+  outline:
+  - 呈现两个具体地方的体验
+  - 在地图和示意图上定位
+  - 沿一个具体案例推进解释
+  - 连接相关空间与时间关系
+  - 回到地方差异
+  examples: *id002
+- category: geography_cities
+  name: 城市为什么这样长
+  title_pattern: '{城市}的{空间形态}怎样与水域、道路和用途联系？'
+  outline:
+  - 展示一处具体城市空间
+  - 沿一次生活活动移动
+  - 连接设施道路和用途
+  - 解释空间组织与体验
+  examples: &id003
+  - title: New York City - NASA Science
+    url: https://science.nasa.gov/earth/earth-observatory/new-york-city-83828
+    summary: 从一幅具体城市影像识别水域、道路和建成空间的联系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: geography_cities
+  name: 跟随一次城市活动
+  title_pattern: 完成一次{日常活动}，要经过城市的哪些地方？
+  outline:
+  - 展示一处具体城市空间
+  - 对照同一问题中的对象与选择
+  - 沿一次生活活动移动
+  - 连接设施道路和用途
+  - 解释空间组织与体验
+  examples: *id003
+- category: geography_cities
+  name: 同城不同体验
+  title_pattern: 同一座{城市}，{片区A}与{片区B}的生活体验为何不同？
+  outline:
+  - 展示一处具体城市空间
+  - 沿一次生活活动移动
+  - 沿一个具体案例推进解释
+  - 连接设施道路和用途
+  - 解释空间组织与体验
+  examples: *id003
+- category: geography_population
+  name: 人聚在何处
+  title_pattern: 看{地区}的人口分布，为什么某些位置更集中？
+  outline:
+  - 在图上定位具体人群
+  - 说明聚集或迁移的背景
+  - 连接工作居住与设施
+  - 观察空间和生活的变化
+  examples: &id004
+  - title: Urbanization | Our World in Data
+    url: https://ourworldindata.org/urbanization
+    summary: 用不同地区和时间的城市人口图表理解人口与空间变化。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: geography_population
+  name: 沿迁移路线走
+  title_pattern: 从{出发地}到{目的地}，人群迁移连接了什么机会与生活？
+  outline:
+  - 在图上定位具体人群
+  - 对照同一问题中的对象与选择
+  - 说明聚集或迁移的背景
+  - 连接工作居住与设施
+  - 观察空间和生活的变化
+  examples: *id004
+- category: geography_population
+  name: 人口变化与城市
+  title_pattern: '{人口变化}怎样改变{地方}的住房、通勤和服务需求？'
+  outline:
+  - 在图上定位具体人群
+  - 说明聚集或迁移的背景
+  - 沿一个具体案例推进解释
+  - 连接工作居住与设施
+  - 观察空间和生活的变化
+  examples: *id004
+- category: geography_resources
+  name: 资源不等于全部产业
+  title_pattern: 拥有{资源}的地方，为什么还需要其他条件才能生产{产品}？
+  outline:
+  - 选一个具体资源或产品
+  - 在地图上标出生产环节
+  - 连接区位交通和配套
+  - 解释地方之间的分工
+  examples: &id005
+  - title: Global Supply Chains of EV Batteries - IEA
+    url: https://www.iea.org/reports/global-supply-chains-of-ev-batteries
+    summary: 沿原料、部件和制造地区组织一条产业链与空间关系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: geography_resources
+  name: 产业为何在这里
+  title_pattern: '{生产环节}为什么布局在{地区}？'
+  outline:
+  - 选一个具体资源或产品
+  - 对照同一问题中的对象与选择
+  - 在地图上标出生产环节
+  - 连接区位交通和配套
+  - 解释地方之间的分工
+  examples: *id005
+- category: geography_resources
+  name: 沿产品看地方分工
+  title_pattern: 一件{产品}的原料和制造来自哪些地方，怎样连接？
+  outline:
+  - 选一个具体资源或产品
+  - 在地图上标出生产环节
+  - 沿一个具体案例推进解释
+  - 连接区位交通和配套
+  - 解释地方之间的分工
+  examples: *id005
+- category: geography_transport
+  name: 跟随一段旅程
+  title_pattern: 从{起点}到{终点}，为什么要沿这条路线走？
+  outline:
+  - 明确一次出行或运输
+  - 在地图上跟随路线
+  - 连接地形设施与成本时间
+  - 回到区域可达性和生活
+  examples: &id006
+  - title: 11.2 Transport system | UN-Habitat
+    url: https://unhabitat.org/11-2-transport-system
+    summary: 从居民可达性和出行联系切入城市交通系统。参考其提问和展开方式，具体结论留给选题后的研究。
+  - title: About the Silk Roads | UNESCO
+    url: https://www.unesco.org/en/silk-roads/about-silk-roads
+    summary: 沿路线、商品和交流过程理解不同社会如何连接。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: geography_transport
+  name: 设施改变可达性
+  title_pattern: '{交通设施}出现后，哪些地方的联系更方便了？'
+  outline:
+  - 明确一次出行或运输
+  - 对照同一问题中的对象与选择
+  - 在地图上跟随路线
+  - 连接地形设施与成本时间
+  - 回到区域可达性和生活
+  examples: *id006
+- category: geography_transport
+  name: 同一目的不同路线
+  title_pattern: 前往{目的地}的{路线A}与{路线B}怎样取舍？
+  outline:
+  - 明确一次出行或运输
+  - 在地图上跟随路线
+  - 沿一个具体案例推进解释
+  - 连接地形设施与成本时间
+  - 回到区域可达性和生活
+  examples: *id006
+- category: geography_environment
+  name: 熟悉环境的差异
+  title_pattern: 同样在{城市}，为什么{地点A}比{地点B}感觉不同？
+  outline:
+  - 从具体环境体验进入
+  - 定位地表和人的活动
+  - 解释相互影响的过程
+  - 回到地方的生活与利用
+  examples: &id007
+  - title: What Is an Urban Heat Island? - NASA Science
+    url: https://science.nasa.gov/kids/earth/what-is-an-urban-heat-island
+    summary: 从城市与周边温度感受的对照解释人地关系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: geography_environment
+  name: 一项活动的空间影响
+  title_pattern: '{人类活动}怎样改变周围的水、土地或温度关系？'
+  outline:
+  - 从具体环境体验进入
+  - 对照同一问题中的对象与选择
+  - 定位地表和人的活动
+  - 解释相互影响的过程
+  - 回到地方的生活与利用
+  examples: *id007
+- category: geography_environment
+  name: 改变一处地方
+  title_pattern: 给{空间}换一种利用方式，环境和日常使用怎样响应？
+  outline:
+  - 从具体环境体验进入
+  - 定位地表和人的活动
+  - 沿一个具体案例推进解释
+  - 解释相互影响的过程
+  - 回到地方的生活与利用
+  examples: *id007
+- category: geography_maps
+  name: 读懂一张地图
+  title_pattern: 看这张{主题地图}，颜色、尺度和时间分别表示什么？
+  outline:
+  - 提出关于一个地方的问题
+  - 识别图例尺度时间
+  - 沿图层和空间做比较
+  - 用读到的关系回答问题
+  examples: &id008
+  - title: National Climate Change Viewer (NCCV) | U.S. Geological Survey
+    url: https://www.usgs.gov/tools/national-climate-change-viewer-nccv
+    summary: 以交互地图的地区、时间和颜色变化组织读图与空间比较。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: geography_maps
+  name: 换一张图看地方
+  title_pattern: 把{地方}放在{不同尺度或图层}中，哪些关系出现了？
+  outline:
+  - 提出关于一个地方的问题
+  - 对照同一问题中的对象与选择
+  - 识别图例尺度时间
+  - 沿图层和空间做比较
+  - 用读到的关系回答问题
+  examples: *id008
+- category: geography_maps
+  name: 从影像追变化
+  title_pattern: 对照{地方}不同时间的影像，怎样理解空间变化？
+  outline:
+  - 提出关于一个地方的问题
+  - 识别图例尺度时间
+  - 沿一个具体案例推进解释
+  - 沿图层和空间做比较
+  - 用读到的关系回答问题
+  examples: *id008

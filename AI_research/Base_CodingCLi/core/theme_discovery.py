@@ -31,7 +31,7 @@ PLATFORMS = {"bilibili": ("B站", "bilibili.com"), "zhihu": ("知乎", "zhihu.co
 def configuration(config_dir: str, key: str) -> dict:
     path = Path(config_dir) / "topic_discovery" / f"{key}.yaml"
     value = yaml.safe_load(path.read_text()) if path.exists() else {}
-    return {"time": "09:00", "timezone": "Asia/Shanghai", "mode": "discovery", "direction": "",
+    return {"time": "09:00", "timezone": "Asia/Shanghai", "mode": "ideas", "direction": "",
             "platforms": ["bilibili", "zhihu", "youtube"],
             **(value or {})}
 
@@ -48,6 +48,8 @@ def search_terms(category: dict, engine, matrix, config: dict) -> list[str]:
         queries = [q.strip()[:120] for q in configured if isinstance(q, str) and q.strip()][:2]
         if queries:
             return queries
+    if category.get("keywords"):
+        return [str(q)[:120] for q in category["keywords"][:2]]
     bindings = production.load_all(engine.config_dir, engine.jobs_dir)
     for key in category["production_ids"]:
         if key in bindings:

@@ -1,0 +1,258 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: economy_prices
+  name: 账单里的变化
+  title_pattern: 同样买{日常商品}，为什么这一笔支出会变化？
+  outline:
+  - 展示一份具体账单
+  - 区分商品和总体价格
+  - 追踪需求或成本传导
+  - 回到不同人群的实际支出
+  examples: &id001
+  - title: 'Inflation: Prices on the Rise'
+    url: https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/inflation
+    summary: 从一篮子商品价格进入通胀的度量、原因与具体影响。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: economy_prices
+  name: 一篮子与一个人
+  title_pattern: '{价格指标}反映的变化，为什么和{人群}的感受不同？'
+  outline:
+  - 展示一份具体账单
+  - 对照同一问题中的对象与选择
+  - 区分商品和总体价格
+  - 追踪需求或成本传导
+  - 回到不同人群的实际支出
+  examples: *id001
+- category: economy_prices
+  name: 顺着成本走
+  title_pattern: '{原料价格}改变之后，怎样传到{终端商品}？'
+  outline:
+  - 展示一份具体账单
+  - 区分商品和总体价格
+  - 沿一个具体案例推进解释
+  - 追踪需求或成本传导
+  - 回到不同人群的实际支出
+  examples: *id001
+- category: economy_money
+  name: 利率传到哪里
+  title_pattern: '{利率}变化后，怎样一步步影响{具体支出}？'
+  outline:
+  - 从一笔借贷或支出进入
+  - 连接银行和使用者
+  - 顺着传导环节展开
+  - 说明不同对象的反应
+  examples: &id002
+  - title: 'Monetary Policy: Stabilizing Prices and Output'
+    url: https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/monetary-policy
+    summary: 沿利率、信贷与支出等环节解释货币政策怎样传导。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: economy_money
+  name: 沿一笔贷款
+  title_pattern: 一笔{贷款}从申请到偿还，连接了哪些经济活动？
+  outline:
+  - 从一笔借贷或支出进入
+  - 对照同一问题中的对象与选择
+  - 连接银行和使用者
+  - 顺着传导环节展开
+  - 说明不同对象的反应
+  examples: *id002
+- category: economy_money
+  name: 同一政策不同感受
+  title_pattern: 同样的{货币变化}，为什么对{人群A}和{人群B}影响不同？
+  outline:
+  - 从一笔借贷或支出进入
+  - 连接银行和使用者
+  - 沿一个具体案例推进解释
+  - 顺着传导环节展开
+  - 说明不同对象的反应
+  examples: *id002
+- category: economy_growth
+  name: 从订单看增长
+  title_pattern: '{行业}多了一批订单，怎样体现在经济增长中？'
+  outline:
+  - 从一项生产或支出进入
+  - 解释总量怎样构成
+  - 对照价格数量和人均情况
+  - 连接行业与观众感受
+  examples: &id003
+  - title: 'Gross Domestic Product: An Economy’s All'
+    url: https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp
+    summary: 通过生产和支出的具体例子区分经济总量、实际变化与人均情况。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: economy_growth
+  name: 增长与生活感受
+  title_pattern: '{经济指标}在增长，为什么不同家庭感受不同？'
+  outline:
+  - 从一项生产或支出进入
+  - 对照同一问题中的对象与选择
+  - 解释总量怎样构成
+  - 对照价格数量和人均情况
+  - 连接行业与观众感受
+  examples: *id003
+- category: economy_growth
+  name: 拆开一个总量
+  title_pattern: 理解{地区}的经济变化，先看哪几块生产和支出？
+  outline:
+  - 从一项生产或支出进入
+  - 解释总量怎样构成
+  - 沿一个具体案例推进解释
+  - 对照价格数量和人均情况
+  - 连接行业与观众感受
+  examples: *id003
+- category: economy_labor
+  name: 工资为什么不同
+  title_pattern: 同样做{工作}，{环境A}与{环境B}的收入为什么不同？
+  outline:
+  - 刻画一个具体岗位
+  - 展示任务与产出的关系
+  - 连接企业和劳动者的选择
+  - 回到机会与收入分配
+  examples: &id004
+  - title: Decoupling of wages from productivity | OECD
+    url: https://www.oecd.org/en/publications/decoupling-of-wages-from-productivity_d4764493-en.html
+    summary: 借鉴从生产率和工资的关系提出劳动收入分配问题。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: economy_labor
+  name: 技术走到岗位
+  title_pattern: '{生产方式}改变之后，一份{工作}的任务怎样变化？'
+  outline:
+  - 刻画一个具体岗位
+  - 对照同一问题中的对象与选择
+  - 展示任务与产出的关系
+  - 连接企业和劳动者的选择
+  - 回到机会与收入分配
+  examples: *id004
+- category: economy_labor
+  name: 效率与收入
+  title_pattern: '{行业}效率提高了，为什么收入的变化还要看其他关系？'
+  outline:
+  - 刻画一个具体岗位
+  - 展示任务与产出的关系
+  - 沿一个具体案例推进解释
+  - 连接企业和劳动者的选择
+  - 回到机会与收入分配
+  examples: *id004
+- category: economy_public
+  name: 一笔公共支出
+  title_pattern: '{公共项目}的钱从哪里来、花到哪里去？'
+  outline:
+  - 从一项可见公共服务进入
+  - 说明收入和支出去向
+  - 解释参与者的行为变化
+  - 回到服务与长期关系
+  examples: &id005
+  - title: 'Fiscal Policy: Taking and Giving Away'
+    url: https://www.imf.org/external/pubs/ft/fandd/basics/36-fiscal-policy.htm
+    summary: 从政府收入与支出的具体去向展开财政工具和影响。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: economy_public
+  name: 税收的传导
+  title_pattern: 改变{税费安排}，怎样影响{家庭或企业}的一次选择？
+  outline:
+  - 从一项可见公共服务进入
+  - 对照同一问题中的对象与选择
+  - 说明收入和支出去向
+  - 解释参与者的行为变化
+  - 回到服务与长期关系
+  examples: *id005
+- category: economy_public
+  name: 现在与以后
+  title_pattern: '{公共投入}如何连接今天的支出和之后的服务？'
+  outline:
+  - 从一项可见公共服务进入
+  - 说明收入和支出去向
+  - 沿一个具体案例推进解释
+  - 解释参与者的行为变化
+  - 回到服务与长期关系
+  examples: *id005
+- category: economy_trade
+  name: 跟随一件商品
+  title_pattern: 一件{跨境商品}怎样把几个地区的工作连起来？
+  outline:
+  - 跟随一件具体商品
+  - 画出生产和交换路线
+  - 解释各方投入与选择
+  - 观察路线变化的影响
+  examples: &id006
+  - title: 'International Trade: Commerce among Nations'
+    url: https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/trade
+    summary: 用跨国交换的具体商品说明贸易如何重组生产和需求。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: economy_trade
+  name: 交换为何发生
+  title_pattern: '{地区A}和{地区B}为什么要交换{商品}？'
+  outline:
+  - 跟随一件具体商品
+  - 对照同一问题中的对象与选择
+  - 画出生产和交换路线
+  - 解释各方投入与选择
+  - 观察路线变化的影响
+  examples: *id006
+- category: economy_trade
+  name: 贸易条件变化
+  title_pattern: '{贸易条件}改变后，一张{订单}怎样重新安排？'
+  outline:
+  - 跟随一件具体商品
+  - 画出生产和交换路线
+  - 沿一个具体案例推进解释
+  - 解释各方投入与选择
+  - 观察路线变化的影响
+  examples: *id006
+- category: economy_markets
+  name: 供需的一次变化
+  title_pattern: '{市场}多了{供给或需求}，价格和成交怎样响应？'
+  outline:
+  - 搭建一个小型具体市场
+  - 分别观察供给和需求
+  - 对照价格数量的变化
+  - 说明这种关系的适用情境
+  examples: &id007
+  - title: The Science of Supply and Demand | St. Louis Fed
+    url: https://www.stlouisfed.org/publications/page-one-economics/2021/03/01/the-science-of-supply-and-demand
+    summary: 从一个市场的供需变化解释价格和交易数量的关系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: economy_markets
+  name: 同一商品不同价格
+  title_pattern: 同样的{商品}，为什么在{场景A}和{场景B}价格不同？
+  outline:
+  - 搭建一个小型具体市场
+  - 对照同一问题中的对象与选择
+  - 分别观察供给和需求
+  - 对照价格数量的变化
+  - 说明这种关系的适用情境
+  examples: *id007
+- category: economy_markets
+  name: 一个信号怎样传递
+  title_pattern: '{价格信号}改变后，卖方和买方分别做了什么？'
+  outline:
+  - 搭建一个小型具体市场
+  - 分别观察供给和需求
+  - 沿一个具体案例推进解释
+  - 对照价格数量的变化
+  - 说明这种关系的适用情境
+  examples: *id007
+- category: economy_productivity
+  name: 同样投入不同结果
+  title_pattern: 两处{生产场景}投入相近，产出为什么不同？
+  outline:
+  - 选择可比较的生产任务
+  - 展示投入和产出
+  - 解释技术组织与协作
+  - 连接企业改进和长期发展
+  examples: &id008
+  - title: Multifactor Productivity | OECD
+    url: https://www.oecd.org/en/about/projects/multifactor-productivity.html
+    summary: 从投入与产出的关系组织生产率和长期增长问题。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: economy_productivity
+  name: 一项改进怎样扩散
+  title_pattern: '{效率改进}怎样从一家企业传到一个行业？'
+  outline:
+  - 选择可比较的生产任务
+  - 对照同一问题中的对象与选择
+  - 展示投入和产出
+  - 解释技术组织与协作
+  - 连接企业改进和长期发展
+  examples: *id008
+- category: economy_productivity
+  name: 看懂生产率
+  title_pattern: 理解{地区}的长期发展，怎样看投入与产出的关系？
+  outline:
+  - 选择可比较的生产任务
+  - 展示投入和产出
+  - 沿一个具体案例推进解释
+  - 解释技术组织与协作
+  - 连接企业改进和长期发展
+  examples: *id008

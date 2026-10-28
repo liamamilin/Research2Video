@@ -33,7 +33,9 @@ not_now 只代表暂时不用，不作为负面偏好。不能因少量反馈放
 reason 说明观众的具体问题和本题内容价值，不把少量选择记录描述成高热度、高需求或显著趋势。
 有参考题时必须引用本栏目提供的 example_ids。已有题型引用 pattern_id；提炼新题型时提供 format。
 format 是你从参考例子归纳的提问结构，包含 name、title_pattern（带槽位的题目格式）、outline（3至6项讲述步骤）。
-输出 JSON {themes:[{category,title,question,topic_key,reason,angle,audience,example_ids:[],pattern_id,format:{name,title_pattern,outline:[]}}]}。
+每条理由用一至两句说明，reason 不超过90个汉字，angle 不超过100个汉字；不抄回参考例题正文。
+已有题型只返回 pattern_id，省略 format 和大纲；只有确实需要新题型时才添加 format。
+输出 JSON {themes:[{category,title,question,topic_key,reason,angle,audience,example_ids:[],pattern_id}]}。
 question 是不含修辞的核心问题，topic_key 是简短稳定的主题标识；不同具体问题可共用同一个题型。
 """
 
@@ -142,7 +144,7 @@ def run(engine, job: dict) -> str | None:
             matrix = matrices.load_all(engine.config_dir).get(key)
             if matrix is None or matrix.archived:
                 raise ValueError("矩阵不存在或已归档")
-            categories = theme_context.categories(engine.config_dir, key)
+            categories = theme_context.categories(engine.config_dir, key, include_legacy=bool(request["category"]))
             if request["category"]:
                 categories = [c for c in categories if c["key"] == request["category"]]
             if not categories:
@@ -167,13 +169,19 @@ def run(engine, job: dict) -> str | None:
                 raise CancelledError("题目生成已取消")
             engine._progress({"type": "phase", "phase": "generating_themes", "message": "参考选题库，按栏目生成候选问题"})
             config = LLMConfig.from_system(engine.sys, "ai")
-            llm = LLMClient(replace(config, max_tokens=min(config.max_tokens, 8192)), cancel_token=engine._cancel, progress_cb=engine._progress)
+            # Reasoning models share this allowance with their internal reasoning.
+            # Keep one bounded request while leaving room for a complete multi-category batch.
+            llm = LLMClient(replace(config, max_tokens=min(config.max_tokens, 16384)), cancel_token=engine._cancel, progress_cb=engine._progress)
             response = llm.chat([{"role": "system", "content": SYSTEM}, {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}], tools=None)
             usage.update(llm.usage)
             day = job.get("idea_day") or datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat()
             folder = Path(engine.workspace_dir) / "output/topic_ideas" / key
             path = folder / f"{day}_{request_id[:8]}.md"
-            atomic_write(str(path.with_suffix(".response.json")), json.dumps({"input": payload, "response": response.content, "usage": usage}, ensure_ascii=False, indent=2))
+            finish_reason = getattr(response, "finish_reason", "")
+            atomic_write(str(path.with_suffix(".response.json")), json.dumps({"input": payload, "response": response.content,
+                "finish_reason": finish_reason, "usage": usage}, ensure_ascii=False, indent=2))
+            if finish_reason == "length":
+                raise RuntimeError("这批题目达到模型输出上限，未完整返回；失败尝试和用量已保留，可重新生成。")
             candidates = select(response.content, categories, library, key, refs, brief=request["brief"], pattern_id=request["pattern_id"])
             for candidate in candidates:
                 candidate["inspiration"]["generation_id"] = request_id

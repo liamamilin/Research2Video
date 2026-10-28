@@ -122,7 +122,7 @@ def test_every_category_collects_bilibili_metrics_even_after_the_first_24_signal
     from web.services import theme_workbench
     import yaml
     (theme_env / 'config/topic_discovery').mkdir(exist_ok=True)
-    (theme_env / 'config/topic_discovery/demo.yaml').write_text('platforms: [bilibili]\n')
+    (theme_env / 'config/topic_discovery/demo.yaml').write_text('mode: discovery\nplatforms: [bilibili]\n')
     for index in range(5):
         (theme_env / f'config/content_columns/extra{index}.yaml').write_text(yaml.safe_dump({'name':f'栏目{index}','matrix':'demo',
             'type':'explainer','promise':f'需要讲清楚的问题{index}','audience':'普通用户','production_ids':[]}))

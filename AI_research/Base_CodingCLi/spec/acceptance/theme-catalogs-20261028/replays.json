@@ -1,0 +1,102 @@
+[
+  {
+    "matrix": "ai_media",
+    "output": "output/topic_ideas/ai_media/2026-10-28_5024ece0.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  {
+    "matrix": "company",
+    "output": "output/topic_ideas/company/2026-10-28_ef1551a3.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  {
+    "matrix": "consumer",
+    "output": "output/topic_ideas/consumer/2026-10-28_0e193563.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  {
+    "matrix": "culture",
+    "output": "output/topic_ideas/culture/2026-10-28_577c0cc6.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  {
+    "matrix": "economy",
+    "output": "output/topic_ideas/economy/2026-10-28_83e34bb1.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  {
+    "matrix": "education",
+    "output": "output/topic_ideas/education/2026-10-28_3e9ab790.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  {
+    "matrix": "geography",
+    "output": "output/topic_ideas/geography/2026-10-28_990a7f8c.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  {
+    "matrix": "history",
+    "output": "output/topic_ideas/history/2026-10-28_2ed22e5a.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  {
+    "matrix": "industry",
+    "output": "output/topic_ideas/industry/2026-10-28_1fe0e50f.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  {
+    "matrix": "science",
+    "output": "output/topic_ideas/science/2026-10-28_53ceafea.md",
+    "usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  }
+]

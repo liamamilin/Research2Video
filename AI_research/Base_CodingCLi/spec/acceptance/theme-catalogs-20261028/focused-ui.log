@@ -1,0 +1,22 @@
+
+ RUN  v3.2.7 /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/ui
+
+ ✓ src/components/ThemeUsage.test.tsx (1 test) 411ms
+   ✓ reads recorded shared usage on demand and keeps unknown cost distinct from zero  410ms
+stderr | src/components/ThemeWorkbench.test.tsx > matrix topic workbench > filters a larger reference library by subject
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/pages/Matrices.test.tsx > Matrices > keeps business domains in the main list and research groups in the source view
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ThemeWorkbench.test.tsx (18 tests) 2523ms
+   ✓ matrix topic workbench > filters a larger reference library by subject  1744ms
+ ✓ src/pages/Matrices.test.tsx (26 tests) 1390ms
+   ✓ Matrices > keeps business domains in the main list and research groups in the source view  424ms
+
+ Test Files  3 passed (3)
+      Tests  45 passed (45)
+   Start at  12:41:15
+   Duration  5.70s (transform 1.98s, setup 0ms, collect 3.97s, tests 4.32s, environment 3.41s, prepare 998ms)

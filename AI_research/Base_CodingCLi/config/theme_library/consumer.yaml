@@ -1,0 +1,258 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: consumer_choices
+  name: 先问用途
+  title_pattern: 主要用来{任务}，选{产品}之前先确定什么？
+  outline:
+  - 说明具体使用者和环境
+  - 列出真正要完成的任务
+  - 比较影响任务的差异
+  - 给出按需求选择的路径
+  examples: &id001
+  - title: 'How We Test Dozens of TVs Each Year: Transforming Mountains of Data Into Objective Reviews - RTINGS.com'
+    url: https://www.rtings.com/tv/learn/how-we-test
+    summary: 从实际使用场景和评测维度组织产品选择问题。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: consumer_choices
+  name: 需求对应差异
+  title_pattern: 面对{候选产品}，哪些差异会真正影响{使用场景}？
+  outline:
+  - 说明具体使用者和环境
+  - 对照同一问题中的对象与选择
+  - 列出真正要完成的任务
+  - 比较影响任务的差异
+  - 给出按需求选择的路径
+  examples: *id001
+- category: consumer_choices
+  name: 放回实际环境
+  title_pattern: 同样买{产品}，{环境A}与{环境B}为什么适合不同选择？
+  outline:
+  - 说明具体使用者和环境
+  - 列出真正要完成的任务
+  - 沿一个具体案例推进解释
+  - 比较影响任务的差异
+  - 给出按需求选择的路径
+  examples: *id001
+- category: consumer_experience
+  name: 跟随一天使用
+  title_pattern: 在{日常场景}里连续使用{产品}，哪些细节最影响体验？
+  outline:
+  - 跟随一次实际使用
+  - 标出与任务有关的细节
+  - 对照动作和结果
+  - 回到适合的人和场景
+  examples: &id002
+  - title: 'How We Test Headphones: Transforming Data Into Objective Reviews - RTINGS.com'
+    url: https://www.rtings.com/headphones/learn/how-we-test
+    summary: 将耳机的测量维度对应到佩戴、通话和聆听等具体体验。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: consumer_experience
+  name: 一个细节的差异
+  title_pattern: '{产品细节}不同，完成{任务}时会有什么可见区别？'
+  outline:
+  - 跟随一次实际使用
+  - 对照同一问题中的对象与选择
+  - 标出与任务有关的细节
+  - 对照动作和结果
+  - 回到适合的人和场景
+  examples: *id002
+- category: consumer_experience
+  name: 场景变化后
+  title_pattern: 从{场景A}换到{场景B}，对{产品}的需求怎样变化？
+  outline:
+  - 跟随一次实际使用
+  - 标出与任务有关的细节
+  - 沿一个具体案例推进解释
+  - 对照动作和结果
+  - 回到适合的人和场景
+  examples: *id002
+- category: consumer_specs
+  name: 参数对应什么
+  title_pattern: '{参数}影响{产品}完成哪一步任务？'
+  outline:
+  - 给出一项具体任务
+  - 展示与它有关的参数
+  - 连接测试和可见体验
+  - 解释实际选择的取舍
+  examples: &id003
+  - title: 'How We Test Monitors: Transforming Data Into Objective Reviews - RTINGS.com'
+    url: https://www.rtings.com/monitor/learn/how-we-test
+    summary: 借鉴把显示器参数和测试结果放回具体使用任务的方式。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: consumer_specs
+  name: 数字相近体验不同
+  title_pattern: '{产品A}和{产品B}的{参数}相近，实际使用为什么还不同？'
+  outline:
+  - 给出一项具体任务
+  - 对照同一问题中的对象与选择
+  - 展示与它有关的参数
+  - 连接测试和可见体验
+  - 解释实际选择的取舍
+  examples: *id003
+- category: consumer_specs
+  name: 看一项测试
+  title_pattern: 评测里的{测试结果}，怎样联系自己的{用途}？
+  outline:
+  - 给出一项具体任务
+  - 展示与它有关的参数
+  - 沿一个具体案例推进解释
+  - 连接测试和可见体验
+  - 解释实际选择的取舍
+  examples: *id003
+- category: consumer_value
+  name: 买入之后的成本
+  title_pattern: 购买{产品}以后，后续{使用阶段}还有哪些花费？
+  outline:
+  - 从现有设备和需求进入
+  - 列出买入维护和使用成本
+  - 对照实际可用的方案
+  - 按使用阶段理解价值
+  examples: &id004
+  - title: Apple Service and Repair for iPhone Battery - Apple Support
+    url: https://support.apple.com/iphone/repair/battery-replacement
+    summary: 从电池维修这一具体选择理解购入、维护和后续使用的总成本。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: consumer_value
+  name: 继续用还是更新
+  title_pattern: '{现有产品}遇到{需求变化}，继续用、维修与更新怎样比较？'
+  outline:
+  - 从现有设备和需求进入
+  - 对照同一问题中的对象与选择
+  - 列出买入维护和使用成本
+  - 对照实际可用的方案
+  - 按使用阶段理解价值
+  examples: *id004
+- category: consumer_value
+  name: 贵在哪里用在哪里
+  title_pattern: 为了{用途}多花{预算}，主要换来哪种实际体验？
+  outline:
+  - 从现有设备和需求进入
+  - 列出买入维护和使用成本
+  - 沿一个具体案例推进解释
+  - 对照实际可用的方案
+  - 按使用阶段理解价值
+  examples: *id004
+- category: consumer_repair
+  name: 一项维修的过程
+  title_pattern: '{产品}需要更换{部件}时，实际要经过哪些步骤？'
+  outline:
+  - 锁定一个问题与部件
+  - 展示进入和更换路径
+  - 解释设计与配套影响
+  - 回到维修后的使用
+  examples: &id005
+  - title: Smartphone Repairability Scores | Most Repairable Phones - iFixit
+    url: https://www.ifixit.com/repairability/smartphone-repairability-scores
+    summary: 从拆解与维修的具体动作理解产品后续维修和升级的差异。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: consumer_repair
+  name: 可维修差异
+  title_pattern: 同样修{问题}，{设计A}与{设计B}为什么难度不同？
+  outline:
+  - 锁定一个问题与部件
+  - 对照同一问题中的对象与选择
+  - 展示进入和更换路径
+  - 解释设计与配套影响
+  - 回到维修后的使用
+  examples: *id005
+- category: consumer_repair
+  name: 升级接在哪里
+  title_pattern: 想让{产品}更适合{任务}，哪一处可以升级或替换？
+  outline:
+  - 锁定一个问题与部件
+  - 展示进入和更换路径
+  - 沿一个具体案例推进解释
+  - 解释设计与配套影响
+  - 回到维修后的使用
+  examples: *id005
+- category: consumer_care
+  name: 状态提示怎么理解
+  title_pattern: '{产品}显示{状态提示}时，它对应什么使用情况？'
+  outline:
+  - 描述可辨认的设备状态
+  - 连接内部过程与使用条件
+  - 展示对应的实际操作
+  - 回到日常使用安排
+  examples: &id006
+  - title: If you see battery “Service Recommended” on your Mac laptop - Apple Support (IE)
+    url: https://support.apple.com/en-ie/108376
+    summary: 从设备实际显示的电池状态进入保养与继续使用的问题。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: consumer_care
+  name: 一个保养动作
+  title_pattern: 日常做{保养动作}，会怎样影响{设备过程}？
+  outline:
+  - 描述可辨认的设备状态
+  - 对照同一问题中的对象与选择
+  - 连接内部过程与使用条件
+  - 展示对应的实际操作
+  - 回到日常使用安排
+  examples: *id006
+- category: consumer_care
+  name: 使用方式的区别
+  title_pattern: 同样使用{产品}，{方式A}与{方式B}会给设备带来什么不同？
+  outline:
+  - 描述可辨认的设备状态
+  - 连接内部过程与使用条件
+  - 沿一个具体案例推进解释
+  - 展示对应的实际操作
+  - 回到日常使用安排
+  examples: *id006
+- category: consumer_ecosystems
+  name: 接力完成任务
+  title_pattern: 用{设备A}和{设备B}完成{任务}，资料怎样交接？
+  outline:
+  - 明确一个跨设备任务
+  - 展示设备和资料流向
+  - 跟随连接和交接动作
+  - 解释环境与使用的取舍
+  examples: &id007
+  - title: Use Handoff to continue tasks on your other Apple devices - Apple Support
+    url: https://support.apple.com/en-us/102426
+    summary: 沿一个跨设备任务解释兼容条件、交接动作和完成结果。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: consumer_ecosystems
+  name: 兼容条件在哪里
+  title_pattern: 想把{设备}接进已有环境，需要满足哪些具体条件？
+  outline:
+  - 明确一个跨设备任务
+  - 对照同一问题中的对象与选择
+  - 展示设备和资料流向
+  - 跟随连接和交接动作
+  - 解释环境与使用的取舍
+  examples: *id007
+- category: consumer_ecosystems
+  name: 一套还是混搭
+  title_pattern: 为了{使用场景}，同一生态和混合设备怎样比较？
+  outline:
+  - 明确一个跨设备任务
+  - 展示设备和资料流向
+  - 沿一个具体案例推进解释
+  - 跟随连接和交接动作
+  - 解释环境与使用的取舍
+  examples: *id007
+- category: consumer_privacy
+  name: 一项权限在做什么
+  title_pattern: 给{产品或应用}打开{权限}后，哪项任务可以完成？
+  outline:
+  - 从具体功能和资料进入
+  - 标出账户权限与设备
+  - 展示设置和操作的影响
+  - 回到使用者的需求选择
+  examples: &id008
+  - title: Apple Platform Security
+    url: https://help.apple.com/pdf/security/en_US/apple-platform-security-guide.pdf
+    summary: 从具体设备使用任务认识权限、身份和信息流的关系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: consumer_privacy
+  name: 信息走过哪里
+  title_pattern: 使用{设备功能}时，{资料}经过哪些地方？
+  outline:
+  - 从具体功能和资料进入
+  - 对照同一问题中的对象与选择
+  - 标出账户权限与设备
+  - 展示设置和操作的影响
+  - 回到使用者的需求选择
+  examples: *id008
+- category: consumer_privacy
+  name: 一项设置的作用
+  title_pattern: 改变{设备设置}，实际改变了哪种信息或使用关系？
+  outline:
+  - 从具体功能和资料进入
+  - 标出账户权限与设备
+  - 沿一个具体案例推进解释
+  - 展示设置和操作的影响
+  - 回到使用者的需求选择
+  examples: *id008

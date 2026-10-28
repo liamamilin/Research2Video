@@ -1,0 +1,292 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: ai_flash
+  name: 变化进入任务
+  title_pattern: '{已发生的能力变化}之后，完成{任务}的哪一步不同了？'
+  outline:
+  - 说明已发生的具体变化
+  - 还原原有用户任务
+  - 对照新的操作和结果
+  - 回到受影响的用户
+  examples: &id001
+  - title: Introducing the Model Context Protocol \ Anthropic
+    url: https://www.anthropic.com/news/model-context-protocol
+    summary: 从已发布的连接能力说明用户原有任务的哪一步发生变化；样本不是今天的新动态。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: ai_flash
+  name: 新能力的入口
+  title_pattern: '{新能力}接进原有{流程}，需要怎样使用？'
+  outline:
+  - 说明已发生的具体变化
+  - 对照同一问题中的对象与选择
+  - 还原原有用户任务
+  - 对照新的操作和结果
+  - 回到受影响的用户
+  examples: *id001
+- category: ai_flash
+  name: 受影响的是谁
+  title_pattern: 面对{已确认变化}，{使用者A}与{使用者B}需要分别注意哪种用法？
+  outline:
+  - 说明已发生的具体变化
+  - 还原原有用户任务
+  - 沿一个具体案例推进解释
+  - 对照新的操作和结果
+  - 回到受影响的用户
+  examples: *id001
+- category: ai_opensource
+  name: 项目放进任务
+  title_pattern: 用{开源项目}完成{具体任务}，输入到输出怎样走？
+  outline:
+  - 从一个实际输入进入
+  - 展示项目处理的位置
+  - 跟随关键操作与输出
+  - 说明接进现有工作的方式
+  examples: &id002
+  - &id008
+    title: 'GitHub - ml-explore/mlx-lm: Run LLMs with MLX · GitHub'
+    url: https://github.com/ml-explore/mlx-lm
+    summary: 从开源项目的实际输入、运行与输出理解它在本地任务中的作用。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: ai_opensource
+  name: 替换一处环节
+  title_pattern: 把现有流程的{步骤}换成{项目}，实际有什么不同？
+  outline:
+  - 从一个实际输入进入
+  - 对照同一问题中的对象与选择
+  - 展示项目处理的位置
+  - 跟随关键操作与输出
+  - 说明接进现有工作的方式
+  examples: *id002
+- category: ai_opensource
+  name: 项目的适用位置
+  title_pattern: 已经有{现有工具}，什么任务下还需要{开源项目}？
+  outline:
+  - 从一个实际输入进入
+  - 展示项目处理的位置
+  - 沿一个具体案例推进解释
+  - 跟随关键操作与输出
+  - 说明接进现有工作的方式
+  examples: *id002
+- category: ai_model_review
+  name: 任务决定选择
+  title_pattern: 主要做{任务}，怎样比较{模型或档位}？
+  outline:
+  - 明确任务与相同输入
+  - 选择影响决策的观察维度
+  - 对照实际结果和使用过程
+  - 按需求说明取舍
+  examples: &id003
+  - title: Leaderboards and Evaluations · Hugging Face
+    url: https://huggingface.co/docs/leaderboards/index
+    summary: 借鉴将模型表现放回任务和评估维度中比较的方式。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: ai_model_review
+  name: 同一输入比较
+  title_pattern: 把同一份{输入}交给{不同模型}，哪些差异值得看？
+  outline:
+  - 明确任务与相同输入
+  - 对照同一问题中的对象与选择
+  - 选择影响决策的观察维度
+  - 对照实际结果和使用过程
+  - 按需求说明取舍
+  examples: *id003
+- category: ai_model_review
+  name: 读懂能力数字
+  title_pattern: '{评估指标}反映了什么任务，怎样联系自己的用法？'
+  outline:
+  - 明确任务与相同输入
+  - 选择影响决策的观察维度
+  - 沿一个具体案例推进解释
+  - 对照实际结果和使用过程
+  - 按需求说明取舍
+  examples: *id003
+- category: ai_workflows
+  name: 从输入到交付
+  title_pattern: 用AI完成{工作任务}，怎样把{输入}变成{交付物}？
+  outline:
+  - 给出具体工作材料
+  - 拆开连续处理步骤
+  - 展示各步输入与输出衔接
+  - 回到可使用的交付物
+  examples: &id004
+  - title: Pipeline · Hugging Face
+    url: https://huggingface.co/docs/transformers/en/pipeline_tutorial
+    summary: 用一个具体任务的输入、处理步骤与输出串起可操作的模型工作流。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: ai_workflows
+  name: 串起几步工作
+  title_pattern: '{工作流程}里的几步怎样衔接，哪一步交给模型？'
+  outline:
+  - 给出具体工作材料
+  - 对照同一问题中的对象与选择
+  - 拆开连续处理步骤
+  - 展示各步输入与输出衔接
+  - 回到可使用的交付物
+  examples: *id004
+- category: ai_workflows
+  name: 改进一个重复任务
+  title_pattern: 反复做{任务}时，怎样整理输入和输出减少重复操作？
+  outline:
+  - 给出具体工作材料
+  - 拆开连续处理步骤
+  - 沿一个具体案例推进解释
+  - 展示各步输入与输出衔接
+  - 回到可使用的交付物
+  examples: *id004
+- category: ai_agents
+  name: 工具怎样接进来
+  title_pattern: 让智能体完成{任务}，什么时候调用哪个工具？
+  outline:
+  - 建立一个多步任务
+  - 标出工具状态和角色
+  - 跟随一次执行与反馈
+  - 解释这种组织方式的取舍
+  examples: &id005
+  - title: Building effective AI agents \ Anthropic
+    url: https://www.anthropic.com/research/building-effective-agents
+    summary: 从连续任务的分工、工具和控制流程区分不同智能体组织方式。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: ai_agents
+  name: 一次任务的分工
+  title_pattern: 同一个{复杂任务}，单个模型和{分工方式}怎样推进？
+  outline:
+  - 建立一个多步任务
+  - 对照同一问题中的对象与选择
+  - 标出工具状态和角色
+  - 跟随一次执行与反馈
+  - 解释这种组织方式的取舍
+  examples: *id005
+- category: ai_agents
+  name: 运行卡在哪里
+  title_pattern: '{智能体流程}停在{具体环节}，怎样理解状态和下一步动作？'
+  outline:
+  - 建立一个多步任务
+  - 标出工具状态和角色
+  - 沿一个具体案例推进解释
+  - 跟随一次执行与反馈
+  - 解释这种组织方式的取舍
+  examples: *id005
+- category: ai_deep_research
+  name: 机制进入例子
+  title_pattern: '{模型机制}在处理{具体输入}时，实际做了什么？'
+  outline:
+  - 拿一份具体输入建立疑问
+  - 用图解释关键机制
+  - 让原输入沿机制继续推进
+  - 回到能力与适用情形
+  examples: &id006
+  - title: Attention Is All You Need
+    url: https://arxiv.org/abs/1706.03762
+    summary: 从序列任务进入注意力机制与结构变化，借鉴用任务解释机制的顺序。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: ai_deep_research
+  name: 为什么会这样输出
+  title_pattern: 面对{任务}，模型出现{表现}可以怎样理解？
+  outline:
+  - 拿一份具体输入建立疑问
+  - 对照同一问题中的对象与选择
+  - 用图解释关键机制
+  - 让原输入沿机制继续推进
+  - 回到能力与适用情形
+  examples: *id006
+- category: ai_deep_research
+  name: 换一种结构
+  title_pattern: 处理同一个{问题}时，{结构变化}改变了哪一步？
+  outline:
+  - 拿一份具体输入建立疑问
+  - 用图解释关键机制
+  - 沿一个具体案例推进解释
+  - 让原输入沿机制继续推进
+  - 回到能力与适用情形
+  examples: *id006
+- category: ai_business
+  name: AI接进哪份工作
+  title_pattern: '{组织}把AI用到{任务}，谁的工作发生变化？'
+  outline:
+  - 从具体用户或工作进入
+  - 画出提供方和使用方关系
+  - 解释采用与交付的变化
+  - 回到实际价值与使用选择
+  examples: &id007
+  - title: Introducing the Anthropic Economic Index \ Anthropic
+    url: https://www.anthropic.com/research/the-anthropic-economic-index
+    summary: 从实际工作任务和采用方式切入AI如何进入组织与产品。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: ai_business
+  name: 从能力到产品
+  title_pattern: '{AI能力}怎样变成{用户群}愿意使用的产品？'
+  outline:
+  - 从具体用户或工作进入
+  - 对照同一问题中的对象与选择
+  - 画出提供方和使用方关系
+  - 解释采用与交付的变化
+  - 回到实际价值与使用选择
+  examples: *id007
+- category: ai_business
+  name: 采用过程的取舍
+  title_pattern: 让{团队}开始用{AI工具}，要怎样衔接原有交付方式？
+  outline:
+  - 从具体用户或工作进入
+  - 画出提供方和使用方关系
+  - 沿一个具体案例推进解释
+  - 解释采用与交付的变化
+  - 回到实际价值与使用选择
+  examples: *id007
+- category: ai_local
+  name: 本地完成任务
+  title_pattern: 在{设备}上运行{模型}完成{任务}，从准备到结果怎样做？
+  outline:
+  - 说明任务资料和设备
+  - 展示模型与运行步骤
+  - 连接资源和使用体验
+  - 按实际需求比较部署选择
+  examples: &id009
+  - *id008
+  - title: Effective context engineering for AI agents \ Anthropic
+    url: https://www.anthropic.com/research/effective-context-engineering-for-ai-agents
+    summary: 借鉴沿一个持续任务说明上下文、工具和状态管理的结构。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: ai_local
+  name: 本地还是云端
+  title_pattern: 主要处理{资料}，本地与云端方案各适合哪一环？
+  outline:
+  - 说明任务资料和设备
+  - 对照同一问题中的对象与选择
+  - 展示模型与运行步骤
+  - 连接资源和使用体验
+  - 按实际需求比较部署选择
+  examples: *id009
+- category: ai_local
+  name: 资源不够怎么办
+  title_pattern: 运行{任务}时遇到{资源限制}，怎样调整模型和流程？
+  outline:
+  - 说明任务资料和设备
+  - 展示模型与运行步骤
+  - 沿一个具体案例推进解释
+  - 连接资源和使用体验
+  - 按实际需求比较部署选择
+  examples: *id009
+- category: ai_efficiency
+  name: 一次请求的路径
+  title_pattern: 完成一次{AI任务}，等待和资源消耗主要发生在哪里？
+  outline:
+  - 明确一次实际请求
+  - 拆开计算和等待位置
+  - 对照可用优化办法
+  - 回到交付目标与资源选择
+  examples: &id010
+  - title: What is inference optimization? | Google Cloud
+    url: https://cloud.google.com/discover/inference-optimization
+    summary: 从一次推理请求的等待、资源和交付任务解释优化取舍。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: ai_efficiency
+  name: 更快与够用
+  title_pattern: 为了{交付目标}，{优化方式}带来怎样的速度和效果取舍？
+  outline:
+  - 明确一次实际请求
+  - 对照同一问题中的对象与选择
+  - 拆开计算和等待位置
+  - 对照可用优化办法
+  - 回到交付目标与资源选择
+  examples: *id010
+- category: ai_efficiency
+  name: 组合工具而非堆档位
+  title_pattern: 反复做{任务}时，怎样组合模型和步骤减少重复处理？
+  outline:
+  - 明确一次实际请求
+  - 拆开计算和等待位置
+  - 沿一个具体案例推进解释
+  - 对照可用优化办法
+  - 回到交付目标与资源选择
+  examples: *id010

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "themes_ai_media",
+    "job_name": "topic_discovery/ai_media",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_chatgpt_acquisition",
+    "job_name": "topic_discovery/chatgpt_acquisition",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_company",
+    "job_name": "topic_discovery/company",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_consumer",
+    "job_name": "topic_discovery/consumer",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_culture",
+    "job_name": "topic_discovery/culture",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_economy",
+    "job_name": "topic_discovery/economy",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_education",
+    "job_name": "topic_discovery/education",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_geography",
+    "job_name": "topic_discovery/geography",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_history",
+    "job_name": "topic_discovery/history",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_industry",
+    "job_name": "topic_discovery/industry",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  },
+  {
+    "id": "themes_science",
+    "job_name": "topic_discovery/science",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "next_run_at": 1793235600.0
+  }
+]

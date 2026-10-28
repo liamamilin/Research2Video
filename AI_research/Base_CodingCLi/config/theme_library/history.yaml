@@ -1,0 +1,262 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: history_turns
+  name: 转折发生在哪一步
+  title_pattern: 从{局面A}走到{局面B}，哪个具体行动改变了走向？
+  outline:
+  - 从一个具体历史场景进入
+  - 认识当时的处境和参与者
+  - 跟随连续行动和变化
+  - 连接后续影响
+  examples: &id001
+  - title: 'The Declaration of Independence: A History | National Archives'
+    url: https://www.archives.gov/founding-docs/declaration-history
+    summary: 沿历史文件的形成过程理解参与者的处境、选择和转折。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: history_turns
+  name: 沿事件过程走
+  title_pattern: '{历史事件}发生前后，参与者依次做了什么？'
+  outline:
+  - 从一个具体历史场景进入
+  - 对照同一问题中的对象与选择
+  - 认识当时的处境和参与者
+  - 跟随连续行动和变化
+  - 连接后续影响
+  examples: *id001
+- category: history_turns
+  name: 远因与近因
+  title_pattern: 理解{转折}，怎样把长期条件和当时行动连起来？
+  outline:
+  - 从一个具体历史场景进入
+  - 认识当时的处境和参与者
+  - 沿一个具体案例推进解释
+  - 跟随连续行动和变化
+  - 连接后续影响
+  examples: *id001
+- category: history_choices
+  name: 回到选择之前
+  title_pattern: 站在{人物}作出{决定}之前，他面对哪些具体选择？
+  outline:
+  - 还原当时可见的处境
+  - 说明人物拥有的信息和资源
+  - 跟随决定与行动
+  - 回到处境的后续变化
+  examples: &id002
+  - title: 'Creating the Declaration: A Timeline | National Archives'
+    url: https://www.archives.gov/founding-docs/timeline
+    summary: 以连续事件和人物行动解释一项历史决定怎样形成。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: history_choices
+  name: 一次合作或分歧
+  title_pattern: '{人物A}与{人物B}为什么在{事件}上采取不同做法？'
+  outline:
+  - 还原当时可见的处境
+  - 对照同一问题中的对象与选择
+  - 说明人物拥有的信息和资源
+  - 跟随决定与行动
+  - 回到处境的后续变化
+  examples: *id002
+- category: history_choices
+  name: 行动改变处境
+  title_pattern: '{人物}做出{行动}后，自己的处境怎样变化？'
+  outline:
+  - 还原当时可见的处境
+  - 说明人物拥有的信息和资源
+  - 沿一个具体案例推进解释
+  - 跟随决定与行动
+  - 回到处境的后续变化
+  examples: *id002
+- category: history_institutions
+  name: 一项事务怎样完成
+  title_pattern: 在{时代}完成{事务}，要经过哪些角色和步骤？
+  outline:
+  - 选一件具体社会事务
+  - 认识参与者和规则
+  - 沿办理或执行过程展开
+  - 说明制度与生活的关系
+  examples: &id003
+  - title: 宫廷典制 - 故宫博物院
+    url: https://www.dpm.org.cn/court/systems.html
+    summary: 从宫廷典制和具体角色进入历史制度如何运转。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: history_institutions
+  name: 制度解决什么问题
+  title_pattern: '{历史制度}怎样应对当时的{具体问题}？'
+  outline:
+  - 选一件具体社会事务
+  - 对照同一问题中的对象与选择
+  - 认识参与者和规则
+  - 沿办理或执行过程展开
+  - 说明制度与生活的关系
+  examples: *id003
+- category: history_institutions
+  name: 规则改变之后
+  title_pattern: '{制度变化}出现后，谁处理事务的方式变了？'
+  outline:
+  - 选一件具体社会事务
+  - 认识参与者和规则
+  - 沿一个具体案例推进解释
+  - 沿办理或执行过程展开
+  - 说明制度与生活的关系
+  examples: *id003
+- category: history_daily_life
+  name: 跟随普通人的一天
+  title_pattern: '{时代}的一名{普通人}，一天怎样度过？'
+  outline:
+  - 进入一个具体日常场景
+  - 跟随普通人的动作
+  - 解释物品劳动和交换
+  - 从细节理解时代生活
+  examples: &id004
+  - title: 张择端清明上河图卷 - 故宫博物院
+    url: https://www.dpm.org.cn/collection/paint/228226.html
+    summary: 从长卷的具体人物、场景和空间细节进入作品与日常生活。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: history_daily_life
+  name: 一件日用品的来路
+  title_pattern: 当时使用的{日用品}，怎样被制作和取得？
+  outline:
+  - 进入一个具体日常场景
+  - 对照同一问题中的对象与选择
+  - 跟随普通人的动作
+  - 解释物品劳动和交换
+  - 从细节理解时代生活
+  examples: *id004
+- category: history_daily_life
+  name: 日常场景中的关系
+  title_pattern: 看一处{市场或街道场景}，怎样理解当时的人如何协作？
+  outline:
+  - 进入一个具体日常场景
+  - 跟随普通人的动作
+  - 沿一个具体案例推进解释
+  - 解释物品劳动和交换
+  - 从细节理解时代生活
+  examples: *id004
+- category: history_technology
+  name: 技术进入生活
+  title_pattern: '{技术}出现之后，{具体工作}怎样改变？'
+  outline:
+  - 展示一件工具或生产任务
+  - 还原旧的操作方式
+  - 跟随技术改变的环节
+  - 连接劳动与社会变化
+  examples: &id005
+  - title: The Industrial Revolution in the United States | Classroom Materials at the Library of Congress | Library
+      of Congress
+    url: https://www.loc.gov/classroom-materials/industrial-revolution-in-the-united-states
+    summary: 从工业化相关史料和具体生产生活变化理解技术进入社会。参考其提问和展开方式，具体结论留给选题后的研究。
+  - title: “后母戊”青铜方鼎_中国国家博物馆官方网站
+    url: https://www.chnmuseum.cn/zp/zpml/kgfjp/202008/t20200824_247255.shtml
+    summary: 从一件具体青铜器的形制、用途和制作理解文物表达。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: history_technology
+  name: 跟随一件工具
+  title_pattern: 一件{工具}怎样被制作、使用并传播？
+  outline:
+  - 展示一件工具或生产任务
+  - 对照同一问题中的对象与选择
+  - 还原旧的操作方式
+  - 跟随技术改变的环节
+  - 连接劳动与社会变化
+  examples: *id005
+- category: history_technology
+  name: 新旧方式并存
+  title_pattern: 面对{任务}，{新技术}为何与旧做法并存了一段时间？
+  outline:
+  - 展示一件工具或生产任务
+  - 还原旧的操作方式
+  - 沿一个具体案例推进解释
+  - 跟随技术改变的环节
+  - 连接劳动与社会变化
+  examples: *id005
+- category: history_connections
+  name: 沿一条历史路线
+  title_pattern: 一条{路线}怎样把不同地方的人和物连起来？
+  outline:
+  - 选一条具体路线或一件物品
+  - 认识沿途参与者
+  - 跟随移动交换和使用
+  - 说明交流形成的联系
+  examples: &id006
+  - title: About the Silk Roads | UNESCO
+    url: https://www.unesco.org/en/silk-roads/about-silk-roads
+    summary: 沿路线、商品和交流过程理解不同社会如何连接。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: history_connections
+  name: 物品带来什么变化
+  title_pattern: '{商品或知识}传到{地区}之后，哪些做法发生变化？'
+  outline:
+  - 选一条具体路线或一件物品
+  - 对照同一问题中的对象与选择
+  - 认识沿途参与者
+  - 跟随移动交换和使用
+  - 说明交流形成的联系
+  examples: *id006
+- category: history_connections
+  name: 迁移者的经历
+  title_pattern: 一群{迁移者}到达{地方}后，怎样与原有生活发生联系？
+  outline:
+  - 选一条具体路线或一件物品
+  - 认识沿途参与者
+  - 沿一个具体案例推进解释
+  - 跟随移动交换和使用
+  - 说明交流形成的联系
+  examples: *id006
+- category: history_sources
+  name: 一件文物讲什么
+  title_pattern: 读懂{文物}的{细节}，可以进入怎样的历史问题？
+  outline:
+  - 展示材料的具体形态
+  - 引导观察文字或器物细节
+  - 连接形成与使用的处境
+  - 解释它帮助理解的历史问题
+  examples: &id007
+  - title: 'Hieroglyphs: unlocking ancient Egypt – 12 exhibition highlights in plain English'
+    url: https://www.britishmuseum.org/sites/default/files/2022-10/Hieroglyphs_unlocking_ancient_Egypt_12_exhibition_highlights_in_plain_English_10_10.pdf
+    summary: 通过具体文字和文物讲述古代信息怎样被重新理解。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: history_sources
+  name: 文字怎样被理解
+  title_pattern: '{历史文字或文件}怎样从留下的痕迹变成可读信息？'
+  outline:
+  - 展示材料的具体形态
+  - 对照同一问题中的对象与选择
+  - 引导观察文字或器物细节
+  - 连接形成与使用的处境
+  - 解释它帮助理解的历史问题
+  examples: *id007
+- category: history_sources
+  name: 几份材料拼场景
+  title_pattern: 把{材料A}和{材料B}放在一起，怎样还原一个历史场景？
+  outline:
+  - 展示材料的具体形态
+  - 引导观察文字或器物细节
+  - 沿一个具体案例推进解释
+  - 连接形成与使用的处境
+  - 解释它帮助理解的历史问题
+  examples: *id007
+- category: history_places
+  name: 空间里的历史
+  title_pattern: 沿着{历史建筑或街区}走，能读出怎样的当时生活？
+  outline:
+  - 从一处可见空间进入
+  - 沿位置和路线观察
+  - 连接营建与当时用途
+  - 认识今天仍可见的历史层次
+  examples: &id008
+  - title: 《紫禁城建筑之道》 - 故宫博物院
+    url: https://www.dpm.org.cn/journal_detail/253575.html
+    summary: 从建筑空间与营建选择理解历史留下的可见结构。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: history_places
+  name: 为何建在这里
+  title_pattern: '{历史设施}为什么放在这个位置、采用这种布局？'
+  outline:
+  - 从一处可见空间进入
+  - 对照同一问题中的对象与选择
+  - 沿位置和路线观察
+  - 连接营建与当时用途
+  - 认识今天仍可见的历史层次
+  examples: *id008
+- category: history_places
+  name: 一个地方的几层变化
+  title_pattern: 同一处{地方}经历几个时代后，哪些结构保留下来？
+  outline:
+  - 从一处可见空间进入
+  - 沿位置和路线观察
+  - 沿一个具体案例推进解释
+  - 连接营建与当时用途
+  - 认识今天仍可见的历史层次
+  examples: *id008

@@ -1,0 +1,83 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: ai_flash
+  name: T01 · 产品变化与实际用法
+  promise: 一项已经发生的变化怎样影响用户的具体任务？
+  type: news
+  production_ids:
+  - flash_daily
+  keywords:
+  - 产品变化与实际用法 一项已经发生的变化怎样影响用户的具体任务？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明已发生的具体变化；还原原有用户任务；对照新的操作和结果；回到受影响的用户。
+- key: ai_opensource
+  name: T02 · 开源项目与工具
+  promise: 一个开源项目能接在实际任务的哪一环？
+  type: explainer
+  production_ids:
+  - ai_media_opensource_digest
+  keywords:
+  - 开源项目与工具 一个开源项目能接在实际任务的哪一环？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一个实际输入进入；展示项目处理的位置；跟随关键操作与输出；说明接进现有工作的方式。
+- key: ai_model_review
+  name: T03 · 模型选择与能力比较
+  promise: 怎样根据真实任务理解模型差异？
+  type: comparison
+  production_ids:
+  - ai_media_arena_digest
+  keywords:
+  - 模型选择与能力比较 怎样根据真实任务理解模型差异？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确任务与相同输入；选择影响决策的观察维度；对照实际结果和使用过程；按需求说明取舍。
+- key: ai_workflows
+  name: T04 · 工作流与任务实作
+  promise: 怎样把模型接成能交付结果的连续任务？
+  type: tutorial
+  production_ids:
+  - software_weekly
+  keywords:
+  - 工作流与任务实作 怎样把模型接成能交付结果的连续任务？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。给出具体工作材料；拆开连续处理步骤；展示各步输入与输出衔接；回到可使用的交付物。
+- key: ai_agents
+  name: T05 · 智能体与工程组织
+  promise: 工具、状态和分工怎样完成多步骤任务？
+  type: explainer
+  production_ids:
+  - ai_media_deep_dive
+  keywords:
+  - 智能体与工程组织 工具、状态和分工怎样完成多步骤任务？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。建立一个多步任务；标出工具状态和角色；跟随一次执行与反馈；解释这种组织方式的取舍。
+- key: ai_deep_research
+  name: T06 · 模型机制与能力边界
+  promise: 一个机制怎样影响模型处理具体任务？
+  type: deep_research
+  production_ids:
+  - ai_media_deep_dive
+  keywords:
+  - 模型机制与能力边界 一个机制怎样影响模型处理具体任务？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。拿一份具体输入建立疑问；用图解释关键机制；让原输入沿机制继续推进；回到能力与适用情形。
+- key: ai_business
+  name: T07 · 产品商业与组织采用
+  promise: AI怎样进入产品、工作与交付关系？
+  type: explainer
+  production_ids:
+  - ai_media_business_digest
+  keywords:
+  - 产品商业与组织采用 AI怎样进入产品、工作与交付关系？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从具体用户或工作进入；画出提供方和使用方关系；解释采用与交付的变化；回到实际价值与使用选择。
+- key: ai_local
+  name: T08 · 本地运行与部署
+  promise: 把模型放到自己的设备上需要哪些取舍？
+  type: tutorial
+  production_ids:
+  - software_weekly
+  keywords:
+  - 本地运行与部署 把模型放到自己的设备上需要哪些取舍？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明任务资料和设备；展示模型与运行步骤；连接资源和使用体验；按实际需求比较部署选择。
+- key: ai_efficiency
+  name: T09 · 成本、延迟与效率
+  promise: 怎样围绕交付目标安排模型和计算资源？
+  type: comparison
+  production_ids:
+  - ai_media_arena_digest
+  keywords:
+  - 成本、延迟与效率 怎样围绕交付目标安排模型和计算资源？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确一次实际请求；拆开计算和等待位置；对照可用优化办法；回到交付目标与资源选择。

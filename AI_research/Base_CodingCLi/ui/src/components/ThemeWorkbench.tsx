@@ -87,6 +87,8 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
   const [minutes, setMinutes] = useState(4);
   const [sort, setSort] = useState("score");
   const [view, setView] = useState("recommendations");
+  const [libraryCategory, setLibraryCategory] = useState("");
+  useEffect(() => { setLibraryCategory(""); }, [matrix]);
   const [ideasOpen, setIdeasOpen] = useState(false);
   const [brief, setBrief] = useState("");
   const [ideaCategory, setIdeaCategory] = useState("");
@@ -158,6 +160,7 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
   }, [matrix, view]);
   const selectedDay = day ?? data?.today ?? "";
   const supportsFeedback = data?.feedback != null;
+  const allCategories = [...(data?.categories || []), ...(data?.legacy_categories || [])];
   const canConfigure = supportsFeedback || data?.configuration.mode !== "ideas";
   const shown = (view === "history" ? history : data?.themes || []).filter((theme) => (view === "history" || ((view === "dismissed" ? theme.status === "dismissed" : theme.status !== "dismissed") && !theme.used_at && theme.status !== "used")) && (!category || category === theme.category)
     && (view === "history" || theme.origin === "manual" || theme.script_id || !selectedDay || theme.day === selectedDay)).sort((a, b) => {
@@ -176,7 +179,7 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
       {canEdit && <><button className="btn btn-primary text-xs" disabled={!data || !!busy || data.ideas_running} onClick={() => { setIdeasOpen(!ideasOpen); setView("recommendations"); }}>
         {data?.ideas_running ? "正在生成题目…" : "帮我出一批题"}</button>
         <button className="btn text-xs" disabled={!!busy || data?.discovery_running} onClick={() => action("discover", () => discoverThemes(matrix))}>
-        {data?.discovery_running || busy === "discover" ? "正在发现主题…" : "现在找一轮"}</button>
+        {data?.discovery_running || busy === "discover" ? "正在发现主题…" : "联网补充参考"}</button>
         <button className="btn text-xs" disabled={!data} onClick={() => { setEditing(null); setView("recommendations"); }}><Plus className="h-3.5 w-3.5" />自己写主题</button></>}
     </div>
     {error && <ErrorState error={error} onRetry={load} compact />}
@@ -197,8 +200,12 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
         {!!data.feedback?.topics && <p className="text-text-muted">后续出题会参考已记录的 {data.feedback.topics} 个主题选择，仍保持栏目多样性。</p>}
         <label className="block space-y-1">补充出题方向（选填）<textarea className="input min-h-20" maxLength={4000} value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="例如：面向用了免费版一段时间的职场用户，多讲办公任务和升级决策。" /></label>
         <div className="grid sm:grid-cols-2 gap-3">
-          <label className="space-y-1">出题栏目<select className="input" value={ideaCategory} onChange={(e) => { setIdeaCategory(e.target.value); setPatternId(""); }}><option value="">各栏目分别推荐</option>{data.categories.map((c) => <option key={c.key} value={c.key}>{c.name}</option>)}</select></label>
-          <label className="space-y-1">参考题型<select className="input" value={patternId} onChange={(e) => { setPatternId(e.target.value); const found = data.library?.patterns.find((p) => p.id === e.target.value); if (found) setIdeaCategory(found.category); }}>
+          <label className="space-y-1">出题栏目<select className="input" value={ideaCategory} onChange={(e) => { setIdeaCategory(e.target.value); setPatternId(""); }}><option value="">各栏目分别推荐</option>{(patternId ? allCategories : data.categories).map((c) => <option key={c.key} value={c.key}>{c.name}</option>)}</select></label>
+          <label className="space-y-1">参考题型<select className="input" value={patternId} onChange={(e) => {
+            setPatternId(e.target.value); const found = data.library?.patterns.find((p) => p.id === e.target.value);
+            if (found) setIdeaCategory(found.category);
+            else if (data.legacy_categories?.some((c) => c.key === ideaCategory)) setIdeaCategory("");
+          }}>
             <option value="">自动选择或从例题提炼</option>{(data.library?.patterns || []).filter((p) => !ideaCategory || p.category === ideaCategory).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
         </div>
         <div className="flex gap-2"><button className="btn btn-primary" disabled={!!busy || data.ideas_running}>{busy === "generate" ? "正在启动…" : "生成候选题目"}</button><button type="button" className="btn" onClick={() => setIdeasOpen(false)}>取消</button></div>
@@ -207,13 +214,14 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
         {data.library.runs[0].error && <span className="text-warning ml-2">{data.library.runs[0].error}</span>}</p>}
       {view === "library" ? <div className="space-y-4">
         <p className="text-xs text-text-muted">参考题目按栏目长期保留；题型记录提问格式和讲述结构。使用过具体问题后，仍可参考同一题型出新题。</p>
-        <div className="grid xl:grid-cols-2 gap-4">{(data.library?.patterns || []).map((pattern) => <article className="card p-4 space-y-3" key={pattern.id} aria-label={`题型 ${pattern.name}`}>
-          <p className="text-xs text-text-muted">{data.categories.find((c) => c.key === pattern.category)?.name}</p><h3 className="font-medium">{pattern.name}</h3>
+        <label className="block text-xs space-y-1">参考库分类<select className="input sm:w-auto" aria-label="参考库分类" value={libraryCategory} onChange={(e) => setLibraryCategory(e.target.value)}><option value="">全部分类</option>{allCategories.map((c) => <option key={c.key} value={c.key}>{c.name}{c.legacy ? " · 早期分类" : ""}</option>)}</select></label>
+        <div className="grid xl:grid-cols-2 gap-4">{(data.library?.patterns || []).filter((p) => !libraryCategory || p.category === libraryCategory).map((pattern) => <article className="card p-4 space-y-3" key={pattern.id} aria-label={`题型 ${pattern.name}`}>
+          <p className="text-xs text-text-muted">{allCategories.find((c) => c.key === pattern.category)?.name || pattern.category}</p><h3 className="font-medium">{pattern.name}</h3>
           <p className="text-sm leading-6">{pattern.title_pattern}</p><ol className="list-decimal pl-5 text-xs text-text-muted space-y-1">{pattern.outline.map((step, index) => <li key={index}>{step}</li>)}</ol>
           <div className="text-xs space-y-2">{(data.library?.examples || []).filter((r) => pattern.example_ids.includes(r.id)).map((r) => <a className="text-accent block hover:underline" href={r.url} target="_blank" rel="noreferrer" key={r.id}>{r.title}<ExternalLink className="inline h-3 w-3 ml-1" /></a>)}</div>
           {canEdit && <button className="btn text-xs" onClick={() => selectPattern(pattern.id, pattern.category)}>参考这个题型</button>}
         </article>)}</div>
-        {data.categories.map((c) => { const refs = (data.library?.examples || []).filter((r) => r.category === c.key); return refs.length ? <details key={c.key} className="card p-4 text-xs">
+        {allCategories.filter((c) => !libraryCategory || c.key === libraryCategory).map((c) => { const refs = (data.library?.examples || []).filter((r) => r.category === c.key); return refs.length ? <details key={c.key} className="card p-4 text-xs">
           <summary className="cursor-pointer">{c.name} · {refs.length} 个原始参考题</summary><ul className="mt-3 space-y-3">{refs.map((r) => <li key={r.id}><a className="text-accent hover:underline" href={r.url} target="_blank" rel="noreferrer">{r.title}</a><p className="text-text-muted mt-1">{r.summary}</p></li>)}</ul>
         </details> : null; })}
         {!data.library?.examples.length && <p className="text-sm text-text-muted">参考库还没有例题。可以先发现一轮平台线索，也可以直接根据矩阵定位出题。</p>}
@@ -226,7 +234,7 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
         {canEdit && <button className="text-accent hover:underline ml-auto disabled:opacity-50" disabled={!canConfigure}
           title={canConfigure ? undefined : "推荐设置更新中，请稍后重试"} onClick={() => {
           setScheduleOpen(!scheduleOpen); setAt(data.configuration.time); setPlatforms(data.configuration.platforms);
-          setMode(data.configuration.mode || "discovery"); setDirection(data.configuration.direction || "");
+          setMode(data.configuration.mode || "ideas"); setDirection(data.configuration.direction || "");
         }}>设置每日推荐</button>}
       </div>
       {scheduleOpen && canEdit && <div className="card p-4 space-y-3 text-xs" aria-label="每日推荐设置">
@@ -242,9 +250,9 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
           await setThemeSchedule(matrix, false, at, platforms, supportsFeedback ? mode : undefined, supportsFeedback ? direction : undefined); setScheduleOpen(false);
         })}>暂停推荐</button>}</div>
       </div>}
-      {editing !== undefined && canEdit && <ThemeForm key={editing?.id || "new"} categories={data.categories} value={editing} saving={busy === "save"} onSave={save} onClose={() => setEditing(undefined)} />}
+      {editing !== undefined && canEdit && <ThemeForm key={editing?.id || "new"} categories={editing ? allCategories : data.categories} value={editing} saving={busy === "save"} onSave={save} onClose={() => setEditing(undefined)} />}
       <div className="flex flex-wrap gap-2 items-center text-xs">
-        <select className="input w-auto" aria-label="筛选主题栏目" value={category} onChange={(e) => setCategory(e.target.value)}><option value="">全部栏目</option>{data.categories.map((c) => <option key={c.key} value={c.key}>{c.name}</option>)}</select>
+        <select className="input w-auto" aria-label="筛选主题栏目" value={category} onChange={(e) => setCategory(e.target.value)}><option value="">全部栏目</option>{allCategories.map((c) => <option key={c.key} value={c.key}>{c.name}{c.legacy ? " · 早期分类" : ""}</option>)}</select>
         {view !== "history" && <><select className="input w-auto" aria-label="推荐日期" value={selectedDay} onChange={(e) => setDay(e.target.value)}>
           <option value={data.today}>今天</option>{days.filter((d) => d !== data.today).map((d) => <option key={d} value={d}>{d}</option>)}<option value="">全部日期</option>
         </select>
@@ -260,7 +268,7 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
         {!!Object.keys(latest.result.failures || {}).length && <span className="ml-2">部分栏目本轮未取得资料，已有推荐保留。</span>}
       </div>}
       <div className="grid xl:grid-cols-2 gap-4">{shown.map((theme) => <article key={theme.id} className="card p-4 space-y-3 min-w-0 break-words" aria-label={`主题 ${theme.title}`}>
-        <div className="flex justify-between gap-2 text-xs text-text-muted"><span>{data.categories.find((c) => c.key === theme.category)?.name || theme.category}</span><span>{status(theme)}</span></div>
+        <div className="flex justify-between gap-2 text-xs text-text-muted"><span>{allCategories.find((c) => c.key === theme.category)?.name || theme.category}</span><span>{status(theme)}</span></div>
         <h3 className="font-medium leading-6">{theme.title}</h3>
         {theme.reason && <p className="text-sm leading-6">{theme.reason}</p>}
         {theme.angle && <p className="text-xs text-text-muted leading-5">讲述角度：{theme.angle}</p>}

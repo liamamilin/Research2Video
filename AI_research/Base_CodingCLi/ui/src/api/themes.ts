@@ -2,6 +2,7 @@ import { api } from "./client";
 
 export interface ThemeCategory {
   key: string; name: string; promise: string; audience: string; notes: string; production_ids: string[];
+  legacy?: boolean;
 }
 export interface ThemeSignal {
   id: string; category: string; platform: string; title: string; url: string; excerpt: string;
@@ -40,7 +41,7 @@ export interface ThemeLibraryData {
 export interface ThemeHistory { themes: Theme[]; total: number; next_offset: number | null }
 export type ThemeInput = Pick<Theme, "title" | "angle" | "audience" | "notes"> & { category: string };
 export interface ThemeWorkbenchData {
-  categories: ThemeCategory[]; themes: Theme[]; today: string; discovery_running: boolean;
+  categories: ThemeCategory[]; legacy_categories?: ThemeCategory[]; themes: Theme[]; today: string; discovery_running: boolean;
   library?: ThemeLibraryData; used_count?: number; ideas_running?: boolean;
   runs: { id: string; status: string; started_at: number; error: string;
     result: { recommended?: number; categories?: number; signals?: number; empty_categories?: string[]; failures?: Record<string, string>;

@@ -1,0 +1,66 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: education_concepts
+  name: T01 · 概念理解与知识连接
+  promise: 怎样从记住一个词走到理解关系？
+  type: explainer
+  production_ids: []
+  keywords:
+  - 概念理解与知识连接 怎样从记住一个词走到理解关系？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。呈现一个具体学习疑问；用例子说明关键关系；对照相近概念；让观众试着迁移解释。
+- key: education_memory
+  name: T02 · 记忆与复习
+  promise: 怎样安排复习才能在需要时想起来？
+  type: explainer
+  production_ids: []
+  keywords:
+  - 记忆与复习 怎样安排复习才能在需要时想起来？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。给出一份具体学习材料；演示回想与复习动作；安排后续间隔和练习；展示如何判断下一步。
+- key: education_practice
+  name: T03 · 练习与反馈
+  promise: 怎样让每次练习都推动技能进步？
+  type: explainer
+  production_ids: []
+  keywords:
+  - 练习与反馈 怎样让每次练习都推动技能进步？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确一个小技能目标；展示一次真实操作；把反馈对应到具体动作；安排下一轮练习。
+- key: education_reading
+  name: T04 · 阅读与信息理解
+  promise: 怎样带着问题读懂一份材料？
+  type: explainer
+  production_ids: []
+  keywords:
+  - 阅读与信息理解 怎样带着问题读懂一份材料？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明阅读目的；展示读前结构观察；跟随一个问题阅读；用自己的表达收拢理解。
+- key: education_planning
+  name: T05 · 学习规划与习惯
+  promise: 怎样把目标安排进真实可用的时间？
+  type: explainer
+  production_ids: []
+  keywords:
+  - 学习规划与习惯 怎样把目标安排进真实可用的时间？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确阶段目标和现实时间；拆成可完成的任务；安排一周具体位置；根据完成情况调整。
+- key: education_notes
+  name: T06 · 笔记与知识组织
+  promise: 记录怎样帮助之后回想和使用知识？
+  type: explainer
+  production_ids: []
+  keywords:
+  - 笔记与知识组织 记录怎样帮助之后回想和使用知识？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。拿出一页具体材料；展示记录与提问区域；演示回顾和重新组织；接到下一次使用。
+- key: education_expression
+  name: T07 · 表达与写作
+  promise: 怎样把学到的东西组织成别人能理解的表达？
+  type: explainer
+  production_ids: []
+  keywords:
+  - 表达与写作 怎样把学到的东西组织成别人能理解的表达？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确读者和表达目的；用问题排列已有材料；形成一段可读表达；按沟通效果修改。
+- key: education_tools
+  name: T08 · 学习工具与资料流程
+  promise: 工具怎样接进一个具体学习任务？
+  type: tutorial
+  production_ids: []
+  keywords:
+  - 学习工具与资料流程 工具怎样接进一个具体学习任务？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明一个具体学习任务；准备输入材料和工具；连续演示关键动作；展示产物和复用办法。

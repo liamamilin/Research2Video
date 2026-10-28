@@ -70,6 +70,9 @@ def theme_env(video_env, monkeypatch):
         "type": "comparison", "promise": "我是否有必要付费？", "production_ids": ["demo_value"], "audience": "用了一个月免费版的人"}, allow_unicode=True))
     from web.services import managed_scheduler
     monkeypatch.setattr(managed_scheduler, "ensure_online", lambda: {"online": True})
+    # These cases exercise the explicitly selected platform-discovery mode.
+    (root / "config/topic_discovery").mkdir(exist_ok=True)
+    (root / "config/topic_discovery/demo.yaml").write_text("mode: discovery\n")
     return root
 
 

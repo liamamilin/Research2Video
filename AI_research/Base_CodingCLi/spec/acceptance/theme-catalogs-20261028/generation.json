@@ -1,0 +1,982 @@
+{
+  "batches": [
+    {
+      "id": "5024ece0496f45b0ab9ed90d461c3008",
+      "matrix": "ai_media",
+      "status": "success",
+      "brief": "面向开发者和AI高频使用者，优先一个具体任务、工具输入输出或工程取舍。产品变化、开源、模型、工作流、智能体、机制、商业、本地运行与效率各有题目；动态材料不足时不凑新闻。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793162187.1090949,
+      "finished_at": 1793162224.571711,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "c3f4d4ada22a44ef91f8b49ca77e6144",
+          "4ad382e172da49d594597068537171c8",
+          "80a81caa40ce497a91b9a877915ddf6e",
+          "86ae756403e449ef9eee4beab8a8c776",
+          "93ea30808f27480aa3dcbbfd14c35145",
+          "e3ee61102a2c4e349bbdffadef972647",
+          "26c257c40f31433c9e876ca94666552f",
+          "457db9bd087840058b21f8352e2320ad"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 9576,
+          "completion_tokens": 5387,
+          "total_tokens": 14963
+        },
+        "output": "output/topic_ideas/ai_media/2026-10-28_5024ece0.md",
+        "categories": 9,
+        "examples": 20,
+        "duration_seconds": 37.5
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "c3f4d4ada22a44ef91f8b49ca77e6144",
+          "category": "ai_opensource",
+          "title": "用开源 OCR 工具处理一批扫描合同，输入到结构化字段怎样走？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "4ad382e172da49d594597068537171c8",
+          "category": "ai_model_review",
+          "title": "主要做 PR 缺陷定位，怎样比较长上下文模型和普通上下文模型？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "80a81caa40ce497a91b9a877915ddf6e",
+          "category": "ai_workflows",
+          "title": "用 AI 完成客户反馈归类，怎样把原始工单导出变成可交付的优先级清单？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "86ae756403e449ef9eee4beab8a8c776",
+          "category": "ai_agents",
+          "title": "让智能体处理线上告警初筛，什么时候查日志、读监控、创建工单？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "93ea30808f27480aa3dcbbfd14c35145",
+          "category": "ai_deep_research",
+          "title": "把一份跨文件报错日志交给模型，注意力机制实际把哪些片段连起来？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "e3ee61102a2c4e349bbdffadef972647",
+          "category": "ai_business",
+          "title": "客服团队把 AI 接到工单摘要，谁的工作发生变化？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "26c257c40f31433c9e876ca94666552f",
+          "category": "ai_local",
+          "title": "在 16GB 内存的开发笔记本上运行小参数模型处理会议转写稿，从准备到结果怎样做？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "457db9bd087840058b21f8352e2320ad",
+          "category": "ai_efficiency",
+          "title": "完成一次长文档问答请求，等待和资源消耗主要发生在哪里？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    },
+    {
+      "id": "ef1551a3d98b4754804486a2048fe7a7",
+      "matrix": "company",
+      "status": "success",
+      "brief": "面向关注商业的中文观众，从一家公司、一项产品或一次经营动作进入。各分类保持多样，用顾客、收入、成本和协作的具体关系讲清公司怎样运转。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793162491.092743,
+      "finished_at": 1793162520.141333,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "07abdb1c78fc40bdbf2a9bb0237b8845",
+          "f03cd03002d149ca9aa8e9c18d9137eb",
+          "97d5da92024f418a9a1216545a6215f5",
+          "c94a71ac53b34030a83c208f706c622b",
+          "be69b6eaebc84461944c6a5da4516a90",
+          "dcf299c70fc74975b7584c7db508ff35",
+          "9b2ffc2ff4304197ba52a0fe8587afea",
+          "769062ebee544f46bf6be035bdbe0a9e"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 5610,
+          "completion_tokens": 4029,
+          "total_tokens": 9639
+        },
+        "output": "output/topic_ideas/company/2026-10-28_ef1551a3.md",
+        "categories": 8,
+        "examples": 8,
+        "duration_seconds": 29.1
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "07abdb1c78fc40bdbf2a9bb0237b8845",
+          "category": "company_models",
+          "title": "山姆会员店卖的是会员资格，主要靠哪一笔收入赚钱？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "f03cd03002d149ca9aa8e9c18d9137eb",
+          "category": "company_competition",
+          "title": "同样提供瓶装水，顾客为什么选择农夫山泉？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "97d5da92024f418a9a1216545a6215f5",
+          "category": "company_financials",
+          "title": "读懂京东的库存周转，需要先看懂哪项经营活动？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "c94a71ac53b34030a83c208f706c622b",
+          "category": "company_growth",
+          "title": "小红书刚起步时，第一批用户是怎样找到它的？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "be69b6eaebc84461944c6a5da4516a90",
+          "category": "company_pricing",
+          "title": "爱奇艺为什么把会员分成不同套餐？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "dcf299c70fc74975b7584c7db508ff35",
+          "category": "company_operations",
+          "title": "从下单到交付，蜜雪冰城的一张门店补货订单要经过什么？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "9b2ffc2ff4304197ba52a0fe8587afea",
+          "category": "company_organization",
+          "title": "比亚迪决定做刀片电池，谁提供信息、谁作出决定？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "769062ebee544f46bf6be035bdbe0a9e",
+          "category": "company_platforms",
+          "title": "美团连接了哪些人，一次外卖下单怎样完成？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    },
+    {
+      "id": "0e193563cfca4e3d89d9d6032575339d",
+      "matrix": "consumer",
+      "status": "success",
+      "brief": "面向做购买与使用决策的中文普通用户，从明确用途和实际使用场景出发。参数、体验、花费、维修、保养、设备协作和隐私各有问题，参考样本只借鉴比较方式。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793162191.170681,
+      "finished_at": 1793162240.3907158,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "7d17594daadb417eaf5dca50a24a5fb5",
+          "4d2f52e54a1941cc91dcf0c95591ea71",
+          "67b5b47b4e7c433082939714b5fb6da1",
+          "3c16fa60b2d64cfba458aa3007ded4f1",
+          "917d267b04934c2a9f5ec2e4318e064f",
+          "9934103914784f94920b6960ea100e6e",
+          "8ec0389ddb714833971c87baaad916f8",
+          "53b0ce7a31e2421b91f88aba34489832"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 5651,
+          "completion_tokens": 6592,
+          "total_tokens": 12243
+        },
+        "output": "output/topic_ideas/consumer/2026-10-28_0e193563.md",
+        "categories": 8,
+        "examples": 8,
+        "duration_seconds": 49.2
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "7d17594daadb417eaf5dca50a24a5fb5",
+          "category": "consumer_choices",
+          "title": "主要用来清理宠物毛发，选扫地机器人前先确定什么？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "4d2f52e54a1941cc91dcf0c95591ea71",
+          "category": "consumer_experience",
+          "title": "在通勤地铁里连续使用开放式耳机，哪些细节最影响体验？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "67b5b47b4e7c433082939714b5fb6da1",
+          "category": "consumer_specs",
+          "title": "显示器亮度参数影响靠窗办公的哪一步任务？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "3c16fa60b2d64cfba458aa3007ded4f1",
+          "category": "consumer_value",
+          "title": "购买家用喷墨打印机以后，后续打印和维护还有哪些花费？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "917d267b04934c2a9f5ec2e4318e064f",
+          "category": "consumer_repair",
+          "title": "同样修电动牙刷充不进电，一体密封与可换电池设计为什么维修难度不同？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "9934103914784f94920b6960ea100e6e",
+          "category": "consumer_care",
+          "title": "空气净化器显示滤网更换提示时，它对应什么使用情况？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "8ec0389ddb714833971c87baaad916f8",
+          "category": "consumer_ecosystems",
+          "title": "用手机和平板完成装修现场拍照标注，照片和标注怎样交接？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "53b0ce7a31e2421b91f88aba34489832",
+          "category": "consumer_privacy",
+          "title": "给家庭摄像头开启离家看家后，视频资料经过哪些地方？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    },
+    {
+      "id": "577c0cc6b9e343799a282ddc533a1761",
+      "matrix": "culture",
+      "status": "success",
+      "brief": "面向对作品和文化好奇的中文观众，先让观众看见一件作品、一个动作或一处细节，再展开形式、创作与时代关系。中外材料都可借鉴，题目保持对象和表达方式的多样性。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793162493.500115,
+      "finished_at": 1793162529.1049201,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "efd127bfebde48b485d5f8ca45cfa48d",
+          "7899426a9ed5438a884e9e1650d9af12",
+          "9430d7dbb73c422e8f1d588a4cb1d3c2",
+          "36db2197bd9541be9de00add8a508ec6",
+          "614634df61df49959106cfca100f73c5",
+          "9d44ac277661415b85b8c9d8df80fa13",
+          "9218c18324114fd1acea13c7006d8e72",
+          "930490f2843c4a8a9eb122806a82798c"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 6076,
+          "completion_tokens": 5109,
+          "total_tokens": 11185
+        },
+        "output": "output/topic_ideas/culture/2026-10-28_577c0cc6.md",
+        "categories": 8,
+        "examples": 12,
+        "duration_seconds": 35.6
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "efd127bfebde48b485d5f8ca45cfa48d",
+          "category": "culture_works",
+          "title": "看懂《清明上河图》，为什么可以先看虹桥上的视线交汇？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "7899426a9ed5438a884e9e1650d9af12",
+          "category": "culture_techniques",
+          "title": "雨点皴在《溪山行旅图》里实际改变了什么？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "9430d7dbb73c422e8f1d588a4cb1d3c2",
+          "category": "culture_creators",
+          "title": "创作《格尔尼卡》时，毕加索为什么采用黑白灰和碎片化形象？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "36db2197bd9541be9de00add8a508ec6",
+          "category": "culture_exchange",
+          "title": "忍冬纹沿丝绸之路来到中国之后，哪些细节变了？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "614634df61df49959106cfca100f73c5",
+          "category": "culture_design",
+          "title": "一件明式圈椅为什么被做成这个样子？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "9d44ac277661415b85b8c9d8df80fa13",
+          "category": "culture_performance",
+          "title": "锣鼓点怎样改变《霸王别姬》剑舞片段的感受？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "9218c18324114fd1acea13c7006d8e72",
+          "category": "culture_heritage",
+          "title": "制作宣纸时，捞纸的入水与抬帘为什么这样做？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "930490f2843c4a8a9eb122806a82798c",
+          "category": "culture_context",
+          "title": "《韩熙载夜宴图》中的屏风与坐席怎样连起五代宴饮生活？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    },
+    {
+      "id": "83e34bb101104ec6a2c8a4c562702cbd",
+      "matrix": "economy",
+      "status": "success",
+      "brief": "面向中文普通观众，从账单、工资、企业订单、公共服务等具体场景进入经济机制。不同分类分别回答自己的问题，用传导关系和可读图表说明影响。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793162241.747178,
+      "finished_at": 1793162282.86745,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "20801a9019284aa486a5913d32cb6874",
+          "2a0523815a304a5cb4d5b8e4e84902af",
+          "e87a0229ff91473f9b48e44a80c74d32",
+          "a19f2880c33a497e9717f2b20899f1e3",
+          "2e8e6178d2a84a75997af779f7a51baf",
+          "720205503e214fa391f167454ad76f91",
+          "8ed631cb115e4c87b11d92de33230118",
+          "bf496a23ac4a4352911857dee68f8058"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 5576,
+          "completion_tokens": 3875,
+          "total_tokens": 9451
+        },
+        "output": "output/topic_ideas/economy/2026-10-28_83e34bb1.md",
+        "categories": 8,
+        "examples": 8,
+        "duration_seconds": 41.1
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "20801a9019284aa486a5913d32cb6874",
+          "category": "economy_prices",
+          "title": "同样买一份早餐，为什么账单里食材、房租和人工的变化不同时出现？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "2a0523815a304a5cb4d5b8e4e84902af",
+          "category": "economy_money",
+          "title": "经营贷利率变化后，一家小店的进货和还款安排会怎样调整？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "e87a0229ff91473f9b48e44a80c74d32",
+          "category": "economy_growth",
+          "title": "一批县城工厂订单增加，怎样在产值、就业和本地支出中体现？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "a19f2880c33a497e9717f2b20899f1e3",
+          "category": "economy_labor",
+          "title": "同样做养老护理员，为什么在机构、社区和居家场景中的收入和任务结构不同？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "2e8e6178d2a84a75997af779f7a51baf",
+          "category": "economy_public",
+          "title": "一条社区公交线路的运营补贴，钱从哪里来、花到哪里去？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "720205503e214fa391f167454ad76f91",
+          "category": "economy_trade",
+          "title": "一件进口咖啡豆从产地到一杯咖啡，跨地区分工怎样影响价格与供应？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "8ed631cb115e4c87b11d92de33230118",
+          "category": "economy_markets",
+          "title": "社区菜市场里一批应季蔬菜集中上市，价格和成交量会怎样响应？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "bf496a23ac4a4352911857dee68f8058",
+          "category": "economy_productivity",
+          "title": "两家小型工厂投入相近，为什么单位产出和交付周期可能不同？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    },
+    {
+      "id": "3e9ab790da6e4e519732fb539a323559",
+      "matrix": "education",
+      "status": "success",
+      "brief": "面向希望学会具体知识与技能的中文学习者，从一个真实学习任务出发。记忆、理解、练习、阅读、规划、笔记、表达与工具各有题目，展示可执行动作及其用途。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793161970.520771,
+      "finished_at": 1793162035.034252,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "ccd9263ed9e94b3f86af36634510f844",
+          "e66d68553c964c7c8494da8a71ad76b5",
+          "4e10f8f48bef4c669d3ae82a9e60d7ef",
+          "aae7adef70734a1f816750ae3f54da59",
+          "0ce53ea25012468f888aa108ceee3284",
+          "44ba911d5888487cb5e15c2832676285",
+          "bf704ef492424800b08ba8f1039c3b48",
+          "5f0026b8cb2c44868f5c468d9659fed0"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 5466,
+          "completion_tokens": 7048,
+          "total_tokens": 12514
+        },
+        "output": "output/topic_ideas/education/2026-10-28_3e9ab790.md",
+        "categories": 8,
+        "examples": 8,
+        "duration_seconds": 64.5
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "ccd9263ed9e94b3f86af36634510f844",
+          "category": "education_concepts",
+          "title": "第一次接触“元认知”概念，怎样用一次做题过程理解它？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "e66d68553c964c7c8494da8a71ad76b5",
+          "category": "education_memory",
+          "title": "复习英语单词表时，怎样从重看变成主动回想？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "4e10f8f48bef4c669d3ae82a9e60d7ef",
+          "category": "education_practice",
+          "title": "练习用Excel做数据透视表时，怎样知道自己哪一步需要改？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "aae7adef70734a1f816750ae3f54da59",
+          "category": "education_reading",
+          "title": "面对一篇不熟悉的学术论文摘要，开始读之前先明确什么？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "0ce53ea25012468f888aa108ceee3284",
+          "category": "education_planning",
+          "title": "想每天练30分钟英语听力，这一周怎样安排具体任务？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "44ba911d5888487cb5e15c2832676285",
+          "category": "education_notes",
+          "title": "学习一节统计学网课时，一页笔记怎样同时帮助记录和回想？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "bf704ef492424800b08ba8f1039c3b48",
+          "category": "education_expression",
+          "title": "准备写一篇读书报告，怎样把已有材料排成清楚的大纲？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "5f0026b8cb2c44868f5c468d9659fed0",
+          "category": "education_tools",
+          "title": "用文献管理工具完成一次课程论文的文献收集与引用，从输入到结果怎样做？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    },
+    {
+      "id": "990a7f8c582440328137b6d1ff9ed9bd",
+      "matrix": "geography",
+      "status": "success",
+      "brief": "面向中文好奇心观众，从地图上的一个地方、一条路线或生活体验进入。地形、气候、城市、人口、资源、交通、人地关系和读图保持多样，用空间关系解释地方怎样运转。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793162284.298518,
+      "finished_at": 1793162312.335412,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "8cbd3e33607d4c07bb160c96fba6c329",
+          "fe97c03762564d3680d88d8393db2ca1",
+          "d9d2e00c154c48e292be2945a47d4bb9",
+          "74231b0f4d1d40bcbe65167d880a2e4b",
+          "965cf44c2210458da8846fe17ddd0c25",
+          "e527932c81b94e81a6e0bb015ed34380",
+          "5560b4415fe242a2b8607294eb681493",
+          "f5517b6c674740de950ce846432a1a85"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 5809,
+          "completion_tokens": 5224,
+          "total_tokens": 11033
+        },
+        "output": "output/topic_ideas/geography/2026-10-28_990a7f8c.md",
+        "categories": 8,
+        "examples": 9,
+        "duration_seconds": 28.0
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "8cbd3e33607d4c07bb160c96fba6c329",
+          "category": "geography_landforms",
+          "title": "沿闽江从上游到下游，山、城与水怎样改变？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "fe97c03762564d3680d88d8393db2ca1",
+          "category": "geography_climate",
+          "title": "同一季节，昆明与贵阳为什么天气体验不同？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "d9d2e00c154c48e292be2945a47d4bb9",
+          "category": "geography_cities",
+          "title": "完成一次早高峰跨江通勤，要经过武汉的哪些地方？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "74231b0f4d1d40bcbe65167d880a2e4b",
+          "category": "geography_population",
+          "title": "看上海的人口分布，为什么临江与远郊的集中程度不同？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "965cf44c2210458da8846fe17ddd0c25",
+          "category": "geography_resources",
+          "title": "一块光伏板的原料和制造来自哪些地方，怎样连接？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "e527932c81b94e81a6e0bb015ed34380",
+          "category": "geography_transport",
+          "title": "从成都到拉萨，川藏公路为什么要沿这条路线走？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "5560b4415fe242a2b8607294eb681493",
+          "category": "geography_environment",
+          "title": "引黄灌溉怎样改变宁夏平原的土地、水和农业？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "f5517b6c674740de950ce846432a1a85",
+          "category": "geography_maps",
+          "title": "看一张中国夜间灯光地图，颜色、尺度和时间能读出什么？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    },
+    {
+      "id": "2ed22e5a005e457c858f75391988d9e1",
+      "matrix": "history",
+      "status": "success",
+      "brief": "面向中文历史爱好者，从具体人物、器物、文件与生活场景进入，沿处境、行动和后续变化讲清关系。中国史与世界史均可选，避免整批仅围绕同一时代或事件。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793162307.223426,
+      "finished_at": 1793162351.847729,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "babfdb39df7049989f18f90fc18cac39",
+          "52ada2446d5d4fe5b853a4e9123daef5",
+          "734dc61dccaf439db34b2723a192e5a7",
+          "7997b4b43f1048b68d1edb66b97b164a",
+          "bf1b2631f4c946eb9fe3ccccf8e59ea8",
+          "f698db326e8a4efe88af388148dfd550",
+          "720f165bd3f44591a3352f1adc431b74",
+          "0333dcf1a56240c58351eb373e438994"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 5725,
+          "completion_tokens": 5625,
+          "total_tokens": 11350
+        },
+        "output": "output/topic_ideas/history/2026-10-28_2ed22e5a.md",
+        "categories": 8,
+        "examples": 9,
+        "duration_seconds": 44.6
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "babfdb39df7049989f18f90fc18cac39",
+          "category": "history_turns",
+          "title": "从1901年新政到1905年废科举，清政府内部哪些连续动作推动了这一转折？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "52ada2446d5d4fe5b853a4e9123daef5",
+          "category": "history_choices",
+          "title": "站在1787年费城制宪会议讨论代表权之前，麦迪逊面对哪些具体选择？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "734dc61dccaf439db34b2723a192e5a7",
+          "category": "history_institutions",
+          "title": "在13世纪威尼斯，一艘商船从入港到卸货要经过哪些角色和步骤？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "7997b4b43f1048b68d1edb66b97b164a",
+          "category": "history_daily_life",
+          "title": "明代江南一名织工，一天怎样度过？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "bf1b2631f4c946eb9fe3ccccf8e59ea8",
+          "category": "history_technology",
+          "title": "收割机进入美国中西部农场后，收割工作怎样改变？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "f698db326e8a4efe88af388148dfd550",
+          "category": "history_connections",
+          "title": "青金石从阿富汗山地运到美索不达米亚，沿途怎样连接不同人群？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "720f165bd3f44591a3352f1adc431b74",
+          "category": "history_sources",
+          "title": "读懂敦煌借贷契约中的保人与利息细节，可以进入怎样的唐代边地生活问题？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "0333dcf1a56240c58351eb373e438994",
+          "category": "history_places",
+          "title": "泉州洛阳桥为什么选在洛阳江入海口，并采用筏形桥基布局？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    },
+    {
+      "id": "1fe0e50f50c54e0d9c667c12f7022f49",
+      "matrix": "industry",
+      "status": "success",
+      "brief": "面向关注技术制造与供应链的中文观众，从一件实物、一条订单或一个工位切入。工艺、材料、装备、协同、质量、效率、能源与产业变化各有问题，用具体流程和空间关系讲清。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793162315.565127,
+      "finished_at": 1793162342.5549152,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "f0f4239e6a4c4f3893806b34f6dc7137",
+          "61cea66ba87f46419055fe7763ba1d30",
+          "7b875ee63b3d48909772f0ef5215afcd",
+          "a4529bd1e2a44d6cb562399284a35b17",
+          "74b05a26c9cc4b0e8f4d83b029382fb9",
+          "ebdbe5c720da48d98b32a6642c442565",
+          "229feeda59584cdaad161adea163a4a9",
+          "8bebd3953ada41158ac76fe3e55fc77d"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 5847,
+          "completion_tokens": 4038,
+          "total_tokens": 9885
+        },
+        "output": "output/topic_ideas/industry/2026-10-28_1fe0e50f.md",
+        "categories": 8,
+        "examples": 10,
+        "duration_seconds": 27.0
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "f0f4239e6a4c4f3893806b34f6dc7137",
+          "category": "industry_processes",
+          "title": "一块铝锭变成汽车轮毂，要经过哪些关键工序？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "61cea66ba87f46419055fe7763ba1d30",
+          "category": "industry_materials",
+          "title": "制造动力电池壳体时，为什么选铝合金而不是高强度钢？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "7b875ee63b3d48909772f0ef5215afcd",
+          "category": "industry_equipment",
+          "title": "激光焊接机怎样把电池极耳焊到汇流排上？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "a4529bd1e2a44d6cb562399284a35b17",
+          "category": "industry_supply",
+          "title": "一张电池包订单怎样经过材料、电芯与整包企业？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "74b05a26c9cc4b0e8f4d83b029382fb9",
+          "category": "industry_quality",
+          "title": "反复生产动力电池极片，怎样让涂布厚度保持一致？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "ebdbe5c720da48d98b32a6642c442565",
+          "category": "industry_efficiency",
+          "title": "制造一台工业机器人时，时间主要用在加工还是等待？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "229feeda59584cdaad161adea163a4a9",
+          "category": "industry_energy",
+          "title": "制造光伏硅片需要的能量，从哪里来、经过哪里？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "8bebd3953ada41158ac76fe3e55fc77d",
+          "category": "industry_changes",
+          "title": "一体化压铸上车后，汽车冲压、焊装和供应链哪些环节先改变？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    },
+    {
+      "id": "53ceafea35df4c2e902a8c7343be1c5c",
+      "matrix": "science",
+      "status": "success",
+      "brief": "面向中文好奇心观众，用身边现象、具体实验、生命过程和宇宙问题进入科学。各类保持多样，用图示和同一个例子把机制逐步讲清。",
+      "category": "",
+      "pattern_id": "",
+      "created_at": 1793162117.244813,
+      "finished_at": 1793162185.823956,
+      "result": {
+        "recommended": 8,
+        "theme_ids": [
+          "ccbd2013b07240d3ac70f454c0858dbd",
+          "1126ebec21dc42d1b6b5a889f28af805",
+          "f1460b41cd5549caa78d399e57b2536d",
+          "2ac2a7b5de9c47af80458d66e6b99110",
+          "fb62eac32fd24f8a895bc2ea2dac548f",
+          "2309b9768b3147a195438a79d5690c83",
+          "817196cf4e034c2db6d6b4af1aedee22",
+          "6f1f4a88c7224986a18c4fbb15c4553c"
+        ],
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 5626,
+          "completion_tokens": 7336,
+          "total_tokens": 12962
+        },
+        "output": "output/topic_ideas/science/2026-10-28_53ceafea.md",
+        "categories": 8,
+        "examples": 8,
+        "duration_seconds": 68.6
+      },
+      "error": "",
+      "themes": [
+        {
+          "id": "ccbd2013b07240d3ac70f454c0858dbd",
+          "category": "science_physics",
+          "title": "保温杯真的能保温一整天吗？热量都从哪儿漏走了？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "1126ebec21dc42d1b6b5a889f28af805",
+          "category": "science_chemistry",
+          "title": "同样煎一个鸡蛋，不粘锅和不锈钢锅为什么一个容易粘、一个容易滑？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "f1460b41cd5549caa78d399e57b2536d",
+          "category": "science_life",
+          "title": "猛地站起来眼前发黑，身体里哪一步调节没跟上？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "2ac2a7b5de9c47af80458d66e6b99110",
+          "category": "science_earth",
+          "title": "看似笔直的河道，怎样在洪水与枯水交替中慢慢弯成曲流？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "fb62eac32fd24f8a895bc2ea2dac548f",
+          "category": "science_space",
+          "title": "系外行星离我们那么远，为什么能知道它的大气里有什么？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "2309b9768b3147a195438a79d5690c83",
+          "category": "science_math",
+          "title": "一个班里出现同一天生日，为什么比直觉中更容易？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "817196cf4e034c2db6d6b4af1aedee22",
+          "category": "science_experiments",
+          "title": "想知道空气有没有质量，可以怎样设计一次能看懂的演示？",
+          "origin": "generated",
+          "used_at": 0.0
+        },
+        {
+          "id": "6f1f4a88c7224986a18c4fbb15c4553c",
+          "category": "science_research",
+          "title": "科学家怎样用冰芯气泡读出几十万年前的大气？",
+          "origin": "generated",
+          "used_at": 0.0
+        }
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "id": "f0258d010e9b43f3be9ef63ab87ad061",
+      "matrix": "company",
+      "status": "failed",
+      "result": {
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 5571,
+          "completion_tokens": 8192,
+          "total_tokens": 13763
+        }
+      },
+      "error": "Unterminated string starting at: line 146 column 20 (char 4526)"
+    },
+    {
+      "id": "ef5fbfcab84b4c7d85a42663f7c99cdb",
+      "matrix": "culture",
+      "status": "failed",
+      "result": {
+        "usage": {
+          "searches": 0,
+          "requests": 1,
+          "prompt_tokens": 6037,
+          "completion_tokens": 8192,
+          "total_tokens": 14229
+        }
+      },
+      "error": "Unterminated string starting at: line 1 column 2438 (char 2437)"
+    }
+  ],
+  "totals": {
+    "successful_batches": 10,
+    "recommended": 80,
+    "requests": 10,
+    "searches": 0,
+    "total_tokens": 115225,
+    "failed_attempts": 2,
+    "failed_requests": 2,
+    "failed_tokens": 27992
+  },
+  "used_history": [
+    {
+      "matrix": "chatgpt_acquisition",
+      "count": 7
+    }
+  ]
+}

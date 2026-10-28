@@ -52,6 +52,44 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 function show(canEdit = true) { return render(<MemoryRouter><ToastProvider><ThemeWorkbench matrix="demo" canEdit={canEdit} /></ToastProvider></MemoryRouter>); }
 
 describe("matrix topic workbench", () => {
+  it("filters a larger reference library by subject", async () => {
+    data.library!.patterns.push({ id: "format-two", category: "how", name: "连续任务演示", title_pattern: "怎样完成{任务}？", outline: ["输入", "操作", "结果"], example_ids: [] });
+    show();
+    fireEvent.click(await screen.findByRole("button", { name: /参考库 ·/ }));
+    expect(screen.getByRole("article", { name: "题型 任务与升级判断" })).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("参考库分类"), { target: { value: "how" } });
+    expect(screen.queryByRole("article", { name: "题型 任务与升级判断" })).toBeNull();
+    expect(screen.getByRole("article", { name: "题型 连续任务演示" })).toBeTruthy();
+  });
+
+  it("keeps earlier categories visible and lets their retained formats generate again", async () => {
+    data.legacy_categories = [{ ...data.categories[0], key: "old", name: "原有每日观察", legacy: true }];
+    data.themes[0].category = "old";
+    data.library!.examples[0].category = "old";
+    data.library!.patterns[0].category = "old";
+    show();
+    const theme = await screen.findByRole("article", { name: "主题 免费版用了一个月，应该升级吗？" });
+    expect(within(theme).getByText("原有每日观察")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /参考库 ·/ }));
+    expect(screen.getByRole("option", { name: "原有每日观察 · 早期分类" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "参考这个题型" }));
+    expect((screen.getByLabelText("出题栏目") as HTMLSelectElement).value).toBe("old");
+    expect((screen.getByLabelText("参考题型") as HTMLSelectElement).value).toBe("format-one");
+    fireEvent.click(screen.getByRole("button", { name: "生成候选题目" }));
+    await waitFor(() => expect(calls.some((c) => c.url.endsWith("/generate") && c.body.category_key === "old" && c.body.pattern_id === "format-one")).toBe(true));
+    fireEvent.click(screen.getByRole("button", { name: "帮我出一批题" }));
+    fireEvent.change(screen.getByLabelText("参考题型"), { target: { value: "" } });
+    expect((screen.getByLabelText("出题栏目") as HTMLSelectElement).value).toBe("");
+  });
+
+  it("keeps platform discovery as an explicit supplementary action", async () => {
+    data.configuration.mode = "ideas";
+    show();
+    fireEvent.click(await screen.findByRole("button", { name: "联网补充参考" }));
+    await waitFor(() => expect(calls.some((c) => c.url.endsWith("/discover") && c.method === "POST")).toBe(true));
+    expect(calls.some((c) => c.url.endsWith("/schedule"))).toBe(false);
+  });
+
   it("keeps an older backend usable during a graceful rollout", async () => {
     delete data.feedback;
     data.configuration.mode = "ideas";

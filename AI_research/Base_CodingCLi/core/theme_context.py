@@ -1,20 +1,35 @@
 """Matrix categories and topic-specific research briefs shared by discovery and manual creation."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from . import matrices
 from .config import load_job
 from .video import content_columns
+from .yaml_cache import load_yaml
 
 
-def categories(config_dir: str, matrix_key: str) -> list[dict]:
+def categories(config_dir: str, matrix_key: str, *, include_legacy: bool = False) -> list[dict]:
     matrix = matrices.load_all(config_dir).get(matrix_key)
     if matrix is None or matrix.archived:
         raise ValueError("矩阵不存在或已归档")
     rows = [{"key": c.key, "name": c.name, "promise": c.promise, "audience": c.audience,
              "notes": c.notes, "production_ids": list(c.production_ids), "type": c.type}
             for c in content_columns.load_all(config_dir).values() if c.matrix == matrix_key and c.usable]
-    return rows or [{"key": "general", "name": matrix.name + " · 主题研究", "promise": matrix.domain or matrix.name,
-                     "audience": matrix.content.get("audience", ""), "notes": "", "production_ids": [], "type": "explainer"}]
+    legacy = rows or [{"key": "general", "name": matrix.name + " · 主题研究", "promise": matrix.domain or matrix.name,
+                       "audience": matrix.content.get("audience", ""), "notes": "", "production_ids": [], "type": "explainer"}]
+    path = Path(config_dir) / "theme_categories" / f"{matrix_key}.yaml"
+    if not path.exists():
+        return legacy
+    catalog = load_yaml(path.read_text()) or {}
+    current = [{"audience": matrix.content.get("audience", ""), "notes": "", "production_ids": [],
+                "type": "explainer", **row, "catalog": True} for row in catalog.get("categories", [])]
+    if not current:
+        raise ValueError("主题分类配置为空")
+    if include_legacy:
+        keys = {row["key"] for row in current}
+        current += [{**row, "legacy": True} for row in legacy if row["key"] not in keys]
+    return current
 
 
 def research_spec(theme: dict, category: dict, matrix, *, sources: list[str]) -> dict:

@@ -1,0 +1,74 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: company_models
+  name: T01 · 商业模式与盈利
+  promise: 产品、顾客、付费者和收入怎样连在一起？
+  type: explainer
+  production_ids:
+  - company_weekly
+  keywords:
+  - 商业模式与盈利 产品、顾客、付费者和收入怎样连在一起？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从顾客的一次购买进入；画出产品与付费关系；展开主要收入和成本；回到这种模式适合的需求。
+- key: company_competition
+  name: T02 · 竞争与差异化
+  promise: 公司靠什么让顾客持续选择它？
+  type: explainer
+  production_ids:
+  - company_daily
+  keywords:
+  - 竞争与差异化 公司靠什么让顾客持续选择它？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。还原顾客要完成的事；对照两个具体选择；解释差异怎样产生；追到顾客和竞争者的下一步。
+- key: company_financials
+  name: T03 · 财务与现金流
+  promise: 报表怎样反映一家公司的真实经营动作？
+  type: explainer
+  production_ids:
+  - company_weekly
+  keywords:
+  - 财务与现金流 报表怎样反映一家公司的真实经营动作？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一笔具体经营活动；展示收入支出和收付款时间；连接相关报表或指标；用业务过程解释读数。
+- key: company_growth
+  name: T04 · 用户与增长路径
+  promise: 企业如何找到用户并形成持续使用？
+  type: explainer
+  production_ids:
+  - company_weekly
+  keywords:
+  - 用户与增长路径 企业如何找到用户并形成持续使用？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。描绘一个目标用户；跟随一次发现和尝试；找出转化与留存的关键动作；讨论阶段和可迁移做法。
+- key: company_pricing
+  name: T05 · 定价与产品组合
+  promise: 价格和产品组合如何改变顾客选择？
+  type: comparison
+  production_ids:
+  - company_weekly
+  keywords:
+  - 定价与产品组合 价格和产品组合如何改变顾客选择？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。用一个顾客需求进入；列出真实可选产品或套餐；拆解价格与交付的关系；按需求解释选择路径。
+- key: company_operations
+  name: T06 · 运营与交付
+  promise: 公司怎样把一次需求稳定变成一份交付？
+  type: explainer
+  production_ids:
+  - company_weekly
+  keywords:
+  - 运营与交付 公司怎样把一次需求稳定变成一份交付？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一张具体订单；沿交付路线跟随流转；解释等待和协作的位置；回到顾客最终收到什么。
+- key: company_organization
+  name: T07 · 组织与决策
+  promise: 团队如何分工、决策并把想法做成产品？
+  type: explainer
+  production_ids:
+  - company_weekly
+  keywords:
+  - 组织与决策 团队如何分工、决策并把想法做成产品？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。还原一次具体决策；认识角色与各自信息；跟随试验和反馈；解释组织方式的取舍。
+- key: company_platforms
+  name: T08 · 平台与生态
+  promise: 平台怎样连接参与者并形成价值？
+  type: explainer
+  production_ids:
+  - company_weekly
+  keywords:
+  - 平台与生态 平台怎样连接参与者并形成价值？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随一次具体平台互动；画出供给使用与平台关系；解释分发与反馈机制；回到参与者各自的选择。

@@ -45,7 +45,8 @@ def require_theme(key: str, theme_id: str) -> dict:
 
 
 def category(key: str, category_key: str) -> dict:
-    return next((row for row in theme_context.categories(paths().config_dir, key) if row["key"] == category_key), None)
+    return next((row for row in theme_context.categories(paths().config_dir, key, include_legacy=True)
+                 if row["key"] == category_key), None)
 
 
 def _schedule(key: str) -> dict | None:
@@ -80,7 +81,9 @@ def snapshot(key: str) -> dict:
     from zoneinfo import ZoneInfo
     from web.runner.registry import TaskRegistry
     from core.lock import LockManager
-    return {"categories": theme_context.categories(paths().config_dir, key), "themes": items,
+    categories = theme_context.categories(paths().config_dir, key, include_legacy=True)
+    return {"categories": [c for c in categories if not c.get("legacy")],
+            "legacy_categories": [c for c in categories if c.get("legacy")], "themes": items,
             "today": datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat(),
             "discovery_running": TaskRegistry().is_running(f"topic_platform/{key}") or
                 (theme_discovery.configuration(paths().config_dir, key)["mode"] == "discovery" and TaskRegistry().is_running(f"topic_discovery/{key}")),
@@ -227,10 +230,13 @@ def start(key: str, theme_id: str, by: str, *, auto_video: bool, minutes: float 
                   "theme_research": theme_context.research_spec(value, found, matrix(key), sources=sources)}
         if binding:
             topic["_production"] = binding.key
-        if not binding:
-            context = {"matrix": key, "source_matrix": key, "column": found["key"], "column_name": found["name"],
+        if not binding or found.get("catalog"):
+            from core.video import content_columns
+            context = content_columns.snapshot(paths().config_dir, binding.key, binding.job) if binding else {
+                "source_matrix": key, "render_inheritance": "content_matrix", "render": {}, "presentation": {}}
+            context.update({"matrix": key, "column": found["key"], "column_name": found["name"],
                        "audience": value["audience"], "promise": found["promise"], "notes": found["notes"],
-                       "render_inheritance": "content_matrix", "render": {}, "presentation": {}}
+                       "type": found["type"], "type_definition": content_columns.types(paths().config_dir).get(found["type"], {})})
             topic["_content_context"] = context
         script = video_executor.create(recipe_key, topic, started_by=by)
         return storage().attach(theme_id, script["id"], auto_video)

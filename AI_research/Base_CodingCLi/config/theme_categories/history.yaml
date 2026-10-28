@@ -1,0 +1,74 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: history_turns
+  name: T01 · 事件与关键转折
+  promise: 一个重要变化怎样由连续行动形成？
+  type: explainer
+  production_ids:
+  - history_weekly
+  keywords:
+  - 事件与关键转折 一个重要变化怎样由连续行动形成？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一个具体历史场景进入；认识当时的处境和参与者；跟随连续行动和变化；连接后续影响。
+- key: history_choices
+  name: T02 · 人物与抉择
+  promise: 当时的人在怎样的处境下作出选择？
+  type: explainer
+  production_ids:
+  - history_weekly
+  keywords:
+  - 人物与抉择 当时的人在怎样的处境下作出选择？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。还原当时可见的处境；说明人物拥有的信息和资源；跟随决定与行动；回到处境的后续变化。
+- key: history_institutions
+  name: T03 · 制度与社会运转
+  promise: 历史制度怎样在具体事务中运行？
+  type: explainer
+  production_ids:
+  - history_weekly
+  keywords:
+  - 制度与社会运转 历史制度怎样在具体事务中运行？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一件具体社会事务；认识参与者和规则；沿办理或执行过程展开；说明制度与生活的关系。
+- key: history_daily_life
+  name: T04 · 普通人的日常
+  promise: 当时的人怎样生活、劳动与交换？
+  type: explainer
+  production_ids:
+  - history_weekly
+  keywords:
+  - 普通人的日常 当时的人怎样生活、劳动与交换？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。进入一个具体日常场景；跟随普通人的动作；解释物品劳动和交换；从细节理解时代生活。
+- key: history_technology
+  name: T05 · 技术与历史变化
+  promise: 一种工具或技术怎样改变具体生活？
+  type: explainer
+  production_ids:
+  - history_weekly
+  keywords:
+  - 技术与历史变化 一种工具或技术怎样改变具体生活？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一件工具或生产任务；还原旧的操作方式；跟随技术改变的环节；连接劳动与社会变化。
+- key: history_connections
+  name: T06 · 贸易、迁移与文明交流
+  promise: 不同社会怎样经由路线与人群相互影响？
+  type: explainer
+  production_ids:
+  - history_weekly
+  keywords:
+  - 贸易、迁移与文明交流 不同社会怎样经由路线与人群相互影响？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一条具体路线或一件物品；认识沿途参与者；跟随移动交换和使用；说明交流形成的联系。
+- key: history_sources
+  name: T07 · 史料、文物与发现
+  promise: 怎样从一份材料理解过去的具体事情？
+  type: explainer
+  production_ids:
+  - history_weekly
+  keywords:
+  - 史料、文物与发现 怎样从一份材料理解过去的具体事情？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示材料的具体形态；引导观察文字或器物细节；连接形成与使用的处境；解释它帮助理解的历史问题。
+- key: history_places
+  name: T08 · 历史空间与遗产
+  promise: 今天可见的地方怎样留下历史关系？
+  type: explainer
+  production_ids:
+  - history_weekly
+  keywords:
+  - 历史空间与遗产 今天可见的地方怎样留下历史关系？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一处可见空间进入；沿位置和路线观察；连接营建与当时用途；认识今天仍可见的历史层次。
