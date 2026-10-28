@@ -256,6 +256,8 @@ def write(
         sections=sections,
         length_check=check,
         meta={"attempts": attempts, "usage": dict(client.usage), "problems": [],
+              "model": getattr(response, "model", "") or getattr(llm_config, "model", ""),
+              "model_switches": list(getattr(client, "model_switches", [])),
               "duration_seconds": round(time.monotonic() - started, 3),
               "generation": "goal_first", "prompt_version": PROMPT_VERSION,
               "creative_direction": column_style.strip(),

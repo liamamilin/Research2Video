@@ -559,7 +559,7 @@ export function SystemConfig() {
                 onPick={(id) => set([section, "model"], id)} />
             </div>
           )}
-          {!opts.simple && (<Field label="付费兜底模型" hint="免费模型额度用尽（计费错误）时按顺序尝试，逗号分隔">
+          {!opts.simple && (<Field label="兜底模型" hint="主模型不可用、连续失败或返回过滤结果时按顺序尝试，逗号分隔">
             <div>
               <ModelListInput value={fallbackModels} placeholder="minimax-m3, deepseek-v4.1-flash" ariaLabel={`${section} 兜底模型`}
                 onChange={(items) => set([section, "fallback_models"], items.length ? items : undefined)} />

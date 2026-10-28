@@ -54,6 +54,12 @@ _RETRYABLE_NAMES = {
 class EmptyReplyError(Exception):
     """The model answered with nothing at all (no text, no tool call): retried like a transient failure, and when it
     keeps happening the next fallback model takes over."""
+
+
+class ContentFilteredError(LLMError):
+    """A provider ended the completion without a usable result."""
+
+
 #: Provider error codes that mean the connection broke, not that the request
 #: was wrong. Seen live: a gateway reported a reset mid-stream as a plain
 #: APIError with no HTTP status, so neither check above caught it.
@@ -91,12 +97,10 @@ class LLMConfig:
     stream: bool = True               # stream text-only calls (live progress)
     extra_body: dict = field(default_factory=dict)
     extra_headers: dict = field(default_factory=dict)
-    # Tried in order, same provider and key, when ``model`` answers with a
-    # quota/billing error (see ``_is_quota_exhausted``) -- never for an
-    # ordinary transient failure, which retries the same model instead. Put a
-    # free model in ``model`` and paid ones here so a quota-exhausted free
-    # model fails over instead of failing the job; once switched, a client
-    # keeps using the fallback for the rest of its calls (see ``_active_model``).
+    # Tried in order on the same endpoint/key when the model cannot serve a
+    # request, including a provider-filtered completion. Transient failures
+    # first use that model's retry budget. Once switched, a client keeps the
+    # fallback for the rest of its calls (see ``_active_model``).
     fallback_models: list = field(default_factory=list)
 
     def validate(self) -> None:
@@ -306,7 +310,7 @@ class LLMClient:
                         max_tokens=max_tokens,
                     )
                 if response.finish_reason == "content_filter":
-                    raise LLMError("模型服务过滤了本次请求（finish_reason=content_filter），没有可用的完整结果")
+                    raise ContentFilteredError("模型服务过滤了本次请求（finish_reason=content_filter），没有可用的完整结果")
                 if self._is_empty_reply(response):
                     raise EmptyReplyError("模型返回了空内容")
                 return response
@@ -386,8 +390,10 @@ class LLMClient:
 
         Switching models is for failures that belong to the model or to the account's access to it: out of quota
         (402 or a balance message), key refused (401/403), model missing or deprecated (404/410, or a 400/422 that
-        blames the model). A bad request, a tool-calling complaint or a content problem fails the same way on every
-        model, so those are not in here."""
+        blames the model). A provider-filtered completion tries the next configured model with the unchanged
+        request. A malformed request or a tool-calling complaint is not a reason to switch."""
+        if isinstance(exc, ContentFilteredError):
+            return "返回过滤结果（content_filter）"
         if self._is_quota_exhausted(exc):
             return "额度或余额用完"
         status = getattr(exc, "status_code", None)
@@ -617,6 +623,10 @@ class LLMClient:
 
         content = "".join(content_parts)
         tool_calls: list[ToolCall] = []
+        if finish_reason == "content_filter":
+            # Incomplete tool JSON is part of the rejected result, not a new
+            # protocol error. Let chat() handle the provider's actual reason.
+            tool_parts.clear()
         if tools and (not finish_reason or (tool_parts and finish_reason == "length")):
             raise LLMError("LLM tool stream ended before completion")
         for index, part in sorted(tool_parts.items()):

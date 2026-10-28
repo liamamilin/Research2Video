@@ -208,7 +208,7 @@ describe("SystemConfig form", () => {
     const call = calls.find((c) => c.url.includes("/test-llm"));
     const body = JSON.parse(String(call?.init?.body));
     expect(body.config.ai.model).toBe("form-model");
-    expect(await screen.findByText(/可用/)).toBeTruthy();
+    expect(await screen.findByText(/^可用 ·/)).toBeTruthy();
   });
 
   it("includes notification toggles in the patch", async () => {

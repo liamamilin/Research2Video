@@ -71,6 +71,30 @@ def test_the_response_names_the_model_that_answered():
     assert client.chat([{"role": "user", "content": "x"}], stream=True).model == "deepseek-test"
 
 
+def test_filtered_incomplete_tool_stream_hands_the_original_request_to_the_fallback():
+    client, rejected, requests = client_for([
+        chunk(calls=[call(0, name="get_job", arguments='{"job_name":', id="rejected")], finish="content_filter"),
+        NS(usage=NS(prompt_tokens=10, completion_tokens=2, total_tokens=12), choices=[]),
+    ], fallback_models=["backup"])
+    _, accepted, _ = client_for([
+        chunk(calls=[call(0, name="get_job", arguments='{"job_name":"daily"}', id="accepted")], finish="tool_calls"),
+    ])
+
+    def create(**kwargs):
+        requests.append(kwargs)
+        return rejected if kwargs["model"] == "deepseek-test" else accepted
+
+    client._client.chat.completions.create = create
+    messages = [{"role": "user", "content": "查询今日任务"}]
+    response = client.chat(messages, tools=TOOLS, stream=True)
+    assert [r["model"] for r in requests] == ["deepseek-test", "backup"]
+    assert all(r["messages"] == messages and r["tools"] == TOOLS for r in requests)
+    assert response.model == "backup" and len(response.tool_calls) == 1
+    assert response.tool_calls[0].id == "accepted" and response.tool_calls[0].arguments == {"job_name": "daily"}
+    assert client.usage["total_tokens"] == 12
+    assert rejected.closed and accepted.closed
+
+
 def test_interleaved_tool_arguments_are_assembled_before_execution():
     client, stream, _requests = client_for([
         chunk(calls=[call(0, name="get_", arguments='{"job_', id="a"),
