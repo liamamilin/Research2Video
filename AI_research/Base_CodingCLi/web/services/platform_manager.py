@@ -377,6 +377,62 @@ def reconcile(task_id: str, bvid: str) -> dict:
     return db.get_upload(task_id)
 
 
+def lookup_upload(task_id: str) -> dict:
+    """Explicit read-only recovery shares the same lock as the automatic uploader."""
+    with account_lock():
+        return _lookup_upload(task_id)
+
+
+def _lookup_upload(task_id: str) -> dict:
+    from web.services.bilibili_recovery import matching_archives
+
+    db = store()
+    row = upload_task(task_id)
+    if row["status"] in ("SUBMITTED", "UNKNOWN") and row["bvid"]:
+        return reconcile(task_id, row["bvid"])
+    if row["status"] != "UNKNOWN":
+        return row
+    count = row["recovery"].get("lookup_count", 0)+1
+    now = time.time()
+    schedule = {"lookup_count": count, "last_checked_at": now,
+                "next_lookup_at": now+min(3600, 60*2**min(count, 6))}
+    try:
+        result = client(row["uid"]).archives(keyword=row["payload"]["title"])
+        matches = matching_archives(row, result["archives"])
+    except Error as exc:
+        db.update_recovery(task_id, {**schedule, "note": str(exc)}, expected="UNKNOWN")
+        return db.get_upload(task_id)
+    if len(matches) == 1:
+        match = matches[0]
+        # A receipt already attached to another local task cannot be claimed a second time.
+        if db.attach_upload_receipt(task_id, row["uid"], match["bvid"]):
+            db.update_recovery(task_id, {**schedule, "note": "已匹配 B 站稿件，等待公开确认。",
+                                         "matched_bvid": match["bvid"]}, expected="SUBMITTED")
+            try:
+                saved = reconcile(task_id, match["bvid"])
+                if saved["status"] == "PUBLISHED":
+                    db.update_recovery(task_id, {"note": "已匹配 B 站稿件并恢复发布记录。"}, expected="PUBLISHED")
+            except Error:
+                pass  # Retain the known receipt and let normal publication polling continue.
+            return db.get_upload(task_id)
+        else:
+            matches.append(match)
+    note = ("匹配到多条或已被其他任务关联的稿件，保留原任务等待进一步核对。" if matches else
+            f"已按标题核对 B 站稿件（{result['pages']} 页），暂未找到匹配；继续自动核对，尚未重新投稿。")
+    db.update_recovery(task_id, {**schedule, "note": note}, expected="UNKNOWN")
+    return db.get_upload(task_id)
+
+
+def _recover_unknown_uploads(owner: str) -> None:
+    now = time.time()
+    for row in store().unknown_uploads(owner):
+        recovery = row["recovery"]
+        if row["updated_at"] > now-60 or recovery.get("next_lookup_at", 0) > now:
+            continue
+        _lookup_upload(row["id"])
+        break  # Bound each worker pass; persist backoff so restarts do not cause a polling storm.
+
+
 def retry_first_comment(task_id: str, *, pin: bool = False) -> dict:
     """Retry only an explicitly rejected send, or pin the already confirmed comment."""
     with account_lock():
@@ -476,6 +532,8 @@ def tick() -> None:
                 return
             if not db.update_upload(task["id"], status="UPLOADING", expected="QUEUED"):
                 return
+            db.update_recovery(task["id"], {"started_at": time.time(), "phase": "upload",
+                                          "lookup_count": 0, "next_lookup_at": 0, "note": ""}, expected="UPLOADING")
             credential = credentials()
             try:
                 bvid = bilibili.upload(credential, video_render.safe_file(render, "video.mp4"), {**task["payload"], "cover": str(cover)}, work_dir)
@@ -487,8 +545,15 @@ def tick() -> None:
             except Exception:
                 db.update_upload(task["id"], status="UNKNOWN", error="投稿结果需核对，请到创作中心检查并回填 BV 号。")
             finally:
+                try:
+                    evidence = json.loads((work_dir / "diagnostic.json").read_text())
+                    current = db.get_upload(task["id"])
+                    db.update_recovery(task["id"], evidence, expected=current["status"])
+                except (OSError, ValueError):
+                    pass
                 if credential and bilibili.upload_authorized(credential):
                     bilibili.private_json(folder / "credentials.json", credential)
+        _recover_unknown_uploads(owner)
         # Submission acceptance isn't publication. Keep polling until the owned video becomes public.
         for task in db.pending_uploads(owner):
             if task["status"] == "SUBMITTED" and task["updated_at"] < time.time() - 60:

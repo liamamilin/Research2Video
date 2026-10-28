@@ -11,6 +11,7 @@ export type PlatformSettings = { auto_upload: boolean; sync_comments: boolean; t
 export type UploadPayload = { render_id: string; title: string; description: string; tags: string[]; tid: number; first_comment?: FirstComment };
 export type UploadPreview = UploadPayload & { adaptation?: PublishAdaptationResult; account_uid?: string; draft?: { payload: Partial<UploadPayload>; render_id: string } | null; warnings: string[]; credibility: { text: string }; freshness_warnings: string[]; existing_upload?: UploadTask | null };
 export type UploadTask = { id: string; render_id: string; script_id: string; version: number; status: string; bvid: string; error: string; created_at: number; payload: UploadPayload;
+  recovery?: { phase?: string; attempt?: number; note?: string; lookup_count?: number; last_checked_at?: number; next_lookup_at?: number };
   first_comment_status?: string; first_comment_rpid?: string; first_comment_error?: string; first_comment_pin_status?: string; first_comment_pin_error?: string };
 export type PlatformComment = { bvid: string; rpid: string; root: string; author: string; message: string; ctime: number; likes: number; status: string; draft: string; reply: string; reply_rpid: string; error: string };
 export type UploadCandidate = { render_id: string; script_id: string; title: string; version: number; completed_at: string; archived?: number; current_version?: number; approved_version?: number; script_status?: string };

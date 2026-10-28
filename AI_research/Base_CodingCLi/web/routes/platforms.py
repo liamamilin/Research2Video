@@ -216,6 +216,11 @@ def retry(task_id: str, user=Depends(require_editor)) -> dict:
     return manager.store().get_upload(task_id)
 
 
+@router.post("/uploads/{task_id}/lookup")
+def lookup_upload(task_id: str, user=Depends(require_editor)) -> dict:
+    return call(manager.lookup_upload, task_id)
+
+
 @router.post("/uploads/{task_id}/first-comment/retry")
 def retry_first_comment(task_id: str, user=Depends(require_editor)) -> dict:
     result = call(manager.retry_first_comment, task_id)

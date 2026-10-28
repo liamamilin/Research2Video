@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { documentPublishLink } from "@/lib/platform-links";
 import { PublishAdaptation } from "./PublishAdaptation";
 import { publishCheck, textCount, validFirstComment } from "@/lib/publish-text";
-const UPLOAD_STATES: Record<string, string> = { QUEUED: "排队中", UPLOADING: "上传中", SUBMITTED: "已提交，待公开确认", PUBLISHED: "已公开", UNKNOWN: "结果待核对", FAILED: "投稿前检查失败", CANCELLED: "已取消" };
+const UPLOAD_STATES: Record<string, string> = { QUEUED: "排队中", UPLOADING: "上传中", SUBMITTED: "已提交，待公开确认", PUBLISHED: "已公开", UNKNOWN: "结果待核对", FAILED: "投稿失败，可重试", CANCELLED: "已取消" };
 type Run = (action: () => Promise<unknown>) => Promise<void>;
 function PlatformLink({ bvid, rpid, children }: { bvid: string; rpid?: string; children: React.ReactNode }) {
   return <a className="text-accent hover:underline inline-flex items-center gap-1 text-xs" target="_blank" rel="noreferrer" href={`https://www.bilibili.com/video/${bvid}${rpid ? `/#reply${rpid}` : ""}`}>{children}<ExternalLink className="w-3 h-3" /></a>;
@@ -67,10 +67,12 @@ export function UploadRow({ task, canEdit, run, busy }: { task: UploadTask; canE
     <div className="flex flex-wrap gap-3 text-xs text-text-muted"><span>文稿 v{task.version}</span><span>{new Date(task.created_at * 1000).toLocaleString("zh-CN")}</span>{task.bvid ? <PlatformLink bvid={task.bvid}>{task.bvid}</PlatformLink> : null}<Link className="text-accent hover:underline" to={documentPublishLink(task.script_id, task.version)}>查看文稿发布记录 →</Link></div>
     {task.status === "PUBLISHED" ? <p className="text-xs text-success">已自动回填文稿的发布链接、日期和已发布状态。</p> : ["QUEUED", "UPLOADING", "SUBMITTED"].includes(task.status) ? <p className="text-xs text-text-muted">确认视频公开后自动回填文稿发布记录。</p> : null}
     {task.error ? <p className="text-xs text-warning">{task.error}</p> : null}
+    {task.recovery?.note ? <p className="text-xs text-text-muted" role="status">{task.recovery.note}</p> : task.status === "UNKNOWN" ? <p className="text-xs text-text-muted">系统会自动核对 B 站稿件，确认结果前保留原任务。</p> : null}
     <details className="rounded border border-border p-3 text-xs"><summary className="cursor-pointer text-text-muted">投稿时发布包</summary><div className="mt-2 space-y-2"><p className="whitespace-pre-wrap break-words">{task.payload.description}</p><p className="text-text-muted">{task.payload.tags?.join(" · ")}</p></div></details>
     <FirstCommentProgress task={task} canEdit={canEdit} run={run} busy={busy} />
     {canEdit && task.status === "QUEUED" ? <button disabled={busy} className="btn text-xs" onClick={() => void run(() => platformAction(`/uploads/${task.id}/cancel`))}>取消排队</button> : null}
     {canEdit && ["FAILED", "CANCELLED"].includes(task.status) ? <button disabled={busy} className="btn text-xs" onClick={() => void run(() => platformAction(`/uploads/${task.id}/retry`))}>重新检查并排队</button> : null}
+    {canEdit && ["UNKNOWN", "SUBMITTED"].includes(task.status) ? <button disabled={busy} className="btn text-xs" onClick={() => void run(() => platformAction(`/uploads/${task.id}/lookup`))}>立即核对投稿结果</button> : null}
     {canEdit && ["UNKNOWN", "SUBMITTED"].includes(task.status) ? <form className="flex flex-wrap gap-2" onSubmit={e => { e.preventDefault(); void run(() => platformAction(`/uploads/${task.id}/reconcile`, { bvid })); }}><input aria-label="已投稿的 BV 号" required pattern="BV[0-9A-Za-z]{10}" className="input text-xs" value={bvid} onChange={e => setBvid(e.target.value)} placeholder="到创作中心核对后填写 BV 号" /><button disabled={busy} className="btn text-xs">核对并回写</button></form> : null}
   </li>;
 }

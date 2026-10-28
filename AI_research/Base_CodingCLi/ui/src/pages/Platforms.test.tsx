@@ -43,6 +43,17 @@ function chooseCategory(label: string, path: string) {
 }
 
 describe("Platform management", () => {
+  it("shows durable Bilibili recovery notes and checks the original task without reuploading", async () => {
+    data.uploads = [{ id: "uncertain", script_id: "s1", render_id: "r1", version: 1,
+      status: "UNKNOWN", bvid: "", error: "连接中断", created_at: 100, payload: preview,
+      recovery: { lookup_count: 2, note: "已核对最近 3 页稿件，暂未找到匹配；继续自动核对，尚未重新投稿。" } }];
+    show();
+    expect(await screen.findByText(/已核对最近 3 页稿件/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "重新检查并排队" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "立即核对投稿结果" }));
+    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/uploads/uncertain/lookup"));
+    expect(platformAction).toHaveBeenCalledTimes(1);
+  });
   it("explains missing upload authorization and links to account settings", async () => {
     data.account.upload_authorized = false;
     show();
