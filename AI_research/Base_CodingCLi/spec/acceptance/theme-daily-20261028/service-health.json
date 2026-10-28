@@ -1,0 +1,97 @@
+{
+  "temporary_pid": 89218,
+  "temporary_service_stopped": true,
+  "temporary_port_closed": true,
+  "primary_pid": 10641,
+  "primary_instance": "4f6af8ba4c1a4f75ae23514d300dc5b0",
+  "primary_health": {
+    "status": "ok",
+    "checked_at": "2026-10-28T01:17:56+0800",
+    "deep": false,
+    "checks": [
+      {
+        "name": "config",
+        "status": "ok",
+        "detail": "model=deepseek-v4.1-flash, search=exa",
+        "model": "deepseek-v4.1-flash",
+        "search_provider": "exa"
+      },
+      {
+        "name": "state_dir",
+        "status": "ok",
+        "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state"
+      },
+      {
+        "name": "output_dir",
+        "status": "ok",
+        "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output"
+      },
+      {
+        "name": "reports_db",
+        "status": "ok",
+        "detail": "520 rows",
+        "value": 520
+      },
+      {
+        "name": "tracking_db",
+        "status": "ok",
+        "detail": "194 rows",
+        "value": 194
+      },
+      {
+        "name": "disk_free",
+        "status": "ok",
+        "detail": "130198 MB free",
+        "free_mb": 130198
+      }
+    ],
+    "errors": [],
+    "warnings": [],
+    "instance_id": "4f6af8ba4c1a4f75ae23514d300dc5b0"
+  },
+  "final_primary_health": {
+    "status": "ok",
+    "checked_at": "2026-10-28T01:26:03+0800",
+    "deep": false,
+    "checks": [
+      {
+        "name": "config",
+        "status": "ok",
+        "detail": "model=deepseek-v4.1-flash, search=exa",
+        "model": "deepseek-v4.1-flash",
+        "search_provider": "exa"
+      },
+      {
+        "name": "state_dir",
+        "status": "ok",
+        "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state"
+      },
+      {
+        "name": "output_dir",
+        "status": "ok",
+        "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output"
+      },
+      {
+        "name": "reports_db",
+        "status": "ok",
+        "detail": "520 rows",
+        "value": 520
+      },
+      {
+        "name": "tracking_db",
+        "status": "ok",
+        "detail": "194 rows",
+        "value": 194
+      },
+      {
+        "name": "disk_free",
+        "status": "ok",
+        "detail": "130187 MB free",
+        "free_mb": 130187
+      }
+    ],
+    "errors": [],
+    "warnings": [],
+    "instance_id": "4f6af8ba4c1a4f75ae23514d300dc5b0"
+  }
+}

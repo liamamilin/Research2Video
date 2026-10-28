@@ -1,0 +1,67 @@
+name: T08 · 使用问题与避坑
+description: 使用过程中有哪些问题？ — 解决顾虑；按 S01–S06 资料研究 ChatGPT 视频题材。
+enabled: true
+keywords:
+- ChatGPT 无法使用
+- ChatGPT 使用限制
+- ChatGPT 重复扣款
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+search: false
+source_history: context
+sources_limit: 8
+sources:
+- source:cg_errors
+- source:cg_capabilities
+- source:cg_help
+- source:cg_status
+- source:cg_cancel
+- source:cg_billing
+- source:cg_regions
+- source:cg_bilibili
+- source:cg_xiaohongshu
+- source:cg_reddit_chatgpt
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：为「ChatGPT 获客矩阵」研究题材，写成后续作者可以直接使用的候选材料。
+  题材：T08 使用问题与避坑
+  观众核心问题：使用过程中有哪些问题？
+  获客作用：解决顾虑
+  目标受众：中文普通用户、职场与学习人群，以及正在考虑升级 ChatGPT 的潜在订阅用户。
+  从真实用户讨论寻找高频问题，并用官方帮助与状态材料整理排查顺序。区分服务故障、额度、账号、功能入口与订阅渠道问题，让观众知道下一步点哪里或检查什么。
+  优先提炼对观众有用的任务、操作和可见成果，以价值展示与解决问题自然承接购买意图。
+  创作者视频与播客只作为公开标题、简介或索引文本中的研究线索；拿到完整内容时再展开，不能凭标题补写操作或测试结果。
+  素材中提供的具体事实、数据和结论作为输入，围绕解释与画面组织材料，不额外增加人工审核步骤。
+  每个候选聚焦一个观众问题，保留场景、具体对象、操作过程、结果和画面建议。候选数量由材料决定。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  输出 Markdown。每个候选使用三级标题，并按以下字段写明；不要将概览或来源清单写成候选。
+  ### 1. 选题标题
+  - **题材分类**：T08 使用问题与避坑
+  - **一句话**：这一期帮助观众理解或完成什么
+  - **核心角度**：使用过程中有哪些问题？ 对应的具体切入点
+  - **目标受众**：有哪种任务或疑问的人
+  - **具体材料**：来自本次素材的内容、例子、数据与适用条件
+  - **操作与演示**：可以展示的输入、步骤与输出；待实测部分标明待实测
+  - **画面建议**：能讲清变化或过程的页面、操作、对比或结果
+  - **获客作用**：解决顾虑；与观众下一步选择的联系
+  - **发布日期**：材料提供的日期；没有则写未提供
+  - **来源网址**：实际使用的素材链接
+
+  ## 来源清单
+  记录实际使用的来源链接。
+  当前完整来源可用于解释现有套餐、操作与常见问题；变化区块用于区分哪些内容刚有修改，不把未变化内容说成新发布。
+output: output/chatgpt_acquisition/{date}_t08_troubleshooting.md
+topics:
+  alias: chatgpt_t08_troubleshooting
+  format: items
+  prefix: CGH
+  refresh: true

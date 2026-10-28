@@ -1,0 +1,317 @@
+{
+  "at": "2026-10-27T12:29:04.110869+00:00",
+  "limit": 4,
+  "search_calls": 12,
+  "sources": [
+    {
+      "source": "cg_release_notes",
+      "spec": "page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "ChatGPT release notes",
+        "ChatGPT release notes · GPT-6.1 Terra"
+      ]
+    },
+    {
+      "source": "cg_openai_news",
+      "spec": "rss:https://openai.com/news/rss.xml",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Greptile takes bug detection beyond code review with GPT-6 Astra",
+        "Working with academic communities to build scientific understanding"
+      ]
+    },
+    {
+      "source": "cg_pricing",
+      "spec": "page:https://chatgpt.com/pricing/",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Plans and Pricing | ChatGPT · Pricing",
+        "Plans and Pricing | ChatGPT · Free"
+      ]
+    },
+    {
+      "source": "cg_status",
+      "spec": "rss:https://status.openai.com/history.rss",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Elevated error rates for most hosted Code Reviews and Security Reviews on private GitHub repositories",
+        "Elevated error rates for Ads POST requests"
+      ]
+    },
+    {
+      "source": "cg_help",
+      "spec": "page:https://help.openai.com/en/collections/3742473-chatgpt",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "ChatGPT",
+        "ChatGPT · Android app"
+      ]
+    },
+    {
+      "source": "cg_learn_videos",
+      "spec": "catalog:https://learn.chatgpt.com/videos",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "WebMCP · Aug 25, 2026 Build agent-ready sites with WebMCP",
+        "Computer History · Aug 13, 2026 Computer History in ChatGPT"
+      ]
+    },
+    {
+      "source": "cg_academy",
+      "spec": "catalog:https://academy.openai.com/",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Livestream ChatGPT Legislative 101",
+        "Livestream Impact Math: Measuring the ROI of LLMs"
+      ]
+    },
+    {
+      "source": "cg_stories",
+      "spec": "catalog:https://openai.com/zh-Hans-CN/stories/chatgpt/",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "ChatGPT 正在助力小型企业事半功倍 ChatGPT 2026年2月4日",
+        "使用 GPT-5 进行创意写作 ChatGPT 2025年8月7日"
+      ]
+    },
+    {
+      "source": "cg_youtube_openai",
+      "spec": "rss:https://www.youtube.com/feeds/videos.xml?channel_id=UCXZCJLdBC09xxGZ6gcdrc6A",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "How Sullivan & Cromwell builds legal tools with Codex | OpenAI",
+        "Amp puts AI agents to work beyond code with OpenAI models"
+      ]
+    },
+    {
+      "source": "cg_kevin",
+      "spec": "search:site:youtube.com Kevin Stratvert ChatGPT tutorial",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "How to Use ChatGPT",
+        "ChatGPT Tutorial for Beginners: How to Actually Get Work Done with AI - YouTube"
+      ]
+    },
+    {
+      "source": "cg_ai_advantage",
+      "spec": "search:site:youtube.com AI Advantage ChatGPT workflow comparison",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Which AI Agent Should You Use in 2026?",
+        "Claude Opus 5 vs. ChatGPT: Which AI Is Actually Better for Business?"
+      ]
+    },
+    {
+      "source": "cg_ai_explained",
+      "spec": "search:site:youtube.com/channel/UCNJ1Ymd5yFuUPtn21xtRbbw ChatGPT",
+      "status": "ok",
+      "items": 2,
+      "titles": [
+        "AI Explained - YouTube",
+        ""
+      ]
+    },
+    {
+      "source": "cg_matt_wolfe",
+      "spec": "catalog:https://mattwolfe.com/",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "AI News: 24 Things You Need To Know This Week 4 days ago",
+        "11 AI Breakthroughs You Didn’t Know Existed 6 days ago"
+      ]
+    },
+    {
+      "source": "cg_how_i_ai",
+      "spec": "catalog:https://podcasts.apple.com/us/podcast/how-i-ai/id1809663079",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "1d ago Why Reddit built its own AI prototyping tool | Blair Metcalf Blair Metcalf is the principal UX engineer at Reddit and the builder of Reddit Proto, the co",
+        "5d ago Claude Duet is beautiful. I still forgot to use it Anthropic's new personal agent, Claude Duet, lives on your phone, inherits all your Claude plugins and"
+      ]
+    },
+    {
+      "source": "cg_bilibili",
+      "spec": "search:site:bilibili.com ChatGPT Plus 使用 教程 订阅",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "【2026保姆级教程】ChatGPT Plus国内订阅全流程！无需信用卡、全程自己操作，告别代充跑路风险，安全稳定不翻车_哔哩哔哩_bilibili",
+        "从注册到升级ChatGPT Plus最新教程！门槛最低，最省时，省钱的虚拟卡充值订阅方法！循行渐进小白也能快速上手！！！_哔哩哔哩_bilibili"
+      ]
+    },
+    {
+      "source": "cg_zhihu",
+      "spec": "search:site:zhihu.com ChatGPT Plus 值得 付款 升级",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "花几百块买ChatGPT账号一年值得吗?",
+        "Why do so many people still choose to pay for a potentially more useful ChatGPT even though DeepSeek is free?-zhihu"
+      ]
+    },
+    {
+      "source": "cg_xiaohongshu",
+      "spec": "search:site:xiaohongshu.com ChatGPT 学习 职场 支付",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "柒柒AI导航 - 小红书",
+        "小红书校园招聘"
+      ]
+    },
+    {
+      "source": "cg_reddit_chatgpt",
+      "spec": "search:site:reddit.com/r/ChatGPT/ ChatGPT Plus subscription limits worth",
+      "status": "empty",
+      "items": 0,
+      "titles": []
+    },
+    {
+      "source": "cg_reddit_openai",
+      "spec": "search:site:reddit.com/r/OpenAI/ ChatGPT Plus subscription limits worth",
+      "status": "empty",
+      "items": 0,
+      "titles": []
+    },
+    {
+      "source": "cg_reddit_plus",
+      "spec": "search:site:reddit.com/r/chatgptplus/ ChatGPT Plus subscription limits worth",
+      "status": "empty",
+      "items": 0,
+      "titles": []
+    },
+    {
+      "source": "cg_plus",
+      "spec": "page:https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "What is ChatGPT Plus?",
+        "What is ChatGPT Plus? · Benefits of ChatGPT Plus"
+      ]
+    },
+    {
+      "source": "cg_multicurrency",
+      "spec": "page:https://help.openai.com/en/articles/10421635-multicurrency-billing",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Multi‑currency billing | OpenAI Help Center",
+        "Multi‑currency billing | OpenAI Help Center · Multi‑currency billing"
+      ]
+    },
+    {
+      "source": "cg_billing",
+      "spec": "page:https://help.openai.com/en/articles/9039756-managing-billing-for-chatgpt-and-the-api-platform",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Managing billing for ChatGPT and the API platform",
+        "Managing billing for ChatGPT and the API platform · Overview"
+      ]
+    },
+    {
+      "source": "cg_regions",
+      "spec": "page:https://help.openai.com/en/articles/7947663-chatgpt-supported-countries",
+      "status": "ok",
+      "items": 2,
+      "titles": [
+        "ChatGPT Supported Countries",
+        "ChatGPT Supported Countries · Supported countries & regions on web and mobile"
+      ]
+    },
+    {
+      "source": "cg_cancel",
+      "spec": "page:https://help.openai.com/en/articles/7232927-how-do-i-cancel-my-chatgpt-subscription",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Canceling your ChatGPT subscription | OpenAI Help Center",
+        "Canceling your ChatGPT subscription | OpenAI Help Center · Canceling your ChatGPT subscription"
+      ]
+    },
+    {
+      "source": "cg_payment_questions",
+      "spec": "search:ChatGPT 支付失败 信用卡 没有国际信用卡 付款方式 扣款没到账 无法升级",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "为什么我的信用卡交易被拒绝？ | OpenAI Help Center",
+        "为什么我的 ChatGPT Plus 或 ChatGPT Pro 续订交易失败？ | OpenAI Help Center"
+      ]
+    },
+    {
+      "source": "cg_trends",
+      "spec": "search:site:trends.google.com ChatGPT Plus 免费版",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "ChatGPT - Explore - Google Trends",
+        "chatgpt - Explore - Google Trends"
+      ]
+    },
+    {
+      "source": "cg_prompts",
+      "spec": "page:https://github.com/f/prompts.chat",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "prompts.chat",
+        "prompts.chat · What is this?"
+      ]
+    },
+    {
+      "source": "cg_cookbook",
+      "spec": "page:https://github.com/openai/openai-cookbook",
+      "status": "ok",
+      "items": 1,
+      "titles": [
+        "GitHub - openai/openai-cookbook: Examples and guides for using the OpenAI API · GitHub · "
+      ]
+    },
+    {
+      "source": "cg_business_stories",
+      "spec": "catalog:https://openai.com/business/customer-stories/",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Greptile takes bug detection beyond code review with GPT-6 Astra Startup Oct 26, 2026",
+        "How Fanatics and OpenAI streamline the fan experience Oct 26, 2026"
+      ]
+    },
+    {
+      "source": "cg_capabilities",
+      "spec": "page:https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "ChatGPT capabilities overview",
+        "ChatGPT capabilities overview · Overview"
+      ]
+    },
+    {
+      "source": "cg_errors",
+      "spec": "page:https://help.openai.com/en/articles/7996703-troubleshooting-chatgpt-error-messages",
+      "status": "ok",
+      "items": 4,
+      "titles": [
+        "Troubleshooting ChatGPT Error Messages",
+        "Troubleshooting ChatGPT Error Messages · \"Something went wrong.\""
+      ]
+    }
+  ]
+}

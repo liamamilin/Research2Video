@@ -1,0 +1,28 @@
+name: 主题讲解
+description: 围绕一个确定的观众问题，使用主题研究的场景、具体材料和原始资料组织完整讲述。
+status: enabled
+tags:
+  domain: {key: themes, name: 主题创作}
+  type: {key: explainer, name: 主题讲解}
+  format: {key: long, name: B站横屏长}
+audiences: [general]
+target_minutes: 4
+minutes_range: [2, 8]
+topic:
+  kind: single
+  whole_report: true
+  fields: [核心角度, 目标受众, 补充材料]
+research:
+  mode: none
+writing:
+  pipeline: single
+  default_style: {depth: intro, tone: explainer}
+  style: |
+    让目标观众围绕开场的问题走向理解或可执行的选择。使用研究中的具体场景、输入、操作、结果和机制展开讲述。
+    同一组人物、任务或对象持续出现，让例子推动解释。观点来自研究材料，讲述顺序和节奏由作者选择。
+    涉及是否值得、怎样选择的题目，把差异放进观众任务里解释，并回到适用条件和下一步行动。
+output:
+  use: auto_form
+  packaging:
+    use: common
+    label: 主题讲解

@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "real_llm": true,
+  "real_tts": true,
+  "mock_calls": 0,
+  "model": "deepseek-v4.1-flash",
+  "llm_call_count": 7,
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 12668,
+    "duration_seconds": 422.272,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.9999488310404451,
+    "decoded_rms": 0.05428747087717056,
+    "full_decode": "PASS"
+  },
+  "timeline": {
+    "ir_frames": 12668,
+    "scene_count": 32,
+    "beat_count": 113,
+    "alignment_granularity": "phrase"
+  },
+  "captions": {
+    "burned_in": true,
+    "srt": "artifacts/captions.srt",
+    "alignment": "local forced alignment; exact original text coverage",
+    "cue_count": 155,
+    "render_track_checked": true
+  },
+  "narration_text": {
+    "status": "PASS",
+    "chapters": 6,
+    "segments": 95,
+    "characters": 2755,
+    "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+    "caption_cues": 155,
+    "checked": [
+      "narration-plan",
+      "video-ir",
+      "captions.srt",
+      "chapter-titles",
+      "short-caption-exact-coverage"
+    ]
+  }
+}

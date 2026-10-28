@@ -1,0 +1,9 @@
+name: 地理与世界探索 · 每日主题发现
+enabled: true
+description: 按栏目寻找公开平台的观众问题与主题线索，每类每天最多一条。
+topic_discovery: geography
+prompt: 动态读取矩阵栏目，执行分类主题发现。
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+output: output/topic_discovery/geography/{date}.md

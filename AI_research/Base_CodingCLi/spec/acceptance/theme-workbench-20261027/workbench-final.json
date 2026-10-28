@@ -1,0 +1,474 @@
+{
+  "categories": [
+    {
+      "key": "chatgpt_t01_product",
+      "name": "T01 · 产品与能力认知",
+      "promise": "ChatGPT 到底能做什么？",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "题材编号 T01；获客作用：吸引新用户。从官方演示挑一个普通人容易理解的能力，用具体输入、操作与可见输出解释它能完成什么。优先让不了解 ChatGPT 的观众看懂结果，不堆功能名称。",
+      "production_ids": [
+        "chatgpt_t01_product"
+      ],
+      "type": "explainer"
+    },
+    {
+      "key": "chatgpt_t02_scenarios",
+      "name": "T02 · 应用场景与成果",
+      "promise": "ChatGPT 能帮我做什么？",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "题材编号 T02；获客作用：展示价值。围绕办公、学习、创作或小企业中的一个任务，保留任务起点、输入材料、操作过程和产物。优先官方教程与客户案例，提炼观众可迁移的用法。",
+      "production_ids": [
+        "chatgpt_t02_scenarios"
+      ],
+      "type": "explainer"
+    },
+    {
+      "key": "chatgpt_t03_tutorials",
+      "name": "T03 · 使用方法与教程",
+      "promise": "怎样才能用好 ChatGPT？",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "题材编号 T03；获客作用：培养兴趣。优先 ChatGPT Learn 的任务式演示，其次参考优质创作者。提炼操作起点、关键步骤、示例提示词和结果画面，用中文重新组织讲解，保留演示链接。",
+      "production_ids": [
+        "chatgpt_t03_tutorials"
+      ],
+      "type": "tutorial"
+    },
+    {
+      "key": "chatgpt_t04_testing",
+      "name": "T04 · 实测与能力验证",
+      "promise": "ChatGPT 实际表现怎么样？",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "题材编号 T04；获客作用：建立信任。围绕一个具体任务提炼可复现的测试输入、步骤、比较维度和预期观察点。来源已有实测就说明是谁测的；尚未执行的部分写成待实测方案，保留后续拍摄可用的操作和画面。",
+      "production_ids": [
+        "chatgpt_t04_testing"
+      ],
+      "type": "comparison"
+    },
+    {
+      "key": "chatgpt_t05_comparison",
+      "name": "T05 · AI 产品横向选择",
+      "promise": "ChatGPT 和其他 AI 哪个好？",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "题材编号 T05；获客作用：影响选择。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。",
+      "production_ids": [
+        "chatgpt_t05_comparison"
+      ],
+      "type": "comparison"
+    },
+    {
+      "key": "chatgpt_t06_value",
+      "name": "T06 · 套餐与付费价值",
+      "promise": "我有没有必要付费？",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "题材编号 T06；获客作用：精准转化。从具体使用频率与任务判断免费或付费套餐的价值，整理当前页面支持的价格、权益、使用限制和体验差异。将套餐名称、价格币种、地区、渠道与页面日期写清，页面变更与当前权益分开表达。",
+      "production_ids": [
+        "chatgpt_t06_value"
+      ],
+      "type": "comparison"
+    },
+    {
+      "key": "chatgpt_t07_subscription",
+      "name": "T07 · 订阅与支付",
+      "promise": "想订阅，怎么完成？",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "题材编号 T07；获客作用：捕获需求。按购买前准备、网页与应用内订阅、支付失败、账单与取消等真实问题整理可操作的官方步骤。区分缺少付款方式与身处未支持地区，区分 ChatGPT 与 API 账单。保留每个入口、所需条件与排查分支。",
+      "production_ids": [
+        "chatgpt_t07_subscription"
+      ],
+      "type": "tutorial"
+    },
+    {
+      "key": "chatgpt_t08_troubleshooting",
+      "name": "T08 · 使用问题与避坑",
+      "promise": "使用过程中有哪些问题？",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "题材编号 T08；获客作用：解决顾虑。从真实用户讨论寻找高频问题，并用官方帮助与状态材料整理排查顺序。区分服务故障、额度、账号、功能入口与订阅渠道问题，让观众知道下一步点哪里或检查什么。",
+      "production_ids": [
+        "chatgpt_t08_troubleshooting"
+      ],
+      "type": "tutorial"
+    },
+    {
+      "key": "chatgpt_t09_updates",
+      "name": "T09 · 产品动态与热点",
+      "promise": "ChatGPT 最近有什么变化？",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "题材编号 T09；获客作用：持续引流。以官方更新与新增演示为主，结合中文用户关心的问题选择值得讲的一项变化。保留变化前后、影响人群、使用入口和可展示细节；趋势与互动线索只用于角度与优先级，不能编造搜索量或热度数据。",
+      "production_ids": [
+        "chatgpt_t09_updates"
+      ],
+      "type": "news"
+    }
+  ],
+  "themes": [
+    {
+      "id": "763bba09b157443bbc82db163ba3fd32",
+      "matrix": "chatgpt_acquisition",
+      "category": "chatgpt_t09_updates",
+      "title": "ChatGPT 免费版也能设“定时任务”了：每天自动推晨报、盯价格，入口和限额在哪？",
+      "angle": "展示变化前后：此前付费专属，现在免费开放；演示创建一个周期性晨报和一个价格监测任务，说明免费 3 个活跃任务、每天最多跑一次、时间只能选模糊时段等限制。",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "",
+      "origin": "discovered",
+      "day": "2026-10-27",
+      "reason": "s67 明确说 8 月 26 日 OpenAI 把定时任务功能向所有免费用户开放，并列出一次性提醒、周期性任务、监测型任务三类用法，以及免费/Plus/Pro 的配额差异。",
+      "signals": [
+        {
+          "id": "s67",
+          "category": "chatgpt_t09_updates",
+          "platform": "知乎",
+          "title": "9亿人免费用，GPT私人秘书来了！ - 知乎",
+          "url": "https://zhuanlan.zhihu.com/p/2077421976931526370",
+          "published_at": "2026-08-30",
+          "excerpt": "9亿人免费用，GPT私人秘书来了！ - 知乎\n\n# 9亿人免费用，GPT私人秘书来了！\n\n新智元​\n\n人工智能话题下的优秀答主\n\nChatGPT 有 9 亿周活用户，付费的不到 5000 万，转化率只有 5% 到 6%。\n\n8 月 26 日，OpenAI 把定时任务功能（侧栏的「已安排」）向所有免费用户开放。\n\n这个此前只属于不到一成人的功能，一夜之间覆盖了剩余九成以上的用户。\n\n定时任务让 ChatGPT 在后台按你设好的时间或条件自动跑一段提示词，跑完把结果推送给你。\n\n你不在线，它也照跑。\n\n对绝大多数免费用户来说，这是第一次不用打开对话框就能让 ChatGPT 替自己干活。\n\n它能替你做什么\n\n定时任务分三类，对应三种不同的使用场景。\n\n最基础的是一次性提醒。\n\n告诉 ChatGPT 一个时间和一件事，到点它推送给你。\n\n比如：「包裹送到了告诉我一声。」\n\n用得更多的是周期性任务。\n\n每个工作日早上 7:30 推送一份 5 条以内的 AI 行业简报，限定领域、限定字数，等于一个零成本的定制晨报。\n\n每周日上午列出下周的减脂食谱和采购清单，每晚 7 点给孩子生成一个新的睡前故事并配一张插图，这些都能用一句自然语言设定完成。\n\n你可以把它当自己的外语私教：每天傍晚推送 5 个中等难度的英语句子，要求翻译，不给答案，等你回复后再批改。\n\n第三类是监测型任务，也是最能体现「替你盯着」的一类。\n\n你可以给 ChatGPT 贴一个商品页面的链接，让它盯住价格，比如跌破 1000 元就通知你。\n\n同样的逻辑可以盯机票、盯房价、盯股价、盯 Steam 上某款游戏的折扣。\n\nChatGPT 会定期去查，没有变化时不打扰你，有值得报告的内容才推送。\n\n做内容的人可以让它盯住竞品的产品页面或新闻发布，有更新了再来通知；\n\n找工作的人可以让它盯住招聘网站上的特定职位，有新发布就推一条摘要过来。\n\n8 月 26 日这批更新还加了一个更激进的能力：事件触发。\n\n付费用户可以把 Gmail、Slack（国外的飞书）或 GitHub 接入 ChatGPT，让任务按事件跑。\n\n客户在 Slack 频道（群组）里发了反馈，ChatGPT 自动总结要点并起草回复方案。\n\nGitHub 上有人给你的 PR 提了 review，它会归纳修改意见列出修订计划。\n\n邮件场景也一样：老板发来一封催进度的邮件，ChatGPT 读完后按你预设的模板起草回复。\n\n从「每天早上 8 点查一次」到「有事才动」，这是定时轮询和事件驱动的区别。\n\n前三类任务按时间跑，事件触发按条件跑，两者不能混在同一个任务里。\n\n所有任务都在侧边栏的 Scheduled 页面统一管理，可以随时暂停、编辑或删除。\n\n创建方式也简单：在对话框里用自然语言描述你想做什么、什么时候做，ChatGPT 确认后任务就开始了。\n\n免费版的天花板在哪\n\nOpenAI 给免费用户的配额很克制。\n\n3 个活跃任务的上限，周期性任务每天最多跑一次，时间只能选「上午」「下午」或「晚上」这样的模糊时段，不能精确到几点几分。\n\n付费用户的权限逐级递增。\n\nPlus 用户（20 美元/月）可以建 5 个任务，支持精确到分钟的时间设定，最快每小时跑一次；\n\nBusiness 和 Edu 用户上限 10 个；\n\nPro 和 Enterprise 用户上限 15 个。\n\n8 月 25 日新增的事件触发功能（接入 Gmail、Slack、GitHub 的 webhook）只对 Plus 及以上套餐开放，免费用户和 Go 用户碰不到。\n\n任务分享是这批更新里唯一不设门槛的功能。\n\n一个用户配好的任务可以生成链接，另一个人打开后会得到一份独立的副本，可以改指令、改时间、接上自己的账号。\n\n免费版拿到的相当于试用小样。\n\n3 个任务够你设一个晨报、一个降",
+          "metrics": {},
+          "collected_at": 1793106852.288077,
+          "signal_kind": "indexed_content"
+        }
+      ],
+      "status": "recommended",
+      "script_id": "",
+      "auto_video": false,
+      "created_at": 1793106907.636398,
+      "updated_at": 1793106907.636398
+    },
+    {
+      "id": "bd1d16d518854883b98af0663d5dd951",
+      "matrix": "chatgpt_acquisition",
+      "category": "chatgpt_t08_troubleshooting",
+      "title": "ChatGPT 一直转圈加载不出来：先查官方状态，还是先换网络？",
+      "angle": "把“服务故障、本地网络、IP/浏览器环境”分开，给观众一个从官方状态页到 DNS、无痕模式、关闭插件的检查清单，并说明每一步能排除什么。",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "",
+      "origin": "discovered",
+      "day": "2026-10-27",
+      "reason": "s57 梳理了 ChatGPT 加载不出来时的网络、IP、浏览器环境和官方服务状态四类原因，并给出修改 DNS、检查 IP 类型、清除缓存/换浏览器、查看 OpenAI 官方状态等排查方法。",
+      "signals": [
+        {
+          "id": "s57",
+          "category": "chatgpt_t08_troubleshooting",
+          "platform": "B站",
+          "title": "ChatGPT一直加载不出来？核心原因 + 实测解决方案全解析 - 哔哩哔哩",
+          "url": "https://www.bilibili.com/opus/1103468933351997442",
+          "published_at": "2025-08-21",
+          "excerpt": "ChatGPT一直加载不出来？核心原因 + 实测解决方案全解析 - 哔哩哔哩\n\n虾米哥跨境\n\n2025年08月21日 15:03\n\n不少用户在使用 ChatGPT 时，都会遇到这样一个尴尬的问题：页面一直停留在“加载中”、提示“network error”或“something went wrong”，又或者刷新后仍然卡在白屏和转圈等，这类问题往往不是单纯的“服务器拥堵”，而是多方面因素叠加导致。本文将系统梳理 核心原因 + 对应排查方法，并结合实测给出一整套解决方案（包含网络代理与环境优化技巧）。\n\n1. 网络问题\n\n原因：\n\n部分运营商对海外线路做了限速/屏蔽，导致访问 OpenAI 服务器异常。\n\nDNS 解析不稳定，域名无法正确指向。\n\n高延迟或丢包，页面请求无法完整加载。\n\n排查方法：\n\n首先打开Fast测速，查看延迟是否异常高。\n\n使用 ping chat.openai.com 或 tracert 命令检测丢包情况。\n\n更换 DNS（如 8.8.8.8 / 1.1.1.1）后再试。\n\n原因：\n\nChatGPT 在部分地区存在访问限制。\n\n如果你的 IP 来自“数据中心机房”，极易被识别为高风险，从而触发封锁。\n\n同一IP频繁登录多个账号，也可能触发防滥用机制。\n\n排查方法：\n\n打开IPinfo或scamalytics检查 IP 类型（Residentia住宅宽比DataCenter数据中心较好）。\n\n如果IP显示为“Hosting Provider”，大概率会被屏蔽。\n\n3. 浏览器环境问题\n\n原因：\n\n旧缓存或cookies导致验证脚本加载失败。\n\n插件（如广告屏蔽）干扰了JS脚本运行。\n\n指纹特征（UA、WebRTC、Canvas）异常，也可能导致加载停滞。\n\n排查方法：\n\n清除浏览器缓存和cookies后重试。\n\n尝试无痕模式或换一个浏览器。\n\n关闭插件后再刷新页面。更换 User-Agent 或禁用 WebRTC 功能也常能绕过部分检测机制。\n\n使用指纹浏览器模拟干净环境。尽量避免在短时间内进行高频操作，合理控制请求间隔，有助于降低被识别为异常行为的概率。\n\nChatGPT 用户量激增时，服务器可能短暂拥堵。\n\nAPI/网页版本更新时，会出现临时访问不稳定。\n\n排查方法：\n\n访问OpenAI的官方服务状态说明网站查看官方状态。\n\n如果官方显示正常，而你无法访问，则说明是本地环境问题。\n\n综上所述，虽然网络和浏览器问题可以临时缓解，但最核心的原因往往是 IP环境不合规。要想真正稳定、长期解决“ChatGPT加载不出来”的困扰，就必须依靠住宅级代理服务来替代风险极高的机房线路。\n\n## 二、实测解决方案\n\n经过多次实测，我们总结出以下几类解决办法，基本能解决 90%以上的“加载不出来”问题：\n\n1. 优化网络连接\n\n切换 WiFi/4G，避免使用公司或校园限制网络。如果你使用的是企业网络或启用了特定防火墙设置，可能会阻止 ChatGPT 连接到服务器。\n\n修改 DNS 为 Google DNS（8.8.8.8）或 Cloudflare（1.1.1.1）。\n\n2. 使用住宅级代理服务\n\n很多用户的卡顿问题，其实是 IP不合规导致。\n\n数据中心IP容易被识别，ChatGPT 网页直接卡死。实用建议使用住宅宽带 IP，更真实，稳定性和通过率远高于数据中心 IP。优质的住宅IP服务通常会提供高纯净度+高匿名度的IP。\n\n实用建议：推荐实用IPFoxy的住宅IP代理服务，因为是来自全球真实家庭网络，能够提供更纯净、稳定的IP，具备更高的隐匿性和信任度，能有效绕过区域封锁和风控机制。\n\n步骤1：获取 IPFoxy 的代理节点信息\n\n访问IPFoxy官网注册一个账号并登录。在购买页面，选择你所需的代理类型，如：静态住宅代理、动态住宅代理、数",
+          "metrics": {},
+          "collected_at": 1793106847.733522,
+          "signal_kind": "indexed_content"
+        }
+      ],
+      "status": "recommended",
+      "script_id": "",
+      "auto_video": false,
+      "created_at": 1793106907.63631,
+      "updated_at": 1793106907.63631
+    },
+    {
+      "id": "246888369b0d4826bbc3d87a84dfd752",
+      "matrix": "chatgpt_acquisition",
+      "category": "chatgpt_t07_subscription",
+      "title": "ChatGPT 订阅支付：网页端 Stripe 与应用内购买各要什么条件？先分清“没卡”还是“地区不支持”",
+      "angle": "对照网页端支付页和应用内购买两条路径，列出卡号、账单地址、电话、账户余额/礼品卡等条件与失败排查分支；明确 ChatGPT 订阅与 API 账单不是一回事。",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "",
+      "origin": "discovered",
+      "day": "2026-10-27",
+      "reason": "s51 记录了从 Upgrade to Plus 进入 Stripe 支付页、填写信用卡信息与账单地址、电话并勾选条款的流程；s50 讨论用本人银行卡走官方渠道、避开代充和虚拟卡，可作为区分支付方式与地区限制的线索。",
+      "signals": [
+        {
+          "id": "s51",
+          "category": "chatgpt_t07_subscription",
+          "platform": "YouTube",
+          "title": "ChatGPTの有料版「ChatGPT Plus」が日本で利用可能に！無料版との速度比較や申込方法を解説",
+          "url": "https://www.youtube.com/watch?v=6PXvBJe0LTw",
+          "published_at": null,
+          "excerpt": "Subscriptions for ChatGPT Plus, the paid plan for ChatGPT, have finally started. At first, it was only available to users with US addresses, so Japanese users couldn't sign up. However, as of February 11, 2023, ChatGPT Plus is now available in Japan. I have already signed up for ChatGPT Plus, so I will explain how to subscribe, how to cancel, and how the performance differs from the free plan. From the afternoon of February 11, 2023 , Japan Standard Time, the paid version , ChatGPT Plus, became available to users in Japan. That morning, only US addresses could be entered, and Japanese credit cards could not be used . But by the afternoon, \"ChatGPT Plus is available in Japan\" was displayed, and it became possible to sign up. I immediately signed up for ChatGPT Plus, so I will explain the sign-up process in this video. I will now demonstrate and explain the actual sign-up process for ChatGPT Plus. I am currently accessing the ChatGPT service screen. Click on \"Upgrade to Plus\" in the menu on the left. You will see two plans: the Free plan and ChatGPT Plus, so click on the upgrade plan to subscribe. You will then be taken to the Stripe payment screen. You can sign up for ChatGPT Plus by entering your credit card information and billing address here. I will go ahead and enter the information now. Next, I will enter the billing address. With the address entered, I will check the box to allow one-click purchases in the future. Now, I will enter the phone number. Finally, I will check the box to agree to the terms of service, which enables the \" Subscribe\" button, and then I'll cli",
+          "metrics": {},
+          "collected_at": 1793106845.174474,
+          "signal_kind": "indexed_content"
+        },
+        {
+          "id": "s50",
+          "category": "chatgpt_t07_subscription",
+          "platform": "YouTube",
+          "title": "不用代充、不买虚拟卡！用自己的国内银行卡订上 ChatGPT Plus｜解锁 codex claude 保姆级教程 - YouTube",
+          "url": "https://www.youtube.com/watch?v=o9GhNogsFuI",
+          "published_at": "2026-06-18",
+          "excerpt": "🟢 视频简介\n\n想订 ChatGPT，是不是只能找代充、买虚拟卡，还得天天担心跑路、封号？这期手把手教你用自己的手机号、自己的国内银行卡，走 OpenAI 官方渠道按原价订上 ChatGPT Plus，解锁 codex 和 GPT 5.5。账号、手机号、付款全是自己的，安全又稳定，除了 5 块钱的办卡工本费，全程没有任何额外花费。十来分钟，跟着做一次性全搞定。\n\n🔵 相关资源\n\n 📄 完整图文教程（所有链接、步骤、避坑点都在这）\n https://feifei.537393.xyz/posts/chatgpt-plus-google-play/\n\n 📺 相关视频\n ▶️ 正规海外手机号怎么来（giffgaff eSIM，Codex 验证必过）\n https://www.youtube.com/watch?v=JGGODziqQnc\n ▶️ Codex 国内零门槛接入 DeepSeek（免账号 免魔法 免月费）\n https://www.youtube.com/watch?v=O_KWRobwudw\n ▶️ 2026 国内 Claude Pro 完整订阅指南（半年零封号）\n https://www.youtube.com/watch?v=f8GBWGTuvW4\n\n 👍 视频对你有帮助的话，点赞订阅支持一下，有问题评论区见～",
+          "metrics": {},
+          "collected_at": 1793106845.1744692,
+          "signal_kind": "indexed_content"
+        }
+      ],
+      "status": "recommended",
+      "script_id": "",
+      "auto_video": false,
+      "created_at": 1793106907.63621,
+      "updated_at": 1793106907.63621
+    },
+    {
+      "id": "2af8fd0fd35441fe9f435718bd8f4dcb",
+      "matrix": "chatgpt_acquisition",
+      "category": "chatgpt_t05_comparison",
+      "title": "查资料、写文档、解难题：ChatGPT、Claude、Gemini 分别该在什么任务里用？",
+      "angle": "选三个具体任务——找资料、改长文、解技术难题，用同一输入分别跑一遍，记录输出差异、费用档位和适用场景，再给不同需求下的选择依据。",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "",
+      "origin": "discovered",
+      "day": "2026-10-27",
+      "reason": "s33 作者按月订阅 ChatGPT Plus 和 Claude Pro，并描述搜索科研资料、Claude 文档处理、Gemini 长文本等实际用途；s34 则按日常对话、命令行编程、特殊能力三个场景划分三家 AI 的强项。",
+      "signals": [
+        {
+          "id": "s33",
+          "category": "chatgpt_t05_comparison",
+          "platform": "B站",
+          "title": "ChatGPT、Claude、Grok、Gemini，2025年8月谁更香？ - 哔哩哔哩",
+          "url": "https://www.bilibili.com/opus/1100810039390633991",
+          "published_at": "2025-08-14",
+          "excerpt": "ChatGPT、Claude、Grok、Gemini，2025年8月谁更香？ - 哔哩哔哩\n\n ChatGPT、Claude、Grok、Gemini，2025年8月谁更香？\n\nSLICES新材料挖掘机\n\n2025年08月14日 11:05\n\n## 前言\n\n作为一个重度AI使用者，我每个月订阅ChatGPT Plus和Claude Pro各20刀，今天来分享一下我常用的4款AI工具的真实体验和优缺点。\n\n## ChatGPT：搜索能力和深度思考的双重王者\n\n搜索信息能力：断档式领先\n\n主要用途： 搜索科研成果、开源程序\n\nChatGPT的搜索能力确实比Claude的深度搜索强很多，经常能找到一些我用传统手艺在Google Scholar或GitHub上找不到的相关参考文献，大大提升了信息收集效率。\n\nChatGPT 5 Thinking：解决复杂问题的利器\n\n这里分享一个印象深刻的真实案例：\n\n我给孩子买的遥控车充电时，不小心把笔记本电脑弄坏了，见下图：——音响没声音，右侧USB接口全部失效。联想客服建议送修，需要10天时间。抱着试试看的心态，我向ChatGPT o3描述了这个问题。\n\n结果： 按照AI给出的解决方案，问题被完美解决了。如图：\n\n说实话挺震撼的，AI维修、AI诊断... 感觉很多传统行业确实会受到冲击。\n\n技术能力方面： 对于一些非常有挑战性的难题（比如晦涩的晶体拓扑学论文，需要把逻辑代码化），只有ChatGPT o3/5 Thinking能给出比较可用的方案和代码。Grok4有一些效果，可以给ChatGPT 5 Thinking出的代码做检查；Claude Opus 4.1在这方面表现很一般，感觉思维深度有限；Gemini 2.5 Pro也不够理想，浮于表面。\n\n## Claude：文档处理专家\n\nClaude 4 Sonnet：文字工作的好帮手\n\n比较适合处理文档、生成文字内容，AI痕迹相对较淡，稍作修改就能很好使用。\n\nClaude Code：编程辅助利器\n\n之前我订阅过Cursor，但上下文太短，Max模式又太贵。改用Claude Code后（20美元套餐可用Sonnet 4版本），发现它的全局理解能力比Cursor好很多。\n\n我的工作流程： 自己或用ChatGPT 5 Thinking制定方案 → Claude Code负责实施 → 效果不错\n\nClaude 4.1 Opus：能力强但用量限制大\n\n虽然比Sonnet更强，但20美元套餐的使用量给得太少，不够用。而且处理复杂问题的能力还是比ChatGPT弱不少，特别是发现数理逻辑深层错误方面。对程序员可能很有用，但我不是专业程序员，无法给出有价值的评价。\n\n## Gemini：长文本处理专家\n\nGemini 2.5 Pro：免费好用的选择\n\n谷歌最近在AI领域进步很快，Gemini 2.5 Pro在 https://aistudio.google.com/prompts/new_chat 上可以无限免费使用，这点很良心。\n\n优势： 上下文特别长，非常适合翻译超长文档这类操作。\n\n如果没有预算购买付费模型，用这个也可以。\n\n## Grok：科研计算的有力补充\n\nGrok4：最近开放免费使用 https://grok.com/chat/\n\n在处理科研领域有挑战性的数理逻辑问题方面，仅次于ChatGPT 5 Thinking，能够和ChatGPT形成很好的互补，两者可以互相验证来发现更深层次的问题，算是免费模型里面最好用的了。\n\n## 我的AI使用策略\n\n对于复杂计算问题，我现在的流程：\n\n1. ChatGPT 5 Thinking制定方案和代码实现\n2. 或者Claude Code 代码实现，并进行调试\n3. ChatGPT 5 Thinking / Grok4 / Cla",
+          "metrics": {},
+          "collected_at": 1793106838.943428,
+          "signal_kind": "indexed_content"
+        },
+        {
+          "id": "s34",
+          "category": "chatgpt_t05_comparison",
+          "platform": "B站",
+          "title": "ChatGPT、Claude、Gemini 什么任务该交给谁？每月600刀经验总结_哔哩哔哩_bilibili",
+          "url": "https://www.bilibili.com/video/BV1LBPjzKECT/",
+          "published_at": "2026-03-02",
+          "excerpt": "ChatGPT、Claude、Gemini 什么任务该交给谁？每月600刀经验总结_哔哩哔哩_bilibili\n\n# ChatGPT、Claude、Gemini 什么任务该交给谁？每月600刀经验总结\n\n2026-03-02 15:50:44\n\n三家AI我都是200美金档的会员，用了很久之后，发现它们的强项完全不同。这个视频从三个场景——日常对话、命令行编程（vibe coding）、特殊能力——帮你搞清楚什么时候该用哪一个。",
+          "metrics": {},
+          "collected_at": 1793106838.943433,
+          "signal_kind": "indexed_content"
+        }
+      ],
+      "status": "recommended",
+      "script_id": "",
+      "auto_video": false,
+      "created_at": 1793106907.636109,
+      "updated_at": 1793106907.636109
+    },
+    {
+      "id": "45fbb4e3c7d547509d7b4c70bd8beb96",
+      "matrix": "chatgpt_acquisition",
+      "category": "chatgpt_t04_testing",
+      "title": "给 ChatGPT 5.6 三个高难度任务：小游戏、3D 飞机和 SVG 动画，哪些能一次跑通？",
+      "angle": "固定三个任务、记录提示词、耗时和可运行/可查看的结果，把“能生成”与“能交付”分开观察，保留失败点和需要人工修改的部分。",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "",
+      "origin": "discovered",
+      "day": "2026-10-27",
+      "reason": "s32 明确说用三个较有难度的实例测试 GPT-5.6 能否完成复杂 SVG 动画、3D 互动模型，以及使用游戏引擎开发完整项目，并讨论 Chat/Work/Codex 合并后的工作流影响。",
+      "signals": [
+        {
+          "id": "s32",
+          "category": "chatgpt_t04_testing",
+          "platform": "YouTube",
+          "title": "ChatGPT 5.6 全面实测：10分钟做出游戏、A380 3D与火箭SVG！Chat/Work/Codex合体，成本仅Claude 1/16｜红孩儿Redman",
+          "url": "https://www.youtube.com/watch?v=dVKJKxcSzac",
+          "published_at": null,
+          "excerpt": "你能想象吗 只要简单的描述 10分钟刚上线的CHATGPT5.6就能 完成如此酷炫的2D游戏 3D 飞机模型和精美的SVG动画 网页端和Codex还实现了重大整合 5小时的用量限制也彻底取消了 最关键的是使用成本仅是Claude的1/16 吓得Anthropic连忙免费 重置了所有用户的额度 本期视频主要回答以下三个问题 第一GPT5.6到底比上一代强在哪里 cha/twork和Codex合并之后 在我们的使用体验和 工作流中产生了哪些影响 最后会以三个较为有 难度的实例来测试 GPT5.6能否完成复杂的SVG动画 3D的互动模型以及使用游戏 引擎开发完整的项目 大家好分享超级软件 畅享网络世界 我是Redman 这是一个专注数字经济与科技频道 每周更新全网最前沿的AIGC资讯 最赚钱的Web3套利项目 以及最硬核的网络技术 如果你不想错过任何一期视频 请一定订阅Redman的频道 并打开小铃铛相信我 这将让你在数字时代快人一步 首先是模型的更新 GPT5.6的模型家族一改 之前Openai的命名模式 一次性给到了三款不同定价的模型 分别是sol terra和Luna 分别对应着太阳地球和月亮 三款模型的售价不同 最贵的sol旗舰模型 主打的是复杂长文本以及 对于游戏3D等任务的执行 也是本期测试的重点 terra模型更偏向一个均衡模型 平衡了模型智能和成本 而Luna呢则是一个 主打高速低延迟低成本的轻量模型 比较适合做高频的简单任务 在Openai主导的last bench测试中 GPT5.6sol模型以绝对的 优势碾压了Claude的新模型 fable5 这个新的基准测试主打55个 行业的产业级工作流测试 而并不是针对于编程等特定 场景的一些机械化的测试即使在 主流的Evanl bench2.1编程能力中 sol和terra也均已超过Claude的最强形态 而这次之所以让claude慌张地 重置了用户使用量的原因 还是因为成本 在交付同等功能流的情况下 terra和Luna的执行成本仅为claude的1/16 巨大的成本优势也让API的 这次升级显得非常的扎眼 看了模型能力 我们再来看一下在UI交互层面 这次的更新也可以说是重大的 变化以前Openai的各个产品 Codex的APP和CLI chatgpt一般都在Web端 而这次升级过后 Openai将这两个重要的 产品形态整合到了一起 而之所以这么做 主要的原因就是解决chat的 生命周期问题在过去 prompt这种方式更像是一种功能 我们需要在网页端和chatgpt 进行项目的对话和讨论 最后让它形成一个output的提示词 然后再将这个提示词 手动复制到Codex中 那整个的这个chat就终止了 所以说chat作为上一种 范式的一个核心资产 它仅是一次性的对话 而且整个chat的 上下文也都会随之死亡 而人类的话 作为整个链条上的缝合怪 需要手动把chat产生的提示词 复制到Codex或者是其他的agents 中来进行强行接续AI的记忆 这次范式升级之后 我们可以将chat整个打包成一个 resource把它添加到Codex agent的 整个工作流程中 让它沉淀为底层逻辑 而不是静态文本 这样的话 我们的chat也就有了更长的生命周期 在整个过程中 还可以随着项目的 运行而持续发挥作用 我们这里展示一下Codex的 Windows桌面端新的变化 今天我们升级完成之后 最大的变化就可以在左侧的 栏目中找到聊天这个选项 如果你同样 Codex登录的也是chatgpt的plus或者是Pro 那么你在网页端chatgpt的所有聊天 内容都会集成在这个选项中 我们可以直接点击这里 然后在这里能找到我们刚刚在 chatgpt里面聊的游戏的这个对话 这个对话前面我们是直接让 它去生成一个You",
+          "metrics": {},
+          "collected_at": 1793106834.3528461,
+          "signal_kind": "indexed_content"
+        }
+      ],
+      "status": "recommended",
+      "script_id": "",
+      "auto_video": false,
+      "created_at": 1793106907.636013,
+      "updated_at": 1793106907.636013
+    },
+    {
+      "id": "4aab6bedf0d94cee841f9469ee6b22ac",
+      "matrix": "chatgpt_acquisition",
+      "category": "chatgpt_t03_tutorials",
+      "title": "别让 ChatGPT 一口吃成胖子：用“拆任务”提示法把复杂需求变成可执行步骤",
+      "angle": "以一个具体需求为例，先让 ChatGPT 把任务拆成子任务，再逐步执行；对比“一句话丢过去”和“拆开一步步做”的输出差异，并给出可复制的步骤提示词。",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "",
+      "origin": "discovered",
+      "day": "2026-10-27",
+      "reason": "s17 是 OpenAI 官方最佳实践系列第三篇，明确讲“将复杂任务分解为更简单的子任务”，并给出先分类用户问题、再输入对应指令的例子，适合改写成普通用户可操作的中文教程。",
+      "signals": [
+        {
+          "id": "s17",
+          "category": "chatgpt_t03_tutorials",
+          "platform": "知乎",
+          "title": "知乎 - 有问题，就会有答案",
+          "url": "https://www.zhihu.com/en/article/653997941",
+          "published_at": null,
+          "excerpt": "知乎 - 有问题，就会有答案\n\nChatGPT Best Practices Series Part 3 - Breaking Down Complex Tasks\n\n无忌\n\n## Background\n\nOpenAI officially detailed the best practices for using ChatGPT, which are applicable not only to users engaging in direct conversations through the ChatGPT website but also to developers accessing it via the OpenAI API.\n\nMastering these best practices will enable you to better utilize the GPT large model.\n\nThis article is the third in the series of best practices for using ChatGPT - Breaking down complex tasks into simpler subtasks.\n\nIn the process of software development, we usually break down a complex system into multiple functional modules, which makes the entire system easier to understand and maintain.\n\nThis principle also applies to large models like GPT, as complex tasks generally have higher error rates compared to simple tasks. If a complex task is broken down into multiple simpler subtasks, the large model's performance in answering is usually better.\n\n## Strategy 1: Categorize User Questions\n\nFor example, if you are building an intelligent customer service system, the user's questions can be very diverse, possibly asking about product information, technical issues, or account information, etc.\n\nTo be able to accurately answer customers' questions, we can first have the large model classify the user's questions to determine which aspect of the question the user is inquiring about. Then, based on the classification of the user's question, we can input the corresponding instruction to the large model, which will improve the response effect.\n\nRefer to the followin",
+          "metrics": {},
+          "collected_at": 1793106830.8259451,
+          "signal_kind": "indexed_content"
+        }
+      ],
+      "status": "recommended",
+      "script_id": "",
+      "auto_video": false,
+      "created_at": 1793106907.635943,
+      "updated_at": 1793106907.635943
+    },
+    {
+      "id": "e625092447554171bca213df4d904fdd",
+      "matrix": "chatgpt_acquisition",
+      "category": "chatgpt_t02_scenarios",
+      "title": "把一份表格丢给 ChatGPT Agent：从数据到图表再到 PPT，一次任务能走多远？",
+      "angle": "保留输入表格、操作步骤、中间产物和最终 PPT，展示一个可迁移的办公流程，重点讲任务起点与交付物，而不是罗列功能名称。",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "",
+      "origin": "discovered",
+      "day": "2026-10-27",
+      "reason": "s13 的时间轴列出“制作电子表格”“生成幻灯片 PPT”“分析数据”等实测案例，并说明用 10 个案例检验 ChatGPT Agent 能否完成报告、表格、PPT 和数据分析等任务。",
+      "signals": [
+        {
+          "id": "s13",
+          "category": "chatgpt_t02_scenarios",
+          "platform": "B站",
+          "title": "ChatGPT Agent 完整测评 (附10大用法案例)_哔哩哔哩_bilibili",
+          "url": "https://www.bilibili.com/video/BV14j81zPEtu/",
+          "published_at": "2025-07-31",
+          "excerpt": "ChatGPT Agent 完整测评 (附10大用法案例)_哔哩哔哩_bilibili\n\n# ChatGPT Agent 完整测评 (附10大用法案例)\n\n2025-08-01 20:00:00\n\n上周，OpenAI 正式推出了ChatGPT Agent，网上对 ChatGPT Agent 的评价褒贬不一，有人觉得 OpenAI 终于走到了 Agent 这个阶段，是巨大的突破；也有人吐槽，说同类的其他产品早就已经做得比 OpenAI 还要更好。 今天我们就用10个案例来实测，看看ChatGPT Agent到底拉不拉胯？ 📽️ 时间轴： 00:00 开场 00:55 ChatGPT Agent入门 02:28 实测案例1: 生成报告 04:02 实测案例2: 操作电脑 05:38 实测案例3: 制作电子表格 07:07 实测案例4: 生成幻灯片PPT 08:03 实测案例5: 分析数据 09:36 实测案例6: 挖掘信息 10:24 实测案例7: 生活场景 11:10 实测案例8: 找工作 & 招聘 12:50 实测案例9: 提供规划 & 建议 13:57 实测案例10: 自媒体发帖 14:50 ChatGPT Agent实测总结 15:40 智能体费用 & 总结 📺 其它关联影片： Genspark VS Manus – 誰是2025年最強AI智能體：https://www.youtube.com/watch?v=WBAuPAF81LA&t=24s ChatGPT Agent：全面解析 + 使用案例：https://www.youtube.com/watch?v=fVe82Hwf1GE 15分鐘掌握 Genspark 7大進階用法: https://www.youtube.com/watch?v=h5T45yrlZZQ 迄今為止最好的AI智能體: Genspark: https://www.youtube.com/watch?v=a6QxSB18efw&t=682s 实测Manus: 能做哪些事儿？(附4个实用案例 + 使用攻略)：https://www.youtube.com/watch?v=nVCwBpaRp70&t=3s 如果你看完这部影片有所收获，请点赞支持👍，订阅我的频道❤️ 你也可以分享出去，让更多人受益！☀️☀️ ============================================ ChatGPT Agent 完整測評 (附10大用法案例) #chatgptagent #chatgpt智能体 #chatgpt智能體 #chatgpt代理 #chatgpt代理教程 #chatgptagent案例 #chatgptoperator #chatgptdeepresearch #深度研究 #deepresearch #openaiagent #operator教程 #operator案例 #ai智能体 #ai智能體 #ai代理工具 #ai自动化 #ai自動化 #ai效率 #ai生产力 #ai生產力 #ai工作流 #aiworkflow #ai工具 #ai工具推荐 #ai工具推薦 #gpt4o #gpt-4o #gpt4workflow #自动化办公 #自動化辦公 #浏览器代理 #瀏覽器代理 #运行代码 #執行代碼 #图像生成 #圖像生成 #图片生成 #圖片生成 #视觉推理 #視覺推理 #codeinterpreter #chatgptcodeinterpreter #chatgptvision #案例解析 #使用案例 #教程2025 #ai教程 #ai教學 #openai更新 #openai新功能 #chatgpt新功能 #chatgpt更新2025 #chatgpt智能體測評 #chatgpt智能体测评 #完整測評",
+          "metrics": {},
+          "collected_at": 1793106826.6184452,
+          "signal_kind": "indexed_content"
+        }
+      ],
+      "status": "recommended",
+      "script_id": "",
+      "auto_video": false,
+      "created_at": 1793106907.635871,
+      "updated_at": 1793106907.635871
+    },
+    {
+      "id": "88756cd1bbab4d408ce9c44c7f905f38",
+      "matrix": "chatgpt_acquisition",
+      "category": "chatgpt_t01_product",
+      "title": "上传一张图，ChatGPT 到底能看懂什么？用 GPT Vision 做一次识图演示",
+      "angle": "拿一张日常照片或截图作为输入，展示上传入口、识别结果和追问过程，让新用户直观看到“看图回答”能完成什么、边界在哪里。",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "",
+      "origin": "discovered",
+      "day": "2026-10-27",
+      "reason": "s6 的章节列表明确包含 GPT Vision，并覆盖 Custom instructions、Plugins、Web browsing、Advanced data analysis、DALL-E 3、GPTs 等功能；可从中挑出识图这一普通人容易理解的能力做具体演示。",
+      "signals": [
+        {
+          "id": "s6",
+          "category": "chatgpt_t01_product",
+          "platform": "YouTube",
+          "title": "All ChatGPT Features Explained in 2024! (Full Guide)",
+          "url": "https://www.youtube.com/watch?v=lFZgr6ayX_U",
+          "published_at": "2024-02-09",
+          "excerpt": "# All ChatGPT Features Explained in 2024! (Full Guide)\n\n- Channel: AI Foundations\n- Length: 21:10\n- Views: 57.3K\n- Likes: 1.3K\n- Published: 2024-02-09T07:00:08-08:00\n- Category: People & Blogs\n- Keywords: chatgpt, chatgpt tips, chatgpt tips for beginners, chatgpt 2023 tips, chatgpt tips 2023, chatgpt 4 tips, gpt4 tips, chatgpt 2023, chatgpt tutorial, full chatgpt tutorial, chatgpt guide, chatgpt tricks, chatgpt tips and tricks, master chatgpt, what is chatgpt, chatgpt explained, chatgpt best tips, chatgpt 2024 tips, chatgpt full tutorial, chatgpt tips for 2024, chatgpt tips in 2024, how to use chatgpt 2024, chatgpt 2024, chatgpt tips 2024, chatgpt features\n- Language: en\n\n## Description\n\nMaster AI through courses and community: https://www.skool.com/ai-foundations\nFull A-Z ChatGPT features guide for 2024!\n👉🏼ChatGPT Mastery Course: https://hi.switchy.io/chatgpt-mastery-course\n👉🏼300 Personas: https://hi.switchy.io/chatgpt-personas\n--------------------\n🛒AI Templates, Prompts and Courses for ChatGPT and Midjourney:\nhttps://aifoundations.io/shop\n\n📰Subscribe to my newsletter:\nhttps://aifoundations.io\n\n🔗Follow me on Linkedin:\nhttps://www.linkedin.com/in/drake-surach-823530203/\n\n🐥Follow me on twitter:\nhttps://twitter.com/drake0DTE\n--------------------\n\n⌚Chapters:\n\n#chatgpt #openai\n\n## Chapters\n\n- 00:00 The Power of ChatGPT\n- 00:46 Best Way to Learn ChatGPT\n- 01:43 Custom instructions\n- 05:12 Plugins\n- 07:46 Web browsing\n- 09:33 Advanced data analysis\n- 13:00 GPT Vision\n- 15:26 Dalle 3\n- 17:04 GPTs\n- 19:24 GPT Mentions\n- 20:49 Learn ChatGPT in depth\n\n## Transcript\n\nlisten chat GPT i",
+          "metrics": {},
+          "collected_at": 1793106815.5616481,
+          "signal_kind": "indexed_content"
+        }
+      ],
+      "status": "recommended",
+      "script_id": "",
+      "auto_video": false,
+      "created_at": 1793106907.6355488,
+      "updated_at": 1793106907.6355488
+    },
+    {
+      "id": "f1e661fd90cf4b53a245d21d4c40b291",
+      "matrix": "chatgpt_acquisition",
+      "category": "chatgpt_t06_value",
+      "title": "ChatGPT 免费版用了一个月，应该升级 Plus 吗？",
+      "angle": "围绕日常任务、使用频率和实际困扰，帮助观众判断自己的升级需求。",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "notes": "一个月指观众已经使用免费版一段时间。重点解释需求与选择，结合具体任务和画面材料展开讲述。",
+      "origin": "manual",
+      "day": "",
+      "reason": "",
+      "signals": [],
+      "status": "completed",
+      "script_id": "9f9e96af89e54057a6339676c9a9c900",
+      "auto_video": true,
+      "created_at": 1793106666.192736,
+      "updated_at": 1793111255.537421,
+      "script_status": "APPROVED",
+      "stage": null,
+      "error": null,
+      "report_path": "output/video/2026-10-27_21-11-06_theme_research-m4_9f9e96af.md",
+      "version": 1,
+      "renders": [
+        {
+          "id": "c8daf66172264932ba0f865c9d34d5d5",
+          "status": "COMPLETED"
+        }
+      ]
+    }
+  ],
+  "today": "2026-10-27",
+  "discovery_running": false,
+  "runs": [
+    {
+      "id": "8eb021d3a682425cb5467c7683b904d8",
+      "matrix": "chatgpt_acquisition",
+      "day": "2026-10-27",
+      "status": "success",
+      "started_at": 1793106811.366884,
+      "finished_at": 1793106907.6473758,
+      "error": "",
+      "result": {
+        "recommended": 8,
+        "categories": 9,
+        "signals": 72,
+        "empty_categories": [
+          "chatgpt_t06_value"
+        ],
+        "failures": {},
+        "usage": {
+          "searches": 9,
+          "requests": 1,
+          "prompt_tokens": 57330,
+          "completion_tokens": 6540,
+          "total_tokens": 63870
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "time": "09:00",
+    "timezone": "Asia/Shanghai",
+    "platforms": [
+      "bilibili",
+      "zhihu",
+      "youtube"
+    ]
+  },
+  "schedule": {
+    "id": "themes_chatgpt_acquisition",
+    "job_name": "topic_discovery/chatgpt_acquisition",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "missed_policy": "latest",
+    "max_retries": 1,
+    "version": 1,
+    "next_run_at": 1793149200.0,
+    "created_at": 1793106807.510171,
+    "updated_at": 1793106807.510171,
+    "deleted": 0,
+    "next_run": "2026-10-28T09:00:00+08:00"
+  },
+  "scheduler": {
+    "checked_at": 1793111300.522326,
+    "status": "ok",
+    "pid": 35320,
+    "runtime": {
+      "workspace": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi",
+      "state_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state",
+      "jobs_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/jobs",
+      "config_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config",
+      "logs_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/logs"
+    },
+    "online": true,
+    "age_seconds": 7.0,
+    "detail": "执行器在线，每 10 秒检查到期任务"
+  }
+}

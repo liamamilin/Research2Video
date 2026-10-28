@@ -13,6 +13,7 @@ import {
 } from "@/api/matrices";
 import { ProductionConfigs } from "@/components/ProductionConfigs";
 import { ContentColumns, MatrixContentSettings } from "@/components/ContentColumns";
+import { ThemeWorkbench } from "@/components/ThemeWorkbench";
 import { listProduction, removeProduction, type ProductionConfig } from "@/api/production";
 import { TimeStamp } from "@/components/TimeStamp";
 import { ErrorState } from "@/components/ErrorState";
@@ -463,7 +464,7 @@ export function MatrixDetailPage() {
   const [params, setParams] = useSearchParams();
   const [matrix, setMatrix] = useState<Matrix | null>(null);
   const business = matrix?.content?.role === "domain";
-  const tab = ["columns", "jobs", "runs", "week", "settings"].includes(params.get("tab") ?? "")
+  const tab = ["columns", "themes", "jobs", "runs", "week", "settings"].includes(params.get("tab") ?? "")
     ? params.get("tab")! : params.get("job") ? "jobs" : business ? "columns" : "jobs";
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -579,9 +580,10 @@ export function MatrixDetailPage() {
     {matrix.monthly_searches ? <MonthlyLimit matrix={matrix} isAdmin={false} onSaved={setMatrix} /> : null}
     <section className="grid grid-cols-3 gap-3" aria-label="当前矩阵概况">{[{ label: "研究任务", value: matrix.members.length }, { label: "需要关注", value: stats.issues }, { label: "已启用定时", value: stats.scheduled }].map((s) => <div key={s.label} className="card p-3"><p className="text-xs text-text-muted">{s.label}</p><p className="text-xl font-semibold tabular-nums mt-1">{s.value}</p></div>)}</section>
     <div role="tablist" aria-label="矩阵工作区" className="flex flex-wrap gap-2 border-b border-border text-sm">
-      {([["columns", "栏目"], ["jobs", business ? "研究来源" : "研究任务"], ["runs", "运行记录"], ["week", "周期"], ["settings", "矩阵设置"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={cn("px-3 py-2 -mb-px border-b-2", tab === id ? "border-accent text-text font-medium" : "border-transparent text-text-muted hover:text-text")} onClick={() => selectTab(id)}>{label}</button>)}
+      {([["columns", "栏目"], ["themes", "主题推荐"], ["jobs", business ? "研究来源" : "研究任务"], ["runs", "运行记录"], ["week", "周期"], ["settings", "矩阵设置"]] as const).map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={cn("px-3 py-2 -mb-px border-b-2", tab === id ? "border-accent text-text font-medium" : "border-transparent text-text-muted hover:text-text")} onClick={() => selectTab(id)}>{label}</button>)}
     </div>
     {tab === "columns" ? <ContentColumns key={matrix.key} matrix={matrix} canEdit={canEdit} /> : null}
+    {tab === "themes" ? <ThemeWorkbench key={matrix.key} matrix={matrix.key} canEdit={canEdit} /> : null}
     {tab === "runs" ? <MatrixRuns key={matrix.key} matrix={matrix} initialJob={params.get("job") ?? ""} /> : null}
     {tab === "week" ? <MatrixWeek matrix={matrix} onChanged={setMatrix} /> : null}
     {tab === "jobs" ? <section aria-label="矩阵里的 Job" className="space-y-3">

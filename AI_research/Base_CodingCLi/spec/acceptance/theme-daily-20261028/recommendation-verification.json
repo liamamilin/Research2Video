@@ -1,0 +1,28 @@
+{
+  "daily_categories": [
+    "chatgpt_t01_product",
+    "chatgpt_t02_scenarios",
+    "chatgpt_t03_tutorials",
+    "chatgpt_t04_testing",
+    "chatgpt_t05_comparison",
+    "chatgpt_t06_value",
+    "chatgpt_t07_subscription",
+    "chatgpt_t08_troubleshooting"
+  ],
+  "daily_theme_ids": [
+    "f86c30aa72e94257b22c610959213726",
+    "a51e41f4f4aa447ebfdb6e47d0353f01",
+    "bb3c2cb615b84ddda6b8d5af5a4905e4",
+    "3bdea185acf145c288ce812ea747e402",
+    "c196bbfcf4e04ef08a0005cf8700651f",
+    "536eb656e6c346dd96a411a1dede5163",
+    "36e32106c2d643dcb2b9427554a7c461",
+    "c293c4625fe448858599054fc4c22ec9"
+  ],
+  "schedule_id": "themes_chatgpt_acquisition",
+  "used_history_count": 5,
+  "previous_plus_example_retained": true,
+  "meeting_completed_in_history": true,
+  "meeting_publications": 0,
+  "final_test_feedback": "clear"
+}

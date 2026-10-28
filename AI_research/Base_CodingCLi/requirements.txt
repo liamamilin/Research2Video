@@ -1,4 +1,5 @@
 PyYAML>=6.0
+beautifulsoup4>=4.12,<5  # Public source pages and tutorial directories
 
 # LLM API client (OpenAI-compatible)
 openai>=1.40

@@ -1,0 +1,21 @@
+schema_version: 1
+name: T05 · AI 产品横向选择
+matrix: chatgpt_acquisition
+type: comparison
+audience: 中文 ChatGPT 新用户、职场与学习人群、潜在付费用户
+promise: ChatGPT 和其他 AI 哪个好？
+production_ids:
+- chatgpt_t05_comparison
+render_inheritance: content_matrix
+render:
+  packaging:
+    label: AI 产品横向选择
+presentation:
+  strategy: 围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。
+  preferred_visuals:
+  - 产品真实截图
+  - 操作步骤
+  - 结果展示
+  - 变化前后对比
+status: configured
+notes: 题材编号 T05；获客作用：影响选择。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。

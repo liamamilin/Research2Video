@@ -210,6 +210,8 @@ def video_env(web_env, monkeypatch):
     (tmp / "config").mkdir(exist_ok=True)
     # These tests drive the one-call writer; the default column is `adapt`, which test_video_adapt.py covers.
     golden.install_recipes(tmp / "config", replace=(("  pipeline: adapt\n", "  pipeline: single\n"),))
+    # This fixture installs the legacy matrix's two source Jobs. The acquisition matrix has its own integration test.
+    (tmp / "config/video_recipes/chatgpt_acquisition.yaml").unlink()
     install_topic_sources(tmp / "jobs")
     store.use_state_dir(str(tmp / "state"))
     store.init_db()

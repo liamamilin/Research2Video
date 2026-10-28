@@ -210,6 +210,17 @@ async def lifespan(app: FastAPI):
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
         threading.Thread(target=platform_loop, name="platform-worker", daemon=True).start()
 
+    def theme_loop() -> None:
+        from web.services import theme_workbench
+        while not sweep_stop.wait(10):
+            try:
+                theme_workbench.tick()
+            except Exception:
+                logger.exception("theme production pass failed")
+
+    if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
+        threading.Thread(target=theme_loop, name="theme-production", daemon=True).start()
+
     def douyin_loop() -> None:
         from web.services import douyin
 
@@ -413,6 +424,8 @@ def create_app() -> FastAPI:
     app.include_router(video_recipes_router)
     app.include_router(video_router)
     app.include_router(matrices_router)
+    from web.routes.themes import router as themes_router
+    app.include_router(themes_router)
     from web.routes.content_columns import router as content_columns_router
     app.include_router(content_columns_router)
     from web.routes.video_brands import router as video_brands_router

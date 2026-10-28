@@ -22,7 +22,7 @@ def column_env(prod_env):
     return prod_env
 
 
-def test_shipped_catalog_reuses_ten_domains_and_all_five_ai_bindings():
+def test_shipped_catalog_reuses_existing_domains_and_all_five_ai_bindings():
     config, jobs = str(ROOT / "config"), str(ROOT / "jobs")
     matrices_by_key = matrices.load_all(config)
     configs = production.load_all(config, jobs)
@@ -30,7 +30,8 @@ def test_shipped_catalog_reuses_ten_domains_and_all_five_ai_bindings():
     assert set(content_columns.types(config)) == set(content_columns.TYPE_KEYS)
     assert not {key: c.errors for key, c in columns.items() if c.errors}
     domains = [m for m in matrices_by_key.values() if not m.archived and m.content.get("role", "domain") == "domain"]
-    assert len(domains) == 10
+    assert len(domains) == 11
+    assert matrices_by_key["chatgpt_acquisition"] in domains
     assert not matrices_by_key["education"].jobs
     assert matrices_by_key["education"].content["status"] == "planned"
     for key in ("flash_daily", "ai_media_opensource_digest", "ai_media_arena_digest",

@@ -240,7 +240,8 @@ def test_shipped_styles_cover_every_columns_defaults_and_tones():
               "report_digest": "进阶 · 简洁干货", "ai-non_tech-digest-long": "入门 · 简洁干货",
               "top_finding": "进阶 · 简洁干货", "ai-non_tech-headline-short": "入门 · 简洁干货",
               "action_list": "进阶 · 讲解通俗", "ai-non_tech-action_list-short": "入门 · 讲解通俗",
-              "topic_digest": "入门 · 简洁干货"}
+              "topic_digest": "入门 · 简洁干货", "chatgpt_acquisition": "入门 · 简洁干货",
+              "theme_research": "入门 · 讲解通俗"}
     columns = video_columns.load(config)
     assert set(columns) == set(labels)
     for key, col in columns.items():

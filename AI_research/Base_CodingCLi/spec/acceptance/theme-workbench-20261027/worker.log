@@ -1,0 +1,26 @@
+G2 run job_7474bd96ad8d4bea8b93cb0525447a10_a1; model=deepseek-v4.1-flash; provider=opencode Go
+STEP prepare-input: START
+NARRATION READY: auto -> information_motion; 6 chapters kept verbatim
+STEP prepare-input: PASS in 9.15s
+STEP narration-plan: START
+STEP narration-plan: PASS in 0.06s
+STEP tts-and-align: START
+VOICE CACHE: 0 reused, 69 freshly synthesized
+REAL TTS: 424.967s, 12749 frames, 69 measured phrase spans
+STEP tts-and-align: PASS in 547.18s
+STEP storyboard-plan: START
+STEP storyboard-plan: PASS in 240.79s
+STEP draw-things-backgrounds: SKIPPED (按段落编排图表与现有组件)
+STEP compile-ir: START
+STEP compile-ir: PASS in 69.97s
+STEP render: START
+STEP render: PASS in 721.36s
+STEP verify-media: START
+MEDIA PASS: 340.011s, 10200 frames, AAC/TTS correlation=0.99995
+STEP verify-media: PASS in 18.14s
+STEP package: START
+STEP package: PASS in 44.68s
+STEP mix-background-music: SKIPPED (本任务未启用背景配乐)
+STEP brand: START
+STEP brand: PASS in 20.05s
+G2 PASS

@@ -102,6 +102,14 @@ class ResearchEngine:
             print(f"  [{job_name}] SKIPPED: job is disabled (enabled: false)")
             return None
 
+        if job.get("topic_ideas"):
+            from .theme_ideas import run as generate_themes
+            return generate_themes(self, job)
+
+        if job.get("topic_discovery"):
+            from .theme_discovery import run as discover_themes
+            return discover_themes(self, job)
+
         # A member of a matrix runs with the matrix's keywords and domain (spec/matrices.md). Applied here and not
         # in load_job, which the web layer also uses: the Job editor must not save them into the Job file.
         from . import matrices
@@ -126,6 +134,8 @@ class ResearchEngine:
         prev_path: Optional[str] = None
         agent: Optional[ResearchAgent] = None
         usage: Optional[dict] = None
+        self._source_pending = None
+        self._source_search_client = None
 
         try:
             with LockManager(job.get("_file", job_name), stale_after=stale_after):
@@ -200,6 +210,8 @@ class ResearchEngine:
                         fallback_queries=job.get("keywords", []),
                     )
                 usage = agent.get_usage()
+                if self._source_search_client is not None:
+                    usage["searches"] = int(usage.get("searches") or 0) + self._source_search_client.calls
 
                 if self._cancel.is_set():
                     raise CancelledError("Job cancelled after research")
@@ -224,6 +236,12 @@ class ResearchEngine:
                 cleaned = extract_report(raw_content, self.sys,
                                          cancel_token=self._cancel)
                 actual_path = self._save_output(cleaned, output_path)
+                if self._source_pending:
+                    from .source_history import commit
+                    try:
+                        commit(self._source_pending)
+                    except OSError as exc:
+                        logger.warning("Source history baseline was not advanced: %s", exc)
                 report_path = self._output_reference(actual_path)
 
                 material = {}
@@ -362,17 +380,38 @@ class ResearchEngine:
         Returns ``(block, (items, stats))``. Raises ``SourcesUnavailableError`` when nothing came back, so the model
         is never asked to write from memory; sources that failed while others answered are named in the block, so the
         report states what it did not cover."""
-        from .search import SearchClient
         from .sources import fetch_all_strict, resolve
 
-        items, stats = fetch_all_strict(resolve(list(job.get("sources") or []), self.config_dir),
-                                        limit_per_source=int(job.get("sources_limit", 8)))
+        specs = resolve(list(job.get("sources") or []), self.config_dir)
+        items, stats = fetch_all_strict(specs, limit_per_source=int(job.get("sources_limit", 8)),
+                                        **self._source_options(specs))
         failed = [f"- {spec}: {state}" for spec, state in stats.items() if not isinstance(state, int)]
         header = ("## Fetched sources\n\n" + "\n".join(
             f"- {spec}: {state if not isinstance(state, int) else f'{state} items'}" for spec, state in stats.items()))
         note = ("\n\n本次未取得内容的来源：\n" + "\n".join(failed)) if failed else ""
         logger.info("Sources fetched: %s", stats)
-        return f"{header}{note}\n\n{SearchClient.format_results(items)}", (items, stats)
+        return f"{header}{note}\n\n{self._source_material(job, items)}", (items, stats)
+
+    def _source_options(self, specs: list[str]) -> dict:
+        if not any(spec.startswith(("page:", "catalog:", "search:")) for spec in specs):
+            return {}
+        if getattr(self, "_source_search_client", None) is None:
+            from .search import SearchClient
+            self._source_search_client = SearchClient(SearchConfig.from_system(self.sys),
+                                                      cancel_token=self._cancel, progress_cb=self._progress)
+        return {"search_client": self._source_search_client}
+
+    def _source_material(self, job: dict, items: list) -> str:
+        from .search import SearchClient
+        if not job.get("source_history"):
+            return SearchClient.format_results(items)
+        from pathlib import Path
+        from .source_history import prepare
+        block, self._source_pending = prepare(Path(self.workspace_dir) / "state/source_history",
+                                             job.get("_file") or job["name"], items)
+        if job["source_history"] == "context":
+            block += "\n\n## 当前来源内容（用于常青教程与套餐比较）\n\n" + SearchClient.format_results(items)
+        return block
 
     def _fetch_sources_block(self, job: dict) -> str:
         """Pre-fetch job ``sources`` (RSS/GitHub/arXiv/HN) into prompt context."""
@@ -380,21 +419,21 @@ class ResearchEngine:
         if not specs:
             return ""
         try:
-            from .search import SearchClient
             from .sources import fetch_all, resolve
 
             limit = int(job.get("sources_limit", 8))
-            results = fetch_all(resolve(list(specs), self.config_dir), limit_per_source=limit)
+            resolved = resolve(list(specs), self.config_dir)
+            results = fetch_all(resolved, limit_per_source=limit, **self._source_options(resolved))
             if not results:
                 return ""
             logger.info("Sources pre-fetched: %d items from %d spec(s)",
                         len(results), len(specs))
             return ("## Pre-fetched subscription sources\n\n"
-                    + SearchClient.format_results(results))
+                    + self._source_material(job, results))
         except Exception as exc:  # noqa: BLE001 - sources are optional context
             from .sources import RegistryError
 
-            if isinstance(exc, RegistryError):
+            if isinstance(exc, (RegistryError, CancelledError)):
                 raise  # a name the registry does not have is a mistake in the Job, not a source that was down
             logger.warning("Sources pre-fetch skipped: %s", exc)
             return ""

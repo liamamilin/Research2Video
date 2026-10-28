@@ -1,0 +1,95 @@
+
+ RUN  v3.2.7 /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/ui
+
+ ✓ src/components/VideoAnalytics.test.tsx (8 tests) 660ms
+   ✓ loads search, workflow filter, sorting, paging, and 30-day overview from cache API  402ms
+ ✓ src/pages/Settings.access.test.tsx (10 tests) 747ms
+ ✓ src/pages/Outputs.test.tsx (9 tests) 863ms
+ ✓ src/pages/VideoScriptView.test.tsx (20 tests) 700ms
+ ✓ src/pages/Ask.test.tsx (22 tests) 866ms
+ ✓ src/pages/Platforms.test.tsx (23 tests) 1061ms
+ ✓ src/pages/Matrices.test.tsx (26 tests) 1137ms
+ ✓ src/components/SystemConfig.test.tsx (22 tests) 1232ms
+ ✓ src/components/SocialPublishing.test.tsx (51 tests) 1232ms
+ ✓ src/pages/JobDetail.test.tsx (9 tests) 1692ms
+   ✓ JobDetail YAML preflight > shows blocking errors before the user attempts a save  732ms
+   ✓ JobDetail YAML preflight > confirms a clean document  722ms
+ ✓ src/pages/VideoScripts.test.tsx (12 tests) 676ms
+ ✓ src/pages/Scheduler.test.tsx (28 tests) 2062ms
+   ✓ Scheduler job picker > creates a durable job plan with an automatic ID and no shell command input  343ms
+   ✓ Schedule editing and previews > switches selected jobs and refuses disabled ones  316ms
+   ✓ Schedule editing and previews > previews a changed schedule and saves an edit with PUT  343ms
+   ✓ write failures stay visible > reports a rejected create instead of closing the form  329ms
+   ✓ Scheduler matrix system tasks > saves only the trigger for a system task  334ms
+ ✓ src/pages/Reports.test.tsx (12 tests) 438ms
+ ✓ src/pages/Topics.test.tsx (11 tests) 631ms
+ ✓ src/components/DouyinPlatform.test.tsx (10 tests) 490ms
+ ✓ src/pages/HomeBoard.test.tsx (8 tests) 564ms
+ ✓ src/components/BrandingSettings.test.tsx (5 tests) 465ms
+ ✓ src/pages/PublishQueue.test.tsx (7 tests) 516ms
+ ✓ src/pages/JobsList.test.tsx (11 tests) 482ms
+ ✓ src/components/AssistantOverview.test.tsx (7 tests) 457ms
+ ✓ src/components/Layout.test.tsx (6 tests) 394ms
+ ✓ src/components/ProductionConfigs.test.tsx (13 tests) 298ms
+ ✓ src/components/ContentColumns.test.tsx (5 tests) 321ms
+ ✓ src/pages/Ask.performance.test.tsx (1 test) 210ms
+ ✓ src/components/PublicationFlow.test.tsx (9 tests) 342ms
+ ✓ src/components/ScriptScreenshots.test.tsx (4 tests) 310ms
+ ✓ src/components/VideoModelConfig.test.tsx (6 tests) 265ms
+ ✓ src/pages/VideoPublish.test.tsx (7 tests) 357ms
+ ✓ src/components/ScriptIteration.test.tsx (4 tests) 296ms
+ ✓ src/pages/ReportView.test.tsx (3 tests) 278ms
+ ✓ src/components/AssistantTaskCenter.test.tsx (4 tests) 299ms
+ ✓ src/components/AssistantTaskCard.test.tsx (8 tests) 239ms
+ ✓ src/components/ApplicationBatchCard.test.tsx (4 tests) 174ms
+ ✓ src/pages/Login.test.tsx (7 tests) 195ms
+ ✓ src/components/ReportToVideo.test.tsx (4 tests) 236ms
+ ✓ src/components/ArticleCreate.test.tsx (3 tests) 208ms
+ ✓ src/pages/VideoRecipes.test.tsx (6 tests) 276ms
+ ✓ src/pages/Rounds.test.tsx (2 tests) 198ms
+ ✓ src/components/ShareLinks.test.tsx (5 tests) 170ms
+ ✓ src/components/AlertsCard.test.tsx (4 tests) 224ms
+ ✓ src/components/BilibiliCategorySelect.test.tsx (5 tests) 177ms
+ ✓ src/pages/Sources.test.tsx (3 tests) 233ms
+ ✓ src/components/VideoComparison.test.tsx (2 tests) 195ms
+ ✓ src/components/TemplateLibrary.test.tsx (9 tests) 195ms
+ ✓ src/components/Modal.test.tsx (10 tests) 171ms
+ ✓ src/pages/Dashboard.test.tsx (5 tests) 186ms
+ ✓ src/components/PublishAdaptation.test.tsx (4 tests) 226ms
+ ✓ src/components/SourceEditor.test.tsx (2 tests) 160ms
+ ✓ src/lib/toast.test.tsx (6 tests) 99ms
+ ✓ src/components/VideoStorageConfig.test.tsx (2 tests) 158ms
+ ✓ src/components/AssistantWorkspace.test.tsx (4 tests) 161ms
+ ✓ src/components/MatrixRuns.test.tsx (2 tests) 241ms
+ ✓ src/components/AutopilotCard.test.tsx (6 tests) 197ms
+ ✓ src/components/ScriptSteps.test.tsx (2 tests) 137ms
+ ✓ src/components/ReportReuse.test.tsx (2 tests) 167ms
+ ✓ src/components/DeleteJobDialog.test.tsx (7 tests) 178ms
+ ✓ src/pages/JobDetail.logstream.test.tsx (3 tests) 133ms
+ ✓ src/components/AssistantAction.test.tsx (6 tests) 101ms
+ ✓ src/components/CronBuilder.test.tsx (3 tests) 107ms
+ ✓ src/components/ErrorState.test.tsx (6 tests) 110ms
+ ✓ src/components/ScheduleRuns.test.tsx (3 tests) 126ms
+ ✓ src/lib/use-page-resource.test.tsx (3 tests) 124ms
+ ✓ src/components/ProviderModels.test.tsx (5 tests) 130ms
+ ✓ src/components/PlanReview.test.tsx (4 tests) 152ms
+ ✓ src/pages/VideoQuality.test.tsx (1 test) 32ms
+ ✓ src/api/client.test.ts (15 tests) 55ms
+ ✓ src/hooks/useLogStream.test.ts (7 tests) 48ms
+ ✓ src/components/AssistantCapabilities.test.tsx (1 test) 33ms
+ ✓ src/components/RoundDetail.priority.test.tsx (5 tests) 28ms
+ ✓ src/api/screenshots.test.ts (1 test) 13ms
+ ✓ src/lib/bilibili-categories.test.ts (9 tests) 31ms
+ ✓ src/theme-contrast.test.ts (4 tests) 69ms
+ ✓ src/markdown.test.ts (9 tests) 3ms
+ ✓ src/App.test.tsx (2 tests) 32ms
+ ✓ src/lib/utils.test.ts (11 tests) 4ms
+ ✓ src/pages/videoNext.test.ts (7 tests) 2ms
+ ✓ src/lib/page-modules.test.ts (2 tests) 2ms
+ ✓ src/lib/publish-text.test.ts (2 tests) 1ms
+ ✓ src/lib/distributions.test.ts (2 tests) 1ms
+
+ Test Files  79 passed (79)
+      Tests  598 passed (598)
+   Start at  20:24:28
+   Duration  8.99s (transform 2.79s, setup 0ms, collect 17.57s, tests 26.48s, environment 37.85s, prepare 3.61s)

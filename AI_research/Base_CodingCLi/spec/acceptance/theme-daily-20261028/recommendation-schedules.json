@@ -1,0 +1,72 @@
+{
+  "modes": {
+    "company": "discovery",
+    "economy": "discovery",
+    "industry": "discovery",
+    "chatgpt_acquisition": "ideas",
+    "history": "discovery",
+    "consumer": "discovery",
+    "geography": "discovery",
+    "education": "discovery",
+    "culture": "discovery",
+    "ai_media": "discovery",
+    "science": "discovery"
+  },
+  "plans": [
+    {
+      "id": "themes_ai_media",
+      "job": "topic_discovery/ai_media",
+      "enabled": 1
+    },
+    {
+      "id": "themes_chatgpt_acquisition",
+      "job": "topic_discovery/chatgpt_acquisition",
+      "enabled": 1
+    },
+    {
+      "id": "themes_company",
+      "job": "topic_discovery/company",
+      "enabled": 1
+    },
+    {
+      "id": "themes_consumer",
+      "job": "topic_discovery/consumer",
+      "enabled": 1
+    },
+    {
+      "id": "themes_culture",
+      "job": "topic_discovery/culture",
+      "enabled": 1
+    },
+    {
+      "id": "themes_economy",
+      "job": "topic_discovery/economy",
+      "enabled": 1
+    },
+    {
+      "id": "themes_education",
+      "job": "topic_discovery/education",
+      "enabled": 1
+    },
+    {
+      "id": "themes_geography",
+      "job": "topic_discovery/geography",
+      "enabled": 1
+    },
+    {
+      "id": "themes_history",
+      "job": "topic_discovery/history",
+      "enabled": 1
+    },
+    {
+      "id": "themes_industry",
+      "job": "topic_discovery/industry",
+      "enabled": 1
+    },
+    {
+      "id": "themes_science",
+      "job": "topic_discovery/science",
+      "enabled": 1
+    }
+  ]
+}

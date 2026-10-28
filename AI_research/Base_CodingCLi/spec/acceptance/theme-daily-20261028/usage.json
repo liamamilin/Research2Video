@@ -1,0 +1,119 @@
+{
+  "theme_id": "a83ba66c1b6847e8a4a24ee900b97cae",
+  "stages": [
+    {
+      "key": "ideas",
+      "name": "整批出题",
+      "shared": true,
+      "batch_topics": 6,
+      "attempts": [
+        {
+          "id": "aabfe18d016c4d1dadf746fdd7aa470f",
+          "status": "success",
+          "usage": {
+            "searches": 0,
+            "requests": 1,
+            "prompt_tokens": 8075,
+            "completion_tokens": 6604,
+            "total_tokens": 14679
+          },
+          "duration_seconds": 51.848
+        }
+      ],
+      "requests": 1,
+      "prompt_tokens": 8075,
+      "completion_tokens": 6604,
+      "total_tokens": 14679,
+      "searches": 0,
+      "duration_seconds": 51.848,
+      "cost_usd": null,
+      "partial": false
+    },
+    {
+      "key": "research",
+      "name": "主题研究",
+      "attempts": [
+        {
+          "status": "success",
+          "usage": {
+            "requests": 9,
+            "prompt_tokens": 289779,
+            "completion_tokens": 15809,
+            "total_tokens": 305588,
+            "model": "deepseek-v4.1-flash",
+            "searches": 8
+          },
+          "duration_seconds": 332.9
+        }
+      ],
+      "requests": 9,
+      "prompt_tokens": 289779,
+      "completion_tokens": 15809,
+      "total_tokens": 305588,
+      "searches": 8,
+      "duration_seconds": 332.9,
+      "cost_usd": null,
+      "partial": false
+    },
+    {
+      "key": "writing",
+      "name": "文稿",
+      "attempts": [
+        {
+          "id": 1,
+          "status": "saved",
+          "usage": {
+            "requests": 1,
+            "prompt_tokens": 107889,
+            "completion_tokens": 5964,
+            "total_tokens": 113853
+          },
+          "duration_seconds": 55.837
+        }
+      ],
+      "requests": 1,
+      "prompt_tokens": 107889,
+      "completion_tokens": 5964,
+      "total_tokens": 113853,
+      "searches": null,
+      "duration_seconds": 55.837,
+      "cost_usd": null,
+      "partial": false
+    },
+    {
+      "key": "video",
+      "name": "视频制作",
+      "attempts": [
+        {
+          "id": "4db7013f7f77474fa640e525284c3523",
+          "status": "COMPLETED",
+          "usage": {
+            "requests": 7,
+            "prompt_tokens": 48940,
+            "completion_tokens": 28633,
+            "total_tokens": 77573
+          },
+          "duration_seconds": 4078.0,
+          "cost_usd": null,
+          "cost_basis": "未配置可用单价",
+          "timings": {
+            "process_runs": 1,
+            "submit_seconds": 3.738,
+            "poll_seconds": 4032.683,
+            "download_seconds": 5.393,
+            "process_seconds": 4078.416
+          }
+        }
+      ],
+      "requests": 7,
+      "prompt_tokens": 48940,
+      "completion_tokens": 28633,
+      "total_tokens": 77573,
+      "searches": null,
+      "duration_seconds": 4078.0,
+      "cost_usd": null,
+      "partial": false
+    }
+  ],
+  "note": "显示已记录用量，重试中缺失的记录不计入已知合计。出题为整批共享，视频耗时包含排队及重试等待。搜索为逻辑批次，不等同供应商计费请求。未知费用不能视为免费，估算不代表实际账单。"
+}

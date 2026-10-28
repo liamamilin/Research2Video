@@ -1,0 +1,21 @@
+schema_version: 1
+name: T08 · 使用问题与避坑
+matrix: chatgpt_acquisition
+type: tutorial
+audience: 中文 ChatGPT 新用户、职场与学习人群、潜在付费用户
+promise: 使用过程中有哪些问题？
+production_ids:
+- chatgpt_t08_troubleshooting
+render_inheritance: content_matrix
+render:
+  packaging:
+    label: 使用问题与避坑
+presentation:
+  strategy: 围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。从真实用户讨论寻找高频问题，并用官方帮助与状态材料整理排查顺序。区分服务故障、额度、账号、功能入口与订阅渠道问题，让观众知道下一步点哪里或检查什么。
+  preferred_visuals:
+  - 产品真实截图
+  - 操作步骤
+  - 结果展示
+  - 变化前后对比
+status: configured
+notes: 题材编号 T08；获客作用：解决顾虑。从真实用户讨论寻找高频问题，并用官方帮助与状态材料整理排查顺序。区分服务故障、额度、账号、功能入口与订阅渠道问题，让观众知道下一步点哪里或检查什么。

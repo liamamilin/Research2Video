@@ -1,0 +1,890 @@
+{
+  "theme": {
+    "id": "f1e661fd90cf4b53a245d21d4c40b291",
+    "matrix": "chatgpt_acquisition",
+    "category": "chatgpt_t06_value",
+    "title": "ChatGPT 免费版用了一个月，应该升级 Plus 吗？",
+    "angle": "围绕日常任务、使用频率和实际困扰，帮助观众判断自己的升级需求。",
+    "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+    "notes": "一个月指观众已经使用免费版一段时间。重点解释需求与选择，结合具体任务和画面材料展开讲述。",
+    "origin": "manual",
+    "day": "",
+    "reason": "",
+    "signals": [],
+    "status": "completed",
+    "script_id": "9f9e96af89e54057a6339676c9a9c900",
+    "auto_video": true,
+    "created_at": 1793106666.192736,
+    "updated_at": 1793111255.537421
+  },
+  "render": {
+    "id": "c8daf66172264932ba0f865c9d34d5d5",
+    "script_id": "9f9e96af89e54057a6339676c9a9c900",
+    "version": 1,
+    "status": "COMPLETED",
+    "title": "ChatGPT免费版用了一个月，该升Plus吗？先看你会不会撞上“静默降级”",
+    "source_text": "如果你已经用了一个月免费版，现在最纠结的往往不是它能不能用，而是：我是不是已经该付这20美元了？先别急着下结论，因为2026年10月的免费版，和你一个月前、甚至一年前听说的免费版，已经不是同一个东西。最会改变判断的一条是：日常文字对话已经不限次数了，受的是防滥用机制约束。所以“我天天在聊天，是不是该升级”这个问法本身就不太对。纯聊天的人，升级收益最小。\n免费版真正卡人的地方，是工具和模型额度：文件上传、图片生成、语音、数据分析、深度研究、Codex、记忆和上下文，各有各的限制。Plus每个月20美元，买的也不是一句“更聪明的回答”，而主要是四件事：不被中断、工具能跑通、高峰期不排队、没有广告。你先把这句话记住，后面所有判断都围着它转。\n\n免费版撞限的时候，最麻烦的不是弹一个错误让你等，而是它经常静默切换到一个更小的模型继续回答。界面上不一定报错，你聊了两三轮才发现：怎么越答越泛、越答越抓不住重点。这个体感就是很多人说的“越聊越笨”。有一组14天双账号实测很能说明问题：同一个免费号，14天里被检测到17次中途静默降级；Plus号是0次。免费号有9天被限流，Plus是2天。这不是说每个人都会撞到17次，而是说升级Plus很大一部分钱，花在“别让它在半路偷偷换人”上。\n\n我们拿一个职场人最常遇到的任务来看：一份90页PDF，让你抽5个指定数字；再加一份12047行的销售CSV，让你做1到6月客户分群留存表、画折线图，并指出90天留存最差的两个渠道。14天里每天同一时段跑同一套任务，结果是：90页PDF抽5个数字全对，免费版6天做到，Plus 13天；CSV出图成功，免费版5天，Plus 14天；出图平均时间，免费版4分10秒，Plus 1分36秒。注意，这是2026年8月、上一代模型下的测试，数字会变，但方法可以复用。\n为什么差这么多？看上下文就明白了。免费版Instant总上下文是27K，官方换算约12页文字；Go和Plus都是54K，约40页；推理模型Plus是256K，约320页。所以一份60页的招标文件或论文，免费版很可能根本就没读完。不是它不聪明，是它没读完。这也是为什么“纯聊天”和“长文档处理”要分开判断：前者免费够用，后者才是Plus的强项。\n\n那中间的Go，8美元一个月，是不是更划算？要看你撞的是哪面墙。可以把免费版的限制分成三类：工具墙、模型墙、体验墙。工具墙是上传被拦、PDF读不完、生图没了、深度研究点不动、Codex一个月一次；模型墙是任务不难，但答案泛泛、抓不住重点，多步骤分析、长文改写、写代码不够准；体验墙是高峰期慢、排队、广告打断。Go解决的主要是第一类：它和Plus的上下文完全一样，都是54K和256K，聊天模型也还是Luna，只是工具额度放宽，而且仍可能有广告。所以Go更像“给免费版松刹车”，不是“换发动机”。\nPlus才换发动机：它给你GPT-6 Sol、Astra这些更强模型，深度研究从limited变成expanded，Codex和Work扩展到全端，速度是Fast，而且没有广告。体验墙里还有一个反转：免费版可以切“无广告模式”，但代价是消息额度更少，图片生成和深度研究直接不可用；而关掉“个性化广告”并不会减少广告，只是广告变得没那么准。Go不能用这个无广告模式，所以如果你被广告烦到，Plus才是那个出口。\n还有两个容易花冤枉钱的点：第一，Plus和Go的上下文一样，升级Plus不是为了“记得更多”；第二，个人方案包括Free、Go、Plus、Pro都不能新建自定义GPT，别把这个当升级理由。Pro从100美元起，更不建议一上来就买，Plus在两周高强度实测里只撞了2次限，Pro解锁的额度上限大多数观众根本碰不到。\n\n所以用了一个月，到底怎么判断？只问一个问题：过去30天里，我有没有因为额度、模型或者功能，把一件本来要做的事改成手动做，或者干脆没做？一次都没有，别升；一周超过2次，大概率值。再细一点：有没有“想用但没敢用”——因为怕额度用完，放弃上传、生图、深度研究，超过3次，那是工具墙；有没有反复因为AI没做完，自己加班补，每次按0.5到1小时折算，那是模型墙或体验墙。\n钱也可以直接算。Plus是20美元一个月，按7.15算约143元，折到30天约4.8元一天。回本线很简单：如果它每月帮你省1小时，你的时薪超过143元就不亏；省2小时，时薪72元也回本。Go是8美元，约57元一个月，约1.9元一天。但别为了省几十块去找代充或者共享号，账号和工作记录的风险，比这点差价贵得多。\n\n最稳的操作顺序，不是先付钱，而是先把自己用光。同一天连续上传文件、跑生图、点深度研究，直到被拦；然后打开升级页，但先别付款。官方有一条很关键的规则：免费版撞到额度后，升级Plus额度会立即重置，不用等。所以正确顺序是——先用光，再决定要不要买。买也先按单月买，第一周盯着自己有没有再撞限：撞了就留，没撞就在续费前取消。Plus是月付、无年付折扣，取消大概4步、40秒，当期还能继续用，但未使用部分不退。\n最后回到那个90页PDF和1.2万行CSV的任务：如果你过去30天也有这样一件事，因为ChatGPT没读完、没跑通、答案不够准，最后你自己手动补完，那你要买的不是“更聪明的聊天”，而是把这件事做完的能力。工具墙为主、题型不难，先看Go；答案不够准、长文档、多步骤分析、写代码，才看Plus。如果过去30天一次都没发生，那就继续用免费版，把这20美元留到真正卡住你的那个月。",
+    "source_sha256": "6fde9d28b79b3556b8253baf9ad68886f34ec8d9106ec4896b290955864a7034",
+    "request": {
+      "input_mode": "narration",
+      "chapters": [
+        {
+          "title": "免费版已经不是你想的那个免费版",
+          "paragraphs": [
+            "如果你已经用了一个月免费版，现在最纠结的往往不是它能不能用，而是：我是不是已经该付这20美元了？先别急着下结论，因为2026年10月的免费版，和你一个月前、甚至一年前听说的免费版，已经不是同一个东西。最会改变判断的一条是：日常文字对话已经不限次数了，受的是防滥用机制约束。所以“我天天在聊天，是不是该升级”这个问法本身就不太对。纯聊天的人，升级收益最小。",
+            "免费版真正卡人的地方，是工具和模型额度：文件上传、图片生成、语音、数据分析、深度研究、Codex、记忆和上下文，各有各的限制。Plus每个月20美元，买的也不是一句“更聪明的回答”，而主要是四件事：不被中断、工具能跑通、高峰期不排队、没有广告。你先把这句话记住，后面所有判断都围着它转。"
+          ]
+        },
+        {
+          "title": "最贵的不是额度，是它偷偷换了个模型",
+          "paragraphs": [
+            "免费版撞限的时候，最麻烦的不是弹一个错误让你等，而是它经常静默切换到一个更小的模型继续回答。界面上不一定报错，你聊了两三轮才发现：怎么越答越泛、越答越抓不住重点。这个体感就是很多人说的“越聊越笨”。有一组14天双账号实测很能说明问题：同一个免费号，14天里被检测到17次中途静默降级；Plus号是0次。免费号有9天被限流，Plus是2天。这不是说每个人都会撞到17次，而是说升级Plus很大一部分钱，花在“别让它在半路偷偷换人”上。"
+          ]
+        },
+        {
+          "title": "拿一份90页PDF和1.2万行CSV，差在哪",
+          "paragraphs": [
+            "我们拿一个职场人最常遇到的任务来看：一份90页PDF，让你抽5个指定数字；再加一份12047行的销售CSV，让你做1到6月客户分群留存表、画折线图，并指出90天留存最差的两个渠道。14天里每天同一时段跑同一套任务，结果是：90页PDF抽5个数字全对，免费版6天做到，Plus 13天；CSV出图成功，免费版5天，Plus 14天；出图平均时间，免费版4分10秒，Plus 1分36秒。注意，这是2026年8月、上一代模型下的测试，数字会变，但方法可以复用。",
+            "为什么差这么多？看上下文就明白了。免费版Instant总上下文是27K，官方换算约12页文字；Go和Plus都是54K，约40页；推理模型Plus是256K，约320页。所以一份60页的招标文件或论文，免费版很可能根本就没读完。不是它不聪明，是它没读完。这也是为什么“纯聊天”和“长文档处理”要分开判断：前者免费够用，后者才是Plus的强项。"
+          ]
+        },
+        {
+          "title": "Go、Plus、Pro：别把“松刹车”当成“换发动机”",
+          "paragraphs": [
+            "那中间的Go，8美元一个月，是不是更划算？要看你撞的是哪面墙。可以把免费版的限制分成三类：工具墙、模型墙、体验墙。工具墙是上传被拦、PDF读不完、生图没了、深度研究点不动、Codex一个月一次；模型墙是任务不难，但答案泛泛、抓不住重点，多步骤分析、长文改写、写代码不够准；体验墙是高峰期慢、排队、广告打断。Go解决的主要是第一类：它和Plus的上下文完全一样，都是54K和256K，聊天模型也还是Luna，只是工具额度放宽，而且仍可能有广告。所以Go更像“给免费版松刹车”，不是“换发动机”。",
+            "Plus才换发动机：它给你GPT-6 Sol、Astra这些更强模型，深度研究从limited变成expanded，Codex和Work扩展到全端，速度是Fast，而且没有广告。体验墙里还有一个反转：免费版可以切“无广告模式”，但代价是消息额度更少，图片生成和深度研究直接不可用；而关掉“个性化广告”并不会减少广告，只是广告变得没那么准。Go不能用这个无广告模式，所以如果你被广告烦到，Plus才是那个出口。",
+            "还有两个容易花冤枉钱的点：第一，Plus和Go的上下文一样，升级Plus不是为了“记得更多”；第二，个人方案包括Free、Go、Plus、Pro都不能新建自定义GPT，别把这个当升级理由。Pro从100美元起，更不建议一上来就买，Plus在两周高强度实测里只撞了2次限，Pro解锁的额度上限大多数观众根本碰不到。"
+          ]
+        },
+        {
+          "title": "30天自测：0次、2次、3次，分别怎么选",
+          "paragraphs": [
+            "所以用了一个月，到底怎么判断？只问一个问题：过去30天里，我有没有因为额度、模型或者功能，把一件本来要做的事改成手动做，或者干脆没做？一次都没有，别升；一周超过2次，大概率值。再细一点：有没有“想用但没敢用”——因为怕额度用完，放弃上传、生图、深度研究，超过3次，那是工具墙；有没有反复因为AI没做完，自己加班补，每次按0.5到1小时折算，那是模型墙或体验墙。",
+            "钱也可以直接算。Plus是20美元一个月，按7.15算约143元，折到30天约4.8元一天。回本线很简单：如果它每月帮你省1小时，你的时薪超过143元就不亏；省2小时，时薪72元也回本。Go是8美元，约57元一个月，约1.9元一天。但别为了省几十块去找代充或者共享号，账号和工作记录的风险，比这点差价贵得多。"
+          ]
+        },
+        {
+          "title": "先把自己用光，再决定要不要付钱",
+          "paragraphs": [
+            "最稳的操作顺序，不是先付钱，而是先把自己用光。同一天连续上传文件、跑生图、点深度研究，直到被拦；然后打开升级页，但先别付款。官方有一条很关键的规则：免费版撞到额度后，升级Plus额度会立即重置，不用等。所以正确顺序是——先用光，再决定要不要买。买也先按单月买，第一周盯着自己有没有再撞限：撞了就留，没撞就在续费前取消。Plus是月付、无年付折扣，取消大概4步、40秒，当期还能继续用，但未使用部分不退。",
+            "最后回到那个90页PDF和1.2万行CSV的任务：如果你过去30天也有这样一件事，因为ChatGPT没读完、没跑通、答案不够准，最后你自己手动补完，那你要买的不是“更聪明的聊天”，而是把这件事做完的能力。工具墙为主、题型不难，先看Go；答案不够准、长文档、多步骤分析、写代码，才看Plus。如果过去30天一次都没发生，那就继续用免费版，把这20美元留到真正卡住你的那个月。"
+          ]
+        }
+      ],
+      "duration_mode": "content",
+      "title": "ChatGPT免费版用了一个月，该升Plus吗？先看你会不会撞上“静默降级”",
+      "production_context": {
+        "content_recipe": {
+          "id": "research:theme_research-m4",
+          "settings": {
+            "video_form": "auto",
+            "creative_intent": {
+              "purpose": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n栏目：T06 · 套餐与付费价值。持续交付：我有没有必要付费？。\n本期可围绕 对象 → 比较维度 → 关键差异 → 适用情形 组织讲述，按素材自然展开。\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。\n栏目创作方向：题材编号 T06；获客作用：精准转化。从具体使用频率与任务判断免费或付费套餐的价值，整理当前页面支持的价格、权益、使用限制和体验差异。将套餐名称、价格币种、地区、渠道与页面日期写清，页面变更与当前权益分开表达。",
+              "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+              "focus": "ChatGPT免费版用了一个月，该升Plus吗？先看你会不会撞上“静默降级”"
+            },
+            "packaging": {
+              "preset": "common",
+              "label": "主题讲解",
+              "accent": "#1f7a4d",
+              "recipe": "theme_research-m4"
+            },
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:chatgpt_t06_value",
+          "settings": {
+            "video_speed": 1.25,
+            "packaging": {
+              "label": "套餐与付费价值",
+              "preset": "common"
+            }
+          }
+        }
+      },
+      "visual_storytelling": true,
+      "creative_intent": {
+        "purpose": "栏目：T06 · 套餐与付费价值。讲解目标：我有没有必要付费？。\n优先按段落组合产品真实截图、操作步骤、结果展示、变化前后对比，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。从具体使用频率与任务判断免费或付费套餐的价值，整理当前页面支持的价格、权益、使用限制和体验差异。将套餐名称、价格币种、地区、渠道与页面日期写清，页面变更与当前权益分开表达。",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户"
+      },
+      "idempotency_key": "research:c8daf66172264932ba0f865c9d34d5d5"
+    },
+    "autovideo_job_id": "7474bd96-ad8d-4bea-8b93-cb0525447a10",
+    "active_stage": "COMPLETE",
+    "attempt_count": 1,
+    "resolved_video_form": "information_motion",
+    "error_code": null,
+    "error_message": null,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "content_type": "application/json",
+        "bytes": 1288,
+        "sha256": "d3bcf022c0f904cb984838e392eea958d53e1b9d7198897c458143805c1daf8a"
+      },
+      {
+        "name": "brand-qa.json",
+        "content_type": "application/json",
+        "bytes": 1827,
+        "sha256": "8dc391e31ea47c6534f0ca799f659f8c0ef632a385b40aeb142c66fcd884de8f"
+      },
+      {
+        "name": "caption-alignment.json",
+        "content_type": "application/json",
+        "bytes": 204903,
+        "sha256": "e78e0fcf361c97d5d7e3d20f7778ff59e3a4cc31238b4afb0d7928be353ebe67"
+      },
+      {
+        "name": "captions.srt",
+        "content_type": "application/x-subrip",
+        "bytes": 10263,
+        "sha256": "a1455e1f424afc0ad6fdfef94b265608b6cc0a05e4c8b2dd6c7410d01ebd79d6"
+      },
+      {
+        "name": "chapters.json",
+        "content_type": "application/json",
+        "bytes": 26071,
+        "sha256": "c702c53ab9885b959d25f62b3944f85dd29199aae37bd1c8c99a13ad12d3f372"
+      },
+      {
+        "name": "content-captions.srt",
+        "content_type": "application/x-subrip",
+        "bytes": 10263,
+        "sha256": "a1455e1f424afc0ad6fdfef94b265608b6cc0a05e4c8b2dd6c7410d01ebd79d6"
+      },
+      {
+        "name": "content-chapters.json",
+        "content_type": "application/json",
+        "bytes": 25726,
+        "sha256": "e68fc41c03da00762e86780aa83a1d11a4e094bd59b803300ceb7e1a5ea96b63"
+      },
+      {
+        "name": "content.mp4",
+        "content_type": "video/mp4",
+        "bytes": 42059098,
+        "sha256": "4c5f356029e3af6af4fbbe90f237fb44617eca339cfb47ed55f908470934f34e"
+      },
+      {
+        "name": "execution-log.txt",
+        "content_type": "text/plain; charset=utf-8",
+        "bytes": 994,
+        "sha256": "43727563d403f6215d69318376c9a7a763ea002e7a18c7f8e5941ffa1a4f73d0"
+      },
+      {
+        "name": "generation-schedule.json",
+        "content_type": "application/json",
+        "bytes": 456,
+        "sha256": "fb4141951af0a9e8a786fb7b84dbd225009d78b0e5bb74c7f13785135149562e"
+      },
+      {
+        "name": "information-timing.json",
+        "content_type": "application/json",
+        "bytes": 16528,
+        "sha256": "6917b3d6654df0e64d8881292d1707f1373ed26c336fcfc56d7c8b030940b535"
+      },
+      {
+        "name": "input-brief.json",
+        "content_type": "application/json",
+        "bytes": 11265,
+        "sha256": "b145a19e490f0cf8ceb1a2a2521d5a162aa118a20e505b000600059bd50e6b7b"
+      },
+      {
+        "name": "manifest.json",
+        "content_type": "application/json",
+        "bytes": 94596,
+        "sha256": "d61e8960d15dc9b2703eca0eb8ae4957d25feb763c6d823971791ffd7deb5c9e"
+      },
+      {
+        "name": "model-cost.json",
+        "content_type": "application/json",
+        "bytes": 9443,
+        "sha256": "5403634c3af7b13f7682758aa6f6a9ebc8323c0a852847ee5af9ee7d62e1c116"
+      },
+      {
+        "name": "narration-check.json",
+        "content_type": "application/json",
+        "bytes": 332,
+        "sha256": "1163fd730ee88bf7eacdd8fcf8ec8c5eb4c9da3b6076fad47d9e05302794daf3"
+      },
+      {
+        "name": "narration.json",
+        "content_type": "application/json",
+        "bytes": 67438,
+        "sha256": "7f77b5edade44291f6ef0fd3aa8b50804dc13d99b0bd43a125c593fa01b29f6a"
+      },
+      {
+        "name": "package-qa.json",
+        "content_type": "application/json",
+        "bytes": 700,
+        "sha256": "5bf5d2f490d633dc0028d04308b48f0ea6858daec07a25aa82cf0614a5b1bf4b"
+      },
+      {
+        "name": "package.json",
+        "content_type": "application/json",
+        "bytes": 3524,
+        "sha256": "7516fe837a125010e06d759a2d4c4ab8ed8dd52e0b2135438ff85a38f6ad87d7"
+      },
+      {
+        "name": "packaging-resolved.json",
+        "content_type": "application/json",
+        "bytes": 1643,
+        "sha256": "b40e76975c0486b09f6625d36bac5510795fdec0c2f300e1990249c8393b65cc"
+      },
+      {
+        "name": "playback.json",
+        "content_type": "application/json",
+        "bytes": 133,
+        "sha256": "83ada33a1d0a486329b9eddd8f764494cf4500a99f588aebc776c0dcbad8e0b6"
+      },
+      {
+        "name": "prepared-source.txt",
+        "content_type": "text/plain; charset=utf-8",
+        "bytes": 6105,
+        "sha256": "df38cbe8d32fbbb1d5308b7569b7eb6f052a3f332bdcc70067d6d617a7a65be9"
+      },
+      {
+        "name": "production-execution.json",
+        "content_type": "application/json",
+        "bytes": 381,
+        "sha256": "e581f375a2dd797cbf6411b346b5cf59df0cdc0fdf210e9437bd992813f3d61e"
+      },
+      {
+        "name": "production-plan.json",
+        "content_type": "application/json",
+        "bytes": 7292,
+        "sha256": "32f5232228d9b514b5f3ee5e273f34efe42385b4c3939f8b9b240c0a5cf42b05"
+      },
+      {
+        "name": "qa.json",
+        "content_type": "application/json",
+        "bytes": 31818,
+        "sha256": "f7b2afb2e0b6129cd2cf179fb8ba01c59429dc40a46d3c3b5ff9c31d9d1863da"
+      },
+      {
+        "name": "render-resources.json",
+        "content_type": "application/json",
+        "bytes": 200,
+        "sha256": "44b9a3a4d4a9c1f572b5ee56b9dab1bcbc1f7137eee0d28f6df0b1d5f12698e4"
+      },
+      {
+        "name": "storyboard.json",
+        "content_type": "application/json",
+        "bytes": 79798,
+        "sha256": "93254ef6ce7702aa2c321ae197c383173580246068886f95ec2c15cfdbef0590"
+      },
+      {
+        "name": "tts-metrics.json",
+        "content_type": "application/json",
+        "bytes": 1247,
+        "sha256": "d8b4c1ce74eaace9b246c19cd47608063e96556cd25355c291db6e38f308bdce"
+      },
+      {
+        "name": "unbranded.mp4",
+        "content_type": "video/mp4",
+        "bytes": 36602367,
+        "sha256": "87828715b5bf63e2dd39d0928192e3ee64c72b8f5f647d2a31cf27e61ed78450"
+      },
+      {
+        "name": "video-ir.json",
+        "content_type": "application/json",
+        "bytes": 110558,
+        "sha256": "de1e5f3c2524476afba0044affd1dd3ef46e747bb440da49295c917f2e2a8c2f"
+      },
+      {
+        "name": "video.mp4",
+        "content_type": "video/mp4",
+        "bytes": 29217861,
+        "sha256": "dedf7760e4c80514d79d34fcc91a609cd7e00412d992e368ef034677f19ef60a"
+      },
+      {
+        "name": "voice-report.json",
+        "content_type": "application/json",
+        "bytes": 19081,
+        "sha256": "ae85528d26d88d2b4034c07cd96f41f74b8ed42ab8ed37d7b28d96db3c77dfed"
+      }
+    ],
+    "submit_started_at": "2026-10-27T13:15:56.321779+00:00",
+    "submitted_at": "2026-10-27T21:15:56+0800",
+    "completed_at": "2026-10-27T22:27:28+0800",
+    "created_at": "2026-10-27T21:15:37+0800",
+    "updated_at": "2026-10-27T22:27:28+0800",
+    "heartbeat_at": 1793111232.230112,
+    "timings": {
+      "process_runs": 2,
+      "last_process_started_at": "2026-10-27T14:11:31.679973+00:00",
+      "submit_seconds": 0.093,
+      "poll_seconds": 951.373,
+      "poll_count": 191,
+      "poll_failures": 0,
+      "remote_completed_at": "2026-10-27T14:27:23.000+00:00",
+      "completion_observed_at": "2026-10-27T14:27:23.086506+00:00",
+      "download_seconds": 5.294,
+      "artifact_list_seconds": 0.003,
+      "download_attempts": 1,
+      "download_workers": 4,
+      "artifacts": [
+        {
+          "name": "authored-narration.json",
+          "seconds": 0.04,
+          "reused": false,
+          "bytes": 1288
+        },
+        {
+          "name": "brand-qa.json",
+          "seconds": 0.039,
+          "reused": false,
+          "bytes": 1827
+        },
+        {
+          "name": "caption-alignment.json",
+          "seconds": 0.04,
+          "reused": false,
+          "bytes": 204903
+        },
+        {
+          "name": "captions.srt",
+          "seconds": 0.04,
+          "reused": false,
+          "bytes": 10263
+        },
+        {
+          "name": "chapters.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 26071
+        },
+        {
+          "name": "content-captions.srt",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 10263
+        },
+        {
+          "name": "content-chapters.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 25726
+        },
+        {
+          "name": "content.mp4",
+          "seconds": 5.249,
+          "reused": false,
+          "bytes": 42059098
+        },
+        {
+          "name": "execution-log.txt",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 994
+        },
+        {
+          "name": "generation-schedule.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 456
+        },
+        {
+          "name": "information-timing.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 16528
+        },
+        {
+          "name": "input-brief.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 11265
+        },
+        {
+          "name": "manifest.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 94596
+        },
+        {
+          "name": "model-cost.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 9443
+        },
+        {
+          "name": "narration-check.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 332
+        },
+        {
+          "name": "narration.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 67438
+        },
+        {
+          "name": "package-qa.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 700
+        },
+        {
+          "name": "package.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 3524
+        },
+        {
+          "name": "packaging-resolved.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 1643
+        },
+        {
+          "name": "playback.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 133
+        },
+        {
+          "name": "prepared-source.txt",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 6105
+        },
+        {
+          "name": "production-execution.json",
+          "seconds": 0.057,
+          "reused": false,
+          "bytes": 381
+        },
+        {
+          "name": "production-plan.json",
+          "seconds": 0.069,
+          "reused": false,
+          "bytes": 7292
+        },
+        {
+          "name": "qa.json",
+          "seconds": 0.07,
+          "reused": false,
+          "bytes": 31818
+        },
+        {
+          "name": "render-resources.json",
+          "seconds": 0.013,
+          "reused": false,
+          "bytes": 200
+        },
+        {
+          "name": "storyboard.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 79798
+        },
+        {
+          "name": "tts-metrics.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 1247
+        },
+        {
+          "name": "unbranded.mp4",
+          "seconds": 4.794,
+          "reused": false,
+          "bytes": 36602367
+        },
+        {
+          "name": "video-ir.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 110558
+        },
+        {
+          "name": "video.mp4",
+          "seconds": 3.108,
+          "reused": false,
+          "bytes": 29217861
+        },
+        {
+          "name": "voice-report.json",
+          "seconds": 0.002,
+          "reused": false,
+          "bytes": 19081
+        }
+      ],
+      "process_seconds": 956.724
+    },
+    "visuals": {
+      "version": 3,
+      "state": "degraded",
+      "reason": "没有通过检查的截图，沿用原有文字画面",
+      "policy": {
+        "enabled": true,
+        "version": 3,
+        "max_pages": 3,
+        "max_images": 3,
+        "max_seconds": 180,
+        "attempts_per_paragraph": 2,
+        "cache_hours": 6,
+        "semantic_review": false,
+        "max_model_calls": 3,
+        "ocr_review": true,
+        "vision_section": "visual_ai",
+        "vision_required": true,
+        "vision_timeout": 60
+      },
+      "chapter_hash": "ab399ab4b53df5d524daef1f0cd81a924353c91096e3cf34895ae91a4acc5073",
+      "needs": [
+        {
+          "id": "c1p1",
+          "chapter_index": 0,
+          "paragraph_index": 0,
+          "title": "免费版已经不是你想的那个免费版",
+          "text": "如果你已经用了一个月免费版，现在最纠结的往往不是它能不能用，而是：我是不是已经该付这20美元了？先别急着下结论，因为2026年10月的免费版，和你一个月前、甚至一年前听说的免费版，已经不是同一个东西。最会改变判断的一条是：日常文字对话已经不限次数了，受的是防滥用机制约束。所以“我天天在聊天，是不是该升级”这个问法本身就不太对。纯聊天的人，升级收益最小。",
+          "kind": "pricing",
+          "urls": [
+            "https://help.openai.com/en/articles/9275245-chatgpt-tier-faq"
+          ],
+          "facts": [],
+          "claims": "如果你已经用了一个月免费版，现在最纠结的往往不是它能不能用，而是：我是不是已经该付这20美元了？先别急着下结论，因为2026年10月的免费版，和你一个月前、甚至一年前听说的免费版，已经不是同一个东西。最会改变判断的一条是：日常文字对话已经不限次数了，受的是防滥用机制约束。所以“我天天在聊天，是不是该升级”这个问法本身就不太对。纯聊天的人，升级收益最小。"
+        },
+        {
+          "id": "c1p2",
+          "chapter_index": 0,
+          "paragraph_index": 1,
+          "title": "免费版已经不是你想的那个免费版",
+          "text": "免费版真正卡人的地方，是工具和模型额度：文件上传、图片生成、语音、数据分析、深度研究、Codex、记忆和上下文，各有各的限制。Plus每个月20美元，买的也不是一句“更聪明的回答”，而主要是四件事：不被中断、工具能跑通、高峰期不排队、没有广告。你先把这句话记住，后面所有判断都围着它转。",
+          "kind": "pricing",
+          "urls": [
+            "https://chatgpt.com/pricing/",
+            "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus"
+          ],
+          "facts": [],
+          "claims": "免费版真正卡人的地方，是工具和模型额度：文件上传、图片生成、语音、数据分析、深度研究、Codex、记忆和上下文，各有各的限制。Plus每个月20美元，买的也不是一句“更聪明的回答”，而主要是四件事：不被中断、工具能跑通、高峰期不排队、没有广告。你先把这句话记住，后面所有判断都围着它转。"
+        },
+        {
+          "id": "c2p1",
+          "chapter_index": 1,
+          "paragraph_index": 0,
+          "title": "最贵的不是额度，是它偷偷换了个模型",
+          "text": "免费版撞限的时候，最麻烦的不是弹一个错误让你等，而是它经常静默切换到一个更小的模型继续回答。界面上不一定报错，你聊了两三轮才发现：怎么越答越泛、越答越抓不住重点。这个体感就是很多人说的“越聊越笨”。有一组14天双账号实测很能说明问题：同一个免费号，14天里被检测到17次中途静默降级；Plus号是0次。免费号有9天被限流，Plus是2天。这不是说每个人都会撞到17次，而是说升级Plus很大一部分钱，花在“别让它在半路偷偷换人”上。",
+          "kind": "feature",
+          "urls": [
+            "https://aivstool.com/blog/is-chatgpt-plus-worth-it"
+          ],
+          "facts": [],
+          "claims": "免费版撞限的时候，最麻烦的不是弹一个错误让你等，而是它经常静默切换到一个更小的模型继续回答。界面上不一定报错，你聊了两三轮才发现：怎么越答越泛、越答越抓不住重点。这个体感就是很多人说的“越聊越笨”。有一组14天双账号实测很能说明问题：同一个免费号，14天里被检测到17次中途静默降级；Plus号是0次。免费号有9天被限流，Plus是2天。这不是说每个人都会撞到17次，而是说升级Plus很大一部分钱，花在“别让它在半路偷偷换人”上。"
+        },
+        {
+          "id": "c3p1",
+          "chapter_index": 2,
+          "paragraph_index": 0,
+          "title": "拿一份90页PDF和1.2万行CSV，差在哪",
+          "text": "我们拿一个职场人最常遇到的任务来看：一份90页PDF，让你抽5个指定数字；再加一份12047行的销售CSV，让你做1到6月客户分群留存表、画折线图，并指出90天留存最差的两个渠道。14天里每天同一时段跑同一套任务，结果是：90页PDF抽5个数字全对，免费版6天做到，Plus 13天；CSV出图成功，免费版5天，Plus 14天；出图平均时间，免费版4分10秒，Plus 1分36秒。注意，这是2026年8月、上一代模型下的测试，数字会变，但方法可以复用。",
+          "kind": "feature",
+          "urls": [
+            "https://aivstool.com/blog/is-chatgpt-plus-worth-it"
+          ],
+          "facts": [],
+          "claims": "我们拿一个职场人最常遇到的任务来看：一份90页PDF，让你抽5个指定数字；再加一份12047行的销售CSV，让你做1到6月客户分群留存表、画折线图，并指出90天留存最差的两个渠道。14天里每天同一时段跑同一套任务，结果是：90页PDF抽5个数字全对，免费版6天做到，Plus 13天；CSV出图成功，免费版5天，Plus 14天；出图平均时间，免费版4分10秒，Plus 1分36秒。注意，这是2026年8月、上一代模型下的测试，数字会变，但方法可以复用。"
+        },
+        {
+          "id": "c3p2",
+          "chapter_index": 2,
+          "paragraph_index": 1,
+          "title": "拿一份90页PDF和1.2万行CSV，差在哪",
+          "text": "为什么差这么多？看上下文就明白了。免费版Instant总上下文是27K，官方换算约12页文字；Go和Plus都是54K，约40页；推理模型Plus是256K，约320页。所以一份60页的招标文件或论文，免费版很可能根本就没读完。不是它不聪明，是它没读完。这也是为什么“纯聊天”和“长文档处理”要分开判断：前者免费够用，后者才是Plus的强项。",
+          "kind": "feature",
+          "urls": [
+            "https://chatgpt.com/pricing/",
+            "https://aivstool.com/blog/is-chatgpt-plus-worth-it"
+          ],
+          "facts": [],
+          "claims": "为什么差这么多？看上下文就明白了。免费版Instant总上下文是27K，官方换算约12页文字；Go和Plus都是54K，约40页；推理模型Plus是256K，约320页。所以一份60页的招标文件或论文，免费版很可能根本就没读完。不是它不聪明，是它没读完。这也是为什么“纯聊天”和“长文档处理”要分开判断：前者免费够用，后者才是Plus的强项。"
+        },
+        {
+          "id": "c4p1",
+          "chapter_index": 3,
+          "paragraph_index": 0,
+          "title": "Go、Plus、Pro：别把“松刹车”当成“换发动机”",
+          "text": "那中间的Go，8美元一个月，是不是更划算？要看你撞的是哪面墙。可以把免费版的限制分成三类：工具墙、模型墙、体验墙。工具墙是上传被拦、PDF读不完、生图没了、深度研究点不动、Codex一个月一次；模型墙是任务不难，但答案泛泛、抓不住重点，多步骤分析、长文改写、写代码不够准；体验墙是高峰期慢、排队、广告打断。Go解决的主要是第一类：它和Plus的上下文完全一样，都是54K和256K，聊天模型也还是Luna，只是工具额度放宽，而且仍可能有广告。所以Go更像“给免费版松刹车”，不是“换发动机”。",
+          "kind": "pricing",
+          "urls": [
+            "https://aicost.tools/compare/chatgpt-go-vs-plus/",
+            "https://chatgpt.com/pricing/"
+          ],
+          "facts": [],
+          "claims": "那中间的Go，8美元一个月，是不是更划算？要看你撞的是哪面墙。可以把免费版的限制分成三类：工具墙、模型墙、体验墙。工具墙是上传被拦、PDF读不完、生图没了、深度研究点不动、Codex一个月一次；模型墙是任务不难，但答案泛泛、抓不住重点，多步骤分析、长文改写、写代码不够准；体验墙是高峰期慢、排队、广告打断。Go解决的主要是第一类：它和Plus的上下文完全一样，都是54K和256K，聊天模型也还是Luna，只是工具额度放宽，而且仍可能有广告。所以Go更像“给免费版松刹车”，不是“换发动机”。"
+        },
+        {
+          "id": "c4p2",
+          "chapter_index": 3,
+          "paragraph_index": 1,
+          "title": "Go、Plus、Pro：别把“松刹车”当成“换发动机”",
+          "text": "Plus才换发动机：它给你GPT-6 Sol、Astra这些更强模型，深度研究从limited变成expanded，Codex和Work扩展到全端，速度是Fast，而且没有广告。体验墙里还有一个反转：免费版可以切“无广告模式”，但代价是消息额度更少，图片生成和深度研究直接不可用；而关掉“个性化广告”并不会减少广告，只是广告变得没那么准。Go不能用这个无广告模式，所以如果你被广告烦到，Plus才是那个出口。",
+          "kind": "feature",
+          "urls": [
+            "https://help.openai.com/en/articles/20001047-ads-in-chatgpt",
+            "https://withplainly.com/posts/how-to-turn-off-chatgpt-ads",
+            "https://aicost.tools/compare/chatgpt-go-vs-plus/"
+          ],
+          "facts": [],
+          "claims": "Plus才换发动机：它给你GPT-6 Sol、Astra这些更强模型，深度研究从limited变成expanded，Codex和Work扩展到全端，速度是Fast，而且没有广告。体验墙里还有一个反转：免费版可以切“无广告模式”，但代价是消息额度更少，图片生成和深度研究直接不可用；而关掉“个性化广告”并不会减少广告，只是广告变得没那么准。Go不能用这个无广告模式，所以如果你被广告烦到，Plus才是那个出口。"
+        },
+        {
+          "id": "c4p3",
+          "chapter_index": 3,
+          "paragraph_index": 2,
+          "title": "Go、Plus、Pro：别把“松刹车”当成“换发动机”",
+          "text": "还有两个容易花冤枉钱的点：第一，Plus和Go的上下文一样，升级Plus不是为了“记得更多”；第二，个人方案包括Free、Go、Plus、Pro都不能新建自定义GPT，别把这个当升级理由。Pro从100美元起，更不建议一上来就买，Plus在两周高强度实测里只撞了2次限，Pro解锁的额度上限大多数观众根本碰不到。",
+          "kind": "pricing",
+          "urls": [
+            "https://chatgpt.com/pricing/",
+            "https://help.openai.com/en/articles/9275245-chatgpt-tier-faq",
+            "https://aivstool.com/blog/is-chatgpt-plus-worth-it"
+          ],
+          "facts": [],
+          "claims": "还有两个容易花冤枉钱的点：第一，Plus和Go的上下文一样，升级Plus不是为了“记得更多”；第二，个人方案包括Free、Go、Plus、Pro都不能新建自定义GPT，别把这个当升级理由。Pro从100美元起，更不建议一上来就买，Plus在两周高强度实测里只撞了2次限，Pro解锁的额度上限大多数观众根本碰不到。"
+        },
+        {
+          "id": "c5p1",
+          "chapter_index": 4,
+          "paragraph_index": 0,
+          "title": "30天自测：0次、2次、3次，分别怎么选",
+          "text": "所以用了一个月，到底怎么判断？只问一个问题：过去30天里，我有没有因为额度、模型或者功能，把一件本来要做的事改成手动做，或者干脆没做？一次都没有，别升；一周超过2次，大概率值。再细一点：有没有“想用但没敢用”——因为怕额度用完，放弃上传、生图、深度研究，超过3次，那是工具墙；有没有反复因为AI没做完，自己加班补，每次按0.5到1小时折算，那是模型墙或体验墙。",
+          "kind": "feature",
+          "urls": [
+            "https://aivstool.com/blog/is-chatgpt-plus-worth-it"
+          ],
+          "facts": [],
+          "claims": "所以用了一个月，到底怎么判断？只问一个问题：过去30天里，我有没有因为额度、模型或者功能，把一件本来要做的事改成手动做，或者干脆没做？一次都没有，别升；一周超过2次，大概率值。再细一点：有没有“想用但没敢用”——因为怕额度用完，放弃上传、生图、深度研究，超过3次，那是工具墙；有没有反复因为AI没做完，自己加班补，每次按0.5到1小时折算，那是模型墙或体验墙。"
+        },
+        {
+          "id": "c5p2",
+          "chapter_index": 4,
+          "paragraph_index": 1,
+          "title": "30天自测：0次、2次、3次，分别怎么选",
+          "text": "钱也可以直接算。Plus是20美元一个月，按7.15算约143元，折到30天约4.8元一天。回本线很简单：如果它每月帮你省1小时，你的时薪超过143元就不亏；省2小时，时薪72元也回本。Go是8美元，约57元一个月，约1.9元一天。但别为了省几十块去找代充或者共享号，账号和工作记录的风险，比这点差价贵得多。",
+          "kind": "pricing",
+          "urls": [
+            "https://chatgpt.com/pricing/",
+            "https://aicost.tools/compare/chatgpt-go-vs-plus/",
+            "https://www.zhihu.com/tardis/jm/ans/2040840364223903503"
+          ],
+          "facts": [],
+          "claims": "钱也可以直接算。Plus是20美元一个月，按7.15算约143元，折到30天约4.8元一天。回本线很简单：如果它每月帮你省1小时，你的时薪超过143元就不亏；省2小时，时薪72元也回本。Go是8美元，约57元一个月，约1.9元一天。但别为了省几十块去找代充或者共享号，账号和工作记录的风险，比这点差价贵得多。"
+        },
+        {
+          "id": "c6p1",
+          "chapter_index": 5,
+          "paragraph_index": 0,
+          "title": "先把自己用光，再决定要不要付钱",
+          "text": "最稳的操作顺序，不是先付钱，而是先把自己用光。同一天连续上传文件、跑生图、点深度研究，直到被拦；然后打开升级页，但先别付款。官方有一条很关键的规则：免费版撞到额度后，升级Plus额度会立即重置，不用等。所以正确顺序是——先用光，再决定要不要买。买也先按单月买，第一周盯着自己有没有再撞限：撞了就留，没撞就在续费前取消。Plus是月付、无年付折扣，取消大概4步、40秒，当期还能继续用，但未使用部分不退。",
+          "kind": "pricing",
+          "urls": [
+            "https://help.openai.com/en/articles/9275245-chatgpt-tier-faq",
+            "https://aivstool.com/blog/is-chatgpt-plus-worth-it"
+          ],
+          "facts": [],
+          "claims": "最稳的操作顺序，不是先付钱，而是先把自己用光。同一天连续上传文件、跑生图、点深度研究，直到被拦；然后打开升级页，但先别付款。官方有一条很关键的规则：免费版撞到额度后，升级Plus额度会立即重置，不用等。所以正确顺序是——先用光，再决定要不要买。买也先按单月买，第一周盯着自己有没有再撞限：撞了就留，没撞就在续费前取消。Plus是月付、无年付折扣，取消大概4步、40秒，当期还能继续用，但未使用部分不退。"
+        },
+        {
+          "id": "c6p2",
+          "chapter_index": 5,
+          "paragraph_index": 1,
+          "title": "先把自己用光，再决定要不要付钱",
+          "text": "最后回到那个90页PDF和1.2万行CSV的任务：如果你过去30天也有这样一件事，因为ChatGPT没读完、没跑通、答案不够准，最后你自己手动补完，那你要买的不是“更聪明的聊天”，而是把这件事做完的能力。工具墙为主、题型不难，先看Go；答案不够准、长文档、多步骤分析、写代码，才看Plus。如果过去30天一次都没发生，那就继续用免费版，把这20美元留到真正卡住你的那个月。",
+          "kind": "pricing",
+          "urls": [
+            "https://aivstool.com/blog/is-chatgpt-plus-worth-it",
+            "https://aicost.tools/compare/chatgpt-go-vs-plus/",
+            "https://chatgpt.com/pricing/"
+          ],
+          "facts": [],
+          "claims": "最后回到那个90页PDF和1.2万行CSV的任务：如果你过去30天也有这样一件事，因为ChatGPT没读完、没跑通、答案不够准，最后你自己手动补完，那你要买的不是“更聪明的聊天”，而是把这件事做完的能力。工具墙为主、题型不难，先看Go；答案不够准、长文档、多步骤分析、写代码，才看Plus。如果过去30天一次都没发生，那就继续用免费版，把这20美元留到真正卡住你的那个月。"
+        }
+      ],
+      "decisions": [
+        {
+          "need_id": "c1p1",
+          "status": "text",
+          "reason": "页面未成功打开（HTTP 403），请检查来源网址"
+        },
+        {
+          "need_id": "c1p2",
+          "status": "text",
+          "reason": "页面未成功打开（HTTP 403），请检查来源网址；页面未成功打开（HTTP 403），请检查来源网址"
+        },
+        {
+          "need_id": "c2p1",
+          "status": "text",
+          "reason": "已达到页面预算"
+        },
+        {
+          "need_id": "c3p1",
+          "status": "text",
+          "reason": "已达到页面预算"
+        },
+        {
+          "need_id": "c3p2",
+          "status": "text",
+          "reason": "已达到页面预算"
+        },
+        {
+          "need_id": "c4p1",
+          "status": "text",
+          "reason": "已达到页面预算"
+        },
+        {
+          "need_id": "c4p2",
+          "status": "text",
+          "reason": "已达到页面预算"
+        },
+        {
+          "need_id": "c4p3",
+          "status": "text",
+          "reason": "已达到页面预算"
+        },
+        {
+          "need_id": "c5p1",
+          "status": "text",
+          "reason": "已达到页面预算"
+        },
+        {
+          "need_id": "c5p2",
+          "status": "text",
+          "reason": "已达到页面预算"
+        },
+        {
+          "need_id": "c6p1",
+          "status": "text",
+          "reason": "已达到页面预算"
+        },
+        {
+          "need_id": "c6p2",
+          "status": "text",
+          "reason": "已达到页面预算"
+        }
+      ],
+      "selection": {
+        "form": "object_showcase",
+        "materials": []
+      },
+      "started_at": "2026-10-27T13:15:37.280057+00:00",
+      "pages": [
+        {
+          "url": "https://help.openai.com/en/articles/9275245-chatgpt-tier-faq",
+          "need_id": "c1p1",
+          "cached": false,
+          "state": "failed",
+          "reason": "页面未成功打开（HTTP 403），请检查来源网址"
+        },
+        {
+          "url": "https://chatgpt.com/pricing/",
+          "need_id": "c1p2",
+          "cached": false,
+          "state": "failed",
+          "reason": "页面未成功打开（HTTP 403），请检查来源网址"
+        },
+        {
+          "url": "https://help.openai.com/en/articles/6950777-what-is-chatgpt-plus",
+          "need_id": "c1p2",
+          "cached": false,
+          "state": "failed",
+          "reason": "页面未成功打开（HTTP 403），请检查来源网址"
+        }
+      ],
+      "model_calls": 0,
+      "seconds": 19.13,
+      "finished_at": "2026-10-27T13:15:56.312760+00:00",
+      "submission_sha256": "e0d17b88abd1c69933245167b18be0927a6e5b36483e25c11ffc04a43ad71310"
+    },
+    "submission_request": {
+      "input_mode": "narration",
+      "chapters": [
+        {
+          "title": "免费版已经不是你想的那个免费版",
+          "paragraphs": [
+            "如果你已经用了一个月免费版，现在最纠结的往往不是它能不能用，而是：我是不是已经该付这20美元了？先别急着下结论，因为2026年10月的免费版，和你一个月前、甚至一年前听说的免费版，已经不是同一个东西。最会改变判断的一条是：日常文字对话已经不限次数了，受的是防滥用机制约束。所以“我天天在聊天，是不是该升级”这个问法本身就不太对。纯聊天的人，升级收益最小。",
+            "免费版真正卡人的地方，是工具和模型额度：文件上传、图片生成、语音、数据分析、深度研究、Codex、记忆和上下文，各有各的限制。Plus每个月20美元，买的也不是一句“更聪明的回答”，而主要是四件事：不被中断、工具能跑通、高峰期不排队、没有广告。你先把这句话记住，后面所有判断都围着它转。"
+          ]
+        },
+        {
+          "title": "最贵的不是额度，是它偷偷换了个模型",
+          "paragraphs": [
+            "免费版撞限的时候，最麻烦的不是弹一个错误让你等，而是它经常静默切换到一个更小的模型继续回答。界面上不一定报错，你聊了两三轮才发现：怎么越答越泛、越答越抓不住重点。这个体感就是很多人说的“越聊越笨”。有一组14天双账号实测很能说明问题：同一个免费号，14天里被检测到17次中途静默降级；Plus号是0次。免费号有9天被限流，Plus是2天。这不是说每个人都会撞到17次，而是说升级Plus很大一部分钱，花在“别让它在半路偷偷换人”上。"
+          ]
+        },
+        {
+          "title": "拿一份90页PDF和1.2万行CSV，差在哪",
+          "paragraphs": [
+            "我们拿一个职场人最常遇到的任务来看：一份90页PDF，让你抽5个指定数字；再加一份12047行的销售CSV，让你做1到6月客户分群留存表、画折线图，并指出90天留存最差的两个渠道。14天里每天同一时段跑同一套任务，结果是：90页PDF抽5个数字全对，免费版6天做到，Plus 13天；CSV出图成功，免费版5天，Plus 14天；出图平均时间，免费版4分10秒，Plus 1分36秒。注意，这是2026年8月、上一代模型下的测试，数字会变，但方法可以复用。",
+            "为什么差这么多？看上下文就明白了。免费版Instant总上下文是27K，官方换算约12页文字；Go和Plus都是54K，约40页；推理模型Plus是256K，约320页。所以一份60页的招标文件或论文，免费版很可能根本就没读完。不是它不聪明，是它没读完。这也是为什么“纯聊天”和“长文档处理”要分开判断：前者免费够用，后者才是Plus的强项。"
+          ]
+        },
+        {
+          "title": "Go、Plus、Pro：别把“松刹车”当成“换发动机”",
+          "paragraphs": [
+            "那中间的Go，8美元一个月，是不是更划算？要看你撞的是哪面墙。可以把免费版的限制分成三类：工具墙、模型墙、体验墙。工具墙是上传被拦、PDF读不完、生图没了、深度研究点不动、Codex一个月一次；模型墙是任务不难，但答案泛泛、抓不住重点，多步骤分析、长文改写、写代码不够准；体验墙是高峰期慢、排队、广告打断。Go解决的主要是第一类：它和Plus的上下文完全一样，都是54K和256K，聊天模型也还是Luna，只是工具额度放宽，而且仍可能有广告。所以Go更像“给免费版松刹车”，不是“换发动机”。",
+            "Plus才换发动机：它给你GPT-6 Sol、Astra这些更强模型，深度研究从limited变成expanded，Codex和Work扩展到全端，速度是Fast，而且没有广告。体验墙里还有一个反转：免费版可以切“无广告模式”，但代价是消息额度更少，图片生成和深度研究直接不可用；而关掉“个性化广告”并不会减少广告，只是广告变得没那么准。Go不能用这个无广告模式，所以如果你被广告烦到，Plus才是那个出口。",
+            "还有两个容易花冤枉钱的点：第一，Plus和Go的上下文一样，升级Plus不是为了“记得更多”；第二，个人方案包括Free、Go、Plus、Pro都不能新建自定义GPT，别把这个当升级理由。Pro从100美元起，更不建议一上来就买，Plus在两周高强度实测里只撞了2次限，Pro解锁的额度上限大多数观众根本碰不到。"
+          ]
+        },
+        {
+          "title": "30天自测：0次、2次、3次，分别怎么选",
+          "paragraphs": [
+            "所以用了一个月，到底怎么判断？只问一个问题：过去30天里，我有没有因为额度、模型或者功能，把一件本来要做的事改成手动做，或者干脆没做？一次都没有，别升；一周超过2次，大概率值。再细一点：有没有“想用但没敢用”——因为怕额度用完，放弃上传、生图、深度研究，超过3次，那是工具墙；有没有反复因为AI没做完，自己加班补，每次按0.5到1小时折算，那是模型墙或体验墙。",
+            "钱也可以直接算。Plus是20美元一个月，按7.15算约143元，折到30天约4.8元一天。回本线很简单：如果它每月帮你省1小时，你的时薪超过143元就不亏；省2小时，时薪72元也回本。Go是8美元，约57元一个月，约1.9元一天。但别为了省几十块去找代充或者共享号，账号和工作记录的风险，比这点差价贵得多。"
+          ]
+        },
+        {
+          "title": "先把自己用光，再决定要不要付钱",
+          "paragraphs": [
+            "最稳的操作顺序，不是先付钱，而是先把自己用光。同一天连续上传文件、跑生图、点深度研究，直到被拦；然后打开升级页，但先别付款。官方有一条很关键的规则：免费版撞到额度后，升级Plus额度会立即重置，不用等。所以正确顺序是——先用光，再决定要不要买。买也先按单月买，第一周盯着自己有没有再撞限：撞了就留，没撞就在续费前取消。Plus是月付、无年付折扣，取消大概4步、40秒，当期还能继续用，但未使用部分不退。",
+            "最后回到那个90页PDF和1.2万行CSV的任务：如果你过去30天也有这样一件事，因为ChatGPT没读完、没跑通、答案不够准，最后你自己手动补完，那你要买的不是“更聪明的聊天”，而是把这件事做完的能力。工具墙为主、题型不难，先看Go；答案不够准、长文档、多步骤分析、写代码，才看Plus。如果过去30天一次都没发生，那就继续用免费版，把这20美元留到真正卡住你的那个月。"
+          ]
+        }
+      ],
+      "duration_mode": "content",
+      "title": "ChatGPT免费版用了一个月，该升Plus吗？先看你会不会撞上“静默降级”",
+      "production_context": {
+        "content_recipe": {
+          "id": "research:theme_research-m4",
+          "settings": {
+            "video_form": "auto",
+            "creative_intent": {
+              "purpose": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n栏目：T06 · 套餐与付费价值。持续交付：我有没有必要付费？。\n本期可围绕 对象 → 比较维度 → 关键差异 → 适用情形 组织讲述，按素材自然展开。\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。\n栏目创作方向：题材编号 T06；获客作用：精准转化。从具体使用频率与任务判断免费或付费套餐的价值，整理当前页面支持的价格、权益、使用限制和体验差异。将套餐名称、价格币种、地区、渠道与页面日期写清，页面变更与当前权益分开表达。",
+              "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+              "focus": "ChatGPT免费版用了一个月，该升Plus吗？先看你会不会撞上“静默降级”"
+            },
+            "packaging": {
+              "preset": "common",
+              "label": "主题讲解",
+              "accent": "#1f7a4d",
+              "recipe": "theme_research-m4"
+            },
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:chatgpt_t06_value",
+          "settings": {
+            "video_speed": 1.25,
+            "packaging": {
+              "label": "套餐与付费价值",
+              "preset": "common"
+            }
+          }
+        }
+      },
+      "visual_storytelling": true,
+      "creative_intent": {
+        "purpose": "栏目：T06 · 套餐与付费价值。讲解目标：我有没有必要付费？。\n优先按段落组合产品真实截图、操作步骤、结果展示、变化前后对比，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。从具体使用频率与任务判断免费或付费套餐的价值，整理当前页面支持的价格、权益、使用限制和体验差异。将套餐名称、价格币种、地区、渠道与页面日期写清，页面变更与当前权益分开表达。",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户"
+      },
+      "idempotency_key": "research:c8daf66172264932ba0f865c9d34d5d5"
+    }
+  },
+  "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/c8daf66172264932ba0f865c9d34d5d5/video.mp4",
+  "duration_seconds": 346.0,
+  "decode_exit_code": 0
+}

@@ -1,0 +1,200 @@
+{
+  "matrix": "chatgpt_acquisition",
+  "examples": 80,
+  "patterns": 9,
+  "generation": {
+    "id": "aabfe18d016c4d1dadf746fdd7aa470f",
+    "matrix": "chatgpt_acquisition",
+    "status": "success",
+    "brief": "面向中文普通用户和职场学习人群。参考库中的题型出题，优先具体任务与实际选择；各栏目保持不同问题，不需要都讨论订阅。",
+    "category": "",
+    "pattern_id": "",
+    "created_at": 1793114804.769595,
+    "finished_at": 1793114856.617972,
+    "result": {
+      "recommended": 6,
+      "theme_ids": [
+        "58b6e4030d4941d18a86bf894127d0b3",
+        "a83ba66c1b6847e8a4a24ee900b97cae",
+        "863911170387426190dcf91685c3d69c",
+        "a9cef209b4004b6cbd8c9490c893185c",
+        "35c6188768344e6594d6cf4d268a4c52",
+        "5154a633b93647ff84906da72b122f2b"
+      ],
+      "usage": {
+        "searches": 0,
+        "requests": 1,
+        "prompt_tokens": 8075,
+        "completion_tokens": 6604,
+        "total_tokens": 14679
+      },
+      "output": "output/topic_ideas/chatgpt_acquisition/2026-10-27_aabfe18d.md",
+      "categories": 9,
+      "examples": 27
+    },
+    "error": ""
+  },
+  "new_themes": [
+    {
+      "id": "5154a633b93647ff84906da72b122f2b",
+      "category": "chatgpt_t08_troubleshooting",
+      "title": "ChatGPT 上传文件一直失败，先检查什么、再尝试什么？",
+      "origin": "generated",
+      "inspiration": {
+        "question": "在 ChatGPT 上传文件失败时，应按什么顺序检查文件本身、网络与账号状态、功能入口及订阅权益？",
+        "topic_key": "chatgpt_file_upload_troubleshooting",
+        "pattern_id": "f2d93f15fae7a05a4a3600af",
+        "pattern_name": "从现象到排查顺序",
+        "title_pattern": "{产品}出现{具体异常}，先检查什么、再尝试什么？",
+        "outline": [
+          "描述可辨认的异常",
+          "区分可能原因",
+          "从简单步骤开始排查",
+          "说明何时换一种处理路径"
+        ],
+        "example_ids": [
+          "9ae48d3126e7b6287b22fb1b"
+        ],
+        "generated_at": 1793114856.60665,
+        "basis": "reference_library"
+      }
+    },
+    {
+      "id": "35c6188768344e6594d6cf4d268a4c52",
+      "category": "chatgpt_t07_subscription",
+      "title": "通过 iPhone App Store 订阅了 ChatGPT Plus，怎样取消自动续费并确认状态？",
+      "origin": "generated",
+      "inspiration": {
+        "question": "通过 iPhone App Store 购买 ChatGPT Plus 后，取消自动续费应在哪里操作，如何确认订阅状态和到期时间？",
+        "topic_key": "chatgpt_plus_ios_cancel_renewal",
+        "pattern_id": "c83e796c64222e6e655dc096",
+        "pattern_name": "按购买入口拆解订阅操作",
+        "title_pattern": "通过{购买入口}订阅了{产品}，怎样完成{订阅管理操作}？",
+        "outline": [
+          "识别购买入口",
+          "找到对应管理页面",
+          "展示操作步骤",
+          "说明操作后的状态"
+        ],
+        "example_ids": [
+          "144a09d06112fb4a3fd43c19"
+        ],
+        "generated_at": 1793114856.606646,
+        "basis": "reference_library"
+      }
+    },
+    {
+      "id": "a9cef209b4004b6cbd8c9490c893185c",
+      "category": "chatgpt_t04_testing",
+      "title": "让 ChatGPT 按一份招聘 JD 修改简历，改完能直接投递吗？",
+      "origin": "generated",
+      "inspiration": {
+        "question": "把一份招聘 JD 和现有简历交给 ChatGPT，按岗位要求修改后，结果能否直接用于投递，需要检查哪些问题？",
+        "topic_key": "chatgpt_resume_jd_test",
+        "pattern_id": "a6baad4b382e7eb0dc8b8ace",
+        "pattern_name": "同一任务下的能力实测",
+        "title_pattern": "让{产品或版本}完成{具体任务}，结果能直接用吗？",
+        "outline": [
+          "定义任务与输入",
+          "约定观察维度",
+          "展示实际输出",
+          "分析成功与局限",
+          "给出适用人群"
+        ],
+        "example_ids": [
+          "97365d773a6bc874c71ae3d0"
+        ],
+        "generated_at": 1793114856.606642,
+        "basis": "reference_library"
+      }
+    },
+    {
+      "id": "863911170387426190dcf91685c3d69c",
+      "category": "chatgpt_t03_tutorials",
+      "title": "第一次用 ChatGPT 准备 10 分钟工作汇报，从哪里开始、怎样一步步完成？",
+      "origin": "generated",
+      "inspiration": {
+        "question": "第一次用 ChatGPT 准备工作汇报，如何从明确汇报目标、整理材料到修改讲稿逐步完成？",
+        "topic_key": "chatgpt_first_work_presentation",
+        "pattern_id": "22a283dcdc9ffe5ed95e7f25",
+        "pattern_name": "完成一个任务的入门教程",
+        "title_pattern": "第一次用{产品}做{任务}，从哪里开始、怎样一步步完成？",
+        "outline": [
+          "说明任务和目标",
+          "准备材料",
+          "分步演示",
+          "修改第一版结果",
+          "给出可复用步骤"
+        ],
+        "example_ids": [
+          "09c9dabbd4f16b70f4dce44b"
+        ],
+        "generated_at": 1793114856.6066382,
+        "basis": "reference_library"
+      }
+    },
+    {
+      "id": "a83ba66c1b6847e8a4a24ee900b97cae",
+      "category": "chatgpt_t02_scenarios",
+      "title": "把一场会议记录交给 ChatGPT，能得到一份怎样的会议纪要和待办清单？",
+      "origin": "generated",
+      "inspiration": {
+        "question": "将一场会议的原始记录交给 ChatGPT，整理成会议纪要和可执行待办清单需要哪些输入、步骤与核对环节？",
+        "topic_key": "chatgpt_meeting_notes_to_actions",
+        "pattern_id": "32e39e93f7393eb594251bab",
+        "pattern_name": "从业务问题到具体成果",
+        "title_pattern": "把{实际问题}交给{产品}，能得到一份怎样的{成果}？",
+        "outline": [
+          "提出实际工作问题",
+          "准备输入资料",
+          "展示处理过程",
+          "比较交付成果与原有做法"
+        ],
+        "example_ids": [
+          "a15830bb6abac9d8370c8cc0"
+        ],
+        "generated_at": 1793114856.606634,
+        "basis": "reference_library"
+      }
+    },
+    {
+      "id": "58b6e4030d4941d18a86bf894127d0b3",
+      "category": "chatgpt_t01_product",
+      "title": "只用 ChatGPT 当搜索框？把一份产品说明书丢给它，还能整理出新手操作清单吗？",
+      "origin": "generated",
+      "inspiration": {
+        "question": "把一份产品说明书交给 ChatGPT，从提取关键步骤到生成新手操作清单，具体能完成哪些处理？",
+        "topic_key": "chatgpt_manual_to_quickstart",
+        "pattern_id": "00bfcc5e8509b07e9e7ec11e",
+        "pattern_name": "从熟悉用法发现能力边界",
+        "title_pattern": "只用{产品}做{已有用法}，你还可以让它完成什么？",
+        "outline": [
+          "观众现在怎样用",
+          "换一个具体任务",
+          "展示输入与成果",
+          "说明适用条件"
+        ],
+        "example_ids": [
+          "e525db35a6e48fa61ae8ed95"
+        ],
+        "generated_at": 1793114856.606619,
+        "basis": "reference_library"
+      }
+    }
+  ],
+  "used_topics": [
+    {
+      "id": "f1e661fd90cf4b53a245d21d4c40b291",
+      "title": "ChatGPT 免费版用了一个月，应该升级 Plus 吗？",
+      "used_at": 1793111255.537421,
+      "script_id": "9f9e96af89e54057a6339676c9a9c900"
+    }
+  ],
+  "validation": {
+    "backend_passed": 3402,
+    "backend_skipped": 3,
+    "frontend_passed": 609,
+    "final_focused_backend_passed": 32,
+    "final_focused_frontend_passed": 37
+  }
+}

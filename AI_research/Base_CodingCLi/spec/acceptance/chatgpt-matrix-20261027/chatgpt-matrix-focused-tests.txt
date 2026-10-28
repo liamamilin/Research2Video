@@ -1,0 +1,15 @@
+........................................................................ [ 56%]
+.......................................................                  [100%]
+=============================== warnings summary ===============================
+tests/test_matrices.py::test_api_rejects_invalid_matrix_speed_without_changing_file[True]
+tests/test_matrices.py::test_api_rejects_invalid_matrix_speed_without_changing_file[False]
+tests/test_matrices.py::test_api_rejects_invalid_matrix_speed_without_changing_file[0]
+tests/test_matrices.py::test_api_rejects_invalid_matrix_speed_without_changing_file[1.2]
+tests/test_matrices.py::test_api_rejects_invalid_matrix_speed_without_changing_file[3]
+tests/test_matrices.py::test_api_rejects_invalid_matrix_speed_without_changing_file[fast]
+tests/test_video_topic_store.py::test_api_sources_manual_topics_and_a_typed_title_lands_in_the_pool
+  /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/starlette/_exception_handler.py:59: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    response = await handler(conn, exc)  # type: ignore[arg-type]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+127 passed, 7 warnings in 16.67s

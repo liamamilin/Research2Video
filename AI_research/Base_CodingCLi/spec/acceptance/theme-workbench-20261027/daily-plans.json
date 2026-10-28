@@ -1,0 +1,107 @@
+{
+  "plans": [
+    {
+      "id": "themes_ai_media",
+      "job_name": "topic_discovery/ai_media",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_chatgpt_acquisition",
+      "job_name": "topic_discovery/chatgpt_acquisition",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_company",
+      "job_name": "topic_discovery/company",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_consumer",
+      "job_name": "topic_discovery/consumer",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_culture",
+      "job_name": "topic_discovery/culture",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_economy",
+      "job_name": "topic_discovery/economy",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_education",
+      "job_name": "topic_discovery/education",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_geography",
+      "job_name": "topic_discovery/geography",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_history",
+      "job_name": "topic_discovery/history",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_industry",
+      "job_name": "topic_discovery/industry",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    },
+    {
+      "id": "themes_science",
+      "job_name": "topic_discovery/science",
+      "enabled": 1,
+      "schedule": "0 9 * * *",
+      "timezone": "Asia/Shanghai",
+      "next_run": "2026-10-28T09:00:00+08:00"
+    }
+  ],
+  "scheduler": {
+    "checked_at": 1793109259.6919758,
+    "status": "ok",
+    "pid": 35320,
+    "runtime": {
+      "workspace": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi",
+      "state_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state",
+      "jobs_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/jobs",
+      "config_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config",
+      "logs_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/logs"
+    },
+    "online": true,
+    "age_seconds": 3.9,
+    "detail": "执行器在线，每 10 秒检查到期任务"
+  }
+}

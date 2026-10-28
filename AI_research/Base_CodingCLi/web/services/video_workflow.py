@@ -115,7 +115,7 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
     prompt = fill_topic(column.research_prompt, column, topic)
     name = research_job_name(column.key, script_id).split("/", 1)[1]
     keywords = [k for k in re.split(r"[：:，,、]", topic.get("title", "")) if k.strip()][:5]
-    return {
+    spec = {
         "name": name,
         "description": f"{column.name}：{topic.get('title', '')}"[:200],
         "enabled": True,
@@ -126,6 +126,9 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
         "prompt": prompt,
         "output": f"output/{JOB_CATEGORY}/{{datetime}}_{name}.md",
     }
+    if topic.get("theme_research"):
+        spec.update(topic["theme_research"])
+    return spec
 
 
 def start(column_key: str, topic: dict, started_by: str) -> dict:
@@ -141,6 +144,7 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     production_id = topic.pop("_production", "") or topic.get("article_production", "")
     config = production.get(settings.paths.config_dir, settings.paths.jobs_dir, production_id) if production_id else None
     context = content_columns.snapshot(settings.paths.config_dir, production_id, config.job) if config else {}
+    context = topic.pop("_content_context", None) or context
     if context.get("audience") and not explicit_audience:
         fields["目标受众"] = context["audience"]
     script = store.create_script(column.key, topic, created_by=started_by,
@@ -204,7 +208,7 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     # 1. Research: an ordinary job, unless the topic comes with a report already (a short video cut from a longer
     # one is written from that one's research, its sources and citation check).
     report_path = topic.get("from_report") or script["report_path"] or ""
-    if not report_path and column.research_mode == "none":
+    if not report_path and column.research_mode == "none" and not topic.get("theme_research"):
         store.update_script(script_id, status="FAILED",
                             error=f"配方 {column.key} 不做调研（research.mode: none），选题要带上研究报告")
         return "FAILED"
@@ -270,6 +274,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     script = content_guard.with_policy(store.get_script(script_id), settings.paths.jobs_dir)
     from core.video.content_columns import apply_script_context
     column = apply_script_context(column, script.get("content_context") or {})
+    joint_input = bool(topic.get("theme_research"))
     guarded = bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
     config, review_config = _llm_configs(llm_config, column)
     dedup_meta, filtered_material = {}, ""
@@ -361,7 +366,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                      if urls & {normalize_url(url) for url in extract_urls(part)}]
             material = "\n\n---\n\n".join(parts)
         written = writer.write(
-            report=material or report,
+            report=report if joint_input else material or report,
             citation_check=None if material else citation_check,
             topic=topic,
             column_style=column.script_style + (
@@ -372,8 +377,10 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             voice=column.voice_id or None,
             paragraph_units=tuple(column.paragraph_units),
             topic_fields=column.writer_topic_fields(),
+            **({"original_material": material} if joint_input else {}),
         )
-        written.meta["input_kind"] = "original_material" if material else "report"
+        written.meta["input_kind"] = ("report_and_original_material" if joint_input and material
+                                      else "original_material" if material else "report")
         if material:
             written.meta["material"] = material_ref
         if guarded:

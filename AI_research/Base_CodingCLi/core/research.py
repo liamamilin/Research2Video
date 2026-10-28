@@ -392,6 +392,17 @@ class ResearchAgent:
         try:
             if name == "search_web":
                 return self._tool_search_web(arguments)
+            if name == "read_webpage":
+                url = str(arguments.get("url") or "")
+                from urllib.parse import urlsplit
+                parsed = urlsplit(url)
+                if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
+                    return "Error: provide a public HTTP or HTTPS URL without credentials"
+                result = self.search.read_page(url)
+                self._remember([result])
+                rendered = self._truncate(SearchClient.format_results([result]), self.config.max_chars_per_call)
+                self.materials.append(rendered)
+                return rendered
             if name == "read_file":
                 return self._tool_read_file(arguments)
             if name == "list_files":
@@ -664,6 +675,11 @@ class ResearchAgent:
 def _tool_definitions() -> list[dict]:
     """OpenAI-style tool schemas exposed to the model."""
     return [
+        {"type": "function", "function": {
+            "name": "read_webpage",
+            "description": "Read the body of a known public webpage to expand a search excerpt or answer a topic's missing question.",
+            "parameters": {"type": "object", "properties": {"url": {"type": "string"}}, "required": ["url"]},
+        }},
         {
             "type": "function",
             "function": {

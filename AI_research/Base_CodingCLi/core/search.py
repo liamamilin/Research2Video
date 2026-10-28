@@ -234,6 +234,25 @@ class SearchClient:
         header = f"({len(results)} sources retrieved from web search)\n"
         return header + "\n\n---\n\n".join(blocks)
 
+    def read_page(self, url: str) -> SearchResult:
+        """Read one exact public URL through Exa Contents when direct fetching is unavailable."""
+        if self._cancel.is_set():
+            raise CancelledError("Cancelled before reading page")
+        key = self.config.api_keys.get("exa")
+        if not key:
+            raise RuntimeError("网页直接读取失败；可配置 EXA_API_KEY 使用 Exa 网页正文读取")
+        self._progress({"type": "tool", "tool": "read_page", "url": url})
+        body = self._post_json("https://api.exa.ai/contents", {
+            "urls": [url], "text": True, "maxAgeHours": 0,
+        }, api_key=key)
+        from .source_pages import canonical_url
+        for item in body.get("results") or []:
+            if canonical_url(item.get("url") or "") == canonical_url(url) and item.get("text"):
+                return SearchResult(title=item.get("title") or url, url=url,
+                                    publish_date=item.get("publishedDate"),
+                                    excerpts=[item["text"][:120000]], provider="exa_contents")
+        raise RuntimeError("网页正文服务未取得指定页面的内容")
+
     # ------------------------------------------------------------------
     # Parallel Search API
     # ------------------------------------------------------------------
