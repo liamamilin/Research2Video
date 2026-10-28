@@ -209,6 +209,32 @@ class ResearchEngine:
                         objective=objective,
                         fallback_queries=job.get("keywords", []),
                     )
+                # The AI pilot deepens the researcher's chosen candidates by
+                # reading existing links, before the ordinary report is saved.
+                from .ai_dossier_sources import enrich
+                from core.video.research_dossier import PRODUCTIONS
+                dossier_detail = {}
+                if job.get("_file") in PRODUCTIONS.values() and raw_content:
+                    from .search import SearchClient
+                    reader = SearchClient(SearchConfig.from_system(self.sys), cancel_token=self._cancel,
+                                          progress_cb=self._progress)
+                    extra, dossier_detail = enrich(
+                        job, raw_content, "\n\n".join([source_block, *agent.materials]),
+                        search_client=reader, cancel_token=self._cancel, progress_cb=self._progress)
+                    if extra:
+                        import hashlib
+                        import json
+                        initial = output_path + ".dossier-initial-" + hashlib.sha256(raw_content.encode()).hexdigest()[:16] + ".json"
+                        atomic_write(initial, json.dumps({"version": 1, "report": raw_content}, ensure_ascii=False) + "\n")
+                        dossier_detail["initial_report"] = initial
+                        try:
+                            raw_content = agent.expand_dossier(prompt, raw_content, extra)
+                            dossier_detail["expanded"] = True
+                        except CancelledError:
+                            raise
+                        except Exception as exc:
+                            dossier_detail.update(expanded=False, expansion_error=str(exc)[:300])
+                            logger.warning("Dossier expansion kept the initial report: %s", exc)
                 usage = agent.get_usage()
                 if self._source_search_client is not None:
                     usage["searches"] = int(usage.get("searches") or 0) + self._source_search_client.calls
@@ -261,7 +287,8 @@ class ResearchEngine:
 
                     append_record(report_path, job_name, usage=usage,
                                   duration_seconds=round(time.time() - start_time, 1),
-                                  extra={"citation_check": citation, "material": material})
+                                  extra={"citation_check": citation, "material": material,
+                                         **({"research_dossier": dossier_detail} if dossier_detail else {})})
                 except Exception as exc:  # noqa: BLE001 - metadata is optional
                     logger.debug("report metadata skipped: %s", exc)
                 logger.info(

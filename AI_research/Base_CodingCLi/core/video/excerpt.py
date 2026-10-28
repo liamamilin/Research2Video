@@ -22,20 +22,40 @@ def _title(heading: str) -> str:
     return _NUMBERING.sub("", heading.replace("**", "").strip()).strip()
 
 
-def item_excerpt(report: str, title: str, *, summary: str = "") -> Optional[str]:
+def heading_text(report: str) -> str:
+    """Mask fenced examples for outline matching, preserving every text offset."""
+    fence = None
+    visible = []
+    for line in report.splitlines(keepends=True):
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if fence:
+            if (marker and marker[1][0] == fence[0] and len(marker[1]) >= fence[1]
+                    and not marker[2].strip()):
+                fence = None
+            visible.append(re.sub(r"[^\r\n]", " ", line))
+        elif marker:
+            fence = (marker[1][0], len(marker[1]))
+            visible.append(re.sub(r"[^\r\n]", " ", line))
+        else:
+            visible.append(line)
+    return "".join(visible)
+
+
+def item_excerpt(report: str, title: str, *, summary: str = "", include_nested: bool = False) -> Optional[str]:
     """Read an item's section and cited sources, using its frozen summary if its display title changed.
 
     A summary must match one section exactly; ambiguous or absent matches never return the whole report.
     """
     lines = report.splitlines()
-    start = next((i for i, line in enumerate(lines)
+    outline = heading_text(report).splitlines() if include_nested else lines
+    start = next((i for i, line in enumerate(outline)
                   if (m := _HEADING.match(line)) and _title(m.group(1)) == title.strip()), None)
     if start is None and summary.strip():
         normalize = lambda value: " ".join(value.split())
         wanted = normalize(summary)
         matches = set()
         heading = None
-        for i, line in enumerate(lines):
+        for i, line in enumerate(outline):
             if _HEADING.match(line):
                 heading = i
             elif heading is not None and (m := _SUMMARY.match(line)) and normalize(m.group(1)) == wanted:
@@ -44,12 +64,14 @@ def item_excerpt(report: str, title: str, *, summary: str = "") -> Optional[str]
             start = matches.pop()
     if start is None:
         return None
-    end = next((i for i in range(start + 1, len(lines)) if _HEADING.match(lines[i])), len(lines))
+    level = len(lines[start]) - len(lines[start].lstrip("#"))
+    end = next((i for i in range(start + 1, len(lines)) if _HEADING.match(outline[i])
+                and (not include_nested or len(outline[i]) - len(outline[i].lstrip("#")) <= level)), len(lines))
     body = lines[start:end]
     cited = {int(n) for n in _REF.findall("\n".join(body))}
     sources: dict[int, str] = {}
     in_sources = False
-    for line in lines:
+    for line in outline:
         heading = _HEADING.match(line)
         if heading:
             in_sources = "来源清单" in heading.group(1)

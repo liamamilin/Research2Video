@@ -28,7 +28,7 @@ from core.config import load_system_config
 from core.llm import LLMConfig
 from core.state import StateManager
 from core.video import columns as video_columns
-from core.video import content_guard, length, store, story_pool, writer
+from core.video import content_guard, length, research_dossier, store, story_pool, writer
 from core.video import plans as video_plans
 from core.video.adapt import draft as adapt_draft
 from core.video.adapt import facts as adapt_facts
@@ -76,7 +76,8 @@ def report_of(script: dict, report_path: str = "") -> str:
     if not topic.get("from_item"):
         return text
     part = excerpt.item_excerpt(text, topic.get("from_item_title") or topic.get("title") or "",
-                                summary=(topic.get("fields") or {}).get("一句话") or "")
+                                summary=(topic.get("fields") or {}).get("一句话") or "",
+                                include_nested=research_dossier.enabled(script))
     if part is None:
         raise OSError(f"报告里找不到条目「{topic.get('title')}」，没法只用它那一节写稿")
     return part
@@ -274,7 +275,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     script = content_guard.with_policy(store.get_script(script_id), settings.paths.jobs_dir)
     from core.video.content_columns import apply_script_context
     column = apply_script_context(column, script.get("content_context") or {})
-    joint_input = bool(topic.get("theme_research"))
+    joint_input = research_dossier.enabled(script) or bool(topic.get("theme_research"))
+    dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
     guarded = bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
     config, review_config = _llm_configs(llm_config, column)
     dedup_meta, filtered_material = {}, ""
@@ -305,6 +307,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}
                 filtered_material = story_pool.material_for(pool, story)
+                if joint_input:
+                    dossier_report, dossier_selection = research_dossier.select_report(dossier_report, story, pool)
                 report = story_pool.brief(story) + "\n\n" + filtered_material
                 dedup_meta = story_pool.selection(script_id)
                 # Both legacy and adaptation writers see the same explicit event.
@@ -312,6 +316,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             else:
                 report, filtered_material, dedup_meta = content_guard.prepare(
                     script, report, original, settings.paths.config_dir, settings.paths.jobs_dir)
+                dossier_report = report
         except story_pool.NoCandidate as exc:
             peers = [{"script_id": d["peer_id"], "title": d["title"]} for d in exc.decisions if d["peer_id"]]
             return _duplicate_script(script_id, content_guard.DuplicateContent(peers, str(exc)), failed_status)
@@ -366,7 +371,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                      if urls & {normalize_url(url) for url in extract_urls(part)}]
             material = "\n\n---\n\n".join(parts)
         written = writer.write(
-            report=report if joint_input else material or report,
+            report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
             topic=topic,
             column_style=column.script_style + (
@@ -381,6 +386,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         )
         written.meta["input_kind"] = ("report_and_original_material" if joint_input and material
                                       else "original_material" if material else "report")
+        if joint_input:
+            written.meta["research_dossier"] = research_dossier.receipt(dossier_report, material, dossier_selection)
         if material:
             written.meta["material"] = material_ref
         if guarded:

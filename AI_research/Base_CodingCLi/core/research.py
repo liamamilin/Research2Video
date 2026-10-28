@@ -309,6 +309,25 @@ class ResearchAgent:
         """Release HTTP resources."""
         self.llm.close()
 
+    def expand_dossier(self, task_prompt: str, report: str, material: str) -> str:
+        """Use newly read body sections in the same researcher's final dossier."""
+        self.materials.append(material)
+        self._remember_urls_in(material)
+        self._check_cancel()
+        self._progress({"type": "phase", "phase": "expanding_research_dossier"})
+        response = self.llm.chat([
+            {"role": "system", "content": _FETCH_SYSTEM_PROMPT},
+            {"role": "user", "content": (
+                task_prompt + "\n\n## 已整理的研究底稿\n" + report
+                + "\n\n## 本轮补充读取的原始正文\n" + material
+                + "\n\n结合补充正文完善研究底稿，保留原有有用资料，把具体例子、操作过程与机制解释展开。"
+                  "输出完整底稿，沿用任务指定的条目与来源格式，供作者和原始素材共同使用。"
+            )},
+        ], tools=None)
+        if response.finish_reason in {"length", "content_filter"} or report_problem(response.content):
+            raise RuntimeError("补充底稿未返回完整正文，沿用原研究结果")
+        return response.content.strip()
+
     def get_usage(self) -> dict:
         """Return LLM/search consumption accumulated by this run."""
         usage = dict(self.llm.usage)
