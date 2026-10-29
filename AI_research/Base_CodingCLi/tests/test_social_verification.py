@@ -121,6 +121,33 @@ def test_discovery_needs_fingerprint_or_unique_title_time_and_duration():
     assert 'opaque-cover-key' not in str(correlated)
 
 
+def test_metadata_match_accepts_one_blank_caption_work_after_the_final_request():
+    lookup = {'title': PAYLOAD['title'], 'submitted_at': NOW - 40, 'duration_seconds': 90.6}
+    blank = parse_ks(ks_row(title='', durationSecond=90))
+    assert select_work(blank, lookup) == (None, 'missing')
+    row, reason = select_work(blank, lookup, metadata_match=True)
+    assert (row['work_id'], row['match_basis'], reason) == (WORK, 'time_duration', '')
+    assert select_work(blank, {**lookup, 'work_id': WORK}, metadata_match=True)[0]['work_id'] == WORK
+    cut = parse_ks(ks_row(title=PAYLOAD['title'][:8], durationSecond=90))
+    assert select_work(cut, lookup, metadata_match=True)[0]['work_id'] == WORK
+
+
+def test_metadata_match_refuses_a_different_caption_duration_time_or_competing_claim():
+    lookup = {'title': PAYLOAD['title'], 'submitted_at': NOW - 40, 'duration_seconds': 90}
+    other = parse_ks(ks_row(title='完全不同的另一条作品标题'))
+    assert select_work(other, lookup, metadata_match=True) == (None, 'missing')
+    assert select_work(parse_ks(ks_row(title='', durationSecond=95)), lookup, metadata_match=True) == (None, 'missing')
+    assert select_work(parse_ks(ks_row(title='', uploadTime=(NOW + 600) * 1000)), lookup, metadata_match=True) == (None, 'missing')
+    blank = parse_ks(ks_row(title=''))
+    assert select_work(blank, {**lookup, 'claimed': [WORK]}, metadata_match=True) == (None, 'missing')
+    peer = {'submitted_at': NOW - 30, 'duration_seconds': 90.5}
+    assert select_work(blank, {**lookup, 'peers': [peer]}, metadata_match=True) == (None, 'ambiguous')
+    far = {'submitted_at': NOW - 3600, 'duration_seconds': 90}
+    assert select_work(blank, {**lookup, 'peers': [far]}, metadata_match=True)[0]['work_id'] == WORK
+    twin = {**blank[0], 'work_id': '3xAnotherBlank0000'}
+    assert select_work([*blank, twin], lookup, metadata_match=True) == (None, 'ambiguous')
+
+
 def test_cover_url_correlation_drops_signatures_and_never_retains_auth_values():
     url = 'https://cdn.kuaishou.example/covers/unique-upload-opaque-file-123456.png'
     correlations = submission_correlations({'cover': url + '?signature=secret&token=private', 'api_ph': 'private', 'cookie': 'secret'})

@@ -20,4 +20,16 @@ def prepare_lookup(db, row: dict) -> dict:
         if duration is not None:
             db.record_duration(row['id'], duration)
             row = db.get(row['id'])
-    return lookup_for(row)
+    lookup = lookup_for(row)
+    if not row['work_id']:
+        lookup.update(competition(db, row))
+    return lookup
+
+
+def competition(db, row: dict) -> dict:
+    """Other uploads of this account that a metadata-only match must not collide with."""
+    uploads = [other for other in db.list(uid=row['uid'], kind='UPLOAD') if other['id'] != row['id']]
+    return {'claimed': sorted({other['work_id'] for other in uploads if other['work_id']}),
+            'peers': [{'submitted_at': other['result'].get('submission_started_at') or other['created_at'],
+                       'duration_seconds': other['result'].get('duration_seconds')}
+                      for other in uploads if not other['work_id'] and other['status'] in ('SUBMITTED', 'UNKNOWN')]}

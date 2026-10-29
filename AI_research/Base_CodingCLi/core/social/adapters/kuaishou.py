@@ -572,6 +572,9 @@ class KuaishouAdapter:
                 if errors:
                     raise AdapterError('快手后续作品列表未能读取，原投稿保留，将稍后核对。')
                 selected, reason = select_work(records, lookup)
+            if not selected and reason == 'missing':
+                # Only after every page is read can a time/duration match be known to be the only fit.
+                selected, reason = select_work(records, lookup, metadata_match=True)
             return {**receipt(self.key, owner_id, selected, reason), 'lookup_diagnostics': lookup_diagnostics(records, lookup)}
         except AdapterError:
             raise

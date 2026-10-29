@@ -110,8 +110,54 @@ def timestamp(value: object) -> float | None:
     return number if number and 946684800 <= number < 4102444800 else None
 
 
-def select_work(rows: list[dict], lookup: dict) -> tuple[dict | None, str]:
+METADATA_WINDOW = (-5, 240)
+METADATA_DURATION_TOLERANCE = 1.5
+
+
+def _metadata_in_window(row: dict, submitted_at: object, duration: object) -> bool:
+    when, actual = timestamp(row.get('published_at')), seconds(row.get('duration_seconds'))
+    started, expected = timestamp(submitted_at), seconds(duration)
+    return (None not in (when, actual, started, expected)
+            and started + METADATA_WINDOW[0] <= when <= started + METADATA_WINDOW[1]
+            and abs(actual - expected) <= METADATA_DURATION_TOLERANCE)
+
+
+def _caption_compatible(row: dict, title: str) -> bool:
+    """A blank or truncated platform caption is compatible; a different caption never is."""
+    shown = text(row.get('title'))
+    return not shown or (len(shown) >= 6 and title.startswith(shown)) or shown == title
+
+
+def metadata_work(rows: list[dict], lookup: dict) -> tuple[dict | None, str]:
+    """Last-resort match for an accepted upload whose caption and cover cannot be read back.
+
+    Needs one own work published within minutes of the final request, a near-identical
+    duration and a compatible caption. A work already bound to another upload, or one
+    that another pending upload also fits, is never chosen.
+    """
+    title, claimed = text(lookup.get('title')), set(lookup.get('claimed') or ())
+    fits = [row for row in rows if row.get('work_id') and row['work_id'] not in claimed
+            and _metadata_in_window(row, lookup.get('submitted_at'), lookup.get('duration_seconds'))
+            and _caption_compatible(row, title)]
+    unique = {row['work_id']: row for row in fits}
+    if len(unique) != 1:
+        return None, 'ambiguous' if unique else 'missing'
+    row = next(iter(unique.values()))
+    if any(_metadata_in_window(row, peer.get('submitted_at'), peer.get('duration_seconds'))
+           for peer in lookup.get('peers') or ()):
+        return None, 'ambiguous'
+    return {**row, 'match_basis': 'time_duration'}, ''
+
+
+def select_work(rows: list[dict], lookup: dict, *, metadata_match: bool = False) -> tuple[dict | None, str]:
     """Rows must already be validated as belonging to the exact signed-in UID."""
+    selected, reason = _select_work(rows, lookup)
+    if selected is None and reason == 'missing' and metadata_match and not lookup.get('work_id'):
+        return metadata_work(rows, lookup)
+    return selected, reason
+
+
+def _select_work(rows: list[dict], lookup: dict) -> tuple[dict | None, str]:
     target = lookup.get('work_id', '')
     if target:
         matches = [row for row in rows if row.get('work_id') == target]
@@ -166,7 +212,8 @@ def receipt(platform: str, uid: str, row: dict | None, state: str = 'missing') -
     details = {key: value for key, value in (row or {}).get('status_details', {}).items()
                if key in ('tab_status', 'permission_code', 'high_self', 'schedule_post_time')
                and (value is None or type(value) in (int, bool))}
-    return {'uid': uid, 'work_id': work_id, 'owned': bool(row), 'public': state == 'published',
+    basis = {'match_basis': row['match_basis']} if row and row.get('match_basis') else {}
+    return {'uid': uid, 'work_id': work_id, 'owned': bool(row), 'public': state == 'published', **basis,
             'platform_state': state, 'check_reason': STATE_LABELS[state],
             'evidence': EVIDENCE[platform] if state == 'published' else '',
             'published_at': row.get('published_at') if row else None,

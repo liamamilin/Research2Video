@@ -452,7 +452,9 @@ def settle(platform: str, db: SocialStore) -> None:
         when = when if when and when <= time.time() + 86400 else time.time()
         video_store.add_publication(row['script_id'],version=row['version'],render_id=row['render_id'],platform=platform,url=url,
                                     published_on=datetime.fromtimestamp(when).astimezone().date().isoformat(),title=row['payload']['title'],
-                                    note='平台自动核对作品归属和公开状态，回写发布记录。',
+                                    note=('平台作品列表按发布时间与时长关联到原投稿，回写发布记录；标题未能读回，建议抽查。'
+                                          if receipt.get('match_basis') == 'time_duration'
+                                          else '平台自动核对作品归属和公开状态，回写发布记录。'),
                                     recorded_by='platform-manager',account_uid=row['uid'],account_name=account(platform).get('name',''))
         db.update(row['id'],expected='SUBMITTED',status='PUBLISHED',phase='已公开并回写文稿',error='')
     schedule_comments(platform, db)
@@ -513,7 +515,7 @@ def apply_check(platform: str, db: SocialStore, check: dict) -> None:
             public = (receipt.get('public') is True and state == 'published' and receipt.get('evidence') == EVIDENCE.get(platform))
             if state == 'published' and not public:
                 state = 'unknown'; tracking.update(state=state, reason=STATE_LABELS[state])
-            result.update({k: receipt[k] for k in ('published_at',) if k in receipt})
+            result.update({k: receipt[k] for k in ('published_at', 'match_basis') if k in receipt})
             result.update(accepted=True, confirmed_not_submitted=False, awaiting_work_id=False,
                           work_id=target, url=url, uid=parent['uid'], owned=True, public=public,
                           evidence=EVIDENCE[platform] if public else '', platform_state=state)
