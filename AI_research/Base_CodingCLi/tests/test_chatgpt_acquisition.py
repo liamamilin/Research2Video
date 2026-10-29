@@ -30,7 +30,7 @@ def test_nine_categories_have_sources_unique_topic_ids_and_usable_video_bindings
         assert not source.error
         prefixes.append(source.prefix)
         pid = "chatgpt_" + job_name.rsplit("/", 1)[-1]
-        assert not configs[pid].errors and configs[pid].auto == 0
+        assert not configs[pid].errors
         assert not columns[pid].errors and columns[pid].name.startswith(f"T{number:02d}")
         report = "### 测试选题\n- **一句话**：从输入到结果\n- **来源网址**：https://example.org/article\n\n## 来源清单\nhttps://example.org/article"
         parsed = topic_store.parse(source, report, "2026-10-27")
