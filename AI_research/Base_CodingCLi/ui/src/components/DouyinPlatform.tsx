@@ -10,6 +10,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { documentPublishLink } from "@/lib/platform-links";
 import { errorMessage } from "@/lib/toast";
 import { usePageResource } from "@/lib/use-page-resource";
+import { DouyinConnectionStatus } from "./DouyinConnectionStatus";
 
 type Run = (action: () => Promise<unknown>) => Promise<void>;
 const STATES: Record<string, string> = { QUEUED: "排队中", RUNNING: "处理中", SUBMITTED: "已投稿 · 待核对公开状态", PUBLISHED: "已公开", UNKNOWN: "结果待核对", FAILED: "未完成", CANCELLED: "已取消", DONE: "检查完成", RECORDED: "检查完成" };
@@ -104,7 +105,7 @@ export function DouyinPlatform() {
       </section>
       {admin && data.account.connected ? <CommentTemplate key={`${data.account.uid}:${JSON.stringify(data.settings?.first_comment)}`} initial={data.settings?.first_comment ?? EMPTY_FIRST_COMMENT} run={run} busy={busy} /> : null}
       {admin && activeLogin ? <LoginStatus key={activeLogin} id={activeLogin} onConnected={onConnected} /> : null}
-      {data.checks.filter(r => r.kind === "VERIFY" || r.error).slice(0,3).map(r => <p key={r.id} className={`text-xs ${r.error ? "text-warning" : "text-text-muted"}`}>{r.phase || STATES[r.status]}{r.error ? `：${r.error}` : ""}</p>)}
+      <DouyinConnectionStatus account={data.account} checks={data.checks} />
       {canEdit && data.account.connected ? <>
         <section className="card p-4 space-y-3"><h2 className="text-sm font-medium">选择抖音投稿成片</h2><div className="flex gap-2"><input aria-label="搜索抖音成片" className="input text-xs flex-1 min-w-0" placeholder="搜索标题或版本" value={query} onChange={e => setQuery(e.target.value)} /><select aria-label="抖音成片范围" className="input text-xs w-auto" value={scope} onChange={e => setScope(e.target.value)}><option value="current">当前已定稿</option><option value="all">全部可投稿</option></select></div>
           <select aria-label="抖音投稿成片" className="input w-full" value={selected} onChange={e => { setSelected(e.target.value); setParams(old => { const next = new URLSearchParams(old); next.delete("task"); if (e.target.value) next.set("render", e.target.value); else next.delete("render"); return next; }); }}><option value="">选择一条成片，预览发布包</option>{selected && !rows.some(r => r.render_id === selected) ? <option value={selected}>当前已选成片</option> : null}{rows.map(r => <option key={r.render_id} value={r.render_id}>{r.title} · v{r.version}{r.archived ? " · 已归档" : ""}</option>)}</select>
