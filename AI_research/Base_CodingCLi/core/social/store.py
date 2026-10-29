@@ -164,12 +164,16 @@ class SocialStore:
             # These known adapter branches stop before a publish click.
             # A missing work-list match alone
             # never establishes that a previous submission is safe to retry.
+            # The account check runs when the browser context is created, before any upload page or
+            # publish route exists, so even a timeout there precedes every provider mutation.
+            account_check = failure.get('stage') == '核对账号' and failure.get('error_type') == 'TimeoutError'
             known_preparation = (failure.get('stage') == '选择视频上传入口'
                                  or failure.get('stage') == '平台上传流程' and
-                                 row['error'].startswith('快手视频素材上传超时，未点击发布。'))
+                                 row['error'].startswith('快手视频素材上传超时，未点击发布。')
+                                 or account_check)
             if (result.get('invocation_started') is not True
                     or not known_preparation
-                    or failure.get('error_type') not in ('AdapterError', 'UploadPreparationError')
+                    or failure.get('error_type') not in ('AdapterError', 'UploadPreparationError') and not account_check
                     or any(result.get(field) for field in
                            ('submission_started', 'submission_started_at', 'submission_response', 'accepted', 'work_id', 'url'))):
                 return False

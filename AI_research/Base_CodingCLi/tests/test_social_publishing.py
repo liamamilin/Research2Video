@@ -221,6 +221,22 @@ def test_legacy_input_selection_failure_can_be_repaired_without_resubmitting(tmp
     assert event['kind'] == 'preparation_failure_repaired' and json.loads(event['detail']) == original
 
 
+def test_account_check_timeout_before_any_upload_page_is_repairable_but_a_generic_timeout_is_not(tmp_path):
+    db = SocialStore(str(tmp_path), 'kuaishou')
+    target = {'id': 'r', 'script_id': 's', 'version': 1}
+    account = db.create('UPLOAD', OWNER['uid'], PAYLOAD, render=target)
+    db.update(account['id'], status='UNKNOWN', result={'invocation_started': True,
+        'failure': {'stage': '核对账号', 'error_type': 'TimeoutError'}}, error='尚未核实快手创作中心账号')
+    assert db.repair_upload_preparation(account['id'], OWNER['uid'], db.get(account['id'])['updated_at'])
+    assert db.get(account['id'])['status'] == 'FAILED' and db.get(account['id'])['result']['confirmed_not_submitted']
+    generic = db.create('UPLOAD', OWNER['uid'], PAYLOAD, render={**target, 'id': 'r2'})
+    db.update(generic['id'], status='UNKNOWN', result={'invocation_started': True,
+        'failure': {'stage': '平台上传流程', 'error_type': 'TimeoutError'}}, error='快手上传流程未完成')
+    before = db.get(generic['id'])
+    assert not db.repair_upload_preparation(generic['id'], OWNER['uid'], before['updated_at'])
+    assert db.get(generic['id']) == before
+
+
 @pytest.mark.parametrize('extra', [{'submission_started': True}, {'submission_response': {'http_status': 200}},
                                   {'accepted': True}, {'submission_started_at': 123}, {'url': 'https://www.kuaishou.com/short-video/original'}])
 def test_preparation_repair_never_overrides_evidence_of_submission(tmp_path, extra):
