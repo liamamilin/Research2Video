@@ -15,6 +15,8 @@ from urllib.parse import urlsplit
 
 CHECK_DELAYS = (15, 30, 60, 120, 300, 600, 1800, 3600)
 MAX_UNRESOLVED_CHECKS = 8
+MAX_TOTAL_CHECKS = 24
+MAX_COMMENT_CHECKS = 12
 EVIDENCE = {'kuaishou': 'kuaishou_creator_public', 'xiaohongshu': 'xiaohongshu_creator_public'}
 STATE_LABELS = {
     'published': '已公开', 'reviewing': '平台审核中', 'processing': '平台处理中',
@@ -32,9 +34,11 @@ def lookup_revision(lookup: dict) -> str:
 def check_progress(previous: dict, state: str, checked_at: float, revision: str) -> dict:
     """Bound unresolved checks for unchanged input; retain the cumulative history."""
     cycle = int(previous.get('attempts_for_input', 0)) + 1 if previous.get('input_revision') == revision else 1
-    exhausted = cycle >= MAX_UNRESOLVED_CHECKS and state in (
+    attempts = int(previous.get('attempts', 0)) + 1
+    # A changed input restarts the per-input count, but total automatic checks stay bounded.
+    exhausted = (cycle >= MAX_UNRESOLVED_CHECKS or attempts >= MAX_TOTAL_CHECKS) and state in (
         'missing', 'ambiguous', 'unknown', 'unavailable', 'metadata_missing')
-    return {'attempts': int(previous.get('attempts', 0)) + 1, 'attempts_for_input': cycle,
+    return {'attempts': attempts, 'attempts_for_input': cycle,
             'input_revision': revision, 'checked_at': checked_at, 'state': state,
             'exhausted': exhausted, 'next_check_at': None if exhausted else checked_at + delay(cycle),
             'reason': STATE_LABELS.get(state, STATE_LABELS['unknown']) +

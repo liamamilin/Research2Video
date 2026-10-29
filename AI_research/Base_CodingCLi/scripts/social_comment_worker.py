@@ -9,7 +9,7 @@ import time
 from core.social.adapter import AdapterError
 from core.social.comments import clean_first_comment
 from core.social.kuaishou_comments import KuaishouComments
-from core.social.verification import delay, EVIDENCE
+from core.social.verification import MAX_COMMENT_CHECKS, delay, EVIDENCE
 
 
 def comment_session(platform, pw, storage, owner, work):
@@ -112,5 +112,7 @@ async def check_first_comment(db, check, pw, storage):
         checked_at = time.time()
         db.update(child['id'], result={**current['result'],'checked_at':checked_at,'check_attempts':attempts,
                                       'next_check_at':checked_at+delay(attempts)},
-                  phase='首评已发送并回读' if current['result'].get('read_back') else '评论暂未回读，继续自动只读核对，不重发')
+                  phase='首评已发送并回读' if current['result'].get('read_back') else
+                        '评论已发送，平台评论列表仍未显示；自动核对已停止，可手动核对，不重发' if attempts >= MAX_COMMENT_CHECKS
+                        else '评论暂未回读，继续自动只读核对，不重发')
         await session.close()

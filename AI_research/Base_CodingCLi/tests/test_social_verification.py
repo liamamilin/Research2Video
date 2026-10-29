@@ -279,6 +279,34 @@ def test_backoff_and_concurrent_scheduler_never_create_or_requeue_uploads(social
     assert delay(10000) == 3600
 
 
+def test_changed_input_restarts_the_count_but_total_automatic_checks_stay_bounded():
+    from core.social.verification import MAX_TOTAL_CHECKS, MAX_UNRESOLVED_CHECKS, check_progress
+    previous = {'attempts': MAX_TOTAL_CHECKS - 2, 'attempts_for_input': 1, 'input_revision': 'old'}
+    assert not check_progress(previous, 'missing', 10.0, 'new')['exhausted']
+    capped = check_progress({**previous, 'attempts': MAX_TOTAL_CHECKS - 1}, 'missing', 10.0, 'newer')
+    assert capped['exhausted'] and capped['attempts_for_input'] == 1 and capped['next_check_at'] is None
+    assert not check_progress({'attempts': MAX_TOTAL_CHECKS}, 'published', 10.0, 'x')['exhausted']
+    assert MAX_UNRESOLVED_CHECKS < MAX_TOTAL_CHECKS
+
+
+def test_unread_comment_stops_automatic_checks_after_the_cap_but_stays_manually_checkable(social_env):
+    from core.social.verification import MAX_COMMENT_CHECKS
+    db, parent = pending_job()
+    db.update(parent['id'], status='PUBLISHED', work_id=WORK)
+    child = db.create('FIRST_COMMENT', parent['uid'], {'text': '首评'}, parent_id=parent['id'])
+    db.update(child['id'], status='SENT', result={'comment_id': '1189533470970', 'check_attempts': MAX_COMMENT_CHECKS,
+                                                   'next_check_at': 1})
+    manager.schedule_comments('kuaishou', db)
+    assert not db.list(kind='COMMENT_CHECK')
+    db.update(child['id'], result={'comment_id': '1189533470970', 'check_attempts': MAX_COMMENT_CHECKS - 1, 'next_check_at': 1})
+    manager.schedule_comments('kuaishou', db)
+    assert len(db.list(kind='COMMENT_CHECK')) == 1
+    for row in db.list(kind='COMMENT_CHECK'):
+        db.update(row['id'], status='RECORDED')
+    manager.first_comment_action('kuaishou', parent['id'], 'check')
+    assert len(db.list(kind='COMMENT_CHECK')) == 2
+
+
 def test_read_only_check_has_priority_without_overlapping_upload(social_env):
     db, parent = pending_job()
     second = enqueue('kuaishou', render())

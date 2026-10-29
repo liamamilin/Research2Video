@@ -18,7 +18,7 @@ from core.social.registry import PLATFORMS, DEFERRED_PLATFORMS, adapter, definit
 from core.social.store import SocialStore, ACTIVE
 from core.social.comments import clean_first_comment, COMMENT_PLATFORMS
 from core.social.verification import EVIDENCE, STATE_LABELS, delay, timestamp
-from core.social.verification import check_progress, lookup_revision
+from core.social.verification import MAX_COMMENT_CHECKS, check_progress, lookup_revision
 from core.social.reconciliation import lookup_for
 from core.social.session_health import assess, verify_due
 from core.video import store as video_store
@@ -484,6 +484,7 @@ def schedule_comments(platform: str, db: SocialStore) -> None:
     active_checks = {row['parent_id'] for row in db.list(kind='COMMENT_CHECK', statuses=ACTIVE)}
     due = [row for row in db.list(uid=owner, kind='FIRST_COMMENT', statuses=('SENT','UNKNOWN'))
            if not row['result'].get('read_back') and row['id'] not in active_checks
+           and int(row['result'].get('check_attempts', 0)) < MAX_COMMENT_CHECKS
            and row['result'].get('next_check_at', row['updated_at'] + 15) <= time.time()]
     if due and not active_checks and session_of(db, owner)['state'] != 'expired':
         child = min(due, key=lambda row:row['result'].get('next_check_at',row['updated_at'] + 15))
