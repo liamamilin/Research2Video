@@ -47,6 +47,9 @@ def replay(database: Path, script_ids: list[str], config_dir: str, jobs_dir: str
             if script is None:
                 raise ValueError(f"Unknown script: {script_id}")
             guarded = guard.with_policy(script, jobs_dir)
+            if not guarded["topic"].get("matrix_dedup") and not guard.is_sample(guarded):
+                guarded = {**guarded, "topic": guard.new_topic(guarded["topic"], guarded.get("content_context") or {},
+                                                               config_dir, jobs_dir)}
             version = store.get_version(script_id, script["current_version"]) if script["current_version"] else None
             item = {"script_id": script_id, "title": version["title"] if version else script["topic"].get("title", ""),
                     "policy": guarded["topic"].get("matrix_dedup"), "result": "NO_VERSION", "peers": [],

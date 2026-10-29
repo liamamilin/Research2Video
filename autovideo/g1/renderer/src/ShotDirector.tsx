@@ -6,7 +6,7 @@ export type ShotPlan = {version:1;profile:'brief'|'balanced'|'explain';summary_b
   closing?:'overview'|'hold';cues:{beat_id:string;targets:string[]}[]};
 type Scene = {component?:string;start_frame:number;end_frame:number;
   previous_scene?:Scene;props:{shot_plan?:ShotPlan;scene_flow?:{entry:string;profile:keyof typeof PACING};story?:Story;images?:any[];focus_indices?:number[]};
-  beats:{id:string;frame:number}[]};
+  beats:{id:string;frame:number;target_id?:string}[]};
 export type Shot = {kind:'overview'|'carry'|'focus'|'summary';frame:number;targets:string[]};
 type Pose = {zoom:number;x:number;y:number};
 export const PACING = {
@@ -29,13 +29,27 @@ export function pacingFor(scene:Scene) {
     summary:Math.round(base.summary*factors[2])};
 }
 
+// Keep beats anchored to speech; settle motion by that anchor after retiming.
+export const visualStart=(scene:Scene,at:number,duration=pacingFor(scene).transition)=>
+  Math.max(scene.start_frame,at-duration);
+
 export function carriesPicture(scene:Scene):boolean {
   const previous=scene.previous_scene;
-  return !!(scene.props.scene_flow?.entry==='carry' && previous?.props.shot_plan && scene.props.shot_plan
-    && !scene.props.story?.recap?.length && !previous.props.story?.recap?.length
-    && ['object_showcase','material_collage'].includes(scene.component??'') && scene.component===previous.component
-    && JSON.stringify(scene.props.images)===JSON.stringify(previous.props.images)
-    && JSON.stringify(scene.props.focus_indices)===JSON.stringify(previous.props.focus_indices));
+  if(scene.props.scene_flow?.entry!=='carry'||!previous||scene.component!==previous.component
+    ||scene.props.story?.recap?.length||previous.props.story?.recap?.length)return false;
+  const keys:Record<string,string[]>={object_showcase:['images','focus_indices'],material_collage:['images','focus_indices'],
+    scatter_chart:['points','x_label','x_unit','y_label','y_unit','x_hint','y_hint'],
+    data_chart:['kind','categories','series','unit'],comparison:['left','right']};
+  const fields=keys[scene.component??''];
+  return !!fields&&fields.every(key=>JSON.stringify((scene.props as any)[key])===JSON.stringify((previous.props as any)[key]));
+}
+
+export function comparisonAt(scene:Scene,frame:number):{opacity:number;target?:string} {
+  const carried=carriesPicture(scene);
+  const t=clamp((frame-scene.start_frame)/12,0,1);
+  const target=scene.beats.filter(b=>b.target_id?.startsWith('side:')&&visualStart(scene,b.frame)<=frame).slice(-1)[0]?.target_id;
+  return {opacity:carried?1:1-Math.pow(1-t,3),target:target??(carried?
+    comparisonAt(scene.previous_scene!,scene.previous_scene!.end_frame-1).target:undefined)};
 }
 
 // Links exist only in the renderer. Beat references keep the carried pose correct
@@ -68,21 +82,24 @@ export function shotsFor(scene:Scene):Shot[] {
     return carried && plan.closing!=='hold' && end-start>=pace.hold+pace.summary+pace.transition
       ? [overview,{kind:'summary',frame:end-pace.summary,targets:[]}]:[overview];
   }
-  const establish=carried?0:pace.overview;
   const beats=new Map(scene.beats.map(b=>[b.id,b.frame]));
   const summaryBeat=plan.summary_beat_id ? beats.get(plan.summary_beat_id) : undefined;
-  const finish=plan.closing==='hold'?end:clamp(Math.min(end-pace.summary,summaryBeat??Infinity),start+establish,end-1);
   const candidates=plan.cues.map(c=>({...c,frame:beats.get(c.beat_id)}))
     .filter((c):c is typeof c & {frame:number}=>c.frame!==undefined)
     .sort((a,b)=>a.frame-b.frame);
+  const lastCue=candidates[candidates.length-1]?.frame??start;
+  const summaryAt=summaryBeat===undefined?undefined:visualStart(scene,summaryBeat);
+  const finish=plan.closing==='hold'?end:summaryBeat!==undefined?(summaryBeat>=lastCue?summaryAt!:end):
+    lastCue>end-pace.summary-pace.hold?end:end-pace.summary;
   const focus:Shot[]=[];
   for(const cue of candidates){
-    const at=Math.max(start+establish,cue.frame);
-    if(at>finish-pace.hold)continue;
+    const at=visualStart(scene,cue.frame);
+    if(at>=finish)continue;
     const previous=focus[focus.length-1];
+    const interrupted=summaryAt!==undefined&&previous&&previous.frame<summaryAt&&at>=summaryAt;
     if(!previous && carried?.join('|')===cue.targets.join('|'))continue;
-    if(previous && previous.targets.join('|')===cue.targets.join('|'))continue;
-    if(previous && at-previous.frame<pace.hold){
+    if(previous && !interrupted && previous.targets.join('|')===cue.targets.join('|'))continue;
+    if(previous && !interrupted && at-previous.frame<pace.hold){
       // Dense speech gets a sustained view of the related objects, rather than
       // a series of short pans. Their native reveals still follow the voice.
       const union=Array.from(new Set([...previous.targets,...cue.targets]));
@@ -91,7 +108,9 @@ export function shotsFor(scene:Scene):Shot[] {
     }
     focus.push({kind:'focus',frame:at,targets:[...cue.targets]});
   }
-  return [overview,...focus,...(plan.closing==='hold'?[]:[{kind:'summary' as const,frame:finish,targets:[]}])];
+  const closing=plan.closing==='hold'?undefined:summaryAt??(finish<end?finish:undefined);
+  return [overview,...focus,...(closing===undefined?[]:[{kind:'summary' as const,frame:closing,targets:[]}])]
+    .sort((a,b)=>a.frame-b.frame);
 }
 
 function poseFor(shot:Shot,rects:Record<string,Rect>,view:Rect,maxZoom:number,margin: {x:number;y:number}):Pose {

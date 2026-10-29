@@ -634,7 +634,12 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
             index = int(cue['target_id'].split(':')[1])
             if index >= len(phrases) or not phrases[index]:
                 continue
-            at = text.find(phrases[index], cursor)
+            # Reveals and later emphasis are separate speech tracks. A focus
+            # step can deliberately reference the same phrase as a reveal.
+            count = len(props['points']) if scene['component'] == 'scatter_chart' else len(keys)
+            if index == count or index == len(phrases)-1:
+                cursor = 0
+            at = visual_language.phrase_at(text, phrases[index], cursor)
             if at >= 0:
                 cursor = at + len(phrases[index])
                 for row in speech:
@@ -645,15 +650,6 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
                             cue['quote'] = phrases[index]
                         break
                     at -= len(row['text'])
-        # A takeaway follows the last data reveal, even when the sentence names the conclusion first.
-        order = {row['id']: i for i, row in enumerate(speech)}
-        last = (0, 0)
-        for cue in result:
-            position = (order[cue['segment_id']], cue['character_index'])
-            if position < last:
-                row = speech[last[0]]
-                cue.update(segment_id=row['id'], quote=row['text'][last[1]:last[1]+1], character_index=last[1])
-            last = max(last, position)
     visual_language.align_object_cues(scene, result, speech)
     return result
 
@@ -682,7 +678,7 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
             beat = {"id": f"{scene['id']}_b{len(beats)}", "action": "reveal", "target_id": cue["target_id"],
                     "trigger": {"segment_id": row["id"], "boundary": "start", "offset_ms": offset}}
             beats.append(beat)
-            timing.append({"scene_id": scene["id"], **cue, "automatic": automatic,
+            timing.append({"scene_id": scene["id"], "beat_id": beat['id'], **cue, "automatic": automatic,
                            "estimated_start_ms": row["start_ms"] + offset})
         beats.extend(visual_language.action_beats(scene, rows))
         beats.sort(key=lambda b: (order.index(b["trigger"]["segment_id"]), b["trigger"].get("offset_ms", 0)))
@@ -694,3 +690,36 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
     pipeline.write_json(pipeline.ARTIFACTS / "information-timing.json", {"cues": timing,
         "phrase_alignment": "measured TTS activity", "within_phrase_timing": "estimated from character position, not word alignment"})
     return board
+
+
+def align_visual_beats(ir: dict, captions: dict, timing: dict) -> list[dict]:
+    """Reuse the existing word alignment for visual cues; keep speech unchanged."""
+    from g2.caption_alignment import word_spans
+
+    rows = {row['id']: row for row in ir['narration']['segments']}
+    words = {row['segment_id']: row['items'] for row in captions.get('word_evidence', [])}
+    beats = {(scene['id'], beat['id']): beat for scene in ir['scenes'] for beat in scene['beats']}
+    changes = []
+    for cue in timing.get('cues', []):
+        row = rows.get(cue['segment_id'])
+        beat = beats.get((cue['scene_id'], cue.get('beat_id')))
+        items = words.get(cue['segment_id'], [])
+        if row is None or beat is None or not items:
+            continue
+        spans = word_spans(row['text'])
+        if [span[0] for span in spans] != [item['text'] for item in items]:
+            continue
+        character = cue.get('character_index', row['text'].find(cue.get('quote', '')))
+        index = next((i for i, (_, a, b) in enumerate(spans) if a <= character < b or a >= character), None)
+        if index is None:
+            continue
+        offset = min(row['end_ms']-row['start_ms']-1, max(0, items[index]['start_ms']))
+        before = beat['trigger']['offset_ms']
+        beat['trigger']['offset_ms'] = offset
+        changes.append({'scene_id': cue['scene_id'], 'beat_id': beat['id'],
+                        'segment_id': row['id'], 'character_index': character,
+                        'previous_offset_ms': before, 'offset_ms': offset})
+    order = {key: i for i, key in enumerate(rows)}
+    for scene in ir['scenes']:
+        scene['beats'].sort(key=lambda b: (order[b['trigger']['segment_id']], b['trigger'].get('offset_ms', 0)))
+    return changes

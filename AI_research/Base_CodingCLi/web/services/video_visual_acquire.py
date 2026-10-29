@@ -77,6 +77,10 @@ def acquire(need: dict, url: str, policy: dict, *, remaining: float) -> tuple[by
     with screenshots.page_for_capture(url, timeout_seconds=min(remaining, 40)) as page:
         snapshot = page.evaluate(REGIONS.read_text(encoding="utf-8"), "yy-" + uuid4().hex[:12])
         ranked = visual_matching.rank(need, snapshot)
+        from urllib.parse import unquote, urlsplit
+        anchor = unquote(urlsplit(url).fragment)
+        if anchor:
+            ranked.sort(key=lambda c: (c.get("anchor") == anchor, c["score"]), reverse=True)
         # Keep the actual words in view. Tall regions are not clipped at an arbitrary position.
         ranked = [c for c in ranked if c["box"]["height"] <= 740 and c["box"]["width"] <= 1408]
         if not ranked:
@@ -85,6 +89,12 @@ def acquire(need: dict, url: str, policy: dict, *, remaining: float) -> tuple[by
         locator = page.locator(chosen["selector"])
         locator.scroll_into_view_if_needed()
         page.evaluate("y => window.scrollTo(0, Math.max(0, y - 80))", chosen["box"]["y"])
+        page.evaluate("""async selector => {
+          const el = document.querySelector(selector);
+          const images = el.tagName === 'IMG' ? [el] : [...el.querySelectorAll('img')];
+          await Promise.race([Promise.all(images.map(img => img.decode().catch(() => {}))),
+            new Promise(resolve => setTimeout(resolve, 2000))]);
+        }""", chosen["selector"])
         # All code below is fixed. The model supplies only an ID already found in the snapshot.
         measured = page.evaluate("""({selector, count}) => {
           const el=document.querySelector(selector), nodes=[el]; let next=el.nextElementSibling;
@@ -101,9 +111,9 @@ def acquire(need: dict, url: str, policy: dict, *, remaining: float) -> tuple[by
             // showing through those gaps is normal, not a covering overlay.
             if(top&&!nodes.some(node=>node.contains(top)||top.contains(node)))covered++;
           }
-          const elements=[...new Set(nodes.flatMap(node=>[node,...node.querySelectorAll('p,code,button,a,td,th,h1,h2,h3')]))]
+          const elements=[...new Set(nodes.flatMap(node=>[node,...node.querySelectorAll('p,pre,code,img,button,a,td,th,h1,h2,h3')]))]
             .filter(node=>node.getBoundingClientRect().width>20&&node.getBoundingClientRect().height>12)
-            .map(node=>{const r=node.getBoundingClientRect();return {text:(node.innerText||'').replace(/\\s+/g,' ').trim().slice(0,800),
+            .map(node=>{const r=node.getBoundingClientRect();return {text:(node.innerText||node.getAttribute('alt')||document.title||'').replace(/\\s+/g,' ').trim().slice(0,800),
               tag:node.tagName.toLowerCase(),x:r.left,y:r.top,width:r.width,height:r.height};})
             .filter(item=>item.text.length>3).slice(0,100);
           return {x:x+scrollX,y:y+scrollY,width:right-x,height:bottom-y,covered,total,elements};
@@ -121,7 +131,7 @@ def acquire(need: dict, url: str, policy: dict, *, remaining: float) -> tuple[by
             raise screenshots.ScreenshotError("相关内容无法完整放入画面")
         # Feature/announcement pages retain viewport context for the trusted camera.
         # Price tables keep the complete matched table and its conditions together.
-        viewport = policy["version"] >= 3 and need["kind"] != "pricing"
+        viewport = policy["version"] >= 3 and need["kind"] != "pricing" and not need.get("visual_subject")
         capture_box = {"x": 0, "y": 0, "width": 1440, "height": 900} if viewport else box
         targets = []
         for element in measured["elements"]:
@@ -136,6 +146,8 @@ def acquire(need: dict, url: str, policy: dict, *, remaining: float) -> tuple[by
                     "selector": chosen["selector"], "clip": None if viewport else box, "scroll": scroll, "viewport": {"width": 1440, "height": 900},
                     "captured_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                     "quality": {"version": policy["version"], "candidate_id": chosen["id"], "score": chosen["score"],
+                                "visual_kind": chosen.get("visual_kind", "text"), "visual_goal": need.get("visual_goal", ""),
+                                "visual_subject": need.get("visual_subject", ""), "heading": chosen.get("heading", ""),
                                 "region_text": chosen["text"], "text_match": chosen["match_reason"], "semantic": semantic,
                                 "dom_targets": targets, "capture_size": {k: capture_box[k] for k in ("width", "height")}}}
         return raw, metadata

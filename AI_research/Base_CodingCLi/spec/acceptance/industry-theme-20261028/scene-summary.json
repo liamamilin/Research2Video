@@ -1,0 +1,391 @@
+{
+  "scene_count": 31,
+  "components": {
+    "comparison": 7,
+    "flow_diagram": 6,
+    "concept_reveal": 10,
+    "big_number": 3,
+    "scatter_chart": 2,
+    "bar_chart": 2,
+    "data_chart": 1
+  },
+  "playback": {
+    "speed": 1.25,
+    "source_duration_ms": 584567,
+    "method": "pitch-preserving audio tempo; synchronized captions and animation"
+  },
+  "scenes": [
+    {
+      "id": "card_1_p1",
+      "component": "comparison",
+      "start_ms": 0,
+      "duration_ms": 18005,
+      "purpose": "充型17秒 vs 30秒：同一缺陷报废率从32%降到2%–4%",
+      "visual_intent": {
+        "viewer_understands": "充型17秒 vs 30秒：同一缺陷报废率从32%降到2%–4%",
+        "before": "要点尚未展开",
+        "after": "充型17秒 vs 30秒：同一缺陷报废率从32%降到2%–4%"
+      }
+    },
+    {
+      "id": "card_1_p2",
+      "component": "flow_diagram",
+      "start_ms": 18005,
+      "duration_ms": 9493,
+      "purpose": "一块铝锭到轮毂：今天走完整条路",
+      "visual_intent": {
+        "viewer_understands": "一块铝锭到轮毂：今天走完整条路",
+        "before": "要点尚未展开",
+        "after": "一块铝锭到轮毂：今天走完整条路"
+      }
+    },
+    {
+      "id": "card_2_p1",
+      "component": "concept_reveal",
+      "start_ms": 27498,
+      "duration_ms": 14146,
+      "purpose": "进厂的不是笼统“一块铝”，而是指定牌号合金锭",
+      "visual_intent": {
+        "viewer_understands": "进厂的不是笼统“一块铝”，而是指定牌号合金锭",
+        "before": "要点尚未展开",
+        "after": "进厂的不是笼统“一块铝”，而是指定牌号合金锭"
+      }
+    },
+    {
+      "id": "card_2_p2",
+      "component": "concept_reveal",
+      "start_ms": 41644,
+      "duration_ms": 13436,
+      "purpose": "铝水不是化开就能用：除气、变质、细化、验成分",
+      "visual_intent": {
+        "viewer_understands": "铝水不是化开就能用：除气、变质、细化、验成分",
+        "before": "要点尚未展开",
+        "after": "铝水不是化开就能用：除气、变质、细化、验成分"
+      }
+    },
+    {
+      "id": "card_2_p3",
+      "component": "concept_reveal",
+      "start_ms": 55080,
+      "duration_ms": 8338,
+      "purpose": "成分合格只是入场券，铝水体检不过关后面白搭",
+      "visual_intent": {
+        "viewer_understands": "成分合格只是入场券，铝水体检不过关后面白搭",
+        "before": "要点尚未展开",
+        "after": "成分合格只是入场券，铝水体检不过关后面白搭"
+      }
+    },
+    {
+      "id": "card_3_p1",
+      "component": "comparison",
+      "start_ms": 63418,
+      "duration_ms": 14755,
+      "purpose": "铝液直供：省掉铸锭、运输、重熔",
+      "visual_intent": {
+        "viewer_understands": "铝液直供：省掉铸锭、运输、重熔",
+        "before": "要点尚未展开",
+        "after": "铝液直供：省掉铸锭、运输、重熔"
+      }
+    },
+    {
+      "id": "card_3_p2",
+      "component": "concept_reveal",
+      "start_ms": 78173,
+      "duration_ms": 13455,
+      "purpose": "轮毂车间直接吃铝水：少一次重熔，少一段能源和烧损",
+      "visual_intent": {
+        "viewer_understands": "轮毂车间直接吃铝水：少一次重熔，少一段能源和烧损",
+        "before": "要点尚未展开",
+        "after": "轮毂车间直接吃铝水：少一次重熔，少一段能源和烧损"
+      }
+    },
+    {
+      "id": "card_4_p1",
+      "component": "flow_diagram",
+      "start_ms": 91628,
+      "duration_ms": 16691,
+      "purpose": "低压≠无压：保温炉→升液管→模具，铝水自下而上",
+      "visual_intent": {
+        "viewer_understands": "低压≠无压：保温炉→升液管→模具，铝水自下而上",
+        "before": "要点尚未展开",
+        "after": "低压≠无压：保温炉→升液管→模具，铝水自下而上"
+      }
+    },
+    {
+      "id": "card_4_p2",
+      "component": "big_number",
+      "start_ms": 108319,
+      "duration_ms": 10820,
+      "purpose": "不是拍脑袋：高度定压力，密度取 2400 kg/m³",
+      "visual_intent": {
+        "viewer_understands": "不是拍脑袋：高度定压力，密度取 2400 kg/m³",
+        "before": "要点尚未展开",
+        "after": "不是拍脑袋：高度定压力，密度取 2400 kg/m³"
+      }
+    },
+    {
+      "id": "card_5_p1",
+      "component": "scatter_chart",
+      "start_ms": 119139,
+      "duration_ms": 14164,
+      "purpose": "同样三段，常规件先看升压；大件更吃充型时间",
+      "visual_intent": {
+        "viewer_understands": "同样三段，常规件先看升压；大件更吃充型时间",
+        "before": "要点尚未展开",
+        "after": "同样三段，常规件先看升压；大件更吃充型时间"
+      }
+    },
+    {
+      "id": "card_5_p2",
+      "component": "concept_reveal",
+      "start_ms": 133303,
+      "duration_ms": 16229,
+      "purpose": "大件小浇道：风险最高的组合，也是本次跟踪对象",
+      "visual_intent": {
+        "viewer_understands": "大件小浇道：风险最高的组合，也是本次跟踪对象",
+        "before": "要点尚未展开",
+        "after": "大件小浇道：风险最高的组合，也是本次跟踪对象"
+      }
+    },
+    {
+      "id": "card_6_p1",
+      "component": "comparison",
+      "start_ms": 149532,
+      "duration_ms": 13642,
+      "purpose": "充型不能快，结束也不能拖",
+      "visual_intent": {
+        "viewer_understands": "充型不能快，结束也不能拖",
+        "before": "要点尚未展开",
+        "after": "充型不能快，结束也不能拖"
+      }
+    },
+    {
+      "id": "card_6_p2",
+      "component": "bar_chart",
+      "start_ms": 163174,
+      "duration_ms": 12827,
+      "purpose": "实测充满后延迟 4.75 秒才升压；轮辋 20 秒已凝固一半",
+      "visual_intent": {
+        "viewer_understands": "实测充满后延迟 4.75 秒才升压；轮辋 20 秒已凝固一半",
+        "before": "要点尚未展开",
+        "after": "实测充满后延迟 4.75 秒才升压；轮辋 20 秒已凝固一半"
+      }
+    },
+    {
+      "id": "card_7",
+      "component": "flow_diagram",
+      "start_ms": 176001,
+      "duration_ms": 16797,
+      "purpose": "钨钢探针加陶瓷绝缘套：铝水一碰到，计时就停",
+      "visual_intent": {
+        "viewer_understands": "钨钢探针加陶瓷绝缘套：铝水一碰到，计时就停",
+        "before": "要点尚未展开",
+        "after": "钨钢探针加陶瓷绝缘套：铝水一碰到，计时就停"
+      }
+    },
+    {
+      "id": "card_8_p1",
+      "component": "bar_chart",
+      "start_ms": 192798,
+      "duration_ms": 14658,
+      "purpose": "实测充型只有17秒，升液加充型理想需25秒以上，调整到约30秒",
+      "visual_intent": {
+        "viewer_understands": "实测充型只有17秒，升液加充型理想需25秒以上，调整到约30秒",
+        "before": "要点尚未展开",
+        "after": "实测充型只有17秒，升液加充型理想需25秒以上，调整到约30秒"
+      }
+    },
+    {
+      "id": "card_8_p2",
+      "component": "scatter_chart",
+      "start_ms": 207456,
+      "duration_ms": 14374,
+      "purpose": "改造前后对比：三个轮型报废率大幅下探，系列整体降至16.43%",
+      "visual_intent": {
+        "viewer_understands": "改造前后对比：三个轮型报废率大幅下探，系列整体降至16.43%",
+        "before": "要点尚未展开",
+        "after": "改造前后对比：三个轮型报废率大幅下探，系列整体降至16.43%"
+      }
+    },
+    {
+      "id": "card_9_p1",
+      "component": "comparison",
+      "start_ms": 221830,
+      "duration_ms": 14695,
+      "purpose": "智能充型：升压延迟4.75秒→0，X光一级以内占比64%→86%",
+      "visual_intent": {
+        "viewer_understands": "智能充型：升压延迟4.75秒→0，X光一级以内占比64%→86%",
+        "before": "要点尚未展开",
+        "after": "智能充型：升压延迟4.75秒→0，X光一级以内占比64%→86%"
+      }
+    },
+    {
+      "id": "card_9_p2",
+      "component": "comparison",
+      "start_ms": 236525,
+      "duration_ms": 9676,
+      "purpose": "力学性能同步抬升：延伸率8.84%、抗拉290.6 MPa",
+      "visual_intent": {
+        "viewer_understands": "力学性能同步抬升：延伸率8.84%、抗拉290.6 MPa",
+        "before": "要点尚未展开",
+        "after": "力学性能同步抬升：延伸率8.84%、抗拉290.6 MPa"
+      }
+    },
+    {
+      "id": "card_10_p1",
+      "component": "flow_diagram",
+      "start_ms": 246201,
+      "duration_ms": 15770,
+      "purpose": "毛坯不能直接用：T6 固溶、淬火、时效",
+      "visual_intent": {
+        "viewer_understands": "毛坯不能直接用：T6 固溶、淬火、时效",
+        "before": "要点尚未展开",
+        "after": "毛坯不能直接用：T6 固溶、淬火、时效"
+      }
+    },
+    {
+      "id": "card_10_p2",
+      "component": "comparison",
+      "start_ms": 261971,
+      "duration_ms": 14221,
+      "purpose": "淬火与时效：两条性能路径",
+      "visual_intent": {
+        "viewer_understands": "淬火与时效：两条性能路径",
+        "before": "要点尚未展开",
+        "after": "淬火与时效：两条性能路径"
+      }
+    },
+    {
+      "id": "card_11",
+      "component": "data_chart",
+      "start_ms": 276192,
+      "duration_ms": 23738,
+      "purpose": "窄窗口：555℃会过烧；实际执行 540℃/155℃，炉温 ±5℃",
+      "visual_intent": {
+        "viewer_understands": "窄窗口：555℃会过烧；实际执行 540℃/155℃，炉温 ±5℃",
+        "before": "要点尚未展开",
+        "after": "窄窗口：555℃会过烧；实际执行 540℃/155℃，炉温 ±5℃"
+      }
+    },
+    {
+      "id": "card_12",
+      "component": "comparison",
+      "start_ms": 299930,
+      "duration_ms": 17190,
+      "purpose": "涂装烘烤 = 二次时效：省掉一段独立时效能耗",
+      "visual_intent": {
+        "viewer_understands": "涂装烘烤 = 二次时效：省掉一段独立时效能耗",
+        "before": "要点尚未展开",
+        "after": "涂装烘烤 = 二次时效：省掉一段独立时效能耗"
+      }
+    },
+    {
+      "id": "card_13_p1",
+      "component": "concept_reveal",
+      "start_ms": 317120,
+      "duration_ms": 15971,
+      "purpose": "机加：从毛坯到装配接口",
+      "visual_intent": {
+        "viewer_understands": "机加：从毛坯到装配接口",
+        "before": "要点尚未展开",
+        "after": "机加：从毛坯到装配接口"
+      }
+    },
+    {
+      "id": "card_13_p2",
+      "component": "concept_reveal",
+      "start_ms": 333091,
+      "duration_ms": 13775,
+      "purpose": "材料收得率决定成本",
+      "visual_intent": {
+        "viewer_understands": "材料收得率决定成本",
+        "before": "要点尚未展开",
+        "after": "材料收得率决定成本"
+      }
+    },
+    {
+      "id": "card_14",
+      "component": "flow_diagram",
+      "start_ms": 346866,
+      "duration_ms": 19662,
+      "purpose": "涂装通用链与工艺边界",
+      "visual_intent": {
+        "viewer_understands": "涂装通用链与工艺边界",
+        "before": "要点尚未展开",
+        "after": "涂装通用链与工艺边界"
+      }
+    },
+    {
+      "id": "card_15",
+      "component": "concept_reveal",
+      "start_ms": 366528,
+      "duration_ms": 23910,
+      "purpose": "出厂验证：不是看外观，是台架上跑到裂",
+      "visual_intent": {
+        "viewer_understands": "出厂验证：不是看外观，是台架上跑到裂",
+        "before": "要点尚未展开",
+        "after": "出厂验证：不是看外观，是台架上跑到裂"
+      }
+    },
+    {
+      "id": "card_16_p1",
+      "component": "big_number",
+      "start_ms": 390438,
+      "duration_ms": 17823,
+      "purpose": "规模推翻手工作坊想象：单线200万件/年、人均6000件/年、全厂600万件/年",
+      "visual_intent": {
+        "viewer_understands": "规模推翻手工作坊想象：单线200万件/年、人均6000件/年、全厂600万件/年",
+        "before": "要点尚未展开",
+        "after": "规模推翻手工作坊想象：单线200万件/年、人均6000件/年、全厂600万件/年"
+      }
+    },
+    {
+      "id": "card_16_p2",
+      "component": "concept_reveal",
+      "start_ms": 408261,
+      "duration_ms": 14722,
+      "purpose": "改造项目新增能耗折算到每只轮毂（新增口径，不是全厂单耗）",
+      "visual_intent": {
+        "viewer_understands": "改造项目新增能耗折算到每只轮毂（新增口径，不是全厂单耗）",
+        "before": "要点尚未展开",
+        "after": "改造项目新增能耗折算到每只轮毂（新增口径，不是全厂单耗）"
+      }
+    },
+    {
+      "id": "card_16_p3",
+      "component": "big_number",
+      "start_ms": 422983,
+      "duration_ms": 5989,
+      "purpose": "2021年，全球汽车轮毂行业首个“灯塔工厂”",
+      "visual_intent": {
+        "viewer_understands": "2021年，全球汽车轮毂行业首个“灯塔工厂”",
+        "before": "要点尚未展开",
+        "after": "2021年，全球汽车轮毂行业首个“灯塔工厂”"
+      }
+    },
+    {
+      "id": "card_17_p1",
+      "component": "flow_diagram",
+      "start_ms": 428972,
+      "duration_ms": 17221,
+      "purpose": "铝锭变成轮毂：铸毛坯、做性能、做装配、做脸面",
+      "visual_intent": {
+        "viewer_understands": "铝锭变成轮毂：铸毛坯、做性能、做装配、做脸面",
+        "before": "要点尚未展开",
+        "after": "铝锭变成轮毂：铸毛坯、做性能、做装配、做脸面"
+      }
+    },
+    {
+      "id": "card_17_p2",
+      "component": "concept_reveal",
+      "start_ms": 446193,
+      "duration_ms": 21507,
+      "purpose": "供应链变量具体，验货先问三个数",
+      "visual_intent": {
+        "viewer_understands": "供应链变量具体，验货先问三个数",
+        "before": "要点尚未展开",
+        "after": "供应链变量具体，验货先问三个数"
+      }
+    }
+  ]
+}

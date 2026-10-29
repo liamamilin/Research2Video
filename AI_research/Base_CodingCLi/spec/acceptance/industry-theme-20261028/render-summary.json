@@ -1,0 +1,214 @@
+{
+  "id": "12e887524418455ebf16eff34abd5f63",
+  "script_id": "9d6ba001f72c4ea88d94eab667bd5274",
+  "version": 1,
+  "status": "COMPLETED",
+  "autovideo_job_id": "9817bfde-4083-4de4-a0c0-3e68ed771e18",
+  "created_at": "2026-10-28T14:36:38+0800",
+  "submitted_at": "2026-10-28T14:39:22+0800",
+  "completed_at": "2026-10-28T15:16:10+0800",
+  "timings": {
+    "process_runs": 1,
+    "last_process_started_at": "2026-10-28T06:36:38.930880+00:00",
+    "submit_seconds": 0.718,
+    "poll_seconds": 2202.396,
+    "poll_count": 428,
+    "poll_failures": 0,
+    "remote_completed_at": "2026-10-28T07:16:04.785+00:00",
+    "completion_observed_at": "2026-10-28T07:16:05.170390+00:00",
+    "download_seconds": 4.883,
+    "artifact_list_seconds": 0.007,
+    "download_attempts": 1,
+    "download_workers": 4,
+    "artifacts": [
+      {
+        "name": "authored-narration.json",
+        "seconds": 0.326,
+        "reused": false,
+        "bytes": 1264
+      },
+      {
+        "name": "brand-qa.json",
+        "seconds": 0.321,
+        "reused": false,
+        "bytes": 1827
+      },
+      {
+        "name": "caption-alignment.json",
+        "seconds": 0.331,
+        "reused": false,
+        "bytes": 266693
+      },
+      {
+        "name": "captions.srt",
+        "seconds": 0.322,
+        "reused": false,
+        "bytes": 13294
+      },
+      {
+        "name": "chapters.json",
+        "seconds": 0.02,
+        "reused": false,
+        "bytes": 33548
+      },
+      {
+        "name": "content-captions.srt",
+        "seconds": 0.065,
+        "reused": false,
+        "bytes": 13294
+      },
+      {
+        "name": "content-chapters.json",
+        "seconds": 0.066,
+        "reused": false,
+        "bytes": 33203
+      },
+      {
+        "name": "content.mp4",
+        "seconds": 4.193,
+        "reused": false,
+        "bytes": 51211447
+      },
+      {
+        "name": "execution-log.txt",
+        "seconds": 0.047,
+        "reused": false,
+        "bytes": 991
+      },
+      {
+        "name": "generation-schedule.json",
+        "seconds": 0.056,
+        "reused": false,
+        "bytes": 458
+      },
+      {
+        "name": "information-timing.json",
+        "seconds": 0.047,
+        "reused": false,
+        "bytes": 38020
+      },
+      {
+        "name": "input-brief.json",
+        "seconds": 0.037,
+        "reused": false,
+        "bytes": 14512
+      },
+      {
+        "name": "manifest.json",
+        "seconds": 0.033,
+        "reused": false,
+        "bytes": 137687
+      },
+      {
+        "name": "model-cost.json",
+        "seconds": 0.019,
+        "reused": false,
+        "bytes": 8171
+      },
+      {
+        "name": "narration-check.json",
+        "seconds": 0.017,
+        "reused": false,
+        "bytes": 332
+      },
+      {
+        "name": "narration.json",
+        "seconds": 0.06,
+        "reused": false,
+        "bytes": 88319
+      },
+      {
+        "name": "package-qa.json",
+        "seconds": 0.016,
+        "reused": false,
+        "bytes": 700
+      },
+      {
+        "name": "package.json",
+        "seconds": 0.014,
+        "reused": false,
+        "bytes": 3770
+      },
+      {
+        "name": "packaging-resolved.json",
+        "seconds": 0.07,
+        "reused": false,
+        "bytes": 1868
+      },
+      {
+        "name": "playback.json",
+        "seconds": 0.073,
+        "reused": false,
+        "bytes": 133
+      },
+      {
+        "name": "prepared-source.txt",
+        "seconds": 0.034,
+        "reused": false,
+        "bytes": 7845
+      },
+      {
+        "name": "production-execution.json",
+        "seconds": 0.06,
+        "reused": false,
+        "bytes": 378
+      },
+      {
+        "name": "production-plan.json",
+        "seconds": 0.059,
+        "reused": false,
+        "bytes": 6757
+      },
+      {
+        "name": "qa.json",
+        "seconds": 0.015,
+        "reused": false,
+        "bytes": 55211
+      },
+      {
+        "name": "render-resources.json",
+        "seconds": 0.046,
+        "reused": false,
+        "bytes": 200
+      },
+      {
+        "name": "storyboard.json",
+        "seconds": 0.134,
+        "reused": false,
+        "bytes": 143330
+      },
+      {
+        "name": "tts-metrics.json",
+        "seconds": 0.033,
+        "reused": false,
+        "bytes": 1244
+      },
+      {
+        "name": "unbranded.mp4",
+        "seconds": 4.249,
+        "reused": false,
+        "bytes": 45680435
+      },
+      {
+        "name": "video-ir.json",
+        "seconds": 0.116,
+        "reused": false,
+        "bytes": 183115
+      },
+      {
+        "name": "video.mp4",
+        "seconds": 3.574,
+        "reused": false,
+        "bytes": 36619878
+      },
+      {
+        "name": "voice-report.json",
+        "seconds": 0.018,
+        "reused": false,
+        "bytes": 25663
+      }
+    ],
+    "process_seconds": 2371.17
+  },
+  "resolved_video_form": "process_diagram"
+}

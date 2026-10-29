@@ -37,7 +37,8 @@ def main() -> None:
         result = {"metadata": metadata}
     except Exception as exc:
         # Keep provider responses, page content and credentials out of errors.
-        result = {"error": str(exc) if isinstance(exc, screenshots.ScreenshotError) else "网页截图失败，请稍后重试"}
+        result = {"error": str(exc) if isinstance(exc, screenshots.ScreenshotError) else "网页截图失败，请稍后重试",
+                  "failure_scope": "page" if isinstance(exc, screenshots.PageUnavailable) else "need"}
     atomic_write(str(folder / "result.json"), json.dumps(result, ensure_ascii=False))
 
 

@@ -97,9 +97,15 @@ def connect(board: dict, groups: list[dict], saved: dict) -> None:
                 and scene['component'] == previous['component']
                 and scene['props']['images'] == previous['props']['images']
                 and scene['props']['focus_indices'] == previous['props']['focus_indices'])
-            if same_picture and scene['props'].get('shot_plan') and previous['props'].get('shot_plan'):
+            fields = {'scatter_chart': ('points', 'x_label', 'x_unit', 'y_label', 'y_unit', 'x_hint', 'y_hint'),
+                      'data_chart': ('kind', 'categories', 'series', 'unit'),
+                      'comparison': ('left', 'right')}.get(scene['component'])
+            same_chart = (fields and scene['component'] == previous['component']
+                          and all(scene['props'].get(key) == previous['props'].get(key) for key in fields))
+            if (same_picture or same_chart) and not scene['props'].get('story', {}).get('recap') and not previous['props'].get('story', {}).get('recap'):
                 entry = 'carry'
-                previous['props']['shot_plan']['closing'] = 'hold'
+                if previous['props'].get('shot_plan'):
+                    previous['props']['shot_plan']['closing'] = 'hold'
         scene['props']['scene_flow'] = {'version': 1, 'profile': profile, 'entry': entry,
             'paragraph_ids': group['paragraph_ids'],
             'part_index': group['part_index'], 'part_count': group['part_count']}

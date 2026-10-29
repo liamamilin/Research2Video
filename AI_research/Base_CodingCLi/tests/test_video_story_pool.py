@@ -12,6 +12,7 @@ from core.video import content_guard as guard, store, story_pool as pool
 from core.video import autopilot_store as ap, columns
 from tests.test_video_content_guard import guard_env, script, sections, SNAKE, NEW  # noqa: F401
 from tests.test_video_scripts import video_env, llm, FakeLLM, script_json  # noqa: F401
+from tests.test_video_scripts import _csrf, _login
 from web.services import video_autopilot as auto, video_workflow as workflow
 from web.settings import get_settings
 
@@ -133,7 +134,7 @@ def test_explicit_new_developments_survive_reused_primary_source(dimension, befo
     packets = pool.packets(f"### 小蛇\n{SNAKE}")
     old = pool.validate([event()], packets, [])[0]
     peers = [{"script_id": "old", "title": old["title"], "story": old, "sources": {guard.source_key(SNAKE)}}]
-    new = pool.validate([event(same_as=["H1"], changes=[{"dimension": dimension, "before": before, "after": after}])],
+    new = pool.validate([event(event_date="2026-10-24", same_as=["H1"], changes=[{"dimension": dimension, "before": before, "after": after}])],
                         packets, pool.context(peers))[0]
     assert not pool.duplicate(new, peers)
 
@@ -179,6 +180,67 @@ def test_dated_release_remains_one_event_despite_different_change_descriptions()
     later = pool.validate([event(action="release", edition="2.0", event_date="2026-10-25", changes=[
         {"dimension": "权重开放", "before": "仅API", "after": "开放权重"}])], packets, [])[0]
     assert not pool.duplicate(later, peers)
+
+
+def test_one_release_does_not_become_new_when_relabelled_as_benchmarks():
+    packets = pool.packets("### Kimi 发布\nhttps://www.kimi.ai/blog/kimi-k3-1-pro")
+    release = event(subject="Kimi K3.1 Pro", action="release", edition="K3.1 Pro", event_date="2026-10-26")
+    benchmark = {**release, "title": "Kimi 长链路跑分", "action": "results", "changes": [
+        {"dimension": "Long-horizon", "before": "55.95%（K3）", "after": "61.2%（K3.1 Pro）"}]}
+    rows = pool.validate([release, benchmark], packets, [])
+    assert len(rows) == 1
+    old = pool.validate([release], packets, [])[0]
+    peers = [{"script_id": "yesterday", "title": "Kimi K3.1 Pro 发布", "story": old,
+              "sources": {guard.source_key(packets[0]["links"][0])}}]
+    repeated = pool.validate([{**benchmark, "same_as": ["H1"]}], packets, pool.context(peers))[0]
+    assert pool.duplicate(repeated, peers)
+
+
+@pytest.mark.parametrize("linked", [True, False])
+def test_legacy_release_blocks_comparison_delta_even_with_extra_core_links(linked):
+    url = "https://www.kimi.ai/blog/kimi-k3-1-pro"
+    packets = pool.packets(f"### 编码分数\n{url}#coding-benchmarks\n{NEW}")
+    peers = [{"script_id": "yesterday", "title": "Kimi K3.1 Pro：API 已上，55 分", "version": 1,
+              "event_date": "2026-10-26", "created_at": "2026-10-27T02:00:00+0800",
+              "sources": {guard.source_key(url)}}]
+    repeated = pool.validate([event(subject="Kimi K3.1 Pro", action="results", edition="K3.1 Pro",
+        event_date="2026-10-26", same_as=["H1"] if linked else [], changes=[
+            {"dimension": "Long-horizon", "before": "55.95%（K3）", "after": "61.2%（K3.1 Pro）"}])],
+        packets, pool.context(peers))[0]
+    assert pool.duplicate(repeated, peers) == peers
+
+
+def test_undated_change_on_same_article_is_not_automatically_new():
+    packets = pool.packets(f"### 小蛇\n{SNAKE}")
+    old = pool.validate([event(event_date="")], packets, [])[0]
+    peers = [{"script_id": "old", "title": old["title"], "story": old, "sources": {guard.source_key(SNAKE)}}]
+    repeat = pool.validate([event(event_date="", same_as=["H1"], changes=[
+        {"dimension": "另一个对比", "before": "之前", "after": "之后"}])], packets, pool.context(peers))[0]
+    assert pool.duplicate(repeat, peers)
+    independent = pool.validate([event(event_date="", same_as=["H1"], changes=[
+        {"dimension": "新实验", "before": "原结果", "after": "独立实验结果"}])],
+        pool.packets(f"### 独立实验\n{NEW}"), pool.context(peers))[0]
+    assert not pool.duplicate(independent, peers)
+
+
+def test_later_independent_result_of_same_edition_is_still_allowed():
+    packets = pool.packets(f"### 发布\n{SNAKE}")
+    old = pool.validate([event(action="release", edition="1.0")], packets, [])[0]
+    peers = [{"script_id": "old", "title": "发布", "story": old, "sources": {guard.source_key(SNAKE)}}]
+    new = pool.validate([event(action="results", edition="1.0", event_date="2026-10-24", same_as=["H1"],
+        changes=[{"dimension": "独立测试", "before": "仅发布测试", "after": "新独立实验"}])],
+        packets, pool.context(peers))[0]
+    assert not pool.duplicate(new, peers)
+
+
+def test_same_day_independent_experiment_can_follow_a_release():
+    packets = pool.packets(f"### 发布\n{SNAKE}")
+    old = pool.validate([event(action="release", edition="1.0")], packets, [])[0]
+    peers = [{"script_id": "old", "title": "发布", "story": old, "sources": {guard.source_key(SNAKE)}}]
+    independent = pool.validate([event(action="results", edition="1.0", same_as=["H1"], changes=[
+        {"dimension": "独立实测", "before": "发布数据", "after": "新实验结果"}])],
+        pool.packets(f"### 新独立实验\n{NEW}"), pool.context(peers))[0]
+    assert not pool.duplicate(independent, peers)
 
 
 def test_already_covered_edition_is_not_new_when_linking_multiple_historical_editions():
@@ -344,6 +406,7 @@ def test_restarted_released_claim_waits_until_reassigned(guard_env, monkeypatch)
 
 def test_genuine_new_result_can_reuse_url_and_pass_same_pre_render_check(guard_env, monkeypatch):
     old = script(guard_env, "science/daily")
+    store.update_script(old["id"], topic={**old["topic"], "event_date": "2026-10-22"})
     peers = history(guard_env)
     delta = [{"dimension": "实验结果", "before": "仅观察到滚动", "after": "新实验证实滚动速度提高"}]
     candidates = create_pool(monkeypatch, [event(same_as=["H1"], changes=delta)], peers)
@@ -463,3 +526,77 @@ def test_historical_replay_uses_readonly_source_and_temporary_claims(guard_env):
     assert before == (store.get_script(previous["id"]), store.get_script(row["id"]))
     with store.connect() as conn:
         assert conn.execute("SELECT COUNT(*) FROM video_story_claims").fetchone()[0] == 0
+
+
+@pytest.mark.parametrize("entry", ["report", "parent"])
+def test_manual_api_entries_share_matrix_memory_before_writing(client, guard_env, monkeypatch, llm, entry):
+    old = script(guard_env, "science/daily")
+    monkeypatch.setattr(workflow, "spawn", lambda *a, **k: None)
+    organized(monkeypatch, [event()])
+    _login(client)
+    body = {"column": "flash", **({"report_id": old["report_id"]} if entry == "report" else
+        {"from_script": old["id"], "topic": {"title": "小蛇滚动的另一个角度"}})}
+    response = client.post("/api/video/scripts", json=body, headers=_csrf(client))
+    assert response.status_code == 202, response.text
+    row = store.get_script(response.json()["id"])
+    assert row["topic"]["matrix_dedup"] == {"job": "science/daily", "policy": pool.POLICY}
+    assert workflow.run(row["id"], started_by="editor") == "FAILED"
+    row = store.get_script(row["id"])
+    assert row["current_version"] == 0 and row["archived"]
+    assert old["id"] in row["topic"]["content_archive"]["duplicate_of"]
+    assert not FakeLLM.calls
+
+
+def test_manual_matrix_report_selects_remaining_event_and_rewrite_keeps_it(guard_env, monkeypatch, llm):
+    old = script(guard_env, "science/daily")
+    text = f"### 小蛇\n{SNAKE}\n\n---\n\n### 恐龙\n{NEW}"
+    (guard_env / old["report_path"]).write_text(text)
+    monkeypatch.setattr(workflow, "spawn", lambda *a, **k: None)
+    calls = organized(monkeypatch, [event(), event(title="恐龙", subject="恐龙新发现", primary=["S2"])])
+    row = workflow.start("flash", {"title": "从报告继续做", "from_report": old["report_path"],
+                                    "report_id": old["report_id"]}, started_by="editor")
+    FakeLLM.replies = [script_json(citations={(0, 0): [NEW]}), script_json(citations={(0, 0): [NEW]})]
+    assert workflow.run(row["id"], started_by="editor") == "DRAFT"
+    first = store.get_version(row["id"], 1)
+    assert first["meta"]["story"]["subject"] == "恐龙新发现"
+    assert workflow.run_rewrite(row["id"], started_by="editor") == "DRAFT"
+    second = store.get_version(row["id"], 2)
+    assert second["meta"]["story"] == first["meta"]["story"] and len(calls) == 1
+    assert not store.get_script(row["id"])["archived"]
+
+
+def test_new_topic_ownership_from_source_and_production_context(guard_env, monkeypatch):
+    from core.video import topic_store
+    paths = get_settings().paths
+    topic = topic_store.add_manual("小蛇观察", {}, "editor")
+    monkeypatch.setattr(topic_store, "resolve", lambda *a: SimpleNamespace(job="science/daily"))
+    by_source = guard.new_topic({"id": topic.id}, {}, paths.config_dir, paths.jobs_dir)
+    by_config = guard.new_topic({"title": "新选题"}, {"job": "science/weekly"}, paths.config_dir, paths.jobs_dir)
+    assert by_source["matrix_dedup"]["job"] == "science/daily"
+    assert by_config["matrix_dedup"]["job"] == "science/weekly"
+    assert by_source["matrix_dedup"]["policy"] == by_config["matrix_dedup"]["policy"] == pool.POLICY
+
+
+def test_legacy_topic_event_date_is_shared_without_changing_saved_rows(guard_env):
+    old = script(guard_env, "science/daily")
+    store.update_script(old["id"], topic={**old["topic"], "fields": {"发布日期": "2026-10-22"}})
+    before = store.get_script(old["id"])
+    peers = history(guard_env)
+    assert peers[0]["event_date"] == "2026-10-22"
+    assert pool.context(peers)[0]["event_date"] == "2026-10-22"
+    assert before == store.get_script(old["id"])
+
+
+@pytest.mark.parametrize("entry", ["parent_script", "report_id"])
+def test_generated_research_report_keeps_original_matrix_for_new_manual_drafts(guard_env, monkeypatch, entry):
+    old = script(guard_env, "science/daily")
+    with store.connect(write=True) as conn:
+        conn.execute("UPDATE research_reports SET job='video/flash_generated' WHERE id=?", (old["report_id"],))
+    assert history(guard_env)[0]["scope"] == "matrix:science"
+    monkeypatch.setattr(workflow, "spawn", lambda *a, **k: None)
+    organized(monkeypatch, [event()])
+    topic = {"title": "再讲一次小蛇", "from_report": old["report_path"], entry: old["id"] if entry == "parent_script" else old["report_id"]}
+    row = workflow.start("flash", topic, started_by="editor")
+    assert row["topic"]["matrix_dedup"]["job"] == "science/daily"
+    assert workflow.run(row["id"]) == "FAILED"
+    assert pool.selection(row["id"])["decisions"][0]["peer_id"] == old["id"]

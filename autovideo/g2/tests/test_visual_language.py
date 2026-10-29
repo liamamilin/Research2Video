@@ -117,6 +117,12 @@ def test_static_comparison_objects_reveal_at_their_own_narration_phrases():
     assert [c['character_index'] for c in cues] == [text.index('本地服务器便于'), text.index('云端服务便于')]
 
 
+def test_spoken_phrase_matching_preserves_decimal_values_and_source_character_positions():
+    assert visual.phrase_at('先看。max档成本 5.98 美元，接着看另一档。', 'MAX 档成本5.98美元。') == 3
+    assert visual.phrase_at('成本59.8美元。', '成本5.98美元。') == -1
+    assert visual.phrase_at('方案A，方案A。', '方案 A。', 4) == 4
+
+
 def test_cyclic_object_flow_keeps_narration_order_and_uses_the_mixed_runtime(tmp_path):
     from g2.tests.test_process_diagram import actual_layout
     props = {'title': '查询流程', 'takeaway': '结果返回给用户',

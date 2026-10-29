@@ -61,6 +61,37 @@ def policy_topic(topic: dict, job: str) -> dict:
     return {**topic, "matrix_dedup": {"job": job, "policy": "matrix-source-v2"}} if job else topic
 
 
+def new_topic(topic: dict, context: dict, config_dir: str, jobs_dir: str) -> dict:
+    """New matrix videos share selection across entry points; rewrites keep their event."""
+    if topic.get("matrix_dedup") or topic.get("article") or topic.get("local_video") or topic.get("test_sample"):
+        return topic
+    candidates = [context.get("job", "")]
+    with store.connect() as conn:
+        row = conn.execute("SELECT job FROM research_reports WHERE id=? OR report_path=? ORDER BY job DESC LIMIT 1",
+                           (topic.get("report_id", ""), topic.get("from_report", ""))).fetchone()
+        source = conn.execute("SELECT source FROM topics WHERE id=?", (topic.get("id", ""),)).fetchone()
+        parents = conn.execute("SELECT topic,content_context FROM scripts WHERE "
+            "(?!='' AND id=?) OR (?!='' AND report_id=?) OR (?!='' AND report_path=?) ORDER BY created_at LIMIT 20",
+            (topic.get("parent_script", ""), topic.get("parent_script", ""), topic.get("report_id", ""),
+             topic.get("report_id", ""), topic.get("from_report", ""), topic.get("from_report", ""))).fetchall()
+    candidates.append(row["job"] if row else "")
+    if source and jobs_dir:
+        from core.video import topic_store
+
+        found = topic_store.resolve(jobs_dir, source["source"])
+        candidates.append(found.job if found else "")
+    for parent in parents:
+        candidates += [json.loads(parent["content_context"] or "{}").get("job", ""),
+                       (json.loads(parent["topic"]).get("matrix_dedup") or {}).get("job", "")]
+    members = {job for matrix in matrices.load_all(config_dir).values() for job in matrix.jobs}
+    job = next((value for value in candidates if value in members), "")
+    if not job:
+        return topic
+    from core.video import story_pool
+
+    return {**topic, "matrix_dedup": {"job": job, "policy": story_pool.POLICY}}
+
+
 def published(script_id: str) -> bool:
     with store.connect() as conn:
         return bool(conn.execute("SELECT 1 FROM publications WHERE script_id=? LIMIT 1", (script_id,)).fetchone())
@@ -150,6 +181,8 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
 
     scripts = store.list_scripts(limit=100000) + store.list_scripts(limit=100000, archived=True)
     owners, _ = outputs.script_owners(config_dir, jobs_dir, scripts)
+    matrix_scopes = {job: f"matrix:{matrix.key}" for matrix in matrices.load_all(config_dir).values()
+                     for job in matrix.jobs}
     by_id = {s["id"]: s for s in scripts}
     cutoff = (datetime.now().astimezone() - timedelta(days=MEMORY_DAYS)).isoformat()[:10]
     with store.connect() as conn:
@@ -168,11 +201,18 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
         owner = owners[script["id"]]
         source_matrix = owner.get("source_matrix", owner["matrix"])
         key = f"matrix:{source_matrix}" if source_matrix else f"job:{owner['job']}" if owner["job"] else ""
+        if not source_matrix:
+            key = matrix_scopes.get((script["topic"].get("matrix_dedup") or {}).get("job"), key)
         sections = json.loads(row["sections"])
         story = json.loads(row["meta"]).get("story") or {}
+        fields = script["topic"].get("fields") or {}
+        event_date = str(fields.get("发布日期") or script["topic"].get("event_date") or "")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", event_date):
+            event_date = ""
         result.append({"script_id": script["id"], "title": row["title"], "published": bool(row["published"]),
                        "version": row["version"],
                        "story": story,
+                       "event_date": story.get("event_date") or event_date,
                        "summary": story.get("summary") or " ".join(p.get("text", "") for section in sections[:2]
                                                                      for p in section.get("paragraphs", []))[:1200],
                        "created_at": script["created_at"],

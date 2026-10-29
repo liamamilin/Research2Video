@@ -33,6 +33,10 @@ class ScreenshotError(ValueError):
     pass
 
 
+class PageUnavailable(ScreenshotError):
+    """The whole page is unavailable, independently of the requested paragraph."""
+
+
 @lru_cache(maxsize=256)
 def _proxy_public_addresses(host: str, minute: int) -> tuple[str, ...]:
     """A fake-IP proxy masks the real DNS answer. Check it independently before allowing the hostname."""
@@ -144,7 +148,7 @@ def page_for_capture(url: str, *, timeout_seconds: float = 60):
                 page.on("dialog", lambda dialog: dialog.dismiss())
                 response = page.goto(url, wait_until="domcontentloaded", timeout=min(30_000, max(1000, int(timeout_seconds * 1000))))
                 if response is None or response.status >= 400:
-                    raise ScreenshotError(f"页面未成功打开（HTTP {response.status if response else '无响应'}），请检查来源网址")
+                    raise PageUnavailable(f"页面未成功打开（HTTP {response.status if response else '无响应'}），请检查来源网址")
                 public_url(page.url)
                 # Read-only DOM inspection. User input is never evaluated as code.
                 page.wait_for_function("document.fonts.status === 'loaded'", timeout=min(10_000, max(1000, int((deadline-time.monotonic())*1000))))

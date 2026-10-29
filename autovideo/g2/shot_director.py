@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 
 from g1.shot_language import COMPONENTS, MATERIAL_COMPONENTS
+from g2.visual_language import phrase_at
 
 
 def profile_for(saved: dict) -> str:
@@ -18,7 +19,7 @@ def profile_for(saved: dict) -> str:
     return 'balanced'
 
 
-def camera_plan(scene: dict, profile: str) -> dict:
+def camera_plan(scene: dict, profile: str, speech_text: str | None = None) -> dict:
     props, component = scene['props'], scene['component']
     cues = []
 
@@ -49,10 +50,32 @@ def camera_plan(scene: dict, profile: str) -> dict:
         summary = f'line:{count}' if props.get('takeaway') else None
     elif component == 'scatter_chart':
         count = len(props['points'])
+        pair = [f'point:{i}' for i in range(count)] if count == 2 else None
+        reveals = {b['target_id']: b for b in scene['beats'] if b['action'] == 'reveal'}
+        phrases = props.get('reveal_phrases') or []
+
+        def onset(beat: dict) -> tuple:
+            trigger = beat.get('trigger')
+            if trigger is None:
+                return (scene['beats'].index(beat), 0)
+            return (scene['narration_segment_ids'].index(trigger['segment_id']), trigger.get('offset_ms', 0))
+
         for i in range(count):
-            add(f'line:{i}', [f'point:{i}'])
+            phrase = phrases[i] if i < len(phrases) and phrases[i] else props['points'][i].get('name', '')
+            if speech_text is not None and phrase_at(speech_text, phrase) < 0:
+                continue  # Context can appear without becoming a spoken focus.
+            point = reveals.get(f'line:{i}')
+            covered = any(i in step['indices'] and reveals.get(f'line:{count+j}')
+                          and (speech_text is None or phrase_at(speech_text, step.get('phrase', '')) >= 0)
+                          and point and onset(reveals[f'line:{count+j}']) <= onset(point)
+                          for j, step in enumerate(props.get('focus_steps', [])))
+            if covered:
+                continue  # Its earlier comparison already introduced this point.
+            add(f'line:{i}', pair or [f'point:{i}'])
         for i, step in enumerate(props.get('focus_steps', [])):
-            add(f'line:{count+i}', [f'point:{j}' for j in step['indices']])
+            if speech_text is not None and phrase_at(speech_text, step.get('phrase', '')) < 0:
+                continue
+            add(f'line:{count+i}', pair or [f'point:{j}' for j in step['indices']])
         if props.get('takeaway') or props.get('focus_indices'):
             summary = f"line:{count+len(props.get('focus_steps', []))}"
     plan = {'version': 1, 'profile': profile, 'cues': cues}
@@ -79,7 +102,9 @@ def attach(board: dict, saved: dict, pipeline, alignment: dict | None = None,
             speech = [rows[sid] for sid in scene['narration_segment_ids']]
             plan = compose(scene, speech, profile, page.get('material_cues'), page.get('material_summary_phrase', ''))
         else:
-            plan = camera_plan(scene, profile)
+            text = (''.join(r['text'] for r in alignment['rows'] if r['id'] in scene['narration_segment_ids'])
+                    if alignment else None)
+            plan = camera_plan(scene, profile, text)
         scene['props'] = {**scene['props'], 'shot_plan': plan}
         records.append({'scene_id': scene['id'], 'component': scene['component'], **plan})
     if records:

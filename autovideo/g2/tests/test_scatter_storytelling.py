@@ -49,6 +49,46 @@ def test_reveal_phrase_can_span_a_measured_tts_split():
     assert cues[2]['segment_id'] == 'n2' and cues[2]['quote'] == '方案B成本'
 
 
+def test_focus_steps_can_reuse_first_reveal_phrases_without_waiting_for_later_objects():
+    props = scatter()
+    props['focus_steps'] = [{'indices': [i], 'phrase': phrase} for i, phrase in enumerate(props['reveal_phrases'])]
+    text = '方案A成本8。方案B成本12。方案C成本18。综合看B。'
+    scene = {'component': 'scatter_chart', 'props': props, 'narration_segment_ids': ['n1']}
+    cues = motion.automatic_cues(scene, {'n1': {'id': 'n1', 'text': text, 'start_ms': 0, 'end_ms': 12000}})
+    by_target = {cue['target_id']: cue['character_index'] for cue in cues}
+    assert [by_target[f'line:{i}'] for i in range(3)] == [by_target[f'line:{i+3}'] for i in range(3)]
+    assert by_target['line:6'] == text.index('综合看B')
+
+
+def test_conclusion_cue_uses_spoken_phrase_when_planner_changes_its_final_punctuation():
+    props = scatter()
+    props['takeaway_phrase'] = '综合看 B 更均衡。'
+    text = '综合看B更均衡，接着比较。方案A成本8。方案B成本12。方案C成本18。先比较A和B。'
+    scene = {'component': 'scatter_chart', 'props': props, 'narration_segment_ids': ['n1']}
+    cues = motion.automatic_cues(scene, {'n1': {'id': 'n1', 'text': text, 'start_ms': 0, 'end_ms': 15000}})
+    assert cues[-1]['character_index'] == 0
+
+
+def test_visual_cues_reuse_actual_word_onsets_instead_of_character_speed_estimates():
+    ir = {'narration': {'segments': [{'id': 'n1', 'text': '先看max，再看xhigh。', 'start_ms': 1000, 'end_ms': 9000}]},
+          'scenes': [{'id': 's1', 'beats': [
+              {'id': 'x', 'trigger': {'segment_id': 'n1', 'offset_ms': 4000}},
+              {'id': 'm', 'trigger': {'segment_id': 'n1', 'offset_ms': 800}}]}]}
+    from g2.caption_alignment import word_spans
+    words = word_spans(ir['narration']['segments'][0]['text'])
+    captions = {'word_evidence': [{'segment_id': 'n1', 'items': [
+        {'text': text, 'start_ms': i*700, 'end_ms': i*700+300} for i, (text, _, _) in enumerate(words)]}]}
+    timing = {'cues': [{'scene_id': 's1', 'beat_id': key, 'segment_id': 'n1', 'character_index': character}
+                      for key, character in [('m', 2), ('x', 8)]]}
+    original = copy.deepcopy(ir['narration'])
+    changes = motion.align_visual_beats(ir, captions, timing)
+    assert len(changes) == 2
+    beats = {beat['id']: beat['trigger']['offset_ms'] for beat in ir['scenes'][0]['beats']}
+    assert beats == {'m': 1400, 'x': 3500}
+    assert ir['narration'] == original
+    assert motion.align_visual_beats(ir, {}, timing) == []
+
+
 def test_scatter_and_mapped_picture_stay_on_the_same_mixed_timeline(tmp_path):
     groups = [{'id': 'card_1', 'title': '比较', 'text': '方案A和B。', 'segment_ids': ['n1'], 'image_indices': [0]}]
     saved = {'image_materials': [{'caption': '页面', 'role': 'detail'}]}

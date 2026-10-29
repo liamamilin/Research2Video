@@ -145,7 +145,7 @@ def test_snapshot_tampering_is_refused_before_network_submit(enabled):
     assert not engine.posts
 
 
-def test_fact_provenance_controls_sources_and_skips_weak_or_derived_claims(video_env):
+def test_visual_selection_uses_supplied_links_without_rechecking_fact_confidence(video_env):
     row = script()
     version = store.get_version(row["id"], 1)
     store.save_fact_sheet("sheet", report_path="", sheet={"facts": [
@@ -156,9 +156,64 @@ def test_fact_provenance_controls_sources_and_skips_weak_or_derived_claims(video
     paragraph.update(facts=["F1"], citations=["https://unrelated.example.com"])
     assert visuals.needs_for(version)[0]["urls"] == [URL]
     paragraph.update(facts=["F2"])
-    assert visuals.needs_for(version) == []
+    assert visuals.needs_for(version)[0]["urls"] == [URL]
     paragraph.update(facts=["F1"], evidence="NEEDS_REVIEW")
-    assert visuals.needs_for(version) == []
+    assert visuals.needs_for(version)[0]["urls"] == [URL]
+
+
+def test_article_example_links_can_supply_uncited_paragraph_visuals_without_keywords(video_env):
+    version = {"sections": [{"title": "实际用法", "paragraphs": [
+        {"text": "MarkItDown 把这个文件变成 Markdown，先看输入与输出。", "citations": []},
+        {"text": "最后总结这期内容。", "citations": []}]}]}
+    linked = [{"title": "MarkItDown README", "url": "https://github.com/microsoft/markitdown"}]
+    needs = visuals.needs_for(version, linked)
+    assert len(needs) == 1 and needs[0]["paragraph_index"] == 0
+    assert needs[0]["visual_subject"] == "markitdown"
+    assert "输入" in needs[0]["visual_goal"]
+
+
+def test_inline_product_example_survives_a_separate_news_bibliography(video_env):
+    from core.video.sources import visual_sources
+    material = ('查看 [MarkItDown 示例](https://github.com/microsoft/markitdown)。\n\n'
+                '## 参考来源\n1. 新闻报道 | 二手 | 持续更新 | https://news.example.org/story\n')
+    linked = visual_sources(material)
+    assert {s['url'] for s in linked} == {'https://github.com/microsoft/markitdown', 'https://news.example.org/story'}
+    version = {'sections': [{'title': '用法', 'paragraphs': [{'text': 'MarkItDown 的输入和输出示例。', 'citations': []}]}]}
+    assert visuals.needs_for(version, linked)[0]['urls'] == ['https://github.com/microsoft/markitdown']
+
+
+def test_repeated_source_does_not_consume_all_distinct_page_slots(enabled, monkeypatch):
+    engine, _ = enabled
+    render = video_render.create(script())
+    audit = render["visuals"]
+    first = audit["needs"][0]
+    audit["needs"] = [first, {**first, "id": "c1p3", "paragraph_index": 2, "urls": ["https://example.org/other"]}]
+    audit["pages"] = [{"need_id": "earlier", "url": URL, "state": "failed"}]
+    audit["policy"]["max_pages"] = 2
+    calls = []
+    def reject(need, url, policy, **kwargs):
+        calls.append(url)
+        raise screenshots.ScreenshotError("没有合适的区域")
+    monkeypatch.setattr(video_visuals, "acquire", reject)
+    store.update_render(render["id"], visuals=audit)
+    video_visuals.prepare(store.get_render(render["id"]), engine.client())
+    assert calls == [URL, "https://example.org/other"]
+
+
+def test_image_matching_another_paragraph_is_mapped_there_without_recapture(enabled, monkeypatch):
+    engine, acquired = enabled
+    render = video_render.create(script())
+    audit = render["visuals"]
+    first = audit["needs"][0]
+    audit["needs"] = [first, {**first, "id": "c1p3", "paragraph_index": 2}]
+    audit["policy"]["version"] = 3
+    store.update_render(render["id"], visuals=audit)
+    monkeypatch.setattr(video_visuals.image_quality, "verify", lambda *a, **k: {
+        "ocr_lines": 2, "vision": {"state": "passed", "paragraph_ids": ["c1p3"], "summary": "对应后面的功能示例"}})
+    prepared, final = video_visuals.prepare(store.get_render(render["id"]), engine.client())
+    assert prepared["image_materials"][0]["placements"] == [{"chapter_index": 0, "paragraph_index": 2}]
+    assert acquired == [URL]
+    assert {d["need_id"]: d["status"] for d in final["decisions"]} == {"c1p2": "text", "c1p3": "accepted"}
 
 
 def test_completed_preparation_survives_restart_before_freezing_submission(enabled):

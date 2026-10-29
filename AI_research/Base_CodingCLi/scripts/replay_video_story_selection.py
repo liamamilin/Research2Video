@@ -34,6 +34,9 @@ def inputs(database: Path, ids: list[str], config_dir: str, jobs_dir: str) -> li
             if not original:
                 raise ValueError(f"Unknown script: {script_id}")
             script = guard.with_policy(original, jobs_dir)
+            if not script["topic"].get("matrix_dedup") and not guard.is_sample(script):
+                script = {**script, "topic": guard.new_topic(script["topic"], script.get("content_context") or {},
+                                                             config_dir, jobs_dir)}
             job = (script["topic"].get("matrix_dedup") or {}).get("job", "")
             scope = guard.scope(job, config_dir)
             report_path = script["report_path"] or script["topic"]["from_report"]

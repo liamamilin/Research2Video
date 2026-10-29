@@ -16,9 +16,10 @@ import uuid
 from core.fileio import file_lock
 from core.video import store
 
-PROMPT_VERSION = 3
+PROMPT_VERSION = 4
 POLICY = "matrix-story-v3"
 ACTIONS = {"release", "pricing", "results", "policy", "financing", "earnings", "discovery", "event", "analysis"}
+EDITION_ACTIONS = {"release", "results", "analysis"}
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS video_story_pools (
     id TEXT PRIMARY KEY, scope TEXT NOT NULL, payload TEXT NOT NULL, created_at TEXT NOT NULL
@@ -125,6 +126,7 @@ def context(peers: list[dict]) -> list[dict]:
                   for p in peers}.values())
     return [{"ref": f"H{i+1}", "script_id": p["script_id"], "title": p["title"],
              "version": p.get("version"),
+             "event_date": p.get("event_date", ""), "written_at": p.get("created_at", ""),
              "summary": p.get("summary", ""), "story": p.get("story") or {},
              "sources": sorted(p["sources"])} for i, p in enumerate(peers)]
 
@@ -134,11 +136,11 @@ def organize(report: str, source_packets: list[dict], previous: list[dict], llm_
     from core.llm import LLMClient
 
     system = """把给定素材整理成视频选题事件池，只使用输入，不检索、不重新核算。
-把同一主事件的不同报道合成一条；一个主体的不同版本、不同结果、不同政策变化可以分别成题。
+把同一次发布及其参数、跑分、用法合成一个事件，不因讲述角度或 action 不同拆成多条。真正后续发生的新版本、新实验或政策变化可以另成题。
 subject 使用具体产品/事项名称，action 从 release/pricing/results/policy/financing/earnings/discovery/event/analysis 选择。
 edition 填材料明确给出的版本/财报期/轮次。event_date 只填材料明确给出的单日事件日期，格式 YYYY-MM-DD，未知留空；时间段、日期范围与历史时期放在 edition 或 summary 中，event_date 留空。报告日期不等于事件日期。
 primary 填核心证据的 S 编号，background 填辅助背景 S 编号。新增参考、热度、下载量或换标题不构成新事件。
-same_as 填已经覆盖该主事件的 H 编号；有实际新进展仍关联旧事件，并在 changes 中写明发生变化的维度及前后值。
+same_as 关联已经讲过该题材的 H 编号；changes 比较的是相对这些已做视频后来发生了什么，不是与上一代产品、竞品或同次发布的另一个指标比较。没有后续进展就留空。
 不确定有新进展时不得编造 changes。保持各候选与实际材料一致，优先排列适合讲述的具体事件。
 JSON: {"events":[{"title":"选题标题","subject":"具体对象","action":"release","edition":"","event_date":"",
 "summary":"事件与本次看点","primary":["S1"],"background":[],"same_as":[],
@@ -159,6 +161,8 @@ JSON: {"events":[{"title":"选题标题","subject":"具体对象","action":"rele
 
 
 def validate(items, source_packets: list[dict], previous: list[dict]) -> list[dict]:
+    from core.video import content_guard as guard
+
     if not isinstance(items, list):
         raise SelectionError("候选事件应为列表")
     by_source, by_peer = {p["id"]: p for p in source_packets}, {p["ref"]: p for p in previous}
@@ -195,14 +199,15 @@ def validate(items, source_packets: list[dict], previous: list[dict]) -> list[di
         event["previous"] = list(dict.fromkeys(by_peer[k]["script_id"] for k in same_as))
         event["previous_refs"] = [{"script_id": by_peer[k]["script_id"], "version": by_peer[k].get("version"),
                                    "event_key": (by_peer[k].get("story") or {}).get("event_key", "")} for k in same_as]
-        event["family_key"] = _hash(_normal(event["subject"]), event["action"])
+        family = "edition" if event["edition"] and event["action"] in EDITION_ACTIONS else event["action"]
+        event["family_key"] = _hash(_normal(event["subject"]), family)
         if same_as and not event["changes"]:
             peer = by_peer[same_as[0]]
             event["event_key"] = (peer.get("story") or {}).get("event_key") or _hash(
                 "legacy", peer["script_id"], peer.get("version") or peer["title"])
         elif event["action"] == "release" and event["edition"] and event["event_date"]:
-            # Different descriptions of one dated version release still reserve
-            # one event. A later release phase keeps its own actual event date.
+            # A release's features and benchmarks share an identity. Actual later
+            # developments retain their own event date, even on the same URL.
             event["event_key"] = _hash(event["family_key"], _edition(event["edition"]), event["event_date"])
         elif event["changes"]:
             event["event_key"] = _hash(event["family_key"], _edition(event["edition"]),
@@ -215,6 +220,11 @@ def validate(items, source_packets: list[dict], previous: list[dict]) -> list[di
             event["event_key"] = _hash(event["family_key"], _edition(event["edition"]), event["event_date"], evidence)
         event["primary_sources"] = list(dict.fromkeys(u for k in primary for u in by_source[k]["links"]))
         key = event["event_key"]
+        for known_key, known in output.items():
+            peer = {"story": known, "sources": {k for u in known["primary_sources"] if (k := guard.source_key(u))}}
+            if _same_event(event, known) and not _advances(event, peer):
+                key = event["event_key"] = known_key
+                break
         if key in output:
             for field in ("primary", "background", "previous", "previous_refs", "primary_sources"):
                 output[key][field] = list({_hash(v): v for v in output[key][field]+event[field]}.values())
@@ -271,19 +281,45 @@ def reservations(scope: str, script_id: str = "") -> list[dict]:
     from core.video import content_guard as guard
 
     with store.connect() as conn:
-        rows = conn.execute("SELECT script_id,story FROM video_story_claims WHERE scope=? AND script_id!=? "
+        rows = conn.execute("SELECT script_id,story,created_at FROM video_story_claims WHERE scope=? AND script_id!=? "
                             "AND state IN ('ACTIVE','COVERED')", (scope, script_id)).fetchall()
     return [{"script_id": r["script_id"], "title": (s := json.loads(r["story"]))["title"],
-             "summary": s["summary"], "story": s,
+             "summary": s["summary"], "story": s, "created_at": r["created_at"],
              "sources": {k for u in s["primary_sources"] if (k := guard.source_key(u))}} for r in rows]
+
+
+def _advances(event: dict, peer: dict) -> bool:
+    """A comparison delta alone is not a development since an existing video."""
+    if not event.get("changes"):
+        return False
+    from core.video import content_guard as guard
+
+    old = peer.get("story") or {}
+    before_date = old.get("event_date") or peer.get("event_date") or peer.get("created_at", "")[:10]
+    after_date = event.get("event_date", "")
+    if before_date and after_date and after_date < before_date:
+        return False
+    before_edition = old.get("edition") or peer.get("edition")
+    after_edition = event.get("edition")
+    if before_edition and after_edition and _edition(before_edition) != _edition(after_edition):
+        return True
+    if before_date and after_date and after_date > before_date:
+        return True
+    # Independent evidence can support a new result even on the same day; the same article
+    # with another fragment, headline or auxiliary reference cannot do so.
+    evidence = {key for u in event["primary_sources"] if (key := guard.source_key(u))}
+    return bool(evidence and peer.get("sources") and not guard.overlap(evidence, peer["sources"]))
 
 
 def _same_event(left: dict, right: dict) -> bool:
     if left["event_key"] == right.get("event_key"):
         return True
-    if left.get("changes"):
+    same_family = left["family_key"] == right.get("family_key")
+    edition_facets = (left.get("action") in EDITION_ACTIONS and right.get("action") in EDITION_ACTIONS
+                      and _normal(left["subject"]) == _normal(right.get("subject", "")))
+    if not same_family and not edition_facets:
         return False
-    if left["family_key"] != right.get("family_key"):
+    if _advances(left, {"story": right}):
         return False
     if left["edition"] and right.get("edition"):
         return _edition(left["edition"]) == _edition(right["edition"])
@@ -307,9 +343,26 @@ def duplicate(event: dict, peers: list[dict]) -> list[dict]:
                 return True
         return False
 
-    result = [p for p in peers if _same_event(event, p.get("story") or {}) or (not event["changes"] and alias(p))]
-    if not event["changes"]:
-        result += guard.duplicate_peers({guard.source_key(u) for u in event["primary_sources"] if guard.source_key(u)}, peers)
+    evidence = {key for u in event["primary_sources"] if (key := guard.source_key(u))}
+    result = []
+    unchanged = []
+    for peer in peers:
+        if event["event_key"] == (peer.get("story") or {}).get("event_key"):
+            result.append(peer)
+            continue
+        if _advances(event, peer):
+            continue
+        unchanged.append(peer)
+        if _same_event(event, peer.get("story") or {}) or alias(peer):
+            result.append(peer)
+            continue
+        # Legacy scripts have no structured story. Match a named edition on its
+        # core article as well, so omitted semantic aliases cannot bypass history.
+        edition = event.get("edition", "")
+        named_edition = bool(edition and _normal(edition) in _normal(peer["title"]))
+        if named_edition and guard.overlap(evidence, peer["sources"]):
+            result.append(peer)
+    result += guard.duplicate_peers(evidence, unchanged)
     by_id = {}
     for peer in result:
         by_id.setdefault(peer["script_id"], peer)
@@ -335,7 +388,8 @@ def take(script_id: str, pool: dict, peers: list[dict]) -> tuple[dict, list[dict
         if existing:
             return json.loads(existing["story"]), []
         occupied = [{"script_id": r["script_id"], "title": (s := json.loads(r["story"]))["title"],
-                     "story": s, "sources": {k for u in s["primary_sources"] if (k := guard.source_key(u))}}
+                     "story": s, "created_at": r["created_at"],
+                     "sources": {k for u in s["primary_sources"] if (k := guard.source_key(u))}}
                     for r in conn.execute("SELECT * FROM video_story_claims WHERE scope=? AND script_id!=? "
                                           "AND state IN ('ACTIVE','COVERED')", (pool["scope"], script_id))]
         for event in pool["events"]:

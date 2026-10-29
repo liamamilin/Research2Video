@@ -407,10 +407,19 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         if problem:
             raise RenderError(problem)
         from core.video import visual_materials
+        listed = []
         try:
-            listed = video_sources.report_sources(video_workflow.report_of(script), fallback=True) if script.get("report_path") else []
+            article = script.get("topic", {}).get("article")
+            listed = video_sources.visual_sources(video_workflow.report_of(script)) if script.get("report_path") or article else []
+            if article and article.get("source", {}).get("source_url"):
+                listed.append({"url": article["source"]["source_url"], "title": version["title"], "kind": ""})
+            from core import report_material
+            original = report_material.read((version.get("meta") or {}).get("material") or {}, script.get("report_path") or "")
+            known_urls = {visual_materials.url_key(s["url"]) for s in listed}
+            listed.extend(s for s in video_sources.visual_sources(original)
+                          if visual_materials.url_key(s["url"]) not in known_urls)
         except (OSError, ValueError, KeyError, TypeError):
-            listed = []
+            pass
         visuals = visual_materials.intent(script, version, request, _video_config().get("visual_materials"), listed)
         return store.create_render(script["id"], version_no, title=title, source_text=text,
                                    source_sha256=sha, request=request, visuals=visuals)

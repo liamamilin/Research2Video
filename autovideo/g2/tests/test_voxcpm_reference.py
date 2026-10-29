@@ -24,6 +24,10 @@ def test_default_generation_reuses_original_reference_instead_of_generated_speec
     anchor_rate = voxcpm_voice.units(voxcpm_voice.VOXCPM_ANCHOR_TEXT) / voxcpm_voice.active_seconds(anchor, rate)
 
     def generate(**kwargs):
+        if calls:
+            checkpoint = json.loads((tmp_path / 'output/voice-report.json').read_text())
+            assert len(checkpoint['segments']) == len(calls)
+            assert (tmp_path / 'output' / f'n{len(calls)-1}.wav').is_file()
         calls.append(kwargs)
         count = round(voxcpm_voice.units(kwargs['text']) / anchor_rate * rate)
         audio = .12 * np.sin(2 * np.pi * 330 * np.arange(count) / rate)

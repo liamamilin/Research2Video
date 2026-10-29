@@ -42,3 +42,23 @@ def test_compact_specific_region_ranks_above_a_long_page():
     short = candidate("Acme element screenshot feature captures page content.")
     long = {**candidate(short["text"] + " unrelated site navigation" * 180), "id": "large", "box": {"height": 1300}}
     assert match.rank(wanted, {"title": "Acme", "candidates": [long, short]})[0]["id"] == "c1"
+
+
+def test_visual_object_can_explain_one_part_of_a_multi_product_paragraph():
+    wanted = {**need("Acme 生成补丁，GitHub 接收代码，随后 pytest 运行测试。", "feature"),
+              "visual_subject": "acme", "visual_goal": "展示 Acme 的代码输出"}
+    code = {**candidate("return {ok: true} // generated patch"), "visual_kind": "code"}
+    assert match.compatible(wanted, code, "Acme examples")[0]
+    assert not match.compatible(wanted, code, "OtherTool examples")[0]
+    text = candidate("Acme project introduction and navigation")
+    assert match.rank(wanted, {"title": "Acme", "candidates": [text, code]})[0]["visual_kind"] == "code"
+
+
+def test_basic_code_example_ranks_above_unrequested_provider_setup():
+    wanted = {**need("MarkItDown 的 Python 示例，把输入文件交给 convert 得到结果。", "feature"),
+              "visual_subject": "markitdown"}
+    simple = {**candidate('from markitdown import MarkItDown; md = MarkItDown(); result = md.convert("test.xlsx"); print(result.markdown)'),
+              "id": "simple", "visual_kind": "code"}
+    complex_example = {**candidate('from markitdown import MarkItDown; from openai import OpenAI; md = MarkItDown(llm_client=OpenAI()); result = md.convert("example.jpg"); print(result.markdown)'),
+                       "id": "provider", "visual_kind": "code"}
+    assert match.rank(wanted, {"title": "MarkItDown", "candidates": [complex_example, simple]})[0]["id"] == "simple"

@@ -52,6 +52,7 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
               '有可用图片的普通说明会自动展示图片；讲到数据时优先用数字或图表。'
               '分组的image_materials给出已配好的图片和区域。为图片讲解填写material_cues，'
               '按旁白顺序指定image_index、可选region_index和讲稿中引出该对象或区域的短语phrase。'
+              '先建立整体位置感；已有多个可读区域时，讲到具体对象、代码调用或输出，填写相应region_index，避免所有镜头都停在整图。'
               '同一张网页可按几个区域连续讲解；两张图片可先看左图、再看右图，最后一起比较。'
               '已有页面或输入输出图片时，普通页面说明用概念或对比组织简短文字，由现有图片呈现，不另画抽象流程替代这些图片。'
               'material_summary_phrase可填写引出总结或整体比较的讲稿原句。只安排画面，不改写旁白。'
@@ -210,7 +211,7 @@ def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | No
 def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, assets: list[dict]) -> dict:
     """Combine paragraph pictures and native data/text scenes on the same measured timeline."""
     scenes = []
-    data = {'data_chart', 'scatter_chart', 'big_number', 'price_change', 'bar_chart', 'flow_diagram'}
+    data = {'data_chart', 'scatter_chart', 'big_number', 'price_change', 'bar_chart'}
     rows = saved.get('image_materials', [])
     for page, group in zip(plan['pages'], plan['groups']):
         component, props = page['component'], page['props']

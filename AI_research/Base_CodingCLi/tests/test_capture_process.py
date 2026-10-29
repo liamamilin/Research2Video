@@ -31,6 +31,17 @@ request = json.load(sys.stdin)
     assert progress == [{"model_calls": 2}]
 
 
+def test_worker_preserves_page_failure_scope(monkeypatch):
+    child_program(monkeypatch, """
+import json, sys
+from pathlib import Path
+json.load(sys.stdin)
+(Path(sys.argv[1]) / 'result.json').write_text(json.dumps({'error':'页面不可用','failure_scope':'page'}))
+""")
+    with pytest.raises(screenshots.PageUnavailable, match="页面不可用"):
+        capture_process.run("automatic", {})
+
+
 def test_busy_worker_is_killed_and_api_remains_responsive(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
     from web.server import create_app

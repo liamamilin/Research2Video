@@ -148,6 +148,8 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     context = topic.pop("_content_context", None) or context
     if context.get("audience") and not explicit_audience:
         fields["目标受众"] = context["audience"]
+    if started_by not in content_guard.SAMPLE_CREATORS:
+        topic = content_guard.new_topic(topic, context, settings.paths.config_dir, settings.paths.jobs_dir)
     script = store.create_script(column.key, topic, created_by=started_by,
                                  production=production_id, content_context=context)
     if topic.get("article"):

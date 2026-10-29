@@ -13,7 +13,7 @@ from core.video import autopilot_store as ap
 from core.video import columns as video_columns
 from core.video import length, outputs, production, recipes, reports, store
 from tests.test_auto_write import _auto_off, _config_file, _pending  # noqa: F401
-from tests.test_production import prod_env  # noqa: F401
+from tests.test_production import prod_env, _organize_event  # noqa: F401
 from tests.test_video_scripts import (GOOD, ROOT, FakeLLM, _csrf, _login, _wait, autovideo, llm,  # noqa: F401
                                       research, script_json, video_env)
 from web.services import video_autopilot as pilot
@@ -80,7 +80,8 @@ def test_recording_a_report_again_fills_in_the_job_it_was_recorded_without(whole
     assert reports.record_file("output/x/2026-10-20.md", job="other")["job"] == JOB  # never taken over
 
 
-def test_api_a_whole_config_lists_the_jobs_reports_and_writes_from_one(client, whole_env, research, llm, autovideo):
+def test_api_a_whole_config_lists_the_jobs_reports_and_writes_from_one(client, whole_env, research, llm, autovideo, monkeypatch):
+    _organize_event(monkeypatch)
     budget = length.budget_for(video_columns.get(str(ROOT / "config"), "deep_dive").target_minutes, "voxcpm_anchor")
     llm.replies = [script_json(budget - 5, citations={(0, 0): [GOOD]})]
     _login(client)

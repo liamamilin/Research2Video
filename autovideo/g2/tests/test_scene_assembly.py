@@ -70,6 +70,25 @@ def test_split_parts_do_not_merge_into_neighboring_paragraphs():
     assert all(u['part_count'] == len(units)-1 for u in units[1:])
 
 
+@pytest.mark.parametrize('component,props', [
+    ('scatter_chart', {'points': [{'name': 'A', 'x': 1, 'y': 2}], 'x_label': '成本', 'y_label': '等待'}),
+    ('data_chart', {'kind': 'grouped', 'categories': ['一月'], 'series': [{'name': 'A', 'values': [1]}], 'unit': '元'}),
+    ('comparison', {'left': {'label': 'A', 'items': ['本地']}, 'right': {'label': 'B', 'items': ['云端']}}),
+])
+def test_identical_comparison_canvas_continues_across_speech_units_but_not_chapters(component, props):
+    groups, _ = inputs([8, 8], [1, 1])
+    for group in groups:
+        group.update(paragraph_ids=[group['id']], part_index=1, part_count=1)
+    scenes = [{'component': component, 'props': {**copy.deepcopy(props),
+               'shot_plan': {'version': 1, 'profile': 'balanced', 'cues': []}}} for _ in groups]
+    connect({'scenes': scenes}, groups, {})
+    assert scenes[1]['props']['scene_flow']['entry'] == 'carry'
+    assert scenes[0]['props']['shot_plan']['closing'] == 'hold'
+    groups[1]['chapter_id'] = 'c2'
+    connect({'scenes': scenes}, groups, {})
+    assert scenes[1]['props']['scene_flow']['entry'] == 'cut'
+
+
 def test_very_long_single_tts_phrase_stays_whole_and_fast_short_phrases_do_not_flicker():
     groups, speech = inputs([35], [1])
     assert arrange(groups, speech, {})[0][0]['segment_ids'] == ['n0']

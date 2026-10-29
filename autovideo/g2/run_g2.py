@@ -611,17 +611,20 @@ def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict) -> dict:
     if missing:
         work_path = ARTIFACTS / "voice-work-input.json"
         write_json(work_path, {**full, "segments": missing})
-        _run_fixed_command("local-mlx-voice", [engine["python"], engine["entry"], work_path, SEGMENTS_DIR, VOICE], PROJECT, timeout=3600)
-        if (SEGMENTS_DIR / "voice-report.json").is_file():
-            fresh = json.loads((SEGMENTS_DIR / "voice-report.json").read_text())
-    if cache:
-        if missing:
+        try:
+            _run_fixed_command("local-mlx-voice", [engine["python"], engine["entry"], work_path, SEGMENTS_DIR, VOICE], PROJECT, timeout=3600)
+        finally:
+            # The child checkpoints each finished segment, even if a later one
+            # fails or times out. Preserve complete chapters before propagating
+            # the original failure; incomplete continuation chains are redone.
             try:
-                cache.publish(SEGMENTS_DIR, fresh)
-            except OSError as exc:
-                # Caching is optional; even a failed temporary-file cleanup
-                # must not discard an already successful voice synthesis.
-                cache.write_errors.append(type(exc).__name__)
+                fresh = json.loads((SEGMENTS_DIR / "voice-report.json").read_text())
+                if cache:
+                    cache.publish(SEGMENTS_DIR, fresh)
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                if cache:
+                    cache.write_errors.append(type(exc).__name__)
+    if cache:
         rows = {row["id"]: {**row, "cache_hit": False} for row in fresh.get("segments", [])}
         rows.update(cached)
         report = {**(fresh or cache.header), "segments": [rows[s["id"]] for s in full["segments"]]}
@@ -810,7 +813,15 @@ def validate_compile_stage(narration: dict, board: dict, alignment: dict) -> dic
     from g2.caption_alignment import supports_short_captions
     if supports_short_captions(ir):
         from g2.caption_alignment import prepare as prepare_short_captions
-        prepare_short_captions(sys.modules[__name__], ir)
+        captions = prepare_short_captions(sys.modules[__name__], ir)
+        timing_path = ARTIFACTS / 'information-timing.json'
+        if timing_path.is_file():
+            from g2.information_motion import align_visual_beats
+            changes = align_visual_beats(ir, captions, json.loads(timing_path.read_text()))
+            write_json(ARTIFACTS / 'visual-cue-alignment.json', {
+                'method': 'existing forced-aligned speech; renderer anticipates visual motion', 'cues': changes})
+            compiled = validate_video_ir(ir, FIXTURE_ROOT)
+            write_json(IR_PATH, ir)
     write_json(ARTIFACTS / "compiled-timeline.json", compiled)
     from g1.video_ir import load_registry
     write_json(ARTIFACTS / "action-catalog.json", load_registry())

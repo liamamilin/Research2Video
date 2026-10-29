@@ -1,7 +1,7 @@
 import React from 'react';
 import {interpolate} from 'remotion';
 import {objectColor} from './StoryDirection';
-import {ShotLayer,CameraAxis,cameraAt,type Rect} from './ShotDirector';
+import {ShotLayer,CameraAxis,cameraAt,visualStart,carriesPicture,type Rect} from './ShotDirector';
 import {init, use} from 'echarts/core';
 import {LineChart, BarChart} from 'echarts/charts';
 import {GridComponent} from 'echarts/components';
@@ -69,8 +69,12 @@ export function DataChart({scene, frame}: {scene: any; frame: number}) {
   const at = (target: string, fallback: number) => scene.beats.find((b: any) => b.target_id === target)?.frame ?? fallback;
   const start = scene.start_frame, end = scene.end_frame;
   const count = p.kind === 'trend' ? p.categories.length : p.series.length;
-  const times = Array.from({length: count}, (_, i) => at(`line:${i}`, start + (end-start) * (i+.3)/(count+1)));
-  const takeawayAt = at(`line:${count}`, start + (end-start)*.78);
+  const times = Array.from({length: count}, (_, i) => {
+    const previous=scene.previous_scene;
+    if(carriesPicture(scene)&&previous.beats.some((b:any)=>b.target_id===`line:${i}`&&b.frame<previous.end_frame))return start-22;
+    return visualStart(scene,at(`line:${i}`, start + (end-start) * (i+.3)/(count+1)),22);
+  });
+  const takeawayAt = visualStart(scene,at(`line:${count}`, start + (end-start)*.78),16);
   // SVG is static. Every changing property below is a pure function of the video frame.
   const point = p.kind === 'trend' ? Math.max(0, ...times.map((t, i) => frame >= t ? i + (i<count-1 ? interpolate(frame,[t,Math.max(t+1,times[i+1])],[0,1],clamp) : 0) : 0)) : 0;
   const right = W - (grid.left + (W-grid.left-grid.right)*point/Math.max(1,count-1) + 18);

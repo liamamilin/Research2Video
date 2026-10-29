@@ -128,12 +128,17 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
                        'units_per_second': round(float(rate), 2), 'attempts': tries, 'prompt': 'anchor' if prompt is anchor_prompt else 'previous',
                        'generation_seconds': round(time.monotonic() - segment_started, 3),
                        'in_range': bool(units(text) < MIN_UNITS or RATE_RANGE[0] <= rate <= RATE_RANGE[1])})
-        print('VOICE', sid, len(out) / OUTPUT_RATE, flush=True)
-    (output_dir / 'voice-report.json').write_text(json.dumps({'voice': voice, 'steps': steps, 'chain': chain, 'anchor_units_per_second': round(float(anchor_rate), 2),
+        # Commit the receipt after the WAV. A later model failure must not erase
+        # completed chapters; the parent only caches groups with every segment.
+        receipt = output_dir / 'voice-report.json'
+        temporary = output_dir / 'voice-report.json.tmp'
+        temporary.write_text(json.dumps({'voice': voice, 'steps': steps, 'chain': chain, 'anchor_units_per_second': round(float(anchor_rate), 2),
                                                                   'segments': report,
                                                                   'performance': {'compiled': options['compile'], 'load_seconds': round(load_seconds, 3),
                                                                       'total_seconds': round(time.monotonic() - started, 3),
                                                                       'reference_cache': reference_cache.report() if reference_cache else None}}, ensure_ascii=False, indent=2))
+        temporary.replace(receipt)
+        print('VOICE', sid, len(out) / OUTPUT_RATE, flush=True)
 
 
 if __name__ == '__main__':

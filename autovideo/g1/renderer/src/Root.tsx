@@ -4,7 +4,7 @@ import {DataChart} from './DataChart';
 import {ScatterChart} from './ScatterChart';
 import {VisualObject, SvgVisualObject, visualFor} from './VisualObjects';
 import {ObjectFlow} from './ObjectFlow';
-import {cameraAt, carriesPicture, flowRects, linkScenes, transitionAt} from './ShotDirector';
+import {cameraAt, carriesPicture, flowRects, linkScenes, transitionAt, comparisonAt} from './ShotDirector';
 import {DirectedMaterials} from './DirectedMaterials';
 import {StoryObjects,objectColor,revealFrames} from './StoryDirection';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
@@ -271,9 +271,12 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   const reveals = scene.beats.filter((b) => b.action === 'reveal');
   const shown = reveals.filter((b) => b.frame <= frame);
   const latest = shown[shown.length-1]?.target_id;
+  const comparison=scene.component==='comparison'?comparisonAt(scene,frame):undefined;
   const motion = (target: string): React.CSSProperties => {
     const beat = reveals.find((b) => b.target_id === target);
-    const t = beat ? ease((frame-beat.frame)/revealFrames(scene)) : 0;
+    // A comparison needs both subjects as readable context from the beginning.
+    // Spoken beats select emphasis, independently of the panels' entrance.
+    const t=comparison&&target.startsWith('side:')?comparison.opacity:beat?ease((frame-beat.frame)/revealFrames(scene)):0;
     return {opacity:t, transform:`translateY(${(1-t)*22}px)`, willChange:'transform, opacity'};
   };
   // 'pretty' keeps a line from ending on a single orphaned character ("美" / "分"). 'balance' was tried for headings and
@@ -333,7 +336,8 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       {scene.component === 'comparison' && <div style={{position:'absolute',left:140,top:330,width:1640,display:'grid',gridTemplateColumns:'1fr 1fr',gap:44}}>
         {(['left','right'] as const).map((side) => {
           const data=p[side], total=data.items.join('').length, bodySize=S(total > 130 ? 30 : 34),color=objectColor(scene,`side:${side}`,side==='right'?paper.green:paper.muted);
-          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:p.story?`${color}08`:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${p.story?color:side === 'right' ? paper.green : paper.line}`}}>
+          const active=comparison?.target===`side:${side}`;
+          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:p.story?`${color}${active?'12':'08'}`:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${active?color:paper.line}`}}>
             <div style={{display:'flex',alignItems:'center',gap:20,marginBottom:30}}><VisualObject scene={scene} target={`side:${side}`} frame={frame} size={64} color={p.story?color:paper.green}/><div style={{...textStyle,flex:1,minWidth:0,color,fontSize:S(data.label.length > 20 ? 34 : 42),lineHeight:1.4,fontWeight:650}}><Tech text={data.label}/></div></div>
             <div style={{display:'flex',flexDirection:'column',gap:20}}>{data.items.map((item: string,i: number) => <div key={i} style={{display:'flex',gap:15,fontSize:bodySize,lineHeight:1.5}}><span style={{color:paper.green}}>·</span><span style={textStyle}><Tech text={item}/></span></div>)}</div>
           </div>;

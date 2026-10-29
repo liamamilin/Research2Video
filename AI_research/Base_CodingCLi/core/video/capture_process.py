@@ -11,7 +11,7 @@ import threading
 from pathlib import Path
 from typing import Callable
 
-from core.video.screenshots import MAX_BYTES, ScreenshotError
+from core.video.screenshots import MAX_BYTES, PageUnavailable, ScreenshotError
 
 ROOT = Path(__file__).resolve().parents[2]
 _slots = threading.BoundedSemaphore(2)
@@ -62,7 +62,8 @@ def run(operation: str, options: dict, *, timeout_seconds: float = 60,
                 raise ScreenshotError("网页截图进程未正常完成，请稍后重试")
             result = json.loads(result_file.read_text(encoding="utf-8"))
             if result.get("error"):
-                raise ScreenshotError(result["error"])
+                error = PageUnavailable if result.get("failure_scope") == "page" else ScreenshotError
+                raise error(result["error"])
             picture = folder / "image.png"
             if not picture.is_file() or not 0 < picture.stat().st_size <= MAX_BYTES:
                 raise ScreenshotError("截图为空或超过 20 MB，请缩小截图范围")

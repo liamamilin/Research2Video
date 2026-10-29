@@ -67,11 +67,12 @@ def test_older_materials_use_existing_labels_or_spoken_position_without_model_ca
     assert json.loads((tmp_path/'shot-director.json').read_text())['extra_model_calls'] == 0
 
 
-def test_mixed_scene_compilation_preserves_images_and_binds_model_hints(tmp_path):
+@pytest.mark.parametrize('component', ['concept_reveal', 'flow_diagram'])
+def test_mixed_scene_compilation_preserves_images_and_binds_model_hints(tmp_path, component):
     pic = image()
     text = ''.join(row['text'] for row in speech())
     groups = [{'id': 'p1', 'title': '工作台', 'text': text, 'segment_ids': ['n1', 'n2'], 'image_indices': [0]}]
-    pages = [{'id': 'p1', 'component': 'concept_reveal', 'props': {'title': '工作台', 'lines': ['文件与问题']},
+    pages = [{'id': 'p1', 'component': component, 'props': {'title': '工作台', 'lines': ['文件与问题']},
               'material_cues': [{'image_index': 0, 'region_index': 1, 'phrase': '提问区'}]}]
     board = explanation.compile_storyboard(pipeline(tmp_path), {'groups': groups, 'pages': pages},
         {'rows': speech()}, {'image_materials': [pic]}, [{'id': pic['image_asset_id'], 'path': pic['image_path']}])
@@ -142,7 +143,7 @@ def material_scene(pair=False):
 
 
 def test_image_switch_crossfades_and_summary_keeps_last_picture(camera_runtime):
-    result = camera_runtime(material_scene(), [80, 300, 306, 320, 590, 320])
+    result = camera_runtime(material_scene(), [80, 287, 293, 300, 590, 300])
     material = result['material']
     assert material[0]['images'] == [0]
     assert material[1]['previous'] == [0] and material[1]['images'] == [1]

@@ -1,0 +1,23 @@
+{
+  "first_identity_seconds": 84.2152,
+  "warm_replay_seconds": 0.0072,
+  "cache": {
+    "enabled": true,
+    "chapter_hits": 2,
+    "chapter_misses": 0,
+    "segment_hits": 4,
+    "segment_misses": 0,
+    "entry_keys": [
+      "479a03e2f72532d7387ae72e6d571ce71526fca049344bdab8e5a089e83ba708",
+      "8a700e8640eabaefb729c72f38b78deaa22ceee53397ce7288c04a5e90a34faf"
+    ],
+    "write_errors": [],
+    "evicted_chapters": 0,
+    "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+    "fingerprint_seconds": 0.006,
+    "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+  },
+  "evicted_chapters_during_publish": 2,
+  "real_generated_audio_identical": true,
+  "new_synthesis_processes": 0
+}

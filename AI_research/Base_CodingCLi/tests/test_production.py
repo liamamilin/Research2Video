@@ -92,7 +92,19 @@ def test_a_config_that_cannot_write_is_listed_with_why(prod_env, data, message):
     assert not bad.usable and any(message in e for e in bad.errors), bad.errors
 
 
-def test_api_writing_from_a_config_is_writing_with_its_recipe_and_records_the_config(client, prod_env, research, llm, autovideo):
+def _organize_event(monkeypatch):
+    from core.video import story_pool
+
+    def organize(report, packets, previous, config):
+        return story_pool.validate([{"title": packets[0]["title"], "subject": packets[0]["title"],
+            "action": "event", "summary": packets[0]["text"], "primary": [packets[0]["id"]]}],
+            packets, previous), {"requests": 1}
+
+    monkeypatch.setattr(story_pool, "organize", organize)
+
+
+def test_api_config_and_direct_entries_share_event_memory(client, prod_env, research, llm, autovideo, monkeypatch):
+    _organize_event(monkeypatch)
     budget = length.budget_for(video_columns.get(str(ROOT / "config"), "flash").target_minutes, "voxcpm_anchor")
     llm.replies = [script_json(budget - 5, citations={(0, 0): [GOOD]}) for _ in range(2)]
     _login(client)
@@ -105,21 +117,21 @@ def test_api_writing_from_a_config_is_writing_with_its_recipe_and_records_the_co
     made = client.post("/api/production/flash/write", json={"topic_ids": ["2026-10-19/F1"]}, headers=_csrf(client))
     assert made.status_code == 202, made.text
     second = _wait(client, made.json()[0]["id"], {"DRAFT", "FAILED"})
-    assert first["status"] == second["status"] == "DRAFT"
+    assert first["status"] == "DRAFT" and second["status"] == "FAILED"
+    assert first["id"] in second["topic"]["content_archive"]["duplicate_of"]
+    assert second["current_version"] == 0
 
-    # the same recipe, the same topic: the research Job's prompt and the writer's request are the same, byte for byte
+    # Both entries use the same research recipe; the repeated event never calls the body writer again.
     def prompt(job: str) -> str:
         return yaml.safe_load((prod_env / "jobs" / f"{job}.yaml").read_text(encoding="utf-8"))["prompt"]
     assert len(research.jobs) == 2 and prompt(research.jobs[0]) == prompt(research.jobs[1])
-    assert len(FakeLLM.calls) == 2 and FakeLLM.calls[0] == FakeLLM.calls[1]
-    assert first["version_shown"]["meta"]["cell"] == second["version_shown"]["meta"]["cell"]
+    assert len(FakeLLM.calls) == 1 and first["version_shown"]["meta"]["cell"]
     assert store.get_script(second["id"])["production"] == "flash" and store.get_script(first["id"])["production"] == ""
 
     pending = client.get("/api/production/flash/pending").json()
     assert pending["report_date"] == "2026-10-19"
     assert [i["written"] for i in pending["items"]][:2] == [True, False]  # F1 written with this recipe, F2 not yet
-    # both count: the direct one is flash on this config's Job, written before it was recorded (spec/outputs.md)
-    assert {c["key"]: c["scripts"] for c in client.get("/api/production").json()}["flash"] == 2
+    assert {c["key"]: c["scripts"] for c in client.get("/api/production").json()}["flash"] == 1
 
 
 def test_api_a_roundup_config_writes_the_picked_items_as_one_script_without_research(client, prod_env, research, llm, autovideo):
@@ -265,7 +277,8 @@ def test_a_config_can_turn_the_research_off_only_where_its_recipe_says_so(prod_e
     assert bare_col["research_mode"] == "none" and bare_col["script_style"] == own["script_style"]
 
 
-def test_api_writing_without_research_gives_the_writer_only_that_items_part_of_the_report(client, prod_env, research, llm, autovideo):
+def test_api_writing_without_research_gives_the_writer_only_that_items_part_of_the_report(client, prod_env, research, llm, autovideo, monkeypatch):
+    _organize_event(monkeypatch)
     budget = length.budget_for(video_columns.get(str(ROOT / "config"), "flash").target_minutes, "voxcpm_anchor")
     llm.replies = [script_json(budget - 5, citations={(0, 0): ["https://example.com/pricing"]})]
     report = prod_env / "output" / "flash" / "2026-10-19_ai_flash_discovery.md"

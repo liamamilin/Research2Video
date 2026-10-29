@@ -80,6 +80,14 @@ def prepare(render: dict, client) -> tuple[dict, dict]:
         accepted = False
         problems = []
         for url in need["urls"][:policy["attempts_per_paragraph"]]:
+            # Reuse page-wide failures across paragraphs and worker recovery.
+            # A rejected region/match remains specific to its original paragraph.
+            unavailable = next((p for p in pages if p.get("failure_scope") == "page"
+                                and visual_materials.url_key(p["url"]) == visual_materials.url_key(url)), None)
+            if unavailable:
+                audit["page_failures_reused"] = audit.get("page_failures_reused", 0) + 1
+                problems.append("复用本次页面失败记录：" + unavailable["reason"])
+                continue
             remaining = policy["max_seconds"] - prior_seconds - (time.monotonic() - started)
             if remaining < 1:
                 problems.append("已达到自动配图时间预算")
@@ -96,7 +104,8 @@ def prepare(render: dict, client) -> tuple[dict, dict]:
                     cached = None
             else:
                 cached = visual_cache.read(need, url, policy)
-            if not cached and sum(not p.get("cached") for p in pages) >= policy["max_pages"]:
+            visited = {visual_materials.url_key(p["url"]) for p in pages if not p.get("cached")}
+            if not cached and visual_materials.url_key(url) not in visited and len(visited) >= policy["max_pages"]:
                 problems.append("已达到页面预算")
                 break
             page_record = pending or {"url": url, "need_id": need["id"], "cached": bool(cached)}
@@ -117,12 +126,22 @@ def prepare(render: dict, client) -> tuple[dict, dict]:
                         raise screenshots.ScreenshotError("截图复核时间不足，保留文字画面")
                     metadata.setdefault("quality", {})["image"] = image_quality.verify(raw, need, metadata, policy, remaining=remaining)
                     atomic_write(str(attempt_path.with_suffix(".json")), json.dumps(metadata, ensure_ascii=False))
+                quality = metadata.get("quality", {})
+                vision = (quality.get("image") or {}).get("vision") or {}
+                matched = set(vision.get("paragraph_ids", [])) if need.get("visual_subject") and vision.get("state") == "passed" else {need["id"]}
+                matching_needs = [n for n in audit["needs"] if n["id"] in matched]
+                placements = [{k: n[k] for k in ("chapter_index", "paragraph_index")} for n in matching_needs]
                 sha = hashlib.sha256(raw).hexdigest()
                 duplicate = next((m for m in materials if m["source"]["sha256"] == sha), None)
                 if duplicate:
-                    duplicate["placements"].append({k: need[k] for k in ("chapter_index", "paragraph_index")})
-                    decisions.append({"need_id": need["id"], "status": "accepted", "reason": "复用已经通过检查的同一图片",
+                    duplicate["placements"].extend(p for p in placements if p not in duplicate["placements"])
+                    decisions.append({"need_id": need["id"], "status": "accepted" if need["id"] in matched else "text", "reason": "复用已匹配的同一图片",
                                       "screenshot_id": duplicate["screenshot_id"], "source_url": url, "cached": True})
+                    for other in matching_needs:
+                        if other["id"] != need["id"] and other["id"] not in completed:
+                            decisions.append({"need_id": other["id"], "status": "accepted", "reason": "复用图片理解已匹配的素材",
+                                              "screenshot_id": duplicate["screenshot_id"], "source_url": url, "cached": True})
+                    completed.update(matched)
                     accepted = True
                     checkpoint()
                     break
@@ -135,17 +154,23 @@ def prepare(render: dict, client) -> tuple[dict, dict]:
                     raise screenshots.ScreenshotError("图片登记时间不足，保留文字画面")
                 asset = screenshots.register(render["script_id"], asset["id"], client, timeout=min(15, remaining))
                 visual_cache.remember(need, url, policy, asset)
-                caption = f"来源页面 · {metadata['captured_at'][:10]} 截图"
+                caption = (vision.get("summary") or quality.get("heading") or need.get("title") or metadata["title"])[:80]
                 row = {"screenshot_id": asset["id"], "image_id": asset["image_id"], "caption": caption,
-                       "role": "comparison" if need["kind"] == "pricing" else "detail",
-                       "placements": [{k: need[k] for k in ("chapter_index", "paragraph_index")}],
+                       "role": "overall" if quality.get("visual_kind") == "image" else "detail",
+                       "placements": placements,
                        "source": {k: asset[k] for k in ("url", "final_url", "title", "captured_at", "sha256")}}
                 focus = visual_focus.for_asset(asset, need)
                 if focus:
                     row["focus"] = focus
                 materials.append(row)
-                decisions.append({"need_id": need["id"], "status": "accepted", "reason": "已取得该段引用来源的页面截图",
+                decisions.append({"need_id": need["id"], "status": "accepted" if need["id"] in matched else "text",
+                                  "reason": "已选择相应讲解点的页面截图" if need["id"] in matched else "该素材用于更匹配的其他段落",
                                   "screenshot_id": asset["id"], "source_url": url, "cached": bool(cached), "quality": metadata.get("quality", {})})
+                for other in matching_needs:
+                    if other["id"] != need["id"] and other["id"] not in completed:
+                        decisions.append({"need_id": other["id"], "status": "accepted", "reason": "复用图片理解已匹配的素材",
+                                          "screenshot_id": asset["id"], "source_url": url, "cached": True})
+                completed.update(matched)
                 accepted = True
                 checkpoint()
                 break
@@ -154,6 +179,9 @@ def prepare(render: dict, client) -> tuple[dict, dict]:
                 problem = str(exc) if isinstance(exc, screenshots.ScreenshotError) else f"素材获取或登记失败（{type(exc).__name__}）"
                 problems.append(problem[:240])
                 page_record.update(state="failed", reason=problem[:240])
+                if isinstance(exc, screenshots.PageUnavailable):
+                    page_record["failure_scope"] = "page"
+                checkpoint()
         if not accepted:
             decisions.append({"need_id": need["id"], "status": "text", "reason": "；".join(problems) or "没有可用截图"})
             checkpoint()

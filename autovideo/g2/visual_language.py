@@ -12,6 +12,30 @@ GUIDANCE = ('为概念卡、对比卡和流程节点选择能解释对象的统�
             'phrase填写讲稿中动作开始处的短语，使动作跟随旁白。静态对象省略action；不添加循环装饰。')
 
 
+def phrase_at(text: str, phrase: str, cursor: int = 0) -> int:
+    """Locate spoken words despite spacing or sentence punctuation in a cue."""
+    exact = text.find(phrase, cursor)
+    if exact >= 0:
+        return exact
+
+    def folded(value: str, start: int = 0) -> tuple[str, list[int]]:
+        chars, positions = [], []
+        for i in range(start, len(value)):
+            char = value[i]
+            decimal = char == '.' and i > 0 and i+1 < len(value) and value[i-1].isdigit() and value[i+1].isdigit()
+            if char.isspace() or (char in '，,。.;；:：！？!?、“”‘’\"\'' and not decimal):
+                continue
+            for letter in char.casefold():
+                chars.append(letter)
+                positions.append(i)
+        return ''.join(chars), positions
+
+    haystack, positions = folded(text, cursor)
+    needle, _ = folded(phrase)
+    at = haystack.find(needle) if needle else -1
+    return positions[at] if at >= 0 else -1
+
+
 def object_rows(component: str, props: dict) -> list[tuple[str, str]]:
     if component == 'concept_reveal':
         return [(f'line:{i}', line) for i, line in enumerate(props['lines'])]
