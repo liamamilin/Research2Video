@@ -12,7 +12,7 @@ import {CornerBadge, type Badge} from './Packaging';
 import {CreativeVideo, type CreativePreset} from './CreativeForms';
 
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
-type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]; previous_scene?: Scene};
+type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]; previous_scene?: Scene; price_layout?: {number_size: number; side_size: number; label_size: number; label_width: number; badge_size: number; unit_size: number; row_gap: number; unit_gap: number; stacked_label: boolean}};
 type Segment = {id: string; text: string; start_ms: number; end_ms: number};
 type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; caption_cues?: Pick<Segment, 'text' | 'start_ms' | 'end_ms'>[]; presentation?: {preset: 'information_motion' | 'explanation' | CreativePreset; density?: 'large'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
 
@@ -348,30 +348,35 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
         {p.note && <div style={{...motion('line:2'),...textStyle,fontSize:S(32),lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
       </div>}
       {scene.component === 'price_change' && (() => {
-        const rows = p.rows, size = rows.length === 1 ? 180 : 128, side = Math.round(size * .42), badge = S(52);
-        // Same geometry as g2/information_motion.py (PRICE_*): 400px label column, 36px gaps, arrow 0.62 x size wide.
+        // Compiler and planner use the same measured geometry. It is derived
+        // from the unchanged strings rather than requested from the model.
+        const rows = p.rows, layout = scene.price_layout;
+        const size = layout?.number_size ?? (rows.length === 1 ? 180 : 128), side = layout?.side_size ?? Math.round(size*.42), badge = layout?.badge_size ?? S(52);
         const Value = ({text, color, opacity = 1}: {text: string; color: string; opacity?: number}) => {
           const m = text.match(/^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$/), parts = m ? [m[1], m[2], m[3]] : ['', text, ''];
           return <span style={{color, opacity, whiteSpace:'nowrap', fontWeight:750, letterSpacing:-2, lineHeight:1.1}}><span style={{fontSize:side}}>{parts[0]}</span><span style={{fontSize:size}}>{parts[1]}</span><span style={{fontSize:side,fontWeight:650}}>{parts[2]}</span></span>;
         };
         return <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 56px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center',boxSizing:'border-box'}}>
-          {p.unit && <div style={{...motion('title'),...textStyle,fontSize:S(36),lineHeight:1.4,color:paper.muted,marginBottom:20}}><Tech text={p.unit}/></div>}
-          <div style={{display:'flex',flexDirection:'column',gap:34}}>
+          {p.unit && <div style={{...motion('title'),...textStyle,fontSize:layout?.unit_size ?? S(36),lineHeight:1.4,color:paper.muted,marginBottom:layout?.unit_gap ?? 20}}><Tech text={p.unit}/></div>}
+          <div style={{display:'flex',flexDirection:'column',gap:layout?.row_gap ?? 34}}>
             {rows.map((row: any, i: number) => {
               const rowTarget = `line:${p.staged ? i*3 : i}`;
               const beat = reveals.find((b) => b.target_id === rowTarget);
+              const oldOpacity = beat ? ease((frame-beat.frame)/14) : 0;
               const later = (delay: number) => {
                 const target = p.staged ? reveals.find(b => b.target_id === `line:${i*3+(delay===8?1:2)}`) : beat;
                 return target ? ease((frame-target.frame-(p.staged?0:delay))/14) : 0;
               };
-              return <div key={i} style={{...motion(rowTarget),display:'flex',alignItems:'center',gap:36,lineHeight:1.1}}>
-                <div style={{...textStyle,width:400,flex:'none',fontSize:S(46),fontWeight:650,lineHeight:1.35}}><Tech text={row.label}/></div>
-                <div style={{flex:1,display:'flex',alignItems:'center',minWidth:0}}>
-                  <Value text={row.before} color={paper.muted}/>
-                  <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:later(8)}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  <Value text={row.after} color={objectColor(scene,rowTarget,paper.green)} opacity={later(8)}/>
+              const label = <div style={{...textStyle,width:layout?.stacked_label?undefined:layout?.label_width ?? 400,flex:layout?.stacked_label?1:'none',minWidth:0,fontSize:layout?.label_size ?? S(46),fontWeight:650,lineHeight:1.35}}><Tech text={row.label}/></div>;
+              const delta = row.change && <div style={{flex:'none',padding:'6px 26px',borderRadius:18,background:row.direction === 'down' ? '#E3F3E9' : '#FBE8E4',color:row.direction === 'down' ? paper.green : '#B3402E',fontSize:badge,fontWeight:750,lineHeight:1.3,opacity:later(20),whiteSpace:'nowrap'}}>{row.direction === 'down' ? '−' : '+'}{row.change}</div>;
+              return <div key={i} data-price-layout={layout?.stacked_label?'stacked':'row'} style={{...motion('title'),display:'flex',flexDirection:layout?.stacked_label?'column':'row',alignItems:layout?.stacked_label?'stretch':'center',gap:layout?.stacked_label?12:36,lineHeight:1.1}}>
+                {layout?.stacked_label?<div style={{display:'flex',alignItems:'center',gap:36}}>{label}{delta}</div>:label}
+                <div style={{flex:1,display:'flex',alignItems:'center',minWidth:0,justifyContent:layout?.stacked_label?'center':undefined}}>
+                  <Value text={row.before} color={paper.muted} opacity={.18+.82*oldOpacity}/>
+                  <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:.18+.82*Math.min(oldOpacity,later(8))}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <Value text={row.after} color={objectColor(scene,rowTarget,paper.green)} opacity={.18+.82*later(8)}/>
                 </div>
-                {row.change && <div style={{flex:'none',padding:'6px 26px',borderRadius:18,background:row.direction === 'down' ? '#E3F3E9' : '#FBE8E4',color:row.direction === 'down' ? paper.green : '#B3402E',fontSize:badge,fontWeight:750,lineHeight:1.3,opacity:later(20),whiteSpace:'nowrap'}}>{row.direction === 'down' ? '−' : '+'}{row.change}</div>}
+                {!layout?.stacked_label&&delta}
               </div>;
             })}
           </div>

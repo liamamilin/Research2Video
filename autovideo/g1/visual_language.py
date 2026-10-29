@@ -41,6 +41,8 @@ def validate_references(component: str, props: dict) -> None:
                else {f"node:{node['id']}" for node in props.get('nodes', [])})
     seen = set()
     for item in props.get('visuals', []):
-        if item['target'] not in targets or item['target'] in seen:
-            raise ValueError('图标需要对应本场景的一个独立对象')
+        if item['target'] not in targets:
+            raise ValueError(f"图标需要对应本场景的一个独立对象：{item['target']} 不存在，可用位置为 {', '.join(sorted(targets))}")
+        if item['target'] in seen:
+            raise ValueError(f"图标需要对应本场景的一个独立对象：{item['target']} 重复绑定")
         seen.add(item['target'])

@@ -7,6 +7,7 @@ from g1.visual_language import COMPONENTS, catalog
 
 GUIDANCE = ('为概念卡、对比卡和流程节点选择能解释对象的统一图标：props.visuals中用target对应line:N、side:left/right或node:id，'
             'icon从visual_vocabulary.objects选择。只有确实有对象时使用图标，抽象判断或文学段落可以省略。'
+            '每个target只选一个主要图标；同一行同时提到时间和成本时，也不要重复绑定该行。'
             '有明确动作时填写action：send传递、process处理、complete结果生成、disconnect连接中断；'
             'phrase填写讲稿中动作开始处的短语，使动作跟随旁白。静态对象省略action；不添加循环装饰。')
 
@@ -23,7 +24,26 @@ def object_rows(component: str, props: dict) -> list[tuple[str, str]]:
 
 def enrich(component: str, props: dict) -> dict:
     """Older plans get literal object icons; explicit planner choices take precedence."""
-    if component not in COMPONENTS or 'visuals' in props:
+    if component not in COMPONENTS:
+        return props
+    if isinstance(props.get('visuals'), list):
+        # One object slot has one icon. Repeated decorative choices must not
+        # waste a model call or fail a video; keep the first complete choice.
+        # Unknown references/objects still reach the ordinary schema checks.
+        try:
+            targets = {target for target, _ in object_rows(component, props)}
+        except (KeyError, TypeError):
+            return props  # Leave malformed component props to the schema.
+        seen, selected = set(), []
+        for item in props['visuals']:
+            target = item.get('target') if isinstance(item, dict) else None
+            if isinstance(target, str) and target in targets:
+                if target in seen:
+                    continue
+                seen.add(target)
+            selected.append(item)
+        return {**props, 'visuals': selected} if len(selected) != len(props['visuals']) else props
+    if 'visuals' in props:
         return props
     visuals = []
     for target, text in object_rows(component, props):

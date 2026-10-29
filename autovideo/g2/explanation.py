@@ -68,6 +68,7 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
                    '最后回顾前面的重点。用同一套讲述角色和对象名称串联卡片、截图、图表及流程。')
     schemas = {name: component_schema(name) for name in COMPONENTS}
     schemas['flow_diagram']['properties'].pop('layout', None)
+    schemas['flow_diagram']['properties']['nodes']['maxItems'] = 5
     for field in ('nodes', 'edges'):
         schemas['flow_diagram']['properties'][field]['items']['properties']['id']['pattern'] = '^[a-z][a-z0-9_]{0,23}$'
     payload = {'title': context['title'], 'groups': context['groups'], 'visual_vocabulary': catalog(),
@@ -113,7 +114,9 @@ def validate(plan: dict, context: dict) -> None:
             validate_references(page['component'], props)
         if page['component'] == 'flow_diagram':
             ids = {n['id'] for n in props['nodes']}
-            if (len(ids) != len(props['nodes']) or len(ids) > 5
+            if len(ids) > 5:
+                raise ValueError(f"{page['id']} 流程图使用2到5个独立节点，本页有{len(ids)}个；请合并讲述阶段，保留原有关系")
+            if (len(ids) != len(props['nodes'])
                     or len({e['id'] for e in props['edges']}) != len(props['edges'])
                     or any(len(item['id']) > 24 for item in [*props['nodes'], *props['edges']])
                     or any(e['from'] not in ids or e['to'] not in ids for e in props['edges'])):

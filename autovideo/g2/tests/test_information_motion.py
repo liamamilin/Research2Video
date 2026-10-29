@@ -616,13 +616,12 @@ def test_price_change_text_fit_at_both_sizes():
     for large in (False, True):
         motion.validate_text_fit(price_scene(), large)
         motion.validate_text_fit(price_scene(rows=[{"label": "输入价", "before": "5 美元", "after": "4 美元"}]), large)
-    wide = price_scene(rows=[{"label": "输入价", "before": "1234567.89 美元", "after": "1234567.89 美元"[:10]}])
+    wide = price_scene(rows=[{"label": "输入价", "before": "1" * 80, "after": "2" * 80}])
     two_line_labels = [{"label": "缓存读取的价格", "before": "5 美元", "after": "4 美元"}, {"label": "缓存写入的价格", "before": "25 美元", "after": "20 美元"}]
-    motion.validate_text_fit(price_scene(rows=two_line_labels), False)  # fits at the normal size
-    for bad, text in ((wide, "too wide"), (price_scene(rows=two_line_labels), "do not fit")):
-        with pytest.raises(motion.InformationFault, match="INFORMATION_TEXT_FIT") as exc:
-            motion.validate_text_fit(bad, True)
-        assert text in exc.value.message
+    for large in (False, True):
+        motion.validate_text_fit(price_scene(rows=two_line_labels), large)
+    with pytest.raises(motion.InformationFault, match="INFORMATION_TEXT_FIT.*do not fit"):
+        motion.validate_text_fit(wide, True)
 
 
 def test_large_text_is_the_same_rounding_as_the_renderer_and_is_rolled_out_by_narration_length():

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import math
 import os
@@ -380,13 +381,25 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
                                       _request_no=_request_no + 1)
         code = PROVIDER.code("AUTH_FAILED" if exc.code in {401, 403} else ("RATE_LIMIT" if exc.code == 429 else "HTTP_ERROR"))
         raise G2Fault(code, f"{PROVIDER.label} returned HTTP {exc.code}; response body and Authorization header were omitted") from exc
-    except urllib.error.URLError as exc:
+    except (urllib.error.URLError, ConnectionError, TimeoutError, http.client.IncompleteRead) as exc:
         elapsed = time.monotonic() - started
         error = {"call_id": call_id, "provider": PROVIDER.name, "error_type": type(exc).__name__,
                  "elapsed_seconds": round(elapsed, 3)}
         write_json(response_path, error)
         record_failed_request(type(exc).__name__)
-        code = PROVIDER.code("TIMEOUT" if isinstance(getattr(exc, "reason", None), TimeoutError) else "UNAVAILABLE")
+        reason = getattr(exc, "reason", exc)
+        transient = isinstance(reason, (ConnectionError, TimeoutError, http.client.IncompleteRead))
+        if transient and _http_attempt <= len(HTTP_RETRY_DELAYS) and len(CALL_RECORDS) < MAX_TOTAL_CALLS:
+            delay = HTTP_RETRY_DELAYS[_http_attempt - 1]
+            append_log(LOGS / "http-retries.jsonl", {"call_id": call_id, "stage": stage,
+                "error_type": type(exc).__name__, "http_attempt": _http_attempt,
+                "next_http_attempt": _http_attempt + 1, "wait_seconds": delay,
+                "remaining_call_budget": MAX_TOTAL_CALLS - len(CALL_RECORDS)})
+            print(f"{PROVIDER.label}: {type(exc).__name__}; retrying the same model in {delay}s", flush=True)
+            time.sleep(delay)
+            return deepseek_json_call(stage, messages, schema, attempt, _http_attempt=_http_attempt + 1,
+                                      _request_no=_request_no + 1)
+        code = PROVIDER.code("TIMEOUT" if isinstance(reason, TimeoutError) else "UNAVAILABLE")
         raise G2Fault(code, f"{PROVIDER.label} request failed ({type(exc).__name__}); no key or response body was logged") from exc
     except json.JSONDecodeError as exc:
         error = {"call_id": call_id, "provider": PROVIDER.name, "error_type": "InvalidJSONResponse",
