@@ -18,7 +18,8 @@
 - 对照表：`mapping.md`（用户在快手上抽查 3 条作品，内容一致）。
 - 备份：`state/validation/kuaishou-backfill-20261029/queue.before.db`。
 - 重启后端后，重新读取作品列表，要求与已抽查对照表一致，为 28 条生成回查结果，由应用按原流程写入作品 ID 并回写文稿发布记录：快手上传 PUBLISHED 46 → 74，28 条发布记录均带上述备注。没有重新投稿。
-- 4 条设置了首评的上传（同一份 80 页合同、Entire、免费 AI 假论文、OpenAI 事故指挥站）刻意未回填：回填会立即激活其推广首评并自动发送，待用户确认。仍为 SUBMITTED。
+- 4 条设置了首评的上传（同一份 80 页合同、Entire、免费 AI 假论文、OpenAI 事故指挥站）先行搁置，用户确认「回填并发首评」后用同一流程回填；快手上传 PUBLISHED 共 78 条。
+- 这 4 条的首评由现有首评流程依次发送，均取得平台回执（SENT、有评论 ID）；回读核对（read_back）尚在自动进行，未重发。回读完成前不能当作评论已对观众可见。
 
 ## 验证
 后端全量 3604 项通过、2 项跳过；`test_tv_qr_login_returns_upload_tokens_without_exposing_them` 因本机环境未安装 `qrcode` 失败，与本改动无关，未纳入。`git diff --check` 通过。
