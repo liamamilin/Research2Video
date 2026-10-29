@@ -133,13 +133,15 @@ export function VideoScriptViewPage() {
   const defaultTab = detail && (current || !detail.version_shown) ? nextStep(detail).tab : "draft";
   const tab: ScriptTab = editing || !tabs.length ? "draft" : asked && tabs.includes(asked) ? asked : defaultTab;
 
-  const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || Boolean(detail.stage) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.distributions?.some(row => ["QUEUED", "UPLOADING", "RUNNING", "SUBMITTED"].includes(row.task?.status ?? "") || (["kuaishou","xiaohongshu"].includes(row.platform) && row.task?.status === "UNKNOWN")));
+  const busyServer = detail && (["RESEARCHING", "WRITING"].includes(detail.status) || (detail.status !== "FAILED" && Boolean(detail.stage)) || detail.renders.some((r) => RENDER_ACTIVE.includes(r.status)) || detail.distributions?.some(row => ["QUEUED", "UPLOADING", "RUNNING", "SUBMITTED"].includes(row.task?.status ?? "") || (["kuaishou","xiaohongshu"].includes(row.platform) && row.task?.status === "UNKNOWN")));
   useEffect(() => {
     if (editing) return;
     const refresh = () => { if (!document.hidden) void load(); };
-    const timer = busyServer ? window.setInterval(refresh, 5000) : undefined;
+    // Another worker/tab can advance a draft between two stages. Keep a slower
+    // refresh when idle so that a brief DRAFT handover never stops live progress.
+    const timer = window.setInterval(refresh, busyServer ? 5000 : 30000);
     document.addEventListener("visibilitychange", refresh);
-    return () => { if (timer) clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
+    return () => { clearInterval(timer); document.removeEventListener("visibilitychange", refresh); };
   }, [busyServer, editing, load]);
 
   useEffect(() => {

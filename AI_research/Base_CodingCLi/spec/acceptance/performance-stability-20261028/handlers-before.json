@@ -1,0 +1,846 @@
+{
+  "measured_at": "2026-10-28T17:43:45+0800",
+  "scope": "local read handlers with SQLite snapshots; excludes browser/auth/gateway",
+  "handlers": {
+    "outputs": {
+      "samples_ms": [
+        218.9,
+        81.8,
+        54.5,
+        54.6,
+        56.3
+      ],
+      "median_ms": 56.3,
+      "max_ms": 218.9,
+      "serialization_median_ms": 4.9,
+      "total_samples_ms": [
+        223.7,
+        86.7,
+        59.2,
+        59.5,
+        61.3
+      ],
+      "total_median_ms": 61.3,
+      "response_bytes": 126495
+    },
+    "production": {
+      "samples_ms": [
+        59.5,
+        30.6,
+        29.1,
+        28.3,
+        27.9
+      ],
+      "median_ms": 29.1,
+      "max_ms": 59.5,
+      "serialization_median_ms": 1.5,
+      "total_samples_ms": [
+        61.0,
+        32.1,
+        30.6,
+        29.8,
+        29.4
+      ],
+      "total_median_ms": 30.6,
+      "response_bytes": 33435
+    },
+    "matrices": {
+      "samples_ms": [
+        67.8,
+        35.0,
+        34.6,
+        35.7,
+        35.7
+      ],
+      "median_ms": 35.7,
+      "max_ms": 67.8,
+      "serialization_median_ms": 3.7,
+      "total_samples_ms": [
+        71.6,
+        38.7,
+        38.5,
+        39.3,
+        39.5
+      ],
+      "total_median_ms": 39.3,
+      "response_bytes": 88548
+    },
+    "columns": {
+      "samples_ms": [
+        4.7,
+        4.8,
+        4.7,
+        4.4,
+        4.9
+      ],
+      "median_ms": 4.7,
+      "max_ms": 4.9,
+      "serialization_median_ms": 0.6,
+      "total_samples_ms": [
+        5.4,
+        5.5,
+        5.3,
+        5.1,
+        5.5
+      ],
+      "total_median_ms": 5.4,
+      "response_bytes": 13845
+    },
+    "board": {
+      "samples_ms": [
+        93.5,
+        62.7,
+        62.6,
+        62.2,
+        91.6
+      ],
+      "median_ms": 62.7,
+      "max_ms": 93.5,
+      "serialization_median_ms": 4.3,
+      "total_samples_ms": [
+        97.6,
+        67.0,
+        67.0,
+        66.6,
+        95.9
+      ],
+      "total_median_ms": 67.0,
+      "response_bytes": 115179
+    },
+    "scripts": {
+      "samples_ms": [
+        73.4,
+        73.2,
+        67.6,
+        90.8,
+        72.0
+      ],
+      "median_ms": 73.2,
+      "max_ms": 90.8,
+      "serialization_median_ms": 28.7,
+      "total_samples_ms": [
+        103.2,
+        101.3,
+        95.5,
+        119.5,
+        100.9
+      ],
+      "total_median_ms": 101.3,
+      "response_bytes": 739665
+    },
+    "sources": {
+      "samples_ms": [
+        47.5,
+        11.3,
+        12.2,
+        11.4,
+        11.3
+      ],
+      "median_ms": 11.4,
+      "max_ms": 47.5,
+      "serialization_median_ms": 2.2,
+      "total_samples_ms": [
+        49.9,
+        13.6,
+        14.4,
+        13.7,
+        13.7
+      ],
+      "total_median_ms": 13.7,
+      "response_bytes": 47751
+    },
+    "shipments": {
+      "samples_ms": [
+        73.3,
+        100.0,
+        74.2,
+        73.8,
+        98.6
+      ],
+      "median_ms": 74.2,
+      "max_ms": 100.0,
+      "serialization_median_ms": 23.2,
+      "total_samples_ms": [
+        96.4,
+        123.4,
+        97.3,
+        97.3,
+        121.8
+      ],
+      "total_median_ms": 97.3,
+      "response_bytes": 592601
+    },
+    "topics": {
+      "samples_ms": [
+        27.8,
+        22.9,
+        22.6,
+        23.0,
+        22.7
+      ],
+      "median_ms": 22.9,
+      "max_ms": 27.8,
+      "serialization_median_ms": 1.9,
+      "total_samples_ms": [
+        29.7,
+        24.8,
+        24.4,
+        24.8,
+        24.6
+      ],
+      "total_median_ms": 24.8,
+      "response_bytes": 41412
+    },
+    "automation_alerts": {
+      "samples_ms": [
+        23.4,
+        20.6,
+        19.9,
+        19.8,
+        19.8
+      ],
+      "median_ms": 19.9,
+      "max_ms": 23.4,
+      "serialization_median_ms": 0.2,
+      "total_samples_ms": [
+        23.6,
+        20.8,
+        20.1,
+        20.0,
+        20.0
+      ],
+      "total_median_ms": 20.1,
+      "response_bytes": 7910
+    },
+    "automation_batches": {
+      "samples_ms": [
+        3.5,
+        4.2,
+        3.5,
+        3.5,
+        3.7
+      ],
+      "median_ms": 3.5,
+      "max_ms": 4.2,
+      "serialization_median_ms": 1.6,
+      "total_samples_ms": [
+        5.2,
+        5.8,
+        5.0,
+        5.2,
+        5.3
+      ],
+      "total_median_ms": 5.2,
+      "response_bytes": 51438
+    },
+    "jobs": {
+      "samples_ms": [
+        15.8,
+        10.8,
+        10.3,
+        10.6,
+        10.7
+      ],
+      "median_ms": 10.7,
+      "max_ms": 15.8,
+      "serialization_median_ms": 3.4,
+      "total_samples_ms": [
+        19.2,
+        14.0,
+        13.6,
+        13.9,
+        14.1
+      ],
+      "total_median_ms": 14.0,
+      "response_bytes": 87307
+    },
+    "rounds": {
+      "samples_ms": [
+        23.6,
+        9.5,
+        9.7,
+        9.7,
+        9.7
+      ],
+      "median_ms": 9.7,
+      "max_ms": 23.6,
+      "serialization_median_ms": 3.8,
+      "total_samples_ms": [
+        27.4,
+        13.2,
+        13.4,
+        13.5,
+        13.4
+      ],
+      "total_median_ms": 13.4,
+      "response_bytes": 79215
+    },
+    "schedules": {
+      "samples_ms": [
+        39.9,
+        33.1,
+        31.9,
+        33.2,
+        32.8
+      ],
+      "median_ms": 33.1,
+      "max_ms": 39.9,
+      "serialization_median_ms": 3.0,
+      "total_samples_ms": [
+        42.9,
+        36.1,
+        35.0,
+        36.3,
+        35.5
+      ],
+      "total_median_ms": 36.1,
+      "response_bytes": 69742
+    },
+    "schedules_managed": {
+      "samples_ms": [
+        8.7,
+        8.9,
+        8.9,
+        8.5,
+        9.3
+      ],
+      "median_ms": 8.9,
+      "max_ms": 9.3,
+      "serialization_median_ms": 2.7,
+      "total_samples_ms": [
+        11.4,
+        11.6,
+        11.6,
+        11.2,
+        12.2
+      ],
+      "total_median_ms": 11.6,
+      "response_bytes": 68184
+    },
+    "schedules_system": {
+      "samples_ms": [
+        24.4,
+        23.9,
+        23.2,
+        23.0,
+        23.1
+      ],
+      "median_ms": 23.2,
+      "max_ms": 24.4,
+      "serialization_median_ms": 0.1,
+      "total_samples_ms": [
+        24.5,
+        24.0,
+        23.4,
+        23.1,
+        23.2
+      ],
+      "total_median_ms": 23.4,
+      "response_bytes": 1766
+    },
+    "recipes": {
+      "samples_ms": [
+        7.8,
+        7.3,
+        7.6,
+        7.1,
+        7.5
+      ],
+      "median_ms": 7.5,
+      "max_ms": 7.8,
+      "serialization_median_ms": 0.7,
+      "total_samples_ms": [
+        8.5,
+        7.9,
+        8.3,
+        7.8,
+        8.1
+      ],
+      "total_median_ms": 8.1,
+      "response_bytes": 10888
+    },
+    "recipe_parts": {
+      "samples_ms": [
+        9.3,
+        9.5,
+        8.9,
+        9.2,
+        9.1
+      ],
+      "median_ms": 9.2,
+      "max_ms": 9.5,
+      "serialization_median_ms": 0.1,
+      "total_samples_ms": [
+        9.4,
+        9.6,
+        9.1,
+        9.3,
+        9.2
+      ],
+      "total_median_ms": 9.3,
+      "response_bytes": 2618
+    },
+    "system_config": {
+      "samples_ms": [
+        22.4,
+        2.0,
+        2.1,
+        1.9,
+        1.9
+      ],
+      "median_ms": 2.0,
+      "max_ms": 22.4,
+      "serialization_median_ms": 0.5,
+      "total_samples_ms": [
+        23.0,
+        2.5,
+        2.6,
+        2.4,
+        2.5
+      ],
+      "total_median_ms": 2.5,
+      "response_bytes": 20709
+    },
+    "provider_presets": {
+      "samples_ms": [
+        0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "median_ms": 0.0,
+      "max_ms": 0.1,
+      "serialization_median_ms": 0.1,
+      "total_samples_ms": [
+        0.2,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ],
+      "total_median_ms": 0.1,
+      "response_bytes": 2322
+    },
+    "report_stats": {
+      "samples_ms": [
+        1.6,
+        0.9,
+        0.7,
+        0.7,
+        0.7
+      ],
+      "median_ms": 0.7,
+      "max_ms": 1.6,
+      "serialization_median_ms": 0.0,
+      "total_samples_ms": [
+        1.6,
+        0.9,
+        0.8,
+        0.7,
+        0.7
+      ],
+      "total_median_ms": 0.8,
+      "response_bytes": 177
+    },
+    "ratings": {
+      "samples_ms": [
+        0.4,
+        0.4,
+        0.3,
+        0.3,
+        0.3
+      ],
+      "median_ms": 0.3,
+      "max_ms": 0.4,
+      "serialization_median_ms": 0.0,
+      "total_samples_ms": [
+        0.5,
+        0.4,
+        0.4,
+        0.3,
+        0.3
+      ],
+      "total_median_ms": 0.4,
+      "response_bytes": 44
+    },
+    "usage": {
+      "samples_ms": [
+        28.3,
+        9.4,
+        10.0,
+        9.4,
+        9.9
+      ],
+      "median_ms": 9.9,
+      "max_ms": 28.3,
+      "serialization_median_ms": 0.8,
+      "total_samples_ms": [
+        29.1,
+        10.2,
+        10.7,
+        10.1,
+        10.6
+      ],
+      "total_median_ms": 10.6,
+      "response_bytes": 12649
+    },
+    "health": {
+      "samples_ms": [
+        2.2,
+        0.9,
+        0.9,
+        1.0,
+        1.3
+      ],
+      "median_ms": 1.0,
+      "max_ms": 2.2,
+      "serialization_median_ms": 0.0,
+      "total_samples_ms": [
+        2.2,
+        1.0,
+        0.9,
+        1.1,
+        1.3
+      ],
+      "total_median_ms": 1.1,
+      "response_bytes": 783
+    },
+    "audit": {
+      "samples_ms": [
+        1.8,
+        1.1,
+        0.9,
+        1.0,
+        1.0
+      ],
+      "median_ms": 1.0,
+      "max_ms": 1.8,
+      "serialization_median_ms": 4.8,
+      "total_samples_ms": [
+        6.8,
+        5.9,
+        5.7,
+        6.0,
+        5.7
+      ],
+      "total_median_ms": 5.9,
+      "response_bytes": 90021
+    },
+    "runtime_logs": {
+      "samples_ms": [
+        1.0,
+        0.3,
+        0.2,
+        0.2,
+        0.3
+      ],
+      "median_ms": 0.3,
+      "max_ms": 1.0,
+      "serialization_median_ms": 0.4,
+      "total_samples_ms": [
+        1.4,
+        0.6,
+        0.6,
+        0.6,
+        0.7
+      ],
+      "total_median_ms": 0.6,
+      "response_bytes": 72643
+    },
+    "platform_bilibili": {
+      "samples_ms": [
+        2210.3,
+        11.8,
+        11.4,
+        11.5,
+        11.4
+      ],
+      "median_ms": 11.5,
+      "max_ms": 2210.3,
+      "serialization_median_ms": 4.5,
+      "total_samples_ms": [
+        2214.7,
+        16.3,
+        15.9,
+        16.0,
+        16.0
+      ],
+      "total_median_ms": 16.0,
+      "response_bytes": 195059
+    },
+    "platform_douyin": {
+      "samples_ms": [
+        104.0,
+        65.6,
+        65.9,
+        92.4,
+        96.6
+      ],
+      "median_ms": 92.4,
+      "max_ms": 104.0,
+      "serialization_median_ms": 4.9,
+      "total_samples_ms": [
+        108.9,
+        70.9,
+        70.7,
+        97.6,
+        101.4
+      ],
+      "total_median_ms": 97.6,
+      "response_bytes": 174961
+    },
+    "platform_kuaishou": {
+      "samples_ms": [
+        36.4,
+        36.6,
+        34.5,
+        61.1,
+        35.1
+      ],
+      "median_ms": 36.4,
+      "max_ms": 61.1,
+      "serialization_median_ms": 6.4,
+      "total_samples_ms": [
+        42.9,
+        43.4,
+        40.7,
+        67.3,
+        41.5
+      ],
+      "total_median_ms": 42.9,
+      "response_bytes": 183691
+    },
+    "platform_xiaohongshu": {
+      "samples_ms": [
+        11.1,
+        10.5,
+        9.2,
+        9.8,
+        9.5
+      ],
+      "median_ms": 9.8,
+      "max_ms": 11.1,
+      "serialization_median_ms": 2.1,
+      "total_samples_ms": [
+        13.2,
+        12.7,
+        11.3,
+        12.0,
+        11.6
+      ],
+      "total_median_ms": 12.0,
+      "response_bytes": 60987
+    },
+    "report_tree": {
+      "samples_ms": [
+        1.7,
+        1.4,
+        1.5,
+        1.4,
+        1.3
+      ],
+      "median_ms": 1.4,
+      "max_ms": 1.7,
+      "serialization_median_ms": 4.2,
+      "total_samples_ms": [
+        6.1,
+        5.6,
+        5.7,
+        5.6,
+        5.8
+      ],
+      "total_median_ms": 5.7,
+      "response_bytes": 101368
+    },
+    "report_list": {
+      "samples_ms": [
+        0.8,
+        0.4,
+        0.4,
+        0.4,
+        0.4
+      ],
+      "median_ms": 0.4,
+      "max_ms": 0.8,
+      "serialization_median_ms": 0.5,
+      "total_samples_ms": [
+        1.3,
+        0.9,
+        0.9,
+        0.8,
+        0.8
+      ],
+      "total_median_ms": 0.9,
+      "response_bytes": 9473
+    },
+    "matrix_detail": {
+      "samples_ms": [
+        57.1,
+        58.3,
+        57.9,
+        57.4,
+        59.1
+      ],
+      "median_ms": 57.9,
+      "max_ms": 59.1,
+      "serialization_median_ms": 1.6,
+      "total_samples_ms": [
+        58.7,
+        59.9,
+        59.5,
+        59.0,
+        60.7
+      ],
+      "total_median_ms": 59.5,
+      "response_bytes": 40174
+    },
+    "matrix_runs": {
+      "samples_ms": [
+        34.8,
+        35.5,
+        34.5,
+        36.1,
+        37.5
+      ],
+      "median_ms": 35.5,
+      "max_ms": 37.5,
+      "serialization_median_ms": 0.5,
+      "total_samples_ms": [
+        35.3,
+        36.0,
+        35.0,
+        36.6,
+        37.9
+      ],
+      "total_median_ms": 36.0,
+      "response_bytes": 9919
+    },
+    "matrix_calendar": {
+      "samples_ms": [
+        26.0,
+        27.2,
+        25.2,
+        25.7,
+        25.0
+      ],
+      "median_ms": 25.7,
+      "max_ms": 27.2,
+      "serialization_median_ms": 0.0,
+      "total_samples_ms": [
+        26.1,
+        27.3,
+        25.2,
+        25.7,
+        25.0
+      ],
+      "total_median_ms": 25.7,
+      "response_bytes": 117
+    },
+    "script_detail": {
+      "samples_ms": [
+        32.7,
+        29.5,
+        30.8,
+        29.5,
+        29.4
+      ],
+      "median_ms": 29.5,
+      "max_ms": 32.7,
+      "serialization_median_ms": 1.3,
+      "total_samples_ms": [
+        34.1,
+        30.7,
+        32.1,
+        30.8,
+        30.7
+      ],
+      "total_median_ms": 30.8,
+      "response_bytes": 39935
+    },
+    "report_content": {
+      "samples_ms": [
+        1.0,
+        0.5,
+        0.4,
+        0.4,
+        0.4
+      ],
+      "median_ms": 0.4,
+      "max_ms": 1.0,
+      "serialization_median_ms": 0.1,
+      "total_samples_ms": [
+        1.1,
+        0.6,
+        0.6,
+        0.6,
+        0.6
+      ],
+      "total_median_ms": 0.6,
+      "response_bytes": 34866
+    },
+    "assistant_recovery": {
+      "samples_ms": [
+        0.4,
+        0.3,
+        0.3,
+        0.3,
+        0.3
+      ],
+      "median_ms": 0.3,
+      "max_ms": 0.4,
+      "serialization_median_ms": 0.0,
+      "total_samples_ms": [
+        0.4,
+        0.3,
+        0.3,
+        0.3,
+        0.3
+      ],
+      "total_median_ms": 0.3,
+      "response_bytes": 134
+    },
+    "assistant_overview": {
+      "samples_ms": [
+        55.3,
+        57.1,
+        56.1,
+        55.9,
+        56.3
+      ],
+      "median_ms": 56.1,
+      "max_ms": 57.1,
+      "serialization_median_ms": 0.3,
+      "total_samples_ms": [
+        55.6,
+        57.4,
+        56.5,
+        56.2,
+        56.6
+      ],
+      "total_median_ms": 56.5,
+      "response_bytes": 5408
+    },
+    "assistant_tasks": {
+      "samples_ms": [
+        431.2,
+        225.3,
+        263.6,
+        265.1,
+        262.8
+      ],
+      "median_ms": 263.6,
+      "max_ms": 431.2,
+      "serialization_median_ms": 3.3,
+      "total_samples_ms": [
+        434.5,
+        228.8,
+        267.1,
+        268.4,
+        266.0
+      ],
+      "total_median_ms": 267.1,
+      "response_bytes": 116562
+    }
+  }
+}

@@ -43,10 +43,10 @@ def _next_action(script: dict, stage: str, label: dict | None, renders: list[dic
     """One next action per current version. Recommendations never approve or publish anything."""
     if stage == "published":
         return {"action": "published", "group": "done", "action_label": "发布记录", "note": "当前版本已记录发布链接"}
-    if stage in ("researching", "rendering") or script.get("stage"):
-        return {"action": "working", "group": "working", "action_label": "查看进度", "note": "任务正在执行，完成后会自动更新"}
     if script["status"] == "FAILED":
         return {"action": "failed", "group": "todo", "action_label": "处理失败", "note": script.get("error") or "任务未完成，查看原因后重试"}
+    if stage in ("researching", "rendering") or script.get("stage"):
+        return {"action": "working", "group": "working", "action_label": "查看进度", "note": "任务正在执行，完成后会自动更新"}
     if script["status"] == "PLAN_READY":
         return {"action": "plan", "group": "todo", "action_label": "确认方案", "note": "讲述方案已完成，确认后继续写稿"}
     if label and label["tier"] in ("serious", "verify", "unaudited"):

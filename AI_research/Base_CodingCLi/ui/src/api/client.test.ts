@@ -26,6 +26,24 @@ afterEach(() => {
 });
 
 describe("api()", () => {
+  it("does not refresh or expire a remembered session for a rejected login", async () => {
+    const expired = vi.fn();
+    setAuthErrorHandler(expired);
+    fetchMock.mockResolvedValueOnce(fakeResponse(401, { error: { code: "invalid_credentials" } }));
+    await expect(api("/api/auth/login", { method: "POST", skipAuthRefresh: true })).rejects.toMatchObject({ code: "invalid_credentials" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(expired).not.toHaveBeenCalled();
+  });
+  it("rejects an HTML success response before it reaches page state", async () => {
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: async () => "<!doctype html><title>Gateway</title>" });
+    await expect(api("/api/video/scripts")).rejects.toMatchObject({ code: "bad_response", status: 200 });
+  });
+
+  it("preserves structured errors even when an upstream error payload is null", async () => {
+    fetchMock.mockResolvedValueOnce(fakeResponse(503, { error: null }));
+    await expect(api("/api/video/scripts")).rejects.toMatchObject({ status: 503, code: "unknown" });
+  });
+
   it("bounds stalled read requests, including stalls while reading the response body", async () => {
     vi.useFakeTimers();
     fetchMock.mockImplementationOnce(async (_url, init) => ({

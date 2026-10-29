@@ -201,11 +201,15 @@ def ack_alert(body: AlertAckIn, user=Depends(require_editor)) -> dict:
 
 
 @router.get("/shipments")
-def shipments(user=Depends(require_viewer)) -> list[dict]:
+def shipments(user=Depends(require_viewer), compact: bool = False) -> list[dict]:
     """Approved scripts with their render and publication state, for the 成片与发布 page."""
     from web.services import video_board
 
-    return video_board.shipments(_known_columns())
+    rows = video_board.shipments(_known_columns())
+    if compact:
+        from web.services.video_list_payload import compact as project
+        return [project(row) for row in rows]
+    return rows
 
 
 @router.get("/quality")
@@ -564,7 +568,7 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
 
 
 @router.get("/scripts")
-def list_scripts(limit: int = 100000, archived: bool = False, user=Depends(require_viewer)) -> list[dict]:
+def list_scripts(limit: int = 100000, archived: bool = False, user=Depends(require_viewer), compact: bool = False) -> list[dict]:
     published = store.published_versions_by_script()
     renders = store.render_statuses_by_script()
     scripts = store.list_scripts(limit=100000) + store.list_scripts(limit=100000, archived=True)
@@ -576,11 +580,15 @@ def list_scripts(limit: int = 100000, archived: bool = False, user=Depends(requi
     columns = _known_columns()
     from web.services import distributions
     distribution_rows = distributions.overview(scripts)
-    return [{**_script_summary(s, published, versions=versions),
+    rows = [{**_script_summary(s, published, versions=versions),
              "distributions": [d for d in distribution_rows[s["id"]] if d["version"] == s["current_version"]],
              **{k: v for k, v in owners[s["id"]].items() if k != "matrix_archived"},
              "column_label": '本地视频' if s['topic'].get('local_video') else owners[s["id"]]["production_name"] or (columns.get(s["column_key"]).name if columns.get(s["column_key"]) else s["column_key"]),
              **progress.render_state(s, renders.get(s["id"], []))} for s in scripts]
+    if compact:
+        from web.services.video_list_payload import compact as project
+        return [project(row) for row in rows]
+    return rows
 
 
 class ArchiveIn(BaseModel):

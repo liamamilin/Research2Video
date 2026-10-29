@@ -9,7 +9,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue>({ isAuthenticated: false });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { user, loading, checkAuth, logout } = useAuthStore();
+  const { user, loading, error, checkAuth, setUser } = useAuthStore();
 
   useEffect(() => {
     checkAuth();
@@ -17,10 +17,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setAuthErrorHandler(() => {
-      logout().catch(() => {});
+      // An expired request only clears the local view. Sending /logout here
+      // could revoke a fresh session established by another tab in the meantime.
+      setUser(null);
     });
     return () => setAuthErrorHandler(null);
-  }, [logout]);
+  }, [setUser]);
 
   if (loading) {
     return (
@@ -28,6 +30,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         <div className="text-text-muted animate-pulse">Loading...</div>
       </div>
     );
+  }
+
+  if (error) {
+    return <div className="flex h-screen items-center justify-center bg-bg">
+      <div className="card p-6 max-w-md space-y-4 text-sm" role="alert">
+        <p>{error}</p>
+        <button className="btn" onClick={() => void checkAuth()}>重试恢复会话</button>
+      </div>
+    </div>;
   }
 
   return (

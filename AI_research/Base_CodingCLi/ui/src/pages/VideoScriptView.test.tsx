@@ -191,6 +191,22 @@ afterEach(() => {
 });
 
 describe("Video script review", () => {
+  it("refreshes an idle draft and follows automatic approval without a page reload", async () => {
+    const timers = vi.spyOn(window, "setInterval");
+    try {
+      renderPage();
+      await screen.findByText("一个时间戳让缓存折扣失效");
+      const refresh = timers.mock.calls.find(([, ms]) => ms === 30000)?.[0];
+      expect(typeof refresh).toBe("function");
+      mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1,
+        renders: [{ id: "auto-render", version: 1, status: "RUNNING", created_at: DETAIL.created_at, files: [] }] });
+      await act(async () => { if (typeof refresh === "function") refresh(); });
+      await screen.findByRole("tab", { name: "成片" });
+      await waitFor(() => expect(timers.mock.calls.some(([, ms]) => ms === 5000)).toBe(true));
+      expect(calls.every(call => call.method === "GET")).toBe(true);
+    } finally { timers.mockRestore(); }
+  });
+
   it('shows an imported local video with playback and publishing, without generation or AutoVideo dependency', async () => {
     mockApi({ ...DETAIL, status: 'APPROVED', approved_version: 1, column: null,
       topic: { title: '演示视频', id: null, local_video: { file_name: '演示视频.mp4', duration: 12, width: 1920, height: 1080, size: 2000 } },

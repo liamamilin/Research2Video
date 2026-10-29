@@ -1,7 +1,7 @@
-import type { Distribution, Publication } from "@/api/video";
+import type { DistributionState, Publication } from "@/api/video";
 import { DISTRIBUTION_LABEL, VISIBLE_PLATFORM_NAMES, publishedPlatformCount } from "@/lib/distributions";
 
-export function DistributionSummary({ rows = [], publications = [] }: { rows?: Distribution[]; publications?: Publication[] }) {
+export function DistributionSummary({ rows = [], publications = [] }: { rows?: DistributionState[]; publications?: Publication[] }) {
   const count = publishedPlatformCount(rows, publications);
   return <div className="flex flex-wrap gap-2 text-xs" aria-label="各平台发布状态">
     {count ? <span className="text-success">已发布至 {count} 个平台</span> : null}

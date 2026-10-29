@@ -47,9 +47,20 @@ def generate_secret() -> str:
     return secrets.token_urlsafe(48)
 
 
+def _secret_file() -> Path:
+    return Path(__file__).resolve().parent.parent / ".env"
+
+
+def _persisted_secret() -> Optional[str]:
+    from dotenv import dotenv_values
+    values = dotenv_values(_secret_file())
+    value = values.get("AI_RESEARCH_SECRET_KEY") or values.get("WEB_SECRET_KEY")
+    return value if value and not is_weak_secret(value) else None
+
+
 def _persist_secret(secret: str) -> Optional[str]:
     """Write the generated secret to .env (0600). Returns the path or None."""
-    path = Path(__file__).resolve().parent.parent / ".env"
+    path = _secret_file()
     try:
         lines: List[str] = []
         if path.is_file():
@@ -207,11 +218,20 @@ class WebSettings(BaseModel):
         # Secret hygiene: a known/weak JWT secret lets anyone forge tokens, so
         # replace it with a strong generated one instead of running with it.
         if is_weak_secret(settings.auth.secret_key):
-            generated = generate_secret()
-            saved = _persist_secret(generated)
+            # Settings may reload after environment cleanup, while the module's
+            # one-time dotenv import is no longer in effect. Reuse the saved
+            # key before generating one: rotating it invalidates every 30-day
+            # session. Also serialize simultaneous first starts.
+            from core.fileio import file_lock
+            with file_lock(str(_secret_file()) + ".auth"):
+                existing = _persisted_secret()
+                generated = existing or generate_secret()
+                saved = str(_secret_file()) if existing else _persist_secret(generated)
             settings.auth.secret_key = generated
             os.environ["AI_RESEARCH_SECRET_KEY"] = generated
-            if saved:
+            if existing:
+                pass
+            elif saved:
                 print("  [config] ⚠ 已检测到弱 JWT 密钥，已自动生成强密钥并写入 .env（0600）。"
                       "登录状态需重新登录。", file=sys.stderr)
             elif env == "production":

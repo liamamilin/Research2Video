@@ -33,6 +33,14 @@ def items():
     return {row["script_id"]: row for row in home_board(user={})["items"]}
 
 
+def test_failed_script_with_a_saved_stage_is_not_reported_as_running(video_env):
+    script = make_script(status="FAILED")
+    store.update_script(script["id"], stage="写稿", error="模型暂时不可用")
+    row = items()[script["id"]]
+    assert row["group"] == "todo" and row["action"] == "failed"
+    assert row["note"] == "模型暂时不可用"
+
+
 def test_same_recipe_does_not_mix_jobs_from_different_matrices(prod_env):
     ai = make_script("research/loose")
     medical = make_script("medical/flash_discovery")

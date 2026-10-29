@@ -285,7 +285,7 @@ export interface VideoScriptSummary {
   title: string;
   length_check: LengthCheck | null;
   published?: boolean;
-  distributions?: Distribution[];
+  distributions?: DistributionState[];
   archived?: number;
   credibility?: Credibility | null;
   auto?: boolean;
@@ -314,6 +314,9 @@ export interface Distribution {
   draft: { render_id: string; updated_at: string } | null;
   publications: Publication[];
 }
+
+export type DistributionState = Pick<Distribution,
+  "platform" | "status" | "account_uid" | "connected" | "current_account" | "blocked_reason">;
 
 // 发布记录和发布前复核（快讯），见 spec/video-publish.md。
 export interface Publication {
@@ -348,6 +351,7 @@ export interface Recheck {
 }
 
 export interface VideoScriptDetail extends VideoScriptSummary {
+  distributions?: Distribution[];
   configuration?: {
     links: { label: string; name: string; href: string; scope: string; next: string }[];
     changed_since_generation: boolean | null;
@@ -565,7 +569,7 @@ export const listVideoTopics = (source = "opportunities", round?: string, signal
   api<TopicListing>("/api/video/topics", { query: { source, ...(round ? { round } : {}) }, signal });
 
 export const listVideoScripts = (archived = false, signal?: AbortSignal) =>
-  api<VideoScriptSummary[]>("/api/video/scripts", { query: archived ? { archived: "true" } : undefined, signal });
+  api<VideoScriptSummary[]>("/api/video/scripts", { query: { compact: "true", ...(archived ? { archived: "true" } : {}) }, signal });
 
 /** 归档：从看板和列表里收起来（不删除）；archived=false 取消归档。 */
 export const archiveVideoScript = (id: string, archived = true) =>
@@ -713,11 +717,11 @@ export interface Shipment {
   render: { id: string; status: string; version: number; error: string | null; completed_at?: string | null } | null;
   video_url: string | null;
   publications: Publication[];
-  distributions?: Distribution[];
+  distributions?: DistributionState[];
   warnings: string[];
 }
 
-export const listShipments = (signal?: AbortSignal) => api<Shipment[]>("/api/video/shipments", { signal });
+export const listShipments = (signal?: AbortSignal) => api<Shipment[]>("/api/video/shipments", { query: { compact: "true" }, signal });
 
 export interface StorySelection {
   pool_id: string;

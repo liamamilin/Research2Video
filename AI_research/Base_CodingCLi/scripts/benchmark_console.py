@@ -47,6 +47,8 @@ def main() -> None:
                 "matrices": matrices.list_matrices, "columns": video.list_columns,
                 "board": video.home_board, "scripts": video.list_scripts, "sources": sources.list_sources,
                 "shipments": video.shipments, "topics": video.topic_browser,
+                "scripts_compact": lambda **kw: video.list_scripts(compact=True, **kw),
+                "shipments_compact": lambda **kw: video.shipments(compact=True, **kw),
                 "automation_alerts": video.automation_alerts, "automation_batches": video.autopilot_overview,
                 "jobs": jobs.list_all, "rounds": lambda **kw: pipeline.list_rounds(limit=30, **kw),
                 "schedules": scheduler.list_scheduled,

@@ -24,6 +24,7 @@ type RequestOpts = {
   signal?: AbortSignal;
   responseType?: "stream";
   timeoutMs?: number;
+  skipAuthRefresh?: boolean;
   query?: Record<string, string | number | undefined>;
 };
 
@@ -161,13 +162,14 @@ export async function api<T = unknown>(
     try {
       data = JSON.parse(text);
     } catch {
-      data = { error: { code: "bad_response", message: text.slice(0, 200) } };
+      if (resp.ok) throw new ApiError(resp.status, "bad_response", "服务返回的数据格式异常，请刷新重试");
+      data = { error: { code: "bad_response", message: "服务返回的数据格式异常，请重试" } };
     }
   }
 
   if (!resp.ok) {
     // Auto-refresh on 401 (only once per request)
-    if (resp.status === 401 && !_retried) {
+    if (resp.status === 401 && !_retried && !opts.skipAuthRefresh) {
       const ok = await tryRefresh();
       if (ok === "ok") return api<T>(path, opts, true);
       if (ok === "unavailable") {
@@ -176,13 +178,14 @@ export async function api<T = unknown>(
     }
 
     // If refresh failed or already retried, fire the logout callback -- once.
-    if (resp.status === 401 && onAuthError && !_sessionExpired) {
+    if (resp.status === 401 && !opts.skipAuthRefresh && onAuthError && !_sessionExpired) {
       _sessionExpired = true;
       onAuthError();
     }
 
-    const errData = data && typeof data === "object" && "error" in data
-      ? (data as Record<string, unknown>).error as Record<string, unknown>
+    const rawError = data && typeof data === "object" && "error" in data ? data.error : null;
+    const errData = rawError && typeof rawError === "object"
+      ? rawError as Record<string, unknown>
       : { code: "unknown", message: resp.statusText };
     throw new ApiError(
       resp.status,

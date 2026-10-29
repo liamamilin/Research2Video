@@ -7,15 +7,16 @@ export async function login(username: string, password: string, remember = false
   return api("/api/auth/login", {
     method: "POST",
     body: { username, password, remember },
+    skipAuthRefresh: true,
   });
 }
 
 export async function logout(): Promise<void> {
-  return api("/api/auth/logout", { method: "POST" });
+  return api("/api/auth/logout", { method: "POST", skipAuthRefresh: true });
 }
 
 export async function refresh(): Promise<TokenResponse> {
-  return api("/api/auth/refresh", { method: "POST" });
+  return api("/api/auth/refresh", { method: "POST", skipAuthRefresh: true });
 }
 
 export async function getMe(): Promise<User> {

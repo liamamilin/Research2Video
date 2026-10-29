@@ -152,7 +152,7 @@ export function VideoScriptsPage() {
     finally { if (flight.current === controller) { flight.current = null; setLoading(false); } }
   }, [showArchived]);
   useEffect(() => { setError(null); void load(); return () => { flight.current?.abort(); flight.current = null; }; }, [load]);
-  const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status) || s.stage || (s.render && RENDERING.includes(s.render.status))) ?? false;
+  const inFlight = scripts?.some((s) => IN_FLIGHT.includes(s.status) || (s.status !== "FAILED" && s.stage) || (s.render && RENDERING.includes(s.render.status))) ?? false;
   useEffect(() => {
     const refresh = () => { if (!document.hidden) void load(); };
     const timer = window.setInterval(refresh, inFlight ? 5000 : 30000);
