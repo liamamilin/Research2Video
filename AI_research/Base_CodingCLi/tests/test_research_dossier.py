@@ -1,4 +1,4 @@
-"""Research explanations and original details survive the AI author boundary."""
+"""Research explanations and original details survive migrated author boundaries."""
 import json
 
 import pytest
@@ -40,7 +40,7 @@ def test_other_binding_keeps_original_single_input(video_env, llm, monkeypatch):
     monkeypatch.setattr(report_meta, "get", lambda _: {"material": ref})
     llm.replies = [script_json(300)]
     script = store.create_script("report_digest", {"title": "原入口", "from_report": str(path)},
-                                 production="science_daily")
+                                 production="legacy_sample")
     assert workflow.run(script["id"], llm_config=object()) == "DRAFT"
     request = llm.calls[0][1]["content"]
     assert MATERIAL in request and REPORT not in request
@@ -72,35 +72,77 @@ def test_flash_keeps_selected_explanation_and_original_example(video_env, llm, m
     assert "不应进入" not in request and OTHER not in request
 
 
-def test_selected_event_does_not_replace_report_with_its_brief(video_env, llm, monkeypatch):
+@pytest.mark.parametrize("production, domain_direction, cohesive", [
+    ("ai_media_opensource_digest", False, False), ("industry_weekly", True, False),
+    ("consumer_weekly", True, True), ("ai_media_opensource_digest", False, True),
+    ("history_weekly", True, True),
+    ("geography_weekly", True, True),
+    ("culture_weekly", True, True),
+])
+def test_selected_event_does_not_replace_report_with_its_brief(video_env, llm, monkeypatch,
+                                                            production, domain_direction, cohesive):
     path = video_env / "event.md"
-    report = REPORT + f"\n\n### 2.2 其他事件\n不应进入的解释。{OTHER}"
+    sibling = "硬件升级的下一步与维护成本" if cohesive else "不应进入的解释"
+    report = REPORT + f"\n\n### 2.2 另一条路线\n{sibling}。{OTHER}"
+    if cohesive:
+        report = "## 本期主问题：旧机器继续使用怎样选择\n\n" + report
     path.write_text(report)
-    ref = report_material.save(str(path), report, [MATERIAL])
+    second_material = f"### 第二路线原文({OTHER})\n只在原始第二路线出现的工具与维护步骤。"
+    unused_material = "### 未采用候选(https://unused.example/news)\n不相关的原文细节。"
+    ref = report_material.save(str(path), report, [MATERIAL, second_material, unused_material])
     monkeypatch.setattr(report_meta, "get", lambda _: {"material": ref})
     event = {"title": "主项目", "subject": "主项目", "action": "release", "edition": "1", "event_date": "",
              "summary": "已选事件", "primary": ["S1"], "background": [], "primary_sources": [PRIMARY],
              "changes": [], "event_key": "one", "pool_id": "test"}
-    pool = {"packets": [{"id": "S1", "text": MATERIAL, "links": [PRIMARY]}]}
-    monkeypatch.setattr(story_pool, "load_or_create", lambda *a: pool)
+    pool = {"packets": [{"id": "S1", "text": MATERIAL, "links": [PRIMARY]},
+                        {"id": "S2", "text": second_material, "links": [OTHER]},
+                        {"id": "S3", "text": unused_material, "links": ["https://unused.example/news"]}]}
+    selection_inputs = []
+    def load_pool(scope, selected_report, material, peers, config):
+        selection_inputs.append(selected_report)
+        assert MATERIAL in material
+        return pool
+    monkeypatch.setattr(story_pool, "load_or_create", load_pool)
     def take(script_id, *args):
         with store.connect(write=True) as conn:
             conn.execute("INSERT INTO video_story_claims VALUES(?,?,?,?,?,?,'ACTIVE',?,?)",
                          ("claim", "test", "one", script_id, "test", json.dumps(event), store._now(), store._now()))
+        current = store.get_script(script_id)
+        store.update_script(script_id, topic={**current["topic"], "story": event, "title": event["title"]})
         return event, []
     monkeypatch.setattr(story_pool, "take", take)
     monkeypatch.setattr(story_pool, "selection", lambda *a: {})
     monkeypatch.setattr(workflow.content_guard, "check", lambda *a: None)
     llm.replies = [script_json(300)]
     script = store.create_script("report_digest", {"title": "整期报告", "from_report": str(path),
-                                 "matrix_dedup": {"job": dossier.PRODUCTIONS["ai_media_opensource_digest"],
+                                 "matrix_dedup": {"job": dossier.PRODUCTIONS[production],
                                                   "policy": story_pool.POLICY}},
-                                 production="ai_media_opensource_digest")
+                                 production=production, content_context={
+                                     "type": "explainer", "column_name": "一件东西怎样造",
+                                     "audience": "想理解工序的观众",
+                                     "promise": "理解同一产品怎样形成交付", "notes": "沿产品的工序与状态展开解释"})
     assert workflow.run(script["id"], llm_config=object()) == "DRAFT"
     request = llm.calls[0][1]["content"]
     assert "反馈如何使下一步输入改变" in request and "返回补丁" in request
-    assert "不应进入" not in request
-    assert store.get_version(script["id"], 1)["meta"]["research_dossier"]["selection"] == "selected_sections"
+    whole = cohesive and domain_direction
+    assert (sibling in request) is whole
+    assert ("只在原始第二路线出现的工具与维护步骤" in request) is whole
+    assert "不相关的原文细节" not in request
+    if whole:
+        assert report in request
+        assert "## 选题\n旧机器继续使用怎样选择" in request
+        assert "本期只围绕已选主事件写稿" not in request
+        assert store.get_script(script["id"])["topic"]["story"]["event_key"] == "one"
+        assert store.get_version(script["id"], 1)["meta"]["story"]["event_key"] == "one"
+    assert len(selection_inputs) == 1 and report in selection_inputs[0]
+    assert ("沿产品的工序与状态展开解释" in selection_inputs[0]) is domain_direction
+    assert ("本栏目选材方向" in selection_inputs[0]) is domain_direction
+    assert "本栏目选材方向" not in request
+    assert len(llm.calls) == 1  # same author call; organizer is the existing mocked call
+    meta = store.get_version(script["id"], 1)["meta"]["research_dossier"]
+    assert meta["selection"] == ("column_explanation" if whole else "selected_sections")
+    if whole:
+        assert meta["report_chars"] == len(report)
 
 
 def test_source_references_preserve_nested_process_and_ignore_other_candidate():
@@ -133,7 +175,7 @@ def test_ai_item_keeps_nested_example_in_report_of(video_env):
               "topic": {"title": "主项目", "from_item": "one"}}
     selected = workflow.report_of(script)
     assert "嵌套的输入与输出" in selected and "不应进入" not in selected
-    script["production"] = "science_daily"
+    script["production"] = "legacy_sample"
     assert "嵌套的输入与输出" not in workflow.report_of(script)
 
 

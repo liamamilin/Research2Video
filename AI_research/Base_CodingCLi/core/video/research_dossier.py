@@ -1,4 +1,4 @@
-"""The AI pilot's research explanations and original detail reach one author.
+"""Productized columns carry research explanations and original detail to one author.
 
 Selection reuses the existing event's links. It neither summarizes the saved
 documents nor runs another model before writing.
@@ -18,15 +18,52 @@ PRODUCTIONS = {
     "ai_media_arena_digest": "ai_media/weekly_model_arena",
     "ai_media_business_digest": "ai_media/weekly_business_watch",
     "ai_media_deep_dive": "ai_media/weekly_deep_research",
+    "science_daily": "science/science_daily",
+    "science_weekly": "science/science_weekly",
+    "company_daily": "company/company_daily",
+    "company_weekly": "company/company_weekly",
+    "economy_daily": "economy/economy_daily",
+    "economy_weekly": "economy/economy_weekly",
+    "industry_daily": "industry/industry_daily",
+    "industry_weekly": "industry/industry_weekly",
+    "consumer_daily": "consumer/consumer_daily",
+    "consumer_weekly": "consumer/consumer_weekly",
+    "history_daily": "history/history_daily",
+    "history_weekly": "history/history_weekly",
+    "geography_daily": "geography/geography_daily",
+    "geography_weekly": "geography/geography_weekly",
+    "culture_daily": "culture/culture_daily",
+    "culture_weekly": "culture/culture_weekly",
 }
 
 
 def enabled(script: dict) -> bool:
-    """Keep the first release on the five existing production bindings."""
+    """Enable joint writing only for the columns migrated so far."""
     return script.get("production") in PRODUCTIONS
 
 
-def select_report(report: str, story: dict, pool: dict) -> tuple[str, str]:
+def selection_brief(report: str, script: dict) -> str:
+    """Give the existing domain-story organizer the column's viewing purpose.
+
+    The writer still receives the original report. Existing AI requests retain
+    their selection input; the domain migration reuses this same organizer call.
+    """
+    job = PRODUCTIONS.get(script.get("production"), "")
+    context = script.get("content_context") or {}
+    if not job or job.startswith(("ai_media/", "monitoring/")) or not context.get("notes"):
+        return report
+    lines = ["## 本栏目选材方向"]
+    for key, label in (("column_name", "栏目"), ("audience", "观众"),
+                       ("promise", "观看收获"), ("notes", "创作方向")):
+        if context.get(key):
+            lines.append(f"{label}：{context[key]}")
+    lines += ["优先排列底稿已经展开、能实现本栏目观看收获的具体问题。"
+              "原始材料中的其他事件作为补充候选，不因标题醒目替换底稿的主例子。",
+              "", "## 已完成研究底稿", report]
+    return "\n".join(lines)
+
+
+def select_report(report: str, story: dict, pool: dict, script: dict | None = None) -> tuple[str, str]:
     """Keep whole relevant research sections, including their nested examples.
 
     A report without an identifiable section remains available as research
@@ -34,6 +71,15 @@ def select_report(report: str, story: dict, pool: dict) -> tuple[str, str]:
     """
     if not story:
         return report, "report"
+    # A domain explainer can compare several routes under one explicit main
+    # question. Those numbered sections are parts of the explanation, not
+    # independent news candidates: keep the already loaded dossier together.
+    job = PRODUCTIONS.get((script or {}).get("production"), "")
+    context = (script or {}).get("content_context") or {}
+    if (job and not job.startswith(("ai_media/", "monitoring/"))
+            and context.get("type") == "explainer"
+            and re.search(r"(?m)^##\s+本期主问题[：:]", heading_text(report))):
+        return report, "column_explanation"
     selected = set(story.get("primary", []) + story.get("background", []))
     links = {normalize_url(u) for p in pool.get("packets", []) if p["id"] in selected for u in p["links"]}
     links.update(normalize_url(u) for u in story.get("primary_sources", []))

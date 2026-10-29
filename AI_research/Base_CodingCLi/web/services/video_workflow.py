@@ -302,17 +302,26 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                         selected = content_guard.sources(report)
                         original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original)
                                                                  if content_guard.sources(p["text"]) & selected)
-                    pool = story_pool.load_or_create(key, report, original, peers, config)
+                    selection_report = research_dossier.selection_brief(report, script)
+                    pool = story_pool.load_or_create(key, selection_report, original, peers, config)
                     story, _ = story_pool.take(script_id, pool, peers)
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}
                 filtered_material = story_pool.material_for(pool, story)
                 if joint_input:
-                    dossier_report, dossier_selection = research_dossier.select_report(dossier_report, story, pool)
+                    dossier_report, dossier_selection = research_dossier.select_report(dossier_report, story, pool, script)
+                    if dossier_selection == "column_explanation":
+                        selected = content_guard.sources(dossier_report)
+                        related = [packet["text"] for packet in pool["packets"]
+                                   if content_guard.sources(packet["text"]) & selected]
+                        filtered_material = "\n\n---\n\n".join(related) or filtered_material
                 report = story_pool.brief(story) + "\n\n" + filtered_material
                 dedup_meta = story_pool.selection(script_id)
-                # Both legacy and adaptation writers see the same explicit event.
-                column = replace(column, script_style=column.script_style + "\n" + story_pool.brief(story))
+                # News keeps the selected event as its writing scope. A coherent
+                # domain explainer follows its completed dossier main question;
+                # the stored event and coverage reservation remain unchanged.
+                if dossier_selection != "column_explanation":
+                    column = replace(column, script_style=column.script_style + "\n" + story_pool.brief(story))
             else:
                 report, filtered_material, dedup_meta = content_guard.prepare(
                     script, report, original, settings.paths.config_dir, settings.paths.jobs_dir)
@@ -370,10 +379,15 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             parts = [part for part in material.split("\n\n---\n\n")
                      if urls & {normalize_url(url) for url in extract_urls(part)}]
             material = "\n\n---\n\n".join(parts)
+        writing_topic = topic
+        if dossier_selection == "column_explanation":
+            question = re.search(r"(?m)^##\s+本期主问题[：:]\s*(.+)$", dossier_report)
+            writing_topic = {key: value for key, value in topic.items() if key != "story"}
+            writing_topic["title"] = question.group(1).strip()
         written = writer.write(
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
-            topic=topic,
+            topic=writing_topic,
             column_style=column.script_style + (
                 "\n本矩阵近期已经讲过以下选题，请从剩余素材选择新选题，标题、开场和正文都不要复述："
                 + "；".join(p["title"] for p in dedup_meta.get("peers", [])) if dedup_meta.get("peers") else ""),

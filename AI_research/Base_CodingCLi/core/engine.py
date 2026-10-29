@@ -209,7 +209,7 @@ class ResearchEngine:
                         objective=objective,
                         fallback_queries=job.get("keywords", []),
                     )
-                # The AI pilot deepens the researcher's chosen candidates by
+                # Migrated columns deepen the researcher's chosen candidates by
                 # reading existing links, before the ordinary report is saved.
                 from .ai_dossier_sources import enrich
                 from core.video.research_dossier import PRODUCTIONS

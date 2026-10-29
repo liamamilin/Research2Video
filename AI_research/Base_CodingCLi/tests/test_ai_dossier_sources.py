@@ -78,10 +78,11 @@ def test_cancellation_is_not_reported_as_a_missing_page():
         enrich({"_file": "ai_media/weekly_deep_research"}, URL, URL, cancel_token=cancel)
 
 
-def test_process_sections_and_document_end_survive_large_page_selection():
+@pytest.mark.parametrize("detail_title", ["Usage examples", "Experimental observations", "实验机制"])
+def test_process_sections_and_document_end_survive_large_page_selection(detail_title):
     rows = [SearchResult("Introduction", URL, excerpts=["intro"])]
     rows += [SearchResult(f"Background {i}", URL, excerpts=["x" * 5500]) for i in range(8)]
-    rows += [SearchResult("Usage examples", URL, excerpts=["complete input and output"]),
+    rows += [SearchResult(detail_title, URL, excerpts=["complete input and output"]),
              SearchResult("Conclusion", URL, excerpts=["final result"])]
     kept = detail_sections(rows)
     assert rows[0] in kept and rows[-2] in kept and rows[-1] in kept
@@ -137,13 +138,22 @@ def test_body_remains_available_when_expansion_deadline_has_elapsed():
 
 
 @pytest.mark.parametrize("expansion_fails", [False, True])
-def test_native_engine_saves_body_snapshot_and_initial_report(tmp_path, monkeypatch, expansion_fails):
+@pytest.mark.parametrize("job_name", ["ai_media/daily_opensource_radar", "science/science_daily", "science/science_weekly",
+                                      "company/company_daily", "company/company_weekly",
+                                      "economy/economy_daily", "economy/economy_weekly",
+                                      "industry/industry_daily", "industry/industry_weekly",
+                                      "consumer/consumer_daily", "consumer/consumer_weekly",
+                                      "history/history_daily", "history/history_weekly",
+                                      "geography/geography_daily", "geography/geography_weekly",
+                                      "culture/culture_daily", "culture/culture_weekly"])
+def test_native_engine_saves_body_snapshot_and_initial_report(tmp_path, monkeypatch, expansion_fails, job_name):
     import json
     from core import ai_dossier_sources, report_meta
     from core.engine import ResearchEngine
     monkeypatch.chdir(tmp_path)
-    (tmp_path / "jobs/ai_media").mkdir(parents=True)
-    (tmp_path / "jobs/ai_media/daily_opensource_radar.yaml").write_text(
+    job_path = tmp_path / "jobs" / (job_name + ".yaml")
+    job_path.parent.mkdir(parents=True)
+    job_path.write_text(
         "name: 研究底稿\nenabled: true\nsearch: false\nsources: [rss:example]\n"
         "prompt: 研究任务\noutput: output/{date}_dossier.md\n")
     (tmp_path / "config").mkdir()
@@ -171,7 +181,7 @@ def test_native_engine_saves_body_snapshot_and_initial_report(tmp_path, monkeypa
     engine = ResearchEngine(str(tmp_path / "config"), str(tmp_path / "jobs"), workspace_dir=str(tmp_path))
     monkeypatch.setattr(engine, "_fetch_sources_strict", lambda job: (
         "原有来源 " + URL, ([SearchResult("项目", URL)], {"rss:example": 1})))
-    result = engine.run_job("ai_media/daily_opensource_radar")
+    result = engine.run_job(job_name)
     assert result
     report = (tmp_path / result).read_text()
     assert ("初始研究底稿" if expansion_fails else "深化研究底稿") in report

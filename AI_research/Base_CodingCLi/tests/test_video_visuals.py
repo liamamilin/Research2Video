@@ -271,3 +271,34 @@ def test_api_exposes_automatic_selection_and_explicit_manual_opt_out(enabled, cl
     assert saved.status_code == 200
     next_render = video_render.create(row)
     assert next_render["visuals"]["state"] == "manual"
+
+
+@pytest.mark.parametrize("production", ["history_weekly", "science_daily", "flash_daily", "legacy_column"])
+def test_migrated_domain_picture_goal_receives_frozen_column_presentation(video_env, production):
+    context = {"presentation": {"preferred_visuals": ["档案图片", "关系图"],
+                                "strategy": "让书页细节、当前人物与回信改变的处境一起可读。"}}
+    row = store.create_script("deep_dive", {"title": "一封回信改变了什么"}, production=production,
+                              content_context=context)
+    sections = [{"title": "回信", "paragraphs": [
+        {"text": "她可以用回信中的论证推进自己学习与写作的空间。", "citations": [URL]}]}]
+    store.add_version(row["id"], title="一封回信改变了什么", sections=sections, length_check={}, edit_type="EDITED")
+    row = store.get_script(row["id"])
+    version = store.get_version(row["id"], 1)
+    request = {"chapters": [{"title": "回信", "paragraphs": [sections[0]["paragraphs"][0]["text"]]}]}
+    original = copy.deepcopy(request)
+    without_direction = {**row, "content_context": {}}
+    baseline = visuals.intent(without_direction, version, request, {"enabled": True})
+    audit = visuals.intent(row, version, request, {"enabled": True})
+    if production in {"history_weekly", "science_daily"}:
+        goal = audit["needs"][0]["visual_goal"]
+        assert context["presentation"]["strategy"] in goal
+        assert all(item in goal for item in context["presentation"]["preferred_visuals"])
+        assert "产品界面" not in goal
+        assert audit["chapter_hash"] == baseline["chapter_hash"]
+        assert audit["policy"] == baseline["policy"]
+        assert [{k: v for k, v in n.items() if k != "visual_goal"} for n in audit["needs"]] == [
+            {k: v for k, v in n.items() if k != "visual_goal"} for n in baseline["needs"]]
+    else:
+        assert audit == baseline
+    assert request == original
+    assert store.get_script(row["id"])["content_context"] == context

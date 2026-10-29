@@ -8,7 +8,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from core.video import screenshots, store
+from core.video import research_dossier, screenshots, store
 
 VERSION = 1
 
@@ -143,6 +143,21 @@ def intent(script: dict, version: dict, request: dict, config: dict | None, repo
     elif (script.get("topic", {}).get("article") or {}).get("kind") == "literary":
         state, reason = "skipped", "文学朗读保留原有画面形式"
     needs = needs_for(version, report_sources) if state == "pending" else []
+    job = research_dossier.PRODUCTIONS.get(script.get("production"), "")
+    if needs and job and not job.startswith(("ai_media/", "monitoring/")):
+        # The same frozen column direction also guides source pictures. A
+        # historical object or a map should not inherit the software UI goal.
+        presentation = (script.get("content_context") or {}).get("presentation") or {}
+        preferred = presentation.get("preferred_visuals") or []
+        strategy = presentation.get("strategy") or ""
+        if preferred or strategy:
+            goal = ["展示当前段落正在讲解的对象、可见细节与对应关系。"]
+            if preferred:
+                goal.append("栏目画面偏好：" + "、".join(preferred) + "。")
+            if strategy:
+                goal.append("栏目画面方向：" + strategy)
+            for need in needs:
+                need["visual_goal"] = "\n".join(goal)
     if state == "pending" and not needs:
         state, reason = "skipped", "没有适合截图且具备可追溯来源的段落"
     return {"version": chosen["version"], "state": state, "reason": reason, "policy": chosen,

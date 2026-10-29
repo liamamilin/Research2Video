@@ -136,7 +136,7 @@ def organize(report: str, source_packets: list[dict], previous: list[dict], llm_
     system = """把给定素材整理成视频选题事件池，只使用输入，不检索、不重新核算。
 把同一主事件的不同报道合成一条；一个主体的不同版本、不同结果、不同政策变化可以分别成题。
 subject 使用具体产品/事项名称，action 从 release/pricing/results/policy/financing/earnings/discovery/event/analysis 选择。
-edition 填材料明确给出的版本/财报期/轮次，event_date 填事件日期，未知留空。报告日期不等于事件日期。
+edition 填材料明确给出的版本/财报期/轮次。event_date 只填材料明确给出的单日事件日期，格式 YYYY-MM-DD，未知留空；时间段、日期范围与历史时期放在 edition 或 summary 中，event_date 留空。报告日期不等于事件日期。
 primary 填核心证据的 S 编号，background 填辅助背景 S 编号。新增参考、热度、下载量或换标题不构成新事件。
 same_as 填已经覆盖该主事件的 H 编号；有实际新进展仍关联旧事件，并在 changes 中写明发生变化的维度及前后值。
 不确定有新进展时不得编造 changes。保持各候选与实际材料一致，优先排列适合讲述的具体事件。

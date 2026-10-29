@@ -1,4 +1,4 @@
-"""Read a few existing AI research links for examples and process detail.
+"""Read existing research links for examples and process detail in migrated columns.
 
 This runs after the ordinary researcher has chosen and organized candidates.
 It reuses public-page adapters and never issues a new search query.
@@ -16,7 +16,7 @@ from core.video.research_dossier import PRODUCTIONS
 MAX_PAGES = 3
 PAGE_SECONDS = 15
 PAGE_CHARS = 24000
-_DETAIL = re.compile(r"example|quick.?start|usage|how.?to|getting.?started|architect|method|result|workflow|示例|用法|过程|方法", re.I)
+_DETAIL = re.compile(r"example|quick.?start|usage|how.?to|getting.?started|architect|method|result|workflow|experiment|observation|mechanism|示例|用法|过程|方法|实验|观测|机制", re.I)
 
 
 def selected_urls(report: str, supplied: str) -> list[str]:

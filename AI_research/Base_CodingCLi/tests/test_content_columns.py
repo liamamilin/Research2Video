@@ -213,3 +213,32 @@ def test_invalid_column_configuration_is_rejected(column_env, patch):
     c = content_columns.load_all(config)["model_review"]
     with pytest.raises(ValueError):
         content_columns.save(config, c.key, {**c.data(), **patch})
+
+@pytest.mark.parametrize("explicit", ["", "作者指定的节目观众"])
+@pytest.mark.parametrize("job", ["science/science_daily", "ai_media/daily_opensource_radar", ""])
+def test_automatic_creation_uses_migrated_audience_and_preserves_existing_choices(column_env, monkeypatch,
+                                                                                 explicit, job):
+    from core.video import autopilot_store as ap, columns, research_dossier
+    from web.services import video_autopilot as pilot, video_workflow
+
+    if job:
+        monkeypatch.setitem(research_dossier.PRODUCTIONS, "flash", job)
+    else:
+        monkeypatch.delitem(research_dossier.PRODUCTIONS, "flash", raising=False)
+    config = str(column_env / "config")
+    recipe_audience = columns.get(config, "flash").audience
+    c = content_columns.load_all(config)["model_review"]
+    content_columns.save(config, c.key, {**c.data(), "audience": "要理解批量工作取舍的使用者",
+                                        "notes": "围绕同一批量任务解释体验差异。"})
+    spawned = []
+    monkeypatch.setattr(video_workflow, "spawn", lambda sid, by: spawned.append(sid))
+    fields = {"目标受众": explicit} if explicit else {}
+    run = ap.create_run({"refresh": False}, [{"column_key": "flash", "production": "flash",
+                                             "topic": {"title": "一批任务怎样选择", "fields": fields}}])
+    item = ap.get_run(run["id"])["items"][0]
+    assert pilot.advance(item, can_start_script=True, can_start_render=False)["script"]
+    script = store.get_script(spawned[0])
+    expected = explicit or ("要理解批量工作取舍的使用者" if job.startswith("science/") else recipe_audience)
+    assert script["topic"]["fields"]["目标受众"] == expected
+    assert script["content_context"]["audience"] == "要理解批量工作取舍的使用者"
+    assert production.get(config, str(column_env / "jobs"), "flash").audience == recipe_audience

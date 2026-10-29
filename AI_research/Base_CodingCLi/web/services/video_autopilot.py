@@ -29,6 +29,7 @@ from core.fileio import file_lock
 from core.video import auto as video_auto
 from core.video import autopilot_store as ap
 from core.video import columns as video_columns
+from core.video import content_columns, research_dossier
 from core.video import excerpt
 from core.video import store, story_pool
 from core.video import topic_store
@@ -399,10 +400,15 @@ def _reselect(item: dict, script: dict, gate: dict) -> None:
 
 def _prepare(item: dict) -> dict:
     topic = dict(item["topic"])
-    column = video_columns.get(get_settings().paths.config_dir, item["column_key"])
+    config_dir = get_settings().paths.config_dir
+    column = video_columns.get(config_dir, item["column_key"])
+    job = research_dossier.PRODUCTIONS.get(item.get("production"), "")
+    domain = job and not job.startswith(("ai_media/", "monitoring/"))
+    business = content_columns.for_production(config_dir, item["production"]) if domain else None
+    audience = (business.audience if business else "") or column.audience
     fields = topic.setdefault("fields", {})
-    if column.audience and not (fields.get("目标受众") or "").strip():
-        fields["目标受众"] = column.audience
+    if audience and not (fields.get("目标受众") or "").strip():
+        fields["目标受众"] = audience
     return topic
 
 

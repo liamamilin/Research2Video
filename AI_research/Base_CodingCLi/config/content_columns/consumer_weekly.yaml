@@ -1,17 +1,20 @@
 schema_version: 1
-name: 消费与生活专题解读
+name: 一个选择怎么做
 matrix: consumer
 type: explainer
-audience: 关注产品选择和日常生活的观众
-promise: 串联消费与生活的重要变化，理解原因与关系
+audience: 想理解产品体验差别、为自己的日常需求做选择的普通观众
+promise: 围绕同一个实际需求，看懂不同方案的体验差别与取舍
 production_ids:
 - consumer_weekly
 render_inheritance: source_compatible
-render: {}
+render:
+  packaging:
+    label: 一个选择怎么做
 presentation:
   preferred_visuals:
   - 实物图片
   - 对比卡
   - 使用场景
+  strategy: 保持同一使用场景、方案称呼与比较维度，当前差异的两侧同时可读。图片帮助认识对象，流程随当前操作推进，数字和图表展示该项投入与体验的关系；局部聚焦保留对应条件和后续结果。讲当前选择时沿使用者下一步展开，在可读整体里连起需求、取舍和继续使用的结果。
 status: configured
-notes: ''
+notes: 围绕一个持续的使用需求，让各方案面对同一任务和使用周期，保留各自操作、结果、时间、成本与维护过程。每一项比较解释它怎样改变用户的下一步，深度用于有意义的体验差别和长期取舍。型号、地区、价格与兼容条件在影响当前选择时讲清，再回到同一使用过程。结尾跟随开场需求完成选择后的新使用状态，让观众知道不同情形看重哪项取舍，作者按材料组织结构与节奏。
