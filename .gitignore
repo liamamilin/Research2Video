@@ -3,6 +3,14 @@
 !/.gitignore
 !/AGENTS.md
 !/README.md
+!/docs/
+/docs/*
+!/docs/images/
+/docs/images/*
+!/docs/images/matrix-workspace.jpg
+!/docs/images/ai-columns.jpg
+!/docs/images/assistant-capabilities.jpg
+!/docs/images/video-example.png
 !/autovideo/
 !/AI_research/
 /AI_research/*
