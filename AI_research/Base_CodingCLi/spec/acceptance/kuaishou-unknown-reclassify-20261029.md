@@ -29,5 +29,7 @@
 
 这 4 条需要用户确认「平台确实没有」后，才能改为可重试，系统不会自行判定。
 
+用户在对话中确认这 4 条在快手上都没有对应作品后，通过现有的「确认未发布」流程（actor `user-confirmed-in-chat-20261029`）记录，状态改为 FAILED（人工确认未发布，可手动重试），原状态写入 job_events；操作前备份 `queue.before-confirm-absent.db`。没有重新投稿。最终快手上传：PUBLISHED 78、FAILED 16、UNKNOWN 0。
+
 ## 验证
 新增 1 项测试；相关后端测试 176 项通过。快手上传现为 PUBLISHED 78、FAILED 12、UNKNOWN 4。
