@@ -25,6 +25,7 @@ from core.video import store as video_store
 from core.video.publication_identity import identify
 from scripts.douyin_worker import private_json
 from web.services import douyin, platform_manager, video_render
+from web.services.publish_cover import publish_cover
 from web.settings import get_settings
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -315,8 +316,7 @@ def enqueue(platform: str, render_id: str, payload: dict) -> dict:
         video = video_render.safe_file(render,'video.mp4')
         if video is None:
             raise AdapterError('成片文件不可用。')
-        cover = next((p for name in ('cover.png','cover.jpg') if (p:=video_render.safe_file(render,name))),None)
-        row = store(platform).create('UPLOAD',owner,{**clean,'video_path':str(video.resolve()),'cover':str(cover.resolve()) if cover else ''},render=render)
+        row = store(platform).create('UPLOAD',owner,{**clean,'video_path':str(video.resolve()),'cover':publish_cover(render,clean['title'])},render=render)
         ensure_comment(store(platform), row)
     tick(platform)
     return public_job(platform,store(platform).get(row['id']))

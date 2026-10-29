@@ -154,12 +154,21 @@ def test_navigation_failure_is_safe_to_retry_and_never_exposes_raw_page_error():
     browser.close.assert_awaited_once()
 
 
-@pytest.mark.parametrize('cover_error,failed', [(AdapterError('封面设置失败'), False), (None, True)])
-def test_failure_before_publication_does_not_click_publish_and_always_closes_resources(cover_error, failed):
-    app, module, pw, _, _, publish, context, browser = workflow(failed=failed, cover_error=cover_error)
+def test_upload_failure_before_publication_does_not_click_publish_and_always_closes_resources():
+    app, module, pw, _, _, publish, context, browser = workflow(failed=True)
     with pytest.raises(AdapterError):
         asyncio.run(_upload_video(app, module, pw))
     publish.click.assert_not_awaited()
+    context.close.assert_awaited_once()
+    browser.close.assert_awaited_once()
+
+
+def test_cover_dialog_failure_is_closed_and_the_upload_continues_with_the_platform_cover():
+    app, module, pw, page, _, publish, context, browser = workflow(cover_error=TimeoutError('弹窗没出现'))
+    asyncio.run(_upload_video(app, module, pw))
+    page.keyboard.press.assert_any_await('Escape')
+    app.apply_collection.assert_awaited_once()
+    publish.click.assert_awaited_once()
     context.close.assert_awaited_once()
     browser.close.assert_awaited_once()
 

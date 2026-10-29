@@ -258,6 +258,16 @@ async def _select_video_file(page: Any, path: str) -> None:
     await (await captured.value).set_files(path)
 
 
+async def _set_cover(app: Any, page: Any) -> None:
+    """The cover is an extra: if the dialog misbehaves, close it and keep the platform's own frame."""
+    try:
+        await app.set_thumbnail(page)
+    except Exception:
+        with suppress(Exception):
+            await page.keyboard.press('Escape')
+            await page.wait_for_timeout(1000)
+
+
 async def _upload_video(app: Any, module: ModuleType, playwright: Any) -> None:
     """Use the reviewed helper methods while keeping one final publish click under our control."""
     await app.validate_upload_args()
@@ -283,7 +293,7 @@ async def _upload_video(app: Any, module: ModuleType, playwright: Any) -> None:
             await _wait_for_video_upload(page, module.KUAISHOU_UPLOAD_TIMEOUT_SECONDS)
             # The first-run guide can mount after the asset finishes uploading.
             await app.close_guide_overlay(page)
-            await app.set_thumbnail(page)
+            await _set_cover(app, page)
             await app.apply_collection(page)
         except UploadPreparationError:
             raise

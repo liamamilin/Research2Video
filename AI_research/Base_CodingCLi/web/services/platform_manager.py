@@ -12,6 +12,7 @@ from pathlib import Path
 from core.platform_store import PlatformStore
 from core.video import content_guard, credibility, store as video_store
 from web.services import bilibili, video_render
+from web.services.publish_cover import publish_cover
 from web.settings import get_settings
 
 Error = bilibili.BilibiliError
@@ -226,9 +227,8 @@ def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
         raise Error("平台发布文案仍需人工整理，请查看发布包。")
     if len(description) > 2000 or not 1 <= int(payload.get("tid") or 0) <= 65535:
         raise Error("简介最多 2000 字，并且需要选择投稿分区。")
-    cover = next((p for name in ("cover.png", "cover.jpg") if (p := video_render.safe_file(render, name))), None)
     clean = {"title": title, "tags": tags, "description": description, "tid": int(payload["tid"]),
-             "cover": str(cover.resolve()) if cover else "", "automatic": automatic,
+             "cover": publish_cover(render, title), "automatic": automatic,
              "first_comment": clean_first_comment(payload.get("first_comment", {}))}
     if automatic:  # tick already owns the same worker lock
         return store().enqueue(owner, render, clean)
