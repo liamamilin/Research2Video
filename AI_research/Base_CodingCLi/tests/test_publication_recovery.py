@@ -62,8 +62,17 @@ def test_assistant_resume_reuses_original_task_and_saved_fields(client, social_e
     if accepted:
         assert db.get(job['id'])['status'] == 'SUBMITTED'
         assert db.list(kind='RECONCILE')[0]['parent_id'] == job['id']
+        assert not value['submitted']
+        assert value['receipts'][0]['status'] == 'SUBMITTED'
+        assert value['receipts'][0]['action'] == 'reconcile'
+        assert value['receipts'][0]['check']['status'] == 'QUEUED'
+        assert '没有重新上传' in value['message']
     else:
         assert db.get(job['id'])['status'] == 'QUEUED' and not db.list(kind='RECONCILE')
+        assert value['submitted'] and value['receipts'][0]['action'] == 'retry'
+    assert 'task=' + job['id'] in value['href']
+    assert value['references'][0]['href'] == value['href']
+    assert 'version=1' in value['href']
 
 
 def test_resume_does_not_replay_unknown_failure_or_published_task(client, social_env, monkeypatch):

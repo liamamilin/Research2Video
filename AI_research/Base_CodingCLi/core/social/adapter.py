@@ -10,6 +10,10 @@ class AdapterError(RuntimeError):
     """Public-safe provider failure; never include credentials or raw provider responses."""
 
 
+class UploadPreparationError(AdapterError):
+    """The adapter stopped in upload preparation, before any publish action."""
+
+
 def accepted_without_work_id(platform: str, receipt: dict) -> bool:
     """Kuaishou's verified acceptance envelope may omit its public work ID."""
     return (platform == 'kuaishou' and receipt.get('accepted') is True
@@ -53,6 +57,7 @@ def upload_failure_details(error: Exception) -> dict[str, str]:
         'validate_base_args': '检查上传配置',
         '_focus_desc_editor': '定位作品描述输入框',
         '_select_video_file': '选择视频上传入口',
+        '_wait_for_video_upload': '等待视频素材上传',
         '_publish_once': '定位并单次点击发布',
         'fill_meta': '填写标题、简介和话题',
         'set_thumbnail': '设置视频封面',

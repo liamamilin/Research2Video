@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from core.social.adapter import AdapterError
+from core.social.adapter import AdapterError, UploadPreparationError
 from core.social.registry import PLATFORMS
 from core.social.store import SocialStore
 from core.video import store as video_store
@@ -199,6 +199,62 @@ def test_retry_archives_the_confirmed_attempt_before_resetting_guards(social_env
         events = conn.execute('select * from job_events where job_id=? order by id', (job['id'],)).fetchall()
     assert [event['kind'] for event in events] == ['confirmed_absent', 'retry_requested']
     assert json.loads(events[1]['detail']) == confirmed
+
+
+def test_legacy_input_selection_failure_can_be_repaired_without_resubmitting(tmp_path):
+    db = SocialStore(str(tmp_path), 'kuaishou')
+    job = db.create('UPLOAD', OWNER['uid'], PAYLOAD, render={'id': 'r', 'script_id': 's', 'version': 1})
+    result = {'invocation_started': True, 'failure': {'stage': '选择视频上传入口', 'error_type': 'AdapterError'},
+              'verification': {'attempts': 8, 'exhausted': True}}
+    db.update(job['id'], status='UNKNOWN', result=result, error='未找到唯一的快手视频上传入口')
+    original = db.get(job['id'])
+    assert not db.repair_upload_preparation(job['id'], 'other-account', original['updated_at'])
+    assert not db.repair_upload_preparation(job['id'], OWNER['uid'], original['updated_at'] - 1)
+    assert db.repair_upload_preparation(job['id'], OWNER['uid'], original['updated_at'])
+    saved = db.get(job['id'])
+    assert saved['status'] == 'FAILED' and saved['result']['confirmed_not_submitted']
+    assert saved['payload'] == original['payload'] and saved['error'] == original['error']
+    assert saved['result']['verification'] == result['verification']
+    assert db.claim() is None
+    with db.connect() as conn:
+        event = conn.execute('SELECT * FROM job_events WHERE job_id=?', (job['id'],)).fetchone()
+    assert event['kind'] == 'preparation_failure_repaired' and json.loads(event['detail']) == original
+
+
+@pytest.mark.parametrize('extra', [{'submission_started': True}, {'submission_response': {'http_status': 200}},
+                                  {'accepted': True}, {'submission_started_at': 123}, {'url': 'https://www.kuaishou.com/short-video/original'}])
+def test_preparation_repair_never_overrides_evidence_of_submission(tmp_path, extra):
+    db = SocialStore(str(tmp_path), 'kuaishou')
+    job = db.create('UPLOAD', OWNER['uid'], PAYLOAD, render={'id': 'r', 'script_id': 's', 'version': 1})
+    db.update(job['id'], status='UNKNOWN', result={'invocation_started': True, **extra,
+        'failure': {'stage': '选择视频上传入口', 'error_type': 'AdapterError'}})
+    original = db.get(job['id'])
+    assert not db.repair_upload_preparation(job['id'], OWNER['uid'], original['updated_at'])
+    assert db.get(job['id']) == original
+
+
+def test_exhausted_lookups_or_failures_after_publishing_do_not_prove_non_submission(tmp_path):
+    db = SocialStore(str(tmp_path), 'kuaishou')
+    job = db.create('UPLOAD', OWNER['uid'], PAYLOAD, render={'id': 'r', 'script_id': 's', 'version': 1})
+    db.update(job['id'], status='UNKNOWN', result={'invocation_started': True,
+        'failure': {'stage': '解析发布回执', 'error_type': 'AdapterError'},
+        'verification': {'state': 'missing', 'exhausted': True, 'attempts': 20}})
+    original = db.get(job['id'])
+    assert not db.repair_upload_preparation(job['id'], OWNER['uid'], original['updated_at'])
+    assert db.get(job['id']) == original
+
+
+def test_legacy_upload_timeout_before_publish_is_repairable_but_preserves_its_attempt(tmp_path):
+    db = SocialStore(str(tmp_path), 'kuaishou')
+    job = db.create('UPLOAD', OWNER['uid'], PAYLOAD, render={'id': 'r', 'script_id': 's', 'version': 1})
+    db.update(job['id'], status='UNKNOWN', result={'invocation_started': True,
+        'failure': {'stage': '平台上传流程', 'error_type': 'AdapterError'}},
+        error='快手视频素材上传超时，未点击发布。（阶段：平台上传流程；异常：AdapterError）')
+    original = db.get(job['id'])
+    assert db.repair_upload_preparation(job['id'], OWNER['uid'], original['updated_at'])
+    assert db.get(job['id'])['result']['confirmed_not_submitted']
+    assert db.get(job['id'])['payload'] == original['payload']
+    assert db.claim() is None
 
 
 @pytest.mark.parametrize('status,work_id,result', [
@@ -397,7 +453,7 @@ def test_worker_login_rejects_cookie_only_identity_without_saving_storage(tmp_pa
 
 
 def worker_upload(tmp_path, monkeypatch, *, outcome="accepted", fail_identity=False, mutation=True, http_status=200, ack_error=False,
-                  platform="kuaishou", response_body=None, final_endpoints=None):
+                  platform="kuaishou", response_body=None, final_endpoints=None, preparation_failure=False):
     """Exercise the production guard, with fake provider/page/network endpoints."""
     db = SocialStore(str(tmp_path), platform)
     target_id = "64477a32000000000800db6b" if platform == 'xiaohongshu' else WORK
@@ -487,6 +543,8 @@ def worker_upload(tmp_path, monkeypatch, *, outcome="accepted", fail_identity=Fa
         async def upload(self, pw, payload, storage):
             browser = await pw.chromium.launch(executable_path="ignored", headless=True)
             context = await browser.new_context(storage_state="must-be-overridden", permissions=["camera"])
+            if preparation_failure:
+                raise UploadPreparationError('上传页面应用加载失败')
             if outcome == "window_closed":
                 return
             for index in range(2):
@@ -526,6 +584,15 @@ def test_worker_does_not_submit_under_different_actual_account(tmp_path, monkeyp
     _, row, events = worker_upload(tmp_path, monkeypatch, fail_identity=True)
     assert events.count("fetch") == 0
     assert row["status"] == "UNKNOWN" and not row["result"].get("confirmed_not_submitted")
+
+
+def test_known_preparation_failure_is_retryable_without_polling_for_a_nonexistent_work(tmp_path, monkeypatch):
+    db, row, events = worker_upload(tmp_path, monkeypatch, preparation_failure=True)
+    assert row['status'] == 'FAILED' and row['phase'] == '上传准备失败，尚未投稿'
+    assert row['result']['confirmed_not_submitted'] and row['result']['preparation_failed']
+    assert not row['result'].get('submission_started') and 'fetch' not in events
+    assert db.claim() is None  # A preparation failure does not silently retry.
+    assert manager.public_job('kuaishou', row, checking=set(), comments={})['can_retry']
 
 
 @pytest.mark.parametrize('paths', [('isolation/submit', 'submit'), ('submit', 'isolation/submit'),

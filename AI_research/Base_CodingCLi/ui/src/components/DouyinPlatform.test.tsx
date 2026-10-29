@@ -125,6 +125,15 @@ it("never offers retry for an uncertain comment and only offers read-only verifi
   expect(douyinAction).toHaveBeenCalledTimes(1);
 });
 
+it("offers read-only verification for a receipt that has not been read back", async () => {
+  connect(); data.uploads = [{ ...job, status: "PUBLISHED", work_id: "7559876543210123456", first_comment: { id: "comment1", status: "SENT", phase: "已取得回执", error: "", text: "评论", comment_id: "known-comment", read_back: false, can_retry: false, created_at: 1, updated_at: 1 } }];
+  show();
+  expect(await screen.findByText("作者评论 · 已取得评论回执，等待回读")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "重新检查并发送评论" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "只读核对评论" }));
+  await waitFor(() => expect(douyinAction).toHaveBeenCalledWith("/uploads/job1/first-comment/check"));
+});
+
 it("saves an account template explicitly without enqueueing old works", async () => {
   connect(); show();
   fireEvent.click(await screen.findByText("常用作者评论设置"));

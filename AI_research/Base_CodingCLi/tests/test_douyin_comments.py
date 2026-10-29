@@ -38,6 +38,34 @@ def test_comment_content_preserves_links_and_paragraphs():
     assert comment_receipt({'status_code': 42}, TEXT)['confirmed_not_submitted'] is True
 
 
+@pytest.mark.parametrize('option,enabled', [({'text': TEXT}, True), ({'text': TEXT, 'enabled': False}, False)])
+def test_comment_text_without_flag_is_enabled_but_explicit_disable_is_kept(option, enabled):
+    assert clean_first_comment(option) == {'enabled': enabled, 'text': TEXT, 'pin': False}
+
+
+@pytest.mark.parametrize('options,enabled', [(None, True), ({'text': TEXT}, True),
+                                           ({'text': TEXT, 'enabled': False}, False)])
+def test_upload_api_preserves_omitted_comment_fields_and_inherits_template(client, douyin_env, options, enabled):
+    manager.save_first_comment_template(OPTION)
+    row = render()
+    _login(client)
+    payload = {'render_id': row['id'], **PAYLOAD}
+    if options is not None:
+        payload['first_comment'] = options
+    response = client.post('/api/platforms/douyin/uploads', json=payload, headers=_csrf(client))
+    assert response.status_code == 202, response.text
+    task = manager.store().get(response.json()['id'])
+    assert task['payload']['first_comment'] == {'enabled': enabled, 'text': TEXT, 'pin': False}
+    assert bool(manager.store().comments(OWNER['uid']).get(task['id'])) is enabled
+
+
+def test_upload_api_keeps_other_defaults_when_comment_is_omitted(client, douyin_env):
+    _login(client)
+    response = client.post('/api/platforms/douyin/uploads', json={'render_id': render()['id'], 'title': '标题'}, headers=_csrf(client))
+    assert response.status_code == 202, response.text
+    assert response.json()['payload']['description'] == '' and response.json()['payload']['tags'] == []
+
+
 @pytest.mark.parametrize('data', [None, {}, {'status_code': False}, {'status_code': 0}, response(comment_id=1234567890123456789), response(text='different'), response(is_author=False), response(level=2), response(level=True)])
 def test_ambiguous_receipt_never_allows_resending(data):
     with pytest.raises(DouyinError):
@@ -103,7 +131,7 @@ def test_recovery_never_requeues_an_uncertain_comment(tmp_path, result, status, 
     assert db.claim() is None
 
 
-@pytest.mark.parametrize('mode,expected,posts', [('ok', 'SENT', 1), ('timeout', 'UNKNOWN', 1), ('bad_receipt', 'UNKNOWN', 1), ('rejected', 'FAILED', 1), ('wrong_owner', 'FAILED', 0), ('no_token', 'FAILED', 0), ('private', 'FAILED', 0)])
+@pytest.mark.parametrize('mode,expected,posts', [('ok', 'SENT', 1), ('existing', 'SENT', 0), ('timeout', 'UNKNOWN', 1), ('bad_receipt', 'UNKNOWN', 1), ('rejected', 'FAILED', 1), ('wrong_owner', 'FAILED', 0), ('no_token', 'FAILED', 0), ('private', 'FAILED', 0)])
 def test_worker_single_post_durable_receipt_and_preflight(tmp_path, monkeypatch, mode, expected, posts):
     db = DouyinStore(str(tmp_path)); parent = db.create('UPLOAD', '123', render={'id': 'r', 'script_id': 's', 'version': 1})
     db.update(parent['id'], status='SUBMITTED' if mode == 'private' else 'PUBLISHED', work_id=WORK)
@@ -127,6 +155,9 @@ def test_worker_single_post_durable_receipt_and_preflight(tmp_path, monkeypatch,
             if mode == 'timeout': raise TimeoutError()
             return Response({'status_code': 42} if mode == 'rejected' else {} if mode == 'bad_receipt' else response())
         async def get(self, url, **kwargs):
+            if not calls['posts']:
+                return Response({'status_code': 0, 'comment_info_list':
+                    [response(text='另一条评论')['comment_info'], response()['comment_info']] if mode == 'existing' else []})
             # A receipt is persisted before the optional read-back (or a crash).
             assert db.get(child['id'])['status'] == 'SENT'
             return Response({'status_code': 0, 'comment_info_list': [response()['comment_info']]})
@@ -146,7 +177,8 @@ def test_worker_single_post_durable_receipt_and_preflight(tmp_path, monkeypatch,
         # Simulate re-entry after restart; guard survives process death.
         asyncio.run(worker.send_first_comment(db, db.get(child['id']), None, tmp_path / 'storage.json'))
         assert calls['posts'] == posts
-    if mode == 'ok': assert db.get(child['id'])['result']['read_back'] is True
+    if mode in ('ok', 'existing'): assert db.get(child['id'])['result']['read_back'] is True
+    if mode == 'existing': assert db.get(child['id'])['result']['existing_comment'] is True
     if posts or mode != 'private': assert calls['closed'] >= 1
     assert db.get(parent['id'])['status'] == ('SUBMITTED' if mode == 'private' else 'PUBLISHED')
 
@@ -292,6 +324,26 @@ def test_repeated_read_only_checks_do_not_duplicate_or_retry_comments(douyin_env
     assert len(db.list(kind='COMMENT_CHECK')) == 1
     assert db.get(child['id'])['status'] == 'UNKNOWN'
     assert db.get(child['id'])['result']['submission_started'] is True
+
+
+@pytest.mark.parametrize('read_back,prior_checks,expected', [(False, 0, 1), (True, 0, 0), (False, 5, 5)])
+def test_receipted_comments_waiting_for_readback_get_bounded_checks(douyin_env, monkeypatch, read_back, prior_checks, expected):
+    from tests.test_douyin import REAL_TICK
+    parent = manager.enqueue(render()['id'], {**PAYLOAD, 'first_comment': OPTION})
+    db = manager.store()
+    db.update(parent['id'], status='PUBLISHED', work_id=WORK)
+    child = db.comments(OWNER['uid'])[parent['id']]
+    db.update(child['id'], status='SENT', work_id=WORK,
+              result={'submission_started': True, 'comment_id': CID, 'read_back': read_back})
+    for _ in range(prior_checks):
+        check = db.create('COMMENT_CHECK', OWNER['uid'], parent_id=child['id'])
+        db.update(check['id'], status='RECORDED')
+    monkeypatch.setattr(manager, 'runtime', lambda: {'ready': False})
+    REAL_TICK()
+    REAL_TICK()
+    assert len(db.list(kind='COMMENT_CHECK')) == expected
+    assert len(db.list(kind='FIRST_COMMENT')) == 1
+    assert db.get(child['id'])['result']['comment_id'] == CID
 
 
 def test_comment_receipt_tolerates_only_platform_whitespace_normalization():

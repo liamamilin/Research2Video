@@ -119,12 +119,12 @@ def upload(platform:str,body:UploadIn,user=Depends(require_editor)):
 
 @router.put('/social/{platform}/first-comment-template')
 def comment_template(platform:str,body:FirstCommentIn,user=Depends(require_admin)):
-    return call(platform,service.save_first_comment_template,body.model_dump())
+    return call(platform,service.save_first_comment_template,body.model_dump(exclude_unset=True))
 
 
 @router.post('/social/{platform}/uploads/{key}/first-comment',status_code=202)
 def add_comment(platform:str,key:str,body:FirstCommentIn,user=Depends(require_editor)):
-    result=call(platform,service.add_first_comment,key,body.model_dump())
+    result=call(platform,service.add_first_comment,key,body.model_dump(exclude_unset=True))
     audit.log('platform_first_comment',user=user['username'],target=platform,result=key)
     return result
 

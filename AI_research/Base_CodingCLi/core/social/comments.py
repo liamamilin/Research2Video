@@ -13,6 +13,8 @@ COMMENT_PLATFORMS = {'kuaishou': '快手', 'xiaohongshu': '小红书'}
 def clean_first_comment(platform: str, value: object) -> dict:
     if not isinstance(value, dict) or set(value) - {'enabled', 'text', 'pin'}:
         raise AdapterError('首条评论配置格式不正确。')
+    from core.social.publish_text import comment_options
+    value = comment_options(value)
     enabled, text, pin = value.get('enabled', False), value.get('text', ''), value.get('pin', False)
     if type(enabled) is not bool or type(pin) is not bool or not isinstance(text, str):
         raise AdapterError('首条评论配置格式不正确。')

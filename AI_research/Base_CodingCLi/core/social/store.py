@@ -150,6 +150,37 @@ class SocialStore:
                          ('人工确认未发布，可手动重试', json.dumps(result, ensure_ascii=False), now, key))
         return True
 
+    def repair_upload_preparation(self, key: str, uid: str, expected_updated_at: float) -> bool:
+        """Repair known legacy Kuaishou preparation failures without uploading or resetting history."""
+        if self.platform != 'kuaishou':
+            return False
+        with self.connect(write=True) as conn:
+            row = self.decode(conn.execute('SELECT * FROM jobs WHERE id=?', (key,)).fetchone())
+            if (not row or row['kind'] != 'UPLOAD' or row['uid'] != uid or row['status'] != 'UNKNOWN'
+                    or row['updated_at'] != expected_updated_at or row['work_id']):
+                return False
+            result = row['result']
+            failure = result.get('failure') or {}
+            # These known adapter branches stop before a publish click.
+            # A missing work-list match alone
+            # never establishes that a previous submission is safe to retry.
+            known_preparation = (failure.get('stage') == '选择视频上传入口'
+                                 or failure.get('stage') == '平台上传流程' and
+                                 row['error'].startswith('快手视频素材上传超时，未点击发布。'))
+            if (result.get('invocation_started') is not True
+                    or not known_preparation
+                    or failure.get('error_type') not in ('AdapterError', 'UploadPreparationError')
+                    or any(result.get(field) for field in
+                           ('submission_started', 'submission_started_at', 'submission_response', 'accepted', 'work_id', 'url'))):
+                return False
+            now = time.time()
+            conn.execute('INSERT INTO job_events(job_id,kind,actor,detail,created_at) VALUES (?,?,?,?,?)',
+                         (key, 'preparation_failure_repaired', 'upload_preparation', json.dumps(row, ensure_ascii=False), now))
+            result = {**result, 'confirmed_not_submitted': True, 'preparation_failed': True}
+            conn.execute("UPDATE jobs SET status='FAILED',phase=?,result=?,updated_at=? WHERE id=?",
+                         ('上传准备失败，尚未投稿', json.dumps(result, ensure_ascii=False), now, key))
+        return True
+
     def requeue_upload(self, key: str, uid: str, payload: dict) -> bool:
         """Save the previous attempt before resetting the single-submit guard for a manual retry."""
         with self.connect(write=True) as conn:

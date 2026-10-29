@@ -297,7 +297,7 @@ def enqueue(render_id: str, payload: dict) -> dict:
     cover = next((p for n in ("cover.png", "cover.jpg") if (p := video_render.safe_file(render, n))), None)
     clean = {"title": title, "description": description, "tags": tags,
              "video_path": str(video_render.safe_file(render, "video.mp4").resolve()),
-             "cover": str(cover.resolve()) if cover else "", "first_comment": clean_first_comment(payload.get("first_comment", {}))}
+             "cover": str(cover.resolve()) if cover else "", "first_comment": clean_first_comment(payload.get("first_comment", store().comment_settings(owner)))}
     with dispatch_lock():
         if uid() != owner or any(r["kind"] == "LOGIN" for r in store().list(statuses=ACTIVE)):
             raise DouyinError("账号正在更换，请刷新后重新投稿。")
@@ -431,8 +431,13 @@ def tick() -> None:
         current = account().get("uid", "")
         active = db.list(statuses=ACTIVE)
         if not active and current:
-            for comment in db.list(uid=current, kind='FIRST_COMMENT', statuses=('UNKNOWN',)):
-                checks = [r for r in db.list(uid=current, kind='COMMENT_CHECK') if r['parent_id'] == comment['id']]
+            checks_by_comment = {}
+            for check in db.list(uid=current, kind='COMMENT_CHECK'):
+                checks_by_comment.setdefault(check['parent_id'], []).append(check)
+            for comment in db.list(uid=current, kind='FIRST_COMMENT', statuses=('UNKNOWN', 'SENT')):
+                if comment['result'].get('read_back'):
+                    continue
+                checks = checks_by_comment.get(comment['id'], [])
                 if len(checks) < 5 and (not checks or time.time() - checks[0]['updated_at'] > 120):
                     db.create('COMMENT_CHECK', current, parent_id=comment['id'])
                     break

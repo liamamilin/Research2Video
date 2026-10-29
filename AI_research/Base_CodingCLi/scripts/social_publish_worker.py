@@ -20,7 +20,7 @@ if __name__ == '__main__':
     sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
     package=ModuleType('core');package.__path__=[str(Path(__file__).resolve().parents[1]/'core')];sys.modules['core']=package
 
-from core.social.adapter import AdapterError, accepted_without_work_id, clean_owner, clean_work, submission_evidence, upload_failure_details
+from core.social.adapter import AdapterError, UploadPreparationError, accepted_without_work_id, clean_owner, clean_work, submission_evidence, upload_failure_details
 from core.social.registry import PLATFORMS, adapter
 from core.social.store import SocialStore
 from core.social.verification import submission_correlations
@@ -195,9 +195,15 @@ async def upload(db, job, provider, pw, storage):
     except Exception as exc:
         row=db.get(job['id'])
         details=upload_failure_details(exc)
+        preparation_failed = (isinstance(exc, UploadPreparationError) and not attempted
+                              and not row['work_id'] and not any(row['result'].get(field) for field in
+                              ('submission_started', 'submission_response', 'accepted')))
+        result = row['result'] if invoked or attempted else {'confirmed_not_submitted': True}
+        if preparation_failed:
+            result = {**result, 'confirmed_not_submitted': True, 'preparation_failed': True}
         error=str(exc) if isinstance(exc,AdapterError) else '平台上传未完成，结果待核对；系统不会自动重投。'
-        db.update(job['id'],status='SUBMITTED' if row['work_id'] or accepted_without_work_id(db.platform,row['result']) else 'UNKNOWN' if invoked or attempted else 'FAILED',
-                  phase='投稿结果待核对',result={**(row['result'] if invoked or attempted else {'confirmed_not_submitted':True}),'failure':details},
+        db.update(job['id'],status='FAILED' if preparation_failed else 'SUBMITTED' if row['work_id'] or accepted_without_work_id(db.platform,row['result']) else 'UNKNOWN' if invoked or attempted else 'FAILED',
+                  phase='上传准备失败，尚未投稿' if preparation_failed else '投稿结果待核对',result={**result,'failure':details},
                   error=f"{error}（阶段：{details['stage']}；异常：{details['error_type']}）")
     finally:
         if task:

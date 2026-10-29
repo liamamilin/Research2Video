@@ -369,6 +369,25 @@ async def inspect_work(pw, storage: Path, owner_id: str, target: str) -> dict:
 
 
 
+async def _existing_author_comment(context, provider_id: str, text: str) -> dict | None:
+    listing = await context.request.get('https://creator.douyin.com/aweme/v1/creator/comment/list/',
+        params={'item_id': provider_id, 'sort': 'TIME', 'cursor': '0', 'count': '50'}, timeout=20000,
+        max_redirects=0, max_retries=0)
+    data = await listing.json()
+    if (listing.status != 200 or not isinstance(data, dict)
+            or type(data.get('status_code')) is not int or data['status_code'] != 0):
+        return None
+    rows = data.get('comment_info_list') or data.get('comment_list') or []
+    if not isinstance(rows, list):
+        return None
+    for row in rows:
+        with suppress(DouyinError):
+            receipt = comment_receipt({'status_code': 0, 'comment_info': row}, text)
+            if receipt['accepted']:
+                return receipt
+    return None
+
+
 async def send_first_comment(db: DouyinStore, job: dict, pw, storage: Path) -> None:
     """One creator-API POST after an exact owner/work preflight, with a durable at-most-once guard."""
     attempted = False
@@ -389,6 +408,16 @@ async def send_first_comment(db: DouyinStore, job: dict, pw, storage: Path) -> N
         provider_id = (owned or {}).get('provider_item_id')
         if not isinstance(provider_id, str) or not provider_id:
             raise DouyinError('未取得这条作品的创作者标识，作者评论未提交。')
+        # A comment may already have been added through the platform while the
+        # application's task was missing. Reuse that exact author comment.
+        existing = None
+        with suppress(Exception):
+            existing = await _existing_author_comment(context, provider_id, job['payload']['text'])
+        if existing:
+            db.update(job['id'], status='SENT', phase='已关联创作中心已有作者评论，未重复发送',
+                      result={**existing, 'read_back': True, 'existing_comment': True,
+                              'work_id': job['work_id']}, error='')
+            return
         # Read the token only from Douyin's own authenticated response; never expose it to the app API or logs.
         proof = await context.request.head('https://creator.douyin.com/web/api/media/anchor/search',
             headers={'X-Secsdk-Csrf-Request': '1', 'X-Secsdk-Csrf-Version': '1.2.22',
@@ -473,6 +502,7 @@ async def check_first_comment(db: DouyinStore, job: dict, pw, storage: Path) -> 
         if not isinstance(rows, list):
             raise DouyinError('创作中心评论列表格式变化；评论未重发。')
         matches, observations = [], []
+        target = child['result'].get('comment_id')
         for row in rows:
             if not isinstance(row, dict):
                 continue
@@ -483,13 +513,14 @@ async def check_first_comment(db: DouyinStore, job: dict, pw, storage: Path) -> 
             observations.append({'text_matches': same, 'is_author': row.get('is_author') is True,
                                  'level': row.get('level') if type(row.get('level')) in (int, bool) else None,
                                  'recent': bool(recent), 'fields': sorted(row)[:25]})
-            if same and recent:
+            if same and (row.get('comment_id') == target if target else recent):
                 with suppress(DouyinError):
                     receipt = comment_receipt({'status_code': 0, 'comment_info': row}, text)
                     matches.append({**receipt, 'read_back': True, 'submission_started': True, 'work_id': child['work_id'],
                                     'normalized_whitespace': text != child['payload']['text']})
         if len(matches) == 1:
-            db.update(child['id'], status='SENT', phase='已在创作中心核对作者评论', result=matches[0], error='')
+            db.update(child['id'], status='SENT', phase='已在创作中心核对作者评论',
+                      result={**child['result'], **matches[0]}, error='')
         else:
             db.update(child['id'], error='暂未在创作中心核对到唯一的本次作者评论；未重复发送。')
         db.update(job['id'], status='DONE', phase='已只读核对评论', result={'matched': len(matches) == 1, 'count': len(rows), 'observations': observations[:10]})
