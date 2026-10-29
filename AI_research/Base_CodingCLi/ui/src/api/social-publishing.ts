@@ -19,7 +19,7 @@ export type SocialJob = {
   payload: { title?: string; description?: string; tags?: string[]; first_comment?: FirstComment };
 };
 export type SocialOverview = {
-  definition: SocialDefinition; account: { connected: boolean; uid?: string; name?: string; verified_at?: number; comments_verified_at?: number };
+  definition: SocialDefinition; account: { connected: boolean; uid?: string; name?: string; verified_at?: number; comments_verified_at?: number; session?: { state: "valid" | "expired" | "unknown"; failures: number; since: number | null } };
   runtime_ready: boolean; login_id: string | null; uploads: SocialJob[]; checks: SocialJob[]; candidates: UploadCandidate[];
   settings?: { first_comment?: FirstComment };
 };

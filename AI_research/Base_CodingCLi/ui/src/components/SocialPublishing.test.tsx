@@ -73,6 +73,16 @@ function show(platform: Platform = "xiaohongshu", query = "") {
   </MemoryRouter>);
 }
 
+it("warns that an expired login paused checks and reconnection is needed", async () => {
+  connect("kuaishou");
+  overviews.kuaishou.account = { ...overviews.kuaishou.account, session: { state: "expired", failures: 5, since: 1 } };
+  show("kuaishou");
+  const alert = await screen.findByRole("alert");
+  expect(within(alert).getByText("快手登录已失效")).toBeTruthy();
+  expect(within(alert).getByText(/连续 5 次账号核实失败/)).toBeTruthy();
+  expect(writes()).toEqual([]);
+});
+
 it("offers connection recovery while keeping checking tied to the original upload", async () => {
   overviews.xiaohongshu.definition.capabilities.public_check = true;
   overviews.xiaohongshu.uploads = [job("xiaohongshu", { status: "SUBMITTED", work_id: "6ade22190000000033018ae8",

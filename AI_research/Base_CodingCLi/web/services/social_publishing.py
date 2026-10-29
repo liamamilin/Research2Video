@@ -20,6 +20,7 @@ from core.social.comments import clean_first_comment, COMMENT_PLATFORMS
 from core.social.verification import EVIDENCE, STATE_LABELS, delay, timestamp
 from core.social.verification import check_progress, lookup_revision
 from core.social.reconciliation import lookup_for
+from core.social.session_health import assess, verify_due
 from core.video import store as video_store
 from core.video.publication_identity import identify
 from scripts.douyin_worker import private_json
@@ -397,6 +398,8 @@ def overview(platform: str) -> dict:
     comments={r['parent_id']:r for r in jobs if r['kind']=='FIRST_COMMENT'}
     checking = {r['parent_id'] for r in jobs if r['kind'] == 'RECONCILE' and r['status'] in ACTIVE}
     path=directory(platform)/'login.json'
+    if owner:
+        profile = {**profile, 'session': session_of(store(platform), owner)}
     return {'definition':definition(platform),'account':profile,'runtime_ready':runtime()['ready'],
             'login_id':json.loads(path.read_text()).get('id') if path.is_file() else None,
             'uploads':[public_job(platform,r,comments=comments,checking=checking) for r in jobs if r['kind']=='UPLOAD'],
@@ -482,7 +485,7 @@ def schedule_comments(platform: str, db: SocialStore) -> None:
     due = [row for row in db.list(uid=owner, kind='FIRST_COMMENT', statuses=('SENT','UNKNOWN'))
            if not row['result'].get('read_back') and row['id'] not in active_checks
            and row['result'].get('next_check_at', row['updated_at'] + 15) <= time.time()]
-    if due and not active_checks:
+    if due and not active_checks and session_of(db, owner)['state'] != 'expired':
         child = min(due, key=lambda row:row['result'].get('next_check_at',row['updated_at'] + 15))
         db.create('COMMENT_CHECK', owner, parent_id=child['id'])
 
@@ -531,6 +534,8 @@ def schedule_checks(platform: str, db: SocialStore) -> None:
     current = account(platform).get('uid')
     if not current or any(row['kind'] in ('LOGIN','RECONCILE') for row in db.list(statuses=ACTIVE)):
         return
+    if session_of(db, current)['state'] == 'expired':
+        return
     now = time.time()
     pending = db.list(uid=current, kind='UPLOAD', statuses=('SUBMITTED','UNKNOWN'))
     due = [row for row in pending if not row['result'].get('verification', {}).get('exhausted')
@@ -540,6 +545,21 @@ def schedule_checks(platform: str, db: SocialStore) -> None:
         return
     row = due[0]
     db.create('RECONCILE', current, {'work_id': row['work_id'], 'lookup': check_lookup(row), 'automatic': True}, parent_id=row['id'])
+
+
+def session_of(db: SocialStore, owner: str) -> dict:
+    """Login health from this account's jobs; a login attempt is queued before its UID is known."""
+    logins = [row for row in db.list(kind='LOGIN') if row['uid'] == owner or row['result'].get('uid') == owner]
+    return assess([*db.list(uid=owner), *logins])
+
+
+def schedule_verify(platform: str, db: SocialStore) -> None:
+    """Queue a read-only login check for an idle account; this never touches a work."""
+    current = account(platform).get('uid')
+    if not current or db.list(statuses=ACTIVE):
+        return
+    if verify_due(session_of(db, current), time.time()):
+        db.create('VERIFY', current)
 
 
 def check_lookup(row: dict) -> dict:
@@ -598,6 +618,7 @@ def tick(platform: str) -> None:
             db.recover()
         if not runtime()['ready']:
             return
+        schedule_verify(platform, db)
         schedule_checks(platform, db)
         row=db.claim(prefer_checks=True)
         if not row:
