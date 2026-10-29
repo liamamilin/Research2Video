@@ -15,6 +15,7 @@ sources_limit: 12
 sources:
   - "rss:https://importai.substack.com/feed"
   - "hf_papers:daily"
+  - "tag:ai_radar"
 prompt: |
   根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
   当前步骤：研究事情本身，形成供视频作者展开讲述的研究底稿。

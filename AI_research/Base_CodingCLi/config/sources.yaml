@@ -555,3 +555,77 @@ cg_errors:
   - chatgpt_acquisition
   - chatgpt_s01
   note: 极高优先；读取错误信息和排查步骤正文。
+
+# --- Radar 导入 · AI 矩阵（2026-10-29）---
+aftergradient:
+  name: aftergradient.com Feed
+  spec: rss:https://aftergradient.com/rss.xml?kind=news
+  tags:
+  - ai
+  - ai_radar
+  - ai_updates
+  note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
+aicatchup:
+  name: aicatchup.com Feed
+  spec: rss:https://aicatchup.com/rss.xml
+  tags:
+  - ai
+  - ai_radar
+  - ai_updates
+  note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
+r_project_blog:
+  name: blog.r-project.org Feed
+  spec: rss:https://blog.r-project.org/index.xml
+  tags:
+  - ai
+  - ai_radar
+  - r_language
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。研映随 AI 栏目研究读取。
+devbrief:
+  name: devbrief.dev Feed
+  spec: rss:https://devbrief.dev/rss.xml
+  tags:
+  - ai
+  - ai_radar
+  - ai_updates
+  note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
+onevium_zh:
+  name: onevium.com Feed
+  spec: rss:https://onevium.com/zh/rss.xml
+  tags:
+  - ai
+  - ai_radar
+  - ai_updates
+  note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
+r_consortium:
+  name: r-consortium.org Feed
+  spec: rss:https://r-consortium.org/blog/index.xml
+  tags:
+  - ai
+  - ai_radar
+  - r_language
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。研映随 AI 栏目研究读取。
+r_for_rest_of_us:
+  name: rfortherestofus.com Feed
+  spec: rss:https://rfortherestofus.com/blog/feed/atom
+  tags:
+  - ai
+  - ai_radar
+  - r_language
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。研映随 AI 栏目研究读取。
+r_weekly:
+  name: rweekly.org Feed
+  spec: rss:https://rweekly.org/atom.xml
+  tags:
+  - ai
+  - ai_radar
+  - r_language
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。研映随 AI 栏目研究读取。
+zhangwen:
+  name: zhangwen.site Feed
+  spec: rss:https://zhangwen.site/rss.xml
+  tags:
+  - ai
+  - ai_radar
+  - ai_updates
+  note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。

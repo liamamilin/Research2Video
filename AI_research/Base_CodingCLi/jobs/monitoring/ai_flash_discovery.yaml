@@ -17,6 +17,7 @@ sources:
   - "tldr:ai"
   - "rss:https://www.therundown.ai/feed"
   - "hf_models:trending"
+  - "tag:ai_radar"
 runtime:
   timeout_seconds: 2400
   skip_if_running: true
