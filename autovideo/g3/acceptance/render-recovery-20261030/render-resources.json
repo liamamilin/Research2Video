@@ -1,0 +1,12 @@
+{
+  "concurrency": 1,
+  "requested": "auto",
+  "logical_cpus": 12,
+  "physical_memory_bytes": 51539607552,
+  "video_form": "information_motion",
+  "presentation_preset": "explanation",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "crf": 18
+}

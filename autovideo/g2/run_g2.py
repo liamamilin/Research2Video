@@ -955,7 +955,8 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     write_json(props_path, props)
     from g2.performance import render_resources
     try:
-        resources = render_resources(video_form=compiled.get("presentation", {}).get("preset"))
+        resources = render_resources(video_form=os.environ.get("AUTOVIDEO_G2_VIDEO_FORM"),
+                                     presentation_preset=compiled.get("presentation", {}).get("preset"))
     except ValueError as exc:
         raise G2Fault("RENDER_CONFIG_INVALID", str(exc)) from exc
     write_json(ARTIFACTS / "render-resources.json", resources)
@@ -969,7 +970,8 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
         argv.extend([f"--frames={hybrid_segment['start_frame']}-{hybrid_segment['end_frame'] - 1}", '--muted', '--color-space=bt709'])
     render_timeout = max(1200, math.ceil(compiled["total_frames"] / FPS * 6)) if CONTENT_MODE else 1200
     label = f"remotion-{hybrid_segment['label']}" if hybrid_segment else 'remotion-render'
-    _run_fixed_command(label, argv, renderer, timeout=render_timeout)
+    from g2.render_retry import run as render_with_recovery
+    render_with_recovery(sys.modules[__name__], label, argv, renderer, timeout=render_timeout, resources=resources)
 
 
 def verify_media(compiled: dict, alignment: dict) -> dict:
@@ -1259,6 +1261,10 @@ def run_all() -> dict:
     (ARTIFACTS / "llm_calls").mkdir(parents=True)
     package_request_from_intent()
     source = PROJECT_INPUT.read_text(encoding="utf-8").strip()
+    from g2.render_checkpoint import resume as resume_render_checkpoint
+    recovered = resume_render_checkpoint(sys.modules[__name__], source)
+    if recovered is not None:
+        return recovered
     storyboard_context = {"narration_plan": None, "case_a": is_case_a_source(source)}
     print(f"G2 run {RUN_ID}; model={MODEL}; provider={PROVIDER.label}", flush=True)
     form = os.environ.get("AUTOVIDEO_G2_VIDEO_FORM", "knowledge_cards")

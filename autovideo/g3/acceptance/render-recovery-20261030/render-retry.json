@@ -1,0 +1,15 @@
+{
+  "max_attempts": 2,
+  "attempts": [
+    {
+      "attempt": 1,
+      "concurrency": 1,
+      "frame_timeout_ms": 30000,
+      "log": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/0ab6095d-ab66-475e-b027-171c41d320a0/attempts/2/g2-run/logs/remotion-render.log",
+      "output": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/0ab6095d-ab66-475e-b027-171c41d320a0/attempts/2/g2-run/artifacts/render-attempts/remotion-render/attempt-1.mp4",
+      "status": "completed"
+    }
+  ],
+  "status": "completed",
+  "output": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/0ab6095d-ab66-475e-b027-171c41d320a0/attempts/2/g2-run/artifacts/G2_自动生成.mp4"
+}

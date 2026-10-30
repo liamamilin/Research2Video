@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "identical_files": {
+    "fixtures/video-ir-v0.2.json": "1b5aa706ce6b9677fa7f51753e0947209049bc76648261b9915bf71925c06aeb",
+    "fixtures/assets/communications_noise.wav": "edee6f902a018866afd4de5597038bffe062936c8e921a8ce6297a5e207cb7a1",
+    "artifacts/final-narration-plan.json": "30087282ba9f70585bea6be9ea23096ebfefa4f4969bcaf5fad0b1012c164938",
+    "artifacts/caption-alignment.json": "c05b5371c2f3de61616bf24c0493e90452f799c37f550898aeac9c1588ee84b8",
+    "artifacts/captions.srt": "5c10ee8149cdf71196aecf9034b51b4aa5a7d15ce6f29c4e46f219082f1f3190",
+    "artifacts/storyboard-plan.json": "1b0e79cfff1341776ecc3f71159c864894071dc20697b11e9684b80342bcfb66"
+  },
+  "reuse": {
+    "source_attempt": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/0ab6095d-ab66-475e-b027-171c41d320a0/attempts/1/g2-run",
+    "source_sha256": "7d6463c1259072805400045b9a153dce365533293cc6471266d7bc4cb27c5f7e",
+    "audio_sha256": "edee6f902a018866afd4de5597038bffe062936c8e921a8ce6297a5e207cb7a1",
+    "video_ir_sha256": "1b5aa706ce6b9677fa7f51753e0947209049bc76648261b9915bf71925c06aeb",
+    "reused_narration": true,
+    "reused_voice": true,
+    "reused_storyboard": true,
+    "reused_captions": true,
+    "new_model_calls": 0,
+    "new_voice_calls": 0
+  },
+  "resources": {
+    "concurrency": 1,
+    "requested": "auto",
+    "logical_cpus": 12,
+    "physical_memory_bytes": 51539607552,
+    "video_form": "information_motion",
+    "presentation_preset": "explanation",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "crf": 18
+  },
+  "media": {
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "duration": 192.8,
+    "size": 13339217
+  },
+  "full_decode_exit_code": 0,
+  "original_attempt_preserved": true
+}

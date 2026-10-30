@@ -1,0 +1,12 @@
+{
+  "source_attempt": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/0ab6095d-ab66-475e-b027-171c41d320a0/attempts/1/g2-run",
+  "source_sha256": "7d6463c1259072805400045b9a153dce365533293cc6471266d7bc4cb27c5f7e",
+  "audio_sha256": "edee6f902a018866afd4de5597038bffe062936c8e921a8ce6297a5e207cb7a1",
+  "video_ir_sha256": "1b5aa706ce6b9677fa7f51753e0947209049bc76648261b9915bf71925c06aeb",
+  "reused_narration": true,
+  "reused_voice": true,
+  "reused_storyboard": true,
+  "reused_captions": true,
+  "new_model_calls": 0,
+  "new_voice_calls": 0
+}

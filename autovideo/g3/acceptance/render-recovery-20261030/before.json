@@ -1,0 +1,11 @@
+{
+  "id": "e86100649a83470c931607fde27d15ee",
+  "script_id": "6276a698e1344996a2003b071eeb2048",
+  "version": 1,
+  "status": "FAILED",
+  "error_code": "COMMAND_FAILED",
+  "error_message": "remotion-render exited 1; see /Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/0ab6095d-ab66-475e-b027-171c41d320a0/attempts/1/g2-run/logs/remotion-render.log",
+  "attempt_count": 1,
+  "completed_at": "2026-10-30T14:57:19+0800",
+  "source_sha256": "7d6463c1259072805400045b9a153dce365533293cc6471266d7bc4cb27c5f7e"
+}

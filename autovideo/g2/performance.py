@@ -17,8 +17,12 @@ def physical_memory_bytes() -> int | None:
         return None
 
 
-def render_resources(*, video_form: str | None = None) -> dict:
+def render_resources(*, video_form: str | None = None, presentation_preset: str | None = None) -> dict:
     """Reserve CPU and RAM for the UI, encoder and local voice model."""
+    # Mixed storytelling compiles information_motion to the internal explanation
+    # preset. Keep its resolved product form; older timelines only have a preset.
+    if not video_form or video_form == "auto":
+        video_form = "information_motion" if presentation_preset == "explanation" else presentation_preset
     cpus = max(1, os.cpu_count() or 1)
     memory = physical_memory_bytes()
     requested = os.environ.get("AUTOVIDEO_G2_RENDER_CONCURRENCY", "auto")
@@ -34,5 +38,6 @@ def render_resources(*, video_form: str | None = None) -> dict:
             raise ValueError(f"AUTOVIDEO_G2_RENDER_CONCURRENCY must be auto or an integer in 1..{min(cpus, 32)}")
         concurrency = int(requested)
     return {"concurrency": concurrency, "requested": requested, "logical_cpus": cpus,
-            "physical_memory_bytes": memory, "video_form": video_form, "width": 1920, "height": 1080,
+            "physical_memory_bytes": memory, "video_form": video_form, "presentation_preset": presentation_preset,
+            "width": 1920, "height": 1080,
             "fps": 30, "crf": 18}

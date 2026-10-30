@@ -25,6 +25,15 @@ def test_auto_uses_only_the_measured_platform_and_form(monkeypatch, platform, fo
     assert performance.render_resources(video_form=form)["concurrency"] == expected
 
 
+@pytest.mark.parametrize("form,expected", [("information_motion", 1), ("process_diagram", 2), ("auto", 1), (None, 1)])
+def test_internal_explanation_preset_does_not_hide_the_resolved_form(monkeypatch, form, expected):
+    monkeypatch.setattr(performance.sys, "platform", "darwin")
+    monkeypatch.setattr(performance.os, "cpu_count", lambda: 12)
+    monkeypatch.setattr(performance, "physical_memory_bytes", lambda: 48 * 1024 ** 3)
+    monkeypatch.delenv("AUTOVIDEO_G2_RENDER_CONCURRENCY", raising=False)
+    assert performance.render_resources(video_form=form, presentation_preset="explanation")["concurrency"] == expected
+
+
 @pytest.mark.parametrize("value", ["0", "-1", "1.5", "80%", "13", "", "２"])
 def test_invalid_render_override_is_rejected(monkeypatch, value):
     monkeypatch.setattr(performance.os, "cpu_count", lambda: 12)
@@ -42,7 +51,11 @@ def test_render_override_preserves_quality_and_records_actual_resources(monkeypa
     monkeypatch.setattr(pipeline, "package_request_from_intent", lambda: None)
     monkeypatch.setattr(pipeline, "packaging_record", lambda: None)
     commands = []
-    monkeypatch.setattr(pipeline, "_run_fixed_command", lambda label, argv, *args, **kwargs: commands.append(argv))
+    def command(label, argv, *args, **kwargs):
+        commands.append(argv)
+        from pathlib import Path
+        Path(argv[5]).touch()
+    monkeypatch.setattr(pipeline, "_run_fixed_command", command)
     pipeline.render({"total_frames": 900}, renderer_root=tmp_path / "renderer")
     argv = commands[0]
     assert {"--concurrency=2", "--crf=18", "--width=1920", "--height=1080", "--fps=30",
