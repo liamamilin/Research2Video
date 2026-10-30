@@ -36,6 +36,7 @@ def test_even_known_upload_paths_do_not_accept_unreviewed_methods(method):
 def test_only_reviewed_upload_and_lookup_posts_are_allowed():
     assert preparation_operation('POST', 'https://cp.kuaishou.com/rest/cp/works/v2/video/pc/upload/pre') == 'upload_pre'
     assert preparation_operation('POST', 'https://cp.kuaishou.com/rest/cp/works/v2/video/pc/upload/isolation/finish') == 'upload_finish'
+    assert preparation_operation('POST', 'https://cp.kuaishou.com/rest/cp/works/v4/video/pc/cover/edit/cover/upload') == 'cover_upload'
     assert preparation_operation('POST', 'https://upload.kuaishouzt.com/api/upload/fragment?upload_token=private') == 'file_fragment'
     assert preparation_operation('GET', 'https://cp.kuaishou.com/article/publish/video') == 'read'
 
