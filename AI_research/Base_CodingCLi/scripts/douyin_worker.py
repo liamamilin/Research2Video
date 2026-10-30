@@ -171,8 +171,15 @@ async def upload(db: DouyinStore, job: dict, storage: Path) -> None:
         title=payload["title"], file_path=payload["video_path"], tags=payload["tags"],
         publish_date=0, account_file=str(storage), desc=payload["description"],
         thumbnail_landscape_path=payload.get("cover") or None,
+        thumbnail_portrait_path=payload.get("cover_portrait") or None,
         declaration="内容由AI生成", headless=False, debug=False,
     )
+    if payload.get('cover_portrait'):
+        from core.social.douyin_cover import set_portrait_cover
+        async def portrait_cover(page):
+            await set_portrait_cover(page, payload['cover_portrait'], upstream._native_click,
+                                     landscape_path=payload.get('cover', ''))
+        video.set_thumbnail = portrait_cover
     async with async_playwright() as pw:
         task = asyncio.create_task(video.upload(SimpleNamespace(chromium=SimpleNamespace(launch=guarded_launch))))
         try:

@@ -19,7 +19,7 @@ from core.social.verification import check_progress, lookup_revision, MAX_UNRESO
 from core.video import store as video_store
 from scripts.douyin_worker import private_json
 from web.services import platform_manager, video_render
-from web.services.publish_cover import publish_cover
+from web.services.publish_cover import publish_covers
 from web.settings import get_settings
 
 PIN = "3847fff01f5434a8a32829833163cd6723cabc59"
@@ -297,7 +297,8 @@ def enqueue(render_id: str, payload: dict) -> dict:
         raise DouyinError("这个版本已记录抖音发布，请查看文稿发布记录。")
     clean = {"title": title, "description": description, "tags": tags,
              "video_path": str(video_render.safe_file(render, "video.mp4").resolve()),
-             "cover": publish_cover(render, title), "first_comment": clean_first_comment(payload.get("first_comment", store().comment_settings(owner)))}
+             **publish_covers(render, title, portrait=True),
+             "first_comment": clean_first_comment(payload.get("first_comment", store().comment_settings(owner)))}
     with dispatch_lock():
         if uid() != owner or any(r["kind"] == "LOGIN" for r in store().list(statuses=ACTIVE)):
             raise DouyinError("账号正在更换，请刷新后重新投稿。")

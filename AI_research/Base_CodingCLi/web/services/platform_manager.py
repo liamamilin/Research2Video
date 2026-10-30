@@ -227,9 +227,12 @@ def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
         raise Error("平台发布文案仍需人工整理，请查看发布包。")
     if len(description) > 2000 or not 1 <= int(payload.get("tid") or 0) <= 65535:
         raise Error("简介最多 2000 字，并且需要选择投稿分区。")
+    first_comment = payload.get("first_comment")
+    if first_comment is None:
+        first_comment = store().settings()["first_comment"]
     clean = {"title": title, "tags": tags, "description": description, "tid": int(payload["tid"]),
              "cover": publish_cover(render, title), "automatic": automatic,
-             "first_comment": clean_first_comment(payload.get("first_comment", {}))}
+             "first_comment": clean_first_comment(first_comment)}
     if automatic:  # tick already owns the same worker lock
         return store().enqueue(owner, render, clean)
     with identity_lock():
@@ -240,6 +243,8 @@ def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
 
 def clean_first_comment(value: dict) -> dict:
     """Validate an opt-in message; keep disabled template text available for later editing."""
+    from core.social.publish_text import comment_options
+    value = comment_options(value)
     text = str(value.get("text", "")).strip()
     enabled = bool(value.get("enabled", False))
     if len(text) > 1000 or (enabled and not text):

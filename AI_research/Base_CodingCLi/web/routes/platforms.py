@@ -42,7 +42,7 @@ class UploadIn(Input):
     description: str = Field(max_length=2000)
     tags: list[str] = Field(min_length=1, max_length=10)
     tid: int = Field(ge=1, le=65535)
-    first_comment: FirstCommentIn = Field(default_factory=FirstCommentIn)
+    first_comment: FirstCommentIn | None = Field(default=None, description="省略或为 null 时继承账号默认首评；enabled=false 明确关闭本次首评。")
 
 
 class VideoIn(Input):
@@ -183,7 +183,10 @@ def first_comment_template(body: FirstCommentIn, user=Depends(require_admin)) ->
 
 @router.post("/uploads", status_code=202)
 def enqueue(body: UploadIn, user=Depends(require_editor)) -> dict:
-    result = call(manager.enqueue, body.render_id, body.model_dump(exclude={"render_id"}))
+    payload = body.model_dump(exclude={"render_id", "first_comment"})
+    if body.first_comment is not None:
+        payload["first_comment"] = body.first_comment.model_dump(exclude_unset=True)
+    result = call(manager.enqueue, body.render_id, payload)
     audit.log("platform_enqueue", user=user["username"], target=result["id"])
     return result
 

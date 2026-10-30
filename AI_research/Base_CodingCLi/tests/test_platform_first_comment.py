@@ -15,6 +15,67 @@ from web.services import bilibili, platform_manager as manager, video_render
 FIRST = {"enabled": True, "text": "固定说明\n欢迎交流。", "pin": True}
 
 
+@pytest.mark.parametrize('via_api', [False, True])
+@pytest.mark.parametrize('option,expected', [
+    (None, FIRST),
+    ({'enabled': False}, {'enabled': False, 'text': '', 'pin': False}),
+    ({}, {'enabled': False, 'text': '', 'pin': False}),
+    ({'text': '本次说明', 'pin': True}, {'enabled': True, 'text': '本次说明', 'pin': True}),
+])
+def test_omitted_comment_inherits_template_but_explicit_override_wins(platform_env, client, via_api, option, expected):
+    manager.save_first_comment_template(FIRST)
+    row = render()
+    payload = dict(PAYLOAD)
+    if option is not None:
+        payload['first_comment'] = option
+    if via_api:
+        _login(client)
+        response = client.post('/api/platforms/bilibili/uploads', json={**payload, 'render_id': row['id']}, headers=_csrf(client))
+        assert response.status_code == 202, response.text
+        task = response.json()
+    else:
+        task = manager.enqueue(row['id'], payload)
+    assert task['payload']['first_comment'] == expected
+    assert task['first_comment_status'] == ('WAITING' if expected['enabled'] else 'DISABLED')
+    manager.save_first_comment_template({**FIRST, 'text': '修改后的账号默认'})
+    assert manager.store().get_upload(task['id'])['payload']['first_comment'] == expected
+
+
+def test_assistant_batch_omitting_comment_uses_account_default(platform_env, client, monkeypatch):
+    from tests.test_assistant_api import tool
+    from tests.test_assistant_workspace import chat
+    manager.save_first_comment_template(FIRST)
+    rows = [render(), render()]
+    response = chat(client, monkeypatch, [tool('manage_publishing', action='submit', platform='bilibili', account_uid='123',
+        items=[{'render_id': row['id'], 'fields': PAYLOAD} for row in rows])])
+    assert response['actions'][0]['ok'], response
+    assert len(manager.store().uploads('123')) == 2
+    assert all(task['payload']['first_comment'] == FIRST and task['first_comment_status'] == 'WAITING'
+               for task in manager.store().uploads('123'))
+
+
+def test_null_comment_inherits_instead_of_becoming_an_empty_disabled_object(platform_env, client):
+    manager.save_first_comment_template(FIRST)
+    _login(client)
+    response = client.post('/api/platforms/bilibili/uploads', json={**PAYLOAD, 'render_id': render()['id'],
+        'first_comment': None}, headers=_csrf(client))
+    assert response.status_code == 202 and response.json()['payload']['first_comment'] == FIRST
+
+
+def test_persistent_batch_keeps_default_comment_without_preview_field(platform_env, client, monkeypatch):
+    from tests.test_assistant_batches import prepare, action, tick
+    manager.save_first_comment_template(FIRST)
+    row = render()
+    monkeypatch.setattr(manager, 'candidates', lambda: [{'render_id': row['id'], 'script_id': row['script_id'],
+        'title': row['title'], 'version': 1, 'current_version': 1, 'approved_version': 1, 'archived': False}])
+    monkeypatch.setattr(manager, 'preview', lambda key: dict(PAYLOAD))
+    batch = prepare(client, {'kind': 'publish', 'scope': {'all': True}, 'platform': 'bilibili', 'account_uid': '123'})
+    action(client, batch['id'], 'start')
+    tick(client)
+    task, = manager.store().uploads('123')
+    assert task['payload']['first_comment'] == FIRST and task['first_comment_status'] == 'WAITING'
+
+
 def make_task(monkeypatch, *, published=True, first=FIRST):
     task = manager.enqueue(render()["id"], {**PAYLOAD, "first_comment": first})
     manager.store().update_upload(task["id"], status="PUBLISHED" if published else "SUBMITTED", bvid=BV)
