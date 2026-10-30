@@ -145,20 +145,24 @@ def test_refresh_does_not_downgrade_a_remembered_session(client, web_env):
     """
     client.post('/api/auth/login', json={
         'username': 'admin', 'password': 'admin-pass-123', 'remember': True})
+    original = client.cookies.get("ai_research_refresh")
     r = client.post("/api/auth/refresh",
                     headers={"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""})
     assert r.headers["X-Session-Days"] == "30"
-    assert "Max-Age=2592000" in _cookie(r, "ai_research_refresh")
+    assert not _cookie(r, "ai_research_refresh")
+    assert client.cookies.get("ai_research_refresh") == original
 
 
 def test_refresh_keeps_a_plain_session_at_seven_days(client, web_env):
     """The fix must not stretch an ordinary login to 30 days."""
     client.post('/api/auth/login',
                 json={'username': 'admin', 'password': 'admin-pass-123'})
+    original = client.cookies.get("ai_research_refresh")
     r = client.post("/api/auth/refresh",
                     headers={"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""})
     assert r.headers["X-Session-Days"] == "7"
-    assert "Max-Age=604800" in _cookie(r, "ai_research_refresh")
+    assert not _cookie(r, "ai_research_refresh")
+    assert client.cookies.get("ai_research_refresh") == original
 
 
 # --- gateway settings --------------------------------------------------------

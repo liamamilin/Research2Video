@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useAuthStore } from "@/lib/auth-store";
 import { setAuthErrorHandler } from "@/api/client";
+import { SESSION_EVENT_KEY } from "@/lib/session-events";
 
 interface AuthContextValue {
   isAuthenticated: boolean;
@@ -23,6 +24,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     return () => setAuthErrorHandler(null);
   }, [setUser]);
+
+  useEffect(() => {
+    let lastFocusCheck = 0;
+    const onFocus = () => {
+      if (document.visibilityState === "hidden" || Date.now() - lastFocusCheck < 2_000) return;
+      lastFocusCheck = Date.now();
+      void checkAuth(true);
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== SESSION_EVENT_KEY || !event.newValue) return;
+      try {
+        // Ignore an older event queued before a subsequent login/logout.
+        if (localStorage.getItem(SESSION_EVENT_KEY) !== event.newValue) return;
+        const value = JSON.parse(event.newValue);
+        if (value.action === "logout") setUser(null);
+        else if (value.action === "login") void checkAuth(true);
+      } catch {
+        // An unavailable storage area is handled by the focus recovery path.
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [checkAuth, setUser]);
 
   if (loading) {
     return (

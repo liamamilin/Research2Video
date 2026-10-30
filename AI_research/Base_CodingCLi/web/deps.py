@@ -80,6 +80,11 @@ def current_user(request: Request) -> dict:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ApiError.make("revoked", "session 已撤销"),
         )
+    if not jwt_helper.matches_browser_session(payload, request.cookies.get(CSRF_COOKIE)):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ApiError.make("session_changed", "登录状态已更新，请恢复会话"),
+        )
     user = user_db.get_user_by_id(int(payload["sub"]))
     if not user or user.get("disabled"):
         raise HTTPException(

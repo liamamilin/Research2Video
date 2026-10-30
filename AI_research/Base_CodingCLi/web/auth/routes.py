@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import math
+import os
 import time
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
-from fastapi.responses import JSONResponse
 
 from web import audit
 from web.auth import db as user_db
@@ -22,31 +23,30 @@ CSRF_COOKIE = "ai_research_csrf"
 
 
 def _set_auth_cookies(response: Response, access: str, refresh: str, csrf: str,
-                      refresh_expires_at: int | None = None):
+                      refresh_expires_at: int | None = None, *, new_session: bool = True):
     """Attach the three auth cookies, tying each lifetime to what it carries.
 
-    ``refresh_expires_at`` is the refresh token's own ``exp`` claim. When given,
-    the refresh cookie (and the CSRF cookie, see below) live exactly as long as
-    that token, so "remember me" (30 days) survives every rotation instead of
-    being silently reset to the 7-day default on the first refresh.
+    Long-lived cookies are issued only on login, with the token's exact expiry.
+    Refresh changes access only, so late responses cannot roll back a newer login.
     """
     settings = get_settings()
     secure = settings.auth.cookie_secure
     samesite = settings.auth.cookie_samesite  # type: ignore[assignment]
     access_max = settings.auth.access_token_minutes * 60
 
-    if refresh_expires_at is not None:
-        # Round to whole days: an "expires in 6d23h59m58s" cookie should be
-        # reported as 7 days and get the matching Max-Age, not 604798 seconds.
-        days = max(1, int(round((int(refresh_expires_at) - time.time()) / 86400)))
-    else:
-        days = max(1, settings.auth.refresh_token_days)
-    refresh_max = days * 86400
+    refresh_max = (max(0, int(refresh_expires_at) - int(time.time()))
+                   if refresh_expires_at is not None else max(1, settings.auth.refresh_token_days) * 86400)
+    days = math.ceil(refresh_max / 86400)
 
     response.set_cookie(
         ACCESS_COOKIE, access,
-        max_age=access_max, httponly=True, secure=secure, samesite=samesite, path="/",
+        max_age=min(access_max, refresh_max), httponly=True, secure=secure, samesite=samesite, path="/",
     )
+    response.headers["X-Session-Days"] = str(days)
+    if not new_session:
+        # Refresh changes only access. Re-sending the old refresh/CSRF cookies
+        # can overwrite a newer login when another tab's response arrives late.
+        return
     response.set_cookie(
         REFRESH_COOKIE, refresh,
         max_age=refresh_max, httponly=True, secure=secure, samesite=samesite,
@@ -64,9 +64,14 @@ def _set_auth_cookies(response: Response, access: str, refresh: str, csrf: str,
         CSRF_COOKIE, csrf,
         max_age=refresh_max, httponly=False, secure=secure, samesite=samesite, path="/",
     )
-    # Lets a client (and the tests) see which lifetime was actually granted
-    # instead of having to parse Set-Cookie.
-    response.headers["X-Session-Days"] = str(days)
+
+
+def _failure(request: Request, action: str, code: str, message: str,
+             reason: str, status_code: int = 401) -> HTTPException:
+    audit.log(action, result="failed", ip=request.client.host if request.client else None,
+              details={"reason": reason, "pid": os.getpid(),
+                       "instance_id": getattr(request.app.state, "instance_id", None)})
+    return HTTPException(status_code=status_code, detail=ApiError.make(code, message))
 
 
 def _clear_auth_cookies(response: Response):
@@ -116,8 +121,9 @@ def login(payload: LoginRequest, request: Request, response: Response):
             detail=ApiError.make("invalid_credentials", "用户名或密码错误"),
         )
 
+    csrf = jwt_helper.new_csrf_token()
     access, access_jti, access_exp = jwt_helper.create_token(
-        user["id"], user["username"], user["role"], "access"
+        user["id"], user["username"], user["role"], "access", csrf_token=csrf
     )
     # The token's own expiry must match the cookie's, or "remember me" would
     # still drop the session at the default lifetime.
@@ -127,7 +133,6 @@ def login(payload: LoginRequest, request: Request, response: Response):
     refresh, refresh_jti, refresh_exp = jwt_helper.create_token(
         user["id"], user["username"], user["role"], "refresh", ttl_seconds=remember_ttl
     )
-    csrf = jwt_helper.new_csrf_token()
 
     user_db.store_session(access_jti, user["id"], "access", access_exp)
     user_db.store_session(refresh_jti, user["id"], "refresh", refresh_exp)
@@ -149,10 +154,14 @@ def logout(request: Request, response: Response):
     access = request.cookies.get(ACCESS_COOKIE)
     refresh = request.cookies.get(REFRESH_COOKIE)
 
-    # CSRF check: only block session revocation, not cookie clearing
+    # A rejected/stale tab must not clear another tab's new browser session.
     cookie_csrf = request.cookies.get(CSRF_COOKIE)
     header_csrf = request.headers.get("x-csrf-token")
     csrf_ok = bool(cookie_csrf and header_csrf and cookie_csrf == header_csrf)
+
+    if not csrf_ok and (access or refresh):
+        raise _failure(request, "session_logout", "csrf_failed", "CSRF 校验失败",
+                       "csrf_mismatch" if cookie_csrf and header_csrf else "csrf_missing", 403)
 
     if csrf_ok:
         for tok in (access, refresh):
@@ -161,15 +170,6 @@ def logout(request: Request, response: Response):
             payload = jwt_helper.decode_token(tok)
             if payload and payload.get("jti"):
                 user_db.revoke_session(payload["jti"])
-
-    # Always clear cookies (CSRF can't prevent this)
-    if not csrf_ok and access:
-        denied = JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN,
-            content=ApiError.make("csrf_failed", "CSRF 校验失败"),
-        )
-        _clear_auth_cookies(denied)
-        return denied
 
     _clear_auth_cookies(response)
     audit.log("logout", ip=request.client.host if request.client else None)
@@ -180,54 +180,36 @@ def logout(request: Request, response: Response):
 def refresh(request: Request, response: Response):
     token = request.cookies.get(REFRESH_COOKIE)
     if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ApiError.make("no_refresh_token", "缺少 refresh token"),
-        )
+        raise _failure(request, "session_refresh", "no_refresh_token", "缺少 refresh token", "no_refresh_token")
 
     # CSRF check for refresh
     cookie_csrf = request.cookies.get(CSRF_COOKIE)
     header_csrf = request.headers.get("x-csrf-token")
     if not cookie_csrf or cookie_csrf != header_csrf:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=ApiError.make("csrf_failed", "CSRF 校验失败"),
-        )
+        raise _failure(request, "session_refresh", "csrf_failed", "CSRF 校验失败",
+                       "csrf_mismatch" if cookie_csrf and header_csrf else "csrf_missing", 403)
 
-    payload = jwt_helper.decode_token(token)
+    payload, reason = jwt_helper.decode_token_diagnostic(token)
     if not payload or payload.get("kind") != "refresh":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ApiError.make("invalid_refresh", "refresh token 无效"),
-        )
+        raise _failure(request, "session_refresh", "invalid_refresh", "refresh token 无效", reason or "wrong_token_kind")
 
     jti = payload.get("jti")
     if jti and user_db.is_revoked(jti):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ApiError.make("revoked", "session 已被撤销"),
-        )
+        raise _failure(request, "session_refresh", "revoked", "session 已被撤销", "revoked")
 
     user = user_db.get_user_by_id(int(payload["sub"]))
     if not user or user.get("disabled"):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ApiError.make("user_disabled", "用户被禁用"),
-        )
+        raise _failure(request, "session_refresh", "user_disabled", "用户被禁用", "user_disabled")
 
     # Rotate access token; keep the refresh as-is (could rotate too)
     access, access_jti, access_exp = jwt_helper.create_token(
-        user["id"], user["username"], user["role"], "access"
+        user["id"], user["username"], user["role"], "access", csrf_token=cookie_csrf
     )
-    csrf = jwt_helper.new_csrf_token()
     user_db.store_session(access_jti, user["id"], "access", access_exp)
-    # Re-issue the cookies against the *existing* refresh token's expiry. Without
-    # this the rotation reset a 30-day "remember me" session to the 7-day default
-    # every time the access token was refreshed.
-    _set_auth_cookies(response, access, token, csrf,
-                      refresh_expires_at=payload.get("exp"))
+    _set_auth_cookies(response, access, token, cookie_csrf,
+                      refresh_expires_at=payload.get("exp"), new_session=False)
 
-    return TokenResponse(user=_user_out(user), csrf_token=csrf)
+    return TokenResponse(user=_user_out(user), csrf_token=cookie_csrf)
 
 
 @router.get("/me", response_model=UserOut)

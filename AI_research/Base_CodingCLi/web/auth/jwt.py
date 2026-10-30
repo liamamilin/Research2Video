@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import secrets
 import time
 from typing import Literal, Optional
@@ -23,6 +24,7 @@ def create_token(
     role: str,
     kind: Literal["access", "refresh"],
     ttl_seconds: int | None = None,
+    csrf_token: str | None = None,
 ) -> tuple[str, str, int]:
     """Return (token, jti, expires_at).
 
@@ -49,17 +51,39 @@ def create_token(
         "iat": _now(),
         "exp": exp,
     }
+    if csrf_token is not None and kind == "access":
+        # A late refresh response must not switch a newly signed-in browser
+        # back to the previous account. Only this session's CSRF cookie matches.
+        payload["csrf"] = hashlib.sha256(csrf_token.encode()).hexdigest()
     token = jwt.encode(payload, settings.auth.secret_key, algorithm=_ALG)
     return token, jti, exp
 
 
 def decode_token(token: str) -> Optional[dict]:
     """Decode and validate a JWT. Returns None on any failure."""
+    return decode_token_diagnostic(token)[0]
+
+
+def decode_token_diagnostic(token: str) -> tuple[Optional[dict], str]:
+    """Return a safe failure category, never token contents or exception text."""
     settings = get_settings()
     try:
-        return jwt.decode(token, settings.auth.secret_key, algorithms=[_ALG])
+        return jwt.decode(token, settings.auth.secret_key, algorithms=[_ALG]), ""
+    except jwt.ExpiredSignatureError:
+        return None, "expired"
+    except jwt.InvalidSignatureError:
+        return None, "signature_mismatch"
     except jwt.PyJWTError:
-        return None
+        return None, "invalid_token"
+
+
+def matches_browser_session(payload: dict, csrf_token: str | None) -> bool:
+    binding = payload.get("csrf")
+    # Existing sessions remain usable; their next refresh adds the binding.
+    if binding is None:
+        return True
+    actual = hashlib.sha256((csrf_token or "").encode()).hexdigest()
+    return isinstance(binding, str) and secrets.compare_digest(binding, actual)
 
 
 def new_csrf_token() -> str:
