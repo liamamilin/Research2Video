@@ -1089,7 +1089,8 @@ class AutopilotPick(BaseModel):
 
     column: Optional[str] = None
     cell: Optional[str] = None  # a matrix cell: its column and topic source come from the matrix
-    count: int = Field(default=1, ge=1, le=10)
+    count: int = Field(default=1, ge=1, le=10)  # explicit manual selections only
+    all: bool = False
     source: str = Field(default="flash", pattern="^(flash|opportunities)$")
 
     @model_validator(mode="after")

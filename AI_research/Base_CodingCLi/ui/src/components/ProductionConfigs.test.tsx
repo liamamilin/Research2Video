@@ -157,20 +157,18 @@ describe("ProductionConfigs", () => {
     await screen.findByLabelText("配置 快讯 · 开发者");
     const boxes = screen.getAllByLabelText("自动写") as HTMLInputElement[];
     expect(boxes.length).toBe(1);  // 盘点 is one video from several items: not written unattended
-    fireEvent.change(screen.getByLabelText("自动每次写几条"), { target: { value: "2" } });
+    expect(screen.queryByLabelText("自动每次写几条")).toBeNull();
     fireEvent.click(boxes[0]);
     await waitFor(() => expect(posts.length).toBe(1));
-    expect(posts[0]).toEqual({ url: "/api/production/flash", body: { auto: 2 } });
-    const said = String((window.confirm as unknown as { mock: { calls: string[][] } }).mock.calls[0][0]);
-    expect(said).toContain("每篇约 4–20 次搜索");
-    expect(said).toContain("只写打开之后出的报告");
+    expect(posts[0]).toEqual({ url: "/api/production/flash", body: { auto: 1 } });
+    expect(screen.getByText("全部不重复选题依次制作")).toBeTruthy();
   });
 
   it("says when a Job with auto has no schedule, so nothing will start it", async () => {
     CONFIGS[0] = { ...CONFIGS[0], auto: 3 };
     show();
     expect(await screen.findByText(/这个 Job 没设周期/)).toBeTruthy();
-    expect(screen.getByText(/自动：报告一出来写最多 3 条/)).toBeTruthy();
+    expect(screen.getByText(/自动：全部不重复选题/)).toBeTruthy();
     CONFIGS[0] = { ...CONFIGS[0], auto: 0 };
   });
 
@@ -212,7 +210,7 @@ describe("ProductionConfigs", () => {
     fireEvent.click(screen.getByLabelText("写 2026-10-20 的报告"));
     await waitFor(() => expect(posts.length).toBe(2));
     expect(posts[1]).toEqual({ url: "/api/production/dd/write", body: { report_path: "output/x/2026-10-20.md" } });
-    expect(String((window.confirm as unknown as { mock: { calls: string[][] } }).mock.calls[1][0])).toContain("不再搜索");
+    expect(String((window.confirm as unknown as { mock: { calls: string[][] } }).mock.calls[0][0])).toContain("不再搜索");
     CONFIGS.pop();
   });
 

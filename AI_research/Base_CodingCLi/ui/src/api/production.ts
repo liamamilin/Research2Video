@@ -15,7 +15,7 @@ export interface ProductionConfig {
   split: "each" | "some" | "whole" | ""; // 每条一期 / 挑几条合一期 / 整份报告一期
   split_name: string;
   reverify: boolean;
-  auto: number; // Job 每出一份新报告，自动写几条（0 是不自动写）
+  auto: number; // 自动制作开关：1 为处理全部不重复选题，0 为关闭
   audience: string;
   target_minutes: number;
   label: string;

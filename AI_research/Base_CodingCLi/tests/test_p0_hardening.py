@@ -320,18 +320,17 @@ def test_report_write_is_atomic(tmp_path, monkeypatch):
     path = engine._save_output("# hello\n", str(target))
     assert Path(path).read_text(encoding="utf-8") == "# hello\n"
     # No temp file left behind.
-    assert sorted(p.name for p in Path(path).parent.iterdir()) == ["report.md", "report.md.report.json"]
+    assert [p.name for p in Path(path).parent.iterdir()] == ["report.md"]
 
 
-def test_failed_report_save_keeps_the_completed_previous_report(tmp_path, monkeypatch):
+def test_empty_new_output_cannot_destroy_an_existing_report(tmp_path):
     from core.engine import ResearchEngine
-
-    target = tmp_path / "report.md"
-    target.write_text("completed previous report")
-    monkeypatch.setattr("core.engine.atomic_write", lambda *a: (_ for _ in ()).throw(OSError("disk full")))
-    with pytest.raises(OSError, match="disk full"):
-        ResearchEngine.__new__(ResearchEngine)._save_output("new report", str(target))
-    assert target.read_text() == "completed previous report" and not (tmp_path / "report_1.md").exists()
+    output = tmp_path / "report.md"
+    output.write_text("# Previous good report")
+    engine = ResearchEngine.__new__(ResearchEngine)
+    new = Path(engine._save_output("", str(output)))
+    assert output.read_text() == "# Previous good report"
+    assert new != output and new.read_text() == ""
 
 
 def test_save_output_still_avoids_overwriting(tmp_path):

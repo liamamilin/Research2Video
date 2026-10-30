@@ -70,7 +70,7 @@ class RenderSettingsIn(BaseModel):
     expected_revision: str = Field(min_length=1)
     render: dict = Field(default_factory=dict)
     inherit: list[str] = Field(default_factory=list)
-    auto: int | None = Field(default=None, ge=0, le=10)
+    auto: int | None = Field(default=None, ge=0)
 
 
 @router.patch('/{key}/settings')
@@ -97,7 +97,13 @@ def update_render_settings(key: str, body: RenderSettingsIn, user=Depends(requir
             if body.render or body.inherit:
                 data['render'] = validate(inherit(overrides, patch))
             if body.auto is not None:
-                data['auto'] = body.auto
+                import time
+                if body.auto:
+                    data['auto_enabled_at'] = ((data.get('auto_enabled_at') or path.stat().st_mtime)
+                                               if data.get('auto') else time.time())
+                else:
+                    data.pop('auto_enabled_at', None)
+                data['auto'] = int(bool(body.auto))
             backup = yaml_io.save_backup(str(path), old)
             yaml_io.atomic_write(str(path), yaml_io.dump_yaml(data))
     except ValueError as exc:
@@ -205,10 +211,9 @@ def set_auto(key: str, body: AutoIn, user=Depends(require_editor)) -> dict:
             raise _error(422, "config_broken", "；".join(config.errors))
         if config.split not in ("each", "whole"):
             raise _error(422, "auto_needs_each", "盘点一期要挑几条合成，不能自动写：自动只用于每条一期或整份报告一期的配方")
-        if config.split == "whole" and count != 1:
-            raise _error(422, "auto_count", "整份报告每份写一期，自动只能开或关")
-        if not 1 <= count <= production.MAX_AUTO:
-            raise _error(422, "auto_count", f"每次写 1 到 {production.MAX_AUTO} 条")
+        if count < 0:
+            raise _error(422, "auto_count", "auto 应是自动制作开关：1 开启，0 关闭")
+        count = 1
     paths = get_settings().paths
     production.set_auto(paths.config_dir, key, count)
     audit.log("production_auto", user=user["username"], target=key, details={"auto": count})

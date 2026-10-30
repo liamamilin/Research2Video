@@ -57,9 +57,6 @@ CREATE TABLE IF NOT EXISTS autopilot_items (
     updated_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_autopilot_items_run ON autopilot_items(run_id);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_autopilot_theme_once
-ON autopilot_items(json_extract(topic,'$.theme_task_id'))
-WHERE json_type(topic,'$.theme_auto')='object';
 CREATE TABLE IF NOT EXISTS alert_acks (
     key TEXT PRIMARY KEY,
     acked_by TEXT NOT NULL DEFAULT '',
@@ -145,13 +142,13 @@ def claim_plan(plan_id: str, expected: float, new_next: Optional[float]) -> bool
 
 # --- runs and items --------------------------------------------------------
 
-def create_run(spec: dict, items: list[dict], *, plan_id: Optional[str] = None, started_by: str = "", stage: str = "TOPICS") -> dict:
+def create_run(spec: dict, items: list[dict], *, plan_id: Optional[str] = None, started_by: str = "") -> dict:
     run_id, now = uuid.uuid4().hex, _now()
     with connect(write=True) as conn:
         conn.execute(
             "INSERT INTO autopilot_runs (id, plan_id, spec, status, stage, started_by, started_at, created_at,"
             " updated_at) VALUES (?, ?, ?, 'RUNNING', ?, ?, ?, ?, ?)",
-            (run_id, plan_id, json.dumps(spec, ensure_ascii=False), stage, started_by, time.time(), now, now))
+            (run_id, plan_id, json.dumps(spec, ensure_ascii=False), "ITEMS" if items else "TOPICS", started_by, time.time(), now, now))
         for i, item in enumerate(items):
             conn.execute(
                 "INSERT INTO autopilot_items (id, run_id, slot, column_key, topic, production, updated_at)"
@@ -174,14 +171,11 @@ def adopt_script(script: dict, *, started_by: str) -> dict:
     """Continue an existing script to video with the normal durable batch worker."""
     run_id, now = uuid.uuid4().hex, _now()
     with connect(write=True) as conn:
-        existing = conn.execute("SELECT r.id,i.id AS item_id FROM autopilot_runs r JOIN autopilot_items i ON i.run_id=r.id "
-                                "WHERE (i.script_id=? OR (?!='' AND json_extract(i.topic,'$.theme_task_id')=?))"
-                                " AND r.status='RUNNING' AND i.state NOT IN ('DONE','FAILED','HELD','CANCELLED') LIMIT 1",
-                                (script['id'], script['topic'].get('theme_task_id', ''), script['topic'].get('theme_task_id', ''))).fetchone()
+        existing = conn.execute("SELECT r.id FROM autopilot_runs r JOIN autopilot_items i ON i.run_id=r.id "
+                                "WHERE i.script_id=? AND r.status='RUNNING' AND i.state NOT IN ('DONE','FAILED','HELD','CANCELLED') LIMIT 1",
+                                (script['id'],)).fetchone()
         if existing:
             run_id = existing['id']
-            conn.execute("UPDATE autopilot_items SET script_id=?,state='WORKING' WHERE id=? AND script_id IS NULL",
-                         (script['id'], existing['item_id']))
         else:
             conn.execute("INSERT INTO autopilot_runs (id,spec,status,stage,started_by,started_at,created_at,updated_at) "
                          "VALUES (?,?,'RUNNING','ITEMS',?,?,?,?)",
@@ -191,13 +185,6 @@ def adopt_script(script: dict, *, started_by: str) -> dict:
                          (uuid.uuid4().hex, run_id, script['column_key'], json.dumps(script['topic'], ensure_ascii=False),
                           script['id'], script.get('production') or '', now))
     return get_run(run_id)
-
-
-def item_for_theme(theme_id: str) -> dict | None:
-    with connect() as conn:
-        row = conn.execute("SELECT * FROM autopilot_items WHERE json_extract(topic,'$.theme_task_id')=?"
-                           " ORDER BY rowid DESC LIMIT 1", (theme_id,)).fetchone()
-    return _dec(row, _ITEM_JSON)
 
 
 def list_runs(limit: Optional[int] = 20, status: Optional[str] = None) -> list[dict]:

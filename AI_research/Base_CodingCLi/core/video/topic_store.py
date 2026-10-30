@@ -17,8 +17,7 @@ is picked up the same way, and the first scan imports every report there already
 ``<report date>/<code>``, as it always was, so the scripts, batches and "not writing" marks made before keep pointing
 at the same topics. Topics added by hand have the source ``manual`` and the id ``manual/<n>``.
 
-Legacy rerun files add their suffix to the id (``<date>/F1@1`` for ``_1.md``). New completed reports carry a
-manifest and use ``<date>/F1@r<report identity>`` while keeping the date and display code. Old links remain valid.
+Rerun files add their suffix to the id (``<date>/F1@1`` for ``_1.md``), while keeping the date and display code.
 Automatic batches read their exact report file, even if a newer report has replaced the browser's topic list.
 
 Ids are unique only while prefixes are: when two sources would give the same codes, the one that has already imported
@@ -39,7 +38,6 @@ from . import flash as flash_format
 from . import topics as opportunity_format
 from .store import connect, _now
 from .topics import Topic
-from core import report_identity
 
 FORMATS = ("flash", "opportunities", "items")
 MANUAL = "manual"
@@ -81,9 +79,8 @@ CREATE TABLE IF NOT EXISTS topic_imports (
 
 def init(conn) -> None:
     conn.executescript(SCHEMA)
-    for table in ("topics", "topic_imports"):
-        if "report_identity" not in {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}:
-            conn.execute(f"ALTER TABLE {table} ADD COLUMN report_identity TEXT NOT NULL DEFAULT ''")
+    if "report_identity" not in {r[1] for r in conn.execute("PRAGMA table_info(topic_imports)")}:
+        conn.execute("ALTER TABLE topic_imports ADD COLUMN report_identity TEXT NOT NULL DEFAULT ''")
 
 
 @dataclass(frozen=True)
@@ -231,17 +228,19 @@ def _pattern(source: Source, root: str) -> tuple[str, re.Pattern]:
 
 
 def all_report_files(source: Source, root: str) -> list[tuple[str, str]]:
-    """Every completed run, including same-day numbered siblings, newest first."""
+    """Every run, including earlier reports from the same day."""
     if source.error:
         return []
     pattern, regex = _pattern(source, root)
-    files = [(match[1], path) for path in glob.glob(pattern)
+    found = [(match[1], path) for path in glob.glob(pattern)
              if (match := regex.match(path)) and os.path.isfile(path)]
-    return sorted(files, key=lambda row: (row[0], os.path.getmtime(row[1]), row[1]), reverse=True)
+    return sorted(found, key=lambda item: (item[0], os.path.getmtime(item[1]), item[1]), reverse=True)
 
 
 def report_files(source: Source, root: str) -> list[tuple[str, str]]:
     """``(date, path)`` of the source's reports, one per day (that day's last run), newest day first."""
+    if source.error:
+        return []
     newest: dict[str, str] = {}
     for date, path in all_report_files(source, root):
         newest.setdefault(date, path)
@@ -262,11 +261,43 @@ def read_report(source: Source, path: str, root: str) -> tuple[str, list[Topic]]
         raise ValueError("报告不属于指定的选题来源")
     with open(path, encoding="utf-8") as fh:
         found = parse(source, fh.read(), match[1])
-    identity = report_identity.version(path, root)
+    from core import report_identity
+    revision = report_identity.version(path, root)
+    if not revision and found:
+        # A legacy pathname may already have been overwritten. Never attach a
+        # different event to a frozen script merely because its F-number fits.
+        ids = json.dumps([t.id + (f"@{match[2]}" if match[2] else "") for t in found])
+        with connect() as db:
+            frozen = {r["topic_id"]: r["title"] for r in db.execute(
+                "SELECT json_extract(topic,'$.id') topic_id,COALESCE(json_extract(topic,'$.from_item_title'),json_extract(topic,'$.title')) title FROM scripts"
+                " WHERE json_extract(topic,'$.id') IN (SELECT value FROM json_each(?))"
+                " AND json_type(topic,'$.fields')='object' AND json_extract(topic,'$.fields')!='{}'", (ids,))}
+        if any(t.id + (f"@{match[2]}" if match[2] else "") in frozen and
+               frozen[t.id + (f"@{match[2]}" if match[2] else "")] != t.title for t in found):
+            revision = report_identity.describe(path, root)["id"]
     rel = os.path.relpath(path, root)
+    # A report published just before deployment may already have scripts using
+    # its numeric legacy suffix. Keep their association only for identical
+    # frozen inputs from this exact report, never for a recycled F-number.
+    with connect() as db:
+        aliases = [dict(r) for r in db.execute(
+            "SELECT json_extract(topic,'$.id') topic_id,"
+            "COALESCE(json_extract(topic,'$.from_item_title'),json_extract(topic,'$.title')) title,"
+            "json_extract(topic,'$.fields') fields FROM scripts"
+            " WHERE json_extract(topic,'$.from_report')=? AND json_type(topic,'$.fields')='object'"
+            " ORDER BY created_at", (rel,))]
+    def fields(value):
+        return {k: v for k,v in value.items() if k != "目标受众"}
     for topic in found:
-        if identity:
-            topic.id += f"@r{identity[:16]}"
+        base_id = topic.id
+        legacy_id = base_id + (f"@{match[2]}" if match[2] else "")
+        alias = next((r["topic_id"] for r in aliases if isinstance(r["topic_id"], str) and r["topic_id"] and
+                      (r["topic_id"] == legacy_id or r["topic_id"].startswith(base_id + "@r")) and
+                      r["title"] == topic.title and fields(json.loads(r["fields"] or "{}")) == fields(topic.fields)), None)
+        if alias:
+            topic.id = alias
+        elif revision:
+            topic.id += f"@r{revision[:16]}"
         elif match[2]:
             topic.id += f"@{match[2]}"
         topic.source = source.name
@@ -327,28 +358,27 @@ def parse(source: Source, text: str, report_date: str) -> list[Topic]:
 def sync(jobs_dir: str, output_dir: str) -> list[dict]:
     """Import every report that is new or changed since it was last read. Returns what each source looks like."""
     root = os.path.dirname(os.path.abspath(output_dir))
+    from core import report_identity
     with connect() as conn:
         seen = {r["report_path"]: (r["mtime"], r["size"], r["report_identity"]) for r in conn.execute(
             "SELECT report_path, mtime, size, report_identity FROM topic_imports WHERE error = ''")}
     status = []
     for source in sources(jobs_dir).values():
         files = all_report_files(source, root)
-        for report_date, path in reversed(files):
+        for report_date, path in files:
             rel = os.path.relpath(path, root)
             stat = os.stat(path)
-            previous = seen.get(rel)
-            if previous and previous[:2] == (stat.st_mtime, stat.st_size) and (
-                    bool(previous[2]) == os.path.isfile(path + '.report.json')):
+            if seen.get(rel) == (stat.st_mtime, stat.st_size, report_identity.describe(path, root)["id"]):
                 continue
             _import(source, rel, path, report_date, stat, root)
-        status.append({**source.as_dict(), "reports": len({date for date, _ in files}), "latest": files[0][0] if files else None})
+        status.append({**source.as_dict(), "reports": len(files), "latest": files[0][0] if files else None})
     return status
 
 
 def _import(source: Source, rel: str, path: str, report_date: str, stat, root: str) -> None:
+    from core import report_identity
     try:
         _, found = read_report(source, path, root)
-        identity = report_identity.version(path, root)
         quiet = False
         if not found:
             try:
@@ -358,22 +388,22 @@ def _import(source: Source, rel: str, path: str, report_date: str, stat, root: s
                 pass
         error = "" if found or quiet else "报告里没找到选题：标题和字段的格式不对？"
     except (OSError, UnicodeDecodeError) as exc:
-        found, identity, error = [], "", f"读不了：{exc}"
+        found, error = [], f"读不了：{exc}"
     now = _now()
     with connect(write=True) as conn:
-        # Preserve prior revisions and same-day runs for frozen scripts and links.
-        conn.execute("DELETE FROM topics WHERE report_path=? AND source=? AND report_identity=?",
-                     (rel, source.name, identity))
+        # the report was rewritten: its topics are replaced as a whole (scripts keep their own copy of the topic)
+        conn.execute("DELETE FROM topics WHERE report_path = ? AND source = ?", (rel, source.name))
         for position, topic in enumerate(found):
             conn.execute(
                 "INSERT OR REPLACE INTO topics (id, source, report_date, report_path, code, position, title, fields,"
-                " created_by, created_at, updated_at, report_identity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'import', ?, ?, ?)",
+                " created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'import', ?, ?)",
                 (topic.id, source.name, report_date, rel, topic.code, position, topic.title,
-                 json.dumps(topic.fields, ensure_ascii=False), now, now, identity))
+                 json.dumps(topic.fields, ensure_ascii=False), now, now))
         conn.execute(
             "INSERT OR REPLACE INTO topic_imports (report_path, source, report_date, mtime, size, count, error,"
-            " imported_at,report_identity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (rel, source.name, report_date, stat.st_mtime, stat.st_size, len(found), error, now, identity))
+            " imported_at, report_identity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (rel, source.name, report_date, stat.st_mtime, stat.st_size, len(found), error, now,
+             report_identity.describe(path, root)["id"]))
 
 
 # --- reading topics ------------------------------------------------------------
@@ -389,9 +419,8 @@ def _topic(row) -> Topic:
 def report_dates(source: str) -> list[str]:
     with connect() as conn:
         return [r["report_date"] for r in conn.execute(
-            "SELECT report_date FROM topics WHERE source=? AND report_date IS NOT NULL UNION"
-            " SELECT report_date FROM topic_imports WHERE source=? AND report_date IS NOT NULL"
-            " ORDER BY report_date DESC", (source, source))]
+            "SELECT DISTINCT report_date FROM topics WHERE source = ? AND report_date IS NOT NULL"
+            " ORDER BY report_date DESC", (source,))]
 
 
 def latest(source: str) -> Optional[str]:
@@ -408,14 +437,10 @@ def load(source: str, report_date: Optional[str] = None) -> tuple[Optional[str],
         report_date = report_date or latest(source)
         if report_date is None:
             return None, []
-        latest_run = conn.execute("SELECT report_path,report_identity FROM topic_imports WHERE source=? AND report_date=?"
-                                  " ORDER BY mtime DESC,report_path DESC LIMIT 1", (source, report_date)).fetchone()
-        if latest_run:
-            rows = conn.execute("SELECT * FROM topics WHERE source=? AND report_path=? AND report_identity=? ORDER BY position",
-                                (source, latest_run['report_path'], latest_run['report_identity'])).fetchall()
-        else:
-            rows = conn.execute("SELECT * FROM topics WHERE source = ? AND report_date = ? ORDER BY position",
-                                (source, report_date)).fetchall()
+        newest = conn.execute("SELECT report_path FROM topic_imports WHERE source=? AND report_date=?"
+                              " ORDER BY mtime DESC,report_path DESC LIMIT 1", (source, report_date)).fetchone()
+        rows = conn.execute("SELECT * FROM topics WHERE source = ? AND report_date = ? AND report_path=? ORDER BY position",
+                            (source, report_date, newest["report_path"] if newest else "")).fetchall()
     return report_date, [_topic(r) for r in rows]
 
 

@@ -2,5 +2,5 @@
 name: 快讯 · 每天（不再调研）
 job: monitoring/ai_flash_discovery
 recipe: flash
-auto: 3
+auto: 1
 reverify: false

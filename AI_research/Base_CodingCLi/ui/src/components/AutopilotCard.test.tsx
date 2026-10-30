@@ -79,7 +79,7 @@ describe("Autopilot card", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("sets how many topics each cell writes and starts that batch", async () => {
+  it("selects recipes and queues all topics without a quantity input", async () => {
     useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
     const calls: { url: string; body?: string; method?: string }[] = [];
     const coverage = [
@@ -95,10 +95,11 @@ describe("Autopilot card", () => {
     fireEvent.click(await screen.findByText("设置这一批"));
     const box = await screen.findByLabelText("快讯");
     expect(screen.queryByLabelText("盘点")).toBeNull(); // a roundup is not picked by count
-    fireEvent.change(box, { target: { value: "2" } });
-    fireEvent.click(screen.getByText(/按这个现在开始一批/));
+    expect((box as HTMLInputElement).type).toBe("checkbox");
+    expect((box as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(screen.getByText(/开始制作/));
     await waitFor(() => expect(calls.some((c) => c.method === "POST" && c.url.includes("/autopilot/runs"))).toBe(true));
     const post = calls.find((c) => c.method === "POST" && c.url.includes("/autopilot/runs"))!;
-    expect(JSON.parse(post.body!).spec.picks).toEqual([{ cell: "flash", count: 2 }]);
+    expect(JSON.parse(post.body!).spec.picks).toEqual([{ cell: "flash", count: 1, all: true }]);
   });
 });

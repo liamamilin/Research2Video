@@ -52,14 +52,14 @@ export function AutopilotCard({ currentItems = [] }: {
         // start from what the weekly plan writes now, else the default batch
         const picks = plans[0]?.spec?.picks ?? [{ cell: "flash", count: 3 }, { cell: "point_short", count: 2 }];
         const init: Record<string, number> = {};
-        for (const pick of picks) init[pick.cell ?? pick.column ?? ""] = pick.count;
+        for (const pick of picks) init[pick.cell ?? pick.column ?? ""] = 1;
         setCounts(init);
       })
       .catch(() => undefined);
   }, [editing, cells.length, plans]);
 
   const specNow = (): AutopilotSpec => ({
-    picks: Object.entries(counts).filter(([cell, n]) => n > 0 && cells.some((c) => c.cell === cell)).map(([cell, count]) => ({ cell, count })),
+    picks: Object.entries(counts).filter(([cell, n]) => n > 0 && cells.some((c) => c.cell === cell)).map(([cell]) => ({ cell, count: 1, all: true })),
     refresh: true,
   });
   const total = specNow().picks.reduce((a, p) => a + p.count, 0);
@@ -106,32 +106,29 @@ export function AutopilotCard({ currentItems = [] }: {
         ) : null}
         {canEdit && run?.status !== "RUNNING" && !editing ? (
           <button className="btn text-xs" disabled={busy} onClick={() => act(() => startAutopilotRun())}>
-            现在开始一批（3 条快讯 + 2 个知识点）
+            现在制作全部不重复选题
           </button>
         ) : null}
       </div>
       {editing ? (
         <div className="space-y-2 rounded border border-border p-3" aria-label="批次设置">
-          <p className="text-xs text-text-muted">每个格子写几条（只列有选题来源、能按条数挑的格子）。每条要研究约几次到二十次搜索。</p>
+          <p className="text-xs text-text-muted">选择制作配方，全部不重复选题按队列制作。</p>
           <div className="flex flex-wrap gap-3">
             {cells.map((c) => (
               <label key={c.cell} className="flex items-center gap-2 text-xs">
                 {c.label}
                 <input
-                  type="number"
-                  min={0}
-                  max={5}
-                  className="input w-16"
+                  type="checkbox"
                   aria-label={c.label}
-                  value={counts[c.cell] ?? 0}
-                  onChange={(e) => setCounts({ ...counts, [c.cell]: Math.max(0, Math.min(5, Number(e.target.value) || 0)) })}
+                  checked={(counts[c.cell] ?? 0) > 0}
+                  onChange={(e) => setCounts({ ...counts, [c.cell]: e.target.checked ? 1 : 0 })}
                 />
               </label>
             ))}
           </div>
           <div className="flex flex-wrap gap-2">
             <button className="btn btn-primary text-xs" disabled={busy || total === 0} onClick={() => act(async () => { await startAutopilotRun(specNow()); setEditing(false); })}>
-              按这个现在开始一批（共 {total} 条）
+              开始制作（{total} 个配方）
             </button>
             {plans[0] ? (
               <button className="btn text-xs" disabled={busy || total === 0} onClick={() => act(() => setPlanSpec(plans[0].id, specNow()))}>
@@ -145,7 +142,7 @@ export function AutopilotCard({ currentItems = [] }: {
       {plans.map((p) => (
         <p key={p.id} className="text-xs text-text-muted">
           计划「{p.name}」{p.expression}{p.enabled ? `（启用），下次 ${when(p.next_fire)}` : "（已停用，不会自动运行）"}
-          {p.spec?.picks.length ? `；写 ${p.spec.picks.map((k) => `${labels[k.cell ?? k.column ?? ""] ?? k.cell ?? k.column} ${k.count} 条`).join("、")}` : ""}
+          {p.spec?.picks.length ? `；写 ${p.spec.picks.map((k) => `${labels[k.cell ?? k.column ?? ""] ?? k.cell ?? k.column} 全部不重复选题`).join("、")}` : ""}
         </p>
       ))}
       {run ? (

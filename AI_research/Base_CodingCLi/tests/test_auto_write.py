@@ -55,7 +55,7 @@ def pilot_env(prod_env, monkeypatch):  # noqa: F811
     return prod_env, spawned, started
 
 
-def test_auto_is_a_count_of_items_and_only_for_a_recipe_that_writes_one_video_per_item(prod_env):
+def test_auto_is_an_enable_flag_and_legacy_positive_counts_do_not_cap_output(prod_env):
     config, jobs = str(prod_env / "config"), str(prod_env / "jobs")
     for name, body in {"on": f"job: {JOB}\nrecipe: flash\nauto: 3\n", "off": f"job: {JOB}\nrecipe: flash\nauto: 0\n",
                        "roundup": f"job: {JOB}\nrecipe: ai-developer-roundup-long\nauto: 2\n",
@@ -63,19 +63,20 @@ def test_auto_is_a_count_of_items_and_only_for_a_recipe_that_writes_one_video_pe
                        "yes": f"job: {JOB}\nrecipe: flash\nauto: true\n"}.items():
         _config_file(prod_env, name).write_text(body, encoding="utf-8")
     every = production.load_all(config, jobs)
-    assert every["on"].usable and every["on"].auto == 3 and every["on"].as_dict()["auto"] == 3
+    assert every["on"].usable and every["on"].auto == 1 and every["on"].as_dict()["auto"] == 1
     assert every["off"].usable and every["off"].auto == 0
     assert every["flash"].auto == 0  # off unless asked for
     assert "不能自动写" in "".join(every["roundup"].errors)
-    for key in ("many", "word", "yes"):
-        assert "auto 应是每次写几条" in "".join(every[key].errors), key
+    assert every["many"].usable and every["many"].auto == 1
+    assert every["yes"].usable and every["yes"].auto == 1
+    assert "auto 应是自动制作开关" in "".join(every["word"].errors)
 
 
 def test_set_auto_keeps_the_rest_of_the_file_and_off_removes_it(prod_env):
     config = str(prod_env / "config")
     path = _config_file(prod_env, "flash")
     before = path.read_text(encoding="utf-8")
-    assert production.set_auto(config, "flash", 2) and "auto: 2" in path.read_text(encoding="utf-8")
+    assert production.set_auto(config, "flash", 2) and "auto: 1" in path.read_text(encoding="utf-8")
     assert production.set_auto(config, "flash", None)
     assert "auto:" not in path.read_text(encoding="utf-8")
     assert [l for l in path.read_text(encoding="utf-8").splitlines() if not l.startswith("#")] == \
@@ -91,7 +92,7 @@ def test_only_a_report_that_came_out_after_auto_was_turned_on_is_written(prod_en
     os.utime(_report(prod_env), (stamp + 500, stamp + 500))
     found = _pending(prod_env, stamp + 9999)
     assert [(f["job"], [p["production"] for p in f["picks"]]) for f in found] == [(JOB, ["flash"])]
-    assert found[0]["picks"][0] == {"column": "flash", "count": 3, "source": "flash", "production": "flash"}
+    assert found[0]["picks"][0] == {"column": "flash", "all": True, "source": "flash", "production": "flash"}
     assert found[0]["report"].endswith("2026-10-19_ai_flash_discovery.md")
 
 
@@ -109,7 +110,7 @@ def test_a_batch_per_job_and_report_with_a_pick_for_each_auto_config_in_key_orde
     stamp = max(os.path.getmtime(_config_file(prod_env, k)) for k in ("flash", "point_short")) + 500
     os.utime(_report(prod_env), (stamp, stamp))
     [found] = _pending(prod_env, stamp + 120)
-    assert [(p["production"], p["count"]) for p in found["picks"]] == [("flash", 3), ("point_short", 2)]
+    assert [(p["production"], p["all"]) for p in found["picks"]] == [("flash", True), ("point_short", True)]
 
 
 def test_firing_records_the_report_so_it_is_written_once_and_each_script_records_its_config(pilot_env):
@@ -149,7 +150,8 @@ def test_auto_without_research_writes_from_the_item_and_a_variant_column_resolve
     assert pilot.fire_auto(now) == 1
     pilot.tick()
     [run] = ap.list_runs()
-    [item] = run["items"]
+    assert len(run["items"]) == 2  # auto: 1 enables all, not one item
+    item = next(i for i in run["items"] if i["script_id"])
     script = store.get_script(item["script_id"])
     assert (script["column_key"], script["production"]) == ("flash-nr", "bare")
     assert script["topic"]["from_item"] == item["topic"]["id"] and script["topic"]["from_report"].endswith("_ai_flash_discovery.md")
@@ -162,23 +164,23 @@ def test_the_scheduler_wakes_the_console_for_a_new_report_and_not_for_an_old_one
     now = _fresh(prod_env)
     assert not schedule_runner.autopilot_due(state, now)  # without the runtime it only knows plans and running batches
     assert schedule_runner.autopilot_due(state, now, runtime)
-    ap.finished_run({"picks": [], "job": JOB, "report": str(_report(prod_env))}, "写过了")
+    ap.finished_run(_pending(prod_env, now)[0], "写过了")
     assert not schedule_runner.autopilot_due(state, now, runtime)
 
 
 def test_api_turning_auto_on_and_off(client, prod_env):
     _login(client)
     on = client.patch("/api/production/flash", json={"auto": 2}, headers=_csrf(client))
-    assert on.status_code == 200 and on.json()["auto"] == 2
-    assert [c["auto"] for c in client.get("/api/production").json() if c["key"] == "flash"] == [2]
+    assert on.status_code == 200 and on.json()["auto"] == 1
+    assert [c["auto"] for c in client.get("/api/production").json() if c["key"] == "flash"] == [1]
     roundup = client.patch("/api/production/ai-developer-roundup-long", json={"auto": 2}, headers=_csrf(client))
     assert roundup.status_code == 422 and roundup.json()["error"]["code"] == "auto_needs_each"
-    assert client.patch("/api/production/flash", json={"auto": 11}, headers=_csrf(client)).status_code == 422
+    assert client.patch("/api/production/flash", json={"auto": -1}, headers=_csrf(client)).status_code == 422
     assert client.patch("/api/production/nope", json={"auto": 1}, headers=_csrf(client)).status_code == 404
     off = client.patch("/api/production/flash", json={"auto": None}, headers=_csrf(client))
     assert off.status_code == 200 and off.json()["auto"] == 0
     added = client.post("/api/production", json={"job": JOB, "recipe": "point_short", "auto": 2}, headers=_csrf(client))
-    assert added.status_code == 201 and added.json()["auto"] == 2
+    assert added.status_code == 201 and added.json()["auto"] == 1
     bad = client.post("/api/production", json={"job": JOB, "recipe": "ai-developer-roundup-long", "auto": 2},
                       headers=_csrf(client))
     assert bad.status_code == 422  # never left behind

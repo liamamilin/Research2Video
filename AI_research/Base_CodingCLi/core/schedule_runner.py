@@ -124,9 +124,8 @@ def auto_due(runtime: Runtime, now: float) -> bool:
     from core.video import auto
 
     try:
-        from core import theme_production
-        return bool(auto.pending(runtime.config_dir, runtime.jobs_dir, runtime.state_dir, runtime.workspace, now)
-                    or theme_production.pending(runtime.config_dir, runtime.state_dir, now))
+        return bool(auto.pending(runtime.config_dir, runtime.jobs_dir, runtime.state_dir, runtime.workspace, now) or
+                    auto.recommendations_pending(runtime.config_dir, runtime.jobs_dir, runtime.state_dir, now))
     except Exception:
         logger.exception('Auto-write check failed')
         return False

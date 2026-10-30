@@ -1,4 +1,4 @@
-"""Portable report-run identities; completed report files remain immutable."""
+"""Content identities for immutable research report runs."""
 from __future__ import annotations
 
 import hashlib
@@ -10,11 +10,10 @@ from core.fileio import atomic_write
 
 
 def describe(path: str, root: str) -> dict:
-    data = Path(path).read_bytes()
     relative = os.path.relpath(path, root).replace(os.sep, "/")
-    digest = hashlib.sha256(data).hexdigest()
-    key = hashlib.sha256((relative + "\n" + digest).encode()).hexdigest()
-    return {"schema": "research-report/v1", "id": key, "path": relative, "sha256": digest}
+    digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    identity = hashlib.sha256((relative + "\n" + digest).encode()).hexdigest()
+    return {"schema": "research-report/v1", "id": identity, "path": relative, "sha256": digest}
 
 
 def publish(path: str, root: str) -> dict:
@@ -24,11 +23,4 @@ def publish(path: str, root: str) -> dict:
 
 
 def version(path: str, root: str) -> str:
-    """Legacy reports keep their IDs until explicitly migrated or rerun.
-
-    A changed file with an older manifest still gets a new content identity;
-    reading never updates its manifest or any historical script.
-    """
-    if not Path(path + ".report.json").is_file():
-        return ""
-    return describe(path, root)["id"]
+    return describe(path, root)["id"] if Path(path + ".report.json").is_file() else ""

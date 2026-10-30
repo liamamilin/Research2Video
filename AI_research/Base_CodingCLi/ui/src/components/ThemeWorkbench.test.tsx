@@ -52,17 +52,6 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 function show(canEdit = true) { return render(<MemoryRouter><ToastProvider><ThemeWorkbench matrix="demo" canEdit={canEdit} /></ToastProvider></MemoryRouter>); }
 
 describe("matrix topic workbench", () => {
-  it('shows queued and quota states without offering a second production start for the queued theme', async () => {
-    data.themes[0].status = 'queued';
-    data.themes[0].automatic_production = { state: 'queued', note: '等待制作名额' };
-    data.themes[1].automatic_production = { state: 'quota', note: '本栏目本周推荐配额已用完' };
-    show();
-    const queued = await screen.findByRole('article', { name: `主题 ${data.themes[0].title}` });
-    expect(within(queued).getByText('已排队，等待制作')).toBeTruthy();
-    expect(within(queued).queryByRole('button', { name: '研究并制作视频' })).toBeNull();
-    expect(screen.getByText('本栏目本周推荐配额已用完')).toBeTruthy();
-    expect(calls.some(call => call.method === 'POST')).toBe(false);
-  });
   it("filters a larger reference library by subject", async () => {
     data.library!.patterns.push({ id: "format-two", category: "how", name: "连续任务演示", title_pattern: "怎样完成{任务}？", outline: ["输入", "操作", "结果"], example_ids: [] });
     show();

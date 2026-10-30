@@ -793,6 +793,7 @@ export interface AutopilotPick {
   column?: string;
   source?: string;
   count: number;
+  all?: boolean;
 }
 
 export interface AutopilotSpec {

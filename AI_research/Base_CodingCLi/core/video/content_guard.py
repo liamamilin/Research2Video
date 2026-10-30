@@ -41,7 +41,7 @@ def publishing_block(script: dict) -> str:
 def with_policy(script: dict, jobs_dir: str = "") -> dict:
     """Infer policy in memory for older automatic drafts, including dated flash topic IDs."""
     topic = script.get("topic") or {}
-    if script.get("created_by") != "autopilot" or any((topic.get("matrix_dedup") or {}).get(k) for k in ("job", "matrix")):
+    if script.get("created_by") != "autopilot" or (topic.get("matrix_dedup") or {}).get("job"):
         return script
     job = (script.get("content_context") or {}).get("job", "")
     with store.connect() as conn:
@@ -175,9 +175,24 @@ def scope(job: str, config_dir: str) -> str:
     return f"matrix:{matrix.key}" if matrix else f"job:{job}" if job else ""
 
 
-def topic_scope(topic: dict, config_dir: str) -> str:
-    policy = topic.get("matrix_dedup") or {}
-    return f"matrix:{policy['matrix']}" if policy.get("matrix") else scope(policy.get("job", ""), config_dir)
+def used_candidate_ids(candidates: list[dict], config_dir: str) -> set[str]:
+    """Recognize the same frozen input across report-version ID changes."""
+    if not candidates:
+        return set()
+    scopes = {}
+    def identity(topic):
+        job = (topic.get("matrix_dedup") or {}).get("job", "")
+        if job not in scopes:
+            scopes[job] = scope(job, config_dir)
+        return scopes[job], json.dumps({"title": topic.get("from_item_title") or topic.get("title"),
+            "fields": {k: v for k,v in (topic.get("fields") or {}).items() if k != "目标受众"}},
+            ensure_ascii=False, sort_keys=True)
+    with store.connect() as db:
+        rows = db.execute("SELECT topic FROM scripts s WHERE (s.archived=0 AND s.status!='FAILED')"
+                          " OR EXISTS (SELECT 1 FROM publications p WHERE p.script_id=s.id)").fetchall()
+        queued = db.execute("SELECT topic FROM autopilot_items WHERE state NOT IN ('FAILED','CANCELLED')").fetchall()
+    covered = {identity(json.loads(r["topic"])) for r in [*rows,*queued]}
+    return {t["id"] for t in candidates if t.get("id") and identity(t) in covered}
 
 
 def known_duplicate_ids(candidates: list[dict], config_dir: str) -> set[str]:
@@ -194,8 +209,7 @@ def known_duplicate_ids(candidates: list[dict], config_dir: str) -> set[str]:
         skipped = [json.loads(r["topic"]) for r in conn.execute(
             "SELECT topic FROM scripts WHERE archived=1 AND status='FAILED' AND current_version=0"
             " AND json_extract(topic,'$.content_archive') IS NOT NULL"
-            " AND json_extract(topic,'$.id') IN (SELECT value FROM json_each(?))",
-            (json.dumps(ids),))]
+            )]
         peers = {peer for t in skipped for peer in t["content_archive"].get("duplicate_of", [])}
         cutoff = (datetime.now().astimezone() - timedelta(days=MEMORY_DAYS)).isoformat()[:10]
         covered = {r["id"] for r in conn.execute(
@@ -213,12 +227,10 @@ def known_duplicate_ids(candidates: list[dict], config_dir: str) -> set[str]:
     scopes: dict[str, str] = {}
 
     def identity(topic: dict) -> tuple[str, str]:
-        policy = topic.get("matrix_dedup") or {}
-        key = policy.get("matrix") or policy.get("job", "")
-        if key not in scopes:
-            scopes[key] = topic_scope(topic, config_dir)
-        return scopes[key], json.dumps({
-            "id": topic.get("id"),
+        job = (topic.get("matrix_dedup") or {}).get("job", "")
+        if job not in scopes:
+            scopes[job] = scope(job, config_dir)
+        return scopes[job], json.dumps({
             "title": topic.get("from_item_title") or topic.get("title"),
             "fields": {k: v for k, v in (topic.get("fields") or {}).items() if k != "目标受众"},
         }, ensure_ascii=False, sort_keys=True)
@@ -252,11 +264,11 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
             continue
         owner = owners[script["id"]]
         source_matrix = owner.get("source_matrix", owner["matrix"])
-        story = json.loads(row["meta"]).get("story") or {}
-        key = story.get("scope") or (f"matrix:{source_matrix}" if source_matrix else f"job:{owner['job']}" if owner["job"] else "")
-        if not source_matrix and not story.get("scope"):
+        key = f"matrix:{source_matrix}" if source_matrix else f"job:{owner['job']}" if owner["job"] else ""
+        if not source_matrix:
             key = matrix_scopes.get((script["topic"].get("matrix_dedup") or {}).get("job"), key)
         sections = json.loads(row["sections"])
+        story = json.loads(row["meta"]).get("story") or {}
         fields = script["topic"].get("fields") or {}
         event_date = str(fields.get("发布日期") or script["topic"].get("event_date") or "")
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", event_date):
@@ -276,7 +288,8 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
 
 
 def coverage(topic: dict, config_dir: str, jobs_dir: str, *, script_id: str = "") -> list[dict]:
-    key = topic_scope(topic, config_dir)
+    policy = topic.get("matrix_dedup") or {}
+    key = scope(policy.get("job", ""), config_dir)
     if not key:
         return []
     with store.connect() as conn:
@@ -289,7 +302,7 @@ def writing_peer(topic: dict, config_dir: str, jobs_dir: str, *, script_id: str 
     """Reserve a matrix until its earlier first draft has usable sources; no same-report exemption."""
     from core.video import outputs, story_pool
 
-    key = topic_scope(topic, config_dir)
+    key = scope((topic.get("matrix_dedup") or {}).get("job", ""), config_dir)
     if not key:
         return False
     with store.connect() as conn:
@@ -367,7 +380,7 @@ def prepare(script: dict, report: str, material: str, config_dir: str, jobs_dir:
     hits = overlap(input_sources, blocked)
     if hits and not input_sources - hits:
         raise DuplicateContent([p for p in peers if overlap(hits, p["sources"])], "报告中的新闻均已讲过，跳过自动写稿")
-    evidence = {"scope": topic_scope(script["topic"], config_dir),
+    evidence = {"scope": scope((script["topic"].get("matrix_dedup") or {}).get("job", ""), config_dir),
                 "excluded_sources": sorted(hits),
                 "peers": [{"script_id": p["script_id"], "title": p["title"]} for p in peers if overlap(hits, p["sources"])]}
     fresh_report, fresh_material = filter_material(report, blocked), filter_material(material, blocked)

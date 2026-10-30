@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import re
-import time
 from pathlib import Path
 
 import yaml
@@ -83,12 +82,7 @@ def snapshot(key: str) -> dict:
     from web.runner.registry import TaskRegistry
     from core.lock import LockManager
     categories = theme_context.categories(paths().config_dir, key, include_legacy=True)
-    from core import theme_production
-    automatic = theme_production.plan(paths().config_dir, paths().state_dir, key)
-    for item in items:
-        item['automatic_production'] = automatic['states'].get(item['id'])
     return {"categories": [c for c in categories if not c.get("legacy")],
-            "automatic_production": {**automatic['configuration'], "daily_used": automatic['daily_used']},
             "legacy_categories": [c for c in categories if c.get("legacy")], "themes": items,
             "today": datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat(),
             "discovery_running": TaskRegistry().is_running(f"topic_platform/{key}") or
@@ -205,8 +199,35 @@ def generate(key: str, by: str, *, brief: str = "", category_key: str = "", patt
         return {"status": "running", "job": name, "run_id": task.task_id, "request_id": request_id}
 
 
+def production_input(key: str, value: dict, minutes: float = 4, *, automatic: bool = False) -> tuple[str, dict]:
+    from core.video import recipes
+    found = category(key, value["category"])
+    if found is None:
+        raise ValueError("主题所属栏目已移除，请调整栏目后再研究")
+    configs = production.load_all(paths().config_dir, paths().jobs_dir)
+    binding = next((configs[pid] for pid in found["production_ids"] if pid in configs and not configs[pid].errors and (not automatic or configs[pid].auto)), None)
+    recipe_key = "theme_research"
+    recipe = recipes.find(paths().config_dir, recipe_key)
+    if recipe and recipe.minutes_range and recipe.minutes_range[0] <= minutes <= recipe.minutes_range[1]:
+        recipe_key = recipes.variant_column_key(recipe_key, minutes=minutes)
+    sources = theme_context.source_specs(found, paths().config_dir, paths().jobs_dir, matrix(key))
+    topic = {"title": value["title"], "fields": {"核心角度": value["angle"], "目标受众": value["audience"],
+              "一句话": found["promise"], "补充材料": value["notes"]}, "theme_task_id": value["id"],
+              "theme_research": theme_context.research_spec(value, found, matrix(key), sources=sources)}
+    if binding:
+        topic["_production"] = binding.key
+    if not binding or found.get("catalog"):
+        from core.video import content_columns
+        context = content_columns.snapshot(paths().config_dir, binding.key, binding.job) if binding else {
+            "source_matrix": key, "render_inheritance": "content_matrix", "render": {}, "presentation": {}}
+        context.update({"matrix": key, "column": found["key"], "column_name": found["name"],
+                   "audience": value["audience"], "promise": found["promise"], "notes": found["notes"],
+                   "type": found["type"], "type_definition": content_columns.types(paths().config_dir).get(found["type"], {})})
+        topic["_content_context"] = context
+    return recipe_key, topic
+
+
 def start(key: str, theme_id: str, by: str, *, auto_video: bool, minutes: float = 4) -> dict:
-    from core.video import autopilot_store as ap
     from web.services import video_executor
     from web.services.assistant_maintenance import run_admission
     with run_admission(), file_lock(str(Path(paths().state_dir) / "theme-start" / theme_id)):
@@ -215,102 +236,79 @@ def start(key: str, theme_id: str, by: str, *, auto_video: bool, minutes: float 
             return value
         if value["used_at"]:
             raise ValueError("主题已记录为使用过，可以参考同一题型生成新问题")
-        queued = ap.item_for_theme(theme_id)
-        if queued and queued['state'] not in ('DONE', 'FAILED', 'CANCELLED', 'HELD'):
-            raise ValueError("主题已在制作队列中，请查看自动制作进度")
         # Recover the small cross-database handover if the app stopped after creating the script.
         with video_store.connect() as db:
             old = db.execute("SELECT id FROM scripts WHERE json_extract(topic,'$.theme_task_id')=?",
                              (theme_id,)).fetchone()
         if old:
             return storage().attach(theme_id, old["id"], auto_video)
-        recipe_key, topic = prepare(key, value, minutes)
+        recipe_key, topic = production_input(key, value, minutes)
         script = video_executor.create(recipe_key, topic, started_by=by)
-        result = storage().attach(theme_id, script["id"], auto_video)
-        if auto_video:
-            ap.adopt_script(script, started_by=by)
-        return result
+        return storage().attach(theme_id, script["id"], auto_video)
 
 
-def prepare(key: str, value: dict, minutes: float) -> tuple[str, dict]:
-    """Freeze the same research brief and matrix identity for manual and automatic entry points."""
-    from core.video import content_columns, recipes, story_pool
-
-    found = category(key, value['category'])
-    if found is None:
-        raise ValueError("主题所属栏目已移除，请调整栏目后再研究")
-    configs = production.load_all(paths().config_dir, paths().jobs_dir)
-    binding = next((configs[pid] for pid in found['production_ids'] if pid in configs and not configs[pid].errors), None)
-    recipe_key = 'theme_research'
-    recipe = recipes.find(paths().config_dir, recipe_key)
-    if recipe and recipe.minutes_range and recipe.minutes_range[0] <= minutes <= recipe.minutes_range[1]:
-        recipe_key = recipes.variant_column_key(recipe_key, minutes=minutes)
-    owner = matrix(key)
-    sources = theme_context.source_specs(found, paths().config_dir, paths().jobs_dir, owner)
-    topic = {'id': 'theme/' + value['id'], 'title': value['title'],
-             'theme_question': (value.get('inspiration') or {}).get('question') or value['title'],
-             'theme_key': (value.get('inspiration') or {}).get('topic_key', ''),
-             'fields': {'核心角度': value['angle'], '目标受众': value['audience'], '一句话': found['promise'], '补充材料': value['notes']},
-             'theme_task_id': value['id'], 'theme_research': theme_context.research_spec(value, found, owner, sources=sources),
-             'matrix_dedup': {'matrix': key, 'job': owner.jobs[0] if owner.jobs else '', 'policy': story_pool.POLICY}}
-    if binding:
-        topic['_production'] = binding.key
-    context = content_columns.snapshot(paths().config_dir, binding.key, binding.job) if binding else {
-        'render_inheritance': 'content_matrix', 'render': {}, 'presentation': {}}
-    context.update({'matrix': key, 'source_matrix': key, 'column': found['key'], 'column_name': found['name'],
-                    'audience': value['audience'], 'promise': found['promise'], 'notes': found['notes'], 'type': found['type'],
-                    'type_definition': content_columns.types(paths().config_dir).get(found['type'], {})})
-    topic['_content_context'] = context
-    return recipe_key, topic
-
-
-def create_queued(item: dict) -> dict:
-    """Recover the cross-database handover by theme ID before starting any new writer."""
-    from web.services import video_executor
-
-    topic = item['topic']
-    theme_id, key = topic['theme_task_id'], topic['theme_auto']['matrix']
-    with file_lock(str(Path(paths().state_dir) / 'theme-start' / theme_id)):
-        value = require_theme(key, theme_id)
-        with video_store.connect() as db:
-            old = db.execute("SELECT id FROM scripts WHERE json_extract(topic,'$.theme_task_id')=? ORDER BY created_at LIMIT 1", (theme_id,)).fetchone()
-        if old:
-            storage().attach(theme_id, old['id'], True)
-            return video_store.get_script(old['id'])
-        if value['used_at'] or value['status'] in ('used', 'dismissed'):
-            raise ValueError('主题已使用或忽略，不再自动制作')
-        from core import theme_production
-        from core.theme_store import normal
-        covered = theme_production.covered_questions(paths().config_dir, paths().state_dir, key, time.time())
-        if any(normal(text) in covered for text in (topic.get('title', ''), topic.get('theme_question', ''), topic.get('theme_key', '')) if text):
-            raise ValueError('同矩阵已有相同问题，已跳过重复研究')
-        script = video_executor.create(item['column_key'], topic, started_by='autopilot')
-        storage().attach(theme_id, script['id'], True)
-        return script
+def enqueue_recommendations() -> int:
+    """All eligible daily recommendations enter the same durable batch queue."""
+    from core.video import auto, autopilot_store as ap, content_guard, story_pool
+    values = auto.recommendations_pending(paths().config_dir, paths().jobs_dir, paths().state_dir)
+    made = 0
+    for row in values:
+        with file_lock(str(Path(paths().state_dir) / "theme-start" / row["id"])):
+            value = storage().get(row["id"])
+            if not value or value["script_id"] or value["used_at"]:
+                continue
+            with video_store.connect() as db:
+                queued = db.execute("SELECT 1 FROM autopilot_items WHERE json_extract(topic,'$.theme_task_id')=?",
+                                    (value["id"],)).fetchone()
+            if queued:
+                continue
+            recipe_key, topic = production_input(value["matrix"], value, automatic=True)
+            owner = matrix(value["matrix"])
+            configs = production.load_all(paths().config_dir, paths().jobs_dir)
+            binding = configs.get(topic.get("_production", ""))
+            job = binding.job if binding else next(iter(owner.jobs), "")
+            topic = content_guard.policy_topic({**topic, "id": "theme/" + value["id"]}, job)
+            topic["matrix_dedup"]["policy"] = story_pool.POLICY
+            ap.create_run({"picks": [], "refresh": False, "theme_id": value["id"], "matrix": value["matrix"]},
+                          [{"column_key": recipe_key, "topic": topic, "production": binding.key if binding else ""}],
+                          started_by="autopilot")
+            storage().mark(value["id"], "queued")
+            made += 1
+    return made
 
 
 def tick() -> None:
     """Advance opt-in themes after writing; existing render records provide idempotency and recovery."""
-    from core.video import autopilot_store as ap
+    from web.services import video_executor
+    with video_store.connect() as db:
+        managed = {r[0] for r in db.execute("SELECT script_id FROM autopilot_items WHERE script_id IS NOT NULL")}
     for theme in storage().active():
+        if theme["script_id"] in managed:
+            script = video_store.get_script(theme["script_id"])
+            renders = video_store.list_renders(theme["script_id"])
+            if any(r["status"] == "COMPLETED" for r in renders):
+                storage().mark(theme["id"], "completed")
+            elif script and script.get("archived"):
+                storage().mark(theme["id"], "skipped")
+            continue
         try:
             with file_lock(str(Path(paths().state_dir) / "theme-render" / theme["id"]), timeout=0.05):
                 script = video_store.get_script(theme["script_id"])
-                if script and script.get('archived') and script['topic'].get('content_archive'):
-                    storage().mark(theme['id'], 'skipped')
+                if script and script["status"] == "FAILED":
+                    storage().mark(theme["id"], "attention")
                     continue
-                if not script:
+                if not script or script["status"] not in {"DRAFT", "APPROVED"} or script.get("stage"):
                     continue
                 renders = video_store.list_renders(script["id"])
-                if any(row["status"] == "COMPLETED" for row in renders):
-                    storage().mark(theme["id"], "completed")
+                if renders:
+                    if any(row["status"] == "COMPLETED" for row in renders):
+                        storage().mark(theme["id"], "completed")
+                    elif all(row["status"] in {"FAILED", "CANCELLED"} for row in renders):
+                        storage().mark(theme["id"], "attention")
                     continue
-                item = ap.item_for_theme(theme['id'])
-                if (item and item['state'] in ('FAILED', 'HELD', 'CANCELLED')) or (
-                        not item and (script['status'] == 'FAILED' or (renders and all(row['status'] in ('FAILED', 'CANCELLED') for row in renders)))):
-                    storage().mark(theme['id'], 'attention')
-                else:
-                    ap.adopt_script(script, started_by='theme-workbench')
+                if script["status"] == "DRAFT":
+                    video_executor.approve(script["id"], script["current_version"], "theme-workbench")
+                video_executor.render(script["id"], "theme-workbench")
         except TimeoutError:
             continue
         except Exception as exc:

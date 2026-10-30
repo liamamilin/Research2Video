@@ -141,21 +141,12 @@ function Pending({ config, canEdit, onWritten }: { config: ProductionConfig; can
   );
 }
 
-/** 自动写：这个 Job 每出一份新报告，就写最多 N 条并出片，不等人点。只写打开之后出的报告，所以打开时不会去写眼前这份旧的。 */
+/** 自动制作只有开关；全部候选经排重进入原有制作队列。 */
 function AutoWrite({ config, scheduled, onChange }: { config: ProductionConfig; scheduled: boolean; onChange: () => void }) {
   const toast = useToast();
-  const [count, setCount] = useState(String(config.auto || 3));
-  const whole = config.split === "whole"; // 整份报告每份写一期：只有开和关，没有条数
-  const n = whole ? 1 : Number(count);
-  const valid = Number.isInteger(n) && n >= 1 && n <= 10;
-  const change = async (next: number | null) => {
-    if (next !== null) {
-      const cost = config.reverify ? "每条先调研一遍，每篇约 4–20 次搜索，" : "";
-      const what = whole ? "写一期并出片" : `写最多 ${next} 条并出片`;
-      if (!window.confirm(`打开后，这个 Job 每出一份新报告，就自动用「${config.name}」${what}，不等你确认；${cost}只写打开之后出的报告。确定？`)) return;
-    }
+  const change = async (enabled: boolean) => {
     try {
-      await setAuto(config.key, next);
+      await setAuto(config.key, enabled ? 1 : null);
       onChange();
     } catch (e) {
       toast.error(errorMessage(e));
@@ -164,21 +155,12 @@ function AutoWrite({ config, scheduled, onChange }: { config: ProductionConfig; 
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs">
       <label className="flex items-center gap-1">
-        <input type="checkbox" aria-label="自动写" checked={config.auto > 0} disabled={config.auto === 0 && !valid}
-          onChange={(e) => change(e.target.checked ? n : null)} />
-        报告一出来就自动写
+        <input type="checkbox" aria-label="自动写" checked={config.auto > 0}
+          onChange={(e) => change(e.target.checked)} />
+        报告一出来就自动制作
       </label>
-      {whole ? null : (
-        <label className="flex items-center gap-1 text-text-muted">
-          最多
-          <input aria-label="自动每次写几条" className="input w-14" type="number" min={1} max={10} value={count} onChange={(e) => setCount(e.target.value)} />
-          条
-        </label>
-      )}
-      {!whole && config.auto > 0 && valid && n !== config.auto ? <button className="btn text-xs" onClick={() => change(n)}>改成 {n} 条</button> : null}
-      {config.auto > 0 && !scheduled ? (
-        <span className="text-warning">这个 Job 没设周期：要有人跑出报告才会触发</span>
-      ) : null}
+      <span className="text-text-muted">{config.split === "whole" ? "整份报告按配方制作" : "全部不重复选题依次制作"}</span>
+      {config.auto > 0 && !scheduled ? <span className="text-warning">这个 Job 没设周期：要有人跑出报告才会触发</span> : null}
     </div>
   );
 }
@@ -200,7 +182,7 @@ function ConfigCard({ config, canEdit, scheduled, onChange }: { config: Producti
           给{config.audience || "—"}看 · 约 {config.target_minutes} 分钟 · {config.split_name}
           {config.split === "whole" ? " · 每份报告写一期，直接用报告，不调研"
             : config.split === "each" ? (config.reverify ? " · 挑中的条目会重新调研一遍" : " · 不再调研") : " · 用报告里的条目，不调研"}
-          {config.auto ? (config.split === "whole" ? " · 自动：报告一出来就写" : ` · 自动：报告一出来写最多 ${config.auto} 条`) : ""}
+          {config.auto ? (config.split === "whole" ? " · 自动：报告一出来就写" : " · 自动：全部不重复选题") : ""}
         </p>
       )}
       {canEdit && (config.split === "each" || config.split === "whole") && !config.errors.length ? <AutoWrite config={config} scheduled={scheduled} onChange={onChange} /> : null}

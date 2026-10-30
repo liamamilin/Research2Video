@@ -291,7 +291,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         try:
             if story_pool.enabled(topic):
                 store.update_script(script_id, stage="选题")
-                key = content_guard.topic_scope(topic, settings.paths.config_dir)
+                key = content_guard.scope(topic["matrix_dedup"]["job"], settings.paths.config_dir)
                 story_pool.reconcile()
                 peers = content_guard.coverage(topic, settings.paths.config_dir, settings.paths.jobs_dir, script_id=script_id)
                 peers += story_pool.reservations(key, script_id)
