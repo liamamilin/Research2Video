@@ -1,5 +1,5 @@
 name: "AI Flash Discovery"
-description: "近 2 天 AI 与软件开发领域值得讲的变化（读 TLDR AI、The Rundown 抓取的内容，不联网搜索）：围绕有价值的变化挑选素材"
+description: "近 2 天 AI 与软件开发领域值得讲的变化（官方公告、套餐权益、TLDR AI、The Rundown 与 Radar 订阅源，不联网搜索）"
 enabled: true
 keywords:
   - 新模型发布
@@ -14,6 +14,9 @@ schedule:
 search: false            # 只读下面声明的订阅源，不联网搜索（core/engine.py）
 sources_limit: 10
 sources:
+  - "source:cg_release_notes"
+  - "source:cg_openai_news"
+  - "source:cg_pro_tiers"
   - "tldr:ai"
   - "rss:https://www.therundown.ai/feed"
   - "hf_models:trending"

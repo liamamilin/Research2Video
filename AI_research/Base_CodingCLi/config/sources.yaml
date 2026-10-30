@@ -341,6 +341,14 @@ cg_openai_news:
   - chatgpt_acquisition
   - chatgpt_s01
   note: 高优先；官方新闻与产品发布。
+cg_pro_tiers:
+  name: ChatGPT Pro Tiers
+  spec: page:https://help.openai.com/en/articles/9793128-about-chatgpt-pro-tiers
+  tags:
+  - ai_official
+  - chatgpt_acquisition
+  - chatgpt_s05
+  note: Pro 套餐权益、Work 与 Codex 使用量变化；直接读取官方正文。
 cg_pricing:
   name: ChatGPT Pricing
   spec: page:https://chatgpt.com/pricing/
