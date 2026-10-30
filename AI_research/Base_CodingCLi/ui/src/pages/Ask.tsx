@@ -46,7 +46,7 @@ function saveConversationId(key: string, id?: string) {
 function messagesFromServer(data: AssistantConversation): AssistantMessage[] {
   return data.requests.flatMap((item) => [
     { role: "user" as const, content: item.message },
-    { role: "assistant" as const, content: item.result.answer || "", actions: item.result.actions || [], error: item.result.error, continuation: item.result.continuation },
+    { role: "assistant" as const, content: item.result.answer || "", actions: item.result.actions || [], error: item.result.error, continuation: item.result.continuation, usage: item.result.usage },
   ]);
 }
 function submitConversation(key: string, text: string, history: AssistantMessage[], conversationId?: string, context?: AssistantContext | null) {
@@ -71,7 +71,7 @@ function submitConversation(key: string, text: string, history: AssistantMessage
   }, { conversation_id: conversationId, request_id: pending.requestId, context }).then((result) => {
     pending.conversationId = result.conversation_id || conversationId;
     saveConversationId(key, pending.conversationId);
-    pending.messages = [...prefix, { role: "assistant", content: result.answer, actions: result.actions, error: result.error, continuation: result.continuation }];
+    pending.messages = [...prefix, { role: "assistant", content: result.answer, actions: result.actions, error: result.error, continuation: result.continuation, usage: result.usage }];
   }).catch((error: unknown) => {
     const reply = pending.messages[pending.messages.length - 1];
     pending.messages = [...prefix, { ...reply, content: reply.content || "请求未完成。",
@@ -291,6 +291,11 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
             </div>}
             {!!message.actions?.length && <ul className="mt-4 pt-3 border-t border-border space-y-3" aria-label="操作结果">{message.actions.map((action, i) => <AssistantAction key={action.operation_id || i} action={action} />)}</ul>}
             {message.error && message.error !== message.content && <p role="alert" className="text-xs text-danger mt-3">{message.error}</p>}
+            {message.usage && typeof message.usage.total_tokens === 'number' && <p className="text-[11px] text-text-muted mt-3" aria-label="本次模型用量">
+              本次{message.usage.estimated || message.usage.estimated_requests ? '约 ' : ' '}{message.usage.total_tokens.toLocaleString('zh-CN')} Token
+              {typeof message.usage.requests === 'number' && ` · ${message.usage.requests} 次模型调用`}
+              {typeof message.usage.cache_read_tokens === 'number' && ` · 缓存读取 ${message.usage.cache_read_tokens.toLocaleString('zh-CN')}`}
+            </p>}
           </>}
         </div>
       </div>)}

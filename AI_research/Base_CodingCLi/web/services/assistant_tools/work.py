@@ -147,6 +147,11 @@ class TemplateQuery(Arguments):
 
 class OperationQuery(Arguments):
     operation_id: str
+    result_path: str | None = Field(default=None, max_length=1000)
+    offset: int = Field(default=0, ge=0)
+    limit: int = Field(default=20, ge=1, le=100)
+    max_chars: int = Field(default=12000, ge=100, le=16000)
+    view: Literal['full', 'brief'] = 'full'
 
 
 class BackgroundQuery(Arguments):
@@ -160,7 +165,11 @@ def background(a, request, user):
 
 def operation(a, request, user):
     from web.services.assistant_store import AssistantStore
-    return AssistantStore().receipt(a.operation_id, user)
+    receipt = AssistantStore().receipt(a.operation_id, user)
+    if a.result_path is None:
+        return receipt
+    from web.services.assistant_context import receipt_page
+    return receipt_page(receipt, a.result_path, a.offset, a.limit, a.max_chars, view=a.view)
 
 
 class TemplateChange(Arguments):
@@ -219,7 +228,7 @@ def clone(a, request, user):
 
 TOOLS = {
     'query_background': Tool(BackgroundQuery, '查询本人后台索引操作的进度和失败项，使用原task_id；服务中断的操作不会自动重放。', background, label='查询后台操作'),
-    'query_operation': Tool(OperationQuery, '查询本人的某次操作回执。started 表示结果待核验，必须重新查询实际业务状态，不能自动重放。', operation, label='核验操作回执'),
+    'query_operation': Tool(OperationQuery, '查询本人的原始操作回执，不重新执行。result_path不填返回原回执；填JSON Pointer如/items按offset/limit分页读取数组，view=brief延续列表简报，默认full取完整字段。其他值按offset/max_chars读取JSON片段。next_offset非空需继续，同sha256为同一结果。started表示结果待核验，应读取实际业务状态，不能自动重放。', operation, label='核验操作回执'),
     'query_schedules': Tool(ScheduleQuery, '查询计划列表/get详情/preview五字段cron时区及未来三次时间/runs执行历史。使用真实schedule_id；当前仅管理员可用。', query, 'admin', label='查询周期计划'),
     'manage_schedule': Tool(ScheduleChange, '按明确请求创建/改期/暂停/恢复/删除计划，或恢复系统计划、启动执行器。先查询真实ID；不接受shell命令。自然语言时间先转换五字段cron并preview，明确时区；不能无损表达的规则先说明。暂停不取消正在运行的一次任务。恢复只从下次未来时间开始，不补跑暂停期间。', change, 'admin', True, '管理周期计划'),
     'query_run': Tool(RunQuery, '读取一次运行的状态、日志和产物。manual使用job_name+可选run_id；scheduled必须具体run_id且需管理员。', run_query, label='查询运行'),

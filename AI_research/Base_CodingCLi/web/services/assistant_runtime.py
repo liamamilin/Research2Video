@@ -8,6 +8,7 @@ from threading import Event
 from urllib.parse import quote
 from web.services import jobs_assistant as jobs
 from web.services import assistant_tools
+from web.services import assistant_context
 from web.services.assistant_delivery import VideoHandoffs, canonical_links
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ query_run/get_job 返回的report经过文件核验，使用其相对path读取�
 配置先读取版本；切换模型先验证候选工具+流式，失败不覆盖。费用未知就如实说未知。保存网络配置不等于监听已生效。
 配置保存返回rollback_id时，指向卡片“恢复变更前配置”或设置页独立恢复入口，不要求用户先通过聊天恢复一个已经失联的模型。
 分步进度只保存读取位置和回执引用，不等于正文仍在当前上下文。继续分析时先用query_operation取回已读证据或按需重读，再从断点展开；不能凭已读标记编造分析结论。
+工具结果包含_model_view时是列表简报，原始回执完整保存。需要详情用query_operation及detail_read；含嵌套列表的complete=false时按对应next_read继续，不能将当前页当成完整范围。历史回执detail_in_receipt=true时详情也用query_operation取回。数组按条分页，JSON片段按字符分页，同sha256才是同一份结果。读取回执不会重新执行操作。
 批量删除、角色/公开访问变更、服务关停/重启先查清具体对象和影响；用户授权已覆盖时执行，否则说明缺少的具体决定。
 停止本次助手响应、取消一次研究运行、暂停后续周期是三个不同操作。
 只根据真实工具结果宣称成功；失败仅在可纠正参数时重试，成功操作不重复。多步中途失败列出已知结果，不自动回滚已成功业务。
@@ -44,7 +46,7 @@ query_run/get_job 返回的report经过文件核验，使用其相对path读取�
 
 
 def definitions(role):
-    return jobs.tool_definitions(role) + assistant_tools.definitions(role)
+    return assistant_context.compact_schema(jobs.tool_definitions(role) + assistant_tools.definitions(role))
 
 
 def references(result: dict, tool: str) -> list[dict]:
@@ -104,8 +106,10 @@ def run(message, history, llm, request, user, on_event=None, cancel_token: Event
         store=None, request_id=None, conversation_id=None, refs=None):
     refs = list(refs or [])
     messages = [{'role': 'system', 'content': SYSTEM.format(
-        now=datetime.now().astimezone().isoformat(timespec='seconds'), role=user['role'],
-        refs=json.dumps(refs, ensure_ascii=False))}, *history, {'role': 'user', 'content': message}]
+        now='见当前请求上下文', role=user['role'], refs='见当前请求上下文')},
+        {'role': 'system', 'content': '当前请求上下文：' + assistant_context.dumps({
+            'now': datetime.now().astimezone().isoformat(timespec='seconds'), 'refs': refs})},
+        *history, {'role': 'user', 'content': message}]
     actions = []
     answer = '本次步骤已达安全上限，已执行结果见操作卡片；可从未完成处继续。'
     error = None
@@ -193,7 +197,16 @@ def run(message, history, llm, request, user, on_event=None, cancel_token: Event
             emit({'type': 'reset'})
             emit({'type': 'status', 'message': '正在思考…'})
             options = {'stream': True, 'on_delta': delta} if on_event else {}
-            response = llm.chat(messages, tools=definitions(user['role']), **options)
+            tool_definitions = definitions(user['role'])
+            if store and request_id:
+                # Counts only: prompt bodies and credentials never enter telemetry.
+                context_metrics = getattr(llm, 'context_metrics', None)
+                if context_metrics is None:
+                    context_metrics = []
+                    llm.context_metrics = context_metrics
+                context_metrics.append({'message_chars': len(assistant_context.dumps(messages)),
+                                        'tool_schema_chars': len(assistant_context.dumps(tool_definitions))})
+            response = llm.chat(messages, tools=tool_definitions, **options)
             if not response.tool_calls:
                 answer = response.content.strip() or '请说明你想查询或管理的对象。'
                 break
@@ -305,8 +318,15 @@ def run(message, history, llm, request, user, on_event=None, cancel_token: Event
                     action['message'] = summary
                 actions.append(action)
                 emit({'type': 'action', 'action': action})
+                try:
+                    model_view = assistant_context.model_result(call.name, call.arguments, result, operation_id)
+                except Exception:
+                    # A presentation optimization must not invalidate an already
+                    # executed operation or make its receipt unavailable.
+                    logger.warning('Assistant brief unavailable; using the complete operation receipt')
+                    model_view = result
                 messages.append({'role': 'tool', 'tool_call_id': call.id,
-                                 'content': json.dumps(result, ensure_ascii=False, default=str)})
+                                 'content': assistant_context.dumps(model_view)})
                 if auth_expired:
                     # The stream holds its original access cookie. Do not let
                     # the model repeatedly retry an expired/revoked session.

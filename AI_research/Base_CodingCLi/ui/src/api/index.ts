@@ -300,12 +300,23 @@ export interface AssistantAction {
   input_card?: { id: string; title: string; description: string; fields: { name: string; label: string; type: string }[] };
 }
 
+export interface AssistantUsage {
+  requests?: number;
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  cache_read_tokens?: number;
+  estimated?: boolean;
+  estimated_requests?: number;
+}
+
 export interface AssistantMessage {
   role: "user" | "assistant";
   content: string;
   actions?: AssistantAction[];
   error?: string | null;
   continuation?: AssistantContinuation;
+  usage?: AssistantUsage;
 }
 
 export interface AssistantContinuation {
@@ -321,6 +332,7 @@ export interface AssistantReply {
   request_id?: string;
   status?: string;
   continuation?: AssistantContinuation;
+  usage?: AssistantUsage;
 }
 
 export interface AssistantConversation {

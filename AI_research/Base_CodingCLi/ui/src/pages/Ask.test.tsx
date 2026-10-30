@@ -286,3 +286,18 @@ it('persists removal of the current object without sending a model request', asy
   expect(JSON.parse(String(request?.[1]?.body)).context).toBeNull();
   expect(fetch.mock.calls.some(([url]) => url.endsWith('/stream'))).toBe(false);
 });
+
+it('shows recorded model usage after a reply and after restoring history', async () => {
+  server({ requests: [{ id: 'old', message: '历史问题', status: 'completed', result: {
+    answer: '历史回复', actions: [], usage: { total_tokens: 1200, requests: 2, cache_read_tokens: 800 },
+  } }], send: () => stream({ answer: '新的回复', actions: [], conversation_id: cid,
+    usage: { total_tokens: 350, requests: 1 } }) });
+  await renderAsk();
+  expect(screen.getByLabelText('本次模型用量').textContent).toContain('1,200 Token');
+  expect(screen.getByLabelText('本次模型用量').textContent).toContain('缓存读取 800');
+  send('新的问题');
+  await screen.findByText('新的回复');
+  const rows = screen.getAllByLabelText('本次模型用量');
+  expect(rows[rows.length - 1].textContent).toContain('350 Token');
+  expect(rows[rows.length - 1].textContent).toContain('1 次模型调用');
+});

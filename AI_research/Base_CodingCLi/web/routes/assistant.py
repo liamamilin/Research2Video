@@ -377,10 +377,13 @@ def _respond(payload, request, user, on_event=None, cancel_token=None):
     llm = None
     try:
         llm = _llm(cancel_token=token)
+        if hasattr(llm, 'set_session_id'):
+            llm.set_session_id('assistant_' + conversation['id'])
         history = [m.model_dump() for m in payload.history]
         if payload.conversation_id:
             history = []
-            for record in conversation['requests'][-10:]:
+            recent_records = conversation['requests'][-10:]
+            for index, record in enumerate(recent_records):
                 history.append({'role': 'user', 'content': record['message']})
                 result = record['result']
                 actions = json.loads(json.dumps(result.get('actions', [])))
@@ -393,9 +396,11 @@ def _respond(payload, request, user, on_event=None, cancel_token=None):
                             action['input_result'] = json.loads(submitted['result']) if submitted['result'] else None
                         except ValueError:
                             action['input_status'] = 'unavailable'
+                from web.services.assistant_context import dumps, history_actions
+                actions = history_actions(actions, brief=index < len(recent_records) - 3)
                 history.append({'role': 'assistant', 'content': (result.get('answer') or '回复未完成')[:24000] +
-                                '\n实际操作回执：' + json.dumps(actions, ensure_ascii=False) +
-                                ('\n尚未完成的任务进度（继续前先核验）：' + json.dumps(result['continuation'], ensure_ascii=False) if result.get('continuation') else '')})
+                                '\n实际操作回执：' + dumps(actions) +
+                                ('\n尚未完成的任务进度（继续前先核验）：' + dumps(result['continuation']) if result.get('continuation') else '')})
         result = jobs_assistant.run(
             payload.message, history, llm, request, user,
             on_event=persist_event if on_event else None, cancel_token=token,
@@ -419,6 +424,13 @@ def _respond(payload, request, user, on_event=None, cancel_token=None):
                 logger.warning('Assistant client cleanup failed: %s', type(exc).__name__)
         with _active_lock:
             _active.pop(payload.request_id, None)
+    if llm is not None:
+        result['usage'] = dict(llm.usage or {})
+        metrics = getattr(llm, 'context_metrics', [])
+        if metrics:
+            result['context_usage'] = {'calls': len(metrics),
+                'message_chars': sum(item['message_chars'] for item in metrics),
+                'tool_schema_chars': sum(item['tool_schema_chars'] for item in metrics)}
     result.update(metadata)
     result['status'] = 'interrupted' if token.is_set() else 'completed'
     storage.save(payload.request_id, result, result['status'])
