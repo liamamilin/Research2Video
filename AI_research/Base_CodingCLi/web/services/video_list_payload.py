@@ -7,7 +7,7 @@ def publication(row: dict) -> dict:
     return {key: value for key, value in row.items() if key in {
         "id", "script_id", "version", "render_id", "platform", "url", "published_on",
         "title", "note", "recorded_by", "account_uid", "account_name", "work_id",
-        "sources", "confirmed_at", "removed_at",
+        "confirmed_at", "removed_at",
     }}
 
 
@@ -16,6 +16,12 @@ def compact(row: dict) -> dict:
     if "topic" in row:
         result["topic"] = {k: v for k, v in row["topic"].items()
                            if k in {"id", "title", "article", "local_video"}}
+        if isinstance(result["topic"].get("article"), dict):
+            result["topic"]["article"] = {k: v for k, v in result["topic"]["article"].items()
+                                          if k in {"mode", "kind"}}
+        if isinstance(result["topic"].get("local_video"), dict):
+            result["topic"]["local_video"] = {k: v for k, v in result["topic"]["local_video"].items()
+                                              if k in {"file_name", "duration", "width", "height", "size"}}
     if row.get("content_context"):
         result["content_context"] = {k: v for k, v in row["content_context"].items()
                                      if k in {"column", "column_name", "matrix", "source_matrix", "type"}}

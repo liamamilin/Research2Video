@@ -26,6 +26,26 @@ afterEach(() => {
 });
 
 describe("Autopilot card", () => {
+  it("distinguishes the full queue from actual execution without starting work", async () => {
+    const body = { ...BODY, queue: { active_batches: 81, preparing_batches: 2, executing_items: 3,
+      queued_items: 78, waiting_items: 1, attention_items: 2, phase_counts: { writing: 2, rendering: 1, queued_render: 10 },
+      oldest_batch_created_at: "2026-10-29T20:00:00+0800", completed_renders_today: 28,
+      limits: { scripts: 2, renders: 1 } },
+      runs: [{ ...BODY.runs[0], items: [{ ...BODY.runs[0].items[0], state: "WORKING",
+        progress: { stage: "queued_render", label: "等待出片", executing: false, queued: true } }] }] };
+    const fetcher = vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(body) }) as Response);
+    vi.stubGlobal("fetch", fetcher);
+    render(<MemoryRouter><AutopilotCard /></MemoryRouter>);
+    expect(await screen.findByText(/在途批次 81 · 执行中 3 项 · 排队 78 项/)).toBeTruthy();
+    expect(screen.getByText("准备选题 2 批")).toBeTruthy();
+    expect(screen.getByText(/研究\/写稿槽 2 · 出片槽 1/)).toBeTruthy();
+    expect(screen.getByText("等待出片")).toBeTruthy();
+    expect(screen.getByText(/最近一批：/).textContent).toContain("等待执行");
+    expect(screen.getByText(/今日完成出片 28 次/)).toBeTruthy();
+    expect(fetcher.mock.calls.every(call => !(call as unknown as [string, RequestInit?])[1]?.method
+      || (call as unknown as [string, RequestInit?])[1]?.method === "GET")).toBe(true);
+  });
+
   it("shows selection and links to a covered event even when a current draft has another note", async () => {
     const body = { ...BODY, runs: [{ ...BODY.runs[0], items: [{ ...BODY.runs[0].items[0], gate: {
       story_selection: { pool_id: "pool", candidates: 2, selected: "恐龙新发现", skipped: 1,

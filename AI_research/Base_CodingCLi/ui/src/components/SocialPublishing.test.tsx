@@ -75,11 +75,38 @@ function show(platform: Platform = "xiaohongshu", query = "") {
 
 it("warns that an expired login paused checks and reconnection is needed", async () => {
   connect("kuaishou");
+  overviews.kuaishou.definition.capabilities.public_check = true;
   overviews.kuaishou.account = { ...overviews.kuaishou.account, session: { state: "expired", failures: 5, since: 1 } };
   show("kuaishou");
   const alert = await screen.findByRole("alert");
   expect(within(alert).getByText("快手登录已失效")).toBeTruthy();
   expect(within(alert).getByText(/连续 5 次账号核实失败/)).toBeTruthy();
+  expect(screen.getByText("登录核实失败 · 自动核对已暂停")).toBeTruthy();
+  expect(screen.queryByText("账号已核验 · 自动核对已开启")).toBeNull();
+  expect(writes()).toEqual([]);
+});
+
+it("preserves the original upload and shows paused verification instead of automatic checking", async () => {
+  connect("kuaishou");
+  overviews.kuaishou.definition.capabilities.public_check = true;
+  overviews.kuaishou.account.session = { state: "expired", failures: 2, since: 1 };
+  overviews.kuaishou.uploads = [job("kuaishou", { status: "SUBMITTED", work_id: "original-work",
+    verification: { automatic: false, paused: true, pause_reason: "平台登录核实失败，自动核对已暂停；原投稿保留。" },
+    progress: { label: "已投稿 · 自动核对暂停", state: "waiting", active: false, needs_attention: true } })];
+  show("kuaishou");
+  expect(await screen.findByText("已投稿 · 自动核对暂停")).toBeTruthy();
+  expect(screen.getByText("平台登录核实失败，自动核对已暂停；原投稿保留。")).toBeTruthy();
+  expect(screen.getByText("作品 ID：original-work")).toBeTruthy();
+  expect(screen.queryByText(/自动核对已开启，确认公开/)).toBeNull();
+  expect(screen.queryByText(/平台已接受投稿，正在自动关联/)).toBeNull();
+  expect(writes()).toEqual([]);
+});
+
+it("does not present an unknown login as verified", async () => {
+  connect("kuaishou");
+  overviews.kuaishou.account.session = { state: "unknown", failures: 0, since: null };
+  show("kuaishou");
+  expect(await screen.findByText("账号已连接 · 登录状态待核实")).toBeTruthy();
   expect(writes()).toEqual([]);
 });
 

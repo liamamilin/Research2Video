@@ -73,15 +73,21 @@ def uid(platform: str) -> str:
     return profile['uid']
 
 
-def public_job(platform: str, row: dict, *, comments: dict | None = None, checking: set[str] | None = None) -> dict:
+def public_job(platform: str, row: dict, *, comments: dict | None = None, checking: set[str] | None = None,
+               session: dict | None = None) -> dict:
     verification = row['result'].get('verification', {})
+    pending = platform in EVIDENCE and row['kind'] == 'UPLOAD' and row['status'] in ('UNKNOWN', 'SUBMITTED')
+    if pending and session is None:
+        session = session_of(store(platform), row['uid'])
+    paused = pending and (session or {}).get('state') == 'expired'
     if row['kind'] == 'UPLOAD' and checking is None:
         checking = {check['parent_id'] for check in store(platform).list(uid=row['uid'], kind='RECONCILE', statuses=ACTIVE)}
     value = {**{k: row[k] for k in ('id','kind','status','phase','error','work_id','script_id','version','render_id','created_at','updated_at')},
             'platform': platform, 'account_uid': row['uid'], 'payload': {k: row['payload'][k] for k in ('title','description','tags','first_comment') if k in row['payload']},
             'url': row['result'].get('url', ''),
-            'verification': {'automatic': platform in EVIDENCE and row['kind'] == 'UPLOAD' and row['status'] in ('UNKNOWN','SUBMITTED') and not verification.get('exhausted'),
+            'verification': {'automatic': pending and not paused and not verification.get('exhausted'),
                              'running': row['id'] in (checking or set()),
+                             **({'paused': True, 'pause_reason': '平台登录核实失败，自动核对已暂停；原投稿保留。'} if paused else {}),
                              **{k: verification[k] for k in ('attempts','checked_at','next_check_at','state','reason','exhausted') if k in verification}},
             'can_confirm_absent': row['status'] == 'UNKNOWN' and not row['work_id'] and row['result'].get('accepted') is not True,
             'can_retry': row['status'] in ('FAILED','CANCELLED') and bool(row['result'].get('confirmed_not_submitted'))}
@@ -402,7 +408,7 @@ def overview(platform: str) -> dict:
         profile = {**profile, 'session': session_of(store(platform), owner)}
     return {'definition':definition(platform),'account':profile,'runtime_ready':runtime()['ready'],
             'login_id':json.loads(path.read_text()).get('id') if path.is_file() else None,
-            'uploads':[public_job(platform,r,comments=comments,checking=checking) for r in jobs if r['kind']=='UPLOAD'],
+            'uploads':[public_job(platform,r,comments=comments,checking=checking,session=profile.get('session')) for r in jobs if r['kind']=='UPLOAD'],
             'settings':{'first_comment':store(platform).comment_settings(owner)} if owner else {},
             'checks':[public_job(platform,r) for r in jobs if r['kind'] in ('VERIFY','RECONCILE')][:10],
             'candidates':candidates(platform) if owner else []}

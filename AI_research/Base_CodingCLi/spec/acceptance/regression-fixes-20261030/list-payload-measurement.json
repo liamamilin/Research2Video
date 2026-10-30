@@ -1,0 +1,32 @@
+{
+  "scripts": {
+    "before": {
+      "rows": 181,
+      "json_bytes": 448487,
+      "gzip_bytes": 61095,
+      "gzip_ms_median": 1.1847494170069695
+    },
+    "after": {
+      "rows": 181,
+      "json_bytes": 447383,
+      "gzip_bytes": 60475,
+      "gzip_ms_median": 1.1160410940647125
+    },
+    "wire_reduction_pct": 86.52
+  },
+  "shipments": {
+    "before": {
+      "rows": 176,
+      "json_bytes": 488961,
+      "gzip_bytes": 60337,
+      "gzip_ms_median": 1.1019576340913773
+    },
+    "after": {
+      "rows": 176,
+      "json_bytes": 480946,
+      "gzip_bytes": 60115,
+      "gzip_ms_median": 1.0612905025482178
+    },
+    "wire_reduction_pct": 87.71
+  }
+}

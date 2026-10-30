@@ -25,6 +25,7 @@ from web.auth.routes import router as auth_router
 from web.deps import require_admin
 from web.models import ApiError
 from web.ratelimit import RateLimitMiddleware
+from web.list_compression import ListCompressionMiddleware
 from web.routes.jobs import router as jobs_router
 from web.routes.reports import router as reports_router
 from web.routes.video_storage import router as video_storage_router
@@ -376,6 +377,7 @@ def create_app() -> FastAPI:
 
     # Rate limiting
     app.add_middleware(RateLimitMiddleware)
+    app.add_middleware(ListCompressionMiddleware)
 
     # ----- Unified error format -----
 

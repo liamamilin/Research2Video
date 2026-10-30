@@ -65,6 +65,23 @@ def test_idle_account_gets_one_read_only_verify_and_an_expired_one_pauses_other_
         db.update(failed['id'], status='FAILED', error=UNVERIFIED)
     for row in db.list(kind='VERIFY'):
         db.update(row['id'], status='FAILED', error=UNVERIFIED)
-    assert manager.overview('kuaishou')['account']['session']['state'] == 'expired'
+    overview = manager.overview('kuaishou')
+    assert overview['account']['session']['state'] == 'expired'
+    shown = next(r for r in overview['uploads'] if r['id'] == upload['id'])
+    assert shown['status'] == 'SUBMITTED' and shown['verification']['automatic'] is False
+    assert shown['verification']['paused'] is True
+    assert shown['progress']['label'] == '已投稿 · 自动核对暂停'
+    assert shown['progress']['active'] is False and shown['progress']['needs_attention'] is True
+    assert shown['progress']['recovery']['kind'] == 'connection'
+    assert manager.public_job('kuaishou', db.get(upload['id']))['verification']['paused'] is True
+    original_upload = db.get(upload['id'])
     manager.schedule_checks('kuaishou', db)
     assert not db.list(kind='RECONCILE')
+    assert db.get(upload['id']) == original_upload
+
+    verified = db.create('VERIFY', OWNER['uid'])
+    db.update(verified['id'], status='RECORDED')
+    resumed = manager.public_job('kuaishou', db.get(upload['id']))
+    assert resumed['verification']['automatic'] is True
+    assert not resumed['verification'].get('paused')
+    assert db.get(upload['id']) == original_upload

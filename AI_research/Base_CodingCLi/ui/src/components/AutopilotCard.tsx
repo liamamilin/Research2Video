@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   cancelAutopilotRun, getAutopilot, listCellCoverage, setPlanSpec, startAutopilotRun,
-  type AutopilotItem, type AutopilotPlan, type AutopilotRun, type AutopilotSpec, type BoardItem, type CellCoverage,
+  type AutopilotItem, type AutopilotPlan, type AutopilotRun, type AutopilotSpec, type AutopilotQueue, type BoardItem, type CellCoverage,
 } from "@/api/video";
 import { CredibilityBadge } from "@/components/CredibilityBadge";
 import { TimeStamp } from "@/components/TimeStamp";
@@ -30,6 +30,7 @@ export function AutopilotCard({ currentItems = [] }: {
   const canEdit = user?.role === "editor" || user?.role === "admin";
   const [plans, setPlans] = useState<AutopilotPlan[]>([]);
   const [run, setRun] = useState<AutopilotRun | null>(null);
+  const [queue, setQueue] = useState<AutopilotQueue | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState(false);
@@ -69,6 +70,7 @@ export function AutopilotCard({ currentItems = [] }: {
       .then((d) => {
         setPlans(Array.isArray(d?.plans) ? d.plans : []);
         setRun(Array.isArray(d?.runs) && d.runs.length ? d.runs[0] : null);
+        setQueue(d.queue ?? null);
       })
       .catch(() => undefined);
 
@@ -91,7 +93,7 @@ export function AutopilotCard({ currentItems = [] }: {
     }
   }
 
-  if (!plans.length && !run && !canEdit) return null;
+  if (!plans.length && !run && !canEdit && !queue?.active_batches) return null;
   return (
     <section className="card p-4 space-y-2" aria-label="自动流水线">
       <div className="flex flex-wrap items-center gap-2">
@@ -110,6 +112,13 @@ export function AutopilotCard({ currentItems = [] }: {
           </button>
         ) : null}
       </div>
+      {queue ? <section aria-label="自动生产队列" className="rounded border border-border p-3 text-xs space-y-2">
+        <p>在途批次 {queue.active_batches} · 执行中 {queue.executing_items} 项 · 排队 {queue.queued_items} 项{queue.waiting_items ? ` · 等待确认 ${queue.waiting_items} 项` : ""}{queue.attention_items ? ` · 需处理 ${queue.attention_items} 项` : ""}</p>
+        {queue.preparing_batches ? <p>准备选题 {queue.preparing_batches} 批</p> : null}
+        <p className="text-text-muted">研究/写稿槽 {queue.limits.scripts} · 出片槽 {queue.limits.renders}；批次在途不代表每条都在同时执行。</p>
+        <div className="flex flex-wrap gap-3">{Object.entries({ researching: "研究中", writing: "写稿中", queued_script: "等待研究/写稿", queued_render: "等待出片", preparing_render: "准备出片", rendering: "渲染中", downloading: "成片回传中" }).map(([key,label]) => <span key={key}>{label} {queue.phase_counts[key] ?? 0}</span>)}</div>
+        <p className="text-text-muted">今日完成出片 {queue.completed_renders_today} 次{queue.oldest_batch_created_at ? <> · 最早在途批次：<TimeStamp value={queue.oldest_batch_created_at} /></> : null}</p>
+      </section> : null}
       {editing ? (
         <div className="space-y-2 rounded border border-border p-3" aria-label="批次设置">
           <p className="text-xs text-text-muted">选择制作配方，全部不重复选题按队列制作。</p>
@@ -148,7 +157,7 @@ export function AutopilotCard({ currentItems = [] }: {
       {run ? (
         <>
           <p className="text-xs text-text-muted">
-            最近一批：<TimeStamp value={run.created_at} />，{run.status === "RUNNING" ? "进行中" : "已结束"}
+            最近一批：<TimeStamp value={run.created_at} />，{run.status === "RUNNING" ? run.stage === "TOPICS" ? "准备选题" : run.items.some(i => i.progress?.executing) ? "执行中" : run.items.some(i => i.progress?.queued) ? "等待执行" : "进行中" : "已结束"}
             {run.note ? `（${run.note}）` : ""}
           </p>
           {run.items.length === 0 ? <p className="text-xs text-text-muted">正在挑选选题…</p> : null}
@@ -160,7 +169,7 @@ export function AutopilotCard({ currentItems = [] }: {
                 .flatMap((s) => s?.decisions ?? []).filter((d) => d.decision === "skip");
               return (
               <li key={item.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2">
-                <span className={cn("badge border", STATE[item.state].cls)}>{run.status === "RUNNING" ? "" : "批次结果："}{STATE[item.state].label}</span>
+                <span className={cn("badge border", STATE[item.progress?.queued ? "PENDING" : item.state].cls)}>{run.status === "RUNNING" ? "" : "批次结果："}{item.progress?.label ?? STATE[item.state].label}</span>
                 {item.script_id ? (
                   <Link to={`/video/${item.script_id}`} className="text-sm font-medium text-accent hover:underline">{current?.title ?? item.topic.title}</Link>
                 ) : (

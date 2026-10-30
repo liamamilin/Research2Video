@@ -1127,16 +1127,21 @@ def autopilot_overview(user=Depends(require_viewer)) -> dict:
     from core.video import autopilot_store
 
     runs = autopilot_store.list_runs(limit=10)
+    from web.services import video_queue_state, video_autopilot
+    queue = video_queue_state.snapshot(runs)
     ids = [item["script_id"] for run in runs for item in run.get("items", []) if item.get("script_id")]
     versions = store.current_versions(ids)
     with store.connect() as conn:
         auditing = {row["id"] for row in conn.execute("SELECT id FROM scripts WHERE COALESCE(stage, '') != ''")}
     for run in runs:  # the label as it is now (an edit or a finished audit changes it), not the one at approval time
         for item in run.get("items", []):
+            item['progress'] = queue['items'].get(item['id'])
             current = versions.get(item.get("script_id"))
             if current:
                 item["credibility"] = credibility.label(current, auditing=item["script_id"] in auditing)
-    return {"plans": autopilot_store.list_plans(), "runs": runs}
+    return {"plans": autopilot_store.list_plans(), "runs": runs,
+            "queue": {**queue['summary'], 'limits': {'scripts': video_autopilot.MAX_SCRIPTS,
+                                                     'renders': video_autopilot.MAX_RENDERS}}}
 
 
 @router.post("/autopilot/runs", status_code=202)

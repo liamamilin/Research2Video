@@ -32,3 +32,24 @@ def test_compact_list_route_is_opt_in(video_env):
     small = list_scripts(user={}, compact=True)[0]
     assert small["id"] == script["id"] and small["topic"]["title"] == "主题"
     assert "theme_research" not in small["topic"]
+
+
+def test_compact_preserves_filter_and_history_fields_without_transferring_source_bodies():
+    row = {'id': 's', 'version': 3, 'status': 'APPROVED', 'column_key': 'flash',
+           'publications': [{'id': 'old', 'version': 1, 'platform': 'kuaishou', 'account_uid': 'old-account',
+                             'url': 'https://example.com/old', 'sources': ['source body' * 1000]}],
+           'topic': {'article': {'mode': 'explain', 'kind': 'article', 'body': 'article body' * 1000},
+                     'local_video': {'file_name': 'v.mp4', 'duration': 45, 'width': 1080, 'height': 1920,
+                                     'size': 999, 'path': '/private/source'}},
+           'distributions': [{'platform': 'kuaishou', 'status': 'PUBLISHED', 'account_uid': 'old-account',
+                              'connected': True, 'current_account': False, 'blocked_reason': ''}]}
+    before = deepcopy(row)
+    small = compact(row)
+    assert row == before
+    assert small['topic']['article'] == {'mode': 'explain', 'kind': 'article'}
+    assert small['topic']['local_video'] == {k: row['topic']['local_video'][k]
+                                            for k in ('file_name', 'duration', 'width', 'height', 'size')}
+    assert small['publications'] == [{k: v for k, v in row['publications'][0].items() if k != 'sources'}]
+    assert small['distributions'] == row['distributions']
+    assert {k: small[k] for k in ('id', 'version', 'status', 'column_key')} == {
+        k: row[k] for k in ('id', 'version', 'status', 'column_key')}

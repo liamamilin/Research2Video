@@ -191,6 +191,28 @@ afterEach(() => {
 });
 
 describe("Video script review", () => {
+  it.each(["RESEARCHING", "WRITING"])("uses the topic heading before the first draft while %s", async (status) => {
+    mockApi({ ...DETAIL, status, current_version: 0, title: "", version_shown: null });
+    renderPage();
+    expect(await screen.findByRole("heading", { level: 1, name: DETAIL.topic.title })).toBeTruthy();
+  });
+
+  it("falls back from blank version and detail titles and retains an existing version title", async () => {
+    mockApi({ ...DETAIL, title: " ", version_shown: { ...DETAIL.version_shown, title: " " } });
+    renderPage();
+    expect(await screen.findByRole("heading", { level: 1, name: DETAIL.topic.title })).toBeTruthy();
+    cleanup();
+    mockApi(DETAIL);
+    renderPage();
+    expect(await screen.findByRole("heading", { level: 1, name: DETAIL.version_shown.title })).toBeTruthy();
+  });
+
+  it("has a default heading when a new task has no title yet", async () => {
+    mockApi({ ...DETAIL, status: "RESEARCHING", current_version: 0, title: "", topic: { title: "" }, version_shown: null });
+    renderPage();
+    expect(await screen.findByRole("heading", { level: 1, name: "视频文稿" })).toBeTruthy();
+  });
+
   it("shows an archived duplicate as a skip with original links instead of a failure", async () => {
     mockApi({ ...DETAIL, status: "FAILED", archived: 1, current_version: 0, version_shown: null, versions: [],
       error: "主事件已经讲过", selection_skip: { kind: "duplicate", reason: "主事件已经讲过", originals: [

@@ -325,7 +325,7 @@ export function VideoScriptViewPage() {
           {editing ? (
             <input className="input text-lg font-semibold" value={draftTitle} onChange={(e) => setDraftTitle(e.target.value)} />
           ) : (
-            <h1 className="text-lg font-semibold">{shown?.title ?? detail.title}</h1>
+            <h1 className="text-lg font-semibold">{shown?.title?.trim() || detail.title?.trim() || detail.topic.title?.trim() || "视频文稿"}</h1>
           )}
           {!localVideo && detail.credibility && detail.credibility.tier !== "trusted" ? (
             <p className="text-xs text-text-muted mt-1">可信度提示：{detail.credibility.reasons.join("；")}</p>

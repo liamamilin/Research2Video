@@ -19,7 +19,7 @@ echo "== python compile =="
 $PY -m compileall -q core web utils scripts run.py run_web.py
 
 echo "== unit tests =="
-$PY -m pytest -q
+"$PY" -m pytest tests -q
 
 echo "== config validation =="
 $PY run.py --validate | tail -1

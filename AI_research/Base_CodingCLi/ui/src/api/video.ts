@@ -754,6 +754,7 @@ export interface StorySelection {
 }
 
 export interface AutopilotItem {
+  progress?: { stage: string; label: string; executing: boolean; queued: boolean } | null;
   id: string;
   slot: number;
   column_key: string;
@@ -801,7 +802,21 @@ export interface AutopilotSpec {
   refresh?: boolean;
 }
 
-export const getAutopilot = () => api<{ plans: AutopilotPlan[]; runs: AutopilotRun[] }>("/api/video/autopilot");
+export interface AutopilotQueue {
+  active_batches: number;
+  preparing_batches: number;
+  executing_items: number;
+  queued_items: number;
+  waiting_items: number;
+  attention_items: number;
+  phase_counts: Record<string, number>;
+  oldest_batch_created_at: string | null;
+  completed_renders_today: number;
+  day: string;
+  checked_at: string;
+  limits: { scripts: number; renders: number };
+}
+export const getAutopilot = () => api<{ plans: AutopilotPlan[]; runs: AutopilotRun[]; queue?: AutopilotQueue }>("/api/video/autopilot");
 export const startAutopilotRun = (spec?: AutopilotSpec) =>
   api<AutopilotRun>("/api/video/autopilot/runs", { method: "POST", ...(spec ? { body: { spec } } : {}) });
 export const setPlanSpec = (id: string, spec: AutopilotSpec) =>
