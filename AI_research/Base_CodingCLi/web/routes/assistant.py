@@ -430,7 +430,10 @@ def _respond(payload, request, user, on_event=None, cancel_token=None):
         if metrics:
             result['context_usage'] = {'calls': len(metrics),
                 'message_chars': sum(item['message_chars'] for item in metrics),
-                'tool_schema_chars': sum(item['tool_schema_chars'] for item in metrics)}
+                'tool_schema_chars': sum(item['tool_schema_chars'] for item in metrics),
+                'context_retired': sum(item.get('context_retired', 0) for item in metrics),
+                'context_saved_chars': sum(item.get('context_saved_chars', 0) for item in metrics),
+                'tool_counts': [item.get('tool_count', 0) for item in metrics]}
     result.update(metadata)
     result['status'] = 'interrupted' if token.is_set() else 'completed'
     storage.save(payload.request_id, result, result['status'])

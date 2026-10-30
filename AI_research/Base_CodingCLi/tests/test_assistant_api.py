@@ -101,7 +101,7 @@ def test_listing_and_history_are_available_to_viewer(client, web_env, monkeypatc
     def check_tools(_messages, kwargs):
         names = {t["function"]["name"] for t in kwargs["tools"]}
         assert jobs_assistant.READ_TOOLS <= names
-        assert {'query_reports', 'query_rounds', 'application_overview'} <= names
+        assert {'load_assistant_tools', 'application_actions', 'query_operation'} <= names
         assert not names & {'manage_schedule', 'query_configuration', 'manage_users', 'create_job'}
         return tool("list_jobs")
 
