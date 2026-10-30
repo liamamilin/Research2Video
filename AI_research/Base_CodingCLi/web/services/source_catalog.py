@@ -56,4 +56,20 @@ def catalog(config_dir: str, jobs_dir: str, state_dir: str, *, job_names: list[s
                         row["last"] = seen
                     break
     rows = sorted([row for group in by_spec.values() for row in group], key=lambda r: (not r["used_by"], r["id"] == "", r["name"].lower()))
+    # The automatic pool is data, not an edit to the user's YAML registry.
+    # Empty ids keep these rows on the page's existing read-only/direct-source path.
+    from core.source_supply import profiles
+    from core.source_supply_store import SupplyStore
+    for key, profile in profiles(config_dir).items():
+        for source in SupplyStore(state_dir, key).pool()["sources"]:
+            last = source.get("last")
+            if last:
+                from datetime import datetime, timezone
+                last = {**last, "at": datetime.fromtimestamp(last["at"], timezone.utc).isoformat()}
+            stats = source.get("stats", {})
+            rows.append({"id": "", "automatic": True, "name": source["name"], "spec": source["spec"],
+                         "tags": [key, "自动来源"], "note": source.get("reason", "") +
+                         f"；报告引用 {stats.get('used', 0)} 页，变化 {stats.get('changed', 0)} 条（不等于成片数）",
+                         "used_by": [{"job": j, "name": profile["jobs"][j]["direction"]}
+                                     for j in source["jobs"] if j in profile["jobs"]], "last": last})
     return {"sources": rows, "problems": problems}

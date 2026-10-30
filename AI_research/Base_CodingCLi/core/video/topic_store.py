@@ -310,7 +310,14 @@ def _import(source: Source, rel: str, path: str, report_date: str, stat) -> None
     try:
         with open(path, encoding="utf-8") as fh:
             found = parse(source, fh.read(), report_date)
-        error = "" if found else "报告里没找到选题：标题和字段的格式不对？"
+        quiet = False
+        if not found:
+            try:
+                with open(path + ".source-supply.json", encoding="utf-8") as receipt:
+                    quiet = json.load(receipt).get("quiet") is True
+            except (OSError, ValueError, AttributeError):
+                pass
+        error = "" if found or quiet else "报告里没找到选题：标题和字段的格式不对？"
     except (OSError, UnicodeDecodeError) as exc:
         found, error = [], f"读不了：{exc}"
     now = _now()

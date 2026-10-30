@@ -31,6 +31,14 @@ function renderPage(body: unknown = BODY, ok = true) {
 }
 
 describe("Sources page", () => {
+  it("identifies automatic sources without showing an unregistered warning", async () => {
+    renderPage({ sources: [{ id: "", automatic: true, name: "AI release notes", spec: "page:https://vendor.example/updates",
+      tags: ["ai_media"], note: "报告引用 2 页，变化 3 条（不等于成片数）", used_by: [], last: null }], problems: [] });
+    expect(await screen.findByText("自动接入")).toBeTruthy();
+    expect(screen.queryByText("没登记")).toBeNull();
+    expect(screen.getByText(/报告引用 2 页/)).toBeTruthy();
+  });
+
   it("lists every source with who uses it and how its last fetch went, and names Jobs that point at a missing source", async () => {
     renderPage();
     expect(await screen.findByText("IEEE Spectrum")).toBeTruthy();

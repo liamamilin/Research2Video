@@ -48,7 +48,7 @@ def _date(text: str) -> str | None:
     return None
 
 
-def parse_page(page: str, url: str, limit: int = 8) -> list[SearchResult]:
+def parse_page(page: str, url: str, limit: int = 8, *, section_chars: int = MAX_SECTION_CHARS) -> list[SearchResult]:
     """Keep heading sections, dates and links; discard navigation and scripts."""
     root, title = _document(page)
     text = root.get_text(" ", strip=True)
@@ -63,7 +63,7 @@ def parse_page(page: str, url: str, limit: int = 8) -> list[SearchResult]:
             return
         target = url + ("#" + quote(anchor, safe="-_") if anchor else
                         "#:~:text=" + quote(heading, safe=""))
-        excerpt = body[:MAX_SECTION_CHARS]
+        excerpt = body[:section_chars]
         if links:
             excerpt += "\n相关页面：" + "；".join(dict.fromkeys(links))[:1500]
         results.append(SearchResult(title=f"{title} · {heading}" if heading != title else title,
@@ -114,11 +114,11 @@ def parse_catalog(page: str, url: str, limit: int = 8) -> list[SearchResult]:
 
 
 def fetch_page(url: str, limit: int, timeout: int, *, get_page, search_client: SearchClient | None = None,
-               catalog: bool = False) -> list[SearchResult]:
+               catalog: bool = False, section_chars: int = MAX_SECTION_CHARS) -> list[SearchResult]:
     parsed = urlsplit(url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
         raise ValueError("网页来源需要不带账号密码的 HTTP 或 HTTPS URL")
-    parser = parse_catalog if catalog else parse_page
+    parser = parse_catalog if catalog else lambda page, url, limit: parse_page(page, url, limit, section_chars=section_chars)
     try:
         results = parser(get_page(url, timeout), url, limit)
         if not results:

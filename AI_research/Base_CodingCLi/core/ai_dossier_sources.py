@@ -32,7 +32,7 @@ def selected_urls(report: str, supplied: str) -> list[str]:
     return chosen
 
 
-def detail_sections(sections: list[SearchResult]) -> list[SearchResult]:
+def detail_sections(sections: list[SearchResult], *, max_chars: int = PAGE_CHARS) -> list[SearchResult]:
     """Prefer examples and methods, keeping selected sections whole and ordered."""
     if not sections:
         return []
@@ -41,7 +41,7 @@ def detail_sections(sections: list[SearchResult]) -> list[SearchResult]:
     kept, used = [], 0
     for i in priority:
         size = len(sections[i].to_markdown())
-        if used + size <= PAGE_CHARS:
+        if used + size <= max_chars:
             kept.append(i)
             used += size
     return [sections[i] for i in sorted(kept)]

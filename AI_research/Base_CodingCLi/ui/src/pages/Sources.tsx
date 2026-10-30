@@ -99,7 +99,7 @@ function Row({ s, onEdit }: { s: SourceRow; onEdit?: () => void }) {
   return (
     <tr className="align-top">
       <td className="px-4 py-2 min-w-[14rem]">
-        <div>{s.name}{s.id ? null : <span className="ml-2 text-xs text-warning">没登记</span>}</div>
+        <div>{s.name}{s.automatic ? <span className="ml-2 text-xs text-accent">自动接入</span> : s.id ? null : <span className="ml-2 text-xs text-warning">没登记</span>}</div>
         <div className="text-xs text-text-muted font-mono break-all">{s.id ? `${s.id} · ` : ""}{s.spec}</div>
         {s.note ? <div className="text-xs text-text-muted mt-1">{s.note}</div> : null}
         {onEdit && <button className="text-xs text-accent mt-1" onClick={onEdit}>修改来源</button>}

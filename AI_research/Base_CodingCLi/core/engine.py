@@ -102,6 +102,10 @@ class ResearchEngine:
             print(f"  [{job_name}] SKIPPED: job is disabled (enabled: false)")
             return None
 
+        if job.get("source_discovery"):
+            from .source_discovery import run as discover_sources
+            return discover_sources(self, job)
+
         if job.get("topic_ideas"):
             from .theme_ideas import run as generate_themes
             return generate_themes(self, job)
@@ -136,6 +140,8 @@ class ResearchEngine:
         usage: Optional[dict] = None
         self._source_pending = None
         self._source_search_client = None
+        self._supply_pending = None
+        self._supply_receipt = None
 
         try:
             with LockManager(job.get("_file", job_name), stale_after=stale_after):
@@ -236,6 +242,8 @@ class ResearchEngine:
                             dossier_detail.update(expanded=False, expansion_error=str(exc)[:300])
                             logger.warning("Dossier expansion kept the initial report: %s", exc)
                 usage = agent.get_usage()
+                if self._supply_receipt is not None:
+                    usage["source_supply"] = self._supply_receipt
                 if self._source_search_client is not None:
                     usage["searches"] = int(usage.get("searches") or 0) + self._source_search_client.calls
 
@@ -262,6 +270,15 @@ class ResearchEngine:
                 cleaned = extract_report(raw_content, self.sys,
                                          cancel_token=self._cancel)
                 actual_path = self._save_output(cleaned, output_path)
+                if self._supply_pending:
+                    from .source_supply import save_receipt
+                    from .source_supply_store import SupplyStore
+                    try:
+                        SupplyStore(os.path.join(self.workspace_dir, "state"), self._supply_pending["profile"]).commit(
+                            self._supply_pending, cleaned, self._output_reference(actual_path))
+                        save_receipt(actual_path, self._supply_receipt)
+                    except OSError as exc:
+                        logger.warning("Source delivery receipt was not advanced: %s", exc)
                 if self._source_pending:
                     from .source_history import commit
                     try:
@@ -407,6 +424,9 @@ class ResearchEngine:
         Returns ``(block, (items, stats))``. Raises ``SourcesUnavailableError`` when nothing came back, so the model
         is never asked to write from memory; sources that failed while others answered are named in the block, so the
         report states what it did not cover."""
+        enhanced = self._fetch_supply(job)
+        if enhanced is not None:
+            return enhanced
         from .sources import fetch_all_strict, resolve
 
         specs = resolve(list(job.get("sources") or []), self.config_dir)
@@ -418,6 +438,14 @@ class ResearchEngine:
         note = ("\n\n本次未取得内容的来源：\n" + "\n".join(failed)) if failed else ""
         logger.info("Sources fetched: %s", stats)
         return f"{header}{note}\n\n{self._source_material(job, items)}", (items, stats)
+
+    def _fetch_supply(self, job: dict):
+        from .source_supply import collect, for_job, material_block
+        profile = for_job(self.config_dir, job)
+        if profile is None:
+            return None
+        items, stats, self._supply_pending, self._supply_receipt = collect(self, job, profile)
+        return material_block(items, self._supply_receipt), (items, stats)
 
     def _source_options(self, specs: list[str]) -> dict:
         if not any(spec.startswith(("page:", "catalog:", "search:")) for spec in specs):
@@ -446,6 +474,9 @@ class ResearchEngine:
         if not specs:
             return ""
         try:
+            enhanced = self._fetch_supply(job)
+            if enhanced is not None:
+                return enhanced[0]
             from .sources import fetch_all, resolve
 
             limit = int(job.get("sources_limit", 8))

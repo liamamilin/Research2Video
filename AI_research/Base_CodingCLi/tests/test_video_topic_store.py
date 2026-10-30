@@ -46,6 +46,17 @@ def reports(env) -> None:
     write(env, "output/practical_ai_intelligence/2026-10-01/07_product_content_opportunities.md", CONTENT_REPORT)
 
 
+def test_successful_quiet_collection_is_not_a_report_format_error(video_env):
+    import json
+    path = "output/flash/2026-10-19_ai_flash_discovery.md"
+    write(video_env, path, "# AI 快讯\n本次来源没有新增或修改材料。")
+    write(video_env, path + ".source-supply.json", json.dumps({"quiet": True}))
+    pilot.sync_topics()
+    with store.connect() as conn:
+        row = conn.execute("SELECT count, error FROM topic_imports WHERE source='flash'").fetchone()
+    assert row["count"] == 0 and row["error"] == ""
+
+
 def test_the_shipped_jobs_declare_the_two_sources_the_recipes_use(video_env):
     every = topic_store.sources(str(video_env / "jobs"))
     assert set(every) == {"flash", "opportunities"}
