@@ -320,13 +320,18 @@ def test_report_write_is_atomic(tmp_path, monkeypatch):
     path = engine._save_output("# hello\n", str(target))
     assert Path(path).read_text(encoding="utf-8") == "# hello\n"
     # No temp file left behind.
-    assert [p.name for p in Path(path).parent.iterdir()] == ["report.md"]
+    assert sorted(p.name for p in Path(path).parent.iterdir()) == ["report.md", "report.md.report.json"]
 
 
-def test_restore_logic_ignores_a_zero_byte_replacement(tmp_path):
-    """The cleanup must not treat an empty leftover as a fresh report."""
-    source = (ROOT / "core" / "engine.py").read_text(encoding="utf-8")
-    assert "os.path.getsize(output_path) > 0" in source
+def test_failed_report_save_keeps_the_completed_previous_report(tmp_path, monkeypatch):
+    from core.engine import ResearchEngine
+
+    target = tmp_path / "report.md"
+    target.write_text("completed previous report")
+    monkeypatch.setattr("core.engine.atomic_write", lambda *a: (_ for _ in ()).throw(OSError("disk full")))
+    with pytest.raises(OSError, match="disk full"):
+        ResearchEngine.__new__(ResearchEngine)._save_output("new report", str(target))
+    assert target.read_text() == "completed previous report" and not (tmp_path / "report_1.md").exists()
 
 
 def test_save_output_still_avoids_overwriting(tmp_path):

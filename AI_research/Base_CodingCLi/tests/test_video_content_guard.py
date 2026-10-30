@@ -301,6 +301,48 @@ def test_fully_covered_report_is_archived_before_calling_any_writer(guard_env, m
     assert "均已讲过" in store.get_script(current["id"])["error"]
 
 
+def test_duplicate_memory_matches_item_content_and_matrix_without_blocking_real_retries(guard_env):
+    from copy import deepcopy
+
+    first = script(guard_env, "science/daily")
+    candidate = {"id": "2026-10-29/F1", "title": "小蛇会滚", "fields": {"核心角度": "滚动逃跑"},
+                 "matrix_dedup": {"job": "science/weekly"}}
+    failed = store.create_script("flash", candidate)
+    assert guard.archive_duplicate(failed["id"], "重复", [first["id"]])
+    store.update_script(failed["id"], status="FAILED")
+    config = str(guard_env / "config")
+    assert guard.known_duplicate_ids([candidate], config) == {candidate["id"]}
+    audience_variant = deepcopy(candidate)
+    audience_variant["fields"]["目标受众"] = "所有观众"
+    assert guard.known_duplicate_ids([audience_variant], config) == {candidate["id"]}
+    corrected = deepcopy(candidate)
+    corrected["fields"]["核心角度"] = "新的实验结果"
+    different_matrix = {**candidate, "matrix_dedup": {"job": "history/daily"}}
+    assert guard.known_duplicate_ids([corrected], config) == set()
+    assert guard.known_duplicate_ids([different_matrix], config) == set()
+    # Archiving an unpublished original releases it; a publication continues to cover it.
+    store.update_script(first["id"], archived=1)
+    assert guard.known_duplicate_ids([candidate], config) == set()
+    store.add_publication(first["id"], version=1, platform="bilibili", url="https://example.com/video", published_on="2026-10-29")
+    assert guard.known_duplicate_ids([candidate], config) == {candidate["id"]}
+    store.update_script(failed["id"], archived=0)
+    assert guard.known_duplicate_ids([candidate], config) == set()
+
+
+def test_duplicate_memory_expires_and_does_not_remember_uncovered_failures(guard_env):
+    first = script(guard_env, "science/daily")
+    candidate = {"id": "test/F1", "title": "小蛇", "matrix_dedup": {"job": "science/daily"}}
+    failed = store.create_script("flash", candidate)
+    assert guard.archive_duplicate(failed["id"], "排重后素材不足", [])
+    store.update_script(failed["id"], status="FAILED")
+    config = str(guard_env / "config")
+    assert guard.known_duplicate_ids([candidate], config) == set()
+    assert guard.archive_duplicate(failed["id"], "重复", [first["id"]])
+    with store.connect(write=True) as conn:
+        conn.execute("UPDATE script_versions SET created_at='2000-01-01' WHERE script_id=?", (first["id"],))
+    assert guard.known_duplicate_ids([candidate], config) == set()
+
+
 def test_programmatic_validation_cannot_write_to_production_store(guard_env, monkeypatch):
     monkeypatch.setattr(evaluation, "ROOT", guard_env)
     with pytest.raises(ValueError, match="正式视频数据库"):

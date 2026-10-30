@@ -173,6 +173,27 @@ export interface Credibility {
   cited_share: number | null;
 }
 
+export interface TopicScript {
+  id: string;
+  column_key: string;
+  cell_key?: string;
+  status: ScriptStatus;
+  created_at: string;
+  archived?: number;
+  version?: number;
+  render_state?: "none" | "working" | "done" | "failed";
+  render?: { id: string; version: number; status: string } | null;
+  video_url?: string | null;
+  previous_video?: { version: number; url: string } | null;
+  selection_skip?: SelectionSkip | null;
+}
+
+export interface SelectionSkip {
+  kind: "duplicate" | "exhausted";
+  reason: string;
+  originals: (TopicScript & { title: string })[];
+}
+
 export interface VideoTopic {
   id: string;
   round: string;
@@ -186,7 +207,7 @@ export interface VideoTopic {
   dismissed?: boolean;
   stale?: boolean;
   event_date?: string | null;
-  scripts?: { id: string; column_key: string; status: ScriptStatus; created_at: string; archived?: number }[];
+  scripts?: TopicScript[];
   /** 来自哪个选题来源：Job 的 topics.alias（或 Job 路径），手动添加的是 manual */
   source?: string;
 }
@@ -351,6 +372,7 @@ export interface Recheck {
 }
 
 export interface VideoScriptDetail extends VideoScriptSummary {
+  selection_skip?: SelectionSkip | null;
   distributions?: Distribution[];
   configuration?: {
     links: { label: string; name: string; href: string; scope: string; next: string }[];

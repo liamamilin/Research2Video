@@ -77,6 +77,89 @@ def test_picking_takes_the_best_unwritten_topics_and_skips_taken_ones(video_env,
     assert [i["topic"]["id"] for i in second] == ["2026-10-19/F2"]  # F1 already has a script
 
 
+def test_confirmed_duplicate_is_not_picked_or_used_as_a_fallback_again(video_env, monkeypatch):
+    from core.video import content_guard
+    from tests.test_video_flash import DISCOVERY
+
+    folder = video_env / "output/flash"
+    folder.mkdir(parents=True)
+    (folder / "2026-10-19_ai_flash_discovery.md").write_text(DISCOVERY, encoding="utf-8")
+    spec = {"picks": [{"column": "flash", "count": 1, "source": "flash"}]}
+    candidate = pilot.pick_topics(spec)[0]["topic"]
+    original = store.create_script("flash", {"id": "earlier/F1", "title": "先前已覆盖"})
+    store.add_version(original["id"], title="先前已覆盖", sections=SECTIONS, length_check={}, edit_type="GENERATED")
+    store.update_script(original["id"], status="APPROVED")
+    duplicate = store.create_script("flash-nr", candidate, "autopilot")
+    assert content_guard.archive_duplicate(duplicate["id"], "同一主事件已经讲过", [original["id"]])
+    store.update_script(duplicate["id"], status="FAILED")
+    before = store.get_script(duplicate["id"])
+    store.init_db()  # Retry memory survives a process restart, without creating new ledger rows.
+    picked = pilot.pick_topics(spec)
+    assert [p["topic"]["id"] for p in picked] == ["2026-10-19/F2"]
+    assert all(t["id"] != candidate["id"] for t in picked[0]["topic"].get("_story_fallbacks", []))
+    assert store.get_script(duplicate["id"]) == before
+    # A pending batch saved before deployment also replaces it before spawning a writer.
+    monkeypatch.setattr(video_workflow, "spawn", lambda *args: pytest.fail("known duplicates must not start a writer"))
+    run = ap.create_run({}, [{"column_key": "flash-nr", "topic": {**candidate, "_story_fallbacks": [picked[0]["topic"]]}}])
+    pilot.advance(run["items"][0], can_start_script=True, can_start_render=True)
+    resumed = ap.get_run(run["id"])["items"][0]
+    assert resumed["state"] == "PENDING" and resumed["script_id"] is None
+    assert resumed["topic"]["id"] == "2026-10-19/F2"
+    assert resumed["gate"]["known_duplicate_skips"] == [candidate["id"]]
+    ap.update_item(resumed["id"], state="CANCELLED")
+    # A real failure of the covering task releases this candidate for retry.
+    store.update_script(original["id"], status="FAILED")
+    assert pilot.pick_topics(spec)[0]["topic"]["id"] == candidate["id"]
+
+
+@pytest.mark.parametrize("absolute", [False, True])
+def test_batch_uses_its_exact_report_even_after_a_newer_report_arrives(video_env, absolute):
+    from tests.test_video_flash import DISCOVERY
+    folder = video_env / "output/flash"
+    folder.mkdir(parents=True)
+    first = folder / "2026-10-19_ai_flash_discovery.md"
+    first.write_text(DISCOVERY, encoding="utf-8")
+    (folder / "2026-10-20_ai_flash_discovery.md").write_text(
+        DISCOVERY.replace("Opus 5.5", "下一天的新模型"), encoding="utf-8")
+    report = str(first) if absolute else str(first.relative_to(video_env))
+    picked = pilot.pick_topics({"report": report, "picks": [{"column": "flash", "source": "flash", "count": 2}]})
+    assert [p["topic"]["id"] for p in picked] == ["2026-10-19/F1", "2026-10-19/F2"]
+    assert picked[0]["topic"]["title"].startswith("Opus")
+
+
+def test_empty_current_report_does_not_pick_yesterdays_topics(video_env):
+    from tests.test_video_flash import DISCOVERY
+    folder = video_env / "output/flash"
+    folder.mkdir(parents=True)
+    (folder / "2026-10-19_ai_flash_discovery.md").write_text(DISCOVERY, encoding="utf-8")
+    current = folder / "2026-10-20_ai_flash_discovery.md"
+    current.write_text("# 本次暂无新题材\n", encoding="utf-8")
+    assert pilot.pick_topics({"report": str(current),
+                              "picks": [{"column": "flash", "source": "flash", "count": 3}]}) == []
+
+
+def test_same_day_batches_keep_separate_report_identities_and_fallbacks(video_env):
+    from tests.test_video_flash import DISCOVERY
+    folder = video_env / "output/flash"
+    folder.mkdir(parents=True)
+    first = folder / "2026-10-19_ai_flash_discovery.md"
+    first.write_text(DISCOVERY, encoding="utf-8")
+    spec = {"report": str(first), "picks": [{"column": "flash", "source": "flash", "count": 1}]}
+    original = pilot.pick_topics(spec)[0]
+    saved = store.create_script("flash", original["topic"])
+    later = folder / "2026-10-19_ai_flash_discovery_1.md"
+    later.write_text(DISCOVERY.replace("Opus 5.5", "下午发布的新模型"), encoding="utf-8")
+    import os
+    os.utime(later, (time.time() + 5, time.time() + 5))
+    picked = pilot.pick_topics({**spec, "report": str(later)})
+    assert len(picked) == 1 and picked[0]["topic"]["id"] == "2026-10-19/F1@1"
+    assert picked[0]["topic"]["title"].startswith("下午发布")
+    assert store.get_script(saved["id"])["topic"] == original["topic"]
+    # A batch waiting on the original file can still read its remaining topic.
+    remaining = pilot.pick_topics(spec)
+    assert len(remaining) == 1 and remaining[0]["topic"]["id"] == "2026-10-19/F2"
+
+
 def test_scripts_start_up_to_the_limit_then_the_rest_wait(pilot_env, monkeypatch):
     spawned, _ = pilot_env
     run = batch(monkeypatch, 3)

@@ -33,6 +33,8 @@ export function currentPublications(detail: VideoScriptDetail) {
 
 /** What the person should do next with a script, and the tab where they do it. */
 export function nextStep(detail: VideoScriptDetail): NextStep {
+  if (detail.selection_skip) return { tab: "draft", text: detail.selection_skip.kind === "duplicate"
+    ? "重复选题已跳过，可查看已有文稿和成片。" : "可用选题不足，本次已跳过，等待新的素材。", tone: "done" };
   const latest = renderForVersion(detail);
   switch (detail.status) {
     case "RESEARCHING":

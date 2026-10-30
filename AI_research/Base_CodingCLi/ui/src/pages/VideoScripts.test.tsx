@@ -94,6 +94,21 @@ function renderPage() {
 }
 
 describe("Video script cell picker", () => {
+  it("allows a topic covered by another cell but blocks a matching cell's active task", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      const u = String(url);
+      if (u.includes("/cells")) return jsonResponse(CELLS);
+      if (u.includes("/topics")) return jsonResponse({ round: "2026-10-19", topics: [
+        { ...FLASH[0], scripted: true, published: true, scripts: [{ id: "flash-task", column_key: "flash-nr", cell_key: "flash", status: "WRITING", created_at: "2026-10-19" }] },
+        { ...FLASH[1], scripted: true, scripts: [{ id: "same-task", column_key: "deep_dive-m8-nr", status: "WRITING", created_at: "2026-10-19" }] },
+      ] });
+      return jsonResponse([]);
+    }));
+    render(<MemoryRouter initialEntries={["/video?cell=deep_dive&topic=2026-10-19/F1&topic_source=flash"]}><VideoScriptsPage /></MemoryRouter>);
+    const allowed = await screen.findByRole("button", { name: "写这一篇" });
+    expect((allowed as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole("button", { name: "已有文稿任务" }) as HTMLButtonElement).disabled).toBe(true);
+  });
   it("marks unverified cells, disables blocked ones and offers the cell's other video forms", async () => {
     renderPage();
     await openCreate();

@@ -164,7 +164,7 @@ def test_discover_api_registers_a_job_once_and_respects_service_maintenance(clie
     assert client.post(f"/api/matrices/demo/themes/{row['id']}/start", json={}, headers=_csrf(client)).status_code == 409
 
 
-def test_auto_video_tick_only_renders_opted_in_themes_once(theme_env, monkeypatch):
+def test_auto_video_tick_adopts_opted_in_themes_into_the_shared_queue_once(theme_env, monkeypatch):
     from web.services import theme_workbench, video_executor
     themes = ThemeStore(str(theme_env / "state"))
     row = themes.create("demo", "demo_value", "免费版用了一个月，应该升级吗？")
@@ -176,7 +176,11 @@ def test_auto_video_tick_only_renders_opted_in_themes_once(theme_env, monkeypatc
     monkeypatch.setattr(video_executor, "render", lambda *args: events.append("render"))
     monkeypatch.setattr(videos, "list_renders", lambda sid: [] if not events else [{"id": "r", "status": "RUNNING"}])
     theme_workbench.tick(); theme_workbench.tick()
-    assert events == ["approve", "render"]
+    assert events == []  # Approval and rendering now respect the shared batch worker and its limits.
+    from core.video import autopilot_store
+    runs = autopilot_store.list_runs()
+    assert len(runs) == 1 and runs[0]['stage'] == 'ITEMS'
+    assert runs[0]['items'][0]['script_id'] == script['id']
 
 
 @pytest.mark.parametrize("script_status,render_status,opt_in,expected", [

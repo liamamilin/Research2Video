@@ -191,6 +191,30 @@ afterEach(() => {
 });
 
 describe("Video script review", () => {
+  it("shows an archived duplicate as a skip with original links instead of a failure", async () => {
+    mockApi({ ...DETAIL, status: "FAILED", archived: 1, current_version: 0, version_shown: null, versions: [],
+      error: "主事件已经讲过", selection_skip: { kind: "duplicate", reason: "主事件已经讲过", originals: [
+        { id: "original", title: "已完成的视频", video_url: "/original.mp4", render_state: "done" },
+      ] } });
+    renderPage("/video/s1?return_to=%2Ftopics%3Ftask%3Dskipped");
+    await screen.findByText("重复选题，已跳过");
+    expect(screen.queryByText("没有完成")).toBeNull();
+    expect(screen.getByRole("link", { name: "已有文稿：已完成的视频" }).getAttribute("href")).toContain("/video/original?");
+    expect(screen.getByRole("link", { name: "查看已有成片" }).getAttribute("href")).toContain("tab=video");
+    expect(screen.getByLabelText("下一步").textContent).toContain("重复选题已跳过");
+    expect(calls.some(c => c.method === "POST")).toBe(false);
+  });
+  it("keeps the topic return destination while changing tabs and rejects unrelated return links", async () => {
+    const back = "/topics?cell=flash&source=flash&round=2026-10-19&task=draft#topic-F1";
+    renderPage(`/video/s1?return_to=${encodeURIComponent(back)}`);
+    const link = await screen.findByRole("link", { name: "← 返回选题，继续处理" });
+    expect(link.getAttribute("href")).toBe(back);
+    fireEvent.click(screen.getByRole("tab", { name: "审校" }));
+    expect(screen.getByRole("link", { name: "← 返回选题，继续处理" }).getAttribute("href")).toBe(back);
+    cleanup();
+    renderPage("/video/s1?return_to=https%3A%2F%2Fevil.test");
+    expect((await screen.findByRole("link", { name: "← 视频文稿" })).getAttribute("href")).toBe("/video");
+  });
   it("refreshes an idle draft and follows automatic approval without a page reload", async () => {
     const timers = vi.spyOn(window, "setInterval");
     try {

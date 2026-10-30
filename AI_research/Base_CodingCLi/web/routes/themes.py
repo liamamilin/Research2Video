@@ -60,6 +60,29 @@ class Feedback(BaseModel):
     note: str = Field(default="", max_length=1000)
 
 
+class ColumnQuota(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    period: Literal['day', 'week']
+    count: int = Field(ge=0, le=5)
+
+
+class AutomaticProduction(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    enabled: bool
+    daily_limit: int = Field(ge=1, le=5)
+    minutes: float = Field(default=4, ge=2, le=8, multiple_of=0.5)
+    columns: dict[str, ColumnQuota] = Field(default_factory=dict, max_length=100)
+
+
+@router.put('/production')
+def automatic_production(matrix_key: str, body: AutomaticProduction, user=Depends(require_editor)):
+    from core import theme_production
+    call(workbench.matrix, matrix_key)
+    result = call(theme_production.save, workbench.paths().config_dir, matrix_key, body.model_dump())
+    audit.log('theme_automatic_production', user=user['username'], target=matrix_key, details=body.model_dump())
+    return result
+
+
 @router.get("")
 def list_themes(matrix_key: str, user=Depends(require_viewer)):
     return call(workbench.snapshot, matrix_key)

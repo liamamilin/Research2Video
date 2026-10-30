@@ -13,6 +13,12 @@ describe("nextStep", () => {
     expect(nextStep(detail({ status: "FAILED" })).tone).toBe("bad");
   });
 
+  it("guides explicit duplicate and exhausted skips without reporting a technical failure", () => {
+    for (const kind of ["duplicate", "exhausted"] as const) {
+      expect(nextStep(detail({ status: "FAILED", selection_skip: { kind, reason: "跳过", originals: [] } }))).toMatchObject({ tone: "done", tab: "draft" });
+    }
+  });
+
   it("asks for approval of a draft and mentions must-fix findings", () => {
     const checks = { summary: { passed: false, serious: 2 } };
     const step = nextStep(detail({ version_shown: { checks } as never }));

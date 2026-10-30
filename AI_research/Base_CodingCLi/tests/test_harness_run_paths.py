@@ -58,7 +58,7 @@ def test_validated_output_is_written_under_its_root_with_a_different_cwd(tmp_pat
 
 
 @pytest.mark.parametrize('fail', [False, True])
-def test_engine_replaces_or_restores_the_previous_report_in_the_validated_workspace(web_env, tmp_path, monkeypatch, fail):
+def test_engine_preserves_previous_report_and_allocates_a_new_run(web_env, tmp_path, monkeypatch, fail):
     from core import engine as engine_module
     from core.engine import ResearchEngine
     from contextlib import nullcontext
@@ -77,6 +77,7 @@ def test_engine_replaces_or_restores_the_previous_report_in_the_validated_worksp
         def __init__(self, **kwargs):
             self.materials = ['### Original source\n\nhttps://source.example/news\n\nConcrete detail.']
         def run(self, *args, **kwargs):
+            assert output.read_text() == '# Previous report'
             if fail:
                 raise RuntimeError('injected research failure')
             return '# Fresh report\n\nUseful evidence and findings.'
@@ -93,12 +94,15 @@ def test_engine_replaces_or_restores_the_previous_report_in_the_validated_worksp
     monkeypatch.setattr(report_meta, 'append_record', lambda *a, **kw: recorded.append(kw))
     engine = ResearchEngine(config_dir=str(root / 'config'), jobs_dir=str(root / 'jobs'), workspace_dir=str(root))
     result = engine.run_job('research/memory')
-    assert result == (None if fail else 'output/kept.md')
-    assert output.read_text().startswith('# Previous' if fail else '# Fresh')
+    assert result == (None if fail else 'output/kept_1.md')
+    assert output.read_text() == '# Previous report'
     assert not output.with_suffix('.md.prev').exists()
     assert not list(process_dir.rglob('*.md'))
     if not fail:
         from core import report_material
         material = recorded[0]['extra']['material']
         assert Path(material['path']).parent == output.parent
-        assert 'Concrete detail.' in report_material.read(material, str(output), output.read_text())
+        saved = root / result
+        assert saved.read_text().startswith('# Fresh')
+        assert Path(str(saved) + '.report.json').is_file()
+        assert 'Concrete detail.' in report_material.read(material, str(saved), saved.read_text())

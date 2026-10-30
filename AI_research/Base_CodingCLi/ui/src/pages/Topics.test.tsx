@@ -1,5 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { Link, MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useAuthStore } from "@/lib/auth-store";
@@ -37,6 +37,12 @@ function browserBody(cells = CELLS, coverage = COVERAGE) {
   return { cells, coverage, sources: SOURCES, initial: { source: "flash", ...TOPICS } };
 }
 
+function CreatedScript() {
+  const location = useLocation();
+  const back = new URLSearchParams(location.search).get("return_to") || "/topics";
+  return <><p>已进入当前文稿</p><output aria-label="文稿地址">{location.pathname + location.search}</output><Link to={back}>返回原选题</Link></>;
+}
+
 beforeEach(() => {
   useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
   vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
@@ -52,6 +58,217 @@ afterEach(() => {
 });
 
 describe("Topics page", () => {
+  it("starts the picked topic once in place and restores its context and scroll on return", async () => {
+    const posts: object[] = [];
+    let finish: (r: Response) => void = () => {};
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        posts.push(JSON.parse(String(init.body)));
+        return new Promise<Response>(resolve => { finish = resolve; });
+      }
+      const u = String(url);
+      const round = new URL(u, "http://local").searchParams.get("round") || TOPICS.round;
+      return { ok: true, status: 200, text: async () => JSON.stringify(u.includes("/topics/browser") ? browserBody() : u.includes("/discovery") ? DISCOVERY : { ...TOPICS, round }) } as Response;
+    }));
+    render(<MemoryRouter initialEntries={["/topics?cell=flash&source=flash&round=2026-10-18&task=unwritten&q=GPT"]}>
+      <main data-testid="topic-scroll"><Routes><Route path="/topics" element={<TopicsPage />} /><Route path="/video/:id" element={<CreatedScript />} /></Routes></main>
+    </MemoryRouter>);
+    const start = await screen.findByRole("button", { name: "开始写稿：GPT-5.5 从 ChatGPT 退役" });
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    const main = screen.getByTestId("topic-scroll"); main.scrollTop = 420; fireEvent.scroll(main);
+    fireEvent.click(start); fireEvent.click(start);
+    await waitFor(() => expect(posts).toHaveLength(1));
+    expect(posts[0]).toEqual({ column: "flash", topic_id: "2026-10-19/F2" });
+    expect((start as HTMLButtonElement).disabled).toBe(true);
+    finish({ ok: true, status: 202, text: async () => JSON.stringify({ id: "new-script" }) } as Response);
+    const address = await screen.findByLabelText("文稿地址");
+    const query = new URL(address.textContent!, "http://local").searchParams;
+    expect(query.get("return_to")).toContain("round=2026-10-18");
+    expect(query.get("return_to")).toContain("task=unwritten");
+    expect(query.get("return_to")).toContain("#topic-2026-10-19%2FF2");
+    main.scrollTop = 0;
+    fireEvent.click(screen.getByText("返回原选题"));
+    await screen.findByRole("button", { name: "开始写稿：GPT-5.5 从 ChatGPT 退役" });
+    expect((screen.getByLabelText("报告日期") as HTMLSelectElement).value).toBe("2026-10-18");
+    expect((screen.getByLabelText("视频类型") as HTMLSelectElement).value).toBe("flash");
+    expect((screen.getByRole("searchbox") as HTMLInputElement).value).toBe("GPT");
+    await waitFor(() => expect(main.scrollTop).toBe(420));
+  });
+
+  it("keeps a failed start visible on its card and does not automatically retry", async () => {
+    let posts = 0;
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") { posts++; return { ok: false, status: 503, text: async () => JSON.stringify({ error: { code: "unavailable", message: "写稿服务暂不可用" } }) } as Response; }
+      return { ok: true, status: 200, text: async () => JSON.stringify(String(url).includes("/topics/browser") ? browserBody() : DISCOVERY) } as Response;
+    }));
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "开始写稿：GPT-5.5 从 ChatGPT 退役" }));
+    expect((await screen.findByRole("alert")).textContent).toContain("写稿服务暂不可用");
+    expect(posts).toBe(1);
+    expect((screen.getByRole("button", { name: "开始写稿：GPT-5.5 从 ChatGPT 退役" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+  function progressTopics() {
+    const topic = (id: string, title: string, scripts: object[] = []) => ({ ...TOPICS.topics[1], id, title, scripts });
+    const script = (id: string, extra: object = {}) => ({ id, column_key: "flash", status: "APPROVED", created_at: "2026-10-19T14:45:00+0800", version: 2, render_state: "none", ...extra });
+    return [
+      topic("done", "当前版本已经完成", [script("done-script", { render_state: "done", video_url: "/api/video/renders/current/files/video.mp4", render: { status: "FAILED", version: 2, id: "retry" } })]),
+      topic("old", "只有旧版成片", [script("old-script", { status: "DRAFT", previous_video: { version: 1, url: "/old-video.mp4" } }), script("earlier-script", { created_at: "2026-10-18", render_state: "done", video_url: "/earlier-script.mp4" })]),
+      topic("working", "当前版本正在制作", [script("running-script", { render_state: "working", render: { id: "run", version: 2, status: "RUNNING" } })]),
+      topic("failed", "当前版本出片失败", [script("failed-script", { render_state: "failed", render: { id: "fail", version: 2, status: "FAILED" } })]),
+      topic("draft-failed", "写稿失败也能看到", [script("draft-failed-script", { status: "FAILED", render_state: "none", version: 0 })]),
+      topic("unwritten", "还没开始写稿"),
+      topic("other", "其他视频类型已有成片", [script("other-script", { column_key: "rnd", render_state: "done", video_url: "/roundup.mp4" })]),
+    ];
+  }
+  function useProgressTopics() {
+    let topics = progressTopics();
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      const listing = { ...TOPICS, topics };
+      const body = String(url).includes("/topics/browser") ? { ...browserBody(), initial: { source: "flash", ...listing } }
+        : String(url).includes("/discovery") ? DISCOVERY : listing;
+      return { ok: true, status: 200, text: async () => JSON.stringify(body) } as Response;
+    }));
+    return (next: typeof topics) => { topics = next; };
+  }
+
+  it("provides task shortcuts for actionable work and includes writing failures in exceptions", async () => {
+    useProgressTopics();
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "异常 2" }));
+    expect(screen.getByText("当前版本出片失败")).toBeTruthy();
+    expect(screen.getByText("写稿失败也能看到")).toBeTruthy();
+    expect(screen.queryByText("当前版本已经完成")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "待写 2" }));
+    expect(screen.getByText("还没开始写稿")).toBeTruthy();
+    expect(screen.getByText("其他视频类型已有成片")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "文稿待处理 1" }));
+    expect(screen.getByRole("link", { name: "继续编辑：只有旧版成片" }).getAttribute("href")).toContain("tab=draft");
+    fireEvent.click(screen.getByRole("button", { name: "出片中 1" }));
+    expect(screen.getByRole("link", { name: "查看进度：当前版本正在制作" }).getAttribute("href")).toContain("tab=video");
+  });
+
+  it("separates duplicate skips from failures and opens the existing video without production requests", async () => {
+    const update = useProgressTopics();
+    update([...progressTopics(), { ...TOPICS.topics[1], id: "duplicate", title: "昨天已经讲过的事件", scripts: [
+      { id: "skipped", column_key: "flash-nr", status: "FAILED", archived: 1, version: 0, created_at: "2026-10-30", render_state: "none",
+        selection_skip: { kind: "duplicate", reason: "主事件已经讲过", originals: [
+          { id: "original", title: "昨天的完整视频", column_key: "flash", status: "APPROVED", version: 1, created_at: "2026-10-29", render_state: "done", video_url: "/original-video.mp4" },
+        ] } },
+    ] }]);
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "已跳过 1" }));
+    const progress = screen.getByLabelText("昨天已经讲过的事件的制作进度");
+    expect(within(progress).getByText("重复选题，已跳过")).toBeTruthy();
+    expect(within(progress).queryByText("写稿：失败")).toBeNull();
+    expect(within(progress).queryByText("出片：未出片")).toBeNull();
+    expect(screen.queryByRole("link", { name: "查看原因：昨天已经讲过的事件" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "开始写稿：昨天已经讲过的事件" })).toBeNull();
+    expect(within(progress).getByRole("link", { name: "已有文稿：昨天的完整视频" }).getAttribute("href")).toContain("/video/original?");
+    fireEvent.click(within(progress).getByRole("button", { name: "查看已有成片：昨天的完整视频" }));
+    expect(progress.querySelector("video")?.getAttribute("src")).toBe("/original-video.mp4");
+    expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === "POST")).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "异常 2" }));
+    expect(screen.queryByText("昨天已经讲过的事件")).toBeNull();
+    expect(screen.getByText("写稿失败也能看到")).toBeTruthy();
+  });
+
+  it("starts only the selected approved script's render and immediately shows its progress", async () => {
+    let posts = 0;
+    const topics = [...progressTopics(), { ...TOPICS.topics[1], id: "ready", title: "已有定稿等待出片", scripts: [{ id: "approved-script", column_key: "flash", status: "APPROVED", version: 2, created_at: "2026-10-19", render_state: "none", previous_video: { version: 1, url: "/kept-old.mp4" } }] }];
+    vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        posts++; expect(String(url)).toBe("/api/video/scripts/approved-script/render");
+        return { ok: true, status: 202, text: async () => JSON.stringify({ id: "new-render", version: 2, status: "SUBMITTING" }) } as Response;
+      }
+      return { ok: true, status: 200, text: async () => JSON.stringify(String(url).includes("/topics/browser") ? { ...browserBody(), initial: { source: "flash", ...TOPICS, topics } } : DISCOVERY) } as Response;
+    }));
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "待出片 1" }));
+    fireEvent.click(screen.getByRole("button", { name: "生成成片：已有定稿等待出片" }));
+    await waitFor(() => expect(posts).toBe(1));
+    // The completed request leaves the ready queue without affecting the old video's record.
+    await waitFor(() => expect(screen.queryByText("已有定稿等待出片")).toBeNull());
+    fireEvent.click(screen.getByRole("button", { name: "出片中 2" }));
+    const progress = screen.getByLabelText("已有定稿等待出片的制作进度");
+    expect(within(progress).getByText("有旧版成片 v1（不计入当前版本）")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "查看进度：已有定稿等待出片" })).toBeTruthy();
+  });
+
+  it("shows separate draft/video states, plays current and old videos within the topic card", async () => {
+    useProgressTopics();
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    const done = await screen.findByLabelText("当前版本已经完成的制作进度");
+    expect(within(done).getByText("写稿：已定稿")).toBeTruthy();
+    expect(within(done).getByText("出片：已出片")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "查看成片：当前版本已经完成" }));
+    expect(within(done).getByLabelText("当前版本已经完成：当前文稿 v2 成片").getAttribute("src")).toBe("/api/video/renders/current/files/video.mp4");
+    fireEvent.click(within(done).getByText("关闭成片"));
+    expect(done.querySelector("video")).toBeNull();
+    const old = screen.getByLabelText("只有旧版成片的制作进度");
+    expect(within(old).getByText("写稿：待审稿")).toBeTruthy();
+    expect(within(old).getByText("出片：未出片")).toBeTruthy();
+    expect(within(old).getByText("有旧版成片 v1（不计入当前版本）")).toBeTruthy();
+    fireEvent.click(within(old).getByText("查看旧版成片"));
+    expect(old.querySelector("video")?.getAttribute("src")).toBe("/old-video.mp4");
+    fireEvent.error(old.querySelector("video")!);
+    expect(within(old).getByRole("alert").textContent).toContain("暂时无法播放");
+    expect(screen.getAllByText("写稿：未写稿")).toHaveLength(2); // Other types do not claim this cell is done.
+    expect(screen.getByLabelText("写稿失败也能看到的制作进度").textContent).toContain("写稿：失败");
+    expect(screen.getByLabelText("写稿失败也能看到的制作进度").textContent).toContain("出片：未出片");
+  });
+
+  it("filters by the newest matching script's current version and preserves the filter in the URL", async () => {
+    useProgressTopics();
+    render(<MemoryRouter initialEntries={["/topics?render=done"]}><TopicsPage /></MemoryRouter>);
+    await screen.findByText("当前版本已经完成");
+    expect(screen.queryByText("只有旧版成片")).toBeNull();
+    expect(screen.queryByText("其他视频类型已有成片")).toBeNull();
+    fireEvent.change(screen.getByLabelText("出片"), { target: { value: "none" } });
+    expect(screen.getByText("只有旧版成片")).toBeTruthy();
+    expect(screen.getByText("还没开始写稿")).toBeTruthy();
+    expect(screen.getByText("其他视频类型已有成片")).toBeTruthy();
+    expect(screen.getByText("写稿失败也能看到")).toBeTruthy();
+    expect(screen.queryByText("当前版本正在制作")).toBeNull();
+    fireEvent.change(screen.getByLabelText("出片"), { target: { value: "working" } });
+    expect(screen.getByText("当前版本正在制作")).toBeTruthy();
+    expect(screen.queryByText("当前版本出片失败")).toBeNull();
+    fireEvent.change(screen.getByLabelText("出片"), { target: { value: "failed" } });
+    expect(screen.getByText("当前版本出片失败")).toBeTruthy();
+    expect(screen.queryByText("写稿失败也能看到")).toBeNull();
+    expect(screen.queryByText("还没开始写稿")).toBeNull();
+  });
+
+  it("refreshes production progress on returning to the page without another catalog request", async () => {
+    const update = useProgressTopics();
+    render(<MemoryRouter><TopicsPage /></MemoryRouter>);
+    await screen.findByText("当前版本正在制作");
+    const next = progressTopics();
+    next[2].scripts = [{ id: "running-script", column_key: "flash", status: "APPROVED", version: 2, created_at: "2026-10-19", render_state: "done", video_url: "/just-completed.mp4" }];
+    update(next);
+    fireEvent(document, new Event("visibilitychange"));
+    const progress = screen.getByLabelText("当前版本正在制作的制作进度");
+    await waitFor(() => expect(within(progress).getByText("出片：已出片")).toBeTruthy());
+    expect(vi.mocked(fetch).mock.calls.filter(([url]) => String(url).includes("/topics/browser"))).toHaveLength(1);
+  });
+
+  it("matches production variants and does not let an archived failed draft hide the usable current video", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      const topics = [{ ...TOPICS.topics[1], title: "自动配置生成的快讯", scripts: [
+        { id: "archived", column_key: "flash-nr", cell_key: "flash", status: "FAILED", archived: 1, created_at: "2026-10-20", render_state: "failed", version: 0 },
+        { id: "live", column_key: "flash-nr", cell_key: "flash", status: "APPROVED", created_at: "2026-10-19", render_state: "done", version: 1, video_url: "/live.mp4" },
+      ] }];
+      return { ok: true, status: 200, text: async () => JSON.stringify(String(url).includes("/topics/browser")
+        ? { ...browserBody(), initial: { source: "flash", ...TOPICS, topics } } : DISCOVERY) } as Response;
+    }));
+    render(<MemoryRouter initialEntries={["/topics?render=done"]}><TopicsPage /></MemoryRouter>);
+    const progress = await screen.findByLabelText("自动配置生成的快讯的制作进度");
+    expect(within(progress).getByText("出片：已出片")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "查看成片：自动配置生成的快讯" }));
+    expect(progress.querySelector("video")?.getAttribute("src")).toBe("/live.mp4");
+    fireEvent.click(within(progress).getByText("其他关联文稿（1）"));
+    expect(within(progress).getByText("写稿：失败")).toBeTruthy();
+  });
+
   it("gets the first topics with one browser request, without waiting for discovery status", async () => {
     const paths: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (url: string) => {
@@ -104,20 +321,20 @@ describe("Topics page", () => {
     await waitFor(() => expect(screen.queryByText("迟到的旧来源条目")).toBeNull());
   });
 
-  it("flags written and published topics and links the rest to the cell picker", async () => {
+  it("keeps publication history and offers a direct start instead of another picker", async () => {
     render(<MemoryRouter><TopicsPage /></MemoryRouter>);
     fireEvent.click(screen.getByText("按领域与受众选择类型"));
     expect(await screen.findByText("已发布")).toBeTruthy();
-    const link = (await screen.findByText("用这个写稿")).closest("a");
-    expect(link?.getAttribute("href")).toBe("/video?cell=ai-developer-quick-take-long&topic=2026-10-19%2FF2&topic_source=flash&topic_round=2026-10-19");
-    expect(screen.getByText(/还有 1 条没写/)).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "开始写稿：GPT-5.5 从 ChatGPT 退役" })).toBeTruthy();
+    expect(screen.queryByText("用这个写稿")).toBeNull();
+    expect(screen.getByText(/当前视频类型待写 1 条/)).toBeTruthy();
   });
 
   it("shows the event date next to the report date and which script already covers a topic, and filters", async () => {
     render(<MemoryRouter><TopicsPage /></MemoryRouter>);
     fireEvent.click(screen.getByText("按领域与受众选择类型"));
     expect(await screen.findByText("事件日期 2026-10-14")).toBeTruthy();
-    expect(screen.getByText("已有文稿").getAttribute("href")).toBe("/video/s9");
+    expect(screen.getByText("已有文稿").getAttribute("href")).toContain("/video/s9?tab=draft&return_to=");
     fireEvent.change(screen.getByLabelText("写稿"), { target: { value: "no" } });
     await waitFor(() => expect(screen.queryByText("Gemini 4 Argon 上线")).toBeNull());
     expect(screen.getByText("GPT-5.5 从 ChatGPT 退役")).toBeTruthy();
@@ -200,8 +417,8 @@ describe("Topics page", () => {
     render(<MemoryRouter><TopicsPage /></MemoryRouter>);
     fireEvent.click(screen.getByText("按领域与受众选择类型"));
     expect(await screen.findByRole("button", { name: "医疗 快讯 开发者" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "AI 快讯 开发者" }).textContent).toContain("1 条待写");
-    expect(screen.getByRole("button", { name: "医疗 快讯 开发者" }).textContent).toContain("4 条待写");
+    expect(screen.getByRole("button", { name: "AI 快讯 开发者" }).textContent).toContain("1 条候选");
+    expect(screen.getByRole("button", { name: "医疗 快讯 开发者" }).textContent).toContain("4 条候选");
     expect(screen.getByLabelText("医疗内容矩阵")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "快讯 开发者" })).toBeNull(); // with one domain the label stays as it was
   });

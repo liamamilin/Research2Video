@@ -298,11 +298,12 @@ def list_topics(round: Optional[str] = None, source: str = "opportunities",
 
 def _topic_listing(source: str, round_date: Optional[str]) -> dict:
     from core.video import topic_store
+    from web.services import topic_progress
 
     round_date, topics = topic_store.load(source, round_date)
     used = store.topic_ids_in_use()
     published = store.published_topic_ids()
-    covered = store.scripts_by_topic()
+    covered = topic_progress.scripts_by_topic([t.id for t in topics])
     dismissed = store.dismissed_topic_ids()
     return {
         "round": round_date,
@@ -621,7 +622,7 @@ def archive_script(script_id: str, body: Optional[ArchiveIn] = None, user=Depend
 @router.get("/scripts/{script_id}")
 def get_script(script_id: str, version: Optional[int] = None, user=Depends(require_viewer)) -> dict:
     from web.services.video_configuration import context
-    from web.services import platform_manager, distributions
+    from web.services import platform_manager, distributions, topic_progress
     script = _script_or_404(script_id)
     shown = version or script["current_version"]
     current = store.get_version(script_id, shown) if shown else None
@@ -632,6 +633,7 @@ def get_script(script_id: str, version: Optional[int] = None, user=Depends(requi
         current = {**current, "checks": video_workflow.rule_checks(current, column)}
     return {
         **script,
+        "selection_skip": topic_progress.selection_skips([script]).get(script_id),
         "credibility": credibility.label(current, auditing=bool(script.get("stage"))) if current else None,
         "auto": script.get("created_by") == "autopilot",
         "column": column.as_dict() if column else None,

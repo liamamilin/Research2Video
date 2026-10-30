@@ -24,6 +24,7 @@ import { errorMessage, useToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { DraftQualityPanel } from "./VideoQuality";
 import { ArticleCreate } from "@/components/ArticleCreate";
+import { scriptFromTopic, topicReturn, topicTaken } from "@/lib/topic-progress";
 
 export const STATUS_LABEL: Record<ScriptStatus, string> = {
   RESEARCHING: "研究中",
@@ -249,7 +250,8 @@ export function VideoScriptsPage() {
       });
       if (kind === "roundup") toast.success("已开始写稿", "盘点直接用发现报告写稿，通常几分钟");
       else toast.success("已开始研究", "研究通常需要 3–10 分钟，完成后自动写稿");
-      navigate(`/video/${made.id}`);
+      const back = topicReturn(params.get("return_to"));
+      navigate(back ? scriptFromTopic(made.id, back) : `/video/${made.id}`);
     } catch (e) {
       toast.error("没能开始", errorMessage(e));
     } finally {
@@ -450,11 +452,11 @@ export function VideoScriptsPage() {
                     {t.score != null ? <span className="badge border border-border text-xs">{t.score}/10</span> : null}
                     <button
                       className="btn btn-primary text-xs shrink-0"
-                      disabled={busy !== null || t.scripted}
+                      disabled={busy !== null || topicTaken(t, cell.key)}
                       onClick={() => create({ topic_id: t.id }, t.id)}
-                      title={t.scripted ? "这个选题已经写过" : undefined}
+                      title={topicTaken(t, cell.key) ? "这个视频类型已有文稿任务" : undefined}
                     >
-                      {t.published ? "已发布" : t.scripted ? "已写过" : busy === t.id ? "开始中..." : "写这一篇"}
+                      {topicTaken(t, cell.key) ? "已有文稿任务" : busy === t.id ? "开始中..." : "写这一篇"}
                     </button>
                   </div>
                 ))}

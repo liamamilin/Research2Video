@@ -119,6 +119,10 @@ def coverage(*, cells: Optional[list[dict]] = None, source_rows: Optional[list[d
     return rows
 
 
+class ReportVersionChanged(ValueError):
+    """The completed input changed after this batch claimed it."""
+
+
 def pick_topics(spec: dict) -> list[dict]:
     """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet."""
     sync_topics()
@@ -128,6 +132,11 @@ def pick_topics(spec: dict) -> list[dict]:
 
     paths = get_settings().paths
     config_dir = paths.config_dir
+    if spec.get("report_identity"):
+        from core import report_identity
+
+        if report_identity.version(spec["report"], video_workflow.workspace_dir()) != spec["report_identity"]:
+            raise ReportVersionChanged("报告已变更，本批次保留原版本回执；新版本由自动流程另行领取")
     for pick in (resolve_pick(p) for p in spec.get("picks", [])):
         column = video_columns.get(config_dir, pick["column"])
         if pick.get("whole"):  # the Job's report as it is, one video: never a topic source
@@ -135,14 +144,21 @@ def pick_topics(spec: dict) -> list[dict]:
             if item is not None:
                 items.append({**item, "pick": pick})
             continue
-        _, topics = topic_store.load(pick.get("source", "flash"))
         source = topic_store.resolve(paths.jobs_dir, pick.get("source", "flash"))
+        if spec.get("report"):
+            if source is None:
+                raise ValueError("批次指定的选题来源不存在")
+            _, topics = topic_store.read_report(source, spec["report"], video_workflow.workspace_dir())
+        else:
+            _, topics = topic_store.load(pick.get("source", "flash"))
         job = source.job if source else ""
         candidates = [content_guard.policy_topic(excerpt.topic_for(column, topic), job)
                       for topic in sorted(topics, key=lambda t: (bool(getattr(t, "stale", lambda: False)()), -(t.score or 0)))]
         for candidate in candidates:
             if candidate.get("matrix_dedup"):
                 candidate["matrix_dedup"]["policy"] = story_pool.POLICY
+        skipped = content_guard.known_duplicate_ids(candidates, config_dir)
+        candidates = [candidate for candidate in candidates if candidate["id"] not in skipped]
         # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
         for candidate in candidates:
             if len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
@@ -331,6 +347,11 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
 
         paths = get_settings().paths
         topic = content_guard.with_policy({"created_by": "autopilot", "topic": item["topic"]}, paths.jobs_dir)["topic"]
+        if topic.get("id") in content_guard.known_duplicate_ids([topic], paths.config_dir):
+            gate = dict(item.get("gate") or {})
+            gate["known_duplicate_skips"] = list(dict.fromkeys([*gate.get("known_duplicate_skips", []), topic["id"]]))
+            _replace_candidate(item, gate, "此候选已确认重复")
+            return took
         if content_guard.writing_peer(topic, paths.config_dir, paths.jobs_dir):
             ap.update_item(item["id"], note="等待同矩阵前一项确定主事件，再从剩余候选选题")
             return took
@@ -342,7 +363,15 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
         topic = _prepare({**item, "topic": topic})
         if item.get("production"):
             topic = {**topic, "_production": item["production"]}
-        script = video_executor.create(item["column_key"], topic, "autopilot")
+        if topic.get('theme_auto'):
+            from web.services import theme_workbench
+            try:
+                script = theme_workbench.create_queued({**item, 'topic': topic})
+            except (ValueError, LookupError) as exc:
+                ap.update_item(item['id'], state='CANCELLED', note=str(exc))
+                return took
+        else:
+            script = video_executor.create(item["column_key"], topic, "autopilot")
         if item.get("production"):
             store.update_script(script["id"], production=item["production"])
         ap.update_item(item["id"], script_id=script["id"], state="WORKING", note="已开始写稿")
@@ -382,20 +411,27 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> di
 
 
 def _reselect(item: dict, script: dict, gate: dict) -> None:
-    alternatives = list(item["topic"].get("_story_fallbacks") or [])
     attempts = list((item.get("gate") or {}).get("story_attempts") or [])
     attempts.append({"script_id": script["id"], "title": script["topic"].get("title", ""),
                      "reason": script.get("error") or "主事件均已覆盖", "selection": gate["story_selection"]})
+    _replace_candidate(item, {**gate, "story_attempts": attempts}, script.get('error') or '主事件均已覆盖')
+
+
+def _replace_candidate(item: dict, gate: dict, reason: str) -> None:
+    from core.video import content_guard
+
+    alternatives = list(item["topic"].get("_story_fallbacks") or [])
     taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
+    taken |= content_guard.known_duplicate_ids(alternatives, get_settings().paths.config_dir)
     for index, topic in enumerate(alternatives):
         if topic["id"] in taken:
             continue
         replacement = {**topic, "_story_fallbacks": alternatives[index+1:]}
         ap.update_item(item["id"], topic=replacement, script_id=None, state="PENDING", retries={},
-                       gate={"story_attempts": attempts}, note=f"旧事件已覆盖，自动改选：{topic['title']}")
+                       gate={k: v for k, v in gate.items() if k != "story_selection"}, note=f"旧事件已覆盖，自动改选：{topic['title']}")
         return
-    ap.update_item(item["id"], state="CANCELLED", gate={**gate, "story_attempts": attempts},
-                   note=f"候选不足，排重后少做一条：{script.get('error') or '主事件均已覆盖'}")
+    ap.update_item(item["id"], state="CANCELLED", gate=gate,
+                   note=f"候选不足，排重后少做一条：{reason}")
 
 
 def _prepare(item: dict) -> dict:
@@ -426,6 +462,8 @@ def tick() -> int:
             story_pool.reconcile()
             fire_due_plans()
             fire_auto()
+            from web.services import theme_autopilot
+            theme_autopilot.fire()
             reopen_approved()
             runs = sorted(ap.list_runs(limit=None, status="RUNNING"), key=lambda r: r["started_at"])  # oldest first: see below
             if runs:  # a batch in flight counts as use of the console: the launcher's idle watchdog must not close it
@@ -500,7 +538,11 @@ def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
     if run["stage"] == "TOPICS":
         if not fresh_topics(spec, run):
             return 0
-        items = pick_topics(spec)
+        try:
+            items = pick_topics(spec)
+        except ReportVersionChanged as exc:
+            ap.update_run(run["id"], status="DONE", note=str(exc))
+            return 0
         if not items:
             # keep why the topics were not fresh: that, not the empty pick, is usually what went wrong
             cause = (ap.get_run(run["id"]) or {}).get("note") or ""
@@ -598,11 +640,11 @@ def fire_auto(now: Optional[float] = None) -> int:
     for found in video_auto.pending(paths.config_dir, paths.jobs_dir, paths.state_dir, root,
                                     time.time() if now is None else now):
         try:
-            start_run({"picks": found["picks"], "refresh": False, "job": found["job"], "report": found["report"]},
+            start_run({**found, "refresh": False},
                       started_by="autopilot")
             fired += 1
         except Exception:  # noqa: BLE001 - a config that cannot start must not stop the others or the tick
             logger.exception("auto batch for %s not started", found["job"])
-            ap.finished_run({"picks": found["picks"], "refresh": False, "job": found["job"], "report": found["report"]},
+            ap.finished_run({**found, "refresh": False},
                             "自动写稿没能开始，看日志", started_by="autopilot")  # also marks the report handled: no retry loop
     return fired

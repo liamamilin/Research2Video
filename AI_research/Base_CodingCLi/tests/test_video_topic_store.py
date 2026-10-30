@@ -144,10 +144,10 @@ def test_a_rewritten_report_replaces_its_topics(video_env):
     reports(video_env)
     pilot.sync_topics()
     path = video_env / "output/flash/2026-10-19_ai_flash_discovery.md"
-    path.write_text(DISCOVERY.replace("### 1.2", "### 1.2 （删掉）\n\n### 9.9 不再是条目\n#### x") + "\n", encoding="utf-8")
+    path.write_text(DISCOVERY.split("### 1.2")[0], encoding="utf-8")
     os.utime(path, (time.time() + 5, time.time() + 5))
     pilot.sync_topics()
-    assert len(topic_store.load("flash")[1]) >= 2
+    assert [t.id for t in topic_store.load("flash")[1]] == ["2026-10-19/F1"]
 
 
 def test_any_job_can_be_a_source_and_a_recipe_can_read_it(video_env):
@@ -314,4 +314,36 @@ def test_a_job_made_from_the_topic_discovery_template_is_a_source_and_reads_the_
     os.utime(later, (time.time() + 5, time.time() + 5))
     pilot.sync_topics()
     date, found = topic_store.load(source.name)
-    assert date == "2026-10-20" and found[0].title == "更长的上下文到底贵在哪" and found[0].id == "2026-10-20/D1"
+    assert date == "2026-10-20" and found[0].title == "更长的上下文到底贵在哪" and found[0].id == "2026-10-20/D1@1"
+
+
+def test_failed_import_is_reparsed_after_parser_repair_without_rewriting_the_report(video_env, monkeypatch):
+    reports(video_env)
+    original = topic_store.parse
+    with monkeypatch.context() as patch:
+        patch.setattr(topic_store, "parse", lambda *args: [])
+        pilot.sync_topics()
+    path = video_env / "output/flash/2026-10-19_ai_flash_discovery.md"
+    before = path.stat()
+    assert topic_store.import_errors()["flash"]
+    pilot.sync_topics()
+    assert len(topic_store.load("flash")[1]) == 2
+    assert "flash" not in topic_store.import_errors()
+    assert path.stat().st_mtime_ns == before.st_mtime_ns
+    assert topic_store.parse is original
+
+
+def test_latest_same_day_report_does_not_include_leftover_topics(video_env):
+    reports(video_env)
+    pilot.sync_topics()
+    later = write(video_env, "output/flash/2026-10-19_ai_flash_discovery_1.md",
+                  "### 1. 新的唯一变化\n- **一句话**：下午更新\n")
+    os.utime(later, (time.time() + 5, time.time() + 5))
+    pilot.sync_topics()
+    _, found = topic_store.load("flash")
+    assert [t.title for t in found] == ["新的唯一变化"]
+    assert found[0].id == "2026-10-19/F1@1"
+    assert topic_store.get(found[0].id).report_path.endswith("_1.md")
+    source = topic_store.resolve(str(video_env / "jobs"), "flash")
+    _, original = topic_store.read_report(source, "output/flash/2026-10-19_ai_flash_discovery.md", str(video_env))
+    assert [t.id for t in original] == ["2026-10-19/F1", "2026-10-19/F2"]

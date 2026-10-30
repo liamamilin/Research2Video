@@ -7,6 +7,7 @@ import { createTheme, discoverThemes, dismissTheme, generateThemes, getThemeHist
 import { ErrorState } from "@/components/ErrorState";
 import { TimeStamp } from "@/components/TimeStamp";
 import { ThemeUsage } from "@/components/ThemeUsage";
+import { ThemeProductionSettings } from "@/components/ThemeProductionSettings";
 import { errorMessage, useToast } from "@/lib/toast";
 
 const PLATFORM_NAMES: Record<string, string> = { bilibili: "B站", zhihu: "知乎", youtube: "YouTube", xiaohongshu: "小红书", reddit: "Reddit" };
@@ -62,6 +63,8 @@ function ThemeForm({ categories, value, saving, onSave, onClose }: {
 }
 
 function status(theme: Theme) {
+  if (theme.automatic_production?.state === 'skipped' || theme.status === 'skipped') return '已跳过';
+  if (theme.automatic_production?.state === 'queued' || theme.status === 'queued') return '已排队，等待制作';
   if (theme.renders?.some((r) => r.status === "COMPLETED")) return "视频已完成";
   if (theme.renders?.some((r) => !["FAILED", "CANCELLED"].includes(r.status))) return "视频制作中";
   if (theme.renders?.length) return "视频需要重试";
@@ -185,6 +188,9 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
     {error && <ErrorState error={error} onRetry={load} compact />}
     {!data && !error && <p role="status" className="text-sm text-text-muted">正在读取主题…</p>}
     {data && <>
+      {data.automatic_production ? <ThemeProductionSettings
+        key={matrix + JSON.stringify({ ...data.automatic_production, daily_used: undefined })}
+        matrix={matrix} config={data.automatic_production} canEdit={canEdit} onSaved={() => void load()} /> : null}
       <nav className="flex flex-wrap gap-2 text-xs" aria-label="主题工作区">
         <button className={`btn ${view === "recommendations" ? "btn-primary" : ""}`} onClick={() => setView("recommendations")}>待选主题</button>
         <button className={`btn ${view === "library" ? "btn-primary" : ""}`} onClick={() => setView("library")}>参考库 · {data.library?.examples.length || 0} 个例题</button>
@@ -285,12 +291,14 @@ export function ThemeWorkbench({ matrix, canEdit }: { matrix: string; canEdit: b
             <TimeStamp value={new Date((signal.metrics_observed_at || signal.collected_at) * 1000).toISOString()} label={signal.metrics_observed_at ? "指标采集" : "线索采集"} staleDays={Infinity} />
           </li>)}</ul>
         </details>}
-        {theme.error && <p className="text-xs text-warning">{theme.error}</p>}
+        {theme.automatic_production?.note ? <p className="text-xs text-text-muted">{theme.automatic_production.note}</p> : null}
+        {theme.error && theme.automatic_production?.state !== 'skipped' && theme.status !== 'skipped' && <p className="text-xs text-warning">{theme.error}</p>}
         {theme.feedback?.action === "interested" && <p className="text-xs text-accent">已标记感兴趣</p>}
         {theme.feedback?.action === "dismissed" && <p className="text-xs text-text-muted">忽略原因：{FEEDBACK_REASONS[theme.feedback.reason || "not_now"]}{theme.feedback.note ? ` · ${theme.feedback.note}` : ""}</p>}
         {supportsFeedback && (theme.origin === "generated" || theme.script_id) && <ThemeUsage matrix={matrix} id={theme.id} />}
         <div className="flex flex-wrap gap-2 border-t border-border pt-3">
-          {theme.script_id ? <Link className="btn btn-primary text-xs" to={`/video/${theme.script_id}`}>查看文稿与视频</Link> : canEdit && !theme.used_at && <>
+          {theme.automatic_production?.state === 'skipped' && theme.automatic_production.script_id ? <Link className="btn text-xs" to={`/video/${theme.automatic_production.script_id}`}>查看已有内容</Link> : null}
+          {theme.script_id ? <Link className="btn btn-primary text-xs" to={`/video/${theme.script_id}`}>查看文稿与视频</Link> : canEdit && !theme.used_at && theme.automatic_production?.state !== 'queued' && theme.status !== 'queued' && <>
             <button className="btn btn-primary text-xs" disabled={!!busy} onClick={() => beginTheme(theme, true)}>{busy === theme.id ? "正在启动…" : "研究并制作视频"}</button>
             <button className="btn text-xs" disabled={!!busy} onClick={() => beginTheme(theme, false)}>先研究写稿</button>
             <button className="text-xs text-accent px-1" onClick={() => setEditing(theme)}>改角度</button>

@@ -18,6 +18,7 @@ export interface ThemeRanking {
     metrics: Record<string, number>; views_per_day?: number; speed_kind: string } | null;
 }
 export interface Theme {
+  automatic_production?: { state: 'disabled' | 'ready' | 'quota' | 'queued' | 'working' | 'done' | 'attention' | 'skipped'; note: string; script_id?: string } | null;
   id: string; matrix: string; category: string; title: string; angle: string; audience: string; notes: string;
   origin: "manual" | "discovered" | "generated"; day: string; reason: string; signals: ThemeSignal[]; status: string;
   script_id: string; auto_video: boolean; created_at: number; updated_at: number;
@@ -41,6 +42,7 @@ export interface ThemeLibraryData {
 export interface ThemeHistory { themes: Theme[]; total: number; next_offset: number | null }
 export type ThemeInput = Pick<Theme, "title" | "angle" | "audience" | "notes"> & { category: string };
 export interface ThemeWorkbenchData {
+  automatic_production?: ThemeProductionConfig;
   categories: ThemeCategory[]; legacy_categories?: ThemeCategory[]; themes: Theme[]; today: string; discovery_running: boolean;
   library?: ThemeLibraryData; used_count?: number; ideas_running?: boolean;
   runs: { id: string; status: string; started_at: number; error: string;
@@ -51,6 +53,13 @@ export interface ThemeWorkbenchData {
   schedule: { enabled: boolean; next_run: string } | null;
   scheduler: { online: boolean; detail: string };
 }
+export interface ThemeProductionConfig {
+  enabled: boolean; daily_limit: number; minutes: number; daily_used?: number; timezone: string; starts_on: string;
+  columns: Record<string, { name: string; period: 'day' | 'week'; count: number }>;
+}
+export const setThemeProduction = (matrix: string, config: Pick<ThemeProductionConfig, 'enabled' | 'daily_limit' | 'minutes'> & {
+  columns: Record<string, { period: 'day' | 'week'; count: number }>;
+}) => api<ThemeProductionConfig>(`${path(matrix)}/production`, { method: 'PUT', body: config });
 const path = (matrix: string) => `/api/matrices/${encodeURIComponent(matrix)}/themes`;
 export const getThemeWorkbench = (matrix: string, signal?: AbortSignal) => api<ThemeWorkbenchData>(path(matrix), { signal });
 export const createTheme = (matrix: string, body: ThemeInput) => api<Theme>(path(matrix), { method: "POST", body });

@@ -135,7 +135,6 @@ class ResearchEngine:
 
         start_time = time.time()
         output_path = None
-        prev_path: Optional[str] = None
         agent: Optional[ResearchAgent] = None
         usage: Optional[dict] = None
         self._source_pending = None
@@ -170,26 +169,9 @@ class ResearchEngine:
 
                 print(f"  [{job_name}] Researching (LLM + web search)...")
 
-                # Move stale output aside: a failed/cancelled run must not
-                # destroy the previous report, but a successful run must not
-                # leave two versions behind either (restored in `finally`).
-                prev_path = output_path + ".prev"
-                try:
-                    if os.path.exists(prev_path):
-                        os.remove(prev_path)
-                    if os.path.exists(output_path):
-                        os.replace(output_path, prev_path)
-                    else:
-                        # Nothing to protect. Output paths are date-stamped, so
-                        # the first run of a day has no previous report; leaving
-                        # prev_path set made the success path in `finally` try to
-                        # delete a stash that was never created, logging a
-                        # spurious "Could not restore stashed report" warning on
-                        # every fresh report.
-                        prev_path = None
-                except OSError as exc:
-                    logger.warning("Could not stash stale output: %s", exc)
-                    prev_path = None
+                # Completed reports are immutable inputs for video batches.
+                # Keep them readable during research; _save_output allocates a
+                # numbered sibling only after the new report is complete.
 
                 research_cfg = ResearchConfig.from_system(self.sys)
                 if job.get("max_searches") is not None:  # a Job may cap its own searches below the system default
@@ -387,20 +369,6 @@ class ResearchEngine:
                          fields={"job": job_name, "status": "failed"})
             return None
         finally:
-            # Restore the stashed report when this run produced no new file.
-            # "Produced a new file" means non-empty: _save_output is atomic now,
-            # so a zero-byte file at output_path can only be a leftover, and
-            # treating it as success would delete the good report we stashed.
-            if prev_path and output_path:
-                try:
-                    if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-                        if os.path.exists(prev_path):
-                            os.remove(prev_path)   # fresh report saved
-                    elif os.path.exists(prev_path):
-                        os.replace(prev_path, output_path)
-                        logger.info("Restored previous report: %s", output_path)
-                except OSError as exc:
-                    logger.warning("Could not restore stashed report: %s", exc)
             if agent is not None:
                 agent.close()
 
@@ -741,10 +709,8 @@ class ResearchEngine:
         If the file already exists, appends a numeric suffix (``_1``, ``_2``,
         etc.) before the extension to avoid overwriting.
 
-        The write is atomic (temp file + rename). A plain ``open(path, "w")``
-        truncates before the first byte lands, so a crash or a full disk
-        mid-write left a partial report that ``run_job``'s cleanup then treated
-        as success -- deleting the stashed previous one.
+        The report and its identity manifest are saved atomically per file.
+        Existing reports remain readable throughout the next research run.
         """
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
 
@@ -756,6 +722,9 @@ class ResearchEngine:
             counter += 1
 
         atomic_write(final_path, content)
+        from . import report_identity
+
+        report_identity.publish(final_path, getattr(self, "workspace_dir", os.path.dirname(final_path)))
         logger.debug("Saved output to %s", final_path)
         return final_path
 

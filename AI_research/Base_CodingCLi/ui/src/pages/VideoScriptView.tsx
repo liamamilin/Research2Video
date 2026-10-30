@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { createSearchParams, Link, useParams, useSearchParams, type SetURLSearchParams } from "react-router-dom";
 import {
   approveVideoScript,
   archiveVideoScript,
@@ -41,6 +41,8 @@ import { PublishPanel, RenderFolder } from "./VideoPublish";
 import { STATUS_CLASS, STATUS_LABEL, minutes } from "./VideoScripts";
 import { ArticleSource } from "@/components/ArticleSource";
 import { ScriptScreenshots } from "@/components/ScriptScreenshots";
+import { topicReturn as workflowReturn } from "@/lib/topic-progress";
+import { SelectionSkipLinks, skipLabel } from "@/components/SelectionSkip";
 
 const EVIDENCE: Record<Evidence, { label: string; cls: string }> = {
   CITED: { label: "有出处", cls: "bg-success/15 text-success border-success/30" },
@@ -82,7 +84,14 @@ function host(url: string): string {
 
 export function VideoScriptViewPage() {
   const { id = "" } = useParams();
-  const [search, setSearch] = useSearchParams();
+  const [search, setRawSearch] = useSearchParams();
+  const setSearch: SetURLSearchParams = (next, options) => setRawSearch(prev => {
+    const result = createSearchParams(typeof next === "function" ? next(new URLSearchParams(prev)) : next);
+    const back = workflowReturn(prev.get("return_to"));
+    if (back && !result.has("return_to")) result.set("return_to", back);
+    return result;
+  }, options);
+  const backToTopics = workflowReturn(search.get("return_to"));
   const versionParam = Number(search.get("version")) || undefined;
   const user = useAuthStore((s) => s.user);
   const canEdit = user?.role === "editor" || user?.role === "admin";
@@ -295,14 +304,14 @@ export function VideoScriptViewPage() {
   return (
     <div className="space-y-5 max-w-6xl">
       {error ? <ErrorState error={error} onRetry={load} compact /> : null}
-      <Link to="/video" className="text-xs text-accent hover:underline">
-        ← 视频文稿
+      <Link to={backToTopics ?? "/video"} className="text-xs text-accent hover:underline">
+        {backToTopics ? "← 返回选题，继续处理" : "← 视频文稿"}
       </Link>
 
       <div className="flex flex-wrap items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className={cn("badge border", STATUS_CLASS[detail.status])}>{localVideo ? '本地视频' : STATUS_LABEL[detail.status]}</span>
+            <span className={cn("badge border", detail.selection_skip ? "border-border text-text-muted" : STATUS_CLASS[detail.status])}>{detail.selection_skip ? skipLabel(detail.selection_skip) : localVideo ? '本地视频' : STATUS_LABEL[detail.status]}</span>
             <DistributionSummary rows={detail.distributions?.filter(d => d.version === detail.current_version)} publications={currentPublications(detail)} />
             {!localVideo && <CredibilityBadge value={detail.credibility} />}
             {detail.auto ? <span className="badge border border-border text-text-muted">自动流水线</span> : null}
@@ -436,11 +445,15 @@ export function VideoScriptViewPage() {
         </section>
       ) : null}
 
-      {detail.error && detail.status !== "FAILED" ? (
+      {detail.selection_skip ? <section className="card p-4" aria-label="选题跳过说明">
+        <SelectionSkipLinks skip={detail.selection_skip} back={backToTopics} />
+      </section> : null}
+
+      {detail.error && detail.status !== "FAILED" && !detail.selection_skip ? (
         <section className="card border-warning/40 text-sm text-warning">{detail.error}</section>
       ) : null}
 
-      {detail.status === "FAILED" ? (
+      {detail.status === "FAILED" && !detail.selection_skip ? (
         <section className="card border-danger/40 text-sm space-y-1">
           <p className="text-danger font-medium">没有完成</p>
           <p className="text-text-muted">{detail.error}</p>
