@@ -26,8 +26,10 @@ def catalog(config_dir: str, jobs_dir: str, state_dir: str, *, job_names: list[s
     for key, entry in registry.items():
         by_spec.setdefault(entry['spec'], []).append({"id": key, **entry, "used_by": [], "last": None})
     problems: list[dict] = []
+    job_labels: dict[str, str] = {}
     for name in list_jobs(jobs_dir) if job_names is None else job_names:
         job = load_job(jobs_dir, name) or {}
+        job_labels[name] = job.get("name") or name
         declared = list(job.get("sources") or [])
         if not declared:
             continue
@@ -70,6 +72,6 @@ def catalog(config_dir: str, jobs_dir: str, state_dir: str, *, job_names: list[s
             rows.append({"id": "", "automatic": True, "name": source["name"], "spec": source["spec"],
                          "tags": [key, "自动来源"], "note": source.get("reason", "") +
                          f"；报告引用 {stats.get('used', 0)} 页，变化 {stats.get('changed', 0)} 条（不等于成片数）",
-                         "used_by": [{"job": j, "name": profile["jobs"][j]["direction"]}
+                         "used_by": [{"job": j, "name": job_labels.get(j) or profile["jobs"][j]["direction"]}
                                      for j in source["jobs"] if j in profile["jobs"]], "last": last})
     return {"sources": rows, "problems": problems}

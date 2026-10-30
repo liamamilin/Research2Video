@@ -39,6 +39,20 @@ describe("Sources page", () => {
     expect(screen.getByText(/报告引用 2 页/)).toBeTruthy();
   });
 
+  it("keeps automatic sources from different matrices distinct when their URLs match", async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const shared = { id: '', automatic: true, spec: 'rss:https://institute.example/feed', note: '', used_by: [], last: null };
+    try {
+      renderPage({ sources: [
+        { ...shared, name: '科技研究', tags: ['tech', '自动来源'] },
+        { ...shared, name: '科学研究', tags: ['science', '自动来源'] },
+      ], problems: [] });
+      expect(await screen.findByText('科技研究')).toBeTruthy();
+      expect(screen.getByText('科学研究')).toBeTruthy();
+      expect(errors.mock.calls.flat().join(' ')).not.toMatch(/same key/);
+    } finally { errors.mockRestore(); }
+  });
+
   it("lists every source with who uses it and how its last fetch went, and names Jobs that point at a missing source", async () => {
     renderPage();
     expect(await screen.findByText("IEEE Spectrum")).toBeTruthy();

@@ -1,0 +1,33 @@
+name: 消费科技与购买决策 · 信息供给
+matrix: consumer
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 10 9 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- reviews
+- guides
+- features
+- teardowns
+discovery_objective: 为「消费科技与购买决策」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：产品的一处差异怎样影响具体使用体验；保留操作、表现和设计细节；同一需求下比较产品的实际取舍；保留测试场景、使用过程和维修例子
+jobs:
+  consumer/consumer_daily:
+    mode: context
+    direction: 产品的一处差异怎样影响具体使用体验；保留操作、表现和设计细节
+    query:
+    - consumer technology product review repairability testing news RSS
+    - 数码 产品 体验 测试 拆解 维修 评测 RSS
+    - consumer electronics usability product testing teardown publication
+  consumer/consumer_weekly:
+    mode: context
+    direction: 同一需求下比较产品的实际取舍；保留测试场景、使用过程和维修例子
+    query:
+    - consumer product comparative testing usability repairability reviews
+    - electronics buying comparison practical testing repair institute blog
+    - 数码 产品 比较 实际 使用 测试 可维修性 专题

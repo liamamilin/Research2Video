@@ -165,7 +165,7 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
                 row["urls"].append(item.url)
                 # Feeds and directories often contain only a teaser. Follow the
                 # selected article, not every link or navigation entry.
-                if item.provider in {"rss", "catalog", "tldr", "hn"} and detail_left:
+                if item.provider in {"rss", "catalog", "tldr", "hn", "gh_new", "github", "arxiv", "hf_papers"} and detail_left:
                     target = canonical_url(item.url)
                     if target not in detailed:
                         candidates.append((target, row))
@@ -196,7 +196,7 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             raise
         except Exception as exc:
             detail["error"] = str(exc)[:300]
-    storage.remember_links(list(dict.fromkeys(discovered_links)))
+    storage.remember_links(list(dict.fromkeys(canonical_url(u) for u in discovered_links)))
     receipt.update(chars=used_chars, items=len(items), automatic=[r["spec"] for r in automatic])
     receipt["quiet"] = mode == "changes" and not items and not any(r["changed"] for r in pending["sources"].values())
     receipt["pending_changes"] = sum(max(0, r["changed"] - r["delivered"]) for r in pending["sources"].values())

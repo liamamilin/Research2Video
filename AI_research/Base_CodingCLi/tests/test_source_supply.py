@@ -63,7 +63,7 @@ def test_failed_report_does_not_consume_changes_and_overflow_is_retained(setup, 
     assert not {r.url for r in remaining[0]} & {r.url for r in first[0]}
 
 
-@pytest.mark.parametrize("provider", ["rss", "catalog", "tldr"])
+@pytest.mark.parametrize("provider", ["rss", "catalog", "tldr", "gh_new", "github", "arxiv"])
 def test_teaser_follows_article_and_failed_detail_preserves_teaser(setup, monkeypatch, provider):
     engine, job, profile, _ = setup
     job["sources"] = ["rss:https://source.example/feed"]
@@ -150,12 +150,20 @@ def test_page_reader_retains_detail_after_original_section_cutoff(monkeypatch):
     assert "usage doubled" in got[0].excerpts[0]
 
 
-def test_only_five_ai_research_jobs_are_enabled():
+def test_ai_profile_keeps_its_five_research_jobs():
     from core.video.research_dossier import PRODUCTIONS
     configured = supply.profiles("config")["ai_media"]
     assert set(configured["jobs"]) == {PRODUCTIONS[key] for key in ["flash_daily", "ai_media_opensource_digest",
            "ai_media_arena_digest", "ai_media_business_digest", "ai_media_deep_dive"]}
-    assert supply.for_job("config", {"_file": "science/science_daily"}) is None
+    assert supply.for_job("config", {"_file": "science/not_a_column"}) is None
+
+
+def test_professional_catalog_reads_news_paths_and_short_chinese_titles():
+    from core.source_pages import parse_catalog
+    rows=parse_catalog('<main><a href="/news/experiment">新型材料实验过程</a>'
+                       '<a href="/publications/one">A concrete research method</a>'
+                       '<a href="/login">Login</a></main>','https://institute.example/news')
+    assert len(rows)==2 and rows[0].title=='新型材料实验过程'
 
 
 def test_source_catalog_exposes_automatic_pool_as_read_only(setup):

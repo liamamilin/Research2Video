@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import html
 import re
+import posixpath
 from urllib.parse import parse_qsl, quote, urlencode, urljoin, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup, NavigableString, Tag
@@ -17,7 +18,8 @@ def canonical_url(url: str) -> str:
     parts = urlsplit(url)
     query = urlencode([(key, value) for key, value in parse_qsl(parts.query)
                        if not key.lower().startswith("utm_") and key not in {"trk", "autoRsvp"}])
-    return urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), query, ""))
+    path = posixpath.normpath(parts.path) if parts.path else ""
+    return urlunsplit((parts.scheme, parts.netloc, path.rstrip("/"), query, ""))
 
 
 def _document(page: str, *, catalog: bool = False):
@@ -93,14 +95,17 @@ def parse_catalog(page: str, url: str, limit: int = 8) -> list[SearchResult]:
         target = canonical_url(urljoin(url, str(link["href"])))
         label = link.get_text(" ", strip=True)
         path = urlsplit(target).path
+        readable_title = len(label) >= 12 or len(re.findall(r"[\u3400-\u9fff]", label)) >= 6
         if (urlsplit(target).scheme not in {"https", "http"} or target in seen or
-                target == canonical_url(url) or len(label) < 12 or
+                target == canonical_url(url) or not readable_title or
                 label.lower() in {"skip to main content", "view all videos", "go to all courses"} or
                 re.search(r"/(login|signin|sign-in|privacy|terms|signup)/?$", path)):
             continue
         # Directory entries link to articles, courses, events, episodes or videos, not site-wide navigation.
         if not (link.find(["h2", "h3", "h4"]) or re.search(
-                r"/(videos?/|watch|stories/|index/|articles/|public/|courses/|podcast/|episode/|examples/)", path)):
+                r"/(videos?/|watch|stories/|index/|articles/|public/|courses/|podcast/|episode/|examples/|"
+                r"news/|blogs?/|reports/|features/|publications/|press-releases/|collections?/|exhibitions?/)", path)
+                or re.search(r"/(?:20\d{2}/\d{1,2}/|t20\d{6}_|20\d{6})", path)):
             continue
         seen.add(target)
         body = label

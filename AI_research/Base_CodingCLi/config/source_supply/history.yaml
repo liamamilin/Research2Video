@@ -1,0 +1,35 @@
+name: 历史与文明 · 信息供给
+matrix: history
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 40 9 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- history
+- archaeology
+- collections
+- stories
+- exhibitions
+- essays
+discovery_objective: 为「历史与文明」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：回到历史现场理解对象、处境和行动；保留器物、地点和事件过程；一个关键转折怎样形成；沿当时人物的行动与具体材料解释前因后果
+jobs:
+  history/history_daily:
+    mode: context
+    direction: 回到历史现场理解对象、处境和行动；保留器物、地点和事件过程
+    query:
+    - museum archaeology history discoveries collections stories RSS
+    - 历史 考古 博物馆 馆藏 故事 研究 新闻 订阅
+    - historical archive archaeology museum research stories publication
+  history/history_weekly:
+    mode: context
+    direction: 一个关键转折怎样形成；沿当时人物的行动与具体材料解释前因后果
+    query:
+    - history museum archives historical turning points essays collections
+    - historical research archive exhibition stories institutions
+    - 历史 文明 转折 档案 博物馆 专题 文章

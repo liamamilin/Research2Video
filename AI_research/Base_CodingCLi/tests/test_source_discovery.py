@@ -76,3 +76,65 @@ def test_discovery_budget_explores_each_column_before_extra_endpoints(tmp_path, 
     discovery.discover(engine, profile, search=search, llm=llm, probe=probe,
         get_page=lambda *a: '<link rel="alternate" type="application/rss+xml" href="/feed"><a href="/blog">Blog</a>')
     assert len({__import__('urllib.parse', fromlist=['urlsplit']).urlsplit(s.partition(':')[2]).hostname for s in tried}) == 5
+
+
+def test_institutional_entry_paths_keep_collections_and_reports_out_of_one_off_items():
+    page = '<title>Museum</title><a href="/collections">Collections</a><a href="/stories">Stories</a>'
+    rows = discovery.endpoints('https://museum.example/stories/a-discovery', page, paths=['collections', 'stories'])
+    assert {r['spec'] for r in rows} == {'catalog:https://museum.example/collections', 'catalog:https://museum.example/stories'}
+    assert not discovery.recurring_path('https://museum.example/collections/object-123', ['collections'])
+
+
+def test_source_discovery_angles_rotate_weekly_without_extra_queries():
+    profile={'jobs':{'one':{'query':['first angle','second angle']},'two':{'query':'fixed angle'}},'discovery_queries':2}
+    assert discovery.search_queries(profile,now=0) == ['first angle','fixed angle']
+    assert discovery.search_queries(profile,now=604800) == ['second angle','fixed angle']
+
+
+def test_a_source_registered_for_another_matrix_is_still_available(tmp_path):
+    config, jobs=tmp_path/'config',tmp_path/'jobs'
+    config.mkdir(); jobs.mkdir()
+    (config/'sources.yaml').write_text('museum:\n  spec: rss:https://museum.example/feed\n')
+    (jobs/'one.yaml').write_text('sources: [source:museum]\n')
+    (jobs/'two.yaml').write_text('sources: [rss:https://other.example/feed]\n')
+    engine=SimpleNamespace(config_dir=str(config),jobs_dir=str(jobs))
+    profile={'jobs':{'one':{},'two':{}}}
+    assert discovery.declared_everywhere(engine,profile) == set()
+    (jobs/'two.yaml').write_text('sources: [source:museum]\n')
+    assert discovery.declared_everywhere(engine,profile) == {'rss:https://museum.example/feed'}
+
+
+def test_chinese_institution_sections_and_rss_anchors_are_real_discovery_entries():
+    page='<nav><a href="/xwzx/kyjz/">研究进展</a><a href="/rss.xml">RSS</a></nav>'
+    rows=discovery.endpoints('https://institute.example/',page)
+    assert {r['spec'] for r in rows} == {'catalog:https://institute.example/xwzx/kyjz', 'rss:https://institute.example/rss.xml'}
+
+
+def test_legacy_absolute_dot_segments_are_normalized_before_trial():
+    rows=discovery.endpoints('https://institute.example/kj/', '<a href="https://institute.example/../../syky">科研动态</a>')
+    assert rows[0]['spec']=='catalog:https://institute.example/syky'
+
+
+def test_institution_home_requires_real_article_cards_to_be_a_catalog():
+    page='<title>Institute News</title><main>'+''.join(
+        f'<a href="/news/result-{i}">Concrete experiment and observation {i}</a>' for i in range(3))+'</main>'
+    rows=discovery.endpoints('https://institute.example/language/zh/home',page)
+    assert any(r['spec']=='catalog:https://institute.example/language/zh/home' for r in rows)
+    assert not discovery.endpoints('https://institute.example/', '<main><p>Welcome to the institute</p></main>')
+
+
+def test_discovery_uses_existing_contents_reader_when_http_is_refused(tmp_path, monkeypatch):
+    from core.video import screenshots
+    monkeypatch.setattr(screenshots, 'public_url', lambda url: url)
+    engine = SimpleNamespace(config_dir=str(tmp_path/'config'), workspace_dir=str(tmp_path),
+                             _cancel=Event(), _progress=lambda *a: None, sys={})
+    profile={'key':'pilot','jobs':{'job':{'query':'institute news'}},'discovery_probes':1}
+    search=SimpleNamespace(calls=1, search=lambda *a,**k:[SearchResult('Institute','https://institute.example/')],
+        read_page=lambda url:SearchResult('Institute',url,excerpts=['[RSS](https://institute.example/feed)']))
+    llm=SimpleNamespace(chat=lambda *a,**k:SimpleNamespace(content='{"sources":[]}'),usage={})
+    def blocked(*a):
+        raise OSError('HTTP 403')
+    result=discovery.discover(engine,profile,search=search,llm=llm,get_page=blocked,
+        probe=lambda *a,**k:[SearchResult('Research story','https://institute.example/news/1',excerpts=['real process'])])
+    assert result['candidates']==1
+    assert any(t.get('reader')=='contents' for t in result['trials'])

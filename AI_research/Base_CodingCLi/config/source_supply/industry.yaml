@@ -1,0 +1,34 @@
+name: 产业与制造业 · 信息供给
+matrix: industry
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 40 8 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- features
+- insights
+- publications
+- reports
+discovery_objective: 为「产业与制造业」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：产业链的一处变化怎样影响生产和交付，保留工艺、部件和协作细节；一件东西怎样造出来：材料、关键工序、设备和供应商怎样连接
+jobs:
+  industry/industry_daily:
+    mode: context
+    direction: 产业链的一处变化怎样影响生产和交付，保留工艺、部件和协作细节
+    query:
+    - manufacturing supply chain semiconductor industrial technology institute news
+      RSS
+    - 制造 产业链 工艺 半导体 研究机构 新闻 订阅
+    - industrial engineering supply chain manufacturing company newsroom
+  industry/industry_weekly:
+    mode: context
+    direction: 一件东西怎样造出来：材料、关键工序、设备和供应商怎样连接
+    query:
+    - manufacturing process engineering case studies institute features
+    - industrial production materials process supply chain engineering blog
+    - 制造 工艺 生产 过程 工程 案例 专题

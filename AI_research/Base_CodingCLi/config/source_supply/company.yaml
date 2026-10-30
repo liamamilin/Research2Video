@@ -1,0 +1,33 @@
+name: 商业与公司研究 · 信息供给
+matrix: company
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 40 7 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- insights
+- reports
+- press
+- newsroom
+discovery_objective: 为「商业与公司研究」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：公司的一次具体动作怎样改变用户、伙伴和竞争者的选择；一笔生意怎样运转：产品、付款方、交付方与竞争位置
+jobs:
+  company/company_daily:
+    mode: context
+    direction: 公司的一次具体动作怎样改变用户、伙伴和竞争者的选择
+    query:
+    - company business strategy product launch investor relations newsroom RSS
+    - 公司 商业 动作 产品 客户 投资者关系 官方 公告
+    - business company strategy case studies corporate newsroom
+  company/company_weekly:
+    mode: context
+    direction: 一笔生意怎样运转：产品、付款方、交付方与竞争位置
+    query:
+    - business model company case study customers delivery strategy publication
+    - company business model engineering customer case studies blog
+    - 商业模式 公司 案例 客户 价值 交付 专题

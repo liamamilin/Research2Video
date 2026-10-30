@@ -1,0 +1,32 @@
+name: 软件与数字工具 · 信息供给
+matrix: software
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 40 6 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- docs
+- tutorials
+- guides
+discovery_objective: 为「软件与数字工具」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：新软件和开源工具怎样解决具体任务；保留安装、实际输入、关键步骤与输出；围绕同一任务比较软件或串联工作流；保留过程、输入输出与实际交付物
+jobs:
+  software/software_daily:
+    mode: changes
+    direction: 新软件和开源工具怎样解决具体任务；保留安装、实际输入、关键步骤与输出
+    query:
+    - open source software developer tools official releases blog RSS
+    - productivity software self hosted tools changelog workflow examples
+    - 开源 软件 工具 更新 官方 博客 使用示例 RSS
+  software/software_weekly:
+    mode: context
+    direction: 围绕同一任务比较软件或串联工作流；保留过程、输入输出与实际交付物
+    query:
+    - open source software workflow tutorials official engineering blog
+    - software tools comparison practical workflow self hosted examples blog
+    - 软件 工作流 实践 教程 开源工具 官方 文档 博客

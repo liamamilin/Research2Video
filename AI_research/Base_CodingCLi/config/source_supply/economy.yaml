@@ -1,0 +1,34 @@
+name: 财经与经济 · 信息供给
+matrix: economy
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 10 8 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- statistics
+- data
+- publications
+- reports
+- insights
+discovery_objective: 为「财经与经济」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：经济变化怎样沿具体路径传到生活与生意；保留数据、条件与过程；用具体例子解释一条经济机制，保留指标含义、前后过程和适用条件
+jobs:
+  economy/economy_daily:
+    mode: context
+    direction: 经济变化怎样沿具体路径传到生活与生意；保留数据、条件与过程
+    query:
+    - economic data central bank statistical agency analysis news RSS
+    - 经济 数据 统计局 央行 研究 公告 订阅
+    - economic research institute policy transmission household business stories
+  economy/economy_weekly:
+    mode: context
+    direction: 用具体例子解释一条经济机制，保留指标含义、前后过程和适用条件
+    query:
+    - economic research mechanisms data explainers central bank publications
+    - economics explainers household business inflation trade research blog
+    - 经济 机制 数据 解读 央行 研究机构 专题

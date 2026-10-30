@@ -86,7 +86,7 @@ export function SourcesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {shown.map((s) => <Row key={s.id || s.spec} s={s} onEdit={editable && s.id ? () => setEditing(s.id) : undefined} />)}
+            {shown.map((s) => <Row key={s.id || `${s.spec}:${s.automatic ? s.tags.join(',') : ''}`} s={s} onEdit={editable && s.id ? () => setEditing(s.id) : undefined} />)}
           </tbody>
         </table>
         {!shown.length ? <ErrorState empty="没有符合的信息源" compact /> : null}

@@ -1,0 +1,33 @@
+name: 科学与知识百科 · 信息供给
+matrix: science
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 10 7 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- articles
+- features
+- publications
+- stories
+discovery_objective: 为「科学与知识百科」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：一项研究或具体现象带来什么新理解；保留实验设置、过程、观测和解释；同一个现象背后的原理怎样解释，沿具体实验或观测推进
+jobs:
+  science/science_daily:
+    mode: context
+    direction: 一项研究或具体现象带来什么新理解；保留实验设置、过程、观测和解释
+    query:
+    - science research institute discoveries experiments news RSS
+    - 科学 研究机构 实验 观测 新发现 新闻 订阅
+    - university science research news experiments findings feed
+  science/science_weekly:
+    mode: context
+    direction: 同一个现象背后的原理怎样解释，沿具体实验或观测推进
+    query:
+    - science institute explainers experiments mechanisms features
+    - scientific research methods experiment observation institute stories
+    - 科学 原理 现象 实验 方法 研究机构 专题

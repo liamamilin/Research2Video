@@ -1,0 +1,12 @@
+name: 商业与公司研究 · 信息源发现
+description: 按本矩阵栏目定位发现、试采并自动接入长期信息来源，保留原研究与视频任务。
+enabled: true
+source_discovery: company
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 1200
+  skip_if_running: true
+prompt: 按矩阵现有栏目定位发现和接入长期信息来源，保留发现与试采回执。
+output: output/source_discovery/company/{date}.md
