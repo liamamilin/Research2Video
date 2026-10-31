@@ -2,7 +2,7 @@ import { Fragment, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
 import {
-  loadComparison, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords,
+  loadComparison, loadPerformance, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords,
   type CompareBy, type CostBasis, type ModelUsage, type PurgeResult, type ScriptBill, type StageUsage, type Usage,
 } from "@/api/telemetry";
 import { usePageResource } from "@/lib/use-page-resource";
@@ -135,6 +135,42 @@ function Comparison({ days, showCost }: { days: number; showCost: boolean }) {
   </section>;
 }
 
+function Performance({ days, showCost }: { days: number; showCost: boolean }) {
+  const [by, setBy] = useState<CompareBy>("column_key");
+  const [all, setAll] = useState(false);
+  const load = useCallback((signal: AbortSignal) => loadPerformance(by, days, signal), [by, days]);
+  const { data, error, reload } = usePageResource(load, 60000);
+  const label = COMPARE.find(c => c.by === by)?.label;
+  const items = data?.items ? (all ? data.items : data.items.slice(0, 10)) : [];
+  const th = "pb-2 font-normal text-right whitespace-nowrap";
+  const td = "py-2 text-right tabular-nums whitespace-nowrap";
+  return <section className="card p-4 space-y-3">
+    <div className="flex flex-wrap items-center gap-3"><div className="mr-auto"><h2 className="text-sm font-medium">成本与播放</h2><p className="text-xs text-text-muted mt-1">已发布到哔哩哔哩的视频，从调研到成片花了多少，换来多少播放。成本按发布日期落在所选范围内的视频算；播放量取自视频数据最近一次采集。</p></div>
+      <label className="text-xs text-text-muted flex items-center gap-2">按<select aria-label="成本对照维度" className="input text-xs w-auto" value={by} onChange={e => setBy(e.target.value as CompareBy)}>{COMPARE.map(c => <option key={c.by} value={c.by}>{c.label}</option>)}</select></label></div>
+    {error ? <ErrorState error={error} onRetry={reload} compact /> : null}
+    {data && data.connected === false ? <p className="text-sm text-text-muted">先在平台管理里连接哔哩哔哩账号并开启视频数据采集，才有播放量可以对照。</p> : null}
+    {data && data.connected !== false && !data.items.length ? <ErrorState empty="范围内还没有发布到哔哩哔哩的视频" compact /> : null}
+    {data?.groups.length ? <div className="overflow-x-auto"><table className="w-full text-xs text-left">
+      <thead className="text-text-muted"><tr><th className="pb-2 font-normal">{label}</th><th className={th}>视频数</th><th className={th}>播放合计</th><th className={th}>播放中位数</th><th className={th}>每千次播放 token</th>{showCost ? <th className={th}>每千次播放成本</th> : null}</tr></thead>
+      <tbody>{data.groups.map(g => <tr key={g.value} className="border-t border-border">
+        <td className="py-2">{g.value || "（未记录）"}</td><td className={td}>{g.videos}</td><td className={td} title={g.watched < g.videos ? `${g.videos - g.watched} 条没有播放量或没有成本记录，未计入` : undefined}>{g.views.toLocaleString("zh-CN")}</td>
+        <td className={td}>{g.view_median == null ? "—" : Math.round(g.view_median).toLocaleString("zh-CN")}</td><td className={td}>{g.tokens_per_kview == null ? "—" : tokens(Math.round(g.tokens_per_kview))}</td>
+        {showCost ? <td className={td} title={g.cost_samples < g.watched || g.cost_partial ? "有些调用没有价格，金额偏低；完全没有价格的视频未计入" : undefined}>{g.cost_per_kview == null ? "未定价" : `${dollars(g.cost_per_kview)}${g.cost_partial ? "+" : ""}`}</td> : null}
+      </tr>)}</tbody></table></div> : null}
+    {items.length ? <div className="overflow-x-auto"><table className="w-full text-xs text-left">
+      <thead className="text-text-muted"><tr><th className="pb-2 font-normal">视频</th><th className={th}>播放</th><th className={th}>制作 + 出片</th><th className={th}>token</th>{showCost ? <th className={th}>成本</th> : null}{showCost ? <th className={th}>每千次播放成本</th> : null}</tr></thead>
+      <tbody>{items.map(v => <tr key={v.bvid} className="border-t border-border">
+        <td className="py-2 max-w-[24rem] truncate"><a className="hover:text-accent" href={`https://www.bilibili.com/video/${v.bvid}`} target="_blank" rel="noreferrer">{v.title || v.bvid}</a></td>
+        <td className={td}>{v.view == null ? "—" : v.view.toLocaleString("zh-CN")}</td>
+        <td className={td}>{v.billed ? duration((v.produce_seconds ?? 0) + (v.render_seconds ?? 0)) : "—"}</td>
+        <td className={td}>{v.tokens == null ? "—" : tokens(v.tokens)}</td>
+        {showCost ? <td className={td}>{v.cost_usd == null ? "—" : `${dollars(v.cost_usd)}${v.partial ? "+" : ""}`}</td> : null}
+        {showCost ? <td className={td}>{v.cost_per_kview == null ? "—" : `${dollars(v.cost_per_kview)}${v.partial ? "+" : ""}`}</td> : null}
+      </tr>)}</tbody></table></div> : null}
+    {data && data.items.length > 10 ? <button className="btn text-xs" onClick={() => setAll(!all)}>{all ? "只看最近 10 条" : `显示全部 ${data.items.length} 条`}</button> : null}
+  </section>;
+}
+
 const KEEP = [{ days: 30, label: "30 天" }, { days: 90, label: "90 天" }, { days: 180, label: "180 天" }, { days: 365, label: "1 年" }];
 const size = (bytes: number) => bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
 const day = (seconds: number | null | undefined) => seconds ? new Date(seconds * 1000).toLocaleDateString("zh-CN") : "—";
@@ -202,6 +238,7 @@ export function UsageAnalytics() {
       </div>
       <Bills days={days} showCost={showCost} />
       <Comparison days={days} showCost={showCost} />
+      <Performance days={days} showCost={showCost} />
       <section className="card p-4 space-y-3"><h2 className="text-sm font-medium">按环节</h2>{data.stages?.length ? <StageTable rows={data.stages} showCost={showCost} /> : <ErrorState empty="暂无记录" compact />}</section>
       <section className="card p-4 space-y-3"><h2 className="text-sm font-medium">按模型</h2>{data.models?.length ? <ModelTable rows={data.models} showCost={showCost} /> : <ErrorState empty="暂无记录" compact />}
         {showCost ? <div className="text-xs text-text-muted space-y-1">

@@ -3,12 +3,12 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { loadPlatforms } from "@/api/platforms";
-import { loadComparison, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords, type Usage } from "@/api/telemetry";
+import { loadComparison, loadPerformance, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords, type Usage } from "@/api/telemetry";
 import { useAuthStore } from "@/lib/auth-store";
 import { AnalyticsPage } from "./Analytics";
 import { PlatformsPage } from "./Platforms";
 
-vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn() }));
+vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadPerformance: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn() }));
 vi.mock("@/api/platforms", async original => ({ ...await original<typeof import("@/api/platforms")>(), loadPlatforms: vi.fn() }));
 vi.mock("@/components/VideoAnalytics", () => ({ VideoAnalytics: ({ isAdmin, canEdit }: { isAdmin: boolean; canEdit: boolean }) => <div>视频数据面板 {String(isAdmin)} {String(canEdit)}</div> }));
 
@@ -30,6 +30,10 @@ beforeEach(() => {
   vi.mocked(loadScriptBills).mockResolvedValue({ enabled: true, total: 1, items: [{ ...usage(), script_id: "s1", title: "第一期视频", column_key: "news", matrix: "", form: "information_motion", recipe: "", path: "adapt", last_ts: 1, produce_seconds: 600, render_seconds: 1200, wait_seconds: 7200 }] });
   vi.mocked(loadScriptDetail).mockResolvedValue({ enabled: true, script_id: "s1", totals: usage(), stages: [stage("audit")], models: [] });
   vi.mocked(loadComparison).mockResolvedValue({ enabled: true, by: "column_key", groups: [{ value: "news", scripts: 2, tokens_avg: 2_000_000, cost_avg_usd: 0.5, cost_samples: 2, produce_median_s: 600, render_median_s: 1200, wait_median_s: null }] });
+  vi.mocked(loadPerformance).mockResolvedValue({ enabled: true, connected: true, by: "column_key",
+    groups: [{ value: "news", videos: 2, watched: 2, views: 4000, view_median: 2000, tokens_per_kview: 12_000, cost_samples: 2, cost_partial: false, cost_avg_usd: 1.75, cost_per_kview: 0.875 }],
+    items: [{ bvid: "BV1abc", title: "已发布的一期", pubdate: 1, view: 3000, script_id: "s1", billed: true, column_key: "news", form: "", matrix: "", recipe: "", path: "",
+      tokens: 3_000_000, cost_usd: 3, partial: false, produce_seconds: 600, render_seconds: 1200, cost_per_kview: 1, tokens_per_kview: 1_000_000 }] });
   vi.mocked(loadPlatforms).mockResolvedValue({ account: { connected: true, uid: "9", name: "up" } } as never);
 });
 afterEach(cleanup);
@@ -68,9 +72,25 @@ it("opens one video's stages on demand", async () => {
 
 it("compares videos by the chosen attribute and reloads", async () => {
   show();
-  expect(await screen.findByText("news")).toBeTruthy();
+  await screen.findByRole("link", { name: "已发布的一期" });
+  expect(screen.getAllByText("news").length).toBeGreaterThan(0);
   fireEvent.change(screen.getByLabelText("对比维度"), { target: { value: "form" } });
   await waitFor(() => expect(loadComparison).toHaveBeenLastCalledWith("form", 30, expect.anything()));
+});
+
+it("sets cost against plays per group and per published video", async () => {
+  show();
+  const link = await screen.findByRole("link", { name: "已发布的一期" });
+  expect(link.getAttribute("href")).toContain("BV1abc");
+  expect(screen.getAllByText("$0.8750").length).toBeGreaterThan(0);
+  fireEvent.change(screen.getByLabelText("成本对照维度"), { target: { value: "recipe" } });
+  await waitFor(() => expect(loadPerformance).toHaveBeenLastCalledWith("recipe", 30, expect.anything()));
+});
+
+it("asks for a Bilibili account when there are no plays to compare with", async () => {
+  vi.mocked(loadPerformance).mockResolvedValue({ enabled: true, connected: false, by: "column_key", items: [], groups: [] });
+  show();
+  expect(await screen.findByText(/先在平台管理里连接哔哩哔哩账号并开启视频数据采集/)).toBeTruthy();
 });
 
 it("changes the range for every section", async () => {

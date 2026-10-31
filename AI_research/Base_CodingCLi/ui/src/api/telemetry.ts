@@ -36,6 +36,19 @@ export const loadScriptBills = (days: number, offset: number, signal?: AbortSign
 export const loadScriptDetail = (id: string, signal?: AbortSignal) => api<ScriptDetail>(`${BASE}/scripts/${encodeURIComponent(id)}`, { signal });
 export const loadComparison = (by: CompareBy, days: number, signal?: AbortSignal) => api<Comparison>(`${BASE}/compare`, { query: { by, days }, signal });
 
+export type PerformanceVideo = {
+  bvid: string; title: string; pubdate: number; view: number | null; script_id: string; billed: boolean;
+  column_key: string; form: string; matrix: string; recipe: string; path: string;
+  tokens: number | null; cost_usd: number | null; partial: boolean; produce_seconds: number | null; render_seconds: number | null;
+  cost_per_kview: number | null; tokens_per_kview: number | null;
+};
+export type PerformanceGroup = {
+  value: string; videos: number; watched: number; views: number; view_median: number | null;
+  tokens_per_kview: number | null; cost_samples: number; cost_partial: boolean; cost_avg_usd: number | null; cost_per_kview: number | null;
+};
+export type Performance = { enabled: boolean; connected?: boolean; by: CompareBy; items: PerformanceVideo[]; groups: PerformanceGroup[] };
+export const loadPerformance = (by: CompareBy, days: number, signal?: AbortSignal) => api<Performance>(`${BASE}/performance`, { query: { by, days }, signal });
+
 export type StorageStats = { enabled: boolean; calls?: number; spans?: number; oldest?: number | null; newest?: number | null; bytes?: number };
 export type PurgeResult = { enabled: boolean; cutoff: number; calls: number; spans: number; dry_run: boolean };
 export const loadStorage = (signal?: AbortSignal) => api<StorageStats>(`${BASE}/storage`, { signal });

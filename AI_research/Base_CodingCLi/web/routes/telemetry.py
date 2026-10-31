@@ -75,6 +75,15 @@ def compare(by: str = Query("column_key", pattern="^(column_key|form|matrix|reci
     return query.compare(str(get_settings().paths.config_dir), by, start, end, _filters(matrix, column_key, form))
 
 
+@router.get("/performance")
+def performance(by: str = Query("column_key", pattern="^(column_key|form|matrix|recipe|path)$"),
+                days: int = Query(30, ge=0, le=3650), user=Depends(require_admin)):
+    """What published videos cost against their plays on Bilibili, per video and grouped by ``by``."""
+    from web.services import telemetry_performance
+    _ensure_synced()
+    return telemetry_performance.load(str(get_settings().paths.config_dir), by, days)
+
+
 @router.get("/scripts/{script_id}")
 def script_detail(script_id: str, user=Depends(require_admin)):
     return query.script_detail(str(get_settings().paths.config_dir), script_id)

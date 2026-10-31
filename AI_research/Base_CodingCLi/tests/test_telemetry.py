@@ -10,7 +10,7 @@ import pytest
 
 from core import telemetry
 from core.llm import LLMClient, LLMConfig
-from core.telemetry import ingest, pricing, query, retention
+from core.telemetry import ingest, performance, pricing, query, retention
 
 
 @pytest.fixture()
@@ -240,12 +240,14 @@ def test_summary_and_script_bill_add_up_and_flag_what_could_not_be_priced(db):
     assert [s["stage"] for s in detail["stages"]] == ["write"] and detail["stages"][0]["span_count"] == 1
 
 
-def test_the_api_is_for_administrators_only_and_serves_the_summary_and_price_table(client, web_env):
+def test_the_api_is_for_administrators_only_and_serves_the_summary_and_price_table(client, web_env, monkeypatch):
+    # the background reader would otherwise keep writing into whichever test's database is current when it finishes
+    monkeypatch.setattr("web.routes.telemetry._ensure_synced", lambda: False)
     from tests.test_assistant_api import login
     assert client.get("/api/telemetry/summary").status_code in (401, 403)
     for role in ("viewer", "editor"):
         login(client, role)
-        for url in ("summary", "scripts", "compare", "pricing", "storage"):
+        for url in ("summary", "scripts", "compare", "pricing", "storage", "performance"):
             assert client.get(f"/api/telemetry/{url}").status_code == 403, (role, url)
         client.cookies.clear()
     login(client, "admin")
@@ -260,6 +262,9 @@ def test_the_api_is_for_administrators_only_and_serves_the_summary_and_price_tab
     assert body["enabled"] and body["llm"]["total_tokens"] == 15
     assert client.get("/api/telemetry/scripts").json()["items"] == []
     assert client.get("/api/telemetry/pricing").json()["prices"][0]["model"] == "m"
+    unconnected = client.get("/api/telemetry/performance?by=form").json()  # no Bilibili account in this environment
+    assert unconnected["connected"] is False and unconnected["items"] == [] and unconnected["groups"] == []
+    assert client.get("/api/telemetry/performance?by=script_id").status_code == 422
 
 
 # --- stage entry points ------------------------------------------------------------------------------------------
@@ -411,6 +416,43 @@ def test_videos_are_compared_by_the_attribute_asked_for(db):
     assert news["render_median_s"] == 1200.0 and explainer["render_median_s"] == 300.0
     with pytest.raises(ValueError):
         query.compare(str(config), "script_id")
+
+
+def _published(bvid, script, views, pubdate=1000, available=True):
+    return {"bvid": bvid, "title": bvid, "pubdate": pubdate, "available": available, "metrics": {"view": views},
+            "publication": {"script_id": script, "matrix": "m1"}}
+
+
+def test_cost_is_set_against_plays_per_video_and_per_group(db):
+    config = db / "config"
+    config.mkdir()
+    (config / "pricing.yaml").write_text("prices:\n  - {model: m, input: 1.0, output: 0}\n", encoding="utf-8")
+    for script, column, tokens in (("a", "news", 1_000_000), ("b", "news", 3_000_000), ("c", "deep", 2_000_000)):
+        telemetry.record_call("llm", model="m", usage={"prompt_tokens": tokens, "completion_tokens": 0},
+                              script_id=script, column_key=column)
+    telemetry.record_call("llm", model="mystery", usage={"prompt_tokens": 5, "completion_tokens": 0},
+                          script_id="c", column_key="deep")
+    telemetry.record_call("llm", model="mystery", usage={"prompt_tokens": 9, "completion_tokens": 0},
+                          script_id="d", column_key="deep")
+    videos = [_published("BV7", "d", 100), _published("BV1", "a", 1000), _published("BV2", "b", 3000, pubdate=2000),
+              _published("BV3", "c", 4000), _published("BV4", "zz", 10), _published("BV5", "a", None)]
+    videos[4]["available"] = False
+    videos.append({"bvid": "BV6", "title": "not ours", "pubdate": 1, "available": True, "metrics": {"view": 5}, "publication": None})
+    result = performance.report(str(config), videos)
+    by_id = {i["bvid"]: i for i in result["items"]}
+    assert "BV6" not in by_id and [i["bvid"] for i in result["items"]][0] == "BV2"
+    assert by_id["BV1"]["cost_usd"] == 0.5 and by_id["BV1"]["cost_per_kview"] == 0.5  # script a is shared with BV5
+    assert by_id["BV5"]["view"] is None and by_id["BV5"]["cost_per_kview"] is None
+    assert by_id["BV3"]["partial"] and by_id["BV3"]["cost_usd"] == 2.0 and by_id["BV3"]["cost_per_kview"] == 0.5  # a lower bound
+    assert by_id["BV7"]["cost_usd"] is None and by_id["BV7"]["cost_per_kview"] is None and by_id["BV7"]["tokens_per_kview"] > 0
+    assert by_id["BV4"]["billed"] is False and by_id["BV4"]["cost_usd"] is None
+    news = next(g for g in result["groups"] if g["value"] == "news")
+    assert (news["videos"], news["watched"], news["views"], news["cost_samples"]) == (3, 2, 4000, 2)
+    deep = next(g for g in result["groups"] if g["value"] == "deep")
+    assert (deep["watched"], deep["cost_samples"], deep["cost_partial"], deep["cost_per_kview"]) == (2, 1, True, 0.5)
+    assert news["cost_partial"] is False and news["cost_per_kview"] == 0.875  # (0.5 + 3.0) per 4000 plays; script a is split between two videos
+    with pytest.raises(ValueError):
+        performance.report(str(config), videos, "script_id")
 
 
 # --- keeping and removing records --------------------------------------------------------------------------------
