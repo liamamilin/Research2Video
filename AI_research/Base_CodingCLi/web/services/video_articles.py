@@ -1,6 +1,7 @@
 """Article inputs join the existing version, review, approval and render workflow."""
 from __future__ import annotations
 
+from core import telemetry
 from core.video import article_writer, articles, columns, store
 from core.video.adapt import review
 from web.settings import get_settings
@@ -17,8 +18,9 @@ def write(script: dict, *, started_by: str, llm_config=None) -> str:
     source = source_of(script)
     config, review_config = video_workflow._llm_configs(llm_config, column)
     store.update_script(script["id"], status="WRITING", stage="整理原文" if article["mode"] == "read" else "文章改编", error=None)
-    written = article_writer.draft(source, mode=article["mode"], kind=article["kind"], topic=script["topic"],
-                                   column=column, config=config)
+    with telemetry.track("write"):
+        written = article_writer.draft(source, mode=article["mode"], kind=article["kind"], topic=script["topic"],
+                                       column=column, config=config)
     initial = review.assemble([], None, None, None, written.sections)
     initial.update(scope="article_fidelity", external_facts_checked=False)
     meta = {**written.meta, "input_kind": "article", "article": article,

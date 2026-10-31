@@ -16,6 +16,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, ValidationError
 
+from core import telemetry
 from core.provenance import extract_urls, normalize_url
 
 from . import length
@@ -247,15 +248,16 @@ def write(
         {"role": "user", "content": _request(report, topic, column_style, target_minutes, 0,
                                               topic_fields=topic_fields, original_material=original_material)},
     ]
-    response = client.chat(messages, temperature=0.4)
-    attempts = 1
-    try:
-        script = _parse(response.content)
-    except ScriptError:
-        # A reply cut off mid-JSON (seen with the free models) is worth one more try before failing the script.
-        attempts += 1
+    with telemetry.track("write"):
         response = client.chat(messages, temperature=0.4)
-        script = _parse(response.content)
+        attempts = 1
+        try:
+            script = _parse(response.content)
+        except ScriptError:
+            # A reply cut off mid-JSON (seen with the free models) is worth one more try before failing the script.
+            attempts += 1
+            response = client.chat(messages, temperature=0.4)
+            script = _parse(response.content)
     allowed = trusted_urls(report, citation_check)
     if original_material is not None:
         allowed.update(trusted_urls(original_material, None))

@@ -254,3 +254,128 @@ def test_the_api_needs_a_login_and_serves_the_summary_and_price_table(client, we
     assert body["enabled"] and body["llm"]["total_tokens"] == 15
     assert client.get("/api/telemetry/scripts").json()["items"] == []
     assert client.get("/api/telemetry/pricing").json()["prices"][0]["model"] == "m"
+
+
+# --- stage entry points ------------------------------------------------------------------------------------------
+
+def test_a_block_can_judge_its_own_outcome_without_raising(db):
+    with telemetry.track("audit", script_id="s1") as span:
+        span["status"] = "failed"
+    assert rows("spans")[0]["status"] == "failed"
+
+
+def test_phases_end_each_stage_when_the_next_begins_and_rename_them(db):
+    with telemetry.Phases({"写稿": "write", "审校": "audit"}, script_id="s1") as phases:
+        phases.enter("拆事实")
+        phases.enter("写稿")
+        telemetry.record_call("llm", model="m")
+        phases.enter("审校")
+    spans = rows("spans")
+    assert [s["stage"] for s in spans] == ["拆事实", "write", "audit"]
+    assert all(s["script_id"] == "s1" and s["status"] == "ok" for s in spans)
+    assert rows("calls")[0]["stage"] == "write" and rows("calls")[0]["span_id"] == spans[1]["id"]
+    assert telemetry.current() == {}
+
+
+def test_phases_close_the_open_stage_as_failed_when_the_pipeline_raises(db):
+    with pytest.raises(RuntimeError):
+        with telemetry.Phases() as phases:
+            phases.enter("写稿")
+            raise RuntimeError("model gone")
+    assert [(s["stage"], s["status"]) for s in rows("spans")] == [("写稿", "failed")]
+    assert telemetry.current() == {}
+
+
+def engine_for(job_result, *, cancelled=False):
+    from core.engine import ResearchEngine
+    engine = ResearchEngine.__new__(ResearchEngine)
+    engine.config_dir = "config"
+    engine._cancel = threading.Event()
+    if cancelled:
+        engine._cancel.set()
+    engine._now = lambda: __import__("datetime").datetime(2026, 10, 31, 9, 0, 0)
+    engine._run_job = lambda name, verbose=False: job_result
+    return engine
+
+
+def test_a_research_run_is_one_span_billed_to_its_job_and_the_video_that_asked(db):
+    with telemetry.bind(script_id="s1", column_key="col"):
+        assert engine_for("out.md").run_job("monitoring/daily") == "out.md"
+        assert engine_for(None).run_job("monitoring/daily") is None
+        assert engine_for(None, cancelled=True).run_job("monitoring/daily") is None
+    spans = rows("spans")
+    assert [(s["stage"], s["status"], s["job"], s["script_id"]) for s in spans] == [
+        ("research", "ok", "monitoring/daily", "s1"), ("research", "failed", "monitoring/daily", "s1"),
+        ("research", "cancelled", "monitoring/daily", "s1")]
+    assert spans[0]["run_ts"].startswith("2026-10-31T09:00:00")
+
+
+def test_the_job_pool_starts_each_run_with_the_callers_attribution(db, monkeypatch):
+    from web.runner import executor
+    seen = []
+    monkeypatch.setattr(executor, "ResearchEngine", lambda **k: object())
+    monkeypatch.setattr(executor, "_attach_persistence", lambda *a: None)
+    monkeypatch.setattr(executor, "run_job_in_thread", lambda *a, **k: seen.append(telemetry.current()))
+    monkeypatch.setattr("core.matrices.cap_block", lambda *a, **k: "")
+    registry = NS(start=lambda name, by, engine: NS(log_bus=NS(write=lambda e: None), future=None))
+    monkeypatch.setattr(executor, "TaskRegistry", lambda: registry)
+    with telemetry.bind(script_id="s1"):
+        executor.start_job("daily", "video").future.result(timeout=5)
+    assert seen[0]["script_id"] == "s1"
+
+
+def test_script_threads_bind_the_scripts_attribution_and_the_pipelines_steps_become_stages(db, monkeypatch):
+    from web.services import video_workflow
+    script = {"id": "s1", "column_key": "col", "content_matrix_id": "mx", "production": "recipe-a", "topic": {}}
+    updates = []
+    monkeypatch.setattr(video_workflow.store, "get_script", lambda _id: script)
+    monkeypatch.setattr(video_workflow.store, "update_script", lambda _id, **k: updates.append(k))
+    monkeypatch.setattr(video_workflow.video_columns, "get", lambda *_a: NS(writer="adapt"))
+    with video_workflow._binding("s1"):
+        assert telemetry.current() == {"script_id": "s1", "column_key": "col", "matrix": "mx", "recipe": "recipe-a",
+                                       "path": "adapt"}
+        with telemetry.Phases(video_workflow.STAGE_NAMES) as phases:
+            announce = video_workflow._announce("s1", phases)
+            announce("写稿")
+            announce("整篇复审")
+    assert updates == [{"stage": "写稿"}, {"stage": "整篇复审"}]
+    spans = rows("spans")
+    assert [s["stage"] for s in spans] == ["write", "audit"] and spans[0]["matrix"] == "mx" and spans[0]["path"] == "adapt"
+
+
+def test_a_script_without_a_column_still_runs_unattributed(db, monkeypatch):
+    from web.services import video_workflow
+    monkeypatch.setattr(video_workflow.store, "get_script", lambda _id: None)
+    with video_workflow._binding("gone"):
+        assert telemetry.current() == {}
+
+
+def test_approval_records_the_wait_since_the_draft_was_ready_apart_from_production(db):
+    from web.services import video_executor
+    script = {"id": "s1", "column_key": "col", "updated_at": "2026-10-30T09:00:00+0800"}
+    video_executor._record_wait(script, 2, "admin")
+    video_executor._record_wait({"id": "s2"}, 1, "admin")  # no timestamp: nothing to measure
+    [wait] = rows("spans")
+    assert (wait["stage"], wait["script_id"], wait["note"]) == ("await-approval", "s1", "v2 by admin")
+    assert wait["duration_s"] > 3600
+
+
+def test_finished_renders_are_swept_in_the_background_one_read_at_a_time(db, monkeypatch):
+    reads, release = [], threading.Event()
+
+    def slow_sweep():
+        reads.append(1)
+        release.wait(5)
+        return 0
+    monkeypatch.setattr(ingest, "sweep_renders", slow_sweep)
+    ingest.sweep_async()
+    ingest.sweep_async()  # a read is already running
+    time.sleep(0.2)
+    release.set()
+    deadline = time.time() + 5
+    while ingest._sweeping.locked() and time.time() < deadline:
+        time.sleep(0.05)
+    assert reads == [1]
+    ingest.sweep_async()
+    time.sleep(0.2)
+    assert reads == [1, 1]

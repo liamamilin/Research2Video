@@ -18,8 +18,11 @@ See spec/video-steps.md.
 from __future__ import annotations
 
 import logging
+import time
+from datetime import datetime
 from typing import Optional
 
+from core import telemetry
 from core.video import columns as video_columns
 from core.video import credibility, steps, store
 from core.video.audience_copy import submission_problem
@@ -202,8 +205,20 @@ def approve(script_id: str, version: int, by: str) -> None:
     problem = submission_problem(found)
     if problem:
         raise StepError(problem)
+    script = store.get_script(script_id) or {}
     store.update_script(script_id, status="APPROVED", approved_version=version)
     steps.log(script_id, "approve", "approve", f"v{version}", by=by)
+    _record_wait(script, version, by)
+
+
+def _record_wait(script: dict, version: int, by: str) -> None:
+    """Time spent waiting for a decision, from the draft being ready to its approval. Kept apart from production time."""
+    try:
+        ready = datetime.strptime(script["updated_at"], "%Y-%m-%dT%H:%M:%S%z").timestamp()
+    except (KeyError, TypeError, ValueError):
+        return
+    telemetry.record_span("await-approval", start=ready, end=time.time(), note=f"v{version} by {by}",
+                          **telemetry.script_attrs(script))
 
 
 # --- a batch's script --------------------------------------------------------

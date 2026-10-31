@@ -30,6 +30,7 @@ from typing import Any, Optional
 
 from core.config import load_system_config
 from core.fileio import file_lock
+from core.telemetry import ingest
 from core.video import archive as video_archive
 from core.video import columns as video_columns
 from core.video import sources as video_sources
@@ -682,6 +683,7 @@ def _download(render_id: str, job_id: str, client: AutoVideoClient) -> str:
                 download_workers=4, artifacts=[row for _, row in results])
         store.update_render(render_id, status="COMPLETED", artifacts=saved, error_code=None,
                             error_message=None, completed_at=_now())
+        ingest.sweep_async()  # the render's model calls and step timings, read while its files are fresh
         return "COMPLETED"
     return _fail(render_id, "DOWNLOAD_FAILED", f"成片已在 AutoVideo 生成，但复制到本地失败：{last_error}")
 

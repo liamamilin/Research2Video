@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 import os
+import contextvars
 from concurrent.futures import ThreadPoolExecutor
 
 from core.engine import ResearchEngine, CancelledError
@@ -122,7 +123,8 @@ def start_job(job_name: str, started_by: str,
         "message": f"Job '{job_name}' started by {started_by}",
     })
 
-    future = _executor.submit(run_job_in_thread, task, config_dir, jobs_dir, verbose)
+    # the pool's thread starts with an empty context: carry the caller's attribution (which video this research is for)
+    future = _executor.submit(contextvars.copy_context().run, run_job_in_thread, task, config_dir, jobs_dir, verbose)
     task.future = future
 
     return task

@@ -13,6 +13,7 @@ import threading
 from datetime import datetime, timedelta
 from typing import Optional
 
+from . import telemetry
 from .config import load_system_config, load_job, list_jobs
 from .errors import CancelledError
 from .extractor import extract_report
@@ -93,6 +94,25 @@ class ResearchEngine:
 
     def run_job(self, job_name: str, verbose: bool = False) -> Optional[str]:
         """Run a single job. Returns output path on success, None on failure."""
+        with telemetry.track("research", **self._telemetry_attrs(job_name)) as span:
+            result = self._run_job(job_name, verbose)
+            if result is None:
+                span["status"] = "cancelled" if self._cancel.is_set() else "failed"
+            return result
+
+    def _telemetry_attrs(self, job_name: str) -> dict:
+        """Which Job, which run, and (when the Job belongs to one) which matrix its research is billed to."""
+        attrs = {"job": job_name, "run_ts": self._now().strftime("%Y-%m-%dT%H:%M:%S%z")}
+        try:
+            from . import matrices
+            matrix = matrices.of_job(job_name, self.config_dir)
+            if matrix is not None:
+                attrs["matrix"] = matrix.key
+        except Exception:  # noqa: BLE001 - attribution is optional
+            pass
+        return attrs
+
+    def _run_job(self, job_name: str, verbose: bool = False) -> Optional[str]:
         context=getattr(self,'run_context',{})
         self.run_context = {}  # One execution context must not leak into the next Job of a reused engine.
         job = context.get('job') or load_job(self.jobs_dir, job_name)

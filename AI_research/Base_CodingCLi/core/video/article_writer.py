@@ -8,6 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from core import telemetry
 from core.video import length, writer
 from core.video.adapt import review
 
@@ -96,19 +97,20 @@ def check(source: dict, *, title: str = "", sections: list[dict], mode: str, kin
         client = LLMClient(config)
         messages = [{"role": "system", "content": REVIEW_PROMPT}, {"role": "user", "content": json.dumps(
             {"kind": kind, "original": source["text"], "title": title, "script": sections}, ensure_ascii=False)}]
-        for attempt in range(2):
-            response = client.chat(messages, temperature=0.1)
-            try:
-                raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", response.content.strip())
-                model = Audit.model_validate_json(raw)
-                for finding in model.issues:
-                    para = sections[finding.section]["paragraphs"][finding.paragraph]
-                    if finding.quote not in para["text"]:
-                        raise ValueError("审校引文与段落不符")
-                break
-            except (ValueError, IndexError, KeyError) as exc:
-                if attempt:
-                    raise writer.ScriptError("文章忠实度审校没有返回有效结果，不能视作通过") from exc
+        with telemetry.track("audit"):
+            for attempt in range(2):
+                response = client.chat(messages, temperature=0.1)
+                try:
+                    raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", response.content.strip())
+                    model = Audit.model_validate_json(raw)
+                    for finding in model.issues:
+                        para = sections[finding.section]["paragraphs"][finding.paragraph]
+                        if finding.quote not in para["text"]:
+                            raise ValueError("审校引文与段落不符")
+                    break
+                except (ValueError, IndexError, KeyError) as exc:
+                    if attempt:
+                        raise writer.ScriptError("文章忠实度审校没有返回有效结果，不能视作通过") from exc
         usage = dict(client.usage)
         for finding in model.issues:
             issues.append(review.issue("ARTICLE_FIDELITY", finding.severity, finding.problem,

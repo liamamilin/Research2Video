@@ -140,7 +140,9 @@ def bind(**attrs: str) -> Iterator[dict]:
 
 @contextmanager
 def track(stage: str, **attrs: str) -> Iterator[dict]:
-    """Time one production stage and attribute every call inside it; the span is written on exit."""
+    """Time one production stage and attribute every call inside it; the span is written on exit.
+
+    Set ``span["status"] = "failed"`` inside the block when the work fails without raising."""
     span_id = uuid.uuid4().hex
     merged = {**_context.get(), **{k: str(v) for k, v in attrs.items() if k in ATTRS and v not in (None, "")},
               "stage": stage, "span_id": span_id}
@@ -148,6 +150,7 @@ def track(stage: str, **attrs: str) -> Iterator[dict]:
     start, status = time.time(), "ok"
     try:
         yield merged
+        status = merged.get("status") or status  # the block may judge its own outcome without raising
     except BaseException as exc:
         status = "cancelled" if type(exc).__name__ == "CancelledError" else "failed"
         raise
@@ -156,6 +159,45 @@ def track(stage: str, **attrs: str) -> Iterator[dict]:
         end = time.time()
         _insert("spans", {"id": span_id, "start": start, "end": end, "duration_s": round(end - start, 3),
                           "status": status, **{k: merged.get(k, "") for k in ATTRS}})
+
+
+def script_attrs(script: Optional[dict]) -> dict:
+    """Which video a call belongs to, from its script record."""
+    script = script or {}
+    return {"script_id": script.get("id", ""), "column_key": script.get("column_key", ""),
+            "matrix": script.get("content_matrix_id", "") or "", "recipe": script.get("production", "") or ""}
+
+
+class Phases:
+    """Consecutive stages reported by a callback: entering one ends the one before, and ``labels`` renames them.
+
+    For a pipeline that announces "now writing", "now auditing" as it goes (the adapt pipeline's ``on_stage``)
+    instead of letting the caller wrap each part. Use as a context manager; the open stage is closed on exit.
+    """
+
+    def __init__(self, labels: Optional[dict] = None, **attrs: str):
+        self._labels, self._attrs, self._open = labels or {}, attrs, None
+
+    def enter(self, label: str) -> None:
+        self.close()
+        manager = track(self._labels.get(label, label), **self._attrs)
+        manager.__enter__()
+        self._open = manager
+
+    def close(self, error: Optional[BaseException] = None) -> None:
+        manager, self._open = self._open, None
+        if manager is not None:
+            if error is None:
+                manager.__exit__(None, None, None)
+            else:
+                manager.__exit__(type(error), error, error.__traceback__)
+
+    def __enter__(self) -> "Phases":
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> bool:
+        self.close(exc)
+        return False
 
 
 def _insert(table: str, row: dict) -> None:

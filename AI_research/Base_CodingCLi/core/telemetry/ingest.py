@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import re
+import threading
 import time
 from datetime import datetime
 from typing import Optional
@@ -48,15 +49,9 @@ def _mark(key: str) -> None:
             conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", (key, str(time.time())))
 
 
-def _script_attrs(script: Optional[dict]) -> dict:
-    script = script or {}
-    return {"script_id": script.get("id", ""), "column_key": script.get("column_key", ""),
-            "matrix": script.get("content_matrix_id", "") or "", "recipe": script.get("production", "") or ""}
-
-
 def ingest_render(render: dict, script: Optional[dict], render_dir: str) -> int:
     """Read one finished render's cost file and step log; the number of rows offered (existing ones are ignored)."""
-    attrs = {**_script_attrs(script), "render_id": render["id"], "form": render.get("resolved_video_form") or ""}
+    attrs = {**store.script_attrs(script), "render_id": render["id"], "form": render.get("resolved_video_form") or ""}
     finished = _epoch(render.get("completed_at")) or _epoch(render.get("updated_at")) or time.time()
     rows = 0
     try:
@@ -121,6 +116,20 @@ def sweep_renders(limit: int = 500) -> int:
         _mark(f"render:{render['id']}")
         count += 1
     return count
+
+
+_sweeping = threading.Lock()
+
+
+def sweep_async() -> None:
+    """Read newly finished renders in the background, if no read is already running. Never raises."""
+    def work():
+        try:
+            sweep_renders()
+        finally:
+            _sweeping.release()
+    if store.enabled() and _sweeping.acquire(blocking=False):
+        threading.Thread(target=work, name="telemetry-sweep", daemon=True).start()
 
 
 def backfill_history(history_dir: str) -> int:
