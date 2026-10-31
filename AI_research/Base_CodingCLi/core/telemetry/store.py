@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS spans (
     id TEXT PRIMARY KEY,
     source_key TEXT UNIQUE,
     {attrs},
+    ts REAL,                                 -- when it happened; start and end are missing for steps read from a log
     start REAL, end REAL, duration_s REAL,
     status TEXT NOT NULL DEFAULT 'ok',
     note TEXT NOT NULL DEFAULT ''
@@ -97,10 +98,22 @@ def _prepare(path: str) -> None:
             return
         with sqlite_util.connect(path, write=True) as conn:
             conn.executescript(_SCHEMA)
+            _add_span_time(conn)
             # Rows older than this were never seen live; backfill may add them, and nothing newer, so a record that
             # exists both live and in an older log is never counted twice.
             conn.execute("INSERT OR IGNORE INTO meta (key, value) VALUES ('live_since', ?)", (str(time.time()),))
         _ready.add(path)
+
+
+def _add_span_time(conn) -> None:
+    """Databases made before ``spans.ts`` existed: add it, dating each span from its own times or its render's."""
+    if any(row[1] == "ts" for row in conn.execute("PRAGMA table_info(spans)")):
+        return
+    conn.execute("ALTER TABLE spans ADD COLUMN ts REAL")
+    conn.execute("UPDATE spans SET ts = COALESCE(end, start)")
+    conn.execute("UPDATE spans SET ts = (SELECT COALESCE(t.end, t.start) FROM spans t WHERE t.render_id = spans.render_id"
+                 " AND t.render_id != '' AND t.stage = 'render' LIMIT 1) WHERE ts IS NULL")
+    conn.execute("UPDATE spans SET ts = ? WHERE ts IS NULL", (time.time(),))
 
 
 @contextmanager
@@ -157,7 +170,7 @@ def track(stage: str, **attrs: str) -> Iterator[dict]:
     finally:
         _context.reset(token)
         end = time.time()
-        _insert("spans", {"id": span_id, "start": start, "end": end, "duration_s": round(end - start, 3),
+        _insert("spans", {"id": span_id, "ts": end, "start": start, "end": end, "duration_s": round(end - start, 3),
                           "status": status, **{k: merged.get(k, "") for k in ATTRS}})
 
 
@@ -248,14 +261,15 @@ def record_call(kind: str, *, provider: str = "", model: str = "", usage: Option
 
 def record_span(stage: str, *, start: Optional[float] = None, end: Optional[float] = None,
                 duration_s: Optional[float] = None, status: str = "ok", note: str = "",
-                source_key: Optional[str] = None, **attrs: str) -> None:
+                source_key: Optional[str] = None, ts: Optional[float] = None, **attrs: str) -> None:
     """A span measured elsewhere (a render's step durations read from its log)."""
     if not enabled():
         return
     if duration_s is None and start is not None and end is not None:
         duration_s = round(end - start, 3)
     ambient = _context.get()
-    _insert("spans", {"id": uuid.uuid4().hex, "source_key": source_key, "start": start, "end": end,
+    _insert("spans", {"id": uuid.uuid4().hex, "source_key": source_key,
+                      "ts": ts if ts is not None else (end or start or time.time()), "start": start, "end": end,
                       "duration_s": duration_s, "status": status, "note": note,
                       **{name: str(attrs.get(name) or ambient.get(name) or "") for name in ATTRS},
                       "stage": stage})

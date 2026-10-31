@@ -28,8 +28,8 @@ const advancedItems = [
   { to: "/topics", label: "选题", icon: Lightbulb },
   { to: "/sources", label: "信息源", icon: Rss },
   { to: "/video-recipes", label: "文稿配方", icon: BookOpen },
-  { to: "/analytics", label: "数据分析", icon: BarChart3 },
 ];
+const adminAdvancedItems = [{ to: "/analytics", label: "数据分析", icon: BarChart3 }];
 
 const adminEngineItems = [{ to: "/scheduler", label: "周期调度", icon: Clock }];
 const adminItems = [{ to: "/settings", label: "设置", icon: Settings }];
@@ -43,7 +43,7 @@ export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate?: () =
   const groups = [
     { title: "", items: mainItems },
     { title: "研究引擎", items: admin ? [...engineItems, ...adminEngineItems] : engineItems },
-    { title: "高级", items: advancedItems },
+    { title: "高级", items: admin ? [...advancedItems, ...adminAdvancedItems] : advancedItems },
     { title: "", items: admin ? adminItems : [] },
   ].filter((g) => g.items.length);
 

@@ -2,10 +2,11 @@ import { Fragment, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
 import {
-  loadComparison, loadScriptBills, loadScriptDetail, loadTelemetrySummary,
-  type CompareBy, type CostBasis, type ModelUsage, type ScriptBill, type StageUsage, type Usage,
+  loadComparison, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords,
+  type CompareBy, type CostBasis, type ModelUsage, type PurgeResult, type ScriptBill, type StageUsage, type Usage,
 } from "@/api/telemetry";
 import { usePageResource } from "@/lib/use-page-resource";
+import { errorMessage } from "@/lib/toast";
 import { ErrorState } from "./ErrorState";
 
 const STAGES: Record<string, string> = {
@@ -134,6 +135,42 @@ function Comparison({ days, showCost }: { days: number; showCost: boolean }) {
   </section>;
 }
 
+const KEEP = [{ days: 30, label: "30 天" }, { days: 90, label: "90 天" }, { days: 180, label: "180 天" }, { days: 365, label: "1 年" }];
+const size = (bytes: number) => bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+const day = (seconds: number | null | undefined) => seconds ? new Date(seconds * 1000).toLocaleDateString("zh-CN") : "—";
+
+/** Records are never removed on their own; this is the only way they go, and it shows what it will remove first. */
+function Retention({ onChanged }: { onChanged: () => void }) {
+  const [keep, setKeep] = useState(365);
+  const [preview, setPreview] = useState<PurgeResult | null>(null);
+  const [message, setMessage] = useState(""), [busy, setBusy] = useState(false);
+  const load = useCallback((signal: AbortSignal) => loadStorage(signal), []);
+  const { data, error, reload } = usePageResource(load);
+  const run = async (dryRun: boolean) => {
+    setBusy(true); setMessage("");
+    try {
+      const result = await purgeRecords(keep, dryRun);
+      if (dryRun) { setPreview(result); return; }
+      setPreview(null); setMessage(`已删除 ${result.calls} 条调用记录、${result.spans} 条环节记录`);
+      await reload(); onChanged();
+    } catch (e) { setMessage(errorMessage(e, "操作失败")); } finally { setBusy(false); }
+  };
+  return <section className="card p-4 space-y-3">
+    <div><h2 className="text-sm font-medium">记录与清理</h2><p className="text-xs text-text-muted mt-1">记录不会自动删除，只在这里手动清理。清理不影响文稿、成片和发布记录。</p></div>
+    {error ? <ErrorState error={error} onRetry={reload} compact /> : null}
+    {data?.enabled ? <p className="text-xs text-text-muted">共 {data.calls?.toLocaleString("zh-CN")} 条调用记录、{data.spans?.toLocaleString("zh-CN")} 条环节记录，最早 {day(data.oldest)}，占用 {size(data.bytes || 0)}。</p> : null}
+    <div className="flex flex-wrap items-center gap-2 text-xs">
+      <label className="flex items-center gap-2">只保留最近<select aria-label="保留时长" className="input text-xs w-auto" value={keep} onChange={e => { setKeep(Number(e.target.value)); setPreview(null); }}>{KEEP.map(k => <option key={k.days} value={k.days}>{k.label}</option>)}</select></label>
+      <button className="btn text-xs" disabled={busy} onClick={() => void run(true)}>查看会清理多少</button>
+      {preview ? <>
+        <span role="status">将删除 {preview.calls.toLocaleString("zh-CN")} 条调用记录、{preview.spans.toLocaleString("zh-CN")} 条环节记录（{day(preview.cutoff)} 之前）</span>
+        {preview.calls || preview.spans ? <button className="btn text-xs text-danger" disabled={busy} onClick={() => void run(false)}>确认删除</button> : null}
+      </> : null}
+    </div>
+    {message ? <p role="status" className="text-xs">{message}</p> : null}
+  </section>;
+}
+
 function storedCost(): boolean {
   try { return localStorage.getItem(COST_KEY) !== "0"; } catch { return true; }
 }
@@ -171,6 +208,7 @@ export function UsageAnalytics() {
           <p>折算金额按公开的正常标价（不计渠道折扣和套餐），免费模型记 0；优先采用服务商返回的实际花费，其次是出片时记录的当时单价，再次是 <code>config/pricing.yaml</code>，都没有就显示「未定价」，只给 token。</p>
           {data.unpriced_models?.length ? <p>未定价：{data.unpriced_models.join("、")}。早期历史记录没有服务商，按模型名取通用标价，可能与实际渠道不同。</p> : null}
         </div> : null}</section>
+      <Retention onChanged={() => void reload()} />
     </> : null}
     {!data && !error ? <p className="text-sm text-text-muted">正在读取…</p> : null}
   </div>;

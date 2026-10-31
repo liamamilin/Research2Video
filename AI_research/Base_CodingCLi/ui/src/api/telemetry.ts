@@ -35,3 +35,9 @@ export const loadScriptBills = (days: number, offset: number, signal?: AbortSign
   api<ScriptBills>(`${BASE}/scripts`, { query: { days, offset, limit: 25 }, signal });
 export const loadScriptDetail = (id: string, signal?: AbortSignal) => api<ScriptDetail>(`${BASE}/scripts/${encodeURIComponent(id)}`, { signal });
 export const loadComparison = (by: CompareBy, days: number, signal?: AbortSignal) => api<Comparison>(`${BASE}/compare`, { query: { by, days }, signal });
+
+export type StorageStats = { enabled: boolean; calls?: number; spans?: number; oldest?: number | null; newest?: number | null; bytes?: number };
+export type PurgeResult = { enabled: boolean; cutoff: number; calls: number; spans: number; dry_run: boolean };
+export const loadStorage = (signal?: AbortSignal) => api<StorageStats>(`${BASE}/storage`, { signal });
+export const purgeRecords = (olderThanDays: number, dryRun: boolean) =>
+  api<PurgeResult>(`${BASE}/purge`, { method: "POST", body: { older_than_days: olderThanDays, dry_run: dryRun } });

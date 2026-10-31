@@ -3,12 +3,12 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { loadPlatforms } from "@/api/platforms";
-import { loadComparison, loadScriptBills, loadScriptDetail, loadTelemetrySummary, type Usage } from "@/api/telemetry";
+import { loadComparison, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords, type Usage } from "@/api/telemetry";
 import { useAuthStore } from "@/lib/auth-store";
 import { AnalyticsPage } from "./Analytics";
 import { PlatformsPage } from "./Platforms";
 
-vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn() }));
+vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn() }));
 vi.mock("@/api/platforms", async original => ({ ...await original<typeof import("@/api/platforms")>(), loadPlatforms: vi.fn() }));
 vi.mock("@/components/VideoAnalytics", () => ({ VideoAnalytics: ({ isAdmin, canEdit }: { isAdmin: boolean; canEdit: boolean }) => <div>视频数据面板 {String(isAdmin)} {String(canEdit)}</div> }));
 
@@ -19,7 +19,9 @@ const stage = (name: string, over = {}) => ({ ...usage(), stage: name, span_coun
 beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
-  useAuthStore.setState({ user: { username: "viewer", role: "viewer" } as never });
+  useAuthStore.setState({ user: { username: "admin", role: "admin" } as never });
+  vi.mocked(loadStorage).mockResolvedValue({ enabled: true, calls: 5460, spans: 900, oldest: 1_760_000_000, newest: 1_793_000_000, bytes: 3_500_000 });
+  vi.mocked(purgeRecords).mockResolvedValue({ enabled: true, cutoff: 1_770_000_000, calls: 120, spans: 30, dry_run: true });
   vi.mocked(loadTelemetrySummary).mockResolvedValue({
     enabled: true, llm: usage({ requests: 640, failed: 3 }), search: usage({ requests: 21, prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }),
     totals: usage(), models: [{ ...usage({ partial: true, unpriced_calls: 4, bases: ["table", "unpriced"] }), kind: "llm", provider: "api.deepseek.com", model: "deepseek-flash" }],
@@ -79,10 +81,44 @@ it("changes the range for every section", async () => {
   expect(loadScriptBills).toHaveBeenLastCalledWith(0, 0, expect.anything());
 });
 
-it("hosts the video data tab, with editing rights following the role", async () => {
-  useAuthStore.setState({ user: { username: "editor", role: "editor" } as never });
+it("hosts the video data tab with full rights, since only administrators reach the page", async () => {
   show("/analytics?tab=video");
-  expect(await screen.findByText("视频数据面板 false true")).toBeTruthy();
+  expect(await screen.findByText("视频数据面板 true true")).toBeTruthy();
+});
+
+it("is closed to anyone but administrators and asks the server for nothing", () => {
+  for (const role of ["viewer", "editor"]) {
+    useAuthStore.setState({ user: { username: role, role } as never });
+    show();
+    expect(screen.getByRole("alert").textContent).toContain("只对管理员开放");
+    cleanup();
+  }
+  expect(loadTelemetrySummary).not.toHaveBeenCalled();
+  expect(loadPlatforms).not.toHaveBeenCalled();
+});
+
+it("shows what is stored and previews a cleanup before deleting anything", async () => {
+  show();
+  expect(await screen.findByText(/共 5,460 条调用记录、900 条环节记录/)).toBeTruthy();
+  fireEvent.change(screen.getByLabelText("保留时长"), { target: { value: "90" } });
+  fireEvent.click(screen.getByText("查看会清理多少"));
+  expect(await screen.findByText(/将删除 120 条调用记录、30 条环节记录/)).toBeTruthy();
+  expect(purgeRecords).toHaveBeenCalledWith(90, true);
+  vi.mocked(purgeRecords).mockResolvedValue({ enabled: true, cutoff: 1_770_000_000, calls: 120, spans: 30, dry_run: false });
+  fireEvent.click(screen.getByText("确认删除"));
+  expect(await screen.findByText("已删除 120 条调用记录、30 条环节记录")).toBeTruthy();
+  expect(purgeRecords).toHaveBeenLastCalledWith(90, false);
+  await waitFor(() => expect(loadStorage).toHaveBeenCalledTimes(2));
+});
+
+it("offers no delete button when nothing is old enough, and forgets a preview when the period changes", async () => {
+  vi.mocked(purgeRecords).mockResolvedValue({ enabled: true, cutoff: 1, calls: 0, spans: 0, dry_run: true });
+  show();
+  fireEvent.click(await screen.findByText("查看会清理多少"));
+  expect(await screen.findByText(/将删除 0 条调用记录/)).toBeTruthy();
+  expect(screen.queryByText("确认删除")).toBeNull();
+  fireEvent.change(screen.getByLabelText("保留时长"), { target: { value: "30" } });
+  expect(screen.queryByText(/将删除/)).toBeNull();
 });
 
 it("sends someone without a connected account to connect one instead of an empty panel", async () => {
@@ -94,6 +130,6 @@ it("sends someone without a connected account to connect one instead of an empty
 
 it("sends the old platform-management data link to its new home", async () => {
   show("/platforms?tab=data");
-  expect(await screen.findByText("视频数据面板 false false")).toBeTruthy();
+  expect(await screen.findByText("视频数据面板 true true")).toBeTruthy();
   expect(screen.getByRole("tab", { name: /视频数据/ }).getAttribute("aria-selected")).toBe("true");
 });

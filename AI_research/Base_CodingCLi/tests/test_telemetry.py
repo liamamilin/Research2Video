@@ -1,5 +1,6 @@
 """Usage and timing records: attribution, the LLM and search hooks, render ingestion, backfill, pricing, the API."""
 import json
+import re
 import threading
 from pathlib import Path
 import time
@@ -9,7 +10,7 @@ import pytest
 
 from core import telemetry
 from core.llm import LLMClient, LLMConfig
-from core.telemetry import ingest, pricing, query
+from core.telemetry import ingest, pricing, query, retention
 
 
 @pytest.fixture()
@@ -239,10 +240,15 @@ def test_summary_and_script_bill_add_up_and_flag_what_could_not_be_priced(db):
     assert [s["stage"] for s in detail["stages"]] == ["write"] and detail["stages"][0]["span_count"] == 1
 
 
-def test_the_api_needs_a_login_and_serves_the_summary_and_price_table(client, web_env):
+def test_the_api_is_for_administrators_only_and_serves_the_summary_and_price_table(client, web_env):
     from tests.test_assistant_api import login
     assert client.get("/api/telemetry/summary").status_code in (401, 403)
-    login(client, "viewer")
+    for role in ("viewer", "editor"):
+        login(client, role)
+        for url in ("summary", "scripts", "compare", "pricing", "storage"):
+            assert client.get(f"/api/telemetry/{url}").status_code == 403, (role, url)
+        client.cookies.clear()
+    login(client, "admin")
     from core import state
     from web.settings import get_settings
     state.use_state_dir(str(get_settings().paths.state_dir))
@@ -405,3 +411,106 @@ def test_videos_are_compared_by_the_attribute_asked_for(db):
     assert news["render_median_s"] == 1200.0 and explainer["render_median_s"] == 300.0
     with pytest.raises(ValueError):
         query.compare(str(config), "script_id")
+
+
+# --- keeping and removing records --------------------------------------------------------------------------------
+
+DAY = 86400.0
+
+
+def seed_ages(*days_ago):
+    now = time.time()
+    for age in days_ago:
+        telemetry.record_call("llm", model="m", ts=now - age * DAY, usage={"prompt_tokens": 10, "completion_tokens": 1})
+        telemetry.record_span("write", start=now - age * DAY - 5, end=now - age * DAY)
+    return now
+
+
+def test_storage_reports_counts_range_and_size(db):
+    assert retention.stats()["calls"] == 0
+    now = seed_ages(2, 40)
+    report = retention.stats()
+    assert (report["calls"], report["spans"]) == (2, 2)
+    assert report["oldest"] == pytest.approx(now - 40 * DAY, abs=1) and report["newest"] == pytest.approx(now - 2 * DAY, abs=1)
+    assert report["bytes"] > 0
+    telemetry.use_state_dir(None)
+    assert retention.stats() == {"enabled": False}
+
+
+def test_a_dry_run_counts_what_would_go_and_a_purge_removes_exactly_that(db):
+    seed_ages(2, 40, 400)
+    assert retention.purge(30, dry_run=True) | {"cutoff": 0} == {"enabled": True, "cutoff": 0, "dry_run": True, "calls": 2, "spans": 2}
+    assert retention.stats()["calls"] == 3
+    result = retention.purge(30)
+    assert (result["calls"], result["spans"], result["dry_run"]) == (2, 2, False)
+    assert [round((time.time() - r["ts"]) / DAY) for r in rows("calls")] == [2]
+    assert len(rows("spans")) == 1
+
+
+def test_a_purge_keeps_what_was_already_read_from_being_read_and_counted_again(db):
+    render_files(db / "r1")
+    render = {"id": "r1", "status": "COMPLETED", "resolved_video_form": "f", "submitted_at": "2020-01-01T10:00:00+0800",
+              "completed_at": "2020-01-01T10:20:00+0800"}
+    ingest.ingest_render(render, {"id": "s1"}, str(db / "r1"))
+    ingest._mark("render:r1")
+    assert retention.purge(30)["calls"] == 2 and rows("calls") == []
+    with telemetry.connect() as conn:
+        assert conn.execute("SELECT 1 FROM meta WHERE key = 'render:r1'").fetchone()
+
+
+def test_purging_refuses_to_delete_everything_and_does_nothing_without_a_database(db):
+    seed_ages(2)
+    with pytest.raises(ValueError):
+        retention.purge(0)
+    assert retention.stats()["calls"] == 1
+    telemetry.use_state_dir(None)
+    assert retention.purge(30)["enabled"] is False
+
+
+def test_steps_read_from_a_render_log_are_dated_by_the_render_so_they_can_be_purged_with_it(db):
+    render_files(db / "r1")
+    render = {"id": "r1", "status": "COMPLETED", "submitted_at": "2020-01-01T10:00:00+0800",
+              "completed_at": "2020-01-01T10:20:00+0800"}
+    ingest.ingest_render(render, {"id": "s1"}, str(db / "r1"))
+    assert all(r["ts"] and r["ts"] < time.time() - 365 * DAY for r in rows("spans"))
+    assert retention.purge(30)["spans"] == 4
+
+
+def test_a_database_made_before_spans_had_a_time_gains_one_dated_from_the_render(tmp_path):
+    import sqlite3
+    path = tmp_path / "telemetry.db"
+    legacy = re.sub(r"\n    ts REAL,[^\n]*", "", telemetry.store._SCHEMA, count=1)  # the schema before spans had a time
+    conn = sqlite3.connect(path)
+    conn.executescript(legacy)
+    conn.execute("INSERT INTO spans (id, stage, render_id, start, end) VALUES ('a', 'render', 'r1', 100, 200)")
+    conn.execute("INSERT INTO spans (id, stage, render_id) VALUES ('b', 'render/package', 'r1')")
+    conn.execute("INSERT INTO spans (id, stage) VALUES ('c', 'write')")
+    conn.commit()
+    conn.close()
+    telemetry.use_state_dir(str(tmp_path))
+    telemetry.store._ready.discard(str(path))
+    got = {r["id"]: r["ts"] for r in rows("spans")}
+    assert got["a"] == 200 and got["b"] == 200 and got["c"] > 1_000_000_000
+
+
+def test_purge_through_the_api_is_audited_and_validated(client, web_env, monkeypatch):
+    from tests.test_assistant_api import login
+    from core import state
+    from web import audit
+    from web.settings import get_settings
+    state.use_state_dir(str(get_settings().paths.state_dir))
+    seed_ages(2, 400)
+    logged = []
+    monkeypatch.setattr(audit, "log", lambda action, **k: logged.append((action, k)))
+    headers = login(client, "admin")
+    assert client.post("/api/telemetry/purge", json={"older_than_days": 0}, headers=headers).status_code == 422
+    assert client.post("/api/telemetry/purge", json={"older_than_days": "30"}, headers=headers).status_code == 422
+    dry = client.post("/api/telemetry/purge", json={"older_than_days": 30, "dry_run": True}, headers=headers).json()
+    assert (dry["calls"], dry["dry_run"]) == (1, True) and not [a for a, _ in logged if a == "telemetry_purge"]
+    done = client.post("/api/telemetry/purge", json={"older_than_days": 30}, headers=headers).json()
+    assert (done["calls"], done["spans"]) == (1, 1)
+    [purge] = [k for a, k in logged if a == "telemetry_purge"]
+    assert purge["user"] == "admin" and purge["details"] == {"older_than_days": 30, "calls": 1, "spans": 1}
+    assert client.get("/api/telemetry/storage").json()["calls"] == 1
+    login(client, "editor")
+    assert client.post("/api/telemetry/purge", json={"older_than_days": 30}, headers=headers).status_code == 403

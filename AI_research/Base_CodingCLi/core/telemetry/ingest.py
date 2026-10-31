@@ -78,7 +78,7 @@ def ingest_render(render: dict, script: Optional[dict], render_dir: str) -> int:
         log = ""
     for name, outcome, seconds in _STEP.findall(log):
         store.record_span(f"render/{name}", duration_s=float(seconds), status="ok" if outcome == "PASS" else "failed",
-                          source_key=f"render:{render['id']}:step:{name}", **attrs)
+                          source_key=f"render:{render['id']}:step:{name}", ts=finished, **attrs)
         rows += 1
     start = _epoch(render.get("submitted_at"))
     if start:
