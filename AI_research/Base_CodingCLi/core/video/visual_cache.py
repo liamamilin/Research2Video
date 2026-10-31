@@ -11,6 +11,8 @@ from core.video import screenshots, store, visual_materials, visual_matching
 
 def key(need: dict, url: str, policy: dict) -> str:
     return visual_materials.digest({"url": visual_materials.url_key(url), "kind": need["kind"],
+                                    "selection_revision": 2,
+                                    "visual_subject": need.get("visual_subject", ""), "visual_goal": need.get("visual_goal", ""),
                                     "version": policy["version"], "entities": visual_matching.entities(need["claims"]),
                                     "prices": visual_matching.prices(need["claims"]), "cycles": sorted(visual_matching.cycles(need["claims"]))})
 
@@ -42,7 +44,7 @@ def reusable(record: dict, need: dict, policy: dict) -> bool:
             okay, _, _ = visual_matching.compatible(need, {"text": quality.get("region_text", ""), "box": {}}, record["title"])
             if not okay:
                 return False
-            if need["kind"] == "pricing" and policy.get("ocr_review"):
+            if need["kind"] == "pricing" and policy.get("ocr_review") and not need.get("visual_subject"):
                 okay, _, _ = visual_matching.compatible(need, {"text": quality["image"]["visible_text"], "box": {}}, record["title"])
                 if not okay:
                     return False

@@ -72,6 +72,27 @@ def test_cache_write_failure_does_not_remove_the_generated_audio(tmp_path, monke
     assert not list(cache.root.glob(".tmp-*"))
 
 
+def test_full_cache_evicts_oldest_copies_and_preserves_original_attempt_audio(tmp_path, monkeypatch):
+    cache, output = populate(tmp_path)
+    old = cache.root / cache.entries[0][0]
+    recent = cache.root / cache.entries[1][0]
+    (recent / ".access").touch()
+    source = {p.name: p.read_bytes() for p in output.glob("*.wav")}
+    size = sum(p.stat().st_size for p in cache.root.rglob("*") if p.is_file())
+    monkeypatch.setattr("g2.voice_cache.MAX_BYTES", size + 100)
+    changed = [{**SEGMENTS[-1], "text": "一个新的独立章节。"}]
+    incoming = VoiceChapterCache(cache.root, cache.fingerprint, changed)
+    incoming.restore(tmp_path / "missing")
+    receipt = json.loads((recent / "entry.json").read_text())
+    incoming.publish(output, {**receipt["header"], "segments": [row["report"] for row in receipt["segments"]]})
+    assert incoming.evicted == 1 and not old.exists() and recent.exists()
+    assert not incoming.write_errors
+    assert {p.name: p.read_bytes() for p in output.glob("*.wav")} == source
+    assert sum(p.stat().st_size for p in cache.root.rglob("*") if p.is_file()) <= size + 100
+    restored = incoming.restore(tmp_path / "new-restored")
+    assert SEGMENTS[-1]["id"] in restored
+
+
 def test_reference_encoding_cache_distinguishes_padding_and_never_caches_continuation():
     class Model:
         def __init__(self):

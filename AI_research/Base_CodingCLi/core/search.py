@@ -178,8 +178,16 @@ class SearchClient:
             if fallback and fallback not in providers:
                 providers.append(fallback)
 
+        from core import search_health
+
+        # Credits, keys and rate limits do not recover within one run: skip a provider that just failed that way
+        # (shared with the other processes) instead of spending another doomed request on it.
+        cooling = search_health.cooling()
         answered = False
         for provider in providers:
+            if provider in cooling:
+                self.errors[provider] = f"暂停使用（{cooling[provider]['reason'][:120]}）"
+                continue
             try:
                 if provider == "parallel":
                     results = self._search_parallel(
@@ -206,6 +214,7 @@ class SearchClient:
                     self.errors[provider] = "未知的搜索服务商"
                     continue
                 answered = True
+                search_health.record_answer(provider)
                 if results:
                     self.calls += 1
                     return self._dedupe(results)
@@ -217,11 +226,13 @@ class SearchClient:
                 raise
             except Exception as exc:  # noqa: BLE001 - provider fallback
                 self.errors[provider] = str(exc)[:300]
+                search_health.record_failures({provider: self.errors[provider]})
                 logger.warning(
                     "Search provider '%s' failed: %s", provider, str(exc)[:300]
                 )
 
         if not answered:
+            search_health.record_outage(self.errors)
             raise SearchUnavailableError(self.errors)
         return []
 
@@ -233,6 +244,25 @@ class SearchClient:
         blocks = [r.to_markdown() for r in results]
         header = f"({len(results)} sources retrieved from web search)\n"
         return header + "\n\n---\n\n".join(blocks)
+
+    def read_page(self, url: str) -> SearchResult:
+        """Read one exact public URL through Exa Contents when direct fetching is unavailable."""
+        if self._cancel.is_set():
+            raise CancelledError("Cancelled before reading page")
+        key = self.config.api_keys.get("exa")
+        if not key:
+            raise RuntimeError("网页直接读取失败；可配置 EXA_API_KEY 使用 Exa 网页正文读取")
+        self._progress({"type": "tool", "tool": "read_page", "url": url})
+        body = self._post_json("https://api.exa.ai/contents", {
+            "urls": [url], "text": True, "maxAgeHours": 0,
+        }, api_key=key)
+        from .source_pages import canonical_url
+        for item in body.get("results") or []:
+            if canonical_url(item.get("url") or "") == canonical_url(url) and item.get("text"):
+                return SearchResult(title=item.get("title") or url, url=url,
+                                    publish_date=item.get("publishedDate"),
+                                    excerpts=[item["text"][:120000]], provider="exa_contents")
+        raise RuntimeError("网页正文服务未取得指定页面的内容")
 
     # ------------------------------------------------------------------
     # Parallel Search API

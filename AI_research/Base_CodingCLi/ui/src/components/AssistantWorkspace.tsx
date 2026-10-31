@@ -33,9 +33,9 @@ export function AssistantWorkspacePanel({ conversationId, context, revision, onP
     {!resource.loading && !resource.error && !data?.objects.length && !data?.tasks?.length && <div className="card p-4 text-xs text-text-muted">从详情页打开助手，或让助手查找要处理的任务、文稿和配方，相关对象会显示在这里。</div>}
     {!!data?.objects.length && <h2 className="font-medium text-sm">相关对象</h2>}
     {data?.objects.map((item) => <section key={`${item.kind}:${item.id}`} className="card p-4 space-y-3">
-      <div className="text-xs text-text-muted">{CONTEXT_LABELS[item.kind as AssistantContext['kind']] || item.kind} · {STATUS[item.status] || item.status}</div>
+      <div className="text-xs text-text-muted">{item.local_video ? '视频' : CONTEXT_LABELS[item.kind as AssistantContext['kind']] || item.kind} · {STATUS[item.status] || item.status}</div>
       <Link to={item.href} className="text-sm font-medium flex items-start gap-2 hover:text-accent"><span className="min-w-0 break-words">{item.title}</span><ArrowUpRight className="w-3.5 h-3.5 shrink-0 mt-1" /></Link>
-      {item.version != null && <div className="text-xs space-y-1"><p>当前文稿 v{item.version}</p><p>视频对应：{item.video_version != null ? `文稿 v${item.video_version}` : '暂无完成的成片'}</p>
+      {item.version != null && !item.local_video && <div className="text-xs space-y-1"><p>当前文稿 v{item.version}</p><p>视频对应：{item.video_version != null ? `文稿 v${item.video_version}` : '暂无完成的成片'}</p>
         {item.video_version != null && item.video_version !== item.version && <p className="text-warning">视频仍使用旧版文稿</p>}</div>}
       {item.video_version != null && item.video_version !== item.version && <button className="btn text-xs" onClick={() => onPrompt(`请比较文稿 ${item.id} 的当前 v${item.version} 与视频所用 v${item.video_version}，说明主要变化。`)}>比较两个版本</button>}
       {item.detail && <p className="text-xs text-text-muted">{item.detail}</p>}
@@ -56,13 +56,14 @@ export function AssistantWorkspacePanel({ conversationId, context, revision, onP
         <button className="btn text-xs" onClick={() => onPrompt(`请查看 ${item.id} 当前平台账号和未投稿的定稿视频，帮我准备发布包，先不要上传。`)}>准备发布</button>
         <button className="btn text-xs" onClick={() => onPrompt(`请查询 ${item.id} 的发布队列，汇总失败和需要核对的任务。先查询。`)}>检查发布队列</button>
       </div>}
-      {item.renders?.map((r) => <Link className="block text-xs text-accent" key={r.id} to={`${item.href}?tab=video&version=${r.version}&render=${r.id}`}>文稿 v{r.version} · {STATUS[r.status] || r.status}{r.error_message ? ` · ${r.error_message}` : ''}</Link>)}
+      {item.renders?.map((r) => <Link className="block text-xs text-accent" key={r.id} to={`${item.href}?tab=video&version=${r.version}&render=${r.id}`}>{item.local_video ? '本地成片' : `文稿 v${r.version}`} · {STATUS[r.status] || r.status}{r.error_message ? ` · ${r.error_message}` : ''}</Link>)}
       {item.tasks?.map((task) => <p className="text-xs" key={task.id}>{task.title || '发布任务'} · {STATUS[task.status] || task.status}{task.error ? ` · ${task.error}` : ''}</p>)}
-      {item.kind === 'video' && <div className="flex flex-wrap gap-2">
+      {item.kind === 'video' && !item.local_video && <div className="flex flex-wrap gap-2">
         <button className="btn text-xs" onClick={() => onPrompt(`请为视频文稿 ${item.id} 重新生成文稿，沿用已有研究报告。`)}>重新生成文稿</button>
         <button className="btn text-xs" onClick={() => onPrompt(`请用视频文稿 ${item.id} 的当前版本重新生成视频。`)}>重新生成视频</button>
         <button className="btn text-xs" onClick={() => onPrompt(`请读取视频文稿 ${item.id} 及其生成配置，帮我调整生成方式。`)}>调整生成方式</button>
       </div>}
+      {item.local_video && <Link className="btn text-xs" to={`${item.href}?tab=publish`}>查看发布信息</Link>}
       {!!item.links?.length && <details className="text-xs"><summary className="cursor-pointer text-accent">相关配置与影响范围</summary><div className="space-y-3 mt-3">{item.links.map((link) => <div key={link.href}>
         <Link to={link.href} className="text-accent hover:underline">{link.label} ↗</Link><p className="text-text-muted mt-1">{link.scope} · {link.next}</p>
       </div>)}</div></details>}

@@ -5,6 +5,9 @@ from __future__ import annotations
 import os
 
 os.environ.setdefault("AREC_NO_AUTOPILOT_LOOP", "1")
+# Every logger the code under test sets up (CLI main, web lifespan, spawned servers) writes here, never to logs/.
+import tempfile as _tempfile
+os.environ["AI_RESEARCH_LOG_FILE"] = os.path.join(_tempfile.mkdtemp(prefix="arec-test-logs-"), "ai_research.log")
 
 import os
 import sys
@@ -16,6 +19,33 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+
+@pytest.fixture(autouse=True)
+def _root_logging_per_test():
+    """CLI entry points replace the root logger's handlers; put them back so later tests neither inherit a file
+    handler nor log into a console stream pytest has already closed."""
+    import logging
+    root = logging.getLogger()
+    handlers, level = list(root.handlers), root.level
+    yield
+    for handler in list(root.handlers):
+        if handler not in handlers:
+            root.removeHandler(handler)
+            handler.close()
+    for handler in handlers:
+        if handler not in root.handlers:
+            root.addHandler(handler)
+    root.setLevel(level)
+
+
+@pytest.fixture(autouse=True)
+def _search_health_per_test():
+    """Search cooldowns follow core.state's directory; one test's provider failures must not skip providers in the next."""
+    from core import search_health
+    search_health.use_state_dir(None)
+    yield
+    search_health.use_state_dir(None)
 
 _PASSWORDS = ("admin-pass-123", "editor-pass-123", "viewer-pass-123", "ghost-pass-123")
 

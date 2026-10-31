@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { AskPage } from "./Ask";
 import { useAuthStore } from "@/lib/auth-store";
@@ -10,11 +10,17 @@ function stream(result: unknown) {
     c.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ type: "done", result })}\n\n`)); c.close();
   } }) } as Response;
 }
-function server(options: { requests?: unknown[]; send?: () => Response } = {}) {
+function server(options: { requests?: unknown[]; context?: unknown; send?: () => Response } = {}) {
   const fetch = vi.fn(async (url: string, init?: RequestInit) => {
-    if (url === "/api/assistant/conversation" || url === `/api/assistant/conversations/${cid}`) return json({ id: cid, requests: options.requests || [] });
+    if (url === "/api/assistant/conversation" || url === `/api/assistant/conversations/${cid}`) return json({ id: cid, context: options.context, requests: options.requests || [] });
+    if (url.startsWith('/api/assistant/overview')) return json({ at: '2026-10-26T08:00:00+08:00', platform: 'bilibili', active: false,
+      platforms: [], matrices: [], summary: { attention: 1, working: 0, publish: 0, jobs: 0 },
+      schedules: { available: false, note: '仅管理员可查看周期' }, warnings: [], scope: '全部矩阵',
+      items: { total: 1, offset: 0, next_offset: null, complete: true, rows: [{ id: 'v', kind: 'video', matrix_name: 'AI',
+        title: '总览中的文稿', label: '待定稿', href: '/video/v?version=2', prompt: '分析文稿 v 的生成设置。' }] } });
     if (url.startsWith('/api/assistant/workspace')) return json({ objects: [], operations: [], active: false });
     if (url.startsWith('/api/assistant/tasks')) return json({ tasks: [], total: 0, active: false });
+    if (url.startsWith('/api/assistant/batches')) return json({ items: [] });
     if (url === "/api/assistant/conversations") return init?.method === 'POST' ? json({ id: "b".repeat(32) }) : json([{ id: cid, title: '之前的工作', updated: 1, request_count: 1 }]);
     if (url.endsWith('/context')) return json({ ok: true });
     if (url.includes("/stop")) return json({ status: "stop_requested" });
@@ -33,6 +39,66 @@ function send(text: string) {
 beforeEach(() => { sessionStorage.clear(); useAuthStore.setState({ user: { username: "admin", role: "admin" } as never }); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 describe("Application assistant", () => {
+  it('opens long conversations at recent messages and reveals older replies without another request', async () => {
+    const fetcher = server({ requests: Array.from({ length: 15 }, (_, index) => ({ id: `r${index}`,
+      message: `问题 ${index}`, status: 'completed', result: { answer: `历史回答 ${index}`, actions: [] } })) });
+    await renderAsk();
+    expect(screen.getByText('历史回答 14')).toBeTruthy();
+    expect(screen.queryByText('历史回答 0')).toBeNull();
+    const previous = fetcher.mock.calls.length;
+    fireEvent.click(screen.getByRole('button', { name: '显示更早的对话（10 条）' }));
+    expect(screen.getByText('历史回答 0')).toBeTruthy();
+    expect(screen.getByText('历史回答 14')).toBeTruthy();
+    expect(fetcher.mock.calls.length).toBe(previous);
+  });
+  it.each([
+    ['/ask?tasks=1', '/api/assistant/tasks'],
+    ['/ask', '/api/assistant/workspace'],
+  ])('loads %s panel once after initial conversation recovery', async (path, endpoint) => {
+    const base = server();
+    let finish!: () => void;
+    const recovery = new Promise<void>(resolve => { finish = resolve; });
+    const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === '/api/assistant/conversation') await recovery;
+      return base(url, init);
+    });
+    vi.stubGlobal('fetch', fetcher);
+    render(<MemoryRouter initialEntries={[path]}><AskPage /></MemoryRouter>);
+    expect(await screen.findByText('正在恢复工作区…')).toBeTruthy();
+    expect(fetcher.mock.calls.filter(([url]) => url.startsWith(endpoint))).toHaveLength(0);
+    await act(async () => { finish(); });
+    await waitFor(() => expect(screen.getByLabelText('消息')).toHaveProperty('disabled', false));
+    await waitFor(() => expect(fetcher.mock.calls.filter(([url]) => url.startsWith(endpoint))).toHaveLength(1));
+    expect(screen.queryByText('正在恢复工作区…')).toBeNull();
+  });
+  it('opens the global overview and returns to the existing conversation without sending or losing its draft', async () => {
+    const fetcher = server({ requests: [{ id: 'old', message: '旧请求', status: 'completed', result: { answer: '保留这段对话', actions: [] } }] });
+    await renderAsk();
+    fireEvent.change(screen.getByLabelText('消息'), { target: { value: '未发送的草稿' } });
+    fireEvent.click(screen.getByRole('button', { name: '全局总览' }));
+    expect(await screen.findByRole('heading', { name: '全局总览' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '返回对话' }));
+    expect(screen.getByText('保留这段对话')).toBeTruthy();
+    expect(screen.getByLabelText('消息')).toHaveProperty('value', '未发送的草稿');
+    expect(fetcher.mock.calls.some(([url]) => url.endsWith('/stream'))).toBe(false);
+    expect(fetcher.mock.calls.some(([url]) => url === '/api/assistant/conversations')).toBe(false);
+  });
+  it('prefills a global action with no stale object context or duplicate conversation recovery', async () => {
+    const fetcher = server({ context: { kind: 'recipe', id: 'old-recipe' } });
+    render(<MemoryRouter initialEntries={['/ask']}><AskPage /></MemoryRouter>);
+    await waitFor(() => expect(screen.getByLabelText('消息')).toHaveProperty('disabled', false));
+    expect(screen.getByText('当前对象：配方')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '全局总览' }));
+    fireEvent.click(await screen.findByText('交给助手'));
+    expect(screen.getByLabelText('消息')).toHaveProperty('value', '分析文稿 v 的生成设置。');
+    expect(screen.queryByText('当前对象：配方')).toBeNull();
+    expect(fetcher.mock.calls.filter(([url]) => url.includes('/conversation') && !url.includes('/context'))).toHaveLength(1);
+    expect(fetcher.mock.calls.some(([url]) => url.endsWith('/stream'))).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: '发送' }));
+    await screen.findByText('已完成。');
+    const sent = fetcher.mock.calls.find(([url]) => url.endsWith('/stream'));
+    expect(JSON.parse(String(sent?.[1]?.body)).context).toBeNull();
+  });
   it('opens the task center directly from a verified action link', async () => {
     const fetcher = server();
     render(<MemoryRouter initialEntries={['/ask?tasks=1']}><AskPage /></MemoryRouter>);
@@ -219,4 +285,19 @@ it('persists removal of the current object without sending a model request', asy
   const request = fetch.mock.calls.find(([url]) => url.endsWith('/context'));
   expect(JSON.parse(String(request?.[1]?.body)).context).toBeNull();
   expect(fetch.mock.calls.some(([url]) => url.endsWith('/stream'))).toBe(false);
+});
+
+it('shows recorded model usage after a reply and after restoring history', async () => {
+  server({ requests: [{ id: 'old', message: '历史问题', status: 'completed', result: {
+    answer: '历史回复', actions: [], usage: { total_tokens: 1200, requests: 2, cache_read_tokens: 800 },
+  } }], send: () => stream({ answer: '新的回复', actions: [], conversation_id: cid,
+    usage: { total_tokens: 350, requests: 1 } }) });
+  await renderAsk();
+  expect(screen.getByLabelText('本次模型用量').textContent).toContain('1,200 Token');
+  expect(screen.getByLabelText('本次模型用量').textContent).toContain('缓存读取 800');
+  send('新的问题');
+  await screen.findByText('新的回复');
+  const rows = screen.getAllByLabelText('本次模型用量');
+  expect(rows[rows.length - 1].textContent).toContain('350 Token');
+  expect(rows[rows.length - 1].textContent).toContain('1 次模型调用');
 });

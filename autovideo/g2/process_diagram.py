@@ -64,6 +64,7 @@ def validate_plan(plan: dict, context: dict) -> None:
             raise DiagramPlanFault("DUPLICATE_DIAGRAM_ID", scene["id"])
         seen_scenes.add(scene["id"])
         if scene.get("visuals"):
+            scene["visuals"] = visual_language.enrich("flow_diagram", scene)["visuals"]
             try:
                 validate_references("flow_diagram", scene)
             except ValueError as exc:

@@ -1,0 +1,20 @@
+schema_version: 1
+name: 一处体验变化
+matrix: consumer
+type: news
+audience: 想理解产品体验差别、为自己的日常需求做选择的普通观众
+promise: 理解一个产品或服务变化，在具体使用中带来什么不同
+production_ids:
+- consumer_daily
+render_inheritance: source_compatible
+render:
+  packaging:
+    label: 一处体验变化
+presentation:
+  preferred_visuals:
+  - 实物图片
+  - 对比卡
+  - 使用场景
+  strategy: 沿同一对象与用户动作推进，前后对比保持相同任务和尺度。已有图片帮助认出当前对象，图解与数字贴着正在解释的操作和结果；局部聚焦仍能辨认动作的位置和下一步。讲完当前比较后继续使用者的新动作，收束连起体验变化、投入和后续使用。
+status: configured
+notes: 从同一位使用者想完成的事进入，尽早给出本次新体验，再沿准备、实际操作、结果和后续使用逐步解释它怎样发生。保留材料中的具体动作、对象特征和投入，让参数说明当前体验和取舍；相关条件在影响这一步时讲清，再接回主任务。结尾跟随开场用户完成这件事及善后后的新状态和下一次使用，标题、节奏和篇幅由本期材料组织，取材备忘作为作者背景。

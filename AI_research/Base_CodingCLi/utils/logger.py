@@ -6,6 +6,10 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
+#: Overrides the configured log file for every logger set up in this process and its children. The test suite sets it so
+#: that CLI and server code under test never appends to (or rotates away) the console's real ``logs/ai_research.log``.
+LOG_FILE_ENV = "AI_RESEARCH_LOG_FILE"
+
 # Third-party loggers that are too chatty at INFO level
 _NOISY_LOGGERS = (
     "httpx",
@@ -28,6 +32,7 @@ def setup_logger(
     ``core.engine`` and ``core.research`` are captured too.
     """
     numeric = getattr(logging, level.upper(), logging.INFO)
+    log_file = os.environ.get(LOG_FILE_ENV) or log_file
     root = logging.getLogger()
     root.setLevel(numeric)
     root.handlers.clear()
@@ -60,6 +65,7 @@ def attach_file_logging(log_file: str, level: str = "INFO") -> None:
     existing handlers (used by the web server, where uvicorn owns console
     logging but we still want job logs persisted to disk)."""
     numeric = getattr(logging, level.upper(), logging.INFO)
+    log_file = os.environ.get(LOG_FILE_ENV) or log_file
     target = os.path.abspath(log_file)
 
     root = logging.getLogger()

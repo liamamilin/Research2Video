@@ -1,32 +1,37 @@
-import type { ReactElement } from "react";
+import { lazy, Suspense, type ReactElement } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { AuthProvider } from "@/components/AuthProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Layout } from "@/components/Layout";
 import { LoginPage } from "@/pages/Login";
-import { DashboardPage } from "@/pages/Dashboard";
-import { HomeBoardPage } from "@/pages/HomeBoard";
-import { TopicsPage } from "@/pages/Topics";
-import { PublishQueuePage } from "@/pages/PublishQueue";
-import { JobsListPage } from "@/pages/JobsList";
-import { JobDetailPage } from "@/pages/JobDetail";
-import { ReportsPage } from "@/pages/Reports";
-import { ReportViewPage } from "@/pages/ReportView";
-import { SettingsPage } from "@/pages/Settings";
-import { SchedulerPage } from "@/pages/Scheduler";
-import { RoundsPage } from "@/pages/Rounds";
-import { AskPage } from "@/pages/Ask";
-import { ShareViewPage } from "@/pages/ShareView";
-import { VideoScriptsPage } from "@/pages/VideoScripts";
-import { VideoScriptViewPage } from "@/pages/VideoScriptView";
-import { VideoRecipesPage } from "@/pages/VideoRecipes";
-import { MatricesPage, MatrixDetailPage, MatrixJobVideoPage } from "@/pages/Matrices";
-import { SourcesPage } from "@/pages/Sources";
-import { OutputsPage } from "@/pages/Outputs";
-import { PlatformsPage } from "@/pages/Platforms";
 import { useAuthStore } from "@/lib/auth-store";
 import { ToastProvider } from "@/lib/toast";
+import { pageLoaders } from "@/lib/page-modules";
+import { PageLoading } from "@/components/PageLoading";
+
+const DashboardPage = lazy(pageLoaders.DashboardPage);
+const HomeBoardPage = lazy(pageLoaders.HomeBoardPage);
+const TopicsPage = lazy(pageLoaders.TopicsPage);
+const PublishQueuePage = lazy(pageLoaders.PublishQueuePage);
+const JobsListPage = lazy(pageLoaders.JobsListPage);
+const JobDetailPage = lazy(pageLoaders.JobDetailPage);
+const ReportsPage = lazy(pageLoaders.ReportsPage);
+const ReportViewPage = lazy(pageLoaders.ReportViewPage);
+const SettingsPage = lazy(pageLoaders.SettingsPage);
+const SchedulerPage = lazy(pageLoaders.SchedulerPage);
+const RoundsPage = lazy(pageLoaders.RoundsPage);
+const AskPage = lazy(pageLoaders.AskPage);
+const ShareViewPage = lazy(pageLoaders.ShareViewPage);
+const VideoScriptsPage = lazy(pageLoaders.VideoScriptsPage);
+const VideoScriptViewPage = lazy(pageLoaders.VideoScriptViewPage);
+const VideoRecipesPage = lazy(pageLoaders.VideoRecipesPage);
+const MatricesPage = lazy(pageLoaders.MatricesPage);
+const MatrixDetailPage = lazy(pageLoaders.MatrixDetailPage);
+const MatrixJobVideoPage = lazy(pageLoaders.MatrixJobVideoPage);
+const SourcesPage = lazy(pageLoaders.SourcesPage);
+const OutputsPage = lazy(pageLoaders.OutputsPage);
+const PlatformsPage = lazy(pageLoaders.PlatformsPage);
 
 /** Blocks deep links to admin-only pages instead of letting every action 403. */
 export function AdminOnly({ children }: { children: ReactElement }) {
@@ -103,7 +108,7 @@ export default function App() {
       <ErrorBoundary>
         <ToastProvider>
           <AuthProvider>
-            <AppRoutes />
+            <Suspense fallback={<PageLoading />}><AppRoutes /></Suspense>
           </AuthProvider>
         </ToastProvider>
       </ErrorBoundary>

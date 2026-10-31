@@ -37,6 +37,7 @@ def test_weak_secret_is_replaced_and_persisted(tmp_path, monkeypatch):
     env_file = tmp_path / ".env"
     env_file.write_text("LLM_API_KEY=\"x\"\nWEB_SECRET_KEY=dev-only-change-me-in-production-aaaaaaaaaaaaaaaaaa\n",
                         encoding="utf-8")
+    monkeypatch.setattr(ws, "_secret_file", lambda: env_file)
     monkeypatch.delenv("AI_RESEARCH_SECRET_KEY", raising=False)
     monkeypatch.delenv("WEB_SECRET_KEY", raising=False)
     monkeypatch.setattr(ws, "_persist_secret", lambda secret: (

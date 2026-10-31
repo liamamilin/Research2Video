@@ -1,0 +1,31 @@
+name: 科技与未来产业 · 信息供给
+matrix: tech
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 10 6 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- features
+- insights
+discovery_objective: 为「科技与未来产业」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：新技术怎样工作、进入了什么实际场景；保留实验、样机、参数与使用过程；围绕同一技术解释机制、进展和落地过程，保留工程例子与限制条件
+jobs:
+  tech/tech_daily:
+    mode: changes
+    direction: 新技术怎样工作、进入了什么实际场景；保留实验、样机、参数与使用过程
+    query:
+    - emerging technology robotics semiconductor energy research institute news RSS
+    - 机器人 半导体 能源 技术突破 研究机构 新闻 RSS
+    - technology engineering laboratory official demonstrations research news
+  tech/tech_weekly:
+    mode: context
+    direction: 围绕同一技术解释机制、进展和落地过程，保留工程例子与限制条件
+    query:
+    - engineering technology research institute feature stories applications
+    - robotics semiconductor energy laboratory engineering explainers blog
+    - 科技 工程 技术原理 应用 实验室 专题

@@ -31,6 +31,7 @@ from zoneinfo import ZoneInfo
 
 from core.social.adapter import AdapterError
 from core.social.verification import protect_context, receipt, select_work, timestamp
+from core.social.verification import lookup_diagnostics
 
 
 CREATOR_URL = "https://creator.xiaohongshu.com/new/home"
@@ -369,7 +370,7 @@ class XiaohongshuAdapter:
             if errors or not loaded:
                 raise AdapterError('暂未取得小红书作品列表，请核对平台登录或验证提示；系统会自动重查，不会重新投稿。')
             selected, reason = select_work(records, lookup)
-            return receipt(self.key, owner_id, selected, reason)
+            return {**receipt(self.key, owner_id, selected, reason), 'lookup_diagnostics': lookup_diagnostics(records, lookup)}
         except AdapterError:
             raise
         except Exception:

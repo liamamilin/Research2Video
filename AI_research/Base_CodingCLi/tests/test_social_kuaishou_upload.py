@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from core.social.adapter import AdapterError
-from core.social.adapters.kuaishou import _publish_once, _select_video_file, _upload_video
+from core.social.adapter import AdapterError, UploadPreparationError
+from core.social.adapters.kuaishou import _publish_once, _select_video_file, _upload_video, _wait_for_video_upload
 
 
 class FileInputs:
@@ -38,6 +38,7 @@ def selection_page(accepts, *, buttons=0):
         yield SimpleNamespace(value=pending)
 
     page = SimpleNamespace(locator=lambda selector: inputs, get_by_role=lambda *args, **kwargs: button,
+                           get_by_text=lambda *a, **kw: SimpleNamespace(count=AsyncMock(return_value=0)),
                            expect_file_chooser=expect_chooser)
     return page, inputs, button, chooser
 
@@ -54,7 +55,7 @@ def test_video_file_input_is_selected_even_when_cover_input_comes_first():
 def test_unique_compatible_file_input_needs_no_css_upload_button(accept):
     page, inputs, _, _ = selection_page([accept])
     asyncio.run(_select_video_file(page, '/fake/video.mp4'))
-    inputs.items[0].wait_for.assert_awaited_once_with(state='attached', timeout=25000)
+    inputs.items[0].wait_for.assert_awaited_once_with(state='attached', timeout=60000)
     inputs.items[0].set_input_files.assert_awaited_once()
 
 
@@ -63,6 +64,15 @@ def test_a_cover_input_is_never_used_as_the_video_input():
     with pytest.raises(AdapterError, match='唯一'):
         asyncio.run(_select_video_file(page, '/fake/video.mp4'))
     inputs.items[0].set_input_files.assert_not_awaited()
+
+
+def test_failed_creator_application_is_reported_as_preparation_failure():
+    page, _, button, chooser = selection_page([])
+    page.get_by_text = lambda text, **kw: SimpleNamespace(count=AsyncMock(return_value=1 if text == '应用加载失败' else 0))
+    with pytest.raises(UploadPreparationError, match='应用加载失败'):
+        asyncio.run(_select_video_file(page, '/fake/video.mp4'))
+    button.click.assert_not_awaited()
+    chooser.set_files.assert_not_awaited()
 
 
 def test_two_video_inputs_are_not_silently_resolved_by_first_position():
@@ -99,7 +109,8 @@ def workflow(*, failed=False, cover_error=None):
 
     def text(value, **kwargs):
         assert value in ('上传中', '上传失败'), 'Publishing must not use an ambiguous text selector'
-        return SimpleNamespace(count=AsyncMock(return_value=1 if value == '上传失败' and failed else 0))
+        return SimpleNamespace(count=AsyncMock(return_value=1 if value == '上传失败' and failed else 0),
+                               nth=lambda index: SimpleNamespace(is_visible=AsyncMock(return_value=True)))
 
     page.get_by_role = role
     page.get_by_text = text
@@ -132,12 +143,32 @@ def test_new_workflow_selects_video_directly_and_clicks_one_exact_publish_button
     browser.close.assert_awaited_once()
 
 
-@pytest.mark.parametrize('cover_error,failed', [(AdapterError('封面设置失败'), False), (None, True)])
-def test_failure_before_publication_does_not_click_publish_and_always_closes_resources(cover_error, failed):
-    app, module, pw, _, _, publish, context, browser = workflow(failed=failed, cover_error=cover_error)
+def test_navigation_failure_is_safe_to_retry_and_never_exposes_raw_page_error():
+    app, module, pw, page, _, publish, context, browser = workflow()
+    page.goto.side_effect = TimeoutError('https://private.example/?token=private-token-secret')
+    with pytest.raises(UploadPreparationError) as captured:
+        asyncio.run(_upload_video(app, module, pw))
+    assert 'private-' not in str(captured.value)
+    publish.click.assert_not_awaited()
+    context.close.assert_awaited_once()
+    browser.close.assert_awaited_once()
+
+
+def test_upload_failure_before_publication_does_not_click_publish_and_always_closes_resources():
+    app, module, pw, _, _, publish, context, browser = workflow(failed=True)
     with pytest.raises(AdapterError):
         asyncio.run(_upload_video(app, module, pw))
     publish.click.assert_not_awaited()
+    context.close.assert_awaited_once()
+    browser.close.assert_awaited_once()
+
+
+def test_cover_dialog_failure_is_closed_and_the_upload_continues_with_the_platform_cover():
+    app, module, pw, page, _, publish, context, browser = workflow(cover_error=TimeoutError('弹窗没出现'))
+    asyncio.run(_upload_video(app, module, pw))
+    page.keyboard.press.assert_any_await('Escape')
+    app.apply_collection.assert_awaited_once()
+    publish.click.assert_awaited_once()
     context.close.assert_awaited_once()
     browser.close.assert_awaited_once()
 
@@ -174,3 +205,35 @@ def test_multiple_semantic_publish_buttons_stop_without_a_text_fallback():
     module = SimpleNamespace(_click_visible_publish_confirm=AsyncMock(return_value=False))
     with pytest.raises(AdapterError, match='唯一'):
         asyncio.run(_publish_once(page, module))
+
+
+@pytest.mark.parametrize('error_visible', [False, True])
+def test_upload_progress_ignores_hidden_labels_but_reports_visible_failure(error_visible):
+    def text(label, **kwargs):
+        return SimpleNamespace(count=AsyncMock(return_value=1), nth=lambda index:
+            SimpleNamespace(is_visible=AsyncMock(return_value=label == '上传失败' and error_visible)))
+    page = SimpleNamespace(get_by_text=text, wait_for_timeout=AsyncMock())
+    if error_visible:
+        with pytest.raises(UploadPreparationError, match='上传失败'):
+            asyncio.run(_wait_for_video_upload(page, 0))
+    else:
+        asyncio.run(_wait_for_video_upload(page, 0))
+    page.wait_for_timeout.assert_not_awaited()
+
+
+def test_visible_upload_progress_waits_until_it_disappears():
+    progress = SimpleNamespace(is_visible=AsyncMock(side_effect=[True, True, False]))
+    def text(label, **kwargs):
+        return SimpleNamespace(count=AsyncMock(return_value=int(label == '上传中')), nth=lambda index: progress)
+    page = SimpleNamespace(get_by_text=text, wait_for_timeout=AsyncMock())
+    asyncio.run(_wait_for_video_upload(page, 60))
+    assert page.wait_for_timeout.await_count == 2
+
+
+def test_real_upload_timeout_remains_a_preparation_failure_without_a_publish_click():
+    def text(label, **kwargs):
+        return SimpleNamespace(count=AsyncMock(return_value=int(label == '上传中')),
+                               nth=lambda index: SimpleNamespace(is_visible=AsyncMock(return_value=True)))
+    page = SimpleNamespace(get_by_text=text, wait_for_timeout=AsyncMock())
+    with pytest.raises(UploadPreparationError, match='上传超时，未点击发布'):
+        asyncio.run(_wait_for_video_upload(page, 0))

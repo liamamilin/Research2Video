@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import {
@@ -153,7 +153,7 @@ function OperationProgress({ id, maintenance }: { id: string; maintenance?: bool
   </div>;
 }
 
-export function AssistantAction({ action }: { action: Action }) {
+export const AssistantAction = memo(function AssistantAction({ action }: { action: Action }) {
   const refs = (action.references || []).filter((ref) => ref.type !== 'job' || !action.job_name);
   return <li className="text-xs space-y-2">
     <div className="flex items-start gap-2">
@@ -178,4 +178,4 @@ export function AssistantAction({ action }: { action: Action }) {
     {action.background_id && <OperationProgress id={action.background_id} />}
     {action.maintenance_id && <OperationProgress id={action.maintenance_id} maintenance />}
   </li>;
-}
+});

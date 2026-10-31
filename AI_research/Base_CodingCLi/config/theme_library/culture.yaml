@@ -1,0 +1,269 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: culture_works
+  name: 从一处细节进入
+  title_pattern: 看懂{作品}，为什么可以先看{具体细节}？
+  outline:
+  - 展示作品和具体细节
+  - 引导视线沿画面移动
+  - 连接形式与表达
+  - 回到整件作品的观看
+  examples: &id001
+  - title: Understanding Formal Analysis (Education at the Getty)
+    url: https://www.getty.edu/education/teachers/classroom_resources/formal_analysis.html
+    summary: 从可见细节、构图和视觉元素进入对一件作品的理解。参考其提问和展开方式，具体结论留给选题后的研究。
+  - &id009
+    title: 张择端清明上河图卷 - 故宫博物院
+    url: https://www.dpm.org.cn/collection/paint/228226.html
+    summary: 从长卷的具体人物、场景和空间细节进入作品与日常生活。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: culture_works
+  name: 观看路线
+  title_pattern: 第一次看{作品}，沿什么顺序能读出画面关系？
+  outline:
+  - 展示作品和具体细节
+  - 对照同一问题中的对象与选择
+  - 引导视线沿画面移动
+  - 连接形式与表达
+  - 回到整件作品的观看
+  examples: *id001
+- category: culture_works
+  name: 同一主题不同表达
+  title_pattern: 同样表现{主题}，{作品A}和{作品B}怎样让人有不同感受？
+  outline:
+  - 展示作品和具体细节
+  - 引导视线沿画面移动
+  - 沿一个具体案例推进解释
+  - 连接形式与表达
+  - 回到整件作品的观看
+  examples: *id001
+- category: culture_techniques
+  name: 一个技法的作用
+  title_pattern: '{技法}在{作品}里实际改变了什么？'
+  outline:
+  - 聚焦一个可见效果
+  - 展示材料与创作动作
+  - 解释技法的具体作用
+  - 放回作品整体表达
+  examples: &id002
+  - title: Vocabulary for Describing an Artwork
+    url: https://www.getty.edu/education/k-12-learning/describe-listen-draw/vocabulary-for-describing-an-artwork
+    summary: 用颜色、线条和形状等可见对象连接作品形式与观看感受。参考其提问和展开方式，具体结论留给选题后的研究。
+  - &id007
+    title: “后母戊”青铜方鼎_中国国家博物馆官方网站
+    url: https://www.chnmuseum.cn/zp/zpml/kgfjp/202008/t20200824_247255.shtml
+    summary: 从一件具体青铜器的形制、用途和制作理解文物表达。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: culture_techniques
+  name: 材料影响表达
+  title_pattern: 把{主题}交给{材料A}与{材料B}，表现方式怎样不同？
+  outline:
+  - 聚焦一个可见效果
+  - 对照同一问题中的对象与选择
+  - 展示材料与创作动作
+  - 解释技法的具体作用
+  - 放回作品整体表达
+  examples: *id002
+- category: culture_techniques
+  name: 从制作到观看
+  title_pattern: '{作品}的一处{效果}，是怎样通过制作动作形成的？'
+  outline:
+  - 聚焦一个可见效果
+  - 展示材料与创作动作
+  - 沿一个具体案例推进解释
+  - 解释技法的具体作用
+  - 放回作品整体表达
+  examples: *id002
+- category: culture_creators
+  name: 创作的一次选择
+  title_pattern: 创作{作品}时，{作者}为什么采用{表达选择}？
+  outline:
+  - 从一件具体作品进入
+  - 还原创作处境和材料
+  - 跟随表达选择
+  - 回到作品给观众的感受
+  examples: &id003
+  - title: Vincent van Gogh. The Starry Night. Saint Rémy, June 1889 | MoMA
+    url: https://www.moma.org/collection/works/79802
+    summary: 从一件具体作品进入创作者的选择与画面表达。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: culture_creators
+  name: 同一作者的变化
+  title_pattern: 从{作品A}到{作品B}，{作者}的表达方式怎样变化？
+  outline:
+  - 从一件具体作品进入
+  - 对照同一问题中的对象与选择
+  - 还原创作处境和材料
+  - 跟随表达选择
+  - 回到作品给观众的感受
+  examples: *id003
+- category: culture_creators
+  name: 沿创作过程走
+  title_pattern: 一件{作品}从最初构想到完成，哪些选择决定了它的样子？
+  outline:
+  - 从一件具体作品进入
+  - 还原创作处境和材料
+  - 沿一个具体案例推进解释
+  - 跟随表达选择
+  - 回到作品给观众的感受
+  examples: *id003
+- category: culture_exchange
+  name: 形式的旅行
+  title_pattern: '{艺术形式}来到{地区}之后，哪些细节变了？'
+  outline:
+  - 选一个可见形式或符号
+  - 沿地点与时代追踪
+  - 对照保留和改变的细节
+  - 解释交流中的新表达
+  examples: &id004
+  - title: Central and North Asia, 1000–1400 A.D. | Chronology | Heilbrunn Timeline of Art History | The Metropolitan
+      Museum of Art
+    url: https://www.metmuseum.org/it/toah/ht/07/nc
+    summary: 结合时代与地区的作品线索观察文化相遇和形式流动。参考其提问和展开方式，具体结论留给选题后的研究。
+  - title: About the Silk Roads | UNESCO
+    url: https://www.unesco.org/en/silk-roads/about-silk-roads
+    summary: 沿路线、商品和交流过程理解不同社会如何连接。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: culture_exchange
+  name: 相遇产生新表达
+  title_pattern: '{文化A}与{文化B}相遇，怎样影响一件{作品}？'
+  outline:
+  - 选一个可见形式或符号
+  - 对照同一问题中的对象与选择
+  - 沿地点与时代追踪
+  - 对照保留和改变的细节
+  - 解释交流中的新表达
+  examples: *id004
+- category: culture_exchange
+  name: 同一符号不同含义
+  title_pattern: 同样的{图像或物件}，在不同文化里怎样被使用？
+  outline:
+  - 选一个可见形式或符号
+  - 沿地点与时代追踪
+  - 沿一个具体案例推进解释
+  - 对照保留和改变的细节
+  - 解释交流中的新表达
+  examples: *id004
+- category: culture_design
+  name: 每天用的设计
+  title_pattern: 一件{日常物}为什么被做成这个样子？
+  outline:
+  - 展示一件熟悉物品
+  - 跟随使用动作
+  - 连接材料制作和形式
+  - 回到日常体验与审美
+  examples: &id005
+  - title: How was it made? Furniture · V&A
+    url: https://www.vam.ac.uk/articles/furniture-how-was-it-made
+    summary: 围绕家具怎样制作认识材料、工艺和使用方式的联系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: culture_design
+  name: 从使用动作看设计
+  title_pattern: 完成{日常动作}时，{设计细节}起了什么作用？
+  outline:
+  - 展示一件熟悉物品
+  - 对照同一问题中的对象与选择
+  - 跟随使用动作
+  - 连接材料制作和形式
+  - 回到日常体验与审美
+  examples: *id005
+- category: culture_design
+  name: 同一用途不同形式
+  title_pattern: 同样用于{用途}，{设计A}与{设计B}怎样取舍？
+  outline:
+  - 展示一件熟悉物品
+  - 跟随使用动作
+  - 沿一个具体案例推进解释
+  - 连接材料制作和形式
+  - 回到日常体验与审美
+  examples: *id005
+- category: culture_performance
+  name: 听见一个细节
+  title_pattern: '{声音或节奏细节}怎样改变{表演}的感受？'
+  outline:
+  - 呈现一个具体片段
+  - 引导关注声音时间或动作
+  - 对照表达选择
+  - 回到完整表演的感受
+  examples: &id006
+  - title: Organ craftsmanship and music - UNESCO Intangible Cultural Heritage
+    url: https://ich.unesco.org/en/RL/organ-craftsmanship-and-music-01277
+    summary: 从乐器制作、演奏和传承之间的联系进入表演艺术。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: culture_performance
+  name: 一段表演怎样推进
+  title_pattern: 沿着{片段}看，情绪和动作是怎样被组织的？
+  outline:
+  - 呈现一个具体片段
+  - 对照同一问题中的对象与选择
+  - 引导关注声音时间或动作
+  - 对照表达选择
+  - 回到完整表演的感受
+  examples: *id006
+- category: culture_performance
+  name: 同一段不同演绎
+  title_pattern: 同样的{作品片段}，不同演绎为什么给人不同感受？
+  outline:
+  - 呈现一个具体片段
+  - 引导关注声音时间或动作
+  - 沿一个具体案例推进解释
+  - 对照表达选择
+  - 回到完整表演的感受
+  examples: *id006
+- category: culture_heritage
+  name: 跟随一个制作动作
+  title_pattern: 制作{传统物件}时，{关键动作}为什么这样做？
+  outline:
+  - 让观众看见一个具体动作
+  - 连接工具材料与知识
+  - 跟随学习和传递过程
+  - 回到当代使用与文化意义
+  examples: &id008
+  - title: Craftsmanship of mechanical watchmaking and art mechanics - UNESCO Intangible Cultural Heritage
+    url: https://ich.unesco.org/en/RL/craftsmanship-of-mechanical-watchmaking-and-art-mechanics-01560
+    summary: 沿一项具体手艺理解知识、动作与文化传承。参考其提问和展开方式，具体结论留给选题后的研究。
+  - *id007
+- category: culture_heritage
+  name: 手艺怎样传下去
+  title_pattern: 学习{手艺}的人，需要怎样看、怎样练？
+  outline:
+  - 让观众看见一个具体动作
+  - 对照同一问题中的对象与选择
+  - 连接工具材料与知识
+  - 跟随学习和传递过程
+  - 回到当代使用与文化意义
+  examples: *id008
+- category: culture_heritage
+  name: 传统进入今天
+  title_pattern: '{传统形式}进入{当代场景}，哪些做法保留、哪些改变？'
+  outline:
+  - 让观众看见一个具体动作
+  - 连接工具材料与知识
+  - 沿一个具体案例推进解释
+  - 跟随学习和传递过程
+  - 回到当代使用与文化意义
+  examples: *id008
+- category: culture_context
+  name: 作品里的生活
+  title_pattern: 从{作品}中的{场景}，能怎样理解当时的人？
+  outline:
+  - 观察一处具体人物或场景
+  - 还原相关生活环境
+  - 连接作者观众与表达
+  - 带着理解重新看作品
+  examples: &id010
+  - *id009
+- category: culture_context
+  name: 观众与表达
+  title_pattern: '{作品}当时给谁看，这怎样影响它的表达？'
+  outline:
+  - 观察一处具体人物或场景
+  - 对照同一问题中的对象与选择
+  - 还原相关生活环境
+  - 连接作者观众与表达
+  - 带着理解重新看作品
+  examples: *id010
+- category: culture_context
+  name: 一处细节连接时代
+  title_pattern: '{作品细节}怎样连起当时的{社会生活}？'
+  outline:
+  - 观察一处具体人物或场景
+  - 还原相关生活环境
+  - 沿一个具体案例推进解释
+  - 连接作者观众与表达
+  - 带着理解重新看作品
+  examples: *id010

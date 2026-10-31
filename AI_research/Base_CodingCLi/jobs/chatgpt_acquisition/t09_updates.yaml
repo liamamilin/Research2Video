@@ -1,0 +1,64 @@
+name: T09 · 产品动态与热点
+description: ChatGPT 最近有什么变化？ — 持续引流；按 S01–S06 资料研究 ChatGPT 视频题材。
+enabled: true
+keywords:
+- ChatGPT 新功能
+- ChatGPT 更新
+- ChatGPT Plus 变化
+language: zh
+schedule:
+  type: manual
+runtime:
+  timeout_seconds: 2400
+  skip_if_running: true
+search: false
+source_history: true
+sources_limit: 12
+sources:
+- source:cg_release_notes
+- source:cg_openai_news
+- source:cg_learn_videos
+- source:cg_youtube_openai
+- source:cg_matt_wolfe
+- source:cg_bilibili
+- source:cg_trends
+prompt: |
+  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
+  当前步骤：为「ChatGPT 获客矩阵」研究题材，写成后续作者可以直接使用的候选材料。
+  题材：T09 产品动态与热点
+  观众核心问题：ChatGPT 最近有什么变化？
+  获客作用：持续引流
+  目标受众：中文普通用户、职场与学习人群，以及正在考虑升级 ChatGPT 的潜在订阅用户。
+  以官方更新与新增演示为主，结合中文用户关心的问题选择值得讲的一项变化。保留变化前后、影响人群、使用入口和可展示细节；趋势与互动线索只用于角度与优先级，不能编造搜索量或热度数据。
+  优先提炼对观众有用的任务、操作和可见成果，以价值展示与解决问题自然承接购买意图。
+  创作者视频与播客只作为公开标题、简介或索引文本中的研究线索；拿到完整内容时再展开，不能凭标题补写操作或测试结果。
+  素材中提供的具体事实、数据和结论作为输入，围绕解释与画面组织材料，不额外增加人工审核步骤。
+  每个候选聚焦一个观众问题，保留场景、具体对象、操作过程、结果和画面建议。候选数量由材料决定。
+  任务：{name}
+  领域：{domain}
+  关键词：{keywords}
+  日期：{date}
+  输出语言：{language}
+
+  输出 Markdown。每个候选使用三级标题，并按以下字段写明；不要将概览或来源清单写成候选。
+  ### 1. 选题标题
+  - **题材分类**：T09 产品动态与热点
+  - **一句话**：这一期帮助观众理解或完成什么
+  - **核心角度**：ChatGPT 最近有什么变化？ 对应的具体切入点
+  - **目标受众**：有哪种任务或疑问的人
+  - **具体材料**：来自本次素材的内容、例子、数据与适用条件
+  - **操作与演示**：可以展示的输入、步骤与输出；待实测部分标明待实测
+  - **画面建议**：能讲清变化或过程的页面、操作、对比或结果
+  - **获客作用**：持续引流；与观众下一步选择的联系
+  - **发布日期**：材料提供的日期；没有则写未提供
+  - **来源网址**：实际使用的素材链接
+
+  ## 来源清单
+  记录实际使用的来源链接。
+  若变化监测显示没有新增或修改，只输出本次暂无新题材及简短说明，不生成重复候选。
+output: output/chatgpt_acquisition/{date}_t09_updates.md
+topics:
+  alias: chatgpt_t09_updates
+  format: items
+  prefix: CGI
+  refresh: true

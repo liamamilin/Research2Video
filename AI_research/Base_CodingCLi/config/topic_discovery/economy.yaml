@@ -1,0 +1,8 @@
+time: 09:00
+timezone: Asia/Shanghai
+platforms:
+- bilibili
+- zhihu
+- youtube
+mode: ideas
+direction: 面向中文普通观众，从账单、工资、企业订单、公共服务等具体场景进入经济机制。不同分类分别回答自己的问题，用传导关系和可读图表说明影响。

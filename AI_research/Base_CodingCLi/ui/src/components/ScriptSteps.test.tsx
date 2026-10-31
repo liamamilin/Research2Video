@@ -39,7 +39,7 @@ describe("ScriptSteps", () => {
     expect(screen.getByText("没跑完")).toBeTruthy();
     expect(screen.getByText("等你定稿")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "从断点继续" })).toBeNull(); // the research did not fail
-    fireEvent.click(screen.getByRole("button", { name: "重跑审计" }));
+    fireEvent.click(screen.getByRole("button", { name: "重跑审校" }));
     expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining("可能自动修改文稿"));
     await waitFor(() => expect(changed).toHaveBeenCalled());
     expect(posted).toEqual(["/api/video/scripts/s1/steps/audit/rerun"]);
@@ -54,9 +54,9 @@ describe("ScriptSteps", () => {
     expect(screen.queryByRole("button", { name: "重写" })).toBeNull();
     rerender(<ScriptSteps detail={{ ...DETAIL, column: { writer: "adapt" } } as unknown as VideoScriptDetail} canEdit onChanged={() => undefined} />);
     expect(screen.getByRole("button", { name: "重写" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "重跑审计" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "重跑审校" })).toBeNull();
     rerender(<ScriptSteps detail={{ ...DETAIL, status: "APPROVED" } as VideoScriptDetail} canEdit onChanged={() => undefined} />);
-    expect(screen.queryByRole("button", { name: "重跑审计" })).toBeNull(); // it would lose its approval
+    expect(screen.queryByRole("button", { name: "重跑审校" })).toBeNull(); // it would lose its approval
     expect(screen.getByRole("button", { name: "重写" })).toBeTruthy();
   });
 });

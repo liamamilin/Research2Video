@@ -1,0 +1,252 @@
+{
+  "render_id": "4db7013f7f77474fa640e525284c3523",
+  "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/4db7013f7f77474fa640e525284c3523/video.mp4",
+  "duration_seconds": 428.266667,
+  "full_decode_exit_code": 0,
+  "playback": {
+    "speed": 1.25,
+    "source_duration_ms": 527833,
+    "method": "pitch-preserving audio tempo; synchronized captions and animation"
+  },
+  "brand_narration_shift_seconds": 0.0,
+  "streams": [
+    {
+      "codec_type": "video",
+      "codec_name": "h264",
+      "width": 1920,
+      "height": 1080,
+      "r_frame_rate": "30/1"
+    },
+    {
+      "codec_type": "audio",
+      "codec_name": "aac",
+      "r_frame_rate": "0/0",
+      "sample_rate": "48000",
+      "channels": 2
+    }
+  ],
+  "caption_cues": 155,
+  "samples": [
+    {
+      "frame": "frame-01.jpg",
+      "seconds": 21.97,
+      "scene_id": "card_2",
+      "purpose": "五行记录：谁、做什么、何时",
+      "caption": "讲师和场地三个事项进展；",
+      "nearby_captions": [
+        {
+          "start": 18.349,
+          "end": 21.439,
+          "text": "主持人最后说，本周五16点再碰一次，看报名页、"
+        },
+        {
+          "start": 21.469,
+          "end": 23.231,
+          "text": "讲师和场地三个事项进展；"
+        },
+        {
+          "start": 23.541,
+          "end": 24.834,
+          "text": "报名人数还没有数据。"
+        }
+      ]
+    },
+    {
+      "frame": "frame-02.jpg",
+      "seconds": 42.8,
+      "scene_id": "card_3",
+      "purpose": "同一份记录，两种结果",
+      "caption": "表格六行，有三格明明白白写着「待确认」。",
+      "nearby_captions": [
+        {
+          "start": 39.112,
+          "end": 42.442,
+          "text": "另一种，纪要里写的是「暂按3000元做方案，未获批准」；"
+        },
+        {
+          "start": 42.768,
+          "end": 45.618,
+          "text": "表格六行，有三格明明白白写着「待确认」。"
+        }
+      ]
+    },
+    {
+      "frame": "frame-03.jpg",
+      "seconds": 176.08,
+      "scene_id": "card_11_p1",
+      "purpose": "先摆已明确的事，再摆未定的事",
+      "caption": "未定的是：预算暂按3000元做方案，还没批，方案谁做没写；",
+      "nearby_captions": [
+        {
+          "start": 172.39600000000002,
+          "end": 174.12,
+          "text": "周五16:00复会核对三件事。"
+        },
+        {
+          "start": 174.606,
+          "end": 178.414,
+          "text": "未定的是：预算暂按3000元做方案，还没批，方案谁做没写；"
+        },
+        {
+          "start": 178.724,
+          "end": 180.611,
+          "text": "场地报价没收到，负责人也没写；"
+        }
+      ]
+    },
+    {
+      "frame": "frame-04.jpg",
+      "seconds": 206.74,
+      "scene_id": "card_13_p2",
+      "purpose": "表格固定五列，三处最容易错",
+      "caption": "三处最容易错，逐个看。",
+      "nearby_captions": [
+        {
+          "start": 200.57,
+          "end": 204.02,
+          "text": "表格的列固定五列：任务、负责人、截止时间、"
+        },
+        {
+          "start": 204.02,
+          "end": 205.66,
+          "text": "当前状态、待确认事项。"
+        },
+        {
+          "start": 206.093,
+          "end": 207.617,
+          "text": "三处最容易错，逐个看。"
+        },
+        {
+          "start": 208.263,
+          "end": 209.193,
+          "text": "第一处，负责人。"
+        },
+        {
+          "start": 209.683,
+          "end": 213.44,
+          "text": "原文是「小陈提醒讲师还没确认，先由小周今天联系」。"
+        }
+      ]
+    },
+    {
+      "frame": "frame-05.jpg",
+      "seconds": 222.61,
+      "scene_id": "card_14",
+      "purpose": "第一处：负责人——提醒的人不算",
+      "caption": "不写这句，小陈很容易被填进负责人那一格。",
+      "nearby_captions": [
+        {
+          "start": 218.149,
+          "end": 220.359,
+          "text": "负责人只写记录里明确承担这个动作"
+        },
+        {
+          "start": 220.359,
+          "end": 221.799,
+          "text": "的人，「提醒的人」不算。"
+        },
+        {
+          "start": 222.31799999999998,
+          "end": 224.938,
+          "text": "不写这句，小陈很容易被填进负责人那一格。"
+        },
+        {
+          "start": 225.584,
+          "end": 226.353,
+          "text": "第二处，时间。"
+        }
+      ]
+    },
+    {
+      "frame": "frame-06.jpg",
+      "seconds": 242.07,
+      "scene_id": "card_15",
+      "purpose": "第二处：时间——相对时间要换算",
+      "caption": "换算依据要写进待确认列，",
+      "nearby_captions": [
+        {
+          "start": 238.103,
+          "end": 240.116,
+          "text": "周三中午前」就是周三12:00。"
+        },
+        {
+          "start": 240.506,
+          "end": 242.476,
+          "text": "换算依据要写进待确认列，"
+        },
+        {
+          "start": 242.586,
+          "end": 244.78,
+          "text": "不然下周没人知道这个周一是哪一天。"
+        }
+      ]
+    },
+    {
+      "frame": "frame-07.jpg",
+      "seconds": 259.02,
+      "scene_id": "card_16",
+      "purpose": "第三处：确定性——空着、标待确认，不能写0",
+      "caption": "报名人数那行写「数据缺失」，不能写成0。",
+      "nearby_captions": [
+        {
+          "start": 256.11,
+          "end": 258.094,
+          "text": "场地报价那行同样是两格空着。"
+        },
+        {
+          "start": 258.5,
+          "end": 261.223,
+          "text": "报名人数那行写「数据缺失」，不能写成0。"
+        },
+        {
+          "start": 261.869,
+          "end": 265.204,
+          "text": "这一步结束后，表里六行，其中好几处的格子是空的。"
+        }
+      ]
+    },
+    {
+      "frame": "frame-08.jpg",
+      "seconds": 320.39,
+      "scene_id": "card_21",
+      "purpose": "不是「看起来很完整」，而是每条都能派出去",
+      "caption": "这些是可以直接派出去的清单，",
+      "nearby_captions": [
+        {
+          "start": 316.367,
+          "end": 318.427,
+          "text": "向运营问报名人数从哪个后台取。"
+        },
+        {
+          "start": 318.83299999999997,
+          "end": 320.883,
+          "text": "这些是可以直接派出去的清单，"
+        },
+        {
+          "start": 320.913,
+          "end": 322.868,
+          "text": "而不是一份看起来很完整的假象。"
+        }
+      ]
+    },
+    {
+      "frame": "frame-09.jpg",
+      "seconds": 419.93,
+      "scene_id": "card_25",
+      "purpose": "五行记录，变成两份东西",
+      "caption": "记住三句话：记录别删，格式先说，不知道就写待确认。",
+      "nearby_captions": [
+        {
+          "start": 414.705,
+          "end": 418.003,
+          "text": "它保证的是另一件事——你写得越清楚，它越不敢替你编。"
+        },
+        {
+          "start": 418.473,
+          "end": 422.242,
+          "text": "记住三句话：记录别删，格式先说，不知道就写待确认。"
+        }
+      ]
+    }
+  ]
+}

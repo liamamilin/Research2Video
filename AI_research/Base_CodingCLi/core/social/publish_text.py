@@ -23,3 +23,11 @@ def default_comment(value: dict | None) -> dict:
     if not result["text"].strip():
         result.update(enabled=False, pin=False)
     return result
+
+
+def comment_options(value: dict) -> dict:
+    """Text supplied without an enable flag requests a comment; an explicit False is preserved."""
+    result = {'enabled': False, 'text': '', 'pin': False, **value}
+    if 'enabled' not in value and isinstance(value.get('text'), str):
+        result['enabled'] = bool(value['text'].strip())
+    return result

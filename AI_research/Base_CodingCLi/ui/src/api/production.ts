@@ -14,12 +14,16 @@ export interface ProductionConfig {
   source: string;
   split: "each" | "some" | "whole" | ""; // 每条一期 / 挑几条合一期 / 整份报告一期
   split_name: string;
+  content_mode?: "episode" | "individual";
   reverify: boolean;
-  auto: number; // Job 每出一份新报告，自动写几条（0 是不自动写）
+  auto: number; // 自动制作开关：1 为处理全部不重复选题，0 为关闭
   audience: string;
   target_minutes: number;
   label: string;
   scripts: number;
+  content_column_id?: string;
+  content_column_name?: string;
+  content_matrix_id?: string;
   render?: { production_recipe?: string; production_mode?: "standard" | "fast"; visual_style?: string; video_form?: string;
     voice_id?: string; video_speed?: number; creative_intent?: Record<string, unknown>; packaging?: Record<string, unknown> };
 }

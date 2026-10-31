@@ -15,6 +15,7 @@ QWEN_VOICES = {'qwen_vivian': ('Vivian', 'Vivian · 普通话女声'),
 #: VoxCPM2 has no built-in speakers: every segment is cloned from one short anchor clip so the voice does not drift.
 VOXCPM_VOICES = {'voxcpm_anchor': 'VoxCPM2 · 普通话女声（参考音色）'}
 VOXCPM_ANCHOR_TEXT = '假设你有个每晚跑的脚本，系统提示第一行是当前时间。'
+VOXCPM_DEFAULT_CHAIN = 'anchor'
 VOICE_IDS = tuple(KOKORO_VOICES) + tuple(QWEN_VOICES) + tuple(VOXCPM_VOICES)
 SPEEDS = (0.5, 1.0, 1.25, 1.5, 2.0)
 

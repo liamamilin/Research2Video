@@ -10,10 +10,33 @@ from __future__ import annotations
 import json
 import os
 import time
+import threading
 
 import pytest
 
 from core import activity
+
+
+def test_slow_background_activity_is_coalesced_and_does_not_hold_api_workers(state_dir, monkeypatch):
+    entered, release = threading.Event(), threading.Event()
+    calls = []
+    monkeypatch.setattr(activity, '_last_background', 0.0)
+
+    def slow_write():
+        calls.append(1)
+        entered.set()
+        assert release.wait(2)
+
+    monkeypatch.setattr(activity, 'mark_activity', slow_write)
+    worker = activity.mark_activity_background(state_dir)
+    try:
+        assert worker is not None and entered.wait(1)
+        assert all(activity.mark_activity_background(state_dir) is None for _ in range(20))
+        assert calls == [1]
+    finally:
+        release.set()
+        worker.join(2)
+    assert not worker.is_alive()
 
 
 @pytest.fixture()

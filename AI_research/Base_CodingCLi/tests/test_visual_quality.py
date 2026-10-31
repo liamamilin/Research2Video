@@ -137,6 +137,15 @@ def test_understanding_key_changes_when_text_or_paragraph_position_changes():
     assert first != image_quality.understanding_key({"id": "c1p1", **NEED, "text": "改稿后的讲解"})
 
 
+def test_verbose_english_ocr_description_does_not_discard_a_relevant_image():
+    result = image_quality.VisionDecision.model_validate({
+        "usable": True, "reason": "The visible product interface is relevant. " * 12,
+        "visible_text": "Request credentials and approve the browser session. " * 30,
+        "summary": "网页中的授权操作界面", "paragraph_ids": ["c1p1"], "focus": None})
+    assert result.usable and len(result.visible_text) == 300 and len(result.reason) == 240
+    assert result.paragraph_ids == ["c1p1"]
+
+
 def test_model_acceptance_cannot_override_a_visible_price_contradiction(monkeypatch):
     from core import llm, config
     from web import settings

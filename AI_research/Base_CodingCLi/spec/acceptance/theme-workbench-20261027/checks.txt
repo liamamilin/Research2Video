@@ -1,0 +1,8 @@
+bash scripts/check.sh
+3364 passed, 3 skipped, 53 warnings in 419.89s (0:06:59)
+ Test Files  80 passed (80)
+      Tests  605 passed (605)
+ALL CHECKS PASSED
+
+Final theme + video steps + whole report regression: 51 passed.
+git diff --check: passed.

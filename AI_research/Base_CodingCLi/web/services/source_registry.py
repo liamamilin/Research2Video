@@ -32,10 +32,10 @@ def validate_entry(key: str, fields: dict) -> None:
     kind, _, target = spec.partition(':')
     if kind not in sources._ADAPTERS or not target.strip():
         raise ValueError('spec 需要支持的来源类型与地址，例如 rss:https://example.org/feed')
-    if kind in ('rss', 'feed'):
+    if kind in ('rss', 'feed', 'page', 'catalog'):
         url = urlsplit(target)
         if url.scheme not in ('http', 'https') or not url.hostname or url.username or url.password:
-            raise ValueError('RSS 地址需要不带账号密码的 HTTP 或 HTTPS URL')
+            raise ValueError('来源地址需要不带账号密码的 HTTP 或 HTTPS URL')
     if kind == 'github' and not re.fullmatch(r'[\w.-]+/[\w.-]+', target):
         raise ValueError('GitHub 来源使用 github:owner/repo')
     if not isinstance(fields.get('tags', []), list) or any(not isinstance(t, str) or not t.strip() for t in fields.get('tags', [])):

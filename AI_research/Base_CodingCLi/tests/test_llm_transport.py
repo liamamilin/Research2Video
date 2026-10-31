@@ -617,8 +617,27 @@ def test_an_empty_reply_from_every_model_fails_and_says_so(monkeypatch):
         client.chat([{"role": "user", "content": "x"}])
 
 
-def test_provider_filter_is_reported_without_retrying_or_switching_models(monkeypatch):
-    client = make_client(model="a", fallback_models=["b"], max_retries=2)
+@pytest.mark.parametrize("stream", [False, True])
+def test_provider_filter_uses_configured_fallback_with_the_unchanged_request(monkeypatch, stream):
+    client = make_client(model="a", fallback_models=["b"], max_retries=2, stream=stream)
+    calls = []
+    messages = [{"role": "user", "content": "介绍定时任务的使用入口"}]
+
+    def answer(given, **kwargs):
+        assert given == messages
+        calls.append(client._active_model())
+        return reply("discard this partial result", finish_reason="content_filter") if len(calls) == 1 else reply("完整结果")
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: pytest.fail("a filtered completion must not back off"))
+    assert client.chat(messages).content == "完整结果"
+    assert calls == ["a", "b"]
+    assert client.model_switches == [{"from": "a", "to": "b", "reason": "返回过滤结果（content_filter）"}]
+
+
+@pytest.mark.parametrize("fallbacks", [[], ["b", "a", "b", "c"]])
+def test_provider_filter_fails_after_each_configured_model_once(monkeypatch, fallbacks):
+    client = make_client(model="a", fallback_models=fallbacks, max_retries=2)
     calls = []
 
     def filtered(_messages, **kwargs):
@@ -626,6 +645,26 @@ def test_provider_filter_is_reported_without_retrying_or_switching_models(monkey
         return reply("", finish_reason="content_filter")
 
     monkeypatch.setattr(client, "_chat_cancellable", filtered)
-    with pytest.raises(LLMError, match="content_filter"):
+    monkeypatch.setattr(client, "_sleep_cancellable", lambda _s: pytest.fail("must not repeat a filtered model"))
+    with pytest.raises(LLMError, match="content_filter") as caught:
         client.chat([{"role": "user", "content": "x"}])
+    assert calls == list(dict.fromkeys(["a", *fallbacks]))
+    if fallbacks:
+        assert "tried: a, b, c" in str(caught.value)
+
+
+def test_provider_filter_does_not_replay_already_displayed_stream_text(monkeypatch):
+    client = make_client(model="a", fallback_models=["b"], max_retries=2)
+    calls = []
+    displayed = []
+
+    def filtered(_messages, **kwargs):
+        calls.append(client._active_model())
+        kwargs["on_delta"]("已显示的前缀")
+        return reply("已显示的前缀", finish_reason="content_filter")
+
+    monkeypatch.setattr(client, "_chat_cancellable", filtered)
+    with pytest.raises(LLMError, match="content_filter"):
+        client.chat([{"role": "user", "content": "x"}], stream=True, on_delta=displayed.append)
     assert calls == ["a"]
+    assert displayed == ["已显示的前缀"]

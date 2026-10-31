@@ -1,4 +1,3 @@
-# 矩阵：地理与世界探索（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
 name: 地理与世界探索
 domain: 地理与世界
 keywords: []
@@ -7,3 +6,13 @@ jobs:
 - geography/geography_weekly
 render:
   video_speed: 1.25
+content:
+  name: 地理与世界
+  role: domain
+  audience: 想看懂一个地方为何如此、空间与环境怎样影响生活的普通观众
+  status: configured
+  visual_focus:
+  - 地图
+  - 空间变化
+  - 统计图
+  description: 沿具体地点、路线和环境关系，理解一个地方的日常运转与生活差异。

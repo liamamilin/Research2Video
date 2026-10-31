@@ -1,0 +1,569 @@
+{
+  "generation": {
+    "id": "330e4d5530f74bcbb118785d5ba8dcc3",
+    "status": "success",
+    "created_at": 1793116924.872524,
+    "finished_at": 1793116979.940659,
+    "result": {
+      "recommended": 8,
+      "theme_ids": [
+        "f86c30aa72e94257b22c610959213726",
+        "a51e41f4f4aa447ebfdb6e47d0353f01",
+        "bb3c2cb615b84ddda6b8d5af5a4905e4",
+        "3bdea185acf145c288ce812ea747e402",
+        "c196bbfcf4e04ef08a0005cf8700651f",
+        "536eb656e6c346dd96a411a1dede5163",
+        "36e32106c2d643dcb2b9427554a7c461",
+        "c293c4625fe448858599054fc4c22ec9"
+      ],
+      "usage": {
+        "searches": 0,
+        "requests": 1,
+        "prompt_tokens": 10459,
+        "completion_tokens": 6034,
+        "total_tokens": 16493
+      },
+      "output": "output/topic_ideas/chatgpt_acquisition/2026-10-28_330e4d55.md",
+      "categories": 9,
+      "examples": 27,
+      "duration_seconds": 55.1
+    }
+  },
+  "reuse": {
+    "job_name": "topic_discovery/chatgpt_acquisition",
+    "last_run_at": "2026-10-28T00:49:30+0800",
+    "last_status": "success",
+    "last_output": "output/topic_ideas/chatgpt_acquisition/2026-10-28_330e4d55.md",
+    "last_error": null,
+    "last_duration_seconds": 0.0,
+    "last_usage": {
+      "requests": 0,
+      "searches": 0,
+      "total_tokens": 0,
+      "reused": true
+    }
+  },
+  "schedule": {
+    "id": "themes_chatgpt_acquisition",
+    "job_name": "topic_discovery/chatgpt_acquisition",
+    "schedule": "0 9 * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": 1,
+    "missed_policy": "latest",
+    "max_retries": 1,
+    "version": 2,
+    "next_run_at": 1793149200.0,
+    "created_at": 1793106807.510171,
+    "updated_at": 1793116924.852034,
+    "deleted": 0,
+    "next_run": "2026-10-28T09:00:00+08:00"
+  },
+  "configuration": {
+    "time": "09:00",
+    "timezone": "Asia/Shanghai",
+    "mode": "ideas",
+    "direction": "面向中文普通用户和职场新人，优先能展示具体输入、操作和成果的题目。九个栏目保持多样性；套餐和订阅围绕真实决策问题，不要求每类凑满。",
+    "platforms": [
+      "bilibili",
+      "zhihu",
+      "youtube"
+    ]
+  },
+  "video": {
+    "theme_id": "a83ba66c1b6847e8a4a24ee900b97cae",
+    "script_id": "c349afb2e2414f75ad266061183cfc2d",
+    "render_id": "4db7013f7f77474fa640e525284c3523",
+    "autovideo_job_id": "c9154751-735a-4470-81ac-c18042e201fd",
+    "status": "COMPLETED",
+    "active_stage": "COMPLETE",
+    "attempt_count": 1,
+    "voice_duration_seconds": 527.833,
+    "voice_segments": 95,
+    "voice_generation_seconds": 605.36,
+    "reference_minutes": 4,
+    "completed_at": "2026-10-28T01:11:00+0800",
+    "timings": {
+      "process_runs": 1,
+      "last_process_started_at": "2026-10-27T16:03:02.123495+00:00",
+      "submit_seconds": 3.738,
+      "poll_seconds": 4032.683,
+      "poll_count": 806,
+      "poll_failures": 0,
+      "remote_completed_at": "2026-10-27T17:10:53.631+00:00",
+      "completion_observed_at": "2026-10-27T17:10:55.137687+00:00",
+      "download_seconds": 5.393,
+      "artifact_list_seconds": 0.003,
+      "download_attempts": 1,
+      "download_workers": 4,
+      "artifacts": [
+        {
+          "name": "authored-narration.json",
+          "seconds": 0.007,
+          "reused": false,
+          "bytes": 1259
+        },
+        {
+          "name": "brand-qa.json",
+          "seconds": 0.008,
+          "reused": false,
+          "bytes": 1879
+        },
+        {
+          "name": "caption-alignment.json",
+          "seconds": 0.009,
+          "reused": false,
+          "bytes": 264549
+        },
+        {
+          "name": "captions.srt",
+          "seconds": 0.007,
+          "reused": false,
+          "bytes": 13435
+        },
+        {
+          "name": "chapters.json",
+          "seconds": 0.061,
+          "reused": false,
+          "bytes": 34027
+        },
+        {
+          "name": "content-captions.srt",
+          "seconds": 0.06,
+          "reused": false,
+          "bytes": 13435
+        },
+        {
+          "name": "content-chapters.json",
+          "seconds": 0.061,
+          "reused": false,
+          "bytes": 33682
+        },
+        {
+          "name": "content.mp4",
+          "seconds": 5.378,
+          "reused": false,
+          "bytes": 53455929
+        },
+        {
+          "name": "execution-log.txt",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 991
+        },
+        {
+          "name": "generation-schedule.json",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 455
+        },
+        {
+          "name": "information-timing.json",
+          "seconds": 0.005,
+          "reused": false,
+          "bytes": 23542
+        },
+        {
+          "name": "input-brief.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 15011
+        },
+        {
+          "name": "manifest.json",
+          "seconds": 0.004,
+          "reused": false,
+          "bytes": 121970
+        },
+        {
+          "name": "model-cost.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 8320
+        },
+        {
+          "name": "narration-check.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 332
+        },
+        {
+          "name": "narration.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 89633
+        },
+        {
+          "name": "package-qa.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 718
+        },
+        {
+          "name": "package.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 3568
+        },
+        {
+          "name": "packaging-resolved.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 1643
+        },
+        {
+          "name": "playback.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 133
+        },
+        {
+          "name": "prepared-source.txt",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 7994
+        },
+        {
+          "name": "production-execution.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 378
+        },
+        {
+          "name": "production-plan.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 7098
+        },
+        {
+          "name": "qa.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 43447
+        },
+        {
+          "name": "render-resources.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 200
+        },
+        {
+          "name": "storyboard.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 102231
+        },
+        {
+          "name": "tts-metrics.json",
+          "seconds": 0.002,
+          "reused": false,
+          "bytes": 1246
+        },
+        {
+          "name": "unbranded.mp4",
+          "seconds": 5.102,
+          "reused": false,
+          "bytes": 46783902
+        },
+        {
+          "name": "video-ir.json",
+          "seconds": 0.003,
+          "reused": false,
+          "bytes": 142527
+        },
+        {
+          "name": "video.mp4",
+          "seconds": 3.806,
+          "reused": false,
+          "bytes": 36910439
+        },
+        {
+          "name": "voice-report.json",
+          "seconds": 0.001,
+          "reused": false,
+          "bytes": 25894
+        }
+      ],
+      "process_seconds": 4078.416
+    },
+    "final_duration_seconds": 428.266667,
+    "playback_speed": 1.25,
+    "theme_status": "completed"
+  },
+  "stopped_attempt": {
+    "theme_id": "35c6188768344e6594d6cf4d268a4c52",
+    "script_id": "7fb8c9bb57844955bb2532a84fabdcf1",
+    "reason": "验收启动时主题 ID 对应错误，已停止，保留记录；中断过程未取得完整用量。"
+  },
+  "media": {
+    "render_id": "4db7013f7f77474fa640e525284c3523",
+    "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/4db7013f7f77474fa640e525284c3523/video.mp4",
+    "duration_seconds": 428.266667,
+    "full_decode_exit_code": 0,
+    "playback": {
+      "speed": 1.25,
+      "source_duration_ms": 527833,
+      "method": "pitch-preserving audio tempo; synchronized captions and animation"
+    },
+    "brand_narration_shift_seconds": 0.0,
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1"
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "r_frame_rate": "0/0",
+        "sample_rate": "48000",
+        "channels": 2
+      }
+    ],
+    "caption_cues": 155,
+    "samples": [
+      {
+        "frame": "frame-01.jpg",
+        "seconds": 21.97,
+        "scene_id": "card_2",
+        "purpose": "五行记录：谁、做什么、何时",
+        "caption": "讲师和场地三个事项进展；",
+        "nearby_captions": [
+          {
+            "start": 18.349,
+            "end": 21.439,
+            "text": "主持人最后说，本周五16点再碰一次，看报名页、"
+          },
+          {
+            "start": 21.469,
+            "end": 23.231,
+            "text": "讲师和场地三个事项进展；"
+          },
+          {
+            "start": 23.541,
+            "end": 24.834,
+            "text": "报名人数还没有数据。"
+          }
+        ]
+      },
+      {
+        "frame": "frame-02.jpg",
+        "seconds": 42.8,
+        "scene_id": "card_3",
+        "purpose": "同一份记录，两种结果",
+        "caption": "表格六行，有三格明明白白写着「待确认」。",
+        "nearby_captions": [
+          {
+            "start": 39.112,
+            "end": 42.442,
+            "text": "另一种，纪要里写的是「暂按3000元做方案，未获批准」；"
+          },
+          {
+            "start": 42.768,
+            "end": 45.618,
+            "text": "表格六行，有三格明明白白写着「待确认」。"
+          }
+        ]
+      },
+      {
+        "frame": "frame-03.jpg",
+        "seconds": 176.08,
+        "scene_id": "card_11_p1",
+        "purpose": "先摆已明确的事，再摆未定的事",
+        "caption": "未定的是：预算暂按3000元做方案，还没批，方案谁做没写；",
+        "nearby_captions": [
+          {
+            "start": 172.39600000000002,
+            "end": 174.12,
+            "text": "周五16:00复会核对三件事。"
+          },
+          {
+            "start": 174.606,
+            "end": 178.414,
+            "text": "未定的是：预算暂按3000元做方案，还没批，方案谁做没写；"
+          },
+          {
+            "start": 178.724,
+            "end": 180.611,
+            "text": "场地报价没收到，负责人也没写；"
+          }
+        ]
+      },
+      {
+        "frame": "frame-04.jpg",
+        "seconds": 206.74,
+        "scene_id": "card_13_p2",
+        "purpose": "表格固定五列，三处最容易错",
+        "caption": "三处最容易错，逐个看。",
+        "nearby_captions": [
+          {
+            "start": 200.57,
+            "end": 204.02,
+            "text": "表格的列固定五列：任务、负责人、截止时间、"
+          },
+          {
+            "start": 204.02,
+            "end": 205.66,
+            "text": "当前状态、待确认事项。"
+          },
+          {
+            "start": 206.093,
+            "end": 207.617,
+            "text": "三处最容易错，逐个看。"
+          },
+          {
+            "start": 208.263,
+            "end": 209.193,
+            "text": "第一处，负责人。"
+          },
+          {
+            "start": 209.683,
+            "end": 213.44,
+            "text": "原文是「小陈提醒讲师还没确认，先由小周今天联系」。"
+          }
+        ]
+      },
+      {
+        "frame": "frame-05.jpg",
+        "seconds": 222.61,
+        "scene_id": "card_14",
+        "purpose": "第一处：负责人——提醒的人不算",
+        "caption": "不写这句，小陈很容易被填进负责人那一格。",
+        "nearby_captions": [
+          {
+            "start": 218.149,
+            "end": 220.359,
+            "text": "负责人只写记录里明确承担这个动作"
+          },
+          {
+            "start": 220.359,
+            "end": 221.799,
+            "text": "的人，「提醒的人」不算。"
+          },
+          {
+            "start": 222.31799999999998,
+            "end": 224.938,
+            "text": "不写这句，小陈很容易被填进负责人那一格。"
+          },
+          {
+            "start": 225.584,
+            "end": 226.353,
+            "text": "第二处，时间。"
+          }
+        ]
+      },
+      {
+        "frame": "frame-06.jpg",
+        "seconds": 242.07,
+        "scene_id": "card_15",
+        "purpose": "第二处：时间——相对时间要换算",
+        "caption": "换算依据要写进待确认列，",
+        "nearby_captions": [
+          {
+            "start": 238.103,
+            "end": 240.116,
+            "text": "周三中午前」就是周三12:00。"
+          },
+          {
+            "start": 240.506,
+            "end": 242.476,
+            "text": "换算依据要写进待确认列，"
+          },
+          {
+            "start": 242.586,
+            "end": 244.78,
+            "text": "不然下周没人知道这个周一是哪一天。"
+          }
+        ]
+      },
+      {
+        "frame": "frame-07.jpg",
+        "seconds": 259.02,
+        "scene_id": "card_16",
+        "purpose": "第三处：确定性——空着、标待确认，不能写0",
+        "caption": "报名人数那行写「数据缺失」，不能写成0。",
+        "nearby_captions": [
+          {
+            "start": 256.11,
+            "end": 258.094,
+            "text": "场地报价那行同样是两格空着。"
+          },
+          {
+            "start": 258.5,
+            "end": 261.223,
+            "text": "报名人数那行写「数据缺失」，不能写成0。"
+          },
+          {
+            "start": 261.869,
+            "end": 265.204,
+            "text": "这一步结束后，表里六行，其中好几处的格子是空的。"
+          }
+        ]
+      },
+      {
+        "frame": "frame-08.jpg",
+        "seconds": 320.39,
+        "scene_id": "card_21",
+        "purpose": "不是「看起来很完整」，而是每条都能派出去",
+        "caption": "这些是可以直接派出去的清单，",
+        "nearby_captions": [
+          {
+            "start": 316.367,
+            "end": 318.427,
+            "text": "向运营问报名人数从哪个后台取。"
+          },
+          {
+            "start": 318.83299999999997,
+            "end": 320.883,
+            "text": "这些是可以直接派出去的清单，"
+          },
+          {
+            "start": 320.913,
+            "end": 322.868,
+            "text": "而不是一份看起来很完整的假象。"
+          }
+        ]
+      },
+      {
+        "frame": "frame-09.jpg",
+        "seconds": 419.93,
+        "scene_id": "card_25",
+        "purpose": "五行记录，变成两份东西",
+        "caption": "记住三句话：记录别删，格式先说，不知道就写待确认。",
+        "nearby_captions": [
+          {
+            "start": 414.705,
+            "end": 418.003,
+            "text": "它保证的是另一件事——你写得越清楚，它越不敢替你编。"
+          },
+          {
+            "start": 418.473,
+            "end": 422.242,
+            "text": "记住三句话：记录别删，格式先说，不知道就写待确认。"
+          }
+        ]
+      }
+    ]
+  },
+  "completed_at": "2026-10-28T01:22:27+08:00",
+  "completion_status": "complete",
+  "formal_ui": {
+    "new_controls_visible": true,
+    "feedback_write_and_clear_verified": true,
+    "schedule_mode": "ideas",
+    "schedule_time": "09:00",
+    "history_completed_video": true,
+    "test_feedback_restored": true
+  },
+  "checks": {
+    "backend_passed": 3413,
+    "backend_skipped": 3,
+    "ui_passed": 614,
+    "theme_focused_passed": 41,
+    "compatibility_focused_passed": 42,
+    "diff_check": "PASS",
+    "decode": "PASS",
+    "browser_playback": "PASS"
+  }
+}

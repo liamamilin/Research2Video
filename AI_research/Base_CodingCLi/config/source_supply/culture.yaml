@@ -1,0 +1,36 @@
+name: 文化与艺术 · 信息供给
+matrix: culture
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 40 10 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- art
+- music
+- design
+- collections
+- stories
+- exhibitions
+- essays
+discovery_objective: 为「文化与艺术」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：从一件作品的具体细节读懂其形式与表达，保留作品、作者和创作过程；一个文化现象的形式、处境和传播怎样形成；保留作品与创作案例
+jobs:
+  culture/culture_daily:
+    mode: context
+    direction: 从一件作品的具体细节读懂其形式与表达，保留作品、作者和创作过程
+    query:
+    - art museum music design work artist process stories RSS
+    - 艺术 作品 博物馆 设计 创作 音乐 文化 订阅
+    - museum art design collections stories artist interviews
+  culture/culture_weekly:
+    mode: context
+    direction: 一个文化现象的形式、处境和传播怎样形成；保留作品与创作案例
+    query:
+    - cultural history art music design movement museum essays
+    - museum culture design history exhibition stories features
+    - 文化 艺术 音乐 设计 流派 传播 专题

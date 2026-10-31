@@ -5,6 +5,7 @@ from pydantic import Field
 
 from . import Arguments, Tool
 from web.services import assistant_management as service
+from web.services.local_video import LocalVideoRequest
 
 
 class MatrixQuery(Arguments):
@@ -71,6 +72,9 @@ class PublishingDraft(Arguments):
 
 
 TOOLS = {
+    'publish_local_video': Tool(LocalVideoRequest, '按用户提供的本机视频绝对路径准备或提交到指定平台。支持MP4/MOV/M4V；path是运行本应用电脑上的文件路径，platform用catalog返回的id。action=prepare导入/复用视频并返回发布信息、平台限制、当前账号，不上传；action=submit直接接入原生投稿队列，无需生成文稿或重生成视频。account_uid可选，默认该平台当前已连接账号；fields可填title/description/tags（B站可tid）和first_comment。未给标题或简介时提示补充缺项，沿用已有草稿信息，不自行把文件名当发布标题或编写简介；返回needs_input时按missing_fields询问，补充后用原路径继续，保留其他字段。按实际平台限制整理发布信息；用户明确要求投稿时可准备后继续submit，信息齐全不再询问一次确认。重复路径/相同文件复用，已有投稿继续原任务。登录或文件不可用时返回具体入口/原因；平台后台跟踪结果，不循环查进度。',
+        lambda a, r, u: service._native(r, 'POST', '/api/assistant/local-video', body=a.model_dump(exclude_none=True)),
+        'editor', True, '发布本地视频'),
     'save_publishing_draft': Tool(PublishingDraft, '保存指定平台、账号和准确成片的发布草稿，不上传。先query_publishing prepare读取发布包，fields仅填写要修改的title/description/tags/first_comment（B站还可tid），保留其他字段。保存后返回原生平台适配和校验结果；需要继续修正时按实际问题修改草稿，不能把未保存的建议称为准备完成。', service.save_publishing_draft, 'editor', True, '保存平台发布草稿'),
     'query_matrices': Tool(MatrixQuery, '查询矩阵。key为空列出矩阵和未归属任务；填key读取成员、周期、每个任务可用的production_options（同原生创建校验，不写文件）、已关联生产配方、矩阵共用render、任务overrides与effective_render及修改revision。', service.matrix_query, label='查询矩阵'),
     'manage_matrix': Tool(MatrixChange, '创建或调整矩阵。create填写key与fields.name；update只填需要改的字段；add_jobs/remove_jobs只填fields.jobs。修改前query_matrices取expected_revision。render按字段合并，保留其他共用设置和任务覆盖。新研究任务用create_job，视频配置用configure_production，周期用manage_schedule，随后关联矩阵。', service.matrix_change, 'editor', True, '管理矩阵'),

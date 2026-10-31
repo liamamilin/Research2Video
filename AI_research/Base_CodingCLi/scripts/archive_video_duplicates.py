@@ -21,22 +21,7 @@ from core.video import autopilot_store, content_guard as guard, outputs, store
 
 def upload_protected(state: Path) -> set[str]:
     """Read every account's outbox without contacting or logging into a platform."""
-    protected = set()
-    files = [(state / "platforms.db", "uploads"), (state / "douyin.db", "jobs")]
-    files += [(p, "jobs") for p in (state / "platforms").glob("*/queue.db")]
-    for path, table in files:
-        if not path.is_file():
-            continue
-        with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as conn:
-            conn.row_factory = sqlite3.Row
-            for raw in conn.execute(f"SELECT * FROM {table}"):
-                row = dict(raw)
-                if table == "jobs" and row.get("kind") != "UPLOAD":
-                    continue
-                if row.get("script_id") and (row["status"] not in ("FAILED", "CANCELLED")
-                                              or row.get("work_id") or row.get("bvid")):
-                    protected.add(row["script_id"])
-    return protected
+    return guard.upload_protected(state)
 
 
 def build_plan(config_dir: str, jobs_dir: str, state_dir: str) -> dict:
@@ -72,8 +57,7 @@ def build_plan(config_dir: str, jobs_dir: str, state_dir: str) -> dict:
             if row["sample"]:
                 reason = "验收样片与正式内容隔离"
             elif row["status"] in ("DRAFT", "APPROVED") and row["scope"]:
-                peers = [p for p in keep if p["scope"] == row["scope"] and guard.overlap(row["sources"], p["covered_sources"])
-                         and not (p["report"] == row["report"] and p["recipe"] != row["recipe"])]
+                peers = [p for p in keep if p["scope"] == row["scope"] and guard.overlap(row["sources"], p["covered_sources"])]
                 covered = set().union(*(p["covered_sources"] for p in peers)) if peers else set()
                 if not row["sources"] or len(guard.overlap(row["sources"], covered)) / len(row["sources"]) < guard.MAIN_STORY_SHARE:
                     peers = []

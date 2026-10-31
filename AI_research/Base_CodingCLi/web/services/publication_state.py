@@ -30,7 +30,16 @@ def describe(platform: str, key: str, row: dict) -> dict:
               'PUBLISHING': '正在发布', 'VERIFYING': '正在核对', 'PROCESSING': '平台处理中'}
     label = STATE_LABELS.get(native_state, labels.get(status, status)) if status in ('SUBMITTED', 'UNKNOWN') else labels.get(status, status)
     recovery = None
-    if native_state == 'unavailable' and status in ('SUBMITTED', 'UNKNOWN'):
+    paused = verification.get('paused') and status in ('SUBMITTED', 'UNKNOWN')
+    if paused:
+        label = '已投稿 · 自动核对暂停' if status == 'SUBMITTED' else '结果待核对 · 自动回查暂停'
+        recovery = {'kind': 'connection', 'label': '检查平台连接', 'href': href,
+                    'message': verification.get('pause_reason') or '平台登录核实失败，自动核对已暂停；原投稿保留。',
+                    'resumable': True}
+    elif verification.get('exhausted') and status in ('SUBMITTED', 'UNKNOWN'):
+        recovery = {'kind': 'check', 'label': '继续核对原投稿', 'href': href,
+                    'message': verification.get('reason') or '自动回查未解决，原投稿与回执已保留。', 'resumable': True}
+    elif native_state == 'unavailable' and status in ('SUBMITTED', 'UNKNOWN'):
         recovery = {'kind': 'connection', 'label': '检查平台连接', 'href': href,
                     'message': '回查暂不可用。请检查原账号登录和平台验证，处理后继续核对原投稿。', 'resumable': True}
     elif native_state in ('private', 'rejected') and status in ('SUBMITTED', 'UNKNOWN', 'FAILED'):
@@ -44,10 +53,11 @@ def describe(platform: str, key: str, row: dict) -> dict:
         recovery = {'kind': 'check', 'label': '核对原投稿', 'href': href,
                     'message': '请核对已有回执和平台作品；当前没有确认可重新投稿。',
                     'resumable': status in ('UNKNOWN', 'NEEDS_RECONCILIATION')}
-    attention = bool(recovery) and (native_state in ('unavailable', 'private', 'rejected')
+    attention = bool(recovery) and (paused or verification.get('exhausted') or native_state in ('unavailable', 'private', 'rejected')
                                   or status in ('FAILED', 'UNKNOWN', 'NEEDS_RECONCILIATION') and not verification.get('automatic'))
     active = not attention and (status in ('QUEUED', 'RUNNING', 'UPLOADING', 'PUBLISHING', 'VERIFYING', 'PROCESSING', 'RECONCILING')
-                               or bool(verification.get('automatic')) or platform == 'bilibili' and status == 'SUBMITTED')
+                               or bool(verification.get('running', verification.get('automatic')))
+                               or platform == 'bilibili' and status == 'SUBMITTED')
     state = 'completed' if status in ('PUBLISHED', 'CANCELLED') else 'failed' if status == 'FAILED' else 'running' if active else 'waiting'
     return {'label': label, 'state': state, 'active': active, 'needs_attention': attention,
             'verification': verification, 'recovery': recovery, 'url': row.get('url', '')}

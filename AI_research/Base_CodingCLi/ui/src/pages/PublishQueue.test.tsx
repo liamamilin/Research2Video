@@ -11,6 +11,7 @@ const ROWS = [
 ];
 
 beforeEach(() => {
+  localStorage.clear();
   vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, statusText: "ok", text: async () => JSON.stringify(ROWS) }) as Response));
 });
 
@@ -21,6 +22,18 @@ afterEach(() => {
 });
 
 describe("Publish queue", () => {
+  it("bounds initial cards, reveals the rest, and searches the entire list", async () => {
+    const many = Array.from({ length: 53 }, (_, index) => ({ ...ROWS[1], script_id: `s${index}`, title: `成片第${index}期` }));
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(many) }) as Response));
+    const { container } = render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
+    await screen.findByText("成片第0期");
+    expect(container.querySelectorAll("li")).toHaveLength(24);
+    fireEvent.click(screen.getByRole("button", { name: "显示更多成片" }));
+    expect(container.querySelectorAll("li")).toHaveLength(48);
+    fireEvent.change(screen.getByPlaceholderText("搜索视频或来源任务"), { target: { value: "成片第52期" } });
+    expect(await screen.findByText("成片第52期")).toBeTruthy();
+    expect(container.querySelectorAll("li")).toHaveLength(1);
+  });
   it("shows this login's last list immediately on return, then replaces it with fresh statuses", async () => {
     useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
     render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
@@ -51,13 +64,14 @@ describe("Publish queue", () => {
 
   it("shows what is ready to publish, what is published and the freshness warnings", async () => {
     render(<MemoryRouter><PublishQueuePage /></MemoryRouter>);
-    expect(await screen.findByText("待核实", { selector: "span" })).toBeTruthy();
+    expect(await screen.findByText("成片完成", { selector: "span" })).toBeTruthy();
     expect(screen.getByText("已发布至 1 个平台", { selector: "span" })).toBeTruthy();
     expect(screen.getByText("有严重问题", { selector: "span" })).toBeTruthy();
     expect(screen.getByText(/成片完成 .*10-20 10:30/)).toBeTruthy();
     expect(screen.getByText("快讯超过 24 小时建议复核")).toBeTruthy();
-    expect(screen.getByText("看成片").getAttribute("href")).toBe("/api/video/renders/r1/files/video.mp4");
-    expect(screen.getByText("各平台发布与记录 →").closest("a")?.getAttribute("href")).toBe("/video/s1?tab=publish");
+    fireEvent.click(screen.getByRole("button", { name: "看成片" }));
+    expect(document.querySelector("video")?.getAttribute("src")).toBe("/api/video/renders/r1/files/video.mp4");
+    expect(screen.getByText("各平台发布与记录 →").closest("a")?.getAttribute("href")).toContain("/video/s1?tab=publish&publish_version=3&render=r1");
   });
 
   it("filters by credibility label, so a video with a serious finding is easy to pick out", async () => {
@@ -94,5 +108,20 @@ it("finds a Bilibili-published asset under Douyin unpublished and retains its di
   fireEvent.change(screen.getByLabelText("平台发布状态"), { target: { value: "UNPUBLISHED" } });
   expect(screen.getByText("已发B站可发抖音")).toBeTruthy();
   expect(screen.queryByText("两个平台已发布")).toBeNull();
-  expect(screen.getByRole("link", { name: "各平台发布与记录 →" }).getAttribute("href")).toBe("/video/s1?tab=publish");
+  expect(screen.getByRole("link", { name: "各平台发布与记录 →" }).getAttribute("href")).toContain("/video/s1?tab=publish&publish_version=3&render=r1");
+});
+
+it("counts only prepared targets when no platform is selected", async () => {
+  const { matchesTodo } = await import("./PublishQueue");
+  const row = { ...ROWS[0], distributions: [
+    { platform:"bilibili",current_account:true,status:"PUBLISHED" },
+    { platform:"douyin",current_account:true,status:"UNPUBLISHED" },
+  ] } as unknown as import("@/api/video").Shipment;
+  expect(matchesTodo(row,"已完成", "")).toBe(true);
+  expect(matchesTodo(row,"部分完成", "")).toBe(false);
+  expect(matchesTodo(row,"待发布", "douyin")).toBe(true);
+  row.distributions![1].status="DRAFT";
+  expect(matchesTodo(row,"部分完成", "")).toBe(true); expect(matchesTodo(row,"草稿", "")).toBe(true);
+  row.distributions![1].status="UNKNOWN";
+  expect(matchesTodo(row,"需处理", "")).toBe(true); expect(matchesTodo(row,"发布中", "")).toBe(false);
 });

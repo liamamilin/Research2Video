@@ -1,0 +1,103 @@
+==================================================
+AI Research System - Config Validation
+==================================================
+
+System config:
+  ✓ system.yaml - model=deepseek-v4.1-flash, timeout=1800s
+
+Job files:
+  Found 90 job file(s):
+    ✓ research/ai
+    ✓ research/ai_agent_coding_tool_research
+    ✓ research/ai_agents_latest_research
+    ✓ research/ai_agents_survey_direct
+    ✓ research/ai_automation_systems_research
+    ✓ research/ai_survey
+    ✓ research/assistant_app_acceptance_20261025
+    ✓ research/assistant_iteration_acceptance_20261025
+    ✓ research/assistant_ops_acceptance_20261025
+    ✓ research/assistant_tracking_acceptance_20261025
+    ✓ research/独立游戏
+    ✓ video/flash_07c8442c
+    ✓ video/flash_bb6a3d49
+    ✓ economy/economy_daily
+    ✓ economy/economy_weekly
+    ✓ analysis/ai_gap_analysis
+    ✓ analysis/ai_trends
+    ✓ analysis/research_gap_analysis
+    ✓ ai_media/daily_opensource_radar
+    ✓ ai_media/weekly_business_watch
+    ✓ ai_media/weekly_deep_research
+    ✓ ai_media/weekly_model_arena
+    ✓ archive/video/deep_dive_48fef9b1
+    ✓ archive/video/deep_dive_56435880
+    ✓ archive/video/deep_dive_d8d44faa
+    ✓ archive/video/flash_039af880
+    ✓ archive/video/flash_6acee9c7
+    ✓ archive/video/flash_79c727e2
+    ✓ archive/video/flash_8ec3bb2a
+    ✓ archive/video/flash_9c4aad41
+    ✓ archive/video/flash_a85ffe6d
+    ✓ archive/video/flash_c2ec78a5
+    ✓ archive/video/flash_c5d88429
+    ✓ archive/video/flash_efc85b6e
+    ✓ archive/video/flash_f5ebc962
+    ✓ archive/video/point_short_18a54247
+    ✓ archive/video/point_short_4628e576
+    ✓ archive/video/point_short_b61ad2dc
+    ✓ archive/video/point_short_e3731576
+    ✓ archive/video/recheck_3cccf3be
+    ✓ archive/vod/opp_06f86a78
+    ✓ archive/vod/opp_09869a4f
+    ✓ archive/vod/opp_4356949f
+    ✓ archive/vod/opp_640260af
+    ✓ archive/vod/opp_f59571c3
+    ✓ science/science_daily
+    ✓ science/science_weekly
+    ✓ actionable/ai_agents_actionable
+    ✓ software/software_daily
+    ✓ software/software_weekly
+    ✓ practical_ai_intelligence/00_collection_planner
+    ✓ practical_ai_intelligence/01_model_and_pricing_radar
+    ✓ practical_ai_intelligence/02_ai_coding_tools_radar
+    ✓ practical_ai_intelligence/03_agent_workflow_radar
+    ✓ practical_ai_intelligence/04_project_understanding_radar
+    ✓ practical_ai_intelligence/05_context_rag_memory_radar
+    ✓ practical_ai_intelligence/06_infra_and_eval_radar
+    ✓ practical_ai_intelligence/07_product_content_opportunities
+    ✓ practical_ai_intelligence/08_risk_and_alternatives
+    ✓ practical_ai_intelligence/09_executive_synthesis_and_actions
+    ✓ chatgpt_acquisition/t01_product
+    ✓ chatgpt_acquisition/t02_scenarios
+    ✓ chatgpt_acquisition/t03_tutorials
+    ✓ chatgpt_acquisition/t04_testing
+    ✓ chatgpt_acquisition/t05_comparison
+    ✓ chatgpt_acquisition/t06_value
+    ✓ chatgpt_acquisition/t07_subscription
+    ✓ chatgpt_acquisition/t08_troubleshooting
+    ✓ chatgpt_acquisition/t09_updates
+    ✓ history/history_daily
+    ✓ history/history_weekly
+    ✓ industry/industry_daily
+    ✓ industry/industry_weekly
+    ✓ consumer/consumer_daily
+    ✓ consumer/consumer_weekly
+    ✓ monitoring/ai
+    ✓ monitoring/ai_flash_discovery
+    ✓ monitoring/ai_monitoring
+    ✓ monitoring/daily_ai_agents
+    ✓ monitoring/人工智能
+    ✓ practice/ai_agents_practice
+    ✓ practice/ai_agents_practice_search
+    ✓ tech/tech_daily
+    ✓ tech/tech_weekly
+    ✓ geography/geography_daily
+    ✓ geography/geography_weekly
+    ✓ culture/culture_daily
+    ✓ culture/culture_weekly
+    ✓ company/company_daily
+    ✓ company/company_weekly
+  All job files valid.
+
+==================================================
+✓ All checks passed.

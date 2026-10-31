@@ -1,0 +1,8 @@
+time: 09:00
+timezone: Asia/Shanghai
+platforms:
+- bilibili
+- zhihu
+- youtube
+mode: ideas
+direction: 面向开发者和AI高频使用者，优先一个具体任务、工具输入输出或工程取舍。产品变化、开源、模型、工作流、智能体、机制、商业、本地运行与效率各有题目；动态材料不足时不凑新闻。

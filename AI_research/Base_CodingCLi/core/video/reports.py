@@ -156,11 +156,13 @@ def _scripts(conn, report_id: str, *, started: bool = False) -> list[dict]:
     for row in conn.execute("SELECT id, column_key, status, topic, archived, created_at FROM scripts"
                             f" WHERE {where} ORDER BY created_at", args):
         try:
-            title = json.loads(row[3] or "{}").get("title", "")
+            topic = json.loads(row[3] or "{}")
+            title = topic.get("title", "")
         except ValueError:
-            title = ""
+            title, topic = "", {}
         out.append({"id": row[0], "column_key": row[1], "status": row[2], "title": title,
-                    "archived": bool(row[4]), "created_at": row[5]})
+                    "archived": bool(row[4]), "created_at": row[5],
+                    **({"content_mode": "episode"} if topic.get("content_mode") == "episode" else {})})
     return out
 
 

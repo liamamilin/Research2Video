@@ -200,3 +200,24 @@ def test_prune_and_remove_keep_fts_consistent(index_db_env):
     os.remove(index_db_env / rel)
     index_db.remove_report(rel)
     assert index_db.search_reports("提示缓存", limit=5) == []
+
+
+def test_startup_scan_skips_unchanged_reports_but_indexes_changes(index_db_env, monkeypatch):
+    _write(index_db_env, 'first.md', '# First\nOriginal report')
+    _write(index_db_env, 'other.md', '# Other\nUnchanged report')
+    index_scanner.full_scan(str(index_db_env))
+    original = index_db.upsert_report
+    writes = []
+    def record(**kwargs):
+        writes.append(kwargs['path'])
+        return original(**kwargs)
+    monkeypatch.setattr(index_db, 'upsert_report', record)
+    assert index_scanner.full_scan(str(index_db_env), force=False)['indexed'] == 2
+    assert writes == []
+    _write(index_db_env, 'first.md', '# First\nUpdated report body')
+    _write(index_db_env, 'new.md', '# New\nNew report')
+    index_scanner.full_scan(str(index_db_env), force=False)
+    assert set(writes) == {'first.md', 'new.md'}
+    writes.clear()
+    index_scanner.full_scan(str(index_db_env), force=True)
+    assert set(writes) == {'first.md', 'other.md', 'new.md'}

@@ -256,6 +256,18 @@ def test_dated_article_source_uses_existing_source_card_contract(client, video_e
     assert request["sources"] == [{"title": "雨停以后", "url": "https://example.com/article", "date": "2026-10-25"}]
 
 
+def test_imported_article_can_find_visuals_from_its_link_without_a_research_report(client, video_env, monkeypatch):
+    url = "https://playwright.dev/python/docs/screenshots"
+    script = create(client, title="Playwright 元素截图", text="Playwright 用 locator 选择元素，再保存截图。",
+                    mode="read", kind="information", source_url=url)
+    store.update_script(script["id"], status="APPROVED", approved_version=1)
+    monkeypatch.setattr(video_render, "_video_config", lambda: {"visual_materials": {"enabled": True, "version": 3}})
+    assert not script["report_path"]
+    render = video_render.create(store.get_script(script["id"]))
+    assert render["visuals"]["state"] == "pending"
+    assert render["visuals"]["needs"][0]["urls"] == [url]
+
+
 @pytest.mark.parametrize("extra", [{"source_url": "javascript:alert(1)"}, {"published_on": "2026-02-30"},
                                   {"import_id": "../../.env"}, {"mode": "bad"}])
 def test_invalid_article_input_is_rejected(client, video_env, extra):

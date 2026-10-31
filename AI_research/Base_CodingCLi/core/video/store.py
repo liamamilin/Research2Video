@@ -41,7 +41,7 @@ STALE_AFTER_SECONDS = 120
 _DB_PATH_OVERRIDE: Optional[str] = None
 _lock = threading.Lock()
 
-_SCRIPT_JSON = ("topic",)
+_SCRIPT_JSON = ("topic", "content_context")
 _VERSION_JSON = ("sections", "length_check", "meta")
 _RENDER_JSON = ("request", "artifacts", "timings", "visuals", "submission_request")
 
@@ -191,6 +191,12 @@ def init_db() -> None:
             conn.execute("ALTER TABLE scripts ADD COLUMN archived INTEGER NOT NULL DEFAULT 0")
         if "production" not in columns:  # the production config that made it (spec/production.md); '' before them
             conn.execute("ALTER TABLE scripts ADD COLUMN production TEXT NOT NULL DEFAULT ''")
+        for name in ("content_column_id", "content_matrix_id", "source_matrix_id"):
+            if name not in columns:
+                conn.execute(f"ALTER TABLE scripts ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
+        if "content_context" not in columns:
+            conn.execute("ALTER TABLE scripts ADD COLUMN content_context TEXT NOT NULL DEFAULT '{}'")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_scripts_content_column ON scripts(content_column_id)")
         pub_columns = {r[1] for r in conn.execute("PRAGMA table_info(publications)")}
         for name in ("account_uid", "account_name", "work_id", "confirmed_at", "removed_at"):
             if name not in pub_columns:
@@ -205,12 +211,16 @@ def init_db() -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT, script_id TEXT NOT NULL, version INTEGER NOT NULL,
             platform TEXT NOT NULL, account_uid TEXT NOT NULL, render_id TEXT NOT NULL,
             payload TEXT NOT NULL, saved_at TEXT NOT NULL)""")
-        from core.video import autopilot_store, plans, reports, steps, topic_store
+        conn.execute("""CREATE TABLE IF NOT EXISTS local_video_assets (
+            sha256 TEXT PRIMARY KEY, script_id TEXT NOT NULL, render_id TEXT NOT NULL UNIQUE,
+            original_path TEXT NOT NULL, metadata TEXT NOT NULL, created_at TEXT NOT NULL)""")
+        from core.video import autopilot_store, plans, reports, steps, story_pool, topic_store
         autopilot_store.init(conn)
         plans.init(conn)
         topic_store.init(conn)
         steps.init(conn)
         reports.init(conn)  # after topic_store: it reads topic_imports to tell a source report from a research one
+        story_pool.init(conn)
 
 
 def _decode(row: sqlite3.Row | None, json_fields: tuple[str, ...]) -> dict | None:
@@ -230,17 +240,55 @@ def _encode(fields: dict, json_fields: tuple[str, ...]) -> dict:
 # --- Scripts -----------------------------------------------------------------
 
 
-def create_script(column_key: str, topic: dict, created_by: str = "") -> dict:
+def local_video_asset(sha256: str) -> dict | None:
+    with connect() as conn:
+        row = conn.execute('SELECT * FROM local_video_assets WHERE sha256=?', (sha256,)).fetchone()
+    return _decode(row, ('metadata',))
+
+
+def local_video_by_path(path: str) -> dict | None:
+    with connect() as conn:
+        row = conn.execute('SELECT * FROM local_video_assets WHERE original_path=? ORDER BY created_at DESC,rowid DESC LIMIT 1', (path,)).fetchone()
+    return _decode(row, ('metadata',))
+
+
+def register_local_video(sha256: str, path: str, metadata: dict, render_id: str, actor: str) -> dict:
+    """Register one completed media asset atomically; no research or writing is scheduled."""
+    now, sid = _now(), uuid.uuid4().hex
+    topic = {'id': None, 'title': metadata['title'], 'fields': {}, 'local_video': metadata}
+    with connect(write=True) as conn:
+        conn.execute('INSERT INTO scripts (id,column_key,topic,status,current_version,approved_version,created_by,created_at,updated_at) '
+                     'VALUES (?,?,?,\'APPROVED\',1,1,?,?,?)',
+                     (sid, 'local_video', json.dumps(topic, ensure_ascii=False), actor, now, now))
+        conn.execute('INSERT INTO script_versions (script_id,version,title,sections,length_check,edit_type,meta,created_by,created_at) '
+                     'VALUES (?,1,?,\'[]\',?,\'IMPORTED\',?,?,?)',
+                     (sid, metadata['title'], json.dumps({'estimated_seconds': metadata['duration']}),
+                      json.dumps({'local_video': metadata}, ensure_ascii=False), actor, now))
+        conn.execute('INSERT INTO renders (id,script_id,version,status,title,source_text,source_sha256,request,artifacts,created_at,updated_at,completed_at) '
+                     'VALUES (?,?,1,\'COMPLETED\',?,\'\',?,?,?,?,?,?)',
+                     (render_id, sid, metadata['title'], sha256, json.dumps({'origin': 'local_file', 'sha256': sha256}),
+                      json.dumps([{'name': 'video.mp4', 'size': metadata['size']}]), now, now, now))
+        conn.execute('INSERT INTO local_video_assets VALUES (?,?,?,?,?,?)',
+                     (sha256, sid, render_id, path, json.dumps(metadata, ensure_ascii=False), now))
+    return local_video_asset(sha256)
+
+
+def create_script(column_key: str, topic: dict, created_by: str = "", *, production: str = "",
+                  content_context: dict | None = None) -> dict:
     from core.video.content_guard import is_sample
 
     now = _now()
     script_id = uuid.uuid4().hex
+    context = content_context or {}
     with connect(write=True) as conn:
         conn.execute(
             "INSERT INTO scripts (id, column_key, topic, status, created_by, created_at, updated_at,"
-            " heartbeat_at, archived) VALUES (?, ?, ?, 'RESEARCHING', ?, ?, ?, ?, ?)",
+            " heartbeat_at, archived, production, content_column_id, content_matrix_id, source_matrix_id, content_context) "
+            "VALUES (?, ?, ?, 'RESEARCHING', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (script_id, column_key, json.dumps(topic, ensure_ascii=False), created_by, now, now, time.time(),
-             int(is_sample({"created_by": created_by, "topic": topic}))),
+             int(is_sample({"created_by": created_by, "topic": topic})), production,
+             context.get("column", ""), context.get("matrix", ""), context.get("source_matrix", ""),
+             json.dumps(context, ensure_ascii=False)),
         )
     return get_script(script_id)
 
@@ -579,14 +627,30 @@ def add_version(
     edit_type: str,
     meta: dict | None = None,
     created_by: str = "",
+    story_claim: str = "",
 ) -> int:
     """Store a new version and make it current. Returns its number."""
     now = _now()
     with connect(write=True) as conn:
+        context = conn.execute("SELECT content_context FROM scripts WHERE id = ?", (script_id,)).fetchone()
+        if context and context[0] != "{}":
+            meta = {**(meta or {}), "content_context": json.loads(context[0])}
         current = conn.execute(
             "SELECT COALESCE(MAX(version), 0) FROM script_versions WHERE script_id = ?", (script_id,)
         ).fetchone()[0]
         version = current + 1
+        if story_claim and not current:
+            # A cancelled/failed author must not save after its reservation was
+            # released and another configuration took that event.
+            claim = conn.execute("SELECT 1 FROM video_story_claims c JOIN scripts s ON s.id=c.script_id "
+                                 "WHERE c.script_id=? AND c.event_key=? AND c.state='ACTIVE' AND s.archived=0 "
+                                 "AND NOT EXISTS(SELECT 1 FROM autopilot_items i WHERE i.script_id=s.id "
+                                 "AND i.state IN ('CANCELLED','FAILED'))", (script_id, story_claim)).fetchone()
+            if not claim:
+                from core.video.story_pool import SelectionError
+
+                raise SelectionError("选题占用已释放或任务已取消，不再保存该初稿")
+            conn.execute("UPDATE video_story_claims SET state='COVERED',updated_at=? WHERE script_id=?", (now, script_id))
         conn.execute(
             "INSERT INTO script_versions (script_id, version, title, sections, length_check,"
             " edit_type, meta, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -643,6 +707,22 @@ def current_versions(script_ids: list[str]) -> dict[str, dict]:
                 f" WHERE s.id IN ({','.join('?' for _ in batch)})", batch,
             )
             out.update((r["script_id"], _decode(r, _VERSION_JSON)) for r in rows)
+    return out
+
+
+def versions_of(pairs: list[tuple[str, int]]) -> dict[tuple[str, int], dict]:
+    """Specific (script, version) rows for a page, batched like ``current_versions``."""
+    wanted = list(dict.fromkeys(pairs))
+    out: dict[tuple[str, int], dict] = {}
+    with connect() as conn:
+        for start in range(0, len(wanted), 400):
+            batch = wanted[start:start + 400]
+            rows = conn.execute(
+                "SELECT * FROM script_versions WHERE "
+                + " OR ".join("(script_id = ? AND version = ?)" for _ in batch),
+                [value for pair in batch for value in pair],
+            )
+            out.update(((r["script_id"], r["version"]), _decode(r, _VERSION_JSON)) for r in rows)
     return out
 
 

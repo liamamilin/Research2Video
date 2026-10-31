@@ -24,6 +24,7 @@ if __name__ == "__main__":
     sys.modules["core"] = package
 
 from core.douyin import CREATE_PATHS, DouyinError, accepted_receipt, profile, public_receipt, creator_diagnostics, comment_receipt, comment_text_matches
+from core.douyin import DouyinLookupError
 from core.douyin_store import DouyinStore
 
 
@@ -170,8 +171,15 @@ async def upload(db: DouyinStore, job: dict, storage: Path) -> None:
         title=payload["title"], file_path=payload["video_path"], tags=payload["tags"],
         publish_date=0, account_file=str(storage), desc=payload["description"],
         thumbnail_landscape_path=payload.get("cover") or None,
+        thumbnail_portrait_path=payload.get("cover_portrait") or None,
         declaration="内容由AI生成", headless=False, debug=False,
     )
+    if payload.get('cover_portrait'):
+        from core.social.douyin_cover import set_portrait_cover
+        async def portrait_cover(page):
+            await set_portrait_cover(page, payload['cover_portrait'], upstream._native_click,
+                                     landscape_path=payload.get('cover', ''))
+        video.set_thumbnail = portrait_cover
     async with async_playwright() as pw:
         task = asyncio.create_task(video.upload(SimpleNamespace(chromium=SimpleNamespace(launch=guarded_launch))))
         try:
@@ -212,19 +220,26 @@ async def owned_record(context, target: str) -> dict | None:
         response = await context.request.get("https://creator.douyin.com/aweme/v1/creator/item/list/",
                                              params={"cursor": cursor, "count": "50"}, timeout=20000)
         if response.status != 200:
-            return None
-        data = await response.json()
-        if data.get("status_code") != 0:
-            return None
-        rows = data.get("item_info_list") or []
+            raise DouyinLookupError(f'抖音作品列表返回 HTTP {response.status}，本次未能读取作品。', 'list_http_error')
+        try:
+            data = await response.json()
+        except (ValueError, TypeError):
+            raise DouyinLookupError('抖音作品列表未返回可解析数据，本次未能读取作品。', 'list_invalid_json') from None
+        if not isinstance(data, dict) or type(data.get('status_code')) is not int or data['status_code'] != 0:
+            raise DouyinLookupError('抖音作品列表接口未成功，请检查平台登录或验证提示。', 'list_api_error')
+        rows = data.get('item_info_list')
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+            raise DouyinLookupError('抖音作品列表格式已变化，本次未能完成作品查找。', 'list_schema_error')
         for row in rows:
             if str(row.get("item_id_plain") or row.get("aweme_id") or "") == target:
                 return {"work_id": target, "owned": True, "provider_item_id": row.get("item_id", ""), "creator_state": creator_diagnostics(row)}
-        next_cursor = str(rows[-1].get("cursor") or "") if rows else ""
-        if not data.get("has_more") or not next_cursor or cursor == next_cursor:
+        if not data.get('has_more'):
             return None
+        next_cursor = str(data.get('cursor') or data.get('max_cursor') or (rows[-1].get('cursor') if rows else '') or '')
+        if not next_cursor or cursor == next_cursor:
+            raise DouyinLookupError('抖音作品列表分页未推进，尚不能认定作品不存在。', 'list_cursor_error')
         cursor = next_cursor
-    return None
+    raise DouyinLookupError('已查到本次作品列表上限，尚未定位原作品。', 'list_limit_reached', state='unknown')
 
 
 
@@ -301,7 +316,7 @@ async def inspect_work(pw, storage: Path, owner_id: str, target: str) -> dict:
             raise DouyinError("核对账号与原投稿账号不一致，请重新连接原账号。")
         owned = await owned_record(context, target)
         if not owned:
-            raise DouyinError("尚未在当前账号最近 500 条作品中核对到这个 ID；未回写发布记录。")
+            raise DouyinLookupError('已读取当前账号作品列表，未找到原作品 ID；保留投稿回执。', 'work_not_found', state='missing')
         await context.close()
         # An isolated anonymous context prevents a private, author-only video from appearing public.
         anonymous = await browser.new_context()
@@ -361,6 +376,25 @@ async def inspect_work(pw, storage: Path, owner_id: str, target: str) -> dict:
 
 
 
+async def _existing_author_comment(context, provider_id: str, text: str) -> dict | None:
+    listing = await context.request.get('https://creator.douyin.com/aweme/v1/creator/comment/list/',
+        params={'item_id': provider_id, 'sort': 'TIME', 'cursor': '0', 'count': '50'}, timeout=20000,
+        max_redirects=0, max_retries=0)
+    data = await listing.json()
+    if (listing.status != 200 or not isinstance(data, dict)
+            or type(data.get('status_code')) is not int or data['status_code'] != 0):
+        return None
+    rows = data.get('comment_info_list') or data.get('comment_list') or []
+    if not isinstance(rows, list):
+        return None
+    for row in rows:
+        with suppress(DouyinError):
+            receipt = comment_receipt({'status_code': 0, 'comment_info': row}, text)
+            if receipt['accepted']:
+                return receipt
+    return None
+
+
 async def send_first_comment(db: DouyinStore, job: dict, pw, storage: Path) -> None:
     """One creator-API POST after an exact owner/work preflight, with a durable at-most-once guard."""
     attempted = False
@@ -381,6 +415,16 @@ async def send_first_comment(db: DouyinStore, job: dict, pw, storage: Path) -> N
         provider_id = (owned or {}).get('provider_item_id')
         if not isinstance(provider_id, str) or not provider_id:
             raise DouyinError('未取得这条作品的创作者标识，作者评论未提交。')
+        # A comment may already have been added through the platform while the
+        # application's task was missing. Reuse that exact author comment.
+        existing = None
+        with suppress(Exception):
+            existing = await _existing_author_comment(context, provider_id, job['payload']['text'])
+        if existing:
+            db.update(job['id'], status='SENT', phase='已关联创作中心已有作者评论，未重复发送',
+                      result={**existing, 'read_back': True, 'existing_comment': True,
+                              'work_id': job['work_id']}, error='')
+            return
         # Read the token only from Douyin's own authenticated response; never expose it to the app API or logs.
         proof = await context.request.head('https://creator.douyin.com/web/api/media/anchor/search',
             headers={'X-Secsdk-Csrf-Request': '1', 'X-Secsdk-Csrf-Version': '1.2.22',
@@ -465,6 +509,7 @@ async def check_first_comment(db: DouyinStore, job: dict, pw, storage: Path) -> 
         if not isinstance(rows, list):
             raise DouyinError('创作中心评论列表格式变化；评论未重发。')
         matches, observations = [], []
+        target = child['result'].get('comment_id')
         for row in rows:
             if not isinstance(row, dict):
                 continue
@@ -475,13 +520,14 @@ async def check_first_comment(db: DouyinStore, job: dict, pw, storage: Path) -> 
             observations.append({'text_matches': same, 'is_author': row.get('is_author') is True,
                                  'level': row.get('level') if type(row.get('level')) in (int, bool) else None,
                                  'recent': bool(recent), 'fields': sorted(row)[:25]})
-            if same and recent:
+            if same and (row.get('comment_id') == target if target else recent):
                 with suppress(DouyinError):
                     receipt = comment_receipt({'status_code': 0, 'comment_info': row}, text)
                     matches.append({**receipt, 'read_back': True, 'submission_started': True, 'work_id': child['work_id'],
                                     'normalized_whitespace': text != child['payload']['text']})
         if len(matches) == 1:
-            db.update(child['id'], status='SENT', phase='已在创作中心核对作者评论', result=matches[0], error='')
+            db.update(child['id'], status='SENT', phase='已在创作中心核对作者评论',
+                      result={**child['result'], **matches[0]}, error='')
         else:
             db.update(child['id'], error='暂未在创作中心核对到唯一的本次作者评论；未重复发送。')
         db.update(job['id'], status='DONE', phase='已只读核对评论', result={'matched': len(matches) == 1, 'count': len(rows), 'observations': observations[:10]})
@@ -544,7 +590,11 @@ async def run(state: Path, key: str) -> None:
             return
         uncertain_comment = job['kind'] == 'FIRST_COMMENT' and row['result'].get('submission_started')
         status = "UNKNOWN" if uncertain_comment or (job["kind"] == "UPLOAD" and row["phase"] != "准备") else "FAILED"
-        db.update(key, status=status, result={**row["result"], "confirmed_not_submitted": not uncertain_comment} if job["kind"] == "FIRST_COMMENT" else row["result"],
+        retained = row['result']
+        if job['kind'] == 'RECONCILE':
+            retained = {**retained, 'lookup_error': {'code': exc.code if isinstance(exc, DouyinLookupError) else type(exc).__name__,
+                                                   'state': exc.state if isinstance(exc, DouyinLookupError) else 'unavailable'}}
+        db.update(key, status=status, result={**retained, "confirmed_not_submitted": not uncertain_comment} if job["kind"] == "FIRST_COMMENT" else retained,
                   error=str(exc) if isinstance(exc, DouyinError) else
                   f"抖音连接或检查没有完成（{type(exc).__name__}），请重试；遇到身份验证时请在独立浏览器完成。")
     finally:

@@ -1,10 +1,14 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { lazy } from "react";
 
 import { Layout } from "./Layout";
 import { useAppStore } from "@/lib/app-store";
 import { useAuthStore } from "@/lib/auth-store";
+import { preloadPage } from "@/lib/page-modules";
+
+vi.mock("@/lib/page-modules", () => ({ preloadPage: vi.fn() }));
 
 function stubMatchMedia(matches: boolean) {
   vi.stubGlobal("matchMedia", vi.fn().mockImplementation((query: string) => ({
@@ -33,6 +37,7 @@ function renderLayout() {
 }
 
 beforeEach(() => {
+  vi.mocked(preloadPage).mockClear();
   useAuthStore.setState({
     user: {
       id: 1,
@@ -52,6 +57,29 @@ afterEach(() => {
 });
 
 describe("Layout sidebar", () => {
+  it("warms internal destination code on pointer, keyboard and touch intent", () => {
+    stubMatchMedia(true);
+    renderLayout();
+    const reports = screen.getByRole("link", { name: "报告" });
+    fireEvent.pointerOver(reports);
+    fireEvent.focus(reports);
+    fireEvent.touchStart(reports);
+    expect(preloadPage).toHaveBeenCalledTimes(3);
+    expect(preloadPage).toHaveBeenLastCalledWith("/reports");
+    expect(screen.getByText("home page")).toBeTruthy();
+    fireEvent.pointerOver(screen.getByRole("button", { name: "让助手处理当前页面" }));
+    expect(preloadPage).toHaveBeenCalledTimes(3);
+  });
+  it("keeps navigation available while the next page module loads", () => {
+    stubMatchMedia(true);
+    const PendingPage = lazy(() => new Promise<{ default: () => null }>(() => {}));
+    render(<MemoryRouter><Routes><Route element={<Layout />}>
+      <Route index element={<PendingPage />} />
+    </Route></Routes></MemoryRouter>);
+    expect(screen.getByRole("status").textContent).toBe("正在加载页面…");
+    expect(screen.getByRole("link", { name: "矩阵" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "让助手处理当前页面" })).toBeTruthy();
+  });
   it("starts a different page at the top while keeping the scroll position for same-page filters", () => {
     stubMatchMedia(true);
     const { container } = renderLayout();

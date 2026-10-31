@@ -1,6 +1,6 @@
 """Flash-news topics from the discovery job's report (``jobs/monitoring/ai_flash_discovery.yaml``).
 
-A report lists its items as ``### 1.1 title`` followed by ``- **field**：value`` bullets, and ends with a numbered
+A report lists its items as ``### 1.1 title`` or ``### 1. title`` followed by ``- **field**：value`` bullets, and ends with a numbered
 source list (``1. title | 一手/二手 | date | url``); an item cites sources as ``[1][3]`` or with the URLs inline, as
 the intelligence radars do. The items become topics numbered ``F1``, ``F2`` ... in the order listed, so a topic's id
 is ``<report date>/F<n>`` and it stays the same for as long as the report does.
@@ -20,7 +20,7 @@ from .topics import Topic
 
 FLASH_DIR = "flash"
 _REPORT = re.compile(r"^(\d{4}-\d{2}-\d{2})_ai_flash_discovery\.md$")
-_ITEM = re.compile(r"^#{2,4}\s*(\d+\.\d+)\s*[.．、:：]?\s*(.+?)\s*$")
+_ITEM = re.compile(r"^#{2,4}\s+(\d+(?:\.\d+)*)(?:\s*[.．、:：]\s*|\s+)(.+?)\s*$")
 _HEADING = re.compile(r"^#{1,4}\s")
 _FIELD = re.compile(r"^\s*[-*]\s*\*\*(.+?)\*\*\s*[:：]\s*(.*)$")
 _NESTED = re.compile(r"^\s{2,}[-*]\s+(.*)$")
@@ -55,11 +55,16 @@ def parse(report: str, report_date: str) -> list[Topic]:
     topics: list[Topic] = []
     current: Topic | None = None
     last_field = ""
+
+    def finish():
+        # Numbered overviews and bibliographies are headings too, but have no item fields.
+        if current is not None and current.fields:
+            topics.append(current)
+
     for line in lines:
         heading = _ITEM.match(line)
         if heading:
-            if current is not None:
-                topics.append(current)
+            finish()
             number = len(topics) + 1
             current = Topic(id=f"{report_date}/F{number}", round=report_date, code=f"F{number}",
                             title=_plain(heading.group(2)))
@@ -68,7 +73,7 @@ def parse(report: str, report_date: str) -> list[Topic]:
         if current is None:
             continue
         if _HEADING.match(line):  # any other heading ends the item
-            topics.append(current)
+            finish()
             current, last_field = None, ""
             continue
         field = _FIELD.match(line)
@@ -79,8 +84,7 @@ def parse(report: str, report_date: str) -> list[Topic]:
         nested = _NESTED.match(line)
         if nested and last_field:
             current.fields[last_field] += "；" + nested.group(1).replace("**", "").strip()
-    if current is not None:
-        topics.append(current)
+    finish()
     for topic in topics:
         _complete(topic, sources)
     return topics

@@ -1,0 +1,74 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: economy_prices
+  name: T01 · 物价与生活成本
+  promise: 价格变化如何进入具体生活和生意？
+  type: explainer
+  production_ids:
+  - economy_weekly
+  keywords:
+  - 物价与生活成本 价格变化如何进入具体生活和生意？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一份具体账单；区分商品和总体价格；追踪需求或成本传导；回到不同人群的实际支出。
+- key: economy_money
+  name: T02 · 货币与利率
+  promise: 利率和信贷怎样传到支出与生产？
+  type: explainer
+  production_ids:
+  - economy_weekly
+  keywords:
+  - 货币与利率 利率和信贷怎样传到支出与生产？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一笔借贷或支出进入；连接银行和使用者；顺着传导环节展开；说明不同对象的反应。
+- key: economy_growth
+  name: T03 · 增长与经济结构
+  promise: 经济总量与具体行业的变化是什么关系？
+  type: explainer
+  production_ids:
+  - economy_weekly
+  keywords:
+  - 增长与经济结构 经济总量与具体行业的变化是什么关系？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一项生产或支出进入；解释总量怎样构成；对照价格数量和人均情况；连接行业与观众感受。
+- key: economy_labor
+  name: T04 · 就业与收入
+  promise: 工作机会、生产率和收入如何相互影响？
+  type: explainer
+  production_ids:
+  - economy_weekly
+  keywords:
+  - 就业与收入 工作机会、生产率和收入如何相互影响？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。刻画一个具体岗位；展示任务与产出的关系；连接企业和劳动者的选择；回到机会与收入分配。
+- key: economy_public
+  name: T05 · 财政与公共服务
+  promise: 公共收入和支出如何连接经济与生活？
+  type: explainer
+  production_ids:
+  - economy_weekly
+  keywords:
+  - 财政与公共服务 公共收入和支出如何连接经济与生活？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一项可见公共服务进入；说明收入和支出去向；解释参与者的行为变化；回到服务与长期关系。
+- key: economy_trade
+  name: T06 · 贸易与全球联系
+  promise: 一个跨境商品如何连接不同地区的生产与需求？
+  type: explainer
+  production_ids:
+  - economy_weekly
+  keywords:
+  - 贸易与全球联系 一个跨境商品如何连接不同地区的生产与需求？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随一件具体商品；画出生产和交换路线；解释各方投入与选择；观察路线变化的影响。
+- key: economy_markets
+  name: T07 · 供需与市场机制
+  promise: 价格与交易数量怎样协调具体市场？
+  type: explainer
+  production_ids:
+  - economy_weekly
+  keywords:
+  - 供需与市场机制 价格与交易数量怎样协调具体市场？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。搭建一个小型具体市场；分别观察供给和需求；对照价格数量的变化；说明这种关系的适用情境。
+- key: economy_productivity
+  name: T08 · 效率与长期发展
+  promise: 同样的投入为何能带来不同产出？
+  type: explainer
+  production_ids:
+  - economy_weekly
+  keywords:
+  - 效率与长期发展 同样的投入为何能带来不同产出？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选择可比较的生产任务；展示投入和产出；解释技术组织与协作；连接企业改进和长期发展。

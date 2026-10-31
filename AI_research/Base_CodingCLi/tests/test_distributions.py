@@ -59,6 +59,16 @@ def test_platform_drafts_are_account_version_scoped_and_shared_with_preview(plat
     assert next(d for d in rows if d['platform'] == 'douyin' and d['account_uid'] == '789')['can_prepare']
 
 
+@pytest.mark.parametrize('option,enabled', [({'text': '补充说明'}, True),
+                                          ({'text': '补充说明', 'enabled': False}, False)])
+def test_partial_comment_draft_is_materialized_for_native_editor(platform_env, monkeypatch, option, enabled):
+    profiles(monkeypatch)
+    r = render()
+    distributions.save_draft(r['id'], 'douyin', '456', {'title': '标题', 'first_comment': option})
+    comment = distributions.preview_draft(r, 'douyin')['draft']['payload']['first_comment']
+    assert comment == {'enabled': enabled, 'text': '补充说明', 'pin': False}
+
+
 def test_manual_and_automatic_same_work_merge_provenance_but_distinct_works_remain(platform_env):
     r = render()
     kwargs = dict(version=1, platform='douyin', published_on='2026-10-24')

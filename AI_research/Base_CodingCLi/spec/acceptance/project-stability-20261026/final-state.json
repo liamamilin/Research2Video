@@ -1,0 +1,17 @@
+{
+  "jobs": {
+    "CANCELLED": 1,
+    "COMPLETED": 132,
+    "FAILED": 24
+  },
+  "music_jobs": {
+    "COMPLETED": 3
+  },
+  "renders": {
+    "CANCELLED": 1,
+    "COMPLETED": 169,
+    "FAILED": 83
+  },
+  "engine_pid": 75796,
+  "storage_marker_exists": false
+}

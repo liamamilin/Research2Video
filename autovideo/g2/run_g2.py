@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import math
 import os
@@ -26,6 +27,7 @@ if str(PROJECT) not in sys.path:
     sys.path.insert(0, str(PROJECT))
 from g2 import llm_provider
 from g2.draw_things import generate_scene_backgrounds, regenerate_scene_background
+from g2.workspace import project_path
 
 #: The model service for every planning call: DeepSeek unless ``.env`` says otherwise (g2/llm_provider.py).
 PROVIDER = llm_provider.load(PROJECT / ".env")
@@ -51,7 +53,7 @@ LLM_INPUT_PER_M, LLM_OUTPUT_PER_M = PROVIDER.input_per_m, PROVIDER.output_per_m
 PROMPT_VERSION = "goal-first-v3"
 FPS = 30
 SAMPLE_RATE = 24000
-from g2.voices import VOICE_IDS, SPEEDS, mlx_engine, qwen_paths
+from g2.voices import VOICE_IDS, SPEEDS, VOXCPM_DEFAULT_CHAIN, mlx_engine, qwen_paths
 from g2 import pauses, pronunciation
 VOICE = os.environ.get("AUTOVIDEO_G2_VOICE_ID", "zf_xiaoxiao")
 OUTPUT_SPEED = float(os.environ.get("AUTOVIDEO_G2_VIDEO_SPEED", "1"))
@@ -96,9 +98,7 @@ MAX_PROJECTED_API_COST_USD = MAX_TOTAL_CALLS * (
 LLM_TIMEOUT_SECONDS = 240
 HTTP_RETRY_DELAYS = (2, 4)
 RETRYABLE_HTTP_STATUSES = {500, 502, 503, 504, 520, 521, 522, 523, 524}
-PROJECT_INPUT = Path(os.environ.get("AUTOVIDEO_G2_SOURCE_FILE", ROOT / "fixtures/case-a/source.txt")).expanduser().resolve()
-if not PROJECT_INPUT.is_relative_to(PROJECT):
-    raise RuntimeError("G2 source file must remain inside the project workspace")
+PROJECT_INPUT = project_path(PROJECT, Path(os.environ.get("AUTOVIDEO_G2_SOURCE_FILE", ROOT / "fixtures/case-a/source.txt")))
 NARRATION_SCHEMA_PATH = ROOT / "schemas/narration-plan.schema.json"
 STORYBOARD_SCHEMA_PATH = ROOT / "schemas/storyboard-plan.schema.json"
 REGISTRY_PATH = PROJECT / "schemas/component-registry-v0.2.json"
@@ -118,9 +118,7 @@ KOKORO_VOICES = PROJECT / "g0/assets/voices-v1.0.bin"
 RUN_ID = os.environ.get("AUTOVIDEO_G2_RUN_ID") or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 if not re.fullmatch(r"[A-Za-z0-9_-]{1,96}", RUN_ID):
     raise RuntimeError("AUTOVIDEO_G2_RUN_ID contains unsupported characters")
-RUN_ROOT = Path(os.environ.get("AUTOVIDEO_G2_RUN_DIR", ROOT / "runs" / RUN_ID)).expanduser().resolve()
-if not RUN_ROOT.is_relative_to(PROJECT):
-    raise RuntimeError("G2 run directory must remain inside the project workspace")
+RUN_ROOT = project_path(PROJECT, Path(os.environ.get("AUTOVIDEO_G2_RUN_DIR", ROOT / "runs" / RUN_ID)))
 FIXTURE_ROOT = RUN_ROOT / "fixtures"
 ASSETS = FIXTURE_ROOT / "assets"
 SEGMENTS_DIR = ASSETS / "segments"
@@ -143,8 +141,12 @@ def creative_messages(messages: list[dict]) -> list[dict]:
     if not path:
         return messages
     candidate = Path(path)
-    if candidate.is_symlink() or not candidate.resolve().is_relative_to(PROJECT):
+    if candidate.is_symlink():
         raise G2Fault("INVALID_INTENT_FILE", "创作偏好路径无效")
+    try:
+        candidate = project_path(PROJECT, candidate)
+    except ValueError as exc:
+        raise G2Fault("INVALID_INTENT_FILE", "创作偏好路径无效") from exc
     intent = json.loads(candidate.read_text()).get("creative_intent", {})
     intent = {k: v for k, v in intent.items() if k in {"audience", "purpose", "tone", "focus"} and isinstance(v, str) and v.strip()}
     if not intent:
@@ -379,13 +381,25 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
                                       _request_no=_request_no + 1)
         code = PROVIDER.code("AUTH_FAILED" if exc.code in {401, 403} else ("RATE_LIMIT" if exc.code == 429 else "HTTP_ERROR"))
         raise G2Fault(code, f"{PROVIDER.label} returned HTTP {exc.code}; response body and Authorization header were omitted") from exc
-    except urllib.error.URLError as exc:
+    except (urllib.error.URLError, ConnectionError, TimeoutError, http.client.IncompleteRead) as exc:
         elapsed = time.monotonic() - started
         error = {"call_id": call_id, "provider": PROVIDER.name, "error_type": type(exc).__name__,
                  "elapsed_seconds": round(elapsed, 3)}
         write_json(response_path, error)
         record_failed_request(type(exc).__name__)
-        code = PROVIDER.code("TIMEOUT" if isinstance(getattr(exc, "reason", None), TimeoutError) else "UNAVAILABLE")
+        reason = getattr(exc, "reason", exc)
+        transient = isinstance(reason, (ConnectionError, TimeoutError, http.client.IncompleteRead))
+        if transient and _http_attempt <= len(HTTP_RETRY_DELAYS) and len(CALL_RECORDS) < MAX_TOTAL_CALLS:
+            delay = HTTP_RETRY_DELAYS[_http_attempt - 1]
+            append_log(LOGS / "http-retries.jsonl", {"call_id": call_id, "stage": stage,
+                "error_type": type(exc).__name__, "http_attempt": _http_attempt,
+                "next_http_attempt": _http_attempt + 1, "wait_seconds": delay,
+                "remaining_call_budget": MAX_TOTAL_CALLS - len(CALL_RECORDS)})
+            print(f"{PROVIDER.label}: {type(exc).__name__}; retrying the same model in {delay}s", flush=True)
+            time.sleep(delay)
+            return deepseek_json_call(stage, messages, schema, attempt, _http_attempt=_http_attempt + 1,
+                                      _request_no=_request_no + 1)
+        code = PROVIDER.code("TIMEOUT" if isinstance(reason, TimeoutError) else "UNAVAILABLE")
         raise G2Fault(code, f"{PROVIDER.label} request failed ({type(exc).__name__}); no key or response body was logged") from exc
     except json.JSONDecodeError as exc:
         error = {"call_id": call_id, "provider": PROVIDER.name, "error_type": "InvalidJSONResponse",
@@ -456,14 +470,17 @@ def reuse_validated_plan(stage: str, source_builder, validator, context) -> dict
     previous_env = os.environ.get("AUTOVIDEO_G2_PREVIOUS_RUN_DIR")
     if not CONTENT_MODE or not previous_env:
         return None
-    previous = Path(previous_env).resolve()
-    if (not previous.is_relative_to(PROJECT) or previous.parent.parent != RUN_ROOT.parent.parent
+    try:
+        previous = project_path(PROJECT, Path(previous_env))
+    except ValueError:
+        return None
+    if (previous.parent.parent != RUN_ROOT.parent.parent
             or previous == RUN_ROOT):
         return None
     plan_path = previous / "artifacts" / f"{stage}-plan.json"
     request_path = previous / "artifacts/llm_calls" / f"{stage}-attempt-1.request.json"
     for path in (plan_path, request_path):
-        if not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(previous):
+        if not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(previous.resolve()):
             return None
     try:
         request = json.loads(request_path.read_text())
@@ -594,17 +611,20 @@ def synthesize_mlx_voice(engine: dict, plan: dict, settings: dict) -> dict:
     if missing:
         work_path = ARTIFACTS / "voice-work-input.json"
         write_json(work_path, {**full, "segments": missing})
-        _run_fixed_command("local-mlx-voice", [engine["python"], engine["entry"], work_path, SEGMENTS_DIR, VOICE], PROJECT, timeout=3600)
-        if (SEGMENTS_DIR / "voice-report.json").is_file():
-            fresh = json.loads((SEGMENTS_DIR / "voice-report.json").read_text())
-    if cache:
-        if missing:
+        try:
+            _run_fixed_command("local-mlx-voice", [engine["python"], engine["entry"], work_path, SEGMENTS_DIR, VOICE], PROJECT, timeout=3600)
+        finally:
+            # The child checkpoints each finished segment, even if a later one
+            # fails or times out. Preserve complete chapters before propagating
+            # the original failure; incomplete continuation chains are redone.
             try:
-                cache.publish(SEGMENTS_DIR, fresh)
-            except OSError as exc:
-                # Caching is optional; even a failed temporary-file cleanup
-                # must not discard an already successful voice synthesis.
-                cache.write_errors.append(type(exc).__name__)
+                fresh = json.loads((SEGMENTS_DIR / "voice-report.json").read_text())
+                if cache:
+                    cache.publish(SEGMENTS_DIR, fresh)
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                if cache:
+                    cache.write_errors.append(type(exc).__name__)
+    if cache:
         rows = {row["id"]: {**row, "cache_hit": False} for row in fresh.get("segments", [])}
         rows.update(cached)
         report = {**(fresh or cache.header), "segments": [rows[s["id"]] for s in full["segments"]]}
@@ -633,7 +653,7 @@ def synthesize_and_align(plan: dict) -> dict:
     cache_metrics = None
     if use_qwen:
         voice_settings = {"steps": int(os.environ.get("AUTOVIDEO_G2_VOXCPM_STEPS", "10")),
-                          "chain": os.environ.get("AUTOVIDEO_G2_VOXCPM_CHAIN", "guarded"),
+                          "chain": os.environ.get("AUTOVIDEO_G2_VOXCPM_CHAIN", VOXCPM_DEFAULT_CHAIN),
                           "compile": os.environ.get("AUTOVIDEO_G2_VOXCPM_COMPILE", "1") != "0",
                           "reference_cache": os.environ.get("AUTOVIDEO_G2_VOXCPM_REFERENCE_CACHE", "1") != "0"} if VOICE.startswith("voxcpm_") else {}
         cache_metrics = synthesize_mlx_voice(mlx, plan, voice_settings)
@@ -793,7 +813,15 @@ def validate_compile_stage(narration: dict, board: dict, alignment: dict) -> dic
     from g2.caption_alignment import supports_short_captions
     if supports_short_captions(ir):
         from g2.caption_alignment import prepare as prepare_short_captions
-        prepare_short_captions(sys.modules[__name__], ir)
+        captions = prepare_short_captions(sys.modules[__name__], ir)
+        timing_path = ARTIFACTS / 'information-timing.json'
+        if timing_path.is_file():
+            from g2.information_motion import align_visual_beats
+            changes = align_visual_beats(ir, captions, json.loads(timing_path.read_text()))
+            write_json(ARTIFACTS / 'visual-cue-alignment.json', {
+                'method': 'existing forced-aligned speech; renderer anticipates visual motion', 'cues': changes})
+            compiled = validate_video_ir(ir, FIXTURE_ROOT)
+            write_json(IR_PATH, ir)
     write_json(ARTIFACTS / "compiled-timeline.json", compiled)
     from g1.video_ir import load_registry
     write_json(ARTIFACTS / "action-catalog.json", load_registry())
@@ -899,7 +927,7 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     shutil.copyfile(PROJECT / "g1/renderer/src/ImageMaterials.tsx", src / "ImageMaterials.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/DataChart.tsx", src / "DataChart.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/ScatterChart.tsx", src / "ScatterChart.tsx")
-    for name in ("VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx", "ShotDirector.tsx", "DirectedMaterials.tsx", "StoryDirection.tsx"):
+    for name in ("VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx", "ShotDirector.tsx", "DirectedMaterials.tsx", "StoryDirection.tsx", "ContentStyle.tsx"):
         shutil.copyfile(PROJECT / "g1/renderer/src" / name, src / name)
     (src / "index.ts").write_text("import {registerRoot} from 'remotion';\nimport {Root} from './Root';\n\nregisterRoot(Root);\n", encoding="utf-8")
     ensure_renderer_dependency_link(renderer)
@@ -913,6 +941,12 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
         props["ir"]["caption_cues"] = captions
     if hybrid_segment is not None:
         props['fastCardBackgrounds'] = hybrid_segment['backgrounds']
+    style = (PACKAGING_INPUT or {}).get("production_plan", {}).get("style", {})
+    if style.get("palette_source") == "brand":
+        props["contentStyle"] = style
+    layout = (PACKAGING_INPUT or {}).get("production_plan", {}).get("brand_layout")
+    if layout:
+        props["brandHeader"] = layout
     package = package_request_from_intent()
     if package:  # a packaged video carries the column's badge instead of the product label
         props["badge"] = {"text": package.get("badge", ""), "color": package["accent"]}
@@ -921,7 +955,8 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     write_json(props_path, props)
     from g2.performance import render_resources
     try:
-        resources = render_resources(video_form=compiled.get("presentation", {}).get("preset"))
+        resources = render_resources(video_form=os.environ.get("AUTOVIDEO_G2_VIDEO_FORM"),
+                                     presentation_preset=compiled.get("presentation", {}).get("preset"))
     except ValueError as exc:
         raise G2Fault("RENDER_CONFIG_INVALID", str(exc)) from exc
     write_json(ARTIFACTS / "render-resources.json", resources)
@@ -935,10 +970,13 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
         argv.extend([f"--frames={hybrid_segment['start_frame']}-{hybrid_segment['end_frame'] - 1}", '--muted', '--color-space=bt709'])
     render_timeout = max(1200, math.ceil(compiled["total_frames"] / FPS * 6)) if CONTENT_MODE else 1200
     label = f"remotion-{hybrid_segment['label']}" if hybrid_segment else 'remotion-render'
-    _run_fixed_command(label, argv, renderer, timeout=render_timeout)
+    from g2.render_retry import run as render_with_recovery
+    render_with_recovery(sys.modules[__name__], label, argv, renderer, timeout=render_timeout, resources=resources)
 
 
 def verify_media(compiled: dict, alignment: dict) -> dict:
+    from g2.episode_navigation import apply as apply_episode_navigation
+    apply_episode_navigation(sys.modules[__name__], compiled)
     import numpy as np
     import soundfile as sf
     from PIL import Image, ImageDraw, ImageFont
@@ -1225,6 +1263,10 @@ def run_all() -> dict:
     (ARTIFACTS / "llm_calls").mkdir(parents=True)
     package_request_from_intent()
     source = PROJECT_INPUT.read_text(encoding="utf-8").strip()
+    from g2.render_checkpoint import resume as resume_render_checkpoint
+    recovered = resume_render_checkpoint(sys.modules[__name__], source)
+    if recovered is not None:
+        return recovered
     storyboard_context = {"narration_plan": None, "case_a": is_case_a_source(source)}
     print(f"G2 run {RUN_ID}; model={MODEL}; provider={PROVIDER.label}", flush=True)
     form = os.environ.get("AUTOVIDEO_G2_VIDEO_FORM", "knowledge_cards")
@@ -1483,6 +1525,9 @@ if __name__ == "__main__":
             run_step("mix-background-music", lambda: run_music_mix(sys.modules[__name__], saved_music, force=sys.argv[1] == "music-revision"))
         else:
             skip_step("mix-background-music", "本任务未启用背景配乐")
+        if saved_music.get("brand_resolved"):
+            from g2.brand_stage import run as run_brand
+            run_step("brand", lambda: run_brand(sys.modules[__name__], saved_music))
         append_log(COMMANDS_PATH, {"time_utc": datetime.now(timezone.utc).isoformat(), "label": "all",
                     "exit_code": 0, "elapsed_seconds": round(time.monotonic() - started, 3), "status": qa_result["status"]})
         private_renderer = RUN_ROOT / "renderer"

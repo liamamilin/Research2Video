@@ -14,18 +14,18 @@ import sys
 import time
 import signal
 import json
-import shutil
-import subprocess
 from types import ModuleType, SimpleNamespace
 
 if __name__ == '__main__':
     sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
     package=ModuleType('core');package.__path__=[str(Path(__file__).resolve().parents[1]/'core')];sys.modules['core']=package
 
-from core.social.adapter import AdapterError, accepted_without_work_id, clean_owner, clean_work, submission_evidence, upload_failure_details
+from core.social.adapter import AdapterError, UploadPreparationError, accepted_without_work_id, clean_owner, clean_work, submission_evidence, upload_failure_details
 from core.social.registry import PLATFORMS, adapter
 from core.social.store import SocialStore
 from core.social.verification import submission_correlations
+from core.social.media import probe_duration
+from core.social.reconciliation import prepare_lookup
 from scripts.douyin_worker import launch, private_json
 
 
@@ -177,15 +177,7 @@ async def upload(db, job, provider, pw, storage):
     task=None
     try:
         invoked=True
-        duration = None
-        binary = shutil.which('ffprobe')
-        if binary:
-            try:
-                info = subprocess.run([binary,'-v','error','-show_entries','format=duration','-of','json',job['payload']['video_path']],
-                                      capture_output=True, text=True, timeout=10, check=True)
-                duration = float(json.loads(info.stdout)['format']['duration'])
-            except (OSError, ValueError, KeyError, subprocess.SubprocessError):
-                pass
+        duration = probe_duration(job['payload'].get('video_path', ''))
         db.update(job['id'],phase='正在准备平台上传页面',result={'invocation_started':True,'duration_seconds':duration})
         task=asyncio.create_task(provider.upload(SimpleNamespace(chromium=SimpleNamespace(launch=guarded_launch)),job['payload'],storage))
         done,_=await asyncio.wait((task,future),timeout=1800,return_when=asyncio.FIRST_COMPLETED)
@@ -203,9 +195,15 @@ async def upload(db, job, provider, pw, storage):
     except Exception as exc:
         row=db.get(job['id'])
         details=upload_failure_details(exc)
+        preparation_failed = (isinstance(exc, UploadPreparationError) and not attempted
+                              and not row['work_id'] and not any(row['result'].get(field) for field in
+                              ('submission_started', 'submission_response', 'accepted')))
+        result = row['result'] if invoked or attempted else {'confirmed_not_submitted': True}
+        if preparation_failed:
+            result = {**result, 'confirmed_not_submitted': True, 'preparation_failed': True}
         error=str(exc) if isinstance(exc,AdapterError) else '平台上传未完成，结果待核对；系统不会自动重投。'
-        db.update(job['id'],status='SUBMITTED' if row['work_id'] or accepted_without_work_id(db.platform,row['result']) else 'UNKNOWN' if invoked or attempted else 'FAILED',
-                  phase='投稿结果待核对',result={**(row['result'] if invoked or attempted else {'confirmed_not_submitted':True}),'failure':details},
+        db.update(job['id'],status='FAILED' if preparation_failed else 'SUBMITTED' if row['work_id'] or accepted_without_work_id(db.platform,row['result']) else 'UNKNOWN' if invoked or attempted else 'FAILED',
+                  phase='上传准备失败，尚未投稿' if preparation_failed else '投稿结果待核对',result={**result,'failure':details},
                   error=f"{error}（阶段：{details['stage']}；异常：{details['error_type']}）")
     finally:
         if task:
@@ -266,7 +264,14 @@ async def run(state: Path, platform: str, key: str):
                         await browser.close()
                 elif job['kind']=='RECONCILE':
                     if 'lookup' in job['payload']:
-                        receipt=await asyncio.wait_for(provider.inspect_submission(pw,storage,job['uid'],job['payload']['lookup']), timeout=120)
+                        parent = db.get(job['parent_id'])
+                        lookup = (prepare_lookup(db, parent) if parent and parent['uid'] == job['uid']
+                                  and parent['kind'] == 'UPLOAD' else job['payload']['lookup'])
+                        if not lookup.get('work_id') and not lookup.get('duration_seconds'):
+                            receipt = {'uid': job['uid'], 'owned': False, 'public': False,
+                                       'platform_state': 'metadata_missing'}
+                        else:
+                            receipt=await asyncio.wait_for(provider.inspect_submission(pw,storage,job['uid'],lookup), timeout=120)
                     else:
                         receipt=await asyncio.wait_for(provider.inspect_work(pw,storage,job['uid'],job['payload']['work_id']), timeout=120)
                     db.update(key,status='DONE',phase='作品核对完成',result=receipt,error='')

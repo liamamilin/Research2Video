@@ -1,0 +1,258 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: science_physics
+  name: 熟悉现象的机制
+  title_pattern: 为什么{日常物体}在{具体条件}下会{现象}？
+  outline:
+  - 呈现可辨认的生活现象
+  - 标出物体与变化条件
+  - 沿作用过程解释机制
+  - 回到一个新的生活场景
+  examples: &id001
+  - title: Heat Flow | Building Science Education
+    url: https://bsesc.energy.gov/energy-basics/heat-flow
+    summary: 从具体建筑场景展示热量如何沿不同路径移动。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: science_physics
+  name: 只改一个条件
+  title_pattern: 同样的{物理过程}，换了{条件}结果为什么不同？
+  outline:
+  - 呈现可辨认的生活现象
+  - 对照同一问题中的对象与选择
+  - 标出物体与变化条件
+  - 沿作用过程解释机制
+  - 回到一个新的生活场景
+  examples: *id001
+- category: science_physics
+  name: 沿能量追踪
+  title_pattern: '{设备或现象}中的能量从哪里来、经过哪里、去了哪里？'
+  outline:
+  - 呈现可辨认的生活现象
+  - 标出物体与变化条件
+  - 沿一个具体案例推进解释
+  - 沿作用过程解释机制
+  - 回到一个新的生活场景
+  examples: *id001
+- category: science_chemistry
+  name: 材料为何这样表现
+  title_pattern: 同样用于{用途}，{材料A}与{材料B}为什么表现不同？
+  outline:
+  - 从一种具体材料进入
+  - 连接微观结构与可见性质
+  - 展开条件和变化过程
+  - 回到产品或生活用途
+  examples: &id002
+  - title: Development of Tide Synthetic Detergent
+    url: https://www.acs.org/education/whatischemistry/landmarks/tidedetergent.html
+    summary: 围绕洗涤剂的材料、问题和产品演进解释化学怎样进入生活。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: science_chemistry
+  name: 一次变化的前后
+  title_pattern: 把{物质}放进{环境}，为什么会发生{可见变化}？
+  outline:
+  - 从一种具体材料进入
+  - 对照同一问题中的对象与选择
+  - 连接微观结构与可见性质
+  - 展开条件和变化过程
+  - 回到产品或生活用途
+  examples: *id002
+- category: science_chemistry
+  name: 产品背后的化学
+  title_pattern: 一件{日常产品}怎样利用材料性质完成{任务}？
+  outline:
+  - 从一种具体材料进入
+  - 连接微观结构与可见性质
+  - 沿一个具体案例推进解释
+  - 展开条件和变化过程
+  - 回到产品或生活用途
+  examples: *id002
+- category: science_life
+  name: 身体的一项过程
+  title_pattern: 当我们{日常活动}时，身体内部在发生什么？
+  outline:
+  - 提出熟悉的生命现象
+  - 进入相关器官或细胞
+  - 连接信号环境和反应
+  - 回到整体过程与适用条件
+  examples: &id003
+  - title: Circadian Rhythms | National Institute of General Medical Sciences
+    url: https://www.nigms.nih.gov/education/fact-sheets/Pages/circadian-rhythms
+    summary: 从日常昼夜节律进入生物钟、细胞和环境之间的联系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: science_life
+  name: 环境与生命反应
+  title_pattern: 改变{环境条件}，为什么{生物}会有不同反应？
+  outline:
+  - 提出熟悉的生命现象
+  - 对照同一问题中的对象与选择
+  - 进入相关器官或细胞
+  - 连接信号环境和反应
+  - 回到整体过程与适用条件
+  examples: *id003
+- category: science_life
+  name: 从细胞到整体
+  title_pattern: 一个{细胞过程}，怎样影响{可见生命现象}？
+  outline:
+  - 提出熟悉的生命现象
+  - 进入相关器官或细胞
+  - 沿一个具体案例推进解释
+  - 连接信号环境和反应
+  - 回到整体过程与适用条件
+  examples: *id003
+- category: science_earth
+  name: 地球现象的过程
+  title_pattern: '{自然现象}发生之前，地球内部或表面经历了什么？'
+  outline:
+  - 展示一个地球现象
+  - 标出参与的物体和空间
+  - 跟随积累与变化过程
+  - 连接不同时间和位置
+  examples: &id004
+  - title: The Science of Earthquakes | U.S. Geological Survey
+    url: https://www.usgs.gov/programs/earthquake-hazards/science-earthquakes
+    summary: 用板块、断层和释放过程解释一个可见地球现象。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: science_earth
+  name: 时间尺度变化
+  title_pattern: 看似不变的{地貌}，怎样在不同时间尺度上改变？
+  outline:
+  - 展示一个地球现象
+  - 对照同一问题中的对象与选择
+  - 标出参与的物体和空间
+  - 跟随积累与变化过程
+  - 连接不同时间和位置
+  examples: *id004
+- category: science_earth
+  name: 沿物质循环
+  title_pattern: '{物质}在地球系统中走过哪些地方？'
+  outline:
+  - 展示一个地球现象
+  - 标出参与的物体和空间
+  - 沿一个具体案例推进解释
+  - 跟随积累与变化过程
+  - 连接不同时间和位置
+  examples: *id004
+- category: science_space
+  name: 遥远现象的解释
+  title_pattern: '{天文现象}离我们很远，为什么仍能知道它发生了什么？'
+  outline:
+  - 从一个直观宇宙问题进入
+  - 展示距离尺度和观测
+  - 用示意过程解释天体关系
+  - 回到最初疑问
+  examples: &id005
+  - title: What Is a Black Hole? | NASA Space Place – NASA Science for Kids
+    url: https://spaceplace.nasa.gov/black-holes/en
+    summary: 从观众对黑洞的直观疑问进入天体结构与观测。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: science_space
+  name: 从观察到模型
+  title_pattern: 看到{观测结果}之后，怎样理解{天体}的结构？
+  outline:
+  - 从一个直观宇宙问题进入
+  - 对照同一问题中的对象与选择
+  - 展示距离尺度和观测
+  - 用示意过程解释天体关系
+  - 回到最初疑问
+  examples: *id005
+- category: science_space
+  name: 尺度改变直觉
+  title_pattern: 把{地球上的直觉}放到{宇宙尺度}，为什么需要换一种理解？
+  outline:
+  - 从一个直观宇宙问题进入
+  - 展示距离尺度和观测
+  - 沿一个具体案例推进解释
+  - 用示意过程解释天体关系
+  - 回到最初疑问
+  examples: *id005
+- category: science_math
+  name: 重复试验看规律
+  title_pattern: 反复进行{小实验}，结果为什么会出现{分布}？
+  outline:
+  - 建立一个可重复的小情境
+  - 展示几次具体结果
+  - 用图和关系解释规律
+  - 回到观众的判断
+  examples: &id006
+  - title: Seeing Theory - Basic Probability
+    url: https://seeing-theory.brown.edu/basic-probability
+    summary: 通过交互实验和重复试验把概率概念变成可观察的结果。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: science_math
+  name: 直觉与概率
+  title_pattern: '{具体选择}看起来差不多，实际概率关系怎样比较？'
+  outline:
+  - 建立一个可重复的小情境
+  - 对照同一问题中的对象与选择
+  - 展示几次具体结果
+  - 用图和关系解释规律
+  - 回到观众的判断
+  examples: *id006
+- category: science_math
+  name: 换一种表示
+  title_pattern: 把{问题}画成{图或模型}，哪一层关系变清楚了？
+  outline:
+  - 建立一个可重复的小情境
+  - 展示几次具体结果
+  - 沿一个具体案例推进解释
+  - 用图和关系解释规律
+  - 回到观众的判断
+  examples: *id006
+- category: science_experiments
+  name: 从问题到实验
+  title_pattern: 想知道{物理量或关系}，可以怎样设计一次演示？
+  outline:
+  - 明确本次要观察的对象
+  - 说明材料工具和量
+  - 展示操作与读数
+  - 将结果放回原问题
+  examples: &id007
+  - title: SI Units | NIST
+    url: https://www.nist.gov/pml/owm/metric-si/si-units
+    summary: 从实际测量任务进入单位、量和比较方法。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: science_experiments
+  name: 读懂一个测量
+  title_pattern: 测得的{数值}究竟表示什么，单位怎样帮助比较？
+  outline:
+  - 明确本次要观察的对象
+  - 对照同一问题中的对象与选择
+  - 说明材料工具和量
+  - 展示操作与读数
+  - 将结果放回原问题
+  examples: *id007
+- category: science_experiments
+  name: 同一对象不同方法
+  title_pattern: 用{方法A}和{方法B}观察{对象}，分别能看见什么？
+  outline:
+  - 明确本次要观察的对象
+  - 说明材料工具和量
+  - 沿一个具体案例推进解释
+  - 展示操作与读数
+  - 将结果放回原问题
+  examples: *id007
+- category: science_research
+  name: 研究改变了哪一步理解
+  title_pattern: 关于{现象}的{具体研究}，让哪一个问题更清楚了？
+  outline:
+  - 还原一个研究疑问
+  - 跟随关键观察或实验
+  - 解释结果怎样连接机制
+  - 回到新的理解及其适用场景
+  examples: &id008
+  - title: Scientific Papers | Learn Science at Scitable
+    url: https://www.nature.com/scitable/topicpage/scientific-papers-13815490
+    summary: 从科学论文的问题、过程和结果关系理解一项研究怎样讲清新的认识。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: science_research
+  name: 沿研究过程走
+  title_pattern: 研究者怎样把{疑问}变成{实验或观察}？
+  outline:
+  - 还原一个研究疑问
+  - 对照同一问题中的对象与选择
+  - 跟随关键观察或实验
+  - 解释结果怎样连接机制
+  - 回到新的理解及其适用场景
+  examples: *id008
+- category: science_research
+  name: 新旧解释对照
+  title_pattern: 面对{现象}，{新解释}比原来的理解多解释了什么？
+  outline:
+  - 还原一个研究疑问
+  - 跟随关键观察或实验
+  - 沿一个具体案例推进解释
+  - 解释结果怎样连接机制
+  - 回到新的理解及其适用场景
+  examples: *id008

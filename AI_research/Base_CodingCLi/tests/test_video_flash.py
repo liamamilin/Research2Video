@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from core.video import flash, topics
+import pytest
 
 DISCOVERY = """\
 ### 0. 本期概览
@@ -110,3 +111,30 @@ def test_the_newest_report_is_used_and_a_topic_is_found_by_its_id(tmp_path):
 
 def test_no_report_means_no_topics(tmp_path):
     assert flash.load(str(tmp_path)) == (None, [])
+
+
+@pytest.mark.parametrize("first, second", [
+    ("1.", "2."), ("1、", "2、"), ("1．", "2．"),
+    ("1", "2"), ("1.1", "1.2"), ("1.1.", "1.2."),
+])
+def test_numbering_variants_keep_the_same_topics_and_fields(first, second):
+    report = DISCOVERY.replace("1.1 Opus", first + " Opus").replace("1.2 某框架", second + " 某框架")
+    expected = flash.parse(DISCOVERY, "2026-10-30")
+    assert [t.as_dict() for t in flash.parse(report, "2026-10-30")] == [t.as_dict() for t in expected]
+
+
+def test_numbered_overviews_and_source_lists_never_become_topics():
+    report = """### 0. 本期导读
+有两件值得讲的新事。
+### 1. Pro 使用量变化
+- **一句话**：Work 与 Codex 使用量提高。
+- **证据来源**：https://example.com/pro
+正文保留具体使用场景。
+### 2. 其他值得留意
+暂不展开的线索。
+### 3. 来源清单
+1. 官方页面 | 一手 | 2026-10-29 | https://example.com/pro
+"""
+    found = flash.parse(report, "2026-10-30")
+    assert len(found) == 1 and found[0].id == "2026-10-30/F1"
+    assert found[0].title == "Pro 使用量变化"

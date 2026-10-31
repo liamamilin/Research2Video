@@ -121,6 +121,33 @@ def test_discovery_needs_fingerprint_or_unique_title_time_and_duration():
     assert 'opaque-cover-key' not in str(correlated)
 
 
+def test_metadata_match_accepts_one_blank_caption_work_after_the_final_request():
+    lookup = {'title': PAYLOAD['title'], 'submitted_at': NOW - 40, 'duration_seconds': 90.6}
+    blank = parse_ks(ks_row(title='', durationSecond=90))
+    assert select_work(blank, lookup) == (None, 'missing')
+    row, reason = select_work(blank, lookup, metadata_match=True)
+    assert (row['work_id'], row['match_basis'], reason) == (WORK, 'time_duration', '')
+    assert select_work(blank, {**lookup, 'work_id': WORK}, metadata_match=True)[0]['work_id'] == WORK
+    cut = parse_ks(ks_row(title=PAYLOAD['title'][:8], durationSecond=90))
+    assert select_work(cut, lookup, metadata_match=True)[0]['work_id'] == WORK
+
+
+def test_metadata_match_refuses_a_different_caption_duration_time_or_competing_claim():
+    lookup = {'title': PAYLOAD['title'], 'submitted_at': NOW - 40, 'duration_seconds': 90}
+    other = parse_ks(ks_row(title='完全不同的另一条作品标题'))
+    assert select_work(other, lookup, metadata_match=True) == (None, 'missing')
+    assert select_work(parse_ks(ks_row(title='', durationSecond=95)), lookup, metadata_match=True) == (None, 'missing')
+    assert select_work(parse_ks(ks_row(title='', uploadTime=(NOW + 600) * 1000)), lookup, metadata_match=True) == (None, 'missing')
+    blank = parse_ks(ks_row(title=''))
+    assert select_work(blank, {**lookup, 'claimed': [WORK]}, metadata_match=True) == (None, 'missing')
+    peer = {'submitted_at': NOW - 30, 'duration_seconds': 90.5}
+    assert select_work(blank, {**lookup, 'peers': [peer]}, metadata_match=True) == (None, 'ambiguous')
+    far = {'submitted_at': NOW - 3600, 'duration_seconds': 90}
+    assert select_work(blank, {**lookup, 'peers': [far]}, metadata_match=True)[0]['work_id'] == WORK
+    twin = {**blank[0], 'work_id': '3xAnotherBlank0000'}
+    assert select_work([*blank, twin], lookup, metadata_match=True) == (None, 'ambiguous')
+
+
 def test_cover_url_correlation_drops_signatures_and_never_retains_auth_values():
     url = 'https://cdn.kuaishou.example/covers/unique-upload-opaque-file-123456.png'
     correlations = submission_correlations({'cover': url + '?signature=secret&token=private', 'api_ph': 'private', 'cookie': 'secret'})
@@ -128,6 +155,15 @@ def test_cover_url_correlation_drops_signatures_and_never_retains_auth_values():
     assert select_work(rows, {'correlations': correlations, 'submitted_at': NOW - 10, 'duration_seconds': 90})[0]['work_id'] == WORK
     assert select_work(rows, {'correlations': correlations, 'submitted_at': NOW - 86400, 'duration_seconds': 90}) == (None, 'missing')
     assert not any(value in str(correlations) for value in ('private','secret','https://','api_ph'))
+
+
+def test_old_opaque_cover_key_matches_same_key_under_creator_cdn_prefix():
+    key = 'video-covers/unique-upload-object-20261027-123456/frame.jpg'
+    old = [fingerprint(key)]
+    rows = parse_ks(ks_row(title='', publishCoverUrl='https://cdn.example/bucket/' + key + '?token=secret'))
+    assert select_work(rows, {'correlations': old, 'submitted_at': NOW - 10, 'duration_seconds': 90})[0]['work_id'] == WORK
+    assert select_work(rows, {'correlations': old, 'submitted_at': NOW - 86400, 'duration_seconds': 90}) == (None, 'missing')
+    assert 'secret' not in str(rows) and key not in str(rows)
 
 
 @pytest.mark.parametrize('method,url,body', [
@@ -243,6 +279,34 @@ def test_backoff_and_concurrent_scheduler_never_create_or_requeue_uploads(social
     assert delay(10000) == 3600
 
 
+def test_changed_input_restarts_the_count_but_total_automatic_checks_stay_bounded():
+    from core.social.verification import MAX_TOTAL_CHECKS, MAX_UNRESOLVED_CHECKS, check_progress
+    previous = {'attempts': MAX_TOTAL_CHECKS - 2, 'attempts_for_input': 1, 'input_revision': 'old'}
+    assert not check_progress(previous, 'missing', 10.0, 'new')['exhausted']
+    capped = check_progress({**previous, 'attempts': MAX_TOTAL_CHECKS - 1}, 'missing', 10.0, 'newer')
+    assert capped['exhausted'] and capped['attempts_for_input'] == 1 and capped['next_check_at'] is None
+    assert not check_progress({'attempts': MAX_TOTAL_CHECKS}, 'published', 10.0, 'x')['exhausted']
+    assert MAX_UNRESOLVED_CHECKS < MAX_TOTAL_CHECKS
+
+
+def test_unread_comment_stops_automatic_checks_after_the_cap_but_stays_manually_checkable(social_env):
+    from core.social.verification import MAX_COMMENT_CHECKS
+    db, parent = pending_job()
+    db.update(parent['id'], status='PUBLISHED', work_id=WORK)
+    child = db.create('FIRST_COMMENT', parent['uid'], {'text': '首评'}, parent_id=parent['id'])
+    db.update(child['id'], status='SENT', result={'comment_id': '1189533470970', 'check_attempts': MAX_COMMENT_CHECKS,
+                                                   'next_check_at': 1})
+    manager.schedule_comments('kuaishou', db)
+    assert not db.list(kind='COMMENT_CHECK')
+    db.update(child['id'], result={'comment_id': '1189533470970', 'check_attempts': MAX_COMMENT_CHECKS - 1, 'next_check_at': 1})
+    manager.schedule_comments('kuaishou', db)
+    assert len(db.list(kind='COMMENT_CHECK')) == 1
+    for row in db.list(kind='COMMENT_CHECK'):
+        db.update(row['id'], status='RECORDED')
+    manager.first_comment_action('kuaishou', parent['id'], 'check')
+    assert len(db.list(kind='COMMENT_CHECK')) == 2
+
+
 def test_read_only_check_has_priority_without_overlapping_upload(social_env):
     db, parent = pending_job()
     second = enqueue('kuaishou', render())
@@ -250,6 +314,17 @@ def test_read_only_check_has_priority_without_overlapping_upload(social_env):
     assert db.claim(prefer_checks=True)['id'] == child['id']
     assert db.claim(prefer_checks=True) is None
     assert db.get(second['id'])['status'] == 'QUEUED'
+
+
+def test_original_upload_is_active_only_while_its_check_executes(social_env):
+    from web.services.publication_state import describe
+    db, parent = pending_job()
+    assert not describe('kuaishou', parent['id'], manager.public_job('kuaishou', parent))['active']
+    child = db.create('RECONCILE', parent['uid'], {'work_id': WORK}, parent_id=parent['id'])
+    db.claim(prefer_checks=True)
+    assert describe('kuaishou', parent['id'], manager.public_job('kuaishou', parent))['active']
+    db.update(child['id'], status='DONE', result={'platform_state': 'missing'})
+    assert not describe('kuaishou', parent['id'], manager.public_job('kuaishou', parent))['active']
 
 
 def test_late_check_does_not_override_manually_confirmed_publication(social_env):

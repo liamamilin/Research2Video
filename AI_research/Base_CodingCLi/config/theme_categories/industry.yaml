@@ -1,0 +1,74 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: industry_processes
+  name: T01 · 一件东西怎样造
+  promise: 原料怎样经过工序变成可用产品？
+  type: explainer
+  production_ids:
+  - industry_weekly
+  keywords:
+  - 一件东西怎样造 原料怎样经过工序变成可用产品？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。拿出一件具体实物；跟随原料流过关键工序；解释每一步改变了什么；展示最终部件的用途。
+- key: industry_materials
+  name: T02 · 材料与核心部件
+  promise: 材料和部件的差异怎样影响产品？
+  type: explainer
+  production_ids:
+  - industry_weekly
+  keywords:
+  - 材料与核心部件 材料和部件的差异怎样影响产品？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示产品里的具体部件；连接材料性质与用途；解释制造中的取舍；回到整体产品的结果。
+- key: industry_equipment
+  name: T03 · 装备与自动化
+  promise: 生产设备怎样完成一个关键动作？
+  type: explainer
+  production_ids:
+  - industry_weekly
+  keywords:
+  - 装备与自动化 生产设备怎样完成一个关键动作？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。锁定一个设备和工件；拆开关键运动或控制；连接前后工位；解释设备带来的能力和取舍。
+- key: industry_supply
+  name: T04 · 供应链与生产协同
+  promise: 分散的企业怎样共同完成一张订单？
+  type: explainer
+  production_ids:
+  - industry_daily
+  keywords:
+  - 供应链与生产协同 分散的企业怎样共同完成一张订单？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随具体订单或部件；画出参与企业与物流；解释到货和加工的衔接；回到最终交付。
+- key: industry_quality
+  name: T05 · 质量与可靠性
+  promise: 产品怎样在连续生产中保持一致？
+  type: explainer
+  production_ids:
+  - industry_weekly
+  keywords:
+  - 质量与可靠性 产品怎样在连续生产中保持一致？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示产品的一项具体要求；沿工序定位形成它的动作；跟随一次检查和反馈；说明一致性怎样被维持。
+- key: industry_efficiency
+  name: T06 · 产能、效率与现场
+  promise: 生产线的时间和资源怎样影响交付？
+  type: explainer
+  production_ids:
+  - industry_weekly
+  keywords:
+  - 产能、效率与现场 生产线的时间和资源怎样影响交付？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随一件工件进入现场；标出加工等待和搬运；解释瓶颈与衔接；回到时间资源和交付关系。
+- key: industry_energy
+  name: T07 · 能源与工业基础设施
+  promise: 能源和设施怎样支持连续生产？
+  type: explainer
+  production_ids:
+  - industry_weekly
+  keywords:
+  - 能源与工业基础设施 能源和设施怎样支持连续生产？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一个具体生产用途；画出能量与设施路线；说明转换储存和使用；回到连续生产的需求。
+- key: industry_changes
+  name: T08 · 产业变化与升级
+  promise: 一处技术或供给变化怎样重组产业关系？
+  type: explainer
+  production_ids:
+  - industry_weekly
+  keywords:
+  - 产业变化与升级 一处技术或供给变化怎样重组产业关系？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一个具体产品变化进入；标出受影响的上下游；解释设备资源和配套变化；回到交付能力与产业位置。

@@ -1,0 +1,17 @@
+schema_version: 1
+name: 科技周解读
+matrix: ai_media
+type: explainer
+audience: 关注 AI 产品、技术与应用的观众
+promise: 理解一周变化之间的联系与实际用途
+production_ids:
+- tech_weekly
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 真实截图
+  - 图表
+  - 流程
+status: configured
+notes: ''

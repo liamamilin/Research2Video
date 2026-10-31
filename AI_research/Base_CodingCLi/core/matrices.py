@@ -51,6 +51,7 @@ class Matrix:
     monthly_searches: int = 0  # most searches its Jobs may use in a calendar month; 0 is no limit
     archived: bool = False     # put away: kept as it is (its Jobs still belong to it), hidden from the matrix list
     render: dict = field(default_factory=dict)  # shared video defaults; explicit task fields override them
+    content: dict = field(default_factory=dict)  # optional business identity; never changes research membership/prompts
 
     @property
     def jobs(self) -> list[str]:
@@ -60,7 +61,7 @@ class Matrix:
         return {"key": self.key, "name": self.name, "domain": self.domain, "keywords": list(self.keywords),
                 "jobs": [{"job": m.job, "copy_as": m.copy_as} for m in self.members], "errors": list(self.errors),
                 "paused": list(self.paused), "monthly_searches": self.monthly_searches, "archived": self.archived,
-                "render": self.render}
+                "render": self.render, **({"content": self.content} if self.content else {})}
 
 
 def directory(config_dir: str) -> str:
@@ -83,6 +84,29 @@ def _cap(value, errors: list[str]) -> int:
         errors.append("monthly_searches 应是每月最多几次搜索的整数（0 是不限）")
         return 0
     return value
+
+
+def content_metadata(value: dict | None) -> dict:
+    """Business presentation only; research domain, keywords and schedules stay unchanged."""
+    if value is None:
+        return {}
+    allowed = {"name", "audience", "description", "role", "parent", "status", "visual_focus"}
+    if not isinstance(value, dict) or set(value) - allowed:
+        raise ValueError("content 仅支持领域名称、受众、介绍、角色、主领域、状态和画面重点")
+    out = dict(value)
+    for key in ("name", "audience", "description", "parent"):
+        if key in out and (not isinstance(out[key], str) or len(out[key]) > 1000):
+            raise ValueError(f"content.{key} 应为文字")
+    if not isinstance(out.get("role", "domain"), str) or out.get("role", "domain") not in {"domain", "source", "operations"}:
+        raise ValueError("content.role 应为 domain、source 或 operations")
+    if not isinstance(out.get("status", "configured"), str) or out.get("status", "configured") not in {"configured", "planned"}:
+        raise ValueError("content.status 应为 configured 或 planned")
+    if out.get("parent") and not KEY.fullmatch(out["parent"]):
+        raise ValueError("content.parent 应为领域矩阵标识")
+    if "visual_focus" in out and (not isinstance(out["visual_focus"], list)
+            or not all(isinstance(item, str) and item.strip() for item in out["visual_focus"])):
+        raise ValueError("content.visual_focus 应为画面重点列表")
+    return out
 
 
 def _read(path: str, key: str) -> Matrix:
@@ -113,13 +137,18 @@ def _read(path: str, key: str) -> Matrix:
     except ValueError as exc:
         errors.append(str(exc))
         render = {}
-    unknown = set(data) - {"name", "domain", "keywords", "jobs", "paused", "monthly_searches", "archived", "render"}
+    try:
+        content = content_metadata(data.get("content"))
+    except ValueError as exc:
+        errors.append(str(exc))
+        content = {}
+    unknown = set(data) - {"name", "domain", "keywords", "jobs", "paused", "monthly_searches", "archived", "render", "content"}
     if unknown:
         errors.append(f"不认识的字段：{', '.join(sorted(unknown))}")
     return Matrix(key=key, name=str(data.get("name") or key).strip(), domain=str(data.get("domain") or "").strip(),
                   keywords=tuple(_strings(data.get("keywords"))), members=tuple(members), errors=tuple(errors),
                   paused=tuple(_strings(data.get("paused"))), monthly_searches=_cap(data.get("monthly_searches"), errors),
-                  archived=data.get("archived") is True, render=render)
+                  archived=data.get("archived") is True, render=render, content=content)
 
 
 def load_all(config_dir: str = "config") -> dict[str, Matrix]:
@@ -190,10 +219,10 @@ def jobs_of_other_matrices(job_name: str, config_dir: str = "config") -> set[str
 
 
 def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members, paused=None,
-         monthly_searches=None, archived=None, render=None) -> None:
+         monthly_searches=None, archived=None, render=None, content=None) -> None:
     """Write a matrix file. ``paused``, ``monthly_searches``, ``archived`` and ``render`` are kept unless
     given (a rename never un-pauses, lifts the limit or un-archives)."""
-    before = load_all(config_dir).get(key) if paused is None or monthly_searches is None or archived is None or render is None else None
+    before = load_all(config_dir).get(key) if any(v is None for v in (paused, monthly_searches, archived, render, content)) else None
     if paused is None:
         paused = before.paused if before else ()
     if monthly_searches is None:
@@ -202,6 +231,9 @@ def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members
         archived = before.archived if before else False
     if render is None:
         render = before.render if before else {}
+    if content is None:
+        content = before.content if before else {}
+    content = content_metadata(content)
     from .video.production_settings import validate as validate_render
     render = validate_render(render)
     data = {"name": name, "domain": domain, "keywords": _strings(keywords),
@@ -215,6 +247,8 @@ def save(config_dir: str, key: str, *, name: str, domain: str, keywords, members
         data["archived"] = True
     if render:
         data["render"] = render
+    if content:
+        data["content"] = content
     text = ("# 矩阵：一组 Job，共用一个领域和一套关键词（spec/matrices.md）。成员 Job 运行时，{keywords} 先放这里的关键词，\n"
             "# 再放 Job 自己的；{domain} 是这里的 domain。\n"
             + yaml.safe_dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False))

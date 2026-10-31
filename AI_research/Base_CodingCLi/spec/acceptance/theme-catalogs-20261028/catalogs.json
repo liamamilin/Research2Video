@@ -1,0 +1,3052 @@
+[
+  {
+    "matrix": "ai_media",
+    "name": "AI 视频栏目",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "在工作中使用 AI、希望跟上变化并改善实际用法的开发者和高频使用者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明已发生的具体变化；还原原有用户任务；对照新的操作和结果；回到受影响的用户。",
+        "production_ids": [
+          "flash_daily"
+        ],
+        "type": "news",
+        "key": "ai_flash",
+        "name": "T01 · 产品变化与实际用法",
+        "promise": "一项已经发生的变化怎样影响用户的具体任务？",
+        "keywords": [
+          "产品变化与实际用法 一项已经发生的变化怎样影响用户的具体任务？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "在工作中使用 AI、希望跟上变化并改善实际用法的开发者和高频使用者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一个实际输入进入；展示项目处理的位置；跟随关键操作与输出；说明接进现有工作的方式。",
+        "production_ids": [
+          "ai_media_opensource_digest"
+        ],
+        "type": "explainer",
+        "key": "ai_opensource",
+        "name": "T02 · 开源项目与工具",
+        "promise": "一个开源项目能接在实际任务的哪一环？",
+        "keywords": [
+          "开源项目与工具 一个开源项目能接在实际任务的哪一环？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "在工作中使用 AI、希望跟上变化并改善实际用法的开发者和高频使用者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确任务与相同输入；选择影响决策的观察维度；对照实际结果和使用过程；按需求说明取舍。",
+        "production_ids": [
+          "ai_media_arena_digest"
+        ],
+        "type": "comparison",
+        "key": "ai_model_review",
+        "name": "T03 · 模型选择与能力比较",
+        "promise": "怎样根据真实任务理解模型差异？",
+        "keywords": [
+          "模型选择与能力比较 怎样根据真实任务理解模型差异？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "在工作中使用 AI、希望跟上变化并改善实际用法的开发者和高频使用者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。给出具体工作材料；拆开连续处理步骤；展示各步输入与输出衔接；回到可使用的交付物。",
+        "production_ids": [
+          "software_weekly"
+        ],
+        "type": "tutorial",
+        "key": "ai_workflows",
+        "name": "T04 · 工作流与任务实作",
+        "promise": "怎样把模型接成能交付结果的连续任务？",
+        "keywords": [
+          "工作流与任务实作 怎样把模型接成能交付结果的连续任务？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "在工作中使用 AI、希望跟上变化并改善实际用法的开发者和高频使用者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。建立一个多步任务；标出工具状态和角色；跟随一次执行与反馈；解释这种组织方式的取舍。",
+        "production_ids": [
+          "ai_media_deep_dive"
+        ],
+        "type": "explainer",
+        "key": "ai_agents",
+        "name": "T05 · 智能体与工程组织",
+        "promise": "工具、状态和分工怎样完成多步骤任务？",
+        "keywords": [
+          "智能体与工程组织 工具、状态和分工怎样完成多步骤任务？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "在工作中使用 AI、希望跟上变化并改善实际用法的开发者和高频使用者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。拿一份具体输入建立疑问；用图解释关键机制；让原输入沿机制继续推进；回到能力与适用情形。",
+        "production_ids": [
+          "ai_media_deep_dive"
+        ],
+        "type": "deep_research",
+        "key": "ai_deep_research",
+        "name": "T06 · 模型机制与能力边界",
+        "promise": "一个机制怎样影响模型处理具体任务？",
+        "keywords": [
+          "模型机制与能力边界 一个机制怎样影响模型处理具体任务？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "在工作中使用 AI、希望跟上变化并改善实际用法的开发者和高频使用者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从具体用户或工作进入；画出提供方和使用方关系；解释采用与交付的变化；回到实际价值与使用选择。",
+        "production_ids": [
+          "ai_media_business_digest"
+        ],
+        "type": "explainer",
+        "key": "ai_business",
+        "name": "T07 · 产品商业与组织采用",
+        "promise": "AI怎样进入产品、工作与交付关系？",
+        "keywords": [
+          "产品商业与组织采用 AI怎样进入产品、工作与交付关系？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "在工作中使用 AI、希望跟上变化并改善实际用法的开发者和高频使用者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明任务资料和设备；展示模型与运行步骤；连接资源和使用体验；按实际需求比较部署选择。",
+        "production_ids": [
+          "software_weekly"
+        ],
+        "type": "tutorial",
+        "key": "ai_local",
+        "name": "T08 · 本地运行与部署",
+        "promise": "把模型放到自己的设备上需要哪些取舍？",
+        "keywords": [
+          "本地运行与部署 把模型放到自己的设备上需要哪些取舍？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "在工作中使用 AI、希望跟上变化并改善实际用法的开发者和高频使用者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确一次实际请求；拆开计算和等待位置；对照可用优化办法；回到交付目标与资源选择。",
+        "production_ids": [
+          "ai_media_arena_digest"
+        ],
+        "type": "comparison",
+        "key": "ai_efficiency",
+        "name": "T09 · 成本、延迟与效率",
+        "promise": "怎样围绕交付目标安排模型和计算资源？",
+        "keywords": [
+          "成本、延迟与效率 怎样围绕交付目标安排模型和计算资源？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 27,
+    "examples": 34,
+    "legacy_categories": [
+      {
+        "key": "ai_software_daily",
+        "name": "软件与工具雷达",
+        "promise": "从现有研究来源持续发现新技术与工具变化",
+        "audience": "关注 AI 产品、技术与应用的观众",
+        "notes": "",
+        "production_ids": [
+          "software_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "ai_software_weekly",
+        "name": "工具周观察",
+        "promise": "理解一周变化之间的联系与实际用途",
+        "audience": "关注 AI 产品、技术与应用的观众",
+        "notes": "",
+        "production_ids": [
+          "software_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      },
+      {
+        "key": "ai_tech_daily",
+        "name": "科技前沿",
+        "promise": "从现有研究来源持续发现新技术与工具变化",
+        "audience": "关注 AI 产品、技术与应用的观众",
+        "notes": "",
+        "production_ids": [
+          "tech_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "ai_tech_weekly",
+        "name": "科技周解读",
+        "promise": "理解一周变化之间的联系与实际用途",
+        "audience": "关注 AI 产品、技术与应用的观众",
+        "notes": "",
+        "production_ids": [
+          "tech_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "ai_efficiency",
+        "title": "What is inference optimization? | Google Cloud",
+        "url": "https://cloud.google.com/discover/inference-optimization"
+      },
+      {
+        "category": "ai_local",
+        "title": "Effective context engineering for AI agents \\ Anthropic",
+        "url": "https://www.anthropic.com/research/effective-context-engineering-for-ai-agents"
+      },
+      {
+        "category": "ai_local",
+        "title": "GitHub - ml-explore/mlx-lm: Run LLMs with MLX · GitHub",
+        "url": "https://github.com/ml-explore/mlx-lm"
+      },
+      {
+        "category": "ai_business",
+        "title": "Introducing the Anthropic Economic Index \\ Anthropic",
+        "url": "https://www.anthropic.com/research/the-anthropic-economic-index"
+      },
+      {
+        "category": "ai_deep_research",
+        "title": "Attention Is All You Need",
+        "url": "https://arxiv.org/abs/1706.03762"
+      },
+      {
+        "category": "ai_agents",
+        "title": "Building effective AI agents \\ Anthropic",
+        "url": "https://www.anthropic.com/research/building-effective-agents"
+      },
+      {
+        "category": "ai_workflows",
+        "title": "Pipeline · Hugging Face",
+        "url": "https://huggingface.co/docs/transformers/en/pipeline_tutorial"
+      },
+      {
+        "category": "ai_model_review",
+        "title": "Leaderboards and Evaluations · Hugging Face",
+        "url": "https://huggingface.co/docs/leaderboards/index"
+      },
+      {
+        "category": "ai_opensource",
+        "title": "GitHub - ml-explore/mlx-lm: Run LLMs with MLX · GitHub",
+        "url": "https://github.com/ml-explore/mlx-lm"
+      },
+      {
+        "category": "ai_flash",
+        "title": "Introducing the Model Context Protocol \\ Anthropic",
+        "url": "https://www.anthropic.com/news/model-context-protocol"
+      },
+      {
+        "category": "ai_opensource",
+        "title": "DeepSeek之后：中国开源人工智能生态的架构选择 - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2002437736506880041"
+      },
+      {
+        "category": "ai_opensource",
+        "title": "2026 年最佳开源大模型！",
+        "url": "https://zhuanlan.zhihu.com/p/1999590757271618835"
+      },
+      {
+        "category": "ai_opensource",
+        "title": "目前有什么可以本地部署的大模型推荐? - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/1946592744748311590"
+      },
+      {
+        "category": "ai_opensource",
+        "title": "目前，已知的开源大模型有哪些?",
+        "url": "https://www.zhihu.com/tardis/bd/ans/3517412450"
+      },
+      {
+        "category": "ai_model_review",
+        "title": "模型评分榜/-哔哩哔哩_bilibili",
+        "url": "https://search.bilibili.com/all?keyword=%E6%A8%A1%E5%9E%8B%E8%AF%84%E5%88%86%E6%A6%9C%2F"
+      },
+      {
+        "category": "ai_model_review",
+        "title": "2026全球大模型终极排名！11大顶级AI模型深度对比｜GPT5.2 vs Claude Opus4.6 vs Gemini3 Pro_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1ieAhz3EkX/"
+      },
+      {
+        "category": "ai_model_review",
+        "title": "AI对比/-哔哩哔哩_bilibili",
+        "url": "https://search.bilibili.com/all?keyword=AI%E5%AF%B9%E6%AF%94%2F"
+      },
+      {
+        "category": "ai_model_review",
+        "title": "锐评当下最强AI大模型，从夯到拉依次排名！_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1bzuz6HEXr/"
+      },
+      {
+        "category": "ai_model_review",
+        "title": "大语言模型综合排行榜-250907 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1109752917171109911"
+      },
+      {
+        "category": "ai_model_review",
+        "title": "B站AI无限竞技场",
+        "url": "https://www.bilibili.com/blackboard/era/aiarena.html?page=home"
+      },
+      {
+        "category": "ai_flash",
+        "title": "DeepSeek V4 Pro 價格永久下調 75%：每百萬代幣最低 0.003625 美元起",
+        "url": "https://www.youtube.com/watch?v=WrXx6piKVUQ"
+      },
+      {
+        "category": "ai_flash",
+        "title": "美国模型应该去蒸馏中国模型 | OpenRouter Alex Atallah | 大模型路由 | 多模型生态 | 杰文斯悖论 | AI算力成本 | 开源模型 | AI定价 | 模型蒸馏",
+        "url": "https://www.youtube.com/watch?v=JsoxafLRCz0"
+      },
+      {
+        "category": "ai_flash",
+        "title": "Gemini 3.7 Flash 发布；DeepSeek Harness 发布；DeepSeek API 涨价【AI 早报 2026-08-14】",
+        "url": "https://www.youtube.com/watch?v=56kvIlS0EAs"
+      },
+      {
+        "category": "ai_flash",
+        "title": "DeepSeek竟然也遭遇斩杀线 | Qwen3.8-Flash Next | GLM-5.3-Flash | 大模型价格战 | 智谱 | 千问 | MoE架构 | 稀疏注意力 | Qwen4架构",
+        "url": "https://www.youtube.com/watch?v=VTBmsvOFlto"
+      },
+      {
+        "category": "ai_deep_research",
+        "title": "【吐血整理】2025年最新DeepSeek研究报告整理，一共165份，欢迎收藏！（附下载）",
+        "url": "https://www.zhihu.com/tardis/zm/art/27108772640"
+      },
+      {
+        "category": "ai_deep_research",
+        "title": "2026生产力实测：深度试用50款AI工具后，这16个才是真“心头好” - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2018657676414961023"
+      },
+      {
+        "category": "ai_deep_research",
+        "title": "RAG 评估（二）：大模型做research总出现错误与虚假引用，怎么解决？ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2052398287517438329"
+      },
+      {
+        "category": "ai_deep_research",
+        "title": "[论文阅读] DeepResearcher: Scaling Deep Research via Reinforcement Learning in Real-world Environments",
+        "url": "https://www.zhihu.com/tardis/bd/art/1902018981906330401"
+      },
+      {
+        "category": "ai_business",
+        "title": "[财务BP-20]搭建经营分析体系的四个步骤：基础数据采集丨标准数据加工丨定制个性报告丨提供决策支持_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1qm421L7Wy/"
+      },
+      {
+        "category": "ai_business",
+        "title": "影响商品价格的因素，需求供给弹性之间关系——经济师03 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/731400525149372465"
+      },
+      {
+        "category": "ai_business",
+        "title": "顶级商学院EMBA课程_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1KJ411k7bH/"
+      },
+      {
+        "category": "ai_business",
+        "title": "财务bp建模，多产品定价模型搭建_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1QE421c7LS/"
+      },
+      {
+        "category": "ai_business",
+        "title": "宾夕法尼亚大学【中英⚡商业基础 专项课程|Business Foundations Specialization】_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1vZWZzAEhA/"
+      },
+      {
+        "category": "ai_business",
+        "title": "市场营销第12章定价策略_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1GA41147N7/"
+      }
+    ]
+  },
+  {
+    "matrix": "chatgpt_acquisition",
+    "name": "ChatGPT 获客矩阵",
+    "mode": "ideas",
+    "categories": [
+      {
+        "key": "chatgpt_t01_product",
+        "name": "T01 · 产品与能力认知",
+        "promise": "ChatGPT 到底能做什么？",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+        "notes": "题材编号 T01；获客作用：吸引新用户。从官方演示挑一个普通人容易理解的能力，用具体输入、操作与可见输出解释它能完成什么。优先让不了解 ChatGPT 的观众看懂结果，不堆功能名称。",
+        "production_ids": [
+          "chatgpt_t01_product"
+        ],
+        "type": "explainer"
+      },
+      {
+        "key": "chatgpt_t02_scenarios",
+        "name": "T02 · 应用场景与成果",
+        "promise": "ChatGPT 能帮我做什么？",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+        "notes": "题材编号 T02；获客作用：展示价值。围绕办公、学习、创作或小企业中的一个任务，保留任务起点、输入材料、操作过程和产物。优先官方教程与客户案例，提炼观众可迁移的用法。",
+        "production_ids": [
+          "chatgpt_t02_scenarios"
+        ],
+        "type": "explainer"
+      },
+      {
+        "key": "chatgpt_t03_tutorials",
+        "name": "T03 · 使用方法与教程",
+        "promise": "怎样才能用好 ChatGPT？",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+        "notes": "题材编号 T03；获客作用：培养兴趣。优先 ChatGPT Learn 的任务式演示，其次参考优质创作者。提炼操作起点、关键步骤、示例提示词和结果画面，用中文重新组织讲解，保留演示链接。",
+        "production_ids": [
+          "chatgpt_t03_tutorials"
+        ],
+        "type": "tutorial"
+      },
+      {
+        "key": "chatgpt_t04_testing",
+        "name": "T04 · 实测与能力验证",
+        "promise": "ChatGPT 实际表现怎么样？",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+        "notes": "题材编号 T04；获客作用：建立信任。围绕一个具体任务提炼可复现的测试输入、步骤、比较维度和预期观察点。来源已有实测就说明是谁测的；尚未执行的部分写成待实测方案，保留后续拍摄可用的操作和画面。",
+        "production_ids": [
+          "chatgpt_t04_testing"
+        ],
+        "type": "comparison"
+      },
+      {
+        "key": "chatgpt_t05_comparison",
+        "name": "T05 · AI 产品横向选择",
+        "promise": "ChatGPT 和其他 AI 哪个好？",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+        "notes": "题材编号 T05；获客作用：影响选择。围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。",
+        "production_ids": [
+          "chatgpt_t05_comparison"
+        ],
+        "type": "comparison"
+      },
+      {
+        "key": "chatgpt_t06_value",
+        "name": "T06 · 套餐与付费价值",
+        "promise": "我有没有必要付费？",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+        "notes": "题材编号 T06；获客作用：精准转化。从具体使用频率与任务判断免费或付费套餐的价值，整理当前页面支持的价格、权益、使用限制和体验差异。将套餐名称、价格币种、地区、渠道与页面日期写清，页面变更与当前权益分开表达。",
+        "production_ids": [
+          "chatgpt_t06_value"
+        ],
+        "type": "comparison"
+      },
+      {
+        "key": "chatgpt_t07_subscription",
+        "name": "T07 · 订阅与支付",
+        "promise": "想订阅，怎么完成？",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+        "notes": "题材编号 T07；获客作用：捕获需求。按购买前准备、网页与应用内订阅、支付失败、账单与取消等真实问题整理可操作的官方步骤。区分缺少付款方式与身处未支持地区，区分 ChatGPT 与 API 账单。保留每个入口、所需条件与排查分支。",
+        "production_ids": [
+          "chatgpt_t07_subscription"
+        ],
+        "type": "tutorial"
+      },
+      {
+        "key": "chatgpt_t08_troubleshooting",
+        "name": "T08 · 使用问题与避坑",
+        "promise": "使用过程中有哪些问题？",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+        "notes": "题材编号 T08；获客作用：解决顾虑。从真实用户讨论寻找高频问题，并用官方帮助与状态材料整理排查顺序。区分服务故障、额度、账号、功能入口与订阅渠道问题，让观众知道下一步点哪里或检查什么。",
+        "production_ids": [
+          "chatgpt_t08_troubleshooting"
+        ],
+        "type": "tutorial"
+      },
+      {
+        "key": "chatgpt_t09_updates",
+        "name": "T09 · 产品动态与热点",
+        "promise": "ChatGPT 最近有什么变化？",
+        "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+        "notes": "题材编号 T09；获客作用：持续引流。以官方更新与新增演示为主，结合中文用户关心的问题选择值得讲的一项变化。保留变化前后、影响人群、使用入口和可展示细节；趋势与互动线索只用于角度与优先级，不能编造搜索量或热度数据。",
+        "production_ids": [
+          "chatgpt_t09_updates"
+        ],
+        "type": "news"
+      }
+    ],
+    "patterns": 9,
+    "examples": 158,
+    "legacy_categories": [],
+    "references": [
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "Codex 正式進駐 ChatGPT 行動版 App #insidenews",
+        "url": "https://www.youtube.com/watch?v=-Eej2lYcMcw"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "GPT-5.6 发布、Codex&ChatGPT合并，这次Anthropic真的慌了…",
+        "url": "https://www.youtube.com/watch?v=ANrkj-3huis"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "Now in preview: Codex in the ChatGPT mobile app. - YouTube",
+        "url": "https://www.youtube.com/shorts/tk9qrk5G4RQ"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "OpenAI 大更新: 一隻視頻看懂 ChatGPT Work + GPT-5.6 所有核心功能，Claude 最大對手來了！",
+        "url": "https://www.youtube.com/watch?v=aZgvDDJmUCs"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "Can I use CHATGPT in China?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/3407724067"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "苹果手机怎么下载chatgpt？ - 知乎",
+        "url": "https://www.zhihu.com/tardis/jm/ans/2020538617659963364"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "Why can't I access chatgpt domestically, yet so many companies still build services based on chatgpt?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/3156735239"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "Why can't I send messages after inputting them in ChatGPT?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/3423416947"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "2024年最新开通ChatGPT Plus教程！信用卡付款失败怎么办？如何使用信用卡升级ChatGPT - 哔哩哔哩",
+        "url": "https://www.bilibili.com/read/cv31027039/"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "大陆可申请的美国信用卡，0月租！_ 微信支付宝充值入金 _ 支持GPT Plus订阅 _ 绑定Apple付款方式 _ WildCard虚拟借记卡 _ 万事达卡_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1Q3UoYkEpA/"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "【2026 年 1月最新】国内信用卡被拒，chatgpt封号原因，官方chatgpt Plus怎么购买订阅升级，gpt5充值教程，国外AI直接支付宝就搞定！_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1QfrZBpEaU/"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "国内信用卡订阅ChatGPT/Gemini被拒？保姆级教程",
+        "url": "https://www.bilibili.com/video/BV1XBpzzuEQa/"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "解决ChatGPT Plus信用卡支付被拒问题及充值指南 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/read/cv36796767"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "国内订阅 ChatGPT Plus 实用攻略：解决支付与访问问题 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1130617078017949700"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "Gemini Plus vs ChatGPT Go in 2026",
+        "url": "https://www.youtube.com/watch?v=3l8GyVW4vZU"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "ChatGPT vs Claude vs Gemini vs Grok—These 2 Plans Win (2026)",
+        "url": "https://www.youtube.com/watch?v=6YLFtp7cIMw"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "AI News: ChatGPT's cheapest subscription comes to the US: I compared Go to Plus and Pro — Explained",
+        "url": "https://www.youtube.com/watch?v=_Y2qlBXJUMQ"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "Free, Go, Plus or Pro? ChatGPT's New Plans Explained",
+        "url": "https://www.youtube.com/watch?v=vLkXG_CaHx4"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "2026年亲测30多款AI智能体工具，最后只留下这10个（附使用场景） - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2037593256230383962"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "AI工具导航",
+        "url": "https://www.zhihu.com/education/training/ai-tools"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "现在的AI工具那么多，你是怎么筛选出适合自己那款的？ - 知乎",
+        "url": "https://www.zhihu.com/tardis/jm/ans/2025340852688429250"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "2025最好用的AI工具一览表（建议收藏）",
+        "url": "https://zhuanlan.zhihu.com/p/25455398839"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "GPT-5.4/5.4 Pro 突发上线！深度实测代码与Agent代理能力，真的比5.3强吗？_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1c1PszeEDk/"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "【ChatGPT】Team订阅实测，三小时140条GPT-4额度，有惊喜也有大坑_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1C5411e7R3/"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "花了200美元，ChatGPT 5.4 Pro 能帮我解决博士数学问题吗? | Easy Riders_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1QhDvB1Efw/"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "ChatGPT Agent 完整测评 (附10大用法案例)_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV14j81zPEtu/"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "ChatGPT o1 vs Claude 全方位实测：创意写作、技术实现、高阶推理能力大比拼，o1 实力惊艳",
+        "url": "https://www.bilibili.com/video/BV1UkiiY2EVT/"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "ChatGPT有那么厉害吗？我亲自测试了一下【科技狐】_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1Nv4y1b7an/"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "How to Use ChatGPT Library Feature for Files !",
+        "url": "https://www.youtube.com/watch?v=DQF0QOq7HlM"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "ChatGPT必備外掛，這樣閱讀PDF資料超快速！AskYourPDF",
+        "url": "https://www.youtube.com/watch?v=T_6LIhVdvHc"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "Cómo trabajar con un documento PDF en chatGPT",
+        "url": "https://www.youtube.com/watch?v=3T63rVyF4oA"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "ChatGPT to Analyze PDF for Free",
+        "url": "https://www.youtube.com/watch?v=1cJR5RsPrDc"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "9亿人免费用，GPT私人秘书来了！ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2077421976931526370"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "ChatGPT 企业版正式发布：它为何而来，又去向何方？这是我们的分析",
+        "url": "https://zhuanlan.zhihu.com/p/653089530"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "ChatGPT到底有多厉害？真的有很多人在用吗？ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/717456116"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "OpenAI announced the release of collaboration features in the desktop version of ChatGPT. What are the highlights? And what impact will it have on various fields?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/63301086393"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "ChatGPT 新手教程：用 AI 构建应用程序（2026） - Mikey No Code【中英字幕】_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1T6FszAES7/"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "【玩转ChatGPT】从零开始，注册、使用_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV178596pE3R/"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "清风说GPT之一：ChatGPT5 新手入门教程（每月更新，建议收藏）_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1tBWXz6EUq/"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "【ChatGPT最完整介绍】ChatGPT是什么？OpenAI，能打赢谷歌吗？_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1FM411e7uy/"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "B站最全ChatGPT教程！一天学完30个ChatGPT使用技巧，这可能是B站目前唯一能将ChatGPT讲清楚的教程，带你从入门到精通｜GPT-4｜GPT-4o_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1Yus6exEoQ/"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "ChatGPT实操全攻略（OpenAI人工智能聊天机器人手把手零基础新人教程 34集 6.42G_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1xu4m1A7ab/"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "GPT-6今起免费用！拒答变少，话变多了 - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2091452909603051426"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "OpenAI刚发ChatGPT Space，国内版就震撼上线！ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2088753376649557098"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "9亿人免费用，GPT私人秘书来了！ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2077421976931526370"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "OpenAI光速上新GPT-6.1 Sol！一睁眼25项更新，都在这里了 - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2088521627344680497"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "解读 GPT-5：ChatGPT（Free / Plus / Pro）功能对照表 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1099455836196962313"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "GPT-4o免费了！每月150元的ChatGPT4.0 Plus会员账号还值得吗？ - 哔哩哔哩",
+        "url": "https://www.bilibili.com/read/cv34923624/"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "OpenAI 推出100 美元的 ChatGPT Pro 档订阅，调整 Plus 用户用量分配【AI 早报 2026-04-10】_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1y8DfBeE7q/"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "ChatGPT Plus有什么功能？怎么充值？2025最新订阅与权益全指南 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1067858822657212416"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "ChatGPT Plus 怎么选？深度解读各版本模型功能，附超详细充值教程！ - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1038908857566363651"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "2024年5月最新GPT-4、GPT-4o模型使用教程和简介（国内可用，必成功） - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/933860391400767521"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "ChatGPT Plus 付款失败？我用美卡也被拒，最后这样成功续费",
+        "url": "https://www.youtube.com/watch?v=0HRWAl8D6W4"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "How To Fix ChatGPT Payment Declined/Failed Issue (Easy Guide 2026)",
+        "url": "https://www.youtube.com/watch?v=dbwNp-ye_8E"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "How to fix ChatGPT Plus issue",
+        "url": "https://www.youtube.com/watch?v=d-yfAnq4WQA"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "付费订阅ChatGPT提示您的银行卡被拒绝了怎么办？ ...",
+        "url": "https://www.youtube.com/watch?v=TaJqr4YHj3U"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "ChatGPT 用户气炸了！Pro 500 美元、实测翻车！30 分钟烧光整周额度 - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2088526885479306956"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "2026 最新｜iPhone 用户如何订阅 ChatGPT Plus？保姆级教程（附避坑指南） - 知乎",
+        "url": "https://www.zhihu.com/tardis/jm/art/1999440265803481930"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "Why do so many people still choose to pay for a potentially more useful ChatGPT when DeepSeek is free?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/1902405053194700169"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "Is it worth buying a ChatGPT account for a year for a few hundred RMB?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/3426967174"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "大模型测评|中外AI大横评_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1dcSDBtEoR/"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "【中配】ChatGPT 5.2 vs. Gemini 3 Pro（正面测试）",
+        "url": "https://www.bilibili.com/video/BV1DimjBUETq/"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "2026 AI实测：GPT-5.2、Gemini 3与Claude 4.5真实对比_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1z7icB4EJf/"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "人工智能大比拼：ChatGPT-4、Claude 和 Gemini 深度对比_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1EJ4m1T7i9/"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "2026全球大模型终极排名！11大顶级AI模型深度对比｜GPT5.2 vs Claude Opus4.6 vs Gemini3 Pro_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1ieAhz3EkX/"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "ChatGPT、Claude、Gemini 什么任务该交给谁？每月600刀经验总结_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1LBPjzKECT/"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "【生成式AI導論 2024】第12講：淺談檢定大型語言模型能力的各種方式",
+        "url": "https://www.youtube.com/watch?v=Hk8Z0uhmWg4"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "GPT-4o VS GPT-4：九大任務終極評測｜ChatGPT｜AI進化論-花生",
+        "url": "https://www.youtube.com/watch?v=vD9pna5rcvE"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "Kann ChatGPT unsere 2. Online-Leistungskontrolle 2023 in den Grundlagen der Elektrotechnik lösen?",
+        "url": "https://www.youtube.com/watch?v=Q1GsYKDh7_o"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "AI Benchmarks Are Lying to You? I Tested 8 Models",
+        "url": "https://www.youtube.com/watch?v=66kRtD-tGCE"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "How can I effectively use ChatGPT?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/3348749312"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "我问了鹅厂程序员：你们工作中怎么用ChatGPT？如何高效Prompt？ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/622459022"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "一个小白如何学好prompt tuning? - 知乎",
+        "url": "https://www.zhihu.com/question/509079916/answer/2894776983"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "AI 提示词如何入门？如何更好地向 ChatGPT 提问？这篇就够了！（含提示词） - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/692666295"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "2025最新ChatGPT教程：学会这19个技巧，彻底告别AI小白！循序渐进！_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1cPGczXEXx/"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "免费白嫖的 ChatGPT 保姆级教程！10 分钟学会万能的提问公式，让 AI 帮你高效学习和打工！_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1Zu4y1h7DX/"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "【清华大学公开课】清华大学重磅推出的人工智能教程，整整258集！从零开始到透彻理解，包含理论到实战全部干货！大佬手把手教学，新手小白秒上手！_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1eya2zDEF3/"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "ChatGPT实操全攻略（OpenAI人工智能聊天机器人手把手零基础新人教程 34集 6.42G_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1xu4m1A7ab/"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "B站最全ChatGPT教程！一天学完30个ChatGPT使用技巧，这可能是B站目前唯一能将ChatGPT讲清楚的教程，带你从入门到精通｜GPT-4｜GPT-4o_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1Yus6exEoQ/"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "清风说GPT之一：ChatGPT5 新手入门教程（每月更新，建议收藏）_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1tBWXz6EUq/"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "AI 小白也能學！ChatGPT 全方位指南，從入門到精通，一次學會高效應用專業技巧! #chatgpt #openai",
+        "url": "https://www.youtube.com/watch?v=vicP7ZIvsA8"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "【2025年ChatGPT最全教程】16種使用技巧，從入門到精通",
+        "url": "https://www.youtube.com/watch?v=FRIa3T49urg"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "【完全免费】GPT4o高级功能向所有用户开放🥳｜ChatGPT中国怎么用📲｜保姆级账号注册教程｜无需境外手机接码｜⭕️所有免费功能演示｜0成本使用文生图、实时搜索、视觉数据分析功能｜红孩儿Redman",
+        "url": "https://www.youtube.com/watch?v=8V8tEBfeuCU"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "【これ1本でわかる】ChatGPTの便利機能まとめ！30種の使い方を網羅し脱初心者へ",
+        "url": "https://www.youtube.com/watch?v=8NW2U6iSUTM"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "ChatGPT release notes",
+        "url": "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "Troubleshooting ChatGPT Error Messages",
+        "url": "https://help.openai.com/en/articles/7996703-troubleshooting-chatgpt-error-messages"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "Canceling your ChatGPT subscription",
+        "url": "https://help.openai.com/en/articles/7232927-canceling-your-chatgpt-subscription"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "Free vs Paid ChatGPT | The Real Difference",
+        "url": "https://www.youtube.com/watch?v=AlVSZcN-h_0"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "200美金/月的GPT Pro，真的值吗？o1 Pro 多场景应用详测。",
+        "url": "https://www.bilibili.com/video/BV1bGqUYSEw4/"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "ChatGPT Tutorial for Beginners: How to Actually Get Work Done with AI",
+        "url": "https://kevinstratvert.com/2026/07/01/chatgpt-tutorial-for-beginners-how-to-actually-get-work-done-with-ai/"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "How to Turn a Business Question Into a Strategy Deck With ChatGPT Work",
+        "url": "https://www.youtube.com/watch?v=XjSJ6ybS9I8"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "Get started with ChatGPT Work",
+        "url": "https://learn.chatgpt.com/videos"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "GPT‑6 Sol、Luna来了：能力更强、价格更低，Codex怎么用？ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2086080060793083850"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "OpenAI 推出个人 AI 智能体 dots；传豆包将推个人 AI 产品「Spell」；SpaceX 发射星舰成功入轨 | 极客早知道 - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2088559515239200513"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "刚刚，ChatGPT免费版史诗升级！GPT-5.6可以无限白嫖了 - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2069018837614326052"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "除了更贵的订阅和砍半的额度，OpenAI 想做的还是「微信」 - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2088637077940445733"
+      },
+      {
+        "category": "chatgpt_t09_updates",
+        "title": "OpenAI「疯狂28天」首日，这都发了些啥啊… - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2090812756115067700"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "ChatGPT大规模封号，为什么有的人没事？哪些坑一定不能踩_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV12j411c7vw/"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "ChatGPT Agent 完整测评 (附10大用法案例)_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV14j81zPEtu/"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "ChatGPT、Claude、Grok、Gemini，2025年8月谁更香？ - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1100810039390633991"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "ChatGPT Plus有什么功能？怎么充值？2025最新订阅与权益全指南 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/read/cv41705406/"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "ChatGPT Plus 优势与劣势对比，如何使用正版 ChatGPT？ - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/992175769381765139"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "Chatgpt功能详解：37 分钟了解所有 ChatGPT 功能_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1PMqjBkEPJ/"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "ChatGPT 国内使用保姆教程，含GPT-5、GPT-o3【2025年更新】 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1124656646996361239"
+      },
+      {
+        "category": "chatgpt_t08_troubleshooting",
+        "title": "ChatGPT一直加载不出来？核心原因 + 实测解决方案全解析 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1103468933351997442"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "👍【2024年最新】在中国如何购买 ChatGPT Plus？我的4种方法充值购买 ChatGPT Plus！使用支付宝、OCBC、虚拟信用卡订阅开通 ChatGPT Plus｜数字牧民LC",
+        "url": "https://www.youtube.com/watch?v=tCx3dBCV0Q4"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "2026最新！最安全的ChatGPT Plus购买方法完全汇总，微信支付即可 | ChatGPT Plus/Pro国内充值订阅指南，代充、苹果礼品卡、谷歌商店、镜像全测评 - YouTube",
+        "url": "https://www.youtube.com/watch?v=yuwoBUZCsqc"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "【全网首发】大陆用户直接订阅ChatGPT Plus，无需信用卡，支付宝最新订阅ChatGPT Plus的“秘密通道”",
+        "url": "https://www.youtube.com/watch?v=vxfRHBfMyvg"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "ChatGPT小白使用教程：GPT项目功能、Codex使用方法、AI编程开发、会员充值没有信用卡怎么办？ - YouTube",
+        "url": "https://www.youtube.com/watch?v=KRGq3rPpZaM"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "【AI教學】ChatGPT 訂閱方案比較：ChatGPT Go / Plus / Pro 5X / Pro 20X 怎麼選？一般人該購買哪個？",
+        "url": "https://www.youtube.com/watch?v=Ozr75-oQEFg"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "ChatGPTの有料版「ChatGPT Plus」が日本で利用可能に！無料版との速度比較や申込方法を解説",
+        "url": "https://www.youtube.com/watch?v=6PXvBJe0LTw"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "不用代充、不买虚拟卡！用自己的国内银行卡订上 ChatGPT Plus｜解锁 codex claude 保姆级教程 - YouTube",
+        "url": "https://www.youtube.com/watch?v=o9GhNogsFuI"
+      },
+      {
+        "category": "chatgpt_t07_subscription",
+        "title": "How to Upgrade your Plan on ChatGPT [2026 Full Guide]",
+        "url": "https://www.youtube.com/watch?v=sNCTxwSJCwU"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "ChatGPT也有会员专属广告？OpenAI可能学坏了 - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/1913684055616124908"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "How to install the ChatGPT software?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/3343049506"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "9亿人免费用，GPT私人秘书来了！ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2077421976931526370"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "ChatGPT广告正式上线，AI营销的格局彻底变了 - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/2036211796185454317"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "Is ChatGPT really being used by a lot of people?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/3255102576"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "ChatGPT到底有多厉害？真的有很多人在用吗？ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/717456116"
+      },
+      {
+        "category": "chatgpt_t06_value",
+        "title": "花几百块买ChatGPT账号一年值得吗?",
+        "url": "https://www.zhihu.com/tardis/bd/ans/3400255850"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "2026超好用的十大 AI 工具！避免你被时代淘汰！免费且强大！_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1wvDmBaETB/"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "AI工具选型焦虑？别被持续付费和同质化套牢！ - 哔哩哔哩",
+        "url": "https://www.bilibili.com/read/cv44401010"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "ChatGPT Plus 怎么选？深度解读各版本模型功能，附超详细充值教程！ - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1038908857566363651"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "大模型测评|GLM|千问|DeepSeek|MiniMax|Kimi_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1sHQQBDEXX/"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "如何科学选择真正适合你的AI？(国内篇)_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1c7abzjErt/"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "DeepSeek、ChatGPT、Gemini、Grok、通义千问、豆包 大横评，AI 是真智能还是真智障？_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1uA1KByEti/"
+      },
+      {
+        "category": "chatgpt_t05_comparison",
+        "title": "ChatGPT、Claude、Grok、Gemini，2025年8月谁更香？ - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1100810039390633991"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "ChatGPT 5.6 全面实测：10分钟做出游戏、A380 3D与火箭SVG！Chat/Work/Codex合体，成本仅Claude 1/16｜红孩儿Redman",
+        "url": "https://www.youtube.com/watch?v=dVKJKxcSzac"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "I tested the new ChatGPT 5!",
+        "url": "https://www.youtube.com/watch?v=MmFLDvOFLW0"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "Is ChatGPT Plus Even Worth It in 2026?",
+        "url": "https://www.youtube.com/watch?v=jwGTzbziLI8"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "Je teste le nouveau ChatGPT Pro — 200$ ça les vaut ?",
+        "url": "https://www.youtube.com/watch?v=dmI0Mhh9M9M"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "AI工具怎麼選？AI 免費版大評比！ChatGPT、Gemini、Claude 該選誰？5 大情境實測全公開｜泛科學院",
+        "url": "https://www.youtube.com/watch?v=y7mFMDxc1VM"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "ChatGPT plus值得付費購買嗎？如何選擇適合自己的AI服務：ChatGPT付費使用體驗",
+        "url": "https://www.youtube.com/watch?v=XGf8BE_qm7s"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "I Used ChatGPT Pro for 90 Days. Was It Worth It?",
+        "url": "https://www.youtube.com/watch?v=fMpwv0GYkcA"
+      },
+      {
+        "category": "chatgpt_t04_testing",
+        "title": "2026年5大AI助手终极对比：Claude vs ChatGPT vs Gemini vs Grok vs DeepSeek——到底哪个最值得订阅？",
+        "url": "https://www.youtube.com/watch?v=cwym1VAM3ZU"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "#ChatGPT# - 知乎",
+        "url": "https://www.zhihu.com/pin/special/1584918820421861376"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "知乎 - 有问题，就会有答案",
+        "url": "https://www.zhihu.com/en/article/634869848"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "花几百块买ChatGPT账号一年值得吗?",
+        "url": "https://www.zhihu.com/tardis/bd/ans/3400255850"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "如何让 ChatGPT 更懂你？新功能 Custom Instructions 尝试",
+        "url": "https://www.zhihu.com/tardis/bd/art/645848626?source_id=1001"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "ChatGPT到底有多厉害？真的有很多人在用吗？ - 知乎",
+        "url": "https://zhuanlan.zhihu.com/p/717456116"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "Is ChatGPT useful?-zhihu",
+        "url": "https://www.zhihu.com/en/answer/3372420484"
+      },
+      {
+        "category": "chatgpt_t03_tutorials",
+        "title": "知乎 - 有问题，就会有答案",
+        "url": "https://www.zhihu.com/en/article/653997941"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "ChatGPT Plus有什么功能？怎么充值？2025最新订阅与权益全指南 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1067858822657212416"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "ChatGPT、Claude、Grok、Gemini，2025年8月谁更香？ - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1100810039390633991"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "解读 GPT-5：ChatGPT（Free / Plus / Pro）功能对照表 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1099455836196962313"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "ChatGPT Agent 完整测评 (附10大用法案例)_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV14j81zPEtu/"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "ChatGPT在个人生活中的应用场景 - 哔哩哔哩",
+        "url": "https://www.bilibili.com/opus/1016390756331421698"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "200美金/月的GPT Pro，真的值吗？o1 Pro 多场景应用详测。_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1bGqUYSEw4/"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "Chatgpt功能详解：37 分钟了解所有 ChatGPT 功能_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV1PMqjBkEPJ/"
+      },
+      {
+        "category": "chatgpt_t02_scenarios",
+        "title": "3 Andrej Karpathy 讲座：我如何使用大型语言模型_哔哩哔哩_bilibili",
+        "url": "https://www.bilibili.com/video/BV11cUaBQEor/"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "AI工具怎麼選？AI 免費版大評比！ChatGPT、Gemini、Claude 該選誰？5 大情境實測全公開｜泛科學院",
+        "url": "https://www.youtube.com/watch?v=y7mFMDxc1VM"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "[2시간 총정리] 챗GPT는 처음부터 제대로 배워야 합니다. (회원가입부터 극한의 결과물을 뽑아내는 방법까지 + 무료 유료 차이)",
+        "url": "https://www.youtube.com/watch?v=EBqnrmnp_i8"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "All ChatGPT Features Explained in 2024! (Full Guide)",
+        "url": "https://www.youtube.com/watch?v=lFZgr6ayX_U"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "震撼到我了！OpenAI ChatGPT-4o發佈會【中文版完整版】",
+        "url": "https://www.youtube.com/watch?v=x0WURH1zXi8"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "ChatGPT plus值得付費購買嗎？如何選擇適合自己的AI服務：ChatGPT付費使用體驗",
+        "url": "https://www.youtube.com/watch?v=XGf8BE_qm7s"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "一次帶你搞懂 ChatGPT「4種用戶」、「8種模型」功能解析！選對模型比課金還重要！同一個指令沒想到差異居然這麼大！｜泛科學院",
+        "url": "https://www.youtube.com/watch?v=-UvK-SYXpaw"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "ChatGPT, Explained: What to Know About OpenAI's Chatbot | WSJ Tech News Briefing",
+        "url": "https://www.youtube.com/watch?v=qqxdsooKggE"
+      },
+      {
+        "category": "chatgpt_t01_product",
+        "title": "【AI教學】ChatGPT 訂閱方案比較：ChatGPT Go / Plus / Pro 5X / Pro 20X 怎麼選？一般人該購買哪個？",
+        "url": "https://www.youtube.com/watch?v=Ozr75-oQEFg"
+      }
+    ]
+  },
+  {
+    "matrix": "company",
+    "name": "商业与公司研究",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从顾客的一次购买进入；画出产品与付费关系；展开主要收入和成本；回到这种模式适合的需求。",
+        "production_ids": [
+          "company_weekly"
+        ],
+        "type": "explainer",
+        "key": "company_models",
+        "name": "T01 · 商业模式与盈利",
+        "promise": "产品、顾客、付费者和收入怎样连在一起？",
+        "keywords": [
+          "商业模式与盈利 产品、顾客、付费者和收入怎样连在一起？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。还原顾客要完成的事；对照两个具体选择；解释差异怎样产生；追到顾客和竞争者的下一步。",
+        "production_ids": [
+          "company_daily"
+        ],
+        "type": "explainer",
+        "key": "company_competition",
+        "name": "T02 · 竞争与差异化",
+        "promise": "公司靠什么让顾客持续选择它？",
+        "keywords": [
+          "竞争与差异化 公司靠什么让顾客持续选择它？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一笔具体经营活动；展示收入支出和收付款时间；连接相关报表或指标；用业务过程解释读数。",
+        "production_ids": [
+          "company_weekly"
+        ],
+        "type": "explainer",
+        "key": "company_financials",
+        "name": "T03 · 财务与现金流",
+        "promise": "报表怎样反映一家公司的真实经营动作？",
+        "keywords": [
+          "财务与现金流 报表怎样反映一家公司的真实经营动作？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。描绘一个目标用户；跟随一次发现和尝试；找出转化与留存的关键动作；讨论阶段和可迁移做法。",
+        "production_ids": [
+          "company_weekly"
+        ],
+        "type": "explainer",
+        "key": "company_growth",
+        "name": "T04 · 用户与增长路径",
+        "promise": "企业如何找到用户并形成持续使用？",
+        "keywords": [
+          "用户与增长路径 企业如何找到用户并形成持续使用？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。用一个顾客需求进入；列出真实可选产品或套餐；拆解价格与交付的关系；按需求解释选择路径。",
+        "production_ids": [
+          "company_weekly"
+        ],
+        "type": "comparison",
+        "key": "company_pricing",
+        "name": "T05 · 定价与产品组合",
+        "promise": "价格和产品组合如何改变顾客选择？",
+        "keywords": [
+          "定价与产品组合 价格和产品组合如何改变顾客选择？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一张具体订单；沿交付路线跟随流转；解释等待和协作的位置；回到顾客最终收到什么。",
+        "production_ids": [
+          "company_weekly"
+        ],
+        "type": "explainer",
+        "key": "company_operations",
+        "name": "T06 · 运营与交付",
+        "promise": "公司怎样把一次需求稳定变成一份交付？",
+        "keywords": [
+          "运营与交付 公司怎样把一次需求稳定变成一份交付？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。还原一次具体决策；认识角色与各自信息；跟随试验和反馈；解释组织方式的取舍。",
+        "production_ids": [
+          "company_weekly"
+        ],
+        "type": "explainer",
+        "key": "company_organization",
+        "name": "T07 · 组织与决策",
+        "promise": "团队如何分工、决策并把想法做成产品？",
+        "keywords": [
+          "组织与决策 团队如何分工、决策并把想法做成产品？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随一次具体平台互动；画出供给使用与平台关系；解释分发与反馈机制；回到参与者各自的选择。",
+        "production_ids": [
+          "company_weekly"
+        ],
+        "type": "explainer",
+        "key": "company_platforms",
+        "name": "T08 · 平台与生态",
+        "promise": "平台怎样连接参与者并形成价值？",
+        "keywords": [
+          "平台与生态 平台怎样连接参与者并形成价值？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 24,
+    "examples": 8,
+    "legacy_categories": [
+      {
+        "key": "company_daily",
+        "name": "商业与公司每日观察",
+        "promise": "发现商业与公司的新变化并讲清影响",
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "",
+        "production_ids": [
+          "company_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "company_weekly",
+        "name": "商业与公司专题解读",
+        "promise": "串联商业与公司的重要变化，理解原因与关系",
+        "audience": "关注公司、商业模式与竞争的观众",
+        "notes": "",
+        "production_ids": [
+          "company_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "company_platforms",
+        "title": "How Netflix’s Recommendations System Works | Netflix Help Center",
+        "url": "https://help.netflix.com/en/node/100639"
+      },
+      {
+        "category": "company_organization",
+        "title": "To our shareowners:",
+        "url": "https://ir.aboutamazon.com/files/doc_financials/annual/2015-Letter-to-Shareholders.PDF"
+      },
+      {
+        "category": "company_operations",
+        "title": "Toyota Production System | Vision & Philosophy | Company | Toyota Motor Corporation Official Global Website",
+        "url": "https://global.toyota/en/company/vision-and-philosophy/production-system"
+      },
+      {
+        "category": "company_pricing",
+        "title": "Pricing Strategy Guide: 10 Types and Examples (2026) - Shopify",
+        "url": "https://www.shopify.com/blog/pricing-strategies"
+      },
+      {
+        "category": "company_growth",
+        "title": "Do Things that Don't Scale",
+        "url": "https://paulgraham.com/ds.html"
+      },
+      {
+        "category": "company_financials",
+        "title": "SEC.gov | Beginners' Guide to Financial Statements",
+        "url": "https://www.sec.gov/about/reports-publications/beginners-guide-financial-statements"
+      },
+      {
+        "category": "company_competition",
+        "title": "Jeff Bezos' 2016 Letter to Amazon Shareholders",
+        "url": "https://www.aboutamazon.com/news/company-news/2016-letter-to-shareholders"
+      },
+      {
+        "category": "company_models",
+        "title": "Jeff Bezos' Original 1997 Letter to Amazon Shareholders",
+        "url": "https://www.aboutamazon.com/news/company-news/amazons-original-1997-letter-to-shareholders"
+      }
+    ]
+  },
+  {
+    "matrix": "consumer",
+    "name": "消费科技与购买决策",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明具体使用者和环境；列出真正要完成的任务；比较影响任务的差异；给出按需求选择的路径。",
+        "production_ids": [
+          "consumer_weekly"
+        ],
+        "type": "comparison",
+        "key": "consumer_choices",
+        "name": "T01 · 需求与选购",
+        "promise": "怎样从自己的需求缩小产品选择？",
+        "keywords": [
+          "需求与选购 怎样从自己的需求缩小产品选择？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随一次实际使用；标出与任务有关的细节；对照动作和结果；回到适合的人和场景。",
+        "production_ids": [
+          "consumer_weekly"
+        ],
+        "type": "explainer",
+        "key": "consumer_experience",
+        "name": "T02 · 使用场景与体验",
+        "promise": "一个产品细节怎样影响实际使用？",
+        "keywords": [
+          "使用场景与体验 一个产品细节怎样影响实际使用？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。给出一项具体任务；展示与它有关的参数；连接测试和可见体验；解释实际选择的取舍。",
+        "production_ids": [
+          "consumer_weekly"
+        ],
+        "type": "explainer",
+        "key": "consumer_specs",
+        "name": "T03 · 参数与性能理解",
+        "promise": "怎样把参数变成可理解的使用差异？",
+        "keywords": [
+          "参数与性能理解 怎样把参数变成可理解的使用差异？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从现有设备和需求进入；列出买入维护和使用成本；对照实际可用的方案；按使用阶段理解价值。",
+        "production_ids": [
+          "consumer_weekly"
+        ],
+        "type": "comparison",
+        "key": "consumer_value",
+        "name": "T04 · 总成本与购买价值",
+        "promise": "一件产品从买入到后续使用要花什么？",
+        "keywords": [
+          "总成本与购买价值 一件产品从买入到后续使用要花什么？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。锁定一个问题与部件；展示进入和更换路径；解释设计与配套影响；回到维修后的使用。",
+        "production_ids": [
+          "consumer_weekly"
+        ],
+        "type": "explainer",
+        "key": "consumer_repair",
+        "name": "T05 · 维修与升级",
+        "promise": "产品怎样被拆开、维护并延长使用？",
+        "keywords": [
+          "维修与升级 产品怎样被拆开、维护并延长使用？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。描述可辨认的设备状态；连接内部过程与使用条件；展示对应的实际操作；回到日常使用安排。",
+        "production_ids": [
+          "consumer_weekly"
+        ],
+        "type": "explainer",
+        "key": "consumer_care",
+        "name": "T06 · 日常使用与保养",
+        "promise": "怎样理解设备状态并安排日常使用？",
+        "keywords": [
+          "日常使用与保养 怎样理解设备状态并安排日常使用？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确一个跨设备任务；展示设备和资料流向；跟随连接和交接动作；解释环境与使用的取舍。",
+        "production_ids": [
+          "consumer_weekly"
+        ],
+        "type": "tutorial",
+        "key": "consumer_ecosystems",
+        "name": "T07 · 兼容与设备协作",
+        "promise": "几件设备怎样共同完成一项任务？",
+        "keywords": [
+          "兼容与设备协作 几件设备怎样共同完成一项任务？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从具体功能和资料进入；标出账户权限与设备；展示设置和操作的影响；回到使用者的需求选择。",
+        "production_ids": [
+          "consumer_weekly"
+        ],
+        "type": "explainer",
+        "key": "consumer_privacy",
+        "name": "T08 · 权限与信息使用",
+        "promise": "设备怎样使用账户、权限和个人资料？",
+        "keywords": [
+          "权限与信息使用 设备怎样使用账户、权限和个人资料？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 24,
+    "examples": 8,
+    "legacy_categories": [
+      {
+        "key": "consumer_daily",
+        "name": "消费与生活每日观察",
+        "promise": "发现消费与生活的新变化并讲清影响",
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "",
+        "production_ids": [
+          "consumer_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "consumer_weekly",
+        "name": "消费与生活专题解读",
+        "promise": "串联消费与生活的重要变化，理解原因与关系",
+        "audience": "关注产品选择和日常生活的观众",
+        "notes": "",
+        "production_ids": [
+          "consumer_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "consumer_privacy",
+        "title": "Apple Platform Security",
+        "url": "https://help.apple.com/pdf/security/en_US/apple-platform-security-guide.pdf"
+      },
+      {
+        "category": "consumer_ecosystems",
+        "title": "Use Handoff to continue tasks on your other Apple devices - Apple Support",
+        "url": "https://support.apple.com/en-us/102426"
+      },
+      {
+        "category": "consumer_care",
+        "title": "If you see battery “Service Recommended” on your Mac laptop - Apple Support (IE)",
+        "url": "https://support.apple.com/en-ie/108376"
+      },
+      {
+        "category": "consumer_repair",
+        "title": "Smartphone Repairability Scores | Most Repairable Phones - iFixit",
+        "url": "https://www.ifixit.com/repairability/smartphone-repairability-scores"
+      },
+      {
+        "category": "consumer_value",
+        "title": "Apple Service and Repair for iPhone Battery - Apple Support",
+        "url": "https://support.apple.com/iphone/repair/battery-replacement"
+      },
+      {
+        "category": "consumer_specs",
+        "title": "How We Test Monitors: Transforming Data Into Objective Reviews - RTINGS.com",
+        "url": "https://www.rtings.com/monitor/learn/how-we-test"
+      },
+      {
+        "category": "consumer_experience",
+        "title": "How We Test Headphones: Transforming Data Into Objective Reviews - RTINGS.com",
+        "url": "https://www.rtings.com/headphones/learn/how-we-test"
+      },
+      {
+        "category": "consumer_choices",
+        "title": "How We Test Dozens of TVs Each Year: Transforming Mountains of Data Into Objective Reviews - RTINGS.com",
+        "url": "https://www.rtings.com/tv/learn/how-we-test"
+      }
+    ]
+  },
+  {
+    "matrix": "culture",
+    "name": "文化与艺术",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示作品和具体细节；引导视线沿画面移动；连接形式与表达；回到整件作品的观看。",
+        "production_ids": [
+          "culture_weekly"
+        ],
+        "type": "explainer",
+        "key": "culture_works",
+        "name": "T01 · 读懂一件作品",
+        "promise": "作品的哪些细节让表达变得可见？",
+        "keywords": [
+          "读懂一件作品 作品的哪些细节让表达变得可见？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。聚焦一个可见效果；展示材料与创作动作；解释技法的具体作用；放回作品整体表达。",
+        "production_ids": [
+          "culture_weekly"
+        ],
+        "type": "explainer",
+        "key": "culture_techniques",
+        "name": "T02 · 形式、材料与技法",
+        "promise": "创作者怎样用材料和技法形成表达？",
+        "keywords": [
+          "形式、材料与技法 创作者怎样用材料和技法形成表达？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一件具体作品进入；还原创作处境和材料；跟随表达选择；回到作品给观众的感受。",
+        "production_ids": [
+          "culture_weekly"
+        ],
+        "type": "explainer",
+        "key": "culture_creators",
+        "name": "T03 · 创作者与创作过程",
+        "promise": "一个创作者怎样形成具体作品选择？",
+        "keywords": [
+          "创作者与创作过程 一个创作者怎样形成具体作品选择？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一个可见形式或符号；沿地点与时代追踪；对照保留和改变的细节；解释交流中的新表达。",
+        "production_ids": [
+          "culture_weekly"
+        ],
+        "type": "explainer",
+        "key": "culture_exchange",
+        "name": "T04 · 文化流动与交融",
+        "promise": "一种形式怎样在不同地方被理解和改写？",
+        "keywords": [
+          "文化流动与交融 一种形式怎样在不同地方被理解和改写？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一件熟悉物品；跟随使用动作；连接材料制作和形式；回到日常体验与审美。",
+        "production_ids": [
+          "culture_weekly"
+        ],
+        "type": "explainer",
+        "key": "culture_design",
+        "name": "T05 · 日常物与设计",
+        "promise": "日常用品怎样把制作、功能与审美连起来？",
+        "keywords": [
+          "日常物与设计 日常用品怎样把制作、功能与审美连起来？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。呈现一个具体片段；引导关注声音时间或动作；对照表达选择；回到完整表演的感受。",
+        "production_ids": [
+          "culture_weekly"
+        ],
+        "type": "explainer",
+        "key": "culture_performance",
+        "name": "T06 · 声音、影像与表演",
+        "promise": "表演怎样用时间、声音和动作组织感受？",
+        "keywords": [
+          "声音、影像与表演 表演怎样用时间、声音和动作组织感受？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。让观众看见一个具体动作；连接工具材料与知识；跟随学习和传递过程；回到当代使用与文化意义。",
+        "production_ids": [
+          "culture_weekly"
+        ],
+        "type": "explainer",
+        "key": "culture_heritage",
+        "name": "T07 · 手艺与文化传承",
+        "promise": "一项手艺的知识怎样通过动作传递？",
+        "keywords": [
+          "手艺与文化传承 一项手艺的知识怎样通过动作传递？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。观察一处具体人物或场景；还原相关生活环境；连接作者观众与表达；带着理解重新看作品。",
+        "production_ids": [
+          "culture_weekly"
+        ],
+        "type": "explainer",
+        "key": "culture_context",
+        "name": "T08 · 作品与时代生活",
+        "promise": "作品怎样反映并参与当时的生活？",
+        "keywords": [
+          "作品与时代生活 作品怎样反映并参与当时的生活？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 24,
+    "examples": 12,
+    "legacy_categories": [
+      {
+        "key": "culture_daily",
+        "name": "文化与艺术每日观察",
+        "promise": "发现文化与艺术的新变化并讲清影响",
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "",
+        "production_ids": [
+          "culture_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "culture_weekly",
+        "name": "文化与艺术专题解读",
+        "promise": "串联文化与艺术的重要变化，理解原因与关系",
+        "audience": "对作品、艺术与文化史感兴趣的观众",
+        "notes": "",
+        "production_ids": [
+          "culture_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "culture_context",
+        "title": "张择端清明上河图卷 - 故宫博物院",
+        "url": "https://www.dpm.org.cn/collection/paint/228226.html"
+      },
+      {
+        "category": "culture_heritage",
+        "title": "“后母戊”青铜方鼎_中国国家博物馆官方网站",
+        "url": "https://www.chnmuseum.cn/zp/zpml/kgfjp/202008/t20200824_247255.shtml"
+      },
+      {
+        "category": "culture_heritage",
+        "title": "Craftsmanship of mechanical watchmaking and art mechanics - UNESCO Intangible Cultural Heritage",
+        "url": "https://ich.unesco.org/en/RL/craftsmanship-of-mechanical-watchmaking-and-art-mechanics-01560"
+      },
+      {
+        "category": "culture_performance",
+        "title": "Organ craftsmanship and music - UNESCO Intangible Cultural Heritage",
+        "url": "https://ich.unesco.org/en/RL/organ-craftsmanship-and-music-01277"
+      },
+      {
+        "category": "culture_design",
+        "title": "How was it made? Furniture · V&A",
+        "url": "https://www.vam.ac.uk/articles/furniture-how-was-it-made"
+      },
+      {
+        "category": "culture_exchange",
+        "title": "About the Silk Roads | UNESCO",
+        "url": "https://www.unesco.org/en/silk-roads/about-silk-roads"
+      },
+      {
+        "category": "culture_exchange",
+        "title": "Central and North Asia, 1000–1400 A.D. | Chronology | Heilbrunn Timeline of Art History | The Metropolitan Museum of Art",
+        "url": "https://www.metmuseum.org/it/toah/ht/07/nc"
+      },
+      {
+        "category": "culture_creators",
+        "title": "Vincent van Gogh. The Starry Night. Saint Rémy, June 1889 | MoMA",
+        "url": "https://www.moma.org/collection/works/79802"
+      },
+      {
+        "category": "culture_techniques",
+        "title": "“后母戊”青铜方鼎_中国国家博物馆官方网站",
+        "url": "https://www.chnmuseum.cn/zp/zpml/kgfjp/202008/t20200824_247255.shtml"
+      },
+      {
+        "category": "culture_techniques",
+        "title": "Vocabulary for Describing an Artwork",
+        "url": "https://www.getty.edu/education/k-12-learning/describe-listen-draw/vocabulary-for-describing-an-artwork"
+      },
+      {
+        "category": "culture_works",
+        "title": "张择端清明上河图卷 - 故宫博物院",
+        "url": "https://www.dpm.org.cn/collection/paint/228226.html"
+      },
+      {
+        "category": "culture_works",
+        "title": "Understanding Formal Analysis (Education at the Getty)",
+        "url": "https://www.getty.edu/education/teachers/classroom_resources/formal_analysis.html"
+      }
+    ]
+  },
+  {
+    "matrix": "economy",
+    "name": "财经与经济",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一份具体账单；区分商品和总体价格；追踪需求或成本传导；回到不同人群的实际支出。",
+        "production_ids": [
+          "economy_weekly"
+        ],
+        "type": "explainer",
+        "key": "economy_prices",
+        "name": "T01 · 物价与生活成本",
+        "promise": "价格变化如何进入具体生活和生意？",
+        "keywords": [
+          "物价与生活成本 价格变化如何进入具体生活和生意？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一笔借贷或支出进入；连接银行和使用者；顺着传导环节展开；说明不同对象的反应。",
+        "production_ids": [
+          "economy_weekly"
+        ],
+        "type": "explainer",
+        "key": "economy_money",
+        "name": "T02 · 货币与利率",
+        "promise": "利率和信贷怎样传到支出与生产？",
+        "keywords": [
+          "货币与利率 利率和信贷怎样传到支出与生产？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一项生产或支出进入；解释总量怎样构成；对照价格数量和人均情况；连接行业与观众感受。",
+        "production_ids": [
+          "economy_weekly"
+        ],
+        "type": "explainer",
+        "key": "economy_growth",
+        "name": "T03 · 增长与经济结构",
+        "promise": "经济总量与具体行业的变化是什么关系？",
+        "keywords": [
+          "增长与经济结构 经济总量与具体行业的变化是什么关系？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。刻画一个具体岗位；展示任务与产出的关系；连接企业和劳动者的选择；回到机会与收入分配。",
+        "production_ids": [
+          "economy_weekly"
+        ],
+        "type": "explainer",
+        "key": "economy_labor",
+        "name": "T04 · 就业与收入",
+        "promise": "工作机会、生产率和收入如何相互影响？",
+        "keywords": [
+          "就业与收入 工作机会、生产率和收入如何相互影响？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一项可见公共服务进入；说明收入和支出去向；解释参与者的行为变化；回到服务与长期关系。",
+        "production_ids": [
+          "economy_weekly"
+        ],
+        "type": "explainer",
+        "key": "economy_public",
+        "name": "T05 · 财政与公共服务",
+        "promise": "公共收入和支出如何连接经济与生活？",
+        "keywords": [
+          "财政与公共服务 公共收入和支出如何连接经济与生活？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随一件具体商品；画出生产和交换路线；解释各方投入与选择；观察路线变化的影响。",
+        "production_ids": [
+          "economy_weekly"
+        ],
+        "type": "explainer",
+        "key": "economy_trade",
+        "name": "T06 · 贸易与全球联系",
+        "promise": "一个跨境商品如何连接不同地区的生产与需求？",
+        "keywords": [
+          "贸易与全球联系 一个跨境商品如何连接不同地区的生产与需求？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。搭建一个小型具体市场；分别观察供给和需求；对照价格数量的变化；说明这种关系的适用情境。",
+        "production_ids": [
+          "economy_weekly"
+        ],
+        "type": "explainer",
+        "key": "economy_markets",
+        "name": "T07 · 供需与市场机制",
+        "promise": "价格与交易数量怎样协调具体市场？",
+        "keywords": [
+          "供需与市场机制 价格与交易数量怎样协调具体市场？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选择可比较的生产任务；展示投入和产出；解释技术组织与协作；连接企业改进和长期发展。",
+        "production_ids": [
+          "economy_weekly"
+        ],
+        "type": "explainer",
+        "key": "economy_productivity",
+        "name": "T08 · 效率与长期发展",
+        "promise": "同样的投入为何能带来不同产出？",
+        "keywords": [
+          "效率与长期发展 同样的投入为何能带来不同产出？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 24,
+    "examples": 8,
+    "legacy_categories": [
+      {
+        "key": "economy_daily",
+        "name": "财经与经济每日观察",
+        "promise": "发现财经与经济的新变化并讲清影响",
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "",
+        "production_ids": [
+          "economy_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "economy_weekly",
+        "name": "财经与经济专题解读",
+        "promise": "串联财经与经济的重要变化，理解原因与关系",
+        "audience": "关注经济变化与其影响的观众",
+        "notes": "",
+        "production_ids": [
+          "economy_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "economy_productivity",
+        "title": "Multifactor Productivity | OECD",
+        "url": "https://www.oecd.org/en/about/projects/multifactor-productivity.html"
+      },
+      {
+        "category": "economy_markets",
+        "title": "The Science of Supply and Demand | St. Louis Fed",
+        "url": "https://www.stlouisfed.org/publications/page-one-economics/2021/03/01/the-science-of-supply-and-demand"
+      },
+      {
+        "category": "economy_trade",
+        "title": "International Trade: Commerce among Nations",
+        "url": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/trade"
+      },
+      {
+        "category": "economy_public",
+        "title": "Fiscal Policy: Taking and Giving Away",
+        "url": "https://www.imf.org/external/pubs/ft/fandd/basics/36-fiscal-policy.htm"
+      },
+      {
+        "category": "economy_labor",
+        "title": "Decoupling of wages from productivity | OECD",
+        "url": "https://www.oecd.org/en/publications/decoupling-of-wages-from-productivity_d4764493-en.html"
+      },
+      {
+        "category": "economy_growth",
+        "title": "Gross Domestic Product: An Economy’s All",
+        "url": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+      },
+      {
+        "category": "economy_money",
+        "title": "Monetary Policy: Stabilizing Prices and Output",
+        "url": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/monetary-policy"
+      },
+      {
+        "category": "economy_prices",
+        "title": "Inflation: Prices on the Rise",
+        "url": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/inflation"
+      }
+    ]
+  },
+  {
+    "matrix": "education",
+    "name": "教育与方法",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "希望理解概念并掌握方法的学习者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。呈现一个具体学习疑问；用例子说明关键关系；对照相近概念；让观众试着迁移解释。",
+        "production_ids": [],
+        "type": "explainer",
+        "key": "education_concepts",
+        "name": "T01 · 概念理解与知识连接",
+        "promise": "怎样从记住一个词走到理解关系？",
+        "keywords": [
+          "概念理解与知识连接 怎样从记住一个词走到理解关系？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "希望理解概念并掌握方法的学习者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。给出一份具体学习材料；演示回想与复习动作；安排后续间隔和练习；展示如何判断下一步。",
+        "production_ids": [],
+        "type": "explainer",
+        "key": "education_memory",
+        "name": "T02 · 记忆与复习",
+        "promise": "怎样安排复习才能在需要时想起来？",
+        "keywords": [
+          "记忆与复习 怎样安排复习才能在需要时想起来？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "希望理解概念并掌握方法的学习者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确一个小技能目标；展示一次真实操作；把反馈对应到具体动作；安排下一轮练习。",
+        "production_ids": [],
+        "type": "explainer",
+        "key": "education_practice",
+        "name": "T03 · 练习与反馈",
+        "promise": "怎样让每次练习都推动技能进步？",
+        "keywords": [
+          "练习与反馈 怎样让每次练习都推动技能进步？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "希望理解概念并掌握方法的学习者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明阅读目的；展示读前结构观察；跟随一个问题阅读；用自己的表达收拢理解。",
+        "production_ids": [],
+        "type": "explainer",
+        "key": "education_reading",
+        "name": "T04 · 阅读与信息理解",
+        "promise": "怎样带着问题读懂一份材料？",
+        "keywords": [
+          "阅读与信息理解 怎样带着问题读懂一份材料？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "希望理解概念并掌握方法的学习者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确阶段目标和现实时间；拆成可完成的任务；安排一周具体位置；根据完成情况调整。",
+        "production_ids": [],
+        "type": "explainer",
+        "key": "education_planning",
+        "name": "T05 · 学习规划与习惯",
+        "promise": "怎样把目标安排进真实可用的时间？",
+        "keywords": [
+          "学习规划与习惯 怎样把目标安排进真实可用的时间？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "希望理解概念并掌握方法的学习者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。拿出一页具体材料；展示记录与提问区域；演示回顾和重新组织；接到下一次使用。",
+        "production_ids": [],
+        "type": "explainer",
+        "key": "education_notes",
+        "name": "T06 · 笔记与知识组织",
+        "promise": "记录怎样帮助之后回想和使用知识？",
+        "keywords": [
+          "笔记与知识组织 记录怎样帮助之后回想和使用知识？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "希望理解概念并掌握方法的学习者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确读者和表达目的；用问题排列已有材料；形成一段可读表达；按沟通效果修改。",
+        "production_ids": [],
+        "type": "explainer",
+        "key": "education_expression",
+        "name": "T07 · 表达与写作",
+        "promise": "怎样把学到的东西组织成别人能理解的表达？",
+        "keywords": [
+          "表达与写作 怎样把学到的东西组织成别人能理解的表达？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "希望理解概念并掌握方法的学习者",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。说明一个具体学习任务；准备输入材料和工具；连续演示关键动作；展示产物和复用办法。",
+        "production_ids": [],
+        "type": "tutorial",
+        "key": "education_tools",
+        "name": "T08 · 学习工具与资料流程",
+        "promise": "工具怎样接进一个具体学习任务？",
+        "keywords": [
+          "学习工具与资料流程 工具怎样接进一个具体学习任务？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 24,
+    "examples": 8,
+    "legacy_categories": [
+      {
+        "key": "general",
+        "name": "教育与方法 · 主题研究",
+        "promise": "教育与方法",
+        "audience": "希望理解概念并掌握方法的学习者",
+        "notes": "",
+        "production_ids": [],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "education_tools",
+        "title": "The Basics | Zotero Documentation",
+        "url": "https://www.zotero.org/support/quick_start_guide"
+      },
+      {
+        "category": "education_expression",
+        "title": "How to Outline - Purdue OWL® - Purdue University",
+        "url": "https://owl.purdue.edu/owl/general_writing/the_writing_process/developing_an_outline/how_to_outline.html"
+      },
+      {
+        "category": "education_notes",
+        "title": "The Cornell Note Taking System – Learning Strategies Center",
+        "url": "https://lsc.cornell.edu/how-to-study/taking-notes/cornell-note-taking-system"
+      },
+      {
+        "category": "education_planning",
+        "title": "Managing Time – Learning Strategies Center",
+        "url": "https://lsc.cornell.edu/managing-time"
+      },
+      {
+        "category": "education_reading",
+        "title": "3 P’s for Effective Reading – Learning Strategies Center",
+        "url": "https://lsc.cornell.edu/how-to-study/reading-strategies/3-ps-for-effective-reading"
+      },
+      {
+        "category": "education_practice",
+        "title": "Learning Principles - Eberly Center - Carnegie Mellon University",
+        "url": "https://www.cmu.edu/teaching/principles/learning.html"
+      },
+      {
+        "category": "education_memory",
+        "title": "Effective Study Strategies – Learning Strategies Center",
+        "url": "https://lsc.cornell.edu/how-to-study/studying-for-and-taking-exams/effective-study-strategies"
+      },
+      {
+        "category": "education_concepts",
+        "title": "Concept Mapping – Learning Strategies Center",
+        "url": "https://lsc.cornell.edu/how-to-study/concept-maps"
+      }
+    ]
+  },
+  {
+    "matrix": "geography",
+    "name": "地理与世界探索",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。在地图上确定具体地方；跟随水和地形的路线；解释相互作用的过程；回到沿途生活和利用。",
+        "production_ids": [
+          "geography_weekly"
+        ],
+        "type": "explainer",
+        "key": "geography_landforms",
+        "name": "T01 · 地形与水系",
+        "promise": "地表和水怎样共同塑造一个地方？",
+        "keywords": [
+          "地形与水系 地表和水怎样共同塑造一个地方？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。呈现两个具体地方的体验；在地图和示意图上定位；连接相关空间与时间关系；回到地方差异。",
+        "production_ids": [
+          "geography_weekly"
+        ],
+        "type": "explainer",
+        "key": "geography_climate",
+        "name": "T02 · 天气、气候与地方差异",
+        "promise": "空间位置怎样影响一个地方的天气体验？",
+        "keywords": [
+          "天气、气候与地方差异 空间位置怎样影响一个地方的天气体验？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一处具体城市空间；沿一次生活活动移动；连接设施道路和用途；解释空间组织与体验。",
+        "production_ids": [
+          "geography_weekly"
+        ],
+        "type": "explainer",
+        "key": "geography_cities",
+        "name": "T03 · 城市空间与日常运转",
+        "promise": "城市里的设施、路线和生活怎样连接？",
+        "keywords": [
+          "城市空间与日常运转 城市里的设施、路线和生活怎样连接？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。在图上定位具体人群；说明聚集或迁移的背景；连接工作居住与设施；观察空间和生活的变化。",
+        "production_ids": [
+          "geography_weekly"
+        ],
+        "type": "explainer",
+        "key": "geography_population",
+        "name": "T04 · 人口分布与迁移",
+        "promise": "人为什么在一些地方聚集又流向别处？",
+        "keywords": [
+          "人口分布与迁移 人为什么在一些地方聚集又流向别处？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一个具体资源或产品；在地图上标出生产环节；连接区位交通和配套；解释地方之间的分工。",
+        "production_ids": [
+          "geography_weekly"
+        ],
+        "type": "explainer",
+        "key": "geography_resources",
+        "name": "T05 · 资源、区位与生产",
+        "promise": "资源和位置怎样影响地方的分工？",
+        "keywords": [
+          "资源、区位与生产 资源和位置怎样影响地方的分工？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确一次出行或运输；在地图上跟随路线；连接地形设施与成本时间；回到区域可达性和生活。",
+        "production_ids": [
+          "geography_weekly"
+        ],
+        "type": "explainer",
+        "key": "geography_transport",
+        "name": "T06 · 交通与区域联系",
+        "promise": "路线怎样影响人、货物与地方的联系？",
+        "keywords": [
+          "交通与区域联系 路线怎样影响人、货物与地方的联系？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从具体环境体验进入；定位地表和人的活动；解释相互影响的过程；回到地方的生活与利用。",
+        "production_ids": [
+          "geography_weekly"
+        ],
+        "type": "explainer",
+        "key": "geography_environment",
+        "name": "T07 · 环境与人地关系",
+        "promise": "人的活动怎样与地方环境相互影响？",
+        "keywords": [
+          "环境与人地关系 人的活动怎样与地方环境相互影响？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。提出关于一个地方的问题；识别图例尺度时间；沿图层和空间做比较；用读到的关系回答问题。",
+        "production_ids": [
+          "geography_weekly"
+        ],
+        "type": "explainer",
+        "key": "geography_maps",
+        "name": "T08 · 地图与空间理解",
+        "promise": "怎样从地图和影像里读出具体关系？",
+        "keywords": [
+          "地图与空间理解 怎样从地图和影像里读出具体关系？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 24,
+    "examples": 9,
+    "legacy_categories": [
+      {
+        "key": "geography_daily",
+        "name": "地理与世界每日观察",
+        "promise": "发现地理与世界的新变化并讲清影响",
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "",
+        "production_ids": [
+          "geography_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "geography_weekly",
+        "name": "地理与世界专题解读",
+        "promise": "串联地理与世界的重要变化，理解原因与关系",
+        "audience": "对国家、城市与地理现象感兴趣的观众",
+        "notes": "",
+        "production_ids": [
+          "geography_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "geography_maps",
+        "title": "National Climate Change Viewer (NCCV) | U.S. Geological Survey",
+        "url": "https://www.usgs.gov/tools/national-climate-change-viewer-nccv"
+      },
+      {
+        "category": "geography_environment",
+        "title": "What Is an Urban Heat Island? - NASA Science",
+        "url": "https://science.nasa.gov/kids/earth/what-is-an-urban-heat-island"
+      },
+      {
+        "category": "geography_transport",
+        "title": "About the Silk Roads | UNESCO",
+        "url": "https://www.unesco.org/en/silk-roads/about-silk-roads"
+      },
+      {
+        "category": "geography_transport",
+        "title": "11.2 Transport system | UN-Habitat",
+        "url": "https://unhabitat.org/11-2-transport-system"
+      },
+      {
+        "category": "geography_resources",
+        "title": "Global Supply Chains of EV Batteries - IEA",
+        "url": "https://www.iea.org/reports/global-supply-chains-of-ev-batteries"
+      },
+      {
+        "category": "geography_population",
+        "title": "Urbanization | Our World in Data",
+        "url": "https://ourworldindata.org/urbanization"
+      },
+      {
+        "category": "geography_cities",
+        "title": "New York City - NASA Science",
+        "url": "https://science.nasa.gov/earth/earth-observatory/new-york-city-83828"
+      },
+      {
+        "category": "geography_climate",
+        "title": "What Causes the Seasons? | NASA Space Place – NASA Science for Kids",
+        "url": "https://spaceplace.nasa.gov/seasons/en"
+      },
+      {
+        "category": "geography_landforms",
+        "title": "Water Cycle Diagrams | U.S. Geological Survey",
+        "url": "https://www.usgs.gov/water-science-school/science/water-cycle-diagrams"
+      }
+    ]
+  },
+  {
+    "matrix": "history",
+    "name": "历史与文明",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一个具体历史场景进入；认识当时的处境和参与者；跟随连续行动和变化；连接后续影响。",
+        "production_ids": [
+          "history_weekly"
+        ],
+        "type": "explainer",
+        "key": "history_turns",
+        "name": "T01 · 事件与关键转折",
+        "promise": "一个重要变化怎样由连续行动形成？",
+        "keywords": [
+          "事件与关键转折 一个重要变化怎样由连续行动形成？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。还原当时可见的处境；说明人物拥有的信息和资源；跟随决定与行动；回到处境的后续变化。",
+        "production_ids": [
+          "history_weekly"
+        ],
+        "type": "explainer",
+        "key": "history_choices",
+        "name": "T02 · 人物与抉择",
+        "promise": "当时的人在怎样的处境下作出选择？",
+        "keywords": [
+          "人物与抉择 当时的人在怎样的处境下作出选择？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一件具体社会事务；认识参与者和规则；沿办理或执行过程展开；说明制度与生活的关系。",
+        "production_ids": [
+          "history_weekly"
+        ],
+        "type": "explainer",
+        "key": "history_institutions",
+        "name": "T03 · 制度与社会运转",
+        "promise": "历史制度怎样在具体事务中运行？",
+        "keywords": [
+          "制度与社会运转 历史制度怎样在具体事务中运行？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。进入一个具体日常场景；跟随普通人的动作；解释物品劳动和交换；从细节理解时代生活。",
+        "production_ids": [
+          "history_weekly"
+        ],
+        "type": "explainer",
+        "key": "history_daily_life",
+        "name": "T04 · 普通人的日常",
+        "promise": "当时的人怎样生活、劳动与交换？",
+        "keywords": [
+          "普通人的日常 当时的人怎样生活、劳动与交换？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一件工具或生产任务；还原旧的操作方式；跟随技术改变的环节；连接劳动与社会变化。",
+        "production_ids": [
+          "history_weekly"
+        ],
+        "type": "explainer",
+        "key": "history_technology",
+        "name": "T05 · 技术与历史变化",
+        "promise": "一种工具或技术怎样改变具体生活？",
+        "keywords": [
+          "技术与历史变化 一种工具或技术怎样改变具体生活？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一条具体路线或一件物品；认识沿途参与者；跟随移动交换和使用；说明交流形成的联系。",
+        "production_ids": [
+          "history_weekly"
+        ],
+        "type": "explainer",
+        "key": "history_connections",
+        "name": "T06 · 贸易、迁移与文明交流",
+        "promise": "不同社会怎样经由路线与人群相互影响？",
+        "keywords": [
+          "贸易、迁移与文明交流 不同社会怎样经由路线与人群相互影响？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示材料的具体形态；引导观察文字或器物细节；连接形成与使用的处境；解释它帮助理解的历史问题。",
+        "production_ids": [
+          "history_weekly"
+        ],
+        "type": "explainer",
+        "key": "history_sources",
+        "name": "T07 · 史料、文物与发现",
+        "promise": "怎样从一份材料理解过去的具体事情？",
+        "keywords": [
+          "史料、文物与发现 怎样从一份材料理解过去的具体事情？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一处可见空间进入；沿位置和路线观察；连接营建与当时用途；认识今天仍可见的历史层次。",
+        "production_ids": [
+          "history_weekly"
+        ],
+        "type": "explainer",
+        "key": "history_places",
+        "name": "T08 · 历史空间与遗产",
+        "promise": "今天可见的地方怎样留下历史关系？",
+        "keywords": [
+          "历史空间与遗产 今天可见的地方怎样留下历史关系？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 24,
+    "examples": 9,
+    "legacy_categories": [
+      {
+        "key": "history_daily",
+        "name": "历史与文明每日观察",
+        "promise": "发现历史与文明的新变化并讲清影响",
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "",
+        "production_ids": [
+          "history_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "history_weekly",
+        "name": "历史与文明专题解读",
+        "promise": "串联历史与文明的重要变化，理解原因与关系",
+        "audience": "对历史事件、人物与文明感兴趣的观众",
+        "notes": "",
+        "production_ids": [
+          "history_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "history_places",
+        "title": "《紫禁城建筑之道》 - 故宫博物院",
+        "url": "https://www.dpm.org.cn/journal_detail/253575.html"
+      },
+      {
+        "category": "history_sources",
+        "title": "Hieroglyphs: unlocking ancient Egypt – 12 exhibition highlights in plain English",
+        "url": "https://www.britishmuseum.org/sites/default/files/2022-10/Hieroglyphs_unlocking_ancient_Egypt_12_exhibition_highlights_in_plain_English_10_10.pdf"
+      },
+      {
+        "category": "history_connections",
+        "title": "About the Silk Roads | UNESCO",
+        "url": "https://www.unesco.org/en/silk-roads/about-silk-roads"
+      },
+      {
+        "category": "history_technology",
+        "title": "“后母戊”青铜方鼎_中国国家博物馆官方网站",
+        "url": "https://www.chnmuseum.cn/zp/zpml/kgfjp/202008/t20200824_247255.shtml"
+      },
+      {
+        "category": "history_technology",
+        "title": "The Industrial Revolution in the United States | Classroom Materials at the Library of Congress | Library of Congress",
+        "url": "https://www.loc.gov/classroom-materials/industrial-revolution-in-the-united-states"
+      },
+      {
+        "category": "history_daily_life",
+        "title": "张择端清明上河图卷 - 故宫博物院",
+        "url": "https://www.dpm.org.cn/collection/paint/228226.html"
+      },
+      {
+        "category": "history_institutions",
+        "title": "宫廷典制 - 故宫博物院",
+        "url": "https://www.dpm.org.cn/court/systems.html"
+      },
+      {
+        "category": "history_choices",
+        "title": "Creating the Declaration: A Timeline | National Archives",
+        "url": "https://www.archives.gov/founding-docs/timeline"
+      },
+      {
+        "category": "history_turns",
+        "title": "The Declaration of Independence: A History | National Archives",
+        "url": "https://www.archives.gov/founding-docs/declaration-history"
+      }
+    ]
+  },
+  {
+    "matrix": "industry",
+    "name": "产业与制造业",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。拿出一件具体实物；跟随原料流过关键工序；解释每一步改变了什么；展示最终部件的用途。",
+        "production_ids": [
+          "industry_weekly"
+        ],
+        "type": "explainer",
+        "key": "industry_processes",
+        "name": "T01 · 一件东西怎样造",
+        "promise": "原料怎样经过工序变成可用产品？",
+        "keywords": [
+          "一件东西怎样造 原料怎样经过工序变成可用产品？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示产品里的具体部件；连接材料性质与用途；解释制造中的取舍；回到整体产品的结果。",
+        "production_ids": [
+          "industry_weekly"
+        ],
+        "type": "explainer",
+        "key": "industry_materials",
+        "name": "T02 · 材料与核心部件",
+        "promise": "材料和部件的差异怎样影响产品？",
+        "keywords": [
+          "材料与核心部件 材料和部件的差异怎样影响产品？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。锁定一个设备和工件；拆开关键运动或控制；连接前后工位；解释设备带来的能力和取舍。",
+        "production_ids": [
+          "industry_weekly"
+        ],
+        "type": "explainer",
+        "key": "industry_equipment",
+        "name": "T03 · 装备与自动化",
+        "promise": "生产设备怎样完成一个关键动作？",
+        "keywords": [
+          "装备与自动化 生产设备怎样完成一个关键动作？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随具体订单或部件；画出参与企业与物流；解释到货和加工的衔接；回到最终交付。",
+        "production_ids": [
+          "industry_daily"
+        ],
+        "type": "explainer",
+        "key": "industry_supply",
+        "name": "T04 · 供应链与生产协同",
+        "promise": "分散的企业怎样共同完成一张订单？",
+        "keywords": [
+          "供应链与生产协同 分散的企业怎样共同完成一张订单？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示产品的一项具体要求；沿工序定位形成它的动作；跟随一次检查和反馈；说明一致性怎样被维持。",
+        "production_ids": [
+          "industry_weekly"
+        ],
+        "type": "explainer",
+        "key": "industry_quality",
+        "name": "T05 · 质量与可靠性",
+        "promise": "产品怎样在连续生产中保持一致？",
+        "keywords": [
+          "质量与可靠性 产品怎样在连续生产中保持一致？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。跟随一件工件进入现场；标出加工等待和搬运；解释瓶颈与衔接；回到时间资源和交付关系。",
+        "production_ids": [
+          "industry_weekly"
+        ],
+        "type": "explainer",
+        "key": "industry_efficiency",
+        "name": "T06 · 产能、效率与现场",
+        "promise": "生产线的时间和资源怎样影响交付？",
+        "keywords": [
+          "产能、效率与现场 生产线的时间和资源怎样影响交付？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一个具体生产用途；画出能量与设施路线；说明转换储存和使用；回到连续生产的需求。",
+        "production_ids": [
+          "industry_weekly"
+        ],
+        "type": "explainer",
+        "key": "industry_energy",
+        "name": "T07 · 能源与工业基础设施",
+        "promise": "能源和设施怎样支持连续生产？",
+        "keywords": [
+          "能源与工业基础设施 能源和设施怎样支持连续生产？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一个具体产品变化进入；标出受影响的上下游；解释设备资源和配套变化；回到交付能力与产业位置。",
+        "production_ids": [
+          "industry_weekly"
+        ],
+        "type": "explainer",
+        "key": "industry_changes",
+        "name": "T08 · 产业变化与升级",
+        "promise": "一处技术或供给变化怎样重组产业关系？",
+        "keywords": [
+          "产业变化与升级 一处技术或供给变化怎样重组产业关系？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 24,
+    "examples": 10,
+    "legacy_categories": [
+      {
+        "key": "industry_daily",
+        "name": "产业与制造每日观察",
+        "promise": "发现产业与制造的新变化并讲清影响",
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "",
+        "production_ids": [
+          "industry_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "industry_weekly",
+        "name": "产业与制造专题解读",
+        "promise": "串联产业与制造的重要变化，理解原因与关系",
+        "audience": "关注技术、制造与供应链的观众",
+        "notes": "",
+        "production_ids": [
+          "industry_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "industry_changes",
+        "title": "Global Supply Chains of EV Batteries - IEA",
+        "url": "https://www.iea.org/reports/global-supply-chains-of-ev-batteries"
+      },
+      {
+        "category": "industry_energy",
+        "title": "Executive summary - Batteries and Secure Energy Transitions - IEA",
+        "url": "https://www.iea.org/reports/batteries-and-secure-energy-transitions/executive-summary"
+      },
+      {
+        "category": "industry_efficiency",
+        "title": "Toyota Production System | Vision & Philosophy | Company | Toyota Motor Corporation Official Global Website",
+        "url": "https://global.toyota/en/company/vision-and-philosophy/production-system"
+      },
+      {
+        "category": "industry_quality",
+        "title": "Toyota Virtual Plant Tour: Toyota Production System | Toyota Virtual Plant Tour | Company | Toyota Motor Corporation Official Global Website",
+        "url": "https://global.toyota/en/company/plant-tours/production-system"
+      },
+      {
+        "category": "industry_supply",
+        "title": "Global Supply Chains of EV Batteries - IEA",
+        "url": "https://www.iea.org/reports/global-supply-chains-of-ev-batteries"
+      },
+      {
+        "category": "industry_supply",
+        "title": "TOYOTA MOTOR CORPORATION GLOBAL WEBSITE | 75 Years of TOYOTA | Logistics | Production Parts Logistics",
+        "url": "https://www.toyota-global.com/company/history_of_toyota/75years/data/automotive_business/production/logistics/production_parts/index.html"
+      },
+      {
+        "category": "industry_equipment",
+        "title": "Lithography principles - Technology | ASML",
+        "url": "https://www.asml.com/en/technology/lithography-principles"
+      },
+      {
+        "category": "industry_materials",
+        "title": "“后母戊”青铜方鼎_中国国家博物馆官方网站",
+        "url": "https://www.chnmuseum.cn/zp/zpml/kgfjp/202008/t20200824_247255.shtml"
+      },
+      {
+        "category": "industry_materials",
+        "title": "Raw materials - worldsteel.org",
+        "url": "https://worldsteel.org/about-steel/raw-materials"
+      },
+      {
+        "category": "industry_processes",
+        "title": "How microchips are made | ASML Description",
+        "url": "https://www.asml.com/en/technology/all-about-microchips/how-microchips-are-made"
+      }
+    ]
+  },
+  {
+    "matrix": "science",
+    "name": "科学与知识百科",
+    "mode": "ideas",
+    "categories": [
+      {
+        "audience": "对世界如何运转感到好奇，希望通过具体例子理解科学的普通观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。呈现可辨认的生活现象；标出物体与变化条件；沿作用过程解释机制；回到一个新的生活场景。",
+        "production_ids": [
+          "science_weekly"
+        ],
+        "type": "explainer",
+        "key": "science_physics",
+        "name": "T01 · 身边的物理",
+        "promise": "日常现象背后的能量、力和运动怎样发生？",
+        "keywords": [
+          "身边的物理 日常现象背后的能量、力和运动怎样发生？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对世界如何运转感到好奇，希望通过具体例子理解科学的普通观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一种具体材料进入；连接微观结构与可见性质；展开条件和变化过程；回到产品或生活用途。",
+        "production_ids": [
+          "science_weekly"
+        ],
+        "type": "explainer",
+        "key": "science_chemistry",
+        "name": "T02 · 化学与材料",
+        "promise": "物质的结构和变化如何影响可见性质？",
+        "keywords": [
+          "化学与材料 物质的结构和变化如何影响可见性质？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对世界如何运转感到好奇，希望通过具体例子理解科学的普通观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。提出熟悉的生命现象；进入相关器官或细胞；连接信号环境和反应；回到整体过程与适用条件。",
+        "production_ids": [
+          "science_weekly"
+        ],
+        "type": "explainer",
+        "key": "science_life",
+        "name": "T03 · 生命与身体",
+        "promise": "身体和生物怎样完成一个具体过程？",
+        "keywords": [
+          "生命与身体 身体和生物怎样完成一个具体过程？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对世界如何运转感到好奇，希望通过具体例子理解科学的普通观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一个地球现象；标出参与的物体和空间；跟随积累与变化过程；连接不同时间和位置。",
+        "production_ids": [
+          "science_weekly"
+        ],
+        "type": "explainer",
+        "key": "science_earth",
+        "name": "T04 · 地球与自然过程",
+        "promise": "地球上的变化怎样由连续过程形成？",
+        "keywords": [
+          "地球与自然过程 地球上的变化怎样由连续过程形成？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对世界如何运转感到好奇，希望通过具体例子理解科学的普通观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一个直观宇宙问题进入；展示距离尺度和观测；用示意过程解释天体关系；回到最初疑问。",
+        "production_ids": [
+          "science_weekly"
+        ],
+        "type": "explainer",
+        "key": "science_space",
+        "name": "T05 · 宇宙与天文",
+        "promise": "我们怎样理解遥远天体和宇宙现象？",
+        "keywords": [
+          "宇宙与天文 我们怎样理解遥远天体和宇宙现象？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对世界如何运转感到好奇，希望通过具体例子理解科学的普通观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。建立一个可重复的小情境；展示几次具体结果；用图和关系解释规律；回到观众的判断。",
+        "production_ids": [
+          "science_weekly"
+        ],
+        "type": "explainer",
+        "key": "science_math",
+        "name": "T06 · 数学与概率直觉",
+        "promise": "抽象关系怎样通过具体例子变得可理解？",
+        "keywords": [
+          "数学与概率直觉 抽象关系怎样通过具体例子变得可理解？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对世界如何运转感到好奇，希望通过具体例子理解科学的普通观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确本次要观察的对象；说明材料工具和量；展示操作与读数；将结果放回原问题。",
+        "production_ids": [
+          "science_weekly"
+        ],
+        "type": "explainer",
+        "key": "science_experiments",
+        "name": "T07 · 实验与测量",
+        "promise": "我们怎样把一个科学问题变成可观察的过程？",
+        "keywords": [
+          "实验与测量 我们怎样把一个科学问题变成可观察的过程？"
+        ],
+        "catalog": true
+      },
+      {
+        "audience": "对世界如何运转感到好奇，希望通过具体例子理解科学的普通观众",
+        "notes": "围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。还原一个研究疑问；跟随关键观察或实验；解释结果怎样连接机制；回到新的理解及其适用场景。",
+        "production_ids": [
+          "science_weekly"
+        ],
+        "type": "explainer",
+        "key": "science_research",
+        "name": "T08 · 研究带来的新理解",
+        "promise": "一项研究如何把具体疑问推进到新的认识？",
+        "keywords": [
+          "研究带来的新理解 一项研究如何把具体疑问推进到新的认识？"
+        ],
+        "catalog": true
+      }
+    ],
+    "patterns": 24,
+    "examples": 8,
+    "legacy_categories": [
+      {
+        "key": "science_daily",
+        "name": "科学新理解",
+        "promise": "看懂一项研究做了什么，以及它让我们对一个具体问题多理解了什么",
+        "audience": "对世界如何运转感到好奇，希望听懂新研究具体意义的普通观众",
+        "notes": "每期选择一个值得好奇的研究问题，从观众能想象的现象、对象或困惑进入。把主要篇幅放在研究者具体做了什么、看见了什么，以及这个结果怎样改变原来的理解。沿一个实验或观测过程展开，解释术语时继续使用正在发生的事；材料中有对照、步骤、尺度和具体例子就把它们讲进过程。背景和相邻研究帮助回答当前问题时进入，来源中的其他新闻留给别期。收束时让观众能重新解释开场的现象；作者自行组织标题、段落和节奏。",
+        "production_ids": [
+          "science_daily"
+        ],
+        "type": "news",
+        "legacy": true
+      },
+      {
+        "key": "science_weekly",
+        "name": "现象背后的原理",
+        "promise": "围绕一个现象逐步理解它如何发生，并能用这套理解认识相近的事情",
+        "audience": "喜欢追问为什么，希望通过具体例子理解科学原理的普通观众",
+        "notes": "从材料中选择一个可以深入解释的现象或问题，让具体对象的一次经历贯穿整期。逐层讲清它怎样发生：一个动作改变什么状态，这个变化怎样产生下一步结果；每解释一层就回到主例子，让观众看到自己现在多理解了什么。研究过程、历史发现和相近案例承担当前机制的一步，随后接回主问题。类比帮助建立直觉，再落回真实对象；专业术语和公式贴着例子解释。结尾用整套机制重新回答开场，并带到一个相近现象。标题与讲述顺序由作者按本期材料组织。",
+        "production_ids": [
+          "science_weekly"
+        ],
+        "type": "explainer",
+        "legacy": true
+      }
+    ],
+    "references": [
+      {
+        "category": "science_research",
+        "title": "Scientific Papers | Learn Science at Scitable",
+        "url": "https://www.nature.com/scitable/topicpage/scientific-papers-13815490"
+      },
+      {
+        "category": "science_experiments",
+        "title": "SI Units | NIST",
+        "url": "https://www.nist.gov/pml/owm/metric-si/si-units"
+      },
+      {
+        "category": "science_math",
+        "title": "Seeing Theory - Basic Probability",
+        "url": "https://seeing-theory.brown.edu/basic-probability"
+      },
+      {
+        "category": "science_space",
+        "title": "What Is a Black Hole? | NASA Space Place – NASA Science for Kids",
+        "url": "https://spaceplace.nasa.gov/black-holes/en"
+      },
+      {
+        "category": "science_earth",
+        "title": "The Science of Earthquakes | U.S. Geological Survey",
+        "url": "https://www.usgs.gov/programs/earthquake-hazards/science-earthquakes"
+      },
+      {
+        "category": "science_life",
+        "title": "Circadian Rhythms | National Institute of General Medical Sciences",
+        "url": "https://www.nigms.nih.gov/education/fact-sheets/Pages/circadian-rhythms"
+      },
+      {
+        "category": "science_chemistry",
+        "title": "Development of Tide Synthetic Detergent",
+        "url": "https://www.acs.org/education/whatischemistry/landmarks/tidedetergent.html"
+      },
+      {
+        "category": "science_physics",
+        "title": "Heat Flow | Building Science Education",
+        "url": "https://bsesc.energy.gov/energy-basics/heat-flow"
+      }
+    ]
+  }
+]

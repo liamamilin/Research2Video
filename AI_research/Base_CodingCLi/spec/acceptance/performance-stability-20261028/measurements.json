@@ -1,0 +1,67 @@
+{
+  "lists": {
+    "scripts": {
+      "before_bytes": 739665,
+      "after_bytes": 282398,
+      "reduction_percent": 61.82,
+      "before_handler_ms": 109.7,
+      "after_handler_ms": 96.2
+    },
+    "shipments": {
+      "before_bytes": 592601,
+      "after_bytes": 317716,
+      "reduction_percent": 46.39,
+      "before_handler_ms": 105.0,
+      "after_handler_ms": 103.2
+    }
+  },
+  "voice": {
+    "first_identity_seconds": 84.2152,
+    "warm_replay_seconds": 0.0072,
+    "cache": {
+      "enabled": true,
+      "chapter_hits": 2,
+      "chapter_misses": 0,
+      "segment_hits": 4,
+      "segment_misses": 0,
+      "entry_keys": [
+        "479a03e2f72532d7387ae72e6d571ce71526fca049344bdab8e5a089e83ba708",
+        "8a700e8640eabaefb729c72f38b78deaa22ceee53397ce7288c04a5e90a34faf"
+      ],
+      "write_errors": [],
+      "evicted_chapters": 0,
+      "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified",
+      "fingerprint_seconds": 0.006,
+      "model_sha256": "c07c59aca742fe8f53384a3da4d8a3b3fd98ddc77066dd4bd35b51e08c34a72f"
+    },
+    "evicted_chapters_during_publish": 2,
+    "real_generated_audio_identical": true,
+    "new_synthesis_processes": 0
+  },
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "avg_frame_rate": "30/1"
+      },
+      {
+        "codec_name": "aac",
+        "sample_rate": "48000",
+        "channels": 2,
+        "avg_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "22.100000"
+    }
+  },
+  "notes": [
+    "Local read handler timings exclude auth/gateway/browser and are not a load test.",
+    "Warm voice replay uses real generated WAVs, with no new synthesis process. Initial generation is still required.",
+    "Initial full backend run had sandbox port/launcher failures and a stale whole-report test fixture; reruns are recorded separately."
+  ]
+}

@@ -10,6 +10,7 @@ export interface PublicationProgress { label: string; state: string; active: boo
 export interface WorkspaceObject {
   kind: string; id: string; title: string; href: string; status: string; active: boolean;
   detail?: string; error?: string; version?: number; video_version?: number;
+  local_video?: boolean;
   links: { label: string; name?: string; href: string; scope?: string; next?: string }[];
   renders?: { id: string; version: number; status: string; active_stage?: string; error_message?: string }[];
   tasks?: { id: string; title?: string; status: string; error?: string }[];

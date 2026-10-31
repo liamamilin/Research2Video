@@ -1,6 +1,7 @@
 import io
 import json
 import urllib.error
+import http.client
 
 import pytest
 
@@ -251,3 +252,39 @@ def test_client_and_quota_errors_do_not_enter_the_transient_retry_loop(monkeypat
     with pytest.raises(g2.G2Fault):
         _call(monkeypatch, tmp_path, lp.PRESETS["opendesign"], urlopen)
     assert len(sent) == len(g2.CALL_RECORDS) == 1
+
+
+@pytest.mark.parametrize("failure", [http.client.RemoteDisconnected("secret provider message"),
+    http.client.IncompleteRead(b"secret partial response", 100), ConnectionResetError("reset"),
+    TimeoutError("timed out"), urllib.error.URLError(ConnectionResetError("reset"))])
+def test_connection_loss_retries_only_the_current_model_request(monkeypatch, tmp_path, failure):
+    calls, delays = [], []
+    monkeypatch.setattr(g2.time, "sleep", delays.append)
+
+    def urlopen(request, timeout=None):
+        calls.append(json.loads(request.data))
+        if len(calls) == 1:
+            raise failure
+        return Reply(json.dumps({"choices": [{"message": {"content": '{"ok": true}'},
+                                               "finish_reason": "stop"}], "usage": {}}).encode())
+
+    assert _call(monkeypatch, tmp_path, lp.PRESETS["opendesign"], urlopen) == {"ok": True}
+    assert len(calls) == 2 and calls[0] == calls[1] and delays == [2]
+    assert len(g2.CALL_RECORDS) == 2 and g2.CALL_RECORDS[0]["status"] == "failed"
+    assert len(list((tmp_path / "calls").glob("*.response.json"))) == 2
+    logs = (tmp_path / "logs/http-retries.jsonl").read_text()
+    assert "secret" not in logs
+    assert "secret" not in (tmp_path / "calls/narration-attempt-1.response.json").read_text()
+
+
+@pytest.mark.parametrize("budget,expected", [(16, 3), (1, 1)])
+def test_disconnect_exhaustion_has_a_specific_error_and_preserves_the_budget(monkeypatch, tmp_path, budget, expected):
+    monkeypatch.setattr(g2, "MAX_TOTAL_CALLS", budget)
+    monkeypatch.setattr(g2.time, "sleep", lambda _: None)
+
+    def urlopen(request, timeout=None):
+        raise http.client.RemoteDisconnected("no response")
+
+    with pytest.raises(g2.G2Fault, match="LLM_UNAVAILABLE.*RemoteDisconnected"):
+        _call(monkeypatch, tmp_path, lp.PRESETS["opendesign"], urlopen)
+    assert len(g2.CALL_RECORDS) == expected

@@ -1,0 +1,41 @@
+{
+  "at": "2026-10-26T17:20:32+0800",
+  "databases": {
+    "state/video.db": {
+      "rows": 249,
+      "statuses": {
+        "CANCELLED": 1,
+        "COMPLETED": 169,
+        "FAILED": 79
+      }
+    },
+    "../../autovideo/g3/data/jobs.sqlite3": {
+      "rows": 153,
+      "statuses": {
+        "CANCELLED": 1,
+        "COMPLETED": 132,
+        "FAILED": 20
+      }
+    }
+  },
+  "samples": [
+    {
+      "render_id": "035b8706167d4f9e9676f07b6cfa4062",
+      "script_id": "2e9ceee28a7d47c182cd2232dfe15c2a",
+      "bytes": 18547071,
+      "sha256": "99e5f55df2ff7390ecdfa2b1478c76bc1252e49063860cacdce85049701d2d47"
+    },
+    {
+      "render_id": "8a30f8e1be97471a8beeb034384da996",
+      "script_id": "332a2c56630a41fd93356e4340ea2245",
+      "bytes": 30125923,
+      "sha256": "6c72d348da3f31acbf3834059c0cf8b7b74c38d360470e047a2d807da3442aef"
+    },
+    {
+      "render_id": "2655bbc42a4f48b195bb2757ee09aea3",
+      "script_id": "fe2917ebc3bb43ebb30470d6a946bb59",
+      "bytes": 13586228,
+      "sha256": "62f0f37699872d08093b80df9dc892acfed272948eb540e5c2ce7b4e494695a8"
+    }
+  ]
+}

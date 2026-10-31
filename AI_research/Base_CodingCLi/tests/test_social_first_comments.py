@@ -76,6 +76,26 @@ def test_template_snapshot_not_applied_to_old_uploads(social_env):
     assert db.get(parent['id'])['payload']['first_comment']['enabled'] is False
 
 
+@pytest.mark.parametrize('options,enabled', [({'text': '补充资料'}, True),
+                                           ({'text': '补充资料', 'enabled': False}, False)])
+def test_text_only_upload_options_create_comment_task_unless_explicitly_disabled(social_env, options, enabled):
+    parent = enqueue('kuaishou', render(), first_comment=options)
+    db = manager.store('kuaishou')
+    assert db.get(parent['id'])['payload']['first_comment']['enabled'] is enabled
+    assert bool(db.comments(OWNER['uid']).get(parent['id'])) is enabled
+
+
+def test_add_existing_comment_api_does_not_insert_an_unrequested_disabled_flag(social_env, client):
+    parent = enqueue('kuaishou', render())
+    db = manager.store('kuaishou')
+    db.update(parent['id'], status='PUBLISHED', work_id=WORK)
+    _login(client)
+    response = client.post('/api/platforms/social/kuaishou/uploads/' + parent['id'] + '/first-comment',
+                           json={'text': '补充资料'}, headers=_csrf(client))
+    assert response.status_code == 202, response.text
+    assert response.json()['first_comment']['text'] == '补充资料'
+
+
 def test_publication_gate_cancel_and_unique_target(social_env):
     parent=enqueue('kuaishou',render(),first_comment=OPTION); db=manager.store('kuaishou')
     child=db.comments(OWNER['uid'])[parent['id']]

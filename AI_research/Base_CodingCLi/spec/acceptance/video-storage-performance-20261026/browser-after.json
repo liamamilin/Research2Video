@@ -1,0 +1,86 @@
+{
+  "method": "Chrome 已登录会话，点击导航至主要内容不再显示加载提示；含自动化开销，不是 LCP/FCP。迁移期间测量。",
+  "measured_at": "2026-10-26T17:36:49+0800",
+  "pages": [
+    {
+      "page": "矩阵",
+      "observed_ready_ms": 666,
+      "loading": false
+    },
+    {
+      "page": "产出",
+      "observed_ready_ms": 1618,
+      "loading": false
+    },
+    {
+      "page": "视频看板",
+      "observed_ready_ms": 658,
+      "loading": false
+    },
+    {
+      "page": "文稿",
+      "observed_ready_ms": 655,
+      "loading": false
+    },
+    {
+      "page": "成片与发布",
+      "observed_ready_ms": 891,
+      "loading": false
+    },
+    {
+      "page": "平台管理",
+      "observed_ready_ms": 579,
+      "loading": false
+    },
+    {
+      "page": "助手",
+      "observed_ready_ms": 2643,
+      "loading": false
+    },
+    {
+      "page": "研究总览",
+      "observed_ready_ms": 199,
+      "loading": false
+    },
+    {
+      "page": "Jobs",
+      "observed_ready_ms": 533,
+      "loading": false
+    },
+    {
+      "page": "情报轮次",
+      "observed_ready_ms": 1042,
+      "loading": false
+    },
+    {
+      "page": "报告",
+      "observed_ready_ms": 311,
+      "loading": false
+    },
+    {
+      "page": "周期调度",
+      "observed_ready_ms": 329,
+      "loading": false
+    },
+    {
+      "page": "选题",
+      "observed_ready_ms": 212,
+      "loading": false
+    },
+    {
+      "page": "信息源",
+      "observed_ready_ms": 296,
+      "loading": false
+    },
+    {
+      "page": "文稿配方",
+      "observed_ready_ms": 192,
+      "loading": false
+    },
+    {
+      "page": "设置",
+      "observed_ready_ms": 192,
+      "loading": false
+    }
+  ]
+}

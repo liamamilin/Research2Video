@@ -63,7 +63,7 @@ def test_isolated_service_restart_and_shutdown(web_env, monkeypatch, via_gateway
         assert duplicate.returncode != 0
         assert json.loads((root / 'state/app_runtime.json').read_text())['pid'] == child.pid
         assert (root / 'state/server.pid').read_text().strip() == str(child.pid)
-        assert client.post('/api/auth/login', json={'username': 'admin', 'password': 'admin-pass-123'}).status_code == 200
+        assert client.post('/api/auth/login', json={'username': 'admin', 'password': 'admin-pass-123', 'remember': True}).status_code == 200
         headers = {'X-CSRF-Token': client.cookies.get('ai_research_csrf')}
         result = client.post('/api/assistant/service', headers=headers, json={'action': 'restart'})
         assert result.status_code == 200, result.text
@@ -79,6 +79,11 @@ def test_isolated_service_restart_and_shutdown(web_env, monkeypatch, via_gateway
         new_pid = record['actual']['pid']
         assert new_pid != child.pid
         assert client.get('/api/health').json()['instance_id'] != first
+        client.cookies.delete('ai_research_access')
+        refreshed = client.post('/api/auth/refresh', headers=headers)
+        assert refreshed.status_code == 200, refreshed.text
+        assert refreshed.headers['X-Session-Days'] == '30'
+        headers = {'X-CSRF-Token': client.cookies.get('ai_research_csrf')}
         assert client.get(f'/api/assistant/maintenance/{key}').json()['status'] == 'completed'
         result = client.post('/api/assistant/service', headers=headers, json={'action': 'shutdown'})
         assert result.status_code == 200, result.text

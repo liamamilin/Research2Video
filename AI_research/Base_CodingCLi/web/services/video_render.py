@@ -71,7 +71,13 @@ def offline_mounts() -> list[str]:
     disk's path, and a program that creates folders along the way would quietly write the videos to the laptop
     under /Volumes. So a render is not started while a disk it needs is missing.
     """
-    return [str(m) for m in _video_config().get("require_mounts") or [] if not os.path.ismount(str(m))]
+    required = list(_video_config().get("require_mounts") or [])
+    from web.services.video_storage import paths, volume
+    for folder in (paths()[0] / "video_renders", paths()[1] / "jobs"):
+        mount = volume(folder)
+        if mount and str(mount) not in required:
+            required.append(str(mount))
+    return [str(m) for m in required if not os.path.ismount(str(m))]
 
 
 def get_client() -> AutoVideoClient:
@@ -177,6 +183,9 @@ def source_card_request(script: dict, version: dict) -> list[dict]:
 
 def publish_pack(script: dict, version: dict, column, *, render_id: str | None = None) -> dict:
     """The publish pack of ``version``; chapter times come from its newest completed render, if there is one."""
+    if (script.get('topic') or {}).get('local_video'):
+        from web.services.local_video import publish_pack as local_pack
+        return {**local_pack(script, version), "render_id": render_id}
     from core.video import publish
 
     report = ""
@@ -185,12 +194,14 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
     except (OSError, KeyError, TypeError):
         pass
     timeline = None
+    used = None  # the render whose chapters the pack carries, echoed so a page can tell which video it describes
     for render in store.list_renders(script["id"]):
         if render_id is not None and render["id"] != render_id:
             continue
         if render["version"] != version["version"] or render["status"] != "COMPLETED":
             continue
         timeline = {}  # there is a video: with no chapters file it has no chapters, which is not "not rendered yet"
+        used = render["id"]
         path = safe_file(render, "chapters.json")
         if path is not None:
             try:
@@ -202,11 +213,13 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
     from web.services import video_recheck
 
     fresh = video_recheck.freshness(script, version, column, store.list_rechecks(script["id"]))
-    return publish.build(script, {**version, "checks": checks}, column, report, timeline, fresh)
+    return {**publish.build(script, {**version, "checks": checks}, column, report, timeline, fresh), "render_id": used}
 
 
 def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None) -> dict:
     """Record a render of the script's approved version. Does not contact AutoVideo."""
+    if (script.get('topic') or {}).get('local_video'):
+        raise RenderError('这是本地导入成片，可直接发布；替换视频请提供新文件路径。')
     version_no = script.get("approved_version")
     if not version_no:
         raise RenderError("文稿还没有定稿，不能出片")
@@ -234,6 +247,9 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         raise RenderError(f"这个栏目不能用视频形式 {form}")
     request: dict[str, Any] = {
         "input_mode": "narration",
+        **({"episode": {"items": [{"title": s["title"][:24], "chapter_indexes": [i]}
+            for i, s in enumerate(version.get("sections", [])) if s.get("episode_role", "item") == "item"]}}
+            if script.get("topic", {}).get("content_mode") == "episode" else {}),
         "chapters": chapter_list,
         "video_form": form,
         "duration_mode": "content",
@@ -282,7 +298,9 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
     config = production.get(paths.config_dir, paths.jobs_dir, script["production"]) if script.get("production") else None
     from core import matrices
     job = getattr(config, "job", "") if config else ""
-    if job:
+    if script.get("source_matrix_id"):
+        matrix = matrices.load_all(paths.config_dir).get(script["source_matrix_id"])
+    elif job:
         matrix = matrices.of_job(job, paths.config_dir)
     else:
         # Older scripts have no production key. Resolve their source Job using
@@ -302,15 +320,16 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         owners, _ = outputs.script_owners(paths.config_dir, paths.jobs_dir, related)
         owner = owners.get(script["id"], {})
         matrix = matrices.load_all(paths.config_dir).get(owner.get("matrix", ""))
-    from core.video.production_settings import inherit
-    matrix_settings = inherit(matrix.render if matrix else {}, config.render if config and config.usable else {})
+    from core.video import content_columns
+    matrix_settings = content_columns.render_settings(paths.config_dir, matrix, script.get("content_context") or {},
+                                                      config.render if config and config.usable else {})
     if column.production_settings or matrix_settings or production_mode is not None:
         if production_mode not in (None, "standard", "fast"):
             raise RenderError("未知制作档位")
         content_settings = {k: v for k, v in column.production_settings.items() if k != "production_recipe"}
         # Old recipe values are explicit only when no new production reference was selected.
         if not column.production_recipe:
-            content_settings.update({k: request[k] for k in ("video_form", "creative_intent", "packaging", "voice_id") if k in request})
+            content_settings.update({k: request[k] for k in ("video_form", "creative_intent", "packaging", "voice_id", "brand") if k in request})
         else:
             for key in ("creative_intent", "packaging"):
                 if key in content_settings and key in request:
@@ -318,11 +337,13 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         recipe_ref = matrix_settings.get("production_recipe") or column.production_recipe
         if recipe_ref:
             request["production_recipe"] = recipe_ref
-        for key in ("video_form", "creative_intent", "packaging", "voice_id"):
+        for key in ("video_form", "creative_intent", "packaging", "voice_id", "brand"):
             request.pop(key, None)
         request["production_context"] = {"content_recipe": {"id": "research:" + column.key, "settings": content_settings}}
         if matrix_settings:
-            settings_id = "research-production:" + config.key if config else "research-matrix:" + matrix.key
+            settings_id = ("research-production:" + config.key if config else
+                           "research-matrix:" + matrix.key if matrix else
+                           "research-column:" + script.get("content_column_id", "unassigned"))
             request["production_context"]["matrix"] = {"id": settings_id,
                 "settings": {k: v for k, v in matrix_settings.items() if k != "production_recipe"}}
         if script["topic"].get("video_form"):
@@ -368,6 +389,10 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         else:
             request["packaging"] = packaging
     request["visual_storytelling"] = not (script["topic"].get("article", {}).get("kind") == "literary")
+    if direction := content_columns.render_direction(script.get("content_context") or {}):
+        intent = request.setdefault("creative_intent", {})
+        intent["purpose"] = (intent.get("purpose", "") + "\n" + direction).strip()
+        intent.setdefault("audience", (script.get("content_context") or {}).get("audience", "普通观众"))
     from core.video import screenshots
     try:
         materials = screenshots.render_materials(script["id"], version, get_client().base_url)
@@ -387,10 +412,19 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         if problem:
             raise RenderError(problem)
         from core.video import visual_materials
+        listed = []
         try:
-            listed = video_sources.report_sources(video_workflow.report_of(script), fallback=True) if script.get("report_path") else []
+            article = script.get("topic", {}).get("article")
+            listed = video_sources.visual_sources(video_workflow.report_of(script)) if script.get("report_path") or article else []
+            if article and article.get("source", {}).get("source_url"):
+                listed.append({"url": article["source"]["source_url"], "title": version["title"], "kind": ""})
+            from core import report_material
+            original = report_material.read((version.get("meta") or {}).get("material") or {}, script.get("report_path") or "")
+            known_urls = {visual_materials.url_key(s["url"]) for s in listed}
+            listed.extend(s for s in video_sources.visual_sources(original)
+                          if visual_materials.url_key(s["url"]) not in known_urls)
         except (OSError, ValueError, KeyError, TypeError):
-            listed = []
+            pass
         visuals = visual_materials.intent(script, version, request, _video_config().get("visual_materials"), listed)
         return store.create_render(script["id"], version_no, title=title, source_text=text,
                                    source_sha256=sha, request=request, visuals=visuals)
@@ -495,6 +529,11 @@ def _advance(render_id: str, client: AutoVideoClient) -> str:
 
 def _submit(render: dict, client: AutoVideoClient) -> Optional[str]:
     timer = time.monotonic()
+    from web.services.video_storage import unavailable_reason
+    reason = unavailable_reason()
+    if reason:
+        _fail(render["id"], "STORAGE_UNAVAILABLE", reason)
+        return None
     offline = offline_mounts()
     if offline:
         _fail(render["id"], "DISK_OFFLINE", f"外接盘没有挂载：{'、'.join(offline)}。接上后再重试，这次没有出片")

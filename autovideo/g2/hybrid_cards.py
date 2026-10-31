@@ -84,7 +84,7 @@ def join_clips(pipeline, compiled: dict, ir: dict, clips: list[dict], root: Path
     captions = json.loads((pipeline.ARTIFACTS / 'caption-alignment.json').read_text())
     verify_plan(ir, captions)
     ass = root / 'captions.ass'
-    fast_cards.write_ass(ir, ass, captions['cues'])
+    fast_cards.write_ass(ir, ass, captions['cues'], style=pipeline.PACKAGING_INPUT['production_plan']['style'])
     escaped = str(ass).replace('\\', '\\\\').replace(':', '\\:').replace("'", "'\\''")
     encoders = [('h264_videotoolbox', ['-b:v', '5500k', '-allow_sw', '0'])] if sys.platform == 'darwin' else []
     encoders.append(('libx264', ['-preset', 'veryfast', '-crf', '20']))
@@ -141,7 +141,7 @@ def render(pipeline, compiled: dict, *, renderer_root: Path | None = None) -> No
         rows = []
         for wi, window in enumerate(windows):
             path = assets / f'page-{index:04d}-{wi}.png'
-            fast_cards.draw_card(card_scene, title=ir['video']['title'], index=index, count=len(ir['scenes']),
+            fast_cards.draw_card(card_scene, header=plan.get('brand_layout'), title=ir['video']['title'], index=index, count=len(ir['scenes']),
                 style=plan['style'], badge=badge, notices=notices, output=path, editorial=page,
                 visible_points=set(window['visible']) if window['visible'] is not None else None)
             rows.append({'path': path, 'frames': window['end_frame']-window['start_frame']})

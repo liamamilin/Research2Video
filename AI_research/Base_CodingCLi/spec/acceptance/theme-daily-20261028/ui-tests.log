@@ -1,0 +1,18 @@
+
+> ai-research-ui@0.1.0 test
+> vitest run --run src/components/ThemeWorkbench.test.tsx src/components/ThemeUsage.test.tsx
+
+
+ RUN  v3.2.7 /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/ui
+
+ ✓ src/components/ThemeUsage.test.tsx (1 test) 80ms
+stderr | src/components/ThemeWorkbench.test.tsx > matrix topic workbench > saves reference generation and a permanent direction on the daily plan
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ThemeWorkbench.test.tsx (13 tests) 405ms
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  00:14:58
+   Duration  1.02s (transform 88ms, setup 0ms, collect 289ms, tests 486ms, environment 563ms, prepare 106ms)

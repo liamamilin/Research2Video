@@ -1,0 +1,10 @@
+[
+  {
+    "file": "AGENTS.md",
+    "manifest_stale_at_HEAD": true
+  },
+  {
+    "file": "RELEASE_STATUS.md",
+    "manifest_stale_at_HEAD": true
+  }
+]

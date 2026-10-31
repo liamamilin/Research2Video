@@ -20,6 +20,7 @@ const catalog = { categories: [
 const preview = { render_id: "r1", title: "第一期", description: "视频介绍", tags: ["科技"], tid: 95, warnings: ["检查参考来源"], credibility: { text: "有出处可信" } };
 
 beforeEach(() => {
+  localStorage.clear();
   vi.clearAllMocks();
   data = { account: { connected: true, name: "测试UP主", uid: "123" }, settings: { auto_upload: false, sync_comments: false, tid: 95, auto_since: 0 }, biliup_ready: true, uploads: [], candidates: [], videos: [{ bvid: BV, title: "第一期", synced_at: null }], comments: [row] };
   data.candidate_summary = { completed_renders: 0, available_versions: 0, published_versions: 0, queued_versions: 0, unavailable_versions: 0, ready_versions: 0 };
@@ -43,6 +44,17 @@ function chooseCategory(label: string, path: string) {
 }
 
 describe("Platform management", () => {
+  it("shows durable Bilibili recovery notes and checks the original task without reuploading", async () => {
+    data.uploads = [{ id: "uncertain", script_id: "s1", render_id: "r1", version: 1,
+      status: "UNKNOWN", bvid: "", error: "连接中断", created_at: 100, payload: preview,
+      recovery: { lookup_count: 2, note: "已核对最近 3 页稿件，暂未找到匹配；继续自动核对，尚未重新投稿。" } }];
+    show();
+    expect(await screen.findByText(/已核对最近 3 页稿件/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "重新检查并排队" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "立即核对投稿结果" }));
+    await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/uploads/uncertain/lookup"));
+    expect(platformAction).toHaveBeenCalledTimes(1);
+  });
   it("explains missing upload authorization and links to account settings", async () => {
     data.account.upload_authorized = false;
     show();
@@ -60,7 +72,7 @@ describe("Platform management", () => {
     show("/platforms?render=r1");
     expect(await screen.findByText("这个版本已有投稿任务，请继续查看进度。")).toBeTruthy();
     expect(await screen.findByRole("button", { name: "取消排队" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "加入投稿队列" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "提交到 B 站" })).toBeNull();
     expect(platformAction).not.toHaveBeenCalled();
   });
   it("focuses an existing document task outside the overview list and returns to its exact version", async () => {
@@ -68,7 +80,7 @@ describe("Platform management", () => {
     show("/platforms?task=old-task&from_script=s1&version=1");
     expect(await screen.findByText("旧版投稿")).toBeTruthy();
     expect(screen.getByRole("link", { name: "← 返回文稿发布页（v1）" }).getAttribute("href")).toBe("/video/s1?tab=publish&publish_version=1");
-    expect(screen.getByRole("link", { name: "查看文稿发布记录 →" }).getAttribute("href")).toBe("/video/s1?tab=publish&publish_version=1");
+    expect(screen.getByRole("link", { name: "查看文稿发布记录 →" }).getAttribute("href")).toBe("/video/s1?tab=publish&publish_version=1&render=old-render");
     expect(platformAction).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("tab", { name: "账号与策略" }));
     expect(screen.getByRole("link", { name: "← 返回文稿发布页（v1）" })).toBeTruthy();
@@ -151,12 +163,13 @@ describe("Platform management", () => {
     data.candidates = [{ render_id: "r1", script_id: "s1", version: 1, title: "第一期", completed_at: "2026-10-24" }];
     vi.mocked(api).mockResolvedValue({ render_id: "r1", title: "第一期", description: "视频介绍", tags: ["科技"], tid: 95, warnings: ["检查参考来源"], credibility: { text: "有出处可信" } });
     show("/platforms?tab=uploads&render=r1");
-    await screen.findByText("检查参考来源");
+    await screen.findByLabelText("标题");
+    expect(screen.queryByText("检查参考来源")).toBeNull();
     await waitFor(() => expect((screen.getByLabelText("投稿分区") as HTMLInputElement).value).toBe("科技 / 数码"));
     expect(screen.queryByRole("spinbutton")).toBeNull();
     expect(platformAction).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText("标题"), { target: { value: "编辑后的标题" } });
-    fireEvent.click(screen.getByRole("button", { name: "加入投稿队列" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交到 B 站" }));
     await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/uploads", { render_id: "r1", title: "编辑后的标题", description: "视频介绍", tid: 95, tags: ["科技"], first_comment: { enabled: false, text: "", pin: false } }));
   });
 
@@ -166,7 +179,7 @@ describe("Platform management", () => {
     await screen.findByLabelText("投稿分区");
     await waitFor(() => expect((screen.getByLabelText("投稿分区") as HTMLInputElement).disabled).toBe(false));
     chooseCategory("投稿分区", "知识 / 科学科普");
-    fireEvent.click(screen.getByRole("button", { name: "加入投稿队列" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交到 B 站" }));
     await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/uploads", expect.objectContaining({ tid: 201 })));
   });
 
@@ -178,7 +191,7 @@ describe("Platform management", () => {
     expect(platformAction).not.toHaveBeenCalled();
     fireEvent.click(button);
     expect(screen.getByLabelText("投稿分区")).toHaveProperty("value", "知识 / 科学科普");
-    fireEvent.click(screen.getByRole("button", { name: "加入投稿队列" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交到 B 站" }));
     await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/uploads", expect.objectContaining({ tid: 201 })));
   });
 
@@ -186,10 +199,10 @@ describe("Platform management", () => {
     vi.mocked(api).mockResolvedValue({ ...preview, tid: 999 });
     show("/platforms?render=r1");
     await screen.findByText("原分区已不在当前可用列表中，请重新选择。");
-    expect((screen.getByRole("button", { name: "加入投稿队列" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "提交到 B 站" }) as HTMLButtonElement).disabled).toBe(true);
     expect(platformAction).not.toHaveBeenCalled();
     chooseCategory("投稿分区", "知识 / 科学科普");
-    expect((screen.getByRole("button", { name: "加入投稿队列" }) as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole("button", { name: "提交到 B 站" }) as HTMLButtonElement).disabled).toBe(false);
   });
 
   it("can retry category loading without losing the edited upload fields", async () => {
@@ -198,7 +211,7 @@ describe("Platform management", () => {
     show("/platforms?render=r1");
     await screen.findByText("分区读取失败：连接失败");
     fireEvent.change(screen.getByLabelText("标题"), { target: { value: "保留编辑内容" } });
-    expect((screen.getByRole("button", { name: "加入投稿队列" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "提交到 B 站" }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "重新获取分区" }));
     await waitFor(() => expect((screen.getByLabelText("投稿分区") as HTMLInputElement).disabled).toBe(false));
     expect((screen.getByLabelText("标题") as HTMLInputElement).value).toBe("保留编辑内容");
@@ -240,11 +253,11 @@ describe("Platform management", () => {
     vi.mocked(api).mockResolvedValue(preview);
     show("/platforms?render=r1");
     fireEvent.click(await screen.findByRole("checkbox", { name: "视频公开后添加首条评论" }));
-    expect((screen.getByRole("button", { name: "加入投稿队列" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "提交到 B 站" }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.change(screen.getByLabelText("首条评论内容"), { target: { value: "本期补充资料\n欢迎交流。" } });
     fireEvent.click(screen.getByRole("checkbox", { name: "置顶这条评论" }));
     expect(platformAction).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "加入投稿队列" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交到 B 站" }));
     await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/uploads", expect.objectContaining({ first_comment: { enabled: true, text: "本期补充资料\n欢迎交流。", pin: true } })));
   });
 
@@ -254,7 +267,7 @@ describe("Platform management", () => {
     expect(await screen.findByLabelText("首条评论内容")).toHaveProperty("value", "常用说明");
     fireEvent.click(screen.getByRole("checkbox", { name: "视频公开后添加首条评论" }));
     expect(screen.queryByLabelText("首条评论内容")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "加入投稿队列" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交到 B 站" }));
     await waitFor(() => expect(platformAction).toHaveBeenCalledWith("/uploads", expect.objectContaining({ first_comment: expect.objectContaining({ enabled: false }) })));
   });
 

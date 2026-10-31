@@ -147,8 +147,8 @@ def create_run(spec: dict, items: list[dict], *, plan_id: Optional[str] = None, 
     with connect(write=True) as conn:
         conn.execute(
             "INSERT INTO autopilot_runs (id, plan_id, spec, status, stage, started_by, started_at, created_at,"
-            " updated_at) VALUES (?, ?, ?, 'RUNNING', 'TOPICS', ?, ?, ?, ?)",
-            (run_id, plan_id, json.dumps(spec, ensure_ascii=False), started_by, time.time(), now, now))
+            " updated_at) VALUES (?, ?, ?, 'RUNNING', ?, ?, ?, ?, ?)",
+            (run_id, plan_id, json.dumps(spec, ensure_ascii=False), "ITEMS" if items else "TOPICS", started_by, time.time(), now, now))
         for i, item in enumerate(items):
             conn.execute(
                 "INSERT INTO autopilot_items (id, run_id, slot, column_key, topic, production, updated_at)"

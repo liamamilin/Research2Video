@@ -51,6 +51,7 @@ class PlatformStore:
                 ("first_comment_pin_status", "TEXT NOT NULL DEFAULT 'DISABLED'"),
                 ("first_comment_pin_error", "TEXT NOT NULL DEFAULT ''"),
                 ("first_comment_updated_at", "REAL NOT NULL DEFAULT 0"),
+                ("recovery", "TEXT NOT NULL DEFAULT '{}'"),
             ):
                 if name not in columns:
                     conn.execute(f"ALTER TABLE uploads ADD COLUMN {name} {definition}")
@@ -96,6 +97,7 @@ class PlatformStore:
     def _upload(row) -> dict:
         data = dict(row)
         data["payload"] = json.loads(data["payload"])
+        data["recovery"] = json.loads(data.get("recovery") or "{}")
         return data
 
     def uploads(self, uid: str) -> list[dict]:
@@ -126,6 +128,31 @@ class PlatformStore:
         with self.connect() as conn:
             row = conn.execute("SELECT * FROM uploads WHERE id=?", (task_id,)).fetchone()
         return self._upload(row) if row else None
+
+    def update_recovery(self, task_id: str, patch: dict, *, expected: str) -> bool:
+        """Persist lookup scheduling without changing original upload timestamps or receipts."""
+        with self.connect(write=True) as conn:
+            row = conn.execute("SELECT recovery FROM uploads WHERE id=? AND status=?", (task_id, expected)).fetchone()
+            if not row:
+                return False
+            data = {**json.loads(row["recovery"] or "{}"), **patch}
+            conn.execute("UPDATE uploads SET recovery=? WHERE id=? AND status=?",
+                         (json.dumps(data, ensure_ascii=False), task_id, expected))
+            return True
+
+    def unknown_uploads(self, uid: str) -> list[dict]:
+        with self.connect() as conn:
+            rows = conn.execute("SELECT * FROM uploads WHERE uid=? AND status='UNKNOWN' ORDER BY created_at", (uid,)).fetchall()
+        return [self._upload(row) for row in rows]
+
+    def attach_upload_receipt(self, task_id: str, uid: str, bvid: str) -> bool:
+        """Attach one recovered receipt atomically, without stealing another task's BV number."""
+        with self.connect(write=True) as conn:
+            if conn.execute("SELECT 1 FROM uploads WHERE uid=? AND bvid=? AND id!=?", (uid, bvid, task_id)).fetchone():
+                return False
+            return bool(conn.execute("UPDATE uploads SET status='SUBMITTED',bvid=?,error='',updated_at=? "
+                                     "WHERE id=? AND uid=? AND status='UNKNOWN' AND bvid=''",
+                                     (bvid, time.time(), task_id, uid)).rowcount)
 
     def update_upload(self, task_id: str, *, status: str, error: str = "", bvid: str = "", expected: str | None = None) -> bool:
         with self.connect(write=True) as conn:

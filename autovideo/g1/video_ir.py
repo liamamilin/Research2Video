@@ -449,6 +449,12 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
             "purpose": scene["purpose"], "visual_intent": scene["visual_intent"],
             "props": props, "narration_segment_ids": scene["narration_segment_ids"],
             "start_frame": start_frame, "end_frame": end_frame, "beats": scheduled_beats})
+        if scene["component"] == "price_change":
+            from g1.price_layout import price_layout
+            try:
+                scheduled_scenes[-1]["price_layout"] = price_layout(props, (presentation or {}).get("density") == "large")
+            except ValueError as exc:
+                _fail("INFORMATION_TEXT_FIT", f"{sp}/props", str(exc))
         previous_scene_end_ms, previous_scene_end_frame = end_ms, end_frame
 
     if previous_scene_end_ms != ir["video"]["duration_ms"]:

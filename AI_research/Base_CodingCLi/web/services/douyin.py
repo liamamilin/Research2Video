@@ -15,9 +15,11 @@ import time
 
 from core.douyin import DouyinError, UID, WORK_ID, work_id, clean_first_comment
 from core.douyin_store import DouyinStore, ACTIVE
+from core.social.verification import check_progress, lookup_revision, MAX_UNRESOLVED_CHECKS
 from core.video import store as video_store
 from scripts.douyin_worker import private_json
 from web.services import platform_manager, video_render
+from web.services.publish_cover import publish_covers
 from web.settings import get_settings
 
 PIN = "3847fff01f5434a8a32829833163cd6723cabc59"
@@ -82,10 +84,12 @@ def public_job(row: dict, *, comments: dict | None = None, checks: dict | None =
         if checks is None:
             checks = verification_checks(store().list(uid=row['uid'], kind='RECONCILE'))
         check = checks.get(row['id'])
-        result['verification'] = {'automatic': row['status'] == 'SUBMITTED' and bool(row['work_id']),
+        tracking = row['result'].get('verification', {})
+        result['verification'] = {'automatic': row['status'] == 'SUBMITTED' and bool(row['work_id']) and not tracking.get('exhausted'),
+                                  **tracking, 'running': bool(check and check['status'] in ACTIVE),
                                   'status': (check or {}).get('status', ''), 'checked_at': (check or {}).get('updated_at'),
-                                  'next_check_at': check['updated_at'] + 120 if check and check['status'] not in ACTIVE and row['status'] == 'SUBMITTED' else None,
-                                  'reason': (check or {}).get('error') or (check or {}).get('result', {}).get('check_reason', ''),
+                                  'next_check_at': tracking.get('next_check_at'),
+                                  'reason': tracking.get('reason') or (check or {}).get('error') or (check or {}).get('result', {}).get('check_reason', ''),
                                   'count': (check or {}).get('check_count', 0)}
     return result
 
@@ -93,8 +97,31 @@ def public_job(row: dict, *, comments: dict | None = None, checks: dict | None =
 def verification_checks(rows: list[dict]) -> dict:
     result = {}
     for row in reversed(rows):
-        result[row['parent_id']] = {**row, 'check_count': result.get(row['parent_id'], {}).get('check_count', 0) + 1}
+        prior = result.get(row['parent_id'], {})
+        result[row['parent_id']] = {**row, 'check_count': prior.get('check_count', 0) + 1,
+                                  'consecutive_failures': prior.get('consecutive_failures', 0) + 1 if row['status'] == 'FAILED' else 0}
     return result
+
+
+def settle_verification(db: DouyinStore) -> None:
+    """Retain failed checks, back off, and stop a persistent unresolved lookup."""
+    checks = verification_checks(db.list(kind='RECONCILE'))
+    for parent in db.list(kind='UPLOAD', statuses=('SUBMITTED', 'UNKNOWN')):
+        latest = checks.get(parent['id'])
+        previous = parent['result'].get('verification', {})
+        if (not latest or latest['status'] in ACTIVE or previous.get('last_check_id') == latest['id']
+                or parent['uid'] != latest['uid']):
+            continue
+        error = latest['result'].get('lookup_error', {})
+        state = error.get('state', 'unavailable') if latest['status'] == 'FAILED' else (
+            'published' if latest['result'].get('public') else 'unknown')
+        tracking = check_progress(previous, state, latest['updated_at'], lookup_revision({'work_id': parent['work_id']}))
+        if not previous and latest['consecutive_failures'] >= MAX_UNRESOLVED_CHECKS:
+            tracking.update(attempts=latest['check_count'], attempts_for_input=latest['consecutive_failures'],
+                            exhausted=True, next_check_at=None)
+            tracking['reason'] = '原作品已多次回查失败，回执已保留；处理回查问题后可继续核对原投稿'
+        tracking['last_check_id'] = latest['id']
+        db.update(parent['id'], expected=parent['status'], result={**parent['result'], 'verification': tracking})
 
 
 def save_first_comment_template(value: dict) -> dict:
@@ -268,10 +295,10 @@ def enqueue(render_id: str, payload: dict) -> dict:
         raise DouyinError("简介与话题合计超过 1000 字，请精简后投稿。")
     if video_store.has_publication(script["id"], render["version"], "douyin", owner):
         raise DouyinError("这个版本已记录抖音发布，请查看文稿发布记录。")
-    cover = next((p for n in ("cover.png", "cover.jpg") if (p := video_render.safe_file(render, n))), None)
     clean = {"title": title, "description": description, "tags": tags,
              "video_path": str(video_render.safe_file(render, "video.mp4").resolve()),
-             "cover": str(cover.resolve()) if cover else "", "first_comment": clean_first_comment(payload.get("first_comment", {}))}
+             **publish_covers(render, title, portrait=True),
+             "first_comment": clean_first_comment(payload.get("first_comment", store().comment_settings(owner)))}
     with dispatch_lock():
         if uid() != owner or any(r["kind"] == "LOGIN" for r in store().list(statuses=ACTIVE)):
             raise DouyinError("账号正在更换，请刷新后重新投稿。")
@@ -334,6 +361,7 @@ def overview() -> dict:
 
 
 def _settle(db: DouyinStore) -> None:
+    settle_verification(db)
     path = directory() / "login.json"
     active = json.loads(path.read_text()).get("id") if path.is_file() else ""
     for row in db.list(statuses=("DONE",)):
@@ -362,7 +390,7 @@ def _settle(db: DouyinStore) -> None:
             receipt = row["result"]
             if parent and parent["uid"] == row["uid"] and parent["status"] in ("UNKNOWN", "SUBMITTED"):
                 if receipt.get("uid") == row["uid"] and WORK_ID.fullmatch(receipt.get("work_id", "")) and (not parent["work_id"] or parent["work_id"] == receipt["work_id"]):
-                    db.update(parent["id"], status="SUBMITTED", work_id=receipt["work_id"], result=receipt,
+                    db.update(parent["id"], status="SUBMITTED", work_id=receipt["work_id"], result={**parent['result'], **receipt},
                               error="" if receipt.get("public") else "账号归属已核对，尚未确认已公开。")
             db.update(row["id"], status="RECORDED")
     for row in db.list(kind="UPLOAD", statuses=("SUBMITTED",)):
@@ -404,17 +432,25 @@ def tick() -> None:
         current = account().get("uid", "")
         active = db.list(statuses=ACTIVE)
         if not active and current:
-            for comment in db.list(uid=current, kind='FIRST_COMMENT', statuses=('UNKNOWN',)):
-                checks = [r for r in db.list(uid=current, kind='COMMENT_CHECK') if r['parent_id'] == comment['id']]
+            checks_by_comment = {}
+            for check in db.list(uid=current, kind='COMMENT_CHECK'):
+                checks_by_comment.setdefault(check['parent_id'], []).append(check)
+            for comment in db.list(uid=current, kind='FIRST_COMMENT', statuses=('UNKNOWN', 'SENT')):
+                if comment['result'].get('read_back'):
+                    continue
+                checks = checks_by_comment.get(comment['id'], [])
                 if len(checks) < 5 and (not checks or time.time() - checks[0]['updated_at'] > 120):
                     db.create('COMMENT_CHECK', current, parent_id=comment['id'])
                     break
             active = db.list(statuses=ACTIVE)
         if not active and current:
             pending = db.list(uid=current, kind="UPLOAD", statuses=("SUBMITTED",))
+            latest_checks = verification_checks(db.list(kind='RECONCILE'))
             for row in pending:
-                checks = [r for r in db.list(kind="RECONCILE") if r["parent_id"] == row["id"]]
-                if row["work_id"] and (not checks or time.time() - checks[0]["updated_at"] > 120):
+                tracking = row['result'].get('verification', {})
+                latest = latest_checks.get(row['id'])
+                next_check = tracking.get('next_check_at') or (latest['updated_at'] + 120 if latest else 0)
+                if row['work_id'] and not tracking.get('exhausted') and time.time() >= next_check:
                     db.create("RECONCILE", current, {"work_id": row["work_id"]}, parent_id=row["id"])
                     break
         if not runtime()["ready"]:

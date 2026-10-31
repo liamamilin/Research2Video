@@ -1,9 +1,10 @@
 import React from 'react';
+import {ContentStyleContext, BrandHeaderContext, type ContentStyle, type BrandHeader} from './ContentStyle';
 import {DataChart} from './DataChart';
 import {ScatterChart} from './ScatterChart';
 import {VisualObject, SvgVisualObject, visualFor} from './VisualObjects';
 import {ObjectFlow} from './ObjectFlow';
-import {cameraAt, carriesPicture, flowRects, linkScenes, transitionAt} from './ShotDirector';
+import {cameraAt, carriesPicture, flowRects, linkScenes, transitionAt, comparisonAt} from './ShotDirector';
 import {DirectedMaterials} from './DirectedMaterials';
 import {StoryObjects,objectColor,revealFrames} from './StoryDirection';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
@@ -11,7 +12,7 @@ import {CornerBadge, type Badge} from './Packaging';
 import {CreativeVideo, type CreativePreset} from './CreativeForms';
 
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
-type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]; previous_scene?: Scene};
+type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]; previous_scene?: Scene; price_layout?: {number_size: number; side_size: number; label_size: number; label_width: number; badge_size: number; unit_size: number; row_gap: number; unit_gap: number; stacked_label: boolean}};
 type Segment = {id: string; text: string; start_ms: number; end_ms: number};
 type Timeline = {schema_version: string; video: {title: string; width: number; height: number; fps: number; duration_ms: number}; narration: {audio_asset_id: string; segments: Segment[]}; scenes: Scene[]; total_frames: number; audio_public_file: string; caption_cues?: Pick<Segment, 'text' | 'start_ms' | 'end_ms'>[]; presentation?: {preset: 'information_motion' | 'explanation' | CreativePreset; density?: 'large'}; content_structure?: {chapters: {id: string; title: string; narration_segment_ids: string[]}[]}};
 
@@ -250,9 +251,14 @@ function LegacyVideo({ir, sceneBackdrops = {}, badge}: {ir: Timeline; sceneBackd
 
 // A separate presentation for the same validated, registered content components.
 const paper = {bg:'#F7F8F5', ink:'#202D28', muted:'#69756E', green:'#17784B', line:'#E1E8E1'};
+const defaultPaper = paper;
 const ease = (value: number) => 1-Math.pow(1-Math.max(0, Math.min(1, value)), 3);
 function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=false, hideStage=false}:
   {ir: Timeline; badge?: Badge; sceneOverride?:Scene; frameOverride?:number; stageOnly?:boolean; hideStage?:boolean}) {
+  const contentStyle = React.useContext(ContentStyleContext);
+  const brandHeader = React.useContext(BrandHeaderContext);
+  const paper = contentStyle ? {bg:contentStyle.background, ink:contentStyle.text, muted:contentStyle.muted,
+    green:contentStyle.accent, line:contentStyle.line} : defaultPaper;
   const currentFrame = useCurrentFrame(), frame=frameOverride??currentFrame;
   const sceneIndex = sceneOverride?ir.scenes.indexOf(sceneOverride):Math.max(0, ir.scenes.findIndex((s) => frame >= s.start_frame && frame < s.end_frame));
   const scene = sceneOverride??ir.scenes[sceneIndex], p = scene.props;
@@ -265,15 +271,18 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   const reveals = scene.beats.filter((b) => b.action === 'reveal');
   const shown = reveals.filter((b) => b.frame <= frame);
   const latest = shown[shown.length-1]?.target_id;
+  const comparison=scene.component==='comparison'?comparisonAt(scene,frame):undefined;
   const motion = (target: string): React.CSSProperties => {
     const beat = reveals.find((b) => b.target_id === target);
-    const t = beat ? ease((frame-beat.frame)/revealFrames(scene)) : 0;
+    // A comparison needs both subjects as readable context from the beginning.
+    // Spoken beats select emphasis, independently of the panels' entrance.
+    const t=comparison&&target.startsWith('side:')?comparison.opacity:beat?ease((frame-beat.frame)/revealFrames(scene)):0;
     return {opacity:t, transform:`translateY(${(1-t)*22}px)`, willChange:'transform, opacity'};
   };
   // 'pretty' keeps a line from ending on a single orphaned character ("美" / "分"). 'balance' was tried for headings and
   // split phrases worse ("账" / "从 10 美元…"), because Chinese text has no word gaps to balance on.
   const textStyle = {overflowWrap:'anywhere', whiteSpace:'normal', wordBreak:'normal', textWrap:'pretty'} as React.CSSProperties;
-  const panelStyle: React.CSSProperties = {background:'#FFFFFF', border:`1px solid ${paper.line}`, borderRadius:22, boxShadow:'0 12px 32px rgba(26,50,35,.045)', boxSizing:'border-box'};
+  const panelStyle: React.CSSProperties = {background:contentStyle?.surface??'#FFFFFF', border:`1px solid ${paper.line}`, borderRadius:22, boxShadow:'0 12px 32px rgba(26,50,35,.045)', boxSizing:'border-box'};
   const chartLike = scene.component === 'comparison' || scene.component === 'bar_chart';
   const heading = chartLike ? scene.purpose : p.title;
   const materialScene = ['object_showcase','material_collage'].includes(scene.component);
@@ -282,9 +291,11 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   const sameHeading=!!previous?.props.scene_flow && (chartLike?previous.purpose:previous.props.title)===heading;
   const headingMotion=carriesPicture(scene)||sameHeading?{}:scene.component==='comparison' && p.visuals?.length
     ? {opacity:ease((frame-scene.start_frame)/16)} : motion(scene.component === 'comparison' ? 'side:left' : scene.component === 'bar_chart' ? 'bar:0' : scene.component === 'flow_diagram'||materialScene ? 'scene' : 'title');
-  return <AbsoluteFill style={{background:stageOnly?'transparent':paper.bg, color:paper.ink, fontFamily:font, backgroundImage:stageOnly?undefined:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
-    {!stageOnly&&<><CornerBadge badge={badge}/><StoryObjects scene={scene}/>
-    <div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
+  return <AbsoluteFill style={{background:stageOnly?'transparent':paper.bg, color:paper.ink, fontFamily:font, backgroundImage:stageOnly||contentStyle?undefined:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
+    {!stageOnly&&<>{brandHeader ? <div data-brand-header="content" style={{position:'absolute',left:brandHeader.left,top:brandHeader.top,width:1920-brandHeader.left-brandHeader.right-brandHeader.width-brandHeader.gap,height:brandHeader.height,overflow:'hidden'}}>
+      <div style={{position:'absolute',top:10,left:0,right:0,height:34,color:paper.muted,fontSize:24,lineHeight:'34px',overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{scene.props.story?.entities?.length ? <StoryObjects scene={scene} inline/> : badge?.text||ir.video.title}</div>
+      <div style={{position:'absolute',top:46,left:0,right:0,fontSize:18,lineHeight:'24px',color:paper.muted,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{chapterIndex >= 0 && chapters.length > 1 ? `${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')} · ${chapters[chapterIndex].title}` : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
+    </div> : <><CornerBadge badge={badge}/><StoryObjects scene={scene}/><div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div></>}
     {scene.component!=='title_card'&&<div style={{position:'absolute',left:140,top:162,width:1640,fontSize:materialScene&&heading.length>40?40:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...headingMotion}}><Tech text={heading}/></div>}</>}
     <div style={{position:'absolute',inset:0,display:hideStage?'none':undefined}}>
     {recapSources.length ? <div data-story-recap={scene.id} style={{position:'absolute',left:140,top:300,width:1640,height:560,display:'flex',justifyContent:'center',gap:40,alignItems:'center'}}>
@@ -325,7 +336,8 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       {scene.component === 'comparison' && <div style={{position:'absolute',left:140,top:330,width:1640,display:'grid',gridTemplateColumns:'1fr 1fr',gap:44}}>
         {(['left','right'] as const).map((side) => {
           const data=p[side], total=data.items.join('').length, bodySize=S(total > 130 ? 30 : 34),color=objectColor(scene,`side:${side}`,side==='right'?paper.green:paper.muted);
-          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:p.story?`${color}08`:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${p.story?color:side === 'right' ? paper.green : paper.line}`}}>
+          const active=comparison?.target===`side:${side}`;
+          return <div key={side} style={{...panelStyle,...motion(`side:${side}`),height:500,padding:'34px 40px',background:p.story?`${color}${active?'12':'08'}`:side === 'right' ? '#EDF6EF' : '#FFFFFF',borderTop:`3px solid ${active?color:paper.line}`}}>
             <div style={{display:'flex',alignItems:'center',gap:20,marginBottom:30}}><VisualObject scene={scene} target={`side:${side}`} frame={frame} size={64} color={p.story?color:paper.green}/><div style={{...textStyle,flex:1,minWidth:0,color,fontSize:S(data.label.length > 20 ? 34 : 42),lineHeight:1.4,fontWeight:650}}><Tech text={data.label}/></div></div>
             <div style={{display:'flex',flexDirection:'column',gap:20}}>{data.items.map((item: string,i: number) => <div key={i} style={{display:'flex',gap:15,fontSize:bodySize,lineHeight:1.5}}><span style={{color:paper.green}}>·</span><span style={textStyle}><Tech text={item}/></span></div>)}</div>
           </div>;
@@ -340,30 +352,35 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
         {p.note && <div style={{...motion('line:2'),...textStyle,fontSize:S(32),lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
       </div>}
       {scene.component === 'price_change' && (() => {
-        const rows = p.rows, size = rows.length === 1 ? 180 : 128, side = Math.round(size * .42), badge = S(52);
-        // Same geometry as g2/information_motion.py (PRICE_*): 400px label column, 36px gaps, arrow 0.62 x size wide.
+        // Compiler and planner use the same measured geometry. It is derived
+        // from the unchanged strings rather than requested from the model.
+        const rows = p.rows, layout = scene.price_layout;
+        const size = layout?.number_size ?? (rows.length === 1 ? 180 : 128), side = layout?.side_size ?? Math.round(size*.42), badge = layout?.badge_size ?? S(52);
         const Value = ({text, color, opacity = 1}: {text: string; color: string; opacity?: number}) => {
           const m = text.match(/^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$/), parts = m ? [m[1], m[2], m[3]] : ['', text, ''];
           return <span style={{color, opacity, whiteSpace:'nowrap', fontWeight:750, letterSpacing:-2, lineHeight:1.1}}><span style={{fontSize:side}}>{parts[0]}</span><span style={{fontSize:size}}>{parts[1]}</span><span style={{fontSize:side,fontWeight:650}}>{parts[2]}</span></span>;
         };
         return <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 56px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center',boxSizing:'border-box'}}>
-          {p.unit && <div style={{...motion('title'),...textStyle,fontSize:S(36),lineHeight:1.4,color:paper.muted,marginBottom:20}}><Tech text={p.unit}/></div>}
-          <div style={{display:'flex',flexDirection:'column',gap:34}}>
+          {p.unit && <div style={{...motion('title'),...textStyle,fontSize:layout?.unit_size ?? S(36),lineHeight:1.4,color:paper.muted,marginBottom:layout?.unit_gap ?? 20}}><Tech text={p.unit}/></div>}
+          <div style={{display:'flex',flexDirection:'column',gap:layout?.row_gap ?? 34}}>
             {rows.map((row: any, i: number) => {
               const rowTarget = `line:${p.staged ? i*3 : i}`;
               const beat = reveals.find((b) => b.target_id === rowTarget);
+              const oldOpacity = beat ? ease((frame-beat.frame)/14) : 0;
               const later = (delay: number) => {
                 const target = p.staged ? reveals.find(b => b.target_id === `line:${i*3+(delay===8?1:2)}`) : beat;
                 return target ? ease((frame-target.frame-(p.staged?0:delay))/14) : 0;
               };
-              return <div key={i} style={{...motion(rowTarget),display:'flex',alignItems:'center',gap:36,lineHeight:1.1}}>
-                <div style={{...textStyle,width:400,flex:'none',fontSize:S(46),fontWeight:650,lineHeight:1.35}}><Tech text={row.label}/></div>
-                <div style={{flex:1,display:'flex',alignItems:'center',minWidth:0}}>
-                  <Value text={row.before} color={paper.muted}/>
-                  <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:later(8)}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  <Value text={row.after} color={objectColor(scene,rowTarget,paper.green)} opacity={later(8)}/>
+              const label = <div style={{...textStyle,width:layout?.stacked_label?undefined:layout?.label_width ?? 400,flex:layout?.stacked_label?1:'none',minWidth:0,fontSize:layout?.label_size ?? S(46),fontWeight:650,lineHeight:1.35}}><Tech text={row.label}/></div>;
+              const delta = row.change && <div style={{flex:'none',padding:'6px 26px',borderRadius:18,background:row.direction === 'down' ? '#E3F3E9' : '#FBE8E4',color:row.direction === 'down' ? paper.green : '#B3402E',fontSize:badge,fontWeight:750,lineHeight:1.3,opacity:later(20),whiteSpace:'nowrap'}}>{row.direction === 'down' ? '−' : '+'}{row.change}</div>;
+              return <div key={i} data-price-layout={layout?.stacked_label?'stacked':'row'} style={{...motion('title'),display:'flex',flexDirection:layout?.stacked_label?'column':'row',alignItems:layout?.stacked_label?'stretch':'center',gap:layout?.stacked_label?12:36,lineHeight:1.1}}>
+                {layout?.stacked_label?<div style={{display:'flex',alignItems:'center',gap:36}}>{label}{delta}</div>:label}
+                <div style={{flex:1,display:'flex',alignItems:'center',minWidth:0,justifyContent:layout?.stacked_label?'center':undefined}}>
+                  <Value text={row.before} color={paper.muted} opacity={.18+.82*oldOpacity}/>
+                  <svg width={Math.round(size*.62)} height={Math.round(size*.5)} viewBox="0 0 62 50" style={{margin:`0 ${Math.round(size*.18)}px`,flex:'none',opacity:.18+.82*Math.min(oldOpacity,later(8))}}><path d="M2 25 H52 M34 5 L56 25 L34 45" fill="none" stroke={paper.green} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <Value text={row.after} color={objectColor(scene,rowTarget,paper.green)} opacity={.18+.82*later(8)}/>
                 </div>
-                {row.change && <div style={{flex:'none',padding:'6px 26px',borderRadius:18,background:row.direction === 'down' ? '#E3F3E9' : '#FBE8E4',color:row.direction === 'down' ? paper.green : '#B3402E',fontSize:badge,fontWeight:750,lineHeight:1.3,opacity:later(20),whiteSpace:'nowrap'}}>{row.direction === 'down' ? '−' : '+'}{row.change}</div>}
+                {!layout?.stacked_label&&delta}
               </div>;
             })}
           </div>
@@ -447,7 +464,12 @@ function FastCardsVideo({ir, backgrounds}: {ir: Timeline; backgrounds: FastCardB
   </AbsoluteFill>;
 }
 
-function Video(props: {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge; fastCardBackgrounds?:FastCardBackgrounds}) {
+type VideoProps = {ir: Timeline; sceneBackdrops?: Record<string, string>; badge?: Badge; fastCardBackgrounds?:FastCardBackgrounds; contentStyle?:ContentStyle;brandHeader?:BrandHeader};
+function Video(props: VideoProps) {
+  return <ContentStyleContext.Provider value={props.contentStyle}><BrandHeaderContext.Provider value={props.brandHeader}><VideoContent {...props}/></BrandHeaderContext.Provider></ContentStyleContext.Provider>;
+}
+
+function VideoContent(props: VideoProps) {
   if(props.fastCardBackgrounds)return <FastCardsVideo ir={props.ir} backgrounds={props.fastCardBackgrounds}/>;
   if (props.ir.presentation?.preset === 'explanation') return <ExplanationVideo {...props}/>;
   if (['information_cards', 'kinetic_typography', 'image_slideshow', 'chat_dialogue', 'object_showcase', 'dynamic_collage'].includes(props.ir.presentation?.preset || '')) return <CreativeVideo ir={props.ir} badge={props.badge}/>;

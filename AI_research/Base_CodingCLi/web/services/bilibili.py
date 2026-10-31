@@ -103,11 +103,11 @@ class BilibiliClient:
         self.cookies = {c["name"]: c["value"] for c in (credentials or {}).get("cookie_info", {}).get("cookies", [])}
 
     def request(self, path: str, *, passport: bool = False, member: bool = False,
-                data: dict | None = None, allowed_codes: tuple[int, ...] = (), **params) -> tuple[dict, httpx.Cookies]:
+                data: dict | None = None, allowed_codes: tuple[int, ...] = (), timeout: float = 20, **params) -> tuple[dict, httpx.Cookies]:
         try:
             host = MEMBER if member else PASSPORT if passport else API
             headers = {**HEADERS, "Referer": MEMBER + "/"} if member else HEADERS
-            with httpx.Client(headers=headers, cookies=self.cookies, timeout=20, follow_redirects=False) as client:
+            with httpx.Client(headers=headers, cookies=self.cookies, timeout=timeout, follow_redirects=False) as client:
                 response = client.request("POST" if data is not None else "GET", host + path,
                                           params=params, data=data)
                 response.raise_for_status()
@@ -160,6 +160,37 @@ class BilibiliClient:
         if not result:
             raise BilibiliError("B 站暂未返回可投稿分区，请重新获取分区或检查登录状态。")
         return result
+
+    def archives(self, max_pages: int = 3, *, keyword: str = "") -> dict:
+        """Read bounded creator pages, including pending and rejected submissions."""
+        if not 1 <= max_pages <= 10:
+            raise BilibiliError("稿件查询页数应在 1 到 10 之间。")
+        rows, total = [], None
+        for page in range(1, max_pages+1):
+            data, _ = self.request("/x/web/archives", member=True, status="is_pubing,pubed,not_pubed",
+                                   pn=page, ps=20, timeout=8, **({"keyword": keyword} if keyword else {}))
+            if not isinstance(data, dict):
+                raise BilibiliError("B 站稿件列表格式异常，本次不改变投稿状态。")
+            metadata, entries = data.get("page"), data.get("arc_audits")
+            if isinstance(metadata, dict) and metadata.get("count") == 0 and entries is None:
+                entries = []  # Bilibili returns null, rather than [], for an empty keyword search.
+            if (not isinstance(metadata, dict) or not isinstance(entries, list)
+                    or not isinstance(metadata.get("count"), int) or not isinstance(metadata.get("ps"), int)
+                    or metadata["count"] < 0 or metadata["ps"] < 1):
+                raise BilibiliError("B 站稿件列表格式异常，本次不改变投稿状态。")
+            if total is not None and total != metadata["count"]:
+                raise BilibiliError("B 站稿件列表正在变化，稍后重新核对。")
+            total = metadata["count"]
+            for entry in entries:
+                if not isinstance(entry, dict) or not isinstance(entry.get("Archive"), dict):
+                    raise BilibiliError("B 站稿件条目格式异常，本次不改变投稿状态。")
+                archive = entry["Archive"]
+                if archive.get("mid") and str(archive["mid"]) != self.cookies.get("DedeUserID"):
+                    raise BilibiliError("稿件列表账号不一致，本次不改变投稿状态。")
+                rows.append({k: archive[k] for k in ("bvid", "title", "desc", "tid", "ctime", "state", "state_desc") if k in archive})
+            if page*metadata["ps"] >= total:
+                break
+        return {"archives": rows, "total": total, "pages": page, "complete": page*metadata["ps"] >= total}
 
     def owned_video(self, bvid: str, uid: str) -> dict:
         if not BV.fullmatch(bvid):
@@ -301,7 +332,8 @@ def cli_diagnostic(output: str) -> str:
         return f"B 站投稿接口返回错误码 {codes[-1]}。"
     if "error decoding response body" in output:
         return "B 站响应格式异常。"
-    if any(message in output.lower() for message in ("error sending request", "connection refused", "dns error", "timed out")):
+    if any(message in output.lower() for message in ("error sending request", "connection refused", "connection reset", "connection closed",
+                                                     "dns error", "timed out", "timedout", "broken pipe", "unexpected eof", "incompletemessage")):
         return "连接 B 站失败或超时。"
     return "biliup 执行失败，未返回可识别的错误码。"
 
@@ -363,20 +395,37 @@ def upload(credentials: dict, video_path: Path, payload: dict, work_dir: Path) -
                 "--tag", ",".join(payload["tags"])]
         args += ["--cover", str(cover)]
         args += ["--", str(video_path.resolve())]
-        try:
-            result = subprocess.run(args, timeout=7200, **options)
-        except (OSError, subprocess.SubprocessError) as exc:
-            upload_diagnostic(work_dir, {"phase": "upload", "reason": "投稿进程中断。", "confirmed_not_submitted": False})
-            raise BilibiliError("投稿进程中断，请到 B 站创作中心核对结果。") from exc
-        output = (result.stdout + result.stderr).decode("utf-8", errors="replace")
-        # biliup currently logs ResponseData, rather than returning machine-readable JSON.
-        # Only accept a BVID in a successful submission response; never infer one from a title.
-        response = re.findall(r'ResponseData\s*\{[^\n]*code:\s*0\s*,[^\n]*', output)
-        bvids = re.findall(r'bvid["\s:]+(?:String\(")?(BV[0-9A-Za-z]{10})', response[-1]) if response else []
-        if result.returncode != 0 or not bvids:
+        from web.services.bilibili_recovery import failure_evidence
+
+        for attempt in range(1, 4):
+            started = time.monotonic()
+            upload_diagnostic(work_dir, {"phase": "upload", "attempt": attempt, "started_at": time.time(),
+                                         "confirmed_not_submitted": False})
+            try:
+                result = subprocess.run(args, timeout=7200, **options)
+            except OSError as exc:
+                upload_diagnostic(work_dir, {"phase": "launch", "attempt": attempt,
+                                             "reason": "上传进程未能启动。", "confirmed_not_submitted": True})
+                raise UploadFailed("上传进程未能启动，可以重新检查并排队。") from exc
+            except subprocess.SubprocessError as exc:
+                upload_diagnostic(work_dir, {"phase": "upload", "attempt": attempt,
+                                             "reason": "投稿进程中断。", "confirmed_not_submitted": False})
+                raise BilibiliError("投稿进程中断，系统将自动核对 B 站稿件；结果确认前不会重投。") from exc
+            output = (result.stdout + result.stderr).decode("utf-8", errors="replace")
+            # A positive platform receipt remains valid even if the process exits abnormally afterwards.
+            response = re.findall(r'ResponseData\s*\{[^\n]*code:\s*0\s*,[^\n]*', output)
+            bvids = re.findall(r'bvid["\s:]+(?:String\(")?(BV[0-9A-Za-z]{10})', response[-1]) if response else []
+            evidence = {**failure_evidence(output), "attempt": attempt, "exit_code": result.returncode,
+                        "elapsed_seconds": round(time.monotonic()-started, 2)}
+            if bvids:
+                upload_diagnostic(work_dir, {**evidence, "phase": "submitted", "bvid": bvids[-1],
+                                             "confirmed_not_submitted": False, "retryable": False})
+                return bvids[-1]
             reason = cli_diagnostic(output) if result.returncode else "biliup 未返回可确认的投稿 BV 号。"
-            upload_diagnostic(work_dir, {"phase": "upload", "exit_code": result.returncode,
-                                                       "reason": reason, "confirmed_not_submitted": False})
-            raise BilibiliError(reason + " 投稿结果尚未确认，请到创作中心核对并回填 BV 号；系统不会自动重投。")
-        upload_diagnostic(work_dir, {"phase": "submitted", "exit_code": 0, "bvid": bvids[-1]})
-        return bvids[-1]
+            upload_diagnostic(work_dir, {**evidence, "reason": reason})
+            if evidence["retryable"] and attempt < 3:
+                time.sleep(2**attempt)
+                continue
+            if evidence["confirmed_not_submitted"]:
+                raise UploadFailed(reason + f" 尚未提交稿件，已尝试 {attempt} 次，可重新排队。")
+            raise BilibiliError(reason + " 投稿结果尚未确认，系统将自动查稿；结果确认前不会重投。")

@@ -1,0 +1,74 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: culture_works
+  name: T01 · 读懂一件作品
+  promise: 作品的哪些细节让表达变得可见？
+  type: explainer
+  production_ids:
+  - culture_weekly
+  keywords:
+  - 读懂一件作品 作品的哪些细节让表达变得可见？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示作品和具体细节；引导视线沿画面移动；连接形式与表达；回到整件作品的观看。
+- key: culture_techniques
+  name: T02 · 形式、材料与技法
+  promise: 创作者怎样用材料和技法形成表达？
+  type: explainer
+  production_ids:
+  - culture_weekly
+  keywords:
+  - 形式、材料与技法 创作者怎样用材料和技法形成表达？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。聚焦一个可见效果；展示材料与创作动作；解释技法的具体作用；放回作品整体表达。
+- key: culture_creators
+  name: T03 · 创作者与创作过程
+  promise: 一个创作者怎样形成具体作品选择？
+  type: explainer
+  production_ids:
+  - culture_weekly
+  keywords:
+  - 创作者与创作过程 一个创作者怎样形成具体作品选择？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一件具体作品进入；还原创作处境和材料；跟随表达选择；回到作品给观众的感受。
+- key: culture_exchange
+  name: T04 · 文化流动与交融
+  promise: 一种形式怎样在不同地方被理解和改写？
+  type: explainer
+  production_ids:
+  - culture_weekly
+  keywords:
+  - 文化流动与交融 一种形式怎样在不同地方被理解和改写？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一个可见形式或符号；沿地点与时代追踪；对照保留和改变的细节；解释交流中的新表达。
+- key: culture_design
+  name: T05 · 日常物与设计
+  promise: 日常用品怎样把制作、功能与审美连起来？
+  type: explainer
+  production_ids:
+  - culture_weekly
+  keywords:
+  - 日常物与设计 日常用品怎样把制作、功能与审美连起来？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一件熟悉物品；跟随使用动作；连接材料制作和形式；回到日常体验与审美。
+- key: culture_performance
+  name: T06 · 声音、影像与表演
+  promise: 表演怎样用时间、声音和动作组织感受？
+  type: explainer
+  production_ids:
+  - culture_weekly
+  keywords:
+  - 声音、影像与表演 表演怎样用时间、声音和动作组织感受？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。呈现一个具体片段；引导关注声音时间或动作；对照表达选择；回到完整表演的感受。
+- key: culture_heritage
+  name: T07 · 手艺与文化传承
+  promise: 一项手艺的知识怎样通过动作传递？
+  type: explainer
+  production_ids:
+  - culture_weekly
+  keywords:
+  - 手艺与文化传承 一项手艺的知识怎样通过动作传递？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。让观众看见一个具体动作；连接工具材料与知识；跟随学习和传递过程；回到当代使用与文化意义。
+- key: culture_context
+  name: T08 · 作品与时代生活
+  promise: 作品怎样反映并参与当时的生活？
+  type: explainer
+  production_ids:
+  - culture_weekly
+  keywords:
+  - 作品与时代生活 作品怎样反映并参与当时的生活？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。观察一处具体人物或场景；还原相关生活环境；连接作者观众与表达；带着理解重新看作品。

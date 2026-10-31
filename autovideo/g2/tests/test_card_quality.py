@@ -61,7 +61,9 @@ def test_no_text_black_box_cannot_pass_the_caption_mask_check():
 
 
 @pytest.mark.parametrize("actual", ["correct", "rectangle", "wrong_text"])
-def test_real_encoded_caption_must_match_expected_glyphs(tmp_path, actual):
+@pytest.mark.parametrize("palette", [None, {"palette_source": "brand", "background": "#faf3e8", "subtitle": "#242424"},
+                                   {"palette_source": "brand", "background": "#151515", "subtitle": "#eeeeee"}])
+def test_real_encoded_caption_must_match_expected_glyphs(tmp_path, actual, palette):
     ffmpeg = Path(__file__).resolve().parents[2] / "g0/darwin_arm64/ffmpeg"
     row = {"id": "n1", "text": "原文字幕必须准确。", "start_ms": 100, "end_ms": 900}
     ir = {"video": {"duration_ms": 1000}, "narration": {"segments": [row]}}
@@ -73,11 +75,11 @@ def test_real_encoded_caption_must_match_expected_glyphs(tmp_path, actual):
     from g2.caption_alignment import srt_text
     (tmp_path / "captions.srt").write_text(srt_text([cue]))
     ass = tmp_path / "actual.ass"
-    write_ass(ir, ass, [{**cue, "text": "错误文字不能通过。"}] if actual == "wrong_text" else [cue])
+    write_ass(ir, ass, [{**cue, "text": "错误文字不能通过。"}] if actual == "wrong_text" else [cue], style=palette)
     filters = ("drawbox=x=100:y=900:w=50:h=20:color=black:t=fill" if actual == "rectangle" else f"ass={ass}")
     video = tmp_path / "video.mp4"
     subprocess.run([str(ffmpeg), "-nostdin", "-v", "error", "-f", "lavfi", "-i",
-                    "color=c=0xf3f5f1:s=1920x1080:r=30:d=1", "-vf", filters,
+                    f"color=c=0x{(palette or {}).get('background', '#f3f5f1')[1:]}:s=1920x1080:r=30:d=1", "-vf", filters,
                     "-c:v", "libx264", "-preset", "ultrafast", str(video)], check=True)
 
     class Fault(RuntimeError):
@@ -89,7 +91,8 @@ def test_real_encoded_caption_must_match_expected_glyphs(tmp_path, actual):
         return subprocess.run([str(a) for a in argv], cwd=cwd, check=True, capture_output=True, text=True).stdout
 
     pipeline = SimpleNamespace(IR_PATH=ir_path, ARTIFACTS=tmp_path, PROJECT=tmp_path,
-        FFMPEG=ffmpeg, VIDEO_PATH=video, G2Fault=Fault, _run_fixed_command=runner)
+        FFMPEG=ffmpeg, VIDEO_PATH=video, G2Fault=Fault, _run_fixed_command=runner,
+        PACKAGING_INPUT={"production_plan": {"style": palette}} if palette else None)
     if actual == "correct":
         result = verify_captions(pipeline, {})
         assert result["fast_cards"]["minimum_glyph_f1"] >= .90

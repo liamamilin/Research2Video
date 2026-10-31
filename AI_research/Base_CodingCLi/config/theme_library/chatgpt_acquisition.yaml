@@ -1,0 +1,74 @@
+# 2026-10-27：从公开目录、正文和既有采集结果整理。outline 是本矩阵归纳的讲述结构。
+patterns:
+  - category: chatgpt_t01_product
+    name: 从熟悉用法发现能力边界
+    title_pattern: 只用{产品}做{已有用法}，你还可以让它完成什么？
+    outline: [观众现在怎样用, 换一个具体任务, 展示输入与成果, 说明适用条件]
+    examples:
+      - title: Get started with ChatGPT Work
+        url: https://learn.chatgpt.com/videos
+        summary: 官方视频目录包含入门演示，从用户的任务出发认识产品。这里借鉴入门与能力展示的选题方式。
+  - category: chatgpt_t02_scenarios
+    name: 从业务问题到具体成果
+    title_pattern: 把{实际问题}交给{产品}，能得到一份怎样的{成果}？
+    outline: [提出实际工作问题, 准备输入资料, 展示处理过程, 比较交付成果与原有做法]
+    examples:
+      - title: How to Turn a Business Question Into a Strategy Deck With ChatGPT Work
+        url: https://www.youtube.com/watch?v=XjSJ6ybS9I8
+        summary: 官方 Learn 目录介绍了从业务问题形成研究、建议和策略演示的教程。借鉴以成果倒推操作流程的结构。
+  - category: chatgpt_t03_tutorials
+    name: 完成一个任务的入门教程
+    title_pattern: 第一次用{产品}做{任务}，从哪里开始、怎样一步步完成？
+    outline: [说明任务和目标, 准备材料, 分步演示, 修改第一版结果, 给出可复用步骤]
+    examples:
+      - title: "ChatGPT Tutorial for Beginners: How to Actually Get Work Done with AI"
+        url: https://kevinstratvert.com/2026/07/01/chatgpt-tutorial-for-beginners-how-to-actually-get-work-done-with-ai/
+        summary: 创作者教程围绕邮件、文件、研究和计划等具体任务展开，适合提炼面向普通用户的步骤式选题。
+  - category: chatgpt_t04_testing
+    name: 同一任务下的能力实测
+    title_pattern: 让{产品或版本}完成{具体任务}，结果能直接用吗？
+    outline: [定义任务与输入, 约定观察维度, 展示实际输出, 分析成功与局限, 给出适用人群]
+    examples:
+      - title: 200美金/月的GPT Pro，真的值吗？o1 Pro 多场景应用详测。
+        url: https://www.bilibili.com/video/BV1bGqUYSEw4/
+        summary: 既有 workflow 找到的视频以多场景测试讨论产品价值。这里只参考任务实测的提问结构，不沿用旧价格与模型结论。
+  - category: chatgpt_t05_comparison
+    name: 由任务决定产品选择
+    title_pattern: 主要做{任务}，{产品A}和{产品B}应该怎么选？
+    outline: [明确用户的主要任务, 同一输入进行比较, 比较过程和成果, 按不同需求给出选择路径]
+    examples:
+      - title: ChatGPT、Claude、Gemini 什么任务该交给谁？每月600刀经验总结
+        url: https://www.bilibili.com/video/BV1LBPjzKECT/
+        summary: 既有采集结果将多个产品与不同任务对应，可借鉴按用户任务而非品牌排列的比较角度。
+  - category: chatgpt_t06_value
+    name: 使用阶段与升级决策
+    title_pattern: "{免费版本}用了{阶段}，为了{具体需求}值得升级{付费版本}吗？"
+    outline: [还原用户使用阶段, 找出实际遇到的限制, 比较与任务有关的差异, 分别说明升级与继续免费的条件]
+    examples:
+      - title: Free vs Paid ChatGPT | The Real Difference
+        url: https://www.youtube.com/watch?v=AlVSZcN-h_0
+        summary: 搜索索引的标题与简介通过图片、文件和复杂提示等任务比较免费与付费体验，适合归纳升级判断类问题。
+  - category: chatgpt_t07_subscription
+    name: 按购买入口拆解订阅操作
+    title_pattern: 通过{购买入口}订阅了{产品}，怎样完成{订阅管理操作}？
+    outline: [识别购买入口, 找到对应管理页面, 展示操作步骤, 说明操作后的状态]
+    examples:
+      - title: Canceling your ChatGPT subscription
+        url: https://help.openai.com/en/articles/7232927-canceling-your-chatgpt-subscription
+        summary: 官方帮助按不同购买入口组织取消订阅说明。借鉴先识别入口、再给操作路径的讲述方式。
+  - category: chatgpt_t08_troubleshooting
+    name: 从现象到排查顺序
+    title_pattern: "{产品}出现{具体异常}，先检查什么、再尝试什么？"
+    outline: [描述可辨认的异常, 区分可能原因, 从简单步骤开始排查, 说明何时换一种处理路径]
+    examples:
+      - title: Troubleshooting ChatGPT Error Messages
+        url: https://help.openai.com/en/articles/7996703-troubleshooting-chatgpt-error-messages
+        summary: 官方帮助按具体错误现象提供排查路径，可用于提炼普通用户能跟着操作的问题解决题。
+  - category: chatgpt_t09_updates
+    name: 从产品变化解释用户影响
+    title_pattern: "{已确认的产品变化}之后，{目标人群}的{常见任务}会怎样变化？"
+    outline: [说明已经发生的变化, 找到受影响的用户任务, 展示原有与新的操作路径, 解释适用范围]
+    examples:
+      - title: ChatGPT release notes
+        url: https://help.openai.com/en/articles/6825453-chatgpt-release-notes
+        summary: 官方更新按时间说明具体产品变化。只提炼更新解读的题型，生成具体动态题时需要已有材料支持该变化。

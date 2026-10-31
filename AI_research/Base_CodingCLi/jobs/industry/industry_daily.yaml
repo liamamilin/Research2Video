@@ -1,5 +1,6 @@
 name: 产业动态日报
-description: 近期值得关注的产业和制造业动态（读 Supply Chain Dive、Manufacturing Dive、EE Times、Semiconductor Digest、NIST 抓取的内容），不联网搜索
+description: 近期值得关注的产业和制造业动态（读 Supply Chain Dive、Manufacturing Dive、EE Times、Semiconductor
+  Digest、NIST 抓取的内容），不联网搜索
 enabled: true
 keywords:
 - 制造业
@@ -19,15 +20,27 @@ sources:
 - source:eetimes
 - source:semiconductor_digest
 - source:nist_manufacturing
-prompt: |
-  根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
-  当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。
-  这次研究要帮助观众理解：从近期材料里发现值得讲给观众听的新事情。关注产业与制造业中的具体变化，以及它怎样影响东西被造出来，保留能把事情讲生动、讲明白的具体材料。
+prompt: '为「产业链的一处变化」整理研究底稿。观众要理解一处产业变化落在生产交付的哪一环，以及它怎样改变前后环节。
+
+  从近期材料保留有具体产品、部件、工艺或交付依赖的候选。用同一件产品或一次交付写明原来怎样做、这次改变哪一步、上游需要给什么、当前工序怎样操作、下游由此得到什么。保留材料中的结构、工具、操作、条件、产出和实际案例。
+
+  公司动作、价格、产能、融资与争议放回它影响的生产环节，相关伙伴通过产品经过的步骤进入解释。让具体过程帮助作者讲清变化，取材备忘保留为研究背景。
+
+  围绕当前改变保留产品或部件可见的前后状态、作用位置和交接对象，让每个设备或伙伴在负责的动作中出现。平台参数与行业规模用于解释当步取舍，背景备注留在底稿，持续展开产品怎样到下一道工序。
+
+
   任务：{name}
+
   领域：{domain}
+
   关键词：{keywords}
+
   日期：{date}
+
   输出语言：{language}
 
-  数据格式：Markdown；条目以「### 2.1 名称」标识，末尾「### 来源清单」记录素材链接。
+
+  数据格式：Markdown；候选或解释单元以「### 2.1 名称」标识，内部以「####」保留完整操作和例子。素材链接放在对应段落，末尾「### 来源清单」继续记录链接。
+
+  '
 output: output/industry/{date}_industry_daily.md

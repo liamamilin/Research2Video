@@ -1,0 +1,74 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: science_physics
+  name: T01 · 身边的物理
+  promise: 日常现象背后的能量、力和运动怎样发生？
+  type: explainer
+  production_ids:
+  - science_weekly
+  keywords:
+  - 身边的物理 日常现象背后的能量、力和运动怎样发生？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。呈现可辨认的生活现象；标出物体与变化条件；沿作用过程解释机制；回到一个新的生活场景。
+- key: science_chemistry
+  name: T02 · 化学与材料
+  promise: 物质的结构和变化如何影响可见性质？
+  type: explainer
+  production_ids:
+  - science_weekly
+  keywords:
+  - 化学与材料 物质的结构和变化如何影响可见性质？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一种具体材料进入；连接微观结构与可见性质；展开条件和变化过程；回到产品或生活用途。
+- key: science_life
+  name: T03 · 生命与身体
+  promise: 身体和生物怎样完成一个具体过程？
+  type: explainer
+  production_ids:
+  - science_weekly
+  keywords:
+  - 生命与身体 身体和生物怎样完成一个具体过程？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。提出熟悉的生命现象；进入相关器官或细胞；连接信号环境和反应；回到整体过程与适用条件。
+- key: science_earth
+  name: T04 · 地球与自然过程
+  promise: 地球上的变化怎样由连续过程形成？
+  type: explainer
+  production_ids:
+  - science_weekly
+  keywords:
+  - 地球与自然过程 地球上的变化怎样由连续过程形成？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一个地球现象；标出参与的物体和空间；跟随积累与变化过程；连接不同时间和位置。
+- key: science_space
+  name: T05 · 宇宙与天文
+  promise: 我们怎样理解遥远天体和宇宙现象？
+  type: explainer
+  production_ids:
+  - science_weekly
+  keywords:
+  - 宇宙与天文 我们怎样理解遥远天体和宇宙现象？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从一个直观宇宙问题进入；展示距离尺度和观测；用示意过程解释天体关系；回到最初疑问。
+- key: science_math
+  name: T06 · 数学与概率直觉
+  promise: 抽象关系怎样通过具体例子变得可理解？
+  type: explainer
+  production_ids:
+  - science_weekly
+  keywords:
+  - 数学与概率直觉 抽象关系怎样通过具体例子变得可理解？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。建立一个可重复的小情境；展示几次具体结果；用图和关系解释规律；回到观众的判断。
+- key: science_experiments
+  name: T07 · 实验与测量
+  promise: 我们怎样把一个科学问题变成可观察的过程？
+  type: explainer
+  production_ids:
+  - science_weekly
+  keywords:
+  - 实验与测量 我们怎样把一个科学问题变成可观察的过程？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确本次要观察的对象；说明材料工具和量；展示操作与读数；将结果放回原问题。
+- key: science_research
+  name: T08 · 研究带来的新理解
+  promise: 一项研究如何把具体疑问推进到新的认识？
+  type: explainer
+  production_ids:
+  - science_weekly
+  keywords:
+  - 研究带来的新理解 一项研究如何把具体疑问推进到新的认识？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。还原一个研究疑问；跟随关键观察或实验；解释结果怎样连接机制；回到新的理解及其适用场景。

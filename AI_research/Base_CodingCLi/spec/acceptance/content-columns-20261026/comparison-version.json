@@ -1,0 +1,282 @@
+{
+  "script_id": "47545c7e72a04a46a22b503f258a0400",
+  "version": 1,
+  "title": "20元8秒、22元5秒、25元3秒：同样的三步，三个方案怎么选",
+  "sections": [
+    {
+      "title": "先别急着比价格：三个方案走的是同一套流程",
+      "paragraphs": [
+        {
+          "text": "如果你正在选处理方案，最容易先盯着两个数字：一次多少钱、多久出结果。但这份材料里，三个方案的差别不只在价格和速度。它们都遵循同一个操作顺序：先上传资料，再开始处理，最后查看结果。也就是说，流程本身没有变化，真正要比较的是同一组条件下的差异。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "这期我们就按同一张比较表来看三个对象：轻量方案、均衡方案、极速方案。比较维度也统一：单次成本、响应时间、处理位置，再加一条三者相同的操作路径。先把它们放在同样的尺子上，再决定哪个适合你。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "同一张表上的三个关键差异：20元8秒、22元5秒、25元3秒",
+      "paragraphs": [
+        {
+          "text": "先看单次成本。轻量方案一次20元，均衡方案一次22元，极速方案一次25元。价格从低到高是：轻量、均衡、极速。也就是说，极速方案单次花费最高，轻量方案单次花费最低。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "再看响应时间。极速方案3秒，均衡方案5秒，轻量方案8秒。等待从短到长是：极速、均衡、轻量。极速方案响应较快，轻量方案等待较久，均衡方案的两个数值都处在中间。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "第三个差异是处理位置。轻量方案在当前设备处理；均衡方案和极速方案通过网络处理。这一点很关键，因为它不是价格或速度的附带说明，而是独立的选择条件。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "操作路径则没有区别：三者都是先上传资料，再开始处理，最后查看结果。所以做选择时，不需要把流程差异算进去，重点放在成本、等待和处理位置上。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "怎么选：先问位置，再看预算和等待",
+      "paragraphs": [
+        {
+          "text": "第一问，是不是需要跨设备发起任务。如果你主要在固定设备工作，也不着急，轻量方案的条件更贴近：一次20元，响应8秒，在当前设备处理。它的特点很明确：单次花费较低，但等待较久。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "如果你希望较快得到结果，并且需要跨设备发起任务，那么极速方案更贴近这些条件：一次25元，响应3秒，通过网络处理。代价是单次花费较高，换来的是更短等待和跨设备处理位置。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "如果你既不想选最便宜但等最久的，也不想直接选最贵但最快的，就可以看均衡方案：一次22元，响应5秒，通过网络处理。它在花费和等待之间折中，处理位置也和极速方案一样，是通过网络。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "这里要提醒一句：不能只用一个更便宜或更快的指标代替所有条件。先确认处理位置是否匹配，再看单次预算，最后看你能接受多长的等待。三个条件一起看，选择才不会偏。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "另外，这份演示材料只覆盖成本、响应时间、处理位置和操作路径。它没有性能准确率、隐私或稳定性材料，所以本期不扩展这些结论。你听到这里，就可以按已有条件做判断，不把材料没说的内容当成依据。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "最后用一句话记住三个方案",
+      "paragraphs": [
+        {
+          "text": "回到同一张表：轻量方案，20元、8秒、当前设备，适合不着急、主要在固定设备工作；均衡方案，22元、5秒、通过网络，适合在花费和等待之间折中；极速方案，25元、3秒、通过网络，适合希望较快得到结果、需要跨设备发起任务。三者操作顺序都一样：上传资料、开始处理、查看结果。选哪个，不只看便宜或快，而是先看处理位置，再看预算和等待。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ]
+    }
+  ],
+  "length_check": {
+    "spoken_length": 968,
+    "estimated_seconds": 218,
+    "segments": 39,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": 3,
+    "budget": 783,
+    "ratio": 1.212,
+    "status": "OVER",
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "先别急着比价格：三个方案走的是同一套流程",
+        "spoken_length": 189,
+        "budget": 196
+      },
+      {
+        "title": "同一张表上的三个关键差异：20元8秒、22元5秒、25元3秒",
+        "spoken_length": 263,
+        "budget": 196
+      },
+      {
+        "title": "怎么选：先问位置，再看预算和等待",
+        "spoken_length": 380,
+        "budget": 196
+      },
+      {
+        "title": "最后用一句话记住三个方案",
+        "spoken_length": 136,
+        "budget": 195
+      }
+    ],
+    "dropped_citations": 0
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 598,
+      "completion_tokens": 1319,
+      "total_tokens": 1917
+    },
+    "problems": [],
+    "generation": "goal_first",
+    "prompt_version": 3,
+    "creative_direction": "从这份材料中找到开发者最值得知道的变化，组织成有重点、有联系的一次讲述，让人听完记得住这期的发现。\n栏目：AI 模型横评。持续交付：讲清模型在关键维度上的差异与适用条件。\n本期可围绕 对象 → 比较维度 → 关键差异 → 适用情形 组织讲述，按素材自然展开。\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。",
+    "trusted_urls": 0,
+    "input_kind": "report",
+    "report_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance/content-columns-20261026/comparison-input.md",
+    "written_at": "2026-10-26T15:10:25+0800",
+    "cell": {
+      "recipe": "report_digest",
+      "sha256": "ef71633b436a3ad14d20bcb0d8a8b01954e7850656d2486a15a482eaaa6be803",
+      "cell": "ai-developer-digest-long",
+      "status": "experimental",
+      "parts": {
+        "domain": {
+          "key": "ai"
+        },
+        "type": {
+          "key": "digest"
+        },
+        "format": {
+          "key": "long"
+        },
+        "audience": {
+          "key": "developer"
+        }
+      },
+      "resolved_sha256": "3477649dd77367402308e25afbc61b573323187b5a56bfe11a08b331c84369f0",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "developer",
+          "sha256": "0ce139d005d64a51134df6823eae3f6fc7c4ae3ddc82a54a4cac6b05f27ba333"
+        },
+        "output": {
+          "kind": "part",
+          "name": "motion",
+          "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    },
+    "checks": {
+      "version": 2,
+      "mode": "on_request",
+      "issues": [],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": false,
+      "audits_complete": false,
+      "pending_review": false,
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 0,
+        "rule_must": 0,
+        "questions": 0,
+        "lost": 0,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          }
+        },
+        "passed": false,
+        "rank": 0
+      }
+    },
+    "content_context": {
+      "column": "ai_model_review",
+      "column_name": "AI 模型横评",
+      "type": "comparison",
+      "matrix": "ai_media",
+      "source_matrix": "ai_media",
+      "job": "ai_media/weekly_model_arena",
+      "revision": "1934c7f86c1b9a58467240b233bc298dd86a0f3890e8822c31628336c09861b3",
+      "audience": "关注 AI 产品、技术与应用的观众",
+      "promise": "讲清模型在关键维度上的差异与适用条件",
+      "type_definition": {
+        "key": "comparison",
+        "name": "横评",
+        "promise": "理解多个对象的差异与适用条件",
+        "structure": [
+          "对象",
+          "比较维度",
+          "关键差异",
+          "适用情形"
+        ],
+        "preferred_visuals": [
+          "对比图",
+          "价格卡",
+          "真实画面",
+          "原理图"
+        ]
+      },
+      "render_inheritance": "source_compatible",
+      "render": {
+        "production_recipe": "mixed_comparison",
+        "production_mode": "fast",
+        "video_form": "information_cards",
+        "visual_style": "editorial_light"
+      },
+      "presentation": {
+        "preferred_visuals": [
+          "对比图",
+          "性能图",
+          "价格卡",
+          "真实截图"
+        ]
+      }
+    }
+  },
+  "created_by": "content-architecture-acceptance",
+  "created_at": "2026-10-26T15:10:25+0800"
+}

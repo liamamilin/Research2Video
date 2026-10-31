@@ -1,0 +1,252 @@
+{
+  "preview": true,
+  "plan": {
+    "schema_version": 1,
+    "settings": {
+      "background_music": {
+        "enabled": false,
+        "level_db": -18.0,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2
+      },
+      "content_notices": [],
+      "creative_intent": {
+        "audience": "关注 AI 产品、技术与应用的观众",
+        "purpose": "栏目：AI 模型横评。讲解目标：讲清模型在关键维度上的差异与适用条件。\n优先按段落组合对比图、性能图、价格卡、真实截图，普通说明保持简洁，重点随旁白展开。",
+        "tone": "清楚、自然",
+        "focus": "20元8秒、22元5秒、25元3秒：同样的三步，三个方案怎么选"
+      },
+      "duration_mode": "content",
+      "image_materials": [],
+      "music": null,
+      "packaging": {
+        "preset": "common",
+        "label": "报告速览",
+        "intro": {
+          "seconds": 1.0
+        },
+        "outro": {
+          "seconds": 3,
+          "lines": [
+            "面向开发者的 报告速览"
+          ]
+        },
+        "sound": {
+          "enabled": false
+        },
+        "accent": "#1f7a4d",
+        "recipe": "report_digest"
+      },
+      "production_context": {
+        "content_recipe": {
+          "id": "research:report_digest",
+          "settings": {
+            "video_form": "information_motion",
+            "creative_intent": {
+              "purpose": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n从这份材料中找到开发者最值得知道的变化，组织成有重点、有联系的一次讲述，让人听完记得住这期的发现。\n栏目：AI 模型横评。持续交付：讲清模型在关键维度上的差异与适用条件。\n本期可围绕 对象 → 比较维度 → 关键差异 → 适用情形 组织讲述，按素材自然展开。\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。",
+              "audience": "希望根据实际条件选择工具的观众",
+              "focus": "20元8秒、22元5秒、25元3秒：同样的三步，三个方案怎么选"
+            },
+            "packaging": {
+              "preset": "common",
+              "label": "报告速览",
+              "accent": "#1f7a4d",
+              "outro": {
+                "lines": [
+                  "面向开发者的 报告速览"
+                ],
+                "seconds": 3
+              },
+              "recipe": "report_digest"
+            },
+            "voice_id": "voxcpm_anchor"
+          }
+        },
+        "matrix": {
+          "id": "research-production:ai_media_arena_digest",
+          "settings": {
+            "video_speed": 1.25,
+            "production_mode": "fast",
+            "video_form": "information_cards",
+            "visual_style": "editorial_light"
+          }
+        }
+      },
+      "production_mode": "fast",
+      "production_recipe": "mixed_comparison",
+      "slideshow_images": [],
+      "slideshow_images_resolved": null,
+      "target_duration_sec": 60,
+      "video_form": "information_cards",
+      "video_speed": 1.25,
+      "visual_storytelling": true,
+      "visual_style": "editorial_light",
+      "voice_id": "voxcpm_anchor"
+    },
+    "origins": {
+      "packaging.label": "content_recipe",
+      "packaging.accent": "content_recipe",
+      "packaging.enabled": "common",
+      "packaging.intro.component": "common",
+      "packaging.intro.enabled": "common",
+      "packaging.intro.seconds": "production_recipe",
+      "packaging.outro.component": "common",
+      "packaging.outro.enabled": "common",
+      "packaging.outro.seconds": "content_recipe",
+      "packaging.outro.lines": "content_recipe",
+      "packaging.badge.component": "common",
+      "packaging.badge.enabled": "common",
+      "packaging.source_card.component": "common",
+      "packaging.source_card.enabled": "common",
+      "packaging.source_card.seconds": "common",
+      "packaging.sound.component": "common",
+      "packaging.sound.enabled": "production_recipe",
+      "video_form": "matrix",
+      "production_mode": "matrix",
+      "visual_style": "matrix",
+      "duration_mode": "request",
+      "target_duration_sec": "common",
+      "voice_id": "content_recipe",
+      "video_speed": "matrix",
+      "creative_intent": "common",
+      "visual_storytelling": "production_recipe",
+      "creative_intent.audience": "request",
+      "creative_intent.purpose": "request",
+      "creative_intent.tone": "production_recipe",
+      "creative_intent.focus": "content_recipe",
+      "packaging.preset": "content_recipe",
+      "background_music.enabled": "production_recipe",
+      "packaging.recipe": "content_recipe",
+      "visual_style.accent": "packaging.accent"
+    },
+    "style": {
+      "id": "editorial_light",
+      "version": 1,
+      "background": "#f3f5f1",
+      "surface": "#ffffff",
+      "text": "#182720",
+      "muted": "#637168",
+      "accent": "#1f7a4d",
+      "warning": "#9b650c",
+      "subtitle": "#182720"
+    },
+    "executor": {
+      "id": "hybrid_cards",
+      "version": 1
+    },
+    "output": {
+      "width": 1920,
+      "height": 1080,
+      "fps": 30
+    },
+    "packaging_sha256": "e1b8ede082c71e9badbdef2e4b9157690b0d9a4474eb67bcbcbb17bbc5d719f2",
+    "packaging": {
+      "library": "autovideo-packaging",
+      "version": 2,
+      "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+      "selection": {
+        "preset": "common",
+        "label": "报告速览",
+        "intro": {
+          "seconds": 1.0
+        },
+        "outro": {
+          "seconds": 3,
+          "lines": [
+            "面向开发者的 报告速览"
+          ]
+        },
+        "sound": {
+          "enabled": false
+        },
+        "accent": "#1f7a4d",
+        "recipe": "report_digest"
+      },
+      "components": {
+        "label": "报告速览",
+        "accent": "#1f7a4d",
+        "enabled": true,
+        "intro": {
+          "component": "stinger",
+          "enabled": true,
+          "seconds": 1.0
+        },
+        "outro": {
+          "component": "end_card",
+          "enabled": true,
+          "seconds": 3,
+          "lines": [
+            "面向开发者的 报告速览"
+          ]
+        },
+        "badge": {
+          "component": "corner_badge",
+          "enabled": true
+        },
+        "source_card": {
+          "component": "source_card",
+          "enabled": true,
+          "seconds": 4.5
+        },
+        "sound": {
+          "component": "synth_sting",
+          "enabled": false
+        }
+      },
+      "package": {
+        "accent": "#1f7a4d",
+        "badge": "报告速览",
+        "intro": {
+          "template": "stinger",
+          "title": "报告速览",
+          "seconds": 1.0
+        },
+        "outro": {
+          "template": "end_card",
+          "title": "报告速览",
+          "seconds": 3,
+          "lines": [
+            "面向开发者的 报告速览"
+          ]
+        }
+      },
+      "badge": {
+        "text": "报告速览",
+        "color": "#1f7a4d"
+      },
+      "source_card": null,
+      "source_card_state": "no_sources",
+      "component_versions": {
+        "intro": {
+          "id": "stinger",
+          "version": 1
+        },
+        "outro": {
+          "id": "end_card",
+          "version": 2
+        },
+        "badge": {
+          "id": "corner_badge",
+          "version": 1
+        },
+        "source_card": {
+          "id": "source_card",
+          "version": 2
+        },
+        "sound": {
+          "id": "synth_sting",
+          "version": 1
+        }
+      },
+      "sha256": "e1b8ede082c71e9badbdef2e4b9157690b0d9a4474eb67bcbcbb17bbc5d719f2"
+    },
+    "recipe_sha256": "642ebfa2108bda90512775d7d308569c1ffd8ea448b97ec6d9d93116997ceb9e",
+    "source_sha256": "f14718ea3f66b61fae22d1f639e7fc2bae0b6babe99bc332180391ac8932b2df",
+    "music": {
+      "mode": "none",
+      "background_music_generated": false
+    },
+    "sha256": "a73ad06b2bf3465a570770b721378e1d45547daf27b4d4903a691d1e104271d8"
+  }
+}

@@ -33,6 +33,10 @@ logger = logging.getLogger("ai_research.web.video_executor")
 MAX_RETRIES = 2
 #: A render AutoVideo failed is submitted again this many times (a render is 15-30 minutes of its time).
 RENDER_RETRIES = 1
+#: A script that failed only because no search provider could answer is retried once search recovers, this many times
+#: (core.search_health spaces the tries by its 10-30 minute cooldowns), without using up MAX_RETRIES.
+SEARCH_RETRIES = 24
+SEARCH_WAIT_NOTE = "联网搜索暂不可用，恢复后自动继续"
 
 
 class StepError(RuntimeError):
@@ -72,6 +76,8 @@ def rerun(script_id: str, step: str, by: str) -> dict:
     script = store.get_script(script_id)
     if script is None:
         raise StepError("没有这篇文稿")
+    if script['topic'].get('local_video'):
+        raise StepError('这是本地导入成片，可直接发布；替换视频请提供新文件路径。')
     if step not in RERUNNABLE:
         raise StepError(f"这一步不能重跑：{step}（定稿在文稿页点「定稿」）")
     if script["status"] in ("RESEARCHING", "WRITING") or (script["status"] == "DRAFT" and script.get("stage")):
@@ -240,9 +246,14 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
 
         # Older daily/weekly drafts also pass this gate before spending another render attempt.
         paths = get_settings().paths
+        guarded = content_guard.with_policy(script, paths.jobs_dir)
+        if (not content_guard.protected(script["id"])
+                and content_guard.writing_peer(guarded["topic"], paths.config_dir, paths.jobs_dir, script_id=script["id"])):
+            out["item"] = {"note": "等待同矩阵更早的文稿完成，再检查主选题重复"}
+            return out
         version = store.get_version(script["id"], script["current_version"])
         try:
-            content_guard.check(content_guard.with_policy(script), version["sections"], paths.config_dir, paths.jobs_dir)
+            content_guard.check(guarded, version["sections"], paths.config_dir, paths.jobs_dir)
         except content_guard.DuplicateContent as exc:
             if content_guard.archive_duplicate(script["id"], str(exc), [p["script_id"] for p in exc.peers]):
                 out["item"] = {"state": "CANCELLED", "note": str(exc)}
@@ -253,16 +264,23 @@ def advance_auto(script: dict, retries: dict, *, can_start_script: bool, can_sta
         out["hold"] = "方案在等你确认"
         return out
     if status == "FAILED":
-        if tries("script") >= MAX_RETRIES:
-            out["hold"] = f"写稿失败 {MAX_RETRIES + 1} 次：{script.get('error')}"
+        from core import search_health
+
+        # Search being down says nothing about this script: it waits for search instead of using up its retries.
+        key = "search" if search_health.is_outage_error(script.get("error")) else "script"
+        limit = SEARCH_RETRIES if key == "search" else MAX_RETRIES
+        if tries(key) >= limit:
+            out["hold"] = f"写稿失败 {limit + 1} 次：{script.get('error')}"
             return out
         if not can_start_script:
+            if key == "search" and search_health.outage():
+                out["item"] = {"note": SEARCH_WAIT_NOTE}
             return out
         failed_step = "research" if not script.get("report_path") else "write"
         store.update_script(script["id"], status="RESEARCHING", error=None)
         video_workflow.spawn(script["id"], "autopilot")
-        steps.log(script["id"], failed_step, "resume", f"第 {tries('script') + 1} 次重试", by="autopilot")
-        out.update(bump="script", item={"note": "写稿失败，从断点继续"})
+        steps.log(script["id"], failed_step, "resume", f"第 {tries(key) + 1} 次重试", by="autopilot")
+        out.update(bump=key, item={"note": "联网搜索可用，重新调研" if key == "search" else "写稿失败，从断点继续"})
         out["took"]["script"] = True
         return out
     if status == "DRAFT":

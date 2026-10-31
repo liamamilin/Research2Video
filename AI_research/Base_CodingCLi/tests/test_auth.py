@@ -120,13 +120,13 @@ def test_refresh_rejects_revoked_session(client):
 # ---------------------------------------------------------------------------
 
 
-def test_logout_requires_csrf_even_after_clearing_cookies(client):
+def test_logout_requires_csrf_and_preserves_the_session_when_rejected(client):
     _login(client)
     r = client.post("/api/auth/logout")
     assert r.status_code == 403
     after = client.get("/api/auth/me")
-    assert after.status_code == 401
-    assert after.json()["error"]["code"] == "not_authenticated"
+    assert after.status_code == 200
+    assert not r.headers.get_list("set-cookie")
 
 
 def test_logout_revokes_access_token(client, app):

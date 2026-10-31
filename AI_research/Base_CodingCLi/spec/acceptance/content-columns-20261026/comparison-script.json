@@ -1,0 +1,71 @@
+{
+  "id": "47545c7e72a04a46a22b503f258a0400",
+  "column_key": "report_digest",
+  "topic": {
+    "title": "三个方案怎么选：预算、等待与操作位置",
+    "fields": {
+      "目标受众": "希望根据实际条件选择工具的观众"
+    },
+    "from_report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance/content-columns-20261026/comparison-input.md"
+  },
+  "status": "DRAFT",
+  "research_job": "",
+  "report_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance/content-columns-20261026/comparison-input.md",
+  "current_version": 1,
+  "approved_version": null,
+  "error": null,
+  "created_by": "content-architecture-acceptance",
+  "created_at": "2026-10-26T15:10:12+0800",
+  "updated_at": "2026-10-26T15:10:25+0800",
+  "heartbeat_at": 1792998612.881515,
+  "stage": null,
+  "archived": 0,
+  "report_id": "3e76048ca7b24d37b4870e56a6fbe0f3",
+  "production": "ai_media_arena_digest",
+  "content_column_id": "ai_model_review",
+  "content_matrix_id": "ai_media",
+  "source_matrix_id": "ai_media",
+  "content_context": {
+    "column": "ai_model_review",
+    "column_name": "AI 模型横评",
+    "type": "comparison",
+    "matrix": "ai_media",
+    "source_matrix": "ai_media",
+    "job": "ai_media/weekly_model_arena",
+    "revision": "1934c7f86c1b9a58467240b233bc298dd86a0f3890e8822c31628336c09861b3",
+    "audience": "关注 AI 产品、技术与应用的观众",
+    "promise": "讲清模型在关键维度上的差异与适用条件",
+    "type_definition": {
+      "key": "comparison",
+      "name": "横评",
+      "promise": "理解多个对象的差异与适用条件",
+      "structure": [
+        "对象",
+        "比较维度",
+        "关键差异",
+        "适用情形"
+      ],
+      "preferred_visuals": [
+        "对比图",
+        "价格卡",
+        "真实画面",
+        "原理图"
+      ]
+    },
+    "render_inheritance": "source_compatible",
+    "render": {
+      "production_recipe": "mixed_comparison",
+      "production_mode": "fast",
+      "video_form": "information_cards",
+      "visual_style": "editorial_light"
+    },
+    "presentation": {
+      "preferred_visuals": [
+        "对比图",
+        "性能图",
+        "价格卡",
+        "真实截图"
+      ]
+    }
+  }
+}

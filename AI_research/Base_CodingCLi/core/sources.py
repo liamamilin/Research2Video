@@ -33,7 +33,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from typing import Optional
 
-from .errors import SourcesUnavailableError
+from .errors import CancelledError, SourcesUnavailableError
 from .search import SearchClient, SearchResult
 from .yaml_cache import load_yaml
 import datetime
@@ -89,6 +89,7 @@ def _parse_feed(xml_text: str, limit: int) -> list[SearchResult]:
         content = entry.find("a:content", _ATOM_NS)
         summary = (" ".join(content.itertext()) if content is not None else "")
         summary = summary or entry.findtext("a:summary", default="", namespaces=_ATOM_NS)
+        summary = summary or entry.findtext("{http://search.yahoo.com/mrss/}group/{http://search.yahoo.com/mrss/}description", default="")
         results.append(SearchResult(
             title=_clean(entry.findtext("a:title", default="", namespaces=_ATOM_NS), 200),
             url=link.strip(),
@@ -379,6 +380,23 @@ _ADAPTERS = {
 }
 
 
+def fetch_web_page(url: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:
+    from .source_pages import fetch_page
+    return fetch_page(url, limit, timeout, get_page=_get_page)
+
+
+def fetch_catalog(url: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:
+    from .source_pages import fetch_page
+    return fetch_page(url, limit, timeout, get_page=_get_page, catalog=True)
+
+
+def fetch_search(query: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:
+    raise ValueError("search: 来源需要研究引擎提供搜索客户端")
+
+
+_ADAPTERS.update({"page": fetch_web_page, "catalog": fetch_catalog, "search": fetch_search})
+
+
 REGISTRY_FILE = "sources.yaml"
 
 
@@ -441,7 +459,8 @@ def resolve(specs: list[str], config_dir: str = "config", *, registry: Optional[
     return out
 
 
-def fetch_source(spec: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:
+def fetch_source(spec: str, limit: int = 8, timeout: int = 20, *,
+                 search_client: Optional[SearchClient] = None) -> list[SearchResult]:
     """Fetch one source spec (``kind:target``)."""
     kind, _, target = (spec or "").partition(":")
     kind = kind.strip().lower()
@@ -450,23 +469,44 @@ def fetch_source(spec: str, limit: int = 8, timeout: int = 20) -> list[SearchRes
     if not adapter or not target:
         logger.warning("Unknown source spec: %s", spec)
         return []
+    if kind in {"page", "catalog"} and search_client is not None:
+        from .source_pages import fetch_page
+        return fetch_page(target, limit, timeout, get_page=_get_page,
+                          search_client=search_client, catalog=kind == "catalog")
+    if kind == "search" and search_client is not None:
+        results = search_client.search([target], objective="收集此固定来源中与查询相关的公开内容")
+        scopes = re.findall(r"site:([^\s]+)", target)
+        if scopes:
+            def matches(item):
+                parsed = urllib.parse.urlsplit(item.url)
+                for scope in scopes:
+                    host, _, path = scope.partition("/")
+                    if ((parsed.hostname == host or (parsed.hostname or "").endswith("." + host)) and
+                            (not path or parsed.path.lower().startswith("/" + path.lower()))):
+                        return True
+                return False
+            results = [item for item in results if matches(item)]
+        return results[:max(1, limit)]
     return adapter(target, limit=limit, timeout=timeout)
 
 
 def fetch_all(sources: list[str], limit_per_source: int = 8,
-              timeout: int = 20) -> list[SearchResult]:
+              timeout: int = 20, *, search_client: Optional[SearchClient] = None) -> list[SearchResult]:
     """Fetch every source spec, dedupe by URL, keep first-seen order."""
     collected: list[SearchResult] = []
     for spec in sources or []:
         try:
-            collected.extend(fetch_source(spec, limit=limit_per_source, timeout=timeout))
+            kwargs = {"search_client": search_client} if search_client is not None else {}
+            collected.extend(fetch_source(spec, limit=limit_per_source, timeout=timeout, **kwargs))
+        except CancelledError:
+            raise
         except Exception as exc:  # noqa: BLE001 - one bad source must not break the run
             logger.warning("Source %s failed: %s", spec, str(exc)[:200])
     return SearchClient._dedupe(collected)
 
 
 def fetch_all_strict(sources: list[str], limit_per_source: int = 8,
-                     timeout: int = 20) -> tuple[list[SearchResult], dict[str, object]]:
+                     timeout: int = 20, *, search_client: Optional[SearchClient] = None) -> tuple[list[SearchResult], dict[str, object]]:
     """Fetch every source spec for a Job that has no web search behind it.
 
     Returns ``(items, stats)``; ``stats`` maps each spec to its item count, or to ``"失败：原因"``. A source that
@@ -478,9 +518,12 @@ def fetch_all_strict(sources: list[str], limit_per_source: int = 8,
     owners: dict[int, str] = {}
     for spec in sources or []:
         try:
-            items = fetch_source(spec, limit=limit_per_source, timeout=timeout)
+            kwargs = {"search_client": search_client} if search_client is not None else {}
+            items = fetch_source(spec, limit=limit_per_source, timeout=timeout, **kwargs)
             if not items:
                 raise ValueError("抓到了页面但没有条目")
+        except CancelledError:
+            raise
         except Exception as exc:  # noqa: BLE001 - recorded per source; only "all failed" stops the run
             failures[spec] = str(exc)[:200]
             stats[spec] = f"失败：{failures[spec]}"

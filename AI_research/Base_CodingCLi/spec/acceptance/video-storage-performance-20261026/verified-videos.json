@@ -1,0 +1,26 @@
+[
+  {
+    "render_id": "035b8706167d4f9e9676f07b6cfa4062",
+    "script_id": "2e9ceee28a7d47c182cd2232dfe15c2a",
+    "completed_at": "2026-10-26T17:14:03+0800",
+    "path": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/035b8706167d4f9e9676f07b6cfa4062/video.mp4",
+    "sha256": "99e5f55df2ff7390ecdfa2b1478c76bc1252e49063860cacdce85049701d2d47",
+    "hash_matches": true
+  },
+  {
+    "render_id": "8a30f8e1be97471a8beeb034384da996",
+    "script_id": "332a2c56630a41fd93356e4340ea2245",
+    "completed_at": "2026-10-26T16:58:25+0800",
+    "path": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/8a30f8e1be97471a8beeb034384da996/video.mp4",
+    "sha256": "6c72d348da3f31acbf3834059c0cf8b7b74c38d360470e047a2d807da3442aef",
+    "hash_matches": true
+  },
+  {
+    "render_id": "2655bbc42a4f48b195bb2757ee09aea3",
+    "script_id": "fe2917ebc3bb43ebb30470d6a946bb59",
+    "completed_at": "2026-10-26T16:29:36+0800",
+    "path": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/2655bbc42a4f48b195bb2757ee09aea3/video.mp4",
+    "sha256": "62f0f37699872d08093b80df9dc892acfed272948eb540e5c2ce7b4e494695a8",
+    "hash_matches": true
+  }
+]

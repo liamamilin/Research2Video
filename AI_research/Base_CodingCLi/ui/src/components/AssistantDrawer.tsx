@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MessageSquareText, X, Maximize2 } from 'lucide-react';
-import { ApplicationAssistant } from '@/pages/Ask';
+import { PageLoading } from './PageLoading';
 import { useAuthStore } from '@/lib/auth-store';
 import { assistantContext, contextHref } from '@/lib/assistant-context';
+
+const ApplicationAssistant = lazy(() => import('@/pages/Ask').then(m => ({ default: m.ApplicationAssistant })));
 
 export function AssistantDrawer() {
   const [open, setOpen] = useState(false);
@@ -41,7 +43,7 @@ export function AssistantDrawer() {
           <Link className="btn text-xs" to={context ? contextHref(context) : '/ask'}><Maximize2 className="w-3.5 h-3.5" />完整工作台</Link>
           <button className="btn text-xs" aria-label="关闭助手" onClick={() => setOpen(false)}><X className="w-4 h-4" /></button>
         </div></div>
-        <div className="flex-1 min-h-0"><ApplicationAssistant key={user.username} username={user.username} readOnly={user.role === 'viewer'} embedded /></div>
+        <div className="flex-1 min-h-0"><Suspense fallback={<PageLoading />}><ApplicationAssistant key={user.username} username={user.username} readOnly={user.role === 'viewer'} embedded /></Suspense></div>
       </div>
     </div>}
   </>;

@@ -12,6 +12,7 @@ from pathlib import Path
 from core.platform_store import PlatformStore
 from core.video import content_guard, credibility, store as video_store
 from web.services import bilibili, video_render
+from web.services.publish_cover import publish_cover
 from web.settings import get_settings
 
 Error = bilibili.BilibiliError
@@ -137,6 +138,8 @@ def categories() -> dict:
 
 
 def column_for(script: dict):
+    if (script.get('topic') or {}).get('local_video'):
+        return None
     from web.routes.video import _known_columns
 
     column = _known_columns().get(script["column_key"])
@@ -152,6 +155,8 @@ def eligible(render_id: str, *, automatic: bool = False) -> tuple[dict, dict, di
         raise Error("请选择已完成的成片。")
     if reason := content_guard.publishing_block(script):
         raise Error(reason)
+    if automatic and (script.get('topic') or {}).get('local_video'):
+        raise Error('本地视频按指定平台投稿，不加入全局自动投稿。')
     if automatic and (script.get("archived") or script["status"] != "APPROVED" or
                       script.get("approved_version") != render["version"] or script.get("current_version") != render["version"]):
         raise Error("自动投稿只处理未归档文稿的当前定稿成片。")
@@ -222,10 +227,12 @@ def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
         raise Error("平台发布文案仍需人工整理，请查看发布包。")
     if len(description) > 2000 or not 1 <= int(payload.get("tid") or 0) <= 65535:
         raise Error("简介最多 2000 字，并且需要选择投稿分区。")
-    cover = next((p for name in ("cover.png", "cover.jpg") if (p := video_render.safe_file(render, name))), None)
+    first_comment = payload.get("first_comment")
+    if first_comment is None:
+        first_comment = store().settings()["first_comment"]
     clean = {"title": title, "tags": tags, "description": description, "tid": int(payload["tid"]),
-             "cover": str(cover.resolve()) if cover else "", "automatic": automatic,
-             "first_comment": clean_first_comment(payload.get("first_comment", {}))}
+             "cover": publish_cover(render, title), "automatic": automatic,
+             "first_comment": clean_first_comment(first_comment)}
     if automatic:  # tick already owns the same worker lock
         return store().enqueue(owner, render, clean)
     with identity_lock():
@@ -236,6 +243,8 @@ def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
 
 def clean_first_comment(value: dict) -> dict:
     """Validate an opt-in message; keep disabled template text available for later editing."""
+    from core.social.publish_text import comment_options
+    value = comment_options(value)
     text = str(value.get("text", "")).strip()
     enabled = bool(value.get("enabled", False))
     if len(text) > 1000 or (enabled and not text):
@@ -258,6 +267,7 @@ def candidate_catalog() -> tuple[list[dict], dict]:
     with video_store.connect() as conn:
         rows = conn.execute("SELECT r.id AS render_id,r.script_id,r.version,r.title,r.completed_at,r.artifacts,"
             "s.current_version,s.approved_version,s.status AS script_status,s.archived,"
+            "(json_extract(s.topic,'$.local_video') IS NOT NULL) AS local_video,"
             f"({content_guard.PUBLISHABLE_SQL}) AS publishable,"
             "EXISTS(SELECT 1 FROM publications p WHERE p.script_id=r.script_id AND p.version=r.version "
             "AND p.platform='bilibili' AND (p.account_uid=? OR p.account_uid='')) AS published FROM renders r JOIN scripts s ON s.id=r.script_id "
@@ -283,7 +293,7 @@ def candidate_catalog() -> tuple[list[dict], dict]:
             stats["queued_versions"] += 1
         elif row["publishable"]:
             result.append({k: row[k] for k in ("render_id", "script_id", "version", "title", "completed_at",
-                                             "current_version", "approved_version", "script_status", "archived")})
+                                             "current_version", "approved_version", "script_status", "archived", "local_video")})
     stats["unavailable_versions"] = len(all_versions - available)
     stats["ready_versions"] = len(result)
     return result, stats
@@ -372,6 +382,62 @@ def reconcile(task_id: str, bvid: str) -> dict:
     return db.get_upload(task_id)
 
 
+def lookup_upload(task_id: str) -> dict:
+    """Explicit read-only recovery shares the same lock as the automatic uploader."""
+    with account_lock():
+        return _lookup_upload(task_id)
+
+
+def _lookup_upload(task_id: str) -> dict:
+    from web.services.bilibili_recovery import matching_archives
+
+    db = store()
+    row = upload_task(task_id)
+    if row["status"] in ("SUBMITTED", "UNKNOWN") and row["bvid"]:
+        return reconcile(task_id, row["bvid"])
+    if row["status"] != "UNKNOWN":
+        return row
+    count = row["recovery"].get("lookup_count", 0)+1
+    now = time.time()
+    schedule = {"lookup_count": count, "last_checked_at": now,
+                "next_lookup_at": now+min(3600, 60*2**min(count, 6))}
+    try:
+        result = client(row["uid"]).archives(keyword=row["payload"]["title"])
+        matches = matching_archives(row, result["archives"])
+    except Error as exc:
+        db.update_recovery(task_id, {**schedule, "note": str(exc)}, expected="UNKNOWN")
+        return db.get_upload(task_id)
+    if len(matches) == 1:
+        match = matches[0]
+        # A receipt already attached to another local task cannot be claimed a second time.
+        if db.attach_upload_receipt(task_id, row["uid"], match["bvid"]):
+            db.update_recovery(task_id, {**schedule, "note": "已匹配 B 站稿件，等待公开确认。",
+                                         "matched_bvid": match["bvid"]}, expected="SUBMITTED")
+            try:
+                saved = reconcile(task_id, match["bvid"])
+                if saved["status"] == "PUBLISHED":
+                    db.update_recovery(task_id, {"note": "已匹配 B 站稿件并恢复发布记录。"}, expected="PUBLISHED")
+            except Error:
+                pass  # Retain the known receipt and let normal publication polling continue.
+            return db.get_upload(task_id)
+        else:
+            matches.append(match)
+    note = ("匹配到多条或已被其他任务关联的稿件，保留原任务等待进一步核对。" if matches else
+            f"已按标题核对 B 站稿件（{result['pages']} 页），暂未找到匹配；继续自动核对，尚未重新投稿。")
+    db.update_recovery(task_id, {**schedule, "note": note}, expected="UNKNOWN")
+    return db.get_upload(task_id)
+
+
+def _recover_unknown_uploads(owner: str) -> None:
+    now = time.time()
+    for row in store().unknown_uploads(owner):
+        recovery = row["recovery"]
+        if row["updated_at"] > now-60 or recovery.get("next_lookup_at", 0) > now:
+            continue
+        _lookup_upload(row["id"])
+        break  # Bound each worker pass; persist backoff so restarts do not cause a polling storm.
+
+
 def retry_first_comment(task_id: str, *, pin: bool = False) -> dict:
     """Retry only an explicitly rejected send, or pin the already confirmed comment."""
     with account_lock():
@@ -437,7 +503,7 @@ def tick() -> None:
         config = db.settings()
         if config["auto_upload"]:
             for candidate in candidates():
-                if (candidate["archived"] or candidate["script_status"] != "APPROVED" or
+                if (candidate.get('local_video') or candidate["archived"] or candidate["script_status"] != "APPROVED" or
                     candidate["version"] != candidate["approved_version"] or candidate["version"] != candidate["current_version"]):
                     continue
                 try:
@@ -471,6 +537,8 @@ def tick() -> None:
                 return
             if not db.update_upload(task["id"], status="UPLOADING", expected="QUEUED"):
                 return
+            db.update_recovery(task["id"], {"started_at": time.time(), "phase": "upload",
+                                          "lookup_count": 0, "next_lookup_at": 0, "note": ""}, expected="UPLOADING")
             credential = credentials()
             try:
                 bvid = bilibili.upload(credential, video_render.safe_file(render, "video.mp4"), {**task["payload"], "cover": str(cover)}, work_dir)
@@ -482,8 +550,15 @@ def tick() -> None:
             except Exception:
                 db.update_upload(task["id"], status="UNKNOWN", error="投稿结果需核对，请到创作中心检查并回填 BV 号。")
             finally:
+                try:
+                    evidence = json.loads((work_dir / "diagnostic.json").read_text())
+                    current = db.get_upload(task["id"])
+                    db.update_recovery(task["id"], evidence, expected=current["status"])
+                except (OSError, ValueError):
+                    pass
                 if credential and bilibili.upload_authorized(credential):
                     bilibili.private_json(folder / "credentials.json", credential)
+        _recover_unknown_uploads(owner)
         # Submission acceptance isn't publication. Keep polling until the owned video becomes public.
         for task in db.pending_uploads(owner):
             if task["status"] == "SUBMITTED" and task["updated_at"] < time.time() - 60:

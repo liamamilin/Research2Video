@@ -1,0 +1,16 @@
+schema_version: 1
+name: 方法实践
+matrix: education
+type: tutorial
+audience: 希望理解概念并掌握方法的学习者
+promise: 将一种方法用于明确任务并观察结果
+production_ids: []
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 操作截图
+  - 流程
+  - 步骤演示
+status: planned
+notes: 目标栏目，尚未配置研究与生产绑定。

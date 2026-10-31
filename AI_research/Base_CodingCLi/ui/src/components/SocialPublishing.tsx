@@ -1,3 +1,5 @@
+import { usePublishDraft } from "@/lib/use-publish-draft";
+import { PublishDraftStatus } from "./PublishDraftStatus";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "@/api/client";
@@ -17,6 +19,12 @@ const STATES: Record<string,string> = { QUEUED:"排队中", RUNNING:"处理中",
 const REVIEW_STATES: Record<string,string> = { reviewing:"平台审核中", processing:"平台处理中", scheduled:"等待定时发布", private:"仅自己可见", rejected:"审核未通过" };
 const length = (value: string) => Array.from(value).length;
 const commentPlatform = (platform:string) => platform === "xiaohongshu" ? "xiaohongshu" : "kuaishou";
+function connectionLabel(account: SocialOverview["account"], spec: SocialDefinition): string {
+  if (!account.connected) return "待账号连接验收";
+  if (account.session?.state === "expired") return "登录核实失败 · 自动核对已暂停";
+  if (account.session?.state === "unknown") return "账号已连接 · 登录状态待核实";
+  return spec.capabilities.public_check ? "账号已核验 · 自动核对已开启" : "账号已核验 · 投稿待验收";
+}
 export function combinedCount(platform: string, title: string, description: string, tags: string[]) {
   return length(combinedText(platform,title.trim(),description,tags));
 }
@@ -29,11 +37,18 @@ export function SocialUploadEditor({ platform, renderId, run, busy, onDone }: { 
 
 function SocialPublishForm({ initial, run, busy, onDone }: { initial: SocialPreview; run: Run; busy: boolean; onDone: () => void }) {
   const spec = initial.definition;
-  const [title,setTitle] = useState(initial.draft?.payload.title ?? initial.title);
-  const [description,setDescription] = useState(initial.draft?.payload.description ?? initial.description);
-  const [tags,setTags] = useState((initial.draft?.payload.tags ?? initial.tags).join("，"));
-  const [saved,setSaved] = useState(Boolean(initial.draft));
-  const [firstComment,setFirstComment] = useState(initial.draft?.payload.first_comment ?? initial.first_comment ?? EMPTY_FIRST_COMMENT);
+  const draft = usePublishDraft(spec.id, initial.render_id, initial.account_uid, {
+    title: initial.draft?.payload.title ?? initial.title,
+    description: initial.draft?.payload.description ?? initial.description,
+    tags: (initial.draft?.payload.tags ?? initial.tags).join("，"),
+    firstComment: initial.draft?.payload.first_comment ?? initial.first_comment ?? EMPTY_FIRST_COMMENT,
+  }, Boolean(initial.draft));
+  const { title, description, tags, firstComment } = draft.value;
+  const setTitle = (value: string) => draft.field("title", value);
+  const setDescription = (value: string) => draft.field("description", value);
+  const setTags = (value: string) => draft.field("tags", value);
+  const setFirstComment = (value: typeof firstComment) => draft.field("firstComment", value);
+
   const admin=useAuthStore(s => s.user?.role)==="admin";
   const [templateSaved,setTemplateSaved]=useState(false);
   const list = tags.split(/[,，]/).map(tag => tag.trim().replace(/^#/,"")).filter(Boolean);
@@ -55,19 +70,22 @@ function SocialPublishForm({ initial, run, busy, onDone }: { initial: SocialPrev
   ].filter(Boolean);
   const valid = errors.length === 0 && textCheck.valid;
   const payload = { title,description,tags:list,...(spec.capabilities.first_comment ? {first_comment:firstComment} : {}) };
-  const changed = () => setSaved(false);
+  const changed = () => {};
   return <form aria-label={`${spec.name}发布包`} className="card p-4 space-y-3" onSubmit={event => { event.preventDefault(); if (valid && spec.capabilities.upload) void run(async () => { await socialAction(spec.id,"/uploads",{render_id:initial.render_id,account_uid:initial.account_uid,...payload}); onDone(); }); }}>
+    <fieldset disabled={busy} className="space-y-3 min-w-0">
+    <p className="text-xs text-text-muted break-all">本次成片 {initial.render_id} · 账号 {initial.account_uid || "待连接"}</p>
+    {initial.draft?.render_id && initial.draft.render_id !== initial.render_id ? <p className="text-xs text-warning">文案复用自本版另一条成片 {initial.draft.render_id}；本次保存和提交使用上方所选成片，原草稿版本仍保留。</p> : null}
     <h3 className="font-medium text-sm">{spec.name}发布包 · 文稿 v{initial.version}</h3>
-    {initial.warnings.map((warning,index) => <p key={index} className="text-xs text-warning">{warning}</p>)}
     <label className="block text-xs">{spec.name}标题（{length(title.trim())}/{spec.title_limit}，至少 {spec.title_min} 字）<input aria-label={`${spec.name}标题`} aria-invalid={titleInvalid} className="input w-full mt-1" value={title} onChange={e => { setTitle(e.target.value); changed(); }} /></label>
     <label className="block text-xs">{spec.name}简介（{length(description)}/{spec.description_limit}）<textarea aria-label={`${spec.name}简介`} aria-invalid={descriptionInvalid} rows={5} className="input w-full mt-1" value={description} onChange={e => { setDescription(e.target.value); changed(); }} /></label>
     <label className="block text-xs">{spec.name}话题（{list.length}/{spec.tag_limit} 个，逗号分隔）<input aria-label={`${spec.name}话题`} aria-invalid={tagsOverLimit || tagTooLong || tagHasNewline} className="input w-full mt-1" value={tags} onChange={e => { setTags(e.target.value); changed(); }} /></label>
     {errors.length ? <div role="alert" className="text-xs text-warning space-y-1"><p>请先修改发布包：</p>{errors.map(error => <p key={error}>{error}</p>)}{tagsOverLimit ? <button type="button" className="btn text-xs" disabled={busy} onClick={() => { setTags(list.slice(0,spec.tag_limit).join("，")); changed(); }}>保留前 {spec.tag_limit} 个话题</button> : null}</div> : null}
-    <PublishAdaptation platform={spec.id} renderId={initial.render_id} accountUid={initial.account_uid} value={payload} initial={initial.adaptation} run={run} busy={busy} onApply={next => {setTitle(next.title);setDescription(next.description);setTags(next.tags.join("，"));if(next.first_comment)setFirstComment(next.first_comment);setSaved(true);}} />
+    <PublishAdaptation platform={spec.id} renderId={initial.render_id} accountUid={initial.account_uid} value={payload} initial={initial.adaptation} run={run} busy={busy} onApply={next => draft.applySaved({ title: next.title, description: next.description, tags: next.tags.join("，"), firstComment: next.first_comment ?? firstComment })} />
     <p className="text-xs text-text-muted">{spec.upload_note || "确认后将在本机独立窗口投稿。"}</p>
     {!spec.capabilities.public_check ? <p className="text-xs text-warning">{spec.public_check_gap} 投稿没有可靠回执时会保留待核对，不自动重投。</p> : null}
-    {spec.capabilities.first_comment ? <><FirstCommentOptions platform={commentPlatform(spec.id)} value={firstComment} onChange={value => {setFirstComment(value);setTemplateSaved(false);changed();}} />{admin ? <div className="flex items-center gap-2"><button type="button" className="btn text-xs" disabled={busy || !validFirstComment(spec.id,firstComment)} onClick={() => void run(async () => {await socialAction(spec.id,"/first-comment-template",firstComment,"PUT");setTemplateSaved(true);})}>保存为{spec.name}常用评论</button>{templateSaved ? <span className="text-xs text-success">已保存，仅影响后续投稿。</span> : null}</div> : null}</> : <p className="text-xs text-text-muted">本平台的首评、置顶和视频数据仍待分别接入。</p>}
-    <div className="flex gap-3 items-center flex-wrap"><button type="button" className="btn text-xs" disabled={busy} onClick={() => void run(async () => { await api(`/api/video/distributions/${spec.id}/draft`,{method:"PUT",body:{render_id:initial.render_id,account_uid:initial.account_uid,payload}}); setSaved(true); })}>保存{spec.name}发布包</button>{saved ? <span className="text-xs text-success">已保存本平台发布包</span> : null}<button className="btn btn-primary text-xs" disabled={busy || !valid || !spec.capabilities.upload}>确认发布到{spec.name}</button></div>
+    {spec.capabilities.first_comment ? <><FirstCommentOptions platform={commentPlatform(spec.id)} value={firstComment} onChange={value => {setFirstComment(value);setTemplateSaved(false);changed();}} />{admin ? <details><summary className="text-xs cursor-pointer">后续投稿默认评论设置</summary><div className="flex items-center gap-2"><button type="button" className="btn text-xs" disabled={busy || !validFirstComment(spec.id,firstComment)} onClick={() => void run(async () => {await socialAction(spec.id,"/first-comment-template",firstComment,"PUT");setTemplateSaved(true);})}>保存为{spec.name}常用评论</button>{templateSaved ? <span className="text-xs text-success">已保存，仅影响后续投稿。</span> : null}</div></details> : null}</> : <p className="text-xs text-text-muted">本平台的首评、置顶和视频数据仍待分别接入。</p>}
+    <div className="flex gap-3 items-center flex-wrap"><button type="button" className="btn text-xs" disabled={busy} onClick={() => void run(async () => { await api(`/api/video/distributions/${spec.id}/draft`,{method:"PUT",body:{render_id:initial.render_id,account_uid:initial.account_uid,payload}}); draft.markSaved(); })}>保存草稿</button><PublishDraftStatus draft={draft} /><button className="btn btn-primary text-xs" disabled={busy || !valid || !spec.capabilities.upload}>提交到{spec.name}</button></div>
+    </fieldset>
   </form>;
 }
 
@@ -94,16 +112,16 @@ function UploadRow({row,spec,accountUid,canEdit,run,busy}:{row:SocialJob;spec:So
   const commentLabels:Record<string,string>={WAITING:"等待视频公开",QUEUED:"等待发送",RUNNING:"正在处理",SENT:"已取得发送回执，待回读",UNKNOWN:"结果待核对，不会重发",FAILED:"未完成",CANCELLED:"已取消"};
   const verification=row.verification;
   const pending=["UNKNOWN","SUBMITTED"].includes(row.status);
-  const statusLabel=pending && verification?.automatic ? REVIEW_STATES[verification.state || ""] || (row.status==="UNKNOWN" ? "结果待核对 · 自动回查中" : "已投稿 · 自动核对中") : row.status==="SUBMITTED" && !row.work_id ? "已投稿 · 待补作品链接" : STATES[row.status] || row.status;
+  const statusLabel=pending && verification?.paused ? (row.status==="UNKNOWN" ? "结果待核对 · 自动回查暂停" : "已投稿 · 自动核对暂停") : pending && verification?.automatic ? REVIEW_STATES[verification.state || ""] || (row.status==="UNKNOWN" ? "结果待核对 · 自动回查中" : "已投稿 · 自动核对中") : row.status==="SUBMITTED" && !row.work_id ? "已投稿 · 待补作品链接" : STATES[row.status] || row.status;
   return <li className="card p-4 space-y-2">
     <div className="flex gap-3 justify-between"><h3 className="text-sm font-medium">{row.payload.title}</h3><span className="badge border border-border">{row.progress?.label || statusLabel}</span></div>
     <p className="text-xs text-text-muted">文稿 v{row.version} · {row.phase}</p>
     {row.progress?.recovery && <div className="text-xs text-warning space-y-2"><p>{row.progress.recovery.message}</p>
       {row.progress.recovery.kind === 'connection' && <a className="btn text-xs inline-block" href="#platform-connection">检查平台连接</a>}
       {row.progress.recovery.resumable && row.progress.recovery.kind !== 'retry' && <p>处理后点击「核对发布结果」，继续检查这条原投稿。</p>}</div>}
-    <div className="flex gap-3 flex-wrap text-xs"><Link className="text-accent" to={documentPublishLink(row.script_id,row.version)}>查看文稿发布记录 →</Link>{row.url ? <a className="text-accent" href={row.url} target="_blank" rel="noreferrer">查看平台作品</a> : null}<a className="text-accent" href={spec.creator_url} target="_blank" rel="noreferrer">打开创作中心 ↗</a></div>
+    <div className="flex gap-3 flex-wrap text-xs"><Link className="text-accent" to={documentPublishLink(row.script_id,row.version,row.render_id)}>查看文稿发布记录 →</Link>{row.url ? <a className="text-accent" href={row.url} target="_blank" rel="noreferrer">查看平台作品</a> : null}<a className="text-accent" href={spec.creator_url} target="_blank" rel="noreferrer">打开创作中心 ↗</a></div>
     {row.work_id ? <p className="text-xs text-text-muted break-all">作品 ID：{row.work_id}</p> : null}
-    {row.status==="SUBMITTED" && !row.work_id ? <p className="text-xs text-text-muted">{verification?.automatic ? "平台已接受投稿，正在自动关联作品并核对审核、公开状态；不会重复投稿。" : "平台已接受投稿，回执未提供公开作品 ID。请补充作品链接，继续核对审核与公开状态；不会重复投稿。"}</p> : null}
+    {pending && verification?.paused ? !row.progress?.recovery && <p className="text-xs text-warning">{verification.pause_reason || "自动核对已暂停，请先恢复平台连接；原投稿保留，不会重新投稿。"}</p> : row.status==="SUBMITTED" && !row.work_id ? <p className="text-xs text-text-muted">{verification?.automatic ? "平台已接受投稿，正在自动关联作品并核对审核、公开状态；不会重复投稿。" : "平台已接受投稿，回执未提供公开作品 ID。请补充作品链接，继续核对审核与公开状态；不会重复投稿。"}</p> : null}
     {pending && verification?.automatic ? <div className="text-xs text-text-muted space-y-1"><p>自动核对已开启，确认公开后将自动回写文稿发布记录。回查只读取结果，不会重新投稿。</p>{verification.checked_at ? <p>最近核对：{new Date(verification.checked_at * 1000).toLocaleString()} · {verification.reason || "等待平台状态"}{verification.next_check_at ? ` · 下次核对：${new Date(verification.next_check_at * 1000).toLocaleTimeString()}` : ""}</p> : <p>投稿后将自动开始核对。</p>}</div> : null}
     {row.error ? <p className="text-xs text-warning">{row.error}</p> : null}
     {first ? <section aria-label={`${spec.name}首评进度`} className="rounded border border-border p-3 space-y-2 text-xs"><p className="font-medium">首条评论 · {first.read_back ? "已发送并回读" : commentLabels[first.status] || first.status}</p><p className="text-text-muted">{first.phase}</p><p className="whitespace-pre-wrap break-words">{first.text}</p>{first.comment_id ? <p className="text-text-muted">评论 ID：{first.comment_id}</p> : null}{first.error ? <p className="text-warning">{first.error}</p> : null}{canEdit && ["WAITING","QUEUED"].includes(first.status) ? <button className="btn text-xs" disabled={busy} onClick={() => void run(() => socialAction(spec.id,`/uploads/${row.id}/first-comment/cancel`))}>取消首评</button> : null}{canEdit && first.can_retry ? <button className="btn text-xs" disabled={busy} onClick={() => void run(() => socialAction(spec.id,`/uploads/${row.id}/first-comment/retry`))}>重新检查并发送首评</button> : null}{canEdit && ["UNKNOWN","SENT"].includes(first.status) ? <button className="btn text-xs" disabled={busy} onClick={() => void run(() => socialAction(spec.id,`/uploads/${row.id}/first-comment/check`))}>只读核对评论</button> : null}</section> : canEdit && spec.capabilities.first_comment && ["SUBMITTED","PUBLISHED"].includes(row.status) && row.work_id ? <button className="btn text-xs" onClick={() => setAddingComment(!addingComment)}>{addingComment ? "收起首评" : "添加首条评论"}</button> : null}
@@ -147,12 +165,13 @@ export function SocialPlatform({platform}:{platform:string}) {
   const candidates=(data?.candidates || []).filter(row => (!query || `${row.title} v${row.version}`.toLowerCase().includes(query.toLowerCase())) && (scope==="all" || (!row.archived && row.script_status==="APPROVED" && row.version===row.current_version && row.version===row.approved_version)));
   return <div className="max-w-6xl space-y-4">
     <header className="flex justify-between gap-3"><div><h1 className="text-xl font-semibold">平台管理{spec ? ` · ${spec.name}` : ""}</h1><p className="text-xs text-text-muted mt-1">账号连接、独立发布包和投稿回执。</p></div><button className="btn text-xs" disabled={loading} onClick={() => void reload()}>刷新平台</button></header>
-    {source && version>0 ? <Link className="text-accent text-sm block" to={documentPublishLink(source,version)}>← 返回文稿发布页（v{version}）</Link> : null}
+    {source && version>0 ? <Link className="text-accent text-sm block" to={documentPublishLink(source,version,params.get("render") || undefined)}>← 返回文稿发布页（v{version}）</Link> : null}
     {error ? <ErrorState error={error} onRetry={reload} compact /> : null}
     {actionError ? <p role="alert" className="card p-3 text-sm text-danger">{actionError}</p> : null}
     {!data && !error ? <p className="text-sm text-text-muted">正在读取平台…</p> : null}
     {data && spec ? <>
-      <section className="card p-4 flex gap-4 flex-wrap items-center"><div className="flex-1"><h2 className="text-sm font-medium">{spec.name}</h2><p className="text-xs text-text-muted mt-1">{data.account.connected ? `${data.account.name} · UID ${data.account.uid}` : "尚未连接账号"}</p></div><span className="text-xs text-text-muted">{data.account.connected ? spec.capabilities.public_check ? "账号已核验 · 自动核对已开启" : "账号已核验 · 投稿待验收" : "待账号连接验收"}</span><a className="btn text-xs" href={spec.creator_url} target="_blank" rel="noreferrer">创作中心 ↗</a></section>
+      <section className="card p-4 flex gap-4 flex-wrap items-center"><div className="flex-1"><h2 className="text-sm font-medium">{spec.name}</h2><p className="text-xs text-text-muted mt-1">{data.account.connected ? `${data.account.name} · UID ${data.account.uid}` : "尚未连接账号"}</p></div><span className="text-xs text-text-muted">{connectionLabel(data.account, spec)}</span><a className="btn text-xs" href={spec.creator_url} target="_blank" rel="noreferrer">创作中心 ↗</a></section>
+      {data.account.connected && data.account.session?.state === "expired" ? <section role="alert" className="card p-4 border border-danger text-sm"><h2 className="font-medium">{spec.name}登录已失效</h2><p className="text-xs text-text-muted mt-1">连续 {data.account.session.failures} 次账号核实失败，作品回查与评论核对已暂停，每 30 分钟自动检查一次。请在下方重新扫码连接同一账号。</p></section> : null}
       <section id="platform-connection" className="card p-4 space-y-3"><h2 className="text-sm font-medium">{spec.name}账号连接</h2><p className="text-xs text-text-muted">使用本机独立浏览器扫码，核实实际账号身份后保存登录；各平台的凭证与队列独立。</p>{admin ? <div className="flex gap-2 flex-wrap"><button className="btn btn-primary text-xs" disabled={busy || !data.runtime_ready} onClick={() => void run(async () => {const result=await socialAction(platform,"/login");setLoginId(result.id);})}>{data.account.connected ? `重新扫码连接${spec.name}` : `扫码连接${spec.name}`}</button>{data.account.connected ? <><button className="btn text-xs" disabled={busy} onClick={() => void run(() => socialAction(platform,"/verify"))}>验证平台登录</button><button className="btn text-xs" disabled={busy} onClick={() => void run(() => socialAction(platform,"/account",undefined,"DELETE"))}>断开平台账号</button></> : null}</div> : <p className="text-xs text-text-muted">账号连接由管理员配置。</p>}{!data.runtime_ready ? <p className="text-xs text-warning">本机上传组件尚未准备好。</p> : null}</section>
       {admin && platform==="xiaohongshu" && data.account.connected && spec.capabilities.first_comment ? <section className="card p-4 space-y-2" aria-label="小红书评论登录"><h2 className="text-sm font-medium">评论登录</h2><p className="text-xs text-text-muted">{data.account.comments_verified_at ? "已核验主站评论账号；发送前仍会检查登录和作品归属。" : "首评需要主站登录，请用当前创作中心的同一小红书账号扫码。现有上传登录保留。"}</p><button className="btn text-xs" disabled={busy || !data.runtime_ready} onClick={() => void run(async () => {const result=await socialAction(platform,"/comments/login");setLoginId(result.id);})}>{data.account.comments_verified_at ? "重新连接评论登录" : "连接评论登录"}</button></section> : null}
       {admin && (loginId || data.login_id) ? <LoginStatus key={loginId || data.login_id} platform={platform} id={loginId || data.login_id!} run={run} busy={busy} onConnected={onConnected} onRenew={setLoginId} /> : null}
@@ -163,4 +182,12 @@ export function SocialPlatform({platform}:{platform:string}) {
       <h2 className="text-sm font-medium">{spec.name}投稿队列与记录 · {data.uploads.length}</h2>{data.uploads.length ? <ul className="space-y-3">{data.uploads.filter(row => row.id!==task).map(row => <UploadRow key={row.id} row={row} spec={spec} accountUid={data.account.uid} canEdit={canEdit} run={run} busy={busy} />)}</ul> : <p className="card p-8 text-center text-sm text-text-muted">尚无投稿任务。连接账号后可选择已有成片。</p>}
     </> : null}
   </div>;
+}
+
+/** Focused task details share the platform's existing recovery and first-comment controls. */
+export function SocialFocusedUpload({ platform, taskId, accountUid, canEdit, run, busy }: { platform: string; taskId: string; accountUid?: string; canEdit: boolean; run: Run; busy: boolean }) {
+  const load = useCallback((signal: AbortSignal) => api<{ platforms: SocialDefinition[] }>("/api/platforms/catalog", { signal }), []);
+  const { data, error, reload } = usePageResource(load);
+  const spec = data?.platforms.find(row => row.id === platform);
+  return error ? <ErrorState error={error} onRetry={reload} compact /> : spec ? <FocusedTask platform={platform} id={taskId} spec={spec} accountUid={accountUid} canEdit={canEdit} run={run} busy={busy} /> : <p className="text-xs text-text-muted">正在读取平台任务设置…</p>;
 }

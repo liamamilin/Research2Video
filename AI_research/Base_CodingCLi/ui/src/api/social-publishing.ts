@@ -15,11 +15,11 @@ export type SocialJob = {
   progress?: PublicationProgress;
   login_purpose?: "comments";
   first_comment?: { id: string; status: string; phase: string; error: string; text: string; comment_id: string; read_back: boolean; can_retry: boolean } | null;
-  verification?: { automatic: boolean; attempts?: number; checked_at?: number; next_check_at?: number; state?: string; reason?: string };
+  verification?: { automatic: boolean; paused?: boolean; pause_reason?: string; attempts?: number; checked_at?: number; next_check_at?: number; state?: string; reason?: string };
   payload: { title?: string; description?: string; tags?: string[]; first_comment?: FirstComment };
 };
 export type SocialOverview = {
-  definition: SocialDefinition; account: { connected: boolean; uid?: string; name?: string; verified_at?: number; comments_verified_at?: number };
+  definition: SocialDefinition; account: { connected: boolean; uid?: string; name?: string; verified_at?: number; comments_verified_at?: number; session?: { state: "valid" | "expired" | "unknown"; failures: number; since: number | null } };
   runtime_ready: boolean; login_id: string | null; uploads: SocialJob[]; checks: SocialJob[]; candidates: UploadCandidate[];
   settings?: { first_comment?: FirstComment };
 };

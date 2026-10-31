@@ -26,6 +26,38 @@ afterEach(() => {
 });
 
 describe("Autopilot card", () => {
+  it("distinguishes the full queue from actual execution without starting work", async () => {
+    const body = { ...BODY, queue: { active_batches: 81, preparing_batches: 2, executing_items: 3,
+      queued_items: 78, waiting_items: 1, attention_items: 2, phase_counts: { writing: 2, rendering: 1, queued_render: 10 },
+      oldest_batch_created_at: "2026-10-29T20:00:00+0800", completed_renders_today: 28,
+      limits: { scripts: 2, renders: 1 } },
+      runs: [{ ...BODY.runs[0], items: [{ ...BODY.runs[0].items[0], state: "WORKING",
+        progress: { stage: "queued_render", label: "等待出片", executing: false, queued: true } }] }] };
+    const fetcher = vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(body) }) as Response);
+    vi.stubGlobal("fetch", fetcher);
+    render(<MemoryRouter><AutopilotCard /></MemoryRouter>);
+    expect(await screen.findByText(/在途批次 81 · 执行中 3 项 · 排队 78 项/)).toBeTruthy();
+    expect(screen.getByText("准备选题 2 批")).toBeTruthy();
+    expect(screen.getByText(/研究\/写稿槽 2 · 出片槽 1/)).toBeTruthy();
+    expect(screen.getByText("等待出片")).toBeTruthy();
+    expect(screen.getByText(/最近一批：/).textContent).toContain("等待执行");
+    expect(screen.getByText(/今日完成出片 28 次/)).toBeTruthy();
+    expect(fetcher.mock.calls.every(call => !(call as unknown as [string, RequestInit?])[1]?.method
+      || (call as unknown as [string, RequestInit?])[1]?.method === "GET")).toBe(true);
+  });
+
+  it("shows selection and links to a covered event even when a current draft has another note", async () => {
+    const body = { ...BODY, runs: [{ ...BODY.runs[0], items: [{ ...BODY.runs[0].items[0], gate: {
+      story_selection: { pool_id: "pool", candidates: 2, selected: "恐龙新发现", skipped: 1,
+        decisions: [{ decision: "skip", title: "小蛇滚动逃跑", peer_id: "older", reason: "主事件已覆盖" }] },
+    } }] }] };
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(body) }) as Response));
+    render(<MemoryRouter><AutopilotCard /></MemoryRouter>);
+    expect(await screen.findByText(/候选 2，已选「恐龙新发现」/)).toBeTruthy();
+    expect(screen.getByText(/跳过「小蛇滚动逃跑」/)).toBeTruthy();
+    expect(screen.getByText("查看已覆盖文稿").getAttribute("href")).toBe("/video/older");
+  });
+
   it("uses the current draft title and audit label instead of an obsolete batch snapshot", async () => {
     const finished = { ...BODY, runs: [{ ...BODY.runs[0], status: "DONE" }] };
     vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, text: async () => JSON.stringify(finished) }) as Response));
@@ -67,7 +99,7 @@ describe("Autopilot card", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("sets how many topics each cell writes and starts that batch", async () => {
+  it("selects recipes and queues all topics without a quantity input", async () => {
     useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
     const calls: { url: string; body?: string; method?: string }[] = [];
     const coverage = [
@@ -83,10 +115,11 @@ describe("Autopilot card", () => {
     fireEvent.click(await screen.findByText("设置这一批"));
     const box = await screen.findByLabelText("快讯");
     expect(screen.queryByLabelText("盘点")).toBeNull(); // a roundup is not picked by count
-    fireEvent.change(box, { target: { value: "2" } });
-    fireEvent.click(screen.getByText(/按这个现在开始一批/));
+    expect((box as HTMLInputElement).type).toBe("checkbox");
+    expect((box as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(screen.getByText(/开始制作/));
     await waitFor(() => expect(calls.some((c) => c.method === "POST" && c.url.includes("/autopilot/runs"))).toBe(true));
     const post = calls.find((c) => c.method === "POST" && c.url.includes("/autopilot/runs"))!;
-    expect(JSON.parse(post.body!).spec.picks).toEqual([{ cell: "flash", count: 2 }]);
+    expect(JSON.parse(post.body!).spec.picks).toEqual([{ cell: "flash", count: 1, all: true }]);
   });
 });

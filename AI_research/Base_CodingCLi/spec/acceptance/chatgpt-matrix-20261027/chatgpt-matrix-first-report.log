@@ -1,0 +1,22 @@
+INFO  ==================================================
+INFO  AI Research System started at 2026-10-27T20:26:57.331465
+INFO  Running job: chatgpt_acquisition/t01_product
+INFO  Sources fetched: {'page:https://help.openai.com/en/articles/9260256-chatgpt-capabilities-overview': 8, 'catalog:https://learn.chatgpt.com/videos': 8, 'page:https://help.openai.com/en/collections/3742473-chatgpt': 8, 'page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes': 8}
+INFO  HTTP Request: POST https://opencode.ai/zen/go/v1/chat/completions "HTTP/1.1 200 OK"
+INFO  LLM usage: 1 requests, 8644 prompt + 12858 completion tokens
+WARNING 引用溯源：3/4 可追溯（75%），1 个未在本次检索结果中 | 未匹配示例: https://learn.chatgpt.com/videos
+INFO  Job 'chatgpt_acquisition/t01_product' completed → output/chatgpt_acquisition/2026-10-27_t01_product.md (5308 bytes)
+INFO  AI Research System finished.
+
+Running 1 job(s)...
+==================================================
+Start: 2026-10-27 20:26:57
+
+  [chatgpt_acquisition/t01_product] ChatGPT 到底能做什么？ — 吸引新用户；按 S01–S06 资料研究 ChatGPT 视频题材。
+  [chatgpt_acquisition/t01_product] Building prompt...
+  [chatgpt_acquisition/t01_product] Researching (LLM + web search)...
+  [chatgpt_acquisition/t01_product] Saving output...
+  [chatgpt_acquisition/t01_product] Done → output/chatgpt_acquisition/2026-10-27_t01_product.md
+  ✓ chatgpt_acquisition/t01_product
+
+Done: 1/1 succeeded.

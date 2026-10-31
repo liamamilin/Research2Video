@@ -1,0 +1,106 @@
+{
+  "checked_at": "2026-10-28T12:57:46.495512+08:00",
+  "public_url": "http://127.0.0.1:8775",
+  "runtime": {
+    "pid": 79630,
+    "host": "127.0.0.1",
+    "port": 8766,
+    "python": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/../.AI_research/bin/python",
+    "config_path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/config/web.yaml",
+    "started": 1793163004.366292,
+    "pid_file": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/server.pid",
+    "instance_id": "42549c105cec43719bcf0ef9956456d3"
+  },
+  "reload_requested_by_this_task": false,
+  "note": "正式服务已在现有运行流程中加载新版，本任务无需另发重启。浏览器确认独立分类、旧分类、每日参考库模式及真实生成结果。",
+  "health_8766": {
+    "status": "ok",
+    "checked_at": "2026-10-28T12:57:55+0800",
+    "deep": false,
+    "checks": [
+      {
+        "name": "config",
+        "status": "ok",
+        "detail": "model=deepseek-v4.1-flash, search=exa",
+        "model": "deepseek-v4.1-flash",
+        "search_provider": "exa"
+      },
+      {
+        "name": "state_dir",
+        "status": "ok",
+        "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state"
+      },
+      {
+        "name": "output_dir",
+        "status": "ok",
+        "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output"
+      },
+      {
+        "name": "reports_db",
+        "status": "ok",
+        "detail": "548 rows",
+        "value": 548
+      },
+      {
+        "name": "tracking_db",
+        "status": "ok",
+        "detail": "194 rows",
+        "value": 194
+      },
+      {
+        "name": "disk_free",
+        "status": "ok",
+        "detail": "123079 MB free",
+        "free_mb": 123079
+      }
+    ],
+    "errors": [],
+    "warnings": [],
+    "instance_id": "42549c105cec43719bcf0ef9956456d3"
+  },
+  "health_8775": {
+    "status": "ok",
+    "checked_at": "2026-10-28T12:57:55+0800",
+    "deep": false,
+    "checks": [
+      {
+        "name": "config",
+        "status": "ok",
+        "detail": "model=deepseek-v4.1-flash, search=exa",
+        "model": "deepseek-v4.1-flash",
+        "search_provider": "exa"
+      },
+      {
+        "name": "state_dir",
+        "status": "ok",
+        "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state"
+      },
+      {
+        "name": "output_dir",
+        "status": "ok",
+        "detail": "writable: /Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/output"
+      },
+      {
+        "name": "reports_db",
+        "status": "ok",
+        "detail": "548 rows",
+        "value": 548
+      },
+      {
+        "name": "tracking_db",
+        "status": "ok",
+        "detail": "194 rows",
+        "value": 194
+      },
+      {
+        "name": "disk_free",
+        "status": "ok",
+        "detail": "123079 MB free",
+        "free_mb": 123079
+      }
+    ],
+    "errors": [],
+    "warnings": [],
+    "instance_id": "42549c105cec43719bcf0ef9956456d3"
+  }
+}

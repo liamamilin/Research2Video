@@ -13,7 +13,7 @@ from core.video import autopilot_store as ap
 from core.video import columns as video_columns
 from core.video import length, outputs, production, recipes, reports, store
 from tests.test_auto_write import _auto_off, _config_file, _pending  # noqa: F401
-from tests.test_production import prod_env  # noqa: F401
+from tests.test_production import prod_env, _organize_event  # noqa: F401
 from tests.test_video_scripts import (GOOD, ROOT, FakeLLM, _csrf, _login, _wait, autovideo, llm,  # noqa: F401
                                       research, script_json, video_env)
 from web.services import video_autopilot as pilot
@@ -40,7 +40,7 @@ def test_a_recipe_says_it_can_be_written_from_a_whole_report():
     every = recipes.expanded(str(ROOT / "config"))
     assert {k for k, r in every.items() if r.whole_report} == {
         "deep_dive", "ai-non_tech-deep_dive-long", "report_digest", "ai-non_tech-digest-long", "top_finding",
-        "ai-non_tech-headline-short", "action_list", "ai-non_tech-action_list-short", "topic_digest"}
+        "ai-non_tech-headline-short", "action_list", "ai-non_tech-action_list-short", "topic_digest", "theme_research"}
     assert not every["flash"].whole_report and not every["ai-developer-roundup-long"].whole_report
 
 
@@ -56,7 +56,6 @@ def test_a_whole_report_config_is_one_video_per_report_and_never_researches(whol
     ("recipe: flash\n", "不是条目列表"),                          # a quick take is made from one item
     ("recipe: ai-developer-roundup-long\n", "不是条目列表"),      # a roundup needs items to pick
     ("recipe: deep_dive\nreverify: false\n", "调研不能关"),   # a knowledge video is not told without research
-    ("recipe: deep_dive\nauto: 2\n", "auto 只能是 1"),
 ])
 def test_a_whole_report_config_that_cannot_be_is_listed_with_why(whole_env, body, message):
     _config_file(whole_env, "bad").write_text(f"job: {JOB}\n{body}", encoding="utf-8")
@@ -80,7 +79,8 @@ def test_recording_a_report_again_fills_in_the_job_it_was_recorded_without(whole
     assert reports.record_file("output/x/2026-10-20.md", job="other")["job"] == JOB  # never taken over
 
 
-def test_api_a_whole_config_lists_the_jobs_reports_and_writes_from_one(client, whole_env, research, llm, autovideo):
+def test_api_a_whole_config_lists_the_jobs_reports_and_writes_from_one(client, whole_env, research, llm, autovideo, monkeypatch):
+    _organize_event(monkeypatch)
     budget = length.budget_for(video_columns.get(str(ROOT / "config"), "deep_dive").target_minutes, "voxcpm_anchor")
     llm.replies = [script_json(budget - 5, citations={(0, 0): [GOOD]})]
     _login(client)
@@ -116,7 +116,7 @@ def test_api_a_whole_config_is_added_and_turned_on_for_auto_as_a_switch(client, 
     assert added.status_code == 201, added.text
     key = added.json()["key"]
     assert added.json()["split"] == "whole"
-    assert client.patch(f"/api/production/{key}", json={"auto": 3}, headers=_csrf(client)).status_code == 422
+    assert client.patch(f"/api/production/{key}", json={"auto": 3}, headers=_csrf(client)).status_code == 200
     on = client.patch(f"/api/production/{key}", json={"auto": 1}, headers=_csrf(client))
     assert on.status_code == 200 and on.json()["auto"] == 1
     assert client.post("/api/production", json={"job": JOB, "recipe": "flash"}, headers=_csrf(client)).status_code == 422
@@ -134,7 +134,7 @@ def test_auto_picks_the_report_itself_and_never_reads_a_topic_source(whole_env, 
     now = _turn_on(whole_env)
     [found] = _pending(whole_env, now)
     assert found["job"] == JOB and found["report"].endswith("2026-10-20.md")
-    assert found["picks"] == [{"column": "deep_dive", "count": 1, "whole": True, "production": "whole"}]  # no source
+    assert found["picks"] == [{"column": "deep_dive", "all": True, "whole": True, "production": "whole"}]  # no source
     spawned: list[str] = []
     monkeypatch.setattr(video_workflow, "spawn", lambda script_id, started_by="": spawned.append(script_id))
     monkeypatch.setattr(video_render, "start", lambda render_id, client=None: None)
@@ -164,7 +164,7 @@ def test_auto_leaves_a_whole_report_alone_when_it_was_written_by_hand(whole_env,
     record = reports.record_file("output/x/2026-10-20.md", job=JOB)
     script = store.create_script("deep_dive", {"id": None, "title": "手写的", "fields": {}})
     reports.attach(script["id"], "output/x/2026-10-20.md")
-    assert pilot.pick_topics({"picks": [{"column": "deep_dive", "count": 1, "whole": True, "production": "whole"}],
+    assert pilot.pick_topics({"picks": [{"column": "deep_dive", "all": True, "whole": True, "production": "whole"}],
                               "job": JOB, "report": str(whole_env / "output" / "x" / "2026-10-20.md")}) == []
     assert record["id"]
 

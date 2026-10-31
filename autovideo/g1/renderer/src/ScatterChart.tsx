@@ -1,7 +1,7 @@
 import React from 'react';
 import {interpolate} from 'remotion';
 import {objectColor} from './StoryDirection';
-import {ShotLayer,CameraAxis,cameraAt,type Rect} from './ShotDirector';
+import {ShotLayer,CameraAxis,cameraAt,visualStart,carriesPicture,type Rect} from './ShotDirector';
 import {init, use} from 'echarts/core';
 import {ScatterChart as EChartsScatter} from 'echarts/charts';
 import {GridComponent} from 'echarts/components';
@@ -87,25 +87,40 @@ export function scatterLayout(p: Props, entityColors:(string|undefined)[]=[]): L
   return result;
 }
 
+export function scatterState(scene:any,frame:number):{times:number[];shown:number[];selected:number[];since:number;caption?:string} {
+  const p=scene.props as Props;
+  const start=scene.start_frame,end=scene.end_frame,count=p.points.length,steps=p.focus_steps||[];
+  const at=(index:number,fallback:number)=>scene.beats.find((b:any)=>b.target_id===`line:${index}`)?.frame??fallback;
+  const times=p.points.map((_,i)=>visualStart(scene,at(i,start+(end-start)*(i+.3)/(count+steps.length+1)),15));
+  const stepTimes=steps.map((_,i)=>visualStart(scene,at(count+i,start+(end-start)*(.65+i*.08)),15));
+  const endingAt=visualStart(scene,at(count+steps.length,start+(end-start)*.84),15);
+  const hasEnding=Boolean(p.takeaway||p.focus_indices?.length);
+  const carried=carriesPicture(scene)?scatterState(scene.previous_scene,scene.previous_scene.end_frame-1):undefined;
+  const cues=scene.props.shot_plan?.cues;
+  const spoken=(index:number)=>!cues||cues.some((cue:any)=>
+    scene.beats.some((beat:any)=>beat.id===cue.beat_id&&beat.target_id===`line:${index}`));
+  // Reveals and emphasis share one chronological timeline. A new point can
+  // replace an earlier focus step instead of leaving that step active forever.
+  const events=[...times.flatMap((time,i)=>spoken(i)?[{time,indices:[i],caption:undefined as string|undefined}]:[]),
+    ...stepTimes.flatMap((time,i)=>spoken(count+i)?[{time,indices:steps[i].indices,caption:steps[i].caption}]:[]),
+    ...(hasEnding?[{time:endingAt,indices:p.focus_indices||p.points.map((_,i)=>i),caption:p.takeaway}]:[])]
+    .sort((a,b)=>a.time-b.time);
+  const active=events.filter(event=>event.time<=frame).slice(-1)[0];
+  carried?.shown.forEach(i=>{times[i]=scene.start_frame-15;});
+  steps.forEach((step,i)=>step.indices.forEach(index=>{times[index]=Math.min(times[index],stepTimes[i]);}));
+  if(hasEnding)times.forEach((time,i)=>{times[i]=Math.min(time,endingAt);});
+  const shown=times.map((t,i)=>frame>=t?i:-1).filter(i=>i>=0);
+  const selected=(active?.indices||carried?.selected||[]).filter(i=>shown.includes(i));
+  return {times,shown,selected,since:active?.time??(carried?start-15:start),caption:active?.caption};
+}
+
 export function ScatterChart({scene,frame}: {scene:any;frame:number}) {
   const p = scene.props as Props;
   const colors=p.points.map((_,i)=>objectColor(scene,`point:${i}`,'')||undefined);
   const layout = React.useMemo(()=>scatterLayout(p,colors),[p,colors.join()]);
-  const start=scene.start_frame,end=scene.end_frame,count=p.points.length,steps=p.focus_steps||[];
-  const at = (index:number,fallback:number) => scene.beats.find((b:any)=>b.target_id===`line:${index}`)?.frame??fallback;
-  const times=p.points.map((_,i)=>at(i,start+(end-start)*(i+.3)/(count+steps.length+1)));
-  const stepTimes=steps.map((_,i)=>at(count+i,start+(end-start)*(.65+i*.08)));
-  const hasEnding=Boolean(p.takeaway||p.focus_indices?.length);
-  const endingAt=at(count+steps.length,start+(end-start)*.84);
-  const ending=hasEnding&&frame>=endingAt;
-  const shown=times.map((t,i)=>frame>=t?i:-1).filter(i=>i>=0);
-  const activeStep=stepTimes.reduce((last,t,i)=>frame>=t?i:last,-1);
-  const chosen=ending?(p.focus_indices||steps[activeStep]?.indices||shown.slice(-1)):activeStep>=0?steps[activeStep].indices:shown.slice(-1);
-  const selected=chosen.filter(i=>shown.includes(i));
-  const since=ending?endingAt:activeStep>=0?stepTimes[activeStep]:times[shown[shown.length-1]]??start;
+  const {times,shown,selected,since,caption}=scatterState(scene,frame);
   const focus=interpolate(frame-since,[0,15],[0,1],clamp);
-  const enter=interpolate(frame-start,[0,12],[0,1],clamp);
-  const caption=ending?p.takeaway:activeStep>=0?steps[activeStep].caption:undefined;
+  const enter=carriesPicture(scene)?1:interpolate(frame-scene.start_frame,[0,12],[0,1],clamp);
   const unit=(label:string,value:string)=>label+(value?` · ${value}`:'');
   const rects:Record<string,Rect>=Object.fromEntries(layout.positions.map((pos,i)=>{
     const label=layout.labels[i], x=Math.min(pos.x-22,label.x), y=Math.min(pos.y-22,label.y);

@@ -1,0 +1,20 @@
+schema_version: 1
+name: AI 快讯
+matrix: ai_media
+type: news
+audience: 已经在工作中使用 AI 的开发者和高频使用者
+promise: 让观众抓住一个 AI 重要变化，并理解它会怎样影响自己的用法
+production_ids:
+- flash_daily
+render_inheritance: source_compatible
+render:
+  packaging:
+    label: AI 快讯
+presentation:
+  strategy: 用变化前后的操作或使用状态建立画面，截图聚焦本次变化所在的区域。让开场的网站、账号、文件或任务对象持续出现，功能、费用与额度的变化随旁白逐步展开。流程使用简短的对象名和动作标签，先让观众看懂整体，再聚焦当前一步；概念说明贴着这一步出现。版本日期、热度作为辅助标签，收束时保留最值得记住的一处用法变化。
+  preferred_visuals:
+  - 重点卡
+  - 真实截图
+  - 关键数字
+status: configured
+notes: 围绕本期一个最值得关注的变化，开场就让观众知道自己的哪种用法受到影响。沿一个具体操作或任务结果讲清这次怎样改变，解释概念时继续使用开场的对象，让观众跟着同一个动作走。背景、原理和适用条件在帮助理解当前用法时进入，主要篇幅留给变化本身。收束时回到开场的任务，把最值得记住的那个新做法、选择或保持现状的理由留下来。标题说出具体看点，讲述顺序与节奏由作者选择。

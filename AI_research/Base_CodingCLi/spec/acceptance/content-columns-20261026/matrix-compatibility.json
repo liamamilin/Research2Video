@@ -1,0 +1,58 @@
+[
+  {
+    "matrix": "ai",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "ai_media",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "assistant_app_check",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "assistant_ops_check",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "company",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "consumer",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "culture",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "economy",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "geography",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "history",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "industry",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "science",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "software",
+    "research_fields_unchanged": true
+  },
+  {
+    "matrix": "tech",
+    "research_fields_unchanged": true
+  }
+]

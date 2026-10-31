@@ -9,9 +9,10 @@ from __future__ import annotations
 import json
 import re
 import threading
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -37,6 +38,7 @@ class _Paragraph(BaseModel):
 class _Section(BaseModel):
     title: str = Field(min_length=1)
     paragraphs: list[_Paragraph] = Field(min_length=1)
+    episode_role: Literal["opening", "item", "closing"] | None = None
 
 
 class _Script(BaseModel):
@@ -83,17 +85,38 @@ TOPIC_FIELDS = ("核心角度", "目标受众", "条目数", "条目", "对比�
 
 
 def _request(report: str, topic: dict, column_style: str, target_minutes: float, budget: int,
-             paragraph_units: Optional[tuple] = None, topic_fields: Optional[tuple] = None) -> str:
+             paragraph_units: Optional[tuple] = None, topic_fields: Optional[tuple] = None,
+             original_material: Optional[str] = None) -> str:
     report = report_body(report)
     fields = topic.get("fields") or {}
     names = set(topic_fields or TOPIC_FIELDS) - {"核心角度", "建议大纲", "评分", "条目数"}
     selected = "\n".join(f"- {name}：{value}" for name, value in fields.items() if name in names and name != "目标受众" and value)
     direction = f"## 这次想做的视频\n{column_style.strip()}\n\n" if column_style.strip() else ""
+    if topic.get("story"):
+        from core.video.story_pool import brief
+
+        direction += "## 已选主事件\n" + brief(topic["story"]) + "\n\n"
+    material = f"## 素材\n{report}"
+    if original_material is not None:
+        material = (
+            f"## 讲述节奏\n配方参考片长约 {target_minutes:g} 分钟，按栏目目标安排解释的深浅。"
+            "优先把主例子的关键动作、机制和结果讲清楚，片长作为节奏参考，不机械按字数压缩。\n\n"
+            "## 本期研究底稿\n" + report
+            + "\n\n## 对应原始材料\n" + (original_material or "本期沿用研究底稿，未附独立原始材料。")
+            + "\n\n## 创作衔接\n"
+            "结合底稿中的背景、关系与机制解释，以及原始材料的具体细节，围绕本期问题写完整口播。"
+            "让具体例子中的对象、操作过程与结果帮助观众理解；重要机制可以充分展开。"
+            "沿用上游给出的数据、计算和结论，把解释篇幅用在事情本身、过程与结果，研究备忘仅作内部取材背景。"
+            "底稿里的“需要核”“可拍任务”等备忘留在制作侧，口播直接讲已有内容，不安排下一轮核实或评测。"
+            "未取到资料的清单同样留在制作侧，正文用本期已有的结果与适用条件展开。"
+            "让同一个具体任务在中段持续推进，参数贴着它解释的作用出现，结尾回到任务的结果与本期形成的认识。"
+            "篇幅与顺序服务于理解，不按固定比例缩写底稿，也不逐节复述。"
+        )
     return (
         f"## 目标观众\n{fields.get('目标受众') or '普通观众'}\n\n"
         f"{direction}"
         f"## 选题\n{topic.get('title', '')}\n\n"
-        f"## 选题资料\n{selected}\n\n## 素材\n{report}"
+        f"## 选题资料\n{selected}\n\n{material}"
     )
 
 
@@ -135,7 +158,8 @@ def _finalize(script: _Script, allowed: set[str], target_minutes: float, voice: 
             paragraphs.append({"text": text, "citations": kept, "evidence": evidence, "note": note})
             if evidence == "NEEDS_REVIEW":
                 paragraphs[-1]["review_reason"] = para.review_reason.strip() or note or "撰稿时对本段事实把握不足，尚需带出处的明确核验"
-        sections.append({"title": section.title.strip(), "paragraphs": paragraphs})
+        sections.append({"title": section.title.strip(), "paragraphs": paragraphs,
+                         **({"episode_role": section.episode_role} if section.episode_role else {})})
     check = length.measure(sections, target_minutes, voice=voice)
     check["dropped_citations"] = dropped
     return sections, check
@@ -204,15 +228,24 @@ def write(
     topic_fields: Optional[tuple] = None,
     source_sheet: Optional[dict] = None,
     on_sheet: Optional[Callable[[dict], None]] = None,
+    original_material: Optional[str] = None,
 ) -> WrittenScript:
     """Write a complete first draft; validate only its transport shape."""
+    started = time.monotonic()
     from core.llm import LLMClient
     client = LLMClient(llm_config, cancel_token=cancel_token)
     report = report_body(report)
+    programme = topic.get("content_mode") == "episode"
+    system = (GOAL + "\n你是整期节目的讲述者，一篇总稿覆盖报告中的多个独立内容。"
+              "各条内容分别充分解释，不把本期多个事件缩成一个主事件的几个角度。"
+              "每个内容一个 section，内部可有多个 paragraphs；episode_role 使用 opening、item、closing。"
+              "整期共用开场和收尾，不受单条视频的篇幅限制。"
+              '\n输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}'
+              if programme else SYSTEM_PROMPT)
     messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": system},
         {"role": "user", "content": _request(report, topic, column_style, target_minutes, 0,
-                                              topic_fields=topic_fields)},
+                                              topic_fields=topic_fields, original_material=original_material)},
     ]
     response = client.chat(messages, temperature=0.4)
     attempts = 1
@@ -224,12 +257,22 @@ def write(
         response = client.chat(messages, temperature=0.4)
         script = _parse(response.content)
     allowed = trusted_urls(report, citation_check)
+    if original_material is not None:
+        allowed.update(trusted_urls(original_material, None))
     sections, check = _finalize(script, allowed, target_minutes, voice)
+    if programme:
+        check = {**length.measure(sections, None, voice=voice), "dropped_citations": check["dropped_citations"], "duration_policy": "content"}
+    from core.video import episodes
+    title = episodes.publication_title(topic, script.title.strip())
     return WrittenScript(
-        title=script.title.strip(),
+        title=title,
         sections=sections,
         length_check=check,
         meta={"attempts": attempts, "usage": dict(client.usage), "problems": [],
+              **({"authored_title": script.title.strip()} if title != script.title.strip() else {}),
+              "model": getattr(response, "model", "") or getattr(llm_config, "model", ""),
+              "model_switches": list(getattr(client, "model_switches", [])),
+              "duration_seconds": round(time.monotonic() - started, 3),
               "generation": "goal_first", "prompt_version": PROMPT_VERSION,
               "creative_direction": column_style.strip(),
               "trusted_urls": len(allowed)},

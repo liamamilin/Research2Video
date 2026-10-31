@@ -5,7 +5,7 @@ import copy
 import re
 
 FIELDS = {"production_recipe", "production_mode", "visual_style", "video_form", "voice_id",
-          "video_speed", "creative_intent", "packaging"}
+          "video_speed", "creative_intent", "packaging", "brand"}
 
 
 def inherit(defaults: dict, overrides: dict) -> dict:
@@ -23,7 +23,7 @@ def validate(value: dict | None) -> dict:
     if value is None:
         return {}
     if not isinstance(value, dict) or set(value) - FIELDS:
-        raise ValueError("render 只接受制作配方、档位、风格、形式、声音与包装设置")
+        raise ValueError("render 只接受制作配方、档位、风格、形式、声音、包装与品牌设置")
     result = copy.deepcopy(value)
     for field, allowed in (("production_mode", {"standard", "fast"}),
                            ("visual_style", {"legacy", "editorial_light"})):
@@ -36,6 +36,13 @@ def validate(value: dict | None) -> dict:
         raise ValueError("render.video_speed 无效")
     if "creative_intent" in result and not isinstance(result["creative_intent"], dict):
         raise ValueError("render.creative_intent 须为映射")
+    if "brand" in result:
+        brand = result["brand"]
+        if (not isinstance(brand, dict) or set(brand) - {"enabled", "profile"}
+                or not isinstance(brand.get("enabled", True), bool)
+                or (brand.get("enabled", True) and (not isinstance(brand.get("profile"), str)
+                    or not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", brand["profile"])) )):
+            raise ValueError("render.brand 须选择品牌 profile 或 enabled:false")
     if "packaging" in result:
         from .packaging import validate as validate_packaging
         result["packaging"] = validate_packaging(result["packaging"])

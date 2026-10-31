@@ -1,0 +1,77 @@
+{
+  "status": "PASS",
+  "brand_sha256": "8e8e766277b1d8553a00a1b068971ad023a039e10575198167446fd6b97c9465",
+  "profile": {
+    "id": "linthesis",
+    "name": "LINTHESIS",
+    "tagline": "From Thought to Form · 从思考到创造",
+    "accent": "#AD3523",
+    "background": "#F6F3ED",
+    "text": "#191B1A",
+    "outro_seconds": 6.0,
+    "assets": {
+      "logo": {
+        "file": "20b92f8055abe9bebaa9e2c2861c65eca4ea4ce6c2a1f76ff605b80cfd5d0aae.png",
+        "sha256": "20b92f8055abe9bebaa9e2c2861c65eca4ea4ce6c2a1f76ff605b80cfd5d0aae"
+      },
+      "sonic": {
+        "file": "048a764c265f8e1107d0ad44d9876f714f7f7b838fe1cae453700c5190f62c2e.wav",
+        "sha256": "048a764c265f8e1107d0ad44d9876f714f7f7b838fe1cae453700c5190f62c2e"
+      }
+    },
+    "intro_seconds": 0.0,
+    "corner_reveal_seconds": 0.6,
+    "apply_to_content": true,
+    "corner_tagline": true,
+    "cta": {
+      "enabled": true,
+      "message": "喜欢这期内容，欢迎",
+      "sound": true
+    }
+  },
+  "intro_seconds": 0.0,
+  "intro_sonic": {
+    "enabled": false
+  },
+  "content_seconds": 472.2,
+  "outro_seconds": 6.0,
+  "duration_seconds": 478.2,
+  "corner_reveal_seconds": 0.6,
+  "brand_card_seconds": 4.5,
+  "header_layout": {
+    "version": 1,
+    "left": 140,
+    "right": 140,
+    "top": 54,
+    "width": 520,
+    "height": 76,
+    "gap": 40
+  },
+  "cta": {
+    "enabled": true,
+    "seconds": 1.5,
+    "start_seconds": 472.2,
+    "actions": [
+      "like",
+      "save",
+      "follow"
+    ]
+  },
+  "sonic": {
+    "enabled": true,
+    "start_seconds": 473.9,
+    "duration_seconds": 4.2,
+    "peak": 0.345611572265625,
+    "cta_sound": {
+      "enabled": true,
+      "onsets_seconds": [
+        0.04,
+        0.16,
+        0.28
+      ]
+    }
+  },
+  "narration_shift_seconds": 0.0,
+  "decoded_all_streams": true,
+  "frames": 14346
+}

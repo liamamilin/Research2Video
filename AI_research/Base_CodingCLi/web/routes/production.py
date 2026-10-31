@@ -41,7 +41,13 @@ def list_configs(job: str = "", user=Depends(require_viewer)) -> list[dict]:
     paths = get_settings().paths
     configs = _all()
     made = outputs.count_by_config(paths.config_dir, paths.jobs_dir, configs=configs)
-    return [{**c.as_dict(), "scripts": made.get(c.key, 0)} for c in configs.values() if not job or c.job == job]
+    from core.video import content_columns
+    columns = content_columns.load_all(paths.config_dir, configs=configs)
+    owners = {pid: c for c in columns.values() if not c.errors for pid in c.production_ids}
+    return [{**c.as_dict(), "scripts": made.get(c.key, 0),
+             **({"content_column_id": owners[c.key].key, "content_column_name": owners[c.key].name,
+                 "content_matrix_id": owners[c.key].matrix} if c.key in owners else {})}
+            for c in configs.values() if not job or c.job == job]
 
 
 @router.get('/{key}/settings')
@@ -49,12 +55,14 @@ def config_settings(key: str, user=Depends(require_viewer)) -> dict:
     import hashlib
     from pathlib import Path
     from core import matrices
-    from core.video.production_settings import inherit
+    from core.video import content_columns
     config = _get(key)
     path = Path(production.directory(get_settings().paths.config_dir)) / (key + '.yaml')
     matrix = matrices.of_job(config.job, get_settings().paths.config_dir)
+    context = content_columns.snapshot(get_settings().paths.config_dir, key, config.job)
     return {**config.as_dict(), 'revision': hashlib.sha256(path.read_bytes()).hexdigest(),
-            'effective_render': inherit(matrix.render if matrix else {}, config.render)}
+            'content_context': context,
+            'effective_render': content_columns.render_settings(get_settings().paths.config_dir, matrix, context, config.render)}
 
 
 class RenderSettingsIn(BaseModel):
@@ -62,7 +70,7 @@ class RenderSettingsIn(BaseModel):
     expected_revision: str = Field(min_length=1)
     render: dict = Field(default_factory=dict)
     inherit: list[str] = Field(default_factory=list)
-    auto: int | None = Field(default=None, ge=0, le=10)
+    auto: int | None = Field(default=None, ge=0)
 
 
 @router.patch('/{key}/settings')
@@ -89,7 +97,13 @@ def update_render_settings(key: str, body: RenderSettingsIn, user=Depends(requir
             if body.render or body.inherit:
                 data['render'] = validate(inherit(overrides, patch))
             if body.auto is not None:
-                data['auto'] = body.auto
+                import time
+                if body.auto:
+                    data['auto_enabled_at'] = ((data.get('auto_enabled_at') or path.stat().st_mtime)
+                                               if data.get('auto') else time.time())
+                else:
+                    data.pop('auto_enabled_at', None)
+                data['auto'] = int(bool(body.auto))
             backup = yaml_io.save_backup(str(path), old)
             yaml_io.atomic_write(str(path), yaml_io.dump_yaml(data))
     except ValueError as exc:
@@ -128,7 +142,8 @@ def _whole_files(config: production.Config) -> list[tuple[str, str]]:
     from web.services import video_workflow
 
     paths = get_settings().paths
-    source = video_topic_store.whole_source(paths.jobs_dir, config.job)
+    source = (video_topic_store.resolve(paths.jobs_dir, config.job) or
+              video_topic_store.whole_source(paths.jobs_dir, config.job))
     if source is None or source.error:
         return []
     root = video_workflow.workspace_dir()
@@ -138,7 +153,18 @@ def _whole_files(config: production.Config) -> list[tuple[str, str]]:
 def _whole_reports(config: production.Config) -> list[dict]:
     return [{"date": date, "path": path, "written": bool(mine), "scripts": mine}
             for date, path in _whole_files(config)[:WHOLE_LISTED]
-            for mine in [[s for s in reports.scripts_of(path, config.recipe) if not s.get('archived')]]]
+            for mine in [_report_scripts(config, path)]]
+
+
+def _report_scripts(config, path):
+    if config.content_mode == "episode":
+        from core.video import episodes
+        from core import report_identity
+        from web.services.video_workflow import workspace_dir
+        import os
+        revision = report_identity.describe(os.path.join(workspace_dir(), path), workspace_dir())["id"]
+        return episodes.scripts_for(path, config.recipe, config.key, config.content_column_id, revision)
+    return [s for s in reports.scripts_of(path, config.recipe) if not s.get("archived")]
 
 
 class ConfigIn(BaseModel):
@@ -197,10 +223,9 @@ def set_auto(key: str, body: AutoIn, user=Depends(require_editor)) -> dict:
             raise _error(422, "config_broken", "；".join(config.errors))
         if config.split not in ("each", "whole"):
             raise _error(422, "auto_needs_each", "盘点一期要挑几条合成，不能自动写：自动只用于每条一期或整份报告一期的配方")
-        if config.split == "whole" and count != 1:
-            raise _error(422, "auto_count", "整份报告每份写一期，自动只能开或关")
-        if not 1 <= count <= production.MAX_AUTO:
-            raise _error(422, "auto_count", f"每次写 1 到 {production.MAX_AUTO} 条")
+        if count < 0:
+            raise _error(422, "auto_count", "auto 应是自动制作开关：1 开启，0 关闭")
+        count = 1
     paths = get_settings().paths
     production.set_auto(paths.config_dir, key, count)
     audit.log("production_auto", user=user["username"], target=key, details={"auto": count})
@@ -249,7 +274,7 @@ def write(key: str, body: WriteIn, request: Request, user=Depends(require_editor
     made, failed = [], []
     for ask in asks:
         try:
-            script = video.create_script(ask, request, user)
+            script = video.create_script(ask.model_copy(update={"production": config.key}), request, user)
         except HTTPException as exc:
             if not made:
                 raise
@@ -280,7 +305,7 @@ def _write_whole(config: production.Config, body: WriteIn, request: Request, use
         full = Path(video_workflow.workspace_dir()) / body.report_path
         if hashlib.sha256(full.read_bytes()).hexdigest() != body.report_sha256:
             raise _error(409, 'report_changed', '报告已经变化，请重新核对本次研究结果')
-    previous = [s for s in reports.scripts_of(body.report_path, config.recipe) if not s.get('archived')]
+    previous = _report_scripts(config, body.report_path)
     if previous and body.rewrite_existing:
         owned = [s for row in previous if (s := store.get_script(row['id']))
                  and s.get('production') == config.key and not s.get('archived')]
@@ -295,7 +320,8 @@ def _write_whole(config: production.Config, body: WriteIn, request: Request, use
     if previous:
         raise _error(409, "already_written", "这份报告已经用这套配置写过了")
     record = reports.record_file(body.report_path, job=config.job, created_by=user["username"])
-    script = video.create_script(video.ScriptCreateIn(column=config.recipe, report_id=record["id"]), request, user)
+    script = video.create_script(video.ScriptCreateIn(column=config.recipe, production=config.key,
+                                                    report_id=record["id"]), request, user)
     store.update_script(script["id"], production=config.key)
     audit.log("production_write", user=user["username"], target=config.key, details={"report": body.report_path})
     return [{**script, "production": config.key}]

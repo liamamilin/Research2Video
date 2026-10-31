@@ -129,6 +129,8 @@ def archive_renders(conf: dict, state_dir: str, renders: list[dict], *, dry_run:
     """Move the files of finished renders older than ``keep_days``. ``renders``: store.list_all_renders() rows."""
     local = Path(state_dir) / "video_renders"
     out = {"moved": 0, "bytes": 0, "kept": 0, "mirrored": 0, "failed": 0}
+    if local.is_symlink():
+        return out  # direct external storage already preserves these files
     for render in renders:
         folder = local / render["id"]
         if not folder.is_dir() or render["status"] not in TERMINAL_RENDER:
@@ -157,7 +159,7 @@ def archive_jobs(conf: dict, *, dry_run: bool) -> dict:
     data = Path(conf["autovideo_data"])
     jobs_dir = data / "jobs"
     out = {"moved": 0, "bytes": 0, "kept": 0, "mirrored": 0, "failed": 0}
-    if not conf["autovideo_data"] or not jobs_dir.is_dir():
+    if not conf["autovideo_data"] or not jobs_dir.is_dir() or jobs_dir.is_symlink():
         return out
     known: dict[str, tuple] = {}
     in_use: set[str] = set()
@@ -192,7 +194,7 @@ def archive_jobs(conf: dict, *, dry_run: bool) -> dict:
     return out
 
 
-def run(config_dir: str, state_dir: str, renders: list[dict], *, dry_run: bool = False) -> dict:
+def _run(config_dir: str, state_dir: str, renders: list[dict], *, dry_run: bool = False) -> dict:
     """One pass. Returns what it did (also written to ``<state>/video_archive.json``)."""
     conf = settings(config_dir)
     result: dict = {"at": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "dry_run": dry_run}
@@ -227,3 +229,13 @@ def restore_job(config_dir: str, job_id: str) -> bool:
     source = jobs_archive(conf["dir"]) / job_id
     dest = Path(conf["autovideo_data"]) / "jobs" / job_id
     return source.is_dir() and _rsync(source, dest)
+
+
+def run(config_dir: str, state_dir: str, renders: list[dict], *, dry_run: bool = False) -> dict:
+    """Serialize archive cleanup with a user-requested storage migration."""
+    from core.fileio import file_lock
+    try:
+        with file_lock(str(Path(state_dir) / "video_storage_migration.json") + ".worker", timeout=1):
+            return _run(config_dir, state_dir, renders, dry_run=dry_run)
+    except TimeoutError:
+        return {"skipped": "视频目录正在迁移"}

@@ -116,6 +116,14 @@ def report_sources(report: str, *, fallback: bool = False) -> list[dict]:
     return list(unique.values())
 
 
+def visual_sources(material: str) -> list[dict]:
+    """Include inline product/example links even when a bibliography is present."""
+    unique = {_key(entry["url"]): entry for entry in report_sources(material)}
+    for entry in _entries(material.splitlines()):
+        unique.setdefault(_key(entry["url"]), entry)
+    return list(unique.values())
+
+
 def _valid(match) -> str:
     try:
         date(int(match.group(1)), int(match.group(2)), int(match.group(3)))

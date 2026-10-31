@@ -1,0 +1,30 @@
+{
+  "job": "chatgpt_acquisition/t01_product",
+  "report": "output/chatgpt_acquisition/2026-10-27_t01_product.md",
+  "topics": [
+    {
+      "code": "CGA1",
+      "title": "把截图丢给 ChatGPT，它能读出什么？"
+    },
+    {
+      "code": "CGA2",
+      "title": "一份 20 页的 PDF，能不能直接问它重点？"
+    },
+    {
+      "code": "CGA3",
+      "title": "ChatGPT 知道今天发生的事吗？让它上网查给你看"
+    },
+    {
+      "code": "CGA4",
+      "title": "说一句“背景加个日落”，它就帮你改图"
+    },
+    {
+      "code": "CGA5",
+      "title": "让 ChatGPT 替你把一个复杂问题查成一份带引用的报告"
+    },
+    {
+      "code": "CGA6",
+      "title": "从一段对话到一套幻灯片，中间不用打开 PowerPoint"
+    }
+  ]
+}

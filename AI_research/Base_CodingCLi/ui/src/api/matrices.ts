@@ -53,6 +53,9 @@ export interface Matrix {
   archived?: boolean; // 收起来了：矩阵列表默认不显示，Job 和已有文稿都不动
   searches_this_month?: number; // 本月已用（只在设了上限的矩阵详情里有）
   render?: ProductionConfig["render"]; // 矩阵内视频的共用默认设置
+  content?: { name?: string; audience?: string; description?: string; role?: "domain" | "source" | "operations";
+    parent?: string; status?: "configured" | "planned"; visual_focus?: string[] };
+  content_summary?: { columns: number; configured: number; planned: number };
 }
 
 export interface MatrixFields {
@@ -62,10 +65,12 @@ export interface MatrixFields {
   jobs?: string[];
   monthly_searches?: number; // 不写是不动，0 是不限
   render?: ProductionConfig["render"];
+  content?: Matrix["content"];
 }
 
 export const listMatrices = (signal?: AbortSignal) => api<{ matrices: Matrix[]; ungrouped: { job: string; name: string }[] }>("/api/matrices", { signal });
-export const getMatrix = (key: string, signal?: AbortSignal) => api<Matrix>(`/api/matrices/${encodeURIComponent(key)}`, { signal });
+export const getMatrix = (key: string, signal?: AbortSignal, reports = true) =>
+  api<Matrix>(`/api/matrices/${encodeURIComponent(key)}`, { signal, query: reports ? undefined : { reports: "false" } });
 export const createMatrix = (body: MatrixFields & { key: string }) => api<Matrix>("/api/matrices", { method: "POST", body });
 export const updateMatrix = (key: string, body: MatrixFields) =>
   api<Matrix>(`/api/matrices/${encodeURIComponent(key)}`, { method: "PUT", body });

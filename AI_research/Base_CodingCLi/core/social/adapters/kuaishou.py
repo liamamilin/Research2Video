@@ -23,8 +23,9 @@ from types import ModuleType
 from typing import Any
 from urllib.parse import urlsplit
 
-from core.social.adapter import AdapterError
+from core.social.adapter import AdapterError, UploadPreparationError
 from core.social.verification import asset_fingerprints, protect_context, receipt, select_work, timestamp
+from core.social.verification import lookup_diagnostics
 
 
 SOURCE_SHA256 = "fc97d1f83aa0d531284365d2e54a6e043bef420f8b8088b3e90b9ed785326c66"
@@ -175,6 +176,28 @@ def work_records(data: Any, owner_id: str, target: str = '') -> list[dict]:
     return records
 
 
+async def _read_more_works(page: Any, records: list[dict], errors: list[Exception]) -> bool:
+    """The creator list uses infinite scroll; observe its next signed list request."""
+    count = len(records)
+    try:
+        await page.evaluate("""() => {
+          const nodes = [document.scrollingElement, ...document.querySelectorAll('*')];
+          for (const node of nodes) {
+            if (node && node.scrollHeight > node.clientHeight + 100 &&
+                (node === document.scrollingElement || /auto|scroll/.test(getComputedStyle(node).overflowY))) {
+              node.scrollTop = node.scrollHeight;
+            }
+          }
+        }""")
+        for _ in range(12):
+            await page.wait_for_timeout(250)
+            if len(records) > count or errors:
+                break
+    except Exception:
+        return False
+    return len(records) > count
+
+
 def _isolated_upstream() -> ModuleType:
     """Load the verified source into private globals; never mutate the shared uploader."""
     try:
@@ -207,7 +230,7 @@ async def _select_video_file(page: Any, path: str) -> None:
     inputs = page.locator('input[type="file"]')
     with suppress(Exception):
         # The creator SPA mounts its uploader after account/config requests.
-        await inputs.first.wait_for(state='attached', timeout=25000)
+        await inputs.first.wait_for(state='attached', timeout=60000)
     videos = []
     generic = []
     for index in range(await inputs.count()):
@@ -224,13 +247,25 @@ async def _select_video_file(page: Any, path: str) -> None:
         await generic[0].set_input_files(path)
         return
     if len(videos) > 1:
-        raise AdapterError('快手页面存在多个视频上传入口，已停止选择，避免误传。')
+        raise UploadPreparationError('快手页面存在多个视频上传入口，已停止选择，避免误传。')
     button = page.get_by_role('button', name=re.compile(r'^(?:上传视频|选择视频|选择文件|点击上传|上传文件|本地上传)$'))
     if await button.count() != 1:
-        raise AdapterError('未找到唯一的快手视频上传入口，请核对创作中心页面。')
+        if await page.get_by_text('应用加载失败', exact=False).count():
+            raise UploadPreparationError('快手上传页面应用加载失败，视频尚未上传、未点击发布；请稍后重试原任务。')
+        raise UploadPreparationError('未找到唯一的快手视频上传入口，视频尚未上传；请核对创作中心页面。')
     async with page.expect_file_chooser() as captured:
         await button.click(timeout=10000)
     await (await captured.value).set_files(path)
+
+
+async def _set_cover(app: Any, page: Any) -> None:
+    """The cover is an extra: if the dialog misbehaves, close it and keep the platform's own frame."""
+    try:
+        await app.set_thumbnail(page)
+    except Exception:
+        with suppress(Exception):
+            await page.keyboard.press('Escape')
+            await page.wait_for_timeout(1000)
 
 
 async def _upload_video(app: Any, module: ModuleType, playwright: Any) -> None:
@@ -239,34 +274,33 @@ async def _upload_video(app: Any, module: ModuleType, playwright: Any) -> None:
     browser = await playwright.chromium.launch(headless=app.headless)
     context = None
     try:
-        context = await browser.new_context(storage_state=app.account_file)
-        context = await module.set_init_script(context)
-        page = await context.new_page()
-        await page.goto(module.KUAISHOU_UPLOAD_URL, wait_until='domcontentloaded', timeout=45000)
-        await page.wait_for_url(module.KUAISHOU_UPLOAD_URL_PATTERN, timeout=15000)
-        await _select_video_file(page, app.file_path)
-        await app.close_guide_overlay(page)
-        await module._focus_desc_editor(page)
-        await page.keyboard.press('Meta+A' if sys.platform == 'darwin' else 'Control+A')
-        await page.keyboard.press('Backspace')
-        await page.keyboard.type(app.desc or app.title)
-        await page.keyboard.press('Enter')
-        for tag in app.tags:
-            await page.keyboard.type(f'#{tag} ')
-            await page.wait_for_timeout(2000)
-        deadline = asyncio.get_running_loop().time() + module.KUAISHOU_UPLOAD_TIMEOUT_SECONDS
-        while await page.get_by_text('上传中', exact=False).count():
-            if await page.get_by_text('上传失败', exact=False).count():
-                raise AdapterError('快手视频素材上传失败，未点击发布；请核对网络和文件格式。')
-            if asyncio.get_running_loop().time() > deadline:
-                raise AdapterError('快手视频素材上传超时，未点击发布。')
-            await page.wait_for_timeout(1000)
-        if await page.get_by_text('上传失败', exact=False).count():
-            raise AdapterError('快手视频素材上传失败，未点击发布；请核对网络和文件格式。')
-        # The first-run guide may mount only after the asset finishes uploading.
-        await app.close_guide_overlay(page)
-        await app.set_thumbnail(page)
-        await app.apply_collection(page)
+        try:
+            context = await browser.new_context(storage_state=app.account_file)
+            context = await module.set_init_script(context)
+            page = await context.new_page()
+            await page.goto(module.KUAISHOU_UPLOAD_URL, wait_until='domcontentloaded', timeout=45000)
+            await page.wait_for_url(module.KUAISHOU_UPLOAD_URL_PATTERN, timeout=15000)
+            await _select_video_file(page, app.file_path)
+            await app.close_guide_overlay(page)
+            await module._focus_desc_editor(page)
+            await page.keyboard.press('Meta+A' if sys.platform == 'darwin' else 'Control+A')
+            await page.keyboard.press('Backspace')
+            await page.keyboard.type(app.desc or app.title)
+            await page.keyboard.press('Enter')
+            for tag in app.tags:
+                await page.keyboard.type(f'#{tag} ')
+                await page.wait_for_timeout(2000)
+            await _wait_for_video_upload(page, module.KUAISHOU_UPLOAD_TIMEOUT_SECONDS)
+            # The first-run guide can mount after the asset finishes uploading.
+            await app.close_guide_overlay(page)
+            await _set_cover(app, page)
+            await app.apply_collection(page)
+        except UploadPreparationError:
+            raise
+        except AdapterError as error:
+            raise UploadPreparationError(str(error)) from error
+        except Exception as error:
+            raise UploadPreparationError('快手上传准备未完成，尚未点击发布；可重试原任务。') from error
         await _publish_once(page, module)
         await page.wait_for_url(module.KUAISHOU_MANAGE_URL_PATTERN, timeout=15000)
     finally:
@@ -275,6 +309,26 @@ async def _upload_video(app: Any, module: ModuleType, playwright: Any) -> None:
                 await context.close()
         with suppress(Exception):
             await browser.close()
+
+
+async def _wait_for_video_upload(page: Any, timeout: float) -> None:
+    """Observe visible progress; hidden upload labels must not keep a finished video waiting."""
+    async def visible(text: str) -> bool:
+        matches = page.get_by_text(text, exact=False)
+        for index in range(await matches.count()):
+            if await matches.nth(index).is_visible():
+                return True
+        return False
+
+    deadline = asyncio.get_running_loop().time() + timeout
+    while True:
+        if await visible('上传失败'):
+            raise UploadPreparationError('快手视频素材上传失败，未点击发布；请核对网络和文件格式。')
+        if not await visible('上传中'):
+            return
+        if asyncio.get_running_loop().time() >= deadline:
+            raise UploadPreparationError('快手视频素材上传超时，未点击发布。')
+        await page.wait_for_timeout(1000)
 
 
 async def _publish_once(page: Any, module: ModuleType) -> None:
@@ -520,7 +574,18 @@ class KuaishouAdapter:
             if not loaded:
                 raise AdapterError('暂未取得快手作品列表，请核对平台登录；系统会自动重查。')
             selected, reason = select_work(records, lookup)
-            return receipt(self.key, owner_id, selected, reason)
+            for _ in range(8):
+                if selected or reason == 'ambiguous' or not await _read_more_works(page, records, errors):
+                    break
+                if tasks:
+                    await asyncio.gather(*tasks)
+                if errors:
+                    raise AdapterError('快手后续作品列表未能读取，原投稿保留，将稍后核对。')
+                selected, reason = select_work(records, lookup)
+            if not selected and reason == 'missing':
+                # Only after every page is read can a time/duration match be known to be the only fit.
+                selected, reason = select_work(records, lookup, metadata_match=True)
+            return {**receipt(self.key, owner_id, selected, reason), 'lookup_diagnostics': lookup_diagnostics(records, lookup)}
         except AdapterError:
             raise
         except Exception:

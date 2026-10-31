@@ -1,0 +1,258 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: education_concepts
+  name: 从例子进入概念
+  title_pattern: 第一次接触{概念}，怎样用一个具体例子理解它？
+  outline:
+  - 呈现一个具体学习疑问
+  - 用例子说明关键关系
+  - 对照相近概念
+  - 让观众试着迁移解释
+  examples: &id001
+  - title: Concept Mapping – Learning Strategies Center
+    url: https://lsc.cornell.edu/how-to-study/concept-maps
+    summary: 用概念图展示知识点怎样连接，借鉴从零散事实到关系理解的讲法。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: education_concepts
+  name: 把知识连起来
+  title_pattern: '{几个知识点}怎样连成一张能用的关系图？'
+  outline:
+  - 呈现一个具体学习疑问
+  - 对照同一问题中的对象与选择
+  - 用例子说明关键关系
+  - 对照相近概念
+  - 让观众试着迁移解释
+  examples: *id001
+- category: education_concepts
+  name: 相似概念怎么区分
+  title_pattern: '{概念A}和{概念B}看起来相近，区别体现在哪个问题上？'
+  outline:
+  - 呈现一个具体学习疑问
+  - 用例子说明关键关系
+  - 沿一个具体案例推进解释
+  - 对照相近概念
+  - 让观众试着迁移解释
+  examples: *id001
+- category: education_memory
+  name: 复习动作的选择
+  title_pattern: 复习{学习材料}时，怎样从重看变成主动回想？
+  outline:
+  - 给出一份具体学习材料
+  - 演示回想与复习动作
+  - 安排后续间隔和练习
+  - 展示如何判断下一步
+  examples: &id002
+  - title: Effective Study Strategies – Learning Strategies Center
+    url: https://lsc.cornell.edu/how-to-study/studying-for-and-taking-exams/effective-study-strategies
+    summary: 从具体复习动作对照提取、间隔和交错等学习方式。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: education_memory
+  name: 安排下一次复习
+  title_pattern: 学完{知识单元}后，下一次复习怎样安排？
+  outline:
+  - 给出一份具体学习材料
+  - 对照同一问题中的对象与选择
+  - 演示回想与复习动作
+  - 安排后续间隔和练习
+  - 展示如何判断下一步
+  examples: *id002
+- category: education_memory
+  name: 一种材料两种复习
+  title_pattern: 同一份{材料}，{复习方式A}与{复习方式B}分别在做什么？
+  outline:
+  - 给出一份具体学习材料
+  - 演示回想与复习动作
+  - 沿一个具体案例推进解释
+  - 安排后续间隔和练习
+  - 展示如何判断下一步
+  examples: *id002
+- category: education_practice
+  name: 从做完到练会
+  title_pattern: 练习{技能}时，怎样知道自己哪一步需要改？
+  outline:
+  - 明确一个小技能目标
+  - 展示一次真实操作
+  - 把反馈对应到具体动作
+  - 安排下一轮练习
+  examples: &id003
+  - title: Learning Principles - Eberly Center - Carnegie Mellon University
+    url: https://www.cmu.edu/teaching/principles/learning.html
+    summary: 把明确目标、练习、反馈与学习迁移放在实际学习任务中说明。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: education_practice
+  name: 拆小一个难点
+  title_pattern: 总卡在{具体步骤}，可以怎样拆成一次小练习？
+  outline:
+  - 明确一个小技能目标
+  - 对照同一问题中的对象与选择
+  - 展示一次真实操作
+  - 把反馈对应到具体动作
+  - 安排下一轮练习
+  examples: *id003
+- category: education_practice
+  name: 反馈接进下一次
+  title_pattern: 收到{反馈}之后，下一轮{练习}具体改什么？
+  outline:
+  - 明确一个小技能目标
+  - 展示一次真实操作
+  - 沿一个具体案例推进解释
+  - 把反馈对应到具体动作
+  - 安排下一轮练习
+  examples: *id003
+- category: education_reading
+  name: 读前先找问题
+  title_pattern: 面对一篇{材料}，开始读之前先明确什么？
+  outline:
+  - 说明阅读目的
+  - 展示读前结构观察
+  - 跟随一个问题阅读
+  - 用自己的表达收拢理解
+  examples: &id004
+  - title: 3 P’s for Effective Reading – Learning Strategies Center
+    url: https://lsc.cornell.edu/how-to-study/reading-strategies/3-ps-for-effective-reading
+    summary: 用读前、阅读中和读后的动作组织一个可照着完成的阅读任务。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: education_reading
+  name: 读完留下什么
+  title_pattern: 读完{章节}后，怎样把内容变成自己的理解？
+  outline:
+  - 说明阅读目的
+  - 对照同一问题中的对象与选择
+  - 展示读前结构观察
+  - 跟随一个问题阅读
+  - 用自己的表达收拢理解
+  examples: *id004
+- category: education_reading
+  name: 难材料怎么进入
+  title_pattern: 读{较难材料}总停住，怎样改变阅读的顺序和动作？
+  outline:
+  - 说明阅读目的
+  - 展示读前结构观察
+  - 沿一个具体案例推进解释
+  - 跟随一个问题阅读
+  - 用自己的表达收拢理解
+  examples: *id004
+- category: education_planning
+  name: 从目标排到一周
+  title_pattern: 想完成{学习目标}，这一周怎样安排具体任务？
+  outline:
+  - 明确阶段目标和现实时间
+  - 拆成可完成的任务
+  - 安排一周具体位置
+  - 根据完成情况调整
+  examples: &id005
+  - title: Managing Time – Learning Strategies Center
+    url: https://lsc.cornell.edu/managing-time
+    summary: 从一周实际可用时间和任务安排切入学习计划。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: education_planning
+  name: 计划遇到变化
+  title_pattern: '{原计划}被打断后，怎样重新排出下一步？'
+  outline:
+  - 明确阶段目标和现实时间
+  - 对照同一问题中的对象与选择
+  - 拆成可完成的任务
+  - 安排一周具体位置
+  - 根据完成情况调整
+  examples: *id005
+- category: education_planning
+  name: 坚持一个小动作
+  title_pattern: 学习{技能}时，怎样把{小动作}接进日常情境？
+  outline:
+  - 明确阶段目标和现实时间
+  - 拆成可完成的任务
+  - 沿一个具体案例推进解释
+  - 安排一周具体位置
+  - 根据完成情况调整
+  examples: *id005
+- category: education_notes
+  name: 一页笔记怎么用
+  title_pattern: 学习{内容}时，一页笔记怎样同时帮助记录和回想？
+  outline:
+  - 拿出一页具体材料
+  - 展示记录与提问区域
+  - 演示回顾和重新组织
+  - 接到下一次使用
+  examples: &id006
+  - title: The Cornell Note Taking System – Learning Strategies Center
+    url: https://lsc.cornell.edu/how-to-study/taking-notes/cornell-note-taking-system
+    summary: 通过一页具体笔记展示记录、提问和回顾怎样衔接。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: education_notes
+  name: 零散记录再组织
+  title_pattern: 已经有一堆{记录}，怎样整理成回答问题的材料？
+  outline:
+  - 拿出一页具体材料
+  - 对照同一问题中的对象与选择
+  - 展示记录与提问区域
+  - 演示回顾和重新组织
+  - 接到下一次使用
+  examples: *id006
+- category: education_notes
+  name: 记完接着做什么
+  title_pattern: 写下{笔记}之后，怎样用它完成下一次学习任务？
+  outline:
+  - 拿出一页具体材料
+  - 展示记录与提问区域
+  - 沿一个具体案例推进解释
+  - 演示回顾和重新组织
+  - 接到下一次使用
+  examples: *id006
+- category: education_expression
+  name: 从材料到大纲
+  title_pattern: 准备写{文章或报告}，怎样把已有材料排成清楚的大纲？
+  outline:
+  - 明确读者和表达目的
+  - 用问题排列已有材料
+  - 形成一段可读表达
+  - 按沟通效果修改
+  examples: &id007
+  - title: How to Outline - Purdue OWL® - Purdue University
+    url: https://owl.purdue.edu/owl/general_writing/the_writing_process/developing_an_outline/how_to_outline.html
+    summary: 从一个写作目标出发，用大纲组织观点和材料。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: education_expression
+  name: 解释给别人听
+  title_pattern: 想讲清{概念或观点}，从哪个具体问题开始？
+  outline:
+  - 明确读者和表达目的
+  - 对照同一问题中的对象与选择
+  - 用问题排列已有材料
+  - 形成一段可读表达
+  - 按沟通效果修改
+  examples: *id007
+- category: education_expression
+  name: 第一版怎么改
+  title_pattern: '{初稿}写出来以后，怎样改顺观点与材料的关系？'
+  outline:
+  - 明确读者和表达目的
+  - 用问题排列已有材料
+  - 沿一个具体案例推进解释
+  - 形成一段可读表达
+  - 按沟通效果修改
+  examples: *id007
+- category: education_tools
+  name: 完成一条资料流程
+  title_pattern: 用{工具}完成{学习任务}，从输入到结果怎样做？
+  outline:
+  - 说明一个具体学习任务
+  - 准备输入材料和工具
+  - 连续演示关键动作
+  - 展示产物和复用办法
+  examples: &id008
+  - title: The Basics | Zotero Documentation
+    url: https://www.zotero.org/support/quick_start_guide
+    summary: 借鉴以收集、整理和引用资料为连续任务的工具教程结构。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: education_tools
+  name: 工具该选哪一种
+  title_pattern: 主要学习{内容}，{工具A}和{工具B}各适合哪一环？
+  outline:
+  - 说明一个具体学习任务
+  - 对照同一问题中的对象与选择
+  - 准备输入材料和工具
+  - 连续演示关键动作
+  - 展示产物和复用办法
+  examples: *id008
+- category: education_tools
+  name: 减少重复操作
+  title_pattern: 整理{学习资料}时，哪一步可以换成更顺手的工具流程？
+  outline:
+  - 说明一个具体学习任务
+  - 准备输入材料和工具
+  - 沿一个具体案例推进解释
+  - 连续演示关键动作
+  - 展示产物和复用办法
+  examples: *id008

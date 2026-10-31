@@ -28,7 +28,7 @@ from core.config import load_system_config
 from core.llm import LLMConfig
 from core.state import StateManager
 from core.video import columns as video_columns
-from core.video import content_guard, length, store, writer
+from core.video import content_guard, length, research_dossier, store, story_pool, writer
 from core.video import plans as video_plans
 from core.video.adapt import draft as adapt_draft
 from core.video.adapt import facts as adapt_facts
@@ -76,7 +76,8 @@ def report_of(script: dict, report_path: str = "") -> str:
     if not topic.get("from_item"):
         return text
     part = excerpt.item_excerpt(text, topic.get("from_item_title") or topic.get("title") or "",
-                                summary=(topic.get("fields") or {}).get("一句话") or "")
+                                summary=(topic.get("fields") or {}).get("一句话") or "",
+                                include_nested=research_dossier.enabled(script))
     if part is None:
         raise OSError(f"报告里找不到条目「{topic.get('title')}」，没法只用它那一节写稿")
     return part
@@ -115,7 +116,7 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
     prompt = fill_topic(column.research_prompt, column, topic)
     name = research_job_name(column.key, script_id).split("/", 1)[1]
     keywords = [k for k in re.split(r"[：:，,、]", topic.get("title", "")) if k.strip()][:5]
-    return {
+    spec = {
         "name": name,
         "description": f"{column.name}：{topic.get('title', '')}"[:200],
         "enabled": True,
@@ -126,6 +127,9 @@ def job_spec(column: video_columns.Column, topic: dict, script_id: str) -> dict:
         "prompt": prompt,
         "output": f"output/{JOB_CATEGORY}/{{datetime}}_{name}.md",
     }
+    if topic.get("theme_research"):
+        spec.update(topic["theme_research"])
+    return spec
 
 
 def start(column_key: str, topic: dict, started_by: str) -> dict:
@@ -133,9 +137,24 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     settings = get_settings()
     column = video_columns.for_new_script(settings.paths.config_dir, column_key)
     fields = topic.setdefault("fields", {})
+    explicit_audience = bool((fields.get("目标受众") or "").strip())
     if column.audience and not (fields.get("目标受众") or "").strip():
         fields["目标受众"] = column.audience  # a topic that names no audience is for the cell's
-    script = store.create_script(column.key, topic, created_by=started_by)
+    from core.video import content_columns, production
+    topic = dict(topic)
+    production_id = topic.pop("_production", "") or topic.get("article_production", "")
+    config = production.get(settings.paths.config_dir, settings.paths.jobs_dir, production_id) if production_id else None
+    context = content_columns.snapshot(settings.paths.config_dir, production_id, config.job) if config else {}
+    context = topic.pop("_content_context", None) or context
+    from core.video import episodes
+    context = episodes.snapshot_context(context, topic)
+    topic = episodes.publication_topic(topic, context)
+    if context.get("audience") and not explicit_audience:
+        fields["目标受众"] = context["audience"]
+    if started_by not in content_guard.SAMPLE_CREATORS and not episodes.enabled(topic):
+        topic = content_guard.new_topic(topic, context, settings.paths.config_dir, settings.paths.jobs_dir)
+    script = store.create_script(column.key, topic, created_by=started_by,
+                                 production=production_id, content_context=context)
     if topic.get("article"):
         store.update_script(script["id"], status="WRITING", production=topic.get("article_production", ""))
     spawn(script["id"], started_by)
@@ -168,6 +187,10 @@ def run(script_id: str, *, started_by: str = "", llm_config: Optional[LLMConfig]
         return "FAILED"
     finally:
         _active.discard(script_id)
+        try:
+            story_pool.reconcile()
+        except Exception:  # recovery must not hide the author's original result
+            logger.exception("video event reservations could not be reconciled")
 
 
 def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> str:
@@ -191,7 +214,7 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     # 1. Research: an ordinary job, unless the topic comes with a report already (a short video cut from a longer
     # one is written from that one's research, its sources and citation check).
     report_path = topic.get("from_report") or script["report_path"] or ""
-    if not report_path and column.research_mode == "none":
+    if not report_path and column.research_mode == "none" and not topic.get("theme_research"):
         store.update_script(script_id, status="FAILED",
                             error=f"配方 {column.key} 不做调研（research.mode: none），选题要带上研究报告")
         return "FAILED"
@@ -254,8 +277,15 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     settings = get_settings()
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
-    script = content_guard.with_policy(store.get_script(script_id))
-    guarded = bool(script["topic"].get("matrix_dedup"))
+    script = content_guard.with_policy(store.get_script(script_id), settings.paths.jobs_dir)
+    from core.video.content_columns import apply_script_context
+    column = apply_script_context(column, script.get("content_context") or {})
+    from core.video import episodes
+    is_episode = episodes.enabled(topic)
+    joint_input = is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
+    dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
+    guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
+    config, review_config = _llm_configs(llm_config, column)
     dedup_meta, filtered_material = {}, ""
     if guarded:
         store.update_script(script_id, topic=script["topic"])
@@ -264,12 +294,51 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         full_path = report_path if os.path.isabs(report_path) else os.path.join(workspace_dir(), report_path)
         original = report_material.read(reference, full_path, _read_report(report_path)) if reference else ""
         try:
-            report, filtered_material, dedup_meta = content_guard.prepare(
-                script, report, original, settings.paths.config_dir, settings.paths.jobs_dir)
+            if story_pool.enabled(topic):
+                store.update_script(script_id, stage="选题")
+                key = content_guard.scope(topic["matrix_dedup"]["job"], settings.paths.config_dir)
+                story_pool.reconcile()
+                peers = content_guard.coverage(topic, settings.paths.config_dir, settings.paths.jobs_dir, script_id=script_id)
+                peers += story_pool.reservations(key, script_id)
+                if script["current_version"] and topic.get("story"):
+                    story = topic["story"]
+                    pool = story_pool.get(story["pool_id"])
+                else:
+                    if topic.get("from_item") and original:
+                        # A flash item cannot wander into another item from its feed.
+                        selected = content_guard.sources(report)
+                        original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original)
+                                                                 if content_guard.sources(p["text"]) & selected)
+                    selection_report = research_dossier.selection_brief(report, script)
+                    pool = story_pool.load_or_create(key, selection_report, original, peers, config)
+                    story, _ = story_pool.take(script_id, pool, peers)
+                topic = {**topic, "title": story["title"], "story": story}
+                script = {**script, "topic": topic}
+                filtered_material = story_pool.material_for(pool, story)
+                if joint_input:
+                    dossier_report, dossier_selection = research_dossier.select_report(dossier_report, story, pool, script)
+                    if dossier_selection == "column_explanation":
+                        selected = content_guard.sources(dossier_report)
+                        related = [packet["text"] for packet in pool["packets"]
+                                   if content_guard.sources(packet["text"]) & selected]
+                        filtered_material = "\n\n---\n\n".join(related) or filtered_material
+                report = story_pool.brief(story) + "\n\n" + filtered_material
+                dedup_meta = story_pool.selection(script_id)
+                # News keeps the selected event as its writing scope. A coherent
+                # domain explainer follows its completed dossier main question;
+                # the stored event and coverage reservation remain unchanged.
+                if dossier_selection != "column_explanation":
+                    column = replace(column, script_style=column.script_style + "\n" + story_pool.brief(story))
+            else:
+                report, filtered_material, dedup_meta = content_guard.prepare(
+                    script, report, original, settings.paths.config_dir, settings.paths.jobs_dir)
+                dossier_report = report
+        except story_pool.NoCandidate as exc:
+            peers = [{"script_id": d["peer_id"], "title": d["title"]} for d in exc.decisions if d["peer_id"]]
+            return _duplicate_script(script_id, content_guard.DuplicateContent(peers, str(exc)), failed_status)
         except content_guard.DuplicateContent as exc:
             return _duplicate_script(script_id, exc, failed_status)
-    config, review_config = _llm_configs(llm_config, column)
-    if column.writer == "adapt":
+    if column.writer == "adapt" and not is_episode:
         if guarded and filtered_material:
             report, citation_check = filtered_material, None
         try:
@@ -308,7 +377,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                     if material_ref else "")
         if guarded:
             material = filtered_material
-        if topic.get("from_item") and material:
+        if topic.get("from_item") and material and not topic.get("story"):
             # A discovered topic is one item, not the entire feed. Keep the
             # original blocks that contain its links, with its selected context.
             from core.provenance import extract_urls, normalize_url
@@ -317,11 +386,16 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             parts = [part for part in material.split("\n\n---\n\n")
                      if urls & {normalize_url(url) for url in extract_urls(part)}]
             material = "\n\n---\n\n".join(parts)
+        writing_topic = topic
+        if dossier_selection == "column_explanation":
+            question = re.search(r"(?m)^##\s+本期主问题[：:]\s*(.+)$", dossier_report)
+            writing_topic = {key: value for key, value in topic.items() if key != "story"}
+            writing_topic["title"] = question.group(1).strip()
         written = writer.write(
-            report=material or report,
+            report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
-            topic=topic,
-            column_style=column.script_style + (
+            topic=writing_topic,
+            column_style=column.script_style + episodes.brief(topic) + (
                 "\n本矩阵近期已经讲过以下选题，请从剩余素材选择新选题，标题、开场和正文都不要复述："
                 + "；".join(p["title"] for p in dedup_meta.get("peers", [])) if dedup_meta.get("peers") else ""),
             target_minutes=column.target_minutes,
@@ -329,13 +403,21 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             voice=column.voice_id or None,
             paragraph_units=tuple(column.paragraph_units),
             topic_fields=column.writer_topic_fields(),
+            **({"original_material": material} if joint_input else {}),
         )
-        written.meta["input_kind"] = "original_material" if material else "report"
+        if is_episode:
+            written.meta["episode"] = episodes.manifest(topic, written.sections)
+        written.meta["input_kind"] = ("report_and_original_material" if joint_input and material
+                                      else "original_material" if material else "report")
+        if joint_input:
+            written.meta["research_dossier"] = research_dossier.receipt(dossier_report, material, dossier_selection)
         if material:
             written.meta["material"] = material_ref
         if guarded:
             content_guard.check(script, written.sections, settings.paths.config_dir, settings.paths.jobs_dir)
             written.meta["content_dedup"] = dedup_meta
+        if topic.get("story"):
+            written.meta["story"] = topic["story"]
     except content_guard.DuplicateContent as exc:
         return _duplicate_script(script_id, exc, failed_status)
     except writer.ScriptError as exc:
@@ -352,6 +434,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         edit_type="GENERATED",
         meta={**meta, "checks": adapt_review.unrequested()},
         created_by=started_by,
+        story_claim=(topic.get("story") or {}).get("event_key", ""),
     )
     store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"
@@ -658,7 +741,7 @@ def _adapt_version(script_id: str, *, report: str, report_path: str, citation_ch
         on_stage=lambda name: store.update_script(script_id, stage=name),
     )
     paths = get_settings().paths
-    content_guard.check(content_guard.with_policy(store.get_script(script_id)), adapted.sections,
+    content_guard.check(content_guard.with_policy(store.get_script(script_id), paths.jobs_dir), adapted.sections,
                         paths.config_dir, paths.jobs_dir)
     return store.add_version(
         script_id,
@@ -667,8 +750,10 @@ def _adapt_version(script_id: str, *, report: str, report_path: str, citation_ch
         length_check=adapted.length_check,
         edit_type="GENERATED",
         meta={**adapted.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-              "cell": video_columns.provenance(get_settings().paths.config_dir, column.key)},
+              "cell": video_columns.provenance(get_settings().paths.config_dir, column.key),
+              **({"story": topic["story"], "content_dedup": story_pool.selection(script_id)} if topic.get("story") else {})},
         created_by=started_by,
+        story_claim=(topic.get("story") or {}).get("event_key", ""),
     )
 
 
@@ -1017,6 +1102,7 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
     clean = [
         {
             "title": str(s.get("title") or "").strip(),
+            **({"episode_role": s["episode_role"]} if s.get("episode_role") else {}),
             "paragraphs": [
                 {
                     "text": str(p.get("text") or "").strip(),
@@ -1060,6 +1146,9 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
                                     plan=plan, sheet=sheet, style=style)
         meta = {"problems": writer.lint(clean),
                 "checks": _rules_only(issues, plan, clean, model_checks_stale=True)}
+    from core.video import episodes
+    if episodes.enabled(script.get("topic") or {}):
+        meta["episode"] = episodes.manifest(script["topic"], clean)
     budgets = None
     if sheet:
         meta.update({k: base_meta.get(k) for k in ("writer", "style", "prompts", "fact_sheet_id", "plan",
@@ -1070,7 +1159,7 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
         script_id,
         title=title.strip(),
         sections=clean,
-        length_check=length.measure(clean, None if base_meta.get("article") else column.target_minutes,
+        length_check=length.measure(clean, None if base_meta.get("article") or episodes.enabled(script.get("topic") or {}) else column.target_minutes,
                                     section_budgets=budgets, voice=column.voice_id),
         edit_type="EDITED",
         meta=meta,

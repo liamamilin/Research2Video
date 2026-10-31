@@ -25,6 +25,16 @@ const titles = () => screen.getAllByRole("listitem").map((li) => li.getAttribute
 const selectAI = async () => { fireEvent.click(await screen.findByRole("button", { name: "查看矩阵 AI 矩阵 的产出" })); };
 
 describe("Outputs", () => {
+  it("keeps multiple programme contents inside one output card and one video link", async () => {
+    const body = { ...DATA, scripts: [{ ...DATA.scripts[0], content_mode: "episode", episode_items: ["端侧长会话", "模型成本变化"] }] };
+    vi.mocked(fetch).mockResolvedValue(response(body));
+    open("/outputs?matrix=ai");
+    const row = await screen.findByLabelText("文稿 新的一篇");
+    expect(within(row).getByText("整期节目 · 2 个内容 · 端侧长会话 / 模型成本变化")).toBeTruthy();
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
+    expect(within(row).getByRole("link", { name: "查看成片：新的一篇" }).getAttribute("href")).toBe("/video/a?tab=video");
+  });
+
   it("retries failed reads, then preserves the result if a later refresh fails", async () => {
     vi.mocked(fetch).mockRejectedValueOnce(new TypeError("offline"));
     open();

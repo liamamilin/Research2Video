@@ -93,3 +93,29 @@ describe("ReportToVideo", () => {
     expect(screen.queryByLabelText("写成哪种视频")).toBeNull();
   });
 });
+
+it("offers the owning column's programme for a topic-source report and creates one script", async () => {
+  report = { ...report, kind: "topic_source", job: "monitoring/ai_flash_discovery" };
+  PRODUCTION = [{ key: "flash_daily", name: "AI 快讯", content_column_name: "AI 快讯", job: "monitoring/ai_flash_discovery", split: "whole", content_mode: "episode", errors: [] }];
+  mount(); fireEvent.click(screen.getByRole("button", { name: "写成视频" }));
+  fireEvent.click(await screen.findByRole("button", { name: "制作本期 · AI 快讯" }));
+  expect(await screen.findByText("new script page")).toBeTruthy();
+  expect(posts.filter(p => p.url.includes("/api/production/"))).toEqual([{ url: "/api/production/flash_daily/write", body: { report_path: report.report_path } }]);
+  expect(posts.some(p => p.url.endsWith("/api/video/scripts"))).toBe(false);
+});
+
+it("offers one programme per business column even when a column has several recipe bindings", async () => {
+  report = { ...report, kind: "topic_source", job: "monitoring/ai_flash_discovery" };
+  PRODUCTION = [
+    { key: "flash_daily", content_column_id: "ai_flash", content_column_name: "AI 快讯", job: report.job, split: "whole", content_mode: "episode", errors: [] },
+    { key: "flash_extra", content_column_id: "ai_flash", content_column_name: "AI 快讯", job: report.job, split: "whole", content_mode: "episode", errors: [] },
+    { key: "deep", content_column_id: "ai_deep", content_column_name: "AI 深度", job: report.job, split: "whole", content_mode: "episode", errors: [] },
+  ];
+  mount(); fireEvent.click(screen.getByRole("button", { name: "写成视频" }));
+  await screen.findByRole("button", { name: "制作本期 · AI 快讯" });
+  expect(screen.getAllByRole("button", { name: "制作本期 · AI 快讯" })).toHaveLength(1);
+  expect(screen.getByRole("button", { name: "制作本期 · AI 深度" })).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "制作本期 · AI 快讯" }));
+  expect(await screen.findByText("new script page")).toBeTruthy();
+  expect(posts.filter(p => p.url.includes("/api/production/"))).toEqual([{ url: "/api/production/flash_daily/write", body: { report_path: report.report_path } }]);
+});

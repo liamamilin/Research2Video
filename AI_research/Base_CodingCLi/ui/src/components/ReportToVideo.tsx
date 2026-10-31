@@ -73,22 +73,25 @@ export function ReportToVideo({ path }: { path: string }) {
   }
   if (!report) return <span className="text-xs text-text-muted">读取中…</span>;
 
-  // 一份报告只写一条选题的配方；盘点、对比要另选条目
+  const programmes = configs.filter(c => c.content_mode === "episode")
+    .filter((c, i, all) => all.findIndex(p => (p.content_column_id || p.key) === (c.content_column_id || c.key)) === i);
+  // Legacy explicit single-topic creation stays available separately.
   const choices = cells.filter((c) => c.usable && c.key && c.column?.topic_kind === "single");
   return (
     <section className="card p-3 space-y-2 text-xs w-full" aria-label="写成视频">
+      {programmes.length ? <div className="space-y-2" aria-label="整期节目制作"><p>按栏目把这份报告组织成一期，多条内容分段讲述，保留具体例子与解释。</p><div className="flex flex-wrap gap-2">{programmes.map(c => <button key={c.key} className="btn btn-primary" disabled={busy} onClick={() => writeWith(c)}>制作本期 · {c.content_column_name || c.name}</button>)}</div><p className="text-text-muted">一篇总稿、一条视频，内容决定时长；生产方式在栏目设置中管理。</p></div> : null}
       {report.kind === "topic_source" ? (
         <p className="text-text-muted">
-          这份报告是选题来源，里面每一条都已经在
+          {programmes.length ? "原来的独立选题仍保留在" : "这份报告是选题来源，里面每一条都已经在"}
           <Link className="text-accent hover:underline" to="/topics">选题页</Link>
           。去那里挑一条写快讯，或者挑几条写一期盘点。
         </p>
       ) : (
         <>
-        {configs.length ? (
+        {configs.filter(c => c.content_mode !== "episode").length ? (
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-text-muted">用这个 Job 的视频配置写：</span>
-            {configs.map((c) => (
+            {configs.filter(c => c.content_mode !== "episode").map((c) => (
               <button key={c.key} className="btn btn-primary" disabled={busy} onClick={() => writeWith(c)}>
                 {c.name}
               </button>
@@ -126,7 +129,7 @@ export function ReportToVideo({ path }: { path: string }) {
             <span key={s.id}>
               {i ? "、" : ""}
               <Link className="text-accent hover:underline" to={`/video/${s.id}`}>
-                {s.title || s.id.slice(0, 8)}
+                {s.content_mode === "episode" ? "整期节目 · " : ""}{s.title || s.id.slice(0, 8)}
               </Link>
             </span>
           ))}

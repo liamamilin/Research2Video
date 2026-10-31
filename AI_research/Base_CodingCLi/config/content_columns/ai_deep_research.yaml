@@ -1,0 +1,21 @@
+schema_version: 1
+name: AI 深度解读
+matrix: ai_media
+type: deep_research
+audience: 希望理解 AI 技术如何影响实际工作的开发者和高频使用者
+promise: 陪观众从一个 AI 疑问走到机制理解，并能用于认识类似问题
+production_ids:
+- ai_media_deep_dive
+render_inheritance: source_compatible
+render:
+  packaging:
+    label: AI 深度解读
+presentation:
+  strategy: 用贯穿本期的任务卡和具体对象呈现输入、过程与结果，让主例子在中段也持续得到更新。每解释一个机制、公式或相关实验，就回到这个任务展示新增关系、状态或选择；同一量的基准与对象名称保持连贯。先给可读整体，再聚焦当前一步，用这一步形成的认识作小标题。结尾回放主例子的关键变化，让观众看到整套解释怎样回答开场。
+  preferred_visuals:
+  - 多章节混合画面
+  - 图表
+  - 真实截图
+  - 视觉回顾
+status: configured
+notes: 围绕材料中一个值得持续理解的问题深入展开，用具体任务中的对象和一次操作建立疑问。让这个例子在中段也实际推进：每解释一层机制、一个公式或一项相关实验，就说明开场任务现在多理解了什么、下一步选择怎样改变。相关案例承担解释当前机制的一步，随后接回主例子，把深度积累在同一个问题上。收束时用这套理解重新回答开场，联系一个相近工作场景。作者自主组织段落与节奏，标题体现本期真正要回答的疑问。

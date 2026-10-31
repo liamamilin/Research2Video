@@ -1,0 +1,8 @@
+{"time": "2026-10-28T00:44:32+0800", "remote": "RUNNING", "phase": "VOICE_ALIGN", "local": "RUNNING"}
+{"time": "2026-10-28T00:49:53+0800", "remote": "RUNNING", "phase": "STORYBOARD", "local": "RUNNING"}
+{"time": "2026-10-28T00:53:13+0800", "remote": "RUNNING", "phase": "BUILD_IR", "local": "RUNNING"}
+{"time": "2026-10-28T00:54:23+0800", "remote": "RUNNING", "phase": "RENDER", "local": "RUNNING"}
+{"time": "2026-10-28T01:09:14+0800", "remote": "RUNNING", "phase": "QUALITY_CHECK", "local": "RUNNING"}
+{"time": "2026-10-28T01:09:44+0800", "remote": "RUNNING", "phase": "PACKAGE", "local": "RUNNING"}
+{"time": "2026-10-28T01:10:54+0800", "remote": "COMPLETED", "phase": "COMPLETE", "local": "RUNNING"}
+{"time": "2026-10-28T01:11:04+0800", "remote": "COMPLETED", "phase": "COMPLETE", "local": "COMPLETED"}

@@ -78,7 +78,10 @@ def preview(render_id: str, user=Depends(require_editor)):
 
 @router.post("/uploads", status_code=202)
 def enqueue(body: UploadIn, user=Depends(require_editor)):
-    result = call(douyin.enqueue, body.render_id, body.model_dump(exclude={"render_id"}))
+    payload = body.model_dump(exclude={"render_id", "first_comment"})
+    if 'first_comment' in body.model_fields_set:
+        payload['first_comment'] = body.first_comment.model_dump(exclude_unset=True)
+    result = call(douyin.enqueue, body.render_id, payload)
     audit.log("platform_enqueue", user=user["username"], target="douyin", result=result["id"])
     return result
 
@@ -107,14 +110,14 @@ def retry(key: str, user=Depends(require_editor)):
 
 @router.put('/first-comment-template')
 def first_comment_template(body: FirstCommentIn, user=Depends(require_admin)):
-    result = call(douyin.save_first_comment_template, body.model_dump())
+    result = call(douyin.save_first_comment_template, body.model_dump(exclude_unset=True))
     audit.log('platform_comment_template', user=user['username'], target='douyin')
     return result
 
 
 @router.post('/uploads/{key}/first-comment', status_code=202)
 def add_first_comment(key: str, body: FirstCommentIn, user=Depends(require_editor)):
-    result = call(douyin.add_first_comment, key, body.model_dump())
+    result = call(douyin.add_first_comment, key, body.model_dump(exclude_unset=True))
     audit.log('platform_first_comment_add', user=user['username'], target='douyin', result=key)
     return result
 

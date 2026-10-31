@@ -4,12 +4,15 @@ from __future__ import annotations
 import re
 from decimal import Decimal
 
-from core.video.screenshots import ScreenshotError
+from core.video.screenshots import PageUnavailable, ScreenshotError
 
 GENERIC = set("the and for with from this that page pages screenshot screenshots full element elements feature features supports support pricing price prices usd eur cny monthly annually yearly month year per input output token tokens api plan plans pro free release released announcement official documentation docs a an is of to in on can use using".split())
 TRANSLATIONS = {"截图": ("screenshot",), "元素": ("element",), "整页": ("full page",), "网页": ("page",),
                 "价格": ("pricing", "price", "$"), "计费": ("billing", "billed"), "功能": ("feature",),
-                "发布": ("release", "launch", "announc"), "缓存": ("cache", "caching"), "工作流": ("workflow",)}
+                "发布": ("release", "launch", "announc"), "缓存": ("cache", "caching"), "工作流": ("workflow",),
+                "示例": ("example", "usage"), "代码": ("code",), "安装": ("install", "pip"),
+                "界面": ("interface", "editor", "screenshot"), "节点": ("node",),
+                "输入": ("input",), "输出": ("output",), "结果": ("result",)}
 
 
 def entities(text: str) -> list[str]:
@@ -56,6 +59,31 @@ def cycles(text: str) -> set[str]:
 def compatible(need: dict, candidate: dict, page_title: str) -> tuple[bool, str, float]:
     text = candidate["text"]
     claim = need["claims"]
+    if need.get("visual_subject"):
+        # Visuals explain one object or action. The entire paragraph may also
+        # mention other products and derived conclusions that are not pictured.
+        subject = need["visual_subject"].lower()
+        context = (text + " " + page_title + " " + candidate.get("context", "")).lower()
+        if subject not in context:
+            return False, "页面没有当前需要展示的对象", 0
+        overlap = sum(word in text.lower() for word in terms(need["text"]))
+        context_overlap = sum(word in candidate.get("context", "").lower() for word in terms(need["text"]))
+        visual_kind = candidate.get("visual_kind", "text")
+        bonus = {"image": 7, "code": 6, "table": 3}.get(visual_kind, 0)
+        if visual_kind == "image" and not candidate.get("described", True) and not context_overlap:
+            bonus = 0
+        score = overlap + min(3, context_overlap) + bonus
+        if visual_kind == "code":
+            # Prefer a self-contained example. A filename such as example.jpg
+            # should not make an optional multi-provider setup outrank the
+            # basic conversion call that the narration is actually explaining.
+            wanted = terms(need["text"] + " " + subject)
+            extra = {word.lower() for word in re.findall(r"\b[A-Z][A-Za-z0-9_]{2,}\b", text)}
+            extra -= wanted | GENERIC | {"true", "false", "none", "set"}
+            score -= min(4, len(extra)*2)
+        score += 4 if subject in text.lower() else 0
+        score -= min(4, len(text) / 1500)
+        return True, "页面对象与本次画面用途对应", round(score, 3)
     names = entities(claim)
     if names and not any(name in (text + " " + page_title).lower() for name in names):
         return False, "页面或区域缺少讲稿所讲的产品实体", 0
@@ -93,7 +121,7 @@ def compatible(need: dict, candidate: dict, page_title: str) -> tuple[bool, str,
 
 def rank(need: dict, page: dict) -> list[dict]:
     if page.get("blocked"):
-        raise ScreenshotError(page["blocked"])
+        raise PageUnavailable(page["blocked"])
     accepted, reasons = [], []
     for candidate in page.get("candidates", []):
         okay, reason, score = compatible(need, candidate, page.get("title", ""))

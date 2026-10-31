@@ -309,6 +309,25 @@ class ResearchAgent:
         """Release HTTP resources."""
         self.llm.close()
 
+    def expand_dossier(self, task_prompt: str, report: str, material: str) -> str:
+        """Use newly read body sections in the same researcher's final dossier."""
+        self.materials.append(material)
+        self._remember_urls_in(material)
+        self._check_cancel()
+        self._progress({"type": "phase", "phase": "expanding_research_dossier"})
+        response = self.llm.chat([
+            {"role": "system", "content": _FETCH_SYSTEM_PROMPT},
+            {"role": "user", "content": (
+                task_prompt + "\n\n## 已整理的研究底稿\n" + report
+                + "\n\n## 本轮补充读取的原始正文\n" + material
+                + "\n\n结合补充正文完善研究底稿，保留原有有用资料，把具体例子、操作过程与机制解释展开。"
+                  "输出完整底稿，沿用任务指定的条目与来源格式，供作者和原始素材共同使用。"
+            )},
+        ], tools=None)
+        if response.finish_reason in {"length", "content_filter"} or report_problem(response.content):
+            raise RuntimeError("补充底稿未返回完整正文，沿用原研究结果")
+        return response.content.strip()
+
     def get_usage(self) -> dict:
         """Return LLM/search consumption accumulated by this run."""
         usage = dict(self.llm.usage)
@@ -392,6 +411,17 @@ class ResearchAgent:
         try:
             if name == "search_web":
                 return self._tool_search_web(arguments)
+            if name == "read_webpage":
+                url = str(arguments.get("url") or "")
+                from urllib.parse import urlsplit
+                parsed = urlsplit(url)
+                if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
+                    return "Error: provide a public HTTP or HTTPS URL without credentials"
+                result = self.search.read_page(url)
+                self._remember([result])
+                rendered = self._truncate(SearchClient.format_results([result]), self.config.max_chars_per_call)
+                self.materials.append(rendered)
+                return rendered
             if name == "read_file":
                 return self._tool_read_file(arguments)
             if name == "list_files":
@@ -409,9 +439,13 @@ class ResearchAgent:
         Writing on without sources is the worse outcome: the report reads as
         researched and the run is recorded as a success.
         """
+        from core import search_health
+
         try:
             return self.search.search(queries, objective=objective)
         except SearchUnavailableError as exc:
+            if exc.reasons and all(search_health.classify(why) for why in exc.reasons.values()):
+                raise  # out of credits, bad keys or rate limits: a retry seconds later meets the same answers
             logger.warning("Web search unavailable, retrying once: %s", exc)
         self._check_cancel()
         time.sleep(_SEARCH_RETRY_DELAY)
@@ -664,6 +698,11 @@ class ResearchAgent:
 def _tool_definitions() -> list[dict]:
     """OpenAI-style tool schemas exposed to the model."""
     return [
+        {"type": "function", "function": {
+            "name": "read_webpage",
+            "description": "Read the body of a known public webpage to expand a search excerpt or answer a topic's missing question.",
+            "parameters": {"type": "object", "properties": {"url": {"type": "string"}}, "required": ["url"]},
+        }},
         {
             "type": "function",
             "function": {

@@ -1,0 +1,5 @@
+# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。拆不拆、要不要再核实由配方定，给谁看在 audience 里选，多长在配方允许的范围里用 minutes 改，要不要重新调研用 reverify 改，auto 只控制自动制作开关，开启后处理全部不重复选题。
+name: T06 · 套餐与付费价值
+job: chatgpt_acquisition/t06_value
+recipe: chatgpt_acquisition
+auto: 1

@@ -3,6 +3,8 @@ import type { Credibility, ScriptStatus } from "./video";
 
 // 产出：每篇文稿属于哪个矩阵、哪个 Job、哪次运行的报告、哪套生产配置（spec/outputs.md）
 export interface OutputScript {
+  content_mode?: "episode" | "individual";
+  episode_items?: string[];
   id: string;
   title: string;
   status: ScriptStatus;

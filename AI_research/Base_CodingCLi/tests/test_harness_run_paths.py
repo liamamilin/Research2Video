@@ -93,12 +93,15 @@ def test_engine_replaces_or_restores_the_previous_report_in_the_validated_worksp
     monkeypatch.setattr(report_meta, 'append_record', lambda *a, **kw: recorded.append(kw))
     engine = ResearchEngine(config_dir=str(root / 'config'), jobs_dir=str(root / 'jobs'), workspace_dir=str(root))
     result = engine.run_job('research/memory')
-    assert result == (None if fail else 'output/kept.md')
-    assert output.read_text().startswith('# Previous' if fail else '# Fresh')
+    assert result == (None if fail else 'output/kept_1.md')
+    assert output.read_text().startswith('# Previous')
+    if not fail:
+        assert (root / result).read_text().startswith('# Fresh')
+        assert (root / (result + '.report.json')).is_file()
     assert not output.with_suffix('.md.prev').exists()
     assert not list(process_dir.rglob('*.md'))
     if not fail:
         from core import report_material
         material = recorded[0]['extra']['material']
         assert Path(material['path']).parent == output.parent
-        assert 'Concrete detail.' in report_material.read(material, str(output), output.read_text())
+        assert 'Concrete detail.' in report_material.read(material, str(root / result), (root / result).read_text())

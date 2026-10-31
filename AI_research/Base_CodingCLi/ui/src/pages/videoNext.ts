@@ -19,6 +19,13 @@ export interface NextStep {
 
 const ACTIVE = ["SUBMITTING", "QUEUED", "RUNNING", "DOWNLOADING"];
 
+export function renderPhase(stage: string | null | undefined): string {
+  const labels: Record<string, string> = { PLAN: "整理讲稿", VOICE_ALIGN: "生成旁白与对齐", STORYBOARD: "规划分镜",
+    SCENE_IMAGES: "准备场景图片", BUILD_IR: "编排画面与时间轴", RENDER: "渲染画面", QUALITY_CHECK: "检查成片",
+    PACKAGE: "制作片头片尾", AUDIO_MIX: "混合音频", COMPLETE: "制作完成" };
+  return stage ? labels[stage] ?? "后台处理中" : "";
+}
+
 /** Prefer an in-flight attempt, then a usable completed video, for this version. */
 export function renderForVersion(detail: VideoScriptDetail, version = detail.current_version): VideoRender | null {
   const renders = detail.renders.filter((r) => r.version === version);
@@ -33,6 +40,8 @@ export function currentPublications(detail: VideoScriptDetail) {
 
 /** What the person should do next with a script, and the tab where they do it. */
 export function nextStep(detail: VideoScriptDetail): NextStep {
+  if (detail.selection_skip) return { tab: "draft", text: detail.selection_skip.kind === "duplicate"
+    ? "重复选题已跳过，可查看已有文稿和成片。" : "可用选题不足，本次已跳过，等待新的素材。", tone: "done" };
   const latest = renderForVersion(detail);
   switch (detail.status) {
     case "RESEARCHING":
@@ -47,8 +56,8 @@ export function nextStep(detail: VideoScriptDetail): NextStep {
       const checks = detail.version_shown?.checks;
       if (detail.stage) return { tab: "review", text: detail.topic?.article ? "正在对照文章审校当前文稿。可以离开此页。" : "正在复审当前文稿，完成后再检查事实与来源。可以离开此页。", tone: "wait" };
       if (checks?.mode === "on_request") return { tab: "draft", text: "文稿已生成，读稿后可定稿出片，也可以修改或重新生成。", tone: "todo" };
-      const hint = checks?.summary?.serious ? `事实审计有 ${checks.summary.serious} 处严重问题，请先核实，` : "";
-      return { tab: "draft", text: `${hint}读稿、看过「审校」页后，在上面点「定稿」。`, tone: "todo" };
+      const hint = checks?.summary?.serious ? `已有审校记录有 ${checks.summary.serious} 处严重问题，可定位查看；` : "";
+      return { tab: "draft", text: `${hint}读稿后可定稿；审校可按需查看或发起。`, tone: "todo" };
     }
     default:
       break;
@@ -58,7 +67,7 @@ export function nextStep(detail: VideoScriptDetail): NextStep {
   const upload = detail.distributions?.find(d => d.version === detail.current_version && ["QUEUED", "UPLOADING", "SUBMITTED"].includes(d.status))?.task ?? detail.platform_uploads?.find(task => task.version === detail.current_version);
   if (upload && ["QUEUED", "UPLOADING", "RUNNING", "SUBMITTED"].includes(upload.status)) return { tab: "publish", text: "投稿正在处理中，公开后自动回填发布记录。", tone: "wait" };
   if (latest && ACTIVE.includes(latest.status)) return { tab: "video", text: "成片正在后台制作，完成后自动回传，可以离开此页。", tone: "wait" };
-  if (latest?.status === "COMPLETED") return { tab: "publish", text: "成片完成：看片后到平台管理投稿，公开后自动记录发布链接。", tone: "todo" };
+  if (latest?.status === "COMPLETED") return { tab: "video", text: "成片完成，可在本页看片、下载；需要发布时再进入「发布」。", tone: "todo" };
   if (latest && (latest.status === "FAILED" || latest.status === "CANCELLED")) return { tab: "video", text: "上次出片没成功，看原因后重新出片。", tone: "bad" };
   return { tab: "video", text: "已定稿，下一步生成成片。", tone: "todo" };
 }

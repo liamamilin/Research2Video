@@ -1,4 +1,5 @@
 import React from 'react';
+import {BrandHeaderContext} from './ContentStyle';
 import {AbsoluteFill, Audio, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {CornerBadge, type Badge} from './Packaging';
 import {ImageMaterials} from './ImageMaterials';
@@ -31,6 +32,7 @@ function cardTextSize(text: string, width: number, height: number, maximum: numb
 }
 
 function InformationCard({ir, scene, frame, badge}: {ir: any; scene: any; frame: number; badge?: Badge}) {
+  const header = React.useContext(BrandHeaderContext);
   const p = scene.props;
   const points = p.points || [{text: p.text}];
   const columns = points.length > 12 ? 3 : p.layout === 'comparison' || points.length > 3 ? 2 : 1;
@@ -42,7 +44,7 @@ function InformationCard({ir, scene, frame, badge}: {ir: any; scene: any; frame:
     panelHeight - (focus ? 80 : 36) - (point.label ? 60 : 0), focus ? 100 : columns === 2 ? 62 : 50)),
   [points, panelWidth, panelHeight, focus, columns]);
   return <AbsoluteFill style={{background:'#f3f5f1', color:ink, fontFamily:font}}>
-    <div style={{position:'absolute',left:80,top:45,right:330,fontSize:28,color:muted}}>{ir.video.title}</div>
+    <div style={{position:'absolute',left:header?.left??80,top:header?header.top+11:45,right:header?header.right+header.width+header.gap:330,fontSize:28,lineHeight:'34px',color:muted,whiteSpace:header?'nowrap':undefined,overflow:header?'hidden':undefined,textOverflow:header?'ellipsis':undefined}}>{ir.video.title}</div>
     <div style={{position:'absolute',left:80,top:145,right:200,fontSize:44,lineHeight:1.3}}>{p.title}</div>
     <div style={{position:'absolute',left:80,top:275,width:1760,height:531,background:'#ffffff',borderRadius:30}}/>
     <div style={{position:'absolute',left:120,top:315,width:1680,height:451,display:'grid',gridTemplateColumns:`repeat(${columns},minmax(0,1fr))`,gridTemplateRows:`repeat(${rows},minmax(0,1fr))`,gap:26}}>
@@ -56,13 +58,14 @@ function InformationCard({ir, scene, frame, badge}: {ir: any; scene: any; frame:
         </div>;
       })}
     </div>
-    {badge?.text && <div style={{position:'absolute',right:80,top:46,fontSize:27,color:badge.color}}>{badge.text}</div>}
+    {badge?.text && !header && <div style={{position:'absolute',right:80,top:46,fontSize:27,color:badge.color}}>{badge.text}</div>}
     <div style={{position:'absolute',bottom:0,left:0,height:5,width:`${100*(frame+1)/ir.total_frames}%`,background:green}}/>
     <Audio src={staticFile(ir.audio_public_file)}/>
   </AbsoluteFill>;
 }
 
 export function CreativeVideo({ir, badge, showCaptions = false}: {ir: any; badge?: Badge; showCaptions?: boolean}) {
+  const header = React.useContext(BrandHeaderContext);
   const frame = useCurrentFrame();
   const scene = ir.scenes.find((s: any) => frame >= s.start_frame && frame < s.end_frame) || ir.scenes[ir.scenes.length - 1];
   if (!scene) return <AbsoluteFill style={{background: cream}}/>;
@@ -86,7 +89,7 @@ export function CreativeVideo({ir, badge, showCaptions = false}: {ir: any; badge
   const footer = <div style={{position:'absolute',left:100,right:100,bottom:50,display:'flex',justifyContent:'space-between',fontSize:24,color:muted}}><span>{mode === 'chat_dialogue' ? '演绎对话 · 统一旁白' : mode === 'image_slideshow' ? '图文讲解 · 图片为辅助表达' : '听见重点，看见内容'}</span><span>{String(index + 1).padStart(2,'0')} / {String(ir.scenes.length).padStart(2,'0')}</span></div>;
   return <AbsoluteFill style={{background:cream,color:ink,fontFamily:font,overflow:'hidden'}}>
     <div style={{position:'absolute',top:0,right:0,width:650,height:1080,background:'#E9EEE4',borderRadius:'55% 0 0 45%'}}/>
-    <div style={{position:'absolute',left:100,top:125,right:100,display:'flex',justifyContent:'space-between',alignItems:'center'}}><div style={{fontSize:27,letterSpacing:2,maxWidth:1430,overflowWrap:'anywhere'}}>{p.title}</div></div><CornerBadge badge={badge}/>
+    <div style={{position:'absolute',left:header?.left??100,top:header?header.top+11:125,right:header?header.right+header.width+header.gap:100,display:'flex',justifyContent:'space-between',alignItems:'center'}}><div style={{fontSize:27,lineHeight:'34px',letterSpacing:2,maxWidth:1430,overflowWrap:'anywhere',whiteSpace:header?'nowrap':undefined,overflow:header?'hidden':undefined,textOverflow:header?'ellipsis':undefined}}>{p.title}</div></div>{!header&&<CornerBadge badge={badge}/>}
     {mode === 'kinetic_typography' && <div style={{position:'absolute',left:110,right:110,top:230,bottom:150,display:'flex',gap:70,alignItems:'center'}}>
       <div style={{alignSelf:'flex-start',fontSize:110,fontWeight:800,color:green,opacity:.23,width:170,flexShrink:0}}>{String(index + 1).padStart(2,'0')}<div style={{height:5,background:green,marginTop:24,width:105}}/></div>
       <div style={{flex:1,display:'flex',flexDirection:'column',gap:16}}>{chunks.map((text: string, i: number) => {

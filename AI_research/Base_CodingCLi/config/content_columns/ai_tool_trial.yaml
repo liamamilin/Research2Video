@@ -1,0 +1,16 @@
+schema_version: 1
+name: AI 工具实测
+matrix: ai_media
+type: comparison
+audience: 关注 AI 产品、技术与应用的观众
+promise: 结合实际使用结果讲清工具差异与适用条件
+production_ids: []
+render_inheritance: source_compatible
+render: {}
+presentation:
+  preferred_visuals:
+  - 运行截图
+  - 对比图
+  - 价格卡
+status: planned
+notes: 目标栏目，尚未配置实测研究与生产绑定。

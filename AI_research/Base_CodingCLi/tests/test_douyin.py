@@ -116,6 +116,18 @@ def test_queue_deduplicates_per_account_version_and_claims_once(douyin_env):
         manager.action(jobs[0]["id"], "retry")
 
 
+def test_upload_snapshots_both_cover_orientations_for_worker(douyin_env, monkeypatch):
+    covers = {'cover': '/test/landscape.jpg', 'cover_portrait': '/test/portrait.jpg'}
+    def prepare_covers(render, title, *, portrait):
+        assert portrait is True and title == PAYLOAD['title']
+        return covers
+    monkeypatch.setattr(manager, 'publish_covers', prepare_covers)
+    task = manager.enqueue(render()['id'], PAYLOAD)
+    stored = manager.store().get(task['id'])
+    assert {k: stored['payload'][k] for k in covers} == covers
+    assert 'cover_portrait' not in task['payload']  # File paths stay in the local worker payload.
+
+
 def test_recovery_preserves_a_receipt_and_scope(douyin_env):
     row = render(); db = manager.store()
     job = manager.enqueue(row["id"], PAYLOAD)
@@ -194,7 +206,8 @@ def test_api_roles_csrf_and_private_fields(douyin_env, client):
 def test_worker_submits_once_persists_receipt_and_closes_its_browser(tmp_path, monkeypatch, provider, expected):
     """Use the real guard around a fake upstream uploader, browser, and responses."""
     db = DouyinStore(str(tmp_path))
-    job = db.create("UPLOAD", OWNER["uid"], {**PAYLOAD, "video_path": "/test/video.mp4"}, render={"id": "r", "script_id": "s", "version": 1})
+    job = db.create("UPLOAD", OWNER["uid"], {**PAYLOAD, "video_path": "/test/video.mp4", "cover": "/test/landscape.jpg",
+        "cover_portrait": "/test/portrait.jpg"}, render={"id": "r", "script_id": "s", "version": 1})
     job = db.claim()
     calls = {"fetch": 0, "abort": 0, "close": 0}
 
@@ -235,6 +248,8 @@ def test_worker_submits_once_persists_receipt_and_closes_its_browser(tmp_path, m
     class Video:
         def __init__(self, **kwargs):
             assert kwargs["declaration"] == "内容由AI生成"
+            assert kwargs['thumbnail_portrait_path'] == '/test/portrait.jpg'
+            assert kwargs['thumbnail_landscape_path'] == '/test/landscape.jpg'
         async def upload(self, pw):
             browser = await pw.chromium.launch()
             context = await browser.new_context()

@@ -1,0 +1,3 @@
+FAILED tests/test_recipe_audiences.py::test_shipped_recipes_come_out_exactly_as_they_were_written_out_per_audience
+FAILED tests/test_video_golden.py::test_a_shipped_column_resolves_as_it_did[flash]
+2 failed, 3206 passed, 3 skipped, 52 warnings in 351.48s (0:05:51)

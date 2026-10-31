@@ -323,10 +323,14 @@ def test_report_write_is_atomic(tmp_path, monkeypatch):
     assert [p.name for p in Path(path).parent.iterdir()] == ["report.md"]
 
 
-def test_restore_logic_ignores_a_zero_byte_replacement(tmp_path):
-    """The cleanup must not treat an empty leftover as a fresh report."""
-    source = (ROOT / "core" / "engine.py").read_text(encoding="utf-8")
-    assert "os.path.getsize(output_path) > 0" in source
+def test_empty_new_output_cannot_destroy_an_existing_report(tmp_path):
+    from core.engine import ResearchEngine
+    output = tmp_path / "report.md"
+    output.write_text("# Previous good report")
+    engine = ResearchEngine.__new__(ResearchEngine)
+    new = Path(engine._save_output("", str(output)))
+    assert output.read_text() == "# Previous good report"
+    assert new != output and new.read_text() == ""
 
 
 def test_save_output_still_avoids_overwriting(tmp_path):

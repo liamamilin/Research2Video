@@ -69,7 +69,9 @@ function host(url: string): string {
   }
 }
 
-function IssueRow({ issue, showWhere = false }: { issue: CheckIssue; showWhere?: boolean }) {
+export type LocateIssue = (section: number, paragraph: number | null) => void;
+
+function IssueRow({ issue, showWhere = false, onLocate }: { issue: CheckIssue; showWhere?: boolean; onLocate?: LocateIssue }) {
   return (
     <li className="space-y-0.5">
       <div className="flex flex-wrap gap-1.5 items-baseline">
@@ -78,6 +80,7 @@ function IssueRow({ issue, showWhere = false }: { issue: CheckIssue; showWhere?:
           {AUDIT_NAME[issue.audit] ?? issue.audit} · {issue.rule}
         </span>
         {showWhere ? <span className="text-text-muted">{where(issue)}</span> : null}
+        {onLocate && issue.section != null ? <button className="text-accent hover:underline" onClick={() => onLocate(issue.section!, issue.paragraph)} aria-label={`定位${where(issue)}：${issue.problem}`}>定位此段</button> : null}
         <span>{issue.problem}</span>
       </div>
       {issue.quote ? <p className="text-text-muted pl-1">原句：「{issue.quote}」</p> : null}
@@ -144,11 +147,11 @@ export function StylePanel({
   );
 }
 
-export function ChecksPanel({ checks }: { checks: ScriptChecks }) {
+export function ChecksPanel({ checks, onLocate }: { checks: ScriptChecks; onLocate?: LocateIssue }) {
   if (checks.scope === "article_fidelity") return <section className="card p-4 text-sm space-y-3">
     <h2 className="font-medium">原文忠实度审校 · {checks.model_checks_stale || !checks.fidelity_checked ? "待核对当前版本" : checks.summary.passed ? "通过" : "有问题需处理"}</h2>
     <p className="text-xs text-text-muted">{checks.article_summary || "对照保存的文章核对原意与限定条件。"} 此项不代表完成外部事实核验。</p>
-    {checks.issues.length ? <ul className="space-y-2 text-xs">{checks.issues.map((item, i) => <IssueRow key={i} issue={item} showWhere />)}</ul> : null}
+    {checks.issues.length ? <ul className="space-y-2 text-xs">{checks.issues.map((item, i) => <IssueRow key={i} issue={item} showWhere onLocate={onLocate} />)}</ul> : null}
   </section>;
   if (checks.mode === "on_request") return <section className="card p-4 text-sm text-text-muted">本版直接根据素材生成，未进行自动审校。</section>;
   const { summary, newcomer, quiz } = checks;
@@ -214,11 +217,16 @@ export function ChecksPanel({ checks }: { checks: ScriptChecks }) {
           <p className="text-danger font-medium">需要你处理的严重问题</p>
           <ul className="space-y-2">
             {unhandled.map((issue, i) => (
-              <IssueRow key={i} issue={issue} showWhere />
+              <IssueRow key={i} issue={issue} showWhere onLocate={onLocate} />
             ))}
           </ul>
         </div>
       ) : null}
+
+      {checks.issues.some(i => i.section != null && i.severity !== "serious") ? <details open>
+        <summary className="cursor-pointer text-xs text-text-muted">段落审校建议</summary>
+        <ul className="text-xs space-y-3 mt-2">{checks.issues.filter(i => i.section != null && i.severity !== "serious").map((issue, i) => <IssueRow key={i} issue={issue} showWhere onLocate={onLocate} />)}</ul>
+      </details> : null}
 
       {checks.deletions.length ? (
         <div className="text-xs space-y-1">
@@ -271,12 +279,21 @@ export function ChecksPanel({ checks }: { checks: ScriptChecks }) {
       {general.length ? (
         <ul className="text-xs space-y-2">
           {general.map((issue, i) => (
-            <IssueRow key={i} issue={issue} />
+            <IssueRow key={i} issue={issue} onLocate={onLocate} />
           ))}
         </ul>
       ) : null}
     </section>
   );
+}
+
+export function ReviewNotes({ checks, version, onLocate }: { checks: ScriptChecks; version: number; onLocate: LocateIssue }) {
+  return <aside className="card p-4 space-y-3 lg:sticky lg:top-24 self-start lg:max-h-[calc(100vh-8rem)] overflow-y-auto" aria-label="编辑审校意见">
+    <h2 className="text-sm font-medium">对照审校意见（{checks.issues.length}）</h2>
+    <p className="text-xs text-text-muted">意见来自保存版 v{version}，尚未包含本次未保存修改；保存不会自动发起审校。</p>
+    {checks.issues.length ? <ul className="text-xs space-y-4">{checks.issues.map((issue, i) => <IssueRow key={i} issue={issue} showWhere onLocate={onLocate} />)}</ul>
+      : <p className="text-xs text-text-muted">这版没有可定位的审校意见。</p>}
+  </aside>;
 }
 
 /** Issues for one section header (section-level) or one paragraph. */

@@ -7,3 +7,6 @@ jobs:
 - software/software_weekly
 render:
   video_speed: 1.25
+content:
+  role: source
+  parent: ai_media

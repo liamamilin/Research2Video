@@ -14,6 +14,14 @@ class DouyinError(RuntimeError):
     """A user-readable failure without provider credentials or raw responses."""
 
 
+class DouyinLookupError(DouyinError):
+    """Distinguish a list failure from an actually completed, empty lookup."""
+    def __init__(self, message: str, code: str, *, state: str = 'unavailable'):
+        super().__init__(message)
+        self.code = code
+        self.state = state
+
+
 def work_id(value: str) -> str:
     value = value.strip()
     if WORK_ID.fullmatch(value):
@@ -114,6 +122,8 @@ def clean_first_comment(value: dict) -> dict:
         raise DouyinError('抖音当前不支持自动置顶评论，请关闭置顶选项。')
     if type(value.get('enabled', False)) is not bool or not isinstance(value.get('text', ''), str):
         raise DouyinError('作者评论选项格式不正确。')
+    from core.social.publish_text import comment_options
+    value = comment_options(value)
     text = value.get('text', '').strip()
     if len(text) > COMMENT_LIMIT or (value.get('enabled') and not text):
         raise DouyinError(f'启用作者评论时请填写 1–{COMMENT_LIMIT} 字的内容。')

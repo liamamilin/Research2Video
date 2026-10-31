@@ -18,6 +18,8 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.concurrency import run_in_threadpool
 
 from g2.music_library import MusicError, selection as music_selection
+from g2.branding import BrandError, selection as brand_selection
+from g3 import brand_profiles
 from g3 import music_assets
 from g2.music_engine import GenerationError, readiness as music_readiness
 from g3.music_generation import MusicGeneration
@@ -77,6 +79,17 @@ class NarrationChapter(BaseModel):
         if any("\x00" in paragraph for paragraph in value):
             raise ValueError("讲稿不能包含空字符")
         return value
+
+
+class EpisodeItem(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    title: str = Field(min_length=1, max_length=32)
+    chapter_indexes: list[int] = Field(min_length=1)
+
+
+class EpisodeProgram(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    items: list[EpisodeItem] = Field(min_length=1)
 
 
 MAX_SOURCES = 3
@@ -227,11 +240,19 @@ class CreateJobRequest(BaseModel):
                                     description="material 模式必填的素材正文；narration 模式不传，由 chapters 生成")
     chapters: list[NarrationChapter] | None = Field(default=None, min_length=1,
                                                     description="narration 模式必填：按顺序的章节标题与讲稿段落")
+    episode: EpisodeProgram | None = Field(default=None, description="整期节目：内容条目对应的讲稿章节，自动生成内容标识和分段进度")
     sources: list[NarrationSource] | None = Field(default=None, min_length=1, max_length=MAX_SOURCES,
                                                   description="来源卡数据（标题、网址、日期），最多 3 条；所有视频形式均可用，不传则记录 no_sources")
     package: dict | None = Field(default=None, description="兼容旧调用方的完整包装配置；新调用方使用 packaging，省略时启用通用默认。"
                                                            "形如 {accent, intro?, outro?}，契约见 UPSTREAM_INTEGRATION.md")
     packaging: dict | None = Field(default=None, description="包装库配置；省略继承 common。enabled:false 明确关闭。与旧 package 互斥。")
+    brand: dict | None = None
+
+    @field_validator("brand")
+    @classmethod
+    def validate_brand(cls, value):
+        return brand_selection(value)
+
     background_music: dict | None = Field(default=None, description="背景音乐开关、素材 id、相对音量、自动压低、循环和淡入淡出；省略保持原旁白。")
 
     @field_validator("background_music")
@@ -299,6 +320,14 @@ class CreateJobRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_content_options(self):
+        if self.episode is not None:
+            if self.input_mode != "narration" or not self.chapters:
+                raise ValueError("整期节目需要按原稿分章配音")
+            indexes = [i for item in self.episode.items for i in item.chapter_indexes]
+            if (any(i < 0 or i >= len(self.chapters) for i in indexes)
+                    or indexes != sorted(set(indexes))
+                    or any(any(ord(c) < 32 for c in item.title) for item in self.episode.items)):
+                raise ValueError("节目条目须按顺序对应不重复的有效章节，标题须为一行文字")
         mixed_cards = (self.production_mode == "fast" and self.video_form == "information_cards"
                        and self.visual_storytelling and self.input_mode == "narration" and self.chapters)
         if self.image_materials:
@@ -477,6 +506,10 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
     application.state.music_generation = music_generation
     application.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver"])
     application.mount("/static", StaticFiles(directory=WEB_ROOT / "static"), name="static")
+
+    @application.exception_handler(BrandError)
+    async def brand_error(_request, exc):
+        return JSONResponse(status_code=422, content={"detail": {"code": "BRAND_INVALID", "message": str(exc)}})
 
     @application.exception_handler(MusicError)
     async def music_error(_request, exc):
@@ -798,20 +831,26 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
         from g2.production_plan import prepare_request
         payload = request.model_dump(exclude_none=True)
         payload["_production_submitted"] = {k: v for k, v in request._submitted.items()
-                                            if k in {"production_recipe", "production_context", "package", "production_mode", "visual_style", "video_form", "duration_mode", "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music"}}
+                                            if k in {"production_recipe", "production_context", "package", "production_mode", "visual_style", "video_form", "duration_mode", "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music", "brand"}}
         try:
-            return {"preview": True, "plan": prepare_request(payload)["production_plan"]}
+            import tempfile
+            with tempfile.TemporaryDirectory(prefix="brand-preview-", dir=settings.data_dir) as folder:
+                payload = brand_profiles.freeze(settings.data_dir, Path(folder), payload)
+                return {"preview": True, "plan": prepare_request(payload)["production_plan"]}
         except (ProductionPlanError, PackageConfigError, CreativeResourceError) as exc:
             raise _error(422, "PRODUCTION_PLAN_INVALID", str(exc)) from exc
+
+    from g3.brand_routes import router as brand_router
+    application.include_router(brand_router(settings.data_dir))
 
     @application.post("/api/jobs", status_code=202)
     def create_job(request: CreateJobRequest):
         payload = request.model_dump()
         payload["image_materials"] = [item.model_dump(exclude_none=True) for item in request.image_materials]
         payload["_production_submitted"] = {k: v for k, v in request._submitted.items()
-                                            if k in {"production_recipe", "production_context", "package", "production_mode", "visual_style", "video_form", "duration_mode", "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music"}}
+                                            if k in {"production_recipe", "production_context", "package", "production_mode", "visual_style", "video_form", "duration_mode", "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music", "brand"}}
         payload["title"] = request.title or "".join(request.source_text.split())[:28] or "未命名视频"
-        for optional in ("chapters", "sources", "package", "packaging", "background_music"):
+        for optional in ("chapters", "sources", "package", "packaging", "background_music", "brand"):
             if payload[optional] is None:
                 payload.pop(optional)
         def response(job: dict) -> dict:
@@ -839,6 +878,8 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
         try:
             document = load_import(settings.data_dir, request.input_document_id) if request.input_document_id else None
             job = store.create_job(job_id, payload, input_document=document)
+        except BrandError as exc:
+            raise _error(422, "BRAND_INVALID", str(exc)) from exc
         except ImageImportError as exc:
             raise _error(422, "CREATIVE_IMAGE_INVALID", str(exc)) from exc
         except DocumentError as exc:
@@ -927,7 +968,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
                     checked = CreateJobRequest(**{k: payload[k] for k in (*fields, *packaging_fields) if k in payload})
                 except ValidationError as exc:
                     raise _error(422, "REVISION_INPUT_INVALID", str(exc.errors()[0]["msg"])) from exc
-                payload.update({k: v for k, v in checked.model_dump().items() if k not in {"package", "packaging", "sources", "production_recipe", "background_music"}})
+                payload.update({k: v for k, v in checked.model_dump().items() if k not in {"package", "packaging", "sources", "production_recipe", "background_music", "brand"}})
                 payload["image_materials"] = [item.model_dump(exclude_none=True) for item in checked.image_materials]
             if payload["use_draw_things"] and not readiness.get("checks", {}).get("draw_things"):
                 raise _error(503, "DRAW_THINGS_NOT_READY", "Draw Things 尚未连接。")
@@ -936,6 +977,8 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
             child_id = str(uuid4())
             child = store.create_job(child_id, payload)
             return {"job_id": child_id, "parent_job_id": job_id, "status": child["status"], "status_url": f"/api/jobs/{child_id}"}
+        except BrandError as exc:
+            raise _error(422, "BRAND_INVALID", str(exc)) from exc
         except ImageImportError as exc:
             raise _error(409, "CREATIVE_IMAGE_INVALID", str(exc)) from exc
         except ValueError as exc:

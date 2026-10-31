@@ -1,0 +1,169 @@
+[
+  {
+    "path": "/matrices/company",
+    "observedReadyMs": 1977,
+    "alerts": [],
+    "loading": [],
+    "nodes": 180,
+    "title": "商业与公司"
+  },
+  {
+    "path": "/matrices/company?tab=runs",
+    "observedReadyMs": 319,
+    "alerts": [],
+    "loading": [],
+    "nodes": 245,
+    "title": "商业与公司"
+  },
+  {
+    "path": "/matrices/company?tab=week",
+    "observedReadyMs": 439,
+    "alerts": [],
+    "loading": [],
+    "nodes": 250,
+    "title": "商业与公司"
+  },
+  {
+    "path": "/matrices/company?tab=settings",
+    "observedReadyMs": 221,
+    "alerts": [],
+    "loading": [],
+    "nodes": 236,
+    "title": "商业与公司"
+  },
+  {
+    "path": "/jobs/company%2Fcompany_weekly",
+    "observedReadyMs": 265,
+    "alerts": [],
+    "loading": [],
+    "nodes": 220
+  },
+  {
+    "path": "/reports/view?path=company%2F2026-10-25_company_weekly.md",
+    "observedReadyMs": 387,
+    "alerts": [],
+    "loading": [],
+    "nodes": 518,
+    "title": "公司与商业模式周观察：2026年10月19日—25日"
+  },
+  {
+    "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=draft",
+    "observedReadyMs": 420,
+    "alerts": [],
+    "loading": [],
+    "nodes": 386,
+    "title": "年化收入670亿美元，这家AI公司为什么推迟上市？"
+  },
+  {
+    "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=review",
+    "observedReadyMs": 470,
+    "alerts": [],
+    "loading": [],
+    "nodes": 322,
+    "title": "年化收入670亿美元，这家AI公司为什么推迟上市？"
+  },
+  {
+    "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=video",
+    "observedReadyMs": 365,
+    "alerts": [],
+    "loading": [],
+    "nodes": 374,
+    "title": "年化收入670亿美元，这家AI公司为什么推迟上市？"
+  },
+  {
+    "path": "/video/2e2c466e8b1b4174ab65ebb0faf15dbc?tab=publish",
+    "observedReadyMs": 301,
+    "alerts": [],
+    "loading": [],
+    "nodes": 484,
+    "title": "年化收入670亿美元，这家AI公司为什么推迟上市？"
+  },
+  {
+    "path": "/platforms?platform=bilibili&tab=uploads",
+    "observedReadyMs": 3196,
+    "alerts": [],
+    "loading": [],
+    "nodes": 1895,
+    "title": "平台管理"
+  },
+  {
+    "path": "/platforms?platform=bilibili&tab=data",
+    "observedReadyMs": 1594,
+    "alerts": [],
+    "loading": [],
+    "nodes": 747,
+    "title": "平台管理"
+  },
+  {
+    "path": "/platforms?platform=bilibili&tab=comments",
+    "observedReadyMs": 216,
+    "alerts": [],
+    "loading": [],
+    "nodes": 273,
+    "title": "平台管理"
+  },
+  {
+    "path": "/platforms?platform=bilibili&tab=settings",
+    "observedReadyMs": 323,
+    "alerts": [],
+    "loading": [],
+    "nodes": 243,
+    "title": "平台管理"
+  },
+  {
+    "path": "/platforms?platform=douyin",
+    "observedReadyMs": 576,
+    "alerts": [],
+    "loading": [],
+    "nodes": 906,
+    "title": "平台管理"
+  },
+  {
+    "path": "/platforms?platform=kuaishou",
+    "observedReadyMs": 282,
+    "alerts": [],
+    "loading": [],
+    "nodes": 1044,
+    "title": "平台管理 · 快手"
+  },
+  {
+    "path": "/platforms?platform=xiaohongshu",
+    "observedReadyMs": 324,
+    "alerts": [],
+    "loading": [],
+    "nodes": 310,
+    "title": "平台管理 · 小红书"
+  },
+  {
+    "path": "/ask?overview=1",
+    "observedReadyMs": 226,
+    "alerts": [],
+    "loading": [],
+    "nodes": 184,
+    "title": "助手"
+  },
+  {
+    "path": "/ask?tasks=1",
+    "observedReadyMs": 277,
+    "alerts": [],
+    "loading": [],
+    "nodes": 954,
+    "title": "助手"
+  },
+  {
+    "path": "/matrices/company/video/company%2Fcompany_weekly",
+    "observedReadyMs": 2295,
+    "alerts": [],
+    "loading": [],
+    "nodes": 167,
+    "title": "公司与商业模式周观察 · 视频配置"
+  },
+  {
+    "path": "/video-recipes/parts/packaging/common",
+    "observedReadyMs": 191,
+    "alerts": [],
+    "loading": [],
+    "nodes": 152,
+    "title": "文稿配方"
+  }
+]

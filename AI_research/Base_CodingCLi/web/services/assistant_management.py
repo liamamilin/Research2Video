@@ -245,7 +245,7 @@ def publishing_query(a, request, user):
 
 
 def publishing_change(a, request, user):
-    from web.services.publication_state import resume_action
+    from web.services.publication_state import resume_action, task_href
     base = platform_path(a.platform)
     profile = account(a.platform)
     if not profile.get('connected') or not a.account_uid or profile.get('uid') != a.account_uid:
@@ -253,6 +253,7 @@ def publishing_change(a, request, user):
     receipts, failures = [], []
     authentication_required = False
     tasks = []
+    refs = []
     entries = a.items if a.action == 'submit' else [None]
     if a.action == 'submit' and not entries:
         raise ValueError('提交需要明确的 items（成片和发布字段）')
@@ -261,6 +262,7 @@ def publishing_change(a, request, user):
     for entry in entries:
         try:
             if entry:
+                operation = 'submit'
                 application.check_credentials(entry.fields)
                 row = _native(request, 'POST', base + '/uploads', body={**entry.fields, 'render_id': entry.render_id, 'account_uid': a.account_uid})
                 key = row['id']
@@ -274,8 +276,15 @@ def publishing_change(a, request, user):
                     raise ValueError('这条原投稿需要先处理平台意见，当前不能重新提交。请打开投稿任务查看恢复说明。')
                 body = ({'bvid': a.video} if a.platform == 'bilibili' else {'video': a.video}) if operation == 'reconcile' else None
                 row = _native(request, 'POST', base + '/uploads/' + quote(key, safe='') + '/' + operation, body=body) if operation else old
+            original = old if operation == 'reconcile' else row
+            href = task_href(a.platform, key, original)
             tasks.append({'platform': a.platform, 'id': key, 'account_uid': a.account_uid})
-            receipts.append({'id': key, 'status': row.get('status'), 'render_id': entry.render_id if entry else old.get('render_id')})
+            refs.append({'type': 'upload', 'id': a.platform + ':' + key, 'href': href})
+            receipt = {'id': key, 'status': original.get('status'), 'action': operation,
+                       'render_id': entry.render_id if entry else old.get('render_id'), 'href': href}
+            if operation == 'reconcile':
+                receipt['check'] = {'id': row.get('id'), 'status': row.get('status')}
+            receipts.append(receipt)
         except (HTTPException, ValueError) as exc:
             if isinstance(exc, HTTPException) and exc.status_code == 401:
                 # Preserve successes before stopping a batch with expired authentication.
@@ -283,27 +292,32 @@ def publishing_change(a, request, user):
                 authentication_required = True
                 break
             failures.append({'render_id': entry.render_id if entry else '', 'error': str(exc.detail if isinstance(exc, HTTPException) else exc)})
-    refs = [{'type': 'upload', 'id': a.platform + ':' + t['id'], 'href': platform_href(a.platform)} for t in tasks]
     already_published = bool(receipts) and all(row['status'] == 'PUBLISHED' for row in receipts)
-    return {'ok': not failures, 'submitted': bool(tasks) and not already_published, 'status': 'completed' if already_published else 'started' if tasks else 'failed',
-            'message': '原投稿已公开，已返回已有结果，没有再次投稿。' if already_published else f'已处理 {len(receipts)} 项，未完成 {len(entries) - len(receipts)} 项；投稿结果由工作区继续跟踪。',
+    checking = bool(receipts) and all(row['action'] == 'reconcile' for row in receipts)
+    message = ('原投稿已公开，已返回已有结果，没有再次投稿。' if already_published else
+               '已发起原投稿回查，没有重新上传；回查任务运行中不代表原投稿已成功。' if checking else
+               f'已处理 {len(receipts)} 项，未完成 {len(entries) - len(receipts)} 项；投稿结果由工作区继续跟踪。')
+    return {'ok': not failures, 'submitted': not already_published and any(row['action'] in ('submit', 'retry') for row in receipts),
+            'status': 'completed' if already_published else 'started' if tasks else 'failed',
+            'message': message,
             'receipts': receipts, 'failures': failures, 'publication_tasks': tasks, 'references': refs,
             'authentication_required': authentication_required,
-            'href': platform_href(a.platform), 'account_uid': a.account_uid,
+            'href': refs[0]['href'] if len(refs) == 1 else platform_href(a.platform), 'account_uid': a.account_uid,
             'remaining_render_ids': [e.render_id for e in entries[len(receipts) + len(failures):] if e]}
 
 
-async def publication_task_view(target: dict, request) -> dict:
+async def publication_task_view(target: dict, request, *, row: dict | None = None) -> dict:
     from web.services.publication_state import describe
     platform, key = target['platform'], target['id']
     item = {**target, 'href': platform_href(platform), 'active': False, 'state': 'waiting'}
     try:
-        _, row = await application.native(request, 'GET', platform_path(platform) + '/uploads/' + quote(key, safe=''))
+        if row is None:
+            _, row = await application.native(request, 'GET', platform_path(platform) + '/uploads/' + quote(key, safe=''))
         status = row.get('status', '')
         owner = row.get('uid') or row.get('account_uid') or target.get('account_uid') or ''
-        profile = account(platform)
+        # account files and receipt state are read in a worker, off the shared event loop
+        profile, progress = await asyncio.to_thread(lambda: (account(platform), describe(platform, key, row)))
         item.update(account_uid=owner, account_name=profile.get('name') if owner and profile.get('uid') == owner else owner)
-        progress = describe(platform, key, row)
         item.update({k: row.get(k) for k in ('status', 'title', 'script_id', 'version', 'render_id', 'phase', 'error', 'url', 'bvid', 'work_id')})
         item.update(**progress)
         item['title'] = row.get('title') or (row.get('payload') or {}).get('title')

@@ -23,6 +23,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import fcntl
 import os
 import re
 import shutil
@@ -151,6 +152,21 @@ def prune_empty_round_dirs(output_dir: Path, days: int, dry_run: bool) -> str:
     return f"空轮次目录: 删除 {len(removed)} 个（{', '.join(sorted(removed))}）"
 
 
+#: Directories whose sidecars each belong to one schedule run, render or theme: once old they are never locked again.
+ONE_SHOT_LOCK_DIRS = ("schedule-locks", "video_render_locks", "theme-start", "theme-render")
+
+
+def _unlink_unless_held(path: Path) -> bool:
+    """Delete a sidecar only while holding its flock, so a live holder (a render still being followed) keeps it."""
+    with path.open("a") as handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return False
+        path.unlink()
+    return True
+
+
 def prune_lock_sidecars(state_dir: Path, days: int, dry_run: bool) -> str:
     """Remove ``.lock`` sidecars left by file_lock.
 
@@ -160,15 +176,18 @@ def prune_lock_sidecars(state_dir: Path, days: int, dry_run: bool) -> str:
     cutoff = time.time() - days * 86400
     removed = freed = 0
     stuck = 0
-    for path in list(state_dir.glob("*.lock")) + list((state_dir / "locks").glob("*")):
+    paths = list(state_dir.glob("*.lock")) + list((state_dir / "locks").glob("*"))
+    for name in ONE_SHOT_LOCK_DIRS:
+        paths += list((state_dir / name).glob("*.lock"))
+    for path in paths:
         if not path.is_file() or path.suffix not in (".lock", ""):
             continue
         try:
             if path.stat().st_mtime >= cutoff:
                 continue
             size = path.stat().st_size
-            if not dry_run:
-                path.unlink()
+            if not dry_run and not _unlink_unless_held(path):
+                continue
             removed += 1
             freed += size
         except OSError:

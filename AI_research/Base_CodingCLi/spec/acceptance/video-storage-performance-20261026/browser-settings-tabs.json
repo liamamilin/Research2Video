@@ -1,0 +1,32 @@
+[
+  {
+    "tab": "用户管理",
+    "observedReadyMs": 374,
+    "alerts": [
+      "opencode zen（按量计费） 没有这个模型：deepseek-v4-flash。请从最新清单选择。"
+    ],
+    "loading": [],
+    "nodes": 1153,
+    "title": "设置"
+  },
+  {
+    "tab": "审计日志",
+    "observedReadyMs": 1375,
+    "alerts": [
+      "opencode zen（按量计费） 没有这个模型：deepseek-v4-flash。请从最新清单选择。"
+    ],
+    "loading": [],
+    "nodes": 5138,
+    "title": "设置"
+  },
+  {
+    "tab": "运行日志",
+    "observedReadyMs": 577,
+    "alerts": [
+      "opencode zen（按量计费） 没有这个模型：deepseek-v4-flash。请从最新清单选择。"
+    ],
+    "loading": [],
+    "nodes": 1634,
+    "title": "设置"
+  }
+]

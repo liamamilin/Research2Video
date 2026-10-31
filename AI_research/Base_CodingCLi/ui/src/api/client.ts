@@ -1,4 +1,5 @@
 // API client with CSRF, auto-refresh, and 401 handling
+import { sessionRevision } from "@/lib/session-events";
 
 export class ApiError extends Error {
   code: string;
@@ -24,6 +25,7 @@ type RequestOpts = {
   signal?: AbortSignal;
   responseType?: "stream";
   timeoutMs?: number;
+  skipAuthRefresh?: boolean;
   query?: Record<string, string | number | undefined>;
 };
 
@@ -32,17 +34,17 @@ let onAuthError: (() => void) | null = null;
 // /api/auth/refresh, which 401s, which calls logout(), whose own request 401s
 // again -- a loop that hammers the API and ends up logging the user out over a
 // transient failure.
-let _sessionExpired = false;
+let _expiredRevision: string | null = null;
 
 export function setAuthErrorHandler(handler: (() => void) | null) {
   onAuthError = handler;
-  _sessionExpired = false;
+  _expiredRevision = null;
 }
 
 // --- Token refresh ---
 
 type RefreshResult = "ok" | "expired" | "unavailable";
-let _refreshing: Promise<RefreshResult> | null = null;
+let _refreshing: { revision: string; csrf: string | null; promise: Promise<RefreshResult> } | null = null;
 
 async function request(url: string, init: RequestInit, timeoutMs: number, stream = false) {
   // Keep the caller's signal attached to a live stream after its headers arrive.
@@ -74,23 +76,40 @@ async function request(url: string, init: RequestInit, timeoutMs: number, stream
 }
 
 async function tryRefresh(): Promise<RefreshResult> {
-  if (_refreshing) return _refreshing;
-  _refreshing = (async () => {
+  const revision = sessionRevision();
+  const csrf = getCookie("ai_research_csrf");
+  if (_refreshing?.revision === revision && _refreshing.csrf === csrf) return _refreshing.promise;
+  const promise = (async (): Promise<RefreshResult> => {
     try {
-      const csrf = getCookie("ai_research_csrf");
-      const { resp } = await request("/api/auth/refresh", {
-        method: "POST",
-        credentials: "include",
-        headers: csrf ? { "X-CSRF-Token": csrf } : undefined,
-      }, 10_000);
-      return resp.ok ? "ok" : [401, 403].includes(resp.status) ? "expired" : "unavailable";
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const csrf = getCookie("ai_research_csrf");
+        const { resp, text } = await request("/api/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+          headers: csrf ? { "X-CSRF-Token": csrf } : undefined,
+        }, 10_000);
+        // The starting gateway may return an HTML page with HTTP 200. That
+        // does not prove login recovered and must not end in a forced logout.
+        if (resp.ok) {
+          const data: unknown = JSON.parse(text);
+          return data && typeof data === "object" && "user" in data ? "ok" : "unavailable";
+        }
+        if (resp.status === 401) return "expired";
+        // Another tab can rotate CSRF after we build these headers. Read the
+        // current cookie once more; a rejected CSRF check does not revoke login.
+        if (resp.status !== 403) return "unavailable";
+      }
+      return "unavailable";
     } catch {
       return "unavailable";
-    } finally {
-      _refreshing = null;
     }
   })();
-  return _refreshing;
+  _refreshing = { revision, csrf, promise };
+  try {
+    return await promise;
+  } finally {
+    if (_refreshing?.promise === promise) _refreshing = null;
+  }
 }
 
 // --- Main api function ---
@@ -100,6 +119,9 @@ export async function api<T = unknown>(
   opts: RequestOpts = {},
   _retried = false,
 ): Promise<T> {
+  const revision = sessionRevision();
+  const sessionCsrf = getCookie("ai_research_csrf");
+  const sessionChanged = () => revision !== sessionRevision() || sessionCsrf !== getCookie("ai_research_csrf");
   const method = opts.method || "GET";
   const headers: Record<string, string> = {
     Accept: opts.responseType === "stream" ? "text/event-stream" : "application/json",
@@ -154,14 +176,28 @@ export async function api<T = unknown>(
     try {
       data = JSON.parse(text);
     } catch {
-      data = { error: { code: "bad_response", message: text.slice(0, 200) } };
+      if (resp.ok) throw new ApiError(resp.status, "bad_response", "服务返回的数据格式异常，请刷新重试");
+      data = { error: { code: "bad_response", message: "服务返回的数据格式异常，请重试" } };
     }
   }
 
   if (!resp.ok) {
+    const rawError = data && typeof data === "object" && "error" in data ? data.error : null;
+    const errData = rawError && typeof rawError === "object"
+      ? rawError as Record<string, unknown>
+      : { code: "unknown", message: resp.statusText };
+    const changedResponse = () => new ApiError(503, "session_changed", "登录状态已更新，请重试");
+    // A late failure belongs to the session that sent it. It cannot log out
+    // the newer session established by this tab or another one in the meantime.
+    if (!opts.skipAuthRefresh && sessionChanged()
+        && (resp.status === 401 || (resp.status === 403 && errData.code === "csrf_failed"))) {
+      if (!_retried) return api<T>(path, opts, true);
+      throw changedResponse();
+    }
     // Auto-refresh on 401 (only once per request)
-    if (resp.status === 401 && !_retried) {
+    if (resp.status === 401 && !_retried && !opts.skipAuthRefresh) {
       const ok = await tryRefresh();
+      if (sessionChanged()) return api<T>(path, opts, true);
       if (ok === "ok") return api<T>(path, opts, true);
       if (ok === "unavailable") {
         throw new ApiError(503, "auth_unavailable", "会话刷新暂时失败，请重试");
@@ -169,14 +205,11 @@ export async function api<T = unknown>(
     }
 
     // If refresh failed or already retried, fire the logout callback -- once.
-    if (resp.status === 401 && onAuthError && !_sessionExpired) {
-      _sessionExpired = true;
+    if (resp.status === 401 && !opts.skipAuthRefresh && onAuthError && _expiredRevision !== revision) {
+      _expiredRevision = revision;
       onAuthError();
     }
 
-    const errData = data && typeof data === "object" && "error" in data
-      ? (data as Record<string, unknown>).error as Record<string, unknown>
-      : { code: "unknown", message: resp.statusText };
     throw new ApiError(
       resp.status,
       String(errData.code || "unknown"),
@@ -185,5 +218,6 @@ export async function api<T = unknown>(
     );
   }
 
+  if (path === "/api/auth/login" || path === "/api/auth/me") _expiredRevision = null;
   return data as T;
 }

@@ -5,13 +5,15 @@ import { ErrorState } from "@/components/ErrorState";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import { Trash2, RefreshCw, Copy, Check } from "lucide-react";
+import { BrandingSettings } from "@/components/BrandingSettings";
+import { VideoStorageConfig } from "@/components/VideoStorageConfig";
 import { SystemConfig } from "@/components/SystemConfig";
 import { ShareLinks } from "@/components/ShareLinks";
 import { usePageResource } from "@/lib/use-page-resource";
 
 const loadGlobalLogs = (signal: AbortSignal) => api<{ lines: string[] }>("/api/logs/global?lines=500", { signal });
 
-type SettingsTab = "system" | "users" | "audit" | "logs";
+type SettingsTab = "system" | "users" | "audit" | "logs" | "brands";
 
 export function SettingsPage() {
   const user = useAuthStore((s) => s.user);
@@ -31,6 +33,7 @@ export function SettingsPage() {
     { key: "users", label: "用户管理" },
     { key: "audit", label: "审计日志" },
     { key: "logs", label: "运行日志" },
+    { key: "brands", label: "视频品牌" },
   ];
 
   return (
@@ -39,10 +42,11 @@ export function SettingsPage() {
         <div className="flex-1"><h1 className="text-xl font-semibold tracking-tight">设置</h1><p className="text-xs text-text-muted mt-1">管理模型与服务配置、账号权限和系统运行记录。</p></div>
       </div>
 
-      <div className="flex gap-0 border-b border-border">
+      <div className="flex flex-wrap gap-0 border-b border-border">
         {tabs.map((t) => (
           <button
             key={t.key}
+            aria-pressed={tab === t.key}
             onClick={() => setTab(t.key)}
             className={cn(
               "px-4 py-2 text-sm border-b-2 transition",
@@ -56,10 +60,11 @@ export function SettingsPage() {
         ))}
       </div>
 
-      <div hidden={tab !== "system"}><SystemConfig /></div>
+      <div hidden={tab !== "system"} className="space-y-4"><VideoStorageConfig /><SystemConfig /></div>
       {tab === "users" && <UserManagement />}
       {tab === "audit" && <AuditLog />}
       {tab === "logs" && <GlobalLogs />}
+      {tab === "brands" && <BrandingSettings />}
 
       {/* At the bottom on purpose: the phone link is a lookup, not a daily
           control, so it should be findable without competing with the tab

@@ -107,6 +107,9 @@ def save_draft(render_id: str, platform: str, owner: str, payload: dict, previou
     if any(t["script_id"] == render["script_id"] and t["version"] == render["version"] for t in existing):
         raise ValueError("此目标已有投稿任务，请查看投稿进度。")
     validate_draft(payload, platform)
+    if 'first_comment' in payload:
+        from core.social.publish_text import comment_options
+        payload = {**payload, 'first_comment': comment_options(payload['first_comment'])}
     if previous_payload is not None:
         validate_draft(previous_payload, platform)
     return store.save_distribution_draft(render, platform, owner, payload, previous_payload)

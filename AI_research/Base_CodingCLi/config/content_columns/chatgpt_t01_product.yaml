@@ -1,0 +1,22 @@
+schema_version: 1
+name: T01 · 产品与能力认知
+matrix: chatgpt_acquisition
+type: explainer
+audience: 中文 ChatGPT 新用户、职场与学习人群、潜在付费用户
+promise: ChatGPT 到底能做什么？
+production_ids:
+- chatgpt_t01_product
+render_inheritance: content_matrix
+render:
+  packaging:
+    label: 产品与能力认知
+presentation:
+  strategy: 围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。从官方演示挑一个普通人容易理解的能力，用具体输入、操作与可见输出解释它能完成什么。优先让不了解 ChatGPT
+    的观众看懂结果，不堆功能名称。
+  preferred_visuals:
+  - 产品真实截图
+  - 操作步骤
+  - 结果展示
+  - 变化前后对比
+status: configured
+notes: 题材编号 T01；获客作用：吸引新用户。从官方演示挑一个普通人容易理解的能力，用具体输入、操作与可见输出解释它能完成什么。优先让不了解 ChatGPT 的观众看懂结果，不堆功能名称。

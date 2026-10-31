@@ -146,6 +146,7 @@ function mockApi(detail: unknown = DETAIL) {
     if (String(url).includes("/publish")) {
       return jsonResponse({ title: "缓存前缀纪律", description: "", chapters: [], chapter_note: "", tags: [],
         cover: { headline: "缓存前缀纪律", badge: "深度解读" }, references: [], warnings: [],
+        render_id: new URL(String(url), "http://localhost").searchParams.get("render_id"),
         version: Number(new URL(String(url), "http://localhost").searchParams.get("version")) || 1 });
     }
     if (String(url).includes("/facts")) {
@@ -181,6 +182,7 @@ function renderPage(path = "/video/s1") {
 }
 
 beforeEach(() => {
+  localStorage.clear();
   useAuthStore.setState({ user: { username: "e", role: "editor" } as never });
   mockApi();
 });
@@ -191,6 +193,85 @@ afterEach(() => {
 });
 
 describe("Video script review", () => {
+  it.each(["RESEARCHING", "WRITING"])("uses the topic heading before the first draft while %s", async (status) => {
+    mockApi({ ...DETAIL, status, current_version: 0, title: "", version_shown: null });
+    renderPage();
+    expect(await screen.findByRole("heading", { level: 1, name: DETAIL.topic.title })).toBeTruthy();
+  });
+
+  it("falls back from blank version and detail titles and retains an existing version title", async () => {
+    mockApi({ ...DETAIL, title: " ", version_shown: { ...DETAIL.version_shown, title: " " } });
+    renderPage();
+    expect(await screen.findByRole("heading", { level: 1, name: DETAIL.topic.title })).toBeTruthy();
+    cleanup();
+    mockApi(DETAIL);
+    renderPage();
+    expect(await screen.findByRole("heading", { level: 1, name: DETAIL.version_shown.title })).toBeTruthy();
+  });
+
+  it("has a default heading when a new task has no title yet", async () => {
+    mockApi({ ...DETAIL, status: "RESEARCHING", current_version: 0, title: "", topic: { title: "" }, version_shown: null });
+    renderPage();
+    expect(await screen.findByRole("heading", { level: 1, name: "视频文稿" })).toBeTruthy();
+  });
+
+  it("shows an archived duplicate as a skip with original links instead of a failure", async () => {
+    mockApi({ ...DETAIL, status: "FAILED", archived: 1, current_version: 0, version_shown: null, versions: [],
+      error: "主事件已经讲过", selection_skip: { kind: "duplicate", reason: "主事件已经讲过", originals: [
+        { id: "original", title: "已完成的视频", video_url: "/original.mp4", render_state: "done" },
+      ] } });
+    renderPage("/video/s1?return_to=%2Ftopics%3Ftask%3Dskipped");
+    await screen.findByText("重复选题，已跳过");
+    expect(screen.queryByText("没有完成")).toBeNull();
+    expect(screen.getByRole("link", { name: "已有文稿：已完成的视频" }).getAttribute("href")).toContain("/video/original?");
+    expect(screen.getByRole("link", { name: "查看已有成片" }).getAttribute("href")).toContain("tab=video");
+    expect(screen.getByLabelText("下一步").textContent).toContain("重复选题已跳过");
+    expect(calls.some(c => c.method === "POST")).toBe(false);
+  });
+  it("keeps the topic return destination while changing tabs and rejects unrelated return links", async () => {
+    const back = "/topics?cell=flash&source=flash&round=2026-10-19&task=draft#topic-F1";
+    renderPage(`/video/s1?return_to=${encodeURIComponent(back)}`);
+    const link = await screen.findByRole("link", { name: "← 返回选题，继续处理" });
+    expect(link.getAttribute("href")).toBe(back);
+    fireEvent.click(screen.getByRole("tab", { name: "审校" }));
+    expect(screen.getByRole("link", { name: "← 返回选题，继续处理" }).getAttribute("href")).toBe(back);
+    cleanup();
+    renderPage("/video/s1?return_to=https%3A%2F%2Fevil.test");
+    expect((await screen.findByRole("link", { name: "← 视频文稿" })).getAttribute("href")).toBe("/video");
+  });
+  it("refreshes an idle draft and follows automatic approval without a page reload", async () => {
+    const timers = vi.spyOn(window, "setInterval");
+    try {
+      renderPage();
+      await screen.findByText("一个时间戳让缓存折扣失效");
+      const refresh = timers.mock.calls.find(([, ms]) => ms === 30000)?.[0];
+      expect(typeof refresh).toBe("function");
+      mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1,
+        renders: [{ id: "auto-render", version: 1, status: "RUNNING", created_at: DETAIL.created_at, files: [] }] });
+      await act(async () => { if (typeof refresh === "function") refresh(); });
+      await screen.findByRole("tab", { name: "成片" });
+      await waitFor(() => expect(timers.mock.calls.some(([, ms]) => ms === 5000)).toBe(true));
+      expect(calls.every(call => call.method === "GET")).toBe(true);
+    } finally { timers.mockRestore(); }
+  });
+
+  it('shows an imported local video with playback and publishing, without generation or AutoVideo dependency', async () => {
+    mockApi({ ...DETAIL, status: 'APPROVED', approved_version: 1, column: null,
+      topic: { title: '演示视频', id: null, local_video: { file_name: '演示视频.mp4', duration: 12, width: 1920, height: 1080, size: 2000 } },
+      version_shown: { ...DETAIL.version_shown, sections: [], meta: { local_video: true } },
+      renders: [{ id: 'r-local', version: 1, status: 'COMPLETED', created_at: '2026-10-27T09:00:00+08:00',
+        files: [{ name: 'video.mp4', url: '/api/video/renders/r-local/files/video.mp4', size: 2000 }] }] });
+    renderPage('/video/s1?tab=video');
+    expect(await screen.findByRole('heading', { name: '本地导入视频' })).toBeTruthy();
+    expect(screen.getByText('演示视频.mp4')).toBeTruthy();
+    expect(screen.getByRole('link', { name: '下载成片' }).getAttribute('href')).toContain('r-local');
+    expect(screen.queryByRole('tab', { name: '稿件' })).toBeNull();
+    expect(screen.queryByRole('tab', { name: '审校' })).toBeNull();
+    expect(screen.queryByText('重新生成文稿')).toBeNull();
+    expect(screen.queryByText('快速卡片出片')).toBeNull();
+    expect(calls.some(c => c.url.includes('/autovideo'))).toBe(false);
+    expect(calls.every(c => c.method === 'GET')).toBe(true);
+  });
   it("keeps polling a social UNKNOWN task and receives its automatic publication record", async () => {
     const distribution={platform:"kuaishou",script_id:"s1",version:1,account_uid:"owner",account_name:"测试作者",connected:true,current_account:true,status:"UNKNOWN",can_prepare:false,blocked_reason:"",draft:null,publications:[],task:{id:"task",status:"UNKNOWN",error:"",work_id:"",render_id:"r",updated_at:1}};
     mockApi({...DETAIL,distributions:[distribution]});
@@ -221,7 +302,10 @@ describe("Video script review", () => {
   it("submits the approved manuscript as fast cards only when explicitly selected", async () => {
     mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1 });
     renderPage("/video/s1?tab=render");
-    const button = await screen.findByRole("button", { name: "快速卡片出片" });
+    await screen.findByLabelText("本次制作档位");
+    fireEvent.change(screen.getByLabelText("本次制作档位"), { target: { value: "fast" } });
+    const button = await screen.findByRole("button", { name: "用定稿 v1 出片" });
+    await waitFor(() => expect((button as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(button);
     await waitFor(() => expect(calls.some(c => c.url.endsWith("/render") && c.method === "POST")).toBe(true));
     expect(calls.find(c => c.url.endsWith("/render") && c.method === "POST")?.body).toEqual({ production_mode: "fast" });
@@ -279,6 +363,18 @@ describe("Video script review", () => {
     expect(screen.getByText("批处理跑了两万次调用")).toBeTruthy();
     expect(screen.getByText("测验 1/2")).toBeTruthy();
     expect(screen.getByText("前缀稳不稳决定缓存省不省钱")).toBeTruthy();
+  });
+
+  it("loads draft-only styles and fact labels when entering the draft tab", async () => {
+    mockApi(ADAPTED);
+    renderPage("/video/s1?tab=review");
+    await screen.findByRole("tab", { name: "审校", selected: true });
+    expect(calls.some(c => /\/styles|\/facts/.test(c.url))).toBe(false);
+    fireEvent.click(screen.getByRole("tab", { name: "稿件" }));
+    await screen.findByLabelText("语气");
+    await waitFor(() => expect(screen.getByText("F3").getAttribute("title")).toContain("比不开缓存贵 25%"));
+    expect(calls.filter(c => c.url.includes("/styles"))).toHaveLength(1);
+    expect(calls.filter(c => c.url.includes("/facts"))).toHaveLength(1);
   });
 });
 
@@ -376,4 +472,140 @@ describe("Script version context", () => {
     expect(await screen.findByText("旧版 v1 成片，当前文稿为 v2")).toBeTruthy();
     expect(screen.getByLabelText("下一步").textContent).not.toContain("成片完成");
   });
+});
+
+describe("Continuous manuscript workflow", () => {
+  it("does not create a version for an unchanged editor and recovers local work after remount", async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "编辑" }));
+    const save = screen.getByRole("button", { name: "保存为新版本" }) as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
+    fireEvent.click(save);
+    expect(calls.some(c => c.method === "PUT")).toBe(false);
+    fireEvent.change(screen.getByLabelText("第 1 节第 1 段正文"), { target: { value: "尚未保存但需要保留的修改。" } });
+    await waitFor(() => expect(localStorage.getItem("script-editor:e:s1:v1")).toContain("尚未保存但需要保留"));
+    cleanup(); renderPage();
+    await screen.findByRole("button", { name: "恢复编辑" });
+    expect((screen.getByRole("button", { name: "定稿 v1" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "恢复编辑" }));
+    expect(screen.getByLabelText("第 1 节第 1 段正文")).toHaveProperty("value", "尚未保存但需要保留的修改。");
+    fireEvent.click(screen.getByRole("button", { name: "退出编辑" }));
+    expect(screen.getByLabelText("本地未保存草稿")).toBeTruthy();
+    expect(calls.some(c => c.method === "PUT")).toBe(false);
+  });
+
+  it("scopes local recovery to the person, manuscript and base version", async () => {
+    localStorage.setItem("script-editor:someone-else:s1:v1", JSON.stringify({ title: "他人的稿", sections: SECTIONS, original: "", baseVersion: 1 }));
+    localStorage.setItem("script-editor:e:s1:v2", JSON.stringify({ title: "另一版", sections: SECTIONS, original: "", baseVersion: 2 }));
+    renderPage();
+    await screen.findByRole("button", { name: "编辑" });
+    expect(screen.queryByRole("button", { name: "恢复编辑" })).toBeNull();
+    expect(screen.queryByText("他人的稿")).toBeNull();
+  });
+
+  it("keeps failed saves editable and locally recoverable without retrying", async () => {
+    const native = vi.mocked(fetch).getMockImplementation()!;
+    vi.stubGlobal("fetch", vi.fn((url: string, init?: RequestInit) => init?.method === "PUT"
+      ? Promise.resolve(jsonResponse({ error: { code: "save_failed", message: "隔离保存失败" } }, 500)) : native(url, init)));
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "编辑" }));
+    fireEvent.change(screen.getByLabelText("第 1 节第 1 段正文"), { target: { value: "失败后仍保留这段修改" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存为新版本" }));
+    await screen.findByRole("alert");
+    expect(screen.getByLabelText("第 1 节第 1 段正文")).toHaveProperty("value", "失败后仍保留这段修改");
+    expect(localStorage.getItem("script-editor:e:s1:v1")).toContain("失败后仍保留");
+    expect(vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "PUT")).toHaveLength(1);
+  });
+
+  it("does not save over a version advanced by another task", async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "编辑" }));
+    fireEvent.change(screen.getByLabelText("第 1 节第 1 段正文"), { target: { value: "本机暂存" } });
+    mockApi({ ...DETAIL, current_version: 2 });
+    fireEvent.click(screen.getByRole("button", { name: "保存为新版本" }));
+    expect((await screen.findByRole("alert")).textContent).toContain("保存版已变化");
+    expect(calls.some(c => c.method === "PUT")).toBe(false);
+    expect(localStorage.getItem("script-editor:e:s1:v1")).toContain("本机暂存");
+  });
+
+  it("locates a review issue, focuses its editor, retains notes and hides audit submission while editing", async () => {
+    mockApi({ ...ADAPTED, column: { ...ADAPTED.column, writer: "single" }, steps: [{ step: "audit", label: "审校", state: "DONE", note: "" }] });
+    renderPage("/video/s1?tab=review");
+    const locator = await screen.findByRole("button", { name: "定位第 1 节第 1 段：把假设场景说成真事" });
+    fireEvent.click(locator);
+    const textarea = await screen.findByLabelText("第 1 节第 1 段正文");
+    await waitFor(() => expect(document.activeElement).toBe(textarea));
+    expect(screen.getByLabelText("编辑审校意见").textContent).toContain("一句话里有 4 个数字");
+    expect(screen.queryByRole("button", { name: "重跑审校" })).toBeNull();
+    expect(calls.some(c => c.method === "POST")).toBe(false);
+  });
+
+  it("approves from an explicit review tab and goes to render settings without starting a render", async () => {
+    renderPage("/video/s1?tab=review");
+    fireEvent.click(await screen.findByRole("button", { name: "定稿 v1" }));
+    await screen.findByRole("tab", { name: "成片", selected: true });
+    expect(screen.getByLabelText("本次出片设置")).toBeTruthy();
+    expect(calls.filter(c => c.method === "POST").map(c => c.url)).toEqual(["/api/video/scripts/s1/approve"]);
+  });
+
+  it("uses one render submission with explicit voice and mode, despite repeated clicks", async () => {
+    mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1 });
+    const native = vi.mocked(fetch).getMockImplementation()!;
+    vi.stubGlobal("fetch", vi.fn((url: string, init?: RequestInit) => String(url).includes("/autovideo")
+      ? Promise.resolve(jsonResponse({ reachable: true, ready: true, voices: [{ id: "voice-test", label: "测试声音" }], blockers: [] })) : native(url, init)));
+    renderPage("/video/s1?tab=video");
+    const button = await screen.findByRole("button", { name: "用定稿 v1 出片" });
+    await waitFor(() => expect((button as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.change(screen.getByLabelText("配音声音"), { target: { value: "voice-test" } });
+    fireEvent.change(screen.getByLabelText("本次制作档位"), { target: { value: "fast" } });
+    fireEvent.click(button); fireEvent.click(button);
+    await waitFor(() => expect(calls.filter(c => c.url.endsWith("/render") && c.method === "POST")).toHaveLength(1));
+    expect(calls.find(c => c.url.endsWith("/render"))?.body).toEqual({ voice_id: "voice-test", production_mode: "fast" });
+    expect(calls.some(c => /settings|recipes/.test(c.url) && c.method !== "GET")).toBe(false);
+  });
+
+  it("keeps the submit button disabled on unavailable service and allows a read-only status retry", async () => {
+    mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1 });
+    const native = vi.mocked(fetch).getMockImplementation()!;
+    const statusRead = vi.fn(() => Promise.resolve(jsonResponse({ reachable: false, ready: false, voices: [], blockers: [], base_url: "local", error: "offline" })));
+    vi.stubGlobal("fetch", vi.fn((url: string, init?: RequestInit) => String(url).includes("/autovideo") ? statusRead() : native(url, init)));
+    renderPage("/video/s1?tab=video");
+    const button = await screen.findByRole("button", { name: "用定稿 v1 出片" });
+    fireEvent.click(await screen.findByRole("button", { name: "重新读取服务状态" }));
+    await waitFor(() => expect(statusRead).toHaveBeenCalledTimes(2));
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(calls.some(c => c.method === "POST")).toBe(false);
+  });
+
+  it("opens a completed current version on the video tab while keeping explicit publication links", async () => {
+    mockApi({ ...DETAIL, status: "APPROVED", approved_version: 1,
+      renders: [{ id: "finished", version: 1, status: "COMPLETED", files: [{ name: "video.mp4", url: "/done.mp4" }], created_at: DETAIL.created_at }] });
+    renderPage();
+    await screen.findByRole("tab", { name: "成片", selected: true });
+    expect(screen.getByLabelText("文稿 v1 成片").getAttribute("src")).toBe("/done.mp4");
+    expect(screen.getByRole("button", { name: "发布 v1：查看发布包与记录链接" })).toBeTruthy();
+  });
+});
+
+it("opens the new approved version's settings instead of silently selecting an old movie", async () => {
+  mockApi({ ...DETAIL, status: "APPROVED", current_version: 2, approved_version: 2,
+    version_shown: { ...DETAIL.version_shown, version: 2 },
+    renders: [{ id: "old", version: 1, status: "COMPLETED", files: [{ name: "video.mp4", url: "/old.mp4" }], created_at: DETAIL.created_at }] });
+  renderPage("/video/s1?tab=video");
+  expect(await screen.findByRole("combobox", { name: "本次制作档位" })).toBeTruthy();
+  expect(screen.queryByLabelText("文稿 v1 成片")).toBeNull();
+  expect(screen.getByLabelText("查看成片记录")).toHaveProperty("value", "");
+  fireEvent.change(screen.getByLabelText("查看成片记录"), { target: { value: "old" } });
+  expect(screen.getByLabelText("文稿 v1 成片").getAttribute("src")).toBe("/old.mp4");
+});
+
+it("keeps an explicit same-version render through preview, pack and version selection", async () => {
+  const renders=["first","second"].map(id => ({id,script_id:"s1",version:1,status:"COMPLETED",title:id,files:[{name:"video.mp4",url:`/${id}.mp4`}],created_at:DETAIL.created_at}));
+  mockApi({...DETAIL,current_version:1,approved_version:1,version_shown:{...DETAIL.version_shown,version:1},renders});
+  renderPage("/video/s1?tab=publish&publish_version=1&render=second");
+  expect((await screen.findByLabelText("本次发布成片")).getAttribute("src")).toBe("/second.mp4");
+  await waitFor(() => expect(calls.some(c => c.url.includes("render_id=second"))).toBe(true));
+  fireEvent.change(screen.getByLabelText("选择具体成片"),{target:{value:"first"}});
+  await waitFor(() => expect(calls.some(c => c.url.includes("render_id=first"))).toBe(true));
+  expect(screen.getByLabelText("本次发布成片").getAttribute("src")).toBe("/first.mp4");
 });

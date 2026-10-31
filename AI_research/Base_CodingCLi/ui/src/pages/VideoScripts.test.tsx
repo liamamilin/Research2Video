@@ -94,6 +94,21 @@ function renderPage() {
 }
 
 describe("Video script cell picker", () => {
+  it("allows a topic covered by another cell but blocks a matching cell's active task", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      const u = String(url);
+      if (u.includes("/cells")) return jsonResponse(CELLS);
+      if (u.includes("/topics")) return jsonResponse({ round: "2026-10-19", topics: [
+        { ...FLASH[0], scripted: true, published: true, scripts: [{ id: "flash-task", column_key: "flash-nr", cell_key: "flash", status: "WRITING", created_at: "2026-10-19" }] },
+        { ...FLASH[1], scripted: true, scripts: [{ id: "same-task", column_key: "deep_dive-m8-nr", status: "WRITING", created_at: "2026-10-19" }] },
+      ] });
+      return jsonResponse([]);
+    }));
+    render(<MemoryRouter initialEntries={["/video?cell=deep_dive&topic=2026-10-19/F1&topic_source=flash"]}><VideoScriptsPage /></MemoryRouter>);
+    const allowed = await screen.findByRole("button", { name: "写这一篇" });
+    expect((allowed as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole("button", { name: "已有文稿任务" }) as HTMLButtonElement).disabled).toBe(true);
+  });
   it("marks unverified cells, disables blocked ones and offers the cell's other video forms", async () => {
     renderPage();
     await openCreate();
@@ -165,7 +180,7 @@ describe("Video script cell picker", () => {
     ];
     const base = (fetch as unknown as ReturnType<typeof vi.fn>).getMockImplementation()!;
     vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) =>
-      String(url).endsWith("/api/video/scripts") ? jsonResponse(scripts) : base(url, init)));
+      String(url).endsWith("/api/video/scripts?compact=true") ? jsonResponse(scripts) : base(url, init)));
     render(
       <MemoryRouter initialEntries={["/video?cell=ai-developer-roundup-long&topic=2026-10-19/F2"]}>
         <VideoScriptsPage />
@@ -191,7 +206,7 @@ describe("Script list columns", () => {
     ];
     const base = (fetch as unknown as ReturnType<typeof vi.fn>).getMockImplementation()!;
     vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
-      if (String(url).endsWith("/api/video/scripts")) return jsonResponse(scripts);
+      if (String(url).endsWith("/api/video/scripts?compact=true")) return jsonResponse(scripts);
       if (String(url).endsWith("/api/production")) return jsonResponse([{ key: "flash_daily", name: "快讯 · 每天（不再调研）", recipe: "flash-nr" }]);
       return base(url, init);
     }));
@@ -212,7 +227,7 @@ describe("Script list stages", () => {
     ];
     const base = (fetch as unknown as ReturnType<typeof vi.fn>).getMockImplementation()!;
     vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) =>
-      String(url).endsWith("/api/video/scripts") ? jsonResponse(scripts) : base(url, init)));
+      String(url).endsWith("/api/video/scripts?compact=true") ? jsonResponse(scripts) : base(url, init)));
     renderPage();
     const row = (await screen.findByText("出完片的")).closest("tr")!;
     expect(row.textContent).toContain("成片完成");
@@ -234,7 +249,7 @@ describe("Script list filters", () => {
     ];
     const base = (fetch as unknown as ReturnType<typeof vi.fn>).getMockImplementation()!;
     vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) =>
-      String(url).endsWith("/api/video/scripts") ? jsonResponse(scripts) : base(url, init)));
+      String(url).endsWith("/api/video/scripts?compact=true") ? jsonResponse(scripts) : base(url, init)));
     render(<MemoryRouter initialEntries={["/video"]}><VideoScriptsPage /></MemoryRouter>);
     expect(await screen.findByText("缓存那一篇")).toBeTruthy();
     expect(screen.getByText(/01-02 09:30|2020-01-02 09:30/)).toBeTruthy(); // the made-at time is written out, not only "x 天前"
@@ -290,11 +305,11 @@ describe("Script list scope and independent loading", () => {
   it("loads existing scripts without loading authoring catalogs, and scopes counts by matrix", async () => {
     vi.stubGlobal("fetch", vi.fn(async (url: string) => {
       calls.push({ url: String(url), method: "GET" });
-      return String(url).endsWith("/api/video/scripts") ? jsonResponse(rows) : jsonResponse({ error: { message: "配方读取失败", code: "catalog_failed" } }, 400);
+      return String(url).endsWith("/api/video/scripts?compact=true") ? jsonResponse(rows) : jsonResponse({ error: { message: "配方读取失败", code: "catalog_failed" } }, 400);
     }));
     renderPage();
     expect(await screen.findByText("矩阵甲的文稿")).toBeTruthy();
-    expect(calls.map((c) => c.url)).toEqual(["/api/video/scripts"]);
+    expect(calls.map((c) => c.url)).toEqual(["/api/video/scripts?compact=true"]);
     fireEvent.change(screen.getByLabelText("文稿矩阵"), { target: { value: "a" } });
     expect(screen.queryByText("矩阵乙的文稿")).toBeNull();
     expect(screen.getByRole("button", { name: "待审稿 1" })).toBeTruthy();

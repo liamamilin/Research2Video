@@ -1,0 +1,21 @@
+schema_version: 1
+name: AI 模型观察
+matrix: ai_media
+type: comparison
+audience: 需要为实际工作选择模型的开发者和 AI 高频使用者
+promise: 帮观众围绕一个使用场景看懂模型差异，理解选择背后的取舍
+production_ids:
+- ai_media_arena_digest
+render_inheritance: source_compatible
+render:
+  packaging:
+    label: AI 模型观察
+presentation:
+  strategy: 先呈现本期任务与最有解释力的差异，让足以改变选择的主要对象留在同一个比较中。主比较沿用一致的对象名、单位和坐标维度，价格、等待或能力读数在解释当前取舍时逐步加入；同一对象保持配色。切换任务时讲清比较维度为什么改变，把任务条件与选择一起呈现。收束回顾本期形成的比较方法，静态数据用静态比较表达。
+  preferred_visuals:
+  - 对比图
+  - 性能图
+  - 价格卡
+  - 真实截图
+status: configured
+notes: 从整期材料选择一个值得解释的使用场景或比较问题，让本期收获能用一句具体的话概括。围绕它选择足以改变决策的主要模型、档位与维度，把读数讲成等待、花费或能力上的取舍；参数在回答当前选择需要它时进入。其他模型或任务用于说明一项取舍怎样改变，随后回到主比较。主问题解释清楚后收束，让观众带走一种可以迁移的比较方法。对象数量、展开顺序与标题由本期问题决定。

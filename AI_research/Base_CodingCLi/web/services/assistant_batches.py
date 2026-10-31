@@ -15,7 +15,7 @@ from fastapi import HTTPException, Request
 
 from core import matrices
 from core.fileio import file_lock
-from core.video import production, production_settings, store as videos, autopilot_store
+from core.video import content_columns, production, production_settings, store as videos, autopilot_store
 from web import audit, deps
 from web.services import assistant_application, assistant_management
 from web.services.assistant_batch_store import BatchStore, view
@@ -142,7 +142,8 @@ def prepare(spec: dict, request: Request, user: dict) -> dict:
         for row in selected_configs:
             config = row['config']
             items.append({'target': config.key, 'title': config.name or config.label or config.key, 'payload': {
-                'type': 'production', 'job': config.job, 'revision': digest(Path(production.directory(paths.config_dir)) / (config.key + '.yaml')),
+                'type': 'production', 'job': config.job, 'content_mode': config.content_mode,
+                'column_revision': content_columns.snapshot(paths.config_dir, config.key, config.job).get('revision', ''), 'revision': digest(Path(production.directory(paths.config_dir)) / (config.key + '.yaml')),
                 'dependency': 'research:' + config.job if spec.get('refresh', True) else '', 'count': spec.get('count', 1)}})
     title = {'matrix_render': '批量调整矩阵设置', 'schedules': '批量启停周期', 'publish': '批量发布到 ' + spec.get('platform', ''),
              'produce': '研究并制作视频'}[kind]
@@ -323,6 +324,10 @@ async def advance_production(batch, item, app, user, storage, *, observe_only=Fa
         config = production.load_all(paths.config_dir, paths.jobs_dir).get(item['target'])
         if not config or not config.usable or digest(Path(production.directory(paths.config_dir)) / (item['target'] + '.yaml')) != payload['revision']:
             raise HTTPException(409, '生产配置已变化，请重新准备本次制作')
+        from core.video import content_columns
+        current_column = content_columns.snapshot(paths.config_dir, config.key, config.job)
+        if payload.get('content_mode', 'individual') != config.content_mode or (payload.get('column_revision', '') and payload['column_revision'] != current_column.get('revision', '')):
+            raise HTTPException(409, '栏目内容组织方式已变化，本批次保留原设置；请为新方式准备新任务')
         pending = await native(app, int(batch['user_id']), 'GET', '/api/production/' + quote(item['target'], safe='') + '/pending')
         report = (dependency or {}).get('result', {}).get('report')
         workspace_report = (dependency or {}).get('result', {}).get('workspace_report')

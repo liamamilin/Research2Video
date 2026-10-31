@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError, api, setAuthErrorHandler } from "./client";
+import { announceSessionChange } from "@/lib/session-events";
 
 function fakeResponse(status: number, body?: unknown): Response {
   return {
@@ -15,6 +16,7 @@ const fetchMock = vi.fn();
 
 beforeEach(() => {
   fetchMock.mockReset();
+  localStorage.clear();
   vi.stubGlobal("fetch", fetchMock);
   document.cookie = "ai_research_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   setAuthErrorHandler(null);
@@ -26,6 +28,24 @@ afterEach(() => {
 });
 
 describe("api()", () => {
+  it("does not refresh or expire a remembered session for a rejected login", async () => {
+    const expired = vi.fn();
+    setAuthErrorHandler(expired);
+    fetchMock.mockResolvedValueOnce(fakeResponse(401, { error: { code: "invalid_credentials" } }));
+    await expect(api("/api/auth/login", { method: "POST", skipAuthRefresh: true })).rejects.toMatchObject({ code: "invalid_credentials" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(expired).not.toHaveBeenCalled();
+  });
+  it("rejects an HTML success response before it reaches page state", async () => {
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: async () => "<!doctype html><title>Gateway</title>" });
+    await expect(api("/api/video/scripts")).rejects.toMatchObject({ code: "bad_response", status: 200 });
+  });
+
+  it("preserves structured errors even when an upstream error payload is null", async () => {
+    fetchMock.mockResolvedValueOnce(fakeResponse(503, { error: null }));
+    await expect(api("/api/video/scripts")).rejects.toMatchObject({ status: 503, code: "unknown" });
+  });
+
   it("bounds stalled read requests, including stalls while reading the response body", async () => {
     vi.useFakeTimers();
     fetchMock.mockImplementationOnce(async (_url, init) => ({
@@ -120,7 +140,7 @@ describe("api()", () => {
     document.cookie = "ai_research_csrf=csrf-123";
     fetchMock
       .mockResolvedValueOnce(fakeResponse(401, { error: { code: "expired", message: "x" } }))
-      .mockResolvedValueOnce(fakeResponse(200, { ok: true }))
+      .mockResolvedValueOnce(fakeResponse(200, { user: { username: "admin" } }))
       .mockResolvedValueOnce(fakeResponse(200, { ok: true }));
 
     const data = await api("/api/things");
@@ -152,6 +172,39 @@ describe("api()", () => {
     expect(onAuthError).not.toHaveBeenCalled();
   });
 
+  it("retries refresh with the latest CSRF cookie after another tab rotates it", async () => {
+    const onAuthError = vi.fn();
+    setAuthErrorHandler(onAuthError);
+    document.cookie = "ai_research_csrf=old-csrf";
+    fetchMock.mockResolvedValueOnce(fakeResponse(401))
+      .mockImplementationOnce(async () => {
+        document.cookie = "ai_research_csrf=new-csrf";
+        return fakeResponse(403, { error: { code: "csrf_failed" } });
+      })
+      .mockResolvedValueOnce(fakeResponse(200))
+      .mockResolvedValueOnce(fakeResponse(200, { ok: true }));
+    expect(await api("/api/assistant/workspace")).toEqual({ ok: true });
+    expect(fetchMock.mock.calls[1][1].headers["X-CSRF-Token"]).toBe("old-csrf");
+    expect(fetchMock.mock.calls[2][1].headers["X-CSRF-Token"]).toBe("new-csrf");
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      "/api/assistant/workspace", "/api/auth/refresh", "/api/auth/refresh", "/api/assistant/workspace",
+    ]);
+    expect(onAuthError).not.toHaveBeenCalled();
+  });
+
+  it("bounds rejected CSRF refreshes without logging out a potentially valid session", async () => {
+    const onAuthError = vi.fn();
+    setAuthErrorHandler(onAuthError);
+    fetchMock.mockResolvedValueOnce(fakeResponse(401))
+      .mockResolvedValueOnce(fakeResponse(403))
+      .mockResolvedValueOnce(fakeResponse(403));
+    await expect(api("/api/assistant/workspace")).rejects.toMatchObject({ code: "auth_unavailable" });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(onAuthError).not.toHaveBeenCalled();
+    fetchMock.mockResolvedValueOnce(fakeResponse(200, { ok: true }));
+    expect(await api("/api/assistant/workspace")).toEqual({ ok: true });
+  });
+
   it("wraps network errors as ApiError", async () => {
     fetchMock.mockRejectedValueOnce(new TypeError("Failed to fetch"));
 
@@ -159,5 +212,80 @@ describe("api()", () => {
       code: "network_error",
       status: 0,
     });
+  });
+
+  it("does not expire a newer login when an earlier refresh fails late", async () => {
+    const expired = vi.fn();
+    setAuthErrorHandler(expired);
+    fetchMock.mockResolvedValueOnce(fakeResponse(401))
+      .mockImplementationOnce(async () => {
+        announceSessionChange("login");
+        return fakeResponse(401, { error: { code: "invalid_refresh" } });
+      })
+      .mockResolvedValueOnce(fakeResponse(200, { ok: true }));
+    expect(await api("/api/outputs")).toEqual({ ok: true });
+    expect(expired).not.toHaveBeenCalled();
+  });
+
+  it("retries a late 401 against the new login instead of refreshing the old one", async () => {
+    const expired = vi.fn();
+    setAuthErrorHandler(expired);
+    fetchMock.mockImplementationOnce(async () => {
+      announceSessionChange("login");
+      return fakeResponse(401);
+    }).mockResolvedValueOnce(fakeResponse(200, { ok: true }));
+    expect(await api("/api/outputs")).toEqual({ ok: true });
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual(["/api/outputs", "/api/outputs"]);
+    expect(expired).not.toHaveBeenCalled();
+  });
+
+  it("rearms expiry handling after a successful new login", async () => {
+    const expired = vi.fn();
+    setAuthErrorHandler(expired);
+    fetchMock.mockResolvedValue(fakeResponse(401));
+    await expect(api("/api/outputs")).rejects.toBeInstanceOf(ApiError);
+    await expect(api("/api/outputs")).rejects.toBeInstanceOf(ApiError);
+    expect(expired).toHaveBeenCalledTimes(1);
+    announceSessionChange("login");
+    await expect(api("/api/outputs")).rejects.toBeInstanceOf(ApiError);
+    expect(expired).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not treat a gateway HTML page as successful authentication", async () => {
+    const expired = vi.fn();
+    setAuthErrorHandler(expired);
+    fetchMock.mockResolvedValueOnce(fakeResponse(401))
+      .mockResolvedValueOnce({ ok: true, status: 200, text: async () => "<!doctype html>正在启动" });
+    await expect(api("/api/outputs")).rejects.toMatchObject({ code: "auth_unavailable" });
+    expect(expired).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries a CSRF rejection only when the browser session actually changed", async () => {
+    document.cookie = "ai_research_csrf=before-login";
+    fetchMock.mockImplementationOnce(async () => {
+      document.cookie = "ai_research_csrf=after-login";
+      return fakeResponse(403, { error: { code: "csrf_failed" } });
+    }).mockResolvedValueOnce(fakeResponse(200, { ok: true }));
+    expect(await api("/api/things", { method: "POST", body: {} })).toEqual({ ok: true });
+    expect(fetchMock.mock.calls[1][1].headers["X-CSRF-Token"]).toBe("after-login");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("shares an in-flight refresh for concurrent requests from one session", async () => {
+    let complete!: (response: Response) => void;
+    const refresh = new Promise<Response>((resolve) => { complete = resolve; });
+    const attempts = new Map<string, number>();
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url === "/api/auth/refresh") return refresh;
+      const count = attempts.get(url) || 0;
+      attempts.set(url, count + 1);
+      return count === 0 ? fakeResponse(401) : fakeResponse(200, { ok: true });
+    });
+    const first = api("/api/first");
+    const second = api("/api/second");
+    await vi.waitFor(() => expect(fetchMock.mock.calls.filter(([url]) => url === "/api/auth/refresh")).toHaveLength(1));
+    complete(fakeResponse(200, { user: { username: "admin" } }));
+    expect(await Promise.all([first, second])).toEqual([{ ok: true }, { ok: true }]);
   });
 });

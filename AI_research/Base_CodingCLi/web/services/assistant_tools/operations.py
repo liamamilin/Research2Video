@@ -20,18 +20,32 @@ class MatrixOperations(Arguments):
     limit: int = Field(default=5, ge=1, le=10)
 
 
+class OperationsOverview(Arguments):
+    matrix: str = Field(default='', description='矩阵key；空为全部，_ungrouped为未归属')
+    platform: str = Field(default='', description='平台id；空时选择首个已连接的平台')
+    view: Literal['attention', 'working', 'publish'] = 'attention'
+    offset: int = Field(default=0, ge=0)
+    limit: int = Field(default=10, ge=1, le=50)
+
+
+def operations_overview(a, request, user):
+    from web.services.assistant_overview import overview
+    return overview(user, **a.model_dump())
+
+
 def inspect_matrix(a, request, user):
     from web.services.assistant_matrix_ops import inspect
     return inspect(a, request, user)
 
 
 CAPABILITIES = [
+    {'key': 'overview', 'title': '全局总览', 'detail': '按矩阵汇总待处理、进行中、可发布视频和最近研究结果；进入原页面或交给助手继续处理。', 'example': '查看全局总览，告诉我现在最需要处理什么。'},
     {'key': 'matrices', 'title': '矩阵与任务', 'detail': '创建矩阵、管理成员、研究任务与配方关联、共用配置和任务覆盖。', 'example': '查看各矩阵的研究任务、配方和周期，找出没有配齐的部分。'},
     {'key': 'sources', 'title': '信息源', 'detail': '查看、登记、修改、删除共享来源，检查直接引用和标签引用；任务 sources 使用原任务编辑。', 'example': '查看最近抓取失败的信息源，以及哪些研究任务受影响。'},
     {'key': 'research', 'title': '研究与报告', 'detail': '启动或取消准确一次研究，检索、比较、读取和分发报告，跟踪情报轮次。', 'example': '查看今天哪些研究没有完成，先分析原因。'},
     {'key': 'production', 'title': '文稿与视频', 'detail': '调整配方、公共提示词、继承设置，编辑或重跑文稿、制作视频、比较版本。', 'example': '查看当前文稿与视频对应的版本，以及生成配置。'},
     {'key': 'batches', 'title': '跨阶段与批量操作', 'detail': '固定范围，批量启停周期、调整矩阵、研究后自动制作视频、逐条投稿；保存逐项结果。', 'example': '把 AI 矩阵的生产配置列出来，准备运行研究并制作视频，先不执行。'},
-    {'key': 'platforms', 'title': '发布与运营', 'detail': '查询账号、准备发布包、投稿及恢复；B站数据同步、视频数据、评论读取与回复通过应用操作目录。', 'example': '查看 B 站发布情况和可读取的视频数据，只分析。'},
+    {'key': 'platforms', 'title': '发布与运营', 'detail': '查询账号、准备发布包、按本地视频路径投稿及恢复；B站数据同步、视频数据、评论读取与回复通过应用操作目录。', 'example': '我想把本地视频发布到指定平台'},
     {'key': 'administration', 'title': '系统管理', 'detail': '模型和配置、用量、诊断、用户、索引、通知与服务维护，按当前账号权限执行。', 'example': '检查当前模型、用量和服务状态，只查询。'},
 ]
 
@@ -132,6 +146,7 @@ def configure_task(a, request, user):
 
 
 TOOLS = {
+    'query_operations_overview': Tool(OperationsOverview, '一次读取整个应用的运营总览：各矩阵研究任务、需处理事项、进行中工作和可发布视频。summary与matrices计数覆盖完整范围，items按view分页，next_offset非空须继续读取才是完整清单。投稿和可发布仅针对所选platform当前账号；不跨平台相加。默认attention，也可working/publish；matrix空为全部。availability/warnings说明缺失，null统计表示未知。今日结果按每个任务最近一次运行统计，不是全天运行次数。只读，不调用模型、同步平台或启动任务。全局状态和运营问题优先用本工具。', operations_overview, label='查看全局总览'),
     'inspect_matrix_operations': Tool(MatrixOperations, '一次检查指定矩阵的运营链路：任务状态、来源及抓取问题、生产配置及继承、周期、已登录平台账号、近期投稿和本矩阵可发布候选。key是矩阵key，platforms可限定平台，默认列全部平台但仅查询已登录账号的候选。候选total为总数，items最多limit条；近期投稿最多10条且可能属于其他矩阵。只读，不触发研究或投稿；运营检查优先使用本工具，细节缺失时再展开。', inspect_matrix, label='检查矩阵运营'),
     'configure_matrix_task': Tool(ConfigureTask, '一次配齐矩阵、共享信息源、研究任务和视频配方。已有对象只改指定字段，缺少时创建；job_name必须是完整路径，title是显示名称。registered_sources登记/修改共享来源，sources设置任务引用。recipe使用兼容配方；render是矩阵共用设置，任务继承且原覆盖保留。返回准确production_keys，可用于prepare_application_batch的scope.ids；也可用scope.jobs选择完整job_name。不会启动研究、周期或发布。失败保留并列出已完成步骤。',
         configure_task, 'editor', True, '配齐矩阵与研究任务'),

@@ -1,0 +1,22 @@
+{
+  "bytes": 18547071,
+  "measurements": [
+    {
+      "variant": "old_whole_file",
+      "ms": 8.095,
+      "hash_matches": true
+    },
+    {
+      "variant": "stream_first",
+      "ms": 7.434,
+      "hash_matches": true
+    },
+    {
+      "variant": "stream_repeat",
+      "ms": 0.008,
+      "hash_matches": true
+    }
+  ],
+  "scope": "Same existing file, OS file cache warm; excludes HTTP transfer, not a cold disk benchmark",
+  "whole_file_allocation_removed": true
+}

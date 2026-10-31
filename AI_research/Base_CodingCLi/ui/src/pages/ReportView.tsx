@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo, memo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { getReportRaw, updateReportMeta, createShareLink, emailReport } from "@/api";
 import ReactMarkdown from "react-markdown";
@@ -218,6 +218,13 @@ function ReportWorkspace({ path }: { path: string }) {
     URL.revokeObjectURL(url);
   };
 
+  const { auxiliary, visibleContent, headings } = useMemo(() => {
+    const preamble = /^\s*<think>([\s\S]*?)<\/think>\s*/i.exec(content);
+    const visibleContent = preamble ? content.slice(preamble[0].length) : content;
+    return { auxiliary: preamble ? [preamble[1]] : [], visibleContent,
+      headings: visibleContent ? extractHeadings(visibleContent) : [] };
+  }, [content]);
+
   if (loading && !content) {
     return <div className="text-text-muted">加载中...</div>;
   }
@@ -235,15 +242,6 @@ function ReportWorkspace({ path }: { path: string }) {
   }
 
   const filename = path.split("/").pop() || "";
-  const preamble = /^\s*<think>([\s\S]*?)<\/think>\s*/i.exec(content);
-  const auxiliary = preamble ? [preamble[1]] : [];
-  const visibleContent = preamble ? content.slice(preamble[0].length) : content;
-  const headings = visibleContent ? extractHeadings(visibleContent) : [];
-  const headingCounts: Record<string, number> = {};
-  const headingId = (children: unknown) => {
-    const base = slugify(childrenToText(children)); const count = headingCounts[base] || 0; headingCounts[base] = count + 1;
-    return count ? `${base}-${count}` : base;
-  };
 
   return (
     <div className="space-y-4">
@@ -414,111 +412,123 @@ function ReportWorkspace({ path }: { path: string }) {
         {/* Markdown content */}
         <div className="card p-4 md:p-6 overflow-x-auto flex-1 min-w-0">
           <div className="md-body md-body-wide">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              h1: ({ children, ...props }) => (
-                <h1 id={headingId(children)} className="text-xl font-bold mt-6 mb-3 pb-1 border-b border-border scroll-mt-4" {...props}>
-                  {children}
-                </h1>
-              ),
-              h2: ({ children, ...props }) => (
-                <h2 id={headingId(children)} className="text-lg font-semibold mt-5 mb-2 scroll-mt-4" {...props}>
-                  {children}
-                </h2>
-              ),
-              h3: ({ children, ...props }) => (
-                <h3 id={headingId(children)} className="text-base font-medium mt-4 mb-1 scroll-mt-4" {...props}>
-                  {children}
-                </h3>
-              ),
-              p: ({ children, ...props }) => (
-                <p className="my-1.5" {...props}>
-                  {children}
-                </p>
-              ),
-              ul: ({ children, ...props }) => (
-                <ul className="list-disc pl-5 my-1.5 space-y-0.5" {...props}>
-                  {children}
-                </ul>
-              ),
-              ol: ({ children, ...props }) => (
-                <ol className="list-decimal pl-5 my-1.5 space-y-0.5" {...props}>
-                  {children}
-                </ol>
-              ),
-              li: ({ children, ...props }) => (
-                <li className="my-0.5" {...props}>
-                  {children}
-                </li>
-              ),
-              code: ({ children, className, ...props }) => {
-                const isInline = !className;
-                if (isInline) {
-                  return (
-                    <code
-                      className="bg-bg-hover px-1 py-0.5 rounded text-xs font-mono"
-                      {...props}
-                    >
-                      {children}
-                    </code>
-                  );
-                }
-                return (
-                  <pre className="bg-[#0d1117] p-3 rounded-md overflow-x-auto my-2">
-                    <code className="text-xs font-mono leading-relaxed" {...props}>
-                      {children}
-                    </code>
-                  </pre>
-                );
-              },
-              pre: ({ children }) => <>{children}</>,
-              table: ({ children, ...props }) => (
-                <div className="overflow-x-auto my-3">
-                  <table className="min-w-full text-xs border-collapse" {...props}>
-                    {children}
-                  </table>
-                </div>
-              ),
-              th: ({ children, ...props }) => (
-                <th className="border border-border px-2 py-1 bg-bg-hover text-left font-medium" {...props}>
-                  {children}
-                </th>
-              ),
-              td: ({ children, ...props }) => (
-                <td className="border border-border px-2 py-1" {...props}>
-                  {children}
-                </td>
-              ),
-              a: ({ children, href, ...props }) => (
-                <a
-                  className="text-accent hover:underline"
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  {...props}
-                >
-                  {children}
-                </a>
-              ),
-              blockquote: ({ children, ...props }) => (
-                <blockquote className="border-l-2 border-accent pl-3 my-2 text-text-muted" {...props}>
-                  {children}
-                </blockquote>
-              ),
-              hr: () => <hr className="my-4 border-border" />,
-              strong: ({ children, ...props }) => (
-                <strong className="font-semibold" {...props}>
-                  {children}
-                </strong>
-              ),
-            }}
-          >
-            {visibleContent}
-          </ReactMarkdown>
+          <ReportBody content={visibleContent} />
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+// Toolbar, TOC and metadata changes do not parse a large report again.
+const ReportBody = memo(function ReportBody({ content }: { content: string }) {
+  const headingCounts: Record<string, number> = {};
+  const headingId = (children: unknown) => {
+    const base = slugify(childrenToText(children)); const count = headingCounts[base] || 0; headingCounts[base] = count + 1;
+    return count ? `${base}-${count}` : base;
+  };
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: ({ children, ...props }) => (
+          <h1 id={headingId(children)} className="text-xl font-bold mt-6 mb-3 pb-1 border-b border-border scroll-mt-4" {...props}>
+            {children}
+          </h1>
+        ),
+        h2: ({ children, ...props }) => (
+          <h2 id={headingId(children)} className="text-lg font-semibold mt-5 mb-2 scroll-mt-4" {...props}>
+            {children}
+          </h2>
+        ),
+        h3: ({ children, ...props }) => (
+          <h3 id={headingId(children)} className="text-base font-medium mt-4 mb-1 scroll-mt-4" {...props}>
+            {children}
+          </h3>
+        ),
+        p: ({ children, ...props }) => (
+          <p className="my-1.5" {...props}>
+            {children}
+          </p>
+        ),
+        ul: ({ children, ...props }) => (
+          <ul className="list-disc pl-5 my-1.5 space-y-0.5" {...props}>
+            {children}
+          </ul>
+        ),
+        ol: ({ children, ...props }) => (
+          <ol className="list-decimal pl-5 my-1.5 space-y-0.5" {...props}>
+            {children}
+          </ol>
+        ),
+        li: ({ children, ...props }) => (
+          <li className="my-0.5" {...props}>
+            {children}
+          </li>
+        ),
+        code: ({ children, className, ...props }) => {
+          const isInline = !className;
+          if (isInline) {
+            return (
+              <code
+                className="bg-bg-hover px-1 py-0.5 rounded text-xs font-mono"
+                {...props}
+              >
+                {children}
+              </code>
+            );
+          }
+          return (
+            <pre className="bg-[#0d1117] p-3 rounded-md overflow-x-auto my-2">
+              <code className="text-xs font-mono leading-relaxed" {...props}>
+                {children}
+              </code>
+            </pre>
+          );
+        },
+        pre: ({ children }) => <>{children}</>,
+        table: ({ children, ...props }) => (
+          <div className="overflow-x-auto my-3">
+            <table className="min-w-full text-xs border-collapse" {...props}>
+              {children}
+            </table>
+          </div>
+        ),
+        th: ({ children, ...props }) => (
+          <th className="border border-border px-2 py-1 bg-bg-hover text-left font-medium" {...props}>
+            {children}
+          </th>
+        ),
+        td: ({ children, ...props }) => (
+          <td className="border border-border px-2 py-1" {...props}>
+            {children}
+          </td>
+        ),
+        a: ({ children, href, ...props }) => (
+          <a
+            className="text-accent hover:underline"
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            {...props}
+          >
+            {children}
+          </a>
+        ),
+        blockquote: ({ children, ...props }) => (
+          <blockquote className="border-l-2 border-accent pl-3 my-2 text-text-muted" {...props}>
+            {children}
+          </blockquote>
+        ),
+        hr: () => <hr className="my-4 border-border" />,
+        strong: ({ children, ...props }) => (
+          <strong className="font-semibold" {...props}>
+            {children}
+          </strong>
+        ),
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+});

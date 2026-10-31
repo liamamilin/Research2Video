@@ -1,15 +1,24 @@
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, type ReactNode, type SyntheticEvent } from "react";
 import { Link, Outlet, useLocation, useNavigationType } from "react-router-dom";
+import { PageLoading } from "./PageLoading";
 import { AssistantDrawer } from "./AssistantDrawer";
 import { Sidebar } from "./Sidebar";
 import { useAppStore } from "@/lib/app-store";
 import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
+import { preloadPage } from "@/lib/page-modules";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
 function isDesktop(): boolean {
   return window.matchMedia(DESKTOP_QUERY).matches;
+}
+
+function preloadDestination(event: SyntheticEvent) {
+  const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+  if (!(link instanceof HTMLAnchorElement) || link.hasAttribute("download") || link.target === "_blank") return;
+  const destination = new URL(link.href, window.location.href);
+  if (destination.origin === window.location.origin) preloadPage(destination.pathname);
 }
 
 export function Layout() {
@@ -53,7 +62,8 @@ export function Layout() {
   ) : null;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden" onPointerOverCapture={preloadDestination}
+      onFocusCapture={preloadDestination} onTouchStartCapture={preloadDestination}>
       {backdrop}
       <Sidebar open={sidebarOpen} onNavigate={handleNavigate} />
 
@@ -71,7 +81,7 @@ export function Layout() {
           <Link className="text-accent font-medium hover:underline" to={`/video/${encodeURIComponent(from)}?tab=draft`}>← 返回文稿，继续迭代</Link>
           <span className="text-text-muted">保存配置后回到文稿重新生成，已有结果会保留。</span>
         </div> : null}
-        <Outlet />
+        <Suspense fallback={<PageLoading />}><Outlet /></Suspense>
         </main>
       </div>
       <AssistantDrawer />

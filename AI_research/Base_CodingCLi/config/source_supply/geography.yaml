@@ -1,0 +1,33 @@
+name: 地理与世界探索 · 信息供给
+matrix: geography
+enabled: true
+timezone: Asia/Shanghai
+recurrence: 10 10 * * 6
+scan_limit: 60
+detail_pages: 3
+material_chars: 140000
+pool_per_job: 3
+pool_limit: 30
+discovery_queries: 2
+discovery_probes: 6
+entry_paths:
+- features
+- stories
+- maps
+- publications
+discovery_objective: 为「地理与世界探索」寻找可持续读取的机构栏目、原始资料、专业文章或订阅入口；覆盖这些实际研究方向：一个地方怎样运转：路线、地形、设施、生态与生活的具体关系；地理怎样塑造生活；沿空间关系、地图、观测和具体地方展开
+jobs:
+  geography/geography_daily:
+    mode: context
+    direction: 一个地方怎样运转：路线、地形、设施、生态与生活的具体关系
+    query:
+    - geography earth science ecology place infrastructure institute stories RSS
+    - 地理 地球 生态 地方 空间 研究机构 新闻 订阅
+    - geographical society earth observatory place stories features
+  geography/geography_weekly:
+    mode: context
+    direction: 地理怎样塑造生活；沿空间关系、地图、观测和具体地方展开
+    query:
+    - geography maps landscape people infrastructure research features
+    - geographical society earth observation maps explainers stories
+    - 地理 地图 地貌 人类 生活 空间 机构 专题

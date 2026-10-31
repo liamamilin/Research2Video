@@ -33,6 +33,17 @@ def test_progress_explains_waiting_and_actionable_failures(status, verification,
     assert resume_action('xiaohongshu', {'status': 'FAILED', 'can_retry': can_retry}) == ('retry' if can_retry else None)
 
 
+@pytest.mark.parametrize('verification,active', [
+    ({'automatic': True, 'running': False, 'state': 'reviewing'}, False),
+    ({'automatic': False, 'running': True, 'state': 'reviewing'}, True),
+    ({'automatic': True, 'running': True, 'exhausted': True, 'state': 'missing'}, False),
+])
+def test_explicit_verification_progress_overrides_legacy_automatic_flag(verification, active):
+    value = describe('xiaohongshu', 'original', {'status': 'SUBMITTED', 'verification': verification})
+    assert value['active'] is active
+    assert value['needs_attention'] is bool(verification.get('exhausted'))
+
+
 @pytest.mark.parametrize('accepted', [True, False])
 def test_assistant_resume_reuses_original_task_and_saved_fields(client, social_env, monkeypatch, accepted):
     job = enqueue('xiaohongshu', render())
@@ -51,8 +62,17 @@ def test_assistant_resume_reuses_original_task_and_saved_fields(client, social_e
     if accepted:
         assert db.get(job['id'])['status'] == 'SUBMITTED'
         assert db.list(kind='RECONCILE')[0]['parent_id'] == job['id']
+        assert not value['submitted']
+        assert value['receipts'][0]['status'] == 'SUBMITTED'
+        assert value['receipts'][0]['action'] == 'reconcile'
+        assert value['receipts'][0]['check']['status'] == 'QUEUED'
+        assert '没有重新上传' in value['message']
     else:
         assert db.get(job['id'])['status'] == 'QUEUED' and not db.list(kind='RECONCILE')
+        assert value['submitted'] and value['receipts'][0]['action'] == 'retry'
+    assert 'task=' + job['id'] in value['href']
+    assert value['references'][0]['href'] == value['href']
+    assert 'version=1' in value['href']
 
 
 def test_resume_does_not_replay_unknown_failure_or_published_task(client, social_env, monkeypatch):

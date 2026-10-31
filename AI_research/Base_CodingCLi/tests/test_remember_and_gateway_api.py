@@ -35,9 +35,20 @@ def _cookie(response, name):
     return ""
 
 
+@pytest.fixture
+def login_clock(monkeypatch):
+    """Exact lifetime assertions must not depend on login crossing a second."""
+    from types import SimpleNamespace
+    from web.auth import jwt as jwt_helper, routes
+
+    now = int(routes.time.time())
+    monkeypatch.setattr(jwt_helper, '_now', lambda: now)
+    monkeypatch.setattr(routes, 'time', SimpleNamespace(time=lambda: now))
+
+
 # --- remember me -------------------------------------------------------------
 
-def test_login_without_remember_keeps_the_default_session(client, web_env):
+def test_login_without_remember_keeps_the_default_session(client, web_env, login_clock):
     response = client.post('/api/auth/login',
                            json={'username': 'admin', 'password': 'admin-pass-123'})
     assert response.status_code == 200
@@ -45,7 +56,7 @@ def test_login_without_remember_keeps_the_default_session(client, web_env):
     assert "Max-Age=604800" in _cookie(response, "ai_research_refresh")
 
 
-def test_remember_me_extends_the_cookie(client, web_env):
+def test_remember_me_extends_the_cookie(client, web_env, login_clock):
     response = client.post('/api/auth/login', json={
         'username': 'admin', 'password': 'admin-pass-123', 'remember': True})
     assert response.status_code == 200
@@ -134,20 +145,24 @@ def test_refresh_does_not_downgrade_a_remembered_session(client, web_env):
     """
     client.post('/api/auth/login', json={
         'username': 'admin', 'password': 'admin-pass-123', 'remember': True})
+    original = client.cookies.get("ai_research_refresh")
     r = client.post("/api/auth/refresh",
                     headers={"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""})
     assert r.headers["X-Session-Days"] == "30"
-    assert "Max-Age=2592000" in _cookie(r, "ai_research_refresh")
+    assert not _cookie(r, "ai_research_refresh")
+    assert client.cookies.get("ai_research_refresh") == original
 
 
 def test_refresh_keeps_a_plain_session_at_seven_days(client, web_env):
     """The fix must not stretch an ordinary login to 30 days."""
     client.post('/api/auth/login',
                 json={'username': 'admin', 'password': 'admin-pass-123'})
+    original = client.cookies.get("ai_research_refresh")
     r = client.post("/api/auth/refresh",
                     headers={"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""})
     assert r.headers["X-Session-Days"] == "7"
-    assert "Max-Age=604800" in _cookie(r, "ai_research_refresh")
+    assert not _cookie(r, "ai_research_refresh")
+    assert client.cookies.get("ai_research_refresh") == original
 
 
 # --- gateway settings --------------------------------------------------------

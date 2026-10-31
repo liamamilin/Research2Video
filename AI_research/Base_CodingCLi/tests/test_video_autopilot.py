@@ -77,6 +77,89 @@ def test_picking_takes_the_best_unwritten_topics_and_skips_taken_ones(video_env,
     assert [i["topic"]["id"] for i in second] == ["2026-10-19/F2"]  # F1 already has a script
 
 
+def test_confirmed_duplicate_is_not_picked_or_used_as_a_fallback_again(video_env, monkeypatch):
+    from core.video import content_guard
+    from tests.test_video_flash import DISCOVERY
+
+    folder = video_env / "output/flash"
+    folder.mkdir(parents=True)
+    (folder / "2026-10-19_ai_flash_discovery.md").write_text(DISCOVERY, encoding="utf-8")
+    spec = {"picks": [{"column": "flash", "count": 1, "source": "flash"}]}
+    candidate = pilot.pick_topics(spec)[0]["topic"]
+    original = store.create_script("flash", {"id": "earlier/F1", "title": "先前已覆盖"})
+    store.add_version(original["id"], title="先前已覆盖", sections=SECTIONS, length_check={}, edit_type="GENERATED")
+    store.update_script(original["id"], status="APPROVED")
+    duplicate = store.create_script("flash-nr", candidate, "autopilot")
+    assert content_guard.archive_duplicate(duplicate["id"], "同一主事件已经讲过", [original["id"]])
+    store.update_script(duplicate["id"], status="FAILED")
+    before = store.get_script(duplicate["id"])
+    store.init_db()  # Retry memory survives a process restart, without creating new ledger rows.
+    picked = pilot.pick_topics(spec)
+    assert [p["topic"]["id"] for p in picked] == ["2026-10-19/F2"]
+    assert all(t["id"] != candidate["id"] for t in picked[0]["topic"].get("_story_fallbacks", []))
+    assert store.get_script(duplicate["id"]) == before
+    # A pending batch saved before deployment also replaces it before spawning a writer.
+    monkeypatch.setattr(video_workflow, "spawn", lambda *args: pytest.fail("known duplicates must not start a writer"))
+    run = ap.create_run({}, [{"column_key": "flash-nr", "topic": {**candidate, "_story_fallbacks": [picked[0]["topic"]]}}])
+    pilot.advance(run["items"][0], can_start_script=True, can_start_render=True)
+    resumed = ap.get_run(run["id"])["items"][0]
+    assert resumed["state"] == "PENDING" and resumed["script_id"] is None
+    assert resumed["topic"]["id"] == "2026-10-19/F2"
+    assert resumed["gate"]["known_duplicate_skips"] == [candidate["id"]]
+    ap.update_item(resumed["id"], state="CANCELLED")
+    # A real failure of the covering task releases this candidate for retry.
+    store.update_script(original["id"], status="FAILED")
+    assert pilot.pick_topics(spec)[0]["topic"]["id"] == candidate["id"]
+
+
+@pytest.mark.parametrize("absolute", [False, True])
+def test_batch_uses_its_exact_report_even_after_a_newer_report_arrives(video_env, absolute):
+    from tests.test_video_flash import DISCOVERY
+    folder = video_env / "output/flash"
+    folder.mkdir(parents=True)
+    first = folder / "2026-10-19_ai_flash_discovery.md"
+    first.write_text(DISCOVERY, encoding="utf-8")
+    (folder / "2026-10-20_ai_flash_discovery.md").write_text(
+        DISCOVERY.replace("Opus 5.5", "下一天的新模型"), encoding="utf-8")
+    report = str(first) if absolute else str(first.relative_to(video_env))
+    picked = pilot.pick_topics({"report": report, "picks": [{"column": "flash", "source": "flash", "count": 2}]})
+    assert [p["topic"]["id"] for p in picked] == ["2026-10-19/F1", "2026-10-19/F2"]
+    assert picked[0]["topic"]["title"].startswith("Opus")
+
+
+def test_empty_current_report_does_not_pick_yesterdays_topics(video_env):
+    from tests.test_video_flash import DISCOVERY
+    folder = video_env / "output/flash"
+    folder.mkdir(parents=True)
+    (folder / "2026-10-19_ai_flash_discovery.md").write_text(DISCOVERY, encoding="utf-8")
+    current = folder / "2026-10-20_ai_flash_discovery.md"
+    current.write_text("# 本次暂无新题材\n", encoding="utf-8")
+    assert pilot.pick_topics({"report": str(current),
+                              "picks": [{"column": "flash", "source": "flash", "count": 3}]}) == []
+
+
+def test_same_day_batches_keep_separate_report_identities_and_fallbacks(video_env):
+    from tests.test_video_flash import DISCOVERY
+    folder = video_env / "output/flash"
+    folder.mkdir(parents=True)
+    first = folder / "2026-10-19_ai_flash_discovery.md"
+    first.write_text(DISCOVERY, encoding="utf-8")
+    spec = {"report": str(first), "picks": [{"column": "flash", "source": "flash", "count": 1}]}
+    original = pilot.pick_topics(spec)[0]
+    saved = store.create_script("flash", original["topic"])
+    later = folder / "2026-10-19_ai_flash_discovery_1.md"
+    later.write_text(DISCOVERY.replace("Opus 5.5", "下午发布的新模型"), encoding="utf-8")
+    import os
+    os.utime(later, (time.time() + 5, time.time() + 5))
+    picked = pilot.pick_topics({**spec, "report": str(later)})
+    assert len(picked) == 1 and picked[0]["topic"]["id"] == "2026-10-19/F1@1"
+    assert picked[0]["topic"]["title"].startswith("下午发布")
+    assert store.get_script(saved["id"])["topic"] == original["topic"]
+    # A batch waiting on the original file can still read its remaining topic.
+    remaining = pilot.pick_topics(spec)
+    assert len(remaining) == 1 and remaining[0]["topic"]["id"] == "2026-10-19/F2"
+
+
 def test_scripts_start_up_to_the_limit_then_the_rest_wait(pilot_env, monkeypatch):
     spawned, _ = pilot_env
     run = batch(monkeypatch, 3)
@@ -847,3 +930,64 @@ def test_the_batch_waits_for_the_discovery_job_as_long_as_the_job_itself_may_run
     ap.update_run(run["id"], discovery_at=time.time() - 600 - pilot.DISCOVERY_SLACK_SECONDS - 1)
     assert pilot.fresh_topics(spec, ap.get_run(run["id"])) is True
     assert "超过了它自己的时限" in ap.get_run(run["id"])["note"] and starts == []  # never restarted to "help"
+
+
+OUTAGE = "研究没有完成（failed）：联网搜索不可用，已中止，没有生成报告。exa: HTTP 402: NO_MORE_CREDITS。"
+
+
+@pytest.fixture
+def search_health_dir(tmp_path):
+    from core import search_health
+    search_health.use_state_dir(str(tmp_path / "search"))
+    (tmp_path / "search").mkdir()
+    yield search_health
+    search_health.use_state_dir(None)
+
+
+def test_while_search_is_down_scripts_wait_instead_of_failing_and_keep_their_retries(pilot_env, monkeypatch, search_health_dir):
+    spawned, _ = pilot_env
+    health = search_health_dir
+    health.record_failures({"exa": "HTTP 402: NO_MORE_CREDITS"})
+    health.record_outage({"exa": "HTTP 402: NO_MORE_CREDITS"})
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    assert spawned == [] and item_of(run["id"], 0)["note"] == pilot.video_executor.SEARCH_WAIT_NOTE
+
+    health.clear()
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    assert spawned == [script_id]
+    for attempt in range(pilot.MAX_RETRIES + 2):  # more than a writing failure may have
+        store.update_script(script_id, status="FAILED", error=OUTAGE)
+        pilot.tick()
+    item = item_of(run["id"], 0)
+    assert item["state"] == "WORKING" and item["retries"].get("script", 0) == 0
+    assert item["retries"]["search"] == pilot.MAX_RETRIES + 2 and spawned.count(script_id) == pilot.MAX_RETRIES + 3
+
+    health.record_failures({"exa": "HTTP 402"})
+    health.record_outage({"exa": "HTTP 402"})
+    store.update_script(script_id, status="FAILED", error=OUTAGE)
+    pilot.tick()
+    assert spawned.count(script_id) == pilot.MAX_RETRIES + 3  # no try while it is still down
+    assert item_of(run["id"], 0)["note"] == pilot.video_executor.SEARCH_WAIT_NOTE
+
+
+def test_items_held_by_a_search_outage_can_be_released_once(pilot_env, monkeypatch, search_health_dir):
+    run = batch(monkeypatch, 2)
+    pilot.tick()
+    outage, other = (item_of(run["id"], i) for i in (0, 1))
+    store.update_script(outage["script_id"], status="FAILED", error=OUTAGE)
+    store.update_script(other["script_id"], status="FAILED", error="模型输出不是 JSON")
+    for item in (outage, other):
+        ap.update_item(item["id"], state="HELD", note="写稿失败 3 次：…", retries={"script": 2, "audit": 1})
+    ap.update_run(run["id"], status="DONE")
+
+    store.update_script(outage["script_id"], archived=1)
+    assert pilot.retry_search_holds() == 0
+    store.update_script(outage["script_id"], archived=0)
+    assert pilot.retry_search_holds() == 1
+    released = item_of(run["id"], 0)
+    assert released["state"] == "WORKING" and released["retries"] == {"audit": 1}
+    assert item_of(run["id"], 1)["state"] == "HELD"
+    assert ap.get_run(run["id"])["status"] == "RUNNING"
+    assert pilot.retry_search_holds() == 0

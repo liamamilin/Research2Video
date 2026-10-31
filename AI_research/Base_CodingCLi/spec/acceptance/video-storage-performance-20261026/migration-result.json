@@ -1,0 +1,364 @@
+{
+  "at": "2026-10-26T19:04:07+0800",
+  "migration": {
+    "status": "completed",
+    "target": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出",
+    "started_at": "2026-10-26T18:58:35+0800",
+    "message": "迁移完成，新视频将直接写入所选目录",
+    "moved_bytes": 28968203307,
+    "moved_folders": 65,
+    "completed_at": "2026-10-26T19:00:31+0800"
+  },
+  "gib": 26.98,
+  "folder_links": [
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-automatic-visuals",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/acceptance-automatic-visuals",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-data-storytelling",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/acceptance-data-storytelling",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-data-storytelling-v2",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/acceptance-data-storytelling-v2",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-hybrid-cards-v5",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/acceptance-hybrid-cards-v5",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-shot-director",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/acceptance-shot-director",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-shot-director-v2",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/acceptance-shot-director-v2",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-shot-director-v3",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/acceptance-shot-director-v3",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-story-direction-v4",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/acceptance-story-direction-v4",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-visual-language",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/acceptance-visual-language",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/content-columns-20261026",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/content-columns-20261026",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/data-storytelling-20261025-final",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/data-storytelling-20261025-final",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/data-storytelling-20261025-first",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/data-storytelling-20261025-first",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/data-storytelling-20261025-provider",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/data-storytelling-20261025-provider",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/data-storytelling-v2-20261025-final",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/data-storytelling-v2-20261025-final",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/data-storytelling-v2-20261025-first",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/data-storytelling-v2-20261025-first",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/failure-recovery-20261024",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/failure-recovery-20261024",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/fast-card-prototype-20261023",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/fast-card-prototype-20261023",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/generation-speed-20261023",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/generation-speed-20261023",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/goal-first-20261024",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/goal-first-20261024",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/package-acceptance",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/package-acceptance",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/packaging-library-20261023",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/packaging-library-20261023",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/production-plan-fast-cards-20261023",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/production-plan-fast-cards-20261023",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/quality-probes",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/quality-probes",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/review-hybrid-20261026-batch1",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/review-hybrid-20261026-batch1",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/scatter-layout-v2-20261025",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/scatter-layout-v2-20261025",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/scatter-layout-v2-20261025-flat",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/scatter-layout-v2-20261025-flat",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-20261026-first",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/shot-director-20261026-first",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-20261026-release",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/shot-director-20261026-release",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-20261026-release-2",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/shot-director-20261026-release-2",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-v2-20261026-first",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/shot-director-v2-20261026-first",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-v2-20261026-pages",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/shot-director-v2-20261026-pages",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-v2-20261026-pages-2",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/shot-director-v2-20261026-pages-2",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-v2-20261026-release",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/shot-director-v2-20261026-release",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-v3-20261026-first",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/shot-director-v3-20261026-first",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/shot-director-v3-20261026-release",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/shot-director-v3-20261026-release",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-deep-final",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-deep-final",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-deep-first",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-deep-first",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-deep-ready",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-deep-ready",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-flash-final",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-flash-final",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-flash-first",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-flash-first",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-flash-ready",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-flash-ready",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-flash-release",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-flash-release",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-pages",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-pages",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-tutorial-final",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-tutorial-final",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-tutorial-first",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-tutorial-first",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/story-direction-v4-20261026-tutorial-retry",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/story-direction-v4-20261026-tutorial-retry",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/test-voice-chain",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/test-voice-chain",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/video-chain-api-20261025-012224",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/video-chain-api-20261025-012224",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/video-chain-polish-20261024",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/video-chain-polish-20261024",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/video-hardening-20261023",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/video-hardening-20261023",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/visual-language-20261026-final",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/visual-language-20261026-final",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/visual-language-20261026-first",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/visual-language-20261026-first",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/visual-language-20261026-release",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/visual-language-20261026-release",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/visual-language-actions-20261026",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/visual-language-actions-20261026",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/visual-language-actions-20261026-final",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/visual-language-actions-20261026-final",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/visual-language-actions-20261026-second",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/visual-language-actions-20261026-second",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/voice-cache",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/voice-cache",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/voice-models",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/voice-models",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/voice-models-test",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/voice-models-test",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/voice-runtime",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/voice-runtime",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/voice-samples",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/voice-samples",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/voice-samples-20261018",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/voice-samples-20261018",
+      "linked": true
+    },
+    {
+      "source": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/voice-transfer-speed-20261023",
+      "destination": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/voice-transfer-speed-20261023",
+      "linked": true
+    }
+  ],
+  "databases": {
+    "state/video.db": {
+      "rows": 250,
+      "statuses": {
+        "CANCELLED": 1,
+        "COMPLETED": 169,
+        "FAILED": 80
+      },
+      "internal": true
+    },
+    "../../autovideo/g3/data/jobs.sqlite3": {
+      "rows": 154,
+      "statuses": {
+        "CANCELLED": 1,
+        "COMPLETED": 132,
+        "FAILED": 21
+      },
+      "internal": true
+    }
+  },
+  "new_writes_external": true,
+  "metadata_only_leftovers": [],
+  "free_internal_gib": 110.4,
+  "free_external_gib": 415.8
+}

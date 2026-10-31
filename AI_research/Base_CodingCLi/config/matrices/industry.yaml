@@ -1,4 +1,3 @@
-# 矩阵：产业与制造业（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
 name: 产业与制造业
 domain: 产业与制造业
 keywords: []
@@ -7,3 +6,13 @@ jobs:
 - industry/industry_weekly
 render:
   video_speed: 1.25
+content:
+  name: 产业与制造
+  role: domain
+  audience: 好奇产品如何被造出、希望看懂制造与供应链关系的普通观众
+  status: configured
+  visual_focus:
+  - 工艺流程
+  - 结构图
+  - 真实素材
+  description: 沿一件产品的制造和交付过程，看懂工艺、部件与参与者怎样相互配合。

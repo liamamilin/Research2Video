@@ -29,6 +29,9 @@ def component_schema(component: str) -> dict:
     schema = json.loads((ROOT / f'schemas/components/{component}.schema.json').read_text(encoding='utf-8'))
     if component in COMPONENTS:
         schema['properties']['visuals'] = visuals_schema()
+    if component == 'bar_chart':
+        # The complete unit may be displayed once in the scene heading.
+        schema['properties']['unit']['minLength'] = 0
     return schema
 
 
@@ -38,6 +41,8 @@ def validate_references(component: str, props: dict) -> None:
                else {f"node:{node['id']}" for node in props.get('nodes', [])})
     seen = set()
     for item in props.get('visuals', []):
-        if item['target'] not in targets or item['target'] in seen:
-            raise ValueError('图标需要对应本场景的一个独立对象')
+        if item['target'] not in targets:
+            raise ValueError(f"图标需要对应本场景的一个独立对象：{item['target']} 不存在，可用位置为 {', '.join(sorted(targets))}")
+        if item['target'] in seen:
+            raise ValueError(f"图标需要对应本场景的一个独立对象：{item['target']} 重复绑定")
         seen.add(item['target'])

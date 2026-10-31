@@ -102,6 +102,18 @@ class ResearchEngine:
             print(f"  [{job_name}] SKIPPED: job is disabled (enabled: false)")
             return None
 
+        if job.get("source_discovery"):
+            from .source_discovery import run as discover_sources
+            return discover_sources(self, job)
+
+        if job.get("topic_ideas"):
+            from .theme_ideas import run as generate_themes
+            return generate_themes(self, job)
+
+        if job.get("topic_discovery"):
+            from .theme_discovery import run as discover_themes
+            return discover_themes(self, job)
+
         # A member of a matrix runs with the matrix's keywords and domain (spec/matrices.md). Applied here and not
         # in load_job, which the web layer also uses: the Job editor must not save them into the Job file.
         from . import matrices
@@ -123,9 +135,12 @@ class ResearchEngine:
 
         start_time = time.time()
         output_path = None
-        prev_path: Optional[str] = None
         agent: Optional[ResearchAgent] = None
         usage: Optional[dict] = None
+        self._source_pending = None
+        self._source_search_client = None
+        self._supply_pending = None
+        self._supply_receipt = None
 
         try:
             with LockManager(job.get("_file", job_name), stale_after=stale_after):
@@ -154,27 +169,9 @@ class ResearchEngine:
 
                 print(f"  [{job_name}] Researching (LLM + web search)...")
 
-                # Move stale output aside: a failed/cancelled run must not
-                # destroy the previous report, but a successful run must not
-                # leave two versions behind either (restored in `finally`).
-                prev_path = output_path + ".prev"
-                try:
-                    if os.path.exists(prev_path):
-                        os.remove(prev_path)
-                    if os.path.exists(output_path):
-                        os.replace(output_path, prev_path)
-                    else:
-                        # Nothing to protect. Output paths are date-stamped, so
-                        # the first run of a day has no previous report; leaving
-                        # prev_path set made the success path in `finally` try to
-                        # delete a stash that was never created, logging a
-                        # spurious "Could not restore stashed report" warning on
-                        # every fresh report.
-                        prev_path = None
-                except OSError as exc:
-                    logger.warning("Could not stash stale output: %s", exc)
-                    prev_path = None
-
+                # Keep completed reports readable while the next run researches.
+                # _save_output allocates a new filename; a failed run leaves all
+                # earlier reports and their bound video inputs untouched.
                 research_cfg = ResearchConfig.from_system(self.sys)
                 if job.get("max_searches") is not None:  # a Job may cap its own searches below the system default
                     research_cfg.max_searches = int(job["max_searches"])
@@ -199,7 +196,37 @@ class ResearchEngine:
                         objective=objective,
                         fallback_queries=job.get("keywords", []),
                     )
+                # Migrated columns deepen the researcher's chosen candidates by
+                # reading existing links, before the ordinary report is saved.
+                from .ai_dossier_sources import enrich
+                from core.video.research_dossier import PRODUCTIONS
+                dossier_detail = {}
+                if job.get("_file") in PRODUCTIONS.values() and raw_content:
+                    from .search import SearchClient
+                    reader = SearchClient(SearchConfig.from_system(self.sys), cancel_token=self._cancel,
+                                          progress_cb=self._progress)
+                    extra, dossier_detail = enrich(
+                        job, raw_content, "\n\n".join([source_block, *agent.materials]),
+                        search_client=reader, cancel_token=self._cancel, progress_cb=self._progress)
+                    if extra:
+                        import hashlib
+                        import json
+                        initial = output_path + ".dossier-initial-" + hashlib.sha256(raw_content.encode()).hexdigest()[:16] + ".json"
+                        atomic_write(initial, json.dumps({"version": 1, "report": raw_content}, ensure_ascii=False) + "\n")
+                        dossier_detail["initial_report"] = initial
+                        try:
+                            raw_content = agent.expand_dossier(prompt, raw_content, extra)
+                            dossier_detail["expanded"] = True
+                        except CancelledError:
+                            raise
+                        except Exception as exc:
+                            dossier_detail.update(expanded=False, expansion_error=str(exc)[:300])
+                            logger.warning("Dossier expansion kept the initial report: %s", exc)
                 usage = agent.get_usage()
+                if self._supply_receipt is not None:
+                    usage["source_supply"] = self._supply_receipt
+                if self._source_search_client is not None:
+                    usage["searches"] = int(usage.get("searches") or 0) + self._source_search_client.calls
 
                 if self._cancel.is_set():
                     raise CancelledError("Job cancelled after research")
@@ -224,6 +251,23 @@ class ResearchEngine:
                 cleaned = extract_report(raw_content, self.sys,
                                          cancel_token=self._cancel)
                 actual_path = self._save_output(cleaned, output_path)
+                from .report_identity import publish
+                publish(os.path.abspath(actual_path), self.workspace_dir)
+                if self._supply_pending:
+                    from .source_supply import save_receipt
+                    from .source_supply_store import SupplyStore
+                    try:
+                        SupplyStore(os.path.join(self.workspace_dir, "state"), self._supply_pending["profile"]).commit(
+                            self._supply_pending, cleaned, self._output_reference(actual_path))
+                        save_receipt(actual_path, self._supply_receipt)
+                    except OSError as exc:
+                        logger.warning("Source delivery receipt was not advanced: %s", exc)
+                if self._source_pending:
+                    from .source_history import commit
+                    try:
+                        commit(self._source_pending)
+                    except OSError as exc:
+                        logger.warning("Source history baseline was not advanced: %s", exc)
                 report_path = self._output_reference(actual_path)
 
                 material = {}
@@ -243,7 +287,8 @@ class ResearchEngine:
 
                     append_record(report_path, job_name, usage=usage,
                                   duration_seconds=round(time.time() - start_time, 1),
-                                  extra={"citation_check": citation, "material": material})
+                                  extra={"citation_check": citation, "material": material,
+                                         **({"research_dossier": dossier_detail} if dossier_detail else {})})
                 except Exception as exc:  # noqa: BLE001 - metadata is optional
                     logger.debug("report metadata skipped: %s", exc)
                 logger.info(
@@ -325,20 +370,6 @@ class ResearchEngine:
                          fields={"job": job_name, "status": "failed"})
             return None
         finally:
-            # Restore the stashed report when this run produced no new file.
-            # "Produced a new file" means non-empty: _save_output is atomic now,
-            # so a zero-byte file at output_path can only be a leftover, and
-            # treating it as success would delete the good report we stashed.
-            if prev_path and output_path:
-                try:
-                    if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-                        if os.path.exists(prev_path):
-                            os.remove(prev_path)   # fresh report saved
-                    elif os.path.exists(prev_path):
-                        os.replace(prev_path, output_path)
-                        logger.info("Restored previous report: %s", output_path)
-                except OSError as exc:
-                    logger.warning("Could not restore stashed report: %s", exc)
             if agent is not None:
                 agent.close()
 
@@ -362,17 +393,49 @@ class ResearchEngine:
         Returns ``(block, (items, stats))``. Raises ``SourcesUnavailableError`` when nothing came back, so the model
         is never asked to write from memory; sources that failed while others answered are named in the block, so the
         report states what it did not cover."""
-        from .search import SearchClient
+        enhanced = self._fetch_supply(job)
+        if enhanced is not None:
+            return enhanced
         from .sources import fetch_all_strict, resolve
 
-        items, stats = fetch_all_strict(resolve(list(job.get("sources") or []), self.config_dir),
-                                        limit_per_source=int(job.get("sources_limit", 8)))
+        specs = resolve(list(job.get("sources") or []), self.config_dir)
+        items, stats = fetch_all_strict(specs, limit_per_source=int(job.get("sources_limit", 8)),
+                                        **self._source_options(specs))
         failed = [f"- {spec}: {state}" for spec, state in stats.items() if not isinstance(state, int)]
         header = ("## Fetched sources\n\n" + "\n".join(
             f"- {spec}: {state if not isinstance(state, int) else f'{state} items'}" for spec, state in stats.items()))
         note = ("\n\n本次未取得内容的来源：\n" + "\n".join(failed)) if failed else ""
         logger.info("Sources fetched: %s", stats)
-        return f"{header}{note}\n\n{SearchClient.format_results(items)}", (items, stats)
+        return f"{header}{note}\n\n{self._source_material(job, items)}", (items, stats)
+
+    def _fetch_supply(self, job: dict):
+        from .source_supply import collect, for_job, material_block
+        profile = for_job(self.config_dir, job)
+        if profile is None:
+            return None
+        items, stats, self._supply_pending, self._supply_receipt = collect(self, job, profile)
+        return material_block(items, self._supply_receipt), (items, stats)
+
+    def _source_options(self, specs: list[str]) -> dict:
+        if not any(spec.startswith(("page:", "catalog:", "search:")) for spec in specs):
+            return {}
+        if getattr(self, "_source_search_client", None) is None:
+            from .search import SearchClient
+            self._source_search_client = SearchClient(SearchConfig.from_system(self.sys),
+                                                      cancel_token=self._cancel, progress_cb=self._progress)
+        return {"search_client": self._source_search_client}
+
+    def _source_material(self, job: dict, items: list) -> str:
+        from .search import SearchClient
+        if not job.get("source_history"):
+            return SearchClient.format_results(items)
+        from pathlib import Path
+        from .source_history import prepare
+        block, self._source_pending = prepare(Path(self.workspace_dir) / "state/source_history",
+                                             job.get("_file") or job["name"], items)
+        if job["source_history"] == "context":
+            block += "\n\n## 当前来源内容（用于常青教程与套餐比较）\n\n" + SearchClient.format_results(items)
+        return block
 
     def _fetch_sources_block(self, job: dict) -> str:
         """Pre-fetch job ``sources`` (RSS/GitHub/arXiv/HN) into prompt context."""
@@ -380,21 +443,24 @@ class ResearchEngine:
         if not specs:
             return ""
         try:
-            from .search import SearchClient
+            enhanced = self._fetch_supply(job)
+            if enhanced is not None:
+                return enhanced[0]
             from .sources import fetch_all, resolve
 
             limit = int(job.get("sources_limit", 8))
-            results = fetch_all(resolve(list(specs), self.config_dir), limit_per_source=limit)
+            resolved = resolve(list(specs), self.config_dir)
+            results = fetch_all(resolved, limit_per_source=limit, **self._source_options(resolved))
             if not results:
                 return ""
             logger.info("Sources pre-fetched: %d items from %d spec(s)",
                         len(results), len(specs))
             return ("## Pre-fetched subscription sources\n\n"
-                    + SearchClient.format_results(results))
+                    + self._source_material(job, results))
         except Exception as exc:  # noqa: BLE001 - sources are optional context
             from .sources import RegistryError
 
-            if isinstance(exc, RegistryError):
+            if isinstance(exc, (RegistryError, CancelledError)):
                 raise  # a name the registry does not have is a mistake in the Job, not a source that was down
             logger.warning("Sources pre-fetch skipped: %s", exc)
             return ""

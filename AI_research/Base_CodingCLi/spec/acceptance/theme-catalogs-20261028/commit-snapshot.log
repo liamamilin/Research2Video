@@ -1,0 +1,36 @@
+Commit-scope snapshot regression: HEAD + explicit theme-catalog files only.
+
+Backend
+....................................................................     [100%]
+=============================== warnings summary ===============================
+tests/test_theme_workbench.py::test_manual_theme_api_is_scoped_and_viewer_is_read_only
+  /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/starlette/_exception_handler.py:59: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    response = await handler(conn, exc)  # type: ignore[arg-type]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+68 passed, 1 warning in 9.54s
+
+UI
+
+> ai-research-ui@0.1.0 test
+> vitest run src/components/ThemeWorkbench.test.tsx src/components/ThemeUsage.test.tsx src/pages/Matrices.test.tsx
+
+
+ RUN  v3.2.7 /private/tmp/theme-catalog-submit-4kapo5or/AI_research/Base_CodingCLi/ui
+
+ ✓ src/components/ThemeUsage.test.tsx (1 test) 81ms
+stderr | src/pages/Matrices.test.tsx > Matrices > keeps business domains in the main list and research groups in the source view
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | src/components/ThemeWorkbench.test.tsx > matrix topic workbench > filters a larger reference library by subject
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ src/components/ThemeWorkbench.test.tsx (18 tests) 539ms
+ ✓ src/pages/Matrices.test.tsx (26 tests) 585ms
+
+ Test Files  3 passed (3)
+      Tests  45 passed (45)
+   Start at  13:02:55
+   Duration  1.38s (transform 212ms, setup 0ms, collect 665ms, tests 1.21s, environment 941ms, prepare 252ms)

@@ -1,0 +1,74 @@
+# 主题分类独立于报告频率，复用原有制作绑定。
+categories:
+- key: geography_landforms
+  name: T01 · 地形与水系
+  promise: 地表和水怎样共同塑造一个地方？
+  type: explainer
+  production_ids:
+  - geography_weekly
+  keywords:
+  - 地形与水系 地表和水怎样共同塑造一个地方？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。在地图上确定具体地方；跟随水和地形的路线；解释相互作用的过程；回到沿途生活和利用。
+- key: geography_climate
+  name: T02 · 天气、气候与地方差异
+  promise: 空间位置怎样影响一个地方的天气体验？
+  type: explainer
+  production_ids:
+  - geography_weekly
+  keywords:
+  - 天气、气候与地方差异 空间位置怎样影响一个地方的天气体验？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。呈现两个具体地方的体验；在地图和示意图上定位；连接相关空间与时间关系；回到地方差异。
+- key: geography_cities
+  name: T03 · 城市空间与日常运转
+  promise: 城市里的设施、路线和生活怎样连接？
+  type: explainer
+  production_ids:
+  - geography_weekly
+  keywords:
+  - 城市空间与日常运转 城市里的设施、路线和生活怎样连接？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。展示一处具体城市空间；沿一次生活活动移动；连接设施道路和用途；解释空间组织与体验。
+- key: geography_population
+  name: T04 · 人口分布与迁移
+  promise: 人为什么在一些地方聚集又流向别处？
+  type: explainer
+  production_ids:
+  - geography_weekly
+  keywords:
+  - 人口分布与迁移 人为什么在一些地方聚集又流向别处？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。在图上定位具体人群；说明聚集或迁移的背景；连接工作居住与设施；观察空间和生活的变化。
+- key: geography_resources
+  name: T05 · 资源、区位与生产
+  promise: 资源和位置怎样影响地方的分工？
+  type: explainer
+  production_ids:
+  - geography_weekly
+  keywords:
+  - 资源、区位与生产 资源和位置怎样影响地方的分工？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。选一个具体资源或产品；在地图上标出生产环节；连接区位交通和配套；解释地方之间的分工。
+- key: geography_transport
+  name: T06 · 交通与区域联系
+  promise: 路线怎样影响人、货物与地方的联系？
+  type: explainer
+  production_ids:
+  - geography_weekly
+  keywords:
+  - 交通与区域联系 路线怎样影响人、货物与地方的联系？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。明确一次出行或运输；在地图上跟随路线；连接地形设施与成本时间；回到区域可达性和生活。
+- key: geography_environment
+  name: T07 · 环境与人地关系
+  promise: 人的活动怎样与地方环境相互影响？
+  type: explainer
+  production_ids:
+  - geography_weekly
+  keywords:
+  - 环境与人地关系 人的活动怎样与地方环境相互影响？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。从具体环境体验进入；定位地表和人的活动；解释相互影响的过程；回到地方的生活与利用。
+- key: geography_maps
+  name: T08 · 地图与空间理解
+  promise: 怎样从地图和影像里读出具体关系？
+  type: explainer
+  production_ids:
+  - geography_weekly
+  keywords:
+  - 地图与空间理解 怎样从地图和影像里读出具体关系？
+  notes: 围绕一个具体问题展开，让同一个对象贯穿材料、过程和结果。提出关于一个地方的问题；识别图例尺度时间；沿图层和空间做比较；用读到的关系回答问题。

@@ -7,3 +7,13 @@ jobs:
 - science/science_weekly
 render:
   video_speed: 1.25
+content:
+  name: 科学与前沿
+  role: domain
+  audience: 对世界如何运转感到好奇，希望通过具体例子理解科学的普通观众
+  description: 从一个具体疑问走到可以理解的科学过程。「科学新理解」解释一项研究怎样带来新的认识；「现象背后的原理」沿一个例子逐步解释事情如何发生。持续留下理解世界的方法与直觉。
+  status: configured
+  visual_focus:
+  - 原理动画
+  - 实验图
+  - 图表

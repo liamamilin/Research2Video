@@ -1,0 +1,34 @@
+name: AI 矩阵信息供给
+matrix: ai_media
+enabled: true
+timezone: Asia/Shanghai
+# 单独的来源探索周计划；现有五个研究周期保持。
+recurrence: "30 6 * * 0"
+scan_limit: 80
+detail_pages: 4
+material_chars: 180000
+pool_per_job: 4
+pool_limit: 40
+discovery_queries: 5
+discovery_probes: 8
+jobs:
+  monitoring/ai_flash_discovery:
+    mode: changes
+    direction: AI 产品公告、编程工具更新、套餐价格与额度、模型能力与实际用法变化
+    query: AI coding tools official release notes changelog pricing usage limits
+  ai_media/daily_opensource_radar:
+    mode: context
+    direction: 开源 AI 工具与项目，实际输入、安装用法、处理过程与输出
+    query: open source AI developer tools releases project blog examples
+  ai_media/weekly_model_arena:
+    mode: context
+    direction: 模型能力、价格、延迟、上下文与真实任务比较
+    query: AI model evaluation benchmark pricing latency methodology updates
+  ai_media/weekly_business_watch:
+    mode: context
+    direction: AI 产品商业模式、企业采用、参与者与用户的交付关系
+    query: AI enterprise product adoption engineering case study company blog
+  ai_media/weekly_deep_research:
+    mode: context
+    direction: 智能体、模型机制、工程实践，有具体任务、实验与过程解释
+    query: AI agents model research engineering blog experiments mechanisms

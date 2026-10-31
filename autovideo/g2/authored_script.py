@@ -22,7 +22,8 @@ def split_marked(text: str) -> list[tuple[str, bool]]:
     chunks = []
     for paragraph in re.split(r"[\r\n]+", text):
         first = True
-        for sentence in re.split(r"(?<=[。！？!?；;])", paragraph):
+        # Closing quotes belong to the sentence before them, including at EOF.
+        for sentence in re.findall(r".*?[。！？!?；;]+[”’\"'）)》】」』]*|.+$", paragraph):
             remaining = sentence.strip()
             while remaining:
                 end = min(80, len(remaining))

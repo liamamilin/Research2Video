@@ -12,6 +12,7 @@ import re
 
 from g2.technical_text import altered_technical_text, display_width, wrap_units
 from g1.visual_language import component_schema, validate_references
+from g1.price_layout import INNER_WIDTH as PRICE_INNER_W, price_layout
 from g2 import visual_language
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -117,36 +118,6 @@ def visible_text(scene: dict) -> list[str]:
     return [scene["headline"], props["title"], props.get("subtitle") or "", *props.get("lines", [])]
 
 
-#: Geometry shared with g1/renderer/src/Root.tsx (price_change): label column, gap, number sizes.
-PRICE_LABEL_W, PRICE_GAP, PRICE_INNER_W = 400, 36, 1528
-PRICE_SIDE = .42  # prefix and unit ("美元", "$") are drawn at this fraction of the number's size
-
-
-def price_size(rows: int) -> int:
-    return 180 if rows == 1 else 128
-
-
-def split_value(text: str) -> tuple[str, str, str]:
-    """('$', '5', ' 美元'): the digits are drawn large, what surrounds them small."""
-    match = re.match(r"^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$", text)
-    return (match[1], match[2], match[3]) if match else ("", text, "")
-
-
-def value_width(text: str, size: int) -> float:
-    prefix, number, suffix = split_value(text)
-    side = int(size * PRICE_SIDE)
-    return sum(display_width(_font(use), part) for part, use in ((prefix, side), (number, size), (suffix, side)) if part)
-
-
-def change_text(row: dict) -> str:
-    """The badge as drawn: the sign comes from direction, so the model never writes a minus sign."""
-    return ("−" if row["direction"] == "down" else "+") + row["change"]
-
-
-def price_badge_size(large: bool) -> int:
-    return scaled(52, large)
-
-
 def _fit_fault(scene: dict, message: str) -> InformationFault:
     return InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: {message}")
 
@@ -196,23 +167,10 @@ def validate_text_fit(scene: dict, large: bool = False) -> None:
         if label_lines > 2 or note_lines > 2 or height > 440:
             raise InformationFault("INFORMATION_TEXT_FIT", f"{scene['id']}: big_number label or note is too long for its panel; shorten it")
     elif component == "price_change":
-        rows = props["rows"]
-        size, label_size, badge = price_size(len(rows)), S(46), price_badge_size(large)
-        unit_size = S(36)
-        height = (unit_size * 1.4 + 20 if props.get("unit") else 0) + 34 * (len(rows) - 1)
-        for row in rows:
-            lines = text_lines(row["label"], label_size, PRICE_LABEL_W)
-            if lines > 2:
-                raise _fit_fault(scene, f"price_change label {row['label']!r} wraps onto more than two lines; shorten it")
-            room = PRICE_INNER_W - PRICE_LABEL_W - PRICE_GAP
-            if row.get("change"):
-                room -= display_width(_font(badge), change_text(row)) + 52 + PRICE_GAP
-            used = value_width(row["before"], size) + value_width(row["after"], size) + size * .62 + size * .36
-            if used > room:
-                raise _fit_fault(scene, f"price_change numbers {row['before']!r} -> {row['after']!r} are too wide for the row; write only the number and its unit")
-            height += max(size * 1.1, lines * label_size * 1.35)
-        if height > 440:
-            raise _fit_fault(scene, "price_change rows do not fit their panel; use fewer rows or shorter labels")
+        try:
+            price_layout(props, large)
+        except ValueError as exc:
+            raise _fit_fault(scene, str(exc)) from exc
     elif component == "source_card":
         height = 26 * (len(props["sources"]) - 1)
         for source in props["sources"]:
@@ -624,15 +582,31 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
             position -= len(row["text"])
     if scene['component'] == 'price_change' and scene['props'].get('staged'):
         phrases = [value for row in scene['props']['rows'] for value in (row['before'], row['after'], row.get('change', ''))]
-        cursor = 0
         text = ''.join(row['text'] for row in speech)
+        numbers = list(re.finditer(r'(?<![\d.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\d.])', text))
+        used, matched_end = {}, 0
         for cue, value in zip(result[1:], phrases):
             number = re.search(r'[-+]?\d[\d,]*(?:\.\d+)?', value)
-            phrase = number[0] if number else value
-            at = text.find(phrase, cursor) if phrase else -1
-            if at < 0:
+            key = number[0].lstrip('+-').replace(',', '') if number else ''
+            matches = [m for m in numbers if m[0].replace(',', '') == key]
+            if matches:
+                # Narration can introduce the new value before the old one.
+                # Match each value independently, keeping repeated occurrences
+                # ordered only when the exact same number appears again.
+                occurrence = used.get(key, 0)
+                match = matches[min(occurrence, len(matches) - 1)]
+                used[key] = occurrence + 1
+                at, phrase = match.start(), match[0]
+                matched_end = max(matched_end, match.end())
+            elif cue['target_id'].startswith('line:') and int(cue['target_id'].split(':')[1]) % 3 == 2:
+                # A spoken delta may be "涨了五个多百分点". Keep the supplied
+                # numeric delta, revealing it at the explanation after values.
+                tail = text[matched_end:]
+                change = re.search(r'增加|减少|上涨|下降|涨了|降了|提升|降低|相差|差额', tail)
+                at = min(len(text) - 1, matched_end + (change.start() if change else 0))
+                phrase = change[0] if change else text[at:at + 1]
+            else:
                 continue
-            cursor = at + len(phrase)
             for row in speech:
                 if at < len(row['text']):
                     cue.update(segment_id=row['id'], quote=phrase, character_index=at)
@@ -650,7 +624,7 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
             # A grouped chart is revealed by series. If a plan supplies monthly
             # phrases instead, the spoken series names give the useful anchors.
             if len(phrases) != len(keys):
-                phrases = keys
+                phrases = list(keys)
             phrases += [props.get('takeaway', '')]
         text = ''.join(row['text'] for row in speech)
         cursor = 0
@@ -660,7 +634,12 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
             index = int(cue['target_id'].split(':')[1])
             if index >= len(phrases) or not phrases[index]:
                 continue
-            at = text.find(phrases[index], cursor)
+            # Reveals and later emphasis are separate speech tracks. A focus
+            # step can deliberately reference the same phrase as a reveal.
+            count = len(props['points']) if scene['component'] == 'scatter_chart' else len(keys)
+            if index == count or index == len(phrases)-1:
+                cursor = 0
+            at = visual_language.phrase_at(text, phrases[index], cursor)
             if at >= 0:
                 cursor = at + len(phrases[index])
                 for row in speech:
@@ -671,15 +650,6 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
                             cue['quote'] = phrases[index]
                         break
                     at -= len(row['text'])
-        # A takeaway follows the last data reveal, even when the sentence names the conclusion first.
-        order = {row['id']: i for i, row in enumerate(speech)}
-        last = (0, 0)
-        for cue in result:
-            position = (order[cue['segment_id']], cue['character_index'])
-            if position < last:
-                row = speech[last[0]]
-                cue.update(segment_id=row['id'], quote=row['text'][last[1]:last[1]+1], character_index=last[1])
-            last = max(last, position)
     visual_language.align_object_cues(scene, result, speech)
     return result
 
@@ -708,7 +678,7 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
             beat = {"id": f"{scene['id']}_b{len(beats)}", "action": "reveal", "target_id": cue["target_id"],
                     "trigger": {"segment_id": row["id"], "boundary": "start", "offset_ms": offset}}
             beats.append(beat)
-            timing.append({"scene_id": scene["id"], **cue, "automatic": automatic,
+            timing.append({"scene_id": scene["id"], "beat_id": beat['id'], **cue, "automatic": automatic,
                            "estimated_start_ms": row["start_ms"] + offset})
         beats.extend(visual_language.action_beats(scene, rows))
         beats.sort(key=lambda b: (order.index(b["trigger"]["segment_id"]), b["trigger"].get("offset_ms", 0)))
@@ -720,3 +690,36 @@ def compile_storyboard(plan: dict, alignment: dict, pipeline) -> dict:
     pipeline.write_json(pipeline.ARTIFACTS / "information-timing.json", {"cues": timing,
         "phrase_alignment": "measured TTS activity", "within_phrase_timing": "estimated from character position, not word alignment"})
     return board
+
+
+def align_visual_beats(ir: dict, captions: dict, timing: dict) -> list[dict]:
+    """Reuse the existing word alignment for visual cues; keep speech unchanged."""
+    from g2.caption_alignment import word_spans
+
+    rows = {row['id']: row for row in ir['narration']['segments']}
+    words = {row['segment_id']: row['items'] for row in captions.get('word_evidence', [])}
+    beats = {(scene['id'], beat['id']): beat for scene in ir['scenes'] for beat in scene['beats']}
+    changes = []
+    for cue in timing.get('cues', []):
+        row = rows.get(cue['segment_id'])
+        beat = beats.get((cue['scene_id'], cue.get('beat_id')))
+        items = words.get(cue['segment_id'], [])
+        if row is None or beat is None or not items:
+            continue
+        spans = word_spans(row['text'])
+        if [span[0] for span in spans] != [item['text'] for item in items]:
+            continue
+        character = cue.get('character_index', row['text'].find(cue.get('quote', '')))
+        index = next((i for i, (_, a, b) in enumerate(spans) if a <= character < b or a >= character), None)
+        if index is None:
+            continue
+        offset = min(row['end_ms']-row['start_ms']-1, max(0, items[index]['start_ms']))
+        before = beat['trigger']['offset_ms']
+        beat['trigger']['offset_ms'] = offset
+        changes.append({'scene_id': cue['scene_id'], 'beat_id': beat['id'],
+                        'segment_id': row['id'], 'character_index': character,
+                        'previous_offset_ms': before, 'offset_ms': offset})
+    order = {key: i for i, key in enumerate(rows)}
+    for scene in ir['scenes']:
+        scene['beats'].sort(key=lambda b: (order[b['trigger']['segment_id']], b['trigger'].get('offset_ms', 0)))
+    return changes

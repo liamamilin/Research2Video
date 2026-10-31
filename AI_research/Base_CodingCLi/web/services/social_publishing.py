@@ -18,10 +18,14 @@ from core.social.registry import PLATFORMS, DEFERRED_PLATFORMS, adapter, definit
 from core.social.store import SocialStore, ACTIVE
 from core.social.comments import clean_first_comment, COMMENT_PLATFORMS
 from core.social.verification import EVIDENCE, STATE_LABELS, delay, timestamp
+from core.social.verification import MAX_COMMENT_CHECKS, check_progress, lookup_revision
+from core.social.reconciliation import lookup_for
+from core.social.session_health import assess, verify_due
 from core.video import store as video_store
 from core.video.publication_identity import identify
 from scripts.douyin_worker import private_json
 from web.services import douyin, platform_manager, video_render
+from web.services.publish_cover import publish_cover
 from web.settings import get_settings
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -69,13 +73,22 @@ def uid(platform: str) -> str:
     return profile['uid']
 
 
-def public_job(platform: str, row: dict, *, comments: dict | None = None) -> dict:
+def public_job(platform: str, row: dict, *, comments: dict | None = None, checking: set[str] | None = None,
+               session: dict | None = None) -> dict:
     verification = row['result'].get('verification', {})
+    pending = platform in EVIDENCE and row['kind'] == 'UPLOAD' and row['status'] in ('UNKNOWN', 'SUBMITTED')
+    if pending and session is None:
+        session = session_of(store(platform), row['uid'])
+    paused = pending and (session or {}).get('state') == 'expired'
+    if row['kind'] == 'UPLOAD' and checking is None:
+        checking = {check['parent_id'] for check in store(platform).list(uid=row['uid'], kind='RECONCILE', statuses=ACTIVE)}
     value = {**{k: row[k] for k in ('id','kind','status','phase','error','work_id','script_id','version','render_id','created_at','updated_at')},
             'platform': platform, 'account_uid': row['uid'], 'payload': {k: row['payload'][k] for k in ('title','description','tags','first_comment') if k in row['payload']},
             'url': row['result'].get('url', ''),
-            'verification': {'automatic': platform in EVIDENCE and row['kind'] == 'UPLOAD' and row['status'] in ('UNKNOWN','SUBMITTED'),
-                             **{k: verification[k] for k in ('attempts','checked_at','next_check_at','state','reason') if k in verification}},
+            'verification': {'automatic': pending and not paused and not verification.get('exhausted'),
+                             'running': row['id'] in (checking or set()),
+                             **({'paused': True, 'pause_reason': '平台登录核实失败，自动核对已暂停；原投稿保留。'} if paused else {}),
+                             **{k: verification[k] for k in ('attempts','checked_at','next_check_at','state','reason','exhausted') if k in verification}},
             'can_confirm_absent': row['status'] == 'UNKNOWN' and not row['work_id'] and row['result'].get('accepted') is not True,
             'can_retry': row['status'] in ('FAILED','CANCELLED') and bool(row['result'].get('confirmed_not_submitted'))}
     if row['kind'] == 'LOGIN' and row['payload'].get('purpose') == 'comments':
@@ -228,14 +241,17 @@ def candidates(platform: str) -> list[dict]:
     owner = uid(platform)
     targets = {(r['script_id'],r['version']) for r in store(platform).list(uid=owner,kind='UPLOAD')}
     with video_store.connect() as conn:
-        rows = conn.execute("SELECT r.*,s.archived,s.status AS script_status,s.current_version,s.approved_version "
+        rows = conn.execute("SELECT r.id,r.script_id,r.version,r.title,r.completed_at,r.artifacts,"
+                            "s.archived,s.status AS script_status,s.current_version,s.approved_version "
                             "FROM renders r JOIN scripts s ON s.id=r.script_id "
-                            f"WHERE r.status='COMPLETED' AND {content_guard.PUBLISHABLE_SQL} "
-                            "ORDER BY r.completed_at DESC,r.created_at DESC").fetchall()
+                            f"WHERE r.status='COMPLETED' AND {content_guard.PUBLISHABLE_SQL} AND NOT EXISTS "
+                            "(SELECT 1 FROM publications p WHERE p.script_id=r.script_id AND p.version=r.version "
+                            "AND p.platform=? AND (p.account_uid=? OR p.account_uid='')) "
+                            "ORDER BY r.completed_at DESC,r.created_at DESC,r.id DESC", (platform, owner)).fetchall()
     seen, values = set(), []
     for raw in rows:
         row = dict(raw); target = (row['script_id'],row['version'])
-        if target in targets or target in seen or video_store.has_publication(*target,platform,owner):
+        if target in targets or target in seen:
             continue
         render = {'id':row['id'],'artifacts':json.loads(row['artifacts'])}
         if video_render.safe_file(render,'video.mp4') is None:
@@ -306,8 +322,7 @@ def enqueue(platform: str, render_id: str, payload: dict) -> dict:
         video = video_render.safe_file(render,'video.mp4')
         if video is None:
             raise AdapterError('成片文件不可用。')
-        cover = next((p for name in ('cover.png','cover.jpg') if (p:=video_render.safe_file(render,name))),None)
-        row = store(platform).create('UPLOAD',owner,{**clean,'video_path':str(video.resolve()),'cover':str(cover.resolve()) if cover else ''},render=render)
+        row = store(platform).create('UPLOAD',owner,{**clean,'video_path':str(video.resolve()),'cover':publish_cover(render,clean['title'])},render=render)
         ensure_comment(store(platform), row)
     tick(platform)
     return public_job(platform,store(platform).get(row['id']))
@@ -385,13 +400,16 @@ def reconcile(platform: str, key: str, value: str = '') -> dict:
 
 def overview(platform: str) -> dict:
     profile = account(platform); owner = profile.get('uid','')
-    jobs=store(platform).list(uid=owner) if owner else []
+    db=store(platform); jobs=db.list(uid=owner) if owner else []
     comments={r['parent_id']:r for r in jobs if r['kind']=='FIRST_COMMENT'}
+    checking = {r['parent_id'] for r in jobs if r['kind'] == 'RECONCILE' and r['status'] in ACTIVE}
     path=directory(platform)/'login.json'
+    if owner:
+        profile = {**profile, 'session': session_of(db, owner, jobs=jobs)}
     return {'definition':definition(platform),'account':profile,'runtime_ready':runtime()['ready'],
             'login_id':json.loads(path.read_text()).get('id') if path.is_file() else None,
-            'uploads':[public_job(platform,r,comments=comments) for r in jobs if r['kind']=='UPLOAD'],
-            'settings':{'first_comment':store(platform).comment_settings(owner)} if owner else {},
+            'uploads':[public_job(platform,r,comments=comments,checking=checking,session=profile.get('session')) for r in jobs if r['kind']=='UPLOAD'],
+            'settings':{'first_comment':db.comment_settings(owner)} if owner else {},
             'checks':[public_job(platform,r) for r in jobs if r['kind'] in ('VERIFY','RECONCILE')][:10],
             'candidates':candidates(platform) if owner else []}
 
@@ -443,7 +461,9 @@ def settle(platform: str, db: SocialStore) -> None:
         when = when if when and when <= time.time() + 86400 else time.time()
         video_store.add_publication(row['script_id'],version=row['version'],render_id=row['render_id'],platform=platform,url=url,
                                     published_on=datetime.fromtimestamp(when).astimezone().date().isoformat(),title=row['payload']['title'],
-                                    note='平台自动核对作品归属和公开状态，回写发布记录。',
+                                    note=('平台作品列表按发布时间与时长关联到原投稿，回写发布记录；标题未能读回，建议抽查。'
+                                          if receipt.get('match_basis') == 'time_duration'
+                                          else '平台自动核对作品归属和公开状态，回写发布记录。'),
                                     recorded_by='platform-manager',account_uid=row['uid'],account_name=account(platform).get('name',''))
         db.update(row['id'],expected='SUBMITTED',status='PUBLISHED',phase='已公开并回写文稿',error='')
     schedule_comments(platform, db)
@@ -470,8 +490,9 @@ def schedule_comments(platform: str, db: SocialStore) -> None:
     active_checks = {row['parent_id'] for row in db.list(kind='COMMENT_CHECK', statuses=ACTIVE)}
     due = [row for row in db.list(uid=owner, kind='FIRST_COMMENT', statuses=('SENT','UNKNOWN'))
            if not row['result'].get('read_back') and row['id'] not in active_checks
+           and int(row['result'].get('check_attempts', 0)) < MAX_COMMENT_CHECKS
            and row['result'].get('next_check_at', row['updated_at'] + 15) <= time.time()]
-    if due and not active_checks:
+    if due and not active_checks and session_of(db, owner)['state'] != 'expired':
         child = min(due, key=lambda row:row['result'].get('next_check_at',row['updated_at'] + 15))
         db.create('COMMENT_CHECK', owner, parent_id=child['id'])
 
@@ -483,14 +504,12 @@ def apply_check(platform: str, db: SocialStore, check: dict) -> None:
             or parent['uid'] != account(platform).get('uid') or parent['status'] not in ('UNKNOWN','SUBMITTED')):
         return
     receipt = check['result']; previous = parent['result'].get('verification', {})
-    attempts = int(previous.get('attempts', 0)) + 1
     state = receipt.get('platform_state', 'unknown') if check['status'] == 'DONE' else 'unavailable'
     if state not in STATE_LABELS:
         state = 'unknown'
-    if check['status'] == 'DONE' and (receipt.get('uid') != parent['uid'] or (receipt.get('owned') is not True and state not in ('missing','ambiguous'))):
+    if check['status'] == 'DONE' and (receipt.get('uid') != parent['uid'] or (receipt.get('owned') is not True and state not in ('missing','ambiguous','metadata_missing'))):
         state = 'unknown'
-    tracking = {'attempts': attempts, 'checked_at': check['updated_at'],
-                'next_check_at': check['updated_at'] + delay(attempts), 'state': state, 'reason': STATE_LABELS[state]}
+    tracking = check_progress(previous, state, check['updated_at'], lookup_revision(check_lookup(parent)))
     if receipt.get('status_details'):
         tracking['status_details'] = receipt['status_details']
     result = {**parent['result'], 'verification': tracking}
@@ -506,7 +525,7 @@ def apply_check(platform: str, db: SocialStore, check: dict) -> None:
             public = (receipt.get('public') is True and state == 'published' and receipt.get('evidence') == EVIDENCE.get(platform))
             if state == 'published' and not public:
                 state = 'unknown'; tracking.update(state=state, reason=STATE_LABELS[state])
-            result.update({k: receipt[k] for k in ('published_at',) if k in receipt})
+            result.update({k: receipt[k] for k in ('published_at', 'match_basis') if k in receipt})
             result.update(accepted=True, confirmed_not_submitted=False, awaiting_work_id=False,
                           work_id=target, url=url, uid=parent['uid'], owned=True, public=public,
                           evidence=EVIDENCE[platform] if public else '', platform_state=state)
@@ -522,9 +541,12 @@ def schedule_checks(platform: str, db: SocialStore) -> None:
     current = account(platform).get('uid')
     if not current or any(row['kind'] in ('LOGIN','RECONCILE') for row in db.list(statuses=ACTIVE)):
         return
+    if session_of(db, current)['state'] == 'expired':
+        return
     now = time.time()
     pending = db.list(uid=current, kind='UPLOAD', statuses=('SUBMITTED','UNKNOWN'))
-    due = [row for row in pending if row['result'].get('verification', {}).get('next_check_at', row['updated_at'] + 15) <= now]
+    due = [row for row in pending if not row['result'].get('verification', {}).get('exhausted')
+           and (row['result'].get('verification', {}).get('next_check_at') or row['updated_at'] + 15) <= now]
     due.sort(key=lambda row: row['result'].get('verification', {}).get('next_check_at', row['updated_at'] + 15))
     if not due:
         return
@@ -532,11 +554,24 @@ def schedule_checks(platform: str, db: SocialStore) -> None:
     db.create('RECONCILE', current, {'work_id': row['work_id'], 'lookup': check_lookup(row), 'automatic': True}, parent_id=row['id'])
 
 
+def session_of(db: SocialStore, owner: str, *, jobs: list[dict] | None = None) -> dict:
+    """Login health from this account's jobs (pass them when already read); a login attempt is queued before its UID is known."""
+    owned = db.list(uid=owner) if jobs is None else jobs
+    logins = [row for row in db.list(kind='LOGIN') if row['uid'] != owner and row['result'].get('uid') == owner]
+    return assess([*owned, *logins])
+
+
+def schedule_verify(platform: str, db: SocialStore) -> None:
+    """Queue a read-only login check for an idle account; this never touches a work."""
+    current = account(platform).get('uid')
+    if not current or db.list(statuses=ACTIVE):
+        return
+    if verify_due(session_of(db, current), time.time()):
+        db.create('VERIFY', current)
+
+
 def check_lookup(row: dict) -> dict:
-    result = row['result']
-    return {'work_id': row['work_id'], 'title': row['payload'].get('title',''),
-            'submitted_at': result.get('submission_started_at') or row['created_at'],
-            'duration_seconds': result.get('duration_seconds'), 'correlations': result.get('correlations', [])}
+    return lookup_for(row)
 
 
 def recover_saved_receipts(platform: str, db: SocialStore) -> None:
@@ -591,6 +626,7 @@ def tick(platform: str) -> None:
             db.recover()
         if not runtime()['ready']:
             return
+        schedule_verify(platform, db)
         schedule_checks(platform, db)
         row=db.claim(prefer_checks=True)
         if not row:

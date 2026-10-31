@@ -36,6 +36,39 @@ _last_write = 0.0
 _dirty = False
 _last_activity = ""
 _running = 0
+_background_gate = threading.Lock()
+_last_background = 0.0
+_background_state_dir = ""
+
+
+def mark_activity_background(state_dir: str) -> Optional[threading.Thread]:
+    """Coalesce UI heartbeats without occupying the API's shared worker pool."""
+    global _last_background, _background_state_dir
+    if not _background_gate.acquire(blocking=False):
+        return None
+    now = time.monotonic()
+    if state_dir == _background_state_dir and now - _last_background < 1:
+        _background_gate.release()
+        return None
+    _last_background = now
+    _background_state_dir = state_dir
+
+    def publish():
+        try:
+            use_state_dir(state_dir)
+            mark_activity()
+        except Exception:
+            pass  # Bookkeeping must never fail a completed response.
+        finally:
+            _background_gate.release()
+
+    worker = threading.Thread(target=publish, name="console-activity", daemon=True)
+    try:
+        worker.start()
+    except RuntimeError:
+        _background_gate.release()
+        return None
+    return worker
 
 
 def use_state_dir(state_dir: str) -> None:

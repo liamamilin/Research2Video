@@ -1,0 +1,55 @@
+{
+  "verified_at": "2026-10-27T19:37:31.575401+08:00",
+  "status": "COMPLETED",
+  "render_id": "a760d4a7244e4a7c81e621053aec717b",
+  "engine_job_id": "1295b12e-fdaf-45ee-bf6c-db042cd8a28f",
+  "completed_at": "2026-10-27T19:16:07+0800",
+  "script_id": "f6026de8e9f547f29df298a828f49ab7",
+  "version": 1,
+  "source_sha256": "752b203194535f172992facecfacf26aa513f4aafbb55ddb570421eae1da051e",
+  "same_narration_all_five_attempts": true,
+  "content_seconds": 443.072,
+  "content_frames": 13292,
+  "service_restarts": 0,
+  "published": false,
+  "qa": {
+    "qa.json": "PASS",
+    "package-qa.json": "PASS",
+    "brand-qa.json": "PASS"
+  },
+  "full_decode": [
+    {
+      "exit_code": 0,
+      "seconds": 8.04,
+      "bytes": 50786976,
+      "file": "content.mp4",
+      "error_log_empty": true
+    },
+    {
+      "exit_code": 0,
+      "seconds": 7.75,
+      "bytes": 36014579,
+      "file": "video.mp4",
+      "error_log_empty": true
+    }
+  ],
+  "regression": {
+    "passed": 902,
+    "skipped": 1,
+    "log_sha256": "9929f65ccd18fb6eaaf2cbb2d5b258dd911c689d8352157625773b7d383eaa0c"
+  },
+  "actual_movie_picture_samples": [
+    {
+      "file": "number-label.png",
+      "content_seconds": 87.248,
+      "scene": "card_7",
+      "component": "bar_chart"
+    },
+    {
+      "file": "comparison.png",
+      "content_seconds": 62.349,
+      "scene": "card_5",
+      "component": "comparison"
+    }
+  ]
+}

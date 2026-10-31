@@ -1,0 +1,264 @@
+# 2026-10-28：参考公开原始内容归纳问题结构；题型与讲述步骤为本矩阵编辑整理。
+patterns:
+- category: industry_processes
+  name: 跟随一个部件
+  title_pattern: 一块{原料}变成{部件}，要经过哪些关键工序？
+  outline:
+  - 拿出一件具体实物
+  - 跟随原料流过关键工序
+  - 解释每一步改变了什么
+  - 展示最终部件的用途
+  examples: &id001
+  - title: How microchips are made | ASML Description
+    url: https://www.asml.com/en/technology/all-about-microchips/how-microchips-are-made
+    summary: 跟随芯片制造的具体工序理解材料如何逐步变成可用部件。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: industry_processes
+  name: 关键工序的作用
+  title_pattern: 制造{产品}时，为什么必须完成{关键步骤}？
+  outline:
+  - 拿出一件具体实物
+  - 对照同一问题中的对象与选择
+  - 跟随原料流过关键工序
+  - 解释每一步改变了什么
+  - 展示最终部件的用途
+  examples: *id001
+- category: industry_processes
+  name: 两种制造路线
+  title_pattern: 同样做{产品}，{工艺A}与{工艺B}的过程怎样不同？
+  outline:
+  - 拿出一件具体实物
+  - 跟随原料流过关键工序
+  - 沿一个具体案例推进解释
+  - 解释每一步改变了什么
+  - 展示最终部件的用途
+  examples: *id001
+- category: industry_materials
+  name: 材料选择
+  title_pattern: 制造{产品}时，为什么选{材料}而不是{另一材料}？
+  outline:
+  - 展示产品里的具体部件
+  - 连接材料性质与用途
+  - 解释制造中的取舍
+  - 回到整体产品的结果
+  examples: &id002
+  - title: Raw materials - worldsteel.org
+    url: https://worldsteel.org/about-steel/raw-materials
+    summary: 从原料组成和生产用途理解材料选择怎样影响后续工艺。参考其提问和展开方式，具体结论留给选题后的研究。
+  - title: “后母戊”青铜方鼎_中国国家博物馆官方网站
+    url: https://www.chnmuseum.cn/zp/zpml/kgfjp/202008/t20200824_247255.shtml
+    summary: 从一件具体青铜器的形制、用途和制作理解文物表达。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: industry_materials
+  name: 一个部件的作用
+  title_pattern: '{部件}在{产品}里承担什么，怎样影响整体表现？'
+  outline:
+  - 展示产品里的具体部件
+  - 对照同一问题中的对象与选择
+  - 连接材料性质与用途
+  - 解释制造中的取舍
+  - 回到整体产品的结果
+  examples: *id002
+- category: industry_materials
+  name: 从性质到工艺
+  title_pattern: '{材料性质}改变后，制造和使用要怎样跟着调整？'
+  outline:
+  - 展示产品里的具体部件
+  - 连接材料性质与用途
+  - 沿一个具体案例推进解释
+  - 解释制造中的取舍
+  - 回到整体产品的结果
+  examples: *id002
+- category: industry_equipment
+  name: 看懂一个设备动作
+  title_pattern: '{生产设备}怎样把{工件}变成下一道工序需要的样子？'
+  outline:
+  - 锁定一个设备和工件
+  - 拆开关键运动或控制
+  - 连接前后工位
+  - 解释设备带来的能力和取舍
+  examples: &id003
+  - title: Lithography principles - Technology | ASML
+    url: https://www.asml.com/en/technology/lithography-principles
+    summary: 用一个关键制造动作解释设备、光与图案转移的关系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: industry_equipment
+  name: 自动化接在哪
+  title_pattern: 把{工位}交给{自动化设备}后，动作和协作怎样变化？
+  outline:
+  - 锁定一个设备和工件
+  - 对照同一问题中的对象与选择
+  - 拆开关键运动或控制
+  - 连接前后工位
+  - 解释设备带来的能力和取舍
+  examples: *id003
+- category: industry_equipment
+  name: 精度怎样实现
+  title_pattern: 制造{部件}所需的{精度或稳定性}，是怎样一步步获得的？
+  outline:
+  - 锁定一个设备和工件
+  - 拆开关键运动或控制
+  - 沿一个具体案例推进解释
+  - 连接前后工位
+  - 解释设备带来的能力和取舍
+  examples: *id003
+- category: industry_supply
+  name: 一张订单的路线
+  title_pattern: 一张{产品订单}怎样经过原料、部件与装配企业？
+  outline:
+  - 跟随具体订单或部件
+  - 画出参与企业与物流
+  - 解释到货和加工的衔接
+  - 回到最终交付
+  examples: &id004
+  - title: TOYOTA MOTOR CORPORATION GLOBAL WEBSITE | 75 Years of TOYOTA | Logistics | Production Parts Logistics
+    url: https://www.toyota-global.com/company/history_of_toyota/75years/data/automotive_business/production/logistics/production_parts/index.html
+    summary: 从零件何时送到哪个工位解释生产物流和供应链关系。参考其提问和展开方式，具体结论留给选题后的研究。
+  - &id008
+    title: Global Supply Chains of EV Batteries - IEA
+    url: https://www.iea.org/reports/global-supply-chains-of-ev-batteries
+    summary: 沿原料、部件和制造地区组织一条产业链与空间关系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: industry_supply
+  name: 缺一件为何会停
+  title_pattern: '{关键部件}交付变化，怎样影响后续生产？'
+  outline:
+  - 跟随具体订单或部件
+  - 对照同一问题中的对象与选择
+  - 画出参与企业与物流
+  - 解释到货和加工的衔接
+  - 回到最终交付
+  examples: *id004
+- category: industry_supply
+  name: 供应方式对照
+  title_pattern: 同样需要{部件}，{供应方式A}与{供应方式B}怎样协同？
+  outline:
+  - 跟随具体订单或部件
+  - 画出参与企业与物流
+  - 沿一个具体案例推进解释
+  - 解释到货和加工的衔接
+  - 回到最终交付
+  examples: *id004
+- category: industry_quality
+  name: 一致性从哪里来
+  title_pattern: 反复制造{产品}，怎样让关键结果保持一致？
+  outline:
+  - 展示产品的一项具体要求
+  - 沿工序定位形成它的动作
+  - 跟随一次检查和反馈
+  - 说明一致性怎样被维持
+  examples: &id005
+  - title: 'Toyota Virtual Plant Tour: Toyota Production System | Toyota Virtual Plant Tour | Company | Toyota Motor
+      Corporation Official Global Website'
+    url: https://global.toyota/en/company/plant-tours/production-system
+    summary: 通过一个生产环节的动作和前后衔接解释现场运转。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: industry_quality
+  name: 问题出现在哪一步
+  title_pattern: '{缺陷现象}出现在成品上，沿工序怎样理解它的来路？'
+  outline:
+  - 展示产品的一项具体要求
+  - 对照同一问题中的对象与选择
+  - 沿工序定位形成它的动作
+  - 跟随一次检查和反馈
+  - 说明一致性怎样被维持
+  examples: *id005
+- category: industry_quality
+  name: 一次改进的过程
+  title_pattern: 生产{产品}时改变{现场做法}，怎样影响后续质量？
+  outline:
+  - 展示产品的一项具体要求
+  - 沿工序定位形成它的动作
+  - 沿一个具体案例推进解释
+  - 跟随一次检查和反馈
+  - 说明一致性怎样被维持
+  examples: *id005
+- category: industry_efficiency
+  name: 东西等在哪里
+  title_pattern: 制造一件{产品}时，时间主要用在加工还是等待？
+  outline:
+  - 跟随一件工件进入现场
+  - 标出加工等待和搬运
+  - 解释瓶颈与衔接
+  - 回到时间资源和交付关系
+  examples: &id006
+  - title: Toyota Production System | Vision & Philosophy | Company | Toyota Motor Corporation Official Global Website
+    url: https://global.toyota/en/company/vision-and-philosophy/production-system
+    summary: 围绕生产现场讲清准时化、发现问题与协作方式之间的关系。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: industry_efficiency
+  name: 产量为何上不去
+  title_pattern: '{生产线}增加了{投入}，为什么交付仍受某个环节影响？'
+  outline:
+  - 跟随一件工件进入现场
+  - 对照同一问题中的对象与选择
+  - 标出加工等待和搬运
+  - 解释瓶颈与衔接
+  - 回到时间资源和交付关系
+  examples: *id006
+- category: industry_efficiency
+  name: 少一个来回
+  title_pattern: 改变{现场衔接}之后，一件{工件}的流转怎样变化？
+  outline:
+  - 跟随一件工件进入现场
+  - 标出加工等待和搬运
+  - 沿一个具体案例推进解释
+  - 解释瓶颈与衔接
+  - 回到时间资源和交付关系
+  examples: *id006
+- category: industry_energy
+  name: 工厂里的能量路线
+  title_pattern: 制造{产品}需要的能量，从哪里来、经过哪里？
+  outline:
+  - 选一个具体生产用途
+  - 画出能量与设施路线
+  - 说明转换储存和使用
+  - 回到连续生产的需求
+  examples: &id007
+  - title: Executive summary - Batteries and Secure Energy Transitions - IEA
+    url: https://www.iea.org/reports/batteries-and-secure-energy-transitions/executive-summary
+    summary: 从能源系统中的实际用途说明技术怎样连接生产与基础设施。参考其提问和展开方式，具体结论留给选题后的研究。
+- category: industry_energy
+  name: 设施连接生产
+  title_pattern: '{工业设施}怎样把几个生产环节接在一起？'
+  outline:
+  - 选一个具体生产用途
+  - 对照同一问题中的对象与选择
+  - 画出能量与设施路线
+  - 说明转换储存和使用
+  - 回到连续生产的需求
+  examples: *id007
+- category: industry_energy
+  name: 替换一种能源方式
+  title_pattern: 把{生产环节}换成{能源方案}，设备和流程要怎样调整？
+  outline:
+  - 选一个具体生产用途
+  - 画出能量与设施路线
+  - 沿一个具体案例推进解释
+  - 说明转换储存和使用
+  - 回到连续生产的需求
+  examples: *id007
+- category: industry_changes
+  name: 变化传到产业链
+  title_pattern: '{技术变化}出现后，{产业链}哪些环节先改变？'
+  outline:
+  - 从一个具体产品变化进入
+  - 标出受影响的上下游
+  - 解释设备资源和配套变化
+  - 回到交付能力与产业位置
+  examples: &id009
+  - *id008
+- category: industry_changes
+  name: 新旧路线并存
+  title_pattern: 生产{产品}时，为什么{新路线}与{旧路线}会同时存在？
+  outline:
+  - 从一个具体产品变化进入
+  - 对照同一问题中的对象与选择
+  - 标出受影响的上下游
+  - 解释设备资源和配套变化
+  - 回到交付能力与产业位置
+  examples: *id009
+- category: industry_changes
+  name: 产业迁移的过程
+  title_pattern: '{生产环节}转移到{新地区}，需要哪些配套跟着发生？'
+  outline:
+  - 从一个具体产品变化进入
+  - 标出受影响的上下游
+  - 沿一个具体案例推进解释
+  - 解释设备资源和配套变化
+  - 回到交付能力与产业位置
+  examples: *id009

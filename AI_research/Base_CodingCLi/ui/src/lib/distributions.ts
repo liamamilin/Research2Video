@@ -1,4 +1,4 @@
-import type { Distribution, Publication } from "@/api/video";
+import type { DistributionState, Publication } from "@/api/video";
 
 export const PLATFORM_NAMES: Record<string, string> = { bilibili: "B 站", douyin: "抖音", kuaishou: "快手", xiaohongshu: "小红书", weixin_channels: "微信视频号" };
 // Deferred by the user on 2026-10-25; retain names for historical records.
@@ -8,10 +8,10 @@ export const DISTRIBUTION_LABEL: Record<string, string> = {
   UNPUBLISHED: "未发布", DRAFT: "待发布", QUEUED: "排队中", UPLOADING: "上传中",
   SUBMITTED: "已提交，待公开确认", PUBLISHED: "已发布", UNKNOWN: "结果待核对", FAILED: "发布失败", CANCELLED: "已取消",
 };
-export function publishedPlatformCount(rows: Distribution[] = [], publications: Publication[] = []) {
+export function publishedPlatformCount(rows: DistributionState[] = [], publications: Publication[] = []) {
   return new Set([...rows.filter(r => r.status === "PUBLISHED").map(r => r.platform), ...publications.map(p => p.platform || "bilibili")]).size;
 }
-export function matchesDistribution(rows: Distribution[] = [], platform: string, state: string, legacyPublished = false) {
+export function matchesDistribution(rows: DistributionState[] = [], platform: string, state: string, legacyPublished = false) {
   if (state === "never") return !legacyPublished && !rows.some(r => r.status === "PUBLISHED");
   if (!state && !platform) return true;
   const targets = rows.filter(r => (!platform || r.platform === platform) && (r.current_account || !r.account_uid));

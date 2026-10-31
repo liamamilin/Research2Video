@@ -448,8 +448,10 @@ def _update_system_config_locked(payload: dict, request: Request, user, *, trust
     atomic_write(path, new_content)
     warnings = []
     try:
+        from core import search_health
         from web.indexer import vector_sync
         vector_sync.reset_client()
+        search_health.clear()  # a changed provider or plan deserves a fresh try, not the old cooldown
         audit.log('system_config_update', user=user['username'], result='success',
                   ip=request.client.host if request.client else None)
     except Exception:
@@ -504,6 +506,8 @@ def update_secrets(payload: dict, request: Request, user=Depends(require_admin))
         _write_env_value(env_name, value or None)
         applied[env_name] = value is not None
 
+    from core import search_health
+    search_health.clear()  # a new or topped-up key is tried at once rather than after its cooldown
     audit.log(
         "config_secrets_update",
         user=user["username"],

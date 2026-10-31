@@ -1,0 +1,16 @@
+{
+  "earlierPlayingTime": 0.160705,
+  "laterPlayingTime": 24.501011,
+  "final": [
+    {
+      "currentTime": 24.510048,
+      "duration": 428.266667,
+      "error": null,
+      "height": 1080,
+      "muted": true,
+      "paused": true,
+      "readyState": 4,
+      "width": 1920
+    }
+  ]
+}

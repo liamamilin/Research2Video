@@ -1,4 +1,3 @@
-# 矩阵：消费科技与购买决策（2026-10-22，spec/ten-matrices.md）。两个 Job：每日一份动态、每周一个主题；都只读订阅源，不联网搜索。
 name: 消费科技与购买决策
 domain: 消费科技
 keywords: []
@@ -7,3 +6,13 @@ jobs:
 - consumer/consumer_weekly
 render:
   video_speed: 1.25
+content:
+  name: 消费与生活
+  role: domain
+  audience: 想理解产品体验差别、为自己的日常需求做选择的普通观众
+  status: configured
+  visual_focus:
+  - 实物图片
+  - 对比卡
+  - 使用场景
+  description: 把产品变化放回具体使用过程，理解体验、投入与取舍怎样影响同一需求。

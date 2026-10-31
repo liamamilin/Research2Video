@@ -8,6 +8,36 @@ from tests.test_video_scripts import GOOD, REPORT, llm, script_json, video_env  
 from web.services import video_executor, video_render, video_workflow
 
 
+def test_failed_writer_can_resume_from_saved_report_through_model_fallback(video_env, monkeypatch):
+    from core.llm import ChatResponse, LLMClient, LLMConfig
+
+    report = video_env / "report.md"
+    report.write_text(REPORT)
+    script = store.create_script("report_digest", {"title": "定时任务", "from_report": str(report)})
+    store.update_script(script["id"], status="FAILED", report_path=str(report), error="content_filter", stage="写稿")
+    calls = []
+    generated = script_json(300, citations={(0, 0): [GOOD]})
+
+    def answer(client, messages, **kwargs):
+        calls.append((client._active_model(), messages))
+        return ChatResponse(content="", finish_reason="content_filter", model="primary") if len(calls) == 1 else ChatResponse(
+            content=generated, finish_reason="stop", model="backup")
+
+    monkeypatch.setattr(LLMClient, "_make_client", lambda self: None)
+    monkeypatch.setattr(LLMClient, "_chat_cancellable", answer)
+    config = LLMConfig(model="primary", fallback_models=["backup"], base_url="http://llm.invalid/v1")
+    assert video_workflow.run_rewrite(script["id"], previous_status="FAILED", llm_config=config) == "DRAFT"
+    after = store.get_script(script["id"])
+    version = store.get_version(script["id"], 1)
+    assert after["report_path"] == str(report) and report.read_text() == REPORT
+    assert after["error"] is None and after["stage"] is None
+    assert [model for model, _ in calls] == ["primary", "backup"] and calls[0][1] == calls[1][1]
+    assert REPORT in calls[0][1][1]["content"]
+    assert version["sections"][0]["paragraphs"][0]["text"] == json.loads(generated)["sections"][0]["paragraphs"][0]["text"]
+    assert version["meta"]["model"] == "backup"
+    assert version["meta"]["model_switches"][0]["from"] == "primary"
+
+
 @pytest.mark.parametrize("recipe", ["flash", "point_short", "deep_dive", "report_digest", "topic_digest",
                                     "action_list", "top_finding", "ai-developer-roundup-long",
                                     "ai-developer-comparison-long"])

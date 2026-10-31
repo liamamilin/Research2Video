@@ -1,0 +1,191 @@
+[
+  {
+    "name": "01_价格变化",
+    "title": "涨价以后，钱花在哪里",
+    "job_id": "8f5bdd5d-bdcb-40b8-b436-1f0ca3ab797b",
+    "executor": "hybrid_cards",
+    "hybrid_version": 5,
+    "media": {
+      "content.mp4": {
+        "decode": "PASS",
+        "duration_seconds": 71.333333,
+        "bytes": 12859644,
+        "streams": [
+          {
+            "type": "video",
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1"
+          },
+          {
+            "type": "audio",
+            "codec": "aac",
+            "width": null,
+            "height": null,
+            "fps": "0/0"
+          }
+        ]
+      },
+      "video.mp4": {
+        "decode": "PASS",
+        "duration_seconds": 73.833333,
+        "bytes": 4328052,
+        "streams": [
+          {
+            "type": "video",
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1"
+          },
+          {
+            "type": "audio",
+            "codec": "aac",
+            "width": null,
+            "height": null,
+            "fps": "0/0"
+          }
+        ]
+      }
+    },
+    "frames": 19,
+    "components": [
+      "title_card",
+      "concept_reveal",
+      "object_showcase",
+      "price_change",
+      "data_chart",
+      "comparison"
+    ],
+    "still_frames": 281,
+    "motion_frames": 1859,
+    "api_qa": "PASS"
+  },
+  {
+    "name": "02_操作教程",
+    "title": "一份材料的两条处理路径",
+    "job_id": "d0a38384-2017-459b-b80e-91d3cd9e1d03",
+    "executor": "hybrid_cards",
+    "hybrid_version": 5,
+    "media": {
+      "content.mp4": {
+        "decode": "PASS",
+        "duration_seconds": 68.566667,
+        "bytes": 15255001,
+        "streams": [
+          {
+            "type": "video",
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1"
+          },
+          {
+            "type": "audio",
+            "codec": "aac",
+            "width": null,
+            "height": null,
+            "fps": "0/0"
+          }
+        ]
+      },
+      "video.mp4": {
+        "decode": "PASS",
+        "duration_seconds": 71.066667,
+        "bytes": 5254363,
+        "streams": [
+          {
+            "type": "video",
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1"
+          },
+          {
+            "type": "audio",
+            "codec": "aac",
+            "width": null,
+            "height": null,
+            "fps": "0/0"
+          }
+        ]
+      }
+    },
+    "frames": 17,
+    "components": [
+      "title_card",
+      "concept_reveal",
+      "material_collage",
+      "flow_diagram",
+      "comparison",
+      "concept_reveal"
+    ],
+    "still_frames": 569,
+    "motion_frames": 1488,
+    "api_qa": "PASS"
+  },
+  {
+    "name": "03_数据比较",
+    "title": "便宜和快，怎么一起看",
+    "job_id": "aa5285f7-4d4d-4b76-a054-70da9219e238",
+    "executor": "hybrid_cards",
+    "hybrid_version": 5,
+    "media": {
+      "content.mp4": {
+        "decode": "PASS",
+        "duration_seconds": 78.866667,
+        "bytes": 13258992,
+        "streams": [
+          {
+            "type": "video",
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1"
+          },
+          {
+            "type": "audio",
+            "codec": "aac",
+            "width": null,
+            "height": null,
+            "fps": "0/0"
+          }
+        ]
+      },
+      "video.mp4": {
+        "decode": "PASS",
+        "duration_seconds": 81.366667,
+        "bytes": 4545715,
+        "streams": [
+          {
+            "type": "video",
+            "codec": "h264",
+            "width": 1920,
+            "height": 1080,
+            "fps": "30/1"
+          },
+          {
+            "type": "audio",
+            "codec": "aac",
+            "width": null,
+            "height": null,
+            "fps": "0/0"
+          }
+        ]
+      }
+    },
+    "frames": 17,
+    "components": [
+      "title_card",
+      "concept_reveal",
+      "data_chart",
+      "comparison",
+      "scatter_chart",
+      "concept_reveal"
+    ],
+    "still_frames": 662,
+    "motion_frames": 1704,
+    "api_qa": "PASS"
+  }
+]

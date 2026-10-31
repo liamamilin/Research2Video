@@ -30,7 +30,7 @@ writing:
     depth: '{{audience.depth}}'
     tone: news
   style: |
-    从开发者熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。
+    从{{audience}}熟悉的工作场景切入，让新进展与实际选择产生联系，像给同事讲一件值得关注的新事。
 output:
   use: motion
   packaging:

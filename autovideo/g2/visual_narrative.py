@@ -100,16 +100,18 @@ def merge_scene_repair(plan: dict, scene_id: str, repaired: dict) -> dict:
 def verified_baseline(root: Path) -> tuple[dict, dict, dict]:
     if root.is_symlink():
         raise pipeline.G2Fault("INVALID_BASELINE", "baseline directory cannot be a symlink")
-    root = root.resolve(strict=True)
-    if not root.is_relative_to(pipeline.PROJECT):
-        raise pipeline.G2Fault("INVALID_BASELINE", "baseline must be an existing project run")
+    from g2.workspace import project_path
+    try:
+        root = project_path(pipeline.PROJECT, root.resolve(strict=True))
+    except ValueError as exc:
+        raise pipeline.G2Fault("INVALID_BASELINE", "baseline must be an existing project run") from exc
     records = json.loads((root / "artifacts/manifest.json").read_text())["files"]
     expected = {record["path"]: record["sha256"] for record in records}
     required = ["artifacts/input.json", "artifacts/final-narration-plan.json", "artifacts/alignment.json",
                 "artifacts/captions.srt", "artifacts/qa.json", "fixtures/assets/communications_noise.wav"]
     for rel in required:
         path = root / rel
-        if path.is_symlink() or not path.resolve(strict=True).is_relative_to(root):
+        if path.is_symlink() or not path.resolve(strict=True).is_relative_to(root.resolve()):
             raise pipeline.G2Fault("INVALID_BASELINE_FILE", rel)
         project_rel = path.relative_to(pipeline.PROJECT).as_posix()
         if expected.get(project_rel) != pipeline.digest(path):
@@ -209,7 +211,8 @@ def verify(compiled: dict, baseline: Path) -> dict:
 
 
 def run(baseline: Path, feedback: str | None = None, response_path: Path | None = None, repair_scene: str | None = None) -> dict:
-    baseline = baseline.resolve(strict=True)
+    from g2.workspace import project_path
+    baseline = project_path(pipeline.PROJECT, baseline.resolve(strict=True))
     source, narration, alignment = verified_baseline(baseline)
     pipeline.RUN_ROOT.mkdir(parents=True, exist_ok=False)
     pipeline.ASSETS.mkdir(parents=True)
@@ -226,9 +229,10 @@ def run(baseline: Path, feedback: str | None = None, response_path: Path | None 
         builder = build_messages
     pipeline.PROMPT_VERSION = "visual-narrative-experiment-v1"
     if response_path:
-        response_path = response_path.resolve(strict=True)
-        if not response_path.is_relative_to(pipeline.PROJECT):
-            raise pipeline.G2Fault("INVALID_REPLAY_PATH", "response must stay in the project")
+        try:
+            response_path = project_path(pipeline.PROJECT, response_path.resolve(strict=True))
+        except ValueError as exc:
+            raise pipeline.G2Fault("INVALID_REPLAY_PATH", "response must stay in the project") from exc
         request_path = response_path.with_name(response_path.name.replace(".response.json", ".request.json"))
         request = json.loads(request_path.read_text())
         payload = json.loads(request["messages"][1]["content"])

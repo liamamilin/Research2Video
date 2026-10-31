@@ -58,10 +58,126 @@ def test_daily_and_weekly_share_story_identity_even_after_title_changes(guard_en
     check(first)  # keep the earlier draft deterministically, including same-second creations
 
 
-def test_different_matrices_and_different_recipes_on_same_report_are_allowed(guard_env):
+def test_different_matrices_and_different_stories_on_same_report_are_allowed(guard_env):
     first = script(guard_env, "science/daily")
     check(script(guard_env, "history/daily"))
-    check(script(guard_env, "science/daily", recipe="point_short", report_path=first["report_path"]))
+    other = script(guard_env, "science/daily", url=NEW, recipe="point_short", report_path=first["report_path"])
+    paths = get_settings().paths
+    guard.check(other, sections(NEW), paths.config_dir, paths.jobs_dir)
+
+
+def test_same_report_different_recipes_no_longer_exempts_same_story(guard_env):
+    first = script(guard_env, "science/daily")
+    second = script(guard_env, "science/daily", recipe="point_short", report_path=first["report_path"])
+    with pytest.raises(guard.DuplicateContent):
+        check(second)
+    paths = get_settings().paths
+    plan = cleanup.build_plan(paths.config_dir, paths.jobs_dir, paths.state_dir)
+    assert [r["script_id"] for r in plan["archive"]] == [second["id"]]
+
+
+def test_legacy_dated_flash_gets_policy_without_rewriting_history(guard_env):
+    first = script(guard_env, "science/daily")
+    current = script(guard_env, "science/weekly")
+    store.update_script(current["id"], topic={"id": "2026-10-27/F2", "from_report": current["report_path"]})
+    original = store.get_script(current["id"])
+    guarded = guard.with_policy(original)
+    assert guarded["topic"]["matrix_dedup"]["policy"] == "matrix-source-v2"
+    with pytest.raises(guard.DuplicateContent) as exc:
+        check(guarded)
+    assert exc.value.peers[0]["script_id"] == first["id"]
+    assert store.get_script(current["id"]) == original
+
+
+def test_same_report_sibling_waits_then_uses_only_fresh_material(guard_env):
+    first = script(guard_env, "science/daily", ready=False)
+    paths = get_settings().paths
+    assert guard.writing_peer(first["topic"], paths.config_dir, paths.jobs_dir)
+    store.add_version(first["id"], title="小蛇", sections=sections(), length_check={}, edit_type="GENERATED")
+    store.update_script(first["id"], status="DRAFT")
+    second = script(guard_env, "science/daily", recipe="point_short", report_path=first["report_path"], ready=False)
+    material = f"### 小蛇\n\n{SNAKE}\n\n### 恐龙\n\n{NEW}"
+    report, _, meta = guard.prepare(second, material, "", paths.config_dir, paths.jobs_dir)
+    assert NEW in report and SNAKE not in report and meta["peers"][0]["script_id"] == first["id"]
+
+
+def test_earlier_writer_reserves_render_but_later_writer_cannot_deadlock_first(guard_env):
+    first = script(guard_env, "science/daily", ready=False)
+    second = script(guard_env, "science/daily", recipe="point_short")
+    result = video_executor.advance_auto(second, {}, can_start_script=True, can_start_render=True)
+    assert not result["hold"] and "更早" in result["item"]["note"]
+    assert not store.list_renders(second["id"])
+    store.add_version(first["id"], title="小蛇", sections=sections(), length_check={}, edit_type="GENERATED")
+    store.update_script(first["id"], status="DRAFT")
+    later = script(guard_env, "science/weekly", ready=False)
+    paths = get_settings().paths
+    assert not guard.writing_peer(first["topic"], paths.config_dir, paths.jobs_dir, script_id=first["id"])
+    assert guard.writing_peer(later["topic"], paths.config_dir, paths.jobs_dir, script_id=second["id"]) is False
+
+
+def test_pending_upload_receipt_prevents_automatic_archival_and_duplicate_mutation(guard_env):
+    import sqlite3
+
+    script(guard_env, "science/daily")
+    second = script(guard_env, "science/weekly")
+    with sqlite3.connect(guard_env / "state/platforms.db") as conn:
+        conn.execute("CREATE TABLE uploads(script_id TEXT,status TEXT,bvid TEXT)")
+        conn.execute("INSERT INTO uploads VALUES(?,?,?)", (second["id"], "VERIFYING", ""))
+    before = store.get_script(second["id"])
+    check(second)
+    assert not guard.archive_duplicate(second["id"], "重复", [])
+    assert store.get_script(second["id"]) == before
+
+
+def test_flash_picking_defers_event_identity_and_keeps_finite_alternatives(guard_env, monkeypatch):
+    from core.video import topic_store
+    from core.video.topics import Topic
+
+    script(guard_env, "science/daily")
+    def item(code, url):
+        return Topic(f"2026-10-27/{code}", "2026-10-27", code, code, {"来源": url})
+
+    topics = [item("F2", SNAKE), item("F3", NEW), item("F4", NEW + "?utm_source=second"),
+              item("F5", "https://science.org/article/another-discovery")]
+    monkeypatch.setattr(video_autopilot, "sync_topics", lambda: [])
+    monkeypatch.setattr(topic_store, "load", lambda source: ("2026-10-27", topics))
+    monkeypatch.setattr(topic_store, "resolve", lambda jobs, source: topic_store.Source("flash", "science/daily", "科学"))
+    picked = video_autopilot.pick_topics({"picks": [{"column": "flash", "count": 3, "source": "flash"}]})
+    # Shared URLs can carry an actual new result. The event organizer makes
+    # that decision before writing, and can replace old events with F5.
+    assert [i["topic"]["id"] for i in picked] == ["2026-10-27/F2", "2026-10-27/F3", "2026-10-27/F4"]
+    assert all(i["topic"]["matrix_dedup"]["policy"] == "matrix-story-v3" for i in picked)
+    assert [t["id"] for t in picked[0]["topic"]["_story_fallbacks"]] == ["2026-10-27/F5"]
+
+
+def test_already_queued_cross_day_topic_cancels_before_spawning_writer(guard_env, monkeypatch):
+    from core.video import autopilot_store as ap
+
+    first = script(guard_env, "science/daily")
+    topic = {**first["topic"], "id": "2026-10-27/F2", "fields": {"来源": SNAKE}}
+    monkeypatch.setattr(video_workflow, "spawn", lambda *args: pytest.fail("duplicate must not start writing"))
+    run = ap.create_run({}, [{"column_key": "flash", "topic": topic}])
+    video_autopilot.advance(run["items"][0], can_start_script=True, can_start_render=True)
+    item = ap.get_run(run["id"])["items"][0]
+    assert item["state"] == "CANCELLED" and not item["script_id"]
+
+
+def test_replay_cannot_mutate_ledger_and_preserves_published_versions(guard_env):
+    import sqlite3
+    from pathlib import Path
+    from scripts.eval_video_dedup import readonly_ledger, replay
+
+    first = script(guard_env, "science/daily")
+    second = script(guard_env, "science/weekly")
+    store.add_publication(first["id"], version=1, url="https://www.bilibili.com/video/BV1xx411c7mD", published_on="2026-10-25")
+    before = cleanup.published_digest()
+    paths = get_settings().paths
+    results = replay(Path(store.db_path()), [first["id"], second["id"]], paths.config_dir, paths.jobs_dir)
+    assert [r["result"] for r in results] == ["PROTECTED", "DUPLICATE"]
+    with readonly_ledger(Path(store.db_path())):
+        with pytest.raises(sqlite3.OperationalError, match="readonly"):
+            store.update_script(second["id"], archived=1)
+    assert not store.get_script(second["id"])["archived"] and cleanup.published_digest() == before
 
 
 def test_published_sample_blocks_repeated_story_without_changing_sample(guard_env):
@@ -113,10 +229,32 @@ def test_prepare_strips_old_original_material_and_keeps_new_story(guard_env):
 def test_sources_are_canonical_and_shared_reference_pages_remain_reusable():
     assert guard.source_key(SNAKE + "?utm_source=share#part") == guard.source_key(SNAKE.replace("https:", "http:"))
     assert guard.source_key("https://arxiv.org/html/2610.12345v2") == guard.source_key("https://arxiv.org/abs/2610.12345")
-    for url in ("https://docs.example.com/models", "https://artificialanalysis.ai/leaderboards/models#one", "https://example.com/rss.xml"):
+    for url in ("https://docs.example.com/models", "https://artificialanalysis.ai/leaderboards/models#one", "https://example.com/rss.xml",
+                "https://www.ft.com/rss/home", "https://example.com/feeds/news", "https://example.com/feed"):
         assert not guard.source_key(url)
+    assert guard.source_key("https://developers.example.com/blog/new-model")
     assert guard.overlap({"a.example/critical-maxkb-ai-agent-flaw"}, {"b.example/critical-maxkb-ai-agent-flaw"})
     assert not guard.overlap({"a.example/openai-launches-gpt6"}, {"b.example/anthropic-ships-opus-55"})
+
+
+def test_extra_background_link_does_not_make_covered_core_event_fresh(guard_env):
+    script(guard_env, "science/daily")
+    topic = guard.policy_topic({"id": "2026-10-27/F2", "title": "同一个小蛇事件的新标题",
+                                "fields": {"证据来源": SNAKE, "相关资料": NEW}}, "science/daily")
+    paths = get_settings().paths
+    assert guard.topic_sources(topic) == {guard.source_key(SNAKE)}
+    with pytest.raises(guard.DuplicateContent):
+        guard.check_topic(topic, paths.config_dir, paths.jobs_dir)
+
+
+def test_new_event_can_reuse_covered_article_as_background(guard_env):
+    script(guard_env, "science/daily")
+    topic = guard.policy_topic({"title": "恐龙的新发现", "fields": {"证据来源": NEW, "背景资料": SNAKE}}, "science/daily")
+    paths = get_settings().paths
+    guard.check_topic(topic, paths.config_dir, paths.jobs_dir)
+    assert guard.topic_sources(topic) == {guard.source_key(NEW)}
+    topic["fields"] = {"证据来源": "[1]", "来源网址": NEW, "背景资料": SNAKE}
+    assert guard.topic_sources(topic) == {guard.source_key(NEW)}
 
 
 def test_new_comparison_with_one_old_reference_is_not_archived_as_a_duplicate(guard_env):
@@ -161,6 +299,48 @@ def test_fully_covered_report_is_archived_before_calling_any_writer(guard_env, m
     assert video_workflow.run(current["id"], started_by="autopilot") == "FAILED"
     assert store.get_script(current["id"])["archived"]
     assert "均已讲过" in store.get_script(current["id"])["error"]
+
+
+def test_duplicate_memory_matches_item_content_and_matrix_without_blocking_real_retries(guard_env):
+    from copy import deepcopy
+
+    first = script(guard_env, "science/daily")
+    candidate = {"id": "2026-10-29/F1", "title": "小蛇会滚", "fields": {"核心角度": "滚动逃跑"},
+                 "matrix_dedup": {"job": "science/weekly"}}
+    failed = store.create_script("flash", candidate)
+    assert guard.archive_duplicate(failed["id"], "重复", [first["id"]])
+    store.update_script(failed["id"], status="FAILED")
+    config = str(guard_env / "config")
+    assert guard.known_duplicate_ids([candidate], config) == {candidate["id"]}
+    audience_variant = deepcopy(candidate)
+    audience_variant["fields"]["目标受众"] = "所有观众"
+    assert guard.known_duplicate_ids([audience_variant], config) == {candidate["id"]}
+    corrected = deepcopy(candidate)
+    corrected["fields"]["核心角度"] = "新的实验结果"
+    different_matrix = {**candidate, "matrix_dedup": {"job": "history/daily"}}
+    assert guard.known_duplicate_ids([corrected], config) == set()
+    assert guard.known_duplicate_ids([different_matrix], config) == set()
+    # Archiving an unpublished original releases it; a publication continues to cover it.
+    store.update_script(first["id"], archived=1)
+    assert guard.known_duplicate_ids([candidate], config) == set()
+    store.add_publication(first["id"], version=1, platform="bilibili", url="https://example.com/video", published_on="2026-10-29")
+    assert guard.known_duplicate_ids([candidate], config) == {candidate["id"]}
+    store.update_script(failed["id"], archived=0)
+    assert guard.known_duplicate_ids([candidate], config) == set()
+
+
+def test_duplicate_memory_expires_and_does_not_remember_uncovered_failures(guard_env):
+    first = script(guard_env, "science/daily")
+    candidate = {"id": "test/F1", "title": "小蛇", "matrix_dedup": {"job": "science/daily"}}
+    failed = store.create_script("flash", candidate)
+    assert guard.archive_duplicate(failed["id"], "排重后素材不足", [])
+    store.update_script(failed["id"], status="FAILED")
+    config = str(guard_env / "config")
+    assert guard.known_duplicate_ids([candidate], config) == set()
+    assert guard.archive_duplicate(failed["id"], "重复", [first["id"]])
+    with store.connect(write=True) as conn:
+        conn.execute("UPDATE script_versions SET created_at='2000-01-01' WHERE script_id=?", (first["id"],))
+    assert guard.known_duplicate_ids([candidate], config) == set()
 
 
 def test_programmatic_validation_cannot_write_to_production_store(guard_env, monkeypatch):

@@ -6,7 +6,7 @@ import { api } from "@/api/client";
 import { PublicationFlow } from "./PublicationFlow";
 
 vi.mock("@/api/client", () => ({ api: vi.fn() }));
-afterEach(() => { cleanup(); vi.clearAllMocks(); });
+afterEach(() => { localStorage.clear(); cleanup(); vi.clearAllMocks(); });
 const video = { id: "r-old", version: 1, files: [{ name: "video.mp4" }] } as VideoRender;
 const publication = { id: "p1", version: 1, platform: "bilibili", url: "https://www.bilibili.com/video/BV1xx411c7mD", account_uid: "123", recorded_by: "platform-manager" } as Publication;
 function target(platform: string, overrides: Partial<Distribution> = {}): Distribution {
@@ -28,7 +28,7 @@ describe("multi-platform document publishing", () => {
     expect(await screen.findByRole("form", { name: "抖音发布包" })).toBeTruthy();
     expect(api).toHaveBeenCalledWith("/api/platforms/douyin/preview/r-old", expect.anything());
     fireEvent.change(screen.getByLabelText("抖音标题"), { target: { value: "独立修改" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存抖音发布包" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
     await waitFor(() => expect(api).toHaveBeenCalledWith("/api/video/distributions/douyin/draft", expect.objectContaining({ method: "PUT", body: { render_id: "r-old", account_uid: "456", payload: { title: "独立修改", description: "简介", tags: ["科技"], first_comment: { enabled: false, text: "", pin: false } } } })));
     expect(screen.getByRole("link", { name: "查看作品" }).getAttribute("href")).toBe(publication.url);
   });
@@ -36,8 +36,8 @@ describe("multi-platform document publishing", () => {
     show({ distributions: [target("bilibili"), target("douyin", { status, can_prepare: false, task: { id: "task", status, error: "原因", work_id: "7700436961890209034", render_id: "r-old", updated_at: 1 } })] });
     expect(screen.getByRole("button", { name: "准备B 站发布" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "准备抖音发布" })).toBeNull();
-    const href = screen.getByRole("link", { name: "查看投稿进度" }).getAttribute("href")!;
-    expect(Object.fromEntries(new URL(href, "http://localhost").searchParams)).toEqual({ tab: "uploads", platform: "douyin", from_script: "s1", version: "1", task: "task" });
+    const href = screen.getByRole("link", { name: "平台管理 ↗" }).getAttribute("href")!;
+    expect(Object.fromEntries(new URL(href, "http://localhost").searchParams)).toEqual({ tab: "uploads", platform: "douyin", from_script: "s1", version: "1", task: "task", render: "r-old" });
   });
   it("never mistakes a Douyin record for Bilibili publication", () => {
     const dy = { ...publication, platform: "douyin", url: "https://www.douyin.com/video/7700436961890209034" };
@@ -58,4 +58,19 @@ describe("multi-platform document publishing", () => {
     show({ canEdit: false });
     expect(screen.queryByRole("button", { name: "准备抖音发布" })).toBeNull();
   });
+});
+
+it("prepares two platform editors without posting and keeps the other platform's unsaved input", async () => {
+  vi.mocked(api).mockImplementation(async (url) => {
+    if (String(url).includes("categories")) return { categories:[] } as never;
+    return {render_id:"r-old",version:1,account_uid:String(url).includes("douyin") ? "456":"123",title:"草稿",description:"简介",tags:["科技"],warnings:[],credibility:{text:"按素材生成"}} as never;
+  });
+  show();
+  fireEvent.click(screen.getByRole("checkbox",{name:"B 站 · B站账号"})); fireEvent.click(screen.getByRole("checkbox",{name:"抖音 · 抖音账号"}));
+  fireEvent.click(screen.getByRole("button",{name:"准备所选平台（不投稿）"}));
+  await screen.findByRole("textbox",{name:"抖音标题"}); await screen.findByRole("textbox",{name:"标题"});
+  fireEvent.change(screen.getByRole("textbox",{name:"抖音标题"}),{target:{value:"保留抖音输入"}});
+  fireEvent.click(screen.getByRole("button",{name:"收起B 站发布包"})); fireEvent.click(screen.getByRole("button",{name:"准备B 站发布"}));
+  expect(screen.getByRole("textbox",{name:"抖音标题"})).toHaveProperty("value","保留抖音输入");
+  expect(vi.mocked(api).mock.calls.every(([,opts]) => !opts?.method || opts.method === "GET")).toBe(true);
 });

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import time
 import uuid
@@ -11,6 +12,9 @@ from core.social.adapter import accepted_without_work_id
 from core.social.registry import PLATFORMS
 
 ACTIVE = ('QUEUED', 'RUNNING')
+# Queue files whose schema this process has already ensured. The DDL takes the write lock, so running it on
+# every read made a page wait behind any publisher holding that lock.
+_SCHEMA_READY: set[str] = set()
 
 
 class SocialStore:
@@ -21,6 +25,8 @@ class SocialStore:
         folder = Path(state_dir) / 'platforms' / platform
         folder.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.path = str(folder / 'queue.db')
+        if self.path in _SCHEMA_READY and os.path.exists(self.path):
+            return
         with self.connect(write=True) as conn:
             conn.executescript('''
                 CREATE TABLE IF NOT EXISTS jobs (
@@ -42,6 +48,7 @@ class SocialStore:
                 CREATE TABLE IF NOT EXISTS settings (uid TEXT PRIMARY KEY,first_comment TEXT NOT NULL);
             ''')
         Path(self.path).chmod(0o600)
+        _SCHEMA_READY.add(self.path)
 
     def connect(self, write: bool = False):
         return sqlite_util.connect(self.path, write=write)
@@ -110,6 +117,29 @@ class SocialStore:
             conn.execute("UPDATE jobs SET status='RUNNING',phase='准备',heartbeat=?,updated_at=? WHERE id=?", (now,now,row['id']))
         return self.get(row['id'])
 
+    def record_duration(self, key: str, duration: float) -> bool:
+        """Merge local metadata into the original pending upload, never reset its receipt."""
+        from core.social.verification import seconds
+        if seconds(duration) is None:
+            return False
+        with self.connect(write=True) as conn:
+            row = self.decode(conn.execute('SELECT * FROM jobs WHERE id=?', (key,)).fetchone())
+            if (not row or row['kind'] != 'UPLOAD' or row['status'] not in ('SUBMITTED', 'UNKNOWN')
+                    or seconds(row['result'].get('duration_seconds')) is not None):
+                return False
+            result = {**row['result'], 'duration_seconds': duration,
+                      'duration_source': 'existing_local_movie'}
+            if result.get('verification'):
+                result['verification'] = {**result['verification'], 'exhausted': False,
+                                          'next_check_at': time.time(),
+                                          'reason': '原视频时长已补齐，等待核对原投稿'}
+            conn.execute('INSERT INTO job_events(job_id,kind,actor,detail,created_at) VALUES (?,?,?,?,?)',
+                         (key, 'metadata_repaired', 'reconciliation',
+                          json.dumps({'field': 'duration_seconds', 'value': duration}), time.time()))
+            conn.execute('UPDATE jobs SET result=?,updated_at=? WHERE id=?',
+                         (json.dumps(result, ensure_ascii=False), time.time(), key))
+        return True
+
     def confirm_absent(self, key: str, uid: str, actor: str, expected_updated_at: float) -> bool:
         """Record a human absence decision without submitting or discarding the previous attempt."""
         with self.connect(write=True) as conn:
@@ -125,6 +155,41 @@ class SocialStore:
                       'manual_confirmation': {'actor': actor, 'confirmed_at': now}}
             conn.execute("UPDATE jobs SET status='FAILED',phase=?,error='',result=?,updated_at=? WHERE id=?",
                          ('人工确认未发布，可手动重试', json.dumps(result, ensure_ascii=False), now, key))
+        return True
+
+    def repair_upload_preparation(self, key: str, uid: str, expected_updated_at: float) -> bool:
+        """Repair known legacy Kuaishou preparation failures without uploading or resetting history."""
+        if self.platform != 'kuaishou':
+            return False
+        with self.connect(write=True) as conn:
+            row = self.decode(conn.execute('SELECT * FROM jobs WHERE id=?', (key,)).fetchone())
+            if (not row or row['kind'] != 'UPLOAD' or row['uid'] != uid or row['status'] != 'UNKNOWN'
+                    or row['updated_at'] != expected_updated_at or row['work_id']):
+                return False
+            result = row['result']
+            failure = result.get('failure') or {}
+            # These known adapter branches stop before a publish click.
+            # A missing work-list match alone
+            # never establishes that a previous submission is safe to retry.
+            # The account check runs when the browser context is created, before any upload page or
+            # publish route exists, so even a timeout there precedes every provider mutation.
+            account_check = failure.get('stage') == '核对账号' and failure.get('error_type') == 'TimeoutError'
+            known_preparation = (failure.get('stage') == '选择视频上传入口'
+                                 or failure.get('stage') == '平台上传流程' and
+                                 row['error'].startswith('快手视频素材上传超时，未点击发布。')
+                                 or account_check)
+            if (result.get('invocation_started') is not True
+                    or not known_preparation
+                    or failure.get('error_type') not in ('AdapterError', 'UploadPreparationError') and not account_check
+                    or any(result.get(field) for field in
+                           ('submission_started', 'submission_started_at', 'submission_response', 'accepted', 'work_id', 'url'))):
+                return False
+            now = time.time()
+            conn.execute('INSERT INTO job_events(job_id,kind,actor,detail,created_at) VALUES (?,?,?,?,?)',
+                         (key, 'preparation_failure_repaired', 'upload_preparation', json.dumps(row, ensure_ascii=False), now))
+            result = {**result, 'confirmed_not_submitted': True, 'preparation_failed': True}
+            conn.execute("UPDATE jobs SET status='FAILED',phase=?,result=?,updated_at=? WHERE id=?",
+                         ('上传准备失败，尚未投稿', json.dumps(result, ensure_ascii=False), now, key))
         return True
 
     def requeue_upload(self, key: str, uid: str, payload: dict) -> bool:

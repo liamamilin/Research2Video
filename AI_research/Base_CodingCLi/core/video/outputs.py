@@ -64,18 +64,22 @@ def _attribute(config_dir: str, jobs_dir: str, configs: dict, sources: dict, own
         else:
             job = origin.get("job") or ""
         config, guessed = script.get("production") or "", False
+        job = (script.get("content_context") or {}).get("job") or job
         if not job and config in configs:
             job = configs[config].job
         if not config and script["column_key"] in configs and configs[script["column_key"]].job == job:
             config, guessed = script["column_key"], True  # made before configs: the one named after its recipe
         matrix = owner.get(job)
-        out.append({"script": script, "origin": origin, "job": job, "matrix": matrix.key if matrix else "",
+        source_matrix = matrix.key if matrix else ""
+        out.append({"script": script, "origin": origin, "job": job,
+                    "source_matrix": script.get("source_matrix_id") or source_matrix,
+                    "matrix": script.get("content_matrix_id") or source_matrix,
                     "production": config, "guessed": guessed})
     return out
 
 
 def script_owners(config_dir: str, jobs_dir: str, scripts: list[dict]) -> tuple[dict, list[dict]]:
-    """Board ownership follows source Jobs, including cuts from archived parents; never infer it from recipe tags."""
+    """Saved business ownership for new scripts; source Job attribution for legacy scripts and archived cuts."""
     every_matrix = matrices.load_all(config_dir)
     owner = {job: matrix for matrix in every_matrix.values() for job in matrix.jobs}
     sources = topic_store.sources(jobs_dir)
@@ -91,14 +95,19 @@ def script_owners(config_dir: str, jobs_dir: str, scripts: list[dict]) -> tuple[
         job = attributed["job"]
         if not job and script.get("production") in configs:
             job = configs[script["production"]].job
-        matrix = owner.get(job)
+        matrix = every_matrix.get(attributed["matrix"])
         if job and job not in names:
             try:
                 names[job] = (load_job(jobs_dir, job) or {}).get("name") or job
             except (OSError, ValueError, TypeError, AttributeError, yaml.YAMLError):
                 names[job] = job
-        out[script["id"]] = {"matrix": matrix.key if matrix else "", "matrix_name": matrix.name if matrix else "独立视频",
+        context = script.get("content_context") or {}
+        out[script["id"]] = {"matrix": attributed["matrix"],
+                             "matrix_name": matrix.content.get("name", matrix.name) if matrix else attributed["matrix"] or "独立视频",
                              "matrix_archived": bool(matrix and matrix.archived), "job": job,
+                             "source_matrix": attributed["source_matrix"],
+                             "content_column_id": script.get("content_column_id", ""),
+                             "content_column_name": context.get("column_name", ""),
                              "job_name": names.get(job, "手动选题"),
                              "production_name": configs[attributed["production"]].name if attributed["production"] in configs else ""}
     return out, [{"key": m.key, "name": m.name} for m in every_matrix.values() if not m.archived]
@@ -127,7 +136,8 @@ def count_by_report(config_dir: str, jobs_dir: str) -> dict[tuple[str, str], int
     counts = Counter()
     for item in _attribute(config_dir, jobs_dir, configs, topic_store.sources(jobs_dir), owner):
         script = item["script"]
-        if script["status"] == "FAILED" or script.get("archived") or (item["matrix"] and every[item["matrix"]].archived):
+        matrix = every.get(item["matrix"])
+        if script["status"] == "FAILED" or script.get("archived") or (matrix and matrix.archived):
             continue
         counts[(item["job"], item["origin"].get("report_path", ""))] += 1
     return counts
@@ -156,11 +166,15 @@ def collect(config_dir: str, jobs_dir: str, archived: bool = False) -> dict:
         publications = published.get(script["id"], set())
         rows.append({
             "id": script["id"], "title": version["title"] if version else (script.get("topic") or {}).get("title", ""),
+            "content_mode": (script.get("topic") or {}).get("content_mode", "individual"),
+            "episode_items": [i["title"] for i in (version or {}).get("meta", {}).get("episode", {}).get("items", [])],
             "status": script["status"], "column_key": script["column_key"], "created_at": script["created_at"],
             "version": script["current_version"], "updated_at": script["updated_at"],
             "credibility": credibility.label(version, auditing=bool(script.get("stage"))) if version else None,
             "archived": bool(script.get("archived")), "auto": script.get("created_by") == "autopilot",
             "matrix": a["matrix"], "job": a["job"], "report_path": origin.get("report_path", ""),
+            "source_matrix": a["source_matrix"], "content_column_id": script.get("content_column_id", ""),
+            "content_column_name": (script.get("content_context") or {}).get("column_name", ""),
             "report_date": origin.get("report_date", ""), "manual": bool(origin.get("manual")),
             "production": config, "production_name": configs[config].name if config in configs else "",
             "production_guessed": a["guessed"], **progress.render_state(script, every_render),

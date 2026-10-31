@@ -1,0 +1,8 @@
+....................................................................     [100%]
+=============================== warnings summary ===============================
+tests/test_theme_workbench.py::test_manual_theme_api_is_scoped_and_viewer_is_read_only
+  /Users/milin/.pyenv/versions/3.10.13/lib/python3.10/site-packages/starlette/_exception_handler.py:59: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    response = await handler(conn, exc)  # type: ignore[arg-type]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+68 passed, 1 warning in 26.73s

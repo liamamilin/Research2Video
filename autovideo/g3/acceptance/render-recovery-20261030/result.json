@@ -1,0 +1,133 @@
+{
+  "script_id": "6276a698e1344996a2003b071eeb2048",
+  "render_id": "e86100649a83470c931607fde27d15ee",
+  "engine_job": "0ab6095d-ab66-475e-b027-171c41d320a0",
+  "status": "COMPLETED",
+  "attempt_count": 2,
+  "version": 1,
+  "recovery_seconds": 1699.619,
+  "source_sha256": "7d6463c1259072805400045b9a153dce365533293cc6471266d7bc4cb27c5f7e",
+  "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/e86100649a83470c931607fde27d15ee/video.mp4",
+  "artifacts": [
+    {
+      "name": "authored-narration.json",
+      "size": null
+    },
+    {
+      "name": "brand-qa.json",
+      "size": null
+    },
+    {
+      "name": "caption-alignment.json",
+      "size": null
+    },
+    {
+      "name": "captions.srt",
+      "size": null
+    },
+    {
+      "name": "chapters.json",
+      "size": null
+    },
+    {
+      "name": "content-captions.srt",
+      "size": null
+    },
+    {
+      "name": "content-chapters.json",
+      "size": null
+    },
+    {
+      "name": "content.mp4",
+      "size": null
+    },
+    {
+      "name": "execution-log.txt",
+      "size": null
+    },
+    {
+      "name": "information-timing.json",
+      "size": null
+    },
+    {
+      "name": "input-brief.json",
+      "size": null
+    },
+    {
+      "name": "manifest.json",
+      "size": null
+    },
+    {
+      "name": "model-cost.json",
+      "size": null
+    },
+    {
+      "name": "narration-check.json",
+      "size": null
+    },
+    {
+      "name": "narration.json",
+      "size": null
+    },
+    {
+      "name": "package-qa.json",
+      "size": null
+    },
+    {
+      "name": "package.json",
+      "size": null
+    },
+    {
+      "name": "packaging-resolved.json",
+      "size": null
+    },
+    {
+      "name": "playback.json",
+      "size": null
+    },
+    {
+      "name": "prepared-source.txt",
+      "size": null
+    },
+    {
+      "name": "production-execution.json",
+      "size": null
+    },
+    {
+      "name": "production-plan.json",
+      "size": null
+    },
+    {
+      "name": "qa.json",
+      "size": null
+    },
+    {
+      "name": "render-resources.json",
+      "size": null
+    },
+    {
+      "name": "storyboard.json",
+      "size": null
+    },
+    {
+      "name": "tts-metrics.json",
+      "size": null
+    },
+    {
+      "name": "unbranded.mp4",
+      "size": null
+    },
+    {
+      "name": "video-ir.json",
+      "size": null
+    },
+    {
+      "name": "video.mp4",
+      "size": null
+    },
+    {
+      "name": "voice-report.json",
+      "size": null
+    }
+  ]
+}

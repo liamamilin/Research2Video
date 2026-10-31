@@ -3,6 +3,7 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -15,6 +16,8 @@ from typing import BinaryIO
 from g3.config import Settings
 from g3.store import JobStore, STAGES
 
+logger = logging.getLogger(__name__)
+
 
 STEP_TO_STAGE = {
     "narration-plan": "PLAN",
@@ -26,6 +29,7 @@ STEP_TO_STAGE = {
     "verify-media": "QUALITY_CHECK",
     "package": "PACKAGE",
     "mix-background-music": "AUDIO_MIX",
+    "brand": "PACKAGE",
 }
 PACKAGE_FINAL_ERRORS = {"PACKAGE_CONFIG_INVALID", "PACKAGE_CONTENT_MISSING", "PACKAGE_UNVERIFIED", "PACKAGE_FORMAT_MISMATCH", "PACKAGING_SOURCE_CONFLICT"}
 STEP_LINE = re.compile(r"^STEP ([a-z0-9-]+): (START|PASS|FAIL|SKIPPED)(?: in ([0-9.]+)s)?")
@@ -166,6 +170,8 @@ class G2ProcessRunner:
         try:
             from g2.music_library import frozen_input
             frozen_input(input_path.parent, input_payload)
+            from g2.branding import frozen_input as frozen_brand
+            frozen_brand(input_path.parent, input_payload)
         except ValueError as exc:
             self.store.mark_failed(job_id, attempt_no, "AUDIO_MIX", "MUSIC_INPUT_INVALID", str(exc), False)
             return
@@ -363,6 +369,7 @@ class G2ProcessRunner:
             (artifacts_dir / "model-cost.json", "model-cost.json", "application/json"),
             (artifacts_dir / "reused-plans.json", "reused-plans.json", "application/json"),
             (artifacts_dir / "chapters.json", "chapters.json", "application/json"),
+            (artifacts_dir / "episode-navigation.json", "episode-navigation.json", "application/json"),
             (artifacts_dir / "content-outline-plan.json", "content-outline.json", "application/json"),
             (artifacts_dir / "final-narration-plan.json", "narration.json", "application/json"),
             (artifacts_dir / "authored-narration.json", "authored-narration.json", "application/json"),
@@ -414,6 +421,24 @@ class G2ProcessRunner:
                                (mix_dir / "mix-qa.json", "mix-qa.json", "application/json"),
                                (mix_dir / "mixed-audio.wav", "mixed-audio.wav", "audio/wav"),
                                (mix_dir / "music-bed.wav", "music-bed.wav", "audio/wav")]
+        if input_payload.get("brand_resolved"):
+            brand_dir = artifacts_dir / "brand"
+            try:
+                brand_qa = json.loads((brand_dir / "brand-qa.json").read_text())
+                if (brand_qa.get("status") != "PASS" or not (brand_dir / "video.mp4").is_file()
+                        or brand_qa.get("brand_sha256") != input_payload["brand_resolved"]["sha256"]):
+                    raise ValueError("brand QA missing")
+            except (OSError, ValueError):
+                self.store.mark_failed(job_id, attempt_no, "PACKAGE", "BRAND_UNVERIFIED", "品牌成片缺少通过的检查报告", False)
+                return
+            artifact_specs = [(path, "unbranded.mp4" if name == "video.mp4" else name, kind)
+                              for path, name, kind in artifact_specs]
+            artifact_specs += [(brand_dir / "video.mp4", "video.mp4", "video/mp4"),
+                               (brand_dir / "brand-qa.json", "brand-qa.json", "application/json")]
+            for name, content_type in (("chapters.json", "application/json"), ("captions.srt", "application/x-subrip")):
+                if (brand_dir / name).is_file():
+                    artifact_specs = [item for item in artifact_specs if item[1] != name]
+                    artifact_specs.append((brand_dir / name, name, content_type))
         artifacts = []
         for path, name, content_type in artifact_specs:
             item = safe_artifact(path, attempt_root, name, content_type)
@@ -464,6 +489,9 @@ class SingleWorker:
         self.stop_event.set()
         if self.thread:
             self.thread.join(timeout=12)
+            if self.thread.is_alive():
+                logger.warning("Video worker is still stopping; retaining its exclusive lock")
+                return
         if self._lock_file:
             try:
                 fcntl.flock(self._lock_file.fileno(), fcntl.LOCK_UN)
@@ -473,10 +501,20 @@ class SingleWorker:
 
     def _loop(self) -> None:
         while not self.stop_event.is_set():
-            job = self.store.claim_next()
+            try:
+                job = self.store.claim_next()
+            except Exception:
+                # A temporary SQLite lock or filesystem outage must not kill
+                # the sole queue consumer for the rest of the app's lifetime.
+                logger.exception("Could not read video queue; retrying")
+                self.stop_event.wait(max(1.0, self.settings.worker_poll_seconds))
+                continue
             if job is None:
-                if self.idle_task and self.idle_task(self.stop_event):
-                    continue
+                try:
+                    if self.idle_task and self.idle_task(self.stop_event):
+                        continue
+                except Exception:
+                    logger.exception("Video worker idle task failed; queue remains active")
                 self.stop_event.wait(self.settings.worker_poll_seconds)
                 continue
             try:

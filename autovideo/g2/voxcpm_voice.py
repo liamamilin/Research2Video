@@ -1,14 +1,14 @@
 """Fixed local MLX entry point for VoxCPM2; never loads a user-selected model or executes model code.
 
-One voice for the whole video: every segment is cloned from the same anchor clip (``ref_audio``) and continues the
-segment before it (``prompt_audio`` / ``prompt_text``), restarting from the anchor at each chapter. Without the
-anchor the voice changes between sentences; continuation alone drifts into a second speaker.
+One voice for the whole video: by default every segment uses the same immutable anchor for both ``ref_audio``
+and ``prompt_audio`` / ``prompt_text``. Generated speech is never fed into the next sentence in this mode, so
+its acoustic texture and level cannot accumulate through a continuation chain.
 
 Continuation also copies the pace: a sentence that comes out a little fast makes the next one faster, and so on up the
 chapter until the anchor takes over again at the next one (C4 v10: every chapter sped up from ~4.6 to ~6.9 units per
 second, every chapter start snapped back). ``chain`` says how the previous sentence is used:
-  guarded  continue the previous sentence unless its pace is more than GUARD away from the anchor's, then use the anchor
-  anchor   never continue, always the anchor
+  anchor   default: never continue generated speech, always the original anchor
+  guarded  legacy opt-in: continue unless pace is more than GUARD away from the anchor's; does not guard timbre/noise
   chain    always continue the previous sentence (the drifting behaviour)
 """
 from pathlib import Path
@@ -18,7 +18,7 @@ os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from g2.tts_text import for_voice
-from g2.voices import VOXCPM_ANCHOR_TEXT, VOXCPM_VOICES, voxcpm_paths
+from g2.voices import VOXCPM_ANCHOR_TEXT, VOXCPM_DEFAULT_CHAIN, VOXCPM_VOICES, voxcpm_paths
 
 SEEDS = (42, 43, 44)
 #: spoken units (CJK char, Latin word, digit) per second of speech; real speech is ~4–7, outside this the clip
@@ -50,14 +50,17 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
     started = time.monotonic()
     if voice not in VOXCPM_VOICES:
         raise ValueError('Unsupported local voice')
-    plan_path = plan_path.resolve(); output_dir = output_dir.resolve()
-    if not plan_path.is_relative_to(ROOT) or not output_dir.is_relative_to(ROOT):
-        raise ValueError('Invalid voice workspace')
+    from g2.workspace import project_path
+    try:
+        plan_path = project_path(ROOT, plan_path)
+        output_dir = project_path(ROOT, output_dir)
+    except ValueError as exc:
+        raise ValueError('Invalid voice workspace') from exc
     plan = json.loads(plan_path.read_text())
     steps = int(plan.get('voice_settings', {}).get('steps', 10))
     if not 4 <= steps <= 50:
         raise ValueError('Invalid diffusion steps')
-    chain = plan.get('voice_settings', {}).get('chain', 'guarded')
+    chain = plan.get('voice_settings', {}).get('chain', VOXCPM_DEFAULT_CHAIN)
     if chain not in CHAIN_MODES:
         raise ValueError('Invalid chain mode')
     options = {key: plan.get('voice_settings', {}).get(key, True)
@@ -125,12 +128,17 @@ def generate(plan_path: Path, output_dir: Path, voice: str):
                        'units_per_second': round(float(rate), 2), 'attempts': tries, 'prompt': 'anchor' if prompt is anchor_prompt else 'previous',
                        'generation_seconds': round(time.monotonic() - segment_started, 3),
                        'in_range': bool(units(text) < MIN_UNITS or RATE_RANGE[0] <= rate <= RATE_RANGE[1])})
-        print('VOICE', sid, len(out) / OUTPUT_RATE, flush=True)
-    (output_dir / 'voice-report.json').write_text(json.dumps({'voice': voice, 'steps': steps, 'chain': chain, 'anchor_units_per_second': round(float(anchor_rate), 2),
+        # Commit the receipt after the WAV. A later model failure must not erase
+        # completed chapters; the parent only caches groups with every segment.
+        receipt = output_dir / 'voice-report.json'
+        temporary = output_dir / 'voice-report.json.tmp'
+        temporary.write_text(json.dumps({'voice': voice, 'steps': steps, 'chain': chain, 'anchor_units_per_second': round(float(anchor_rate), 2),
                                                                   'segments': report,
                                                                   'performance': {'compiled': options['compile'], 'load_seconds': round(load_seconds, 3),
                                                                       'total_seconds': round(time.monotonic() - started, 3),
                                                                       'reference_cache': reference_cache.report() if reference_cache else None}}, ensure_ascii=False, indent=2))
+        temporary.replace(receipt)
+        print('VOICE', sid, len(out) / OUTPUT_RATE, flush=True)
 
 
 if __name__ == '__main__':

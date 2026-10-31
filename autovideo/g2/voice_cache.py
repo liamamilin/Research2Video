@@ -5,6 +5,7 @@ import fcntl
 import hashlib
 import json
 from pathlib import Path
+import re
 import shutil
 import tempfile
 import uuid
@@ -29,10 +30,12 @@ def identity(project: Path, engine: dict, voice: str, settings: dict) -> dict:
                                       "tokenizer_config.json", "special_tokens_map.json")]
     paths += [anchor, engine["entry"], project / "g2/voices.py", project / "g2/tts_text.py",
               project / "g2/voice_performance.py", Path(__file__)]
+    from g2.file_fingerprint import digest, __file__ as fingerprint_source
+    paths.append(Path(fingerprint_source))
     runtime = engine["python"].parent.parent
     paths += sorted(runtime.glob("lib/python*/site-packages/mlx_audio/tts/models/voxcpm2/*.py"))
     paths += sorted(runtime.glob("lib/python*/site-packages/mlx_audio-*.dist-info/METADATA"))
-    files = {str(path.relative_to(project)): sha256(path) for path in paths}
+    files = {str(path.relative_to(project)): digest(path, project / "g3/data/voice-cache/fingerprints") for path in paths}
     return {"version": 1, "voice": voice, "settings": settings, "files": files,
             "model_sha256": files[str((model / "model.safetensors").relative_to(project))]}
 
@@ -52,6 +55,7 @@ class VoiceChapterCache:
         self.hits = []
         self.misses = []
         self.write_errors = []
+        self.evicted = 0
 
     def _key(self, group: list[dict]) -> str:
         # IDs/locations do not affect the voice; order and all spoken text do.
@@ -86,6 +90,10 @@ class VoiceChapterCache:
                 cached.update(restored)
                 self.header = manifest["header"]
                 self.hits.append(key)
+                try:
+                    (entry / ".access").touch()
+                except OSError:
+                    pass
             except (OSError, ValueError, KeyError, TypeError, AssertionError, wave.Error):
                 self.misses.append((key, group))
         return cached
@@ -109,10 +117,26 @@ class VoiceChapterCache:
                 (staging / "entry.json").write_text(json.dumps({"key": key, "header": header, "segments": rows}))
                 with (self.root / ".publish.lock").open("a+") as lock:
                     fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-                    size = sum(p.stat().st_size for p in self.root.rglob("*") if p.is_file() and not p.is_symlink())
-                    if size > MAX_BYTES:
+                    def size_of(folder: Path) -> int:
+                        return sum(p.stat().st_size for p in folder.rglob("*") if p.is_file() and not p.is_symlink())
+                    incoming = size_of(staging)
+                    if incoming > MAX_BYTES:
                         self.write_errors.append("cache budget reached; audio still generated normally")
                         continue
+                    entries = [p for p in self.root.iterdir() if p.is_dir() and not p.is_symlink()
+                               and re.fullmatch(r"[a-f0-9]{64}(?:\.prior-[a-f0-9]{32})?", p.name)]
+                    size = sum(size_of(p) for p in entries)
+                    def used(folder: Path) -> int:
+                        marker = folder / ".access"
+                        receipt = folder / "entry.json"
+                        return (marker if marker.exists() else receipt if receipt.exists() else folder).stat().st_mtime_ns
+                    for entry in sorted(entries, key=used):
+                        if size + incoming <= MAX_BYTES:
+                            break
+                        released = size_of(entry)
+                        shutil.rmtree(entry)  # Cache copies only; original attempt WAVs are retained.
+                        size -= released
+                        self.evicted += 1
                     target = self.root / key
                     if target.exists():
                         target.rename(self.root / f"{key}.prior-{uuid.uuid4().hex}")
@@ -126,5 +150,5 @@ class VoiceChapterCache:
     def report(self, cached: dict) -> dict:
         return {"enabled": True, "chapter_hits": len(self.hits), "chapter_misses": len(self.misses),
                 "segment_hits": len(cached), "segment_misses": sum(len(g) for _, g in self.misses),
-                "entry_keys": self.hits, "write_errors": self.write_errors,
+                "entry_keys": self.hits, "write_errors": self.write_errors, "evicted_chapters": self.evicted,
                 "rule": "complete chapters only; model/voice/settings/text-bound, WAV SHA verified"}

@@ -20,6 +20,9 @@ export interface VideoColumn {
   description: string;
   target_minutes: number;
   video_form: string;
+  voice_id?: string;
+  production_recipe?: string;
+  production_mode?: string;
   writer?: "legacy" | "adapt";
   default_style?: { depth: string; tone: string };
   allowed_tones?: string[];
@@ -173,6 +176,27 @@ export interface Credibility {
   cited_share: number | null;
 }
 
+export interface TopicScript {
+  id: string;
+  column_key: string;
+  cell_key?: string;
+  status: ScriptStatus;
+  created_at: string;
+  archived?: number;
+  version?: number;
+  render_state?: "none" | "working" | "done" | "failed";
+  render?: { id: string; version: number; status: string } | null;
+  video_url?: string | null;
+  previous_video?: { version: number; url: string } | null;
+  selection_skip?: SelectionSkip | null;
+}
+
+export interface SelectionSkip {
+  kind: "duplicate" | "exhausted";
+  reason: string;
+  originals: (TopicScript & { title: string })[];
+}
+
 export interface VideoTopic {
   id: string;
   round: string;
@@ -186,7 +210,7 @@ export interface VideoTopic {
   dismissed?: boolean;
   stale?: boolean;
   event_date?: string | null;
-  scripts?: { id: string; column_key: string; status: ScriptStatus; created_at: string; archived?: number }[];
+  scripts?: TopicScript[];
   /** 来自哪个选题来源：Job 的 topics.alias（或 Job 路径），手动添加的是 manual */
   source?: string;
 }
@@ -202,6 +226,7 @@ export interface ScriptParagraph {
 }
 
 export interface ScriptSection {
+  episode_role?: "opening" | "item" | "closing";
   title: string;
   paragraphs: ScriptParagraph[];
 }
@@ -223,7 +248,7 @@ export interface ScriptVersion {
   title: string;
   sections: ScriptSection[];
   length_check: LengthCheck;
-  edit_type: "GENERATED" | "EDITED";
+  edit_type: "GENERATED" | "EDITED" | "IMPORTED";
   meta: {
     problems?: string[];
     attempts?: number;
@@ -258,6 +283,7 @@ export interface VideoRender {
   submitted_at: string | null;
   completed_at: string | null;
   created_at: string;
+  updated_at?: string;
   timings?: { elapsed_seconds?: number; download_seconds?: number; process_seconds?: number };
   visuals?: import("./screenshots").AutomaticVisuals | null;
 }
@@ -265,7 +291,12 @@ export interface VideoRender {
 export interface VideoScriptSummary {
   id: string;
   column_key: string;
-  topic: { id: string | null; title: string; fields?: Record<string, string>; article?: { mode: "read" | "adapt"; kind: "literary" | "information" } };
+  content_column_id?: string;
+  content_column_name?: string;
+  content_matrix_id?: string;
+  source_matrix_id?: string;
+  content_context?: { column: string; column_name: string; matrix: string; source_matrix: string; type: string };
+  topic: { id: string | null; title: string; content_mode?: "episode" | "individual"; fields?: Record<string, string>; article?: { mode: "read" | "adapt"; kind: "literary" | "information" }; local_video?: { file_name: string; duration: number; width: number; height: number; size: number } };
   status: ScriptStatus;
   stage?: string | null;
   research_job: string;
@@ -280,7 +311,7 @@ export interface VideoScriptSummary {
   title: string;
   length_check: LengthCheck | null;
   published?: boolean;
-  distributions?: Distribution[];
+  distributions?: DistributionState[];
   archived?: number;
   credibility?: Credibility | null;
   auto?: boolean;
@@ -309,6 +340,9 @@ export interface Distribution {
   draft: { render_id: string; updated_at: string } | null;
   publications: Publication[];
 }
+
+export type DistributionState = Pick<Distribution,
+  "platform" | "status" | "account_uid" | "connected" | "current_account" | "blocked_reason">;
 
 // 发布记录和发布前复核（快讯），见 spec/video-publish.md。
 export interface Publication {
@@ -343,6 +377,8 @@ export interface Recheck {
 }
 
 export interface VideoScriptDetail extends VideoScriptSummary {
+  selection_skip?: SelectionSkip | null;
+  distributions?: Distribution[];
   configuration?: {
     links: { label: string; name: string; href: string; scope: string; next: string }[];
     changed_since_generation: boolean | null;
@@ -427,6 +463,7 @@ export const listVideoColumns = () => api<VideoColumn[]>("/api/video/columns");
 
 // 上传用的发布包：标题、简介、章节、标签、封面文字。见 core/video/publish.py。
 export interface PublishPack {
+  render_id?: string | null;
   title: string;
   description: string;
   chapters: { seconds: number; time: string; title: string }[];
@@ -446,8 +483,11 @@ export interface PublishPack {
   };
 }
 
-export const getPublishPack = (id: string, version?: number, signal?: AbortSignal) =>
-  api<PublishPack>(`/api/video/scripts/${encodeURIComponent(id)}/publish`, { query: { version }, signal });
+export const getPublishPack = async (id: string, version?: number, signal?: AbortSignal, renderId?: string) => {
+  const pack = await api<PublishPack>(`/api/video/scripts/${encodeURIComponent(id)}/publish`, { query: { version, render_id: renderId }, signal });
+  if (renderId && pack.render_id !== renderId) throw new Error("服务尚未支持具体成片绑定，暂不展示可能来自其他成片的发布包。请待安全加载完成后刷新。");
+  return pack;
+};
 
 // 初稿质量：定稿的文稿保留了多少生成的初稿，见 core/video/quality.py。
 export interface DraftQuality {
@@ -560,7 +600,7 @@ export const listVideoTopics = (source = "opportunities", round?: string, signal
   api<TopicListing>("/api/video/topics", { query: { source, ...(round ? { round } : {}) }, signal });
 
 export const listVideoScripts = (archived = false, signal?: AbortSignal) =>
-  api<VideoScriptSummary[]>("/api/video/scripts", { query: archived ? { archived: "true" } : undefined, signal });
+  api<VideoScriptSummary[]>("/api/video/scripts", { query: { compact: "true", ...(archived ? { archived: "true" } : {}) }, signal });
 
 /** 归档：从看板和列表里收起来（不删除）；archived=false 取消归档。 */
 export const archiveVideoScript = (id: string, archived = true) =>
@@ -591,7 +631,7 @@ export interface ResearchReport {
   created_by: string;
   created_at: string;
   on_disk: boolean;
-  scripts: { id: string; column_key: string; status: ScriptStatus; title: string; archived: boolean; created_at: string }[];
+  scripts: { content_mode?: "episode" | "individual"; id: string; column_key: string; status: ScriptStatus; title: string; archived: boolean; created_at: string }[];
 }
 
 export const listResearchReports = () => api<ResearchReport[]>("/api/video/reports");
@@ -693,6 +733,9 @@ export const ackAutomationAlert = (key: string) =>
   api<{ key: string; acked: boolean }>("/api/video/alerts/ack", { method: "POST", body: { key } });
 
 export interface Shipment {
+  current_version?: number;
+  script_status?: string;
+  historical?: boolean;
   matrix?: string | null;
   matrix_name?: string;
   job?: string | null;
@@ -708,13 +751,26 @@ export interface Shipment {
   render: { id: string; status: string; version: number; error: string | null; completed_at?: string | null } | null;
   video_url: string | null;
   publications: Publication[];
-  distributions?: Distribution[];
+  distributions?: DistributionState[];
   warnings: string[];
 }
 
-export const listShipments = (signal?: AbortSignal) => api<Shipment[]>("/api/video/shipments", { signal });
+export const listShipments = async (signal?: AbortSignal, includeHistory = false) => {
+  const rows = await api<Shipment[]>("/api/video/shipments", { query: { compact: "true", include_history: includeHistory ? "true" : undefined }, signal });
+  if (includeHistory && rows.some(row => row.current_version === undefined)) throw new Error("历史范围尚未加载到当前服务，请待安全加载完成后刷新；当前定稿仍可查看。");
+  return rows;
+};
+
+export interface StorySelection {
+  pool_id: string;
+  candidates: number;
+  selected: string;
+  skipped: number;
+  decisions: { decision: string; title: string; peer_id: string; reason: string }[];
+}
 
 export interface AutopilotItem {
+  progress?: { stage: string; label: string; executing: boolean; queued: boolean } | null;
   id: string;
   slot: number;
   column_key: string;
@@ -724,7 +780,11 @@ export interface AutopilotItem {
   state: "PENDING" | "WORKING" | "HELD" | "DONE" | "FAILED" | "CANCELLED";
   note: string;
   credibility?: Credibility;
-  gate: { label?: CredibilityTier; text?: string; approved?: string; reasons?: string[]; ignored?: { must: number; warn: number } };
+  gate: {
+    label?: CredibilityTier; text?: string; approved?: string; reasons?: string[]; ignored?: { must: number; warn: number };
+    story_selection?: StorySelection;
+    story_attempts?: { script_id: string; title: string; reason: string; selection: StorySelection }[];
+  };
 }
 
 export interface AutopilotRun {
@@ -750,6 +810,7 @@ export interface AutopilotPick {
   column?: string;
   source?: string;
   count: number;
+  all?: boolean;
 }
 
 export interface AutopilotSpec {
@@ -757,7 +818,21 @@ export interface AutopilotSpec {
   refresh?: boolean;
 }
 
-export const getAutopilot = () => api<{ plans: AutopilotPlan[]; runs: AutopilotRun[] }>("/api/video/autopilot");
+export interface AutopilotQueue {
+  active_batches: number;
+  preparing_batches: number;
+  executing_items: number;
+  queued_items: number;
+  waiting_items: number;
+  attention_items: number;
+  phase_counts: Record<string, number>;
+  oldest_batch_created_at: string | null;
+  completed_renders_today: number;
+  day: string;
+  checked_at: string;
+  limits: { scripts: number; renders: number };
+}
+export const getAutopilot = () => api<{ plans: AutopilotPlan[]; runs: AutopilotRun[]; queue?: AutopilotQueue }>("/api/video/autopilot");
 export const startAutopilotRun = (spec?: AutopilotSpec) =>
   api<AutopilotRun>("/api/video/autopilot/runs", { method: "POST", ...(spec ? { body: { spec } } : {}) });
 export const setPlanSpec = (id: string, spec: AutopilotSpec) =>
