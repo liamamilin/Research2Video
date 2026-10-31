@@ -3,7 +3,7 @@ import { api } from "@/api/client";
 import { publishCheck, type PublishAdaptationResult, type PublishPayload } from "@/lib/publish-text";
 import { errorMessage } from "@/lib/toast";
 
-type History = { id: number; saved_at: string; payload: PublishPayload };
+type History = { render_id?: string; id: number; saved_at: string; payload: PublishPayload };
 type Run = (action: () => Promise<unknown>) => Promise<void>;
 export function PublishAdaptation({ platform, renderId, accountUid, value, initial, onApply, run, busy }: {
   platform: string; renderId: string; accountUid?: string; value: PublishPayload; initial?: PublishAdaptationResult;
@@ -58,6 +58,6 @@ export function PublishAdaptation({ platform, renderId, accountUid, value, initi
       <button type="button" className="btn text-xs" disabled={busy || reading || stale || !accountUid} onClick={() => void run(() => save(result.payload))}>{result.check.valid ? "应用适配并保留原版本" : "应用后继续编辑，并保留原版本"}</button>
       <button type="button" className="text-accent ml-3" onClick={() => setResult(null)}>保留当前文案</button>
     </section> : null}
-    {history ? <section aria-label="发布包手动版本" className="space-y-2">{history.length ? history.map(row => <div key={row.id} className="border-t border-border pt-2"><p>版本 {row.id} · {row.saved_at}</p><p>{row.payload.title}</p><p className="whitespace-pre-wrap break-words max-h-20 overflow-auto text-text-muted">{row.payload.description}</p><button type="button" className="text-accent" disabled={busy || !accountUid} onClick={() => void run(() => save({...value,...row.payload}))}>恢复这个版本并保留当前内容</button></div>) : <p>暂无已保存版本。应用适配或保存发布包后会留存版本。</p>}</section> : null}
+    {history ? <section aria-label="发布包手动版本" className="space-y-2">{history.length ? history.map(row => <div key={row.id} className="border-t border-border pt-2"><p>版本 {row.id} · {row.saved_at} · 成片 {row.render_id || "旧记录未绑定"}</p><p>{row.payload.title}</p><p className="whitespace-pre-wrap break-words max-h-20 overflow-auto text-text-muted">{row.payload.description}</p><button type="button" className="text-accent" disabled={busy || !accountUid} onClick={() => void run(() => save({...value,...row.payload}))}>恢复这个版本并保留当前内容</button></div>) : <p>暂无已保存版本。应用适配或保存发布包后会留存版本。</p>}</section> : null}
   </section>;
 }

@@ -20,6 +20,9 @@ export interface VideoColumn {
   description: string;
   target_minutes: number;
   video_form: string;
+  voice_id?: string;
+  production_recipe?: string;
+  production_mode?: string;
   writer?: "legacy" | "adapt";
   default_style?: { depth: string; tone: string };
   allowed_tones?: string[];
@@ -280,6 +283,7 @@ export interface VideoRender {
   submitted_at: string | null;
   completed_at: string | null;
   created_at: string;
+  updated_at?: string;
   timings?: { elapsed_seconds?: number; download_seconds?: number; process_seconds?: number };
   visuals?: import("./screenshots").AutomaticVisuals | null;
 }
@@ -459,6 +463,7 @@ export const listVideoColumns = () => api<VideoColumn[]>("/api/video/columns");
 
 // 上传用的发布包：标题、简介、章节、标签、封面文字。见 core/video/publish.py。
 export interface PublishPack {
+  render_id?: string | null;
   title: string;
   description: string;
   chapters: { seconds: number; time: string; title: string }[];
@@ -478,8 +483,11 @@ export interface PublishPack {
   };
 }
 
-export const getPublishPack = (id: string, version?: number, signal?: AbortSignal) =>
-  api<PublishPack>(`/api/video/scripts/${encodeURIComponent(id)}/publish`, { query: { version }, signal });
+export const getPublishPack = async (id: string, version?: number, signal?: AbortSignal, renderId?: string) => {
+  const pack = await api<PublishPack>(`/api/video/scripts/${encodeURIComponent(id)}/publish`, { query: { version, render_id: renderId }, signal });
+  if (renderId && pack.render_id !== renderId) throw new Error("服务尚未支持具体成片绑定，暂不展示可能来自其他成片的发布包。请待安全加载完成后刷新。");
+  return pack;
+};
 
 // 初稿质量：定稿的文稿保留了多少生成的初稿，见 core/video/quality.py。
 export interface DraftQuality {
@@ -725,6 +733,9 @@ export const ackAutomationAlert = (key: string) =>
   api<{ key: string; acked: boolean }>("/api/video/alerts/ack", { method: "POST", body: { key } });
 
 export interface Shipment {
+  current_version?: number;
+  script_status?: string;
+  historical?: boolean;
   matrix?: string | null;
   matrix_name?: string;
   job?: string | null;
@@ -744,7 +755,11 @@ export interface Shipment {
   warnings: string[];
 }
 
-export const listShipments = (signal?: AbortSignal) => api<Shipment[]>("/api/video/shipments", { query: { compact: "true" }, signal });
+export const listShipments = async (signal?: AbortSignal, includeHistory = false) => {
+  const rows = await api<Shipment[]>("/api/video/shipments", { query: { compact: "true", include_history: includeHistory ? "true" : undefined }, signal });
+  if (includeHistory && rows.some(row => row.current_version === undefined)) throw new Error("历史范围尚未加载到当前服务，请待安全加载完成后刷新；当前定稿仍可查看。");
+  return rows;
+};
 
 export interface StorySelection {
   pool_id: string;

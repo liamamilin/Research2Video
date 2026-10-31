@@ -151,7 +151,7 @@ function BilibiliPlatformsPage() {
   const changeTab = (value: string) => setParams(previous => { const next = new URLSearchParams(previous); next.set("tab", value); return next; });
   return <div className="space-y-5 max-w-6xl">
     <header className="flex flex-wrap justify-between items-start gap-3"><div><h1 className="text-xl font-semibold tracking-tight">平台管理</h1><p className="text-xs text-text-muted mt-1">从成片投稿到评论处理，集中管理哔哩哔哩账号。</p></div><button className="btn text-xs" disabled={loading} onClick={() => void reload()}><RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />刷新平台</button></header>
-    {sourceScript && Number.isInteger(sourceVersion) && sourceVersion > 0 ? <Link className="text-sm text-accent hover:underline block" to={documentPublishLink(sourceScript, sourceVersion)}>← 返回文稿发布页（v{sourceVersion}）</Link> : null}
+    {sourceScript && Number.isInteger(sourceVersion) && sourceVersion > 0 ? <Link className="text-sm text-accent hover:underline block" to={documentPublishLink(sourceScript, sourceVersion, params.get("render") || undefined)}>← 返回文稿发布页（v{sourceVersion}）</Link> : null}
     {error ? <ErrorState error={error} onRetry={reload} compact /> : null}
     {actionError ? <div role="alert" className="card p-3 text-sm text-danger">{actionError}</div> : null}
     {!data && !error ? <p className="text-sm text-text-muted">正在读取平台…</p> : null}

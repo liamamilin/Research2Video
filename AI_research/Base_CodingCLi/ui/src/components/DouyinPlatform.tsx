@@ -41,7 +41,7 @@ function UploadRow({ row, canEdit, run, busy, template }: { row: DouyinJob; canE
   return <li className="card p-4 space-y-2">
     <div className="flex justify-between gap-3"><span className="text-sm font-medium">{row.payload.title}</span><span className="badge border border-border">{STATES[row.status] || row.status}</span></div>
     <p className="text-xs text-text-muted">文稿 v{row.version} · {row.phase}</p>
-    <div className="flex flex-wrap gap-3 text-xs"><Link className="text-accent" to={documentPublishLink(row.script_id, row.version)}>查看文稿发布记录 →</Link>{row.url ? <a className="text-accent" href={row.url} target="_blank" rel="noreferrer">打开抖音作品</a> : null}</div>
+    <div className="flex flex-wrap gap-3 text-xs"><Link className="text-accent" to={documentPublishLink(row.script_id, row.version, row.render_id)}>查看文稿发布记录 →</Link>{row.url ? <a className="text-accent" href={row.url} target="_blank" rel="noreferrer">打开抖音作品</a> : null}</div>
     {row.work_id ? <p className="text-xs text-text-muted">作品 ID：{row.work_id}</p> : null}
     {verification?.automatic ? <p className="text-xs text-text-muted">{["QUEUED", "RUNNING"].includes(verification.status) ? "正在自动核对公开状态" : "自动核对已启用，完成后约 2 分钟重查"}{verification.count ? ` · 已检查 ${verification.count} 次` : ""}{verification.checked_at ? ` · 最近检查 ${new Date(verification.checked_at * 1000).toLocaleString("zh-CN")}` : ""}</p> : null}
     {verification?.reason ? <p className="text-xs text-warning">{verification.reason}</p> : null}
@@ -57,7 +57,7 @@ function UploadRow({ row, canEdit, run, busy, template }: { row: DouyinJob; canE
   </li>;
 }
 
-function FocusedUpload({ id, canEdit, run, busy, template }: { id: string; canEdit: boolean; run: Run; busy: boolean; template?: FirstComment }) {
+export function FocusedUpload({ id, canEdit, run, busy, template }: { id: string; canEdit: boolean; run: Run; busy: boolean; template?: FirstComment }) {
   const load = useCallback((signal: AbortSignal) => api<DouyinJob>(`${DOUYIN_API}/uploads/${encodeURIComponent(id)}`, { signal }), [id]);
   const { data, error, reload } = usePageResource(load, 4000);
   return <section aria-label="当前抖音投稿任务" className="space-y-2"><h2 className="text-sm font-medium">当前抖音投稿任务</h2>{error ? <ErrorState error={error} onRetry={reload} compact /> : data ? <ul><UploadRow row={data} template={template} canEdit={canEdit} run={async action => { await run(action); await reload(); }} busy={busy} /></ul> : <p className="text-xs text-text-muted">正在读取投稿回执…</p>}</section>;
@@ -94,7 +94,7 @@ export function DouyinPlatform() {
   return <div className="space-y-4 max-w-6xl">
     <header className="flex justify-between gap-3"><div><h1 className="text-xl font-semibold">平台管理</h1><p className="text-xs text-text-muted mt-1">抖音账号连接、视频投稿与发布结果核对。</p></div><button className="btn text-xs" disabled={loading} onClick={() => void reload()}>刷新抖音</button></header>
     {error ? <ErrorState error={error} onRetry={reload} compact /> : null}
-    {sourceScript && sourceVersion > 0 ? <Link className="text-sm text-accent block" to={documentPublishLink(sourceScript, sourceVersion)}>← 返回文稿发布页（v{sourceVersion}）</Link> : null}
+    {sourceScript && sourceVersion > 0 ? <Link className="text-sm text-accent block" to={documentPublishLink(sourceScript, sourceVersion, params.get("render") || undefined)}>← 返回文稿发布页（v{sourceVersion}）</Link> : null}
     {actionError ? <p role="alert" className="card p-3 text-sm text-danger">{actionError}</p> : null}
     {!data && !error ? <p className="text-sm text-text-muted">正在读取抖音…</p> : null}
     {data ? <>

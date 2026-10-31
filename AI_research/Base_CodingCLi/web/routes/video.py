@@ -844,6 +844,8 @@ def get_publish_pack(script_id: str, version: Optional[int] = None, render_id: O
         if version is not None and render["version"] != version:
             raise HTTPException(422, detail=ApiError.make("render_version_mismatch",
                                                           f"这条成片属于 v{render['version']}，不是 v{version}"))
+        if video_render.safe_file(render, "video.mp4") is None:
+            raise _not_found("成片文件")
         version = render["version"]
     number = version or script["approved_version"] or script["current_version"]
     shown = store.get_version(script_id, number) if number else None

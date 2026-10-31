@@ -134,6 +134,7 @@ function writes() {
 }
 
 beforeEach(() => {
+  localStorage.clear();
   vi.clearAllMocks();
   auth.role = "admin";
   focused = {};
@@ -204,7 +205,7 @@ describe("Kuaishou first comments", () => {
     expect(form.getByLabelText("自动置顶（快手待接入）")).toHaveProperty("disabled",true);
     fireEvent.change(form.getByLabelText("首条评论内容"),{target:{value:"这条视频的补充资料"}});
     expect(writes()).toEqual([]);
-    fireEvent.click(form.getByRole("button",{name:"确认发布到快手"}));
+    fireEvent.click(form.getByRole("button",{name:"提交到快手"}));
     await waitFor(() => expect(api).toHaveBeenCalledWith("/api/platforms/social/kuaishou/uploads",expect.objectContaining({body:expect.objectContaining({first_comment:{enabled:true,text:"这条视频的补充资料",pin:false}})})));
     expect(writes()).toHaveLength(1);
   });
@@ -213,9 +214,9 @@ describe("Kuaishou first comments", () => {
     enable();show("kuaishou",`&render=${RENDER}`);
     const form=within(await screen.findByRole("form",{name:"快手发布包"}));
     fireEvent.click(form.getByLabelText("视频公开后添加首条评论"));
-    expect(form.getByRole("button",{name:"确认发布到快手"})).toHaveProperty("disabled",true);
+    expect(form.getByRole("button",{name:"提交到快手"})).toHaveProperty("disabled",true);
     fireEvent.change(form.getByLabelText("首条评论内容"),{target:{value:"补充资料"}});
-    fireEvent.click(form.getByRole("button",{name:"保存快手发布包"}));
+    fireEvent.click(form.getByRole("button",{name:"保存草稿"}));
     await waitFor(() => expect(drafts[`kuaishou:${RENDER}`]?.payload.first_comment).toEqual({enabled:true,text:"补充资料",pin:false}));
     expect(writes().every(([,options]) => options?.method==="PUT")).toBe(true);
   });
@@ -269,12 +270,12 @@ describe("Xiaohongshu author comments", () => {
     enable();show("xiaohongshu",`&render=${RENDER}`);
     const form=within(await screen.findByRole("form",{name:"小红书发布包"}));
     fireEvent.click(form.getByLabelText("视频公开后添加首条评论"));
-    expect(form.getByRole("button",{name:"确认发布到小红书"})).toHaveProperty("disabled",true);
+    expect(form.getByRole("button",{name:"提交到小红书"})).toHaveProperty("disabled",true);
     fireEvent.change(form.getByLabelText("首条评论内容"),{target:{value:"资料补充"}});
-    fireEvent.click(form.getByRole("button",{name:"保存小红书发布包"}));
+    fireEvent.click(form.getByRole("button",{name:"保存草稿"}));
     await waitFor(() => expect(drafts[`xiaohongshu:${RENDER}`]?.payload.first_comment).toEqual({enabled:true,text:"资料补充",pin:false}));
     expect(writes().some(([path]) => path.endsWith("/uploads"))).toBe(false);
-    fireEvent.click(form.getByRole("button",{name:"确认发布到小红书"}));
+    fireEvent.click(form.getByRole("button",{name:"提交到小红书"}));
     await waitFor(() => expect(api).toHaveBeenCalledWith("/api/platforms/social/xiaohongshu/uploads",expect.objectContaining({body:expect.objectContaining({first_comment:{enabled:true,text:"资料补充",pin:false}})})));
   });
   it("connects the comment login explicitly and renews the same login purpose", async () => {
@@ -409,7 +410,7 @@ describe("platform-specific finished videos and publish packages", () => {
     expect(await screen.findByRole("form", { name: `${name}发布包` })).toBeTruthy();
     expect(api).toHaveBeenCalledWith(`/api/platforms/social/${platform}/preview/${RENDER}`, expect.anything());
     expect(screen.getByRole("link", { name: "← 返回文稿发布页（v3）" }).getAttribute("href"))
-      .toBe(`/video/${SCRIPT}?tab=publish&publish_version=3`);
+      .toBe(`/video/${SCRIPT}?tab=publish&publish_version=3&render=${RENDER}`);
     expect(writes()).toEqual([]);
   });
 
@@ -418,8 +419,8 @@ describe("platform-specific finished videos and publish packages", () => {
     show("xiaohongshu", `&render=${RENDER}`);
     fireEvent.change(await screen.findByLabelText("小红书标题"), { target: { value: "小红书独立编辑" } });
     fireEvent.change(screen.getByLabelText("小红书简介"), { target: { value: "这段只用于小红书" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存小红书发布包" }));
-    await screen.findByText("已保存本平台发布包");
+    fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
+    await screen.findByText("已保存本平台草稿");
     expect(api).toHaveBeenCalledWith("/api/video/distributions/xiaohongshu/draft", {
       method: "PUT", body: { render_id: RENDER, account_uid: ACCOUNT,
         payload: { title: "小红书独立编辑", description: "这段只用于小红书", tags: ["科技"] } },
@@ -427,7 +428,7 @@ describe("platform-specific finished videos and publish packages", () => {
     fireEvent.change(screen.getByLabelText("选择平台"), { target: { value: "kuaishou" } });
     expect(await screen.findByLabelText("快手标题")).toHaveProperty("value", "快手版视频标题");
     fireEvent.change(screen.getByLabelText("快手标题"), { target: { value: "快手单独标题" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存快手发布包" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
     await waitFor(() => expect(api).toHaveBeenCalledWith("/api/video/distributions/kuaishou/draft", expect.objectContaining({ method: "PUT" })));
     fireEvent.change(screen.getByLabelText("选择平台"), { target: { value: "xiaohongshu" } });
     expect(await screen.findByLabelText("小红书标题")).toHaveProperty("value", "小红书独立编辑");
@@ -443,7 +444,7 @@ describe("platform-specific finished videos and publish packages", () => {
     fireEvent.change(screen.getByLabelText(`${name}简介`), { target: { value: "修改后的简介" } });
     fireEvent.change(screen.getByLabelText(`${name}话题`), { target: { value: "#AI，开发者" } });
     expect(writes()).toEqual([]);
-    fireEvent.click(screen.getByRole("button", { name: `确认发布到${name}` }));
+    fireEvent.click(screen.getByRole("button", { name: `提交到${name}` }));
     await waitFor(() => expect(api).toHaveBeenCalledWith(`/api/platforms/social/${platform}/uploads`, {
       method: "POST", body: { render_id: RENDER, account_uid: ACCOUNT, title: "这是明确确认的标题",
         description: "修改后的简介", tags: ["AI", "开发者"] },
@@ -458,7 +459,7 @@ describe("platform-specific finished videos and publish packages", () => {
     expect(form.getByText("本平台的首评、置顶和视频数据仍待分别接入。")).toBeTruthy();
     expect(form.queryByRole("checkbox")).toBeNull();
     expect(form.queryByLabelText(/评论内容|自动置顶/)).toBeNull();
-    fireEvent.click(form.getByRole("button", { name: "确认发布到小红书" }));
+    fireEvent.click(form.getByRole("button", { name: "提交到小红书" }));
     await waitFor(() => expect(writes()).toHaveLength(1));
     expect(writes()[0][1]?.body).not.toHaveProperty("first_comment");
     expect(writes()[0][1]?.body).not.toHaveProperty("pin");
@@ -476,8 +477,8 @@ describe("character limits and safe queue actions", () => {
     expect(input.getAttribute("aria-invalid")).toBe("true");
     expect(screen.getByText("快手话题（7/3 个，逗号分隔）")).toBeTruthy();
     expect(screen.getByRole("alert").textContent).toContain("话题超限：当前 7 个，最多 3 个，请删除 4 个。");
-    expect(screen.getByRole("button", { name: "保存快手发布包" })).toHaveProperty("disabled", false);
-    expect(screen.getByRole("button", { name: "确认发布到快手" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "保存草稿" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "提交到快手" })).toHaveProperty("disabled", true);
     expect(writes()).toEqual([]);
 
     fireEvent.click(screen.getByRole("button", { name: "保留前 3 个话题" }));
@@ -485,8 +486,8 @@ describe("character limits and safe queue actions", () => {
     expect(screen.getByLabelText("快手标题")).toHaveProperty("value", "用户保存的标题");
     expect(input.getAttribute("aria-invalid")).toBe("false");
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.getByRole("button", { name: "保存快手发布包" })).toHaveProperty("disabled", false);
-    expect(screen.getByRole("button", { name: "确认发布到快手" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "保存草稿" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "提交到快手" })).toHaveProperty("disabled", false);
     expect(screen.getByText(/审核和公开状态尚未核实/)).toBeTruthy();
     expect(writes()).toEqual([]);
     expect(drafts[`kuaishou:${RENDER}`]?.payload.tags).toEqual(topics);
@@ -497,9 +498,9 @@ describe("character limits and safe queue actions", () => {
     const input = await screen.findByLabelText("快手话题");
     fireEvent.change(input, { target: { value: "🙂".repeat(31) } });
     expect(screen.getByRole("alert").textContent).toContain("每个话题最多 30 字");
-    expect(screen.getByRole("button", { name: "确认发布到快手" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "提交到快手" })).toHaveProperty("disabled", true);
     fireEvent.change(input, { target: { value: "🙂".repeat(30) } });
-    expect(screen.getByRole("button", { name: "确认发布到快手" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "提交到快手" })).toHaveProperty("disabled", false);
     expect(writes()).toEqual([]);
   });
 
@@ -509,9 +510,9 @@ describe("character limits and safe queue actions", () => {
     show("kuaishou", `&render=${RENDER}`);
     await screen.findByLabelText("快手话题");
     expect(screen.getByRole("alert").textContent).toContain("话题不能包含换行");
-    expect(screen.getByRole("button", { name: "确认发布到快手" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "提交到快手" })).toHaveProperty("disabled", true);
     fireEvent.change(screen.getByLabelText("快手话题"), { target: { value: "科技，知识" } });
-    expect(screen.getByRole("button", { name: "确认发布到快手" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "提交到快手" })).toHaveProperty("disabled", false);
     expect(writes()).toEqual([]);
   });
 
@@ -520,12 +521,12 @@ describe("character limits and safe queue actions", () => {
     const title = await screen.findByLabelText("小红书标题");
     fireEvent.change(title, { target: { value: "🙂".repeat(20) } });
     expect(screen.getByText("小红书标题（20/20，至少 1 字）")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "确认发布到小红书" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "提交到小红书" })).toHaveProperty("disabled", false);
     fireEvent.change(title, { target: { value: "🙂".repeat(21) } });
-    expect(screen.getByRole("button", { name: "确认发布到小红书" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "提交到小红书" })).toHaveProperty("disabled", true);
     expect(screen.getByRole("alert").textContent).toContain("标题需为 1–20 字，当前 21 字。");
     fireEvent.change(title, { target: { value: "   " } });
-    expect(screen.getByRole("button", { name: "保存小红书发布包" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "保存草稿" })).toHaveProperty("disabled", false);
     expect(writes()).toEqual([]);
   });
 
@@ -534,7 +535,7 @@ describe("character limits and safe queue actions", () => {
     const title = await screen.findByLabelText("微信视频号标题");
     for (const [count, disabled] of [[5, true], [6, false], [16, false], [17, true]] as const) {
       fireEvent.change(title, { target: { value: "🙂".repeat(count) } });
-      expect(screen.getByRole("button", { name: "确认发布到微信视频号" })).toHaveProperty("disabled", disabled);
+      expect(screen.getByRole("button", { name: "提交到微信视频号" })).toHaveProperty("disabled", disabled);
     }
     expect(writes()).toEqual([]);
   });
@@ -545,11 +546,11 @@ describe("character limits and safe queue actions", () => {
     fireEvent.change(screen.getByLabelText("快手话题"), { target: { value: "" } });
     fireEvent.change(screen.getByLabelText("快手简介"), { target: { value: "🙂".repeat(497) } });
     expect(screen.getByText("标题、简介和话题合计 500/500 字")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "确认发布到快手" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "提交到快手" })).toHaveProperty("disabled", false);
     fireEvent.change(screen.getByLabelText("快手简介"), { target: { value: "🙂".repeat(498) } });
     expect(screen.getByText("标题、简介和话题合计 501/500 字")).toBeTruthy();
     expect(screen.getByRole("alert").textContent).toContain("标题、简介和话题合计超限：当前 501 字，最多 500 字。");
-    expect(screen.getByRole("button", { name: "确认发布到快手" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "提交到快手" })).toHaveProperty("disabled", true);
   });
 
   it("includes Channels hashtags and newlines in its combined 1000-character limit", async () => {
@@ -558,9 +559,9 @@ describe("character limits and safe queue actions", () => {
     fireEvent.change(screen.getByLabelText("微信视频号话题"), { target: { value: "AI" } });
     fireEvent.change(screen.getByLabelText("微信视频号简介"), { target: { value: "文".repeat(988) } });
     expect(screen.getByText("标题、简介和话题合计 1000/1000 字")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "确认发布到微信视频号" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("button", { name: "提交到微信视频号" })).toHaveProperty("disabled", false);
     fireEvent.change(screen.getByLabelText("微信视频号简介"), { target: { value: "文".repeat(989) } });
-    expect(screen.getByRole("button", { name: "确认发布到微信视频号" })).toHaveProperty("disabled", true);
+    expect(screen.getByRole("button", { name: "提交到微信视频号" })).toHaveProperty("disabled", true);
     expect(writes()).toEqual([]);
   });
 

@@ -124,7 +124,7 @@ export function PublishPanel({
   onChanged?: () => void;
 }) {
   const toast = useToast();
-  const loadPack = useCallback((signal: AbortSignal) => getPublishPack(scriptId, version, signal), [scriptId, version]);
+  const loadPack = useCallback((signal: AbortSignal) => getPublishPack(scriptId, version, signal, renderId), [scriptId, version, renderId]);
   const { data: pack, error, reload } = usePageResource(loadPack);
   const [platform, setPlatform] = useState("bilibili");
   const [owner, setOwner] = useState("");
@@ -217,7 +217,7 @@ export function PublishPanel({
     <section className="card p-4 space-y-3" aria-label="发布包">
       {error ? <ErrorState error={error} onRetry={reload} compact /> : null}
       <div className="flex items-center gap-2">
-        <h2 className="font-medium flex-1">发布包</h2>
+        <h2 className="font-medium flex-1">通用原始素材与发布记录</h2>
         <span className="text-xs text-text-muted">v{pack.version} · 用于平台投稿，也可复制后手动发布</span>
       </div>
       {pack.warnings.map((w) => (

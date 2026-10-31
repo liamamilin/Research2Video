@@ -12,7 +12,6 @@ describe("nextStep", () => {
     expect(nextStep(detail({ status: "RESEARCHING" })).tone).toBe("wait");
     expect(nextStep(detail({ status: "FAILED" })).tone).toBe("bad");
   });
-
   it("guides explicit duplicate and exhausted skips without reporting a technical failure", () => {
     for (const kind of ["duplicate", "exhausted"] as const) {
       expect(nextStep(detail({ status: "FAILED", selection_skip: { kind, reason: "跳过", originals: [] } }))).toMatchObject({ tone: "done", tab: "draft" });
@@ -31,7 +30,7 @@ describe("nextStep", () => {
     expect(nextStep(detail(approved))).toMatchObject({ tab: "video", tone: "todo" });
     expect(nextStep(detail({ ...approved, renders: [{ version: 1, status: "RUNNING" }] as never }))).toMatchObject({ tab: "video", tone: "wait" });
     expect(nextStep(detail({ ...approved, renders: [{ version: 1, status: "FAILED" }] as never })).tone).toBe("bad");
-    expect(nextStep(detail({ ...approved, renders: [{ version: 1, status: "COMPLETED" }] as never }))).toMatchObject({ tab: "publish", tone: "todo" });
+    expect(nextStep(detail({ ...approved, renders: [{ version: 1, status: "COMPLETED" }] as never }))).toMatchObject({ tab: "video", tone: "todo" });
     expect(nextStep(detail({ ...approved, renders: [{ version: 1, status: "COMPLETED" }] as never, publications: [{ version: 1 }] as never }))).toMatchObject({ tab: "publish", tone: "done" });
   });
   it("ignores earlier-version videos and publications, and keeps a completed video after a failed retry", () => {
@@ -39,7 +38,7 @@ describe("nextStep", () => {
       renders: [{ version: 1, status: "COMPLETED" }] as never, publications: [{ version: 1 }, { version: null }] as never });
     expect(nextStep(newer)).toMatchObject({ tab: "video", text: "已定稿，下一步生成成片。" });
     newer.renders = [{ version: 2, status: "FAILED" }, { version: 2, status: "COMPLETED" }] as never;
-    expect(nextStep(newer)).toMatchObject({ tab: "publish", tone: "todo" });
+    expect(nextStep(newer)).toMatchObject({ tab: "video", tone: "todo" });
   });
 
   it("waits for an audit and treats style-only findings as advice", () => {
@@ -60,4 +59,12 @@ it("does not assign an unknown legacy publication version to the current draft",
 it("keeps polling guidance for the Douyin worker RUNNING status", () => {
   const d = detail({ status: "APPROVED", distributions: [{ version: 1, platform: "douyin", status: "UPLOADING", task: { status: "RUNNING" } }] as never });
   expect(nextStep(d)).toMatchObject({ tab: "publish", tone: "wait" });
+});
+
+it("names the real renderer phases for the manuscript UI", async () => {
+  const { renderPhase } = await import("./videoNext");
+  expect(renderPhase("STORYBOARD")).toBe("规划分镜");
+  expect(renderPhase("VOICE_ALIGN")).toBe("生成旁白与对齐");
+  expect(renderPhase("NEW_INTERNAL_STAGE")).toBe("后台处理中");
+  expect(renderPhase(null)).toBe("");
 });

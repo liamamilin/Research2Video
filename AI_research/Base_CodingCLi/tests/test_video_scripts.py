@@ -1301,7 +1301,8 @@ def test_api_publish_pack_binds_the_requested_render(client, video_env, autovide
         (folder / "chapters.json").write_text(json.dumps({"timeline": "packaged", "chapters": [
             {"title": "开场", "start_ms": 0}, {"title": "展开", "start_ms": start}, {"title": "结论", "start_ms": 55000}]}),
             encoding="utf-8")
-        store.update_render(render["id"], status="COMPLETED", artifacts=[{"name": "chapters.json"}])
+        (folder / "video.mp4").write_bytes(b"mp4")
+        store.update_render(render["id"], status="COMPLETED", artifacts=[{"name": "chapters.json"}, {"name": "video.mp4"}])
         renders.append(render)
     _login(client)
     for render, time in zip(renders, ("00:30", "00:40")):

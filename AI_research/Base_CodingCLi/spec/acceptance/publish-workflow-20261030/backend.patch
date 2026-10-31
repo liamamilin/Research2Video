@@ -1,0 +1,147 @@
+--- a/AI_research/Base_CodingCLi/web/routes/video.py
++++ b/AI_research/Base_CodingCLi/web/routes/video.py
+@@ -201,11 +201,11 @@
+ 
+ 
+ @router.get("/shipments")
+-def shipments(user=Depends(require_viewer), compact: bool = False) -> list[dict]:
++def shipments(user=Depends(require_viewer), compact: bool = False, include_history: bool = False) -> list[dict]:
+     """Approved scripts with their render and publication state, for the 成片与发布 page."""
+     from web.services import video_board
+ 
+-    rows = video_board.shipments(_known_columns())
++    rows = video_board.shipments(_known_columns(), include_history=include_history)
+     if compact:
+         from web.services.video_list_payload import compact as project
+         return [project(row) for row in rows]
+@@ -814,17 +814,24 @@
+ 
+ 
+ @router.get("/scripts/{script_id}/publish")
+-def get_publish_pack(script_id: str, version: Optional[int] = None, user=Depends(require_viewer)) -> dict:
++def get_publish_pack(script_id: str, version: Optional[int] = None, render_id: Optional[str] = None, user=Depends(require_viewer)) -> dict:
+     """Title, description, chapters, tags and cover text for uploading a version (the approved one by default)."""
+     script = _script_or_404(script_id)
+-    number = version or script["approved_version"] or script["current_version"]
++    selected = store.get_render(render_id) if render_id else None
++    if render_id and (not selected or selected["script_id"] != script_id):
++        raise _not_found("这条文稿的成片")
++    if selected and (selected["status"] != "COMPLETED" or (version is not None and selected["version"] != version)):
++        raise HTTPException(422, detail=ApiError.make("render_mismatch", "所选成片与文稿版本不匹配或尚未完成"))
++    if selected and video_render.safe_file(selected, "video.mp4") is None:
++        raise _not_found("成片文件")
++    number = selected["version"] if selected else version or script["approved_version"] or script["current_version"]
+     shown = store.get_version(script_id, number) if number else None
+     if shown is None:
+         raise _not_found("这个版本")
+     column = _known_columns().get(script["column_key"])
+     if column is None and not script['topic'].get('local_video'):
+         raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{script['column_key']}"))
+-    return video_render.publish_pack(script, shown, column)
++    return {**video_render.publish_pack(script, shown, column, render_id=render_id), "render_id": render_id}
+ 
+ 
+ class PublicationIn(BaseModel):
+--- a/AI_research/Base_CodingCLi/web/services/video_board.py
++++ b/AI_research/Base_CodingCLi/web/services/video_board.py
+@@ -117,26 +117,36 @@
+     }
+ 
+ 
+-def shipments(columns: dict, *, limit: int = 100000, config_dir: str = "config", jobs_dir: str = "jobs") -> list[dict]:
++def shipments(columns: dict, *, include_history: bool = False, limit: int = 100000, config_dir: str = "config", jobs_dir: str = "jobs") -> list[dict]:
+     """Approved current versions and their own videos/publications, excluding archived matrices."""
+     from web.services import video_recheck
+ 
+     scripts = store.list_scripts(limit=limit)
+     owners, _ = outputs.script_owners(config_dir, jobs_dir, scripts)
+-    scripts = [s for s in scripts if s["status"] == "APPROVED" and not owners[s["id"]]["matrix_archived"]]
+-    versions = store.current_versions([s["id"] for s in scripts])
++    render_statuses = store.render_statuses_by_script()
++    retained = []
++    for script in scripts:
++        current = script["current_version"]
++        visible = script["status"] == "APPROVED" and not owners[script["id"]]["matrix_archived"]
++        numbers = [current] if visible else []
++        if include_history:
++            numbers += [r["version"] for r in render_statuses.get(script["id"], []) if r["status"] == "COMPLETED"]
++        for number in dict.fromkeys(numbers):
++            retained.append({**script, "current_version": number, "_actual_current_version": current,
++                             "_script_status": script["status"], "_historical": number != current or script["status"] != "APPROVED" or owners[script["id"]]["matrix_archived"]})
++    scripts = retained
+     published = store.published_versions_by_script()
+     render_statuses = store.render_statuses_by_script()
+-    chosen_renders = {s["id"]: progress.render_state(s, render_statuses.get(s["id"], []))["render"] for s in scripts}
++    chosen_renders = {(s["id"], s["current_version"]): progress.render_state(s, [r for r in render_statuses.get(s["id"], []) if not s["_historical"] or r["status"] == "COMPLETED"])["render"] for s in scripts}
+     details = store.shipment_rows([s["id"] for s in scripts], [r["id"] for r in chosen_renders.values() if r])
+     from web.services import distributions
+     distribution_rows = distributions.overview(scripts)
+     rows = []
+     for script in scripts:
+         owner = owners[script["id"]]
+-        chosen = chosen_renders[script["id"]]
++        chosen = chosen_renders[(script["id"], script["current_version"])]
+         latest = details["renders"].get(chosen["id"]) if chosen else None
+-        version = versions.get(script["id"])
++        version = store.get_version(script["id"], script["current_version"])
+         column = columns.get(script["column_key"])
+         warnings: list[str] = []
+         if column is not None and column.recheck and version is not None and not progress.is_published(script, published.get(script["id"], set())):
+@@ -148,7 +158,8 @@
+             "script_id": script["id"], "title": version["title"] if version else script["topic"].get("title", ""),
+             "column_key": script["column_key"], "column_label": owner.get("production_name") or (column.name if column else script["column_key"]),
+             **{k: v for k, v in owner.items() if k != "matrix_archived"},
+-            "approved_version": script["approved_version"], "created_at": script["created_at"],
++            "approved_version": script["current_version"], "created_at": script["created_at"],
++            "current_version": script["_actual_current_version"], "script_status": script["_script_status"], "historical": script["_historical"],
+             "credibility": credibility.label(version) if version else None, "auto": script.get("created_by") == "autopilot",
+             "render": None if latest is None else {"id": latest["id"], "status": latest["status"],
+                                                    "version": latest["version"], "error": latest.get("error_message"),
+--- /dev/null
++++ b/AI_research/Base_CodingCLi/tests/test_publish_workflow.py
+@@ -0,0 +1,45 @@
++"""Exact render identity and retained-history contracts; isolated databases only."""
++import json
++from tests.test_video_scripts import video_env, _approved_script, _login
++from core.video import store
++from web.services import video_render
++
++
++def completed(script, number, start):
++    row = store.create_render(script['id'], number, title='具体成片', source_text='x', source_sha256='0'*64, request={})
++    folder = video_render.files_dir(row['id']); folder.mkdir(parents=True)
++    (folder/'video.mp4').write_bytes(b'preserved-video')
++    (folder/'chapters.json').write_text(json.dumps({'timeline':'packaged','chapters':[{'title':'开场','start_ms':0},{'title':'展开','start_ms':start},{'title':'结论','start_ms':start+20000}]}))
++    store.update_render(row['id'], status='COMPLETED', artifacts=[{'name':'video.mp4'},{'name':'chapters.json'}])
++    return row
++
++
++def test_exact_render_chapters_reject_cross_script_version_and_unavailable(client, video_env):
++    s = _approved_script('具体成片'); a = completed(s,1,30000); b = completed(s,1,50000)
++    other = _approved_script('其他文稿'); c = completed(other,1,70000)
++    _login(client)
++    url = f"/api/video/scripts/{s['id']}/publish"
++    one = client.get(url,params={'version':1,'render_id':a['id']}); assert one.status_code == 200, one.text
++    assert one.json()['render_id'] == a['id'] and '00:30 展开' in one.json()['description']
++    assert '00:50 展开' in client.get(url,params={'version':1,'render_id':b['id']}).json()['description']
++    assert client.get(url,params={'version':2,'render_id':a['id']}).status_code == 422
++    assert client.get(url,params={'render_id':c['id']}).status_code == 404
++    assert client.get(url,params={'render_id':'missing'}).status_code == 404
++    (video_render.files_dir(a['id'])/'video.mp4').unlink()
++    assert client.get(url,params={'render_id':a['id']}).status_code == 404
++
++
++def test_history_keeps_two_versions_after_edit_without_altering_inflight(client, video_env):
++    s = _approved_script('保留旧片'); a = completed(s,1,30000)
++    store.add_version(s['id'],title='第二版',sections=[],length_check={},edit_type='MANUAL',meta={})
++    b = completed(s,2,50000); store.update_script(s['id'],status='DRAFT')
++    active = store.create_render(s['id'],2,title='在途',source_text='x',source_sha256='0'*64,request={})
++    store.update_render(active['id'],status='RUNNING')
++    _login(client)
++    assert not client.get('/api/video/shipments').json()
++    rows = client.get('/api/video/shipments',params={'include_history':'true','compact':'true'}).json()
++    assert len(rows)==2 and {r['render']['version'] for r in rows}=={1,2}
++    assert all(r['historical'] and r['current_version']==2 and r['script_status']=='DRAFT' for r in rows)
++    assert store.get_render(active['id'])['status']=='RUNNING'
++    assert (video_render.files_dir(a['id'])/'video.mp4').read_bytes()==b'preserved-video'
++    assert (video_render.files_dir(b['id'])/'video.mp4').read_bytes()==b'preserved-video'

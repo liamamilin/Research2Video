@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { rerunVideoStep, type ScriptEvent, type ScriptStep, type StepName, type VideoScriptDetail } from "@/api/video";
 import { errorMessage, useToast } from "@/lib/toast";
@@ -29,24 +29,27 @@ function rerunnable(step: ScriptStep, detail: VideoScriptDetail): { label: strin
   }
   // only a draft: the audit resumes as a draft, which would take an approved script's approval away
   if (step.step === "audit" && detail.status === "DRAFT" && ["DONE", "INCOMPLETE", "SKIPPED"].includes(step.state) && detail.column?.writer !== "adapt") {
-    return { label: step.state === "SKIPPED" ? "发起审校" : "重跑审计", confirm: "发起事实、风格和理解检查？这会调用审校模型，并可能自动修改文稿。" };
+    return { label: step.state === "SKIPPED" ? "发起审校" : "重跑审校", confirm: "发起事实、风格和理解检查？这会调用审校模型，并可能自动修改文稿。" };
   }
   return null;
 }
 
-export function ScriptSteps({ detail, canEdit, onChanged, showRewrite = true }: {
-  detail: VideoScriptDetail; canEdit: boolean; onChanged: (d: VideoScriptDetail) => void; showRewrite?: boolean;
+export function ScriptSteps({ detail, canEdit, onChanged, showRewrite = true, onBusyChange }: {
+  detail: VideoScriptDetail; canEdit: boolean; onChanged: (d: VideoScriptDetail) => void; showRewrite?: boolean; onBusyChange?: (busy: boolean) => void;
 }) {
   const toast = useToast();
   const [busy, setBusy] = useState<StepName | null>(null);
   const [showLog, setShowLog] = useState(false);
+  const lock = useRef(false);
   const steps = detail.steps ?? [];
   const events: ScriptEvent[] = detail.events ?? [];
   if (!steps.length) return null;
   const working = ["RESEARCHING", "WRITING"].includes(detail.status) || Boolean(detail.stage);
 
   const rerun = async (step: ScriptStep, confirmText: string) => {
+    if (lock.current) return;
     if (!window.confirm(confirmText)) return;
+    lock.current = true; onBusyChange?.(true);
     setBusy(step.step);
     try {
       onChanged(await rerunVideoStep(detail.id, step.step));
@@ -55,6 +58,7 @@ export function ScriptSteps({ detail, canEdit, onChanged, showRewrite = true }: 
       toast.error(errorMessage(e));
     } finally {
       setBusy(null);
+      lock.current = false; onBusyChange?.(false);
     }
   };
 
@@ -66,7 +70,7 @@ export function ScriptSteps({ detail, canEdit, onChanged, showRewrite = true }: 
           return (
             <li key={step.step} className="flex items-center gap-1.5" title={step.note || undefined}>
               <span className="text-text-muted">{i + 1}.</span>
-              <span>{step.label}</span>
+              <span>{step.step === "audit" ? "审校" : step.label}</span>
               <span className={cn("font-medium", STATE[step.state].cls)}>{STATE[step.state].label}</span>
               {step.note && step.state !== "DONE" ? (
                 <span className="text-text-muted max-w-[16rem] truncate">{step.note}</span>

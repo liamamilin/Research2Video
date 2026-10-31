@@ -1,3 +1,5 @@
+import { usePublishDraft } from "@/lib/use-publish-draft";
+import { PublishDraftStatus } from "./PublishDraftStatus";
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { ExternalLink, Send } from "lucide-react";
@@ -27,12 +29,19 @@ export function UploadForm({ renderId, onDone, run, busy }: { renderId: string; 
 }
 
 function UploadEditor({ initial, onDone, run, busy }: { initial: UploadPreview; onDone: (task: UploadTask) => void; run: Run; busy: boolean }) {
-  const [title, setTitle] = useState(initial.draft?.payload.title ?? initial.title);
-  const [description, setDescription] = useState(initial.draft?.payload.description ?? initial.description);
-  const [tags, setTags] = useState((initial.draft?.payload.tags ?? initial.tags).join("，"));
-  const [tid, setTid] = useState(initial.draft?.payload.tid ?? initial.tid ?? 0);
-  const [firstComment, setFirstComment] = useState(initial.draft?.payload.first_comment ?? initial.first_comment ?? EMPTY_FIRST_COMMENT);
-  const [saved, setSaved] = useState(Boolean(initial.draft));
+  const draft = usePublishDraft("bilibili", initial.render_id, initial.account_uid ?? "", {
+    title: initial.draft?.payload.title ?? initial.title,
+    description: initial.draft?.payload.description ?? initial.description,
+    tags: (initial.draft?.payload.tags ?? initial.tags).join("，"),
+    firstComment: initial.draft?.payload.first_comment ?? initial.first_comment ?? EMPTY_FIRST_COMMENT,
+    tid: initial.draft?.payload.tid ?? initial.tid ?? 0,
+  }, Boolean(initial.draft));
+  const { title, description, tags, firstComment, tid = 0 } = draft.value;
+  const setTitle = (value: string) => draft.field("title", value);
+  const setDescription = (value: string) => draft.field("description", value);
+  const setTags = (value: string) => draft.field("tags", value);
+  const setFirstComment = (value: typeof firstComment) => draft.field("firstComment", value);
+  const setTid = (value: number) => draft.field("tid", value);
   const content = { title, description, tid: Number(tid), tags: tags.split(/[,，]/).map(t => t.trim()).filter(Boolean), first_comment: firstComment };
   const textCheck = publishCheck("bilibili",content,initial.adaptation?.check.limits);
   const validComment = validFirstComment("bilibili",firstComment);
@@ -45,26 +54,29 @@ function UploadEditor({ initial, onDone, run, busy }: { initial: UploadPreview; 
     if (!textCheck.valid || !validComment) return;
     const task = await platformAction<UploadTask>("/uploads", { render_id: initial.render_id, account_uid: initial.account_uid, ...content }); onDone(task);
   }); }}>
+    <fieldset disabled={busy} className="space-y-3 min-w-0">
+    <p className="text-xs text-text-muted break-all">本次成片 {initial.render_id} · 账号 {initial.account_uid || "待连接"}</p>
+    {initial.draft?.render_id && initial.draft.render_id !== initial.render_id ? <p className="text-xs text-warning">文案复用自本版另一条成片 {initial.draft.render_id}；本次保存和提交使用上方所选成片，原草稿版本仍保留。</p> : null}
     <div className="flex justify-between gap-3"><h3 className="text-sm font-medium">投稿信息</h3><span className="text-xs text-text-muted">{initial.credibility.text} · 自制视频</span></div>
-    <label className="block text-xs">标题（{textCount(title.trim())}/80）<input aria-label="标题" required className="input w-full mt-1" value={title} onChange={e => {setTitle(e.target.value);setSaved(false);}} /></label>
-    <label className="block text-xs">简介（{textCount(description)}/2000）<textarea aria-label="简介" rows={5} className="input w-full mt-1" value={description} onChange={e => {setDescription(e.target.value);setSaved(false);}} /></label>
+    <label className="block text-xs">标题（{textCount(title.trim())}/80）<input aria-label="标题" required className="input w-full mt-1" value={title} onChange={e => {setTitle(e.target.value);}} /></label>
+    <label className="block text-xs">简介（{textCount(description)}/2000）<textarea aria-label="简介" rows={5} className="input w-full mt-1" value={description} onChange={e => {setDescription(e.target.value);}} /></label>
     <div className="grid sm:grid-cols-[minmax(0,1fr)_minmax(280px,0.65fr)] gap-3"><label className="block text-xs">标签（用逗号分隔）<input required className="input w-full mt-1" value={tags} onChange={e => setTags(e.target.value)} /></label><BilibiliCategorySelect label="投稿分区" required value={tid} onChange={setTid} resource={categoryResource} content={{ title, description, tags: tags.split(/[,，]/).map(tag => tag.trim()).filter(Boolean) }} /></div>
     <FirstCommentOptions value={firstComment} onChange={value => { setFirstComment(value); setTemplateSaved(false); }} />
-    <PublishAdaptation platform="bilibili" renderId={initial.render_id} accountUid={initial.account_uid} value={content} initial={initial.adaptation} run={run} busy={busy} onApply={next => {setTitle(next.title);setDescription(next.description);setTags(next.tags.join("，"));if(next.first_comment)setFirstComment(next.first_comment);if(next.tid!==undefined)setTid(next.tid);setSaved(true);}} />
+    <PublishAdaptation platform="bilibili" renderId={initial.render_id} accountUid={initial.account_uid} value={content} initial={initial.adaptation} run={run} busy={busy} onApply={next => draft.applySaved({ title: next.title, description: next.description, tags: next.tags.join("，"), firstComment: next.first_comment ?? firstComment, tid: next.tid ?? tid })} />
     {textCheck.issues.length ? <div role="alert" className="text-xs text-warning">{textCheck.issues.map(issue => <p key={issue}>{issue}</p>)}</div> : null}
-    {role === "admin" ? <div className="flex flex-wrap items-center gap-3"><button type="button" className="btn text-xs" disabled={busy || (firstComment.enabled && !firstComment.text.trim())} onClick={() => void run(async () => { await platformAction("/first-comment-template", firstComment, "PUT"); setTemplateSaved(true); })}>保存为常用评论</button><span className="text-xs text-text-muted">{templateSaved ? "已保存，后续投稿默认使用；当前还未发送。" : "可将内容和置顶选项保存为后续投稿的默认设置。"}</span></div> : null}
-    {initial.warnings.map(w => <p className="text-xs text-warning" key={w}>{w}</p>)}
+    {role === "admin" ? <details><summary className="text-xs cursor-pointer">后续投稿默认评论设置</summary><div className="flex flex-wrap items-center gap-3"><button type="button" className="btn text-xs" disabled={busy || (firstComment.enabled && !firstComment.text.trim())} onClick={() => void run(async () => { await platformAction("/first-comment-template", firstComment, "PUT"); setTemplateSaved(true); })}>保存为常用评论</button><span className="text-xs text-text-muted">{templateSaved ? "已保存，后续投稿默认使用；当前还未发送。" : "可将内容和置顶选项保存为后续投稿的默认设置。"}</span></div></details> : null}
     <p className="text-xs text-text-muted">使用这次成片及已有封面；没有封面时自动截取视频画面。加入队列后会自动开始上传，B 站审核通过并公开后回写发布记录。</p>
-    <div className="flex flex-wrap gap-3 items-center"><button type="button" className="btn text-xs" disabled={busy} onClick={() => void run(async () => { await api("/api/video/distributions/bilibili/draft", { method: "PUT", body: { render_id: initial.render_id, account_uid: initial.account_uid, payload: content } }); setSaved(true); })}>保存 B 站发布包</button>{saved ? <span className="text-xs text-text-muted">已保存本平台发布包；修改后请再次保存。</span> : null}</div>
-    <button className="btn btn-primary text-xs" disabled={busy || !validCategory || !textCheck.valid || !validComment}><Send className="w-3.5 h-3.5" />加入投稿队列</button>
+    <div className="flex flex-wrap gap-3 items-center"><button type="button" className="btn text-xs" disabled={busy} onClick={() => void run(async () => { await api("/api/video/distributions/bilibili/draft", { method: "PUT", body: { render_id: initial.render_id, account_uid: initial.account_uid, payload: content } }); draft.markSaved(); })}>保存草稿</button><PublishDraftStatus draft={draft} /></div>
+    <button className="btn btn-primary text-xs" disabled={busy || !validCategory || !textCheck.valid || !validComment}><Send className="w-3.5 h-3.5" />提交到 B 站</button>
+    </fieldset>
   </form>;
 }
 
 export function UploadRow({ task, canEdit, run, busy }: { task: UploadTask; canEdit: boolean; run: Run; busy: boolean }) {
   const [bvid, setBvid] = useState(task.bvid);
   return <li className="card p-4 space-y-2">
-    <div className="flex flex-wrap justify-between gap-2"><Link className="text-sm font-medium hover:underline" to={documentPublishLink(task.script_id, task.version)}>{task.payload.title}</Link><span className={cn("badge border border-border", task.status === "UNKNOWN" && "text-warning")}>{UPLOAD_STATES[task.status] || task.status}</span></div>
-    <div className="flex flex-wrap gap-3 text-xs text-text-muted"><span>文稿 v{task.version}</span><span>{new Date(task.created_at * 1000).toLocaleString("zh-CN")}</span>{task.bvid ? <PlatformLink bvid={task.bvid}>{task.bvid}</PlatformLink> : null}<Link className="text-accent hover:underline" to={documentPublishLink(task.script_id, task.version)}>查看文稿发布记录 →</Link></div>
+    <div className="flex flex-wrap justify-between gap-2"><Link className="text-sm font-medium hover:underline" to={documentPublishLink(task.script_id, task.version, task.render_id)}>{task.payload.title}</Link><span className={cn("badge border border-border", task.status === "UNKNOWN" && "text-warning")}>{UPLOAD_STATES[task.status] || task.status}</span></div>
+    <div className="flex flex-wrap gap-3 text-xs text-text-muted"><span>文稿 v{task.version}</span><span>{new Date(task.created_at * 1000).toLocaleString("zh-CN")}</span>{task.bvid ? <PlatformLink bvid={task.bvid}>{task.bvid}</PlatformLink> : null}<Link className="text-accent hover:underline" to={documentPublishLink(task.script_id, task.version, task.render_id)}>查看文稿发布记录 →</Link></div>
     {task.status === "PUBLISHED" ? <p className="text-xs text-success">已自动回填文稿的发布链接、日期和已发布状态。</p> : ["QUEUED", "UPLOADING", "SUBMITTED"].includes(task.status) ? <p className="text-xs text-text-muted">确认视频公开后自动回填文稿发布记录。</p> : null}
     {task.error ? <p className="text-xs text-warning">{task.error}</p> : null}
     {task.recovery?.note ? <p className="text-xs text-text-muted" role="status">{task.recovery.note}</p> : task.status === "UNKNOWN" ? <p className="text-xs text-text-muted">系统会自动核对 B 站稿件，确认结果前保留原任务。</p> : null}
