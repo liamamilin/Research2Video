@@ -3,12 +3,12 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { loadPlatforms } from "@/api/platforms";
-import { loadComparison, loadPerformance, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords, type Usage } from "@/api/telemetry";
+import { loadAssistantRequest, loadAssistantUsage, loadComparison, loadPerformance, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords, type Usage } from "@/api/telemetry";
 import { useAuthStore } from "@/lib/auth-store";
 import { AnalyticsPage } from "./Analytics";
 import { PlatformsPage } from "./Platforms";
 
-vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadPerformance: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn() }));
+vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadPerformance: vi.fn(), loadAssistantUsage: vi.fn(), loadAssistantRequest: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn() }));
 vi.mock("@/api/platforms", async original => ({ ...await original<typeof import("@/api/platforms")>(), loadPlatforms: vi.fn() }));
 vi.mock("@/components/VideoAnalytics", () => ({ VideoAnalytics: ({ isAdmin, canEdit }: { isAdmin: boolean; canEdit: boolean }) => <div>视频数据面板 {String(isAdmin)} {String(canEdit)}</div> }));
 
@@ -34,6 +34,18 @@ beforeEach(() => {
     groups: [{ value: "news", videos: 2, watched: 2, views: 4000, view_median: 2000, tokens_per_kview: 12_000, cost_samples: 2, cost_partial: false, cost_avg_usd: 1.75, cost_per_kview: 0.875 }],
     items: [{ bvid: "BV1abc", title: "已发布的一期", pubdate: 1, view: 3000, script_id: "s1", billed: true, column_key: "news", form: "", matrix: "", recipe: "", path: "",
       tokens: 3_000_000, cost_usd: 3, partial: false, produce_seconds: 600, render_seconds: 1200, cost_per_kview: 1, tokens_per_kview: 1_000_000 }] });
+  vi.mocked(loadAssistantUsage).mockResolvedValue({ enabled: true, request_total: 1,
+    totals: { requests: 1, turns: 3, turns_per_request: 3, prompt_tokens: 60_000, completion_tokens: 900, cache_read_tokens: 30_000, cache_rate: 0.5, cost_usd: 0.06, partial: false,
+      tool_schema_share: 0.25, tool_calls: 2, failed: 0, earlier_calls: 728, earlier_prompt_tokens: 26_774_000, earlier_completion_tokens: 410_000 },
+    tools: [{ name: "query_jobs", calls: 2, requests: 1, avg_chars: 5000, max_chars: 8000, total_chars: 10_000 }],
+    turns: [{ turn: 0, requests: 1, prompt_tokens_avg: 10_000, completion_tokens_avg: 100, message_chars_avg: 40_000, tool_schema_chars_avg: 20_000, tool_count_avg: 12, retired: 0 }],
+    requests: [{ request_id: "r1", conversation_id: "c1", user: "admin", ts: 1_790_000_000, question: "帮我看看今天的任务", turns: 3, tools: ["query_jobs", "query_jobs"],
+      prompt_tokens: 60_000, completion_tokens: 900, cache_read_tokens: 30_000, cost_usd: 0.06, partial: false, failed: 0, seconds: 42, peak_prompt_tokens: 30_000 }] });
+  vi.mocked(loadAssistantRequest).mockResolvedValue({ enabled: true, request_id: "r1", turns: [
+    { turn: 0, message_chars: 40_000, tool_schema_chars: 20_000, tool_count: 12, retired: 0, saved_chars: 0, tools: [{ name: "query_jobs", chars: 5000 }], prompt_tokens: 10_000,
+      completion_tokens: 100, cache_read_tokens: 0, cost_usd: 0.01, partial: false, seconds: 3, failed: 0 },
+    { turn: 1, message_chars: 45_000, tool_schema_chars: 20_000, tool_count: 12, retired: 1, saved_chars: 800, tools: [], prompt_tokens: 20_000,
+      completion_tokens: 200, cache_read_tokens: 10_000, cost_usd: 0.02, partial: false, seconds: 4, failed: 0 }] });
   vi.mocked(loadPlatforms).mockResolvedValue({ account: { connected: true, uid: "9", name: "up" } } as never);
 });
 afterEach(cleanup);
@@ -91,6 +103,19 @@ it("asks for a Bilibili account when there are no plays to compare with", async 
   vi.mocked(loadPerformance).mockResolvedValue({ enabled: true, connected: false, by: "column_key", items: [], groups: [] });
   show();
   expect(await screen.findByText(/先在平台管理里连接哔哩哔哩账号并开启视频数据采集/)).toBeTruthy();
+});
+
+it("breaks the assistant down by turn, tool and request, and opens one request turn by turn", async () => {
+  show("/analytics?tab=assistant");
+  expect(await screen.findByText("帮我看看今天的任务")).toBeTruthy();
+  expect(screen.getByText(/728 次更早的助手调用/)).toBeTruthy();
+  expect(screen.getAllByText("query_jobs").length).toBeGreaterThan(0);
+  expect(screen.getByText("缓存命中 50.0%")).toBeTruthy();
+  fireEvent.click(screen.getByText("帮我看看今天的任务"));
+  await waitFor(() => expect(loadAssistantRequest).toHaveBeenCalledWith("r1", expect.anything()));
+  expect(await screen.findByText("直接回答")).toBeTruthy();
+  fireEvent.change(screen.getByLabelText("助手统计范围"), { target: { value: "7" } });
+  await waitFor(() => expect(loadAssistantUsage).toHaveBeenLastCalledWith(7, 0, expect.anything()));
 });
 
 it("changes the range for every section", async () => {

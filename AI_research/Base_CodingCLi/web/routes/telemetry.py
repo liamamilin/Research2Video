@@ -84,6 +84,24 @@ def performance(by: str = Query("column_key", pattern="^(column_key|form|matrix|
     return telemetry_performance.load(str(get_settings().paths.config_dir), by, days)
 
 
+@router.get("/assistant")
+def assistant_usage(days: int = Query(30, ge=0, le=3650), since: Optional[float] = None, until: Optional[float] = None,
+                    limit: int = Query(25, ge=1, le=100), offset: int = Query(0, ge=0), user=Depends(require_admin)):
+    """The assistant request by request: turns, tokens, cost, which tools it called and how large their answers were."""
+    from web.services import telemetry_assistant
+    syncing = _ensure_synced()
+    start, end = _window(days, since, until)
+    settings = get_settings()
+    return {**telemetry_assistant.report(str(settings.paths.config_dir), str(settings.paths.state_dir), start, end, limit, offset),
+            "syncing": syncing}
+
+
+@router.get("/assistant/requests/{request_id}")
+def assistant_request(request_id: str, user=Depends(require_admin)):
+    from core.telemetry import assistant
+    return assistant.request_detail(str(get_settings().paths.config_dir), request_id)
+
+
 @router.get("/scripts/{script_id}")
 def script_detail(script_id: str, user=Depends(require_admin)):
     return query.script_detail(str(get_settings().paths.config_dir), script_id)

@@ -10,7 +10,7 @@ import pytest
 
 from core import telemetry
 from core.llm import LLMClient, LLMConfig
-from core.telemetry import ingest, performance, pricing, query, retention
+from core.telemetry import assistant, ingest, performance, pricing, query, retention
 
 
 @pytest.fixture()
@@ -247,7 +247,7 @@ def test_the_api_is_for_administrators_only_and_serves_the_summary_and_price_tab
     assert client.get("/api/telemetry/summary").status_code in (401, 403)
     for role in ("viewer", "editor"):
         login(client, role)
-        for url in ("summary", "scripts", "compare", "pricing", "storage", "performance"):
+        for url in ("summary", "scripts", "compare", "pricing", "storage", "performance", "assistant"):
             assert client.get(f"/api/telemetry/{url}").status_code == 403, (role, url)
         client.cookies.clear()
     login(client, "admin")
@@ -265,6 +265,9 @@ def test_the_api_is_for_administrators_only_and_serves_the_summary_and_price_tab
     unconnected = client.get("/api/telemetry/performance?by=form").json()  # no Bilibili account in this environment
     assert unconnected["connected"] is False and unconnected["items"] == [] and unconnected["groups"] == []
     assert client.get("/api/telemetry/performance?by=script_id").status_code == 422
+    nothing = client.get("/api/telemetry/assistant?days=0").json()
+    assert nothing["enabled"] and nothing["totals"]["requests"] == 0 and nothing["requests"] == []
+    assert client.get("/api/telemetry/assistant/requests/nope").json()["turns"] == []
 
 
 # --- stage entry points ------------------------------------------------------------------------------------------
@@ -429,6 +432,114 @@ def test_the_assistants_model_calls_are_recorded_under_the_assistant_stage(db, m
     [call] = rows("calls")
     assert call["stage"] == "assistant" and call["prompt_tokens"] == 10
     assert [s["stage"] for s in rows("spans")] == ["assistant"] and telemetry.current() == {}
+
+
+def _assistant_request(request_id, turns, user="admin", tool="query_jobs", answer_chars=5000):
+    """What the assistant runtime does for one user message: a model call per turn, a tool asked for, its answer sized."""
+    recorder = assistant.Recorder(request_id, "conv1", user)
+    messages = []
+    with telemetry.track("assistant", request_id=request_id, conversation_id="conv1"):
+        for turn in range(turns):
+            recorder.settle(messages)
+            with telemetry.bind(turn=str(turn)):
+                telemetry.record_call("llm", provider="p", model="m", usage={"prompt_tokens": 1000 * (turn + 1), "completion_tokens": 50,
+                                                                              "cache_read_tokens": 400 * turn})
+            last = turn == turns - 1
+            recorder.round(turn, {"message_chars": 4000 * (turn + 1), "tool_schema_chars": 2000, "tool_count": 12, "context_retired": turn},
+                           [] if last else [NS(id=f"{request_id}-{turn}", name=tool)])
+            if not last:
+                messages.append({"role": "tool", "tool_call_id": f"{request_id}-{turn}", "content": "x" * answer_chars})
+
+
+def test_the_assistant_is_broken_down_by_request_turn_and_tool(db):
+    config = db / "config"
+    config.mkdir()
+    (config / "pricing.yaml").write_text("prices:\n  - {model: m, input: 1.0, output: 0}\n", encoding="utf-8")
+    _assistant_request("r1", 3)
+    _assistant_request("r2", 2, user="editor", tool="read_application", answer_chars=100)
+    telemetry.record_call("llm", model="m", usage={"prompt_tokens": 7, "completion_tokens": 1}, stage="assistant")  # logged before turns were kept
+    result = assistant.report(str(config))
+    totals = result["totals"]
+    assert (totals["requests"], totals["turns"], totals["turns_per_request"], totals["tool_calls"]) == (2, 5, 2.5, 3)
+    assert totals["prompt_tokens"] == 6000 + 3000 and totals["earlier_calls"] == 1 and totals["earlier_prompt_tokens"] == 7
+    assert totals["cache_rate"] == round((400 + 800 + 400) / 9000, 4) and totals["tool_schema_share"] is not None
+    assert totals["cost_usd"] == 0.009
+    by_id = {r["request_id"]: r for r in result["requests"]}
+    assert by_id["r1"]["turns"] == 3 and by_id["r1"]["tools"] == ["query_jobs", "query_jobs"] and by_id["r1"]["user"] == "admin"
+    assert by_id["r1"]["peak_prompt_tokens"] == 3000 and by_id["r2"]["user"] == "editor" and by_id["r1"]["seconds"] >= 0
+    tools = {t["name"]: t for t in result["tools"]}
+    assert tools["query_jobs"]["calls"] == 2 and tools["query_jobs"]["avg_chars"] == 5000 and tools["query_jobs"]["requests"] == 1
+    assert [t["name"] for t in result["tools"]][0] == "query_jobs"  # biggest answers first
+    first, second, third = result["turns"]
+    assert (first["turn"], first["requests"], first["prompt_tokens_avg"]) == (0, 2, 1000)
+    assert (second["prompt_tokens_avg"], third["requests"]) == (2000, 1) and second["message_chars_avg"] == 8000
+    detail = assistant.request_detail(str(config), "r1")
+    assert [t["turn"] for t in detail["turns"]] == [0, 1, 2]
+    assert detail["turns"][0]["tools"] == [{"name": "query_jobs", "chars": 5000}] and detail["turns"][2]["tools"] == []
+    assert detail["turns"][1]["prompt_tokens"] == 2000 and detail["turns"][1]["retired"] == 1
+    assert assistant.report(str(config), limit=1)["requests"][0]["request_id"] in ("r1", "r2")
+
+
+def test_assistant_recording_needs_a_request_and_never_fails_the_assistant(db):
+    assistant.Recorder("", "c", "u").round(0, {}, [])
+    assert rows("assistant_rounds") == []
+    telemetry.use_state_dir(None)
+    recorder = assistant.Recorder("r9", "c", "u")
+    recorder.round(0, {"message_chars": 1}, [NS(id="a", name="t")])  # no state directory: dropped quietly
+    recorder.settle([{"role": "tool", "tool_call_id": "a", "content": "abc"}])
+
+
+def test_databases_made_before_the_assistant_columns_gain_them(db):
+    import sqlite3
+    from core.telemetry import store
+    head, tail = store._SCHEMA.split("CREATE TABLE IF NOT EXISTS assistant_rounds")
+    legacy = sqlite3.connect(db / "telemetry.db")
+    legacy.executescript(re.sub(r",\n    (request_id|conversation_id|turn) TEXT NOT NULL DEFAULT ''", "", head))
+    legacy.execute("INSERT INTO calls (ts, kind) VALUES (1, 'llm')")
+    legacy.commit()
+    legacy.close()
+    telemetry.use_state_dir(str(db))
+    telemetry.record_span("assistant", duration_s=1, request_id="r1")
+    assert rows("spans")[0]["request_id"] == "r1" and rows("calls")[0]["request_id"] == ""
+
+
+def test_each_assistant_request_is_shown_with_what_the_user_asked(db):
+    import sqlite3
+    from web.services import telemetry_assistant
+    (db / "config").mkdir()
+    with sqlite3.connect(db / "assistant.db") as conn:
+        conn.execute("CREATE TABLE requests (id TEXT, message TEXT)")
+        conn.execute("INSERT INTO requests VALUES ('r1', ?)", ("帮我看看\n今天的任务  " + "很长" * 100,))
+    _assistant_request("r1", 1)
+    _assistant_request("r2", 1)
+    [r2, r1] = sorted(telemetry_assistant.report(str(db / "config"), str(db), None, None, 25, 0)["requests"],
+                      key=lambda r: r["request_id"], reverse=True)
+    assert r1["question"].startswith("帮我看看 今天的任务") and len(r1["question"]) == telemetry_assistant.PREVIEW
+    assert r2["question"] == ""
+
+
+def test_a_real_assistant_request_leaves_a_row_per_turn_with_the_size_of_each_tool_answer(client, web_env, monkeypatch):
+    from copy import deepcopy
+    from core.llm import ChatResponse, ToolCall
+    from tests.test_assistant_api import fake_llm, login
+    from web.services.assistant_tools import video
+    monkeypatch.setattr(video.video, "home_board", lambda **kwargs: deepcopy(
+        {"items": [{"script_id": str(i), "title": f"Video {i}"} for i in range(5)], "failed": 0, "stages": {}, "attention": []}))
+    fake_llm(monkeypatch, [ChatResponse(tool_calls=[ToolCall(id="call1", name="query_video", arguments={"action": "board"})]),
+                           ChatResponse(content="看板正常。")])
+    headers = login(client)
+    from web.settings import get_settings
+    telemetry.use_state_dir(str(get_settings().paths.state_dir))
+    reply = client.post("/api/assistant", headers=headers, json={"message": "看板状态", "request_id": "abcdef123456"}).json()
+    assert reply["answer"] == "看板正常。"
+    first, second = rows("assistant_rounds")
+    assert (first["request_id"], first["turn"], first["user"]) == ("abcdef123456", 0, "admin") and first["conversation_id"]
+    tools = json.loads(first["tools"])
+    assert [t["name"] for t in tools] == ["query_video"] and tools[0]["chars"] > 0
+    assert second["turn"] == 1 and json.loads(second["tools"]) == [] and second["message_chars"] > first["message_chars"]
+    assert first["tool_count"] > 0 and first["tool_schema_chars"] > 0
+    [span] = [s for s in rows("spans") if s["stage"] == "assistant"]
+    assert span["request_id"] == "abcdef123456" and span["conversation_id"] == first["conversation_id"]
 
 
 def _published(bvid, script, views, pubdate=1000, available=True):

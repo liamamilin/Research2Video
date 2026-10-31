@@ -210,6 +210,7 @@ def run(message: str, history: list[dict], llm, request: Request, user: dict,
     """Compatibility entry point for the application-wide runtime."""
     from core import telemetry
     from web.services.assistant_runtime import run as application_run
-    with telemetry.track("assistant"):  # every model turn of this conversation is attributed to the assistant
+    # every model turn of this request is attributed to the assistant, with its request and conversation
+    with telemetry.track("assistant", request_id=kwargs.get("request_id"), conversation_id=kwargs.get("conversation_id")):
         return application_run(message, history, llm, request, user,
                                on_event=on_event, cancel_token=cancel_token, **kwargs)

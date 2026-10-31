@@ -23,7 +23,7 @@ const COMPARE: { by: CompareBy; label: string }[] = [
   { by: "column_key", label: "栏目" }, { by: "form", label: "出片形式" }, { by: "matrix", label: "矩阵" },
   { by: "recipe", label: "配方" }, { by: "path", label: "写稿路径" },
 ];
-const COST_KEY = "analytics.showCost";
+export const COST_KEY = "analytics.showCost";
 
 export const stageLabel = (stage: string) => STAGES[stage] || stage || "（未归环节）";
 export const tokens = (value: number) => value >= 1e8 ? `${(value / 1e8).toFixed(2)} 亿` : value >= 1e4 ? `${(value / 1e4).toFixed(1)} 万` : value.toLocaleString("zh-CN");
@@ -34,7 +34,7 @@ export function duration(seconds: number | null | undefined): string {
   if (seconds < 5400) return `${Math.round(seconds / 60)} 分钟`;
   return `${(seconds / 3600).toFixed(1)} 小时`;
 }
-const dollars = (value: number) => `$${value >= 100 ? value.toFixed(0) : value >= 1 ? value.toFixed(2) : value.toFixed(4)}`;
+export const dollars = (value: number) => `$${value >= 100 ? value.toFixed(0) : value >= 1 ? value.toFixed(2) : value.toFixed(4)}`;
 
 function Money({ usage, show }: { usage: Usage; show: boolean }) {
   if (!show) return null;
@@ -207,7 +207,7 @@ function Retention({ onChanged }: { onChanged: () => void }) {
   </section>;
 }
 
-function storedCost(): boolean {
+export function storedCost(): boolean {
   try { return localStorage.getItem(COST_KEY) !== "0"; } catch { return true; }
 }
 

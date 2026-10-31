@@ -6,6 +6,8 @@ import re
 from datetime import datetime
 from threading import Event
 from urllib.parse import quote
+from core import telemetry
+from core.telemetry.assistant import Recorder as AssistantRounds
 from web.services import jobs_assistant as jobs
 from web.services import assistant_tools
 from web.services import assistant_context
@@ -198,6 +200,7 @@ def run(message, history, llm, request, user, on_event=None, cancel_token: Event
             raise CancelledError('Assistant stopped')
 
     try:
+    rounds = AssistantRounds(request_id, conversation_id, user.get('username', ''))
         for round_index in range(MAX_STEPS):
             check_cancel()
             streamed_text = ''
@@ -205,21 +208,25 @@ def run(message, history, llm, request, user, on_event=None, cancel_token: Event
             emit({'type': 'status', 'message': '正在思考…'})
             options = {'stream': True, 'on_delta': delta} if on_event else {}
             context_savings = {}
+            rounds.settle(messages)
             try:
                 context_savings = prompt_context.prepare(messages, round_index)
             except Exception:
                 logger.warning('Assistant context retirement unavailable; retaining prompt content')
             tool_definitions = toolset.definitions(user['role'])
             if store and request_id:
+            metric = {'message_chars': len(assistant_context.dumps(messages)),
+                      'tool_schema_chars': len(assistant_context.dumps(tool_definitions)),
+                      'tool_count': len(tool_definitions), **context_savings}
                 # Counts only: prompt bodies and credentials never enter telemetry.
                 context_metrics = getattr(llm, 'context_metrics', None)
                 if context_metrics is None:
                     context_metrics = []
                     llm.context_metrics = context_metrics
-                context_metrics.append({'message_chars': len(assistant_context.dumps(messages)),
-                                        'tool_schema_chars': len(assistant_context.dumps(tool_definitions)),
-                                        'tool_count': len(tool_definitions), **context_savings})
-            response = llm.chat(messages, tools=tool_definitions, **options)
+                context_metrics.append(metric)
+            with telemetry.bind(turn=str(round_index)):
+                response = llm.chat(messages, tools=tool_definitions, **options)
+            rounds.round(round_index, metric, response.tool_calls)
             prompt_context.consumed()
             if not response.tool_calls:
                 answer = response.content.strip() or '请说明你想查询或管理的对象。'

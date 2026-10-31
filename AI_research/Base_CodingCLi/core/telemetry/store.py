@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 FILE_NAME = "telemetry.db"
 #: Attribution carried from ``track`` into every span and call recorded inside it.
 ATTRS = ("stage", "script_id", "render_id", "matrix", "column_key", "recipe", "form", "path",
-         "batch_id", "item_id", "job", "run_ts")
+         "batch_id", "item_id", "job", "run_ts", "request_id", "conversation_id", "turn")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -71,6 +71,20 @@ CREATE TABLE IF NOT EXISTS calls (
 CREATE INDEX IF NOT EXISTS idx_calls_ts ON calls(ts);
 CREATE INDEX IF NOT EXISTS idx_calls_script ON calls(script_id);
 CREATE INDEX IF NOT EXISTS idx_calls_render ON calls(render_id);
+CREATE TABLE IF NOT EXISTS assistant_rounds (          -- one model turn of an assistant request; its tokens are in calls
+    request_id TEXT NOT NULL,
+    turn INTEGER NOT NULL,
+    ts REAL NOT NULL,
+    conversation_id TEXT NOT NULL DEFAULT '',
+    user TEXT NOT NULL DEFAULT '',
+    message_chars INTEGER NOT NULL DEFAULT 0,  -- the conversation sent to the model
+    tool_schema_chars INTEGER NOT NULL DEFAULT 0,
+    tool_count INTEGER NOT NULL DEFAULT 0,     -- tool definitions offered this turn
+    retired INTEGER NOT NULL DEFAULT 0,        -- old tool results replaced by a short receipt
+    saved_chars INTEGER NOT NULL DEFAULT 0,
+    tools TEXT NOT NULL DEFAULT '[]',          -- JSON list of id, name, chars: what the model asked for, and how big each answer was
+    PRIMARY KEY (request_id, turn)
+);
 """.format(attrs=",\n    ".join(f"{name} TEXT NOT NULL DEFAULT ''" for name in ATTRS))
 
 _dir: Optional[str] = None
@@ -99,6 +113,7 @@ def _prepare(path: str) -> None:
         with sqlite_util.connect(path, write=True) as conn:
             conn.executescript(_SCHEMA)
             _add_span_time(conn)
+            _add_attr_columns(conn)
             # Rows older than this were never seen live; backfill may add them, and nothing newer, so a record that
             # exists both live and in an older log is never counted twice.
             conn.execute("INSERT OR IGNORE INTO meta (key, value) VALUES ('live_since', ?)", (str(time.time()),))
@@ -114,6 +129,16 @@ def _add_span_time(conn) -> None:
     conn.execute("UPDATE spans SET ts = (SELECT COALESCE(t.end, t.start) FROM spans t WHERE t.render_id = spans.render_id"
                  " AND t.render_id != '' AND t.stage = 'render' LIMIT 1) WHERE ts IS NULL")
     conn.execute("UPDATE spans SET ts = ? WHERE ts IS NULL", (time.time(),))
+
+
+def _add_attr_columns(conn) -> None:
+    """Databases made before an attribution column existed: add it, empty for the rows already there."""
+    for table in ("spans", "calls"):
+        have = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+        for name in ATTRS:
+            if name not in have:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_calls_request ON calls(request_id)")
 
 
 @contextmanager

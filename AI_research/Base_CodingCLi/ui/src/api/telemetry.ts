@@ -49,6 +49,37 @@ export type PerformanceGroup = {
 export type Performance = { enabled: boolean; connected?: boolean; by: CompareBy; items: PerformanceVideo[]; groups: PerformanceGroup[] };
 export const loadPerformance = (by: CompareBy, days: number, signal?: AbortSignal) => api<Performance>(`${BASE}/performance`, { query: { by, days }, signal });
 
+export type AssistantRequest = {
+  request_id: string; conversation_id: string; user: string; ts: number; question: string; turns: number; tools: string[];
+  prompt_tokens: number; completion_tokens: number; cache_read_tokens: number; cost_usd: number; partial: boolean;
+  failed: number; seconds: number; peak_prompt_tokens: number;
+};
+export type AssistantTool = { name: string; calls: number; requests: number; avg_chars: number | null; max_chars: number; total_chars: number };
+export type AssistantTurn = {
+  turn: number; requests: number; prompt_tokens_avg: number | null; completion_tokens_avg: number | null;
+  message_chars_avg: number; tool_schema_chars_avg: number; tool_count_avg: number; retired: number;
+};
+export type AssistantReport = {
+  enabled: boolean; syncing?: boolean; request_total?: number;
+  totals?: {
+    requests: number; turns: number; turns_per_request: number | null; prompt_tokens: number; completion_tokens: number;
+    cache_read_tokens: number; cache_rate: number | null; cost_usd: number; partial: boolean; tool_schema_share: number | null;
+    tool_calls: number; failed: number; earlier_calls: number; earlier_prompt_tokens: number; earlier_completion_tokens: number;
+  };
+  tools?: AssistantTool[]; turns?: AssistantTurn[]; requests?: AssistantRequest[];
+};
+export type AssistantRequestTurn = {
+  turn: number; message_chars: number | null; tool_schema_chars: number | null; tool_count: number | null; retired: number | null;
+  saved_chars: number | null; tools: { name: string; chars: number | null }[]; prompt_tokens: number | null;
+  completion_tokens: number | null; cache_read_tokens: number | null; cost_usd: number | null; partial: boolean;
+  seconds: number | null; failed: number;
+};
+export type AssistantRequestDetail = { enabled: boolean; request_id: string; turns: AssistantRequestTurn[] };
+export const loadAssistantUsage = (days: number, offset: number, signal?: AbortSignal) =>
+  api<AssistantReport>(`${BASE}/assistant`, { query: { days, offset, limit: 25 }, signal });
+export const loadAssistantRequest = (id: string, signal?: AbortSignal) =>
+  api<AssistantRequestDetail>(`${BASE}/assistant/requests/${encodeURIComponent(id)}`, { signal });
+
 export type StorageStats = { enabled: boolean; calls?: number; spans?: number; oldest?: number | null; newest?: number | null; bytes?: number };
 export type PurgeResult = { enabled: boolean; cutoff: number; calls: number; spans: number; dry_run: boolean };
 export const loadStorage = (signal?: AbortSignal) => api<StorageStats>(`${BASE}/storage`, { signal });
