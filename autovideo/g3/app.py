@@ -81,6 +81,17 @@ class NarrationChapter(BaseModel):
         return value
 
 
+class EpisodeItem(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    title: str = Field(min_length=1, max_length=32)
+    chapter_indexes: list[int] = Field(min_length=1)
+
+
+class EpisodeProgram(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    items: list[EpisodeItem] = Field(min_length=1)
+
+
 MAX_SOURCES = 3
 
 
@@ -229,6 +240,7 @@ class CreateJobRequest(BaseModel):
                                     description="material 模式必填的素材正文；narration 模式不传，由 chapters 生成")
     chapters: list[NarrationChapter] | None = Field(default=None, min_length=1,
                                                     description="narration 模式必填：按顺序的章节标题与讲稿段落")
+    episode: EpisodeProgram | None = Field(default=None, description="整期节目：内容条目对应的讲稿章节，自动生成内容标识和分段进度")
     sources: list[NarrationSource] | None = Field(default=None, min_length=1, max_length=MAX_SOURCES,
                                                   description="来源卡数据（标题、网址、日期），最多 3 条；所有视频形式均可用，不传则记录 no_sources")
     package: dict | None = Field(default=None, description="兼容旧调用方的完整包装配置；新调用方使用 packaging，省略时启用通用默认。"
@@ -308,6 +320,14 @@ class CreateJobRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_content_options(self):
+        if self.episode is not None:
+            if self.input_mode != "narration" or not self.chapters:
+                raise ValueError("整期节目需要按原稿分章配音")
+            indexes = [i for item in self.episode.items for i in item.chapter_indexes]
+            if (any(i < 0 or i >= len(self.chapters) for i in indexes)
+                    or indexes != sorted(set(indexes))
+                    or any(any(ord(c) < 32 for c in item.title) for item in self.episode.items)):
+                raise ValueError("节目条目须按顺序对应不重复的有效章节，标题须为一行文字")
         mixed_cards = (self.production_mode == "fast" and self.video_form == "information_cards"
                        and self.visual_storytelling and self.input_mode == "narration" and self.chapters)
         if self.image_materials:

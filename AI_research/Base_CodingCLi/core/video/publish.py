@@ -43,7 +43,7 @@ def clock(seconds: float) -> str:
 
 def chapter_lines(timeline: Optional[dict]) -> list[dict]:
     """``[{seconds, time, title}]`` from a render's packaged chapter timeline; empty when it has too few chapters."""
-    if not timeline or timeline.get("timeline") != "packaged":
+    if not timeline or timeline.get("timeline") not in {"packaged", "branded"}:
         return []
     out: list[dict] = []
     for chapter in timeline.get("chapters") or []:

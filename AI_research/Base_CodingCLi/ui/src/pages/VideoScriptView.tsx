@@ -1,3 +1,4 @@
+import { EpisodeOutline, EpisodePlayer } from "@/components/EpisodeProgramme";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createSearchParams, Link, useParams, useSearchParams, type SetURLSearchParams } from "react-router-dom";
 import {
@@ -315,6 +316,7 @@ export function VideoScriptViewPage() {
             <DistributionSummary rows={detail.distributions?.filter(d => d.version === detail.current_version)} publications={currentPublications(detail)} />
             {!localVideo && <CredibilityBadge value={detail.credibility} />}
             {detail.auto ? <span className="badge border border-border text-text-muted">自动流水线</span> : null}
+            {detail.topic.content_mode === "episode" ? <span className="badge border border-accent text-accent">整期节目</span> : null}
             {detail.column ? <span className="text-xs text-text-muted">{detail.column.name}</span> : null}
             {detail.content_context?.column_name ? <Link className="text-xs text-accent hover:underline"
               to={`/matrices/${detail.content_context.matrix}?tab=columns`}>栏目：{detail.content_context.column_name}</Link> : null}
@@ -404,6 +406,8 @@ export function VideoScriptViewPage() {
       {detail.pending_plan ? (
         <PlanReview key={detail.pending_plan.id} detail={detail} canEdit={canEdit} onChanged={setDetail} />
       ) : null}
+
+      {detail.topic.content_mode === "episode" && shown && tab === "draft" && !editing ? <EpisodeOutline sections={shown.sections} /> : null}
 
       {tabs.length ? (
         <div role="tablist" className="flex gap-1 border-b border-border">
@@ -529,7 +533,7 @@ export function VideoScriptViewPage() {
       {shown?.meta?.description && !editing && tab === "review" ? <DescriptionPanel description={shown.meta.description} /> : null}
 
       {(tab === "draft" ? sections : []).map((section, si) => (
-        <section key={si} className="card p-5 space-y-3">
+        <section id={`script-section-${si}`} key={si} className="card p-5 space-y-3">
           <div className="flex items-baseline gap-3">
             <span className="font-mono text-xs text-accent">{String(si + 1).padStart(2, "0")}</span>
             {editing ? (
@@ -682,7 +686,7 @@ function RenderPanel({
 
       {video && latest ? (
         <div className="space-y-2">
-          <video key={latest.id} controls preload="metadata" src={video.url} className="w-full rounded bg-black aspect-video" />
+          <EpisodePlayer render={latest} episode={detail.topic.content_mode === "episode"} />
           <div className="flex flex-wrap items-center gap-3 text-xs">
             <a href={video.url} download={video.name} className="text-accent hover:underline">
               下载成片

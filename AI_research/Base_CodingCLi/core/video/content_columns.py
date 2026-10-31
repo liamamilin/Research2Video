@@ -21,7 +21,7 @@ from .recipes import KEY
 TYPE_KEYS = ("news", "explainer", "comparison", "tutorial", "deep_research", "series")
 DIR = "content_columns"
 FIELDS = {"schema_version", "name", "matrix", "type", "audience", "promise", "production_ids",
-          "render_inheritance", "render", "presentation", "status", "notes"}
+          "render_inheritance", "render", "presentation", "status", "notes", "content_mode"}
 
 
 @dataclass(frozen=True)
@@ -38,6 +38,7 @@ class ContentColumn:
     presentation: dict = field(default_factory=dict)
     status: str = "configured"
     notes: str = ""
+    content_mode: str = "episode"
     revision: str = ""
     errors: tuple[str, ...] = ()
 
@@ -53,7 +54,8 @@ class ContentColumn:
         return {"schema_version": 1, "name": self.name, "matrix": self.matrix, "type": self.type,
                 "audience": self.audience, "promise": self.promise, "production_ids": list(self.production_ids),
                 "render_inheritance": self.render_inheritance, "render": copy.deepcopy(self.render),
-                "presentation": copy.deepcopy(self.presentation), "status": self.status, "notes": self.notes}
+                "presentation": copy.deepcopy(self.presentation), "status": self.status, "notes": self.notes,
+                "content_mode": self.content_mode}
 
 
 def types(config_dir: str) -> dict[str, dict]:
@@ -101,6 +103,9 @@ def _build(key: str, data: dict, matrix_map: dict, type_map: dict, revision: str
     status = data.get("status", "configured")
     if status not in {"configured", "planned"}:
         raise ValueError("栏目状态应为 configured 或 planned")
+    content_mode = data.get("content_mode", "episode")
+    if content_mode not in {"episode", "individual"}:
+        raise ValueError("内容组织方式应为 episode（整期节目）或 individual（独立单条）")
     presentation = data.get("presentation", {})
     if not isinstance(presentation, dict) or set(presentation) - {"strategy", "preferred_visuals"}:
         raise ValueError("画面偏好支持 strategy 和 preferred_visuals")
@@ -112,7 +117,7 @@ def _build(key: str, data: dict, matrix_map: dict, type_map: dict, revision: str
     return ContentColumn(key=key, name=data["name"].strip(), matrix=matrix.key, type=data["type"],
                          audience=data.get("audience", "").strip(), promise=data["promise"].strip(),
                          production_ids=tuple(ids), render_inheritance=mode, render=validate_render(data.get("render")),
-                         presentation=copy.deepcopy(presentation), status=status, notes=data.get("notes", ""), revision=revision)
+                         presentation=copy.deepcopy(presentation), status=status, notes=data.get("notes", ""), content_mode=content_mode, revision=revision)
 
 
 def load_all(config_dir: str, *, configs: dict | None = None, matrix_map: dict | None = None) -> dict[str, ContentColumn]:
@@ -159,6 +164,7 @@ def snapshot(config_dir: str, production_id: str, job: str) -> dict:
     return {"column": column.key, "column_name": column.name, "type": column.type, "matrix": column.matrix,
             "source_matrix": source.key if source else "", "job": job, "revision": column.revision,
             "audience": column.audience, "promise": column.promise, "notes": column.notes,
+            "content_mode": column.content_mode,
             "type_definition": copy.deepcopy(types(config_dir).get(column.type, {})),
             "render_inheritance": column.render_inheritance, "render": copy.deepcopy(column.render),
             "presentation": copy.deepcopy(column.presentation)}

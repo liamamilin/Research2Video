@@ -245,6 +245,9 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         raise RenderError(f"这个栏目不能用视频形式 {form}")
     request: dict[str, Any] = {
         "input_mode": "narration",
+        **({"episode": {"items": [{"title": s["title"][:24], "chapter_indexes": [i]}
+            for i, s in enumerate(version.get("sections", [])) if s.get("episode_role", "item") == "item"]}}
+            if script.get("topic", {}).get("content_mode") == "episode" else {}),
         "chapters": chapter_list,
         "video_form": form,
         "duration_mode": "content",

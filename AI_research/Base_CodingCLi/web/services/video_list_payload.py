@@ -15,7 +15,7 @@ def compact(row: dict) -> dict:
     result = dict(row)
     if "topic" in row:
         result["topic"] = {k: v for k, v in row["topic"].items()
-                           if k in {"id", "title", "article", "local_video"}}
+                           if k in {"id", "title", "article", "local_video", "content_mode"}}
         if isinstance(result["topic"].get("article"), dict):
             result["topic"]["article"] = {k: v for k, v in result["topic"]["article"].items()
                                           if k in {"mode", "kind"}}
@@ -24,7 +24,7 @@ def compact(row: dict) -> dict:
                                               if k in {"file_name", "duration", "width", "height", "size"}}
     if row.get("content_context"):
         result["content_context"] = {k: v for k, v in row["content_context"].items()
-                                     if k in {"column", "column_name", "matrix", "source_matrix", "type"}}
+                                     if k in {"column", "column_name", "matrix", "source_matrix", "type", "content_mode"}}
     if row.get("length_check"):
         result["length_check"] = {**{k: v for k, v in row["length_check"].items() if k in {
             "spoken_length", "estimated_seconds", "target_minutes", "budget", "ratio", "status", "dropped_citations",

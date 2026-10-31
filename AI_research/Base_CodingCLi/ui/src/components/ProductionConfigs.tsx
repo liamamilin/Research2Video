@@ -159,7 +159,7 @@ function AutoWrite({ config, scheduled, onChange }: { config: ProductionConfig; 
           onChange={(e) => change(e.target.checked)} />
         报告一出来就自动制作
       </label>
-      <span className="text-text-muted">{config.split === "whole" ? "整份报告按配方制作" : "全部不重复选题依次制作"}</span>
+      <span className="text-text-muted">{config.split === "whole" ? config.content_mode === "episode" ? "每份报告制作一期，自动组织多个内容" : "整份报告按配方制作" : "全部不重复选题依次制作"}</span>
       {config.auto > 0 && !scheduled ? <span className="text-warning">这个 Job 没设周期：要有人跑出报告才会触发</span> : null}
     </div>
   );
@@ -179,7 +179,7 @@ function ConfigCard({ config, canEdit, scheduled, onChange }: { config: Producti
         <p className="text-xs text-warning">{config.errors.join("；")}</p>
       ) : (
         <p className="text-xs text-text-muted">
-          给{config.audience || "—"}看 · 约 {config.target_minutes} 分钟 · {config.split_name}
+          给{config.audience || "—"}看 · {config.content_mode === "episode" ? "内容决定时长" : `约 ${config.target_minutes} 分钟`} · {config.split_name}
           {config.split === "whole" ? " · 每份报告写一期，直接用报告，不调研"
             : config.split === "each" ? (config.reverify ? " · 挑中的条目会重新调研一遍" : " · 不再调研") : " · 用报告里的条目，不调研"}
           {config.auto ? (config.split === "whole" ? " · 自动：报告一出来就写" : " · 自动：全部不重复选题") : ""}

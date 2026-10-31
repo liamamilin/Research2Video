@@ -369,6 +369,7 @@ class G2ProcessRunner:
             (artifacts_dir / "model-cost.json", "model-cost.json", "application/json"),
             (artifacts_dir / "reused-plans.json", "reused-plans.json", "application/json"),
             (artifacts_dir / "chapters.json", "chapters.json", "application/json"),
+            (artifacts_dir / "episode-navigation.json", "episode-navigation.json", "application/json"),
             (artifacts_dir / "content-outline-plan.json", "content-outline.json", "application/json"),
             (artifacts_dir / "final-narration-plan.json", "narration.json", "application/json"),
             (artifacts_dir / "authored-narration.json", "authored-narration.json", "application/json"),

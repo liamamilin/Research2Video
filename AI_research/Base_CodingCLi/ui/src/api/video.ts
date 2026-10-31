@@ -223,6 +223,7 @@ export interface ScriptParagraph {
 }
 
 export interface ScriptSection {
+  episode_role?: "opening" | "item" | "closing";
   title: string;
   paragraphs: ScriptParagraph[];
 }
@@ -291,7 +292,7 @@ export interface VideoScriptSummary {
   content_matrix_id?: string;
   source_matrix_id?: string;
   content_context?: { column: string; column_name: string; matrix: string; source_matrix: string; type: string };
-  topic: { id: string | null; title: string; fields?: Record<string, string>; article?: { mode: "read" | "adapt"; kind: "literary" | "information" }; local_video?: { file_name: string; duration: number; width: number; height: number; size: number } };
+  topic: { id: string | null; title: string; content_mode?: "episode" | "individual"; fields?: Record<string, string>; article?: { mode: "read" | "adapt"; kind: "literary" | "information" }; local_video?: { file_name: string; duration: number; width: number; height: number; size: number } };
   status: ScriptStatus;
   stage?: string | null;
   research_job: string;
@@ -622,7 +623,7 @@ export interface ResearchReport {
   created_by: string;
   created_at: string;
   on_disk: boolean;
-  scripts: { id: string; column_key: string; status: ScriptStatus; title: string; archived: boolean; created_at: string }[];
+  scripts: { content_mode?: "episode" | "individual"; id: string; column_key: string; status: ScriptStatus; title: string; archived: boolean; created_at: string }[];
 }
 
 export const listResearchReports = () => api<ResearchReport[]>("/api/video/reports");

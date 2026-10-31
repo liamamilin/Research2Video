@@ -14,6 +14,7 @@ export interface ProductionConfig {
   source: string;
   split: "each" | "some" | "whole" | ""; // 每条一期 / 挑几条合一期 / 整份报告一期
   split_name: string;
+  content_mode?: "episode" | "individual";
   reverify: boolean;
   auto: number; // 自动制作开关：1 为处理全部不重复选题，0 为关闭
   audience: string;

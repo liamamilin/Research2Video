@@ -1,0 +1,68 @@
+{
+  "mode": "fast",
+  "render_id": "14fc3d8518d24b46b579fd8f5ec2275e",
+  "job_id": "970361ee-9d14-403d-9237-a158a3f1f97f",
+  "sha256": "0f9b759c66852730e19cc52adbccdcc575a7de2b56740373449bda0a6a828455",
+  "bytes": 38328216,
+  "duration_seconds": 717.233333,
+  "size": [
+    1920,
+    1080
+  ],
+  "full_decode": "passed",
+  "audio_unchanged_by_navigation": true,
+  "navigation_items": [
+    {
+      "index": 1,
+      "title": "LFM3：1GB 权重跑本地长会话",
+      "start_seconds": 41.9,
+      "end_seconds": 200.6
+    },
+    {
+      "index": 2,
+      "title": "Apple：20B 模型只占 2GB",
+      "start_seconds": 200.6,
+      "end_seconds": 347.9
+    },
+    {
+      "index": 3,
+      "title": "Kimi：先用 API 再等权重",
+      "start_seconds": 347.9,
+      "end_seconds": 394.0
+    },
+    {
+      "index": 4,
+      "title": "GPT-6.1 Terra 的 agent 成本",
+      "start_seconds": 394.0,
+      "end_seconds": 442.667
+    },
+    {
+      "index": 5,
+      "title": "本地跑开源权重不等于安全",
+      "start_seconds": 442.667,
+      "end_seconds": 494.633
+    },
+    {
+      "index": 6,
+      "title": "Entire：把评估轨迹放进 PR",
+      "start_seconds": 494.633,
+      "end_seconds": 544.367
+    },
+    {
+      "index": 7,
+      "title": "编程评测开始像真实 PR",
+      "start_seconds": 544.367,
+      "end_seconds": 589.5
+    },
+    {
+      "index": 8,
+      "title": "Lean 构建通过，语义还未对齐",
+      "start_seconds": 589.5,
+      "end_seconds": 645.067
+    }
+  ],
+  "player": {
+    "eight_final_time_seeks": "passed",
+    "follows_native_time_changes": "passed"
+  }
+}

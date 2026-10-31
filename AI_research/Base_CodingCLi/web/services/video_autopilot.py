@@ -178,10 +178,23 @@ def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
     if not report:
         return None
     workspace = video_workflow.workspace_dir()
-    relative = reports.relative(report, workspace)
-    if [s for s in reports.scripts_of(relative, pick["column"]) if not s.get("archived")]:
+    relative = reports.relative(os.path.join(workspace, report), workspace)
+    if pick.get("content_mode") == "episode":
+        from core.video import episodes
+        owner = content_columns.for_production(get_settings().paths.config_dir, pick.get("production", ""))
+        from core import report_identity
+        revision = spec.get("report_identity") or report_identity.describe(os.path.join(workspace, relative), workspace)["id"]
+        existing = episodes.scripts_for(relative, pick["column"], pick.get("production", ""), owner.key if owner else "", revision)
+    else:
+        existing = [s for s in reports.scripts_of(relative, pick["column"]) if not s.get("archived")]
+    if existing:
         return None  # written already (by hand, or by an earlier batch); one put away does not count: that is how a redo is asked for
     record = reports.record_file(relative, job=spec.get("job", ""), created_by="autopilot")
+    if pick.get("content_mode") == "episode":
+        from core.video import episodes
+        source = topic_store.resolve(get_settings().paths.jobs_dir, spec.get("job", ""))
+        topic = episodes.topic(record, workspace, job=spec.get("job", ""), source=source, production=pick.get("production", ""))
+        return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
     topic = {**reports.topic_for(record, workspace), "from_report": relative, "report_id": record["id"],
              "matrix_dedup": {"job": spec.get("job") or record.get("job", ""), "policy": story_pool.POLICY}}
     return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}

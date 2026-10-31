@@ -12,7 +12,7 @@ import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -38,6 +38,7 @@ class _Paragraph(BaseModel):
 class _Section(BaseModel):
     title: str = Field(min_length=1)
     paragraphs: list[_Paragraph] = Field(min_length=1)
+    episode_role: Literal["opening", "item", "closing"] | None = None
 
 
 class _Script(BaseModel):
@@ -157,7 +158,8 @@ def _finalize(script: _Script, allowed: set[str], target_minutes: float, voice: 
             paragraphs.append({"text": text, "citations": kept, "evidence": evidence, "note": note})
             if evidence == "NEEDS_REVIEW":
                 paragraphs[-1]["review_reason"] = para.review_reason.strip() or note or "撰稿时对本段事实把握不足，尚需带出处的明确核验"
-        sections.append({"title": section.title.strip(), "paragraphs": paragraphs})
+        sections.append({"title": section.title.strip(), "paragraphs": paragraphs,
+                         **({"episode_role": section.episode_role} if section.episode_role else {})})
     check = length.measure(sections, target_minutes, voice=voice)
     check["dropped_citations"] = dropped
     return sections, check
@@ -233,8 +235,15 @@ def write(
     from core.llm import LLMClient
     client = LLMClient(llm_config, cancel_token=cancel_token)
     report = report_body(report)
+    programme = topic.get("content_mode") == "episode"
+    system = (GOAL + "\n你是整期节目的讲述者，一篇总稿覆盖报告中的多个独立内容。"
+              "各条内容分别充分解释，不把本期多个事件缩成一个主事件的几个角度。"
+              "每个内容一个 section，内部可有多个 paragraphs；episode_role 使用 opening、item、closing。"
+              "整期共用开场和收尾，不受单条视频的篇幅限制。"
+              '\n输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}'
+              if programme else SYSTEM_PROMPT)
     messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": system},
         {"role": "user", "content": _request(report, topic, column_style, target_minutes, 0,
                                               topic_fields=topic_fields, original_material=original_material)},
     ]
@@ -251,6 +260,8 @@ def write(
     if original_material is not None:
         allowed.update(trusted_urls(original_material, None))
     sections, check = _finalize(script, allowed, target_minutes, voice)
+    if programme:
+        check = {**length.measure(sections, None, voice=voice), "dropped_citations": check["dropped_citations"], "duration_policy": "content"}
     return WrittenScript(
         title=script.title.strip(),
         sections=sections,

@@ -53,6 +53,7 @@ function ColumnEditor({ matrix, types, column, onSaved, onCancel }: {
   matrix: Matrix; types: ColumnType[]; column?: ContentColumn; onSaved: () => void; onCancel: () => void;
 }) {
   const [value, setValue] = useState<ContentColumnInput>(() => ({ name: column?.name || "", matrix: matrix.key,
+    content_mode: column?.content_mode || "episode",
     type: column?.type || types[0]?.key || "news", audience: column?.audience || matrix.content?.audience || "",
     promise: column?.promise || "", production_ids: column?.production_ids || [],
     render_inheritance: column?.render_inheritance || "content_matrix", render: column?.render || {},
@@ -105,8 +106,14 @@ function ColumnEditor({ matrix, types, column, onSaved, onCancel }: {
       <label className="sm:col-span-2">持续交付什么价值<textarea className="input mt-1" rows={2} value={value.promise} onChange={(e) => setValue({ ...value, promise: e.target.value })} /></label>
       <label className="sm:col-span-2">面向哪些观众<input className="input mt-1" value={value.audience} onChange={(e) => setValue({ ...value, audience: e.target.value })} /></label>
     </div>
+    <fieldset className="space-y-2 text-xs"><legend className="font-medium mb-2">内容组织方式</legend>
+      <label className="block"><input type="radio" name="content-mode" checked={value.content_mode === "episode"} onChange={() => setValue({ ...value, content_mode: "episode" })} /> 整期节目（推荐）</label>
+      <p className="text-text-muted">一份报告组织成一篇完整讲稿、一条视频；多个内容分段讲述，自动生成内容导航。内容决定时长。</p>
+      <label className="block"><input type="radio" name="content-mode" checked={value.content_mode === "individual"} onChange={() => setValue({ ...value, content_mode: "individual" })} /> 独立单条</label>
+      <p className="text-text-muted">保留原来的逐条制作方式。切换只用于之后的新任务，已有文稿和成片保留。</p>
+    </fieldset>
     <fieldset className="space-y-2 text-xs"><legend className="font-medium mb-2">供稿与生产绑定</legend>
-      <p className="text-text-muted">复用已有研究任务和生产配置。关联栏目会保留原来的自动数量与研究周期。</p>
+      <p className="text-text-muted">复用已有研究任务和生产配置。关联栏目会保留原来的自动开关与研究周期。</p>
       {configs === null ? <p>读取生产配置…</p> : <div className="max-h-48 overflow-auto border border-border rounded-lg p-2 space-y-2">
         {configs.map((c) => { const taken = !!c.content_column_id && c.content_column_id !== column?.key; return <label key={c.key} className="flex items-start gap-2">
           <input type="checkbox" disabled={taken} checked={value.production_ids.includes(c.key)} onChange={(e) => setValue({ ...value,
@@ -185,6 +192,7 @@ export function ContentColumns({ matrix, canEdit }: { matrix: Matrix; canEdit: b
       <div className="p-4 space-y-3"><div className="flex justify-between gap-3 items-start"><div><span className="text-xs text-accent">{names.get(c.type) || c.type}</span><h3 className="font-medium mt-1">{c.name}</h3></div>
         <span className="text-xs text-text-muted">{c.status === "planned" || !c.bindings.length ? "待配置" : c.auto_bindings ? "已接自动制作" : "手动制作"}</span></div>
         <p className="text-sm leading-6">{c.promise}</p><p className="text-xs text-text-muted">观众：{c.audience || matrix.content?.audience || "待设置"}</p>
+        <p className="text-xs text-accent">{c.content_mode === "individual" ? "独立单条 · 每个内容分别制作" : "整期节目 · 一份报告，一篇总稿，一条视频"}</p>
         {c.presentation.preferred_visuals?.length ? <p className="text-xs text-text-muted">画面偏好：{c.presentation.preferred_visuals.join("、")}</p> : null}
         {c.presentation.strategy ? <p className="text-xs leading-5 text-text-muted">画面讲述：{c.presentation.strategy}</p> : null}
         {c.notes ? <p className="text-xs leading-5 text-text-muted">创作方向：{c.notes}</p> : null}

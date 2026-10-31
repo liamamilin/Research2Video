@@ -134,6 +134,7 @@ class ColumnIn(BaseModel):
     presentation: dict = Field(default_factory=dict)
     status: str = "configured"
     notes: str = ""
+    content_mode: str | None = None
 
 
 def _save(key: str, body: ColumnIn, user, *, creating: bool):
@@ -146,6 +147,7 @@ def _save(key: str, body: ColumnIn, user, *, creating: bool):
     if not creating and body.expected_revision is None:
         raise _error(422, "revision_required", "保存栏目需要当前 revision")
     data = body.model_dump(exclude={"key", "expected_revision"})
+    data["content_mode"] = body.content_mode or (existing[key].content_mode if key in existing else "episode")
     try:
         content_columns.save(paths.config_dir, key, data,
                              expected_revision="" if creating else body.expected_revision)

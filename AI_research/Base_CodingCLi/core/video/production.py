@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Optional
 from pathlib import Path
 
@@ -68,6 +68,8 @@ class Config:
     minutes: float = 0.0
     minutes_range: tuple = ()
     #: filled when the recipe builds: what it derives from the recipe
+    content_mode: str = "individual"
+    content_column_id: str = ""
     source: str = ""         # the topic source the Job feeds (its alias), where items are picked from
     split: str = ""
     split_name: str = ""
@@ -87,7 +89,7 @@ class Config:
         return {"key": self.key, "name": self.name, "job": self.job, "recipe": self.recipe, "errors": list(self.errors),
                 "base_recipe": self.base_recipe, "audience_key": self.audience_key, "minutes": self.minutes,
                 "minutes_range": list(self.minutes_range),
-                "source": self.source, "split": self.split, "split_name": self.split_name, "reverify": self.reverify,
+                "content_mode": self.content_mode, "source": self.source, "split": self.split, "split_name": self.split_name, "reverify": self.reverify,
                 "auto": self.auto,
                 **({"render": self.render} if self.render else {}),
                 "audience": self.audience, "target_minutes": self.target_minutes, "label": self.label}
@@ -194,9 +196,6 @@ def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: d
     if auto is not None and (not isinstance(auto, int) or auto < 0):
         errors.append("auto 应是自动制作开关：1 开启，0 关闭")
         auto = None
-    elif auto and split == "some":
-        errors.append("盘点一期要挑几条合成，不能自动写：自动只用于每条一期的配方")
-        auto = None
     # Legacy positive counts remain readable, with no cap on selected topics.
     auto = int(bool(auto))
     label = recipe.label if recipe is not None else ""
@@ -247,6 +246,20 @@ def load_all(config_dir: str, jobs_dir: str) -> dict[str, Config]:
             out[key] = Config(key=key, name=str(data.get("name") or key), job=str(data.get("job") or ""),
                               recipe=str(data.get("recipe") or ""),
                               errors=(f"配置加载失败：{type(exc).__name__}: {str(exc)[:160]}",))
+    from . import content_columns
+    for owner in content_columns.load_all(config_dir, configs=out).values():
+        if not owner.usable:
+            continue
+        for pid in owner.production_ids:
+            config = out.get(pid)
+            if config and config.usable:
+                out[pid] = replace(config, content_mode=owner.content_mode, content_column_id=owner.key,
+                    **({"split": "whole", "split_name": "整期节目", "reverify": False}
+                       if owner.content_mode == "episode" else {}))
+    for key, config in list(out.items()):
+        if config.auto and config.split == "some":
+            out[key] = replace(config, auto=0, errors=(*config.errors,
+                "盘点一期要挑几条合成，不能自动写：自动只用于每条一期的配方"))
     return out
 
 

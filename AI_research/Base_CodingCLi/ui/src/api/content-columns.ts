@@ -12,11 +12,12 @@ export interface ContentColumn {
   production_ids: string[]; render_inheritance: "source_compatible" | "content_matrix";
   render: NonNullable<ProductionConfig["render"]>;
   presentation: { strategy?: string; preferred_visuals?: string[] };
+  content_mode?: "episode" | "individual";
   status: "configured" | "planned"; notes: string; revision: string; errors: string[]; usable: boolean;
   bindings: ColumnBinding[]; auto_bindings: number; scripts: number; updated_at: string;
 }
 export type ContentColumnInput = Pick<ContentColumn, "name" | "matrix" | "type" | "audience" | "promise" |
-  "production_ids" | "render_inheritance" | "render" | "presentation" | "status" | "notes"> &
+  "content_mode" | "production_ids" | "render_inheritance" | "render" | "presentation" | "status" | "notes"> &
   { key?: string; expected_revision?: string };
 export interface ColumnScript {
   id: string; title: string; status: string; version: number; updated_at: string; production: string; legacy_association: boolean;

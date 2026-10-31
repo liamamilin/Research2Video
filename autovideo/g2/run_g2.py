@@ -975,6 +975,8 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
 
 
 def verify_media(compiled: dict, alignment: dict) -> dict:
+    from g2.episode_navigation import apply as apply_episode_navigation
+    apply_episode_navigation(sys.modules[__name__], compiled)
     import numpy as np
     import soundfile as sf
     from PIL import Image, ImageDraw, ImageFont

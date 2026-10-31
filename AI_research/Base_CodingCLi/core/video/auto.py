@@ -68,6 +68,7 @@ def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: floa
             previous = [r for r in runs if r["spec"]["job"] == job and
                         os.path.abspath(os.path.join(root, r["spec"]["report"])) == os.path.abspath(report)]
             picks = []
+            episode_columns = set()
             for config in sorted(mine, key=lambda c: c.key):
                 try:
                     enabled_at = config.auto_enabled_at or os.path.getmtime(
@@ -91,7 +92,13 @@ def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: floa
                         handled = True
                 if handled:
                     continue
+                if config.content_mode == "episode":
+                    if config.content_column_id in episode_columns:
+                        continue
+                    episode_columns.add(config.content_column_id)
                 pick = {"column": config.recipe, "all": True, "production": config.key}
+                if config.content_mode == "episode":
+                    pick["content_mode"] = "episode"
                 if config.split == "whole":
                     pick["whole"] = True
                 else:

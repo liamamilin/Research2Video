@@ -142,7 +142,8 @@ def _whole_files(config: production.Config) -> list[tuple[str, str]]:
     from web.services import video_workflow
 
     paths = get_settings().paths
-    source = video_topic_store.whole_source(paths.jobs_dir, config.job)
+    source = (video_topic_store.resolve(paths.jobs_dir, config.job) or
+              video_topic_store.whole_source(paths.jobs_dir, config.job))
     if source is None or source.error:
         return []
     root = video_workflow.workspace_dir()
@@ -152,7 +153,18 @@ def _whole_files(config: production.Config) -> list[tuple[str, str]]:
 def _whole_reports(config: production.Config) -> list[dict]:
     return [{"date": date, "path": path, "written": bool(mine), "scripts": mine}
             for date, path in _whole_files(config)[:WHOLE_LISTED]
-            for mine in [[s for s in reports.scripts_of(path, config.recipe) if not s.get('archived')]]]
+            for mine in [_report_scripts(config, path)]]
+
+
+def _report_scripts(config, path):
+    if config.content_mode == "episode":
+        from core.video import episodes
+        from core import report_identity
+        from web.services.video_workflow import workspace_dir
+        import os
+        revision = report_identity.describe(os.path.join(workspace_dir(), path), workspace_dir())["id"]
+        return episodes.scripts_for(path, config.recipe, config.key, config.content_column_id, revision)
+    return [s for s in reports.scripts_of(path, config.recipe) if not s.get("archived")]
 
 
 class ConfigIn(BaseModel):
@@ -293,7 +305,7 @@ def _write_whole(config: production.Config, body: WriteIn, request: Request, use
         full = Path(video_workflow.workspace_dir()) / body.report_path
         if hashlib.sha256(full.read_bytes()).hexdigest() != body.report_sha256:
             raise _error(409, 'report_changed', '报告已经变化，请重新核对本次研究结果')
-    previous = [s for s in reports.scripts_of(body.report_path, config.recipe) if not s.get('archived')]
+    previous = _report_scripts(config, body.report_path)
     if previous and body.rewrite_existing:
         owned = [s for row in previous if (s := store.get_script(row['id']))
                  and s.get('production') == config.key and not s.get('archived')]

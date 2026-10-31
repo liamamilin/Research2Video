@@ -41,6 +41,8 @@ def publishing_block(script: dict) -> str:
 def with_policy(script: dict, jobs_dir: str = "") -> dict:
     """Infer policy in memory for older automatic drafts, including dated flash topic IDs."""
     topic = script.get("topic") or {}
+    if topic.get("content_mode") == "episode":
+        return script
     if script.get("created_by") != "autopilot" or (topic.get("matrix_dedup") or {}).get("job"):
         return script
     job = (script.get("content_context") or {}).get("job", "")

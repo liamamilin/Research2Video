@@ -37,6 +37,7 @@ function ScriptLine({ s, data, showMatrix = false }: { s: OutputScript; data: Ou
   return <li className="p-4 space-y-2.5" aria-label={`文稿 ${s.title}`}>
     <div className="flex flex-wrap items-center gap-2 text-xs"><span className={cn("px-1.5 py-0.5 rounded border whitespace-nowrap", STAGE_CLASS[stage])}>{STAGE_LABEL[stage]}</span><CredibilityBadge value={s.credibility} />{s.version ? <span className="text-text-muted">v{s.version}</span> : null}{s.has_previous_video ? <span className="text-text-muted">有旧版成片</span> : null}{s.archived ? <span className="text-text-muted">已归档</span> : null}</div>
     <Link className="block text-sm leading-6 font-medium hover:underline hover:text-accent break-words" to={`/video/${s.id}`}>{s.title || "未命名文稿"}</Link>
+    {s.content_mode === "episode" ? <p className="text-xs text-accent">整期节目{s.episode_items?.length ? ` · ${s.episode_items.length} 个内容 · ${s.episode_items.join(" / ")}` : " · 本期内容正在编排"}</p> : null}
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted leading-5">
       {showMatrix ? <span>{matrixName(data, ownerKey(s))} ·</span> : null}
       {s.job ? <Link className="hover:text-accent hover:underline" to={`/jobs/${encodeURIComponent(s.job)}`}>{jobName(data, s.job)}</Link> : <span>独立选题</span>}

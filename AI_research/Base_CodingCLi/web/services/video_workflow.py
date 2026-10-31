@@ -146,9 +146,11 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     config = production.get(settings.paths.config_dir, settings.paths.jobs_dir, production_id) if production_id else None
     context = content_columns.snapshot(settings.paths.config_dir, production_id, config.job) if config else {}
     context = topic.pop("_content_context", None) or context
+    from core.video import episodes
+    context = episodes.snapshot_context(context, topic)
     if context.get("audience") and not explicit_audience:
         fields["目标受众"] = context["audience"]
-    if started_by not in content_guard.SAMPLE_CREATORS:
+    if started_by not in content_guard.SAMPLE_CREATORS and not episodes.enabled(topic):
         topic = content_guard.new_topic(topic, context, settings.paths.config_dir, settings.paths.jobs_dir)
     script = store.create_script(column.key, topic, created_by=started_by,
                                  production=production_id, content_context=context)
@@ -277,9 +279,11 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     script = content_guard.with_policy(store.get_script(script_id), settings.paths.jobs_dir)
     from core.video.content_columns import apply_script_context
     column = apply_script_context(column, script.get("content_context") or {})
-    joint_input = research_dossier.enabled(script) or bool(topic.get("theme_research"))
+    from core.video import episodes
+    is_episode = episodes.enabled(topic)
+    joint_input = is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
     dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
-    guarded = bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
+    guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
     config, review_config = _llm_configs(llm_config, column)
     dedup_meta, filtered_material = {}, ""
     if guarded:
@@ -333,7 +337,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             return _duplicate_script(script_id, content_guard.DuplicateContent(peers, str(exc)), failed_status)
         except content_guard.DuplicateContent as exc:
             return _duplicate_script(script_id, exc, failed_status)
-    if column.writer == "adapt":
+    if column.writer == "adapt" and not is_episode:
         if guarded and filtered_material:
             report, citation_check = filtered_material, None
         try:
@@ -390,7 +394,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
             topic=writing_topic,
-            column_style=column.script_style + (
+            column_style=column.script_style + episodes.brief(topic) + (
                 "\n本矩阵近期已经讲过以下选题，请从剩余素材选择新选题，标题、开场和正文都不要复述："
                 + "；".join(p["title"] for p in dedup_meta.get("peers", [])) if dedup_meta.get("peers") else ""),
             target_minutes=column.target_minutes,
@@ -400,6 +404,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             topic_fields=column.writer_topic_fields(),
             **({"original_material": material} if joint_input else {}),
         )
+        if is_episode:
+            written.meta["episode"] = episodes.manifest(topic, written.sections)
         written.meta["input_kind"] = ("report_and_original_material" if joint_input and material
                                       else "original_material" if material else "report")
         if joint_input:
@@ -1095,6 +1101,7 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
     clean = [
         {
             "title": str(s.get("title") or "").strip(),
+            **({"episode_role": s["episode_role"]} if s.get("episode_role") else {}),
             "paragraphs": [
                 {
                     "text": str(p.get("text") or "").strip(),
@@ -1138,6 +1145,9 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
                                     plan=plan, sheet=sheet, style=style)
         meta = {"problems": writer.lint(clean),
                 "checks": _rules_only(issues, plan, clean, model_checks_stale=True)}
+    from core.video import episodes
+    if episodes.enabled(script.get("topic") or {}):
+        meta["episode"] = episodes.manifest(script["topic"], clean)
     budgets = None
     if sheet:
         meta.update({k: base_meta.get(k) for k in ("writer", "style", "prompts", "fact_sheet_id", "plan",
@@ -1148,7 +1158,7 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
         script_id,
         title=title.strip(),
         sections=clean,
-        length_check=length.measure(clean, None if base_meta.get("article") else column.target_minutes,
+        length_check=length.measure(clean, None if base_meta.get("article") or episodes.enabled(script.get("topic") or {}) else column.target_minutes,
                                     section_budgets=budgets, voice=column.voice_id),
         edit_type="EDITED",
         meta=meta,

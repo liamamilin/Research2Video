@@ -166,6 +166,8 @@ def collect(config_dir: str, jobs_dir: str, archived: bool = False) -> dict:
         publications = published.get(script["id"], set())
         rows.append({
             "id": script["id"], "title": version["title"] if version else (script.get("topic") or {}).get("title", ""),
+            "content_mode": (script.get("topic") or {}).get("content_mode", "individual"),
+            "episode_items": [i["title"] for i in (version or {}).get("meta", {}).get("episode", {}).get("items", [])],
             "status": script["status"], "column_key": script["column_key"], "created_at": script["created_at"],
             "version": script["current_version"], "updated_at": script["updated_at"],
             "credibility": credibility.label(version, auditing=bool(script.get("stage"))) if version else None,

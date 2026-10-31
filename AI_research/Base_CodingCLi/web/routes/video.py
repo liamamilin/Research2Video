@@ -526,7 +526,9 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
                 if len(report_topic["title"]) < 4:
                     raise HTTPException(422, detail=ApiError.make("topic_required", "选题标题至少 4 个字"))
     kind = chosen.topic_kind
-    if kind == "roundup":
+    if report is not None and body.production and config.content_mode == "episode":
+        topic = reports.topic_for(report, video_workflow.workspace_dir())
+    elif kind == "roundup":
         topic = _roundup_topic(body)
     elif kind == "comparison":
         topic = _comparison_topic(body)
@@ -561,6 +563,10 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
         raise HTTPException(422, detail=ApiError.make(
             "report_required", "这个配方不做调研（research.mode: none）：要从已有文稿切（from_script）或选发现报告里的条目"))
     if body.production:
+        if report is not None and config.content_mode == "episode":
+            from core.video import episodes, topic_store as episode_topics
+            topic = episodes.topic(report, video_workflow.workspace_dir(), job=config.job,
+                source=episode_topics.resolve(get_settings().paths.jobs_dir, config.job), production=config.key)
         topic = {**topic, "_production": body.production}
     script = video_executor.create(body.column, topic, user["username"])
     audit.log("video_script_create", user=user["username"], target=script["id"], result="started",
@@ -750,6 +756,7 @@ class ParagraphIn(BaseModel):
 class SectionIn(BaseModel):
     title: str
     paragraphs: list[ParagraphIn]
+    episode_role: Optional[str] = Field(default=None, pattern="^(opening|item|closing)$")
 
 
 class ScriptEditIn(BaseModel):
@@ -770,7 +777,7 @@ def edit_script(script_id: str, body: ScriptEditIn, user=Depends(require_editor)
     if body.base_version is not None and store.get_version(script_id, body.base_version) is None:
         raise _not_found("这个版本")
     version = video_workflow.save_edit(
-        script_id, title=body.title, sections=[s.model_dump() for s in body.sections],
+        script_id, title=body.title, sections=[{k: v for k, v in s.model_dump().items() if k != "episode_role" or v is not None} for s in body.sections],
         edited_by=user["username"], base_version=body.base_version,
     )
     store.update_script(script_id, status="DRAFT")
