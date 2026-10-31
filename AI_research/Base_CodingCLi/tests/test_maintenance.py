@@ -190,6 +190,25 @@ def test_stale_lock_sidecars_are_removed(tree):
     assert fresh.exists(), "a live sidecar was removed"
 
 
+def test_one_shot_lock_directories_are_pruned_but_a_held_lock_is_kept(tmp_path):
+    import fcntl
+
+    state = tmp_path / "state"
+    old = time.time() - 30 * 86400
+    finished = state / "schedule-locks" / "run1.lock"
+    held = state / "video_render_locks" / "abc.lock"
+    unrelated = state / "video_visual_cache" / "x.lock"
+    for path in (finished, held, unrelated):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"")
+        os.utime(path, (old, old))
+    with held.open("a") as holder:
+        fcntl.flock(holder, fcntl.LOCK_EX)
+        report = maintenance.prune_lock_sidecars(state, days=7, dry_run=False)
+    assert not finished.exists() and held.exists(), "a render still being followed lost its lock"
+    assert unrelated.exists() and report.startswith("lock sidecars: 1 个")
+
+
 # --- empty round directories -------------------------------------------------
 
 def _round_tree(tmp_path):

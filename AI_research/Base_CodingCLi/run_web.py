@@ -39,6 +39,19 @@ def cmd_serve(args):
     # The app is loopback-only; which address the front door binds is the
     # gateway's decision, not this process's.
     host = "127.0.0.1" if settings.gateway.enabled else (args.host or settings.server.host)
+    # uvicorn runs the whole lifespan (render resume, autopilot, watchers)
+    # before it binds, so a duplicate launch used to do all of that and only
+    # then fail. Probe the port first, with the same SO_REUSEADDR uvicorn uses.
+    import socket
+    probe = socket.socket(socket.AF_INET6 if ":" in host else socket.AF_INET)
+    probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        probe.bind((host, port))
+    except OSError as exc:
+        print(f"{host}:{port} is already in use ({exc.strerror}); not starting a second instance.", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        probe.close()
     from pathlib import Path
     from web.services.yaml_io import atomic_write
     import json
