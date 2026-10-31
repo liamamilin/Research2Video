@@ -339,6 +339,16 @@ def _render_auto(script: dict, can_start_render: bool, out: dict, retries: Optio
         return out
     if not can_start_render:
         return out
+    from core.video import production_admission
+    from core.research_window import date_of
+    created = date_of(script.get('created_at'))
+    topic = {**script['topic'], '_production':script.get('production') or script['topic'].get('_production', ''),
+             '_content_context':script.get('content_context') or {}}
+    if not production_admission.enter(get_settings().paths, topic, key=script['id'],
+            accepted_before=created.timestamp() if created else None,
+            manual=script.get('created_by') != 'autopilot'):
+        out['item'] = {'note':production_admission.WAIT_NOTE}
+        return out
     try:
         render = video_render.create(script)
     except video_render.RenderError as exc:

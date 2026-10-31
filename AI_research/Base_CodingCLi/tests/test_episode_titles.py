@@ -43,6 +43,12 @@ def test_columns_use_their_programme_name_and_report_date(ctx, expected):
     assert original == saved
 
 
+def test_delayed_programme_uses_frozen_issue_date_instead_of_completion_date():
+    original=topic()
+    original['episode']['issue']={'research_window':{'end':'2026-10-28T00:10:00+08:00'}}
+    assert episodes.publication_topic(original,context())['title']=='今日快讯｜2026年10月28日'
+
+
 def test_published_column_label_wins_over_internal_topic_number():
     ctx = {**context("chatgpt_t01_product", "T01 · 内部名称", "explainer", "chatgpt_acquisition"),
            "render": {"packaging": {"label": "产品与能力认知"}}}

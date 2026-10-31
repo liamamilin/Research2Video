@@ -37,13 +37,15 @@ class ResearchEngine:
                  date_override: Optional[str] = None,
                  user: Optional[str] = None,
                  prompt_vars: Optional[dict] = None,
-                 timeout_override: Optional[int] = None):
+                 timeout_override: Optional[int] = None,
+                 state_dir: Optional[str] = None):
         self.config_dir = config_dir
         self.jobs_dir = jobs_dir
         self.sys = load_system_config(config_dir)
         self._cancel = cancel_token or threading.Event()
         self._progress = progress_cb or (lambda _: None)
         self.workspace_dir = os.path.abspath(workspace_dir or os.getcwd())
+        self.state_dir = os.path.abspath(state_dir or os.path.join(self.workspace_dir, 'state'))
         self._date_override = date_override
         # An explicit limit from the caller (run.py --timeout) outranks both
         # the job's runtime.timeout_seconds and system.yaml. Mutating self.sys
@@ -91,7 +93,9 @@ class ResearchEngine:
 
     def run_job(self, job_name: str, verbose: bool = False) -> Optional[str]:
         """Run a single job. Returns output path on success, None on failure."""
-        job = load_job(self.jobs_dir, job_name)
+        context=getattr(self,'run_context',{})
+        self.run_context = {}  # One execution context must not leak into the next Job of a reused engine.
+        job = context.get('job') or load_job(self.jobs_dir, job_name)
         if not job:
             logger.info("Job not found: %s", job_name)
             print(f"  [{job_name}] NOT FOUND: no matching job file")
@@ -101,6 +105,10 @@ class ResearchEngine:
             logger.info("Job '%s' is disabled, skipping.", job_name)
             print(f"  [{job_name}] SKIPPED: job is disabled (enabled: false)")
             return None
+
+        if job.get('source_collection'):
+            from .material_collection import run as collect_materials
+            return collect_materials(self, job)
 
         if job.get("source_discovery"):
             from .source_discovery import run as discover_sources
@@ -117,7 +125,17 @@ class ResearchEngine:
         # A member of a matrix runs with the matrix's keywords and domain (spec/matrices.md). Applied here and not
         # in load_job, which the web layer also uses: the Job editor must not save them into the Job file.
         from . import matrices
-        job = matrices.for_run(job, self.config_dir)
+        if not context.get('job'):
+            job = matrices.for_run(job, self.config_dir)
+        from .research_window import freeze
+        if not context.get('legacy'):
+            from .production_policy import issue
+            context=issue(self.config_dir,self.state_dir,job,self._now(),context)
+        if context.get('research_window'):
+            job={**job,'_collection_window':context['research_window'],'_issue_id':context['issue_id'],
+                 '_production_policy':context.get('policy', {})}
+        else:
+            job = freeze(job, self._now())
         self._events_exclude = matrices.jobs_of_other_matrices(job.get("_file", job_name), self.config_dir)
 
         logger.info("Running job: %s", job_name)
@@ -187,6 +205,8 @@ class ResearchEngine:
                 objective = " - ".join(
                     part for part in (job.get("name", ""), desc) if part
                 )
+                from .research_window import instruction
+                objective += instruction(job.get('_collection_window'))
                 if fetch_only:
                     raw_content = agent.run_fetch_only(
                         prompt, fetched_urls=[r.url for r in fetched[0]], stats=fetched[1])
@@ -223,6 +243,10 @@ class ResearchEngine:
                             dossier_detail.update(expanded=False, expansion_error=str(exc)[:300])
                             logger.warning("Dossier expansion kept the initial report: %s", exc)
                 usage = agent.get_usage()
+                if job.get('_collection_window'):
+                    usage['collection_window'] = job['_collection_window']
+                if context.get('issue_id'):
+                    usage['production_issue'] = {k:context[k] for k in ('issue_id','policy_revision','research_window')}
                 if self._supply_receipt is not None:
                     usage["source_supply"] = self._supply_receipt
                 if self._source_search_client is not None:
@@ -257,7 +281,7 @@ class ResearchEngine:
                     from .source_supply import save_receipt
                     from .source_supply_store import SupplyStore
                     try:
-                        SupplyStore(os.path.join(self.workspace_dir, "state"), self._supply_pending["profile"]).commit(
+                        SupplyStore(self.state_dir, self._supply_pending["profile"]).commit(
                             self._supply_pending, cleaned, self._output_reference(actual_path))
                         save_receipt(actual_path, self._supply_receipt)
                     except OSError as exc:
@@ -288,6 +312,7 @@ class ResearchEngine:
                     append_record(report_path, job_name, usage=usage,
                                   duration_seconds=round(time.time() - start_time, 1),
                                   extra={"citation_check": citation, "material": material,
+                                         **({'production_issue':usage['production_issue']} if (usage or {}).get('production_issue') else {}),
                                          **({"research_dossier": dossier_detail} if dossier_detail else {})})
                 except Exception as exc:  # noqa: BLE001 - metadata is optional
                     logger.debug("report metadata skipped: %s", exc)
@@ -399,8 +424,11 @@ class ResearchEngine:
         from .sources import fetch_all_strict, resolve
 
         specs = resolve(list(job.get("sources") or []), self.config_dir)
+        options = self._source_options(specs)
+        if job.get('_collection_window'):
+            options['collection_window'] = job['_collection_window']
         items, stats = fetch_all_strict(specs, limit_per_source=int(job.get("sources_limit", 8)),
-                                        **self._source_options(specs))
+                                        **options)
         failed = [f"- {spec}: {state}" for spec, state in stats.items() if not isinstance(state, int)]
         header = ("## Fetched sources\n\n" + "\n".join(
             f"- {spec}: {state if not isinstance(state, int) else f'{state} items'}" for spec, state in stats.items()))
@@ -427,6 +455,8 @@ class ResearchEngine:
 
     def _source_material(self, job: dict, items: list) -> str:
         from .search import SearchClient
+        from .research_window import select
+        items = select(items, job.get('_collection_window'))
         if not job.get("source_history"):
             return SearchClient.format_results(items)
         from pathlib import Path
@@ -450,7 +480,10 @@ class ResearchEngine:
 
             limit = int(job.get("sources_limit", 8))
             resolved = resolve(list(specs), self.config_dir)
-            results = fetch_all(resolved, limit_per_source=limit, **self._source_options(resolved))
+            options = self._source_options(resolved)
+            if job.get('_collection_window'):
+                options['collection_window'] = job['_collection_window']
+            results = fetch_all(resolved, limit_per_source=limit, **options)
             if not results:
                 return ""
             logger.info("Sources pre-fetched: %d items from %d spec(s)",
@@ -509,7 +542,8 @@ class ResearchEngine:
         # have fired on every synthesis round, and pointed at the wrong thing.
         self._prompt_urls = _urls_in(str(variables.get("upstream_reports") or ""))
 
-        return result
+        from .research_window import instruction
+        return result + instruction(job.get('_collection_window'))
 
     def _known_urls(self, agent) -> set:
         """URLs this report may legitimately cite.

@@ -3,7 +3,7 @@ matrix: ai_media
 enabled: true
 timezone: Asia/Shanghai
 # 单独的来源探索周计划；现有五个研究周期保持。
-recurrence: "30 6 * * 0"
+recurrence: "30 5 * * 0"
 scan_limit: 80
 detail_pages: 4
 material_chars: 180000

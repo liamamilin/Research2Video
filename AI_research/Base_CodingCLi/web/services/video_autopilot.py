@@ -386,6 +386,14 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool, searc
         topic = _prepare({**item, "topic": topic})
         if item.get("production"):
             topic = {**topic, "_production": item["production"]}
+        from core.video import production_admission
+        parent = ap.run_origin(item['run_id'])
+        if not production_admission.enter(paths, topic, key=item['id'],
+                accepted_before=parent['started_at'] if parent else None,
+                manual=bool(parent and parent['started_by'] != 'autopilot')):
+            if item.get('note') != production_admission.WAIT_NOTE:
+                ap.update_item(item['id'], note=production_admission.WAIT_NOTE)
+            return took
         script, created = create_queued_script(item, topic)
         ap.update_item(item["id"], script_id=script["id"], state="WORKING", note="已开始写稿" if created else "接续已有文稿")
         took["script"] = created

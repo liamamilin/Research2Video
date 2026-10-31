@@ -204,30 +204,51 @@ def parse_tldr(page: str, issue_date: str) -> list[SearchResult]:
     return results
 
 
-def fetch_tldr(edition: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:
+class FetchBatch(list):
+    """List-compatible results with per-date reading coverage, never inferred publication dates."""
+    def __init__(self, items=(), coverage=None):
+        super().__init__(items)
+        self.coverage = coverage or {}
+
+
+def fetch_tldr(edition: str, limit: int = 8, timeout: int = 20, *, collection_window: Optional[dict] = None) -> list[SearchResult]:
     """The latest TLDR issues of an edition (``ai``): up to 3 issues from the last 7 days, newest first. A day
     without an issue (weekend, holiday) answers 404 and is skipped; ``limit`` caps the items per issue."""
     results: list[SearchResult] = []
     issues = 0
+    coverage = {}
     today = datetime.date.today()
-    for back in range(8):
-        day = (today - datetime.timedelta(days=back)).isoformat()
+    from .research_window import dates
+    days = dates(collection_window) if collection_window else [(today - datetime.timedelta(days=back)).isoformat() for back in range(8)]
+    for day in days:
         try:
             page = _get_page(f"https://tldr.tech/{edition}/{day}", timeout)
         except urllib.error.HTTPError as exc:
             if exc.code == 404:
+                coverage[day] = {'status': 'no_issue'}
                 continue
+            if not collection_window:
+                raise
+            coverage[day] = {'status': 'unavailable', 'error': str(exc)[:300]}
+            continue
+        except CancelledError:
             raise
+        except Exception as exc:
+            if not collection_window:
+                raise
+            coverage[day] = {'status': 'unavailable', 'error': str(exc)[:300]}
+            continue
         items = parse_tldr(page, day)
+        coverage[day] = {'status': 'read' if items else 'empty', 'items': len(items)}
         if not items:  # today's page before the issue is out; a redesign empties every day and ends in the error below
             continue
         results.extend(items[: max(limit, 1)])
         issues += 1
-        if issues == 3:
+        if not collection_window and issues == 3:
             break
     if not issues:
         raise ValueError(f"tldr {edition}: 最近 7 天没有找到任何一期（没有页面，或页面里解析不到条目，页面结构可能变了）")
-    return results
+    return FetchBatch(results, coverage) if collection_window else results
 
 
 def parse_hf_papers(data: list, limit: int) -> list[SearchResult]:
@@ -247,7 +268,25 @@ def parse_hf_papers(data: list, limit: int) -> list[SearchResult]:
     return results
 
 
-def fetch_hf_papers(target: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:
+def fetch_hf_papers(target: str, limit: int = 8, timeout: int = 20, *, collection_window: Optional[dict] = None) -> list[SearchResult]:
+    if collection_window:
+        from .research_window import dates
+        results, answered, last_error, coverage = [], False, None, {}
+        for day in dates(collection_window):
+            try:
+                data = json.loads(_get_page(f"https://huggingface.co/api/daily_papers?date={day}&limit={max(1,min(limit,50))}", timeout))
+                answered = True
+                results.extend(parse_hf_papers(data, limit))
+                coverage[day] = {'status': 'read', 'items': len(data)}
+            except CancelledError:
+                raise
+            except Exception as exc:
+                last_error = exc
+                coverage[day] = {'status': 'unavailable', 'error': str(exc)[:300]}
+                logger.warning('HF papers %s unavailable: %s', day, exc)
+        if not answered and last_error:
+            raise last_error
+        return FetchBatch(SearchClient._dedupe(results), coverage)
     data = json.loads(_get_page(f"https://huggingface.co/api/daily_papers?limit={max(1, min(limit, 50))}", timeout))
     return parse_hf_papers(data, limit)
 
@@ -284,9 +323,10 @@ def parse_gh_search(data: dict, limit: int) -> list[SearchResult]:
     return results
 
 
-def fetch_gh_new(keywords: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:
+def fetch_gh_new(keywords: str, limit: int = 8, timeout: int = 20, *, collection_window: Optional[dict] = None) -> list[SearchResult]:
     since = (datetime.date.today() - datetime.timedelta(days=7)).isoformat()
-    query = urllib.parse.urlencode({"q": f"{keywords} created:>{since}", "sort": "stars", "order": "desc",
+    date_query = f"created:{collection_window['start'][:10]}..{collection_window['end'][:10]}" if collection_window else f"created:>{since}"
+    query = urllib.parse.urlencode({"q": f"{keywords} {date_query}", "sort": "stars", "order": "desc",
                                     "per_page": max(1, min(limit, 30))})
     token = os.environ.get("GITHUB_TOKEN", "")
     headers = {"User-Agent": _UA, "Accept": "application/vnd.github+json"}
@@ -460,7 +500,7 @@ def resolve(specs: list[str], config_dir: str = "config", *, registry: Optional[
 
 
 def fetch_source(spec: str, limit: int = 8, timeout: int = 20, *,
-                 search_client: Optional[SearchClient] = None) -> list[SearchResult]:
+                 search_client: Optional[SearchClient] = None, collection_window: Optional[dict] = None) -> list[SearchResult]:
     """Fetch one source spec (``kind:target``)."""
     kind, _, target = (spec or "").partition(":")
     kind = kind.strip().lower()
@@ -469,12 +509,15 @@ def fetch_source(spec: str, limit: int = 8, timeout: int = 20, *,
     if not adapter or not target:
         logger.warning("Unknown source spec: %s", spec)
         return []
+    if collection_window and kind in {'tldr', 'hf_papers', 'gh_new'}:
+        return adapter(target, limit=limit, timeout=timeout, collection_window=collection_window)
     if kind in {"page", "catalog"} and search_client is not None:
         from .source_pages import fetch_page
         return fetch_page(target, limit, timeout, get_page=_get_page,
                           search_client=search_client, catalog=kind == "catalog")
     if kind == "search" and search_client is not None:
-        results = search_client.search([target], objective="收集此固定来源中与查询相关的公开内容")
+        from .research_window import instruction
+        results = search_client.search([target], objective="收集此固定来源中与查询相关的公开内容" + instruction(collection_window))
         scopes = re.findall(r"site:([^\s]+)", target)
         if scopes:
             def matches(item):
@@ -491,12 +534,14 @@ def fetch_source(spec: str, limit: int = 8, timeout: int = 20, *,
 
 
 def fetch_all(sources: list[str], limit_per_source: int = 8,
-              timeout: int = 20, *, search_client: Optional[SearchClient] = None) -> list[SearchResult]:
+              timeout: int = 20, *, search_client: Optional[SearchClient] = None, collection_window: Optional[dict] = None) -> list[SearchResult]:
     """Fetch every source spec, dedupe by URL, keep first-seen order."""
     collected: list[SearchResult] = []
     for spec in sources or []:
         try:
             kwargs = {"search_client": search_client} if search_client is not None else {}
+            if collection_window:
+                kwargs['collection_window'] = collection_window
             collected.extend(fetch_source(spec, limit=limit_per_source, timeout=timeout, **kwargs))
         except CancelledError:
             raise
@@ -506,7 +551,7 @@ def fetch_all(sources: list[str], limit_per_source: int = 8,
 
 
 def fetch_all_strict(sources: list[str], limit_per_source: int = 8,
-                     timeout: int = 20, *, search_client: Optional[SearchClient] = None) -> tuple[list[SearchResult], dict[str, object]]:
+                     timeout: int = 20, *, search_client: Optional[SearchClient] = None, collection_window: Optional[dict] = None) -> tuple[list[SearchResult], dict[str, object]]:
     """Fetch every source spec for a Job that has no web search behind it.
 
     Returns ``(items, stats)``; ``stats`` maps each spec to its item count, or to ``"失败：原因"``. A source that
@@ -519,6 +564,8 @@ def fetch_all_strict(sources: list[str], limit_per_source: int = 8,
     for spec in sources or []:
         try:
             kwargs = {"search_client": search_client} if search_client is not None else {}
+            if collection_window:
+                kwargs['collection_window'] = collection_window
             items = fetch_source(spec, limit=limit_per_source, timeout=timeout, **kwargs)
             if not items:
                 raise ValueError("抓到了页面但没有条目")

@@ -1,5 +1,5 @@
-name: "AI 深度研究（每周）"
-description: "每周挑一个主题深挖：先读 Import AI、Hugging Face 论文选题，再用少量联网搜索补一手证据（本栏目是唯一联网搜索的）"
+name: "AI 深度研究"
+description: "每期挑一个主题深挖：先读 Import AI、Hugging Face 论文选题，再用少量联网搜索补一手证据（本栏目是唯一联网搜索的）"
 enabled: true
 keywords:
   - 深度研究

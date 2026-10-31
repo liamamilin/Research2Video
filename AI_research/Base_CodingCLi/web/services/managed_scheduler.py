@@ -16,7 +16,8 @@ def runtime() -> Runtime:
 
 
 def store() -> ScheduleStore:
-    return ScheduleStore(runtime().state_dir)
+    active = runtime()
+    return ScheduleStore(active.state_dir, config_dir=active.config_dir, jobs_dir=active.jobs_dir)
 
 
 def ensure_online() -> dict:
@@ -60,10 +61,16 @@ def describe(plan: dict, *, records: list[dict] | None = None) -> dict:
         name = config.get('name') or plan['job_name']
     except (OSError, ValueError, TypeError, AttributeError, yaml.YAMLError):
         name = plan['job_name']
+    from core.production_policy import issue
+    preview = issue(get_settings().paths.config_dir, get_settings().paths.state_dir,
+                    {'_file':plan['job_name']}, datetime.now(),
+                    {'schedule_id':plan['id'], 'version':plan['version'], 'expression':plan['schedule'],
+                     'timezone':plan['timezone'], 'due_at':plan['next_run_at']})
     return {**plan, **cron.parse_schedule(plan['schedule']), 'enabled': bool(plan['enabled']),
             'backend': 'managed', 'editable': True, 'title': plan['job_name'], 'job_label': name,
             'command': '', 'next_runs': [r.isoformat(timespec='seconds') for r in next_runs] if plan['enabled'] else [],
-            'last_run': last, 'pending_due_at': iso(plan['next_run_at'], plan['timezone'])}
+            'last_run': last, 'pending_due_at': iso(plan['next_run_at'], plan['timezone']),
+            **({'research_window':preview['research_window']} if preview.get('research_window') else {})}
 
 
 def describe_all(storage: ScheduleStore) -> list[dict]:

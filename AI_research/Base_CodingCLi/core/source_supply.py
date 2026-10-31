@@ -7,6 +7,7 @@ import json
 import logging
 from pathlib import Path
 import re
+import sqlite3
 import time
 from urllib.parse import urlsplit
 
@@ -86,10 +87,24 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
     """Scan before slicing, deepen selected links, and return uncommitted delivery."""
     from .sources import fetch_source, resolve
     from .source_pages import canonical_url
-    root = Path(engine.workspace_dir) / "state"
+    root = Path(getattr(engine, 'state_dir', Path(engine.workspace_dir) / 'state'))
     storage = SupplyStore(root, profile["key"])
     canonical = job["_file"]
     now = time.time()
+    from .research_window import select
+    window = job.get('_collection_window')
+    from .production_policy import load, manages, references
+    policy = job.get('_production_policy') or load(engine.config_dir)
+    archive = None
+    archive_error = ''
+    reference_specs = set()
+    if job.get('_issue_id') or manages(policy, engine.config_dir, job=canonical):
+        from .material_archive import MaterialArchive
+        try:
+            archive = MaterialArchive(root)
+        except (OSError, sqlite3.Error) as exc:
+            archive_error = str(exc)[:300]
+        reference_specs = references(policy, engine.config_dir)
     old = storage.baseline(canonical)["items"]
     declared = resolve(list(job.get("sources") or []), engine.config_dir)
     automatic = choose_pool(storage.pool()["sources"], canonical, int(profile.get("pool_per_job", 4)), now)
@@ -108,19 +123,57 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
     detailed = set()
     receipt = {"version": 1, "profile": profile["key"], "mode": mode, "first_collection": not bool(old),
                "scan_limit": scan, "details": [], "sources": pending["sources"]}
+    if archive_error:
+        receipt['archive_error'] = archive_error
+    if window:
+        receipt['collection_window'] = window
     for spec in specs:
         if engine._cancel.is_set():
             raise CancelledError("信息源采集已取消")
         row = {"scanned": 0, "changed": 0, "delivered": 0, "urls": [], "error": ""}
         pending["sources"][spec] = row
         try:
-            if spec.startswith("page:"):
-                fetched = read_page(spec[5:], limit=scan, search_client=client)
-            else:
-                fetched = fetch_source(spec, limit=scan, timeout=15, search_client=client)
+            try:
+                if spec.startswith("page:"):
+                    fetched = read_page(spec[5:], limit=scan, search_client=client)
+                else:
+                    options = {'collection_window': window} if window else {}
+                    fetched = fetch_source(spec, limit=scan, timeout=15, search_client=client, **options)
+                if archive:
+                    try:
+                        archive.record(spec, fetched)
+                    except (OSError, sqlite3.Error) as exc:
+                        row['archive_error'] = str(exc)[:300]
+                        archive = None
+                row['date_coverage'] = getattr(fetched, 'coverage', {})
+            except CancelledError:
+                raise
+            except Exception as exc:
+                if not archive:
+                    raise
+                try:
+                    archive.record(spec, [], error=str(exc))
+                except (OSError, sqlite3.Error) as cache_error:
+                    row['archive_error'] = str(cache_error)[:300]
+                    archive = None
+                row['error'] = str(exc)[:300]
+                fetched = []
+            if archive:
+                from .material_archive import merge
+                from datetime import datetime
+                cutoff = datetime.fromisoformat(window['end']).timestamp() if window else now
+                try:
+                    archived, row['archive_coverage'] = archive.read(spec, before=cutoff)
+                except (OSError, sqlite3.Error) as exc:
+                    archived = []
+                    row['archive_error'] = str(exc)[:300]
+                    archive = None
+                row['archived_items'] = len(archived)
+                fetched = merge(archived, fetched)
             if not fetched:
                 raise ValueError("未取得正文条目")
             row["scanned"] = len(fetched)
+            fetched = select(fetched, window, reference=spec in reference_specs)
             changes, unchanged = [], []
             for item in fetched:
                 key = section_key(item)
@@ -207,14 +260,29 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
 
 
 def material_block(items: list, receipt: dict) -> str:
+    from .research_window import instruction
     intro = ("首次采集用于建立背景；发布时间以材料实际提供的时间为准。" if receipt["first_collection"] else
              "优先提供新增或修改材料；修改页面不代表产品刚发布。")
     failures = [f"- {spec}: {row['error']}" for spec, row in receipt.get("sources", {}).items() if row.get("error")]
     missing = "\n\n本次未取得内容的来源：\n" + "\n".join(failures) if failures else ""
-    return ("## 矩阵信息采集\n\n" + intro +
+    coverage = []
+    for spec, row in receipt.get('sources', {}).items():
+        unavailable = [day for day, detail in row.get('date_coverage', {}).items()
+                       if detail.get('status') in {'unavailable', 'empty'}]
+        if unavailable:
+            coverage.append(f"- {spec} 未读取到这些日期：{', '.join(unavailable)}")
+        archive = row.get('archive_coverage')
+        if archive and receipt.get('collection_window'):
+            from datetime import datetime
+            start = datetime.fromisoformat(receipt['collection_window']['start'])
+            first = archive.get('first_observation')
+            if first is None or first > start.timestamp():
+                coverage.append(f'- {spec} 的日常归档尚未积满本期范围；较早材料依赖来源历史接口，未保证覆盖。')
+    coverage_text = '\n\n采集范围说明：\n' + '\n'.join(coverage) if coverage else ''
+    return ("## 矩阵信息采集\n\n" + instruction(receipt.get('collection_window')) + intro +
             "扫描受单源条数与正文预算约束，不代表覆盖整个网站。\n\n" +
             (SearchClient.format_results(items) if items else
-             "已成功读取来源，本次没有新增或修改材料；不要将上次事件重新当作新变化。") + missing)
+             "已成功读取来源，本次没有新增或修改材料；不要将上次事件重新当作新变化。") + missing + coverage_text)
 
 
 def save_receipt(path: str, receipt: dict) -> None:

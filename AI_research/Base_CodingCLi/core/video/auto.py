@@ -1,4 +1,4 @@
-"""Find unprocessed report runs for enabled production tasks, without output caps."""
+"""Find unprocessed reports without dropping pending work; admission happens downstream."""
 from __future__ import annotations
 
 import json
@@ -120,8 +120,12 @@ def recommendations_pending(config_dir: str, jobs_dir: str, state_dir: str, now:
     day = datetime.fromtimestamp(time.time() if now is None else now, ZoneInfo("Asia/Shanghai")).date().isoformat()
     configs = production.load_all(config_dir, jobs_dir)
     owners = matrices.load_all(config_dir)
+    from core import production_policy
+    policy = production_policy.load(config_dir)
     allowed = {m.key for m in owners.values() if not m.archived and not m.paused and any(
         c.auto and c.usable and c.job in m.jobs for c in configs.values())}
+    if policy and not policy.get('automatic', {}).get('recommendations', False):
+        allowed -= set(policy.get('matrices', []))
     try:
         with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as db:
             db.row_factory = sqlite3.Row

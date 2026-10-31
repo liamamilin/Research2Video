@@ -158,6 +158,13 @@ def create_run(spec: dict, items: list[dict], *, plan_id: Optional[str] = None, 
     return get_run(run_id)
 
 
+def run_origin(run_id: str) -> dict | None:
+    """Read admission ownership without loading a batch's full candidate history."""
+    with connect() as conn:
+        row = conn.execute('SELECT started_at,started_by FROM autopilot_runs WHERE id=?', (run_id,)).fetchone()
+    return dict(row) if row else None
+
+
 def get_run(run_id: str) -> dict | None:
     with connect() as conn:
         run = _dec(conn.execute("SELECT * FROM autopilot_runs WHERE id = ?", (run_id,)).fetchone(), _RUN_JSON)

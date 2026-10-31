@@ -1,0 +1,29 @@
+# 排期在「周期调度」维护；默认研究窗口随相邻计划槽位变化。
+schema_version: 1
+matrices:
+  - ai_media
+  - chatgpt_acquisition
+window:
+  mode: previous_slot
+  timezone: Asia/Shanghai
+# 可在 jobs 中为任意任务指定 rolling + days，独立调整研究范围而不修改出片周期。
+jobs: {}
+collection:
+  enabled: true
+  schedule: "0 0 * * *"
+  timezone: Asia/Shanghai
+  retention_days: 60
+  limit_per_source: 80
+  max_sources: 100
+  timeout_seconds: 15
+automatic:
+  daily_limit: 4
+  timezone: Asia/Shanghai
+  recommendations: false
+sources:
+  reference:
+    - source:cg_pro_tiers
+    - source:cg_pricing
+    - source:cg_help
+    - source:cg_capabilities
+    - source:cg_errors

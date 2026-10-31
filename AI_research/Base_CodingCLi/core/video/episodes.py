@@ -18,6 +18,8 @@ def topic(report: dict, workspace: str, *, job: str, source=None, production: st
     from core import report_identity
     import os
     identity = report_identity.describe(os.path.join(workspace, report["report_path"]), workspace)["id"]
+    from core import report_meta
+    issue = (report_meta.get(report['report_path']) or {}).get('production_issue') or {}
     value = reports.topic_for(report, workspace)
     items = []
     if source is not None:
@@ -25,7 +27,8 @@ def topic(report: dict, workspace: str, *, job: str, source=None, production: st
         items = [{"id": t.id, "title": t.title} for t in candidates]
     return {**value, "content_mode": MODE, "from_report": report["report_path"],
             "report_id": report["id"], "episode": {"job": job, "production": production,
-            "items": items, "report_path": report["report_path"], "report_identity": identity}}
+            "items": items, "report_path": report["report_path"], "report_identity": identity,
+            **({'issue':copy.deepcopy(issue)} if issue else {})}}
 
 
 def snapshot_context(context: dict, topic: dict) -> dict:
@@ -52,7 +55,8 @@ def publication_topic(topic: dict, context: dict) -> dict:
     # Use this report's issue date, never the later render/retry date or an
     # individual event's release date. Undated reports keep a date-free label.
     issue = ""
-    for value in (PurePath(topic.get("from_report") or episode.get("report_path") or "").name, topic.get("round", "")):
+    for value in (((episode.get('issue') or {}).get('research_window') or {}).get('end', ''),
+                  PurePath(topic.get("from_report") or episode.get("report_path") or "").name, topic.get("round", "")):
         if match := re.search(r"\d{4}-\d{2}-\d{2}", str(value)):
             try:
                 issue = date.fromisoformat(match.group()).isoformat()

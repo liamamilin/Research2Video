@@ -1,5 +1,5 @@
-name: "AI 开源雷达（每日）"
-description: "最近几天值得开发者关注的 AI 开源项目、热门模型和论文（读 GitHub、Hugging Face、TLDR 抓取的内容，不联网搜索）"
+name: "AI 开源雷达"
+description: "本期值得开发者关注的 AI 开源项目、热门模型和论文（读 GitHub、Hugging Face、TLDR 抓取的内容，不联网搜索）"
 enabled: true
 keywords:
   - 开源项目

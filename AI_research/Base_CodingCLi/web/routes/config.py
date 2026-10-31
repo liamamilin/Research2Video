@@ -29,6 +29,26 @@ router = APIRouter(prefix="/api/config", tags=["config"])
 logger = logging.getLogger(__name__)
 
 
+@router.get('/production-policy')
+def get_production_policy(user=Depends(require_admin)):
+    from web.settings import get_settings
+    from web.services.production_policy import describe
+    return describe(get_settings().paths)
+
+
+@router.put('/production-policy')
+def update_production_policy(payload: dict, user=Depends(require_admin)):
+    from web.settings import get_settings
+    from web.services.production_policy import save
+    from core.schedule_store import ScheduleConflict
+    try:
+        return save(get_settings().paths, payload['policy'], payload['expected_revision'])
+    except ScheduleConflict as exc:
+        raise HTTPException(409, detail=str(exc)) from exc
+    except (ValueError, KeyError, TypeError) as exc:
+        raise HTTPException(422, detail=str(exc)) from exc
+
+
 @lru_cache(maxsize=8)
 def _parsed_system_text(content: str) -> dict:
     return parse_yaml(content)
