@@ -47,6 +47,15 @@ def _search_health_per_test():
     yield
     search_health.use_state_dir(None)
 
+@pytest.fixture(autouse=True)
+def _telemetry_per_test():
+    """Usage records follow core.state's directory; no test writes to, or reads from, another test's database."""
+    from core import telemetry
+    telemetry.use_state_dir(None)
+    yield
+    telemetry.use_state_dir(None)
+
+
 _PASSWORDS = ("admin-pass-123", "editor-pass-123", "viewer-pass-123", "ghost-pass-123")
 
 _WEB_YAML = """\

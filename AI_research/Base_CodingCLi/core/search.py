@@ -36,6 +36,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Optional
 
+from . import telemetry
 from .errors import CancelledError, SearchUnavailableError
 
 logger = logging.getLogger(__name__)
@@ -188,6 +189,7 @@ class SearchClient:
             if provider in cooling:
                 self.errors[provider] = f"暂停使用（{cooling[provider]['reason'][:120]}）"
                 continue
+            started = time.monotonic()
             try:
                 if provider == "parallel":
                     results = self._search_parallel(
@@ -217,8 +219,10 @@ class SearchClient:
                 search_health.record_answer(provider)
                 if results:
                     self.calls += 1
+                    telemetry.record_search(provider, "", started)
                     return self._dedupe(results)
                 self.errors[provider] = "没有返回结果"
+                telemetry.record_search(provider, "no_results", started)
                 logger.warning(
                     "Search provider '%s' returned no results", provider
                 )
@@ -226,6 +230,7 @@ class SearchClient:
                 raise
             except Exception as exc:  # noqa: BLE001 - provider fallback
                 self.errors[provider] = str(exc)[:300]
+                telemetry.record_search(provider, self.errors[provider], started)
                 search_health.record_failures({provider: self.errors[provider]})
                 logger.warning(
                     "Search provider '%s' failed: %s", provider, str(exc)[:300]
