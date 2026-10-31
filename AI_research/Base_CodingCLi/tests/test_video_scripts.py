@@ -1286,6 +1286,33 @@ def test_api_publish_pack_uses_the_renders_chapters(client, video_env, autovideo
     second = client.get(f"/api/video/scripts/{script['id']}/publish").json()
     assert [c["time"] for c in second["chapters"]] == ["00:00", "00:30", "00:50"]
     assert "00:30 展开" in second["description"]
+    assert second["render_id"] == render["id"] and first.json()["render_id"] is None
+
+
+def test_api_publish_pack_binds_the_requested_render(client, video_env, autovideo):
+    from web.services import video_render
+
+    script = _approved_script("绑定成片的选题")
+    renders = []
+    for start in (30000, 40000):
+        render = store.create_render(script["id"], 1, title="一篇定稿", source_text="x", source_sha256="0" * 64, request={})
+        folder = video_render.files_dir(render["id"])
+        folder.mkdir(parents=True)
+        (folder / "chapters.json").write_text(json.dumps({"timeline": "packaged", "chapters": [
+            {"title": "开场", "start_ms": 0}, {"title": "展开", "start_ms": start}, {"title": "结论", "start_ms": 55000}]}),
+            encoding="utf-8")
+        store.update_render(render["id"], status="COMPLETED", artifacts=[{"name": "chapters.json"}])
+        renders.append(render)
+    _login(client)
+    for render, time in zip(renders, ("00:30", "00:40")):
+        pack = client.get(f"/api/video/scripts/{script['id']}/publish", params={"render_id": render["id"]}).json()
+        assert pack["render_id"] == render["id"] and f"{time} 展开" in pack["description"]
+    wrong_version = client.get(f"/api/video/scripts/{script['id']}/publish",
+                               params={"render_id": renders[0]["id"], "version": 2})
+    assert wrong_version.status_code == 422
+    assert client.get(f"/api/video/scripts/{script['id']}/publish", params={"render_id": "no-such"}).status_code == 404
+    other = _approved_script("别的选题")
+    assert client.get(f"/api/video/scripts/{other['id']}/publish", params={"render_id": renders[0]["id"]}).status_code == 404
 
 
 def test_api_publish_pack_attaches_table_report_sources_without_rewriting_a_finished_video(client, video_env):

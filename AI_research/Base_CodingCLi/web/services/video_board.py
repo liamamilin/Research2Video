@@ -117,44 +117,65 @@ def board(columns: dict, *, limit: int = 100000, config_dir: str = "config", job
     }
 
 
-def shipments(columns: dict, *, limit: int = 100000, config_dir: str = "config", jobs_dir: str = "jobs") -> list[dict]:
-    """Approved current versions and their own videos/publications, excluding archived matrices."""
+def shipments(columns: dict, *, limit: int = 100000, config_dir: str = "config", jobs_dir: str = "jobs",
+              include_history: bool = False) -> list[dict]:
+    """Approved current versions and their own videos/publications, excluding archived matrices.
+
+    ``include_history`` adds one row per other version that still has a completed video, including scripts that
+    are being edited again; such a row is ``historical`` and carries the script's ``current_version``."""
     from web.services import video_recheck
 
-    scripts = store.list_scripts(limit=limit)
-    owners, _ = outputs.script_owners(config_dir, jobs_dir, scripts)
-    scripts = [s for s in scripts if s["status"] == "APPROVED" and not owners[s["id"]]["matrix_archived"]]
-    versions = store.current_versions([s["id"] for s in scripts])
-    published = store.published_versions_by_script()
+    every = store.list_scripts(limit=limit)
+    owners, _ = outputs.script_owners(config_dir, jobs_dir, every)
+    every = [s for s in every if not owners[s["id"]]["matrix_archived"]]
+    approved = [s for s in every if s["status"] == "APPROVED"]
     render_statuses = store.render_statuses_by_script()
-    chosen_renders = {s["id"]: progress.render_state(s, render_statuses.get(s["id"], []))["render"] for s in scripts}
-    details = store.shipment_rows([s["id"] for s in scripts], [r["id"] for r in chosen_renders.values() if r])
+    # (script, version number, chosen render, historical) in display order: a script's current row, then its older videos
+    entries: list[tuple[dict, int, dict | None, bool]] = []
+    for script in (every if include_history else approved):
+        current = script["status"] == "APPROVED"
+        if current:
+            entries.append((script, script["current_version"],
+                            progress.render_state(script, render_statuses.get(script["id"], []))["render"], False))
+        if include_history:
+            seen = {script["current_version"]} if current else set()
+            for render in render_statuses.get(script["id"], []):  # newest first: the newest video of each version
+                if render["status"] == "COMPLETED" and render["version"] not in seen:
+                    seen.add(render["version"])
+                    entries.append((script, render["version"], render, True))
+    scripts = list({s["id"]: s for s, *_ in entries}.values())
+    versions = store.current_versions([s["id"] for s in approved])
+    older = store.versions_of([(s["id"], number) for s, number, _, historical in entries if historical])
+    published = store.published_versions_by_script()
+    details = store.shipment_rows([s["id"] for s in scripts], [r["id"] for _, _, r, _ in entries if r])
     from web.services import distributions
     distribution_rows = distributions.overview(scripts)
     rows = []
-    for script in scripts:
+    for script, number, chosen, historical in entries:
         owner = owners[script["id"]]
-        chosen = chosen_renders[script["id"]]
         latest = details["renders"].get(chosen["id"]) if chosen else None
-        version = versions.get(script["id"])
+        version = older.get((script["id"], number)) if historical else versions.get(script["id"])
         column = columns.get(script["column_key"])
         warnings: list[str] = []
-        if column is not None and column.recheck and version is not None and not progress.is_published(script, published.get(script["id"], set())):
+        if (not historical and column is not None and column.recheck and version is not None
+                and not progress.is_published(script, published.get(script["id"], set()))):
             warnings = video_recheck.freshness(script, version, column, details["rechecks"].get(script["id"], [])).get("warnings", [])
         video = next((a for a in (latest or {}).get("artifacts") or [] if a["name"] == "video.mp4"), None)
-        publications = [p for p in details["publications"].get(script["id"], []) if p["version"] == script["current_version"]
-                        or (p["version"] is None and script["current_version"] == 1)]
+        publications = [p for p in details["publications"].get(script["id"], []) if p["version"] == number
+                        or (p["version"] is None and number == 1)]
         rows.append({
             "script_id": script["id"], "title": version["title"] if version else script["topic"].get("title", ""),
             "column_key": script["column_key"], "column_label": owner.get("production_name") or (column.name if column else script["column_key"]),
             **{k: v for k, v in owner.items() if k != "matrix_archived"},
-            "approved_version": script["approved_version"], "created_at": script["created_at"],
+            # a historical row stands for its own version, so (script_id, approved_version) stays unique per row
+            "approved_version": number if historical else script["approved_version"], "created_at": script["created_at"],
+            "current_version": script["current_version"], "script_status": script["status"], "historical": historical,
             "credibility": credibility.label(version) if version else None, "auto": script.get("created_by") == "autopilot",
             "render": None if latest is None else {"id": latest["id"], "status": latest["status"],
                                                    "version": latest["version"], "error": latest.get("error_message"),
                                                    "completed_at": latest.get("completed_at")},
             "video_url": f"/api/video/renders/{latest['id']}/files/video.mp4" if video and latest["status"] == "COMPLETED" else None,
             "publications": [p for p in publications if not p.get("removed_at")], "warnings": warnings,
-            "distributions": [d for d in distribution_rows[script["id"]] if d["version"] == script["current_version"]],
+            "distributions": [d for d in distribution_rows.get(script["id"], []) if d["version"] == number],
         })
     return rows

@@ -177,3 +177,32 @@ def test_platform_workspace_follows_current_registered_platform_prefix(client, m
     assert response.status_code == 200
     item = response.json()['objects'][0]
     assert item['status'] == '平台管理' and item['tasks'][0]['id'] == 'one' and item['active']
+
+
+def test_workspace_reads_do_not_hold_the_shared_event_loop(monkeypatch):
+    """A slow database read inside the projection must not stall every other request (/api/live included)."""
+    import asyncio
+    import time
+    from web.services import assistant_tasks, assistant_workspace
+
+    monkeypatch.setattr(assistant_tasks, 'recovered_operations', lambda operations: time.sleep(0.4) or {})
+    conversation = {'id': 'c', 'requests': [], 'refs': [], 'context': None}
+
+    async def measure():
+        lag = 0.0
+
+        async def ticker():
+            nonlocal lag
+            while True:
+                started = time.perf_counter()
+                await asyncio.sleep(0.01)
+                lag = max(lag, time.perf_counter() - started - 0.01)
+
+        tick = asyncio.create_task(ticker())
+        await asyncio.sleep(0.02)
+        result = await assistant_workspace.project(None, {'username': 'admin'}, conversation, [])
+        tick.cancel()
+        return result, lag
+
+    result, lag = asyncio.run(measure())
+    assert result['tasks'] == [] and lag < 0.2

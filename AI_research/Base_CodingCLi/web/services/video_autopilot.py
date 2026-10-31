@@ -340,13 +340,15 @@ def _hold(item: dict, note: str) -> None:
     ap.update_item(item["id"], state="HELD", note=note)
 
 
-def advance(item: dict, *, can_start_script: bool, can_start_render: bool) -> dict:
+def advance(item: dict, *, can_start_script: bool, can_start_render: bool, search_down: bool = False) -> dict:
     """Do the next missing thing for one item. Returns which kinds of work it newly started."""
     took = {"script": False, "render": False}
     if item["state"] in ("DONE", "FAILED", "HELD", "CANCELLED"):
         return took
     if not item["script_id"]:
         if not can_start_script:
+            if search_down and item["note"] != video_executor.SEARCH_WAIT_NOTE:
+                ap.update_item(item["id"], note=video_executor.SEARCH_WAIT_NOTE)
             return took
         from core.video import content_guard
 
@@ -561,6 +563,31 @@ def retry_held_renders() -> int:
     return reopened
 
 
+def retry_search_holds() -> int:
+    """Items held because research could not search (credits ran out, every provider rate-limited) go on, their earlier
+    tries no longer counted, and their themes leave 「需处理」. Only failed, unarchived scripts whose error was that
+    outage; while search is still down they wait for it rather than fail again. Returns how many."""
+    from core import search_health
+    from core.theme_store import ThemeStore
+
+    themes = ThemeStore(get_settings().paths.state_dir)
+    reopened = 0
+    for item in ap.held_items(limit=500):
+        script = store.get_script(item["script_id"]) if item["script_id"] else None
+        if not (script and script["status"] == "FAILED" and not script.get("archived")
+                and search_health.is_outage_error(script.get("error"))):
+            continue
+        retries = {k: v for k, v in (item.get("retries") or {}).items() if k not in ("script", "search")}
+        ap.update_item(item["id"], state="WORKING", note="等待重新调研", retries=retries)
+        ap.update_run(item["run_id"], status="RUNNING")
+        theme_id = script["topic"].get("theme_task_id")
+        theme = themes.get(theme_id) if theme_id else None
+        if theme and theme["status"] == "attention":
+            themes.mark(theme_id, "started")
+        reopened += 1
+    return reopened
+
+
 def _in_flight(runs: list[dict]) -> dict:
     """Scripts being written and renders being made right now, over every one of these batches' items."""
     counts = {"scripts": 0, "renders": 0}
@@ -595,8 +622,12 @@ def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
         run = ap.get_run(run["id"])
     if counts is None:  # a batch ticked on its own: the work in flight is its own and every other running batch's
         counts = _in_flight(ap.list_runs(limit=None, status="RUNNING"))
+    from core import search_health
+    # While no search provider can answer, research would only fail: new scripts wait, renders go on.
+    search_down = search_health.outage() is not None
     for item in run["items"]:
-        took = advance(item, can_start_script=counts["scripts"] < MAX_SCRIPTS, can_start_render=counts["renders"] < MAX_RENDERS)
+        took = advance(item, can_start_script=counts["scripts"] < MAX_SCRIPTS and not search_down,
+                       can_start_render=counts["renders"] < MAX_RENDERS, search_down=search_down)
         counts["scripts"] += took["script"]
         counts["renders"] += took["render"]
     run = ap.get_run(run["id"])

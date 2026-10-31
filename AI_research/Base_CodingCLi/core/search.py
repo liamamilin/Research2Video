@@ -178,8 +178,16 @@ class SearchClient:
             if fallback and fallback not in providers:
                 providers.append(fallback)
 
+        from core import search_health
+
+        # Credits, keys and rate limits do not recover within one run: skip a provider that just failed that way
+        # (shared with the other processes) instead of spending another doomed request on it.
+        cooling = search_health.cooling()
         answered = False
         for provider in providers:
+            if provider in cooling:
+                self.errors[provider] = f"暂停使用（{cooling[provider]['reason'][:120]}）"
+                continue
             try:
                 if provider == "parallel":
                     results = self._search_parallel(
@@ -206,6 +214,7 @@ class SearchClient:
                     self.errors[provider] = "未知的搜索服务商"
                     continue
                 answered = True
+                search_health.record_answer(provider)
                 if results:
                     self.calls += 1
                     return self._dedupe(results)
@@ -217,11 +226,13 @@ class SearchClient:
                 raise
             except Exception as exc:  # noqa: BLE001 - provider fallback
                 self.errors[provider] = str(exc)[:300]
+                search_health.record_failures({provider: self.errors[provider]})
                 logger.warning(
                     "Search provider '%s' failed: %s", provider, str(exc)[:300]
                 )
 
         if not answered:
+            search_health.record_outage(self.errors)
             raise SearchUnavailableError(self.errors)
         return []
 

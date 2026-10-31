@@ -155,6 +155,32 @@ def test_shipments_use_current_approval_video_and_publication(video_env, publica
     assert shipments({})[0]["render"]["status"] == "COMPLETED"
 
 
+def test_shipments_history_keeps_older_videos_and_scripts_being_edited(video_env):
+    from web.services.video_board import shipments
+    script = make_script()
+    render(script)
+    data = version(["CITED"])
+    store.add_version(script["id"], title="新版定稿", sections=data["sections"], length_check={}, meta=data["meta"], edit_type="EDITED")
+    store.update_script(script["id"], status="APPROVED", approved_version=2)
+    render(store.get_script(script["id"]), number=2)
+    store.add_publication(script["id"], url="https://b23.tv/old", published_on="2026-10-20", version=1)
+    editing = make_script()
+    render(editing)
+    store.update_script(editing["id"], status="DRAFT")
+
+    current = shipments({})
+    assert [(r["script_id"], r["approved_version"], r["historical"]) for r in current] == [(script["id"], 2, False)]
+    assert current[0]["current_version"] == 2 and current[0]["script_status"] == "APPROVED"
+
+    rows = {(r["script_id"], r["approved_version"]): r for r in shipments({}, include_history=True)}
+    assert set(rows) == {(script["id"], 2), (script["id"], 1), (editing["id"], 1)}
+    old = rows[(script["id"], 1)]
+    assert old["historical"] and old["render"]["version"] == 1 and old["current_version"] == 2
+    assert [p["url"] for p in old["publications"]] == ["https://b23.tv/old"] and rows[(script["id"], 2)]["publications"] == []
+    assert all(d["version"] == 1 for d in old["distributions"])
+    assert rows[(editing["id"], 1)]["historical"] and rows[(editing["id"], 1)]["script_status"] == "DRAFT"
+
+
 def test_shipments_exclude_archived_matrix_videos(prod_env):
     from web.services.video_board import shipments
     make_script("research/loose")

@@ -439,9 +439,13 @@ class ResearchAgent:
         Writing on without sources is the worse outcome: the report reads as
         researched and the run is recorded as a success.
         """
+        from core import search_health
+
         try:
             return self.search.search(queries, objective=objective)
         except SearchUnavailableError as exc:
+            if exc.reasons and all(search_health.classify(why) for why in exc.reasons.values()):
+                raise  # out of credits, bad keys or rate limits: a retry seconds later meets the same answers
             logger.warning("Web search unavailable, retrying once: %s", exc)
         self._check_cancel()
         time.sleep(_SEARCH_RETRY_DELAY)

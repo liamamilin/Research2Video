@@ -20,6 +20,10 @@ class LLMUnsupportedError(LLMError):
     """
 
 
+#: How every SearchUnavailableError message starts; recorded failures are recognised by it (core.search_health).
+SEARCH_UNAVAILABLE_PREFIX = "联网搜索不可用"
+
+
 class SearchUnavailableError(Exception):
     """Raised when no search provider could answer (quota, key, rate limit, network).
 
@@ -31,7 +35,7 @@ class SearchUnavailableError(Exception):
         self.reasons = dict(reasons)
         detail = "；".join(f"{name}: {why}" for name, why in self.reasons.items())
         super().__init__(
-            f"联网搜索不可用，已中止，没有生成报告。{detail}。"
+            f"{SEARCH_UNAVAILABLE_PREFIX}，已中止，没有生成报告。{detail}。"
             "请到「设置 → 搜索」检查服务商额度和 Key，或换一个搜索服务商后重新运行。"
         )
 

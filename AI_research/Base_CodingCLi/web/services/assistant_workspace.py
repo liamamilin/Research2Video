@@ -51,7 +51,7 @@ async def object_view(context: dict, request: Request, load_video=None) -> dict:
                         active=bool(data.get('is_running')))
         elif kind == 'batch':
             from core.video import autopilot_store
-            data = autopilot_store.get_run(key)
+            data = await asyncio.to_thread(autopilot_store.get_run, key)
             if not data:
                 raise ValueError('视频生产批次不存在')
             item.update(title='视频生产批次', href='/?automation=1', status=data['status'],
@@ -62,7 +62,7 @@ async def object_view(context: dict, request: Request, load_video=None) -> dict:
         elif kind == 'application_batch':
             from web.deps import current_user
             from web.services.assistant_batch_store import BatchStore
-            data = BatchStore().get(key, current_user(request))
+            data = await asyncio.to_thread(lambda: BatchStore().get(key, current_user(request)))
             item.update(title=data['title'], href=data['href'], status=data['status'], active=data['active'],
                         detail='固定范围，逐项接续；结果未知的提交不会自动重放。')
             item['tasks'] = [{'id': i['id'], 'title': i['title'], 'status': i['state'], 'error': i['error']} for i in data['items']]
@@ -134,7 +134,10 @@ async def project(request: Request, user: dict, conversation: dict, operations: 
         if len(objects) == 4:
             break
     from web.services.assistant_tasks import recovered_operations
-    recovered = recovered_operations(operations)
+    from web.services import assistant_tools, jobs_assistant
+    # Database reads and the tool registry run in a worker: this coroutine shares the event loop with every request.
+    recovered, specs = await asyncio.gather(asyncio.to_thread(recovered_operations, operations),
+                                            asyncio.to_thread(assistant_tools.registry))
     reads = {}
     publication_reads = {}
     publication_catalogs = {}
@@ -194,8 +197,6 @@ async def project(request: Request, user: dict, conversation: dict, operations: 
 
     shown = await asyncio.gather(*(object_view(ref, request, load_video) for ref in objects))
     changes = []
-    from web.services import assistant_tools, jobs_assistant
-    specs = assistant_tools.registry()
     labels = {**jobs_assistant.LABELS, **{k: t.label for k, t in specs.items()}}
     for op in operations:
         result = op['result'] or {}
@@ -213,13 +214,17 @@ async def project(request: Request, user: dict, conversation: dict, operations: 
         actions = [op for op in reversed(operations) if op['request_id'] == record['id']]
         modifications = [change for change in reversed(changes) if change['request_id'] == record['id']]
         from web.services.assistant_batch_store import BatchStore, view as batch_view
-        batches = []
-        for key in dict.fromkeys(op['result'].get('application_batch_id') for op in actions if op.get('result')):
-            if key:
+
+        def read_batches(keys):
+            found = []
+            for key in keys:
                 try:
-                    batches.append(batch_view(BatchStore().get(key, user)))
+                    found.append(batch_view(BatchStore().get(key, user)))
                 except ValueError:
                     pass
+            return found
+        keys = [key for key in dict.fromkeys(op['result'].get('application_batch_id') for op in actions if op.get('result')) if key]
+        batches = await asyncio.to_thread(read_batches, keys) if keys else []
         preparations = [p for op in actions for p in (op['result'] or {}).get('publication_preparations', [])]
         targets = {(t['platform'], t['id']): t for op in actions for t in (op['result'] or {}).get('publication_tasks', [])}
         # Also track native generic API submissions, including partial success.

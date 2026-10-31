@@ -930,3 +930,64 @@ def test_the_batch_waits_for_the_discovery_job_as_long_as_the_job_itself_may_run
     ap.update_run(run["id"], discovery_at=time.time() - 600 - pilot.DISCOVERY_SLACK_SECONDS - 1)
     assert pilot.fresh_topics(spec, ap.get_run(run["id"])) is True
     assert "超过了它自己的时限" in ap.get_run(run["id"])["note"] and starts == []  # never restarted to "help"
+
+
+OUTAGE = "研究没有完成（failed）：联网搜索不可用，已中止，没有生成报告。exa: HTTP 402: NO_MORE_CREDITS。"
+
+
+@pytest.fixture
+def search_health_dir(tmp_path):
+    from core import search_health
+    search_health.use_state_dir(str(tmp_path / "search"))
+    (tmp_path / "search").mkdir()
+    yield search_health
+    search_health.use_state_dir(None)
+
+
+def test_while_search_is_down_scripts_wait_instead_of_failing_and_keep_their_retries(pilot_env, monkeypatch, search_health_dir):
+    spawned, _ = pilot_env
+    health = search_health_dir
+    health.record_failures({"exa": "HTTP 402: NO_MORE_CREDITS"})
+    health.record_outage({"exa": "HTTP 402: NO_MORE_CREDITS"})
+    run = batch(monkeypatch, 1)
+    pilot.tick()
+    assert spawned == [] and item_of(run["id"], 0)["note"] == pilot.video_executor.SEARCH_WAIT_NOTE
+
+    health.clear()
+    pilot.tick()
+    script_id = item_of(run["id"], 0)["script_id"]
+    assert spawned == [script_id]
+    for attempt in range(pilot.MAX_RETRIES + 2):  # more than a writing failure may have
+        store.update_script(script_id, status="FAILED", error=OUTAGE)
+        pilot.tick()
+    item = item_of(run["id"], 0)
+    assert item["state"] == "WORKING" and item["retries"].get("script", 0) == 0
+    assert item["retries"]["search"] == pilot.MAX_RETRIES + 2 and spawned.count(script_id) == pilot.MAX_RETRIES + 3
+
+    health.record_failures({"exa": "HTTP 402"})
+    health.record_outage({"exa": "HTTP 402"})
+    store.update_script(script_id, status="FAILED", error=OUTAGE)
+    pilot.tick()
+    assert spawned.count(script_id) == pilot.MAX_RETRIES + 3  # no try while it is still down
+    assert item_of(run["id"], 0)["note"] == pilot.video_executor.SEARCH_WAIT_NOTE
+
+
+def test_items_held_by_a_search_outage_can_be_released_once(pilot_env, monkeypatch, search_health_dir):
+    run = batch(monkeypatch, 2)
+    pilot.tick()
+    outage, other = (item_of(run["id"], i) for i in (0, 1))
+    store.update_script(outage["script_id"], status="FAILED", error=OUTAGE)
+    store.update_script(other["script_id"], status="FAILED", error="模型输出不是 JSON")
+    for item in (outage, other):
+        ap.update_item(item["id"], state="HELD", note="写稿失败 3 次：…", retries={"script": 2, "audit": 1})
+    ap.update_run(run["id"], status="DONE")
+
+    store.update_script(outage["script_id"], archived=1)
+    assert pilot.retry_search_holds() == 0
+    store.update_script(outage["script_id"], archived=0)
+    assert pilot.retry_search_holds() == 1
+    released = item_of(run["id"], 0)
+    assert released["state"] == "WORKING" and released["retries"] == {"audit": 1}
+    assert item_of(run["id"], 1)["state"] == "HELD"
+    assert ap.get_run(run["id"])["status"] == "RUNNING"
+    assert pilot.retry_search_holds() == 0

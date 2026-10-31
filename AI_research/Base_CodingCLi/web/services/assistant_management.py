@@ -315,9 +315,9 @@ async def publication_task_view(target: dict, request, *, row: dict | None = Non
             _, row = await application.native(request, 'GET', platform_path(platform) + '/uploads/' + quote(key, safe=''))
         status = row.get('status', '')
         owner = row.get('uid') or row.get('account_uid') or target.get('account_uid') or ''
-        profile = account(platform)
+        # account files and receipt state are read in a worker, off the shared event loop
+        profile, progress = await asyncio.to_thread(lambda: (account(platform), describe(platform, key, row)))
         item.update(account_uid=owner, account_name=profile.get('name') if owner and profile.get('uid') == owner else owner)
-        progress = describe(platform, key, row)
         item.update({k: row.get(k) for k in ('status', 'title', 'script_id', 'version', 'render_id', 'phase', 'error', 'url', 'bvid', 'work_id')})
         item.update(**progress)
         item['title'] = row.get('title') or (row.get('payload') or {}).get('title')

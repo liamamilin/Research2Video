@@ -17,6 +17,15 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+
+@pytest.fixture(autouse=True)
+def _search_health_per_test():
+    """Search cooldowns follow core.state's directory; one test's provider failures must not skip providers in the next."""
+    from core import search_health
+    search_health.use_state_dir(None)
+    yield
+    search_health.use_state_dir(None)
+
 _PASSWORDS = ("admin-pass-123", "editor-pass-123", "viewer-pass-123", "ghost-pass-123")
 
 _WEB_YAML = """\

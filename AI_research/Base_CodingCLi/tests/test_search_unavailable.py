@@ -57,12 +57,13 @@ def test_a_fallback_that_answers_keeps_the_run_going(monkeypatch):
 class _DeadSearch:
     calls = 0
 
-    def __init__(self):
+    def __init__(self, reason="connection failed"):
         self.attempts = 0
+        self.reason = reason
 
     def search(self, queries, objective="", after_date=None):
         self.attempts += 1
-        raise SearchUnavailableError({"parallel": "HTTP 402"})
+        raise SearchUnavailableError({"parallel": self.reason})
 
 
 def _agent(monkeypatch, mode: str) -> ResearchAgent:
@@ -77,6 +78,14 @@ def test_the_search_tool_ends_the_agent_run_instead_of_telling_the_model(monkeyp
     with pytest.raises(SearchUnavailableError):
         agent._execute_tool("search_web", {"queries": ["q"]})
     assert agent.search.attempts == 2  # one retry, then it stops
+
+
+def test_credits_and_rate_limits_are_not_retried_within_the_run(monkeypatch):
+    agent = _agent(monkeypatch, "agent")
+    agent.search = _DeadSearch("HTTP 402: NO_MORE_CREDITS")
+    with pytest.raises(SearchUnavailableError):
+        agent._execute_tool("search_web", {"queries": ["q"]})
+    assert agent.search.attempts == 1
 
 
 def test_the_pipeline_does_not_write_a_report_without_sources(monkeypatch):
@@ -102,3 +111,66 @@ def test_a_transient_outage_is_retried_once(monkeypatch):
 
     agent.search.search = flaky
     assert "https://a.test" in agent._execute_tool("search_web", {"queries": ["q"]})
+
+
+@pytest.fixture()
+def health(tmp_path):
+    from core import search_health
+    search_health.use_state_dir(str(tmp_path))
+    yield search_health
+    search_health.use_state_dir(None)
+
+
+@pytest.mark.parametrize("reason, kind", [
+    ('HTTP 402: {"error":"You have exceeded your credits limit","tag":"NO_MORE_CREDITS"}', "permanent"),
+    ("HTTP 401: invalid api key", "permanent"),
+    ("HTTP 429：被限流", "rate_limit"),
+    ("https://duckduckgo.com/?q=x 202 Ratelimit", "rate_limit"),
+    ("connection reset by peer", None),
+    ("没有返回结果", None),
+])
+def test_failures_are_classified_by_status_and_provider_text(reason, kind):
+    from core.search_health import classify
+    assert classify(reason) == kind
+
+
+def test_a_provider_out_of_credits_is_skipped_until_its_cooldown_ends(monkeypatch, health):
+    from core.search import SearchResult
+
+    hit = SearchResult(title="t", url="https://a.test", excerpts=["x"], provider="duckduckgo")
+    client = _client(monkeypatch, {"parallel": RuntimeError("HTTP 402: NO_MORE_CREDITS"), "duckduckgo": [hit]})
+    client.search(["q"])
+    monkeypatch.setattr(client, "_search_parallel", lambda *a, **k: pytest.fail("asked a provider that is out of credits"))
+    assert [r.url for r in client.search(["q"])] == ["https://a.test"]
+    assert "暂停使用" in client.errors["parallel"]
+    later = health.PERMANENT_COOLDOWN + 1
+    real = health.time.time
+    monkeypatch.setattr(health.time, "time", lambda: real() + later)
+    assert health.cooling() == {}
+
+
+def test_every_provider_down_is_an_outage_until_one_answers(monkeypatch, health):
+    from core.search import SearchResult
+
+    client = _client(monkeypatch, {"parallel": RuntimeError("HTTP 402"), "duckduckgo": RuntimeError("202 Ratelimit")})
+    with pytest.raises(SearchUnavailableError):
+        client.search(["q"])
+    assert set(health.outage()["reasons"]) == {"parallel", "duckduckgo"}
+    # while both cool down, a search fails at once without a request
+    with pytest.raises(SearchUnavailableError):
+        client.search(["q"])
+    health.clear()
+    hit = SearchResult(title="t", url="https://a.test", excerpts=["x"], provider="duckduckgo")
+    client = _client(monkeypatch, {"parallel": RuntimeError("connection failed"), "duckduckgo": [hit]})
+    health.record_outage({"parallel": "HTTP 402"})
+    client.search(["q"])
+    assert health.outage() is None
+
+
+def test_without_a_state_dir_nothing_is_shared(monkeypatch):
+    from core import search_health
+    search_health.use_state_dir(None)
+    client = _client(monkeypatch, {"parallel": RuntimeError("HTTP 402"), "duckduckgo": RuntimeError("HTTP 402")})
+    with pytest.raises(SearchUnavailableError):
+        client.search(["q"])
+    assert search_health.cooling() == {} and search_health.outage() is None

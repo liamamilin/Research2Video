@@ -710,6 +710,22 @@ def current_versions(script_ids: list[str]) -> dict[str, dict]:
     return out
 
 
+def versions_of(pairs: list[tuple[str, int]]) -> dict[tuple[str, int], dict]:
+    """Specific (script, version) rows for a page, batched like ``current_versions``."""
+    wanted = list(dict.fromkeys(pairs))
+    out: dict[tuple[str, int], dict] = {}
+    with connect() as conn:
+        for start in range(0, len(wanted), 400):
+            batch = wanted[start:start + 400]
+            rows = conn.execute(
+                "SELECT * FROM script_versions WHERE "
+                + " OR ".join("(script_id = ? AND version = ?)" for _ in batch),
+                [value for pair in batch for value in pair],
+            )
+            out.update(((r["script_id"], r["version"]), _decode(r, _VERSION_JSON)) for r in rows)
+    return out
+
+
 def current_titles() -> dict[str, str]:
     """Titles for list pages, without reading narration or audit JSON."""
     with connect() as conn:

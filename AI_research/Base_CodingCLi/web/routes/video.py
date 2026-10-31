@@ -201,11 +201,11 @@ def ack_alert(body: AlertAckIn, user=Depends(require_editor)) -> dict:
 
 
 @router.get("/shipments")
-def shipments(user=Depends(require_viewer), compact: bool = False) -> list[dict]:
+def shipments(user=Depends(require_viewer), compact: bool = False, include_history: bool = False) -> list[dict]:
     """Approved scripts with their render and publication state, for the 成片与发布 page."""
     from web.services import video_board
 
-    rows = video_board.shipments(_known_columns())
+    rows = video_board.shipments(_known_columns(), include_history=include_history)
     if compact:
         from web.services.video_list_payload import compact as project
         return [project(row) for row in rows]
@@ -358,6 +358,16 @@ def retry_held_renders(user=Depends(require_editor)) -> dict:
 
     reopened = video_autopilot.retry_held_renders()
     audit.log("video_retry_held", user=user["username"], result=str(reopened))
+    return {"reopened": reopened}
+
+
+@router.post("/autopilot/retry-search-held")
+def retry_search_held(user=Depends(require_editor)) -> dict:
+    """Run again the items held because no search provider could answer, once search is back (credits, keys)."""
+    from web.services import video_autopilot
+
+    reopened = video_autopilot.retry_search_holds()
+    audit.log("video_retry_search_held", user=user["username"], result=str(reopened))
     return {"reopened": reopened}
 
 
@@ -821,9 +831,20 @@ def get_facts(script_id: str, version: Optional[int] = None, user=Depends(requir
 
 
 @router.get("/scripts/{script_id}/publish")
-def get_publish_pack(script_id: str, version: Optional[int] = None, user=Depends(require_viewer)) -> dict:
-    """Title, description, chapters, tags and cover text for uploading a version (the approved one by default)."""
+def get_publish_pack(script_id: str, version: Optional[int] = None, render_id: Optional[str] = None,
+                     user=Depends(require_viewer)) -> dict:
+    """Title, description, chapters, tags and cover text for uploading a version (the approved one by default).
+
+    With ``render_id`` the pack describes exactly that completed video of this script, never a newer one."""
     script = _script_or_404(script_id)
+    if render_id is not None:
+        render = store.get_render(render_id)
+        if render is None or render["script_id"] != script_id or render["status"] != "COMPLETED":
+            raise _not_found("这条成片")
+        if version is not None and render["version"] != version:
+            raise HTTPException(422, detail=ApiError.make("render_version_mismatch",
+                                                          f"这条成片属于 v{render['version']}，不是 v{version}"))
+        version = render["version"]
     number = version or script["approved_version"] or script["current_version"]
     shown = store.get_version(script_id, number) if number else None
     if shown is None:
@@ -831,7 +852,7 @@ def get_publish_pack(script_id: str, version: Optional[int] = None, user=Depends
     column = _known_columns().get(script["column_key"])
     if column is None and not script['topic'].get('local_video'):
         raise HTTPException(422, detail=ApiError.make("unknown_column", f"没有这个栏目：{script['column_key']}"))
-    return video_render.publish_pack(script, shown, column)
+    return video_render.publish_pack(script, shown, column, render_id=render_id)
 
 
 class PublicationIn(BaseModel):

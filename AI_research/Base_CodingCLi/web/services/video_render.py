@@ -185,7 +185,7 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
     """The publish pack of ``version``; chapter times come from its newest completed render, if there is one."""
     if (script.get('topic') or {}).get('local_video'):
         from web.services.local_video import publish_pack as local_pack
-        return local_pack(script, version)
+        return {**local_pack(script, version), "render_id": render_id}
     from core.video import publish
 
     report = ""
@@ -194,12 +194,14 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
     except (OSError, KeyError, TypeError):
         pass
     timeline = None
+    used = None  # the render whose chapters the pack carries, echoed so a page can tell which video it describes
     for render in store.list_renders(script["id"]):
         if render_id is not None and render["id"] != render_id:
             continue
         if render["version"] != version["version"] or render["status"] != "COMPLETED":
             continue
         timeline = {}  # there is a video: with no chapters file it has no chapters, which is not "not rendered yet"
+        used = render["id"]
         path = safe_file(render, "chapters.json")
         if path is not None:
             try:
@@ -211,7 +213,7 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
     from web.services import video_recheck
 
     fresh = video_recheck.freshness(script, version, column, store.list_rechecks(script["id"]))
-    return publish.build(script, {**version, "checks": checks}, column, report, timeline, fresh)
+    return {**publish.build(script, {**version, "checks": checks}, column, report, timeline, fresh), "render_id": used}
 
 
 def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None) -> dict:
