@@ -191,16 +191,19 @@ function App() {
     } catch (e) { if (request === listRequest.current) setError(e instanceof Error ? e.message : '无法读取任务列表'); }
     finally { if (request === listRequest.current) setListLoading(false); }
   }, [offset, query, filter]);
-  const reloadJob = useCallback(async (id: string) => {
+  // A completed job's files do not change, so they are read once per job rather than on every 2.5s status poll.
+  const filesLoadedFor = useRef('');
+  const reloadJob = useCallback(async (id: string, force = false) => {
     try {
       const value = await api<Job>(`/api/jobs/${id}`);
       const active = parseRoute(); if (active.kind !== 'job' || active.id !== id) return;
       setJob(value);
       if (value.status === 'COMPLETED') {
+        if (!force && filesLoadedFor.current === id) return;
         const [files, images] = await Promise.all([api<{items: Artifact[]}>(`/api/jobs/${id}/artifacts`), api<{items: SceneImage[]}>(`/api/jobs/${id}/scene-images`)]);
         const active = parseRoute(); if (active.kind !== 'job' || active.id !== id) return;
-        setArtifacts(files.items); setSceneImages(images.items);
-      } else { setArtifacts([]); setSceneImages([]); }
+        setArtifacts(files.items); setSceneImages(images.items); filesLoadedFor.current = id;
+      } else { filesLoadedFor.current = ''; setArtifacts([]); setSceneImages([]); }
     } catch (e) { const active = parseRoute(); if (active.kind === 'job' && active.id === id) setError(e instanceof Error ? e.message : '无法读取任务'); }
   }, []);
   useEffect(() => {
@@ -215,6 +218,7 @@ function App() {
     return () => clearTimeout(timer);
   }, [page.kind, reloadList]);
   useEffect(() => {
+    filesLoadedFor.current = '';
     if (page.kind !== 'job') { setJob(null); setArtifacts([]); setSceneImages([]); return; }
     setJob(null); setArtifacts([]); setSceneImages([]);
     const tick = () => { void reloadJob(page.id); };
@@ -335,7 +339,7 @@ function App() {
           <div className="jobs-table" aria-busy={listLoading}><div className="table-head"><span>作品</span><span>创建时间</span><span>时长模式</span><span>状态</span><span/></div>{collection.items.map(item => <JobRow key={item.job_id} job={item} detailed/>)}{!collection.items.length && <div className="empty-state"><Icon name="film"/><h2>{listLoading ? '正在读取作品…' : query || filter ? '没有找到对应作品' : '从第一支视频开始'}</h2><p>{query || filter ? '试试其他关键词，或调整筛选条件。' : '提供素材，我们来完成讲稿、配音和画面。'}</p>{!query && !filter && <a href="#new" className="primary-button">新建视频</a>}</div>}</div>
           <div className="pagination"><span>{listLoading ? '正在更新作品…' : collection.total ? `${offset + 1}–${Math.min(offset + 12, collection.total)} / 共 ${collection.total} 个记录` : '0 个记录'}</span><div><button className="secondary-button" disabled={offset === 0 || listLoading} onClick={() => setOffset(v => Math.max(0, v - 12))}>上一页</button><button className="secondary-button" disabled={offset + 12 >= collection.total || listLoading} onClick={() => setOffset(v => v + 12)}>下一页</button></div></div>
         </section>}
-        {page.kind === 'job' && <JobDetail key={page.id} job={job} artifacts={artifacts} sceneImages={sceneImages} drawThingsReady={Boolean(config?.draw_things?.ready)} onCancel={cancel} onRetry={retry} onRegenerateScene={regenerateScene} onRefresh={() => job && reloadJob(job.job_id)}/>}
+        {page.kind === 'job' && <JobDetail key={page.id} job={job} artifacts={artifacts} sceneImages={sceneImages} drawThingsReady={Boolean(config?.draw_things?.ready)} onCancel={cancel} onRetry={retry} onRegenerateScene={regenerateScene} onRefresh={() => job && reloadJob(job.job_id, true)}/>}
       </div>
       <footer className="main-footer"><span>AutoVideo <b>本地版</b></span><span>素材到成片，留在同一个工作台。</span></footer>
     </main>
