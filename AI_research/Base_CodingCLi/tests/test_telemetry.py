@@ -418,6 +418,19 @@ def test_videos_are_compared_by_the_attribute_asked_for(db):
         query.compare(str(config), "script_id")
 
 
+def test_the_assistants_model_calls_are_recorded_under_the_assistant_stage(db, monkeypatch):
+    from web.services import jobs_assistant
+
+    def application_run(message, history, llm, request, user, **kwargs):
+        telemetry.record_call("llm", provider="p", model="m", usage={"prompt_tokens": 10, "completion_tokens": 5})
+        return {"answer": message}
+    monkeypatch.setattr("web.services.assistant_runtime.run", application_run)
+    assert jobs_assistant.run("hi", [], None, None, {"role": "admin"}) == {"answer": "hi"}
+    [call] = rows("calls")
+    assert call["stage"] == "assistant" and call["prompt_tokens"] == 10
+    assert [s["stage"] for s in rows("spans")] == ["assistant"] and telemetry.current() == {}
+
+
 def _published(bvid, script, views, pubdate=1000, available=True):
     return {"bvid": bvid, "title": bvid, "pubdate": pubdate, "available": available, "metrics": {"view": views},
             "publication": {"script_id": script, "matrix": "m1"}}

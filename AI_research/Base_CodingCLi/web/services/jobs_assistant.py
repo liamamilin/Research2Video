@@ -208,6 +208,8 @@ def _error_message(exc: Exception) -> str:
 def run(message: str, history: list[dict], llm, request: Request, user: dict,
         on_event=None, cancel_token=None, **kwargs) -> dict:
     """Compatibility entry point for the application-wide runtime."""
+    from core import telemetry
     from web.services.assistant_runtime import run as application_run
-    return application_run(message, history, llm, request, user,
-                           on_event=on_event, cancel_token=cancel_token, **kwargs)
+    with telemetry.track("assistant"):  # every model turn of this conversation is attributed to the assistant
+        return application_run(message, history, llm, request, user,
+                               on_event=on_event, cancel_token=cancel_token, **kwargs)

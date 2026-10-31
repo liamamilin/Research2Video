@@ -62,6 +62,10 @@ def test_candidate(patch: dict, user, provider_id: str = '', *, private_headers=
     llm_config.max_tokens = 512
     client = LLMClient(llm_config)
     started = time.monotonic()
+    from contextlib import ExitStack
+    from core import telemetry
+    timing = ExitStack()
+    timing.enter_context(telemetry.track('assistant-test'))
     try:
         plain = client.chat([{'role': 'user', 'content': 'Reply only: ok'}], stream=False, max_tokens=32)
         if not plain.content.strip():
@@ -91,6 +95,7 @@ def test_candidate(patch: dict, user, provider_id: str = '', *, private_headers=
             from core.state import StateManager
             StateManager.record_usage('assistant-test', user['username'], client.usage or None)
         finally:
+            timing.close()
             client.close()
 
 
