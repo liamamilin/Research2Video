@@ -400,16 +400,16 @@ def reconcile(platform: str, key: str, value: str = '') -> dict:
 
 def overview(platform: str) -> dict:
     profile = account(platform); owner = profile.get('uid','')
-    jobs=store(platform).list(uid=owner) if owner else []
+    db=store(platform); jobs=db.list(uid=owner) if owner else []
     comments={r['parent_id']:r for r in jobs if r['kind']=='FIRST_COMMENT'}
     checking = {r['parent_id'] for r in jobs if r['kind'] == 'RECONCILE' and r['status'] in ACTIVE}
     path=directory(platform)/'login.json'
     if owner:
-        profile = {**profile, 'session': session_of(store(platform), owner)}
+        profile = {**profile, 'session': session_of(db, owner, jobs=jobs)}
     return {'definition':definition(platform),'account':profile,'runtime_ready':runtime()['ready'],
             'login_id':json.loads(path.read_text()).get('id') if path.is_file() else None,
             'uploads':[public_job(platform,r,comments=comments,checking=checking,session=profile.get('session')) for r in jobs if r['kind']=='UPLOAD'],
-            'settings':{'first_comment':store(platform).comment_settings(owner)} if owner else {},
+            'settings':{'first_comment':db.comment_settings(owner)} if owner else {},
             'checks':[public_job(platform,r) for r in jobs if r['kind'] in ('VERIFY','RECONCILE')][:10],
             'candidates':candidates(platform) if owner else []}
 
@@ -554,10 +554,11 @@ def schedule_checks(platform: str, db: SocialStore) -> None:
     db.create('RECONCILE', current, {'work_id': row['work_id'], 'lookup': check_lookup(row), 'automatic': True}, parent_id=row['id'])
 
 
-def session_of(db: SocialStore, owner: str) -> dict:
-    """Login health from this account's jobs; a login attempt is queued before its UID is known."""
-    logins = [row for row in db.list(kind='LOGIN') if row['uid'] == owner or row['result'].get('uid') == owner]
-    return assess([*db.list(uid=owner), *logins])
+def session_of(db: SocialStore, owner: str, *, jobs: list[dict] | None = None) -> dict:
+    """Login health from this account's jobs (pass them when already read); a login attempt is queued before its UID is known."""
+    owned = db.list(uid=owner) if jobs is None else jobs
+    logins = [row for row in db.list(kind='LOGIN') if row['uid'] != owner and row['result'].get('uid') == owner]
+    return assess([*owned, *logins])
 
 
 def schedule_verify(platform: str, db: SocialStore) -> None:

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import time
 import uuid
@@ -11,6 +12,9 @@ from core.social.adapter import accepted_without_work_id
 from core.social.registry import PLATFORMS
 
 ACTIVE = ('QUEUED', 'RUNNING')
+# Queue files whose schema this process has already ensured. The DDL takes the write lock, so running it on
+# every read made a page wait behind any publisher holding that lock.
+_SCHEMA_READY: set[str] = set()
 
 
 class SocialStore:
@@ -21,6 +25,8 @@ class SocialStore:
         folder = Path(state_dir) / 'platforms' / platform
         folder.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.path = str(folder / 'queue.db')
+        if self.path in _SCHEMA_READY and os.path.exists(self.path):
+            return
         with self.connect(write=True) as conn:
             conn.executescript('''
                 CREATE TABLE IF NOT EXISTS jobs (
@@ -42,6 +48,7 @@ class SocialStore:
                 CREATE TABLE IF NOT EXISTS settings (uid TEXT PRIMARY KEY,first_comment TEXT NOT NULL);
             ''')
         Path(self.path).chmod(0o600)
+        _SCHEMA_READY.add(self.path)
 
     def connect(self, write: bool = False):
         return sqlite_util.connect(self.path, write=write)
