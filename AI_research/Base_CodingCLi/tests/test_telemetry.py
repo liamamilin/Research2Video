@@ -379,3 +379,29 @@ def test_finished_renders_are_swept_in_the_background_one_read_at_a_time(db, mon
     ingest.sweep_async()
     time.sleep(0.2)
     assert reads == [1, 1]
+
+
+def test_a_scripts_time_is_split_into_production_rendering_and_waiting_without_counting_render_steps_twice(db):
+    for stage, seconds in (("research", 100), ("write", 50), ("render", 1000), ("render/tts-and-align", 400),
+                           ("render/render", 600), ("await-approval", 3600)):
+        telemetry.record_span(stage, duration_s=seconds, script_id="s1", column_key="col")
+    telemetry.record_call("llm", model="m", usage={"prompt_tokens": 1, "completion_tokens": 1}, script_id="s1")
+    [bill] = query.scripts(str(db))["items"]
+    assert (bill["produce_seconds"], bill["render_seconds"], bill["wait_seconds"]) == (150.0, 1000.0, 3600.0)
+
+
+def test_videos_are_compared_by_the_attribute_asked_for(db):
+    config = db / "config"
+    config.mkdir()
+    (config / "pricing.yaml").write_text("prices:\n  - {model: m, input: 1.0, output: 0}\n", encoding="utf-8")
+    for script, column, minutes, tokens in (("a", "news", 10, 1_000_000), ("b", "news", 30, 3_000_000),
+                                            ("c", "explainer", 5, 500_000)):
+        telemetry.record_call("llm", model="m", usage={"prompt_tokens": tokens, "completion_tokens": 0},
+                              script_id=script, column_key=column)
+        telemetry.record_span("render", duration_s=minutes * 60, script_id=script, column_key=column)
+    result = query.compare(str(config), "column_key")
+    news, explainer = result["groups"]
+    assert (news["value"], news["scripts"], news["tokens_avg"], news["cost_avg_usd"]) == ("news", 2, 2_000_000, 2.0)
+    assert news["render_median_s"] == 1200.0 and explainer["render_median_s"] == 300.0
+    with pytest.raises(ValueError):
+        query.compare(str(config), "script_id")

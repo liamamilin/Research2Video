@@ -65,6 +65,14 @@ def scripts(days: int = Query(30, ge=0, le=3650), since: Optional[float] = None,
                             limit, offset), "syncing": syncing}
 
 
+@router.get("/compare")
+def compare(by: str = Query("column_key", pattern="^(column_key|form|matrix|recipe|path)$"),
+            days: int = Query(30, ge=0, le=3650), since: Optional[float] = None, until: Optional[float] = None,
+            matrix: str = "", column_key: str = "", form: str = "", user=Depends(require_viewer)):
+    start, end = _window(days, since, until)
+    return query.compare(str(get_settings().paths.config_dir), by, start, end, _filters(matrix, column_key, form))
+
+
 @router.get("/scripts/{script_id}")
 def script_detail(script_id: str, user=Depends(require_viewer)):
     return query.script_detail(str(get_settings().paths.config_dir), script_id)

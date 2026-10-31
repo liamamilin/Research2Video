@@ -116,32 +116,45 @@ def _topic_title(script: Optional[dict]) -> str:
     return str((topic or {}).get("title") or (topic or {}).get("topic") or "") if isinstance(topic, dict) else ""
 
 
-def scripts(config_dir: str, since: Optional[float] = None, until: Optional[float] = None,
-            filters: Optional[dict] = None, limit: int = 50, offset: int = 0) -> dict:
-    """One bill per script, newest activity first."""
+def _script_bills(conn, config_dir: str, since, until, filters: dict) -> list[dict]:
+    """One bill per script: tokens and cost from its calls, and its time split into production, rendering, waiting."""
     table = pricing.load(config_dir)
-    where, params = _where(since, until, filters or {})
+    where, params = _where(since, until, filters)
     where += " AND script_id != ''"
-    with store.connect() as conn:
-        if conn is None:
-            return {"enabled": False, "items": [], "total": 0}
-        rows = _priced(conn, ["script_id", "column_key", "matrix", "form"], where, params, table)
-        spans = {r["script_id"]: r["seconds"] for r in conn.execute(
-            "SELECT script_id, SUM(duration_s) AS seconds FROM spans WHERE script_id != '' AND stage != 'render'"
-            " GROUP BY script_id").fetchall()}
-        totals = {r["script_id"]: r["seconds"] for r in conn.execute(
-            "SELECT script_id, SUM(duration_s) AS seconds FROM spans WHERE stage = 'render' GROUP BY script_id").fetchall()}
+    rows = _priced(conn, ["script_id", "column_key", "matrix", "form", "recipe", "path"], where, params, table)
+    seconds: dict = {}
+    for row in conn.execute("SELECT script_id, stage, SUM(duration_s) AS seconds FROM spans WHERE script_id != ''"
+                            " GROUP BY script_id, stage"):
+        slot = seconds.setdefault(row["script_id"], {"produce": 0.0, "render": 0.0, "wait": 0.0})
+        if row["stage"] == "render":
+            slot["render"] += row["seconds"] or 0
+        elif row["stage"] == "await-approval":
+            slot["wait"] += row["seconds"] or 0
+        elif not row["stage"].startswith("render/"):  # a render's steps are inside its total, and overlap each other
+            slot["produce"] += row["seconds"] or 0
     grouped: dict = {}
     for row in rows:
         grouped.setdefault(row["script_id"], []).append(row)
     items = []
     for script_id, parts in grouped.items():
-        first = parts[0]
+        pick = lambda key: next((p[key] for p in parts if p[key]), "")  # noqa: E731
+        slot = seconds.get(script_id, {})
         items.append(_fold(parts, {
-            "script_id": script_id, "column_key": first["column_key"], "matrix": first["matrix"],
-            "form": next((p["form"] for p in parts if p["form"]), ""), "last_ts": max(p["ts"] or 0 for p in parts),
-            "render_seconds": round(totals.get(script_id) or 0, 1), "stage_seconds": round(spans.get(script_id) or 0, 1)}))
+            "script_id": script_id, "column_key": pick("column_key"), "matrix": pick("matrix"), "form": pick("form"),
+            "recipe": pick("recipe"), "path": pick("path"), "last_ts": max(p["ts"] or 0 for p in parts),
+            "produce_seconds": round(slot.get("produce", 0), 1), "render_seconds": round(slot.get("render", 0), 1),
+            "wait_seconds": round(slot.get("wait", 0), 1)}))
     items.sort(key=lambda i: -i["last_ts"])
+    return items
+
+
+def scripts(config_dir: str, since: Optional[float] = None, until: Optional[float] = None,
+            filters: Optional[dict] = None, limit: int = 50, offset: int = 0) -> dict:
+    """One bill per script, newest activity first."""
+    with store.connect() as conn:
+        if conn is None:
+            return {"enabled": False, "items": [], "total": 0}
+        items = _script_bills(conn, config_dir, since, until, filters or {})
     page = items[offset:offset + limit]
     from core.video import store as video_store
     for item in page:
@@ -150,6 +163,43 @@ def scripts(config_dir: str, since: Optional[float] = None, until: Optional[floa
         except Exception:  # noqa: BLE001 - a missing script still has a bill
             item["title"] = ""
     return {"enabled": True, "items": page, "total": len(items)}
+
+
+COMPARE_BY = ("column_key", "form", "matrix", "recipe", "path")
+
+
+def _median(values: list) -> Optional[float]:
+    values = sorted(v for v in values if v)
+    if not values:
+        return None
+    middle = len(values) // 2
+    return round(values[middle] if len(values) % 2 else (values[middle - 1] + values[middle]) / 2, 1)
+
+
+def compare(config_dir: str, by: str, since: Optional[float] = None, until: Optional[float] = None,
+            filters: Optional[dict] = None) -> dict:
+    """Videos grouped by one attribute (column, video form, matrix, recipe, writing path): the typical cost and time."""
+    if by not in COMPARE_BY:
+        raise ValueError(f"cannot compare by {by!r}")
+    with store.connect() as conn:
+        if conn is None:
+            return {"enabled": False, "by": by, "groups": []}
+        bills = _script_bills(conn, config_dir, since, until, filters or {})
+    groups: dict = {}
+    for bill in bills:
+        groups.setdefault(bill[by], []).append(bill)
+    out = []
+    for value, members in groups.items():
+        priced = [m["cost_usd"] for m in members if not m["partial"]]
+        out.append({
+            "value": value, "scripts": len(members),
+            "tokens_avg": round(sum(m["total_tokens"] for m in members) / len(members)),
+            "cost_avg_usd": round(sum(priced) / len(priced), 6) if priced else None, "cost_samples": len(priced),
+            "produce_median_s": _median([m["produce_seconds"] for m in members]),
+            "render_median_s": _median([m["render_seconds"] for m in members]),
+            "wait_median_s": _median([m["wait_seconds"] for m in members])})
+    out.sort(key=lambda g: -g["scripts"])
+    return {"enabled": True, "by": by, "groups": out}
 
 
 def script_detail(config_dir: str, script_id: str) -> dict:
