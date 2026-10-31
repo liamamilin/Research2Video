@@ -262,11 +262,14 @@ def write(
     sections, check = _finalize(script, allowed, target_minutes, voice)
     if programme:
         check = {**length.measure(sections, None, voice=voice), "dropped_citations": check["dropped_citations"], "duration_policy": "content"}
+    from core.video import episodes
+    title = episodes.publication_title(topic, script.title.strip())
     return WrittenScript(
-        title=script.title.strip(),
+        title=title,
         sections=sections,
         length_check=check,
         meta={"attempts": attempts, "usage": dict(client.usage), "problems": [],
+              **({"authored_title": script.title.strip()} if title != script.title.strip() else {}),
               "model": getattr(response, "model", "") or getattr(llm_config, "model", ""),
               "model_switches": list(getattr(client, "model_switches", [])),
               "duration_seconds": round(time.monotonic() - started, 3),

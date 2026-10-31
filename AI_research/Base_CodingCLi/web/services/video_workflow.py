@@ -148,6 +148,7 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     context = topic.pop("_content_context", None) or context
     from core.video import episodes
     context = episodes.snapshot_context(context, topic)
+    topic = episodes.publication_topic(topic, context)
     if context.get("audience") and not explicit_audience:
         fields["目标受众"] = context["audience"]
     if started_by not in content_guard.SAMPLE_CREATORS and not episodes.enabled(topic):
