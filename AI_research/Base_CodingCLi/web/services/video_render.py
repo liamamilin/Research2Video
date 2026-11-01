@@ -244,6 +244,10 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
     chapter_list = chapters(version)
     text, sha = narration_source(chapter_list)
     title = version["title"][:80]
+    version_meta = version.get('meta') or {}
+    programme = ((version_meta.get('episode') or {}).get('mode') == 'episode'
+                 if version_meta.get('input_kind') == 'user_materials'
+                 else script.get('topic', {}).get('content_mode') == 'episode')
     # Narration mode: the approved words are voiced verbatim; AutoVideo only
     # plans the visuals and fails the job rather than change a word.
     form = script["topic"].get("video_form") or column.video_form
@@ -253,7 +257,7 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         "input_mode": "narration",
         **({"episode": {"items": [{"title": s["title"][:24], "chapter_indexes": [i]}
             for i, s in enumerate(spoken_sections) if s.get("episode_role", "item") == "item"]}}
-            if script.get("topic", {}).get("content_mode") == "episode" else {}),
+            if programme else {}),
         "chapters": chapter_list,
         "video_form": form,
         "duration_mode": "content",

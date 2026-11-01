@@ -330,12 +330,12 @@ export function VideoScriptViewPage() {
 
   async function rewrite() {
     if (editing || actionLock.current) return;
-    if (!window.confirm(detail?.topic.article ? "用保存的文章，按本次选择的处理方式重新生成文稿并审校？将保存为新版本，旧稿和旧视频保留。" : "用同一份研究报告，按当前配方重新生成文稿并审校？将保存为新版本，旧稿和旧视频保留。新稿需要重新定稿后再出片。")) return;
+    if (!window.confirm(detail?.topic.article ? "用保存的文章，按本次选择的处理方式重新生成文稿并审校？将保存为新版本，旧稿和旧视频保留。" : detail?.topic.user_materials ? "用保存的创作材料和要求重新生成文稿？将保存为新版本，旧稿和旧视频保留。新稿需要重新定稿后再出片。" : "用同一份研究报告，按当前配方重新生成文稿并审校？将保存为新版本，旧稿和旧视频保留。新稿需要重新定稿后再出片。")) return;
     actionLock.current = true; setBusy("rewrite");
     try {
       setDetail(await rerunVideoStep(id, "write"));
       setSearch({ tab: "draft" });
-      toast.success("已开始重新生成文稿", detail?.topic.article ? "沿用保存的文章，完成后可查看新版本" : "沿用原报告，完成后可查看新版本");
+      toast.success("已开始重新生成文稿", detail?.topic.article ? "沿用保存的文章，完成后可查看新版本" : detail?.topic.user_materials ? "沿用保存的创作材料，完成后可查看新版本" : "沿用原报告，完成后可查看新版本");
     } catch (e) { toast.error("没有开始重新生成", errorMessage(e)); }
     finally { setBusy(null); actionLock.current = false; }
   }

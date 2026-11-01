@@ -153,6 +153,7 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     context = content_columns.snapshot(settings.paths.config_dir, production_id, config.job) if config else {}
     context = topic.pop("_content_context", None) or context
     from core.video import episodes
+    topic = episodes.material_topic(topic, context)
     context = episodes.snapshot_context(context, topic)
     topic = episodes.publication_topic(topic, context)
     if context.get("audience") and not explicit_audience:
@@ -330,8 +331,6 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     column = apply_script_context(column, script.get("content_context") or {})
     from core.video import episodes
     is_episode = episodes.enabled(topic)
-    tutorial = ((script.get('content_context') or {}).get('type') == 'tutorial'
-                or ((script.get('content_context') or {}).get('render') or {}).get('production_recipe') == 'mixed_tutorial')
     joint_input = is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
     dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
     guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
@@ -442,21 +441,16 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             writing_topic = {key: value for key, value in topic.items() if key != "story"}
             writing_topic["title"] = question.group(1).strip()
         greeting = episodes.greeting(topic, script.get("content_context") or {})
-        written = writer.write(
+        written = writer.write_for_column(
+            column=column, content_context=script.get('content_context') or {},
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
             topic=writing_topic,
-            column_style=column.script_style + episodes.brief(topic, tutorial=tutorial) + (
+            column_style=column.script_style + (
                 "\n本矩阵近期已经讲过以下选题，请从剩余素材选择新选题，标题、开场和正文都不要复述："
                 + "；".join(p["title"] for p in dedup_meta.get("peers", [])) if dedup_meta.get("peers") else ""),
-            target_minutes=column.target_minutes,
             llm_config=config,
-            voice=column.voice_id or None,
-            paragraph_units=tuple(column.paragraph_units),
-            topic_fields=column.writer_topic_fields(),
             **({"original_material": material} if joint_input else {}),
-            greeting=greeting or None,
-            tutorial=tutorial,
         )
         polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
         if is_episode:

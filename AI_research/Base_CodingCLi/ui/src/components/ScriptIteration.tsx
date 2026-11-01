@@ -26,6 +26,7 @@ export function ScriptIteration({ detail, canEdit, canManageModels = false, isCu
     : !checks?.model_ran ? "未进行模型审校" : checks.summary.passed ? "审校通过" : `有 ${checks.issues.length} 条意见`;
   const config = detail.configuration;
   const article = detail.topic?.article;
+  const materials = detail.topic?.user_materials;
   const links = config?.links.filter(l => !article || ["文稿配方与提示词", "出片形式与配音", "片头片尾与包装", "矩阵的共用视频设置", "任务的视频生成设置"].includes(l.label));
   const recipe = config?.links.find(l => l.label === "文稿配方与提示词");
   const writingLink = config?.writing?.source === "content_column"
@@ -52,11 +53,11 @@ export function ScriptIteration({ detail, canEdit, canManageModels = false, isCu
       <summary className="cursor-pointer text-xs text-text-muted">重新生成与共用设置</summary>
       <div className="mt-3 space-y-3">
         {canEdit ? <div className="flex flex-wrap gap-2">
-          <button className="btn text-xs" disabled={!isCurrent || running || busy !== null || (!detail.report_path && !article)} onClick={onRewrite}>{busy === "rewrite" ? "提交中…" : "重新生成文稿"}</button>
+          <button className="btn text-xs" disabled={!isCurrent || running || busy !== null || (!detail.report_path && !article && !materials)} onClick={onRewrite}>{busy === "rewrite" ? "提交中…" : "重新生成文稿"}</button>
           {writingLink ? <Link className="btn text-xs" to={configHref(writingLink.href)}>{writingLink === recipe ? "调整配方与提示词" : "调整栏目创作方向"}<ArrowUpRight className="h-3 w-3" /></Link> : null}
         </div> : null}
         {onCompare && (detail.versions.length > 1 || detail.renders.length > 1) && <button className="btn text-xs" onClick={onCompare}>对比前后文稿与视频</button>}
-        <p className="text-xs text-text-muted">{!isCurrent ? "历史版本只读，返回当前版本后可重新生成。" : running ? "任务进行中，完成后可继续迭代。" : article ? "沿用保存的文章与本次处理方式生成新版本，旧稿、旧片均保留。" : "沿用研究报告生成新版本，旧稿、旧片及所有制作尝试均保留。只修改当前文字，用上方「编辑」。"}</p>
+        <p className="text-xs text-text-muted">{!isCurrent ? "历史版本只读，返回当前版本后可重新生成。" : running ? "任务进行中，完成后可继续迭代。" : article ? "沿用保存的文章与本次处理方式生成新版本，旧稿、旧片均保留。" : materials ? "沿用保存的创作材料与要求生成新版本，旧稿、旧片均保留。" : "沿用研究报告生成新版本，旧稿、旧片及所有制作尝试均保留。只修改当前文字，用上方「编辑」。"}</p>
         {config?.changed_since_generation ? <p className="text-xs text-warning">生成配置已有变化；已有稿件和视频不会自动更新。</p> : null}
         {config?.writing ? <p className="text-xs text-text-muted">{config.writing.note}</p> : null}
         {config?.writing?.direction ? <details className="text-xs text-text-muted"><summary className="cursor-pointer">本版本实际写稿方向</summary><p className="mt-2 whitespace-pre-wrap">{config.writing.direction}</p></details> : null}

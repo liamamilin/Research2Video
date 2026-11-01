@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "checks": {
+    "full_decode": "PASS",
+    "format": {
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "sample_rate": "48000",
+      "channels": 2,
+      "uniform_across_frames": true
+    },
+    "duration": {
+      "frames": 11176,
+      "seconds": 372.533333,
+      "expected_frames": 11176,
+      "expected_seconds": 372.53333333333336,
+      "tolerance_seconds": 0.035333333333333335
+    },
+    "content_audio": {
+      "shifted_by_frames": 0,
+      "offset_samples": 0,
+      "correlation": 0.999915190333706,
+      "rms": 0.056943781673908234
+    },
+    "seam_loudness": {
+      "speech_active_db": -23.98,
+      "min_margin_db": 3.0,
+      "regions": {}
+    }
+  }
+}

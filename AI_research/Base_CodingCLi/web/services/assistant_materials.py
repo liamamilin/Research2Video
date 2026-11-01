@@ -12,7 +12,7 @@ import re
 from core import user_materials as materials
 from core.config import load_system_config
 from core.llm import LLMClient, LLMConfig
-from core.video import columns, content_columns, production, store, writer, length, material_context, screenshots
+from core.video import columns, content_columns, episodes, production, store, writer, length, material_context, screenshots
 from web.services.assistant_store import identity
 from web.settings import get_settings
 
@@ -174,9 +174,21 @@ def write(script: dict, *, started_by: str, llm_config=None, style=None) -> str:
     from web.services import video_workflow
     settings = get_settings()
     info = material_context.get(script)
+    previous_topic = script['topic']
+    mode_update = {}
+    # Older material tasks never froze a mode in their topic. Fill that missing
+    # default on the next write; explicit modes and earlier versions stay intact.
+    if 'content_mode' not in script['topic'] and info.get('mode') != 'narration' and script.get('production'):
+        binding = production.get(settings.paths.config_dir, settings.paths.jobs_dir, script['production'])
+        default = content_columns.snapshot(settings.paths.config_dir, binding.key, binding.job) if binding else {}
+        topic = episodes.material_topic(script['topic'], default)
+        context = episodes.snapshot_context(script.get('content_context') or default, topic)
+        if topic != script['topic']:
+            mode_update = {'topic': topic, 'content_context': context}
+            script = {**script, 'topic': topic, 'content_context': context}
     if style:
         info = material_context.revise(info, style=style.as_dict(), mode='adapt' if info['mode'] == 'narration' else info['mode'])
-        store.update_script(script['id'], topic={**script['topic'], 'user_materials': info})
+        store.update_script(script['id'], topic={**previous_topic, 'user_materials': info})
     store.update_script(script["id"], status="WRITING", stage="读取用户材料", error=None)
     body = source_of(script, info)
     recipe = content_columns.apply_script_context(
@@ -227,14 +239,17 @@ def write(script: dict, *, started_by: str, llm_config=None, style=None) -> str:
             body += "\n\n## 补充研究\n" + report_path.read_text()
             info['research_report'] = str(report_path)
             store.update_script(script['id'], report_path=str(report_path), stage='写稿')
-        result = writer.write(report=body, citation_check=None, topic=script["topic"], column_style=goal,
-                              target_minutes=recipe.target_minutes, llm_config=config, voice=recipe.voice_id)
+        result = writer.write_for_column(column=recipe, content_context=script.get('content_context') or {},
+                                         report=body, citation_check=None, topic=script["topic"],
+                                         column_style=goal, llm_config=config)
     store.add_version(script["id"], title=result.title, sections=result.sections, length_check=result.length_check,
                       edit_type="GENERATED", created_by=started_by,
                       meta={**result.meta, "input_kind": "user_materials", "user_materials": info,
                             **({'style': style.as_dict()} if style else {}),
                             "checks": unrequested(), "cell": columns.provenance(settings.paths.config_dir, recipe.key)})
-    store.update_script(script["id"], status="DRAFT", stage=None, error=None)
+    if mode_update:
+        mode_update['topic'] = {**script['topic'], 'user_materials': info}
+    store.update_script(script["id"], status="DRAFT", stage=None, error=None, **mode_update)
     return "DRAFT"
 
 

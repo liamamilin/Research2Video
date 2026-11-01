@@ -13,6 +13,15 @@ def enabled(topic: dict) -> bool:
     return topic.get("content_mode") == MODE
 
 
+def material_topic(topic: dict, context: dict) -> dict:
+    """Supplied material follows its column's mode unless the words are final narration."""
+    supplied = topic.get('user_materials') or {}
+    if (not supplied or supplied.get('mode') == 'narration' or 'content_mode' in topic
+            or not context.get('column')):
+        return topic
+    return {**topic, 'content_mode': context.get('content_mode', 'individual')}
+
+
 def topic(report: dict, workspace: str, *, job: str, source=None, production: str = "") -> dict:
     from . import reports, topic_store
     from core import report_identity
@@ -65,7 +74,7 @@ def greeting(topic: dict, context: dict) -> str:
 
 def publication_topic(topic: dict, context: dict) -> dict:
     """Freeze the programme's public name at creation, without retitling old work."""
-    if not enabled(topic) or not context.get("column"):
+    if not enabled(topic) or not context.get("column") or topic.get('user_materials'):
         return topic
     episode = topic.get("episode") or {}
     if episode.get("publication"):

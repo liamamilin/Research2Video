@@ -12,7 +12,7 @@ import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -275,6 +275,21 @@ def _require_chinese(sections: list[dict]) -> None:
         raise ScriptError("文稿主要不是中文，AutoVideo 只能制作中文视频")
 
 
+def write_for_column(*, column: Any, content_context: dict, column_style: str | None = None, **kwargs: Any) -> WrittenScript:
+    """Apply the same column programme settings to report and supplied-material authors."""
+    from core.video import episodes
+
+    topic = kwargs['topic']
+    tutorial = (content_context.get('type') == 'tutorial'
+                or (content_context.get('render') or {}).get('production_recipe') == 'mixed_tutorial')
+    return write(**kwargs,
+                 column_style=(column.script_style if column_style is None else column_style)
+                 + episodes.brief(topic, tutorial=tutorial),
+                 target_minutes=column.target_minutes, voice=column.voice_id or None,
+                 paragraph_units=tuple(column.paragraph_units), topic_fields=column.writer_topic_fields(),
+                 greeting=episodes.greeting(topic, content_context) or None, tutorial=tutorial)
+
+
 def write(
     *,
     report: str,
@@ -341,5 +356,6 @@ def write(
               "duration_seconds": round(time.monotonic() - started, 3),
               "generation": "goal_first", "prompt_version": PROMPT_VERSION,
               "creative_direction": column_style.strip(),
-              "trusted_urls": len(allowed)},
+              "trusted_urls": len(allowed),
+              **({'episode': episodes.manifest(topic, sections)} if programme else {})},
     )

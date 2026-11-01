@@ -48,6 +48,15 @@ describe("Script state and iteration", () => {
     expect(screen.getByRole("link", { name: "调整配方与提示词" }).getAttribute("href")).toBe("/video-recipes/flash?from=s1");
     expect(screen.getByRole("button", { name: "重新生成文稿" }).className).not.toContain("btn-primary");
   });
+  it("allows saved-material tasks to regenerate without a research report", () => {
+    const actions = show({ ...BASE, report_path: "", topic: { user_materials: { mode: "adapt", revision: 1 } } } as VideoScriptDetail);
+    fireEvent.click(screen.getByText("重新生成与共用设置"));
+    const button = screen.getByRole("button", { name: "重新生成文稿" }) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    expect(screen.getByText("沿用保存的创作材料与要求生成新版本，旧稿、旧片均保留。")).toBeTruthy();
+    fireEvent.click(button);
+    expect(actions.onRewrite).toHaveBeenCalledOnce();
+  });
   it("points to the effective column direction and shows the exact saved writer input", () => {
     show({ ...BASE, configuration: { ...BASE.configuration!,
       writing: { source: "content_column", note: "本稿重写沿用创建时的栏目方向。", direction: "当时传给作者的方向" },
