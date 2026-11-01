@@ -2,19 +2,26 @@ import React from 'react';
 import {ContentStyleContext} from './ContentStyle';
 import {SvgVisualObject,visualFor} from './VisualObjects';
 import {objectColor} from './StoryDirection';
-import {cameraAt,flowRects} from './ShotDirector';
+import {cameraAt,flowRects,visualStart} from './ShotDirector';
 
 export function ObjectFlow({scene,frame}:{scene:any;frame:number}) {
   const palette = React.useContext(ContentStyleContext);
   const p=scene.props, layout=p.layout, reveal=scene.beats.filter((b:any)=>b.action==='reveal');
   const starts=(target:string)=>reveal.find((b:any)=>b.target_id===target)?.frame;
   const alpha=(target:string)=>{
-    const at=starts(target); return at===undefined || frame<at ? .12 : Math.min(1,.2+(frame-at)/14);
+    // Keep the relationship readable while the voice introduces it. The
+    // current node reaches full emphasis by its spoken anchor.
+    const at=starts(target), t=at===undefined?0:Math.max(0,Math.min(1,(frame-visualStart(scene,at,14))/14));
+    return .65+.35*t;
   };
-  const active = reveal.filter((b:any)=>b.frame<=frame).sort((a:any,b:any)=>a.frame-b.frame).at(-1)?.target_id;
+  const active = reveal.filter((b:any)=>visualStart(scene,b.frame,14)<=frame).sort((a:any,b:any)=>a.frame-b.frame).at(-1)?.target_id;
   const ends=new Map(layout.nodes.map((n:any)=>[n.id,n]));
   const green=palette?.accent??'#17784B', ink=palette?.text??'#202D28', soft=palette?.muted??'#69756E';
-  const camera=cameraAt(scene,frame,flowRects(p),{x:0,y:0,width:1560,height:500});
+  const rects=flowRects(p);
+  // A readable process stays whole; focus colors and one-pass packets guide
+  // attention without cutting off its next step. Dense diagrams can move in.
+  const camera=cameraAt(scene,frame,rects,{x:0,y:0,width:1560,height:500},{x:120,y:90},
+    {targets:Object.keys(rects),hold:layout.font_size>=30});
   const clipId=`${scene.id}_camera_clip`;
   const focused=camera.shot.kind==='focus' ? camera.shot.targets : [];
   const focusLabel=focused.map(t=>p.nodes.find((n:any)=>`node:${n.id}`===t)?.label).filter(Boolean).join(' · ');
@@ -37,7 +44,7 @@ export function ObjectFlow({scene,frame}:{scene:any;frame:number}) {
         const ready=endpoints.every(n=>starts(`node:${n.id}`)!==undefined && starts(`node:${n.id}`)!<=frame);
         const t=at===undefined ? -1 : (frame-at)/54, point=pathPoint(edge.points,Math.max(0,Math.min(1,t)));
         const blocked=data.relation==='blocked', color=blocked ? '#B84A42' : green;
-        return <g key={edge.id} opacity={ready ? alpha(target) : .1}>
+        return <g key={edge.id} opacity={alpha(target)}>
           <polyline points={edge.points.map((v:any)=>`${v.x},${v.y}`).join(' ')} fill="none" stroke={color} strokeWidth={3} strokeLinejoin="round" strokeDasharray={blocked?'10 7':undefined} markerEnd={blocked?undefined:`url(#${scene.id}_object_arrow)`}/>
           {ready && t>=0 && t<1 && !blocked && <g transform={`translate(${point.x} ${point.y})`}><rect x={-9} y={-11} width={18} height={22} rx={3} fill="white" stroke={green} strokeWidth={2}/><path d="M-4 -3 H4 M-4 3 H4" stroke={green} strokeWidth={1.5}/></g>}
           {data.label && <g><rect x={edge.label_x-data.label.length*layout.edge_font_size/2-10} y={edge.label_y-layout.edge_font_size/2-6} width={data.label.length*layout.edge_font_size+20} height={layout.edge_font_size+12} rx={5} fill={palette?.background??'#F7F8F5'}/><text x={edge.label_x} y={edge.label_y} dominantBaseline="middle" textAnchor="middle" fontSize={layout.edge_font_size} fill={soft}>{data.label}</text></g>}

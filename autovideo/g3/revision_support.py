@@ -46,7 +46,7 @@ def scenes(store,jid):
 
 
 def create_revision(store,jid,request,kind):
-    parent,ir,_=source(store,jid);draft=store.editable_content(jid)
+    parent,ir,_=source(store,jid);draft=store.editable_content(jid,include_episode=True)
     settings=draft['options'];settings['video_form']=parent.get('resolved_video_form') or parent['video_form']
     payload={**settings,'title':(parent['title'][:70]+' · '+('画面修订' if kind=='visual_revision' else '声音与速度')),
              'source_text':draft['source_text'],'creative_intent':draft['creative_intent'],'use_draw_things':False,

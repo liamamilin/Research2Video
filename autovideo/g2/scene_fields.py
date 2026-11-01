@@ -5,11 +5,16 @@ from copy import deepcopy
 def editable_fields(scene: dict) -> list[dict]:
     p=scene['props'];c=scene['component'];fields=[]
     def add(path,label,value):fields.append({'path':path,'label':label,'value':value})
-    if c in {'title_card','concept_reveal','flow_diagram','big_number'}:
+    if c in {'title_card','concept_reveal','flow_diagram','big_number','code_demo'}:
         add('title','场景标题',p.get('title',''))
     if c=='title_card' and 'subtitle' in p:add('subtitle','副标题',p['subtitle'])
     if c=='concept_reveal':
         for i,text in enumerate(p['lines']):add(f'lines.{i}',f'卡片 {i+1}（标题｜说明）',text)
+    if c=='code_demo':
+        if 'label' in p:add('label','代码窗口标题',p['label'])
+        for i,line in enumerate(p['lines']):
+            add(f'lines.{i}.text',f'代码 {i+1}',line['text'])
+            if 'annotation' in line:add(f'lines.{i}.annotation',f'代码说明 {i+1}',line['annotation'])
     if c=='big_number':
         add('value','大数字',p['value']);add('label','数字说明',p['label'])
         if 'note' in p:add('note','前提或口径',p['note'])

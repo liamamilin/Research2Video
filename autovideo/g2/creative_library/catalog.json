@@ -1,6 +1,6 @@
 {
   "library": "autovideo-creative-resources",
-  "version": 6,
+  "version": 7,
   "provenance": {
     "taxonomy_version": "1.1.0",
     "source": "AI创作/tool/creator-studio/sources/recovered-upstream-20261020.json",
@@ -1112,7 +1112,7 @@
       "material_guidance": "用于分章讲稿的跨领域画面组合。截图、图表、价格与流程可同片混用，普通段落使用轻量卡片；画面按输入素材和旁白自动编排。"
     },
     {
-      "version": 1,
+      "version": 2,
       "id": "mixed_tutorial",
       "name": "混合步骤",
       "description": "沿着操作过程，组合界面截图、步骤聚焦、分支流程和结果。",
@@ -1136,7 +1136,7 @@
           "audience": "当前栏目面向的观众",
           "purpose": "沿着操作过程，组合界面截图、步骤聚焦、分支流程和结果。",
           "tone": "清楚、自然",
-          "focus": "每一步先呈现当前操作位置，再展示动作与结果；有界面截图时聚焦相应区域，分支用流程讲清。"
+          "focus": "沿同一份输入串起准备、实际操作和输出结果。已有输入或结果截图优先展示原图并随旁白聚焦；文件名只作对象标签，实际命令或代码用逐行强调。一步的结果保留到下一步需要它时，再回到这份任务的最终结果。沿用讲稿已有问候与告别，画面只承担开场、步骤切换和回顾。"
         },
         "packaging": {
           "preset": "common",
@@ -1160,7 +1160,7 @@
         "suggested_forms": [],
         "description": "默认保留清楚的旁白，不添加背景音乐。"
       },
-      "material_guidance": "用于分章讲稿的跨领域画面组合。截图、图表、价格与流程可同片混用，普通段落使用轻量卡片；画面按输入素材和旁白自动编排。"
+      "material_guidance": "使用已有输入、实际操作代码和结果截图，按讲稿段落关联同一任务；截图区域聚焦、代码强调、步骤导航与通用片头片尾复用现有制作链路。"
     }
   ]
 }

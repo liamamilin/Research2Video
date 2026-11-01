@@ -235,3 +235,12 @@ def test_diagram_labels_reject_an_altered_flag_and_wrap_flags_whole():
     plan["scenes"][0]["nodes"][0]["label"] = "请求 –models"
     diagrams.validate_plan(plan, context)
 
+
+def test_diagram_labels_keep_the_last_chinese_word_together_without_changing_text():
+    font = ImageFont.truetype(diagrams.FONT, 36)
+    for label, last in [('你脑子里的规范', '规范'), ('团队 review 评论', '评论')]:
+        lines = diagrams.wrap_label(label, font)
+        assert ''.join(lines) == label
+        assert lines[-1] == last
+        assert all(diagrams.display_width(font, line) <= 250 for line in lines)
+

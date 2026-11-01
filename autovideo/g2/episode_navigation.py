@@ -80,7 +80,7 @@ def _fit(text: str, width: int, largest: int) -> int:
 
 
 def ass(items: list[dict], total_frames: int, *, accent: str = '#238759', opening: dict | None = None,
-        item_cards: list[dict] | None = None, palette: dict | None = None) -> str:
+        item_cards: list[dict] | None = None, palette: dict | None = None, tutorial: bool = False) -> str:
     color = _bgr(accent)
     paper = {**PAPER, **{k: v for k, v in (palette or {}).items() if k in PAPER and isinstance(v, str)}}
     header = '''[Script Info]
@@ -115,7 +115,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         next_index = item['index']
         if next_index < len(items):
             following = _ass_text(items[next_index]['title'][:20] + ('…' if len(items[next_index]['title']) > 20 else ''))
-            event(3, start, end, r'{\an6\pos(1840,1047)\fs22\c&H00C7D5CD}下一条 · '+following)
+            event(3, start, end, r'{\an6\pos(1840,1047)\fs22\c&H00C7D5CD}'+('下一步' if tutorial else '下一条')+' · '+following)
         rect(3, 0, total_frames, x, 1069, 2, 11, '&H00D0DDD6')
     x0, y0, x1, y1 = STAGE
     def cover(start, end):
@@ -125,7 +125,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     if opening:
         start, end = opening['start_frame'], opening['end_frame']
         cover(start, end)
-        text(start, end, 140, 205, 44, _bgr(paper['text']), '本期导读')
+        text(start, end, 140, 205, 44, _bgr(paper['text']), '操作步骤' if tutorial else '本期导读')
         rect(5, start, end, 140, 240, 84, 5, _bgr(accent), f'\\fad({FADE_MS},{FADE_MS})')
         columns = 1 if len(items) <= 5 else 2
         rows = -(-len(items) // columns)
@@ -162,10 +162,32 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         rect(5, start, end, 918, 450, 84, 5, _bgr(accent), f'\\fad({FADE_MS},{FADE_MS})')
         text(start, end, 960, 540, _fit(item['title'], 1500, 72), _bgr(paper['text']), item['title'], align=5)
     if items[0]['start_frame'] > 0:
-        event(3, 0, items[0]['start_frame'], r'{\an4\pos(80,1047)}本期导读')
+        event(3, 0, items[0]['start_frame'], r'{\an4\pos(80,1047)}'+('操作步骤' if tutorial else '本期导读'))
     if items[-1]['end_frame'] < total_frames:
-        event(3, items[-1]['end_frame'], total_frames, r'{\an4\pos(80,1047)}本期回顾')
+        event(3, items[-1]['end_frame'], total_frames, r'{\an4\pos(80,1047)}'+('步骤回顾' if tutorial else '本期回顾'))
     return header + '\n'.join(events) + '\n'
+
+
+def program_for(saved: dict, ir: dict) -> dict | None:
+    """Reuse authored items, or the tutorial's already planned chapter roles."""
+    if saved.get('episode'):
+        return saved['episode']
+    chapters = ir.get('content_structure', {}).get('chapters', [])
+    if saved.get('production_recipe') != 'mixed_tutorial' or len(chapters) < 2:
+        return None
+    items = []
+    for index, chapter in enumerate(chapters):
+        ids = set(chapter['narration_segment_ids'])
+        roles = {scene['props'].get('story', {}).get('role') for scene in ir['scenes']
+                 if ids.intersection(scene['narration_segment_ids'])}
+        if not roles or None in roles:
+            return None
+        if index == 0 and roles <= {'question', 'bridge'}:
+            continue
+        if index == len(chapters)-1 and roles <= {'recap', 'bridge'}:
+            continue
+        items.append({'title': chapter['title'][:32], 'chapter_indexes': [index]})
+    return {'items': items} if items else None
 
 
 def apply(pipeline, compiled: dict) -> dict | None:
@@ -173,10 +195,12 @@ def apply(pipeline, compiled: dict) -> dict | None:
     if not input_path.is_file():
         return None
     saved = json.loads(input_path.read_text())
-    program = saved.get('episode')
-    if not program:
+    if not saved.get('episode') and saved.get('production_recipe') != 'mixed_tutorial':
         return None
     ir = json.loads(pipeline.IR_PATH.read_text())
+    program = program_for(saved, ir)
+    if not program:
+        return None
     items = timeline(program, ir, compiled)
     folder = pipeline.ARTIFACTS / 'episode-navigation'
     folder.mkdir(exist_ok=True)
@@ -193,7 +217,8 @@ def apply(pipeline, compiled: dict) -> dict | None:
     item_cards = cards(items)
     script = folder / 'navigation.ass'
     script.write_text(ass(items, compiled['total_frames'], accent=style.get('accent', '#238759'), opening=opening,
-                          item_cards=item_cards, palette=style if style.get('palette_source') == 'brand' else None),
+                          item_cards=item_cards, palette=style if style.get('palette_source') == 'brand' else None,
+                          tutorial=(pipeline.PACKAGING_INPUT or {}).get('production_recipe') == 'mixed_tutorial'),
                       encoding='utf-8')
     escaped = str(script).replace('\\', '\\\\').replace(':', '\\:').replace("'", "'\\''")
     target = folder / 'navigation.mp4'

@@ -30,7 +30,8 @@
               "price_change",
               "data_chart",
               "scatter_chart",
-              "flow_diagram"
+              "flow_diagram",
+              "code_demo"
             ]
           },
           "props": {

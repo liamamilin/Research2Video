@@ -19,6 +19,8 @@ def run_revision(p):
     for name in ['captions.srt','prepared-source.txt']:
         path=parent/'artifacts'/name
         if path.is_file():shutil.copy2(path,p.ARTIFACTS/name)
+    timing_path=p.ARTIFACTS/'information-timing.json'
+    parent_timing=json.loads(timing_path.read_text()) if timing_path.is_file() else {'cues':[]}
     if (p.ARTIFACTS/'prepared-source.txt').exists():p.PREPARED_SOURCE=(p.ARTIFACTS/'prepared-source.txt').read_text()
     ir=json.loads(p.IR_PATH.read_text());before=deepcopy(ir)
     narration=json.loads((p.ARTIFACTS/'final-narration-plan.json').read_text())
@@ -36,6 +38,11 @@ def run_revision(p):
         if saved.get('scene_instruction'):
             replacement=p.run_step('storyboard-plan',replan_scene,p,old,narration,ir,saved['scene_instruction'])
             old.update({k:replacement[k] for k in ['component','props','beats','purpose','visual_intent']})
+            if timing_path.is_file():
+                timing=json.loads(timing_path.read_text())
+                timing['cues']=[cue for cue in parent_timing['cues'] if cue['scene_id']!=target]+[
+                    cue for cue in timing['cues'] if cue['scene_id']==target]
+                p.write_json(timing_path,timing)
         else:
             updated=p.run_step('storyboard-plan',apply_changes,old,saved['scene_changes']);old['props']=updated['props']
             if old['component']=='flow_diagram':
@@ -84,7 +91,17 @@ def run_revision(p):
     from g2.caption_alignment import supports_short_captions
     if supports_short_captions(ir):
         from g2.caption_alignment import prepare as prepare_short_captions
-        prepare_short_captions(p,ir)
+        captions=prepare_short_captions(p,ir)
+        if timing_path.is_file():
+            from g2.information_motion import align_visual_beats
+            timing=json.loads(timing_path.read_text())
+            if saved['operation_type']=='visual_revision':
+                timing={'cues':[cue for cue in timing['cues'] if cue['scene_id']==saved['scene_id']]}
+            changes=align_visual_beats(ir,captions,timing)
+            compiled=validate_video_ir(ir,p.FIXTURE_ROOT)
+            p.write_json(p.IR_PATH,ir);p.write_json(p.ARTIFACTS/'compiled-timeline.json',compiled)
+            p.write_json(p.ARTIFACTS/'storyboard-plan.json',{'scenes':[{k:v for k,v in s.items() if k not in {'start_ms','duration_ms'}} for s in ir['scenes']]})
+            p.write_json(p.ARTIFACTS/'visual-cue-alignment.json',{'method':'existing word alignment after revision','cues':changes})
     else:
         write_captions(p,ir['narration']['segments'])
     if saved['operation_type']=='media_revision':

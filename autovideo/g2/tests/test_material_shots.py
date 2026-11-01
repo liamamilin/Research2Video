@@ -134,6 +134,49 @@ def test_a_reused_page_only_visits_the_regions_selected_for_this_paragraph():
     assert len(fallback['cues']) == 2
 
 
+def test_material_focus_reuses_word_alignment_instead_of_character_rate(tmp_path):
+    from g2.caption_alignment import word_spans
+    from g2.information_motion import align_visual_beats
+
+    p, s = pipeline(tmp_path), scene()
+    text = '先看整体，文件区显示研究报告。接着看提问区。'
+    rows = [{'id': 'n1', 'text': text, 'start_ms': 0, 'end_ms': 12000}]
+    s['narration_segment_ids'] = ['n1']
+    hints = [{'image_index': 0, 'region_index': 1, 'phrase': '提问区'}]
+    shot_director.attach({'scenes': [s]}, {}, p, {'rows': rows},
+                         [{'id': s['id'], 'material_cues': hints}])
+    timing = json.loads((tmp_path / 'information-timing.json').read_text())
+    cue = timing['cues'][0]
+    assert cue['character_index'] == text.index('提问区')
+    spans = word_spans(text)
+    items = [{'text': word, 'start_ms': i * 120, 'end_ms': (i + 1) * 120}
+             for i, (word, _, _) in enumerate(spans)]
+    captions = {'word_evidence': [{'segment_id': 'n1', 'items': items}]}
+    ir = {'narration': {'segments': rows}, 'scenes': [s]}
+    changes = align_visual_beats(ir, captions, timing)
+    index = next(i for i, (_, a, _) in enumerate(spans) if a == text.index('提问区'))
+    assert changes[0]['offset_ms'] == items[index]['start_ms']
+    assert changes[0]['offset_ms'] != changes[0]['previous_offset_ms']
+    before = copy.deepcopy(timing)
+    shot_director.attach({'scenes': [s]}, {}, p, {'rows': rows},
+                         [{'id': s['id'], 'material_cues': hints}])
+    assert json.loads((tmp_path / 'information-timing.json').read_text()) == before
+
+
+def test_material_hints_match_technical_text_and_punctuation_without_new_planning():
+    s = scene()
+    text = '先看 Tool API 的文件区。然后看提问区。最后回到整体。'
+    rows = [{'id': 'n1', 'text': text, 'start_ms': 0, 'end_ms': 10000}]
+    s['narration_segment_ids'] = ['n1']
+    timing = []
+    plan = material_shots.compose(s, rows, 'balanced',
+        [{'image_index': 0, 'region_index': 0, 'phrase': 'tool api的文件区，'},
+         {'image_index': 0, 'region_index': 1, 'phrase': '提问区'}], '最后回到整体，', timing)
+    assert timing[0]['character_index'] == text.index('Tool')
+    assert timing[-1]['character_index'] == text.index('最后回到整体')
+    assert plan['summary_beat_id'] == timing[-1]['beat_id']
+
+
 def material_scene(pair=False):
     return {'component': 'material_collage' if pair else 'object_showcase', 'start_frame': 0, 'end_frame': 600,
         'props': {'images': [image('左图'), image('右图', 2)], 'focus_indices': [0, 1],

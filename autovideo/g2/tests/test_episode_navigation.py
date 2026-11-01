@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
-from g2.episode_navigation import timeline, ass, apply, agenda, cards
+from g2.episode_navigation import timeline, ass, apply, agenda, cards, program_for
 from g3.app import CreateJobRequest
 
 
@@ -39,6 +39,26 @@ def test_navigation_uses_measured_frames_and_leaves_opening_and_closing_separate
 def test_individual_mode_does_no_compositor_work(tmp_path):
     (tmp_path / 'input.json').write_text('{}')
     assert apply(SimpleNamespace(PROJECT_INPUT=tmp_path / 'source.txt'), {}) is None
+
+
+def test_tutorial_uses_existing_chapter_roles_without_a_second_step_configuration():
+    ir = {'content_structure': {'chapters': [
+        {'title': name, 'narration_segment_ids': [f'n{i}']} for i, name in
+        enumerate(['开场', '准备输入', '执行转换', '查看结果', '回顾'])]},
+        'scenes': [{'narration_segment_ids': [f'n{i}'], 'props': {'story': {'role': role}}}
+                   for i, role in enumerate(['question', 'explain', 'explain', 'result', 'recap'])]}
+    result = program_for({'production_recipe': 'mixed_tutorial'}, ir)
+    assert result == {'items': [{'title': title, 'chapter_indexes': [i]}
+                                for i, title in [(1, '准备输入'), (2, '执行转换'), (3, '查看结果')]]}
+    assert program_for({'production_recipe': 'mixed_explainer'}, ir) is None
+    del ir['scenes'][0]['props']['story']
+    assert program_for({'production_recipe': 'mixed_tutorial'}, ir) is None
+
+
+def test_explicit_programme_items_keep_their_original_mapping():
+    saved = {'production_recipe': 'mixed_tutorial', 'episode': {'items': [
+        {'title': '保留命名', 'chapter_indexes': [0, 1]}]}}
+    assert program_for(saved, {}) == saved['episode']
 
 
 def _programme(paragraph_ids):

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from jsonschema import Draft202012Validator, ValidationError
 
@@ -13,7 +14,7 @@ from g2.material_shots import describe
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = ROOT / 'g2/schemas/explanation-plan.schema.json'
-COMPONENTS = (*motion.COMPONENTS, 'data_chart', 'scatter_chart', 'flow_diagram')
+COMPONENTS = (*motion.COMPONENTS, 'data_chart', 'scatter_chart', 'flow_diagram', 'code_demo')
 
 
 def enabled(saved: dict, form: str) -> bool:
@@ -56,6 +57,10 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
               '同一张网页可按几个区域连续讲解；两张图片可先看左图、再看右图，最后一起比较。'
               '已有页面或输入输出图片时，普通页面说明用概念或对比组织简短文字，由现有图片呈现，不另画抽象流程替代这些图片。'
               'material_summary_phrase可填写引出总结或整体比较的讲稿原句。只安排画面，不改写旁白。'
+              '讲稿已有代码、命令或明确的代码改动时，可用code_demo展示1到6行原代码或命令。'
+              'lines逐行填写text、对应讲稿短语phrase，以及可选的简短annotation；'
+              '修改前后用change=remove/add标记，其他行省略change。配置、端口、版本号的代码修改也用code_demo，不用价格变化卡。保留代码原文、缩进和标点；'
+              'phrase只给本段正在讲解的行；保留为上下文的代码行可省略phrase。沿用讲述顺序。没有代码输入时使用现有截图或图解，不为装饰编写新代码。'
               '画面文字简洁，不把整段旁白贴上屏。只返回符合required_schema的JSON。')
     system += ('明确的传递过程可以用flow_diagram：2到5个节点，edges连接已有节点，paths填空数组，附title和takeaway；布局由程序生成。' + visual_language.GUIDANCE)
     from g2.story_direction import GUIDANCE
@@ -77,6 +82,8 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
                'required_schema': json.loads(SCHEMA.read_text())}
     if context.get('instruction'):
         payload['visual_preference'] = context['instruction']
+    if context.get('creative_intent'):
+        payload['creative_intent'] = context['creative_intent']
     if context.get('chapter_context'):
         payload['chapter_context'] = context['chapter_context']
     if context.get('established_entities'):
@@ -93,6 +100,16 @@ def validate(plan: dict, context: dict) -> None:
         raise ValueError('画面页需要按顺序覆盖输入分组')
     for page in plan['pages']:
         group = next(g for g in context['groups'] if g['id'] == page['id'])
+        # An assignment edit is best understood in its original code context,
+        # even when the planner notices the numbers and chooses a price card.
+        snippets = re.findall(r'`([^`\n]+)`', group['text']) if page['component'] == 'price_change' else []
+        assignments = [re.match(r'^\s*([A-Za-z_]\w*)\s*=', text) for text in snippets]
+        if len(snippets) == 2 and all(assignments) and assignments[0][1] == assignments[1][1]:
+            page['component'] = 'code_demo'
+            page['props'] = {'title': page['props'].get('title', '配置修改')[:24], 'label': '修改前后',
+                             'lines': [{'text': text, 'phrase': text, 'change': change,
+                                        'annotation': note} for text, change, note in
+                                       zip(snippets, ('remove', 'add'), ('原来的配置', '本次修改后的配置'))]}
         materials = group.get('image_materials', [])
         for cue in page.get('material_cues', []):
             if (cue['image_index'] >= len(materials) or
@@ -191,7 +208,8 @@ def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | No
     # One request per chapter; ordinary paragraphs still share the chapter's data context.
     for chapter in dict.fromkeys(g['chapter_id'] for g in input_groups):
         local = [g for g in input_groups if g['chapter_id'] == chapter]
-        context = {'title': narration['title'], 'groups': local}
+        context = {'title': narration['title'], 'groups': local,
+                   'creative_intent': saved.get('creative_intent', {})}
         from g2.production_plan import hybrid_enabled
         context['fast_cards'] = hybrid_enabled(saved)
         context['established_entities'] = list(dict.fromkeys(e['name'] for p in pages for e in p.get('entities', [])))
@@ -210,11 +228,36 @@ def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | No
 
 def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, assets: list[dict]) -> dict:
     """Combine paragraph pictures and native data/text scenes on the same measured timeline."""
-    scenes = []
-    data = {'data_chart', 'scatter_chart', 'big_number', 'price_change', 'bar_chart'}
+    scenes, direction_pages = [], []
+    data = {'data_chart', 'scatter_chart', 'big_number', 'price_change', 'bar_chart', 'code_demo'}
     rows = saved.get('image_materials', [])
     for page, group in zip(plan['pages'], plan['groups']):
-        component, props = page['component'], page['props']
+        component, props = page['component'], dict(page['props'])
+        direction = page
+        if (component == 'code_demo' and scenes and scenes[-1]['component'] == 'code_demo'
+                and group.get('chapter_id') == plan['groups'][len(scenes)-1].get('chapter_id')
+                and re.search(r'第二步|第三步|下一步|接着|然后|继续|保留|刚才|上一步', group['text'])
+                and not any(line.get('change') == 'remove' for line in [*scenes[-1]['props']['lines'], *props['lines']])):
+            # Carry short earlier commands as context. Only the current lines
+            # get spoken cues; the renderer keeps their positions consistent.
+            current = {line['text'] for line in props['lines']}
+            room = 6-len(props['lines'])
+            previous = [line for line in scenes[-1]['props']['lines'] if line['text'] not in current]
+            prefix = [{key: value for key, value in line.items() if key not in {'phrase', 'change'}}
+                      for line in previous[-room:]] if room > 0 else []
+            while prefix:
+                extended = {**props, 'lines': prefix+props['lines']}
+                try:
+                    motion.validate_text_fit({'id': page['id'], 'component': component, 'props': extended})
+                except motion.InformationFault:
+                    prefix = prefix[1:]
+                    continue
+                props = extended
+                direction = {**page, 'entities': [{**entity, 'targets': [
+                    f'line:{int(target.split(":")[1])+len(prefix)}' if re.fullmatch(r'line:\d+', target) else target
+                    for target in entity.get('targets', [])]} for entity in page.get('entities', [])]}
+                break
+        direction_pages.append(direction)
         if component == 'price_change':
             props = {**props, 'staged': True}
         indices = group['image_indices']
@@ -245,7 +288,7 @@ def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, asset
         connect(board, plan['groups'], saved)
     if plan.get('direction_version') == 4 or any(p.get('story_role') for p in plan['pages']):
         from g2.story_direction import attach as attach_story
-        attach_story(board, plan['pages'], plan['groups'], pipeline, saved.get('_story_entities'))
+        attach_story(board, direction_pages, plan['groups'], pipeline, saved.get('_story_entities'))
     pipeline.write_json(pipeline.ARTIFACTS / 'explanation-plan.json', plan)
     pipeline.write_json(pipeline.ARTIFACTS / 'storyboard-plan.json', board)
     return board

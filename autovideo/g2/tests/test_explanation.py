@@ -23,6 +23,30 @@ def test_planner_uses_upstream_copy_and_registered_visuals():
     assert 'source' not in payload and 'facts' not in payload
 
 
+def test_tutorial_recipe_direction_reaches_the_existing_chapter_planning_call(tmp_path, monkeypatch):
+    from g2.creative_library import prepare_request
+
+    saved = prepare_request({'production_recipe': 'mixed_tutorial'})
+    group = {'id': 'p1', 'chapter_id': 'c1', 'title': '准备输入', 'text': '先看这份周报。',
+             'segment_ids': ['n1'], 'image_indices': []}
+    monkeypatch.setattr(explanation, 'paragraph_groups', lambda *args: [group])
+    captured = []
+
+    def generate(stage, messages, schema, check, context):
+        captured.append(json.loads(messages(context)[1]['content']))
+        plan = {'pages': [{'id': 'p1', 'component': 'concept_reveal',
+                          'props': {'title': '准备输入', 'lines': ['这份周报']}}]}
+        check(plan, context)
+        return plan
+
+    pipeline = SimpleNamespace(generate_validated_plan=generate)
+    plan = explanation.plan_storyboard(pipeline, {'title': '工具教程'}, saved)
+    assert len(captured) == 1
+    assert captured[0]['creative_intent'] == saved['creative_intent']
+    assert '实际命令或代码' in captured[0]['creative_intent']['focus']
+    assert plan['groups'][0]['text'] == group['text']
+
+
 def test_mixed_visuals_enabled_for_standard_matrix_forms_only():
     saved = {'visual_storytelling': True, 'chapters': [{'paragraphs': ['说明。']}]}
     for form in ('auto', 'information_motion', 'process_diagram', 'object_showcase', 'dynamic_collage', 'kinetic_typography'):
