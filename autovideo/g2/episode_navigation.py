@@ -2,6 +2,8 @@
 
 This compositor reads authored item/chapters and measured scene timing. It does
 not choose content or change voice, captions, scenes or production selection.
+Besides the footer it draws the opening agenda and a short card where each item
+starts, over the picture area only: the header, captions and footer stay visible.
 """
 from __future__ import annotations
 
@@ -26,8 +28,61 @@ def timeline(program: dict, ir: dict, compiled: dict) -> list[dict]:
     return items
 
 
-def ass(items: list[dict], total_frames: int, *, accent: str = '#238759') -> str:
-    color = '&H00' + accent[5:7] + accent[3:5] + accent[1:3]
+#: The picture area the agenda and item cards cover; two-line captions start below it, the header sits above it.
+STAGE = (0, 140, 1920, 870)
+CARD_FRAMES = 54           # an item card shows for 1.8 s, never longer than a third of its item
+FADE_MS = 220
+PAPER = {'background': '#F7F8F5', 'text': '#202D28', 'muted': '#69756E', 'accent': '#17784B',
+         'line': '#E1E8E1', 'surface': '#FFFFFF'}
+
+
+def agenda(program: dict, ir: dict, compiled: dict, items: list[dict], paragraph_starts: list[str]) -> dict | None:
+    """When the opening agenda shows and, where the briefing gives each item its own paragraph, when each lights up.
+
+    The opening is everything before the first item. Its first paragraph is the greeting (and maybe the overview);
+    if the opening has at least one paragraph more than there are items, its last paragraphs are the items' lines,
+    one each, and an item lights up as its line starts. Otherwise the list stays unlit: a highlight that may sit on
+    an item other than the one being said is worse than none.
+    """
+    first = items[0]['start_frame'] if items else 0
+    if first <= 0:
+        return None
+    chapters = ir['content_structure']['chapters']
+    covered = {ci for item in program['items'] for ci in item['chapter_indexes']}
+    opening = [sid for ci, chapter in enumerate(chapters) if ci not in covered and ci < min(covered, default=0)
+               for sid in chapter['narration_segment_ids']]
+    starts_ms = {s['id']: s['start_ms'] for s in compiled.get('narration', {}).get('segments', [])}
+    to_frame = lambda ms: (ms * 30 + 500) // 1000
+    paragraphs = [sid for sid in paragraph_starts if sid in opening and sid in starts_ms]
+    start = to_frame(starts_ms[paragraphs[1]]) if len(paragraphs) > 1 else 0
+    highlights = None
+    if len(paragraphs) >= len(items) + 1:
+        highlights = [to_frame(starts_ms[sid]) for sid in paragraphs[-len(items):]]
+        start = min(start, highlights[0])
+    start = max(0, min(start, first - 1))
+    return {'start_frame': start, 'end_frame': first, 'highlights': highlights}
+
+
+def cards(items: list[dict]) -> list[dict]:
+    """The card at each item's start: its number and title, clamped to a third of the item."""
+    return [{'index': item['index'], 'start_frame': item['start_frame'],
+             'end_frame': item['start_frame'] + max(1, min(CARD_FRAMES, (item['end_frame'] - item['start_frame']) // 3))}
+            for item in items]
+
+
+def _bgr(color: str) -> str:
+    return '&H00' + color[5:7] + color[3:5] + color[1:3]
+
+
+def _fit(text: str, width: int, largest: int) -> int:
+    """A font size at which ``text`` fits ``width``: ASS does not shrink text, so the size is chosen here."""
+    return max(24, min(largest, width // max(1, len(text))))
+
+
+def ass(items: list[dict], total_frames: int, *, accent: str = '#238759', opening: dict | None = None,
+        item_cards: list[dict] | None = None, palette: dict | None = None) -> str:
+    color = _bgr(accent)
+    paper = {**PAPER, **{k: v for k, v in (palette or {}).items() if k in PAPER and isinstance(v, str)}}
     header = '''[Script Info]
 ScriptType: v4.00+
 PlayResX: 1920
@@ -62,6 +117,50 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             following = _ass_text(items[next_index]['title'][:20] + ('…' if len(items[next_index]['title']) > 20 else ''))
             event(3, start, end, r'{\an6\pos(1840,1047)\fs22\c&H00C7D5CD}下一条 · '+following)
         rect(3, 0, total_frames, x, 1069, 2, 11, '&H00D0DDD6')
+    x0, y0, x1, y1 = STAGE
+    def cover(start, end):
+        rect(4, start, end, x0, y0, x1 - x0, y1 - y0, _bgr(paper['background']), f'\\fad({FADE_MS},{FADE_MS})')
+    def text(start, end, x, y, size, fill, value, align=4, bold=True):
+        event(8, start, end, '{' + f'\\an{align}\\pos({x},{y})\\fs{size}\\c{fill}\\b{int(bold)}\\fad({FADE_MS},{FADE_MS})' + '}' + _ass_text(value))
+    if opening:
+        start, end = opening['start_frame'], opening['end_frame']
+        cover(start, end)
+        text(start, end, 140, 205, 44, _bgr(paper['text']), '本期导读')
+        rect(5, start, end, 140, 240, 84, 5, _bgr(accent), f'\\fad({FADE_MS},{FADE_MS})')
+        columns = 1 if len(items) <= 5 else 2
+        rows = -(-len(items) // columns)
+        width = (x1 - 280 - 40 * (columns - 1)) // columns
+        height = min(96, (y1 - 290 - 20 * (rows - 1)) // rows)
+        lights = opening.get('highlights')
+        top = 280 + max(0, (y1 - 300 - (rows * height + 20 * (rows - 1))) // 2)
+        for i, item in enumerate(items):
+            column, row = divmod(i, rows)
+            x, y = 140 + column * (width + 40), top + row * (height + 20)
+            size = _fit(item['title'], width - 150, 38 if columns == 1 else 32)
+            windows = [(start, end, 'idle')] if lights is None else [
+                (start, lights[i], 'next'), (lights[i], lights[i + 1] if i + 1 < len(items) else end, 'now'),
+                (lights[i + 1] if i + 1 < len(items) else end, end, 'done')]
+            for begin, until, state in windows:
+                if until <= begin:
+                    continue
+                # Only the agenda's own edges fade, so a row does not flicker when its state changes.
+                fade = f'\\fad({FADE_MS if begin == start else 0},{FADE_MS if until == end else 0})'
+                border = _bgr(accent) if state == 'now' else _bgr(paper['line'])
+                rect(5, begin, until, x, y, width, height, border, fade)
+                rect(6, begin, until, x + 2, y + 2, width - 4, height - 4, _bgr(paper['surface']), fade)
+                if state == 'now':
+                    rect(7, begin, until, x, y, 8, height, _bgr(accent), fade)
+                ink = _bgr(accent) if state == 'now' else _bgr(paper['muted']) if state == 'done' else _bgr(paper['text'])
+                number = _bgr(accent) if state != 'done' else _bgr(paper['muted'])
+                event(8, begin, until, '{' + f'\\an4\\pos({x + 36},{y + height // 2})\\fs30\\c{number}\\b1' + fade + '}' + f"{item['index']:02d}")
+                event(8, begin, until, '{' + f'\\an4\\pos({x + 110},{y + height // 2})\\fs{size}\\c{ink}\\b{int(state == "now")}' + fade + '}' + _ass_text(item['title']))
+    for card in item_cards or []:
+        start, end = card['start_frame'], card['end_frame']
+        item = items[card['index'] - 1]
+        cover(start, end)
+        text(start, end, 960, 400, 40, _bgr(accent), f"{item['index']:02d} / {len(items):02d}", align=5)
+        rect(5, start, end, 918, 450, 84, 5, _bgr(accent), f'\\fad({FADE_MS},{FADE_MS})')
+        text(start, end, 960, 540, _fit(item['title'], 1500, 72), _bgr(paper['text']), item['title'], align=5)
     if items[0]['start_frame'] > 0:
         event(3, 0, items[0]['start_frame'], r'{\an4\pos(80,1047)}本期导读')
     if items[-1]['end_frame'] < total_frames:
@@ -88,8 +187,14 @@ def apply(pipeline, compiled: dict) -> dict | None:
         if old.get('video_sha256') == digest(pipeline.VIDEO_PATH):
             return old
     style = ((pipeline.PACKAGING_INPUT or {}).get('production_plan') or {}).get('style') or {}
+    starts_path = pipeline.ARTIFACTS / 'paragraph-starts.json'
+    starts = json.loads(starts_path.read_text())['segment_ids'] if starts_path.is_file() else []
+    opening = agenda(program, ir, compiled, items, starts)
+    item_cards = cards(items)
     script = folder / 'navigation.ass'
-    script.write_text(ass(items, compiled['total_frames'], accent=style.get('accent', '#238759')), encoding='utf-8')
+    script.write_text(ass(items, compiled['total_frames'], accent=style.get('accent', '#238759'), opening=opening,
+                          item_cards=item_cards, palette=style if style.get('palette_source') == 'brand' else None),
+                      encoding='utf-8')
     escaped = str(script).replace('\\', '\\\\').replace(':', '\\:').replace("'", "'\\''")
     target = folder / 'navigation.mp4'
     pipeline._run_fixed_command('episode-navigation', [pipeline.FFMPEG, '-nostdin', '-v', 'warning', '-n',
@@ -102,7 +207,11 @@ def apply(pipeline, compiled: dict) -> dict | None:
         raise pipeline.G2Fault('EPISODE_OUTPUT_EXISTS', '节目导航的原始成片已保留，请使用新的尝试目录')
     pipeline.VIDEO_PATH.replace(source)
     target.replace(pipeline.VIDEO_PATH)
+    covered = ([[opening['start_frame'], opening['end_frame']]] if opening else []) + [
+        [c['start_frame'], c['end_frame']] for c in item_cards]
     report = {'mode': 'episode', 'items': items, 'total_frames': compiled['total_frames'],
+              'agenda': opening, 'item_cards': item_cards, 'covered_frames': covered,
+              'agenda_highlight': 'per item paragraph' if opening and opening['highlights'] else 'static list',
               'fps': 30, 'timing': 'measured narration chapters', 'footer': [0, 1024, 1920, 56],
               'audio': 'stream copy', 'source_preserved': str(source), 'video_sha256': digest(pipeline.VIDEO_PATH)}
     pipeline.write_json(report_path, report)

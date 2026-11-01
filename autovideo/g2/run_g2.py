@@ -1026,6 +1026,12 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
         action_changes[beat_id] = {"action": beat["action"], "target_id": beat["target_id"],
                                    "beat_frame": frame, "before_frame": before, "after_frame": after}
     frame_targets = {max(0, min(frames - 1, frame)) for frame in frame_targets}
+    # A programme's agenda and item cards cover the picture for a moment; a beat under one is not on screen.
+    navigation = ARTIFACTS / "episode-navigation.json"
+    covered = json.loads(navigation.read_text()).get("covered_frames", []) if navigation.is_file() else []
+    for info in action_changes.values():
+        if any(start <= info["beat_frame"] < end for start, end in covered):
+            info["covered_by_episode_card"] = True
     keyframe_dir = ARTIFACTS / "keyframes"
     keyframe_dir.mkdir(parents=True, exist_ok=True)
     expression = "+".join(f"eq(n\\,{frame})" for frame in sorted(frame_targets))
@@ -1042,7 +1048,7 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
         changed = np.max(np.abs(after - before), axis=2) > 25
         ratio = float(np.mean(changed))
         info["changed_pixel_ratio"] = ratio
-        if info["action"] in {"activate_path", "mark_disrupted"} and ratio < 0.002:
+        if info["action"] in {"activate_path", "mark_disrupted"} and ratio < 0.002 and not info.get("covered_by_episode_card"):
             raise G2Fault("VISUAL_BEAT_NOT_OBSERVABLE", f"{beat_id}/{info['action']} changed {ratio:.3%} of pixels")
 
     width, height = 800, 450
