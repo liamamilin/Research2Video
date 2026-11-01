@@ -89,7 +89,7 @@ class VideoHandoffs:
         return bool(script_id and script_id in self.pending and script_id in self.observed)
 
     def record(self, name: str, arguments: dict, result: dict) -> None:
-        if name == 'continue_video' and result.get('status') == 'started' and result.get('batch_id'):
+        if name in {'continue_video', 'create_video', 'update_video_materials'} and result.get('status') == 'started' and result.get('batch_id'):
             script_id = result['script_id']
             self.pending.setdefault(script_id, {k: result[k] for k in ('script_id', 'batch_id', 'href')})
             return

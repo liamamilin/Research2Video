@@ -16,26 +16,39 @@ def capture(name: str, arguments: dict) -> dict | None:
     sid, step = arguments.get('script_id'), ''
     if name == 'continue_video':
         step = 'workflow'
+    elif name == 'update_video_materials':
+        if not arguments.get('regenerate', True) and not arguments.get('make_video'):
+            return None
+        step = 'workflow' if arguments.get('make_video') else 'write'
     elif name == 'create_video':
-        step = 'write'
+        step = 'workflow' if arguments.get('make_video') else 'write'
     elif name == 'manage_video':
         step = {'restyle': 'write', 'approve': 'approve', 'render': 'render', 'recheck': 'recheck'}.get(arguments.get('action'), '')
     elif name == 'operate_application':
         action = arguments.get('action_id', '')
         sid = (arguments.get('path') or {}).get('script_id')
+        if action == 'PATCH /api/video/scripts/{script_id}/materials':
+            body = arguments.get('body') or {}
+            if not body.get('regenerate', True) and not body.get('make_video'):
+                return None
         if action == 'POST /api/video/scripts/{script_id}/steps/{step}/rerun':
             step = (arguments.get('path') or {}).get('step', '')
         else:
             step = {'POST /api/video/scripts': 'write', 'PUT /api/video/scripts/{script_id}': 'edit',
+                    'PATCH /api/video/scripts/{script_id}/materials': 'write',
                     'POST /api/video/scripts/{script_id}/restyle': 'write',
                     'POST /api/video/scripts/{script_id}/approve': 'approve',
                     'POST /api/video/scripts/{script_id}/render': 'render',
                     'POST /api/video/scripts/{script_id}/recheck': 'recheck'}.get(action, '')
+            if action == 'PATCH /api/video/scripts/{script_id}/materials' and (arguments.get('body') or {}).get('make_video'):
+                step = 'workflow'
     if not step:
         return None
     script = store.get_script(sid) if sid else None
     version = (script or {}).get('current_version', 0)
-    target = version + 1 if step in ('write', 'edit', 'research') or (
+    material_update = name == 'update_video_materials' or (name == 'operate_application' and
+        arguments.get('action_id') == 'PATCH /api/video/scripts/{script_id}/materials')
+    target = version + 1 if material_update or step in ('write', 'edit', 'research') or (
         step == 'workflow' and (script or {}).get('status') in ('WRITING', 'RESEARCHING')) else max(1, version)
     renders = store.list_renders(sid) if script else []
     old = next((r for r in renders if r['version'] == version and r['status'] == 'COMPLETED'), None)

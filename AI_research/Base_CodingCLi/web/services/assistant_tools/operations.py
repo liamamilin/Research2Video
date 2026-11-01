@@ -63,6 +63,10 @@ def capabilities(request, user):
 
 
 class SourceQuery(Arguments):
+    action: Literal['list', 'coverage', 'materials'] = 'list'
+    profile: str = ''
+    job: str = ''
+    status: Literal['', 'offered', 'reported', 'background', 'deferred', 'unknown'] = ''
     id: str = ''
     text: str = ''
     tag: str = ''
@@ -72,6 +76,11 @@ class SourceQuery(Arguments):
 
 def source_query(a, request, user):
     from web.services.assistant_management import _native
+    if a.action == 'coverage':
+        return {**_native(request, 'GET', '/api/sources/coverage'), 'href': '/sources'}
+    if a.action == 'materials':
+        return _native(request, 'GET', '/api/sources/materials', query={
+            key: getattr(a, key) for key in ('profile', 'job', 'text', 'status', 'offset', 'limit')})
     if a.id:
         from urllib.parse import quote
         return _native(request, 'GET', '/api/sources/' + quote(a.id, safe=''))
@@ -151,7 +160,7 @@ TOOLS = {
     'configure_matrix_task': Tool(ConfigureTask, '一次配齐矩阵、共享信息源、研究任务和视频配方。已有对象只改指定字段，缺少时创建；job_name必须是完整路径，title是显示名称。registered_sources登记/修改共享来源，sources设置任务引用。recipe使用兼容配方；render是矩阵共用设置，任务继承且原覆盖保留。返回准确production_keys，可用于prepare_application_batch的scope.ids；也可用scope.jobs选择完整job_name。不会启动研究、周期或发布。失败保留并列出已完成步骤。',
         configure_task, 'editor', True, '配齐矩阵与研究任务'),
     'application_capabilities': Tool(Capabilities, '查看整个应用助手的能力范围、当前角色可发现的操作数量和边界，先整体后局部。', lambda a, r, u: capabilities(r, u), label='查看应用能力'),
-    'query_sources': Tool(SourceQuery, 'id为空分页读取信息源、revision、adapter、引用任务与抓取状态，可用text/tag筛选；id非空读取准确来源及直接/标签引用。next_offset非空说明还有来源。', source_query, label='查询信息源'),
+    'query_sources': Tool(SourceQuery, 'action=coverage读取主题/产品覆盖目标、来源角色、最近读取、失败/过期缺口和素材采用状态。action=materials按profile/job/text/status分页查素材交付与采用记录及对应报告，再用报告工具读取报告；不能把交付或引用链接说成已采用，也不能从无记录推断所有历史报告均未涉及。action=list时id为空分页读取信息源、revision、adapter、引用任务与抓取状态，可用text/tag筛选；id非空读取准确来源及直接/标签引用。next_offset非空说明还有来源。', source_query, label='查询信息源'),
     'manage_source': Tool(SourceChange, '登记、修改或删除共享信息源。先query_sources读取expected_revision，只改fields指定字段；会造成直接引用或标签引用失效的删除将返回受影响任务，按用户要求调整引用后再删除。', source_change, 'editor', True, '管理信息源'),
     'prepare_application_batch': Tool(PrepareBatch, '准备完整范围的持久批次，不执行。kind：produce按生产配置研究后自动写稿出片（refresh=false用现有最新报告）；publish批量发布到指定platform和核对过的account_uid；schedules按enabled批量启停；matrix_render合并render且保留任务覆盖。scope指定ids（produce填production_keys，不是job名）、jobs（完整研究任务名）、matrices（矩阵key）或明确all=true。候选全部分页收集并冻结；返回批次id与逐项清单。用户明确要求执行时准备后直接start，无需额外确认；只要求查看或准备时不要start。',
         lambda a, r, u: assistant_batches.prepare(a.spec.model_dump(), r, u), 'editor', True, '准备操作批次'),

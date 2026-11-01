@@ -50,6 +50,8 @@ class AssistantStore:
                     db.execute(f'ALTER TABLE protected_inputs ADD COLUMN {name} {declaration}')
             if 'context' not in {row[1] for row in db.execute('PRAGMA table_info(conversations)')}:
                 db.execute("ALTER TABLE conversations ADD COLUMN context TEXT NOT NULL DEFAULT 'null'")
+            if 'materials' not in {row[1] for row in db.execute('PRAGMA table_info(requests)')}:
+                db.execute("ALTER TABLE requests ADD COLUMN materials TEXT NOT NULL DEFAULT '[]'")
 
     @contextmanager
     def db(self):
@@ -96,6 +98,7 @@ class AssistantStore:
             result['requests'] = []
             for record in records:
                 item = dict(record)
+                item['materials'] = json.loads(item['materials'])
                 item['result'] = json.loads(item['result'])
                 if item['status'] == 'running' and item['owner'] != OWNER:
                     item['status'] = 'interrupted'
@@ -120,20 +123,23 @@ class AssistantStore:
                 result['requests'].append(item)
             return result
 
-    def begin(self, user: dict, request_id: str, conversation_id: str, message: str) -> tuple[bool, dict]:
+    def begin(self, user: dict, request_id: str, conversation_id: str, message: str,
+              materials: list[dict] | None = None) -> tuple[bool, dict]:
+        materials = materials or []
         with self.db() as db:
             row = db.execute('SELECT * FROM requests WHERE id=?', (request_id,)).fetchone()
             if row:
-                if row['user_id'] != identity(user) or row['conversation_id'] != conversation_id or row['message'] != message:
+                if (row['user_id'] != identity(user) or row['conversation_id'] != conversation_id
+                        or row['message'] != message or json.loads(row['materials']) != materials):
                     raise ValueError('请求标识已被使用，请刷新后重新提交')
                 return False, {**json.loads(row['result']), 'status': row['status']}
             if db.execute("SELECT 1 FROM requests WHERE conversation_id=? AND status='running'", (conversation_id,)).fetchone():
                 raise ValueError('此对话仍有请求在运行，请等待完成或停止响应')
             now = time.time()
             empty = {'answer': '', 'actions': [], 'error': None}
-            db.execute('INSERT INTO requests VALUES (?,?,?,?,?,?,?,?,?)',
+            db.execute('INSERT INTO requests(id,conversation_id,user_id,message,status,owner,result,created,updated,materials) VALUES (?,?,?,?,?,?,?,?,?,?)',
                        (request_id, conversation_id, identity(user), message, 'running', OWNER,
-                        json.dumps(empty), now, now))
+                        json.dumps(empty), now, now, json.dumps(materials, ensure_ascii=False)))
             db.execute('UPDATE conversations SET updated=? WHERE id=?', (now, conversation_id))
             return True, empty
 
