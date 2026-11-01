@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import Literal
 
 from core import sources
 from pydantic import BaseModel, ConfigDict, Field
@@ -22,9 +23,29 @@ def list_sources(user=Depends(require_viewer)) -> dict:
     try:
         data = source_catalog.catalog(paths.config_dir, paths.jobs_dir, paths.state_dir)
         snap = source_registry.snapshot()
-        return {**data, 'revision': snap['revision'], 'adapters': snap['adapters']}
+        from core.source_coverage import overview
+        return {**data, 'revision': snap['revision'], 'adapters': snap['adapters'],
+                'coverage': overview(paths.config_dir, paths.state_dir)['profiles']}
     except sources.RegistryError as exc:
         raise HTTPException(500, detail=ApiError.make("bad_registry", str(exc))) from exc
+
+
+@router.get('/coverage')
+def source_coverage(user=Depends(require_viewer)) -> dict:
+    from core.source_coverage import overview
+    paths = get_settings().paths
+    return overview(paths.config_dir, paths.state_dir)
+
+
+@router.get('/materials')
+def source_materials(profile: str = '', job: str = '', text: str = Query(default='', max_length=300),
+                     status: Literal['', 'offered', 'reported', 'background', 'deferred', 'unknown'] = '',
+                     offset: int = Query(default=0, ge=0), limit: int = Query(default=30, ge=1, le=100),
+                     user=Depends(require_viewer)) -> dict:
+    from core.source_coverage import material_records
+    paths = get_settings().paths
+    return material_records(paths.config_dir, paths.state_dir, profile=profile, job=job, text=text,
+                            status=status, offset=offset, limit=limit)
 
 
 class SourceFields(BaseModel):

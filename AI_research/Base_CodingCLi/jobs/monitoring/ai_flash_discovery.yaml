@@ -17,6 +17,8 @@ sources:
   - "source:cg_release_notes"
   - "source:cg_openai_news"
   - "source:cg_pro_tiers"
+  - "tag:ai_daily_shared"
+  - "github:anthropics/claude-code"
   - "tldr:ai"
   - "rss:https://www.therundown.ai/feed"
   - "hf_models:trending"

@@ -40,6 +40,7 @@ def test_shipped_catalog_reuses_existing_domains_and_all_five_ai_bindings():
         assert c and c.matrix == "ai_media"
         assert set(c.render) == {"packaging"}
         assert c.render["packaging"]["label"] == c.name
+    assert columns["ai_opensource"].type == "explainer"
     assert matrices_by_key["tech"].content["role"] == matrices_by_key["software"].content["role"] == "source"
     assert matrices_by_key["ai"].archived
 
@@ -87,6 +88,35 @@ def test_cross_domain_render_defaults_have_explicit_priority_and_legacy_mode(col
     assert content_columns.render_settings(config, source, context, {}) == {"video_speed": 2}
     assert content_columns.render_settings(config, source, context, {"video_speed": 1}) == {"video_speed": 1}
     assert content_columns.render_settings(config, source, {}, {}) == {"video_speed": 1.25}
+
+
+@pytest.mark.parametrize('kind,chosen,expected', [
+    ('tutorial', None, 'mixed_tutorial'),
+    ('tutorial', 'mixed_explainer', 'mixed_explainer'),
+    ('explainer', 'mixed_tutorial', 'mixed_tutorial'),
+    ('explainer', None, None),
+])
+def test_matrix_tutorial_recipe_reaches_render_without_legacy_executor_overrides(column_env, kind, chosen, expected):
+    from web.services import video_render
+    context = content_columns.snapshot(str(column_env / 'config'), 'flash', 'monitoring/ai_flash_discovery')
+    context.update(type=kind, render={'packaging': {'label': '实际操作'}})
+    if chosen:
+        context['render']['production_recipe'] = chosen
+    script = store.create_script('flash', {'title': '转换周报'}, production='flash', content_context=context)
+    version = store.add_version(script['id'], title='转换周报', sections=[{
+        'title': '执行转换', 'paragraphs': [{'text': '运行转换命令，查看生成的文件。',
+                                         'citations': [], 'evidence': 'UNCITED'}]}],
+        length_check={}, edit_type='GENERATED')
+    store.update_script(script['id'], status='APPROVED', approved_version=version)
+    request = video_render.create(store.get_script(script['id']))['request']
+    assert request.get('production_recipe') == expected
+    if expected:
+        settings = request['production_context']['content_recipe']['settings']
+        assert 'video_form' not in settings
+        from core.video import columns
+        assert settings['voice_id'] == columns.get(str(column_env / 'config'), 'flash').voice_id
+        assert request['production_context']['matrix']['settings']['packaging']['label'] == '实际操作'
+    assert store.get_script(script['id'])['content_context'] == context
 
 
 def test_workflow_records_business_identity_before_spawn_and_versions_keep_it(column_env, monkeypatch):

@@ -23,6 +23,11 @@ def canonical_url(url: str) -> str:
 
 
 def _document(page: str, *, catalog: bool = False):
+    # Official documentation also offers public Markdown endpoints. Keep their
+    # headings and links instead of treating the entire document as one paragraph.
+    if not re.search(r"<(?:!doctype|html|body|main|article|h[1-6]|p)\b", page, re.I):
+        import markdown
+        page = markdown.markdown(page, extensions=["tables"])
     soup = BeautifulSoup(page, "html.parser")
     for node in soup.select("script,style,nav,footer,aside,svg,noscript,[hidden]"):
         node.decompose()
@@ -57,7 +62,9 @@ def parse_page(page: str, url: str, limit: int = 8, *, section_chars: int = MAX_
     if len(text) < 40 or re.search(r"^(just a moment|access denied|verify you are human)", text, re.I):
         raise ValueError("网页没有可读取的正文")
     results: list[SearchResult] = []
+    sections = {}
     heading, anchor, date, chunks, links = title, "", None, [], []
+    year = ""
 
     def flush():
         body = re.sub(r"\s+", " ", " ".join(chunks)).strip()
@@ -68,14 +75,29 @@ def parse_page(page: str, url: str, limit: int = 8, *, section_chars: int = MAX_
         excerpt = body[:section_chars]
         if links:
             excerpt += "\n相关页面：" + "；".join(dict.fromkeys(links))[:1500]
-        results.append(SearchResult(title=f"{title} · {heading}" if heading != title else title,
-                                    url=target, publish_date=date, excerpts=[excerpt], provider="page"))
+        key = (target, date)
+        if key in sections:
+            # Several releases can share a date heading and text-fragment URL.
+            # Preserve all their bodies before the archive indexes that URL.
+            if excerpt not in sections[key].excerpts:
+                sections[key].excerpts.append(excerpt)
+        else:
+            result = SearchResult(title=f"{title} · {heading}" if heading != title else title,
+                                  url=target, publish_date=date, excerpts=[excerpt], provider="page")
+            results.append(result)
+            sections[key] = result
 
     for node in root.descendants:
         if isinstance(node, Tag) and re.fullmatch(r"h[1-4]", node.name or ""):
             flush()
             heading, anchor = node.get_text(" ", strip=True), str(node.get("id") or "")
-            date = _date(heading) or date
+            dated_year = re.search(r"\b(20\d{2})\b", heading)
+            if dated_year:
+                year = dated_year.group(1)
+                date = _date(heading)
+            else:
+                # Changelogs often group “Oct 30” under “October, 2026”.
+                date = _date(heading) or (_date(heading + " " + year) if year else None) or date
             chunks, links = [], []
         elif isinstance(node, Tag) and node.name == "a" and node.get("href"):
             link = urljoin(url, str(node["href"]))

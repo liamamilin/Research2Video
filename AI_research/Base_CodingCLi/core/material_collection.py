@@ -21,6 +21,7 @@ def collect(engine, policy: dict) -> dict:
     root = Path(getattr(engine, "state_dir", Path(engine.workspace_dir) / "state"))
     archive = MaterialArchive(root)
     specs = []
+    overdue = []
     owners = matrices.load_all(engine.config_dir)
     active = set()
     for key in policy["matrices"]:
@@ -36,6 +37,10 @@ def collect(engine, policy: dict) -> dict:
                 )
     for profile in source_supply.profiles(engine.config_dir).values():
         if profile.get("matrix") in active:
+            from core.source_coverage import CoverageStore
+            coverage = CoverageStore(root, profile['key']).status(profile)
+            specs.extend(r['spec'] for r in coverage)
+            overdue.extend(r for r in coverage if r['status'] != 'current')
             specs.extend(
                 r["spec"] for r in SupplyStore(root, profile["key"]).pool()["sources"]
             )
@@ -43,7 +48,8 @@ def collect(engine, policy: dict) -> dict:
     specs = sorted(set(specs))
     bound = settings.get("max_sources", 100)
     offset = (int(time.time() // 86400) * bound) % max(1, len(specs))
-    selected = (specs[offset:] + specs[:offset])[:bound]
+    priority = [r['spec'] for r in sorted(overdue, key=lambda r: r.get('attempted_at', 0))]
+    selected = list(dict.fromkeys(priority + specs[offset:] + specs[:offset]))[:bound]
     receipt = {
         "policy_revision": policy["revision"],
         "sources_total": len(specs),
@@ -61,14 +67,17 @@ def collect(engine, policy: dict) -> dict:
             }
             continue
         try:
-            items = sources.fetch_source(
-                spec,
-                limit=settings.get("limit_per_source", 80),
-                timeout=settings.get("timeout_seconds", 15),
-            )
-            archive.record(spec, items)
+            if spec.startswith(('page:', 'catalog:')):
+                kind, url = spec.split(':', 1)
+                items = source_supply.read_page(url, limit=settings.get('limit_per_source', 80),
+                                                timeout=settings.get('timeout_seconds', 15), catalog=kind == 'catalog')
+            else:
+                items = sources.fetch_source(spec, limit=settings.get("limit_per_source", 80),
+                                             timeout=settings.get("timeout_seconds", 15))
+            error = '' if items else '本次实时读取未取得正文条目'
+            archive.record(spec, items, error=error)
             receipt["sources"][spec] = {
-                "status": "read",
+                "status": "read" if items else 'unavailable', 'error': error,
                 "items": len(items),
                 "coverage": getattr(items, "coverage", {}),
             }
@@ -85,6 +94,10 @@ def collect(engine, policy: dict) -> dict:
                 "error": str(exc)[:300],
             }
     archive.prune(settings.get("retention_days", 60))
+    from core.source_coverage import CoverageStore
+    for profile in source_supply.profiles(engine.config_dir).values():
+        if profile.get('matrix') in active:
+            CoverageStore(root, profile['key']).record(receipt['sources'])
     receipt["finished_at"] = time.time()
     return receipt
 

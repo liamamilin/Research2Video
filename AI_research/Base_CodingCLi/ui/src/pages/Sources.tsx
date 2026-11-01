@@ -49,6 +49,21 @@ export function SourcesPage() {
       <details className="text-xs text-text-muted"><summary className="cursor-pointer">登记与引用信息源</summary><p className="mt-2">在此页或通过助手登记来源，研究任务使用 source:id 引用一个来源，或使用 tag:标签 引用一组。删除前会检查引用任务。</p></details>
       {editing !== null && catalog.revision && <SourceEditor key={editing} id={editing || undefined} revision={catalog.revision} onClose={() => setEditing(null)} onSaved={load} />}
 
+      {catalog.coverage?.map(profile => <details key={profile.key} className="card p-4 text-xs" aria-label="主题覆盖">
+        <summary className="cursor-pointer font-medium">{profile.name} · 主题覆盖 · {profile.cells.filter(c => c.status !== 'current').length} 项有缺口</summary>
+        <p className="text-text-muted mt-2">分别跟踪当前状态页、更新公告、数据快照和文章案例。已交给研究模型的材料与报告已采用的材料分开记录；覆盖状态表示实际读取情况。</p>
+        <div className="grid gap-3 mt-3 sm:grid-cols-2">{profile.cells.map(cell => <div key={cell.key} className="border border-border rounded p-3">
+          <p className="font-medium">{cell.subject} <span className={cell.status === 'current' ? 'text-success' : 'text-warning'}>{cell.status === 'current' ? '已覆盖' : '待补全'}</span></p>
+          <p className="text-text-muted mt-1">{cell.topics.join('、')}</p>
+          {!cell.sources.length && <p className="text-warning mt-2">尚无专用来源，来源探索将优先处理</p>}
+          <ul className="space-y-2 mt-2">{cell.sources.map((source, i) => <li key={`${source.spec}:${i}`} className="break-all text-text-muted">
+            <span>{({ state: '当前状态', release: '更新公告', snapshot: '数据快照', editorial: '文章案例' } as Record<string, string>)[source.role]} · {({ current: '已实时读取', missing: '未采集', stale: '已过期', unavailable: '读取失败', cached: '仅有历史缓存' } as Record<string, string>)[source.status]}</span>
+            <div>{source.spec}</div>{source.error && <div className="text-danger">{source.error}</div>}
+          </li>)}</ul>
+        </div>)}</div>
+        <p className="mt-3 text-text-muted">素材记录：已交付待记录采用 {profile.candidates.offered || 0} · 报告采用 {profile.candidates.reported || 0} · 解释背景 {profile.candidates.background || 0} · 延后处理 {profile.candidates.deferred || 0} · 历史采用关系未知 {profile.candidates.unknown || 0}</p>
+      </details>)}
+
       {catalog.problems.length ? (
         <section className="card p-4 space-y-1 border-danger" aria-label="引用错误">
           <h2 className="text-sm font-medium text-danger">有 Job 引用了注册表里没有的源（这些 Job 跑不起来）</h2>
