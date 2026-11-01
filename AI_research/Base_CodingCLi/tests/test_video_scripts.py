@@ -111,6 +111,9 @@ class FakeLLM:
     fact_calls: list[list[dict]] = []
     headline_replies: list[str] = []
     headline_calls: list[list[dict]] = []
+    #: the polish of a fresh draft runs only when the program finds stiff narration; it changes nothing unless queued
+    polish_replies: list[str] = []
+    polish_calls: list[list[dict]] = []
 
     def __init__(self, config, cancel_token=None, progress_cb=None):
         self.usage = {"requests": 0, "total_tokens": 0}
@@ -119,9 +122,13 @@ class FakeLLM:
         from core.video import audit as video_audit
         from core.video import editorial
         from core.video import headline
+        from core.video import polish
         from core.video.adapt import facts
         from core.provenance import extract_urls
         self.usage["requests"] += 1
+        if messages[0]["content"] == polish.SYSTEM_PROMPT:
+            FakeLLM.polish_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.polish_replies.pop(0) if FakeLLM.polish_replies else '{"paragraphs":[]}')
         if messages[0]["content"] == headline.PROMPT:
             FakeLLM.headline_calls.append(list(messages))
             return ChatResponse(content=FakeLLM.headline_replies.pop(0) if FakeLLM.headline_replies else
@@ -189,6 +196,8 @@ def llm(monkeypatch):
     FakeLLM.fact_calls = []
     FakeLLM.headline_replies = []
     FakeLLM.headline_calls = []
+    FakeLLM.polish_replies = []
+    FakeLLM.polish_calls = []
     monkeypatch.setattr("core.llm.LLMClient", FakeLLM)
     return FakeLLM
 

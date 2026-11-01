@@ -242,6 +242,16 @@ export interface LengthCheck {
   dropped_citations?: number;
 }
 
+/** The automatic polish of a fresh draft (core/video/polish.py): which paragraphs it reworded and why. */
+export interface ScriptPolish {
+  version: number;
+  findings: { id: string; rule: string; quote: string; problem: string }[];
+  changes: { id: string; rules: string[]; before: string; after: string }[];
+  rejected: { id: string; reason: string; text: string }[];
+  remaining?: { id: string; rule: string; quote: string; problem: string }[];
+  error?: string;
+}
+
 export interface ScriptVersion {
   script_id: string;
   version: number;
@@ -259,6 +269,7 @@ export interface ScriptVersion {
     plan?: ScriptPlan;
     description?: ScriptDescription;
     fact_sheet_id?: string;
+    polish?: ScriptPolish;
   };
   checks?: ScriptChecks;
   created_by: string;

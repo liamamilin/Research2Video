@@ -29,7 +29,7 @@ from core.config import load_system_config
 from core.llm import LLMConfig
 from core.state import StateManager
 from core.video import columns as video_columns
-from core.video import content_guard, length, research_dossier, store, story_pool, writer
+from core.video import content_guard, length, polish, research_dossier, store, story_pool, writer
 from core.video import plans as video_plans
 from core.video.adapt import draft as adapt_draft
 from core.video.adapt import facts as adapt_facts
@@ -419,6 +419,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             question = re.search(r"(?m)^##\s+本期主问题[：:]\s*(.+)$", dossier_report)
             writing_topic = {key: value for key, value in topic.items() if key != "story"}
             writing_topic["title"] = question.group(1).strip()
+        greeting = episodes.greeting(topic, script.get("content_context") or {})
         written = writer.write(
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
@@ -432,8 +433,9 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             paragraph_units=tuple(column.paragraph_units),
             topic_fields=column.writer_topic_fields(),
             **({"original_material": material} if joint_input else {}),
-            greeting=episodes.greeting(topic, script.get("content_context") or {}) or None,
+            greeting=greeting or None,
         )
+        polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
         if is_episode:
             written.meta["episode"] = episodes.manifest(topic, written.sections)
         written.meta["input_kind"] = ("report_and_original_material" if joint_input and material
