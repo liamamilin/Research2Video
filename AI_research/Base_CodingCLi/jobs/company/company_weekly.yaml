@@ -21,6 +21,16 @@ sources:
 - source:fast_company
 - source:sec_press
 - source:ft_home
+- source:apple_newsroom
+- source:samsung_newsroom
+- source:amazon_news
+- source:nvidia_newsroom
+- source:tsmc_pr
+- source:techmeme
+- source:techcrunch
+- source:stratechery
+- source:not_boring
+- source:economist_world
 prompt: '为「一笔生意怎样运转」整理围绕客户需求与实际交易的研究底稿。选择材料能展开具体业务过程的一个生意，让观众跟随同一客户从发起需求到得到结果，理解它靠什么持续运转。
 
   沿材料中的实际过程保存购买、付款、产品或服务交付、伙伴协作与后续使用的细节。写明各方做什么、传递什么，某一步的成本与收益怎样影响下一步；让同一个例子贯穿价值、资金和交付关系。术语、金额与比例解释当前动作，具体过程和例子充分展开。

@@ -585,10 +585,8 @@ r_project_blog:
   name: blog.r-project.org Feed
   spec: rss:https://blog.r-project.org/index.xml
   tags:
-  - ai
-  - ai_radar
   - r_language
-  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。研映随 AI 栏目研究读取。
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
 devbrief:
   name: devbrief.dev Feed
   spec: rss:https://devbrief.dev/rss.xml
@@ -609,26 +607,20 @@ r_consortium:
   name: r-consortium.org Feed
   spec: rss:https://r-consortium.org/blog/index.xml
   tags:
-  - ai
-  - ai_radar
   - r_language
-  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。研映随 AI 栏目研究读取。
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
 r_for_rest_of_us:
   name: rfortherestofus.com Feed
   spec: rss:https://rfortherestofus.com/blog/feed/atom
   tags:
-  - ai
-  - ai_radar
   - r_language
-  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。研映随 AI 栏目研究读取。
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
 r_weekly:
   name: rweekly.org Feed
   spec: rss:https://rweekly.org/atom.xml
   tags:
-  - ai
-  - ai_radar
   - r_language
-  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。研映随 AI 栏目研究读取。
+  note: 从 Radar 2026-10-29 导入；原关注：关于R语言。2026-11-01 移出 AI 雷达，不再进入 AI 栏目研究。
 zhangwen:
   name: zhangwen.site Feed
   spec: rss:https://zhangwen.site/rss.xml
@@ -637,3 +629,323 @@ zhangwen:
   - ai_radar
   - ai_updates
   note: 从 Radar 2026-10-29 导入；原关注：chatgpt / claude / codex 动态。研映随 AI 栏目研究读取。
+
+# --- 2026-11-01 补充：各矩阵源头信息（官方机构、期刊、公司与项目原始发布；本组与下组都逐个试读通过）---
+stats_cn_release:
+  name: 国家统计局 · 最新发布
+  spec: catalog:https://www.stats.gov.cn/sj/zxfb/
+  tags: [economy, data]
+  note: 官方统计发布目录：PMI、CPI、工业、零售等月度数据原文
+pbc_news:
+  name: 中国人民银行 · 新闻发布
+  spec: catalog:http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/index.html
+  tags: [economy]
+  note: 货币政策、讲话与公告目录
+bls_latest:
+  name: 美国劳工统计局 · 最新数据
+  spec: rss:https://www.bls.gov/feed/bls_latest.rss
+  tags: [economy, data]
+  note: 就业、CPI 等主要指标的最新读数，只有一条汇总
+ny_fed_liberty:
+  name: 纽约联储 Liberty Street Economics
+  spec: rss:https://libertystreeteconomics.newyorkfed.org/feed/
+  tags: [economy]
+  note: 研究员解读数据的博客，常带图表与方法
+climate_gov:
+  name: NOAA Climate.gov
+  spec: rss:https://www.climate.gov/feeds/news-features/highlights.rss
+  tags: [geography, science]
+  note: 订阅源没有日期
+esa_science:
+  name: ESA · 空间科学
+  spec: rss:https://www.esa.int/rssfeed/Our_Activities/Space_Science
+  tags: [science, space]
+boe_news:
+  name: 英格兰银行 · 新闻
+  spec: rss:https://www.bankofengland.co.uk/rss/news
+  tags: [economy]
+boj_news:
+  name: 日本银行 · 最新发布
+  spec: rss:https://www.boj.or.jp/en/rss/whatsnew.xml
+  tags: [economy]
+mof_cn:
+  name: 财政部 · 财政新闻
+  spec: catalog:https://www.mof.gov.cn/zhengwuxinxi/caizhengxinwen/
+  tags: [economy]
+  note: 含会议类新闻，财政数据发布夹在其中
+apple_newsroom:
+  name: Apple Newsroom
+  spec: rss:https://www.apple.com/newsroom/rss-feed.rss
+  tags: [business, consumer]
+samsung_newsroom:
+  name: Samsung Newsroom
+  spec: rss:https://news.samsung.com/global/feed
+  tags: [business, consumer]
+  note: 含季度财报原文
+amazon_news:
+  name: About Amazon · 新闻
+  spec: rss:https://www.aboutamazon.com/news/rss
+  tags: [business]
+nvidia_newsroom:
+  name: NVIDIA Newsroom
+  spec: rss:https://nvidianews.nvidia.com/releases.xml
+  tags: [business, industry]
+tsmc_pr:
+  name: 台积电 · 新闻发布
+  spec: catalog:https://pr.tsmc.com/english/latest-news
+  tags: [business, industry, semiconductors]
+  note: 月营收与季度财报原文
+sia_news:
+  name: 美国半导体行业协会 · 新闻
+  spec: catalog:https://www.semiconductors.org/news-events/latest-news/
+  tags: [industry, semiconductors]
+  note: 全球半导体月度销售数据的发布方
+google_products:
+  name: Google 产品博客
+  spec: rss:https://blog.google/products/rss/
+  tags: [consumer, software]
+cpsc_recalls:
+  name: 美国消费品安全委员会 · 召回
+  spec: rss:https://www.cpsc.gov/Newsroom/CPSC-RSS-Feed/Recalls-RSS
+  tags: [consumer]
+gdacs:
+  name: GDACS 全球灾害预警
+  spec: rss:https://www.gdacs.org/xml/rss.xml
+  tags: [geography, data]
+  note: 联合国与欧盟联合的地震、热带气旋、洪水预警，带等级
+nhc_atlantic:
+  name: 美国国家飓风中心 · 大西洋
+  spec: rss:https://www.nhc.noaa.gov/index-at.xml
+  tags: [geography]
+  note: 飓风季以外条目很少
+cma_news:
+  name: 中国气象局 · 气象新闻
+  spec: catalog:https://www.cma.gov.cn/2011xwzx/2011xqxxw/
+  tags: [geography]
+nih_news:
+  name: 美国国立卫生研究院 · 新闻
+  spec: rss:https://www.nih.gov/news-releases/feed.xml
+  tags: [science]
+nsf_news:
+  name: 美国国家科学基金会 · 新闻
+  spec: rss:https://www.nsf.gov/rss/rss_www_news.xml
+  tags: [science]
+cell_journal:
+  name: Cell · 当期论文
+  spec: rss:https://www.cell.com/cell/current.rss
+  tags: [science]
+science_journal:
+  name: Science · 当期目录
+  spec: rss:https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=science
+  tags: [science]
+  note: 期刊目录原文；Science 新闻是另一个源
+python_insider:
+  name: Python Insider
+  spec: rss:https://blog.python.org/feeds/posts/default
+  tags: [software]
+rust_blog:
+  name: Rust 官方博客
+  spec: rss:https://blog.rust-lang.org/feed.xml
+  tags: [software]
+kubernetes_blog:
+  name: Kubernetes 官方博客
+  spec: rss:https://kubernetes.io/feed.xml
+  tags: [software]
+apple_developer:
+  name: Apple Developer News
+  spec: rss:https://developer.apple.com/news/rss/news.rss
+  tags: [software]
+android_developers:
+  name: Android Developers Blog
+  spec: rss:https://android-developers.googleblog.com/feeds/posts/default
+  tags: [software]
+ms_devblogs:
+  name: Microsoft Developer Blogs
+  spec: rss:https://devblogs.microsoft.com/feed/
+  tags: [software]
+darpa_news:
+  name: DARPA · 新闻
+  spec: catalog:https://www.darpa.mil/news
+  tags: [tech]
+esa_tech:
+  name: ESA · 空间工程与技术
+  spec: rss:https://www.esa.int/rssfeed/Our_Activities/Space_Engineering_Technology
+  tags: [tech, space]
+# --- 2026-11-01 补充：高质量二手报道、评论与聚合 ---
+techmeme:
+  name: Techmeme
+  spec: rss:https://www.techmeme.com/feed.xml
+  tags: [tech, business]
+  note: 科技商业新闻聚合，每条指向原始报道
+techcrunch:
+  name: TechCrunch
+  spec: rss:https://techcrunch.com/feed/
+  tags: [business, tech]
+stratechery:
+  name: Stratechery
+  spec: rss:https://stratechery.com/feed/
+  tags: [business]
+  note: 付费订阅为主，订阅源里多为免费文章和摘要；适合商业模式分析
+not_boring:
+  name: Not Boring
+  spec: rss:https://www.notboring.co/feed
+  tags: [business]
+  note: 公司与商业模式长文
+economist_world:
+  name: The Economist · 本周世界
+  spec: rss:https://www.economist.com/the-world-this-week/rss.xml
+  tags: [economy, business]
+  note: 每周政经要闻汇总；付费墙，订阅源里是摘要
+marginal_revolution:
+  name: Marginal Revolution
+  spec: rss:https://marginalrevolution.com/feed
+  tags: [economy]
+  note: 经济学家的每日链接与点评，指向论文和数据原文
+the_verge:
+  name: The Verge
+  spec: rss:https://www.theverge.com/rss/index.xml
+  tags: [consumer, tech]
+nine_to_five_mac:
+  name: 9to5Mac
+  spec: rss:https://9to5mac.com/feed/
+  tags: [consumer]
+android_authority:
+  name: Android Authority
+  spec: rss:https://www.androidauthority.com/feed/
+  tags: [consumer]
+ithome:
+  name: IT之家
+  spec: rss:https://www.ithome.com/rss/
+  tags: [consumer]
+  note: 中文数码快讯，更新量很大
+sspai:
+  name: 少数派
+  spec: rss:https://sspai.com/feed
+  tags: [consumer, software]
+  note: 中文效率工具与数码使用体验
+dpreview:
+  name: DPReview
+  spec: rss:https://www.dpreview.com/feeds/news.xml
+  tags: [consumer]
+  note: 相机与影像器材评测
+three_quarks:
+  name: 3 Quarks Daily
+  spec: rss:https://3quarksdaily.com/feed
+  tags: [culture]
+  note: 科学、艺术与思想文章的每日精选
+art_newspaper:
+  name: The Art Newspaper
+  spec: rss:https://www.theartnewspaper.com/rss.xml
+  tags: [culture]
+aeon:
+  name: Aeon
+  spec: rss:https://aeon.co/feed.rss
+  tags: [culture, history]
+  note: 思想、哲学与历史长文
+lithub:
+  name: Literary Hub
+  spec: rss:https://lithub.com/feed/
+  tags: [culture]
+  note: 文学与出版
+indiewire:
+  name: IndieWire
+  spec: rss:https://www.indiewire.com/feed/
+  tags: [culture]
+  note: 电影与剧集
+public_domain_review:
+  name: The Public Domain Review
+  spec: rss:https://publicdomainreview.org/rss.xml
+  tags: [culture, history]
+  note: 公版图像与文献，画面素材丰富
+marginalian:
+  name: The Marginalian
+  spec: rss:https://www.themarginalian.org/feed/
+  tags: [culture]
+carbon_brief:
+  name: Carbon Brief
+  spec: rss:https://www.carbonbrief.org/feed
+  tags: [geography, energy]
+  note: 气候与能源，带数据图表
+archaeology_mag:
+  name: Archaeology Magazine
+  spec: rss:https://www.archaeology.org/feed
+  tags: [history]
+  note: 考古新发现简讯
+history_blog:
+  name: The History Blog
+  spec: rss:https://www.thehistoryblog.com/feed
+  tags: [history]
+  note: 考古与文物发现，带图片
+canary_media:
+  name: Canary Media
+  spec: rss:https://www.canarymedia.com/rss.rss
+  tags: [industry, energy]
+  note: 能源转型产业报道
+electrek:
+  name: Electrek
+  spec: rss:https://electrek.co/feed/
+  tags: [industry]
+  note: 电动车与电池
+semiwiki:
+  name: SemiWiki
+  spec: rss:https://www.semiwiki.com/feed/
+  tags: [industry, semiconductors]
+  note: 半导体设计与制造，常有业内访谈
+new_scientist:
+  name: New Scientist
+  spec: rss:https://www.newscientist.com/feed/home/
+  tags: [science]
+  note: 部分文章在付费墙后
+scientific_american:
+  name: Scientific American
+  spec: rss:http://rss.sciam.com/ScientificAmerican-Global
+  tags: [science]
+knowable:
+  name: Knowable Magazine
+  spec: rss:https://knowablemagazine.org/rss
+  tags: [science]
+  note: 基于综述期刊的科普长文
+hn_front:
+  name: Hacker News 首页（300 分以上）
+  spec: rss:https://hnrss.org/frontpage?points=300
+  tags: [software]
+lobsters:
+  name: Lobsters
+  spec: rss:https://lobste.rs/rss
+  tags: [software]
+ruanyifeng_weekly:
+  name: 阮一峰 · 科技爱好者周刊
+  spec: rss:https://www.ruanyifeng.com/blog/atom.xml
+  tags: [software, tech]
+  note: 中文每周科技与工具精选
+infoq_en:
+  name: InfoQ
+  spec: rss:https://feed.infoq.com/
+  tags: [software]
+  note: 架构与工程实践
+new_stack:
+  name: The New Stack
+  spec: rss:https://thenewstack.io/feed/
+  tags: [software]
+martin_fowler:
+  name: Martin Fowler
+  spec: rss:https://martinfowler.com/feed.atom
+  tags: [software]
+pragmatic_engineer:
+  name: The Pragmatic Engineer
+  spec: rss:https://newsletter.pragmaticengineer.com/feed
+  tags: [software]
+  note: 付费订阅为主，免费部分是行业动态
+robot_report:
+  name: The Robot Report
+  spec: rss:https://www.therobotreport.com/feed/
+  tags: [tech, robotics]
+spacenews:
+  name: SpaceNews
+  spec: rss:https://spacenews.com/feed/
+  tags: [tech, space]
+media_404:
+  name: 404 Media
+  spec: rss:https://www.404media.co/rss/
+  tags: [tech]
+  note: 调查型科技报道

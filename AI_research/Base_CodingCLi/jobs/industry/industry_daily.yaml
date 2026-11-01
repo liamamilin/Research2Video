@@ -20,6 +20,12 @@ sources:
 - source:eetimes
 - source:semiconductor_digest
 - source:nist_manufacturing
+- source:tsmc_pr
+- source:sia_news
+- source:nvidia_newsroom
+- source:canary_media
+- source:electrek
+- source:semiwiki
 prompt: '为「产业链的一处变化」整理研究底稿。观众要理解一处产业变化落在生产交付的哪一环，以及它怎样改变前后环节。
 
   从近期材料保留有具体产品、部件、工艺或交付依赖的候选。用同一件产品或一次交付写明原来怎样做、这次改变哪一步、上游需要给什么、当前工序怎样操作、下游由此得到什么。保留材料中的结构、工具、操作、条件、产出和实际案例。

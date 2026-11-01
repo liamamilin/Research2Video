@@ -19,6 +19,14 @@ sources:
 - source:toms_hardware
 - source:ifixit_news
 - source:engadget
+- source:apple_newsroom
+- source:samsung_newsroom
+- source:google_products
+- source:cpsc_recalls
+- source:the_verge
+- source:ithome
+- source:nine_to_five_mac
+- source:android_authority
 prompt: '为「一处体验变化」整理研究底稿。选择材料中有实际操作和结果的一处产品或服务变化，从同一位使用者想完成的事进入，尽早保留新体验，再展开准备、使用、结果与善后的完整过程。把对象特征、具体动作、投入、耗时和维护放在相应步骤，参数解释当前体验和取舍；相关条件影响哪一步就在那一步讲清，接回主任务。保留完成这件事后的新状态和下一次使用，让作者有材料把结尾继续向前推进。底稿完整保留例子、过程与解释深度，取材备忘作为作者背景。
 
   任务：{name}
