@@ -39,10 +39,10 @@ PAPER = {'background': '#F7F8F5', 'text': '#202D28', 'muted': '#69756E', 'accent
 def agenda(program: dict, ir: dict, compiled: dict, items: list[dict], paragraph_starts: list[str]) -> dict | None:
     """When the opening agenda shows and, where the briefing gives each item its own paragraph, when each lights up.
 
-    The opening is everything before the first item. Its first paragraph is the greeting (and maybe the overview);
-    if the opening has at least one paragraph more than there are items, its last paragraphs are the items' lines,
-    one each, and an item lights up as its line starts. Otherwise the list stays unlit: a highlight that may sit on
-    an item other than the one being said is worse than none.
+    The opening is everything before the first item. A briefing is an overview, optionally after the greeting, then
+    one line per item; when the opening has exactly that many paragraphs, its last paragraphs are the items' lines and
+    an item lights up as its line starts. Any other shape stays unlit: a highlight that may sit on an item other than
+    the one being said is worse than none.
     """
     first = items[0]['start_frame'] if items else 0
     if first <= 0:
@@ -56,7 +56,7 @@ def agenda(program: dict, ir: dict, compiled: dict, items: list[dict], paragraph
     paragraphs = [sid for sid in paragraph_starts if sid in opening and sid in starts_ms]
     start = to_frame(starts_ms[paragraphs[1]]) if len(paragraphs) > 1 else 0
     highlights = None
-    if len(paragraphs) >= len(items) + 1:
+    if len(paragraphs) - len(items) in (1, 2):
         highlights = [to_frame(starts_ms[sid]) for sid in paragraphs[-len(items):]]
         start = min(start, highlights[0])
     start = max(0, min(start, first - 1))

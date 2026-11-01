@@ -17,9 +17,12 @@ CONTRAST_ALLOWED = 2
 
 #: A production note to the video maker said as narration ("视频里应该说清楚", "素材只有一句描述").
 _PRODUCTION_NOTE = re.compile(
-    r"(?:视频|画面|片子|口播|这条|本条|这一条)(?:里|中|上)?(?:应该|应当|要|需要)(?:说清楚|讲清楚|讲清|说清|把|当|讲成|强调|展示|交代)"
-    r"|素材(?:给的信息|给出的信息|只有|里只有|中只有|显示|提到|没有|里没有|中没有)"
-    r"|(?:素材|材料)(?:里|中)(?:也)?(?:明确)?(?:说|提到|写|实测|给)"
+    # "视频里应该" is a note; "生成的视频应该更稳" is content about a video tool, so the 里/中 is required.
+    r"(?:视频|画面|片子|口播)(?:里|中)(?:应该|应当|要|需要)(?:说清楚|讲清楚|讲清|说清|把|当|讲成|强调|交代)"
+    r"|(?:这条|本条|这一条)(?:应该|应当)(?:说清楚|讲清楚|讲清|说清|把|当|讲成|强调|交代)"
+    # Narration about footage ("素材没有版权") is content; these are remarks on the research brief.
+    r"|素材(?:给的信息|给出的信息|只有一句|里只有|中只有)"
+    r"|(?:素材|材料)(?:里|中)(?:也)?(?:明确)?(?:说|提到|写|实测)"
     r"|(?:研究)?底稿(?:里|中)?")
 #: An item rounded off with the same stock line ("这条的要点是", "这一条记住的是").
 _STOCK_ENDING = re.compile(r"这(?:一)?条(?:的)?(?:要点|重点|核心|价值)(?:是|在于)|这(?:一)?条(?:要)?记住")
@@ -120,13 +123,16 @@ def polish(client, sections: list[dict], *, greeting: str = "") -> tuple[list[di
         before = out[si]["paragraphs"][pi]["text"]
         after = rewrite.text.strip()
         goodbye = "".join(m.group() for m in _SIGN_OFF.finditer(before)).strip()
-        if goodbye and goodbye not in after:
+        if goodbye and not _SIGN_OFF.search(after):
             after = after.rstrip() + goodbye
+        if after == before:
+            continue
         if _numbers(after) != _numbers(before):
             record["rejected"].append({"id": rewrite.id, "reason": "改写改动了数字", "text": after})
             continue
         out[si]["paragraphs"][pi]["text"] = after
-        record["changes"].append({"id": rewrite.id, "rules": sorted({f["rule"] for f in targets[rewrite.id]}),
+        record["changes"].append({"id": rewrite.id, "where": f"{out[si]['title']} · 第 {pi + 1} 段",
+                                  "rules": sorted({f["rule"] for f in targets[rewrite.id]}),
                                   "before": before, "after": after})
     record["remaining"] = findings(out, greeting=greeting)
     return out, record
@@ -140,7 +146,11 @@ def apply(written, llm_config, *, greeting: Optional[str] = None, voice: Optiona
     from . import length
     client = LLMClient(llm_config, cancel_token=cancel_token)
     with telemetry.track("polish") as span:
-        sections, record = polish(client, written.sections, greeting=greeting or "")
+        try:
+            sections, record = polish(client, written.sections, greeting=greeting or "")
+        except Exception as exc:  # noqa: BLE001 - a bug here must not cost a finished draft
+            sections, record = written.sections, {"version": PROMPT_VERSION, "findings": [], "changes": [],
+                                                  "rejected": [], "error": f"{type(exc).__name__}: {exc}"[:500]}
         if record.get("error"):
             span["status"] = "failed"
     record["usage"] = dict(client.usage)

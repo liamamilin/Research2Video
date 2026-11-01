@@ -256,3 +256,17 @@ def test_automatic_creation_uses_migrated_audience_and_preserves_existing_choice
     assert script["topic"]["fields"]["目标受众"] == expected
     assert script["content_context"]["audience"] == "要理解批量工作取舍的使用者"
     assert production.get(config, str(column_env / "jobs"), "flash").audience == recipe_audience
+
+
+def test_saving_a_column_from_the_page_keeps_its_yaml_greeting(client, column_env):
+    path = column_env / "config" / "content_columns" / "model_review.yaml"
+    path.write_text(path.read_text(encoding="utf-8") + "greeting: 大家好，这里是模型横评。\n", encoding="utf-8")
+    _login(client, "editor", "editor-pass-123")
+    column = content_columns.load_all(str(column_env / "config"))["model_review"]
+    assert column.greeting == "大家好，这里是模型横评。"
+    payload = {**column.data(), "expected_revision": column.revision, "name": "模型与工具横评"}
+    payload.pop("schema_version")
+    payload.pop("greeting")
+    assert client.put("/api/content-columns/model_review", json=payload, headers=_csrf(client)).status_code == 200
+    saved = content_columns.load_all(str(column_env / "config"))["model_review"]
+    assert saved.name == "模型与工具横评" and saved.greeting == "大家好，这里是模型横评。"

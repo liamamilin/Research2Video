@@ -162,6 +162,10 @@ def _parse(content: str) -> _Script:
         raise ScriptError(f"文稿 JSON 不符合格式：{exc}") from exc
 
 
+#: Only the salutation or the welcome clause, so "大家好，今天讲三件事……" keeps its overview.
+_OWN_GREETING = re.compile(r"^(?:(?:大家好|各位好|哈喽|嗨|你好)[，,！!。\s]*|各位(?:观众|朋友们?)?[，,！!。]\s*|欢迎(?:收看|来到|回到)[^，,。！？!]*[，,。！？!]\s*)")
+
+
 def _programme_frame(script: _Script, greeting: Optional[str], programme: bool) -> _Script:
     """Put the fixed greeting first and give a programme's opening and closing their viewer-facing titles."""
     sections = [section.model_copy(deep=True) for section in script.sections]
@@ -172,7 +176,13 @@ def _programme_frame(script: _Script, greeting: Optional[str], programme: bool) 
             elif section.episode_role == "closing":
                 section.title = CLOSING_TITLE
     if greeting and not sections[0].paragraphs[0].text.strip().startswith(greeting):
-        sections[0].paragraphs.insert(0, _Paragraph(text=greeting))
+        # A greeting the author worded anyway would be heard twice; the column's own line replaces it.
+        opening = sections[0].paragraphs
+        while opening and _OWN_GREETING.match(opening[0].text.strip()):
+            opening[0].text = _OWN_GREETING.sub("", opening[0].text.strip(), count=1)
+            if not opening[0].text:
+                opening.pop(0)
+        opening.insert(0, _Paragraph(text=greeting))
     return script.model_copy(update={"sections": sections})
 
 

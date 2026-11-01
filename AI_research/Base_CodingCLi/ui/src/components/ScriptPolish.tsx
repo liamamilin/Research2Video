@@ -18,7 +18,7 @@ export function ScriptPolish({ polish }: { polish?: Polish }) {
       <div className="px-3 pb-3 space-y-3 text-sm">
         {polish.changes.map((c) => (
           <div key={c.id} className="space-y-1">
-            <div className="text-xs text-text-muted">{c.id} · {c.rules.map((r) => RULE_LABEL[r] ?? r).join("、")}</div>
+            <div className="text-xs text-text-muted">{c.where ?? c.id} · {c.rules.map((r) => RULE_LABEL[r] ?? r).join("、")}</div>
             <div className="text-text-muted line-through decoration-text-muted/50">{c.before}</div>
             <div>{c.after}</div>
           </div>

@@ -28,8 +28,9 @@ def test_the_program_finds_production_notes_stock_endings_and_a_contrast_tic():
     found = polish.findings(sections, greeting=GREETING)
     assert [(f["id"], f["rule"]) for f in found] == [
         ("S2P1", "production_note"), ("S2P2", "production_note"), ("S3P1", "stock_ending"), ("S4P3", "contrast_overuse")]
-    # Talking about videos is not a production note, and the greeting is never flagged.
-    assert polish.findings(_sections(["这个模型能生成一段会说话的视频，口播也更自然。"]), greeting=GREETING) == []
+    # Talking about videos and footage is not a production note, and the greeting is never flagged.
+    assert polish.findings(_sections(["这个模型能生成一段会说话的视频，口播也更自然。", "生成的视频应该更稳定，画面要展示口型。",
+                                      "素材没有版权就别用，素材显示在时间线上。"]), greeting=GREETING) == []
 
 
 def test_a_clean_draft_makes_no_model_call(llm):
@@ -46,7 +47,7 @@ def test_only_flagged_paragraphs_change_and_keep_their_citations_and_place(llm):
     assert out[1]["paragraphs"][1]["citations"] == ["https://example.com/a"]
     assert out[1]["paragraphs"][0]["text"] == "先看额度。"
     assert [len(s["paragraphs"]) for s in out] == [len(s["paragraphs"]) for s in sections]
-    assert record["changes"] == [{"id": "S2P2", "rules": ["stock_ending"],
+    assert record["changes"] == [{"id": "S2P2", "where": "第1条 · 第 2 段", "rules": ["stock_ending"],
                                   "before": "这条记住的就一件事：上限按周算，5 小时窗口还在。",
                                   "after": "说到底，上限从此按周来算，而那个 5 小时窗口还在。"}]
     assert record["remaining"] == []
@@ -100,3 +101,20 @@ def test_a_closing_rewrite_keeps_its_goodbye(llm):
 def test_research_material_mentioned_to_the_viewer_is_a_production_note():
     found = polish.findings(_sections(["素材里实测齿音从 13.2 dB 降到 5.9 dB。", "材料里也明确说周限额没有变。"]))
     assert [f["rule"] for f in found] == ["production_note", "production_note"]
+
+
+def test_a_reworded_goodbye_is_not_added_twice(llm):
+    sections = _sections(["先看额度。"])
+    sections[-1]["paragraphs"] = [_p("一句话：它不是炫技，而是验收。"), _p("另一句：不是工具，而是方法。"),
+                                  _p("值得记住的不是生成，而是验收。感谢收看，我们下期见。")]
+    llm.polish_replies = [_reply(S3P3="值得记住的是验收。感谢收看，下期见。")]
+    out, _ = polish.polish(llm(None), sections, greeting=GREETING)
+    assert out[2]["paragraphs"][2]["text"] == "值得记住的是验收。感谢收看，下期见。"
+
+
+def test_a_bug_in_polishing_keeps_the_draft(llm, monkeypatch):
+    written = writer.WrittenScript(title="本期", sections=_sections(["这条的要点是：按周算。"]), length_check={})
+    monkeypatch.setattr(polish, "polish", lambda *a, **k: 1 / 0)
+    polish.apply(written, None, greeting=GREETING)
+    assert written.sections[1]["paragraphs"][0]["text"] == "这条的要点是：按周算。"
+    assert written.meta["polish"]["error"].startswith("ZeroDivisionError")

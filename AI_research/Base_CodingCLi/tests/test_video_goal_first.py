@@ -196,6 +196,21 @@ def test_a_greeting_the_author_already_said_is_not_repeated_and_no_greeting_adds
     assert "起承转合" in llm.calls[1][0]["content"]
 
 
+def test_a_greeting_the_author_worded_differently_is_replaced_not_heard_twice(llm):
+    payload = json.loads(script_json(300))
+    payload["sections"][0]["paragraphs"][0]["text"] = "大家好！欢迎来到本期快讯。今天讲一件事。"
+    payload["sections"][0]["paragraphs"].insert(0, {"text": "哈喽，各位。", "citations": []})
+    llm.replies = [json.dumps(payload, ensure_ascii=False)]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
+                           target_minutes=1, llm_config=None, greeting="大家好，欢迎收看AI 快讯。")
+    assert [p["text"] for p in written.sections[0]["paragraphs"]][:2] == ["大家好，欢迎收看AI 快讯。", "今天讲一件事。"]
+    payload["sections"][0]["paragraphs"] = [{"text": "大家好，今天聊三件事：额度、价格和账号。", "citations": []}]
+    llm.replies = [json.dumps(payload, ensure_ascii=False)]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
+                           target_minutes=1, llm_config=None, greeting="大家好，欢迎收看AI 快讯。")
+    assert [p["text"] for p in written.sections[0]["paragraphs"]] == ["大家好，欢迎收看AI 快讯。", "今天聊三件事：额度、价格和账号。"]
+
+
 def test_the_greeting_comes_from_the_column_name_or_its_own_line_and_never_says_a_date():
     from core.video import episodes
 

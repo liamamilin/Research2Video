@@ -246,7 +246,7 @@ export interface LengthCheck {
 export interface ScriptPolish {
   version: number;
   findings: { id: string; rule: string; quote: string; problem: string }[];
-  changes: { id: string; rules: string[]; before: string; after: string }[];
+  changes: { id: string; where?: string; rules: string[]; before: string; after: string }[];
   rejected: { id: string; reason: string; text: string }[];
   remaining?: { id: string; rule: string; quote: string; problem: string }[];
   error?: string;

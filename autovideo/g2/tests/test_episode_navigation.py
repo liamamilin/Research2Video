@@ -63,6 +63,21 @@ def test_agenda_lights_each_item_when_the_briefing_gives_it_its_own_paragraph():
     assert '0:00:02.00' in text and '0:00:03.00' in text
 
 
+def test_a_long_opening_is_not_read_as_a_briefing():
+    """Seven opening paragraphs for two items: the last two are not necessarily the items' lines."""
+    ids = [f'n{i}' for i in range(10)]
+    ir = {'content_structure': {'chapters': [{'narration_segment_ids': ids[:7]}, {'narration_segment_ids': ['n7']},
+                                             {'narration_segment_ids': ['n8']}, {'narration_segment_ids': ['n9']}]}}
+    spans = [(240, 300), (300, 360), (360, 400)]
+    compiled = {'narration': {'segments': [{'id': sid, 'start_ms': i * 1000} for i, sid in enumerate(ids)]},
+                'scenes': [{'narration_segment_ids': ids[:7], 'start_frame': 0, 'end_frame': 240}]
+                + [{'narration_segment_ids': [f'n{i + 7}'], 'start_frame': a, 'end_frame': b} for i, (a, b) in enumerate(spans)]}
+    program = request().episode.model_dump()
+    items = timeline(program, ir, compiled)
+    opening = agenda(program, ir, compiled, items, ids[:7])
+    assert opening['highlights'] is None and opening['start_frame'] == 30
+
+
 @pytest.mark.parametrize('paragraphs', [['n0'], ['n0', 'n2']])
 def test_agenda_stays_unlit_when_items_and_briefing_lines_do_not_match(paragraphs):
     opening, items = _programme(paragraphs)
