@@ -37,6 +37,32 @@ def snapshot_context(context: dict, topic: dict) -> dict:
     return {**context, "content_mode": MODE if enabled(topic) else "individual"}
 
 
+def programme_label(context: dict) -> str:
+    """The column's public programme name, as viewers see it in the title and hear it in the greeting."""
+    if not context.get("column"):
+        return ""
+    label = ((context.get("render") or {}).get("packaging") or {}).get("label") or context.get("column_name", "")
+    label = re.sub(r"^T\d+\s*[·.、：:]\s*", "", label).strip()
+    if context["column"] == "ai_flash":
+        label = "今日快讯"
+    elif context.get("matrix") == "chatgpt_acquisition" and label and not label.startswith("ChatGPT"):
+        label = "ChatGPT " + label
+    return label
+
+
+def greeting(topic: dict, context: dict) -> str:
+    """The fixed line the narrator opens with: the column's own ``greeting``, else one built from its name.
+
+    It is the same for every issue of a column and says no date. A script without a column has none.
+    """
+    if not context.get("column"):
+        return ""
+    if (context.get("greeting") or "").strip():
+        return context["greeting"].strip()
+    label = ((topic.get("episode") or {}).get("publication") or {}).get("label") or programme_label(context)
+    return f"大家好，欢迎收看{label}。" if label else ""
+
+
 def publication_topic(topic: dict, context: dict) -> dict:
     """Freeze the programme's public name at creation, without retitling old work."""
     if not enabled(topic) or not context.get("column"):
@@ -44,12 +70,7 @@ def publication_topic(topic: dict, context: dict) -> dict:
     episode = topic.get("episode") or {}
     if episode.get("publication"):
         return topic
-    label = ((context.get("render") or {}).get("packaging") or {}).get("label") or context.get("column_name", "")
-    label = re.sub(r"^T\d+\s*[·.、：:]\s*", "", label).strip()
-    if context["column"] == "ai_flash":
-        label = "今日快讯"
-    elif context.get("matrix") == "chatgpt_acquisition" and not label.startswith("ChatGPT"):
-        label = "ChatGPT " + label
+    label = programme_label(context)
     if not label:
         return topic
     # Use this report's issue date, never the later render/retry date or an
@@ -93,13 +114,12 @@ def brief(topic: dict) -> str:
               + "日期是展示信息，不必写进口播，不要求讲述者念日期。" if publication else "")
     return ("\n\n## 内容组织方式：整期节目\n"
             "本份报告只制作一篇总稿、一条视频。把本期有价值的多个内容按合理顺序充分展开。"
-            "整期共享开场和收尾，各条之间自然转场。每条内容用一个 section，title 为适合导航的短标题，"
+            "整期共享开场和收尾，各条之间承接转场。每条内容用一个 section，title 为适合导航的短标题，"
             "该 section 的 paragraphs 按需要展开背景、具体例子、操作过程、机制、结果与影响。"
             "同一内容可以有很多段旁白；不要把每个解释步骤拆成新的内容条目。"
-            "开场和收尾可各占一个 section。每个 section 加 episode_role：开场 opening、内容 item、收尾 closing。"
+            "开场和收尾各占一个 section。每个 section 加 episode_role：开场 opening、内容 item、收尾 closing。"
             "内容标题最多 24 字，不使用编号，视频自动显示序号。"
             "时长由内容决定，配方中单条视频的秒数、分钟数或字数只作历史参考，不作为整期篇幅上限。"
-            "栏目方向中只选一个事件的要求用于独立单条，本期按整期节目覆盖多个内容。"
             "保留原始材料的具体细节和研究底稿的解释深度。上游结论直接用于讲述。"
             "本期素材若围绕同一问题，则按解释层次组织章节，不强行制造无关话题。"
             + naming + ("\n报告中的内容线索：\n" + chosen if chosen else ""))

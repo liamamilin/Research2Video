@@ -138,6 +138,20 @@ def test_column_brief_reaches_single_call_writer_and_saved_context_stays_frozen(
     assert "改为长文档问题" not in frozen.script_style
 
 
+def test_programme_scopes_tutorial_direction_to_each_item(column_env):
+    from core.video import columns
+    recipe = columns.get(str(column_env / "config"), "flash")
+    context = {"column": "tutorial", "column_name": "教程", "content_mode": "episode", "type": "tutorial",
+               "type_definition": {"structure": ["操作", "结果"]}, "notes": "沿一个任务讲清输入和输出。"}
+    result = content_columns.apply_script_context(recipe, context)
+    assert "每项独立内容可围绕 操作 → 结果" in result.script_style
+    assert "每项独立内容围绕自己的明确任务" in result.script_style
+    assert "同一问题的解释章节沿用共同主例子" in result.script_style
+    assert "单项内容创作方向" in result.script_style
+    single = content_columns.apply_script_context(recipe, {**context, "content_mode": "individual"})
+    assert "栏目创作方向" in single.script_style and "单项内容创作方向" not in single.script_style
+
+
 def test_saved_presentation_strategy_reaches_render_direction_and_old_contexts_still_work(column_env):
     config = str(column_env / "config")
     c = content_columns.load_all(config)["model_review"]

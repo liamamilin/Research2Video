@@ -432,6 +432,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             paragraph_units=tuple(column.paragraph_units),
             topic_fields=column.writer_topic_fields(),
             **({"original_material": material} if joint_input else {}),
+            greeting=episodes.greeting(topic, script.get("content_context") or {}) or None,
         )
         if is_episode:
             written.meta["episode"] = episodes.manifest(topic, written.sections)

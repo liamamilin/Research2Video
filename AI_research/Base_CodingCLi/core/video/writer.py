@@ -47,13 +47,35 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 3
+PROMPT_VERSION = 5
 GOAL = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。"
-SYSTEM_PROMPT = GOAL + """
+AUTHORING_PROMPT = GOAL + """
 当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。
-找到这次讲述最值得听的东西，让标题说出本期最有意思的具体事情，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。
+找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。
+沿用上游给出的数据、计算和结论，把解释篇幅用在事情本身、过程与结果，研究备忘仅作内部取材背景。
+素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧，口播直接讲已有内容，不安排下一轮核实或评测。
+影响观众理解和实际使用的条件随对应内容讲清。"""
+SYSTEM_PROMPT = AUTHORING_PROMPT + """
+讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
+让标题说出本期最有意思的具体事情。
 接口输出 JSON：
 {"title":"视频标题","sections":[{"title":"小节标题","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}"""
+EPISODE_PROMPT = AUTHORING_PROMPT + """
+你是整期节目的讲述者，一篇总稿覆盖报告中的多个独立内容；同一问题的内容按解释层次组织。
+各条内容分别充分解释，不把本期多个事件缩成一个主事件的几个角度。
+各独立内容使用自己的具体对象、主例子和讲述线索，整期按合理顺序排列；同一问题的解释章节沿用共同主例子。
+整期按节目讲述：开场是本期简报，先用一句话说本期整体看点，再按播出顺序为每条内容单独写一个 paragraph，一两句话说出它的看点，让观众知道接下来会听到什么。
+随后逐条展开。每条开头用一两句承接上一条，说出两条之间的关系、对比或递进，再进入本条，不重新打招呼，也不各自重新设计开场；每条结尾自然收住本条最值得记住的一点，各条措辞各不相同，不套用“这一条的要点是”之类的固定句式。
+收尾串起本期最值得记住的几点。
+每个内容一个 section，内部可有多个 paragraphs；episode_role 使用 opening、item、closing。
+整期共用开场和收尾，不受单条视频的篇幅限制。具体看点体现在各内容标题中，整期总标题沿用栏目命名。
+输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}"""
+
+
+GREETING_PROMPT = """
+口播开头由节目固定念出问候「{greeting}」，正文从这句问候之后接着讲，不再另外问候或介绍栏目；最后用一句简短的道别结束。"""
+#: Opening and closing sections of a programme carry these titles, so the screen never shows a working label.
+OPENING_TITLE, CLOSING_TITLE = "本期导读", "本期回顾"
 
 
 @dataclass
@@ -99,19 +121,22 @@ def _request(report: str, topic: dict, column_style: str, target_minutes: float,
         direction += "## 已选主事件\n" + brief(topic["story"]) + "\n\n"
     material = f"## 素材\n{report}"
     if original_material is not None:
+        programme = topic.get("content_mode") == "episode"
+        pacing = ("整期篇幅由内容决定，各项分别安排解释的深浅。" if programme else
+                  f"配方参考片长约 {target_minutes:g} 分钟，按栏目目标安排解释的深浅。")
+        throughline = ("各独立内容中的具体例子持续推进；同一问题的章节沿用共同主例子、按解释层次展开，参数贴着当前一步出现。"
+                       if programme else
+                       "让同一个具体任务在中段持续推进，参数贴着它解释的作用出现，结尾回到任务的结果与本期形成的认识。")
         material = (
-            f"## 讲述节奏\n配方参考片长约 {target_minutes:g} 分钟，按栏目目标安排解释的深浅。"
+            f"## 讲述节奏\n{pacing}"
             "优先把主例子的关键动作、机制和结果讲清楚，片长作为节奏参考，不机械按字数压缩。\n\n"
             "## 本期研究底稿\n" + report
             + "\n\n## 对应原始材料\n" + (original_material or "本期沿用研究底稿，未附独立原始材料。")
             + "\n\n## 创作衔接\n"
             "结合底稿中的背景、关系与机制解释，以及原始材料的具体细节，围绕本期问题写完整口播。"
             "让具体例子中的对象、操作过程与结果帮助观众理解；重要机制可以充分展开。"
-            "沿用上游给出的数据、计算和结论，把解释篇幅用在事情本身、过程与结果，研究备忘仅作内部取材背景。"
-            "底稿里的“需要核”“可拍任务”等备忘留在制作侧，口播直接讲已有内容，不安排下一轮核实或评测。"
-            "未取到资料的清单同样留在制作侧，正文用本期已有的结果与适用条件展开。"
-            "让同一个具体任务在中段持续推进，参数贴着它解释的作用出现，结尾回到任务的结果与本期形成的认识。"
-            "篇幅与顺序服务于理解，不按固定比例缩写底稿，也不逐节复述。"
+            + throughline
+            + "篇幅与顺序服务于理解，不按固定比例缩写底稿，也不逐节复述。"
         )
     return (
         f"## 目标观众\n{fields.get('目标受众') or '普通观众'}\n\n"
@@ -135,6 +160,20 @@ def _parse(content: str) -> _Script:
         return _Script.model_validate(json.loads(text))
     except (json.JSONDecodeError, ValidationError) as exc:
         raise ScriptError(f"文稿 JSON 不符合格式：{exc}") from exc
+
+
+def _programme_frame(script: _Script, greeting: Optional[str], programme: bool) -> _Script:
+    """Put the fixed greeting first and give a programme's opening and closing their viewer-facing titles."""
+    sections = [section.model_copy(deep=True) for section in script.sections]
+    if programme:
+        for section in sections:
+            if section.episode_role == "opening":
+                section.title = OPENING_TITLE
+            elif section.episode_role == "closing":
+                section.title = CLOSING_TITLE
+    if greeting and not sections[0].paragraphs[0].text.strip().startswith(greeting):
+        sections[0].paragraphs.insert(0, _Paragraph(text=greeting))
+    return script.model_copy(update={"sections": sections})
 
 
 def _finalize(script: _Script, allowed: set[str], target_minutes: float, voice: Optional[str] = None) -> tuple[list[dict], dict]:
@@ -230,19 +269,21 @@ def write(
     source_sheet: Optional[dict] = None,
     on_sheet: Optional[Callable[[dict], None]] = None,
     original_material: Optional[str] = None,
+    greeting: Optional[str] = None,
 ) -> WrittenScript:
-    """Write a complete first draft; validate only its transport shape."""
+    """Write a complete first draft; validate only its transport shape.
+
+    A ``greeting`` is the column's fixed opening line: the author is told it is said first, and it is put in front
+    of the script as its own paragraph rather than left to the model to word.
+    """
     started = time.monotonic()
     from core.llm import LLMClient
     client = LLMClient(llm_config, cancel_token=cancel_token)
     report = report_body(report)
     programme = topic.get("content_mode") == "episode"
-    system = (GOAL + "\n你是整期节目的讲述者，一篇总稿覆盖报告中的多个独立内容。"
-              "各条内容分别充分解释，不把本期多个事件缩成一个主事件的几个角度。"
-              "每个内容一个 section，内部可有多个 paragraphs；episode_role 使用 opening、item、closing。"
-              "整期共用开场和收尾，不受单条视频的篇幅限制。"
-              '\n输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}'
-              if programme else SYSTEM_PROMPT)
+    system = EPISODE_PROMPT if programme else SYSTEM_PROMPT
+    if greeting:
+        system += GREETING_PROMPT.format(greeting=greeting)
     messages = [
         {"role": "system", "content": system},
         {"role": "user", "content": _request(report, topic, column_style, target_minutes, 0,
@@ -258,6 +299,7 @@ def write(
             attempts += 1
             response = client.chat(messages, temperature=0.4)
             script = _parse(response.content)
+    script = _programme_frame(script, greeting, programme)
     allowed = trusted_urls(report, citation_check)
     if original_material is not None:
         allowed.update(trusted_urls(original_material, None))
