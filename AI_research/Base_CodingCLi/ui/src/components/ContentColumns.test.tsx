@@ -28,7 +28,7 @@ beforeEach(() => {
   }));
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
-const mount = (canEdit = true) => render(<MemoryRouter><ToastProvider><ContentColumns matrix={matrix} canEdit={canEdit} /></ToastProvider></MemoryRouter>);
+const mount = (canEdit = true, entry = "/matrices/ai_media?tab=columns") => render(<MemoryRouter initialEntries={[entry]}><ToastProvider><ContentColumns matrix={matrix} canEdit={canEdit} /></ToastProvider></MemoryRouter>);
 
 describe("ContentColumns", () => {
   it("separates named column, script recipe and mixed visual preferences", async () => {
@@ -81,5 +81,20 @@ describe("ContentColumns", () => {
     mount(false); await screen.findByText("AI 模型横评");
     expect(screen.queryByRole("button", { name: "新增栏目" })).toBeNull();
     expect(screen.queryByRole("button", { name: "编辑栏目" })).toBeNull();
+  });
+
+  it("opens the linked column editor and keeps the return-to-script link", async () => {
+    mount(true, "/matrices/ai_media?tab=columns&column=model_review&from=s1");
+    expect(await screen.findByLabelText("栏目创作方向")).toBeTruthy();
+    expect((screen.getByLabelText("栏目名称") as HTMLInputElement).value).toBe("AI 模型横评");
+    expect(screen.getByRole("link", { name: "返回文稿，继续迭代 →" }).getAttribute("href")).toBe("/video/s1");
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+    await waitFor(() => expect(screen.queryByLabelText("栏目创作方向")).toBeNull());
+  });
+
+  it("does not open an editor from a deep link for a viewer", async () => {
+    mount(false, "/matrices/ai_media?tab=columns&column=model_review");
+    await screen.findByText("AI 模型横评");
+    expect(screen.queryByLabelText("栏目创作方向")).toBeNull();
   });
 });

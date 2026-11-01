@@ -12,7 +12,10 @@ TRANSLATIONS = {"截图": ("screenshot",), "元素": ("element",), "整页": ("f
                 "发布": ("release", "launch", "announc"), "缓存": ("cache", "caching"), "工作流": ("workflow",),
                 "示例": ("example", "usage"), "代码": ("code",), "安装": ("install", "pip"),
                 "界面": ("interface", "editor", "screenshot"), "节点": ("node",),
-                "输入": ("input",), "输出": ("output",), "结果": ("result",)}
+                "输入": ("input",), "输出": ("output",), "结果": ("result",),
+                "账号": ("account",), "切换": ("switch",), "添加": ("add",),
+                "订阅": ("subscription",), "记忆": ("memory",), "聊天": ("chat",),
+                "文件": ("file",), "设置": ("settings",)}
 
 
 def entities(text: str) -> list[str]:

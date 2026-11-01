@@ -48,6 +48,19 @@ describe("Script state and iteration", () => {
     expect(screen.getByRole("link", { name: "调整配方与提示词" }).getAttribute("href")).toBe("/video-recipes/flash?from=s1");
     expect(screen.getByRole("button", { name: "重新生成文稿" }).className).not.toContain("btn-primary");
   });
+  it("points to the effective column direction and shows the exact saved writer input", () => {
+    show({ ...BASE, configuration: { ...BASE.configuration!,
+      writing: { source: "content_column", note: "本稿重写沿用创建时的栏目方向。", direction: "当时传给作者的方向" },
+      links: [...BASE.configuration!.links, { label: "栏目创作方向", name: "模型横评",
+        href: "/matrices/ai_media?tab=columns&column=model_review", scope: "此栏目之后新建的文稿", next: "保存后新建文稿" }] } });
+    fireEvent.click(screen.getByText("重新生成与共用设置"));
+    expect(screen.getByRole("link", { name: "调整栏目创作方向" }).getAttribute("href"))
+      .toBe("/matrices/ai_media?tab=columns&column=model_review&from=s1");
+    expect(screen.queryByRole("link", { name: "调整配方与提示词" })).toBeNull();
+    expect(screen.getByText("本稿重写沿用创建时的栏目方向。")).toBeTruthy();
+    fireEvent.click(screen.getByText("本版本实际写稿方向"));
+    expect(screen.getByText("当时传给作者的方向")).toBeTruthy();
+  });
   it("blocks re-generation while working, editing or viewing history", () => {
     show(BASE, { isCurrent: false });
     fireEvent.click(screen.getByText("重新生成与共用设置"));

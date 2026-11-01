@@ -23,6 +23,15 @@ TEXT = "Acme Pro monthly pricing $20 per month. Screenshot feature available."
 META = {"title": "Acme pricing", "quality": {"region_text": TEXT}}
 
 
+def test_picture_understanding_is_scoped_to_the_requested_paragraph():
+    current = {'id': 'c1p1', **NEED, 'visual_subject': 'rosalind'}
+    related = {'id': 'c2p1', **NEED, 'visual_subject': 'rosalind'}
+    unrelated = {'id': 'c3p1', **NEED, 'visual_subject': 'trust_remote_code'}
+    _, allowed = image_quality.vision_messages(pixels(), current, [related, unrelated])
+    assert allowed == {'c1p1'}
+    assert image_quality.understanding_key(current) != image_quality.understanding_key({**current, 'visual_subject': 'mcp'})
+
+
 def lines(text=TEXT, height=.05):
     return [{"text": text, "confidence": .95, "height": height}]
 
@@ -100,7 +109,7 @@ def test_optional_vision_interface_sends_pixels_and_respects_a_rejection(monkeyp
 
 @pytest.mark.parametrize("change,expected", [
     ({"paragraph_ids": ["invented"]}, "未完成"),
-    ({"paragraph_ids": ["c1p2"]}, "当前讲解"),
+    ({"paragraph_ids": ["c1p2"]}, "未完成"),
     ({"focus": {"x1": 900, "y1": 10, "x2": 200, "y2": 900}}, "未完成"),
 ])
 def test_image_understanding_cannot_invent_positions_or_apply_invalid_focus(monkeypatch, change, expected):
@@ -129,6 +138,18 @@ def test_required_vision_does_not_silently_accept_ocr_only_cache_or_budget_exhau
         image_quality.multimodal_review(pixels(), NEED, policy, remaining=30)
     record = {"captured_at": datetime.now(timezone.utc).isoformat(), "quality": {"version": 3, "image": {"ocr_lines": 4}}}
     assert not visual_cache.reusable(record, NEED, policy)
+
+
+@pytest.mark.parametrize('required', [False, True])
+def test_disabling_ocr_does_not_disable_configured_picture_understanding(monkeypatch, required):
+    policy = visual_materials.policy({'enabled': True, 'version': 3, 'ocr_review': False,
+                                     'vision_section': 'vision_ai', 'vision_required': required})
+    monkeypatch.setattr(image_quality, 'recognize', lambda *a, **k: pytest.fail('OCR is disabled'))
+    def reject(*args, **kwargs):
+        raise screenshots.ScreenshotError('图片内容与当前段落不对应')
+    monkeypatch.setattr(image_quality, 'multimodal_review', reject)
+    with pytest.raises(screenshots.ScreenshotError, match='当前段落'):
+        image_quality.verify(pixels(), NEED, META, policy, remaining=15)
 
 
 def test_understanding_key_changes_when_text_or_paragraph_position_changes():

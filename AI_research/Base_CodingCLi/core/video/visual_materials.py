@@ -26,6 +26,10 @@ def fast_visuals(request: dict) -> bool:
 def attach(request: dict, materials: dict) -> dict:
     """Keep fast production when pictures are attached by either automatic or saved selection."""
     mixed = fast_visuals(request)
+    # The engine recipe owns its executor. Pictures are inputs to that recipe,
+    # rather than a reason to replace it with the legacy screenshot executor.
+    if request.get('production_recipe') and request.get('visual_storytelling'):
+        materials = {k: v for k, v in materials.items() if k not in {'video_form', 'production_mode'}}
     request.update(materials)
     if mixed:
         request.update(production_mode='fast', video_form='information_cards', visual_style='editorial_light')
@@ -74,7 +78,14 @@ def url_key(url: str) -> str:
 def policy(config: dict | None) -> dict:
     """Invalid optional configuration disables pictures rather than stopping production."""
     try:
-        return VisualPolicy.model_validate(config or {}).model_dump()
+        chosen = VisualPolicy.model_validate(config or {})
+        # Explicit capabilities select their existing implementation version;
+        # an omitted or older version must not silently disable a chosen flag.
+        if chosen.ocr_review or chosen.vision_section or chosen.vision_required:
+            chosen.version = 3
+        elif chosen.semantic_review:
+            chosen.version = max(2, chosen.version)
+        return chosen.model_dump()
     except ValidationError:
         return {**VisualPolicy().model_dump(), "problem": "自动配图配置无效，已跳过"}
 
@@ -89,21 +100,13 @@ def kind_of(text: str) -> str:
     return "text"
 
 
-def source_subject(url: str) -> str:
-    """Name the visual object from an existing link, without inventing URLs."""
-    parts = urlsplit(url)
-    path = [p for p in parts.path.split("/") if p]
-    if parts.hostname == "github.com" and len(path) >= 2:
-        return path[1]
-    host = (parts.hostname or "").split(".")
-    return host[-2] if len(host) >= 2 else ""
-
-
 def visual_goal(text: str, title: str, url: str) -> str:
     if re.search(r"示例|代码|输入|输出|结果|安装|调用|\bexample|\bdemo|\busage", text, re.I):
         return "展示相关的输入、代码示例或输出结果"
     if "github.com/" in url:
         return "展示项目 README 中的功能演示、用法或示例"
+    if re.search(r"/(?:news|guides|articles|blog)(?:/|$)", urlsplit(url).path):
+        return "展示公开资料中与当前讲解对应的操作说明或产品截图"
     return "展示当前讲解的产品界面或功能区域"
 
 
@@ -115,12 +118,8 @@ def needs_for(version: dict, report_sources: list[dict] | None = None) -> list[d
     known = {fact["id"]: fact for fact in sheet.get("facts", [])}
     sources = {url_key(s["url"]): s for s in report_sources or [] if s.get("url")}
     out = []
-    ci = 0
-    for section in version["sections"]:
-        paragraphs = [p for p in section["paragraphs"] if p["text"].strip()]
-        if not paragraphs:
-            continue
-        for pi, paragraph in enumerate(paragraphs):
+    for ci, section in enumerate(screenshots.spoken_sections(version)):
+        for pi, paragraph in enumerate(section['paragraphs']):
             text = paragraph["text"].strip()
             kind = kind_of(text)
             facts = [known[fid] for fid in paragraph.get("facts", []) if fid in known]
@@ -131,7 +130,9 @@ def needs_for(version: dict, report_sources: list[dict] | None = None) -> list[d
             # citation on this exact paragraph. Match only supplied object names.
             names = entities(text)
             for source in report_sources or []:
-                haystack = (source.get("title", "") + " " + source.get("url", "")).lower()
+                label = source.get('title', '')
+                haystack = (('' if label.startswith(('https://', 'http://')) else label) + ' ' +
+                            urlsplit(source.get('url', '')).path).lower()
                 if any(name in haystack for name in names) and source.get("url") not in urls:
                     urls.append(source["url"])
             urls = [u for u in urls if isinstance(u, str) and u.startswith(("https://", "http://"))]
@@ -139,12 +140,13 @@ def needs_for(version: dict, report_sources: list[dict] | None = None) -> list[d
                 continue
             urls.sort(key=lambda u: (not ("github.com/" in u or re.search(r"/docs?[/\.]|/examples?[/#]", u)),
                                      not str(sources.get(url_key(u), {}).get("kind", "")).startswith("一手")))
+            # Keep the authored paragraph as the requirement. A publisher or
+            # an arbitrarily chosen title token is not an explicit visual object.
             out.append({"id": f"c{ci+1}p{pi+1}", "chapter_index": ci, "paragraph_index": pi,
                         "title": section["title"], "text": text, "kind": kind if kind != "text" else "feature", "urls": urls[:4],
-                        "visual_subject": source_subject(urls[0]), "visual_goal": visual_goal(text, section["title"], urls[0]),
+                        "visual_goal": visual_goal(text, section["title"], urls[0]),
                         "facts": [{k: f.get(k, "") for k in ("id", "claim", "confidence", "caveat")} for f in facts],
                         "claims": text})
-        ci += 1
     return out
 
 

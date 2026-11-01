@@ -103,7 +103,7 @@ def publication_title(topic: dict, authored_title: str) -> str:
     return heading
 
 
-def brief(topic: dict) -> str:
+def brief(topic: dict, *, tutorial: bool = False) -> str:
     if not enabled(topic):
         return ""
     items = (topic.get("episode") or {}).get("items") or []
@@ -112,6 +112,12 @@ def brief(topic: dict) -> str:
     naming = (f"\n整期总标题使用「{publication['title']}」，不要把第一条或最显眼的事件当作整期总标题。"
               + ("本期单主题深度解读的具体疑问可保留为副标题。" if publication.get("subject_subtitle") else "具体事件使用各段的内容标题。")
               + "日期是展示信息，不必写进口播，不要求讲述者念日期。" if publication else "")
+    if tutorial:
+        return ("\n\n## 内容组织方式：完整教程\n"
+                "本份报告制作一条视频，按实际任务的准备、操作、结果等阶段分章，每个阶段一个 section。"
+                "章节就是步骤导航，title 为不带编号的短标题；各步骤承接同一份输入与输出。"
+                "开场与收尾各一个 section，episode_role 使用 opening、item、closing。"
+                "按实际内容展开，沿用上游给出的命令和结果。" + naming)
     return ("\n\n## 内容组织方式：整期节目\n"
             "本份报告只制作一篇总稿、一条视频。把本期有价值的多个内容按合理顺序充分展开。"
             "整期共享开场和收尾，各条之间承接转场。每条内容用一个 section，title 为适合导航的短标题，"
@@ -126,12 +132,15 @@ def brief(topic: dict) -> str:
 
 
 def manifest(topic: dict, sections: list[dict]) -> dict:
+    from .screenshots import spoken_sections
+
     return {"mode": MODE, "report_path": topic.get("from_report", ""),
             **({"publication": copy.deepcopy(topic["episode"]["publication"])}
                if (topic.get("episode") or {}).get("publication") else {}),
             "source_items": copy.deepcopy((topic.get("episode") or {}).get("items") or []),
             "items": [{"index": i, "title": s["title"], "chapter_index": i,
-                       "paragraphs": len(s["paragraphs"])} for i, s in enumerate(sections) if s.get("episode_role", "item") == "item"]}
+                       "paragraphs": len(s["paragraphs"])} for i, s in enumerate(spoken_sections({'sections': sections}))
+                      if s.get("episode_role", "item") == "item"]}
 
 
 def scripts_for(report_path: str, recipe: str, production_id: str, column_id: str, revision: str = "") -> list[dict]:

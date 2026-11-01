@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowUpRight, ChevronDown, Layers3, Plus, RefreshCw } from "lucide-react";
 import { getColumnScripts, listContentColumns, listPresentationRecipes, saveContentColumn,
   type ColumnScript, type ColumnType, type ContentColumn, type ContentColumnInput, type PresentationRecipe } from "@/api/content-columns";
@@ -156,6 +156,9 @@ function ColumnEditor({ matrix, types, column, onSaved, onCancel }: {
 }
 
 export function ContentColumns({ matrix, canEdit }: { matrix: Matrix; canEdit: boolean }) {
+  const [params, setParams] = useSearchParams();
+  const requestedColumn = params.get("column");
+  const from = params.get("from");
   const [data, setData] = useState<{ types: ColumnType[]; columns: ContentColumn[] } | null>(null);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
@@ -171,11 +174,17 @@ export function ContentColumns({ matrix, canEdit }: { matrix: Matrix; canEdit: b
     return () => controller.abort();
   }, [matrix.key, retry]);
   const refresh = useCallback(() => setRetry((n) => n + 1), []);
+  const closeEditor = () => {
+    setEditing(null);
+    if (requestedColumn) { const next = new URLSearchParams(params); next.delete("column"); setParams(next, { replace: true }); }
+  };
+  const editor = editing ?? (canEdit && data?.columns.some(c => c.key === requestedColumn) ? requestedColumn : null);
   if (error) return <ErrorState error={error} onRetry={refresh} />;
   if (!data) return <p className="card p-6 text-sm text-text-muted" role="status">读取领域栏目…</p>;
   const configured = data.columns.filter((c) => c.bindings.length && !c.errors.length);
   const names = new Map(data.types.map((t) => [t.key, t.name]));
   return <section className="space-y-4" aria-label="领域栏目">
+    {from ? <Link className="text-xs text-accent hover:underline" to={`/video/${encodeURIComponent(from)}`}>返回文稿，继续迭代 →</Link> : null}
     <div className="card p-4 space-y-3"><div className="flex justify-between gap-3"><div><h2 className="font-medium text-sm">持续提供什么价值</h2>
       <p className="text-xs text-text-muted mt-2">{matrix.content?.audience || "在栏目中设置目标观众"}</p></div><Layers3 className="h-5 w-5 text-accent shrink-0" /></div>
       <p className="text-xs">{data.columns.length} 个栏目 · {configured.length} 个已关联来源 · {data.columns.reduce((n, c) => n + c.auto_bindings, 0)} 个绑定自动制作</p>
@@ -186,8 +195,8 @@ export function ContentColumns({ matrix, canEdit }: { matrix: Matrix; canEdit: b
         <button className="btn text-xs" aria-expanded={showRecipes} onClick={() => setShowRecipes(!showRecipes)}>制作配方库</button>
         {canEdit ? <button className="btn btn-primary text-xs" onClick={() => setEditing("")}><Plus className="h-3.5 w-3.5" />新增栏目</button> : null}</div></div>
     {showRecipes ? <PresentationRecipes /> : null}
-    {editing !== null ? <ColumnEditor key={editing || "new"} matrix={matrix} types={data.types} column={data.columns.find((c) => c.key === editing)}
-      onCancel={() => setEditing(null)} onSaved={() => { setEditing(null); refresh(); }} /> : null}
+    {editor !== null ? <ColumnEditor key={editor || "new"} matrix={matrix} types={data.types} column={data.columns.find((c) => c.key === editor)}
+      onCancel={closeEditor} onSaved={() => { closeEditor(); refresh(); }} /> : null}
     <div className="grid gap-4 xl:grid-cols-2 items-start">{data.columns.map((c) => <article key={c.key} className="card overflow-hidden" aria-label={`栏目 ${c.name}`}>
       <div className="p-4 space-y-3"><div className="flex justify-between gap-3 items-start"><div><span className="text-xs text-accent">{names.get(c.type) || c.type}</span><h3 className="font-medium mt-1">{c.name}</h3></div>
         <span className="text-xs text-text-muted">{c.status === "planned" || !c.bindings.length ? "待配置" : c.auto_bindings ? "已接自动制作" : "手动制作"}</span></div>

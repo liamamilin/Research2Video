@@ -63,7 +63,7 @@ def steps_of(script: dict) -> list[dict]:
 def create(column_key: str, topic: dict, started_by: str) -> dict:
     """A new script, researching (or writing, from a given report) right away."""
     script = video_workflow.start(column_key, topic, started_by=started_by)
-    first = "write" if topic.get("from_report") or topic.get("article") else "research"
+    first = "write" if topic.get("from_report") or topic.get("article") or topic.get("user_materials") else "research"
     steps.log(script["id"], first, "start", "使用手动导入的文章" if topic.get("article") else
               "用已有的研究报告" if first == "write" else "", by=started_by)
     return script
@@ -107,7 +107,7 @@ def _resume_research(script: dict, by: str) -> dict:
 
 
 def _rewrite(script: dict, by: str) -> dict:
-    if not script.get("report_path") and not script["topic"].get("article"):
+    if not script.get("report_path") and not script["topic"].get("article") and not script["topic"].get("user_materials"):
         raise StepError("还没有研究报告，先完成调研")
     try:
         video_workflow.rewrite(script["id"], started_by=by)

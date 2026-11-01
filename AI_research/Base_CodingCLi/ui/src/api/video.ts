@@ -307,7 +307,7 @@ export interface VideoScriptSummary {
   content_matrix_id?: string;
   source_matrix_id?: string;
   content_context?: { column: string; column_name: string; matrix: string; source_matrix: string; type: string };
-  topic: { id: string | null; title: string; content_mode?: "episode" | "individual"; fields?: Record<string, string>; article?: { mode: "read" | "adapt"; kind: "literary" | "information" }; local_video?: { file_name: string; duration: number; width: number; height: number; size: number } };
+  topic: { id: string | null; title: string; content_mode?: "episode" | "individual"; fields?: Record<string, string>; user_materials?: { mode: "narration" | "adapt" | "research"; revision?: number }; article?: { mode: "read" | "adapt"; kind: "literary" | "information" }; local_video?: { file_name: string; duration: number; width: number; height: number; size: number } };
   status: ScriptStatus;
   stage?: string | null;
   research_job: string;
@@ -394,6 +394,7 @@ export interface VideoScriptDetail extends VideoScriptSummary {
     links: { label: string; name: string; href: string; scope: string; next: string }[];
     changed_since_generation: boolean | null;
     recipe_available: boolean;
+    writing?: { source: "content_column" | "recipe" | "article"; direction: string; note: string };
   };
   column: VideoColumn | null;
   version_shown: ScriptVersion | null;

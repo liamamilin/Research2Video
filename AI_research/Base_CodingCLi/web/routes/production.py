@@ -151,9 +151,19 @@ def _whole_files(config: production.Config) -> list[tuple[str, str]]:
 
 
 def _whole_reports(config: production.Config) -> list[dict]:
-    return [{"date": date, "path": path, "written": bool(mine), "scripts": mine}
-            for date, path in _whole_files(config)[:WHOLE_LISTED]
-            for mine in [_report_scripts(config, path)]]
+    from web.services import video_workflow
+
+    source = video_topic_store.resolve(get_settings().paths.jobs_dir, config.job)
+    root = video_workflow.workspace_dir()
+    result = []
+    for date, path in _whole_files(config):
+        if not video_topic_store.report_has_content(source, path, root):
+            continue
+        mine = _report_scripts(config, path)
+        result.append({"date": date, "path": path, "written": bool(mine), "scripts": mine})
+        if len(result) >= WHOLE_LISTED:
+            break
+    return result
 
 
 def _report_scripts(config, path):

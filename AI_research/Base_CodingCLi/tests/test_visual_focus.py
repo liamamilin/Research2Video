@@ -1,4 +1,22 @@
+import pytest
+
 from core.video import visual_focus
+
+
+@pytest.mark.parametrize('label', ['Research', 'Enterprise', '基础版'])
+@pytest.mark.parametrize('position', [
+    {'x1': 10, 'x2': 250, 'y1': 650, 'y2': 730},
+    {'x1': 530, 'x2': 750, 'y1': 100, 'y2': 160},
+])
+def test_unstructured_table_keeps_all_rows_columns_and_conditions(label, position):
+    asset = {'width': 896, 'height': 252, 'quality': {'visual_kind': 'table',
+        'dom_targets': [{'text': label, 'tag': 'th', **position}],
+        'image': {'ocr_targets': [{'text': label, **position}]}}}
+    result = visual_focus.for_asset(asset, {'text': f'{label} 的价格与使用条件。'})
+    region, = result['regions']
+    assert (region['x1'], region['y1'], region['x2'], region['y2']) == (0, 0, 1000, 1000)
+    region, = visual_focus.for_asset(asset, {'text': '这些价格适用于不同模型。'})['regions']
+    assert (region['x1'], region['y1'], region['x2'], region['y2']) == (0, 0, 1000, 1000)
 
 
 def test_focus_uses_measured_image_coordinates_and_preserves_model_proposal_as_audit():

@@ -50,6 +50,29 @@ def test_recipe_can_reference_autovideo_recipe_and_keep_only_explicit_overrides(
     assert request["production_context"]["content_recipe"]["id"] == "research:deep_dive"
 
 
+@pytest.mark.parametrize("matrix_voice,chosen_voice", [
+    (None, None), ("zm_yunxi", None), ("zm_yunxi", "zf_xiaoxiao"),
+])
+def test_visual_recipe_keeps_app_narrator_and_voice_override_priority(video_env, monkeypatch, matrix_voice, chosen_voice):
+    from core.video import columns
+
+    config = SimpleNamespace(usable=True, key="tutorial", job="research/source", render={
+        "production_recipe": "mixed_tutorial",
+        **({"voice_id": matrix_voice} if matrix_voice else {}),
+    })
+    monkeypatch.setattr(production, "get", lambda *args: config)
+    script = {**_approved_script(), "production": "tutorial"}
+    request = video_render.create(script, voice_id=chosen_voice)["request"]
+    narrator = columns.get(str(video_env / "config"), script["column_key"]).voice_id
+    assert narrator == "voxcpm_anchor"
+    content = request["production_context"]["content_recipe"]["settings"]
+    assert content["voice_id"] == narrator and "video_form" not in content
+    assert request.get("voice_id") == chosen_voice
+    matrix = request["production_context"]["matrix"]["settings"]
+    assert matrix.get("voice_id") == matrix_voice
+    assert (request.get("voice_id") or matrix.get("voice_id") or content["voice_id"]) == (chosen_voice or matrix_voice or narrator)
+
+
 def test_saving_old_matrix_editor_settings_keeps_explicit_render_overrides(tmp_path):
     root = tmp_path / "production"
     root.mkdir()

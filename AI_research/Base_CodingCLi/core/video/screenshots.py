@@ -270,10 +270,16 @@ def assets(script_id: str) -> list[dict]:
     return sorted(out, key=lambda r: r["captured_at"], reverse=True)
 
 
+def spoken_sections(version: dict) -> list[dict]:
+    """Keep authored metadata on exactly the sections and paragraphs sent to narration."""
+    return [{**section, 'paragraphs': [p for p in section['paragraphs'] if p['text'].strip()]}
+            for section in version['sections'] if any(p['text'].strip() for p in section['paragraphs'])]
+
+
 def chapters(version: dict) -> list[dict]:
     return [{"title": " ".join(s["title"].split())[:CHAPTER_TITLE_MAX] or "未命名",
-             "paragraphs": [p["text"].strip() for p in s["paragraphs"] if p["text"].strip()]}
-            for s in version["sections"] if any(p["text"].strip() for p in s["paragraphs"])]
+             "paragraphs": [p["text"].strip() for p in s["paragraphs"]]}
+            for s in spoken_sections(version)]
 
 
 def chapter_hash(version: dict) -> str:

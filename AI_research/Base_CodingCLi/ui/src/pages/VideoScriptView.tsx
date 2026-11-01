@@ -163,11 +163,11 @@ export function VideoScriptViewPage() {
   }, [busyServer, editing, load]);
 
   useEffect(() => {
-    if (tab !== "draft" || !canEdit || detail?.topic.article || detail?.column?.writer !== "adapt" || catalog) return;
+    if (tab !== "draft" || !canEdit || detail?.topic.article || (!detail?.topic.user_materials && detail?.column?.writer !== "adapt") || catalog) return;
     const controller = new AbortController();
     listVideoStyles(controller.signal).then((value) => { if (!controller.signal.aborted) setCatalog(value); }).catch(() => undefined);
     return () => controller.abort();
-  }, [tab, canEdit, detail?.topic.article, detail?.column?.writer, catalog]);
+  }, [tab, canEdit, detail?.topic.article, detail?.topic.user_materials, detail?.column?.writer, catalog]);
 
   // The fact sheet behind the version on screen, for the fact labels' tooltips.
   const sheetId = detail?.version_shown?.meta?.fact_sheet_id;
@@ -572,7 +572,7 @@ export function VideoScriptViewPage() {
           key={`${shown.version}-${catalog ? "ready" : "loading"}`}
           detail={detail}
           catalog={catalog}
-          canRestyle={writable && !editing && ["DRAFT", "APPROVED"].includes(detail.status) && Boolean(detail.report_path) && detail.column?.writer === "adapt"}
+          canRestyle={writable && !editing && ["DRAFT", "APPROVED"].includes(detail.status) && (Boolean(detail.topic.user_materials) || (Boolean(detail.report_path) && detail.column?.writer === "adapt"))}
           busy={busy === "restyle"}
           onRestyle={restyle}
         />

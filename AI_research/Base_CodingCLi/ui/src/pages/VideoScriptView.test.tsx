@@ -365,6 +365,16 @@ describe("Video script review", () => {
     expect(screen.getByText("前缀稳不稳决定缓存省不省钱")).toBeTruthy();
   });
 
+  it('restyles a material script without requiring a research report or an adapt recipe', async () => {
+    mockApi({ ...DETAIL, report_path: '', topic: { ...DETAIL.topic, user_materials: { mode: 'narration', revision: 1 } } });
+    renderPage();
+    const tone = await screen.findByLabelText('语气');
+    fireEvent.change(tone, { target: { value: 'playful' } });
+    fireEvent.click(screen.getByText('用这个风格重写'));
+    await waitFor(() => expect(calls.some(c => c.url.includes('/restyle'))).toBe(true));
+    expect(calls.find(c => c.url.includes('/restyle'))!.body).toEqual({ depth: 'intermediate', tone: 'playful' });
+  });
+
   it("loads draft-only styles and fact labels when entering the draft tab", async () => {
     mockApi(ADAPTED);
     renderPage("/video/s1?tab=review");

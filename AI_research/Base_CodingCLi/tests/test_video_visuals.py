@@ -91,6 +91,22 @@ def test_capture_failure_downgrades_without_holding_or_retrying_the_video(enable
     assert "验证码" in saved["visuals"]["decisions"][0]["reason"]
 
 
+@pytest.mark.parametrize('version', [1, 2, 3])
+@pytest.mark.parametrize('required', [False, True])
+def test_configured_picture_understanding_runs_without_an_explicit_v3_or_ocr_flag(enabled, monkeypatch, version, required):
+    engine, _ = enabled
+    monkeypatch.setattr(video_render, '_video_config', lambda: {'visual_materials': {
+        'enabled': True, 'version': version, 'vision_section': 'vision_ai', 'vision_required': required}})
+    checked = []
+    def verify(raw, need, metadata, policy, **kwargs):
+        checked.append(need['id'])
+        return {'vision': {'state': 'passed', 'paragraph_ids': [need['id']]}}
+    monkeypatch.setattr(video_visuals.image_quality, 'verify', verify)
+    render = video_render.create(script())
+    assert video_render.process(render['id']) == 'COMPLETED'
+    assert checked == ['c1p2']
+
+
 def test_lost_submit_reconciles_frozen_images_without_recapture(enabled):
     engine, acquired = enabled
     engine.drop_create_response = True
@@ -134,6 +150,18 @@ def test_matrix_fast_setting_keeps_its_executor_when_automatic_images_arrive():
     assert not visuals.fast_visuals({**request, 'visual_storytelling': False})
 
 
+def test_recipe_keeps_its_executor_when_saved_or_automatic_pictures_arrive():
+    request = {'production_recipe': 'mixed_tutorial', 'visual_storytelling': True,
+               'chapters': [{'title': '转换', 'paragraphs': ['运行实际命令。']}]}
+    selected = {'video_form': 'object_showcase', 'production_mode': 'standard',
+                'image_materials': [{'image_id': 'input', 'placements': [{'chapter_index': 0, 'paragraph_index': 0}]}]}
+    result = visuals.attach(copy.deepcopy(request), selected)
+    assert result == {**request, 'image_materials': selected['image_materials']}
+    assert selected['video_form'] == 'object_showcase'
+    explicit = visuals.attach({**request, 'production_mode': 'standard', 'video_form': 'information_motion'}, selected)
+    assert explicit['production_mode'] == 'standard' and explicit['video_form'] == 'information_motion'
+
+
 def test_snapshot_tampering_is_refused_before_network_submit(enabled):
     engine, _ = enabled
     render = video_render.create(script())
@@ -168,8 +196,34 @@ def test_article_example_links_can_supply_uncited_paragraph_visuals_without_keyw
     linked = [{"title": "MarkItDown README", "url": "https://github.com/microsoft/markitdown"}]
     needs = visuals.needs_for(version, linked)
     assert len(needs) == 1 and needs[0]["paragraph_index"] == 0
-    assert needs[0]["visual_subject"] == "markitdown"
+    assert not needs[0].get("visual_subject")
     assert "输入" in needs[0]["visual_goal"]
+
+
+def test_automatic_intent_does_not_infer_a_visual_object_from_title_or_publisher(video_env):
+    version = {'sections': [
+        {'title': 'Rosalind：访问范围', 'paragraphs': [{'text': 'OpenAI 发布 GPT-6 Rosalind，用于生命科学研究。',
+            'citations': ['https://developers.openai.com/api/docs/changelog.md']}]},
+        {'title': 'trust_remote_code 的影响', 'paragraphs': [{'text': 'Hugging Face 模型的 trust_remote_code 会执行作者的代码。',
+            'citations': ['https://devbrief.dev/ai-security/2026-10-30/']}]}]}
+    needs = visuals.needs_for(version)
+    assert all(not n.get('visual_subject') for n in needs)
+    from core.video.visual_matching import compatible
+    unrelated = {'text': 'OpenAI product → OpenAI tunnel service → tunnel-client', 'visual_kind': 'image'}
+    assert not compatible(needs[0], unrelated, 'Secure MCP Tunnel | OpenAI API')[0]
+
+
+def test_publisher_domain_does_not_add_other_product_links(video_env):
+    url = 'https://developers.openai.com/api/docs/changelog.md'
+    version = {'sections': [
+        {'title': '三条更新，三种用法', 'paragraphs': [{'text': '这一期涉及生命科学研究、跑 MCP 工具和团队试点。', 'citations': [url]}]},
+        {'title': 'Rosalind 访问范围', 'paragraphs': [{'text': 'OpenAI 发布 Rosalind，用于生命科学研究。', 'citations': [url]}]}]}
+    unrelated = {'title': 'Secure MCP Tunnel', 'url': 'https://developers.openai.com/api/docs/guides/secure-mcp-tunnels'}
+    needs = visuals.needs_for(version, [unrelated])
+    assert len(needs) == 2
+    assert needs[1]['urls'] == [url]
+    version['sections'][0]['title'] = 'MCP 工具调用'
+    assert not visuals.needs_for(version)[0].get('visual_subject')
 
 
 def test_inline_product_example_survives_a_separate_news_bibliography(video_env):
@@ -200,11 +254,11 @@ def test_repeated_source_does_not_consume_all_distinct_page_slots(enabled, monke
     assert calls == [URL, "https://example.org/other"]
 
 
-def test_image_matching_another_paragraph_is_mapped_there_without_recapture(enabled, monkeypatch):
+def test_each_paragraph_needs_its_own_picture_match_even_for_identical_subjects(enabled, monkeypatch):
     engine, acquired = enabled
     render = video_render.create(script())
     audit = render["visuals"]
-    first = audit["needs"][0]
+    first = {**audit["needs"][0], 'visual_subject': 'acme'}
     audit["needs"] = [first, {**first, "id": "c1p3", "paragraph_index": 2}]
     audit["policy"]["version"] = 3
     store.update_render(render["id"], visuals=audit)
@@ -212,8 +266,23 @@ def test_image_matching_another_paragraph_is_mapped_there_without_recapture(enab
         "ocr_lines": 2, "vision": {"state": "passed", "paragraph_ids": ["c1p3"], "summary": "对应后面的功能示例"}})
     prepared, final = video_visuals.prepare(store.get_render(render["id"]), engine.client())
     assert prepared["image_materials"][0]["placements"] == [{"chapter_index": 0, "paragraph_index": 2}]
-    assert acquired == [URL]
+    assert acquired == [URL, URL]
     assert {d["need_id"]: d["status"] for d in final["decisions"]} == {"c1p2": "text", "c1p3": "accepted"}
+
+
+def test_old_image_decision_cannot_place_a_picture_in_a_different_product_story(enabled, monkeypatch):
+    engine, _ = enabled
+    render = video_render.create(script())
+    audit = render['visuals']
+    first = {**audit['needs'][0], 'visual_subject': 'mcp'}
+    audit['needs'] = [first, {**first, 'id': 'c1p3', 'paragraph_index': 2, 'visual_subject': 'rosalind', 'urls': []}]
+    audit['policy']['version'] = 3
+    store.update_render(render['id'], visuals=audit)
+    monkeypatch.setattr(video_visuals.image_quality, 'verify', lambda *a, **k: {
+        'ocr_lines': 2, 'vision': {'state': 'passed', 'paragraph_ids': ['c1p3'], 'summary': 'MCP diagram'}})
+    prepared, final = video_visuals.prepare(store.get_render(render['id']), engine.client())
+    assert not prepared.get('image_materials')
+    assert all(row['status'] == 'text' for row in final['decisions'])
 
 
 def test_completed_preparation_survives_restart_before_freezing_submission(enabled):
@@ -271,7 +340,7 @@ def test_deduplicated_picture_can_cover_multiple_paragraphs_without_duplicate_uu
     render = video_render.create(store.get_script(row["id"]))
     assert video_render.process(render["id"]) == "COMPLETED"
     images = engine.posts[0]["image_materials"]
-    assert len(images) == 1 and engine.uploads == len(acquired) == 1
+    assert len(images) == engine.uploads == 1 and len(acquired) == 2
     assert images[0]["placements"] == [{"chapter_index": 0, "paragraph_index": 1}, {"chapter_index": 0, "paragraph_index": 2}]
 
 

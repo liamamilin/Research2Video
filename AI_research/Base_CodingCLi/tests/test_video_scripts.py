@@ -1668,7 +1668,9 @@ def _assistant(name, arguments, role="editor"):
     return assistant_tools.execute(name, arguments, request, {"username": "tester", "role": role})
 
 
-def test_assistant_video_tools_query_start_and_record_without_posting_anywhere(client, video_env, llm, research):
+def test_assistant_video_tools_query_start_and_record_without_posting_anywhere(client, video_env, monkeypatch):
+    spawned = []
+    monkeypatch.setattr('web.services.video_workflow.spawn', lambda script_id, started_by='': spawned.append((script_id, started_by)))
     script = _approved(client)
     found = _assistant("query_video", {"action": "find", "text": "Argon"})
     assert [s["script_id"] for s in found["scripts"]] == [script["id"]]
@@ -1686,6 +1688,7 @@ def test_assistant_video_tools_query_start_and_record_without_posting_anywhere(c
     # starting a script says what it costs and stops at a draft (it is not approved or rendered)
     started = _assistant("create_video", {"column": "deep_dive", "title": "助手发起的选题"})
     assert started["status"] == "started" and "草稿" in started["cost"]
+    assert spawned == [(started['script_id'], 'tester')]
 
 
 def test_assistant_video_writes_need_an_editor(client, video_env):
