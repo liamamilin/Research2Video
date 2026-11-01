@@ -1,0 +1,73 @@
+{
+  "id": "e778b4baa11744f0baeed10d516c1705",
+  "plan_id": null,
+  "spec": {
+    "job": "ai_media/daily_opensource_radar",
+    "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-matrix-tutorial-20261101/run-1/output/radar/2026-11-01_ai_opensource_radar.md",
+    "report_identity": "9b771528590bdc6c37fd5325226980ba56a8d72a611b7784188013a326265f44",
+    "picks": [
+      {
+        "column": "report_digest",
+        "all": true,
+        "production": "ai_media_opensource_digest",
+        "content_mode": "episode",
+        "whole": true
+      }
+    ],
+    "refresh": false
+  },
+  "status": "DONE",
+  "stage": "ITEMS",
+  "note": "DONE 1",
+  "started_by": "autopilot",
+  "started_at": 1793512163.4323142,
+  "created_at": "2026-11-01T13:49:23+0800",
+  "updated_at": "2026-11-01T14:07:28+0800",
+  "discovery_at": null,
+  "discovery_tries": 0,
+  "dispatch_failures": 0,
+  "items": [
+    {
+      "id": "056eaaeb7dda46ba9aab85b570e5d235",
+      "run_id": "e778b4baa11744f0baeed10d516c1705",
+      "slot": 0,
+      "column_key": "report_digest",
+      "topic": {
+        "id": null,
+        "title": "MarkItDown 实操：把项目周报转成 Markdown",
+        "fields": {},
+        "content_mode": "episode",
+        "from_report": "output/radar/2026-11-01_ai_opensource_radar.md",
+        "report_id": "1a84ea7f84364e6987c466684e001dea",
+        "episode": {
+          "job": "ai_media/daily_opensource_radar",
+          "production": "ai_media_opensource_digest",
+          "items": [],
+          "report_path": "output/radar/2026-11-01_ai_opensource_radar.md",
+          "report_identity": "9b771528590bdc6c37fd5325226980ba56a8d72a611b7784188013a326265f44"
+        }
+      },
+      "script_id": "1b559626cc89494490eb905fe69b9757",
+      "render_id": "8a42d300602e4d61aa8b4cfacebdf39a",
+      "state": "DONE",
+      "note": "成片完成，等你看片和发布",
+      "gate": {
+        "label": "generated",
+        "text": "按素材生成",
+        "reasons": [],
+        "core_issues": 0,
+        "cited_share": 0.0,
+        "audited": false,
+        "ignored": {
+          "must": 0,
+          "warn": 0
+        },
+        "version": 1,
+        "approved": "auto"
+      },
+      "retries": {},
+      "updated_at": "2026-11-01T14:07:28+0800",
+      "production": "ai_media_opensource_digest"
+    }
+  ]
+}

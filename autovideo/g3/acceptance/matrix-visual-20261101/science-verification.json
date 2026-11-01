@@ -1,0 +1,48 @@
+{
+  "title": "代码库塞不进上下文？这个项目用 PageRank 加背包问题替 agent 挑文件",
+  "source_attempt": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/ai-matrix-productization-20261027/d513973b136f410893bc5257df7aae69/jobs/de1c7f72-613b-4737-9190-a735e2e5650b/attempts/1/g2-run",
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "nb_read_frames": "6518",
+        "side_data_list": [
+          {}
+        ]
+      },
+      {
+        "codec_name": "aac",
+        "r_frame_rate": "0/0",
+        "nb_read_frames": "10185"
+      }
+    ],
+    "format": {
+      "duration": "217.280000"
+    }
+  },
+  "full_decode": "PASS",
+  "narration_unchanged": true,
+  "assets_unchanged": true,
+  "source_audio_sha256": "6651b2a210ddf198c71f25364c42793d283d47eb2b4660d8ec26962b91ab86e9",
+  "decoded_audio_correlation": 0.9999999999999999,
+  "video_sha256": "51214ede536f499841b92017d13590ee3786741bae90d113f99cf225b94e7ba8",
+  "new_model_calls": 0,
+  "new_tts_calls": 0,
+  "manual_scene_or_beat_edits": 0,
+  "scene_count": 15,
+  "sampled_seconds": [
+    9,
+    24,
+    37,
+    67,
+    83,
+    104,
+    141,
+    194
+  ]
+}

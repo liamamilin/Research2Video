@@ -1,0 +1,34 @@
+[
+  {
+    "id": "90e2a29c6cb04e8e82b50519597dd2e5",
+    "version": 3,
+    "status": "COMPLETED",
+    "autovideo_job_id": "9227152e-b727-4f4f-95fe-16b3b0a4f848",
+    "error_code": null,
+    "error_message": null
+  },
+  {
+    "id": "e6c25fdd81134ea680444a0ebdc42328",
+    "version": 2,
+    "status": "FAILED",
+    "autovideo_job_id": "b06d68bf-e1d9-4b99-9026-3d34a625d69a",
+    "error_code": "GENERATION_FAILED",
+    "error_message": "视频生成失败，请查看任务阶段错误并重试"
+  },
+  {
+    "id": "e9832837e62d44aea2701df3ca854a2d",
+    "version": 2,
+    "status": "FAILED",
+    "autovideo_job_id": "b729492b-e94b-4a89-880c-613720f770e8",
+    "error_code": "GENERATION_FAILED",
+    "error_message": "视频生成失败，请查看任务阶段错误并重试"
+  },
+  {
+    "id": "f3e50b50693b432aa8714a25f624b6da",
+    "version": 1,
+    "status": "CANCELLED",
+    "autovideo_job_id": "8f6e4ae4-1786-4a14-9f5e-f3569fa8ee42",
+    "error_code": null,
+    "error_message": null
+  }
+]

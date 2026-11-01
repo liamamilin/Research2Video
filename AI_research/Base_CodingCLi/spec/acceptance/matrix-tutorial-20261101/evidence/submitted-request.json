@@ -1,0 +1,142 @@
+{
+  "input_mode": "narration",
+  "episode": {
+    "items": [
+      {
+        "title": "准备周报输入",
+        "chapter_indexes": [
+          1
+        ]
+      },
+      {
+        "title": "执行转换命令",
+        "chapter_indexes": [
+          2
+        ]
+      },
+      {
+        "title": "查看转换结果",
+        "chapter_indexes": [
+          3
+        ]
+      }
+    ]
+  },
+  "chapters": [
+    {
+      "title": "本期导读",
+      "paragraphs": [
+        "大家好，欢迎收看AI 开源发现。",
+        "这期是一次完整的本地实操：用 Microsoft 的 MarkItDown，把一份项目周报网页转成 Markdown 文件，从准备输入、执行转换到查看结果，三步走完。",
+        "第一步准备输入，我们手里有一份 weekly.html，里面是标题、已完成列表和下一步任务表，先看清楚它包含什么结构。",
+        "第二步执行转换，安装 MarkItDown 之后运行一条命令，指定输入文件和输出文件，转换在本地完成。",
+        "第三步查看结果，打开生成的 weekly.md，对照网页里的标题、列表和表格，看它们分别变成了什么。"
+      ]
+    },
+    {
+      "title": "准备周报输入",
+      "paragraphs": [
+        "先看输入这一端。我们准备了一份本地网页文件 weekly.html，直接用浏览器打开，最上面是一级标题“项目周报”，下面有“已完成”小节，列着“整理项目资料”和“完成脚本联调”两项；再往下是“下一步”表格，两列分别是任务和状态，第一行是“转换文档、进行中”，第二行是“整理结果、待开始”。",
+        "这份 HTML 不是随手一段文字，它有清楚的结构：标题用 h1，小节标题用 h2，已完成项放在 ul 的 li 里，下一步任务放在 table 的表头和表体里。MarkItDown 后面能还原出 Markdown 的层级，靠的就是读取这些标签，而不是让模型猜内容。",
+        "所以这一步的重点不是把网页做得漂亮，而是让输入保留清晰的标题、列表和表格结构——这份 weekly.html 就是后面转换任务唯一的输入。"
+      ]
+    },
+    {
+      "title": "执行转换命令",
+      "paragraphs": [
+        "输入文件确定后，接下来把它交给 MarkItDown 处理。",
+        "本次用的是 MarkItDown 0.1.9，装在一个临时的 Python 环境里。先安装工具，实际执行的命令是 pip install markitdown；安装完成后，再在 weekly.html 所在的文件夹里运行转换命令：markitdown weekly.html -o weekly.md。",
+        "这条命令里，weekly.html 是输入文件，-o 后面的 weekly.md 指定输出文件。也就是说，工具读取当前目录下的网页，把转换结果写到同一个文件夹里的 Markdown 文件，不改变原文件。",
+        "这里有一个容易被忽略的点：这次 HTML 转 Markdown 没有调用大模型。MarkItDown 在本地按 HTML 结构做解析和映射，标题、列表、表格分别对应到 Markdown 语法，所以过程是确定性的，也不需要把文件发到外部服务。",
+        "命令执行完，当前文件夹里就会多出一个 weekly.md，转换这一步就算完成。"
+      ]
+    },
+    {
+      "title": "查看转换结果",
+      "paragraphs": [
+        "命令跑完，结果就落在 weekly.md 里，接下来直接看输出。",
+        "打开 weekly.md，最上面是“项目周报”的一级标题，对应网页最上面的 h1；接着是“已完成”的二级标题，下面保留两个列表项，还是“整理项目资料”和“完成脚本联调”；再往下是“下一步”的二级标题，内容是一张 Markdown 表格，表头是任务和状态，两行数据分别是“转换文档、进行中”和“整理结果、待开始”。",
+        "对照输入就能看出映射关系：网页的 h1 变成一级标题，h2 变成二级标题，ul 里的 li 变成列表项，table 保留成带表头分隔线的表格。原来网页里的层级和行列关系没有丢，只是从 HTML 标签换成了 Markdown 写法。",
+        "得到的是一个纯文本文件，可以继续编辑、放进笔记，也可以交给后续的文本流程。对开发者来说，它适合接在“已经有一份结构清楚的网页或文档，需要变成可编辑 Markdown”这一环；本次只演示了本地 HTML 文件，其他格式不在这次任务范围内。",
+        "这份 weekly.md 就是整次操作的最终产物：标题、列表、表格都在，内容可以直接进入下一道工序。"
+      ]
+    },
+    {
+      "title": "本期回顾",
+      "paragraphs": [
+        "回到这次任务本身：准备 weekly.html，运行 markitdown weekly.html -o weekly.md，得到 weekly.md。",
+        "最值得记住的是三点：输入要保持清晰结构，转换命令用 -o 指定输出，结果会保留标题、列表和表格的对应关系；而且这次 HTML 转换完全在本地完成，没有调用大模型。",
+        "如果你手里正好有一批结构化的网页文档，需要变成可编辑的 Markdown，MarkItDown 可以放在这条流程的转换环节里。",
+        "感谢收看，我们下期见。"
+      ]
+    }
+  ],
+  "duration_mode": "content",
+  "title": "AI 开源发现｜2026年11月01日",
+  "production_recipe": "mixed_tutorial",
+  "production_context": {
+    "content_recipe": {
+      "id": "research:report_digest",
+      "settings": {}
+    },
+    "matrix": {
+      "id": "research-production:ai_media_opensource_digest",
+      "settings": {
+        "video_speed": 1.25,
+        "packaging": {
+          "label": "AI 开源发现",
+          "preset": "common"
+        }
+      }
+    }
+  },
+  "visual_storytelling": true,
+  "creative_intent": {
+    "purpose": "栏目：AI 开源发现。讲解目标：帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点。\n优先按段落组合项目截图、产品画面、输入输出对照、任务流程、重点卡，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：用项目页面或任务示意建立对象感，让同一份文件、代码或任务卡从输入经过项目处理走到输出，主项目持续处于这条关系中。材料里的输入与输出例子值得停下来展示，参数与原理说明贴在它实际改变的那一步。相关工具作为流程相应位置的简短补充，随后回到主项目；结尾用同一任务的结果收束。Stars、下载量、发布时间和团队背景作为辅助信息。",
+    "audience": "想把开源工具用于实际工作的开发者和 AI 高频使用者"
+  },
+  "idempotency_key": "research:8a42d300602e4d61aa8b4cfacebdf39a",
+  "use_draw_things": false,
+  "image_materials": [
+    {
+      "image_id": "616f4d81-5398-4378-a827-9b0254a5c7fd",
+      "caption": "展示安装 MarkItDown 及其依赖项的命令行示例。",
+      "role": "detail",
+      "placements": [
+        {
+          "chapter_index": 2,
+          "paragraph_index": 1
+        }
+      ],
+      "source": {
+        "url": "https://github.com/microsoft/markitdown",
+        "final_url": "https://github.com/microsoft/markitdown",
+        "title": "GitHub - microsoft/markitdown: Python tool for converting files and office documents to Markdown. · GitHub",
+        "captured_at": "2026-11-01T05:53:17+00:00",
+        "sha256": "001484418009721fed78a5ca23fe566c47ce7f0527b807ffaf875eeb9a8681e9"
+      },
+      "focus": {
+        "width": 392,
+        "height": 128,
+        "regions": [
+          {
+            "x1": 46,
+            "y1": 109,
+            "x2": 954,
+            "y2": 379,
+            "label": "pip install 'markitdown ［pdf, do",
+            "style": "box"
+          },
+          {
+            "x1": 6,
+            "y1": 499,
+            "x2": 1000,
+            "y2": 833,
+            "label": "will install only the dependenci",
+            "style": "box"
+          }
+        ]
+      }
+    }
+  ]
+}

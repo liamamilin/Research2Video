@@ -1,0 +1,85 @@
+{
+  "mode": "episode",
+  "items": [
+    {
+      "index": 1,
+      "title": "准备输入",
+      "chapter_indexes": [
+        1
+      ],
+      "start_frame": 490,
+      "end_frame": 1210
+    },
+    {
+      "index": 2,
+      "title": "执行转换",
+      "chapter_indexes": [
+        2
+      ],
+      "start_frame": 1210,
+      "end_frame": 2066
+    },
+    {
+      "index": 3,
+      "title": "查看结果",
+      "chapter_indexes": [
+        3
+      ],
+      "start_frame": 2066,
+      "end_frame": 3123
+    }
+  ],
+  "total_frames": 3472,
+  "agenda": {
+    "start_frame": 108,
+    "end_frame": 490,
+    "highlights": null
+  },
+  "item_cards": [
+    {
+      "index": 1,
+      "start_frame": 490,
+      "end_frame": 544
+    },
+    {
+      "index": 2,
+      "start_frame": 1210,
+      "end_frame": 1264
+    },
+    {
+      "index": 3,
+      "start_frame": 2066,
+      "end_frame": 2120
+    }
+  ],
+  "covered_frames": [
+    [
+      108,
+      490
+    ],
+    [
+      490,
+      544
+    ],
+    [
+      1210,
+      1264
+    ],
+    [
+      2066,
+      2120
+    ]
+  ],
+  "agenda_highlight": "static list",
+  "fps": 30,
+  "timing": "measured narration chapters",
+  "footer": [
+    0,
+    1024,
+    1920,
+    56
+  ],
+  "audio": "stream copy",
+  "source_preserved": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-tool-tutorial-20261101/normal-run-v2/engine-data/jobs/2df80b03-d640-4840-b6d7-10420ca9e0ea/attempts/1/g2-run/artifacts/episode-navigation/original-content.mp4",
+  "video_sha256": "f957c01827004061580d27b5e194284dd449b01cafd44e419489426b071d4aca"
+}

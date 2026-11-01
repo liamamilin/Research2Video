@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "production_source_files_verified": 9,
+  "loaded_sources_match_current_files": true,
+  "media_sources_match_loaded_sources": true,
+  "video_sha256_verified": "9ffd6956e97ecab910634128e637dd51821dcd583ea6b1363baff53f6a35a1cd",
+  "movie_bytes": 12232789,
+  "acceptance_scripts_parse": true,
+  "visual_inspection": {
+    "contact_sheet_samples": 13,
+    "full_size_frames": [
+      "frame-picture-2.png",
+      "frame-picture-4.png"
+    ],
+    "scope": "公开资料截图、问候、步骤转场、字幕、品牌片尾；公开文章讲解教程"
+  },
+  "original_schedules_unchanged": true,
+  "new_schedules": 0
+}

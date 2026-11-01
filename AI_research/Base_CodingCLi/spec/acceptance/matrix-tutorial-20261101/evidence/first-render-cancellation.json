@@ -1,0 +1,491 @@
+{
+  "job_id": "2adf7c0d-73c9-4d1f-b5db-7dd15477e5b0",
+  "reason": "Acceptance used base Python without the existing screenshot dependency; retry same approved script under the installed app runtime.",
+  "result": {
+    "job_id": "2adf7c0d-73c9-4d1f-b5db-7dd15477e5b0",
+    "title": "AI 开源发现｜2026年11月01日",
+    "status": "RUNNING",
+    "active_stage": "STORYBOARD",
+    "attempt_count": 1,
+    "cancel_requested": true,
+    "error_code": null,
+    "error_message": null,
+    "retryable": false,
+    "source_sha256": "49279ca44cea992b14da925fc3289e0b9cf253535b339d341400afb13fa5c43d",
+    "source_char_count": 1772,
+    "target_duration_sec": 60,
+    "theme": "minimal_dark",
+    "voice_id": "zf_xiaoxiao",
+    "created_at": "2026-11-01T05:51:16.502+00:00",
+    "updated_at": "2026-11-01T05:52:03.695+00:00",
+    "version": 8,
+    "operation_type": "generate",
+    "parent_job_id": null,
+    "parent_attempt_no": null,
+    "scene_id": null,
+    "creative_intent": {
+      "audience": "想把开源工具用于实际工作的开发者和 AI 高频使用者",
+      "purpose": "栏目：AI 开源发现。讲解目标：帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点。\n优先按段落组合项目截图、产品画面、输入输出对照、任务流程、重点卡，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：用项目页面或任务示意建立对象感，让同一份文件、代码或任务卡从输入经过项目处理走到输出，主项目持续处于这条关系中。材料里的输入与输出例子值得停下来展示，参数与原理说明贴在它实际改变的那一步。相关工具作为流程相应位置的简短补充，随后回到主项目；结尾用同一任务的结果收束。Stars、下载量、发布时间和团队背景作为辅助信息。",
+      "tone": "清楚、自然",
+      "focus": "沿同一份输入串起准备、实际操作和输出结果。已有输入或结果截图优先展示原图并随旁白聚焦；文件名只作对象标签，实际命令或代码用逐行强调。一步的结果保留到下一步需要它时，再回到这份任务的最终结果。沿用讲稿已有问候与告别，画面只承担开场、步骤切换和回顾。"
+    },
+    "revision_mode": null,
+    "input_mode": "narration",
+    "idempotency_key": "research:e61a800faeb0480c8b67fbe45fbe1841",
+    "background_music_resolved": {
+      "schema_version": 1,
+      "selection": {
+        "enabled": false,
+        "level_db": -18.0,
+        "ducking": true,
+        "loop": true,
+        "fade_seconds": 1.2
+      },
+      "asset": null,
+      "music_generated": false,
+      "scope": "content_only",
+      "engine": "local-mix-v1",
+      "sha256": "d3c6cfd9eb2290a2c19d81e744191b4cc51f974d5829624f8e4e6d690ae39013"
+    },
+    "background_music": {
+      "enabled": false,
+      "level_db": -18.0,
+      "ducking": true,
+      "loop": true,
+      "fade_seconds": 1.2
+    },
+    "production_recipe_resolved": {
+      "schema_version": 1,
+      "catalog_sha256": "06410f1380cf8ecaee34d7278180c45040bb4eea212382bbdf745cb95822251f",
+      "recipe": {
+        "version": 2,
+        "id": "mixed_tutorial",
+        "name": "混合步骤",
+        "description": "沿着操作过程，组合界面截图、步骤聚焦、分支流程和结果。",
+        "topics": [
+          "教程",
+          "方法实践",
+          "流程讲解"
+        ],
+        "recommended_forms": [
+          "F12",
+          "F16",
+          "F04"
+        ],
+        "defaults": {
+          "production_mode": "fast",
+          "visual_style": "editorial_light",
+          "video_form": "information_cards",
+          "visual_storytelling": true,
+          "duration_mode": "content",
+          "creative_intent": {
+            "audience": "当前栏目面向的观众",
+            "purpose": "沿着操作过程，组合界面截图、步骤聚焦、分支流程和结果。",
+            "tone": "清楚、自然",
+            "focus": "沿同一份输入串起准备、实际操作和输出结果。已有输入或结果截图优先展示原图并随旁白聚焦；文件名只作对象标签，实际命令或代码用逐行强调。一步的结果保留到下一步需要它时，再回到这份任务的最终结果。沿用讲稿已有问候与告别，画面只承担开场、步骤切换和回顾。"
+          },
+          "packaging": {
+            "preset": "common",
+            "label": "混合步骤",
+            "intro": {
+              "seconds": 1.0
+            },
+            "outro": {
+              "seconds": 1.5
+            },
+            "sound": {
+              "enabled": false
+            }
+          },
+          "background_music": {
+            "enabled": false
+          }
+        },
+        "music": {
+          "mode": "none",
+          "suggested_forms": [],
+          "description": "默认保留清楚的旁白，不添加背景音乐。"
+        },
+        "material_guidance": "使用已有输入、实际操作代码和结果截图，按讲稿段落关联同一任务；截图区域聚焦、代码强调、步骤导航与通用片头片尾复用现有制作链路。"
+      },
+      "selection": {
+        "video_form": "information_cards",
+        "duration_mode": "content",
+        "target_duration_sec": 60,
+        "voice_id": "zf_xiaoxiao",
+        "video_speed": 1.25,
+        "creative_intent": {
+          "audience": "想把开源工具用于实际工作的开发者和 AI 高频使用者",
+          "purpose": "栏目：AI 开源发现。讲解目标：帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点。\n优先按段落组合项目截图、产品画面、输入输出对照、任务流程、重点卡，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：用项目页面或任务示意建立对象感，让同一份文件、代码或任务卡从输入经过项目处理走到输出，主项目持续处于这条关系中。材料里的输入与输出例子值得停下来展示，参数与原理说明贴在它实际改变的那一步。相关工具作为流程相应位置的简短补充，随后回到主项目；结尾用同一任务的结果收束。Stars、下载量、发布时间和团队背景作为辅助信息。",
+          "tone": "清楚、自然",
+          "focus": "沿同一份输入串起准备、实际操作和输出结果。已有输入或结果截图优先展示原图并随旁白聚焦；文件名只作对象标签，实际命令或代码用逐行强调。一步的结果保留到下一步需要它时，再回到这份任务的最终结果。沿用讲稿已有问候与告别，画面只承担开场、步骤切换和回顾。"
+        },
+        "background_music": {
+          "enabled": false,
+          "level_db": -18.0,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        }
+      },
+      "music": {
+        "mode": "none",
+        "background_music_generated": false
+      },
+      "packaging_sha256": "5cabeb3669c0f98b49b35d91a6965edb4a5e013eb0efe684f15496acedb2d095",
+      "sha256": "a9fdbdead5fb6c121fca344ed990d92fd9727761d3e05b232a5bf4a7de61fed1"
+    },
+    "production_plan": {
+      "schema_version": 1,
+      "settings": {
+        "background_music": {
+          "enabled": false,
+          "level_db": -18.0,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        },
+        "brand": {
+          "enabled": true,
+          "profile": "linthesis"
+        },
+        "content_notices": [],
+        "creative_intent": {
+          "audience": "想把开源工具用于实际工作的开发者和 AI 高频使用者",
+          "purpose": "栏目：AI 开源发现。讲解目标：帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点。\n优先按段落组合项目截图、产品画面、输入输出对照、任务流程、重点卡，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：用项目页面或任务示意建立对象感，让同一份文件、代码或任务卡从输入经过项目处理走到输出，主项目持续处于这条关系中。材料里的输入与输出例子值得停下来展示，参数与原理说明贴在它实际改变的那一步。相关工具作为流程相应位置的简短补充，随后回到主项目；结尾用同一任务的结果收束。Stars、下载量、发布时间和团队背景作为辅助信息。",
+          "tone": "清楚、自然",
+          "focus": "沿同一份输入串起准备、实际操作和输出结果。已有输入或结果截图优先展示原图并随旁白聚焦；文件名只作对象标签，实际命令或代码用逐行强调。一步的结果保留到下一步需要它时，再回到这份任务的最终结果。沿用讲稿已有问候与告别，画面只承担开场、步骤切换和回顾。"
+        },
+        "duration_mode": "content",
+        "image_materials": [],
+        "music": null,
+        "packaging": {
+          "preset": "common",
+          "label": "AI 开源发现",
+          "intro": {
+            "enabled": false
+          },
+          "outro": {
+            "enabled": false
+          },
+          "sound": {
+            "enabled": false
+          },
+          "badge": {
+            "enabled": false
+          }
+        },
+        "production_context": {
+          "content_recipe": {
+            "id": "research:report_digest",
+            "settings": {}
+          },
+          "matrix": {
+            "id": "research-production:ai_media_opensource_digest",
+            "settings": {
+              "video_speed": 1.25,
+              "packaging": {
+                "label": "AI 开源发现",
+                "preset": "common"
+              }
+            }
+          }
+        },
+        "production_mode": "fast",
+        "production_recipe": "mixed_tutorial",
+        "slideshow_images": [],
+        "slideshow_images_resolved": null,
+        "target_duration_sec": 60,
+        "video_form": "information_cards",
+        "video_speed": 1.25,
+        "visual_storytelling": true,
+        "visual_style": "editorial_light",
+        "voice_id": "zf_xiaoxiao"
+      },
+      "origins": {
+        "packaging.label": "matrix",
+        "packaging.accent": "common",
+        "packaging.enabled": "common",
+        "packaging.intro.component": "common",
+        "packaging.intro.enabled": "common",
+        "packaging.intro.seconds": "production_recipe",
+        "packaging.outro.component": "common",
+        "packaging.outro.enabled": "common",
+        "packaging.outro.seconds": "production_recipe",
+        "packaging.badge.component": "common",
+        "packaging.badge.enabled": "common",
+        "packaging.source_card.component": "common",
+        "packaging.source_card.enabled": "common",
+        "packaging.source_card.seconds": "common",
+        "packaging.sound.component": "common",
+        "packaging.sound.enabled": "production_recipe",
+        "video_form": "fast_capability_selection",
+        "production_mode": "production_recipe",
+        "visual_style": "fast_capability_selection",
+        "duration_mode": "request",
+        "target_duration_sec": "common",
+        "voice_id": "common",
+        "video_speed": "matrix",
+        "creative_intent": "common",
+        "visual_storytelling": "production_recipe",
+        "creative_intent.audience": "request",
+        "creative_intent.purpose": "request",
+        "creative_intent.tone": "production_recipe",
+        "creative_intent.focus": "production_recipe",
+        "packaging.preset": "matrix",
+        "background_music.enabled": "production_recipe",
+        "visual_style.accent": "brand",
+        "visual_style.background": "brand",
+        "visual_style.text": "brand",
+        "visual_style.subtitle": "brand",
+        "visual_style.muted": "brand",
+        "visual_style.line": "brand",
+        "visual_style.inactive": "brand",
+        "visual_style.soft": "brand",
+        "enabled": "brand_default",
+        "profile": "brand_default"
+      },
+      "style": {
+        "id": "editorial_light",
+        "version": 1,
+        "background": "#F6F3ED",
+        "surface": "#ffffff",
+        "text": "#191B1A",
+        "muted": "#696966",
+        "accent": "#AD3523",
+        "warning": "#9b650c",
+        "subtitle": "#191B1A",
+        "line": "#d7d5cf",
+        "inactive": "#bfbdb8",
+        "soft": "#f2e8e1",
+        "palette_source": "brand"
+      },
+      "executor": {
+        "id": "hybrid_cards",
+        "version": 1
+      },
+      "output": {
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "packaging_sha256": "5cabeb3669c0f98b49b35d91a6965edb4a5e013eb0efe684f15496acedb2d095",
+      "packaging": {
+        "library": "autovideo-packaging",
+        "version": 2,
+        "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+        "selection": {
+          "preset": "common",
+          "label": "AI 开源发现",
+          "intro": {
+            "enabled": false
+          },
+          "outro": {
+            "enabled": false
+          },
+          "sound": {
+            "enabled": false
+          },
+          "badge": {
+            "enabled": false
+          }
+        },
+        "components": {
+          "label": "AI 开源发现",
+          "accent": "#1f7a4d",
+          "enabled": true,
+          "intro": {
+            "component": "stinger",
+            "enabled": false,
+            "seconds": 1.5
+          },
+          "outro": {
+            "component": "end_card",
+            "enabled": false,
+            "seconds": 2.5
+          },
+          "badge": {
+            "component": "corner_badge",
+            "enabled": false
+          },
+          "source_card": {
+            "component": "source_card",
+            "enabled": true,
+            "seconds": 4.5
+          },
+          "sound": {
+            "component": "synth_sting",
+            "enabled": false
+          }
+        },
+        "package": {
+          "accent": "#1f7a4d"
+        },
+        "badge": {
+          "text": "",
+          "color": "#1f7a4d"
+        },
+        "source_card": null,
+        "source_card_state": "no_sources",
+        "component_versions": {
+          "intro": {
+            "id": "stinger",
+            "version": 1
+          },
+          "outro": {
+            "id": "end_card",
+            "version": 2
+          },
+          "badge": {
+            "id": "corner_badge",
+            "version": 1
+          },
+          "source_card": {
+            "id": "source_card",
+            "version": 2
+          },
+          "sound": {
+            "id": "synth_sting",
+            "version": 1
+          }
+        },
+        "sha256": "5cabeb3669c0f98b49b35d91a6965edb4a5e013eb0efe684f15496acedb2d095"
+      },
+      "recipe_sha256": "a9fdbdead5fb6c121fca344ed990d92fd9727761d3e05b232a5bf4a7de61fed1",
+      "source_sha256": "49279ca44cea992b14da925fc3289e0b9cf253535b339d341400afb13fa5c43d",
+      "music": {
+        "mode": "none",
+        "selection": {
+          "enabled": false,
+          "level_db": -18.0,
+          "ducking": true,
+          "loop": true,
+          "fade_seconds": 1.2
+        },
+        "background_music_generated": false
+      },
+      "music_record_sha256": "d3c6cfd9eb2290a2c19d81e744191b4cc51f974d5829624f8e4e6d690ae39013",
+      "brand_record_sha256": "8e8e766277b1d8553a00a1b068971ad023a039e10575198167446fd6b97c9465",
+      "brand_layout": {
+        "version": 1,
+        "left": 80,
+        "right": 80,
+        "top": 54,
+        "width": 520,
+        "height": 76,
+        "gap": 40
+      },
+      "sha256": "9df88c049f519a757ac99a5b7e68bbf27d7f84a8689e9a05565fdae253e611a8"
+    },
+    "production_mode": "fast",
+    "visual_style": "editorial_light",
+    "video_speed": 1.25,
+    "video_form": "information_cards",
+    "duration_mode": "content",
+    "input_analysis": {
+      "requested_form": "information_cards",
+      "selected_form": "information_cards",
+      "recommended_form": "information_cards",
+      "selection_mode": "manual",
+      "status": "ready",
+      "reason": "按指定形式制作，定稿讲稿逐字配音。",
+      "issues": [],
+      "retained_units": 29,
+      "excluded_units": 0
+    },
+    "resolved_video_form": "information_cards",
+    "attempts": [
+      {
+        "attempt_no": 1,
+        "status": "RUNNING",
+        "started_at": "2026-11-01T05:51:16.514+00:00",
+        "completed_at": null,
+        "error_code": null,
+        "error_message": null,
+        "stages": [
+          {
+            "stage": "PLAN",
+            "status": "SUCCEEDED",
+            "started_at": "2026-11-01T05:51:16.514+00:00",
+            "completed_at": "2026-11-01T05:51:17.241+00:00",
+            "duration_seconds": 0.0,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "VOICE_ALIGN",
+            "status": "SUCCEEDED",
+            "started_at": "2026-11-01T05:51:17.243+00:00",
+            "completed_at": "2026-11-01T05:52:01.667+00:00",
+            "duration_seconds": 44.52,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "STORYBOARD",
+            "status": "RUNNING",
+            "started_at": "2026-11-01T05:52:01.670+00:00",
+            "completed_at": null,
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "SCENE_IMAGES",
+            "status": "PENDING",
+            "started_at": null,
+            "completed_at": null,
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "BUILD_IR",
+            "status": "PENDING",
+            "started_at": null,
+            "completed_at": null,
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "RENDER",
+            "status": "PENDING",
+            "started_at": null,
+            "completed_at": null,
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "QUALITY_CHECK",
+            "status": "PENDING",
+            "started_at": null,
+            "completed_at": null,
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "PACKAGE",
+            "status": "PENDING",
+            "started_at": null,
+            "completed_at": null,
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          },
+          {
+            "stage": "AUDIO_MIX",
+            "status": "PENDING",
+            "started_at": null,
+            "completed_at": null,
+            "duration_seconds": null,
+            "error_code": null,
+            "error_message": null
+          }
+        ]
+      }
+    ]
+  }
+}

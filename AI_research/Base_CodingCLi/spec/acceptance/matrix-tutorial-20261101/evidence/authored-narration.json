@@ -1,0 +1,43 @@
+{
+  "mode": "user_authored",
+  "origin": "narration_create",
+  "text_sha256": "49279ca44cea992b14da925fc3289e0b9cf253535b339d341400afb13fa5c43d",
+  "model_rewrite": false,
+  "whitespace_normalized_only": true,
+  "segments": 37,
+  "chapters": [
+    {
+      "id": "c1",
+      "title": "本期导读",
+      "segments": 6
+    },
+    {
+      "id": "c2",
+      "title": "准备周报输入",
+      "segments": 7
+    },
+    {
+      "id": "c3",
+      "title": "执行转换命令",
+      "segments": 9
+    },
+    {
+      "id": "c4",
+      "title": "查看转换结果",
+      "segments": 10
+    },
+    {
+      "id": "c5",
+      "title": "本期回顾",
+      "segments": 5
+    }
+  ],
+  "exact_text_check": {
+    "status": "PASS",
+    "chapters": 5,
+    "segments": 37,
+    "characters": 1764,
+    "rule": "segments reproduce the script in order; only splitting and whitespace may differ"
+  },
+  "provenance": "上游定稿讲稿逐字配音；AutoVideo 只做分句、空白规整与画面规划。"
+}

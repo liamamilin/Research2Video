@@ -1,0 +1,68 @@
+{
+  "same_input": true,
+  "checks": {
+    "material-before": {
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 1920,
+            "height": 1080,
+            "r_frame_rate": "30/1",
+            "nb_read_frames": "425",
+            "side_data_list": [
+              {}
+            ]
+          },
+          {
+            "codec_name": "aac",
+            "r_frame_rate": "0/0",
+            "nb_read_frames": "665"
+          }
+        ],
+        "format": {
+          "duration": "14.187000"
+        }
+      },
+      "decode": "PASS"
+    },
+    "material-after": {
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "width": 1920,
+            "height": 1080,
+            "r_frame_rate": "30/1",
+            "nb_read_frames": "425",
+            "side_data_list": [
+              {}
+            ]
+          },
+          {
+            "codec_name": "aac",
+            "r_frame_rate": "0/0",
+            "nb_read_frames": "665"
+          }
+        ],
+        "format": {
+          "duration": "14.187000"
+        }
+      },
+      "decode": "PASS"
+    }
+  },
+  "audio_sha256": "ff9798692032fdb649d97885d42f808b1471d8f25527ae46f123523ec7c8cec0",
+  "narration_unchanged": true,
+  "new_model_calls": 0,
+  "manual_scene_or_beat_edits": 0,
+  "decoded_audio_sha256": {
+    "material-before": "b0220f5ca1b7223af2c7bd69ef94b29f9f768ba5c9793cc15367f8582e46b9da",
+    "material-after": "b0220f5ca1b7223af2c7bd69ef94b29f9f768ba5c9793cc15367f8582e46b9da"
+  },
+  "decoded_audio_identical": true
+}

@@ -1,0 +1,81 @@
+{
+  "library": "autovideo-packaging",
+  "version": 2,
+  "catalog_sha256": "814a6482d008e3914c4360e8c471c8eec2ba97f113750fa0ee4971f8ef863937",
+  "selection": {
+    "preset": "common",
+    "label": "使用方法与教程",
+    "intro": {
+      "enabled": false
+    },
+    "outro": {
+      "enabled": false
+    },
+    "sound": {
+      "enabled": false
+    },
+    "badge": {
+      "enabled": false
+    }
+  },
+  "components": {
+    "label": "使用方法与教程",
+    "accent": "#1f7a4d",
+    "enabled": true,
+    "intro": {
+      "component": "stinger",
+      "enabled": false,
+      "seconds": 1.5
+    },
+    "outro": {
+      "component": "end_card",
+      "enabled": false,
+      "seconds": 2.5
+    },
+    "badge": {
+      "component": "corner_badge",
+      "enabled": false
+    },
+    "source_card": {
+      "component": "source_card",
+      "enabled": true,
+      "seconds": 4.5
+    },
+    "sound": {
+      "component": "synth_sting",
+      "enabled": false
+    }
+  },
+  "package": {
+    "accent": "#1f7a4d"
+  },
+  "badge": {
+    "text": "",
+    "color": "#1f7a4d"
+  },
+  "source_card": null,
+  "source_card_state": "no_sources",
+  "component_versions": {
+    "intro": {
+      "id": "stinger",
+      "version": 1
+    },
+    "outro": {
+      "id": "end_card",
+      "version": 2
+    },
+    "badge": {
+      "id": "corner_badge",
+      "version": 1
+    },
+    "source_card": {
+      "id": "source_card",
+      "version": 2
+    },
+    "sound": {
+      "id": "synth_sting",
+      "version": 1
+    }
+  },
+  "sha256": "00bcd6432b99c23554c9c071650bb7774a91497f4492992d7108fc22d03e6e48"
+}

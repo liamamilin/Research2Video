@@ -1,0 +1,48 @@
+{
+  "title": "Claude API 的版本号三年没动，今天动了——你顺手升个依赖就会切过去",
+  "source_attempt": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/ai-matrix-productization-20261027/baece7b63aae4df3b8dbde7d64ab6f3a/jobs/66e890f5-71b6-49ed-bacb-1f1a6e9741ed/attempts/1/g2-run",
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "nb_read_frames": "3627",
+        "side_data_list": [
+          {}
+        ]
+      },
+      {
+        "codec_name": "aac",
+        "r_frame_rate": "0/0",
+        "nb_read_frames": "5668"
+      }
+    ],
+    "format": {
+      "duration": "120.917000"
+    }
+  },
+  "full_decode": "PASS",
+  "narration_unchanged": true,
+  "assets_unchanged": true,
+  "source_audio_sha256": "ca189562a10be546f985ca71abecb6338d2d25cdab8c0bf65e67c68ab1c7067b",
+  "decoded_audio_correlation": 1.0,
+  "video_sha256": "7268e8c3ca554343b66a3b8ba7e861c1b32431ae83ca7c14d1346107c43b959e",
+  "new_model_calls": 0,
+  "new_tts_calls": 0,
+  "manual_scene_or_beat_edits": 0,
+  "scene_count": 11,
+  "sampled_seconds": [
+    7,
+    13,
+    24,
+    36,
+    57,
+    70,
+    92,
+    114
+  ]
+}

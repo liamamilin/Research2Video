@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "request_has_episode": false,
+  "recipe": "mixed_tutorial",
+  "model_calls": 0,
+  "tts_calls": 0,
+  "steps": [
+    "准备输入",
+    "执行转换",
+    "查看结果"
+  ],
+  "same_timing_as_final": true,
+  "body_video_identical_to_final": true
+}

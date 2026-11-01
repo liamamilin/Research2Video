@@ -1,0 +1,57 @@
+{
+  "common_sources": [
+    "page:https://developers.openai.com/api/docs/changelog.md",
+    "page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+    "page:https://learn.chatgpt.com/docs/whats-new.md",
+    "rss:https://aicatchup.com/rss.xml",
+    "rss:https://openai.com/news/rss.xml",
+    "rss:https://ratelimitnow.com/whats-new.xml"
+  ],
+  "reads": [
+    {
+      "spec": "page:https://developers.openai.com/api/docs/changelog.md",
+      "items": 80,
+      "error": "",
+      "archived_items": 80
+    },
+    {
+      "spec": "page:https://learn.chatgpt.com/docs/whats-new.md",
+      "items": 80,
+      "error": "",
+      "archived_items": 80
+    },
+    {
+      "spec": "rss:https://aicatchup.com/rss.xml",
+      "items": 50,
+      "error": "",
+      "archived_items": 50
+    },
+    {
+      "spec": "rss:https://openai.com/news/rss.xml",
+      "items": 80,
+      "error": "",
+      "archived_items": 80
+    },
+    {
+      "spec": "rss:https://ratelimitnow.com/whats-new.xml",
+      "items": 80,
+      "error": "",
+      "archived_items": 80
+    },
+    {
+      "spec": "catalog:https://learn.chatgpt.com/videos",
+      "items": 80,
+      "error": "",
+      "archived_items": 80
+    },
+    {
+      "spec": "github:anthropics/claude-code",
+      "items": 30,
+      "error": "",
+      "archived_items": 30
+    }
+  ],
+  "shared_archive": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-sources-20261101/run-1/state/materials.db",
+  "paid_content_reads": 0,
+  "personal_login": false
+}

@@ -1,0 +1,84 @@
+Browser tab: 1070520283, Title: "研映 · Research2Video", URL: "http://127.0.0.1:8775/matrices/chatgpt_acquisition/video/chatgpt_acquisition%2Ft09_updates".
+1 AXWebArea 研映 · Research2Video, URL: 127.0.0.1:8775/matrices/chatgpt_acquisition/video/chatgpt_acquisition%2Ft09_updates
+	2 container root
+		3 container
+			4 heading 研映 · Research2Video, Value: 2
+				5 text 研映 · Research2Video
+			6 button admin · admin （账号设置）
+				7 text admin
+				8 text  · 
+				9 text admin
+				10 text （账号设置）
+			11 link Description: 矩阵, Value: 127.0.0.1:8775/matrices
+			12 link Description: 产出, Value: 127.0.0.1:8775/outputs
+			13 link Description: 视频看板, Value: 127.0.0.1:8775/
+			14 link Description: 文稿, Value: 127.0.0.1:8775/video
+			15 link Description: 成片与发布, Value: 127.0.0.1:8775/publish
+			16 link Description: 平台管理, Value: 127.0.0.1:8775/platforms
+			17 link Description: 助手, Value: 127.0.0.1:8775/ask
+			18 text 研究引擎
+			19 link Description: 研究总览, Value: 127.0.0.1:8775/engine
+			20 link Description: Jobs, Value: 127.0.0.1:8775/jobs
+			21 link Description: 情报轮次, Value: 127.0.0.1:8775/rounds
+			22 link Description: 报告, Value: 127.0.0.1:8775/reports
+			23 link Description: 周期调度, Value: 127.0.0.1:8775/scheduler
+			24 text 高级
+			25 link Description: 选题, Value: 127.0.0.1:8775/topics
+			26 link Description: 信息源, Value: 127.0.0.1:8775/sources
+			27 link Description: 文稿配方, Value: 127.0.0.1:8775/video-recipes
+			28 link Description: 数据分析, Value: 127.0.0.1:8775/analytics
+			29 link Description: 设置, Value: 127.0.0.1:8775/settings
+			30 button 退出
+				31 image
+				32 text 退出
+		33 container
+			39 link Description: 矩阵, Value: 127.0.0.1:8775/matrices
+			40 text /
+			41 link Description: ChatGPT 获客矩阵, Value: 127.0.0.1:8775/matrices/chatgpt_acquisition
+			42 heading T09 · 产品动态与热点 · 视频配置, Value: 1
+				43 text T09 · 产品动态与热点  · 视频配置
+			44 text 设置这项研究的报告要写成哪些视频。
+			45 button 刷新
+				46 image
+				47 text 刷新
+			48 link Description: 研究任务详情, Value: 127.0.0.1:8775/jobs/chatgpt_acquisition%2Ft09_updates
+			49 link Description: 本矩阵的视频, Value: 127.0.0.1:8775/?matrix=chatgpt_acquisition&view=all
+			50 container 视频配置
+				51 heading 视频配置, Value: 2
+					52 text 视频配置
+				53 text 每个 Job 的报告写成哪几种视频。给谁看在配置里选；多长、要不要重新调研，配方允许的才能在配置里改；拆不拆由配方定。
+				54 container 配置 T09 · 产品动态与热点
+					55 text T09 · 产品动态与热点 配方  chatgpt_acquisition 已写 8 篇
+					56 container
+						57 text 给 大众观众 看 ·  内容决定时长  ·  整期节目  · 每份报告写一期，直接用报告，不调研  · 自动：报告一出来就写
+					58 container
+						59 checkbox (settable, integer) Description: 自动写, Value: 1
+						60 text 报告一出来就自动制作
+					61 text 每份报告制作一期，自动组织多个内容
+					62 button 收起
+					63 button 删除这套
+					72 container T09 · 产品动态与热点 的报告
+						73 text 最近的报告，每份写成一期：
+						74 content list
+							75 container
+								76 text 2026-10-31 output/chatgpt_acquisition/2026-10-31_t09_updates_1.md
+								77 link Description: 写过了, Value: 127.0.0.1:8775/video/7a70793b2e0b4832a9b9bfc4cd7b1829
+							78 container
+								79 text 2026-10-30 output/chatgpt_acquisition/2026-10-30_t09_updates.md
+								80 button 写 2026-10-30 的报告
+							81 container
+								82 text 2026-10-29 output/chatgpt_acquisition/2026-10-29_t09_updates.md
+								83 button 写 2026-10-29 的报告
+				64 pop up button (collapsed, settable) Description: 加配置用的配方, Value: 用哪个配方…, Secondary Actions: Expand
+					65 menu
+						66 (selected) 用哪个配方…
+						67 实用讲解 · B站横屏长
+				68 pop up button (disabled, collapsed, settable) Description: 加配置给谁看, Value: 先选配方, Secondary Actions: Expand
+					69 menu
+						70 (disabled) 先选配方
+				71 button (disabled) 加一套配置
+		36 button 让助手处理当前页面
+			37 image
+			38 text 让助手处理
+
+The focused UI element is 62 button 收起

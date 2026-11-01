@@ -1,0 +1,103 @@
+{
+  "report": "output/chatgpt_acquisition/2026-11-01_t03_tutorials.md",
+  "bytes": 6242,
+  "source": "https://aicatchup.com/news/chatgpt-account-switching-mobile",
+  "anonymous_public_source": true,
+  "manual_report_edit": false,
+  "usage": {
+    "requests": 1,
+    "prompt_tokens": 4052,
+    "completion_tokens": 6980,
+    "total_tokens": 11032,
+    "cache_read_tokens": 0,
+    "cache_reported_requests": 1,
+    "reasoning_tokens": 5434,
+    "cost_usd": 0.0047958,
+    "cost_reported_requests": 1,
+    "model": "deepseek-v4.1-flash",
+    "searches": 0,
+    "fetched": {
+      "page:https://aicatchup.com/news/chatgpt-account-switching-mobile": 12
+    },
+    "collection_window": {
+      "mode": "previous_slot",
+      "days": 7,
+      "start": "2026-10-25T15:36:33.232851+08:00",
+      "end": "2026-11-01T15:36:33.232851+08:00",
+      "timezone": "Asia/Shanghai"
+    },
+    "production_issue": {
+      "issue_id": "91446647ec93782fdf00f2446179144a516eafe245cedded0ccb9ac55d9aee1a",
+      "policy_revision": "a18871da42300673a5d7d7d44ae7796d63df396cc3f63195feb505b56c9067c2",
+      "research_window": {
+        "mode": "previous_slot",
+        "days": 7,
+        "start": "2026-10-25T15:36:33.232851+08:00",
+        "end": "2026-11-01T15:36:33.232851+08:00",
+        "timezone": "Asia/Shanghai"
+      }
+    },
+    "source_supply": {
+      "version": 1,
+      "profile": "chatgpt_acquisition",
+      "mode": "context",
+      "first_collection": true,
+      "scan_limit": 60,
+      "details": [],
+      "sources": {
+        "page:https://aicatchup.com/news/chatgpt-account-switching-mobile": {
+          "scanned": 12,
+          "changed": 12,
+          "delivered": 12,
+          "urls": [
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#:~:text=ChatGPT%20Account%20Switching%20Rolls%20Out%20on%20iOS%20and%20Android",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#key-takeaways",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#how-to-add-and-switch-accounts",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#what-stays-separate",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#mobile-availability",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#:~:text=ChatGPT%20Expands%20GPT-5.6%20Luna%20Access%20and%20Adds%20a%20Reasoning%20Slider",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#:~:text=Codex%20Adds%20Windows%20Computer%20Use%20%2B%20ChatGPT%20Mobile%20Windows%20Connections%20for%20On-the-Go%20Steering",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#:~:text=Codex%20in%20the%20ChatGPT%20Mobile%20App%3A%20Run%2C%20Review%2C%20and%20Steer%20Codex%20from%20Your%20Phone",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#:~:text=Codex%20Opens%20GPT-5.6%20Sol%27s%201M-Token%20Context%20to%20ChatGPT%20Accounts",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#sources",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#:~:text=Frequently%20Asked%20Questions",
+            "https://aicatchup.com/news/chatgpt-account-switching-mobile#:~:text=Get%20the%20weekly%20AI%20Catchup"
+          ],
+          "error": "",
+          "role": "editorial",
+          "coverage": "",
+          "live_items": 12,
+          "cache_items": 0,
+          "live_status": "read",
+          "date_coverage": {},
+          "archive_coverage": {
+            "first_observation": null,
+            "last_observation": null,
+            "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯"
+          },
+          "archived_items": 0
+        }
+      },
+      "collection_window": {
+        "mode": "previous_slot",
+        "days": 7,
+        "start": "2026-10-25T15:36:33.232851+08:00",
+        "end": "2026-11-01T15:36:33.232851+08:00",
+        "timezone": "Asia/Shanghai"
+      },
+      "coverage": [],
+      "detail_budget": {
+        "success_limit": 3,
+        "attempt_limit": 9,
+        "attempts": 0,
+        "successful": 0
+      },
+      "chars": 10207,
+      "items": 12,
+      "automatic": [],
+      "quiet": false,
+      "pending_changes": 0
+    }
+  },
+  "receipt_path_fix_only": true
+}

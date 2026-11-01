@@ -1,0 +1,7 @@
+{
+  "/api/assistant/materials": true,
+  "/api/assistant/materials/{key}/file": true,
+  "/api/sources/coverage": true,
+  "/api/sources/materials": true,
+  "chat_material_ids": true
+}

@@ -1,0 +1,21 @@
+{
+  "health": "ok",
+  "instance_id": "8ddb2a882c1b4583abcdc0e273a4144f",
+  "material_update_route": true,
+  "revision_required": true,
+  "fields": [
+    "material_ids",
+    "urls",
+    "text",
+    "goal",
+    "title",
+    "audience",
+    "mode",
+    "replace_materials",
+    "base_revision",
+    "regenerate",
+    "make_video"
+  ],
+  "real_sample_workflow": "DONE",
+  "real_sample_render": "COMPLETED"
+}

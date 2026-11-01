@@ -1,0 +1,73 @@
+{
+  "id": "12d07acd3c7f4a1f80a9b6f7e121c053",
+  "plan_id": null,
+  "spec": {
+    "job": "ai_media/daily_opensource_radar",
+    "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-tutorial-jq-20261101/run-1/output/radar/2026-11-01_ai_opensource_radar.md",
+    "report_identity": "4f1df76720054e293d54cc7c0ded0c2f3512d8089e5ab0a417f717683e01d746",
+    "picks": [
+      {
+        "column": "report_digest",
+        "all": true,
+        "production": "ai_media_opensource_digest",
+        "content_mode": "episode",
+        "whole": true
+      }
+    ],
+    "refresh": false
+  },
+  "status": "DONE",
+  "stage": "ITEMS",
+  "note": "DONE 1",
+  "started_by": "autopilot",
+  "started_at": 1793516142.739808,
+  "created_at": "2026-11-01T14:55:42+0800",
+  "updated_at": "2026-11-01T15:03:51+0800",
+  "discovery_at": null,
+  "discovery_tries": 0,
+  "dispatch_failures": 0,
+  "items": [
+    {
+      "id": "4fc6c62f7e26474eb290aceebd156d61",
+      "run_id": "12d07acd3c7f4a1f80a9b6f7e121c053",
+      "slot": 0,
+      "column_key": "report_digest",
+      "topic": {
+        "id": null,
+        "title": "jq 实操：从任务清单筛出已完成任务",
+        "fields": {},
+        "content_mode": "episode",
+        "from_report": "output/radar/2026-11-01_ai_opensource_radar.md",
+        "report_id": "511b0d725c0a46648ec05882db43ec29",
+        "episode": {
+          "job": "ai_media/daily_opensource_radar",
+          "production": "ai_media_opensource_digest",
+          "items": [],
+          "report_path": "output/radar/2026-11-01_ai_opensource_radar.md",
+          "report_identity": "4f1df76720054e293d54cc7c0ded0c2f3512d8089e5ab0a417f717683e01d746"
+        }
+      },
+      "script_id": "5f5b5633c4ee45778b4e7bfc602fce96",
+      "render_id": "a75279f29f15458486b0cf901a04e234",
+      "state": "DONE",
+      "note": "成片完成，等你看片和发布",
+      "gate": {
+        "label": "generated",
+        "text": "按素材生成",
+        "reasons": [],
+        "core_issues": 0,
+        "cited_share": 0.0,
+        "audited": false,
+        "ignored": {
+          "must": 0,
+          "warn": 0
+        },
+        "version": 1,
+        "approved": "auto"
+      },
+      "retries": {},
+      "updated_at": "2026-11-01T15:03:51+0800",
+      "production": "ai_media_opensource_digest"
+    }
+  ]
+}

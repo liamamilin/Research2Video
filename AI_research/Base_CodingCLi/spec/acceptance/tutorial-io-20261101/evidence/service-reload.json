@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "method": "existing service_maintenance.perform + restart_gate",
+  "old_pid": 16410,
+  "new_pid": 42346,
+  "health": "ok",
+  "idle_before_reload": true,
+  "preserved_records": {
+    "scripts": 361,
+    "renders": 371
+  },
+  "existing_script_and_render_records_unchanged": true,
+  "source_sha256": {
+    "web/services/video_render.py": "ce62dea69fe5829644dc3d672f18ff8a17b9ef58867dd7a3372087c7a79030f7",
+    "core/video/visual_materials.py": "fd2dcc8b4f9047de148708e86f70dc024f002b4d082430ccf53e6ca91845fe99",
+    "config/content_columns/ai_opensource.yaml": "721e78dbde65665a5c953c87504656efc8c0a7d2d89cbf2951f877fe0f01e489",
+    "core/user_materials.py": "31039a2e99deb14f8deb0a6a2976e281afdeb2371608ef0175ff6627373f6413",
+    "core/video/writer.py": "0b7f2936e39f697098c48ca0a14b7ca0cbcca4aa4dc9d22e1e258ff04fe53482",
+    "core/video/episodes.py": "f204e7ca5fc4cf83182bb73cc3bcce16f3169ce059913d5f090bc5f86c427cb1",
+    "web/services/video_workflow.py": "8ffc3f5ddeb35991e8520496f72e2000452595a27f35441667cf17d3ab6868fb",
+    "web/services/assistant_materials.py": "a1a097a1a37053b73e9dcf1ad6863c33fbce124c833cda0b57a95c8f4ce95059"
+  },
+  "maintenance_receipt": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/maintenance/50883638a4d649dbb6bae74b454f5df4.json"
+}

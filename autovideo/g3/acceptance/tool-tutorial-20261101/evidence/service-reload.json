@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "old_pid": 26748,
+  "new_pid": 93149,
+  "action": "started",
+  "url": "http://127.0.0.1:8011",
+  "idle_before_reload": true,
+  "old_jobs": 312,
+  "jobs_after": 312,
+  "existing_jobs_unchanged": true,
+  "tutorial_recipe_version": 2,
+  "model_calls": 0
+}

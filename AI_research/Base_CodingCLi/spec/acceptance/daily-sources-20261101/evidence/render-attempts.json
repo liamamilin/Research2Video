@@ -1,0 +1,30 @@
+{
+  "attempts": [
+    {
+      "id": "aaf0a751ad3e4e4082964ea102bb342c",
+      "script_id": "bd834feccb9844b3acfcc6ef41f9d922",
+      "version": 1,
+      "status": "COMPLETED",
+      "autovideo_job_id": "c2fe1190-7ff7-4319-ac9c-60a1e3246164",
+      "created_at": "2026-11-01T15:57:02+0800",
+      "completed_at": "2026-11-01T16:12:21+0800",
+      "source_sha256": "84de8c6bd926b719bfba66e6b20c1d1d70a7078ce194b0b5286cd8ea40598f5e",
+      "resolved_video_form": "information_cards"
+    },
+    {
+      "id": "75ee31c92d2d4232b033bc350cab93aa",
+      "script_id": "bd834feccb9844b3acfcc6ef41f9d922",
+      "version": 1,
+      "status": "COMPLETED",
+      "autovideo_job_id": "79c434f2-65fc-4969-a709-32d4949c1a4f",
+      "created_at": "2026-11-01T15:41:05+0800",
+      "completed_at": "2026-11-01T15:56:58+0800",
+      "source_sha256": "84de8c6bd926b719bfba66e6b20c1d1d70a7078ce194b0b5286cd8ea40598f5e",
+      "resolved_video_form": "information_cards"
+    }
+  ],
+  "same_approved_version": true,
+  "first_output_preserved": true,
+  "manual_script_edits": 0,
+  "manual_picture_placements": 0
+}

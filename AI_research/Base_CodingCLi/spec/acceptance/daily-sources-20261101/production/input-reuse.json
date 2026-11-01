@@ -1,0 +1,10 @@
+{
+  "input_reused_without_changes": true,
+  "original_report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-sources-20261101/run-1/output/chatgpt_acquisition/2026-11-01_t03_tutorials.md",
+  "production_report": "output/chatgpt_acquisition/2026-11-01_t03_tutorials_1.md",
+  "sha256": "8e6d9f45c88ffed1dedc9c33702a3ea9bd262edeafb67017ba4887c4255025c3",
+  "production": "chatgpt_t03_tutorials",
+  "new_research_calls": 0,
+  "primary_state": "state/video.db",
+  "isolated_store_created": false
+}

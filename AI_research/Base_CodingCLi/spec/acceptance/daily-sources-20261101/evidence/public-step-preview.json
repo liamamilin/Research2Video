@@ -1,0 +1,99 @@
+{
+  "need": {
+    "id": "c2p1",
+    "chapter_index": 1,
+    "paragraph_index": 0,
+    "title": "准备两个账号",
+    "text": "先准备两个能正常登录的 ChatGPT 账号，后面用账号 A、账号 B 来代称。一个可以是个人号，一个工作号；也可以一个 Free、一个 Plus 或 Pro。准备阶段只做一件事：确认两个账号的登录方式你都知道，因为添加第二个账号时，需要登录一次。这里先记住两个限制：同一个切换入口最多保留两个已登录账号；要加第三个，必须先退出其中一个。还有，切换账号只是换当前使用的账号，不会把两个账号的数据合在一起。",
+    "kind": "feature",
+    "urls": [
+      "https://aicatchup.com/news/chatgpt-account-switching-mobile",
+      "https://help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile",
+      "https://help.openai.com/en/articles/6825453-chatgpt-release-notes"
+    ],
+    "visual_subject": "chatgpt",
+    "visual_goal": "展示公开资料中与当前讲解对应的操作说明或产品截图",
+    "facts": [],
+    "claims": "先准备两个能正常登录的 ChatGPT 账号，后面用账号 A、账号 B 来代称。一个可以是个人号，一个工作号；也可以一个 Free、一个 Plus 或 Pro。准备阶段只做一件事：确认两个账号的登录方式你都知道，因为添加第二个账号时，需要登录一次。这里先记住两个限制：同一个切换入口最多保留两个已登录账号；要加第三个，必须先退出其中一个。还有，切换账号只是换当前使用的账号，不会把两个账号的数据合在一起。"
+  },
+  "capture": {
+    "url": "https://aicatchup.com/news/chatgpt-account-switching-mobile",
+    "final_url": "https://aicatchup.com/news/chatgpt-account-switching-mobile",
+    "title": "How to Switch Between Two ChatGPT Accounts on Mobile | AI Catchup",
+    "mode": "crop",
+    "selector": "[data-yanying-capture=\"yy-b15040221533-6\"]",
+    "clip": {
+      "x": 156,
+      "y": 67,
+      "width": 1128,
+      "height": 128
+    },
+    "scroll": {
+      "x": 0,
+      "y": 1316
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "captured_at": "2026-11-01T07:51:42+00:00",
+    "quality": {
+      "version": 3,
+      "candidate_id": "yy-b15040221533-6",
+      "score": 10.72,
+      "visual_kind": "text",
+      "visual_goal": "展示公开资料中与当前讲解对应的操作说明或产品截图",
+      "visual_subject": "chatgpt",
+      "heading": "",
+      "region_text": "OpenAI's release notes say account switching is rolling out to ChatGPT on iOS and Android. If Switch account is missing from Settings, mobile access may not have reached your account. On iOS or Android, if Add account is missing, check whether two accounts are already signed in; log out of one to add another. The Help Center also documents account switching on the web (ChatGPT release notes; account-switching guide).",
+      "text_match": "页面对象与本次画面用途对应",
+      "semantic": {
+        "state": "skipped",
+        "reason": "使用可核对的规则匹配"
+      },
+      "dom_targets": [
+        {
+          "text": "OpenAI's release notes say account switching is rolling out to ChatGPT on iOS and Android. If Switch account is missing from Settings, mobile access may not have reached your account. On iOS or Android, if Add account is missing, check whether two accounts are already signed in; log out of one to add another. The Help Center also documents account switching on the web (ChatGPT release notes; account-switching guide).",
+          "tag": "p",
+          "x": 168,
+          "y": 79.75,
+          "width": 1104,
+          "height": 78,
+          "x1": 11,
+          "y1": 100,
+          "x2": 989,
+          "y2": 709
+        },
+        {
+          "text": "ChatGPT release notes",
+          "tag": "a",
+          "x": 730.828125,
+          "y": 135.75,
+          "width": 166.734375,
+          "height": 18,
+          "x1": 510,
+          "y1": 537,
+          "x2": 657,
+          "y2": 678
+        },
+        {
+          "text": "account-switching guide",
+          "tag": "a",
+          "x": 906.1875,
+          "y": 135.75,
+          "width": 178.8125,
+          "height": 18,
+          "x1": 665,
+          "y1": 537,
+          "x2": 824,
+          "y2": 678
+        }
+      ],
+      "capture_size": {
+        "width": 1128,
+        "height": 128
+      }
+    }
+  },
+  "image": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-sources-20261101/run-1/preview/public-step-1793519502382011000.png"
+}

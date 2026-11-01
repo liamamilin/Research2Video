@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-01",
+  "new_model_calls": 0,
+  "new_tts_calls": 0,
+  "new_production_dependencies": [],
+  "new_production_components": [],
+  "scene_count": 47,
+  "total_frames": 17618,
+  "source_sha256": {
+    "g1/renderer/src/Root.tsx": "3088ca28ac74ad7feea35f96a54ea869c983487f802927969bce27350ea35f3c",
+    "g1/renderer/src/ObjectFlow.tsx": "841832c14918b733fd0e57a1a29d355f4fbb9fb1b32f50e23320baa069923990",
+    "g1/renderer/src/ShotDirector.tsx": "1057b06a645afb6b8d6217714d07149b48368db105c3175e2db074e1e6292b64",
+    "g2/process_diagram.py": "0f8619e26c128e743abb5ffac01b3b2c90456fcf2487a56f90d79a6a8f603e10"
+  },
+  "existing_recipe_defaults": {
+    "mixed_explainer": {
+      "production_mode": "fast",
+      "visual_style": "editorial_light",
+      "video_form": "information_cards",
+      "visual_storytelling": true
+    },
+    "mixed_comparison": {
+      "production_mode": "fast",
+      "visual_style": "editorial_light",
+      "video_form": "information_cards",
+      "visual_storytelling": true
+    },
+    "mixed_tutorial": {
+      "production_mode": "fast",
+      "visual_style": "editorial_light",
+      "video_form": "information_cards",
+      "visual_storytelling": true
+    }
+  },
+  "tests": {
+    "engine": "989 passed, 1 skipped",
+    "typescript": "PASS",
+    "diff_check": "PASS"
+  },
+  "cases": {
+    "news": {
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-matrix-visual-20261101/news/release/video.mp4",
+      "scene_count": 11,
+      "full_decode": "PASS",
+      "narration_unchanged": true,
+      "audio_correlation": 1.0,
+      "video_sha256": "7268e8c3ca554343b66a3b8ba7e861c1b32431ae83ca7c14d1346107c43b959e",
+      "same_ir_as_first_replay": true
+    },
+    "tutorial": {
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-matrix-visual-20261101/tutorial/release/video.mp4",
+      "scene_count": 21,
+      "full_decode": "PASS",
+      "narration_unchanged": true,
+      "audio_correlation": 1.0,
+      "video_sha256": "42357bb5736653cb819469d4d92888ca5e70befd6c970b9fe59a5b55c75c4603",
+      "same_ir_as_first_replay": true
+    },
+    "science": {
+      "video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-matrix-visual-20261101/science/release/video.mp4",
+      "scene_count": 15,
+      "full_decode": "PASS",
+      "narration_unchanged": true,
+      "audio_correlation": 0.9999999999999999,
+      "video_sha256": "51214ede536f499841b92017d13590ee3786741bae90d113f99cf225b94e7ba8",
+      "same_ir_as_first_replay": true
+    }
+  },
+  "visual_review": "Original and final samples: 8 timestamps per case, plus full-size news 57s, tutorial 31s and science 141s. Not a full manual screening."
+}

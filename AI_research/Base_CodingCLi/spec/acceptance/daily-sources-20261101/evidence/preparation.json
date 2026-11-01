@@ -1,0 +1,20 @@
+{
+  "topic": "ChatGPT 双账号切换",
+  "job": "chatgpt_acquisition/t03_tutorials",
+  "production": "chatgpt_t03_tutorials",
+  "source": "https://aicatchup.com/news/chatgpt-account-switching-mobile",
+  "official_reference": "https://help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile",
+  "config_snapshot": true,
+  "isolated_state": true,
+  "personal_account_required": false,
+  "manual_script_or_storyboard": false,
+  "manual_image_assignments": 0,
+  "source_sha256": {
+    "core/source_pages.py": "a60d9c0879c7f8268c10e94ec644970f6bccfe5904c858420e8cef9114dc1ce8",
+    "core/source_supply.py": "a50459f0253d4df678cafa728bcdededf202db0e3562ab7fb55eb1d1c1ec9d9a",
+    "core/material_collection.py": "3e27e7ff4534367a15d4900582405314db622823d473c91c486375dafb3e60a3",
+    "core/video/auto.py": "8bbedd5025b2d9414a1c3600aaf42a615505d52d9e43021f82bdfb9e16d3bbbc",
+    "core/video/topic_store.py": "f327e45e485397825e0e5361b0c76df36021ccbbee59bb22427d786ad719e603",
+    "web/services/video_autopilot.py": "d7a3af7cdba8dadba6a4e50151c2bf9eba26933e20e7070e7ef0e8852af39e23"
+  }
+}

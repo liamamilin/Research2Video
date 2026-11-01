@@ -1,0 +1,19 @@
+{
+  "run_id": "e778b4baa11744f0baeed10d516c1705",
+  "spec": {
+    "job": "ai_media/daily_opensource_radar",
+    "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-matrix-tutorial-20261101/run-1/output/radar/2026-11-01_ai_opensource_radar.md",
+    "report_identity": "9b771528590bdc6c37fd5325226980ba56a8d72a611b7784188013a326265f44",
+    "picks": [
+      {
+        "column": "report_digest",
+        "all": true,
+        "production": "ai_media_opensource_digest",
+        "content_mode": "episode",
+        "whole": true
+      }
+    ],
+    "refresh": false
+  },
+  "state": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-matrix-tutorial-20261101/run-1/state"
+}

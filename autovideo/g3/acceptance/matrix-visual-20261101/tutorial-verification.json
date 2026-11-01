@@ -1,0 +1,48 @@
+{
+  "title": "AI 写的 Rust 能编译，一跑 clippy 就露馅：这个千星项目把「地道」变成了可执行的检查",
+  "source_attempt": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/ai-matrix-productization-20261027/f7b94a0ff1fa465b88e447159aba0da9/jobs/bcaeb5f2-6190-4930-8615-bd600885fede/attempts/1/g2-run",
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "nb_read_frames": "7473",
+        "side_data_list": [
+          {}
+        ]
+      },
+      {
+        "codec_name": "aac",
+        "r_frame_rate": "0/0",
+        "nb_read_frames": "11677"
+      }
+    ],
+    "format": {
+      "duration": "249.109000"
+    }
+  },
+  "full_decode": "PASS",
+  "narration_unchanged": true,
+  "assets_unchanged": true,
+  "source_audio_sha256": "070c42cbcd9cc555c5bace94d2763c41822730e5935ed2a9b9104fd888223c99",
+  "decoded_audio_correlation": 1.0,
+  "video_sha256": "42357bb5736653cb819469d4d92888ca5e70befd6c970b9fe59a5b55c75c4603",
+  "new_model_calls": 0,
+  "new_tts_calls": 0,
+  "manual_scene_or_beat_edits": 0,
+  "scene_count": 21,
+  "sampled_seconds": [
+    10,
+    31,
+    56,
+    76,
+    98,
+    116,
+    152,
+    208
+  ]
+}

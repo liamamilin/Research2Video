@@ -1,0 +1,27 @@
+{
+  "tool": "jq",
+  "version": "jq-1.7.1-apple",
+  "commands": [
+    "jq '[.[]|select(.done)]' tasks.json > done.json",
+    "jq . done.json"
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "input_authored_for_tutorial": true,
+  "output_from_actual_command": true,
+  "kept_task_ids": [
+    "T01",
+    "T03"
+  ],
+  "excluded_task_ids": [
+    "T02"
+  ],
+  "model_calls": 0,
+  "source": "https://jqlang.org/manual/v1.7/",
+  "sha256": {
+    "tasks.json": "7d94593aeb015d3921816ebc052f1e9a427c8bf03f251384adf04601994af82a",
+    "done.json": "1d016bf41e5682bef333c261e206280b9079b9ae9e256fada12b1e1ad9730c53"
+  }
+}

@@ -1,0 +1,677 @@
+{
+  "state_dir": "/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/material-mechanisms-real-iaoxy7ne/state",
+  "script": {
+    "id": "d203f9760e3d4c33b606aba79a43670e",
+    "column_key": "deep_dive",
+    "topic": {
+      "title": "套餐价格与付款周期",
+      "fields": {
+        "目标受众": "开发者"
+      },
+      "user_materials": {
+        "ids": [
+          "1c9c704d5b3e4d5aa61320a74443203f",
+          "217e752d49c04896a9a27a91fe17f065"
+        ],
+        "owner": "material-acceptance",
+        "mode": "narration",
+        "goal": "在讲套餐价格时展示用户提供的原始截图，完整保留旁白。",
+        "revision": 2,
+        "title": "套餐价格与付款周期",
+        "audience": "开发者",
+        "style": {}
+      }
+    },
+    "status": "APPROVED",
+    "research_job": "",
+    "report_path": "",
+    "current_version": 2,
+    "approved_version": 2,
+    "error": null,
+    "created_by": "material-acceptance",
+    "created_at": "2026-10-31T19:51:43+0800",
+    "updated_at": "2026-10-31T19:52:12+0800",
+    "heartbeat_at": 1793447530.592584,
+    "stage": null,
+    "archived": 0,
+    "production": "",
+    "content_column_id": "",
+    "content_matrix_id": "",
+    "source_matrix_id": "",
+    "content_context": {
+      "content_mode": "individual"
+    },
+    "report_id": null
+  },
+  "run": {
+    "id": "a3681208c8b64980867b8eb9177a7566",
+    "plan_id": null,
+    "spec": {
+      "picks": [],
+      "refresh": false
+    },
+    "status": "DONE",
+    "stage": "ITEMS",
+    "note": "DONE 1",
+    "started_by": "material-acceptance",
+    "started_at": 1793447530.590807,
+    "created_at": "2026-10-31T19:52:10+0800",
+    "updated_at": "2026-11-01T03:41:35+0800",
+    "discovery_at": null,
+    "discovery_tries": 0,
+    "dispatch_failures": 0,
+    "items": [
+      {
+        "id": "839b567735974fa2a26e806ef054da6a",
+        "run_id": "a3681208c8b64980867b8eb9177a7566",
+        "slot": 0,
+        "column_key": "deep_dive",
+        "topic": {
+          "title": "套餐价格与付款周期",
+          "fields": {
+            "目标受众": "开发者"
+          },
+          "user_materials": {
+            "ids": [
+              "1c9c704d5b3e4d5aa61320a74443203f",
+              "217e752d49c04896a9a27a91fe17f065"
+            ],
+            "owner": "material-acceptance",
+            "mode": "narration",
+            "goal": "在讲套餐价格时展示用户提供的原始截图，完整保留旁白。",
+            "revision": 2,
+            "title": "套餐价格与付款周期",
+            "audience": "开发者",
+            "style": {}
+          }
+        },
+        "script_id": "d203f9760e3d4c33b606aba79a43670e",
+        "render_id": "3a5388d4390243c8a300181e71901ede",
+        "state": "DONE",
+        "note": "成片完成，等你看片和发布",
+        "gate": {
+          "label": "generated",
+          "text": "按素材生成",
+          "reasons": [],
+          "core_issues": 0,
+          "cited_share": 0.0,
+          "audited": false,
+          "ignored": {
+            "must": 0,
+            "warn": 0
+          },
+          "version": 2,
+          "approved": "auto"
+        },
+        "retries": {},
+        "updated_at": "2026-11-01T03:41:35+0800",
+        "production": ""
+      }
+    ]
+  },
+  "renders": [
+    {
+      "id": "3a5388d4390243c8a300181e71901ede",
+      "script_id": "d203f9760e3d4c33b606aba79a43670e",
+      "version": 2,
+      "status": "COMPLETED",
+      "title": "套餐价格与付款周期",
+      "source_text": "先看这张套餐截图。十七美元对应按年订阅，月付则是二十美元。比较价格时，要把付款周期一起看。",
+      "source_sha256": "8307c3696790d0fd5c69f71ab55015aa7a1196bed300306a546e3d9de66fb9ee",
+      "request": {
+        "input_mode": "narration",
+        "chapters": [
+          {
+            "title": "套餐价格与付款周期",
+            "paragraphs": [
+              "先看这张套餐截图。十七美元对应按年订阅，月付则是二十美元。比较价格时，要把付款周期一起看。"
+            ]
+          }
+        ],
+        "video_form": "auto",
+        "duration_mode": "content",
+        "creative_intent": {
+          "purpose": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n用户要求：在讲套餐价格时展示用户提供的原始截图，完整保留旁白。",
+          "audience": "开发者",
+          "focus": "套餐价格与付款周期"
+        },
+        "title": "套餐价格与付款周期",
+        "packaging": {
+          "preset": "common",
+          "label": "深度解读",
+          "accent": "#1f7a4d",
+          "outro": {
+            "lines": [
+              "面向开发者的 深度解读"
+            ],
+            "seconds": 2.5
+          },
+          "recipe": "deep_dive",
+          "intro": {
+            "title": "套餐价格与付款周期"
+          }
+        },
+        "voice_id": "voxcpm_anchor",
+        "visual_storytelling": true,
+        "idempotency_key": "research:3a5388d4390243c8a300181e71901ede"
+      },
+      "autovideo_job_id": "5f2f3854-95cb-4042-9147-ad9911d39904",
+      "active_stage": "COMPLETE",
+      "attempt_count": 1,
+      "resolved_video_form": "object_showcase",
+      "error_code": null,
+      "error_message": null,
+      "artifacts": [
+        {
+          "name": "authored-narration.json",
+          "content_type": "application/json",
+          "bytes": 659,
+          "sha256": "c2851420903388730aa1b9bd08e18207b6755fd22e6d3faff9491aae63b22902"
+        },
+        {
+          "name": "brand-qa.json",
+          "content_type": "application/json",
+          "bytes": 1819,
+          "sha256": "9f8c869f66eee2a9ce992ea16775ebf160dbfde098f02635bb3fa71ae3b70394"
+        },
+        {
+          "name": "caption-alignment.json",
+          "content_type": "application/json",
+          "bytes": 5358,
+          "sha256": "c9543b51968af99a812a827bb9c70cb2af17e1308facbc33afa71311adfb7624"
+        },
+        {
+          "name": "captions.srt",
+          "content_type": "application/x-subrip",
+          "bytes": 236,
+          "sha256": "120bdc8d04b55a76aee199dd3d63ff72be4bb3345090e04536ccd17ca942db4a"
+        },
+        {
+          "name": "chapters.json",
+          "content_type": "application/json",
+          "bytes": 1751,
+          "sha256": "f4853a0f79d078c9d593b00b1d5a32cbeaeb92cff449cc24e55a56fe13819d78"
+        },
+        {
+          "name": "content-captions.srt",
+          "content_type": "application/x-subrip",
+          "bytes": 236,
+          "sha256": "120bdc8d04b55a76aee199dd3d63ff72be4bb3345090e04536ccd17ca942db4a"
+        },
+        {
+          "name": "content-chapters.json",
+          "content_type": "application/json",
+          "bytes": 1410,
+          "sha256": "24ed4a12b3a1965897f268deb78b3bc3d79910526f629d902de2576cfc394e93"
+        },
+        {
+          "name": "content.mp4",
+          "content_type": "video/mp4",
+          "bytes": 1278389,
+          "sha256": "1438dc2174b89d0800a46bca068e9407cc21a6a7b155337d6cf5d42b9e45facc"
+        },
+        {
+          "name": "execution-log.txt",
+          "content_type": "text/plain; charset=utf-8",
+          "bytes": 989,
+          "sha256": "5c2fd80af944a5eda56e9722f0c70c7ba2add38a6af7d5b58b471f76c93c999f"
+        },
+        {
+          "name": "generation-schedule.json",
+          "content_type": "application/json",
+          "bytes": 457,
+          "sha256": "8123dda84fe90bf237bf7bccdf53d886acb32b9e795efdeaf5094039e806b281"
+        },
+        {
+          "name": "information-timing.json",
+          "content_type": "application/json",
+          "bytes": 384,
+          "sha256": "b966950cbcaa131ba4e8e715b8a119cce69afb730261afb0fb3fa8d949ad006f"
+        },
+        {
+          "name": "input-brief.json",
+          "content_type": "application/json",
+          "bytes": 854,
+          "sha256": "df00bafd60649e941ca64eb280afdacd7fd8270f0cbce57eb6e6afcc1541573a"
+        },
+        {
+          "name": "manifest.json",
+          "content_type": "application/json",
+          "bytes": 25670,
+          "sha256": "7a825f633e2af9be5baea42d4613e36c08bd165896ff695a37ba9c0e3b3c2263"
+        },
+        {
+          "name": "model-cost.json",
+          "content_type": "application/json",
+          "bytes": 1561,
+          "sha256": "b96d2b4d6a16d4ba2316da8a00c73afbce8987afb17f7ff4a6bf6071a36b4f52"
+        },
+        {
+          "name": "narration-check.json",
+          "content_type": "application/json",
+          "bytes": 327,
+          "sha256": "262f0c853a8e2885dd8f26828c830665078d905136fcfeda0bbe911f1020f84e"
+        },
+        {
+          "name": "narration.json",
+          "content_type": "application/json",
+          "bytes": 2502,
+          "sha256": "ff45bc7314efdb4aceee685a28fe1393083237b4f50848ee7d919bb72de595bf"
+        },
+        {
+          "name": "package-qa.json",
+          "content_type": "application/json",
+          "bytes": 692,
+          "sha256": "852d036d26a3401bfefa116d79ec9095c317aeaa4ea47dde0db0ef952a9117b6"
+        },
+        {
+          "name": "package.json",
+          "content_type": "application/json",
+          "bytes": 3478,
+          "sha256": "f58b12812da51b738753629ba59d5ef223f3f3ee1040091154629d55a8e21074"
+        },
+        {
+          "name": "packaging-resolved.json",
+          "content_type": "application/json",
+          "bytes": 1617,
+          "sha256": "b49a2c4ea0e88d7f6937b83759574e53ce631e38bba9b10fb76a664cd04f8376"
+        },
+        {
+          "name": "prepared-source.txt",
+          "content_type": "text/plain; charset=utf-8",
+          "bytes": 136,
+          "sha256": "3b2acc33f94662887c5f1c39048fd4a5584670f7d0294536735d0dcd0c7cf392"
+        },
+        {
+          "name": "production-execution.json",
+          "content_type": "application/json",
+          "bytes": 378,
+          "sha256": "800e2993f49f9083d45c3fdffcaaa762387346e8edeb6d5292ea4d79907d66ea"
+        },
+        {
+          "name": "production-plan.json",
+          "content_type": "application/json",
+          "bytes": 6154,
+          "sha256": "3d1aaea95cc3ba3086508171fd8351877c7a4db5850368fda5da47da46500566"
+        },
+        {
+          "name": "qa.json",
+          "content_type": "application/json",
+          "bytes": 2962,
+          "sha256": "ad9318ff6c3113f7bc9fc4470be74aa97c32e1f68f12682d30122737aa7aa564"
+        },
+        {
+          "name": "render-resources.json",
+          "content_type": "application/json",
+          "bytes": 244,
+          "sha256": "abdba4f1a9ae350a760df94d126debc8973a51ce4a364995b99ecdef92d1b928"
+        },
+        {
+          "name": "slideshow-images.json",
+          "content_type": "application/json",
+          "bytes": 408,
+          "sha256": "d087ef0ee8858198622bc7047fec66dd1865d02a99da069df241d73d9dba4b66"
+        },
+        {
+          "name": "storyboard.json",
+          "content_type": "application/json",
+          "bytes": 3126,
+          "sha256": "2d3a60aafb0880d9ef0bff312a4b1d8a134cac6e715c66ce8e9e4035cdf0d182"
+        },
+        {
+          "name": "tts-metrics.json",
+          "content_type": "application/json",
+          "bytes": 881,
+          "sha256": "dab2716836d50414b1e10106754a4afb5be5bef6ec4600dd293606f7f89112a2"
+        },
+        {
+          "name": "unbranded.mp4",
+          "content_type": "video/mp4",
+          "bytes": 1136703,
+          "sha256": "40eaefffd67de0fef37886e54629df6b812f8185ef694a643e3d32df2012604f"
+        },
+        {
+          "name": "video-ir.json",
+          "content_type": "application/json",
+          "bytes": 5092,
+          "sha256": "e76b322230ab40be24a8c60a5ce9c92ab0404cb9b1d2c4d818800a9311d5a49f"
+        },
+        {
+          "name": "video.mp4",
+          "content_type": "video/mp4",
+          "bytes": 1150282,
+          "sha256": "361e19ca21bbe50bcec751542e006778616a3d7acac79f8e055272012a24da4b"
+        },
+        {
+          "name": "voice-report.json",
+          "content_type": "application/json",
+          "bytes": 1438,
+          "sha256": "7abfe25240a088d15eb74e5999fc7aac5e66a9f5b1bc460d8044c6c23846a0be"
+        }
+      ],
+      "submit_started_at": "2026-10-31T11:52:18.419833+00:00",
+      "submitted_at": "2026-10-31T19:52:18+0800",
+      "completed_at": "2026-11-01T03:41:35+0800",
+      "created_at": "2026-10-31T19:52:14+0800",
+      "updated_at": "2026-11-01T03:41:35+0800",
+      "heartbeat_at": 1793475695.073837,
+      "timings": {
+        "process_runs": 2,
+        "last_process_started_at": "2026-10-31T19:41:35.076091+00:00",
+        "submit_seconds": 0.245,
+        "poll_seconds": 0.006,
+        "poll_count": 1,
+        "poll_failures": 0,
+        "remote_completed_at": "2026-10-31T12:34:27.600+00:00",
+        "completion_observed_at": "2026-10-31T19:41:35.099106+00:00",
+        "download_seconds": 0.432,
+        "artifact_list_seconds": 0.004,
+        "download_attempts": 1,
+        "download_workers": 4,
+        "artifacts": [
+          {
+            "name": "authored-narration.json",
+            "seconds": 0.058,
+            "reused": false,
+            "bytes": 659
+          },
+          {
+            "name": "brand-qa.json",
+            "seconds": 0.085,
+            "reused": false,
+            "bytes": 1819
+          },
+          {
+            "name": "caption-alignment.json",
+            "seconds": 0.094,
+            "reused": false,
+            "bytes": 5358
+          },
+          {
+            "name": "captions.srt",
+            "seconds": 0.076,
+            "reused": false,
+            "bytes": 236
+          },
+          {
+            "name": "chapters.json",
+            "seconds": 0.028,
+            "reused": false,
+            "bytes": 1751
+          },
+          {
+            "name": "content-captions.srt",
+            "seconds": 0.107,
+            "reused": false,
+            "bytes": 236
+          },
+          {
+            "name": "content-chapters.json",
+            "seconds": 0.033,
+            "reused": false,
+            "bytes": 1410
+          },
+          {
+            "name": "content.mp4",
+            "seconds": 0.115,
+            "reused": false,
+            "bytes": 1278389
+          },
+          {
+            "name": "execution-log.txt",
+            "seconds": 0.089,
+            "reused": false,
+            "bytes": 989
+          },
+          {
+            "name": "generation-schedule.json",
+            "seconds": 0.075,
+            "reused": false,
+            "bytes": 457
+          },
+          {
+            "name": "information-timing.json",
+            "seconds": 0.028,
+            "reused": false,
+            "bytes": 384
+          },
+          {
+            "name": "input-brief.json",
+            "seconds": 0.028,
+            "reused": false,
+            "bytes": 854
+          },
+          {
+            "name": "manifest.json",
+            "seconds": 0.034,
+            "reused": false,
+            "bytes": 25670
+          },
+          {
+            "name": "model-cost.json",
+            "seconds": 0.027,
+            "reused": false,
+            "bytes": 1561
+          },
+          {
+            "name": "narration-check.json",
+            "seconds": 0.016,
+            "reused": false,
+            "bytes": 327
+          },
+          {
+            "name": "narration.json",
+            "seconds": 0.026,
+            "reused": false,
+            "bytes": 2502
+          },
+          {
+            "name": "package-qa.json",
+            "seconds": 0.034,
+            "reused": false,
+            "bytes": 692
+          },
+          {
+            "name": "package.json",
+            "seconds": 0.032,
+            "reused": false,
+            "bytes": 3478
+          },
+          {
+            "name": "packaging-resolved.json",
+            "seconds": 0.021,
+            "reused": false,
+            "bytes": 1617
+          },
+          {
+            "name": "prepared-source.txt",
+            "seconds": 0.022,
+            "reused": false,
+            "bytes": 136
+          },
+          {
+            "name": "production-execution.json",
+            "seconds": 0.012,
+            "reused": false,
+            "bytes": 378
+          },
+          {
+            "name": "production-plan.json",
+            "seconds": 0.019,
+            "reused": false,
+            "bytes": 6154
+          },
+          {
+            "name": "qa.json",
+            "seconds": 0.02,
+            "reused": false,
+            "bytes": 2962
+          },
+          {
+            "name": "render-resources.json",
+            "seconds": 0.019,
+            "reused": false,
+            "bytes": 244
+          },
+          {
+            "name": "slideshow-images.json",
+            "seconds": 0.02,
+            "reused": false,
+            "bytes": 408
+          },
+          {
+            "name": "storyboard.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 3126
+          },
+          {
+            "name": "tts-metrics.json",
+            "seconds": 0.013,
+            "reused": false,
+            "bytes": 881
+          },
+          {
+            "name": "unbranded.mp4",
+            "seconds": 0.125,
+            "reused": false,
+            "bytes": 1136703
+          },
+          {
+            "name": "video-ir.json",
+            "seconds": 0.072,
+            "reused": false,
+            "bytes": 5092
+          },
+          {
+            "name": "video.mp4",
+            "seconds": 0.145,
+            "reused": false,
+            "bytes": 1150282
+          },
+          {
+            "name": "voice-report.json",
+            "seconds": 0.108,
+            "reused": false,
+            "bytes": 1438
+          }
+        ],
+        "process_seconds": 0.469
+      },
+      "visuals": {
+        "state": "completed",
+        "reason": "用户图片准备完成",
+        "input_kind": "user_materials",
+        "material_context": {
+          "ids": [
+            "1c9c704d5b3e4d5aa61320a74443203f",
+            "217e752d49c04896a9a27a91fe17f065"
+          ],
+          "owner": "material-acceptance",
+          "mode": "narration",
+          "goal": "在讲套餐价格时展示用户提供的原始截图，完整保留旁白。",
+          "revision": 2,
+          "title": "套餐价格与付款周期",
+          "audience": "开发者",
+          "style": {}
+        },
+        "decisions": [
+          {
+            "material_id": "1c9c704d5b3e4d5aa61320a74443203f",
+            "status": "accepted",
+            "reason": "该段落正在讲解套餐价格及年付、月付差异，与图片中的订阅计划对比内容直接对应，适合在此展示原始截图。",
+            "placements": [
+              {
+                "chapter_index": 0,
+                "paragraph_index": 0
+              }
+            ]
+          }
+        ],
+        "selection": {
+          "materials": [
+            {
+              "image_id": "d3fec46c-22a3-43a0-90ac-5959ee98633f",
+              "role": "reference",
+              "caption": "Claude 订阅套餐价格对比图",
+              "placements": [
+                {
+                  "chapter_index": 0,
+                  "paragraph_index": 0
+                }
+              ],
+              "source": {
+                "title": "Claude套餐截图.png",
+                "url": "/api/assistant/materials/1c9c704d5b3e4d5aa61320a74443203f/file",
+                "final_url": "/api/assistant/materials/1c9c704d5b3e4d5aa61320a74443203f/file",
+                "captured_at": "2026-10-31T11:51:43.477129+00:00",
+                "sha256": "63c38dc3920ebda70b695843907e51b1f303fccfd9808691bf3fe626716e2658"
+              }
+            }
+          ]
+        },
+        "submission_sha256": "1ba67a3d7fdf452fa725130bb745e84bbc7d9b1c9ea5752e53258ee0fa28a21c"
+      },
+      "submission_request": {
+        "input_mode": "narration",
+        "chapters": [
+          {
+            "title": "套餐价格与付款周期",
+            "paragraphs": [
+              "先看这张套餐截图。十七美元对应按年订阅，月付则是二十美元。比较价格时，要把付款周期一起看。"
+            ]
+          }
+        ],
+        "video_form": "object_showcase",
+        "duration_mode": "content",
+        "creative_intent": {
+          "purpose": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n用户要求：在讲套餐价格时展示用户提供的原始截图，完整保留旁白。",
+          "audience": "开发者",
+          "focus": "套餐价格与付款周期"
+        },
+        "title": "套餐价格与付款周期",
+        "packaging": {
+          "preset": "common",
+          "label": "深度解读",
+          "accent": "#1f7a4d",
+          "outro": {
+            "lines": [
+              "面向开发者的 深度解读"
+            ],
+            "seconds": 2.5
+          },
+          "recipe": "deep_dive",
+          "intro": {
+            "title": "套餐价格与付款周期"
+          }
+        },
+        "voice_id": "voxcpm_anchor",
+        "visual_storytelling": true,
+        "idempotency_key": "research:3a5388d4390243c8a300181e71901ede",
+        "image_materials": [
+          {
+            "image_id": "d3fec46c-22a3-43a0-90ac-5959ee98633f",
+            "role": "reference",
+            "caption": "Claude 订阅套餐价格对比图",
+            "placements": [
+              {
+                "chapter_index": 0,
+                "paragraph_index": 0
+              }
+            ],
+            "source": {
+              "title": "Claude套餐截图.png",
+              "url": "/api/assistant/materials/1c9c704d5b3e4d5aa61320a74443203f/file",
+              "final_url": "/api/assistant/materials/1c9c704d5b3e4d5aa61320a74443203f/file",
+              "captured_at": "2026-10-31T11:51:43.477129+00:00",
+              "sha256": "63c38dc3920ebda70b695843907e51b1f303fccfd9808691bf3fe626716e2658"
+            }
+          }
+        ],
+        "production_mode": "standard",
+        "use_draw_things": false
+      }
+    }
+  ],
+  "old_version_unchanged": true
+}

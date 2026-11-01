@@ -1,0 +1,69 @@
+{
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "nb_read_frames": "2836",
+        "side_data_list": [
+          {}
+        ]
+      },
+      {
+        "codec_name": "aac",
+        "r_frame_rate": "0/0",
+        "nb_read_frames": "4432"
+      }
+    ],
+    "format": {
+      "duration": "94.549000"
+    }
+  },
+  "full_decode": "PASS",
+  "narration_unchanged": true,
+  "source_audio_sha256": "de4099b36fd62853d2a3c4f0f48e94c94859f84608845a7c72491250504886ec",
+  "decoded_audio_correlation_with_normal_job": 0.9999747830675682,
+  "new_model_calls_in_replay": 0,
+  "manual_scene_or_beat_edits": 0,
+  "code_scenes": [
+    {
+      "id": "card_2",
+      "lines": [
+        "python -m venv .venv"
+      ]
+    },
+    {
+      "id": "card_3",
+      "lines": [
+        "python -m venv .venv",
+        "source .venv/bin/activate"
+      ]
+    },
+    {
+      "id": "card_4",
+      "lines": [
+        "python -m venv .venv",
+        "source .venv/bin/activate",
+        "python app.py --port 8011"
+      ]
+    },
+    {
+      "id": "card_5",
+      "lines": [
+        "PORT = 8010",
+        "PORT = 8011"
+      ]
+    }
+  ],
+  "sampled_frames": [
+    "frame-20.png",
+    "frame-40.png",
+    "frame-55.png",
+    "frame-70.png",
+    "frame-90.png"
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "input_mode": "narration",
+  "episode": {
+    "items": [
+      {
+        "title": "准备输入",
+        "chapter_indexes": [
+          1
+        ]
+      },
+      {
+        "title": "执行转换",
+        "chapter_indexes": [
+          2
+        ]
+      },
+      {
+        "title": "查看结果",
+        "chapter_indexes": [
+          3
+        ]
+      }
+    ]
+  },
+  "chapters": [
+    {
+      "title": "本期导读",
+      "paragraphs": [
+        "大家好，欢迎收看AI 开源发现。这期我们做一件很具体的小事：把一份项目周报网页，原样变成 Markdown 文件。用的工具是 Microsoft 的 MarkItDown，输入是一份本地网页 weekly.html，输出是同目录下的 weekly.md。下面按准备、转换、看结果三步走完。"
+      ]
+    },
+    {
+      "title": "准备输入",
+      "paragraphs": [
+        "先把输入准备好。这次用的是一份本地文件，名字叫 weekly.html，用浏览器打开，它就是一份普通的项目周报网页。",
+        "页面顶部是“项目周报”这个大标题。往下看“已完成”这一节，是一个列表，里面有两项：整理项目资料，完成脚本联调。",
+        "再往下是“下一步”，这是一张表格，只有任务和状态两列。第一行是转换文档，状态进行中；第二行是整理结果，状态待开始。",
+        "这份页面的结构很典型：有标题层级，有列表，也有表格。我们后面要检查的，就是这些结构在转换之后还在不在。输入就保持这一份，不另做改动。"
+      ]
+    },
+    {
+      "title": "执行转换",
+      "paragraphs": [
+        "接下来装工具、跑命令。这次实际使用的是 MarkItDown 0.1.9，装在一个临时的 Python 环境里，装完即用，不污染现有环境。",
+        "安装命令就是 pip install markitdown。",
+        "装好之后，进到 weekly.html 所在的目录，执行这条转换命令：markitdown weekly.html -o weekly.md。",
+        "这条命令里，weekly.html 是输入，-o 后面的 weekly.md 是输出文件。命令跑完，weekly.md 就生成在当前目录里。",
+        "有一点值得说明：这次转换全程在本地完成，没有调用模型。它做的是把网页里的结构翻译成 Markdown 写法，不是让模型去总结或改写内容。所以页面里原来写了什么，输出里就还是什么。"
+      ]
+    },
+    {
+      "title": "查看结果",
+      "paragraphs": [
+        "现在打开命令实际生成的 weekly.md，看看内容变成了什么样。",
+        "开头是“项目周报”，变成了一级标题。“已完成”是二级标题，下面两项“整理项目资料”和“完成脚本联调”都还在，变成了 Markdown 的列表项。原来的标题层级和列表，一样没少。",
+        "再看下方那张任务表。表头“任务”和“状态”都在，两行数据也都在：转换文档对应进行中，整理结果对应待开始。整张表被改写成了 Markdown 的表格写法，行和列的对应关系保持原样。",
+        "最后把两张截图放在一起对照：左边是原来的周报网页，右边是同一份内容的 Markdown。能看出来，网页上的层级、列表和任务状态都保留了下来。输出不是一张死图，也不是一段摘要，而是一份可以继续编辑、也可以直接交给后续文本流程的 Markdown 文件。"
+      ]
+    },
+    {
+      "title": "本期回顾",
+      "paragraphs": [
+        "回头看这次任务：准备 weekly.html，运行 markitdown 转换，拿到 weekly.md，网页里的标题、列表和表格都完整落到了 Markdown 里。本期这份任务就到这里，感谢收看，我们下期再见。"
+      ]
+    }
+  ],
+  "duration_mode": "content",
+  "title": "AI 开源发现｜2026年11月01日",
+  "production_recipe": "mixed_tutorial",
+  "production_context": {
+    "content_recipe": {
+      "id": "research:report_digest",
+      "settings": {}
+    },
+    "matrix": {
+      "id": "research-production:ai_media_opensource_digest",
+      "settings": {
+        "video_speed": 1.25,
+        "packaging": {
+          "label": "AI 开源发现",
+          "preset": "common"
+        }
+      }
+    }
+  },
+  "visual_storytelling": true,
+  "creative_intent": {
+    "purpose": "用户要求：围绕同一份周报串起真实输入截图、安装与转换代码、实际输出截图和输入输出对照，沿用栏目问候、步骤转场及品牌包装。\n栏目：AI 开源发现。讲解目标：帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点。\n优先按段落组合项目截图、产品画面、输入输出对照、任务流程、重点卡，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：用项目页面或任务示意建立对象感，让同一份文件、代码或任务卡从输入经过项目处理走到输出，主项目持续处于这条关系中。材料里的输入与输出例子值得停下来展示，参数与原理说明贴在它实际改变的那一步。相关工具作为流程相应位置的简短补充，随后回到主项目；结尾用同一任务的结果收束。Stars、下载量、发布时间和团队背景作为辅助信息。",
+    "audience": "想把开源工具用于实际工作的开发者和 AI 高频使用者"
+  },
+  "idempotency_key": "research:90e2a29c6cb04e8e82b50519597dd2e5",
+  "image_materials": [
+    {
+      "image_id": "3c76a996-4e19-4eaa-89dd-fc28b2c2fe4e",
+      "role": "reference",
+      "caption": "项目周报网页输入",
+      "focus": {
+        "width": 1200,
+        "height": 900,
+        "regions": [
+          {
+            "x1": 38,
+            "y1": 53,
+            "x2": 962,
+            "y2": 384,
+            "label": "项目周报与已完成列表",
+            "style": "box"
+          },
+          {
+            "x1": 38,
+            "y1": 398,
+            "x2": 962,
+            "y2": 754,
+            "label": "下一步任务与状态",
+            "style": "box"
+          }
+        ]
+      },
+      "placements": [
+        {
+          "chapter_index": 1,
+          "paragraph_index": 0
+        },
+        {
+          "chapter_index": 1,
+          "paragraph_index": 1
+        },
+        {
+          "chapter_index": 1,
+          "paragraph_index": 2
+        },
+        {
+          "chapter_index": 1,
+          "paragraph_index": 3
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 3
+        }
+      ],
+      "source": {
+        "title": "周报网页实际输入.png",
+        "url": "/api/assistant/materials/c81a1c6c52474a848943f1e886471a1e/file",
+        "final_url": "/api/assistant/materials/c81a1c6c52474a848943f1e886471a1e/file",
+        "captured_at": "2026-11-01T06:23:17.465898+00:00",
+        "sha256": "2bd3dbf84945958d09422967e6887ce63b0f6fbf317a44bdc347f01f4bb071af"
+      }
+    },
+    {
+      "image_id": "81379156-53df-4390-9261-155076aebb12",
+      "role": "reference",
+      "caption": "转换后的 Markdown 周报",
+      "focus": {
+        "width": 1200,
+        "height": 900,
+        "regions": [
+          {
+            "x1": 38,
+            "y1": 138,
+            "x2": 962,
+            "y2": 641,
+            "label": "Markdown 标题和列表",
+            "style": "box"
+          },
+          {
+            "x1": 38,
+            "y1": 624,
+            "x2": 962,
+            "y2": 857,
+            "label": "Markdown 任务表格",
+            "style": "box"
+          }
+        ]
+      },
+      "placements": [
+        {
+          "chapter_index": 3,
+          "paragraph_index": 0
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 1
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 2
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 3
+        }
+      ],
+      "source": {
+        "title": "Markdown实际输出.png",
+        "url": "/api/assistant/materials/aead84bc14cc4d088189929e78fe0070/file",
+        "final_url": "/api/assistant/materials/aead84bc14cc4d088189929e78fe0070/file",
+        "captured_at": "2026-11-01T06:23:17.492747+00:00",
+        "sha256": "4a38e53abcd7b6766480c3d5a3da2723e2d11c86b658f4afb9589289691d73aa"
+      }
+    }
+  ],
+  "use_draw_things": false
+}

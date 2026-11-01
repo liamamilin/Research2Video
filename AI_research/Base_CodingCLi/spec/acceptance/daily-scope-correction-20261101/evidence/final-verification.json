@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "production_app_pid": 23403,
+  "production_source_hashes_verified": 13,
+  "effective_ai_opensource_render": {
+    "video_speed": 1.25,
+    "packaging": {
+      "label": "AI 开源发现",
+      "preset": "common"
+    }
+  },
+  "old_movie_preserved_bytes": 15796483,
+  "app_picker_excludes_empty_report": true,
+  "independent_tutorial_still_draft": true,
+  "regression_tests_passed": 174,
+  "new_scripts": 0,
+  "new_renders": 0,
+  "new_schedules": 0,
+  "release_notes_403_persists": true
+}

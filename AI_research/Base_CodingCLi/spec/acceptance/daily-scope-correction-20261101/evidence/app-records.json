@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "archived_in_app": {
+    "id": "5f10a2a8dd484b02b7b9596257b2b451",
+    "status": "APPROVED",
+    "archived": 1,
+    "report_path": "output/chatgpt_acquisition/2026-11-01_t09_updates.md",
+    "current_version": 1,
+    "approved_version": 1
+  },
+  "old_renders_preserved": [
+    {
+      "id": "c35cc767eec046e98c868373a78d7b7e",
+      "status": "COMPLETED",
+      "artifact_count": 32
+    }
+  ],
+  "independent_tutorial_stopped": {
+    "id": "eae621cb8d784eb4b3d6b3849a5ef640",
+    "status": "DRAFT",
+    "archived": 0,
+    "current_version": 1,
+    "approved_version": null
+  },
+  "independent_tutorial_renders": 0,
+  "new_writer_calls": 0,
+  "new_renders": 0
+}

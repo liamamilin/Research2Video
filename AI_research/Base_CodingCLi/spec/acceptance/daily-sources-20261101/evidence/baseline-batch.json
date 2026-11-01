@@ -1,0 +1,89 @@
+{
+  "id": "1d2a656571d047d9896527bc7f9051fa",
+  "plan_id": null,
+  "spec": {
+    "job": "chatgpt_acquisition/t03_tutorials",
+    "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-sources-20261101/run-1/output/chatgpt_acquisition/2026-11-01_t03_tutorials.md",
+    "report_identity": "73f6d0ae39f24ceb0415f1745f146973ba7db59824c5254a4970f322f78ce182",
+    "picks": [
+      {
+        "column": "chatgpt_acquisition",
+        "all": true,
+        "production": "chatgpt_t03_tutorials",
+        "content_mode": "episode",
+        "whole": true
+      }
+    ],
+    "refresh": false
+  },
+  "status": "DONE",
+  "stage": "ITEMS",
+  "note": "DONE 1",
+  "started_by": "autopilot",
+  "started_at": 1793518758.4493592,
+  "created_at": "2026-11-01T15:39:18+0800",
+  "updated_at": "2026-11-01T15:57:00+0800",
+  "discovery_at": null,
+  "discovery_tries": 0,
+  "dispatch_failures": 0,
+  "items": [
+    {
+      "id": "26a3aa3256c84e4f89fa3897f832a813",
+      "run_id": "1d2a656571d047d9896527bc7f9051fa",
+      "slot": 0,
+      "column_key": "chatgpt_acquisition",
+      "topic": {
+        "id": null,
+        "title": "2026-11-01_t03_tutorials",
+        "fields": {},
+        "content_mode": "episode",
+        "from_report": "output/chatgpt_acquisition/2026-11-01_t03_tutorials.md",
+        "report_id": "c078189dedd948f7a9385978d239861f",
+        "episode": {
+          "job": "chatgpt_acquisition/t03_tutorials",
+          "production": "chatgpt_t03_tutorials",
+          "items": [
+            {
+              "id": "2026-11-01/CGC1@r73f6d0ae39f24ceb",
+              "title": "ChatGPT 双账号切换教程：网页加一个、手机切一个，聊天和订阅各归各"
+            }
+          ],
+          "report_path": "output/chatgpt_acquisition/2026-11-01_t03_tutorials.md",
+          "report_identity": "73f6d0ae39f24ceb0415f1745f146973ba7db59824c5254a4970f322f78ce182",
+          "issue": {
+            "issue_id": "91446647ec93782fdf00f2446179144a516eafe245cedded0ccb9ac55d9aee1a",
+            "policy_revision": "a18871da42300673a5d7d7d44ae7796d63df396cc3f63195feb505b56c9067c2",
+            "research_window": {
+              "mode": "previous_slot",
+              "days": 7,
+              "start": "2026-10-25T15:36:33.232851+08:00",
+              "end": "2026-11-01T15:36:33.232851+08:00",
+              "timezone": "Asia/Shanghai"
+            }
+          }
+        }
+      },
+      "script_id": "bd834feccb9844b3acfcc6ef41f9d922",
+      "render_id": "75ee31c92d2d4232b033bc350cab93aa",
+      "state": "DONE",
+      "note": "成片完成，等你看片和发布",
+      "gate": {
+        "label": "generated",
+        "text": "按素材生成",
+        "reasons": [],
+        "core_issues": 0,
+        "cited_share": 0.0,
+        "audited": false,
+        "ignored": {
+          "must": 0,
+          "warn": 0
+        },
+        "version": 1,
+        "approved": "auto"
+      },
+      "retries": {},
+      "updated_at": "2026-11-01T15:57:00+0800",
+      "production": "chatgpt_t03_tutorials"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "backend": {
+    "passed": 4041,
+    "skipped": 2,
+    "warnings": 54,
+    "duration_seconds": 499.87
+  },
+  "frontend": {
+    "files_passed": 92,
+    "tests_passed": 730
+  },
+  "compile": true,
+  "typecheck": true,
+  "lint": true,
+  "build": true,
+  "config_validation": true,
+  "log": "final-check-complete.log",
+  "environment_note": "初次沙箱执行因禁止回环绑定而中断；允许隔离测试的临时本地端口后，完整 scripts/check.sh 通过。",
+  "renderer": {
+    "passed": 994,
+    "skipped": 1,
+    "duration_seconds": 65.13,
+    "log": "renderer-check.log",
+    "trusted_root_esbuild": true,
+    "focused_regressions_passed": 77
+  },
+  "visual_matching_regressions_passed": 51
+}

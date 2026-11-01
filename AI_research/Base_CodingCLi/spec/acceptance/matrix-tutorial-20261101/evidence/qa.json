@@ -1,0 +1,1063 @@
+{
+  "status": "PASS",
+  "gate": "G2",
+  "real_llm": true,
+  "real_tts": true,
+  "mock_calls": 0,
+  "model": "deepseek-v4.1-flash",
+  "llm_call_count": 5,
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 6647,
+    "duration_seconds": 221.566667,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.999959105901082,
+    "decoded_rms": 0.08067963272333145,
+    "full_decode": "PASS"
+  },
+  "timeline": {
+    "ir_frames": 6647,
+    "scene_count": 20,
+    "beat_count": 83,
+    "alignment_granularity": "phrase"
+  },
+  "visual_beats": {
+    "card_1_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 6,
+      "before_frame": 3,
+      "after_frame": 10,
+      "changed_pixel_ratio": 0.0027879050925925927
+    },
+    "card_1_b1": {
+      "action": "reveal",
+      "target_id": "subtitle",
+      "beat_frame": 163,
+      "before_frame": 160,
+      "after_frame": 167,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0
+    },
+    "card_3_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 378,
+      "before_frame": 375,
+      "after_frame": 382,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.010564236111111111
+    },
+    "card_3_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 421,
+      "before_frame": 418,
+      "after_frame": 425,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0
+    },
+    "card_3_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 460,
+      "before_frame": 457,
+      "after_frame": 464,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0
+    },
+    "card_3_b3": {
+      "action": "reveal",
+      "target_id": "line:2",
+      "beat_frame": 500,
+      "before_frame": 497,
+      "after_frame": 504,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 1.8325617283950617e-05
+    },
+    "card_3_b4": {
+      "action": "reveal",
+      "target_id": "line:3",
+      "beat_frame": 551,
+      "before_frame": 548,
+      "after_frame": 555,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0038999807098765433
+    },
+    "card_4_b0": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 617,
+      "before_frame": 614,
+      "after_frame": 621,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.015423900462962962
+    },
+    "card_4_action_1": {
+      "action": "reveal",
+      "target_id": "node:markitdown",
+      "beat_frame": 647,
+      "before_frame": 644,
+      "after_frame": 651,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0
+    },
+    "card_4_b1": {
+      "action": "reveal",
+      "target_id": "node:markitdown",
+      "beat_frame": 660,
+      "before_frame": 657,
+      "after_frame": 664,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0
+    },
+    "card_4_b2": {
+      "action": "reveal",
+      "target_id": "node:weekly_html",
+      "beat_frame": 718,
+      "before_frame": 715,
+      "after_frame": 722,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.006962287808641976
+    },
+    "card_4_b3": {
+      "action": "reveal",
+      "target_id": "edge:input_to_markitdown",
+      "beat_frame": 718,
+      "before_frame": 715,
+      "after_frame": 722,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.006962287808641976
+    },
+    "card_4_b4": {
+      "action": "reveal",
+      "target_id": "node:weekly_md",
+      "beat_frame": 749,
+      "before_frame": 746,
+      "after_frame": 753,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 2.170138888888889e-05
+    },
+    "card_4_b5": {
+      "action": "reveal",
+      "target_id": "edge:markitdown_to_output",
+      "beat_frame": 749,
+      "before_frame": 746,
+      "after_frame": 753,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 2.170138888888889e-05
+    },
+    "card_5_b1": {
+      "action": "reveal",
+      "target_id": "side:right",
+      "beat_frame": 859,
+      "before_frame": 856,
+      "after_frame": 863,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0
+    },
+    "card_5_b0": {
+      "action": "reveal",
+      "target_id": "side:left",
+      "beat_frame": 909,
+      "before_frame": 906,
+      "after_frame": 913,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0
+    },
+    "card_6_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 1041,
+      "before_frame": 1038,
+      "after_frame": 1045,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0014949845679012345
+    },
+    "card_6_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 1164,
+      "before_frame": 1161,
+      "after_frame": 1168,
+      "changed_pixel_ratio": 0.0042505787037037035
+    },
+    "card_6_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 1272,
+      "before_frame": 1269,
+      "after_frame": 1276,
+      "changed_pixel_ratio": 0.008722029320987654
+    },
+    "card_6_b3": {
+      "action": "reveal",
+      "target_id": "line:2",
+      "beat_frame": 1388,
+      "before_frame": 1385,
+      "after_frame": 1392,
+      "changed_pixel_ratio": 0.005084394290123456
+    },
+    "card_6_b4": {
+      "action": "reveal",
+      "target_id": "line:3",
+      "beat_frame": 1519,
+      "before_frame": 1516,
+      "after_frame": 1523,
+      "changed_pixel_ratio": 0.004752604166666666
+    },
+    "card_7_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 1644,
+      "before_frame": 1641,
+      "after_frame": 1648,
+      "changed_pixel_ratio": 0.027083815586419754
+    },
+    "card_7_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 1738,
+      "before_frame": 1735,
+      "after_frame": 1742,
+      "changed_pixel_ratio": 0.002256462191358025
+    },
+    "card_7_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 1824,
+      "before_frame": 1821,
+      "after_frame": 1828,
+      "changed_pixel_ratio": 0.0032981288580246912
+    },
+    "card_7_b3": {
+      "action": "reveal",
+      "target_id": "line:2",
+      "beat_frame": 1903,
+      "before_frame": 1900,
+      "after_frame": 1907,
+      "changed_pixel_ratio": 0.007053433641975308
+    },
+    "card_7_b4": {
+      "action": "reveal",
+      "target_id": "line:3",
+      "beat_frame": 1966,
+      "before_frame": 1963,
+      "after_frame": 1970,
+      "changed_pixel_ratio": 0.00544945987654321
+    },
+    "card_8_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 2101,
+      "before_frame": 2098,
+      "after_frame": 2105,
+      "changed_pixel_ratio": 0.0037683256172839504
+    },
+    "card_8_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 2178,
+      "before_frame": 2175,
+      "after_frame": 2182,
+      "changed_pixel_ratio": 0.006961323302469136
+    },
+    "card_8_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 2250,
+      "before_frame": 2247,
+      "after_frame": 2254,
+      "changed_pixel_ratio": 0.0021436149691358023
+    },
+    "card_8_b3": {
+      "action": "reveal",
+      "target_id": "line:2",
+      "beat_frame": 2293,
+      "before_frame": 2290,
+      "after_frame": 2297,
+      "changed_pixel_ratio": 0.002180266203703704
+    },
+    "card_9_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 2394,
+      "before_frame": 2391,
+      "after_frame": 2398,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.0045640432098765435
+    },
+    "card_9_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 2442,
+      "before_frame": 2439,
+      "after_frame": 2446,
+      "changed_pixel_ratio": 0.003940007716049383
+    },
+    "card_9_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 2461,
+      "before_frame": 2458,
+      "after_frame": 2465,
+      "changed_pixel_ratio": 0.003855613425925926
+    },
+    "card_10_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 2501,
+      "before_frame": 2498,
+      "after_frame": 2505,
+      "changed_pixel_ratio": 0.2794208140432099
+    },
+    "card_10_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 2654,
+      "before_frame": 2651,
+      "after_frame": 2658,
+      "changed_pixel_ratio": 0.0001345486111111111
+    },
+    "card_10_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 2829,
+      "before_frame": 2826,
+      "after_frame": 2833,
+      "changed_pixel_ratio": 0.00013310185185185186
+    },
+    "card_11_b0": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 2940,
+      "before_frame": 2937,
+      "after_frame": 2944,
+      "changed_pixel_ratio": 0.28434461805555555
+    },
+    "card_11_action_0": {
+      "action": "reveal",
+      "target_id": "node:weekly_html",
+      "beat_frame": 2959,
+      "before_frame": 2956,
+      "after_frame": 2963,
+      "changed_pixel_ratio": 0.0003862847222222222
+    },
+    "card_11_b1": {
+      "action": "reveal",
+      "target_id": "node:weekly_html",
+      "beat_frame": 2966,
+      "before_frame": 2963,
+      "after_frame": 2970,
+      "changed_pixel_ratio": 0.00028597608024691357
+    },
+    "card_11_action_1": {
+      "action": "reveal",
+      "target_id": "node:markitdown",
+      "beat_frame": 3125,
+      "before_frame": 3122,
+      "after_frame": 3129,
+      "changed_pixel_ratio": 0.0005343364197530864
+    },
+    "card_11_b2": {
+      "action": "reveal",
+      "target_id": "node:markitdown",
+      "beat_frame": 3130,
+      "before_frame": 3127,
+      "after_frame": 3134,
+      "changed_pixel_ratio": 0.000236304012345679
+    },
+    "card_11_b3": {
+      "action": "reveal",
+      "target_id": "edge:read_html",
+      "beat_frame": 3130,
+      "before_frame": 3127,
+      "after_frame": 3134,
+      "changed_pixel_ratio": 0.000236304012345679
+    },
+    "card_11_action_2": {
+      "action": "reveal",
+      "target_id": "node:weekly_md",
+      "beat_frame": 3173,
+      "before_frame": 3170,
+      "after_frame": 3177,
+      "changed_pixel_ratio": 0.004924768518518518
+    },
+    "card_11_b4": {
+      "action": "reveal",
+      "target_id": "node:weekly_md",
+      "beat_frame": 3188,
+      "before_frame": 3185,
+      "after_frame": 3192,
+      "changed_pixel_ratio": 0.006417824074074074
+    },
+    "card_11_b5": {
+      "action": "reveal",
+      "target_id": "edge:write_md",
+      "beat_frame": 3188,
+      "before_frame": 3185,
+      "after_frame": 3192,
+      "changed_pixel_ratio": 0.006417824074074074
+    },
+    "card_12_b1": {
+      "action": "reveal",
+      "target_id": "side:right",
+      "beat_frame": 3369,
+      "before_frame": 3366,
+      "after_frame": 3373,
+      "changed_pixel_ratio": 0.005341917438271605
+    },
+    "card_12_b0": {
+      "action": "reveal",
+      "target_id": "side:left",
+      "beat_frame": 3454,
+      "before_frame": 3451,
+      "after_frame": 3458,
+      "changed_pixel_ratio": 0.005519386574074074
+    },
+    "card_13_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 3733,
+      "before_frame": 3730,
+      "after_frame": 3737,
+      "changed_pixel_ratio": 0.028051215277777777
+    },
+    "card_13_action_0": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 3757,
+      "before_frame": 3754,
+      "after_frame": 3761,
+      "changed_pixel_ratio": 0.0038252314814814815
+    },
+    "card_13_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 3762,
+      "before_frame": 3759,
+      "after_frame": 3766,
+      "changed_pixel_ratio": 0.00597752700617284
+    },
+    "card_13_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 3831,
+      "before_frame": 3828,
+      "after_frame": 3835,
+      "changed_pixel_ratio": 0.004159432870370371
+    },
+    "card_14_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 3916,
+      "before_frame": 3913,
+      "after_frame": 3920,
+      "covered_by_episode_card": true,
+      "changed_pixel_ratio": 0.005262345679012345
+    },
+    "card_14_b1": {
+      "action": "reveal",
+      "target_id": "subtitle",
+      "beat_frame": 3961,
+      "before_frame": 3958,
+      "after_frame": 3965,
+      "changed_pixel_ratio": 0.01597704475308642
+    },
+    "card_15_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 4045,
+      "before_frame": 4042,
+      "after_frame": 4049,
+      "changed_pixel_ratio": 0.02587914737654321
+    },
+    "card_15_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 4045,
+      "before_frame": 4042,
+      "after_frame": 4049,
+      "changed_pixel_ratio": 0.02587914737654321
+    },
+    "card_15_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 4290,
+      "before_frame": 4287,
+      "after_frame": 4294,
+      "changed_pixel_ratio": 0.0037591628086419753
+    },
+    "card_15_b3": {
+      "action": "reveal",
+      "target_id": "line:2",
+      "beat_frame": 4416,
+      "before_frame": 4413,
+      "after_frame": 4420,
+      "changed_pixel_ratio": 0.004325810185185185
+    },
+    "card_15_b4": {
+      "action": "reveal",
+      "target_id": "line:3",
+      "beat_frame": 4512,
+      "before_frame": 4509,
+      "after_frame": 4516,
+      "changed_pixel_ratio": 0.003689718364197531
+    },
+    "card_16_b0": {
+      "action": "reveal",
+      "target_id": "side:left",
+      "beat_frame": 4654,
+      "before_frame": 4651,
+      "after_frame": 4658,
+      "changed_pixel_ratio": 0.029326774691358026
+    },
+    "card_16_b1": {
+      "action": "reveal",
+      "target_id": "side:right",
+      "beat_frame": 4853,
+      "before_frame": 4850,
+      "after_frame": 4857,
+      "changed_pixel_ratio": 8.198302469135803e-06
+    },
+    "card_17_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 5088,
+      "before_frame": 5085,
+      "after_frame": 5092,
+      "changed_pixel_ratio": 0.00456983024691358
+    },
+    "card_17_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 5191,
+      "before_frame": 5188,
+      "after_frame": 5195,
+      "changed_pixel_ratio": 0.011023823302469135
+    },
+    "card_17_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 5301,
+      "before_frame": 5298,
+      "after_frame": 5305,
+      "changed_pixel_ratio": 0.0038681520061728397
+    },
+    "card_17_b3": {
+      "action": "reveal",
+      "target_id": "line:2",
+      "beat_frame": 5395,
+      "before_frame": 5392,
+      "after_frame": 5399,
+      "changed_pixel_ratio": 0.005688175154320988
+    },
+    "card_17_b4": {
+      "action": "reveal",
+      "target_id": "line:3",
+      "beat_frame": 5476,
+      "before_frame": 5473,
+      "after_frame": 5480,
+      "changed_pixel_ratio": 0.004606481481481481
+    },
+    "card_18_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 5581,
+      "before_frame": 5578,
+      "after_frame": 5585,
+      "changed_pixel_ratio": 0.027650462962962963
+    },
+    "card_18_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 5643,
+      "before_frame": 5640,
+      "after_frame": 5647,
+      "changed_pixel_ratio": 0.0040822723765432094
+    },
+    "card_18_action_0": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 5656,
+      "before_frame": 5653,
+      "after_frame": 5660,
+      "changed_pixel_ratio": 0.005537712191358025
+    },
+    "card_18_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 5665,
+      "before_frame": 5662,
+      "after_frame": 5669,
+      "changed_pixel_ratio": 0.006095679012345679
+    },
+    "card_18_b3": {
+      "action": "reveal",
+      "target_id": "line:2",
+      "beat_frame": 5713,
+      "before_frame": 5710,
+      "after_frame": 5717,
+      "changed_pixel_ratio": 9.162808641975309e-06
+    },
+    "card_19_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 5795,
+      "before_frame": 5792,
+      "after_frame": 5799,
+      "changed_pixel_ratio": 0.003245563271604938
+    },
+    "card_19_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 5883,
+      "before_frame": 5880,
+      "after_frame": 5887,
+      "changed_pixel_ratio": 0.011022858796296296
+    },
+    "card_20_b0": {
+      "action": "reveal",
+      "target_id": "title",
+      "beat_frame": 6009,
+      "before_frame": 6006,
+      "after_frame": 6013,
+      "changed_pixel_ratio": 0.017922453703703704
+    },
+    "card_20_b1": {
+      "action": "reveal",
+      "target_id": "line:0",
+      "beat_frame": 6052,
+      "before_frame": 6049,
+      "after_frame": 6056,
+      "changed_pixel_ratio": 0.004040798611111111
+    },
+    "card_20_b2": {
+      "action": "reveal",
+      "target_id": "line:1",
+      "beat_frame": 6095,
+      "before_frame": 6092,
+      "after_frame": 6099,
+      "changed_pixel_ratio": 0.0121875
+    },
+    "card_20_b3": {
+      "action": "reveal",
+      "target_id": "line:2",
+      "beat_frame": 6146,
+      "before_frame": 6143,
+      "after_frame": 6150,
+      "changed_pixel_ratio": 0.0
+    },
+    "card_20_b4": {
+      "action": "reveal",
+      "target_id": "line:3",
+      "beat_frame": 6248,
+      "before_frame": 6245,
+      "after_frame": 6252,
+      "changed_pixel_ratio": 8.680555555555556e-06
+    },
+    "card_21_b0": {
+      "action": "reveal",
+      "target_id": "scene",
+      "beat_frame": 6371,
+      "before_frame": 6368,
+      "after_frame": 6375,
+      "changed_pixel_ratio": 0.0299266975308642
+    },
+    "card_21_b1": {
+      "action": "reveal",
+      "target_id": "node:html",
+      "beat_frame": 6371,
+      "before_frame": 6368,
+      "after_frame": 6375,
+      "changed_pixel_ratio": 0.0299266975308642
+    },
+    "card_21_b2": {
+      "action": "reveal",
+      "target_id": "node:md",
+      "beat_frame": 6462,
+      "before_frame": 6459,
+      "after_frame": 6466,
+      "changed_pixel_ratio": 8.487654320987654e-05
+    },
+    "card_21_b3": {
+      "action": "reveal",
+      "target_id": "node:markitdown",
+      "beat_frame": 6500,
+      "before_frame": 6497,
+      "after_frame": 6504,
+      "changed_pixel_ratio": 0.006333429783950617
+    },
+    "card_21_b4": {
+      "action": "reveal",
+      "target_id": "edge:e1",
+      "beat_frame": 6500,
+      "before_frame": 6497,
+      "after_frame": 6504,
+      "changed_pixel_ratio": 0.006333429783950617
+    },
+    "card_21_b5": {
+      "action": "reveal",
+      "target_id": "edge:e2",
+      "beat_frame": 6500,
+      "before_frame": 6497,
+      "after_frame": 6504,
+      "changed_pixel_ratio": 0.006333429783950617
+    }
+  },
+  "scene_samples": [
+    {
+      "scene_id": "card_1",
+      "frame": 0,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-001.png"
+    },
+    {
+      "scene_id": "card_1",
+      "frame": 185,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-006.png"
+    },
+    {
+      "scene_id": "card_1",
+      "frame": 370,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-007.png"
+    },
+    {
+      "scene_id": "card_3",
+      "frame": 371,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-008.png"
+    },
+    {
+      "scene_id": "card_3",
+      "frame": 490,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-015.png"
+    },
+    {
+      "scene_id": "card_3",
+      "frame": 609,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-020.png"
+    },
+    {
+      "scene_id": "card_4",
+      "frame": 610,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-021.png"
+    },
+    {
+      "scene_id": "card_4",
+      "frame": 713,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-028.png"
+    },
+    {
+      "scene_id": "card_4",
+      "frame": 815,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-033.png"
+    },
+    {
+      "scene_id": "card_5",
+      "frame": 816,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-034.png"
+    },
+    {
+      "scene_id": "card_5",
+      "frame": 922,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-039.png"
+    },
+    {
+      "scene_id": "card_5",
+      "frame": 1027,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-040.png"
+    },
+    {
+      "scene_id": "card_6",
+      "frame": 1028,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-041.png"
+    },
+    {
+      "scene_id": "card_6",
+      "frame": 1332,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-048.png"
+    },
+    {
+      "scene_id": "card_6",
+      "frame": 1636,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-053.png"
+    },
+    {
+      "scene_id": "card_7",
+      "frame": 1637,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-054.png"
+    },
+    {
+      "scene_id": "card_7",
+      "frame": 1865,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-061.png"
+    },
+    {
+      "scene_id": "card_7",
+      "frame": 2093,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-066.png"
+    },
+    {
+      "scene_id": "card_8",
+      "frame": 2094,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-067.png"
+    },
+    {
+      "scene_id": "card_8",
+      "frame": 2237,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-072.png"
+    },
+    {
+      "scene_id": "card_8",
+      "frame": 2380,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-077.png"
+    },
+    {
+      "scene_id": "card_9",
+      "frame": 2381,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-078.png"
+    },
+    {
+      "scene_id": "card_9",
+      "frame": 2437,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-081.png"
+    },
+    {
+      "scene_id": "card_9",
+      "frame": 2493,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-086.png"
+    },
+    {
+      "scene_id": "card_10",
+      "frame": 2494,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-087.png"
+    },
+    {
+      "scene_id": "card_10",
+      "frame": 2713,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-092.png"
+    },
+    {
+      "scene_id": "card_10",
+      "frame": 2932,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-095.png"
+    },
+    {
+      "scene_id": "card_11",
+      "frame": 2933,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-096.png"
+    },
+    {
+      "scene_id": "card_11",
+      "frame": 3121,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-102.png"
+    },
+    {
+      "scene_id": "card_11",
+      "frame": 3309,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-111.png"
+    },
+    {
+      "scene_id": "card_12",
+      "frame": 3310,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-112.png"
+    },
+    {
+      "scene_id": "card_12",
+      "frame": 3518,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-117.png"
+    },
+    {
+      "scene_id": "card_12",
+      "frame": 3725,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-118.png"
+    },
+    {
+      "scene_id": "card_13",
+      "frame": 3726,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-119.png"
+    },
+    {
+      "scene_id": "card_13",
+      "frame": 3814,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-126.png"
+    },
+    {
+      "scene_id": "card_13",
+      "frame": 3902,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-129.png"
+    },
+    {
+      "scene_id": "card_14",
+      "frame": 3903,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-130.png"
+    },
+    {
+      "scene_id": "card_14",
+      "frame": 3970,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-135.png"
+    },
+    {
+      "scene_id": "card_14",
+      "frame": 4037,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-136.png"
+    },
+    {
+      "scene_id": "card_15",
+      "frame": 4038,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-137.png"
+    },
+    {
+      "scene_id": "card_15",
+      "frame": 4342,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-142.png"
+    },
+    {
+      "scene_id": "card_15",
+      "frame": 4646,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-147.png"
+    },
+    {
+      "scene_id": "card_16",
+      "frame": 4647,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-148.png"
+    },
+    {
+      "scene_id": "card_16",
+      "frame": 4864,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-153.png"
+    },
+    {
+      "scene_id": "card_16",
+      "frame": 5080,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-154.png"
+    },
+    {
+      "scene_id": "card_17",
+      "frame": 5081,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-155.png"
+    },
+    {
+      "scene_id": "card_17",
+      "frame": 5327,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-162.png"
+    },
+    {
+      "scene_id": "card_17",
+      "frame": 5573,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-167.png"
+    },
+    {
+      "scene_id": "card_18",
+      "frame": 5574,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-168.png"
+    },
+    {
+      "scene_id": "card_18",
+      "frame": 5678,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-177.png"
+    },
+    {
+      "scene_id": "card_18",
+      "frame": 5781,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-180.png"
+    },
+    {
+      "scene_id": "card_19",
+      "frame": 5782,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-181.png"
+    },
+    {
+      "scene_id": "card_19",
+      "frame": 5892,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-186.png"
+    },
+    {
+      "scene_id": "card_19",
+      "frame": 6001,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-187.png"
+    },
+    {
+      "scene_id": "card_20",
+      "frame": 6002,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-188.png"
+    },
+    {
+      "scene_id": "card_20",
+      "frame": 6183,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-197.png"
+    },
+    {
+      "scene_id": "card_20",
+      "frame": 6363,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-200.png"
+    },
+    {
+      "scene_id": "card_21",
+      "frame": 6364,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-201.png"
+    },
+    {
+      "scene_id": "card_21",
+      "frame": 6505,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-208.png"
+    },
+    {
+      "scene_id": "card_21",
+      "frame": 6646,
+      "file": "g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/keyframes/frame-209.png"
+    }
+  ],
+  "contact_sheet": "artifacts/contact-sheet.jpg",
+  "captions": {
+    "burned_in": true,
+    "srt": "artifacts/captions.srt",
+    "alignment": "phrase-level measured PCM activity"
+  },
+  "fast_cards": {
+    "caption_cues_checked": 77,
+    "caption_frames_checked": 113,
+    "minimum_caption_dark_pixels": 1193,
+    "minimum_glyph_f1": 0.9864670313849697,
+    "exact_srt_coverage": true,
+    "alignment": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+    "executor": "hybrid_cards",
+    "manual_page_copy": false
+  },
+  "video_form": "information_cards",
+  "visual_storytelling": true,
+  "information": {
+    "scene_count": 20,
+    "components": [
+      "code_demo",
+      "comparison",
+      "concept_reveal",
+      "flow_diagram",
+      "title_card"
+    ],
+    "timing": "speech-led mixed scenes",
+    "theme": "minimal_light"
+  },
+  "narration_text": {
+    "status": "PASS",
+    "chapters": 5,
+    "segments": 37,
+    "characters": 1764,
+    "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+    "caption_cues": 77,
+    "checked": [
+      "narration-plan",
+      "video-ir",
+      "captions.srt",
+      "chapter-titles",
+      "short-caption-exact-coverage"
+    ]
+  }
+}

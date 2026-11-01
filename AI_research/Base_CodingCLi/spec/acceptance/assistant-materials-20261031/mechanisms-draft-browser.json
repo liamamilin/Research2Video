@@ -1,0 +1,10 @@
+{
+  "scope": "isolated temporary admin and database",
+  "port": 65062,
+  "file_survived_reload": true,
+  "original_bytes_match": true,
+  "text_survived_reload": true,
+  "conversations_isolated": true,
+  "original_draft_restored": true,
+  "status": "PASS"
+}

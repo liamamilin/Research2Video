@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "maintenance_id": "64cb0dbb4cf74f2dabadaca50e811799",
+  "old_pid": 12218,
+  "new_pid": 23403,
+  "health": "ok",
+  "primary_state_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state",
+  "records": {
+    "scripts": {
+      "count": 362,
+      "sha256": "82d8c36ef4794f01f9466bdbdf55a71a34e84794219d53d1c8b44ad42e02b24e"
+    },
+    "renders": {
+      "count": 371,
+      "sha256": "c62b7063cdac9a82afef1f0c3fc695bc333a79ae09077eb7588b91ab2de3a3b3"
+    },
+    "schedules": {
+      "count": 61,
+      "sha256": "4c3d9a8148ab0691288186453471e5c39a7f8f553dd967270735654147d43738"
+    }
+  },
+  "records_unchanged_during_reload": true,
+  "new_schedules": 0,
+  "new_writes": 0,
+  "new_renders": 0,
+  "source_sha256": {
+    "web/routes/production.py": "72eb1649373cc5f76a519f544de16f413eafda2ebcf5b92a4aa64be041b8b899",
+    "web/routes/video.py": "b1ca92fd1bf75ab46328bfef63ce5019e63a59c0d886963c7a5e243a3df9c135",
+    "web/services/video_render.py": "6105aa16d8596f2af716fa4b08db716ec80574ce3685c220904b246310e826c4",
+    "core/video/auto.py": "8bbedd5025b2d9414a1c3600aaf42a615505d52d9e43021f82bdfb9e16d3bbbc",
+    "core/video/topic_store.py": "f327e45e485397825e0e5361b0c76df36021ccbbee59bb22427d786ad719e603",
+    "web/services/video_autopilot.py": "d7a3af7cdba8dadba6a4e50151c2bf9eba26933e20e7070e7ef0e8852af39e23",
+    "core/source_supply.py": "a50459f0253d4df678cafa728bcdededf202db0e3562ab7fb55eb1d1c1ec9d9a",
+    "core/source_pages.py": "f8d949e046095a32e44fe42362a65f21750bb5936a73daab7f28b031e53509ab",
+    "core/material_collection.py": "3e27e7ff4534367a15d4900582405314db622823d473c91c486375dafb3e60a3",
+    "jobs/chatgpt_acquisition/t09_updates.yaml": "8fd40b76640c01df613bc73ff796f97f38a1e16108ce4a7462ef4d45ec6ea3d0",
+    "jobs/monitoring/ai_flash_discovery.yaml": "2f9d1edb09aee2459f6fe26e8dbcea12be9e08805e72eb83801c30cc677b7ad1",
+    "config/content_columns/ai_opensource.yaml": "a5d536e1260ad98289eceb794c2ce7b41db4ef03d650d1e0504d49f54a4b6806",
+    "config/sources.yaml": "e5fc2a9d3fc75d3de4de0abfc5b2c8cd0e4fa67dd69aec733676340b44c09322"
+  }
+}

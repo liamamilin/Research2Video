@@ -1,0 +1,110 @@
+{
+  "actual_conversion": {
+    "tool": "markitdown",
+    "version": "0.1.9",
+    "command": "markitdown weekly.html -o weekly.md",
+    "exit_code": 0,
+    "model_calls": 0,
+    "input_authored_for_tutorial": true,
+    "output_from_actual_command": true,
+    "source": "https://github.com/microsoft/markitdown",
+    "sha256": {
+      "weekly.html": "9a37e55fe9ed85b6a65c62baf9328e6a3a1f7c0752efd61aeacf7de74be397b7",
+      "weekly.md": "8dc3c24a108addea6b4699059d962ce97d4e5d9da130b169d21cf2d634c1c83e"
+    }
+  },
+  "demo": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-tutorial-io-20261101/run-1/actual-demo",
+  "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-tutorial-io-20261101/run-1/output/radar/2026-11-01_ai_opensource_radar.md",
+  "image_records": [
+    {
+      "id": "c81a1c6c52474a848943f1e886471a1e",
+      "owner": "matrix:ai_media",
+      "name": "周报网页实际输入.png",
+      "created_at": 1793514197.465898,
+      "kind": "image",
+      "status": "ready",
+      "url": "",
+      "text": "实际输入：weekly.html 在本地浏览器打开的项目周报网页。上方是“项目周报”标题和“已完成”列表，列表有整理项目资料、完成脚本联调。下方“下一步”表格两列是任务与状态，两行是转换文档／进行中、整理结果／待开始。",
+      "chars": 109,
+      "error": "",
+      "image_sha256": "7faa09c6fee06b71024eabd3c6f5b30e7597d7951d4e20b3fa5705f409f1f760",
+      "focus": {
+        "width": 1200,
+        "height": 900,
+        "regions": [
+          {
+            "x1": 38,
+            "y1": 53,
+            "x2": 962,
+            "y2": 384,
+            "label": "项目周报与已完成列表",
+            "style": "box"
+          },
+          {
+            "x1": 38,
+            "y1": 398,
+            "x2": 962,
+            "y2": 754,
+            "label": "下一步任务与状态",
+            "style": "box"
+          }
+        ]
+      },
+      "original": "original.png",
+      "sha256": "2bd3dbf84945958d09422967e6887ce63b0f6fbf317a44bdc347f01f4bb071af"
+    },
+    {
+      "id": "aead84bc14cc4d088189929e78fe0070",
+      "owner": "matrix:ai_media",
+      "name": "Markdown实际输出.png",
+      "created_at": 1793514197.492747,
+      "kind": "image",
+      "status": "ready",
+      "url": "",
+      "text": "实际输出：MarkItDown 命令本次生成的 weekly.md 原文。Markdown 一级标题“项目周报”，二级标题“已完成”和“下一步”，两项列表为整理项目资料、完成脚本联调；下方 Markdown 表格保留任务、状态两列与转换文档／进行中、整理结果／待开始两行。",
+      "chars": 136,
+      "error": "",
+      "image_sha256": "ae6d535b2baf4c4025116ec9993a267c05b750676c45a27908c18a0bc786713f",
+      "focus": {
+        "width": 1200,
+        "height": 900,
+        "regions": [
+          {
+            "x1": 38,
+            "y1": 138,
+            "x2": 962,
+            "y2": 641,
+            "label": "Markdown 标题和列表",
+            "style": "box"
+          },
+          {
+            "x1": 38,
+            "y1": 624,
+            "x2": 962,
+            "y2": 857,
+            "label": "Markdown 任务表格",
+            "style": "box"
+          }
+        ]
+      },
+      "original": "original.png",
+      "sha256": "4a38e53abcd7b6766480c3d5a3da2723e2d11c86b658f4afb9589289691d73aa"
+    }
+  ],
+  "material_context": {
+    "ids": [
+      "c81a1c6c52474a848943f1e886471a1e",
+      "aead84bc14cc4d088189929e78fe0070"
+    ],
+    "owner": "matrix:ai_media",
+    "mode": "adapt",
+    "revision": 1,
+    "title": "MarkItDown 真实输入与输出",
+    "audience": "开发者和工具使用者",
+    "goal": "围绕同一份周报串起真实输入截图、安装与转换代码、实际输出截图和输入输出对照，沿用栏目问候、步骤转场及品牌包装。"
+  },
+  "automatic_capture_register_match_render": true,
+  "manual_paragraph_assignments": 0,
+  "manual_script_or_storyboard": false,
+  "model_calls": 0
+}

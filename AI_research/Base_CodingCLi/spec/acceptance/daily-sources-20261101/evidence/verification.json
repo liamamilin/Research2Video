@@ -1,0 +1,140 @@
+{
+  "status": "PASS",
+  "job_id": "c2fe1190-7ff7-4319-ac9c-60a1e3246164",
+  "render_id": "aaf0a751ad3e4e4082964ea102bb342c",
+  "public_source_only": true,
+  "personal_login_required": false,
+  "manual_script_edits": 0,
+  "manual_picture_placements": 0,
+  "greeting_count": 1,
+  "steps": [
+    "准备两个账号",
+    "网页添加账号",
+    "网页直接切换",
+    "手机添加账号",
+    "手机切换与异常",
+    "确认结果"
+  ],
+  "automatic_public_pictures": 2,
+  "pictured_scenes": [
+    "card_2",
+    "card_3_p1",
+    "card_3_p2",
+    "card_5_p1",
+    "card_5_p2"
+  ],
+  "public_source_pixels_preserved": true,
+  "returned_artifacts_verified": 33,
+  "probes": {
+    "content.mp4": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "6056"
+        },
+        {
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "9463"
+        }
+      ],
+      "format": {
+        "duration": "201.866667"
+      }
+    },
+    "video.mp4": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "6236"
+        },
+        {
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "9744"
+        }
+      ],
+      "format": {
+        "duration": "207.866667"
+      }
+    }
+  },
+  "samples": [
+    [
+      "greeting",
+      1.5
+    ],
+    [
+      "agenda",
+      11.583333333333334
+    ],
+    [
+      "step-1",
+      24.066666666666666
+    ],
+    [
+      "step-2",
+      53.8
+    ],
+    [
+      "step-3",
+      80.56666666666666
+    ],
+    [
+      "step-4",
+      106.4
+    ],
+    [
+      "step-5",
+      136.7
+    ],
+    [
+      "step-6",
+      162.8
+    ],
+    [
+      "picture-1",
+      38.03333333333333
+    ],
+    [
+      "picture-2",
+      63.18333333333333
+    ],
+    [
+      "picture-3",
+      76.56666666666666
+    ],
+    [
+      "picture-4",
+      117.26666666666667
+    ],
+    [
+      "outro",
+      205.86666666666667
+    ]
+  ],
+  "duration_seconds": 207.86666666666667,
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-sources-20261101/run-1/state/video_renders/aaf0a751ad3e4e4082964ea102bb342c/video.mp4",
+  "video_sha256": "9ffd6956e97ecab910634128e637dd51821dcd583ea6b1363baff53f6a35a1cd",
+  "source_sha256": {
+    "core/source_pages.py": "f8d949e046095a32e44fe42362a65f21750bb5936a73daab7f28b031e53509ab",
+    "core/source_supply.py": "a50459f0253d4df678cafa728bcdededf202db0e3562ab7fb55eb1d1c1ec9d9a",
+    "core/material_collection.py": "3e27e7ff4534367a15d4900582405314db622823d473c91c486375dafb3e60a3",
+    "core/video/auto.py": "8bbedd5025b2d9414a1c3600aaf42a615505d52d9e43021f82bdfb9e16d3bbbc",
+    "core/video/topic_store.py": "f327e45e485397825e0e5361b0c76df36021ccbbee59bb22427d786ad719e603",
+    "web/services/video_autopilot.py": "d7a3af7cdba8dadba6a4e50151c2bf9eba26933e20e7070e7ef0e8852af39e23",
+    "core/video/visual_materials.py": "076133cbfbcf823ae1b54c66fda732463116baba46bdafc55b8152103ce6956b",
+    "core/video/visual_matching.py": "7f085289147c4c624ff5201164a4853800977ce881add3eb606deb839e8fc4f0",
+    "core/video/page_regions.js": "bd01e049422382855a0693a627a48d383251bc26af0c252e78df3f2d33524265"
+  }
+}

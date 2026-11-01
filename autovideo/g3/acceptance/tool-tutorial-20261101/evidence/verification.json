@@ -1,0 +1,132 @@
+{
+  "status": "PASS",
+  "probes": {
+    "content.mp4": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "3472"
+        },
+        {
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "5425"
+        }
+      ],
+      "format": {
+        "duration": "115.733333"
+      }
+    },
+    "video.mp4": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "3682"
+        },
+        {
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "5754"
+        }
+      ],
+      "format": {
+        "duration": "122.733333"
+      }
+    }
+  },
+  "normal_parent_llm_calls": 5,
+  "final_new_model_calls": 0,
+  "final_new_tts_calls": 0,
+  "greeting_count": 1,
+  "narration_unchanged": true,
+  "scene_props_unchanged": true,
+  "decoded_content_audio_correlation": 1.0,
+  "episode_inherited": true,
+  "tutorial_default_derives_same_steps": true,
+  "step_titles": [
+    "准备输入",
+    "执行转换",
+    "查看结果"
+  ],
+  "sample_times": [
+    [
+      "intro",
+      0.5
+    ],
+    [
+      "greeting",
+      2.5
+    ],
+    [
+      "agenda",
+      10
+    ],
+    [
+      "step-1",
+      18.133333333333333
+    ],
+    [
+      "step-2",
+      42.13333333333333
+    ],
+    [
+      "step-3",
+      70.66666666666666
+    ],
+    [
+      "card_3",
+      24.166666666666668
+    ],
+    [
+      "card_5",
+      44.8
+    ],
+    [
+      "card_6",
+      54.8
+    ],
+    [
+      "card_8",
+      75.61666666666666
+    ],
+    [
+      "card_9",
+      87.35
+    ],
+    [
+      "card_10",
+      99.21666666666667
+    ],
+    [
+      "card_11",
+      110.91666666666667
+    ],
+    [
+      "sources",
+      118.73333333333333
+    ],
+    [
+      "outro",
+      122.13333333333334
+    ]
+  ],
+  "source_sha256": {
+    "g1/renderer/src/CodeDemo.tsx": "b9f8d4fe0b5b71821a2df424332e67a812db78b9caedcc1cc96c44102c27c893",
+    "g2/explanation.py": "442bf02f1aab9fc731a43711cc46a742990ab215c5c495c70e951be14e7762bc",
+    "g2/episode_navigation.py": "59c1d7609c9dbfcbde62904f5db5a25d598b64c60fc8a5f974e039e15ae4907e",
+    "g2/creative_library/catalog.json": "8db569a4a14ca2ad35aa2a377ae2761b81e9fa325b846553120306950b584d6f",
+    "g3/store.py": "c9b7d97856eea4c90b9e05eb102ff150adea43078aebc21dc637fce27f833785",
+    "g3/revision_support.py": "99d86aeb0b175c27bac3471c646ed3bec9ae4fad1cfabbdb2e30321bb12ba3b0"
+  },
+  "final_video_sha256": "75c6ec334a18abeeca66f1df0184c44a6dbc3ded7bd8585cf28377f5a73569cb"
+}

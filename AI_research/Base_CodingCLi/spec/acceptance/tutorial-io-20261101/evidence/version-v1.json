@@ -1,0 +1,335 @@
+{
+  "script_id": "34d64b0926034c16b84a4b686bcaa91a",
+  "version": 1,
+  "title": "AI 开源发现｜2026年11月01日",
+  "sections": [
+    {
+      "title": "本期导读",
+      "paragraphs": [
+        {
+          "text": "大家好，欢迎收看AI 开源发现。本期我们用一个真实的小任务，认识微软开源的 MarkItDown：把一份浏览器里打开的项目周报 weekly.html，原样转成可以继续编辑、也可以直接喂给后续文本流程的 weekly.md。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "我们不会只停在“它能转格式”这句话上，而是从准备输入、敲下命令，到打开生成的文件逐行对照，把这一条任务线完整走一遍，让你看清它到底接在你工作流的哪一环。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "opening"
+    },
+    {
+      "title": "MarkItDown 转周报为 Markdown",
+      "paragraphs": [
+        {
+          "text": "先看我们手上这份输入。它就是本地一个叫 weekly.html 的文件，用浏览器打开，是一份很典型的项目周报：最上面是“项目周报”这个大标题，下面“已完成”一节列了两项，分别是“整理项目资料”和“完成脚本联调”；再往下是一张“下一步”表格，只有任务和状态两列，“转换文档”对应“进行中”，“整理结果”对应“待开始”。内容不多，但结构齐全：有标题层级、有列表、有表格。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "问题也正出在这儿。这份东西如果要继续交给文本流程处理，或者让人接着编辑，一整片 HTML 标签是不合适的；我们想要的是同样结构、但更干净的 Markdown。MarkItDown 就是干这一环的工具，它是微软开源的一个 Python 项目，专门把各类文档转成 Markdown。整个转换是本地解析，规则化地把结构映射过去，不是把内容丢给大模型重写一遍。",
+          "citations": [
+            "https://github.com/microsoft/markitdown"
+          ],
+          "evidence": "CITED",
+          "note": null
+        },
+        {
+          "text": "本次实际操作使用的是 MarkItDown 0.1.9，装在了一个临时的 Python 环境里，这样不会污染你本机已有的依赖。安装就一行：pip install markitdown。装完，工具本身和它的命令行入口就都就位了。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "接着进入 weekly.html 所在的目录，执行第二条命令：markitdown weekly.html -o weekly.md。这里的 weekly.html 是输入，-o 后面跟的 weekly.md 是输出文件。命令跑完，weekly.md 就实实在在落在目录里了。整个过程都在本地完成，没有调用任何模型，这也意味着同样的输入，你每次得到的输出是可预期的、可重复的。安装和转换这两条命令，建议连起来看：一条准备工具，一条执行任务。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "现在打开这份实际生成的 weekly.md。开头是“项目周报”，变成了一个一级标题；“已完成”成了二级标题，下面“整理项目资料”“完成脚本联调”两项，规规矩矩保留成 Markdown 的无序列表。也就是说，网页里的标题层级和列表，被一一对应地带了过来，没有丢，也没有被压平。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "再往下看那张表。“下一步”同样是二级标题，然后是一张 Markdown 表格：表头是任务、状态，两行数据“转换文档 / 进行中”和“整理结果 / 待开始”都在，只是换成了 Markdown 的表格写法，用竖线分隔单元格。原来网页表格里的信息，一行没少。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "最后把两张实际截图并排放在一起看：左边是浏览器里的原网页，右边是同一份内容的 Markdown。网页上的层级、列表和任务状态，在输出里都对得上。这份 weekly.md 你可以直接接着编辑，也可以交给后续的文本流程去处理，不需要再回头清洗标签。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "所以 MarkItDown 在这个任务里的位置很清楚：它站在“原始文档”和“后续文本处理”之间，做的是转换这一道工序。适合你的场合也很具体：文件就在本地，想要批量、稳定地转，希望保留原有结构，又不打算为格式转换去调一次模型。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "本期回顾",
+      "paragraphs": [
+        {
+          "text": "回到这次的任务：准备 weekly.html，运行一条转换命令，拿到 weekly.md。标题、列表、表格都留在原位，转换在本地完成。下次你手上有一批文档要进文本流程，先想想是不是缺的正是这一道工序。感谢收看，我们下期见。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "closing"
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1060,
+    "estimated_seconds": 236,
+    "segments": 39,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": null,
+    "budget": null,
+    "ratio": null,
+    "status": null,
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "本期导读",
+        "spoken_length": 143
+      },
+      {
+        "title": "MarkItDown 转周报为 Markdown",
+        "spoken_length": 836
+      },
+      {
+        "title": "本期回顾",
+        "spoken_length": 81
+      }
+    ],
+    "dropped_citations": 0,
+    "duration_policy": "content"
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 1714,
+      "completion_tokens": 2098,
+      "total_tokens": 3812,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 980,
+      "cost_usd": 0.0015159,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 26.528,
+    "generation": "goal_first",
+    "prompt_version": 5,
+    "creative_direction": "栏目：AI 开源发现。持续交付：帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点。\n每项独立内容可围绕 问题 → 机制 → 例子 → 结论 组织讲述，按素材自然展开。\n以下创作方向分别用于各项独立内容，其中的主例子和任务线在该项内部展开，各项之间由整期简报与转场衔接，不各自重新开场；同一问题的解释章节沿用共同主例子。\n单项内容创作方向：每项内容介绍一个值得观众认识的项目，尽早把它放进一个具体任务。沿同一份输入讲清项目处理哪一环、输出是什么，以及最有辨识度的动作或能力。参数、原理和相关项目各自帮助解释这条任务线中的一个作用，说明后让该项目继续推进；材料里的输入与输出例子成为讲述的抓手。该项结尾回到项目带来的任务结果与适用场合，让观众记住这个项目能接在自己工作中的哪个位置。项目热度与开发背景作为补充，作者自主决定切入点和展开方式。\n\n## 内容组织方式：整期节目\n本份报告只制作一篇总稿、一条视频。把本期有价值的多个内容按合理顺序充分展开。整期共享开场和收尾，各条之间承接转场。每条内容用一个 section，title 为适合导航的短标题，该 section 的 paragraphs 按需要展开背景、具体例子、操作过程、机制、结果与影响。同一内容可以有很多段旁白；不要把每个解释步骤拆成新的内容条目。开场和收尾各占一个 section。每个 section 加 episode_role：开场 opening、内容 item、收尾 closing。内容标题最多 24 字，不使用编号，视频自动显示序号。时长由内容决定，配方中单条视频的秒数、分钟数或字数只作历史参考，不作为整期篇幅上限。保留原始材料的具体细节和研究底稿的解释深度。上游结论直接用于讲述。本期素材若围绕同一问题，则按解释层次组织章节，不强行制造无关话题。\n整期总标题使用「AI 开源发现｜2026年11月01日」，不要把第一条或最显眼的事件当作整期总标题。具体事件使用各段的内容标题。日期是展示信息，不必写进口播，不要求讲述者念日期。",
+    "trusted_urls": 1,
+    "polish": {
+      "version": 2,
+      "findings": [],
+      "changes": [],
+      "rejected": [],
+      "usage": {
+        "requests": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    },
+    "episode": {
+      "mode": "episode",
+      "report_path": "output/radar/2026-11-01_ai_opensource_radar.md",
+      "publication": {
+        "scheme": "column-date/v1",
+        "title": "AI 开源发现｜2026年11月01日",
+        "label": "AI 开源发现",
+        "issue_date": "2026-11-01",
+        "subject_subtitle": false
+      },
+      "source_items": [],
+      "items": [
+        {
+          "index": 1,
+          "title": "MarkItDown 转周报为 Markdown",
+          "chapter_index": 1,
+          "paragraphs": 8
+        }
+      ]
+    },
+    "input_kind": "report",
+    "research_dossier": {
+      "version": 4,
+      "selection": "report",
+      "report_sha256": "0f60bff8945f0b6b8900b4beb66f65749e633df47b789bd72d6d851192adc92b",
+      "material_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "report_chars": 1056,
+      "material_chars": 0
+    },
+    "report_path": "output/radar/2026-11-01_ai_opensource_radar.md",
+    "written_at": "2026-11-01T14:25:38+0800",
+    "cell": {
+      "recipe": "report_digest",
+      "sha256": "ef71633b436a3ad14d20bcb0d8a8b01954e7850656d2486a15a482eaaa6be803",
+      "cell": "ai-developer-digest-long",
+      "status": "experimental",
+      "parts": {
+        "domain": {
+          "key": "ai"
+        },
+        "type": {
+          "key": "digest"
+        },
+        "format": {
+          "key": "long"
+        },
+        "audience": {
+          "key": "developer"
+        }
+      },
+      "resolved_sha256": "3477649dd77367402308e25afbc61b573323187b5a56bfe11a08b331c84369f0",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "developer",
+          "sha256": "0ce139d005d64a51134df6823eae3f6fc7c4ae3ddc82a54a4cac6b05f27ba333"
+        },
+        "output": {
+          "kind": "part",
+          "name": "motion",
+          "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    },
+    "user_materials": {
+      "ids": [
+        "c81a1c6c52474a848943f1e886471a1e",
+        "aead84bc14cc4d088189929e78fe0070"
+      ],
+      "owner": "matrix:ai_media",
+      "mode": "adapt",
+      "revision": 1,
+      "title": "MarkItDown 真实输入与输出",
+      "audience": "开发者和工具使用者",
+      "goal": "围绕同一份周报串起真实输入截图、安装与转换代码、实际输出截图和输入输出对照，沿用栏目问候、步骤转场及品牌包装。"
+    },
+    "checks": {
+      "version": 2,
+      "mode": "on_request",
+      "issues": [],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": false,
+      "audits_complete": false,
+      "pending_review": false,
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 0,
+        "rule_must": 0,
+        "questions": 0,
+        "lost": 0,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          }
+        },
+        "passed": false,
+        "rank": 0
+      }
+    },
+    "content_context": {
+      "column": "ai_opensource",
+      "column_name": "AI 开源发现",
+      "type": "explainer",
+      "matrix": "ai_media",
+      "source_matrix": "ai_media",
+      "job": "ai_media/daily_opensource_radar",
+      "revision": "721e78dbde65665a5c953c87504656efc8c0a7d2d89cbf2951f877fe0f01e489",
+      "audience": "想把开源工具用于实际工作的开发者和 AI 高频使用者",
+      "promise": "帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点",
+      "notes": "每项内容介绍一个值得观众认识的项目，尽早把它放进一个具体任务。沿同一份输入讲清项目处理哪一环、输出是什么，以及最有辨识度的动作或能力。参数、原理和相关项目各自帮助解释这条任务线中的一个作用，说明后让该项目继续推进；材料里的输入与输出例子成为讲述的抓手。该项结尾回到项目带来的任务结果与适用场合，让观众记住这个项目能接在自己工作中的哪个位置。项目热度与开发背景作为补充，作者自主决定切入点和展开方式。",
+      "content_mode": "episode",
+      "greeting": "",
+      "type_definition": {
+        "key": "explainer",
+        "name": "解读",
+        "promise": "理解事件或概念背后的原因",
+        "structure": [
+          "问题",
+          "机制",
+          "例子",
+          "结论"
+        ],
+        "preferred_visuals": [
+          "图表",
+          "流程",
+          "截图",
+          "解释卡"
+        ]
+      },
+      "render_inheritance": "source_compatible",
+      "render": {
+        "production_recipe": "mixed_tutorial",
+        "packaging": {
+          "label": "AI 开源发现",
+          "preset": "common"
+        }
+      },
+      "presentation": {
+        "strategy": "用项目页面或任务示意建立对象感，让同一份文件、代码或任务卡从输入经过项目处理走到输出，主项目持续处于这条关系中。材料里的输入与输出例子值得停下来展示，参数与原理说明贴在它实际改变的那一步。相关工具作为流程相应位置的简短补充，随后回到主项目；结尾用同一任务的结果收束。Stars、下载量、发布时间和团队背景作为辅助信息。",
+        "preferred_visuals": [
+          "项目截图",
+          "产品画面",
+          "输入输出对照",
+          "任务流程",
+          "重点卡"
+        ]
+      }
+    }
+  },
+  "created_by": "autopilot",
+  "created_at": "2026-11-01T14:25:38+0800"
+}

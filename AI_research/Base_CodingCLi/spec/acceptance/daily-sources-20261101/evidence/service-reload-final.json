@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "old_pid": 82029,
+  "new_pid": 92585,
+  "health": "ok",
+  "idle_before_reload": true,
+  "original_records": {
+    "scripts": 361,
+    "renders": 371,
+    "schedules": 61
+  },
+  "original_records_unchanged": {
+    "scripts": true,
+    "renders": true,
+    "schedules": true
+  },
+  "maintenance_receipt": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/maintenance/8c7efab83aff4f109715aec2660a8b55.json",
+  "new_schedules": 0,
+  "source_sha256": {
+    "core/source_pages.py": "f8d949e046095a32e44fe42362a65f21750bb5936a73daab7f28b031e53509ab",
+    "core/source_supply.py": "a50459f0253d4df678cafa728bcdededf202db0e3562ab7fb55eb1d1c1ec9d9a",
+    "core/material_collection.py": "3e27e7ff4534367a15d4900582405314db622823d473c91c486375dafb3e60a3",
+    "core/video/auto.py": "8bbedd5025b2d9414a1c3600aaf42a615505d52d9e43021f82bdfb9e16d3bbbc",
+    "core/video/topic_store.py": "f327e45e485397825e0e5361b0c76df36021ccbbee59bb22427d786ad719e603",
+    "web/services/video_autopilot.py": "d7a3af7cdba8dadba6a4e50151c2bf9eba26933e20e7070e7ef0e8852af39e23",
+    "core/video/visual_materials.py": "076133cbfbcf823ae1b54c66fda732463116baba46bdafc55b8152103ce6956b",
+    "core/video/visual_matching.py": "7f085289147c4c624ff5201164a4853800977ce881add3eb606deb839e8fc4f0",
+    "core/video/page_regions.js": "bd01e049422382855a0693a627a48d383251bc26af0c252e78df3f2d33524265"
+  }
+}
