@@ -314,7 +314,7 @@ class JobStore:
                              (json.dumps(request["production_recipe_resolved"], ensure_ascii=False)
                               if request.get("production_recipe_resolved") else None, job_id))
 
-    def editable_content(self, job_id: str) -> dict:
+    def editable_content(self, job_id: str, *, include_episode: bool = False) -> dict:
         job = self.get_job(job_id)
         source_path = self.source_path(job_id)
         source = source_path.read_text(encoding="utf-8")
@@ -342,6 +342,10 @@ class JobStore:
         for key in ("package", "packaging", "packaging_resolved", "sources", "production_recipe", "production_recipe_resolved", "production_plan", "production_mode", "visual_style", "production_context", "content_notices", "visual_storytelling", "slideshow_images", "image_materials", "slideshow_images_resolved", "background_music", "background_music_resolved", "brand", "brand_resolved"):
             if saved.get(key) is not None:
                 options[key] = saved[key]
+        # Screen/media revisions retain chapters; edited scripts may reorganize
+        # them, so only the former inherit the original navigation mapping.
+        if include_episode and saved.get("episode") is not None:
+            options["episode"] = saved["episode"]
         return {"job_id": job_id, "title": job["title"], "source_text": source, "narration_text": narration,
                 "creative_intent": job["creative_intent"], "options": options}
 

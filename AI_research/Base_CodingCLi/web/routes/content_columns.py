@@ -135,6 +135,7 @@ class ColumnIn(BaseModel):
     status: str = "configured"
     notes: str = ""
     content_mode: str | None = None
+    greeting: str | None = None
 
 
 def _save(key: str, body: ColumnIn, user, *, creating: bool):
@@ -148,6 +149,11 @@ def _save(key: str, body: ColumnIn, user, *, creating: bool):
         raise _error(422, "revision_required", "保存栏目需要当前 revision")
     data = body.model_dump(exclude={"key", "expected_revision"})
     data["content_mode"] = body.content_mode or (existing[key].content_mode if key in existing else "episode")
+    # The page does not edit the greeting yet; a save from it keeps the one set in the column's YAML.
+    greeting = body.greeting if body.greeting is not None else (existing[key].greeting if key in existing else "")
+    data.pop("greeting")
+    if greeting.strip():
+        data["greeting"] = greeting
     try:
         content_columns.save(paths.config_dir, key, data,
                              expected_revision="" if creating else body.expected_revision)

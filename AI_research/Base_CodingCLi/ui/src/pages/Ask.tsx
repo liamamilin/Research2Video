@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Loader2, MessageSquareText, Plus, Send, Square, History, PanelRight, ListTodo, LayoutDashboard, X } from "lucide-react";
 import {
   chatWithAssistant, getAssistantConversation, newAssistantConversation, stopAssistantResponse,
-  type AssistantConversation, type AssistantMessage,
+  type AssistantMaterial, type AssistantConversation, type AssistantMessage,
 } from "@/api";
 import { AssistantAction } from "@/components/AssistantAction";
 import { AssistantMarkdown } from "@/components/AssistantMarkdown";
@@ -14,6 +14,7 @@ import { AssistantOverview } from "@/components/AssistantOverview";
 import { listAssistantConversations, setAssistantContext, type ConversationSummary, type AssistantContext } from "@/api/assistant-workspace";
 import { assistantContext, CONTEXT_LABELS } from "@/lib/assistant-context";
 import { useAuthStore } from "@/lib/auth-store";
+import { useAssistantDraft, moveAssistantDraft, clearAssistantDraft, setAssistantDraftText } from '@/lib/assistant-draft';
 
 const EXAMPLES = ["查看各矩阵的任务与运行安排", "帮我创建一个研究矩阵", "看看有哪些文稿等我审", "看看有哪些视频可以发布", "我想把本地视频发布到指定平台", "检查发布队列里需要处理的问题", "检查今天有哪些任务失败了"];
 const READ_EXAMPLES = ["看看有哪些文稿等我审", "今天的快讯里有哪些选题还没写", "查看现有 Jobs", "查看发布进度"];
@@ -45,12 +46,12 @@ function saveConversationId(key: string, id?: string) {
 }
 function messagesFromServer(data: AssistantConversation): AssistantMessage[] {
   return data.requests.flatMap((item) => [
-    { role: "user" as const, content: item.message },
+    { role: "user" as const, content: item.message, materials: item.materials },
     { role: "assistant" as const, content: item.result.answer || "", actions: item.result.actions || [], error: item.result.error, continuation: item.result.continuation, usage: item.result.usage },
   ]);
 }
-function submitConversation(key: string, text: string, history: AssistantMessage[], conversationId?: string, context?: AssistantContext | null) {
-  const prefix: AssistantMessage[] = [...history, { role: "user", content: text }];
+function submitConversation(key: string, text: string, history: AssistantMessage[], conversationId?: string, context?: AssistantContext | null, materials: AssistantMaterial[] = []) {
+  const prefix: AssistantMessage[] = [...history, { role: "user", content: text, materials }];
   const pending: PendingConversation = {
     messages: [...prefix, { role: "assistant", content: "", actions: [] }], status: "正在连接…",
     requestId: crypto.randomUUID().replace(/-/g, ""), listeners: new Set(), promise: Promise.resolve([]),
@@ -68,7 +69,7 @@ function submitConversation(key: string, text: string, history: AssistantMessage
     if (event.type === "action") pending.messages = [...prefix, { ...reply, actions: [...(reply.actions || []), event.action] }];
     if (event.type === "status") pending.status = event.message;
     publish();
-  }, { conversation_id: conversationId, request_id: pending.requestId, context }).then((result) => {
+  }, { conversation_id: conversationId, request_id: pending.requestId, context, material_ids: materials.map(m => m.id) }).then((result) => {
     pending.conversationId = result.conversation_id || conversationId;
     saveConversationId(key, pending.conversationId);
     pending.messages = [...prefix, { role: "assistant", content: result.answer, actions: result.actions, error: result.error, continuation: result.continuation, usage: result.usage }];
@@ -104,7 +105,9 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
   const [revision, setRevision] = useState(0);
   const [messages, setMessages] = useState<AssistantMessage[]>(() => pendingConversations.get(storageKey)?.messages || readConversation(storageKey));
   const [historyLimit, setHistoryLimit] = useState(20);
-  const [input, setInput] = useState(() => (new URLSearchParams(location.search).get('prompt') || '').slice(0, 8000));
+  const [initialInput] = useState(() => (new URLSearchParams(location.search).get('prompt') || '').slice(0, 8000));
+  const [materialError, setMaterialError] = useState('');
+  const uploadInput = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(() => pendingConversations.has(storageKey));
   const [restoring, setRestoring] = useState(() => !pendingConversations.has(storageKey));
   const [restoreError, setRestoreError] = useState("");
@@ -114,10 +117,13 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
   const conversationId = useRef<string | undefined>(pendingConversations.get(storageKey)?.conversationId ||
     (/^[a-f0-9]{32}$/.test(requestedConversation) ? requestedConversation : readConversationId(storageKey)));
   const [activeConversationId, setActiveConversationId] = useState(conversationId.current);
+  const draft = useAssistantDraft(username, activeConversationId, initialInput);
+  const { text: input, setText: setInput, materials, busy: uploading } = draft;
   const bindConversation = useCallback((id?: string) => {
     if (conversationId.current !== id) setHistoryLimit(20);
+    if (!conversationId.current && id) moveAssistantDraft(username, undefined, id);
     conversationId.current = id; setActiveConversationId(id); if (id) saveConversationId(storageKey, id);
-  }, [storageKey]);
+  }, [storageKey, username]);
   const historySelected = useRef(false);
   const runningId = useRef<string>();
   const submitting = useRef(false);
@@ -206,11 +212,19 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
     void recover();
     return () => { active = false; clearTimeout(timer); };
   }, [storageKey, recoverVersion, bindConversation, location.pathname, hasRouteContext]);
+  const addMaterials = async (values: (File | string)[]) => {
+    if (readOnly || busy) return;
+    setMaterialError('');
+    try {
+      await draft.add(values);
+    } catch (error) { setMaterialError(error instanceof Error ? error.message : '材料上传失败，请重试'); }
+  };
   const send = async (example?: string) => {
-    const text = (example ?? input).trim();
-    if (!text || restoring || restoreError || busy || submitting.current || pendingConversations.has(storageKey)) return;
+    const text = (example ?? input).trim() || (materials.length ? '请读取这些材料，帮我生成文稿并完成视频。' : '');
+    if (!text || draft.incomplete || uploading || restoring || restoreError || busy || submitting.current || pendingConversations.has(storageKey)) return;
     follow.current = true; submitting.current = true; setInput(""); setBusy(true);
-    const pending = submitConversation(storageKey, text, messages, conversationId.current, selectedContext);
+    const pending = submitConversation(storageKey, text, messages, conversationId.current, selectedContext, materials);
+    draft.clear(); setMaterialError('');
     runningId.current = pending.requestId;
     const update = (current: AssistantMessage[], progress: string) => { setMessages(current); setStatus(progress); };
     update(pending.messages, pending.status); pending.listeners.add(update);
@@ -219,7 +233,7 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
   };
   const fresh = async () => {
     setRestoring(true); setRestoreError(""); historySelected.current = false;
-    try { const data = await newAssistantConversation(); bindConversation(data.id); saveConversation(storageKey, []); setMessages([]); setInput(""); setSelectedContext(assistantContext(location.pathname, location.search)); setRevision((n) => n + 1);
+    try { const data = await newAssistantConversation(); clearAssistantDraft(username, data.id); bindConversation(data.id); saveConversation(storageKey, []); setMessages([]); setMaterialError(''); setSelectedContext(assistantContext(location.pathname, location.search)); setRevision((n) => n + 1);
       if (location.pathname === '/ask' && requestedConversation) { const params = new URLSearchParams(location.search); params.delete('conversation'); navigate('/ask' + (params.size ? '?' + params.toString() : ''), { replace: true }); }
     }
     catch (error) { setRestoreError(error instanceof Error ? error.message : "新对话未创建"); }
@@ -235,11 +249,12 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
   const openConversation = (id: string, prompt = '') => {
     if (busy) return;
     historySelected.current = true; bindConversation(id); setHistoryOpen(false); setTaskCenterOpen(false); setOverviewOpen(false);
+    if (prompt) setAssistantDraftText(username, id, prompt);
     setWorkspaceOpen(!embedded && window.innerWidth >= 1024); setRestoring(true); setRestoreError('');
-    setMessages([]); setSelectedContext(null); setInput(prompt); setRecoverVersion(n => n + 1);
+    setMessages([]); setSelectedContext(null); setMaterialError(''); setRecoverVersion(n => n + 1);
     if (!embedded) navigate('/ask?conversation=' + id, { replace: true });
   };
-  const disabled = busy || restoring || !!restoreError;
+  const disabled = busy || restoring || uploading || !!restoreError;
   return <div className={`${embedded ? "h-full" : "h-[calc(100dvh-3rem)]"} min-h-[420px] max-w-[1500px] mx-auto flex flex-col gap-4`}>
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex-1 min-w-[14rem]"><h1 className="text-lg font-semibold">助手</h1><p className="text-xs text-text-muted mt-1">
@@ -251,7 +266,7 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
       <button className="btn text-xs" aria-expanded={!overviewOpen && taskCenterOpen} onClick={() => { if (overviewOpen) toggleOverview(false); setTaskCenterOpen(v => !v); setWorkspaceOpen(false); }}><ListTodo className="w-3.5 h-3.5" />任务中心</button>
       <button className="btn text-xs" aria-expanded={capabilitiesOpen} onClick={() => setCapabilitiesOpen(v => !v)}>能做什么</button>
       <button className="btn text-xs" disabled={disabled || messages.length === 0} onClick={() => { setRestoring(true); setRecoverVersion((n) => n + 1); }}>核验结果</button>
-      <button className="btn text-xs" disabled={busy || restoring || (!restoreError && messages.length === 0)} onClick={() => void fresh()}><Plus className="w-3.5 h-3.5" />新对话</button>
+      <button className="btn text-xs" disabled={busy || restoring || (!restoreError && messages.length === 0 && !input && !draft.entries.length)} onClick={() => void fresh()}><Plus className="w-3.5 h-3.5" />新对话</button>
     </div>
     {capabilitiesOpen && <AssistantCapabilities onPrompt={text => { setInput(text); setCapabilitiesOpen(false); }} />}
     {!overviewOpen && selectedContext && <div className="card p-3 flex items-center gap-3 text-xs">
@@ -283,7 +298,8 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
       {messages.slice(-historyLimit).map((message, index) => <div key={Math.max(0, messages.length - historyLimit) + index} className={message.role === "user" ? "ml-auto max-w-[90%] sm:max-w-[80%]" : "max-w-full"}>
         <div className="text-xs text-text-muted mb-2">{message.role === "user" ? "你" : "助手"}</div>
         <div className={message.role === "user" ? "rounded-lg bg-bg-hover border border-border px-4 py-3" : "card px-4 py-4 sm:px-5"}>
-          {message.role === "user" ? <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p> : <>
+          {message.role === "user" ? <><p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            {!!message.materials?.length && <ul className="mt-2 text-xs space-y-1" aria-label="已提供的材料">{message.materials.map(m => <li key={m.id}><a className="text-accent" href={m.file_url} target="_blank" rel="noreferrer">{m.kind === 'image' ? '图片' : m.kind === 'url' ? '链接' : '正文 / 文档'} · {m.name}</a></li>)}</ul>}</> : <>
             <div className="md-body"><AssistantMarkdown content={message.content} /></div>
             {message.continuation && <div className="mt-3 rounded border border-border p-3 text-xs space-y-2">
               <p>{message.continuation.reason === 'service_maintenance' ? '维护已提交，后续步骤需恢复访问后继续。' : `原请求尚未完成，进度已保存。已完整读取 ${message.continuation.reports_complete} 份报告，${message.continuation.remaining_report_count} 份候选待展开。`}</p>
@@ -302,14 +318,29 @@ export function ApplicationAssistant({ username, readOnly, embedded = false }: {
       {busy && <div className="flex items-center gap-2 text-sm text-text-muted" role="status"><Loader2 className="w-4 h-4 animate-spin text-accent" />{status || "正在处理…"}</div>}
       {messages.length > 0 && <div ref={bottom} />}
     </div>
-    <form className="card p-3 flex items-end gap-3" onSubmit={(event) => { event.preventDefault(); void send(); }}>
+    <form className="card p-3" onDragOver={event => { if (!readOnly) event.preventDefault(); }} onDrop={event => { event.preventDefault(); if (!disabled) void addMaterials(Array.from(event.dataTransfer.files)); }} onSubmit={(event) => { event.preventDefault(); void send(); }}>
+      {!!draft.entries.length && <ul className="flex flex-wrap gap-2 mb-2" aria-label="待发送材料">{draft.entries.map(entry => <li key={entry.id} className="rounded border border-border px-2 py-1 text-xs max-w-full">
+        <div className="flex items-center gap-2"><span className="truncate">{entry.material?.kind === 'image' ? '图片' : '材料'} · {entry.name}</span>
+          {entry.state === 'uploading' && <Loader2 className="w-3 h-3 animate-spin" />}
+          {entry.state !== 'ready' && entry.state !== 'uploading' && <button type="button" className="text-accent" disabled={busy} onClick={() => void draft.retry(entry.id)}>重试上传</button>}
+          <button type="button" aria-label={`移除 ${entry.name}`} disabled={busy} onClick={() => draft.remove(entry.id)}><X className="w-3 h-3" /></button></div>
+        {entry.error && <p role="alert" className="text-danger mt-1">{entry.error}</p>}
+      </li>)}</ul>}
+      {materialError && <p role="alert" className="text-xs text-danger mb-2">{materialError}</p>}
+      <div className="flex items-end gap-3">
+      {!readOnly && <><input ref={uploadInput} type="file" multiple hidden accept=".png,.jpg,.jpeg,.webp,.gif,.txt,.md,.pdf,.docx" aria-label="上传创作材料" onChange={event => { const files = Array.from(event.target.files || []); event.target.value = ''; void addMaterials(files); }} /><button type="button" className="btn mb-1 shrink-0" disabled={disabled || uploading} onClick={() => uploadInput.current?.click()}>{uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}材料</button></>}
       <textarea ref={composer} className="input resize-none border-0 focus:ring-0 flex-1 min-w-0" rows={2} aria-label="消息" placeholder={selectedContext ? "描述你想怎样调整当前对象…" : "例如：管理矩阵和周期，调整生成配置，准备或发布视频"}
-        value={input} maxLength={8000} disabled={disabled} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
+        value={input} maxLength={8000} disabled={disabled} onPaste={event => {
+          const files = Array.from(event.clipboardData.files);
+          if (files.length && !readOnly) { event.preventDefault(); void addMaterials(files); }
+          else if (!readOnly && event.clipboardData.getData('text').length + input.length > 8000) { event.preventDefault(); void addMaterials([event.clipboardData.getData('text')]); }
+        }} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
           if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); void send(); }
         }} />
-      {busy ? <button type="button" className="btn mb-1" onClick={() => void stop()}><Square className="w-3.5 h-3.5" />停止响应</button> : <button type="submit" className="btn btn-primary mb-1" disabled={disabled || !input.trim()}><Send className="w-3.5 h-3.5" />发送</button>}
+      {busy ? <button type="button" className="btn mb-1" onClick={() => void stop()}><Square className="w-3.5 h-3.5" />停止响应</button> : <button type="submit" className="btn btn-primary mb-1" disabled={disabled || uploading || draft.incomplete || (!input.trim() && !materials.length)}><Send className="w-3.5 h-3.5" />发送</button>}
+      </div>
     </form>
-    <p className="text-[11px] text-text-muted">Enter 发送 · Shift + Enter 换行 · 执行结果会保留在对话中，可用「核验结果」重新读取。</p>
+    <p className="text-[11px] text-text-muted">{readOnly ? '' : '可直接粘贴链接、正文、截图，或拖入图片和文档。'}Enter 发送 · Shift + Enter 换行</p>
     </section>
     {(workspaceOpen || taskCenterOpen) && <aside className={`${embedded ? 'absolute inset-0 z-10 bg-bg-card p-4 rounded-xl' : 'absolute inset-0 z-10 bg-bg-card p-4 lg:p-0 lg:static lg:w-96 lg:shrink-0'} overflow-y-auto border-l border-border lg:pl-5`}>
       <button className={`${embedded ? '' : 'lg:hidden'} btn text-xs mb-4`} onClick={() => { setWorkspaceOpen(false); setTaskCenterOpen(false); }}>返回对话</button>

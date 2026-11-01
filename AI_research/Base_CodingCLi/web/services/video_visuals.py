@@ -51,7 +51,6 @@ def prepare(render: dict, client) -> tuple[dict, dict]:
         return payload, audit
     policy = copy.deepcopy(audit["policy"])
     policy["_model_calls"] = audit.get("model_calls", 0)
-    policy["_paragraphs"] = audit["needs"]
     started = time.monotonic()
     prior_seconds = float(audit.get("seconds", 0))
     materials = list(audit.get("selection", {}).get("materials", []))
@@ -128,20 +127,16 @@ def prepare(render: dict, client) -> tuple[dict, dict]:
                     atomic_write(str(attempt_path.with_suffix(".json")), json.dumps(metadata, ensure_ascii=False))
                 quality = metadata.get("quality", {})
                 vision = (quality.get("image") or {}).get("vision") or {}
-                matched = set(vision.get("paragraph_ids", [])) if need.get("visual_subject") and vision.get("state") == "passed" else {need["id"]}
-                matching_needs = [n for n in audit["needs"] if n["id"] in matched]
-                placements = [{k: n[k] for k in ("chapter_index", "paragraph_index")} for n in matching_needs]
+                if vision.get("state") == "passed" and need["id"] not in vision.get("paragraph_ids", []):
+                    raise screenshots.ScreenshotError('图片没有匹配当前讲解段落')
+                placements = [{k: need[k] for k in ("chapter_index", "paragraph_index")}]
                 sha = hashlib.sha256(raw).hexdigest()
                 duplicate = next((m for m in materials if m["source"]["sha256"] == sha), None)
                 if duplicate:
                     duplicate["placements"].extend(p for p in placements if p not in duplicate["placements"])
-                    decisions.append({"need_id": need["id"], "status": "accepted" if need["id"] in matched else "text", "reason": "复用已匹配的同一图片",
+                    decisions.append({"need_id": need["id"], "status": "accepted", "reason": "复用已匹配的同一图片",
                                       "screenshot_id": duplicate["screenshot_id"], "source_url": url, "cached": True})
-                    for other in matching_needs:
-                        if other["id"] != need["id"] and other["id"] not in completed:
-                            decisions.append({"need_id": other["id"], "status": "accepted", "reason": "复用图片理解已匹配的素材",
-                                              "screenshot_id": duplicate["screenshot_id"], "source_url": url, "cached": True})
-                    completed.update(matched)
+                    completed.add(need["id"])
                     accepted = True
                     checkpoint()
                     break
@@ -163,14 +158,10 @@ def prepare(render: dict, client) -> tuple[dict, dict]:
                 if focus:
                     row["focus"] = focus
                 materials.append(row)
-                decisions.append({"need_id": need["id"], "status": "accepted" if need["id"] in matched else "text",
-                                  "reason": "已选择相应讲解点的页面截图" if need["id"] in matched else "该素材用于更匹配的其他段落",
+                decisions.append({"need_id": need["id"], "status": "accepted",
+                                  "reason": "已选择相应讲解点的页面截图",
                                   "screenshot_id": asset["id"], "source_url": url, "cached": bool(cached), "quality": metadata.get("quality", {})})
-                for other in matching_needs:
-                    if other["id"] != need["id"] and other["id"] not in completed:
-                        decisions.append({"need_id": other["id"], "status": "accepted", "reason": "复用图片理解已匹配的素材",
-                                          "screenshot_id": asset["id"], "source_url": url, "cached": True})
-                completed.update(matched)
+                completed.add(need["id"])
                 accepted = True
                 checkpoint()
                 break

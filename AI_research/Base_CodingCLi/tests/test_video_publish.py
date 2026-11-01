@@ -121,6 +121,20 @@ def test_tags_skip_prices_and_a_long_title_is_cut_at_its_first_clause_for_the_co
     assert publish.cover_text("短标题", column())["headline"] == "短标题"
 
 
+@pytest.mark.parametrize("title", [
+    "今日快讯｜2026年10月31日",
+    "ChatGPT 产品动态与热点｜2026年10月31日",
+    "AI 深度解读｜2026年10月31日｜并行任务为什么越跑越慢",
+])
+@pytest.mark.parametrize("identity", ["topic", "version"])
+def test_programme_cover_preserves_complete_name_date_and_subject(title, identity):
+    script = {**SCRIPT, "topic": {"title": title, **({"content_mode": "episode"} if identity == "topic" else {})}}
+    saved = version(**({"episode": {"mode": "episode"}} if identity == "version" else {}))
+    saved["title"] = title
+    pack = publish.build(script, saved, column(), REPORT, None)
+    assert pack["title"] == pack["cover"]["headline"] == title
+
+
 def test_a_summary_cut_for_length_ends_at_a_comma_not_in_the_middle_of_a_word():
     long = "这周讲几个大模型怎么挑" + "，Claude Opus 5.5 智能指数最高" * 6 + "，最快开始返回第一段，最便宜的是另一个。后面还有。"
     out = publish.summary({"sections": [{"paragraphs": [{"text": long}]}]})

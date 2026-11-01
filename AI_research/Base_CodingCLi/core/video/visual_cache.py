@@ -11,7 +11,7 @@ from core.video import screenshots, store, visual_materials, visual_matching
 
 def key(need: dict, url: str, policy: dict) -> str:
     return visual_materials.digest({"url": visual_materials.url_key(url), "kind": need["kind"],
-                                    "selection_revision": 2,
+                                    "selection_revision": 4, "paragraph": {"text": need["text"], "claims": need["claims"]},
                                     "visual_subject": need.get("visual_subject", ""), "visual_goal": need.get("visual_goal", ""),
                                     "version": policy["version"], "entities": visual_matching.entities(need["claims"]),
                                     "prices": visual_matching.prices(need["claims"]), "cycles": sorted(visual_matching.cycles(need["claims"]))})

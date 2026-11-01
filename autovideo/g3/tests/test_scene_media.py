@@ -63,8 +63,8 @@ def test_safe_screen_fields_and_parent_immutability():
     with pytest.raises(ValueError):apply_changes(scene,{'lines.8':'bad'})
 
 
-def complete_parent(client):
-    response=client.post('/api/jobs',json={'source_text':SOURCE,'duration_mode':'content','video_form':'information_motion','voice_id':'zm_yunxi','video_speed':1.5})
+def complete_parent(client, body=None):
+    response=client.post('/api/jobs',json=body or {'source_text':SOURCE,'duration_mode':'content','video_form':'information_motion','voice_id':'zm_yunxi','video_speed':1.5})
     assert response.status_code==202
     jid=response.json()['job_id'];store=client.app.state.store;claim=store.claim_next()
     run=store.data_dir/claim['workspace_rel_path']/'g2-run';fixture=run/'fixtures';artifacts=run/'artifacts';artifacts.mkdir(parents=True)
@@ -77,6 +77,27 @@ def complete_parent(client):
     for name,path in [('video-ir.json',fixture/'video-ir-v0.2.json'),('video.mp4',artifacts/'video.mp4'),('narration.json',artifacts/'final-narration-plan.json'),('manifest.json',artifacts/'manifest.json')]:
         records.append({'name':name,'relative_path':str(path.relative_to(run.parent)),'content_type':'application/json','sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'bytes':path.stat().st_size})
     store.mark_completed(jid,1,records);return jid
+
+
+@pytest.mark.parametrize('kind,changes', [
+    ('visual-revisions', {'scene_id': 's1', 'changes': {'title': '新标题'}}),
+    ('media-revisions', {'video_speed': 1.25}),
+])
+def test_screen_and_media_revisions_keep_original_step_navigation(tmp_path, kind, changes):
+    with TestClient(create_app(Settings(data_dir=tmp_path/'data'),start_worker=False,preflight=READY)) as client:
+        episode = {'items': [{'title': '转换文件', 'chapter_indexes': [0]}]}
+        parent = complete_parent(client, {'input_mode': 'narration', 'duration_mode': 'content',
+            'video_form': 'information_motion', 'chapters': [{'title': '转换文件', 'paragraphs': ['测试旁白。']}],
+            'episode': episode})
+        store = client.app.state.store
+        parent_file = store.source_path(parent).parent/'input.json'
+        original = parent_file.read_bytes()
+        response = client.post(f'/api/jobs/{parent}/{kind}', json=changes)
+        assert response.status_code == 202, response.text
+        child_file = store.source_path(response.json()['job_id']).parent/'input.json'
+        assert json.loads(child_file.read_text())['episode'] == episode
+        assert parent_file.read_bytes() == original
+        assert 'episode' not in store.editable_content(parent)['options']
 
 
 def test_versioned_scene_and_media_requests_preserve_parent_and_options(tmp_path):

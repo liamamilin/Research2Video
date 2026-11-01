@@ -1,0 +1,27 @@
+{
+  "source_attempt": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/ai-matrix-productization-20261027/f7b94a0ff1fa465b88e447159aba0da9/jobs/bcaeb5f2-6190-4930-8615-bd600885fede/attempts/1/g2-run",
+  "scene_id": null,
+  "narration_unchanged": true,
+  "audio_sha256": "070c42cbcd9cc555c5bace94d2763c41822730e5935ed2a9b9104fd888223c99",
+  "new_model_calls": 0,
+  "new_tts_calls": 0,
+  "manual_scene_or_beat_edits": 0,
+  "source_plan_sha256": "1160e4daa7ceb5846bf26238b16a69db1df484b3d92ce6d812dbf5edd0851560",
+  "renderer_sha256": {
+    "ShotDirector.tsx": "1057b06a645afb6b8d6217714d07149b48368db105c3175e2db074e1e6292b64",
+    "DataChart.tsx": "d40edaed2e598e132b41861eb9c2b313dcdd41a6d146d3bc1b67fdd51be5dae6",
+    "StoryDirection.tsx": "0d1e89bc92acbe7cfbb13000f37024672f667f666e4e5c2e5315fd0a7a6ba59b",
+    "CodeDemo.tsx": "c3d2747d55565c1555eae9307b633a1597c89054b7a92429d7a4fd8b1d444076",
+    "CreativeForms.tsx": "b5cd904e704de8aeb436108bed21b1cb1ac0884ba3fbe293efc441861b361261",
+    "Root.tsx": "3088ca28ac74ad7feea35f96a54ea869c983487f802927969bce27350ea35f3c",
+    "ObjectFlow.tsx": "841832c14918b733fd0e57a1a29d355f4fbb9fb1b32f50e23320baa069923990",
+    "ObjectMotions.ts": "86a10e83a96abd54f8bad8ad0616391e829d8ee0c517a39eacb386c3495fe03e",
+    "ScatterChart.tsx": "f36ddefcbab6a39ac24d359c4da4d7e90d8e8259e0e1a5c0be036869ad4b1b12",
+    "DirectedMaterials.tsx": "2d242877cf2d400203bfdddd00665357905b34416393365e81060233f2b97ce6",
+    "ContentStyle.tsx": "f3e71ec7c6d6ec116c09bc795c371ea42bd9b72ec499a4e5e897ae6c1457c043",
+    "index.ts": "a58f804bf74bab68b4549aa5c715eb4a89ec5835206d198fc79b462b4fc71ef9",
+    "VisualObjects.tsx": "e08ac79311a1dcf10596216ee333bb4b6e2912548f5d0741ac0fb98c23cbc7b9",
+    "ImageMaterials.tsx": "111b7ba3dc325a30b03f37f0c838fbc19f1a2e812032b8d59fcadcde8d54e7e2",
+    "Packaging.tsx": "04337d58feeb7200188d3481d02bd3412d91c32f31272dc34d19bdf6461eecaa"
+  }
+}

@@ -261,6 +261,7 @@ describe("managed plan status honesty", () => {
     schedule: "0 3 * * *",
     schedule_label: "0 3 * * *",
     timezone: "Asia/Shanghai",
+    research_window: {mode: 'previous_slot', start: '2026-09-25T03:00:00+08:00', end: '2026-09-26T03:00:00+08:00', days: 1, timezone: 'Asia/Shanghai'},
   };
 
   function mockManaged(state: unknown) {
@@ -289,6 +290,7 @@ describe("managed plan status honesty", () => {
     expect(screen.queryByText("正常")).toBeNull();
     expect(screen.getByText(/尚未执行过/)).toBeTruthy();
     expect(screen.getByText(/周期执行器在线/)).toBeTruthy();
+    expect(screen.getByText(/下期研究范围.*随排期调整/)).toBeTruthy();
   });
 
   it("shows healthy only after a run actually succeeded", async () => {

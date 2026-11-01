@@ -22,6 +22,13 @@ sources:
 - source:pitchfork
 - source:dezeen
 - source:jazztimes
+- source:three_quarks
+- source:art_newspaper
+- source:aeon
+- source:lithub
+- source:indiewire
+- source:public_domain_review
+- source:marginalian
 prompt: '为「一个文化现象的来路」整理研究底稿。围绕材料已经有具体过程的一处表达形式、用途或观看关系的变化，用持续的代表作品和参与者在具体场合的行动，解释它怎样形成、展示、转译、传播与被重新理解。尽早把作品、正在发生的动作和本期文化问题接起来，保留具体过程、作品细节、观众接触方式和解释中的推理；本期问题贴着持续展开的变化。相邻案例在解释主过程某一步时进入，讲清该步动作与结果后回到主例子；人物履历、机构和年代说明它们改变了哪一步。比较围绕同一表达变化与观看条件展开。
 
 

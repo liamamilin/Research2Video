@@ -41,6 +41,7 @@ import { PublishPanel, RenderFolder } from "./VideoPublish";
 import { STATUS_CLASS, STATUS_LABEL, minutes } from "./VideoScripts";
 import { ArticleSource } from "@/components/ArticleSource";
 import { ScriptScreenshots } from "@/components/ScriptScreenshots";
+import { ScriptPolish } from "@/components/ScriptPolish";
 import { workflowReturn } from "@/lib/platform-links";
 import { SelectionSkipLinks, skipLabel } from "@/components/SelectionSkip";
 import { useScriptEditor } from "@/lib/use-script-editor";
@@ -162,11 +163,11 @@ export function VideoScriptViewPage() {
   }, [busyServer, editing, load]);
 
   useEffect(() => {
-    if (tab !== "draft" || !canEdit || detail?.topic.article || detail?.column?.writer !== "adapt" || catalog) return;
+    if (tab !== "draft" || !canEdit || detail?.topic.article || (!detail?.topic.user_materials && detail?.column?.writer !== "adapt") || catalog) return;
     const controller = new AbortController();
     listVideoStyles(controller.signal).then((value) => { if (!controller.signal.aborted) setCatalog(value); }).catch(() => undefined);
     return () => controller.abort();
-  }, [tab, canEdit, detail?.topic.article, detail?.column?.writer, catalog]);
+  }, [tab, canEdit, detail?.topic.article, detail?.topic.user_materials, detail?.column?.writer, catalog]);
 
   // The fact sheet behind the version on screen, for the fact labels' tooltips.
   const sheetId = detail?.version_shown?.meta?.fact_sheet_id;
@@ -556,6 +557,7 @@ export function VideoScriptViewPage() {
         </section>
       ) : null}
 
+      {shown && !editing && tab === "draft" ? <ScriptPolish polish={shown.meta?.polish} /> : null}
       {!localVideo && shown && !editing && (tab === "draft" || tab === "video") ? <ScriptScreenshots key={`${detail.id}-${shown.version}-${renderForVersion(detail, shown.version)?.id ?? ""}`} id={detail.id} version={shown.version} canEdit={writable && ["DRAFT", "APPROVED"].includes(detail.status)} /> : null}
       {detail.topic.article && tab === "draft" ? <ArticleSource key={detail.id} id={detail.id} mode={detail.topic.article.mode} /> : null}
       {detail.report_id && tab === "draft" ? (
@@ -570,7 +572,7 @@ export function VideoScriptViewPage() {
           key={`${shown.version}-${catalog ? "ready" : "loading"}`}
           detail={detail}
           catalog={catalog}
-          canRestyle={writable && !editing && ["DRAFT", "APPROVED"].includes(detail.status) && Boolean(detail.report_path) && detail.column?.writer === "adapt"}
+          canRestyle={writable && !editing && ["DRAFT", "APPROVED"].includes(detail.status) && (Boolean(detail.topic.user_materials) || (Boolean(detail.report_path) && detail.column?.writer === "adapt"))}
           busy={busy === "restyle"}
           onRestyle={restyle}
         />

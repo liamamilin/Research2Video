@@ -1,0 +1,122 @@
+{
+  "status": "PASS",
+  "job_id": "d018731b-0056-4264-8c75-bb5a6cc8cb83",
+  "run_id": "e778b4baa11744f0baeed10d516c1705",
+  "production": "ai_media_opensource_digest",
+  "automatic_pick_write_approve_render_download": true,
+  "greeting_count": 1,
+  "narration_matches_approved_script": true,
+  "tutorial_recipe_version": 2,
+  "steps": [
+    "准备周报输入",
+    "执行转换命令",
+    "查看转换结果"
+  ],
+  "code_scenes": 2,
+  "pictured_scenes": 0,
+  "automatic_images": 1,
+  "registered_image_focus": true,
+  "image_display_note": "The image is assigned to the command paragraph; native code_demo takes priority.",
+  "new_production_dependencies": 0,
+  "writer_requests": 2,
+  "visual_model_calls": 3,
+  "final_render_model_calls": 5,
+  "render_attempts": 2,
+  "probes": {
+    "video.mp4": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "6827"
+        },
+        {
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "10668"
+        }
+      ],
+      "format": {
+        "duration": "227.566667"
+      }
+    },
+    "content.mp4": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "6647"
+        },
+        {
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "10386"
+        }
+      ],
+      "format": {
+        "duration": "221.566667"
+      }
+    }
+  },
+  "sample_times": [
+    [
+      "brand-opening",
+      0.8
+    ],
+    [
+      "greeting",
+      1.5
+    ],
+    [
+      "agenda",
+      18.566666666666666
+    ],
+    [
+      "step-1",
+      35.166666666666664
+    ],
+    [
+      "step-2",
+      80.26666666666667
+    ],
+    [
+      "step-3",
+      131.0
+    ],
+    [
+      "code-1",
+      90.45
+    ],
+    [
+      "code-2",
+      196.4
+    ],
+    [
+      "recap",
+      216.85
+    ],
+    [
+      "outro",
+      225.56666666666666
+    ]
+  ],
+  "returned_artifacts_verified": 33,
+  "video_sha256": "52b26d8f9dcdae563610cec221a3c3d1c3561e46de83de8084763aac016566ac",
+  "current_code_renderer_used": true,
+  "code_renderer_sha256": "b9f8d4fe0b5b71821a2df424332e67a812db78b9caedcc1cc96c44102c27c893",
+  "brand_profile": "linthesis",
+  "brand_outro_seconds": 6.0,
+  "source_sha256": {
+    "web/services/video_render.py": "ce62dea69fe5829644dc3d672f18ff8a17b9ef58867dd7a3372087c7a79030f7",
+    "core/video/visual_materials.py": "fd2dcc8b4f9047de148708e86f70dc024f002b4d082430ccf53e6ca91845fe99",
+    "config/content_columns/ai_opensource.yaml": "721e78dbde65665a5c953c87504656efc8c0a7d2d89cbf2951f877fe0f01e489"
+  }
+}

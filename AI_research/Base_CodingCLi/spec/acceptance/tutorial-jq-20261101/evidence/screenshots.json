@@ -1,0 +1,44 @@
+[
+  {
+    "name": "input",
+    "width": 1200,
+    "height": 900,
+    "regions": [
+      {
+        "id": "summary",
+        "x": 54,
+        "y": 116,
+        "width": 1092,
+        "height": 234
+      },
+      {
+        "id": "tasks",
+        "x": 54,
+        "y": 350,
+        "width": 1092,
+        "height": 429
+      }
+    ]
+  },
+  {
+    "name": "output",
+    "width": 1200,
+    "height": 900,
+    "regions": [
+      {
+        "id": "summary",
+        "x": 54,
+        "y": 116,
+        "width": 1092,
+        "height": 249.5625
+      },
+      {
+        "id": "tasks",
+        "x": 54,
+        "y": 365.5625,
+        "width": 1092,
+        "height": 249.5625
+      }
+    ]
+  }
+]

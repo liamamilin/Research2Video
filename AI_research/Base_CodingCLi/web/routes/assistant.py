@@ -10,8 +10,8 @@ import time
 import uuid
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Request, HTTPException, Query
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, Request, HTTPException, Query, UploadFile, File, Form
+from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from core.config import load_system_config
@@ -26,6 +26,32 @@ from web.services.local_video import LocalVideoRequest
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/assistant", tags=["assistant"])
+
+
+@router.post('/materials')
+async def add_material(file: UploadFile | None = File(default=None), text: str = Form(default=''),
+                       url: str = Form(default=''), name: str = Form(default=''), user=Depends(require_editor)):
+    from core import user_materials
+    from web.services.assistant_store import identity
+    try:
+        if sum((file is not None, bool(text), bool(url))) != 1:
+            raise ValueError('每次请提供一个文件、一份正文或一个链接')
+        raw = await file.read(user_materials.MAX_BYTES + 1) if file else None
+        return user_materials.summary(user_materials.save(get_settings().paths.state_dir, identity(user),
+                                     name=file.filename if file else name, text=text, url=url, raw=raw))
+    except (ValueError, OSError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@router.get('/materials/{key}/file')
+def material_file(key: str, user=Depends(require_viewer)):
+    from core import user_materials
+    from web.services.assistant_store import identity
+    try:
+        record = user_materials.load(get_settings().paths.state_dir, key, identity(user))
+        return FileResponse(user_materials.path(get_settings().paths.state_dir, record), filename=record['name'])
+    except (ValueError, OSError) as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 
 @router.post('/local-video')
@@ -69,6 +95,7 @@ class ChatRequest(BaseModel):
     conversation_id: str | None = Field(default=None, pattern=r'^[a-f0-9]{32}$')
     request_id: str = Field(default_factory=lambda: uuid.uuid4().hex, pattern=r'^[a-zA-Z0-9_-]{8,80}$')
     context: Context | None = None
+    material_ids: list[str] = Field(default_factory=list, max_length=12)
 
 
 _active: dict[str, threading.Event] = {}
@@ -333,11 +360,23 @@ def chat(payload: ChatRequest, request: Request, user=Depends(require_viewer)):
     return _respond(payload, request, user)
 
 
+def _material_message(message: str, materials: list[dict]) -> str:
+    if not materials:
+        return message
+    return message + '\n\n用户随消息提供的创作材料（用 read_materials 读取，用 material_ids 交给 create_video）：\n' + json.dumps(materials, ensure_ascii=False)
+
+
 def _respond(payload, request, user, on_event=None, cancel_token=None):
     storage = AssistantStore()
     try:
+        from core import user_materials
+        from web.services.assistant_store import identity
+        materials = [user_materials.summary(user_materials.load(get_settings().paths.state_dir, key, identity(user)))
+                     for key in dict.fromkeys(payload.material_ids)]
+        if materials and user['role'] == 'viewer':
+            raise ValueError('只读账号不能提交创作材料')
         conversation = storage.conversation(user, payload.conversation_id)
-        started, previous = storage.begin(user, payload.request_id, conversation['id'], payload.message)
+        started, previous = storage.begin(user, payload.request_id, conversation['id'], payload.message, materials)
     except ValueError as exc:
         raise HTTPException(409, str(exc)) from exc
     metadata = {'conversation_id': conversation['id'], 'request_id': payload.request_id}
@@ -384,7 +423,7 @@ def _respond(payload, request, user, on_event=None, cancel_token=None):
             history = []
             recent_records = conversation['requests'][-10:]
             for index, record in enumerate(recent_records):
-                history.append({'role': 'user', 'content': record['message']})
+                history.append({'role': 'user', 'content': _material_message(record['message'], record.get('materials', []))})
                 result = record['result']
                 actions = json.loads(json.dumps(result.get('actions', [])))
                 for action in actions:
@@ -402,7 +441,7 @@ def _respond(payload, request, user, on_event=None, cancel_token=None):
                                 '\n实际操作回执：' + dumps(actions) +
                                 ('\n尚未完成的任务进度（继续前先核验）：' + dumps(result['continuation']) if result.get('continuation') else '')})
         result = jobs_assistant.run(
-            payload.message, history, llm, request, user,
+            _material_message(payload.message, materials), history, llm, request, user,
             on_event=persist_event if on_event else None, cancel_token=token,
             store=storage, request_id=payload.request_id, conversation_id=conversation['id'], refs=conversation['refs'])
     except Exception as exc:

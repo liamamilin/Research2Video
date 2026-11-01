@@ -19,6 +19,11 @@ sources:
 - source:nasa
 - source:mit_news
 - source:ars_technica
+- source:darpa_news
+- source:esa_tech
+- source:techmeme
+- source:robot_report
+- source:spacenews
 prompt: |
   根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
   当前步骤：研究事情本身，把后续讲述用得上的具体资料写明白。

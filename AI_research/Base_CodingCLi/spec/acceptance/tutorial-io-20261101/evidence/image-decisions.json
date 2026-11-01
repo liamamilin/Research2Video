@@ -1,0 +1,183 @@
+{
+  "state": "completed",
+  "reason": "用户图片准备完成",
+  "input_kind": "user_materials",
+  "material_context": {
+    "ids": [
+      "c81a1c6c52474a848943f1e886471a1e",
+      "aead84bc14cc4d088189929e78fe0070"
+    ],
+    "owner": "matrix:ai_media",
+    "mode": "adapt",
+    "revision": 1,
+    "title": "MarkItDown 真实输入与输出",
+    "audience": "开发者和工具使用者",
+    "goal": "围绕同一份周报串起真实输入截图、安装与转换代码、实际输出截图和输入输出对照，沿用栏目问候、步骤转场及品牌包装。",
+    "style": {}
+  },
+  "decisions": [
+    {
+      "material_id": "c81a1c6c52474a848943f1e886471a1e",
+      "status": "accepted",
+      "reason": "该图是 weekly.html 的实际输入画面，适合在准备输入、分述标题列表与任务表格、说明页面结构时展示；也适合在最后的输入输出对照段与 Markdown 输出图共同呈现。开场导读和安装执行命令段只保留原有标题、步骤与代码画面，不因提到文件名而贴图。",
+      "placements": [
+        {
+          "chapter_index": 1,
+          "paragraph_index": 0
+        },
+        {
+          "chapter_index": 1,
+          "paragraph_index": 1
+        },
+        {
+          "chapter_index": 1,
+          "paragraph_index": 2
+        },
+        {
+          "chapter_index": 1,
+          "paragraph_index": 3
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 3
+        }
+      ]
+    },
+    {
+      "material_id": "aead84bc14cc4d088189929e78fe0070",
+      "status": "accepted",
+      "reason": "当前图片是命令生成的实际输出，适合放在“看结果”章节：打开结果时展示整体，标题与列表段匹配一级/二级标题和列表，表格段匹配 Markdown 表格，输入输出对照段需要该图参与现有拼贴。开场导读和安装、执行命令段保留已有标题与代码画面，因此不放。",
+      "placements": [
+        {
+          "chapter_index": 3,
+          "paragraph_index": 0
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 1
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 2
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 3
+        }
+      ]
+    }
+  ],
+  "selection": {
+    "materials": [
+      {
+        "image_id": "3c76a996-4e19-4eaa-89dd-fc28b2c2fe4e",
+        "role": "reference",
+        "caption": "项目周报网页输入",
+        "focus": {
+          "width": 1200,
+          "height": 900,
+          "regions": [
+            {
+              "x1": 38,
+              "y1": 53,
+              "x2": 962,
+              "y2": 384,
+              "label": "项目周报与已完成列表",
+              "style": "box"
+            },
+            {
+              "x1": 38,
+              "y1": 398,
+              "x2": 962,
+              "y2": 754,
+              "label": "下一步任务与状态",
+              "style": "box"
+            }
+          ]
+        },
+        "placements": [
+          {
+            "chapter_index": 1,
+            "paragraph_index": 0
+          },
+          {
+            "chapter_index": 1,
+            "paragraph_index": 1
+          },
+          {
+            "chapter_index": 1,
+            "paragraph_index": 2
+          },
+          {
+            "chapter_index": 1,
+            "paragraph_index": 3
+          },
+          {
+            "chapter_index": 3,
+            "paragraph_index": 3
+          }
+        ],
+        "source": {
+          "title": "周报网页实际输入.png",
+          "url": "/api/assistant/materials/c81a1c6c52474a848943f1e886471a1e/file",
+          "final_url": "/api/assistant/materials/c81a1c6c52474a848943f1e886471a1e/file",
+          "captured_at": "2026-11-01T06:23:17.465898+00:00",
+          "sha256": "2bd3dbf84945958d09422967e6887ce63b0f6fbf317a44bdc347f01f4bb071af"
+        }
+      },
+      {
+        "image_id": "81379156-53df-4390-9261-155076aebb12",
+        "role": "reference",
+        "caption": "转换后的 Markdown 周报",
+        "focus": {
+          "width": 1200,
+          "height": 900,
+          "regions": [
+            {
+              "x1": 38,
+              "y1": 138,
+              "x2": 962,
+              "y2": 641,
+              "label": "Markdown 标题和列表",
+              "style": "box"
+            },
+            {
+              "x1": 38,
+              "y1": 624,
+              "x2": 962,
+              "y2": 857,
+              "label": "Markdown 任务表格",
+              "style": "box"
+            }
+          ]
+        },
+        "placements": [
+          {
+            "chapter_index": 3,
+            "paragraph_index": 0
+          },
+          {
+            "chapter_index": 3,
+            "paragraph_index": 1
+          },
+          {
+            "chapter_index": 3,
+            "paragraph_index": 2
+          },
+          {
+            "chapter_index": 3,
+            "paragraph_index": 3
+          }
+        ],
+        "source": {
+          "title": "Markdown实际输出.png",
+          "url": "/api/assistant/materials/aead84bc14cc4d088189929e78fe0070/file",
+          "final_url": "/api/assistant/materials/aead84bc14cc4d088189929e78fe0070/file",
+          "captured_at": "2026-11-01T06:23:17.492747+00:00",
+          "sha256": "4a38e53abcd7b6766480c3d5a3da2723e2d11c86b658f4afb9589289691d73aa"
+        }
+      }
+    ]
+  },
+  "submission_sha256": "cf73a452d16464eaa0d4fb8c9a7b98c89b66ebcbfa06a8ae5eee08d1141aebfd"
+}

@@ -20,6 +20,14 @@ sources:
 - source:phys_org
 - source:sciencedaily
 - source:mit_news
+- source:esa_science
+- source:nih_news
+- source:nsf_news
+- source:science_journal
+- source:cell_journal
+- source:scientific_american
+- source:new_scientist
+- source:knowable
 prompt: |
   为「现象背后的原理」整理研究底稿。观众希望从一个具体的为什么出发，逐步理解现象如何发生，并认识相近的事情。
   从这一周材料选择一个值得深入解释的主问题，用简短导读说明现象与核心疑问，正文围绕同一问题展开，保留后续作者组织讲述所需的解释深度。

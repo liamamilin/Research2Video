@@ -1,0 +1,150 @@
+{
+  "note": "只读正式 App 数据。条目匹配用于核对报道覆盖，不表示所有子细节均单独展开。",
+  "scripts": [
+    {
+      "script_id": "ea95b2042bb9457eb6bbc1e0ff43ce2d",
+      "title": "今日快讯｜2026年11月01日",
+      "column": "ai_flash",
+      "archived": 0,
+      "sections": [
+        "开场：先看被限额打断的任务",
+        "Claude Ultra 不再五小时断一次",
+        "OpenCode Go 额度上调",
+        "ChatGPT 可同时登两个账号",
+        "Antigravity 接入安卓 IDE",
+        "Claude Code 子代理 effort 控制",
+        "Kimi Code 单文件读取降到十万字符",
+        "收尾：今天先改哪一个"
+      ],
+      "opening": "今天这期快讯，我们从“什么时候会被打断”讲起。Claude 的 $200 档改了名字，也改了限额的执行方式；OpenCode Go 把 DeepSeek V4.1 Flash 的月额度往上提了一截；ChatGPT 开始允许同一台设备保持两个",
+      "latest_render": {
+        "id": "b9704252719f4317a5bb83ea79e19523",
+        "status": "COMPLETED",
+        "autovideo_job_id": "639e7614-1c76-40e9-8ce6-803832733d35"
+      }
+    },
+    {
+      "script_id": "9e665f565f2b4abe9f0317579ba4f2c7",
+      "title": "今日快讯｜2026年10月31日",
+      "column": "ai_flash",
+      "archived": 0,
+      "sections": [
+        "先别急着升级",
+        "Pro 200 不降了",
+        "Terra 把价格砍到 $1/$5",
+        "订阅每月能领 API credits",
+        "Copilot 开始编排模型",
+        "Claude Code 加组共享预算",
+        "Droid 一个请求跑几百次工具",
+        "Mistral 开放 1T 权重",
+        "Gemini 限防御者，Jules 关停",
+        "补丁公开到生效的窗口",
+        "几个 agent 工具发版",
+        "回到那个周四任务"
+      ],
+      "opening": "周四晚上，你在排下周的 Codex 任务：一个仓库级重构，两百来个文件，要跑测试、改失败、再跑。按九月底的公告，10 月 30 号之后 Pro 200 的额度要腰斩，你本来打算这周末升级到 Pro 500。现在可以先停一下——这个削减取消了",
+      "latest_render": {
+        "id": "b098a9e2557b40aca38b463829d1e3a1",
+        "status": "COMPLETED",
+        "autovideo_job_id": "5fb8f849-ecfd-45b8-bbcd-546f820d95d1"
+      }
+    },
+    {
+      "script_id": "ef2cde084af34f408376c38de3f8052f",
+      "title": "ChatGPT 产品动态与热点｜2026年10月31日",
+      "column": "chatgpt_t09_updates",
+      "archived": 0,
+      "sections": [
+        "ChatGPT最近变了什么",
+        "信息变图：汇报学习怎么用",
+        "业务问题变策略deck",
+        "财务重复任务能交给它吗",
+        "网站如何表达训练偏好",
+        "青少年保护加强了什么",
+        "三个判断与行动建议"
+      ],
+      "opening": "如果你最近只盯着ChatGPT又换了哪个模型，可能会漏掉更有用的变化。它正在往三个方向走：把信息讲成图，把工作变成可交付的文档，以及把使用边界写得更清楚。这期我们把五条官方材料串起来：三条是8月的官方教程演示，两条是10月30日的公告。先说",
+      "latest_render": {
+        "id": "a28980f4bd92441d825b9fca368a6d18",
+        "status": "COMPLETED",
+        "autovideo_job_id": "606f80ec-158a-4a11-8d7c-c35936c8a363"
+      }
+    },
+    {
+      "script_id": "4dadd075fd8845f3876402133cf0ba88",
+      "title": "GitHub 把 agent 推进 CI/PR：Agentic Workflows GA、Agent Merge 自动修 PR、Code Review Max 多 agent 审查",
+      "column": "ai_flash",
+      "archived": 0,
+      "sections": [
+        "那个你已经很熟悉的红色 CI",
+        "从 Markdown 到 Actions YAML：CI 失败分析可以写成 workflow",
+        "Agent Merge：在云端监视 PR，发现问题就修",
+        "多个 agent 审查，Copilot 也能批准",
+        "回到那个红色 CI 的 PR"
+      ],
+      "opening": "你打开一个 PR，CI 失败了。接下来你大概率要干这些事：点进日志，找失败原因，本地拉分支，修，push，等 review，等批准，最后 merge。整条流程里真正需要你判断的可能只有一小段，剩下都是等待和来回操作。10 月 28 日 Gi",
+      "latest_render": {
+        "id": "98adf96fb9174db69c05a2b71495e283",
+        "status": "COMPLETED",
+        "autovideo_job_id": "113ea4ec-693f-484d-b9d7-17b42363bcf9"
+      }
+    },
+    {
+      "script_id": "07e9f1efa61a49a2beb170fba4de16d7",
+      "title": "Claude Code 2.1.314：工作目录外写入被硬拦，空闲会话加摘要压缩",
+      "column": "ai_flash",
+      "archived": 0,
+      "sections": [
+        "开场：这个变化正好打在你的日常用法上",
+        "不是提醒，是权限层的准入判断",
+        "回到那个跨包任务：改的是周边动作",
+        "同版还有两处：空闲压缩和换模型重试",
+        "收束"
+      ],
+      "opening": "如果你习惯把工作目录设成 monorepo 的仓库根，然后让 Claude 去改 packages/api 里的 handlers，再同步 packages/web 里的 client——这期有个变化直接影响你。Claude Code 2.",
+      "latest_render": {
+        "id": "f542a716f14e40e2acde75a315d63287",
+        "status": "COMPLETED",
+        "autovideo_job_id": "b8d7d936-010c-41da-a356-9a66ebf31366"
+      }
+    },
+    {
+      "script_id": "0868102204dc4f2e954c30612b1eec39",
+      "title": "ChatGPT 产品动态与热点｜2026年11月01日",
+      "column": "chatgpt_t09_updates",
+      "archived": 0,
+      "sections": [
+        "本期导读",
+        "手机双账号切换与权益边界",
+        "GPT-6.1 Terra 用在哪",
+        "Codex 的过夜研究用法",
+        "本期回顾"
+      ],
+      "opening": "大家好，欢迎收看ChatGPT 产品动态与热点。今天这期围绕三个和实际使用有关的变化：手机端终于能同时登录两个 ChatGPT 账号，GPT-6.1 Terra 进入 Work 和 Codex，以及两个技术团队把 Codex 当作过夜研究助",
+      "latest_render": {
+        "id": "0733f650e698483f964ca7c33d9ec220",
+        "status": "RUNNING",
+        "autovideo_job_id": "8e5fdd52-83b1-4821-ac13-8b573246039b"
+      }
+    },
+    {
+      "script_id": "26d755b67a5646ca975093ff9ecbc843",
+      "title": "快讯补充｜10月29–30日的三条更新",
+      "column": "ai_flash",
+      "archived": 0,
+      "sections": [
+        "三条更新，三种用法",
+        "Rosalind：能力对口，但你多半没有访问权",
+        "trust_remote_code 一开，模型作者就在你进程里跑代码",
+        "954% ROI 的试点，重点不在 954%",
+        "三个门槛"
+      ],
+      "opening": "这期快讯补充讲三条近期更新，它们分别落在三种不同的用法上。你如果正打算把模型接进生物或生命科学的研发流程，第一条决定你有没有资格调用；你如果在生产环境里加载社区模型、跑 MCP 工具，第二条决定你今天该关掉哪个开关；你如果正在为团队申请预算",
+      "latest_render": {
+        "id": "0c2bc4acfd194c438e53d3619f9e4ace",
+        "status": "QUEUED",
+        "autovideo_job_id": "13a9160a-aca4-43cf-9e58-dfa8d9674e81"
+      }
+    }
+  ]
+}

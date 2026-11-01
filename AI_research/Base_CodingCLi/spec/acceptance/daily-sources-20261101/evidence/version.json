@@ -1,0 +1,391 @@
+{
+  "script_id": "bd834feccb9844b3acfcc6ef41f9d922",
+  "version": 1,
+  "title": "ChatGPT 使用方法与教程｜2026年11月01日",
+  "sections": [
+    {
+      "title": "本期导读",
+      "paragraphs": [
+        {
+          "text": "大家好，欢迎收看ChatGPT 使用方法与教程。今天解决一个很具体的麻烦：网页上要切个人号和工作号，手机上还要来回退出登录。其实网页和手机都能保留两个已登录账号，直接切换；但两个账号的聊天记录、记忆、文件、设置和账单各归各的，不会合并。下面按网页、手机两条路径走一遍，最后看切换后怎么确认。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "opening"
+    },
+    {
+      "title": "准备两个账号",
+      "paragraphs": [
+        {
+          "text": "先准备两个能正常登录的 ChatGPT 账号，后面用账号 A、账号 B 来代称。一个可以是个人号，一个工作号；也可以一个 Free、一个 Plus 或 Pro。准备阶段只做一件事：确认两个账号的登录方式你都知道，因为添加第二个账号时，需要登录一次。这里先记住两个限制：同一个切换入口最多保留两个已登录账号；要加第三个，必须先退出其中一个。还有，切换账号只是换当前使用的账号，不会把两个账号的数据合在一起。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "网页添加账号",
+      "paragraphs": [
+        {
+          "text": "先看网页端。打开 ChatGPT，点开页面里的账号菜单，也就是显示当前账号名或头像的位置。在下拉菜单里选 Add account，添加账号。接着登录第二个账号一次。注意，不是先退出当前账号，而是在已经登录的状态下再添加一个。登录完成后，第二个账号就留在账号菜单里了。不同版本里菜单位置和图标可能略有差别，认准账号菜单和 Add account 这个入口即可。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "网页直接切换",
+      "paragraphs": [
+        {
+          "text": "添加过一次以后，网页端切换就不用再登录。再打开账号菜单，里面会列出已登录的账号，点另一个账号就切过去了。切换后先看账号菜单上的当前账号名或头像，确认现在是 A 还是 B。因为聊天记录、记忆、文件、设置和账单都跟着当前账号走，所以开始新对话之前，最好停两秒看一眼。要回到原来的账号，也是同一个动作：打开账号菜单，选另一个。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "手机添加账号",
+      "paragraphs": [
+        {
+          "text": "手机端的入口和网页不一样。打开 ChatGPT 应用，进入 Settings，也就是设置，找到 Switch account，切换账号，再选 Add account，添加账号。然后登录第二个账号一次。之后要切换，还是回到 Settings 里的 Switch account，选择账号即可。这里有两个常见情况。第一，Settings 里没有 Switch account，不一定是操作错了，可能是移动端的逐步推送还没覆盖到这个账号。第二，看不到 Add account，先检查是不是已经登录了两个账号；如果是，退出其中一个，再添加。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "手机切换与异常",
+      "paragraphs": [
+        {
+          "text": "手机上切过去以后，先看顶部的当前账号名或头像。再打开对话列表，确认看到的是这个账号自己的聊天记录。记忆、文件、设置和账单入口也一样，都属于当前选中的账号。用账号 A 和账号 B 来对照：A 的历史不会跑到 B 里，B 的订阅也不会因为切换就变成 A 的。切换只是换当前账号，不是合并数据。要加第三个账号，还是那句话：先退出一个，再加。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "确认结果",
+      "paragraphs": [
+        {
+          "text": "最后养成一个动作：每次开始新对话，或者要用和套餐相关的功能之前，先看顶部或账号菜单里的当前账号名。尤其是在个人号和工作号之间来回切的时候，确认当前账号，能避免在错误账号里找历史记录，或者以为某个功能不见了。网页从账号菜单添加和切换，手机从 Settings 里的 Switch account 添加和切换；最多保留两个已登录账号，聊天记录、记忆、文件、设置和账单各自独立。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "本期回顾",
+      "paragraphs": [
+        {
+          "text": "这就是完整结果：不退出登录，也能在两个账号之间切换；用之前看一眼当前账号名，就能少走很多弯路。两个账号，各归各；要加第三个，先退出一个。我们下期再见。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "closing"
+    }
+  ],
+  "length_check": {
+    "spoken_length": 1065,
+    "estimated_seconds": 240,
+    "segments": 47,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": null,
+    "budget": null,
+    "ratio": null,
+    "status": null,
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "本期导读",
+        "spoken_length": 123
+      },
+      {
+        "title": "准备两个账号",
+        "spoken_length": 161
+      },
+      {
+        "title": "网页添加账号",
+        "spoken_length": 137
+      },
+      {
+        "title": "网页直接切换",
+        "spoken_length": 140
+      },
+      {
+        "title": "手机添加账号",
+        "spoken_length": 151
+      },
+      {
+        "title": "手机切换与异常",
+        "spoken_length": 140
+      },
+      {
+        "title": "确认结果",
+        "spoken_length": 148
+      },
+      {
+        "title": "本期回顾",
+        "spoken_length": 65
+      }
+    ],
+    "dropped_citations": 0,
+    "duration_policy": "content"
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "attempts": 2,
+    "usage": {
+      "requests": 2,
+      "prompt_tokens": 11418,
+      "completion_tokens": 9690,
+      "total_tokens": 21108,
+      "cache_read_tokens": 5632,
+      "cache_reported_requests": 2,
+      "reasoning_tokens": 6573,
+      "cost_usd": 0.0066987999999999995,
+      "cost_reported_requests": 2
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 104.505,
+    "generation": "goal_first",
+    "prompt_version": 5,
+    "creative_direction": "栏目：T03 · 使用方法与教程。持续交付：怎样才能用好 ChatGPT？。\n每项独立内容可围绕 目标 → 准备 → 操作 → 结果 组织讲述，按素材自然展开。\n每项独立内容围绕自己的明确任务，按操作顺序讲清步骤和可看到的结果。\n以下创作方向分别用于各项独立内容，其中的主例子和任务线在该项内部展开，各项之间由整期简报与转场衔接，不各自重新开场；同一问题的解释章节沿用共同主例子。\n单项内容创作方向：题材编号 T03；获客作用：培养兴趣。优先 ChatGPT Learn 的任务式演示，其次参考优质创作者。提炼操作起点、关键步骤、示例提示词和结果画面，用中文重新组织讲解，保留演示链接。\n\n## 内容组织方式：完整教程\n本份报告制作一条视频，按实际任务的准备、操作、结果等阶段分章，每个阶段一个 section。章节就是步骤导航，title 为不带编号的短标题；各步骤承接同一份输入与输出。开场与收尾各一个 section，episode_role 使用 opening、item、closing。按实际内容展开，沿用上游给出的命令和结果。\n整期总标题使用「ChatGPT 使用方法与教程｜2026年11月01日」，不要把第一条或最显眼的事件当作整期总标题。具体事件使用各段的内容标题。日期是展示信息，不必写进口播，不要求讲述者念日期。",
+    "trusted_urls": 7,
+    "polish": {
+      "version": 2,
+      "findings": [],
+      "changes": [],
+      "rejected": [],
+      "usage": {
+        "requests": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    },
+    "episode": {
+      "mode": "episode",
+      "report_path": "output/chatgpt_acquisition/2026-11-01_t03_tutorials.md",
+      "publication": {
+        "scheme": "column-date/v1",
+        "title": "ChatGPT 使用方法与教程｜2026年11月01日",
+        "label": "ChatGPT 使用方法与教程",
+        "issue_date": "2026-11-01",
+        "subject_subtitle": false
+      },
+      "source_items": [
+        {
+          "id": "2026-11-01/CGC1@r73f6d0ae39f24ceb",
+          "title": "ChatGPT 双账号切换教程：网页加一个、手机切一个，聊天和订阅各归各"
+        }
+      ],
+      "items": [
+        {
+          "index": 1,
+          "title": "准备两个账号",
+          "chapter_index": 1,
+          "paragraphs": 1
+        },
+        {
+          "index": 2,
+          "title": "网页添加账号",
+          "chapter_index": 2,
+          "paragraphs": 1
+        },
+        {
+          "index": 3,
+          "title": "网页直接切换",
+          "chapter_index": 3,
+          "paragraphs": 1
+        },
+        {
+          "index": 4,
+          "title": "手机添加账号",
+          "chapter_index": 4,
+          "paragraphs": 1
+        },
+        {
+          "index": 5,
+          "title": "手机切换与异常",
+          "chapter_index": 5,
+          "paragraphs": 1
+        },
+        {
+          "index": 6,
+          "title": "确认结果",
+          "chapter_index": 6,
+          "paragraphs": 1
+        }
+      ]
+    },
+    "input_kind": "report_and_original_material",
+    "research_dossier": {
+      "version": 4,
+      "selection": "report",
+      "report_sha256": "8e6d9f45c88ffed1dedc9c33702a3ea9bd262edeafb67017ba4887c4255025c3",
+      "material_sha256": "2f5fd652309f40640b6945ec414a1dd3949ee43ea3abb5d59573270d84c88f18",
+      "report_chars": 3166,
+      "material_chars": 10995
+    },
+    "material": {
+      "path": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-daily-sources-20261101/run-1/output/chatgpt_acquisition/2026-11-01_t03_tutorials.materials-2f5fd652309f4064.json",
+      "sha256": "2f5fd652309f40640b6945ec414a1dd3949ee43ea3abb5d59573270d84c88f18",
+      "report_sha256": "8e6d9f45c88ffed1dedc9c33702a3ea9bd262edeafb67017ba4887c4255025c3"
+    },
+    "report_path": "output/chatgpt_acquisition/2026-11-01_t03_tutorials.md",
+    "written_at": "2026-11-01T15:41:03+0800",
+    "cell": {
+      "recipe": "chatgpt_acquisition",
+      "sha256": "981f9409469db466cb171b80cecc3f8292335c54a14df9e59ac550cb171ba5a6",
+      "cell": "chatgpt-general-explainer-long",
+      "status": "experimental",
+      "parts": {
+        "domain": {
+          "key": "chatgpt"
+        },
+        "type": {
+          "key": "explainer"
+        },
+        "format": {
+          "key": "long"
+        },
+        "audience": {
+          "key": "general"
+        }
+      },
+      "resolved_sha256": "3adf9411e6239013da81b747b296bbaa2acf273c4b036267aa9e018010f192bb",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "general",
+          "sha256": "0cb36848f9724ed10585e7ddba96a31b632c37a6069777c18f2210dbe2d7168e"
+        },
+        "output": {
+          "kind": "part",
+          "name": "motion",
+          "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    },
+    "checks": {
+      "version": 2,
+      "mode": "on_request",
+      "issues": [],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": false,
+      "audits_complete": false,
+      "pending_review": false,
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 0,
+        "rule_must": 0,
+        "questions": 0,
+        "lost": 0,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          }
+        },
+        "passed": false,
+        "rank": 0
+      }
+    },
+    "content_context": {
+      "column": "chatgpt_t03_tutorials",
+      "column_name": "T03 · 使用方法与教程",
+      "type": "tutorial",
+      "matrix": "chatgpt_acquisition",
+      "source_matrix": "chatgpt_acquisition",
+      "job": "chatgpt_acquisition/t03_tutorials",
+      "revision": "ed1b41de5dc2edcd4d3c957c43fe93b9da5bc25370f423399292d0cd346d27e6",
+      "audience": "中文 ChatGPT 新用户、职场与学习人群、潜在付费用户",
+      "promise": "怎样才能用好 ChatGPT？",
+      "notes": "题材编号 T03；获客作用：培养兴趣。优先 ChatGPT Learn 的任务式演示，其次参考优质创作者。提炼操作起点、关键步骤、示例提示词和结果画面，用中文重新组织讲解，保留演示链接。",
+      "content_mode": "episode",
+      "greeting": "",
+      "type_definition": {
+        "key": "tutorial",
+        "name": "教程",
+        "promise": "按照步骤完成一个具体任务",
+        "structure": [
+          "目标",
+          "准备",
+          "操作",
+          "结果"
+        ],
+        "preferred_visuals": [
+          "操作截图",
+          "步骤演示",
+          "局部聚焦",
+          "流程"
+        ]
+      },
+      "render_inheritance": "content_matrix",
+      "render": {
+        "packaging": {
+          "label": "使用方法与教程",
+          "preset": "common"
+        }
+      },
+      "presentation": {
+        "strategy": "围绕一个具体任务持续展示同一组输入、操作和结果；用真实页面、局部放大和变化前后对照，让旁白与操作同步。优先 ChatGPT Learn 的任务式演示，其次参考优质创作者。提炼操作起点、关键步骤、示例提示词和结果画面，用中文重新组织讲解，保留演示链接。",
+        "preferred_visuals": [
+          "产品真实截图",
+          "操作步骤",
+          "结果展示",
+          "变化前后对比"
+        ]
+      }
+    }
+  },
+  "created_by": "autopilot",
+  "created_at": "2026-11-01T15:41:03+0800"
+}

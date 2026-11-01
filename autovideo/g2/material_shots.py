@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import hashlib
 
+from g2.visual_language import phrase_at
+
 
 def describe(images: list[dict]) -> list[dict]:
     return [{'image_index': i, 'caption': image.get('caption', ''), 'role': image.get('role', 'reference'),
@@ -12,7 +14,7 @@ def describe(images: list[dict]) -> list[dict]:
 
 
 def compose(scene: dict, rows: list[dict], profile: str, hints: list[dict] | None = None,
-            summary_phrase: str = '') -> dict:
+            summary_phrase: str = '', timing: list[dict] | None = None) -> dict:
     images = scene['props']['images']
     selected = scene['props']['focus_indices']
     text = ''.join(row['text'] for row in rows)
@@ -26,9 +28,9 @@ def compose(scene: dict, rows: list[dict], profile: str, hints: list[dict] | Non
         target = (f"region:{i}:{hint['region_index']}" if hint.get('region_index') is not None else f'image:{i}')
         if target not in valid:
             continue
-        at = text.find(hint['phrase'], cursor)
+        at = phrase_at(text, hint['phrase'], cursor)
         if at < 0:
-            at = text.find(hint['phrase'])
+            at = phrase_at(text, hint['phrase'])
         if at >= 0:
             events.append((at, target))
             directed_images.add(i)
@@ -40,7 +42,7 @@ def compose(scene: dict, rows: list[dict], profile: str, hints: list[dict] | Non
         if int(target.split(':')[1]) in directed_images:
             continue
         label = valid[target]
-        at = text.find(label) if label else -1
+        at = phrase_at(text, label) if label else -1
         # Older callers have labels and coordinates, with no phrase hints. Their
         # fallback follows positions in the measured speech, rather than page progress.
         if at < 0:
@@ -58,13 +60,17 @@ def compose(scene: dict, rows: list[dict], profile: str, hints: list[dict] | Non
                 offset = int(character/len(row['text'])*(row['end_ms']-row['start_ms']))
                 scene['beats'].append({'id': beat_id, 'action': 'reveal', 'target_id': 'scene',
                     'trigger': {'segment_id': row['id'], 'boundary': 'start', 'offset_ms': offset}})
+                if timing is not None:
+                    timing.append({'scene_id': scene['id'], 'beat_id': beat_id,
+                                   'segment_id': row['id'], 'character_index': character,
+                                   'estimated_start_ms': row['start_ms'] + offset})
                 return beat_id
             character -= len(row['text'])
         raise ValueError('图片镜头需要对应本场景的旁白')
 
     cues = [{'beat_id': beat_at(at), 'targets': [target]} for at, target in events]
     plan = {'version': 1, 'profile': profile, 'cues': cues}
-    summary_at = text.find(summary_phrase) if summary_phrase else -1
+    summary_at = phrase_at(text, summary_phrase) if summary_phrase else -1
     if summary_at >= 0 and (not events or summary_at > events[-1][0]):
         plan['summary_beat_id'] = beat_at(summary_at)
     order = {r['id']: i for i, r in enumerate(rows)}

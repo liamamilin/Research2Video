@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "production_plan_sha256": "5097fb1b359d8ca7d89f70e41015ea6403986c6dfee4488ed01bc33bfd95efc8",
+  "executor": "remotion",
+  "form": "object_showcase",
+  "style": {
+    "id": "legacy",
+    "version": 1,
+    "description": "保留各既有形式的原始视觉定义"
+  },
+  "music": {
+    "selection": null,
+    "background_music_generated": false
+  }
+}

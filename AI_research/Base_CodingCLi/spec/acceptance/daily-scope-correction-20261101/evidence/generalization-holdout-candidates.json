@@ -1,0 +1,77 @@
+{
+  "purpose": "Existing formal App tasks reserved for independent validation; not claimed as passed or used to tune this round. No new production started.",
+  "cases": [
+    {
+      "script_id": "56b6c5e2f36f41f8a62bdb4f6f8e7484",
+      "title": "ChatGPT 订阅与支付｜2026年11月01日",
+      "column": "chatgpt_t07_subscription",
+      "content_type": "tutorial",
+      "version": 1,
+      "sections": 9,
+      "paragraphs": 41,
+      "prior_render_id": "b7d1206cbe0c47c9916c5a07bdd96fe6",
+      "prior_g3_job_id": "5967f9b7-5bf2-4644-993f-49c2505e2ae0",
+      "validation_status": "not_evaluated"
+    },
+    {
+      "script_id": "ea95b2042bb9457eb6bbc1e0ff43ce2d",
+      "title": "今日快讯｜2026年11月01日",
+      "column": "ai_flash",
+      "content_type": "news",
+      "version": 1,
+      "sections": 8,
+      "paragraphs": 20,
+      "prior_render_id": "b9704252719f4317a5bb83ea79e19523",
+      "prior_g3_job_id": "639e7614-1c76-40e9-8ce6-803832733d35",
+      "validation_status": "not_evaluated"
+    },
+    {
+      "script_id": "7a70793b2e0b4832a9b9bfc4cd7b1829",
+      "title": "ChatGPT 产品动态与热点｜2026年10月31日",
+      "column": "chatgpt_t09_updates",
+      "content_type": "news",
+      "version": 1,
+      "sections": 7,
+      "paragraphs": 18,
+      "prior_render_id": "8f862a0919d24f92ba9a4b9c18a3d499",
+      "prior_g3_job_id": "b8f45dc3-30ab-4704-bc76-58574d6062fa",
+      "validation_status": "not_evaluated"
+    },
+    {
+      "script_id": "997b1426d00e4e36b5ed0844403dd48d",
+      "title": "ChatGPT 使用问题与避坑｜2026年10月31日",
+      "column": "chatgpt_t08_troubleshooting",
+      "content_type": "tutorial",
+      "version": 1,
+      "sections": 7,
+      "paragraphs": 19,
+      "prior_render_id": "30006bcec93044408419301364aefadf",
+      "prior_g3_job_id": "7276570b-7614-4d61-97b3-c63aa10bc606",
+      "validation_status": "not_evaluated"
+    },
+    {
+      "script_id": "6133ac9cfe004d12a8485e52fba1f690",
+      "title": "ChatGPT 套餐与付费价值｜2026年10月31日",
+      "column": "chatgpt_t06_value",
+      "content_type": "comparison",
+      "version": 1,
+      "sections": 9,
+      "paragraphs": 26,
+      "prior_render_id": "0951fb7b81f446acbf38376bc6d9226e",
+      "prior_g3_job_id": "bf3d76be-5fed-45c8-adef-775825760efd",
+      "validation_status": "not_evaluated"
+    },
+    {
+      "script_id": "16df8b23175c454bb787daa142cf75db",
+      "title": "ChatGPT AI 产品横向选择｜2026年10月31日",
+      "column": "chatgpt_t05_comparison",
+      "content_type": "comparison",
+      "version": 1,
+      "sections": 10,
+      "paragraphs": 38,
+      "prior_render_id": "03b513da75df4f9398ff8cf570b85fc4",
+      "prior_g3_job_id": "19852cb7-098f-4bb0-a36d-5cce8bc6c63c",
+      "validation_status": "not_evaluated"
+    }
+  ]
+}

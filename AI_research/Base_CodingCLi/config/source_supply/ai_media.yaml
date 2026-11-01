@@ -3,14 +3,162 @@ matrix: ai_media
 enabled: true
 timezone: Asia/Shanghai
 # 单独的来源探索周计划；现有五个研究周期保持。
-recurrence: "30 6 * * 0"
+recurrence: "30 5 * * 0"
 scan_limit: 80
 detail_pages: 4
+detail_attempts: 12
+snapshot_items: 2
+retry_items: 3
+probes_per_host: 2
 material_chars: 180000
 pool_per_job: 4
 pool_limit: 40
 discovery_queries: 5
 discovery_probes: 8
+# 覆盖目标与来源角色是数据：新增产品/主题只扩展这里，不写供应商分支。
+# state 持续比较页面内容；release 追踪公告；snapshot 控制快照条数；editorial 补充案例。
+coverage:
+  - key: openai_product
+    subject: OpenAI / ChatGPT
+    topics: [套餐价格, 用量额度, 产品能力, 更新]
+    max_age_hours: 48
+    jobs: [monitoring/ai_flash_discovery, ai_media/weekly_model_arena, ai_media/weekly_business_watch]
+    queries: [OpenAI ChatGPT official pricing plans usage limits updates]
+    sources:
+      - {spec: 'page:https://chatgpt.com/pricing', role: state}
+      - {spec: 'page:https://openai.com/api/pricing/', role: state}
+      - {spec: 'page:https://help.openai.com/en/articles/6825453-chatgpt-release-notes', role: release}
+      # 帮助中心与价格页常被拒绝直接读取；新闻与开发者订阅源能直接读到。
+      - {spec: 'rss:https://openai.com/news/rss.xml', role: release}
+      - {spec: 'rss:https://developers.openai.com/rss.xml', role: release}
+      - {spec: 'page:https://learn.chatgpt.com/docs/whats-new.md', role: release}
+      - {spec: 'page:https://developers.openai.com/api/docs/changelog.md', role: release}
+  - key: anthropic_product
+    subject: Anthropic / Claude
+    topics: [套餐价格, 用量额度, 产品能力, 编程工具]
+    max_age_hours: 48
+    jobs: [monitoring/ai_flash_discovery, ai_media/weekly_model_arena, ai_media/weekly_business_watch]
+    queries: [Anthropic Claude official pricing plans usage limits release notes]
+    sources:
+      - {spec: 'page:https://claude.com/pricing', role: state}
+      - {spec: 'page:https://platform.claude.com/docs/en/about-claude/pricing', role: state}
+      - {spec: 'rss:https://code.claude.com/docs/en/changelog/rss.xml', role: release}
+      - {spec: 'github:anthropics/claude-code', role: release}
+      - {spec: 'catalog:https://www.anthropic.com/news', role: release}
+      - {spec: 'page:https://support.claude.com/en/articles/12138966-release-notes', role: release}
+  - key: google_product
+    subject: Google / Gemini
+    topics: [套餐价格, 用量额度, 模型能力]
+    max_age_hours: 48
+    jobs: [monitoring/ai_flash_discovery, ai_media/weekly_model_arena, ai_media/weekly_business_watch]
+    queries: [Google Gemini official AI plans API pricing release notes]
+    sources:
+      - {spec: 'page:https://one.google.com/about/google-ai-plans/', role: state}
+      - {spec: 'page:https://ai.google.dev/gemini-api/docs/pricing', role: state}
+      - {spec: 'page:https://gemini.google/release-notes/', role: release}
+      - {spec: 'page:https://ai.google.dev/gemini-api/docs/changelog', role: release}
+  - key: coding_products
+    subject: AI 编程工具
+    topics: [套餐价格, 额度, 产品更新]
+    max_age_hours: 48
+    jobs: [monitoring/ai_flash_discovery, ai_media/weekly_business_watch]
+    queries: [AI coding tools official pricing plans changelog usage limits]
+    sources:
+      - {spec: 'page:https://cursor.com/pricing', role: state}
+      - {spec: 'page:https://cursor.com/changelog', role: release}
+      - {spec: 'page:https://github.com/features/copilot/plans', role: state}
+      - {spec: 'rss:https://github.blog/changelog/label/copilot/feed/', role: release}
+      - {spec: 'github:openai/codex', role: release}
+      - {spec: 'github:cline/cline', role: release}
+      # Windsurf 的更新日志已迁到 Devin Desktop。
+      - {spec: 'page:https://docs.devin.ai/desktop/changelog', role: release}
+  - key: opensource_practice
+    subject: 开源 AI 实践
+    topics: [项目发布, 实际用法, 输入输出]
+    jobs: [ai_media/daily_opensource_radar, ai_media/weekly_deep_research]
+    queries: [open source AI agents official releases documentation examples]
+    sources:
+      - {spec: 'github:ollama/ollama', role: release}
+      - {spec: 'github:vllm-project/vllm', role: release}
+      - {spec: 'github:modelcontextprotocol/servers', role: release}
+      - {spec: 'github:langchain-ai/langgraph', role: release}
+      - {spec: 'rss:https://huggingface.co/blog/feed.xml', role: editorial}
+  - key: xai_product
+    subject: xAI / Grok
+    topics: [模型能力, API 价格, 产品更新]
+    max_age_hours: 72
+    jobs: [monitoring/ai_flash_discovery, ai_media/weekly_model_arena]
+    queries: [xAI Grok official models API pricing release notes]
+    sources:
+      - {spec: 'page:https://docs.x.ai/developers/models', role: state}
+      - {spec: 'page:https://docs.x.ai/developers/release-notes', role: release}
+      - {spec: 'catalog:https://x.ai/news', role: release}
+  - key: open_weight_labs
+    subject: Meta / Mistral
+    topics: [模型发布, 开放权重, API 更新]
+    max_age_hours: 72
+    jobs: [monitoring/ai_flash_discovery, ai_media/weekly_model_arena]
+    queries: [Meta Llama Mistral official model release announcement]
+    sources:
+      - {spec: 'catalog:https://ai.meta.com/blog/', role: release}
+      - {spec: 'catalog:https://mistral.ai/news', role: release}
+      - {spec: 'page:https://docs.mistral.ai/resources/changelogs', role: release}
+  - key: china_models
+    subject: 国产大模型（DeepSeek / 通义千问 / Kimi / 智谱 / MiniMax）
+    topics: [模型发布, API 价格, 编程工具]
+    max_age_hours: 72
+    jobs: [monitoring/ai_flash_discovery, ai_media/weekly_model_arena]
+    queries: [DeepSeek Qwen Kimi GLM MiniMax 官方 模型发布 API 价格 更新日志]
+    sources:
+      - {spec: 'page:https://api-docs.deepseek.com/updates', role: release}
+      - {spec: 'page:https://api-docs.deepseek.com/quick_start/pricing', role: state}
+      - {spec: 'page:https://platform.moonshot.cn/docs/pricing/chat', role: state}
+      - {spec: 'page:https://docs.bigmodel.cn/cn/update/new-releases', role: release}
+      - {spec: 'catalog:https://www.minimax.io/news', role: release}
+      - {spec: 'github:QwenLM/qwen-code', role: release}
+  - key: creative_generation
+    subject: 图像与视频生成
+    topics: [模型发布, 功能更新]
+    max_age_hours: 168
+    jobs: [monitoring/ai_flash_discovery]
+    queries: [AI image video generation model official release Midjourney Kling Runway Veo FLUX]
+    sources:
+      - {spec: 'rss:https://updates.midjourney.com/rss/', role: release}
+      - {spec: 'catalog:https://bfl.ai/blog', role: release}
+  - key: platform_vendors
+    subject: 云与硬件平台（微软 / 英伟达 / AWS / 苹果）
+    topics: [企业采用, 平台能力, 成本]
+    max_age_hours: 168
+    jobs: [ai_media/weekly_business_watch]
+    queries: [Microsoft NVIDIA AWS Apple AI platform enterprise announcement]
+    sources:
+      - {spec: 'rss:https://news.microsoft.com/source/topics/ai/feed/', role: editorial}
+      - {spec: 'rss:https://blogs.nvidia.com/feed/', role: editorial}
+      - {spec: 'rss:https://aws.amazon.com/blogs/machine-learning/feed/', role: editorial}
+      - {spec: 'rss:https://machinelearning.apple.com/rss.xml', role: editorial}
+  - key: practitioner_commentary
+    subject: 一线实践、汇总与中文报道
+    topics: [实际用法, 工程经验, 每周汇总, 中文快讯]
+    max_age_hours: 72
+    jobs: [ai_media/weekly_deep_research, monitoring/ai_flash_discovery]
+    queries: [AI engineering practitioner blog agents hands-on weekly roundup]
+    sources:
+      - {spec: 'rss:https://simonwillison.net/atom/everything/', role: editorial}
+      - {spec: 'rss:https://www.latent.space/feed', role: editorial}
+      - {spec: 'rss:https://lastweekin.ai/feed', role: editorial}
+      - {spec: 'rss:https://www.bensbites.com/feed', role: editorial}
+      - {spec: 'rss:https://www.qbitai.com/feed', role: editorial}
+  - key: research_labs
+    subject: 研究机构与研究者解读
+    topics: [模型机制, 训练方法, 工程实践]
+    max_age_hours: 336
+    jobs: [ai_media/weekly_deep_research]
+    queries: [AI lab research blog model training mechanisms explained]
+    sources:
+      - {spec: 'rss:https://research.google/blog/rss/', role: editorial}
+      - {spec: 'catalog:https://www.anthropic.com/engineering', role: editorial}
+      - {spec: 'rss:https://www.interconnects.ai/feed', role: editorial}
+      - {spec: 'rss:https://magazine.sebastianraschka.com/feed', role: editorial}
 jobs:
   monitoring/ai_flash_discovery:
     mode: changes

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "production_plan_sha256": "26931dd84ffaebe7cf9894be912fa6fb44ceb413f8a12f5b1863f8e0f6505220",
+  "executor": "hybrid_cards",
+  "encoder": "h264_videotoolbox",
+  "fallbacks": [],
+  "render_seconds": 398.606,
+  "normalized_track_timescale": 90000,
+  "form": "information_cards",
+  "style": {
+    "id": "editorial_light",
+    "version": 1,
+    "background": "#F6F3ED",
+    "surface": "#ffffff",
+    "text": "#191B1A",
+    "muted": "#696966",
+    "accent": "#AD3523",
+    "warning": "#9b650c",
+    "subtitle": "#191B1A",
+    "line": "#d7d5cf",
+    "inactive": "#bfbdb8",
+    "soft": "#f2e8e1",
+    "palette_source": "brand"
+  },
+  "music": {
+    "mode": "none",
+    "selection": {
+      "enabled": false,
+      "level_db": -18.0,
+      "ducking": true,
+      "loop": true,
+      "fade_seconds": 1.2
+    },
+    "background_music_generated": false
+  },
+  "still_frames": 2247,
+  "motion_frames": 4400,
+  "scene_count": 20,
+  "block_count": 10,
+  "caption_plan_version": 2,
+  "packaging_owner": "shared_package_stage",
+  "manual_scene_selection": false
+}

@@ -1,4 +1,4 @@
-"""Find unprocessed report runs for enabled production tasks, without output caps."""
+"""Find unprocessed reports without dropping pending work; admission happens downstream."""
 from __future__ import annotations
 
 import json
@@ -54,7 +54,8 @@ def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: floa
     out = []
     today = time.strftime("%Y-%m-%d", time.localtime(now))
     for job, mine in by_job.items():
-        source = topic_store.resolve(jobs_dir, job) or topic_store.whole_source(jobs_dir, job)
+        declared_source = topic_store.resolve(jobs_dir, job)
+        source = declared_source or topic_store.whole_source(jobs_dir, job)
         if source is None:
             continue
         for day, report in reversed(topic_store.all_report_files(source, root)):
@@ -64,6 +65,8 @@ def pending(config_dir: str, jobs_dir: str, state_dir: str, root: str, now: floa
             except OSError:
                 continue
             if now - reported < SETTLE_SECONDS:
+                continue
+            if not topic_store.report_has_content(declared_source, report, root):
                 continue
             previous = [r for r in runs if r["spec"]["job"] == job and
                         os.path.abspath(os.path.join(root, r["spec"]["report"])) == os.path.abspath(report)]
@@ -120,8 +123,12 @@ def recommendations_pending(config_dir: str, jobs_dir: str, state_dir: str, now:
     day = datetime.fromtimestamp(time.time() if now is None else now, ZoneInfo("Asia/Shanghai")).date().isoformat()
     configs = production.load_all(config_dir, jobs_dir)
     owners = matrices.load_all(config_dir)
+    from core import production_policy
+    policy = production_policy.load(config_dir)
     allowed = {m.key for m in owners.values() if not m.archived and not m.paused and any(
         c.auto and c.usable and c.job in m.jobs for c in configs.values())}
+    if policy and not policy.get('automatic', {}).get('recommendations', False):
+        allowed -= set(policy.get('matrices', []))
     try:
         with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as db:
             db.row_factory = sqlite3.Row

@@ -1,0 +1,42 @@
+G2 run job_d018731b005642648c75bb5a6cc8cb83_a1; model=deepseek-v4.1-flash; provider=opencode Go
+STEP prepare-input: START
+NARRATION READY: information_cards -> information_cards; 5 chapters kept verbatim
+STEP prepare-input: PASS in 0.00s
+STEP narration-plan: START
+STEP narration-plan: PASS in 0.12s
+STEP tts-and-align: START
+Building prefix dict from the default dictionary ...
+Loading model from cache /var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/jieba.cache
+Loading model cost 0.240 seconds.
+Prefix dict has been built successfully.
+REAL TTS: 276.967s, 8309 frames, 37 measured phrase spans
+STEP tts-and-align: PASS in 44.18s
+STEP storyboard-plan: START
+STEP storyboard-plan: PASS in 177.10s
+STEP draw-things-backgrounds: START
+STEP draw-things-backgrounds: PASS in 0.68s
+STEP compile-ir: START
+STEP compile-ir: PASS in 70.54s
+STEP render: START
+STEP render: PASS in 398.61s
+STEP verify-media: START
+/Users/milin/2026/软件开发/视频workflow/autovideo/g2/fast_cards.py:408: RuntimeWarning: divide by zero encountered in matmul
+  observed = ((actual.astype(float)-bg) @ delta) / max(1, delta @ delta) > .55
+/Users/milin/2026/软件开发/视频workflow/autovideo/g2/fast_cards.py:408: RuntimeWarning: overflow encountered in matmul
+  observed = ((actual.astype(float)-bg) @ delta) / max(1, delta @ delta) > .55
+/Users/milin/2026/软件开发/视频workflow/autovideo/g2/fast_cards.py:408: RuntimeWarning: invalid value encountered in matmul
+  observed = ((actual.astype(float)-bg) @ delta) / max(1, delta @ delta) > .55
+/Users/milin/2026/软件开发/视频workflow/autovideo/g2/fast_cards.py:409: RuntimeWarning: divide by zero encountered in matmul
+  required = ((expected_pixels.astype(float)-bg) @ delta) / max(1, delta @ delta) > .55
+/Users/milin/2026/软件开发/视频workflow/autovideo/g2/fast_cards.py:409: RuntimeWarning: overflow encountered in matmul
+  required = ((expected_pixels.astype(float)-bg) @ delta) / max(1, delta @ delta) > .55
+/Users/milin/2026/软件开发/视频workflow/autovideo/g2/fast_cards.py:409: RuntimeWarning: invalid value encountered in matmul
+  required = ((expected_pixels.astype(float)-bg) @ delta) / max(1, delta @ delta) > .55
+MEDIA PASS: 221.567s, 6647 frames, AAC/TTS correlation=0.99996
+STEP verify-media: PASS in 28.58s
+STEP package: START
+STEP package: PASS in 23.60s
+STEP mix-background-music: SKIPPED (本任务未启用背景配乐)
+STEP brand: START
+STEP brand: PASS in 14.40s
+G2 PASS

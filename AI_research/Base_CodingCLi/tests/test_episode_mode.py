@@ -34,6 +34,61 @@ def test_multiple_report_items_make_one_automatic_work_item(column_env):
     assert not items[0]['topic'].get('from_item')
 
 
+def test_empty_topic_report_never_becomes_an_episode_or_consumes_a_writer(column_env, monkeypatch):
+    from core.video import auto, autopilot_store as ap
+    import os
+    import time
+    spec = _pick(column_env)
+    path = column_env / spec['report']
+    path.write_text('## 本次暂无新题材\n官方来源本期没有新增。\n\n## 来源清单\nhttps://example.org/notes\n')
+    production.set_auto(str(column_env / 'config'), 'flash', 1)
+    now = time.time() + 300
+    os.utime(path, (now - 120, now - 120))
+    assert auto.pending(str(column_env / 'config'), str(column_env / 'jobs'),
+                        str(column_env / 'state'), str(column_env), now) == []
+    assert video_autopilot.pick_topics(spec) == []
+    monkeypatch.setattr(video_autopilot, 'fresh_topics', lambda *a: True)
+    monkeypatch.setattr('web.services.video_workflow.spawn', lambda *a, **k: (_ for _ in ()).throw(AssertionError('no writer')))
+    run = ap.create_run(spec, [])
+    video_autopilot._tick_run(run)
+    done = ap.get_run(run['id'])
+    assert done['status'] == 'DONE' and not done['items']
+    assert '没有可写的新选题' in done['note']
+    # A later, meaningful report is still eligible at the same path.
+    path.write_text('### 1.1 新功能\n- **一句话**：两个账号直接切换。\n- **证据来源**：https://example.org/accounts\n')
+    os.utime(path, (now - 60, now - 60))
+    assert video_autopilot.pick_topics(spec)
+
+
+def test_whole_prose_research_still_has_content_without_topic_headings(tmp_path):
+    from core.video import topic_store
+    path = tmp_path / 'research.md'
+    path.write_text('# 实际工具教程\n## 准备输入\n一份文件。\n## 执行操作\n处理文件。\n## 查看结果\n输出文件。')
+    assert topic_store.report_has_content(None, str(path), str(tmp_path))
+
+
+def test_app_report_picker_and_both_write_entries_skip_empty_topic_report(client, column_env, llm, monkeypatch):
+    from tests.test_video_scripts import _csrf, _login
+
+    spec = _pick(column_env)
+    path = column_env / spec['report']
+    path.write_text('## 本次暂无新题材\n本次未取得产品变化。\n\n## 来源清单\nhttps://example.org/notes\n')
+    monkeypatch.setattr('web.services.video_workflow.spawn', lambda *a, **k: (_ for _ in ()).throw(AssertionError('no writer')))
+    before = store.list_scripts()
+    _login(client)
+    pending = client.get('/api/production/flash/pending').json()
+    assert spec['report'] not in [r['path'] for r in pending['reports']]
+    response = client.post('/api/production/flash/write', json={'report_path': spec['report']}, headers=_csrf(client))
+    assert response.status_code == 422
+    assert response.json()['error']['code'] == 'no_topic_content'
+    record = reports.record_file(spec['report'], job=spec['job'], created_by='test')
+    direct = client.post('/api/video/scripts', json={
+        'column': 'flash', 'production': 'flash', 'report_id': record['id']}, headers=_csrf(client))
+    assert direct.status_code == 422
+    assert direct.json()['error']['code'] == 'no_topic_content'
+    assert store.list_scripts() == before and not llm.calls
+
+
 def test_a_frozen_programme_pick_survives_later_column_mode_changes(column_env):
     spec = _pick(column_env)
     column = content_columns.load_all(str(column_env / 'config'))['model_review']

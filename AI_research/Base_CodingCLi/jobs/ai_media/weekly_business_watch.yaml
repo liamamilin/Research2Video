@@ -1,5 +1,5 @@
-name: "AI 商业观察（每周）"
-description: "本周 AI 行业的商业动向：产品、定价、公司动作、政策（读 Import AI、The Rundown、TLDR 抓取的内容，不联网搜索）"
+name: "AI 商业观察"
+description: "本期 AI 行业的商业动向：产品、定价、公司动作、政策（读 Import AI、The Rundown、TLDR 抓取的内容，不联网搜索）"
 enabled: true
 keywords:
   - AI 商业

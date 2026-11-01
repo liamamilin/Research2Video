@@ -108,6 +108,14 @@ def main():
 
     print("\nJob files:")
     jobs_ok = check_jobs()
+    from core.production_policy import load, references
+    try:
+        policy = load('config')
+        references(policy, 'config')
+        print('  ✓ Production policy valid.' if policy else '  Production policy: legacy defaults.')
+    except Exception as exc:
+        print(f'  ✗ Production policy: {exc}')
+        jobs_ok = False
 
     print("\n" + "=" * 50)
     if sys_ok and jobs_ok:

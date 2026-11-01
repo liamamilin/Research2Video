@@ -1,0 +1,663 @@
+{
+  "state_dir": "/var/folders/hr/tz7sdpwx2xv30x2xydhkg70w0000gn/T/assistant-materials-real-vokf52sr/state",
+  "script": {
+    "id": "2619839baf3b4eb6b4098078e2ec3da9",
+    "column_key": "deep_dive",
+    "topic": {
+      "title": "看套餐价格，别漏掉付款周期",
+      "fields": {
+        "目标受众": "开发者"
+      },
+      "user_materials": {
+        "ids": [
+          "0b0bd4b875bb46ad8ab29f4c6a138235",
+          "bbe40405adbf4063b0e40ad313e76c75"
+        ],
+        "owner": "material-acceptance",
+        "mode": "narration",
+        "goal": "按照提供的旁白制作短视频，在讲价格时展示原始截图。"
+      }
+    },
+    "status": "APPROVED",
+    "research_job": "",
+    "report_path": "",
+    "current_version": 1,
+    "approved_version": 1,
+    "error": null,
+    "created_by": "material-acceptance",
+    "created_at": "2026-10-31T17:53:05+0800",
+    "updated_at": "2026-10-31T17:53:34+0800",
+    "heartbeat_at": 1793440405.625862,
+    "stage": null,
+    "archived": 0,
+    "production": "",
+    "content_column_id": "",
+    "content_matrix_id": "",
+    "source_matrix_id": "",
+    "content_context": {
+      "content_mode": "individual"
+    },
+    "report_id": null
+  },
+  "run": {
+    "id": "1ef1be0fd5464d2baef1e047388a4ba5",
+    "plan_id": null,
+    "spec": {
+      "picks": [],
+      "refresh": false
+    },
+    "status": "DONE",
+    "stage": "ITEMS",
+    "note": "DONE 1",
+    "started_by": "material-acceptance",
+    "started_at": 1793440385.618049,
+    "created_at": "2026-10-31T17:53:05+0800",
+    "updated_at": "2026-10-31T18:36:03+0800",
+    "discovery_at": null,
+    "discovery_tries": 0,
+    "items": [
+      {
+        "id": "1f69513a402841458780b6bebed473ea",
+        "run_id": "1ef1be0fd5464d2baef1e047388a4ba5",
+        "slot": 0,
+        "column_key": "deep_dive",
+        "topic": {
+          "title": "看套餐价格，别漏掉付款周期",
+          "fields": {
+            "目标受众": "开发者"
+          },
+          "user_materials": {
+            "ids": [
+              "0b0bd4b875bb46ad8ab29f4c6a138235",
+              "bbe40405adbf4063b0e40ad313e76c75"
+            ],
+            "owner": "material-acceptance",
+            "mode": "narration",
+            "goal": "按照提供的旁白制作短视频，在讲价格时展示原始截图。"
+          }
+        },
+        "script_id": "2619839baf3b4eb6b4098078e2ec3da9",
+        "render_id": "0f4da34a278b45a99d60c5305a1948d7",
+        "state": "DONE",
+        "note": "成片完成，等你看片和发布",
+        "gate": {
+          "label": "generated",
+          "text": "按素材生成",
+          "reasons": [],
+          "core_issues": 0,
+          "cited_share": 0.0,
+          "audited": false,
+          "ignored": {
+            "must": 0,
+            "warn": 0
+          },
+          "version": 1,
+          "approved": "auto"
+        },
+        "retries": {},
+        "updated_at": "2026-10-31T18:06:22+0800",
+        "production": ""
+      }
+    ]
+  },
+  "renders": [
+    {
+      "id": "0f4da34a278b45a99d60c5305a1948d7",
+      "script_id": "2619839baf3b4eb6b4098078e2ec3da9",
+      "version": 1,
+      "status": "COMPLETED",
+      "title": "看套餐价格，别漏掉付款周期",
+      "source_text": "这张截图里，Pro 显示十七美元。下面还有一个条件：按年订阅，全年一次付二百美元；按月支付则是二十美元。看套餐价格时，要把付款周期一起看。",
+      "source_sha256": "cf163d2bec4b627f036012ffd358b4f73629396bbb4a21e0c63d0b948e483e91",
+      "request": {
+        "input_mode": "narration",
+        "chapters": [
+          {
+            "title": "看套餐价格，别漏掉付款周期",
+            "paragraphs": [
+              "这张截图里，Pro 显示十七美元。下面还有一个条件：按年订阅，全年一次付二百美元；按月支付则是二十美元。看套餐价格时，要把付款周期一起看。"
+            ]
+          }
+        ],
+        "video_form": "object_showcase",
+        "duration_mode": "content",
+        "creative_intent": {
+          "purpose": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n用户要求：按照提供的旁白制作短视频，在讲价格时展示原始截图。",
+          "audience": "开发者",
+          "focus": "看套餐价格，别漏掉付款周期"
+        },
+        "title": "看套餐价格，别漏掉付款周期",
+        "packaging": {
+          "preset": "common",
+          "label": "深度解读",
+          "accent": "#1f7a4d",
+          "outro": {
+            "lines": [
+              "面向开发者的 深度解读"
+            ],
+            "seconds": 2.5
+          },
+          "recipe": "deep_dive",
+          "intro": {
+            "title": "看套餐价格"
+          }
+        },
+        "voice_id": "voxcpm_anchor",
+        "visual_storytelling": true,
+        "image_materials": [
+          {
+            "image_id": "e81db63e-8293-4170-8c1a-9e38d2493167",
+            "role": "reference",
+            "caption": "Claude套餐截图.png",
+            "placements": [
+              {
+                "chapter_index": 0,
+                "paragraph_index": 0
+              }
+            ],
+            "source": {
+              "title": "Claude套餐截图.png",
+              "url": "/api/assistant/materials/0b0bd4b875bb46ad8ab29f4c6a138235/file",
+              "final_url": "/api/assistant/materials/0b0bd4b875bb46ad8ab29f4c6a138235/file",
+              "captured_at": "2026-10-31T09:53:05.502261+00:00",
+              "sha256": "63c38dc3920ebda70b695843907e51b1f303fccfd9808691bf3fe626716e2658"
+            }
+          }
+        ],
+        "production_mode": "standard",
+        "use_draw_things": false,
+        "idempotency_key": "research:0f4da34a278b45a99d60c5305a1948d7"
+      },
+      "autovideo_job_id": "19840092-7b67-4528-abfa-4c5ec8393f3e",
+      "active_stage": "COMPLETE",
+      "attempt_count": 1,
+      "resolved_video_form": "object_showcase",
+      "error_code": null,
+      "error_message": null,
+      "artifacts": [
+        {
+          "name": "authored-narration.json",
+          "content_type": "application/json",
+          "bytes": 671,
+          "sha256": "9665ea85a368a57359c91912f5563279755f85263e649edb4c6f2cdc276f75f4"
+        },
+        {
+          "name": "brand-qa.json",
+          "content_type": "application/json",
+          "bytes": 1877,
+          "sha256": "05a5a261ca14bd7e87d437239bceba84fe5c55fbc713d7672a6afa0923645e0e"
+        },
+        {
+          "name": "caption-alignment.json",
+          "content_type": "application/json",
+          "bytes": 7413,
+          "sha256": "ee75b06d7a66ad829622856d707ff96bb07a0f2dc2784b0057a8815e051db8e3"
+        },
+        {
+          "name": "captions.srt",
+          "content_type": "application/x-subrip",
+          "bytes": 334,
+          "sha256": "f9259990d5a59ec093b58ff11dcaba3592c7b0d0dd74b9f6e799930745bf9ec5"
+        },
+        {
+          "name": "chapters.json",
+          "content_type": "application/json",
+          "bytes": 2061,
+          "sha256": "1d1df8981d5c85b364e3d96796e754bc49a5692601cc404bf73dcb356da04b23"
+        },
+        {
+          "name": "content-captions.srt",
+          "content_type": "application/x-subrip",
+          "bytes": 334,
+          "sha256": "f9259990d5a59ec093b58ff11dcaba3592c7b0d0dd74b9f6e799930745bf9ec5"
+        },
+        {
+          "name": "content-chapters.json",
+          "content_type": "application/json",
+          "bytes": 1720,
+          "sha256": "b00a5f7f57c8681687a4b6c85532e483cbaa5ce9e8a39dbff8689add7976b88e"
+        },
+        {
+          "name": "content.mp4",
+          "content_type": "video/mp4",
+          "bytes": 1839512,
+          "sha256": "88d0dca7feeb073514afbac59b01df126d24c9a152d6f739549442e11acaf022"
+        },
+        {
+          "name": "execution-log.txt",
+          "content_type": "text/plain; charset=utf-8",
+          "bytes": 992,
+          "sha256": "7db19526e5c1381b0e1a64df2f662282f3f4c02ffa6eebd1016a7debbc92dc5c"
+        },
+        {
+          "name": "generation-schedule.json",
+          "content_type": "application/json",
+          "bytes": 455,
+          "sha256": "ddae3fef87c1057eaa6f80a1fd53bebdfe3917cbf40b55a11c03d60bb39f24f5"
+        },
+        {
+          "name": "information-timing.json",
+          "content_type": "application/json",
+          "bytes": 384,
+          "sha256": "9d0485ec967a2b9b7926f14d1c858faa2592344ab188e8ecdd71bdb152dc3436"
+        },
+        {
+          "name": "input-brief.json",
+          "content_type": "application/json",
+          "bytes": 918,
+          "sha256": "0d8b13106183d2304de868b2f9a0de59c0502e06835b98c1ee83611c06bcd3a0"
+        },
+        {
+          "name": "manifest.json",
+          "content_type": "application/json",
+          "bytes": 26386,
+          "sha256": "24eaac95038a30975fef8a65562b1493827aba9a97a042bc8cb04076cd8cf0ee"
+        },
+        {
+          "name": "model-cost.json",
+          "content_type": "application/json",
+          "bytes": 1561,
+          "sha256": "eeae0a9d157575b533032aaa6023efd5c8b2b2b2d371501f2748e8430d6916a4"
+        },
+        {
+          "name": "narration-check.json",
+          "content_type": "application/json",
+          "bytes": 327,
+          "sha256": "1e1238d303b34efa86ca580bb00159b7ff892f9055ecb357a66c1aabe23665ae"
+        },
+        {
+          "name": "narration.json",
+          "content_type": "application/json",
+          "bytes": 3341,
+          "sha256": "549d7c59c2f90f2ae5fd93fe57bd64770f64cc7d804321b392699dc9ad9f68bd"
+        },
+        {
+          "name": "package-qa.json",
+          "content_type": "application/json",
+          "bytes": 713,
+          "sha256": "bd4b529bb8413f64ce6f8345e68196513eba8e471a3c239386f6e3e2e5eefbb8"
+        },
+        {
+          "name": "package.json",
+          "content_type": "application/json",
+          "bytes": 3531,
+          "sha256": "72a2975faf40f5f4e80af01c0161814c2c74b2d7368b9368fbd948df137afabd"
+        },
+        {
+          "name": "packaging-resolved.json",
+          "content_type": "application/json",
+          "bytes": 1617,
+          "sha256": "b49a2c4ea0e88d7f6937b83759574e53ce631e38bba9b10fb76a664cd04f8376"
+        },
+        {
+          "name": "prepared-source.txt",
+          "content_type": "text/plain; charset=utf-8",
+          "bytes": 200,
+          "sha256": "932d617801ec05baa4dcdb91d2de48d1f1be9417d2156eeef204f9fc71f79426"
+        },
+        {
+          "name": "production-execution.json",
+          "content_type": "application/json",
+          "bytes": 378,
+          "sha256": "d4e0389f15a3eeba8da7bb19cdd8bff8e934b589d3cee2e6c41ed9c44d4fad8f"
+        },
+        {
+          "name": "production-plan.json",
+          "content_type": "application/json",
+          "bytes": 6151,
+          "sha256": "e6a5e0f209debbbc1a701e0e5c0a4862991d3a4f323bbbd399e8ce7330f2a32f"
+        },
+        {
+          "name": "qa.json",
+          "content_type": "application/json",
+          "bytes": 3192,
+          "sha256": "3630eab1dbfb7b22f4036fcd20d221ec6edc234184004b45d3293ac9d9961015"
+        },
+        {
+          "name": "render-resources.json",
+          "content_type": "application/json",
+          "bytes": 244,
+          "sha256": "abdba4f1a9ae350a760df94d126debc8973a51ce4a364995b99ecdef92d1b928"
+        },
+        {
+          "name": "slideshow-images.json",
+          "content_type": "application/json",
+          "bytes": 408,
+          "sha256": "d087ef0ee8858198622bc7047fec66dd1865d02a99da069df241d73d9dba4b66"
+        },
+        {
+          "name": "storyboard.json",
+          "content_type": "application/json",
+          "bytes": 3708,
+          "sha256": "502c0973390a78cc618e8ee73fcf81298f7cefc82da5c1087d05db7fc01eb134"
+        },
+        {
+          "name": "tts-metrics.json",
+          "content_type": "application/json",
+          "bytes": 896,
+          "sha256": "d32f38dc62993128b7fb216eb740fb548c82e4f9a9e636f14311e088c30ce9d6"
+        },
+        {
+          "name": "unbranded.mp4",
+          "content_type": "video/mp4",
+          "bytes": 1605115,
+          "sha256": "38984443fb2a7989f4f8b60e4198f0368737cddf962931634c1cb93a274ecfb9"
+        },
+        {
+          "name": "video-ir.json",
+          "content_type": "application/json",
+          "bytes": 6023,
+          "sha256": "8dab3eb6568012f4659a22b67021b7ebeaa3ce9a6906a5d384596e51985d4d09"
+        },
+        {
+          "name": "video.mp4",
+          "content_type": "video/mp4",
+          "bytes": 1508425,
+          "sha256": "02fc35c68bf4b86ffbd0611ec33ee6d005d101f7884a8a09d337673603bfd362"
+        },
+        {
+          "name": "voice-report.json",
+          "content_type": "application/json",
+          "bytes": 1698,
+          "sha256": "3c16cebbaa7469068bb0e357d08a0c2064d1c3348563f1efb0f798f8f5a42449"
+        }
+      ],
+      "submit_started_at": "2026-10-31T09:53:39.863608+00:00",
+      "submitted_at": "2026-10-31T17:53:40+0800",
+      "completed_at": "2026-10-31T18:06:21+0800",
+      "created_at": "2026-10-31T17:53:39+0800",
+      "updated_at": "2026-10-31T18:06:21+0800",
+      "heartbeat_at": 1793441180.226967,
+      "timings": {
+        "process_runs": 1,
+        "last_process_started_at": "2026-10-31T09:53:39.844467+00:00",
+        "submit_seconds": 0.306,
+        "poll_seconds": 761.426,
+        "poll_count": 153,
+        "poll_failures": 0,
+        "remote_completed_at": "2026-10-31T10:06:18.100+00:00",
+        "completion_observed_at": "2026-10-31T10:06:21.602636+00:00",
+        "download_seconds": 0.04,
+        "artifact_list_seconds": 0.002,
+        "download_attempts": 1,
+        "download_workers": 4,
+        "artifacts": [
+          {
+            "name": "authored-narration.json",
+            "seconds": 0.006,
+            "reused": false,
+            "bytes": 671
+          },
+          {
+            "name": "brand-qa.json",
+            "seconds": 0.006,
+            "reused": false,
+            "bytes": 1877
+          },
+          {
+            "name": "caption-alignment.json",
+            "seconds": 0.006,
+            "reused": false,
+            "bytes": 7413
+          },
+          {
+            "name": "captions.srt",
+            "seconds": 0.005,
+            "reused": false,
+            "bytes": 334
+          },
+          {
+            "name": "chapters.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 2061
+          },
+          {
+            "name": "content-captions.srt",
+            "seconds": 0.005,
+            "reused": false,
+            "bytes": 334
+          },
+          {
+            "name": "content-chapters.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 1720
+          },
+          {
+            "name": "content.mp4",
+            "seconds": 0.012,
+            "reused": false,
+            "bytes": 1839512
+          },
+          {
+            "name": "execution-log.txt",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 992
+          },
+          {
+            "name": "generation-schedule.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 455
+          },
+          {
+            "name": "information-timing.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 384
+          },
+          {
+            "name": "input-brief.json",
+            "seconds": 0.005,
+            "reused": false,
+            "bytes": 918
+          },
+          {
+            "name": "manifest.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 26386
+          },
+          {
+            "name": "model-cost.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 1561
+          },
+          {
+            "name": "narration-check.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 327
+          },
+          {
+            "name": "narration.json",
+            "seconds": 0.005,
+            "reused": false,
+            "bytes": 3341
+          },
+          {
+            "name": "package-qa.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 713
+          },
+          {
+            "name": "package.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 3531
+          },
+          {
+            "name": "packaging-resolved.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 1617
+          },
+          {
+            "name": "prepared-source.txt",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 200
+          },
+          {
+            "name": "production-execution.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 378
+          },
+          {
+            "name": "production-plan.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 6151
+          },
+          {
+            "name": "qa.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 3192
+          },
+          {
+            "name": "render-resources.json",
+            "seconds": 0.004,
+            "reused": false,
+            "bytes": 244
+          },
+          {
+            "name": "slideshow-images.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 408
+          },
+          {
+            "name": "storyboard.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 3708
+          },
+          {
+            "name": "tts-metrics.json",
+            "seconds": 0.003,
+            "reused": false,
+            "bytes": 896
+          },
+          {
+            "name": "unbranded.mp4",
+            "seconds": 0.008,
+            "reused": false,
+            "bytes": 1605115
+          },
+          {
+            "name": "video-ir.json",
+            "seconds": 0.002,
+            "reused": false,
+            "bytes": 6023
+          },
+          {
+            "name": "video.mp4",
+            "seconds": 0.007,
+            "reused": false,
+            "bytes": 1508425
+          },
+          {
+            "name": "voice-report.json",
+            "seconds": 0.002,
+            "reused": false,
+            "bytes": 1698
+          }
+        ],
+        "process_seconds": 761.809
+      },
+      "visuals": {
+        "version": 3,
+        "state": "manual",
+        "reason": "使用已提交的图片素材",
+        "policy": {
+          "enabled": true,
+          "version": 3,
+          "max_pages": 3,
+          "max_images": 3,
+          "max_seconds": 180,
+          "attempts_per_paragraph": 2,
+          "cache_hours": 6,
+          "semantic_review": false,
+          "max_model_calls": 3,
+          "ocr_review": true,
+          "vision_section": "visual_ai",
+          "vision_required": true,
+          "vision_timeout": 60
+        },
+        "chapter_hash": "c7e4d152b2cf70de4e599297c5721722a8b70864dc2afc40fe8b15404fab5e34",
+        "needs": [],
+        "decisions": [],
+        "selection": {
+          "form": "object_showcase",
+          "materials": []
+        },
+        "submission_sha256": "c6f722102f9c9102500581144061d05ec37f717f8791d43abe8a5d12cfb8fe90"
+      },
+      "submission_request": {
+        "input_mode": "narration",
+        "chapters": [
+          {
+            "title": "看套餐价格，别漏掉付款周期",
+            "paragraphs": [
+              "这张截图里，Pro 显示十七美元。下面还有一个条件：按年订阅，全年一次付二百美元；按月支付则是二十美元。看套餐价格时，要把付款周期一起看。"
+            ]
+          }
+        ],
+        "video_form": "object_showcase",
+        "duration_mode": "content",
+        "creative_intent": {
+          "purpose": "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。\n用户要求：按照提供的旁白制作短视频，在讲价格时展示原始截图。",
+          "audience": "开发者",
+          "focus": "看套餐价格，别漏掉付款周期"
+        },
+        "title": "看套餐价格，别漏掉付款周期",
+        "packaging": {
+          "preset": "common",
+          "label": "深度解读",
+          "accent": "#1f7a4d",
+          "outro": {
+            "lines": [
+              "面向开发者的 深度解读"
+            ],
+            "seconds": 2.5
+          },
+          "recipe": "deep_dive",
+          "intro": {
+            "title": "看套餐价格"
+          }
+        },
+        "voice_id": "voxcpm_anchor",
+        "visual_storytelling": true,
+        "image_materials": [
+          {
+            "image_id": "e81db63e-8293-4170-8c1a-9e38d2493167",
+            "role": "reference",
+            "caption": "Claude套餐截图.png",
+            "placements": [
+              {
+                "chapter_index": 0,
+                "paragraph_index": 0
+              }
+            ],
+            "source": {
+              "title": "Claude套餐截图.png",
+              "url": "/api/assistant/materials/0b0bd4b875bb46ad8ab29f4c6a138235/file",
+              "final_url": "/api/assistant/materials/0b0bd4b875bb46ad8ab29f4c6a138235/file",
+              "captured_at": "2026-10-31T09:53:05.502261+00:00",
+              "sha256": "63c38dc3920ebda70b695843907e51b1f303fccfd9808691bf3fe626716e2658"
+            }
+          }
+        ],
+        "production_mode": "standard",
+        "use_draw_things": false,
+        "idempotency_key": "research:0f4da34a278b45a99d60c5305a1948d7"
+      }
+    }
+  ]
+}

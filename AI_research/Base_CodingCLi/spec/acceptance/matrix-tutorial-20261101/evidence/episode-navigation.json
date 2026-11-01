@@ -1,0 +1,89 @@
+{
+  "mode": "episode",
+  "items": [
+    {
+      "index": 1,
+      "title": "准备周报输入",
+      "chapter_indexes": [
+        1
+      ],
+      "start_frame": 1028,
+      "end_frame": 2381
+    },
+    {
+      "index": 2,
+      "title": "执行转换命令",
+      "chapter_indexes": [
+        2
+      ],
+      "start_frame": 2381,
+      "end_frame": 3903
+    },
+    {
+      "index": 3,
+      "title": "查看转换结果",
+      "chapter_indexes": [
+        3
+      ],
+      "start_frame": 3903,
+      "end_frame": 5782
+    }
+  ],
+  "total_frames": 6647,
+  "agenda": {
+    "start_frame": 86,
+    "end_frame": 1028,
+    "highlights": [
+      378,
+      617,
+      823
+    ]
+  },
+  "item_cards": [
+    {
+      "index": 1,
+      "start_frame": 1028,
+      "end_frame": 1082
+    },
+    {
+      "index": 2,
+      "start_frame": 2381,
+      "end_frame": 2435
+    },
+    {
+      "index": 3,
+      "start_frame": 3903,
+      "end_frame": 3957
+    }
+  ],
+  "covered_frames": [
+    [
+      86,
+      1028
+    ],
+    [
+      1028,
+      1082
+    ],
+    [
+      2381,
+      2435
+    ],
+    [
+      3903,
+      3957
+    ]
+  ],
+  "agenda_highlight": "per item paragraph",
+  "fps": 30,
+  "timing": "measured narration chapters",
+  "footer": [
+    0,
+    1024,
+    1920,
+    56
+  ],
+  "audio": "stream copy",
+  "source_preserved": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/d018731b-0056-4264-8c75-bb5a6cc8cb83/attempts/1/g2-run/artifacts/episode-navigation/original-content.mp4",
+  "video_sha256": "e157a4fba0707e9de012ebcc7ea29ea7fd0025086a5885939c73120487adcfa8"
+}

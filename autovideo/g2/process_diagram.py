@@ -125,7 +125,14 @@ def wrap_label(text: str, font: ImageFont.FreeTypeFont, width: int = 250) -> lis
                 current = piece
             else:
                 current += piece
-    return [*lines, current] if current else lines
+    lines = [*lines, current] if current else lines
+    if len(lines) > 1 and len(lines[-1]) == 1 and '\u4e00' <= lines[-1] <= '\u9fff':
+        units = wrap_units(lines[-2])
+        if len(units) > 1 and len(units[-1]) == 1 and '\u4e00' <= units[-1] <= '\u9fff':
+            tail = units[-1] + lines[-1]
+            if display_width(font, tail) <= width:
+                lines[-2], lines[-1] = ''.join(units[:-1]), tail
+    return lines
 
 
 def layout_request(plan: dict) -> dict:

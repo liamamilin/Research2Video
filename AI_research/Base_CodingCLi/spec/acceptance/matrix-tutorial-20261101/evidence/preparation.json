@@ -1,0 +1,24 @@
+{
+  "production": "ai_media_opensource_digest",
+  "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-matrix-tutorial-20261101/run-1/output/radar/2026-11-01_ai_opensource_radar.md",
+  "report_sha256": "40ebb5ae90ef7d1c457ecdfaaa19c5268c951ad69652954bbfaa0f7698300622",
+  "actual_conversion": {
+    "tool": "markitdown",
+    "version": "0.1.9",
+    "command": "markitdown weekly.html -o weekly.md",
+    "exit_code": 0,
+    "model_calls": 0,
+    "input_authored_for_tutorial": true,
+    "output_from_actual_command": true,
+    "source": "https://github.com/microsoft/markitdown",
+    "sha256": {
+      "weekly.html": "9a37e55fe9ed85b6a65c62baf9328e6a3a1f7c0752efd61aeacf7de74be397b7",
+      "weekly.md": "8dc3c24a108addea6b4699059d962ce97d4e5d9da130b169d21cf2d634c1c83e"
+    }
+  },
+  "config_snapshot": true,
+  "isolated_state": true,
+  "manual_script_or_storyboard": false,
+  "automatic_visual_selection": true,
+  "model_calls": 0
+}

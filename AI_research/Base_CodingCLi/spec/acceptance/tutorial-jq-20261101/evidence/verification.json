@@ -1,0 +1,154 @@
+{
+  "status": "PASS",
+  "run_id": "12d07acd3c7f4a1f80a9b6f7e121c053",
+  "job_id": "4ac177be-44a0-46ac-9289-8adee3a83667",
+  "automatic_report_write_approve_register_match_render_download": true,
+  "manual_paragraph_assignments": 0,
+  "manual_storyboard_edits": 0,
+  "greeting_count": 1,
+  "steps": [
+    "准备输入",
+    "执行筛选",
+    "查看结果"
+  ],
+  "input_scenes": [
+    "card_2",
+    "card_3"
+  ],
+  "output_scenes": [
+    "card_6"
+  ],
+  "comparison_scenes": [
+    "card_7"
+  ],
+  "code_scenes": [
+    "card_4",
+    "card_5_p1"
+  ],
+  "actual_input_code_output_order": true,
+  "original_screenshot_pixels_preserved": true,
+  "registered_focus_regions": 4,
+  "returned_artifacts_verified": 33,
+  "rendered_input_and_output_region_cues": true,
+  "writer_requests": 1,
+  "model_calls": 5,
+  "probes": {
+    "content.mp4": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "3160"
+        },
+        {
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "4938"
+        }
+      ],
+      "format": {
+        "duration": "105.333333"
+      }
+    },
+    "video.mp4": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "3340"
+        },
+        {
+          "codec_name": "aac",
+          "r_frame_rate": "0/0",
+          "nb_read_frames": "5219"
+        }
+      ],
+      "format": {
+        "duration": "111.333333"
+      }
+    }
+  },
+  "brand_profile": "linthesis",
+  "sample_times": [
+    [
+      "greeting",
+      1.5
+    ],
+    [
+      "agenda",
+      5.483333333333333
+    ],
+    [
+      "step-1",
+      11.866666666666667
+    ],
+    [
+      "step-2",
+      41.233333333333334
+    ],
+    [
+      "step-3",
+      68.13333333333334
+    ],
+    [
+      "input",
+      17.283333333333335
+    ],
+    [
+      "code",
+      54.983333333333334
+    ],
+    [
+      "output",
+      73.26666666666667
+    ],
+    [
+      "comparison",
+      89.1
+    ],
+    [
+      "outro",
+      109.33333333333333
+    ],
+    [
+      "input-focus-1",
+      24.333333333333332
+    ],
+    [
+      "input-focus-2",
+      27.766666666666666
+    ],
+    [
+      "output-focus-1",
+      71.23333333333333
+    ],
+    [
+      "output-focus-2",
+      73.33333333333333
+    ]
+  ],
+  "video": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-tutorial-jq-20261101/run-1/state/video_renders/a75279f29f15458486b0cf901a04e234/video.mp4",
+  "video_sha256": "a8febb09307018d57d9afda6adb54ca0411fc4f0ac70d20025465acc6b2638c4",
+  "source_sha256": {
+    "core/user_materials.py": "31039a2e99deb14f8deb0a6a2976e281afdeb2371608ef0175ff6627373f6413",
+    "core/video/writer.py": "0b7f2936e39f697098c48ca0a14b7ca0cbcca4aa4dc9d22e1e258ff04fe53482",
+    "core/video/episodes.py": "f204e7ca5fc4cf83182bb73cc3bcce16f3169ce059913d5f090bc5f86c427cb1",
+    "web/services/video_workflow.py": "8ffc3f5ddeb35991e8520496f72e2000452595a27f35441667cf17d3ab6868fb",
+    "web/services/assistant_materials.py": "a1a097a1a37053b73e9dcf1ad6863c33fbce124c833cda0b57a95c8f4ce95059"
+  },
+  "tool": "jq",
+  "tool_version": "jq-1.7.1-apple",
+  "displayed_commands_checked": [
+    "jq '[.[]|select(.done)]' tasks.json > done.json",
+    "jq . done.json"
+  ],
+  "same_production_source_as_previous_tool": true
+}

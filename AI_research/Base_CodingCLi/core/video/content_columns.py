@@ -21,7 +21,7 @@ from .recipes import KEY
 TYPE_KEYS = ("news", "explainer", "comparison", "tutorial", "deep_research", "series")
 DIR = "content_columns"
 FIELDS = {"schema_version", "name", "matrix", "type", "audience", "promise", "production_ids",
-          "render_inheritance", "render", "presentation", "status", "notes", "content_mode"}
+          "render_inheritance", "render", "presentation", "status", "notes", "content_mode", "greeting"}
 
 
 @dataclass(frozen=True)
@@ -39,6 +39,7 @@ class ContentColumn:
     status: str = "configured"
     notes: str = ""
     content_mode: str = "episode"
+    greeting: str = ""
     revision: str = ""
     errors: tuple[str, ...] = ()
 
@@ -55,7 +56,7 @@ class ContentColumn:
                 "audience": self.audience, "promise": self.promise, "production_ids": list(self.production_ids),
                 "render_inheritance": self.render_inheritance, "render": copy.deepcopy(self.render),
                 "presentation": copy.deepcopy(self.presentation), "status": self.status, "notes": self.notes,
-                "content_mode": self.content_mode}
+                "content_mode": self.content_mode, **({"greeting": self.greeting} if self.greeting else {})}
 
 
 def types(config_dir: str) -> dict[str, dict]:
@@ -79,7 +80,7 @@ def _build(key: str, data: dict, matrix_map: dict, type_map: dict, revision: str
         raise ValueError("栏目字段无效，请使用名称、所属领域、类型、受众、交付目标、生产绑定和制作设置")
     if data.get("schema_version", 1) != 1:
         raise ValueError("不支持的栏目配置版本")
-    for name in ("name", "matrix", "type", "audience", "promise", "notes"):
+    for name in ("name", "matrix", "type", "audience", "promise", "notes", "greeting"):
         value = data.get(name, "")
         if not isinstance(value, str) or len(value) > 2000:
             raise ValueError(f"{name} 应为文字，最多 2000 字")
@@ -117,7 +118,8 @@ def _build(key: str, data: dict, matrix_map: dict, type_map: dict, revision: str
     return ContentColumn(key=key, name=data["name"].strip(), matrix=matrix.key, type=data["type"],
                          audience=data.get("audience", "").strip(), promise=data["promise"].strip(),
                          production_ids=tuple(ids), render_inheritance=mode, render=validate_render(data.get("render")),
-                         presentation=copy.deepcopy(presentation), status=status, notes=data.get("notes", ""), content_mode=content_mode, revision=revision)
+                         presentation=copy.deepcopy(presentation), status=status, notes=data.get("notes", ""), content_mode=content_mode,
+                         greeting=data.get("greeting", "").strip(), revision=revision)
 
 
 def load_all(config_dir: str, *, configs: dict | None = None, matrix_map: dict | None = None) -> dict[str, ContentColumn]:
@@ -164,7 +166,7 @@ def snapshot(config_dir: str, production_id: str, job: str) -> dict:
     return {"column": column.key, "column_name": column.name, "type": column.type, "matrix": column.matrix,
             "source_matrix": source.key if source else "", "job": job, "revision": column.revision,
             "audience": column.audience, "promise": column.promise, "notes": column.notes,
-            "content_mode": column.content_mode,
+            "content_mode": column.content_mode, "greeting": column.greeting,
             "type_definition": copy.deepcopy(types(config_dir).get(column.type, {})),
             "render_inheritance": column.render_inheritance, "render": copy.deepcopy(column.render),
             "presentation": copy.deepcopy(column.presentation)}
@@ -176,16 +178,20 @@ def apply_script_context(recipe, context: dict):
         return recipe
     definition = context.get("type_definition") or {}
     structure = " → ".join(definition.get("structure") or [])
+    programme = context.get("content_mode") == "episode"
+    scope = "每项独立内容" if programme else "本期"
     direction = f"栏目：{context.get('column_name', '')}。持续交付：{context.get('promise', '')}。"
     if structure:
-        direction += f"\n本期可围绕 {structure} 组织讲述，按素材自然展开。"
+        direction += f"\n{scope}可围绕 {structure} 组织讲述，按素材自然展开。"
     if context.get("type") == "comparison":
         direction += "\n把材料中的对象放到相同维度比较，讲清关键差异和适用情形；对象数量沿用材料，不限定为两个。"
     elif context.get("type") == "tutorial":
-        direction += "\n围绕一个明确任务，按操作顺序讲清步骤和可看到的结果。"
+        direction += f"\n{scope}围绕自己的明确任务，按操作顺序讲清步骤和可看到的结果。"
     notes = (context.get("notes") or "").strip()
     if notes:
-        direction += f"\n栏目创作方向：{notes}"
+        if programme:
+            direction += "\n以下创作方向分别用于各项独立内容，其中的主例子和任务线在该项内部展开，各项之间由整期简报与转场衔接，不各自重新开场；同一问题的解释章节沿用共同主例子。"
+        direction += f"\n{'单项内容创作方向' if programme else '栏目创作方向'}：{notes}"
     # A concrete business-column brief owns the creative goal. The reused
     # recipe continues to own its input mode, writer and output contract.
     return replace(recipe, script_style=direction if notes else recipe.script_style + "\n" + direction,

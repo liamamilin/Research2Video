@@ -32,6 +32,7 @@ const MatrixJobVideoPage = lazy(pageLoaders.MatrixJobVideoPage);
 const SourcesPage = lazy(pageLoaders.SourcesPage);
 const OutputsPage = lazy(pageLoaders.OutputsPage);
 const PlatformsPage = lazy(pageLoaders.PlatformsPage);
+const AnalyticsPage = lazy(pageLoaders.AnalyticsPage);
 
 /** Blocks deep links to admin-only pages instead of letting every action 403. */
 export function AdminOnly({ children }: { children: ReactElement }) {
@@ -83,6 +84,7 @@ function AppRoutes() {
         <Route path="/topics" element={<TopicsPage />} />
         <Route path="/publish" element={<PublishQueuePage />} />
         <Route path="/platforms" element={<PlatformsPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/video" element={<VideoScriptsPage />} />
         <Route path="/video-recipes" element={<VideoRecipesPage />} />
         <Route path="/video-recipes/:key" element={<VideoRecipesPage />} />

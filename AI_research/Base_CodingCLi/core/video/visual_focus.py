@@ -50,6 +50,13 @@ def _reading_regions(quality: dict, need: dict) -> list[dict]:
 
 def for_asset(asset: dict, need: dict | None = None) -> dict | None:
     quality = asset.get("quality") or {}
+    if quality.get('visual_kind') == 'table':
+        # OCR labels do not identify a complete row or column. Until structure
+        # is available, preserve the complete table, including its conditions.
+        region = {'x1': 0, 'x2': 1000, 'y1': 0, 'y2': 1000,
+                  'label': '表格内容', 'style': 'box'}
+        return {'width': asset.get('registered_width', asset['width']),
+                'height': asset.get('registered_height', asset['height']), 'regions': [region]}
     if (need or {}).get("visual_subject"):
         regions = _reading_regions(quality, need)
         if regions:

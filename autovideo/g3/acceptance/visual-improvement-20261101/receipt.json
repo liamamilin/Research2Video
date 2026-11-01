@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-01",
+  "normal_model_jobs": 1,
+  "normal_job_id": "5c02b20a-388b-4d72-9632-7556850c2178",
+  "runtime_root": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-visual-improvement-20261101",
+  "final_video": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-visual-improvement-20261101/tutorial-release/video.mp4",
+  "video_sha256": "fc942508f098d46d4fc90ce6f95e9cda5574ff2e07537d6691c2f39d337565cf",
+  "source_sha256": {
+    "g1/renderer/src/CodeDemo.tsx": "c3d2747d55565c1555eae9307b633a1597c89054b7a92429d7a4fd8b1d444076",
+    "g1/renderer/src/DirectedMaterials.tsx": "2d242877cf2d400203bfdddd00665357905b34416393365e81060233f2b97ce6",
+    "g2/explanation.py": "dd73b0342b7e59e43af9998c534464977affc370750dd22a671a605a88bffe36",
+    "g2/information_motion.py": "f0ba1b2e078004a03cf35aa6f8de4fd48b778ea45f12f15370aa45107f22e63b",
+    "g2/material_shots.py": "425b703ac8b24cb525df30cb6ea9d649a8bbffac8e7de4de0315959fe2b5ab80",
+    "g2/shot_director.py": "cf12a60ac5ead5744c83feff9fd42dcaba44a5778bd066cd48ccb9620068e6d5",
+    "g2/scene_revision.py": "8c2088ab93a42c1e56e139dcbbda1ee4b60cd3b311457f22ba74f94f43e0277b",
+    "g2/tests/test_code_demo.py": "90a7162d58a542b0f417f06d4569dae70c2f313b4d78b5214b48eb616c364a65",
+    "g2/tests/test_material_shots.py": "c41853b2d0867ca248e8ccabf9cd495db6be0ee433d082c10e65ca0aec57b039"
+  },
+  "tests": {
+    "engine": "986 passed, 1 skipped",
+    "research": "87 passed, 1 warning",
+    "typescript": "PASS",
+    "diff_check": "PASS"
+  },
+  "new_production_dependencies": [],
+  "reviewed_frames": [
+    "screenshot-before.png",
+    "screenshot-after.png",
+    "tutorial-steps.png",
+    "tutorial-diff-after.png"
+  ]
+}

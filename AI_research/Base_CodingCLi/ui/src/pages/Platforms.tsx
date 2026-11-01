@@ -1,8 +1,8 @@
 import { SocialPlatform } from "@/components/SocialPublishing";
 import { VISIBLE_PLATFORM_NAMES, SOCIAL_PLATFORM_KEYS } from "@/lib/distributions";
 import { useCallback, useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { BarChart3, CheckCircle2, ExternalLink, MessageSquareText, RefreshCw, Settings, UploadCloud } from "lucide-react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { CheckCircle2, ExternalLink, MessageSquareText, RefreshCw, Settings, UploadCloud } from "lucide-react";
 import { EMPTY_FIRST_COMMENT, loadPlatforms, loadBilibiliCategories, platformAction, type PlatformOverview, type PlatformComment, type PlatformSettings, type UploadCandidate } from "@/api/platforms";
 import { useAuthStore } from "@/lib/auth-store";
 import { usePageResource } from "@/lib/use-page-resource";
@@ -10,7 +10,6 @@ import { errorMessage } from "@/lib/toast";
 import { ErrorState } from "@/components/ErrorState";
 import { BilibiliCategorySelect } from "@/components/BilibiliCategorySelect";
 import { FirstCommentOptions } from "@/components/FirstCommentOptions";
-import { VideoAnalytics } from "@/components/VideoAnalytics";
 import { cn } from "@/lib/utils";
 import { documentPublishLink } from "@/lib/platform-links";
 import { UploadForm, UploadRow, FocusedUpload } from "@/components/BilibiliPublishing";
@@ -113,6 +112,7 @@ function Policy({ initial, run, busy, ready }: { initial: PlatformSettings; run:
 export function PlatformsPage() {
   const [params, setParams] = useSearchParams();
   const selected = params.get("platform") && VISIBLE_PLATFORM_NAMES[params.get("platform")!] ? params.get("platform")! : "bilibili";
+  if (params.get("tab") === "data") return <Navigate to="/analytics?tab=video" replace />; // 视频数据 moved to 高级 › 数据分析
   return <div className="space-y-4"><div className="max-w-6xl flex items-center gap-2 text-sm"><label htmlFor="platform-choice" className="text-text-muted">选择平台</label><select id="platform-choice" className="input w-auto text-sm" value={selected} onChange={event => {
     const next = new URLSearchParams(params); next.set("platform", event.target.value);
     for (const key of ["task", "tab", "bvid"]) next.delete(key);
@@ -157,8 +157,7 @@ function BilibiliPlatformsPage() {
     {!data && !error ? <p className="text-sm text-text-muted">正在读取平台…</p> : null}
     {data ? <>
       <section className="card p-4 flex flex-wrap items-center gap-4"><div className="w-11 h-11 rounded-xl bg-accent/10 text-accent flex items-center justify-center font-bold text-xl">哔</div><div className="flex-1"><h2 className="font-medium text-sm">哔哩哔哩</h2><p className="text-xs text-text-muted mt-1">{data.account.connected ? `${data.account.name || "已连接"} · UID ${data.account.uid}` : "尚未连接账号"}</p></div><span className={cn("text-xs", data.biliup_ready ? "text-success" : "text-warning")}>{data.biliup_ready ? "投稿组件可用" : "投稿组件待安装"}</span><a href="https://member.bilibili.com/platform/upload-manager/article" target="_blank" rel="noreferrer" className="btn text-xs">创作中心<ExternalLink className="w-3 h-3" /></a></section>
-      <div role="tablist" className="flex gap-1 border-b border-border">{[{ id: "uploads", label: "视频投稿", icon: UploadCloud }, { id: "data", label: "视频数据", icon: BarChart3 }, { id: "comments", label: `评论收件箱${pending ? ` · ${pending}` : ""}`, icon: MessageSquareText }, { id: "settings", label: "账号与策略", icon: Settings }].map(item => <button key={item.id} role="tab" aria-selected={tab === item.id} className={cn("px-3 py-2 text-sm flex gap-2 items-center border-b-2", tab === item.id ? "text-accent border-accent" : "text-text-muted border-transparent")} onClick={() => changeTab(item.id)}><item.icon className="w-4 h-4" />{item.label}</button>)}</div>
-      {tab === "data" && data.account.connected ? <VideoAnalytics key={data.account.uid} isAdmin={role === "admin"} canEdit={canEdit} /> : null}
+      <div role="tablist" className="flex gap-1 border-b border-border">{[{ id: "uploads", label: "视频投稿", icon: UploadCloud }, { id: "comments", label: `评论收件箱${pending ? ` · ${pending}` : ""}`, icon: MessageSquareText }, { id: "settings", label: "账号与策略", icon: Settings }].map(item => <button key={item.id} role="tab" aria-selected={tab === item.id} className={cn("px-3 py-2 text-sm flex gap-2 items-center border-b-2", tab === item.id ? "text-accent border-accent" : "text-text-muted border-transparent")} onClick={() => changeTab(item.id)}><item.icon className="w-4 h-4" />{item.label}</button>)}</div>
       {!data.account.connected && tab !== "settings" ? <section className="card p-8 text-center space-y-3"><p className="text-sm text-text-muted">先连接哔哩哔哩账号，再开始投稿和管理评论。</p><button className="btn btn-primary text-xs" onClick={() => changeTab("settings")}>前往账号连接</button></section> : null}
       {tab === "uploads" ? <div className="space-y-4">
         {canEdit && data.account.connected ? <CandidatePicker data={data} selected={selected} onSelect={value => { setSelected(value); setParams(previous => { const next = new URLSearchParams(previous); next.delete("task"); if (value) next.set("render", value); else next.delete("render"); return next; }); }} /> : null}

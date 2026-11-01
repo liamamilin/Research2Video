@@ -1,0 +1,15 @@
+{
+  "job_id": "6908817b-10ce-415e-ab74-ad26f4ab9cd7",
+  "source_attempt": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-tool-tutorial-20261101/normal-run-v2/engine-data/jobs/6908817b-10ce-415e-ab74-ad26f4ab9cd7/attempts/1/g2-run",
+  "normal_api_and_worker": true,
+  "manual_storyboard_or_beat_edits": 0,
+  "components": [
+    "code_demo",
+    "concept_reveal",
+    "flow_diagram",
+    "material_collage",
+    "object_showcase",
+    "title_card"
+  ],
+  "greeting_count": 1
+}

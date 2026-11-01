@@ -30,13 +30,14 @@ from typing import Any, Optional
 
 from core.config import load_system_config
 from core.fileio import file_lock
+from core.telemetry import ingest
 from core.video import archive as video_archive
 from core.video import columns as video_columns
 from core.video import sources as video_sources
 from core.video import store
 from core.video.audience_copy import submission_problem
 from core.video.autovideo import ARTIFACT_NAME, AutoVideoClient, AutoVideoError, AutoVideoUnreachable
-from core.video.screenshots import CHAPTER_TITLE_MAX, chapters as authored_chapters
+from core.video.screenshots import CHAPTER_TITLE_MAX, chapters as authored_chapters, spoken_sections as authored_sections
 from web.services import video_workflow
 from web.settings import get_settings
 
@@ -170,8 +171,9 @@ def source_card_request(script: dict, version: dict) -> list[dict]:
         return ([{"title": source["title"][:40], "url": source["source_url"], "date": source["published_on"]}]
                 if source.get("source_url") and source.get("published_on") else [])
     try:
-        report = video_workflow.report_of(script)
-    except (OSError, KeyError, TypeError):
+        report = (video_workflow.report_of(script, version=version) if script.get('topic', {}).get('user_materials')
+                  else video_workflow.report_of(script))
+    except (OSError, KeyError, TypeError, ValueError):
         logger.warning("script %s: no readable report, so no source card", script.get("id"))
         report = ""
     from core import report_material
@@ -190,8 +192,9 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
 
     report = ""
     try:
-        report = video_workflow.report_of(script)
-    except (OSError, KeyError, TypeError):
+        report = (video_workflow.report_of(script, version=version) if script.get('topic', {}).get('user_materials')
+                  else video_workflow.report_of(script))
+    except (OSError, KeyError, TypeError, ValueError):
         pass
     timeline = None
     used = None  # the render whose chapters the pack carries, echoed so a page can tell which video it describes
@@ -237,6 +240,7 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         except ArticleError as exc:
             raise RenderError(str(exc)) from exc
     column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
+    spoken_sections = authored_sections(version)
     chapter_list = chapters(version)
     text, sha = narration_source(chapter_list)
     title = version["title"][:80]
@@ -248,7 +252,7 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
     request: dict[str, Any] = {
         "input_mode": "narration",
         **({"episode": {"items": [{"title": s["title"][:24], "chapter_indexes": [i]}
-            for i, s in enumerate(version.get("sections", [])) if s.get("episode_role", "item") == "item"]}}
+            for i, s in enumerate(spoken_sections) if s.get("episode_role", "item") == "item"]}}
             if script.get("topic", {}).get("content_mode") == "episode" else {}),
         "chapters": chapter_list,
         "video_form": form,
@@ -286,8 +290,6 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
     voice_id = voice_id or column.voice_id
     if voice_id:
         request["voice_id"] = voice_id
-    spoken_sections = [section for section in version.get("sections", [])
-                       if any(p.get("text", "").strip() for p in section.get("paragraphs", []))]
     notices = [{"chapter_index": i, "message": "本章节有内容待核实"}
                for i, section in enumerate(spoken_sections)
                if any(p.get("evidence") == "NEEDS_REVIEW" for p in section.get("paragraphs", []))]
@@ -323,18 +325,24 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
     from core.video import content_columns
     matrix_settings = content_columns.render_settings(paths.config_dir, matrix, script.get("content_context") or {},
                                                       config.render if config and config.usable else {})
-    if column.production_settings or matrix_settings or production_mode is not None:
+    recipe_ref = (matrix_settings.get("production_recipe") or column.production_recipe
+                  or ("mixed_tutorial" if (script.get("content_context") or {}).get("type") == "tutorial" else ""))
+    if column.production_settings or matrix_settings or production_mode is not None or recipe_ref:
         if production_mode not in (None, "standard", "fast"):
             raise RenderError("未知制作档位")
         content_settings = {k: v for k, v in column.production_settings.items() if k != "production_recipe"}
         # Old recipe values are explicit only when no new production reference was selected.
-        if not column.production_recipe:
+        if not recipe_ref:
             content_settings.update({k: request[k] for k in ("video_form", "creative_intent", "packaging", "voice_id", "brand") if k in request})
         else:
+            # A visual recipe replaces the executor, not the narrator selected
+            # by the App's writing/output recipe. Matrix and per-render voice
+            # choices still override this lower-priority content layer.
+            if column.voice_id:
+                content_settings.setdefault("voice_id", column.voice_id)
             for key in ("creative_intent", "packaging"):
                 if key in content_settings and key in request:
                     content_settings[key] = request[key]
-        recipe_ref = matrix_settings.get("production_recipe") or column.production_recipe
         if recipe_ref:
             request["production_recipe"] = recipe_ref
         for key in ("video_form", "creative_intent", "packaging", "voice_id", "brand"):
@@ -389,6 +397,11 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         else:
             request["packaging"] = packaging
     request["visual_storytelling"] = not (script["topic"].get("article", {}).get("kind") == "literary")
+    from core.video import material_context
+    user_context = material_context.get(script, version)
+    if goal := user_context.get('goal'):
+        intent = request.setdefault('creative_intent', {})
+        intent['purpose'] = (intent.get('purpose', '') + '\n用户要求：' + goal).strip()
     if direction := content_columns.render_direction(script.get("content_context") or {}):
         intent = request.setdefault("creative_intent", {})
         intent["purpose"] = (intent.get("purpose", "") + "\n" + direction).strip()
@@ -415,7 +428,11 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         listed = []
         try:
             article = script.get("topic", {}).get("article")
-            listed = video_sources.visual_sources(video_workflow.report_of(script)) if script.get("report_path") or article else []
+            if user_context:
+                from web.services.assistant_materials import source_of
+                listed = video_sources.visual_sources(source_of(script, user_context, prepare_inputs=False))
+            else:
+                listed = video_sources.visual_sources(video_workflow.report_of(script)) if script.get('report_path') or article else []
             if article and article.get("source", {}).get("source_url"):
                 listed.append({"url": article["source"]["source_url"], "title": version["title"], "kind": ""})
             from core import report_material
@@ -426,6 +443,12 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         except (OSError, ValueError, KeyError, TypeError):
             pass
         visuals = visual_materials.intent(script, version, request, _video_config().get("visual_materials"), listed)
+        from core import user_materials
+        supplied_images = user_context and any(user_materials.load(get_settings().paths.state_dir, key, user_context['owner'])['kind'] == 'image'
+                                               for key in user_context['ids'])
+        if supplied_images and not materials:
+            visuals = {'state': 'pending', 'reason': '准备用户材料画面', 'input_kind': 'user_materials',
+                       'material_context': user_context, 'decisions': []}
         return store.create_render(script["id"], version_no, title=title, source_text=text,
                                    source_sha256=sha, request=request, visuals=visuals)
     except store.ActiveRenderError as exc:
@@ -515,6 +538,12 @@ def _advance(render_id: str, client: AutoVideoClient) -> str:
     job_id = render["autovideo_job_id"]
     if job_id is None:
         if not render["submit_started_at"]:
+            if (render.get('visuals') or {}).get('input_kind') == 'user_materials':
+                from web.services.assistant_materials import prepare_render, MaterialPreparationError
+                try:
+                    render = prepare_render(render, client)
+                except MaterialPreparationError as exc:
+                    return _fail(render_id, 'MATERIAL_PREPARATION_FAILED', str(exc))
             from web.services import video_visuals
             render = video_visuals.freeze(render, client)
         job_id = _reconcile(render, client) if render["submit_started_at"] else _submit(render, client)
@@ -682,6 +711,7 @@ def _download(render_id: str, job_id: str, client: AutoVideoClient) -> str:
                 download_workers=4, artifacts=[row for _, row in results])
         store.update_render(render_id, status="COMPLETED", artifacts=saved, error_code=None,
                             error_message=None, completed_at=_now())
+        ingest.sweep_async()  # the render's model calls and step timings, read while its files are fresh
         return "COMPLETED"
     return _fail(render_id, "DOWNLOAD_FAILED", f"成片已在 AutoVideo 生成，但复制到本地失败：{last_error}")
 

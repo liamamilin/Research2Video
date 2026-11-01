@@ -215,7 +215,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         if information:
             schema["properties"]["style"]["properties"]["preset"] = {"const": "minimal_light"}
             motion_scene = copy.deepcopy(schema["properties"]["scenes"]["items"])
-            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"] + (["data_chart", "scatter_chart", "flow_diagram", "object_showcase", "material_collage"] if presentation["preset"] == "explanation" else [])}
+            motion_scene["properties"]["component"] = {"enum": ["title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"] + (["data_chart", "scatter_chart", "flow_diagram", "object_showcase", "material_collage", "code_demo"] if presentation["preset"] == "explanation" else [])}
             motion_scene["properties"]["beats"].pop("maxItems", None)
             motion_scene["properties"]["beats"]["items"]["properties"]["action"] = {"const": "reveal"}
             motion_scene["properties"]["beats"]["items"]["properties"]["trigger"]["properties"]["offset_ms"].pop("maximum", None)
@@ -246,7 +246,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
         if not isinstance(ir.get("scenes"), list) or not ir["scenes"] or any(not isinstance(s, dict) or not (
                 (creative and s.get("component") in allowed_creative)
                 or (information and s.get("component") in {"title_card", "concept_reveal", "comparison", "big_number", "bar_chart", "price_change", "source_card"}
-                    | ({"data_chart", "scatter_chart", "flow_diagram", "object_showcase", "material_collage"} if presentation["preset"] == "explanation" else set()))
+                    | ({"data_chart", "scatter_chart", "flow_diagram", "object_showcase", "material_collage", "code_demo"} if presentation["preset"] == "explanation" else set()))
                 or (not information and s.get("component") == "flow_diagram" and isinstance(s.get("props"), dict) and "layout" in s["props"])) for s in ir["scenes"]):
             _fail("CONTENT_COMPONENT_UNSUPPORTED", "/scenes", "chapter extension requires laid-out flow diagrams or explicit information motion")
     if isinstance(ir, dict) and "playback" in ir:

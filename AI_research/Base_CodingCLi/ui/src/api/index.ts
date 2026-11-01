@@ -310,6 +310,18 @@ export interface AssistantUsage {
   estimated_requests?: number;
 }
 
+export interface AssistantMaterial {
+  id: string; name: string; kind: 'text' | 'document' | 'image' | 'url';
+  status: string; chars: number; file_url: string; url?: string; error?: string;
+}
+
+export function uploadAssistantMaterial(value: File | string) {
+  const body = new FormData();
+  if (typeof value === 'string') { body.append('text', value); body.append('name', '粘贴的正文'); }
+  else body.append('file', value);
+  return api<AssistantMaterial>('/api/assistant/materials', { method: 'POST', body });
+}
+
 export interface AssistantMessage {
   role: "user" | "assistant";
   content: string;
@@ -317,6 +329,7 @@ export interface AssistantMessage {
   error?: string | null;
   continuation?: AssistantContinuation;
   usage?: AssistantUsage;
+  materials?: AssistantMaterial[];
 }
 
 export interface AssistantContinuation {
@@ -338,7 +351,7 @@ export interface AssistantReply {
 export interface AssistantConversation {
   id: string;
   context?: import('./assistant-workspace').AssistantContext | null;
-  requests: { id: string; message: string; status: string; result: AssistantReply }[];
+  requests: { id: string; message: string; status: string; result: AssistantReply; materials?: AssistantMaterial[] }[];
 }
 
 export const getAssistantConversation = (id?: string) => api<AssistantConversation>(
@@ -364,7 +377,7 @@ export type AssistantEvent =
 
 export async function chatWithAssistant(
   message: string, history: AssistantMessage[], onEvent: (event: AssistantEvent) => void,
-  options: { conversation_id?: string; request_id?: string; signal?: AbortSignal; context?: import('./assistant-workspace').AssistantContext | null } = {},
+  options: { conversation_id?: string; request_id?: string; signal?: AbortSignal; context?: import('./assistant-workspace').AssistantContext | null; material_ids?: string[] } = {},
 ): Promise<AssistantReply> {
   const response = await api<Response>("/api/assistant/stream", {
     method: "POST",
@@ -372,6 +385,7 @@ export async function chatWithAssistant(
     signal: options.signal,
     body: {
       message,
+      ...(options.material_ids?.length ? { material_ids: options.material_ids } : {}),
       ...('context' in options ? { context: options.context } : {}),
       ...(options.conversation_id ? { conversation_id: options.conversation_id } : {}),
       ...(options.request_id ? { request_id: options.request_id } : {}),

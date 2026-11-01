@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "target": "ES2021",
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": "../../../g0/vendor/remotion-audiogram/node_modules",
+    "typeRoots": ["../../../g0/vendor/remotion-audiogram/node_modules/@types"],
+    "paths": {
+      "react": ["@types/react"],
+      "react/*": ["@types/react/*"],
+      "*": ["*"]
+    }
+  },
+  "files": ["../../../g1/renderer/src/Root.tsx"]
+}

@@ -355,6 +355,18 @@ def parse(source: Source, text: str, report_date: str) -> list[Topic]:
     return found
 
 
+def report_has_content(source: Source | None, path: str, root: str) -> bool:
+    """A declared topic report needs actual items, also when made as one episode.
+
+    Prose research reports have no declared topic parser and remain whole reports.
+    This uses the existing topic format, without another model or content review.
+    """
+    if source is None:
+        return True
+    with open(os.path.join(root, path), encoding="utf-8") as handle:
+        return bool(parse(source, handle.read(), "2000-01-01"))
+
+
 def sync(jobs_dir: str, output_dir: str) -> list[dict]:
     """Import every report that is new or changed since it was last read. Returns what each source looks like."""
     root = os.path.dirname(os.path.abspath(output_dir))

@@ -132,7 +132,8 @@ console.log(JSON.stringify({shots:shotsFor(scene),
   scatter:scene.component==='scatter_chart'?input.frames.map(frame=>scatterState(scene,frame)):null,
   comparison:scene.component==='comparison'?input.frames.map(frame=>comparisonAt(scene,frame)):null,
   image:input.image?imageRects(input.image,0,1000,500):null,
-  cameras:input.frames.map(frame=>cameraAt(scene,frame,input.rects,input.view))}));
+  cameras:input.frames.map(frame=>cameraAt(scene,frame,input.rects,input.view,undefined,
+    {targets:input.overviewTargets,hold:input.holdOverview}))}));
 '''.replace('CAMERA', json.dumps(str(ROOT/'g1/renderer/src/ShotDirector.tsx')))
    .replace('MATERIALS', json.dumps(str(ROOT/'g1/renderer/src/DirectedMaterials.tsx')))
    .replace('SCATTER', json.dumps(str(ROOT/'g1/renderer/src/ScatterChart.tsx'))))
@@ -142,9 +143,10 @@ console.log(JSON.stringify({shots:shotsFor(scene),
         '--bundle', '--platform=node', '--format=cjs', '--jsx=automatic', f'--outfile={target}'],
         env=env, check=True, capture_output=True, text=True)
 
-    def run(scene, frames, rects=None, view=None, image=None):
+    def run(scene, frames, rects=None, view=None, image=None, overview_targets=None, hold_overview=False):
         payload = {'scene': scene, 'frames': frames, 'rects': rects or {},
-                   'view': view or {'x': 20, 'y': 70, 'width': 1000, 'height': 400}, 'image': image}
+                   'view': view or {'x': 20, 'y': 70, 'width': 1000, 'height': 400}, 'image': image,
+                   'overviewTargets': overview_targets or [], 'holdOverview': hold_overview}
         result = subprocess.run([shutil.which('node'), str(target), json.dumps(payload)],
                                 check=True, capture_output=True, text=True)
         return json.loads(result.stdout)
@@ -177,6 +179,39 @@ def test_short_scenes_hold_overview_and_missing_legacy_plan_is_identity(camera_r
     assert len(camera_runtime(scene, [160])['shots']) == 1
     del scene['props']['shot_plan']
     assert camera_runtime(scene, [110])['cameras'][0]['pose'] == {'zoom': 1, 'x': 0, 'y': 0}
+
+
+def test_small_flow_overview_uses_available_space_and_preserves_all_nodes(camera_runtime):
+    scene = camera_scene()
+    scene['props']['shot_plan']['cues'] = []
+    rects = {'node:a': {'x': 350, 'y': 200, 'width': 100, 'height': 100},
+             'node:b': {'x': 550, 'y': 200, 'width': 100, 'height': 100}}
+    view = {'x': 0, 'y': 0, 'width': 1000, 'height': 500}
+    result = camera_runtime(scene, [100, 610], rects, view, overview_targets=list(rects))
+    for camera in result['cameras']:
+        pose = camera['pose']
+        assert pose['zoom'] > 1
+        for rect in rects.values():
+            assert 0 <= rect['x'] * pose['zoom'] + pose['x']
+            assert (rect['x'] + rect['width']) * pose['zoom'] + pose['x'] <= view['width']
+            assert 0 <= rect['y'] * pose['zoom'] + pose['y']
+            assert (rect['y'] + rect['height']) * pose['zoom'] + pose['y'] <= view['height']
+    assert result['cameras'][0]['pose'] == result['cameras'][-1]['pose']
+
+
+def test_readable_flow_keeps_the_full_process_while_spoken_focus_changes(camera_runtime):
+    scene = camera_scene()
+    rects = {f'node:{name}': {'x': x, 'y': 200, 'width': 180, 'height': 100}
+             for name, x in [('a', 100), ('b', 410), ('c', 720)]}
+    result = camera_runtime(scene, [100, 180, 400, 610], rects,
+        {'x': 0, 'y': 0, 'width': 1000, 'height': 500},
+        overview_targets=list(rects), hold_overview=True)
+    assert len({tuple(row['pose'].values()) for row in result['cameras']}) == 1
+    assert result['cameras'][1]['shot']['targets'] != result['cameras'][2]['shot']['targets']
+    for rect in rects.values():
+        pose = result['cameras'][0]['pose']
+        assert 0 <= rect['x'] * pose['zoom'] + pose['x']
+        assert (rect['x'] + rect['width']) * pose['zoom'] + pose['x'] <= 1000
 
 
 def test_camera_stays_inside_canvas_at_edges_and_is_seek_deterministic(camera_runtime):

@@ -29,6 +29,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
+from . import telemetry
 from .errors import CancelledError, LLMConfigError, LLMError, LLMUnsupportedError
 
 logger = logging.getLogger(__name__)
@@ -297,6 +298,7 @@ class LLMClient:
         self.usage['requests'] += 1
         for key, value in usage.items():
             self.usage[key] = self.usage.get(key, 0) + value
+        telemetry.record_llm(self, usage)
 
     # ------------------------------------------------------------------
     # Public API
@@ -458,6 +460,8 @@ class LLMClient:
         if not hasattr(self, "model_switches"):
             self.model_switches = []
         self.model_switches.append({"from": previous, "to": self._active_model(), "reason": reason})
+        telemetry.record_call("llm", provider=telemetry.provider_of(self.config.base_url), model=previous,
+                              error_code=reason)
         return True
 
     def _tried(self) -> str:
@@ -566,6 +570,7 @@ class LLMClient:
         not support ``stream_options``.
         """
         client = self._ensure_client()
+        self._call_started = time.monotonic()
         base = {
             "model": self._active_model(),
             "messages": messages,
@@ -687,6 +692,7 @@ class LLMClient:
             self.usage["completion_tokens"] += approx
             self.usage["total_tokens"] += approx
             self.usage['estimated_requests'] = self.usage.get('estimated_requests', 0) + 1
+            telemetry.record_llm(self, usage)
 
         return ChatResponse(
             content=content,
@@ -701,6 +707,7 @@ class LLMClient:
     def _chat_once(self, messages, tools=None, tool_choice=None,
                    temperature=None, max_tokens=None) -> ChatResponse:
         client = self._ensure_client()
+        self._call_started = time.monotonic()
         kwargs: dict[str, Any] = {
             "model": self._active_model(),
             "messages": messages,

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "maintenance_id": "022e3641717446e6914e261907d41522",
+  "old_pid": 92585,
+  "new_pid": 12218,
+  "health": "ok",
+  "production_state_dir": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state",
+  "original_records": {
+    "scripts": {
+      "count": 361,
+      "sha256": "ed84a10de4182db9fc112c14908cf2c094d785d8bd55680bff77b0349d0e8c76"
+    },
+    "renders": {
+      "count": 371,
+      "sha256": "c62b7063cdac9a82afef1f0c3fc695bc333a79ae09077eb7588b91ab2de3a3b3"
+    },
+    "schedules": {
+      "count": 61,
+      "sha256": "4c3d9a8148ab0691288186453471e5c39a7f8f553dd967270735654147d43738"
+    }
+  },
+  "original_records_unchanged": true,
+  "source_sha256": "6105aa16d8596f2af716fa4b08db716ec80574ce3685c220904b246310e826c4"
+}

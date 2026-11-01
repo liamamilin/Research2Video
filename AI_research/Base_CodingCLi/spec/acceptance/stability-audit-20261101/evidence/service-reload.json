@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "maintenance_id": "da52024d4a484a57a5bd5e18001494c8",
+  "old_pid": 84543,
+  "new_pid": 938,
+  "health": "ok",
+  "waited_for_existing_work": true,
+  "before": {
+    "scripts": {
+      "count": 364,
+      "sha256": "cffae9615c39b0e86fc0721390f548e71362619d84d5e6fb65d82464ca833258"
+    },
+    "renders": {
+      "count": 377,
+      "sha256": "cf9e25f8fae09dca9136c35ac265a24fc85d4b4b78d39b08ee348f386be2a161"
+    },
+    "schedules": {
+      "count": 61,
+      "sha256": "4c3d9a8148ab0691288186453471e5c39a7f8f553dd967270735654147d43738"
+    }
+  },
+  "after": {
+    "scripts": {
+      "count": 364,
+      "sha256": "cffae9615c39b0e86fc0721390f548e71362619d84d5e6fb65d82464ca833258"
+    },
+    "renders": {
+      "count": 377,
+      "sha256": "cf9e25f8fae09dca9136c35ac265a24fc85d4b4b78d39b08ee348f386be2a161"
+    },
+    "schedules": {
+      "count": 61,
+      "sha256": "4c3d9a8148ab0691288186453471e5c39a7f8f553dd967270735654147d43738"
+    }
+  },
+  "records_unchanged_during_reload": true,
+  "new_schedules": 0,
+  "source_sha256": {
+    "core/source_supply.py": "b33c18016c97ca42b1e7e90aa8112e67b9e7846dde2f2422825cb5fcb46da730",
+    "core/video/screenshots.py": "672327b4134ec82f236c11ca1361447e4eb4ecee418cac57aa4634346586e649",
+    "core/video/episodes.py": "80c1efe57c218fd18888cac17368c4b1d417c2c3d19921bbf0820fc12e5cd5d0",
+    "core/video/image_quality.py": "8cd82db49483bc403fefd6a3f3dd562faac327eec4d1aadcdee772aebfd6bd12",
+    "core/video/visual_materials.py": "6d16d505643a5302c9086cf709b7d18eee79a72866916ddd68319c4178ba6d54",
+    "web/services/video_render.py": "2f80af915eebc1e5de077043f28401568fdfa0f2223f87dae619fb331f4194c3",
+    "web/services/assistant_materials.py": "74748b28ff546eb964840063930a649df348fc7b0ff7c768c2cd61c691623ad1"
+  }
+}

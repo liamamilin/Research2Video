@@ -32,6 +32,8 @@ from web.routes.video_articles import router as article_router
 router.include_router(article_router)
 from web.routes.video_screenshots import router as screenshots_router
 router.include_router(screenshots_router)
+from web.routes.video_materials import router as material_router
+router.include_router(material_router)
 
 
 def _not_found(what: str) -> HTTPException:
@@ -537,6 +539,12 @@ def create_script(body: ScriptCreateIn, request: Request, user=Depends(require_e
                     raise HTTPException(422, detail=ApiError.make("topic_required", "选题标题至少 4 个字"))
     kind = chosen.topic_kind
     if report is not None and body.production and config.content_mode == "episode":
+        from core.video import topic_store
+
+        source = topic_store.resolve(get_settings().paths.jobs_dir, config.job)
+        if not topic_store.report_has_content(source, report["report_path"], video_workflow.workspace_dir()):
+            raise HTTPException(422, detail=ApiError.make(
+                "no_topic_content", "这份报告没有可写的新选题，本期跳过制作"))
         topic = reports.topic_for(report, video_workflow.workspace_dir())
     elif kind == "roundup":
         topic = _roundup_topic(body)

@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "shared_primary_archive_has_account_switching": true,
+  "matching_items": [
+    {
+      "spec": "rss:https://ratelimitnow.com/whats-new.xml",
+      "title": "[Confirmed] ChatGPT: ChatGPT account switching: stay signed in to up to 2 ChatGPT accounts and switch between them without signing out, on the web and now rolling out in the iOS and Android apps (Sett",
+      "url": "https://ratelimitnow.com/whats-new/#w-431",
+      "publish_date": "Sat, 31 Oct 2026 05:42:26 GMT",
+      "excerpts": [],
+      "provider": "rss"
+    }
+  ],
+  "actual_empty_report": "output/chatgpt_acquisition/2026-11-01_t09_updates.md",
+  "actual_empty_report_has_content": false,
+  "primary_archive_mutated": false
+}

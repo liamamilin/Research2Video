@@ -20,6 +20,10 @@ sources:
 - source:pitchfork
 - source:dezeen
 - source:open_culture
+- source:three_quarks
+- source:art_newspaper
+- source:lithub
+- source:indiewire
 prompt: '为「读懂一件作品」整理研究底稿。从现有来源选择一件能沿具体细节持续展开的主作品，围绕一处表达变化保留创作者的动作、构图、材料、形式、声音线索、观看姿态与感受之间的关系。让具体作品与操作建立本期问题，相关背景、年代和参数解释它们怎样影响当前表达；相邻作品的对应细节帮助理解当前一步，再接回主作品。材料清单按其结构、工序或感受作用展开，保留具体例子、推理与过程。
 
 

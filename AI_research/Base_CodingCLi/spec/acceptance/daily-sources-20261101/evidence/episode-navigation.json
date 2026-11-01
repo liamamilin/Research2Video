@@ -1,0 +1,139 @@
+{
+  "mode": "episode",
+  "items": [
+    {
+      "index": 1,
+      "title": "准备两个账号",
+      "chapter_indexes": [
+        1
+      ],
+      "start_frame": 695,
+      "end_frame": 1587
+    },
+    {
+      "index": 2,
+      "title": "网页添加账号",
+      "chapter_indexes": [
+        2
+      ],
+      "start_frame": 1587,
+      "end_frame": 2390
+    },
+    {
+      "index": 3,
+      "title": "网页直接切换",
+      "chapter_indexes": [
+        3
+      ],
+      "start_frame": 2390,
+      "end_frame": 3165
+    },
+    {
+      "index": 4,
+      "title": "手机添加账号",
+      "chapter_indexes": [
+        4
+      ],
+      "start_frame": 3165,
+      "end_frame": 4074
+    },
+    {
+      "index": 5,
+      "title": "手机切换与异常",
+      "chapter_indexes": [
+        5
+      ],
+      "start_frame": 4074,
+      "end_frame": 4857
+    },
+    {
+      "index": 6,
+      "title": "确认结果",
+      "chapter_indexes": [
+        6
+      ],
+      "start_frame": 4857,
+      "end_frame": 5656
+    }
+  ],
+  "total_frames": 6056,
+  "agenda": {
+    "start_frame": 0,
+    "end_frame": 695,
+    "highlights": null
+  },
+  "item_cards": [
+    {
+      "index": 1,
+      "start_frame": 695,
+      "end_frame": 749
+    },
+    {
+      "index": 2,
+      "start_frame": 1587,
+      "end_frame": 1641
+    },
+    {
+      "index": 3,
+      "start_frame": 2390,
+      "end_frame": 2444
+    },
+    {
+      "index": 4,
+      "start_frame": 3165,
+      "end_frame": 3219
+    },
+    {
+      "index": 5,
+      "start_frame": 4074,
+      "end_frame": 4128
+    },
+    {
+      "index": 6,
+      "start_frame": 4857,
+      "end_frame": 4911
+    }
+  ],
+  "covered_frames": [
+    [
+      0,
+      695
+    ],
+    [
+      695,
+      749
+    ],
+    [
+      1587,
+      1641
+    ],
+    [
+      2390,
+      2444
+    ],
+    [
+      3165,
+      3219
+    ],
+    [
+      4074,
+      4128
+    ],
+    [
+      4857,
+      4911
+    ]
+  ],
+  "agenda_highlight": "static list",
+  "fps": 30,
+  "timing": "measured narration chapters",
+  "footer": [
+    0,
+    1024,
+    1920,
+    56
+  ],
+  "audio": "stream copy",
+  "source_preserved": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/c2fe1190-7ff7-4319-ac9c-60a1e3246164/attempts/1/g2-run/artifacts/episode-navigation/original-content.mp4",
+  "video_sha256": "ea68b09986edc46697a48559ad34418afc9c0043127ce1f5826d0354b87c4d8d"
+}

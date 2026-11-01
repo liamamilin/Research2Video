@@ -1,0 +1,9 @@
+{
+  "job": "chatgpt_acquisition/t03_tutorials",
+  "sources": [
+    "page:https://aicatchup.com/news/chatgpt-account-switching-mobile"
+  ],
+  "chosen_topic": "ChatGPT 双账号切换",
+  "search": false,
+  "login_required": false
+}

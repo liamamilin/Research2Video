@@ -19,6 +19,11 @@ sources:
 - source:fast_company
 - source:yc_blog
 - source:sec_press
+- source:apple_newsroom
+- source:nvidia_newsroom
+- source:tsmc_pr
+- source:techmeme
+- source:techcrunch
 prompt: '为「公司这一招」保存可供深入讲述的业务案例。观众希望理解公司改变了一个什么具体环节，以及客户、伙伴或对手因此怎样行动。
 
   保留近期材料中值得讲述的候选。每个重点候选从当事人的购买、使用、生产或交付场景进入，沿同一产品与参与者写清原来怎样做、这次改了哪一步、下一方为什么改变选择、实际结果如何回到原场景。保留材料已有的具体动作、操作顺序、交接与例子，让同一案例可以不断讲深。

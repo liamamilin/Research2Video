@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 from functools import lru_cache
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -62,6 +63,8 @@ def narration_brief(narration_plan: dict) -> dict:
 
 
 def targets(component: str, props: dict) -> list[str]:
+    if component == 'code_demo':
+        return ['title', *[f'line:{i}' for i in range(len(props['lines']))]]
     if component in {"object_showcase", "material_collage"}:
         return ["scene"]
     if component == "scatter_chart":
@@ -129,7 +132,15 @@ def validate_text_fit(scene: dict, large: bool = False) -> None:
     """
     S = lambda size: scaled(size, large)
     component, props = scene["component"], scene["props"]
-    if component == "title_card" and large:
+    if component == 'code_demo':
+        capacity = 1400 / (28 * .62)
+        height = 0
+        for line in props['lines']:
+            columns = sum(2 if ord(char) > 255 else 1 for char in line['text'].replace('\t', '  '))
+            height += max(1, math.ceil(columns / capacity)) * 28 * 1.45 + 24
+        if height - 14 > 400:
+            raise InformationFault('INFORMATION_TEXT_FIT', f"{scene['id']}: code needs fewer lines per scene to remain readable")
+    elif component == "title_card" and large:
         title_size = S(66) if len(props["title"]) > 20 else S(83)
         sub_size = S(36) if len(props.get("subtitle", "")) > 65 else S(42)
         height = text_lines(props["title"], title_size, 1450) * title_size * 1.35 + 43
@@ -566,6 +577,30 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
     Phrase boundaries are measured. Within-phrase positions are estimates,
     as with the legacy character-position cues, and are recorded as such.
     """
+    if scene['component'] == 'code_demo':
+        speech = [rows[sid] for sid in scene['narration_segment_ids']]
+        text = ''.join(row['text'] for row in speech)
+        cues = [{'target_id': 'title', 'segment_id': speech[0]['id'],
+                 'quote': speech[0]['text'][0], 'character_index': 0}]
+        cursor = 0
+        for i, line in enumerate(scene['props']['lines']):
+            if not line.get('phrase'):
+                continue  # Earlier commands stay visible without a new spoken focus.
+            at = visual_language.phrase_at(text, line['phrase'], cursor)
+            if at < 0:
+                at = visual_language.phrase_at(text, line['phrase'])
+            if at < 0:
+                at = visual_language.phrase_at(text, line['text'])
+            if at < 0:
+                at = len(text)*i//len(scene['props']['lines'])
+            cursor = at + len(line['phrase'])
+            for row in speech:
+                if at < len(row['text']):
+                    cues.append({'target_id': f'line:{i}', 'segment_id': row['id'],
+                                 'quote': row['text'][at:at+1], 'character_index': at})
+                    break
+                at -= len(row['text'])
+        return cues
     if scene["component"] == "flow_diagram":
         return visual_language.flow_cues(scene, rows)
     required = targets(scene["component"], scene["props"])

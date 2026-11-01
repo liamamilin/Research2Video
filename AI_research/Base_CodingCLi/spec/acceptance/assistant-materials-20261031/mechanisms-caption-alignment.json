@@ -1,0 +1,256 @@
+{
+  "version": 2,
+  "method": "local Qwen3 forced alignment; original transcript and PCM unchanged",
+  "narration_sha256": "169ee601735c63968f48e7aa07abee88f59013421049668c19b2617b4646a513",
+  "audio_sha256": "d768bb5523523bc82e68074152ece6f451ad4a160d7146c026848c66ae4336ef",
+  "model": {
+    "repo": "mlx-community/Qwen3-ForcedAligner-0.6B-8bit",
+    "revision": "0e1a68e91d815300c7c9754b2a7639378b23db15",
+    "code": "installed mlx_audio only; no repository Python downloaded"
+  },
+  "model_sha256": "be19ef8ac4326d032e7673342930b14c2df30bd68c1632493b0f563e30829f91",
+  "generation_seconds": 1.846,
+  "cues": [
+    {
+      "segment_id": "c1_n1",
+      "text": "先看这张套餐截图。",
+      "char_start": 0,
+      "char_end": 9,
+      "start_ms": 360,
+      "end_ms": 1910
+    },
+    {
+      "segment_id": "c1_n2",
+      "text": "十七美元对应按年订阅，月付则是二十美元。",
+      "char_start": 0,
+      "char_end": 20,
+      "start_ms": 2390,
+      "end_ms": 6085
+    },
+    {
+      "segment_id": "c1_n3",
+      "text": "比较价格时，要把付款周期一起看。",
+      "char_start": 0,
+      "char_end": 16,
+      "start_ms": 6565,
+      "end_ms": 9255
+    }
+  ],
+  "word_evidence": [
+    {
+      "segment_id": "c1_n1",
+      "items": [
+        {
+          "text": "先",
+          "start_ms": 160,
+          "end_ms": 400
+        },
+        {
+          "text": "看",
+          "start_ms": 400,
+          "end_ms": 560
+        },
+        {
+          "text": "这",
+          "start_ms": 560,
+          "end_ms": 640
+        },
+        {
+          "text": "张",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "套",
+          "start_ms": 800,
+          "end_ms": 960
+        },
+        {
+          "text": "餐",
+          "start_ms": 960,
+          "end_ms": 1200
+        },
+        {
+          "text": "截",
+          "start_ms": 1200,
+          "end_ms": 1360
+        },
+        {
+          "text": "图",
+          "start_ms": 1360,
+          "end_ms": 1600
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n2",
+      "items": [
+        {
+          "text": "十",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "七",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "美",
+          "start_ms": 480,
+          "end_ms": 720
+        },
+        {
+          "text": "元",
+          "start_ms": 720,
+          "end_ms": 960
+        },
+        {
+          "text": "对",
+          "start_ms": 1040,
+          "end_ms": 1200
+        },
+        {
+          "text": "应",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "按",
+          "start_ms": 1280,
+          "end_ms": 1520
+        },
+        {
+          "text": "年",
+          "start_ms": 1520,
+          "end_ms": 1680
+        },
+        {
+          "text": "订",
+          "start_ms": 1680,
+          "end_ms": 1840
+        },
+        {
+          "text": "阅",
+          "start_ms": 1840,
+          "end_ms": 2160
+        },
+        {
+          "text": "月",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "付",
+          "start_ms": 2480,
+          "end_ms": 2720
+        },
+        {
+          "text": "则",
+          "start_ms": 2720,
+          "end_ms": 2880
+        },
+        {
+          "text": "是",
+          "start_ms": 2880,
+          "end_ms": 3040
+        },
+        {
+          "text": "二",
+          "start_ms": 3040,
+          "end_ms": 3200
+        },
+        {
+          "text": "十",
+          "start_ms": 3200,
+          "end_ms": 3360
+        },
+        {
+          "text": "美",
+          "start_ms": 3360,
+          "end_ms": 3520
+        },
+        {
+          "text": "元",
+          "start_ms": 3520,
+          "end_ms": 3760
+        }
+      ]
+    },
+    {
+      "segment_id": "c1_n3",
+      "items": [
+        {
+          "text": "比",
+          "start_ms": 160,
+          "end_ms": 320
+        },
+        {
+          "text": "较",
+          "start_ms": 320,
+          "end_ms": 480
+        },
+        {
+          "text": "价",
+          "start_ms": 480,
+          "end_ms": 640
+        },
+        {
+          "text": "格",
+          "start_ms": 640,
+          "end_ms": 800
+        },
+        {
+          "text": "时",
+          "start_ms": 800,
+          "end_ms": 1120
+        },
+        {
+          "text": "要",
+          "start_ms": 1200,
+          "end_ms": 1280
+        },
+        {
+          "text": "把",
+          "start_ms": 1280,
+          "end_ms": 1440
+        },
+        {
+          "text": "付",
+          "start_ms": 1440,
+          "end_ms": 1600
+        },
+        {
+          "text": "款",
+          "start_ms": 1600,
+          "end_ms": 1840
+        },
+        {
+          "text": "周",
+          "start_ms": 1840,
+          "end_ms": 2000
+        },
+        {
+          "text": "期",
+          "start_ms": 2000,
+          "end_ms": 2240
+        },
+        {
+          "text": "一",
+          "start_ms": 2240,
+          "end_ms": 2320
+        },
+        {
+          "text": "起",
+          "start_ms": 2320,
+          "end_ms": 2480
+        },
+        {
+          "text": "看",
+          "start_ms": 2480,
+          "end_ms": 2720
+        }
+      ]
+    }
+  ]
+}

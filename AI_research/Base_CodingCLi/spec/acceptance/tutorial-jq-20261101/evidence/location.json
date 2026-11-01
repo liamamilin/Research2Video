@@ -1,0 +1,19 @@
+{
+  "run_id": "12d07acd3c7f4a1f80a9b6f7e121c053",
+  "spec": {
+    "job": "ai_media/daily_opensource_radar",
+    "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-tutorial-jq-20261101/run-1/output/radar/2026-11-01_ai_opensource_radar.md",
+    "report_identity": "4f1df76720054e293d54cc7c0ded0c2f3512d8089e5ab0a417f717683e01d746",
+    "picks": [
+      {
+        "column": "report_digest",
+        "all": true,
+        "production": "ai_media_opensource_digest",
+        "content_mode": "episode",
+        "whole": true
+      }
+    ],
+    "refresh": false
+  },
+  "state": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-tutorial-jq-20261101/run-1/state"
+}

@@ -12,10 +12,22 @@
   if ([...document.querySelectorAll('input[type=password]')].some(visible) && body.length < 4000) blocked = '页面需要登录';
   if (!blocked && body.length < 80) blocked = '页面正文尚未加载或内容过少';
   const candidates = [], seen = new Set();
+  const related = node => /^(read next|related (?:articles|coverage|stories)|recommended|you may also like|相关阅读|相关推荐|延伸阅读)/i
+    .test(clean(node.querySelector('h2,h3')?.innerText || (/^H[1-3]$/.test(node.tagName) ? node.innerText : '')));
   const add = (el, parts = [el], visual_kind = 'text') => {
     if (!visible(el) || candidates.length >= 100) return;
+    if (el.closest('nav,aside,footer,[role="navigation"]')) return;
+    if (parts.some(related)) return;
+    // Related-story boxes repeat product names but are not the supplied article.
+    for (let parent = el; parent && parent !== document.body; parent = parent.parentElement) {
+      if (parent.tagName !== 'SECTION') continue;
+      if (related(parent)) return;
+    }
     const text = clean(parts.map(node => [node.innerText, node.getAttribute('alt'), node.getAttribute('aria-label'),
       ...[...node.querySelectorAll('img')].map(img => img.alt)].filter(Boolean).join(' ')).join(' '));
+    const links = parts.flatMap(node => [...node.querySelectorAll('a[href]')]);
+    const linkText = clean(links.map(link => link.innerText).join(' '));
+    if (visual_kind === 'text' && links.length >= 2 && linkText.length > text.length * .6) return;
     const rects = parts.map(node => node.getBoundingClientRect());
     const box = {x: Math.min(...rects.map(r => r.left)) + scrollX, y: Math.min(...rects.map(r => r.top)) + scrollY,
       width: Math.max(...rects.map(r => r.right)) - Math.min(...rects.map(r => r.left)),
@@ -37,7 +49,8 @@
   for (const el of document.querySelectorAll('main img,article img,.markdown-body img,figure img')) add(el, [el], 'image');
   for (const el of document.querySelectorAll('main pre,article pre,.markdown-body pre,main [class*=codeBlock],article [class*=codeBlock]')) add(el, [el], 'code');
   for (const el of document.querySelectorAll('table,[role=table]')) add(el, [el], 'table');
-  for (const heading of document.querySelectorAll('main h1,main h2,main h3,article h1,article h2,article h3,h1,h2,h3')) {
+  const contentRoot = document.querySelector('article') || document.querySelector('main') || document.body;
+  for (const heading of contentRoot.querySelectorAll('h1,h2,h3')) {
     const parts = [heading];
     let next = heading.nextElementSibling;
     while (next && parts.length < 6 && !/^H[1-4]$/.test(next.tagName)) {

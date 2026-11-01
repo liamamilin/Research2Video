@@ -90,6 +90,7 @@ def attach(board: dict, saved: dict, pipeline, alignment: dict | None = None,
            pages: list[dict] | None = None) -> None:
     profile = profile_for(saved)
     records = []
+    material_timing = []
     for scene in board['scenes']:
         if scene['component'] not in COMPONENTS:
             continue
@@ -100,13 +101,24 @@ def attach(board: dict, saved: dict, pipeline, alignment: dict | None = None,
             page = next((p for p in pages or [] if p['id'] == scene['id']), {})
             rows = {r['id']: r for r in alignment['rows']}
             speech = [rows[sid] for sid in scene['narration_segment_ids']]
-            plan = compose(scene, speech, profile, page.get('material_cues'), page.get('material_summary_phrase', ''))
+            plan = compose(scene, speech, profile, page.get('material_cues'),
+                           page.get('material_summary_phrase', ''), material_timing)
         else:
             text = (''.join(r['text'] for r in alignment['rows'] if r['id'] in scene['narration_segment_ids'])
                     if alignment else None)
             plan = camera_plan(scene, profile, text)
         scene['props'] = {**scene['props'], 'shot_plan': plan}
         records.append({'scene_id': scene['id'], 'component': scene['component'], **plan})
+    if material_timing:
+        # These beats use the same existing word-alignment pass as native charts.
+        # Keep the character anchor so pauses and English names do not move the focus.
+        path = pipeline.ARTIFACTS / 'information-timing.json'
+        timing = json.loads(path.read_text()) if path.is_file() else {'cues': []}
+        scenes = {cue['scene_id'] for cue in material_timing}
+        timing['cues'] = [cue for cue in timing['cues']
+                          if not (cue['scene_id'] in scenes and cue.get('beat_id', '').startswith('material_'))]
+        timing['cues'].extend(material_timing)
+        pipeline.write_json(path, timing)
     if records:
         pipeline.write_json(pipeline.ARTIFACTS / 'shot-director.json', {
             'version': 1, 'profile': profile, 'scenes': records,

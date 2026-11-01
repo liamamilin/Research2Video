@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes, Layers, Rss, PanelsTopLeft } from "lucide-react";
+import { ListOrdered, FileText, LayoutDashboard, Settings, Clock, LogOut, Radar, MessageSquareText, Clapperboard, Gauge, Lightbulb, Send, BookOpen, Boxes, Layers, Rss, PanelsTopLeft, BarChart3 } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import { AccountModal } from "./AccountModal";
@@ -29,6 +29,7 @@ const advancedItems = [
   { to: "/sources", label: "信息源", icon: Rss },
   { to: "/video-recipes", label: "文稿配方", icon: BookOpen },
 ];
+const adminAdvancedItems = [{ to: "/analytics", label: "数据分析", icon: BarChart3 }];
 
 const adminEngineItems = [{ to: "/scheduler", label: "周期调度", icon: Clock }];
 const adminItems = [{ to: "/settings", label: "设置", icon: Settings }];
@@ -42,7 +43,7 @@ export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate?: () =
   const groups = [
     { title: "", items: mainItems },
     { title: "研究引擎", items: admin ? [...engineItems, ...adminEngineItems] : engineItems },
-    { title: "高级", items: advancedItems },
+    { title: "高级", items: admin ? [...advancedItems, ...adminAdvancedItems] : advancedItems },
     { title: "", items: admin ? adminItems : [] },
   ].filter((g) => g.items.length);
 

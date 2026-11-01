@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-01T03:59:30.756746+08:00",
+  "command": "bash scripts/check.sh",
+  "exit_code": 0,
+  "backend": {
+    "passed": 3997,
+    "skipped": 2
+  },
+  "frontend": {
+    "files": 91,
+    "passed": 728
+  },
+  "compile": "PASS",
+  "config_validation": "PASS",
+  "type_check": "PASS",
+  "lint": "PASS",
+  "build": "PASS",
+  "boundary_and_isolation": {
+    "passed": 25
+  },
+  "real_browser_draft": "PASS",
+  "real_video": "COMPLETED",
+  "video_decode_exit_code": 0,
+  "package_qa": "PASS",
+  "managed_reload": "completed",
+  "log": "/tmp/material-mechanisms-complete-check.log"
+}

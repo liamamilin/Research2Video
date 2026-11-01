@@ -19,6 +19,12 @@ sources:
 - source:bis
 - source:owid
 - source:ft_home
+- source:stats_cn_release
+- source:pbc_news
+- source:bls_latest
+- source:boe_news
+- source:boj_news
+- source:marginal_revolution
 prompt: '为「变化怎样传到你」整理研究底稿。观众希望理解一处经济变化怎样经过具体环节，影响一次生活选择或一笔生意。
 
 

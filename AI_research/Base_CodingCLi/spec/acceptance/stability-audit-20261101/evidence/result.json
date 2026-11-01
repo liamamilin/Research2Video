@@ -1,0 +1,21 @@
+{
+  "result": "fixed_three_reproducible_boundary_defects_and_loaded",
+  "python": {
+    "passed": 4070,
+    "skipped": 2
+  },
+  "frontend": {
+    "files": 92,
+    "passed": 730
+  },
+  "full_check_completed": true,
+  "deployed_source_matches_checked_files": true,
+  "production_records_unchanged": true,
+  "health": "ok",
+  "new_renders": 0,
+  "new_schedules": 0,
+  "remaining": [
+    "historical 2026-10-26 caption failure not replayed on current version",
+    "cross-topic visual meaning and narration focus timing are not accepted by technical checks"
+  ]
+}

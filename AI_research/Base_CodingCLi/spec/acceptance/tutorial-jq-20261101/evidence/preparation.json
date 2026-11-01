@@ -1,0 +1,135 @@
+{
+  "actual_operation": {
+    "tool": "jq",
+    "version": "jq-1.7.1-apple",
+    "commands": [
+      "jq '[.[]|select(.done)]' tasks.json > done.json",
+      "jq . done.json"
+    ],
+    "exit_codes": [
+      0,
+      0
+    ],
+    "input_authored_for_tutorial": true,
+    "output_from_actual_command": true,
+    "kept_task_ids": [
+      "T01",
+      "T03"
+    ],
+    "excluded_task_ids": [
+      "T02"
+    ],
+    "model_calls": 0,
+    "source": "https://jqlang.org/manual/v1.7/",
+    "sha256": {
+      "tasks.json": "7d94593aeb015d3921816ebc052f1e9a427c8bf03f251384adf04601994af82a",
+      "done.json": "1d016bf41e5682bef333c261e206280b9079b9ae9e256fada12b1e1ad9730c53"
+    }
+  },
+  "demo": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-tutorial-jq-20261101/run-1/actual-demo",
+  "report": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/acceptance-tutorial-jq-20261101/run-1/output/radar/2026-11-01_ai_opensource_radar.md",
+  "image_records": [
+    {
+      "id": "a7e4bd354de24599a563748b8d1b995b",
+      "owner": "matrix:ai_media",
+      "name": "任务清单实际输入.png",
+      "created_at": 1793516050.410777,
+      "kind": "image",
+      "status": "ready",
+      "url": "",
+      "text": "真实输入 tasks.json，JSON 数组包含三条任务。T01 整理资料的 done 为 true，T02 生成草稿的 done 为 false，T03 检查输出的 done 为 true。字段 id 是编号，task 是任务名，done 是完成标记；截图展示实际 JSON 原文。",
+      "chars": 143,
+      "error": "",
+      "image_sha256": "c1fa543c6ec2aa1c2ea0d4a79a927c727887fef9c522e406857d4a520d59857f",
+      "focus": {
+        "width": 1200,
+        "height": 900,
+        "regions": [
+          {
+            "x1": 38,
+            "y1": 123,
+            "x2": 962,
+            "y2": 394,
+            "label": "输入任务 T01：已完成",
+            "style": "box"
+          },
+          {
+            "x1": 38,
+            "y1": 383,
+            "x2": 962,
+            "y2": 871,
+            "label": "输入任务 T02 未完成与 T03 已完成",
+            "style": "box"
+          }
+        ]
+      },
+      "original": "original.png",
+      "sha256": "30b824b6317ff401ee51c53c0c77d2722959b5bad3d117d4c7226768871f9806"
+    },
+    {
+      "id": "b714c8aa91834c5aa5eb781d1b46baba",
+      "owner": "matrix:ai_media",
+      "name": "已完成任务实际输出.png",
+      "created_at": 1793516050.4284139,
+      "kind": "image",
+      "status": "ready",
+      "url": "",
+      "text": "真实输出 done.json，由本次 jq 筛选命令生成，仍是 JSON 数组。只留下 T01 整理资料和 T03 检查输出，两条 done 都是 true；T02 生成草稿没有留下。保留记录的 id、task、done 内容不变；截图展示实际输出原文。",
+      "chars": 127,
+      "error": "",
+      "image_sha256": "a50301999678bfb184ae8fdc80a4e28d206ec57faebac77b73020cffa5d9b0b3",
+      "focus": {
+        "width": 1200,
+        "height": 900,
+        "regions": [
+          {
+            "x1": 38,
+            "y1": 123,
+            "x2": 962,
+            "y2": 412,
+            "label": "保留任务 T01：整理资料",
+            "style": "box"
+          },
+          {
+            "x1": 38,
+            "y1": 401,
+            "x2": 962,
+            "y2": 689,
+            "label": "保留任务 T03：检查输出",
+            "style": "box"
+          }
+        ]
+      },
+      "original": "original.png",
+      "sha256": "c5029ec9a39d5e222d83c0b169ce40958aa8ffc3018341a3a061b455da46502d"
+    }
+  ],
+  "material_context": {
+    "ids": [
+      "a7e4bd354de24599a563748b8d1b995b",
+      "b714c8aa91834c5aa5eb781d1b46baba"
+    ],
+    "owner": "matrix:ai_media",
+    "mode": "adapt",
+    "revision": 1,
+    "title": "jq 实际任务筛选",
+    "audience": "开发者和工具使用者",
+    "goal": "用真实任务清单串起输入截图、jq 筛选代码、真实输出截图和同屏对照，沿用栏目问候、三步转场及品牌包装。"
+  },
+  "displayed_commands": [
+    "jq '[.[]|select(.done)]' tasks.json > done.json",
+    "jq . done.json"
+  ],
+  "automatic_capture_register_match_render": true,
+  "manual_paragraph_assignments": 0,
+  "manual_script_or_storyboard": false,
+  "model_calls": 0,
+  "pipeline_source_sha256": {
+    "core/user_materials.py": "31039a2e99deb14f8deb0a6a2976e281afdeb2371608ef0175ff6627373f6413",
+    "core/video/writer.py": "0b7f2936e39f697098c48ca0a14b7ca0cbcca4aa4dc9d22e1e258ff04fe53482",
+    "core/video/episodes.py": "f204e7ca5fc4cf83182bb73cc3bcce16f3169ce059913d5f090bc5f86c427cb1",
+    "web/services/video_workflow.py": "8ffc3f5ddeb35991e8520496f72e2000452595a27f35441667cf17d3ab6868fb",
+    "web/services/assistant_materials.py": "a1a097a1a37053b73e9dcf1ad6863c33fbce124c833cda0b57a95c8f4ce95059"
+  },
+  "same_production_source_as_previous_tool": true
+}

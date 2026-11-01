@@ -22,6 +22,7 @@ export const pageLoaders = {
   SourcesPage: () => import("@/pages/Sources").then(m => ({ default: m.SourcesPage })),
   OutputsPage: () => import("@/pages/Outputs").then(m => ({ default: m.OutputsPage })),
   PlatformsPage: () => import("@/pages/Platforms").then(m => ({ default: m.PlatformsPage })),
+  AnalyticsPage: () => import("@/pages/Analytics").then(m => ({ default: m.AnalyticsPage })),
 };
 
 export function pageLoader(path: string) {
@@ -41,6 +42,7 @@ export function pageLoader(path: string) {
   if (path === "/topics") return pageLoaders.TopicsPage;
   if (path === "/publish") return pageLoaders.PublishQueuePage;
   if (path === "/platforms") return pageLoaders.PlatformsPage;
+  if (path === "/analytics") return pageLoaders.AnalyticsPage;
   if (path === "/video") return pageLoaders.VideoScriptsPage;
   if (/^\/video\/[^/]+$/.test(path)) return pageLoaders.VideoScriptViewPage;
   if (/^\/video-recipes(?:\/.*)?$/.test(path)) return pageLoaders.VideoRecipesPage;

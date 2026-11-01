@@ -111,6 +111,9 @@ class FakeLLM:
     fact_calls: list[list[dict]] = []
     headline_replies: list[str] = []
     headline_calls: list[list[dict]] = []
+    #: the polish of a fresh draft runs only when the program finds stiff narration; it changes nothing unless queued
+    polish_replies: list[str] = []
+    polish_calls: list[list[dict]] = []
 
     def __init__(self, config, cancel_token=None, progress_cb=None):
         self.usage = {"requests": 0, "total_tokens": 0}
@@ -119,9 +122,13 @@ class FakeLLM:
         from core.video import audit as video_audit
         from core.video import editorial
         from core.video import headline
+        from core.video import polish
         from core.video.adapt import facts
         from core.provenance import extract_urls
         self.usage["requests"] += 1
+        if messages[0]["content"] == polish.SYSTEM_PROMPT:
+            FakeLLM.polish_calls.append(list(messages))
+            return ChatResponse(content=FakeLLM.polish_replies.pop(0) if FakeLLM.polish_replies else '{"paragraphs":[]}')
         if messages[0]["content"] == headline.PROMPT:
             FakeLLM.headline_calls.append(list(messages))
             return ChatResponse(content=FakeLLM.headline_replies.pop(0) if FakeLLM.headline_replies else
@@ -189,6 +196,8 @@ def llm(monkeypatch):
     FakeLLM.fact_calls = []
     FakeLLM.headline_replies = []
     FakeLLM.headline_calls = []
+    FakeLLM.polish_replies = []
+    FakeLLM.polish_calls = []
     monkeypatch.setattr("core.llm.LLMClient", FakeLLM)
     return FakeLLM
 
@@ -1659,7 +1668,9 @@ def _assistant(name, arguments, role="editor"):
     return assistant_tools.execute(name, arguments, request, {"username": "tester", "role": role})
 
 
-def test_assistant_video_tools_query_start_and_record_without_posting_anywhere(client, video_env, llm, research):
+def test_assistant_video_tools_query_start_and_record_without_posting_anywhere(client, video_env, monkeypatch):
+    spawned = []
+    monkeypatch.setattr('web.services.video_workflow.spawn', lambda script_id, started_by='': spawned.append((script_id, started_by)))
     script = _approved(client)
     found = _assistant("query_video", {"action": "find", "text": "Argon"})
     assert [s["script_id"] for s in found["scripts"]] == [script["id"]]
@@ -1677,6 +1688,7 @@ def test_assistant_video_tools_query_start_and_record_without_posting_anywhere(c
     # starting a script says what it costs and stops at a draft (it is not approved or rendered)
     started = _assistant("create_video", {"column": "deep_dive", "title": "助手发起的选题"})
     assert started["status"] == "started" and "草稿" in started["cost"]
+    assert spawned == [(started['script_id'], 'tester')]
 
 
 def test_assistant_video_writes_need_an_editor(client, video_env):

@@ -40,6 +40,7 @@ def test_shipped_catalog_reuses_existing_domains_and_all_five_ai_bindings():
         assert c and c.matrix == "ai_media"
         assert set(c.render) == {"packaging"}
         assert c.render["packaging"]["label"] == c.name
+    assert columns["ai_opensource"].type == "explainer"
     assert matrices_by_key["tech"].content["role"] == matrices_by_key["software"].content["role"] == "source"
     assert matrices_by_key["ai"].archived
 
@@ -89,6 +90,35 @@ def test_cross_domain_render_defaults_have_explicit_priority_and_legacy_mode(col
     assert content_columns.render_settings(config, source, {}, {}) == {"video_speed": 1.25}
 
 
+@pytest.mark.parametrize('kind,chosen,expected', [
+    ('tutorial', None, 'mixed_tutorial'),
+    ('tutorial', 'mixed_explainer', 'mixed_explainer'),
+    ('explainer', 'mixed_tutorial', 'mixed_tutorial'),
+    ('explainer', None, None),
+])
+def test_matrix_tutorial_recipe_reaches_render_without_legacy_executor_overrides(column_env, kind, chosen, expected):
+    from web.services import video_render
+    context = content_columns.snapshot(str(column_env / 'config'), 'flash', 'monitoring/ai_flash_discovery')
+    context.update(type=kind, render={'packaging': {'label': '实际操作'}})
+    if chosen:
+        context['render']['production_recipe'] = chosen
+    script = store.create_script('flash', {'title': '转换周报'}, production='flash', content_context=context)
+    version = store.add_version(script['id'], title='转换周报', sections=[{
+        'title': '执行转换', 'paragraphs': [{'text': '运行转换命令，查看生成的文件。',
+                                         'citations': [], 'evidence': 'UNCITED'}]}],
+        length_check={}, edit_type='GENERATED')
+    store.update_script(script['id'], status='APPROVED', approved_version=version)
+    request = video_render.create(store.get_script(script['id']))['request']
+    assert request.get('production_recipe') == expected
+    if expected:
+        settings = request['production_context']['content_recipe']['settings']
+        assert 'video_form' not in settings
+        from core.video import columns
+        assert settings['voice_id'] == columns.get(str(column_env / 'config'), 'flash').voice_id
+        assert request['production_context']['matrix']['settings']['packaging']['label'] == '实际操作'
+    assert store.get_script(script['id'])['content_context'] == context
+
+
 def test_workflow_records_business_identity_before_spawn_and_versions_keep_it(column_env, monkeypatch):
     from web.services import video_workflow
     seen = []
@@ -136,6 +166,20 @@ def test_column_brief_reaches_single_call_writer_and_saved_context_stays_frozen(
     frozen = content_columns.apply_script_context(columns.get(config, "flash"), context)
     assert frozen.script_style == recipe.script_style
     assert "改为长文档问题" not in frozen.script_style
+
+
+def test_programme_scopes_tutorial_direction_to_each_item(column_env):
+    from core.video import columns
+    recipe = columns.get(str(column_env / "config"), "flash")
+    context = {"column": "tutorial", "column_name": "教程", "content_mode": "episode", "type": "tutorial",
+               "type_definition": {"structure": ["操作", "结果"]}, "notes": "沿一个任务讲清输入和输出。"}
+    result = content_columns.apply_script_context(recipe, context)
+    assert "每项独立内容可围绕 操作 → 结果" in result.script_style
+    assert "每项独立内容围绕自己的明确任务" in result.script_style
+    assert "同一问题的解释章节沿用共同主例子" in result.script_style
+    assert "单项内容创作方向" in result.script_style
+    single = content_columns.apply_script_context(recipe, {**context, "content_mode": "individual"})
+    assert "栏目创作方向" in single.script_style and "单项内容创作方向" not in single.script_style
 
 
 def test_saved_presentation_strategy_reaches_render_direction_and_old_contexts_still_work(column_env):
@@ -242,3 +286,17 @@ def test_automatic_creation_uses_migrated_audience_and_preserves_existing_choice
     assert script["topic"]["fields"]["目标受众"] == expected
     assert script["content_context"]["audience"] == "要理解批量工作取舍的使用者"
     assert production.get(config, str(column_env / "jobs"), "flash").audience == recipe_audience
+
+
+def test_saving_a_column_from_the_page_keeps_its_yaml_greeting(client, column_env):
+    path = column_env / "config" / "content_columns" / "model_review.yaml"
+    path.write_text(path.read_text(encoding="utf-8") + "greeting: 大家好，这里是模型横评。\n", encoding="utf-8")
+    _login(client, "editor", "editor-pass-123")
+    column = content_columns.load_all(str(column_env / "config"))["model_review"]
+    assert column.greeting == "大家好，这里是模型横评。"
+    payload = {**column.data(), "expected_revision": column.revision, "name": "模型与工具横评"}
+    payload.pop("schema_version")
+    payload.pop("greeting")
+    assert client.put("/api/content-columns/model_review", json=payload, headers=_csrf(client)).status_code == 200
+    saved = content_columns.load_all(str(column_env / "config"))["model_review"]
+    assert saved.name == "模型与工具横评" and saved.greeting == "大家好，这里是模型横评。"

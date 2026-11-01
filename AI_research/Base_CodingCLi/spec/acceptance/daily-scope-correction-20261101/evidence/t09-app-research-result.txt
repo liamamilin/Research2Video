@@ -1,0 +1,247 @@
+Browser tab: 1070520283, Title: "研映 · Research2Video", URL: "http://127.0.0.1:8775/reports/view?path=chatgpt_acquisition%2F2026-11-01_t09_updates_1.md".
+1 AXWebArea 研映 · Research2Video, URL: 127.0.0.1:8775/reports/view?path=chatgpt_acquisition%2F2026-11-01_t09_updates_1.md
+	2 container root
+		3 container
+			4 heading 研映 · Research2Video, Value: 2
+				5 text 研映 · Research2Video
+			6 button admin · admin （账号设置）
+				7 text admin
+				8 text  · 
+				9 text admin
+				10 text （账号设置）
+			11 link Description: 矩阵, Value: 127.0.0.1:8775/matrices
+			12 link Description: 产出, Value: 127.0.0.1:8775/outputs
+			13 link Description: 视频看板, Value: 127.0.0.1:8775/
+			14 link Description: 文稿, Value: 127.0.0.1:8775/video
+			15 link Description: 成片与发布, Value: 127.0.0.1:8775/publish
+			16 link Description: 平台管理, Value: 127.0.0.1:8775/platforms
+			17 link Description: 助手, Value: 127.0.0.1:8775/ask
+			18 text 研究引擎
+			19 link Description: 研究总览, Value: 127.0.0.1:8775/engine
+			20 link Description: Jobs, Value: 127.0.0.1:8775/jobs
+			21 link Description: 情报轮次, Value: 127.0.0.1:8775/rounds
+			22 link Description: 报告, Value: 127.0.0.1:8775/reports
+			23 link Description: 周期调度, Value: 127.0.0.1:8775/scheduler
+			24 text 高级
+			25 link Description: 选题, Value: 127.0.0.1:8775/topics
+			26 link Description: 信息源, Value: 127.0.0.1:8775/sources
+			27 link Description: 文稿配方, Value: 127.0.0.1:8775/video-recipes
+			28 link Description: 数据分析, Value: 127.0.0.1:8775/analytics
+			29 link Description: 设置, Value: 127.0.0.1:8775/settings
+			30 button 退出
+				31 image
+				32 text 退出
+		33 container
+			39 link Description: 报告, Value: 127.0.0.1:8775/reports
+			40 text / 2026-11-01_t09_updates_1.md
+			41 link Description: 在助手中分析, Value: 127.0.0.1:8775/ask?report=chatgpt_acquisition%2F2026-11-01_t09_updates_1.md
+			42 button 目录
+				43 image
+				44 text 目录
+			45 container 报告评分（点击设置，再点取消）
+				46 button 1 分
+					47 image
+				48 button 2 分
+					49 image
+				50 button 3 分
+					51 image
+				52 button 4 分
+					53 image
+				54 button 5 分
+					55 image
+			56 button 星标
+				57 image
+				58 text 星标
+			59 button 标签, Help: 编辑标签
+				60 image
+				61 text 标签
+			62 button 分享, Help: 生成分享链接
+				63 image
+				64 text 分享
+			65 button HTML, Help: 导出 HTML
+				66 image
+				67 text HTML
+			68 button 邮件, Help: 邮件发送
+				69 image
+				70 text 邮件
+			71 button 复制, Help: 复制原文
+				72 image
+				73 text 复制
+			74 button 下载, Help: 下载 Markdown
+				75 image
+				76 text 下载
+			77 button 写成视频
+			78 button 刷新报告
+				79 image
+				80 text 刷新报告
+			81 text chatgpt_acquisition/2026-11-01_t09_updates_1.md ·  deepseek-v4.1-flash  · 40.3k tokens  · 192s  · 2 次搜索  · 2026-11-01 16:52:25
+			82 container 未在本次检索结果中的引用： https://www.youtube.com/watch?v=cbfbzHRvGvg
+				83 text 引用  11 / 12  可追溯 （1 个存疑）
+			84 text 目录
+			85 button T09 产品动态与热点 · 研究底稿
+			86 button 1. 手机端终于能双账号切换：个人号和工作号不用再反复退出登录
+			87 button 2. 两个账号切换后，Plus 权益会跟着走吗？账单、记忆、文件到底怎么算
+			88 button 3. GPT-6.1 Terra 进了 ChatGPT Work 和 Codex：能看产品图、还能跨应用操作，但别把它当成聊天默认模型
+			89 button 4. Shopify CTO 和 HashiCorp 创始人怎么把 Codex 当“过夜研究助理”
+			90 button 来源清单
+			91 heading T09 产品动态与热点 · 研究底稿, Value: 1, ID: t09-产品动态与热点-研究底稿
+				92 text T09 产品动态与热点 · 研究底稿
+			93 text 本期采集范围：2026-10-31T01:25:00+08:00 至 2026-11-01T01:25:00+08:00（Asia/Shanghai）。
+			94 text 说明：以下按“一个观众问题一个候选”组织。账号切换是本期范围内可确认的 ChatGPT 功能变化；GPT-6.1 Terra 来自官方 What's new 页面，具体发布日期未提供，只作产品动态候选、不称“本周刚上线”；Codex 客户案例来自 10/31 公开视频标题与简介，完整内容未取得，不补写操作或测试结果。扫描受单源条数与正文预算约束，不代表覆盖整个网站。
+			95 heading 1. 手机端终于能双账号切换：个人号和工作号不用再反复退出登录, Value: 3, ID: 1-手机端终于能双账号切换-个人号和工作号不用再反复退出登录
+				96 text 1. 手机端终于能双账号切换：个人号和工作号不用再反复退出登录
+			97 content list
+				98 container
+					99 AXListMarker • 
+					100 text 题材分类 ：T09 产品动态与热点
+				101 container
+					102 AXListMarker • 
+					103 text 一句话 ：这一期帮观众在 ChatGPT 手机 App 里设置两个账号，并弄清楚切换后聊天、记忆、文件和账单为什么各自独立。
+				104 container
+					105 AXListMarker • 
+					106 text 核心角度 ：ChatGPT 最近有什么变化？——账号切换从网页扩展到 iOS/Android，最多同时登录两个账号，不用退出再登。
+				107 container
+					108 AXListMarker • 
+					109 text 目标受众 ：一个人有个人号和工作号、经常在手机和网页来回切换、或考虑给工作号单独升级 Plus 的人。
+				110 container
+					111 AXListMarker • 
+					112 text 具体材料 ：OpenAI 帮助中心说明，账号切换支持同时登录最多两个账号，切换时不用退出；每个账号保留自己的聊天、记忆、文件、设置和账单，数据不合并。网页入口是账户菜单里的 Add account；iOS/Android 入口是 Settings > Switch account > Add account。材料还提到第二个账号从 Free 计划开始，受管理的工作空间可能关闭这个选项。如果手机 Settings 里没有 Switch account，说明移动端推送还没到该账号。aicatchup 发布日期为 2026-10-31；ratelimitnow 在 2026-10-31 05:42 UTC 确认该功能正在 iOS/Android 推送。官方 release notes 链接在材料中，但本次未取得正文条目，需以帮助中心和上述确认交叉核对。原始链接：
+					113 link Description: https://help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile；https://aicatchup.com/news/chatgpt-account-switching-mobile；https://ratelimitnow.com/whats-new#w-431, Value: help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile%EF%BC%9Bhttps://aicatchup.com/news/chatgpt-account-switching-mobile%EF%BC%9Bhttps://ratelimitnow.com/whats-new#w-431
+				114 container
+					115 AXListMarker • 
+					116 text 操作与演示 ：手机录屏进入 Settings，找到 Switch account，选择 Add account，登录第二个账号，再切回第一个账号；展示两个账号不同的聊天列表和文件列表。待实测：中文界面文案是否一致、不同 iOS/Android 版本入口位置、企业/教育 workspace 是否隐藏该选项。演示用测试账号，不展示真实隐私数据。
+				117 container
+					118 AXListMarker • 
+					119 text 画面建议 ：手机设置页特写；两个账号头像/名称切换；并排对比两个账号的聊天列表；账单页打码；字幕提示“最多两个，第二个默认 Free，数据不合并”。
+				120 container
+					121 AXListMarker • 
+					122 text 获客作用 ：持续引流；观众自然会问“工作号要不要也开 Plus”，可自然承接账号规划与订阅选择。提醒切换前先确认当前账号，避免把工作资料放进个人号。
+				123 container
+					124 AXListMarker • 
+					125 text 发布日期 ：2026-10-31（材料发布/确认）；官方帮助中心未给具体发布日期
+				126 container
+					127 AXListMarker • 
+					128 text 来源网址 ：
+					129 link Description: https://aicatchup.com/news/chatgpt-account-switching-mobile；https://ratelimitnow.com/whats-new#w-431；https://help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile；https://help.openai.com/en/articles/6825453-chatgpt-release-notes, Value: aicatchup.com/news/chatgpt-account-switching-mobile%EF%BC%9Bhttps://ratelimitnow.com/whats-new#w-431%EF%BC%9Bhttps://help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile%EF%BC%9Bhttps://help.openai.com/en/articles/6825453-chatgpt-release-notes
+			130 heading 2. 两个账号切换后，Plus 权益会跟着走吗？账单、记忆、文件到底怎么算, Value: 3, ID: 2-两个账号切换后-plus-权益会跟着走吗-账单-记忆-文件到底怎么算
+				131 text 2. 两个账号切换后，Plus 权益会跟着走吗？账单、记忆、文件到底怎么算
+			132 content list
+				133 container
+					134 AXListMarker • 
+					135 text 一句话 ：帮观众判断一个设备两个 ChatGPT 账号时，哪个账号有 Plus、哪些数据不会串，以及要不要给第二个账号单独付费。
+				136 container
+					137 AXListMarker • 
+					138 text 核心角度 ：账号切换解决的是登录麻烦，不是合并账号，也不是共享订阅；切换哪个账号，就显示哪个账号的历史和订阅。
+				139 container
+					140 AXListMarker • 
+					141 text 目标受众 ：已有 Plus、又开了第二个 Free 账号的职场人；想用工作号但不想重复付费的人；共用设备、需要区分个人和工作资料的人。
+				142 container
+					143 AXListMarker • 
+					144 text 具体材料 ：帮助中心写明每个账号保留自己的聊天、记忆、文件、设置和账单，切换不会合并数据；最多两个账号。ratelimitnow 的确认条目进一步写“Chats, memory, files, billing and subscriptions stay separate per account; a second account starts on the Free plan”。aicatchup 也写“billing separate”“account you select determines which history and subscription you see”。按这些材料理解，不能认为一个账号的 Plus 订阅会自动覆盖第二个账号；具体功能限制需实测。原始链接：
+					145 link Description: https://help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile；https://aicatchup.com/news/chatgpt-account-switching-mobile#what-stays-separate；https://ratelimitnow.com/whats-new#w-431, Value: help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile%EF%BC%9Bhttps://aicatchup.com/news/chatgpt-account-switching-mobile#what-stays-separate%25EF%25BC%259Bhttps://ratelimitnow.com/whats-new%23w-431
+				146 container
+					147 AXListMarker • 
+					148 text 操作与演示 ：准备一个 Plus 账号和一个 Free 账号；切换后展示 Plus 标识、模型选择、订阅页和文件列表；在 Free 账号尝试一个 Plus 功能，记录提示或限制（待实测）。不要展示真实账单信息。
+				149 container
+					150 AXListMarker • 
+					151 text 画面建议 ：切换前后顶栏账号名与 Plus 标识；订阅页“当前计划”打码；模型下拉对比；文件列表左右分屏；字幕“切换不合并数据，订阅按账号算”。
+				152 container
+					153 AXListMarker • 
+					154 text 获客作用 ：持续引流；帮观众先判断“第二个账号是否真的需要付费”，如果只是偶尔用，Free 可能够；如果工作号长期需要 Plus 功能，再考虑单独订阅。不要硬推升级。
+				155 container
+					156 AXListMarker • 
+					157 text 发布日期 ：2026-10-31（材料确认）；官方帮助中心未给具体发布日期
+				158 container
+					159 AXListMarker • 
+					160 text 来源网址 ：
+					161 link Description: https://help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile；https://aicatchup.com/news/chatgpt-account-switching-mobile#what-stays-separate；https://ratelimitnow.com/whats-new#w-431, Value: help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile%EF%BC%9Bhttps://aicatchup.com/news/chatgpt-account-switching-mobile#what-stays-separate%25EF%25BC%259Bhttps://ratelimitnow.com/whats-new%23w-431
+			162 heading 3. GPT-6.1 Terra 进了 ChatGPT Work 和 Codex：能看产品图、还能跨应用操作，但别把它当成聊天默认模型, Value: 3, ID: 3-gpt-6-1-terra-进了-chatgpt-work-和-codex-能看产品图-还能跨应用操作-但别把它当成聊天默认模型
+				163 text 3. GPT-6.1 Terra 进了 ChatGPT Work 和 Codex：能看产品图、还能跨应用操作，但别把它当成聊天默认模型
+			164 content list
+				165 container
+					166 AXListMarker • 
+					167 text 一句话 ：帮观众判断这个新模型适合什么工作、在哪些计划里能用，以及普通聊天用户要不要关心。
+				168 container
+					169 AXListMarker • 
+					170 text 核心角度 ：官方 What's new 新增“Use GPT-6.1 Terra for visual reasoning and computer use”；它面向专业工作流，强调图像理解加电脑操作，不是“ChatGPT 聊天窗口换默认模型”的新闻。
+				171 container
+					172 AXListMarker • 
+					173 text 目标受众 ：做电商商品图、设计资产审查、跨浏览器/桌面/应用操作的人；在 Plus、Pro、Business、Enterprise、Edu 计划里使用 ChatGPT Work 或 Codex 的职场人。
+				174 container
+					175 AXListMarker • 
+					176 text 具体材料 ：官方条目写 GPT-6.1 Terra 现在可用于 ChatGPT Work 和 Codex，适用 Plus、Pro、Business、Enterprise、Edu 计划；能力是较强的图像理解与精确的电脑使用；示例包括把产品照片匹配到目录条目、审查设计资产、在浏览器、桌面和应用中对发现的结果采取动作。条目本身未给具体发布日期；相关更新页标注 October 26–30, 2026，只能作背景，不能说成本期刚发布。这里不是 API 模型公告，也不写成普通 ChatGPT 聊天功能。原始链接：
+					177 link Description: https://learn.chatgpt.com/docs/whats-new.md#:~:text=Use%20GPT-6.1%20Terra%20for%20visual%20reasoning%20and%20computer%20use；https://learn.chatgpt.com/docs/models?surface=app#app-gpt-61-terra；https://learn.chatgpt.com/docs/whats-new/october-26-30-2026, Value: learn.chatgpt.com/docs/whats-new.md#:~:text=Use%2520GPT-6.1%2520Terra%2520for%2520visual%2520reasoning%2520and%2520computer%2520use%25EF%25BC%259Bhttps://learn.chatgpt.com/docs/models?surface=app%23app-gpt-61-terra%25EF%25BC%259Bhttps://learn.chatgpt.com/docs/whats-new/october-26-30-2026
+				178 container
+					179 AXListMarker • 
+					180 text 操作与演示 ：在 ChatGPT Work/Codex 的模型选择里找到 GPT-6.1 Terra；上传一组产品照片，要求按目录字段匹配并输出表格；上传设计稿，要求列出不一致项；再让它在浏览器或桌面执行后续动作（待实测权限、地区和确认步骤）。待实测：中文界面是否可见、Plus 计划额度、电脑操作是否需要逐步确认、中文商品名匹配效果。材料未给准确率或测试数据，不能编造。
+				181 container
+					182 AXListMarker • 
+					183 text 画面建议 ：模型选择器出现 GPT-6.1 Terra；上传产品图到匹配表；设计稿标注差异；电脑操作确认弹窗；字幕“ChatGPT Work/Codex，不是普通聊天默认模型”。
+				184 container
+					185 AXListMarker • 
+					186 text 获客作用 ：持续引流；把“新模型”翻译成具体任务。如果观众只是写作聊天，可以明确说不用为这个功能升级；如果工作涉及商品图、设计资产或跨应用操作，再继续了解 Work/Codex 的使用条件。
+				187 container
+					188 AXListMarker • 
+					189 text 发布日期 ：未提供具体日期（官方 What's new 条目；相关页标注 October 26–30, 2026，作为背景）
+				190 container
+					191 AXListMarker • 
+					192 text 来源网址 ：
+					193 link Description: https://learn.chatgpt.com/docs/whats-new.md#:~:text=Use%20GPT-6.1%20Terra%20for%20visual%20reasoning%20and%20computer%20use；https://learn.chatgpt.com/docs/models?surface=app#app-gpt-61-terra；https://learn.chatgpt.com/docs/whats-new/october-26-30-2026, Value: learn.chatgpt.com/docs/whats-new.md#:~:text=Use%2520GPT-6.1%2520Terra%2520for%2520visual%2520reasoning%2520and%2520computer%2520use%25EF%25BC%259Bhttps://learn.chatgpt.com/docs/models?surface=app%23app-gpt-61-terra%25EF%25BC%259Bhttps://learn.chatgpt.com/docs/whats-new/october-26-30-2026
+			194 heading 4. Shopify CTO 和 HashiCorp 创始人怎么把 Codex 当“过夜研究助理”, Value: 3, ID: 4-shopify-cto-和-hashicorp-创始人怎么把-codex-当-过夜研究助理
+				195 text 4. Shopify CTO 和 HashiCorp 创始人怎么把 Codex 当“过夜研究助理”
+			196 content list
+				197 container
+					198 AXListMarker • 
+					199 text 一句话 ：用两个公开客户案例说明 Codex 在真实工作里的用法：研究竞争对手、比较工具、先做原型；但这是 Codex，不是 ChatGPT 聊天功能。
+				200 container
+					201 AXListMarker • 
+					202 text 核心角度 ：产品动态不只在功能更新，也在客户怎么用；这期讲“把任务交给 agent，第二天带着原型开会”的工作方式。
+				203 container
+					204 AXListMarker • 
+					205 text 目标受众 ：开发者、技术管理者、想了解 Codex 与 ChatGPT 区别的人；不适合只想用聊天写作的普通用户。
+				206 container
+					207 AXListMarker • 
+					208 text 具体材料 ：Mitchell Hashimoto 的公开简介说，他一天结束时把 Codex agents 放去研究竞争对手、比较工具、原型他还没想清楚的功能，给第二天工作一个 head start。Shopify CTO Mikhail Parakhin 的公开简介说，Codex 改变了他团队带到会上的东西；从委派任务到探索架构选项，用 Codex 做以前做不了的工作，并说“If you have an idea, bring a prototype right away.” 两个视频均发布于 2026-10-31（UTC），在采集范围内。只有标题和简介，完整内容未取得；不能补写具体提示词、操作步骤或量化结果。原始链接：
+					209 link Description: https://www.youtube.com/watch?v=cbfbzHRvGvg（实际为, Value: youtube.com/watch?v=cbfbzHRvGvg%EF%BC%88%E5%AE%9E%E9%99%85%E4%B8%BA
+					210 link Description: https://www.youtube.com/watch?v=cflbzHRvGvg）；https://www.youtube.com/watch?v=lPZQrVFcz3c, Value: youtube.com/watch?v=cflbzHRvGvg%EF%BC%89%EF%BC%9Bhttps://www.youtube.com/watch?v=lPZQrVFcz3c
+				211 container
+					212 AXListMarker • 
+					213 text 操作与演示 ：待实测/需看完整视频。可展示 Codex 任务列表、agent 运行状态、diff 或原型输出；不要假装复现客户结果。写稿前需拿到完整视频或自己实测，并标明“公开简介只说了工作类型，没给结果数字”。
+				214 container
+					215 AXListMarker • 
+					216 text 画面建议 ：Codex 任务列表和 agent 状态；竞品对比表/原型页面；引用视频标题与简介字幕；明确“Codex，不是 ChatGPT 聊天”标识。
+				217 container
+					218 AXListMarker • 
+					219 text 获客作用 ：持续引流；吸引技术人群，顺手解释 Codex 与 ChatGPT 的边界；如果观众是普通用户，引导回 ChatGPT 账号切换或 Plus 选择内容。
+				220 container
+					221 AXListMarker • 
+					222 text 发布日期 ：2026-10-31
+				223 container
+					224 AXListMarker • 
+					225 text 来源网址 ：
+					226 link Description: https://www.youtube.com/watch?v=cflbzHRvGvg；https://www.youtube.com/watch?v=lPZQrVFcz3c, Value: youtube.com/watch?v=cflbzHRvGvg%EF%BC%9Bhttps://www.youtube.com/watch?v=lPZQrVFcz3c
+			227 heading 来源清单, Value: 2
+				228 text 来源清单
+			229 content list
+				230 container
+					231 AXListMarker • 
+					232 text ChatGPT 账号切换：
+					233 link Description: https://aicatchup.com/news/chatgpt-account-switching-mobile；https://ratelimitnow.com/whats-new#w-431；https://help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile；https://help.openai.com/en/articles/6825453-chatgpt-release-notes, Value: aicatchup.com/news/chatgpt-account-switching-mobile%EF%BC%9Bhttps://ratelimitnow.com/whats-new#w-431%EF%BC%9Bhttps://help.openai.com/en/articles/20001068-using-multiple-chatgpt-accounts-on-web-and-mobile%EF%BC%9Bhttps://help.openai.com/en/articles/6825453-chatgpt-release-notes
+				234 container
+					235 AXListMarker • 
+					236 text GPT-6.1 Terra：
+					237 link Description: https://learn.chatgpt.com/docs/whats-new.md#:~:text=Use%20GPT-6.1%20Terra%20for%20visual%20reasoning%20and%20computer%20use；https://learn.chatgpt.com/docs/models?surface=app#app-gpt-61-terra；https://learn.chatgpt.com/docs/whats-new/october-26-30-2026, Value: learn.chatgpt.com/docs/whats-new.md#:~:text=Use%2520GPT-6.1%2520Terra%2520for%2520visual%2520reasoning%2520and%2520computer%2520use%25EF%25BC%259Bhttps://learn.chatgpt.com/docs/models?surface=app%23app-gpt-61-terra%25EF%25BC%259Bhttps://learn.chatgpt.com/docs/whats-new/october-26-30-2026
+				238 container
+					239 AXListMarker • 
+					240 text Codex 客户案例：
+					241 link Description: https://www.youtube.com/watch?v=cflbzHRvGvg；https://www.youtube.com/watch?v=lPZQrVFcz3c, Value: youtube.com/watch?v=cflbzHRvGvg%EF%BC%9Bhttps://www.youtube.com/watch?v=lPZQrVFcz3c
+				242 container
+					243 AXListMarker • 
+					244 text 官方更新页索引（背景）：
+					245 link Description: https://learn.chatgpt.com/docs/whats-new.md, Value: learn.chatgpt.com/docs/whats-new.md
+			246 text <!-- material-use: {"selected":["M15d60aacd132d6be","Mc681f773beb91f3b","Mdb087df93d9773d7","M1a0814276f2e933a","M038b640da08e17ce","Mcfb32a913c060f20"],"background":["M43e59e2f13cacde9"],"deferred":["M7a8114d5dc907584","M8033f69abf49eafe","M3c95366fb38e945c","M86ede603695a6063","Mdb40d19f0ca1ac92","M8476ceb9cc35b736","M4aa4f8502de370cc","Mdb12f730db992046","M8f95e0b49189cf7a","M1455382d85dbf3bb","M919192f2c3ae1da7","M041b344dfe07095d"]} -->
+		36 button 让助手处理当前页面
+			37 image
+			38 text 让助手处理
+
+The focused UI element is 1 AXWebArea 研映 · Research2Video, URL: 127.0.0.1:8775/reports/view?path=chatgpt_acquisition%2F2026-11-01_t09_updates_1.md

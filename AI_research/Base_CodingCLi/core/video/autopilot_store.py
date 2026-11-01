@@ -76,6 +76,8 @@ def init(conn) -> None:
         conn.execute("ALTER TABLE autopilot_runs ADD COLUMN discovery_at REAL")
     if "discovery_tries" not in columns:
         conn.execute("ALTER TABLE autopilot_runs ADD COLUMN discovery_tries INTEGER NOT NULL DEFAULT 0")
+    if 'dispatch_failures' not in columns:
+        conn.execute('ALTER TABLE autopilot_runs ADD COLUMN dispatch_failures INTEGER NOT NULL DEFAULT 0')
     if "production" not in {r[1] for r in conn.execute("PRAGMA table_info(autopilot_items)")}:
         conn.execute("ALTER TABLE autopilot_items ADD COLUMN production TEXT NOT NULL DEFAULT ''")
 
@@ -156,6 +158,13 @@ def create_run(spec: dict, items: list[dict], *, plan_id: Optional[str] = None, 
                 (uuid.uuid4().hex, run_id, i, item["column_key"], json.dumps(item["topic"], ensure_ascii=False),
                  item.get("production", ""), now))
     return get_run(run_id)
+
+
+def run_origin(run_id: str) -> dict | None:
+    """Read admission ownership without loading a batch's full candidate history."""
+    with connect() as conn:
+        row = conn.execute('SELECT started_at,started_by FROM autopilot_runs WHERE id=?', (run_id,)).fetchone()
+    return dict(row) if row else None
 
 
 def get_run(run_id: str) -> dict | None:

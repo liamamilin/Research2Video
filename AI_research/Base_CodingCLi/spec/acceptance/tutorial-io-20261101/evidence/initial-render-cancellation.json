@@ -1,0 +1,6 @@
+{
+  "job_id": "8f6e4ae4-1786-4a14-9f5e-f3569fa8ee42",
+  "reason": "Real acceptance exposed a single combined tutorial chapter and missing shared input/output comparison; use the existing rewrite entry point for a new automatic version.",
+  "acceptance_driver_pid": 26987,
+  "cancel_requested": true
+}

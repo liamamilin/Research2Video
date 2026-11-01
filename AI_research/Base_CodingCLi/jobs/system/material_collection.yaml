@@ -1,0 +1,9 @@
+name: 矩阵素材积累
+description: 按生产策略读取公开来源并归档，不调用研究或写稿模型，不创建视频
+enabled: true
+source_collection: true
+search: false
+runtime:
+  timeout_seconds: 5400
+prompt: 按生产策略积累当前公开素材。
+output: output/source_collections/{date}.json

@@ -1,0 +1,182 @@
+{
+  "scope": "Read-only synthetic invariance probes; no model calls or new videos. These are not a real-video generalization acceptance suite.",
+  "summary": {
+    "unrelated_picture_rejected_with_chinese_narration": {
+      "passed": 0,
+      "failed": 4
+    },
+    "title_order_preserves_relevant_picture": {
+      "passed": 3,
+      "failed": 3
+    },
+    "explicit_product_survives_publisher_substitution": {
+      "passed": 12,
+      "failed": 0
+    },
+    "vertical_table_emphasis_includes_values": {
+      "passed": 0,
+      "failed": 3
+    }
+  },
+  "cases": [
+    {
+      "property": "unrelated_picture_rejected_with_chinese_narration",
+      "case": "账号切换与记忆隔离",
+      "pass": false,
+      "subject": "openai"
+    },
+    {
+      "property": "unrelated_picture_rejected_with_chinese_narration",
+      "case": "图像生成功能更新",
+      "pass": false,
+      "subject": "openai"
+    },
+    {
+      "property": "unrelated_picture_rejected_with_chinese_narration",
+      "case": "语音输入更新",
+      "pass": false,
+      "subject": "openai"
+    },
+    {
+      "property": "unrelated_picture_rejected_with_chinese_narration",
+      "case": "工作空间文件",
+      "pass": false,
+      "subject": "openai"
+    },
+    {
+      "property": "title_order_preserves_relevant_picture",
+      "case": "Orion 与 Nova 对比",
+      "pass": false,
+      "subject": "nova"
+    },
+    {
+      "property": "title_order_preserves_relevant_picture",
+      "case": "Nova 与 Orion 对比",
+      "pass": true,
+      "subject": "orion"
+    },
+    {
+      "property": "title_order_preserves_relevant_picture",
+      "case": "Aurora 与 Vertex 对比",
+      "pass": false,
+      "subject": "vertex"
+    },
+    {
+      "property": "title_order_preserves_relevant_picture",
+      "case": "Vertex 与 Aurora 对比",
+      "pass": true,
+      "subject": "aurora"
+    },
+    {
+      "property": "title_order_preserves_relevant_picture",
+      "case": "Cedar 与 Nimbus 对比",
+      "pass": false,
+      "subject": "nimbus"
+    },
+    {
+      "property": "title_order_preserves_relevant_picture",
+      "case": "Nimbus 与 Cedar 对比",
+      "pass": true,
+      "subject": "cedar"
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Orion@help.openai.com",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Orion@docs.vendor.example",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Orion@docs.other.example",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Aurora@help.openai.com",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Aurora@docs.vendor.example",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Aurora@docs.other.example",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Cedar@help.openai.com",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Cedar@docs.vendor.example",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Cedar@docs.other.example",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Nimbus@help.openai.com",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Nimbus@docs.vendor.example",
+      "pass": true
+    },
+    {
+      "property": "explicit_product_survives_publisher_substitution",
+      "case": "Nimbus@docs.other.example",
+      "pass": true
+    },
+    {
+      "property": "vertical_table_emphasis_includes_values",
+      "case": "Research",
+      "pass": false,
+      "region": {
+        "x1": 0,
+        "x2": 1000,
+        "y1": 40,
+        "y2": 180,
+        "label": "Research",
+        "style": "box"
+      }
+    },
+    {
+      "property": "vertical_table_emphasis_includes_values",
+      "case": "Enterprise",
+      "pass": false,
+      "region": {
+        "x1": 0,
+        "x2": 1000,
+        "y1": 40,
+        "y2": 180,
+        "label": "Enterprise",
+        "style": "box"
+      }
+    },
+    {
+      "property": "vertical_table_emphasis_includes_values",
+      "case": "Business",
+      "pass": false,
+      "region": {
+        "x1": 0,
+        "x2": 1000,
+        "y1": 40,
+        "y2": 180,
+        "label": "Business",
+        "style": "box"
+      }
+    }
+  ]
+}

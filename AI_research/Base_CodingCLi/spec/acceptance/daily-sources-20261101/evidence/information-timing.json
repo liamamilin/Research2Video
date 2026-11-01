@@ -1,0 +1,503 @@
+{
+  "cues": [
+    {
+      "scene_id": "card_1",
+      "beat_id": "card_1_b0",
+      "target_id": "title",
+      "segment_id": "c1_n1",
+      "quote": "大",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 258
+    },
+    {
+      "scene_id": "card_1",
+      "beat_id": "card_1_b1",
+      "target_id": "line:0",
+      "segment_id": "c1_n2",
+      "quote": "个",
+      "character_index": 5,
+      "automatic": true,
+      "estimated_start_ms": 5565
+    },
+    {
+      "scene_id": "card_1",
+      "beat_id": "card_1_b2",
+      "target_id": "line:1",
+      "segment_id": "c1_n2",
+      "quote": "出",
+      "character_index": 34,
+      "automatic": true,
+      "estimated_start_ms": 10931
+    },
+    {
+      "scene_id": "card_1",
+      "beat_id": "card_1_b3",
+      "target_id": "line:2",
+      "segment_id": "c1_n4",
+      "quote": "两",
+      "character_index": 1,
+      "automatic": true,
+      "estimated_start_ms": 17415
+    },
+    {
+      "scene_id": "card_1",
+      "beat_id": "card_1_b4",
+      "target_id": "line:3",
+      "segment_id": "c1_n4",
+      "quote": "并",
+      "character_index": 30,
+      "automatic": true,
+      "estimated_start_ms": 22353
+    },
+    {
+      "scene_id": "card_2",
+      "beat_id": "card_2_b0",
+      "target_id": "scene",
+      "segment_id": "c2_n1",
+      "quote": "先",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 29489
+    },
+    {
+      "scene_id": "card_3_p1",
+      "beat_id": "card_3_p1_b0",
+      "target_id": "scene",
+      "segment_id": "c3_n1",
+      "quote": "先",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 66671
+    },
+    {
+      "scene_id": "card_3_p2",
+      "beat_id": "card_3_p2_b0",
+      "target_id": "scene",
+      "segment_id": "c3_n7",
+      "quote": "不",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 92139
+    },
+    {
+      "scene_id": "card_4_p1",
+      "beat_id": "card_4_p1_b0",
+      "target_id": "title",
+      "segment_id": "c4_n1",
+      "quote": "添",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 100131
+    },
+    {
+      "scene_id": "card_4_p1",
+      "beat_id": "card_4_p1_b1",
+      "target_id": "line:0",
+      "segment_id": "c4_n2",
+      "quote": "打",
+      "character_index": 1,
+      "automatic": true,
+      "estimated_start_ms": 104438
+    },
+    {
+      "scene_id": "card_4_p1",
+      "beat_id": "card_4_p1_b2",
+      "target_id": "line:1",
+      "segment_id": "c4_n2",
+      "quote": "一",
+      "character_index": 22,
+      "automatic": true,
+      "estimated_start_ms": 108213
+    },
+    {
+      "scene_id": "card_4_p1",
+      "beat_id": "card_4_p1_b3",
+      "target_id": "line:2",
+      "segment_id": "c4_n3",
+      "quote": "当",
+      "character_index": 11,
+      "automatic": true,
+      "estimated_start_ms": 112608
+    },
+    {
+      "scene_id": "card_4_p2",
+      "beat_id": "card_4_p2_b0",
+      "target_id": "side:left",
+      "segment_id": "c4_n4",
+      "quote": "因",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 117266
+    },
+    {
+      "scene_id": "card_4_p2",
+      "beat_id": "card_4_p2_b1",
+      "target_id": "side:right",
+      "segment_id": "c4_n4",
+      "quote": "最",
+      "character_index": 37,
+      "automatic": true,
+      "estimated_start_ms": 124028
+    },
+    {
+      "scene_id": "card_5_p1",
+      "beat_id": "card_5_p1_b0",
+      "target_id": "scene",
+      "segment_id": "c5_n1",
+      "quote": "手",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 132391
+    },
+    {
+      "scene_id": "card_5_p2",
+      "beat_id": "card_5_p2_b0",
+      "target_id": "scene",
+      "segment_id": "c5_n7",
+      "quote": "第",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 161596
+    },
+    {
+      "scene_id": "card_6_p1",
+      "beat_id": "card_6_p1_b0",
+      "target_id": "side:left",
+      "segment_id": "c6_n1",
+      "quote": "手",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 170270
+    },
+    {
+      "scene_id": "card_6_p1",
+      "beat_id": "card_6_p1_b1",
+      "target_id": "side:right",
+      "segment_id": "c6_n3",
+      "quote": "一",
+      "character_index": 14,
+      "automatic": true,
+      "estimated_start_ms": 183016
+    },
+    {
+      "scene_id": "card_6_p2",
+      "beat_id": "card_6_p2_b0",
+      "target_id": "title",
+      "segment_id": "c6_n5",
+      "quote": "切",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 193890
+    },
+    {
+      "scene_id": "card_6_p2",
+      "beat_id": "card_6_p2_b1",
+      "target_id": "line:0",
+      "segment_id": "c6_n5",
+      "quote": "切",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 193890
+    },
+    {
+      "scene_id": "card_6_p2",
+      "beat_id": "card_6_p2_b2",
+      "target_id": "line:1",
+      "segment_id": "c6_n5",
+      "quote": "。",
+      "character_index": 16,
+      "automatic": true,
+      "estimated_start_ms": 196954
+    },
+    {
+      "scene_id": "card_6_p2",
+      "beat_id": "card_6_p2_b3",
+      "target_id": "line:2",
+      "segment_id": "c6_n6",
+      "quote": "，",
+      "character_index": 7,
+      "automatic": true,
+      "estimated_start_ms": 198967
+    },
+    {
+      "scene_id": "card_6_p2",
+      "beat_id": "card_6_p2_b4",
+      "target_id": "line:3",
+      "segment_id": "c6_n6",
+      "quote": "要",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 197715
+    },
+    {
+      "scene_id": "card_7_p1",
+      "beat_id": "card_7_p1_b0",
+      "target_id": "title",
+      "segment_id": "c7_n1",
+      "quote": "最",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 202882
+    },
+    {
+      "scene_id": "card_7_p1",
+      "beat_id": "card_7_p1_b1",
+      "target_id": "line:0",
+      "segment_id": "c7_n1",
+      "quote": "用",
+      "character_index": 20,
+      "automatic": true,
+      "estimated_start_ms": 206669
+    },
+    {
+      "scene_id": "card_7_p1",
+      "beat_id": "card_7_p1_b2",
+      "target_id": "line:1",
+      "segment_id": "c7_n1",
+      "quote": "里",
+      "character_index": 41,
+      "automatic": true,
+      "estimated_start_ms": 210646
+    },
+    {
+      "scene_id": "card_7_p1",
+      "beat_id": "card_7_p1_b3",
+      "target_id": "line:2",
+      "segment_id": "c7_n2",
+      "quote": "间",
+      "character_index": 12,
+      "automatic": true,
+      "estimated_start_ms": 214938
+    },
+    {
+      "scene_id": "card_7_p1",
+      "beat_id": "card_7_p1_b4",
+      "target_id": "line:3",
+      "segment_id": "c7_n2",
+      "quote": "账",
+      "character_index": 33,
+      "automatic": true,
+      "estimated_start_ms": 218814
+    },
+    {
+      "scene_id": "card_7_p2",
+      "beat_id": "card_7_p2_b0",
+      "target_id": "side:left",
+      "segment_id": "c7_n3",
+      "quote": "网",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 223248
+    },
+    {
+      "scene_id": "card_7_p2",
+      "beat_id": "card_7_p2_b1",
+      "target_id": "side:right",
+      "segment_id": "c7_n3",
+      "quote": "手",
+      "character_index": 13,
+      "automatic": true,
+      "estimated_start_ms": 224753
+    },
+    {
+      "scene_id": "card_8",
+      "beat_id": "card_8_b0",
+      "target_id": "title",
+      "segment_id": "c8_n1",
+      "quote": "这",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 236186
+    },
+    {
+      "scene_id": "card_8",
+      "beat_id": "card_8_b1",
+      "target_id": "line:0",
+      "segment_id": "c8_n1",
+      "quote": "不",
+      "character_index": 8,
+      "automatic": true,
+      "estimated_start_ms": 237631
+    },
+    {
+      "scene_id": "card_8",
+      "beat_id": "card_8_b2",
+      "target_id": "line:1",
+      "segment_id": "c8_n2",
+      "quote": "一",
+      "character_index": 4,
+      "automatic": true,
+      "estimated_start_ms": 242062
+    },
+    {
+      "scene_id": "card_8",
+      "beat_id": "card_8_b3",
+      "target_id": "line:2",
+      "segment_id": "c8_n2",
+      "quote": "路",
+      "character_index": 19,
+      "automatic": true,
+      "estimated_start_ms": 244966
+    },
+    {
+      "scene_id": "card_8",
+      "beat_id": "card_8_b4",
+      "target_id": "line:3",
+      "segment_id": "c8_n4",
+      "quote": "要",
+      "character_index": 0,
+      "automatic": true,
+      "estimated_start_ms": 247930
+    },
+    {
+      "scene_id": "card_2",
+      "beat_id": "material_ecc68afeb9ca_0",
+      "segment_id": "c2_n1",
+      "character_index": 0,
+      "estimated_start_ms": 29489
+    },
+    {
+      "scene_id": "card_2",
+      "beat_id": "material_ecc68afeb9ca_1",
+      "segment_id": "c2_n5",
+      "character_index": 10,
+      "estimated_start_ms": 52203
+    },
+    {
+      "scene_id": "card_2",
+      "beat_id": "material_ecc68afeb9ca_2",
+      "segment_id": "c2_n6",
+      "character_index": 0,
+      "estimated_start_ms": 56120
+    },
+    {
+      "scene_id": "card_2",
+      "beat_id": "material_ecc68afeb9ca_3",
+      "segment_id": "c2_n7",
+      "character_index": 18,
+      "estimated_start_ms": 62926
+    },
+    {
+      "scene_id": "card_3_p1",
+      "beat_id": "material_d445713c76b2_0",
+      "segment_id": "c3_n2",
+      "character_index": 0,
+      "estimated_start_ms": 68465
+    },
+    {
+      "scene_id": "card_3_p1",
+      "beat_id": "material_d445713c76b2_1",
+      "segment_id": "c3_n3",
+      "character_index": 0,
+      "estimated_start_ms": 75443
+    },
+    {
+      "scene_id": "card_3_p1",
+      "beat_id": "material_d445713c76b2_2",
+      "segment_id": "c3_n5",
+      "character_index": 0,
+      "estimated_start_ms": 81616
+    },
+    {
+      "scene_id": "card_3_p1",
+      "beat_id": "material_d445713c76b2_3",
+      "segment_id": "c3_n6",
+      "character_index": 0,
+      "estimated_start_ms": 87788
+    },
+    {
+      "scene_id": "card_3_p2",
+      "beat_id": "material_2bcbfb007f11_0",
+      "segment_id": "c3_n7",
+      "character_index": 0,
+      "estimated_start_ms": 92139
+    },
+    {
+      "scene_id": "card_3_p2",
+      "beat_id": "material_2bcbfb007f11_1",
+      "segment_id": "c3_n7",
+      "character_index": 19,
+      "estimated_start_ms": 95003
+    },
+    {
+      "scene_id": "card_5_p1",
+      "beat_id": "material_5d5f72e7b816_0",
+      "segment_id": "c5_n1",
+      "character_index": 0,
+      "estimated_start_ms": 132391
+    },
+    {
+      "scene_id": "card_5_p1",
+      "beat_id": "material_5d5f72e7b816_1",
+      "segment_id": "c5_n2",
+      "character_index": 14,
+      "estimated_start_ms": 136849
+    },
+    {
+      "scene_id": "card_5_p1",
+      "beat_id": "material_5d5f72e7b816_2",
+      "segment_id": "c5_n2",
+      "character_index": 55,
+      "estimated_start_ms": 141014
+    },
+    {
+      "scene_id": "card_5_p1",
+      "beat_id": "material_5d5f72e7b816_3",
+      "segment_id": "c5_n3",
+      "character_index": 0,
+      "estimated_start_ms": 143598
+    },
+    {
+      "scene_id": "card_5_p1",
+      "beat_id": "material_5d5f72e7b816_4",
+      "segment_id": "c5_n4",
+      "character_index": 0,
+      "estimated_start_ms": 146369
+    },
+    {
+      "scene_id": "card_5_p1",
+      "beat_id": "material_5d5f72e7b816_5",
+      "segment_id": "c5_n5",
+      "character_index": 0,
+      "estimated_start_ms": 151484
+    },
+    {
+      "scene_id": "card_5_p1",
+      "beat_id": "material_5d5f72e7b816_6",
+      "segment_id": "c5_n6",
+      "character_index": 3,
+      "estimated_start_ms": 154268
+    },
+    {
+      "scene_id": "card_5_p1",
+      "beat_id": "material_5d5f72e7b816_7",
+      "segment_id": "c5_n6",
+      "character_index": 40,
+      "estimated_start_ms": 158579
+    },
+    {
+      "scene_id": "card_5_p2",
+      "beat_id": "material_51be7d2c7d14_0",
+      "segment_id": "c5_n7",
+      "character_index": 0,
+      "estimated_start_ms": 161596
+    },
+    {
+      "scene_id": "card_5_p2",
+      "beat_id": "material_51be7d2c7d14_1",
+      "segment_id": "c5_n7",
+      "character_index": 19,
+      "estimated_start_ms": 163981
+    },
+    {
+      "scene_id": "card_5_p2",
+      "beat_id": "material_51be7d2c7d14_2",
+      "segment_id": "c5_n8",
+      "character_index": 0,
+      "estimated_start_ms": 166402
+    }
+  ],
+  "phrase_alignment": "measured TTS activity",
+  "within_phrase_timing": "estimated from character position, not word alignment"
+}

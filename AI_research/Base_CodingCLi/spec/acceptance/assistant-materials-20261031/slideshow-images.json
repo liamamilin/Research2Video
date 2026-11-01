@@ -1,0 +1,13 @@
+{
+  "mode": "uploaded",
+  "assignment": "submitted image order, distributed over narration segments; images repeat if needed",
+  "images": [
+    {
+      "id": "slide_image_1",
+      "type": "image",
+      "path": "assets/slideshow/image-01.png",
+      "origin": "user supplied image: Claude套餐截图.png.png",
+      "sha256": "e6622101ef78565330b7a0fb329c4f882d791842575957026c05e1ff665ab91d"
+    }
+  ]
+}

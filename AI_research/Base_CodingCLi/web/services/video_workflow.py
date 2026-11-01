@@ -17,18 +17,19 @@ from __future__ import annotations
 import copy
 import logging
 import os
+from contextlib import contextmanager
 from dataclasses import is_dataclass, replace
 import re
 import threading
 import time
 from typing import Optional
 
-from core import report_material, report_meta
+from core import report_material, report_meta, telemetry
 from core.config import load_system_config
 from core.llm import LLMConfig
 from core.state import StateManager
 from core.video import columns as video_columns
-from core.video import content_guard, length, research_dossier, store, story_pool, writer
+from core.video import content_guard, length, polish, research_dossier, store, story_pool, writer
 from core.video import plans as video_plans
 from core.video.adapt import draft as adapt_draft
 from core.video.adapt import facts as adapt_facts
@@ -63,9 +64,14 @@ def _read_report(report_path: str) -> str:
         return fh.read()
 
 
-def report_of(script: dict, report_path: str = "") -> str:
+def report_of(script: dict, report_path: str = "", *, version: dict | None = None) -> str:
     """The text a script is written and checked against: its report, or for an item written without research that
     item's part of it (core/video/excerpt.py). Raises OSError when the report or the item is not there."""
+    if script.get("topic", {}).get("user_materials"):
+        from web.services.assistant_materials import source_of
+        from core.video import material_context
+        version = version or (store.get_version(script['id'], script['current_version']) if script.get('current_version') else None)
+        return source_of(script, material_context.get(script, version), prepare_inputs=False)
     if script.get("topic", {}).get("article"):
         from web.services.video_articles import source_of
         return source_of(script)["text"]
@@ -157,6 +163,8 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
                                  production=production_id, content_context=context)
     if topic.get("article"):
         store.update_script(script["id"], status="WRITING", production=topic.get("article_production", ""))
+    elif topic.get("user_materials"):
+        store.update_script(script["id"], status="WRITING", stage="读取用户材料")
     spawn(script["id"], started_by)
     return script
 
@@ -169,13 +177,40 @@ def spawn(script_id: str, started_by: str = "") -> None:
     ).start()
 
 
+#: What the adapt pipeline calls its steps -> the stage names the usage records use.
+STAGE_NAMES = {"拆事实": "facts", "定方案": "plan", "写稿": "write", "审校": "audit", "整篇复审": "audit",
+               "编辑稿事实复审": "audit", "修改": "revise", "主编打磨": "revise", "标题打磨": "revise"}
+
+
+@contextmanager
+def _binding(script_id: str):
+    """Attribute every model call made while this thread works on the script to it (threads start with no context)."""
+    attrs = {}
+    try:
+        script = store.get_script(script_id)
+        attrs = telemetry.script_attrs(script)
+        attrs["path"] = video_columns.get(get_settings().paths.config_dir, script["column_key"]).writer or ""
+    except Exception:  # noqa: BLE001 - attribution is optional; the work must not depend on it
+        logger.debug("no usage attribution for script %s", script_id, exc_info=True)
+    with telemetry.bind(**attrs):
+        yield
+
+
+def _announce(script_id: str, phases: "telemetry.Phases"):
+    """The pipeline's ``on_stage``: show the step on the script and start timing it."""
+    def on_stage(name: str) -> None:
+        store.update_script(script_id, stage=name)
+        phases.enter(name)
+    return on_stage
+
+
 def run(script_id: str, *, started_by: str = "", llm_config: Optional[LLMConfig] = None) -> str:
     """Research then write. Returns the final status (DRAFT or FAILED)."""
     if script_id in _active:
         return "RUNNING"
     _active.add(script_id)
     try:
-        with store.beating(store.touch_script, script_id):
+        with store.beating(store.touch_script, script_id), _binding(script_id):
             return _run(script_id, started_by, llm_config)
     except Exception as exc:  # noqa: BLE001 - a crash must not leave it in flight
         logger.exception("video script %s crashed", script_id)
@@ -201,6 +236,13 @@ def _run(script_id: str, started_by: str, llm_config: Optional[LLMConfig]) -> st
     script = store.get_script(script_id)
     column = video_columns.get(settings.paths.config_dir, script["column_key"])
     topic = script["topic"]
+
+    if topic.get("user_materials"):
+        from web.services import assistant_materials
+        if script["current_version"]:
+            store.update_script(script_id, status="DRAFT", stage=None, error=None)
+            return "DRAFT"
+        return assistant_materials.write(script, started_by=started_by, llm_config=llm_config)
 
     if topic.get("article"):
         from web.services import video_articles
@@ -271,10 +313,16 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
            llm_config: Optional[LLMConfig], failed_status: str = "FAILED", style=None) -> str:
     """Write a new version directly from ``report``. Returns DRAFT, or
     ``failed_status`` when writing failed (a rewrite keeps the script a DRAFT: its earlier versions still stand)."""
+    if topic.get("user_materials"):
+        from web.services import assistant_materials
+        return assistant_materials.write(store.get_script(script_id), started_by=started_by, llm_config=llm_config, style=style)
     if topic.get("article"):
         from web.services import video_articles
         return video_articles.write(store.get_script(script_id), started_by=started_by, llm_config=llm_config)
     settings = get_settings()
+    relative_report = os.path.relpath(os.path.join(workspace_dir(), report_path), workspace_dir())
+    report_info = report_meta.get(report_path) or report_meta.get(relative_report) or {}
+    report_images = copy.deepcopy(report_info.get('user_materials') or {})
     # error=None: a stale note (e.g. a false "interrupted") must not outlive the work.
     store.update_script(script_id, status="WRITING", report_path=report_path, error=None)
     script = content_guard.with_policy(store.get_script(script_id), settings.paths.jobs_dir)
@@ -282,6 +330,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     column = apply_script_context(column, script.get("content_context") or {})
     from core.video import episodes
     is_episode = episodes.enabled(topic)
+    tutorial = ((script.get('content_context') or {}).get('type') == 'tutorial'
+                or ((script.get('content_context') or {}).get('render') or {}).get('production_recipe') == 'mixed_tutorial')
     joint_input = is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
     dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
     guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
@@ -391,11 +441,12 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             question = re.search(r"(?m)^##\s+本期主问题[：:]\s*(.+)$", dossier_report)
             writing_topic = {key: value for key, value in topic.items() if key != "story"}
             writing_topic["title"] = question.group(1).strip()
+        greeting = episodes.greeting(topic, script.get("content_context") or {})
         written = writer.write(
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
             topic=writing_topic,
-            column_style=column.script_style + episodes.brief(topic) + (
+            column_style=column.script_style + episodes.brief(topic, tutorial=tutorial) + (
                 "\n本矩阵近期已经讲过以下选题，请从剩余素材选择新选题，标题、开场和正文都不要复述："
                 + "；".join(p["title"] for p in dedup_meta.get("peers", [])) if dedup_meta.get("peers") else ""),
             target_minutes=column.target_minutes,
@@ -404,7 +455,10 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             paragraph_units=tuple(column.paragraph_units),
             topic_fields=column.writer_topic_fields(),
             **({"original_material": material} if joint_input else {}),
+            greeting=greeting or None,
+            tutorial=tutorial,
         )
+        polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
         if is_episode:
             written.meta["episode"] = episodes.manifest(topic, written.sections)
         written.meta["input_kind"] = ("report_and_original_material" if joint_input and material
@@ -426,6 +480,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
 
     meta = {**written.meta, "report_path": report_path, "written_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "cell": video_columns.provenance(settings.paths.config_dir, column.key)}
+    if report_images:
+        meta['user_materials'] = report_images
     store.add_version(
         script_id,
         title=written.title,
@@ -497,13 +553,15 @@ def _audit_short(script_id: str, written, report: str, column, config, review_co
         base = replace(base, request_timeout=min(base.request_timeout, AUDIT_REQUEST_SECONDS),
                        timeout=min(base.timeout, total))
     client = LLMClient(base)
-    try:
-        checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues,
-                                          column_style=column.script_style, audience=column.audience,
-                                          style_severity=adapt_review.WARN)
-    except Exception as exc:  # noqa: BLE001 - an audit that crashes must not lose the draft
-        logger.exception("fact audit of script %s failed", script_id)
-        checks, note = _rules_only(rule_issues, None, written.sections), f"事实审计没有完成：{type(exc).__name__}: {exc}"
+    with telemetry.track("audit") as span:
+        try:
+            checks, note = video_audit.audit(client, written.sections, report, rule_issues=rule_issues,
+                                              column_style=column.script_style, audience=column.audience,
+                                              style_severity=adapt_review.WARN)
+        except Exception as exc:  # noqa: BLE001 - an audit that crashes must not lose the draft
+            logger.exception("fact audit of script %s failed", script_id)
+            checks, note = _rules_only(rule_issues, None, written.sections), f"事实审计没有完成：{type(exc).__name__}: {exc}"
+            span["status"] = "failed"
     checks = _current_copy_checks(checks, written.sections, written.meta)
     problems = [p for p in (written.meta.get("problems") or []) if not p.startswith(STALE_AUDIT_NOTES)]
     problems += [note] if note else []
@@ -511,7 +569,10 @@ def _audit_short(script_id: str, written, report: str, column, config, review_co
             "audit_prompt_version": video_audit.PROMPT_VERSION}
     # A failed fact audit provides no basis for model-driven repairs. Keep the
     # draft and pending marks; resume the audit instead of making blind edits.
-    return _revise_short(script_id, written, report, column, config, meta) if checks.get("model_ran") else meta
+    if not checks.get("model_ran"):
+        return meta
+    with telemetry.track("revise"):
+        return _revise_short(script_id, written, report, column, config, meta)
 
 
 #: Notes a finished audit replaces: the one saying the audits were still running, and the ones saying one failed.
@@ -728,18 +789,19 @@ def _adapt_version(script_id: str, *, report: str, report_path: str, citation_ch
     """Adapt the report in ``style`` and store the result as a new GENERATED version."""
     sheet_id = adapt_facts.sheet_id(report)
     cached = store.get_fact_sheet(sheet_id)
-    adapted, _ = adapt_pipeline.adapt(
-        report=report,
-        citation_check=citation_check,
-        topic=topic,
-        column=column,
-        style=style,
-        llm_config=llm_config,
-        review_llm_config=review_llm_config,
-        sheet=cached["sheet"] if cached else None,
-        on_sheet=lambda sheet: store.save_fact_sheet(sheet_id, report_path=report_path, sheet=sheet),
-        on_stage=lambda name: store.update_script(script_id, stage=name),
-    )
+    with telemetry.Phases(STAGE_NAMES) as phases:
+        adapted, _ = adapt_pipeline.adapt(
+            report=report,
+            citation_check=citation_check,
+            topic=topic,
+            column=column,
+            style=style,
+            llm_config=llm_config,
+            review_llm_config=review_llm_config,
+            sheet=cached["sheet"] if cached else None,
+            on_sheet=lambda sheet: store.save_fact_sheet(sheet_id, report_path=report_path, sheet=sheet),
+            on_stage=_announce(script_id, phases),
+        )
     paths = get_settings().paths
     content_guard.check(content_guard.with_policy(store.get_script(script_id), paths.jobs_dir), adapted.sections,
                         paths.config_dir, paths.jobs_dir)
@@ -776,19 +838,20 @@ def _make_plan(script_id: str, *, report: str, report_path: str, citation_check:
     """Steps ① and ② of the adaptation; the plan is stored to wait for the user."""
     sheet_id = adapt_facts.sheet_id(report)
     cached = store.get_fact_sheet(sheet_id)
-    planned, _ = adapt_pipeline.make_plan(
-        report=report,
-        citation_check=citation_check,
-        topic=topic,
-        column=column,
-        style=style,
-        llm_config=llm_config,
-        sheet=cached["sheet"] if cached else None,
-        on_sheet=lambda sheet: store.save_fact_sheet(sheet_id, report_path=report_path, sheet=sheet),
-        on_stage=lambda name: store.update_script(script_id, stage=name),
-        note=note,
-        previous=previous,
-    )
+    with telemetry.Phases(STAGE_NAMES) as phases:
+        planned, _ = adapt_pipeline.make_plan(
+            report=report,
+            citation_check=citation_check,
+            topic=topic,
+            column=column,
+            style=style,
+            llm_config=llm_config,
+            sheet=cached["sheet"] if cached else None,
+            on_sheet=lambda sheet: store.save_fact_sheet(sheet_id, report_path=report_path, sheet=sheet),
+            on_stage=_announce(script_id, phases),
+            note=note,
+            previous=previous,
+        )
     return video_plans.save(script_id, plan=planned.plan, problems=planned.problems, usage=planned.usage,
                             sheet_id=sheet_id, style=_style_keys(style), note=note,
                             previous_status=previous_status, created_by=started_by)
@@ -802,16 +865,17 @@ def _version_from_plan(script_id: str, row: dict, *, report: str, report_path: s
     cached = store.get_fact_sheet(row["sheet_id"])
     if cached is None:
         raise AdaptError("这份方案用的事实底稿不见了，请放弃方案后重新写稿")
-    adapted = adapt_pipeline.write_from_plan(
-        report=report,
-        planned=adapt_pipeline.Planned(plan=row["plan"], problems=row["problems"], usage=row["usage"]),
-        sheet=cached["sheet"],
-        column=column,
-        style=style,
-        llm_config=llm_config,
-        review_llm_config=review_llm_config,
-        on_stage=lambda name: store.update_script(script_id, stage=name),
-    )
+    with telemetry.Phases(STAGE_NAMES) as phases:
+        adapted = adapt_pipeline.write_from_plan(
+            report=report,
+            planned=adapt_pipeline.Planned(plan=row["plan"], problems=row["problems"], usage=row["usage"]),
+            sheet=cached["sheet"],
+            column=column,
+            style=style,
+            llm_config=llm_config,
+            review_llm_config=review_llm_config,
+            on_stage=_announce(script_id, phases),
+        )
     version = store.add_version(
         script_id,
         title=adapted.title,
@@ -861,7 +925,7 @@ def run_from_plan(script_id: str, *, started_by: str = "", llm_config: Optional[
     _active.add(script_id)
     row = None
     try:
-        with store.beating(store.touch_script, script_id):
+        with store.beating(store.touch_script, script_id), _binding(script_id):
             script = store.get_script(script_id)
             row = video_plans.open_plan(script_id)
             if row is None or row["state"] != "CONFIRMED":
@@ -902,7 +966,7 @@ def run_redo_plan(script_id: str, plan_id: str, note: str, *, started_by: str = 
         return "RUNNING"
     _active.add(script_id)
     try:
-        with store.beating(store.touch_script, script_id):
+        with store.beating(store.touch_script, script_id), _binding(script_id):
             script = store.get_script(script_id)
             row = video_plans.get(plan_id)
             column = video_columns.get(get_settings().paths.config_dir, script["column_key"])
@@ -944,14 +1008,15 @@ def restyle(script_id: str, *, depth: Optional[str] = None, tone: Optional[str] 
     script = store.get_script(script_id)
     if script["status"] not in ("DRAFT", "APPROVED") or script_id in _active:
         raise RestyleError(f"文稿当前是 {script['status']}，不能换风格")
-    if not script["report_path"]:
+    if not script["report_path"] and not script['topic'].get('user_materials'):
         raise RestyleError("这篇文稿没有研究报告，不能换风格")
-    try:
-        report_of(script)
-    except OSError as exc:
-        raise RestyleError(f"无法使用研究报告 {script['report_path']}：{exc}") from exc
+    if not script['topic'].get('user_materials'):
+        try:
+            report_of(script)
+        except OSError as exc:
+            raise RestyleError(f"无法使用研究报告 {script['report_path']}：{exc}") from exc
     column = video_columns.get(settings.paths.config_dir, script["column_key"])
-    if column.writer != "adapt":
+    if column.writer != "adapt" and not script['topic'].get('user_materials'):
         raise RestyleError(f"配方 {column.key} 一次写成（writing.pipeline: single），没有换风格这一步；"
                            "要换写法就改配方的 writing.style 后重新生成")
     style = video_styles.resolve(settings.paths.config_dir, column, depth, tone)  # StyleError → 422
@@ -970,12 +1035,13 @@ def rewrite(script_id: str, *, started_by: str = "") -> dict:
     script = store.get_script(script_id)
     if script["status"] not in ("DRAFT", "APPROVED", "FAILED") or script_id in _active:
         raise RestyleError(f"文稿当前是 {script['status']}，不能重写")
-    if not script["report_path"] and not script["topic"].get("article"):
+    if not script["report_path"] and not script["topic"].get("article") and not script["topic"].get("user_materials"):
         raise RestyleError("这篇文稿没有研究报告，不能重写")
-    try:
-        report_of(script)
-    except OSError as exc:
-        raise RestyleError(f"无法使用研究报告 {script['report_path']}：{exc}") from exc
+    if not script['topic'].get('user_materials'):
+        try:
+            report_of(script)
+        except OSError as exc:
+            raise RestyleError(f"无法使用研究报告 {script['report_path']}：{exc}") from exc
     store.update_script(script_id, status="WRITING", stage="排队", error=None, heartbeat_at=time.time())
     threading.Thread(target=run_rewrite, args=(script_id,),
                      kwargs={"started_by": started_by, "previous_status": script["status"]},
@@ -994,14 +1060,14 @@ def run_rewrite(script_id: str, *, started_by: str = "", previous_status: str = 
     _active.add(script_id)
     failed = previous_status
     try:
-        with store.beating(store.touch_script, script_id):
+        with store.beating(store.touch_script, script_id), _binding(script_id):
             settings = get_settings()
             script = store.get_script(script_id)
             column = video_columns.get(settings.paths.config_dir, script["column_key"])
-            report = report_of(script)
+            report = '' if script['topic'].get('user_materials') else report_of(script)
             citation_check = (report_meta.get(script["report_path"]) or {}).get("citation_check")
             style = None
-            if column.writer == "adapt" and script["current_version"]:
+            if (column.writer == "adapt" or script['topic'].get('user_materials')) and script["current_version"]:
                 meta = (store.get_version(script_id, script["current_version"]) or {}).get("meta") or {}
                 style = _style_of(meta, column)  # keep the style the current version was written in
             store.update_script(script_id, stage=None)
@@ -1023,11 +1089,14 @@ def run_restyle(script_id: str, depth: str, tone: str, *, started_by: str = "",
         return "RUNNING"
     _active.add(script_id)
     try:
-        with store.beating(store.touch_script, script_id):
+        with store.beating(store.touch_script, script_id), _binding(script_id):
             settings = get_settings()
             script = store.get_script(script_id)
             column = video_columns.get(settings.paths.config_dir, script["column_key"])
             style = video_styles.resolve(settings.paths.config_dir, column, depth, tone)
+            if script['topic'].get('user_materials'):
+                from web.services import assistant_materials
+                return assistant_materials.write(script, started_by=started_by, llm_config=llm_config, style=style)
             report = report_of(script)
             citation_check = (report_meta.get(script["report_path"]) or {}).get("citation_check")
             config, review_config = _llm_configs(llm_config, column)
@@ -1147,6 +1216,10 @@ def save_edit(script_id: str, *, title: str, sections: list[dict], edited_by: st
         meta = {"problems": writer.lint(clean),
                 "checks": _rules_only(issues, plan, clean, model_checks_stale=True)}
     from core.video import episodes
+    if base_meta.get('user_materials'):
+        meta.update(input_kind='user_materials', user_materials=base_meta['user_materials'])
+        if base_meta.get('style'):
+            meta['style'] = base_meta['style']
     if episodes.enabled(script.get("topic") or {}):
         meta["episode"] = episodes.manifest(script["topic"], clean)
     budgets = None

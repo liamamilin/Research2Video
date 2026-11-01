@@ -1,0 +1,347 @@
+{
+  "script_id": "5f5b5633c4ee45778b4e7bfc602fce96",
+  "version": 1,
+  "title": "AI 开源发现｜2026年11月01日",
+  "sections": [
+    {
+      "title": "本期导读",
+      "paragraphs": [
+        {
+          "text": "大家好，欢迎收看AI 开源发现。这一期用一个实际任务，把 jq 放进工作流里：从一份任务清单中筛出已经完成的任务，并把结果保存成新的 JSON 数组。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "opening"
+    },
+    {
+      "title": "准备输入",
+      "paragraphs": [
+        {
+          "text": "先看输入。本次使用本机已有的 jq，版本是 jq-1.7.1-apple。文件 tasks.json 是一个 JSON 数组，截图里一共有三条任务，每条都有编号、任务名和完成标记三个字段。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "三条任务分别是：T01 整理资料，done 为 true；T02 生成草稿，done 为 false；T03 检查输出，done 为 true。done 表示这条任务是否完成。我们的目标就是保留完成的任务，输出仍然是一个 JSON 数组，方便后面的脚本继续处理。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "执行筛选",
+      "paragraphs": [
+        {
+          "text": "在 tasks.json 所在目录，实际执行的命令是「jq '[.[]|select(.done)]' tasks.json > done.json」。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "这条命令里，点方括号会取出数组中的每个对象；select 后面的 done 只保留 done 为 true 的对象；外层方括号再把筛选结果重新收成一个数组；最后的大于号把结果写进 done.json。命令执行成功后，接着用「jq . done.json」打开查看结果。本次不需要安装工具，也不需要模型参与筛选。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "查看结果",
+      "paragraphs": [
+        {
+          "text": "done.json 是刚才命令真实产生的文件。里面只留下 T01 整理资料和 T03 检查输出，这两条任务的 done 都是 true。编号、任务名和完成标记都按原内容保留。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        },
+        {
+          "text": "输入里的 T02 生成草稿，因为 done 为 false，没有进入输出。输入三条，输出两条，变化只发生在筛掉了未完成任务。现在画面上并排对照的是实际输入和实际输出截图：左边三条任务，右边只保留已完成的两条。筛选结果仍然是数组，可以继续交给后续脚本处理。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "item"
+    },
+    {
+      "title": "本期回顾",
+      "paragraphs": [
+        {
+          "text": "准备任务清单，执行 jq 筛选，得到已完成任务文件，这次任务完成。我们下期见。",
+          "citations": [],
+          "evidence": "UNCITED",
+          "note": null
+        }
+      ],
+      "episode_role": "closing"
+    }
+  ],
+  "length_check": {
+    "spoken_length": 524,
+    "estimated_seconds": 121,
+    "segments": 26,
+    "units_per_second": 4.35,
+    "voice": "voxcpm_anchor",
+    "target_minutes": null,
+    "budget": null,
+    "ratio": null,
+    "status": null,
+    "tolerance": 0.15,
+    "sections": [
+      {
+        "title": "本期导读",
+        "spoken_length": 59
+      },
+      {
+        "title": "准备输入",
+        "spoken_length": 143
+      },
+      {
+        "title": "执行筛选",
+        "spoken_length": 126
+      },
+      {
+        "title": "查看结果",
+        "spoken_length": 165
+      },
+      {
+        "title": "本期回顾",
+        "spoken_length": 31
+      }
+    ],
+    "dropped_citations": 0,
+    "duration_policy": "content"
+  },
+  "edit_type": "GENERATED",
+  "meta": {
+    "attempts": 1,
+    "usage": {
+      "requests": 1,
+      "prompt_tokens": 1521,
+      "completion_tokens": 2535,
+      "total_tokens": 4056,
+      "cache_read_tokens": 0,
+      "cache_reported_requests": 1,
+      "reasoning_tokens": 1822,
+      "cost_usd": 0.00174915,
+      "cost_reported_requests": 1
+    },
+    "problems": [],
+    "model": "deepseek-v4.1-flash",
+    "model_switches": [],
+    "duration_seconds": 30.145,
+    "generation": "goal_first",
+    "prompt_version": 5,
+    "creative_direction": "栏目：AI 开源发现。持续交付：帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点。\n每项独立内容可围绕 问题 → 机制 → 例子 → 结论 组织讲述，按素材自然展开。\n以下创作方向分别用于各项独立内容，其中的主例子和任务线在该项内部展开，各项之间由整期简报与转场衔接，不各自重新开场；同一问题的解释章节沿用共同主例子。\n单项内容创作方向：每项内容介绍一个值得观众认识的项目，尽早把它放进一个具体任务。沿同一份输入讲清项目处理哪一环、输出是什么，以及最有辨识度的动作或能力。参数、原理和相关项目各自帮助解释这条任务线中的一个作用，说明后让该项目继续推进；材料里的输入与输出例子成为讲述的抓手。该项结尾回到项目带来的任务结果与适用场合，让观众记住这个项目能接在自己工作中的哪个位置。项目热度与开发背景作为补充，作者自主决定切入点和展开方式。\n\n## 内容组织方式：完整教程\n本份报告制作一条视频，按实际任务的准备、操作、结果等阶段分章，每个阶段一个 section。章节就是步骤导航，title 为不带编号的短标题；各步骤承接同一份输入与输出。开场与收尾各一个 section，episode_role 使用 opening、item、closing。按实际内容展开，沿用上游给出的命令和结果。\n整期总标题使用「AI 开源发现｜2026年11月01日」，不要把第一条或最显眼的事件当作整期总标题。具体事件使用各段的内容标题。日期是展示信息，不必写进口播，不要求讲述者念日期。",
+    "trusted_urls": 1,
+    "polish": {
+      "version": 2,
+      "findings": [],
+      "changes": [],
+      "rejected": [],
+      "usage": {
+        "requests": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      }
+    },
+    "episode": {
+      "mode": "episode",
+      "report_path": "output/radar/2026-11-01_ai_opensource_radar.md",
+      "publication": {
+        "scheme": "column-date/v1",
+        "title": "AI 开源发现｜2026年11月01日",
+        "label": "AI 开源发现",
+        "issue_date": "2026-11-01",
+        "subject_subtitle": false
+      },
+      "source_items": [],
+      "items": [
+        {
+          "index": 1,
+          "title": "准备输入",
+          "chapter_index": 1,
+          "paragraphs": 2
+        },
+        {
+          "index": 2,
+          "title": "执行筛选",
+          "chapter_index": 2,
+          "paragraphs": 2
+        },
+        {
+          "index": 3,
+          "title": "查看结果",
+          "chapter_index": 3,
+          "paragraphs": 2
+        }
+      ]
+    },
+    "input_kind": "report",
+    "research_dossier": {
+      "version": 4,
+      "selection": "report",
+      "report_sha256": "098544057850ebefe7cc20a4010fc5a8a7ab2d0468e0c8d0c77890598df0c216",
+      "material_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "report_chars": 953,
+      "material_chars": 0
+    },
+    "report_path": "output/radar/2026-11-01_ai_opensource_radar.md",
+    "written_at": "2026-11-01T14:56:12+0800",
+    "cell": {
+      "recipe": "report_digest",
+      "sha256": "ef71633b436a3ad14d20bcb0d8a8b01954e7850656d2486a15a482eaaa6be803",
+      "cell": "ai-developer-digest-long",
+      "status": "experimental",
+      "parts": {
+        "domain": {
+          "key": "ai"
+        },
+        "type": {
+          "key": "digest"
+        },
+        "format": {
+          "key": "long"
+        },
+        "audience": {
+          "key": "developer"
+        }
+      },
+      "resolved_sha256": "3477649dd77367402308e25afbc61b573323187b5a56bfe11a08b331c84369f0",
+      "uses": {
+        "audience": {
+          "kind": "audience",
+          "name": "developer",
+          "sha256": "0ce139d005d64a51134df6823eae3f6fc7c4ae3ddc82a54a4cac6b05f27ba333"
+        },
+        "output": {
+          "kind": "part",
+          "name": "motion",
+          "sha256": "c5411c48dbafc63c2e964104eb0cde3ac97ef0591d54eec810e1453947a2cc22"
+        },
+        "packaging": {
+          "kind": "part",
+          "name": "common",
+          "sha256": "670e00b793643e1a69a364ab421c7d52f8b24123392559f2c1e2c5861c1c78b9"
+        }
+      }
+    },
+    "user_materials": {
+      "ids": [
+        "a7e4bd354de24599a563748b8d1b995b",
+        "b714c8aa91834c5aa5eb781d1b46baba"
+      ],
+      "owner": "matrix:ai_media",
+      "mode": "adapt",
+      "revision": 1,
+      "title": "jq 实际任务筛选",
+      "audience": "开发者和工具使用者",
+      "goal": "用真实任务清单串起输入截图、jq 筛选代码、真实输出截图和同屏对照，沿用栏目问候、三步转场及品牌包装。"
+    },
+    "checks": {
+      "version": 2,
+      "mode": "on_request",
+      "issues": [],
+      "quiz": {
+        "items": [],
+        "score": null
+      },
+      "newcomer": null,
+      "core_message_match": null,
+      "core_message_note": "",
+      "model_ran": false,
+      "audits_complete": false,
+      "pending_review": false,
+      "rounds": 0,
+      "deletions": [],
+      "initial": [],
+      "summary": {
+        "serious": 0,
+        "must": 0,
+        "warn": 0,
+        "rule_must": 0,
+        "questions": 0,
+        "lost": 0,
+        "quiz_score": null,
+        "low_scores": [],
+        "by_audit": {
+          "fact": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "comprehension": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          },
+          "communication": {
+            "serious": 0,
+            "must": 0,
+            "warn": 0
+          }
+        },
+        "passed": false,
+        "rank": 0
+      }
+    },
+    "content_context": {
+      "column": "ai_opensource",
+      "column_name": "AI 开源发现",
+      "type": "explainer",
+      "matrix": "ai_media",
+      "source_matrix": "ai_media",
+      "job": "ai_media/daily_opensource_radar",
+      "revision": "721e78dbde65665a5c953c87504656efc8c0a7d2d89cbf2951f877fe0f01e489",
+      "audience": "想把开源工具用于实际工作的开发者和 AI 高频使用者",
+      "promise": "帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点",
+      "notes": "每项内容介绍一个值得观众认识的项目，尽早把它放进一个具体任务。沿同一份输入讲清项目处理哪一环、输出是什么，以及最有辨识度的动作或能力。参数、原理和相关项目各自帮助解释这条任务线中的一个作用，说明后让该项目继续推进；材料里的输入与输出例子成为讲述的抓手。该项结尾回到项目带来的任务结果与适用场合，让观众记住这个项目能接在自己工作中的哪个位置。项目热度与开发背景作为补充，作者自主决定切入点和展开方式。",
+      "content_mode": "episode",
+      "greeting": "",
+      "type_definition": {
+        "key": "explainer",
+        "name": "解读",
+        "promise": "理解事件或概念背后的原因",
+        "structure": [
+          "问题",
+          "机制",
+          "例子",
+          "结论"
+        ],
+        "preferred_visuals": [
+          "图表",
+          "流程",
+          "截图",
+          "解释卡"
+        ]
+      },
+      "render_inheritance": "source_compatible",
+      "render": {
+        "production_recipe": "mixed_tutorial",
+        "packaging": {
+          "label": "AI 开源发现",
+          "preset": "common"
+        }
+      },
+      "presentation": {
+        "strategy": "用项目页面或任务示意建立对象感，让同一份文件、代码或任务卡从输入经过项目处理走到输出，主项目持续处于这条关系中。材料里的输入与输出例子值得停下来展示，参数与原理说明贴在它实际改变的那一步。相关工具作为流程相应位置的简短补充，随后回到主项目；结尾用同一任务的结果收束。Stars、下载量、发布时间和团队背景作为辅助信息。",
+        "preferred_visuals": [
+          "项目截图",
+          "产品画面",
+          "输入输出对照",
+          "任务流程",
+          "重点卡"
+        ]
+      }
+    }
+  },
+  "created_by": "autopilot",
+  "created_at": "2026-11-01T14:56:12+0800"
+}

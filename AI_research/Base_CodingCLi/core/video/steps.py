@@ -65,7 +65,13 @@ def derive(script: dict, version: Optional[dict], renders: list[dict], *, resear
     failed_before_report = status == "FAILED" and not has_report and not has_version
     error = script.get("error") or ""
 
-    if topic.get("article"):
+    if topic.get("user_materials"):
+        if topic['user_materials']['mode'] != 'research':
+            research = _step('research', 'SKIPPED', '直接使用用户提供的材料')
+        else:
+            research = _step('research', 'DONE' if has_report else 'FAILED' if failed_before_report else
+                             'RUNNING' if stage == '补充研究' else 'PENDING', error if failed_before_report else '')
+    elif topic.get("article"):
         research = _step("research", "SKIPPED", "使用手动导入文章，未调研")
     elif topic.get("from_report"):
         research = _step("research", "SKIPPED", "用已有的研究报告，没有再调研")
@@ -86,7 +92,7 @@ def derive(script: dict, version: Optional[dict], renders: list[dict], *, resear
         write = _step("write", "RUNNING", stage or "")
     elif has_version:
         write = _step("write", "DONE", f"v{script['current_version']}")
-    elif status == "FAILED" and (has_report or topic.get("article")):
+    elif status == "FAILED" and (has_report or topic.get("article") or topic.get("user_materials")):
         write = _step("write", "FAILED", error)
     else:
         write = _step("write", "PENDING")

@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "method": "existing service_maintenance.perform + restart_gate",
+  "old_pid": 34229,
+  "new_pid": 16410,
+  "health": "ok",
+  "idle_before_reload": true,
+  "preserved_records": {
+    "scripts": 361,
+    "renders": 371
+  },
+  "existing_script_and_render_records_unchanged": true,
+  "source_sha256": {
+    "web/services/video_render.py": "ce62dea69fe5829644dc3d672f18ff8a17b9ef58867dd7a3372087c7a79030f7",
+    "core/video/visual_materials.py": "fd2dcc8b4f9047de148708e86f70dc024f002b4d082430ccf53e6ca91845fe99",
+    "config/content_columns/ai_opensource.yaml": "721e78dbde65665a5c953c87504656efc8c0a7d2d89cbf2951f877fe0f01e489"
+  },
+  "maintenance_receipt": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/maintenance/f6f98d3963eb4180a03ee085f5acb595.json"
+}

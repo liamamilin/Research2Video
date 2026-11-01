@@ -86,6 +86,30 @@ def test_context_columns_keep_current_comparison_not_just_news(setup, monkeypatc
     assert "当前背景" in supply.collect(engine, job, profile)[0][0].excerpts[0]
 
 
+@pytest.mark.parametrize("status,budget,expected", [("deferred", 100000, 1), ("deferred", 1, 0), ("selected", 100000, 0)])
+def test_unchanged_sources_reoffer_unused_material_without_calling_it_new(setup, monkeypatch, status, budget, expected):
+    engine, job, profile, storage = setup
+    profile['retry_items'] = 3
+    now = [100000.0]
+    monkeypatch.setattr(supply.time, 'time', lambda: now[0])
+    monkeypatch.setattr(supply, 'read_page', lambda *a, **k: [item()])
+    pending = supply.collect(engine, job, profile)[2]
+    material_id = pending['candidates'][0]['id']
+    report = '<!-- material-use: ' + json.dumps({status: [material_id]}) + ' -->'
+    storage.commit(pending, report, 'first.md')
+    now[0] += 90000
+    profile['material_chars'] = budget
+    got, _, pending, receipt = supply.collect(engine, job, profile)
+    assert not any(row['changed'] for row in receipt['sources'].values())
+    assert len(got) == receipt['retry_items'] == expected
+    assert receipt['quiet'] is (not expected)
+    if expected:
+        assert pending['candidates'][0]['id'] == material_id
+        assert '此前未采用' in supply.material_block(got, receipt)
+        assert '原发布日期' in supply.material_block(got, receipt)
+        assert '未记录为已采用' in got[0].to_markdown()
+
+
 def test_full_length_section_is_not_dropped_by_its_markdown_header(setup, monkeypatch):
     engine, job, profile, _ = setup
     job["sources"] = ["rss:https://source.example/feed"]
@@ -109,6 +133,29 @@ def test_one_failed_source_does_not_block_other_and_all_fail_is_not_quiet_day(se
     monkeypatch.setattr(supply, "read_page", fail)
     with pytest.raises(SourcesUnavailableError):
         supply.collect(engine, job, profile)
+
+
+@pytest.mark.parametrize('adopted', [False, True])
+def test_unavailable_sources_can_still_deliver_eligible_deferred_material(setup, monkeypatch, adopted):
+    engine, job, profile, storage = setup
+    profile['retry_items'] = 3
+    now = [100000.0]
+    monkeypatch.setattr(supply.time, 'time', lambda: now[0])
+    monkeypatch.setattr(supply, 'read_page', lambda *a, **k: [item()])
+    pending = supply.collect(engine, job, profile)[2]
+    key = pending['candidates'][0]['id']
+    status = 'selected' if adopted else 'deferred'
+    storage.commit(pending, '<!-- material-use: ' + json.dumps({status: [key]}) + ' -->', 'first.md')
+    now[0] += 90000
+    monkeypatch.setattr(supply, 'read_page', lambda *a, **k: (_ for _ in ()).throw(OSError('offline')))
+    if adopted:
+        with pytest.raises(SourcesUnavailableError):
+            supply.collect(engine, job, profile)
+    else:
+        rows, _, _, receipt = supply.collect(engine, job, profile)
+        assert len(rows) == receipt['retry_items'] == 1 and not receipt['quiet']
+        assert all(row['scanned'] == 0 and row['error'] for row in receipt['sources'].values())
+        assert '原发布日期' in supply.material_block(rows, receipt)
 
 
 def test_cancellation_keeps_baseline(setup, monkeypatch):

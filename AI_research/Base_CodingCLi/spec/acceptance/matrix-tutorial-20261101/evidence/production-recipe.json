@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "catalog_sha256": "06410f1380cf8ecaee34d7278180c45040bb4eea212382bbdf745cb95822251f",
+  "recipe": {
+    "version": 2,
+    "id": "mixed_tutorial",
+    "name": "混合步骤",
+    "description": "沿着操作过程，组合界面截图、步骤聚焦、分支流程和结果。",
+    "topics": [
+      "教程",
+      "方法实践",
+      "流程讲解"
+    ],
+    "recommended_forms": [
+      "F12",
+      "F16",
+      "F04"
+    ],
+    "defaults": {
+      "production_mode": "fast",
+      "visual_style": "editorial_light",
+      "video_form": "information_cards",
+      "visual_storytelling": true,
+      "duration_mode": "content",
+      "creative_intent": {
+        "audience": "当前栏目面向的观众",
+        "purpose": "沿着操作过程，组合界面截图、步骤聚焦、分支流程和结果。",
+        "tone": "清楚、自然",
+        "focus": "沿同一份输入串起准备、实际操作和输出结果。已有输入或结果截图优先展示原图并随旁白聚焦；文件名只作对象标签，实际命令或代码用逐行强调。一步的结果保留到下一步需要它时，再回到这份任务的最终结果。沿用讲稿已有问候与告别，画面只承担开场、步骤切换和回顾。"
+      },
+      "packaging": {
+        "preset": "common",
+        "label": "混合步骤",
+        "intro": {
+          "seconds": 1.0
+        },
+        "outro": {
+          "seconds": 1.5
+        },
+        "sound": {
+          "enabled": false
+        }
+      },
+      "background_music": {
+        "enabled": false
+      }
+    },
+    "music": {
+      "mode": "none",
+      "suggested_forms": [],
+      "description": "默认保留清楚的旁白，不添加背景音乐。"
+    },
+    "material_guidance": "使用已有输入、实际操作代码和结果截图，按讲稿段落关联同一任务；截图区域聚焦、代码强调、步骤导航与通用片头片尾复用现有制作链路。"
+  },
+  "selection": {
+    "video_form": "information_cards",
+    "duration_mode": "content",
+    "target_duration_sec": 60,
+    "voice_id": "zf_xiaoxiao",
+    "video_speed": 1.25,
+    "creative_intent": {
+      "audience": "想把开源工具用于实际工作的开发者和 AI 高频使用者",
+      "purpose": "栏目：AI 开源发现。讲解目标：帮观众理解一个开源项目解决什么问题，以及它在实际任务中的位置与特点。\n优先按段落组合项目截图、产品画面、输入输出对照、任务流程、重点卡，普通说明保持简洁，重点随旁白展开。\n画面讲述方向：用项目页面或任务示意建立对象感，让同一份文件、代码或任务卡从输入经过项目处理走到输出，主项目持续处于这条关系中。材料里的输入与输出例子值得停下来展示，参数与原理说明贴在它实际改变的那一步。相关工具作为流程相应位置的简短补充，随后回到主项目；结尾用同一任务的结果收束。Stars、下载量、发布时间和团队背景作为辅助信息。",
+      "tone": "清楚、自然",
+      "focus": "沿同一份输入串起准备、实际操作和输出结果。已有输入或结果截图优先展示原图并随旁白聚焦；文件名只作对象标签，实际命令或代码用逐行强调。一步的结果保留到下一步需要它时，再回到这份任务的最终结果。沿用讲稿已有问候与告别，画面只承担开场、步骤切换和回顾。"
+    },
+    "background_music": {
+      "enabled": false,
+      "level_db": -18.0,
+      "ducking": true,
+      "loop": true,
+      "fade_seconds": 1.2
+    }
+  },
+  "music": {
+    "mode": "none",
+    "background_music_generated": false
+  },
+  "packaging_sha256": "5cabeb3669c0f98b49b35d91a6965edb4a5e013eb0efe684f15496acedb2d095",
+  "sha256": "a9fdbdead5fb6c121fca344ed990d92fd9727761d3e05b232a5bf4a7de61fed1"
+}

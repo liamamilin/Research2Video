@@ -1,0 +1,38 @@
+{
+  "production_reader": "core.source_supply.read_page",
+  "configured_content_api_used": false,
+  "new_research_or_writer_started": false,
+  "reads": [
+    {
+      "name": "chatgpt_release_notes",
+      "url": "https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+      "items": 0,
+      "error": "页面未成功打开（HTTP 403），请检查来源网址",
+      "paid_content_reader": false
+    },
+    {
+      "name": "chatgpt_learn_videos",
+      "url": "https://learn.chatgpt.com/videos",
+      "items": 4,
+      "titles": [
+        "WebMCP · Aug 25, 2026 Build agent-ready sites with WebMCP",
+        "Computer History · Aug 13, 2026 Computer History in ChatGPT",
+        "Visualizations · Aug 24, 2026 Make information visual with ChatGPT"
+      ],
+      "error": "",
+      "paid_content_reader": false
+    },
+    {
+      "name": "chatgpt_learn_updates",
+      "url": "https://learn.chatgpt.com/docs/whats-new.md",
+      "items": 4,
+      "titles": [
+        "What's new",
+        "What's new · Text your dot",
+        "What's new · Use GPT-6.1 Terra for visual reasoning and computer use"
+      ],
+      "error": "",
+      "paid_content_reader": false
+    }
+  ]
+}

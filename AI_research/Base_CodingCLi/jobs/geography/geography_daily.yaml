@@ -19,6 +19,11 @@ sources:
 - source:geographical
 - source:unesco_wh
 - source:usgs_quakes
+- source:climate_gov
+- source:gdacs
+- source:cma_news
+- source:nhc_atlantic
+- source:carbon_brief
 prompt: '为「一个地方怎样运转」整理研究底稿。从现有来源选择一项可以沿地方活动或设施使用展开的具体空间问题，保留起点、路径、地点之间的关系、参与者行动、尺度和过程。写清人和事物在哪里相遇，道路、土地、水流或设施怎样接起来，生活怎样因此改变。机构新闻、政策和人物反应解释它们在当地改变了哪一步，背景与当前主问题相连。
 
 

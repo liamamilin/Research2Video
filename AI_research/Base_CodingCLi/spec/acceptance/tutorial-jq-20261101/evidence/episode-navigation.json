@@ -1,0 +1,85 @@
+{
+  "mode": "episode",
+  "items": [
+    {
+      "index": 1,
+      "title": "准备输入",
+      "chapter_indexes": [
+        1
+      ],
+      "start_frame": 329,
+      "end_frame": 1210
+    },
+    {
+      "index": 2,
+      "title": "执行筛选",
+      "chapter_indexes": [
+        2
+      ],
+      "start_frame": 1210,
+      "end_frame": 2017
+    },
+    {
+      "index": 3,
+      "title": "查看结果",
+      "chapter_indexes": [
+        3
+      ],
+      "start_frame": 2017,
+      "end_frame": 2967
+    }
+  ],
+  "total_frames": 3160,
+  "agenda": {
+    "start_frame": 0,
+    "end_frame": 329,
+    "highlights": null
+  },
+  "item_cards": [
+    {
+      "index": 1,
+      "start_frame": 329,
+      "end_frame": 383
+    },
+    {
+      "index": 2,
+      "start_frame": 1210,
+      "end_frame": 1264
+    },
+    {
+      "index": 3,
+      "start_frame": 2017,
+      "end_frame": 2071
+    }
+  ],
+  "covered_frames": [
+    [
+      0,
+      329
+    ],
+    [
+      329,
+      383
+    ],
+    [
+      1210,
+      1264
+    ],
+    [
+      2017,
+      2071
+    ]
+  ],
+  "agenda_highlight": "static list",
+  "fps": 30,
+  "timing": "measured narration chapters",
+  "footer": [
+    0,
+    1024,
+    1920,
+    56
+  ],
+  "audio": "stream copy",
+  "source_preserved": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/4ac177be-44a0-46ac-9289-8adee3a83667/attempts/1/g2-run/artifacts/episode-navigation/original-content.mp4",
+  "video_sha256": "d5f2e9e9b1405c187af07792010dffb08dcc716a9d8083b352d4a6a25fb31037"
+}

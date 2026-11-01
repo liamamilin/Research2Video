@@ -23,6 +23,15 @@ sources:
 - source:wb_gdp_growth
 - source:wb_inflation
 - source:wb_unemployment
+- source:stats_cn_release
+- source:pbc_news
+- source:bls_latest
+- source:ny_fed_liberty
+- source:boe_news
+- source:boj_news
+- source:mof_cn
+- source:economist_world
+- source:marginal_revolution
 prompt: '为「一条经济机制」整理研究底稿。选择一个可以沿过程讲深的问题，尽早明确要追踪的同一笔钱、同一张报价或同一次交易，让它成为持续主例子。
 
 

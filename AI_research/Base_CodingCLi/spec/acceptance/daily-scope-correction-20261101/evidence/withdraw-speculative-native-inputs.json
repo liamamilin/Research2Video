@@ -1,0 +1,97 @@
+{
+  "result": "PASS: withdrawal contract only; not semantic visual quality acceptance",
+  "current_cases": 2,
+  "other_existing_cases": 6,
+  "new_renders": 0,
+  "new_scripts": 0,
+  "cases": [
+    {
+      "script_id": "0868102204dc4f2e954c30612b1eec39",
+      "title": "ChatGPT 产品动态与热点｜2026年11月01日",
+      "column": "chatgpt_t09_updates",
+      "scope": "read-only authored input contract; no image acquisition, model call or new video",
+      "needs": 14,
+      "inferred_visual_subjects": 0,
+      "title_change_preserves_matching_requirements": true,
+      "authored_input_unchanged": true,
+      "version_sha256": "3b0cac9ef8a46c0de5ed0220049cf1a4fa796fca0de2492fa0f6d8cb0aa58788"
+    },
+    {
+      "script_id": "26d755b67a5646ca975093ff9ecbc843",
+      "title": "快讯补充｜10月29–30日的三条更新",
+      "column": "ai_flash",
+      "scope": "read-only authored input contract; no image acquisition, model call or new video",
+      "needs": 13,
+      "inferred_visual_subjects": 0,
+      "title_change_preserves_matching_requirements": true,
+      "authored_input_unchanged": true,
+      "version_sha256": "588734f91dac09c006ee325418716be17e7736f79a921118ff2a401e05b3dfa9"
+    },
+    {
+      "script_id": "56b6c5e2f36f41f8a62bdb4f6f8e7484",
+      "title": "ChatGPT 订阅与支付｜2026年11月01日",
+      "column": "chatgpt_t07_subscription",
+      "scope": "read-only authored input contract; no image acquisition, model call or new video",
+      "needs": 37,
+      "inferred_visual_subjects": 0,
+      "title_change_preserves_matching_requirements": true,
+      "authored_input_unchanged": true,
+      "version_sha256": "8a47308a481cf589f656fcaf7c265fb92ce25d04d0a8ef5c984371794f96ef6e"
+    },
+    {
+      "script_id": "ea95b2042bb9457eb6bbc1e0ff43ce2d",
+      "title": "今日快讯｜2026年11月01日",
+      "column": "ai_flash",
+      "scope": "read-only authored input contract; no image acquisition, model call or new video",
+      "needs": 20,
+      "inferred_visual_subjects": 0,
+      "title_change_preserves_matching_requirements": true,
+      "authored_input_unchanged": true,
+      "version_sha256": "0b78940075ac5f272fa2fd83f1b30f85a082f00b9227a5a22b5de60a7fda0e5f"
+    },
+    {
+      "script_id": "7a70793b2e0b4832a9b9bfc4cd7b1829",
+      "title": "ChatGPT 产品动态与热点｜2026年10月31日",
+      "column": "chatgpt_t09_updates",
+      "scope": "read-only authored input contract; no image acquisition, model call or new video",
+      "needs": 17,
+      "inferred_visual_subjects": 0,
+      "title_change_preserves_matching_requirements": true,
+      "authored_input_unchanged": true,
+      "version_sha256": "ae01d01a6c4f6d82a33f9fd8dab4419cf0728d68fc276f98d142a85b594608a0"
+    },
+    {
+      "script_id": "997b1426d00e4e36b5ed0844403dd48d",
+      "title": "ChatGPT 使用问题与避坑｜2026年10月31日",
+      "column": "chatgpt_t08_troubleshooting",
+      "scope": "read-only authored input contract; no image acquisition, model call or new video",
+      "needs": 18,
+      "inferred_visual_subjects": 0,
+      "title_change_preserves_matching_requirements": true,
+      "authored_input_unchanged": true,
+      "version_sha256": "9e1a5102e7d8d0f7d44080e7b0f45f089cfc5e4f198e3d67bb21a8bfbb9d18b6"
+    },
+    {
+      "script_id": "6133ac9cfe004d12a8485e52fba1f690",
+      "title": "ChatGPT 套餐与付费价值｜2026年10月31日",
+      "column": "chatgpt_t06_value",
+      "scope": "read-only authored input contract; no image acquisition, model call or new video",
+      "needs": 26,
+      "inferred_visual_subjects": 0,
+      "title_change_preserves_matching_requirements": true,
+      "authored_input_unchanged": true,
+      "version_sha256": "01901515df6d05738d6841650bf52e255bd38879d3e3d70e33d5f51d72002329"
+    },
+    {
+      "script_id": "16df8b23175c454bb787daa142cf75db",
+      "title": "ChatGPT AI 产品横向选择｜2026年10月31日",
+      "column": "chatgpt_t05_comparison",
+      "scope": "read-only authored input contract; no image acquisition, model call or new video",
+      "needs": 38,
+      "inferred_visual_subjects": 0,
+      "title_change_preserves_matching_requirements": true,
+      "authored_input_unchanged": true,
+      "version_sha256": "208fe8009011143640af559421de0e73765c44a9c4a714d95f26f19b151e0162"
+    }
+  ]
+}

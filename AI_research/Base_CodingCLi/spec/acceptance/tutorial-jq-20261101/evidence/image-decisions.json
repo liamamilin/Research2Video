@@ -1,0 +1,151 @@
+{
+  "state": "completed",
+  "reason": "用户图片准备完成",
+  "input_kind": "user_materials",
+  "material_context": {
+    "ids": [
+      "a7e4bd354de24599a563748b8d1b995b",
+      "b714c8aa91834c5aa5eb781d1b46baba"
+    ],
+    "owner": "matrix:ai_media",
+    "mode": "adapt",
+    "revision": 1,
+    "title": "jq 实际任务筛选",
+    "audience": "开发者和工具使用者",
+    "goal": "用真实任务清单串起输入截图、jq 筛选代码、真实输出截图和同屏对照，沿用栏目问候、三步转场及品牌包装。",
+    "style": {}
+  },
+  "decisions": [
+    {
+      "material_id": "a7e4bd354de24599a563748b8d1b995b",
+      "status": "accepted",
+      "reason": "该图展示 tasks.json 的实际 JSON 数组及三条任务的 id、task、done 字段，适合在输入结构介绍段具体展示；在第3章第1段中作为实际输入与输出截图并排对照的一部分，参与现有拼贴呈现。",
+      "placements": [
+        {
+          "chapter_index": 1,
+          "paragraph_index": 0
+        },
+        {
+          "chapter_index": 1,
+          "paragraph_index": 1
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 1
+        }
+      ]
+    },
+    {
+      "material_id": "b714c8aa91834c5aa5eb781d1b46baba",
+      "status": "accepted",
+      "reason": "第3章第1段具体讲述 done.json 的真实输出内容，适合展示筛选结果；第3章第2段明确进行实际输入与实际输出并排对照，该图作为输出侧参与共同对照段落，应由现有拼贴呈现。",
+      "placements": [
+        {
+          "chapter_index": 3,
+          "paragraph_index": 0
+        },
+        {
+          "chapter_index": 3,
+          "paragraph_index": 1
+        }
+      ]
+    }
+  ],
+  "selection": {
+    "materials": [
+      {
+        "image_id": "e4bfc6ce-fac5-4900-8074-d2d8577b6c73",
+        "role": "reference",
+        "caption": "任务清单实际输入截图",
+        "focus": {
+          "width": 1200,
+          "height": 900,
+          "regions": [
+            {
+              "x1": 38,
+              "y1": 123,
+              "x2": 962,
+              "y2": 394,
+              "label": "输入任务 T01：已完成",
+              "style": "box"
+            },
+            {
+              "x1": 38,
+              "y1": 383,
+              "x2": 962,
+              "y2": 871,
+              "label": "输入任务 T02 未完成与 T03 已完成",
+              "style": "box"
+            }
+          ]
+        },
+        "placements": [
+          {
+            "chapter_index": 1,
+            "paragraph_index": 0
+          },
+          {
+            "chapter_index": 1,
+            "paragraph_index": 1
+          },
+          {
+            "chapter_index": 3,
+            "paragraph_index": 1
+          }
+        ],
+        "source": {
+          "title": "任务清单实际输入.png",
+          "url": "/api/assistant/materials/a7e4bd354de24599a563748b8d1b995b/file",
+          "final_url": "/api/assistant/materials/a7e4bd354de24599a563748b8d1b995b/file",
+          "captured_at": "2026-11-01T06:54:10.410777+00:00",
+          "sha256": "30b824b6317ff401ee51c53c0c77d2722959b5bad3d117d4c7226768871f9806"
+        }
+      },
+      {
+        "image_id": "dafcfa15-b97e-4524-a47d-f750c87bd063",
+        "role": "reference",
+        "caption": "筛选后的任务结果画面",
+        "focus": {
+          "width": 1200,
+          "height": 900,
+          "regions": [
+            {
+              "x1": 38,
+              "y1": 123,
+              "x2": 962,
+              "y2": 412,
+              "label": "保留任务 T01：整理资料",
+              "style": "box"
+            },
+            {
+              "x1": 38,
+              "y1": 401,
+              "x2": 962,
+              "y2": 689,
+              "label": "保留任务 T03：检查输出",
+              "style": "box"
+            }
+          ]
+        },
+        "placements": [
+          {
+            "chapter_index": 3,
+            "paragraph_index": 0
+          },
+          {
+            "chapter_index": 3,
+            "paragraph_index": 1
+          }
+        ],
+        "source": {
+          "title": "已完成任务实际输出.png",
+          "url": "/api/assistant/materials/b714c8aa91834c5aa5eb781d1b46baba/file",
+          "final_url": "/api/assistant/materials/b714c8aa91834c5aa5eb781d1b46baba/file",
+          "captured_at": "2026-11-01T06:54:10.428414+00:00",
+          "sha256": "c5029ec9a39d5e222d83c0b169ce40958aa8ffc3018341a3a061b455da46502d"
+        }
+      }
+    ]
+  },
+  "submission_sha256": "80cbfc2f33d58a3f734c45909c2f81b8511578f244650ff90656e7c26c472818"
+}

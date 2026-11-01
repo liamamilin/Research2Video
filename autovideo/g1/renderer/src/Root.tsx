@@ -6,6 +6,7 @@ import {VisualObject, SvgVisualObject, visualFor} from './VisualObjects';
 import {ObjectFlow} from './ObjectFlow';
 import {cameraAt, carriesPicture, flowRects, linkScenes, transitionAt, comparisonAt} from './ShotDirector';
 import {DirectedMaterials} from './DirectedMaterials';
+import {CodeDemo} from './CodeDemo';
 import {StoryObjects,objectColor,revealFrames} from './StoryDirection';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {CornerBadge, type Badge} from './Packaging';
@@ -294,8 +295,8 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
   return <AbsoluteFill style={{background:stageOnly?'transparent':paper.bg, color:paper.ink, fontFamily:font, backgroundImage:stageOnly||contentStyle?undefined:'radial-gradient(#DDE5DB .8px, transparent .8px)', backgroundSize:'26px 26px'}}>
     {!stageOnly&&<>{brandHeader ? <div data-brand-header="content" style={{position:'absolute',left:brandHeader.left,top:brandHeader.top,width:1920-brandHeader.left-brandHeader.right-brandHeader.width-brandHeader.gap,height:brandHeader.height,overflow:'hidden'}}>
       <div style={{position:'absolute',top:10,left:0,right:0,height:34,color:paper.muted,fontSize:24,lineHeight:'34px',overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis'}}>{scene.props.story?.entities?.length ? <StoryObjects scene={scene} inline/> : badge?.text||ir.video.title}</div>
-      <div style={{position:'absolute',top:46,left:0,right:0,fontSize:18,lineHeight:'24px',color:paper.muted,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{chapterIndex >= 0 && chapters.length > 1 ? `${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')} · ${chapters[chapterIndex].title}` : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div>
-    </div> : <><CornerBadge badge={badge}/><StoryObjects scene={scene}/><div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <>{`${String(chapterIndex+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}　`}<Tech text={chapters[chapterIndex].title}/></> : `${String(sceneIndex+1).padStart(2,'0')} / ${String(ir.scenes.length).padStart(2,'0')}`}</div></>}
+      <div style={{position:'absolute',top:46,left:0,right:0,fontSize:18,lineHeight:'24px',color:paper.muted,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{chapterIndex >= 0 && chapters.length > 1 ? chapters[chapterIndex].title : null}</div>
+    </div> : <><CornerBadge badge={badge}/><StoryObjects scene={scene}/><div style={{position:'absolute', right:140, top:72, color:paper.muted, fontSize:22}}>{chapterIndex >= 0 && chapters.length > 1 ? <Tech text={chapters[chapterIndex].title}/> : null}</div></>}
     {scene.component!=='title_card'&&<div style={{position:'absolute',left:140,top:162,width:1640,fontSize:materialScene&&heading.length>40?40:large ? (heading.length > 22 ? S(46) : S(55)) : heading.length > 24 ? 54 : 64,fontWeight:700,lineHeight:1.3,...textStyle,...headingMotion}}><Tech text={heading}/></div>}</>}
     <div style={{position:'absolute',inset:0,display:hideStage?'none':undefined}}>
     {recapSources.length ? <div data-story-recap={scene.id} style={{position:'absolute',left:140,top:300,width:1640,height:560,display:'flex',justifyContent:'center',gap:40,alignItems:'center'}}>
@@ -321,6 +322,7 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       {p.subtitle && <div style={{...motion('subtitle'),...textStyle,maxWidth:1380,marginTop:40,fontSize:p.subtitle.length > 65 ? S(36) : S(42),lineHeight:1.65,color:paper.muted}}><Tech text={p.subtitle}/></div>}
     </div> : <>
       {materialScene && <DirectedMaterials scene={scene} frame={frame}/>}
+      {scene.component === 'code_demo' && <CodeDemo scene={scene} frame={frame}/>}
       {scene.component === 'concept_reveal' && <div style={{position:'absolute',left:140,top:p.lines.length === 4 ? 330 : 360,width:1640,display:'grid',gridTemplateColumns:`repeat(${p.lines.length === 4 ? 2 : p.lines.length}, 1fr)`,gap:28}}>
         {p.lines.map((line: string,i: number) => {
           const match = line.match(/^([^：:]{1,16})[：:]\s*([\s\S]+)$/);
@@ -348,8 +350,8 @@ function InformationVideo({ir, badge, sceneOverride, frameOverride, stageOnly=fa
       {scene.component === 'data_chart' && <DataChart scene={scene} frame={frame}/>}
       {scene.component === 'big_number' && <div style={{position:'absolute',left:140,top:330,width:1640,height:500,...panelStyle,padding:'0 72px',borderTop:`3px solid ${paper.green}`,display:'flex',flexDirection:'column',justifyContent:'center'}}>
         <div style={{...motion('line:0'),...textStyle,fontSize:p.value.length <= 6 ? 220 : p.value.length <= 9 ? 180 : 140,fontWeight:750,lineHeight:1.1,letterSpacing:-2,color:paper.green}}><Tech text={p.value}/></div>
-        <div style={{...motion('line:1'),...textStyle,fontSize:S(46),fontWeight:650,lineHeight:1.35,marginTop:24}}><Tech text={p.label}/></div>
-        {p.note && <div style={{...motion('line:2'),...textStyle,fontSize:S(32),lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
+        <div style={{...textStyle,opacity:ease((frame-scene.start_frame)/12),fontSize:S(46),fontWeight:650,lineHeight:1.35,marginTop:24}}><Tech text={p.label}/></div>
+        {p.note && <div style={{...textStyle,opacity:ease((frame-scene.start_frame)/12),fontSize:S(32),lineHeight:1.5,color:paper.muted,marginTop:20}}><Tech text={p.note}/></div>}
       </div>}
       {scene.component === 'price_change' && (() => {
         // Compiler and planner use the same measured geometry. It is derived

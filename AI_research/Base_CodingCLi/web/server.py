@@ -35,6 +35,7 @@ from web.routes.logs import router as logs_router
 from web.routes.scheduler import router as scheduler_router
 from web.routes.deploy import router as deploy_router
 from web.routes.usage import router as usage_router
+from web.routes.telemetry import router as telemetry_router
 from web.routes.pipeline import router as pipeline_router
 from web.routes.tracking import router as tracking_router
 from web.routes.share import router as share_router
@@ -415,6 +416,7 @@ def create_app() -> FastAPI:
     app.include_router(scheduler_router)
     app.include_router(deploy_router)
     app.include_router(usage_router)
+    app.include_router(telemetry_router)
     app.include_router(pipeline_router)
     app.include_router(tracking_router)
     app.include_router(share_router)

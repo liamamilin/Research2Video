@@ -13,6 +13,10 @@ export interface SourceRow {
 }
 
 export interface SourceCatalog {
+  coverage?: { key: string; name: string; candidates: Record<string, number>; cells: {
+    key: string; subject: string; topics: string[]; status: string;
+    sources: { spec: string; role: string; status: string; read_at?: number; error?: string }[];
+  }[] }[];
   revision?: string;
   adapters?: string[];
   sources: SourceRow[];

@@ -23,6 +23,8 @@ def story_schema() -> dict:
 
 
 def object_labels(component: str, p: dict) -> dict[str, str]:
+    if component == 'code_demo':
+        return {f'line:{i}': line.get('annotation') or line['text'] for i, line in enumerate(p['lines'])}
     if component in {'object_showcase', 'material_collage'}:
         labels = {f'image:{i}': image.get('caption', '') for i, image in enumerate(p['images'])}
         labels.update({f'region:{i}:{j}': region.get('label', '') for i, image in enumerate(p['images'])

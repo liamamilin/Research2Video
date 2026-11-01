@@ -13,6 +13,7 @@ import re
 import unicodedata
 import uuid
 
+from core import telemetry
 from core.fileio import file_lock
 from core.video import store
 
@@ -149,8 +150,9 @@ JSON: {"events":[{"title":"选题标题","subject":"具体对象","action":"rele
                "materials": [{**p, "text": p["text"][:2400]} for p in source_packets],
                "covered": [{k: v for k, v in p.items() if k != "script_id"} for p in previous]}
     client = LLMClient(llm_config)
-    reply = client.chat([{"role": "system", "content": system},
-                         {"role": "user", "content": json.dumps(request, ensure_ascii=False)}], temperature=0)
+    with telemetry.track("story-pool"):
+        reply = client.chat([{"role": "system", "content": system},
+                             {"role": "user", "content": json.dumps(request, ensure_ascii=False)}], temperature=0)
     try:
         raw = reply.content.strip()
         start, end = raw.find("{"), raw.rfind("}")

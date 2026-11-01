@@ -29,6 +29,7 @@ interface ScheduledJob {
   schedule?: string;
   schedule_label?: string;
   next_runs?: string[];
+  research_window?: {mode: string; start: string; end: string; days: number; timezone: string};
   kind?: string;
   installed?: boolean;
   loaded?: boolean;
@@ -361,6 +362,7 @@ export function SchedulerPage() {
           <button className="btn btn-danger text-xs" disabled={!!busy} onClick={() => mutate(job, true)} aria-label={`删除 ${job.id}`} title={isSystem ? "删除（可恢复）" : "删除"}><Trash2 className="w-3 h-3" /></button>
         </div>}</div>
         <div className="grid sm:grid-cols-2 gap-2 text-xs"><p><span className="text-text-muted mr-2">下次计划</span>{!job.enabled ? "暂停期间不执行" : job.next_runs?.[0] ? displayTime(job.next_runs[0]) : isSystem ? "由系统安排检查" : "暂无预览"}</p><p><span className="text-text-muted mr-2">{job.backend === "managed" ? "最近执行" : "最近运行证据"}</span>{displayTime(state?.last_ran_at)}</p></div>
+        {job.enabled && job.research_window && <p className="text-xs text-text-muted">下期研究范围：{displayTime(job.research_window.start)} 至 {displayTime(job.research_window.end)} · {job.research_window.mode === 'previous_slot' ? '随排期调整' : `固定近 ${job.research_window.days} 天`}</p>}
         {state && <div role={state.status === "overdue" ? "alert" : undefined} className={cn("text-xs p-2.5 rounded bg-bg-hover", state.status === "overdue" ? "text-danger" : "text-text-muted")}>
           {state.status === "overdue" && <p className="flex gap-1.5 items-center font-medium mb-1"><AlertTriangle className="w-3.5 h-3.5" />{job.backend === "managed" ? "上次执行未完成" : "存在漏跑记录"}</p>}
           {state.status === "paused" && <p className="mb-1">已暂停</p>}

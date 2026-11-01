@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 import re
+import json
 import sqlite3
 import time
 import uuid
@@ -44,8 +45,10 @@ def iso(at: float | None, timezone: str = 'local') -> str | None:
 class ScheduleStore:
     """SQLite transactions make slot creation and claims safe across processes."""
 
-    def __init__(self, state_dir: str):
+    def __init__(self, state_dir: str, *, config_dir: str | None = None, jobs_dir: str | None = None):
         self.state_dir = str(Path(state_dir).resolve())
+        self.config_dir = config_dir or str(Path(self.state_dir).parent/'config')
+        self.jobs_dir = jobs_dir or str(Path(self.state_dir).parent/'jobs')
         Path(self.state_dir).mkdir(parents=True, exist_ok=True)
         self.path = str(Path(self.state_dir) / 'schedules.db')
         with self.connect() as db:
@@ -85,6 +88,15 @@ class ScheduleStore:
                 columns = {r['name'] for r in db.execute('PRAGMA table_info(schedule_runs)')}
                 if 'cancel_requested' not in columns:
                     db.execute('ALTER TABLE schedule_runs ADD COLUMN cancel_requested INTEGER NOT NULL DEFAULT 0')
+        if 'context' not in columns:
+            with self.connect(True) as db:
+                if 'context' not in {r['name'] for r in db.execute('PRAGMA table_info(schedule_runs)')}:
+                    db.execute("ALTER TABLE schedule_runs ADD COLUMN context TEXT NOT NULL DEFAULT '{}'")
+        with self.connect() as db:
+            context_enabled = db.execute("SELECT 1 FROM scheduler_meta WHERE key='issue_context_enabled_at'").fetchone()
+        if not context_enabled:
+            with self.connect(True) as db:
+                db.execute("INSERT OR IGNORE INTO scheduler_meta(key,value) VALUES ('issue_context_enabled_at',?)",(str(time.time()),))
 
     def _migrate_runs_timezone(self):
         """Stamp each run with the plan timezone it was scheduled in.
@@ -142,7 +154,7 @@ class ScheduleStore:
     def save(self, job_name: str, expression: str, *, schedule_id: str | None = None,
              timezone: str = 'local', missed_policy: str = 'latest', max_retries: int = 2,
              editing: bool = False, now: float | None = None, expected_version: int | None = None) -> dict:
-        """Create or edit a plan; edits preserve enabled state and cancel pending old slots."""
+        """Edit future slots; preserve enabled state and already frozen production issues."""
         now = time.time() if now is None else now
         schedule_id = schedule_id or uuid.uuid4().hex
         if not re.fullmatch(r'[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}', schedule_id):
@@ -168,7 +180,7 @@ class ScheduleStore:
                     db.execute('''UPDATE schedules SET schedule=?, timezone=?, missed_policy=?, max_retries=?,
                                   next_run_at=?, version=version+1, updated_at=? WHERE id=?''',
                                (expression, timezone, missed_policy, max_retries, next_run, now, schedule_id))
-                    self._cancel_pending(db, schedule_id, now, '计划已修改，旧的待执行任务取消')
+                    self._cancel_pending(db, schedule_id, now, '计划已修改，旧的待执行任务取消', keep_issues=True)
                 else:
                     db.execute('''INSERT INTO schedules
                         (id,job_name,schedule,timezone,missed_policy,max_retries,next_run_at,created_at,updated_at)
@@ -179,9 +191,10 @@ class ScheduleStore:
         return self.get(schedule_id)
 
     @staticmethod
-    def _cancel_pending(db, schedule_id, now, reason):
+    def _cancel_pending(db, schedule_id, now, reason, keep_issues=False):
         db.execute("""UPDATE schedule_runs SET status='skipped',finished_at=?,error=?
-                      WHERE schedule_id=? AND status IN ('queued','retry','starting')""", (now, reason, schedule_id))
+                      WHERE schedule_id=? AND status IN ('queued','retry','starting')
+                      AND (?=0 OR json_extract(context,'$.issue_id') IS NULL)""", (now, reason, schedule_id, int(keep_issues)))
 
     def toggle(self, schedule_id: str, enabled: bool, now: float | None = None) -> bool:
         """Resume from the next future slot; paused intervals are never backfilled."""
@@ -251,6 +264,28 @@ class ScheduleStore:
             row = db.execute('SELECT * FROM schedule_runs WHERE id=?', (run_id,)).fetchone()
             return dict(row) if row else None
 
+    def freeze_context(self, run_id: str, prepare) -> dict:
+        """Persist the first prepared issue; never reinterpret a legacy run or a retry."""
+        with self.connect(True) as db:
+            row=db.execute('SELECT * FROM schedule_runs WHERE id=?',(run_id,)).fetchone()
+            if row is None:raise KeyError(run_id)
+            context=json.loads(row['context'])
+            if not context:
+                migrated=float(db.execute("SELECT value FROM scheduler_meta WHERE key='issue_context_enabled_at'").fetchone()[0])
+                if row['created_at'] < migrated:return {'legacy':True}
+                # An older dispatcher may still enqueue after the schema migration. The current worker can
+                # reconstruct its identity while the plan's version still agrees; no service restart is needed.
+                plan=db.execute('SELECT * FROM schedules WHERE id=?',(row['schedule_id'],)).fetchone()
+                if not plan or plan['version']!=row['version']:return {'legacy':True}
+                context={'schedule_id':row['schedule_id'],'version':row['version'],'expression':plan['schedule'],
+                         'timezone':row['timezone'] or plan['timezone'],'due_at':row['due_at']}
+            if context.get('prepared'):return context
+            prepared=prepare(context)
+            # Even unconfigured jobs freeze the schedule identity once.
+            prepared={**prepared,'prepared':True}
+            db.execute('UPDATE schedule_runs SET context=? WHERE id=?',(json.dumps(prepared,ensure_ascii=False),run_id))
+            return json.loads(json.dumps(prepared,ensure_ascii=False))
+
     def cancel(self, run_id: str) -> dict:
         """Cancel one slot durably; a live worker cooperatively observes the flag."""
         with self.connect(True) as db:
@@ -275,13 +310,19 @@ class ScheduleStore:
                     continue
                 due = max(plan['next_run_at'], slot(plan['schedule'], now, plan['timezone'], backwards=True))
                 skipped = plan['missed_policy'] == 'skip' and now - due >= 60
+                from types import SimpleNamespace
+                from core.production_policy import prepare
+                context = prepare(SimpleNamespace(config_dir=self.config_dir, jobs_dir=self.jobs_dir,
+                                                  state_dir=self.state_dir), plan['job_name'],
+                                  {'schedule_id':plan['id'],'version':plan['version'],
+                                   'expression':plan['schedule'],'timezone':plan['timezone'],'due_at':due})
                 db.execute('''INSERT OR IGNORE INTO schedule_runs
-                    (id,schedule_id,job_name,version,due_at,status,max_retries,ready_at,created_at,error,finished_at,timezone)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)''',
+                    (id,schedule_id,job_name,version,due_at,status,max_retries,ready_at,created_at,error,finished_at,timezone,context)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''',
                            (uuid.uuid4().hex, plan['id'], plan['job_name'], plan['version'], due,
                             'skipped' if skipped else 'queued', plan['max_retries'], now, now,
                             '已按策略跳过错过的计划' if skipped else '', now if skipped else None,
-                            plan['timezone']))
+                            plan['timezone'],json.dumps(context,ensure_ascii=False)))
                 db.execute('UPDATE schedules SET next_run_at=? WHERE id=?',
                            (slot(plan['schedule'], now, plan['timezone']), plan['id']))
                 count += 1
@@ -296,7 +337,7 @@ class ScheduleStore:
                 return None
             row = db.execute("""SELECT r.* FROM schedule_runs r JOIN schedules s ON s.id=r.schedule_id
                 WHERE r.status IN ('queued','retry') AND r.ready_at<=? AND s.enabled=1 AND s.deleted=0
-                  AND r.version=s.version
+                  AND (r.version=s.version OR json_extract(r.context,'$.issue_id') IS NOT NULL)
                 ORDER BY r.ready_at,r.created_at LIMIT 1""", (now,)).fetchone()
             if not row:
                 return None
@@ -309,7 +350,8 @@ class ScheduleStore:
         now = time.time() if now is None else now
         with self.connect(True) as db:
             row = db.execute('''SELECT r.* FROM schedule_runs r JOIN schedules s ON s.id=r.schedule_id
-                WHERE r.id=? AND r.status='starting' AND s.enabled=1 AND s.deleted=0 AND r.version=s.version''', (run_id,)).fetchone()
+                WHERE r.id=? AND r.status='starting' AND s.enabled=1 AND s.deleted=0
+                AND (r.version=s.version OR json_extract(r.context,'$.issue_id') IS NOT NULL)''', (run_id,)).fetchone()
             if not row:
                 return False
             db.execute("UPDATE schedule_runs SET status='running',pid=?,started_at=?,lease_until=? WHERE id=?", (pid, now, now + LEASE_SECONDS, run_id))
@@ -323,7 +365,7 @@ class ScheduleStore:
 
     def finish(self, run_id: str, status: str, error: str = '', output_path: str | None = None,
                now: float | None = None) -> None:
-        """Persist the result and bounded backoff; changed/paused plans never retry."""
+        """Persist bounded backoff; frozen issues survive edits, explicit pauses fence retries."""
         now = time.time() if now is None else now
         with self.connect(True) as db:
             run = db.execute('SELECT * FROM schedule_runs WHERE id=?', (run_id,)).fetchone()
@@ -333,7 +375,8 @@ class ScheduleStore:
                 status, error = 'cancelled', '用户取消；不会自动重试'
             plan = db.execute('SELECT * FROM schedules WHERE id=?', (run['schedule_id'],)).fetchone()
             retry = (status in ('failed', 'interrupted') and run['attempt'] <= run['max_retries']
-                     and plan and plan['enabled'] and not plan['deleted'] and plan['version'] == run['version'])
+                     and plan and plan['enabled'] and not plan['deleted']
+                     and (plan['version'] == run['version'] or json.loads(run['context']).get('issue_id')))
             delay = min(60 * 5 ** max(0, run['attempt'] - 1), 3600)
             db.execute('''INSERT OR REPLACE INTO schedule_attempts
                 (run_id,attempt,started_at,finished_at,status,error,output_path) VALUES (?,?,?,?,?,?,?)''',

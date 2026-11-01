@@ -31,6 +31,8 @@ def use_state_dir(state_dir: str) -> None:
     _HISTORY_DIR = os.path.join(state_dir, "history")
     from core import search_health
     search_health.use_state_dir(state_dir)  # search cooldowns live with the rest of the run state
+    from core import telemetry
+    telemetry.use_state_dir(state_dir)
 
 
 def _job_state_path(job_name: str) -> str:

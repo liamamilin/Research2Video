@@ -1,0 +1,19 @@
+{
+  "scope": "read-only existing production records; no model or new production",
+  "latest_unarchived_script_render_statuses": {
+    "COMPLETED": 180,
+    "CANCELLED": 2,
+    "FAILED": 1
+  },
+  "recent_since": "2026-10-27",
+  "recent_latest_statuses": {
+    "COMPLETED": 99,
+    "CANCELLED": 2
+  },
+  "effective_voice_comparisons": 95,
+  "voice_or_speed_mismatches": [],
+  "recent_video_files_checked": 99,
+  "missing_or_size_mismatched_video_files": [],
+  "approved_unarchived_versions_with_empty_content": 0,
+  "historical_latest_failure_count": 1
+}

@@ -195,11 +195,12 @@ def dispatch_once(runtime: Runtime, store: ScheduleStore, now: float | None = No
         poke_autopilot(runtime, now)
     except Exception:
         logger.exception('Video pipeline wake-up failed')
-    store.heartbeat({'checked_at': now, 'status': 'ok', 'pid': os.getpid(), 'runtime': runtime.identity()})
+    store.heartbeat({'checked_at': now, 'status': 'ok', 'pid': os.getpid(), 'runtime': runtime.identity(),
+                     'issue_context_version': 1})
     return launched
 
 
-def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event) -> tuple[str, str, str | None]:
+def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event, *, context: dict | None = None) -> tuple[str, str, str | None]:
     """Use the research engine's actual result, not run.py's historical exit code."""
     from core.platform_analytics_store import INTERNAL_JOB
     if job_name == INTERNAL_JOB:
@@ -213,29 +214,40 @@ def execute_job(runtime: Runtime, job_name: str, cancel: threading.Event) -> tup
     lock._LOCK_DIR = str(Path(runtime.state_dir) / 'locks')
     report_meta.META_FILE = str(Path(runtime.state_dir) / 'report_meta.jsonl')
     try:
-        canonical, job = canonical_job(runtime, job_name)
+        if context and context.get('job'):
+            job = context['job']
+            canonical = job['_file']
+        else:
+            canonical, job = canonical_job(runtime, job_name)
+        if not job.get('enabled', True):
+            return 'blocked', '此期次入队时研究任务已停用', None
     except ValueError as exc:
         return 'blocked', str(exc), None
-    allowed, reason = pipeline_allowed(load_system_config(runtime.config_dir))
-    if not allowed:
-        return 'blocked', reason, None
+    if not job.get('source_collection'):
+        allowed, reason = pipeline_allowed(load_system_config(runtime.config_dir))
+        if not allowed:
+            return 'blocked', reason, None
     from core.matrices import cap_block
     reason = cap_block(canonical, runtime.config_dir)
     if reason:
         return 'blocked', reason, None
     # The engine shares its own per-job lock with CLI/Web manual runs.
     engine = ResearchEngine(config_dir=runtime.config_dir, jobs_dir=runtime.jobs_dir,
-                            workspace_dir=runtime.workspace, cancel_token=cancel, user='scheduler')
+                            workspace_dir=runtime.workspace, state_dir=runtime.state_dir,
+                            cancel_token=cancel, user='scheduler')
+    engine.run_context = context or {}
     output = engine.run_job(canonical)
     if output and Path(output).is_file():
         return 'success', '', str(Path(output).resolve())
     last = state.StateManager.get(canonical) or {}
+    if job.get('source_collection') and last.get('last_status') == 'skipped':
+        return 'skipped', '素材积累已关闭，未调用模型或生产视频', None
     return 'failed', ('任务超过运行时限' if cancel.is_set() else last.get('last_error') or '任务未生成报告，可能已有同名任务运行'), None
 
 
 def work(runtime: Runtime, run_id: str, execute=execute_job) -> None:
     """Run one claimed slot under OS locks, with a lease and a bounded lifetime."""
-    store = ScheduleStore(runtime.state_dir)
+    store = ScheduleStore(runtime.state_dir, config_dir=runtime.config_dir, jobs_dir=runtime.jobs_dir)
     run = store.run(run_id)
     if not run:
         return
@@ -248,7 +260,13 @@ def work(runtime: Runtime, run_id: str, execute=execute_job) -> None:
                     if not store.start(run_id, os.getpid()):
                         return
                     try:
-                        _, job = canonical_job(runtime, run['job_name'])
+                        context = None
+                        if execute is execute_job:
+                            from core.production_policy import prepare
+                            context = store.freeze_context(run_id, lambda value:prepare(runtime,run['job_name'],value))
+                        job = (context or {}).get('job')
+                        if not job:
+                            _, job = canonical_job(runtime, run['job_name'])
                         config = job.get('runtime') or {}
                         timeout = min(max(int(config.get('timeout_seconds') or 3600), 60), 86400)
                     except (ValueError, TypeError, AttributeError) as exc:
@@ -277,7 +295,10 @@ def work(runtime: Runtime, run_id: str, execute=execute_job) -> None:
                     if threading.current_thread() is threading.main_thread():
                         signal.signal(signal.SIGTERM, lambda *_: cancel.set())
                     try:
-                        status, error, output = execute(runtime, run['job_name'], cancel)
+                        if execute is execute_job:
+                            status,error,output=execute(runtime,run['job_name'],cancel,context=context)
+                        else:
+                            status, error, output = execute(runtime, run['job_name'], cancel)
                         store.finish(run_id, status, error, output)
                     except Exception as exc:
                         logger.exception('Scheduled job failed')
@@ -294,7 +315,7 @@ def work(runtime: Runtime, run_id: str, execute=execute_job) -> None:
 def serve(runtime: Runtime, once: bool = False) -> None:
     """Keep dispatching independently of the Web service; launchd supervises us."""
     os.chdir(runtime.workspace)
-    store = ScheduleStore(runtime.state_dir)
+    store = ScheduleStore(runtime.state_dir, config_dir=runtime.config_dir, jobs_dir=runtime.jobs_dir)
     stop = threading.Event()
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
     signal.signal(signal.SIGINT, lambda *_: stop.set())

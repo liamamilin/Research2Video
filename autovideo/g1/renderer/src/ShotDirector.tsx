@@ -124,12 +124,14 @@ function poseFor(shot:Shot,rects:Record<string,Rect>,view:Rect,maxZoom:number,ma
     y:clamp(view.y+view.height/2-(y+bottom)/2*zoom,(view.y+view.height)*(1-zoom),view.y*(1-zoom))};
 }
 
-export function cameraAt(scene:Scene,frame:number,rects:Record<string,Rect>,view:Rect,margin={x:120,y:90}) {
+export function cameraAt(scene:Scene,frame:number,rects:Record<string,Rect>,view:Rect,margin={x:120,y:90},overview?:{targets:string[];hold?:boolean}) {
   const shots=shotsFor(scene), pace=pacingFor(scene);
   let index=0;
   shots.forEach((shot,i)=>{if(shot.frame<=frame)index=i;});
-  const shot=shots[index], target=poseFor(shot,rects,view,pace.maxZoom,margin);
-  const previous=poseFor(shots[Math.max(0,index-1)],rects,view,pace.maxZoom,margin);
+  const overviewPose=overview?.targets.length?poseFor({kind:'focus',frame:scene.start_frame,targets:overview.targets},rects,view,pace.maxZoom,margin):identity;
+  const poseForShot=(shot:Shot)=>overview?.hold||shot.kind==='overview'||shot.kind==='summary'?overviewPose:poseFor(shot,rects,view,pace.maxZoom,margin);
+  const shot=shots[index], target=poseForShot(shot);
+  const previous=poseForShot(shots[Math.max(0,index-1)]);
   const t=clamp((frame-shot.frame)/pace.transition,0,1), ease=t*t*(3-2*t);
   const pose={zoom:previous.zoom+(target.zoom-previous.zoom)*ease,
     x:previous.x+(target.x-previous.x)*ease,y:previous.y+(target.y-previous.y)*ease};

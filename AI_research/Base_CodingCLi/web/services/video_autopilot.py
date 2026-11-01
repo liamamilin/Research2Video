@@ -179,6 +179,9 @@ def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
         return None
     workspace = video_workflow.workspace_dir()
     relative = reports.relative(os.path.join(workspace, report), workspace)
+    source = topic_store.resolve(get_settings().paths.jobs_dir, spec.get("job", ""))
+    if not topic_store.report_has_content(source, relative, workspace):
+        return None
     if pick.get("content_mode") == "episode":
         from core.video import episodes
         owner = content_columns.for_production(get_settings().paths.config_dir, pick.get("production", ""))
@@ -192,7 +195,6 @@ def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
     record = reports.record_file(relative, job=spec.get("job", ""), created_by="autopilot")
     if pick.get("content_mode") == "episode":
         from core.video import episodes
-        source = topic_store.resolve(get_settings().paths.jobs_dir, spec.get("job", ""))
         topic = episodes.topic(record, workspace, job=spec.get("job", ""), source=source, production=pick.get("production", ""))
         return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
     topic = {**reports.topic_for(record, workspace), "from_report": relative, "report_id": record["id"],
@@ -386,6 +388,14 @@ def advance(item: dict, *, can_start_script: bool, can_start_render: bool, searc
         topic = _prepare({**item, "topic": topic})
         if item.get("production"):
             topic = {**topic, "_production": item["production"]}
+        from core.video import production_admission
+        parent = ap.run_origin(item['run_id'])
+        if not production_admission.enter(paths, topic, key=item['id'],
+                accepted_before=parent['started_at'] if parent else None,
+                manual=bool(parent and parent['started_by'] != 'autopilot')):
+            if item.get('note') != production_admission.WAIT_NOTE:
+                ap.update_item(item['id'], note=production_admission.WAIT_NOTE)
+            return took
         script, created = create_queued_script(item, topic)
         ap.update_item(item["id"], script_id=script["id"], state="WORKING", note="已开始写稿" if created else "接续已有文稿")
         took["script"] = created
@@ -518,7 +528,24 @@ def tick() -> int:
             # slot. Oldest first: a script that failed or waits for its audit is retried before any newer batch starts,
             # instead of starving behind them for as long as new batches keep coming.
             counts = _in_flight(runs)
-            return sum(_tick_run(run, counts) for run in runs)
+            advanced = 0
+            for run in runs:
+                try:
+                    advanced += _tick_run(run, counts)
+                    if run.get('dispatch_failures'):
+                        ap.update_run(run['id'], dispatch_failures=0)
+                except Exception as exc:
+                    failures = run.get('dispatch_failures', 0) + 1
+                    note = f'批次调度失败 {failures} 次（{type(exc).__name__}）'
+                    ap.update_run(run['id'], dispatch_failures=failures, note=note)
+                    if failures >= 3:
+                        for item in run['items']:
+                            if item['state'] not in {'DONE', 'FAILED', 'HELD', 'CANCELLED'}:
+                                _fail(item, note)
+                        ap.update_run(run['id'], status='DONE')
+                    counts.update(_in_flight(ap.list_runs(limit=None, status='RUNNING')))
+                    logger.warning('video batch %s dispatch failed (%s)', run['id'], type(exc).__name__)
+            return advanced
     except TimeoutError:
         return 0
 
@@ -626,8 +653,22 @@ def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
     # While no search provider can answer, research would only fail: new scripts wait, renders go on.
     search_down = search_health.outage() is not None
     for item in run["items"]:
-        took = advance(item, can_start_script=counts["scripts"] < MAX_SCRIPTS and not search_down,
-                       can_start_render=counts["renders"] < MAX_RENDERS, search_down=search_down)
+        try:
+            took = advance(item, can_start_script=counts["scripts"] < MAX_SCRIPTS and not search_down,
+                           can_start_render=counts["renders"] < MAX_RENDERS, search_down=search_down)
+            if (item.get('retries') or {}).get('dispatch'):
+                current = (ap.get_run(run['id']) or {}).get('items', [])
+                latest = next((row for row in current if row['id'] == item['id']), item)
+                ap.update_item(item['id'], retries={**(latest.get('retries') or {}), 'dispatch': 0})
+        except Exception as exc:
+            failures = int((item.get('retries') or {}).get('dispatch', 0)) + 1
+            note = f'任务调度失败 {failures} 次（{type(exc).__name__}）'
+            ap.update_item(item['id'], retries={**(item.get('retries') or {}), 'dispatch': failures}, note=note)
+            if failures >= 3:
+                _fail(item, note)
+            counts.update(_in_flight(ap.list_runs(limit=None, status='RUNNING')))
+            logger.warning('video item %s dispatch failed (%s)', item['id'], type(exc).__name__)
+            continue
         counts["scripts"] += took["script"]
         counts["renders"] += took["render"]
     run = ap.get_run(run["id"])

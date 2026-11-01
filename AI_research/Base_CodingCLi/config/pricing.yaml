@@ -1,0 +1,28 @@
+# 模型单价，美元 / 每百万 token。只用来在「数据分析」里折算金额，不影响任何运行。
+#
+# 取值规则（2026-10-31 查）：用公开的正常标价，不计各渠道折扣、套餐和限时优惠；免费模型记 0。
+# 查找顺序：服务商返回的实际花费 > 成片里记着的当时单价 > 本表 > 「未定价」（只显示 token）。
+# 一条记录匹配「模型名一致」，并且 host 为空（任何服务商）或包含在请求地址的主机名里；
+# 指定了 host 的优先于没指定的。`effective_from`（可选，YYYY-MM-DD）之前的调用不用这一条。
+# 输入按 input 计，其中命中缓存的部分按 cache_read 计（没写就按 input 计）；推理 token 已含在输出里，不重复算。
+prices:
+  # DeepSeek 官方 https://api-docs.deepseek.com/quick_start/pricing（高峰价；非高峰时段是它的一半）
+  - {host: api.deepseek.com, model: deepseek-flash, input: 0.30, cache_read: 0.006, output: 1.20}
+  - {host: api.deepseek.com, model: deepseek-v4-flash, input: 0.30, cache_read: 0.006, output: 1.20}
+  - {host: api.deepseek.com, model: deepseek-v4-pro, input: 1.32, cache_read: 0.044, output: 3.96}
+
+  # opencode（https://opencode.ai/docs/zen/）。项目接的是 Go 订阅端点，按次不收费，所以 deepseek-v4.1-flash 记 0
+  - {host: opencode.ai, model: deepseek-v4.1-flash, input: 0, cache_read: 0, output: 0, note: opencode Go 订阅，按次不计费}
+  - {host: opencode.ai, model: deepseek-v4-flash, input: 0, cache_read: 0, output: 0, note: opencode Go 订阅，按次不计费}
+
+  # 其余服务商（含 Open Design 中转）：按各家公开标价
+  - {model: deepseek-v4.1-flash, input: 0.30, cache_read: 0.006, output: 1.20}
+  - {model: deepseek-flash, input: 0.30, cache_read: 0.006, output: 1.20}
+  - {model: deepseek-v4-flash, input: 0.30, cache_read: 0.006, output: 1.20}
+  - {model: deepseek-v4-pro, input: 1.32, cache_read: 0.044, output: 3.96}
+  - {model: minimax-m3, input: 0.30, cache_read: 0.06, output: 1.20}
+  - {model: minimax-m3.1-flash, input: 0.15, cache_read: 0.015, output: 0.60}
+
+  # 免费模型
+  - {model: minimax-m3.1-flash-free, input: 0, cache_read: 0, output: 0}
+  - {model: longcat-2.5-preview-free, input: 0, cache_read: 0, output: 0}

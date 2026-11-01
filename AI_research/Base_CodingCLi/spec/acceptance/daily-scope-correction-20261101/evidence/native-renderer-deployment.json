@@ -1,0 +1,27 @@
+{
+  "trusted_root_sha256": "0dca18b44f68d10e82959e9e4d4aea73597b2e5dfaa4324d348710f13823ec2c",
+  "jobs": [
+    {
+      "job": "e3bc2d9b-a4f4-4bc8-9e98-80bb16807684",
+      "matches_trusted_root": true,
+      "components": {
+        "CodeDemo.tsx": true,
+        "ShotDirector.tsx": true,
+        "DirectedMaterials.tsx": true,
+        "ObjectFlow.tsx": true,
+        "StoryDirection.tsx": true
+      }
+    },
+    {
+      "job": "49ade885-4786-4b0a-9fde-930953ce53d5",
+      "matches_trusted_root": true,
+      "components": {
+        "CodeDemo.tsx": true,
+        "ShotDirector.tsx": true,
+        "DirectedMaterials.tsx": true,
+        "ObjectFlow.tsx": true,
+        "StoryDirection.tsx": true
+      }
+    }
+  ]
+}

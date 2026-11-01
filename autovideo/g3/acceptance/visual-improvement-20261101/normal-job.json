@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "real_llm": true,
+  "real_tts": true,
+  "model": "deepseek-v4.1-flash",
+  "llm_call_count": 1,
+  "video": {
+    "codec": "h264",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "frames": 2836,
+    "duration_seconds": 94.533333,
+    "full_decode": "PASS"
+  },
+  "audio": {
+    "codec": "aac",
+    "sample_rate": "48000",
+    "channels": 2,
+    "decoded_tts_correlation": 0.9999649355918208,
+    "decoded_rms": 0.08151444047689438,
+    "full_decode": "PASS"
+  },
+  "timeline": {
+    "ir_frames": 2836,
+    "scene_count": 6,
+    "beat_count": 22,
+    "alignment_granularity": "phrase"
+  },
+  "video_form": "information_cards",
+  "visual_storytelling": true,
+  "job_id": "5c02b20a-388b-4d72-9632-7556850c2178",
+  "attempt": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/acceptance-visual-improvement-20261101/c5e7873b692047eb8eb385c7e7ff8671/jobs/5c02b20a-388b-4d72-9632-7556850c2178/attempts/1/g2-run",
+  "code_scene_ids": [
+    "card_2",
+    "card_3",
+    "card_4"
+  ],
+  "normal_api_and_worker": true,
+  "manual_storyboard_or_beat_edits": 0
+}

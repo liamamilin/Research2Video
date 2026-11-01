@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "maintenance_id": "203b163bf6d444a393bf45ed24b23fdc",
+  "old_pid": 23403,
+  "new_pid": 22465,
+  "health": "ok",
+  "waited_for_existing_work": true,
+  "before": {
+    "scripts": {
+      "count": 364,
+      "sha256": "cffae9615c39b0e86fc0721390f548e71362619d84d5e6fb65d82464ca833258"
+    },
+    "renders": {
+      "count": 374,
+      "sha256": "c7b16c0837982f619168ac9494da539e5b67e400c48b47c8295193f9732ebc75"
+    },
+    "schedules": {
+      "count": 61,
+      "sha256": "4c3d9a8148ab0691288186453471e5c39a7f8f553dd967270735654147d43738"
+    }
+  },
+  "after": {
+    "scripts": {
+      "count": 364,
+      "sha256": "cffae9615c39b0e86fc0721390f548e71362619d84d5e6fb65d82464ca833258"
+    },
+    "renders": {
+      "count": 374,
+      "sha256": "c7b16c0837982f619168ac9494da539e5b67e400c48b47c8295193f9732ebc75"
+    },
+    "schedules": {
+      "count": 61,
+      "sha256": "4c3d9a8148ab0691288186453471e5c39a7f8f553dd967270735654147d43738"
+    }
+  },
+  "records_unchanged_during_reload": true,
+  "new_schedules": 0,
+  "source_sha256": {
+    "core/source_supply.py": "087f51f4036427b9fe7df5542362522e8d157076570266a07dd296156fd68b81",
+    "config/source_supply/chatgpt_acquisition.yaml": "532593d94e507358c44b64c969c72a90b2835e2824f42acec869c4a75df314d1"
+  }
+}

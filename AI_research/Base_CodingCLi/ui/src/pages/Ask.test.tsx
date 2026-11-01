@@ -25,6 +25,7 @@ function server(options: { requests?: unknown[]; context?: unknown; send?: () =>
     if (url.endsWith('/context')) return json({ ok: true });
     if (url.includes("/stop")) return json({ status: "stop_requested" });
     if (url === "/api/assistant/stream") return options.send ? options.send() : stream({ answer: "已完成。", actions: [], conversation_id: cid });
+    if (url === '/api/assistant/materials') return json({ id: 'm'.repeat(32), name: '提供的材料', kind: 'image', status: 'pending', chars: 0, file_url: '/api/assistant/materials/m/file' });
     throw new Error(`Unexpected request ${url} ${init?.method}`);
   });
   vi.stubGlobal("fetch", fetch); return fetch;
@@ -39,6 +40,81 @@ function send(text: string) {
 beforeEach(() => { sessionStorage.clear(); useAuthStore.setState({ user: { username: "admin", role: "admin" } as never }); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 describe("Application assistant", () => {
+  it('pastes an image into the existing composer and sends its persistent material id', async () => {
+    const fetcher = server();
+    await renderAsk();
+    const image = new File(['image'], '截图.png', { type: 'image/png' });
+    fireEvent.paste(screen.getByLabelText('消息'), { clipboardData: { files: [image], getData: () => '' } });
+    expect(await screen.findByLabelText('待发送材料')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('消息'), { target: { value: '结合 https://example.com/plans 讲清套餐，并生成视频' } });
+    fireEvent.click(screen.getByRole('button', { name: '发送' }));
+    await screen.findByText('已完成。');
+    const sent = fetcher.mock.calls.find(([url]) => url.endsWith('/stream'));
+    const payload = JSON.parse(String(sent?.[1]?.body));
+    expect(payload.material_ids).toEqual(['m'.repeat(32)]);
+    expect(payload.message).toContain('https://example.com/plans');
+    expect(screen.getByLabelText('已提供的材料').textContent).toContain('提供的材料');
+  });
+  it('keeps a long pasted article as an attachment instead of truncating at the chat limit', async () => {
+    const fetcher = server();
+    await renderAsk();
+    const text = '完整正文。'.repeat(2000);
+    fireEvent.paste(screen.getByLabelText('消息'), { clipboardData: { files: [], getData: () => text } });
+    expect(await screen.findByLabelText('待发送材料')).toBeTruthy();
+    const upload = fetcher.mock.calls.find(([url]) => url.endsWith('/materials'));
+    expect((upload?.[1]?.body as FormData).get('text')).toBe(text);
+    expect(screen.getByLabelText('消息')).toHaveProperty('value', '');
+  });
+  it('restores the material references with the conversation after reload', async () => {
+    server({ requests: [{ id: 'r', message: '按照这张图生成视频', status: 'completed',
+      materials: [{ id: 'm', name: '套餐截图.png', kind: 'image', file_url: '/api/assistant/materials/m/file' }],
+      result: { answer: '已交给视频流程。', actions: [] } }] });
+    await renderAsk();
+    expect(screen.getByLabelText('已提供的材料').textContent).toContain('套餐截图.png');
+    expect(screen.getByRole('link', { name: '图片 · 套餐截图.png' }).getAttribute('href')).toBe('/api/assistant/materials/m/file');
+  });
+  it('restores unsent materials and the request after remounting', async () => {
+    server();
+    const first = await renderAsk();
+    fireEvent.change(screen.getByLabelText('消息'), { target: { value: '还没发送的要求' } });
+    fireEvent.paste(screen.getByLabelText('消息'), { clipboardData: { files: [new File(['bytes'], '截图.png', { type: 'image/png' })], getData: () => '' } });
+    await waitFor(() => expect(screen.queryByText('重试上传')).toBeNull());
+    await waitFor(() => expect(screen.getByLabelText('待发送材料').textContent).toContain('提供的材料'));
+    first.unmount();
+    await renderAsk();
+    expect(screen.getByLabelText('消息')).toHaveProperty('value', '还没发送的要求');
+    expect(screen.getByLabelText('待发送材料').textContent).toContain('提供的材料');
+  });
+  it('keeps the full failed paste and offers retry before sending', async () => {
+    const fetcher = server();
+    const handler = fetcher.getMockImplementation()!;
+    let attempts = 0;
+    fetcher.mockImplementation(async (url, init) => {
+      if (url === '/api/assistant/materials' && attempts++ === 0) throw new Error('upload offline');
+      return handler(url, init);
+    });
+    await renderAsk();
+    const text = '完整的长文。'.repeat(2000);
+    fireEvent.paste(screen.getByLabelText('消息'), { clipboardData: { files: [], getData: () => text } });
+    expect(await screen.findByText('upload offline')).toBeTruthy();
+    expect(screen.getByRole('button', { name: '发送' })).toHaveProperty('disabled', true);
+    fireEvent.click(screen.getByText('重试上传'));
+    await waitFor(() => expect(screen.queryByText('upload offline')).toBeNull());
+    const uploads = fetcher.mock.calls.filter(([url]) => url === '/api/assistant/materials');
+    expect(uploads.map(([, init]) => (init?.body as FormData).get('text'))).toEqual([text, text]);
+    expect(screen.getByRole('button', { name: '发送' })).toHaveProperty('disabled', false);
+  });
+  it('keeps old attachments in their original conversation when starting a new one', async () => {
+    server();
+    await renderAsk();
+    fireEvent.paste(screen.getByLabelText('消息'), { clipboardData: { files: [], getData: () => '长文'.repeat(5000) } });
+    await waitFor(() => expect(screen.getByLabelText('待发送材料').textContent).toContain('提供的材料'));
+    fireEvent.click(screen.getByText('新对话'));
+    await waitFor(() => expect(screen.queryByLabelText('待发送材料')).toBeNull());
+    fireEvent.click(screen.getByText('历史对话'));
+    fireEvent.click(await screen.findByText('之前的工作'));
+    await waitFor(() => expect(screen.getByLabelText('待发送材料').textContent).toContain('提供的材料'));
+  });
   it('opens long conversations at recent messages and reveals older replies without another request', async () => {
     const fetcher = server({ requests: Array.from({ length: 15 }, (_, index) => ({ id: `r${index}`,
       message: `问题 ${index}`, status: 'completed', result: { answer: `历史回答 ${index}`, actions: [] } })) });

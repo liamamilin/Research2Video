@@ -1,6 +1,6 @@
 """Optional visual sequencing metadata over the unchanged narration timeline."""
 COMPONENTS = {'title_card', 'concept_reveal', 'comparison', 'big_number', 'bar_chart', 'price_change',
-              'source_card', 'data_chart', 'scatter_chart', 'flow_diagram', 'object_showcase', 'material_collage'}
+              'source_card', 'data_chart', 'scatter_chart', 'flow_diagram', 'object_showcase', 'material_collage', 'code_demo'}
 
 
 def flow_schema() -> dict:
