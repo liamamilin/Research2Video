@@ -118,3 +118,16 @@ def test_a_bug_in_polishing_keeps_the_draft(llm, monkeypatch):
     polish.apply(written, None, greeting=GREETING)
     assert written.sections[1]["paragraphs"][0]["text"] == "这条的要点是：按周算。"
     assert written.meta["polish"]["error"].startswith("ZeroDivisionError")
+
+
+def test_stock_memorable_lines_made_up_bridges_and_disclaimer_hedges_are_found():
+    sections = _sections(["如果说上一条讲的是入口，那么这一条讲的是能力。", "最值得记住的是：先看你卡在哪。"],
+                         ["接下来这条处理的是订阅。", "具体额度以你实际界面为准。"])
+    found = polish.findings(sections, greeting=GREETING)
+    assert [(f["id"], f["rule"]) for f in found] == [
+        ("S2P1", "stock_bridge"), ("S2P2", "stock_ending"), ("S3P1", "stock_bridge"), ("S3P2", "hedge")]
+    # a real relation said plainly, and a closing that names the one thing to take away, are left alone
+    assert polish.findings(_sections(["和上一条一样，这也是价格变化。"]), greeting=GREETING) == []
+    closing = _sections()
+    closing[-1]["paragraphs"].insert(0, _p("今天最值得记住的是：额度是钱，不是配额。"))
+    assert polish.findings(closing, greeting=GREETING) == []

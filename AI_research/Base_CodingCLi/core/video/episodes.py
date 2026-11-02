@@ -141,7 +141,7 @@ def brief(topic: dict, *, tutorial: bool = False) -> str:
                 "按实际内容展开，沿用上游给出的命令和结果。" + naming)
     return ("\n\n## 内容组织方式：整期节目\n"
             "本份报告只制作一篇总稿、一条视频。把本期有价值的多个内容按合理顺序充分展开。"
-            "整期共享开场和收尾，各条之间承接转场。每条内容用一个 section，title 为适合导航的短标题，"
+            "整期共享开场和收尾，各条之间按需要衔接。每条内容用一个 section，title 为适合导航的短标题，"
             "该 section 的 paragraphs 按需要展开背景、具体例子、操作过程、机制、结果与影响。"
             "同一内容可以有很多段旁白；不要把每个解释步骤拆成新的内容条目。"
             "开场和收尾各占一个 section。每个 section 加 episode_role：开场 opening、内容 item、收尾 closing。"

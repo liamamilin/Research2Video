@@ -47,20 +47,25 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 6
+PROMPT_VERSION = 7
 #: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
 #: the money stated, no date or programme name.
 TITLE_RULE = ("标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；"
               "标题不写日期，不写栏目名，不用“本期”“今日”开头。")
 #: Viewers barely comment or share; the last words ask them something they can answer.
 ENDING_RULE = "道别前用一个和本期内容直接相关、观众能凭自己经历回答的问题（比如你现在用哪一家、会不会为它付费），邀请大家在评论区说说。"
+#: How the two most-watched videos talk (2026-11-02 review): short lines, a stated judgement, few numbers said aloud.
+STYLE_RULE = ("像对一个懂行的朋友讲：多用短句，可以直接说出你的判断（比如“我的建议是先别升级”）。"
+              "一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数和明细交给画面。"
+              "英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。")
 GOAL = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。"
 AUTHORING_PROMPT = GOAL + """
 当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。
 找到这次讲述最值得听的东西，让开场引起兴趣，让观众随着讲述理解它，并愿意继续听。
 沿用上游给出的数据、计算和结论，把解释篇幅用在事情本身、过程与结果，研究备忘仅作内部取材背景。
 素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧，口播直接讲已有内容，不安排下一轮核实或评测。
-影响观众理解和实际使用的条件随对应内容讲清。"""
+影响观众理解和实际使用的条件随对应内容讲清。
+""" + STYLE_RULE
 SYSTEM_PROMPT = AUTHORING_PROMPT + """
 讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
 让标题说出本期最有意思的具体事情。""" + TITLE_RULE + ENDING_RULE + """
@@ -70,9 +75,9 @@ EPISODE_PROMPT = AUTHORING_PROMPT + """
 你是整期节目的讲述者，一篇总稿覆盖报告中的多个独立内容；同一问题的内容按解释层次组织。
 各条内容分别充分解释，不把本期多个事件缩成一个主事件的几个角度。
 各独立内容使用自己的具体对象、主例子和讲述线索，整期按合理顺序排列；同一问题的解释章节沿用共同主例子。
-整期按节目讲述：开场是本期简报，先用一句话说本期整体看点，再按播出顺序为每条内容单独写一个 paragraph，一两句话说出它的看点，让观众知道接下来会听到什么。
-随后逐条展开。每条开头用一两句承接上一条，说出两条之间的关系、对比或递进，再进入本条，不重新打招呼，也不各自重新设计开场；每条结尾自然收住本条最值得记住的一点，各条措辞各不相同，不套用“这一条的要点是”之类的固定句式。
-收尾串起本期最值得记住的几点。""" + ENDING_RULE + """
+整期按节目讲述：开场用一两句话抛出本期最抓人的那一条，再用一句话报出后面还有哪几条，细节留到正文讲。
+随后逐条展开。两条之间确有关系、对比或递进就用一句话接上；没有就直接切换（比如“再说 Gemini。”），不硬造过渡，不重新打招呼。每条用一句短判断收住，各条措辞不同，不用“最值得记住的是”“这一条的要点是”之类的固定句式。
+收尾只用一两句话落下本期最重要的一个判断，不逐条复述。""" + ENDING_RULE + """
 每个内容一个 section，内部可有多个 paragraphs；episode_role 使用 opening、item、closing。
 整期共用开场和收尾，不受单条视频的篇幅限制。具体看点体现在各内容标题中；整期总标题用本期最值得看的一两条内容来写，""" + TITLE_RULE + """
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}"""
