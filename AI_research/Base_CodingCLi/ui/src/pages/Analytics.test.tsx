@@ -3,12 +3,12 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { loadPlatforms } from "@/api/platforms";
-import { loadAssistantRequest, loadAssistantUsage, loadComparison, loadPerformance, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords, type Usage } from "@/api/telemetry";
+import { loadAssistantRequest, loadAssistantUsage, loadComparison, loadPerformance, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, loadWeeklyReview, purgeRecords, type Usage } from "@/api/telemetry";
 import { useAuthStore } from "@/lib/auth-store";
 import { AnalyticsPage } from "./Analytics";
 import { PlatformsPage } from "./Platforms";
 
-vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadPerformance: vi.fn(), loadAssistantUsage: vi.fn(), loadAssistantRequest: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn() }));
+vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadPerformance: vi.fn(), loadAssistantUsage: vi.fn(), loadAssistantRequest: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn(), loadWeeklyReview: vi.fn() }));
 vi.mock("@/api/platforms", async original => ({ ...await original<typeof import("@/api/platforms")>(), loadPlatforms: vi.fn() }));
 vi.mock("@/components/VideoAnalytics", () => ({ VideoAnalytics: ({ isAdmin, canEdit }: { isAdmin: boolean; canEdit: boolean }) => <div>视频数据面板 {String(isAdmin)} {String(canEdit)}</div> }));
 
@@ -177,4 +177,23 @@ it("sends the old platform-management data link to its new home", async () => {
   show("/platforms?tab=data");
   expect(await screen.findByText("视频数据面板 true true")).toBeTruthy();
   expect(screen.getByRole("tab", { name: /视频数据/ }).getAttribute("aria-selected")).toBe("true");
+});
+
+it("opens the weekly review from the URL, picks another week and keeps gaps apart from plays", async () => {
+  const video = { bvid: "BV1x", title: "ChatGPT 和 Claude 怎么选", pubdate: 1_793_000_000, duration: 300, view: 900, h24: 800, h72: null, h168: null, state: "ok" as const,
+    form: "单篇", matrix: "ChatGPT 获客矩阵", column: "T05 · AI 产品横向选择", structure: "A 价格反差与分任务对决" };
+  const review = { connected: true as const, weeks: [1_793_548_800, 1_792_944_000], start: 1_792_944_000, end: 1_793_548_800, now: 1_793_600_000, min_n: 3, ratio: 2,
+    summary: { videos: 2, ok: 1, pending: 0, gap: 1, median_24h: 800, previous_median_24h: 5, previous_videos: 4, views: 1000, top_share: 0.9 },
+    dimensions: [{ key: "matrix", label: "矩阵", groups: [{ value: "ChatGPT 获客矩阵", videos: 2, measured: 1, median: 800, max: 800, best_title: video.title, previous_median: null, previous_measured: 0, flag: "" as const }] }],
+    top: [video], findings: ["1 条视频在发布后 24 小时附近没有采集快照（采集当时停了），不计入中位数。"], suggestions: [],
+    videos: [video, { ...video, bvid: "BV2y", title: "采集停掉那天的一条", h24: null, state: "gap" as const }] };
+  vi.mocked(loadWeeklyReview).mockResolvedValue(review);
+  show("/analytics?tab=review");
+  expect(await screen.findByText("本周结论")).toBeTruthy();
+  expect(screen.getByText(/没有采集快照/)).toBeTruthy();
+  expect(screen.getByText("采集中断")).toBeTruthy();
+  expect(screen.getAllByText("A 价格反差与分任务对决").length).toBe(2);
+  expect(screen.getByRole("tab", { name: /每周复盘/ }).getAttribute("aria-selected")).toBe("true");
+  fireEvent.change(screen.getByLabelText("复盘的周"), { target: { value: "1793548800" } });
+  await waitFor(() => expect(vi.mocked(loadWeeklyReview).mock.calls.at(-1)?.[0]).toBe(1_793_548_800));
 });

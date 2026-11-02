@@ -84,6 +84,13 @@ def performance(by: str = Query("column_key", pattern="^(column_key|form|matrix|
     return telemetry_performance.load(str(get_settings().paths.config_dir), by, days)
 
 
+@router.get("/weekly-review")
+def weekly(start: Optional[float] = None, user=Depends(require_admin)):
+    """One week's published videos by their 24-hour plays, cut by form, matrix, column, title and timing."""
+    from web.services import weekly_review
+    return weekly_review.load(str(get_settings().paths.config_dir), start)
+
+
 @router.get("/assistant")
 def assistant_usage(days: int = Query(30, ge=0, le=3650), since: Optional[float] = None, until: Optional[float] = None,
                     limit: int = Query(25, ge=1, le=100), offset: int = Query(0, ge=0), user=Depends(require_admin)):

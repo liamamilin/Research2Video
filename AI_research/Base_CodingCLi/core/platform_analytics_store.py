@@ -246,6 +246,16 @@ class AnalyticsStore:
                            "favorite_rate": group["rate_favorites"] / group["rate_views"] if group["rate_views"] else None})
         return sorted(result, key=lambda row: (not row["key"].startswith("matrix:"), -(row["view"] or 0), row["key"]))
 
+    def view_series(self, uid: str, bvids: list[str], *, since: float) -> dict[str, list[tuple[float, int]]]:
+        """Each video's plays as (observed_at, view), oldest first, from ``since`` on: one read for many videos."""
+        out: dict[str, list[tuple[float, int]]] = {bvid: [] for bvid in bvids}
+        with self.connect() as db:
+            for row in db.execute("SELECT bvid,observed_at,json_extract(metrics,'$.view') AS view FROM analytics_snapshots "
+                                  "WHERE uid=? AND observed_at>=? ORDER BY observed_at", (uid, since)):
+                if row["bvid"] in out and type(row["view"]) is int:
+                    out[row["bvid"]].append((row["observed_at"], row["view"]))
+        return out
+
     def history(self, uid: str, bvid: str, *, since: float) -> dict:
         with self.connect() as db:
             baseline = db.execute("SELECT min(observed_at) FROM analytics_snapshots WHERE uid=? AND bvid=?", (uid, bvid)).fetchone()[0]

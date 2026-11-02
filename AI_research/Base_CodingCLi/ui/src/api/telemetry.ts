@@ -85,3 +85,15 @@ export type PurgeResult = { enabled: boolean; cutoff: number; calls: number; spa
 export const loadStorage = (signal?: AbortSignal) => api<StorageStats>(`${BASE}/storage`, { signal });
 export const purgeRecords = (olderThanDays: number, dryRun: boolean) =>
   api<PurgeResult>(`${BASE}/purge`, { method: "POST", body: { older_than_days: olderThanDays, dry_run: dryRun } });
+
+export type ReviewGroup = { value: string; videos: number; measured: number; median: number | null; max: number | null; best_title: string;
+  previous_median: number | null; previous_measured: number; flag: "" | "high" | "low" };
+export type ReviewVideo = { bvid: string; title: string; pubdate: number; duration: number; view: number | null; h24: number | null; h72: number | null; h168: number | null;
+  state: "ok" | "pending" | "gap"; form: string; matrix: string; column: string; structure: string };
+export type WeeklyReview = { connected: false } | {
+  connected: true; weeks: number[]; start: number; end: number; now: number; min_n: number; ratio: number;
+  summary: { videos: number; ok: number; pending: number; gap: number; median_24h: number | null; previous_median_24h: number | null; previous_videos: number; views: number; top_share: number | null };
+  dimensions: { key: string; label: string; groups: ReviewGroup[] }[]; top: ReviewVideo[]; findings: string[]; suggestions: string[]; videos: ReviewVideo[];
+};
+export const loadWeeklyReview = (start: number | null, signal?: AbortSignal) =>
+  api<WeeklyReview>(`${BASE}/weekly-review`, { query: start == null ? {} : { start }, signal });
