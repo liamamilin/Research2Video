@@ -1,6 +1,7 @@
-import { useCallback, useState } from "react";
-import { RefreshCw } from "lucide-react";
-import { loadWeeklyReview, type ReviewGroup } from "@/api/telemetry";
+import { useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Download, RefreshCw } from "lucide-react";
+import { loadWeeklyReview, weeklyReportUrl, type ReviewGroup } from "@/api/telemetry";
 import { usePageResource } from "@/lib/use-page-resource";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "./ErrorState";
@@ -12,6 +13,7 @@ const when = (seconds: number) => new Date(seconds * 1000).toLocaleString("zh-CN
 const num = (value: number | null | undefined) => value == null ? "—" : value.toLocaleString("zh-CN");
 const week = (start: number) => `${day(start)}–${day(start + 6 * 86400)}`;
 const STATE = { pending: "未满 24 小时", gap: "采集中断" } as const;
+const STAGE = { "24h": "24 小时定稿", "7d": "7 天定稿" } as const;
 
 function Groups({ label, groups, minN }: { label: string; groups: ReviewGroup[]; minN: number }) {
   return <section className="card p-4 space-y-3">
@@ -27,20 +29,40 @@ function Groups({ label, groups, minN }: { label: string; groups: ReviewGroup[];
 }
 
 export function WeeklyReview() {
-  const [start, setStart] = useState<number | null>(null);
-  const load = useCallback((signal: AbortSignal) => loadWeeklyReview(start, signal), [start]);
+  // the week and version live in the URL, so a home-board notice can open one saved review directly
+  const [params, setParams] = useSearchParams();
+  const raw = Number(params.get("start"));
+  const start = params.get("start") && Number.isFinite(raw) ? raw : null;
+  const stage = params.get("stage") === "24h" || params.get("stage") === "7d" ? params.get("stage") as string : "";
+  const pick = (next: { start?: number; stage?: string }) => setParams(previous => {
+    const out = new URLSearchParams(previous);
+    if (next.start != null) out.set("start", String(next.start));
+    if (next.stage) out.set("stage", next.stage); else out.delete("stage");
+    return out;
+  });
+  const load = useCallback((signal: AbortSignal) => loadWeeklyReview(start, stage, signal), [start, stage]);
   const { data, error, loading, reload } = usePageResource(load);
   if (error) return <ErrorState error={error} onRetry={reload} compact />;
   if (!data) return <p className="text-sm text-text-muted">正在读取…</p>;
   if (!data.connected) return <ErrorState empty="先在平台管理里连接哔哩哔哩账号" compact />;
+  const current = new Date().getTime() / 1000;
+  const controls = <div className="flex flex-wrap items-center gap-3">
+    <select aria-label="复盘的周" className="input text-xs w-auto" value={data.start} onChange={e => pick({ start: Number(e.target.value) })}>
+      {data.weeks.map(w => <option key={w} value={w}>{week(w)}{w + 7 * 86400 > current ? "（本周，未完）" : ""}</option>)}</select>
+    <select aria-label="复盘的版本" className="input text-xs w-auto" value={data.missing ? stage : data.stage} onChange={e => pick({ start: data.start, stage: e.target.value })}>
+      <option value="">现在重新计算</option>
+      {data.saved.map(v => <option key={v.stage} value={v.stage}>存档 · {STAGE[v.stage]}（{when(v.saved_at)}）</option>)}
+      {data.missing && !data.saved.some(v => v.stage === stage) ? <option value={stage}>存档 · {STAGE[stage as "24h"]}（还没有）</option> : null}</select>
+    {!data.missing && data.stage ? <a className="btn text-xs" href={weeklyReportUrl(data.start, data.stage)}><Download className="w-3.5 h-3.5" />下载报告</a> : null}
+    <button className="btn text-xs ml-auto" disabled={loading} onClick={() => void reload()}><RefreshCw className="w-3.5 h-3.5" />刷新</button>
+  </div>;
+  const archiveNote = "每周的报告和数据快照在数字定稿后自动存档：周一起第 8 天存「24 小时定稿」，第 14 天存「7 天定稿」，存下后不再改写。";
+  if (data.missing) return <div className="space-y-4">{controls}<ErrorState empty="这一周的这个版本还没有存档" compact /><p className="text-xs text-text-muted">{archiveNote}</p></div>;
   const s = data.summary;
   return <div className="space-y-4">
-    <div className="flex flex-wrap items-center gap-3">
-      <select aria-label="复盘的周" className="input text-xs w-auto" value={data.start} onChange={e => setStart(Number(e.target.value))}>
-        {data.weeks.map(w => <option key={w} value={w}>{week(w)}{w + 7 * 86400 > data.now ? "（本周，未完）" : ""}</option>)}</select>
-      <p className="text-xs text-text-muted">按每条视频发布后 24 小时的播放比较，用中位数；一组少于 {data.min_n} 条只列出不下结论，中位数达到整体 {data.ratio} 倍或一半以下记为明显偏高或偏低。</p>
-      <button className="btn text-xs ml-auto" disabled={loading} onClick={() => void reload()}><RefreshCw className="w-3.5 h-3.5" />刷新</button>
-    </div>
+    {controls}
+    <p className="text-xs text-text-muted">{data.stage && data.saved_at ? `这是 ${when(data.saved_at)} 存下的${STAGE[data.stage]}，当时的结论和每条视频的数字都原样保留。` : "这是按现在的数据重新算的。"}
+      按每条视频发布后 24 小时的播放比较，用中位数；一组少于 {data.min_n} 条只列出不下结论，中位数达到整体 {data.ratio} 倍或一半以下记为明显偏高或偏低。{archiveNote}</p>
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       <Card label="本周发布" value={s.videos} note={`有 24h 数据 ${s.ok} 条${s.pending ? `，未满 24 小时 ${s.pending}` : ""}${s.gap ? `，采集中断 ${s.gap}` : ""}`} />
       <Card label="24h 播放中位数" value={num(s.median_24h)} note={`上周 ${num(s.previous_median_24h)}（${s.previous_videos} 条）`} />

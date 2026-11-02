@@ -224,7 +224,11 @@ def run_scheduled(state_dir: str, cancel: threading.Event) -> tuple[str, str, st
         cancel.wait(0.3)
     if cancel.is_set():
         return "cancelled", "采集已取消，已保存分页进度。", None
-    return ("failed", "采集暂时失败，详情见平台管理的视频数据页。", None) if result == "error" else ("success", "", None)
+    if result == "error":
+        return "failed", "采集暂时失败，详情见平台管理的视频数据页。", None
+    from web.services import weekly_review
+    weekly_review.archive_after_collection(state_dir)  # a finished week's review is saved with the numbers just read
+    return "success", "", None
 
 
 def current() -> tuple[Collector, str]:

@@ -8,7 +8,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { AnalyticsPage } from "./Analytics";
 import { PlatformsPage } from "./Platforms";
 
-vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadPerformance: vi.fn(), loadAssistantUsage: vi.fn(), loadAssistantRequest: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn(), loadWeeklyReview: vi.fn() }));
+vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadPerformance: vi.fn(), loadAssistantUsage: vi.fn(), loadAssistantRequest: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn(), loadWeeklyReview: vi.fn(), weeklyReportUrl: (start: number, stage: string) => `/api/telemetry/weekly-review/report?start=${start}&stage=${stage}` }));
 vi.mock("@/api/platforms", async original => ({ ...await original<typeof import("@/api/platforms")>(), loadPlatforms: vi.fn() }));
 vi.mock("@/components/VideoAnalytics", () => ({ VideoAnalytics: ({ isAdmin, canEdit }: { isAdmin: boolean; canEdit: boolean }) => <div>视频数据面板 {String(isAdmin)} {String(canEdit)}</div> }));
 
@@ -182,7 +182,7 @@ it("sends the old platform-management data link to its new home", async () => {
 it("opens the weekly review from the URL, picks another week and keeps gaps apart from plays", async () => {
   const video = { bvid: "BV1x", title: "ChatGPT 和 Claude 怎么选", pubdate: 1_793_000_000, duration: 300, view: 900, h24: 800, h72: null, h168: null, state: "ok" as const,
     form: "单篇", matrix: "ChatGPT 获客矩阵", column: "T05 · AI 产品横向选择", structure: "A 价格反差与分任务对决" };
-  const review = { connected: true as const, weeks: [1_793_548_800, 1_792_944_000], start: 1_792_944_000, end: 1_793_548_800, now: 1_793_600_000, min_n: 3, ratio: 2,
+  const review = { connected: true as const, weeks: [1_793_548_800, 1_792_944_000], saved: [], stage: "" as const, start: 1_792_944_000, end: 1_793_548_800, now: 1_793_600_000, min_n: 3, ratio: 2,
     summary: { videos: 2, ok: 1, pending: 0, gap: 1, median_24h: 800, previous_median_24h: 5, previous_videos: 4, views: 1000, top_share: 0.9 },
     dimensions: [{ key: "matrix", label: "矩阵", groups: [{ value: "ChatGPT 获客矩阵", videos: 2, measured: 1, median: 800, max: 800, best_title: video.title, previous_median: null, previous_measured: 0, flag: "" as const }] }],
     top: [video], findings: ["1 条视频在发布后 24 小时附近没有采集快照（采集当时停了），不计入中位数。"], suggestions: [],
@@ -195,5 +195,20 @@ it("opens the weekly review from the URL, picks another week and keeps gaps apar
   expect(screen.getAllByText("A 价格反差与分任务对决").length).toBe(2);
   expect(screen.getByRole("tab", { name: /每周复盘/ }).getAttribute("aria-selected")).toBe("true");
   fireEvent.change(screen.getByLabelText("复盘的周"), { target: { value: "1793548800" } });
-  await waitFor(() => expect(vi.mocked(loadWeeklyReview).mock.calls.at(-1)?.[0]).toBe(1_793_548_800));
+  await waitFor(() => expect(vi.mocked(loadWeeklyReview).mock.calls.at(-1)?.slice(0, 2)).toEqual([1_793_548_800, ""]));
+});
+
+it("opens a saved week from a notice link and offers its report", async () => {
+  vi.mocked(loadWeeklyReview).mockImplementation(async (_start, stage) => stage
+    ? { connected: true, weeks: [1_792_944_000], saved: [{ start: 1_792_944_000, stage: "24h", saved_at: 1_793_640_000, findings: 2, suggestions: 1 }], stage: "24h", saved_at: 1_793_640_000,
+      start: 1_792_944_000, end: 1_793_548_800, now: 1_793_640_000, min_n: 3, ratio: 2,
+      summary: { videos: 0, ok: 0, pending: 0, gap: 0, median_24h: null, previous_median_24h: null, previous_videos: 0, views: 0, top_share: null },
+      dimensions: [], top: [], findings: ["存下时的结论"], suggestions: ["存下时的建议"], videos: [] }
+    : { connected: true, missing: true, start: 1_792_944_000, weeks: [1_792_944_000], saved: [] });
+  show("/analytics?tab=review&start=1792944000&stage=24h");
+  expect(await screen.findByText("存下时的结论")).toBeTruthy();
+  expect(vi.mocked(loadWeeklyReview).mock.calls[0].slice(0, 2)).toEqual([1_792_944_000, "24h"]);
+  expect(screen.getByRole("link", { name: /下载报告/ }).getAttribute("href")).toContain("/weekly-review/report?start=1792944000&stage=24h");
+  fireEvent.change(screen.getByLabelText("复盘的版本"), { target: { value: "" } });
+  expect(await screen.findByText("这一周的这个版本还没有存档")).toBeTruthy();
 });

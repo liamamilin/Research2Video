@@ -6,6 +6,7 @@ import time
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.responses import PlainTextResponse
 
 from core import telemetry
 from core.telemetry import ingest, pricing, query, retention
@@ -85,10 +86,24 @@ def performance(by: str = Query("column_key", pattern="^(column_key|form|matrix|
 
 
 @router.get("/weekly-review")
-def weekly(start: Optional[float] = None, user=Depends(require_admin)):
-    """One week's published videos by their 24-hour plays, cut by form, matrix, column, title and timing."""
+def weekly(start: Optional[float] = None, stage: str = Query("", pattern="^(|24h|7d)$"), user=Depends(require_admin)):
+    """One week's published videos by their 24-hour plays, cut by form, matrix, column, title and timing: computed
+    now, or as saved once its figures were final (``stage``)."""
     from web.services import weekly_review
-    return weekly_review.load(str(get_settings().paths.config_dir), start)
+    paths = get_settings().paths
+    return weekly_review.load(str(paths.config_dir), str(paths.state_dir), start, stage)
+
+
+@router.get("/weekly-review/report", response_class=PlainTextResponse)
+def weekly_report(start: float, stage: str = Query(..., pattern="^(24h|7d)$"), user=Depends(require_admin)):
+    """A saved week's report as Markdown, for download."""
+    from core.weekly_review_store import ReviewStore
+    from pathlib import Path
+    path = Path(ReviewStore(str(get_settings().paths.state_dir)).report_path(start, stage))
+    if not path.is_file():
+        raise HTTPException(404, "这一周还没有存档")
+    return PlainTextResponse(path.read_text(encoding="utf-8"), media_type="text/markdown; charset=utf-8",
+                             headers={"Content-Disposition": f'attachment; filename="weekly-review-{path.stem}.md"'})
 
 
 @router.get("/assistant")

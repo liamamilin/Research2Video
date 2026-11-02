@@ -227,12 +227,30 @@ def analytics_alerts(now: float) -> list[dict]:
                    link)]
 
 
+def review_notices(now: float) -> list[dict]:
+    """A week's review saved in the last week: say it is there to read (acknowledging it clears it)."""
+    from core.weekly_review_store import ReviewStore
+
+    out = []
+    for kept in ReviewStore(get_settings().paths.state_dir).saved():
+        if kept["stage"] != "24h" or now - kept["saved_at"] > WINDOW_DAYS * 86400:
+            continue
+        week = time.strftime("%m-%d", time.localtime(kept["start"]))
+        s = kept["summary"]
+        median = "—" if s.get("median_24h") is None else f"{s['median_24h']:g}"
+        out.append(_alert(f"review:{kept['start']:.0f}:{kept['stage']}", "review_saved", kept["saved_at"],
+                          f"{week} 这周的复盘已存档：{kept['findings']} 条结论、{kept['suggestions']} 条建议",
+                          f"发布 {s.get('videos', 0)} 条，24 小时播放中位数 {median}。",
+                          f"/analytics?tab=review&start={kept['start']:.0f}&stage=24h"))
+    return out
+
+
 def alerts(now: Optional[float] = None, *, include_acked: bool = False) -> list[dict]:
     """Everything that went wrong on its own in the last week, newest first, minus what the user acknowledged."""
     now = time.time() if now is None else now
     since = now - WINDOW_DAYS * 86400
     out = (job_alerts(since) + batch_alerts(since, now) + plan_alerts(now) + round_alerts(since) + cap_alerts(now)
-           + analytics_alerts(now))
+           + analytics_alerts(now) + review_notices(now))
     if not include_acked:
         acked = ap.acked_alerts()
         out = [a for a in out if a["key"] not in acked]

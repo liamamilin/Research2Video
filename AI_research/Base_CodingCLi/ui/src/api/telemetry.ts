@@ -89,11 +89,14 @@ export const purgeRecords = (olderThanDays: number, dryRun: boolean) =>
 export type ReviewGroup = { value: string; videos: number; measured: number; median: number | null; max: number | null; best_title: string;
   previous_median: number | null; previous_measured: number; flag: "" | "high" | "low" };
 export type ReviewVideo = { bvid: string; title: string; pubdate: number; duration: number; view: number | null; h24: number | null; h72: number | null; h168: number | null;
-  state: "ok" | "pending" | "gap"; form: string; matrix: string; column: string; structure: string };
-export type WeeklyReview = { connected: false } | {
-  connected: true; weeks: number[]; start: number; end: number; now: number; min_n: number; ratio: number;
+  state: "ok" | "pending" | "gap"; form: string; matrix: string; column: string; structure: string; metrics?: Record<string, number> };
+export type SavedReview = { start: number; stage: "24h" | "7d"; saved_at: number; findings: number; suggestions: number };
+export type WeeklyReview = { connected: false } | { connected: true; missing: true; start: number; weeks: number[]; saved: SavedReview[] } | {
+  connected: true; missing?: undefined; weeks: number[]; saved: SavedReview[]; stage: "" | "24h" | "7d"; saved_at?: number;
+  start: number; end: number; now: number; min_n: number; ratio: number;
   summary: { videos: number; ok: number; pending: number; gap: number; median_24h: number | null; previous_median_24h: number | null; previous_videos: number; views: number; top_share: number | null };
   dimensions: { key: string; label: string; groups: ReviewGroup[] }[]; top: ReviewVideo[]; findings: string[]; suggestions: string[]; videos: ReviewVideo[];
 };
-export const loadWeeklyReview = (start: number | null, signal?: AbortSignal) =>
-  api<WeeklyReview>(`${BASE}/weekly-review`, { query: start == null ? {} : { start }, signal });
+export const loadWeeklyReview = (start: number | null, stage: string, signal?: AbortSignal) =>
+  api<WeeklyReview>(`${BASE}/weekly-review`, { query: { ...(start == null ? {} : { start }), ...(stage ? { stage } : {}) }, signal });
+export const weeklyReportUrl = (start: number, stage: string) => `${BASE}/weekly-review/report?start=${start}&stage=${stage}`;

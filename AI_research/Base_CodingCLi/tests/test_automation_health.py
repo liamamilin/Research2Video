@@ -224,3 +224,16 @@ def test_pausing_the_collector_from_the_scheduler_is_a_deliberate_pause(platform
         assert response.status_code == 200
         assert AnalyticsStore(str(platform_env / "state")).account("123")["enabled"] == flag
         assert health.analytics_alerts(time.time()) == []
+
+
+def test_a_week_saved_in_the_last_week_is_announced_once(jobs):
+    from core.weekly_review_store import ReviewStore
+    from tests.test_weekly_review import MONDAY, _saved_review
+    from web.settings import get_settings
+    store = ReviewStore(get_settings().paths.state_dir)
+    store.save(_saved_review(MONDAY), "24h", now=MONDAY + 8 * 86400)
+    store.save(_saved_review(MONDAY), "7d", now=MONDAY + 14 * 86400)  # the 7-day copy is kept without a second notice
+    notices = [a for a in health.alerts(now=MONDAY + 9 * 86400) if a["kind"] == "review_saved"]
+    assert [(a["title"], a["link"]) for a in notices] == [
+        ("10-26 这周的复盘已存档：1 条结论、0 条建议", f"/analytics?tab=review&start={MONDAY:.0f}&stage=24h")]
+    assert not [a for a in health.alerts(now=MONDAY + 16 * 86400) if a["kind"] == "review_saved"]

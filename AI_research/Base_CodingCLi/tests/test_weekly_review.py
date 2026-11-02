@@ -92,3 +92,51 @@ def test_view_series_reads_many_videos_at_once(tmp_path):
         for bvid, at, view in (("BV1", 10, 1), ("BV1", 20, 3), ("BV2", 15, 7), ("BV3", 15, 9), ("BV1", 5, 0)):
             db.execute("INSERT INTO analytics_snapshots VALUES ('u',?,?,?,'catalog')", (bvid, at, json.dumps({"view": view})))
     assert store.view_series("u", ["BV1", "BV2"], since=8) == {"BV1": [(10, 1), (20, 3)], "BV2": [(15, 7)]}
+
+
+def _saved_review(start, findings=("一条结论",)):
+    pub = start + 12 * H
+    review = wr.review([_video("v1", pub, 40, title="ChatGPT | 定价"), _video("v2", pub, 4)], start, now=start + 8 * 86400)
+    review["findings"] = list(findings)
+    return review
+
+
+def test_store_keeps_report_and_numbers_and_never_rewrites(tmp_path):
+    from core.weekly_review_store import ReviewStore
+    store = ReviewStore(str(tmp_path))
+    assert store.save(_saved_review(MONDAY), "24h", now=MONDAY + 8 * 86400)
+    assert not store.save(_saved_review(MONDAY, findings=("改过的",)), "24h", now=MONDAY + 9 * 86400)
+    kept = store.get(MONDAY, "24h")
+    assert kept["findings"] == ["一条结论"] and kept["saved_at"] == MONDAY + 8 * 86400
+    assert {v["bvid"]: v["h24"] for v in kept["videos"]} == {"v1": 40, "v2": 4}
+    report = (tmp_path / "weekly_reviews" / "2026-10-26_24h.md").read_text(encoding="utf-8")
+    assert report.startswith("# 每周复盘 2026-10-26 至 2026-11-01（24 小时定稿）")
+    assert "- 一条结论" in report and "ChatGPT ｜ 定价" in report  # a pipe in a title does not break the table
+    assert store.saved() == [{"start": MONDAY, "stage": "24h", "saved_at": MONDAY + 8 * 86400, "summary": kept["summary"],
+                              "findings": 1, "suggestions": 0}]
+
+
+def test_archive_saves_each_stage_once_it_is_final(tmp_path, monkeypatch):
+    from web.services import weekly_review as service
+    pub = MONDAY + 12 * H
+    gathered = []
+    monkeypatch.setattr(service.platform_analytics, "current", lambda: (None, "u"))
+    monkeypatch.setattr(service, "_gather", lambda config_dir, collector, uid: gathered.append(1) or [_video("v1", pub, 40)])
+    monkeypatch.setattr(service, "_weeks_since", lambda now: [w for w in (MONDAY, MONDAY - 7 * 86400) if w < wr.week_start(now)])
+
+    # the week before is final at both stages; this week's Sunday videos are not a day old yet
+    assert service.archive_due("cfg", str(tmp_path), now=MONDAY + 7 * 86400 + H) == [(MONDAY - 7 * 86400, "24h"), (MONDAY - 7 * 86400, "7d")]
+    assert service.archive_due("cfg", str(tmp_path), now=MONDAY + 8 * 86400) == [(MONDAY, "24h")]
+    calls = len(gathered)
+    assert service.archive_due("cfg", str(tmp_path), now=MONDAY + 9 * 86400) == []
+    assert len(gathered) == calls  # nothing due: the videos are not even read
+    assert service.archive_due("cfg", str(tmp_path), now=MONDAY + 14 * 86400) == [(MONDAY, "7d")]
+    empty = service.ReviewStore(str(tmp_path)).get(MONDAY - 7 * 86400, "24h")
+    assert empty["summary"]["videos"] == 0  # a week with nothing published is kept as such
+
+
+def test_collection_survives_a_review_that_cannot_be_saved(monkeypatch, caplog):
+    from web.services import weekly_review as service
+    monkeypatch.setattr(service, "archive_due", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
+    service.archive_after_collection("unused")
+    assert "could not be saved" in caplog.text

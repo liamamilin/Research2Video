@@ -76,7 +76,7 @@ def _measure(video: dict, now: float) -> dict:
     windows = {f"h{h}": views_at(snaps, video["pubdate"], h, now) for h in WINDOWS}
     title = video.get("title") or ""
     return {"bvid": video["bvid"], "title": title, "pubdate": video["pubdate"], "duration": video.get("duration") or 0,
-            "view": video.get("view"),
+            "view": video.get("view"), "metrics": video.get("metrics") or {},
             **{key: value for key, (_, value) in windows.items()}, "state": windows["h24"][0],
             "form": video.get("form") or "未标注", "matrix": video.get("matrix") or "未标注",
             "column": video.get("column") or "未标注", "structure": video.get("structure") or "",
@@ -146,8 +146,8 @@ def _findings(dimensions: list[dict], overall: Optional[float], counts: dict) ->
 def review(videos: list[dict], start: float, now: float) -> dict:
     """The review of the week starting ``start`` (local Monday 00:00), compared with the week before.
 
-    ``videos`` are published workflow videos: bvid, title, pubdate, duration, view (current plays), snapshots
-    [(observed_at, plays)], form, matrix, column, structure."""
+    ``videos`` are published workflow videos: bvid, title, pubdate, duration, view (current plays), metrics (current
+    counters), snapshots [(observed_at, plays)], form, matrix, column, structure."""
     end = start + 7 * 86400
     measured = [_measure(v, now) for v in videos if start - 7 * 86400 <= v["pubdate"] < end]
     items = [i for i in measured if i["pubdate"] >= start]
