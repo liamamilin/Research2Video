@@ -7,8 +7,10 @@ export type BilibiliCategoryCatalog = { categories: BilibiliCategory[]; updated_
 export const loadBilibiliCategories = (signal: AbortSignal) => api<BilibiliCategoryCatalog>(`${PLATFORM_API}/categories`, { signal });
 export type FirstComment = { enabled: boolean; text: string; pin: boolean };
 export const EMPTY_FIRST_COMMENT: FirstComment = { enabled: false, text: "", pin: false };
-export type PlatformSettings = { auto_upload: boolean; sync_comments: boolean; tid: number; auto_since?: number; first_comment?: FirstComment };
-export type UploadPayload = { render_id: string; title: string; description: string; tags: string[]; tid: number; first_comment?: FirstComment };
+export type PublishWindow = { enabled: boolean; start: number; end: number; spacing: number };
+export const DEFAULT_PUBLISH_WINDOW: PublishWindow = { enabled: true, start: 12, end: 18, spacing: 20 };
+export type PlatformSettings = { auto_upload: boolean; sync_comments: boolean; tid: number; auto_since?: number; first_comment?: FirstComment; publish_window?: PublishWindow };
+export type UploadPayload = { render_id: string; title: string; description: string; tags: string[]; tid: number; first_comment?: FirstComment; dtime?: number };
 export type UploadPreview = UploadPayload & { adaptation?: PublishAdaptationResult; account_uid?: string; draft?: { payload: Partial<UploadPayload>; render_id: string } | null; warnings: string[]; credibility: { text: string }; freshness_warnings: string[]; existing_upload?: UploadTask | null };
 export type UploadTask = { id: string; render_id: string; script_id: string; version: number; status: string; bvid: string; error: string; created_at: number; payload: UploadPayload;
   recovery?: { phase?: string; attempt?: number; note?: string; lookup_count?: number; last_checked_at?: number; next_lookup_at?: number };

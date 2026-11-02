@@ -64,6 +64,7 @@ class PlatformStore:
             row = conn.execute("SELECT data FROM settings WHERE id=1").fetchone()
         return {"auto_upload": False, "auto_since": 0, "tid": 0, "tid_by_matrix": {},
                 "first_comment": {"enabled": False, "text": "", "pin": False},
+                "publish_window": {"enabled": True, "start": 12, "end": 18, "spacing": 20},
                 "sync_comments": False, **(json.loads(row[0]) if row else {})}
 
     def save_settings(self, patch: dict) -> dict:
@@ -153,6 +154,18 @@ class PlatformStore:
             return bool(conn.execute("UPDATE uploads SET status='SUBMITTED',bvid=?,error='',updated_at=? "
                                      "WHERE id=? AND uid=? AND status='UNKNOWN' AND bvid=''",
                                      (bvid, time.time(), task_id, uid)).rowcount)
+
+    def schedule_upload(self, task_id: str, dtime: int | None) -> bool:
+        """Record the scheduled publish time on a task still waiting in the queue."""
+        with self.connect(write=True) as conn:
+            row = conn.execute("SELECT payload FROM uploads WHERE id=? AND status='QUEUED'", (task_id,)).fetchone()
+            if not row:
+                return False
+            payload = {k: v for k, v in json.loads(row[0]).items() if k != "dtime"}
+            if dtime:
+                payload["dtime"] = int(dtime)
+            return bool(conn.execute("UPDATE uploads SET payload=? WHERE id=? AND status='QUEUED'",
+                                     (json.dumps(payload, ensure_ascii=False), task_id)).rowcount)
 
     def update_upload(self, task_id: str, *, status: str, error: str = "", bvid: str = "", expected: str | None = None) -> bool:
         with self.connect(write=True) as conn:

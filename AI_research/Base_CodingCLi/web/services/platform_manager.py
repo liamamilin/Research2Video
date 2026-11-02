@@ -7,7 +7,7 @@ import json
 import logging
 import time
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from core.platform_store import PlatformStore
@@ -250,6 +250,38 @@ def upload_task(task_id: str) -> dict:
     return row
 
 
+SCHEDULE_LEAD = 4.5 * 3600  # biliup needs dtime more than 4 hours after submission; the rest covers the upload
+
+
+def publish_at(now: float, window: dict, taken: list[float]) -> int | None:
+    """Publish time for an automatic upload: now inside the window, else the next free slot in it."""
+    if not window.get("enabled"):
+        return None
+    start, end = int(window.get("start", 12)), int(window.get("end", 18))
+    spacing = max(1, int(window.get("spacing") or 20)) * 60
+    if not 0 <= start < end <= 24:
+        return None
+    local = datetime.fromtimestamp(now).astimezone()
+    if start <= local.hour < end:
+        return None
+    earliest = now + SCHEDULE_LEAD
+    midnight = local.replace(hour=0, minute=0, second=0, microsecond=0)
+    for offset in range(8):
+        day = midnight + timedelta(days=offset)
+        slot, close = (day + timedelta(hours=start)).timestamp(), (day + timedelta(hours=end)).timestamp()
+        if slot < earliest:
+            slot += -(-(earliest - slot) // spacing) * spacing
+        while slot < close:
+            if all(abs(slot - t) >= spacing for t in taken):
+                return int(slot)
+            slot += spacing
+    return int(earliest)
+
+
+def scheduled_note(dtime: float) -> str:
+    return "定时发布：将于 " + datetime.fromtimestamp(dtime).astimezone().strftime("%m-%d %H:%M") + " 公开。"
+
+
 def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
     owner = uid()
     if payload.get("account_uid") and payload["account_uid"] != owner:
@@ -414,7 +446,9 @@ def reconcile(task_id: str, bvid: str) -> dict:
         raise Error("只能为当前账号待核对的投稿回填 BV 号。")
     info = client(row["uid"]).owned_video(bvid, row["uid"])
     if info.get("state") != 0:
-        db.update_upload(task_id, status="SUBMITTED", bvid=bvid, error="平台尚未公开这条投稿，请在创作中心查看审核状态。")
+        dtime = float(row["payload"].get("dtime") or 0)
+        db.update_upload(task_id, status="SUBMITTED", bvid=bvid, error=scheduled_note(dtime) if dtime > time.time() else
+                         "平台尚未公开这条投稿，请在创作中心查看审核状态。")
         return db.get_upload(task_id)
     db.watch(uid(), bvid, info.get("title", bvid))
     url = f"https://www.bilibili.com/video/{bvid}"
@@ -585,6 +619,14 @@ def tick() -> None:
             except Error as exc:
                 db.update_upload(task["id"], status="FAILED", error=str(exc), expected="QUEUED")
                 return
+            if task["payload"].get("automatic"):
+                now = time.time()
+                taken = [float(u["payload"]["dtime"]) for u in db.pending_uploads(owner)
+                         if u["id"] != task["id"] and float(u["payload"].get("dtime") or 0) > now]
+                dtime = publish_at(now, config.get("publish_window") or {}, taken)
+                if not db.schedule_upload(task["id"], dtime):
+                    return
+                task = db.get_upload(task["id"])
             if not db.update_upload(task["id"], status="UPLOADING", expected="QUEUED"):
                 return
             db.update_recovery(task["id"], {"started_at": time.time(), "phase": "upload",
@@ -592,7 +634,8 @@ def tick() -> None:
             credential = credentials()
             try:
                 bvid = bilibili.upload(credential, video_render.safe_file(render, "video.mp4"), {**task["payload"], "cover": str(cover)}, work_dir)
-                db.update_upload(task["id"], status="SUBMITTED", bvid=bvid)
+                dtime = task["payload"].get("dtime")
+                db.update_upload(task["id"], status="SUBMITTED", bvid=bvid, error=scheduled_note(dtime) if dtime else "")
             except bilibili.UploadFailed as exc:
                 db.update_upload(task["id"], status="FAILED", error=str(exc))
             except Error as exc:
@@ -611,6 +654,8 @@ def tick() -> None:
         _recover_unknown_uploads(owner)
         # Submission acceptance isn't publication. Keep polling until the owned video becomes public.
         for task in db.pending_uploads(owner):
+            if float(task["payload"].get("dtime") or 0) > time.time():
+                continue  # scheduled: the platform keeps it private until then
             if task["status"] == "SUBMITTED" and task["updated_at"] < time.time() - 60:
                 try:
                     reconcile(task["id"], task["bvid"])

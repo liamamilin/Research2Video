@@ -394,6 +394,8 @@ def upload(credentials: dict, video_path: Path, payload: dict, work_dir: Path) -
                 "--tid", str(payload["tid"]), "--title", payload["title"], "--desc", payload["description"],
                 "--tag", ",".join(payload["tags"])]
         args += ["--cover", str(cover)]
+        if payload.get("dtime"):  # scheduled publish; the platform requires more than 4 hours ahead
+            args += ["--dtime", str(int(payload["dtime"]))]
         args += ["--", str(video_path.resolve())]
         from web.services.bilibili_recovery import failure_evidence
 

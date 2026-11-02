@@ -550,6 +550,10 @@ def test_biliup_arguments_use_web_submission_and_a_private_cookie_snapshot(platf
     assert result == BV
     assert calls[1][3:6] == ["upload", "--submit", "web"]
     assert "--" in calls[1] and "--tid" in calls[1]
+    assert "--dtime" not in calls[1]
+    bilibili.upload(native_credentials(), video_render.safe_file(row, "video.mp4"), {**PAYLOAD, "dtime": 1793592000}, manager.directory())
+    assert calls[-1][calls[-1].index("--dtime") + 1] == "1793592000"
+    assert calls[-1].index("--dtime") < calls[-1].index("--")
 
 
 def test_native_preflight_error_is_actionable_private_and_never_uploads(platform_env, monkeypatch):
@@ -795,3 +799,72 @@ def test_automatic_upload_reads_the_offset_renders_record_and_skips_the_backlog(
     monkeypatch.setattr(manager, "store", lambda: db)
     manager.tick()
     assert [task["render_id"] for task in db.uploads("123")] == [new["id"]]
+
+
+WINDOW = {"enabled": True, "start": 12, "end": 18, "spacing": 20}
+
+
+def _at(hour, minute=0, day=2):
+    return datetime(2026, 11, day, hour, minute).timestamp()  # local time, like the window
+
+
+def test_publish_window_keeps_daytime_uploads_and_schedules_the_rest():
+    assert manager.publish_at(_at(14), WINDOW, []) is None
+    assert manager.publish_at(_at(2), {**WINDOW, "enabled": False}, []) is None
+    assert manager.publish_at(_at(2), WINDOW, []) == _at(12)
+    # Too close to the window for the platform's 4-hour minimum: the first slot after the lead time.
+    assert manager.publish_at(_at(10), WINDOW, []) == _at(14, 40)
+    assert manager.publish_at(_at(20), WINDOW, []) == _at(12, day=3)
+    # Several overnight renders are spread out instead of all going public at noon.
+    assert manager.publish_at(_at(2), WINDOW, [_at(12), _at(12, 20)]) == _at(12, 40)
+    full = [_at(12) + i * 1200 for i in range(18)]
+    assert manager.publish_at(_at(2), WINDOW, full) == _at(12, day=3)
+
+
+def test_overnight_automatic_upload_is_scheduled_and_waits_until_public(platform_env, monkeypatch):
+    row = render()
+    manager.store().save_settings({"auto_upload": True, "tid": 188})
+    manager.store().save_settings({"auto_since": 0})
+    pack = {**PAYLOAD, "credibility": {"tier": "trusted"}, "warnings": [], "freshness_warnings": []}
+    monkeypatch.setattr(manager, "preview", lambda _: pack)
+    when = int(time.time()) + 5 * 3600
+    seen = []
+    monkeypatch.setattr(manager, "publish_at", lambda now, window, taken: seen.append((window, taken)) or when)
+    sent = []
+    monkeypatch.setattr(bilibili, "upload", lambda credential, video, payload, folder: sent.append(payload) or BV)
+    monkeypatch.setattr(bilibili.BilibiliClient, "owned_video", lambda *args: pytest.fail("not public before its time"))
+    manager.tick()
+    [task] = manager.store().uploads("123")
+    assert sent[0]["dtime"] == when and seen[0][0] == WINDOW
+    assert task["status"] == "SUBMITTED" and task["error"].startswith("定时发布：将于")
+    monkeypatch.setattr(manager.time, "time", lambda: when - 120)
+    manager.tick()  # still before its time: no polling
+    monkeypatch.setattr(bilibili.BilibiliClient, "owned_video", lambda *args: {"title": "测试视频", "state": -40})
+    assert manager.reconcile(task["id"], BV)["error"].startswith("定时发布")
+    monkeypatch.setattr(manager.time, "time", lambda: when + 120)
+    assert "审核状态" in manager.reconcile(task["id"], BV)["error"]
+    monkeypatch.setattr(bilibili.BilibiliClient, "owned_video", lambda *args: {"title": "测试视频", "state": 0, "pubdate": when})
+    assert manager.reconcile(task["id"], BV)["status"] == "PUBLISHED"
+    assert video_store.list_publications(row["script_id"])[0]["published_on"] == datetime.fromtimestamp(when).date().isoformat()
+
+
+def test_manual_uploads_are_never_scheduled(platform_env, monkeypatch):
+    row = render()
+    task = manager.enqueue(row["id"], PAYLOAD)
+    monkeypatch.setattr(manager, "publish_at", lambda *args: pytest.fail("manual uploads publish now"))
+    sent = []
+    monkeypatch.setattr(bilibili, "upload", lambda credential, video, payload, folder: sent.append(payload) or BV)
+    manager.tick()
+    assert "dtime" not in sent[0] and manager.store().get_upload(task["id"])["error"] == ""
+
+
+def test_publish_window_is_saved_and_validated(platform_env, client):
+    _login(client, "admin", "admin-pass-123")
+    headers = _csrf(client)
+    body = {"auto_upload": False, "sync_comments": False, "tid": 231}
+    assert client.put("/api/platforms/bilibili/settings", json=body, headers=headers).json()["publish_window"] == WINDOW
+    evening = {"enabled": True, "start": 18, "end": 22, "spacing": 30}
+    assert client.put("/api/platforms/bilibili/settings", json={**body, "publish_window": evening}, headers=headers).json()["publish_window"] == evening
+    assert client.put("/api/platforms/bilibili/settings", json=body, headers=headers).json()["publish_window"] == evening
+    bad = client.put("/api/platforms/bilibili/settings", json={**body, "publish_window": {**evening, "start": 22}}, headers=headers)
+    assert bad.status_code == 422

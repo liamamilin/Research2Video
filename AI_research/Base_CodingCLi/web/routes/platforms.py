@@ -30,6 +30,13 @@ class FirstCommentIn(Input):
     pin: bool = False
 
 
+class PublishWindowIn(Input):
+    enabled: bool = True
+    start: int = Field(default=12, ge=0, le=23)
+    end: int = Field(default=18, ge=1, le=24)
+    spacing: int = Field(default=20, ge=5, le=180)
+
+
 class SettingsIn(Input):
     auto_upload: bool
     sync_comments: bool
@@ -37,6 +44,8 @@ class SettingsIn(Input):
     tid_by_matrix: dict[Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{0,23}$")], Annotated[int, Field(ge=1, le=65535)]] | None = Field(
         default=None, description="按矩阵指定投稿分区；未列出的矩阵用默认分区 tid。省略时保留原设置。")
     first_comment: FirstCommentIn = Field(default_factory=FirstCommentIn)
+    publish_window: PublishWindowIn | None = Field(
+        default=None, description="自动投稿的公开时段；时段外完成的成片定时到下一个时段公开。省略时保留原设置。")
 
 
 class UploadIn(Input):
@@ -163,6 +172,10 @@ def settings(body: SettingsIn, user=Depends(require_admin)) -> dict:
         if body.tid < 1 or not bilibili.biliup_binary():
             raise HTTPException(409, detail=ApiError.make("platform_not_ready", "自动投稿需要连接账号、安装 biliup 并选择默认投稿分区。"))
     patch = body.model_dump(exclude_unset=True)
+    if patch.get("publish_window", 0) is None:
+        del patch["publish_window"]
+    elif body.publish_window and body.publish_window.start >= body.publish_window.end:
+        raise HTTPException(422, detail=ApiError.make("invalid_publish_window", "发布时段的开始时间需早于结束时间。"))
     if "first_comment" in patch:
         if body.first_comment.enabled:
             call(manager.uid)
