@@ -56,11 +56,54 @@ def _task(row: dict, operation_id: str, index: int) -> dict:
     return result
 
 
+MATERIAL_CHARS = 16000
+
+
+def _matrix_detail(result: dict, operation_id: str) -> dict:
+    """A matrix read without its members' token counters, which dwarf everything else and answer nothing asked."""
+    members = result.get('members')
+    if not isinstance(members, list) or not any(
+            isinstance(m, dict) and isinstance(m.get('state'), dict) and 'last_usage' in m['state'] for m in members):
+        return result
+    view = deepcopy(result)
+    for member in view['members']:
+        if isinstance(member, dict) and isinstance(member.get('state'), dict):
+            member['state'].pop('last_usage', None)
+    view['_model_view'] = {'operation_id': operation_id, 'fields': 'members[].state.last_usage omitted',
+                           'fields_complete': False,
+                           'detail_read': {'operation_id': operation_id, 'result_path': '/members'}}
+    return view
+
+
+def _materials(result: dict, operation_id: str) -> dict:
+    """Long extracted text is given a page at a time; next_read continues it from the stored receipt."""
+    materials = result.get('materials')
+    if not isinstance(materials, list) or not any(
+            isinstance(m, dict) and isinstance(m.get('text'), str) and len(m['text']) > MATERIAL_CHARS for m in materials):
+        return result
+    view = deepcopy(result)
+    for index, material in enumerate(view['materials']):
+        text = material.get('text') if isinstance(material, dict) else None
+        if not isinstance(text, str) or len(text) <= MATERIAL_CHARS:
+            continue
+        material['text'] = text[:MATERIAL_CHARS]
+        # Offsets count the stored JSON string, opening quote included, so this one resumes right after the page.
+        material['_model_view'] = {
+            'text_chars': len(text), 'shown_chars': MATERIAL_CHARS, 'complete': False,
+            'next_read': {'operation_id': operation_id, 'result_path': f'/materials/{index}/text',
+                          'offset': len(dumps(text[:MATERIAL_CHARS])) - 1, 'max_chars': MATERIAL_CHARS}}
+    return view
+
+
 def model_result(tool: str, arguments: dict, result: dict, operation_id: str | None,
                  *, index_offset: int = 0) -> dict:
     """Project only known list tools. Detail reads, writes and small results are untouched."""
     if not operation_id or not isinstance(result, dict) or len(dumps(result)) < 8000:
         return result
+    if tool == 'query_matrices' and arguments.get('key'):
+        return _matrix_detail(result, operation_id)
+    if tool == 'read_materials':
+        return _materials(result, operation_id)
     field, limit = None, 20
     if tool == 'list_jobs':
         field, limit = 'items', 40
