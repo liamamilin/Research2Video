@@ -72,6 +72,14 @@ class AnalyticsStore:
                 CREATE TABLE IF NOT EXISTS analytics_overview_errors (
                     uid TEXT PRIMARY KEY,error TEXT NOT NULL,at REAL NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS analytics_watch (
+                    uid TEXT NOT NULL,bvid TEXT NOT NULL,day TEXT NOT NULL,data TEXT NOT NULL,
+                    collected_at REAL NOT NULL,PRIMARY KEY(uid,bvid,day)
+                );
+                CREATE TABLE IF NOT EXISTS analytics_watch_state (
+                    uid TEXT PRIMARY KEY,day TEXT NOT NULL DEFAULT '',next_at REAL NOT NULL DEFAULT 0,
+                    error TEXT NOT NULL DEFAULT '',at REAL NOT NULL DEFAULT 0
+                );
             """)
 
     def connect(self, write: bool = False):
@@ -265,3 +273,47 @@ class AnalyticsStore:
         delta = {key: points[-1]["metrics"][key] - points[0]["metrics"][key]
                  if len(points) >= 2 and points[-1]["metrics"].get(key) is not None and points[0]["metrics"].get(key) is not None else None for key in METRICS}
         return {"baseline_at": baseline, "points": points, "delta": delta}
+
+    # How each video was watched, read once a day from the creator centre (completion, watch time, early exits).
+
+    def watch_state(self, uid: str) -> dict:
+        with self.connect(write=True) as db:
+            db.execute("INSERT OR IGNORE INTO analytics_watch_state(uid) VALUES (?)", (uid,))
+            return dict(db.execute("SELECT * FROM analytics_watch_state WHERE uid=?", (uid,)).fetchone())
+
+    def update_watch_state(self, uid: str, **patch) -> None:
+        if not patch.keys() <= {"day", "next_at", "error", "at"}:
+            raise ValueError("unknown watch state field")
+        self.watch_state(uid)
+        with self.connect(write=True) as db:
+            db.execute("UPDATE analytics_watch_state SET " + ",".join(f"{key}=?" for key in patch) + " WHERE uid=?",
+                       (*patch.values(), uid))
+
+    def save_watch(self, uid: str, bvid: str, day: str, values: dict, now: float) -> None:
+        """Merge one reading into the video's record for ``day``; two endpoints each fill part of it."""
+        with self.connect(write=True) as db:
+            row = db.execute("SELECT data FROM analytics_watch WHERE uid=? AND bvid=? AND day=?", (uid, bvid, day)).fetchone()
+            data = {**(json.loads(row["data"]) if row else {}), **values}
+            db.execute("INSERT INTO analytics_watch VALUES (?,?,?,?,?) ON CONFLICT(uid,bvid,day) DO UPDATE SET "
+                       "data=excluded.data,collected_at=excluded.collected_at", (uid, bvid, day, json.dumps(data), now))
+
+    def watch_day(self, uid: str, day: str) -> dict[str, dict]:
+        with self.connect() as db:
+            return {row["bvid"]: json.loads(row["data"]) for row in
+                    db.execute("SELECT bvid,data FROM analytics_watch WHERE uid=? AND day=?", (uid, day))}
+
+    def recent_public(self, uid: str, since: float) -> list[str]:
+        with self.connect() as db:
+            return [row["bvid"] for row in db.execute("SELECT bvid FROM analytics_videos WHERE uid=? AND state=0 AND "
+                                                       "missing=0 AND pubdate>=? ORDER BY pubdate DESC", (uid, since))]
+
+    def latest_watch(self, uid: str, bvids: list[str]) -> dict[str, dict]:
+        """Each video's most recent value of every number (a day it was not ready keeps the day before), and that day."""
+        wanted, out = set(bvids), {}
+        with self.connect() as db:
+            for row in db.execute("SELECT bvid,day,data FROM analytics_watch WHERE uid=? ORDER BY day", (uid,)):
+                if row["bvid"] in wanted:
+                    values = {k: v for k, v in json.loads(row["data"]).items() if v is not None}
+                    if values:
+                        out[row["bvid"]] = {**out.get(row["bvid"], {}), **values, "day": row["day"]}
+        return out

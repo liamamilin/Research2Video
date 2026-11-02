@@ -27,6 +27,7 @@ def _gather(config_dir: str, collector, uid: str) -> list[dict]:
     first = min((r["pubdate"] for r in rows if r.get("pubdate")), default=time.time())
     series = collector.storage.view_series(uid, [r["bvid"] for r in rows], since=weekly_review.week_start(first) - 7 * 86400)
     columns = {key: c.name for key, c in content_columns.load_all(config_dir).items()}
+    watch = collector.storage.latest_watch(uid, [r["bvid"] for r in rows])
     videos = []
     for row in rows:
         publication = row.get("publication") or {}
@@ -42,7 +43,8 @@ def _gather(config_dir: str, collector, uid: str) -> list[dict]:
                        "matrix": publication.get("matrix_name") or publication.get("matrix") or "",
                        # before columns existed: the Job it came from (production config names repeat across Jobs)
                        "column": columns.get(column, column) or publication.get("job_name") or "",
-                       "structure": weekly_review.structure(str(fields.get("推荐结构") or ""))})
+                       "structure": weekly_review.structure(str(fields.get("推荐结构") or "")),
+                       "watch": watch.get(row["bvid"]) or {}})
     return videos
 
 

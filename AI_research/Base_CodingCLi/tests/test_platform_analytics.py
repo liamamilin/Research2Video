@@ -30,6 +30,7 @@ def item(index=0, **patch):
 
 def provider(monkeypatch, count=113):
     calls = []
+    monkeypatch.setattr(analytics, "WATCH_SPACING", 0)
     monkeypatch.setattr(bilibili.BilibiliClient, "verify", lambda self: {"uid": "123"})
 
     def request(self, path, **params):
@@ -42,6 +43,10 @@ def provider(monkeypatch, count=113):
             return {"play": 9, "like": 0, "fav": 1, "fan": -6, "log_date": 20261023}, None
         if path.endswith("/graph"):
             return {"tendency": [{"date_key": NOW - 86400, "total_inc": 9}]}, None
+        if path == "/x/web/data/archive_diagnose/compare":
+            return {"list": []}, None
+        if path == "/x/web/data/archive":
+            return {"play": None}, None
         raise AssertionError(path)
     monkeypatch.setattr(bilibili.BilibiliClient, "request", request)
     return calls
@@ -348,3 +353,109 @@ async def test_routes_cache_only_rbac_and_exact_workflow_links(platform_env, mon
         response = await client.put("/api/platforms/bilibili/analytics/settings", json={"enabled": True}, headers=_csrf(client))
         assert response.status_code == 200, response.text
         assert response.json()["enabled"] == 1
+
+
+DIAGNOSE = {"list": [
+    {"bvid": "BV0000000001", "stat": {"not_ready_field": [], "play": 8, "full_play_ratio": 975, "crash_rate": 6250,
+                                      "tm_pass_rate": 6469, "tm_rate": 99, "interact_rate": 1250, "play_viewer_rate": 2500}},
+    {"bvid": "BV0000000002", "stat": {"not_ready_field": ["full_play_ratio", "crash_rate"], "play": 12,
+                                      "full_play_ratio": 0, "crash_rate": 0, "tm_pass_rate": 0}},
+]}
+
+
+def test_diagnosis_and_single_video_readings_are_parsed_without_the_unstable_click_rate():
+    rows = dict(analytics.diagnose_rows(DIAGNOSE))
+    assert rows["BV0000000001"] == {"completion": 9.75, "exit3s": 62.5, "cover_pass": 64.69, "interact": 12.5,
+                                    "guest_share": 25.0, "views": 8}
+    assert rows["BV0000000002"] == {"cover_pass": 0.0, "views": 12}  # not ready yet: left out, not zero
+    assert analytics.archive_watch({"play": {"view": 8, "rate": 975, "avg_duration": 73}}) == {
+        "avg_seconds": 73, "completion": 9.75, "views": 8}
+    assert analytics.archive_watch({"play": None}) == {"avg_seconds": None}  # published today
+    assert analytics.archive_watch({"play": {"view": 0, "rate": 0, "avg_duration": 0}}) == {"avg_seconds": None}
+    with pytest.raises(bilibili.BilibiliError, match="格式发生变化"):
+        analytics.archive_watch({"play": {"rate": "975"}})
+    with pytest.raises(bilibili.BilibiliError, match="格式发生变化"):
+        analytics.diagnose_rows({"list": [{"bvid": "x", "stat": {}}]})
+
+
+def _watch_provider(monkeypatch, *, fail=None):
+    calls = []
+
+    def request(self, path, **params):
+        calls.append(path)
+        if path == "/x/web/data/archive_diagnose/compare":
+            if fail:
+                raise fail
+            return DIAGNOSE, None
+        if path == "/x/web/data/archive":
+            if params["bvid"] == "BV0000000002":
+                raise bilibili.BilibiliRejected("B 站接口返回 -404", code=-404)
+            return {"play": {"view": 8, "rate": 975, "avg_duration": 73}}, None
+        raise AssertionError(path)
+    monkeypatch.setattr(bilibili.BilibiliClient, "request", request)
+    return calls
+
+
+def _noon(hour=13):
+    from datetime import datetime
+    return datetime.fromtimestamp(NOW).replace(hour=hour, minute=0).timestamp()
+
+
+def test_watch_is_read_once_a_day_after_noon_in_small_batches(platform_env, monkeypatch):
+    monkeypatch.setattr(analytics, "WATCH_SPACING", 0)
+    monkeypatch.setattr(analytics, "WATCH_BATCH", 1)
+    worker = collector(platform_env)
+    store = worker.storage
+    client = bilibili.BilibiliClient({})
+    calls = _watch_provider(monkeypatch)
+    worker.collect_watch("123", client, _noon(11), None)
+    assert calls == []  # yesterday's numbers have not settled yet
+    worker.collect_watch("123", client, _noon(), None)
+    assert calls == ["/x/web/data/archive_diagnose/compare", "/x/web/data/archive"]
+    worker.collect_watch("123", client, _noon() + 300, None)  # the rest in the next step; a gone video is not asked again
+    assert calls[2:] == ["/x/web/data/archive"]
+    day = store.watch_state("123")["day"]
+    assert store.watch_day("123", day)["BV0000000001"] == {
+        "completion": 9.75, "exit3s": 62.5, "cover_pass": 64.69, "interact": 12.5, "guest_share": 25.0, "views": 8, "avg_seconds": 73}
+    assert store.watch_day("123", day)["BV0000000002"]["avg_seconds"] is None
+    worker.collect_watch("123", client, _noon() + 600, None)
+    assert len(calls) == 3 and store.watch_state("123")["next_at"] > _noon() + 12 * 3600
+    assert store.latest_watch("123", ["BV0000000001"])["BV0000000001"]["day"] == day
+    store.save_watch("123", "BV0000000001", "2099-01-01", {"avg_seconds": None, "completion": 12.0}, NOW)
+    latest = store.latest_watch("123", ["BV0000000001"])["BV0000000001"]
+    assert latest["avg_seconds"] == 73 and latest["completion"] == 12.0 and latest["day"] == "2099-01-01"
+
+
+def test_a_failed_watch_reading_retries_later_and_rate_limits_pause_collection(platform_env, monkeypatch):
+    worker = collector(platform_env)
+    client = bilibili.BilibiliClient({})
+    _watch_provider(monkeypatch, fail=bilibili.BilibiliError("创作中心稿件诊断格式发生变化，保留上次数据。"))
+    worker.collect_watch("123", client, _noon(), None)
+    state = worker.storage.watch_state("123")
+    assert state["next_at"] == _noon() + 3600 and "格式" in state["error"] and state["day"] == ""
+    limited = bilibili.BilibiliError("B 站连接失败")
+    limited.http_status = 412
+    _watch_provider(monkeypatch, fail=limited)
+    with pytest.raises(bilibili.BilibiliError):
+        worker.collect_watch("123", client, _noon() + 7200, None)
+
+
+def test_one_odd_video_does_not_hold_up_the_rest(platform_env, monkeypatch):
+    monkeypatch.setattr(analytics, "WATCH_SPACING", 0)
+    worker = collector(platform_env)
+    read = []
+
+    def request(self, path, **params):
+        if path == "/x/web/data/archive_diagnose/compare":
+            return DIAGNOSE, None
+        read.append(params["bvid"])
+        if params["bvid"] == "BV0000000001":
+            return {"play": {"view": 3, "rate": "975", "avg_duration": 73}}, None  # a shape we do not know
+        return {"play": {"view": 8, "rate": 975, "avg_duration": 73}}, None
+    monkeypatch.setattr(bilibili.BilibiliClient, "request", request)
+    worker.collect_watch("123", bilibili.BilibiliClient({}), _noon(), None)
+    day = worker.storage.watch_state("123")["day"]
+    readings = worker.storage.watch_day("123", day)
+    assert read == ["BV0000000001", "BV0000000002"]
+    assert readings["BV0000000001"]["avg_seconds"] is None and readings["BV0000000002"]["avg_seconds"] == 73
+    assert worker.storage.watch_state("123")["error"] == ""

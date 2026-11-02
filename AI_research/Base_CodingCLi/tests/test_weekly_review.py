@@ -140,3 +140,40 @@ def test_collection_survives_a_review_that_cannot_be_saved(monkeypatch, caplog):
     monkeypatch.setattr(service, "archive_due", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
     service.archive_after_collection("unused")
     assert "could not be saved" in caplog.text
+
+
+def test_watch_numbers_sit_next_to_plays_and_short_videos_stand_out():
+    pub = MONDAY + 12 * H
+    short = [_video(f"s{i}", pub, 10, duration=100, watch={"completion": 60.0, "avg_seconds": 70, "exit3s": 20.0}) for i in range(3)]
+    long = [_video(f"l{i}", pub, 10, duration=700, watch={"completion": 6.0, "avg_seconds": 60, "exit3s": 50.0}) for i in range(4)]
+    unread = _video("u", pub, 10)
+    review = wr.review(short + long + [unread], MONDAY, now=MONDAY + 7 * 86400)
+    watch = review["summary"]["watch"]
+    assert watch["watch_measured"] == 7 and watch["completion"] == 6.0 and watch["exit3s"] == 50.0
+    bands = {g["value"]: g for g in next(d for d in review["dimensions"] if d["key"] == "duration")["groups"]}
+    assert bands["2 分钟内"]["completion"] == 60.0 and bands["2 分钟内"]["watch_measured"] == 3
+    assert bands["8 分钟以上"]["avg_seconds"] == 60
+    assert not [f for f in review["findings"] if "完播率" in f]  # length alone explains completion
+    by_column = [_video(f"c{i}", pub, 10, column="快讯" if i < 3 else "T05", duration=300,
+                        watch={"completion": 40.0 if i < 3 else 8.0}) for i in range(7)]
+    findings = wr.review(by_column, MONDAY, now=MONDAY + 7 * 86400)["findings"]
+    assert "栏目「快讯」完播率中位数 40%，整体 8%，明显偏高（3 条）。" in findings
+    row = next(v for v in review["videos"] if v["bvid"] == "s0")
+    assert row["watched_share"] == 70.0 and next(v for v in review["videos"] if v["bvid"] == "u")["completion"] is None
+
+
+def test_report_shows_watch_numbers_and_old_reviews_still_render():
+    from core.weekly_review_store import markdown
+    pub = MONDAY + 12 * H
+    review = wr.review([_video(f"v{i}", pub, 10, watch={"completion": 9.75, "avg_seconds": 73, "exit3s": 62.5,
+                                                        "cover_pass": 64.69}) for i in range(3)], MONDAY, now=MONDAY + 8 * 86400)
+    report = markdown(review, "24h")
+    assert "完播率中位数 9.75%，平均观看 73 秒，3 秒内退出 62.5%，封面点击超过同类 64.69%" in report
+    assert "| 9.75% | 73 秒 | 62.5% |" in report
+    old = _saved_review(MONDAY)
+    old["summary"].pop("watch")
+    for dimension in old["dimensions"]:
+        for group in dimension["groups"]:
+            for key in ("watch_measured", "completion", "avg_seconds", "exit3s", "cover_pass"):
+                group.pop(key)
+    assert "观看情况" not in markdown(old, "24h")

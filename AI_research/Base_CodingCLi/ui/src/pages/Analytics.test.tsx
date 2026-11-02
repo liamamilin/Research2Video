@@ -198,6 +198,22 @@ it("opens the weekly review from the URL, picks another week and keeps gaps apar
   await waitFor(() => expect(vi.mocked(loadWeeklyReview).mock.calls.at(-1)?.slice(0, 2)).toEqual([1_793_548_800, ""]));
 });
 
+it("shows completion, watch time and early exits once the creator centre has been read", async () => {
+  const video = { bvid: "BV1x", title: "Kimi 3D Make", pubdate: 1_793_000_000, duration: 181, view: 15, h24: 15, h72: null, h168: null, state: "ok" as const,
+    form: "单篇", matrix: "AI", column: "快讯", structure: "", completion: 66.57, avg_seconds: 120, exit3s: 16.66, cover_pass: null, watched_share: 66.3 };
+  const watch = { watch_measured: 1, completion: 66.57, avg_seconds: 120, exit3s: 16.66, cover_pass: 77.49 };
+  vi.mocked(loadWeeklyReview).mockResolvedValue({ connected: true, weeks: [1_792_944_000], saved: [], stage: "", start: 1_792_944_000, end: 1_793_548_800, now: 1_793_600_000, min_n: 3, ratio: 2,
+    summary: { videos: 1, ok: 1, pending: 0, gap: 0, median_24h: 15, previous_median_24h: null, previous_videos: 0, views: 15, top_share: 1, watch },
+    dimensions: [{ key: "duration", label: "时长", groups: [{ value: "2–4 分钟", videos: 1, measured: 1, median: 15, max: 15, best_title: video.title, previous_median: null, previous_measured: 0, flag: "", ...watch }] }],
+    top: [video], findings: [], suggestions: [], videos: [video] });
+  show("/analytics?tab=review");
+  expect(await screen.findByText("完播率中位数")).toBeTruthy();
+  expect(screen.getByText("77.5%")).toBeTruthy();
+  expect(screen.getAllByText("66.6%").length).toBe(3);
+  expect(screen.getByTitle("看了全片的 66.3%").textContent).toBe("120 秒");
+  expect(screen.queryByText(/这一周还没有读到/)).toBeNull();
+});
+
 it("opens a saved week from a notice link and offers its report", async () => {
   vi.mocked(loadWeeklyReview).mockImplementation(async (_start, stage) => stage
     ? { connected: true, weeks: [1_792_944_000], saved: [{ start: 1_792_944_000, stage: "24h", saved_at: 1_793_640_000, findings: 2, suggestions: 1 }], stage: "24h", saved_at: 1_793_640_000,

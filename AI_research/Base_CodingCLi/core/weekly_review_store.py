@@ -32,6 +32,14 @@ def _table(header: list[str], rows: list[list]) -> list[str]:
     return ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)] + ["| " + " | ".join(map(clean, r)) + " |" for r in rows]
 
 
+def _pct(value) -> str:
+    return "—" if value is None else f"{value:g}%"
+
+
+def _secs(value) -> str:
+    return "—" if value is None else f"{value:g} 秒"
+
+
 def markdown(review: dict, stage: str) -> str:
     """The review as a report a person reads."""
     label = dict((key, name) for key, name, _ in STAGES)[stage]
@@ -44,7 +52,13 @@ def markdown(review: dict, stage: str) -> str:
              "## 概况", "",
              f"- 本周发布 {s['videos']} 条：有 24 小时数据 {s['ok']} 条，未满 24 小时 {s['pending']} 条，采集中断 {s['gap']} 条",
              f"- 24 小时播放中位数 {_num(s['median_24h'])}（上周 {_num(s['previous_median_24h'])}，{s['previous_videos']} 条）",
-             f"- 目前总播放 {s['views']}，最高一条占 {share}", "",
+             f"- 目前总播放 {s['views']}，最高一条占 {share}"]
+    watch = s.get("watch") or {}
+    if watch.get("watch_measured"):
+        lines.append(f"- 观看情况（创作中心，{watch['watch_measured']} 条）：完播率中位数 {_pct(watch['completion'])}，"
+                     f"平均观看 {_secs(watch['avg_seconds'])}，3 秒内退出 {_pct(watch['exit3s'])}，"
+                     f"封面点击超过同类 {_pct(watch['cover_pass'])}")
+    lines += ["",
              "## 结论", ""]
     lines += [f"- {f}" for f in review["findings"]] or ["- 没有哪一组明显偏离整体。"]
     lines += ["", "## 建议（需要确认后再改配置）", ""]
@@ -52,14 +66,17 @@ def markdown(review: dict, stage: str) -> str:
     for dimension in review["dimensions"]:
         flag = {"high": "明显偏高", "low": "明显偏低", "": ""}
         lines += ["", f"## 按{dimension['label']}", ""]
-        lines += _table([dimension["label"], "视频", "有 24h 数据", "24h 中位数", "上周中位数", "最高", "判断", "最高的一条"],
-                        [[g["value"], g["videos"], g["measured"], g["median"], g["previous_median"], g["max"], flag[g["flag"]], g["best_title"]]
+        lines += _table([dimension["label"], "视频", "有 24h 数据", "24h 中位数", "上周中位数", "最高", "判断",
+                         "完播率", "平均观看", "3 秒退出", "最高的一条"],
+                        [[g["value"], g["videos"], g["measured"], g["median"], g["previous_median"], g["max"], flag[g["flag"]],
+                          _pct(g.get("completion")), _secs(g.get("avg_seconds")), _pct(g.get("exit3s")), g["best_title"]]
                          for g in dimension["groups"]])
     lines += ["", "## 本周每一条", ""]
     state = {"ok": "", "pending": "未满 24 小时", "gap": "采集中断"}
-    lines += _table(["发布", "标题", "栏目", "形式", "24h", "72h", "7 天", "目前", "点赞", "收藏", "备注"],
+    lines += _table(["发布", "标题", "栏目", "形式", "24h", "72h", "7 天", "目前", "完播率", "平均观看", "3 秒退出", "点赞", "收藏", "备注"],
                     [[datetime.fromtimestamp(v["pubdate"]).strftime("%m-%d %H:%M"), v["title"], v["column"], v["form"], v["h24"], v["h72"],
-                      v["h168"], v["view"], (v.get("metrics") or {}).get("like"), (v.get("metrics") or {}).get("favorite"),
+                      v["h168"], v["view"], _pct(v.get("completion")), _secs(v.get("avg_seconds")), _pct(v.get("exit3s")),
+                      (v.get("metrics") or {}).get("like"), (v.get("metrics") or {}).get("favorite"),
                       " ".join(filter(None, [state[v["state"]], v.get("structure") or "", v["bvid"]]))] for v in review["videos"]])
     return "\n".join(lines) + "\n"
 

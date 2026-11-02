@@ -87,14 +87,17 @@ export const purgeRecords = (olderThanDays: number, dryRun: boolean) =>
   api<PurgeResult>(`${BASE}/purge`, { method: "POST", body: { older_than_days: olderThanDays, dry_run: dryRun } });
 
 export type ReviewGroup = { value: string; videos: number; measured: number; median: number | null; max: number | null; best_title: string;
-  previous_median: number | null; previous_measured: number; flag: "" | "high" | "low" };
+  previous_median: number | null; previous_measured: number; flag: "" | "high" | "low" } & Partial<WatchMedians>;
+/** Creator-centre watch numbers: percentages, except avg_seconds. Absent in reviews saved before they were collected. */
+export type WatchMedians = { watch_measured: number; completion: number | null; avg_seconds: number | null; exit3s: number | null; cover_pass: number | null };
 export type ReviewVideo = { bvid: string; title: string; pubdate: number; duration: number; view: number | null; h24: number | null; h72: number | null; h168: number | null;
-  state: "ok" | "pending" | "gap"; form: string; matrix: string; column: string; structure: string; metrics?: Record<string, number> };
+  state: "ok" | "pending" | "gap"; form: string; matrix: string; column: string; structure: string; metrics?: Record<string, number>;
+  completion?: number | null; avg_seconds?: number | null; exit3s?: number | null; cover_pass?: number | null; watched_share?: number | null };
 export type SavedReview = { start: number; stage: "24h" | "7d"; saved_at: number; findings: number; suggestions: number };
 export type WeeklyReview = { connected: false } | { connected: true; missing: true; start: number; weeks: number[]; saved: SavedReview[] } | {
   connected: true; missing?: undefined; weeks: number[]; saved: SavedReview[]; stage: "" | "24h" | "7d"; saved_at?: number;
   start: number; end: number; now: number; min_n: number; ratio: number;
-  summary: { videos: number; ok: number; pending: number; gap: number; median_24h: number | null; previous_median_24h: number | null; previous_videos: number; views: number; top_share: number | null };
+  summary: { videos: number; ok: number; pending: number; gap: number; median_24h: number | null; previous_median_24h: number | null; previous_videos: number; views: number; top_share: number | null; watch?: WatchMedians };
   dimensions: { key: string; label: string; groups: ReviewGroup[] }[]; top: ReviewVideo[]; findings: string[]; suggestions: string[]; videos: ReviewVideo[];
 };
 export const loadWeeklyReview = (start: number | null, stage: string, signal?: AbortSignal) =>

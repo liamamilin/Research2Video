@@ -46,6 +46,56 @@ def public_video(data: dict) -> dict:
             "stat": data.get("stat") or {}}
 
 
+#: Creator-centre numbers settle around noon the next day; read them once a day after this local time.
+WATCH_HOUR, WATCH_MINUTE = 12, 30
+#: Videos this recent also get their average watch time, one request each: the weekly review's 7-day version of
+#: a week is saved on its 14th day, so every video in it is still read until then.
+WATCH_DAYS = 14
+#: Requests per collector step for the per-video reading, spaced out to stay clear of rate limits.
+WATCH_BATCH = 8
+WATCH_SPACING = 1.0
+#: Ratios arrive in 1/10000; these keys become percentages.
+_DIAGNOSE = {"full_play_ratio": "completion", "crash_rate": "exit3s", "tm_pass_rate": "cover_pass",
+             "interact_rate": "interact", "play_viewer_rate": "guest_share"}
+
+
+def diagnose_rows(data: dict) -> list[tuple[str, dict]]:
+    """The recent-videos diagnosis list: completion, 3-second exits, cover clicks beaten among peers (percent).
+
+    The absolute cover-click rate (tm_rate) changes from one request to the next, so it is never kept."""
+    rows = data.get("list")
+    if not isinstance(rows, list):
+        raise BilibiliError("创作中心稿件诊断格式发生变化，保留上次数据。")
+    out = []
+    for row in rows:
+        stat = row.get("stat") if isinstance(row, dict) else None
+        bvid = str((row or {}).get("bvid") or "")
+        if not isinstance(stat, dict) or not BV.fullmatch(bvid):
+            raise BilibiliError("创作中心稿件诊断格式发生变化，保留上次数据。")
+        skip = set(stat.get("not_ready_field") or [])
+        values = {name: stat[key] / 100 for key, name in _DIAGNOSE.items() if key not in skip and type(stat.get(key)) is int}
+        if type(stat.get("play")) is int:
+            values["views"] = stat["play"]
+        out.append((bvid, values))
+    return out
+
+
+def archive_watch(data: dict) -> dict:
+    """One video's completion and average watch time (seconds); ``avg_seconds: None`` while not yet counted."""
+    play = data.get("play")
+    if play is None or (isinstance(play, dict) and play.get("view") == 0):
+        return {"avg_seconds": None}  # too new: the creator centre has no numbers for it yet; asked again tomorrow
+    if not isinstance(play, dict) or type(play.get("avg_duration")) is not int or type(play.get("rate")) is not int:
+        raise BilibiliError("创作中心单稿数据格式发生变化，保留上次数据。")
+    return {"avg_seconds": play["avg_duration"], "completion": play["rate"] / 100,
+            **({"views": play["view"]} if type(play.get("view")) is int else {})}
+
+
+def watch_due(now: float) -> datetime:
+    """Today's reading time (local), when the previous day's numbers have settled."""
+    return datetime.fromtimestamp(now).replace(hour=WATCH_HOUR, minute=WATCH_MINUTE, second=0, microsecond=0)
+
+
 def account_data(summary: dict, graph: dict) -> tuple[dict, list, str]:
     stamp = str(summary.get("log_date") or "")
     try:
@@ -182,9 +232,52 @@ class Collector:
                 if paused_error(exc) or not isinstance(exc, BilibiliRejected):
                     raise
                 self.storage.video_failure(uid, row["bvid"], str(exc), now)
+        self.collect_watch(uid, client, now, cancel)
         self.storage.update_account(uid, status="IDLE", error="", failures=0, blocked_until=0,
                                     last_success_at=now)
         return f"videos:{count}"
+
+    def collect_watch(self, uid: str, client: BilibiliClient, now: float, cancel: threading.Event | None) -> None:
+        """Once a day after noon: the diagnosis list, then the average watch time of the last week's videos.
+
+        Spread over several steps; a failure here leaves play counts alone and is retried in an hour."""
+        state = self.storage.watch_state(uid)
+        due = watch_due(now)
+        day = due.date().isoformat()
+        if now < due.timestamp() or state["next_at"] > now:
+            return
+        try:
+            if state["day"] != day:
+                data, _ = client.request("/x/web/data/archive_diagnose/compare", member=True, size=50)
+                for bvid, values in diagnose_rows(data):
+                    self.storage.save_watch(uid, bvid, day, values, now)
+                self.storage.update_watch_state(uid, day=day, error="", at=now)
+            read = self.storage.watch_day(uid, day)
+            wanted = dict.fromkeys(self.storage.recent_public(uid, now - WATCH_DAYS * 86400) + list(read))
+            pending = [bvid for bvid in wanted if "avg_seconds" not in read.get(bvid, {})]
+            for bvid in pending[:WATCH_BATCH]:
+                if cancel is not None and cancel.wait(WATCH_SPACING):
+                    return
+                if cancel is None:
+                    time.sleep(WATCH_SPACING)
+                try:
+                    data, _ = client.request("/x/web/data/archive", member=True, bvid=bvid)
+                except BilibiliRejected as exc:
+                    if paused_error(exc):
+                        raise
+                    self.storage.save_watch(uid, bvid, day, {"avg_seconds": None}, now)  # gone or not ours: stop asking
+                    continue
+                try:
+                    values = archive_watch(data)
+                except BilibiliError:
+                    values = {"avg_seconds": None}  # one odd video must not hold up the rest of the day's reading
+                self.storage.save_watch(uid, bvid, day, values, now)
+            if len(pending) <= WATCH_BATCH:
+                self.storage.update_watch_state(uid, next_at=(due.timestamp() + 86400), error="", at=now)
+        except BilibiliError as exc:
+            if paused_error(exc):
+                raise
+            self.storage.update_watch_state(uid, next_at=now + 3600, error=str(exc), at=now)
 
     def overview_error(self, uid: str, error: str, now: float) -> None:
         # Dedicated cache metadata: never replace good measurements with an error payload.
