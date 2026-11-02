@@ -27,6 +27,8 @@ RESTART_LOOP = 3
 TOPICS_STUCK_SECONDS = 3 * 3600
 #: A plan whose slot passed this long ago without firing: the console was not woken.
 PLAN_LATE_SECONDS = 2 * 3600
+#: Bilibili video data runs every five minutes; this long without a success means it stopped arriving.
+ANALYTICS_STALE_SECONDS = 2 * 3600
 #: Jobs made per script live here; their failures show on the script itself.
 _PER_SCRIPT_JOBS = ("video/", "vod/")
 
@@ -172,11 +174,65 @@ def cap_alerts(now: float) -> list[dict]:
     return out
 
 
+def analytics_alerts(now: float) -> list[dict]:
+    """Bilibili video data that stopped arriving while collection is meant to be on.
+
+    2026-10-31 00:10 the collector's plan was switched off outside the product (no audit entry) while the account
+    still said "collect"; the data page showed one grey line and nothing was collected for two days. Pausing through
+    the product clears the account flag too, so only a stop nobody asked for raises this."""
+    import sqlite3
+
+    from core.platform_analytics_store import SCHEDULE_ID
+    from core.schedule_store import ScheduleStore
+
+    state_dir = get_settings().paths.state_dir
+    folder = os.path.join(state_dir, "platforms", "bilibili")
+    path = os.path.join(state_dir, "platform_analytics.db")
+    try:
+        with open(os.path.join(folder, "account.json"), encoding="utf-8") as fh:
+            uid = str(json.load(fh).get("uid") or "")
+        if not uid or not os.path.isfile(os.path.join(folder, "credentials.json")) or not os.path.isfile(path):
+            return []  # not connected: disconnecting is a deliberate stop
+        with sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=2) as db:
+            db.row_factory = sqlite3.Row
+            account = db.execute("SELECT * FROM analytics_accounts WHERE uid=?", (uid,)).fetchone()
+    except (OSError, ValueError, sqlite3.Error):
+        return []
+    if account is None or not account["enabled"]:
+        return []
+    store = ScheduleStore(state_dir)
+    plan = store.get(SCHEDULE_ID)
+    link = "/analytics?tab=video"
+    last = account["last_success_at"] or 0
+    since = time.strftime("%m-%d %H:%M", time.localtime(last)) if last else "从未成功"
+    if not plan or not plan["enabled"]:
+        changed = plan["updated_at"] if plan else 0
+        return [_alert(f"analytics-off:{uid}:{changed}", "analytics_off", changed or now,
+                       "B 站视频数据的定时采集被关掉了",
+                       f"账号仍设为定时采集，但采集计划没有开启，播放数据停在 {since}。"
+                       "到数据分析的视频数据页点「开启定时采集」；有意暂停请用那里的「暂停定时采集」。", link)]
+    if now - last <= ANALYTICS_STALE_SECONDS:
+        return []
+    reasons = []
+    if account["blocked_until"] and account["blocked_until"] > now:
+        reasons.append("B 站暂时拒绝请求，退避到 " + time.strftime("%m-%d %H:%M", time.localtime(account["blocked_until"])))
+    if account["error"]:
+        reasons.append(f"最近的错误：{account['error'][:200]}")
+    if not store.health(now).get("online"):
+        reasons.append("调度执行器离线，定时任务都不会运行")
+    hours = (now - last) / 3600
+    return [_alert(f"analytics-stale:{uid}:{last}", "analytics_stale", now,
+                   f"B 站视频数据 {hours:.0f} 小时没有更新",
+                   f"定时采集开着，但最近一次成功是 {since}。" + ("；".join(reasons) or "没有记录到错误，可以在视频数据页点「立即同步数据」看结果。"),
+                   link)]
+
+
 def alerts(now: Optional[float] = None, *, include_acked: bool = False) -> list[dict]:
     """Everything that went wrong on its own in the last week, newest first, minus what the user acknowledged."""
     now = time.time() if now is None else now
     since = now - WINDOW_DAYS * 86400
-    out = job_alerts(since) + batch_alerts(since, now) + plan_alerts(now) + round_alerts(since) + cap_alerts(now)
+    out = (job_alerts(since) + batch_alerts(since, now) + plan_alerts(now) + round_alerts(since) + cap_alerts(now)
+           + analytics_alerts(now))
     if not include_acked:
         acked = ap.acked_alerts()
         out = [a for a in out if a["key"] not in acked]

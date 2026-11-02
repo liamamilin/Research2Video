@@ -19,6 +19,7 @@ from web.services import launchd_agents
 from web.services import scheduler, managed_scheduler as managed
 from core.schedule_store import ScheduleConflict
 from core import schedule_host
+from core.platform_analytics_store import INTERNAL_JOB
 from web.settings import get_settings
 
 router = APIRouter(prefix="/api/scheduler", tags=["scheduler"])
@@ -291,6 +292,15 @@ def toggle_scheduled(job_id: str, payload: ScheduleToggle, user=Depends(require_
     operation = managed.store().toggle if plan else scheduler.toggle_job
     if not _mutate(operation, job_id, payload.enabled):
         raise _error(404, "not_found", f"未找到调度：{job_id}")
+    if plan and plan["job_name"] == INTERNAL_JOB:
+        # The video-data page reads collection as account flag + plan; keep them together so a pause here is
+        # a pause there, and the stopped-collection alert stays for stops nobody asked for.
+        from web.services import platform_analytics
+        try:
+            collector, uid = platform_analytics.current()
+            collector.storage.update_account(uid, enabled=int(payload.enabled))
+        except platform_analytics.BilibiliError:
+            pass  # no connected account: nothing collects either way
     audit.log("schedule_toggle", user=user["username"], target=job_id,
               result="enabled" if payload.enabled else "disabled")
     return {"ok": True, "enabled": payload.enabled}

@@ -171,3 +171,56 @@ def test_an_empty_batch_started_by_hand_is_not_an_alert(jobs):
     run = ap.create_run({"picks": [], "refresh": False}, [], started_by="admin")
     ap.update_run(run["id"], started_at=FIVE, status="DONE", note="没有可写的新选题")
     assert health.alerts(now=FIVE + 3600) == []
+
+
+# --- Bilibili video data that stopped arriving (2026-10-31 00:10: plan switched off, nothing said so) ---
+
+from core.platform_analytics_store import AnalyticsStore, INTERNAL_JOB, SCHEDULE_ID  # noqa: E402
+from core.schedule_store import ScheduleStore  # noqa: E402
+from tests.test_platforms import platform_env  # noqa: E402,F401
+
+
+def _collecting(tmp, *, enabled=1, plan_on=True, last=None):
+    state = str(tmp / "state")
+    plans = ScheduleStore(state)
+    if not plans.get(SCHEDULE_ID):
+        plans.save(INTERNAL_JOB, "*/5 * * * *", schedule_id=SCHEDULE_ID, timezone="Asia/Shanghai", max_retries=0)
+    plans.toggle(SCHEDULE_ID, plan_on)
+    AnalyticsStore(state).update_account("123", enabled=enabled, last_success_at=time.time() if last is None else last)
+
+
+def test_a_plan_switched_off_behind_the_accounts_back_is_reported(platform_env):
+    _collecting(platform_env, plan_on=False)
+    [alert] = health.analytics_alerts(time.time())
+    assert alert["kind"] == "analytics_off" and "被关掉" in alert["title"] and alert["link"] == "/analytics?tab=video"
+    ap.ack_alert(alert["key"], "admin")
+    assert all(a["kind"] != "analytics_off" for a in health.alerts())
+
+
+def test_collection_that_stops_succeeding_is_reported_with_its_reason(platform_env):
+    now = time.time()
+    _collecting(platform_env, last=now - 3 * 3600)
+    AnalyticsStore(str(platform_env / "state")).update_account("123", error="HTTP 412", blocked_until=now + 600)
+    [alert] = health.analytics_alerts(now)
+    assert alert["kind"] == "analytics_stale" and "3 小时" in alert["title"]
+    assert "HTTP 412" in alert["detail"] and "退避" in alert["detail"]
+
+
+def test_fresh_paused_or_disconnected_collection_is_quiet(platform_env):
+    _collecting(platform_env)
+    assert health.analytics_alerts(time.time()) == []
+    _collecting(platform_env, enabled=0, plan_on=False)  # paused on purpose: account flag cleared too
+    assert health.analytics_alerts(time.time()) == []
+    from web.services import platform_manager
+    platform_manager.disconnect()
+    assert health.analytics_alerts(time.time()) == []
+
+
+def test_pausing_the_collector_from_the_scheduler_is_a_deliberate_pause(platform_env, client):
+    _collecting(platform_env)
+    _login(client, "admin", "admin-pass-123")
+    for enabled, flag in ((False, 0), (True, 1)):
+        response = client.put(f"/api/scheduler/{SCHEDULE_ID}/toggle", json={"enabled": enabled}, headers=_csrf(client))
+        assert response.status_code == 200
+        assert AnalyticsStore(str(platform_env / "state")).account("123")["enabled"] == flag
+        assert health.analytics_alerts(time.time()) == []
