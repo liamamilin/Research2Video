@@ -47,7 +47,13 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 5
+PROMPT_VERSION = 6
+#: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
+#: the money stated, no date or programme name.
+TITLE_RULE = ("标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；"
+              "标题不写日期，不写栏目名，不用“本期”“今日”开头。")
+#: Viewers barely comment or share; the last words ask them something they can answer.
+ENDING_RULE = "道别前用一个和本期内容直接相关、观众能凭自己经历回答的问题（比如你现在用哪一家、会不会为它付费），邀请大家在评论区说说。"
 GOAL = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。"
 AUTHORING_PROMPT = GOAL + """
 当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。
@@ -57,7 +63,7 @@ AUTHORING_PROMPT = GOAL + """
 影响观众理解和实际使用的条件随对应内容讲清。"""
 SYSTEM_PROMPT = AUTHORING_PROMPT + """
 讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
-让标题说出本期最有意思的具体事情。
+让标题说出本期最有意思的具体事情。""" + TITLE_RULE + ENDING_RULE + """
 接口输出 JSON：
 {"title":"视频标题","sections":[{"title":"小节标题","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}"""
 EPISODE_PROMPT = AUTHORING_PROMPT + """
@@ -66,9 +72,9 @@ EPISODE_PROMPT = AUTHORING_PROMPT + """
 各独立内容使用自己的具体对象、主例子和讲述线索，整期按合理顺序排列；同一问题的解释章节沿用共同主例子。
 整期按节目讲述：开场是本期简报，先用一句话说本期整体看点，再按播出顺序为每条内容单独写一个 paragraph，一两句话说出它的看点，让观众知道接下来会听到什么。
 随后逐条展开。每条开头用一两句承接上一条，说出两条之间的关系、对比或递进，再进入本条，不重新打招呼，也不各自重新设计开场；每条结尾自然收住本条最值得记住的一点，各条措辞各不相同，不套用“这一条的要点是”之类的固定句式。
-收尾串起本期最值得记住的几点。
+收尾串起本期最值得记住的几点。""" + ENDING_RULE + """
 每个内容一个 section，内部可有多个 paragraphs；episode_role 使用 opening、item、closing。
-整期共用开场和收尾，不受单条视频的篇幅限制。具体看点体现在各内容标题中，整期总标题沿用栏目命名。
+整期共用开场和收尾，不受单条视频的篇幅限制。具体看点体现在各内容标题中；整期总标题用本期最值得看的一两条内容来写，""" + TITLE_RULE + """
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}"""
 
 TUTORIAL_PROMPT = AUTHORING_PROMPT + """
@@ -175,6 +181,14 @@ def _parse(content: str) -> _Script:
 
 #: Only the salutation or the welcome clause, so "大家好，今天讲三件事……" keeps its overview.
 _OWN_GREETING = re.compile(r"^(?:(?:大家好|各位好|哈喽|嗨|你好)[，,！!。\s]*|各位(?:观众|朋友们?)?[，,！!。]\s*|欢迎(?:收看|来到|回到)[^，,。！？!]*[，,。！？!]\s*)")
+
+
+def without_greeting(text: str) -> str:
+    """``text`` without a salutation or welcome clause at its start ("大家好，欢迎收看今日快讯。今天……" → "今天……")."""
+    previous = None
+    while previous != text:
+        previous, text = text, _OWN_GREETING.sub("", text, count=1).lstrip()
+    return text
 
 
 def _programme_frame(script: _Script, greeting: Optional[str], programme: bool) -> _Script:

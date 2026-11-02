@@ -93,20 +93,26 @@ def publication_topic(topic: dict, context: dict) -> dict:
             except ValueError:
                 continue
             break
-    display_date = f"{int(issue[:4])}年{int(issue[5:7]):02d}月{int(issue[8:]):02d}日" if issue else ""
-    heading = label + ("｜" + display_date if display_date else "")
-    publication = {"scheme": "column-date/v1", "title": heading, "label": label, "issue_date": issue,
-                   "subject_subtitle": context.get("type") == "deep_research"}
-    return {**topic, "title": heading, **({"round": issue} if issue else {}),
+    # "栏目｜日期" titles got 35–98 plays against hundreds for named, concrete ones (weekly review, 10-19 to 11-01):
+    # the programme keeps its name for the greeting, and the public title is the one written from this issue's
+    # strongest items. Until it is written the column name stands in.
+    publication = {"scheme": SCHEME, "title": label, "label": label, "issue_date": issue}
+    return {**topic, "title": label, **({"round": issue} if issue else {}),
             "episode": {**episode, "publication": publication}}
+
+
+#: Programmes created before 2026-11-02 keep the dated title they were given ("column-date/v1").
+SCHEME = "lead-subject/v2"
 
 
 def publication_title(topic: dict, authored_title: str) -> str:
     publication = (topic.get("episode") or {}).get("publication") if enabled(topic) else None
     if not publication:
         return authored_title
-    heading = publication["title"]
     subject = authored_title.strip()
+    if publication.get("scheme") == SCHEME:
+        return subject or publication["title"]
+    heading = publication["title"]
     if publication.get("subject_subtitle") and subject:
         return subject if subject.startswith(heading) else heading + "｜" + subject
     return heading
@@ -118,9 +124,15 @@ def brief(topic: dict, *, tutorial: bool = False) -> str:
     items = (topic.get("episode") or {}).get("items") or []
     chosen = "\n".join(f"{i+1}. {t['title']}" for i, t in enumerate(items))
     publication = (topic.get("episode") or {}).get("publication") or {}
-    naming = (f"\n整期总标题使用「{publication['title']}」，不要把第一条或最显眼的事件当作整期总标题。"
-              + ("本期单主题深度解读的具体疑问可保留为副标题。" if publication.get("subject_subtitle") else "具体事件使用各段的内容标题。")
-              + "日期是展示信息，不必写进口播，不要求讲述者念日期。" if publication else "")
+    if publication.get("scheme") == SCHEME:
+        naming = ("\n整期总标题由你来写：从本期最值得看的一两条内容里取具体产品和数字，"
+                  f"不写日期，也不写栏目名「{publication['label']}」。日期不写进口播。")
+    elif publication:
+        naming = (f"\n整期总标题使用「{publication['title']}」，不要把第一条或最显眼的事件当作整期总标题。"
+                  + ("本期单主题深度解读的具体疑问可保留为副标题。" if publication.get("subject_subtitle") else "具体事件使用各段的内容标题。")
+                  + "日期是展示信息，不必写进口播，不要求讲述者念日期。")
+    else:
+        naming = ""
     if tutorial:
         return ("\n\n## 内容组织方式：完整教程\n"
                 "本份报告制作一条视频，按实际任务的准备、操作、结果等阶段分章，每个阶段一个 section。"

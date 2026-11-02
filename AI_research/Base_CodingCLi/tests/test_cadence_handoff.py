@@ -159,4 +159,6 @@ def test_native_issue_handoff_keeps_original_range_and_details_after_configurati
         target_minutes=1,
         llm_config=object(),
     )
-    assert len(result.sections) == 1 and result.title == "研究专题｜2026年11月02日"
+    # the written title is public now; the issue date stays frozen with the programme
+    assert len(result.sections) == 1 and result.title == "研究专题"
+    assert result.meta["episode"]["publication"]["issue_date"] == "2026-11-02"
