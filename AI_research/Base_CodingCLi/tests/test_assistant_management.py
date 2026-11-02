@@ -152,6 +152,7 @@ def test_prepare_only_reads_exact_render_and_persists_review_card(client, video_
     prepared = card['preparations'][0]
     assert prepared['version'] == 1 and prepared['render_id'] == render['id'] and prepared['account_uid'] == 'owner'
     assert prepared['fields']['title'] == '准备标题' and 'version=1' in prepared['href']
+    assert prepared['limits']['title_limit'] == 80 and not prepared['limits']['issues']
 
 
 def test_partial_batch_keeps_success_and_live_task_never_claims_submitted_is_published(client, video_env, monkeypatch):
@@ -180,6 +181,57 @@ def test_partial_batch_keeps_success_and_live_task_never_claims_submitted_is_pub
     assert card()['publications'][0]['state'] == 'completed'
     assert 'task=upload-one' in card()['publications'][0]['href']
     assert len(calls) == 2  # Projection never resubmits.
+
+
+def test_submit_fills_unchanged_fields_from_the_prepared_package(client, video_env, monkeypatch):
+    platform = publishing(monkeypatch)
+    sent = []
+    monkeypatch.setattr(platform, 'preview', lambda key: {'title': '准备标题', 'description': '简介与来源', 'tags': ['工具'], 'tid': 201})
+    monkeypatch.setattr(platform, 'enqueue', lambda key, fields: sent.append(fields) or {'id': 'up-' + key, 'uid': 'owner', 'status': 'QUEUED'})
+    response = chat(client, monkeypatch, [tool('manage_publishing', action='submit', platform='bilibili', account_uid='owner',
+        items=[{'render_id': 'one'}, {'render_id': 'two', 'fields': {'title': '改过的标题', 'tid': 0}}])])
+    assert response['actions'][0]['ok']
+    assert sent[0]['title'] == '准备标题' and sent[0]['tags'] == ['工具'] and sent[0]['tid'] == 201
+    assert sent[1]['title'] == '改过的标题' and sent[1]['description'] == '简介与来源' and sent[1]['tid'] == 201
+
+
+def test_submit_over_the_title_limit_names_the_field_and_never_dispatches(client, video_env, monkeypatch):
+    platform = publishing(monkeypatch)
+    monkeypatch.setattr(platform, 'preview', lambda key: {'title': '准备标题', 'description': '简介', 'tags': ['工具'], 'tid': 201})
+    monkeypatch.setattr(platform, 'enqueue', lambda *args: pytest.fail('over-limit copy must not dispatch'))
+    response = chat(client, monkeypatch, [tool('manage_publishing', action='submit', platform='bilibili', account_uid='owner',
+        items=[{'render_id': 'one', 'fields': {'title': '长' * 81}}])])
+    result = result_for(response, 'manage_publishing')
+    assert not result['ok'] and '标题需为 1–80 字，当前 81 字' in result['failures'][0]['error']
+
+
+def test_bilibili_submit_without_a_partition_names_it_and_never_dispatches(client, video_env, monkeypatch):
+    platform = publishing(monkeypatch)
+    monkeypatch.setattr(platform, 'preview', lambda key: {'title': '准备标题', 'description': '简介', 'tags': ['工具'], 'tid': 0})
+    monkeypatch.setattr(platform, 'enqueue', lambda *args: pytest.fail('a missing partition must not dispatch'))
+    response = chat(client, monkeypatch, [tool('manage_publishing', action='submit', platform='bilibili', account_uid='owner',
+        items=[{'render_id': 'one'}])])
+    assert 'B站分区未设置' in result_for(response, 'manage_publishing')['failures'][0]['error']
+
+
+@pytest.mark.parametrize('name', ['douyin', 'kuaishou'])
+def test_short_video_submit_fills_fields_without_the_bilibili_partition(client, video_env, monkeypatch, name):
+    from web.services import douyin, social_publishing
+    sent = []
+    preview = {'title': '准备标题', 'description': '简介与来源', 'tags': ['工具'], 'first_comment': {'enabled': False}}
+    if name == 'douyin':
+        monkeypatch.setattr(douyin, 'account', lambda: {'connected': True, 'uid': 'owner', 'name': '抖音号'})
+        monkeypatch.setattr(douyin, 'preview', lambda key: preview)
+        monkeypatch.setattr(douyin, 'enqueue', lambda key, payload: sent.append(payload) or {'id': 'up', 'uid': 'owner', 'status': 'QUEUED'})
+    else:
+        monkeypatch.setattr('core.social.registry.active_platforms', lambda: ['kuaishou'])
+        monkeypatch.setattr(social_publishing, 'account', lambda p: {'connected': True, 'uid': 'owner', 'name': '快手号'})
+        monkeypatch.setattr(social_publishing, 'preview', lambda p, key: preview)
+        monkeypatch.setattr(social_publishing, 'enqueue', lambda p, key, payload: sent.append(payload) or {'id': 'up', 'uid': 'owner', 'status': 'QUEUED'})
+    response = chat(client, monkeypatch, [tool('manage_publishing', action='submit', platform=name, account_uid='owner',
+        items=[{'render_id': 'one', 'fields': {'tid': 231}}])])
+    assert result_for(response, 'manage_publishing')['ok'], result_for(response, 'manage_publishing')
+    assert sent[0]['title'] == '准备标题' and sent[0]['tags'] == ['工具'] and 'tid' not in sent[0]
 
 
 def test_changed_account_and_deferred_platform_never_dispatch(client, monkeypatch):
