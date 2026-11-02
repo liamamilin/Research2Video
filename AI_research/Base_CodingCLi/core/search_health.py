@@ -30,7 +30,9 @@ RATE_LIMIT_COOLDOWN = 10 * 60
 
 _dir: Optional[str] = None
 
-_PERMANENT_WORDS = ("no_more_credits", "credits limit", "insufficient", "quota", "invalid api key", "unauthorized")
+_CREDIT_WORDS = ("no_more_credits", "credits limit", "insufficient", "quota")
+_KEY_WORDS = ("invalid api key", "unauthorized")
+_PERMANENT_WORDS = _CREDIT_WORDS + _KEY_WORDS
 _RATE_WORDS = ("ratelimit", "rate limit", "too many requests", "限流", "太频繁")
 
 
@@ -52,6 +54,18 @@ def classify(reason: str) -> Optional[str]:
         return "permanent"
     if code == 429 or any(word in text for word in _RATE_WORDS):
         return "rate_limit"
+    return None
+
+
+def cause(reason: str) -> Optional[str]:
+    """Why a permanent failure needs the user: ``"credits"`` (out of balance), ``"key"`` (refused) or ``None``."""
+    text = (reason or "").lower()
+    match = re.search(r"http (\d{3})", text)
+    code = int(match.group(1)) if match else None
+    if code == 402 or any(word in text for word in _CREDIT_WORDS):
+        return "credits"
+    if code in (401, 403) or any(word in text for word in _KEY_WORDS):
+        return "key"
     return None
 
 
@@ -96,9 +110,14 @@ def record_failures(reasons: dict[str, str], now: Optional[float] = None) -> Non
 
     def change(data: dict) -> None:
         providers = data.setdefault("providers", {})
+        blocked = data.setdefault("blocked", {})
         for name, kind in found.items():
             wait = PERMANENT_COOLDOWN if kind == "permanent" else RATE_LIMIT_COOLDOWN
             providers[name] = {"until": now + wait, "kind": kind, "reason": str(reasons[name])[:300]}
+            # Cooldowns run out and the provider is tried again; this stays until it answers, so it can be shown.
+            if why := cause(reasons[name]):
+                since = (blocked.get(name) or {}).get("since") if (blocked.get(name) or {}).get("cause") == why else None
+                blocked[name] = {"cause": why, "since": since or now, "at": now, "reason": str(reasons[name])[:300]}
     _update(change)
 
 
@@ -117,13 +136,23 @@ def record_answer(provider: str) -> None:
     if path is None:
         return
     data = _read(path)
-    if not data.get("outage") and provider not in (data.get("providers") or {}):
+    if (not data.get("outage") and provider not in (data.get("providers") or {})
+            and provider not in (data.get("blocked") or {})):
         return  # the usual case: nothing to clear, so no write
 
     def change(data: dict) -> None:
         data.pop("outage", None)
         (data.get("providers") or {}).pop(provider, None)
+        (data.get("blocked") or {}).pop(provider, None)
     _update(change)
+
+
+def blocked() -> dict[str, dict]:
+    """Providers that need the user (out of credits, key refused) until they answer again: name -> record."""
+    path = _path()
+    if path is None:
+        return {}
+    return {name: row for name, row in (_read(path).get("blocked") or {}).items() if isinstance(row, dict)}
 
 
 def outage(now: Optional[float] = None) -> Optional[dict]:

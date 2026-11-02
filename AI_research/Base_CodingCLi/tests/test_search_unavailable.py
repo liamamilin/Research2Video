@@ -174,3 +174,21 @@ def test_without_a_state_dir_nothing_is_shared(monkeypatch):
     with pytest.raises(SearchUnavailableError):
         client.search(["q"])
     assert search_health.cooling() == {} and search_health.outage() is None
+
+
+def test_running_out_of_credits_is_remembered_until_the_provider_answers(health):
+    credits = 'HTTP 402: {"error":"You have exceeded your credits limit","tag":"NO_MORE_CREDITS"}'
+    health.record_failures({"exa": credits, "duckduckgo": "202 Ratelimit"}, now=1000)
+    health.record_failures({"exa": credits}, now=1000 + 2 * health.PERMANENT_COOLDOWN)
+    assert not health.cooling(now=1000 + 2 * health.PERMANENT_COOLDOWN + health.PERMANENT_COOLDOWN + 1)
+    blocked = health.blocked()
+    assert list(blocked) == ["exa"]  # rate limits pass on their own
+    assert blocked["exa"]["cause"] == "credits" and blocked["exa"]["since"] == 1000
+    assert blocked["exa"]["at"] == 1000 + 2 * health.PERMANENT_COOLDOWN
+    health.record_failures({"exa": "HTTP 401: invalid api key"}, now=9000)
+    assert health.blocked()["exa"]["cause"] == "key" and health.blocked()["exa"]["since"] == 9000
+    health.record_answer("exa")
+    assert not health.blocked()
+    health.record_failures({"exa": credits}, now=10000)
+    health.clear()  # saving keys
+    assert not health.blocked()

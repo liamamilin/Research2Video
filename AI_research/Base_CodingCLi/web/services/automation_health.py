@@ -29,6 +29,10 @@ TOPICS_STUCK_SECONDS = 3 * 3600
 PLAN_LATE_SECONDS = 2 * 3600
 #: Bilibili video data runs every five minutes; this long without a success means it stopped arriving.
 ANALYTICS_STALE_SECONDS = 2 * 3600
+#: A provider out of credits that has not been tried for this long is probably no longer in use.
+SEARCH_BLOCKED_QUIET_SECONDS = 2 * 86400
+_SEARCH_NAMES = {"exa": "Exa", "youcom": "You.com", "tavily": "Tavily", "brave": "Brave", "serper": "Serper",
+                 "duckduckgo": "DuckDuckGo", "bing": "Bing", "google": "Google"}
 #: Jobs made per script live here; their failures show on the script itself.
 _PER_SCRIPT_JOBS = ("video/", "vod/")
 
@@ -245,12 +249,36 @@ def review_notices(now: float) -> list[dict]:
     return out
 
 
+def search_alerts(now: float) -> list[dict]:
+    """A search provider out of credits or refusing its key: one alert per episode, until it answers again."""
+    from core import search_health
+    alerts = []
+    down = search_health.outage(now) is not None
+    for name, row in search_health.blocked().items():
+        if now - float(row.get("at") or 0) > SEARCH_BLOCKED_QUIET_SECONDS:
+            continue
+        label = _SEARCH_NAMES.get(name, name)
+        since = float(row.get("since") or row.get("at") or now)
+        credits = row.get("cause") == "credits"
+        title = f"{label} 搜索额度用完" if credits else f"{label} 搜索 key 被拒绝"
+        detail = (f"{time.strftime('%m-%d %H:%M', time.localtime(since))} 起每次调用都返回"
+                  f"{'余额不足' if credits else ' key 无效或无权限'}，最近一次在 "
+                  f"{time.strftime('%m-%d %H:%M', time.localtime(float(row.get('at') or since)))}。")
+        detail += ("所有搜索服务都不可用：自动调研和出片在等待恢复，不会算作失败。" if down else
+                   "其他搜索服务在顶替，调研结果可能变少。")
+        detail += ("充值后 30 分钟内会自动重试，恢复后这条提醒自动消失。" if credits else
+                   "到设置里更新 key 后会立即重试。")
+        alerts.append(_alert(f"search-{row.get('cause')}:{name}:{int(since)}", "search_blocked", since, title, detail,
+                             "/settings"))
+    return alerts
+
+
 def alerts(now: Optional[float] = None, *, include_acked: bool = False) -> list[dict]:
     """Everything that went wrong on its own in the last week, newest first, minus what the user acknowledged."""
     now = time.time() if now is None else now
     since = now - WINDOW_DAYS * 86400
     out = (job_alerts(since) + batch_alerts(since, now) + plan_alerts(now) + round_alerts(since) + cap_alerts(now)
-           + analytics_alerts(now) + review_notices(now))
+           + analytics_alerts(now) + review_notices(now) + search_alerts(now))
     if not include_acked:
         acked = ap.acked_alerts()
         out = [a for a in out if a["key"] not in acked]

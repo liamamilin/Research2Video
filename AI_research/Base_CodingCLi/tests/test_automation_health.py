@@ -237,3 +237,23 @@ def test_a_week_saved_in_the_last_week_is_announced_once(jobs):
     assert [(a["title"], a["link"]) for a in notices] == [
         ("10-26 这周的复盘已存档：1 条结论、0 条建议", f"/analytics?tab=review&start={MONDAY:.0f}&stage=24h")]
     assert not [a for a in health.alerts(now=MONDAY + 16 * 86400) if a["kind"] == "review_saved"]
+
+
+def test_search_out_of_credits_is_one_alert_until_it_answers(jobs, tmp_path):
+    from core import search_health
+    search_health.use_state_dir(str(tmp_path))
+    try:
+        credits = 'HTTP 402: {"error":"You have exceeded your credits limit","tag":"NO_MORE_CREDITS"}'
+        for minute in range(0, 600, 30):  # retried every cooldown: still one alert
+            search_health.record_failures({"exa": credits}, now=FIVE + minute * 60)
+        [alert] = [a for a in health.alerts(now=FIVE + 36000) if a["kind"] == "search_blocked"]
+        assert alert["title"] == "Exa 搜索额度用完" and alert["link"] == "/settings" and alert["at"] == FIVE
+        assert "10-20 05:00 起" in alert["detail"] and "其他搜索服务在顶替" in alert["detail"]
+        search_health.record_outage({"exa": credits}, now=FIVE + 35000)
+        assert "自动调研和出片在等待恢复" in health.search_alerts(FIVE + 35000)[0]["detail"]
+        # Not tried for two days (e.g. taken out of the settings): it drops off.
+        assert not health.search_alerts(FIVE + 4 * 86400)
+        search_health.record_answer("exa")
+        assert not health.search_alerts(FIVE + 36000)
+    finally:
+        search_health.use_state_dir(None)
