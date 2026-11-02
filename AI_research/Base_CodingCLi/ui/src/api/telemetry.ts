@@ -52,8 +52,11 @@ export const loadPerformance = (by: CompareBy, days: number, signal?: AbortSigna
 export type AssistantRequest = {
   request_id: string; conversation_id: string; user: string; ts: number; question: string; turns: number; tools: string[];
   prompt_tokens: number; completion_tokens: number; cache_read_tokens: number; cost_usd: number; partial: boolean;
-  failed: number; seconds: number; peak_prompt_tokens: number;
+  failed: number; seconds: number; peak_prompt_tokens: number; origin: AssistantOrigin;
 };
+/** app: sent from the app's own page; script: another program (curl, a coding session); "": before the origin was kept. */
+export type AssistantOrigin = "app" | "script" | "";
+export type OriginGroup = { requests: number; turns: number; prompt_tokens: number; cost_usd: number };
 export type AssistantTool = { name: string; calls: number; requests: number; avg_chars: number | null; max_chars: number; total_chars: number };
 export type AssistantTurn = {
   turn: number; requests: number; prompt_tokens_avg: number | null; completion_tokens_avg: number | null;
@@ -65,6 +68,7 @@ export type AssistantReport = {
     requests: number; turns: number; turns_per_request: number | null; prompt_tokens: number; completion_tokens: number;
     cache_read_tokens: number; cache_rate: number | null; cost_usd: number; partial: boolean; tool_schema_share: number | null;
     tool_calls: number; failed: number; earlier_calls: number; earlier_prompt_tokens: number; earlier_completion_tokens: number;
+    by_origin?: Record<"app" | "script" | "", OriginGroup>;
   };
   tools?: AssistantTool[]; turns?: AssistantTurn[]; requests?: AssistantRequest[];
 };
@@ -75,8 +79,8 @@ export type AssistantRequestTurn = {
   seconds: number | null; failed: number;
 };
 export type AssistantRequestDetail = { enabled: boolean; request_id: string; turns: AssistantRequestTurn[] };
-export const loadAssistantUsage = (days: number, offset: number, signal?: AbortSignal) =>
-  api<AssistantReport>(`${BASE}/assistant`, { query: { days, offset, limit: 25 }, signal });
+export const loadAssistantUsage = (days: number, offset: number, signal?: AbortSignal, origin = "") =>
+  api<AssistantReport>(`${BASE}/assistant`, { query: { days, offset, limit: 25, ...(origin ? { origin } : {}) }, signal });
 export const loadAssistantRequest = (id: string, signal?: AbortSignal) =>
   api<AssistantRequestDetail>(`${BASE}/assistant/requests/${encodeURIComponent(id)}`, { signal });
 

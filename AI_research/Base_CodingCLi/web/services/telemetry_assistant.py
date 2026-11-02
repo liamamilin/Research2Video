@@ -21,8 +21,8 @@ def _questions(state_dir: str, ids: list[str]) -> dict:
     return {request_id: " ".join(str(message or "").split())[:PREVIEW] for request_id, message in rows}
 
 
-def report(config_dir: str, state_dir: str, since, until, limit: int, offset: int) -> dict:
-    result = assistant.report(config_dir, since, until, limit, offset)
+def report(config_dir: str, state_dir: str, since, until, limit: int, offset: int, origin=None) -> dict:
+    result = assistant.report(config_dir, since, until, limit, offset, origin)
     if result.get("enabled"):
         asked = _questions(state_dir, [r["request_id"] for r in result["requests"]])
         for request in result["requests"]:

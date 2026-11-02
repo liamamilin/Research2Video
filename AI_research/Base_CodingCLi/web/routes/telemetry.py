@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse
@@ -108,13 +108,17 @@ def weekly_report(start: float, stage: str = Query(..., pattern="^(24h|7d)$"), u
 
 @router.get("/assistant")
 def assistant_usage(days: int = Query(30, ge=0, le=3650), since: Optional[float] = None, until: Optional[float] = None,
-                    limit: int = Query(25, ge=1, le=100), offset: int = Query(0, ge=0), user=Depends(require_admin)):
-    """The assistant request by request: turns, tokens, cost, which tools it called and how large their answers were."""
+                    limit: int = Query(25, ge=1, le=100), offset: int = Query(0, ge=0),
+                    origin: Optional[Literal["app", "script", "unknown"]] = None, user=Depends(require_admin)):
+    """The assistant request by request: turns, tokens, cost, which tools it called and how large their answers were.
+    ``origin`` keeps requests sent from the app's page, from another program, or from before the origin was kept."""
     from web.services import telemetry_assistant
     syncing = _ensure_synced()
     start, end = _window(days, since, until)
     settings = get_settings()
-    return {**telemetry_assistant.report(str(settings.paths.config_dir), str(settings.paths.state_dir), start, end, limit, offset),
+    kept = None if origin is None else "" if origin == "unknown" else origin
+    return {**telemetry_assistant.report(str(settings.paths.config_dir), str(settings.paths.state_dir), start, end, limit,
+                                         offset, kept),
             "syncing": syncing}
 
 

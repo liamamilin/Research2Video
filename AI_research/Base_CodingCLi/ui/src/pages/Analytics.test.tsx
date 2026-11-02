@@ -36,11 +36,12 @@ beforeEach(() => {
       tokens: 3_000_000, cost_usd: 3, partial: false, produce_seconds: 600, render_seconds: 1200, cost_per_kview: 1, tokens_per_kview: 1_000_000 }] });
   vi.mocked(loadAssistantUsage).mockResolvedValue({ enabled: true, request_total: 1,
     totals: { requests: 1, turns: 3, turns_per_request: 3, prompt_tokens: 60_000, completion_tokens: 900, cache_read_tokens: 30_000, cache_rate: 0.5, cost_usd: 0.06, partial: false,
-      tool_schema_share: 0.25, tool_calls: 2, failed: 0, earlier_calls: 728, earlier_prompt_tokens: 26_774_000, earlier_completion_tokens: 410_000 },
+      tool_schema_share: 0.25, tool_calls: 2, failed: 0, earlier_calls: 728, earlier_prompt_tokens: 26_774_000, earlier_completion_tokens: 410_000,
+      by_origin: { app: { requests: 1, turns: 3, prompt_tokens: 60_000, cost_usd: 0.06 }, script: { requests: 2, turns: 9, prompt_tokens: 900_000, cost_usd: 0.4 }, "": { requests: 0, turns: 0, prompt_tokens: 0, cost_usd: 0 } } },
     tools: [{ name: "query_jobs", calls: 2, requests: 1, avg_chars: 5000, max_chars: 8000, total_chars: 10_000 }],
     turns: [{ turn: 0, requests: 1, prompt_tokens_avg: 10_000, completion_tokens_avg: 100, message_chars_avg: 40_000, tool_schema_chars_avg: 20_000, tool_count_avg: 12, retired: 0 }],
     requests: [{ request_id: "r1", conversation_id: "c1", user: "admin", ts: 1_790_000_000, question: "帮我看看今天的任务", turns: 3, tools: ["query_jobs", "query_jobs"],
-      prompt_tokens: 60_000, completion_tokens: 900, cache_read_tokens: 30_000, cost_usd: 0.06, partial: false, failed: 0, seconds: 42, peak_prompt_tokens: 30_000 }] });
+      prompt_tokens: 60_000, completion_tokens: 900, cache_read_tokens: 30_000, cost_usd: 0.06, partial: false, failed: 0, seconds: 42, peak_prompt_tokens: 30_000, origin: "app" }] });
   vi.mocked(loadAssistantRequest).mockResolvedValue({ enabled: true, request_id: "r1", turns: [
     { turn: 0, message_chars: 40_000, tool_schema_chars: 20_000, tool_count: 12, retired: 0, saved_chars: 0, tools: [{ name: "query_jobs", chars: 5000 }], prompt_tokens: 10_000,
       completion_tokens: 100, cache_read_tokens: 0, cost_usd: 0.01, partial: false, seconds: 3, failed: 0 },
@@ -115,7 +116,15 @@ it("breaks the assistant down by turn, tool and request, and opens one request t
   await waitFor(() => expect(loadAssistantRequest).toHaveBeenCalledWith("r1", expect.anything()));
   expect(await screen.findByText("直接回答")).toBeTruthy();
   fireEvent.change(screen.getByLabelText("助手统计范围"), { target: { value: "7" } });
-  await waitFor(() => expect(loadAssistantUsage).toHaveBeenLastCalledWith(7, 0, expect.anything()));
+  await waitFor(() => expect(loadAssistantUsage).toHaveBeenLastCalledWith(7, 0, expect.anything(), ""));
+});
+
+it("splits the assistant's requests by where they were sent from", async () => {
+  show("/analytics?tab=assistant");
+  expect(await screen.findByText(/按来源：应用内 1 个请求.*；其他程序 2 个请求/)).toBeTruthy();
+  expect(screen.getByRole("cell", { name: "应用内" })).toBeTruthy();
+  fireEvent.change(screen.getByLabelText("请求来源"), { target: { value: "script" } });
+  await waitFor(() => expect(loadAssistantUsage).toHaveBeenLastCalledWith(30, 0, expect.anything(), "script"));
 });
 
 it("changes the range for every section", async () => {

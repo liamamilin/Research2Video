@@ -20,8 +20,9 @@ logger = logging.getLogger(__name__)
 class Recorder:
     """Writes one ``assistant_rounds`` row per model turn; a no-op without a request id or a state directory."""
 
-    def __init__(self, request_id: Optional[str], conversation_id: Optional[str], user: str):
+    def __init__(self, request_id: Optional[str], conversation_id: Optional[str], user: str, origin: str = ""):
         self.request_id, self.conversation_id, self.user = request_id or "", conversation_id or "", user or ""
+        self.origin = origin or ""
         self._rows: dict[int, dict] = {}
 
     def round(self, turn: int, metrics: dict, tool_calls: list) -> None:
@@ -30,7 +31,7 @@ class Recorder:
             return
         self._rows[turn] = {
             "request_id": self.request_id, "turn": turn, "ts": _now(), "conversation_id": self.conversation_id,
-            "user": self.user, "message_chars": int(metrics.get("message_chars") or 0),
+            "user": self.user, "origin": self.origin, "message_chars": int(metrics.get("message_chars") or 0),
             "tool_schema_chars": int(metrics.get("tool_schema_chars") or 0), "tool_count": int(metrics.get("tool_count") or 0),
             "retired": int(metrics.get("context_retired") or 0), "saved_chars": int(metrics.get("context_saved_chars") or 0),
             "tools": json.dumps([{"id": getattr(c, "id", ""), "name": getattr(c, "name", ""), "chars": None}
@@ -87,9 +88,15 @@ def _turn_bills(conn, config_dir: str, where: str, params: list) -> dict:
             for key, parts in grouped.items()}
 
 
+ORIGINS = ("app", "script", "")
+
+
 def report(config_dir: str, since: Optional[float] = None, until: Optional[float] = None,
-           limit: int = 25, offset: int = 0) -> dict:
-    """Totals, the requests that cost the most recently, the tools whose answers are largest, and context growth by turn."""
+           limit: int = 25, offset: int = 0, origin: Optional[str] = None) -> dict:
+    """Totals, the requests that cost the most recently, the tools whose answers are largest, and context growth by turn.
+
+    ``origin`` keeps only requests sent from the app's page ("app"), from another program ("script"), or recorded
+    before the origin was kept (""); ``by_origin`` always counts all three."""
     with store.connect() as conn:
         if conn is None:
             return {"enabled": False}
@@ -115,7 +122,8 @@ def report(config_dir: str, since: Optional[float] = None, until: Optional[float
         turns = layout.get(request_id, [])
         requests.append({
             "request_id": request_id, "conversation_id": next((t["conversation_id"] for t in turns), ""),
-            "user": next((t["user"] for t in turns), ""), "ts": max(p["ts"] for p in parts), "turns": len(parts),
+            "user": next((t["user"] for t in turns), ""), "origin": next((t.get("origin") or "" for t in turns), ""),
+            "ts": max(p["ts"] for p in parts), "turns": len(parts),
             "tools": [t["name"] for turn in turns for t in _tools(turn)],
             "prompt_tokens": sum(p["prompt_tokens"] for p in parts), "completion_tokens": sum(p["completion_tokens"] for p in parts),
             "cache_read_tokens": sum(p["cache_read_tokens"] for p in parts), "cost_usd": round(sum(p["cost_usd"] for p in parts), 6),
@@ -123,7 +131,20 @@ def report(config_dir: str, since: Optional[float] = None, until: Optional[float
             "seconds": round((spans.get(request_id) or {}).get("seconds") or sum(p["seconds"] for p in parts), 1),
             "peak_prompt_tokens": max(p["prompt_tokens"] for p in parts)})
     requests.sort(key=lambda r: -r["ts"])
-    return {"enabled": True, "totals": _totals(requests, rounds, earlier), "tools": _tool_sizes(rounds),
+    by_origin = {key: {"requests": 0, "turns": 0, "prompt_tokens": 0, "cost_usd": 0.0} for key in ORIGINS}
+    for request in requests:
+        group = by_origin[request["origin"] if request["origin"] in by_origin else ""]
+        group["requests"] += 1
+        group["turns"] += request["turns"]
+        group["prompt_tokens"] += request["prompt_tokens"]
+        group["cost_usd"] = round(group["cost_usd"] + request["cost_usd"], 6)
+    if origin is not None:
+        requests = [r for r in requests if r["origin"] == origin]
+        kept = {r["request_id"] for r in requests}
+        rounds = [r for r in rounds if r["request_id"] in kept]
+        bills = {key: bill for key, bill in bills.items() if key[0] in kept}
+    totals = {**_totals(requests, rounds, earlier), "by_origin": by_origin}
+    return {"enabled": True, "totals": totals, "tools": _tool_sizes(rounds),
             "turns": _by_turn(bills, rounds), "requests": requests[offset:offset + limit], "request_total": len(requests)}
 
 
