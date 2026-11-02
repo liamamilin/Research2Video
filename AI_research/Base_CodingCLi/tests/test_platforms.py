@@ -717,3 +717,81 @@ def test_category_api_requires_login_and_returns_names(platform_env, client, mon
     response = client.get("/api/platforms/bilibili/categories")
     assert response.status_code == 200 and response.json()["categories"] == rows
     assert "secret" not in response.text
+
+
+def _matrix(tmp, key, jobs, **extra):
+    folder = tmp / "config" / "matrices"
+    folder.mkdir(parents=True, exist_ok=True)
+    lines = [f"name: {key}", f"domain: {key}", "keywords: []", "jobs:", *[f"- {job}" for job in jobs]]
+    lines += [f"{name}: {value}" for name, value in extra.items()]
+    (folder / f"{key}.yaml").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def test_partition_follows_the_scripts_matrix_and_falls_back_to_the_default(platform_env):
+    _matrix(platform_env, "economy", ["economy/economy_daily"])
+    _matrix(platform_env, "old", ["economy/economy_daily", "research/ai"], archived="true")
+    (platform_env / "config" / "matrices" / "tech.yaml").write_text(
+        "name: tech\ndomain: tech\nkeywords: []\njobs:\n- tech/tech_daily\ncontent:\n  role: source\n  parent: ai_media\n",
+        encoding="utf-8")
+    manager.store().save_settings({"tid": 231, "tid_by_matrix": {"economy": 207, "ai_media": 95}})
+    # An individual script has no column context; its Job comes from the topic.
+    assert manager.category_for({"topic": {"matrix_dedup": {"job": "economy/economy_daily"}}}) == 207
+    assert manager.category_for({"topic": {"episode": {"job": "economy/economy_daily"}}, "content_context": {}}) == 207
+    # A programme names its matrices; the source matrix is tried before the column's domain.
+    assert manager.category_for({"content_context": {"matrix": "ai_media", "source_matrix": "economy"}}) == 207
+    assert manager.category_for({"content_context": {"matrix": "ai_media", "source_matrix": "chatgpt_acquisition"}}) == 95
+    # A source matrix without its own partition uses its parent domain's.
+    assert manager.category_for({"topic": {"matrix_dedup": {"job": "tech/tech_daily"}}}) == 95
+    # Archived matrices and unlisted ones fall back to the account default.
+    assert manager.category_for({"topic": {"matrix_dedup": {"job": "research/ai"}}}) == 231
+    assert manager.category_for({"topic": {}, "content_context": {}}) == 231
+
+
+def test_automatic_upload_uses_the_resolved_partition(platform_env, monkeypatch):
+    _matrix(platform_env, "economy", ["economy/economy_daily"])
+    row = render()
+    video_store.update_script(row["script_id"], topic={"title": "测试视频", "matrix_dedup": {"job": "economy/economy_daily"}})
+    manager.store().save_settings({"auto_upload": True, "tid": 231, "tid_by_matrix": {"economy": 207}})
+    manager.store().save_settings({"auto_since": 0})  # switching on stamps "now"; this render finished just before
+    monkeypatch.setattr(manager, "column_for", lambda script: object())
+    monkeypatch.setattr(video_render, "publish_pack", lambda script, version, column, *, render_id: {
+        **PAYLOAD, "warnings": [], "freshness": {"warnings": []}})
+    monkeypatch.setattr(manager.credibility, "label", lambda version: {"tier": "generated"})
+    assert manager.preview(row["id"])["tid"] == 207
+    monkeypatch.setattr(bilibili, "upload", lambda *args, **kwargs: pytest.fail("this test only checks the queue"))
+    monkeypatch.setattr(manager, "verify", lambda: pytest.fail("this test only checks the queue"))
+    db = manager.store()
+    monkeypatch.setattr(db, "pending_uploads", lambda owner: [])
+    monkeypatch.setattr(manager, "store", lambda: db)
+    manager.tick()
+    [task] = db.uploads("123")
+    assert task["payload"]["tid"] == 207 and task["payload"]["automatic"] is True
+
+
+def test_partition_map_is_saved_and_validated(platform_env, client):
+    _login(client, "admin", "admin-pass-123")
+    headers = _csrf(client)
+    body = {"auto_upload": False, "sync_comments": False, "tid": 231}
+    saved = client.put("/api/platforms/bilibili/settings", json={**body, "tid_by_matrix": {"economy": 207}}, headers=headers)
+    assert saved.status_code == 200 and saved.json()["tid_by_matrix"] == {"economy": 207}
+    # Saving the page without the map keeps it.
+    assert client.put("/api/platforms/bilibili/settings", json=body, headers=headers).json()["tid_by_matrix"] == {"economy": 207}
+    bad = client.put("/api/platforms/bilibili/settings", json={**body, "tid_by_matrix": {"economy": 0}}, headers=headers)
+    assert bad.status_code == 422
+
+
+def test_automatic_upload_reads_the_offset_renders_record_and_skips_the_backlog(platform_env, monkeypatch):
+    old, new = render(), render()
+    # Renders record time.strftime("%Y-%m-%dT%H:%M:%S%z"), e.g. 2026-11-02T03:17:39+0800.
+    video_store.update_render(old["id"], completed_at=time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(time.time() - 3600)))
+    video_store.update_render(new["id"], completed_at=time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(time.time() + 60)))
+    manager.store().save_settings({"auto_upload": True, "tid": 231})
+    monkeypatch.setattr(manager, "column_for", lambda script: object())
+    monkeypatch.setattr(video_render, "publish_pack", lambda script, version, column, *, render_id: {
+        **PAYLOAD, "warnings": [], "freshness": {"warnings": []}})
+    monkeypatch.setattr(manager.credibility, "label", lambda version: {"tier": "generated"})
+    db = manager.store()
+    monkeypatch.setattr(db, "pending_uploads", lambda owner: [])
+    monkeypatch.setattr(manager, "store", lambda: db)
+    manager.tick()
+    assert [task["render_id"] for task in db.uploads("123")] == [new["id"]]

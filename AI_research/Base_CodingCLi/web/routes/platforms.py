@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -32,6 +34,8 @@ class SettingsIn(Input):
     auto_upload: bool
     sync_comments: bool
     tid: int = Field(ge=0, le=65535)
+    tid_by_matrix: dict[Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{0,23}$")], Annotated[int, Field(ge=1, le=65535)]] | None = Field(
+        default=None, description="按矩阵指定投稿分区；未列出的矩阵用默认分区 tid。省略时保留原设置。")
     first_comment: FirstCommentIn = Field(default_factory=FirstCommentIn)
 
 

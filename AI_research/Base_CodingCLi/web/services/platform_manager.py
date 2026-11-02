@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import fcntl
 import json
+import logging
 import time
 from contextlib import contextmanager
 from datetime import datetime
@@ -16,6 +17,7 @@ from web.services.publish_cover import publish_cover
 from web.settings import get_settings
 
 Error = bilibili.BilibiliError
+logger = logging.getLogger(__name__)
 
 
 def directory() -> Path:
@@ -137,6 +139,52 @@ def categories() -> dict:
     return {**result, "stale": False}
 
 
+def _timestamp(value: str) -> float:
+    """Renders record ``+0800`` offsets, which ``fromisoformat`` before Python 3.11 rejects."""
+    try:
+        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S%z").timestamp()
+    except ValueError:
+        return datetime.fromisoformat(value).timestamp()
+
+
+_logged: set[tuple[str, str]] = set()
+
+
+def _log_once(level: int, render_id: str, reason: str) -> None:
+    """The worker re-checks every candidate each pass; say why a render stays out only when the reason is new."""
+    if (render_id, reason) not in _logged:
+        _logged.add((render_id, reason))
+        logger.log(level, "Auto upload %s %s", render_id, reason)
+
+
+def _matrix_keys(script: dict) -> list[str]:
+    """The script's matrices, most specific first: where its Job's reports come from, then the column's domain.
+    Individual scripts have no column context, so their Job is read from the topic; archived matrices never count."""
+    from core import matrices
+
+    context = script.get("content_context") or {}
+    topic = script.get("topic") or {}
+    job = ((topic.get("episode") or {}).get("job") or (topic.get("matrix_dedup") or {}).get("job")
+           or context.get("job", ""))
+    found = None
+    if job:
+        found = next((m for m in matrices.load_all(get_settings().paths.config_dir).values()
+                      if not m.archived and job in m.jobs), None)
+    keys = [context.get("source_matrix", ""), found.key if found else "", context.get("matrix", ""),
+            found.content.get("parent", "") if found else ""]
+    return [key for key in dict.fromkeys(keys) if key]
+
+
+def category_for(script: dict) -> int:
+    """The Bilibili partition for a script: its matrix's entry in ``tid_by_matrix``, else the account default."""
+    config = store().settings()
+    by_matrix = config.get("tid_by_matrix") or {}
+    for key in _matrix_keys(script):
+        if int(by_matrix.get(key) or 0) >= 1:
+            return int(by_matrix[key])
+    return int(config.get("tid") or 0)
+
+
 def column_for(script: dict):
     if (script.get('topic') or {}).get('local_video'):
         return None
@@ -181,7 +229,7 @@ def preview(render_id: str) -> dict:
     if script.get("current_version") != render["version"]:
         warnings.append(f"本次投稿使用 v{render['version']} 成片；文稿当前为 v{script['current_version']}，请确认选中了需要的版本。")
     return {**preview_draft(render, "bilibili"), "render_id": render["id"], **adaptation["payload"],
-            "adaptation": adaptation, "tid": store().settings()["tid"], "warnings": warnings,
+            "adaptation": adaptation, "tid": category_for(script), "warnings": warnings,
             "first_comment": default_comment(store().settings()["first_comment"]),
             "freshness_warnings": pack.get("freshness", {}).get("warnings", []),
             "credibility": credibility.label(version),
@@ -507,15 +555,17 @@ def tick() -> None:
                     candidate["version"] != candidate["approved_version"] or candidate["version"] != candidate["current_version"]):
                     continue
                 try:
-                    completed = datetime.fromisoformat(candidate["completed_at"]).timestamp()
-                    if completed < config["auto_since"]:
+                    if _timestamp(candidate["completed_at"]) < config["auto_since"]:
                         continue
                     pack = preview(candidate["render_id"])
                     # Reuse the pipeline's quality hold; freshness warnings also hold unattended publishing.
                     if pack["credibility"]["tier"] in ("serious", "verify", "unaudited") or pack["freshness_warnings"]:
+                        _log_once(logging.INFO, candidate["render_id"], "held: credibility %s, freshness %s"
+                                  % (pack["credibility"]["tier"], pack["freshness_warnings"]))
                         continue
-                    enqueue(candidate["render_id"], {**pack, "tid": config["tid"]}, automatic=True)
-                except (Error, ValueError, TypeError):
+                    enqueue(candidate["render_id"], pack, automatic=True)
+                except (Error, ValueError, TypeError) as exc:
+                    _log_once(logging.WARNING, candidate["render_id"], f"skipped: {exc}")
                     continue
         queued = [u for u in db.pending_uploads(owner) if u["status"] == "QUEUED"]
         if queued:

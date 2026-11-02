@@ -62,7 +62,7 @@ class PlatformStore:
     def settings(self) -> dict:
         with self.connect() as conn:
             row = conn.execute("SELECT data FROM settings WHERE id=1").fetchone()
-        return {"auto_upload": False, "auto_since": 0, "tid": 0,
+        return {"auto_upload": False, "auto_since": 0, "tid": 0, "tid_by_matrix": {},
                 "first_comment": {"enabled": False, "text": "", "pin": False},
                 "sync_comments": False, **(json.loads(row[0]) if row else {})}
 
