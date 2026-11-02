@@ -499,6 +499,111 @@ cg_plus:
   - chatgpt_acquisition
   - chatgpt_s05
   note: 极高优先；功能、费用、购买与使用限制。
+cg_claude_pricing:
+  name: Claude 套餐与价格
+  spec: page:https://claude.com/pricing
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；Free/Pro/Max 套餐与权益。
+cg_claude_release_notes:
+  name: Claude 应用更新记录
+  spec: page:https://support.claude.com/en/articles/12138966-release-notes.md
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；官方 Markdown 版更新记录，带日期。
+cg_anthropic_news:
+  name: Anthropic 新闻
+  spec: page:https://www.anthropic.com/news
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；模型与产品发布。
+cg_gemini_plans:
+  name: Gemini 订阅方案
+  spec: page:https://gemini.google/subscriptions/
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；Google AI 各档订阅与权益。
+cg_gemini_release_notes:
+  name: Gemini 应用更新记录
+  spec: page:https://gemini.google/release-notes/
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；Gemini App 功能更新。
+cg_gemini_blog:
+  name: Google 博客 · Gemini
+  spec: rss:https://blog.google/products/gemini/rss/
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；Gemini 产品动态，带日期。
+cg_grok:
+  name: Grok 产品页
+  spec: page:https://x.ai/grok
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；Grok 功能与 SuperGrok 套餐。
+cg_xai_news:
+  name: xAI 新闻
+  spec: page:https://x.ai/news
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；Grok 模型与功能发布。
+cg_mistral_pricing:
+  name: Mistral Le Chat 价格
+  spec: page:https://mistral.ai/pricing
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；Le Chat 各档与 API 价格。
+cg_zai_release_notes:
+  name: 智谱 Z.ai 更新记录
+  spec: page:https://docs.z.ai/release-notes
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；GLM 模型与产品更新。
+cg_qbitai:
+  name: 量子位
+  spec: rss:https://www.qbitai.com/feed
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；国内 AI 产品动态（豆包、Kimi、通义千问、元宝、DeepSeek 等），正文较短。
+cg_ifanr:
+  name: 爱范儿
+  spec: rss:https://www.ifanr.com/feed
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；面向普通用户的 AI 产品体验与评测。
+cg_tomsguide_ai:
+  name: Tom's Guide · AI
+  spec: rss:https://www.tomsguide.com/feeds/tag/artificial-intelligence
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；面向普通用户的 AI 助手实测与横评。
+cg_cn_ai_apps:
+  name: 国内 AI 助手会员与新功能
+  spec: search:豆包 Kimi 通义千问 腾讯元宝 DeepSeek 会员 新功能 对比
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；国内应用页面需要脚本渲染，直接读取不到，改用检索。
+cg_reddit_compare:
+  name: Reddit · AI 订阅横向讨论
+  spec: search:site:reddit.com ChatGPT vs Claude vs Gemini vs Grok which subscription
+  tags:
+  - chatgpt_acquisition
+  - chatgpt_t05
+  note: T05 横向比较；用户真实选择理由，作为需求线索。
 cg_multicurrency:
   name: ChatGPT 多币种与支付方式
   spec: page:https://help.openai.com/en/articles/10421635-multicurrency-billing
