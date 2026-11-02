@@ -75,25 +75,37 @@ def _first_sentence(text: str, limit: int) -> str:
 
 
 def summary(version: dict) -> str:
-    """One or two sentences for the description's first line: the model's summary when the version has one."""
+    """One or two sentences for the description's first line: the model's summary when the version has one.
+
+    Otherwise the first thing said, without the narrator's greeting: a description that opens "大家好，欢迎收看……"
+    spends its only visible line on nothing."""
+    from .writer import without_greeting
+
     given = ((version.get("meta") or {}).get("description") or {}).get("summary")
     if given:
-        return str(given).strip()
+        return without_greeting(str(given).strip())
     for section in version.get("sections") or []:
         for paragraph in section.get("paragraphs") or []:
-            text = str(paragraph.get("text") or "").strip()
+            text = without_greeting(str(paragraph.get("text") or "").strip())
             if text:
                 return _first_sentence(text, SUMMARY_MAX)
     return ""
 
 
-def tags(title: str, column, topic_title: str = "") -> list[str]:
-    """Up to ten tags: the content type, the audience, product names from the title, then its keywords."""
-    candidates = [column.name, column.audience, "AI"]
-    candidates += _LATIN_NAME.findall(f"{title} {topic_title}")
+#: Product names in Chinese a title may carry; Latin ones (ChatGPT, Claude, Qwen…) are found by pattern.
+_CHINESE_PRODUCTS = ("豆包", "通义", "千问", "元宝", "文心", "智谱", "清言", "腾讯混元", "讯飞星火")
+
+
+def tags(title: str, topic_title: str = "") -> list[str]:
+    """Up to ten tags viewers search for: product names, the title's key phrases, then the field.
+
+    Not the column's own name or audience label: tags read 快讯、开发者、大众观众, which nobody searches."""
+    text = f"{title} {topic_title}"
+    candidates = _LATIN_NAME.findall(text) + [name for name in _CHINESE_PRODUCTS if name in text]
     for source in (title, topic_title):  # phrases of the title; a price or a bare number is no tag
         candidates += [p for p in _TITLE_SPLIT.split(source)
                        if 2 <= len(p) <= TAG_LENGTH and re.match(r"[A-Za-z\u4e00-\u9fff]", p)][:2]
+    candidates += ["AI", "人工智能"]
     out: list[str] = []
     for tag in candidates:
         tag = tag.strip()
@@ -220,7 +232,7 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
         "description": description,
         "chapters": chapters,
         "chapter_note": CHAPTER_NOTE if chapters else "",
-        "tags": tags(title, column, (script.get("topic") or {}).get("title", "")),
+        "tags": tags(title, (script.get("topic") or {}).get("title", "")),
         "cover": cover_text(title, column, programme=(script.get("topic") or {}).get("content_mode") == "episode"
                             or ((version.get("meta") or {}).get("episode") or {}).get("mode") == "episode"),
         "references": refs,
