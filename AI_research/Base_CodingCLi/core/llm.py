@@ -19,6 +19,7 @@ Configured via ``system.yaml``::
 
 from __future__ import annotations
 
+import contextvars
 import json
 import logging
 import os
@@ -530,7 +531,9 @@ class LLMClient:
             except BaseException as exc:  # noqa: BLE001 - re-raised in caller
                 box["err"] = exc
 
-        thread = threading.Thread(target=worker, daemon=True)
+        # The worker records the call's usage; give it the caller's context so the
+        # row keeps the stage, request and turn it belongs to.
+        thread = threading.Thread(target=contextvars.copy_context().run, args=(worker,), daemon=True)
         thread.start()
 
         start = time.time()

@@ -73,6 +73,17 @@ def test_a_new_thread_does_not_inherit_attribution_so_track_goes_inside_the_thre
     assert rows("calls")[0]["script_id"] == ""
 
 
+def test_the_llm_worker_thread_keeps_the_callers_stage_request_and_turn(db, monkeypatch):
+    client = llm_client()
+    monkeypatch.setattr(client, "_chat_once", lambda messages, **_k: telemetry.record_call("llm", model="m1") or "reply",
+                        raising=False)
+    with telemetry.track("assistant", request_id="req-1", conversation_id="conv-1"):
+        with telemetry.bind(turn="2"):
+            assert client._chat_cancellable([]) == "reply"
+    call = rows("calls")[0]
+    assert (call["stage"], call["request_id"], call["conversation_id"], call["turn"]) == ("assistant", "req-1", "conv-1", "2")
+
+
 def test_recording_failures_never_reach_the_caller(db, monkeypatch):
     def broken(*_a, **_k):
         raise OSError("disk full")
