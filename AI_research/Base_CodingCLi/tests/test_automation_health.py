@@ -180,13 +180,18 @@ from core.schedule_store import ScheduleStore  # noqa: E402
 from tests.test_platforms import platform_env  # noqa: E402,F401
 
 
-def _collecting(tmp, *, enabled=1, plan_on=True, last=None):
+def _collecting(tmp, *, enabled=1, plan_on=True, last=None, watched=True):
+    from web.services.platform_analytics import watch_due
     state = str(tmp / "state")
     plans = ScheduleStore(state)
     if not plans.get(SCHEDULE_ID):
         plans.save(INTERNAL_JOB, "*/5 * * * *", schedule_id=SCHEDULE_ID, timezone="Asia/Shanghai", max_retries=0)
     plans.toggle(SCHEDULE_ID, plan_on)
-    AnalyticsStore(state).update_account("123", enabled=enabled, last_success_at=time.time() if last is None else last)
+    store = AnalyticsStore(state)
+    store.update_account("123", enabled=enabled, last_success_at=time.time() if last is None else last)
+    if watched:  # today's creator-centre reading finished
+        due = watch_due(time.time())
+        store.update_watch_state("123", day=due.date().isoformat(), next_at=due.timestamp() + 86400)
 
 
 def test_a_plan_switched_off_behind_the_accounts_back_is_reported(platform_env):
@@ -300,3 +305,22 @@ def test_two_batches_with_a_shared_cause_stay_separate(jobs):
     for n in range(2):
         _held_batch(FIVE + n * 60, f"题目{n}", "出片失败两次")
     assert [a["kind"] for a in health.alerts(now=FIVE + 3600)] == ["batch_items", "batch_items"]
+
+
+def test_a_daily_watch_reading_that_has_not_finished_by_afternoon_is_reported(platform_env):
+    from web.services.platform_analytics import watch_due
+    _collecting(platform_env, watched=False)
+    due = watch_due(time.time()).timestamp()
+    assert health.analytics_alerts(due + 3600) == []  # still within a normal pass
+    [alert] = health.analytics_alerts(due + 5 * 3600)
+    assert alert["kind"] == "analytics_watch" and "没有读完" in alert["title"] and "从未读到" in alert["detail"]
+    store = AnalyticsStore(str(platform_env / "state"))
+    store.save_watch("123", "BV0000000001", "2026-11-02", {"completion": 9.75}, due + 5 * 3600 - 600)
+    assert health.analytics_alerts(due + 5 * 3600) == []  # late but still saving readings: let it finish
+    store.update_watch_state("123", day="2026-11-01", next_at=due + 5 * 3600 + 600,
+                             error="创作中心稿件诊断格式发生变化，保留上次数据。")
+    [alert] = health.analytics_alerts(due + 5 * 3600)
+    assert "2026-11-01" in alert["detail"] and "格式发生变化" in alert["detail"] and alert["link"] == "/analytics?tab=review"
+    # Play data stopped too: the one stale-data alert says it, not a second one.
+    _collecting(platform_env, last=due + 5 * 3600 - 3 * 3600, watched=False)
+    assert [a["kind"] for a in health.analytics_alerts(due + 5 * 3600)] == ["analytics_stale"]

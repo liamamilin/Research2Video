@@ -31,6 +31,10 @@ TOPICS_STUCK_SECONDS = 3 * 3600
 PLAN_LATE_SECONDS = 2 * 3600
 #: Bilibili video data runs every five minutes; this long without a success means it stopped arriving.
 ANALYTICS_STALE_SECONDS = 2 * 3600
+#: The daily watch reading (from 12:30) normally finishes within about 90 minutes; this long after, it is late.
+WATCH_LATE_SECONDS = 4 * 3600
+#: No reading saved for this long while late: the pass has stopped, not just slow.
+WATCH_STALL_SECONDS = 3600
 #: A provider out of credits that has not been tried for this long is probably no longer in use.
 SEARCH_BLOCKED_QUIET_SECONDS = 2 * 86400
 _SEARCH_NAMES = {"exa": "Exa", "youcom": "You.com", "tavily": "Tavily", "brave": "Brave", "serper": "Serper",
@@ -259,6 +263,11 @@ def analytics_alerts(now: float) -> list[dict]:
         with sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=2) as db:
             db.row_factory = sqlite3.Row
             account = db.execute("SELECT * FROM analytics_accounts WHERE uid=?", (uid,)).fetchone()
+            try:
+                watch = db.execute("SELECT * FROM analytics_watch_state WHERE uid=?", (uid,)).fetchone()
+                read_at = db.execute("SELECT max(collected_at) FROM analytics_watch WHERE uid=?", (uid,)).fetchone()[0] or 0
+            except sqlite3.OperationalError:
+                watch, read_at = None, 0  # before the first daily reading created the table
     except (OSError, ValueError, sqlite3.Error):
         return []
     if account is None or not account["enabled"]:
@@ -275,7 +284,7 @@ def analytics_alerts(now: float) -> list[dict]:
                        f"账号仍设为定时采集，但采集计划没有开启，播放数据停在 {since}。"
                        "到数据分析的视频数据页点「开启定时采集」；有意暂停请用那里的「暂停定时采集」。", link)]
     if now - last <= ANALYTICS_STALE_SECONDS:
-        return []
+        return watch_alerts(uid, watch, read_at, now)
     reasons = []
     if account["blocked_until"] and account["blocked_until"] > now:
         reasons.append("B 站暂时拒绝请求，退避到 " + time.strftime("%m-%d %H:%M", time.localtime(account["blocked_until"])))
@@ -288,6 +297,31 @@ def analytics_alerts(now: float) -> list[dict]:
                    f"B 站视频数据 {hours:.0f} 小时没有更新",
                    f"定时采集开着，但最近一次成功是 {since}。" + ("；".join(reasons) or "没有记录到错误，可以在视频数据页点「立即同步数据」看结果。"),
                    link)]
+
+
+def watch_alerts(uid: str, watch, read_at: float, now: float) -> list[dict]:
+    """Plays arrive but the daily creator-centre reading (completion, watch time) has not finished hours after noon,
+    and it is failing or has stopped saving readings (a pass that is still moving is left alone).
+
+    Those endpoints are not documented; a change on Bilibili's side would otherwise only show as missing columns."""
+    from web.services.platform_analytics import watch_due
+
+    due = watch_due(now)
+    if now < due.timestamp() + WATCH_LATE_SECONDS:
+        return []
+    day = due.date().isoformat()
+    done = watch is not None and watch["day"] == day and watch["next_at"] >= due.timestamp() + 86400
+    if done:
+        return []
+    error = (watch["error"] if watch is not None else "") or ""
+    if not error and now - read_at < WATCH_STALL_SECONDS:
+        return []  # still reading, a few videos every five minutes
+    last = watch["day"] if watch is not None and watch["day"] else "从未读到"
+    return [_alert(f"analytics-watch:{uid}:{day}", "analytics_watch", due.timestamp(),
+                   f"{day[5:]} 的完播率和观看时长没有读完",
+                   f"播放数据正常更新，但创作中心的观看数据（每天 {due:%H:%M} 起读）到现在还没读完，"
+                   f"最近一次读到是 {last}。" + (f"最近的错误：{error[:200]}" if error else "没有记录到错误。")
+                   + "这两个接口 B 站没有公开，可能改了格式；每周复盘里这些列会缺数。", "/analytics?tab=review")]
 
 
 def review_notices(now: float) -> list[dict]:
