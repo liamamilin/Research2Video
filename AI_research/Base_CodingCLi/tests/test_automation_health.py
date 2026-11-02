@@ -257,3 +257,46 @@ def test_search_out_of_credits_is_one_alert_until_it_answers(jobs, tmp_path):
         assert not health.search_alerts(FIVE + 36000)
     finally:
         search_health.use_state_dir(None)
+
+
+def test_a_job_failure_it_has_since_recovered_from_is_quiet(jobs):
+    history(jobs, "monitoring/ai_flash_discovery", [
+        {"ts": ts("02:05:37"), "user": "", "status": "failed", "error": "content_filter"},
+        {"ts": ts("02:08:31"), "user": "", "status": "success"},
+        {"ts": ts("14:00:00"), "user": "", "status": "failed", "error": "Unterminated string"},
+    ])
+    found = [a for a in health.alerts(now=FIVE + 12 * 3600) if a["kind"] == "job_failed"]
+    assert [a["detail"] for a in found] == ["Unterminated string"]
+
+
+def _held_batch(at, title, note):
+    run = ap.create_run({"picks": [], "refresh": False}, [{"column_key": "flash", "topic": {"id": title, "title": title}}],
+                        started_by="autopilot")
+    ap.update_run(run["id"], started_at=at)
+    ap.update_item(run["items"][0]["id"], state="HELD", note=note)
+    return run
+
+
+def test_many_batches_stuck_on_one_cause_are_one_alert(jobs):
+    from core.errors import SEARCH_UNAVAILABLE_PREFIX
+    for n in range(4):
+        _held_batch(FIVE + n * 60, f"题目{n}", f"写稿失败 3 次：研究没有完成：{SEARCH_UNAVAILABLE_PREFIX}，已中止。"
+                    f"exa: HTTP 402 requestId {n}abcdef0123456789abcdef；请到「设置 → 搜索」检查服务商额度。")
+    _held_batch(FIVE + 600, "另一题", "出片失败两次")
+    found = health.alerts(now=FIVE + 3600)
+    assert sorted(a["kind"] for a in found) == ["batch_cause", "batch_items"]
+    [group] = [a for a in found if a["kind"] == "batch_cause"]
+    assert group["title"] == "10-20 05:00 起 4 个批次因同一原因卡住：等你处理 4 篇" and group["at"] == FIVE
+    assert "exa:" not in group["detail"] and "请到「设置 → 搜索」" in group["detail"]
+    assert "题目0、题目1、题目2、题目3" in group["detail"]
+    # Acknowledged once, it stays off until another batch joins it.
+    ap.ack_alert(group["key"])
+    assert [a["kind"] for a in health.alerts(now=FIVE + 3600)] == ["batch_items"]
+    _held_batch(FIVE + 1200, "题目4", f"{SEARCH_UNAVAILABLE_PREFIX}，已中止。")
+    assert "5 个批次" in [a for a in health.alerts(now=FIVE + 3600) if a["kind"] == "batch_cause"][0]["title"]
+
+
+def test_two_batches_with_a_shared_cause_stay_separate(jobs):
+    for n in range(2):
+        _held_batch(FIVE + n * 60, f"题目{n}", "出片失败两次")
+    assert [a["kind"] for a in health.alerts(now=FIVE + 3600)] == ["batch_items", "batch_items"]

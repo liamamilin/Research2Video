@@ -8,8 +8,10 @@ user has acknowledged stays off the list.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import re
 import time
 from datetime import datetime
 from typing import Optional
@@ -33,6 +35,8 @@ ANALYTICS_STALE_SECONDS = 2 * 3600
 SEARCH_BLOCKED_QUIET_SECONDS = 2 * 86400
 _SEARCH_NAMES = {"exa": "Exa", "youcom": "You.com", "tavily": "Tavily", "brave": "Brave", "serper": "Serper",
                  "duckduckgo": "DuckDuckGo", "bing": "Bing", "google": "Google"}
+#: Bad items sharing a cause across batches are folded into one alert from this many on.
+GROUP_MIN = 3
 #: Jobs made per script live here; their failures show on the script itself.
 _PER_SCRIPT_JOBS = ("video/", "vod/")
 
@@ -79,11 +83,13 @@ def job_alerts(since: float) -> list[dict]:
         if short != name:
             entries += _history(settings.paths.state_dir, short)
         cancelled: dict[str, list[dict]] = {}
+        # A failure the job has since run past successfully needs nothing from the user.
+        recovered = max((_ts(e.get("ts")) or 0 for e in entries if e.get("status") == "success"), default=0)
         for entry in entries:
             at = _ts(entry.get("ts"))
             if at is None or at < since:
                 continue
-            if entry.get("status") == "failed":
+            if entry.get("status") == "failed" and at > recovered:
                 alerts.append(_alert(f"job:{name}:{entry['ts']}", "job_failed", at, f"Job {name} 失败",
                                      str(entry.get("error") or "")[:300], f"/jobs/{quote(name, safe='')}"))
             elif entry.get("status") == "cancelled":
@@ -101,9 +107,12 @@ def job_alerts(since: float) -> list[dict]:
     return alerts
 
 
-def batch_alerts(since: float, now: float) -> list[dict]:
-    """Autopilot batches that wrote nothing, items that failed or wait for the user, batches stuck picking."""
-    alerts = []
+def batch_alerts(since: float, now: float, acked: frozenset = frozenset()) -> list[dict]:
+    """Autopilot batches that wrote nothing, items that failed or wait for the user, batches stuck picking.
+
+    Many batches failing on one cause (search down for a night) are one alert, not one per batch."""
+    alerts: list[dict] = []
+    causes: dict[str, list] = {}
     for run in ap.list_runs(limit=100):
         if run["started_at"] < since or run["started_by"] == "probe":
             continue
@@ -122,12 +131,62 @@ def batch_alerts(since: float, now: float) -> list[dict]:
         if bad:
             failed = sum(i["state"] == "FAILED" for i in bad)
             held = len(bad) - failed
+            key = f"batch-items:{run['id']}:{failed}:{held}"
+            if key in acked:
+                continue
+            for item in bad:
+                causes.setdefault(_cause(item["note"]), []).append((run, item))
             parts = [f"失败 {failed} 篇" if failed else "", f"等你处理 {held} 篇" if held else ""]
-            alerts.append(_alert(f"batch-items:{run['id']}:{failed}:{held}", "batch_items", run["started_at"],
+            alerts.append(_alert(key, "batch_items", run["started_at"],
                                  f"{when} 的{who}批次：" + "，".join(filter(None, parts)),
                                  "；".join(f"{(i['topic'] or {}).get('title', '')}：{i['note']}" for i in bad)[:500],
-                                 "/"))
-    return alerts
+                                 "/") | {"_runs": {run["id"]}, "_causes": {_cause(i["note"]) for i in bad}})
+    return _group_by_cause(alerts, causes)
+
+
+def _cause(note: str) -> str:
+    """What an item failed on, without the parts that differ per item (request ids, queries, links)."""
+    from core import search_health
+    if search_health.is_outage_error(note):
+        return "联网搜索不可用"
+    text = re.sub(r"https?://\S+|[0-9a-f]{16,}|\d+", "#", note or "")
+    return text[:80]
+
+
+def _short(note: str) -> str:
+    """A search-outage note without the per-provider dump: the sentence that says so, and its advice."""
+    from core.errors import SEARCH_UNAVAILABLE_PREFIX
+    head, _, rest = note.partition(SEARCH_UNAVAILABLE_PREFIX)
+    stop = rest.find("。")
+    advice = note[note.rfind("请到"):] if "请到" in note else ""
+    return (head + SEARCH_UNAVAILABLE_PREFIX + (rest[:stop + 1] if stop >= 0 else "") + advice).strip()
+
+
+def _group_by_cause(alerts: list[dict], causes: dict[str, list]) -> list[dict]:
+    """Batches whose every bad item shares a cause with GROUP_MIN or more others become one alert for that cause."""
+    grouped = {cause: rows for cause, rows in causes.items() if len({r["id"] for r, _ in rows}) > 1
+               and len(rows) >= GROUP_MIN}
+    out = []
+    for alert in alerts:
+        causes_here = alert.pop("_causes", None)
+        alert.pop("_runs", None)
+        if causes_here is None or not causes_here <= grouped.keys():
+            out.append(alert)
+    for cause, rows in grouped.items():
+        rows = sorted(rows, key=lambda row: row[0]["started_at"])
+        first = rows[0][0]["started_at"]
+        failed = sum(item["state"] == "FAILED" for _, item in rows)
+        held = len(rows) - failed
+        parts = [f"失败 {failed} 篇" if failed else "", f"等你处理 {held} 篇" if held else ""]
+        titles = [(item["topic"] or {}).get("title", "") for _, item in rows]
+        sample = "、".join(titles[:5]) + (f" 等 {len(titles)} 篇" if len(titles) > 5 else "")
+        note = _short(rows[0][1]["note"]) if cause == "联网搜索不可用" else rows[0][1]["note"][:300]
+        out.append(_alert(f"batch-cause:{hashlib.sha1(cause.encode()).hexdigest()[:10]}:{first:.0f}:{len(rows)}",
+                          "batch_cause", first,
+                          f"{time.strftime('%m-%d %H:%M', time.localtime(first))} 起 {len({r['id'] for r, _ in rows})} "
+                          f"个批次因同一原因卡住：" + "，".join(filter(None, parts)),
+                          f"原因：{note} 涉及：{sample}", "/"))
+    return out
 
 
 def plan_alerts(now: float) -> list[dict]:
@@ -277,9 +336,8 @@ def alerts(now: Optional[float] = None, *, include_acked: bool = False) -> list[
     """Everything that went wrong on its own in the last week, newest first, minus what the user acknowledged."""
     now = time.time() if now is None else now
     since = now - WINDOW_DAYS * 86400
-    out = (job_alerts(since) + batch_alerts(since, now) + plan_alerts(now) + round_alerts(since) + cap_alerts(now)
-           + analytics_alerts(now) + review_notices(now) + search_alerts(now))
-    if not include_acked:
-        acked = ap.acked_alerts()
-        out = [a for a in out if a["key"] not in acked]
+    acked = frozenset() if include_acked else frozenset(ap.acked_alerts())
+    out = (job_alerts(since) + batch_alerts(since, now, acked) + plan_alerts(now) + round_alerts(since)
+           + cap_alerts(now) + analytics_alerts(now) + review_notices(now) + search_alerts(now))
+    out = [a for a in out if a["key"] not in acked]
     return sorted(out, key=lambda a: a["at"], reverse=True)

@@ -732,7 +732,7 @@ export const getVideoBoard = (signal?: AbortSignal) => api<VideoBoard>("/api/vid
 /** 自动化异常：自己跑的东西出了问题（批次空跑、Job 失败或被反复重启、周计划没触发、情报轮次失败）。 */
 export interface AutomationAlert {
   key: string;
-  kind: "job_failed" | "job_restarted" | "batch_empty" | "batch_stuck" | "batch_items" | "plan_late" | "round_failed" | "matrix_cap" | "matrix_cap_near" | "analytics_off" | "analytics_stale" | "review_saved" | "search_blocked";
+  kind: "job_failed" | "job_restarted" | "batch_empty" | "batch_stuck" | "batch_items" | "plan_late" | "round_failed" | "matrix_cap" | "matrix_cap_near" | "analytics_off" | "analytics_stale" | "review_saved" | "search_blocked" | "batch_cause";
   at: number;
   title: string;
   detail: string;
