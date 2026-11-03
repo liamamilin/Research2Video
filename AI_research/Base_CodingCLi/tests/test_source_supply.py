@@ -280,3 +280,29 @@ def test_native_report_save_advances_delivery_and_preserves_original_material(tm
         meta = json.loads(Path(report_meta.META_FILE).read_text().splitlines()[-1])
         material = json.loads(Path(meta["material"]["path"]).read_text())["material"]
         assert "Concrete input, processing steps, final output" in material
+
+
+def test_new_dated_announcement_on_price_page_is_the_change_not_background(setup, monkeypatch):
+    engine, job, profile, storage = setup
+    spec = job["sources"][0]
+    monkeypatch.setattr(supply.source_coverage, "targets", lambda *a, **k: [{"spec": spec, "role": "state", "cell": "", "max_age_hours": 24}])
+    page = ["Business $25 per seat. Unlimited subject to abuse guardrails."]
+    monkeypatch.setattr(supply, "read_page", lambda *a, **k: [item(text=page[0])])
+    storage.commit(supply.collect(engine, job, profile)[2], "background", "first.md")
+    page[0] += " Starting in December, plan usage will have a shared limit across all of ChatGPT and Codex."
+    got, _, pending, _ = supply.collect(engine, job, profile)
+    header = got[0].excerpts[0].split("\n", 2)[1]
+    assert "页面新增带生效时间的公告：Starting in December, plan usage will have a shared limit" in header
+    assert "页面变化不等于事件刚刚发生" not in header
+    storage.commit(pending, "announced", "second.md")
+    # The announcement stays on the page; the next edit around it is no longer the announcement.
+    page[0] = page[0].replace("$25", "$30")
+    header = supply.collect(engine, job, profile)[0][0].excerpts[0].split("\n", 2)[1]
+    assert "生效时间的公告" not in header and "页面变化不等于事件刚刚发生" in header
+
+
+def test_announcements_pick_dated_sentences_only():
+    assert supply.announcements("Prices may vary. Data from May. Effective Jan 5, 2027 the price rises.") == [
+        "Effective Jan 5, 2027 the price rises."]
+    assert supply.announcements("说明。自 2026 年 12 月 1 日起，Plus 调整为 25 美元。其余不变。") == [
+        "自 2026 年 12 月 1 日起，Plus 调整为 25 美元。"]

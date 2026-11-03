@@ -35,6 +35,20 @@ def for_job(config_dir: str, job: dict) -> dict | None:
     return next((p for p in profiles(config_dir).values() if job.get("_file") in p.get("jobs", {})), None)
 
 
+_MONTH = (r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|"
+          r"Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)(?![a-z])")
+_ANNOUNCED = re.compile(
+    rf"\b(?:starting|beginning|effective|as of)\s+(?:(?:in|on|from)\s+)?(?:{_MONTH}|\d{{4}}-\d{{1,2}}-\d{{1,2}})"
+    r"|(?:自|从)?\s*(?:\d{4}\s*年\s*)?\d{1,2}\s*月(?:\s*\d{1,2}\s*日)?\s*(?:起|开始)",
+    re.I)
+
+
+def announcements(text: str) -> list[str]:
+    """Sentences on a price/plan page that state when a change takes effect, e.g. "Starting in December, ..."."""
+    sentences = re.split(r"(?<=[.!?])\s+|(?<=[。！？])|\n+", text)
+    return list(dict.fromkeys(s.strip() for s in sentences if _ANNOUNCED.search(s)))
+
+
 def section_key(item) -> str:
     # normalize_url strips tracking but also fragments. Keep heading fragments so
     # a late release-note section cannot collapse into the first one on the page.
@@ -240,10 +254,15 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
                 state = "首次观察材料" if not old else "新增材料" if prior is None else "页面内容修改" if prior["fingerprint"] != record["fingerprint"] else "当前背景"
                 if row['role'] == 'state' and prior is None:
                     state = '首次观察当前状态，尚无历史对照，不能据此宣称降价或涨价'
+                # A dated announcement new on a reference page is the period's change, unlike the page around it.
+                announced = [a for a in announcements(text) if not prior or a not in prior["text"]] \
+                    if old and row['role'] in {'state', 'snapshot'} else []
+                if announced:
+                    state = f"页面新增带生效时间的公告：{' '.join(announced)[:600]}——这条公告可作为本期变化，时间以页面原文为准；页面其余内容仍是当前背景"
                 if prior and prior["fingerprint"] != record["fingerprint"]:
                     text += "\n上次已交付内容：" + prior["text"][:3000]
                 material_id = 'M' + hashlib.sha256((canonical + key + record['fingerprint']).encode()).hexdigest()[:16]
-                rendered = replace(item, excerpts=[f"材料编号：{material_id}；来源角色：{row['role']}。\n采集状态：{state}；页面变化不等于事件刚刚发生。\n" + text])
+                rendered = replace(item, excerpts=[f"材料编号：{material_id}；来源角色：{row['role']}。\n采集状态：{state}{'' if announced else '；页面变化不等于事件刚刚发生'}。\n" + text])
                 if used_chars + len(rendered.to_markdown()) > initial_budget:
                     continue
                 used_chars += len(rendered.to_markdown())
