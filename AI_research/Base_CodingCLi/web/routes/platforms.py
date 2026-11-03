@@ -236,6 +236,13 @@ def retry(task_id: str, user=Depends(require_editor)) -> dict:
     return manager.store().get_upload(task_id)
 
 
+@router.post("/uploads/{task_id}/reupload")
+def reupload(task_id: str, user=Depends(require_editor)) -> dict:
+    result = call(manager.reupload, task_id)
+    audit.log("platform_reupload", user=user["username"], target=task_id)
+    return result
+
+
 @router.post("/uploads/{task_id}/lookup")
 def lookup_upload(task_id: str, user=Depends(require_editor)) -> dict:
     return call(manager.lookup_upload, task_id)

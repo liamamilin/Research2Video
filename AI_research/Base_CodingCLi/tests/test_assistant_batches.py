@@ -205,10 +205,11 @@ def test_publish_collects_every_page_freezes_versions_and_keeps_partial_results(
     assert 'render-1' not in queued and 'render-2' not in queued and len(queued) == 51
     for key in queued:
         statuses[key] = 'PUBLISHED'
+    statuses[queued[0]] = 'REMOVED'  # the creator deleted it on the platform: their decision, not a failure
     for _ in range(5):
         tick(client)
     value = BatchStore().get(batch['id'])
-    assert value['counts'] == {'completed': 51, 'failed': 2} and value['status'] == 'failed'
+    assert value['counts'] == {'completed': 50, 'removed': 1, 'failed': 2} and value['status'] == 'failed'
     count = len(queued); tick(client)
     assert len(queued) == count
 

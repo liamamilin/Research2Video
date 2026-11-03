@@ -898,3 +898,23 @@ def test_publish_window_is_saved_and_validated(platform_env, client):
     assert client.put("/api/platforms/bilibili/settings", json=body, headers=headers).json()["publish_window"] == evening
     bad = client.put("/api/platforms/bilibili/settings", json={**body, "publish_window": {**evening, "start": 22}}, headers=headers)
     assert bad.status_code == 422
+
+
+def test_published_video_deleted_on_bilibili_can_be_published_again(platform_env, monkeypatch):
+    row = render()
+    task = manager.enqueue(row["id"], PAYLOAD)
+    monkeypatch.setattr(bilibili, "upload", lambda credential, video, payload, folder: BV)
+    manager.tick()
+    monkeypatch.setattr(bilibili.BilibiliClient, "owned_video", lambda *args: {"title": "测试视频", "state": 0, "pubdate": time.time()})
+    assert manager.reconcile(task["id"], BV)["status"] == "PUBLISHED"
+    # Deleted on B站: gone from the title search, and the video page answers "nothing here".
+    monkeypatch.setattr(bilibili.BilibiliClient, "archives", lambda self, max_pages=3, keyword="": {"archives": [], "complete": True})
+    monkeypatch.setattr(bilibili.BilibiliClient, "owned_video", lambda *args: (_ for _ in ()).throw(bilibili.BilibiliRejected("gone", code=-404)))
+    assert manager.mark_removed(task["id"])["status"] == "REMOVED"
+    assert video_store.list_publications(row["script_id"]) == []  # the dead link leaves the document's record
+    manager.reupload(task["id"])
+    second = "BV1yy411c7mD"
+    monkeypatch.setattr(bilibili, "upload", lambda credential, video, payload, folder: second)
+    manager.tick()  # the removed record of the deleted video does not stop the new upload
+    assert manager.store().get_upload(task["id"])["status"] == "SUBMITTED"
+    assert manager.store().get_upload(task["id"])["bvid"] == second

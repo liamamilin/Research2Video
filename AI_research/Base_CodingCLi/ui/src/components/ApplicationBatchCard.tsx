@@ -5,7 +5,7 @@ import { useAuthStore } from '@/lib/auth-store';
 
 const LABELS: Record<string, string> = { prepared: '已准备，未执行', running: '后台处理中', completed: '已完成', failed: '部分未完成',
   waiting: '等待处理', cancelled: '已停止后续派发', pending: '等待开始', active: '处理中', dispatching: '正在提交',
-  unknown: '提交结果待核对', blocked: '需要处理', skipped: '已跳过',
+  unknown: '提交结果待核对', blocked: '需要处理', skipped: '已跳过', removed: '已在平台删除',
   PUBLISHED: '已公开', SUBMITTED: '已投稿，等待公开确认', QUEUED: '等待上传', RUNNING: '正在处理', FAILED: '未完成', CANCELLED: '已取消', REMOVED: '已在平台删除' };
 
 export function ApplicationBatchCard({ batch, reload, focused = false }: { batch: ApplicationBatch; reload: () => void; focused?: boolean }) {

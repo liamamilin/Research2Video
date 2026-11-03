@@ -169,6 +169,24 @@ class PlatformStore:
             return bool(conn.execute("UPDATE uploads SET payload=?,error='' WHERE id=? AND status='QUEUED'",
                                      (json.dumps(payload, ensure_ascii=False), task_id)).rowcount)
 
+    def requeue_removed(self, task_id: str, uid: str) -> bool:
+        """A deleted submission goes back in the queue as a manual upload: no timer, a fresh first comment."""
+        with self.connect(write=True) as conn:
+            row = conn.execute("SELECT payload,bvid FROM uploads WHERE id=? AND uid=? AND status='REMOVED'", (task_id, uid)).fetchone()
+            if not row:
+                return False
+            old = json.loads(row[0])
+            payload = {**{k: v for k, v in old.items() if k not in ("dtime", "held", "released_at")},
+                       "automatic": False, "removed_bvids": [*old.get("removed_bvids", []), row[1]]}
+            comment = payload.get("first_comment") or {}
+            return bool(conn.execute(
+                "UPDATE uploads SET status='QUEUED',bvid='',error='',payload=?,recovery='{}',updated_at=?,"
+                "first_comment_status=?,first_comment_rpid='',first_comment_error='',first_comment_pin_status=?,"
+                "first_comment_pin_error='' WHERE id=? AND status='REMOVED'",
+                (json.dumps(payload, ensure_ascii=False), time.time(),
+                 "WAITING" if comment.get("enabled") else "DISABLED",
+                 "WAITING" if comment.get("enabled") and comment.get("pin") else "DISABLED", task_id)).rowcount)
+
     def hold_upload(self, task_id: str, note: str) -> bool:
         """An automatic upload the platform's timer cannot reach waits here for the publish window."""
         with self.connect(write=True) as conn:

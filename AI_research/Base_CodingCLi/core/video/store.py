@@ -458,12 +458,14 @@ def list_publications(script_id: str, *, include_removed: bool = False) -> list[
     return [dict(r) for r in rows]
 
 
-def has_publication(script_id: str, version: int, platform: str, account_uid: str) -> bool:
-    """Keep the duplicate guard even after a local record is removed. Unknown old accounts block conservatively."""
+def has_publication(script_id: str, version: int, platform: str, account_uid: str, *, deleted: tuple[str, ...] = ()) -> bool:
+    """Keep the duplicate guard even after a local record is removed. Unknown old accounts block conservatively.
+    ``deleted`` names videos the creator deleted on the platform: their removed records no longer block."""
+    skip = "".join(" AND NOT (removed_at<>'' AND url LIKE ?)" for _ in deleted)
     with connect() as conn:
         return bool(conn.execute("SELECT 1 FROM publications WHERE script_id=? AND version=? AND platform=? "
-                                 "AND (account_uid=? OR account_uid='') LIMIT 1",
-                                 (script_id, version, platform, account_uid)).fetchone())
+                                 "AND (account_uid=? OR account_uid='')" + skip + " LIMIT 1",
+                                 (script_id, version, platform, account_uid, *[f"%{b}%" for b in deleted])).fetchone())
 
 
 def delete_publication(pub_id: str) -> bool:

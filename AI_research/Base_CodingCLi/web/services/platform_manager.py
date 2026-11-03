@@ -479,17 +479,47 @@ def reconcile(task_id: str, bvid: str) -> dict:
     return db.get_upload(task_id)
 
 
+GONE_CODES = (-404, 62002, 62004)  # the video page answers "nothing here" / "not visible"
+
+
 def mark_removed(task_id: str) -> dict:
-    """Record a submission the creator deleted on B站, after checking it is gone from their archive list."""
+    """Record a submission the creator deleted on B站, after checking it exists nowhere on the account.
+
+    The creator list, searched by title, still shows pending and rejected submissions; the video page
+    finds a public one whose title was edited. Only when both miss it, by an explicit answer, is it gone."""
     task = upload_task(task_id)
     if task["status"] not in ("SUBMITTED", "PUBLISHED") or not task["bvid"]:
         raise Error("只有已投稿的稿件可以标记为已在 B 站删除。")
-    data = client(task["uid"]).archives(max_pages=5)
-    rows = data.get("archives") or data.get("rows") or []
-    if any((row.get("Archive") or row).get("bvid") == task["bvid"] for row in rows):
+    api = client(task["uid"])
+    listed = api.archives(max_pages=10, keyword=task["payload"]["title"])
+    if any((row.get("Archive") or row).get("bvid") == task["bvid"] for row in listed["archives"]):
         raise Error(f"{task['bvid']} 仍在 B 站稿件列表里，没有标记。")
+    if not listed.get("complete"):
+        raise Error("同标题的稿件太多，没能读完，没有标记。")
+    try:
+        api.owned_video(task["bvid"], task["uid"])
+    except bilibili.BilibiliRejected as exc:
+        if exc.code not in GONE_CODES:
+            raise
+    else:
+        raise Error(f"{task['bvid']} 在 B 站仍可访问，没有标记。")
     store().mark_removed(task_id, task["uid"], f"{task['bvid']} 已在 B 站删除")
+    for record in video_store.list_publications(task["script_id"]):
+        if task["bvid"] in (record.get("url") or ""):
+            video_store.delete_publication(record["id"])  # the link is dead; restorable like any removed record
     return upload_task(task_id)
+
+
+def reupload(task_id: str) -> dict:
+    """Queue a deleted submission again, as a new manual upload of the same render and text."""
+    with account_lock():
+        task = upload_task(task_id)
+        if task["status"] != "REMOVED":
+            raise Error("只有已在 B 站删除的投稿可以重新投稿。")
+        eligible(task["render_id"])
+        if not store().requeue_removed(task_id, task["uid"]):
+            raise Error("这条投稿的状态已经变化，请刷新后再试。")
+        return upload_task(task_id)
 
 
 def lookup_upload(task_id: str) -> dict:
@@ -645,7 +675,8 @@ def tick() -> None:
         if task:
             try:
                 render, _, _ = eligible(task["render_id"], automatic=bool(task["payload"].get("automatic")))
-                if video_store.has_publication(task["script_id"], task["version"], "bilibili", owner):
+                if video_store.has_publication(task["script_id"], task["version"], "bilibili", owner,
+                                               deleted=tuple(task["payload"].get("removed_bvids") or ())):
                     raise Error("这个版本已经补录发布，已停止重复投稿。")
                 verify()
                 if not bilibili.biliup_binary():
