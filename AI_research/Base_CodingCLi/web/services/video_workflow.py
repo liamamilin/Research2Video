@@ -438,6 +438,17 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                      if urls & {normalize_url(url) for url in extract_urls(part)}]
             material = "\n\n---\n\n".join(parts)
         writing_topic = topic
+        told = _episode_told(script, topic, dossier_report) if is_episode else []
+        if told:
+            items = topic["episode"]["items"]
+            titles = {c["title"] for c in told}
+            if titles >= {i["title"] for i in items}:
+                raise content_guard.DuplicateContent([{"script_id": c["peer_id"], "title": c["peer_title"]} for c in told],
+                                                     "本期条目往期都已讲过，少做一期")
+            dossier_report = episodes.without(dossier_report, items, titles)
+            writing_topic = {**topic, "episode": {**topic["episode"], "items": [i for i in items if i["title"] not in titles]}}
+            column = replace(column, script_style=column.script_style + "\n以下条目往期已经讲过，本期不讲，原始材料里出现也跳过："
+                             + "；".join(sorted(titles)))
         if dossier_selection == "column_explanation":
             question = re.search(r"(?m)^##\s+本期主问题[：:]\s*(.+)$", dossier_report)
             writing_topic = {key: value for key, value in topic.items() if key != "story"}
@@ -457,6 +468,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
         polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
         if is_episode:
             written.meta["episode"] = episodes.manifest(topic, written.sections)
+            if told:
+                written.meta["episode_told"] = told
         written.meta["input_kind"] = ("report_and_original_material" if joint_input and material
                                       else "original_material" if material else "report")
         if joint_input:
@@ -490,6 +503,21 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     )
     store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"
+
+
+def _episode_told(script: dict, topic: dict, report: str) -> list[dict]:
+    """Items of this programme an earlier video of the matrix already told; videos from the same report
+    (its own singles) do not count."""
+    from core.video import episodes
+
+    episode = topic.get("episode") or {}
+    if not episode.get("items") or not episode.get("job") or content_guard.protected(script["id"]):
+        return []
+    settings = get_settings()
+    peers = [p for p in content_guard.coverage({"matrix_dedup": {"job": episode["job"]}}, settings.paths.config_dir,
+                                               settings.paths.jobs_dir, script_id=script["id"])
+             if p.get("report") != episode.get("report_path")]
+    return episodes.covered(report, episode["items"], peers, _read_report)
 
 
 def _duplicate_script(script_id: str, exc: content_guard.DuplicateContent, failed_status: str) -> str:

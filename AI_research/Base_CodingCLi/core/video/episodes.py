@@ -178,3 +178,81 @@ def scripts_for(report_path: str, recipe: str, production_id: str, column_id: st
     import json
     return [{"id": x["id"], "column_key": x["column_key"], "status": x["status"],
              "title": json.loads(x["topic"])["title"], "created_at": x["created_at"], "archived": False} for x in rows]
+
+
+_FIGURE = re.compile(r"(?:US\$|\$|¥|￥)\s?(\d[\d,]*(?:\.\d+)?)|(\d[\d,]*(?:\.\d+)?)\s?(?:美元|美金|元|USD|%|％)")
+_NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
+
+
+def _number(value: str) -> str:
+    value = value.replace(",", "")
+    return value.rstrip("0").rstrip(".") if "." in value else value
+
+
+# Worked examples and production notes compute their own illustrative figures; only the facts count.
+_ILLUSTRATIVE = ("使用场景", "用户最终得到什么", "画面建议", "操作与演示", "输入与结果", "获客作用", "注意", "待实测")
+
+
+def _figures(text: str) -> set[str]:
+    segments = re.split(r"\*\*([^*\n]{1,16})\*\*", text)
+    facts = segments[0] + "".join(body for label, body in zip(segments[1::2], segments[2::2])
+                                  if not label.strip("：: ").startswith(_ILLUSTRATIVE))
+    facts = re.sub(r"https?://\S+", " ", facts)  # "GPT-5.6%20..." in a link is not 5.6%
+    return {_number(a or b) for a, b in _FIGURE.findall(facts)}
+
+
+def _pages(text: str) -> set[tuple[str, str]]:
+    """Cited entries: one what's-new or pricing page holds many, told apart by their anchors."""
+    from core.provenance import extract_urls
+    from core.video.story_pool import _anchored
+    return {_anchored(u) for u in extract_urls(text)}
+
+
+def _key(value: str) -> str:
+    return re.sub(r"[\W_]+", "", value).casefold()
+
+
+def item_parts(report: str, items: list[dict]) -> dict[str, str]:
+    """Each picked item's own section of the report, found by its heading."""
+    parts = {}
+    for part in re.split(r"(?m)^(?=### )", report):
+        heading = _key(part.splitlines()[0]) if part.startswith("### ") else ""
+        for item in items:
+            if heading and _key(item["title"]) and _key(item["title"]) in heading:
+                parts.setdefault(item["title"], part)
+    return parts
+
+
+def covered(report: str, items: list[dict], peers: list[dict], read=None) -> list[dict]:
+    """Items an earlier video already told in full: its report cited the same entry and the video said
+    every price and figure the item gives. An item with a figure the earlier video never said is an update and stays;
+    an item without figures is never dropped on a guess."""
+    read = read or (lambda path: open(path, encoding="utf-8").read())
+    pages = {}
+    result = []
+    for title, part in item_parts(report, items).items():
+        figures, cited = _figures(part), _pages(part)
+        if not figures or not cited:
+            continue
+        for peer in peers:
+            told = {_number(n) for n in _NUMBER.findall(peer.get("text") or "")}
+            if not figures <= told:
+                continue
+            if peer.get("report") not in pages:
+                try:
+                    pages[peer.get("report")] = _pages(read(peer["report"])) if peer.get("report") else set()
+                except OSError:
+                    pages[peer.get("report")] = set()
+            shared = cited & pages[peer.get("report")]
+            # A whole help article backs many different tips; one figure on it is not the same story.
+            if any(anchor for _, anchor in shared) or (shared and len(figures) >= 2):
+                result.append({"title": title, "peer_id": peer["script_id"], "peer_title": peer["title"]})
+                break
+    return result
+
+
+def without(report: str, items: list[dict], titles: set[str]) -> str:
+    parts = item_parts(report, [i for i in items if i["title"] in titles])
+    for part in parts.values():
+        report = report.replace(part, "")
+    return report
