@@ -264,7 +264,7 @@ async def advance(batch: dict, item: dict, app, user: dict, storage: BatchStore,
                 return
             progress = describe(platform, result['upload_id'], data)
             checking = result.get('resume_check_started_at', 0) > (data.get('verification') or {}).get('checked_at', 0) and status in ('SUBMITTED', 'UNKNOWN')
-            state = 'completed' if status == 'PUBLISHED' else 'failed' if status in ('FAILED', 'CANCELLED') else 'blocked' if not progress['active'] and not checking else 'active'
+            state = 'completed' if status == 'PUBLISHED' else 'failed' if status in ('FAILED', 'CANCELLED', 'REMOVED') else 'blocked' if not progress['active'] and not checking else 'active'
             result = {k: v for k, v in result.items() if k != 'retry_requested'}
             if not checking:
                 result.pop('resume_check_started_at', None)

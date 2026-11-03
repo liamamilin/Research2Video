@@ -26,6 +26,7 @@ def describe(platform: str, key: str, row: dict) -> dict:
     href = task_href(platform, key, row)
     labels = {'PUBLISHED': '已公开', 'SUBMITTED': '已投稿，等待公开确认', 'UNKNOWN': '投稿结果待核对',
               'NEEDS_RECONCILIATION': '投稿结果待核对', 'FAILED': '投稿未完成', 'CANCELLED': '已取消',
+              'REMOVED': '已在平台删除',
               'QUEUED': '等待上传', 'RUNNING': '正在处理', 'UPLOADING': '正在上传',
               'PUBLISHING': '正在发布', 'VERIFYING': '正在核对', 'PROCESSING': '平台处理中'}
     label = STATE_LABELS.get(native_state, labels.get(status, status)) if status in ('SUBMITTED', 'UNKNOWN') else labels.get(status, status)

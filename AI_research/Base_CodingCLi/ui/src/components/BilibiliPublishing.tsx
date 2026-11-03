@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { documentPublishLink } from "@/lib/platform-links";
 import { PublishAdaptation } from "./PublishAdaptation";
 import { publishCheck, textCount, validFirstComment } from "@/lib/publish-text";
-const UPLOAD_STATES: Record<string, string> = { QUEUED: "排队中", UPLOADING: "上传中", SUBMITTED: "已提交，待公开确认", PUBLISHED: "已公开", UNKNOWN: "结果待核对", FAILED: "投稿失败，可重试", CANCELLED: "已取消" };
+const UPLOAD_STATES: Record<string, string> = { QUEUED: "排队中", UPLOADING: "上传中", SUBMITTED: "已提交，待公开确认", PUBLISHED: "已公开", UNKNOWN: "结果待核对", FAILED: "投稿失败，可重试", CANCELLED: "已取消", REMOVED: "已在 B 站删除" };
 type Run = (action: () => Promise<unknown>) => Promise<void>;
 function PlatformLink({ bvid, rpid, children }: { bvid: string; rpid?: string; children: React.ReactNode }) {
   return <a className="text-accent hover:underline inline-flex items-center gap-1 text-xs" target="_blank" rel="noreferrer" href={`https://www.bilibili.com/video/${bvid}${rpid ? `/#reply${rpid}` : ""}`}>{children}<ExternalLink className="w-3 h-3" /></a>;

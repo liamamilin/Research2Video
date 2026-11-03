@@ -173,6 +173,13 @@ class PlatformStore:
                                      (" AND status=?" if expected else ""),
                                      (status, error, bvid, time.time(), task_id) + ((expected,) if expected else ())).rowcount)
 
+    def mark_removed(self, task_id: str, uid: str, note: str) -> bool:
+        """The submission was deleted on the platform: it no longer waits, holds a slot or can be retried."""
+        with self.connect(write=True) as conn:
+            return bool(conn.execute("UPDATE uploads SET status='REMOVED',error=?,updated_at=? "
+                                     "WHERE id=? AND uid=? AND status IN ('SUBMITTED','PUBLISHED') AND bvid<>''",
+                                     (note, time.time(), task_id, uid)).rowcount)
+
     def recover_uploads(self) -> None:
         # Caller holds the cross-process worker lock: no living upload is being interrupted.
         with self.connect(write=True) as conn:

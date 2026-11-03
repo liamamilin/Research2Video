@@ -6,7 +6,7 @@ export const VISIBLE_PLATFORM_NAMES = Object.fromEntries(Object.entries(PLATFORM
 export const isVisiblePlatform = (platform: string) => Boolean(VISIBLE_PLATFORM_NAMES[platform]);
 export const DISTRIBUTION_LABEL: Record<string, string> = {
   UNPUBLISHED: "未发布", DRAFT: "待发布", QUEUED: "排队中", UPLOADING: "上传中",
-  SUBMITTED: "已提交，待公开确认", PUBLISHED: "已发布", UNKNOWN: "结果待核对", FAILED: "发布失败", CANCELLED: "已取消",
+  SUBMITTED: "已提交，待公开确认", PUBLISHED: "已发布", UNKNOWN: "结果待核对", FAILED: "发布失败", CANCELLED: "已取消", REMOVED: "已在平台删除",
 };
 export function publishedPlatformCount(rows: DistributionState[] = [], publications: Publication[] = []) {
   return new Set([...rows.filter(r => r.status === "PUBLISHED").map(r => r.platform), ...publications.map(p => p.platform || "bilibili")]).size;

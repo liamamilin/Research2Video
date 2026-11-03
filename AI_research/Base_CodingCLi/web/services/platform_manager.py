@@ -464,6 +464,19 @@ def reconcile(task_id: str, bvid: str) -> dict:
     return db.get_upload(task_id)
 
 
+def mark_removed(task_id: str) -> dict:
+    """Record a submission the creator deleted on B站, after checking it is gone from their archive list."""
+    task = upload_task(task_id)
+    if task["status"] not in ("SUBMITTED", "PUBLISHED") or not task["bvid"]:
+        raise Error("只有已投稿的稿件可以标记为已在 B 站删除。")
+    data = client(task["uid"]).archives(max_pages=5)
+    rows = data.get("archives") or data.get("rows") or []
+    if any((row.get("Archive") or row).get("bvid") == task["bvid"] for row in rows):
+        raise Error(f"{task['bvid']} 仍在 B 站稿件列表里，没有标记。")
+    store().mark_removed(task_id, task["uid"], f"{task['bvid']} 已在 B 站删除")
+    return upload_task(task_id)
+
+
 def lookup_upload(task_id: str) -> dict:
     """Explicit read-only recovery shares the same lock as the automatic uploader."""
     with account_lock():
