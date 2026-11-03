@@ -15,7 +15,7 @@ from typing import Optional
 
 from . import telemetry
 from .config import load_system_config, load_job, list_jobs
-from .errors import CancelledError
+from .errors import CancelledError, LLMError
 from .extractor import extract_report
 from .fileio import atomic_write
 from .llm import LLMConfig
@@ -238,10 +238,9 @@ class ResearchEngine:
                     )
                 # Migrated columns deepen the researcher's chosen candidates by
                 # reading existing links, before the ordinary report is saved.
-                from .ai_dossier_sources import enrich
-                from core.video.research_dossier import PRODUCTIONS
+                from .ai_dossier_sources import enrich, wanted
                 dossier_detail = {}
-                if job.get("_file") in PRODUCTIONS.values() and raw_content:
+                if wanted(job) and raw_content:
                     from .search import SearchClient
                     reader = SearchClient(SearchConfig.from_system(self.sys), cancel_token=self._cancel,
                                           progress_cb=self._progress)
@@ -257,8 +256,8 @@ class ResearchEngine:
                         try:
                             raw_content = agent.expand_dossier(prompt, raw_content, extra)
                             dossier_detail["expanded"] = True
-                        except CancelledError:
-                            raise
+                        except (CancelledError, LLMError):
+                            raise  # the model API is out or refused: stop the run rather than keep a thinner report
                         except Exception as exc:
                             dossier_detail.update(expanded=False, expansion_error=str(exc)[:300])
                             logger.warning("Dossier expansion kept the initial report: %s", exc)

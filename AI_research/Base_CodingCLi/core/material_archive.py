@@ -105,6 +105,12 @@ class MaterialArchive:
             "scope": "已观察条目；来源历史列表及首次归档前的缺口无法保证回溯",
         }
 
+    def first_seen(self, spec: str) -> dict[str, float]:
+        """When each of a source's items was first observed, whatever its later edits."""
+        with self.connect() as db:
+            return {r[0]: r[1] for r in db.execute(
+                "SELECT item_key,MIN(first_seen) FROM observations WHERE spec=? GROUP BY item_key", (spec,))}
+
     def prune(self, retention_days: int, *, now: float | None = None) -> None:
         """Prune only this cache; reports, attempts and video artifacts are untouched."""
         cutoff = (time.time() if now is None else now) - retention_days * 86400

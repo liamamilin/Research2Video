@@ -644,8 +644,10 @@ class ResearchAgent:
         outputs, which are the bulk of the transcript.
         """
 
+        # Only what the agent read along the way counts. The task's own material can exceed the
+        # budget by itself; counting it would shrink every page the agent reads to 800 characters.
         def total_chars() -> int:
-            return sum(len(str(m.get("content") or "")) for m in messages)
+            return sum(len(str(m.get("content") or "")) for m in messages if m.get("role") == "tool")
 
         if total_chars() <= self.config.context_char_budget:
             return

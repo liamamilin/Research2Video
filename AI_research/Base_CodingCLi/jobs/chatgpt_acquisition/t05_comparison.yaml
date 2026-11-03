@@ -12,6 +12,8 @@ runtime:
   skip_if_running: true
 search: false
 source_history: true
+# 报告写完后为每个条目读一篇原文，交给写稿（core/ai_dossier_sources.py）。
+dossier_sources: true
 sources_limit: 6
 sources:
 - source:cg_pricing

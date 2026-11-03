@@ -11,7 +11,7 @@ import sqlite3
 import time
 from urllib.parse import urlsplit
 
-from .errors import CancelledError, SourcesUnavailableError
+from .errors import CancelledError, SearchUnavailableError, SourcesUnavailableError
 from .provenance import extract_urls, normalize_url
 from .search import SearchClient
 from .source_supply_store import SupplyStore
@@ -19,6 +19,7 @@ from . import source_coverage
 from .yaml_cache import load_yaml
 
 logger = logging.getLogger(__name__)
+PAGE_CHARS = 24000  # one article read in full, as the page reader splits it
 
 
 def profiles(config_dir: str) -> dict[str, dict]:
@@ -41,6 +42,11 @@ _ANNOUNCED = re.compile(
     rf"\b(?:starting|beginning|effective|as of)\s+(?:(?:in|on|from)\s+)?(?:{_MONTH}|\d{{4}}-\d{{1,2}}-\d{{1,2}})"
     r"|(?:自|从)?\s*(?:\d{4}\s*年\s*)?\d{1,2}\s*月(?:\s*\d{1,2}\s*日)?\s*(?:起|开始)",
     re.I)
+
+
+def datetime_from(value: str):
+    from datetime import datetime
+    return datetime.fromisoformat(value)
 
 
 def announcements(text: str) -> list[str]:
@@ -123,7 +129,17 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
         except (OSError, sqlite3.Error) as exc:
             archive_error = str(exc)[:300]
         reference_specs = references(policy, engine.config_dir)
-    old = storage.baseline(canonical)["items"]
+    baseline = storage.baseline(canonical)
+    old = baseline["items"]
+    # News dated after the last delivered run's own range is still owed if that run did not hand it over
+    # (it overflowed, or a run failed): widen only the date filter, back to where the last run started.
+    select_window = window
+    if window and old and baseline.get("at"):
+        from datetime import datetime
+        start = datetime.fromisoformat(window["start"])
+        owed = datetime.fromtimestamp(float(baseline["at"]) - window["days"] * 86400, start.tzinfo)
+        if owed < start:
+            select_window = {**window, "start": owed.isoformat()}
     declared = resolve(list(job.get("sources") or []), engine.config_dir)
     automatic = choose_pool(storage.pool()["sources"], canonical, int(profile.get("pool_per_job", 4)), now)
     coverage = source_coverage.targets(profile, canonical, storage.pool()['sources'])
@@ -141,10 +157,12 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
                "initial_baseline": {}, "candidates": []}
     items, stats, candidates, discovered_links = [], {}, [], []
     observed, complete_sources = [], set()
-    queues = {}
+    queues, fresh = {}, {}
     budget = int(profile.get("material_chars", 180000))
     used_chars = 0
-    detail_left = int(profile.get("detail_pages", 4))
+    # Originals are bounded by the material budget and a reading time, not by a count. ``detail_pages``
+    # (0 turns reading off) and ``detail_attempts`` remain optional explicit caps.
+    detail_left = float("inf") if profile.get("detail_pages") is None else int(profile["detail_pages"])
     detailed = set()
     receipt = {"version": 1, "profile": profile["key"], "mode": mode, "first_collection": not bool(old),
                "scan_limit": scan, "details": [], "sources": pending["sources"]}
@@ -216,7 +234,7 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             row["scanned"] = len(fetched)
             if spec not in metadata and all(item.provider in {'aa', 'hf_models', 'wb'} for item in fetched):
                 role = row['role'] = 'snapshot'
-            fetched = select(fetched, window, reference=spec in reference_specs or role in {'state', 'snapshot'})
+            fetched = select(fetched, select_window, reference=spec in reference_specs or role in {'state', 'snapshot'})
             changes, unchanged = [], []
             for item in fetched:
                 key = section_key(item)
@@ -233,7 +251,20 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
                 discovered_links.extend(extract_urls(item.url + "\n" + "\n".join(item.excerpts)))
             # Changed entries are considered before old context, even at the end of a long page.
             limit = min(per_source, int(profile.get('snapshot_items', 2))) if role == 'snapshot' else per_source
-            queues[spec] = (changes + (unchanged if mode == "context" or role == 'state' else []))[:limit]
+            # A dated item that survived the window is this period's news: it goes before undated page
+            # sections from every source, and the per-source cap does not cut it.
+            reference = spec in reference_specs or role in {'state', 'snapshot'}
+            fresh[spec] = [c for c in changes if c[0].publish_date and not reference]
+            rest = [c for c in changes if c not in fresh[spec]]
+            if archive:
+                # Undated sections that appeared most recently go first; one still waiting from days ago
+                # (a long release page re-scanned) stays offered but no longer crowds out today's.
+                try:
+                    seen = archive.first_seen(spec)
+                    rest.sort(key=lambda c: -seen.get(c[1], now))
+                except (OSError, sqlite3.Error) as exc:
+                    row['archive_error'] = str(exc)[:300]
+            queues[spec] = (rest + (unchanged if mode == "context" or role == 'state' else []))[:max(0, limit - len(fresh[spec]))]
             stats[spec] = 0
         except CancelledError:
             raise
@@ -242,71 +273,107 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             stats[spec] = "失败：" + row["error"]
     # Round-robin across sources keeps a long first page from consuming the
     # entire context before a small specialist feed gets its first item.
-    initial_budget = int(budget * .75) if detail_left else budget
-    for index in range(per_source):
-        for spec, selected in queues.items():
-            if index < len(selected):
-                item, key, record, prior = selected[index]
-                row = pending["sources"][spec]
-                if key in pending["delivered"]:
-                    continue
-                text = "\n".join(item.excerpts)
-                state = "首次观察材料" if not old else "新增材料" if prior is None else "页面内容修改" if prior["fingerprint"] != record["fingerprint"] else "当前背景"
-                if row['role'] == 'state' and prior is None:
-                    state = '首次观察当前状态，尚无历史对照，不能据此宣称降价或涨价'
-                # A dated announcement new on a reference page is the period's change, unlike the page around it.
-                announced = [a for a in announcements(text) if not prior or a not in prior["text"]] \
-                    if old and row['role'] in {'state', 'snapshot'} else []
-                if announced:
-                    state = f"页面新增带生效时间的公告：{' '.join(announced)[:600]}——这条公告可作为本期变化，时间以页面原文为准；页面其余内容仍是当前背景"
-                if prior and prior["fingerprint"] != record["fingerprint"]:
-                    text += "\n上次已交付内容：" + prior["text"][:3000]
-                material_id = 'M' + hashlib.sha256((canonical + key + record['fingerprint']).encode()).hexdigest()[:16]
-                rendered = replace(item, excerpts=[f"材料编号：{material_id}；来源角色：{row['role']}。\n采集状态：{state}{'' if announced else '；页面变化不等于事件刚刚发生'}。\n" + text])
-                if used_chars + len(rendered.to_markdown()) > initial_budget:
-                    continue
-                used_chars += len(rendered.to_markdown())
-                items.append(rendered)
-                pending["delivered"][key] = record
-                pending['candidates'].append({'id': material_id, 'source': spec, 'key': key, 'fingerprint': record['fingerprint'],
-                                              'item': asdict(item), 'role': row['role']})
-                row["delivered"] += 1
-                row["urls"].append(item.url)
-                # Feeds and directories often contain only a teaser. Follow the
-                # selected article, not every link or navigation entry.
-                if item.provider in {"rss", "catalog", "tldr", "hn", "gh_new", "github", "arxiv", "hf_papers"} and detail_left:
-                    target = canonical_url(item.url)
-                    if target not in detailed:
-                        candidates.append((target, row, material_id))
-                        detailed.add(target)
-                stats[spec] = row["delivered"]
+    initial_budget = int(budget * (1 - float(profile.get("detail_share", .4)))) if detail_left else budget
+    def rounds(lists):
+        for index in range(max((len(v) for v in lists.values()), default=0)):
+            for spec, entries in lists.items():
+                if index < len(entries):
+                    yield spec, entries[index]
+    from .research_window import date_of
+    window_start = datetime_from(window["start"]) if window else None
+    news_chars = 0
+    for spec, (item, key, record, prior), news in [*((s, e, True) for s, e in rounds(fresh)),
+                                                    *((s, e, False) for s, e in rounds(queues))]:
+        row = pending["sources"][spec]
+        if key in pending["delivered"]:
+            continue
+        text = "\n".join(item.excerpts)
+        state = "首次观察材料" if not old else "新增材料" if prior is None else "页面内容修改" if prior["fingerprint"] != record["fingerprint"] else "当前背景"
+        if row['role'] == 'state' and prior is None:
+            state = '首次观察当前状态，尚无历史对照，不能据此宣称降价或涨价'
+        # A dated announcement new on a reference page is the period's change, unlike the page around it.
+        announced = [a for a in announcements(text) if not prior or a not in prior["text"]] \
+            if old and row['role'] in {'state', 'snapshot'} else []
+        if announced:
+            state = f"页面新增带生效时间的公告：{' '.join(announced)[:600]}——这条公告可作为本期变化，时间以页面原文为准；页面其余内容仍是当前背景"
+        when = date_of(item.publish_date) if news else None
+        if when and window_start and (when.replace(tzinfo=window_start.tzinfo) if when.tzinfo is None else when) < window_start:
+            state += "；上期范围内发布、上期没有交给研究，本期补交，按原发布日期报道"
+        if prior and prior["fingerprint"] != record["fingerprint"]:
+            text += "\n上次已交付内容：" + prior["text"][:3000]
+        material_id = 'M' + hashlib.sha256((canonical + key + record['fingerprint']).encode()).hexdigest()[:16]
+        rendered = replace(item, excerpts=[f"材料编号：{material_id}；来源角色：{row['role']}。\n采集状态：{state}{'' if announced else '；页面变化不等于事件刚刚发生'}。\n" + text])
+        size = len(rendered.to_markdown())
+        if news:
+            news_chars += size  # this period's news is all handed over; the budget only bounds page context
+        elif used_chars + size > initial_budget:
+            continue
+        else:
+            used_chars += size
+        items.append(rendered)
+        pending["delivered"][key] = record
+        pending['candidates'].append({'id': material_id, 'source': spec, 'key': key, 'fingerprint': record['fingerprint'],
+                                      'item': asdict(item), 'role': row['role']})
+        row["delivered"] += 1
+        row["urls"].append(item.url)
+        # Feeds and directories often contain only a teaser. Follow the
+        # selected article, not every link or navigation entry.
+        if item.provider in {"rss", "catalog", "tldr", "hn", "gh_new", "github", "arxiv", "hf_papers"} and detail_left:
+            target = canonical_url(item.url)
+            if target not in detailed:
+                candidates.append((target, row, material_id, news))
+                detailed.add(target)
+        stats[spec] = row["delivered"]
     attempts = 0
-    max_attempts = int(profile.get('detail_attempts', max(4, detail_left * 3)))
-    for url, row, material_id in candidates:
-        if detail_left <= 0 or attempts >= max_attempts or used_chars >= budget:
-            break
+    max_attempts = float(profile.get('detail_attempts') or "inf")
+    article_chars = int(profile.get('detail_chars', PAGE_CHARS))
+    # News articles are all read in full; page-context articles share what is left of the budget.
+    for url, row, material_id, news in sorted(candidates, key=lambda c: not c[3]):
+        if detail_left <= 0 or attempts >= max_attempts or (not news and used_chars >= budget):
+            continue
         if engine._cancel.is_set():
             raise CancelledError("正文补读已取消")
         attempts += 1
-        detail = {"url": url, "status": "unavailable", "sections": 0}
+        detail = {"url": url, "status": "unavailable", "sections": 0, "news": news}
         receipt["details"].append(detail)
         try:
-            parts = read_page(url, limit=scan, search_client=client)
+            try:
+                parts = read_page(url, limit=scan, search_client=None)
+            except CancelledError:
+                raise
+            except Exception:
+                if client is None:
+                    raise
+                detail["reader"] = "exa"  # the paid reader, only after direct and browser reads fail
+                try:
+                    parts = read_page(url, limit=scan, search_client=client, browser=False)
+                except RuntimeError as exc:
+                    if re.search(r"HTTP (401|402|429)\b", str(exc)):
+                        raise SearchUnavailableError({"exa": str(exc)[:200]}) from exc  # out of quota: stop, don't thin out
+                    raise
             from .ai_dossier_sources import detail_sections
-            parts = detail_sections(parts, max_chars=min(48000, budget - used_chars))
+            room = article_chars if news else min(article_chars, budget - used_chars)
+            whole = parts
+            parts = detail_sections(whole, max_chars=room)
+            if not parts and whole and room > 1000:
+                # One long section: keep the article's opening rather than nothing.
+                parts = [replace(whole[0], excerpts=[whole[0].excerpts[0][:room - 600] if whole[0].excerpts else ""])]
             for part in parts:
                 part = replace(part, excerpts=[*part.excerpts, f'材料编号：{material_id}（正文补读）'])
                 size = len(part.to_markdown())
-                if used_chars + size > budget:
+                if news:
+                    news_chars += size
+                elif used_chars + size > budget:
                     continue
+                else:
+                    used_chars += size
                 items.append(part)
-                used_chars += size
                 detail["sections"] += 1
                 row["urls"].append(part.url)
             detail["status"] = "read" if detail["sections"] else "budget"
             if detail['sections']:
                 detail_left -= 1
-        except CancelledError:
+        except (CancelledError, SearchUnavailableError):
             raise
         except Exception as exc:
             detail["error"] = str(exc)[:300]
@@ -327,10 +394,11 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             retry_items += 1
     source_coverage.CoverageStore(root, profile['key']).record(pending['sources'], at=now)
     receipt['coverage'] = source_coverage.CoverageStore(root, profile['key']).status(profile, now=now)
-    receipt['detail_budget'] = {'success_limit': int(profile.get('detail_pages', 4)), 'attempt_limit': max_attempts,
+    receipt['detail_budget'] = {'success_limit': profile.get('detail_pages'), 'attempt_limit': profile.get('detail_attempts'),
+                                'article_chars': article_chars, 'news_chars': news_chars,
                                 'attempts': attempts, 'successful': sum(d['status'] == 'read' for d in receipt['details'])}
     storage.remember_links(list(dict.fromkeys(canonical_url(u) for u in discovered_links)))
-    receipt.update(chars=used_chars, items=len(items), retry_items=retry_items, automatic=[r["spec"] for r in automatic])
+    receipt.update(chars=used_chars + news_chars, news_chars=news_chars, items=len(items), retry_items=retry_items, automatic=[r["spec"] for r in automatic])
     receipt["quiet"] = mode == "changes" and not retry_items and not any(r["changed"] for r in pending["sources"].values())
     receipt["pending_changes"] = sum(max(0, r["changed"] - r["delivered"]) for r in pending["sources"].values())
     storage.attempt({"type": "collection", "at": now, "job": canonical, **receipt})

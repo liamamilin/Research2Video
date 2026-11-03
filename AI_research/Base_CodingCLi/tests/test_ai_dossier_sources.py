@@ -14,8 +14,10 @@ URL = "https://example.com/project"
 
 def test_urls_follow_research_order_and_only_use_supplied_links():
     known = " ".join(f"https://example.com/{i}" for i in range(6))
-    report = "https://unknown.example/a " + " ".join(f"https://example.com/{i}" for i in [4, 2, 1, 0, 3])
-    assert selected_urls(report, known) == [f"https://example.com/{i}" for i in [4, 2, 1]]
+    # One original per report item, in report order; an item's unknown link is passed over, background is skipped.
+    report = "\n".join(f"### 1.{n} 条目\nhttps://unknown.example/{n} https://example.com/{i}" for n, i in enumerate([4, 2, 1, 0, 3]))
+    report += "\n### 其他背景 / 未展开\nhttps://example.com/5"
+    assert selected_urls(report, known) == [f"https://example.com/{i}" for i in [4, 2, 1, 0, 3]]
 
 
 def test_existing_page_adapter_reads_task_process_without_search(monkeypatch):
@@ -63,7 +65,7 @@ def test_ai_reads_body_without_search_queries_and_keeps_failures():
             raise RuntimeError("page unavailable")
         return [SearchResult("Usage", URL, excerpts=["Input file → apply patch → test output."])]
     bad = "https://example.com/bad"
-    text, receipt = enrich({"_file": "ai_media/daily_opensource_radar"}, URL + " " + bad,
+    text, receipt = enrich({"_file": "ai_media/daily_opensource_radar"}, f"### 一\n{URL}\n### 二\n{bad}",
                            URL + " " + bad, fetch=fetch)
     assert "apply patch" in text
     assert {row["status"] for row in receipt["pages"]} == {"read", "unavailable"}
@@ -192,3 +194,16 @@ def test_native_engine_saves_body_snapshot_and_initial_report(tmp_path, monkeypa
     assert "初始研究底稿" in Path(detail["initial_report"]).read_text()
     snapshot = json.loads(Path(metadata["material"]["path"]).read_text())
     assert "原有来源" in snapshot["material"] and "正文中的具体过程" in snapshot["material"]
+
+
+def test_opted_in_job_reads_a_full_original_for_every_item():
+    from core import ai_dossier_sources as dossier
+    urls = [f"https://example.com/{i}" for i in range(8)]
+    report = "\n".join(f"### 条目 {i}\n{u}" for i, u in enumerate(urls))
+    seen = []
+    def fetch(spec, **kwargs):
+        seen.append(spec)
+        return [SearchResult("正文", spec[5:], excerpts=["机制" * 20000])]
+    text, receipt = enrich({"_file": "chatgpt_acquisition/t09_updates", "dossier_sources": True}, report, " ".join(urls), fetch=fetch)
+    assert len(seen) == 8 and receipt["page_chars"] == dossier.PAGE_CHARS
+    assert enrich({"_file": "chatgpt_acquisition/t09_updates"}, report, " ".join(urls), fetch=fetch) == ("", {})
