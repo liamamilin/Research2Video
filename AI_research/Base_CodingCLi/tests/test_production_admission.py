@@ -80,3 +80,12 @@ def test_policy_changes_adjust_future_allowance_without_recounting_existing(tmp_
     assert ledger.enter("a", RULE, "v1", now=NOW)
     assert not ledger.enter("b", {**RULE, "daily_limit": 1}, "v2", now=NOW)
     assert ledger.enter("b", {**RULE, "daily_limit": 2}, "v3", now=NOW)
+
+
+def test_no_daily_limit_admits_every_issue_once(tmp_path):
+    ledger = Ledger(str(tmp_path), now=NOW - 10)
+    unlimited = {**RULE, "daily_limit": None}
+    assert all(ledger.enter(f"issue-{i}", unlimited, "v1", now=NOW + i) for i in range(12))
+    assert ledger.enter("issue-0", unlimited, "v1", now=NOW + 20)  # a retry is the same issue
+    with ledger.connect() as db:
+        assert db.execute("SELECT COUNT(*) FROM admissions").fetchone()[0] == 12

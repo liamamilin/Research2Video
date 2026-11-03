@@ -17,7 +17,8 @@ collection:
   max_sources: 100
   timeout_seconds: 15
 automatic:
-  daily_limit: 4
+  # 每天新接纳的自动节目数；留空（null）表示不限。每期仍只记一次，重试不重复占位。
+  daily_limit: null
   timezone: Asia/Shanghai
   recommendations: false
 sources:
