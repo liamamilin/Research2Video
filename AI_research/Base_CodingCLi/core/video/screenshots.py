@@ -8,6 +8,8 @@ from __future__ import annotations
 import hashlib
 import ipaddress
 import json
+import os
+import re
 import socket
 import threading
 import time
@@ -108,6 +110,30 @@ def _capture(url: str, *, mode: str = "viewport", selector: str = "", clip: dict
         return capture_page(page, url, mode=mode, selector=selector, clip=clip)
 
 
+_READER_PROFILE = re.compile(r"--user-data-dir=\S*/playwright_chromiumdev_profile-")  # Playwright's throwaway profile
+
+
+def reap_orphans() -> list[int]:
+    """Stop page-reader browsers left without an owner (their Playwright driver was killed): headless, on a
+    throwaway Playwright profile, and re-parented to launchd. Run at startup; returns the stopped pids."""
+    import signal
+    import subprocess
+    try:
+        table = subprocess.run(["ps", "-axo", "pid=,ppid=,command="], capture_output=True, text=True, timeout=10).stdout
+    except (OSError, subprocess.SubprocessError):
+        return []
+    stopped = []
+    for line in table.splitlines():
+        fields = line.split(None, 2)
+        if len(fields) == 3 and fields[1] == "1" and "--headless" in fields[2] and _READER_PROFILE.search(fields[2]):
+            try:
+                os.kill(int(fields[0]), signal.SIGTERM)
+                stopped.append(int(fields[0]))
+            except (ProcessLookupError, PermissionError, ValueError):
+                pass
+    return stopped
+
+
 @contextmanager
 def page_for_capture(url: str, *, timeout_seconds: float = 60):
     """One guarded anonymous page, shared by DOM inspection and the final screenshot."""
@@ -116,13 +142,14 @@ def page_for_capture(url: str, *, timeout_seconds: float = 60):
     try:
         from playwright.sync_api import sync_playwright
     except ImportError as exc:
-        raise ScreenshotError("截图组件未安装：请安装 requirements.txt 后运行 python -m playwright install chromium") from exc
+        raise ScreenshotError("截图组件未安装：请安装 requirements.txt，并确认本机装有 Google Chrome") from exc
     if not _captures.acquire(blocking=False):
         raise ScreenshotError("已有两项截图正在执行，请稍后重试")
     try:
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=True, args=["--disable-quic"],
-                                         **({} if Path(pw.chromium.executable_path).is_file() else {"channel": "chrome"}))
+            # Always the installed Google Chrome, which updates itself, sandboxed: these pages are arbitrary third-party
+            # sites, and Playwright's bundled Chromium lags Chrome's security fixes and runs unsandboxed by default.
+            browser = pw.chromium.launch(headless=True, args=["--disable-quic"], channel="chrome", chromium_sandbox=True)
             try:
                 context = browser.new_context(viewport={"width": 1440, "height": 900}, device_scale_factor=1,
                                               locale="zh-CN", timezone_id="Asia/Shanghai", service_workers="block",
@@ -161,7 +188,7 @@ def page_for_capture(url: str, *, timeout_seconds: float = 60):
         raise
     except Exception as exc:
         # Browser errors can include page content, URLs and local executable paths.
-        raise ScreenshotError("网页截图失败，请检查页面是否可公开访问、元素是否可见，或运行 python -m playwright install chromium 安装浏览器") from exc
+        raise ScreenshotError("网页截图失败，请检查页面是否可公开访问、元素是否可见，或确认本机装有 Google Chrome") from exc
     finally:
         _captures.release()
 
