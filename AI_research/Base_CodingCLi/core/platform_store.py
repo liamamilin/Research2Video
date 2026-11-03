@@ -64,7 +64,7 @@ class PlatformStore:
             row = conn.execute("SELECT data FROM settings WHERE id=1").fetchone()
         return {"auto_upload": False, "auto_since": 0, "tid": 0, "tid_by_matrix": {},
                 "first_comment": {"enabled": False, "text": "", "pin": False},
-                "publish_window": {"enabled": True, "start": 12, "end": 18, "spacing": 20},
+                "publish_window": {"enabled": True, "start": 8, "end": 23, "spacing": 20},
                 "sync_comments": False, **(json.loads(row[0]) if row else {})}
 
     def save_settings(self, patch: dict) -> dict:
@@ -161,11 +161,23 @@ class PlatformStore:
             row = conn.execute("SELECT payload FROM uploads WHERE id=? AND status='QUEUED'", (task_id,)).fetchone()
             if not row:
                 return False
-            payload = {k: v for k, v in json.loads(row[0]).items() if k != "dtime"}
+            payload = {k: v for k, v in json.loads(row[0]).items() if k not in ("dtime", "released_at")}
             if dtime:
                 payload["dtime"] = int(dtime)
-            return bool(conn.execute("UPDATE uploads SET payload=? WHERE id=? AND status='QUEUED'",
+            else:
+                payload["released_at"] = int(time.time())  # goes public on approval: later held uploads space from it
+            return bool(conn.execute("UPDATE uploads SET payload=?,error='' WHERE id=? AND status='QUEUED'",
                                      (json.dumps(payload, ensure_ascii=False), task_id)).rowcount)
+
+    def hold_upload(self, task_id: str, note: str) -> bool:
+        """An automatic upload the platform's timer cannot reach waits here for the publish window."""
+        with self.connect(write=True) as conn:
+            row = conn.execute("SELECT payload FROM uploads WHERE id=? AND status='QUEUED'", (task_id,)).fetchone()
+            if not row:
+                return False
+            payload = {**json.loads(row[0]), "held": True}
+            return bool(conn.execute("UPDATE uploads SET payload=?,error=?,updated_at=? WHERE id=? AND status='QUEUED'",
+                                     (json.dumps(payload, ensure_ascii=False), note, time.time(), task_id)).rowcount)
 
     def update_upload(self, task_id: str, *, status: str, error: str = "", bvid: str = "", expected: str | None = None) -> bool:
         with self.connect(write=True) as conn:

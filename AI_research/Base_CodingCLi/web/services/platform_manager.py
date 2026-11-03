@@ -251,31 +251,46 @@ def upload_task(task_id: str) -> dict:
 
 
 SCHEDULE_LEAD = 4.5 * 3600  # biliup needs dtime more than 4 hours after submission; the rest covers the upload
+HOLD = "hold"  # wait here and submit once the window opens: the platform's timer cannot reach it
 
 
-def publish_at(now: float, window: dict, taken: list[float]) -> int | None:
-    """Publish time for an automatic upload: now inside the window, else the next free slot in it."""
+def publish_at(now: float, window: dict, taken: list[float], *, held: bool = False) -> int | str | None:
+    """Daytime renders publish now; night renders go public from the window's opening, in order and spaced.
+
+    A slot the platform's 4-hour timer can reach becomes a ``dtime``; an earlier one is held here
+    (``HOLD``) and submitted in the window, so a render finished at 11:00 never waits longer than one
+    finished at 12:00. ``held`` uploads leave one per spacing inside the window, around ``taken`` times.
+    """
     if not window.get("enabled"):
         return None
-    start, end = int(window.get("start", 12)), int(window.get("end", 18))
+    start, end = int(window.get("start", 8)), int(window.get("end", 23))
     spacing = max(1, int(window.get("spacing") or 20)) * 60
     if not 0 <= start < end <= 24:
         return None
     local = datetime.fromtimestamp(now).astimezone()
     if start <= local.hour < end:
-        return None
-    earliest = now + SCHEDULE_LEAD
+        return HOLD if held and any(abs(now - t) < spacing for t in taken) else None
     midnight = local.replace(hour=0, minute=0, second=0, microsecond=0)
     for offset in range(8):
         day = midnight + timedelta(days=offset)
         slot, close = (day + timedelta(hours=start)).timestamp(), (day + timedelta(hours=end)).timestamp()
-        if slot < earliest:
-            slot += -(-(earliest - slot) // spacing) * spacing
+        if close <= now:
+            continue
         while slot < close:
             if all(abs(slot - t) >= spacing for t in taken):
-                return int(slot)
+                return int(slot) if slot >= now + SCHEDULE_LEAD else HOLD
             slot += spacing
-    return int(earliest)
+    return int(now + SCHEDULE_LEAD)
+
+
+def held_note(window: dict) -> str:
+    return f"等待白天时段：{int(window.get('start', 8)):02d}:00 起按完成顺序依次投稿。"
+
+
+def _publish_times(db, owner: str, task_id: str) -> list[float]:
+    """When other automatic uploads go (or went) public: their timers and the moments held ones were released."""
+    return [float(t) for u in db.uploads(owner) if u["id"] != task_id and u["status"] in ("QUEUED", "UPLOADING", "SUBMITTED", "PUBLISHED")
+            for t in (u["payload"].get("dtime"), u["payload"].get("released_at")) if t]
 
 
 def scheduled_note(dtime: float) -> str:
@@ -614,9 +629,20 @@ def tick() -> None:
                 except (Error, ValueError, TypeError) as exc:
                     _log_once(logging.WARNING, candidate["render_id"], f"skipped: {exc}")
                     continue
-        queued = [u for u in db.pending_uploads(owner) if u["status"] == "QUEUED"]
-        if queued:
-            task = queued[0]
+        task, dtime = None, None
+        for waiting in (u for u in db.pending_uploads(owner) if u["status"] == "QUEUED"):
+            if not waiting["payload"].get("automatic"):
+                task = waiting
+                break
+            window = config.get("publish_window") or {}
+            dtime = publish_at(time.time(), window, _publish_times(db, owner, waiting["id"]),
+                               held=bool(waiting["payload"].get("held")))
+            if dtime != HOLD:
+                task = waiting
+                break
+            if not waiting["payload"].get("held"):
+                db.hold_upload(waiting["id"], held_note(window))
+        if task:
             try:
                 render, _, _ = eligible(task["render_id"], automatic=bool(task["payload"].get("automatic")))
                 if video_store.has_publication(task["script_id"], task["version"], "bilibili", owner):
@@ -633,10 +659,6 @@ def tick() -> None:
                 db.update_upload(task["id"], status="FAILED", error=str(exc), expected="QUEUED")
                 return
             if task["payload"].get("automatic"):
-                now = time.time()
-                taken = [float(u["payload"]["dtime"]) for u in db.pending_uploads(owner)
-                         if u["id"] != task["id"] and float(u["payload"].get("dtime") or 0) > now]
-                dtime = publish_at(now, config.get("publish_window") or {}, taken)
                 if not db.schedule_upload(task["id"], dtime):
                     return
                 task = db.get_upload(task["id"])

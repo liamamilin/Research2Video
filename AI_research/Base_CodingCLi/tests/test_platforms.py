@@ -801,7 +801,7 @@ def test_automatic_upload_reads_the_offset_renders_record_and_skips_the_backlog(
     assert [task["render_id"] for task in db.uploads("123")] == [new["id"]]
 
 
-WINDOW = {"enabled": True, "start": 12, "end": 18, "spacing": 20}
+WINDOW = {"enabled": True, "start": 8, "end": 23, "spacing": 20}
 
 
 def _at(hour, minute=0, day=2):
@@ -811,14 +811,44 @@ def _at(hour, minute=0, day=2):
 def test_publish_window_keeps_daytime_uploads_and_schedules_the_rest():
     assert manager.publish_at(_at(14), WINDOW, []) is None
     assert manager.publish_at(_at(2), {**WINDOW, "enabled": False}, []) is None
-    assert manager.publish_at(_at(2), WINDOW, []) == _at(12)
-    # Too close to the window for the platform's 4-hour minimum: the first slot after the lead time.
-    assert manager.publish_at(_at(10), WINDOW, []) == _at(14, 40)
-    assert manager.publish_at(_at(20), WINDOW, []) == _at(12, day=3)
-    # Several overnight renders are spread out instead of all going public at noon.
-    assert manager.publish_at(_at(2), WINDOW, [_at(12), _at(12, 20)]) == _at(12, 40)
-    full = [_at(12) + i * 1200 for i in range(18)]
-    assert manager.publish_at(_at(2), WINDOW, full) == _at(12, day=3)
+    assert manager.publish_at(_at(2), WINDOW, []) == _at(8)
+    assert manager.publish_at(_at(23, 30), WINDOW, []) == _at(8, day=3)
+    # Several overnight renders are spread out instead of all going public at once.
+    assert manager.publish_at(_at(2), WINDOW, [_at(8), _at(8, 20)]) == _at(8, 40)
+    full = [_at(8) + i * 1200 for i in range(45)]
+    assert manager.publish_at(_at(2), WINDOW, full) == _at(8, day=3)
+
+
+def test_render_finished_shortly_before_the_window_never_waits_longer_than_one_inside_it():
+    # 05:00 + 4 hours is past 08:00: the timer cannot reach the opening, so it waits here instead of until 09:40.
+    assert manager.publish_at(_at(5), WINDOW, []) == manager.HOLD
+    # Overnight timers already took 08:00–08:20; a slot after the lead time is still a timer.
+    assert manager.publish_at(_at(4), WINDOW, [_at(8), _at(8, 20)]) == _at(8, 40)
+    # Inside the window the held one leaves at once, unless another upload goes public within the spacing.
+    assert manager.publish_at(_at(8), WINDOW, [], held=True) is None
+    assert manager.publish_at(_at(8, 5), WINDOW, [_at(8)], held=True) == manager.HOLD
+    assert manager.publish_at(_at(8, 20), WINDOW, [_at(8)], held=True) is None
+    # A render finished in the daytime is never held back by the queue.
+    assert manager.publish_at(_at(8, 5), WINDOW, [_at(8)]) is None
+
+
+def test_held_upload_waits_here_then_submits_without_timer_in_order(platform_env, monkeypatch):
+    first, second = render(), render()
+    db = manager.store()
+    tasks = [manager.enqueue(row["id"], PAYLOAD, automatic=True) for row in (first, second)]
+    clock = [_at(6)]
+    monkeypatch.setattr(manager.time, "time", lambda: clock[0])
+    sent = []
+    monkeypatch.setattr(bilibili, "upload", lambda credential, video, payload, folder: sent.append(payload) or BV + str(len(sent)))
+    manager.tick()
+    assert sent == [] and all(db.get_upload(t["id"])["error"].startswith("等待白天时段：08:00") for t in tasks)
+    clock[0] = _at(8, 1)
+    manager.tick()
+    manager.tick()  # the second waits a spacing after the first
+    assert len(sent) == 1 and "dtime" not in sent[0] and db.get_upload(tasks[0]["id"])["status"] == "SUBMITTED"
+    clock[0] = _at(8, 21)
+    manager.tick()
+    assert len(sent) == 2 and db.get_upload(tasks[1]["id"])["status"] == "SUBMITTED"
 
 
 def test_overnight_automatic_upload_is_scheduled_and_waits_until_public(platform_env, monkeypatch):
@@ -829,7 +859,7 @@ def test_overnight_automatic_upload_is_scheduled_and_waits_until_public(platform
     monkeypatch.setattr(manager, "preview", lambda _: pack)
     when = int(time.time()) + 5 * 3600
     seen = []
-    monkeypatch.setattr(manager, "publish_at", lambda now, window, taken: seen.append((window, taken)) or when)
+    monkeypatch.setattr(manager, "publish_at", lambda now, window, taken, held=False: seen.append((window, taken)) or when)
     sent = []
     monkeypatch.setattr(bilibili, "upload", lambda credential, video, payload, folder: sent.append(payload) or BV)
     monkeypatch.setattr(bilibili.BilibiliClient, "owned_video", lambda *args: pytest.fail("not public before its time"))
