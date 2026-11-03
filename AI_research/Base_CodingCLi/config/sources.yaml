@@ -581,6 +581,7 @@ cg_ifanr:
   spec: rss:https://www.ifanr.com/feed
   tags:
   - chatgpt_acquisition
+  - ai_news
   - chatgpt_t05
   note: T05 横向比较；面向普通用户的 AI 产品体验与评测。
 cg_tomsguide_ai:
@@ -1070,3 +1071,25 @@ media_404:
   spec: rss:https://www.404media.co/rss/
   tags: [tech]
   note: 调查型科技报道
+# AI 新闻媒体：官方文档页之外的产品、平台与行业消息（快讯与 ChatGPT 产品动态共用，tag ai_news）
+techcrunch_ai:
+  name: TechCrunch · AI
+  spec: rss:https://techcrunch.com/category/artificial-intelligence/feed/
+  tags: [ai, ai_news]
+verge_ai:
+  name: The Verge · AI
+  spec: rss:https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+  tags: [ai, ai_news]
+the_decoder:
+  name: The Decoder
+  spec: rss:https://the-decoder.com/feed/
+  tags: [ai, ai_news]
+testingcatalog:
+  name: TestingCatalog
+  spec: rss:https://www.testingcatalog.com/rss/
+  tags: [ai, ai_news]
+  note: 产品灰测与界面变化线索，未正式发布的标为线索
+nine_to_five_mac_ai:
+  name: 9to5Mac · Apple Intelligence
+  spec: rss:https://9to5mac.com/guides/apple-intelligence/feed/
+  tags: [ai, ai_news]

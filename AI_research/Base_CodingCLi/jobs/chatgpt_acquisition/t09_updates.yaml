@@ -18,6 +18,7 @@ sources:
 - source:cg_release_notes
 - source:cg_openai_news
 - tag:ai_daily_shared
+- tag:ai_news
 - source:cg_learn_videos
 - source:cg_youtube_openai
 - source:cg_matt_wolfe

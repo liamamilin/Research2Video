@@ -1,5 +1,5 @@
 name: "AI Flash Discovery"
-description: "本期 AI 与软件开发领域值得讲的变化（官方公告、套餐权益、TLDR AI、The Rundown 与 Radar 订阅源，不联网搜索）"
+description: "本期 AI 与软件开发领域值得讲的变化（官方公告、套餐权益、TLDR AI、The Rundown、Radar 订阅源与 AI 新闻媒体，不联网搜索）"
 enabled: true
 keywords:
   - 新模型发布
@@ -23,6 +23,7 @@ sources:
   - "rss:https://www.therundown.ai/feed"
   - "hf_models:trending"
   - "tag:ai_radar"
+  - "tag:ai_news"
 runtime:
   timeout_seconds: 2400
   skip_if_running: true
