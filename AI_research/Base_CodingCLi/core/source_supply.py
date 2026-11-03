@@ -64,6 +64,12 @@ def section_key(item) -> str:
     return normalize_url(item.url) + ("#" + fragment if fragment else "")
 
 
+def revised(prior: dict, record: dict) -> bool:
+    """The same link read again by the source that delivered it, with different text. Another source's summary
+    of an already delivered link (Radar and the original feed often point at one article) is not a revision."""
+    return prior["fingerprint"] != record["fingerprint"] and prior.get("source", record["source"]) == record["source"]
+
+
 def fingerprint(item) -> str:
     text = item.title + "\n" + "\n".join(item.excerpts)
     return hashlib.sha256(re.sub(r"\s+", " ", text).strip().encode()).hexdigest()
@@ -238,13 +244,13 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             changes, unchanged = [], []
             for item in fetched:
                 key = section_key(item)
-                record = {"fingerprint": fingerprint(item), "text": "\n".join(item.excerpts)}
+                record = {"fingerprint": fingerprint(item), "text": "\n".join(item.excerpts), "source": spec}
                 if key in live_keys:
                     observed.append({'source': spec, 'key': key, 'fingerprint': record['fingerprint']})
                 if not old:
                     pending["initial_baseline"][key] = record
                 prior = old.get(key)
-                changed = prior is None or prior["fingerprint"] != record["fingerprint"]
+                changed = prior is None or revised(prior, record)
                 if changed:
                     row["changed"] += 1
                 (changes if changed else unchanged).append((item, key, record, prior))
@@ -288,7 +294,7 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
         if key in pending["delivered"]:
             continue
         text = "\n".join(item.excerpts)
-        state = "首次观察材料" if not old else "新增材料" if prior is None else "页面内容修改" if prior["fingerprint"] != record["fingerprint"] else "当前背景"
+        state = "首次观察材料" if not old else "新增材料" if prior is None else "页面内容修改" if revised(prior, record) else "当前背景"
         if row['role'] == 'state' and prior is None:
             state = '首次观察当前状态，尚无历史对照，不能据此宣称降价或涨价'
         # A dated announcement new on a reference page is the period's change, unlike the page around it.
@@ -298,8 +304,8 @@ def collect(engine, job: dict, profile: dict) -> tuple[list, dict, dict, dict]:
             state = f"页面新增带生效时间的公告：{' '.join(announced)[:600]}——这条公告可作为本期变化，时间以页面原文为准；页面其余内容仍是当前背景"
         when = date_of(item.publish_date) if news else None
         if when and window_start and (when.replace(tzinfo=window_start.tzinfo) if when.tzinfo is None else when) < window_start:
-            state += "；上期范围内发布、上期没有交给研究，本期补交，按原发布日期报道"
-        if prior and prior["fingerprint"] != record["fingerprint"]:
+            state += "；发布于本期范围开始之前、此前没有交给研究，本期补交，按原发布日期报道"
+        if prior and revised(prior, record):
             text += "\n上次已交付内容：" + prior["text"][:3000]
         material_id = 'M' + hashlib.sha256((canonical + key + record['fingerprint']).encode()).hexdigest()[:16]
         rendered = replace(item, excerpts=[f"材料编号：{material_id}；来源角色：{row['role']}。\n采集状态：{state}{'' if announced else '；页面变化不等于事件刚刚发生'}。\n" + text])

@@ -355,6 +355,24 @@ def test_news_a_run_did_not_hand_over_is_owed_to_the_next_run(setup, monkeypatch
     assert [r.url for r in got] == ["https://news.example/2"] and "本期补交" in got[0].excerpts[0]
 
 
+def test_another_sources_summary_of_a_delivered_link_is_not_handed_over_again(setup, monkeypatch):
+    engine, job, profile, storage = setup
+    job.update(sources=["rss:https://feed.example/x", "radar:动态"],
+               _collection_window={"days": 1, "timezone": "Asia/Shanghai",
+                                   "start": "2026-11-02T07:30:00+08:00", "end": "2026-11-03T07:30:00+08:00"})
+    article = replace(item(1, "feed summary", provider="rss"), url="https://news.example/1", publish_date="2026-11-02")
+    feeds = {"rss:https://feed.example/x": [article], "radar:动态": []}
+    monkeypatch.setattr(sources, "fetch_source", lambda spec, **k: list(feeds[spec]))
+    storage.commit(supply.collect(engine, job, profile)[2], "first", "first.md")
+    # Radar points at the same article with its own summary: not a revision, on this run or the next.
+    feeds["radar:动态"] = [replace(article, excerpts=["Radar 的摘要"], provider="radar")]
+    got, _, pending, _ = supply.collect(engine, job, profile)
+    assert [r.url for r in got if r.url == "https://news.example/1"] == [] and not pending["delivered"]
+    # The feed that delivered it rewriting the entry is still a change.
+    feeds["rss:https://feed.example/x"] = [replace(article, excerpts=["feed summary, corrected"])]
+    assert "https://news.example/1" in [r.url for r in supply.collect(engine, job, profile)[0]]
+
+
 def test_dated_news_goes_before_old_page_sections_and_is_not_cut_per_source(setup, monkeypatch):
     engine, job, profile, storage = setup
     job.update(sources=["page:https://source.example/notes", "tldr:ai"], sources_limit=3,
