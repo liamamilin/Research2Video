@@ -600,3 +600,98 @@ def test_generated_research_report_keeps_original_matrix_for_new_manual_drafts(g
     assert row["topic"]["matrix_dedup"]["job"] == "science/daily"
     assert workflow.run(row["id"]) == "FAILED"
     assert pool.selection(row["id"])["decisions"][0]["peer_id"] == old["id"]
+
+
+WHATS_NEW = "https://learn.chatgpt.com/docs/whats-new.md"
+CHANGELOG_PAGE = """### [What's new · Choose GPT-6 Sol and Luna]({page}#:~:text=Choose%20GPT-6%20Sol%20and%20Luna)
+GPT-6 Sol and GPT-6 Luna are rolling out in Codex.
+
+---
+
+### [What's new · Astra Ultrafast in Codex]({page}#:~:text=Astra%20Ultrafast%20in%20Codex)
+Astra Ultrafast is available in Codex.
+
+---
+
+### [What's new · Collaborate in a dedicated academic research workspace]({page}#:~:text=Collaborate%20in%20a%20dedicated%20academic%20research%20workspace)
+Eligible faculty can apply for a 12-month workspace. https://openai.com/index/chatgpt-for-academic-researchers/
+
+---
+
+### [某文章：逆向记忆生成工程](https://www.ifanr.com/1686832)
+一篇另外的文章，顺带链接了 https://gemini.google/subscriptions/ 作背景。
+""".format(page=WHATS_NEW)
+
+
+def test_a_report_item_keeps_only_its_own_entry_of_a_page_with_many_entries():
+    # 2026-11-03: the academic item cited one anchor of the what's-new page; every other entry
+    # on that page (an old GPT-6 Sol launch, Codex/API news the report excluded) came along too.
+    item = ("### 学术研究者可申请 12 个月 ChatGPT 专属工作区\n- **来源网址**："
+            f"{WHATS_NEW}#:~:text=Collaborate%20in%20a%20dedicated%20academic%20research%20workspace；"
+            "https://openai.com/index/chatgpt-for-academic-researchers/")
+    cited = pool.cited(item)
+    kept = [p["title"] for p in pool.packets(item, CHANGELOG_PAGE) if pool.cited_packet(p, cited)]
+    assert kept == ["[What's new · Collaborate in a dedicated academic research workspace]"
+                    f"({WHATS_NEW}#:~:text=Collaborate%20in%20a%20dedicated%20academic%20research%20workspace)"]
+
+
+def test_a_page_cited_whole_keeps_its_entries_but_not_an_article_that_only_links_to_it():
+    # A comparison item cites a subscription page as a whole; an unrelated article that merely
+    # links to that page as background is not part of the item.
+    item = "### 每月 20 美元的 AI 会员怎么选\n- **来源网址**：https://gemini.google/subscriptions/"
+    material = ("### [Google AI Pro](https://gemini.google/subscriptions/#:~:text=Google%20AI%20Pro)\n价格与权益\n\n---\n\n"
+                + CHANGELOG_PAGE.split("---\n\n")[-1])
+    cited = pool.cited(item)
+    kept = [p["text"].splitlines()[0] for p in pool.packets(item, material) if pool.cited_packet(p, cited)]
+    assert kept == ["### [Google AI Pro](https://gemini.google/subscriptions/#:~:text=Google%20AI%20Pro)"]
+
+
+PRICING = "https://chatgpt.com/pricing/#:~:text=Plus"
+
+
+def _comparison(page_says: str, said: str):
+    # 2026-11-03: a redone "$20 会员怎么选" only had the same old answer as evidence; the price
+    # pages it cited were dropped as reusable references, so a change could never be seen.
+    packets = pool.packets("", f"### [Pricing · Plus]({PRICING})\nPlus {page_says} per month\n\n---\n\n### 知乎回答\n{SNAKE}",
+                           keep_references=True)
+    peers = [{"script_id": "old", "title": "同样 20 美元，三家卖的不是同一样东西", "version": 1,
+              "event_date": "", "created_at": "2026-10-20T02:00:00+0800", "sources": {guard.source_key(SNAKE)},
+              "text": said}]
+    row = event(subject="20 美元档 AI 会员", action="analysis", event_date="", primary=["S2"], background=["S1"],
+                same_as=["H1"], changes=[{"dimension": "ChatGPT Plus 月费", "before": "$20", "after": page_says}])
+    return pool.validate([row], packets, pool.context(peers, True)), peers
+
+
+def test_price_and_plan_pages_an_item_cites_are_kept_only_when_asked_and_marked():
+    material = f"### [Pricing · Plus]({PRICING})\nPlus $20 per month"
+    assert pool.packets("", material) == []  # a pool without a report item still leaves them out
+    kept = pool.packets("", material, keep_references=True)
+    assert [p["links"] for p in kept] == [[PRICING]] and kept[0]["reference"] is True
+
+
+def test_a_redone_comparison_is_new_when_the_cited_price_page_now_states_another_value():
+    (changed,), peers = _comparison("$25", "ChatGPT Plus 每月 20 美元，Claude Pro 也是 20 美元。")
+    assert changed["reference_changes"] and not pool.duplicate(changed, peers)
+
+
+@pytest.mark.parametrize("page_says, said", [
+    ("$20", "ChatGPT Plus 每月 20 美元。"),           # the page says what the video already said
+    ("$25", "ChatGPT Plus 每月 25 美元。"),           # the "new" value was already told
+    ("$25", "这期只讲了功能，没有讲价格。"),             # the video never stated the old value
+])
+def test_a_comparison_without_a_confirmed_change_from_the_earlier_video_stays_a_repeat(page_says, said):
+    (repeat,), peers = _comparison(page_says, said)
+    assert pool.duplicate(repeat, peers) == peers
+
+
+def test_a_claimed_change_the_price_page_does_not_state_is_not_a_reference_change():
+    packets = pool.packets("", f"### [Pricing · Plus]({PRICING})\nPlus $20 per month", keep_references=True)
+    (row,) = pool.validate([event(action="analysis", event_date="", changes=[
+        {"dimension": "月费", "before": "$20", "after": "$30"}])], packets, [])
+    assert row["reference_changes"] == []
+
+
+def test_earlier_narration_is_sent_to_the_organizer_only_for_pools_with_reference_pages():
+    peers = [{"script_id": "old", "title": "t", "text": "ChatGPT Plus 每月 20 美元。", "sources": set()}]
+    assert "said" not in pool.context(peers)[0]
+    assert pool.context(peers, True)[0]["said"] == "ChatGPT Plus 每月 20 美元。"

@@ -355,11 +355,13 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                 else:
                     if topic.get("from_item") and original:
                         # A flash item cannot wander into another item from its feed.
-                        selected = content_guard.sources(report)
-                        original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original)
-                                                                 if content_guard.sources(p["text"]) & selected)
+                        cited = story_pool.cited(report)
+                        original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
+                                                                 if story_pool.cited_packet(p, cited))
                     selection_report = research_dossier.selection_brief(report, script)
-                    pool = story_pool.load_or_create(key, selection_report, original, peers, config)
+                    # An item's cited price/plan pages stay in: they are how a redone comparison shows what changed.
+                    pool = story_pool.load_or_create(key, selection_report, original, peers, config,
+                                                     references=bool(topic.get("from_item")))
                     story, _ = story_pool.take(script_id, pool, peers)
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}

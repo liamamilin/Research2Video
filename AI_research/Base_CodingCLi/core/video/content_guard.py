@@ -281,6 +281,7 @@ def history(config_dir: str, jobs_dir: str) -> list[dict]:
                        "event_date": story.get("event_date") or event_date,
                        "summary": story.get("summary") or " ".join(p.get("text", "") for section in sections[:2]
                                                                      for p in section.get("paragraphs", []))[:1200],
+                       "text": " ".join(p.get("text", "") for section in sections for p in section.get("paragraphs", [])),
                        "created_at": script["created_at"],
                        "sequence": row["sequence"],
                        "scope": key, "report": script.get("report_path") or script["topic"].get("from_report", ""),
