@@ -195,3 +195,28 @@ def test_description_skips_the_greeting_and_tags_name_chinese_products():
     merged = {"sections": [{"title": "t", "paragraphs": [{"text": "大家好，欢迎收看今日快讯。今天最值得先看的是两件事。"}]}]}
     assert publish.summary(merged) == "今天最值得先看的是两件事。"
     assert publish.tags("豆包和 Kimi 同时降价：每月 20 元能买到什么")[:2] == ["Kimi", "豆包"]
+
+
+def test_the_platform_copy_skips_the_greeting_even_when_it_is_a_paragraph_of_its_own():
+    script = {**SCRIPT, "topic": {"title": "ChatGPT 产品动态与热点", "content_mode": "episode"}}
+    saved = version()
+    saved["sections"] = [{"title": "本期导读", "paragraphs": [
+        {"text": "大家好，欢迎收看ChatGPT 产品动态与热点。"}, {"text": "GPT-5.6 加了思考量滑杆。Free 和 Go 默认换成 Luna。"}]}]
+    pack = publish.build(script, saved, column(), REPORT, None)
+    assert pack["content"]["required"][0] == "GPT-5.6 加了思考量滑杆。Free 和 Go 默认换成 Luna。"
+    merged = {**saved, "sections": [{"title": "t", "paragraphs": [{"text": "大家好，欢迎收看今日快讯。先看 Gemini 的价格。"}]}]}
+    assert publish.build(script, merged, column(), REPORT, None)["content"]["required"][0] == "先看 Gemini 的价格。"
+
+
+@pytest.mark.parametrize("title, topic, expected, absent", [
+    ("Cursor 市场被点名出现恶意 Claude Code 扩展：先查这四样，再决定装不装",
+     "Cursor 市场被周报点名出现恶意 Claude Code 扩展：先讲排查清单，证据待核实",
+     ["Cursor", "Claude Code", "Claude"], ["市场被点名出现恶意", "Code"]),
+    ("Gemini 输入价 $2 变 $4，ChatGPT Pro 多出 $500 档", "今日快讯", ["Gemini", "ChatGPT Pro", "ChatGPT"], ["今日快讯", "输入价"]),
+    ("GPT-5.6 加思考量滑杆，Free 和 Go 默认换 Luna", "ChatGPT 产品动态与热点", ["GPT-5.6", "Luna", "ChatGPT"], ["产品动态与热点"]),
+    ("OpenAI Agent Security 配置地图：Global 定审批", "", ["OpenAI", "Agent Security"], ["OpenAI Agent Security"]),
+])
+def test_tags_are_whole_product_names_never_pieces_of_the_title(title, topic, expected, absent):
+    found = publish.tags(title, topic)
+    assert all(tag in found for tag in expected) and not set(absent) & set(found)
+    assert found[-2:] == ["AI", "人工智能"] and all(len(t) <= publish.TAG_LENGTH for t in found)
