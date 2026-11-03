@@ -221,7 +221,9 @@ def test_fresh_paused_or_disconnected_collection_is_quiet(platform_env):
     assert health.analytics_alerts(time.time()) == []
 
 
-def test_pausing_the_collector_from_the_scheduler_is_a_deliberate_pause(platform_env, client):
+def test_pausing_the_collector_from_the_scheduler_is_a_deliberate_pause(platform_env, client, monkeypatch):
+    from web.services import managed_scheduler
+    monkeypatch.setattr(managed_scheduler, "ensure_online", lambda: {"online": True})
     _collecting(platform_env)
     _login(client, "admin", "admin-pass-123")
     for enabled, flag in ((False, 0), (True, 1)):
@@ -309,12 +311,14 @@ def test_two_batches_with_a_shared_cause_stay_separate(jobs):
 
 def test_a_daily_watch_reading_that_has_not_finished_by_afternoon_is_reported(platform_env):
     from web.services.platform_analytics import watch_due
-    _collecting(platform_env, watched=False)
     due = watch_due(time.time()).timestamp()
+    # Play data keeps arriving throughout; times follow the reading's, not the wall clock, so the morning run agrees.
+    _collecting(platform_env, watched=False, last=due + 3000)
     assert health.analytics_alerts(due + 3600) == []  # still within a normal pass
+    store = AnalyticsStore(str(platform_env / "state"))
+    store.update_account("123", last_success_at=due + 5 * 3600 - 300)
     [alert] = health.analytics_alerts(due + 5 * 3600)
     assert alert["kind"] == "analytics_watch" and "没有读完" in alert["title"] and "从未读到" in alert["detail"]
-    store = AnalyticsStore(str(platform_env / "state"))
     store.save_watch("123", "BV0000000001", "2026-11-02", {"completion": 9.75}, due + 5 * 3600 - 600)
     assert health.analytics_alerts(due + 5 * 3600) == []  # late but still saving readings: let it finish
     store.update_watch_state("123", day="2026-11-01", next_at=due + 5 * 3600 + 600,
