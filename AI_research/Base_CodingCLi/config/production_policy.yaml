@@ -10,7 +10,7 @@ window:
 jobs: {}
 collection:
   enabled: true
-  schedule: "0 0 * * *"
+  schedule: "20 7 * * *"  # 在 Radar 07:00 简报之后；美国前一天的新闻已出齐
   timezone: Asia/Shanghai
   retention_days: 60
   limit_per_source: 80

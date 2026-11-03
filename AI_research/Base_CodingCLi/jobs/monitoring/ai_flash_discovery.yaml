@@ -24,6 +24,8 @@ sources:
   - "hf_models:trending"
   - "tag:ai_radar"
   - "tag:ai_news"
+  - "tag:radar_official"
+  - "tag:radar_dev"
 runtime:
   timeout_seconds: 2400
   skip_if_running: true

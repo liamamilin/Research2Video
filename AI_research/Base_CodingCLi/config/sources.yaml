@@ -1093,3 +1093,24 @@ nine_to_five_mac_ai:
   name: 9to5Mac · Apple Intelligence
   spec: rss:https://9to5mac.com/guides/apple-intelligence/feed/
   tags: [ai, ai_news]
+radar_chatgpt_claude_codex:
+  name: Radar · chatgpt / claude / codex 动态
+  spec: "radar:chatgpt / claude / codex 动态"
+  tags: [ai, radar_brief, radar_official]
+  note: 本机 Radar 每日简报的一个栏目（radar-cli 只读）；条目原文仍按原文补读流程取得
+radar_tool_updates:
+  name: Radar · Ollama / Claude Code / Codex 重要更新
+  spec: "radar:Ollama / Claude Code / Codex 重要更新"
+  tags: [ai, radar_brief, radar_dev]
+radar_coding_tools:
+  name: Radar · AI 编程工具产品动态
+  spec: "radar:AI 编程工具产品动态（每周对比）"
+  tags: [ai, radar_brief, radar_dev]
+radar_dev_community:
+  name: Radar · 开发者社区
+  spec: "radar:开发者社区：AI Agent / 本地 LLM / 开发效率新工具"
+  tags: [ai, radar_brief, radar_dev]
+radar_opensource_models:
+  name: Radar · 开源大模型发布雷达
+  spec: "radar:开源大模型发布雷达"
+  tags: [ai, radar_brief, radar_opensource]
