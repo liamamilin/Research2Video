@@ -182,14 +182,20 @@ def verdict(primary: dict, better: Better, *, ended: bool, srm: float, guardrail
     hints = [g["metric"] for g in guardrails if g.get("status") == "hint"]
     if hints:
         notes.append(f"护栏指标变差，样本不足以确认：{'、'.join(hints)}")
+    vetoed = [g["metric"] for g in guardrails if g.get("status") == "worse"]
+    if vetoed:
+        notes.append(f"护栏指标明显变差：{'、'.join(vetoed)}")
     if not ended:
         return {"verdict": "running", "notes": notes}
     if srm < SRM_ALPHA:
         return {"verdict": "srm", "notes": notes}
     e, lo, hi = _oriented(primary, better)
     mde = minimum_detectable(primary.get("sd"), primary.get("n_a", 0), primary.get("n_b", 0))
-    if lo is not None and lo > 0 and not any(g.get("status") == "worse" for g in guardrails):
-        return {"verdict": "b_better", "notes": notes}
+    if lo is not None and lo > 0:
+        if not vetoed:
+            return {"verdict": "b_better", "notes": notes}
+        # the primary metric alone would say「B 更好」: say why it does not, instead of a bare「没有分出差异」
+        notes.append("主要指标 B 更好，但护栏指标明显变差，所以不算 B 更好")
     if hi is not None and hi < 0:
         return {"verdict": "b_worse", "notes": notes}
     return {"verdict": "no_difference", "minimum_detectable": mde, "notes": notes}

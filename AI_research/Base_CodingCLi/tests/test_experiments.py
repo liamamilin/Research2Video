@@ -1083,3 +1083,12 @@ def test_editing_the_draft_after_confirming_needs_a_new_preview(tmp_path, monkey
     assert not store.preview_confirmed("cov")
     preview.confirm(store, "cov", "admin")  # confirming the old preview again is not enough
     assert not store.preview_confirmed("cov")
+
+
+def test_a_guardrail_veto_says_why_b_is_not_better():
+    primary = {"estimate": 10, "low": 4, "high": 16, "n_a": 80, "n_b": 80, "sd": 10}
+    out = an.verdict(primary, "higher", ended=True, srm=1.0,
+                     guardrails=[{"metric": "views_24h", "status": "worse"}])
+    assert out["verdict"] == "no_difference"
+    assert "护栏指标明显变差：views_24h" in out["notes"] and any("不算 B 更好" in n for n in out["notes"])
+    assert an.verdict(primary, "higher", ended=True, srm=1.0)["verdict"] == "b_better"
