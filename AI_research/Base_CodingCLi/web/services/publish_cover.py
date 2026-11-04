@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
+from core.social import cover_copy
 from core.social.cover import make_covers
 from web.services import bilibili, video_render
 from web.settings import get_settings
@@ -18,10 +19,11 @@ def publish_covers(render: dict, title: str, *, portrait: bool = False) -> dict[
     """Resolve orientation-specific assets and sample once when either one needs generating."""
     key = hashlib.sha256(' '.join(title.split()).encode()).hexdigest()[:10]
     folder = Path(get_settings().paths.state_dir) / 'platforms' / 'covers'
-    destinations = ({'douyin_landscape': folder / f"{render['id']}-{key}-douyin-landscape-v1.jpg"} if portrait else
-                    {'landscape': folder / f"{render['id']}-{key}.jpg"})
+    # v2: number-led covers; covers made earlier in the title layout are not reused
+    destinations = ({'douyin_landscape': folder / f"{render['id']}-{key}-douyin-landscape-v2.jpg"} if portrait else
+                    {'landscape': folder / f"{render['id']}-{key}-v2.jpg"})
     if portrait:
-        destinations['portrait'] = folder / f"{render['id']}-{key}-portrait-v1.jpg"
+        destinations['portrait'] = folder / f"{render['id']}-{key}-portrait-v2.jpg"
     result, missing = {}, {}
     for orientation, dest in destinations.items():
         prefix = {'portrait': 'cover-portrait', 'douyin_landscape': 'cover-douyin-landscape'}.get(orientation, 'cover')
@@ -34,6 +36,7 @@ def publish_covers(render: dict, title: str, *, portrait: bool = False) -> dict[
             missing[orientation] = dest
     video = video_render.safe_file(render, 'video.mp4')
     if missing and video is not None:
-        result.update(make_covers(video, title, missing, bilibili.ffmpeg_binary()))
+        copy = cover_copy.for_render(render, title, folder / f"{render['id']}-{key}-copy.json")
+        result.update(make_covers(video, title, missing, bilibili.ffmpeg_binary(), copy))
     return {('cover_portrait' if k == 'portrait' else 'cover'): str(result[k].resolve()) if k in result else ''
             for k in destinations}
