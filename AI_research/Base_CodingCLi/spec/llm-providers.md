@@ -44,6 +44,35 @@ ai:
 设置页「AI 模型」卡片上，选中一个有免费模型的服务商后，模型 ID 下面会出现
 免费模型的按钮，点一下就填进模型 ID；「兜底模型」是一个逗号分隔的列表。
 
+## 跨服务商兜底（2026-11-04）
+
+`fallback_models` 只能换同一服务商、同一把密钥下的模型；服务商整体出问题（宕机、密钥失效、套餐额度用完）
+时没有用。`fallback_providers` 排在它后面，每项写成 `服务商预设 id:模型`，冒号只按第一个切，所以
+`ollama:qwen3.8:27b-mlx` 也能写：
+
+```yaml
+ai:
+  model: "deepseek-v4.1-flash"
+  fallback_providers:
+    - "opencode-go:deepseek-v4.1-flash"
+    - "open-design:deepseek-v4.1-flash"
+```
+
+- 每项用该预设自己的地址、密钥变量和请求头（`core/providers.py`），密钥不会发给别的厂商；`extra_body`
+  不带过去。和主模型「同地址同模型」的项自动去掉，所以两家互相写上，主用哪家都有兜底。
+- 密钥变量没有值的项启动时跳过并记一条警告（不打印密钥）；本地 Ollama 不需要密钥。
+- 切换条件与 `fallback_models` 相同。切过去后这次任务剩下的调用都留在新服务商，可能整次任务都计费到
+  付费的那家。切换记录写进 `model_switches`（跨服务商时带 `from_provider` / `to_provider`），用量库按
+  实际服务商的主机记录，数据分析里的金额因此按那家的单价算。
+- 设置页「测试连接」只测主模型，同时清空 `fallback_models` 和 `fallback_providers`。
+- 设置页目前不编辑这一项，改 `config/system.yaml`；页面保存其他字段不会动它。
+
+AutoVideo 出片（`autovideo/g2/llm_provider.py`）用同一种写法：`.env` 的
+`AUTOVIDEO_LLM_FALLBACK_PROVIDERS`（逗号分隔）或设置文件 `llm-settings.json` 的 `fallback_providers`。
+预设名用它自己的 `opencode` / `opendesign` / `deepseek`，也认这里的 `opencode-go` / `open-design`。
+AREC 设置页保存视频模型时不带这一项，AutoVideo 保留原值。出片在 401/402/403/404/410，以及 429、5xx、
+超时重试用尽后换下一项，每次切换写进该次运行的 `logs/model-switches.jsonl`。
+
 ## 切换服务商时的模型
 
 设置页每张模型卡（AI、审校、报告清理、视频）会在浏览器里记住「这张卡上次在每家服务商用的模型」

@@ -27,7 +27,7 @@ import random
 import threading
 import time
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Optional
 
 from . import telemetry
@@ -127,6 +127,12 @@ class LLMConfig:
     # first use that model's retry budget. Once switched, a client keeps the
     # fallback for the rest of its calls (see ``_active_model``).
     fallback_models: list = field(default_factory=list)
+    # Tried after ``fallback_models``: ``"<provider preset id>:<model>"`` entries
+    # (core/providers.py), e.g. ``open-design:deepseek-v4.1-flash`` or
+    # ``ollama:qwen3.8:27b-mlx``. Each uses its own preset's address, key variable
+    # and headers, so a key never goes to another vendor. An entry whose key is
+    # not set is skipped (``fallback_targets``).
+    fallback_providers: list = field(default_factory=list)
 
     def validate(self) -> None:
         if not self.model:
@@ -176,7 +182,46 @@ class LLMConfig:
             extra_body=cfg.get("extra_body") or {},
             extra_headers=cfg.get("extra_headers") or {},
             fallback_models=[str(m) for m in (cfg.get("fallback_models") or [])],
+            fallback_providers=[str(m) for m in (cfg.get("fallback_providers") or [])],
         )
+
+
+def parse_fallback_provider(entry: str) -> tuple[str, str]:
+    """``"open-design:deepseek-v4.1-flash"`` -> ``("open-design", "deepseek-v4.1-flash")``.
+
+    Split on the first colon only: model ids such as ``qwen3.8:27b-mlx`` contain one. ``("", "")`` when malformed."""
+    provider, sep, model = str(entry or "").strip().partition(":")
+    return (provider.strip(), model.strip()) if sep and provider.strip() and model.strip() else ("", "")
+
+
+def fallback_targets(config: LLMConfig) -> list[LLMConfig]:
+    """Every endpoint+model a client may use, in order: ``model``, ``fallback_models`` (same endpoint and key),
+    then ``fallback_providers`` (each on its own preset's endpoint, key and headers).
+
+    A provider entry is left out when its preset is unknown or its key variable is empty (a keyless local preset
+    such as Ollama needs none), and so is any repeat of an endpoint+model already listed."""
+    from .providers import get_provider
+
+    same = replace(config, fallback_models=[], fallback_providers=[])
+    targets = [replace(same, model=m) for m in [config.model, *(config.fallback_models or [])] if m]
+    for entry in config.fallback_providers or []:
+        preset_id, model = parse_fallback_provider(entry)
+        preset = get_provider(preset_id)
+        if preset is None:
+            logger.warning("LLM fallback %r skipped: not a known provider:model entry", entry)
+            continue
+        key = os.environ.get(preset.api_key_env, "").strip() if preset.api_key_env else ""
+        if preset.api_key_env and not key:
+            logger.warning("LLM fallback %r skipped: %s is not set", entry, preset.api_key_env)
+            continue
+        targets.append(replace(same, model=model, base_url=preset.base_url.rstrip("/"), api_key=key,
+                               api_key_env=preset.api_key_env, extra_headers=dict(preset.extra_headers),
+                               extra_body={}))
+    out: list[LLMConfig] = []
+    for target in targets:
+        if not any(t.base_url == target.base_url and t.model == target.model for t in out):
+            out.append(target)
+    return out or [same]
 
 
 @dataclass
@@ -390,13 +435,17 @@ class LLMClient:
                 )
                 self._sleep_cancellable(delay)
 
+    def _targets(self) -> list[LLMConfig]:
+        """The endpoint+model chain (``fallback_targets``), worked out once from the configuration the client began
+        with: after a switch ``self.config`` is the target in use."""
+        targets = getattr(self, "_target_list", None)
+        if targets is None:
+            targets = self._target_list = fallback_targets(self.config)
+        return targets
+
     def _model_list(self) -> list[str]:
-        """``[config.model, *config.fallback_models]``, de-duplicated in order."""
-        out: list[str] = []
-        for model in [self.config.model, *(self.config.fallback_models or [])]:
-            if model and model not in out:
-                out.append(model)
-        return out
+        """The models of the chain, in order (one per endpoint+model)."""
+        return [t.model for t in self._targets()]
 
     def _active_model(self) -> str:
         """The model the next request uses: ``config.model`` or a fallback switched to.
@@ -411,11 +460,22 @@ class LLMClient:
         return models[min(idx, len(models) - 1)]
 
     def _advance_model(self) -> bool:
-        """Switch to the next fallback model. False when there is none left."""
+        """Switch to the next target in the chain. False when there is none left.
+
+        A target on another endpoint replaces ``self.config`` (address, key, headers) and gets a new HTTP client, so
+        the next request goes there with that provider's own key."""
+        targets = self._targets()
         idx = getattr(self, "_model_idx", 0)
-        if idx + 1 >= len(self._model_list()):
+        if idx + 1 >= len(targets):
             return False
         self._model_idx = idx + 1
+        target = targets[self._model_idx]
+        if (target.base_url, target.api_key, target.extra_headers) != (self.config.base_url, self.config.api_key,
+                                                                       self.config.extra_headers):
+            if getattr(self, "_client", None) is not None:
+                self.close()
+            self._client = None
+        self.config = target
         return True
 
     def _is_quota_exhausted(self, exc: Exception) -> bool:
@@ -454,15 +514,19 @@ class LLMClient:
     def _switch_model(self, reason: str, exc: Exception) -> bool:
         """Move to the next fallback model for ``reason``; False (and nothing changes) when none is left."""
         previous = self._active_model()
+        previous_host = telemetry.provider_of(self.config.base_url)
         if not self._advance_model():
             return False
-        logger.warning("LLM model %r %s, switching to fallback %r: %s", previous, reason, self._active_model(),
-                       self._short(exc))
+        host = telemetry.provider_of(self.config.base_url)
+        logger.warning("LLM model %r (%s) %s, switching to fallback %r (%s): %s", previous, previous_host, reason,
+                       self._active_model(), host, self._short(exc))
         if not hasattr(self, "model_switches"):
             self.model_switches = []
-        self.model_switches.append({"from": previous, "to": self._active_model(), "reason": reason})
-        telemetry.record_call("llm", provider=telemetry.provider_of(self.config.base_url), model=previous,
-                              error_code=reason)
+        switch = {"from": previous, "to": self._active_model(), "reason": reason}
+        if host != previous_host:
+            switch.update(from_provider=previous_host, to_provider=host)
+        self.model_switches.append(switch)
+        telemetry.record_call("llm", provider=previous_host, model=previous, error_code=reason)
         return True
 
     def _tried(self) -> str:
