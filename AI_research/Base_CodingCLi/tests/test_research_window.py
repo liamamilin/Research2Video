@@ -210,6 +210,7 @@ def test_native_research_saves_period_in_original_material_and_usage(
             self.materials, self.retrieved_urls = [], set()
 
         def run_fetch_only(self, prompt, **kw):
+            prompt += "\n\n" + kw.get("sources", "")  # the source block now arrives separately
             assert (
                 "近 7 天" in prompt
                 and "week_start" in prompt

@@ -263,6 +263,7 @@ def test_native_report_save_advances_delivery_and_preserves_original_material(tm
         def __init__(self, **kw):
             self.materials, self.retrieved_urls = [], set()
         def run_fetch_only(self, prompt, **kw):
+            prompt += "\n\n" + kw.get("sources", "")  # the source block now arrives separately
             assert "processing steps" in prompt
             if writer_fails:
                 raise RuntimeError("Writer interrupted")

@@ -79,6 +79,7 @@ def test_native_issue_handoff_keeps_original_range_and_details_after_configurati
             self.retrieved_urls = set()
 
         def run_fetch_only(self, prompt, **kw):
+            prompt += "\n\n" + kw.get("sources", "")  # the source block now arrives separately
             assert (
                 "Original explanation" in prompt and "Later incompatible" not in prompt
             )
