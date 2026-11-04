@@ -43,7 +43,10 @@ export type Results = {
   harm: string | null; applied_rate: number | null; active_days: number; endpoint_reached: boolean; settled: boolean;
   verdict: { verdict: "running" | "srm" | "b_better" | "b_worse" | "no_difference"; notes: string[]; minimum_detectable?: number | null };
   median_views: { A: number | null; B: number | null }; median_duration: { A: number | null; B: number | null };
-  videos: { script_id: string; arm: "A" | "B"; bvid: string; state: "measured" | "pending" | "missing" }[];
+  no_metric?: { A: number; B: number }; missing_alarm?: boolean; reference?: Estimate & { min_views: number };
+  completion_skipped?: { A: number; B: number }; code_changed?: { files: string[] } | null; production_gaps?: number;
+  costs?: Partial<Record<"A" | "B", { scripts: number; cost_usd: number; render_minutes: number; partial: boolean }>>;
+  videos: { script_id: string; arm: "A" | "B"; bvid: string; state: "measured" | "pending" | "missing"; [metric: string]: unknown }[];
 };
 export const loadResults = (id: string, signal?: AbortSignal) => api<Results>(`${BASE}/${encodeURIComponent(id)}/results`, { signal });
 
@@ -55,3 +58,6 @@ export type RecordRow = { id: string; name: string; kind: "compare" | "aa"; hypo
   n: { A: number; B: number } | null; decision: { choice: string; label: string } | null };
 export const loadRecords = (signal?: AbortSignal) => api<{ items: RecordRow[] }>(`${BASE}/records`, { signal });
 export const decideExperiment = (id: string, choice: "adopt" | "keep" | "defer") => api<ExperimentRow>(`${BASE}/${encodeURIComponent(id)}/decide`, { method: "POST", body: { choice } });
+
+export type EstimateResult = { per_day: number; per_arm_per_day?: number; coverage: number | null; days: number | null; max_days?: number; window_days: number; stopped_days?: number; within_max?: boolean };
+export const estimateExperiment = (definition: Definition) => api<EstimateResult>(`${BASE}/estimate`, { method: "POST", body: definition });

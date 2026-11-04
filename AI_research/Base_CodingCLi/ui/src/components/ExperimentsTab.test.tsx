@@ -4,9 +4,9 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { createExperiment, loadExperiments, loadRecords, moveExperiment, setExperimentsEnabled, type ExperimentRow } from "@/api/experiments";
 import { ExperimentBadge } from "./ExperimentBadge";
-import { ExperimentsTab } from "./ExperimentsTab";
+import { estimateText, ExperimentsTab } from "./ExperimentsTab";
 
-vi.mock("@/api/experiments", () => ({ loadExperiments: vi.fn(), loadExperiment: vi.fn(), createExperiment: vi.fn(), moveExperiment: vi.fn(), setExperimentsEnabled: vi.fn(), loadPreview: vi.fn(), requestPreview: vi.fn(), confirmPreview: vi.fn(), loadResults: vi.fn(), loadSuggestion: vi.fn(), loadRecords: vi.fn(), decideExperiment: vi.fn() }));
+vi.mock("@/api/experiments", () => ({ loadExperiments: vi.fn(), loadExperiment: vi.fn(), createExperiment: vi.fn(), moveExperiment: vi.fn(), setExperimentsEnabled: vi.fn(), loadPreview: vi.fn(), requestPreview: vi.fn(), confirmPreview: vi.fn(), loadResults: vi.fn(), loadSuggestion: vi.fn(), loadRecords: vi.fn(), decideExperiment: vi.fn(), estimateExperiment: vi.fn() }));
 afterEach(cleanup);
 beforeEach(() => { vi.mocked(loadRecords).mockResolvedValue({ items: [] }); vi.mocked(createExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(moveExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(setExperimentsEnabled).mockResolvedValue({ enabled: true }); });
 
@@ -103,4 +103,29 @@ it("lists experiment records with the conclusion and the choice", async () => {
   render(<MemoryRouter><ExperimentsTab /></MemoryRouter>);
   expect(await screen.findByText(/B 更差/)).toBeTruthy();
   expect(screen.getByText(/你的选择：保留 A/)).toBeTruthy();
+});
+
+it("words the estimate from recent output, coverage and the day limit", () => {
+  expect(estimateText({ per_day: 7.1, coverage: 0.9, days: 25, within_max: true, window_days: 14, stopped_days: 2 }, 73, 28))
+    .toBe("按近 14 天的产量：范围内每天约 7.1 条自动视频，其中约 90% 读得到主要指标；其中 2 天停产；凑够每组 73 条大约要 25 天");
+  expect(estimateText({ per_day: 2, coverage: null, days: 60, within_max: false, window_days: 14 }, 73, 28)).toContain("超过设定的 28 天");
+  expect(estimateText({ per_day: 0, coverage: null, days: null, window_days: 14 }, 20, 28)).toContain("跑不起来");
+});
+
+it("reads an A/A result as a check of the process, with the video list on demand", async () => {
+  const { loadExperiment, loadResults } = await import("@/api/experiments");
+  const running = { ...draft, status: "ended" as const };
+  vi.mocked(loadExperiments).mockResolvedValue({ enabled: true, registry, experiments: [running] });
+  vi.mocked(loadExperiment).mockResolvedValue({ ...running, events: [], start_problems: [], arms: { A: 20, B: 20 } });
+  const estimate = { estimate: 1, low: -3, high: 5, n_a: 20, n_b: 20, strata: 3, skipped_strata: [], sd: 10 };
+  vi.mocked(loadResults).mockResolvedValue({ frozen: true, n: { A: 20, B: 20 }, with_data: { A: 20, B: 20 }, missing: { A: 0, B: 0 }, srm_p: 1,
+    primary: { metric: "completion_adjusted", ...estimate }, guardrails: [], harm: null, applied_rate: null, active_days: 7, endpoint_reached: true, settled: true,
+    verdict: { verdict: "no_difference", notes: [], minimum_detectable: 8 }, median_views: { A: 12, B: 13 }, median_duration: { A: 180, B: 182 },
+    missing_alarm: false, production_gaps: 1, videos: [{ script_id: "s1", arm: "A", bvid: "BV1x", state: "measured", completion_adjusted: 2.5 }] });
+  render(<MemoryRouter><ExperimentsTab /></MemoryRouter>);
+  fireEvent.click(await screen.findByRole("button", { name: "第一次 A/A" }));
+  expect(await screen.findByText(/流程正常/)).toBeTruthy();
+  expect(screen.getByText(/其中 1 天停产/)).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: /看两组的视频/ }));
+  expect(screen.getByRole("link", { name: "BV1x" })).toBeTruthy();
 });

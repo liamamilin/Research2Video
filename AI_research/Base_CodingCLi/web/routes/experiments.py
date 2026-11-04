@@ -63,6 +63,14 @@ def create(request: Request, body: dict = Body(...), user=Depends(require_admin)
     return {**store.get(experiment.id), "duplicates": records.duplicates(store, experiment)}
 
 
+@router.post("/estimate")
+def estimate(body: dict = Body(...), user=Depends(require_admin)) -> dict:
+    """How long a definition would run at the last 14 days' output (§8). Reads only."""
+    from core.experiments import planning
+    experiment = _parse({**body, "id": body.get("id") or "estimate"})
+    return planning.estimate(get_settings().paths.state_dir, experiment)
+
+
 @router.get("/records")
 def records_view(user=Depends(require_admin)) -> dict:
     """「实验记录」(§9a step ⑤): every ended experiment, what it tested and what came of it."""
@@ -105,7 +113,8 @@ def results_view(experiment_id: str, user=Depends(require_admin)) -> dict:
     frozen = store.result(experiment_id)
     if frozen:
         return {**frozen, "frozen": True}
-    live = results.evaluate(store, experiment_id, get_settings().paths.state_dir)
+    live = results.evaluate(store, experiment_id, get_settings().paths.state_dir,
+                            config_dir=get_settings().paths.config_dir)
     return {**live, "frozen": False}
 
 

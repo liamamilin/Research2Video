@@ -12,6 +12,8 @@ TITLES = {
     "harm_hint": "实验「{name}」建议提前停止",
     "endpoint": "实验「{name}」到达终点，进入收尾期",
     "verdict": "实验「{name}」有结论了",
+    "missing_alarm": "实验「{name}」两组缺数据的比例差太多，结论不可信",
+    "code_changed": "实验「{name}」期间被测开关相关的代码改过，比较可能不公平",
     "queue_waiting": "排队的实验「{name}」轮到了，但还没确认预览",
 }
 PREVIEW = {"done": "实验「{name}」的预览出好了，可以去看", "failed": "实验「{name}」的预览没出成"}

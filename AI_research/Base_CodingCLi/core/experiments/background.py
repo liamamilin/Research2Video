@@ -36,6 +36,22 @@ def code_version(repo: str | Path | None = None) -> str:
     return _code_version
 
 
+_diffs: dict[tuple[str, str], list[str]] = {}
+
+
+def changed_files(old: str, new: str, files: list[str]) -> list[str]:
+    """Which of ``files`` differ between two commits (``git diff --name-only``); empty when git cannot say."""
+    key = (old, new)
+    if key not in _diffs:
+        try:
+            out = subprocess.run(["git", "diff", "--name-only", "--relative", old, new, "--", *files],
+                                 cwd=Path(__file__).resolve().parents[2], capture_output=True, text=True, timeout=10)
+            _diffs[key] = [line for line in out.stdout.splitlines() if line.strip()] if out.returncode == 0 else []
+        except (OSError, subprocess.SubprocessError):
+            _diffs[key] = []
+    return [f for f in _diffs[key] if f in files]
+
+
 def tokens_on_scripts(video_db: str | Path, since: float) -> dict[str, str]:
     """token → script id, from scripts created at or after ``since`` (read-only)."""
     path = Path(video_db)

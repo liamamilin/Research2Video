@@ -595,7 +595,7 @@ def _results_world(tmp_path, n=6, start=None):
     with store.connect(write=True) as db:
         db.execute("UPDATE experiments SET started_at=? WHERE id='aa_first'", (start,))
     vdb, adb = sqlite3.connect(tmp_path / "video.db"), sqlite3.connect(tmp_path / "platform_analytics.db")
-    vdb.executescript("CREATE TABLE scripts (id TEXT, status TEXT, archived INT, content_context TEXT, created_at TEXT);"
+    vdb.executescript("CREATE TABLE scripts (id TEXT, status TEXT, archived INT, content_context TEXT, created_at TEXT, created_by TEXT DEFAULT 'autopilot');"
                       "CREATE TABLE script_versions (script_id TEXT, version INT);"
                       "CREATE TABLE publications (script_id TEXT, platform TEXT, url TEXT, removed_at TEXT, created_at TEXT);"
                       "CREATE TABLE renders (id TEXT, script_id TEXT, status TEXT);")
@@ -608,7 +608,7 @@ def _results_world(tmp_path, n=6, start=None):
         pub = start + 86400 + i * 3600
         with store.connect(write=True) as db:
             db.execute("INSERT INTO assignments VALUES (?,?,?,?,?,?,?,?)", (f"t{i}", "aa_first", arm, "ai_flash", i // 2, start, "v", sid))
-        vdb.execute("INSERT INTO scripts VALUES (?,?,?,?,?)", (sid, "PUBLISHED", 0, json.dumps({"column": "ai_flash"}), ""))
+        vdb.execute("INSERT INTO scripts VALUES (?,?,?,?,?,?)", (sid, "PUBLISHED", 0, json.dumps({"column": "ai_flash"}), "", "autopilot"))
         vdb.execute("INSERT INTO script_versions VALUES (?,1)", (sid,))
         vdb.execute("INSERT INTO publications VALUES (?,?,?,?,?)", (sid, "bilibili", f"https://b23/{bvid}", None, str(i)))
         adb.execute("INSERT INTO analytics_videos VALUES (?,?,?,1)", (bvid, pub, 120 + 10 * i))
@@ -908,3 +908,94 @@ def test_the_assistant_reads_experiments_only_as_an_administrator(web_env):
     ExperimentStore(tmp / "state").save(aa("aa_first"), "admin")
     out = tool.handler(tool.arguments.model_validate({}), None, {"username": "admin"})
     assert out["available"] and out["current"][0]["id"] == "aa_first" and out["records"] == []
+
+
+# ---- §14 gaps: missing alarm, reference, skipped completion, gaps, cost, code changes, estimate --------------------
+
+from core.experiments import planning  # noqa: E402
+
+
+def test_missing_shares_far_apart_raise_an_alarm_once(tmp_path):
+    store = _results_world(tmp_path)
+    with sqlite3.connect(tmp_path / "video.db") as db:
+        for sid in ("s1", "s3", "s5"):  # three of six B uploads removed
+            db.execute("UPDATE publications SET removed_at='x' WHERE script_id=?", (sid,))
+    out = results.evaluate(store, "aa_first", tmp_path)
+    assert out["missing_alarm"] and "数据缺失不均，结论不可信" in out["verdict"]["notes"]
+    results.evaluate_all(tmp_path)
+    results.evaluate_all(tmp_path)
+    assert [e["kind"] for e in store.events("aa_first")].count("missing_alarm") == 1
+
+
+def test_reference_skipped_completion_and_production_gaps(tmp_path):
+    store = _results_world(tmp_path)
+    with sqlite3.connect(tmp_path / "platform_analytics.db") as db:
+        # s0's only late reading came from the diagnosis list: completion without avg_seconds
+        db.execute("UPDATE analytics_watch SET data=? WHERE bvid='BV1000000000' AND day='d2'",
+                   (json.dumps({"completion": 40, "exit3s": 30, "views": 3}),))
+        db.execute("UPDATE analytics_watch SET data=json_set(data, '$.views', 25) WHERE day='d2' AND bvid!='BV1000000000'")
+    out = results.evaluate(store, "aa_first", tmp_path)
+    assert out["completion_skipped"] == {"A": 1, "B": 0}
+    assert out["reference"]["min_views"] == 10 and out["reference"]["n_a"] == 5  # s0 has 3 plays
+    assert out["production_gaps"] >= 15  # the fixture publishes on one day only
+
+
+def test_costs_per_arm_come_from_the_usage_records(tmp_path, monkeypatch):
+    from core.telemetry import query
+    monkeypatch.setattr(query, "scripts", lambda config_dir, since=None, limit=50: {"items": [
+        {"script_id": "s0", "cost_usd": 0.2, "render_seconds": 120, "partial": False},
+        {"script_id": "s1", "cost_usd": 0.4, "render_seconds": 240, "partial": True}]})
+    out = results.costs("config", {"s0": "A", "s1": "B", "s2": "A"}, 0)
+    assert out["A"] == {"scripts": 1, "cost_usd": 0.2, "render_minutes": 2.0, "partial": False}
+    assert out["B"]["partial"] is True
+    monkeypatch.setattr(query, "scripts", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("no telemetry")))
+    assert results.costs("config", {"s0": "A"}, 0) == {}
+
+
+def test_code_changes_in_the_switch_readers_warn_once(tmp_path, monkeypatch):
+    from core.experiments import background
+    store = ExperimentStore(tmp_path)
+    store.save(compare(id="greet", overrides={"greeting": "你好"}), "admin")
+    store.move("greet", "start", "admin")
+    with store.connect(write=True) as db:
+        db.execute("INSERT INTO assignments VALUES ('t1','greet','B','c',0,0,'old1',NULL)")
+    monkeypatch.setattr(background, "code_version", lambda repo=None: "new2")
+    calls = []
+    monkeypatch.setattr(background, "changed_files", lambda old, new, files: calls.append((old, new, files)) or ["core/video/episodes.py"])
+    results._check_code(store, store.get("greet"), set())
+    results._check_code(store, store.get("greet"), {e["kind"] for e in store.events("greet")})
+    assert calls == [("old1", "new2", ["core/video/episodes.py"])]
+    [event] = [e for e in store.events("greet") if e["kind"] == "code_changed"]
+    assert event["detail"]["files"] == ["core/video/episodes.py"]
+    assert "代码改过" in [r for r in notices.recent(tmp_path, time.time(), 7) if "代码" in r["title"]][0]["title"]
+
+
+def test_changed_files_asks_git_and_keeps_only_the_named_files():
+    from core.experiments import background
+    head = background.code_version()
+    assert background.changed_files(head, head, ["core/video/episodes.py"]) == []
+    assert background.changed_files("not-a-commit", head, ["x.py"]) == []
+
+
+def test_the_estimate_uses_the_last_14_days_and_reachable_scripts(tmp_path):
+    now = time.time()
+    with sqlite3.connect(tmp_path / "video.db") as db:
+        db.execute("CREATE TABLE scripts (id TEXT, column_key TEXT, content_context TEXT, created_by TEXT)")
+        db.execute("CREATE TABLE publications (script_id TEXT, platform TEXT, url TEXT, created_at TEXT)")
+        for i in range(28):
+            ctx = {"column": "ai_flash"} if i % 2 == 0 else {}
+            db.execute("INSERT INTO scripts VALUES (?,?,?,?)", (f"s{i}", "flash", json.dumps(ctx), "autopilot"))
+            stamp = time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(now - (i % 14 + 0.5) * 86400))
+            db.execute("INSERT INTO publications VALUES (?,?,?,?)", (f"s{i}", "bilibili", f"https://b23/BV1{i:09d}", stamp))
+    out = planning.estimate(tmp_path, aa("aa_first"), now)
+    assert out["per_day"] == 2.0 and out["days"] == 20 and out["within_max"]  # 1 per arm per day, 20 per arm
+    greet = planning.estimate(tmp_path, compare(id="g1", overrides={"greeting": "你好"}), now)
+    assert greet["per_day"] == 1.0  # only scripts with a content column are reachable
+    assert planning.estimate(tmp_path / "none", aa("x1"), now)["days"] is None
+
+
+def test_the_estimate_route_needs_no_saved_draft(client, web_env):
+    _login(client)
+    csrf = {"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""}
+    out = client.post("/api/experiments/estimate", json={**aa("aa_first").model_dump(), "id": ""}, headers=csrf)
+    assert out.status_code == 200 and out.json()["window_days"] == 14

@@ -23,6 +23,8 @@ SRM_ALPHA = 0.01
 Z_MDE = 1.6449 + 0.8416
 APPLIED_FLOOR = 0.80
 HARM_MIN = 15
+MISSING_GAP = 0.15   # two arms' missing shares more than 15 points apart: not trustworthy (§8)
+REFERENCE_VIEWS = 10  # the reference result keeps videos with at least this many plays at 48 hours
 
 Better = Literal["higher", "lower"]
 

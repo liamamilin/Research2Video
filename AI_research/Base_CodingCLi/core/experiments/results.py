@@ -90,6 +90,10 @@ def _measure(analytics_db: Path, bvids: list[str], now: float) -> dict[str, dict
                 # completion only from the per-video endpoint: that row also carries avg_seconds (§8)
                 if "completion" not in row and data.get("avg_seconds") is not None and data.get("completion") is not None:
                     row["completion"], row["avg_seconds"] = data["completion"], data["avg_seconds"]
+                elif "completion" not in row and data.get("completion") is not None:
+                    row["completion_from_list"] = True  # a diagnosis-list reading: not used (§8), but counted
+                if "views_48h" not in row and data.get("views") is not None:
+                    row["views_48h"] = data["views"]
                 for key in ("exit3s", "cover_pass"):
                     if key not in row and data.get(key) is not None:
                         row[key] = data[key]
@@ -99,6 +103,8 @@ def _measure(analytics_db: Path, bvids: list[str], now: float) -> dict[str, dict
             state, views = views_at(snaps, pub, 24, now)
             if state == "ok":
                 row["views_24h"] = views
+            if "completion" in row:
+                row.pop("completion_from_list", None)
             out[bvid] = row
     return out
 
@@ -181,8 +187,46 @@ def _renders_of(video_db: Path, script_id: str) -> set[str]:
         return {r[0] for r in db.execute("SELECT id FROM renders WHERE script_id=?", (script_id,))}
 
 
-def evaluate(store: ExperimentStore, experiment_id: str, state_dir: str | Path, now: float | None = None) -> dict:
-    """Everything the tab shows for one experiment, computed now. Writes nothing."""
+def production_gaps(video_db: Path, start: float, until: float) -> int:
+    """Days in [start, until) with no automatic video published to bilibili at all (§8「产量起伏」)."""
+    if not video_db.is_file() or until <= start:
+        return 0
+    try:
+        with _ro(video_db) as db:
+            days = {r[0] for r in db.execute(
+                "SELECT DISTINCT substr(p.created_at, 1, 10) FROM publications p JOIN scripts s ON s.id = p.script_id "
+                "WHERE p.platform='bilibili' AND s.created_by='autopilot'")}
+    except sqlite3.Error:
+        return 0
+    gaps, day = 0, start
+    while day < until - 3600:
+        if time.strftime("%Y-%m-%d", time.localtime(day)) not in days:
+            gaps += 1
+        day += 86400
+    return gaps
+
+
+def costs(config_dir: str, script_ids: dict[str, str], since: float) -> dict:
+    """Mean model cost and render minutes per arm from the existing usage records (§8「成本」); empty when unknown."""
+    try:
+        from core.telemetry import query
+        bills = query.scripts(config_dir, since=since - 86400, limit=100000).get("items") or []
+    except Exception:  # noqa: BLE001 - cost is shown when it can be read
+        return {}
+    by = {b["script_id"]: b for b in bills}
+    out = {}
+    for arm in ("A", "B"):
+        mine = [by[s] for s, a in script_ids.items() if a == arm and s in by]
+        if mine:
+            out[arm] = {"scripts": len(mine), "cost_usd": sum(b.get("cost_usd") or 0 for b in mine) / len(mine),
+                        "render_minutes": sum(b.get("render_seconds") or 0 for b in mine) / len(mine) / 60,
+                        "partial": any(b.get("partial") for b in mine)}
+    return out
+
+
+def evaluate(store: ExperimentStore, experiment_id: str, state_dir: str | Path, now: float | None = None,
+             config_dir: str | None = None) -> dict:
+    """Everything the tab shows for one experiment, computed now. Writes nothing. Costs only with ``config_dir``."""
     now = now or time.time()
     state_dir = Path(state_dir)
     found = store.get(experiment_id)
@@ -251,12 +295,28 @@ def evaluate(store: ExperimentStore, experiment_id: str, state_dir: str | Path, 
                                          or (not in_flight and now >= last_pub + SETTLE))
     verdict = an.verdict(main, experiment.metric.better, ended=settled, srm=srm, guardrails=guards,
                          applied_rate=applied_rate if experiment.kind == "compare" else None)
+    measured_n = {arm: sum(1 for v in videos if v["arm"] == arm and v["state"] == "measured") for arm in ("A", "B")}
+    no_metric = {arm: sum(1 for v in videos if v["arm"] == arm and v["state"] == "measured" and v.get(primary) is None)
+                 for arm in ("A", "B")}
+    gap = lambda counts, base: abs(counts["A"] / base["A"] - counts["B"] / base["B"]) if base["A"] and base["B"] else 0.0  # noqa: E731
+    missing_alarm = (min(n.values()) >= 5 and gap(missing, n) > an.MISSING_GAP) or \
+        (min(measured_n.values()) >= 5 and gap(no_metric, measured_n) > an.MISSING_GAP)
+    if missing_alarm:
+        verdict["notes"] = [*verdict.get("notes", []), "数据缺失不均，结论不可信"]
+    reference = an.estimate([{"arm": v["arm"], "stratum": v["stratum"], "value": v.get(primary)}
+                             for v in videos if (v.get("views_48h") or 0) >= an.REFERENCE_VIEWS], resamples=2000)
+    skipped = {arm: sum(1 for v in videos if v["arm"] == arm and v.get("completion_from_list")) for arm in ("A", "B")}
+    code = next((e["detail"] for e in reversed(events) if e["kind"] == "code_changed"), None)
     return {"experiment_id": experiment_id, "computed_at": now, "n": n, "with_data": with_data, "missing": missing,
             "srm_p": srm, "primary": {"metric": primary, **main}, "guardrails": guards, "harm": harm,
             "applied_rate": applied_rate, "active_days": active / 86400, "endpoint_reached": reached,
             "ended_at": ended_at, "settled": settled, "verdict": verdict, "fit": fit,
             "median_views": {arm: _median([v.get("views_24h") for v in videos if v["arm"] == arm]) for arm in ("A", "B")},
             "median_duration": {arm: _median([v.get("duration") for v in videos if v["arm"] == arm]) for arm in ("A", "B")},
+            "no_metric": no_metric, "missing_alarm": missing_alarm, "reference": {"min_views": an.REFERENCE_VIEWS, **reference},
+            "completion_skipped": skipped, "code_changed": code,
+            "production_gaps": production_gaps(state_dir / "video.db", start, ended_at or now),
+            "costs": costs(config_dir, {v["script_id"]: v["arm"] for v in videos}, start) if config_dir else {},
             "videos": videos}
 
 
@@ -264,6 +324,26 @@ def _median(values: list) -> Optional[float]:
     import statistics
     kept = [x for x in values if x is not None]
     return statistics.median(kept) if kept else None
+
+
+def _check_code(store: ExperimentStore, row: dict, kinds: set) -> None:
+    """Warn once when files that read the tested switch changed between assignment and the running code (§7)."""
+    if "code_changed" in kinds or row["status"] not in ("running", "paused"):
+        return
+    from core.experiments import background
+    experiment = Experiment.model_validate(row["definition"])
+    files = sorted({f for s in experiment.switches() for f in s.readers})
+    current = background.code_version()
+    versions = {a["code_version"] for a in store.assignments(row["id"])} - {current, "未知", ""}
+    if not files or current == "未知" or not versions:
+        return
+    changed = set()
+    for old in sorted(versions):
+        changed |= set(background.changed_files(old, current, files))
+    if changed:
+        with store.connect(write=True) as db:
+            store._event(db, row["id"], "code_changed", "system", {"files": sorted(changed), "from": sorted(versions),
+                                                                  "to": current})
 
 
 def evaluate_all(state_dir: str | Path, now: float | None = None) -> None:
@@ -282,6 +362,10 @@ def evaluate_all(state_dir: str | Path, now: float | None = None) -> None:
                 store._event(db, row["id"], "srm_alarm", "system", {"p": result["srm_p"]})
             if result["harm"] and "harm_hint" not in kinds:
                 store._event(db, row["id"], "harm_hint", "system", {"message": result["harm"]})
+            if result["missing_alarm"] and "missing_alarm" not in kinds:
+                store._event(db, row["id"], "missing_alarm", "system", {"missing": result["missing"],
+                                                                       "no_metric": result["no_metric"]})
+        _check_code(store, row, kinds)
         if row["status"] in ("running", "paused") and result["endpoint_reached"]:
             store.move(row["id"], "end", "system", {"reason": "endpoint"})
             with store.connect(write=True) as db:
