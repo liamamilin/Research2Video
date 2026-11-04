@@ -28,6 +28,9 @@ def _gather(config_dir: str, collector, uid: str) -> list[dict]:
     series = collector.storage.view_series(uid, [r["bvid"] for r in rows], since=weekly_review.week_start(first) - 7 * 86400)
     columns = {key: c.name for key, c in content_columns.load_all(config_dir).items()}
     watch = collector.storage.latest_watch(uid, [r["bvid"] for r in rows])
+    from web.services.publish_cover import upload_styles
+    from web.settings import get_settings
+    covers = upload_styles(get_settings().paths.state_dir)
     videos = []
     for row in rows:
         publication = row.get("publication") or {}
@@ -44,6 +47,8 @@ def _gather(config_dir: str, collector, uid: str) -> list[dict]:
                        # before columns existed: the Job it came from (production config names repeat across Jobs)
                        "column": columns.get(column, column) or publication.get("job_name") or "",
                        "structure": weekly_review.structure(str(fields.get("推荐结构") or "")),
+                       # uploaded outside the queue (no upload row): its cover is unknown
+                       "cover": covers.get(publication.get("render_id") or "", ""),
                        "watch": watch.get(row["bvid"]) or {}})
     return videos
 

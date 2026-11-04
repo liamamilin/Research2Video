@@ -21,12 +21,12 @@ function Groups({ label, groups, minN, watch }: { label: string; groups: ReviewG
   return <section className="card p-4 space-y-3">
     <h2 className="text-sm font-medium">按{label}</h2>
     <div className="overflow-x-auto"><table className="w-full text-xs text-left">
-      <thead className="text-text-muted"><tr><th className="pb-2 font-normal">{label}</th><th className={th}>视频</th><th className={th}>有 24h 数据</th><th className={th}>24h 中位数</th><th className={th}>上周中位数</th><th className={th}>最高</th>{watch ? <><th className={th}>完播率</th><th className={th}>平均观看</th><th className={th}>3 秒退出</th></> : null}<th className="pb-2 font-normal pl-4">最高的一条</th></tr></thead>
+      <thead className="text-text-muted"><tr><th className="pb-2 font-normal">{label}</th><th className={th}>视频</th><th className={th}>有 24h 数据</th><th className={th}>24h 中位数</th><th className={th}>上周中位数</th><th className={th}>最高</th>{watch ? <><th className={th}>完播率</th><th className={th}>平均观看</th><th className={th}>3 秒退出</th><th className={th}>封面点击超过同类</th></> : null}<th className="pb-2 font-normal pl-4">最高的一条</th></tr></thead>
       <tbody>{groups.map(g => <tr key={g.value} className="border-t border-border">
         <td className="py-2">{g.value}{g.flag ? <span className={cn("ml-2 px-1.5 rounded text-[11px]", g.flag === "high" ? "bg-success/15 text-success" : "bg-danger/15 text-danger")}>{g.flag === "high" ? "明显偏高" : "明显偏低"}</span> : null}</td>
         <td className={td}>{g.videos}</td><td className={td} title={g.measured < minN ? `少于 ${minN} 条，不下结论` : undefined}>{g.measured}{g.measured && g.measured < minN ? <span className="text-text-muted">（少）</span> : null}</td>
         <td className={td}>{num(g.median)}</td><td className={td}>{num(g.previous_median)}</td><td className={td}>{num(g.max)}</td>
-        {watch ? <><td className={td}>{pct(g.completion)}</td><td className={td}>{secs(g.avg_seconds)}</td><td className={td}>{pct(g.exit3s)}</td></> : null}
+        {watch ? <><td className={td}>{pct(g.completion)}</td><td className={td}>{secs(g.avg_seconds)}</td><td className={td}>{pct(g.exit3s)}</td><td className={td}>{pct(g.cover_pass)}</td></> : null}
         <td className="py-2 pl-4 max-w-[22rem] truncate" title={g.best_title}>{g.best_title || "—"}</td></tr>)}</tbody></table></div>
   </section>;
 }
@@ -90,7 +90,7 @@ export function WeeklyReview() {
     <section className="card p-4 space-y-3">
       <h2 className="text-sm font-medium">本周每一条</h2>
       {data.videos.length ? <div className="overflow-x-auto"><table className="w-full text-xs text-left">
-        <thead className="text-text-muted"><tr><th className="pb-2 font-normal">发布</th><th className="pb-2 font-normal">标题</th><th className="pb-2 font-normal">栏目</th><th className="pb-2 font-normal">形式</th><th className={th}>24h</th><th className={th}>72h</th><th className={th}>7 天</th><th className={th}>目前</th>{watch ? <><th className={th}>完播率</th><th className={th}>平均观看</th><th className={th}>3 秒退出</th></> : null}</tr></thead>
+        <thead className="text-text-muted"><tr><th className="pb-2 font-normal">发布</th><th className="pb-2 font-normal">标题</th><th className="pb-2 font-normal">栏目</th><th className="pb-2 font-normal">形式</th><th className={th}>24h</th><th className={th}>72h</th><th className={th}>7 天</th><th className={th}>目前</th>{watch ? <><th className={th}>完播率</th><th className={th}>平均观看</th><th className={th}>3 秒退出</th><th className={th}>封面点击超过同类</th></> : null}</tr></thead>
         <tbody>{data.videos.map(v => <tr key={v.bvid} className="border-t border-border">
           <td className="py-2 whitespace-nowrap">{when(v.pubdate)}</td>
           <td className="py-2 max-w-[22rem] truncate" title={v.title}><a className="hover:text-accent" href={`https://www.bilibili.com/video/${v.bvid}`} target="_blank" rel="noreferrer">{v.title}</a>{v.structure ? <span className="ml-2 text-text-muted">{v.structure}</span> : null}</td>

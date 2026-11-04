@@ -177,3 +177,31 @@ def test_report_shows_watch_numbers_and_old_reviews_still_render():
             for key in ("watch_measured", "completion", "avg_seconds", "exit3s", "cover_pass"):
                 group.pop(key)
     assert "观看情况" not in markdown(old, "24h")
+
+
+def test_review_compares_cover_styles_by_plays_and_cover_clicks():
+    pub = MONDAY + 12 * H
+    videos = ([_video(f"n{i}", pub, 60, cover="数字封面", watch={"cover_pass": 80.0}) for i in range(3)] +
+              [_video(f"t{i}", pub, 10, cover="标题封面", watch={"cover_pass": 50.0}) for i in range(3)] +
+              [_video("x", pub, 10)])
+    review = wr.review(videos, MONDAY, now=MONDAY + 7 * 86400)
+    groups = {g["value"]: g for g in next(d for d in review["dimensions"] if d["key"] == "cover")["groups"]}
+    assert groups["数字封面"]["median"] == 60 and groups["数字封面"]["cover_pass"] == 80.0
+    assert groups["标题封面"]["cover_pass"] == 50.0 and groups["未标注"]["videos"] == 1
+    assert any(f.startswith("封面样式「数字封面」24 小时中位数 60") for f in review["findings"])
+
+
+def test_cover_style_is_read_from_the_uploaded_cover(tmp_path):
+    import sqlite3
+    from web.services import publish_cover as pc
+    number, title_v2, old = tmp_path / "r1-abc-v2.jpg", tmp_path / "r2-def-v2.jpg", tmp_path / "r3-ghi.jpg"
+    (tmp_path / "r1-abc-copy.json").write_text(json.dumps({"copy": {"big": "差十倍"}}), encoding="utf-8")
+    (tmp_path / "r2-def-copy.json").write_text(json.dumps({"copy": None, "reason": "超时"}), encoding="utf-8")
+    assert [pc.style(str(p)) for p in (number, title_v2, old)] == [pc.NUMBER_LED, pc.TITLE, pc.TITLE]
+    assert pc.style("") == pc.FRAME
+    with sqlite3.connect(tmp_path / "platforms.db") as db:
+        db.execute("CREATE TABLE uploads (render_id TEXT, payload TEXT, status TEXT)")
+        db.executemany("INSERT INTO uploads VALUES (?,?,?)", [("r1", json.dumps({"cover": str(number)}), "PUBLISHED"),
+                                                              ("r4", json.dumps({"cover": ""}), "PUBLISHED"),
+                                                              ("r5", json.dumps({"cover": str(number)}), "FAILED")])
+    assert pc.upload_styles(str(tmp_path)) == {"r1": pc.NUMBER_LED, "r4": pc.FRAME}

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import sqlite3
 from pathlib import Path
 
 from core.social import cover_copy
@@ -40,3 +42,33 @@ def publish_covers(render: dict, title: str, *, portrait: bool = False) -> dict[
         result.update(make_covers(video, title, missing, bilibili.ffmpeg_binary(), copy))
     return {('cover_portrait' if k == 'portrait' else 'cover'): str(result[k].resolve()) if k in result else ''
             for k in destinations}
+
+
+#: Cover styles the weekly review compares.
+NUMBER_LED, TITLE, FRAME = '数字封面', '标题封面', '成片截帧'
+
+
+def style(cover: str) -> str:
+    """The style of an uploaded cover from its file: number-led when its copy was used, else the title layout;
+    no cover means B站 took a frame of the video."""
+    if not cover:
+        return FRAME
+    path = Path(cover)
+    if path.name.endswith('-v2.jpg'):
+        stem = path.name[:-len('-v2.jpg')]
+        try:
+            if json.loads(path.with_name(f'{stem}-copy.json').read_text(encoding='utf-8')).get('copy'):
+                return NUMBER_LED
+        except (OSError, ValueError):
+            pass
+    return TITLE
+
+
+def upload_styles(state_dir: str) -> dict[str, str]:
+    """render id -> cover style of its published B站 upload."""
+    path = Path(state_dir) / 'platforms.db'
+    if not path.is_file():
+        return {}
+    with sqlite3.connect(f'file:{path}?mode=ro', uri=True, timeout=2) as db:
+        rows = db.execute("SELECT render_id, json_extract(payload,'$.cover') FROM uploads WHERE status='PUBLISHED'").fetchall()
+    return {render: style(cover or '') for render, cover in rows}
