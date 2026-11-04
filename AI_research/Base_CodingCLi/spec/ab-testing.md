@@ -1,6 +1,6 @@
 # A/B 测试：独立模块设计
 
-状态：设计已定（2026-11-04），尚未开发。
+状态：6 期已开发并上线（2026-11-04 22:21 重启，提交 11ae71a…3003e87），总开关关着、没有实验。实现和设计不一致或还没做的部分见 §14。
 
 ## 1. 要解决什么
 
@@ -36,23 +36,25 @@ A/B 测试是现有后台里的一个**独立模块**：跑在同一个后台进
 
 ### 边界规则
 
-1. **代码边界**：A/B 的代码只放在 `core/experiments/`、`web/routes/experiments.py` 和界面的「A/B 测试」tab 里。现有代码对 A/B 模块的引用只有下面这份白名单：
-   - **写入点（唯一）**：建稿处调用 `experiments.arm_for(...)`（§5）。
-   - **启动**：`web/server.py` 启动时调用一行 `experiments.start_background()`，由 A/B 模块自己开线程做定时检查：到终点停止分组、SRM 报警、建议止损、排队的实验自动开始、对账（§11）。不往现有的 `autopilot_loop` 里加调用。
-   - **只读展示**：首页提醒、稿件详情和出片列表上的「实验 X · B 组」（列表接口 `web/services/video_list_payload.py` 只返回 `content_context` 里 6 个字段，要在它的白名单里加上 `experiments`）、每周复盘的「实验进展」和 B 组标记、配置页的预填改动和「来自实验 X」、助手读取实验记录。这些地方只读稿件自己的 `content_context.experiments`，或者调用 A/B 模块提供的只读函数；A/B 模块出错、缺失时就不显示这一块，原有功能照常。
-   - **「是否为空」的判断**：A 组稿件也写入 `content_context.experiments`（用来对账），原本为空的 `content_context` 会变成非空。下面 4 处按「是否为空」走不同分支，要改成「除去 `experiments` 以后是否为空」，这 4 处小改动也算在白名单里：
-     - `core/video/store.py:638` 保存新版本：为空时版本记录不带 `content_context`。
-     - `web/services/video_configuration.py:18`：为空时读稿件上的，否则读版本记录里的。
-     - `web/services/video_list_payload.py:25` 列表接口：为空时不返回这个字段。
-     - `web/services/assistant_materials.py:185`：为空时用默认设置（手动稿件，目前不参加实验，也一起改）。
+1. **代码边界**：A/B 的代码放在 `core/experiments/`、`web/routes/experiments.py`、`web/services/assistant_tools/experiments.py` 和界面的 `ExperimentsTab.tsx`、`ExperimentBadge.tsx`、`api/experiments.ts` 里。现有代码对 A/B 模块的引用只有下面这份白名单（`tests/test_experiments.py` 的 `ALLOWED` 扫描守住）：
+   - **写入点（唯一）**：`web/services/video_workflow.py` 的 `start` 在冻结 `content_context` 前调用 `core.experiments.hook.arm_for(...)`，包在异常保护里（§5）。
+   - **启动和接口**：`web/server.py` 两处，都包在异常保护里：`create_app` 里注册 `web.routes.experiments` 的接口；启动时在 `AREC_NO_AUTOPILOT_LOOP` 的保护下调用 `core.experiments.background.start_background(...)`，A/B 模块自己开两个线程：每 10 分钟对账、排队开始、算结果（到终点结束、SRM 和止损提醒、收尾期后存档），每 30 秒看有没有排队的预览。不往现有的 `autopilot_loop` 里加调用。
+   - **只读展示**：首页提醒（`web/services/automation_health.py` 的 `experiment_notices`）、每周复盘的「实验进展」（`web/services/weekly_review.py` 的 `_experiments`）、助手工具注册（`web/services/assistant_tools/__init__.py` 用导入保护加载 `experiments` 工具）。A/B 模块出错、缺失时这些地方返回空，原有功能照常。
    - 白名单以外，现有代码不引用 A/B 模块的任何东西。
+
+   另外，现有应用为 A/B 做了几处不引用 A/B 模块的普通改动（都有测试，没有实验时结果不变）：
+   - **「是否为空」的判断（3 处，不是早先估计的 4 处）**：A 组稿件也写入 `content_context.experiments`（用来对账），原本为空的 `content_context` 会变成非空，所以改成「除去 `experiments` 以后是否为空」：`core/video/store.py`（保存新版本时是否把 `content_context` 写进版本记录）、`web/services/assistant_materials.py`（用户材料稿件是否用默认设置）。列表接口 `web/services/video_list_payload.py` 的字段白名单加了 `experiments`。`web/services/video_configuration.py:18` 核对后不用改：版本记录和稿件上的值相同。
+   - **标记展示**：稿件列表和详情页显示「实验 X · A/B 组」；`core/telemetry/weekly_review.py` 的每条视频带上稿件自己的实验标记，复盘里显示。
+   - **开关的读取方**：`web/services/publish_cover.py` 读 `cover_style`；`web/services/video_visuals.py` 的 `freeze` 和新文件 `web/services/opening_card.py` 处理 `presentation.opening_card`（§6，目前待确认）。
+   - **预览复用正式出片的构建代码**：`web/services/video_render.py` 的 `create` 多了一个可选参数 `record`，默认仍写出片记录（§9a）。
+   - **采用时预填**：`ui/src/components/ContentColumns.tsx` 读 `?prefill=` 和 `&experiment=` 预填栏目编辑器并显示提示条（§10）。
 2. **依赖单向**：A/B 模块可以通过现有的只读接口读现有数据。现有代码不依赖 A/B 模块：A/B 模块缺失、导入失败或报错时，现有代码照常运行。
 3. **数据分开**：A/B 用自己的 `state/experiments.db`，不写现有的表。唯一例外是建稿时，把分组结果写进这份稿件自己的 `content_context`。
 4. **出错隔离**：`arm_for` 由调用方包一层：异常、数据库忙、总开关关闭，一律当作 A。进程内的 sqlite 调用没法可靠地按 1 秒截断，所以不设单独的超时，而是用 sqlite 自带的忙等超时（`timeout=2`，等锁超过 2 秒就抛错），再由外层的异常保护接住，按 A 处理。
 5. **用测试守边界**：
    - 测试一：没有实验时，建出的稿件和现在逐字段一致。实验进行中，A 组稿件除了 `experiments` 这个字段以外，写稿输入、出片参数、版本记录、列表接口的输出都和没有实验时一致；以后新写的「是否为空」判断会被这条拦住。
    - 测试二：A/B 模块抛异常或导入失败时，建稿照常完成。
-   - 测试三：扫描代码，现有代码里引用 `core.experiments` 的地方都在白名单里（边界规则 1）。
+   - 测试三：扫描代码，现有代码里引用 `core.experiments` 或 `web.routes.experiments` 的地方都在白名单里（边界规则 1）。还有一条测试：A/B 接口导入失败时，后台照常启动。
    - 测试四：A/B 模块的只读函数全部抛异常时，白名单里的每个展示点照常返回，只是少了实验那一块。
 6. **能整个拿掉**：删掉 A/B 目录和白名单里的调用，系统就回到现在的样子。
 
@@ -123,24 +125,26 @@ B站采集（快照、创作中心数据）          ─── 只读 ──▶ 
 
 ## 6. 开关登记表
 
-B 组只能改登记过的开关。每个开关登记七项：写进 `content_context` 的哪个位置、由哪一步读取、允许什么取值、默认值（等于现状）、**读取时机**：「写稿前」（研究、选题、去重时就会读到）还是「写稿起」（写稿或之后才读），读取时机决定失败怎么算（§8）；**对哪些稿件能生效**（比如「要有内容栏目」），不能生效的稿件不参加这个实验的分组，tab 估算样本量时也只数能生效的稿件；以及**怎么判断生效**：A/B 模块只读现有的产物来判断这条 B 组视频的改动有没有真的用上，比如 `cover_style` 看封面文字缓存（`<render>-<平台>-copy.json`）里的 `copy` 是否为空，`opening_card` 看出片参数里有没有这张卡。判断不了的开关，「实际生效率」显示「无法判断」。现有代码不为此写任何东西。
+B 组只能改登记过的开关。每个开关登记七项：写进 `content_context` 的哪个位置、由哪一步读取、允许什么取值、默认值（等于现状）、**读取时机**：「写稿前」（研究、选题、去重时就会读到）还是「写稿起」（写稿或之后才读），读取时机决定失败怎么算（§8）；**对哪些稿件能生效**（比如「要有内容栏目」），不能生效的稿件不参加这个实验的分组，tab 估算样本量时也只数能生效的稿件；以及**怎么判断生效**：A/B 模块只读现有的产物来判断这条 B 组视频的改动有没有真的用上，比如 `cover_style` 看封面文字缓存（`state/platforms/covers/<render>-<标题哈希>-copy.json`）里的 `copy` 是否为空，`presentation.opening_card` 看出片记录的配图审计 `visuals.opening_card.applied`。判断不了的开关，「实际生效率」显示「无法判断」。现有代码不为此写任何东西。
 
-| 开关 | 写入位置 | 由谁读 | 读取时机 | 现状 |
-| --- | --- | --- | --- | --- |
-| `greeting` | `content_context.greeting` | 写稿（问候语）；只对有内容栏目的稿件生效（`episodes.greeting` 没有 column 就返回空） | 写稿起 | 已有 |
-| `notes` | `content_context.notes` | 写稿（创作方向）；**研究和选题也读**（`research_dossier`）；只对有内容栏目的稿件生效 | 写稿前 | 已有 |
-| `presentation.strategy` | `content_context.presentation` | 出片（画面讲述方向） | 写稿起 | 已有 |
-| `render.*` | `content_context.render` | 出片参数 | 写稿起 | 已有 |
-| `greeting_position` | `content_context.greeting_position` | 写稿 | 写稿起 | **要新增**，默认 `before` |
-| `opening_card` | `content_context.presentation.opening_card` | 出片（AutoVideo） | 写稿起 | **要新增**，默认关 |
-| `cover_style` | `content_context.cover_style` | `publish_cover`（现在完全不读 `content_context`，新增时要通过出片记录找到稿件再读） | 写稿起 | **要新增**，默认数字封面 |
-| `packaging.intro` | `content_context.render.packaging` | 出片 | 写稿起 | 待确认现有配置能否单独关掉片头 |
+| 开关 | 写入位置 | 由谁读 | 读取时机 | 能生效的稿件 | 预览 | 现状（11-04） |
+| --- | --- | --- | --- | --- | --- | --- |
+| `greeting` | `content_context.greeting` | `core/video/episodes.py`（问候语，没有 column 就返回空） | 写稿起 | 要有内容栏目 | 不用 | 已有 |
+| `notes` | `content_context.notes` | `core/video/content_columns.py`；**研究和选题也读**（`core/video/research_dossier.py`） | 写稿前 | 要有内容栏目 | 不用 | 已有 |
+| `presentation.strategy` | `content_context.presentation.strategy` | `core/video/content_columns.py`、`core/video/visual_materials.py` | 写稿起 | 全部 | 出片 | 已有 |
+| `render.<子项>` | `content_context.render.<子项>` | `web/services/video_render.py`、`core/video/content_columns.py` | 写稿起 | 全部 | 出片 | 已有；必须写到具体子项，不能整块替换 `render` |
+| `greeting_position` | `content_context.greeting_position` | 写稿 | 写稿起 | 要有内容栏目 | 不用 | **要新增**（等待开发），默认 `before` |
+| `presentation.opening_card` | `content_context.presentation.opening_card` | `web/services/opening_card.py`、`web/services/video_visuals.py` | 写稿起 | 全部 | 出片 | **待确认**：真实出片验证时，带品牌的视频被 AutoVideo 关掉片头，卡片显示不出来（§9a） |
+| `cover_style` | `content_context.cover_style`（`number` / `title`） | `web/services/publish_cover.py`（通过出片记录找到稿件再读） | 写稿起 | 全部 | 封面 | 已有，默认数字封面 |
+| `render.packaging` | `content_context.render.packaging` | `web/services/video_render.py` | 写稿起 | 全部 | 出片 | **待确认**：现有配置能否单独关掉片头 |
+
+「待确认」和「等待开发」的开关能存进草稿，但不能开始，也不能排队。
 
 读取时机要开发时用代码核对（搜索读取这个字段的地方），不能只凭名字判断。
 
 **`render.*` 开关**：因为生产配置的优先级高于 `content_context.render`（§5），开始实验前要校验：范围内有任何生产配置设了同一项，就不能开始，并提示是哪个配置。「怎么判断生效」对 `render.*` 读实际出片参数，不能只看 `content_context`。不改出片代码的合并顺序，那是现有应用的行为。`presentation` 没有这个问题，`visual_materials.py` 和 `content_columns.py` 都直接读冻结的值。
 
-**覆盖只改那一个字段**：B 组的覆盖按写入位置逐个字段写进 `content_context`（比如只改 `presentation.opening_card`），不替换上级的整块设置（不能把整个 `presentation` 换掉），否则会冲掉同一块里的其他设置，包括另一个实验的改动。要有测试守住。
+**覆盖只改那一个字段**：B 组的覆盖按写入位置逐个字段写进 `content_context`（比如只改 `presentation.strategy`），不替换上级的整块设置（不能把整个 `presentation` 换掉），否则会冲掉同一块里的其他设置，包括另一个实验的改动。要有测试守住。
 
 要新增的开关，属于现有应用的正常功能，随第一个用到它的实验一起开发。没有实验时取默认值，行为不变。
 
@@ -291,12 +295,14 @@ A、B 两组视频都照常自动发布，不加人工确认。这是公平比�
 - 修复会改变 B 组的效果（比如改了 B 组的画面或写法）：结束这个实验，复制成新实验重新开始。修复前后的 B 组混在一起比较说明不了问题，这也是 §7「进行中锁定」的要求。
 - 修复和 B 组效果无关（比如修好了取数据、展示）：修好后继续这个实验。
 
-这样现有的发布流程完全不用改：现有应用对 A/B 模块只有建稿处一处写入，加上 §2 白名单里的只读展示和一行启动。
+这样现有的发布流程完全不用改：现有应用对 A/B 模块只有建稿处一处写入，加上 §2 白名单里的只读展示和启动。
 
 **预览不破坏边界**：
 
-- **预览出片**：现有的 `video_render.create` 会在出片表（renders）里建记录，不能直接用。A/B 模块另做一条预览路径：自己调 AutoVideo，出片和记录都写在自己的目录（`state/experiments/previews/`）和 `experiments.db` 里，不在现有的出片表里建记录，也不进入发布流程。开发时尽量复用出片的底层函数，只把记录写到自己那里。
-- **预览不抢正式出片**：自动出片有并发上限（`video_autopilot` 的 `MAX_RENDERS`），预览走自己的路径会绕过它。所以同一时刻最多只出一个预览，并且只在正式出片没有在跑、也没有在排队时才开始（只读现有的出片状态判断）；否则预览排队等待，tab 里显示「等正式出片空闲」。
+- **预览出片**（11-04 用户同意改出片代码，前提是不搞崩现有工作流）：从最近 7 天、实验范围内的一条自动出片开始，把 B 的设置逐字段写进它的稿件副本，交给正式出片的同一套构建代码 `video_render.create(..., record=...)`：`record` 返回请求而不写出片记录。然后跑同样的配图准备（`video_visuals.prepare`）和要点卡处理，直接提交给 AutoVideo（标识 `experiment-preview:<预览 id>`），只把 `video.mp4` 下载到 `state/experiments/previews/<预览 id>/`。出片表里没有这条记录，所以任何发布器都不会拿到它。AutoVideo 自己的作品库里能看到这些任务。
+- **封面预览**：`cover_style` 不用出片，直接用一条已有成片画出 A（数字封面）和 B 两张封面。
+- tab 里把 A（原视频或原封面）和 B 并排放，用户点「确认 B 没问题」后记一条 `preview_confirmed`，开始前的校验读它。
+- **预览不抢正式出片**：自动出片有并发上限（`video_autopilot` 的 `MAX_RENDERS`），预览走自己的路径会绕过它。所以同一时刻最多只出一个预览，并且只在出片表里没有进行中的出片时才开始（只读判断）；否则预览排队等待，tab 里显示「排队中（等正式出片空闲）」。封面预览不占出片资源，立即画。
 
 ### 实验排队
 
@@ -319,35 +325,37 @@ A/B 模块上线后，第一个实验是 A/A：A、B 两组设置完全相同。
 ## 11. 存储
 
 - 实验定义：草稿和正式的实验定义都只存在 `experiments.db` 里，不在 git 工作区产生文件。需要时在 tab 里下载。
-- `state/experiments.db`（A/B 模块独占）：
-  - `assignments(token, experiment_id, arm, column, block, assigned_at, code_version, script_id)`：`script_id` 由对账填上（§7「分组号」），对不上的丢掉。`code_version` 是进程启动时读一次并缓存的 git 提交号，读不到记为「未知」，不在每次分组时调用 git。A/B 模块的定时线程每天用 `git diff --name-only <分组时的版本> <当前进程启动时的版本>` 比较一次，看被测开关「由谁读」列出的文件有没有改过（§7「记录代码版本」）
-  - `settings(key, value)`：总开关等。读不到时当作关闭，`arm_for` 回答 A
-  - `applied(script_id, experiment_id, switch, applied, reason, at)`：B 组的改动是否真的生效，由 A/B 模块按 §6「怎么判断生效」只读判断后写入
-  - `events(experiment_id, kind, at, by, detail)`：记录开始、暂停、结束、SRM 报警、采用。采用时用户的选择（采用 B、保留 A、暂不处理）和改动前的值都存在 `detail` 里（§9a 第 ⑥ 步、§10）
-  - `results(experiment_id, computed_at, data)`：结束时的快照，之后不改写
+- `state/experiments.db`（A/B 模块独占，第一次读写时建表）：
+  - `experiments(id, definition, status, created_at, updated_at, started_at)`：状态有 草稿 `draft`、排队 `queued`、进行中 `running`、暂停 `paused`、已结束 `ended`、已处理 `decided`
+  - `assignments(token, experiment_id, arm, column_key, block, assigned_at, code_version, script_id)`：`script_id` 由对账填上（§7「分组号」），对不上的丢掉。`code_version` 是进程启动时读一次并缓存的 git 提交号，读不到记为「未知」
+  - `settings(key, value)`：总开关。读不到时当作关闭，`arm_for` 不分组
+  - `previews(id, experiment_id, kind, status, source_render_id, source_script_id, job_id, files, error, requested_at, finished_at)`：预览 B
+  - `applied(...)`：建了表但目前没用。「实际生效率」每次计算结果时按 §6 只读判断，不存表
+  - `events(id, experiment_id, kind, at, by, detail)`：created、saved、start、pause、resume、end、queue、unqueue、decide、preview_requested、preview_confirmed、srm_alarm、harm_hint、endpoint、verdict、queue_waiting，以及总开关的 master_on、master_off（`experiment_id` 为空）。采用时的选择和改动前的值存在 `decide` 的 `detail` 里
+  - `results(experiment_id, computed_at, data)`：收尾期结束时的快照，之后不改写
 - 现有应用里只多出一项：参加实验的稿件的 `content_context.experiments = [{"id": "...", "arm": "B", "token": "..."}]`（A 组也写，用来对账），是建稿时写进去的，方便在稿件详情里看到这条视频属于哪个实验的哪一组。
 
 实验定义示例（存库的内容，这里用 YAML 写出来方便阅读）：
 
 ```yaml
-id: opening_card_all
-name: 自动视频：开头加一张要点卡
-hypothesis: 开头先给一张写着本期最抓人数字的卡片，观众更愿意看下去，完播率会上升。
-status: draft            # draft → running → paused → ended → decided
+id: cover_title
+name: 自动视频：标题封面对比数字封面
+hypothesis: 数字封面在信息流里更醒目，封面点击会更高；反过来测标题封面会不会更差。
+kind: compare
 scope:
-  automatic: all         # 也可以写 matrices / columns / content_mode；手动选题固定不参加
-share_b: 50              # B 组占比（%）
+  automatic: all         # 也可以写 matrices / columns / content_mode（individual 或 episode）；手动选题固定不参加
+share_b: 50              # B 组占比（%），5–50，按 5% 一档
 arms:
-  A: {name: 现状, overrides: {}}
-  B: {name: 要点卡, overrides: {presentation.opening_card: on}}
+  A: {name: 现状（数字封面）, overrides: {}}
+  B: {name: 标题封面, overrides: {cover_style: title}}
 metric:
-  primary: completion_adjusted   # 时长校正后的完播率（§8）
+  primary: cover_pass
   better: higher
-  min_effect: 8          # 个点；§8 表里每组约 45 条
+  min_effect: 15         # 个点；§8 表里每组约 73 条
 guardrails:
-  - {metric: exit3s, better: lower}
+  - {metric: completion_adjusted, better: higher}
   - {metric: views_24h, better: higher}
-stop: {per_arm: 45, max_days: 28}
+stop: {per_arm: 73, max_days: 28}
 ```
 
 ## 12. 已定事项
@@ -381,14 +389,38 @@ stop: {per_arm: 45, max_days: 28}
 25. 第十五次核对（11-04 用户同意）：视频播放量很少（中位数 13 次）；不按播放量筛选或加权；播放量只作护栏。
 26. 更正第 25 条（11-04 用户同意）：「封面点击、3 秒退出为 0 且播放不到 10 次的按缺数据」撤回，采集已按 `not_ready_field` 去掉没算出来的值，存下的 0 是真实小样本值；封面点击恢复波动 36.6、每组约 73 条；加一份「只看播放 10 次以上」的参考结果，不用来下结论。
 27. 第十六次核对（11-04 用户同意）：完播率有诊断列表和单条接口两个来源、合并时互相覆盖；按同一行 `avg_seconds` 是否有值分辨来源，分析和时长拟合只用单条接口的值，跳过的条数分组显示。
+28. 按实现更正（11-04 用户同意）：边界白名单、3 处为空判断、开关登记表现状、预览走正式出片的构建代码、存储表结构、示例换成 `cover_style`、分期表标上提交号；还没做和做法不同的部分列在 §14。
 
 ## 13. 分期开发
 
-| 期 | 内容 |
-| --- | --- |
-| 1 | A/B 模块骨架：实验定义加校验、`experiments.db`（含总开关、分组号对账）、分析引擎（纯函数和测试）、tab 只读展示、A/B 自己的定时线程。现有应用只多 `server.py` 启动的一行 |
-| 2 | 接入点：在 `video_workflow.start` 冻结 `content_context` 处询问分组，异常或数据库忙时按 A；分组原子事务；总开关；「没有实验时行为不变」的测试。tab 里新建（含「A/A 检查」类型）、开始、暂停、结束；稿件详情和出片列表上的「实验 X · B 组」标记。上线后马上跑 A/A（不改开关、不用预览），用它 48 小时的读数重算波动和样本量 |
-| 2.5 | 预览 B（只出片不发布）、首页提醒 |
-| 3 | 第一个正式实验用 `cover_style`：现在已有数字封面和标题封面两套，开发量最小，对所有自动视频都生效，主要指标是封面点击（每组约 73 条、约 25 天，§8；A/A 后再核对）。登记表里其他候选不行：`greeting`、`greeting_position` 只对有内容栏目的稿件生效（41%），`opening_card` 要 AutoVideo 开发。每周复盘里的「实验进展」 |
-| 4 | 视觉类开关：`opening_card`（AutoVideo 渲染，要用真实出片验证）；建议改动跳转配置页并预填 |
-| 5 | 实验记录、实验排队、复盘「为它建实验」、采用时记下改动前的值、助手读取实验 |
+| 期 | 内容 | 状态 |
+| --- | --- | --- |
+| 1 | A/B 模块骨架：实验定义加校验、`experiments.db`（含总开关、分组号对账）、分析引擎（纯函数和测试）、tab 只读展示、A/B 自己的定时线程 | 11ae71a |
+| 2 | 接入点：在 `video_workflow.start` 冻结 `content_context` 处分组，异常或数据库忙时按现状；分组原子事务；总开关；「没有实验时行为不变」「实验中 A 组和现状一致」的测试。tab 里新建（含「A/A 检查」）、开始、暂停、继续、结束；稿件列表和详情的实验标记 | 475caff |
+| 2.5 | 预览 B（走正式出片的构建代码，不写出片表、不发布）、首页提醒 | 5567404 |
+| 3 | 结果计算和存档；`cover_style` 开关和封面预览；每周复盘「实验进展」和实验标记。第一个正式实验用 `cover_style`（每组约 73 条、约 25 天，A/A 后再核对） | b47c896 |
+| 4 | 建议改动跳转栏目配置页并预填；`presentation.opening_card` 的代码已写、真实出片验证没通过，开关待确认 | f6277c4 |
+| 5 | 实验记录和重复提醒、实验排队、复盘「为它建实验」、记录采用选择和改动前的值、助手只读查询 | 3003e87 |
+
+## 14. 实现状态与还没做的部分（2026-11-04 核对代码）
+
+和前面各节的设计相比，下面这些**还没做**或做法不同。做之前要先实现，不能当成已有：
+
+1. **成本**（§8）：每组的模型花费和出片耗时没有显示。
+2. **要跑多久的估算**（§8、§9）：新建实验时不估算天数，tab 也没有按近 14 天产量估算；停产天数没有显示。
+3. **缺失不均报警**（§8）：「两组缺失比例相差超过 15 个点」没有报警，只在结果里分组列出缺失条数。
+4. **参考结果**（§8）：「只看播放 10 次以上」的参考结果没有做。
+5. **完播率来源跳过的条数**（§8）：只用单条接口的值已经做了，但跳过了几条没有分组显示。
+6. **代码版本提示**（§7、§11）：分组时记下了代码版本，但定时线程没有用 `git diff` 比较、也没有「比较可能不公平」的提示。
+7. **实验详情的视频列表**（§9）：结果接口返回了每条视频的组别和状态，tab 里没有列出来。
+8. **护栏的个数类阈值**：24 小时播放和平均观看时长都按「中位数低 20%」判断（§8 只写了 24 小时播放）。
+9. **结论里的 A/A**：A/A 检查也按同一套规则给结论，「B 更好 / B 更差」在 A/A 里应理解为「流程有问题」，tab 里没有专门区分。
+10. **`presentation.opening_card`**：代码已写（把封面文字的数字放到 AutoVideo 片头），真实出片证据在 `spec/acceptance/ab-opening-card-20261104/`：带品牌的视频被 `autovideo/g3/brand_profiles.py` 关掉片头，卡片不出现。要么改品牌规则，要么在正文开头新做一幕画面，待定。
+
+和设计写法不同、以代码为准的地方：
+
+- `content_mode` 的取值是 `individual` / `episode`。
+- 前缀开关（`render`）必须写到具体子项，比如 `render.voice_id`。
+- 草稿能保存任何登记过的开关；「等待开发」「待确认」只在开始和排队时拦。
+- 排队：只有「写入位置重叠」和「还没确认预览」可以等，其他问题当场拒绝排队；轮到了但没确认预览，只提醒一次。
+- 「暂不处理」不改状态（仍是已结束），「采用 B」「保留 A」改为已处理。
