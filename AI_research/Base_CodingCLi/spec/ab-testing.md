@@ -285,11 +285,10 @@ A/B 模块上线后，第一个实验是 A/A：A、B 两组设置完全相同。
 
 - 实验定义：草稿和正式的实验定义都只存在 `experiments.db` 里，不在 git 工作区产生文件。需要时在 tab 里下载。
 - `state/experiments.db`（A/B 模块独占）：
-  - `assignments(token, experiment_id, arm, column, block, assigned_at, code_version, script_id)`：`script_id` 由对账填上（§7「分组号」），对不上的丢掉
+  - `assignments(token, experiment_id, arm, column, block, assigned_at, code_version, script_id)`：`script_id` 由对账填上（§7「分组号」），对不上的丢掉。`code_version` 是进程启动时读一次并缓存的 git 提交号，读不到记为「未知」，不在每次分组时调用 git。A/B 模块的定时线程每天用 `git diff --name-only <分组时的版本> HEAD` 比较一次，看被测开关「由谁读」列出的文件有没有改过（§7「记录代码版本」）
   - `settings(key, value)`：总开关等。读不到时当作关闭，`arm_for` 回答 A
-  - 代码版本：进程启动时读一次 git 提交号并缓存，读不到记为「未知」，不在每次分组时调用 git
   - `applied(script_id, experiment_id, switch, applied, reason, at)`：B 组的改动是否真的生效，由 A/B 模块按 §6「怎么判断生效」只读判断后写入
-  - `events(experiment_id, kind, at, by, detail)`：记录开始、暂停、结束、SRM 报警、采用
+  - `events(experiment_id, kind, at, by, detail)`：记录开始、暂停、结束、SRM 报警、采用。采用时用户的选择（采用 B、保留 A、暂不处理）和改动前的值都存在 `detail` 里（§9a 第 ⑥ 步、§10）
   - `results(experiment_id, computed_at, data)`：结束时的快照，之后不改写
 - 现有应用里只多出一项：参加实验的稿件的 `content_context.experiments = [{"id": "...", "arm": "B", "token": "..."}]`（A 组也写，用来对账），是建稿时写进去的，方便在稿件详情里看到这条视频属于哪个实验的哪一组。
 
@@ -337,14 +336,15 @@ stop: {per_arm: 61, max_days: 28}
 15. 第五次核对（11-04 用户同意）：是否生效由 A/B 模块只读现有产物判断，登记表加「怎么判断生效」；预览只从最近 7 天的视频里选；重新投稿只认第一次发布的 bvid；助手读取实验记录只对管理员开放。
 16. 第六次核对（11-04 用户同意）：收尾期改为最后一条进入分析的稿件发布满 72 小时、最长 7 天；波动和样本量表注明按发布 3–11 天后的读数估算，A/A 后用 48 小时读数重算；3 秒退出覆盖率等 A/A 后再核对；新建实验加「A/A 检查」类型。
 17. 第七次核对（11-04 用户同意）：任一组没有视频的层跳过；排队按写入位置是否重叠；代码版本只在被测开关「由谁读」列出的文件改过时提示。
+18. 第八次核对（11-04 用户同意）：A/A 提前到第 2 期上线后马上跑；稿件详情和出片列表的实验标记放进第 2 期；`code_version` 是 `assignments` 的字段，定时线程每天用 `git diff --name-only` 检测相关文件；采用时的选择和改动前的值存进 `events.detail`。
 
 ## 13. 分期开发
 
 | 期 | 内容 |
 | --- | --- |
 | 1 | A/B 模块骨架：实验定义加校验、`experiments.db`（含总开关、分组号对账）、分析引擎（纯函数和测试）、tab 只读展示、A/B 自己的定时线程。现有应用只多 `server.py` 启动的一行 |
-| 2 | 接入点：在 `video_workflow.start` 冻结 `content_context` 处询问分组，异常或数据库忙时按 A；分组原子事务；总开关；「没有实验时行为不变」的测试。tab 里新建、开始、暂停、结束 |
-| 2.5 | 预览 B（只出片不发布）、首页提醒；上线后先跑 A/A |
+| 2 | 接入点：在 `video_workflow.start` 冻结 `content_context` 处询问分组，异常或数据库忙时按 A；分组原子事务；总开关；「没有实验时行为不变」的测试。tab 里新建（含「A/A 检查」类型）、开始、暂停、结束；稿件详情和出片列表上的「实验 X · B 组」标记。上线后马上跑 A/A（不改开关、不用预览），用它 48 小时的读数重算波动和样本量 |
+| 2.5 | 预览 B（只出片不发布）、首页提醒 |
 | 3 | 第一个正式实验要用的新开关，要对所有自动视频都生效；每周复盘里的「实验进展」 |
 | 4 | 视觉类开关：`opening_card`（AutoVideo 渲染，要用真实出片验证）、`cover_style`；建议改动跳转配置页并预填 |
 | 5 | 实验记录、实验排队、复盘「为它建实验」、采用时记下改动前的值、助手读取实验 |
