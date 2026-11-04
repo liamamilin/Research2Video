@@ -1,3 +1,4 @@
+import type { ExperimentMark } from "@/components/ExperimentBadge";
 // 视频文稿：选题 → 研究 → 文稿 → 定稿 → AutoVideo 出片。见 spec/video-scripts.md；
 // 风格、改编和审校见 spec/video-adaptation.md。
 import { api } from "./client";
@@ -306,7 +307,7 @@ export interface VideoScriptSummary {
   content_column_name?: string;
   content_matrix_id?: string;
   source_matrix_id?: string;
-  content_context?: { column: string; column_name: string; matrix: string; source_matrix: string; type: string };
+  content_context?: { column: string; column_name: string; matrix: string; source_matrix: string; type: string; experiments?: ExperimentMark[] };
   topic: { id: string | null; title: string; content_mode?: "episode" | "individual"; fields?: Record<string, string>; user_materials?: { mode: "narration" | "adapt" | "research"; revision?: number }; article?: { mode: "read" | "adapt"; kind: "literary" | "information" }; local_video?: { file_name: string; duration: number; width: number; height: number; size: number } };
   status: ScriptStatus;
   stage?: string | null;

@@ -65,7 +65,7 @@ def reconcile(store: ExperimentStore, video_db: str | Path) -> int:
         pending = set(store.unbound_tokens(experiment["id"]))
         if not pending:
             continue
-        found = tokens_on_scripts(video_db, experiment["created_at"])
+        found = tokens_on_scripts(video_db, experiment.get("started_at") or experiment["created_at"])
         bound += store.bind_scripts({t: s for t, s in found.items() if t in pending})
     return bound
 

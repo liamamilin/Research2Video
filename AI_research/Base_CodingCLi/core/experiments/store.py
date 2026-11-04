@@ -19,7 +19,7 @@ MASTER = "enabled"
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS experiments (
     id TEXT PRIMARY KEY, definition TEXT NOT NULL, status TEXT NOT NULL,
-    created_at REAL NOT NULL, updated_at REAL NOT NULL
+    created_at REAL NOT NULL, updated_at REAL NOT NULL, started_at REAL
 );
 CREATE TABLE IF NOT EXISTS assignments (
     token TEXT PRIMARY KEY, experiment_id TEXT NOT NULL, arm TEXT NOT NULL, column_key TEXT NOT NULL,
@@ -48,6 +48,9 @@ class ExperimentStore:
         if not self._ready:
             with sqlite_util.connect(self.path, timeout=BUSY_SECONDS) as db:
                 db.executescript(_SCHEMA)
+                columns = {r[1] for r in db.execute("PRAGMA table_info(experiments)")}
+                if "started_at" not in columns:  # a phase-1 database
+                    db.execute("ALTER TABLE experiments ADD COLUMN started_at REAL")
             self._ready = True
         return sqlite_util.connect(self.path, timeout=BUSY_SECONDS, write=write)
 
@@ -76,8 +79,8 @@ class ExperimentStore:
             row = db.execute("SELECT status FROM experiments WHERE id=?", (experiment.id,)).fetchone()
             if row and row[0] != "draft":
                 raise ValueError("实验开始后不能修改，请复制成新实验")
-            db.execute("INSERT INTO experiments VALUES (?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET "
-                       "definition=excluded.definition, updated_at=excluded.updated_at",
+            db.execute("INSERT INTO experiments (id, definition, status, created_at, updated_at) VALUES (?,?,?,?,?) "
+                       "ON CONFLICT(id) DO UPDATE SET definition=excluded.definition, updated_at=excluded.updated_at",
                        (experiment.id, experiment.model_dump_json(), "draft", now, now))
             self._event(db, experiment.id, "saved" if row else "created", by, {})
 
@@ -122,6 +125,61 @@ class ExperimentStore:
     def running(self) -> list[dict]:
         return [e for e in self.list() if e["status"] == "running"]
 
+    def preview_confirmed(self, experiment_id: str) -> bool:
+        """Whether the user looked at a B preview and confirmed it (§9a step ③)."""
+        with self.connect() as db:
+            row = db.execute("SELECT 1 FROM events WHERE experiment_id=? AND kind='preview_confirmed'",
+                             (experiment_id,)).fetchone()
+        return bool(row)
+
+    def active(self) -> list[dict]:
+        """Running or paused: both still own their write paths (§7「冲突」)."""
+        return [e for e in self.list() if e["status"] in ("running", "paused")]
+
+    #: Allowed status changes: action → (from, to).
+    MOVES = {"start": (("draft",), "running"), "pause": (("running",), "paused"),
+             "resume": (("paused",), "running"), "end": (("running", "paused"), "ended")}
+
+    def move(self, experiment_id: str, action: str, by: str, detail: dict | None = None) -> dict:
+        """Change an experiment's status, recording an event. Checks belong to the caller (web/routes)."""
+        if action not in self.MOVES:
+            raise ValueError("未知操作")
+        allowed, target = self.MOVES[action]
+        now = time.time()
+        with self.connect(write=True) as db:
+            row = db.execute("SELECT status FROM experiments WHERE id=?", (experiment_id,)).fetchone()
+            if not row:
+                raise KeyError(experiment_id)
+            if row[0] not in allowed:
+                raise ValueError(f"实验现在是「{row[0]}」，不能{action}")
+            db.execute("UPDATE experiments SET status=?, updated_at=?" + (", started_at=?" if action == "start" else "")
+                       + " WHERE id=?", (target, now, *((now,) if action == "start" else ()), experiment_id))
+            self._event(db, experiment_id, action, by, detail or {})
+        return self.get(experiment_id)
+
+    def assign(self, experiment_id: str, column: str, block_size: int, share_b: int, code_version: str) -> tuple[str, str]:
+        """The next arm for ``column``, decided and recorded in one locked transaction (§7). Returns (token, arm).
+
+        Within each column, scripts fill blocks in order; a block's arms are a fixed shuffle seeded by
+        ``sha256(experiment:column:block)`` holding exactly ``share_b`` percent B.
+        """
+        import hashlib
+        import random
+        import uuid
+        token = uuid.uuid4().hex
+        with self.connect(write=True) as db:
+            n = db.execute("SELECT COUNT(*) FROM assignments WHERE experiment_id=? AND column_key=?",
+                           (experiment_id, column)).fetchone()[0]
+            block, position = divmod(n, block_size)
+            arms = ["B"] * (block_size * share_b // 100)
+            arms += ["A"] * (block_size - len(arms))
+            seed = int(hashlib.sha256(f"{experiment_id}:{column}:{block}".encode()).hexdigest()[:16], 16)
+            random.Random(seed).shuffle(arms)
+            arm = arms[position]
+            db.execute("INSERT INTO assignments VALUES (?,?,?,?,?,?,?,NULL)",
+                       (token, experiment_id, arm, column, block, time.time(), code_version))
+        return token, arm
+
     # ---- helpers -------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -132,4 +190,5 @@ class ExperimentStore:
     @staticmethod
     def _row(row) -> dict:
         return {"id": row["id"], "status": row["status"], "created_at": row["created_at"],
-                "updated_at": row["updated_at"], "definition": json.loads(row["definition"])}
+                "updated_at": row["updated_at"], "started_at": row["started_at"],
+                "definition": json.loads(row["definition"])}

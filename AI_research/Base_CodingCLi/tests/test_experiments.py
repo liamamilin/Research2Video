@@ -15,6 +15,9 @@ from core.experiments import analysis as an
 from core.experiments import background, registry
 from core.experiments.definition import Arm, Experiment, Metric, Scope, Stop, aa, conflicts
 from core.experiments.store import ExperimentStore
+from tests.test_content_columns import column_env  # noqa: F401
+from tests.test_production import prod_env  # noqa: F401
+from tests.test_video_scripts import video_env  # noqa: F401
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -51,7 +54,9 @@ def test_a_compare_experiment_needs_a_registered_switch_with_an_allowed_value():
     with pytest.raises(ValidationError, match="至少要改一个开关"):
         compare(overrides={})
     with pytest.raises(ValidationError, match="写入位置重叠"):
-        compare(overrides={"render": {}, "render.packaging": {}})
+        compare(overrides={"render.packaging": {}, "render.packaging.intro": False})
+    with pytest.raises(ValidationError, match="具体的子项"):
+        compare(overrides={"render": {}})
 
 
 def test_arm_a_is_always_today_and_the_share_comes_in_steps_of_five():
@@ -86,13 +91,13 @@ def test_switch_timing_and_reach_follow_the_registry():
 
 
 def test_running_together_is_refused_only_for_overlapping_write_paths_in_overlapping_scope():
-    render_all = compare(id="r1", overrides={"render": {"x": 1}})
+    render_all = compare(id="r1", overrides={"render.packaging.intro": False})
     packaging = compare(id="r2", overrides={"render.packaging": {"intro": False}})
     cover = compare(id="c1")
     assert conflicts(render_all, packaging)
     assert not conflicts(render_all, cover)
     apart = compare(id="r3", overrides={"render.packaging": {"intro": False}}, scope=Scope(columns=["ai_flash"]))
-    other = compare(id="r4", overrides={"render": {"x": 1}}, scope=Scope(columns=["topic_digest"]))
+    other = compare(id="r4", overrides={"render.packaging.intro": False}, scope=Scope(columns=["topic_digest"]))
     assert not conflicts(apart, other)
 
 
@@ -266,11 +271,11 @@ def test_the_tab_api_is_read_only_and_for_administrators(client, web_env):
     ExperimentStore(tmp / "state").save(aa("aa_first"), "admin")
     detail = client.get("/api/experiments/aa_first").json()
     assert detail["status"] == "draft" and detail["arms"] == {"A": 0, "B": 0} and detail["events"][0]["kind"] == "created"
-    assert client.post("/api/experiments", json={}).status_code == 405
+    assert client.post("/api/experiments", json={}).status_code == 403  # no CSRF token
 
 
-#: Existing files allowed to reference the A/B module (spec §2 rule 1). Phase 1 adds only server.py.
-ALLOWED = {"web/server.py"}
+#: Existing files allowed to reference the A/B module (spec §2 rule 1).
+ALLOWED = {"web/server.py", "web/services/video_workflow.py"}
 _OWN = ("core/experiments/", "web/routes/experiments.py", "tests/")
 
 
@@ -301,3 +306,151 @@ def test_a_broken_module_leaves_the_app_up(monkeypatch, web_env):
     from fastapi.testclient import TestClient
     client = TestClient(create_app())
     assert client.get("/api/live").status_code == 200
+
+
+# ---- phase 2: the creation hook -----------------------------------------------------------------------------------
+
+from core.experiments import hook  # noqa: E402
+
+
+def _running(store: ExperimentStore, experiment: Experiment) -> None:
+    store.save(experiment, "admin")
+    store.move(experiment.id, "start", "admin")
+
+
+def test_the_hook_changes_nothing_when_off_manual_or_idle(tmp_path):
+    store = ExperimentStore(tmp_path)
+    context = {"column": "ai_flash", "notes": "x"}
+    assert hook.arm_for(tmp_path, context, column_key="flash", created_by="autopilot") is context  # switch off
+    store.set_enabled(True, "admin")
+    assert hook.arm_for(tmp_path, context, column_key="flash", created_by="autopilot") is context  # nothing running
+    _running(store, aa("aa_first"))
+    assert hook.arm_for(tmp_path, context, column_key="flash", created_by="admin") is context  # manual
+    assert store.assignments("aa_first") == []
+
+
+def test_blocks_of_two_hold_one_of_each_arm_per_column_and_repeat_the_same_way(tmp_path):
+    store = ExperimentStore(tmp_path)
+    store.set_enabled(True, "admin")
+    _running(store, aa("aa_first"))
+    arms = [hook.arm_for(tmp_path, {"column": "c1"}, column_key="flash", created_by="autopilot")["experiments"][0]["arm"]
+            for _ in range(10)]
+    other = [hook.arm_for(tmp_path, {}, column_key="topic_digest", created_by="autopilot")["experiments"][0]["arm"]
+             for _ in range(4)]
+    assert all(sorted(arms[i:i + 2]) == ["A", "B"] for i in range(0, 10, 2))
+    assert sorted(other) == ["A", "A", "B", "B"]
+    rows = store.assignments("aa_first")
+    assert {r["column_key"] for r in rows} == {"c1", "topic_digest"} and all(r["code_version"] for r in rows)
+    again = ExperimentStore(tmp_path / "again")
+    again.set_enabled(True, "admin")
+    _running(again, aa("aa_first"))
+    assert [hook.arm_for(tmp_path / "again", {"column": "c1"}, column_key="flash", created_by="autopilot")["experiments"][0]["arm"]
+            for _ in range(10)] == arms
+
+
+def test_arm_b_writes_only_its_own_field_and_arm_a_gains_only_the_mark(tmp_path):
+    store = ExperimentStore(tmp_path)
+    store.set_enabled(True, "admin")
+    experiment = compare(id="card", overrides={"presentation.opening_card": True})
+    store.save(experiment, "admin")
+    store.move("card", "start", "admin")
+    before = {"column": "c1", "presentation": {"strategy": "先讲数字"}}
+    results = [hook.arm_for(tmp_path, before, column_key="flash", created_by="autopilot") for _ in range(2)]
+    by_arm = {r["experiments"][0]["arm"]: r for r in results}
+    assert by_arm["B"]["presentation"] == {"strategy": "先讲数字", "opening_card": True}
+    assert {k: v for k, v in by_arm["A"].items() if k != "experiments"} == before
+    assert before == {"column": "c1", "presentation": {"strategy": "先讲数字"}}  # the caller's dict is untouched
+
+
+def test_scope_and_reach_decide_who_takes_part(tmp_path):
+    store = ExperimentStore(tmp_path)
+    store.set_enabled(True, "admin")
+    _running(store, compare(id="greet", overrides={"greeting": "你好"}))  # needs a content column
+    _running(store, aa("aa_flash", scope=Scope(columns=["ai_flash"], content_mode="individual")))
+    no_column = hook.arm_for(tmp_path, {"content_mode": "individual"}, column_key="topic_digest", created_by="autopilot")
+    assert no_column == {"content_mode": "individual"}
+    flash = hook.arm_for(tmp_path, {"column": "ai_flash", "content_mode": "individual"}, column_key="flash", created_by="autopilot")
+    assert {m["id"] for m in flash["experiments"]} == {"greet", "aa_flash"}
+    episode = hook.arm_for(tmp_path, {"column": "ai_flash", "content_mode": "episode"}, column_key="flash", created_by="autopilot")
+    assert [m["id"] for m in episode["experiments"]] == ["greet"]
+
+
+def test_status_moves_follow_the_allowed_paths(tmp_path):
+    store = ExperimentStore(tmp_path)
+    store.save(aa("aa_first"), "admin")
+    with pytest.raises(ValueError):
+        store.move("aa_first", "pause", "admin")
+    assert store.move("aa_first", "start", "admin")["started_at"]
+    assert store.move("aa_first", "pause", "admin")["status"] == "paused"
+    assert store.move("aa_first", "resume", "admin")["status"] == "running"
+    assert store.move("aa_first", "end", "admin")["status"] == "ended"
+    assert [e["kind"] for e in store.events("aa_first")] == ["created", "start", "pause", "resume", "end"]
+
+
+@pytest.fixture
+def workflow_env(column_env, monkeypatch):
+    from web.services import video_workflow
+    monkeypatch.setattr(video_workflow, "spawn", lambda sid, by: None)
+    return column_env
+
+
+def _start(by="autopilot"):
+    from core.video import store as video_store
+    from web.services import video_workflow
+    script = video_workflow.start("flash", {"title": "测试模型更新", "_production": "flash"}, by)
+    no = video_store.add_version(script["id"], title="测试", sections=[], length_check={}, edit_type="manual")
+    return video_store.get_script(script["id"]), video_store.get_version(script["id"], no)
+
+
+def test_with_an_experiment_running_arm_a_matches_a_script_made_without_one(workflow_env):
+    from web.services import video_list_payload
+    plain, plain_version = _start()
+    store = ExperimentStore(workflow_env / "state")
+    store.set_enabled(True, "admin")
+    _running(store, aa("aa_first"))
+    scripts = [_start() for _ in range(2)]
+    a_script, a_version = next(s for s in scripts if s[0]["content_context"]["experiments"][0]["arm"] == "A")
+    strip = lambda ctx: {k: v for k, v in ctx.items() if k != "experiments"}  # noqa: E731
+    assert strip(a_script["content_context"]) == plain["content_context"]
+    assert strip(a_version["meta"]["content_context"]) == plain_version["meta"]["content_context"]
+    listed = video_list_payload.compact(a_script)["content_context"]
+    assert strip(listed) == video_list_payload.compact(plain)["content_context"]
+    assert listed["experiments"][0]["id"] == "aa_first"
+
+
+def test_a_failing_hook_leaves_script_creation_as_today(workflow_env, monkeypatch):
+    plain, _ = _start()
+    store = ExperimentStore(workflow_env / "state")
+    store.set_enabled(True, "admin")
+    _running(store, aa("aa_first"))
+
+    def broken(*_a, **_k):
+        raise RuntimeError("database is locked")
+
+    monkeypatch.setattr(hook, "arm_for", broken)
+    script, _ = _start()
+    assert script["content_context"] == plain["content_context"]
+
+
+def test_an_empty_context_with_only_a_mark_is_not_copied_into_versions(tmp_path, monkeypatch):
+    from core.video import store as video_store
+    monkeypatch.setattr(video_store, "_DB_PATH_OVERRIDE", str(tmp_path / "video.db"))
+    video_store.init_db() if hasattr(video_store, "init_db") else None
+    script = video_store.create_script("flash", {"title": "x"}, content_context={"experiments": [{"id": "e", "arm": "A", "token": "t"}]})
+    no = video_store.add_version(script["id"], title="x", sections=[], length_check={}, edit_type="manual")
+    assert "content_context" not in (video_store.get_version(script["id"], no)["meta"] or {})
+
+
+def test_start_is_refused_for_undeveloped_switches_previews_and_conflicts(client, web_env):
+    _login(client)
+    csrf = {"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""}
+    made = client.post("/api/experiments", json=compare().model_dump(), headers=csrf)
+    assert made.status_code == 201
+    refused = client.post("/api/experiments/cover_title/start", headers=csrf)
+    assert refused.status_code == 409 and "等待开发" in refused.json()["error"]["message"] and "预览" in refused.json()["error"]["message"]
+    assert client.post("/api/experiments", json={"id": "bad"}, headers=csrf).status_code == 422
+    assert client.post("/api/experiments", json=aa("aa_first").model_dump(), headers=csrf).status_code == 201
+    assert client.post("/api/experiments/aa_first/start", headers=csrf).status_code == 200
+    assert client.post("/api/experiments/aa_first/start", headers=csrf).status_code == 409
+    assert client.put("/api/experiments/settings", json={"enabled": True}, headers=csrf).json() == {"enabled": True}
+    assert client.get("/api/experiments").json()["enabled"] is True

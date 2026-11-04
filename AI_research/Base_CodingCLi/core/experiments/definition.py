@@ -65,7 +65,17 @@ class Scope(BaseModel):
     automatic: Literal["all"] = "all"
     matrices: list[str] = Field(default_factory=list)
     columns: list[str] = Field(default_factory=list)
-    content_mode: Optional[Literal["single", "episode"]] = None
+    content_mode: Optional[Literal["individual", "episode"]] = None
+
+    def matches(self, context: dict, column: str) -> bool:
+        """Whether a script with this frozen context (and stratum column) is in scope (§7)."""
+        if self.columns and column not in self.columns:
+            return False
+        if self.matrices and (context.get("matrix") or context.get("source_matrix") or "") not in self.matrices:
+            return False
+        if self.content_mode and (context.get("content_mode") or "individual") != self.content_mode:
+            return False
+        return True
 
 
 class Experiment(BaseModel):
@@ -112,6 +122,8 @@ class Experiment(BaseModel):
             switch = registry.find(path)
             if switch is None:
                 raise ValueError(f"「{path}」不在开关登记表里")
+            if switch.prefix and path == switch.path:
+                raise ValueError(f"「{path}」要写到具体的子项，比如「{path}.voice_id」，不能整块替换")
             if switch.values and value not in switch.values:
                 raise ValueError(f"「{path}」只能取 {list(switch.values)}")
         for i, a in enumerate(paths):
@@ -138,6 +150,10 @@ class Experiment(BaseModel):
 
     def needs_column(self) -> bool:
         return any(s.reaches == "with_column" for s in self.switches())
+
+    def needs_preview(self) -> bool:
+        """Visual and cover switches are looked at before they go live (§9a step ③); writing ones need not be."""
+        return any(p.startswith(("presentation", "render", "cover_style")) for p in self.write_paths())
 
 
 def aa(id: str, name: str = "A/A 检查", *, scope: Scope | None = None, per_arm: int = AA_PER_ARM,

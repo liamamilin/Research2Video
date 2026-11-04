@@ -24,6 +24,7 @@ import { errorMessage, useToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { DraftQualityPanel } from "./VideoQuality";
 import { ArticleCreate } from "@/components/ArticleCreate";
+import { ExperimentBadge } from "@/components/ExperimentBadge";
 import { scriptFromTopic, topicReturn, topicTaken } from "@/lib/topic-progress";
 
 export const STATUS_LABEL: Record<ScriptStatus, string> = {
@@ -521,7 +522,7 @@ export function VideoScriptsPage() {
         <thead className="text-xs text-text-muted border-b border-border"><tr><th className="text-left font-normal px-4 py-3">文稿与来源</th><th className="text-left font-normal px-4 py-3">制作进度</th><th className="text-left font-normal px-4 py-3">事实审计</th><th className="text-left font-normal px-4 py-3">创建时间</th></tr></thead>
         <tbody>{shownScripts.slice(0, limit).map((s, i) => <Fragment key={s.id}>{i === 0 || dayLabel(s.created_at) !== dayLabel(shownScripts[i - 1].created_at) ? <tr className="bg-bg-hover/50"><td colSpan={4} className="px-4 py-2 text-xs text-text-muted">{dayLabel(s.created_at)}</td></tr> : null}<tr className="border-b border-border last:border-0 hover:bg-bg-hover">
           <td className="px-4 py-3 min-w-60"><Link to={`/video/${s.id}`} className="font-medium text-sm leading-6 hover:text-accent hover:underline">{s.title}</Link><div className="text-xs text-text-muted flex flex-wrap gap-x-2 gap-y-1 mt-1"><span>{s.matrix_name || "独立视频"}</span>{s.current_version ? <span>v{s.current_version}</span> : null}{s.has_previous_video ? <span>有旧版成片</span> : null}{s.auto ? <span>自动生成</span> : null}</div><p className="text-xs text-text-muted mt-1">{columnName(s.column_key)}{s.length_check?.estimated_seconds ? ` · 预计口播 ${minutes(s.length_check.estimated_seconds)}` : ""}</p>{s.job_name ? <p className="text-xs text-text-muted mt-1">{s.job_name}</p> : null}</td>
-          <td className="px-4 py-3 align-top pt-4"><span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>{STAGE_LABEL[stageOf(s)]}{s.stage ? ` · ${s.stage}` : ""}</span><div className="mt-2"><DistributionSummary rows={s.distributions} /></div></td>
+          <td className="px-4 py-3 align-top pt-4"><span className={cn("badge border", STAGE_CLASS[stageOf(s)])}>{STAGE_LABEL[stageOf(s)]}{s.stage ? ` · ${s.stage}` : ""}</span>{s.content_context?.experiments?.length ? <div className="mt-1 flex flex-wrap gap-1"><ExperimentBadge marks={s.content_context.experiments} /></div> : null}<div className="mt-2"><DistributionSummary rows={s.distributions} /></div></td>
           <td className="px-4 py-3 align-top pt-4"><Link to={`/video/${s.id}?tab=review`} className="inline-flex hover:opacity-80" aria-label={`查看审校：${s.title}`}><CredibilityBadge value={s.credibility} /></Link></td>
           <td className="px-4 py-3 align-top pt-4"><TimeStamp value={s.created_at} staleDays={Infinity} /></td>
         </tr></Fragment>)}</tbody>

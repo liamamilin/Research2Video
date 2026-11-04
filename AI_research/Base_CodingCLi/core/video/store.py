@@ -635,8 +635,10 @@ def add_version(
     now = _now()
     with connect(write=True) as conn:
         context = conn.execute("SELECT content_context FROM scripts WHERE id = ?", (script_id,)).fetchone()
-        if context and context[0] != "{}":
-            meta = {**(meta or {}), "content_context": json.loads(context[0])}
+        frozen = json.loads(context[0]) if context and context[0] else {}
+        # An A/B assignment mark alone does not make a context (spec/ab-testing.md §2: arm A stays as today).
+        if any(key != "experiments" for key in frozen):
+            meta = {**(meta or {}), "content_context": frozen}
         current = conn.execute(
             "SELECT COALESCE(MAX(version), 0) FROM script_versions WHERE script_id = ?", (script_id,)
         ).fetchone()[0]

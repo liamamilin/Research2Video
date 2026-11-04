@@ -160,6 +160,12 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
         fields["目标受众"] = context["audience"]
     if started_by not in content_guard.SAMPLE_CREATORS and not episodes.enabled(topic):
         topic = content_guard.new_topic(topic, context, settings.paths.config_dir, settings.paths.jobs_dir)
+    try:  # the A/B module's one write point (spec/ab-testing.md §5); any failure leaves the script as today (A)
+        from core.experiments import hook as experiments_hook
+        context = experiments_hook.arm_for(settings.paths.state_dir, context, column_key=column.key,
+                                           created_by=started_by)
+    except Exception:  # noqa: BLE001
+        logger.exception("experiments: arm_for failed; this script is produced as today")
     script = store.create_script(column.key, topic, created_by=started_by,
                                  production=production_id, content_context=context)
     if topic.get("article"):
