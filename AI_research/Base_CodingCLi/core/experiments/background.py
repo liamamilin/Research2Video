@@ -71,11 +71,35 @@ def reconcile(store: ExperimentStore, video_db: str | Path) -> int:
     return bound
 
 
+def start_queued(store: ExperimentStore, config_dir: str | None = None, jobs_dir: str | None = None) -> list[str]:
+    """Start queued experiments, oldest first, once nothing blocks them (§9a「实验排队」).
+
+    One still waiting only for its preview is reminded about once and left queued.
+    """
+    from core.experiments import checks
+    from core.experiments.definition import Experiment
+    if config_dir is None or jobs_dir is None:
+        from web.settings import get_settings
+        paths = get_settings().paths
+        config_dir, jobs_dir = paths.config_dir, paths.jobs_dir
+    started = []
+    for row in sorted((r for r in store.list() if r["status"] == "queued"), key=lambda r: r["updated_at"]):
+        problems = checks.start_problems(Experiment.model_validate(row["definition"]), store, config_dir, jobs_dir)
+        if not problems:
+            store.move(row["id"], "start", "system", {"reason": "queue"})
+            started.append(row["id"])
+        elif problems == [checks.NO_PREVIEW] and "queue_waiting" not in {e["kind"] for e in store.events(row["id"])}:
+            with store.connect(write=True) as db:
+                store._event(db, row["id"], "queue_waiting", "system", {"reason": checks.NO_PREVIEW})
+    return started
+
+
 def tick(state_dir: str | Path) -> None:
     store = ExperimentStore(state_dir)
     if not store.list():
         return
     reconcile(store, Path(state_dir) / "video.db")
+    start_queued(store)
     from core.experiments import results
     results.evaluate_all(state_dir)  # alarms, end point and final snapshot run even while assignment is switched off
 

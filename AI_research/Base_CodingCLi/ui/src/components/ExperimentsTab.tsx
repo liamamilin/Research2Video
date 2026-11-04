@@ -1,11 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Fragment, useCallback, useState } from "react";
-import { confirmPreview, createExperiment, loadExperiment, loadExperiments, loadPreview, loadResults, loadSuggestion, moveExperiment, requestPreview, setExperimentsEnabled,
+import { confirmPreview, createExperiment, loadExperiment, loadExperiments, loadPreview, loadResults, loadSuggestion, loadRecords, decideExperiment, moveExperiment, requestPreview, setExperimentsEnabled,
   type Definition, type ExperimentDetail, type ExperimentRow, type Move, type SwitchRow } from "@/api/experiments";
 import { usePageResource } from "@/lib/use-page-resource";
 import { ErrorState } from "./ErrorState";
 
-const STATUS: Record<ExperimentRow["status"], string> = { draft: "草稿", running: "进行中", paused: "已暂停", ended: "已结束", decided: "已处理" };
+const STATUS: Record<ExperimentRow["status"], string> = { draft: "草稿", queued: "排队中", running: "进行中", paused: "已暂停", ended: "已结束", decided: "已处理" };
 const TIMING = { before_writing: "写稿前", from_writing: "写稿起" } as const;
 const REACH = { all: "全部", with_column: "要有内容栏目" } as const;
 const STATE = { existing: "已有", planned: "要新增", unconfirmed: "待确认" } as const;
@@ -13,7 +13,7 @@ const METRICS: Record<string, { label: string; better: "higher" | "lower" }> = {
   completion_adjusted: { label: "时长校正后的完播率", better: "higher" }, completion: { label: "完播率", better: "higher" },
   exit3s: { label: "3 秒退出", better: "lower" }, cover_pass: { label: "封面点击超过同类", better: "higher" } };
 const ACTIONS: Record<ExperimentRow["status"], [Move, string][]> = {
-  draft: [["start", "开始"]], running: [["pause", "暂停"], ["end", "结束"]], paused: [["resume", "继续"], ["end", "结束"]], ended: [], decided: [] };
+  draft: [["start", "开始"], ["queue", "排队"]], queued: [["unqueue", "取消排队"]], running: [["pause", "暂停"], ["end", "结束"]], paused: [["resume", "继续"], ["end", "结束"]], ended: [], decided: [] };
 const th = "pb-2 font-normal whitespace-nowrap";
 const list = (text: string) => text.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
 const message = (e: unknown) => e instanceof Error ? e.message : String(e);
@@ -23,9 +23,10 @@ function parseValue(raw: string, sw: SwitchRow | undefined): unknown {
   try { return JSON.parse(raw); } catch { return raw; }
 }
 
-function NewExperiment({ registry, onDone }: { registry: SwitchRow[]; onDone: () => void }) {
-  const [kind, setKind] = useState<"compare" | "aa">("aa");
-  const [id, setId] = useState(""); const [name, setName] = useState("");
+function NewExperiment({ registry, onDone, initial }: { registry: SwitchRow[]; onDone: (note?: string) => void; initial?: { name?: string; hypothesis?: string } }) {
+  const [kind, setKind] = useState<"compare" | "aa">(initial?.hypothesis ? "compare" : "aa");
+  const [id, setId] = useState(""); const [name, setName] = useState(initial?.name ?? "");
+  const [hypothesis, setHypothesis] = useState(initial?.hypothesis ?? "");
   const [path, setPath] = useState(registry[0]?.path ?? ""); const [sub, setSub] = useState(""); const [value, setValue] = useState("");
   const [primary, setPrimary] = useState("completion_adjusted"); const [effect, setEffect] = useState(8);
   const [share, setShare] = useState(50); const [perArm, setPerArm] = useState(20); const [days, setDays] = useState(28);
@@ -35,12 +36,15 @@ function NewExperiment({ registry, onDone }: { registry: SwitchRow[]; onDone: ()
   const prefix = path.endsWith(".*");
   const submit = async () => {
     const key = prefix ? `${path.slice(0, -2)}.${sub}` : path;
-    const definition: Definition = { id, name, kind, share_b: share,
+    const definition: Definition = { id, name, hypothesis, kind, share_b: share,
       scope: { columns: list(columns), matrices: list(matrices), content_mode: (mode || null) as "individual" | "episode" | null },
       arms: { A: { name: "现状", overrides: {} }, B: { name: kind === "aa" ? "现状（对照）" : `${sw?.label ?? key}：${value}`, overrides: kind === "aa" ? {} : { [key]: parseValue(value, sw) } } },
       metric: { primary, better: METRICS[primary].better, min_effect: effect }, stop: { per_arm: perArm, max_days: days } };
     setBusy(true); setError("");
-    try { await createExperiment(definition); onDone(); } catch (e) { setError(message(e)); } finally { setBusy(false); }
+    try {
+      const made = await createExperiment(definition);
+      onDone(made.duplicates?.length ? `以前做过改同样开关、同样取值的实验：${made.duplicates.map(d => `${d.name}（${d.verdict ? VERDICT[d.verdict as keyof typeof VERDICT] ?? d.verdict : STATUS[d.status as ExperimentRow["status"]] ?? d.status}）`).join("、")}，可以先看实验记录。` : undefined);
+    } catch (e) { setError(message(e)); } finally { setBusy(false); }
   };
   const field = "input text-xs";
   return <section className="card p-4 space-y-3" aria-label="新建实验">
@@ -50,6 +54,7 @@ function NewExperiment({ registry, onDone }: { registry: SwitchRow[]; onDone: ()
         <option value="aa">A/A 检查（两组相同，检查流程）</option><option value="compare">对比实验</option></select></label>
       <label className="space-y-1"><span>标识（小写字母、数字、-、_）</span><input className={field} value={id} onChange={e => setId(e.target.value)} /></label>
       <label className="space-y-1 sm:col-span-2"><span>名称</span><input className={field} value={name} onChange={e => setName(e.target.value)} /></label>
+      <label className="space-y-1 sm:col-span-2"><span>假设（为什么觉得 B 会更好）</span><textarea className={field} rows={2} value={hypothesis} onChange={e => setHypothesis(e.target.value)} /></label>
       {kind === "compare" ? <>
         <label className="space-y-1"><span>要改的开关</span><select className={field} value={path} onChange={e => { setPath(e.target.value); setValue(""); }}>
           {registry.map(r => <option key={r.path} value={r.path}>{r.label}（{r.path}）{r.status !== "existing" ? ` · ${STATE[r.status]}` : ""}</option>)}</select></label>
@@ -72,7 +77,7 @@ function NewExperiment({ registry, onDone }: { registry: SwitchRow[]; onDone: ()
     </div>
     {error ? <p role="alert" className="text-xs text-danger">{error}</p> : null}
     <div className="flex gap-2"><button className="btn btn-primary text-xs" disabled={busy || !id || !name} onClick={() => void submit()}>保存草稿</button>
-      <button className="btn text-xs" onClick={onDone}>取消</button></div>
+      <button className="btn text-xs" onClick={() => onDone()}>取消</button></div>
   </section>;
 }
 
@@ -122,7 +127,7 @@ function SuggestionPanel({ id }: { id: string }) {
   </div>;
 }
 
-function ResultsPanel({ id }: { id: string }) {
+function ResultsPanel({ id, status, onChanged }: { id: string; status: ExperimentRow["status"]; onChanged: () => void }) {
   const load = useCallback((signal: AbortSignal) => loadResults(id, signal), [id]);
   const { data, error } = usePageResource(load);
   if (error) return <p className="text-xs text-danger">{message(error)}</p>;
@@ -137,11 +142,15 @@ function ResultsPanel({ id }: { id: string }) {
     <p>主要指标 {METRICS[p.metric]?.label ?? p.metric}：B − A = {fmt(p.estimate)}，90% 区间 [{fmt(p.low)}, {fmt(p.high)}]{data.verdict.verdict === "running" ? "（未到终点）" : ""}</p>
     {data.guardrails.map(g => <p key={g.metric} className={g.status === "worse" ? "text-danger" : undefined}>护栏 {g.metric}：{fmt(g.estimate, 2)} [{fmt(g.low, 2)}, {fmt(g.high, 2)}]{g.status === "worse" ? " 明显变差" : g.status === "hint" ? " 变差，样本不足以确认" : ""}</p>)}
     {data.frozen && data.verdict.verdict === "b_better" ? <SuggestionPanel id={id} /> : null}
+    {data.frozen && status === "ended" ? <div className="flex flex-wrap gap-2 items-center"><span>你的选择：</span>
+      {([["adopt", "采用 B"], ["keep", "保留 A"], ["defer", "暂不处理"]] as const).map(([choice, label]) =>
+        <button key={choice} className="btn text-xs" onClick={() => void decideExperiment(id, choice).then(onChanged)}>{label}</button>)}
+      <span className="text-text-muted">采用 B 只记下选择和改动前的值，配置要在栏目页保存。</span></div> : null}
     <p className="text-text-muted">已跑 {fmt(data.active_days)} 天（不含暂停）；时长中位数 A {fmt(data.median_duration.A, 0)} 秒 / B {fmt(data.median_duration.B, 0)} 秒；24 小时播放中位数 A {fmt(data.median_views.A, 0)} / B {fmt(data.median_views.B, 0)}（仅供参考）{data.applied_rate != null ? `；B 组实际生效率 ${Math.round(data.applied_rate * 100)}%` : ""}</p>
   </div>;
 }
 
-function Details({ id }: { id: string }) {
+function Details({ id, onChanged }: { id: string; onChanged: () => void }) {
   const load = useCallback((signal: AbortSignal) => loadExperiment(id, signal), [id]);
   const { data, error } = usePageResource(load);
   if (error) return <p className="text-xs text-danger">{message(error)}</p>;
@@ -150,15 +159,30 @@ function Details({ id }: { id: string }) {
   return <div className="text-xs space-y-1 py-2">
     <p>已分组：A {d.arms.A} 条，B {d.arms.B} 条</p>
     {d.start_problems.length ? <ul className="text-danger list-disc pl-4">{d.start_problems.map(p => <li key={p}>{p}</li>)}</ul> : null}
-    {d.status === "draft" ? <Preview id={id} /> : <ResultsPanel id={id} />}
+    {d.status === "draft" || d.status === "queued" ? <Preview id={id} /> : <ResultsPanel id={id} status={d.status} onChanged={onChanged} />}
     <p className="text-text-muted">记录：{d.events.map(e => `${new Date(e.at * 1000).toLocaleString("zh-CN", { hour12: false })} ${e.kind}`).join("；")}</p>
   </div>;
 }
 
-/** spec/ab-testing.md §9. Analysis results arrive with the next phases. */
+function Records() {
+  const { data } = usePageResource(loadRecords);
+  if (!data?.items.length) return null;
+  return <section className="card p-4 space-y-2" aria-label="实验记录">
+    <h2 className="text-sm font-medium">实验记录</h2>
+    <ul className="text-xs space-y-1">{data.items.map(r => <li key={r.id}><strong>{r.name}</strong>：{r.verdict ? VERDICT[r.verdict as keyof typeof VERDICT] ?? r.verdict : "结论未存档"}
+      {r.estimate != null ? `（${METRICS[r.metric]?.label ?? r.metric} B − A = ${fmt(r.estimate)}，区间 [${fmt(r.low)}, ${fmt(r.high)}]）` : ""}
+      {r.minimum_detectable != null ? `；这次能测出的最小差异约 ${fmt(r.minimum_detectable)} 个点` : ""}
+      {r.decision ? `；你的选择：${r.decision.label}` : ""}</li>)}</ul>
+  </section>;
+}
+
+/** spec/ab-testing.md §9. */
 export function ExperimentsTab() {
   const { data, error, reload } = usePageResource(loadExperiments);
-  const [creating, setCreating] = useState(false);
+  const [params, setParams] = useSearchParams();
+  const fromReview = params.get("new") === "1" ? { name: (params.get("hypothesis") || "").slice(0, 40), hypothesis: params.get("hypothesis") || "" } : undefined;
+  const [creating, setCreating] = useState(Boolean(fromReview));
+  const [notice, setNotice] = useState("");
   const [open, setOpen] = useState<string | null>(null);
   const [problem, setProblem] = useState("");
   if (error) return <ErrorState error={error} onRetry={reload} compact />;
@@ -175,7 +199,11 @@ export function ExperimentsTab() {
       <button className="btn text-xs ml-auto" onClick={toggle}>{data.enabled ? "关闭总开关" : "打开总开关"}</button>
     </section>
     {problem ? <p role="alert" className="text-xs text-danger">{problem}</p> : null}
-    {creating ? <NewExperiment registry={data.registry} onDone={() => { setCreating(false); void reload(); }} /> : null}
+    {notice ? <p role="status" className="text-xs text-warning">{notice}</p> : null}
+    {creating ? <NewExperiment registry={data.registry} initial={fromReview} onDone={(note) => {
+      setCreating(false); setNotice(note ?? "");
+      if (fromReview) setParams(previous => { const next = new URLSearchParams(previous); next.delete("new"); next.delete("hypothesis"); return next; }, { replace: true });
+      void reload(); }} /> : null}
     <section className="card p-4 space-y-3">
       <div className="flex items-center"><h2 className="text-sm font-medium">实验</h2>
         {!creating ? <button className="btn btn-primary text-xs ml-auto" onClick={() => setCreating(true)}>新建实验</button> : null}</div>
@@ -191,9 +219,10 @@ export function ExperimentsTab() {
               <td className="py-2 tabular-nums">每组 {e.definition.stop.per_arm} 条 / {e.definition.stop.max_days} 天</td>
               <td className="py-2 text-right space-x-1 whitespace-nowrap">{ACTIONS[e.status].map(([action, label]) =>
                 <button key={action} className="btn text-xs" onClick={() => void act(() => moveExperiment(e.id, action))}>{label}</button>)}</td></tr>
-            {open === e.id ? <tr><td colSpan={7}><Details id={e.id} /></td></tr> : null}
+            {open === e.id ? <tr><td colSpan={7}><Details id={e.id} onChanged={() => void reload()} /></td></tr> : null}
           </Fragment>)}</tbody></table></div>}
     </section>
+    <Records />
     <section className="card p-4 space-y-3">
       <h2 className="text-sm font-medium">开关登记表</h2>
       <p className="text-xs text-text-muted">B 组只能改这里登记过的开关。</p>

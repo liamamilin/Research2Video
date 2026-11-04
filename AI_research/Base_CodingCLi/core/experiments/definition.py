@@ -83,7 +83,7 @@ class Experiment(BaseModel):
     name: str = Field(min_length=1, max_length=80)
     hypothesis: str = Field(default="", max_length=500)
     kind: Literal["compare", "aa"] = "compare"
-    status: Literal["draft", "running", "paused", "ended", "decided"] = "draft"
+    status: Literal["draft", "queued", "running", "paused", "ended", "decided"] = "draft"
     scope: Scope = Field(default_factory=Scope)
     share_b: int = 50
     arms: dict[Literal["A", "B"], Arm]

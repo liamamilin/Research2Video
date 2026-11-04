@@ -1,13 +1,14 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
-import { createExperiment, loadExperiments, moveExperiment, setExperimentsEnabled, type ExperimentRow } from "@/api/experiments";
+import { createExperiment, loadExperiments, loadRecords, moveExperiment, setExperimentsEnabled, type ExperimentRow } from "@/api/experiments";
 import { ExperimentBadge } from "./ExperimentBadge";
 import { ExperimentsTab } from "./ExperimentsTab";
 
-vi.mock("@/api/experiments", () => ({ loadExperiments: vi.fn(), loadExperiment: vi.fn(), createExperiment: vi.fn(), moveExperiment: vi.fn(), setExperimentsEnabled: vi.fn(), loadPreview: vi.fn(), requestPreview: vi.fn(), confirmPreview: vi.fn(), loadResults: vi.fn(), loadSuggestion: vi.fn() }));
+vi.mock("@/api/experiments", () => ({ loadExperiments: vi.fn(), loadExperiment: vi.fn(), createExperiment: vi.fn(), moveExperiment: vi.fn(), setExperimentsEnabled: vi.fn(), loadPreview: vi.fn(), requestPreview: vi.fn(), confirmPreview: vi.fn(), loadResults: vi.fn(), loadSuggestion: vi.fn(), loadRecords: vi.fn(), decideExperiment: vi.fn() }));
 afterEach(cleanup);
-beforeEach(() => { vi.mocked(createExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(moveExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(setExperimentsEnabled).mockResolvedValue({ enabled: true }); });
+beforeEach(() => { vi.mocked(loadRecords).mockResolvedValue({ items: [] }); vi.mocked(createExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(moveExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(setExperimentsEnabled).mockResolvedValue({ enabled: true }); });
 
 const registry = [{ path: "cover_style", label: "封面样式", readers: ["web/services/publish_cover.py"], timing: "from_writing" as const,
   reaches: "all" as const, applied_by: "封面文字缓存里 copy 是否为空", status: "planned" as const, values: ["number", "title"], note: "" }];
@@ -17,7 +18,7 @@ const draft: ExperimentRow = { id: "aa_first", status: "draft", created_at: 1, u
 
 it("shows the master switch off, an empty list and the switch registry", async () => {
   vi.mocked(loadExperiments).mockResolvedValue({ enabled: false, experiments: [], registry });
-  render(<ExperimentsTab />);
+  render(<MemoryRouter><ExperimentsTab /></MemoryRouter>);
   expect(await screen.findByText("关")).toBeTruthy();
   expect(screen.getByText("还没有实验。")).toBeTruthy();
   expect(screen.getByText("封面样式")).toBeTruthy();
@@ -26,7 +27,7 @@ it("shows the master switch off, an empty list and the switch registry", async (
 
 it("lists saved experiments and starts a draft", async () => {
   vi.mocked(loadExperiments).mockResolvedValue({ enabled: true, registry, experiments: [draft] });
-  render(<ExperimentsTab />);
+  render(<MemoryRouter><ExperimentsTab /></MemoryRouter>);
   expect(await screen.findByText("第一次 A/A")).toBeTruthy();
   expect(screen.getByText("A/A 检查")).toBeTruthy();
   expect(screen.getByText("时长校正后的完播率")).toBeTruthy();
@@ -37,7 +38,7 @@ it("lists saved experiments and starts a draft", async () => {
 it("asks before turning the master switch on", async () => {
   vi.mocked(loadExperiments).mockResolvedValue({ enabled: false, experiments: [], registry });
   const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
-  render(<ExperimentsTab />);
+  render(<MemoryRouter><ExperimentsTab /></MemoryRouter>);
   fireEvent.click(await screen.findByRole("button", { name: "打开总开关" }));
   expect(setExperimentsEnabled).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "打开总开关" }));
@@ -47,7 +48,7 @@ it("asks before turning the master switch on", async () => {
 
 it("saves a new A/A check with both arms unchanged", async () => {
   vi.mocked(loadExperiments).mockResolvedValue({ enabled: false, experiments: [], registry });
-  render(<ExperimentsTab />);
+  render(<MemoryRouter><ExperimentsTab /></MemoryRouter>);
   fireEvent.click(await screen.findByRole("button", { name: "新建实验" }));
   fireEvent.change(screen.getByLabelText(/标识/), { target: { value: "aa_first" } });
   fireEvent.change(screen.getByLabelText("名称"), { target: { value: "第一次 A/A" } });
@@ -75,10 +76,31 @@ it("shows A and B side by side once a preview is done and confirms it", async ()
   vi.mocked(loadPreview).mockResolvedValue({ kind: "render", confirmed: false, sources: [{ render_id: "r1", script_id: "s1", title: "一条视频", completed_at: "" }],
     preview: { id: "p1", status: "done", error: "", source_render_id: "r1", files: ["video.mp4"] }, a_video: "/a.mp4", b_video: "/b.mp4" });
   vi.mocked(confirmPreview).mockResolvedValue({});
-  const { container } = render(<ExperimentsTab />);
+  const { container } = render(<MemoryRouter><ExperimentsTab /></MemoryRouter>);
   fireEvent.click(await screen.findByRole("button", { name: "要点卡" }));
   expect(await screen.findByText("状态：已出好")).toBeTruthy();
   expect(container.querySelectorAll("video")).toHaveLength(2);
   fireEvent.click(screen.getByRole("button", { name: "确认 B 没问题" }));
   await waitFor(() => expect(confirmPreview).toHaveBeenCalledWith("card"));
+});
+
+it("opens a prefilled draft from a weekly review finding and warns about earlier experiments", async () => {
+  vi.mocked(loadExperiments).mockResolvedValue({ enabled: false, experiments: [], registry });
+  vi.mocked(createExperiment).mockResolvedValue({ ...draft, duplicates: [{ id: "old", name: "上次的封面实验", status: "ended", verdict: "no_difference" }] });
+  render(<MemoryRouter initialEntries={["/analytics?tab=experiments&new=1&hypothesis=" + encodeURIComponent("周末发布的播放更高")]}><ExperimentsTab /></MemoryRouter>);
+  expect((await screen.findByLabelText(/假设/) as HTMLTextAreaElement).value).toBe("周末发布的播放更高");
+  fireEvent.change(screen.getByLabelText(/标识/), { target: { value: "weekend" } });
+  fireEvent.change(screen.getByLabelText("要改的开关"), { target: { value: "cover_style" } });
+  fireEvent.change(screen.getByLabelText("B 组的取值"), { target: { value: "title" } });
+  fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
+  expect(await screen.findByText(/以前做过改同样开关.*上次的封面实验（没有分出差异）/)).toBeTruthy();
+});
+
+it("lists experiment records with the conclusion and the choice", async () => {
+  vi.mocked(loadExperiments).mockResolvedValue({ enabled: false, experiments: [], registry });
+  vi.mocked(loadRecords).mockResolvedValue({ items: [{ id: "c1", name: "封面实验", kind: "compare", hypothesis: "", status: "decided", changes: { cover_style: "title" },
+    metric: "cover_pass", verdict: "b_worse", estimate: -12, low: -20, high: -4, minimum_detectable: 9, n: { A: 70, B: 71 }, decision: { choice: "keep", label: "保留 A" } }] });
+  render(<MemoryRouter><ExperimentsTab /></MemoryRouter>);
+  expect(await screen.findByText(/B 更差/)).toBeTruthy();
+  expect(screen.getByText(/你的选择：保留 A/)).toBeTruthy();
 });

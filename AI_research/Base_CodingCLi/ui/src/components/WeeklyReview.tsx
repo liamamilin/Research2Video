@@ -83,7 +83,8 @@ export function WeeklyReview() {
     {!watch ? <p className="text-xs text-text-muted">完播率、平均观看时长和 3 秒退出每天 12:30 后从创作中心读取一次；这一周还没有读到。</p> : null}
     <section className="card p-4 space-y-2">
       <h2 className="text-sm font-medium">本周结论</h2>
-      {data.findings.length ? <ul className="text-sm list-disc pl-5 space-y-1">{data.findings.map(f => <li key={f}>{f}</li>)}</ul> : <p className="text-sm text-text-muted">没有哪一组明显偏离整体。</p>}
+      {data.findings.length ? <ul className="text-sm list-disc pl-5 space-y-1">{data.findings.map(f => <li key={f}>{f}
+        <a className="ml-2 text-xs text-accent hover:underline" href={`/analytics?tab=experiments&new=1&hypothesis=${encodeURIComponent(f)}`}>为它建实验</a></li>)}</ul> : <p className="text-sm text-text-muted">没有哪一组明显偏离整体。</p>}
       <h3 className="text-sm font-medium pt-2">建议（需要你确认后再改配置）</h3>
       {data.suggestions.length ? <ul className="text-sm list-disc pl-5 space-y-1">{data.suggestions.map(f => <li key={f}>{f}</li>)}</ul> : <p className="text-sm text-text-muted">数据还不足以给出连续两周成立的建议。</p>}
     </section>

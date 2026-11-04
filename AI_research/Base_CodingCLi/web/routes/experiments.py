@@ -7,7 +7,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from pydantic import BaseModel, ValidationError
 
 from core.experiments import registry
-from core.experiments.definition import Experiment, conflicts
+from core.experiments.definition import Experiment
 from core.experiments.store import ExperimentStore
 from web import audit
 from web.deps import require_admin
@@ -28,27 +28,9 @@ def _parse(body: dict) -> Experiment:
 
 
 def start_problems(experiment: Experiment, store: ExperimentStore) -> list[str]:
-    """Why this draft may not start yet (§9「开始前程序做校验」, §6, §7). Empty means it may."""
-    problems = []
-    for path in experiment.write_paths():
-        switch = registry.find(path)
-        if switch and switch.status == "planned":
-            problems.append(f"开关「{switch.label}」还没开发（等待开发）")
-        elif switch and switch.status == "unconfirmed":
-            problems.append(f"开关「{switch.label}」待确认，不能使用")
-    if experiment.needs_preview() and not store.preview_confirmed(experiment.id):
-        problems.append("画面类、封面类开关要先预览 B 并确认")
-    for other in store.active():
-        problems += conflicts(experiment, Experiment.model_validate(other["definition"]))
-    render_keys = {p.split(".", 1)[1].split(".")[0] for p in experiment.write_paths() if p.startswith("render.")}
-    if render_keys:
-        from core.video import production
-        settings = get_settings()
-        for config in production.load_all(settings.paths.config_dir, settings.paths.jobs_dir).values():
-            shared = render_keys & set(config.render or {})
-            if shared:
-                problems.append(f"生产配置「{config.key}」设了 {'、'.join(sorted(shared))}，会盖掉 B 组的值")
-    return problems
+    from core.experiments import checks
+    settings = get_settings()
+    return checks.start_problems(experiment, store, settings.paths.config_dir, settings.paths.jobs_dir)
 
 
 @router.get("")
@@ -77,7 +59,15 @@ def create(request: Request, body: dict = Body(...), user=Depends(require_admin)
         raise HTTPException(409, "已有同名实验，换一个标识")
     store.save(experiment, user["username"])
     audit.log("experiment_create", user=user["username"], target=experiment.id)
-    return store.get(experiment.id)
+    from core.experiments import records
+    return {**store.get(experiment.id), "duplicates": records.duplicates(store, experiment)}
+
+
+@router.get("/records")
+def records_view(user=Depends(require_admin)) -> dict:
+    """「实验记录」(§9a step ⑤): every ended experiment, what it tested and what came of it."""
+    from core.experiments import records
+    return {"items": records.listing(_store())}
 
 
 @router.put("/{experiment_id}")
@@ -204,17 +194,40 @@ def preview_file(experiment_id: str, name: str, user=Depends(require_admin)):
     return FileResponse(path, media_type="video/mp4" if name == "video" else "image/jpeg")
 
 
+class DecideIn(BaseModel):
+    choice: Literal["adopt", "keep", "defer"]
+    note: str = ""
+
+
+@router.post("/{experiment_id}/decide")
+def decide(experiment_id: str, body: DecideIn, user=Depends(require_admin)) -> dict:
+    """Record what the user chose and the values before the change (§9a step ⑥, §10). Changes no config."""
+    from core.experiments import records
+    store = _store()
+    experiment = _definition(store, experiment_id)
+    try:
+        records.decide(store, experiment, body.choice, user["username"], get_settings().paths.config_dir, body.note)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    audit.log("experiment_decide", user=user["username"], target=experiment_id, result=body.choice)
+    return store.get(experiment_id)
+
+
 @router.post("/{experiment_id}/{action}")
-def move(experiment_id: str, action: Literal["start", "pause", "resume", "end"], request: Request,
+def move(experiment_id: str, action: Literal["start", "pause", "resume", "end", "queue", "unqueue"], request: Request,
          user=Depends(require_admin)) -> dict:
     store = _store()
     found = store.get(experiment_id)
     if not found:
         raise HTTPException(404, "没有这个实验")
-    if action in ("start", "resume"):
+    if action in ("start", "resume", "queue"):
+        from core.experiments import checks
         experiment = Experiment.model_validate(found["definition"])
-        problems = start_problems(experiment, store) if action == "start" else [
-            p for p in start_problems(experiment, store) if "写入位置重叠" in p]
+        problems = start_problems(experiment, store)
+        if action == "resume":
+            problems = [p for p in problems if checks.CONFLICT in p]
+        elif action == "queue":
+            problems = checks.queue_problems(problems)
         if problems:
             raise HTTPException(409, "；".join(problems))
     try:

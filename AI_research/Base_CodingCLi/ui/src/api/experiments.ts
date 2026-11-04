@@ -13,17 +13,17 @@ export type Definition = {
   guardrails?: { metric: string; better: "higher" | "lower" }[];
   stop: { per_arm: number; max_days: number };
 };
-export type ExperimentStatus = "draft" | "running" | "paused" | "ended" | "decided";
+export type ExperimentStatus = "draft" | "queued" | "running" | "paused" | "ended" | "decided";
 export type ExperimentRow = { id: string; status: ExperimentStatus; created_at: number; updated_at: number; started_at?: number | null; definition: Definition };
 export type ExperimentsOverview = { enabled: boolean; experiments: ExperimentRow[]; registry: SwitchRow[] };
 export type ExperimentDetail = ExperimentRow & { events: { kind: string; at: number; by: string }[]; start_problems: string[]; arms: { A: number; B: number } };
-export type Move = "start" | "pause" | "resume" | "end";
+export type Move = "start" | "pause" | "resume" | "end" | "queue" | "unqueue";
 
 const BASE = "/api/experiments";
 export const loadExperiments = (signal?: AbortSignal) => api<ExperimentsOverview>(BASE, { signal });
 export const loadExperiment = (id: string, signal?: AbortSignal) => api<ExperimentDetail>(`${BASE}/${encodeURIComponent(id)}`, { signal });
 export const setExperimentsEnabled = (enabled: boolean) => api<{ enabled: boolean }>(`${BASE}/settings`, { method: "PUT", body: { enabled } });
-export const createExperiment = (definition: Definition) => api<ExperimentRow>(BASE, { method: "POST", body: definition });
+export const createExperiment = (definition: Definition) => api<ExperimentRow & { duplicates?: { id: string; name: string; status: string; verdict: string | null }[] }>(BASE, { method: "POST", body: definition });
 export const moveExperiment = (id: string, action: Move) => api<ExperimentRow>(`${BASE}/${encodeURIComponent(id)}/${action}`, { method: "POST" });
 
 export type PreviewSource = { render_id: string; script_id: string; title: string; completed_at: string };
@@ -49,3 +49,9 @@ export const loadResults = (id: string, signal?: AbortSignal) => api<Results>(`$
 
 export type Suggestion = { path: string; to: unknown; column: string; column_name?: string; from?: unknown; editable: boolean; link?: string; reason?: string };
 export const loadSuggestion = (id: string, signal?: AbortSignal) => api<{ verdict: string | null; items: Suggestion[] }>(`${BASE}/${encodeURIComponent(id)}/suggestion`, { signal });
+
+export type RecordRow = { id: string; name: string; kind: "compare" | "aa"; hypothesis: string; status: ExperimentStatus; changes: Record<string, unknown>;
+  metric: string; verdict: string | null; estimate: number | null; low: number | null; high: number | null; minimum_detectable: number | null;
+  n: { A: number; B: number } | null; decision: { choice: string; label: string } | null };
+export const loadRecords = (signal?: AbortSignal) => api<{ items: RecordRow[] }>(`${BASE}/records`, { signal });
+export const decideExperiment = (id: string, choice: "adopt" | "keep" | "defer") => api<ExperimentRow>(`${BASE}/${encodeURIComponent(id)}/decide`, { method: "POST", body: { choice } });

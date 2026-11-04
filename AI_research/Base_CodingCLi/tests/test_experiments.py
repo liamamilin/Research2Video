@@ -276,7 +276,7 @@ def test_the_tab_api_is_read_only_and_for_administrators(client, web_env):
 
 #: Existing files allowed to reference the A/B module (spec §2 rule 1).
 ALLOWED = {"web/server.py", "web/services/video_workflow.py", "web/services/automation_health.py",
-           "web/services/weekly_review.py"}
+           "web/services/weekly_review.py", "web/services/assistant_tools/experiments.py"}
 _OWN = ("core/experiments/", "web/routes/experiments.py", "tests/")
 
 
@@ -805,3 +805,106 @@ def test_suggestions_link_to_the_column_editor_or_say_why_not():
     assert not card["editable"] and "配置字段" in card["reason"]
     [none] = adoption.suggestions(notes, columns, {"topic_digest"})
     assert not none["editable"] and "没有内容栏目" in none["reason"]
+
+
+# ---- phase 5: records, queue, decisions, assistant ----------------------------------------------------------------
+
+from core.experiments import checks, records  # noqa: E402
+
+
+def _ended_with_result(store, experiment, verdict="b_better"):
+    store.save(experiment, "admin")
+    store.move(experiment.id, "start", "admin")
+    store.move(experiment.id, "end", "system")
+    store.save_result(experiment.id, {"verdict": {"verdict": verdict, "minimum_detectable": 7.5},
+                                      "primary": {"metric": "cover_pass", "estimate": 9, "low": 2, "high": 16},
+                                      "n": {"A": 70, "B": 71}})
+
+
+def test_records_list_ended_experiments_and_duplicates_are_found(tmp_path):
+    store = ExperimentStore(tmp_path)
+    _ended_with_result(store, compare(id="cover_a"))
+    [row] = records.listing(store)
+    assert row["verdict"] == "b_better" and row["minimum_detectable"] == 7.5 and row["changes"] == {"cover_style": "title"}
+    again = compare(id="cover_b")
+    store.save(again, "admin")
+    assert [d["id"] for d in records.duplicates(store, again)] == ["cover_a"]
+    assert records.duplicates(store, compare(id="greet", overrides={"greeting": "你好"})) == []
+
+
+def test_deciding_records_the_choice_and_the_values_before(tmp_path, monkeypatch):
+    from core.video import content_columns
+    store = ExperimentStore(tmp_path)
+    notes = compare(id="notes1", overrides={"notes": "先讲结论"})
+    _ended_with_result(store, notes)
+    with store.connect(write=True) as db:
+        db.execute("INSERT INTO assignments VALUES ('t1','notes1','B','ai_flash',0,0,'v','s1')")
+
+    class Column:
+        name, matrix, notes, presentation, render = "AI 快讯", "ai_media", "旧方向", {}, {}
+
+    monkeypatch.setattr(content_columns, "load_all", lambda config_dir: {"ai_flash": Column()})
+    with pytest.raises(ValueError, match="未知选择"):
+        records.decide(store, notes, "maybe", "admin", "config")
+    records.decide(store, notes, "adopt", "admin", "config")
+    assert store.get("notes1")["status"] == "decided"
+    [row] = records.listing(store)
+    assert row["decision"]["choice"] == "adopt" and row["decision"]["before"] == {"ai_flash:notes": {"from": "旧方向", "to": "先讲结论"}}
+
+
+def test_deferring_keeps_the_experiment_open_and_unsettled_results_cannot_be_decided(tmp_path):
+    store = ExperimentStore(tmp_path)
+    _ended_with_result(store, compare(id="c1"))
+    records.decide(store, compare(id="c1"), "defer", "admin", "config")
+    assert store.get("c1")["status"] == "ended"
+    store.save(compare(id="c2"), "admin")
+    store.move("c2", "start", "admin")
+    with pytest.raises(ValueError, match="还没结束"):
+        records.decide(store, compare(id="c2"), "keep", "admin", "config")
+
+
+def test_a_queued_experiment_starts_when_the_conflict_ends_and_waits_for_its_preview(tmp_path):
+    from core.experiments import background
+    store = ExperimentStore(tmp_path)
+    first = compare(id="greet1", overrides={"greeting": "你好"})
+    second = compare(id="greet2", overrides={"greeting": "嗨"})
+    store.save(first, "admin")
+    store.move("greet1", "start", "admin")
+    store.save(second, "admin")
+    assert checks.queue_problems(checks.start_problems(second, store, "c", "j")) == []
+    store.move("greet2", "queue", "admin")
+    assert background.start_queued(store, "c", "j") == []  # greet1 still owns the path
+    store.move("greet1", "end", "admin")
+    assert background.start_queued(store, "c", "j") == ["greet2"]
+    assert store.get("greet2")["status"] == "running"
+    cover = compare(id="cover1")
+    store.save(cover, "admin")
+    store.move("cover1", "queue", "admin")
+    background.start_queued(store, "c", "j")
+    background.start_queued(store, "c", "j")
+    assert store.get("cover1")["status"] == "queued"
+    assert [e["kind"] for e in store.events("cover1")].count("queue_waiting") == 1
+
+
+def test_queueing_is_refused_for_problems_a_queue_cannot_wait_out(client, web_env):
+    _login(client)
+    csrf = {"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""}
+    planned = compare(id="later", overrides={"greeting_position": "after"}).model_dump()
+    client.post("/api/experiments", json=planned, headers=csrf)
+    refused = client.post("/api/experiments/later/queue", headers=csrf)
+    assert refused.status_code == 409 and "等待开发" in refused.json()["error"]["message"]
+    client.post("/api/experiments", json=compare(id="cover1").model_dump(), headers=csrf)
+    assert client.post("/api/experiments/cover1/queue", headers=csrf).json()["status"] == "queued"
+    assert client.get("/api/experiments/records").json() == {"items": []}
+    made = client.post("/api/experiments", json=compare(id="cover2").model_dump(), headers=csrf).json()
+    assert [d["id"] for d in made["duplicates"]] == ["cover1"]
+
+
+def test_the_assistant_reads_experiments_only_as_an_administrator(web_env):
+    from web.services import assistant_tools
+    tool = assistant_tools.registry()["query_experiments"]
+    assert tool.role == "admin" and not tool.write
+    tmp, _ = web_env
+    ExperimentStore(tmp / "state").save(aa("aa_first"), "admin")
+    out = tool.handler(tool.arguments.model_validate({}), None, {"username": "admin"})
+    assert out["available"] and out["current"][0]["id"] == "aa_first" and out["records"] == []

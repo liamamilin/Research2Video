@@ -83,7 +83,7 @@ class ExperimentStore:
         with self.connect(write=True) as db:
             row = db.execute("SELECT status FROM experiments WHERE id=?", (experiment.id,)).fetchone()
             if row and row[0] != "draft":
-                raise ValueError("实验开始后不能修改，请复制成新实验")
+                raise ValueError("实验已排队或已开始，不能修改；请复制成新实验")
             db.execute("INSERT INTO experiments (id, definition, status, created_at, updated_at) VALUES (?,?,?,?,?) "
                        "ON CONFLICT(id) DO UPDATE SET definition=excluded.definition, updated_at=excluded.updated_at",
                        (experiment.id, experiment.model_dump_json(), "draft", now, now))
@@ -153,8 +153,9 @@ class ExperimentStore:
         return [e for e in self.list() if e["status"] in ("running", "paused")]
 
     #: Allowed status changes: action → (from, to).
-    MOVES = {"start": (("draft",), "running"), "pause": (("running",), "paused"),
-             "resume": (("paused",), "running"), "end": (("running", "paused"), "ended")}
+    MOVES = {"start": (("draft", "queued"), "running"), "pause": (("running",), "paused"),
+             "resume": (("paused",), "running"), "end": (("running", "paused"), "ended"),
+             "queue": (("draft",), "queued"), "unqueue": (("queued",), "draft"), "decide": (("ended",), "decided")}
 
     def move(self, experiment_id: str, action: str, by: str, detail: dict | None = None) -> dict:
         """Change an experiment's status, recording an event. Checks belong to the caller (web/routes)."""

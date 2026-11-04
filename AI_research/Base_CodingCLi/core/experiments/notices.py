@@ -12,6 +12,7 @@ TITLES = {
     "harm_hint": "实验「{name}」建议提前停止",
     "endpoint": "实验「{name}」到达终点，进入收尾期",
     "verdict": "实验「{name}」有结论了",
+    "queue_waiting": "排队的实验「{name}」轮到了，但还没确认预览",
 }
 PREVIEW = {"done": "实验「{name}」的预览出好了，可以去看", "failed": "实验「{name}」的预览没出成"}
 
