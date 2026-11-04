@@ -46,3 +46,6 @@ export type Results = {
   videos: { script_id: string; arm: "A" | "B"; bvid: string; state: "measured" | "pending" | "missing" }[];
 };
 export const loadResults = (id: string, signal?: AbortSignal) => api<Results>(`${BASE}/${encodeURIComponent(id)}/results`, { signal });
+
+export type Suggestion = { path: string; to: unknown; column: string; column_name?: string; from?: unknown; editable: boolean; link?: string; reason?: string };
+export const loadSuggestion = (id: string, signal?: AbortSignal) => api<{ verdict: string | null; items: Suggestion[] }>(`${BASE}/${encodeURIComponent(id)}/suggestion`, { signal });

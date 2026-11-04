@@ -161,6 +161,9 @@ def render(state_dir: str | Path, preview_id: str, built: dict, client, *,
         logger.warning("preview %s: visual preparation failed (%s); using the request as built", preview_id,
                        type(exc).__name__)
         payload = copy.deepcopy(built["request"])
+    from web.services import opening_card  # the same post-visuals step production runs in video_visuals.freeze
+    shadow.update(version=built.get("version"), title=built.get("title") or "")
+    payload, _ = opening_card.apply(payload, shadow, built.get("context"), folder(state_dir, preview_id) / "opening-copy.json")
     if payload.get("input_mode") != "narration":
         payload["source_text"] = built["source_text"]
     payload["idempotency_key"] = f"experiment-preview:{preview_id}"
@@ -233,7 +236,8 @@ def run_next(state_dir: str | Path, client=None) -> Optional[str]:
         script = video_store.get_script(row["source_script_id"])
         if script is None:
             raise RuntimeError("找不到预览用的稿件")
-        built = build_request(b_script(script, experiment))
+        shown = b_script(script, experiment)
+        built = {**build_request(shown), "context": shown["content_context"]}
         if client is None:
             from web.services.video_render import get_client
             client = get_client()

@@ -119,6 +119,24 @@ def results_view(experiment_id: str, user=Depends(require_admin)) -> dict:
     return {**live, "frozen": False}
 
 
+@router.get("/{experiment_id}/suggestion")
+def suggestion(experiment_id: str, user=Depends(require_admin)) -> dict:
+    """「建议改动」: offered once the conclusion is「B 更好」; the user saves it on the existing config page."""
+    from core.experiments import adoption
+    from core.video import content_columns
+    store = _store()
+    experiment = _definition(store, experiment_id)
+    frozen = store.result(experiment_id) or {}
+    verdict = (frozen.get("verdict") or {}).get("verdict")
+    if verdict != "b_better":
+        return {"verdict": verdict, "items": []}
+    settings = get_settings()
+    columns = {k: {"name": c.name, "matrix": c.matrix, "notes": c.notes, "presentation": c.presentation, "render": c.render}
+               for k, c in content_columns.load_all(settings.paths.config_dir).items()}
+    used = {a["column_key"] for a in store.assignments(experiment_id) if a["arm"] == "B"}
+    return {"verdict": verdict, "items": adoption.suggestions(experiment, columns, used)}
+
+
 class PreviewIn(BaseModel):
     source_render_id: str | None = None
 

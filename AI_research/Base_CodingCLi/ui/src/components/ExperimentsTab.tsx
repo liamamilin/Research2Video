@@ -1,5 +1,6 @@
+import { Link } from "react-router-dom";
 import { Fragment, useCallback, useState } from "react";
-import { confirmPreview, createExperiment, loadExperiment, loadExperiments, loadPreview, loadResults, moveExperiment, requestPreview, setExperimentsEnabled,
+import { confirmPreview, createExperiment, loadExperiment, loadExperiments, loadPreview, loadResults, loadSuggestion, moveExperiment, requestPreview, setExperimentsEnabled,
   type Definition, type ExperimentDetail, type ExperimentRow, type Move, type SwitchRow } from "@/api/experiments";
 import { usePageResource } from "@/lib/use-page-resource";
 import { ErrorState } from "./ErrorState";
@@ -110,6 +111,17 @@ function Preview({ id }: { id: string }) {
 const VERDICT = { running: "进行中，不下结论", srm: "分组失衡，结论不可信", b_better: "B 更好", b_worse: "B 更差", no_difference: "没有分出差异" } as const;
 const fmt = (v: number | null | undefined, digits = 1) => v == null ? "—" : (Math.round(v * 10 ** digits) / 10 ** digits).toString();
 
+function SuggestionPanel({ id }: { id: string }) {
+  const load = useCallback((signal: AbortSignal) => loadSuggestion(id, signal), [id]);
+  const { data } = usePageResource(load);
+  if (!data?.items.length) return null;
+  return <div className="border-t border-border pt-2 mt-2 space-y-1" aria-label="建议改动">
+    <p className="font-medium">建议改动（在栏目配置页确认保存后才生效）</p>
+    {data.items.map((s, i) => <p key={i}>{s.editable && s.link ? <Link className="text-accent hover:underline" to={s.link}>
+      去「{s.column_name}」栏目：{s.path} 从 {JSON.stringify(s.from ?? "")} 改成 {JSON.stringify(s.to)}</Link> : <span>{s.path} → {JSON.stringify(s.to)}：{s.reason}</span>}</p>)}
+  </div>;
+}
+
 function ResultsPanel({ id }: { id: string }) {
   const load = useCallback((signal: AbortSignal) => loadResults(id, signal), [id]);
   const { data, error } = usePageResource(load);
@@ -124,6 +136,7 @@ function ResultsPanel({ id }: { id: string }) {
     <p>样本：A {data.n.A} 条（有数据 {data.with_data.A}，缺失 {data.missing.A}），B {data.n.B} 条（有数据 {data.with_data.B}，缺失 {data.missing.B}）；分组检查 p = {fmt(data.srm_p, 3)}</p>
     <p>主要指标 {METRICS[p.metric]?.label ?? p.metric}：B − A = {fmt(p.estimate)}，90% 区间 [{fmt(p.low)}, {fmt(p.high)}]{data.verdict.verdict === "running" ? "（未到终点）" : ""}</p>
     {data.guardrails.map(g => <p key={g.metric} className={g.status === "worse" ? "text-danger" : undefined}>护栏 {g.metric}：{fmt(g.estimate, 2)} [{fmt(g.low, 2)}, {fmt(g.high, 2)}]{g.status === "worse" ? " 明显变差" : g.status === "hint" ? " 变差，样本不足以确认" : ""}</p>)}
+    {data.frozen && data.verdict.verdict === "b_better" ? <SuggestionPanel id={id} /> : null}
     <p className="text-text-muted">已跑 {fmt(data.active_days)} 天（不含暂停）；时长中位数 A {fmt(data.median_duration.A, 0)} 秒 / B {fmt(data.median_duration.B, 0)} 秒；24 小时播放中位数 A {fmt(data.median_views.A, 0)} / B {fmt(data.median_views.B, 0)}（仅供参考）{data.applied_rate != null ? `；B 组实际生效率 ${Math.round(data.applied_rate * 100)}%` : ""}</p>
   </div>;
 }

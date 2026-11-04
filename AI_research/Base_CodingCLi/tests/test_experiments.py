@@ -724,3 +724,84 @@ def test_cover_previews_draw_both_styles(tmp_path, monkeypatch):
     monkeypatch.setattr(cover_module, "make_covers", fake_make)
     files = preview.covers(tmp_path, "p1", {"id": "r1", "title": "t"}, "t", "title")
     assert files == ["cover-a.jpg", "cover-b.jpg"] and drawn[0]["big"] == "差十倍" and drawn[1] is None
+
+
+# ---- phase 4: opening card and suggested change -------------------------------------------------------------------
+
+from core.experiments import adoption  # noqa: E402
+
+
+def _payload():
+    return {"input_mode": "narration", "packaging": {"preset": "common", "intro": {"component": "stinger", "title": "AI 快讯"}}}
+
+
+def test_the_opening_card_puts_the_cover_number_on_the_intro(monkeypatch, tmp_path):
+    from core.social import cover_copy
+    from web.services import opening_card
+    monkeypatch.setattr(cover_copy, "for_render", lambda render, title, cache: {"big": "差十倍", "figure": "$600 vs $60 / 月", "topic": "订阅"})
+    on = {"presentation": {"opening_card": True}}
+    out, note = opening_card.apply(_payload(), {"id": "r1"}, on, tmp_path / "c.json")
+    assert out["packaging"]["intro"] == {"component": "stinger", "enabled": True, "seconds": 2.0, "title": "差十倍", "subtitle": "$600 vs $60 / 月"}
+    assert note["applied"] is True
+    same, empty = opening_card.apply(_payload(), {"id": "r1"}, {}, tmp_path / "c.json")
+    assert same == _payload() and empty == {}
+
+
+def test_the_opening_card_falls_back_to_the_usual_intro(monkeypatch, tmp_path):
+    from core.social import cover_copy
+    from web.services import opening_card
+    on = {"presentation": {"opening_card": True}}
+    monkeypatch.setattr(cover_copy, "for_render", lambda *a: None)
+    out, note = opening_card.apply(_payload(), {"id": "r1"}, on, tmp_path / "c.json")
+    assert out == _payload() and note["applied"] is False
+    layered = {"input_mode": "narration", "production_context": {
+        "content_recipe": {"settings": {"packaging": {"preset": "common", "label": "实用讲解", "intro": {"title": "旧标题"}}}},
+        "matrix": {"settings": {"packaging": {"label": "AI 产品"}}}}}
+    monkeypatch.setattr(cover_copy, "for_render", lambda *a: {"big": "差十倍", "figure": "", "topic": "订阅"})
+    out, note = opening_card.apply(layered, {"id": "r1"}, on, tmp_path / "c.json")
+    assert out["packaging"] == {"preset": "common", "label": "AI 产品", "intro": {"title": "差十倍", "subtitle": "订阅", "enabled": True, "seconds": 2.0}}
+    assert out["production_context"] == layered["production_context"] and note["applied"]
+    monkeypatch.setattr(cover_copy, "for_render", lambda *a: None)
+    no_intro = {"input_mode": "narration", "packaging": {"enabled": False}}
+    assert opening_card.apply(no_intro, {"id": "r1"}, on, tmp_path / "c.json")[1]["reason"] == "这个配方没有片头"
+    monkeypatch.setattr(cover_copy, "for_render", lambda *a: (_ for _ in ()).throw(RuntimeError("model down")))
+    assert opening_card.apply(_payload(), {"id": "r1"}, on, tmp_path / "c.json")[0] == _payload()
+
+
+def test_freeze_applies_the_opening_card_before_the_digest(monkeypatch):
+    from core.video import store as video_store
+    from web.services import opening_card, video_visuals
+    monkeypatch.setattr(video_visuals, "prepare", lambda render, client: (_payload(), {}))
+    monkeypatch.setattr(video_store, "get_script", lambda sid: {"content_context": {"presentation": {"opening_card": True}}})
+    monkeypatch.setattr(opening_card, "apply", lambda payload, render, context, cache: (
+        {**payload, "packaging": {**payload["packaging"], "intro": {"title": "差十倍"}}}, {"applied": True}))
+    frozen = {}
+    monkeypatch.setattr(video_store, "freeze_render_submission", lambda rid, payload, audit: frozen.update(payload=payload, audit=audit))
+    video_visuals.freeze({"id": "r1", "script_id": "s1", "request": _payload()}, client=None)
+    from core.video import visual_materials
+    assert frozen["payload"]["packaging"]["intro"]["title"] == "差十倍"
+    assert frozen["audit"]["opening_card"] == {"applied": True}
+    assert frozen["audit"]["submission_sha256"] == visual_materials.digest(frozen["payload"])
+
+
+def test_opening_card_applied_is_read_from_the_render_audit(tmp_path):
+    with sqlite3.connect(tmp_path / "video.db") as db:
+        db.execute("CREATE TABLE renders (id TEXT, script_id TEXT, status TEXT, visuals TEXT)")
+        db.execute("INSERT INTO renders VALUES ('r1','s1','COMPLETED',?)", (json.dumps({"opening_card": {"applied": True}}),))
+        db.execute("INSERT INTO renders VALUES ('r2','s2','COMPLETED',?)", (json.dumps({"opening_card": {"applied": False}}),))
+    card = compare(id="card", overrides={"presentation.opening_card": True})
+    assert results.applied(card, "s1", {}, tmp_path) is True
+    assert results.applied(card, "s2", {}, tmp_path) is False
+    assert results.applied(card, "s9", {}, tmp_path) is None
+
+
+def test_suggestions_link_to_the_column_editor_or_say_why_not():
+    columns = {"ai_flash": {"name": "AI 快讯", "matrix": "ai_media", "notes": "旧方向", "presentation": {}, "render": {}}}
+    notes = compare(id="n1", overrides={"notes": "先讲数字"})
+    [item] = adoption.suggestions(notes, columns, {"ai_flash", "topic_digest"})
+    assert item["editable"] and item["from"] == "旧方向" and item["to"] == "先讲数字"
+    assert item["link"].startswith("/matrices/ai_media?tab=columns&column=ai_flash&prefill=") and "experiment=n1" in item["link"]
+    [card] = adoption.suggestions(compare(id="c1", overrides={"presentation.opening_card": True}), columns, {"ai_flash"})
+    assert not card["editable"] and "配置字段" in card["reason"]
+    [none] = adoption.suggestions(notes, columns, {"topic_digest"})
+    assert not none["editable"] and "没有内容栏目" in none["reason"]

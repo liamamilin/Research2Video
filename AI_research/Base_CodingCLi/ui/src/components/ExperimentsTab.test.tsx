@@ -5,7 +5,7 @@ import { createExperiment, loadExperiments, moveExperiment, setExperimentsEnable
 import { ExperimentBadge } from "./ExperimentBadge";
 import { ExperimentsTab } from "./ExperimentsTab";
 
-vi.mock("@/api/experiments", () => ({ loadExperiments: vi.fn(), loadExperiment: vi.fn(), createExperiment: vi.fn(), moveExperiment: vi.fn(), setExperimentsEnabled: vi.fn(), loadPreview: vi.fn(), requestPreview: vi.fn(), confirmPreview: vi.fn() }));
+vi.mock("@/api/experiments", () => ({ loadExperiments: vi.fn(), loadExperiment: vi.fn(), createExperiment: vi.fn(), moveExperiment: vi.fn(), setExperimentsEnabled: vi.fn(), loadPreview: vi.fn(), requestPreview: vi.fn(), confirmPreview: vi.fn(), loadResults: vi.fn(), loadSuggestion: vi.fn() }));
 afterEach(cleanup);
 beforeEach(() => { vi.mocked(createExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(moveExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(setExperimentsEnabled).mockResolvedValue({ enabled: true }); });
 

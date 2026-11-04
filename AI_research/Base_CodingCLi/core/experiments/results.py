@@ -155,7 +155,23 @@ def applied(experiment: Experiment, script_id: str, script: dict, state_dir: Pat
                 except (OSError, ValueError):
                     pass
         return (not used) if value == "title" else used
+    if paths == ["presentation.opening_card"]:
+        flags = _opening_flags(state_dir / "video.db", script_id)
+        return any(flags) if flags else None
     return None
+
+
+def _opening_flags(video_db: Path, script_id: str) -> list[bool]:
+    if not video_db.is_file():
+        return []
+    with _ro(video_db) as db:
+        rows = db.execute("SELECT visuals FROM renders WHERE script_id=? AND status='COMPLETED'", (script_id,)).fetchall()
+    out = []
+    for r in rows:
+        note = (json.loads(r["visuals"] or "{}") or {}).get("opening_card")
+        if isinstance(note, dict) and "applied" in note:
+            out.append(bool(note["applied"]))
+    return out
 
 
 def _renders_of(video_db: Path, script_id: str) -> set[str]:
