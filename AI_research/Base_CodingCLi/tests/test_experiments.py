@@ -619,8 +619,9 @@ def _results_world(tmp_path, n=6, start=None):
             adb.execute("INSERT INTO analytics_snapshots VALUES (?,?,?)", (bvid, pub + h * 3600, json.dumps({"view": 10 + h})))
     for k in range(12):  # history before the start, for the length fit
         bvid = f"BVh{k:09d}"
-        adb.execute("INSERT INTO analytics_videos VALUES (?,?,?,1)", (bvid, start - 86400 * (k + 1), 60 + 60 * k))
+        adb.execute("INSERT INTO analytics_videos VALUES (?,?,?,1)", (bvid, start - 86400 * (k + 3), 60 + 60 * k))
         adb.execute("INSERT INTO analytics_watch VALUES (?,?,?,?)", (bvid, "h", json.dumps({"completion": 50 - 3 * k, "avg_seconds": 40}), start))
+        adb.execute("INSERT INTO analytics_watch VALUES (?,?,?,?)", (bvid, "h2", json.dumps({"completion": 1, "avg_seconds": 40}), start + 1))
     vdb.commit(); adb.commit(); vdb.close(); adb.close()
     return store
 
@@ -1039,3 +1040,46 @@ def test_the_schema_is_ensured_once_per_database(tmp_path, monkeypatch):
     monkeypatch.setattr(sqlite_util, "connect", spy)
     ExperimentStore(tmp_path).enabled()
     assert len(scripts) == 1  # only the read itself, no second schema pass
+
+
+def test_the_length_fit_takes_one_reading_per_video_after_48_hours(tmp_path):
+    _results_world(tmp_path)
+    fit = results.duration_fit(tmp_path / "platform_analytics.db", time.time() - 20 * 86400)
+    assert fit["n"] == 12 and fit["intercept"] > 10  # the later reading of 1% is not used
+
+
+def test_scripts_assigned_just_before_a_pause_or_the_end_are_still_bound(tmp_path):
+    store = ExperimentStore(tmp_path)
+    store.save(compare(), "admin")
+    now = time.time()
+    with store.connect(write=True) as db:
+        db.execute("UPDATE experiments SET status='ended', created_at=? WHERE id='cover_title'", (now - 3600,))
+        db.execute("INSERT INTO assignments VALUES (?,?,?,?,?,?,?,NULL)", ("t1", "cover_title", "B", "ai_flash", 0, now, "abc"))
+    stamp = time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(now))
+    _video_db(tmp_path / "video.db", [("s1", stamp, {"experiments": [{"id": "cover_title", "arm": "B", "token": "t1"}]})])
+    assert background.reconcile(store, tmp_path / "video.db") == 1
+    store.save_result("cover_title", {"verdict": {"verdict": "no_difference"}})
+    with store.connect(write=True) as db:
+        db.execute("UPDATE assignments SET script_id=NULL")
+    assert background.reconcile(store, tmp_path / "video.db") == 0  # frozen: nothing changes any more
+
+
+def test_the_frozen_result_keeps_the_metric_for_the_video_list(tmp_path):
+    store = _results_world(tmp_path)
+    results.evaluate_all(tmp_path)
+    results.evaluate_all(tmp_path, now=time.time() + 8 * 86400)
+    videos = store.result("aa_first")["videos"]
+    assert all(isinstance(v["completion_adjusted"], float) for v in videos)
+
+
+def test_editing_the_draft_after_confirming_needs_a_new_preview(tmp_path, monkeypatch):
+    store, queued = _queue(tmp_path, monkeypatch, compare(id="cov", overrides={"cover_style": "title"}))
+    with store.connect(write=True) as db:
+        db.execute("UPDATE previews SET status='done'")
+    preview.confirm(store, "cov", "admin")
+    assert store.preview_confirmed("cov")
+    time.sleep(0.01)
+    store.save(compare(id="cov", overrides={"cover_style": "title"}, share_b=30), "admin")
+    assert not store.preview_confirmed("cov")
+    preview.confirm(store, "cov", "admin")  # confirming the old preview again is not enough
+    assert not store.preview_confirmed("cov")

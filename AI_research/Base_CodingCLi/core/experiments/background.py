@@ -76,9 +76,15 @@ def tokens_on_scripts(video_db: str | Path, since: float) -> dict[str, str]:
 
 
 def reconcile(store: ExperimentStore, video_db: str | Path) -> int:
-    """Bind tokens to scripts for every running experiment. Returns how many assignments were bound."""
+    """Bind tokens to scripts for every experiment whose result is still open. Returns how many were bound.
+
+    Paused and ended ones are included: a script assigned in the last minutes before a pause or the end point is
+    created after the move, and must still be counted (§7).
+    """
     bound = 0
-    for experiment in store.running():
+    for experiment in store.list():
+        if experiment["status"] not in ("running", "paused", "ended") or store.result(experiment["id"]):
+            continue
         pending = set(store.unbound_tokens(experiment["id"]))
         if not pending:
             continue

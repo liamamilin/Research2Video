@@ -113,14 +113,18 @@ def duration_fit(analytics_db: Path, before: float) -> Optional[dict]:
     """The length → completion line from videos published before the experiment started (§8)."""
     if not analytics_db.is_file():
         return None
-    points = []
+    points: dict[str, tuple] = {}
     with _ro(analytics_db) as db:
-        for r in db.execute("SELECT v.duration, w.data FROM analytics_videos v JOIN analytics_watch w ON w.bvid=v.bvid "
-                            "WHERE v.pubdate < ? AND v.duration > 0 ORDER BY w.collected_at", (before,)):
+        # the same reading the experiment uses (§8): one per video, the first per-video one 48 hours after publishing
+        for r in db.execute("SELECT v.bvid, v.duration, w.data FROM analytics_videos v JOIN analytics_watch w "
+                            "ON w.bvid=v.bvid WHERE v.pubdate < ? AND v.duration > 0 AND w.collected_at >= v.pubdate + ? "
+                            "ORDER BY w.collected_at", (before, READ_AFTER)):
+            if r["bvid"] in points:
+                continue
             data = json.loads(r["data"] or "{}")
             if data.get("avg_seconds") is not None and data.get("completion") is not None:
-                points.append((r["duration"], data["completion"]))
-    return an.fit_duration(points)
+                points[r["bvid"]] = (r["duration"], data["completion"])
+    return an.fit_duration(points.values())
 
 
 # ---- time ---------------------------------------------------------------------------------------------------------
@@ -377,7 +381,8 @@ def evaluate_all(state_dir: str | Path, now: float | None = None) -> None:
                 store._event(db, row["id"], "endpoint", "system", {"with_data": result["with_data"]})
         elif row["status"] == "ended" and result["settled"]:
             slim = {k: v for k, v in result.items() if k != "videos"}
-            store.save_result(row["id"], {**slim, "videos": [{k: v.get(k) for k in ("script_id", "arm", "bvid", "state")}
-                                                             for v in result["videos"]]})
+            experiment = Experiment.model_validate(row["definition"])
+            keep = ("script_id", "arm", "bvid", "state", experiment.metric.primary, *(g.metric for g in experiment.guardrails))
+            store.save_result(row["id"], {**slim, "videos": [{k: v.get(k) for k in keep} for v in result["videos"]]})
             with store.connect(write=True) as db:
                 store._event(db, row["id"], "verdict", "system", {"verdict": result["verdict"]["verdict"]})

@@ -149,9 +149,17 @@ class ExperimentStore:
     def preview_confirmed(self, experiment_id: str) -> bool:
         """Whether the user looked at a B preview and confirmed it (§9a step ③)."""
         with self.connect() as db:
-            row = db.execute("SELECT 1 FROM events WHERE experiment_id=? AND kind='preview_confirmed'",
-                             (experiment_id,)).fetchone()
-        return bool(row)
+            saved = db.execute("SELECT MAX(at) FROM events WHERE experiment_id=? AND kind IN ('created','saved')",
+                               (experiment_id,)).fetchone()[0] or 0
+            rows = db.execute("SELECT detail FROM events WHERE experiment_id=? AND kind='preview_confirmed' AND at>=?",
+                              (experiment_id, saved)).fetchall()
+            for (detail,) in rows:
+                # the preview shown must have been asked for after the last edit, so it shows today's B
+                asked = db.execute("SELECT requested_at FROM previews WHERE id=?",
+                                   (json.loads(detail or "{}").get("preview"),)).fetchone()
+                if asked and asked[0] >= saved:
+                    return True
+        return False
 
     def active(self) -> list[dict]:
         """Running or paused: both still own their write paths (§7「冲突」)."""
