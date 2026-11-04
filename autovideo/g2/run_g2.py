@@ -32,21 +32,38 @@ from g2.workspace import project_path
 #: The model service for every planning call: DeepSeek unless ``.env`` says otherwise (g2/llm_provider.py).
 PROVIDER = llm_provider.load(PROJECT / ".env")
 MODEL = PROVIDER.model
-#: ``[model, *fallbacks]``; a 402 (out of balance or quota) moves to the next one for the rest of the run.
-MODELS = [PROVIDER.model, *PROVIDER.fallback_models]
+#: Service+model pairs, in order (``llm_provider.chain``): the chosen one, its same-service fallbacks, then other
+#: services. A model that cannot serve (``SWITCH_HTTP_STATUSES``, or retries used up) moves the rest of the run to the
+#: next pair; ``PROVIDER`` and the values read from it then follow the pair in use.
+CHAIN = llm_provider.chain(PROVIDER, PROJECT / ".env") if not PROVIDER.error else [PROVIDER]
 _ACTIVE_MODEL = 0
+#: Statuses that belong to the model or the account's access to it: out of balance, key refused, model missing or gone.
+SWITCH_HTTP_STATUSES = {401, 402, 403, 404, 410}
 
 
 def active_model() -> str:
-    return MODELS[min(_ACTIVE_MODEL, len(MODELS) - 1)]
+    return CHAIN[min(_ACTIVE_MODEL, len(CHAIN) - 1)].model
 
 
 def _next_model() -> bool:
-    global _ACTIVE_MODEL
-    if _ACTIVE_MODEL + 1 >= len(MODELS):
+    """Move to the next pair in ``CHAIN``; False when none is left. Another service brings its own address, key
+    variable, headers, request style, prices and error codes."""
+    global _ACTIVE_MODEL, PROVIDER, DEEPSEEK_URL, LLM_INPUT_PER_M, LLM_OUTPUT_PER_M, MAX_TOKENS_PER_CALL
+    if _ACTIVE_MODEL + 1 >= len(CHAIN):
         return False
     _ACTIVE_MODEL += 1
+    PROVIDER = CHAIN[_ACTIVE_MODEL]
+    DEEPSEEK_URL = PROVIDER.url
+    LLM_INPUT_PER_M, LLM_OUTPUT_PER_M = PROVIDER.input_per_m, PROVIDER.output_per_m
+    MAX_TOKENS_PER_CALL = PROVIDER.max_tokens
     return True
+
+
+def _switch_note(previous: llm_provider.Provider, why: str) -> None:
+    where = f"{previous.label} → {PROVIDER.label}" if previous.base_url != PROVIDER.base_url else PROVIDER.label
+    print(f"{where}: {previous.model} {why}; continuing with {active_model()}", flush=True)
+    append_log(LOGS / "model-switches.jsonl", {"from_provider": previous.name, "from_model": previous.model,
+                                                "to_provider": PROVIDER.name, "to_model": active_model(), "reason": why})
 
 DEEPSEEK_URL = PROVIDER.url  # the name predates other providers
 LLM_INPUT_PER_M, LLM_OUTPUT_PER_M = PROVIDER.input_per_m, PROVIDER.output_per_m
@@ -367,8 +384,9 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
         write_json(response_path, error)
         record_failed_request("HTTPError", http_status=exc.code)
         exc.close()
-        if exc.code == 402 and _next_model():
-            print(f"{PROVIDER.label}: {MODELS[_ACTIVE_MODEL - 1]} is out of balance/quota (HTTP 402); continuing with {active_model()}", flush=True)
+        previous = PROVIDER
+        if exc.code in SWITCH_HTTP_STATUSES and _next_model():
+            _switch_note(previous, f"answered HTTP {exc.code}")
             return deepseek_json_call(stage, messages, schema, attempt, _request_no=_request_no + 1)
         if exc.code in RETRYABLE_HTTP_STATUSES and _http_attempt <= len(HTTP_RETRY_DELAYS) and len(CALL_RECORDS) < MAX_TOTAL_CALLS:
             delay = HTTP_RETRY_DELAYS[_http_attempt - 1]
@@ -379,6 +397,9 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
             time.sleep(delay)
             return deepseek_json_call(stage, messages, schema, attempt, _http_attempt=_http_attempt + 1,
                                       _request_no=_request_no + 1)
+        if (exc.code == 429 or exc.code in RETRYABLE_HTTP_STATUSES) and len(CALL_RECORDS) < MAX_TOTAL_CALLS and _next_model():
+            _switch_note(previous, f"kept failing (HTTP {exc.code})")
+            return deepseek_json_call(stage, messages, schema, attempt, _request_no=_request_no + 1)
         code = PROVIDER.code("AUTH_FAILED" if exc.code in {401, 403} else ("RATE_LIMIT" if exc.code == 429 else "HTTP_ERROR"))
         raise G2Fault(code, f"{PROVIDER.label} returned HTTP {exc.code}; response body and Authorization header were omitted") from exc
     except (urllib.error.URLError, ConnectionError, TimeoutError, http.client.IncompleteRead) as exc:
@@ -399,7 +420,11 @@ def deepseek_json_call(stage: str, messages: list[dict[str, str]], schema: dict,
             time.sleep(delay)
             return deepseek_json_call(stage, messages, schema, attempt, _http_attempt=_http_attempt + 1,
                                       _request_no=_request_no + 1)
-        code = PROVIDER.code("TIMEOUT" if isinstance(reason, TimeoutError) else "UNAVAILABLE")
+        previous = PROVIDER
+        if transient and len(CALL_RECORDS) < MAX_TOTAL_CALLS and _next_model():
+            _switch_note(previous, f"kept failing ({type(exc).__name__})")
+            return deepseek_json_call(stage, messages, schema, attempt, _request_no=_request_no + 1)
+        code = previous.code("TIMEOUT" if isinstance(reason, TimeoutError) else "UNAVAILABLE")
         raise G2Fault(code, f"{PROVIDER.label} request failed ({type(exc).__name__}); no key or response body was logged") from exc
     except json.JSONDecodeError as exc:
         error = {"call_id": call_id, "provider": PROVIDER.name, "error_type": "InvalidJSONResponse",
