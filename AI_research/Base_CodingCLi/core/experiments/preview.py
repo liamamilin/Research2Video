@@ -187,13 +187,34 @@ def render(state_dir: str | Path, preview_id: str, built: dict, client, *,
     return saved
 
 
+def covers(state_dir: str | Path, preview_id: str, render: dict, title: str, b_style: str) -> list[str]:
+    """Both covers for one finished render: today's style as A, B's style as B (no AutoVideo involved)."""
+    from core.social import cover_copy
+    from core.social.cover import make_covers
+    from web.services import bilibili, video_render
+    video = video_render.safe_file(render, "video.mp4")
+    if video is None:
+        raise RuntimeError("这条视频的成片文件不在本机（可能已归档），换一条")
+    dest = folder(state_dir, preview_id)
+    dest.mkdir(parents=True, exist_ok=True)
+    saved = []
+    for arm, style in (("a", "number"), ("b", b_style)):
+        copy = None if style == "title" else cover_copy.for_render(render, title, dest / "copy.json")
+        made = make_covers(video, title, {"landscape": dest / f"cover-{arm}.jpg"}, bilibili.ffmpeg_binary(), copy)
+        if made.get("landscape"):
+            saved.append(f"cover-{arm}.jpg")
+    if len(saved) != 2:
+        raise RuntimeError("封面没有画出来")
+    return saved
+
+
 def run_next(state_dir: str | Path, client=None) -> Optional[str]:
-    """Run the oldest queued render preview if production is idle. Returns its id, or None."""
+    """Run the oldest queued preview: covers at once, a render only while production is idle. Returns its id."""
     store = ExperimentStore(state_dir)
     with store.connect() as db:
-        row = db.execute("SELECT * FROM previews WHERE status='requested' AND kind='render' ORDER BY requested_at "
+        row = db.execute("SELECT * FROM previews WHERE status='requested' ORDER BY kind='render', requested_at "
                          "LIMIT 1").fetchone()
-    if not row or not production_idle(state_dir):
+    if not row or (row["kind"] == "render" and not production_idle(state_dir)):
         return None
     preview_id = row["id"]
     _update(store, preview_id, status="running")
@@ -201,6 +222,14 @@ def run_next(state_dir: str | Path, client=None) -> Optional[str]:
         found = store.get(row["experiment_id"])
         experiment = Experiment.model_validate(found["definition"])
         from core.video import store as video_store
+        if row["kind"] == "cover":
+            render_row = video_store.get_render(row["source_render_id"])
+            if render_row is None:
+                raise RuntimeError("找不到预览用的出片")
+            files = covers(state_dir, preview_id, render_row, render_row.get("title") or "",
+                           str(experiment.arms["B"].overrides.get("cover_style", "number")))
+            _update(store, preview_id, status="done", files=files, finished_at=time.time())
+            return preview_id
         script = video_store.get_script(row["source_script_id"])
         if script is None:
             raise RuntimeError("找不到预览用的稿件")

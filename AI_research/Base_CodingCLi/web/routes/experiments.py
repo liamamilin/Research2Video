@@ -106,6 +106,19 @@ def detail(experiment_id: str, user=Depends(require_admin)) -> dict:
             "arms": {arm: sum(1 for a in assignments if a["arm"] == arm) for arm in ("A", "B")}}
 
 
+@router.get("/{experiment_id}/results")
+def results_view(experiment_id: str, user=Depends(require_admin)) -> dict:
+    """Live numbers, or the frozen snapshot once the wind-down is over (§8). Reading never writes."""
+    from core.experiments import results
+    store = _store()
+    _definition(store, experiment_id)
+    frozen = store.result(experiment_id)
+    if frozen:
+        return {**frozen, "frozen": True}
+    live = results.evaluate(store, experiment_id, get_settings().paths.state_dir)
+    return {**live, "frozen": False}
+
+
 class PreviewIn(BaseModel):
     source_render_id: str | None = None
 
@@ -126,7 +139,9 @@ def preview_state(experiment_id: str, user=Depends(require_admin)) -> dict:
     return {"kind": experiment.preview_kind(), "preview": shown, "confirmed": store.preview_confirmed(experiment_id),
             "sources": preview.sources(get_settings().paths.state_dir, experiment),
             "a_video": f"/api/video/renders/{shown['source_render_id']}/files/video.mp4" if shown else None,
-            "b_video": f"/api/experiments/{experiment_id}/preview/video" if shown and "video.mp4" in shown["files"] else None}
+            "b_video": f"/api/experiments/{experiment_id}/preview/video" if shown and "video.mp4" in shown["files"] else None,
+            "covers": {arm: f"/api/experiments/{experiment_id}/preview/cover-{arm}" for arm in ("a", "b")}
+            if shown and "cover-b.jpg" in shown["files"] else None}
 
 
 @router.post("/{experiment_id}/preview", status_code=202)

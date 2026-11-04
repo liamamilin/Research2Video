@@ -49,6 +49,7 @@ def _gather(config_dir: str, collector, uid: str) -> list[dict]:
                        "structure": weekly_review.structure(str(fields.get("推荐结构") or "")),
                        # uploaded outside the queue (no upload row): its cover is unknown
                        "cover": covers.get(publication.get("render_id") or "", ""),
+                       "experiments": (script.get("content_context") or {}).get("experiments") or [],
                        "watch": watch.get(row["bvid"]) or {}})
     return videos
 
@@ -71,7 +72,18 @@ def load(config_dir: str, state_dir: str, start: Optional[float] = None, stage: 
             return {"connected": True, "missing": True, "start": start, "weeks": weeks, "saved": saved}
         return {"connected": True, **kept, "weeks": weeks, "saved": saved}
     return {"connected": True, "weeks": weeks, "saved": saved, "stage": "",
-            **weekly_review.review(_gather(config_dir, collector, uid), start, now)}
+            **weekly_review.review(_gather(config_dir, collector, uid), start, now),
+            "experiments": _experiments(state_dir, start)}
+
+
+def _experiments(state_dir: str, start: float) -> list[dict]:
+    """「实验进展」(spec/ab-testing.md §9): read-only, and empty whenever the A/B module cannot answer."""
+    try:
+        from core.experiments import progress
+        return progress.week(state_dir, start, start + 7 * 86400)
+    except Exception:  # noqa: BLE001 - the review never depends on the A/B module
+        logger.warning("experiment progress unavailable", exc_info=True)
+        return []
 
 
 def archive_due(config_dir: str, state_dir: str, now: Optional[float] = None) -> list[tuple[float, str]]:

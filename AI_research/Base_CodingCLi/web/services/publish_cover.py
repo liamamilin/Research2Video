@@ -38,10 +38,22 @@ def publish_covers(render: dict, title: str, *, portrait: bool = False) -> dict[
             missing[orientation] = dest
     video = video_render.safe_file(render, 'video.mp4')
     if missing and video is not None:
-        copy = cover_copy.for_render(render, title, folder / f"{render['id']}-{key}-copy.json")
+        # the script's frozen cover style (default: number-led); "title" keeps the title layout and asks no model
+        copy = None if cover_style(render) == 'title' else \
+            cover_copy.for_render(render, title, folder / f"{render['id']}-{key}-copy.json")
         result.update(make_covers(video, title, missing, bilibili.ffmpeg_binary(), copy))
     return {('cover_portrait' if k == 'portrait' else 'cover'): str(result[k].resolve()) if k in result else ''
             for k in destinations}
+
+
+def cover_style(render: dict) -> str:
+    """``number`` (default) or ``title``, from the script's frozen content_context (spec/ab-testing.md §6)."""
+    try:
+        from core.video import store
+        script = store.get_script(render.get('script_id') or '') or {}
+    except Exception:  # noqa: BLE001 - an unreadable script keeps today's cover
+        return 'number'
+    return 'title' if (script.get('content_context') or {}).get('cover_style') == 'title' else 'number'
 
 
 #: Cover styles the weekly review compares.

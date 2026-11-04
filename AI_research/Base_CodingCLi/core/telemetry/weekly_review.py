@@ -95,6 +95,9 @@ def _measure(video: dict, now: float) -> dict:
             "form": video.get("form") or "未标注", "matrix": video.get("matrix") or "未标注",
             "column": video.get("column") or "未标注", "structure": video.get("structure") or "",
             "cover": video.get("cover") or "未标注",
+            # A/B marks frozen on the script (spec/ab-testing.md §9): so a change in the review is not misread
+            "experiments": [{"id": m.get("id"), "arm": m.get("arm")} for m in video.get("experiments") or []
+                            if isinstance(m, dict)],
             "product": "是" if PRODUCTS.search(title) else "否", "money": "是" if MONEY.search(title) else "否",
             "duration_band": _band(video.get("duration") or 0), "slot": _slot(video["pubdate"]), **_watch(video)}
 

@@ -30,8 +30,19 @@ export type PreviewSource = { render_id: string; script_id: string; title: strin
 export type PreviewState = {
   kind: "render" | "cover" | "none"; confirmed: boolean; sources: PreviewSource[];
   preview: { id: string; status: "requested" | "running" | "done" | "failed"; error: string; source_render_id: string; files: string[] } | null;
-  a_video: string | null; b_video: string | null;
+  a_video: string | null; b_video: string | null; covers?: { a: string; b: string } | null;
 };
 export const loadPreview = (id: string, signal?: AbortSignal) => api<PreviewState>(`${BASE}/${encodeURIComponent(id)}/preview`, { signal });
 export const requestPreview = (id: string, sourceRenderId?: string) => api(`${BASE}/${encodeURIComponent(id)}/preview`, { method: "POST", body: { source_render_id: sourceRenderId || null } });
 export const confirmPreview = (id: string) => api(`${BASE}/${encodeURIComponent(id)}/preview/confirm`, { method: "POST" });
+
+export type Estimate = { estimate: number | null; low: number | null; high: number | null; n_a: number; n_b: number; strata: number; skipped_strata: string[]; sd: number | null };
+export type Results = {
+  frozen: boolean; n: { A: number; B: number }; with_data: { A: number; B: number }; missing: { A: number; B: number };
+  srm_p: number; primary: Estimate & { metric: string }; guardrails: (Estimate & { metric: string; status: "ok" | "worse" | "hint" })[];
+  harm: string | null; applied_rate: number | null; active_days: number; endpoint_reached: boolean; settled: boolean;
+  verdict: { verdict: "running" | "srm" | "b_better" | "b_worse" | "no_difference"; notes: string[]; minimum_detectable?: number | null };
+  median_views: { A: number | null; B: number | null }; median_duration: { A: number | null; B: number | null };
+  videos: { script_id: string; arm: "A" | "B"; bvid: string; state: "measured" | "pending" | "missing" }[];
+};
+export const loadResults = (id: string, signal?: AbortSignal) => api<Results>(`${BASE}/${encodeURIComponent(id)}/results`, { signal });

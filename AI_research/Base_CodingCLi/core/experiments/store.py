@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import time
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Optional
 
 from core import sqlite_util
 from core.experiments.definition import Experiment
@@ -129,6 +129,17 @@ class ExperimentStore:
 
     def running(self) -> list[dict]:
         return [e for e in self.list() if e["status"] == "running"]
+
+    def result(self, experiment_id: str) -> Optional[dict]:
+        with self.connect() as db:
+            row = db.execute("SELECT data FROM results WHERE experiment_id=?", (experiment_id,)).fetchone()
+        return json.loads(row[0]) if row else None
+
+    def save_result(self, experiment_id: str, data: dict) -> None:
+        """The snapshot at the end of the wind-down; never rewritten (§8「终点」)."""
+        with self.connect(write=True) as db:
+            db.execute("INSERT OR IGNORE INTO results VALUES (?,?,?)",
+                       (experiment_id, time.time(), json.dumps(data, ensure_ascii=False, default=str)))
 
     def preview_confirmed(self, experiment_id: str) -> bool:
         """Whether the user looked at a B preview and confirmed it (§9a step ③)."""

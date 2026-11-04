@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useState } from "react";
-import { confirmPreview, createExperiment, loadExperiment, loadExperiments, loadPreview, moveExperiment, requestPreview, setExperimentsEnabled,
+import { confirmPreview, createExperiment, loadExperiment, loadExperiments, loadPreview, loadResults, moveExperiment, requestPreview, setExperimentsEnabled,
   type Definition, type ExperimentDetail, type ExperimentRow, type Move, type SwitchRow } from "@/api/experiments";
 import { usePageResource } from "@/lib/use-page-resource";
 import { ErrorState } from "./ErrorState";
@@ -99,8 +99,32 @@ function Preview({ id }: { id: string }) {
       {p?.status === "done" && !data.confirmed ? <button className="btn btn-primary text-xs" onClick={() => void run(() => confirmPreview(id))}>确认 B 没问题</button> : null}
       <button className="btn text-xs" onClick={() => void reload()}>刷新</button>
     </div>
+    {data.covers ? <div className="grid gap-2 sm:grid-cols-2">
+      <figure><figcaption className="text-text-muted mb-1">A（现状）</figcaption><img src={data.covers.a} alt="A 组封面" className="w-full rounded" /></figure>
+      <figure><figcaption className="text-text-muted mb-1">B</figcaption><img src={data.covers.b} alt="B 组封面" className="w-full rounded" /></figure></div> : null}
     {data.sources.length === 0 ? <p className="text-text-muted">最近 7 天没有这个实验范围内的自动出片，暂时没法预览。</p> : null}
     {problem ? <p role="alert" className="text-danger">{problem}</p> : null}
+  </div>;
+}
+
+const VERDICT = { running: "进行中，不下结论", srm: "分组失衡，结论不可信", b_better: "B 更好", b_worse: "B 更差", no_difference: "没有分出差异" } as const;
+const fmt = (v: number | null | undefined, digits = 1) => v == null ? "—" : (Math.round(v * 10 ** digits) / 10 ** digits).toString();
+
+function ResultsPanel({ id }: { id: string }) {
+  const load = useCallback((signal: AbortSignal) => loadResults(id, signal), [id]);
+  const { data, error } = usePageResource(load);
+  if (error) return <p className="text-xs text-danger">{message(error)}</p>;
+  if (!data) return <p className="text-xs text-text-muted">正在计算…</p>;
+  const p = data.primary;
+  return <div className="border-t border-border pt-2 mt-2 space-y-1" aria-label="实验结果">
+    <p className="font-medium">结论：{VERDICT[data.verdict.verdict]}{data.frozen ? "（已存档，不再改写）" : ""}</p>
+    {data.verdict.minimum_detectable != null ? <p>这次样本量能测出的最小差异：约 {fmt(data.verdict.minimum_detectable)} 个点</p> : null}
+    {data.verdict.notes.map(n => <p key={n} className="text-warning">{n}</p>)}
+    {data.harm ? <p className="text-danger">{data.harm}（由你决定是否停止）</p> : null}
+    <p>样本：A {data.n.A} 条（有数据 {data.with_data.A}，缺失 {data.missing.A}），B {data.n.B} 条（有数据 {data.with_data.B}，缺失 {data.missing.B}）；分组检查 p = {fmt(data.srm_p, 3)}</p>
+    <p>主要指标 {METRICS[p.metric]?.label ?? p.metric}：B − A = {fmt(p.estimate)}，90% 区间 [{fmt(p.low)}, {fmt(p.high)}]{data.verdict.verdict === "running" ? "（未到终点）" : ""}</p>
+    {data.guardrails.map(g => <p key={g.metric} className={g.status === "worse" ? "text-danger" : undefined}>护栏 {g.metric}：{fmt(g.estimate, 2)} [{fmt(g.low, 2)}, {fmt(g.high, 2)}]{g.status === "worse" ? " 明显变差" : g.status === "hint" ? " 变差，样本不足以确认" : ""}</p>)}
+    <p className="text-text-muted">已跑 {fmt(data.active_days)} 天（不含暂停）；时长中位数 A {fmt(data.median_duration.A, 0)} 秒 / B {fmt(data.median_duration.B, 0)} 秒；24 小时播放中位数 A {fmt(data.median_views.A, 0)} / B {fmt(data.median_views.B, 0)}（仅供参考）{data.applied_rate != null ? `；B 组实际生效率 ${Math.round(data.applied_rate * 100)}%` : ""}</p>
   </div>;
 }
 
@@ -113,7 +137,7 @@ function Details({ id }: { id: string }) {
   return <div className="text-xs space-y-1 py-2">
     <p>已分组：A {d.arms.A} 条，B {d.arms.B} 条</p>
     {d.start_problems.length ? <ul className="text-danger list-disc pl-4">{d.start_problems.map(p => <li key={p}>{p}</li>)}</ul> : null}
-    {d.status === "draft" ? <Preview id={id} /> : null}
+    {d.status === "draft" ? <Preview id={id} /> : <ResultsPanel id={id} />}
     <p className="text-text-muted">记录：{d.events.map(e => `${new Date(e.at * 1000).toLocaleString("zh-CN", { hour12: false })} ${e.kind}`).join("；")}</p>
   </div>;
 }

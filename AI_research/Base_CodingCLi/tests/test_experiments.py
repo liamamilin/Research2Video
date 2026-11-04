@@ -275,7 +275,8 @@ def test_the_tab_api_is_read_only_and_for_administrators(client, web_env):
 
 
 #: Existing files allowed to reference the A/B module (spec §2 rule 1).
-ALLOWED = {"web/server.py", "web/services/video_workflow.py", "web/services/automation_health.py"}
+ALLOWED = {"web/server.py", "web/services/video_workflow.py", "web/services/automation_health.py",
+           "web/services/weekly_review.py"}
 _OWN = ("core/experiments/", "web/routes/experiments.py", "tests/")
 
 
@@ -447,7 +448,11 @@ def test_start_is_refused_for_undeveloped_switches_previews_and_conflicts(client
     made = client.post("/api/experiments", json=compare().model_dump(), headers=csrf)
     assert made.status_code == 201
     refused = client.post("/api/experiments/cover_title/start", headers=csrf)
-    assert refused.status_code == 409 and "等待开发" in refused.json()["error"]["message"] and "预览" in refused.json()["error"]["message"]
+    assert refused.status_code == 409 and "预览" in refused.json()["error"]["message"]
+    planned = compare(id="later", overrides={"greeting_position": "after"}).model_dump()
+    assert client.post("/api/experiments", json=planned, headers=csrf).status_code == 201
+    waiting = client.post("/api/experiments/later/start", headers=csrf)
+    assert waiting.status_code == 409 and "等待开发" in waiting.json()["error"]["message"]
     assert client.post("/api/experiments", json={"id": "bad"}, headers=csrf).status_code == 422
     assert client.post("/api/experiments", json=aa("aa_first").model_dump(), headers=csrf).status_code == 201
     assert client.post("/api/experiments/aa_first/start", headers=csrf).status_code == 200
@@ -573,3 +578,149 @@ def test_reminders_cover_starts_and_survive_a_broken_module(tmp_path, monkeypatc
     from web.services import automation_health
     monkeypatch.setattr(notices, "recent", lambda *a: (_ for _ in ()).throw(RuntimeError("broken")))
     assert automation_health.experiment_notices(time.time()) == []
+
+
+# ---- phase 3: results pipeline, cover_style, weekly review ---------------------------------------------------------
+
+from core.experiments import progress, results  # noqa: E402
+
+
+def _results_world(tmp_path, n=6, start=None):
+    """A video.db and platform_analytics.db with ``n`` scripts per arm, all published and read after 48 hours."""
+    start = start or time.time() - 20 * 86400
+    store = ExperimentStore(tmp_path)
+    experiment = aa("aa_first", per_arm=n)
+    store.save(experiment, "admin")
+    store.move("aa_first", "start", "admin")
+    with store.connect(write=True) as db:
+        db.execute("UPDATE experiments SET started_at=? WHERE id='aa_first'", (start,))
+    vdb, adb = sqlite3.connect(tmp_path / "video.db"), sqlite3.connect(tmp_path / "platform_analytics.db")
+    vdb.executescript("CREATE TABLE scripts (id TEXT, status TEXT, archived INT, content_context TEXT, created_at TEXT);"
+                      "CREATE TABLE script_versions (script_id TEXT, version INT);"
+                      "CREATE TABLE publications (script_id TEXT, platform TEXT, url TEXT, removed_at TEXT, created_at TEXT);"
+                      "CREATE TABLE renders (id TEXT, script_id TEXT, status TEXT);")
+    adb.executescript("CREATE TABLE analytics_videos (bvid TEXT, pubdate REAL, duration INT, state INT);"
+                      "CREATE TABLE analytics_watch (bvid TEXT, day TEXT, data TEXT, collected_at REAL);"
+                      "CREATE TABLE analytics_snapshots (bvid TEXT, observed_at REAL, metrics TEXT);")
+    rng = random.Random(5)
+    for i in range(2 * n):
+        sid, arm, bvid = f"s{i}", "A" if i % 2 == 0 else "B", f"BV1{i:09d}"
+        pub = start + 86400 + i * 3600
+        with store.connect(write=True) as db:
+            db.execute("INSERT INTO assignments VALUES (?,?,?,?,?,?,?,?)", (f"t{i}", "aa_first", arm, "ai_flash", i // 2, start, "v", sid))
+        vdb.execute("INSERT INTO scripts VALUES (?,?,?,?,?)", (sid, "PUBLISHED", 0, json.dumps({"column": "ai_flash"}), ""))
+        vdb.execute("INSERT INTO script_versions VALUES (?,1)", (sid,))
+        vdb.execute("INSERT INTO publications VALUES (?,?,?,?,?)", (sid, "bilibili", f"https://b23/{bvid}", None, str(i)))
+        adb.execute("INSERT INTO analytics_videos VALUES (?,?,?,1)", (bvid, pub, 120 + 10 * i))
+        adb.execute("INSERT INTO analytics_watch VALUES (?,?,?,?)", (bvid, "d0", json.dumps({"completion": 99, "avg_seconds": 1}), pub + 3600))
+        adb.execute("INSERT INTO analytics_watch VALUES (?,?,?,?)", (bvid, "d2", json.dumps(
+            {"completion": 30 + rng.gauss(0, 5), "avg_seconds": 50, "exit3s": 30, "cover_pass": 60}), pub + 50 * 3600))
+        for h in (0, 24):
+            adb.execute("INSERT INTO analytics_snapshots VALUES (?,?,?)", (bvid, pub + h * 3600, json.dumps({"view": 10 + h})))
+    for k in range(12):  # history before the start, for the length fit
+        bvid = f"BVh{k:09d}"
+        adb.execute("INSERT INTO analytics_videos VALUES (?,?,?,1)", (bvid, start - 86400 * (k + 1), 60 + 60 * k))
+        adb.execute("INSERT INTO analytics_watch VALUES (?,?,?,?)", (bvid, "h", json.dumps({"completion": 50 - 3 * k, "avg_seconds": 40}), start))
+    vdb.commit(); adb.commit(); vdb.close(); adb.close()
+    return store
+
+
+def test_results_read_after_48_hours_from_the_per_video_endpoint_only(tmp_path):
+    store = _results_world(tmp_path)
+    out = results.evaluate(store, "aa_first", tmp_path)
+    assert out["n"] == {"A": 6, "B": 6} and out["with_data"] == {"A": 6, "B": 6}
+    first = out["videos"][0]
+    assert first["completion"] != 99 and first["views_24h"] == 34  # the 1-hour reading is too early
+    assert out["fit"]["n"] == 12 and out["primary"]["metric"] == "completion_adjusted"
+    assert out["endpoint_reached"] and out["verdict"]["verdict"] == "running"  # not ended yet
+
+
+def test_the_timer_ends_at_the_end_point_then_freezes_the_result_after_the_wind_down(tmp_path):
+    store = _results_world(tmp_path)
+    results.evaluate_all(tmp_path)
+    assert store.get("aa_first")["status"] == "ended"
+    assert "endpoint" in [e["kind"] for e in store.events("aa_first")] and store.result("aa_first") is None
+    results.evaluate_all(tmp_path, now=time.time() + 8 * 86400)
+    frozen = store.result("aa_first")
+    assert frozen["verdict"]["verdict"] in ("no_difference", "b_better", "b_worse")
+    assert [e["kind"] for e in store.events("aa_first")][-1] == "verdict"
+    results.evaluate_all(tmp_path, now=time.time() + 9 * 86400)
+    assert store.result("aa_first")["computed_at"] == frozen["computed_at"]  # never rewritten
+
+
+def test_scripts_that_failed_before_writing_leave_the_denominator_for_writing_switches(tmp_path):
+    store = _results_world(tmp_path)
+    with sqlite3.connect(tmp_path / "video.db") as db:
+        db.execute("DELETE FROM script_versions WHERE script_id='s0'")
+        db.execute("UPDATE publications SET removed_at='x' WHERE script_id='s3'")
+    out = results.evaluate(store, "aa_first", tmp_path)
+    assert out["n"] == {"A": 5, "B": 6} and out["missing"]["B"] == 1
+
+
+def test_paused_and_switched_off_time_is_not_counted():
+    events = [{"kind": "pause", "at": 100.0}, {"kind": "resume", "at": 300.0}]
+    master = [{"kind": "master_off", "at": 500.0}]
+    assert results.paused_seconds(events, master, 0.0, 1000.0) == 200 + 500
+
+
+def test_cover_style_title_skips_the_cover_copy_model(monkeypatch, tmp_path):
+    from core.video import store as video_store
+    from web.services import publish_cover
+    monkeypatch.setattr(video_store, "get_script", lambda sid: {"content_context": {"cover_style": "title"}} if sid == "s1" else {})
+    assert publish_cover.cover_style({"script_id": "s1"}) == "title"
+    assert publish_cover.cover_style({"script_id": "s2"}) == "number"
+    monkeypatch.setattr(video_store, "get_script", lambda sid: (_ for _ in ()).throw(RuntimeError("db")))
+    assert publish_cover.cover_style({"script_id": "s1"}) == "number"
+
+
+def test_cover_style_applied_is_read_from_the_copy_cache(tmp_path):
+    folder = tmp_path / "platforms" / "covers"
+    folder.mkdir(parents=True)
+    with sqlite3.connect(tmp_path / "video.db") as db:
+        db.execute("CREATE TABLE renders (id TEXT, script_id TEXT)")
+        db.executemany("INSERT INTO renders VALUES (?,?)", [("r1", "s1"), ("r2", "s2")])
+    (folder / "r1-abc-copy.json").write_text(json.dumps({"copy": {"big": "差十倍"}}))
+    (folder / "r2-abc-copy.json").write_text(json.dumps({"copy": None}))
+    title = compare(overrides={"cover_style": "title"})
+    assert results.applied(title, "s1", {}, tmp_path) is False and results.applied(title, "s2", {}, tmp_path) is True
+    assert results.applied(compare(id="g1", overrides={"greeting": "x"}), "s1", {}, tmp_path) is None
+
+
+def test_weekly_progress_lists_running_and_just_ended_experiments(tmp_path):
+    store = ExperimentStore(tmp_path)
+    store.save(aa("aa_first"), "admin")
+    store.move("aa_first", "start", "admin")
+    now = time.time()
+    [row] = progress.week(tmp_path, now - 86400, now + 86400)
+    assert row["status"] == "running" and row["verdict"] == "进行中"
+    assert progress.week(tmp_path, now + 86400, now + 8 * 86400)[0]["id"] == "aa_first"  # still running next week
+    assert progress.week(tmp_path, now - 30 * 86400, now - 20 * 86400) == []
+    assert progress.week(tmp_path / "none", 0, now) == []
+
+
+def test_review_marks_experiment_videos():
+    from core.telemetry import weekly_review
+    item = weekly_review._measure({"bvid": "BV1", "pubdate": 0, "experiments": [{"id": "e", "arm": "B", "token": "t"}]}, 1)
+    assert item["experiments"] == [{"id": "e", "arm": "B"}]
+    assert weekly_review._measure({"bvid": "BV2", "pubdate": 0}, 1)["experiments"] == []
+
+
+def test_cover_previews_draw_both_styles(tmp_path, monkeypatch):
+    from core.social import cover_copy
+    from web.services import video_render
+    import core.social.cover as cover_module
+    video = tmp_path / "video.mp4"
+    video.write_bytes(b"x")
+    monkeypatch.setattr(video_render, "safe_file", lambda render, name: video)
+    monkeypatch.setattr(cover_copy, "for_render", lambda render, title, cache: {"big": "差十倍", "figure": "", "topic": ""})
+    drawn = []
+
+    def fake_make(video, title, dests, ffmpeg, copy):
+        drawn.append(copy)
+        for path in dests.values():
+            Path(path).write_bytes(b"jpg")
+        return dests
+
+    monkeypatch.setattr(cover_module, "make_covers", fake_make)
+    files = preview.covers(tmp_path, "p1", {"id": "r1", "title": "t"}, "t", "title")
+    assert files == ["cover-a.jpg", "cover-b.jpg"] and drawn[0]["big"] == "差十倍" and drawn[1] is None

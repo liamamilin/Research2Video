@@ -5,6 +5,7 @@ import { loadWeeklyReview, weeklyReportUrl, type ReviewGroup } from "@/api/telem
 import { usePageResource } from "@/lib/use-page-resource";
 import { cn } from "@/lib/utils";
 import { ErrorState } from "./ErrorState";
+import { ExperimentBadge } from "./ExperimentBadge";
 
 const th = "pb-2 font-normal text-right whitespace-nowrap";
 const td = "py-2 text-right tabular-nums whitespace-nowrap";
@@ -86,6 +87,11 @@ export function WeeklyReview() {
       <h3 className="text-sm font-medium pt-2">建议（需要你确认后再改配置）</h3>
       {data.suggestions.length ? <ul className="text-sm list-disc pl-5 space-y-1">{data.suggestions.map(f => <li key={f}>{f}</li>)}</ul> : <p className="text-sm text-text-muted">数据还不足以给出连续两周成立的建议。</p>}
     </section>
+    {data.experiments?.length ? <section className="card p-4 space-y-2" aria-label="实验进展">
+      <h2 className="text-sm font-medium">实验进展</h2>
+      <p className="text-xs text-text-muted">下面标了「实验 · B 组」的视频用了实验里的改动，看本周变化时把它们分开看。</p>
+      <ul className="text-sm space-y-1">{data.experiments.map(e => <li key={e.id}>{e.name}：A {e.A} 条、B {e.B} 条 · {e.ended_this_week ? `本周结束，${e.verdict}` : e.verdict}</li>)}</ul>
+    </section> : null}
     {data.dimensions.map(d => <Groups key={d.key} label={d.label} groups={d.groups} minN={data.min_n} watch={watch} />)}
     <section className="card p-4 space-y-3">
       <h2 className="text-sm font-medium">本周每一条</h2>
@@ -93,7 +99,7 @@ export function WeeklyReview() {
         <thead className="text-text-muted"><tr><th className="pb-2 font-normal">发布</th><th className="pb-2 font-normal">标题</th><th className="pb-2 font-normal">栏目</th><th className="pb-2 font-normal">形式</th><th className={th}>24h</th><th className={th}>72h</th><th className={th}>7 天</th><th className={th}>目前</th>{watch ? <><th className={th}>完播率</th><th className={th}>平均观看</th><th className={th}>3 秒退出</th><th className={th}>封面点击超过同类</th></> : null}</tr></thead>
         <tbody>{data.videos.map(v => <tr key={v.bvid} className="border-t border-border">
           <td className="py-2 whitespace-nowrap">{when(v.pubdate)}</td>
-          <td className="py-2 max-w-[22rem] truncate" title={v.title}><a className="hover:text-accent" href={`https://www.bilibili.com/video/${v.bvid}`} target="_blank" rel="noreferrer">{v.title}</a>{v.structure ? <span className="ml-2 text-text-muted">{v.structure}</span> : null}</td>
+          <td className="py-2 max-w-[22rem] truncate" title={v.title}><a className="hover:text-accent" href={`https://www.bilibili.com/video/${v.bvid}`} target="_blank" rel="noreferrer">{v.title}</a>{v.structure ? <span className="ml-2 text-text-muted">{v.structure}</span> : null}{v.experiments?.length ? <span className="ml-2"><ExperimentBadge marks={v.experiments} /></span> : null}</td>
           <td className="py-2 whitespace-nowrap">{v.column}</td><td className="py-2 whitespace-nowrap">{v.form}</td>
           <td className={td}>{v.state === "ok" ? num(v.h24) : <span className="text-text-muted">{STATE[v.state]}</span>}</td>
           <td className={td}>{num(v.h72)}</td><td className={td}>{num(v.h168)}</td><td className={td}>{num(v.view)}</td>

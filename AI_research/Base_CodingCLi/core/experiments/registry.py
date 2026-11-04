@@ -50,7 +50,7 @@ SWITCHES: tuple[Switch, ...] = (
     Switch("presentation.opening_card", "开头要点卡", ("core/video/visual_materials.py",), "from_writing", "all",
            "出片参数里有没有这张卡", False, "planned", values=(False, True), preview="render"),
     Switch("cover_style", "封面样式", ("web/services/publish_cover.py",), "from_writing", "all",
-           "封面文字缓存里 copy 是否为空", "number", "planned", values=("number", "title"), preview="cover"),
+           "封面文字缓存里 copy 是否为空", "number", "existing", values=("number", "title"), preview="cover"),
     Switch("render.packaging", "片头片尾", ("web/services/video_render.py",), "from_writing", "all",
            "读实际出片参数", None, "unconfirmed", note="待确认现有配置能否单独关掉片头", preview="render"),
 )

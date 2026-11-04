@@ -73,9 +73,11 @@ def reconcile(store: ExperimentStore, video_db: str | Path) -> int:
 
 def tick(state_dir: str | Path) -> None:
     store = ExperimentStore(state_dir)
-    if not store.enabled():
+    if not store.list():
         return
     reconcile(store, Path(state_dir) / "video.db")
+    from core.experiments import results
+    results.evaluate_all(state_dir)  # alarms, end point and final snapshot run even while assignment is switched off
 
 
 def start_background(state_dir: str | Path, stop: threading.Event) -> None:
