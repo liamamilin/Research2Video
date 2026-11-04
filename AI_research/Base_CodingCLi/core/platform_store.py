@@ -62,8 +62,9 @@ class PlatformStore:
     def settings(self) -> dict:
         with self.connect() as conn:
             row = conn.execute("SELECT data FROM settings WHERE id=1").fetchone()
-        return {"auto_upload": False, "auto_since": 0, "tid": 0,
+        return {"auto_upload": False, "auto_since": 0, "tid": 0, "tid_by_matrix": {},
                 "first_comment": {"enabled": False, "text": "", "pin": False},
+                "publish_window": {"enabled": True, "start": 8, "end": 23, "spacing": 20},
                 "sync_comments": False, **(json.loads(row[0]) if row else {})}
 
     def save_settings(self, patch: dict) -> dict:
@@ -154,11 +155,60 @@ class PlatformStore:
                                      "WHERE id=? AND uid=? AND status='UNKNOWN' AND bvid=''",
                                      (bvid, time.time(), task_id, uid)).rowcount)
 
+    def schedule_upload(self, task_id: str, dtime: int | None) -> bool:
+        """Record the scheduled publish time on a task still waiting in the queue."""
+        with self.connect(write=True) as conn:
+            row = conn.execute("SELECT payload FROM uploads WHERE id=? AND status='QUEUED'", (task_id,)).fetchone()
+            if not row:
+                return False
+            payload = {k: v for k, v in json.loads(row[0]).items() if k not in ("dtime", "released_at")}
+            if dtime:
+                payload["dtime"] = int(dtime)
+            else:
+                payload["released_at"] = int(time.time())  # goes public on approval: later held uploads space from it
+            return bool(conn.execute("UPDATE uploads SET payload=?,error='' WHERE id=? AND status='QUEUED'",
+                                     (json.dumps(payload, ensure_ascii=False), task_id)).rowcount)
+
+    def requeue_removed(self, task_id: str, uid: str) -> bool:
+        """A deleted submission goes back in the queue as a manual upload: no timer, a fresh first comment."""
+        with self.connect(write=True) as conn:
+            row = conn.execute("SELECT payload,bvid FROM uploads WHERE id=? AND uid=? AND status='REMOVED'", (task_id, uid)).fetchone()
+            if not row:
+                return False
+            old = json.loads(row[0])
+            payload = {**{k: v for k, v in old.items() if k not in ("dtime", "held", "released_at")},
+                       "automatic": False, "removed_bvids": [*old.get("removed_bvids", []), row[1]]}
+            comment = payload.get("first_comment") or {}
+            return bool(conn.execute(
+                "UPDATE uploads SET status='QUEUED',bvid='',error='',payload=?,recovery='{}',updated_at=?,"
+                "first_comment_status=?,first_comment_rpid='',first_comment_error='',first_comment_pin_status=?,"
+                "first_comment_pin_error='' WHERE id=? AND status='REMOVED'",
+                (json.dumps(payload, ensure_ascii=False), time.time(),
+                 "WAITING" if comment.get("enabled") else "DISABLED",
+                 "WAITING" if comment.get("enabled") and comment.get("pin") else "DISABLED", task_id)).rowcount)
+
+    def hold_upload(self, task_id: str, note: str) -> bool:
+        """An automatic upload the platform's timer cannot reach waits here for the publish window."""
+        with self.connect(write=True) as conn:
+            row = conn.execute("SELECT payload FROM uploads WHERE id=? AND status='QUEUED'", (task_id,)).fetchone()
+            if not row:
+                return False
+            payload = {**json.loads(row[0]), "held": True}
+            return bool(conn.execute("UPDATE uploads SET payload=?,error=?,updated_at=? WHERE id=? AND status='QUEUED'",
+                                     (json.dumps(payload, ensure_ascii=False), note, time.time(), task_id)).rowcount)
+
     def update_upload(self, task_id: str, *, status: str, error: str = "", bvid: str = "", expected: str | None = None) -> bool:
         with self.connect(write=True) as conn:
             return bool(conn.execute("UPDATE uploads SET status=?,error=?,bvid=?,updated_at=? WHERE id=?" +
                                      (" AND status=?" if expected else ""),
                                      (status, error, bvid, time.time(), task_id) + ((expected,) if expected else ())).rowcount)
+
+    def mark_removed(self, task_id: str, uid: str, note: str) -> bool:
+        """The submission was deleted on the platform: it no longer waits, holds a slot or can be retried."""
+        with self.connect(write=True) as conn:
+            return bool(conn.execute("UPDATE uploads SET status='REMOVED',error=?,updated_at=? "
+                                     "WHERE id=? AND uid=? AND status IN ('SUBMITTED','PUBLISHED') AND bvid<>''",
+                                     (note, time.time(), task_id, uid)).rowcount)
 
     def recover_uploads(self) -> None:
         # Caller holds the cross-process worker lock: no living upload is being interrupted.

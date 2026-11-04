@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import fcntl
 import json
+import logging
 import time
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from core.platform_store import PlatformStore
@@ -16,6 +17,7 @@ from web.services.publish_cover import publish_cover
 from web.settings import get_settings
 
 Error = bilibili.BilibiliError
+logger = logging.getLogger(__name__)
 
 
 def directory() -> Path:
@@ -137,6 +139,52 @@ def categories() -> dict:
     return {**result, "stale": False}
 
 
+def _timestamp(value: str) -> float:
+    """Renders record ``+0800`` offsets, which ``fromisoformat`` before Python 3.11 rejects."""
+    try:
+        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S%z").timestamp()
+    except ValueError:
+        return datetime.fromisoformat(value).timestamp()
+
+
+_logged: set[tuple[str, str]] = set()
+
+
+def _log_once(level: int, render_id: str, reason: str) -> None:
+    """The worker re-checks every candidate each pass; say why a render stays out only when the reason is new."""
+    if (render_id, reason) not in _logged:
+        _logged.add((render_id, reason))
+        logger.log(level, "Auto upload %s %s", render_id, reason)
+
+
+def _matrix_keys(script: dict) -> list[str]:
+    """The script's matrices, most specific first: where its Job's reports come from, then the column's domain.
+    Individual scripts have no column context, so their Job is read from the topic; archived matrices never count."""
+    from core import matrices
+
+    context = script.get("content_context") or {}
+    topic = script.get("topic") or {}
+    job = ((topic.get("episode") or {}).get("job") or (topic.get("matrix_dedup") or {}).get("job")
+           or context.get("job", ""))
+    found = None
+    if job:
+        found = next((m for m in matrices.load_all(get_settings().paths.config_dir).values()
+                      if not m.archived and job in m.jobs), None)
+    keys = [context.get("source_matrix", ""), found.key if found else "", context.get("matrix", ""),
+            found.content.get("parent", "") if found else ""]
+    return [key for key in dict.fromkeys(keys) if key]
+
+
+def category_for(script: dict) -> int:
+    """The Bilibili partition for a script: its matrix's entry in ``tid_by_matrix``, else the account default."""
+    config = store().settings()
+    by_matrix = config.get("tid_by_matrix") or {}
+    for key in _matrix_keys(script):
+        if int(by_matrix.get(key) or 0) >= 1:
+            return int(by_matrix[key])
+    return int(config.get("tid") or 0)
+
+
 def column_for(script: dict):
     if (script.get('topic') or {}).get('local_video'):
         return None
@@ -181,7 +229,7 @@ def preview(render_id: str) -> dict:
     if script.get("current_version") != render["version"]:
         warnings.append(f"本次投稿使用 v{render['version']} 成片；文稿当前为 v{script['current_version']}，请确认选中了需要的版本。")
     return {**preview_draft(render, "bilibili"), "render_id": render["id"], **adaptation["payload"],
-            "adaptation": adaptation, "tid": store().settings()["tid"], "warnings": warnings,
+            "adaptation": adaptation, "tid": category_for(script), "warnings": warnings,
             "first_comment": default_comment(store().settings()["first_comment"]),
             "freshness_warnings": pack.get("freshness", {}).get("warnings", []),
             "credibility": credibility.label(version),
@@ -200,6 +248,53 @@ def upload_task(task_id: str) -> dict:
     if not row or row["uid"] != uid():
         raise Error("找不到当前账号的这条投稿任务。")
     return row
+
+
+SCHEDULE_LEAD = 4.5 * 3600  # biliup needs dtime more than 4 hours after submission; the rest covers the upload
+HOLD = "hold"  # wait here and submit once the window opens: the platform's timer cannot reach it
+
+
+def publish_at(now: float, window: dict, taken: list[float], *, held: bool = False) -> int | str | None:
+    """Daytime renders publish now; night renders go public from the window's opening, in order and spaced.
+
+    A slot the platform's 4-hour timer can reach becomes a ``dtime``; an earlier one is held here
+    (``HOLD``) and submitted in the window, so a render finished at 11:00 never waits longer than one
+    finished at 12:00. ``held`` uploads leave one per spacing inside the window, around ``taken`` times.
+    """
+    if not window.get("enabled"):
+        return None
+    start, end = int(window.get("start", 8)), int(window.get("end", 23))
+    spacing = max(1, int(window.get("spacing") or 20)) * 60
+    if not 0 <= start < end <= 24:
+        return None
+    local = datetime.fromtimestamp(now).astimezone()
+    if start <= local.hour < end:
+        return HOLD if held and any(abs(now - t) < spacing for t in taken) else None
+    midnight = local.replace(hour=0, minute=0, second=0, microsecond=0)
+    for offset in range(8):
+        day = midnight + timedelta(days=offset)
+        slot, close = (day + timedelta(hours=start)).timestamp(), (day + timedelta(hours=end)).timestamp()
+        if close <= now:
+            continue
+        while slot < close:
+            if all(abs(slot - t) >= spacing for t in taken):
+                return int(slot) if slot >= now + SCHEDULE_LEAD else HOLD
+            slot += spacing
+    return int(now + SCHEDULE_LEAD)
+
+
+def held_note(window: dict) -> str:
+    return f"等待白天时段：{int(window.get('start', 8)):02d}:00 起按完成顺序依次投稿。"
+
+
+def _publish_times(db, owner: str, task_id: str) -> list[float]:
+    """When other automatic uploads go (or went) public: their timers and the moments held ones were released."""
+    return [float(t) for u in db.uploads(owner) if u["id"] != task_id and u["status"] in ("QUEUED", "UPLOADING", "SUBMITTED", "PUBLISHED")
+            for t in (u["payload"].get("dtime"), u["payload"].get("released_at")) if t]
+
+
+def scheduled_note(dtime: float) -> str:
+    return "定时发布：将于 " + datetime.fromtimestamp(dtime).astimezone().strftime("%m-%d %H:%M") + " 公开。"
 
 
 def enqueue(render_id: str, payload: dict, *, automatic: bool = False) -> dict:
@@ -366,7 +461,9 @@ def reconcile(task_id: str, bvid: str) -> dict:
         raise Error("只能为当前账号待核对的投稿回填 BV 号。")
     info = client(row["uid"]).owned_video(bvid, row["uid"])
     if info.get("state") != 0:
-        db.update_upload(task_id, status="SUBMITTED", bvid=bvid, error="平台尚未公开这条投稿，请在创作中心查看审核状态。")
+        dtime = float(row["payload"].get("dtime") or 0)
+        db.update_upload(task_id, status="SUBMITTED", bvid=bvid, error=scheduled_note(dtime) if dtime > time.time() else
+                         "平台尚未公开这条投稿，请在创作中心查看审核状态。")
         return db.get_upload(task_id)
     db.watch(uid(), bvid, info.get("title", bvid))
     url = f"https://www.bilibili.com/video/{bvid}"
@@ -380,6 +477,49 @@ def reconcile(task_id: str, bvid: str) -> dict:
         account_uid=row["uid"], account_name=account().get("name", ""))
     db.update_upload(task_id, status="PUBLISHED", bvid=bvid)
     return db.get_upload(task_id)
+
+
+GONE_CODES = (-404, 62002, 62004)  # the video page answers "nothing here" / "not visible"
+
+
+def mark_removed(task_id: str) -> dict:
+    """Record a submission the creator deleted on B站, after checking it exists nowhere on the account.
+
+    The creator list, searched by title, still shows pending and rejected submissions; the video page
+    finds a public one whose title was edited. Only when both miss it, by an explicit answer, is it gone."""
+    task = upload_task(task_id)
+    if task["status"] not in ("SUBMITTED", "PUBLISHED") or not task["bvid"]:
+        raise Error("只有已投稿的稿件可以标记为已在 B 站删除。")
+    api = client(task["uid"])
+    listed = api.archives(max_pages=10, keyword=task["payload"]["title"])
+    if any((row.get("Archive") or row).get("bvid") == task["bvid"] for row in listed["archives"]):
+        raise Error(f"{task['bvid']} 仍在 B 站稿件列表里，没有标记。")
+    if not listed.get("complete"):
+        raise Error("同标题的稿件太多，没能读完，没有标记。")
+    try:
+        api.owned_video(task["bvid"], task["uid"])
+    except bilibili.BilibiliRejected as exc:
+        if exc.code not in GONE_CODES:
+            raise
+    else:
+        raise Error(f"{task['bvid']} 在 B 站仍可访问，没有标记。")
+    store().mark_removed(task_id, task["uid"], f"{task['bvid']} 已在 B 站删除")
+    for record in video_store.list_publications(task["script_id"]):
+        if task["bvid"] in (record.get("url") or ""):
+            video_store.delete_publication(record["id"])  # the link is dead; restorable like any removed record
+    return upload_task(task_id)
+
+
+def reupload(task_id: str) -> dict:
+    """Queue a deleted submission again, as a new manual upload of the same render and text."""
+    with account_lock():
+        task = upload_task(task_id)
+        if task["status"] != "REMOVED":
+            raise Error("只有已在 B 站删除的投稿可以重新投稿。")
+        eligible(task["render_id"])
+        if not store().requeue_removed(task_id, task["uid"]):
+            raise Error("这条投稿的状态已经变化，请刷新后再试。")
+        return upload_task(task_id)
 
 
 def lookup_upload(task_id: str) -> dict:
@@ -507,22 +647,36 @@ def tick() -> None:
                     candidate["version"] != candidate["approved_version"] or candidate["version"] != candidate["current_version"]):
                     continue
                 try:
-                    completed = datetime.fromisoformat(candidate["completed_at"]).timestamp()
-                    if completed < config["auto_since"]:
+                    if _timestamp(candidate["completed_at"]) < config["auto_since"]:
                         continue
                     pack = preview(candidate["render_id"])
                     # Reuse the pipeline's quality hold; freshness warnings also hold unattended publishing.
                     if pack["credibility"]["tier"] in ("serious", "verify", "unaudited") or pack["freshness_warnings"]:
+                        _log_once(logging.INFO, candidate["render_id"], "held: credibility %s, freshness %s"
+                                  % (pack["credibility"]["tier"], pack["freshness_warnings"]))
                         continue
-                    enqueue(candidate["render_id"], {**pack, "tid": config["tid"]}, automatic=True)
-                except (Error, ValueError, TypeError):
+                    enqueue(candidate["render_id"], pack, automatic=True)
+                except (Error, ValueError, TypeError) as exc:
+                    _log_once(logging.WARNING, candidate["render_id"], f"skipped: {exc}")
                     continue
-        queued = [u for u in db.pending_uploads(owner) if u["status"] == "QUEUED"]
-        if queued:
-            task = queued[0]
+        task, dtime = None, None
+        for waiting in (u for u in db.pending_uploads(owner) if u["status"] == "QUEUED"):
+            if not waiting["payload"].get("automatic"):
+                task = waiting
+                break
+            window = config.get("publish_window") or {}
+            dtime = publish_at(time.time(), window, _publish_times(db, owner, waiting["id"]),
+                               held=bool(waiting["payload"].get("held")))
+            if dtime != HOLD:
+                task = waiting
+                break
+            if not waiting["payload"].get("held"):
+                db.hold_upload(waiting["id"], held_note(window))
+        if task:
             try:
                 render, _, _ = eligible(task["render_id"], automatic=bool(task["payload"].get("automatic")))
-                if video_store.has_publication(task["script_id"], task["version"], "bilibili", owner):
+                if video_store.has_publication(task["script_id"], task["version"], "bilibili", owner,
+                                               deleted=tuple(task["payload"].get("removed_bvids") or ())):
                     raise Error("这个版本已经补录发布，已停止重复投稿。")
                 verify()
                 if not bilibili.biliup_binary():
@@ -535,6 +689,10 @@ def tick() -> None:
             except Error as exc:
                 db.update_upload(task["id"], status="FAILED", error=str(exc), expected="QUEUED")
                 return
+            if task["payload"].get("automatic"):
+                if not db.schedule_upload(task["id"], dtime):
+                    return
+                task = db.get_upload(task["id"])
             if not db.update_upload(task["id"], status="UPLOADING", expected="QUEUED"):
                 return
             db.update_recovery(task["id"], {"started_at": time.time(), "phase": "upload",
@@ -542,7 +700,8 @@ def tick() -> None:
             credential = credentials()
             try:
                 bvid = bilibili.upload(credential, video_render.safe_file(render, "video.mp4"), {**task["payload"], "cover": str(cover)}, work_dir)
-                db.update_upload(task["id"], status="SUBMITTED", bvid=bvid)
+                dtime = task["payload"].get("dtime")
+                db.update_upload(task["id"], status="SUBMITTED", bvid=bvid, error=scheduled_note(dtime) if dtime else "")
             except bilibili.UploadFailed as exc:
                 db.update_upload(task["id"], status="FAILED", error=str(exc))
             except Error as exc:
@@ -561,6 +720,8 @@ def tick() -> None:
         _recover_unknown_uploads(owner)
         # Submission acceptance isn't publication. Keep polling until the owned video becomes public.
         for task in db.pending_uploads(owner):
+            if float(task["payload"].get("dtime") or 0) > time.time():
+                continue  # scheduled: the platform keeps it private until then
             if task["status"] == "SUBMITTED" and task["updated_at"] < time.time() - 60:
                 try:
                     reconcile(task["id"], task["bvid"])

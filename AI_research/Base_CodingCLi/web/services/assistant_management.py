@@ -204,16 +204,14 @@ def publishing_query(a, request, user):
             if not render:
                 raise ValueError('成片记录不存在：' + rid)
             data = _native(request, 'GET', base + '/preview/' + quote(rid, safe=''))
-            draft = ((data.get('draft') or {}).get('payload') or {})
-            fields = {k: draft.get(k, data.get(k)) for k in ('title', 'description', 'tags', 'tid', 'first_comment')
-                      if k in data or k in draft}
+            fields = _prepared(data)
             preparations.append({'platform': a.platform, 'render_id': rid, 'script_id': render['script_id'],
                                  'version': render['version'], 'account_uid': profile.get('uid') or '',
                                  'account_name': profile.get('name') or '', 'fields': fields,
-                                 'warnings': data.get('warnings', []),
+                                 'warnings': data.get('warnings', []), 'limits': _limits(a.platform, fields),
                                  'href': f"/video/{render['script_id']}?tab=publish&version={render['version']}&render={rid}"})
         return {'publication_preparations': preparations, 'references': refs, 'href': platform_href(a.platform),
-                'message': '发布包已准备，尚未提交上传。'}
+                'message': '发布包已准备，尚未提交上传。投稿时 fields 只填要改的字段，其余沿用发布包。'}
     if a.action == 'overview':
         data = _native(request, 'GET', base)
         # Native overviews are already public projections; return compact task rows.
@@ -244,6 +242,47 @@ def publishing_query(a, request, user):
             'note': '候选针对当前平台账号排除已投稿或已发布的版本；默认仅当前定稿，不会自动提交。'}
 
 
+PREPARED = ('title', 'description', 'tags', 'tid', 'first_comment')
+
+
+def _prepared(preview: dict) -> dict:
+    """The publish fields a render goes out with: its saved draft, else the platform preview."""
+    draft = ((preview.get('draft') or {}).get('payload') or {})
+    return {k: draft.get(k, preview.get(k)) for k in PREPARED if k in preview or k in draft}
+
+
+def _limits(platform: str, fields: dict) -> dict:
+    """The platform's limits next to these fields' counts, so a fix touches only the field that is over."""
+    from core.video.platform_publish import inspect
+    check = inspect(platform, {'title': fields.get('title') or '', 'description': fields.get('description') or '',
+                               'tags': fields.get('tags') or []})
+    spec = check['limits']
+    return {'title_limit': spec['title_limit'], 'description_limit': spec['description_limit'],
+            'tag_limit': spec['tag_limit'], 'combined_limit': spec['combined_limit'],
+            'counts': check['counts'], 'issues': check['issues']}
+
+
+def _submit_fields(request, base: str, platform: str, entry) -> dict:
+    """What one submit sends: the prepared title, description, tags (and B站 partition) with the model's changes on
+    top. A partition below 1 means "not chosen", so the prepared one stands. Over-limit copy or a missing partition
+    is refused here, naming the field, instead of reaching the platform's validation."""
+    changes = {k: v for k, v in entry.fields.items()
+               if k != 'tid' or platform == 'bilibili' and isinstance(v, int) and v >= 1}
+    needed = ('title', 'description', 'tags') + (('tid',) if platform == 'bilibili' else ())
+    fields = dict(changes)
+    if any(k not in changes for k in needed):
+        prepared = _prepared(_native(request, 'GET', base + '/preview/' + quote(entry.render_id, safe='')))
+        # Without first_comment each platform applies the account's saved template, as before.
+        prepared = {k: v for k, v in prepared.items() if k in needed}
+        fields = {**prepared, **changes}
+    issues = _limits(platform, fields)['issues']
+    if platform == 'bilibili' and not (isinstance(fields.get('tid'), int) and fields['tid'] >= 1):
+        issues.append('B站分区未设置：在平台页设置默认分区，或在 fields.tid 填分区号。')
+    if issues:
+        raise ValueError('发布信息不符合平台限制，未提交：' + ' '.join(issues) + ' 只改出问题的字段后重新提交。')
+    return fields
+
+
 def publishing_change(a, request, user):
     from web.services.publication_state import resume_action, task_href
     base = platform_path(a.platform)
@@ -264,7 +303,8 @@ def publishing_change(a, request, user):
             if entry:
                 operation = 'submit'
                 application.check_credentials(entry.fields)
-                row = _native(request, 'POST', base + '/uploads', body={**entry.fields, 'render_id': entry.render_id, 'account_uid': a.account_uid})
+                fields = _submit_fields(request, base, a.platform, entry)
+                row = _native(request, 'POST', base + '/uploads', body={**fields, 'render_id': entry.render_id, 'account_uid': a.account_uid})
                 key = row['id']
             else:
                 key = a.task_id

@@ -235,3 +235,35 @@ def test_projection_failure_preserves_success_and_does_not_repeat_operation(clie
     reply = client.post('/api/assistant', headers=login(client), json={'message': '只查询'}).json()
     assert reply['actions'][0]['ok'] and reply['answer'] == '已查询。'
     assert calls == [True]
+
+
+def test_matrix_detail_drops_member_token_counters_and_keeps_everything_else():
+    member = {'job': 'research/a', 'keywords': ['智能体'], 'production_options': [{'recipe': 'deep_dive'}],
+              'state': {'last_status': 'success', 'last_run_at': 't', 'last_usage': {'calls': ['x' * 9000]}}}
+    original = {'key': 'ai', 'revision': 'r1', 'members': [member, deepcopy(member)], 'production': [{'key': 'p'}]}
+    frozen = deepcopy(original)
+    projected = context.model_result('query_matrices', {'key': 'ai'}, original, 'operation')
+    assert original == frozen
+    assert all('last_usage' not in m['state'] for m in projected['members'])
+    assert projected['members'][0]['state']['last_status'] == 'success' and projected['revision'] == 'r1'
+    assert projected['members'][0]['keywords'] == ['智能体'] and projected['production'] == [{'key': 'p'}]
+    assert projected['_model_view']['fields_complete'] is False
+
+
+def test_long_material_text_is_paged_and_next_read_resumes_exactly():
+    text = '第一段\n"引号"与正文。' * 3000
+    original = {'materials': [{'id': 'm1', 'status': 'ready', 'text': text}, {'id': 'm2', 'text': '短材料'}]}
+    projected = context.model_result('read_materials', {'urls': ['https://example.com']}, original, 'operation')
+    first = projected['materials'][0]
+    assert first['text'] == text[:context.MATERIAL_CHARS] and projected['materials'][1]['text'] == '短材料'
+    read = first['_model_view']['next_read']
+    assert read['result_path'] == '/materials/0/text' and first['_model_view']['text_chars'] == len(text)
+    receipt = {'id': 'operation', 'tool': 'read_materials', 'status': 'completed', 'result': original}
+    fragment, offset = '', read['offset']
+    while True:
+        page = context.receipt_page(receipt, read['result_path'], offset, 20, read['max_chars'])
+        fragment += page['content']
+        if page['complete']:
+            break
+        offset = page['next_offset']
+    assert first['text'] + json.loads('"' + fragment) == text

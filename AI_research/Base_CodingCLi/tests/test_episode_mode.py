@@ -206,3 +206,37 @@ def test_publishing_uses_final_branded_programme_chapter_times():
     assert [(c['title'], c['seconds'], c['time']) for c in lines] == [
         ('本期导读', 0, '00:00'), ('内容甲', 13.5, '00:13'), ('内容乙', 111.5, '01:51')]
     assert publish.chapter_lines({**final, 'timeline': 'content'}) == []
+
+
+def _write_episode(client, llm, monkeypatch, told):
+    import json
+    from tests.test_video_scripts import _login, _csrf, _wait
+    seen = {}
+
+    def covered(report, items, peers, read=None):
+        seen['items'] = [i['title'] for i in items]
+        return [{'title': items[i]['title'], 'peer_id': 'old', 'peer_title': '昨天那期'} for i in told(items)]
+
+    monkeypatch.setattr(episodes, 'covered', covered)
+    llm.replies.append(json.dumps({'title': '本期', 'sections': [
+        {'title': '导读', 'episode_role': 'opening', 'paragraphs': [{'text': '本期讲一个具体变化。'}]},
+        {'title': '变化', 'episode_role': 'item', 'paragraphs': [{'text': '看这个变化的具体过程。'}]}]}, ensure_ascii=False))
+    _login(client)
+    path = client.get('/api/production/flash/pending').json()['reports'][0]['path']
+    response = client.post('/api/production/flash/write', json={'report_path': path}, headers=_csrf(client))
+    return _wait(client, response.json()[0]['id'], {'DRAFT', 'FAILED'}), seen
+
+
+def test_an_episode_leaves_out_items_an_earlier_video_already_told(client, column_env, llm, monkeypatch):
+    script, seen = _write_episode(client, llm, monkeypatch, lambda items: [0])
+    assert script['status'] == 'DRAFT', script.get('error')
+    dropped = seen['items'][0]
+    prompt = llm.calls[0][1]['content'] + llm.calls[0][0]['content']
+    assert '往期已经讲过' in prompt and dropped in prompt  # named once, as the item to skip
+    assert script['version_shown']['meta']['episode_told'][0]['title'] == dropped
+
+
+def test_an_episode_whose_items_were_all_told_is_not_made(client, column_env, llm, monkeypatch):
+    script, _ = _write_episode(client, llm, monkeypatch, lambda items: range(len(items)))
+    assert script['status'] == 'FAILED' and '往期都已讲过' in (script.get('error') or '')
+    assert not llm.calls

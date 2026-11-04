@@ -3,12 +3,12 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import { loadPlatforms } from "@/api/platforms";
-import { loadAssistantRequest, loadAssistantUsage, loadComparison, loadPerformance, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, purgeRecords, type Usage } from "@/api/telemetry";
+import { loadAssistantRequest, loadAssistantUsage, loadComparison, loadPerformance, loadScriptBills, loadScriptDetail, loadStorage, loadTelemetrySummary, loadWeeklyReview, purgeRecords, type Usage } from "@/api/telemetry";
 import { useAuthStore } from "@/lib/auth-store";
 import { AnalyticsPage } from "./Analytics";
 import { PlatformsPage } from "./Platforms";
 
-vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadPerformance: vi.fn(), loadAssistantUsage: vi.fn(), loadAssistantRequest: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn() }));
+vi.mock("@/api/telemetry", () => ({ loadTelemetrySummary: vi.fn(), loadScriptBills: vi.fn(), loadScriptDetail: vi.fn(), loadComparison: vi.fn(), loadPerformance: vi.fn(), loadAssistantUsage: vi.fn(), loadAssistantRequest: vi.fn(), loadStorage: vi.fn(), purgeRecords: vi.fn(), loadWeeklyReview: vi.fn(), weeklyReportUrl: (start: number, stage: string) => `/api/telemetry/weekly-review/report?start=${start}&stage=${stage}` }));
 vi.mock("@/api/platforms", async original => ({ ...await original<typeof import("@/api/platforms")>(), loadPlatforms: vi.fn() }));
 vi.mock("@/components/VideoAnalytics", () => ({ VideoAnalytics: ({ isAdmin, canEdit }: { isAdmin: boolean; canEdit: boolean }) => <div>视频数据面板 {String(isAdmin)} {String(canEdit)}</div> }));
 
@@ -36,11 +36,12 @@ beforeEach(() => {
       tokens: 3_000_000, cost_usd: 3, partial: false, produce_seconds: 600, render_seconds: 1200, cost_per_kview: 1, tokens_per_kview: 1_000_000 }] });
   vi.mocked(loadAssistantUsage).mockResolvedValue({ enabled: true, request_total: 1,
     totals: { requests: 1, turns: 3, turns_per_request: 3, prompt_tokens: 60_000, completion_tokens: 900, cache_read_tokens: 30_000, cache_rate: 0.5, cost_usd: 0.06, partial: false,
-      tool_schema_share: 0.25, tool_calls: 2, failed: 0, earlier_calls: 728, earlier_prompt_tokens: 26_774_000, earlier_completion_tokens: 410_000 },
+      tool_schema_share: 0.25, tool_calls: 2, failed: 0, earlier_calls: 728, earlier_prompt_tokens: 26_774_000, earlier_completion_tokens: 410_000,
+      by_origin: { app: { requests: 1, turns: 3, prompt_tokens: 60_000, cost_usd: 0.06 }, script: { requests: 2, turns: 9, prompt_tokens: 900_000, cost_usd: 0.4 }, "": { requests: 0, turns: 0, prompt_tokens: 0, cost_usd: 0 } } },
     tools: [{ name: "query_jobs", calls: 2, requests: 1, avg_chars: 5000, max_chars: 8000, total_chars: 10_000 }],
     turns: [{ turn: 0, requests: 1, prompt_tokens_avg: 10_000, completion_tokens_avg: 100, message_chars_avg: 40_000, tool_schema_chars_avg: 20_000, tool_count_avg: 12, retired: 0 }],
     requests: [{ request_id: "r1", conversation_id: "c1", user: "admin", ts: 1_790_000_000, question: "帮我看看今天的任务", turns: 3, tools: ["query_jobs", "query_jobs"],
-      prompt_tokens: 60_000, completion_tokens: 900, cache_read_tokens: 30_000, cost_usd: 0.06, partial: false, failed: 0, seconds: 42, peak_prompt_tokens: 30_000 }] });
+      prompt_tokens: 60_000, completion_tokens: 900, cache_read_tokens: 30_000, cost_usd: 0.06, partial: false, failed: 0, seconds: 42, peak_prompt_tokens: 30_000, origin: "app" }] });
   vi.mocked(loadAssistantRequest).mockResolvedValue({ enabled: true, request_id: "r1", turns: [
     { turn: 0, message_chars: 40_000, tool_schema_chars: 20_000, tool_count: 12, retired: 0, saved_chars: 0, tools: [{ name: "query_jobs", chars: 5000 }], prompt_tokens: 10_000,
       completion_tokens: 100, cache_read_tokens: 0, cost_usd: 0.01, partial: false, seconds: 3, failed: 0 },
@@ -115,7 +116,15 @@ it("breaks the assistant down by turn, tool and request, and opens one request t
   await waitFor(() => expect(loadAssistantRequest).toHaveBeenCalledWith("r1", expect.anything()));
   expect(await screen.findByText("直接回答")).toBeTruthy();
   fireEvent.change(screen.getByLabelText("助手统计范围"), { target: { value: "7" } });
-  await waitFor(() => expect(loadAssistantUsage).toHaveBeenLastCalledWith(7, 0, expect.anything()));
+  await waitFor(() => expect(loadAssistantUsage).toHaveBeenLastCalledWith(7, 0, expect.anything(), ""));
+});
+
+it("splits the assistant's requests by where they were sent from", async () => {
+  show("/analytics?tab=assistant");
+  expect(await screen.findByText(/按来源：应用内 1 个请求.*；其他程序 2 个请求/)).toBeTruthy();
+  expect(screen.getByRole("cell", { name: "应用内" })).toBeTruthy();
+  fireEvent.change(screen.getByLabelText("请求来源"), { target: { value: "script" } });
+  await waitFor(() => expect(loadAssistantUsage).toHaveBeenLastCalledWith(30, 0, expect.anything(), "script"));
 });
 
 it("changes the range for every section", async () => {
@@ -177,4 +186,54 @@ it("sends the old platform-management data link to its new home", async () => {
   show("/platforms?tab=data");
   expect(await screen.findByText("视频数据面板 true true")).toBeTruthy();
   expect(screen.getByRole("tab", { name: /视频数据/ }).getAttribute("aria-selected")).toBe("true");
+});
+
+it("opens the weekly review from the URL, picks another week and keeps gaps apart from plays", async () => {
+  const video = { bvid: "BV1x", title: "ChatGPT 和 Claude 怎么选", pubdate: 1_793_000_000, duration: 300, view: 900, h24: 800, h72: null, h168: null, state: "ok" as const,
+    form: "单篇", matrix: "ChatGPT 获客矩阵", column: "T05 · AI 产品横向选择", structure: "A 价格反差与分任务对决" };
+  const review = { connected: true as const, weeks: [1_793_548_800, 1_792_944_000], saved: [], stage: "" as const, start: 1_792_944_000, end: 1_793_548_800, now: 1_793_600_000, min_n: 3, ratio: 2,
+    summary: { videos: 2, ok: 1, pending: 0, gap: 1, median_24h: 800, previous_median_24h: 5, previous_videos: 4, views: 1000, top_share: 0.9 },
+    dimensions: [{ key: "matrix", label: "矩阵", groups: [{ value: "ChatGPT 获客矩阵", videos: 2, measured: 1, median: 800, max: 800, best_title: video.title, previous_median: null, previous_measured: 0, flag: "" as const }] }],
+    top: [video], findings: ["1 条视频在发布后 24 小时附近没有采集快照（采集当时停了），不计入中位数。"], suggestions: [],
+    videos: [video, { ...video, bvid: "BV2y", title: "采集停掉那天的一条", h24: null, state: "gap" as const }] };
+  vi.mocked(loadWeeklyReview).mockResolvedValue(review);
+  show("/analytics?tab=review");
+  expect(await screen.findByText("本周结论")).toBeTruthy();
+  expect(screen.getByText(/没有采集快照/)).toBeTruthy();
+  expect(screen.getByText("采集中断")).toBeTruthy();
+  expect(screen.getAllByText("A 价格反差与分任务对决").length).toBe(2);
+  expect(screen.getByRole("tab", { name: /每周复盘/ }).getAttribute("aria-selected")).toBe("true");
+  fireEvent.change(screen.getByLabelText("复盘的周"), { target: { value: "1793548800" } });
+  await waitFor(() => expect(vi.mocked(loadWeeklyReview).mock.calls.at(-1)?.slice(0, 2)).toEqual([1_793_548_800, ""]));
+});
+
+it("shows completion, watch time and early exits once the creator centre has been read", async () => {
+  const video = { bvid: "BV1x", title: "Kimi 3D Make", pubdate: 1_793_000_000, duration: 181, view: 15, h24: 15, h72: null, h168: null, state: "ok" as const,
+    form: "单篇", matrix: "AI", column: "快讯", structure: "", completion: 66.57, avg_seconds: 120, exit3s: 16.66, cover_pass: null, watched_share: 66.3 };
+  const watch = { watch_measured: 1, completion: 66.57, avg_seconds: 120, exit3s: 16.66, cover_pass: 77.49 };
+  vi.mocked(loadWeeklyReview).mockResolvedValue({ connected: true, weeks: [1_792_944_000], saved: [], stage: "", start: 1_792_944_000, end: 1_793_548_800, now: 1_793_600_000, min_n: 3, ratio: 2,
+    summary: { videos: 1, ok: 1, pending: 0, gap: 0, median_24h: 15, previous_median_24h: null, previous_videos: 0, views: 15, top_share: 1, watch },
+    dimensions: [{ key: "duration", label: "时长", groups: [{ value: "2–4 分钟", videos: 1, measured: 1, median: 15, max: 15, best_title: video.title, previous_median: null, previous_measured: 0, flag: "", ...watch }] }],
+    top: [video], findings: [], suggestions: [], videos: [video] });
+  show("/analytics?tab=review");
+  expect(await screen.findByText("完播率中位数")).toBeTruthy();
+  expect(screen.getByText("77.5%")).toBeTruthy();
+  expect(screen.getAllByText("66.6%").length).toBe(3);
+  expect(screen.getByTitle("看了全片的 66.3%").textContent).toBe("120 秒");
+  expect(screen.queryByText(/这一周还没有读到/)).toBeNull();
+});
+
+it("opens a saved week from a notice link and offers its report", async () => {
+  vi.mocked(loadWeeklyReview).mockImplementation(async (_start, stage) => stage
+    ? { connected: true, weeks: [1_792_944_000], saved: [{ start: 1_792_944_000, stage: "24h", saved_at: 1_793_640_000, findings: 2, suggestions: 1 }], stage: "24h", saved_at: 1_793_640_000,
+      start: 1_792_944_000, end: 1_793_548_800, now: 1_793_640_000, min_n: 3, ratio: 2,
+      summary: { videos: 0, ok: 0, pending: 0, gap: 0, median_24h: null, previous_median_24h: null, previous_videos: 0, views: 0, top_share: null },
+      dimensions: [], top: [], findings: ["存下时的结论"], suggestions: ["存下时的建议"], videos: [] }
+    : { connected: true, missing: true, start: 1_792_944_000, weeks: [1_792_944_000], saved: [] });
+  show("/analytics?tab=review&start=1792944000&stage=24h");
+  expect(await screen.findByText("存下时的结论")).toBeTruthy();
+  expect(vi.mocked(loadWeeklyReview).mock.calls[0].slice(0, 2)).toEqual([1_792_944_000, "24h"]);
+  expect(screen.getByRole("link", { name: /下载报告/ }).getAttribute("href")).toContain("/weekly-review/report?start=1792944000&stage=24h");
+  fireEvent.change(screen.getByLabelText("复盘的版本"), { target: { value: "" } });
+  expect(await screen.findByText("这一周的这个版本还没有存档")).toBeTruthy();
 });

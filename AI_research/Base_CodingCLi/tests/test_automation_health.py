@@ -171,3 +171,160 @@ def test_an_empty_batch_started_by_hand_is_not_an_alert(jobs):
     run = ap.create_run({"picks": [], "refresh": False}, [], started_by="admin")
     ap.update_run(run["id"], started_at=FIVE, status="DONE", note="没有可写的新选题")
     assert health.alerts(now=FIVE + 3600) == []
+
+
+# --- Bilibili video data that stopped arriving (2026-10-31 00:10: plan switched off, nothing said so) ---
+
+from core.platform_analytics_store import AnalyticsStore, INTERNAL_JOB, SCHEDULE_ID  # noqa: E402
+from core.schedule_store import ScheduleStore  # noqa: E402
+from tests.test_platforms import platform_env  # noqa: E402,F401
+
+
+def _collecting(tmp, *, enabled=1, plan_on=True, last=None, watched=True):
+    from web.services.platform_analytics import watch_due
+    state = str(tmp / "state")
+    plans = ScheduleStore(state)
+    if not plans.get(SCHEDULE_ID):
+        plans.save(INTERNAL_JOB, "*/5 * * * *", schedule_id=SCHEDULE_ID, timezone="Asia/Shanghai", max_retries=0)
+    plans.toggle(SCHEDULE_ID, plan_on)
+    store = AnalyticsStore(state)
+    store.update_account("123", enabled=enabled, last_success_at=time.time() if last is None else last)
+    if watched:  # today's creator-centre reading finished
+        due = watch_due(time.time())
+        store.update_watch_state("123", day=due.date().isoformat(), next_at=due.timestamp() + 86400)
+
+
+def test_a_plan_switched_off_behind_the_accounts_back_is_reported(platform_env):
+    _collecting(platform_env, plan_on=False)
+    [alert] = health.analytics_alerts(time.time())
+    assert alert["kind"] == "analytics_off" and "被关掉" in alert["title"] and alert["link"] == "/analytics?tab=video"
+    ap.ack_alert(alert["key"], "admin")
+    assert all(a["kind"] != "analytics_off" for a in health.alerts())
+
+
+def test_collection_that_stops_succeeding_is_reported_with_its_reason(platform_env):
+    now = time.time()
+    _collecting(platform_env, last=now - 3 * 3600)
+    AnalyticsStore(str(platform_env / "state")).update_account("123", error="HTTP 412", blocked_until=now + 600)
+    [alert] = health.analytics_alerts(now)
+    assert alert["kind"] == "analytics_stale" and "3 小时" in alert["title"]
+    assert "HTTP 412" in alert["detail"] and "退避" in alert["detail"]
+
+
+def test_fresh_paused_or_disconnected_collection_is_quiet(platform_env):
+    _collecting(platform_env)
+    assert health.analytics_alerts(time.time()) == []
+    _collecting(platform_env, enabled=0, plan_on=False)  # paused on purpose: account flag cleared too
+    assert health.analytics_alerts(time.time()) == []
+    from web.services import platform_manager
+    platform_manager.disconnect()
+    assert health.analytics_alerts(time.time()) == []
+
+
+def test_pausing_the_collector_from_the_scheduler_is_a_deliberate_pause(platform_env, client, monkeypatch):
+    from web.services import managed_scheduler
+    monkeypatch.setattr(managed_scheduler, "ensure_online", lambda: {"online": True})
+    _collecting(platform_env)
+    _login(client, "admin", "admin-pass-123")
+    for enabled, flag in ((False, 0), (True, 1)):
+        response = client.put(f"/api/scheduler/{SCHEDULE_ID}/toggle", json={"enabled": enabled}, headers=_csrf(client))
+        assert response.status_code == 200
+        assert AnalyticsStore(str(platform_env / "state")).account("123")["enabled"] == flag
+        assert health.analytics_alerts(time.time()) == []
+
+
+def test_a_week_saved_in_the_last_week_is_announced_once(jobs):
+    from core.weekly_review_store import ReviewStore
+    from tests.test_weekly_review import MONDAY, _saved_review
+    from web.settings import get_settings
+    store = ReviewStore(get_settings().paths.state_dir)
+    store.save(_saved_review(MONDAY), "24h", now=MONDAY + 8 * 86400)
+    store.save(_saved_review(MONDAY), "7d", now=MONDAY + 14 * 86400)  # the 7-day copy is kept without a second notice
+    notices = [a for a in health.alerts(now=MONDAY + 9 * 86400) if a["kind"] == "review_saved"]
+    assert [(a["title"], a["link"]) for a in notices] == [
+        ("10-26 这周的复盘已存档：1 条结论、0 条建议", f"/analytics?tab=review&start={MONDAY:.0f}&stage=24h")]
+    assert not [a for a in health.alerts(now=MONDAY + 16 * 86400) if a["kind"] == "review_saved"]
+
+
+def test_search_out_of_credits_is_one_alert_until_it_answers(jobs, tmp_path):
+    from core import search_health
+    search_health.use_state_dir(str(tmp_path))
+    try:
+        credits = 'HTTP 402: {"error":"You have exceeded your credits limit","tag":"NO_MORE_CREDITS"}'
+        for minute in range(0, 600, 30):  # retried every cooldown: still one alert
+            search_health.record_failures({"exa": credits}, now=FIVE + minute * 60)
+        [alert] = [a for a in health.alerts(now=FIVE + 36000) if a["kind"] == "search_blocked"]
+        assert alert["title"] == "Exa 搜索额度用完" and alert["link"] == "/settings" and alert["at"] == FIVE
+        assert "10-20 05:00 起" in alert["detail"] and "其他搜索服务在顶替" in alert["detail"]
+        search_health.record_outage({"exa": credits}, now=FIVE + 35000)
+        assert "自动调研和出片在等待恢复" in health.search_alerts(FIVE + 35000)[0]["detail"]
+        # Not tried for two days (e.g. taken out of the settings): it drops off.
+        assert not health.search_alerts(FIVE + 4 * 86400)
+        search_health.record_answer("exa")
+        assert not health.search_alerts(FIVE + 36000)
+    finally:
+        search_health.use_state_dir(None)
+
+
+def test_a_job_failure_it_has_since_recovered_from_is_quiet(jobs):
+    history(jobs, "monitoring/ai_flash_discovery", [
+        {"ts": ts("02:05:37"), "user": "", "status": "failed", "error": "content_filter"},
+        {"ts": ts("02:08:31"), "user": "", "status": "success"},
+        {"ts": ts("14:00:00"), "user": "", "status": "failed", "error": "Unterminated string"},
+    ])
+    found = [a for a in health.alerts(now=FIVE + 12 * 3600) if a["kind"] == "job_failed"]
+    assert [a["detail"] for a in found] == ["Unterminated string"]
+
+
+def _held_batch(at, title, note):
+    run = ap.create_run({"picks": [], "refresh": False}, [{"column_key": "flash", "topic": {"id": title, "title": title}}],
+                        started_by="autopilot")
+    ap.update_run(run["id"], started_at=at)
+    ap.update_item(run["items"][0]["id"], state="HELD", note=note)
+    return run
+
+
+def test_many_batches_stuck_on_one_cause_are_one_alert(jobs):
+    from core.errors import SEARCH_UNAVAILABLE_PREFIX
+    for n in range(4):
+        _held_batch(FIVE + n * 60, f"题目{n}", f"写稿失败 3 次：研究没有完成：{SEARCH_UNAVAILABLE_PREFIX}，已中止。"
+                    f"exa: HTTP 402 requestId {n}abcdef0123456789abcdef；请到「设置 → 搜索」检查服务商额度。")
+    _held_batch(FIVE + 600, "另一题", "出片失败两次")
+    found = health.alerts(now=FIVE + 3600)
+    assert sorted(a["kind"] for a in found) == ["batch_cause", "batch_items"]
+    [group] = [a for a in found if a["kind"] == "batch_cause"]
+    assert group["title"] == "10-20 05:00 起 4 个批次因同一原因卡住：等你处理 4 篇" and group["at"] == FIVE
+    assert "exa:" not in group["detail"] and "请到「设置 → 搜索」" in group["detail"]
+    assert "题目0、题目1、题目2、题目3" in group["detail"]
+    # Acknowledged once, it stays off until another batch joins it.
+    ap.ack_alert(group["key"])
+    assert [a["kind"] for a in health.alerts(now=FIVE + 3600)] == ["batch_items"]
+    _held_batch(FIVE + 1200, "题目4", f"{SEARCH_UNAVAILABLE_PREFIX}，已中止。")
+    assert "5 个批次" in [a for a in health.alerts(now=FIVE + 3600) if a["kind"] == "batch_cause"][0]["title"]
+
+
+def test_two_batches_with_a_shared_cause_stay_separate(jobs):
+    for n in range(2):
+        _held_batch(FIVE + n * 60, f"题目{n}", "出片失败两次")
+    assert [a["kind"] for a in health.alerts(now=FIVE + 3600)] == ["batch_items", "batch_items"]
+
+
+def test_a_daily_watch_reading_that_has_not_finished_by_afternoon_is_reported(platform_env):
+    from web.services.platform_analytics import watch_due
+    due = watch_due(time.time()).timestamp()
+    # Play data keeps arriving throughout; times follow the reading's, not the wall clock, so the morning run agrees.
+    _collecting(platform_env, watched=False, last=due + 3000)
+    assert health.analytics_alerts(due + 3600) == []  # still within a normal pass
+    store = AnalyticsStore(str(platform_env / "state"))
+    store.update_account("123", last_success_at=due + 5 * 3600 - 300)
+    [alert] = health.analytics_alerts(due + 5 * 3600)
+    assert alert["kind"] == "analytics_watch" and "没有读完" in alert["title"] and "从未读到" in alert["detail"]
+    store.save_watch("123", "BV0000000001", "2026-11-02", {"completion": 9.75}, due + 5 * 3600 - 600)
+    assert health.analytics_alerts(due + 5 * 3600) == []  # late but still saving readings: let it finish
+    store.update_watch_state("123", day="2026-11-01", next_at=due + 5 * 3600 + 600,
+                             error="创作中心稿件诊断格式发生变化，保留上次数据。")
+    [alert] = health.analytics_alerts(due + 5 * 3600)
+    assert "2026-11-01" in alert["detail"] and "格式发生变化" in alert["detail"] and alert["link"] == "/analytics?tab=review"
+    # Play data stopped too: the one stale-data alert says it, not a second one.
+    _collecting(platform_env, last=due + 5 * 3600 - 3 * 3600, watched=False)
+    assert [a["kind"] for a in health.analytics_alerts(due + 5 * 3600)] == ["analytics_stale"]

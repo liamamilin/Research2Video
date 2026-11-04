@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from core import sources
 
 RSS_XML = """<?xml version="1.0"?>
@@ -299,3 +301,65 @@ def test_the_shipped_registry_loads_and_every_tag_a_job_uses_exists():
                 assert spec[4:] in tags, f"{path}: {spec}"
             if str(spec).startswith("source:"):
                 assert spec[7:] in registry, f"{path}: {spec}"
+
+
+def _fake_radar(tmp_path, monkeypatch, briefings: dict, *, fail: bool = False):
+    """A radar-cli stand-in: ``days`` lists the briefings, ``briefing --day D`` prints one (exit 2 when missing)."""
+    import json as _json
+    import stat
+    data = tmp_path / "briefings.json"
+    data.write_text(_json.dumps(briefings), encoding="utf-8")
+    cli = tmp_path / "radar-cli"
+    cli.write_text(f"""#!/usr/bin/env python3
+import json, sys
+if {fail!r}:
+    print("db locked", file=sys.stderr); sys.exit(3)
+b = json.load(open({str(data)!r}, encoding="utf-8"))
+if sys.argv[1] == "days":
+    print("\\n".join(sorted(b, reverse=True))); sys.exit(0)
+day = sys.argv[sys.argv.index("--day") + 1]
+day = max(b) if day == "latest" else day
+if day not in b:
+    sys.exit(2)
+print(json.dumps(b[day]))
+""", encoding="utf-8")
+    cli.chmod(cli.stat().st_mode | stat.S_IEXEC)
+    monkeypatch.setenv("RADAR_CLI", str(cli))
+    monkeypatch.delenv("RADAR_DB", raising=False)
+
+
+def _radar_day(day, *evidence, title="chatgpt / claude / codex 动态"):
+    return {"day": day, "sections": [{"title": title, "evidence": list(evidence)}]}
+
+
+def _event(url, date, title="t", is_event=True):
+    return {"url": url, "date": date, "title": title, "text": "摘要", "isEvent": is_event}
+
+
+def test_radar_reads_the_window_days_of_one_section_in_beijing_time(tmp_path, monkeypatch):
+    _fake_radar(tmp_path, monkeypatch, {
+        "2026-11-02": _radar_day("2026-11-02", _event("https://a/1", "2026-11-01T23:00:00Z"),
+                                 _event("https://a/standing", "2026-10-20T00:00:00Z", is_event=False)),
+        "2026-11-03": _radar_day("2026-11-03", _event("https://a/2", "2026-11-02T23:30:00Z"),
+                                 _event("https://a/1", "2026-11-01T23:00:00Z")),
+        "2026-10-30": _radar_day("2026-10-30", _event("https://a/old", "2026-10-29T23:00:00Z")),
+    })
+    window = {"start": "2026-11-02T07:30:00+08:00", "end": "2026-11-03T07:30:00+08:00", "days": 1}
+    items = sources.fetch_source("radar:chatgpt / claude / codex 动态", collection_window=window)
+    assert [i.url for i in items] == ["https://a/2", "https://a/1"]  # one copy each, standing entries and old days left out
+    assert items[0].publish_date == "2026-11-03T07:30:00+08:00" and items[0].provider == "radar"
+    assert items.coverage == {"2026-11-03": {"status": "read", "items": 2}, "2026-11-02": {"status": "empty", "items": 0}}
+
+
+def test_radar_falls_back_to_the_latest_briefing_and_names_a_missing_section(tmp_path, monkeypatch):
+    _fake_radar(tmp_path, monkeypatch, {"2026-11-01": _radar_day("2026-11-01", _event("https://a/1", "2026-10-31T23:00:00Z"))})
+    window = {"start": "2026-11-02T07:30:00+08:00", "end": "2026-11-03T07:30:00+08:00", "days": 1}
+    assert [i.url for i in sources.fetch_source("radar:chatgpt / claude / codex 动态", collection_window=window)] == ["https://a/1"]
+    with pytest.raises(ValueError, match="没有栏目「改了名的栏目」"):
+        sources.fetch_source("radar:改了名的栏目", collection_window=window)
+
+
+def test_radar_cli_failure_is_an_error_not_a_quiet_day(tmp_path, monkeypatch):
+    _fake_radar(tmp_path, monkeypatch, {}, fail=True)
+    with pytest.raises(RuntimeError, match="退出码 3：db locked"):
+        sources.fetch_source("radar:chatgpt / claude / codex 动态")

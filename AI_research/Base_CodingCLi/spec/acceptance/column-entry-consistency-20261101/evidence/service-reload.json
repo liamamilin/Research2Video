@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "maintenance_id": "400c2b95510848618570881eb34dd7bc",
+  "old_pid": 938,
+  "new_pid": 35941,
+  "health": "ok",
+  "waited_for_existing_work": true,
+  "before": {
+    "scripts": {
+      "count": 364,
+      "sha256": "cffae9615c39b0e86fc0721390f548e71362619d84d5e6fb65d82464ca833258"
+    },
+    "renders": {
+      "count": 377,
+      "sha256": "cf9e25f8fae09dca9136c35ac265a24fc85d4b4b78d39b08ee348f386be2a161"
+    },
+    "schedules": {
+      "count": 61,
+      "sha256": "4c3d9a8148ab0691288186453471e5c39a7f8f553dd967270735654147d43738"
+    }
+  },
+  "after": {
+    "scripts": {
+      "count": 364,
+      "sha256": "cffae9615c39b0e86fc0721390f548e71362619d84d5e6fb65d82464ca833258"
+    },
+    "renders": {
+      "count": 377,
+      "sha256": "cf9e25f8fae09dca9136c35ac265a24fc85d4b4b78d39b08ee348f386be2a161"
+    },
+    "schedules": {
+      "count": 61,
+      "sha256": "4c3d9a8148ab0691288186453471e5c39a7f8f553dd967270735654147d43738"
+    }
+  },
+  "records_unchanged_during_reload": true,
+  "new_schedules": 0,
+  "source_sha256": {
+    "core/video/episodes.py": "e4073d24d636b974f5e0971794f26d32a4f495be97943ea6a4fd074d69d531d1",
+    "core/video/writer.py": "da0912cdc35e59f6a5e4d608911ee967462908dfa08bb87380da5de92cf46214",
+    "web/services/video_workflow.py": "4d0b206a67686e21f1bea64dd979b777114aeb26c5a9f7621f85bbc4e558695b",
+    "web/services/assistant_materials.py": "0d62d1caf92cc00db4dcd393cf71761d8fd745abac6e46d1e4f374d2b1c5b617",
+    "web/services/video_render.py": "5a842f091b8442959a6c24b5ff89d780019e0010ffad25fb825990445554a384"
+  }
+}

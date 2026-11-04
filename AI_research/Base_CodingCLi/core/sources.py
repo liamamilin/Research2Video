@@ -13,6 +13,7 @@ with web-search results. Specs are strings:
 * ``gh_new:keywords``      GitHub repositories created in the last 7 days matching the keywords, by stars
 * ``aa:models``            Artificial Analysis model leaderboard (intelligence, price, speed)
 * ``wb:CODE[@ISO;ISO]``   World Bank indicator: the two latest yearly values for the world and nine large economies
+* ``radar:<section title>`` one section of the local Radar app's daily briefings (read-only ``radar-cli``)
 
 A Job's ``sources`` may also name entries of the registry (``config/sources.yaml``): ``source:<id>`` is one source,
 ``tag:<tag>`` every source carrying that tag, in registry order. ``resolve`` turns them into the specs above.
@@ -251,6 +252,71 @@ def fetch_tldr(edition: str, limit: int = 8, timeout: int = 20, *, collection_wi
     return FetchBatch(results, coverage) if collection_window else results
 
 
+RADAR_CLI = "/Users/milin/2026/软件开发/Radar-Lean/Radar/dist/radar-cli"
+
+
+def _radar(*args: str, timeout: int) -> Optional[str]:
+    """Output of a read-only radar-cli call; None when the asked day has no briefing (exit code 2)."""
+    import subprocess
+    cli = os.environ.get("RADAR_CLI") or RADAR_CLI
+    command = [cli, *args] + (["--db", os.environ["RADAR_DB"]] if os.environ.get("RADAR_DB") else [])
+    try:
+        done = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise RuntimeError(f"radar-cli 无法运行：{exc}") from exc
+    if done.returncode == 2:
+        return None
+    if done.returncode:
+        raise RuntimeError(f"radar-cli 退出码 {done.returncode}：{(done.stderr or done.stdout).strip()[:300]}")
+    return done.stdout
+
+
+def parse_radar(briefing: dict, section: str) -> Optional[list[SearchResult]]:
+    """The events of one section, each a link with Radar's summary and its UTC time in Beijing time. Standing
+    entries (no event) are left out. None when the briefing has no section of that title."""
+    from zoneinfo import ZoneInfo
+    found = next((s for s in briefing.get("sections") or [] if s.get("title") == section), None)
+    if found is None:
+        return None
+    results = []
+    for item in found.get("evidence") or []:
+        if not item.get("isEvent") or not item.get("url"):
+            continue
+        when = ""
+        if item.get("date"):
+            when = datetime.datetime.fromisoformat(item["date"].replace("Z", "+00:00")).astimezone(
+                ZoneInfo("Asia/Shanghai")).isoformat()
+        results.append(SearchResult(
+            title=_clean(item.get("title"), 200), url=item["url"].strip(), publish_date=when or None,
+            excerpts=[_clean(item.get("text"), FEED_EXCERPT_CHARS)], provider="radar"))
+    return results
+
+
+def fetch_radar(section: str, limit: int = 8, timeout: int = 30, *, collection_window: Optional[dict] = None) -> list[SearchResult]:
+    """One section of the Radar briefings. With a window, every briefing whose day is in it (Radar files the
+    morning's briefing under that day; the window's own dates decide what is news), else the latest one. When
+    none of those days has a briefing yet, the latest is read. A section title missing from every briefing read
+    is an error, so a renamed section is not taken for a quiet day."""
+    from .research_window import dates
+    days = set((_radar("days", timeout=timeout) or "").split())
+    wanted = [d for d in dates(collection_window) if d in days] if collection_window else []
+    coverage, results, seen, titled = {}, [], set(), False
+    for day in wanted or ["latest"]:
+        raw = _radar("briefing", "--day", day, timeout=timeout)
+        if raw is None:
+            coverage[day] = {"status": "no_issue"}
+            continue
+        items = parse_radar(json.loads(raw), section)
+        titled = titled or items is not None
+        items = [i for i in items or [] if i.url not in seen]
+        seen.update(i.url for i in items)
+        coverage[day] = {"status": "read" if items else "empty", "items": len(items)}
+        results.extend(items)
+    if not titled:
+        raise ValueError(f"radar：简报里没有栏目「{section}」（栏目改名或被删除了）")
+    return FetchBatch(results, coverage) if collection_window else results
+
+
 def parse_hf_papers(data: list, limit: int) -> list[SearchResult]:
     results = []
     for item in data[:limit]:
@@ -417,6 +483,7 @@ _ADAPTERS = {
     "gh_new": fetch_gh_new,
     "aa": fetch_aa_models,
     "wb": fetch_worldbank,
+    "radar": fetch_radar,
 }
 
 
@@ -509,7 +576,7 @@ def fetch_source(spec: str, limit: int = 8, timeout: int = 20, *,
     if not adapter or not target:
         logger.warning("Unknown source spec: %s", spec)
         return []
-    if collection_window and kind in {'tldr', 'hf_papers', 'gh_new'}:
+    if collection_window and kind in {'tldr', 'hf_papers', 'gh_new', 'radar'}:
         return adapter(target, limit=limit, timeout=timeout, collection_window=collection_window)
     if kind in {"page", "catalog"} and search_client is not None:
         from .source_pages import fetch_page

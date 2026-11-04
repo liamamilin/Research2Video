@@ -1,0 +1,142 @@
+{
+  "scope": "existing App rewrite and automatic continuation; no handwritten script or manual rendering",
+  "script_id": "26d755b67a5646ca975093ff9ecbc843",
+  "script_count": 364,
+  "old_v1_unchanged": true,
+  "versions": [
+    {
+      "version": 1,
+      "title": "快讯补充｜10月29–30日的三条更新",
+      "sha256": "588734f91dac09c006ee325418716be17e7736f79a921118ff2a401e05b3dfa9",
+      "first_paragraph": "这期快讯补充讲三条近期更新，它们分别落在三种不同的用法上。你如果正打算把模型接进生物或生命科学的研发流程，第一条决定你有没有资格调用；你如果在生产环境里加载社区模型、跑 MCP 工具，第二条决定你今天该关掉哪个开关；你如果正在为团队申请预算、向管理层说明 AI 的投入产出，第三条给了一组可以直接引用的数字。三条都不长，但每条后面都跟着一个容易忽略的前提。",
+      "sections": [
+        {
+          "title": "三条更新，三种用法",
+          "role": null,
+          "paragraphs": 1
+        },
+        {
+          "title": "Rosalind：能力对口，但你多半没有访问权",
+          "role": null,
+          "paragraphs": 3
+        },
+        {
+          "title": "trust_remote_code 一开，模型作者就在你进程里跑代码",
+          "role": null,
+          "paragraphs": 5
+        },
+        {
+          "title": "954% ROI 的试点，重点不在 954%",
+          "role": null,
+          "paragraphs": 3
+        },
+        {
+          "title": "三个门槛",
+          "role": null,
+          "paragraphs": 1
+        }
+      ],
+      "episode": null,
+      "material_ids": [
+        "8f351bbf01fc4e3dba1d6016e8fbd4b9",
+        "ecb3b00e82cb49419f7decee0eb3e2f1",
+        "ae4963614a094ec684a9a68157599933"
+      ]
+    },
+    {
+      "version": 2,
+      "title": "快讯补充｜10月29–30日的三条更新",
+      "sha256": "4bf487723203298f9a26d9530adc0aa0a34ca71349e858c91ac2f326b67afcce",
+      "first_paragraph": "大家好，欢迎收看今日快讯。这期补充稿看三条近期更新：OpenAI 把生物研究模型放进可信访问计划，安全简报提醒模型仓库和工具链仍在放大风险，还有一个企业试点给出了可量化的 AI 采用结果。",
+      "sections": [
+        {
+          "title": "本期导读",
+          "role": "opening",
+          "paragraphs": 4
+        },
+        {
+          "title": "生物研究模型的受限访问",
+          "role": "item",
+          "paragraphs": 4
+        },
+        {
+          "title": "模型仓库与工具链风险",
+          "role": "item",
+          "paragraphs": 6
+        },
+        {
+          "title": "试点指标比发账号更重要",
+          "role": "item",
+          "paragraphs": 4
+        },
+        {
+          "title": "本期回顾",
+          "role": "closing",
+          "paragraphs": 1
+        }
+      ],
+      "episode": {
+        "mode": "episode",
+        "report_path": "",
+        "source_items": [],
+        "items": [
+          {
+            "index": 1,
+            "title": "生物研究模型的受限访问",
+            "chapter_index": 1,
+            "paragraphs": 4
+          },
+          {
+            "index": 2,
+            "title": "模型仓库与工具链风险",
+            "chapter_index": 2,
+            "paragraphs": 6
+          },
+          {
+            "index": 3,
+            "title": "试点指标比发账号更重要",
+            "chapter_index": 3,
+            "paragraphs": 4
+          }
+        ]
+      },
+      "material_ids": [
+        "8f351bbf01fc4e3dba1d6016e8fbd4b9",
+        "ecb3b00e82cb49419f7decee0eb3e2f1",
+        "ae4963614a094ec684a9a68157599933"
+      ]
+    }
+  ],
+  "render_id": "23a05127a2334c0ebb1fd03fb5d409a2",
+  "render_status": "RUNNING",
+  "episode": {
+    "items": [
+      {
+        "title": "生物研究模型的受限访问",
+        "chapter_indexes": [
+          1
+        ]
+      },
+      {
+        "title": "模型仓库与工具链风险",
+        "chapter_indexes": [
+          2
+        ]
+      },
+      {
+        "title": "试点指标比发账号更重要",
+        "chapter_indexes": [
+          3
+        ]
+      }
+    ]
+  },
+  "voice_id": "voxcpm_anchor",
+  "video_speed": 1.25,
+  "packaging": {
+    "label": "AI 快讯",
+    "preset": "common"
+  },
+  "new_schedules": 0,
+  "published": false
+}

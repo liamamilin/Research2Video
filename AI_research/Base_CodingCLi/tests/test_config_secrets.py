@@ -264,12 +264,13 @@ def test_test_llm_tries_the_configured_model_alone_never_its_fallbacks(client, s
     class Recording(_FakeLLMClient):
         def __init__(self, cfg):
             super().__init__(cfg)
-            seen.append(cfg.fallback_models)
+            seen.append([*cfg.fallback_models, *cfg.fallback_providers])
 
     monkeypatch.setattr("web.routes.config.LLMClient", Recording)
     _login(client)
     r = client.post("/api/config/test-llm", headers=_csrf(client), json={
-        "section": "review_ai", "config": {"review_ai": {"model": "dead-free", "fallback_models": ["minimax-m3"]}}})
+        "section": "review_ai", "config": {"review_ai": {"model": "dead-free", "fallback_models": ["minimax-m3"],
+                                                     "fallback_providers": ["open-design:deepseek-v4.1-flash"]}}})
     assert r.status_code == 200, r.text
     assert seen == [[]]  # a dead primary answered by its fallback would read as "available"
 

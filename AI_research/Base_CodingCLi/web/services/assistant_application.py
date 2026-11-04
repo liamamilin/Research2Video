@@ -23,7 +23,10 @@ DOMAINS = {
     'jobs': ('研究任务与素材来源', '/api/jobs'),
     'sources': ('信息源', '/api/sources'),
     'platforms': ('平台发布、账号状态与评论', '/api/platforms'),
+    'analytics': ('数据分析（只读）：每周复盘（播放、完播率、观看时长、3 秒退出，按矩阵/栏目/时长等分组）、成本与用量', '/api/telemetry'),
 }
+#: Domains the assistant may read but never change (analytics purge stays a button in the UI).
+READ_ONLY = frozenset({'analytics'})
 RANK = {'viewer': 0, 'editor': 1, 'admin': 2}
 
 
@@ -33,6 +36,8 @@ def domain(path: str) -> str | None:
 
 def allowed(route: Any) -> bool:
     if not isinstance(route, APIRoute) or not domain(route.path):
+        return False
+    if domain(route.path) in READ_ONLY and route.methods - {'GET', 'HEAD'}:
         return False
     # Binary/stream transports and credentials have dedicated UI/protected-input flows.
     return not any(part in route.path.split('/') for part in ('stream', 'files', 'reveal', 'credentials', 'login'))

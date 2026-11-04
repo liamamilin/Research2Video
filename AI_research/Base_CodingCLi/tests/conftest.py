@@ -48,6 +48,17 @@ def _search_health_per_test():
     search_health.use_state_dir(None)
 
 @pytest.fixture(autouse=True)
+def _no_real_dispatcher_install(monkeypatch):
+    """Installing the dispatcher writes a KeepAlive agent into ~/Library/LaunchAgents that outlives the test and keeps
+    a process running for its temporary workspace. A test that gets this far must stub managed_scheduler.ensure_online."""
+    from core import schedule_host
+
+    def refuse(*_args, **_kwargs):
+        pytest.fail("a test reached the real launchd dispatcher install; stub managed_scheduler.ensure_online")
+    monkeypatch.setattr(schedule_host, "install", refuse)
+
+
+@pytest.fixture(autouse=True)
 def _telemetry_per_test():
     """Usage records follow core.state's directory; no test writes to, or reads from, another test's database."""
     from core import telemetry

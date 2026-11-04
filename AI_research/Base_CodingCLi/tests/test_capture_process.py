@@ -146,3 +146,43 @@ def test_manual_capture_also_uses_disposable_worker(monkeypatch):
     monkeypatch.setattr(capture_process, "run", lambda *a, **k: calls.append((a, k)) or (b"image", {}))
     assert screenshots.capture("https://example.com", mode="element", selector="#content") == (b"image", {})
     assert calls[0][0] == ("screenshot", {"url": "https://example.com", "mode": "element", "selector": "#content", "clip": None})
+
+
+def test_timeout_also_stops_a_browser_started_in_its_own_process_group(monkeypatch, tmp_path):
+    # Playwright launches Chrome detached; killing the worker's group alone used to leave it running for days.
+    pid_file = tmp_path / "browser.pid"
+    child_program(monkeypatch, f"""
+import json, subprocess, sys, time
+from pathlib import Path
+json.load(sys.stdin)
+browser = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"], start_new_session=True)
+Path({str(pid_file)!r}).write_text(str(browser.pid))
+time.sleep(60)
+""")
+    with pytest.raises(screenshots.ScreenshotError, match="超时"):
+        capture_process.run("automatic", {}, timeout_seconds=1.5)
+    browser = int(pid_file.read_text())
+    deadline = time.monotonic() + 3
+    while time.monotonic() < deadline:
+        try:
+            os.kill(browser, 0)
+        except ProcessLookupError:
+            break
+        time.sleep(.05)
+    with pytest.raises(ProcessLookupError):
+        os.kill(browser, 0)
+
+
+def test_startup_stops_only_ownerless_page_reader_browsers(monkeypatch):
+    import subprocess
+    profile = "--user-data-dir=/var/folders/x/T/playwright_chromiumdev_profile-abc"
+    table = "\n".join([
+        f"101 1 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless {profile}",
+        f"102 555 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome --headless {profile}",  # driver alive
+        "103 1 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome",  # the user's own Chrome
+        "104 1 Google Chrome for Testing --headless --user-data-dir=/Users/me/state/platforms/douyin",  # logged-in publisher
+    ])
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout=table))
+    killed = []
+    monkeypatch.setattr(os, "kill", lambda pid, sig: killed.append(pid))
+    assert screenshots.reap_orphans() == [101] and killed == [101]

@@ -668,3 +668,67 @@ def test_provider_filter_does_not_replay_already_displayed_stream_text(monkeypat
         client.chat([{"role": "user", "content": "x"}], stream=True, on_delta=displayed.append)
     assert calls == ["a"]
     assert displayed == ["已显示的前缀"]
+
+
+# --- fallback to another provider ---------------------------------------------
+
+def test_a_provider_fallback_uses_that_providers_address_key_and_headers(monkeypatch):
+    from core import llm as llm_module
+    from core.telemetry import store
+
+    monkeypatch.setenv("OPENDESIGN_API_KEY", "od-key")
+    client = make_client(model="deepseek-v4.1-flash", base_url="https://opencode.ai/zen/go/v1", api_key="oc-key",
+                         extra_headers={"x-opencode-session": "ses_{session_id}"}, extra_body={"x": 1},
+                         fallback_providers=["open-design:deepseek-v4.1-flash"])
+    client._session_id = "ses_t"
+    built: list[dict] = []
+    monkeypatch.setattr(llm_module, "OpenAI", lambda **kw: built.append(kw) or types.SimpleNamespace(close=lambda: None))
+    recorded: list[str] = []
+    monkeypatch.setattr(llm_module.telemetry, "record_call", lambda kind, provider="", **kw: recorded.append(provider))
+
+    def answer(_messages, **_kw):
+        client._ensure_client()
+        if "opencode" in client.config.base_url:
+            raise FakeAPIStatusError(401)
+        return reply("ok")
+
+    monkeypatch.setattr(client, "_chat_cancellable", answer)
+    assert client.chat([{"role": "user", "content": "x"}]).content == "ok"
+    assert [b["base_url"] for b in built] == ["https://opencode.ai/zen/go/v1", "https://amr-link.open-design.ai/v1"]
+    assert built[1]["api_key"] == "od-key" and built[0]["api_key"] == "oc-key"
+    assert built[1]["default_headers"] is None  # the opencode session header stays with opencode
+    assert client.config.extra_body == {} and client.config.api_key_env == "OPENDESIGN_API_KEY"
+    assert client.model_switches[-1] == {"from": "deepseek-v4.1-flash", "to": "deepseek-v4.1-flash",
+                                         "reason": "鉴权被拒绝", "from_provider": "opencode.ai",
+                                         "to_provider": "amr-link.open-design.ai"}
+    assert recorded == ["opencode.ai"]  # the failed attempt is billed to the provider that failed
+    assert store.provider_of(client.config.base_url) == "amr-link.open-design.ai"  # later usage goes to the new host
+
+
+def test_same_provider_models_come_before_other_providers_and_unready_entries_are_skipped(monkeypatch):
+    from core.llm import fallback_targets
+
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.setenv("OPENDESIGN_API_KEY", "od-key")
+    config = LLMConfig(model="a", base_url="https://opencode.ai/zen/go/v1", api_key="k", fallback_models=["b"],
+                       fallback_providers=["deepseek:deepseek-chat", "nobody:x", "broken",
+                                           "open-design:deepseek-v4.1-flash", "ollama:qwen3.8:27b-mlx"])
+    chain = [(t.base_url, t.model) for t in fallback_targets(config)]
+    assert chain == [("https://opencode.ai/zen/go/v1", "a"), ("https://opencode.ai/zen/go/v1", "b"),
+                     ("https://amr-link.open-design.ai/v1", "deepseek-v4.1-flash"),
+                     ("http://localhost:11434/v1", "qwen3.8:27b-mlx")]  # keyless Ollama needs no key
+
+
+def test_every_provider_failing_names_each_model_tried(monkeypatch):
+    monkeypatch.setenv("OPENDESIGN_API_KEY", "od-key")
+    client = make_client(model="a", base_url="https://opencode.ai/zen/go/v1",
+                         fallback_providers=["open-design:b"])
+
+    def boom(_messages, **_kw):
+        raise FakeAPIStatusError(410)
+
+    monkeypatch.setattr(client, "_chat_cancellable", boom)
+    with pytest.raises(LLMError) as caught:
+        client.chat([{"role": "user", "content": "x"}])
+    assert "a" in str(caught.value) and "b" in str(caught.value)
+    assert client._active_model() == "b"

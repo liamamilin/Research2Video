@@ -76,7 +76,8 @@ def test_the_pack_has_title_description_references_tags_and_cover_text():
     assert "https://example.com/unused" in pack["description"]
     assert "参考来源（文稿引用）：" in pack["description"] and "报告补充资料：" in pack["description"]
     assert [r["cited"] for r in pack["references"]] == [True, True, True, False]
-    assert pack["tags"][:3] == ["快讯", "开发者", "AI"] and "Gemini" in pack["tags"] and len(pack["tags"]) <= 10
+    assert "Gemini" in pack["tags"] and "AI" in pack["tags"] and len(pack["tags"]) <= 10
+    assert not {"快讯", "开发者"} & set(pack["tags"])  # the column's own name and audience are no search terms
     assert pack["cover"] == {"headline": "Gemini 4 Argon", "badge": "快讯"}
     assert pack["chapter_note"] and any("没有发布日期" in w for w in pack["warnings"])
     assert not any("定稿" in w for w in pack["warnings"])
@@ -116,7 +117,7 @@ def test_a_description_over_the_limit_drops_the_extras_before_the_references():
 
 def test_tags_skip_prices_and_a_long_title_is_cut_at_its_first_clause_for_the_cover():
     title = "Gemini 4 Argon 上线：限时输入 $2 输出 $10"
-    assert not any(t.startswith("$") or t[0].isdigit() for t in publish.tags(title, column()))
+    assert not any(t.startswith("$") or t[0].isdigit() for t in publish.tags(title))
     assert publish.cover_text("系统提示里一行时间戳，让缓存白开了", column())["headline"] == "系统提示里一行时间戳"
     assert publish.cover_text("短标题", column())["headline"] == "短标题"
 
@@ -185,3 +186,37 @@ def test_reference_links_are_never_cut_to_fit_the_description_budget():
     assert len(pack["references"]) == 25
     assert all(r["url"] in pack["description"] for r in pack["references"])
     assert any("简介有" in w for w in pack["warnings"])
+
+
+def test_description_skips_the_greeting_and_tags_name_chinese_products():
+    version = {"sections": [{"title": "本期导读", "paragraphs": [
+        {"text": "大家好，欢迎收看今日快讯。"}, {"text": "今天先看豆包降价和 Claude 的新额度，再看两条更新。后面还有。"}]}]}
+    assert publish.summary(version) == "今天先看豆包降价和 Claude 的新额度，再看两条更新。"
+    merged = {"sections": [{"title": "t", "paragraphs": [{"text": "大家好，欢迎收看今日快讯。今天最值得先看的是两件事。"}]}]}
+    assert publish.summary(merged) == "今天最值得先看的是两件事。"
+    assert publish.tags("豆包和 Kimi 同时降价：每月 20 元能买到什么")[:2] == ["Kimi", "豆包"]
+
+
+def test_the_platform_copy_skips_the_greeting_even_when_it_is_a_paragraph_of_its_own():
+    script = {**SCRIPT, "topic": {"title": "ChatGPT 产品动态与热点", "content_mode": "episode"}}
+    saved = version()
+    saved["sections"] = [{"title": "本期导读", "paragraphs": [
+        {"text": "大家好，欢迎收看ChatGPT 产品动态与热点。"}, {"text": "GPT-5.6 加了思考量滑杆。Free 和 Go 默认换成 Luna。"}]}]
+    pack = publish.build(script, saved, column(), REPORT, None)
+    assert pack["content"]["required"][0] == "GPT-5.6 加了思考量滑杆。Free 和 Go 默认换成 Luna。"
+    merged = {**saved, "sections": [{"title": "t", "paragraphs": [{"text": "大家好，欢迎收看今日快讯。先看 Gemini 的价格。"}]}]}
+    assert publish.build(script, merged, column(), REPORT, None)["content"]["required"][0] == "先看 Gemini 的价格。"
+
+
+@pytest.mark.parametrize("title, topic, expected, absent", [
+    ("Cursor 市场被点名出现恶意 Claude Code 扩展：先查这四样，再决定装不装",
+     "Cursor 市场被周报点名出现恶意 Claude Code 扩展：先讲排查清单，证据待核实",
+     ["Cursor", "Claude Code", "Claude"], ["市场被点名出现恶意", "Code"]),
+    ("Gemini 输入价 $2 变 $4，ChatGPT Pro 多出 $500 档", "今日快讯", ["Gemini", "ChatGPT Pro", "ChatGPT"], ["今日快讯", "输入价"]),
+    ("GPT-5.6 加思考量滑杆，Free 和 Go 默认换 Luna", "ChatGPT 产品动态与热点", ["GPT-5.6", "Luna", "ChatGPT"], ["产品动态与热点"]),
+    ("OpenAI Agent Security 配置地图：Global 定审批", "", ["OpenAI", "Agent Security"], ["OpenAI Agent Security"]),
+])
+def test_tags_are_whole_product_names_never_pieces_of_the_title(title, topic, expected, absent):
+    found = publish.tags(title, topic)
+    assert all(tag in found for tag in expected) and not set(absent) & set(found)
+    assert found[-2:] == ["AI", "人工智能"] and all(len(t) <= publish.TAG_LENGTH for t in found)

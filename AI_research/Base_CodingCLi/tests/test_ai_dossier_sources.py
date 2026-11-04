@@ -14,8 +14,10 @@ URL = "https://example.com/project"
 
 def test_urls_follow_research_order_and_only_use_supplied_links():
     known = " ".join(f"https://example.com/{i}" for i in range(6))
-    report = "https://unknown.example/a " + " ".join(f"https://example.com/{i}" for i in [4, 2, 1, 0, 3])
-    assert selected_urls(report, known) == [f"https://example.com/{i}" for i in [4, 2, 1]]
+    # One original per report item, in report order; an item's unknown link is passed over, background is skipped.
+    report = "\n".join(f"### 1.{n} 条目\nhttps://unknown.example/{n} https://example.com/{i}" for n, i in enumerate([4, 2, 1, 0, 3]))
+    report += "\n### 其他背景 / 未展开\nhttps://example.com/5"
+    assert selected_urls(report, known) == [f"https://example.com/{i}" for i in [4, 2, 1, 0, 3]]
 
 
 def test_existing_page_adapter_reads_task_process_without_search(monkeypatch):
@@ -63,7 +65,7 @@ def test_ai_reads_body_without_search_queries_and_keeps_failures():
             raise RuntimeError("page unavailable")
         return [SearchResult("Usage", URL, excerpts=["Input file → apply patch → test output."])]
     bad = "https://example.com/bad"
-    text, receipt = enrich({"_file": "ai_media/daily_opensource_radar"}, URL + " " + bad,
+    text, receipt = enrich({"_file": "ai_media/daily_opensource_radar"}, f"### 一\n{URL}\n### 二\n{bad}",
                            URL + " " + bad, fetch=fetch)
     assert "apply patch" in text
     assert {row["status"] for row in receipt["pages"]} == {"read", "unavailable"}
@@ -167,7 +169,7 @@ def test_native_engine_saves_body_snapshot_and_initial_report(tmp_path, monkeypa
             self.materials, self.retrieved_urls = [], {URL}
         def run_fetch_only(self, *a, **kw):
             return "# 初始研究底稿\n原有例子 " + URL
-        def expand_dossier(self, prompt, report, material):
+        def expand_dossier(self, prompt, report, material, sources=""):
             self.materials.append(material)
             if expansion_fails:
                 raise RuntimeError("model unavailable")
@@ -192,3 +194,49 @@ def test_native_engine_saves_body_snapshot_and_initial_report(tmp_path, monkeypa
     assert "初始研究底稿" in Path(detail["initial_report"]).read_text()
     snapshot = json.loads(Path(metadata["material"]["path"]).read_text())
     assert "原有来源" in snapshot["material"] and "正文中的具体过程" in snapshot["material"]
+
+
+def test_opted_in_job_reads_a_full_original_for_every_item():
+    from core import ai_dossier_sources as dossier
+    urls = [f"https://example.com/{i}" for i in range(8)]
+    report = "\n".join(f"### 条目 {i}\n{u}" for i, u in enumerate(urls))
+    seen = []
+    def fetch(spec, **kwargs):
+        seen.append(spec)
+        return [SearchResult("正文", spec[5:], excerpts=["机制" * 20000])]
+    text, receipt = enrich({"_file": "chatgpt_acquisition/t09_updates", "dossier_sources": True}, report, " ".join(urls), fetch=fetch)
+    assert len(seen) == 8 and receipt["page_chars"] == dossier.PAGE_CHARS
+    assert enrich({"_file": "chatgpt_acquisition/t09_updates"}, report, " ".join(urls), fetch=fetch) == ("", {})
+
+
+def test_the_material_receipt_survives_the_dossier_rewrite(tmp_path, monkeypatch):
+    from core import ai_dossier_sources, report_meta
+    from core.engine import ResearchEngine
+    monkeypatch.chdir(tmp_path)
+    job_path = tmp_path / "jobs/ai_media/daily_opensource_radar.yaml"
+    job_path.parent.mkdir(parents=True)
+    job_path.write_text("name: 研究底稿\nenabled: true\nsearch: false\nsources: [rss:example]\n"
+                        "prompt: 研究任务\noutput: output/{date}_dossier.md\n")
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config/system.yaml").write_text("{}")
+    monkeypatch.setattr(report_meta, "META_FILE", str(tmp_path / "state/report_meta.jsonl"))
+    monkeypatch.setattr(ai_dossier_sources, "enrich", lambda *a, **kw: ("正文 " + URL, {"pages": []}))
+    receipt = '<!-- material-use: {"selected": ["M1"], "background": [], "deferred": ["M2"]} -->'
+
+    class Agent:
+        def __init__(self, **kwargs):
+            self.materials, self.retrieved_urls = [], {URL}
+        def run_fetch_only(self, *a, **kw):
+            return "# 初始研究底稿\n" + URL + "\n\n" + receipt
+        def expand_dossier(self, prompt, report, material, sources=""):
+            return "# 深化研究底稿\n" + URL  # the rewrite left the receipt out
+        def get_usage(self):
+            return {"searches": 0}
+        def close(self):
+            pass
+
+    monkeypatch.setattr("core.engine.ResearchAgent", Agent)
+    engine = ResearchEngine(str(tmp_path / "config"), str(tmp_path / "jobs"), workspace_dir=str(tmp_path))
+    monkeypatch.setattr(engine, "_fetch_sources_strict", lambda job: ("来源 " + URL, ([SearchResult("项目", URL)], {})))
+    report = (tmp_path / engine.run_job("ai_media/daily_opensource_radar")).read_text()
+    assert "深化研究底稿" in report and '"selected": ["M1"]' in report and '"deferred": ["M2"]' in report

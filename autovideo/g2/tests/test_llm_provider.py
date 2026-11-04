@@ -64,19 +64,19 @@ class Reply(io.BytesIO):
         return False
 
 
-def _call(monkeypatch, tmp_path, provider, urlopen):
+def _call(monkeypatch, tmp_path, provider, urlopen, environ=None):
     monkeypatch.setattr(g2, "PROJECT", tmp_path)
     monkeypatch.setattr(g2, "CALLS_DIR", tmp_path / "calls")
     monkeypatch.setattr(g2, "LOGS", tmp_path / "logs")
     monkeypatch.setattr(g2, "CALL_RECORDS", [])
     monkeypatch.setattr(g2, "PROVIDER", provider)
     monkeypatch.setattr(g2, "MODEL", provider.model)
-    monkeypatch.setattr(g2, "MODELS", [provider.model, *provider.fallback_models])
+    monkeypatch.setattr(g2, "CHAIN", lp.chain(provider, None, environ or {}))
     monkeypatch.setattr(g2, "_ACTIVE_MODEL", 0)
     monkeypatch.setattr(g2, "MAX_TOKENS_PER_CALL", provider.max_tokens)  # both are read from PROVIDER at import
     monkeypatch.setattr(g2, "LLM_INPUT_PER_M", provider.input_per_m)
     monkeypatch.setattr(g2, "LLM_OUTPUT_PER_M", provider.output_per_m)
-    monkeypatch.setattr(g2, "load_deepseek_api_key", lambda _: "secret-key")
+    monkeypatch.setattr(g2, "load_deepseek_api_key", lambda _: f"key-of-{g2.PROVIDER.name}")
     monkeypatch.setattr(g2.urllib.request, "urlopen", urlopen)
     return g2.deepseek_json_call("narration", [{"role": "user", "content": "x"}], {}, 1)
 
@@ -94,14 +94,14 @@ def test_a_free_provider_gets_its_url_headers_and_plain_body_and_costs_nothing(m
     result = _call(monkeypatch, tmp_path, lp.PRESETS["opencode"], urlopen)
     assert result == {"ok": True}
     assert sent["url"] == "https://opencode.ai/zen/go/v1/chat/completions"
-    assert sent["headers"]["user-agent"] == "AutoVideo/1.0" and sent["headers"]["authorization"] == "Bearer secret-key"
+    assert sent["headers"]["user-agent"] == "AutoVideo/1.0" and sent["headers"]["authorization"] == "Bearer key-of-opencode"
     assert sent["headers"]["x-opencode-session"] == f"ses_{g2.RUN_ID}"  # opencode answers 400 without it
     assert sent["body"]["model"] == "minimax-m3.1-flash-free" and sent["body"]["max_tokens"] == 32_768
     assert "thinking" not in sent["body"] and "reasoning_effort" not in sent["body"]
     assert sent["body"]["response_format"] == {"type": "json_object"}
     record = g2.CALL_RECORDS[0]
     assert record["provider"] == "opencode_api" and record["peak_uncached_cost_upper_bound_usd"] == 0
-    assert "secret-key" not in (tmp_path / "calls" / "narration-attempt-1.request.json").read_text()
+    assert "key-of-opencode" not in (tmp_path / "calls" / "narration-attempt-1.request.json").read_text()
 
 
 def test_deepseek_still_asks_for_thinking(monkeypatch, tmp_path):
@@ -213,18 +213,73 @@ def test_transient_520_retries_same_request_and_preserves_each_attempt(monkeypat
     assert "520" in diagnostics and "secret" not in diagnostics
 
 
-def test_persistent_520_stops_after_three_requests_without_switching_models(monkeypatch, tmp_path):
+def test_persistent_520_uses_up_three_requests_then_moves_to_the_fallback(monkeypatch, tmp_path):
     seen, delays = [], []
     monkeypatch.setattr(g2.time, "sleep", delays.append)
+
+    def urlopen(request, timeout=None):
+        model = json.loads(request.data)["model"]
+        seen.append(model)
+        if model != "another-model":
+            raise urllib.error.HTTPError(request.full_url, 520, "x", {}, None)
+        return Reply(json.dumps({"id": "r", "model": model, "choices": [
+            {"message": {"content": '{"ok": true}'}, "finish_reason": "stop"}], "usage": {}}).encode())
+
+    provider = lp.replace(lp.PRESETS["opendesign"], fallback_models=("another-model",))
+    assert _call(monkeypatch, tmp_path, provider, urlopen) == {"ok": True}
+    assert seen == [provider.model] * 3 + ["another-model"] and delays == [2, 4]
+
+
+def test_persistent_520_with_no_fallback_stops_after_three_requests(monkeypatch, tmp_path):
+    seen = []
+    monkeypatch.setattr(g2.time, "sleep", lambda _s: None)
 
     def urlopen(request, timeout=None):
         seen.append(json.loads(request.data)["model"])
         raise urllib.error.HTTPError(request.full_url, 520, "x", {}, None)
 
-    provider = lp.replace(lp.PRESETS["opendesign"], fallback_models=("another-model",))
     with pytest.raises(g2.G2Fault, match="HTTP 520"):
-        _call(monkeypatch, tmp_path, provider, urlopen)
-    assert seen == [provider.model] * 3 and delays == [2, 4]
+        _call(monkeypatch, tmp_path, lp.PRESETS["opendesign"], urlopen)
+    assert len(seen) == 3
+
+
+def test_a_gone_model_moves_to_another_service_with_its_own_url_key_headers_and_body(monkeypatch, tmp_path):
+    sent = []
+
+    def urlopen(request, timeout=None):
+        sent.append({"url": request.full_url, "headers": {k.lower(): v for k, v in request.header_items()},
+                     "body": json.loads(request.data)})
+        if "opencode" in request.full_url:
+            raise urllib.error.HTTPError(request.full_url, 410, "Gone", {}, None)
+        return Reply(json.dumps({"id": "r", "model": "deepseek-v4.1-flash", "choices": [
+            {"message": {"content": '{"ok": true}'}, "finish_reason": "stop"}], "usage": {}}).encode())
+
+    provider = lp.replace(lp.PRESETS["opencode"], model="dead-free", thinking=True,
+                          fallback_providers=("open-design:deepseek-v4.1-flash",))
+    assert _call(monkeypatch, tmp_path, provider, urlopen, {"OPENDESIGN_API_KEY": "x"}) == {"ok": True}
+    first, second = sent
+    assert first["url"].startswith("https://opencode.ai/") and first["headers"]["authorization"] == "Bearer key-of-opencode"
+    assert second["url"] == "https://amr-link.open-design.ai/v1/chat/completions"
+    assert second["headers"]["authorization"] == "Bearer key-of-opendesign"
+    assert "x-opencode-session" not in second["headers"]
+    assert second["body"]["model"] == "deepseek-v4.1-flash" and second["body"]["thinking"] == {"type": "enabled"}
+    assert g2.PROVIDER.name == "opendesign" and g2.CALL_RECORDS[-1]["provider"] == "opendesign_api"
+    switch = json.loads((tmp_path / "logs" / "model-switches.jsonl").read_text().splitlines()[0])
+    assert switch["from_provider"] == "opencode" and switch["to_provider"] == "opendesign"
+
+
+def test_a_fallback_service_without_a_key_is_left_out_and_bad_entries_are_refused(tmp_path):
+    provider = lp.replace(lp.PRESETS["opencode"], fallback_providers=("opendesign:m", "deepseek:deepseek-flash"))
+    assert [p.name for p in lp.chain(provider, None, {"DEEPSEEK_API_KEY": "x"})] == ["opencode", "deepseek"]
+    saved = tmp_path / "s.json"
+    saved.write_text(json.dumps({"base_url": "https://opencode.ai/zen/go/v1", "model": "m", "key_env": "K",
+                                 "fallback_providers": ["nobody:x"]}))
+    assert "不认识" in lp.load(None, {"AUTOVIDEO_LLM_SETTINGS_FILE": str(saved)}).error
+    with pytest.raises(ValueError):
+        lp.validate_settings({"base_url": "https://a/v1", "model": "m", "fallback_providers": "broken"})
+    loaded = lp.load(None, {"AUTOVIDEO_LLM_PROVIDER": "opencode",
+                            "AUTOVIDEO_LLM_FALLBACK_PROVIDERS": "open-design:deepseek-v4.1-flash, deepseek:deepseek-flash"})
+    assert loaded.fallback_providers == ("open-design:deepseek-v4.1-flash", "deepseek:deepseek-flash")
 
 
 def test_transport_retries_respect_the_shared_call_budget(monkeypatch, tmp_path):

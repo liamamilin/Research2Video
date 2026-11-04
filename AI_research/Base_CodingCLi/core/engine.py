@@ -15,7 +15,7 @@ from typing import Optional
 
 from . import telemetry
 from .config import load_system_config, load_job, list_jobs
-from .errors import CancelledError
+from .errors import CancelledError, LLMError
 from .extractor import extract_report
 from .fileio import atomic_write
 from .llm import LLMConfig
@@ -189,7 +189,7 @@ class ResearchEngine:
                 self._progress({"type": "phase", "phase": "building_prompt"})
                 print(f"  [{job_name}] Building prompt...")
                 output_path = self._resolve_output_path(job)
-                prompt = self._build_prompt(job)
+                prompt = base_prompt = self._build_prompt(job)
                 fetch_only = job.get("search") is False  # search: false -> the Job reads only its declared sources
                 fetched = None
                 if fetch_only:
@@ -229,8 +229,17 @@ class ResearchEngine:
                 objective += instruction(job.get('_collection_window'))
                 if fetch_only:
                     raw_content = agent.run_fetch_only(
-                        prompt, fetched_urls=[r.url for r in fetched[0]], stats=fetched[1])
+                        base_prompt, fetched_urls=[r.url for r in fetched[0]], stats=fetched[1],
+                        sources=source_block or "")
                 else:
+                    from .research_batches import MAX_PROMPT_CHARS
+                    if source_block and len(prompt) > MAX_PROMPT_CHARS:
+                        # The searching agent keeps its first message for the whole run: collected material too large
+                        # for the window is first researched in batches, and the agent continues from that draft.
+                        agent._remember_urls_in(source_block)
+                        digest = agent.write_from(base_prompt, source_block)
+                        prompt = (f"{base_prompt}\n\n## 本期采集材料的分批整理稿\n本期采集材料超过单次处理上限，"
+                                  f"已分 {agent.batches} 批整理如下，原始链接保留在条目中。\n\n{digest}")
                     raw_content = agent.run(
                         prompt,
                         objective=objective,
@@ -238,10 +247,9 @@ class ResearchEngine:
                     )
                 # Migrated columns deepen the researcher's chosen candidates by
                 # reading existing links, before the ordinary report is saved.
-                from .ai_dossier_sources import enrich
-                from core.video.research_dossier import PRODUCTIONS
+                from .ai_dossier_sources import enrich, wanted
                 dossier_detail = {}
-                if job.get("_file") in PRODUCTIONS.values() and raw_content:
+                if wanted(job) and raw_content:
                     from .search import SearchClient
                     reader = SearchClient(SearchConfig.from_system(self.sys), cancel_token=self._cancel,
                                           progress_cb=self._progress)
@@ -255,10 +263,16 @@ class ResearchEngine:
                         atomic_write(initial, json.dumps({"version": 1, "report": raw_content}, ensure_ascii=False) + "\n")
                         dossier_detail["initial_report"] = initial
                         try:
-                            raw_content = agent.expand_dossier(prompt, raw_content, extra)
+                            from .research_batches import joined_receipt, strip_receipts
+                            initial_report = raw_content
+                            raw_content = agent.expand_dossier(base_prompt, raw_content, extra,
+                                                               sources=source_block or "")
+                            # The rewrite may drop the material receipt; the supply commit reads it, so carry it over.
+                            if strip_receipts(initial_report)[1] != strip_receipts("")[1] and "material-use" not in raw_content:
+                                raw_content = raw_content.rstrip() + "\n\n" + joined_receipt([initial_report])
                             dossier_detail["expanded"] = True
-                        except CancelledError:
-                            raise
+                        except (CancelledError, LLMError):
+                            raise  # the model API is out or refused: stop the run rather than keep a thinner report
                         except Exception as exc:
                             dossier_detail.update(expanded=False, expansion_error=str(exc)[:300])
                             logger.warning("Dossier expansion kept the initial report: %s", exc)

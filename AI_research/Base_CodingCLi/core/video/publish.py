@@ -27,8 +27,8 @@ CHAPTER_TITLE_MAX = 20
 SUMMARY_MAX = 100
 
 _CLAUSE_END = re.compile(r"[。！？!?；;]")
-_TITLE_SPLIT = re.compile(r"[：:，,、｜|—\-·（）()《》「」\s]+")
-_LATIN_NAME = re.compile(r"[A-Za-z][A-Za-z0-9.+-]{2,}")
+# A Latin name, with the capitalised or numbered words that follow it ("Claude Code", "Gemini 4 Argon", "GPT-6 Sol").
+_LATIN_NAME = re.compile(r"[A-Za-z][A-Za-z0-9.+-]*(?:[ \t]+[A-Z0-9][A-Za-z0-9.+-]*)*")
 _CHAPTER_CHARS = re.compile(r"[^0-9A-Za-z一-鿿 ]+")
 CHAPTER_NOTE = ("章节格式（MM:SS 标题、首条 00:00、至少 3 条、间隔不少于 5 秒、标题不带特殊符号）来自第三方资料，"
                 "没有找到 B 站官方说明；第一次发布时粘贴后确认是否变成可点击的章节。")
@@ -75,25 +75,50 @@ def _first_sentence(text: str, limit: int) -> str:
 
 
 def summary(version: dict) -> str:
-    """One or two sentences for the description's first line: the model's summary when the version has one."""
+    """One or two sentences for the description's first line: the model's summary when the version has one.
+
+    Otherwise the first thing said, without the narrator's greeting: a description that opens "大家好，欢迎收看……"
+    spends its only visible line on nothing."""
+    from .writer import without_greeting
+
     given = ((version.get("meta") or {}).get("description") or {}).get("summary")
     if given:
-        return str(given).strip()
+        return without_greeting(str(given).strip())
+    text = lead_paragraph(version)
+    return _first_sentence(text, SUMMARY_MAX) if text else ""
+
+
+def lead_paragraph(version: dict) -> str:
+    """The first paragraph that says something once the narrator's greeting is taken off; empty when none does."""
+    from .writer import without_greeting
+
     for section in version.get("sections") or []:
         for paragraph in section.get("paragraphs") or []:
-            text = str(paragraph.get("text") or "").strip()
+            text = without_greeting(str(paragraph.get("text") or "").strip())
             if text:
-                return _first_sentence(text, SUMMARY_MAX)
+                return text
     return ""
 
 
-def tags(title: str, column, topic_title: str = "") -> list[str]:
-    """Up to ten tags: the content type, the audience, product names from the title, then its keywords."""
-    candidates = [column.name, column.audience, "AI"]
-    candidates += _LATIN_NAME.findall(f"{title} {topic_title}")
-    for source in (title, topic_title):  # phrases of the title; a price or a bare number is no tag
-        candidates += [p for p in _TITLE_SPLIT.split(source)
-                       if 2 <= len(p) <= TAG_LENGTH and re.match(r"[A-Za-z\u4e00-\u9fff]", p)][:2]
+#: Product names in Chinese a title may carry; Latin ones (ChatGPT, Claude, Qwen…) are found by pattern.
+_CHINESE_PRODUCTS = ("豆包", "通义", "千问", "元宝", "文心", "智谱", "清言", "腾讯混元", "讯飞星火")
+
+
+def tags(title: str, topic_title: str = "") -> list[str]:
+    """Up to ten tags viewers search for: the product and model names in the titles, then the field.
+
+    A multi-word name is kept whole and also by its first word ("Claude Code", "Claude"). Pieces of the title cut at
+    its punctuation are not tags: they read 市场被点名出现恶意、的预训练数据, and a programme's topic is its column
+    name (今日快讯), which nobody searches."""
+    candidates: list[str] = []
+    for source in (title, topic_title):
+        for name in _LATIN_NAME.findall(source):
+            name = name.strip(".+-")
+            first, _, rest = name.partition(" ")
+            # Too long for a tag whole ("OpenAI Agent Security"): its maker and the product apart.
+            candidates += [n for n in (name, first, rest.strip() if len(name) > TAG_LENGTH else "") if len(n) >= 3]
+    candidates += [name for name in _CHINESE_PRODUCTS if name in f"{title} {topic_title}"]
+    candidates += ["AI", "人工智能"]
     out: list[str] = []
     for tag in candidates:
         tag = tag.strip()
@@ -158,6 +183,8 @@ def reference_lines(version: dict, report: str) -> list[dict]:
 def build(script: dict, version: dict, column, report: str, timeline: Optional[dict],
           freshness: Optional[dict] = None) -> dict:
     """The pack for ``version``. ``report`` may be empty (then no references); ``timeline`` is a render's chapters.json."""
+    from .writer import without_greeting
+
     title = str(version.get("title") or "").strip()
     chapters = chapter_lines(timeline)
     meta_description = (version.get("meta") or {}).get("description") or {}
@@ -220,7 +247,7 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
         "description": description,
         "chapters": chapters,
         "chapter_note": CHAPTER_NOTE if chapters else "",
-        "tags": tags(title, column, (script.get("topic") or {}).get("title", "")),
+        "tags": tags(title, (script.get("topic") or {}).get("title", "")),
         "cover": cover_text(title, column, programme=(script.get("topic") or {}).get("content_mode") == "episode"
                             or ((version.get("meta") or {}).get("episode") or {}).get("mode") == "episode"),
         "references": refs,
@@ -230,8 +257,7 @@ def build(script: dict, version: dict, column, report: str, timeline: Optional[d
         "content": {
             # Keep an entire paragraph when no separately authored summary is
             # available. The first sentence may omit a following qualification.
-            "required": [str(meta_description.get("summary") or next((p["text"] for s in version.get("sections") or []
-                         for p in s.get("paragraphs") or [] if p.get("text")), "")).strip(),
+            "required": [without_greeting(str(meta_description.get("summary") or "").strip()) or lead_paragraph(version),
                          *([article_credit] if article_credit else []),
                          *(["数字和口径：\n" + "\n".join(f"· {d}" for d in meta_description["details"])] if meta_description.get("details") else []),
                          *(["还没确定：\n" + "\n".join(f"· {q}" for q in meta_description["open_questions"])] if meta_description.get("open_questions") else [])],

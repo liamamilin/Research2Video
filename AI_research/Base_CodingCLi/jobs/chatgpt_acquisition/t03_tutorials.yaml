@@ -9,7 +9,7 @@ language: zh
 schedule:
   type: manual
 runtime:
-  timeout_seconds: 2400
+  timeout_seconds: 7200  # 周更：7 天材料全读原文，超出模型上限时分批研究再合并
   skip_if_running: true
 search: false
 source_history: false

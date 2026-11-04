@@ -3,7 +3,7 @@ import { VISIBLE_PLATFORM_NAMES, SOCIAL_PLATFORM_KEYS } from "@/lib/distribution
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, ExternalLink, MessageSquareText, RefreshCw, Settings, UploadCloud } from "lucide-react";
-import { EMPTY_FIRST_COMMENT, loadPlatforms, loadBilibiliCategories, platformAction, type PlatformOverview, type PlatformComment, type PlatformSettings, type UploadCandidate } from "@/api/platforms";
+import { DEFAULT_PUBLISH_WINDOW, EMPTY_FIRST_COMMENT, loadPlatforms, loadBilibiliCategories, platformAction, type PlatformOverview, type PlatformComment, type PlatformSettings, type PublishWindow, type UploadCandidate } from "@/api/platforms";
 import { useAuthStore } from "@/lib/auth-store";
 import { usePageResource } from "@/lib/use-page-resource";
 import { errorMessage } from "@/lib/toast";
@@ -97,15 +97,20 @@ function Policy({ initial, run, busy, ready }: { initial: PlatformSettings; run:
   const categoryResource = usePageResource(loadBilibiliCategories);
   const validCategory = categoryResource.data?.categories.some(row => row.tid === config.tid);
   const firstComment = config.first_comment || EMPTY_FIRST_COMMENT;
-  return <form className="card p-4 space-y-4" onSubmit={e => { e.preventDefault(); void run(() => platformAction("/settings", { auto_upload: config.auto_upload, sync_comments: config.sync_comments, tid: config.tid, first_comment: firstComment }, "PUT")); }}>
+  const hours = config.publish_window || DEFAULT_PUBLISH_WINDOW;
+  const setWindow = (patch: Partial<PublishWindow>) => setConfig({ ...config, publish_window: { ...hours, ...patch } });
+  return <form className="card p-4 space-y-4" onSubmit={e => { e.preventDefault(); void run(() => platformAction("/settings", { auto_upload: config.auto_upload, sync_comments: config.sync_comments, tid: config.tid, first_comment: firstComment, publish_window: hours }, "PUT")); }}>
     <h2 className="text-sm font-medium">自动化策略</h2>
     <BilibiliCategorySelect label="默认投稿分区" required={config.auto_upload} value={config.tid} onChange={tid => setConfig({ ...config, tid })} resource={categoryResource} />
     <label className="flex gap-2 text-sm items-center"><input type="checkbox" checked={config.auto_upload} disabled={!ready && !config.auto_upload} onChange={e => setConfig({ ...config, auto_upload: e.target.checked })} />出片后自动投稿</label>
     <p className="text-xs text-text-muted">保存启用后，只处理此后完成的当前定稿成片。沿用发布包和封面，使用自制投稿；未审计、有待核实、严重事实问题或时效复核提醒会保留在成片列表供人工处理。旧成片可在投稿页单独选择。</p>
+    <div className="space-y-2"><label className="flex gap-2 text-sm items-center"><input type="checkbox" checked={hours.enabled} onChange={e => setWindow({ enabled: e.target.checked })} />只在白天时段公开自动投稿</label>
+      {hours.enabled ? <div className="flex flex-wrap gap-2 items-center text-xs"><label>从 <input aria-label="公开时段开始" type="number" min={0} max={23} className="input w-16 text-xs" value={hours.start} onChange={e => setWindow({ start: Number(e.target.value) })} /> 点</label><label>到 <input aria-label="公开时段结束" type="number" min={1} max={24} className="input w-16 text-xs" value={hours.end} onChange={e => setWindow({ end: Number(e.target.value) })} /> 点</label><label>间隔 <input aria-label="定时间隔分钟" type="number" min={5} max={180} className="input w-16 text-xs" value={hours.spacing} onChange={e => setWindow({ spacing: Number(e.target.value) })} /> 分钟</label></div> : null}
+      <p className="text-xs text-text-muted">时段内完成的成片立即公开；时段外（夜里）完成的从下一个时段开始按完成顺序公开，多条按间隔错开。离开始不足 4 小时、平台定时够不到的，先在本机等待，时段一开再投稿。</p></div>
     <label className="flex gap-2 text-sm items-center"><input type="checkbox" checked={config.sync_comments} onChange={e => setConfig({ ...config, sync_comments: e.target.checked })} />每 5 分钟同步已管理视频的最新评论</label>
     <p className="text-xs text-text-muted">每轮读取每个视频的最新一页和楼中楼预览；更早评论和完整楼中楼可继续读取。回复由你编辑并点击发送。</p>
     <FirstCommentOptions template value={firstComment} onChange={value => setConfig({ ...config, first_comment: value })} />
-    <button disabled={busy || (config.auto_upload && !validCategory) || (firstComment.enabled && !firstComment.text.trim())} className="btn btn-primary text-xs">保存策略</button>
+    <button disabled={busy || (config.auto_upload && !validCategory) || (firstComment.enabled && !firstComment.text.trim()) || (hours.enabled && hours.start >= hours.end)} className="btn btn-primary text-xs">保存策略</button>
   </form>;
 }
 

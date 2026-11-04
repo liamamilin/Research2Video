@@ -550,7 +550,8 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
         key = llm_provider.api_key(provider, settings.key_file, environ)
         return provider, key, {
             "label": provider.label, "base_url": provider.base_url, "model": provider.model, "key_env": provider.key_env,
-            "env_file": provider.env_file, "fallback_models": list(provider.fallback_models), "source": provider.source, "needs_key": provider.needs_key,
+            "env_file": provider.env_file, "fallback_models": list(provider.fallback_models),
+            "fallback_providers": list(provider.fallback_providers), "source": provider.source, "needs_key": provider.needs_key,
             "key_ready": bool(key) or not provider.needs_key, "error": provider.error,
         }
 
@@ -568,6 +569,11 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
     def put_llm_config(payload: dict):
         saved = checked_llm_settings(payload)
         path = settings.llm_settings_file
+        if "fallback_providers" not in saved:
+            # the settings page does not edit the cross-service chain: saving the model there must not erase it
+            previous = llm_provider.read_settings(str(path)).get("fallback_providers")
+            if previous:
+                saved["fallback_providers"] = previous
         path.parent.mkdir(parents=True, exist_ok=True)
         temp = path.with_suffix(".tmp")
         temp.write_text(json.dumps(saved, ensure_ascii=False, indent=2), encoding="utf-8")

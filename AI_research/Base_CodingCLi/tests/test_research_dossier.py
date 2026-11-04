@@ -98,7 +98,7 @@ def test_selected_event_does_not_replace_report_with_its_brief(video_env, llm, m
                         {"id": "S2", "text": second_material, "links": [OTHER]},
                         {"id": "S3", "text": unused_material, "links": ["https://unused.example/news"]}]}
     selection_inputs = []
-    def load_pool(scope, selected_report, material, peers, config):
+    def load_pool(scope, selected_report, material, peers, config, references=False):
         selection_inputs.append(selected_report)
         assert MATERIAL in material
         return pool

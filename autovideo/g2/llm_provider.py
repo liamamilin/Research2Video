@@ -6,6 +6,8 @@ DeepSeek is the default and behaves exactly as before. Others are chosen in ``.e
     AUTOVIDEO_LLM_ENV_FILE=/path/.env      # optional: a second file to read the key from, so it is never copied
 
 and any single setting of the chosen provider can be overridden: AUTOVIDEO_LLM_BASE_URL, _MODEL, _API_KEY_ENV,
+_FALLBACK_MODELS (same service), _FALLBACK_PROVIDERS (``preset:model`` entries on other services, e.g.
+``opendesign:deepseek-v4.1-flash``; see ``chain``),
 _MAX_TOKENS, _INPUT_PER_M, _OUTPUT_PER_M (USD per million tokens), _THINKING (0/1: DeepSeek's thinking request
 fields) and _JSON_MODE (0/1: ``response_format: json_object``). ``custom`` has no defaults: base URL, model and
 key variable are all required. Every service must speak the OpenAI chat-completions protocol.
@@ -50,7 +52,8 @@ class Provider:
     pricing_source: str = ""
     error: str = ""  # set when the settings cannot be used; the first call fails with it instead of the import
     env_file: str = ""  # a second file to read the key from (never copied)
-    fallback_models: tuple = ()  # tried in order, same service and key, when the model answers 402 (out of balance/quota)
+    fallback_models: tuple = ()  # tried in order, same service and key, when the model cannot serve (``chain``)
+    fallback_providers: tuple = ()  # then ``preset:model`` on another service, with that service's own key
     source: str = "默认"  # where the choice came from: 默认 | .env | 设置页
 
     @property
@@ -89,6 +92,9 @@ PRESETS: dict[str, Provider] = {
         model="deepseek-v4-flash", key_env="OPENDESIGN_API_KEY", thinking=True, json_mode=True, max_tokens=100_000,
         input_per_m=0.30, output_per_m=1.20, headers={"User-Agent": "AutoVideo/1.0"}),
 }
+#: The research console's preset ids (AI_research core/providers.py) for the same services, so one entry works in both.
+ALIASES = {"opencode-go": "opencode", "open-design": "opendesign"}
+
 #: Every provider's codes, for the places that must tell a service failure from a bad plan.
 ALL_FAULT_CODES = {c for p in (*PRESETS.values(), Provider("x", "x", "", "", "")) for c in p.fault_codes}
 
@@ -115,6 +121,49 @@ def _models(value) -> tuple:
     """A list (or comma-separated text) of model ids, without blanks or repeats."""
     items = value.split(",") if isinstance(value, str) else (value or [])
     return tuple(dict.fromkeys(str(m).strip() for m in items if str(m).strip()))
+
+
+def parse_fallback_provider(entry: str) -> tuple[str, str]:
+    """``"opendesign:deepseek-v4.1-flash"`` -> ``("opendesign", "deepseek-v4.1-flash")``; ``("", "")`` when it names no
+    known preset. Split on the first colon only: a model id may contain one."""
+    name, sep, model = str(entry or "").strip().partition(":")
+    name = ALIASES.get(name.strip().lower(), name.strip().lower())
+    return (name, model.strip()) if sep and name in PRESETS and model.strip() else ("", "")
+
+
+def _provider_entries(value) -> tuple:
+    """``fallback_providers`` from a list or comma-separated text; raises ``ValueError`` on an entry naming no preset."""
+    entries = _models(value)
+    bad = [e for e in entries if not parse_fallback_provider(e)[0]]
+    if bad:
+        raise ValueError(f"备用服务要写成 服务商:模型，服务商可选 {', '.join([*PRESETS, *ALIASES])}；不认识：{', '.join(bad)}")
+    return entries
+
+
+def chain(provider: Provider, env_path: Optional[Path] = None, environ: Optional[Mapping[str, str]] = None) -> list[Provider]:
+    """Every service+model a run may use, in order: the chosen one, its ``fallback_models`` on the same service, then
+    each ``fallback_providers`` entry on its own preset (address, key variable, headers, request style, prices).
+
+    An entry on another service is left out when its key cannot be found (the primary's ``env_file`` is searched
+    too), and so is a repeat of a service+model already listed."""
+    plain = replace(provider, fallback_models=(), fallback_providers=())
+    out = [plain, *(replace(plain, model=m) for m in provider.fallback_models)]
+    for entry in provider.fallback_providers:
+        name, model = parse_fallback_provider(entry)
+        if not name:
+            continue
+        candidate = replace(PRESETS[name], model=model, env_file=provider.env_file, source=provider.source)
+        if candidate.needs_key and not api_key(candidate, env_path, environ):
+            print(f"LLM fallback {entry} skipped: {candidate.key_env} is not set", flush=True)
+            continue
+        out.append(candidate)
+    seen: set = set()
+    unique = []
+    for item in out:
+        if (item.base_url, item.model) not in seen:
+            seen.add((item.base_url, item.model))
+            unique.append(item)
+    return unique
 
 
 def preset_for(base_url: str) -> Provider:
@@ -166,13 +215,15 @@ def load(env_path: Optional[Path] = None, environ: Optional[Mapping[str, str]] =
                                 ("MAX_TOKENS", "max_tokens", int), ("INPUT_PER_M", "input_per_m", float),
                                 ("OUTPUT_PER_M", "output_per_m", float), ("THINKING", "thinking", _flag),
                                 ("FALLBACK_MODELS", "fallback_models", _models),
+                                ("FALLBACK_PROVIDERS", "fallback_providers", _provider_entries),
                                 ("JSON_MODE", "json_mode", _flag)):
             raw = (settings.get(f"AUTOVIDEO_LLM_{var}") or "").strip()
             if raw:
                 changes[attr] = cast(raw)
-        for attr, cast in (("model", str), ("key_env", str), ("fallback_models", _models), ("max_tokens", int), ("input_per_m", float),
+        for attr, cast in (("model", str), ("key_env", str), ("fallback_models", _models),
+                           ("fallback_providers", _provider_entries), ("max_tokens", int), ("input_per_m", float),
                            ("output_per_m", float), ("thinking", bool), ("json_mode", bool)):
-            if attr in saved and (attr in ("key_env", "fallback_models") or saved[attr] not in (None, "")):
+            if attr in saved and (attr in ("key_env", "fallback_models", "fallback_providers") or saved[attr] not in (None, "")):
                 changes[attr] = cast(saved[attr])
     except (ValueError, TypeError) as exc:
         return replace(provider, error=f"LLM 设置里的数值写错了：{exc}")
@@ -248,6 +299,8 @@ def validate_settings(raw: dict) -> dict:
         raise ValueError("找不到存放密钥的文件")
     fallbacks = [m for m in _models(raw.get("fallback_models")) if m != model]
     out = {"base_url": base_url, "model": model, "key_env": key_env, "env_file": env_file, "fallback_models": fallbacks}
+    if raw.get("fallback_providers") is not None:
+        out["fallback_providers"] = list(_provider_entries(raw["fallback_providers"]))
     for attr, cast in (("max_tokens", int), ("input_per_m", float), ("output_per_m", float)):
         if raw.get(attr) not in (None, ""):
             try:

@@ -73,6 +73,17 @@ def test_a_new_thread_does_not_inherit_attribution_so_track_goes_inside_the_thre
     assert rows("calls")[0]["script_id"] == ""
 
 
+def test_the_llm_worker_thread_keeps_the_callers_stage_request_and_turn(db, monkeypatch):
+    client = llm_client()
+    monkeypatch.setattr(client, "_chat_once", lambda messages, **_k: telemetry.record_call("llm", model="m1") or "reply",
+                        raising=False)
+    with telemetry.track("assistant", request_id="req-1", conversation_id="conv-1"):
+        with telemetry.bind(turn="2"):
+            assert client._chat_cancellable([]) == "reply"
+    call = rows("calls")[0]
+    assert (call["stage"], call["request_id"], call["conversation_id"], call["turn"]) == ("assistant", "req-1", "conv-1", "2")
+
+
 def test_recording_failures_never_reach_the_caller(db, monkeypatch):
     def broken(*_a, **_k):
         raise OSError("disk full")
@@ -434,9 +445,9 @@ def test_the_assistants_model_calls_are_recorded_under_the_assistant_stage(db, m
     assert [s["stage"] for s in rows("spans")] == ["assistant"] and telemetry.current() == {}
 
 
-def _assistant_request(request_id, turns, user="admin", tool="query_jobs", answer_chars=5000):
+def _assistant_request(request_id, turns, user="admin", tool="query_jobs", answer_chars=5000, origin=""):
     """What the assistant runtime does for one user message: a model call per turn, a tool asked for, its answer sized."""
-    recorder = assistant.Recorder(request_id, "conv1", user)
+    recorder = assistant.Recorder(request_id, "conv1", user, origin)
     messages = []
     with telemetry.track("assistant", request_id=request_id, conversation_id="conv1"):
         for turn in range(turns):
@@ -449,6 +460,25 @@ def _assistant_request(request_id, turns, user="admin", tool="query_jobs", answe
                            [] if last else [NS(id=f"{request_id}-{turn}", name=tool)])
             if not last:
                 messages.append({"role": "tool", "tool_call_id": f"{request_id}-{turn}", "content": "x" * answer_chars})
+
+
+def test_assistant_requests_are_split_and_filtered_by_where_they_came_from(db):
+    from web.services.assistant_runtime import origin_of
+    assert origin_of(NS(headers={"sec-fetch-site": "same-origin"})) == "app"
+    assert origin_of(NS(headers={"user-agent": "curl/8"})) == "script" and origin_of(None) == ""
+    config = db / "config"
+    config.mkdir()
+    _assistant_request("mine", 2, origin="app")
+    _assistant_request("maintenance", 3, origin="script")
+    _assistant_request("older", 1)
+    everything = assistant.report(str(config))
+    split = everything["totals"]["by_origin"]
+    assert {k: v["requests"] for k, v in split.items()} == {"app": 1, "script": 1, "": 1}
+    assert split["script"]["turns"] == 3 and {r["request_id"]: r["origin"] for r in everything["requests"]}["mine"] == "app"
+    mine = assistant.report(str(config), origin="app")
+    assert [r["request_id"] for r in mine["requests"]] == ["mine"] and mine["totals"]["turns"] == 2
+    assert mine["totals"]["by_origin"] == split and [t["turn"] for t in mine["turns"]] == [0, 1]
+    assert [r["request_id"] for r in assistant.report(str(config), origin="")["requests"]] == ["older"]
 
 
 def test_the_assistant_is_broken_down_by_request_turn_and_tool(db):

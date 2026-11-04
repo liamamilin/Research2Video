@@ -17,7 +17,8 @@ from core import telemetry
 from core.fileio import file_lock
 from core.video import store
 
-PROMPT_VERSION = 4
+PROMPT_VERSION = 5
+SAID_CHARS = 2400  # what an earlier video told viewers, for comparing against a price/plan page
 POLICY = "matrix-story-v3"
 ACTIONS = {"release", "pricing", "results", "policy", "financing", "earnings", "discovery", "event", "analysis"}
 EDITION_ACTIONS = {"release", "results", "analysis"}
@@ -75,7 +76,8 @@ def _hash(*values) -> str:
     return hashlib.sha256(json.dumps(values, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
 
 
-def packets(report: str, material: str = "") -> list[dict]:
+def packets(report: str, material: str = "", keep_references: bool = False) -> list[dict]:
+    """``keep_references`` keeps price/plan/doc sections a report item cites; they say what is current, not what is new."""
     from core.provenance import extract_urls
     from core.video import content_guard as guard
 
@@ -92,15 +94,43 @@ def packets(report: str, material: str = "") -> list[dict]:
             continue
         references = [u for n in re.findall(r"\[(\d+)\]", part) for u in bibliography.get(n, [])]
         links = list(dict.fromkeys(u for u in extract_urls(part)+references if guard.source_key(u)))
+        reference = not links and keep_references
+        if reference:
+            links = list(dict.fromkeys(extract_urls(part)+references))
         if not links:
             continue
         heading = part.splitlines()[0].lstrip("# ")
         if references:
             part += "\n\n本条引用：\n" + "\n".join(dict.fromkeys(references))
-        result.append({"id": f"S{len(result)+1}", "title": heading, "text": part, "links": links})
+        result.append({"id": f"S{len(result)+1}", "title": heading, "text": part, "links": links,
+                       **({"reference": True} if reference else {})})
     if not result and report.strip():
         result = [{"id": "S1", "title": report.splitlines()[0].lstrip("# "), "text": report, "links": []}]
     return result
+
+
+def _anchored(url: str) -> tuple[str, str]:
+    """The page and its text anchor: one what's-new page holds many separate entries."""
+    from urllib.parse import unquote, urlsplit
+    from core.provenance import normalize_url
+
+    return normalize_url(url).rstrip("/"), unquote(urlsplit(url).fragment)
+
+
+def cited(item: str) -> set[tuple[str, str]]:
+    from core.provenance import extract_urls
+
+    return {_anchored(u) for u in extract_urls(item)}
+
+
+def cited_packet(packet: dict, item_urls: set[tuple[str, str]]) -> bool:
+    """A packet belongs to a report item when the item cites the packet's own entry: the same
+    anchor, or the whole page without one. A shared background link or a sibling entry on the
+    same page does not make another story part of the item."""
+    if not packet["links"]:
+        return False
+    page, anchor = _anchored(packet["links"][0])
+    return (page, anchor) in item_urls or (page, "") in item_urls
 
 
 def changes(value: list[dict]) -> list[dict]:
@@ -121,7 +151,7 @@ def changes(value: list[dict]) -> list[dict]:
     return result
 
 
-def context(peers: list[dict]) -> list[dict]:
+def context(peers: list[dict], said: bool = False) -> list[dict]:
     """Keep legacy frozen event summaries as evidence without backfilling their versions."""
     peers = list({(p["script_id"], (p.get("story") or {}).get("event_key") or p.get("version") or p["title"]): p
                   for p in peers}.values())
@@ -129,6 +159,7 @@ def context(peers: list[dict]) -> list[dict]:
              "version": p.get("version"),
              "event_date": p.get("event_date", ""), "written_at": p.get("created_at", ""),
              "summary": p.get("summary", ""), "story": p.get("story") or {},
+             **({"said": p.get("text", "")[:SAID_CHARS]} if said and p.get("text") else {}),
              "sources": sorted(p["sources"])} for i, p in enumerate(peers)]
 
 
@@ -142,6 +173,7 @@ subject 使用具体产品/事项名称，action 从 release/pricing/results/pol
 edition 填材料明确给出的版本/财报期/轮次。event_date 只填材料明确给出的单日事件日期，格式 YYYY-MM-DD，未知留空；时间段、日期范围与历史时期放在 edition 或 summary 中，event_date 留空。报告日期不等于事件日期。
 primary 填核心证据的 S 编号，background 填辅助背景 S 编号。新增参考、热度、下载量或换标题不构成新事件。
 same_as 关联已经讲过该题材的 H 编号；changes 比较的是相对这些已做视频后来发生了什么，不是与上一代产品、竞品或同次发布的另一个指标比较。没有后续进展就留空。
+标 reference 的材料是价格/套餐/文档页的当前内容：已做视频的 said 与它的数值不同时，写入 changes，before 取 said 原文里的值，after 取页面原文里的值；页面与 said 一致就不是新进展。
 不确定有新进展时不得编造 changes。保持各候选与实际材料一致，优先排列适合讲述的具体事件。
 JSON: {"events":[{"title":"选题标题","subject":"具体对象","action":"release","edition":"","event_date":"",
 "summary":"事件与本次看点","primary":["S1"],"background":[],"same_as":[],
@@ -190,6 +222,9 @@ def validate(items, source_packets: list[dict], previous: list[dict]) -> list[di
         if not isinstance(delta, list):
             raise SelectionError("新进展应为列表")
         event["changes"] = changes(delta)
+        # A price/plan page states today's value; a change it confirms can be checked against an earlier video.
+        current = " ".join(by_source[k]["text"] for k in primary+background if by_source[k].get("reference"))
+        event["reference_changes"] = [c for c in event["changes"] if current and _stated(c["after"], current)]
         # Explicit edition metadata already carries a real release change. Do
         # not require the organizer to repeat it in a free-form changes field.
         if event["action"] == "release" and event["edition"] and not event["changes"]:
@@ -235,16 +270,18 @@ def validate(items, source_packets: list[dict], previous: list[dict]) -> list[di
     return list(output.values())
 
 
-def load_or_create(scope: str, report: str, material: str, peers: list[dict], llm_config) -> dict:
-    pool_id = _hash(PROMPT_VERSION, scope, report, material)
+def load_or_create(scope: str, report: str, material: str, peers: list[dict], llm_config,
+                   references: bool = False) -> dict:
+    pool_id = _hash(PROMPT_VERSION, scope, report, material, *(["references"] if references else []))
     lock = Path(store.db_path()).parent / ("story-pool-" + pool_id)
     with file_lock(str(lock), timeout=60):
         with store.connect() as conn:
             row = conn.execute("SELECT payload FROM video_story_pools WHERE id=?", (pool_id,)).fetchone()
         if row:
             return json.loads(row["payload"])
-        source_packets = packets(report, material)
-        events, usage = organize(report, source_packets, context(peers), llm_config)
+        source_packets = packets(report, material, references)
+        said = any(p.get("reference") for p in source_packets)
+        events, usage = organize(report, source_packets, context(peers, said), llm_config)
         pool = {"id": pool_id, "scope": scope, "packets": source_packets, "events": events, "usage": usage,
                 "prompt_version": PROMPT_VERSION}
         with store.connect(write=True) as conn:
@@ -290,6 +327,14 @@ def reservations(scope: str, script_id: str = "") -> list[dict]:
              "sources": {k for u in s["primary_sources"] if (k := guard.source_key(u))}} for r in rows]
 
 
+def _stated(value: str, text: str) -> bool:
+    """The text states the value: verbatim, or every number in it ("$20/月" and "20 USD per month")."""
+    numbers = re.findall(r"\d+(?:\.\d+)?", value)
+    if numbers:
+        return set(numbers) <= set(re.findall(r"\d+(?:\.\d+)?", text))
+    return bool(_value(value)) and _value(value) in _value(text)
+
+
 def _advances(event: dict, peer: dict) -> bool:
     """A comparison delta alone is not a development since an existing video."""
     if not event.get("changes"):
@@ -306,6 +351,12 @@ def _advances(event: dict, peer: dict) -> bool:
     if before_edition and after_edition and _edition(before_edition) != _edition(after_edition):
         return True
     if before_date and after_date and after_date > before_date:
+        return True
+    # A comparison redone on a price/plan page: the earlier video said the old value, and the page
+    # cited now states a new one the video never said.
+    told = peer.get("text") or ""
+    if told and any(_stated(c["before"], told) and not _stated(c["after"], told)
+                    for c in event.get("reference_changes") or []):
         return True
     # Independent evidence can support a new result even on the same day; the same article
     # with another fragment, headline or auxiliary reference cannot do so.

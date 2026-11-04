@@ -11,14 +11,31 @@ runtime:
   timeout_seconds: 2400
   skip_if_running: true
 search: false
-source_history: false
-sources_limit: 8
+source_history: true
+# 报告写完后为每个条目读一篇原文，交给写稿（core/ai_dossier_sources.py）。
+dossier_sources: true
+sources_limit: 6
 sources:
 - source:cg_pricing
+- source:cg_claude_pricing
+- source:cg_gemini_plans
+- source:cg_grok
+- source:cg_mistral_pricing
+- source:cg_claude_release_notes
+- source:cg_anthropic_news
+- source:cg_gemini_release_notes
+- source:cg_gemini_blog
+- source:cg_xai_news
+- source:cg_zai_release_notes
+- source:cg_qbitai
+- source:cg_ifanr
+- source:sspai
+- source:ithome
+- source:cg_tomsguide_ai
 - source:cg_ai_advantage
-- source:cg_reddit_chatgpt
 - source:cg_zhihu
-- source:cg_learn_videos
+- source:cg_cn_ai_apps
+- source:cg_reddit_compare
 prompt: |
   根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
   当前步骤：为「ChatGPT 获客矩阵」研究题材，写成后续作者可以直接使用的候选材料。
@@ -27,6 +44,9 @@ prompt: |
   获客作用：影响选择
   目标受众：中文普通用户、职场与学习人群，以及正在考虑升级 ChatGPT 的潜在订阅用户。
   围绕同一用户任务比较 ChatGPT 与其他产品，整理任务输入、操作方式、输出差异、费用和适用场景；结合真实购买前疑问，给出不同需求下的选择依据。
+  比较对象覆盖 ChatGPT、Claude、Gemini、Grok、DeepSeek、通义千问、Kimi、豆包、腾讯元宝、智谱清言、Mistral 等，按素材实际涉及的产品选择；每个候选至少比较两家不同公司的产品，并放在同一任务或同一维度上。
+  只比较 ChatGPT 自家免费版、Plus、Pro 等档位的题目属于 T06，不在这里生成。
+  某家产品有新功能、新模型或价格变化时，可以作为切入点，比较其他家在同一件事上的做法和差距。
   优先提炼对观众有用的任务、操作和可见成果，以价值展示与解决问题自然承接购买意图。
   创作者视频与播客只作为公开标题、简介或索引文本中的研究线索；拿到完整内容时再展开，不能凭标题补写操作或测试结果。
   素材中提供的具体事实、数据和结论作为输入，围绕解释与画面组织材料，不额外增加人工审核步骤。
@@ -46,6 +66,8 @@ prompt: |
   - **具体材料**：来自本次素材的内容、例子、数据与适用条件
   - **操作与演示**：可以展示的输入、步骤与输出；待实测部分标明待实测
   - **画面建议**：能讲清变化或过程的页面、操作、对比或结果
+  - **比较对象**：参与比较的产品及档位
+  - **推荐结构**：从价格反差与分任务对决、同题盲测、按人群选购、新功能同台、单项擂台、误区纠正、换用成本中选一种，并说明为什么适合这条材料
   - **获客作用**：影响选择；与观众下一步选择的联系
   - **发布日期**：材料提供的日期；没有则写未提供
   - **来源网址**：实际使用的素材链接

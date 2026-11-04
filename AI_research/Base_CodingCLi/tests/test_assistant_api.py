@@ -354,3 +354,15 @@ def test_disconnect_stops_the_harness_before_executing_another_tool(web_env, mon
 
     asyncio.run(disconnect())
     assert not (web_env[0] / "jobs/research/must_not_create.yaml").exists()
+
+
+def test_the_assistant_reads_the_weekly_review_but_cannot_purge_analytics(client):
+    from types import SimpleNamespace
+    from web.services import assistant_application as application
+    request = SimpleNamespace(app=client.app)
+    actions = application.describe(request, {"role": "admin"}, domain_key="analytics", offset=0)
+    ids = {a["action_id"] for a in actions["actions"]}
+    assert "GET /api/telemetry/weekly-review" in ids
+    assert not [a for a in actions["actions"] if a["write"]] and "POST /api/telemetry/purge" not in ids
+    assert "每周复盘" in actions["domains"]["analytics"]
+    assert not application.describe(request, {"role": "viewer"}, domain_key="analytics")["actions"]  # admin pages stay admin

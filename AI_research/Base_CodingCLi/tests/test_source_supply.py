@@ -1,5 +1,6 @@
 """Real delivery boundaries: late page changes, failed reports, article depth and pool rotation."""
 from dataclasses import replace
+from datetime import datetime
 import json
 from threading import Event
 from types import SimpleNamespace
@@ -113,7 +114,7 @@ def test_unchanged_sources_reoffer_unused_material_without_calling_it_new(setup,
 def test_full_length_section_is_not_dropped_by_its_markdown_header(setup, monkeypatch):
     engine, job, profile, _ = setup
     job["sources"] = ["rss:https://source.example/feed"]
-    profile["detail_pages"] = 1
+    profile.update(detail_pages=1, detail_chars=30000)
     monkeypatch.setattr(sources, "fetch_source", lambda *a, **k: [item(provider="rss", text="teaser")])
     monkeypatch.setattr(supply, "read_page", lambda *a, **k: [item(9, "x" * 24000)])
     got, _, _, receipt = supply.collect(engine, job, profile)
@@ -262,6 +263,7 @@ def test_native_report_save_advances_delivery_and_preserves_original_material(tm
         def __init__(self, **kw):
             self.materials, self.retrieved_urls = [], set()
         def run_fetch_only(self, prompt, **kw):
+            prompt += "\n\n" + kw.get("sources", "")  # the source block now arrives separately
             assert "processing steps" in prompt
             if writer_fails:
                 raise RuntimeError("Writer interrupted")
@@ -280,3 +282,140 @@ def test_native_report_save_advances_delivery_and_preserves_original_material(tm
         meta = json.loads(Path(report_meta.META_FILE).read_text().splitlines()[-1])
         material = json.loads(Path(meta["material"]["path"]).read_text())["material"]
         assert "Concrete input, processing steps, final output" in material
+
+
+def test_new_dated_announcement_on_price_page_is_the_change_not_background(setup, monkeypatch):
+    engine, job, profile, storage = setup
+    spec = job["sources"][0]
+    monkeypatch.setattr(supply.source_coverage, "targets", lambda *a, **k: [{"spec": spec, "role": "state", "cell": "", "max_age_hours": 24}])
+    page = ["Business $25 per seat. Unlimited subject to abuse guardrails."]
+    monkeypatch.setattr(supply, "read_page", lambda *a, **k: [item(text=page[0])])
+    storage.commit(supply.collect(engine, job, profile)[2], "background", "first.md")
+    page[0] += " Starting in December, plan usage will have a shared limit across all of ChatGPT and Codex."
+    got, _, pending, _ = supply.collect(engine, job, profile)
+    header = got[0].excerpts[0].split("\n", 2)[1]
+    assert "页面新增带生效时间的公告：Starting in December, plan usage will have a shared limit" in header
+    assert "页面变化不等于事件刚刚发生" not in header
+    storage.commit(pending, "announced", "second.md")
+    # The announcement stays on the page; the next edit around it is no longer the announcement.
+    page[0] = page[0].replace("$25", "$30")
+    header = supply.collect(engine, job, profile)[0][0].excerpts[0].split("\n", 2)[1]
+    assert "生效时间的公告" not in header and "页面变化不等于事件刚刚发生" in header
+
+
+def test_announcements_pick_dated_sentences_only():
+    assert supply.announcements("Prices may vary. Data from May. Effective Jan 5, 2027 the price rises.") == [
+        "Effective Jan 5, 2027 the price rises."]
+    assert supply.announcements("说明。自 2026 年 12 月 1 日起，Plus 调整为 25 美元。其余不变。") == [
+        "自 2026 年 12 月 1 日起，Plus 调整为 25 美元。"]
+
+
+def test_every_news_original_is_read_exa_comes_last_and_its_quota_stops_the_run(setup, monkeypatch):
+    from core.errors import SearchUnavailableError
+    engine, job, profile, _ = setup
+    del profile["detail_pages"]
+    profile["material_chars"] = 3000  # far too small: news is not bounded by it
+    job.update(sources=["rss:https://news.example/feed"], sources_limit=8)
+    monkeypatch.setattr(sources, "fetch_source", lambda *a, **k: [
+        replace(item(i, provider="rss", text="teaser"), url=f"https://news.example/a{i}", publish_date="2026-11-02")
+        for i in range(8)])
+    readers = []
+    def read(url, *, search_client=None, browser=True, **k):
+        readers.append((url[-2:], "exa" if search_client is not None else "direct"))
+        if url.endswith("a0") and search_client is None:
+            raise ValueError("403")  # direct and browser refused: only the paid reader is left
+        return [SearchResult("Body", url, excerpts=["正文" * 3000])]
+    monkeypatch.setattr(supply, "read_page", read)
+    engine._source_options = lambda specs: {"search_client": SimpleNamespace(calls=0)}
+    got, _, _, receipt = supply.collect(engine, job, profile)
+    assert receipt["detail_budget"]["successful"] == 8 and ("a0", "exa") in readers
+    assert sum(r.title == "Body" for r in got) == 8
+    def out_of_quota(url, *, search_client=None, **k):
+        if search_client is None:
+            raise ValueError("403")
+        raise RuntimeError("HTTP 402: insufficient credits")
+    monkeypatch.setattr(supply, "read_page", out_of_quota)
+    with pytest.raises(SearchUnavailableError):
+        supply.collect(engine, job, profile)
+
+
+def test_news_a_run_did_not_hand_over_is_owed_to_the_next_run(setup, monkeypatch):
+    engine, job, profile, storage = setup
+    day = {"days": 1, "timezone": "Asia/Shanghai"}
+    job.update(sources=["tldr:ai"], _collection_window={**day, "start": "2026-11-01T00:10:00+08:00", "end": "2026-11-02T00:10:00+08:00"})
+    news = [replace(item(1, "first", provider="tldr"), url="https://news.example/1", publish_date="2026-11-01")]
+    monkeypatch.setattr(sources, "fetch_source", lambda spec, **k: list(news))
+    pending = supply.collect(engine, job, profile)[2]
+    pending["at"] = datetime(2026, 11, 2, 0, 10).timestamp()
+    storage.commit(pending, "first", "first.md")
+    # The next day's range starts at 11-02 00:10; an 11-02 item the last run never saw is still owed,
+    # while what that run already handed over is not offered again.
+    news.append(replace(item(2, "late", provider="tldr"), url="https://news.example/2", publish_date="2026-11-02"))
+    job["_collection_window"] = {**day, "start": "2026-11-03T00:10:00+08:00", "end": "2026-11-04T00:10:00+08:00"}
+    got = supply.collect(engine, job, profile)[0]
+    assert [r.url for r in got] == ["https://news.example/2"] and "本期补交" in got[0].excerpts[0]
+
+
+def test_another_sources_summary_of_a_delivered_link_is_not_handed_over_again(setup, monkeypatch):
+    engine, job, profile, storage = setup
+    job.update(sources=["rss:https://feed.example/x", "radar:动态"],
+               _collection_window={"days": 1, "timezone": "Asia/Shanghai",
+                                   "start": "2026-11-02T07:30:00+08:00", "end": "2026-11-03T07:30:00+08:00"})
+    article = replace(item(1, "feed summary", provider="rss"), url="https://news.example/1", publish_date="2026-11-02")
+    feeds = {"rss:https://feed.example/x": [article], "radar:动态": []}
+    monkeypatch.setattr(sources, "fetch_source", lambda spec, **k: list(feeds[spec]))
+    storage.commit(supply.collect(engine, job, profile)[2], "first", "first.md")
+    # Radar points at the same article with its own summary: not a revision, on this run or the next.
+    feeds["radar:动态"] = [replace(article, excerpts=["Radar 的摘要"], provider="radar")]
+    got, _, pending, _ = supply.collect(engine, job, profile)
+    assert [r.url for r in got if r.url == "https://news.example/1"] == [] and not pending["delivered"]
+    # The feed that delivered it rewriting the entry is still a change.
+    feeds["rss:https://feed.example/x"] = [replace(article, excerpts=["feed summary, corrected"])]
+    assert "https://news.example/1" in [r.url for r in supply.collect(engine, job, profile)[0]]
+
+
+def test_dated_news_goes_before_old_page_sections_and_is_not_cut_per_source(setup, monkeypatch):
+    engine, job, profile, storage = setup
+    job.update(sources=["page:https://source.example/notes", "tldr:ai"], sources_limit=3,
+               _collection_window={"days": 1, "start": "2026-11-02T00:10:00+08:00", "end": "2026-11-03T00:10:00+08:00",
+                                   "timezone": "Asia/Shanghai"})
+    pages = [item(i, "旧段落" * 400) for i in range(30)]
+    news = [replace(item(100 + i, f"news {i}", provider="tldr"), url=f"https://news.example/{i}", publish_date="2026-11-02")
+            for i in range(6)]
+    monkeypatch.setattr(supply, "read_page", lambda *a, **k: pages)
+    monkeypatch.setattr(sources, "fetch_source", lambda spec, **k: news)
+    storage.commit(supply.collect(engine, job, profile)[2], "first", "first.md")
+    pages[:] = [item(i, "改过的旧段落" * 400) for i in range(30)]  # a long page re-rendered: every section "changed"
+    news[:] = [replace(n, excerpts=[n.excerpts[0] + " update"]) for n in news]
+    profile["material_chars"] = 9000
+    got = supply.collect(engine, job, profile)[0]
+    delivered = [r.url for r in got]
+    assert all(f"https://news.example/{i}" in delivered for i in range(6))  # all six, past the per-source cap of 3
+    assert delivered.index("https://news.example/0") < min(
+        (n for n, u in enumerate(delivered) if u.startswith("https://source.example")), default=len(delivered))
+
+
+def test_a_newly_appeared_page_section_goes_before_ones_waiting_for_days(tmp_path, monkeypatch):
+    from core.material_archive import MaterialArchive
+    archive = MaterialArchive(tmp_path)
+    old = [item(i, f"old {i}") for i in range(5)]
+    archive.record("page:https://source.example/notes", old, now=1000)
+    archive.record("page:https://source.example/notes", old + [item(9, "new section")], now=90000)
+    seen = archive.first_seen("page:https://source.example/notes")
+    assert seen[supply.section_key(item(9))] == 90000 and seen[supply.section_key(old[0])] == 1000
+
+
+def test_collect_offers_todays_new_section_before_a_backlog_from_days_ago(setup, monkeypatch, tmp_path):
+    from core.material_archive import MaterialArchive
+    engine, job, profile, storage = setup
+    job.update(_issue_id="issue-1", sources_limit=2)
+    spec = job["sources"][0]
+    storage.commit(supply.collect(engine, job, profile)[2] if False else {"profile": "pilot", "job": JOB, "at": 1, "delivered": {},
+                   "sources": {}, "initial_baseline": {supply.section_key(item(0)): {"fingerprint": "x", "text": ""}},
+                   "candidates": []}, "first", "first.md")
+    backlog = [item(i, f"old {i}") for i in range(1, 6)]
+    MaterialArchive(tmp_path / "state").record(spec, backlog, now=1000)  # waiting since days ago
+    page = backlog + [item(9, "new today")]
+    monkeypatch.setattr(supply, "read_page", lambda *a, **k: page)
+    got = supply.collect(engine, job, profile)[0]
+    assert "new today" in got[0].excerpts[0]

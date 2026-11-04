@@ -88,7 +88,7 @@ class BatchStore(AssistantStore):
         if batch['status'] not in ('running', 'waiting'):
             return
         states = {i['state'] for i in batch['items']}
-        if batch['status'] == 'waiting' and not states <= {'completed', 'skipped'}:
+        if batch['status'] == 'waiting' and not states <= {'completed', 'skipped', 'removed'}:
             return
         if states & {'pending', 'active', 'dispatching'}:
             return

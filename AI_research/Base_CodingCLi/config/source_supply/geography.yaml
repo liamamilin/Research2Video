@@ -4,7 +4,6 @@ enabled: true
 timezone: Asia/Shanghai
 recurrence: 10 10 * * 6
 scan_limit: 60
-detail_pages: 3
 material_chars: 140000
 pool_per_job: 3
 pool_limit: 30

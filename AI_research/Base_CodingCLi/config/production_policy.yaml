@@ -10,14 +10,15 @@ window:
 jobs: {}
 collection:
   enabled: true
-  schedule: "0 0 * * *"
+  schedule: "20 7 * * *"  # 在 Radar 07:00 简报之后；美国前一天的新闻已出齐
   timezone: Asia/Shanghai
   retention_days: 60
   limit_per_source: 80
   max_sources: 100
   timeout_seconds: 15
 automatic:
-  daily_limit: 4
+  # 每天新接纳的自动节目数；留空（null）表示不限。每期仍只记一次，重试不重复占位。
+  daily_limit: null
   timezone: Asia/Shanghai
   recommendations: false
 sources:

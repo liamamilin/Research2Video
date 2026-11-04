@@ -21,8 +21,29 @@ def _command(folder: Path) -> list[str]:
     return [sys.executable, "-m", "core.video.capture_worker", str(folder)]
 
 
+def descendants(pid: int) -> list[int]:
+    """Every process below ``pid``, read before anything is killed (an orphan is re-parented to launchd)."""
+    try:
+        table = subprocess.run(["ps", "-axo", "pid=,ppid="], capture_output=True, text=True, timeout=10).stdout
+    except (OSError, subprocess.SubprocessError):
+        return []
+    children: dict[int, list[int]] = {}
+    for line in table.splitlines():
+        fields = line.split()
+        if len(fields) == 2 and all(f.isdigit() for f in fields):
+            children.setdefault(int(fields[1]), []).append(int(fields[0]))
+    found, queue = [], [pid]
+    while queue:
+        for child in children.get(queue.pop(), []):
+            found.append(child)
+            queue.append(child)
+    return found
+
+
 def _stop(process: subprocess.Popen) -> None:
-    """Reap this worker and its browser/driver even if browser cleanup hangs."""
+    """Reap this worker and its browser/driver even if browser cleanup hangs. Playwright starts the browser in a
+    process group of its own, so killing the worker's group alone leaves Chrome running with no owner."""
+    below = descendants(process.pid) if os.name == "posix" and process.poll() is None else []
     try:
         if os.name == "posix":
             os.killpg(process.pid, signal.SIGKILL)
@@ -30,6 +51,11 @@ def _stop(process: subprocess.Popen) -> None:
             process.kill()
     except ProcessLookupError:
         pass
+    for pid in below:
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
     process.wait(timeout=5)
 
 

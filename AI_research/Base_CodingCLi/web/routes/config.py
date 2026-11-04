@@ -577,6 +577,7 @@ def test_llm(payload: dict, user=Depends(require_admin)):
     # the configured model alone: with fallbacks a dead primary (402 "Endpoint is unavailable") is answered by the next
     # one and the test reads "可用" while every real request pays for a failed first try
     llm_cfg.fallback_models = []
+    llm_cfg.fallback_providers = []
 
     started = time.time()
     try:

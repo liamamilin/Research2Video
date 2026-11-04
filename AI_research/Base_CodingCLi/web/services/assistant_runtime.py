@@ -110,6 +110,14 @@ def references(result: dict, tool: str) -> list[dict]:
     return refs + research_refs
 
 
+def origin_of(request) -> str:
+    """Where a request came from: browsers mark their own fetches with Sec-Fetch-Site; curl and scripts do not."""
+    headers = getattr(request, 'headers', None)
+    if headers is None:
+        return ''
+    return 'app' if headers.get('sec-fetch-site') else 'script'
+
+
 def run(message, history, llm, request, user, on_event=None, cancel_token: Event | None = None,
         store=None, request_id=None, conversation_id=None, refs=None):
     refs = list(refs or [])
@@ -201,7 +209,7 @@ def run(message, history, llm, request, user, on_event=None, cancel_token: Event
             from core.errors import CancelledError
             raise CancelledError('Assistant stopped')
 
-    rounds = AssistantRounds(request_id, conversation_id, user.get('username', ''))
+    rounds = AssistantRounds(request_id, conversation_id, user.get('username', ''), origin_of(request))
     try:
         for round_index in range(MAX_STEPS):
             check_cancel()

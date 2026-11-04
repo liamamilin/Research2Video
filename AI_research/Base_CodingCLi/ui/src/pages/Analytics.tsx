@@ -1,15 +1,16 @@
 import { useSearchParams, Link } from "react-router-dom";
-import { BarChart3, Bot, Gauge } from "lucide-react";
+import { BarChart3, Bot, CalendarCheck, Gauge } from "lucide-react";
 import { loadPlatforms } from "@/api/platforms";
 import { ErrorState } from "@/components/ErrorState";
 import { AssistantAnalytics } from "@/components/AssistantAnalytics";
 import { UsageAnalytics } from "@/components/UsageAnalytics";
 import { VideoAnalytics } from "@/components/VideoAnalytics";
+import { WeeklyReview } from "@/components/WeeklyReview";
 import { useAuthStore } from "@/lib/auth-store";
 import { usePageResource } from "@/lib/use-page-resource";
 import { cn } from "@/lib/utils";
 
-const TABS = [{ id: "usage", label: "用量与耗时", icon: Gauge }, { id: "assistant", label: "助手", icon: Bot }, { id: "video", label: "视频数据", icon: BarChart3 }];
+const TABS = [{ id: "usage", label: "用量与耗时", icon: Gauge }, { id: "assistant", label: "助手", icon: Bot }, { id: "video", label: "视频数据", icon: BarChart3 }, { id: "review", label: "每周复盘", icon: CalendarCheck }];
 
 /** The bilibili account decides whether there is anything to show; the data itself loads inside VideoAnalytics. */
 function VideoData() {
@@ -26,7 +27,7 @@ export function AnalyticsPage() {
   const role = useAuthStore(s => s.user?.role);
   const [params, setParams] = useSearchParams();
   const requested = params.get("tab");
-  const tab = requested === "video" || requested === "assistant" ? requested : "usage";
+  const tab = TABS.some(item => item.id === requested) ? requested as string : "usage";
   const change = (value: string) => setParams(previous => { const next = new URLSearchParams(previous); next.set("tab", value); return next; });
   if (role !== "admin") return <div className="space-y-5 max-w-6xl"><h1 className="text-xl font-semibold tracking-tight">数据分析</h1><p role="alert" className="card p-6 text-sm text-text-muted">数据分析只对管理员开放。</p></div>;
   return <div className="space-y-5 max-w-6xl">
@@ -34,6 +35,6 @@ export function AnalyticsPage() {
       <p className="text-xs text-text-muted mt-1">一条视频从调研到成片的耗时、模型和 token，以及发布到哔哩哔哩之后的表现。</p></header>
     <div role="tablist" className="flex gap-1 border-b border-border">{TABS.map(item =>
       <button key={item.id} role="tab" aria-selected={tab === item.id} className={cn("px-3 py-2 text-sm flex gap-2 items-center border-b-2", tab === item.id ? "text-accent border-accent" : "text-text-muted border-transparent")} onClick={() => change(item.id)}><item.icon className="w-4 h-4" />{item.label}</button>)}</div>
-    {tab === "usage" ? <UsageAnalytics /> : tab === "assistant" ? <AssistantAnalytics /> : <VideoData />}
+    {tab === "usage" ? <UsageAnalytics /> : tab === "assistant" ? <AssistantAnalytics /> : tab === "review" ? <WeeklyReview /> : <VideoData />}
   </div>;
 }

@@ -153,6 +153,7 @@ def start(column_key: str, topic: dict, started_by: str) -> dict:
     context = content_columns.snapshot(settings.paths.config_dir, production_id, config.job) if config else {}
     context = topic.pop("_content_context", None) or context
     from core.video import episodes
+    topic = episodes.material_topic(topic, context)
     context = episodes.snapshot_context(context, topic)
     topic = episodes.publication_topic(topic, context)
     if context.get("audience") and not explicit_audience:
@@ -330,8 +331,6 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     column = apply_script_context(column, script.get("content_context") or {})
     from core.video import episodes
     is_episode = episodes.enabled(topic)
-    tutorial = ((script.get('content_context') or {}).get('type') == 'tutorial'
-                or ((script.get('content_context') or {}).get('render') or {}).get('production_recipe') == 'mixed_tutorial')
     joint_input = is_episode or research_dossier.enabled(script) or bool(topic.get("theme_research"))
     dossier_report, dossier_selection = report, "item" if topic.get("from_item") else "report"
     guarded = not is_episode and bool(script["topic"].get("matrix_dedup")) and not content_guard.protected(script_id)
@@ -356,11 +355,13 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                 else:
                     if topic.get("from_item") and original:
                         # A flash item cannot wander into another item from its feed.
-                        selected = content_guard.sources(report)
-                        original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original)
-                                                                 if content_guard.sources(p["text"]) & selected)
+                        cited = story_pool.cited(report)
+                        original = "\n\n---\n\n".join(p["text"] for p in story_pool.packets(report, original, True)
+                                                                 if story_pool.cited_packet(p, cited))
                     selection_report = research_dossier.selection_brief(report, script)
-                    pool = story_pool.load_or_create(key, selection_report, original, peers, config)
+                    # An item's cited price/plan pages stay in: they are how a redone comparison shows what changed.
+                    pool = story_pool.load_or_create(key, selection_report, original, peers, config,
+                                                     references=bool(topic.get("from_item")))
                     story, _ = story_pool.take(script_id, pool, peers)
                 topic = {**topic, "title": story["title"], "story": story}
                 script = {**script, "topic": topic}
@@ -437,30 +438,38 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
                      if urls & {normalize_url(url) for url in extract_urls(part)}]
             material = "\n\n---\n\n".join(parts)
         writing_topic = topic
+        told = _episode_told(script, topic, dossier_report) if is_episode else []
+        if told:
+            items = topic["episode"]["items"]
+            titles = {c["title"] for c in told}
+            if titles >= {i["title"] for i in items}:
+                raise content_guard.DuplicateContent([{"script_id": c["peer_id"], "title": c["peer_title"]} for c in told],
+                                                     "本期条目往期都已讲过，少做一期")
+            dossier_report = episodes.without(dossier_report, items, titles)
+            writing_topic = {**topic, "episode": {**topic["episode"], "items": [i for i in items if i["title"] not in titles]}}
+            column = replace(column, script_style=column.script_style + "\n以下条目往期已经讲过，本期不讲，原始材料里出现也跳过："
+                             + "；".join(sorted(titles)))
         if dossier_selection == "column_explanation":
             question = re.search(r"(?m)^##\s+本期主问题[：:]\s*(.+)$", dossier_report)
             writing_topic = {key: value for key, value in topic.items() if key != "story"}
             writing_topic["title"] = question.group(1).strip()
         greeting = episodes.greeting(topic, script.get("content_context") or {})
-        written = writer.write(
+        written = writer.write_for_column(
+            column=column, content_context=script.get('content_context') or {},
             report=dossier_report if joint_input else material or report,
             citation_check=None if material else citation_check,
             topic=writing_topic,
-            column_style=column.script_style + episodes.brief(topic, tutorial=tutorial) + (
+            column_style=column.script_style + (
                 "\n本矩阵近期已经讲过以下选题，请从剩余素材选择新选题，标题、开场和正文都不要复述："
                 + "；".join(p["title"] for p in dedup_meta.get("peers", [])) if dedup_meta.get("peers") else ""),
-            target_minutes=column.target_minutes,
             llm_config=config,
-            voice=column.voice_id or None,
-            paragraph_units=tuple(column.paragraph_units),
-            topic_fields=column.writer_topic_fields(),
             **({"original_material": material} if joint_input else {}),
-            greeting=greeting or None,
-            tutorial=tutorial,
         )
         polish.apply(written, config, greeting=greeting, voice=column.voice_id or None)
         if is_episode:
             written.meta["episode"] = episodes.manifest(topic, written.sections)
+            if told:
+                written.meta["episode_told"] = told
         written.meta["input_kind"] = ("report_and_original_material" if joint_input and material
                                       else "original_material" if material else "report")
         if joint_input:
@@ -494,6 +503,21 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     )
     store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"
+
+
+def _episode_told(script: dict, topic: dict, report: str) -> list[dict]:
+    """Items of this programme an earlier video of the matrix already told; videos from the same report
+    (its own singles) do not count."""
+    from core.video import episodes
+
+    episode = topic.get("episode") or {}
+    if not episode.get("items") or not episode.get("job") or content_guard.protected(script["id"]):
+        return []
+    settings = get_settings()
+    peers = [p for p in content_guard.coverage({"matrix_dedup": {"job": episode["job"]}}, settings.paths.config_dir,
+                                               settings.paths.jobs_dir, script_id=script["id"])
+             if p.get("report") != episode.get("report_path")]
+    return episodes.covered(report, episode["items"], peers, _read_report)
 
 
 def _duplicate_script(script_id: str, exc: content_guard.DuplicateContent, failed_status: str) -> str:

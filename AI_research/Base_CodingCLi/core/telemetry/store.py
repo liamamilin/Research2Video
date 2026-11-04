@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS assistant_rounds (          -- one model turn of an a
     retired INTEGER NOT NULL DEFAULT 0,        -- old tool results replaced by a short receipt
     saved_chars INTEGER NOT NULL DEFAULT 0,
     tools TEXT NOT NULL DEFAULT '[]',          -- JSON list of id, name, chars: what the model asked for, and how big each answer was
+    origin TEXT NOT NULL DEFAULT '',           -- app: sent from the app's page; script: another program; empty: not recorded
     PRIMARY KEY (request_id, turn)
 );
 """.format(attrs=",\n    ".join(f"{name} TEXT NOT NULL DEFAULT ''" for name in ATTRS))
@@ -138,6 +139,8 @@ def _add_attr_columns(conn) -> None:
         for name in ATTRS:
             if name not in have:
                 conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
+    if "origin" not in {row[1] for row in conn.execute("PRAGMA table_info(assistant_rounds)")}:
+        conn.execute("ALTER TABLE assistant_rounds ADD COLUMN origin TEXT NOT NULL DEFAULT ''")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_calls_request ON calls(request_id)")
 
 

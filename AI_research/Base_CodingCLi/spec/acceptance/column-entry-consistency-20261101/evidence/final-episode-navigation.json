@@ -1,0 +1,89 @@
+{
+  "mode": "episode",
+  "items": [
+    {
+      "index": 1,
+      "title": "生物研究模型的受限访问",
+      "chapter_indexes": [
+        1
+      ],
+      "start_frame": 1318,
+      "end_frame": 3290
+    },
+    {
+      "index": 2,
+      "title": "模型仓库与工具链风险",
+      "chapter_indexes": [
+        2
+      ],
+      "start_frame": 3290,
+      "end_frame": 7678
+    },
+    {
+      "index": 3,
+      "title": "试点指标比发账号更重要",
+      "chapter_indexes": [
+        3
+      ],
+      "start_frame": 7678,
+      "end_frame": 10526
+    }
+  ],
+  "total_frames": 11176,
+  "agenda": {
+    "start_frame": 427,
+    "end_frame": 1318,
+    "highlights": [
+      427,
+      719,
+      1011
+    ]
+  },
+  "item_cards": [
+    {
+      "index": 1,
+      "start_frame": 1318,
+      "end_frame": 1372
+    },
+    {
+      "index": 2,
+      "start_frame": 3290,
+      "end_frame": 3344
+    },
+    {
+      "index": 3,
+      "start_frame": 7678,
+      "end_frame": 7732
+    }
+  ],
+  "covered_frames": [
+    [
+      427,
+      1318
+    ],
+    [
+      1318,
+      1372
+    ],
+    [
+      3290,
+      3344
+    ],
+    [
+      7678,
+      7732
+    ]
+  ],
+  "agenda_highlight": "per item paragraph",
+  "fps": 30,
+  "timing": "measured narration chapters",
+  "footer": [
+    0,
+    1024,
+    1920,
+    56
+  ],
+  "audio": "stream copy",
+  "source_preserved": "/Users/milin/2026/软件开发/视频workflow/autovideo/g3/data/jobs/48614128-cb4f-4b07-801e-ca6b8cb1ba66/attempts/1/g2-run/artifacts/episode-navigation/original-content.mp4",
+  "video_sha256": "401042abde75d1653add4d560133c7e4c2a97a30cca7b6cbb06c477eca55868a"
+}

@@ -106,8 +106,8 @@ def validate(value: dict) -> None:
     }:
         raise ValueError("自动生产配置无效")
     n = automatic.get("daily_limit", 4)
-    if type(n) is not int or not 1 <= n <= 100:
-        raise ValueError("每日自动生产数量应为 1–100")
+    if n is not None and (type(n) is not int or not 1 <= n <= 100):  # null: no daily limit
+        raise ValueError("每日自动生产数量应为 1–100，或留空表示不限")
     ZoneInfo(automatic.get("timezone", "Asia/Shanghai"))
     if type(automatic.get("recommendations", False)) is not bool:
         raise ValueError("推荐自动接续应为布尔值")

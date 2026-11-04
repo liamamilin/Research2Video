@@ -175,7 +175,8 @@ def test_a_programme_opens_with_the_fixed_greeting_and_viewer_facing_titles(llm)
                            column_style="", target_minutes=1, llm_config=None, greeting="大家好，欢迎收看今日快讯。")
     system = llm.calls[0][0]["content"]
     assert "「大家好，欢迎收看今日快讯。」" in system and "不再另外问候" in system and "道别" in system
-    assert "本期简报" in system and "承接上一条" in system and "不重新打招呼" in system
+    assert "最抓人的那一条" in system and "直接切换" in system and "不重新打招呼" in system
+    assert "不逐条复述" in system and writer.STYLE_RULE in system
     opening = written.sections[0]
     assert [p["text"] for p in opening["paragraphs"]] == ["大家好，欢迎收看今日快讯。", "今天有两件事。"]
     assert [s["title"] for s in written.sections] == [writer.OPENING_TITLE, "额度上调", writer.CLOSING_TITLE]

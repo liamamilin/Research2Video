@@ -11,7 +11,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-PROMPT_VERSION = 2
+PROMPT_VERSION = 3
 #: "不是 A，而是 B" is a fine turn of phrase once or twice an episode; past this it becomes a tic.
 CONTRAST_ALLOWED = 2
 
@@ -25,7 +25,13 @@ _PRODUCTION_NOTE = re.compile(
     r"|(?:素材|材料)(?:里|中)(?:也)?(?:明确)?(?:说|提到|写|实测)"
     r"|(?:研究)?底稿(?:里|中)?")
 #: An item rounded off with the same stock line ("这条的要点是", "这一条记住的是").
-_STOCK_ENDING = re.compile(r"这(?:一)?条(?:的)?(?:要点|重点|核心|价值)(?:是|在于)|这(?:一)?条(?:要)?记住")
+# "最值得记住的是" closed six items of one programme (2026-11-02 快讯).
+_STOCK_ENDING = re.compile(r"这(?:一)?条(?:的)?(?:要点|重点|核心|价值)(?:是|在于)|这(?:一)?条(?:要)?记住"
+                           r"|最值得(?:记住|注意|看|弄懂)的(?:是|一点|新做法|，)|这(?:一)?条真正(?:改变|值得看)的是")
+#: A made-up bridge into an item ("如果说上一条讲的是……那么这一条……", "接下来这条处理的是").
+_STOCK_BRIDGE = re.compile(r"如果说[^。！？]{2,40}?[，,]\s*那么|接下来(?:这|的这)(?:一)?条|下面这(?:一)?条")
+#: A hedge said like a disclaimer ("以你实际界面为准", "不是效果承诺", "我们不做猜测").
+_HEDGE = re.compile(r"以(?:你的?)?实际(?:界面|页面|情况|账单)?(?:显示)?为准|不是效果承诺|(?:我们)?不(?:做|作)(?:任何)?猜测")
 _CONTRAST = re.compile(r"不是[^。！？；\n]{1,30}?[，,]\s*(?:而)?是")
 #: The closing's goodbye; a rewrite of that paragraph must still say it.
 _SIGN_OFF = re.compile(r"[^。！？]*(?:下期见|感谢收看|感谢观看|再见)[^。！？]*[。！？]?")
@@ -34,12 +40,15 @@ RULES = {
     "production_note": "制作说明混进了口播，观众听到的是写给剪辑的话",
     "stock_ending": "用固定句式收尾，各条听起来一个模子",
     "contrast_overuse": "「不是……而是……」在本期用得太多，变成口头禅",
+    "stock_bridge": "硬造的过渡句，两条之间没有关系也要接上",
+    "hedge": "像免责声明一样的套话，观众听着生硬",
 }
 
 SYSTEM_PROMPT = """根据素材，产出目标观众愿意看、听得懂、想继续看的视频。
 当前步骤：润色口播稿中被指出问题的段落。
 只改列出的段落，每段改成一段，意思、事实、数字、名称和条件保持不变，只换说法。
-制作说明（写给剪辑或画面的话）改成直接对观众讲的内容，或删去那句话；固定收尾句改成贴合本段内容的自然收束；
+制作说明（写给剪辑或画面的话）改成直接对观众讲的内容，或删去那句话；固定收尾句改成一句贴合本段内容的短判断；
+硬造的过渡句改成直接进入本条（比如“再说 Gemini。”），或用一句话说出两条真实的关系；免责套话删去，必要的前提用半句话自然带过；
 「不是……而是……」改为直接说出肯定的那一半，被否定的一半不必要就删去，不换成「……反而没那么重要」「……倒在其次」之类的新套话。
 保持段落与前后文的衔接，不加新内容，不打招呼；段落里原有的道别句原样保留。
 输出 JSON：{"paragraphs":[{"id":"S1P2","text":"改好的口播"}]}"""
@@ -74,6 +83,8 @@ def findings(sections: list[dict], *, greeting: str = "") -> list[dict]:
             hits = [("production_note", m.group()) for m in _PRODUCTION_NOTE.finditer(text)]
             if item:
                 hits += [("stock_ending", m.group()) for m in _STOCK_ENDING.finditer(text)]
+                hits += [("stock_bridge", m.group()) for m in _STOCK_BRIDGE.finditer(text)]
+            hits += [("hedge", m.group()) for m in _HEDGE.finditer(text)]
             for match in _CONTRAST.finditer(text):
                 contrasts += 1
                 if contrasts > CONTRAST_ALLOWED:

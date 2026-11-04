@@ -118,6 +118,11 @@ async def lifespan(app: FastAPI):
 
     user_db.init_db()
 
+    from core.video.screenshots import reap_orphans
+    stopped = reap_orphans()
+    if stopped:
+        logger.warning("Stopped %d page-reader browser(s) left without an owner: %s", len(stopped), stopped)
+
     # Initialize report indexer
     init_result = index_db.init_db()
     if init_result.get("fts_rebuilt"):

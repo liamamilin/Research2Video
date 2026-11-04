@@ -85,3 +85,17 @@ def test_testing_a_candidate_does_not_save_it_and_never_leaks_the_key(tmp_path, 
                                                       "model": "glm-5.3-flash", "key_env": "OPENDESIGN_API_KEY", "env_file": str(other)})
     assert reply.json()["ok"] is True and seen == {"model": "glm-5.3-flash", "key": "secret-value"}
     assert not settings.llm_settings_file.exists() and not list((tmp_path / "data").glob("*.candidate.json"))
+
+
+def test_saving_the_model_from_the_settings_page_keeps_the_other_service_chain(tmp_path, clean_env):
+    client, settings = make_client(tmp_path)
+    first = client.put("/api/config/llm", json={"base_url": "https://opencode.ai/zen/go/v1", "model": "a", "key_env": "K",
+                                                "fallback_providers": ["open-design:deepseek-v4.1-flash"]}).json()
+    assert first["fallback_providers"] == ["open-design:deepseek-v4.1-flash"]
+    again = client.put("/api/config/llm", json={"base_url": "https://opencode.ai/zen/go/v1", "model": "b", "key_env": "K"}).json()
+    assert again["model"] == "b" and again["fallback_providers"] == ["open-design:deepseek-v4.1-flash"]
+    cleared = client.put("/api/config/llm", json={"base_url": "https://opencode.ai/zen/go/v1", "model": "b", "key_env": "K",
+                                                  "fallback_providers": []}).json()
+    assert cleared["fallback_providers"] == []
+    assert client.put("/api/config/llm", json={"base_url": "https://a/v1", "model": "m",
+                                               "fallback_providers": ["nobody:x"]}).status_code == 422

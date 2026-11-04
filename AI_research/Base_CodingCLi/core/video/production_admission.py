@@ -74,7 +74,8 @@ class Ledger:
                 "SELECT COUNT(*) FROM admissions WHERE accepted_at>=? AND accepted_at<? AND mode='automatic'",
                 (midnight.timestamp(), (midnight + timedelta(days=1)).timestamp()),
             ).fetchone()[0]
-            if mode == "automatic" and count >= automatic.get("daily_limit", 4):
+            limit = automatic.get("daily_limit", 4)  # None: every issue is admitted, still once
+            if mode == "automatic" and limit is not None and count >= limit:
                 return False
             db.execute(
                 "INSERT INTO admissions VALUES (?,?,?,?,?)",

@@ -1,0 +1,75 @@
+{
+  "captured_at": "2026-11-01T23:19:12.538736",
+  "script_id": "26d755b67a5646ca975093ff9ecbc843",
+  "version": 2,
+  "approved_version": 2,
+  "current_version": 2,
+  "render_id": "fb0e0667ef374e149559d0d07bda3064",
+  "autovideo_job_id": "48614128-cb4f-4b07-801e-ca6b8cb1ba66",
+  "render_status": "RUNNING",
+  "entry": "existing App assistant; rerender approved v2; no rewrite or manual postprocessing",
+  "same_narration_as_first_v2": true,
+  "source_sha256": "da514c88e79fcd851fe950b9c80df3c0972113ab965d3d20cdbc86934a58ff29",
+  "episode": {
+    "items": [
+      {
+        "title": "生物研究模型的受限访问",
+        "chapter_indexes": [
+          1
+        ]
+      },
+      {
+        "title": "模型仓库与工具链风险",
+        "chapter_indexes": [
+          2
+        ]
+      },
+      {
+        "title": "试点指标比发账号更重要",
+        "chapter_indexes": [
+          3
+        ]
+      }
+    ]
+  },
+  "visuals": {
+    "state": "skipped",
+    "reason": "自动配图未开启",
+    "web_image_count": 0
+  },
+  "script_count": 364,
+  "new_schedules": 0,
+  "published": false,
+  "voice_settings": {
+    "steps": 10,
+    "chain": "anchor",
+    "compile": true,
+    "reference_cache": true
+  },
+  "video_speed": 1.25,
+  "packaging": {
+    "selection": {
+      "preset": "common",
+      "label": "AI 快讯",
+      "accent": "#1f7a4d",
+      "intro": {
+        "enabled": false
+      },
+      "outro": {
+        "enabled": false
+      },
+      "recipe": "flash-nr",
+      "badge": {
+        "enabled": false
+      },
+      "sound": {
+        "enabled": false
+      }
+    },
+    "badge": {
+      "text": "",
+      "color": "#1f7a4d"
+    }
+  },
+  "voice_id": "voxcpm_anchor"
+}

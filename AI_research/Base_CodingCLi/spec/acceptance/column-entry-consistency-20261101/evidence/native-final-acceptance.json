@@ -1,0 +1,126 @@
+{
+  "captured_at": "2026-11-01T23:31:22.222453",
+  "script_id": "26d755b67a5646ca975093ff9ecbc843",
+  "version": 2,
+  "render_id": "fb0e0667ef374e149559d0d07bda3064",
+  "autovideo_job_id": "48614128-cb4f-4b07-801e-ca6b8cb1ba66",
+  "status": "COMPLETED",
+  "completed_at": "2026-11-01T23:28:34+0800",
+  "production_entry": "existing App assistant and native production chain; no manual script/storyboard/composition",
+  "video": {
+    "file": "/Users/milin/2026/软件开发/视频workflow/AI_research/Base_CodingCLi/state/video_renders/fb0e0667ef374e149559d0d07bda3064/video.mp4",
+    "bytes": 24675649,
+    "sha256": "9dbb3ceb6c3987f11c1f051f596e3059538aa56c5c00a5a311242af922a869f9",
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "content_seconds": 372.533333,
+    "final_seconds": 378.53333333333336,
+    "native_final_decode": true
+  },
+  "checks": {
+    "media": "PASS",
+    "video_decode": "PASS",
+    "audio_decode": "PASS",
+    "narration": {
+      "status": "PASS",
+      "chapters": 5,
+      "segments": 67,
+      "characters": 2927,
+      "rule": "segments reproduce the script in order; only splitting and whitespace may differ",
+      "caption_cues": 114,
+      "checked": [
+        "narration-plan",
+        "video-ir",
+        "captions.srt",
+        "chapter-titles",
+        "short-caption-exact-coverage"
+      ]
+    },
+    "package": "PASS",
+    "brand": "PASS"
+  },
+  "presentation": {
+    "scene_count": 36,
+    "scene_entries": {
+      "cut": 5,
+      "dissolve": 31
+    },
+    "episode_items": [
+      {
+        "index": 1,
+        "title": "生物研究模型的受限访问",
+        "chapter_indexes": [
+          1
+        ],
+        "start_frame": 1318,
+        "end_frame": 3290
+      },
+      {
+        "index": 2,
+        "title": "模型仓库与工具链风险",
+        "chapter_indexes": [
+          2
+        ],
+        "start_frame": 3290,
+        "end_frame": 7678
+      },
+      {
+        "index": 3,
+        "title": "试点指标比发账号更重要",
+        "chapter_indexes": [
+          3
+        ],
+        "start_frame": 7678,
+        "end_frame": 10526
+      }
+    ],
+    "greeting_caption": "大家好，欢迎收看今日快讯。",
+    "greeting_caption_seconds": [
+      0.31,
+      1.88
+    ],
+    "visual_samples": {
+      "greeting": {
+        "source": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/48614128-cb4f-4b07-801e-ca6b8cb1ba66/attempts/1/g2-run/artifacts/keyframes/frame-003.png",
+        "evidence": "final-greeting.png",
+        "sha256": "971183f256430b830069e337f8bf953e9ed4556ced61575df586b7de16a14813"
+      },
+      "agenda": {
+        "source": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/48614128-cb4f-4b07-801e-ca6b8cb1ba66/attempts/1/g2-run/artifacts/keyframes/frame-013.png",
+        "evidence": "final-agenda.png",
+        "sha256": "9087f8d28285ef28824ab4ac08b8ed8890b2855a425443573709038601e03942"
+      },
+      "item-01": {
+        "source": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/48614128-cb4f-4b07-801e-ca6b8cb1ba66/attempts/1/g2-run/artifacts/keyframes/frame-063.png",
+        "evidence": "final-item-01.png",
+        "sha256": "9dec1f332a1769b7d03031421f1744e34f41a45631e5e5ef8e5b5241e76192af"
+      },
+      "item-02": {
+        "source": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/48614128-cb4f-4b07-801e-ca6b8cb1ba66/attempts/1/g2-run/artifacts/keyframes/frame-155.png",
+        "evidence": "final-item-02.png",
+        "sha256": "ea568ba5451bb98ff92612a2a13165d2fbe9f10f33ad89930135e16b181fd743"
+      },
+      "item-03": {
+        "source": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/制作数据/jobs/48614128-cb4f-4b07-801e-ca6b8cb1ba66/attempts/1/g2-run/artifacts/keyframes/frame-298.png",
+        "evidence": "final-item-03.png",
+        "sha256": "932e3906b51e95b7d07495d105336a4a1b8e3097160254b146d65b7dc3699372"
+      }
+    }
+  },
+  "web_pictures": {
+    "state": "skipped",
+    "reason": "自动配图未开启",
+    "enabled": false,
+    "selected_images": 0,
+    "semantic_matching_stable": false,
+    "first_v2_render_retained_as_failed_visual_sample": "23a05127a2334c0ebb1fd03fb5d409a2"
+  },
+  "limits": [
+    "Catalogue contracts cover 10 matrices and 34 bound productions; this is one real App movie acceptance, not a visual review of all matrices.",
+    "Legacy unbound recipes and existing MP4s retain their prior behavior; new successful rewrites inherit their bound column settings."
+  ],
+  "new_schedules": 0,
+  "published": false,
+  "app_screenshot": "app-final-player.jpg"
+}

@@ -31,6 +31,8 @@ _LLM_SECTION = {
     # same provider and key as ``model`` -- e.g. a free model first, paid ones
     # after. See spec/llm-providers.md.
     'fallback_models': STRINGS,
+    # Then other providers, as "<preset id>:<model>" (core.llm.fallback_targets).
+    'fallback_providers': STRINGS,
     'pricing': {'input_per_1m': NONNEGATIVE_NUMBER, 'output_per_1m': NONNEGATIVE_NUMBER},
 }
 SCHEMA = {

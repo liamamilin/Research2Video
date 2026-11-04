@@ -232,6 +232,7 @@ class ResearchAgent:
         self.retrieved_urls: set[str] = set()
         # Original text shown by the search/file tools, for downstream authors.
         self.materials: list[str] = []
+        self.batches = 1
         self._timeout_seconds = int(timeout_seconds or 0)
         self._deadline = (
             time.time() + self._timeout_seconds if self._timeout_seconds else 0.0
@@ -286,35 +287,99 @@ class ResearchAgent:
             fallback_queries=fallback_queries or [],
         )
 
-    def run_fetch_only(self, task_prompt: str, fetched_urls=(), stats: Optional[dict] = None) -> str:
-        """Write the report from the fetched sources already in ``task_prompt``: one model call, no tools, no web
-        search and no query planning. ``fetched_urls`` count as retrieved for the citation check."""
+    def run_fetch_only(self, task_prompt: str, fetched_urls=(), stats: Optional[dict] = None, *,
+                       sources: str = "") -> str:
+        """Write the report from the fetched sources: no tools, no web search and no query planning. ``sources`` is
+        the source block (it may also arrive already inside ``task_prompt``); one too large for the model is
+        researched in batches and merged. ``fetched_urls`` count as retrieved for the citation check."""
         self.search = _NoSearch()
         self.fetched = dict(stats or {})
         for url in fetched_urls:
             if url:
                 self.retrieved_urls.add(url)
-        self._remember_urls_in(task_prompt)
+        self._remember_urls_in(task_prompt + "\n" + sources)
         self._progress({"type": "phase", "phase": "writing_report"})
         self._check_cancel()
-        messages = [
+        return self.write_from(task_prompt, sources)
+
+    def write_from(self, task_prompt: str, sources: str) -> str:
+        """One call when the sources fit the model's window, else item-boundary batches and a merge. The provider's
+        context-length refusal resizes the batches; any other model failure stops the run."""
+        from . import research_batches as rb
+        full = task_prompt + ("\n\n" + sources if sources else "")
+        if not sources or len(full) <= rb.MAX_PROMPT_CHARS:
+            try:
+                return self._fetch_call(full, complete=bool(sources))
+            except rb.Truncated:
+                # The report outgrew the model's output in one go: the same material, written in two batches.
+                logger.warning("Report reached the model's output limit; researching in batches")
+                limit = max(1, len(full) // 2)
+            except LLMError as exc:
+                seen = rb.overflow(exc)
+                if not seen or not sources:
+                    raise
+                logger.warning("Sources exceed the model window (%d > %d tokens); researching in batches", seen[1], seen[0])
+                limit = rb.resized(seen[1], seen[0], len(full))
+        else:
+            limit = rb.BATCH_CHARS
+        parts = rb.batches_for(sources, len(task_prompt) + 2, limit=limit)
+        if len(parts) < 2:
+            raise LLMError("采集材料超过模型上下文上限，但无法再按条目拆分")
+        drafts, done = [], 0
+        while parts:
+            self._check_cancel()
+            part = parts.pop(0)
+            self._progress({"type": "phase", "phase": "writing_report_batch", "batch": done + 1,
+                            "batches": done + 1 + len(parts)})
+            try:
+                drafts.append(self._fetch_call(task_prompt + "\n\n" + part + rb.BATCH_NOTE, complete=True))
+                done += 1
+            except rb.Truncated:
+                # A batch whose candidate list outgrew the model's output is redone as two smaller batches.
+                header, items = rb.split(part)
+                if len(items) < 2:
+                    raise
+                middle = len(items) // 2
+                parts[:0] = [header + "".join(items[:middle]), header + "".join(items[middle:])]
+        self.batches = len(drafts)
+        return self._merge(task_prompt, drafts)
+
+    def _merge(self, task_prompt: str, drafts: list[str]) -> str:
+        from . import research_batches as rb
+        prompt = rb.merge_prompt(task_prompt, drafts)
+        if len(prompt) > rb.MAX_PROMPT_CHARS and len(drafts) > 2:
+            middle = len(drafts) // 2
+            drafts = [self._merge(task_prompt, drafts[:middle]), self._merge(task_prompt, drafts[middle:])]
+            prompt = rb.merge_prompt(task_prompt, drafts)
+        self._progress({"type": "phase", "phase": "merging_report_batches", "batches": len(drafts)})
+        merged = self._fetch_call(prompt, complete=True)
+        return rb.strip_receipts(merged)[0] + "\n\n" + rb.joined_receipt(drafts)
+
+    def _fetch_call(self, prompt: str, *, complete: bool = False) -> str:
+        response = self.llm.chat([
             {"role": "system", "content": _FETCH_SYSTEM_PROMPT},
-            {"role": "user", "content": task_prompt},
-        ]
-        response = self.llm.chat(messages, tools=None)
+            {"role": "user", "content": prompt},
+        ], tools=None)
         self._log_usage()
+        if complete and getattr(response, "finish_reason", None) == "length":
+            from .research_batches import Truncated
+            raise Truncated("分批研究稿被模型输出长度截断，结果不完整")
         return response.content.strip()
 
     def close(self) -> None:
         """Release HTTP resources."""
         self.llm.close()
 
-    def expand_dossier(self, task_prompt: str, report: str, material: str) -> str:
-        """Use newly read body sections in the same researcher's final dossier."""
+    def expand_dossier(self, task_prompt: str, report: str, material: str, *, sources: str = "") -> str:
+        """Use newly read body sections in the same researcher's final dossier. The collected ``sources`` go along
+        when they fit the model's window; otherwise the report already distilled from them stands in for them."""
+        from .research_batches import MAX_PROMPT_CHARS
         self.materials.append(material)
         self._remember_urls_in(material)
         self._check_cancel()
         self._progress({"type": "phase", "phase": "expanding_research_dossier"})
+        if sources and len(task_prompt) + len(sources) + len(report) + len(material) < MAX_PROMPT_CHARS:
+            task_prompt += "\n\n" + sources
         response = self.llm.chat([
             {"role": "system", "content": _FETCH_SYSTEM_PROMPT},
             {"role": "user", "content": (
@@ -644,8 +709,10 @@ class ResearchAgent:
         outputs, which are the bulk of the transcript.
         """
 
+        # Only what the agent read along the way counts. The task's own material can exceed the
+        # budget by itself; counting it would shrink every page the agent reads to 800 characters.
         def total_chars() -> int:
-            return sum(len(str(m.get("content") or "")) for m in messages)
+            return sum(len(str(m.get("content") or "")) for m in messages if m.get("role") == "tool")
 
         if total_chars() <= self.config.context_char_budget:
             return
