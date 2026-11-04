@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useState } from "react";
-import { createExperiment, loadExperiment, loadExperiments, moveExperiment, setExperimentsEnabled,
+import { confirmPreview, createExperiment, loadExperiment, loadExperiments, loadPreview, moveExperiment, requestPreview, setExperimentsEnabled,
   type Definition, type ExperimentDetail, type ExperimentRow, type Move, type SwitchRow } from "@/api/experiments";
 import { usePageResource } from "@/lib/use-page-resource";
 import { ErrorState } from "./ErrorState";
@@ -75,6 +75,35 @@ function NewExperiment({ registry, onDone }: { registry: SwitchRow[]; onDone: ()
   </section>;
 }
 
+const PREVIEW_STATUS = { requested: "排队中（等正式出片空闲）", running: "正在出片", done: "已出好", failed: "没出成" } as const;
+
+function Preview({ id }: { id: string }) {
+  const load = useCallback((signal: AbortSignal) => loadPreview(id, signal), [id]);
+  const { data, error, reload } = usePageResource(load);
+  const [source, setSource] = useState(""); const [problem, setProblem] = useState("");
+  if (error) return <p className="text-xs text-danger">{message(error)}</p>;
+  if (!data || data.kind === "none") return null;
+  const run = async (fn: () => Promise<unknown>) => { setProblem(""); try { await fn(); await reload(); } catch (e) { setProblem(message(e)); } };
+  const p = data.preview;
+  return <div className="border-t border-border pt-2 mt-2 space-y-2" aria-label="预览 B">
+    <p className="font-medium">预览 B（只出片，不发布）{data.confirmed ? <span className="text-success ml-2">已确认</span> : null}</p>
+    {p ? <p>状态：{PREVIEW_STATUS[p.status]}{p.error ? `：${p.error}` : ""}</p> : <p className="text-text-muted">还没有预览。</p>}
+    {data.a_video && data.b_video ? <div className="grid gap-2 sm:grid-cols-2">
+      <figure><figcaption className="text-text-muted mb-1">A（现状）</figcaption><video controls src={data.a_video} className="w-full rounded" /></figure>
+      <figure><figcaption className="text-text-muted mb-1">B</figcaption><video controls src={data.b_video} className="w-full rounded" /></figure></div> : null}
+    <div className="flex flex-wrap gap-2 items-center">
+      <select aria-label="预览用的视频" className="input text-xs w-auto" value={source} onChange={e => setSource(e.target.value)}>
+        <option value="">最近的一条</option>{data.sources.map(s => <option key={s.render_id} value={s.render_id}>{s.title}</option>)}</select>
+      <button className="btn text-xs" disabled={p?.status === "requested" || p?.status === "running" || data.sources.length === 0}
+        onClick={() => void run(() => requestPreview(id, source || undefined))}>生成预览</button>
+      {p?.status === "done" && !data.confirmed ? <button className="btn btn-primary text-xs" onClick={() => void run(() => confirmPreview(id))}>确认 B 没问题</button> : null}
+      <button className="btn text-xs" onClick={() => void reload()}>刷新</button>
+    </div>
+    {data.sources.length === 0 ? <p className="text-text-muted">最近 7 天没有这个实验范围内的自动出片，暂时没法预览。</p> : null}
+    {problem ? <p role="alert" className="text-danger">{problem}</p> : null}
+  </div>;
+}
+
 function Details({ id }: { id: string }) {
   const load = useCallback((signal: AbortSignal) => loadExperiment(id, signal), [id]);
   const { data, error } = usePageResource(load);
@@ -84,6 +113,7 @@ function Details({ id }: { id: string }) {
   return <div className="text-xs space-y-1 py-2">
     <p>已分组：A {d.arms.A} 条，B {d.arms.B} 条</p>
     {d.start_problems.length ? <ul className="text-danger list-disc pl-4">{d.start_problems.map(p => <li key={p}>{p}</li>)}</ul> : null}
+    {d.status === "draft" ? <Preview id={id} /> : null}
     <p className="text-text-muted">记录：{d.events.map(e => `${new Date(e.at * 1000).toLocaleString("zh-CN", { hour12: false })} ${e.kind}`).join("；")}</p>
   </div>;
 }

@@ -342,6 +342,17 @@ def review_notices(now: float) -> list[dict]:
     return out
 
 
+def experiment_notices(now: float) -> list[dict]:
+    """A/B experiment reminders (spec/ab-testing.md §9a). The module is optional: any failure shows none."""
+    try:
+        from core.experiments import notices
+        return notices.recent(get_settings().paths.state_dir, now, WINDOW_DAYS)
+    except Exception:  # noqa: BLE001 - reminders must never break the home board
+        import logging
+        logging.getLogger(__name__).warning("experiment reminders unavailable", exc_info=True)
+        return []
+
+
 def search_alerts(now: float) -> list[dict]:
     """A search provider out of credits or refusing its key: one alert per episode, until it answers again."""
     from core import search_health
@@ -372,6 +383,7 @@ def alerts(now: Optional[float] = None, *, include_acked: bool = False) -> list[
     since = now - WINDOW_DAYS * 86400
     acked = frozenset() if include_acked else frozenset(ap.acked_alerts())
     out = (job_alerts(since) + batch_alerts(since, now, acked) + plan_alerts(now) + round_alerts(since)
-           + cap_alerts(now) + analytics_alerts(now) + review_notices(now) + search_alerts(now))
+           + cap_alerts(now) + analytics_alerts(now) + review_notices(now) + search_alerts(now)
+           + experiment_notices(now))
     out = [a for a in out if a["key"] not in acked]
     return sorted(out, key=lambda a: a["at"], reverse=True)

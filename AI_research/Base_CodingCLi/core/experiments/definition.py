@@ -153,7 +153,11 @@ class Experiment(BaseModel):
 
     def needs_preview(self) -> bool:
         """Visual and cover switches are looked at before they go live (§9a step ③); writing ones need not be."""
-        return any(p.startswith(("presentation", "render", "cover_style")) for p in self.write_paths())
+        return self.preview_kind() != "none"
+
+    def preview_kind(self) -> str:
+        kinds = {s.preview for s in self.switches()}
+        return "render" if "render" in kinds else "cover" if "cover" in kinds else "none"
 
 
 def aa(id: str, name: str = "A/A 检查", *, scope: Scope | None = None, per_arm: int = AA_PER_ARM,

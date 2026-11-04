@@ -5,7 +5,7 @@ import { createExperiment, loadExperiments, moveExperiment, setExperimentsEnable
 import { ExperimentBadge } from "./ExperimentBadge";
 import { ExperimentsTab } from "./ExperimentsTab";
 
-vi.mock("@/api/experiments", () => ({ loadExperiments: vi.fn(), loadExperiment: vi.fn(), createExperiment: vi.fn(), moveExperiment: vi.fn(), setExperimentsEnabled: vi.fn() }));
+vi.mock("@/api/experiments", () => ({ loadExperiments: vi.fn(), loadExperiment: vi.fn(), createExperiment: vi.fn(), moveExperiment: vi.fn(), setExperimentsEnabled: vi.fn(), loadPreview: vi.fn(), requestPreview: vi.fn(), confirmPreview: vi.fn() }));
 afterEach(cleanup);
 beforeEach(() => { vi.mocked(createExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(moveExperiment).mockResolvedValue({} as ExperimentRow); vi.mocked(setExperimentsEnabled).mockResolvedValue({ enabled: true }); });
 
@@ -64,4 +64,21 @@ it("labels a script with its experiment and arm, and nothing otherwise", () => {
   expect(container.textContent).toBe("");
   render(<ExperimentBadge marks={[{ id: "aa_first", arm: "B" }]} />);
   expect(screen.getByText("实验 aa_first · B 组")).toBeTruthy();
+});
+
+it("shows A and B side by side once a preview is done and confirms it", async () => {
+  const { loadExperiment, loadPreview, confirmPreview } = await import("@/api/experiments");
+  const visual: ExperimentRow = { ...draft, id: "card", definition: { ...draft.definition, id: "card", name: "要点卡", kind: "compare",
+    arms: { A: { name: "现状", overrides: {} }, B: { name: "要点卡", overrides: { "presentation.opening_card": true } } } } };
+  vi.mocked(loadExperiments).mockResolvedValue({ enabled: false, registry, experiments: [visual] });
+  vi.mocked(loadExperiment).mockResolvedValue({ ...visual, events: [], start_problems: ["画面类、封面类开关要先预览 B 并确认"], arms: { A: 0, B: 0 } });
+  vi.mocked(loadPreview).mockResolvedValue({ kind: "render", confirmed: false, sources: [{ render_id: "r1", script_id: "s1", title: "一条视频", completed_at: "" }],
+    preview: { id: "p1", status: "done", error: "", source_render_id: "r1", files: ["video.mp4"] }, a_video: "/a.mp4", b_video: "/b.mp4" });
+  vi.mocked(confirmPreview).mockResolvedValue({});
+  const { container } = render(<ExperimentsTab />);
+  fireEvent.click(await screen.findByRole("button", { name: "要点卡" }));
+  expect(await screen.findByText("状态：已出好")).toBeTruthy();
+  expect(container.querySelectorAll("video")).toHaveLength(2);
+  fireEvent.click(screen.getByRole("button", { name: "确认 B 没问题" }));
+  await waitFor(() => expect(confirmPreview).toHaveBeenCalledWith("card"));
 });

@@ -275,7 +275,7 @@ def test_the_tab_api_is_read_only_and_for_administrators(client, web_env):
 
 
 #: Existing files allowed to reference the A/B module (spec §2 rule 1).
-ALLOWED = {"web/server.py", "web/services/video_workflow.py"}
+ALLOWED = {"web/server.py", "web/services/video_workflow.py", "web/services/automation_health.py"}
 _OWN = ("core/experiments/", "web/routes/experiments.py", "tests/")
 
 
@@ -454,3 +454,122 @@ def test_start_is_refused_for_undeveloped_switches_previews_and_conflicts(client
     assert client.post("/api/experiments/aa_first/start", headers=csrf).status_code == 409
     assert client.put("/api/experiments/settings", json={"enabled": True}, headers=csrf).json() == {"enabled": True}
     assert client.get("/api/experiments").json()["enabled"] is True
+
+
+# ---- phase 2.5: preview B and reminders ---------------------------------------------------------------------------
+
+from core.experiments import notices, preview  # noqa: E402
+
+
+def _approved(column_env):
+    from core.video import store as video_store
+    context = content_columns_snapshot(column_env)
+    script = video_store.create_script("flash", {"title": "转换周报"}, production="flash", content_context=context,
+                                       created_by="autopilot")
+    version = video_store.add_version(script["id"], title="转换周报", sections=[{"title": "执行转换", "paragraphs": [
+        {"text": "运行转换命令，查看生成的文件。", "citations": [], "evidence": "UNCITED"}]}], length_check={}, edit_type="GENERATED")
+    video_store.update_script(script["id"], status="APPROVED", approved_version=version)
+    return video_store.get_script(script["id"])
+
+
+def content_columns_snapshot(column_env):
+    from core.video import content_columns
+    return content_columns.snapshot(str(column_env / "config"), "flash", "monitoring/ai_flash_discovery")
+
+
+def test_preview_builds_b_from_the_real_request_builder_without_a_render_row(column_env):
+    from core.video import store as video_store
+    script = _approved(column_env)
+    experiment = compare(id="card", overrides={"render.packaging.label": "要点版"})
+    built = preview.build_request(preview.b_script(script, experiment))
+    assert built["request"]["production_context"]["matrix"]["settings"]["packaging"]["label"] == "要点版"
+    assert built["script_id"] == script["id"] and built["source_text"]
+    assert video_store.list_renders(script["id"]) == []
+    assert video_store.get_script(script["id"])["content_context"] == script["content_context"]  # the source is untouched
+
+
+class FakeAutoVideo:
+    def __init__(self):
+        self.payloads, self.statuses = [], ["QUEUED", "RUNNING", "COMPLETED"]
+
+    def create_job(self, payload):
+        self.payloads.append(payload)
+        return {"job_id": "job-1"}
+
+    def get_job(self, job_id):
+        return {"status": self.statuses.pop(0)}
+
+    def list_artifacts(self, job_id):
+        return [{"name": "video.mp4"}, {"name": "captions.srt"}]
+
+    def download(self, item, dest):
+        Path(dest).write_bytes(b"mp4")
+
+    def session(self):
+        from contextlib import nullcontext
+        return nullcontext()
+
+
+def test_a_render_preview_submits_once_and_keeps_only_the_video(tmp_path, monkeypatch):
+    from web.services import video_visuals
+    monkeypatch.setattr(video_visuals, "prepare", lambda render, client: ({**render["request"], "visual": 1}, {}))
+    client = FakeAutoVideo()
+    built = {"script_id": "s1", "request": {"input_mode": "narration", "chapters": []}, "visuals": {}, "source_text": "x"}
+    files = preview.render(tmp_path, "card-1", built, client, sleep=lambda _s: None)
+    assert files == ["video.mp4"] and (preview.folder(tmp_path, "card-1") / "video.mp4").read_bytes() == b"mp4"
+    [payload] = client.payloads
+    assert payload["idempotency_key"] == "experiment-preview:card-1" and payload["visual"] == 1
+
+
+def _queue(tmp_path, monkeypatch, experiment):
+    store = ExperimentStore(tmp_path)
+    store.save(experiment, "admin")
+    monkeypatch.setattr(preview, "sources", lambda *a, **k: [{"render_id": "r1", "script_id": "s1", "title": "t", "completed_at": ""}])
+    return store, preview.request(store, tmp_path, experiment.id, "admin")
+
+
+def test_previews_wait_for_idle_production_then_run_and_can_be_confirmed(tmp_path, monkeypatch):
+    store, queued = _queue(tmp_path, monkeypatch, compare(id="card", overrides={"render.packaging.label": "x"}))
+    assert queued["status"] == "requested"
+    with pytest.raises(ValueError, match="已有一个预览"):
+        preview.request(store, tmp_path, "card", "admin")
+    with pytest.raises(ValueError, match="还没有做好的预览"):
+        preview.confirm(store, "card", "admin")
+    monkeypatch.setattr(preview, "production_idle", lambda _s: False)
+    assert preview.run_next(tmp_path) is None
+    monkeypatch.setattr(preview, "production_idle", lambda _s: True)
+    from core.video import store as video_store
+    monkeypatch.setattr(video_store, "get_script", lambda _id: {"id": "s1", "content_context": {}})
+    monkeypatch.setattr(preview, "build_request", lambda script: {"script_id": "s1", "request": {}, "visuals": {}, "source_text": ""})
+    monkeypatch.setattr(preview, "render", lambda *a, **k: ["video.mp4"])
+    assert preview.run_next(tmp_path, client=FakeAutoVideo()) == queued["id"]
+    assert preview.latest(store, "card")["status"] == "done"
+    preview.confirm(store, "card", "admin")
+    assert store.preview_confirmed("card")
+
+
+def test_a_failed_preview_is_recorded_and_reminded(tmp_path, monkeypatch):
+    store, queued = _queue(tmp_path, monkeypatch, compare(id="card", overrides={"render.packaging.label": "x"}))
+    monkeypatch.setattr(preview, "production_idle", lambda _s: True)
+    from core.video import store as video_store
+    monkeypatch.setattr(video_store, "get_script", lambda _id: None)
+    preview.run_next(tmp_path, client=FakeAutoVideo())
+    shown = preview.latest(store, "card")
+    assert shown["status"] == "failed" and "找不到" in shown["error"]
+    [reminder] = notices.recent(tmp_path, time.time(), 7)
+    assert "没出成" in reminder["title"] and reminder["link"] == "/analytics?tab=experiments"
+
+
+def test_writing_only_experiments_need_no_preview(tmp_path, monkeypatch):
+    with pytest.raises(ValueError, match="不需要预览"):
+        _queue(tmp_path, monkeypatch, compare(id="greet", overrides={"greeting": "你好"}))
+
+
+def test_reminders_cover_starts_and_survive_a_broken_module(tmp_path, monkeypatch, web_env):
+    store = ExperimentStore(tmp_path)
+    store.save(aa("aa_first"), "admin")
+    store.move("aa_first", "start", "admin")
+    assert [r["title"] for r in notices.recent(tmp_path, time.time(), 7)] == ["实验「A/A 检查」开始了"]
+    from web.services import automation_health
+    monkeypatch.setattr(notices, "recent", lambda *a: (_ for _ in ()).throw(RuntimeError("broken")))
+    assert automation_health.experiment_notices(time.time()) == []

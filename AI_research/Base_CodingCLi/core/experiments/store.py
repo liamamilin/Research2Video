@@ -36,6 +36,11 @@ CREATE TABLE IF NOT EXISTS events (
     at REAL NOT NULL, by TEXT NOT NULL DEFAULT '', detail TEXT NOT NULL DEFAULT '{}'
 );
 CREATE TABLE IF NOT EXISTS results (experiment_id TEXT PRIMARY KEY, computed_at REAL NOT NULL, data TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS previews (
+    id TEXT PRIMARY KEY, experiment_id TEXT NOT NULL, kind TEXT NOT NULL, status TEXT NOT NULL,
+    source_render_id TEXT NOT NULL, source_script_id TEXT NOT NULL, job_id TEXT, files TEXT NOT NULL DEFAULT '[]',
+    error TEXT NOT NULL DEFAULT '', requested_at REAL NOT NULL, finished_at REAL
+);
 """
 
 

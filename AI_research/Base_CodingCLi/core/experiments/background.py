@@ -17,6 +17,7 @@ from core.experiments.store import ExperimentStore
 logger = logging.getLogger(__name__)
 
 INTERVAL = 600.0
+PREVIEW_INTERVAL = 30.0
 _started = threading.Lock()
 _thread: threading.Thread | None = None
 _code_version: str | None = None
@@ -92,5 +93,15 @@ def start_background(state_dir: str | Path, stop: threading.Event) -> None:
                 except Exception:  # noqa: BLE001 - the A/B module must never take anything else down
                     logger.exception("experiments background check failed; will try again")
 
+        def previews() -> None:
+            # its own thread: a render preview can take an hour and must not hold up the checks above
+            from core.experiments import preview
+            while not stop.wait(PREVIEW_INTERVAL):
+                try:
+                    preview.run_next(state_dir)
+                except Exception:  # noqa: BLE001
+                    logger.exception("experiments preview pass failed; will try again")
+
         _thread = threading.Thread(target=loop, name="experiments", daemon=True)
         _thread.start()
+        threading.Thread(target=previews, name="experiments-preview", daemon=True).start()

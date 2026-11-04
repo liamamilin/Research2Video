@@ -106,6 +106,71 @@ def detail(experiment_id: str, user=Depends(require_admin)) -> dict:
             "arms": {arm: sum(1 for a in assignments if a["arm"] == arm) for arm in ("A", "B")}}
 
 
+class PreviewIn(BaseModel):
+    source_render_id: str | None = None
+
+
+def _definition(store: ExperimentStore, experiment_id: str) -> Experiment:
+    found = store.get(experiment_id)
+    if not found:
+        raise HTTPException(404, "没有这个实验")
+    return Experiment.model_validate(found["definition"])
+
+
+@router.get("/{experiment_id}/preview")
+def preview_state(experiment_id: str, user=Depends(require_admin)) -> dict:
+    from core.experiments import preview
+    store = _store()
+    experiment = _definition(store, experiment_id)
+    shown = preview.latest(store, experiment_id)
+    return {"kind": experiment.preview_kind(), "preview": shown, "confirmed": store.preview_confirmed(experiment_id),
+            "sources": preview.sources(get_settings().paths.state_dir, experiment),
+            "a_video": f"/api/video/renders/{shown['source_render_id']}/files/video.mp4" if shown else None,
+            "b_video": f"/api/experiments/{experiment_id}/preview/video" if shown and "video.mp4" in shown["files"] else None}
+
+
+@router.post("/{experiment_id}/preview", status_code=202)
+def preview_request(experiment_id: str, body: PreviewIn, user=Depends(require_admin)) -> dict:
+    from core.experiments import preview
+    store = _store()
+    _definition(store, experiment_id)
+    try:
+        queued = preview.request(store, get_settings().paths.state_dir, experiment_id, user["username"],
+                                 body.source_render_id)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    audit.log("experiment_preview", user=user["username"], target=experiment_id)
+    return queued
+
+
+@router.post("/{experiment_id}/preview/confirm")
+def preview_confirm(experiment_id: str, user=Depends(require_admin)) -> dict:
+    from core.experiments import preview
+    store = _store()
+    _definition(store, experiment_id)
+    try:
+        preview.confirm(store, experiment_id, user["username"])
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    audit.log("experiment_preview_confirm", user=user["username"], target=experiment_id)
+    return {"confirmed": True}
+
+
+@router.get("/{experiment_id}/preview/{name}")
+def preview_file(experiment_id: str, name: str, user=Depends(require_admin)):
+    from fastapi.responses import FileResponse
+    from core.experiments import preview
+    store = _store()
+    shown = preview.latest(store, experiment_id)
+    files = {"video": "video.mp4", "cover-a": "cover-a.jpg", "cover-b": "cover-b.jpg"}
+    if not shown or files.get(name) not in shown["files"]:
+        raise HTTPException(404, "没有这个预览文件")
+    path = preview.folder(get_settings().paths.state_dir, shown["id"]) / files[name]
+    if not path.is_file():
+        raise HTTPException(404, "没有这个预览文件")
+    return FileResponse(path, media_type="video/mp4" if name == "video" else "image/jpeg")
+
+
 @router.post("/{experiment_id}/{action}")
 def move(experiment_id: str, action: Literal["start", "pause", "resume", "end"], request: Request,
          user=Depends(require_admin)) -> dict:

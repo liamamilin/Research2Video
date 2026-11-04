@@ -25,3 +25,13 @@ export const loadExperiment = (id: string, signal?: AbortSignal) => api<Experime
 export const setExperimentsEnabled = (enabled: boolean) => api<{ enabled: boolean }>(`${BASE}/settings`, { method: "PUT", body: { enabled } });
 export const createExperiment = (definition: Definition) => api<ExperimentRow>(BASE, { method: "POST", body: definition });
 export const moveExperiment = (id: string, action: Move) => api<ExperimentRow>(`${BASE}/${encodeURIComponent(id)}/${action}`, { method: "POST" });
+
+export type PreviewSource = { render_id: string; script_id: string; title: string; completed_at: string };
+export type PreviewState = {
+  kind: "render" | "cover" | "none"; confirmed: boolean; sources: PreviewSource[];
+  preview: { id: string; status: "requested" | "running" | "done" | "failed"; error: string; source_render_id: string; files: string[] } | null;
+  a_video: string | null; b_video: string | null;
+};
+export const loadPreview = (id: string, signal?: AbortSignal) => api<PreviewState>(`${BASE}/${encodeURIComponent(id)}/preview`, { signal });
+export const requestPreview = (id: string, sourceRenderId?: string) => api(`${BASE}/${encodeURIComponent(id)}/preview`, { method: "POST", body: { source_render_id: sourceRenderId || null } });
+export const confirmPreview = (id: string) => api(`${BASE}/${encodeURIComponent(id)}/preview/confirm`, { method: "POST" });

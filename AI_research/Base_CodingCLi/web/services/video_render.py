@@ -26,7 +26,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from core.config import load_system_config
 from core.fileio import file_lock
@@ -219,8 +219,13 @@ def publish_pack(script: dict, version: dict, column, *, render_id: str | None =
     return {**publish.build(script, {**version, "checks": checks}, column, report, timeline, fresh), "render_id": used}
 
 
-def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None) -> dict:
-    """Record a render of the script's approved version. Does not contact AutoVideo."""
+def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bool = False, production_mode: Optional[str] = None,
+           record: Optional[Callable[..., dict]] = None) -> dict:
+    """Record a render of the script's approved version. Does not contact AutoVideo.
+
+    ``record`` replaces ``store.create_render`` for a caller that needs the request without a render row: the A/B
+    preview (core/experiments/preview.py), whose output must never become a publishable render.
+    """
     if (script.get('topic') or {}).get('local_video'):
         raise RenderError('这是本地导入成片，可直接发布；替换视频请提供新文件路径。')
     version_no = script.get("approved_version")
@@ -453,8 +458,8 @@ def create(script: dict, *, voice_id: Optional[str] = None, recover_download: bo
         if supplied_images and not materials:
             visuals = {'state': 'pending', 'reason': '准备用户材料画面', 'input_kind': 'user_materials',
                        'material_context': user_context, 'decisions': []}
-        return store.create_render(script["id"], version_no, title=title, source_text=text,
-                                   source_sha256=sha, request=request, visuals=visuals)
+        return (record or store.create_render)(script["id"], version_no, title=title, source_text=text,
+                                               source_sha256=sha, request=request, visuals=visuals)
     except store.ActiveRenderError as exc:
         raise RenderError(str(exc)) from exc
     except screenshots.ScreenshotError as exc:
