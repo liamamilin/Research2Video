@@ -275,6 +275,11 @@ async def lifespan(app: FastAPI):
 
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
         threading.Thread(target=analytics_manual_loop, name="analytics-manual", daemon=True).start()
+        try:  # A/B module (spec/ab-testing.md §2): its own thread; a missing or broken module never stops startup
+            from core.experiments import background as experiments_background
+            experiments_background.start_background(settings.paths.state_dir, sweep_stop)
+        except Exception:  # noqa: BLE001
+            logger.exception("experiments module did not start")
 
     logger.info("Web UI started")
     app.state.instance_id = uuid.uuid4().hex
@@ -445,6 +450,11 @@ def create_app() -> FastAPI:
     app.include_router(platforms_router)
     app.include_router(douyin_router)
     app.include_router(social_publishing_router)
+    try:  # A/B module (spec/ab-testing.md §2): optional, so an import failure leaves the rest of the app up
+        from web.routes.experiments import router as experiments_router
+        app.include_router(experiments_router)
+    except Exception:  # noqa: BLE001
+        logger.exception("experiments routes not loaded")
 
     @app.get("/api/live")
     async def live():

@@ -1,0 +1,303 @@
+"""A/B module, phase 1 (spec/ab-testing.md): registry, definitions, store, analysis engine, boundary."""
+from __future__ import annotations
+
+import json
+import random
+import re
+import sqlite3
+import time
+from pathlib import Path
+
+import pytest
+from pydantic import ValidationError
+
+from core.experiments import analysis as an
+from core.experiments import background, registry
+from core.experiments.definition import Arm, Experiment, Metric, Scope, Stop, aa, conflicts
+from core.experiments.store import ExperimentStore
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def compare(id="cover_title", overrides=None, **extra) -> Experiment:
+    return Experiment(id=id, name="封面样式", arms={"A": Arm(name="现状"), "B": Arm(name="标题封面", overrides={"cover_style": "title"} if overrides is None else overrides)},
+                      metric=Metric(primary="cover_pass", better="higher", min_effect=15), stop=Stop(per_arm=73, max_days=28), **extra)
+
+
+# ---- registry ------------------------------------------------------------------------------------------------------
+
+def test_write_paths_overlap_when_equal_or_nested():
+    assert registry.overlaps("render", "render.packaging")
+    assert registry.overlaps("presentation.opening_card", "presentation.opening_card")
+    assert not registry.overlaps("presentation.strategy", "presentation.opening_card")
+    assert not registry.overlaps("render", "renderer")
+
+
+def test_a_sub_path_of_a_prefix_switch_is_found_but_not_of_a_plain_one():
+    assert registry.find("render.voice_id").path == "render"
+    assert registry.find("render.packaging").path == "render.packaging"
+    assert registry.find("greeting.extra") is None
+    assert registry.find("unknown") is None
+
+
+# ---- definitions ---------------------------------------------------------------------------------------------------
+
+def test_a_compare_experiment_needs_a_registered_switch_with_an_allowed_value():
+    assert compare().block_size() == 2
+    with pytest.raises(ValidationError, match="不在开关登记表"):
+        compare(overrides={"title_style": "x"})
+    with pytest.raises(ValidationError, match="只能取"):
+        compare(overrides={"cover_style": "frame"})
+    with pytest.raises(ValidationError, match="至少要改一个开关"):
+        compare(overrides={})
+    with pytest.raises(ValidationError, match="写入位置重叠"):
+        compare(overrides={"render": {}, "render.packaging": {}})
+
+
+def test_arm_a_is_always_today_and_the_share_comes_in_steps_of_five():
+    with pytest.raises(ValidationError, match="A 组就是现状"):
+        Experiment(id="x1", name="x", arms={"A": Arm(name="a", overrides={"cover_style": "title"}), "B": Arm(name="b", overrides={"cover_style": "title"})},
+                   metric=Metric(primary="cover_pass", better="higher", min_effect=15), stop=Stop(per_arm=10, max_days=10))
+    assert compare(share_b=30).block_size() == 10
+    for bad in (0, 33, 60):
+        with pytest.raises(ValidationError, match="B 组比例"):
+            compare(share_b=bad)
+
+
+def test_metrics_must_be_known_and_point_the_natural_way():
+    with pytest.raises(ValidationError, match="主要指标只能是"):
+        Metric(primary="views_24h", better="higher", min_effect=1)
+    with pytest.raises(ValidationError, match="方向应为 lower"):
+        Metric(primary="exit3s", better="higher", min_effect=1)
+
+
+def test_an_aa_check_changes_nothing_and_defaults_to_twenty_per_arm():
+    check = aa("aa_first")
+    assert check.kind == "aa" and check.write_paths() == [] and check.stop.per_arm == 20
+    with pytest.raises(ValidationError, match="A/A 检查两组设置相同"):
+        Experiment(id="aa2", name="x", kind="aa", arms={"A": Arm(name="a"), "B": Arm(name="b", overrides={"cover_style": "title"})},
+                   metric=Metric(primary="completion", better="higher", min_effect=8), stop=Stop(per_arm=20, max_days=28))
+
+
+def test_switch_timing_and_reach_follow_the_registry():
+    notes = compare(id="n1", overrides={"notes": "先讲价格"})
+    assert notes.counts_failures_before_writing() and notes.needs_column()
+    assert not compare().counts_failures_before_writing() and not compare().needs_column()
+
+
+def test_running_together_is_refused_only_for_overlapping_write_paths_in_overlapping_scope():
+    render_all = compare(id="r1", overrides={"render": {"x": 1}})
+    packaging = compare(id="r2", overrides={"render.packaging": {"intro": False}})
+    cover = compare(id="c1")
+    assert conflicts(render_all, packaging)
+    assert not conflicts(render_all, cover)
+    apart = compare(id="r3", overrides={"render.packaging": {"intro": False}}, scope=Scope(columns=["ai_flash"]))
+    other = compare(id="r4", overrides={"render": {"x": 1}}, scope=Scope(columns=["topic_digest"]))
+    assert not conflicts(apart, other)
+
+
+# ---- store ---------------------------------------------------------------------------------------------------------
+
+def test_the_master_switch_is_off_until_turned_on_and_off_when_unreadable(tmp_path):
+    store = ExperimentStore(tmp_path)
+    assert store.enabled() is False
+    store.set_enabled(True, "admin")
+    assert store.enabled() is True
+    broken = ExperimentStore(tmp_path / "missing" / "deeper")
+    broken.path = str(tmp_path)  # a directory, not a database
+    assert broken.enabled() is False
+
+
+def test_drafts_save_and_list_and_a_started_experiment_is_locked(tmp_path):
+    store = ExperimentStore(tmp_path)
+    store.save(compare(), "admin")
+    store.save(compare(), "admin")
+    [row] = store.list()
+    assert row["status"] == "draft" and row["definition"]["arms"]["B"]["overrides"] == {"cover_style": "title"}
+    assert [e["kind"] for e in store.events("cover_title")] == ["created", "saved"]
+    with store.connect(write=True) as db:
+        db.execute("UPDATE experiments SET status='running' WHERE id='cover_title'")
+    with pytest.raises(ValueError, match="不能修改"):
+        store.save(compare(), "admin")
+
+
+def _video_db(path: Path, rows: list[tuple[str, str, dict]]) -> None:
+    with sqlite3.connect(path) as db:
+        db.execute("CREATE TABLE scripts (id TEXT, created_at TEXT, content_context TEXT)")
+        db.executemany("INSERT INTO scripts VALUES (?,?,?)", [(i, c, json.dumps(ctx)) for i, c, ctx in rows])
+
+
+def test_reconciliation_binds_tokens_found_on_scripts_and_never_writes_video_db(tmp_path):
+    store = ExperimentStore(tmp_path)
+    store.save(compare(), "admin")
+    now = time.time()
+    with store.connect(write=True) as db:
+        db.execute("UPDATE experiments SET status='running', created_at=? WHERE id='cover_title'", (now - 3600,))
+        for token in ("t1", "t2", "t-orphan"):
+            db.execute("INSERT INTO assignments VALUES (?,?,?,?,?,?,?,NULL)", (token, "cover_title", "B", "ai_flash", 0, now, "abc"))
+    stamp = time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(now))
+    old = time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(now - 86400))
+    _video_db(tmp_path / "video.db", [
+        ("s1", stamp, {"experiments": [{"id": "cover_title", "arm": "B", "token": "t1"}]}),
+        ("s2", stamp, {"column": "x", "experiments": [{"id": "cover_title", "arm": "A", "token": "t2"}]}),
+        ("s0", old, {"experiments": [{"id": "cover_title", "arm": "B", "token": "t-orphan"}]}),  # before the start
+        ("s3", stamp, {}),
+    ])
+    before = (tmp_path / "video.db").read_bytes()
+    assert background.reconcile(store, tmp_path / "video.db") == 2
+    bound = {a["token"]: a["script_id"] for a in store.assignments("cover_title")}
+    assert bound == {"t1": "s1", "t2": "s2", "t-orphan": None}
+    assert (tmp_path / "video.db").read_bytes() == before
+
+
+def test_the_background_tick_does_nothing_while_switched_off(tmp_path, monkeypatch):
+    called = []
+    monkeypatch.setattr(background, "reconcile", lambda *a: called.append(a))
+    background.tick(tmp_path)
+    assert called == []
+
+
+# ---- analysis ------------------------------------------------------------------------------------------------------
+
+def test_completion_is_adjusted_for_length_with_a_frozen_fit():
+    rng = random.Random(3)
+    points = [(d, 60 - 8 * __import__("math").log(d) + rng.gauss(0, 1)) for d in rng.choices(range(60, 800), k=80)]
+    fit = an.fit_duration(points)
+    assert fit["slope"] == pytest.approx(-8, abs=0.5)
+    assert an.adjusted_completion(None, 100, fit) is None and an.adjusted_completion(30, None, fit) is None
+    short, long = an.adjusted_completion(40, 60, fit), an.adjusted_completion(15, 700, fit)
+    assert abs(short - (40 - (fit["slope"] * __import__("math").log(60) + fit["intercept"]))) < 1e-9
+    assert an.fit_duration(points[:5]) is None
+
+
+def test_low_volume_columns_join_their_matrix_and_weekly_ones_use_four_week_windows():
+    start = 0.0
+    day = 86400
+    videos = ([{"column": "daily", "matrix": "m1", "pubdate": start + i * day / 2} for i in range(28)]  # 14 days, 2 a day
+              + [{"column": "weekly", "matrix": "m2", "pubdate": start + i * 7 * day} for i in range(2)]
+              + [{"column": "rare", "matrix": "", "pubdate": start + 3 * day}]
+              + [{"column": "", "matrix": "", "pubdate": start + 9 * day}])
+    keys = an.stratum_keys(videos, start)
+    assert keys[0] == "daily|w0" and keys[27] == "daily|w1"
+    assert keys[28] == keys[29] == "m2|m0"
+    assert keys[30] == keys[31] == f"{an.LOW_VOLUME}|m0"
+
+
+def test_strata_missing_an_arm_are_skipped_and_reported():
+    rows = [{"arm": "A", "stratum": "s1", "value": 10}, {"arm": "B", "stratum": "s1", "value": 20},
+            {"arm": "A", "stratum": "only_a", "value": 99}, {"arm": "B", "stratum": "s1", "value": None}]
+    result = an.estimate(rows, resamples=200)
+    assert result["skipped_strata"] == ["only_a"] and result["n_a"] == 1 and result["n_b"] == 1
+    assert result["estimate"] == pytest.approx(10)
+
+
+def _simulate(rng, n, shift=0.0):
+    rows = []
+    for i in range(2 * n):
+        stratum = f"c{(i // 2) % 6}"
+        arm = "A" if i % 2 == 0 else "B"
+        level = {"c0": 10, "c1": 25, "c2": 40, "c3": 15, "c4": 30, "c5": 20}[stratum]
+        rows.append({"arm": arm, "stratum": stratum, "value": level + rng.gauss(0, 15) + (shift if arm == "B" else 0)})
+    return rows
+
+
+def test_aa_rarely_calls_b_better_and_a_real_fifteen_point_gain_is_found():
+    rng = random.Random(7)
+    runs = 150
+    false_better = sum(an.estimate(_simulate(rng, 45), resamples=400, seed=k)["low"] > 0 for k in range(runs))
+    assert false_better / runs <= 0.05
+    found = sum(an.estimate(_simulate(rng, 45, 15), resamples=400, seed=k)["low"] > 0 for k in range(60))
+    assert found / 60 >= 0.8
+
+
+def test_ratio_of_medians_for_play_counts():
+    rows = [{"arm": "A", "stratum": "s", "value": v} for v in (10, 20, 30)] + [{"arm": "B", "stratum": "s", "value": v} for v in (5, 10, 15)]
+    assert an.estimate(rows, "ratio", resamples=200)["estimate"] == pytest.approx(-0.5)
+
+
+def test_srm_uses_the_exact_binomial():
+    assert an.srm_p(50, 50, 50) == pytest.approx(1.0)
+    assert an.srm_p(70, 30, 50) < 0.01
+    assert an.srm_p(70, 30, 30) > 0.5
+
+
+def test_verdict_follows_the_rules_in_order_and_respects_lower_is_better():
+    good = {"estimate": 6, "low": 2, "high": 10, "sd": 15, "n_a": 45, "n_b": 45}
+    assert an.verdict(good, "higher", ended=False, srm=1)["verdict"] == "running"
+    assert an.verdict(good, "higher", ended=True, srm=0.001)["verdict"] == "srm"
+    assert an.verdict(good, "higher", ended=True, srm=1)["verdict"] == "b_better"
+    assert an.verdict(good, "lower", ended=True, srm=1)["verdict"] == "b_worse"  # exits went up
+    vetoed = an.verdict(good, "higher", ended=True, srm=1, guardrails=[{"metric": "exit3s", "status": "worse"}])
+    assert vetoed["verdict"] == "no_difference" and vetoed["minimum_detectable"] == pytest.approx(an.Z_MDE * 15 * (2 / 45) ** 0.5)
+    noted = an.verdict(good, "higher", ended=True, srm=1, applied_rate=0.5, guardrails=[{"metric": "views_24h", "status": "hint"}])
+    assert noted["verdict"] == "b_better" and len(noted["notes"]) == 2
+
+
+def test_guardrails_veto_only_when_the_whole_interval_is_past_the_threshold():
+    exits_up = {"estimate": 12, "low": 7, "high": 17}  # exit3s, lower is better
+    assert an.guardrail_status(exits_up, "lower", 5) == "worse"
+    assert an.guardrail_status({"estimate": 8, "low": -2, "high": 18}, "lower", 5) == "hint"
+    assert an.guardrail_status({"estimate": -0.3, "low": -0.5, "high": -0.25}, "higher", 0.2) == "worse"
+    assert an.guardrail_status({"estimate": 0.0, "low": -0.3, "high": 0.3}, "higher", 0.2) == "ok"
+
+
+def test_harm_hint_waits_for_fifteen_each_and_only_warns():
+    small = [10.0] * 10
+    assert an.harm_hint(small, small, 0, 0) is None
+    assert "不到 A 组一半" in an.harm_hint([20.0] * 15, [5.0] * 15, 0, 0)
+    assert "缺失率" in an.harm_hint([10.0] * 15, [10.0] * 15, 0.1, 0.35)
+
+
+# ---- API and boundary ----------------------------------------------------------------------------------------------
+
+def _login(client, username="admin"):
+    client.post("/api/auth/login", json={"username": username, "password": f"{username}-pass-123"})
+
+
+def test_the_tab_api_is_read_only_and_for_administrators(client, web_env):
+    _login(client, "editor")
+    assert client.get("/api/experiments").status_code == 403
+    _login(client)
+    body = client.get("/api/experiments").json()
+    assert body["enabled"] is False and body["experiments"] == []
+    assert any(r["path"] == "render.*" for r in body["registry"])
+    assert client.get("/api/experiments/nope").status_code == 404
+    tmp, _ = web_env
+    ExperimentStore(tmp / "state").save(aa("aa_first"), "admin")
+    detail = client.get("/api/experiments/aa_first").json()
+    assert detail["status"] == "draft" and detail["arms"] == {"A": 0, "B": 0} and detail["events"][0]["kind"] == "created"
+    assert client.post("/api/experiments", json={}).status_code == 405
+
+
+#: Existing files allowed to reference the A/B module (spec §2 rule 1). Phase 1 adds only server.py.
+ALLOWED = {"web/server.py"}
+_OWN = ("core/experiments/", "web/routes/experiments.py", "tests/")
+
+
+def test_existing_code_references_the_module_only_from_the_allowlist():
+    pattern = re.compile(r"core\.experiments|core import experiments|web\.routes\.experiments|routes import experiments")
+    found = set()
+    for folder in ("core", "web", "utils", "scripts"):
+        for path in (ROOT / folder).rglob("*.py"):
+            rel = path.relative_to(ROOT).as_posix()
+            if rel.startswith(_OWN):
+                continue
+            if pattern.search(path.read_text(encoding="utf-8", errors="ignore")):
+                found.add(rel)
+    assert found <= ALLOWED, f"A/B 模块被白名单以外的文件引用：{sorted(found - ALLOWED)}"
+
+
+def test_a_broken_module_leaves_the_app_up(monkeypatch, web_env):
+    import builtins
+    real = builtins.__import__
+
+    def refuse(name, *args, **kwargs):
+        if name.startswith("web.routes.experiments"):
+            raise ImportError("broken on purpose")
+        return real(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", refuse)
+    from web.server import create_app
+    from fastapi.testclient import TestClient
+    client = TestClient(create_app())
+    assert client.get("/api/live").status_code == 200
