@@ -138,6 +138,10 @@ def start_background(state_dir: str | Path, stop: threading.Event) -> None:
         def previews() -> None:
             # its own thread: a render preview can take an hour and must not hold up the checks above
             from core.experiments import preview
+            try:
+                preview.recover(state_dir)
+            except Exception:  # noqa: BLE001
+                logger.exception("experiments: could not recover interrupted previews")
             while not stop.wait(PREVIEW_INTERVAL):
                 try:
                     preview.run_next(state_dir)

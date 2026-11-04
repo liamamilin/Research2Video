@@ -211,6 +211,16 @@ def covers(state_dir: str | Path, preview_id: str, render: dict, title: str, b_s
     return saved
 
 
+def recover(state_dir: str | Path) -> int:
+    """At process start: a preview left「running」was cut off by a restart; mark it failed so a new one can be asked for."""
+    if not (Path(state_dir) / "experiments.db").is_file():
+        return 0
+    store = ExperimentStore(state_dir)
+    with store.connect(write=True) as db:
+        return db.execute("UPDATE previews SET status='failed', error='后台重启，预览中断，请重新生成', finished_at=? "
+                          "WHERE status='running'", (time.time(),)).rowcount
+
+
 def run_next(state_dir: str | Path, client=None) -> Optional[str]:
     """Run the oldest queued preview: covers at once, a render only while production is idle. Returns its id."""
     store = ExperimentStore(state_dir)

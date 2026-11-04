@@ -999,3 +999,43 @@ def test_the_estimate_route_needs_no_saved_draft(client, web_env):
     csrf = {"X-CSRF-Token": client.cookies.get("ai_research_csrf") or ""}
     out = client.post("/api/experiments/estimate", json={**aa("aa_first").model_dump(), "id": ""}, headers=csrf)
     assert out.status_code == 200 and out.json()["window_days"] == 14
+
+
+# ---- review fixes (11-04) ------------------------------------------------------------------------------------------
+
+def test_a_preview_cut_off_by_a_restart_can_be_asked_for_again(tmp_path, monkeypatch):
+    store, queued = _queue(tmp_path, monkeypatch, compare(id="card", overrides={"render.packaging.label": "x"}))
+    preview._update(store, queued["id"], status="running")
+    assert preview.recover(tmp_path) == 1
+    shown = preview.latest(store, "card")
+    assert shown["status"] == "failed" and "后台重启" in shown["error"]
+    assert preview.request(store, tmp_path, "card", "admin")["status"] == "requested"
+    assert preview.recover(tmp_path / "nowhere") == 0
+
+
+def test_videos_still_unpublished_after_the_wind_down_count_as_missing(tmp_path):
+    store = _results_world(tmp_path)
+    with sqlite3.connect(tmp_path / "video.db") as db:
+        db.execute("DELETE FROM publications WHERE script_id IN ('s1','s3')")  # held, never published
+        db.execute("UPDATE scripts SET status='APPROVED' WHERE id IN ('s1','s3')")
+    store.move("aa_first", "end", "system")
+    live = results.evaluate(store, "aa_first", tmp_path)
+    assert live["missing"]["B"] == 0 and not live["settled"]
+    after = results.evaluate(store, "aa_first", tmp_path, now=time.time() + 8 * 86400)
+    assert after["settled"] and after["missing"]["B"] == 2
+
+
+def test_the_schema_is_ensured_once_per_database(tmp_path, monkeypatch):
+    from core import sqlite_util
+    ExperimentStore(tmp_path).enabled()
+    scripts = []
+    real = sqlite_util.connect
+
+    def spy(*a, **k):
+        cm = real(*a, **k)
+        scripts.append(1)
+        return cm
+
+    monkeypatch.setattr(sqlite_util, "connect", spy)
+    ExperimentStore(tmp_path).enabled()
+    assert len(scripts) == 1  # only the read itself, no second schema pass

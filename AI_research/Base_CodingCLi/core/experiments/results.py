@@ -275,6 +275,17 @@ def evaluate(store: ExperimentStore, experiment_id: str, state_dir: str | Path, 
         result = an.estimate(rows(g.metric), "ratio" if counted else "difference")
         status = an.guardrail_status(result, g.better, defs.COUNT_THRESHOLD if counted else defs.RATIO_THRESHOLD)
         guards.append({"metric": g.metric, "status": status, **result})
+    # settled first: once the wind-down is over, anything still without a reading counts as missing (§8「终点」)
+    active = (ended_at or now) - start - paused_seconds(events, master, start, ended_at or now)
+    counted = [v for v in videos if v["state"] != "missing"]
+    last_pub = max((v.get("pubdate") or 0 for v in counted), default=0)
+    in_flight = any(v["state"] == "pending" and "pubdate" not in v for v in counted)
+    settled = ended_at is not None and (now >= ended_at + WIND_DOWN_MAX
+                                         or (not in_flight and now >= last_pub + SETTLE))
+    if settled:
+        for v in videos:
+            if v["state"] == "pending":
+                v["state"] = "missing"
     n = {arm: sum(1 for v in videos if v["arm"] == arm) for arm in ("A", "B")}
     with_data = {arm: sum(1 for v in videos if v["arm"] == arm and v.get(primary) is not None) for arm in ("A", "B")}
     missing = {arm: sum(1 for v in videos if v["arm"] == arm and v["state"] == "missing") for arm in ("A", "B")}
@@ -286,13 +297,7 @@ def evaluate(store: ExperimentStore, experiment_id: str, state_dir: str | Path, 
     flags = [applied(experiment, v["script_id"], scripts[v["script_id"]], state_dir) for v in videos if v["arm"] == "B"]
     known = [f for f in flags if f is not None]
     applied_rate = (sum(known) / len(known)) if known else None
-    active = (ended_at or now) - start - paused_seconds(events, master, start, ended_at or now)
     reached = min(with_data.values()) >= experiment.stop.per_arm or active >= experiment.stop.max_days * 86400
-    counted = [v for v in videos if v["state"] != "missing"]
-    last_pub = max((v.get("pubdate") or 0 for v in counted), default=0)
-    in_flight = any(v["state"] == "pending" and "pubdate" not in v for v in counted)
-    settled = ended_at is not None and (now >= ended_at + WIND_DOWN_MAX
-                                         or (not in_flight and now >= last_pub + SETTLE))
     verdict = an.verdict(main, experiment.metric.better, ended=settled, srm=srm, guardrails=guards,
                          applied_rate=applied_rate if experiment.kind == "compare" else None)
     measured_n = {arm: sum(1 for v in videos if v["arm"] == arm and v["state"] == "measured") for arm in ("A", "B")}

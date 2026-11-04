@@ -14,6 +14,8 @@ from core import sqlite_util
 from core.experiments.definition import Experiment
 
 BUSY_SECONDS = 2.0
+#: databases whose schema this process already ensured (the creation hook asks on every automatic script)
+_READY: set[str] = set()
 MASTER = "enabled"
 
 _SCHEMA = """
@@ -50,6 +52,8 @@ class ExperimentStore:
         self._ready = False
 
     def connect(self, write: bool = False) -> Iterator:
+        if not self._ready and self.path in _READY:
+            self._ready = True
         if not self._ready:
             with sqlite_util.connect(self.path, timeout=BUSY_SECONDS) as db:
                 db.executescript(_SCHEMA)
@@ -57,6 +61,7 @@ class ExperimentStore:
                 if "started_at" not in columns:  # a phase-1 database
                     db.execute("ALTER TABLE experiments ADD COLUMN started_at REAL")
             self._ready = True
+            _READY.add(self.path)
         return sqlite_util.connect(self.path, timeout=BUSY_SECONDS, write=write)
 
     # ---- master switch: off unless explicitly on (§2, §11) ------------------------------------------------------
