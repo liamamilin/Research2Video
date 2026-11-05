@@ -201,7 +201,8 @@ def covers(state_dir: str | Path, preview_id: str, render: dict, title: str, b_s
     dest = folder(state_dir, preview_id)
     dest.mkdir(parents=True, exist_ok=True)
     saved = []
-    for arm, style in (("a", "number"), ("b", b_style)):
+    from core.experiments import registry
+    for arm, style in (("a", registry.find("cover_style").default), ("b", b_style)):
         copy = None if style == "title" else cover_copy.for_render(render, title, dest / "copy.json")
         made = make_covers(video, title, {"landscape": dest / f"cover-{arm}.jpg"}, bilibili.ffmpeg_binary(), copy)
         if made.get("landscape"):
@@ -240,7 +241,7 @@ def run_next(state_dir: str | Path, client=None) -> Optional[str]:
             if render_row is None:
                 raise RuntimeError("找不到预览用的出片")
             files = covers(state_dir, preview_id, render_row, render_row.get("title") or "",
-                           str(experiment.arms["B"].overrides.get("cover_style", "number")))
+                           str(experiment.arms["B"].overrides.get("cover_style", "title")))
             _update(store, preview_id, status="done", files=files, finished_at=time.time())
             return preview_id
         script = video_store.get_script(row["source_script_id"])

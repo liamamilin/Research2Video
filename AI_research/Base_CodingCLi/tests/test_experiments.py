@@ -669,9 +669,11 @@ def test_cover_style_title_skips_the_cover_copy_model(monkeypatch, tmp_path):
     from web.services import publish_cover
     monkeypatch.setattr(video_store, "get_script", lambda sid: {"content_context": {"cover_style": "title"}} if sid == "s1" else {})
     assert publish_cover.cover_style({"script_id": "s1"}) == "title"
-    assert publish_cover.cover_style({"script_id": "s2"}) == "number"
+    assert publish_cover.cover_style({"script_id": "s2"}) == "title"  # the default since 11-05
+    monkeypatch.setattr(video_store, "get_script", lambda sid: {"content_context": {"cover_style": "number"}})
+    assert publish_cover.cover_style({"script_id": "s3"}) == "number"  # only arm B of an experiment asks for it
     monkeypatch.setattr(video_store, "get_script", lambda sid: (_ for _ in ()).throw(RuntimeError("db")))
-    assert publish_cover.cover_style({"script_id": "s1"}) == "number"
+    assert publish_cover.cover_style({"script_id": "s1"}) == "title"
 
 
 def test_cover_style_applied_is_read_from_the_copy_cache(tmp_path):
@@ -723,8 +725,8 @@ def test_cover_previews_draw_both_styles(tmp_path, monkeypatch):
         return dests
 
     monkeypatch.setattr(cover_module, "make_covers", fake_make)
-    files = preview.covers(tmp_path, "p1", {"id": "r1", "title": "t"}, "t", "title")
-    assert files == ["cover-a.jpg", "cover-b.jpg"] and drawn[0]["big"] == "差十倍" and drawn[1] is None
+    files = preview.covers(tmp_path, "p1", {"id": "r1", "title": "t"}, "t", "number")
+    assert files == ["cover-a.jpg", "cover-b.jpg"] and drawn[0] is None and drawn[1]["big"] == "差十倍"  # A: today's title cover
 
 
 # ---- phase 4: opening card and suggested change -------------------------------------------------------------------

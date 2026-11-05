@@ -51,7 +51,7 @@ SWITCHES: tuple[Switch, ...] = (
            "from_writing", "all", "出片记录的配图审计里 opening_card.applied", False, "unconfirmed", values=(False, True),
            preview="render", note="待确认：有品牌的视频 AutoVideo 会关掉片头（g3/brand_profiles.py），要点卡显示不出来"),
     Switch("cover_style", "封面样式", ("web/services/publish_cover.py",), "from_writing", "all",
-           "封面文字缓存里 copy 是否为空", "number", "existing", values=("number", "title"), preview="cover"),
+           "封面文字缓存里 copy 是否为空", "title", "existing", values=("number", "title"), preview="cover"),
     Switch("render.packaging", "片头片尾", ("web/services/video_render.py",), "from_writing", "all",
            "读实际出片参数", None, "unconfirmed", note="待确认现有配置能否单独关掉片头", preview="render"),
 )

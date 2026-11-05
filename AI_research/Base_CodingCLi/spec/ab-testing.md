@@ -135,7 +135,7 @@ B 组只能改登记过的开关。每个开关登记七项：写进 `content_co
 | `render.<子项>` | `content_context.render.<子项>` | `web/services/video_render.py`、`core/video/content_columns.py` | 写稿起 | 全部 | 出片 | 已有；必须写到具体子项，不能整块替换 `render` |
 | `greeting_position` | `content_context.greeting_position` | 写稿 | 写稿起 | 要有内容栏目 | 不用 | **要新增**（等待开发），默认 `before` |
 | `presentation.opening_card` | `content_context.presentation.opening_card` | `web/services/opening_card.py`、`web/services/video_visuals.py` | 写稿起 | 全部 | 出片 | **待确认**：真实出片验证时，带品牌的视频被 AutoVideo 关掉片头，卡片显示不出来（§9a） |
-| `cover_style` | `content_context.cover_style`（`number` / `title`） | `web/services/publish_cover.py`（通过出片记录找到稿件再读） | 写稿起 | 全部 | 封面 | 已有，默认数字封面 |
+| `cover_style` | `content_context.cover_style`（`number` / `title`） | `web/services/publish_cover.py`（通过出片记录找到稿件再读） | 写稿起 | 全部 | 封面 | 已有，默认标题封面（11-05 起；数字封面只在 B 组用） |
 | `render.packaging` | `content_context.render.packaging` | `web/services/video_render.py` | 写稿起 | 全部 | 出片 | **待确认**：现有配置能否单独关掉片头 |
 
 「待确认」和「等待开发」的开关能存进草稿，但不能开始，也不能排队。
@@ -300,7 +300,7 @@ A、B 两组视频都照常自动发布，不加人工确认。这是公平比�
 **预览不破坏边界**：
 
 - **预览出片**（11-04 用户同意改出片代码，前提是不搞崩现有工作流）：从最近 7 天、实验范围内的一条自动出片开始，把 B 的设置逐字段写进它的稿件副本，交给正式出片的同一套构建代码 `video_render.create(..., record=...)`：`record` 返回请求而不写出片记录。然后跑同样的配图准备（`video_visuals.prepare`）和要点卡处理，直接提交给 AutoVideo（标识 `experiment-preview:<预览 id>`），只把 `video.mp4` 下载到 `state/experiments/previews/<预览 id>/`。出片表里没有这条记录，所以任何发布器都不会拿到它。AutoVideo 自己的作品库里能看到这些任务。
-- **封面预览**：`cover_style` 不用出片，直接用一条已有成片画出 A（数字封面）和 B 两张封面。
+- **封面预览**：`cover_style` 不用出片，直接用一条已有成片画出 A（现状，默认标题封面）和 B 两张封面。
 - tab 里把 A（原视频或原封面）和 B 并排放，用户点「确认 B 没问题」后记一条 `preview_confirmed`，开始前的校验读它。
 - **预览不抢正式出片**：自动出片有并发上限（`video_autopilot` 的 `MAX_RENDERS`），预览走自己的路径会绕过它。所以同一时刻最多只出一个预览，并且只在出片表里没有进行中的出片时才开始（只读判断）；否则预览排队等待，tab 里显示「排队中（等正式出片空闲）」。封面预览不占出片资源，立即画。
 

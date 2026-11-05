@@ -39,7 +39,7 @@ def publish_covers(render: dict, title: str, *, portrait: bool = False) -> dict[
     video = video_render.safe_file(render, 'video.mp4')
     if missing and video is not None:
         # the script's frozen cover style (default: number-led); "title" keeps the title layout and asks no model
-        copy = None if cover_style(render) == 'title' else \
+        copy = None if cover_style(render) != 'number' else \
             cover_copy.for_render(render, title, folder / f"{render['id']}-{key}-copy.json")
         result.update(make_covers(video, title, missing, bilibili.ffmpeg_binary(), copy))
     return {('cover_portrait' if k == 'portrait' else 'cover'): str(result[k].resolve()) if k in result else ''
@@ -47,13 +47,16 @@ def publish_covers(render: dict, title: str, *, portrait: bool = False) -> dict[
 
 
 def cover_style(render: dict) -> str:
-    """``number`` (default) or ``title``, from the script's frozen content_context (spec/ab-testing.md §6)."""
+    """``title`` (default: the title over a content frame) or ``number``, from the script's frozen content_context.
+
+    Number-led covers were the default for one morning (11-05); early plays fell against the day before, so they
+    went back to being only what an A/B experiment's B arm asks for (spec/ab-testing.md §6)."""
     try:
         from core.video import store
         script = store.get_script(render.get('script_id') or '') or {}
     except Exception:  # noqa: BLE001 - an unreadable script keeps today's cover
-        return 'number'
-    return 'title' if (script.get('content_context') or {}).get('cover_style') == 'title' else 'number'
+        return 'title'
+    return 'number' if (script.get('content_context') or {}).get('cover_style') == 'number' else 'title'
 
 
 #: Cover styles the weekly review compares.
