@@ -443,6 +443,7 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             parts = [part for part in material.split("\n\n---\n\n")
                      if urls & {normalize_url(url) for url in extract_urls(part)}]
             material = "\n\n---\n\n".join(parts)
+        material, material_fit = fit_material(dossier_report if joint_input else report, material)
         writing_topic = topic
         told = _episode_told(script, topic, dossier_report) if is_episode else []
         if told:
@@ -482,6 +483,8 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
             written.meta["research_dossier"] = research_dossier.receipt(dossier_report, material, dossier_selection)
         if material:
             written.meta["material"] = material_ref
+        if material_fit:
+            written.meta["material_fit"] = material_fit
         if guarded:
             content_guard.check(script, written.sections, settings.paths.config_dir, settings.paths.jobs_dir)
             written.meta["content_dedup"] = dedup_meta
@@ -509,6 +512,40 @@ def _write(script_id: str, *, report: str, report_path: str, citation_check, col
     )
     store.update_script(script_id, status="DRAFT", error=None, stage=None)
     return "DRAFT"
+
+
+MATERIAL_SEPARATOR = "\n\n---\n\n"
+
+
+def fit_material(report: str, material: str, limit: int | None = None) -> tuple[str, dict]:
+    """The original material the writer is sent, kept inside the model's window.
+
+    Since every news article is read in full (11-03), a weekly dossier's material can run to millions of characters;
+    research works through it in batches, but the writer gets one call. When report and material do not fit, only the
+    material blocks the report cites are kept (the report is what the script is written from), in their order; if
+    those still do not fit, they are taken in order until the window is full. Returns the material and, when it was
+    reduced, what was kept, so the version records it.
+    """
+    from core import research_batches
+    from core.provenance import extract_urls, normalize_url
+
+    limit = limit or research_batches.MAX_PROMPT_CHARS
+    room = limit - len(report)
+    if not material or len(material) <= room:
+        return material, {}
+    blocks = material.split(MATERIAL_SEPARATOR)
+    cited_urls = {normalize_url(url) for url in extract_urls(report)}
+    cited = [b for b in blocks if cited_urls & {normalize_url(url) for url in extract_urls(b)}]
+    kept, used = [], 0
+    for block in cited:
+        cost = len(block) + len(MATERIAL_SEPARATOR)
+        if used + cost > room:
+            break
+        kept.append(block)
+        used += cost
+    return MATERIAL_SEPARATOR.join(kept), {"reason": "原始材料超出模型上限，只保留报告引用的材料",
+                                           "blocks": len(blocks), "cited": len(cited), "kept": len(kept),
+                                           "chars": len(material), "kept_chars": used}
 
 
 def _episode_told(script: dict, topic: dict, report: str) -> list[dict]:
