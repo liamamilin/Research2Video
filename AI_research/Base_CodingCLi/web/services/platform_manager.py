@@ -185,6 +185,60 @@ def category_for(script: dict) -> int:
     return int(config.get("tid") or 0)
 
 
+def season_for(script: dict, config: dict) -> int:
+    """The 合集 a script's video joins: its recipe's entry first (e.g. all 快讯), then its matrices, most specific first."""
+    rules = config.get("collections") or {}
+    by_recipe, by_matrix = rules.get("by_recipe") or {}, rules.get("by_matrix") or {}
+    if int(by_recipe.get(script.get("column_key", "")) or 0) > 0:
+        return int(by_recipe[script["column_key"]])
+    for key in _matrix_keys(script):
+        if int(by_matrix.get(key) or 0) > 0:
+            return int(by_matrix[key])
+    return 0
+
+
+COLLECTION_RETRY_SECONDS = 600
+COLLECTION_MAX_ATTEMPTS = 30
+
+
+def process_collection(task: dict) -> None:
+    """Called under the worker lock: put a published video into its 合集, idempotently.
+    A video that is not open yet, or that the platform refuses for now, is retried later."""
+    db = store()
+    season = int(task.get("collection_season") or 0)
+    if not season:
+        script = video_store.get_script(task["script_id"])
+        season = season_for(script, db.settings()) if script else 0
+    if not season:
+        db.set_collection(task["id"], status="NONE")
+        return
+
+    def wait(reason: str) -> None:
+        exhausted = int(task.get("collection_attempts") or 0) + 1 >= COLLECTION_MAX_ATTEMPTS
+        db.set_collection(task["id"], status="FAILED" if exhausted else "WAITING", season=season, error=reason, attempt=True)
+
+    api = client(task["uid"])
+    try:
+        info = api.owned_video(task["bvid"], task["uid"])
+        if info.get("state") != 0:
+            return wait("视频尚未公开，公开后再加入合集。")
+        section = api.season_sections().get(season)
+        if not section:
+            return db.set_collection(task["id"], status="FAILED", season=season,
+                                     error=f"账号里找不到合集 {season}，请检查合集设置。")
+        aid = int(info["aid"])
+        if aid in api.section_aids(section):
+            return db.set_collection(task["id"], status="DONE", season=season)
+        state = api.season_episode_state([aid]).get(aid) or {}
+        if state.get("code"):
+            return wait(state.get("msg") or f"B 站暂不允许加入合集（{state['code']}）。")
+        api.add_to_season(section, [{"aid": aid, "cid": state.get("cid") or info.get("cid"), "title": info.get("title") or ""}])
+    except Error as exc:
+        # Uncertain outcomes are safe to retry: the next pass reads the section before adding again.
+        return wait(str(exc))
+    db.set_collection(task["id"], status="DONE", season=season)
+
+
 def column_for(script: dict):
     if (script.get('topic') or {}).get('local_video'):
         return None
@@ -731,6 +785,9 @@ def tick() -> None:
         comment_tasks = db.first_comment_tasks(owner)
         if comment_tasks:
             process_first_comment(comment_tasks[0])
+        collection_tasks = db.collection_tasks(owner, retry_after=COLLECTION_RETRY_SECONDS)
+        if collection_tasks:
+            process_collection(collection_tasks[0])
         if config["sync_comments"]:
             due = [v for v in db.videos(owner) if (v["last_attempt_at"] or v["synced_at"] or 0) < time.time() - 300]
             if due:

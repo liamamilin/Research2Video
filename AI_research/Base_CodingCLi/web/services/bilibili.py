@@ -103,13 +103,14 @@ class BilibiliClient:
         self.cookies = {c["name"]: c["value"] for c in (credentials or {}).get("cookie_info", {}).get("cookies", [])}
 
     def request(self, path: str, *, passport: bool = False, member: bool = False,
-                data: dict | None = None, allowed_codes: tuple[int, ...] = (), timeout: float = 20, **params) -> tuple[dict, httpx.Cookies]:
+                data: dict | None = None, json_body: dict | None = None, allowed_codes: tuple[int, ...] = (),
+                timeout: float = 20, **params) -> tuple[dict, httpx.Cookies]:
         try:
             host = MEMBER if member else PASSPORT if passport else API
             headers = {**HEADERS, "Referer": MEMBER + "/"} if member else HEADERS
             with httpx.Client(headers=headers, cookies=self.cookies, timeout=timeout, follow_redirects=False) as client:
-                response = client.request("POST" if data is not None else "GET", host + path,
-                                          params=params, data=data)
+                response = client.request("POST" if data is not None or json_body is not None else "GET", host + path,
+                                          params=params, data=data, json=json_body)
                 response.raise_for_status()
                 result = response.json()
                 if result.get("code") != 0 and result.get("code") not in allowed_codes:
@@ -199,6 +200,48 @@ class BilibiliClient:
         if str((data.get("owner") or {}).get("mid")) != uid:
             raise BilibiliError("只能管理当前登录账号发布的视频。")
         return data
+
+    # 合集 (UGC seasons): request shapes follow the creator center's own web client.
+    def season_sections(self) -> dict[int, int]:
+        """Each of the account's seasons mapped to the section new episodes join (the last one, as the web client does)."""
+        result: dict[int, int] = {}
+        for page in range(1, 11):
+            data, _ = self.request("/x2/creative/web/seasons", member=True, pn=page, ps=30,
+                                   order="mtime", sort="desc", draft=1)
+            for row in data.get("seasons") or []:
+                season = (row or {}).get("season") or {}
+                sections = ((row or {}).get("sections") or {}).get("sections") or []
+                if season.get("id") and sections and sections[-1].get("id"):
+                    result[int(season["id"])] = int(sections[-1]["id"])
+            if page * 30 >= int(data.get("total") or 0):
+                break
+        return result
+
+    def section_aids(self, section_id: int) -> set[int]:
+        data, _ = self.request("/x2/creative/web/season/section", member=True, id=section_id)
+        return {int(e["aid"]) for e in data.get("episodes") or [] if isinstance(e, dict) and e.get("aid")}
+
+    def season_episode_state(self, aids: list[int]) -> dict[int, dict]:
+        """Whether each video may join a season now; a non-zero ``code`` comes with the platform's reason."""
+        data, _ = self.request("/x2/creative/web/season/section/episode/verify/batch", member=True,
+                               aids=",".join(str(a) for a in aids))
+        audits = data.get("ep_audits") or {}
+        return {int(aid): {"cid": int((row or {}).get("cid") or 0), "code": int((row or {}).get("code") or 0),
+                           "msg": str((row or {}).get("msg") or "")} for aid, row in audits.items()}
+
+    def create_season(self, title: str, cover: str, desc: str = "") -> int:
+        data, _ = self.request("/x2/creative/web/season/add", member=True, csrf=self.cookies.get("bili_jct", ""),
+                               json_body={"title": title, "cover": cover, "desc": desc})
+        if not isinstance(data, int) or data <= 0:
+            raise BilibiliError("B 站没有返回合集 ID，请到创作中心核对是否已创建。")
+        return data
+
+    def add_to_season(self, section_id: int, episodes: list[dict]) -> None:
+        """``episodes``: dicts with aid, cid and title."""
+        self.request("/x2/creative/web/season/section/episodes/add", member=True, csrf=self.cookies.get("bili_jct", ""),
+                     json_body={"sectionId": section_id, "episodes": [
+                         {"title": e["title"], "aid": int(e["aid"]), "cid": int(e["cid"]),
+                          "charging_pay": 0, "member_first": 0} for e in episodes]})
 
     def comments(self, info: dict, page: int = 1) -> tuple[list[dict], bool]:
         data, _ = self.request("/x/v2/reply", oid=info["aid"], type=1, pn=page, ps=20, sort=0)

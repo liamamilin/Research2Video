@@ -52,6 +52,12 @@ class PlatformStore:
                 ("first_comment_pin_error", "TEXT NOT NULL DEFAULT ''"),
                 ("first_comment_updated_at", "REAL NOT NULL DEFAULT 0"),
                 ("recovery", "TEXT NOT NULL DEFAULT '{}'"),
+                # 合集: '' = not yet handled; WAITING, DONE, NONE (no season for it), FAILED.
+                ("collection_status", "TEXT NOT NULL DEFAULT ''"),
+                ("collection_season", "INTEGER NOT NULL DEFAULT 0"),
+                ("collection_error", "TEXT NOT NULL DEFAULT ''"),
+                ("collection_attempts", "INTEGER NOT NULL DEFAULT 0"),
+                ("collection_updated_at", "REAL NOT NULL DEFAULT 0"),
             ):
                 if name not in columns:
                     conn.execute(f"ALTER TABLE uploads ADD COLUMN {name} {definition}")
@@ -65,7 +71,8 @@ class PlatformStore:
         return {"auto_upload": False, "auto_since": 0, "tid": 0, "tid_by_matrix": {},
                 "first_comment": {"enabled": False, "text": "", "pin": False},
                 "publish_window": {"enabled": True, "start": 8, "end": 23, "spacing": 20},
-                "sync_comments": False, **(json.loads(row[0]) if row else {})}
+                "sync_comments": False, "collections": {"by_recipe": {}, "by_matrix": {}},
+                **(json.loads(row[0]) if row else {})}
 
     def save_settings(self, patch: dict) -> dict:
         with self.connect(write=True) as conn:
@@ -182,7 +189,8 @@ class PlatformStore:
             return bool(conn.execute(
                 "UPDATE uploads SET status='QUEUED',bvid='',error='',payload=?,recovery='{}',updated_at=?,"
                 "first_comment_status=?,first_comment_rpid='',first_comment_error='',first_comment_pin_status=?,"
-                "first_comment_pin_error='' WHERE id=? AND status='REMOVED'",
+                "first_comment_pin_error='',collection_status='',collection_error='',collection_attempts=0 "
+                "WHERE id=? AND status='REMOVED'",
                 (json.dumps(payload, ensure_ascii=False), time.time(),
                  "WAITING" if comment.get("enabled") else "DISABLED",
                  "WAITING" if comment.get("enabled") and comment.get("pin") else "DISABLED", task_id)).rowcount)
@@ -202,6 +210,22 @@ class PlatformStore:
             return bool(conn.execute("UPDATE uploads SET status=?,error=?,bvid=?,updated_at=? WHERE id=?" +
                                      (" AND status=?" if expected else ""),
                                      (status, error, bvid, time.time(), task_id) + ((expected,) if expected else ())).rowcount)
+
+    def collection_tasks(self, uid: str, *, retry_after: float) -> list[dict]:
+        """Published videos whose season placement is new or due for another look."""
+        with self.connect() as conn:
+            rows = conn.execute("SELECT * FROM uploads WHERE uid=? AND status='PUBLISHED' AND bvid<>'' AND "
+                                "(collection_status='' OR (collection_status='WAITING' AND collection_updated_at<?)) "
+                                "ORDER BY collection_updated_at,created_at", (uid, time.time() - retry_after)).fetchall()
+        return [self._upload(row) for row in rows]
+
+    def set_collection(self, task_id: str, *, status: str, season: int | None = None, error: str = "",
+                       attempt: bool = False) -> None:
+        with self.connect(write=True) as conn:
+            conn.execute("UPDATE uploads SET collection_status=?,collection_error=?,collection_updated_at=?,"
+                         "collection_season=COALESCE(?,collection_season),"
+                         "collection_attempts=collection_attempts+? WHERE id=?",
+                         (status, error, time.time(), season, int(attempt), task_id))
 
     def mark_removed(self, task_id: str, uid: str, note: str) -> bool:
         """The submission was deleted on the platform: it no longer waits, holds a slot or can be retried."""
