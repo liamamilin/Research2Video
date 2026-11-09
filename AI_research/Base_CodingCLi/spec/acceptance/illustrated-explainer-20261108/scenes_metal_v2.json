@@ -1,0 +1,74 @@
+{
+ "cast": {
+  "A": "short black hair, mustard yellow knit sweater, dark blue jeans",
+  "B": "curly brown hair tied back, green long-sleeve shirt, black trousers"
+ },
+ "scenes": [
+  {
+   "section": 1,
+   "kind": "scene",
+   "scene": "short black hair, mustard yellow knit sweater, dark blue jeans steps through a winter doorway, one hand jerking back from a metal doorknob, the other hand resting on a wooden doorframe; a cold draft enters behind.",
+   "overlay": [
+    "铁把手",
+    "木门框"
+   ],
+   "note": "画的是进门时一只手缩离铁把手，另一只手扶着木门框。",
+   "scene_template": "{A} steps through a winter doorway, one hand jerking back from a metal doorknob, the other hand resting on a wooden doorframe; a cold draft enters behind."
+  },
+  {
+   "section": 2,
+   "kind": "analogy",
+   "scene": "The warm bare hand of short black hair, mustard yellow knit sweater, dark blue jeans hovers beside a cool metal block and a cool wood block; heat wisps leave the hand toward both, a steady stream toward metal and a weaker stream toward wood.",
+   "overlay": [
+    "热流向物体",
+    "方向固定"
+   ],
+   "note": "画一只暖手同时向金属和木头散出热流，金属一侧更急。",
+   "scene_template": "The warm bare hand of {A} hovers beside a cool metal block and a cool wood block; heat wisps leave the hand toward both, a steady stream toward metal and a weaker stream toward wood."
+  },
+  {
+   "section": 3,
+   "kind": "analogy",
+   "scene": "short black hair, mustard yellow knit sweater, dark blue jeans and curly brown hair tied back, green long-sleeve shirt, black trousers press fingertips onto a metal countertop and a wood countertop; each fingertip is a small cup of warm water, with a thick pipe descending from the metal side and a thin straw from the wood side.",
+   "overlay": [
+    "粗水管",
+    "细吸管"
+   ],
+   "note": "画两个人的指尖像温水杯，金属下接粗管，木头下接细吸管。",
+   "scene_template": "{A} and {B} press fingertips onto a metal countertop and a wood countertop; each fingertip is a small cup of warm water, with a thick pipe descending from the metal side and a thin straw from the wood side."
+  },
+  {
+   "section": 4,
+   "kind": "analogy",
+   "scene": "A thick pipe from a warm fingertip cup runs through a large metal block into a room-sized reservoir; a thin straw from another cup ends in a bottle-cap-sized shallow pit that is full and blocked.",
+   "overlay": [
+    "大水库",
+    "小瓶盖"
+   ],
+   "note": "画粗管通向大水库，细吸管通向已灌满堵住的小坑。",
+   "scene_template": "A thick pipe from a warm fingertip cup runs through a large metal block into a room-sized reservoir; a thin straw from another cup ends in a bottle-cap-sized shallow pit that is full and blocked."
+  },
+  {
+   "section": 5,
+   "kind": "analogy",
+   "scene": "Cross-section of short black hair, mustard yellow knit sweater, dark blue jeans's skin under metal and wood: many tiny cold-sensor beads glow under metal, few under wood; beside it, curly brown hair tied back, green long-sleeve shirt, black trousers's fingertip reddens on hot metal but stays calm on hot wood.",
+   "overlay": [
+    "降温快慢",
+    "烫与不烫"
+   ],
+   "note": "画皮肤感受器在金属下密集发亮、木头下稀疏，旁边热金属烫红指尖而热木头无碍。",
+   "scene_template": "Cross-section of {A}'s skin under metal and wood: many tiny cold-sensor beads glow under metal, few under wood; beside it, {B}'s fingertip reddens on hot metal but stays calm on hot wood."
+  },
+  {
+   "section": 6,
+   "kind": "scene",
+   "scene": "Barefoot short black hair, mustard yellow knit sweater, dark blue jeans steps with one foot on tile and one on thick carpet; nearby a pot with a plain wooden handle sits on a stove, and a glass of water waits on the counter.",
+   "overlay": [
+    "瓷砖与地毯",
+    "木锅柄"
+   ],
+   "note": "画光脚一只踩瓷砖一只踩地毯，旁边是木柄锅和一杯水。",
+   "scene_template": "Barefoot {A} steps with one foot on tile and one on thick carpet; nearby a pot with a plain wooden handle sits on a stove, and a glass of water waits on the counter."
+  }
+ ]
+}

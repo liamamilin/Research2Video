@@ -1,0 +1,54 @@
+{
+ "style": "扁平插画",
+ "version": 2,
+ "images": [
+  {
+   "section": 1,
+   "path": "section-01.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans stands behind a narrow counter in a tiny shop, pressing a small plain colored sticker onto the paper sleeve of a milk tea cup, a sheet of blank stickers lying on the counter., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 31.0,
+   "kind": "scene"
+  },
+  {
+   "section": 2,
+   "path": "section-02.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans crouches beside a crate of oranges at the shop's back door, holding one orange in her hand, a carton of fresh milk on the floor beside her., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 32.9,
+   "kind": "scene"
+  },
+  {
+   "section": 3,
+   "path": "section-03.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans stands alone behind the counter of a quiet shop on a rainy day, pressing a sticker onto a cup sleeve, empty stools in front of her, rain streaking the window behind., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 35.2,
+   "kind": "scene"
+  },
+  {
+   "section": 4,
+   "path": "section-04.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans stands behind the counter scooping ice from a bucket into a plastic cup, the cup resting on the counter beside a blank plain colored board, her eyes on the cup., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 34.6,
+   "kind": "scene"
+  },
+  {
+   "section": 5,
+   "path": "section-05.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, a young woman with shoulder-length black hair tied in a low ponytail, wearing a teal short-sleeve shirt and dark grey jeans on the left hands a plain paper takeaway bag across the counter to a man in his twenties with short curly black hair, wearing a white hoodie and black trousers on the right, who reaches for it with one hand, a milk tea cup in the other., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 34.6,
+   "kind": "scene"
+  },
+  {
+   "section": 6,
+   "path": "section-06.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, a man in his twenties with short curly black hair, wearing a white hoodie and black trousers stands on the sidewalk holding a milk tea cup up near eye level, looking at it, a shop front softly behind him, one finger tapping the side of the cup., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 33.8,
+   "kind": "scene"
+  }
+ ]
+}

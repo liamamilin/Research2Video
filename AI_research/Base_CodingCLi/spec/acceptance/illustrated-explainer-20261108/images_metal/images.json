@@ -1,0 +1,48 @@
+{
+ "style": "极简几何",
+ "version": 1,
+ "images": [
+  {
+   "section": 1,
+   "path": "section-01.png",
+   "seed": 653350517,
+   "prompt": "minimal geometric illustration, simple circles rectangles and lines, flat solid colors, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, very simple figures built from geometric shapes, round heads without facial details, In a winter doorway, a young woman in a grey sweater jerks her hand back from a cold iron door handle, then rests the same hand calmly on the wooden door frame beside it., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, no text, no letters, no numbers, no watermark",
+   "seconds": 28.2
+  },
+  {
+   "section": 2,
+   "path": "section-02.png",
+   "seed": 653350517,
+   "prompt": "minimal geometric illustration, simple circles rectangles and lines, flat solid colors, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, very simple figures built from geometric shapes, round heads without facial details, In a cool room, the bare hand of a young woman in a grey sweater hovers a breath above a dull metal tabletop, her warm skin close to the cold surface., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, no text, no letters, no numbers, no watermark",
+   "seconds": 30.5
+  },
+  {
+   "section": 3,
+   "path": "section-03.png",
+   "seed": 653350517,
+   "prompt": "minimal geometric illustration, simple circles rectangles and lines, flat solid colors, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, very simple figures built from geometric shapes, round heads without facial details, At a kitchen table, a young woman in a grey sweater and a young man in a navy shirt each press one fingertip down, she on a metal slab, he on a wooden board., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, no text, no letters, no numbers, no watermark",
+   "seconds": 29.3
+  },
+  {
+   "section": 4,
+   "path": "section-04.png",
+   "seed": 653350517,
+   "prompt": "minimal geometric illustration, simple circles rectangles and lines, flat solid colors, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, very simple figures built from geometric shapes, round heads without facial details, Same kitchen table: the woman's fingertip stays on a thick metal slab backed by a heavy block, while the man's fingertip rests on a thin wooden board., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, no text, no letters, no numbers, no watermark",
+   "seconds": 27.6
+  },
+  {
+   "section": 5,
+   "path": "section-05.png",
+   "seed": 653350517,
+   "prompt": "minimal geometric illustration, simple circles rectangles and lines, flat solid colors, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, very simple figures built from geometric shapes, round heads without facial details, At the counter, the woman touches a metal spoon, then a wooden spoon, wincing at the first and leaving her finger resting on the second., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, no text, no letters, no numbers, no watermark",
+   "seconds": 29.7
+  },
+  {
+   "section": 6,
+   "path": "section-06.png",
+   "seed": 653350517,
+   "prompt": "minimal geometric illustration, simple circles rectangles and lines, flat solid colors, clean diagram-like clarity, limited palette of navy, sky blue, coral red and off-white, very simple figures built from geometric shapes, round heads without facial details, Barefoot at the kitchen threshold, a young woman in a grey sweater stands with one foot on cold tile and one on a soft rug, a wooden-handled pan on the stove behind her., plain off-white background, subject placed on the right half, generous empty space on the left half, balanced modern poster composition, no text, no letters, no numbers, no watermark",
+   "seconds": 27.6
+  }
+ ]
+}

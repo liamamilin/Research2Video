@@ -1,0 +1,54 @@
+{
+ "style": "扁平插画",
+ "version": 2,
+ "images": [
+  {
+   "section": 1,
+   "path": "section-01.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, middle-aged East Asian man, short black hair, white short-sleeve shirt under a red apron, dark gray trousers stands behind a small milk tea counter, pressing five plain colored paper strips—red, yellow, blue, green, white—onto a cup sleeve beside a row of cups., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 27.5,
+   "kind": "scene"
+  },
+  {
+   "section": 2,
+   "path": "section-02.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, A red paper strip is taped to a single cup; a yellow strip and a blue strip hang from a thick blank wall-mounted block, both stretching down past many cups., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 27.7,
+   "kind": "analogy"
+  },
+  {
+   "section": 3,
+   "path": "section-03.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, Left: a tall stack of yellow and blue paper strips rises far above a cup sleeve while middle-aged East Asian man, short black hair, white short-sleeve shirt under a red apron, dark gray trousers peels away half of a white strip. Right: the same five strips lie thin, and a tall white strip covers them., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 27.3,
+   "kind": "scene"
+  },
+  {
+   "section": 4,
+   "path": "section-04.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, A blank plain colored menu board stays unchanged; beneath it, one cup grows taller, one is mostly ice with a thin foam layer, and one is propped up by a stack of plain colored paper strips., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 28.0,
+   "kind": "analogy"
+  },
+  {
+   "section": 5,
+   "path": "section-05.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, Four identical cups in a row each wear a different thickness of plain colored paper strips: one huge yellow-and-blue stack, one medium pile, one thin layer, one with extra green strips beside a small plain delivery bag., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 27.7,
+   "kind": "analogy"
+  },
+  {
+   "section": 6,
+   "path": "section-06.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, young East Asian woman, long dark ponytail, light blue hoodie, black jeans holds one cup at the counter and counts on her fingers toward middle-aged East Asian man, short black hair, white short-sleeve shirt under a red apron, dark gray trousers; three plain colored paper strips lie on the counter between them., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, wordless picture: every paper, sticker, sign, label and screen is blank plain color, no text, no letters, no numbers, no watermark",
+   "seconds": 29.6,
+   "kind": "scene"
+  }
+ ]
+}

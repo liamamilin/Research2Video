@@ -1,0 +1,48 @@
+{
+ "style": "扁平插画",
+ "version": 1,
+ "images": [
+  {
+   "section": 1,
+   "path": "section-01.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, A young shop owner in a teal apron stands behind a small counter in a ten-square-meter milk tea shop, pressing five colored stickers onto a cup sleeve., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, no text, no letters, no numbers, no watermark",
+   "seconds": 28.2
+  },
+  {
+   "section": 2,
+   "path": "section-02.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, The same young shop owner in a teal apron holds a red sticker beside a monthly rent bill pinned to the wall and a staff shift sheet., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, no text, no letters, no numbers, no watermark",
+   "seconds": 28.0
+  },
+  {
+   "section": 3,
+   "path": "section-03.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, On a rainy Tuesday, the same young shop owner in a teal apron presses a thick stack of yellow and blue stickers onto a cup sleeve, peeling the white one half off., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, no text, no letters, no numbers, no watermark",
+   "seconds": 28.8
+  },
+  {
+   "section": 4,
+   "path": "section-04.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, The same young shop owner in a teal apron scoops extra ice into a cup and sets two topping jars aside, a thin layer of milk foam on the drink., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, no text, no letters, no numbers, no watermark",
+   "seconds": 29.2
+  },
+  {
+   "section": 5,
+   "path": "section-05.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, A customer in a gray hoodie pulls a suitcase and holds a milk tea cup at an airport counter, while the same young shop owner in a teal apron hands a delivery bag to a rider., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, no text, no letters, no numbers, no watermark",
+   "seconds": 30.2
+  },
+  {
+   "section": 6,
+   "path": "section-06.png",
+   "seed": 1322303539,
+   "prompt": "flat vector illustration, clean solid color blocks, soft flat shading, limited palette of deep blue, teal, warm orange and cream, simple rounded characters with round heads, minimal friendly faces, solid color clothes, The customer in a gray hoodie points at the five colored stickers on a cup sleeve while the young shop owner in a teal apron explains at the counter., uncluttered plain cream background, subject placed on the right half, generous empty space on the left half, minimalist poster-like composition, no text, no letters, no numbers, no watermark",
+   "seconds": 29.7
+  }
+ ]
+}

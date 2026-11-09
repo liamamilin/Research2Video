@@ -1,0 +1,43 @@
+{
+ "jobs": {
+  "60bc154f-55ec-44bd-85b4-fc79b43de8b6": {
+   "note": "first render; keyword order bug",
+   "qa": "PASS",
+   "llm_calls": 0,
+   "frames": 8272,
+   "body_seconds": 275.73,
+   "package_seconds": 279.73,
+   "full_decode": "PASS",
+   "phrase_boundary_image_mean_diff": 0.073
+  },
+  "4c415d75-d694-4c8a-89f7-f1821b18b5ae": {
+   "note": "keyword order fixed",
+   "qa": "PASS",
+   "llm_calls": 0,
+   "frames": 8271,
+   "body_seconds": 275.71,
+   "full_decode": "PASS"
+  },
+  "22cefd4a-657c-4651-905f-20be98669a6c": {
+   "note": "workflow-built request (economy matrix); voxcpm_anchor 1.25x; chapter 3 formula wrongly dropped (Chinese numerals), overlays at 0.88 scale",
+   "qa": "PASS",
+   "llm_calls": 2,
+   "frames": 6478,
+   "body_seconds": 215.94,
+   "full_decode": "PASS"
+  },
+  "9086bb4d-6ee8-4438-8cfd-70701779a95f": {
+   "note": "workflow-built, numeral fix + full-size overlays; all 6 chapters with overlays",
+   "qa": "PASS",
+   "llm_calls": 3,
+   "frames": 6478,
+   "body_seconds": 215.94,
+   "package_seconds": 219.93,
+   "full_decode": "PASS",
+   "voice": "voxcpm_anchor (VoxCPM2-8bit)"
+  }
+ },
+ "data_dir": "autovideo/g3/data/acceptance-illustrated-explainer-20261109",
+ "server": "isolated trial instance on 127.0.0.1:8013; production 8011 untouched",
+ "offline_tests": "AutoVideo 1000 passed 1 skipped (before numeral test); AREC 4301 passed, 1 unrelated failure (test_production_policy research_window), qrcode-module test deselected"
+}
