@@ -204,7 +204,8 @@ def covers(state_dir: str | Path, preview_id: str, render: dict, title: str, b_s
     from core.experiments import registry
     for arm, style in (("a", registry.find("cover_style").default), ("b", b_style)):
         copy = None if style == "title" else cover_copy.for_render(render, title, dest / "copy.json")
-        made = make_covers(video, title, {"landscape": dest / f"cover-{arm}.jpg"}, bilibili.ffmpeg_binary(), copy)
+        made = make_covers(video, title, {"landscape": dest / f"cover-{arm}.jpg"}, bilibili.ffmpeg_binary(), copy,
+                           video_render.safe_file(render, "cover-frame.png"))
         if made.get("landscape"):
             saved.append(f"cover-{arm}.jpg")
     if len(saved) != 2:

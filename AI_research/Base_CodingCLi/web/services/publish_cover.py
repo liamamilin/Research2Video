@@ -41,7 +41,8 @@ def publish_covers(render: dict, title: str, *, portrait: bool = False) -> dict[
         # the script's frozen cover style (default: number-led); "title" keeps the title layout and asks no model
         copy = None if cover_style(render) != 'number' else \
             cover_copy.for_render(render, title, folder / f"{render['id']}-{key}-copy.json")
-        result.update(make_covers(video, title, missing, bilibili.ffmpeg_binary(), copy))
+        result.update(make_covers(video, title, missing, bilibili.ffmpeg_binary(), copy,
+                                  video_render.safe_file(render, 'cover-frame.png')))
     return {('cover_portrait' if k == 'portrait' else 'cover'): str(result[k].resolve()) if k in result else ''
             for k in destinations}
 

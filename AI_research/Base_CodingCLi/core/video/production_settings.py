@@ -5,7 +5,7 @@ import copy
 import re
 
 FIELDS = {"production_recipe", "production_mode", "visual_style", "video_form", "voice_id",
-          "video_speed", "creative_intent", "packaging", "brand"}
+          "video_speed", "creative_intent", "packaging", "brand", "illustration_style"}
 
 
 def inherit(defaults: dict, overrides: dict) -> dict:
@@ -23,7 +23,7 @@ def validate(value: dict | None) -> dict:
     if value is None:
         return {}
     if not isinstance(value, dict) or set(value) - FIELDS:
-        raise ValueError("render 只接受制作配方、档位、风格、形式、声音、包装与品牌设置")
+        raise ValueError("render 只接受制作配方、档位、风格、形式、声音、包装、品牌与插画画风设置")
     result = copy.deepcopy(value)
     for field, allowed in (("production_mode", {"standard", "fast"}),
                            ("visual_style", {"legacy", "editorial_light"})):
@@ -32,6 +32,10 @@ def validate(value: dict | None) -> dict:
     for field in ("production_recipe", "voice_id", "video_form"):
         if field in result and (not isinstance(result[field], str) or not re.fullmatch(r"[a-z][a-z0-9_-]{0,79}", result[field])):
             raise ValueError(f"render.{field} 无效")
+    # the pack list is AutoVideo's (g2/illustration_styles); an unknown name is refused there when the job is created
+    if "illustration_style" in result and (not isinstance(result["illustration_style"], str)
+                                           or not re.fullmatch(r"[a-z][a-z0-9_]{0,31}", result["illustration_style"])):
+        raise ValueError("render.illustration_style 无效")
     if "video_speed" in result and (isinstance(result["video_speed"], bool) or result["video_speed"] not in (.5, 1, 1.25, 1.5, 2)):
         raise ValueError("render.video_speed 无效")
     if "creative_intent" in result and not isinstance(result["creative_intent"], dict):

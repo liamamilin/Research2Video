@@ -185,3 +185,22 @@ def test_make_covers_with_copy_needs_no_frame_and_falls_back_without_it(tmp_path
     assert Image.open(made['portrait']).size == cover.PORTRAIT_SIZE
     monkeypatch.setattr(cover, 'compose_figure', lambda *a, **k: None)
     assert cover.make_covers(video, '标题', {'landscape': tmp_path / 'c.jpg'}, FFMPEG, COPY) and sampled
+
+
+@pytest.mark.skipif(not FFMPEG, reason='ffmpeg unavailable')
+def test_a_shipped_picture_replaces_the_sampled_frame(tmp_path, monkeypatch):
+    video = tmp_path / 'video.mp4'
+    subprocess.run([FFMPEG, '-v', 'error', '-f', 'lavfi', '-i', 'testsrc=size=640x360:rate=10:duration=3', '-pix_fmt', 'yuv420p', str(video)], check=True)
+    picture = tmp_path / 'cover-frame.png'
+    Image.new('RGB', (1344, 768), (250, 120, 30)).save(picture)
+    sampled, used = [], []
+    original_frames, original_compose = cover.frames, cover.compose
+    monkeypatch.setattr(cover, 'frames', lambda *a: sampled.append(1) or original_frames(*a))
+    monkeypatch.setattr(cover, 'compose', lambda frame, title, size=cover.SIZE: used.append(frame.getpixel((10, 10))) or original_compose(frame, title, size))
+    made = cover.make_covers(video, '标题', {'landscape': tmp_path / 'a.jpg'}, FFMPEG, None, picture)
+    assert made and not sampled and used == [(250, 120, 30)]
+    # a missing or unreadable picture falls back to a frame of the video
+    (tmp_path / 'bad.png').write_bytes(b'not a png')
+    for fallback in (tmp_path / 'none.png', tmp_path / 'bad.png'):
+        sampled.clear()
+        assert cover.make_covers(video, '标题', {'landscape': tmp_path / f'{fallback.stem}.jpg'}, FFMPEG, None, fallback) and sampled

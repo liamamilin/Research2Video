@@ -718,7 +718,7 @@ def test_cover_previews_draw_both_styles(tmp_path, monkeypatch):
     monkeypatch.setattr(cover_copy, "for_render", lambda render, title, cache: {"big": "差十倍", "figure": "", "topic": ""})
     drawn = []
 
-    def fake_make(video, title, dests, ffmpeg, copy):
+    def fake_make(video, title, dests, ffmpeg, copy, frame_image=None):
         drawn.append(copy)
         for path in dests.values():
             Path(path).write_bytes(b"jpg")

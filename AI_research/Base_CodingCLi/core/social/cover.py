@@ -242,24 +242,33 @@ def compose_figure_portrait(copy: dict):
 
 
 def make_covers(video: Path, title: str, destinations: dict[str, Path], ffmpeg: str | None,
-                copy: dict | None = None) -> dict[str, Path]:
+                copy: dict | None = None, frame_image: Path | None = None) -> dict[str, Path]:
     """Sample the video once for both orientations; never crop a landscape cover into a portrait.
 
     With ``copy`` (see ``cover_copy``) the cover is number-led and needs no frame; without it, or when that layout
-    cannot be drawn, it is the title over a content frame."""
+    cannot be drawn, it is the title over a content frame. ``frame_image`` is a clean picture the render shipped for
+    this (an illustrated explainer's chapter-1 illustration): it replaces the sampled video frame."""
     if not ffmpeg or not title.strip() or not video.is_file():
         return {}
     made = {}
     try:
         with tempfile.TemporaryDirectory() as tmp:
-            frame = None if copy else busiest(frames(ffmpeg, video, Path(tmp)))
+            def content_frame():
+                if frame_image is not None and frame_image.is_file():
+                    from PIL import Image
+                    try:
+                        return Image.open(frame_image).convert('RGB')
+                    except OSError:
+                        pass  # an unreadable picture: fall back to a frame of the video
+                return busiest(frames(ffmpeg, video, Path(tmp)))
+            frame = None if copy else content_frame()
             for orientation, dest in destinations.items():
                 size = DOUYIN_LANDSCAPE_SIZE if orientation == 'douyin_landscape' else SIZE
                 image = None
                 if copy:
                     image = compose_figure_portrait(copy) if orientation == 'portrait' else compose_figure(copy, size)
                     if image is None and frame is None:
-                        frame = busiest(frames(ffmpeg, video, Path(tmp)))
+                        frame = content_frame()
                 if image is None:
                     if frame is None:
                         continue
