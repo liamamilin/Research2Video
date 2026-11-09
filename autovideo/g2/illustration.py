@@ -37,12 +37,12 @@ SYSTEM = """你是插画分镜师。视频每一章配一张插画，观众会�
 
 三、每章 keywords：最多 2 个中文关键词，每个不超过 12 字，取自本章讲稿。
 
-四、每章 overlay：画在画面左侧留白里的一个示意，帮助观众看懂本章最关键的关系。只能从下面五种里选一种，没有合适的就写 null。所有文字必须来自本章讲稿，数字必须是本章讲稿里出现过的数字，不要编造。
+四、每章 overlay：画在画面左侧留白里的一个示意，帮助观众看懂本章最关键的关系。只能从下面五种里选一种，没有合适的就写 null。优先用能表达关系的对比、算式、流向、构成；清单只用在本章确实是并列的几条做法或几个问题时，全片清单最多 2 次。所有文字必须来自本章讲稿，数字必须是本章讲稿里出现过的数字，不要编造。
 1. 对比 {"kind":"compare","glyph":"pipe|pool|arrows|dots|bar|reading","relation":"big_small|small_big|same","items":[{"label":"≤6字","note":"≤12字，可省略"},{"label":"...","note":"..."}]}
    两项用同一种图形比大小或多少。glyph：pipe 粗细管子、pool 大小水池、arrows 箭头多少、dots 圆点疏密、bar 柱子高低、reading 两个读数框。relation：big_small 表示第一项大，small_big 表示第二项大，same 表示一样。
 2. 构成 {"kind":"composition","items":["≤6字",...2到5项],"total":"≤12字，合起来是什么"}
 3. 算式 {"kind":"formula","terms":["≤6字",...2到3项],"operators":["+|-|×|÷",...比 terms 少一个],"result":"≤14字","bars":[{"label":"≤8字","value":数字},{"label":"...","value":数字}]}
-   bars 可省略；有 bars 时两个 value 都必须是本章讲稿里的数字。
+   bars 可省略。bars 画的是 result 本身的大小（例如"每杯摊多少"），不是算式里某个词块的大小：只有讲稿直接给出两种情况下 result 的数字时才写 bars，两个 value 都必须是本章讲稿里的数字；拿不准就不写 bars。
 4. 清单 {"kind":"steps","style":"number|question","items":["≤10字",...2到4项]}
 5. 流向 {"kind":"flow","source":"≤6字","target":"≤6字","label":"≤10字"}
 
@@ -57,6 +57,11 @@ def _overlay_validator() -> Draft202012Validator:
         schema = json.loads(COMPONENT_SCHEMA.read_text(encoding="utf-8"))
         _component = Draft202012Validator(schema["properties"]["overlay"])
     return _component
+
+
+def style_keys() -> tuple[str, ...]:
+    """Style packs a job may choose (request field ``illustration_style``): one JSON file each."""
+    return tuple(sorted(path.stem for path in STYLES.glob("*.json")))
 
 
 def load_style(key: str = DEFAULT_STYLE) -> dict:
@@ -153,6 +158,18 @@ def check_plan(plan: dict, context: dict, fault) -> None:
             raise fault("ILLUSTRATION_PLAN_SCENE", f"第{chapter['chapter']}章画面描述须用英文")
 
 
+MAX_STEPS = 2
+
+
+def soft_problems(plan: dict, context: dict) -> list[str]:
+    """Advisory: earns one more attempt, never fails the job (generate_validated_plan keeps the first plan)."""
+    steps = [c["chapter"] for c in plan["chapters"] if isinstance(c.get("overlay"), dict) and c["overlay"].get("kind") == "steps"]
+    if len(steps) > MAX_STEPS:
+        return [f"清单用了 {len(steps)} 次（第{'、'.join(map(str, steps))}章），全片最多 {MAX_STEPS} 次；"
+                "请把其中讲关系的章节换成对比、算式、流向或构成，没有合适的就写 null"]
+    return []
+
+
 def finalize(plan: dict, context: dict) -> tuple[list[dict], list[dict]]:
     """Substitute the cast and keep only valid overlays; returns (chapters, dropped)."""
     cast = plan.get("cast") or {}
@@ -193,7 +210,8 @@ def generate(pipeline, narration: dict, style_key: str = DEFAULT_STYLE) -> tuple
     context = {"chapters": [{"title": c["title"], "text": "".join(segments[sid] for sid in c["narration_segment_ids"])}
                             for c in narration["chapters"]]}
     plan = pipeline.generate_validated_plan("illustration-storyboard", messages, PLAN_SCHEMA,
-                                            lambda value, ctx: check_plan(value, ctx, pipeline.G2Fault), context)
+                                            lambda value, ctx: check_plan(value, ctx, pipeline.G2Fault), context,
+                                            soft_validator=soft_problems)
     chapters, dropped = finalize(plan, context)
     folder = pipeline.ASSETS / "slideshow"
     folder.mkdir(parents=True, exist_ok=False)
@@ -213,6 +231,9 @@ def generate(pipeline, narration: dict, style_key: str = DEFAULT_STYLE) -> tuple
         except (KeyError, IndexError, ValueError, TypeError) as exc:
             raise pipeline.G2Fault("ILLUSTRATION_IMAGE_INVALID", f"第{index + 1}章未收到有效插画") from exc
         assets.append(_save_image(folder, index, raw, "Draw Things local illustration; not documentary evidence"))
+        if index == 0:
+            # the clean chapter-1 picture (no overlay, no caption): the upload cover uses it as its frame
+            (pipeline.ARTIFACTS / "cover-frame.png").write_bytes(raw)
         records.append({"chapter": index + 1, "prompt": text, "seed": seed, "note": chapter["note"]})
     pipeline.write_json(pipeline.ARTIFACTS / "illustrations.json", {
         "style": {"key": style["key"], "name": style["name"], "version": style["version"]},

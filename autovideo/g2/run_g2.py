@@ -1349,7 +1349,8 @@ def run_all() -> dict:
         saved_images = json.loads((PROJECT_INPUT.parent / "input.json").read_text(encoding="utf-8"))
         if form == "illustrated_explainer" and not saved_images.get("slideshow_images_resolved"):
             from g2 import illustration
-            assets, extras = run_step("draw-things-backgrounds", illustration.generate, sys.modules[__name__], narration)
+            assets, extras = run_step("draw-things-backgrounds", illustration.generate, sys.modules[__name__], narration,
+                                      saved_images.get("illustration_style") or illustration.DEFAULT_STYLE)
             board = creative_forms.attach_illustrations(board, assets, narration, extras)
         elif form in {"image_slideshow", "object_showcase", "dynamic_collage", "illustrated_explainer"}:
             assets = run_step("draw-things-backgrounds", creative_forms.prepare_images, sys.modules[__name__], narration)

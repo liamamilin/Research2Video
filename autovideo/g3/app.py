@@ -40,7 +40,7 @@ from g3.worker import G2ProcessRunner, SingleWorker
 
 
 WEB_ROOT = Path(__file__).resolve().parent / "web"
-ARTIFACT_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9-]{0,40}\.(?:mp4|srt|json|txt|wav)$")
+ARTIFACT_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9-]{0,40}\.(?:mp4|srt|json|txt|wav|png)$")
 
 
 class CreativeIntent(BaseModel):
@@ -279,6 +279,8 @@ class CreateJobRequest(BaseModel):
     image_materials: list[ImageMaterial] = Field(default_factory=list, max_length=12)
     chapter_keywords: list[list[str]] | None = Field(default=None, max_length=12,
         description="插画讲解：每章最多 2 个叠加关键词（每个 ≤12 字），与 chapters 一一对应")
+    illustration_style: str | None = Field(default=None,
+        description="插画讲解自动出图的画风包（g2/illustration_styles 下的文件名）；省略用 flat")
 
     @field_validator("slideshow_images")
     @classmethod
@@ -388,6 +390,12 @@ class CreateJobRequest(BaseModel):
                 raise ValueError("插画讲解最多 12 章")
             # No pictures: AutoVideo plans the scenes and draws one per chapter.
             self.use_draw_things = not self.slideshow_images
+        if self.illustration_style is not None:
+            from g2.illustration import style_keys
+            if self.video_form != "illustrated_explainer" or self.slideshow_images:
+                raise ValueError("illustration_style 仅用于由本机 Draw Things 出图的插画讲解")
+            if self.illustration_style not in style_keys():
+                raise ValueError(f"没有这个画风：{self.illustration_style}（可选 {'、'.join(style_keys())}）")
         if self.chapter_keywords is not None:
             if self.video_form != "illustrated_explainer" or not self.slideshow_images:
                 raise ValueError("chapter_keywords 仅用于附带插画的插画讲解；自动出图时关键词由分镜生成")
@@ -856,7 +864,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
         from g2.production_plan import prepare_request
         payload = request.model_dump(exclude_none=True)
         payload["_production_submitted"] = {k: v for k, v in request._submitted.items()
-                                            if k in {"production_recipe", "production_context", "package", "production_mode", "visual_style", "video_form", "duration_mode", "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music", "brand"}}
+                                            if k in {"production_recipe", "production_context", "package", "production_mode", "visual_style", "video_form", "duration_mode", "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music", "brand", "illustration_style"}}
         try:
             import tempfile
             with tempfile.TemporaryDirectory(prefix="brand-preview-", dir=settings.data_dir) as folder:
@@ -873,9 +881,9 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
         payload = request.model_dump()
         payload["image_materials"] = [item.model_dump(exclude_none=True) for item in request.image_materials]
         payload["_production_submitted"] = {k: v for k, v in request._submitted.items()
-                                            if k in {"production_recipe", "production_context", "package", "production_mode", "visual_style", "video_form", "duration_mode", "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music", "brand"}}
+                                            if k in {"production_recipe", "production_context", "package", "production_mode", "visual_style", "video_form", "duration_mode", "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music", "brand", "illustration_style"}}
         payload["title"] = request.title or "".join(request.source_text.split())[:28] or "未命名视频"
-        for optional in ("chapters", "sources", "package", "packaging", "background_music", "brand"):
+        for optional in ("chapters", "sources", "package", "packaging", "background_music", "brand", "illustration_style"):
             if payload[optional] is None:
                 payload.pop(optional)
         def response(job: dict) -> dict:
@@ -988,7 +996,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True, p
                 payload["content_notices"] = [{"chapter_index": None, "message": "原稿有内容待核实，修订后仍需核对来源"}]
             if request.mode == "source":
                 try:
-                    fields = ("title", "source_text", "target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "creative_intent", "video_speed", "slideshow_images", "image_materials", "visual_storytelling", "production_mode", "visual_style", "production_context", "content_notices")
+                    fields = ("title", "source_text", "target_duration_sec", "duration_mode", "theme", "voice_id", "video_form", "use_draw_things", "creative_intent", "video_speed", "slideshow_images", "image_materials", "visual_storytelling", "production_mode", "visual_style", "production_context", "content_notices", "illustration_style")
                     packaging_fields = ("packaging",) if payload.get("packaging_resolved") else ("package",)
                     checked = CreateJobRequest(**{k: payload[k] for k in (*fields, *packaging_fields) if k in payload})
                 except ValidationError as exc:

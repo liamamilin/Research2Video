@@ -14,6 +14,7 @@ from g2 import creative_library
 FIELDS = {
     "video_form", "production_mode", "visual_style", "duration_mode",
     "target_duration_sec", "voice_id", "video_speed", "creative_intent", "packaging", "background_music", "brand",
+    "illustration_style",
 }
 DEFAULTS = {
     "video_form": "knowledge_cards", "production_mode": "standard", "visual_style": "legacy",
@@ -147,6 +148,9 @@ def _binding(request: dict) -> dict:
         fields = fields - {"background_music"}
     if "brand" not in request:
         fields = fields - {"brand"}
+    if request.get("illustration_style") is None:
+        # plans saved before style packs were selectable keep their exact binding
+        fields = fields - {"illustration_style"}
     return {key: copy.deepcopy(request.get(key)) for key in sorted(fields)}
 
 

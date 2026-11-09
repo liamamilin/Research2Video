@@ -150,7 +150,7 @@ def fake_pipeline(tmp_path):
     written = {}
     return SimpleNamespace(
         G2Fault=Fault, ASSETS=tmp_path / 'assets', ARTIFACTS=tmp_path,
-        generate_validated_plan=lambda stage, builder, schema, check, ctx: (check(plan(), ctx), plan())[1],
+        generate_validated_plan=lambda stage, builder, schema, check, ctx, **kw: (check(plan(), ctx), plan())[1],
         write_json=lambda path, value: written.__setitem__(path.name, value)), written
 
 
@@ -172,6 +172,20 @@ def test_generate_draws_one_picture_per_chapter_with_the_style_pack(tmp_path, mo
     assert len({b['seed'] for b in sent}) == 1 and sent[0]['width'] == 1344
     assert rows[1]['overlay'] == OVERLAYS['flow'] and rows[0]['overlay'] is None
     assert written['illustrations.json']['style']['key'] == 'flat'
+    assert (tmp_path / 'cover-frame.png').read_bytes() == png()  # chapter 1, clean, for the upload cover
+
+
+def test_generate_uses_the_chosen_style_pack(tmp_path, monkeypatch):
+    from g2 import draw_things
+    sent = []
+    monkeypatch.setattr(draw_things, 'probe_draw_things', lambda *a, **k: {'ready': True, 'endpoint': 'http://127.0.0.1:7860', 'error': None})
+    monkeypatch.setattr(draw_things, '_read_json', lambda url, **k: (sent.append(json.loads(k['body'])), {'images': [base64.b64encode(png()).decode()]})[1])
+    pipeline, written = fake_pipeline(tmp_path)
+    illustration.generate(pipeline, two_chapter_narration(), 'geometric')
+    style = illustration.load_style('geometric')
+    assert written['illustrations.json']['style']['key'] == 'geometric'
+    assert sent and all(b['prompt'].startswith(style['prefix']) for b in sent)
+    assert set(illustration.style_keys()) >= {'flat', 'geometric'}
 
 
 def test_generate_fails_with_a_reason_when_draw_things_is_off(tmp_path, monkeypatch):
@@ -187,3 +201,16 @@ def test_numbers_spoken_in_chinese_numerals_count_as_present():
     formula = copy.deepcopy(OVERLAYS['formula'])
     assert illustration.overlay_problem(formula, '一家一天卖三百杯，一家一天卖八十杯。') is None
     assert '300' in illustration.overlay_problem(formula, '一家一天卖八十杯。')
+
+
+def test_more_than_two_lists_earns_one_revision_hint():
+    many = plan()
+    steps = {'kind': 'steps', 'style': 'number', 'items': ['一', '二']}
+    many['chapters'] = [dict(many['chapters'][0], chapter=i, overlay=steps) for i in range(1, 4)]
+    assert '清单用了 3 次' in illustration.soft_problems(many, context())[0]
+    many['chapters'][2]['overlay'] = OVERLAYS['flow']
+    assert illustration.soft_problems(many, context()) == []
+
+
+def test_prompt_says_bars_show_the_result():
+    assert 'bars 画的是 result 本身的大小' in illustration.SYSTEM and '全片清单最多 2 次' in illustration.SYSTEM
