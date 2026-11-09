@@ -24,7 +24,7 @@ def enabled(saved: dict, form: str) -> bool:
                     and all(row.get('placements') for row in saved.get('image_materials', [])))
     return bool(saved.get('visual_storytelling') and (saved.get('chapters') or saved.get('revision_mode') == 'narration')
                 and saved.get('production_mode') != 'fast'
-                and form not in {'information_cards', 'chat_dialogue', 'image_slideshow'}
+                and form not in {'information_cards', 'chat_dialogue', 'image_slideshow', 'illustrated_explainer'}
                 and not (form == 'process_diagram' and saved.get('video_form') == 'process_diagram')
                 and all(row.get('placements') for row in saved.get('image_materials', [])))
 

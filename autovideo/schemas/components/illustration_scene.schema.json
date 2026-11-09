@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "illustration_scene trusted props",
+  "description": "One narration phrase over its chapter's full-bleed illustration. All phrases of a chapter share one image; keywords come from the request, never from the model. overlay is one of five trusted diagram parts drawn in the empty left half; it never points into the picture.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "text",
+    "chapter_index",
+    "image",
+    "keywords"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "chapter_index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 11
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "image_path",
+        "image_asset_id"
+      ],
+      "properties": {
+        "image_path": {
+          "type": "string",
+          "pattern": "^assets/slideshow/image-[0-9]{2}\\.png$"
+        },
+        "image_asset_id": {
+          "type": "string",
+          "pattern": "^slide_image_[1-9][0-9]*$"
+        }
+      }
+    },
+    "keywords": {
+      "type": "array",
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 12
+      }
+    },
+    "overlay": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "glyph",
+            "relation",
+            "items"
+          ],
+          "properties": {
+            "kind": {
+              "const": "compare"
+            },
+            "glyph": {
+              "enum": [
+                "pipe",
+                "pool",
+                "arrows",
+                "dots",
+                "bar",
+                "reading"
+              ]
+            },
+            "relation": {
+              "enum": [
+                "big_small",
+                "small_big",
+                "same"
+              ]
+            },
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "label"
+                ],
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 6
+                  },
+                  "note": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 12
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "items",
+            "total"
+          ],
+          "properties": {
+            "kind": {
+              "const": "composition"
+            },
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 5,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 6
+              }
+            },
+            "total": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "terms",
+            "operators",
+            "result"
+          ],
+          "properties": {
+            "kind": {
+              "const": "formula"
+            },
+            "terms": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 3,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 6
+              }
+            },
+            "operators": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 2,
+              "items": {
+                "enum": [
+                  "+",
+                  "-",
+                  "×",
+                  "÷"
+                ]
+              }
+            },
+            "result": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 14
+            },
+            "bars": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "label",
+                  "value"
+                ],
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8
+                  },
+                  "value": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "style",
+            "items"
+          ],
+          "properties": {
+            "kind": {
+              "const": "steps"
+            },
+            "style": {
+              "enum": [
+                "number",
+                "question"
+              ]
+            },
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 4,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "source",
+            "target",
+            "label"
+          ],
+          "properties": {
+            "kind": {
+              "const": "flow"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 6
+            },
+            "target": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 6
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 10
+            }
+          }
+        }
+      ]
+    }
+  }
+}

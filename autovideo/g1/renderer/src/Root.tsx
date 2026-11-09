@@ -11,6 +11,7 @@ import {StoryObjects,objectColor,revealFrames} from './StoryDirection';
 import {AbsoluteFill, Audio, Composition, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {CornerBadge, type Badge} from './Packaging';
 import {CreativeVideo, type CreativePreset} from './CreativeForms';
+import {IllustratedVideo} from './Illustrated';
 
 type Beat = {id: string; action: string; target_id: string; frame: number; order: number};
 type Scene = {id: string; component: string; purpose: string; visual_intent: object; props: any; start_frame: number; end_frame: number; beats: Beat[]; narration_segment_ids: string[]; previous_scene?: Scene; price_layout?: {number_size: number; side_size: number; label_size: number; label_width: number; badge_size: number; unit_size: number; row_gap: number; unit_gap: number; stacked_label: boolean}};
@@ -474,6 +475,7 @@ function Video(props: VideoProps) {
 function VideoContent(props: VideoProps) {
   if(props.fastCardBackgrounds)return <FastCardsVideo ir={props.ir} backgrounds={props.fastCardBackgrounds}/>;
   if (props.ir.presentation?.preset === 'explanation') return <ExplanationVideo {...props}/>;
+  if (props.ir.presentation?.preset === 'illustrated_explainer') return <IllustratedVideo ir={props.ir} badge={props.badge}/>;
   if (['information_cards', 'kinetic_typography', 'image_slideshow', 'chat_dialogue', 'object_showcase', 'dynamic_collage'].includes(props.ir.presentation?.preset || '')) return <CreativeVideo ir={props.ir} badge={props.badge}/>;
   return props.ir.presentation?.preset === 'information_motion' ? <InformationVideo ir={props.ir} badge={props.badge}/> : <LegacyVideo {...props}/>;
 }

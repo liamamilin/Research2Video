@@ -45,6 +45,13 @@ def creative_ir(tmp_path, form):
             forms.attach_images({'scenes': ir['scenes']}, assets)
         else:
             forms.attach_materials({'scenes': ir['scenes']},assets,{'slideshow_images_resolved':[{'image_id':'fixture'}]})
+    if form == 'illustrated_explainer':
+        folder = root / 'assets/slideshow'; folder.mkdir()
+        assets = [forms._save_image(folder, 0, b'image bytes', 'test')]
+        ir['assets'].extend(assets)
+        forms.attach_illustrations({'scenes': ir['scenes']}, assets,
+                                   {'chapters': [{'id': 'c1', 'narration_segment_ids': ['n1']}]},
+                                   [{'keywords': ['传输'], 'overlay': {'kind': 'flow', 'source': '发送端', 'target': '接收端', 'label': '传输'}}])
     return ir, root
 
 

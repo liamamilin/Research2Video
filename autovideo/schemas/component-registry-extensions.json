@@ -1,6 +1,6 @@
 {
-  "registry_version": "0.2-ext7",
-  "notes": "Runtime extensions for explicit information_motion and creative presentations; each presentation permits only its registered components. The frozen v0.2 registry (component-registry-v0.2.json) is unchanged; g1/video_ir.load_registry() merges these entries. big_number reveals title, then line:0 (value), line:1 (label) and line:2 (note, if present): the frozen beat target pattern has no other names. price_change reveals title and one row per line:N (1-2 rows). source_card reveals title and one source per line:N; its props come from the request's sources, never from the model. Runtime visual-object props for concept_reveal, comparison and flow_diagram are composed by g1/visual_language.py; frozen component schemas remain unchanged.",
+  "registry_version": "0.2-ext8",
+  "notes": "Runtime extensions for explicit information_motion and creative presentations; each presentation permits only its registered components. The frozen v0.2 registry (component-registry-v0.2.json) is unchanged; g1/video_ir.load_registry() merges these entries. big_number reveals title, then line:0 (value), line:1 (label) and line:2 (note, if present): the frozen beat target pattern has no other names. price_change reveals title and one row per line:N (1-2 rows). source_card reveals title and one source per line:N; its props come from the request's sources, never from the model. Runtime visual-object props for concept_reveal, comparison and flow_diagram are composed by g1/visual_language.py; frozen component schemas remain unchanged. illustration_scene (preset illustrated_explainer) shows one full-bleed illustration per chapter; images and keywords come from the request.",
   "components": {
     "big_number": {
       "props_schema": "components/big_number.schema.json",
@@ -99,6 +99,14 @@
           "scene",
           "title",
           "line:*"
+        ]
+      }
+    },
+    "illustration_scene": {
+      "props_schema": "components/illustration_scene.schema.json",
+      "actions": {
+        "reveal": [
+          "scene"
         ]
       }
     }

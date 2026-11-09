@@ -139,6 +139,8 @@ def _binding(request: dict) -> dict:
     fields = FIELDS | {"production_recipe", "production_context", "content_notices", "music"}
     if request.get("video_form") in {"object_showcase", "dynamic_collage"}:
         fields |= {"slideshow_images", "slideshow_images_resolved", "image_materials"}
+    if request.get("video_form") == "illustrated_explainer":
+        fields |= {"slideshow_images", "slideshow_images_resolved", "chapter_keywords"}
     if hybrid_enabled(request):
         fields |= {"visual_storytelling", "slideshow_images", "slideshow_images_resolved", "image_materials"}
     if "background_music" not in request:

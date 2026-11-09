@@ -952,7 +952,7 @@ def render(compiled: dict, scene_backdrops: dict[str, str] | None = None,
     shutil.copyfile(PROJECT / "g1/renderer/src/ImageMaterials.tsx", src / "ImageMaterials.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/DataChart.tsx", src / "DataChart.tsx")
     shutil.copyfile(PROJECT / "g1/renderer/src/ScatterChart.tsx", src / "ScatterChart.tsx")
-    for name in ("VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx", "ShotDirector.tsx", "DirectedMaterials.tsx", "CodeDemo.tsx", "StoryDirection.tsx", "ContentStyle.tsx"):
+    for name in ("Illustrated.tsx", "IllustratedOverlays.tsx", "VisualObjects.tsx", "ObjectMotions.ts", "ObjectFlow.tsx", "ShotDirector.tsx", "DirectedMaterials.tsx", "CodeDemo.tsx", "StoryDirection.tsx", "ContentStyle.tsx"):
         shutil.copyfile(PROJECT / "g1/renderer/src" / name, src / name)
     (src / "index.ts").write_text("import {registerRoot} from 'remotion';\nimport {Root} from './Root';\n\nregisterRoot(Root);\n", encoding="utf-8")
     ensure_renderer_dependency_link(renderer)
@@ -1346,10 +1346,18 @@ def run_all() -> dict:
         from g2 import creative_forms
         narration, alignment, board = run_planning_stages(narration,
             lambda final: creative_forms.plan_storyboard(sys.modules[__name__], final, form))
-        if form in {"image_slideshow", "object_showcase", "dynamic_collage"}:
+        saved_images = json.loads((PROJECT_INPUT.parent / "input.json").read_text(encoding="utf-8"))
+        if form == "illustrated_explainer" and not saved_images.get("slideshow_images_resolved"):
+            from g2 import illustration
+            assets, extras = run_step("draw-things-backgrounds", illustration.generate, sys.modules[__name__], narration)
+            board = creative_forms.attach_illustrations(board, assets, narration, extras)
+        elif form in {"image_slideshow", "object_showcase", "dynamic_collage", "illustrated_explainer"}:
             assets = run_step("draw-things-backgrounds", creative_forms.prepare_images, sys.modules[__name__], narration)
             if form == "image_slideshow":
                 board = creative_forms.attach_images(board, assets)
+            elif form == "illustrated_explainer":
+                board = creative_forms.attach_illustrations(board, assets, narration,
+                    creative_forms.chapter_extras(saved_images, len(narration.get("chapters") or [])))
             else:
                 saved_images = json.loads((PROJECT_INPUT.parent / "input.json").read_text(encoding="utf-8"))
                 board = creative_forms.attach_materials(board, assets, saved_images)
