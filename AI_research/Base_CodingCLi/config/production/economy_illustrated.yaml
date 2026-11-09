@@ -1,5 +1,8 @@
-# 生产配置：插画讲解 Job 的底稿怎么写成视频（spec/production.md、spec/illustrated-explainer.md）。试点期不自动出片。
+# 生产配置：这个 Job 的报告怎么写成视频（spec/production.md）。拆不拆、要不要再核实由配方定，给谁看在 audience 里选，多长在配方允许的范围里用 minutes 改，要不要重新调研用 reverify 改，auto 只控制自动制作开关，开启后处理全部不重复选题。
 job: economy/economy_illustrated
 recipe: illustrated_explainer
 audience: general
-auto: 0
+auto: 1
+render:
+  illustration_style: geometric
+auto_enabled_at: 1794218634.446236
