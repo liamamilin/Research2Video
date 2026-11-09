@@ -192,7 +192,20 @@ class ResearchEngine:
                 prompt = base_prompt = self._build_prompt(job)
                 fetch_only = job.get("search") is False  # search: false -> the Job reads only its declared sources
                 fetched = None
-                if fetch_only:
+                from . import knowledge_job
+                if knowledge_job.enabled(job):
+                    # Declared knowledge Job: no sources by design; it sees only what it already covered.
+                    if issue := knowledge_job.problem(job):
+                        raise ValueError(issue)
+                    source_block = knowledge_job.block(knowledge_job.past_titles(job, self.workspace_dir))
+                    if job.get("sources"):
+                        from .sources import fetch_all, resolve
+                        specs = resolve(list(job["sources"]), self.config_dir)
+                        ideas = fetch_all(specs, limit_per_source=int(job.get("sources_limit", 8)))
+                        logger.info("Knowledge job topic ideas: %d items from %d source(s)", len(ideas), len(specs))
+                        source_block += "\n\n" + knowledge_job.topic_block(ideas)
+                    fetched = ([], {})
+                elif fetch_only:
                     source_block, fetched = self._fetch_sources_strict(job)
                 else:
                     source_block = self._fetch_sources_block(job)

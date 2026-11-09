@@ -1114,3 +1114,23 @@ radar_opensource_models:
   name: Radar · 开源大模型发布雷达
   spec: "radar:开源大模型发布雷达"
   tags: [ai, radar_brief, radar_opensource]
+curious_kids:
+  name: The Conversation · Curious Kids
+  spec: rss:https://theconversation.com/us/topics/curious-kids-us-74795/articles.atom
+  tags: [science, explainer_questions]
+  note: 孩子提的"为什么"、专家作答；插画讲解的选题参考
+livescience_mysteries:
+  name: Live Science · Life's Little Mysteries
+  spec: rss:https://www.livescience.com/feeds/tag/lifes-little-mysteries
+  tags: [science, explainer_questions]
+  note: 生活里的小谜题问答；插画讲解的选题参考
+boe_knowledge_bank:
+  name: Bank of England · Knowledge Bank
+  spec: rss:https://www.bankofengland.co.uk/rss/knowledgebank
+  tags: [economy, explainer_questions]
+  note: 「什么是……」经济概念讲解；插画讲解的选题参考
+economics_se:
+  name: Economics StackExchange
+  spec: rss:https://economics.stackexchange.com/feeds
+  tags: [economy, explainer_questions]
+  note: 真实经济学提问，学术题多，只挑生活里看得见的；插画讲解的选题参考

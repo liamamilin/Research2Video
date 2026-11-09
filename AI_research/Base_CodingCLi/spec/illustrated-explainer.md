@@ -138,6 +138,26 @@
   - 示意种类偏向"清单"，两次出片各不相同。
 - **还没做**：从选题到定稿的上游（不联网知识文档）接进 workflow；画风按矩阵选择；前端界面；A/B。
 
+### 用 Job 接入（11-09，按"能力靠代码、组合靠配置"）
+
+- **能力**：新增 `core/knowledge_job.py`。Job 写 `knowledge: true`（同时须 `search: false`、不写 `sources`、output 含 `{date}`）时，引擎不抓订阅源，只把本 Job 往期底稿的标题作为"往期已讲过的问题"放进提示词，模型凭已有知识写。没写这个声明的 `search: false` Job 保持原样：订阅源全空就中止。`run.py --validate` 会检查这个声明是否合规。
+- **配置**：
+  - Job `jobs/economy/economy_illustrated.yaml`、`jobs/science/science_illustrated.yaml`：各带一份 16 题的清单，按顺序挑没讲过的；讲完后按同样风格自拟。
+  - 生产配置 `config/production/{economy,science}_illustrated.yaml`：配方 `illustrated_explainer`，`auto: 0`。
+  - 两个 Job 已加入财经、科学矩阵。调度方式是 `manual`，不进入每日自动。
+- **试跑（11-09）**：两个 Job 各跑一次，都成功。财经选了第 1 题（奶茶价格），科学选了第 1 题（金属和木头），各约 5300 字，7 段结构齐全。
+- **选题信息源（11-09）**：试抓了 40 多个候选源，接入 4 个：
+  - 科学：The Conversation · Curious Kids、Live Science · Life's Little Mysteries。
+  - 财经：Bank of England · Knowledge Bank、Economics StackExchange。
+  - 中文源（果壳、科普中国、科学松鼠会、中科院物理所 RSSHub）都抓不到，暂缓。
+  - `knowledge: true` 的 Job 现在可以写 `sources`：信息源只作"选题参考"放进提示词（标题、摘要、链接），内容仍凭已有知识写；取不到不影响运行。
+  - 第二次试跑：科学选了 Live Science 的"为什么猫不喜欢被摸肚子"；财经判断信息源这次没有合适的，退回清单第 2 题"超市为什么把鸡蛋牛奶放最里面"。两份都没有重复往期的题。
+- **待做**：
+  - 从这两份底稿走产出页写稿、定稿、出片。
+  - Draw Things 没开时改为排队等待（日更前要做）。
+  - 画风按矩阵选。
+  - 确认稳定后再开 `auto` 和日更调度。
+
 尚未做：主题研究里"不搜索"的开关（现在主题研究固定走搜索）；文档结构接进主题工作台。
 
 ### 2.2 画风包

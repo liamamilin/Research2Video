@@ -1,0 +1,5 @@
+# 生产配置：插画讲解 Job 的底稿怎么写成视频（spec/production.md、spec/illustrated-explainer.md）。试点期不自动出片。
+job: science/science_illustrated
+recipe: illustrated_explainer
+audience: general
+auto: 0
