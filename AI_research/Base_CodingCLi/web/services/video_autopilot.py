@@ -30,7 +30,7 @@ from core.video import auto as video_auto
 from core.video import autopilot_store as ap
 from core.video import columns as video_columns
 from core.video import content_columns, research_dossier
-from core.video import excerpt
+from core.video import excerpt, production
 from core.video import store, story_pool
 from core.video import topic_store
 from web.services import video_executor, video_render, video_workflow  # noqa: F401 - tests patch the last two here
@@ -119,8 +119,30 @@ def coverage(*, cells: Optional[list[dict]] = None, source_rows: Optional[list[d
     return rows
 
 
-def pick_topics(spec: dict) -> list[dict]:
-    """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet."""
+def _heat_rank(pick: dict, column, candidates: list[dict], taken: set) -> tuple[list[dict], str]:
+    """A production with ``selection.heat_min`` keeps only items hot enough on B站, hottest first (core/video/heat.py).
+
+    Only items not taken yet are scored. Any failure keeps every item in its order: heat never stops a video."""
+    paths = get_settings().paths
+    config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
+    minimum = (config.selection if config is not None else {}).get("heat_min")
+    if minimum is None:
+        return candidates, ""
+    from core.video import heat
+
+    fresh = [c for c in candidates if c["id"] not in taken]
+    try:
+        kept, _, note = heat.Heat(paths.state_dir).rank(fresh, int(minimum), video_workflow._llm_configs(None, column)[0])
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("heat ranking failed (%s)", type(exc).__name__)
+        return candidates, f"热度排序出错（{type(exc).__name__}），按原顺序"
+    return kept, note
+
+
+def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
+    """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet.
+
+    ``notes`` collects what the batch should say about its choice (items dropped as not hot enough)."""
     sync_topics()
     taken = store.topic_ids_in_use() | store.published_topic_ids() | ap.used_topic_ids() | store.dismissed_topic_ids()
     items: list[dict] = []
@@ -151,6 +173,10 @@ def pick_topics(spec: dict) -> list[dict]:
         skipped = (content_guard.known_duplicate_ids(candidates, config_dir) |
                    content_guard.used_candidate_ids(candidates, config_dir))
         candidates = [candidate for candidate in candidates if candidate["id"] not in skipped]
+        # before the fallbacks are taken from them: an item too cold to make is no fallback either
+        candidates, heat_note = _heat_rank(pick, column, candidates, taken)
+        if heat_note and notes is not None:
+            notes.append(heat_note)
         # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
         for candidate in candidates:
             if not pick.get("all") and len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
@@ -641,14 +667,15 @@ def _tick_run(run: dict, counts: Optional[dict] = None) -> int:
                 return 0
         if not fresh_topics(spec, run):
             return 0
-        items = pick_topics(spec)
+        notes: list[str] = []
+        items = pick_topics(spec, notes)
         if not items:
             # keep why the topics were not fresh: that, not the empty pick, is usually what went wrong
             cause = (ap.get_run(run["id"]) or {}).get("note") or ""
-            ap.update_run(run["id"], status="DONE", note="；".join(filter(None, [cause, "没有可写的新选题"])))
+            ap.update_run(run["id"], status="DONE", note="；".join(filter(None, [cause, *notes, "没有可写的新选题"])))
             return 0
         _add_items(run["id"], items)
-        ap.update_run(run["id"], stage="ITEMS")
+        ap.update_run(run["id"], stage="ITEMS", **({"note": "；".join(notes)} if notes else {}))
         run = ap.get_run(run["id"])
     if counts is None:  # a batch ticked on its own: the work in flight is its own and every other running batch's
         counts = _in_flight(ap.list_runs(limit=None, status="RUNNING"))

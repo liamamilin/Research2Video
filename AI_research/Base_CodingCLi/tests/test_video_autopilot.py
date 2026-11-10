@@ -39,7 +39,7 @@ def topic(n: int) -> dict:
 
 def batch(monkeypatch, n=3, column="flash") -> dict:
     items = [{"column_key": column, "topic": topic(i)} for i in range(1, n + 1)]
-    monkeypatch.setattr(pilot, "pick_topics", lambda spec: items)
+    monkeypatch.setattr(pilot, "pick_topics", lambda spec, notes=None: items)
     return pilot.start_run({"picks": [{"column": column, "count": n, "source": "flash"}], "refresh": False})
 
 

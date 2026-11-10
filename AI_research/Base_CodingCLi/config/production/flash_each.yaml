@@ -4,3 +4,7 @@ job: monitoring/ai_flash_discovery
 recipe: flash
 auto: 1
 reverify: false
+# 选题热度（core/video/heat.py，11-10 对标报告）：只做 B站近 7 天同产品视频前 5 条合计播放 ≥ 2 万的条目，按热度从高到低；
+# 不到门槛的不做。取不到热度（被拦、次数用完）时照旧全做。
+selection:
+  heat_min: 20000
