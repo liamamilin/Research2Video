@@ -680,6 +680,23 @@ def process_first_comment(task: dict) -> None:
             db.finish_first_comment_pin(task["id"], status="PINNED")
 
 
+def heat_of(script_ids: list[str]) -> dict[str, int]:
+    """B站 heat each script's topic was picked with (core/video/heat.py); 0 when it had none."""
+    if not script_ids:
+        return {}
+    with video_store.connect() as conn:
+        rows = conn.execute("SELECT id, COALESCE(json_extract(topic,'$.heat.score'),0) AS heat FROM scripts "
+                            "WHERE id IN (SELECT value FROM json_each(?))", (json.dumps(sorted(set(script_ids))),)).fetchall()
+    return {row["id"]: int(row["heat"] or 0) for row in rows}
+
+
+def by_priority(waiting: list[dict]) -> list[dict]:
+    """The order queued uploads go out (11-10, 发片优先级): what a person queued by hand first, then the hottest topic,
+    then the oldest. A topic told from several angles shares its heat, so its videos follow one another in order."""
+    heat = heat_of([u["script_id"] for u in waiting])
+    return sorted(waiting, key=lambda u: (bool(u["payload"].get("automatic")), -heat.get(u["script_id"], 0), u["created_at"]))
+
+
 def tick() -> None:
     """Single worker across threads/processes; unknown submissions are never automatically retried."""
     folder = directory()
@@ -714,7 +731,7 @@ def tick() -> None:
                     _log_once(logging.WARNING, candidate["render_id"], f"skipped: {exc}")
                     continue
         task, dtime = None, None
-        for waiting in (u for u in db.pending_uploads(owner) if u["status"] == "QUEUED"):
+        for waiting in by_priority([u for u in db.pending_uploads(owner) if u["status"] == "QUEUED"]):
             if not waiting["payload"].get("automatic"):
                 task = waiting
                 break
