@@ -397,6 +397,9 @@ def duplicate(event: dict, peers: list[dict]) -> list[dict]:
         return False
 
     evidence = {key for u in event["primary_sources"] if (key := guard.source_key(u))}
+    # An event told from another angle (core/video/angles.py) is another video: only the same angle repeats it.
+    angle = event.get("angle") or ""
+    peers = [peer for peer in peers if ((peer.get("story") or {}).get("angle") or "") == angle]
     result = []
     unchanged = []
     for peer in peers:
@@ -445,7 +448,10 @@ def take(script_id: str, pool: dict, peers: list[dict]) -> tuple[dict, list[dict
                      "sources": {k for u in s["primary_sources"] if (k := guard.source_key(u))}}
                     for r in conn.execute("SELECT * FROM video_story_claims WHERE scope=? AND script_id!=? "
                                           "AND state IN ('ACTIVE','COVERED')", (pool["scope"], script_id))]
+        angle = json.loads(row["topic"]).get("angle") or ""
         for event in pool["events"]:
+            if angle:  # a variant claims its own angle of the event, and is compared with that angle only
+                event = {**event, "angle": angle, "event_key": f"{event['event_key']}#{angle}"}
             hits = duplicate(event, peers+occupied)
             if hits:
                 decisions.append({"decision": "skip", "title": event["title"], "peer_id": hits[0]["script_id"],
@@ -489,7 +495,10 @@ def get(pool_id: str) -> dict:
 
 
 def brief(story: dict) -> str:
-    return ("本期只围绕已选主事件写稿，不从背景材料另选主事件。\n" +
+    from core.video import angles
+
+    told = angles.prompt(story.get("angle") or "")
+    return ("本期只围绕已选主事件写稿，不从背景材料另选主事件。\n" + (told + "\n" if told else "") +
             json.dumps({k: story[k] for k in ("title", "subject", "action", "edition", "event_date", "summary",
                                              "primary_sources", "changes")}, ensure_ascii=False))
 

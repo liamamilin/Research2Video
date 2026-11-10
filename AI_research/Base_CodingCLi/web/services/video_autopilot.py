@@ -139,6 +139,41 @@ def _heat_rank(pick: dict, column, candidates: list[dict], taken: set) -> tuple[
     return kept, note
 
 
+def _item_text(topic: dict) -> str:
+    """The item's own part of its report (what a variant would be written from); its title and fields when unreadable."""
+    plain = " ".join([topic.get("title", ""), *map(str, (topic.get("fields") or {}).values())])
+    report = topic.get("from_report") or ""
+    if not report:
+        return plain
+    try:
+        path = report if os.path.isabs(report) else os.path.join(video_workflow.workspace_dir(), report)
+        with open(path, encoding="utf-8") as fh:
+            part = excerpt.item_excerpt(fh.read(), topic.get("from_item_title") or topic.get("title", ""))
+    except OSError:
+        return plain
+    return part or plain
+
+
+def _angle_variants(pick: dict, candidates: list[dict], fresh: set) -> tuple[Optional[str], list[dict], str]:
+    """(base id, its variants, note): the hottest new item at or above ``selection.angle_min``, told again from
+    every angle its material supports (core/video/angles.py). Only scored items qualify: no heat, no variants."""
+    paths = get_settings().paths
+    config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
+    minimum = (config.selection if config is not None else {}).get("angle_min")
+    if minimum is None:
+        return None, [], ""
+    from core.video import angles
+
+    hottest = next((c for c in candidates if c["id"] in fresh and (c.get("heat") or {}).get("score", -1) >= minimum), None)
+    if hottest is None:
+        return None, [], ""
+    made = angles.variants(hottest, _item_text(hottest))
+    if not made:
+        return hottest["id"], [], f"「{hottest.get('title', '')[:16]}」够热但材料撑不起算账或上手，只做一条"
+    return hottest["id"], made, (f"「{hottest.get('title', '')[:16]}」热度 {hottest['heat']['score']}，加做 "
+                                 + "、".join(angles.ANGLES[v["angle"]]["label"] for v in made))
+
+
 def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
     """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet.
 
@@ -177,6 +212,9 @@ def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
         candidates, heat_note = _heat_rank(pick, column, candidates, taken)
         if heat_note and notes is not None:
             notes.append(heat_note)
+        base_id, extra, angle_note = _angle_variants(pick, candidates, {c["id"] for c in candidates if c["id"] not in taken})
+        if angle_note and notes is not None:
+            notes.append(angle_note)
         # news that is already old ranks after fresher news (it is still picked when nothing fresher is left)
         for candidate in candidates:
             if not pick.get("all") and len([i for i in items if i["pick"] is pick]) >= int(pick.get("count", 1)):
@@ -186,6 +224,12 @@ def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
             taken.add(candidate["id"])
             items.append({"column_key": pick["column"], "topic": candidate,
                           "production": pick.get("production", ""), "pick": pick})
+            if candidate["id"] == base_id:  # its angles right after it, each a video of its own
+                for variant in extra:
+                    if variant["id"] not in taken:
+                        taken.add(variant["id"])
+                        items.append({"column_key": pick["column"], "topic": variant,
+                                      "production": pick.get("production", ""), "pick": pick})
         # A finite queue of alternatives lets semantic cross-day duplicates be
         # replaced before writing; candidates do not reserve videos on their own.
         for item in items:

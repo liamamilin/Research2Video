@@ -132,15 +132,23 @@ def column_key(every_recipe: dict, recipe: str, audience: str = "", minutes=None
 
 
 def _selection(value) -> tuple[dict, str]:
-    """``selection: {heat_min: N}`` (N >= 0 plays): which report items are worth making. Absent: every item."""
+    """``selection: {heat_min: N, angle_min: M}`` (plays): which report items are worth making (core/video/heat.py),
+    and from what heat the hottest one is also told as 算账 / 上手 (core/video/angles.py). Absent: every item, once."""
     if value is None:
         return {}, ""
-    if not isinstance(value, dict) or set(value) - {"heat_min"}:
-        return {}, "selection 只认 heat_min（B站近 7 天同产品视频的播放门槛）"
-    minimum = value.get("heat_min")
-    if minimum is not None and (isinstance(minimum, bool) or not isinstance(minimum, int) or minimum < 0):
-        return {}, "selection.heat_min 应是不小于 0 的整数（播放数）"
-    return ({"heat_min": minimum} if minimum is not None else {}), ""
+    if not isinstance(value, dict) or set(value) - {"heat_min", "angle_min"}:
+        return {}, "selection 只认 heat_min（B站近 7 天同产品视频的播放门槛）和 angle_min（多讲几个角度的门槛）"
+    out = {}
+    for name in ("heat_min", "angle_min"):
+        number = value.get(name)
+        if number is None:
+            continue
+        if isinstance(number, bool) or not isinstance(number, int) or number < 0:
+            return {}, f"selection.{name} 应是不小于 0 的整数（播放数）"
+        out[name] = number
+    if "angle_min" in out and "heat_min" not in out:
+        return {}, "selection.angle_min 要和 heat_min 一起用：没有热度就不知道哪条最热"
+    return out, ""
 
 
 def _check(key: str, data: dict, config_dir: str, jobs_dir: str, every_recipe: dict,
