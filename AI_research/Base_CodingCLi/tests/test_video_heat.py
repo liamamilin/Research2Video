@@ -179,3 +179,10 @@ def test_a_heat_failure_keeps_the_batch_as_it_was(video_env, monkeypatch):
     spec = {"picks": [{"column": "flash", "all": True, "source": "flash", "production": "hot"}]}
     assert len(pilot.pick_topics(spec, notes)) == len(pilot.pick_topics({"picks": [{"column": "flash", "all": True, "source": "flash"}]}))
     assert notes == ["热度排序出错（OSError），按原顺序"]
+
+
+def test_a_bar_of_zero_ranks_everything_and_drops_nothing(tmp_path, words):
+    search = FakeSearch({"豆包": [900000]})
+    words.update({"r/F1": "", "r/F2": "豆包"})
+    kept, dropped, note = make(tmp_path, search).rank(cands("版本号怎么看", "豆包对比"), 0, None)
+    assert [c["id"] for c in kept] == ["r/F2", "r/F1"] and dropped == [] and note == ""

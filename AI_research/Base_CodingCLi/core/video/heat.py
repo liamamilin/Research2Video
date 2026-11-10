@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 WINDOW_DAYS = 7
 MIN_SECONDS = 90
 TOP = 5
-DAILY_SEARCHES = 40
+DAILY_SEARCHES = 60  # flash ×2, ChatGPT T05/T09, hot words and burst runs (11-10)
 BUDGET_SECONDS = 120.0
 SPACING = 1.5
 EXCLUDED_TYPES = frozenset({
@@ -250,8 +250,9 @@ class Heat:
         kept, dropped, unscored = [], [], []
         for candidate in candidates:
             keyword = words.get(candidate["id"], "")
-            if not keyword:
-                dropped.append({**candidate, "heat": {"keyword": "", "score": 0, "videos": 0}})
+            if not keyword:  # nothing to search: heat 0, kept only under a bar of 0
+                value = {"keyword": "", "score": 0, "videos": 0}
+                (kept if minimum <= 0 else dropped).append({**candidate, "heat": value})
                 continue
             if keyword not in scored:
                 unscored.append(candidate)
