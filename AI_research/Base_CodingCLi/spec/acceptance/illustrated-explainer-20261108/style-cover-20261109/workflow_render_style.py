@@ -2,7 +2,7 @@
 to the isolated AutoVideo trial instance. Writes nothing to AREC's database (same idea as the
 A/B preview's build_request): the approved version is supplied in memory.
 
-Usage (from AREC root): PYTHONPATH=. python3 workflow_render_style.py <script.json> <matrix> <title> <out_dir> <style>
+Usage (from AREC root): PYTHONPATH=. python3 workflow_render_style.py <script.json> <matrix> <title> <out_dir> <style> [production_key]
 Same as video-20261109/workflow_render.py, plus a production layer choosing the illustration style pack.
 """
 import copy
@@ -18,6 +18,7 @@ from core.video.autovideo import AutoVideoClient
 from web.services import video_render, video_visuals, opening_card
 
 sections_path, matrix, title, out_dir, style = sys.argv[1:6]
+production_key = sys.argv[6] if len(sys.argv) > 6 and sys.argv[6] != "dry" else "economy_illustrated"
 out = Path(out_dir); out.mkdir(parents=True, exist_ok=True)
 if (out / "request.json").exists():
     sys.exit(f"{out} already used")
@@ -25,7 +26,7 @@ sections = json.loads(Path(sections_path).read_text(encoding="utf-8"))
 version = {"version": 1, "title": title, "sections": sections, "meta": {}, "length_check": {}}
 import uuid
 script = {"id": uuid.uuid4().hex, "column_key": "illustrated_explainer", "approved_version": 1,
-          "topic": {"title": title, "fields": {"核心角度": title}}, "production": "economy_illustrated", "source_matrix_id": matrix,
+          "topic": {"title": title, "fields": {"核心角度": title}}, "production": production_key, "source_matrix_id": matrix,
           "content_context": {}, "status": "APPROVED"}
 
 real_get_version = video_render.store.get_version
@@ -33,7 +34,7 @@ video_render.store.get_version = lambda sid, no: copy.deepcopy(version) if sid =
 
 from types import SimpleNamespace
 from core.video import production
-production.get = lambda *a, **k: SimpleNamespace(usable=True, key="economy_illustrated", render={"illustration_style": style})
+production.get = lambda *a, **k: SimpleNamespace(usable=True, key=production_key, render={"illustration_style": style})
 
 client = AutoVideoClient("http://127.0.0.1:8013", timeout=120)
 video_render.get_client = lambda: client
@@ -44,7 +45,7 @@ payload, _ = video_visuals.prepare(shadow, client)
 shadow.update(version=built.get("version"), title=built.get("title") or "")
 payload, _ = opening_card.apply(payload, shadow, built.get("context"), out / "opening-copy.json")
 (out / "request.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
-if len(sys.argv) > 6 and sys.argv[6] == "dry":
+if sys.argv[-1] == "dry":
     (out / "request.json").rename(out / "request-dry.json"); sys.exit(0)
 job = client.create_job(payload)
 print("job", job["job_id"], flush=True)
