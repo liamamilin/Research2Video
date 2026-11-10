@@ -174,6 +174,20 @@ def _angle_variants(pick: dict, candidates: list[dict], fresh: set) -> tuple[Opt
                                  + "、".join(angles.ANGLES[v["angle"]]["label"] for v in made))
 
 
+def _chain_episodes(pick: dict, picked: list[dict]) -> None:
+    """``selection.next_episode`` (11-10, growth research: give viewers a reason to follow): each item of the batch
+    ends by promising the next one, and the next goes public only after it (web/services/platform_manager.py), so
+    the promise is kept. Extra angles are not links of the chain; the last item promises nothing."""
+    paths = get_settings().paths
+    config = production.get(paths.config_dir, paths.jobs_dir, pick["production"]) if pick.get("production") else None
+    if not (config is not None and config.selection.get("next_episode")):
+        return
+    chain = [i for i in picked if not i["topic"].get("angle")]
+    for before, after in zip(chain, chain[1:]):
+        before["topic"] = {**before["topic"], "next_episode": after["topic"].get("title", "")}
+        after["topic"] = {**after["topic"], "after_id": before["topic"]["id"]}
+
+
 def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
     """Items for a batch: per pick, the best-scored topics that have no script, no publication and no item yet.
 
@@ -230,6 +244,7 @@ def pick_topics(spec: dict, notes: Optional[list] = None) -> list[dict]:
                         taken.add(variant["id"])
                         items.append({"column_key": pick["column"], "topic": variant,
                                       "production": pick.get("production", ""), "pick": pick})
+        _chain_episodes(pick, [i for i in items if i["pick"] is pick])
         # A finite queue of alternatives lets semantic cross-day duplicates be
         # replaced before writing; candidates do not reserve videos on their own.
         for item in items:

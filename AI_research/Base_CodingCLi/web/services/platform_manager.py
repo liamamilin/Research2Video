@@ -705,7 +705,8 @@ def topics_of(script_ids: list[str]) -> dict[str, dict]:
         return {}
     with video_store.connect() as conn:
         rows = conn.execute("SELECT id, COALESCE(json_extract(topic,'$.heat.score'),0) AS heat, "
-                            "json_extract(topic,'$.id') AS topic_id, json_extract(topic,'$.base_id') AS base_id FROM scripts "
+                            "json_extract(topic,'$.id') AS topic_id, "
+                            "COALESCE(json_extract(topic,'$.base_id'),json_extract(topic,'$.after_id')) AS base_id FROM scripts "
                             "WHERE id IN (SELECT value FROM json_each(?))", (json.dumps(sorted(set(script_ids))),)).fetchall()
     return {row["id"]: {"heat": int(row["heat"] or 0), "topic_id": row["topic_id"] or "", "base_id": row["base_id"] or ""}
             for row in rows}
@@ -717,7 +718,8 @@ def heat_of(script_ids: list[str]) -> dict[str, int]:
 
 
 def base_pending(upload: dict, pending: list[dict], topics: dict[str, dict], now: float) -> bool:
-    """An extra angle waits while the video that tells its item is still queued or not yet public on its timer."""
+    """An extra angle waits while the video that tells its item is still queued or not yet public on its timer; so does
+    the next episode of a series (``after_id``), so its promise is never older than the video that made it."""
     base = (topics.get(upload["script_id"]) or {}).get("base_id")
     if not base:
         return False
@@ -778,7 +780,7 @@ def tick() -> None:
             angle = bool((topics.get(waiting["script_id"]) or {}).get("base_id"))
             if angle and base_pending(waiting, pending, topics, time.time()):
                 if not waiting["payload"].get("held"):
-                    db.hold_upload(waiting["id"], "等同一选题讲发布的那条先公开，再按间隔接着发。")
+                    db.hold_upload(waiting["id"], "等前一条（同一选题讲发布的那条，或预告它的上一期）先公开，再按间隔接着发。")
                 continue
             # an extra angle follows its item instead of taking an evening-peak slot of its own
             dtime = publish_at(time.time(), window, _publish_times(db, owner, waiting["id"]),

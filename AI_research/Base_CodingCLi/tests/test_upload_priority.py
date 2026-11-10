@@ -40,3 +40,10 @@ def test_an_extra_angle_waits_for_its_item_s_video_then_follows_it():
     assert not pm.base_pending(angle, [timed_base, angle], topics, now=2001)  # public now: the angle may follow
     assert not pm.base_pending(angle, [angle], topics, now=1000)  # no video of the item queued: nothing to wait for
     assert not pm.base_pending({"script_id": "other", "status": "QUEUED", "payload": {}}, [queued_base], topics, 1000)
+
+
+def test_the_next_episode_waits_for_the_one_that_promised_it():
+    topics = {"ep1": {"heat": 0, "topic_id": "r/F1", "base_id": ""}, "ep2": {"heat": 0, "topic_id": "r/F2", "base_id": "r/F1"}}
+    ep2 = {"script_id": "ep2", "status": "QUEUED", "payload": {}}
+    assert pm.base_pending(ep2, [{"script_id": "ep1", "status": "QUEUED", "payload": {}}, ep2], topics, now=1000)
+    assert not pm.base_pending(ep2, [ep2], topics, now=1000)

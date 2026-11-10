@@ -106,6 +106,9 @@ episode_role 使用 opening、item、closing。保留实际步骤顺序，不把
 输出 JSON：{"title":"本期标题","sections":[{"title":"短标题","episode_role":"item","paragraphs":[{"text":"口播正文","citations":[]}]}]}"""
 
 
+#: A series item that has a next one (selection.next_episode): the last words before the farewell promise it.
+NEXT_EPISODE_PROMPT = """
+这是一个连续系列，下一期已经排好，讲的是「{next}」。道别前用一句话预告它：把它说成观众关心的一个问题（比如“下一期我接着讲：……？”），让观众知道关注后下一期能得到什么；只预告这一个，不编别的内容。"""
 GREETING_PROMPT = """
 口播开头由节目固定念出问候「{greeting}」，正文从这句问候之后接着讲，不再另外问候或介绍栏目；最后用一句简短的道别结束。"""
 #: Opening and closing sections of a programme carry these titles, so the screen never shows a working label.
@@ -381,6 +384,8 @@ def write(
     system = (TUTORIAL_PROMPT if tutorial else EPISODE_PROMPT) if programme else SYSTEM_PROMPT
     if greeting:
         system += GREETING_PROMPT.format(greeting=greeting)
+    if topic.get("next_episode"):
+        system += NEXT_EPISODE_PROMPT.format(next=topic["next_episode"])
     from core.video import persona as narrator
     persona = narrator.load()
     system += narrator.prompt(persona)

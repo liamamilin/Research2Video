@@ -76,3 +76,10 @@ def test_a_written_script_never_keeps_the_picture_note(llm):
     written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
                            target_minutes=1, llm_config=None)
     assert written.sections[0]["paragraphs"][0]["text"] == "想象一个人往空杯子里倒水。"
+
+
+def test_a_series_item_promises_its_next_episode(llm):
+    llm.replies = [script_json(300)]
+    writer.write(report=REPORT, citation_check=None, topic={"title": "本期", "next_episode": "额度没用完为什么停了"},
+                 column_style="", target_minutes=1, llm_config=None)
+    assert "「额度没用完为什么停了」" in llm.calls[0][0]["content"] and "道别前用一句话预告它" in llm.calls[0][0]["content"]

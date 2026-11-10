@@ -137,3 +137,32 @@ def test_an_angle_is_written_at_its_own_longer_length(monkeypatch):
         writer.write_for_column(column=column, content_context={}, topic=topic, report="r", citation_check=None,
                                 llm_config=None)
         assert seen["target_minutes"] == expected
+
+
+def test_a_series_batch_promises_each_next_item_and_angles_stay_out_of_the_chain(flash_report, monkeypatch):
+    from web.services import video_autopilot as pilot
+
+    monkeypatch.setattr(production, "get", lambda c, j, key: SimpleNamespace(
+        selection={"heat_min": 1, "angle_min": 500000, "next_episode": True}))
+
+    class Ranked:
+        def __init__(self, state_dir):
+            pass
+
+        def rank(self, candidates, minimum, llm):
+            return [{**c, "heat": {"keyword": "k", "score": 900000 - i, "videos": 1}} for i, c in enumerate(candidates)], [], ""
+
+    monkeypatch.setattr(heat, "Heat", Ranked)
+    monkeypatch.setattr(pilot, "_item_text", lambda topic: "每月 20 美元")
+    topics = [i["topic"] for i in pilot.pick_topics(SPEC, [])]
+    base = [t for t in topics if not t.get("angle")]
+    assert len(base) >= 2
+    for before, after in zip(base, base[1:]):
+        assert before["next_episode"] == after["title"] and after["after_id"] == before["id"]
+    assert "next_episode" not in base[-1] and "after_id" not in base[0]
+    assert all("next_episode" not in t and "after_id" not in t for t in topics if t.get("angle"))
+
+
+def test_next_episode_is_validated():
+    assert production._selection({"next_episode": True}) == ({"next_episode": True}, "")
+    assert production._selection({"next_episode": "yes"})[1]

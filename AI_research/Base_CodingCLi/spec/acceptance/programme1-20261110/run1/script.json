@@ -1,0 +1,204 @@
+{
+ "report": "./output/chatgpt_acquisition/2026-11-10_t05_comparison.md",
+ "item": "手机上只装一个 AI，先看“能不能用”而不是跑分：豆包、元宝、千问、DeepSeek、Kimi 对 ChatGPT",
+ "next_episode": "开完会谁写纪要？微信输入法、手机系统录音、ChatGPT 语音同题比",
+ "title": "手机只装一个 AI：五家全免费，ChatGPT 先别急着付费",
+ "sections": [
+  {
+   "title": "八成人都在用它，我却劝你先别掏钱",
+   "paragraphs": [
+    {
+     "text": "全球每十个用 AI 聊天机器人的人里，有八个多用的都是 ChatGPT，一周活跃用户十二亿。但我给身边人的建议是：手机上那个位置，先别急着为它花钱。",
+     "citations": [
+      "https://www.ithome.com/1/024/542.htm"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "我是洛洛，这期帮你把“手机里只留一个 AI”这件事定下来。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "因为用得多，和适合你手上这台手机，是两件事。我先说结论：日常那几件事，国内五家的免费档基本都能干，你要掏的钱，多半不该花在这儿。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "先用三个动作，把范围框死",
+   "paragraphs": [
+    {
+     "text": "我先把任务定死，就三个动作。第一，对着手机说一句“帮我排一个周六上午的时间表，带老人小孩”；第二，拍一张空调遥控器，问哪个键是除湿；第三，把答案转发到微信，发给家里人。",
+     "citations": [
+      "https://www.aisolink.com/china-ai-assistants-2026-review"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "就这三件，别的都不算。豆包、元宝、千问、DeepSeek、Kimi，五家都能从应用商店直接下，手机号或微信登录，基础功能不要钱。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "说话、拍照、转发：免费档到底够不够",
+   "paragraphs": [
+    {
+     "text": "第一个维度，说话。这一项豆包最突出，语音输入、语音通话都能用，边说边转成文字，长句子也接得住。ChatGPT 免费版的文字聊天是不限量的，但语音是有限的，额度用完就得等，或者往上升档。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/",
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "第二个维度，拍照。豆包的拍照识图、讲题、做文档和 PPT 都在行。ChatGPT 免费版的图像和上传同样是限次数的，到 Go 档才把消息、上传、图像、语音、记忆一起放开，官方还注明那一档可能带广告。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/",
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "第三个维度，转发到微信。这一步最容易被忽略，但它是你天天要走的一步。元宝能用微信、QQ 直接登录，还能查公众号和视频号里的内容；千问接的是淘宝、支付宝、高德、飞猪，点外卖、订酒店、查办事流程，一句话就能往下走。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "另外两家各有一个清楚的定位：Kimi 偏长文档、PPT 和办公文件；DeepSeek 的页面上没列付费项目，免费就能用。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "还有一条跟你手机直接相关。国行 iPhone 这边，苹果和阿里已经宣布，部分机型升到 iOS 27.3 之后，Siri、写作工具和视觉智能里就能直接用千问。你要是 iPhone 用户，这条比任何跑分都实在。",
+     "citations": [
+      "https://www.ithome.com/1/024/542.htm"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "什么时候才轮到 ChatGPT",
+   "paragraphs": [
+    {
+     "text": "那 ChatGPT 什么时候值得掏钱？我给的条件很窄：你经常要跨语言、做深度研究、对着长文件连续追问，或者要写代码。这些才是它付费档真正放得开的地方。排时间表、认遥控器、发微信，一分钱都不用花。",
+     "citations": [
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "价格上给个参照。ChatGPT 各档的具体金额，官方页面只写“每月”，没写数字，我不硬猜。别家的订阅页列得比较全：入门档 4.99 美元一个月，主力档 19.99 美元，合人民币一百四十块左右，最高一档从 99.99 美元起。这笔钱值不值，就看你上面那类任务一个月做几次。",
+     "citations": [
+      "https://chatgpt.com/pricing/",
+      "https://gemini.google/subscriptions/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "对号入座，你该装哪一个",
+   "paragraphs": [
+    {
+     "text": "那怎么选，我按人分。你要是主要用嘴说、用相机拍，家里老人小孩也跟着用，就选豆包。你的号和公众号内容离不开，元宝更顺手。淘宝、支付宝、高德天天开，想把事一句话办完，千问。只想免费用、不想被订阅捆住，DeepSeek。长文档、PPT、查资料这种事多，Kimi。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "反过来说一个反例：有人看 ChatGPT 用得人最多，直接开了 Plus，结果一个月下来只让它排过两次时间表、认过三张照片。这种用法，钱是白花的。",
+     "citations": [
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "所以回到开头那个问题。八成的流量在 ChatGPT 手上，但你手机里那个位置，该留给能一句话、一张照片就把事办完、还能直接发进微信的那个。你会把位置留给免费的国内 AI，还是留给 ChatGPT？评论区说一声。",
+     "citations": [
+      "https://www.ithome.com/1/024/542.htm"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "下一期我接着讲：开完会谁写纪要？微信输入法、手机系统录音、ChatGPT 语音，同一段会谁整理得最省事。我是洛洛，我们下期见。",
+     "citations": [
+      "https://niuxue.org/guides/domestic-ai-assistants/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  }
+ ],
+ "length_check": {
+  "spoken_length": 1060,
+  "estimated_seconds": 243,
+  "segments": 49,
+  "units_per_second": 4.35,
+  "voice": "voxcpm_anchor",
+  "target_minutes": 5,
+  "budget": 1305,
+  "ratio": 0.811,
+  "status": "UNDER",
+  "tolerance": 0.15,
+  "sections": [
+   {
+    "title": "八成人都在用它，我却劝你先别掏钱",
+    "spoken_length": 137,
+    "budget": 261
+   },
+   {
+    "title": "先用三个动作，把范围框死",
+    "spoken_length": 115,
+    "budget": 261
+   },
+   {
+    "title": "说话、拍照、转发：免费档到底够不够",
+    "spoken_length": 347,
+    "budget": 261
+   },
+   {
+    "title": "什么时候才轮到 ChatGPT",
+    "spoken_length": 184,
+    "budget": 261
+   },
+   {
+    "title": "对号入座，你该装哪一个",
+    "spoken_length": 277,
+    "budget": 261
+   }
+  ],
+  "dropped_citations": 0
+ }
+}

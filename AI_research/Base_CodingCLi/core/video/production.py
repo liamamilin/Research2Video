@@ -136,9 +136,14 @@ def _selection(value) -> tuple[dict, str]:
     and from what heat the hottest one is also told as 算账 / 上手 (core/video/angles.py). Absent: every item, once."""
     if value is None:
         return {}, ""
-    if not isinstance(value, dict) or set(value) - {"heat_min", "angle_min"}:
-        return {}, "selection 只认 heat_min（B站近 7 天同产品视频的播放门槛）和 angle_min（多讲几个角度的门槛）"
+    if not isinstance(value, dict) or set(value) - {"heat_min", "angle_min", "next_episode"}:
+        return {}, "selection 只认 heat_min（B站近 7 天同产品视频的播放门槛）、angle_min（多讲几个角度的门槛）和 next_episode（结尾预告下一期）"
     out = {}
+    if "next_episode" in value:
+        if not isinstance(value["next_episode"], bool):
+            return {}, "selection.next_episode 应是 true 或 false"
+        if value["next_episode"]:
+            out["next_episode"] = True
     for name in ("heat_min", "angle_min"):
         number = value.get(name)
         if number is None:
