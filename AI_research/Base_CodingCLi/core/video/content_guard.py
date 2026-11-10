@@ -43,7 +43,8 @@ def with_policy(script: dict, jobs_dir: str = "") -> dict:
     topic = script.get("topic") or {}
     if topic.get("content_mode") == "episode":
         return script
-    if script.get("created_by") != "autopilot" or (topic.get("matrix_dedup") or {}).get("job"):
+    if (script.get("created_by") != "autopilot" or (topic.get("matrix_dedup") or {}).get("job")
+            or topic.get("knowledge_job")):
         return script
     job = (script.get("content_context") or {}).get("job", "")
     with store.connect() as conn:
@@ -65,7 +66,8 @@ def policy_topic(topic: dict, job: str) -> dict:
 
 def new_topic(topic: dict, context: dict, config_dir: str, jobs_dir: str) -> dict:
     """New matrix videos share selection across entry points; rewrites keep their event."""
-    if topic.get("matrix_dedup") or topic.get("article") or topic.get("local_video") or topic.get("test_sample"):
+    if (topic.get("matrix_dedup") or topic.get("knowledge_job") or topic.get("article") or topic.get("local_video")
+            or topic.get("test_sample")):
         return topic
     candidates = [context.get("job", "")]
     with store.connect() as conn:
@@ -89,9 +91,29 @@ def new_topic(topic: dict, context: dict, config_dir: str, jobs_dir: str) -> dic
     job = next((value for value in candidates if value in members), "")
     if not job:
         return topic
+    return matrix_topic(topic, job, jobs_dir)
+
+
+def matrix_topic(topic: dict, job: str, jobs_dir: str) -> dict:
+    """A matrix Job's new video: news goes through the shared event pool; a knowledge Job does not.
+
+    A knowledge Job picks one new question per report and avoids repeats by its past titles. Its topic ideas are
+    the same source pages every day, so the event pool would match every new question to the first video by
+    those links (11-10: six new economy questions skipped as “already covered”). The Job is still recorded
+    (``knowledge_job``) so the video is filed under its matrix (合集, partition)."""
+    if _knowledge(jobs_dir, job):
+        return {**topic, "knowledge_job": job}
     from core.video import story_pool
 
     return {**topic, "matrix_dedup": {"job": job, "policy": story_pool.POLICY}}
+
+
+def _knowledge(jobs_dir: str, job: str) -> bool:
+    from core import knowledge_job
+    from core.config import load_job
+
+    found = load_job(jobs_dir, job) if jobs_dir and job else None
+    return bool(found) and knowledge_job.enabled(found)
 
 
 def published(script_id: str) -> bool:

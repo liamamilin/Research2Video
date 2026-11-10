@@ -1,6 +1,7 @@
 """Event selection is tested before authors/renderers and never touches real accounts."""
 import json
 import sqlite3
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from threading import Barrier
@@ -575,6 +576,19 @@ def test_new_topic_ownership_from_source_and_production_context(guard_env, monke
     assert by_source["matrix_dedup"]["job"] == "science/daily"
     assert by_config["matrix_dedup"]["job"] == "science/weekly"
     assert by_source["matrix_dedup"]["policy"] == by_config["matrix_dedup"]["policy"] == pool.POLICY
+
+
+def test_a_knowledge_job_skips_the_news_event_pool(guard_env):
+    paths = get_settings().paths
+    folder = guard_env / "config/matrices"
+    (folder / "science.yaml").write_text("name: 科学\njobs: [science/daily, science/explainer]\n")
+    job = Path(paths.jobs_dir) / "science" / "explainer.yaml"
+    job.parent.mkdir(parents=True, exist_ok=True)
+    job.write_text("name: 讲原理\nknowledge: true\nsearch: false\nprompt: x\noutput: output/science/{date}_x.md\n")
+    knowledge = guard.new_topic({"title": "为什么天是蓝的"}, {"job": "science/explainer"}, paths.config_dir, paths.jobs_dir)
+    news = guard.new_topic({"title": "新发现"}, {"job": "science/daily"}, paths.config_dir, paths.jobs_dir)
+    assert "matrix_dedup" not in knowledge
+    assert news["matrix_dedup"]["job"] == "science/daily"
 
 
 def test_legacy_topic_event_date_is_shared_without_changing_saved_rows(guard_env):

@@ -165,7 +165,7 @@ def _matrix_keys(script: dict) -> list[str]:
     context = script.get("content_context") or {}
     topic = script.get("topic") or {}
     job = ((topic.get("episode") or {}).get("job") or (topic.get("matrix_dedup") or {}).get("job")
-           or context.get("job", ""))
+           or topic.get("knowledge_job") or context.get("job", ""))
     found = None
     if job:
         found = next((m for m in matrices.load_all(get_settings().paths.config_dir).values()

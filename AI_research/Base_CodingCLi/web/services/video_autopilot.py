@@ -197,8 +197,11 @@ def _whole_item(spec: dict, pick: dict) -> Optional[dict]:
         from core.video import episodes
         topic = episodes.topic(record, workspace, job=spec.get("job", ""), source=source, production=pick.get("production", ""))
         return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
-    topic = {**reports.topic_for(record, workspace), "from_report": relative, "report_id": record["id"],
-             "matrix_dedup": {"job": spec.get("job") or record.get("job", ""), "policy": story_pool.POLICY}}
+    from core.video import content_guard
+
+    topic = content_guard.matrix_topic({**reports.topic_for(record, workspace), "from_report": relative,
+                                        "report_id": record["id"]},
+                                       spec.get("job") or record.get("job", ""), get_settings().paths.jobs_dir)
     return {"column_key": pick["column"], "topic": topic, "production": pick.get("production", "")}
 
 

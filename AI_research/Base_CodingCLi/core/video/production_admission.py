@@ -93,9 +93,11 @@ def enter(
     manual: bool = False,
 ) -> bool:
     policy = production_policy.load(paths.config_dir)
-    job = (topic.get("episode") or {}).get("job") or (
-        topic.get("matrix_dedup") or {}
-    ).get("job", "")
+    job = (
+        (topic.get("episode") or {}).get("job")
+        or (topic.get("matrix_dedup") or {}).get("job", "")
+        or topic.get("knowledge_job", "")
+    )
     matrix = (topic.get("_content_context") or {}).get("matrix", "")
     if not job and topic.get("_production"):
         from core.video.production import load_all
