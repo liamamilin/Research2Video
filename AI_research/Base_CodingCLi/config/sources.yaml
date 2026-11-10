@@ -1179,3 +1179,8 @@ livescience_tech:
   spec: rss:https://www.livescience.com/feeds/tag/technology
   tags: [tech, explainer_questions]
   note: 技术原理与评论，只挑原理题；插画讲解的选题参考
+bili_hot_ai:
+  name: B站 · AI 热词
+  spec: bili_hot:DeepSeek,豆包,千问,Kimi,腾讯混元,智谱,MiniMax,Claude Code,Codex,ChatGPT,Gemini,Grok,Cursor,Trae,WorkBuddy,OpenAI
+  tags: [ai_hot]
+  note: B站热搜里的 AI 词 + 这些产品近 7 天在 B站的热度，最热的几个附最新网页报道；让快讯覆盖观众正在看的国内热点（11-10 选题热度）

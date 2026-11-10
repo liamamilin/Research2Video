@@ -48,8 +48,10 @@ def words(monkeypatch):
 def test_score_counts_only_videos_about_every_word_of_the_product_and_not_games_or_clips():
     rows = [row("<em>GPT</em>-6.2-<em>Astra</em>实测", 100), row("Astra 新游戏", 900, typename="单机游戏"),
             row("GPT Astra 一分钟", 800, duration="0:59"), row("GPT 闲聊", 700)] + [row(f"GPT Astra {i}", 10) for i in range(6)]
-    assert heat.score(rows, "GPT Astra") == {"score": 140, "videos": 7}  # top 5: 100 + 4 × 10
-    assert heat.score(rows, "") == {"score": 0, "videos": 0}
+    got = heat.score(rows, "GPT Astra")
+    assert (got["score"], got["videos"]) == (140, 7)  # top 5: 100 + 4 × 10
+    assert got["top"][0] == {"title": "GPT-6.2-Astra实测", "bvid": "", "play": 100} and len(got["top"]) == 3
+    assert heat.score(rows, "") == {"score": 0, "videos": 0, "top": []}
 
 
 def test_hot_items_go_first_and_cold_ones_are_dropped_with_the_reason(tmp_path, words):

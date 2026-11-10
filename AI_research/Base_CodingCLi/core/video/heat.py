@@ -71,11 +71,14 @@ def score(rows: list[dict], keyword: str) -> dict:
     """Sum of the top ``TOP`` plays among the results that are about ``keyword`` (every word of it in the title: "GPT Astra"
     matches "GPT-6.2-Astra实测") and are not games, anime or clips."""
     words = [_clean(w) for w in re.split(r"[\s\-_·/]+", str(keyword or "")) if _clean(w)]
-    plays = sorted((int(row.get("play") or 0) for row in rows
+    about = sorted((row for row in rows
                     if words and all(w in _clean(row.get("title")) for w in words)
                     and row.get("typename") not in EXCLUDED_TYPES and _seconds(row.get("duration")) >= MIN_SECONDS),
-                   reverse=True)
-    return {"score": sum(plays[:TOP]), "videos": len(plays)}
+                   key=lambda row: -int(row.get("play") or 0))
+    plays = [int(row.get("play") or 0) for row in about]
+    top = [{"title": re.sub(r"<[^>]+>", "", str(row.get("title") or "")), "bvid": str(row.get("bvid") or ""),
+            "play": int(row.get("play") or 0)} for row in about[:3]]
+    return {"score": sum(plays[:TOP]), "videos": len(plays), "top": top}
 
 
 def title_head(title: str) -> str:
@@ -120,6 +123,14 @@ class Search:
         clean = {k: "".join(c for c in str(v) if c not in "!'()*") for k, v in sorted(signed.items())}
         clean["w_rid"] = hashlib.md5((urllib.parse.urlencode(clean) + self._mixin).encode()).hexdigest()
         return clean
+
+    def trending(self, limit: int = 50) -> list[str]:
+        """B站热搜 words, in rank order (no login needed)."""
+        reply = self._get("https://api.bilibili.com/x/web-interface/wbi/search/square", self._sign({"limit": limit}))
+        rows = ((reply.get("data") or {}).get("trending") or {}).get("list") or []
+        if reply.get("code") != 0:
+            raise Unavailable(f"B站热搜取不到（{reply.get('code')}）")
+        return [str(row.get("keyword") or "").strip() for row in rows if str(row.get("keyword") or "").strip()]
 
     def videos(self, keyword: str, begin: int, end: int) -> list[dict]:
         if not self.cookies.get("SESSDATA"):
@@ -245,7 +256,7 @@ class Heat:
             if keyword not in scored:
                 unscored.append(candidate)
                 continue
-            value = {"keyword": keyword, **scored[keyword]}
+            value = {"keyword": keyword, "score": scored[keyword]["score"], "videos": scored[keyword]["videos"]}
             (kept if value["score"] >= minimum else dropped).append({**candidate, "heat": value})
         kept.sort(key=lambda c: -c["heat"]["score"])
         note = ""

@@ -492,7 +492,7 @@ class ResearchEngine:
         return material_block(items, self._supply_receipt), (items, stats)
 
     def _source_options(self, specs: list[str]) -> dict:
-        if not any(spec.startswith(("page:", "catalog:", "search:")) for spec in specs):
+        if not any(spec.startswith(("page:", "catalog:", "search:", "bili_hot:")) for spec in specs):
             return {}
         if getattr(self, "_source_search_client", None) is None:
             from .search import SearchClient

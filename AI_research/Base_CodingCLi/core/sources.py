@@ -14,6 +14,7 @@ with web-search results. Specs are strings:
 * ``aa:models``            Artificial Analysis model leaderboard (intelligence, price, speed)
 * ``wb:CODE[@ISO;ISO]``   World Bank indicator: the two latest yearly values for the world and nine large economies
 * ``radar:<section title>`` one section of the local Radar app's daily briefings (read-only ``radar-cli``)
+* ``bili_hot:词,词``        B站 viewers' hot AI words this week, with the latest web news on each (``core/bili_hot.py``)
 
 A Job's ``sources`` may also name entries of the registry (``config/sources.yaml``): ``source:<id>`` is one source,
 ``tag:<tag>`` every source carrying that tag, in registry order. ``resolve`` turns them into the specs above.
@@ -501,7 +502,12 @@ def fetch_search(query: str, limit: int = 8, timeout: int = 20) -> list[SearchRe
     raise ValueError("search: 来源需要研究引擎提供搜索客户端")
 
 
-_ADAPTERS.update({"page": fetch_web_page, "catalog": fetch_catalog, "search": fetch_search})
+def fetch_bili_hot(target: str, limit: int = 8, timeout: int = 20) -> list[SearchResult]:
+    from .bili_hot import fetch
+    return fetch(target, limit, timeout)
+
+
+_ADAPTERS.update({"page": fetch_web_page, "catalog": fetch_catalog, "search": fetch_search, "bili_hot": fetch_bili_hot})
 
 
 REGISTRY_FILE = "sources.yaml"
@@ -582,6 +588,9 @@ def fetch_source(spec: str, limit: int = 8, timeout: int = 20, *,
         from .source_pages import fetch_page
         return fetch_page(target, limit, timeout, get_page=_get_page,
                           search_client=search_client, catalog=kind == "catalog")
+    if kind == "bili_hot":
+        from .bili_hot import fetch
+        return fetch(target, limit, timeout, search_client=search_client)
     if kind == "search" and search_client is not None:
         from .research_window import instruction
         results = search_client.search([target], objective="收集此固定来源中与查询相关的公开内容" + instruction(collection_window))
