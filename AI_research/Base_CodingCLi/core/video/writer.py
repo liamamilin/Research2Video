@@ -47,7 +47,7 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 10
+PROMPT_VERSION = 11
 #: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
 #: the money stated, no date or programme name. The 11-10 benchmark (spec/benchmark-20261110/ai-report.md) adds the
 #: framing: small accounts' AI hits ask a question, set two things against each other or state a judgement (41% / 23%
@@ -58,6 +58,7 @@ TITLE_RULE = ("标题点名材料里的具体产品或公司（如 ChatGPT、Cla
               "标题不写日期，不写栏目名，不用“本期”“今日”开头。")
 #: The first seconds decide whether a viewer stays (11-10 benchmark): small accounts' hits open on the hook itself.
 OPENING_RULE = ("第一句话就要让观众想听下去：用一个反常识的数字、一个直接问观众的问题，或者先说结论；"
+                "钩子要落在目标观众自己的处境上，不用和观众无关的全球或海外统计开场（11-10 试片用“全球八成人用 ChatGPT”开场，国内观众听着不沾边）；"
                 "不打招呼，不报栏目名，不用“据某某报道”起头。")
 #: Viewers like and favourite a fifth as often as on the benchmark hits; the last words ask them to take a side.
 ENDING_RULE = ("道别前抛一个让观众站队的问题，最好是二选一（比如“你会为它多花这笔钱吗？”“你选 A 还是 B？”），"
@@ -68,6 +69,9 @@ STYLE_RULE = ("像对一个懂行的朋友讲：多用短句，可以直接说�
               "英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。")
 #: Narration is what viewers hear; a note to the picture ("画面里可以……") was read out and subtitled (11-10 research,
 #: spec/bilibili-growth-research-20261110/SAMPLE-O03.md). The program also rewrites what slips through (``spoken_only``).
+#: An item's 核心角度 names what it is about; the 11-10 trial narrowed to three dimensions and dropped the one point
+#: its angle named (ChatGPT's barrier for Chinese users).
+ANGLE_RULE = "选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。"
 PICTURE_RULE = "口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。"
 GOAL = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。"
 AUTHORING_PROMPT = GOAL + """
@@ -76,7 +80,7 @@ AUTHORING_PROMPT = GOAL + """
 沿用上游给出的数据、计算和结论，把解释篇幅用在事情本身、过程与结果，研究备忘仅作内部取材背景。
 素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧，口播直接讲已有内容，不安排下一轮核实或评测。
 影响观众理解和实际使用的条件随对应内容讲清。
-""" + STYLE_RULE + PICTURE_RULE
+""" + STYLE_RULE + PICTURE_RULE + ANGLE_RULE
 SYSTEM_PROMPT = AUTHORING_PROMPT + """
 讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
 """ + OPENING_RULE + """

@@ -83,3 +83,33 @@ def test_a_series_item_promises_its_next_episode(llm):
     writer.write(report=REPORT, citation_check=None, topic={"title": "本期", "next_episode": "额度没用完为什么停了"},
                  column_style="", target_minutes=1, llm_config=None)
     assert "「额度没用完为什么停了」" in llm.calls[0][0]["content"] and "道别前用一句话预告它" in llm.calls[0][0]["content"]
+
+
+def test_hooks_stay_with_the_viewer_and_the_named_angle_is_kept():
+    assert "不用和观众无关的全球或海外统计开场" in writer.OPENING_RULE
+    assert writer.ANGLE_RULE in writer.SYSTEM_PROMPT and writer.ANGLE_RULE in writer.EPISODE_PROMPT
+
+
+def test_the_chatgpt_matrix_tells_every_script_how_its_viewers_can_use_chatgpt():
+    from core import matrices
+    from core.video import content_columns, production
+    from core.video import columns as video_columns
+
+    premise = matrices.load_all("config")["chatgpt_acquisition"].content["premise"]
+    assert "国内应用商店下载不到" in premise and "电脑网页端" in premise
+    config = production.get("config", "jobs", "chatgpt_t05_comparison")
+    context = content_columns.snapshot("config", config.key, config.job)
+    assert context["premise"] == premise
+    column = content_columns.apply_script_context(video_columns.get("config", config.recipe), context)
+    assert "观众前提：" + premise in column.script_style
+    with open("jobs/chatgpt_acquisition/t05_comparison.yaml", encoding="utf-8") as fh:
+        assert "不假设观众已经在手机上装好了 ChatGPT" in fh.read()
+
+
+def test_a_matrix_premise_must_be_text():
+    import pytest
+    from core import matrices
+
+    assert matrices.content_metadata({"premise": "x"}) == {"premise": "x"}
+    with pytest.raises(ValueError):
+        matrices.content_metadata({"premise": ["x"]})

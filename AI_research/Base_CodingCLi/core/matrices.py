@@ -90,11 +90,11 @@ def content_metadata(value: dict | None) -> dict:
     """Business presentation only; research domain, keywords and schedules stay unchanged."""
     if value is None:
         return {}
-    allowed = {"name", "audience", "description", "role", "parent", "status", "visual_focus"}
+    allowed = {"name", "audience", "description", "role", "parent", "status", "visual_focus", "premise"}
     if not isinstance(value, dict) or set(value) - allowed:
-        raise ValueError("content 仅支持领域名称、受众、介绍、角色、主领域、状态和画面重点")
+        raise ValueError("content 仅支持领域名称、受众、介绍、角色、主领域、状态、画面重点和观众前提")
     out = dict(value)
-    for key in ("name", "audience", "description", "parent"):
+    for key in ("name", "audience", "description", "parent", "premise"):
         if key in out and (not isinstance(out[key], str) or len(out[key]) > 1000):
             raise ValueError(f"content.{key} 应为文字")
     if not isinstance(out.get("role", "domain"), str) or out.get("role", "domain") not in {"domain", "source", "operations"}:

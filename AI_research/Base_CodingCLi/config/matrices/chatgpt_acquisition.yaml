@@ -19,6 +19,8 @@ content:
   name: ChatGPT 获客矩阵
   role: domain
   audience: 中文普通用户、职场与学习人群，以及正在考虑购买或升级 ChatGPT 的潜在用户
+  # 11-10：试片把 ChatGPT 当成手机上能直接装的选项、用全球数字开场；这条前提进入本矩阵所有写稿（core/video/content_columns.py）
+  premise: 国内用户使用 ChatGPT 的现实：国内应用商店下载不到，要有海外账号（海外手机号或海外区 Apple ID、Google Play）和能访问海外服务的网络，付费方式也和国内 App 不同；真正在用的人大多在电脑网页端使用。讲到 ChatGPT 时按这个前提：把使用门槛当作选择的一部分讲清楚，不把它当成手机上和国产 App 并列、能直接下载的选项；和国产产品比较时，先说清各自在国内能不能直接用。
   description: 围绕了解、使用和购买 ChatGPT 的过程，以 T01–T09 九类题材展示价值、培养兴趣并承接订阅需求。信息源分为 S01 官方产品、S02 官方教程与案例、S03 优质创作者、S04 用户需求、S05
     套餐付款订阅、S06 趋势与补充资料。
   status: configured
