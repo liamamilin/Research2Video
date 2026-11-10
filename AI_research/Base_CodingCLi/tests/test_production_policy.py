@@ -131,6 +131,9 @@ def test_new_worker_recovers_identity_from_older_dispatcher(setup):
     run = store.runs(p["id"])[0]
     with store.connect(True) as db:
         db.execute("UPDATE schedule_runs SET context='{}' WHERE id=?", (run["id"],))
+        # The schema migration is stamped with the real clock; place it before this fixed-date run, or the run
+        # reads as legacy once the real date passes 2026-11-02 (the test failed from then on).
+        db.execute("UPDATE scheduler_meta SET value=? WHERE key='issue_context_enabled_at'", (str(base - 3600),))
     result = store.freeze_context(
         run["id"],
         lambda c: policy.issue(str(config), store.state_dir, job, datetime.now(), c),
