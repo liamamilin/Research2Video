@@ -47,7 +47,7 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 9
+PROMPT_VERSION = 10
 #: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
 #: the money stated, no date or programme name. The 11-10 benchmark (spec/benchmark-20261110/ai-report.md) adds the
 #: framing: small accounts' AI hits ask a question, set two things against each other or state a judgement (41% / 23%
@@ -66,6 +66,9 @@ ENDING_RULE = ("道别前抛一个让观众站队的问题，最好是二选一�
 STYLE_RULE = ("像对一个懂行的朋友讲：多用短句，可以直接说出你的判断（比如“我的建议是先别升级”）。"
               "一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数和明细交给画面。"
               "英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。")
+#: Narration is what viewers hear; a note to the picture ("画面里可以……") was read out and subtitled (11-10 research,
+#: spec/bilibili-growth-research-20261110/SAMPLE-O03.md). The program also rewrites what slips through (``spoken_only``).
+PICTURE_RULE = "口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。"
 GOAL = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。"
 AUTHORING_PROMPT = GOAL + """
 当前步骤：你是本期讲述者，现在直接对目标观众讲述，正文就是观众将听到的口播。
@@ -73,7 +76,7 @@ AUTHORING_PROMPT = GOAL + """
 沿用上游给出的数据、计算和结论，把解释篇幅用在事情本身、过程与结果，研究备忘仅作内部取材背景。
 素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧，口播直接讲已有内容，不安排下一轮核实或评测。
 影响观众理解和实际使用的条件随对应内容讲清。
-""" + STYLE_RULE
+""" + STYLE_RULE + PICTURE_RULE
 SYSTEM_PROMPT = AUTHORING_PROMPT + """
 讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
 """ + OPENING_RULE + """
@@ -233,13 +236,27 @@ def _programme_frame(script: _Script, greeting: Optional[str], programme: bool) 
     return script.model_copy(update={"sections": sections})
 
 
+#: A note to the picture spoken as narration, in the two forms seen: "画面里可以是X" (an image to imagine) and
+#: "画面还是X" (the picture returning). Other forms are only reported (``lint``): rewriting them blindly could break a
+#: sentence about a product's own picture or camera.
+_PICTURE_IMAGINE = re.compile(r"(?:(?<=^)|(?<=[。！？!?；;，,]))\s*画面(?:里|上|中)?(?:可以|会|能)?是")
+_PICTURE_AGAIN = re.compile(r"(?:(?<=^)|(?<=[。！？!?；;，,]))\s*画面(?:里|上|中)?(还是|又回到|回到)")
+_PICTURE_NOTE = re.compile(r"(?:(?<=^)|(?<=[。！？!?；;]))\s*(?:这里|此处|这时)?画面(?:里|上|中)?(?:可以|应该|要|会|能|切到|换成|出现|显示|放|给)")
+
+
+def spoken_only(text: str) -> str:
+    """``text`` without a note to the picture: "画面里可以是一个人倒水" → "想象一个人倒水", "画面还是那杯水" → "还是那杯水"."""
+    text = _PICTURE_IMAGINE.sub("想象", text)
+    return _PICTURE_AGAIN.sub(lambda m: m.group(1), text)
+
+
 def _finalize(script: _Script, allowed: set[str], target_minutes: float, voice: Optional[str] = None) -> tuple[list[dict], dict]:
     sections: list[dict] = []
     dropped = 0
     for section in script.sections:
         paragraphs = []
         for para in section.paragraphs:
-            text = para.text.strip()
+            text = spoken_only(para.text.strip())
             kept = [u for u in dict.fromkeys(para.citations) if normalize_url(u) in allowed]
             dropped_here = len(set(para.citations)) - len(kept)
             dropped += dropped_here
@@ -294,6 +311,10 @@ def lint(sections: list[dict], report: Optional[str] = None) -> list[str]:
     """Trace concrete research leaks, unsupported numbers and the voice language requirement."""
     problems = []
     spoken = "".join(p["text"] for s in sections for p in s["paragraphs"])
+    note = _PICTURE_NOTE.search(spoken)
+    if note:
+        start = max(0, note.start() - 12)
+        problems.append(f"口播里有给画面的说明，观众会听到：「{spoken[start:note.end() + 12]}」")
     if report is not None:
         missing = ungrounded_numbers(sections, report)
         if missing:

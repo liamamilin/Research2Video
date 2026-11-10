@@ -55,3 +55,24 @@ def test_a_written_script_is_told_by_the_narrator(llm, monkeypatch):
                            target_minutes=1, llm_config=None)
     assert written.sections[0]["paragraphs"][0]["text"].startswith("先看两个数。我是洛洛。三家最高档")
     assert "你是这个账号固定的讲述者「洛洛」" in llm.calls[0][0]["content"]
+
+
+def test_a_note_to_the_picture_is_rewritten_as_narration_and_others_are_reported():
+    assert writer.spoken_only("画面里可以是一个人往空杯子里倒水，杯子空。") == "想象一个人往空杯子里倒水，杯子空。"
+    assert writer.spoken_only("先说结论。画面还是那杯水，水快满了。") == "先说结论。还是那杯水，水快满了。"
+    keep = "把镜头拉远一点。它在画面上会出现难看的网格。"
+    assert writer.spoken_only(keep) == keep
+    sections = [{"title": "s", "paragraphs": [{"text": keep}]}]
+    assert not any("给画面的说明" in p for p in writer.lint(sections))
+    sections[0]["paragraphs"][0]["text"] = "先讲道理。这里画面切到工厂。"
+    assert any("给画面的说明" in p for p in writer.lint(sections))
+    assert writer.PICTURE_RULE in writer.SYSTEM_PROMPT and writer.PICTURE_RULE in writer.EPISODE_PROMPT
+
+
+def test_a_written_script_never_keeps_the_picture_note(llm):
+    payload = json.loads(script_json(300))
+    payload["sections"][0]["paragraphs"][0]["text"] = "画面里可以是一个人往空杯子里倒水。"
+    llm.replies = [json.dumps(payload, ensure_ascii=False)]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
+                           target_minutes=1, llm_config=None)
+    assert written.sections[0]["paragraphs"][0]["text"] == "想象一个人往空杯子里倒水。"
