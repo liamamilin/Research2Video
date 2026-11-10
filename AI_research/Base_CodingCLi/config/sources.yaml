@@ -1134,3 +1134,48 @@ economics_se:
   spec: rss:https://economics.stackexchange.com/feeds
   tags: [economy, explainer_questions]
   note: 真实经济学提问，学术题多，只挑生活里看得见的；插画讲解的选题参考
+npr_planet_money:
+  name: NPR · Planet Money
+  spec: rss:https://feeds.npr.org/510289/podcast.xml
+  tags: [company, explainer_questions]
+  note: 讲生意和经济原理的节目；插画讲解的选题参考
+howtogeek:
+  name: How-To Geek
+  spec: rss:https://www.howtogeek.com/feed/
+  tags: [consumer, explainer_questions]
+  note: 数码产品和软件的用法与原理；插画讲解的选题参考
+makeuseof:
+  name: MakeUseOf
+  spec: rss:https://www.makeuseof.com/feed/
+  tags: [software, explainer_questions]
+  note: 日常软件、手机电脑功能讲解；插画讲解的选题参考
+geography_realm:
+  name: Geography Realm
+  spec: rss:https://www.geographyrealm.com/feed/
+  tags: [geography, explainer_questions]
+  note: 地理常识与地方现象讲解；插画讲解的选题参考
+livescience_earth:
+  name: Live Science · Planet Earth
+  spec: rss:https://www.livescience.com/feeds/tag/planet-earth
+  tags: [geography, explainer_questions]
+  note: 地球与环境现象；插画讲解的选题参考
+historyextra:
+  name: HistoryExtra
+  spec: rss:https://www.historyextra.com/feed/
+  tags: [history, explainer_questions]
+  note: 历史小知识、古人生活；插画讲解的选题参考
+livescience_history:
+  name: Live Science · History
+  spec: rss:https://www.livescience.com/feeds/tag/history
+  tags: [history, explainer_questions]
+  note: 考古与古人生活；插画讲解的选题参考
+interesting_engineering:
+  name: Interesting Engineering
+  spec: rss:https://interestingengineering.com/feed
+  tags: [industry, explainer_questions]
+  note: 工程与制造，含 Explained 讲解；新闻多，只挑原理题；插画讲解的选题参考
+livescience_tech:
+  name: Live Science · Technology
+  spec: rss:https://www.livescience.com/feeds/tag/technology
+  tags: [tech, explainer_questions]
+  note: 技术原理与评论，只挑原理题；插画讲解的选题参考

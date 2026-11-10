@@ -4,6 +4,7 @@ keywords: []
 jobs:
 - industry/industry_daily
 - industry/industry_weekly
+- industry/industry_illustrated
 render:
   video_speed: 1.25
 content:

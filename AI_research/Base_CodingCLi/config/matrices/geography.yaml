@@ -4,6 +4,7 @@ keywords: []
 jobs:
 - geography/geography_daily
 - geography/geography_weekly
+- geography/geography_illustrated
 render:
   video_speed: 1.25
 content:

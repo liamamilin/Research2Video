@@ -5,6 +5,7 @@ keywords: []
 jobs:
 - tech/tech_daily
 - tech/tech_weekly
+- tech/tech_illustrated
 render:
   video_speed: 1.25
 content:

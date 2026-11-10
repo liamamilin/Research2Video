@@ -4,6 +4,7 @@ keywords: []
 jobs:
 - history/history_daily
 - history/history_weekly
+- history/history_illustrated
 render:
   video_speed: 1.25
 content:

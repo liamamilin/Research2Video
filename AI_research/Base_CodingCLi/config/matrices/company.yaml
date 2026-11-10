@@ -4,6 +4,7 @@ keywords: []
 jobs:
 - company/company_daily
 - company/company_weekly
+- company/company_illustrated
 render:
   video_speed: 1.25
 content:

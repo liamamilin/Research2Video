@@ -1,0 +1,7 @@
+# 生产配置：插画讲解试点（spec/illustrated-explainer.md）。auto 0：只在手动运行后出片看效果。
+job: company/company_illustrated
+recipe: illustrated_explainer
+audience: general
+auto: 0
+render:
+  illustration_style: flat
