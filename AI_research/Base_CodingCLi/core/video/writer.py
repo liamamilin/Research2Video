@@ -47,13 +47,21 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 7
+PROMPT_VERSION = 8
 #: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
-#: the money stated, no date or programme name.
+#: the money stated, no date or programme name. The 11-10 benchmark (spec/benchmark-20261110/ai-report.md) adds the
+#: framing: small accounts' AI hits ask a question, set two things against each other or state a judgement (41% / 23%
+#: of titles against our 9% / 7%), with one or two numbers rather than a list of parameters.
 TITLE_RULE = ("标题点名材料里的具体产品或公司（如 ChatGPT、Claude、Gemini、Qwen），材料给出价格、套餐、额度、成本或关键数字时把它写进标题；"
+              "标题写成观众想点开的一句话：一个问题（如“XX 值不值得升级？”）、一个对比（如“同样 20 美元，三家卖的不是一样东西”）"
+              "或一个直接的判断（如“建议先别急着换 XX”），可以带明确的态度；只放一两个最关键的数字，不堆参数清单，控制在 30 字以内；"
               "标题不写日期，不写栏目名，不用“本期”“今日”开头。")
-#: Viewers barely comment or share; the last words ask them something they can answer.
-ENDING_RULE = "道别前用一个和本期内容直接相关、观众能凭自己经历回答的问题（比如你现在用哪一家、会不会为它付费），邀请大家在评论区说说。"
+#: The first seconds decide whether a viewer stays (11-10 benchmark): small accounts' hits open on the hook itself.
+OPENING_RULE = ("第一句话就要让观众想听下去：用一个反常识的数字、一个直接问观众的问题，或者先说结论；"
+                "不打招呼，不报栏目名，不用“据某某报道”起头。")
+#: Viewers like and favourite a fifth as often as on the benchmark hits; the last words ask them to take a side.
+ENDING_RULE = ("道别前抛一个让观众站队的问题，最好是二选一（比如“你会为它多花这笔钱吗？”“你选 A 还是 B？”），"
+               "请大家在评论区说出自己的选择；觉得有用就点个赞、收藏起来。")
 #: How the two most-watched videos talk (2026-11-02 review): short lines, a stated judgement, few numbers said aloud.
 STYLE_RULE = ("像对一个懂行的朋友讲：多用短句，可以直接说出你的判断（比如“我的建议是先别升级”）。"
               "一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数和明细交给画面。"
@@ -68,6 +76,7 @@ AUTHORING_PROMPT = GOAL + """
 """ + STYLE_RULE
 SYSTEM_PROMPT = AUTHORING_PROMPT + """
 讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
+""" + OPENING_RULE + """
 让标题说出本期最有意思的具体事情。""" + TITLE_RULE + ENDING_RULE + """
 接口输出 JSON：
 {"title":"视频标题","sections":[{"title":"小节标题","paragraphs":[{"text":"口播正文","citations":["素材链接"]}]}]}"""
@@ -75,7 +84,7 @@ EPISODE_PROMPT = AUTHORING_PROMPT + """
 你是整期节目的讲述者，一篇总稿覆盖报告中的多个独立内容；同一问题的内容按解释层次组织。
 各条内容分别充分解释，不把本期多个事件缩成一个主事件的几个角度。
 各独立内容使用自己的具体对象、主例子和讲述线索，整期按合理顺序排列；同一问题的解释章节沿用共同主例子。
-整期按节目讲述：开场用一两句话抛出本期最抓人的那一条，再用一句话报出后面还有哪几条，细节留到正文讲。
+整期按节目讲述：开场用一两句话抛出本期最抓人的那一条，再用一句话报出后面还有哪几条，细节留到正文讲。""" + OPENING_RULE + """
 随后逐条展开。两条之间确有关系、对比或递进就用一句话接上；没有就直接切换（比如“再说 Gemini。”），不硬造过渡，不重新打招呼。每条用一句短判断收住，各条措辞不同，不用“最值得记住的是”“这一条的要点是”之类的固定句式。
 收尾只用一两句话落下本期最重要的一个判断，不逐条复述。""" + ENDING_RULE + """
 每个内容一个 section，内部可有多个 paragraphs；episode_role 使用 opening、item、closing。
@@ -196,8 +205,16 @@ def without_greeting(text: str) -> str:
     return text
 
 
+def _drop_own_greeting(opening: list) -> None:
+    """Take a salutation or welcome clause off the first paragraphs, dropping any left empty."""
+    while opening and _OWN_GREETING.match(opening[0].text.strip()):
+        opening[0].text = _OWN_GREETING.sub("", opening[0].text.strip(), count=1)
+        if not opening[0].text:
+            opening.pop(0)
+
+
 def _programme_frame(script: _Script, greeting: Optional[str], programme: bool) -> _Script:
-    """Put the fixed greeting first and give a programme's opening and closing their viewer-facing titles."""
+    """Put the fixed greeting first (or take the author's off when there is none) and give a programme's opening and closing their viewer-facing titles."""
     sections = [section.model_copy(deep=True) for section in script.sections]
     if programme:
         for section in sections:
@@ -205,13 +222,13 @@ def _programme_frame(script: _Script, greeting: Optional[str], programme: bool) 
                 section.title = OPENING_TITLE
             elif section.episode_role == "closing":
                 section.title = CLOSING_TITLE
-    if greeting and not sections[0].paragraphs[0].text.strip().startswith(greeting):
+    if not greeting:
+        # No fixed line: the video opens on the hook, so a greeting the author wrote anyway is taken off.
+        _drop_own_greeting(sections[0].paragraphs)
+    elif not sections[0].paragraphs[0].text.strip().startswith(greeting):
         # A greeting the author worded anyway would be heard twice; the column's own line replaces it.
         opening = sections[0].paragraphs
-        while opening and _OWN_GREETING.match(opening[0].text.strip()):
-            opening[0].text = _OWN_GREETING.sub("", opening[0].text.strip(), count=1)
-            if not opening[0].text:
-                opening.pop(0)
+        _drop_own_greeting(opening)
         opening.insert(0, _Paragraph(text=greeting))
     return script.model_copy(update={"sections": sections})
 

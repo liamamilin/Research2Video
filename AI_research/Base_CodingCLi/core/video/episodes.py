@@ -60,16 +60,14 @@ def programme_label(context: dict) -> str:
 
 
 def greeting(topic: dict, context: dict) -> str:
-    """The fixed line the narrator opens with: the column's own ``greeting``, else one built from its name.
+    """The fixed line the narrator opens with: only a column's own ``greeting``.
 
-    It is the same for every issue of a column and says no date. A script without a column has none.
+    Since 11-10 a column no longer gets "大家好，欢迎收看<栏目>。" by default: the benchmark of small accounts' AI hits
+    (spec/benchmark-20261110/ai-report.md) open on the hook itself. A column that wants a line sets ``greeting``.
     """
     if not context.get("column"):
         return ""
-    if (context.get("greeting") or "").strip():
-        return context["greeting"].strip()
-    label = ((topic.get("episode") or {}).get("publication") or {}).get("label") or programme_label(context)
-    return f"大家好，欢迎收看{label}。" if label else ""
+    return (context.get("greeting") or "").strip()
 
 
 def publication_topic(topic: dict, context: dict) -> dict:

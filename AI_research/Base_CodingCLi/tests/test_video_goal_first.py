@@ -212,12 +212,25 @@ def test_a_greeting_the_author_worded_differently_is_replaced_not_heard_twice(ll
     assert [p["text"] for p in written.sections[0]["paragraphs"]] == ["大家好，欢迎收看AI 快讯。", "今天聊三件事：额度、价格和账号。"]
 
 
-def test_the_greeting_comes_from_the_column_name_or_its_own_line_and_never_says_a_date():
+def test_only_a_column_s_own_greeting_is_said_and_by_default_the_video_opens_on_the_hook():
     from core.video import episodes
 
     flash = {"column": "ai_flash", "column_name": "AI 快讯"}
-    assert episodes.greeting({}, flash) == "大家好，欢迎收看今日快讯。"
+    assert episodes.greeting({}, flash) == ""
     topic = {"episode": {"publication": {"label": "ChatGPT 订阅与支付", "title": "ChatGPT 订阅与支付｜2026年11月01日"}}}
-    assert episodes.greeting(topic, {"column": "chatgpt_t07_subscription"}) == "大家好，欢迎收看ChatGPT 订阅与支付。"
+    assert episodes.greeting(topic, {"column": "chatgpt_t07_subscription"}) == ""
     assert episodes.greeting(topic, {**flash, "greeting": "各位好，这里是今日快讯。"}) == "各位好，这里是今日快讯。"
     assert episodes.greeting({}, {}) == ""
+
+
+def test_without_a_greeting_the_author_s_own_salutation_is_taken_off_and_the_prompt_asks_for_a_hook(llm):
+    payload = json.loads(script_json(300))
+    payload["sections"][0]["paragraphs"][0]["text"] = "大家好，欢迎收看AI 快讯。先看一个数字：十倍。"
+    payload["sections"][0]["paragraphs"].insert(0, {"text": "哈喽，各位。", "citations": []})
+    llm.replies = [json.dumps(payload, ensure_ascii=False)]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
+                           target_minutes=1, llm_config=None)
+    assert written.sections[0]["paragraphs"][0]["text"] == "先看一个数字：十倍。"
+    system = llm.calls[0][0]["content"]
+    assert writer.OPENING_RULE in system and writer.TITLE_RULE in system and writer.ENDING_RULE in system
+    assert "站队" in system and "不打招呼" in system and "一个问题" in system
