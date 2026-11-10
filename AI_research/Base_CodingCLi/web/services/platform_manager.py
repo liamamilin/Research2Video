@@ -308,37 +308,55 @@ SCHEDULE_LEAD = 4.5 * 3600  # biliup needs dtime more than 4 hours after submiss
 HOLD = "hold"  # wait here and submit once the window opens: the platform's timer cannot reach it
 
 
-def publish_at(now: float, window: dict, taken: list[float], *, held: bool = False) -> int | str | None:
-    """Daytime renders publish now; night renders go public from the window's opening, in order and spaced.
+PRIME = {"prime_start": 19, "prime_end": 22, "prime_heat": 100000}  # B站 evening peak; topics this hot wait for it
 
-    A slot the platform's 4-hour timer can reach becomes a ``dtime``; an earlier one is held here
-    (``HOLD``) and submitted in the window, so a render finished at 11:00 never waits longer than one
-    finished at 12:00. ``held`` uploads leave one per spacing inside the window, around ``taken`` times.
+
+def publish_at(now: float, window: dict, taken: list[float], *, held: bool = False, heat: int = 0) -> int | str | None:
+    """When an automatic upload goes public: ``None`` now, a ``dtime`` timer, or ``HOLD`` (wait here, ask again).
+
+    Every upload keeps ``spacing`` minutes from the others (11-10: in the daytime too, so one topic's videos and a
+    morning's batch no longer go out back to back). A topic at least ``prime_heat`` hot (core/video/heat.py) goes out
+    in the evening peak ``prime_start``–``prime_end`` when a slot there is free; otherwise the ordinary rule applies.
+    Night renders go public from the window's opening, in order and spaced. A slot the platform's 4-hour timer can
+    reach becomes a ``dtime``; an earlier one is held here and submitted at its time.
     """
     if not window.get("enabled"):
         return None
     start, end = int(window.get("start", 8)), int(window.get("end", 23))
-    spacing = max(1, int(window.get("spacing") or 20)) * 60
+    spacing = max(1, int(window.get("spacing") or 30)) * 60
     if not 0 <= start < end <= 24:
         return None
     local = datetime.fromtimestamp(now).astimezone()
-    if start <= local.hour < end:
-        return HOLD if held and any(abs(now - t) < spacing for t in taken) else None
     midnight = local.replace(hour=0, minute=0, second=0, microsecond=0)
+    free = lambda slot: all(abs(slot - t) >= spacing for t in taken)  # noqa: E731
+    prime_start = int(window.get("prime_start", PRIME["prime_start"]))
+    prime_end = int(window.get("prime_end", PRIME["prime_end"]))
+    if heat >= int(window.get("prime_heat", PRIME["prime_heat"])) and start <= prime_start < prime_end <= end:
+        # Only today's peak, and only while it is still ahead: a hot topic is not held a day for tomorrow's.
+        slot = (midnight + timedelta(hours=prime_start)).timestamp()
+        close = (midnight + timedelta(hours=prime_end)).timestamp()
+        while now < slot < close:
+            if free(slot):
+                return int(slot) if slot >= now + SCHEDULE_LEAD else HOLD
+            slot += spacing
+    if start <= local.hour < end:
+        return None if free(now) else HOLD
     for offset in range(8):
         day = midnight + timedelta(days=offset)
         slot, close = (day + timedelta(hours=start)).timestamp(), (day + timedelta(hours=end)).timestamp()
         if close <= now:
             continue
         while slot < close:
-            if all(abs(slot - t) >= spacing for t in taken):
+            if free(slot):
                 return int(slot) if slot >= now + SCHEDULE_LEAD else HOLD
             slot += spacing
     return int(now + SCHEDULE_LEAD)
 
 
 def held_note(window: dict) -> str:
-    return f"等待白天时段：{int(window.get('start', 8)):02d}:00 起按完成顺序依次投稿。"
+    return (f"等待发布时段：{int(window.get('start', 8)):02d}:00–{int(window.get('end', 23)):02d}:00 内按热度依次投稿，"
+            f"每条至少间隔 {int(window.get('spacing') or 30)} 分钟；热门选题留到 "
+            f"{int(window.get('prime_start', PRIME['prime_start'])):02d}:00 晚高峰。")
 
 
 def _publish_times(db, owner: str, task_id: str) -> list[float]:
@@ -680,20 +698,37 @@ def process_first_comment(task: dict) -> None:
             db.finish_first_comment_pin(task["id"], status="PINNED")
 
 
-def heat_of(script_ids: list[str]) -> dict[str, int]:
-    """B站 heat each script's topic was picked with (core/video/heat.py); 0 when it had none."""
+def topics_of(script_ids: list[str]) -> dict[str, dict]:
+    """Per script: the B站 heat its topic was picked with (0 when none), its topic id, and for an extra angle
+    (core/video/angles.py) the id of the item it retells."""
     if not script_ids:
         return {}
     with video_store.connect() as conn:
-        rows = conn.execute("SELECT id, COALESCE(json_extract(topic,'$.heat.score'),0) AS heat FROM scripts "
+        rows = conn.execute("SELECT id, COALESCE(json_extract(topic,'$.heat.score'),0) AS heat, "
+                            "json_extract(topic,'$.id') AS topic_id, json_extract(topic,'$.base_id') AS base_id FROM scripts "
                             "WHERE id IN (SELECT value FROM json_each(?))", (json.dumps(sorted(set(script_ids))),)).fetchall()
-    return {row["id"]: int(row["heat"] or 0) for row in rows}
+    return {row["id"]: {"heat": int(row["heat"] or 0), "topic_id": row["topic_id"] or "", "base_id": row["base_id"] or ""}
+            for row in rows}
 
 
-def by_priority(waiting: list[dict]) -> list[dict]:
+def heat_of(script_ids: list[str]) -> dict[str, int]:
+    """B站 heat each script's topic was picked with (core/video/heat.py); 0 when it had none."""
+    return {sid: info["heat"] for sid, info in topics_of(script_ids).items()}
+
+
+def base_pending(upload: dict, pending: list[dict], topics: dict[str, dict], now: float) -> bool:
+    """An extra angle waits while the video that tells its item is still queued or not yet public on its timer."""
+    base = (topics.get(upload["script_id"]) or {}).get("base_id")
+    if not base:
+        return False
+    return any((topics.get(u["script_id"]) or {}).get("topic_id") == base
+               and (u["status"] == "QUEUED" or float(u["payload"].get("dtime") or 0) > now) for u in pending)
+
+
+def by_priority(waiting: list[dict], heat: dict[str, int] | None = None) -> list[dict]:
     """The order queued uploads go out (11-10, 发片优先级): what a person queued by hand first, then the hottest topic,
     then the oldest. A topic told from several angles shares its heat, so its videos follow one another in order."""
-    heat = heat_of([u["script_id"] for u in waiting])
+    heat = heat_of([u["script_id"] for u in waiting]) if heat is None else heat
     return sorted(waiting, key=lambda u: (bool(u["payload"].get("automatic")), -heat.get(u["script_id"], 0), u["created_at"]))
 
 
@@ -731,13 +766,24 @@ def tick() -> None:
                     _log_once(logging.WARNING, candidate["render_id"], f"skipped: {exc}")
                     continue
         task, dtime = None, None
-        for waiting in by_priority([u for u in db.pending_uploads(owner) if u["status"] == "QUEUED"]):
+        pending = db.pending_uploads(owner)
+        queued = [u for u in pending if u["status"] == "QUEUED"]
+        topics = topics_of([u["script_id"] for u in pending])
+        heat = {sid: info["heat"] for sid, info in topics.items()}
+        for waiting in by_priority(queued, heat):
             if not waiting["payload"].get("automatic"):
                 task = waiting
                 break
             window = config.get("publish_window") or {}
+            angle = bool((topics.get(waiting["script_id"]) or {}).get("base_id"))
+            if angle and base_pending(waiting, pending, topics, time.time()):
+                if not waiting["payload"].get("held"):
+                    db.hold_upload(waiting["id"], "等同一选题讲发布的那条先公开，再按间隔接着发。")
+                continue
+            # an extra angle follows its item instead of taking an evening-peak slot of its own
             dtime = publish_at(time.time(), window, _publish_times(db, owner, waiting["id"]),
-                               held=bool(waiting["payload"].get("held")))
+                               held=bool(waiting["payload"].get("held")),
+                               heat=0 if angle else heat.get(waiting["script_id"], 0))
             if dtime != HOLD:
                 task = waiting
                 break

@@ -70,7 +70,7 @@ class PlatformStore:
             row = conn.execute("SELECT data FROM settings WHERE id=1").fetchone()
         return {"auto_upload": False, "auto_since": 0, "tid": 0, "tid_by_matrix": {},
                 "first_comment": {"enabled": False, "text": "", "pin": False},
-                "publish_window": {"enabled": True, "start": 8, "end": 23, "spacing": 20},
+                "publish_window": {"enabled": True, "start": 8, "end": 23, "spacing": 30},
                 "sync_comments": False, "collections": {"by_recipe": {}, "by_matrix": {}},
                 **(json.loads(row[0]) if row else {})}
 

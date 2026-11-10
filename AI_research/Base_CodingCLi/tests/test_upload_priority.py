@@ -26,3 +26,17 @@ def test_heat_is_read_from_the_topic_the_script_was_picked_with(video_env):
     plain = store.create_script("flash", {"id": "r/F2", "title": "插画讲解"})
     assert pm.heat_of([hot["id"], angle["id"], plain["id"], "missing"]) == {
         hot["id"]: 2700000, angle["id"]: 2700000, plain["id"]: 0}
+
+
+def test_an_extra_angle_waits_for_its_item_s_video_then_follows_it():
+    topics = {"base": {"heat": 900000, "topic_id": "r/F1", "base_id": ""},
+              "money": {"heat": 900000, "topic_id": "r/F1~money", "base_id": "r/F1"},
+              "other": {"heat": 0, "topic_id": "r/F2", "base_id": ""}}
+    angle = {"script_id": "money", "status": "QUEUED", "payload": {}}
+    queued_base = {"script_id": "base", "status": "QUEUED", "payload": {}}
+    timed_base = {"script_id": "base", "status": "SUBMITTED", "payload": {"dtime": 2000}}
+    assert pm.base_pending(angle, [queued_base, angle], topics, now=1000)
+    assert pm.base_pending(angle, [timed_base, angle], topics, now=1000)  # scheduled for the evening peak
+    assert not pm.base_pending(angle, [timed_base, angle], topics, now=2001)  # public now: the angle may follow
+    assert not pm.base_pending(angle, [angle], topics, now=1000)  # no video of the item queued: nothing to wait for
+    assert not pm.base_pending({"script_id": "other", "status": "QUEUED", "payload": {}}, [queued_base], topics, 1000)

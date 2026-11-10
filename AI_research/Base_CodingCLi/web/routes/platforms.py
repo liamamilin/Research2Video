@@ -34,7 +34,7 @@ class PublishWindowIn(Input):
     enabled: bool = True
     start: int = Field(default=8, ge=0, le=23)
     end: int = Field(default=23, ge=1, le=24)
-    spacing: int = Field(default=20, ge=5, le=180)
+    spacing: int = Field(default=30, ge=5, le=180)
 
 
 class SettingsIn(Input):
