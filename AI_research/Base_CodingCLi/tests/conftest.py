@@ -59,6 +59,13 @@ def _no_real_dispatcher_install(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _no_narrator_unless_asked(monkeypatch):
+    """The account's narrator (config/persona.yaml) is real configuration: tests write as before unless they set one."""
+    from core.video import persona
+    monkeypatch.setattr(persona, "load", lambda config_dir=None: {})
+
+
+@pytest.fixture(autouse=True)
 def _telemetry_per_test():
     """Usage records follow core.state's directory; no test writes to, or reads from, another test's database."""
     from core import telemetry

@@ -1,0 +1,57 @@
+"""The account's narrator (core/video/persona.py): first person, introduced right after the hook, never faking tests."""
+
+from __future__ import annotations
+
+import json
+from types import SimpleNamespace
+
+from core.video import writer
+from core.video import persona as narrator
+from tests.test_video_scripts import REPORT, llm, script_json  # noqa: F401
+
+LUOLUO = {"name": "洛洛", "introduce": "我是洛洛。", "farewell": "我是洛洛，我们下期见。"}
+
+
+def test_the_persona_file_names_the_narrator_and_its_absence_turns_it_off(tmp_path):
+    from importlib import reload
+    import core.video.persona as real
+    real = reload(real)  # the conftest stub replaced load on the module object; read the file itself here
+    assert real.load(str(tmp_path)) == {}
+    (tmp_path / "persona.yaml").write_text("name: 洛洛\n", encoding="utf-8")
+    assert real.load(str(tmp_path)) == LUOLUO
+    (tmp_path / "persona.yaml").write_text("name: ''\n", encoding="utf-8")
+    assert real.load(str(tmp_path)) == {}
+
+
+def test_the_prompt_asks_for_the_first_person_and_forbids_claiming_tests():
+    text = narrator.prompt(LUOLUO)
+    assert "第一人称" in text and "以「我是洛洛，」开头" in text and "我是洛洛，我们下期见。" in text
+    assert "不说“我实测”" in text and "据某某报道" in text
+    assert narrator.prompt({}) == ""
+
+
+def _paragraphs(*texts):
+    return [SimpleNamespace(text=t) for t in texts]
+
+
+def test_the_introduction_follows_the_first_sentence_only_when_the_author_left_it_out():
+    hook = _paragraphs("降价20%，跑一个任务却要26.5美元。这笔账先别急着说划算。", "第二段。")
+    assert narrator.ensure_introduced(hook, LUOLUO)
+    assert hook[0].text == "降价20%，跑一个任务却要26.5美元。我是洛洛。这笔账先别急着说划算。"
+    said = _paragraphs("先看一个数字。", "我是洛洛，这期帮你算清楚。")
+    assert not narrator.ensure_introduced(said, LUOLUO) and said[0].text == "先看一个数字。"
+    single = _paragraphs("只有一句话没有句号")
+    narrator.ensure_introduced(single, LUOLUO)
+    assert single[0].text == "只有一句话没有句号我是洛洛。"
+    assert not narrator.ensure_introduced(_paragraphs("一句。"), {})
+
+
+def test_a_written_script_is_told_by_the_narrator(llm, monkeypatch):
+    monkeypatch.setattr(narrator, "load", lambda config_dir=None: LUOLUO)
+    payload = json.loads(script_json(300))
+    payload["sections"][0]["paragraphs"][0]["text"] = "先看两个数。三家最高档差了十倍。"
+    llm.replies = [json.dumps(payload, ensure_ascii=False)]
+    written = writer.write(report=REPORT, citation_check=None, topic={"title": "本期"}, column_style="",
+                           target_minutes=1, llm_config=None)
+    assert written.sections[0]["paragraphs"][0]["text"].startswith("先看两个数。我是洛洛。三家最高档")
+    assert "你是这个账号固定的讲述者「洛洛」" in llm.calls[0][0]["content"]

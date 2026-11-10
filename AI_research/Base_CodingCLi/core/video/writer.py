@@ -47,7 +47,7 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 8
+PROMPT_VERSION = 9
 #: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
 #: the money stated, no date or programme name. The 11-10 benchmark (spec/benchmark-20261110/ai-report.md) adds the
 #: framing: small accounts' AI hits ask a question, set two things against each other or state a judgement (41% / 23%
@@ -357,6 +357,9 @@ def write(
     system = (TUTORIAL_PROMPT if tutorial else EPISODE_PROMPT) if programme else SYSTEM_PROMPT
     if greeting:
         system += GREETING_PROMPT.format(greeting=greeting)
+    from core.video import persona as narrator
+    persona = narrator.load()
+    system += narrator.prompt(persona)
     messages = [
         {"role": "system", "content": system},
         {"role": "user", "content": _request(report, topic, column_style, target_minutes, 0,
@@ -373,6 +376,8 @@ def write(
             response = client.chat(messages, temperature=0.4)
             script = _parse(response.content)
     script = _programme_frame(script, greeting, programme)
+    if script.sections:  # the author left the introduction out: it goes right after the first sentence
+        narrator.ensure_introduced(script.sections[0].paragraphs, persona)
     allowed = trusted_urls(report, citation_check)
     if original_material is not None:
         allowed.update(trusted_urls(original_material, None))
