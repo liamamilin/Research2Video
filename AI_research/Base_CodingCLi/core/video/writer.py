@@ -315,13 +315,16 @@ def write_for_column(*, column: Any, content_context: dict, column_style: str | 
     """Apply the same column programme settings to report and supplied-material authors."""
     from core.video import episodes
 
+    from core.video import angles
+
     topic = kwargs['topic']
     tutorial = (content_context.get('type') == 'tutorial'
                 or (content_context.get('render') or {}).get('production_recipe') == 'mixed_tutorial')
     return write(**kwargs,
                  column_style=(column.script_style if column_style is None else column_style)
                  + episodes.brief(topic, tutorial=tutorial),
-                 target_minutes=column.target_minutes, voice=column.voice_id or None,
+                 # an extra angle on a hot item (core/video/angles.py) is told at its own, longer length
+                 target_minutes=angles.minutes(topic.get("angle") or "") or column.target_minutes, voice=column.voice_id or None,
                  paragraph_units=tuple(column.paragraph_units), topic_fields=column.writer_topic_fields(),
                  greeting=episodes.greeting(topic, content_context) or None, tutorial=tutorial)
 

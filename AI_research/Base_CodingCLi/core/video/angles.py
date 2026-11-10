@@ -17,6 +17,7 @@ import re
 ANGLES = {
     "money": {
         "label": "算账值不值",
+        "minutes": 5,  # the account's 7-minute hit was a 算账 video; a cost comparison needs room (11-10)
         "markers": re.compile(r"[¥$￥]|\d\s*(?:元|美元|刀)|额度|套餐|价格|定价|每月|月费|年费|每百万|免费|降价|涨价|订阅"),
         "prompt": ("本条讲述角度：算账值不值。同一事件已有一条视频讲发布了什么，这一条只从观众的钱和选择讲："
                    "价格、额度、套餐怎么算，和观众手上现有的方案比多花还是省，什么人值得换、什么人不必。"
@@ -24,6 +25,7 @@ ANGLES = {
     },
     "howto": {
         "label": "怎么上手",
+        "minutes": 4,
         "markers": re.compile(r"入口|打开|设置|命令|步骤|开启|安装|下载|登录|点击|输入|配置|启用|切换|在[^，。]{1,12}里"),
         "prompt": ("本条讲述角度：怎么上手。同一事件已有一条视频讲发布了什么，这一条只讲观众今天怎么用上它："
                    "从哪里进入、按什么顺序操作、用一个具体任务走一遍、会遇到什么限制。"
@@ -46,6 +48,11 @@ def variants(topic: dict, text: str) -> list[dict]:
                        fields={**(topic.get("fields") or {}), "讲述角度": ANGLES[key]["label"]})
         out.append(variant)
     return out
+
+
+def minutes(angle: str) -> float:
+    """The angle's own length, longer than a flash item's; 0 for no angle."""
+    return float(ANGLES[angle]["minutes"]) if angle in ANGLES else 0.0
 
 
 def prompt(angle: str) -> str:

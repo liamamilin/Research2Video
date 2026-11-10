@@ -123,3 +123,17 @@ def test_no_angles_below_the_bar_without_supporting_text_or_without_a_score(flas
     notes = []
     assert not any("~" in i["topic"]["id"] for i in pilot.pick_topics(SPEC, notes))
     assert any("只做一条" in n for n in notes)
+
+
+def test_an_angle_is_written_at_its_own_longer_length(monkeypatch):
+    from core.video import writer
+
+    seen = {}
+    monkeypatch.setattr(writer, "write", lambda **kw: seen.update(kw) or kw)
+    column = SimpleNamespace(script_style="", target_minutes=1.25, voice_id="", paragraph_units=(),
+                             writer_topic_fields=lambda: ())
+    for angle, expected in (("money", 5.0), ("howto", 4.0), ("", 1.25)):
+        topic = {"id": "r/F1", "title": "x", **({"angle": angle} if angle else {})}
+        writer.write_for_column(column=column, content_context={}, topic=topic, report="r", citation_check=None,
+                                llm_config=None)
+        assert seen["target_minutes"] == expected

@@ -2,4 +2,6 @@
 name: T05 · AI 产品横向选择
 job: chatgpt_acquisition/t05_comparison
 recipe: chatgpt_acquisition
+# 11-10 主打片拉长：对比和付费价值要讲透，按 5 分钟写（配方允许 2–6 分钟；我们的 1.9 万爆款是 7 分钟的算账片）。
+minutes: 5
 auto: 1
