@@ -685,7 +685,8 @@ def automatic_cues(scene: dict, rows: dict) -> list[dict]:
                             cue['quote'] = phrases[index]
                         break
                     at -= len(row['text'])
-    visual_language.align_object_cues(scene, result, speech)
+    placed = visual_language.align_object_cues(scene, result, speech)
+    visual_language.align_label_cues(scene, result, speech, placed)
     return result
 
 

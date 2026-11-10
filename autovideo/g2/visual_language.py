@@ -136,17 +136,77 @@ def flow_cues(scene: dict, rows: dict) -> list[dict]:
     return result
 
 
-def align_object_cues(scene: dict, cues: list[dict], speech: list[dict]) -> None:
-    """Named object phrases can replace the default evenly spaced card reveals."""
+def _place(cue: dict, at: int, speech: list[dict]) -> None:
+    for row in speech:
+        if at < len(row['text']):
+            cue.update(segment_id=row['id'], quote=row['text'][at:at+1], character_index=at)
+            return
+        at -= len(row['text'])
+
+
+def align_object_cues(scene: dict, cues: list[dict], speech: list[dict]) -> set[str]:
+    """Named object phrases can replace the default evenly spaced card reveals; returns the targets so placed."""
     text = ''.join(row['text'] for row in speech)
+    placed = set()
     for visual in scene['props'].get('visuals', []):
         phrase = visual.get('phrase', '')
         at = text.find(phrase) if phrase else -1
+        if at < 0 and phrase:
+            at = phrase_at(text, phrase)  # the same words with other spacing or punctuation
         cue = next((c for c in cues if c['target_id'] == visual['target']), None)
         if at < 0 or cue is None:
             continue
-        for row in speech:
-            if at < len(row['text']):
-                cue.update(segment_id=row['id'], quote=row['text'][at:at+1], character_index=at)
+        _place(cue, at, speech)
+        placed.add(visual['target'])
+    return placed
+
+
+#: The cards whose own words can anchor them: what the viewer reads on the card is usually said aloud.
+LABELLED = ('comparison', 'concept_reveal', 'bar_chart', 'big_number')
+
+
+def target_label(scene: dict, target: str) -> list[str]:
+    """What a card target shows, most specific first: a side's label before its "·", a line, a bar's category,
+    a big number's value and label."""
+    props, component = scene['props'], scene['component']
+    kind, _, index = target.partition(':')
+    if component == 'comparison' and kind == 'side':
+        label = str((props.get('left' if index == 'left' else 'right') or {}).get('label') or '')
+        head = label.split('·')[0].strip()
+        return [head, label, *(head.split()[:1] if ' ' in head else [])]  # "ChatGPT Plus" is often said "ChatGPT"
+    if component == 'concept_reveal' and kind == 'line':
+        line = str(props['lines'][int(index)])
+        return [line, re.split(r'[、，,：:（(；;—]', line)[0].strip()]
+    if component == 'bar_chart' and kind == 'bar':
+        return [str(props['categories'][int(index)])]
+    if component == 'big_number' and kind == 'line':
+        field = {'0': 'value', '1': 'label', '2': 'note'}.get(index, '')
+        value = str(props.get(field) or '')
+        return [value, re.split(r'[·（(，,]', value)[0].strip()]
+    return []
+
+
+def align_label_cues(scene: dict, cues: list[dict], speech: list[dict], placed: set[str]) -> None:
+    """A card nobody gave a spoken phrase reveals where its own label is first said, in card order, instead of
+    at an evenly spaced point: the published 同样20美元 showed Claude's side 5.8 s after "Claude" was said (11-10)."""
+    if scene['component'] not in LABELLED:
+        return
+    text = ''.join(row['text'] for row in speech)
+    cursor = 0
+    for cue in cues:
+        target = cue['target_id']
+        if target == 'title':
+            continue
+        if target in placed:
+            cursor = max(cursor, cue.get('character_index', 0))
+            continue
+        for n, label in enumerate(target_label(scene, target)):
+            if len(label) < (2 if n == 0 else 3):  # a shortened label must still be specific ("结果" is not)
+                continue
+            at = phrase_at(text, label, cursor)
+            if at < 0:
+                at = phrase_at(text, label)
+            if at >= 0:
+                _place(cue, at, speech)
+                cursor = max(cursor, at)
                 break
-            at -= len(row['text'])
