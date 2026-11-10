@@ -42,11 +42,13 @@ def state(tmp_path, search):
 
 
 def test_choose_takes_ai_words_of_the_hot_list_then_the_hottest_watch_words_over_the_bar():
-    trending = ["BLG夺冠", "DeepSeek改架构数学能力提升", "让九个AI大模型玩造桥", "王者新赛季", "美国AI泡沫", "AI长片"]
+    trending = ["BLG夺冠", "DeepSeek改架构数学能力提升", "让九个AI大模型玩造桥", "王者新赛季", "豆包工作取消额度",
+                "AI长片", "GPT-6.2 Astra 灰测", "Kimi新模型"]
     scored = {"豆包": {"score": 2_700_000}, "Cursor": {"score": 5000}, "Codex": {"score": 570_000},
               "Kimi": {"score": 190_000}, "Grok": {"score": 105_000}}
     chosen = bili_hot.choose(trending, scored)
-    assert [c["word"] for c in chosen] == ["DeepSeek改架构数学能力提升", "让九个AI大模型玩造桥", "美国AI泡沫",
+    # named products only: the AI films and contests of 热搜 are no product news; three at most
+    assert [c["word"] for c in chosen] == ["DeepSeek改架构数学能力提升", "豆包工作取消额度", "GPT-6.2 Astra 灰测",
                                            "豆包", "Codex", "Kimi"]
     assert chosen[0]["why"] == "B站热搜" and chosen[3]["heat"]["score"] == 2_700_000
 

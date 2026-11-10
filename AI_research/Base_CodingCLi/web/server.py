@@ -200,8 +200,21 @@ async def lifespan(app: FastAPI):
             except Exception:  # noqa: BLE001 - one bad pass must not stop the loop
                 logger.exception("video archive pass failed")
 
+    def hot_trigger_loop() -> None:
+        """B站热搜 AI words start an extra flash run (web/services/hot_trigger.py); it throttles itself."""
+        from web.services import hot_trigger
+
+        while not sweep_stop.wait(300):
+            try:
+                note = hot_trigger.tick()
+                if note:
+                    logger.info("hot trigger: %s", note)
+            except Exception:  # noqa: BLE001 - one bad pass must not stop the loop
+                logger.exception("hot trigger pass failed")
+
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):
         threading.Thread(target=archive_loop, name="video-archive", daemon=True).start()
+        threading.Thread(target=hot_trigger_loop, name="hot-trigger", daemon=True).start()
     if not os.environ.get("AREC_NO_AUTOPILOT_LOOP"):  # tests set this so no stray thread ticks against their data
         threading.Thread(target=autopilot_loop, name="video-autopilot", daemon=True).start()
 

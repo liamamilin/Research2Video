@@ -24,8 +24,11 @@ from .search import SearchClient, SearchResult
 
 logger = logging.getLogger(__name__)
 
-HOT_TERMS = re.compile(r"AI|人工智能|大模型|智能体|GPT|OpenAI|Claude|DeepSeek|豆包|千问|通义|Kimi|混元|Gemini|Grok|"
-                       r"文心|智谱|MiniMax|Codex|Cursor|Agent", re.I)
+#: Named AI products and companies only: generic words ("AI", "大模型", "Agent") also match B站's AI films, memes and
+#: predictions ("AI科幻电影", "三家国产AI预测BLG夺冠"), which are no product news (11-10 live check).
+HOT_TERMS = re.compile(r"ChatGPT|GPT-?\d|OpenAI|Sora|Claude|Anthropic|DeepSeek|豆包|千问|通义|Qwen|Kimi|月之暗面|混元|元宝|"
+                       r"Gemini|Grok|文心|智谱|GLM|MiniMax|海螺|可灵|即梦|Codex|Cursor|Trae|Copilot|Midjourney|Seedream|Seedance",
+                       re.I)
 PICK_TRENDING = 3
 PICK_WORDS = 3
 MIN_HEAT = 100000
