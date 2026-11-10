@@ -1,0 +1,20 @@
+{
+  "theme_id": "f0f4239e6a4c4f3893806b34f6dc7137",
+  "script_id": "9d6ba001f72c4ea88d94eab667bd5274",
+  "matrix": "industry",
+  "category": "industry_processes",
+  "title": "一块铝锭变成汽车轮毂，要经过哪些关键工序？",
+  "started_at": "2026-10-28T14:28:06+0800",
+  "workflow": "normal theme workbench: research and generate video",
+  "target_minutes": 4,
+  "auto_video": true,
+  "render_id": "12e887524418455ebf16eff34abd5f63",
+  "report_path": "output/video/2026-10-28_14-28-06_theme_research-m4_9d6ba001.md",
+  "video": "/Volumes/个人资料/2026/视频生成工作流/AI创作/视频输出/研究成片/12e887524418455ebf16eff34abd5f63/video.mp4",
+  "duration_seconds": 478.2,
+  "status": "COMPLETED",
+  "autovideo_job_id": "9817bfde-4083-4de4-a0c0-3e68ed771e18",
+  "completed_at": "2026-10-28T15:16:10+0800",
+  "elapsed_seconds": 2884.0,
+  "published": false
+}

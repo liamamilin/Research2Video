@@ -1,0 +1,804 @@
+{
+  "schema_version": "0.2",
+  "video": {
+    "title": "视频生产状态与章节复用",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "duration_ms": 18100
+  },
+  "source": {
+    "language": "zh-CN",
+    "original_text": "视频从写稿进入制作时，页面需要继续更新。正在工作的任务显示进度，完成之后显示可以播放的成片。\n\n长文稿可以分成独立章节。如果后面的配音失败，已经完成的章节应当保留，重试时继续生成剩下的内容。",
+    "text_sha256": "5b45d6d5f0662374edc94c137c7bfe0da55301808a49eb5d682094c4fc5fb5ce"
+  },
+  "style": {
+    "preset": "minimal_light",
+    "seed": 20261013
+  },
+  "assets": [
+    {
+      "id": "communication_voice",
+      "type": "audio",
+      "path": "assets/communications_noise.wav",
+      "origin": "local VoxCPM2 Chinese speech from user-edited narration",
+      "sha256": "ef54e7a0f03e6f9a6a9f1e502b3788cbabcc0be73bc30fb396730efcc0dc6657"
+    }
+  ],
+  "narration": {
+    "text": "视频从写稿进入制作时，页面需要继续更新。正在工作的任务显示进度，完成之后显示可以播放的成片。长文稿可以分成独立章节。如果后面的配音失败，已经完成的章节应当保留，重试时继续生成剩下的内容。",
+    "audio_asset_id": "communication_voice",
+    "segments": [
+      {
+        "id": "c1_n1",
+        "text": "视频从写稿进入制作时，页面需要继续更新。",
+        "start_ms": 250,
+        "end_ms": 3957
+      },
+      {
+        "id": "c1_n2",
+        "text": "正在工作的任务显示进度，完成之后显示可以播放的成片。",
+        "start_ms": 4327,
+        "end_ms": 8815
+      },
+      {
+        "id": "c2_n1",
+        "text": "长文稿可以分成独立章节。",
+        "start_ms": 9671,
+        "end_ms": 12080
+      },
+      {
+        "id": "c2_n2",
+        "text": "如果后面的配音失败，已经完成的章节应当保留，重试时继续生成剩下的内容。",
+        "start_ms": 12370,
+        "end_ms": 18064
+      }
+    ],
+    "alignment": {
+      "method": "provider",
+      "granularity": "phrase"
+    }
+  },
+  "scenes": [
+    {
+      "id": "card_1",
+      "start_ms": 0,
+      "duration_ms": 9243,
+      "component": "flow_diagram",
+      "props": {
+        "nodes": [
+          {
+            "id": "draft",
+            "label": "写稿"
+          },
+          {
+            "id": "rendering",
+            "label": "制作中 · 显示进度"
+          },
+          {
+            "id": "ready",
+            "label": "已完成 · 可播放"
+          }
+        ],
+        "edges": [
+          {
+            "id": "to_rendering",
+            "from": "draft",
+            "to": "rendering",
+            "label": "进入制作",
+            "relation": "flow"
+          },
+          {
+            "id": "to_ready",
+            "from": "rendering",
+            "to": "ready",
+            "label": "完成",
+            "relation": "flow"
+          }
+        ],
+        "paths": [],
+        "title": "视频制作状态更新",
+        "takeaway": "制作中显示进度，完成后显示可播放成片",
+        "visuals": [
+          {
+            "target": "node:draft",
+            "icon": "file",
+            "phrase": "视频从写稿进入制作时"
+          },
+          {
+            "target": "node:rendering",
+            "icon": "clock",
+            "action": "process",
+            "phrase": "正在工作的任务显示进度"
+          },
+          {
+            "target": "node:ready",
+            "icon": "result",
+            "action": "complete",
+            "phrase": "完成之后显示可以播放的成片"
+          }
+        ],
+        "layout": {
+          "width": 1560,
+          "height": 500,
+          "font_size": 36,
+          "edge_font_size": 28,
+          "direction": "RIGHT",
+          "scale": 1,
+          "engine": "elkjs-0.12.0",
+          "nodes": [
+            {
+              "id": "draft",
+              "x": 123,
+              "y": 170,
+              "width": 210,
+              "height": 160,
+              "label_lines": [
+                "写稿"
+              ]
+            },
+            {
+              "id": "rendering",
+              "x": 613,
+              "y": 149,
+              "width": 300,
+              "height": 202,
+              "label_lines": [
+                "制作中 · 显示",
+                "进度"
+              ]
+            },
+            {
+              "id": "ready",
+              "x": 1137,
+              "y": 149,
+              "width": 300,
+              "height": 202,
+              "label_lines": [
+                "已完成 · 可播",
+                "放"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "to_rendering",
+              "points": [
+                {
+                  "x": 333,
+                  "y": 250
+                },
+                {
+                  "x": 613,
+                  "y": 250
+                }
+              ],
+              "label_x": 473,
+              "label_y": 270
+            },
+            {
+              "id": "to_ready",
+              "points": [
+                {
+                  "x": 913,
+                  "y": 250
+                },
+                {
+                  "x": 1137,
+                  "y": 250
+                }
+              ],
+              "label_x": 1025,
+              "label_y": 270
+            }
+          ]
+        },
+        "shot_plan": {
+          "version": 1,
+          "profile": "balanced",
+          "cues": [
+            {
+              "beat_id": "card_1_b1",
+              "targets": [
+                "node:draft",
+                "node:rendering"
+              ]
+            },
+            {
+              "beat_id": "card_1_b2",
+              "targets": [
+                "node:draft",
+                "node:rendering"
+              ]
+            },
+            {
+              "beat_id": "card_1_b4",
+              "targets": [
+                "node:rendering",
+                "node:ready"
+              ]
+            }
+          ]
+        },
+        "scene_flow": {
+          "version": 1,
+          "profile": "balanced",
+          "entry": "cut",
+          "paragraph_ids": [
+            "card_1"
+          ],
+          "part_index": 1,
+          "part_count": 1
+        },
+        "story": {
+          "version": 1,
+          "role": "explain",
+          "importance": "key",
+          "density": "normal",
+          "entities": [
+            {
+              "id": "e_a67a2a83e184",
+              "name": "写稿",
+              "color": "#17784B",
+              "targets": [
+                "node:draft"
+              ]
+            },
+            {
+              "id": "e_805a6dec4a38",
+              "name": "制作中任务",
+              "color": "#557DB2",
+              "targets": [
+                "node:rendering"
+              ]
+            },
+            {
+              "id": "e_4c37793e7654",
+              "name": "已完成成片",
+              "color": "#C9813E",
+              "targets": [
+                "node:ready"
+              ]
+            }
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c1_n1",
+        "c1_n2"
+      ],
+      "purpose": "从写稿到可播放成片，任务状态持续更新",
+      "visual_intent": {
+        "viewer_understands": "从写稿到可播放成片，任务状态持续更新",
+        "before": "要点尚未展开",
+        "after": "从写稿到可播放成片，任务状态持续更新"
+      },
+      "beats": [
+        {
+          "id": "card_1_b0",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "c1_n1",
+            "boundary": "start",
+            "offset_ms": 160
+          }
+        },
+        {
+          "id": "card_1_b1",
+          "action": "reveal",
+          "target_id": "node:draft",
+          "trigger": {
+            "segment_id": "c1_n1",
+            "boundary": "start",
+            "offset_ms": 800
+          }
+        },
+        {
+          "id": "card_1_action_1",
+          "action": "reveal",
+          "target_id": "node:rendering",
+          "trigger": {
+            "segment_id": "c1_n2",
+            "boundary": "start",
+            "offset_ms": 0
+          }
+        },
+        {
+          "id": "card_1_b2",
+          "action": "reveal",
+          "target_id": "node:rendering",
+          "trigger": {
+            "segment_id": "c1_n2",
+            "boundary": "start",
+            "offset_ms": 160
+          }
+        },
+        {
+          "id": "card_1_b3",
+          "action": "reveal",
+          "target_id": "edge:to_rendering",
+          "trigger": {
+            "segment_id": "c1_n2",
+            "boundary": "start",
+            "offset_ms": 160
+          }
+        },
+        {
+          "id": "card_1_action_2",
+          "action": "reveal",
+          "target_id": "node:ready",
+          "trigger": {
+            "segment_id": "c1_n2",
+            "boundary": "start",
+            "offset_ms": 2071
+          }
+        },
+        {
+          "id": "card_1_b4",
+          "action": "reveal",
+          "target_id": "node:ready",
+          "trigger": {
+            "segment_id": "c1_n2",
+            "boundary": "start",
+            "offset_ms": 2320
+          }
+        },
+        {
+          "id": "card_1_b5",
+          "action": "reveal",
+          "target_id": "edge:to_ready",
+          "trigger": {
+            "segment_id": "c1_n2",
+            "boundary": "start",
+            "offset_ms": 2320
+          }
+        }
+      ]
+    },
+    {
+      "id": "card_2",
+      "start_ms": 9243,
+      "duration_ms": 8857,
+      "component": "flow_diagram",
+      "props": {
+        "title": "章节拆分与续生成",
+        "nodes": [
+          {
+            "id": "long_script",
+            "label": "长文稿"
+          },
+          {
+            "id": "chapters",
+            "label": "独立章节"
+          },
+          {
+            "id": "kept",
+            "label": "已完成章节"
+          },
+          {
+            "id": "retry",
+            "label": "重试剩余内容"
+          }
+        ],
+        "edges": [
+          {
+            "id": "e_split",
+            "from": "long_script",
+            "to": "chapters",
+            "label": "拆分",
+            "relation": "flow"
+          },
+          {
+            "id": "e_keep",
+            "from": "chapters",
+            "to": "kept",
+            "label": "配音完成",
+            "relation": "flow"
+          },
+          {
+            "id": "e_fail",
+            "from": "chapters",
+            "to": "retry",
+            "label": "配音失败",
+            "relation": "flow"
+          },
+          {
+            "id": "e_continue",
+            "from": "kept",
+            "to": "retry",
+            "label": "继续生成",
+            "relation": "flow"
+          }
+        ],
+        "paths": [],
+        "takeaway": "已完成章节保留，重试时只生成剩下的内容",
+        "visuals": [
+          {
+            "target": "node:long_script",
+            "icon": "file"
+          },
+          {
+            "target": "node:chapters",
+            "icon": "folder",
+            "phrase": "长文稿可以分成独立章节"
+          },
+          {
+            "target": "node:kept",
+            "icon": "shield",
+            "action": "complete",
+            "phrase": "已经完成的章节应当保留"
+          },
+          {
+            "target": "node:retry",
+            "icon": "settings",
+            "action": "process",
+            "phrase": "重试时继续生成剩下的内容"
+          }
+        ],
+        "layout": {
+          "width": 1560,
+          "height": 500,
+          "font_size": 31.55056179775281,
+          "edge_font_size": 24.53932584269663,
+          "direction": "RIGHT",
+          "scale": 0.8764044943820225,
+          "engine": "elkjs-0.12.0",
+          "nodes": [
+            {
+              "id": "long_script",
+              "x": 26.292134831460675,
+              "y": 164.69662921348313,
+              "width": 184.04494382022472,
+              "height": 140.2247191011236,
+              "label_lines": [
+                "长文稿"
+              ]
+            },
+            {
+              "id": "chapters",
+              "x": 406.65168539325845,
+              "y": 164.69662921348313,
+              "width": 184.04494382022472,
+              "height": 140.2247191011236,
+              "label_lines": [
+                "独立章节"
+              ]
+            },
+            {
+              "id": "kept",
+              "x": 836.0898876404494,
+              "y": 141.32584269662922,
+              "width": 210.3370786516854,
+              "height": 140.2247191011236,
+              "label_lines": [
+                "已完成章节"
+              ]
+            },
+            {
+              "id": "retry",
+              "x": 1291.8202247191011,
+              "y": 164.69662921348313,
+              "width": 241.8876404494382,
+              "height": 140.2247191011236,
+              "label_lines": [
+                "重试剩余内容"
+              ]
+            }
+          ],
+          "edges": [
+            {
+              "id": "e_split",
+              "points": [
+                {
+                  "x": 210.3370786516854,
+                  "y": 234.80898876404495
+                },
+                {
+                  "x": 406.65168539325845,
+                  "y": 234.80898876404495
+                }
+              ],
+              "label_x": 308.49438202247194,
+              "label_y": 252.33707865168537
+            },
+            {
+              "id": "e_keep",
+              "points": [
+                {
+                  "x": 590.6966292134832,
+                  "y": 211.43820224719101
+                },
+                {
+                  "x": 836.0898876404494,
+                  "y": 211.43820224719101
+                }
+              ],
+              "label_x": 713.3932584269663,
+              "label_y": 193.91011235955057
+            },
+            {
+              "id": "e_fail",
+              "points": [
+                {
+                  "x": 590.6966292134832,
+                  "y": 258.17977528089887
+                },
+                {
+                  "x": 599.4606741573034,
+                  "y": 258.17977528089887
+                },
+                {
+                  "x": 599.4606741573034,
+                  "y": 325.37078651685397
+                },
+                {
+                  "x": 1237.4831460674159,
+                  "y": 325.37078651685397
+                },
+                {
+                  "x": 1237.4831460674159,
+                  "y": 258.17977528089887
+                },
+                {
+                  "x": 1291.8202247191011,
+                  "y": 258.17977528089887
+                }
+              ],
+              "label_x": 941.2584269662922,
+              "label_y": 342.8988764044944
+            },
+            {
+              "id": "e_continue",
+              "points": [
+                {
+                  "x": 1046.426966292135,
+                  "y": 211.43820224719101
+                },
+                {
+                  "x": 1291.8202247191011,
+                  "y": 211.43820224719101
+                }
+              ],
+              "label_x": 1169.123595505618,
+              "label_y": 193.91011235955057
+            }
+          ]
+        },
+        "shot_plan": {
+          "version": 1,
+          "profile": "balanced",
+          "cues": [
+            {
+              "beat_id": "card_2_b1",
+              "targets": [
+                "node:long_script",
+                "node:chapters"
+              ]
+            },
+            {
+              "beat_id": "card_2_b2",
+              "targets": [
+                "node:long_script",
+                "node:chapters"
+              ]
+            },
+            {
+              "beat_id": "card_2_b4",
+              "targets": [
+                "node:chapters",
+                "node:kept"
+              ]
+            },
+            {
+              "beat_id": "card_2_b6",
+              "targets": [
+                "node:kept",
+                "node:retry"
+              ]
+            }
+          ]
+        },
+        "scene_flow": {
+          "version": 1,
+          "profile": "balanced",
+          "entry": "cut",
+          "paragraph_ids": [
+            "card_2"
+          ],
+          "part_index": 1,
+          "part_count": 1
+        },
+        "story": {
+          "version": 1,
+          "role": "explain",
+          "importance": "key",
+          "density": "normal",
+          "entities": [
+            {
+              "id": "e_aad8d8da187e",
+              "name": "长文稿",
+              "color": "#886CAD",
+              "targets": [
+                "node:long_script"
+              ]
+            },
+            {
+              "id": "e_330b6c473a50",
+              "name": "独立章节",
+              "color": "#408E94",
+              "targets": [
+                "node:chapters"
+              ]
+            },
+            {
+              "id": "e_293e4e09f7e4",
+              "name": "已完成章节",
+              "color": "#AF5969",
+              "targets": [
+                "node:kept"
+              ]
+            },
+            {
+              "id": "e_6f2a40f8fd74",
+              "name": "重试剩余内容",
+              "color": "#17784B",
+              "targets": [
+                "node:retry"
+              ]
+            }
+          ]
+        }
+      },
+      "narration_segment_ids": [
+        "c2_n1",
+        "c2_n2"
+      ],
+      "purpose": "章节独立生成，失败只重试剩余部分",
+      "visual_intent": {
+        "viewer_understands": "章节独立生成，失败只重试剩余部分",
+        "before": "要点尚未展开",
+        "after": "章节独立生成，失败只重试剩余部分"
+      },
+      "beats": [
+        {
+          "id": "card_2_b0",
+          "action": "reveal",
+          "target_id": "scene",
+          "trigger": {
+            "segment_id": "c2_n1",
+            "boundary": "start",
+            "offset_ms": 160
+          }
+        },
+        {
+          "id": "card_2_b1",
+          "action": "reveal",
+          "target_id": "node:long_script",
+          "trigger": {
+            "segment_id": "c2_n1",
+            "boundary": "start",
+            "offset_ms": 160
+          }
+        },
+        {
+          "id": "card_2_b2",
+          "action": "reveal",
+          "target_id": "node:chapters",
+          "trigger": {
+            "segment_id": "c2_n1",
+            "boundary": "start",
+            "offset_ms": 1600
+          }
+        },
+        {
+          "id": "card_2_b3",
+          "action": "reveal",
+          "target_id": "edge:e_split",
+          "trigger": {
+            "segment_id": "c2_n1",
+            "boundary": "start",
+            "offset_ms": 1600
+          }
+        },
+        {
+          "id": "card_2_b4",
+          "action": "reveal",
+          "target_id": "node:kept",
+          "trigger": {
+            "segment_id": "c2_n2",
+            "boundary": "start",
+            "offset_ms": 1600
+          }
+        },
+        {
+          "id": "card_2_b5",
+          "action": "reveal",
+          "target_id": "edge:e_keep",
+          "trigger": {
+            "segment_id": "c2_n2",
+            "boundary": "start",
+            "offset_ms": 1600
+          }
+        },
+        {
+          "id": "card_2_action_2",
+          "action": "reveal",
+          "target_id": "node:kept",
+          "trigger": {
+            "segment_id": "c2_n2",
+            "boundary": "start",
+            "offset_ms": 1626
+          }
+        },
+        {
+          "id": "card_2_b6",
+          "action": "reveal",
+          "target_id": "node:retry",
+          "trigger": {
+            "segment_id": "c2_n2",
+            "boundary": "start",
+            "offset_ms": 3440
+          }
+        },
+        {
+          "id": "card_2_b7",
+          "action": "reveal",
+          "target_id": "edge:e_fail",
+          "trigger": {
+            "segment_id": "c2_n2",
+            "boundary": "start",
+            "offset_ms": 3440
+          }
+        },
+        {
+          "id": "card_2_b8",
+          "action": "reveal",
+          "target_id": "edge:e_continue",
+          "trigger": {
+            "segment_id": "c2_n2",
+            "boundary": "start",
+            "offset_ms": 3440
+          }
+        },
+        {
+          "id": "card_2_action_3",
+          "action": "reveal",
+          "target_id": "node:retry",
+          "trigger": {
+            "segment_id": "c2_n2",
+            "boundary": "start",
+            "offset_ms": 3579
+          }
+        }
+      ]
+    }
+  ],
+  "audio_mix": {
+    "narration_gain_db": 0
+  },
+  "presentation": {
+    "preset": "explanation"
+  },
+  "content_structure": {
+    "mode": "content",
+    "chapters": [
+      {
+        "id": "c1",
+        "title": "状态更新",
+        "narration_segment_ids": [
+          "c1_n1",
+          "c1_n2"
+        ]
+      },
+      {
+        "id": "c2",
+        "title": "章节复用",
+        "narration_segment_ids": [
+          "c2_n1",
+          "c2_n2"
+        ]
+      }
+    ]
+  }
+}

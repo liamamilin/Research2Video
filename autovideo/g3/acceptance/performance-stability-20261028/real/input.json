@@ -1,0 +1,28 @@
+{
+  "title": "视频生产状态与章节复用",
+  "input_mode": "narration",
+  "duration_mode": "content",
+  "chapters": [
+    {
+      "title": "状态更新",
+      "paragraphs": [
+        "视频从写稿进入制作时，页面需要继续更新。正在工作的任务显示进度，完成之后显示可以播放的成片。"
+      ]
+    },
+    {
+      "title": "章节复用",
+      "paragraphs": [
+        "长文稿可以分成独立章节。如果后面的配音失败，已经完成的章节应当保留，重试时继续生成剩下的内容。"
+      ]
+    }
+  ],
+  "voice_id": "voxcpm_anchor",
+  "production_mode": "fast",
+  "visual_storytelling": true,
+  "use_draw_things": false,
+  "packaging": {
+    "sound": {
+      "enabled": false
+    }
+  }
+}
