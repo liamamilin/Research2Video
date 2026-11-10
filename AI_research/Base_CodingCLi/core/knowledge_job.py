@@ -37,12 +37,21 @@ def problem(job: dict) -> str | None:
 
 
 def past_titles(job: dict, workspace_dir: str) -> list[str]:
-    """Titles (first ``# `` line) of this Job's earlier reports, newest first."""
-    pattern = os.path.join(workspace_dir, str(job["output"]).replace("{date}", "*"))
+    """Titles (first ``# `` line) of this Job's earlier reports, newest first.
+
+    A second report on the same day is saved as ``<name>_1.md`` (``_2`` …); it counts as well."""
+    template = os.path.join(workspace_dir, str(job["output"]))
+    stem, ext = os.path.splitext(template)
+    folder, name = os.path.split(stem)
+    head, _, tail = name.partition("{date}")
+    shape = re.compile(re.escape(head) + r"(\d{4}-\d{2}-\d{2})" + re.escape(tail) + r"(?:_(\d+))?" + re.escape(ext) + "$")
+    found = []
+    for path in glob.glob(os.path.join(folder.replace("{date}", "*"), "*" + ext)):
+        match = shape.match(os.path.basename(path))
+        if match and path.endswith(".md"):
+            found.append(((match.group(1), int(match.group(2) or 0)), path))
     titles = []
-    for path in sorted(glob.glob(pattern), reverse=True):
-        if not path.endswith(".md"):
-            continue
+    for _, path in sorted(found, reverse=True):
         try:
             with open(path, encoding="utf-8") as handle:
                 for line in handle:

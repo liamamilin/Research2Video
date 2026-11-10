@@ -29,6 +29,12 @@ def test_past_titles_are_read_from_this_jobs_reports_newest_first(tmp_path):
     titles = knowledge_job.past_titles(JOB, str(tmp_path))
     assert titles == ["第二个问题", "第一个问题"]
     block = knowledge_job.block(titles)
+    # a second report the same day is saved as <name>_1.md; its question counts too (11-10: the cat question repeated)
+    (folder / "2026-11-02_x_1.md").write_text("# 同一天第二个问题\n", encoding="utf-8")
+    (folder / "2026-11-02_x_10.md").write_text("# 同一天第十一个问题\n", encoding="utf-8")
+    (folder / "2026-11-02_xy.md").write_text("# 另一个 Job\n", encoding="utf-8")
+    assert knowledge_job.past_titles(JOB, str(tmp_path)) == [
+        "同一天第十一个问题", "同一天第二个问题", "第二个问题", "第一个问题"]
     assert "- 第二个问题" in block and "不要再选" in block
     assert "还没有往期底稿" in knowledge_job.block([])
 
