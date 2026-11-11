@@ -1,0 +1,256 @@
+{
+ "report": "./output/chatgpt_acquisition/2026-11-10_t05_comparison.md",
+ "item": "开完会谁写纪要？微信输入法、手机系统录音、ChatGPT 语音同题比",
+ "next_episode": "100 页 PDF 找页码：Kimi、通义千问、Gemini、ChatGPT 谁在“编”？",
+ "title": "开完会谁写纪要：微信输入法免费，ChatGPT先别指望",
+ "sections": [
+  {
+   "title": "先给结论：这场会，0 元就够",
+   "paragraphs": [
+    {
+     "text": "开完一场两小时的会，你还在自己写纪要吗？我的建议是：先别为这件事掏钱。我是洛洛，这期帮你把“会议纪要该用谁”这一件事算清楚。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "这笔钱是 0 和每月 20 美元的区别。任务只有一件：把一场会变成一份能直接发进工作群的纪要。结论先给你——线下开会、上课、采访，微信输入法的免费 AI 录音笔基本够用；天天开电话会的，用手机系统自带的录音；ChatGPT 现在还不能算这个任务里的选项，原因我后面说。",
+     "citations": [
+      "https://www.ifanr.com/1688410",
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "第一个维度：谁按下开始",
+   "paragraphs": [
+    {
+     "text": "第一个维度，谁按下开始。已经公开的体验里，微信输入法的 AI 录音笔免费，不用额外硬件，点输入法工具栏的按钮，或者打开微信输入法 App 就能用，整个流程只有“开始录音”和“总结”两步，边听边总结。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "它的短板也在这两步上。入口要自己找，手动点开始，很常见的场面是讲到一半才想起来没录。录音结束以后，生成总结还要等一会儿。同一台手机正在打微信语音时，录音通道被占用，AI 录音笔没法同时工作。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "对照的是 vivo OriginOS 7 的系统级通话录音。它支持微信、钉钉、飞书这些第三方 App 的通话录音，结束后自动转写，生成关键洞察和待办，全程不用你手动开始和结束。这一项上，系统级赢在不用记。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "ChatGPT 放在这里比，我只能标“待实测”。免费版只有有限的语音聊天，它能不能直接录一场会议、转写、再生成结构化纪要，目前没有完整测试结果，我不替它下结论。",
+     "citations": [
+      "https://www.ifanr.com/1688410",
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "第二个维度：总结能不能直接发群",
+   "paragraphs": [
+    {
+     "text": "第二个维度，总结能不能直接发群。这一步才是会议纪要真正花时间的地方。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "微信输入法的输出不是一大段文字，是几个独立模块。一场“拍摄规范与设备登记”的会，它给出的是设备入库流程图、拍摄规范、责任分工和注意事项；另一场内容排期会，它排出了一条带发布时间和跟进事项的时间轴；聊游戏的时候，它还能把两款的格挡机制做成对照卡片。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "分享也做完了闭环。点右上角“分享”生成链接，直接发到工作群，没装微信输入法的同事也能打开看，页面会按手机和电脑的屏幕自适应。多端也通：iPhone 上录完，换关联的 Android 或鸿蒙手机，历史记录还在；电脑上录，手机上就能看整理结果。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "ChatGPT 就算能总结，给你的也是聊天框里的一段话，你还得自己整理、排版、再搬进群里。这一维度上，它省的是思考，不是劳动。",
+     "citations": [
+      "https://chatgpt.com/pricing/",
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "第三个维度：国内能不能直接用，花多少钱",
+   "paragraphs": [
+    {
+     "text": "第三个维度，国内能不能直接用，花多少钱。这个必须先说清楚，因为它直接决定选项成不成立。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "微信输入法，装了微信就能用，免费。OriginOS 7 是手机系统自带的功能，也不用另外付钱。这两个国产方案，门槛基本为零。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "ChatGPT 不一样。国内应用商店下载不到，你得有海外账号，海外手机号，或者海外区的 Apple ID、Google Play；还要有能访问海外服务的网络；付费方式也和国内 App 不同。真正在用的人，大多是在电脑网页端用的。所以它不是手机上拿起来就能装的选项，别把它和国产 App 并排摆着比。付费档每月 20 美元，折下来一百多块人民币一个月。",
+     "citations": [
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "什么情况会让我改主意",
+   "paragraphs": [
+    {
+     "text": "有一个条件会让我改建议：你要记的会，是线上还是线下。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "如果一天三四场微信、钉钉、飞书的电话会，手动点开始根本不现实，忘一次就少一份纪要，这时候系统级自动录音更合适，宁可牺牲一点控制权。反过来，线下开会、上课、采访居多，手动开始反而更好，因为它不会一直待机录着。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "还有一类是硬件。Plaud 这种专用录音设备有独立麦克风和硬件按键，按一下就开始，不受手机录音通道影响；雷鸟 io 这类 AI 眼镜能戴着全天无感记录。它们确实解决“忘了录”，但那是另外一笔设备钱，和免费的方案不是一回事。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "什么时候才轮到 ChatGPT？跨语言、长文反复追问、要把纪要接进更复杂的工作流，这几种情况它才有优势。但前提是先看清一件事：它的语音到底能不能录音加总结，得先测出来。",
+     "citations": [
+      "https://www.ifanr.com/1688410",
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "照这张表选，别多花钱",
+   "paragraphs": [
+    {
+     "text": "所以照这张表选就行。偶尔线下开会、上课、采访，想零成本出一份能发群的纪要，用微信输入法 AI 录音笔。每天好几场电话会、懒得点开始，用手机系统自带的通话录音。要跨语言、要长文追问，先别急着订 ChatGPT，等语音录音总结这件事测清楚。",
+     "citations": [
+      "https://www.ifanr.com/1688410",
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "一个反例：如果你只是要把会上的事通知到群里，系统录音的自动转写就够了，不必再去买专用录音硬件。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "那你呢？同样一场会，你愿意手动点一下开始、换一份免费的现成纪要，还是宁可每月多花一百多块？评论区说你的选择。觉得有用就点个赞、收藏起来。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "下一期我接着讲：100 页 PDF 找页码，Kimi、通义千问、Gemini、ChatGPT 谁在“编”？我是洛洛，我们下期见。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  }
+ ],
+ "length_check": {
+  "spoken_length": 1461,
+  "estimated_seconds": 334,
+  "segments": 65,
+  "units_per_second": 4.35,
+  "voice": "voxcpm_anchor",
+  "target_minutes": 5,
+  "budget": 1305,
+  "ratio": 1.112,
+  "status": "OK",
+  "tolerance": 0.15,
+  "sections": [
+   {
+    "title": "先给结论：这场会，0 元就够",
+    "spoken_length": 161,
+    "budget": 218
+   },
+   {
+    "title": "第一个维度：谁按下开始",
+    "spoken_length": 301,
+    "budget": 218
+   },
+   {
+    "title": "第二个维度：总结能不能直接发群",
+    "spoken_length": 283,
+    "budget": 218
+   },
+   {
+    "title": "第三个维度：国内能不能直接用，花多少钱",
+    "spoken_length": 212,
+    "budget": 217
+   },
+   {
+    "title": "什么情况会让我改主意",
+    "spoken_length": 272,
+    "budget": 217
+   },
+   {
+    "title": "照这张表选，别多花钱",
+    "spoken_length": 232,
+    "budget": 217
+   }
+  ],
+  "dropped_citations": 0
+ }
+}

@@ -1,0 +1,206 @@
+{
+ "report": "./output/chatgpt_acquisition/2026-11-10_t05_comparison.md",
+ "item": "开完会谁写纪要？微信输入法、手机系统录音、ChatGPT 语音同题比",
+ "next_episode": "100 页 PDF 找页码：Kimi、通义千问、Gemini、ChatGPT 谁在“编”？",
+ "title": "微信输入法免费出纪要，还用得上 ChatGPT 吗？",
+ "sections": [
+  {
+   "title": "先看这场会",
+   "paragraphs": [
+    {
+     "text": "开一场会，最亏的不是没记住，是讲到一半才想起来没按录音。我是洛洛，这期帮你把「会议纪要到底谁来写」这笔账算清楚，按一分钱不花的方式来算。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "任务就一个：一场「拍摄规范与设备登记」的会。参与比较的是三个对象：微信输入法里的 AI 录音笔、vivo 手机系统的通话录音、ChatGPT 的语音。先给结论：会是在现场开的，微信输入法那个免费的够用。决定你选哪个的只有三件事：谁更少动手、总结能不能直接发到群里、你在国内能不能直接用。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "微信输入法的入口在工具栏上，点一下按钮，或者打开输入法 App 进去，只有两步：开始录音、总结。会还在开，它就在旁边边听边总结。会后出来的不是一大段文字，是拆好的几个模块：设备入库流程图、拍摄规范单列、责任分工、注意事项。换一场 Mac 内容排期的会，它给的是一条时间轴，带发布时间、内容安排、后续跟进事项。再换一场聊《影之刃零》的，它把《只狼》和《影之刃零》的格挡机制做成对照卡片，还画了杀气槽攻防消耗的逻辑图。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "谁更少动手",
+   "paragraphs": [
+    {
+     "text": "它的短板很实在：得你自己找到入口，手动点开始。真开会时，最常见的场面就是讲到一半才想起来忘了录。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "vivo 的 OriginOS 7 走的是另一条路。微信、钉钉、飞书的通话，它自己开录，结束后自动转写、给关键洞察和待办，全程不用你按任何键。代价是它依附在手机上，这是系统带的功能，换台别的牌子就没了。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "再往外一层是硬件。Plaud 这类设备有独立麦克风和一个按键，按一下就录，不占用手机的录音通道；雷鸟 io 那种 AI 眼镜戴在脸上，全天无感记录。这两条路都得先掏钱买设备。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "能不能直接发群",
+   "paragraphs": [
+    {
+     "text": "微信输入法页面右上角有个「分享」，点一下生成链接，直接发到工作群，没装微信输入法的同事也能打开看，页面会按手机和电脑的屏幕尺寸调排版。多端也对得上：iPhone 上录完，换一台关联的 Android 或鸿蒙手机，打开历史记录就能看到；电脑上录，手机上看结果。开会的人和整理的人可以不是同一个人。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "有两处需要等。录完点总结，结果要等一会儿才出来；同一台手机正在打微信语音时，录音通道被占用，录音笔这时候用不了。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "国内能不能用，花多少钱",
+   "paragraphs": [
+    {
+     "text": "微信输入法这个功能是免费的，不需要额外硬件，装着输入法就有。它很关键的地方就在这里：把开完会写纪要这件事的成本压到零。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "ChatGPT 得先讲清它在这边的处境。国内应用商店下载不到，你得有海外账号、海外手机号，或者海外区的 Apple ID、Google Play；网络要能访问海外服务；付费方式也和国内 App 不一样。真正在用的人，大多是在电脑网页端用。免费版给的是有限时长的语音聊天，是你对着它说话、它回你，不是一个录完整场会再给你流程图的东西，额度用完要付费。所以摆在会议记录这件事上，它在手机上不是一个下完就能按、按了就能录的选项。",
+     "citations": [
+      "https://www.ifanr.com/1688410",
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "什么情况会改主意",
+   "paragraphs": [
+    {
+     "text": "一周就一两场线下会、采访或者上课，你手动点一下开始，换来一份能直接发群的纪要，这是划算的。免费加上不用自己排版，是它最大的优势。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "电话会密集，尤其微信、钉钉打进来的那种，系统级自动录音省掉的是「忘了按」这件事。这个亏吃一次就够难受，所以用 vivo 手机的人，先把这个开关打开。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "完全不想碰手机、要独立麦克风的，看 Plaud；要全天无感记录的，看雷鸟 io。真需要跨语言、要在纪要上接着追问、要把内容接进更复杂的工作流，那才轮到 ChatGPT。但先打开它的语音聊两句，看看它给的是对话还是纪要，再决定要不要为它付费。",
+     "citations": [
+      "https://www.ifanr.com/1688410",
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  },
+  {
+   "title": "照着选",
+   "paragraphs": [
+    {
+     "text": "给你一张表：一周一两场线下会、采访、上课，选微信输入法 AI 录音笔，免费；电话会多、手里是 vivo 手机，用 OriginOS 7 的系统录音，自动转写加待办；要独立麦克风，选 Plaud；要全天无感，选雷鸟 io；要跨语言、要追问、要接工作流，才考虑 ChatGPT，前提是先过账号和网络这关。",
+     "citations": [
+      "https://www.ifanr.com/1688410",
+      "https://chatgpt.com/pricing/"
+     ],
+     "evidence": "CITED",
+     "note": null
+    },
+    {
+     "text": "你自己会选哪种：手动点一下的免费，还是全程不用管的自动开录？评论区说一声。下一期我接着讲：100 页 PDF 找页码，Kimi、通义千问、Gemini、ChatGPT 谁在「编」？觉得有用就点个赞、收藏起来。我是洛洛，我们下期见。",
+     "citations": [
+      "https://www.ifanr.com/1688410"
+     ],
+     "evidence": "CITED",
+     "note": null
+    }
+   ]
+  }
+ ],
+ "length_check": {
+  "spoken_length": 1311,
+  "estimated_seconds": 296,
+  "segments": 54,
+  "units_per_second": 4.35,
+  "voice": "voxcpm_anchor",
+  "target_minutes": 5,
+  "budget": 1305,
+  "ratio": 0.987,
+  "status": "OK",
+  "tolerance": 0.15,
+  "sections": [
+   {
+    "title": "先看这场会",
+    "spoken_length": 345,
+    "budget": 218
+   },
+   {
+    "title": "谁更少动手",
+    "spoken_length": 188,
+    "budget": 218
+   },
+   {
+    "title": "能不能直接发群",
+    "spoken_length": 169,
+    "budget": 218
+   },
+   {
+    "title": "国内能不能用，花多少钱",
+    "spoken_length": 220,
+    "budget": 217
+   },
+   {
+    "title": "什么情况会改主意",
+    "spoken_length": 211,
+    "budget": 217
+   },
+   {
+    "title": "照着选",
+    "spoken_length": 178,
+    "budget": 217
+   }
+  ],
+  "dropped_citations": 0
+ }
+}

@@ -1,7 +1,8 @@
 """One trial video of programme 1「同一笔钱，怎么选」(11-10): the real T05 item, writer and render builder, nothing
 written to AREC's database (so it cannot be approved or auto-published).
 
-Usage (from AREC root): PYTHONPATH=. python3 spec/acceptance/programme1-20261110/trial.py <out_dir>
+Usage (from AREC root): PYTHONPATH=. python3 spec/acceptance/programme1-20261110/trial.py <out_dir> [production] [item]
+production defaults to chatgpt_t05_comparison and item (0-based, in report order) to 0.
 Writes script.json (title, sections, next episode), request.json, job.json and final-status.json into <out_dir>.
 """
 import copy
@@ -22,24 +23,28 @@ from web.services.video_workflow import _llm_configs
 from web.settings import get_settings
 
 out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
+production_key = sys.argv[2] if len(sys.argv) > 2 else "chatgpt_t05_comparison"
+index = int(sys.argv[3]) if len(sys.argv) > 3 else 0
 settings = get_settings()
-config = production.get(settings.paths.config_dir, settings.paths.jobs_dir, "chatgpt_t05_comparison")
+config = production.get(settings.paths.config_dir, settings.paths.jobs_dir, production_key)
 source = topic_store.resolve(settings.paths.jobs_dir, config.source)
 day, path = topic_store.report_files(source, ".")[0]
 _, topics = topic_store.read_report(source, path, ".")
-item, following = topics[0].as_dict(), topics[1].as_dict()
+item = topics[index].as_dict()
+following = topics[index + 1].as_dict() if index + 1 < len(topics) else None
 report = open(path, encoding="utf-8").read()
 material = excerpt.item_excerpt(report, item["title"]) or report
 
 context = content_columns.snapshot(settings.paths.config_dir, config.key, config.job)
 column = content_columns.apply_script_context(video_columns.get(settings.paths.config_dir, config.recipe), context)
 # as a series batch would give it (selection.next_episode): the next item of the same report
-topic = {**item, "next_episode": following["title"]}
+series = bool(config.selection.get("next_episode")) and following is not None
+topic = {**item, **({"next_episode": following["title"]} if series else {})}
 llm, _ = _llm_configs(None, column)
 written = writer.write_for_column(column=column, content_context=context, topic=topic, report=material,
                                   citation_check=None, llm_config=llm)
 polish.apply(written, llm, greeting=None, voice=column.voice_id or None)
-(out / "script.json").write_text(json.dumps({"report": path, "item": item["title"], "next_episode": following["title"],
+(out / "script.json").write_text(json.dumps({"report": path, "item": item["title"], "next_episode": topic.get("next_episode", ""),
                                              "title": written.title, "sections": written.sections,
                                              "length_check": written.length_check}, ensure_ascii=False, indent=1),
                                  encoding="utf-8")
@@ -48,7 +53,7 @@ print("written", written.title, written.length_check.get("estimated_seconds"), f
 version = {"version": 1, "title": written.title, "sections": written.sections, "meta": written.meta,
            "length_check": written.length_check}
 script = {"id": uuid.uuid4().hex, "column_key": column.key, "approved_version": 1, "topic": topic,
-          "production": config.key, "source_matrix_id": "chatgpt_acquisition", "content_context": context,
+          "production": config.key, "source_matrix_id": context.get("source_matrix") or context.get("matrix") or "", "content_context": context,
           "status": "APPROVED"}
 real_get_version = store.get_version
 video_render.store.get_version = lambda sid, no: copy.deepcopy(version) if sid == script["id"] else real_get_version(sid, no)
