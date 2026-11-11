@@ -75,7 +75,7 @@ ANGLE_RULE = "选题核心角度里点名要比较或讲清的点，正文必须
 #: Scripts felt distant (11-11): a lecture skeleton said aloud, hedges read out, summaries instead of what happens. The
 #: same item written four ways (current model, deepseek-v4-pro, this rule, plus the original articles) showed the rule,
 #: not the stronger model or more material, gives a scene with quoted words and no abstract lines.
-CONCRETE_RULE = ("写具体，不写远：整条视频跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），"
+CONCRETE_RULE = ("写具体，不写远：每条内容跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），"
                  "每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；"
                  "判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；"
                  "不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”“这期帮你……”），换话题就直接说下一件事；"
