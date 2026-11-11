@@ -47,7 +47,7 @@ class _Script(BaseModel):
     sections: list[_Section] = Field(min_length=1)
 
 
-PROMPT_VERSION = 11
+PROMPT_VERSION = 12
 #: What the weekly review found titles that get watched have in common (two weeks, 120 videos): the product named,
 #: the money stated, no date or programme name. The 11-10 benchmark (spec/benchmark-20261110/ai-report.md) adds the
 #: framing: small accounts' AI hits ask a question, set two things against each other or state a judgement (41% / 23%
@@ -65,13 +65,21 @@ ENDING_RULE = ("道别前抛一个让观众站队的问题，最好是二选一�
                "请大家在评论区说出自己的选择；觉得有用就点个赞、收藏起来。")
 #: How the two most-watched videos talk (2026-11-02 review): short lines, a stated judgement, few numbers said aloud.
 STYLE_RULE = ("像对一个懂行的朋友讲：多用短句，可以直接说出你的判断（比如“我的建议是先别升级”）。"
-              "一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数和明细交给画面。"
+              "一段口播只念最关键的两三个数字，钱说成观众熟悉的口径（每月多少钱，材料给了人民币就说人民币），其余参数交给画面，但具体的场景、动作和原话要讲出来。"
               "英文术语换成中文说法，或用半句话讲明白。一个前提或限制只在相关处说一次，说短，不在后面重复。")
 #: Narration is what viewers hear; a note to the picture ("画面里可以……") was read out and subtitled (11-10 research,
 #: spec/bilibili-growth-research-20261110/SAMPLE-O03.md). The program also rewrites what slips through (``spoken_only``).
 #: An item's 核心角度 names what it is about; the 11-10 trial narrowed to three dimensions and dropped the one point
 #: its angle named (ChatGPT's barrier for Chinese users).
 ANGLE_RULE = "选题核心角度里点名要比较或讲清的点，正文必须讲到，不能为了收窄或控制篇幅把它省掉。"
+#: Scripts felt distant (11-11): a lecture skeleton said aloud, hedges read out, summaries instead of what happens. The
+#: same item written four ways (current model, deepseek-v4-pro, this rule, plus the original articles) showed the rule,
+#: not the stronger model or more material, gives a scene with quoted words and no abstract lines.
+CONCRETE_RULE = ("写具体，不写远：整条视频跟着一个具体的人、一个具体时刻走（谁、在哪、手里拿着什么、屏幕上跳出什么字），"
+                 "每个结论都落到这个场景里发生的事；材料里有的原话、真实输出、按钮名、页面上的字，直接念出来；"
+                 "判断用具体后果说（少等几分钟、多按几下、每月多花多少钱），不用“省的是思考不是劳动”“门槛基本为零”这类概括；"
+                 "不说结构提示语（“第一个维度”“这一维度上”“原因我后面说”“这期帮你……”），换话题就直接说下一件事；"
+                 "材料没有的东西直接不讲，不把“待实测”“没有测试结果”“我不下结论”念给观众听。")
 PICTURE_RULE = "口播只写观众听到的话：不描述画面、不给画面或镜头提要求（不说“画面里可以……”“画面还是……”），要打比方就直接讲情境。"
 GOAL = "根据素材，产出目标观众愿意看、听得懂、想继续看的视频。"
 AUTHORING_PROMPT = GOAL + """
@@ -80,7 +88,7 @@ AUTHORING_PROMPT = GOAL + """
 沿用上游给出的数据、计算和结论，把解释篇幅用在事情本身、过程与结果，研究备忘仅作内部取材背景。
 素材里的“需要核”“可拍任务”和未取到资料的清单等制作备忘留在制作侧，口播直接讲已有内容，不安排下一轮核实或评测。
 影响观众理解和实际使用的条件随对应内容讲清。
-""" + STYLE_RULE + PICTURE_RULE + ANGLE_RULE
+""" + STYLE_RULE + PICTURE_RULE + ANGLE_RULE + CONCRETE_RULE
 SYSTEM_PROMPT = AUTHORING_PROMPT + """
 讲述有起承转合：开头引出本期的问题或看点，中段一步步展开，在关键处转折或点出要害，结尾回到开头的问题落下结论。
 """ + OPENING_RULE + """
