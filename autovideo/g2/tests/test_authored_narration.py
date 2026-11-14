@@ -25,7 +25,6 @@ class Pipeline:
     MAX_TOTAL_CALLS = 16
     MAX_INPUT_TOKENS_PER_CALL = 10000
     MAX_TOKENS_PER_CALL = 100000
-    MAX_PROJECTED_API_COST_USD = 0
     choice = {"recommended_form": "information_motion", "reason": "并列的说明和对照适合卡片"}
 
     def __init__(self, root, chapters=CHAPTERS, title="crewAI 成本与耗时"):

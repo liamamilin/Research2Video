@@ -110,8 +110,23 @@ MAX_LLM_ATTEMPTS = 3
 MAX_TOTAL_CALLS = 16
 MAX_TOKENS_PER_CALL = PROVIDER.max_tokens
 MAX_INPUT_TOKENS_PER_CALL = 10000
-MAX_PROJECTED_API_COST_USD = MAX_TOTAL_CALLS * (
-    MAX_INPUT_TOKENS_PER_CALL * LLM_INPUT_PER_M + MAX_TOKENS_PER_CALL * LLM_OUTPUT_PER_M) / 1_000_000
+
+
+def model_cost_budget(env_path: Path, environ: dict[str, str] | None = None) -> float:
+    """A fixed per-video USD cap, independent of provider prices and chapter count."""
+    environ = os.environ if environ is None else environ
+    name = "AUTOVIDEO_G2_MAX_COST_USD"
+    value = environ.get(name, llm_provider.read_env_file(env_path).get(name, "20"))
+    try:
+        budget = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be a positive finite USD amount") from exc
+    if not math.isfinite(budget) or budget <= 0:
+        raise ValueError(f"{name} must be a positive finite USD amount")
+    return budget
+
+
+MAX_PROJECTED_API_COST_USD = model_cost_budget(PROJECT / ".env")
 LLM_TIMEOUT_SECONDS = 240
 HTTP_RETRY_DELAYS = (2, 4)
 RETRYABLE_HTTP_STATUSES = {500, 502, 503, 504, 520, 521, 522, 523, 524}
@@ -566,8 +581,8 @@ def generate_validated_plan(stage: str, source_builder, schema_path: Path, valid
                         "error_code": exc.code, "error": str(exc), "retry_limit": MAX_LLM_ATTEMPTS})
             feedback = f"上一次输出被本地验证器拒绝：{exc}。请修正后只输出完整 JSON。"
             if attempt == MAX_LLM_ATTEMPTS or exc.code in {
-                    *llm_provider.ALL_FAULT_CODES, "LLM_PROVIDER_INVALID", "MODEL_CALL_BUDGET_EXHAUSTED",
-                    "MODEL_COST_BUDGET_EXCEEDED"} - {PROVIDER.code("INVALID_RESPONSE")}:
+                    *llm_provider.ALL_FAULT_CODES, "LLM_PROVIDER_INVALID",
+                    "MODEL_CALL_BUDGET_EXHAUSTED", "MODEL_COST_BUDGET_EXCEEDED"} - {PROVIDER.code("INVALID_RESPONSE")}:
                 if fallback is not None:
                     append_log(LOGS / "fidelity-warnings.jsonl", {"stage": stage, "attempt": 1, "problems": fallback[1],
                                 "retry_failed_with": exc.code})
@@ -1119,10 +1134,11 @@ def verify_media(compiled: dict, alignment: dict) -> dict:
 
 
 def write_call_summary() -> None:
+    # The cap is frozen at process startup, even if provider prices change.
     write_json(ARTIFACTS / "model-cost.json", {"provider": PROVIDER.label, "model": active_model(),
                "endpoint": PROVIDER.url, "prompt_version": PROMPT_VERSION, "calls": CALL_RECORDS,
                "peak_uncached_cost_upper_bound_usd": round(sum(c.get("peak_uncached_cost_upper_bound_usd", 0) for c in CALL_RECORDS), 8),
-               "configured_worst_case_budget_usd": round(MAX_PROJECTED_API_COST_USD, 6),
+               "configured_worst_case_budget_usd": MAX_PROJECTED_API_COST_USD,
                "per_call_max_tokens": MAX_TOKENS_PER_CALL, "max_calls_per_run": MAX_TOTAL_CALLS,
                "price_basis": "conservative upper bound at current peak rates assuming no prompt-cache hits",
                "pricing_source": PROVIDER.pricing_source or "configured in .env"})
