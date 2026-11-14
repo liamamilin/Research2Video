@@ -1,0 +1,1799 @@
+{
+  "bvid": "BV1Wvn26tEiY",
+  "observed_at": "2026-11-10T08:55:05.652755+00:00",
+  "language": "ai-zh",
+  "body": [
+    {
+      "from": 0.04,
+      "to": 1.66,
+      "sid": 1,
+      "location": 2,
+      "content": "同样是十美元套餐",
+      "music": 0.0
+    },
+    {
+      "from": 1.66,
+      "to": 3.92,
+      "sid": 2,
+      "location": 2,
+      "content": "想用deep sk v4.1flash",
+      "music": 0.0
+    },
+    {
+      "from": 3.92,
+      "to": 5.07,
+      "sid": 3,
+      "location": 2,
+      "content": "到底该买哪家",
+      "music": 0.0
+    },
+    {
+      "from": 5.07,
+      "to": 5.79,
+      "sid": 4,
+      "location": 2,
+      "content": "这是对比",
+      "music": 0.0
+    },
+    {
+      "from": 5.79,
+      "to": 7.53,
+      "sid": 5,
+      "location": 2,
+      "content": "Open code go command go",
+      "music": 0.0
+    },
+    {
+      "from": 7.53,
+      "to": 8.61,
+      "sid": 6,
+      "location": 2,
+      "content": "Open design go",
+      "music": 0.0
+    },
+    {
+      "from": 8.61,
+      "to": 9.23,
+      "sid": 7,
+      "location": 2,
+      "content": "Deep seek",
+      "music": 0.0
+    },
+    {
+      "from": 9.23,
+      "to": 10.23,
+      "sid": 8,
+      "location": 2,
+      "content": "官方做基准",
+      "music": 0.0
+    },
+    {
+      "from": 10.23,
+      "to": 11.09,
+      "sid": 9,
+      "location": 2,
+      "content": "先说结论",
+      "music": 0.0
+    },
+    {
+      "from": 11.09,
+      "to": 13.99,
+      "sid": 10,
+      "location": 2,
+      "content": "补测里官方和open design的任务耗时接近",
+      "music": 0.0
+    },
+    {
+      "from": 13.99,
+      "to": 15.21,
+      "sid": 11,
+      "location": 2,
+      "content": "open code更慢",
+      "music": 0.0
+    },
+    {
+      "from": 15.21,
+      "to": 16.41,
+      "sid": 12,
+      "location": 2,
+      "content": "但哪家更划算",
+      "music": 0.0
+    },
+    {
+      "from": 16.41,
+      "to": 17.43,
+      "sid": 13,
+      "location": 2,
+      "content": "要分情况看",
+      "music": 0.0
+    },
+    {
+      "from": 17.43,
+      "to": 19.08,
+      "sid": 14,
+      "location": 2,
+      "content": "这期我按三个问题讲",
+      "music": 0.0
+    },
+    {
+      "from": 19.08,
+      "to": 20.32,
+      "sid": 15,
+      "location": 2,
+      "content": "交付得稳不稳",
+      "music": 0.0
+    },
+    {
+      "from": 20.32,
+      "to": 21.22,
+      "sid": 16,
+      "location": 2,
+      "content": "质量怎么样",
+      "music": 0.0
+    },
+    {
+      "from": 21.22,
+      "to": 22.2,
+      "sid": 17,
+      "location": 2,
+      "content": "要等多久",
+      "music": 0.0
+    },
+    {
+      "from": 22.2,
+      "to": 23.56,
+      "sid": 18,
+      "location": 2,
+      "content": "额度到底怎么算",
+      "music": 0.0
+    },
+    {
+      "from": 23.56,
+      "to": 24.61,
+      "sid": 19,
+      "location": 2,
+      "content": "就怎么测",
+      "music": 0.0
+    },
+    {
+      "from": 24.61,
+      "to": 27.05,
+      "sid": 20,
+      "location": 2,
+      "content": "三家订阅每家计划60次",
+      "music": 0.0
+    },
+    {
+      "from": 27.05,
+      "to": 29.31,
+      "sid": 21,
+      "location": 2,
+      "content": "分封时古时两轮",
+      "music": 0.0
+    },
+    {
+      "from": 29.31,
+      "to": 31.31,
+      "sid": 22,
+      "location": 2,
+      "content": "官方另外补30次封时",
+      "music": 0.0
+    },
+    {
+      "from": 31.31,
+      "to": 33.35,
+      "sid": 23,
+      "location": 2,
+      "content": "最后实际发起207次",
+      "music": 0.0
+    },
+    {
+      "from": 33.35,
+      "to": 34.43,
+      "sid": 24,
+      "location": 2,
+      "content": "拿到205次",
+      "music": 0.0
+    },
+    {
+      "from": 34.43,
+      "to": 36.55,
+      "sid": 25,
+      "location": 2,
+      "content": "最终答案都是一个接一个跑的",
+      "music": 0.0
+    },
+    {
+      "from": 36.55,
+      "to": 37.01,
+      "sid": 26,
+      "location": 2,
+      "content": "没有测",
+      "music": 0.0
+    },
+    {
+      "from": 37.01,
+      "to": 40.44,
+      "sid": 27,
+      "location": 2,
+      "content": "并发任务是写一个CSV导出函数",
+      "music": 0.0
+    },
+    {
+      "from": 40.44,
+      "to": 42.52,
+      "sid": 28,
+      "location": 2,
+      "content": "再连续追问加长材料",
+      "music": 0.0
+    },
+    {
+      "from": 42.52,
+      "to": 45.78,
+      "sid": 29,
+      "location": 2,
+      "content": "修改要求相同时段给一样的材料",
+      "music": 0.0
+    },
+    {
+      "from": 45.78,
+      "to": 47.4,
+      "sid": 30,
+      "location": 2,
+      "content": "发送顺序也轮换",
+      "music": 0.0
+    },
+    {
+      "from": 47.4,
+      "to": 50.37,
+      "sid": 31,
+      "location": 2,
+      "content": "尽量减少谁先测谁后测的影响",
+      "music": 0.0
+    },
+    {
+      "from": 50.37,
+      "to": 53.49,
+      "sid": 32,
+      "location": 2,
+      "content": "这次统一的是任务材料和验收标准",
+      "music": 0.0
+    },
+    {
+      "from": 53.49,
+      "to": 55.45,
+      "sid": 33,
+      "location": 2,
+      "content": "你实际用起来要等多久",
+      "music": 0.0
+    },
+    {
+      "from": 55.45,
+      "to": 56.69,
+      "sid": 34,
+      "location": 2,
+      "content": "会消耗多少额度",
+      "music": 0.0
+    },
+    {
+      "from": 56.69,
+      "to": 58.63,
+      "sid": 35,
+      "location": 2,
+      "content": "是这期重点比较的两件事",
+      "music": 0.0
+    },
+    {
+      "from": 58.63,
+      "to": 60.01,
+      "sid": 36,
+      "location": 2,
+      "content": "先看任务完成的怎么样",
+      "music": 0.0
+    },
+    {
+      "from": 60.01,
+      "to": 61.91,
+      "sid": 37,
+      "location": 2,
+      "content": "我把它交出来的函数提出来",
+      "music": 0.0
+    },
+    {
+      "from": 61.91,
+      "to": 67.09,
+      "sid": 38,
+      "location": 2,
+      "content": "检查空数据零和false逗号引号换行列顺序",
+      "music": 0.0
+    },
+    {
+      "from": 67.09,
+      "to": 71.169,
+      "sid": 39,
+      "location": 2,
+      "content": "再要求他修改BOM4家共同完成的那批任务里",
+      "music": 0.0
+    },
+    {
+      "from": 71.169,
+      "to": 72.869,
+      "sid": 40,
+      "location": 2,
+      "content": "每家21份完整代码",
+      "music": 0.0
+    },
+    {
+      "from": 75.479,
+      "to": 78.119,
+      "sid": 41,
+      "location": 2,
+      "content": "基本上大家教出来的完整代码都通过了",
+      "music": 0.0
+    },
+    {
+      "from": 78.119,
+      "to": 80.199,
+      "sid": 42,
+      "location": 2,
+      "content": "全部检查完成度打平",
+      "music": 0.0
+    },
+    {
+      "from": 80.199,
+      "to": 82.53,
+      "sid": 43,
+      "location": 2,
+      "content": "接下来看的就是同样能交差",
+      "music": 0.0
+    },
+    {
+      "from": 82.53,
+      "to": 83.69,
+      "sid": 44,
+      "location": 2,
+      "content": "我要多等多久",
+      "music": 0.0
+    },
+    {
+      "from": 83.69,
+      "to": 85.69,
+      "sid": 45,
+      "location": 2,
+      "content": "又要多消耗多少额度速度",
+      "music": 0.0
+    },
+    {
+      "from": 85.69,
+      "to": 87.419,
+      "sid": 46,
+      "location": 2,
+      "content": "这里我另外补了一轮",
+      "music": 0.0
+    },
+    {
+      "from": 87.419,
+      "to": 89.179,
+      "sid": 47,
+      "location": 2,
+      "content": "直接从任务请求发出",
+      "music": 0.0
+    },
+    {
+      "from": 89.179,
+      "to": 91.699,
+      "sid": 48,
+      "location": 2,
+      "content": "开始计时到完整答案返回结束",
+      "music": 0.0
+    },
+    {
+      "from": 91.699,
+      "to": 94.019,
+      "sid": 49,
+      "location": 2,
+      "content": "无算客户端启动和结束处理",
+      "music": 0.0
+    },
+    {
+      "from": 94.019,
+      "to": 96.18,
+      "sid": 50,
+      "location": 2,
+      "content": "这次换成同一份JASON生成任务",
+      "music": 0.0
+    },
+    {
+      "from": 96.18,
+      "to": 98.48,
+      "sid": 51,
+      "location": 2,
+      "content": "在古时用同一个采集工具",
+      "music": 0.0
+    },
+    {
+      "from": 98.48,
+      "to": 99.76,
+      "sid": 52,
+      "location": 2,
+      "content": "三家各跑五次",
+      "music": 0.0
+    },
+    {
+      "from": 99.76,
+      "to": 100.789,
+      "sid": 53,
+      "location": 2,
+      "content": "轮换顺序",
+      "music": 0.0
+    },
+    {
+      "from": 100.789,
+      "to": 104.029,
+      "sid": 54,
+      "location": 2,
+      "content": "它和前面的CSV功能测试是两批数据分开",
+      "music": 0.0
+    },
+    {
+      "from": 104.029,
+      "to": 106.1,
+      "sid": 55,
+      "location": 2,
+      "content": "看完整返回时间的中位数",
+      "music": 0.0
+    },
+    {
+      "from": 106.1,
+      "to": 107.5,
+      "sid": 56,
+      "location": 2,
+      "content": "官方11.4秒",
+      "music": 0.0
+    },
+    {
+      "from": 107.5,
+      "to": 108.98,
+      "sid": 57,
+      "location": 2,
+      "content": "open design10.9秒",
+      "music": 0.0
+    },
+    {
+      "from": 108.98,
+      "to": 110.66,
+      "sid": 58,
+      "location": 2,
+      "content": "open code26.8秒",
+      "music": 0.0
+    },
+    {
+      "from": 110.66,
+      "to": 114.359,
+      "sid": 59,
+      "location": 2,
+      "content": "也就是说这轮官方和open design比较接近",
+      "music": 0.0
+    },
+    {
+      "from": 114.359,
+      "to": 116.09,
+      "sid": 60,
+      "location": 2,
+      "content": "open code等待更长",
+      "music": 0.0
+    },
+    {
+      "from": 116.09,
+      "to": 118.87,
+      "sid": 61,
+      "location": 2,
+      "content": "但每家只有五次半秒的差距",
+      "music": 0.0
+    },
+    {
+      "from": 118.87,
+      "to": 120.71,
+      "sid": 62,
+      "location": 2,
+      "content": "我不拿它来封速度冠军",
+      "music": 0.0
+    },
+    {
+      "from": 120.71,
+      "to": 121.97,
+      "sid": 63,
+      "location": 2,
+      "content": "如果只看正文",
+      "music": 0.0
+    },
+    {
+      "from": 121.97,
+      "to": 123.53,
+      "sid": 64,
+      "location": 2,
+      "content": "开始出来以后",
+      "music": 0.0
+    },
+    {
+      "from": 123.53,
+      "to": 125.33,
+      "sid": 65,
+      "location": 2,
+      "content": "每秒收到多少token",
+      "music": 0.0
+    },
+    {
+      "from": 125.33,
+      "to": 127.11,
+      "sid": 66,
+      "location": 2,
+      "content": "官方大约425",
+      "music": 0.0
+    },
+    {
+      "from": 127.11,
+      "to": 128.69,
+      "sid": 67,
+      "location": 2,
+      "content": "Open design413",
+      "music": 0.0
+    },
+    {
+      "from": 128.69,
+      "to": 130.37,
+      "sid": 68,
+      "location": 2,
+      "content": "Open code227",
+      "music": 0.0
+    },
+    {
+      "from": 130.37,
+      "to": 132.97,
+      "sid": 69,
+      "location": 2,
+      "content": "这部分不算前面的等待和思考",
+      "music": 0.0
+    },
+    {
+      "from": 132.97,
+      "to": 135.37,
+      "sid": 70,
+      "location": 2,
+      "content": "是正文流到达速率的估算",
+      "music": 0.0
+    },
+    {
+      "from": 135.37,
+      "to": 137.55,
+      "sid": 71,
+      "location": 2,
+      "content": "也可能受网络缓冲影响",
+      "music": 0.0
+    },
+    {
+      "from": 137.55,
+      "to": 140.25,
+      "sid": 72,
+      "location": 2,
+      "content": "所以我的判断是股策这套任务里",
+      "music": 0.0
+    },
+    {
+      "from": 140.25,
+      "to": 142.15,
+      "sid": 73,
+      "location": 2,
+      "content": "官方和open design都比较利落",
+      "music": 0.0
+    },
+    {
+      "from": 142.15,
+      "to": 143.37,
+      "sid": 74,
+      "location": 2,
+      "content": "open code慢一些",
+      "music": 0.0
+    },
+    {
+      "from": 143.37,
+      "to": 144.93,
+      "sid": 75,
+      "location": 2,
+      "content": "至于风时是不是也这样",
+      "music": 0.0
+    },
+    {
+      "from": 144.93,
+      "to": 146.09,
+      "sid": 76,
+      "location": 2,
+      "content": "不能拿这轮股时",
+      "music": 0.0
+    },
+    {
+      "from": 146.09,
+      "to": 147.57,
+      "sid": 77,
+      "location": 2,
+      "content": "结果替他回答慢的",
+      "music": 0.0
+    },
+    {
+      "from": 147.57,
+      "to": 150.74,
+      "sid": 78,
+      "location": 2,
+      "content": "现在的账单耗时和这三家定义不一样",
+      "music": 0.0
+    },
+    {
+      "from": 150.74,
+      "to": 151.88,
+      "sid": 79,
+      "location": 2,
+      "content": "这一页我先留空",
+      "music": 0.0
+    },
+    {
+      "from": 151.88,
+      "to": 154.02,
+      "sid": 80,
+      "location": 2,
+      "content": "不把不同口径的数字硬排在一起",
+      "music": 0.0
+    },
+    {
+      "from": 154.02,
+      "to": 155.649,
+      "sid": 81,
+      "location": 2,
+      "content": "稳定性先给结论",
+      "music": 0.0
+    },
+    {
+      "from": 155.649,
+      "to": 158.149,
+      "sid": 82,
+      "location": 2,
+      "content": "这轮open code和open design都稳",
+      "music": 0.0
+    },
+    {
+      "from": 158.149,
+      "to": 161.229,
+      "sid": 83,
+      "location": 2,
+      "content": "60次发起60次都拿到了完整答案",
+      "music": 0.0
+    },
+    {
+      "from": 161.229,
+      "to": 163.05,
+      "sid": 84,
+      "location": 2,
+      "content": "交付这一项两家打平",
+      "music": 0.0
+    },
+    {
+      "from": 163.05,
+      "to": 164.55,
+      "sid": 85,
+      "location": 2,
+      "content": "command发起57次",
+      "music": 0.0
+    },
+    {
+      "from": 164.55,
+      "to": 165.81,
+      "sid": 86,
+      "location": 2,
+      "content": "拿到55次答案",
+      "music": 0.0
+    },
+    {
+      "from": 165.81,
+      "to": 169.27,
+      "sid": 87,
+      "location": 2,
+      "content": "剩下两次卡在我设置的一轮测试上限模型",
+      "music": 0.0
+    },
+    {
+      "from": 169.27,
+      "to": 170.59,
+      "sid": 88,
+      "location": 2,
+      "content": "想先读文件工具",
+      "music": 0.0
+    },
+    {
+      "from": 170.59,
+      "to": 172.45,
+      "sid": 89,
+      "location": 2,
+      "content": "这一步跑完流程就停了",
+      "music": 0.0
+    },
+    {
+      "from": 172.45,
+      "to": 174.09,
+      "sid": 90,
+      "location": 2,
+      "content": "这是测试流程没走完",
+      "music": 0.0
+    },
+    {
+      "from": 174.09,
+      "to": 176.13,
+      "sid": 91,
+      "location": 2,
+      "content": "没有证据显示是平台断流",
+      "music": 0.0
+    },
+    {
+      "from": 176.13,
+      "to": 180.149,
+      "sid": 92,
+      "location": 2,
+      "content": "所以这轮我能确认open code和open design的交付稳定",
+      "music": 0.0
+    },
+    {
+      "from": 180.149,
+      "to": 182.409,
+      "sid": 93,
+      "location": 2,
+      "content": "command的平台稳定性还不能",
+      "music": 0.0
+    },
+    {
+      "from": 182.409,
+      "to": 183.84,
+      "sid": 94,
+      "location": 2,
+      "content": "因为这两次就盘差",
+      "music": 0.0
+    },
+    {
+      "from": 183.84,
+      "to": 186.86,
+      "sid": 95,
+      "location": 2,
+      "content": "这一项我暂时不给他排高低",
+      "music": 0.0
+    },
+    {
+      "from": 186.86,
+      "to": 189.2,
+      "sid": 96,
+      "location": 2,
+      "content": "如果你问这次谁用起来更省心",
+      "music": 0.0
+    },
+    {
+      "from": 189.2,
+      "to": 191.899,
+      "sid": 97,
+      "location": 2,
+      "content": "open code和open design都交出了完整记录",
+      "music": 0.0
+    },
+    {
+      "from": 191.899,
+      "to": 193.939,
+      "sid": 98,
+      "location": 2,
+      "content": "但60次测试也不等于",
+      "music": 0.0
+    },
+    {
+      "from": 193.939,
+      "to": 195.999,
+      "sid": 99,
+      "location": 2,
+      "content": "以后长期使用绝不会出问题",
+      "music": 0.0
+    },
+    {
+      "from": 195.999,
+      "to": 198.239,
+      "sid": 100,
+      "location": 2,
+      "content": "再来看我们比较关心的价格问题",
+      "music": 0.0
+    },
+    {
+      "from": 198.239,
+      "to": 200.58,
+      "sid": 101,
+      "location": 2,
+      "content": "同样一批任务做完以后",
+      "music": 0.0
+    },
+    {
+      "from": 200.58,
+      "to": 202.98,
+      "sid": 102,
+      "location": 2,
+      "content": "究竟吃掉了这个套餐多少月额度",
+      "music": 0.0
+    },
+    {
+      "from": 202.98,
+      "to": 206.28,
+      "sid": 103,
+      "location": 2,
+      "content": "按尼康14家都完成的25次任务来看",
+      "music": 0.0
+    },
+    {
+      "from": 206.28,
+      "to": 207.39,
+      "sid": 104,
+      "location": 2,
+      "content": "先定基准",
+      "music": 0.0
+    },
+    {
+      "from": 207.39,
+      "to": 210.87,
+      "sid": 105,
+      "location": 2,
+      "content": "deep sk官方一共消耗90一点87万token",
+      "music": 0.0
+    },
+    {
+      "from": 210.87,
+      "to": 212.23,
+      "sid": 106,
+      "location": 2,
+      "content": "按官方价格算",
+      "music": 0.0
+    },
+    {
+      "from": 212.23,
+      "to": 213.86,
+      "sid": 107,
+      "location": 2,
+      "content": "大约一块五毛四",
+      "music": 0.0
+    },
+    {
+      "from": 213.86,
+      "to": 216.58,
+      "sid": 108,
+      "location": 2,
+      "content": "这里的总量包括未缓存输入",
+      "music": 0.0
+    },
+    {
+      "from": 216.58,
+      "to": 217.56,
+      "sid": 109,
+      "location": 2,
+      "content": "缓存输入",
+      "music": 0.0
+    },
+    {
+      "from": 217.56,
+      "to": 219.26,
+      "sid": 110,
+      "location": 2,
+      "content": "还有包含思考的输出",
+      "music": 0.0
+    },
+    {
+      "from": 219.26,
+      "to": 221.04,
+      "sid": 111,
+      "location": 2,
+      "content": "把官方这批用量当成一倍",
+      "music": 0.0
+    },
+    {
+      "from": 221.04,
+      "to": 222.82,
+      "sid": 112,
+      "location": 2,
+      "content": "open code用了91.80万",
+      "music": 0.0
+    },
+    {
+      "from": 222.82,
+      "to": 223.22,
+      "sid": 113,
+      "location": 2,
+      "content": "Token",
+      "music": 0.0
+    },
+    {
+      "from": 223.22,
+      "to": 225.1,
+      "sid": 114,
+      "location": 2,
+      "content": "open design用了91.79万",
+      "music": 0.0
+    },
+    {
+      "from": 225.1,
+      "to": 227.16,
+      "sid": 115,
+      "location": 2,
+      "content": "两家都基本和官方的消耗一样",
+      "music": 0.0
+    },
+    {
+      "from": 227.16,
+      "to": 229.2,
+      "sid": 116,
+      "location": 2,
+      "content": "command用了127.18万",
+      "music": 0.0
+    },
+    {
+      "from": 229.2,
+      "to": 230.84,
+      "sid": 117,
+      "location": 2,
+      "content": "大约是官方的1.38倍",
+      "music": 0.0
+    },
+    {
+      "from": 230.84,
+      "to": 232.579,
+      "sid": 118,
+      "location": 2,
+      "content": "也就是多了38%左右",
+      "music": 0.0
+    },
+    {
+      "from": 232.579,
+      "to": 234.999,
+      "sid": 119,
+      "location": 2,
+      "content": "所以光看这批任务的token总量",
+      "music": 0.0
+    },
+    {
+      "from": 234.999,
+      "to": 237.319,
+      "sid": 120,
+      "location": 2,
+      "content": "open code open design和官方基本接近",
+      "music": 0.0
+    },
+    {
+      "from": 237.319,
+      "to": 238.49,
+      "sid": 121,
+      "location": 2,
+      "content": "command用的更多",
+      "music": 0.0
+    },
+    {
+      "from": 238.49,
+      "to": 239.73,
+      "sid": 122,
+      "location": 2,
+      "content": "这里比的是用量",
+      "music": 0.0
+    },
+    {
+      "from": 239.73,
+      "to": 241.93,
+      "sid": 123,
+      "location": 2,
+      "content": "不是说费用就一定贵38%",
+      "music": 0.0
+    },
+    {
+      "from": 241.93,
+      "to": 244.57,
+      "sid": 124,
+      "location": 2,
+      "content": "但我不直接拿token总数排价格",
+      "music": 0.0
+    },
+    {
+      "from": 244.57,
+      "to": 245.79,
+      "sid": 125,
+      "location": 2,
+      "content": "因为读输入",
+      "music": 0.0
+    },
+    {
+      "from": 245.79,
+      "to": 248.41,
+      "sid": 126,
+      "location": 2,
+      "content": "读缓存生成答案单价不一样",
+      "music": 0.0
+    },
+    {
+      "from": 248.41,
+      "to": 251.01,
+      "sid": 127,
+      "location": 2,
+      "content": "咱们把他们各自真实扣掉的额度",
+      "music": 0.0
+    },
+    {
+      "from": 251.01,
+      "to": 252.51,
+      "sid": 128,
+      "location": 2,
+      "content": "除以对应的月额度",
+      "music": 0.0
+    },
+    {
+      "from": 252.51,
+      "to": 255.98,
+      "sid": 129,
+      "location": 2,
+      "content": "就能看出同样的活到底吃掉几分之几",
+      "music": 0.0
+    },
+    {
+      "from": 255.98,
+      "to": 258.26,
+      "sid": 130,
+      "location": 2,
+      "content": "按各家的月额度规则换算",
+      "music": 0.0
+    },
+    {
+      "from": 258.26,
+      "to": 258.98,
+      "sid": 131,
+      "location": 2,
+      "content": "Open code",
+      "music": 0.0
+    },
+    {
+      "from": 258.98,
+      "to": 260.8,
+      "sid": 132,
+      "location": 2,
+      "content": "这批占0.29%",
+      "music": 0.0
+    },
+    {
+      "from": 260.8,
+      "to": 262.64,
+      "sid": 133,
+      "location": 2,
+      "content": "大约1/350",
+      "music": 0.0
+    },
+    {
+      "from": 262.64,
+      "to": 264.74,
+      "sid": 134,
+      "location": 2,
+      "content": "command占0.39%",
+      "music": 0.0
+    },
+    {
+      "from": 264.74,
+      "to": 266.42,
+      "sid": 135,
+      "location": 2,
+      "content": "大约1/260",
+      "music": 0.0
+    },
+    {
+      "from": 266.42,
+      "to": 267.0,
+      "sid": 136,
+      "location": 2,
+      "content": "喷design",
+      "music": 0.0
+    },
+    {
+      "from": 267.0,
+      "to": 267.74,
+      "sid": 137,
+      "location": 2,
+      "content": "现在有活动",
+      "music": 0.0
+    },
+    {
+      "from": 267.74,
+      "to": 269.6,
+      "sid": 138,
+      "location": 2,
+      "content": "这批大约占0.1%",
+      "music": 0.0
+    },
+    {
+      "from": 269.6,
+      "to": 271.44,
+      "sid": 139,
+      "location": 2,
+      "content": "也就是一1‰左右",
+      "music": 0.0
+    },
+    {
+      "from": 271.44,
+      "to": 273.06,
+      "sid": 140,
+      "location": 2,
+      "content": "假如恢复常规倍率",
+      "music": 0.0
+    },
+    {
+      "from": 273.06,
+      "to": 275.92,
+      "sid": 141,
+      "location": 2,
+      "content": "同样这批任务预计占0.19%",
+      "music": 0.0
+    },
+    {
+      "from": 275.92,
+      "to": 277.39,
+      "sid": 142,
+      "location": 2,
+      "content": "大约五1%",
+      "music": 0.0
+    },
+    {
+      "from": 277.39,
+      "to": 278.49,
+      "sid": 143,
+      "location": 2,
+      "content": "这个好理解了",
+      "music": 0.0
+    },
+    {
+      "from": 278.49,
+      "to": 281.27,
+      "sid": 144,
+      "location": 2,
+      "content": "先按每月十美元的基础月费比较",
+      "music": 0.0
+    },
+    {
+      "from": 281.27,
+      "to": 282.63,
+      "sid": 145,
+      "location": 2,
+      "content": "不计额外手续费",
+      "music": 0.0
+    },
+    {
+      "from": 282.63,
+      "to": 283.86,
+      "sid": 146,
+      "location": 2,
+      "content": "做完同样的活儿",
+      "music": 0.0
+    },
+    {
+      "from": 283.86,
+      "to": 288.22,
+      "sid": 147,
+      "location": 2,
+      "content": "open design活动期吃掉的月额度最少恢复常规以后",
+      "music": 0.0
+    },
+    {
+      "from": 288.22,
+      "to": 292.59,
+      "sid": 148,
+      "location": 2,
+      "content": "这批风时任务按规则推算仍然比open code少",
+      "music": 0.0
+    },
+    {
+      "from": 292.59,
+      "to": 294.23,
+      "sid": 149,
+      "location": 2,
+      "content": "open design的活动只写一周",
+      "music": 0.0
+    },
+    {
+      "from": 294.23,
+      "to": 295.23,
+      "sid": 150,
+      "location": 2,
+      "content": "还有五小时",
+      "music": 0.0
+    },
+    {
+      "from": 295.23,
+      "to": 296.27,
+      "sid": 151,
+      "location": 2,
+      "content": "七天的上限",
+      "music": 0.0
+    },
+    {
+      "from": 296.27,
+      "to": 298.69,
+      "sid": 152,
+      "location": 2,
+      "content": "这里比较的是这批任务占月池的比例",
+      "music": 0.0
+    },
+    {
+      "from": 298.69,
+      "to": 299.91,
+      "sid": 153,
+      "location": 2,
+      "content": "能不能把整个月用满",
+      "music": 0.0
+    },
+    {
+      "from": 299.91,
+      "to": 300.81,
+      "sid": 154,
+      "location": 2,
+      "content": "是下一回事",
+      "music": 0.0
+    },
+    {
+      "from": 300.81,
+      "to": 302.299,
+      "sid": 155,
+      "location": 2,
+      "content": "用得多就接着看风骨",
+      "music": 0.0
+    },
+    {
+      "from": 302.299,
+      "to": 304.199,
+      "sid": 156,
+      "location": 2,
+      "content": "open node和command的公开规则里",
+      "music": 0.0
+    },
+    {
+      "from": 304.199,
+      "to": 307.72,
+      "sid": 157,
+      "location": 2,
+      "content": "峰时输入输出价格大约是古时的两倍",
+      "music": 0.0
+    },
+    {
+      "from": 307.72,
+      "to": 308.84,
+      "sid": 158,
+      "location": 2,
+      "content": "换成北京时间",
+      "music": 0.0
+    },
+    {
+      "from": 308.84,
+      "to": 311.2,
+      "sid": 159,
+      "location": 2,
+      "content": "周一到周五上午九点到12点",
+      "music": 0.0
+    },
+    {
+      "from": 311.2,
+      "to": 313.45,
+      "sid": 160,
+      "location": 2,
+      "content": "下午两点到六点是峰时",
+      "music": 0.0
+    },
+    {
+      "from": 313.45,
+      "to": 315.81,
+      "sid": 161,
+      "location": 2,
+      "content": "这同样的任务在open code上",
+      "music": 0.0
+    },
+    {
+      "from": 315.81,
+      "to": 318.17,
+      "sid": 162,
+      "location": 2,
+      "content": "白天跑和晚上跑消耗会不一样",
+      "music": 0.0
+    },
+    {
+      "from": 318.17,
+      "to": 319.33,
+      "sid": 163,
+      "location": 2,
+      "content": "主要下班以后",
+      "music": 0.0
+    },
+    {
+      "from": 319.33,
+      "to": 320.59,
+      "sid": 164,
+      "location": 2,
+      "content": "周末写代码的人",
+      "music": 0.0
+    },
+    {
+      "from": 320.59,
+      "to": 323.11,
+      "sid": 165,
+      "location": 2,
+      "content": "股价这个优惠是更容易用上的",
+      "music": 0.0
+    },
+    {
+      "from": 323.11,
+      "to": 326.38,
+      "sid": 166,
+      "location": 2,
+      "content": "这轮股时同样30次任务按规则换算",
+      "music": 0.0
+    },
+    {
+      "from": 326.38,
+      "to": 329.16,
+      "sid": 167,
+      "location": 2,
+      "content": "open code战略额度大约0.16%",
+      "music": 0.0
+    },
+    {
+      "from": 329.16,
+      "to": 331.82,
+      "sid": 168,
+      "location": 2,
+      "content": "open design活动期约0.11%",
+      "music": 0.0
+    },
+    {
+      "from": 331.82,
+      "to": 333.419,
+      "sid": 169,
+      "location": 2,
+      "content": "现在还是open design少",
+      "music": 0.0
+    },
+    {
+      "from": 333.419,
+      "to": 334.619,
+      "sid": 170,
+      "location": 2,
+      "content": "可恢复常规以后",
+      "music": 0.0
+    },
+    {
+      "from": 334.619,
+      "to": 337.85,
+      "sid": 171,
+      "location": 2,
+      "content": "open design预计变成0.22%就反过来了",
+      "music": 0.0
+    },
+    {
+      "from": 337.85,
+      "to": 339.69,
+      "sid": 172,
+      "location": 2,
+      "content": "所以价格结论就两句",
+      "music": 0.0
+    },
+    {
+      "from": 339.69,
+      "to": 341.59,
+      "sid": 173,
+      "location": 2,
+      "content": "活动期open design更省",
+      "music": 0.0
+    },
+    {
+      "from": 341.59,
+      "to": 342.85,
+      "sid": 174,
+      "location": 2,
+      "content": "恢复常规以后",
+      "music": 0.0
+    },
+    {
+      "from": 342.85,
+      "to": 345.89,
+      "sid": 175,
+      "location": 2,
+      "content": "白天这批任务仍是open design更省闲时",
+      "music": 0.0
+    },
+    {
+      "from": 345.89,
+      "to": 347.59,
+      "sid": 176,
+      "location": 2,
+      "content": "这批则是open code更省",
+      "music": 0.0
+    },
+    {
+      "from": 347.59,
+      "to": 348.29,
+      "sid": 177,
+      "location": 2,
+      "content": "这五小时",
+      "music": 0.0
+    },
+    {
+      "from": 348.29,
+      "to": 349.83,
+      "sid": 178,
+      "location": 2,
+      "content": "七天的窗口月额度大",
+      "music": 0.0
+    },
+    {
+      "from": 349.83,
+      "to": 351.52,
+      "sid": 179,
+      "location": 2,
+      "content": "不代表你今晚能一次用完",
+      "music": 0.0
+    },
+    {
+      "from": 351.52,
+      "to": 352.84,
+      "sid": 180,
+      "location": 2,
+      "content": "这就像买了一张饭卡",
+      "music": 0.0
+    },
+    {
+      "from": 352.84,
+      "to": 353.6,
+      "sid": 181,
+      "location": 2,
+      "content": "余额不少",
+      "music": 0.0
+    },
+    {
+      "from": 353.6,
+      "to": 355.0,
+      "sid": 182,
+      "location": 2,
+      "content": "但一顿只能刷这么多",
+      "music": 0.0
+    },
+    {
+      "from": 355.0,
+      "to": 356.14,
+      "sid": 183,
+      "location": 2,
+      "content": "你今晚要赶项目",
+      "music": 0.0
+    },
+    {
+      "from": 356.14,
+      "to": 357.65,
+      "sid": 184,
+      "location": 2,
+      "content": "先撞到五小时上限",
+      "music": 0.0
+    },
+    {
+      "from": 357.65,
+      "to": 360.31,
+      "sid": 185,
+      "location": 2,
+      "content": "月额度剩再多也解决不了眼前的问题",
+      "music": 0.0
+    },
+    {
+      "from": 360.31,
+      "to": 362.85,
+      "sid": 186,
+      "location": 2,
+      "content": "我的建议是先看你几点用",
+      "music": 0.0
+    },
+    {
+      "from": 362.85,
+      "to": 364.61,
+      "sid": 187,
+      "location": 2,
+      "content": "会不会集中跑很多任务",
+      "music": 0.0
+    },
+    {
+      "from": 364.61,
+      "to": 365.57,
+      "sid": 188,
+      "location": 2,
+      "content": "再看月额度",
+      "music": 0.0
+    },
+    {
+      "from": 365.57,
+      "to": 368.47,
+      "sid": 189,
+      "location": 2,
+      "content": "别把今天的促销榜当成永久的购买攻略",
+      "music": 0.0
+    },
+    {
+      "from": 368.47,
+      "to": 370.21,
+      "sid": 190,
+      "location": 2,
+      "content": "就直接说我会怎么买",
+      "music": 0.0
+    },
+    {
+      "from": 370.21,
+      "to": 372.55,
+      "sid": 191,
+      "location": 2,
+      "content": "第一种偶尔用用量不固定",
+      "music": 0.0
+    },
+    {
+      "from": 372.55,
+      "to": 374.5,
+      "sid": 192,
+      "location": 2,
+      "content": "先从官方按量开始",
+      "music": 0.0
+    },
+    {
+      "from": 374.5,
+      "to": 377.34,
+      "sid": 193,
+      "location": 2,
+      "content": "五册里他和open design的任务耗时接近",
+      "music": 0.0
+    },
+    {
+      "from": 377.34,
+      "to": 379.55,
+      "sid": 194,
+      "location": 2,
+      "content": "也不用先付整个月的订阅费",
+      "music": 0.0
+    },
+    {
+      "from": 379.55,
+      "to": 381.53,
+      "sid": 195,
+      "location": 2,
+      "content": "等你知道自己一个月能用多少",
+      "music": 0.0
+    },
+    {
+      "from": 381.53,
+      "to": 382.95,
+      "sid": 196,
+      "location": 2,
+      "content": "再决定要不要买套餐",
+      "music": 0.0
+    },
+    {
+      "from": 382.95,
+      "to": 385.07,
+      "sid": 197,
+      "location": 2,
+      "content": "第二种工作日白天重度用",
+      "music": 0.0
+    },
+    {
+      "from": 385.07,
+      "to": 386.51,
+      "sid": 198,
+      "location": 2,
+      "content": "我会优先关注open design",
+      "music": 0.0
+    },
+    {
+      "from": 386.51,
+      "to": 387.42,
+      "sid": 199,
+      "location": 2,
+      "content": "当前的活动",
+      "music": 0.0
+    },
+    {
+      "from": 387.42,
+      "to": 389.42,
+      "sid": 200,
+      "location": 2,
+      "content": "五册里他的任务耗时接近官方",
+      "music": 0.0
+    },
+    {
+      "from": 389.42,
+      "to": 391.14,
+      "sid": 201,
+      "location": 2,
+      "content": "之前60次也都拿到了答案",
+      "music": 0.0
+    },
+    {
+      "from": 391.14,
+      "to": 392.75,
+      "sid": 202,
+      "location": 2,
+      "content": "活动价格确实值得看",
+      "music": 0.0
+    },
+    {
+      "from": 392.75,
+      "to": 394.69,
+      "sid": 203,
+      "location": 2,
+      "content": "但买之前确认一下活动还在不在",
+      "music": 0.0
+    },
+    {
+      "from": 394.69,
+      "to": 395.55,
+      "sid": 204,
+      "location": 2,
+      "content": "窗口够不够",
+      "music": 0.0
+    },
+    {
+      "from": 395.55,
+      "to": 396.86,
+      "sid": 205,
+      "location": 2,
+      "content": "到现后会怎么样",
+      "music": 0.0
+    },
+    {
+      "from": 396.86,
+      "to": 397.62,
+      "sid": 206,
+      "location": 2,
+      "content": "第三种",
+      "music": 0.0
+    },
+    {
+      "from": 397.62,
+      "to": 399.52,
+      "sid": 207,
+      "location": 2,
+      "content": "晚上或者周末集中用",
+      "music": 0.0
+    },
+    {
+      "from": 399.52,
+      "to": 402.24,
+      "sid": 208,
+      "location": 2,
+      "content": "重点比较open code的股价和窗口",
+      "music": 0.0
+    },
+    {
+      "from": 402.24,
+      "to": 403.86,
+      "sid": 209,
+      "location": 2,
+      "content": "他这轮没有速度优势",
+      "music": 0.0
+    },
+    {
+      "from": 403.86,
+      "to": 405.56,
+      "sid": 210,
+      "location": 2,
+      "content": "但古时额度更耐用",
+      "music": 0.0
+    },
+    {
+      "from": 405.56,
+      "to": 407.86,
+      "sid": 211,
+      "location": 2,
+      "content": "尤其open design恢复常规以后",
+      "music": 0.0
+    },
+    {
+      "from": 407.86,
+      "to": 409.92,
+      "sid": 212,
+      "location": 2,
+      "content": "值得重新算一遍common",
+      "music": 0.0
+    },
+    {
+      "from": 409.92,
+      "to": 414.0,
+      "sid": 213,
+      "location": 2,
+      "content": "我这轮先不把它放在只为flash买套餐的第一推荐",
+      "music": 0.0
+    },
+    {
+      "from": 414.0,
+      "to": 415.38,
+      "sid": 214,
+      "location": 2,
+      "content": "做完同样的任务",
+      "music": 0.0
+    },
+    {
+      "from": 415.38,
+      "to": 417.36,
+      "sid": 215,
+      "location": 2,
+      "content": "它消耗的模型额度更多",
+      "music": 0.0
+    },
+    {
+      "from": 417.36,
+      "to": 419.24,
+      "sid": 216,
+      "location": 2,
+      "content": "如果你还要用它的其他功能",
+      "music": 0.0
+    },
+    {
+      "from": 419.24,
+      "to": 420.65,
+      "sid": 217,
+      "location": 2,
+      "content": "那可以另外考虑",
+      "music": 0.0
+    },
+    {
+      "from": 420.65,
+      "to": 421.99,
+      "sid": 218,
+      "location": 2,
+      "content": "你就记住三句话",
+      "music": 0.0
+    },
+    {
+      "from": 421.99,
+      "to": 422.85,
+      "sid": 219,
+      "location": 2,
+      "content": "用的少",
+      "music": 0.0
+    },
+    {
+      "from": 422.85,
+      "to": 423.71,
+      "sid": 220,
+      "location": 2,
+      "content": "先按量",
+      "music": 0.0
+    },
+    {
+      "from": 423.71,
+      "to": 424.83,
+      "sid": 221,
+      "location": 2,
+      "content": "白天重度用",
+      "music": 0.0
+    },
+    {
+      "from": 424.83,
+      "to": 428.33,
+      "sid": 222,
+      "location": 2,
+      "content": "看看当前活动晚上集中用算算股价",
+      "music": 0.0
+    },
+    {
+      "from": 428.33,
+      "to": 429.93,
+      "sid": 223,
+      "location": 2,
+      "content": "先按自己的习惯选",
+      "music": 0.0
+    },
+    {
+      "from": 429.93,
+      "to": 431.76,
+      "sid": 224,
+      "location": 2,
+      "content": "再看平台写了多大的额度",
+      "music": 0.0
+    }
+  ]
+}

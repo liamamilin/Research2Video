@@ -1,0 +1,323 @@
+{
+  "checked_at": "2026-11-10T09:33:53.174702+00:00",
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "evidence_json_parse",
+      "passed": true,
+      "detail": {
+        "files": 34
+      }
+    },
+    {
+      "check": "baseline_recomputed",
+      "passed": true,
+      "detail": {
+        "n": 263,
+        "total_views": 40073,
+        "median_views": 19,
+        "top1_share": 0.4975419858757767,
+        "top5_share": 0.6473935068499987
+      }
+    },
+    {
+      "check": "h24_recomputed",
+      "passed": true,
+      "detail": {
+        "statuses": {
+          "ok": 195,
+          "gap": 49,
+          "pending": 19
+        },
+        "median": 15
+      }
+    },
+    {
+      "check": "h72_recomputed",
+      "passed": true,
+      "detail": {
+        "statuses": {
+          "ok": 200,
+          "gap": 22,
+          "pending": 41
+        },
+        "median": 15.0
+      }
+    },
+    {
+      "check": "h168_recomputed",
+      "passed": true,
+      "detail": {
+        "statuses": {
+          "gap": 31,
+          "ok": 137,
+          "pending": 95
+        },
+        "median": 15
+      }
+    },
+    {
+      "check": "watch_avg_seconds",
+      "passed": true,
+      "detail": {
+        "n": 242,
+        "median": 42.0
+      }
+    },
+    {
+      "check": "watch_completion",
+      "passed": true,
+      "detail": {
+        "n": 249,
+        "median": 22.26
+      }
+    },
+    {
+      "check": "watch_exit3s",
+      "passed": true,
+      "detail": {
+        "n": 34,
+        "median": 43.644999999999996
+      }
+    },
+    {
+      "check": "watch_cover_pass",
+      "passed": true,
+      "detail": {
+        "n": 40,
+        "median": 58.14
+      }
+    },
+    {
+      "check": "completion_semantic_observation",
+      "passed": true,
+      "detail": {
+        "records": 243,
+        "within_one_percentage_point": 239
+      }
+    },
+    {
+      "check": "source_A01",
+      "passed": true,
+      "detail": {
+        "source": "evidence/A01-metadata.json"
+      }
+    },
+    {
+      "check": "source_C01",
+      "passed": true,
+      "detail": {
+        "source": "evidence/C01-metadata.json"
+      }
+    },
+    {
+      "check": "source_A02",
+      "passed": true,
+      "detail": {
+        "source": "evidence/A02-metadata.json"
+      }
+    },
+    {
+      "check": "source_C02",
+      "passed": true,
+      "detail": {
+        "source": "evidence/C02-metadata.json"
+      }
+    },
+    {
+      "check": "source_A03",
+      "passed": true,
+      "detail": {
+        "source": "evidence/A03-metadata.json"
+      }
+    },
+    {
+      "check": "source_A04",
+      "passed": true,
+      "detail": {
+        "source": "evidence/A04-metadata.json"
+      }
+    },
+    {
+      "check": "source_C03",
+      "passed": true,
+      "detail": {
+        "source": "evidence/C03-metadata.json"
+      }
+    },
+    {
+      "check": "source_A03candidate",
+      "passed": true,
+      "detail": {
+        "source": "evidence/A03candidate-metadata.json"
+      }
+    },
+    {
+      "check": "source_O01",
+      "passed": true,
+      "detail": {
+        "source": "evidence/own-baseline-rows.json"
+      }
+    },
+    {
+      "check": "source_O02",
+      "passed": true,
+      "detail": {
+        "source": "evidence/own-baseline-rows.json"
+      }
+    },
+    {
+      "check": "source_O03",
+      "passed": true,
+      "detail": {
+        "source": "evidence/own-baseline-rows.json"
+      }
+    },
+    {
+      "check": "source_O04",
+      "passed": true,
+      "detail": {
+        "source": "evidence/own-baseline-rows.json"
+      }
+    },
+    {
+      "check": "source_O05",
+      "passed": true,
+      "detail": {
+        "source": "evidence/own-baseline-rows.json"
+      }
+    },
+    {
+      "check": "source_O06",
+      "passed": true,
+      "detail": {
+        "source": "evidence/own-baseline-rows.json"
+      }
+    },
+    {
+      "check": "analysis_scope",
+      "passed": true,
+      "detail": {
+        "core": [
+          "A01",
+          "C01",
+          "A03",
+          "O01",
+          "O02",
+          "O03"
+        ],
+        "supplemental": [
+          "C02"
+        ]
+      }
+    },
+    {
+      "check": "subtitle_A01",
+      "passed": true,
+      "detail": {
+        "segments": 224,
+        "first_from": 0.04,
+        "last_to": 431.76,
+        "duration": 432
+      }
+    },
+    {
+      "check": "subtitle_C01",
+      "passed": true,
+      "detail": {
+        "segments": 225,
+        "first_from": 0.54,
+        "last_to": 513.74,
+        "duration": 522
+      }
+    },
+    {
+      "check": "subtitle_A03",
+      "passed": true,
+      "detail": {
+        "segments": 89,
+        "first_from": 5.24,
+        "last_to": 205.46,
+        "duration": 206
+      }
+    },
+    {
+      "check": "subtitle_C02",
+      "passed": true,
+      "detail": {
+        "segments": 201,
+        "first_from": 0.76,
+        "last_to": 549.32,
+        "duration": 576
+      }
+    },
+    {
+      "check": "media_own20-media-manifest.json",
+      "passed": true,
+      "detail": {
+        "sha256": "b27ab7576b1d4663569f84177722972eaf0f07bb1a9bddb9d72af1a5ba73373d",
+        "caption_exists": true,
+        "sampled_frames": 15
+      }
+    },
+    {
+      "check": "media_O02-media-manifest.json",
+      "passed": true,
+      "detail": {
+        "sha256": "74af8b1690d7a4b1440e9cf401fc8db727a9b8539cc38e7f77fd9567d2456a18",
+        "caption_exists": true,
+        "sampled_frames": 12
+      }
+    },
+    {
+      "check": "media_O03-media-manifest.json",
+      "passed": true,
+      "detail": {
+        "sha256": "ac97dfa979d0bb81806976ded0f81b6de2efccbaaaadf06d5fd9b76fb357709c",
+        "caption_exists": true,
+        "sampled_frames": 12
+      }
+    },
+    {
+      "check": "legacy_members_rates_lengths",
+      "passed": true,
+      "detail": {
+        "n": 39,
+        "title_len_median": 30,
+        "dur_median_s": 318,
+        "like_rate": 2.71,
+        "fav_rate": 1.11
+      }
+    },
+    {
+      "check": "same_author_pair",
+      "passed": true,
+      "detail": {
+        "play_ratio": 27.897391304347828
+      }
+    },
+    {
+      "check": "local_markdown_links",
+      "passed": true,
+      "detail": {
+        "checked": 50,
+        "broken": []
+      }
+    },
+    {
+      "check": "programme_and_brief_counts",
+      "passed": true,
+      "detail": {
+        "programmes": 3,
+        "briefs": 6
+      }
+    },
+    {
+      "check": "research_whitespace",
+      "passed": true,
+      "detail": {
+        "files_with_trailing_whitespace": []
+      }
+    }
+  ]
+}

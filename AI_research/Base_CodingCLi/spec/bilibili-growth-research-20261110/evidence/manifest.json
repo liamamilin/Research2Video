@@ -1,0 +1,37 @@
+{
+  "preserved_at": "2026-11-10T16:37:47.757044+08:00",
+  "sources": [
+    {
+      "source_file": "/private/tmp/claude-501/-Users-milin--claude-spares-spare-HvtEOY/14124477-bc6d-447c-8b46-3500aadae9a3/scratchpad/bench/search.json",
+      "source_sha256": "eceeec57d0a2bb06edd8c64c8c8e30321d46f74845034f2dc53339a805c1f3e8",
+      "source_file_modified_at": "2026-11-10T15:23:22.367868+08:00",
+      "rows": 690,
+      "saved_file": "search.json",
+      "note": "仅保存研究必要元数据；源文件修改时间不等于逐条精确采集时间。原始样本来自既有对标研究，尚未重新核查公开页面。"
+    },
+    {
+      "source_file": "/private/tmp/claude-501/-Users-milin--claude-spares-spare-HvtEOY/14124477-bc6d-447c-8b46-3500aadae9a3/scratchpad/bench/bench.json",
+      "source_sha256": "048c29d32b2bd9819194db7558941152cd79e043c065edc1a55f8f0ba068549b",
+      "source_file_modified_at": "2026-11-10T15:34:42.281803+08:00",
+      "rows": 147,
+      "saved_file": "bench.json",
+      "note": "仅保存研究必要元数据；源文件修改时间不等于逐条精确采集时间。原始样本来自既有对标研究，尚未重新核查公开页面。"
+    },
+    {
+      "source_file": "/private/tmp/claude-501/-Users-milin--claude-spares-spare-HvtEOY/14124477-bc6d-447c-8b46-3500aadae9a3/scratchpad/bench/ours.json",
+      "source_sha256": "f8ec3a1e2b0fbf7d2e39b4cbe3809dcfdb0719dca88d7a480d64ec5f52d515a7",
+      "source_file_modified_at": "2026-11-10T15:24:03.128543+08:00",
+      "rows": 264,
+      "saved_file": "ours.json",
+      "note": "仅保存研究必要元数据；源文件修改时间不等于逐条精确采集时间。原始样本来自既有对标研究，尚未重新核查公开页面。"
+    },
+    {
+      "source_file": "/private/tmp/claude-501/-Users-milin--claude-spares-spare-HvtEOY/14124477-bc6d-447c-8b46-3500aadae9a3/scratchpad/bench/finalists_full.json",
+      "source_sha256": "a839c3a6d03ea01304feb698d4dea04f4d804babcdb1bba73230a39d125e0882",
+      "source_file_modified_at": "2026-11-10T15:35:00.114299+08:00",
+      "rows": 28,
+      "saved_file": "finalists_full.json",
+      "note": "仅保存研究必要元数据；源文件修改时间不等于逐条精确采集时间。原始样本来自既有对标研究，尚未重新核查公开页面。"
+    }
+  ]
+}
