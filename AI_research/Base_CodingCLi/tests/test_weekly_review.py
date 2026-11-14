@@ -205,3 +205,26 @@ def test_cover_style_is_read_from_the_uploaded_cover(tmp_path):
                                                               ("r4", json.dumps({"cover": ""}), "PUBLISHED"),
                                                               ("r5", json.dumps({"cover": str(number)}), "FAILED")])
     assert pc.upload_styles(str(tmp_path)) == {"r1": pc.NUMBER_LED, "r4": pc.FRAME}
+
+
+def test_review_tracks_delivered_materials_and_frozen_programme_separately_from_requests():
+    from core.video.presentation import snapshot
+    version = {'meta': {'prompt_version': 13, 'creative_direction': '三维度比较'}}
+    request = {'image_materials': [{}, {}, {}]}
+    unseen = snapshot(version, request, None)
+    assert unseen['requested_images'] == 3 and unseen['used_images'] is None
+    assert unseen['material_usage'] == '未读取成片分镜'
+    board = {'scenes': [
+        {'component': 'object_showcase', 'props': {'image': {'image_asset_id': 'a'}}},
+        {'component': 'material_collage', 'props': {'images': [{'image_asset_id': 'a'}, {'image_asset_id': 'b'}]}},
+        {'component': 'illustration_scene', 'props': {'layout': 'diagram', 'chapter_index': 1}},
+        {'component': 'illustration_scene', 'props': {'layout': 'diagram', 'chapter_index': 1}}]}
+    used = snapshot(version, request, board)
+    assert used['used_images'] == 2 and used['material_scenes'] == 2 and used['diagram_chapters'] == 1
+    assert used['programme'] == unseen['programme']
+    assert snapshot({'meta': {**version['meta'], 'creative_direction': '新写法'}}, request, board)['programme'] != used['programme']
+    video = _video('visual', MONDAY + 12 * H, 100, programme=used['programme'],
+                   material_usage=used['material_usage'], presentation=used)
+    review = wr.review([video], MONDAY, now=MONDAY + 7 * 86400)
+    assert review['videos'][0]['presentation'] == used
+    assert {'programme', 'material_usage'} <= {d['key'] for d in review['dimensions']}
