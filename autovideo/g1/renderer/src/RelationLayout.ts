@@ -24,7 +24,7 @@ export function relationLayout(props:any,scale=1,measure:Measure=measureText):Re
     }
     y+=6;
     for(let start=0;start<props.edges.length;start+=2){
-      const row=props.edges.slice(start,start+2).map((e:any,index:number)=>({id:e.id,from:e.from,to:e.to,
+      const row:RelationLayout['edges']=props.edges.slice(start,start+2).map((e:any,index:number)=>({id:e.id,from:e.from,to:e.to,
         relation:e.relation??'flow',lines:wrapMeasured(e.label??'',column-150,edgeFont,400,measure),
         x:index*(column+columnGap),y,width:column,height:0}));
       const rowHeight=Math.max(...row.map(e=>e.lines.length*edgeFont*1.1));
