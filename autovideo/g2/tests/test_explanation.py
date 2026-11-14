@@ -23,6 +23,14 @@ def test_planner_uses_upstream_copy_and_registered_visuals():
     assert 'source' not in payload and 'facts' not in payload
 
 
+def test_flow_planner_capacity_matches_runtime_contract_without_computed_layouts():
+    from g1.visual_language import component_schema
+    payload = json.loads(explanation.messages({'title': '关系', 'groups': []})[1]['content'])
+    props = payload['component_props_schemas']['flow_diagram']['properties']
+    assert props['nodes']['maxItems'] == component_schema('flow_diagram')['properties']['nodes']['maxItems'] == 8
+    assert 'layout' not in props and 'layout_views' not in props
+
+
 def test_tutorial_recipe_direction_reaches_the_existing_chapter_planning_call(tmp_path, monkeypatch):
     from g2.creative_library import prepare_request
 

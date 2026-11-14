@@ -50,7 +50,9 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
               'grouped可用focus_series强调结论对应的整个系列，避免随意聚焦单个类别。'
               'reveal_phrases填写讲稿中引出每个时间点（trend）或每个系列（grouped）的短语；数量分别等于categories或series的数量。'
               'grouped按系列展开；不要在reveal_phrases里按月份列出短语，也不要把总结句放进去。'
-              '有可用图片的普通说明会自动展示图片；讲到数据时优先用数字或图表。'
+              '有可用图片时先展示真实对象，讲到数据时优先用数字或图表。'
+              '同一张单图已经展示过，后续讲解转向对比时，可用comparison承接解释；'
+              '执行时会保留这种原生说明，不再被重复截图覆盖。双图对照及指定区域讲解仍使用真实图片。'
               '分组的image_materials给出已配好的图片和区域。为图片讲解填写material_cues，'
               '按旁白顺序指定image_index、可选region_index和讲稿中引出该对象或区域的短语phrase。'
               '先建立整体位置感；已有多个可读区域时，讲到具体对象、代码调用或输出，填写相应region_index，避免所有镜头都停在整图。'
@@ -62,7 +64,7 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
               '修改前后用change=remove/add标记，其他行省略change。配置、端口、版本号的代码修改也用code_demo，不用价格变化卡。保留代码原文、缩进和标点；'
               'phrase只给本段正在讲解的行；保留为上下文的代码行可省略phrase。沿用讲述顺序。没有代码输入时使用现有截图或图解，不为装饰编写新代码。'
               '画面文字简洁，不把整段旁白贴上屏。只返回符合required_schema的JSON。')
-    system += ('明确的传递过程可以用flow_diagram：2到5个节点，edges连接已有节点，paths填空数组，附title和takeaway；布局由程序生成。' + visual_language.GUIDANCE)
+    system += ('明确的传递过程可以用flow_diagram：2到8个节点，edges连接已有节点，paths填空数组，附title和takeaway；布局由程序生成。复杂关系可按讲述阶段分成多页，保留各阶段的必要上下文。' + visual_language.GUIDANCE)
     from g2.story_direction import GUIDANCE
     system += GUIDANCE
     if context.get('fast_cards'):
@@ -74,7 +76,7 @@ def messages(context: dict, correction: str | None = None) -> list[dict]:
                    '最后回顾前面的重点。用同一套讲述角色和对象名称串联卡片、截图、图表及流程。')
     schemas = {name: component_schema(name) for name in COMPONENTS}
     schemas['flow_diagram']['properties'].pop('layout', None)
-    schemas['flow_diagram']['properties']['nodes']['maxItems'] = 5
+    schemas['flow_diagram']['properties'].pop('layout_views', None)
     for field in ('nodes', 'edges'):
         schemas['flow_diagram']['properties'][field]['items']['properties']['id']['pattern'] = '^[a-z][a-z0-9_]{0,23}$'
     payload = {'title': context['title'], 'groups': context['groups'], 'visual_vocabulary': catalog(),
@@ -132,13 +134,11 @@ def validate(plan: dict, context: dict) -> None:
             validate_references(page['component'], props)
         if page['component'] == 'flow_diagram':
             ids = {n['id'] for n in props['nodes']}
-            if len(ids) > 5:
-                raise ValueError(f"{page['id']} 流程图使用2到5个独立节点，本页有{len(ids)}个；请合并讲述阶段，保留原有关系")
             if (len(ids) != len(props['nodes'])
                     or len({e['id'] for e in props['edges']}) != len(props['edges'])
                     or any(len(item['id']) > 24 for item in [*props['nodes'], *props['edges']])
                     or any(e['from'] not in ids or e['to'] not in ids for e in props['edges'])):
-                raise ValueError('流程图使用2到5个独立节点，连线连接已有节点')
+                raise ValueError('流程图使用2到8个独立节点，连线连接已有节点')
             if not props.get('title') or not props.get('takeaway'):
                 raise ValueError('流程图需要标题和讲解结语')
         if page['component'] == 'data_chart':
@@ -229,6 +229,9 @@ def plan_storyboard(pipeline, narration: dict, saved: dict, alignment: dict | No
 def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, assets: list[dict]) -> dict:
     """Combine paragraph pictures and native data/text scenes on the same measured timeline."""
     scenes, direction_pages = [], []
+    from g2.material_expression import keep_planned_explanation
+    shown_materials: set[int] = set()
+    material_choices = []
     data = {'data_chart', 'scatter_chart', 'big_number', 'price_change', 'bar_chart', 'code_demo'}
     rows = saved.get('image_materials', [])
     for page, group in zip(plan['pages'], plan['groups']):
@@ -261,11 +264,17 @@ def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, asset
         if component == 'price_change':
             props = {**props, 'staged': True}
         indices = group['image_indices']
-        if indices and component not in data:
+        native_explanation = keep_planned_explanation(page, group, shown_materials)
+        if indices and component not in data and not native_explanation:
+            shown_materials.update(indices)
             images = [{**{'image_path': assets[i]['path'], 'image_asset_id': assets[i]['id']},
                        **{k: rows[i][k] for k in ('caption', 'role', 'focus') if k in rows[i]}} for i in indices]
             component = 'material_collage' if len(images) == 2 else 'object_showcase'
             props = {'title': group['title'], 'text': (' '.join(props.get('lines', [])) or props.get('subtitle') or group['text'])[:80], 'images': images, 'focus_indices': list(range(len(images)))}
+        if indices:
+            material_choices.append({'scene_id': page['id'], 'planned_component': page['component'],
+                                     'rendered_component': component, 'image_indices': indices,
+                                     'established_material_explanation': native_explanation})
         scenes.append({'id': page['id'], 'component': component, 'props': props,
                        'headline': page.get('headline', props.get('title', group['title'])),
                        'narration_segment_ids': group['segment_ids']})
@@ -290,6 +299,7 @@ def compile_storyboard(pipeline, plan: dict, alignment: dict, saved: dict, asset
         from g2.story_direction import attach as attach_story
         attach_story(board, direction_pages, plan['groups'], pipeline, saved.get('_story_entities'))
     pipeline.write_json(pipeline.ARTIFACTS / 'explanation-plan.json', plan)
+    pipeline.write_json(pipeline.ARTIFACTS / 'material-expression.json', {'version': 1, 'scenes': material_choices})
     pipeline.write_json(pipeline.ARTIFACTS / 'storyboard-plan.json', board)
     return board
 

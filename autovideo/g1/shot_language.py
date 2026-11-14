@@ -14,7 +14,7 @@ def shot_schema() -> dict:
                 'cues': {'type': 'array', 'maxItems': 48, 'items': {
                     'type': 'object', 'additionalProperties': False, 'required': ['beat_id', 'targets'],
                     'properties': {'beat_id': {'type': 'string', 'minLength': 1, 'maxLength': 80},
-                        'targets': {'type': 'array', 'minItems': 1, 'maxItems': 4, 'uniqueItems': True,
+                        'targets': {'type': 'array', 'minItems': 1, 'maxItems': 8, 'uniqueItems': True,
                                     'items': {'type': 'string', 'pattern': r'^(node:[a-z][a-z0-9_]{0,47}|category:[0-7]|series:[0-2]|point:[0-9]|image:([0-9]|1[01])|region:([0-9]|1[01]):[0-2])$'}}}}}}}
 
 
@@ -25,6 +25,14 @@ def validate_shots(scene: dict) -> None:
     beats = {beat['id'] for beat in scene['beats']}
     if scene['component'] == 'flow_diagram':
         targets = {f"node:{node['id']}" for node in props['nodes']}
+        for view in props.get('layout_views', []):
+            selected = set(view['targets'])
+            laid_out = {f"node:{node['id']}" for node in view['layout']['nodes']}
+            edges = {edge['id'] for edge in props['edges']
+                     if f"node:{edge['from']}" in selected and f"node:{edge['to']}" in selected}
+            if (not selected <= targets or laid_out != selected
+                    or {edge['id'] for edge in view['layout']['edges']} != edges):
+                raise ValueError('关系局部布局需要完整保留选中节点及其相互连线')
     elif scene['component'] == 'data_chart':
         targets = ({f'category:{i}' for i in range(len(props['categories']))}
                    | {f'series:{i}' for i in range(len(props['series']))})

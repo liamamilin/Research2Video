@@ -317,6 +317,7 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
     all_beats = []
     all_beat_ids = set()
     scheduled_scenes = []
+    image_reading_cache = {}
     previous_scene_end_ms = 0
     previous_scene_end_frame = 0
     for scene_index, scene in enumerate(ir["scenes"]):
@@ -460,6 +461,18 @@ def validate_video_ir(ir: dict[str, Any], project_root: Path) -> dict[str, Any]:
                 scheduled_scenes[-1]["price_layout"] = price_layout(props, (presentation or {}).get("density") == "large")
             except ValueError as exc:
                 _fail("INFORMATION_TEXT_FIT", f"{sp}/props", str(exc))
+        if (scene["component"] in {"object_showcase", "material_collage"}
+                and len(props['images']) <= 2
+                and not any(item.get('focus', {}).get('regions') for item in props['images'])):
+            from g1.image_reading import reading_bounds
+            layouts = []
+            for item in props['images']:
+                key = item['image_asset_id']
+                if key not in image_reading_cache:
+                    image_reading_cache[key] = reading_bounds(project_root / item['image_path'])
+                layouts.append(image_reading_cache[key])
+            if all(layouts):
+                scheduled_scenes[-1]['image_reading'] = layouts
         previous_scene_end_ms, previous_scene_end_frame = end_ms, end_frame
 
     if previous_scene_end_ms != ir["video"]["duration_ms"]:

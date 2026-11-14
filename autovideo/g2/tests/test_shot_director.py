@@ -120,7 +120,7 @@ def camera_runtime(tmp_path_factory):
     folder = tmp_path_factory.mktemp('shot-runtime')
     source = folder/'camera.ts'
     source.write_text('''
-import {cameraAt,shotsFor,materialAt,transitionAt,pacingFor,comparisonAt} from CAMERA;
+import {cameraAt,flowCameraAt,shotsFor,materialAt,transitionAt,pacingFor,comparisonAt} from CAMERA;
 import {imageRects} from MATERIALS;
 import {scatterState} from SCATTER;
 const input=JSON.parse(process.argv[2]);
@@ -131,6 +131,7 @@ console.log(JSON.stringify({shots:shotsFor(scene),
   material:scene.props.images?input.frames.map(frame=>materialAt(scene,frame)):null,
   scatter:scene.component==='scatter_chart'?input.frames.map(frame=>scatterState(scene,frame)):null,
   comparison:scene.component==='comparison'?input.frames.map(frame=>comparisonAt(scene,frame)):null,
+  flow:scene.component==='flow_diagram'&&scene.props.layout?input.frames.map(frame=>flowCameraAt(scene,frame)):null,
   image:input.image?imageRects(input.image,0,1000,500):null,
   cameras:input.frames.map(frame=>cameraAt(scene,frame,input.rects,input.view,undefined,
     {targets:input.overviewTargets,hold:input.holdOverview}))}));
@@ -212,6 +213,26 @@ def test_readable_flow_keeps_the_full_process_while_spoken_focus_changes(camera_
         pose = result['cameras'][0]['pose']
         assert 0 <= rect['x'] * pose['zoom'] + pose['x']
         assert (rect['x'] + rect['width']) * pose['zoom'] + pose['x'] <= 1000
+
+
+def test_five_node_branch_keeps_other_choices_inside_frame_during_focus(camera_runtime):
+    scene = camera_scene()
+    scene['component'] = 'flow_diagram'
+    nodes = [{'id': name, 'x': x, 'y': y, 'width': width, 'height': height}
+             for name, x, y, width, height in [
+                 ('a', 343, 68, 166, 91), ('b', 672, 21, 191, 140),
+                 ('c', 1027, 21, 191, 140), ('d', 663, 195, 209, 140),
+                 ('e', 663, 369, 166, 110)]]
+    scene['props']['layout'] = {'font_size': 24.86, 'nodes': nodes}
+    cameras = camera_runtime(scene, [100, 180, 340, 610])['flow']
+    assert cameras[1]['shot']['targets'] != cameras[2]['shot']['targets']
+    for camera in cameras:
+        pose = camera['pose']
+        for node in nodes:
+            assert 0 <= node['x'] * pose['zoom'] + pose['x']
+            assert (node['x'] + node['width']) * pose['zoom'] + pose['x'] <= 1560
+            assert 0 <= node['y'] * pose['zoom'] + pose['y']
+            assert (node['y'] + node['height']) * pose['zoom'] + pose['y'] <= 500
 
 
 def test_camera_stays_inside_canvas_at_edges_and_is_seek_deterministic(camera_runtime):
@@ -373,3 +394,74 @@ def test_pair_keeps_emphasis_at_boundary_and_changed_picture_falls_back_to_disso
     assert result['shots'][0]['kind'] == 'overview'
     assert [t['progress'] for t in result['transitions']] == [0, .5, 1]
     assert [t['active'] for t in result['transitions']] == [True, True, False]
+
+
+def test_dense_spoken_objects_are_not_dropped_when_context_exceeds_four_targets(camera_runtime):
+    scene = camera_scene(length=600)
+    scene['beats'] = [{'id': f'b{i}', 'frame': 150+i*9, 'target_id': f'node:n{i}'} for i in range(8)]
+    scene['props']['shot_plan']['cues'] = [{'beat_id': f'b{i}', 'targets': [f'node:n{i}']} for i in range(8)]
+    scene['props']['shot_plan'].pop('summary_beat_id')
+    shots = camera_runtime(scene, [230])['shots']
+    assert {t for shot in shots for t in shot['targets']} == {f'node:n{i}' for i in range(8)}
+
+
+def test_fork_and_merge_keep_every_required_branch():
+    nodes = [{'id': f'n{i}'} for i in range(8)]
+    for edges, index in [([{'from': 'n0', 'to': f'n{i}'} for i in range(1, 8)], 0),
+                         ([{'from': f'n{i}', 'to': 'n7'} for i in range(7)], 7)]:
+        scene = {'component': 'flow_diagram', 'props': {'nodes': nodes, 'edges': edges},
+                 'beats': [{'id': f'b{i}', 'action': 'reveal', 'target_id': f'node:n{i}'} for i in range(8)]}
+        plan = shot_director.camera_plan(scene, 'balanced')
+        assert set(plan['cues'][index]['targets']) == {f'node:n{i}' for i in range(8)}
+
+
+def test_parallel_relationships_do_not_duplicate_a_camera_object():
+    scene = {'component':'flow_diagram', 'props':{'nodes':[{'id':'a'},{'id':'b'}],
+        'edges':[{'from':'a','to':'b'}, {'from':'a','to':'b'}]},
+        'beats':[{'id':key,'action':'reveal','target_id':f'node:{key}'} for key in ['a','b']]}
+    plan=shot_director.camera_plan(scene,'balanced')
+    assert all(cue['targets']==['node:a','node:b'] for cue in plan['cues'])
+
+
+def test_context_layout_keeps_edges_and_dense_unions(tmp_path, camera_runtime):
+    from g2.flow_layouts import attach
+    from g1.shot_language import validate_shots
+    from g1.visual_language import component_schema
+    from jsonschema import Draft202012Validator
+    from g2.process_diagram import layout_request, LAYOUT_SCRIPT
+    nodes = [{'id': f'n{i}', 'label': '处理输入并保留完整结果'} for i in range(4)]
+    props = {'title': '完整的关系', 'nodes': nodes,
+             'edges': [{'id': f'e{i}', 'from': f'n{i}', 'to': f'n{i+1}', 'label': '传递'} for i in range(3)],
+             'paths': [], 'takeaway': '所有关系保持完整', 'visuals': []}
+    env = {**os.environ, 'NODE_PATH': str(ROOT/'g0/vendor/remotion-audiogram/node_modules')}
+    def command(name, args, cwd, timeout):
+        return subprocess.check_output([str(a) for a in args], cwd=cwd, env=env, timeout=timeout)
+    pipeline = SimpleNamespace(ARTIFACTS=tmp_path, PROJECT=ROOT, NODE='node', _run_fixed_command=command,
+                               write_json=lambda path, data: path.write_text(json.dumps(data)))
+    request = tmp_path/'whole.json';pipeline.write_json(request, layout_request({'scenes':[{'id':'f', **props}]}))
+    props['layout'] = json.loads(command('whole', ['node',LAYOUT_SCRIPT,request], ROOT, 60))['scenes'][0]['layout']
+    scene = {'id':'f', 'component':'flow_diagram', 'props':props, 'start_frame':0,'end_frame':600,
+             'beats':[{'id':f'b{i}', 'action':'reveal', 'target_id':f'node:n{i}', 'frame':90+i*12} for i in range(4)]}
+    props['shot_plan'] = shot_director.camera_plan(scene, 'balanced')
+    attach({'scenes':[scene]},pipeline)
+    Draft202012Validator(component_schema('flow_diagram')).validate({k:v for k,v in props.items() if k!='shot_plan'})
+    validate_shots(scene)
+    assert any(set(v['targets'])=={f'node:n{i}' for i in range(4)} for v in props['layout_views'])
+    for view in props['layout_views']:
+        assert {f'node:{n["id"]}' for n in view['layout']['nodes']}==set(view['targets'])
+    bad=copy.deepcopy(scene);bad['props']['layout_views'][0]['layout']['edges']=[]
+    with pytest.raises(ValueError,match='相互连线'):validate_shots(bad)
+    result=camera_runtime(scene,[100,150,100])['flow']
+    assert result[0]==result[-1]
+
+
+def test_complete_relationship_view_does_not_reserve_a_duplicate_map(camera_runtime):
+    scene=camera_scene();scene['component']='flow_diagram'
+    nodes=[{'id':key,'x':i*450,'y':150,'width':400,'height':200,'label_lines':['完整说明']} for i,key in enumerate(['a','b','c'])]
+    layout={'font_size':12,'edge_font_size':10,'scale':1,'nodes':nodes,'edges':[]}
+    scene['props'].update(nodes=[{'id':key} for key in ['a','b','c']],edges=[],layout=layout,
+        layout_views=[{'targets':['node:a','node:b','node:c'],'layout':{**layout,'font_size':32}}])
+    scene['props']['shot_plan']['cues']=[{'beat_id':'first','targets':['node:a','node:b','node:c']}]
+    camera=camera_runtime(scene,[180])['flow'][0]
+    assert camera['detail'] and not camera['showMap']
+    assert camera['view']['width']==1560 and camera['readable']
